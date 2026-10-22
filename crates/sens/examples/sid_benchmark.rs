@@ -7,9 +7,7 @@
 //! a complete standalone SID source unit. The AST case excludes that metadata
 //! form and therefore isolates evaluator dispatch after parsing.
 
-use sens::{
-    eval_parsed_expressions, eval_program, load_core_library, parse, Session,
-};
+use sens::{eval_parsed_expressions, eval_program, load_core_library, parse, Session};
 use std::{hint::black_box, time::Instant};
 
 const SURFACE_SOURCE: &str = "(car (cons 1 (cons 2 ())))";
@@ -47,7 +45,10 @@ fn main() {
 
     let surface_result = eval_program(SURFACE_SOURCE, &mut session).expect("surface program");
     let sid_result = eval_program(SID_SOURCE, &mut session).expect("SID program");
-    assert_eq!(surface_result.value, sid_result.value, "paired programs must agree");
+    assert_eq!(
+        surface_result.value, sid_result.value,
+        "paired programs must agree"
+    );
     assert_eq!(surface_result.value.to_string(), "1");
 
     let surface_source_ns = sampled(|| {

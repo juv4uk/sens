@@ -26,19 +26,25 @@ fn six_machine_block_definitions_have_exact_d4_and_no_legacy_w8_heads() {
             panic!("машинне визначення має бути структурним списком")
         };
         assert_eq!(items.len(), 3);
-        assert!(matches!(
-            &items[0].kind,
-            ExprKind::DomainIdentity(identity)
-                if identity.width() == 4 && identity.packed_bits() == 0b0011
-        ), "DEFINE має мати точну D4-координату");
+        assert!(
+            matches!(
+                &items[0].kind,
+                ExprKind::DomainIdentity(identity)
+                    if identity.width() == 4 && identity.packed_bits() == 0b0011
+            ),
+            "DEFINE має мати точну D4-координату"
+        );
         let ExprKind::List(lambda) = &items[2].kind else {
             panic!("значення має бути безпосередньою LAMBDA")
         };
-        assert!(matches!(
-            &lambda[0].kind,
-            ExprKind::DomainIdentity(identity)
-                if identity.width() == 4 && identity.packed_bits() == 0b0010
-        ), "LAMBDA має мати точну D4-координату");
+        assert!(
+            matches!(
+                &lambda[0].kind,
+                ExprKind::DomainIdentity(identity)
+                    if identity.width() == 4 && identity.packed_bits() == 0b0010
+            ),
+            "LAMBDA має мати точну D4-координату"
+        );
     }
 }
 
@@ -52,18 +58,37 @@ fn exact_machine_block_preserves_nine_historical_observations() {
     let cases = [
         ("(порожній-машинний-блок)", "()"),
         ("(блок-з-однієї-форми (quote (mov r1 r2)))", "((mov r1 r2))"),
-        ("(додати-форму-до-блоку (quote ((mov r1 r2) (branch L1))) (quote ret))", "((mov r1 r2) (branch L1) ret)"),
-        ("(поєднати-машинні-блоки (quote ((mov r1 r2) (branch L1))) (quote ((label L2))))", "((mov r1 r2) (branch L1) (label L2))"),
-        ("(форми-машинного-блоку (quote ((mov r1 r2) (branch L1))))", "((mov r1 r2) (branch L1))"),
-        ("(машинний-блок (quote ((mov r1 r2) (branch L1))))", "((mov r1 r2) (branch L1))"),
+        (
+            "(додати-форму-до-блоку (quote ((mov r1 r2) (branch L1))) (quote ret))",
+            "((mov r1 r2) (branch L1) ret)",
+        ),
+        (
+            "(поєднати-машинні-блоки (quote ((mov r1 r2) (branch L1))) (quote ((label L2))))",
+            "((mov r1 r2) (branch L1) (label L2))",
+        ),
+        (
+            "(форми-машинного-блоку (quote ((mov r1 r2) (branch L1))))",
+            "((mov r1 r2) (branch L1))",
+        ),
+        (
+            "(машинний-блок (quote ((mov r1 r2) (branch L1))))",
+            "((mov r1 r2) (branch L1))",
+        ),
         ("(додати-форму-до-блоку (quote ()) (quote nop))", "(nop)"),
-        ("(поєднати-машинні-блоки (quote ()) (quote ((mov r1 r2))))", "((mov r1 r2))"),
-        ("(поєднати-машинні-блоки (quote ((mov r1 r2))) (quote ()))", "((mov r1 r2))"),
+        (
+            "(поєднати-машинні-блоки (quote ()) (quote ((mov r1 r2))))",
+            "((mov r1 r2))",
+        ),
+        (
+            "(поєднати-машинні-блоки (quote ((mov r1 r2))) (quote ()))",
+            "((mov r1 r2))",
+        ),
     ];
     for (program, expected) in cases {
         let actual = eval_program(program, &mut session)
             .unwrap_or_else(|error| panic!("{program}: {error}"))
-            .value.to_string();
+            .value
+            .to_string();
         assert_eq!(actual, expected, "{program}");
     }
 }
@@ -71,21 +96,33 @@ fn exact_machine_block_preserves_nine_historical_observations() {
 #[test]
 fn x86_atom_let_cutover_uses_exact_d4_lambda_applications() {
     let source = include_str!("../../../lib/machine/atoms/x86-64.lisp");
-    assert!(!source.contains("(001000 "), "виконувана D6 LET більше не потрібна");
-    let expressions = parse_mixed_exact_domain_machine_source(
-        "lib/machine/atoms/x86-64.lisp",
-        source,
-    ).expect("основний x86 Lisp-файл має читатися за точною доменною шириною");
+    assert!(
+        !source.contains("(001000 "),
+        "виконувана D6 LET більше не потрібна"
+    );
+    let expressions =
+        parse_mixed_exact_domain_machine_source("lib/machine/atoms/x86-64.lisp", source)
+            .expect("основний x86 Lisp-файл має читатися за точною доменною шириною");
 
     fn check(expression: &Expr, lambda_applications: &mut usize) {
-        let ExprKind::List(items) = &expression.kind else { return };
-        if let Some(Expr { kind: ExprKind::List(operator), .. }) = items.first() {
+        let ExprKind::List(items) = &expression.kind else {
+            return;
+        };
+        if let Some(Expr {
+            kind: ExprKind::List(operator),
+            ..
+        }) = items.first()
+        {
             if matches!(
                 operator.first().map(|e| &e.kind),
                 Some(ExprKind::DomainIdentity(identity))
                     if identity.width() == 4 && identity.packed_bits() == 0b0010
             ) {
-                assert_eq!(items.len(), 2, "LET мав лише одне ініціалізоване зв'язування");
+                assert_eq!(
+                    items.len(),
+                    2,
+                    "LET мав лише одне ініціалізоване зв'язування"
+                );
                 assert_eq!(operator.len(), 3, "кожна LAMBDA має одне тіло");
                 let ExprKind::List(parameters) = &operator[1].kind else {
                     panic!("параметр LAMBDA має бути структурним списком")
@@ -95,22 +132,27 @@ fn x86_atom_let_cutover_uses_exact_d4_lambda_applications() {
                 *lambda_applications += 1;
             }
         }
-        for item in items.iter() { check(item, lambda_applications); }
+        for item in items.iter() {
+            check(item, lambda_applications);
+        }
     }
 
     let mut converted = 0;
-    for expression in &expressions { check(expression, &mut converted); }
-    assert_eq!(converted, 28, "усі 28 доведених LET перетворено без випадкових пропусків");
+    for expression in &expressions {
+        check(expression, &mut converted);
+    }
+    assert_eq!(
+        converted, 28,
+        "усі 28 доведених LET перетворено без випадкових пропусків"
+    );
 }
-
 
 #[test]
 fn x86_operand_rejection_predicate_returns_exact_d1_for_all_shapes() {
     let source = include_str!("../../../lib/machine/operands/x86-64.lisp");
-    let parsed = parse_mixed_exact_domain_machine_source(
-        "lib/machine/operands/x86-64.lisp",
-        source,
-    ).expect("лише машинний читач має обробляти цей Lisp-код");
+    let parsed =
+        parse_mixed_exact_domain_machine_source("lib/machine/operands/x86-64.lisp", source)
+            .expect("лише машинний читач має обробляти цей Lisp-код");
     let mut session = Session::default();
     load_core_library(&mut session).expect("канонічна базова бібліотека");
     eval_parsed_expressions(&parsed, &mut session)
@@ -132,19 +174,20 @@ fn x86_operand_rejection_predicate_returns_exact_d1_for_all_shapes() {
     }
 }
 
-
 #[test]
 fn machine_block_reader_is_path_bound_and_quote_data_stays_opaque() {
-    assert!(parse_mixed_exact_domain_machine_source(
-        "lib/machine/other/block-exact.lisp", SOURCE
-    ).is_ok(), "машинний reader не наділяє семантикою сам basename");
-    assert!(parse_mixed_exact_domain_machine_source(
-        "lib/not-machine/block-exact.lisp", SOURCE
-    ).is_err());
-    let quoted = parse_mixed_exact_domain_machine_source(
-        PATH,
-        "(001 (00001001 старе (00001000 (x) x)))",
-    ).expect("цитовані дані не можна перетворювати на виклики");
+    assert!(
+        parse_mixed_exact_domain_machine_source("lib/machine/other/block-exact.lisp", SOURCE)
+            .is_ok(),
+        "машинний reader не наділяє семантикою сам basename"
+    );
+    assert!(
+        parse_mixed_exact_domain_machine_source("lib/not-machine/block-exact.lisp", SOURCE)
+            .is_err()
+    );
+    let quoted =
+        parse_mixed_exact_domain_machine_source(PATH, "(001 (00001001 старе (00001000 (x) x)))")
+            .expect("цитовані дані не можна перетворювати на виклики");
     let ExprKind::List(items) = &quoted[0].kind else {
         panic!("QUOTE має лишатися списком")
     };
@@ -153,6 +196,8 @@ fn machine_block_reader_is_path_bound_and_quote_data_stays_opaque() {
     let ExprKind::List(payload) = &items[1].kind else {
         panic!("цитований payload має лишатися списком")
     };
-    assert!(!matches!(&payload[0].kind, ExprKind::DomainIdentity(_)),
-        "історична голова в цитаті не стає D8");
+    assert!(
+        !matches!(&payload[0].kind, ExprKind::DomainIdentity(_)),
+        "історична голова в цитаті не стає D8"
+    );
 }

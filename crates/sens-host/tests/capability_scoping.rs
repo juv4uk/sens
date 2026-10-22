@@ -38,7 +38,9 @@ fn session(environment: Environment) -> Session {
 fn assert_scope_denied(error: sens::LanguageError, operation: &str) {
     assert_eq!(error.kind, ErrorKind::InvalidForm);
     assert!(
-        error.message.contains("outside this session's capability scope"),
+        error
+            .message
+            .contains("outside this session's capability scope"),
         "{operation} should fail at policy boundary, got: {}",
         error.message
     );
@@ -113,7 +115,10 @@ fn write_scope_allows_new_file_inside_and_denies_outside() {
     )
     .expect_err("outside write root must be denied before file creation");
     assert_scope_denied(error, "write-file");
-    assert!(!outside_file.exists(), "denied write must not create a file");
+    assert!(
+        !outside_file.exists(),
+        "denied write must not create a file"
+    );
 
     fs::remove_dir_all(allowed).ok();
     fs::remove_dir_all(outside).ok();
@@ -128,11 +133,8 @@ fn load_cannot_bypass_read_scope() {
 
     let env = Environment::root().with_fs_read_roots(vec![allowed.clone()]);
     let mut session = session(env);
-    let error = eval_program(
-        &format!(r#"(load "{}")"#, lisp_path(&source)),
-        &mut session,
-    )
-    .expect_err("load must obey the same read scope as read-file");
+    let error = eval_program(&format!(r#"(load "{}")"#, lisp_path(&source)), &mut session)
+        .expect_err("load must obey the same read scope as read-file");
     assert_scope_denied(error, "load");
     assert!(
         session.environment.get("escaped-through-load").is_none(),

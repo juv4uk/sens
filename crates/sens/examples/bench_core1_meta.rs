@@ -7,7 +7,10 @@ use std::time::Instant;
 
 const CORE1_SOURCE: &str = include_str!("../../../lib/core1.lisp");
 #[derive(Clone, Copy)]
-struct Case { id: &'static str, quoted_form: &'static str }
+struct Case {
+    id: &'static str,
+    quoted_form: &'static str,
+}
 const CASES: &[Case] = &[
     Case { id: "quote-atom", quoted_form: "(quote (quote a))" },
     Case { id: "quote-list", quoted_form: "(quote (quote (a b c)))" },
@@ -22,14 +25,22 @@ const CASES: &[Case] = &[
 ];
 
 fn opt_number(args: &[String], key: &str, default: usize) -> usize {
-    args.windows(2).find(|pair| pair[0] == key)
-        .map(|pair| pair[1].parse::<usize>().expect("expected positive integer argument"))
+    args.windows(2)
+        .find(|pair| pair[0] == key)
+        .map(|pair| {
+            pair[1]
+                .parse::<usize>()
+                .expect("expected positive integer argument")
+        })
         .unwrap_or(default)
 }
 fn median(sorted: &[f64]) -> f64 {
     let n = sorted.len();
-    if n % 2 == 1 { sorted[n / 2] }
-    else { (sorted[n / 2 - 1] + sorted[n / 2]) / 2.0 }
+    if n % 2 == 1 {
+        sorted[n / 2]
+    } else {
+        (sorted[n / 2 - 1] + sorted[n / 2]) / 2.0
+    }
 }
 fn p95(sorted: &[f64]) -> f64 {
     let idx = ((sorted.len() as f64 * 0.95).ceil() as usize).saturating_sub(1);
@@ -37,9 +48,17 @@ fn p95(sorted: &[f64]) -> f64 {
 }
 fn run_once(session: &mut Session, ast: &[sens::Expr]) -> String {
     eval_lowered_expressions(ast, session)
-        .unwrap_or_else(|err| panic!("evaluator failed: {err}")).value.to_string()
+        .unwrap_or_else(|err| panic!("evaluator failed: {err}"))
+        .value
+        .to_string()
 }
-fn measure(session: &mut Session, ast: &[sens::Expr], samples: usize, batch: usize, warmup: usize) -> (f64, f64) {
+fn measure(
+    session: &mut Session,
+    ast: &[sens::Expr],
+    samples: usize,
+    batch: usize,
+    warmup: usize,
+) -> (f64, f64) {
     for _ in 0..warmup {
         black_box(eval_lowered_expressions(ast, session).expect("warmup evaluator failure"));
     }
@@ -59,7 +78,10 @@ fn main() {
     let samples = opt_number(&args, "--samples", 25);
     let batch = opt_number(&args, "--batch", 5);
     let warmup = opt_number(&args, "--warmup", 10);
-    assert!(samples > 0 && batch > 0, "samples and batch must be nonzero");
+    assert!(
+        samples > 0 && batch > 0,
+        "samples and batch must be nonzero"
+    );
 
     let mut core_session = Session::default();
     let core_boot_start = Instant::now();
@@ -79,7 +101,9 @@ fn main() {
     println!("status=RESEARCH_NON_GATE_NOT_SEMANTIC_AUTHORITY");
     println!("samples={samples} batch={batch} warmup={warmup}");
     println!("core1_bootstrap_us={core_boot_us} meta_bootstrap_us={meta_boot_us}");
-    println!("case,core1_p50_us,core1_p95_us,meta_p50_us,meta_p95_us,meta_div_core1,expected_value");
+    println!(
+        "case,core1_p50_us,core1_p95_us,meta_p50_us,meta_p95_us,meta_div_core1,expected_value"
+    );
 
     let mut compared = 0usize;
     let mut different = 0usize;
@@ -92,22 +116,38 @@ fn main() {
         let m_out = run_once(&mut meta_session, &m_ast);
         if c_out != m_out {
             different += 1;
-            eprintln!("BLOCKED_DIFFERENT_SEMANTICS case={} core1={:?} meta={:?}", case.id, c_out, m_out);
+            eprintln!(
+                "BLOCKED_DIFFERENT_SEMANTICS case={} core1={:?} meta={:?}",
+                case.id, c_out, m_out
+            );
             continue;
         }
         let (c, m) = if i % 2 == 0 {
-            (measure(&mut core_session, &c_ast, samples, batch, warmup),
-             measure(&mut meta_session, &m_ast, samples, batch, warmup))
+            (
+                measure(&mut core_session, &c_ast, samples, batch, warmup),
+                measure(&mut meta_session, &m_ast, samples, batch, warmup),
+            )
         } else {
             let m = measure(&mut meta_session, &m_ast, samples, batch, warmup);
             let c = measure(&mut core_session, &c_ast, samples, batch, warmup);
             (c, m)
         };
         compared += 1;
-        println!("{},{:.3},{:.3},{:.3},{:.3},{:.3},{}",
-            case.id, c.0, c.1, m.0, m.1, m.0 / c.0, c_out);
+        println!(
+            "{},{:.3},{:.3},{:.3},{:.3},{:.3},{}",
+            case.id,
+            c.0,
+            c.1,
+            m.0,
+            m.1,
+            m.0 / c.0,
+            c_out
+        );
     }
-    println!("summary=COMPARED:{compared};SEMANTIC_MISMATCH:{different};TOTAL:{}", CASES.len());
+    println!(
+        "summary=COMPARED:{compared};SEMANTIC_MISMATCH:{different};TOTAL:{}",
+        CASES.len()
+    );
     if compared == 0 {
         eprintln!("BLOCKED_NO_COMPARABLE_CASES — жодного валідного виміру");
         std::process::exit(2);

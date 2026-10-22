@@ -4,11 +4,11 @@
 use std::hint::black_box;
 use std::time::Instant;
 
+use sens::frame3_domain::{decode as decode_v3, encode as encode_v3, Word};
+use sens::universal_frame3::{decode, decode_v2, encode, encode_v2};
 use sens::{
     decode_ternary_words, encode_ternary_words, parse_binary_source_words, BinarySourceWord,
 };
-use sens::universal_frame3::{decode, decode_v2, encode, encode_v2};
-use sens::frame3_domain::{encode as encode_v3, decode as decode_v3, Word};
 
 #[path = "../../../research/framed3/rust_codec/senc.rs"]
 mod senc;
@@ -26,7 +26,10 @@ fn timings(mut run: impl FnMut()) -> (u128, u128) {
         values.push(start.elapsed().as_nanos() / REPS as u128);
     }
     values.sort_unstable();
-    (values[SAMPLES / 2], values[(SAMPLES * 95).div_ceil(100) - 1])
+    (
+        values[SAMPLES / 2],
+        values[(SAMPLES * 95).div_ceil(100) - 1],
+    )
 }
 
 fn run_case(name: &str, source: &str) {
@@ -63,7 +66,15 @@ fn run_case(name: &str, source: &str) {
             full
         }
         Err(_) => {
-            println!("{}\t{}\t{}\t{}\t{}\t{}\tNA", name, words.len(), t5.len(), v1.len(), v2.len(), v3.len());
+            println!(
+                "{}\t{}\t{}\t{}\t{}\t{}\tNA",
+                name,
+                words.len(),
+                t5.len(),
+                v1.len(),
+                v2.len(),
+                v3.len()
+            );
             return;
         }
     };
@@ -73,7 +84,12 @@ fn run_case(name: &str, source: &str) {
             eprintln!("# F3_REJECTED_NONCANONICAL\t{name}\tcurrent canonical form law");
             println!(
                 "{}\t{}\t{}\t{}\t{}\t{}\tNA",
-                name, words.len(), t5.len(), v1.len(), v2.len(), v3.len()
+                name,
+                words.len(),
+                t5.len(),
+                v1.len(),
+                v2.len(),
+                v3.len()
             );
             return;
         }
@@ -133,10 +149,22 @@ fn run_case(name: &str, source: &str) {
 }
 
 fn main() {
-    println!("# SHA\t{}", std::env::var("GITHUB_SHA").unwrap_or_else(|_| "local-unpinned".into()));
-    println!("# runner OS\t{}", std::env::var("BENCH_OS").unwrap_or_else(|_| "unknown".into()));
-    println!("# rustc\t{}", std::env::var("BENCH_RUSTC").unwrap_or_else(|_| "unknown".into()));
-    println!("# CPU\t{}", std::env::var("BENCH_CPU").unwrap_or_else(|_| "unknown".into()));
+    println!(
+        "# SHA\t{}",
+        std::env::var("GITHUB_SHA").unwrap_or_else(|_| "local-unpinned".into())
+    );
+    println!(
+        "# runner OS\t{}",
+        std::env::var("BENCH_OS").unwrap_or_else(|_| "unknown".into())
+    );
+    println!(
+        "# rustc\t{}",
+        std::env::var("BENCH_RUSTC").unwrap_or_else(|_| "unknown".into())
+    );
+    println!(
+        "# CPU\t{}",
+        std::env::var("BENCH_CPU").unwrap_or_else(|_| "unknown".into())
+    );
     println!("# scope\trelease; same process, same sample/corpus; {} samples x {} repetitions; ns/one call, p50/p95; T5/Frame3-v1/v2/v3/F3 are different physical formats; do not equate this with language execution; hosted CPUs vary", SAMPLES, REPS);
     println!("case\twords\tt5_bytes\tv1_bytes\tv2_bytes\tv3_bytes\tf3_bytes\tt5_encode_p50_ns\tt5_encode_p95_ns\tv1_encode_p50_ns\tv1_encode_p95_ns\tv2_encode_p50_ns\tv2_encode_p95_ns\tv3_encode_p50_ns\tv3_encode_p95_ns\tf3_encode_p50_ns\tf3_encode_p95_ns\tt5_decode_p50_ns\tt5_decode_p95_ns\tv1_decode_p50_ns\tv1_decode_p95_ns\tv2_decode_p50_ns\tv2_decode_p95_ns\tv3_decode_p50_ns\tv3_decode_p95_ns\tf3_decode_p50_ns\tf3_decode_p95_ns");
 

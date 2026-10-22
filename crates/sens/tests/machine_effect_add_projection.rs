@@ -65,14 +65,7 @@ fn current_d5_plus_builds_target_neutral_bounded_add_effect() {
         fs::read_to_string(repo_root().join("lib/machine/effects/u64.lisp")).expect("effect");
     let lower = effect_source.to_ascii_lowercase();
     for forbidden in [
-        "x86",
-        "rax",
-        "rcx",
-        "mov-r64",
-        "add-r64",
-        "0x01",
-        "modrm",
-        "vex",
+        "x86", "rax", "rcx", "mov-r64", "add-r64", "0x01", "modrm", "vex",
     ] {
         assert!(
             !lower.contains(forbidden),
@@ -91,7 +84,11 @@ fn current_d5_plus_builds_target_neutral_bounded_add_effect() {
 fn bounded_add_effect_projects_to_same_forms_and_bytes_as_current_donor() {
     let mut session = machine_session();
 
-    for (left, right) in [(2u64, 3u64), (0, u32::MAX as u64), (u32::MAX as u64, u32::MAX as u64)] {
+    for (left, right) in [
+        (2u64, 3u64),
+        (0, u32::MAX as u64),
+        (u32::MAX as u64, u32::MAX as u64),
+    ] {
         let effect = eval_value(
             &format!("(машинний-ефект-додавання-64 {left} {right})"),
             &mut session,
@@ -194,11 +191,20 @@ fn ukrainian_machine_effect_and_atom_aliases_keep_execution_parity() {
     // Порівнюємо фактичне обчислення, не лише наявність рядків у файлах.
     let pairs = [
         ("x86-ret", "машинна-команда-повернення"),
-        ("x86-add-r64-r64 (як-є rax) (як-є rcx)", "машинна-команда-додати-64-розрядні-регістри (як-є rax) (як-є rcx)"),
+        (
+            "x86-add-r64-r64 (як-є rax) (як-є rcx)",
+            "машинна-команда-додати-64-розрядні-регістри (як-є rax) (як-є rcx)",
+        ),
         ("x86-jnz-rel8 11", "машинна-команда-перехід-якщо-не-нуль 11"),
         ("x86-gpr64 (як-є rax)", "машинний-регістр-64 (як-є rax)"),
-        ("x86-as-gpr64 (як-є rax)", "типізувати-машинний-регістр-64 (як-є rax)"),
-        ("x86-gpr64-value (як-є (gpr64 rax))", "значення-машинного-регістра-64 (як-є (gpr64 rax))"),
+        (
+            "x86-as-gpr64 (як-є rax)",
+            "типізувати-машинний-регістр-64 (як-є rax)",
+        ),
+        (
+            "x86-gpr64-value (як-є (gpr64 rax))",
+            "значення-машинного-регістра-64 (як-є (gpr64 rax))",
+        ),
         ("x86-disp8 11", "машинний-зсув-8 11"),
         ("x86-disp8 256", "машинний-зсув-8 256"),
         ("x86-u64-imm 3", "машинне-безпосереднє-беззнакове-64 3"),
@@ -206,8 +212,17 @@ fn ukrainian_machine_effect_and_atom_aliases_keep_execution_parity() {
     for (historical, ukrainian) in pairs {
         let previous = eval_value(&format!("({historical})"), &mut session);
         let current = eval_value(&format!("({ukrainian})"), &mut session);
-        assert_eq!(current, previous, "{historical} must retain its exact SENS result");
+        assert_eq!(
+            current, previous,
+            "{historical} must retain its exact SENS result"
+        );
     }
-    assert_eq!(eval_value("(машинний-ефект-додавання-64 2 3)", &mut session), "(bounded-u64-add 2 3)");
-    assert_eq!(eval_value("(машинна-команда-повернення)", &mut session), "(ret)");
+    assert_eq!(
+        eval_value("(машинний-ефект-додавання-64 2 3)", &mut session),
+        "(bounded-u64-add 2 3)"
+    );
+    assert_eq!(
+        eval_value("(машинна-команда-повернення)", &mut session),
+        "(ret)"
+    );
 }

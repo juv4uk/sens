@@ -55,7 +55,10 @@ fn require_math_domain(values: &[Value], span: Span) -> Result<(), LanguageError
         };
         return Err(LanguageError::new(
             ErrorKind::Type,
-            format!("{REASON}; operand_position={} actual_kind={kind}", index + 1),
+            format!(
+                "{REASON}; operand_position={} actual_kind={kind}",
+                index + 1
+            ),
             span,
         ));
     }
@@ -71,7 +74,11 @@ fn exact_domain_result_width(result: &Value, span: Span) -> Result<usize, Langua
             LanguageError::new(ErrorKind::Type, "numeric result lacks explicit Dn", span)
         }),
         Value::NumericComposition(composition) => Ok(composition.domain_width()),
-        _ => Err(LanguageError::new(ErrorKind::Type, "numeric composite invariant", span)),
+        _ => Err(LanguageError::new(
+            ErrorKind::Type,
+            "numeric composite invariant",
+            span,
+        )),
     }
 }
 
@@ -81,7 +88,10 @@ fn check_domain_result_limit(
     span: Span,
 ) -> Result<(), LanguageError> {
     let bit_length = exact_domain_result_width(result, span)?;
-    if environment.numeric_bit_limit().is_some_and(|limit| bit_length > limit) {
+    if environment
+        .numeric_bit_limit()
+        .is_some_and(|limit| bit_length > limit)
+    {
         return Err(arithmetic_overflow(span));
     }
     Ok(())
@@ -133,8 +143,9 @@ pub(super) fn division_on_values(
         // Domain admission is an exact-width identity check, not a
         // rational equality query. Comparing fractions here would multiply
         // potentially huge numerators before the actual division even starts.
-        [lhs, rhs] if argument_count == 2 =>
-            domain_numeric::shared_numeric_domain_width(lhs, rhs).is_some(),
+        [lhs, rhs] if argument_count == 2 => {
+            domain_numeric::shared_numeric_domain_width(lhs, rhs).is_some()
+        }
         _ => false,
     };
     if !admitted_operands {
@@ -213,17 +224,32 @@ mod qualified_numeric_domain_value_tests {
             let value = Value::DomainIdentity(identity);
             for op in ["+", "-", "*"] {
                 assert_eq!(
-                    arithmetic_on_values(op, &[value.clone(), value.clone()], &env, Span::default())
-                        .unwrap_err().kind,
+                    arithmetic_on_values(
+                        op,
+                        &[value.clone(), value.clone()],
+                        &env,
+                        Span::default()
+                    )
+                    .unwrap_err()
+                    .kind,
                     ErrorKind::Type,
-                    "D{} is not an arithmetic operand", identity.width()
+                    "D{} is not an arithmetic operand",
+                    identity.width()
                 );
             }
-            assert_eq!(division_on_values(&[value.clone(), value.clone()], 2, &env, Span::default())
-                .unwrap_err().kind, ErrorKind::Type);
+            assert_eq!(
+                division_on_values(&[value.clone(), value.clone()], 2, &env, Span::default())
+                    .unwrap_err()
+                    .kind,
+                ErrorKind::Type
+            );
             for op in ["=", "<", ">"] {
-                assert_eq!(comparison_on_values(op, &[value.clone(), value.clone()], Span::default())
-                    .unwrap_err().kind, ErrorKind::Type);
+                assert_eq!(
+                    comparison_on_values(op, &[value.clone(), value.clone()], Span::default())
+                        .unwrap_err()
+                        .kind,
+                    ErrorKind::Type
+                );
             }
         }
         for value in [
@@ -231,15 +257,29 @@ mod qualified_numeric_domain_value_tests {
             Value::Rational(Rational::integer(1)),
             Value::BinaryNumber(BinaryNumber::one()),
         ] {
-            assert_eq!(arithmetic_on_values("+", &[value.clone(), value.clone()], &env, Span::default())
-                .unwrap_err().kind, ErrorKind::Type);
-            assert_eq!(division_on_values(&[value.clone(), value.clone()], 2, &env, Span::default())
-                .unwrap_err().kind, ErrorKind::Type);
-            assert_eq!(comparison_on_values("=", &[value.clone(), value], Span::default())
-                .unwrap_err().kind, ErrorKind::Type);
+            assert_eq!(
+                arithmetic_on_values("+", &[value.clone(), value.clone()], &env, Span::default())
+                    .unwrap_err()
+                    .kind,
+                ErrorKind::Type
+            );
+            assert_eq!(
+                division_on_values(&[value.clone(), value.clone()], 2, &env, Span::default())
+                    .unwrap_err()
+                    .kind,
+                ErrorKind::Type
+            );
+            assert_eq!(
+                comparison_on_values("=", &[value.clone(), value], Span::default())
+                    .unwrap_err()
+                    .kind,
+                ErrorKind::Type
+            );
         }
         assert_eq!(
-            arithmetic_on_values("+", &[], &env, Span::default()).unwrap_err().kind,
+            arithmetic_on_values("+", &[], &env, Span::default())
+                .unwrap_err()
+                .kind,
             ErrorKind::Type
         );
     }
@@ -269,9 +309,11 @@ mod qualified_numeric_domain_value_tests {
         assert_eq!(full[47], 0);
 
         let zero = in_domain(24, vec![0; 24]);
-        let result = arithmetic_on_values("+", &[zero.clone(), zero], &env, Span::default())
-            .unwrap();
-        let Value::BinaryNumber(ref same) = result else { panic!("D24 result") };
+        let result =
+            arithmetic_on_values("+", &[zero.clone(), zero], &env, Span::default()).unwrap();
+        let Value::BinaryNumber(ref same) = result else {
+            panic!("D24 result")
+        };
         assert_eq!(same.numeric_domain_width(), Some(24));
         assert_eq!(same.exact_numeric_domain_bits(), Some(vec![0; 24]));
     }
@@ -299,13 +341,13 @@ mod qualified_numeric_domain_value_tests {
         ] {
             assert_eq!(
                 arithmetic_on_values("+", &operands, &environment_23, Span::default())
-                    .unwrap_err().kind,
+                    .unwrap_err()
+                    .kind,
                 ErrorKind::NumericOverflow,
                 "test_id=d24-resource-domain-width layer=resource expected=overflow"
             );
             assert!(
-                arithmetic_on_values("+", &operands, &environment_24, Span::default())
-                    .is_ok(),
+                arithmetic_on_values("+", &operands, &environment_24, Span::default()).is_ok(),
                 "test_id=d24-resource-equal-cap layer=resource expected=allowed"
             );
         }
@@ -314,13 +356,13 @@ mod qualified_numeric_domain_value_tests {
         let wide_operands = [d48_one.clone(), d48_one];
         assert_eq!(
             arithmetic_on_values("+", &wide_operands, &environment_24, Span::default())
-                .unwrap_err().kind,
+                .unwrap_err()
+                .kind,
             ErrorKind::NumericOverflow,
             "test_id=d48-resource-width layer=resource expected=overflow"
         );
         assert!(
-            arithmetic_on_values("+", &wide_operands, &environment_48, Span::default())
-                .is_ok()
+            arithmetic_on_values("+", &wide_operands, &environment_48, Span::default()).is_ok()
         );
 
         // Small reduced fractions also retain their explicit D24 identity.
@@ -334,14 +376,12 @@ mod qualified_numeric_domain_value_tests {
         let arguments = [one, three];
         assert_eq!(
             division_on_values(&arguments, 2, &environment_23, Span::default())
-                .unwrap_err().kind,
+                .unwrap_err()
+                .kind,
             ErrorKind::NumericOverflow,
             "test_id=ratio-resource-domain-width layer=resource expected=overflow"
         );
-        assert!(
-            division_on_values(&arguments, 2, &environment_24, Span::default())
-                .is_ok()
-        );
+        assert!(division_on_values(&arguments, 2, &environment_24, Span::default()).is_ok());
     }
 
     #[test]
@@ -355,7 +395,8 @@ mod qualified_numeric_domain_value_tests {
         session.environment.define("a", max.clone());
         session.environment.define("b", max);
         let result = crate::eval_program("(додати a b)", &mut session)
-            .expect("Core addition over domain-qualified values").value;
+            .expect("Core addition over domain-qualified values")
+            .value;
         let Value::BinaryNumber(ref value) = result else {
             panic!("domain-qualified Value expected")
         };
@@ -367,35 +408,51 @@ mod qualified_numeric_domain_value_tests {
     fn core_runtime_exact_signed_d24_mul_sub_div_without_literals() {
         let mut session = crate::Session::default();
         let make = |number: u32| {
-            let mut bits = vec![0u8;24];
-            for i in 0..24 { bits[23-i] = ((number>>i)&1) as u8; }
-            in_domain(24,bits)
+            let mut bits = vec![0u8; 24];
+            for i in 0..24 {
+                bits[23 - i] = ((number >> i) & 1) as u8;
+            }
+            in_domain(24, bits)
         };
         session.environment.define("a", make(6));
         session.environment.define("b", make(2));
-        for (expr, expected) in [
-            ("(помножити a b)", 12),
-            ("(відняти a b)", 4),
-        ] {
+        for (expr, expected) in [("(помножити a b)", 12), ("(відняти a b)", 4)] {
             let result = crate::eval_program(expr, &mut session)
-                .expect("same-D24 exact integer arithmetic").value;
-            let Value::BinaryNumber(ref bits) = result else { panic!("numeric D24 Value") };
+                .expect("same-D24 exact integer arithmetic")
+                .value;
+            let Value::BinaryNumber(ref bits) = result else {
+                panic!("numeric D24 Value")
+            };
             assert_eq!(bits.numeric_domain_width(), Some(24), "{expr}");
             assert_eq!(bits.to_decimal_string(), expected.to_string(), "{expr}");
         }
         session.environment.define("a", make(1));
         session.environment.define("b", make(3));
-        let minus = crate::eval_program("(відняти a b)", &mut session).unwrap().value;
+        let minus = crate::eval_program("(відняти a b)", &mut session)
+            .unwrap()
+            .value;
         assert_eq!(minus.to_string(), "-2");
         let fraction = crate::domain_numeric::compute("/", &make(1), &make(3))
             .expect("exact rational division is available through the admitted numeric API");
         assert_eq!(fraction.to_string(), "1/3");
         session.environment.define("negative", minus);
         session.environment.define("fraction", fraction);
-        assert_eq!(crate::eval_program("(додати negative b)", &mut session).unwrap().value, make(1));
-        assert_eq!(crate::eval_program("(помножити fraction b)", &mut session).unwrap().value, make(1));
-        assert!(crate::domain_numeric::compute("/", &make(1), &make(0)).is_none(),
-            "division by zero must fail closed");
+        assert_eq!(
+            crate::eval_program("(додати negative b)", &mut session)
+                .unwrap()
+                .value,
+            make(1)
+        );
+        assert_eq!(
+            crate::eval_program("(помножити fraction b)", &mut session)
+                .unwrap()
+                .value,
+            make(1)
+        );
+        assert!(
+            crate::domain_numeric::compute("/", &make(1), &make(0)).is_none(),
+            "division by zero must fail closed"
+        );
     }
 
     /// One focused Core execution witness. The mathematical comparison is
@@ -420,30 +477,49 @@ mod qualified_numeric_domain_value_tests {
             )
         };
         for (name, bits) in [
-            ("a", "1"), ("b", "10"), ("c", "11"), ("f", "110"),
-            ("g", "111"), ("z", "0"),
+            ("a", "1"),
+            ("b", "10"),
+            ("c", "11"),
+            ("f", "110"),
+            ("g", "111"),
+            ("z", "0"),
         ] {
             session.environment.define(name, qualified(24, bits));
         }
         // Same magnitude as D24:a, but a different domain identity.
         session.environment.define("w", qualified(48, "1"));
-        session.environment.define("u", Value::BinaryNumber(BinaryNumber::one()));
+        session
+            .environment
+            .define("u", Value::BinaryNumber(BinaryNumber::one()));
 
         // D5 10111 = quotient, D5 01010 = sum, D5 11010/11011
         // = less/greater. The two D1:NO results prove exact equality
         // of 1/3 + 1/6 and 1/2 under SENS's admitted total order.
         // The one-input mutation 1/6 -> 1/7 MUST change the less verdict.
         let cases = [
-            ("equal-not-less", "(11010 (01010 (10111 a c) (10111 a f)) (10111 a b))", false),
-            ("equal-not-greater", "(11011 (01010 (10111 a c) (10111 a f)) (10111 a b))", false),
-            ("mutated-less", "(11010 (01010 (10111 a c) (10111 a g)) (10111 a b))", true),
+            (
+                "equal-not-less",
+                "(11010 (01010 (10111 a c) (10111 a f)) (10111 a b))",
+                false,
+            ),
+            (
+                "equal-not-greater",
+                "(11011 (01010 (10111 a c) (10111 a f)) (10111 a b))",
+                false,
+            ),
+            (
+                "mutated-less",
+                "(11010 (01010 (10111 a c) (10111 a g)) (10111 a b))",
+                true,
+            ),
         ];
         for (id, source, expected) in cases {
             let parsed = crate::parse_mixed_exact_domain(source)
                 .unwrap_or_else(|err| panic!("id={id} layer=parse source={source} actual={err}"));
             let actual = crate::eval_parsed_expressions(&parsed, &mut session)
                 .unwrap_or_else(|err| panic!("id={id} layer=eval source={source} actual={err}"))
-                .value.as_predicate_bit();
+                .value
+                .as_predicate_bit();
             assert_eq!(
                 actual,
                 Some(expected),
@@ -476,8 +552,10 @@ mod qualified_numeric_domain_value_tests {
         let mut max_word = vec![1; 24];
         max_word[0] = 0;
         let max = in_domain(24, max_word);
-        let result = arithmetic_on_values("*", &[max.clone(),max], &env, Span::default()).unwrap();
-        let Value::BinaryNumber(ref bits) = result else { panic!("numeric D48 Value") };
+        let result = arithmetic_on_values("*", &[max.clone(), max], &env, Span::default()).unwrap();
+        let Value::BinaryNumber(ref bits) = result else {
+            panic!("numeric D48 Value")
+        };
         assert_eq!(bits.numeric_domain_width(), Some(48));
         assert!(bits.width() <= 48);
         assert_eq!(bits.exact_numeric_domain_bits().unwrap().len(), 48);
@@ -498,10 +576,12 @@ mod qualified_numeric_domain_value_tests {
             assert_eq!(cmp.kind, ErrorKind::Type);
         }
         for op in ["*", "-", "+"] {
-            let e = arithmetic_on_values(op, &[d24.clone(), d48.clone()], &env, Span::default()).unwrap_err();
+            let e = arithmetic_on_values(op, &[d24.clone(), d48.clone()], &env, Span::default())
+                .unwrap_err();
             assert_eq!(e.kind, ErrorKind::Type);
         }
-        let e = division_on_values(&[d24.clone(), d48.clone()], 2, &env, Span::default()).unwrap_err();
+        let e =
+            division_on_values(&[d24.clone(), d48.clone()], 2, &env, Span::default()).unwrap_err();
         assert_eq!(e.kind, ErrorKind::Type);
         let e = arithmetic_on_values("+", &[d24], &env, Span::default()).unwrap_err();
         assert_eq!(e.kind, ErrorKind::Type);

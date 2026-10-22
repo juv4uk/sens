@@ -52,8 +52,14 @@ fn legacy_abi_query_for_request(
     }
 
     let mut parts = payload.split_whitespace();
-    let left = parts.next().and_then(|value| value.parse::<i64>().ok()).ok_or(())?;
-    let right = parts.next().and_then(|value| value.parse::<i64>().ok()).ok_or(())?;
+    let left = parts
+        .next()
+        .and_then(|value| value.parse::<i64>().ok())
+        .ok_or(())?;
+    let right = parts
+        .next()
+        .and_then(|value| value.parse::<i64>().ok())
+        .ok_or(())?;
     if parts.next().is_some() {
         return Err(());
     }
@@ -69,7 +75,6 @@ pub struct PrologResult {
     pub stdout: Vec<u8>,
     pub stderr: Vec<u8>,
 }
-
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum PrologCanonicalListError {
@@ -97,9 +102,7 @@ impl std::error::Error for PrologCanonicalListError {}
 /// This is producer protocol mechanics, not a semantic projection. It accepts
 /// only a flat list of unquoted lowercase Prolog atoms such as
 /// `[bob,dave,carol]`.
-pub fn decode_canonical_atom_list(
-    bytes: &[u8],
-) -> Result<Vec<String>, PrologCanonicalListError> {
+pub fn decode_canonical_atom_list(bytes: &[u8]) -> Result<Vec<String>, PrologCanonicalListError> {
     let text = std::str::from_utf8(bytes)
         .map_err(|_| PrologCanonicalListError::Utf8)?
         .trim();
@@ -136,10 +139,7 @@ pub struct PrologRequest {
 
 impl PrologRequest {
     pub fn new(semantic_id: LegacyAbiSemanticId, query: PrologQuery) -> Self {
-        Self {
-            semantic_id,
-            query,
-        }
+        Self { semantic_id, query }
     }
 }
 
@@ -465,7 +465,10 @@ mod tests {
             decode_canonical_atom_list(b"[bob,dave,carol]\n").unwrap(),
             vec!["bob", "dave", "carol"]
         );
-        assert_eq!(decode_canonical_atom_list(b"[]").unwrap(), Vec::<String>::new());
+        assert_eq!(
+            decode_canonical_atom_list(b"[]").unwrap(),
+            Vec::<String>::new()
+        );
     }
 
     #[test]
@@ -490,11 +493,8 @@ mod tests {
 
     #[test]
     fn abi_adapter_is_mechanically_prolog() {
-        let adapter = PrologAbiAdapter::new(
-            PrologKernel::new("__runtime_not_used__"),
-            "fixture.pl",
-            "X",
-        );
+        let adapter =
+            PrologAbiAdapter::new(PrologKernel::new("__runtime_not_used__"), "fixture.pl", "X");
         let vtable = adapter.vtable();
         assert_eq!(vtable.abi_version, WSM_KERNEL_ABI_VERSION);
         assert_eq!(vtable.kernel, WsmKernelKind::Prolog);

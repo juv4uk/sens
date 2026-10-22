@@ -43,10 +43,8 @@ impl KernelDriver for PrologLifecycleDriver {
         }
         let goal = std::str::from_utf8(payload)
             .map_err(|error| KernelHostError::Driver(error.to_string()))?;
-        let request = PrologRequest::new(
-            LegacyAbiSemanticId(UNIFY_SID),
-            PrologQuery::new(goal, "X"),
-        );
+        let request =
+            PrologRequest::new(LegacyAbiSemanticId(UNIFY_SID), PrologQuery::new(goal, "X"));
         let result = self
             .kernel
             .execute(&self.program, &request)

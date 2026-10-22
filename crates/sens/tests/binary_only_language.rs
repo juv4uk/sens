@@ -2,8 +2,8 @@
 //! Human surface names and retired flat function IDs play no part in execution.
 
 use sens::{
-    eval_parsed_expressions, parse_canonical_binary, wire_decode_program,
-    wire_encode_program, Expr, ExprKind, Session, Value,
+    eval_parsed_expressions, parse_canonical_binary, wire_decode_program, wire_encode_program,
+    Expr, ExprKind, Session, Value,
 };
 
 const SOURCE: &str = include_str!("../../../tests/fixtures/canonical-binary-smoke.bits");
@@ -27,7 +27,9 @@ fn assert_exact_binary_tree(expr: &Expr) {
 #[test]
 fn only_bits_are_enough_for_quote_atom_cond_and_cons() {
     assert!(
-        SOURCE.bytes().all(|byte| byte == b'0' || byte == b'1' || byte.is_ascii_whitespace()),
+        SOURCE
+            .bytes()
+            .all(|byte| byte == b'0' || byte == b'1' || byte.is_ascii_whitespace()),
         "exact-bit .bits witness must contain no human names or punctuation"
     );
 
@@ -62,7 +64,12 @@ fn only_bits_are_enough_for_quote_atom_cond_and_cons() {
 
 #[test]
 fn named_lisp_is_not_canonical_binary_source() {
-    for source in ["(QUOTE ())", "10 ATOM 00 000 01", "(110 ((1 1)))", "0000000000"] {
+    for source in [
+        "(QUOTE ())",
+        "10 ATOM 00 000 01",
+        "(110 ((1 1)))",
+        "0000000000",
+    ] {
         assert!(parse_canonical_binary(source).is_err(), "{source}");
     }
 }

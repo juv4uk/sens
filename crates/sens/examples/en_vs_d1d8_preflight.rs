@@ -3,7 +3,10 @@
 //! This executable proves that two source projections lower to the same
 //! current exact-domain trace before any timing is allowed.
 
-use sens::{lower_program, parse, parse_canonical_binary, CoreDomainIdentity, DomainIdentity, Expr, ExprKind};
+use sens::{
+    lower_program, parse, parse_canonical_binary, CoreDomainIdentity, DomainIdentity, Expr,
+    ExprKind,
+};
 use std::{env, fs, process::ExitCode};
 
 fn domain_key(prefix: &str, identity: DomainIdentity) -> String {

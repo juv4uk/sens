@@ -131,7 +131,10 @@ fn i5_6400_profile_tracks_official_intel_capability_classes() {
         "(unavailable-extension AVX-512)",
         "(unavailable-extension AMX)",
     ] {
-        assert!(source.contains(required), "CPU profile missing Intel capability fact: {required}");
+        assert!(
+            source.contains(required),
+            "CPU profile missing Intel capability fact: {required}"
+        );
     }
 }
 
@@ -237,10 +240,13 @@ fn semantic_sid_00001100_lowers_through_structured_forms_without_legacy_byte_wra
     eval_program(&lowering_source, &mut session)
         .expect("semantic x86-64 lowering must load as ordinary sens");
 
-    let forms = eval_program("(машина-знизити-додавання-беззнакових-64-до-форм 2 3)", &mut session)
-        .expect("semantic ADD proof lowering must produce structured machine forms")
-        .value
-        .to_string();
+    let forms = eval_program(
+        "(машина-знизити-додавання-беззнакових-64-до-форм 2 3)",
+        &mut session,
+    )
+    .expect("semantic ADD proof lowering must produce structured machine forms")
+    .value
+    .to_string();
     assert_eq!(
         forms,
         "((mov-r64-imm64 rax 2) (mov-r64-imm64 rcx 3) (add-r64-r64 rax rcx) (ret))"
@@ -292,15 +298,7 @@ fn target_neutral_machine_effect_contract_is_explicit_and_nonsemantic() {
 
     let lower = boundary.to_ascii_lowercase();
     for forbidden in [
-        "x86-",
-        "rax",
-        "rcx",
-        "modrm",
-        "vex",
-        "avx",
-        "cuda",
-        "ptx",
-        "fpga",
+        "x86-", "rax", "rcx", "modrm", "vex", "avx", "cuda", "ptx", "fpga",
     ] {
         assert!(
             !lower.contains(forbidden),

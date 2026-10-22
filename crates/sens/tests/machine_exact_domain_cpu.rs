@@ -1,6 +1,6 @@
 use sens::{
-    eval_parsed_expressions, eval_program, load_core_library, lower_program,
-    parse, parse_mixed_exact_domain_machine_source, ExprKind, Session,
+    eval_parsed_expressions, eval_program, load_core_library, lower_program, parse,
+    parse_mixed_exact_domain_machine_source, ExprKind, Session,
 };
 use std::fs;
 use std::path::PathBuf;
@@ -19,10 +19,13 @@ fn load_lisp_file(path: &str, session: &mut Session) {
         fs::read_to_string(&file_path)
             .unwrap_or_else(|error| panic!("{} must exist: {error}", file_path.display()))
     };
-    let expressions = parse_mixed_exact_domain_machine_source(path, &source)
-        .unwrap_or_else(|error| panic!("{path} must parse as exact-domain machine source: {error}"));
-    eval_parsed_expressions(&expressions, session)
-        .unwrap_or_else(|error| panic!("{path} must load through the machine-source reader: {error}"));
+    let expressions =
+        parse_mixed_exact_domain_machine_source(path, &source).unwrap_or_else(|error| {
+            panic!("{path} must parse as exact-domain machine source: {error}")
+        });
+    eval_parsed_expressions(&expressions, session).unwrap_or_else(|error| {
+        panic!("{path} must load through the machine-source reader: {error}")
+    });
 }
 
 #[test]
@@ -59,7 +62,10 @@ fn current_d5_plus_selects_x86_add_without_legacy_sid_join() {
     .expect("exact-domain machine capability lookup")
     .value
     .to_string();
-    assert_eq!(capabilities, "((integer-add bounded-u32-inputs u64-result))");
+    assert_eq!(
+        capabilities,
+        "((integer-add bounded-u32-inputs u64-result))"
+    );
 
     let bytes = eval_program(
         &format!("(машина-кодувати-поточну-двомісну-дію-64 {width} {packed_bits} 2 3)"),

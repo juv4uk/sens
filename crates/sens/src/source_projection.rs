@@ -49,8 +49,7 @@ fn integer_lexeme<'a>(expr: &Expr, source: &'a str) -> Option<&'a str> {
         .strip_prefix('-')
         .or_else(|| token.strip_prefix('+'))
         .unwrap_or(token);
-    (!digits.is_empty() && digits.bytes().all(|byte| byte.is_ascii_digit()))
-        .then_some(token)
+    (!digits.is_empty() && digits.bytes().all(|byte| byte.is_ascii_digit())).then_some(token)
 }
 
 /// Convert decimal digits to a magnitude bit vector without routing through
@@ -166,7 +165,11 @@ fn is_d5_call(expr: &Expr) -> bool {
     let ExprKind::List(items) = &expr.kind else {
         return false;
     };
-    let Some(Expr { kind: ExprKind::Symbol(name), .. }) = items.first() else {
+    let Some(Expr {
+        kind: ExprKind::Symbol(name),
+        ..
+    }) = items.first()
+    else {
         return false;
     };
     crate::semantic_registry_export::admitted_core_domain_for_surface(name)
@@ -222,9 +225,9 @@ fn is_quoted_source_form(expr: &Expr, source: &str) -> bool {
     {
         return true;
     }
-    source.get(head.span.start..head.span.end).is_some_and(|spelling| {
-        matches!(spelling, "001" | "'" | "00000001")
-    })
+    source
+        .get(head.span.start..head.span.end)
+        .is_some_and(|spelling| matches!(spelling, "001" | "'" | "00000001"))
 }
 
 fn project_expr(
@@ -329,13 +332,21 @@ mod tests {
         let parsed = crate::parse(source).expect("source parses");
         let projected = project_ukr_decimal_integer_literals(&parsed, source)
             .expect("both operands receive one common exact domain");
-        let [Expr { kind: ExprKind::List(items), .. }] = projected.as_slice() else {
+        let [Expr {
+            kind: ExprKind::List(items),
+            ..
+        }] = projected.as_slice()
+        else {
             panic!("expected one list form");
         };
-        let widths: Vec<_> = items.iter().skip(1).map(|expr| match &expr.kind {
-            ExprKind::BinaryNumber(number) => number.numeric_domain_width(),
-            _ => None,
-        }).collect();
+        let widths: Vec<_> = items
+            .iter()
+            .skip(1)
+            .map(|expr| match &expr.kind {
+                ExprKind::BinaryNumber(number) => number.numeric_domain_width(),
+                _ => None,
+            })
+            .collect();
         assert_eq!(widths, vec![Some(48), Some(48)]);
     }
 
@@ -345,7 +356,11 @@ mod tests {
         let parsed = crate::parse(source).expect("source parses");
         let projected = project_ukr_decimal_integer_literals(&parsed, source)
             .expect("one math tree has a shared source-selected domain");
-        let [Expr { kind: ExprKind::List(items), .. }] = projected.as_slice() else {
+        let [Expr {
+            kind: ExprKind::List(items),
+            ..
+        }] = projected.as_slice()
+        else {
             panic!("expected one list form");
         };
         let ExprKind::BinaryNumber(left) = &items[1].kind else {
@@ -355,10 +370,14 @@ mod tests {
             panic!("expected nested multiply")
         };
         assert_eq!(left.numeric_domain_width(), Some(48));
-        let widths: Vec<_> = nested.iter().skip(1).map(|expr| match &expr.kind {
-            ExprKind::BinaryNumber(number) => number.numeric_domain_width(),
-            _ => None,
-        }).collect();
+        let widths: Vec<_> = nested
+            .iter()
+            .skip(1)
+            .map(|expr| match &expr.kind {
+                ExprKind::BinaryNumber(number) => number.numeric_domain_width(),
+                _ => None,
+            })
+            .collect();
         assert_eq!(widths, vec![Some(48), Some(48)]);
     }
 
@@ -370,14 +389,20 @@ mod tests {
         let identity = crate::DomainIdentity::from_source_word(word[0].word);
         let typed = Expr {
             kind: ExprKind::DomainIdentity(identity),
-            span: Span { start: 0, end: source.len() },
+            span: Span {
+                start: 0,
+                end: source.len(),
+            },
         };
         let projected = project_ukr_decimal_integer_literals(&[typed], source)
             .expect("already-typed domain identity remains a domain identity");
-        assert!(matches!(&projected[0].kind,
-            ExprKind::DomainIdentity(identity)
-                if identity.width() == 4 && identity.packed_bits() == 0b0011
-        ), "domain width and exact bits must survive source projection unchanged");
+        assert!(
+            matches!(&projected[0].kind,
+                ExprKind::DomainIdentity(identity)
+                    if identity.width() == 4 && identity.packed_bits() == 0b0011
+            ),
+            "domain width and exact bits must survive source projection unchanged"
+        );
     }
 
     #[test]
@@ -389,12 +414,19 @@ mod tests {
             let parsed = crate::parse(source).expect("source parses");
             let projected = project_ukr_decimal_integer_literals(&parsed, source)
                 .expect("quoted source data remains opaque");
-            assert_eq!(projected, parsed, "projection must not recurse beneath QUOTE: {source}");
+            assert_eq!(
+                projected, parsed,
+                "projection must not recurse beneath QUOTE: {source}"
+            );
         }
         let source = "(як-є (сполучити 2 (сполучити -3 (як-є ()))))";
         let parsed = crate::parse(source).expect("source parses");
-        let ExprKind::List(outer) = &parsed[0].kind else { panic!("outer QUOTE"); };
-        let ExprKind::List(data) = &outer[1].kind else { panic!("quoted list data"); };
+        let ExprKind::List(outer) = &parsed[0].kind else {
+            panic!("outer QUOTE");
+        };
+        let ExprKind::List(data) = &outer[1].kind else {
+            panic!("quoted list data");
+        };
         assert!(matches!(&data[1].kind, ExprKind::Number(value, _) if *value == 2.0));
     }
 
@@ -411,7 +443,10 @@ mod tests {
             panic!("large decimal operand must become an exact binary-domain word")
         };
         assert_eq!(value.numeric_domain_width(), Some(192));
-        assert_eq!(value.to_decimal_string(), "170141183460469231731687303715884105728");
+        assert_eq!(
+            value.to_decimal_string(),
+            "170141183460469231731687303715884105728"
+        );
     }
 
     #[test]
@@ -447,11 +482,14 @@ mod tests {
         let projected = project_ukr_decimal_integer_literals(&parsed, source)
             .expect("source decimal integers become D24 words");
         let lowered = crate::lower_program(&projected);
-        assert!(matches!(
-            &lowered[0].kind,
-            ExprKind::DomainCall(identity, _)
-                if identity.width() == 5 && identity.packed_bits() == 0b10111
-        ), "D5:10111 must be the immutable call head, not a rebindable Lisp name");
+        assert!(
+            matches!(
+                &lowered[0].kind,
+                ExprKind::DomainCall(identity, _)
+                    if identity.width() == 5 && identity.packed_bits() == 0b10111
+            ),
+            "D5:10111 must be the immutable call head, not a rebindable Lisp name"
+        );
 
         let mut session = crate::Session::default();
         crate::load_core_library(&mut session).expect("Core library loads");
@@ -463,7 +501,9 @@ mod tests {
         let (_, numerator, denominator) = composition.as_parts();
         assert_eq!(numerator.to_unsigned_decimal_string(), "1");
         assert_eq!(
-            denominator.expect("nonintegral quotient has denominator").to_unsigned_decimal_string(),
+            denominator
+                .expect("nonintegral quotient has denominator")
+                .to_unsigned_decimal_string(),
             "3"
         );
     }
@@ -484,7 +524,9 @@ mod tests {
         let (_, numerator, denominator) = composition.as_parts();
         assert_eq!(numerator.to_unsigned_decimal_string(), "2");
         assert_eq!(
-            denominator.expect("nonintegral sum has denominator").to_unsigned_decimal_string(),
+            denominator
+                .expect("nonintegral sum has denominator")
+                .to_unsigned_decimal_string(),
             "3"
         );
     }
@@ -520,7 +562,9 @@ mod tests {
         let (_, numerator, denominator) = composition.as_parts();
         assert_eq!(numerator.to_unsigned_decimal_string(), "5");
         assert_eq!(
-            denominator.expect("дробовий знаменник").to_unsigned_decimal_string(),
+            denominator
+                .expect("дробовий знаменник")
+                .to_unsigned_decimal_string(),
             "336"
         );
 
@@ -534,5 +578,4 @@ mod tests {
             .expect("SENS сам забороняє ділення на нуль");
         assert_eq!(error.kind, ErrorKind::DivisionByZero);
     }
-
 }

@@ -908,5 +908,4 @@ mod tests {
         assert!(BigInt::from_binary_str("").is_err());
         assert!(BigInt::from_binary_str("102").is_err());
     }
-
 }

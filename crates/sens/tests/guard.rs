@@ -12,10 +12,7 @@ fn eval_guard_ukr(source: &str) -> String {
 
 fn eval_guard_with_source(source: &str, exact_ukr: bool) -> String {
     let mut session = Session::default();
-    sens::eval_core_library_source(include_str!("../../../lib/core.lisp"),
-        &mut session,
-    )
-    .unwrap();
+    sens::eval_core_library_source(include_str!("../../../lib/core.lisp"), &mut session).unwrap();
     sens::eval_pinned_reasoning_source(
         "lib/unify.lisp",
         include_str!("../../../lib/unify.lisp"),
@@ -23,8 +20,8 @@ fn eval_guard_with_source(source: &str, exact_ukr: bool) -> String {
     )
     .unwrap();
 
-    let guard_forms = parse_mixed_exact_domain(GUARD_SOURCE)
-        .expect("guard library exact-width source");
+    let guard_forms =
+        parse_mixed_exact_domain(GUARD_SOURCE).expect("guard library exact-width source");
     sens::eval_parsed_expressions(&guard_forms, &mut session)
         .expect("guard library must load with exact D3/D4 identities");
     let reference_source = include_str!("../../../knowledge/guard-reference.lisp");
@@ -33,14 +30,16 @@ fn eval_guard_with_source(source: &str, exact_ukr: bool) -> String {
         reference_source,
     )
     .expect("curated Guard directory must parse through its path-pinned data reader");
-    sens::eval_parsed_expressions(&reference_forms, &mut session)
-        .expect("Guard reference entries remain quoted data and executable helpers use exact heads");
+    sens::eval_parsed_expressions(&reference_forms, &mut session).expect(
+        "Guard reference entries remain quoted data and executable helpers use exact heads",
+    );
 
     if exact_ukr {
-        let forms = parse_mixed_exact_domain(source)
-            .expect("exact Ukrainian Guard source");
+        let forms = parse_mixed_exact_domain(source).expect("exact Ukrainian Guard source");
         sens::eval_parsed_expressions(&forms, &mut session)
-            .unwrap_or_else(|e| panic!("exact Ukrainian Guard evaluation failed: {e}\\nsource: {source}"))
+            .unwrap_or_else(|e| {
+                panic!("exact Ukrainian Guard evaluation failed: {e}\\nsource: {source}")
+            })
             .value
             .to_string()
     } else {
@@ -91,14 +90,20 @@ fn guard_verifies_sync_and_drift_without_freezing_commits() {
              (quote (git sync)))"#,
     );
     assert!(incomplete.contains("(decision warn)"), "{incomplete}");
-    assert!(incomplete.contains("complete-sync-and-preserve-logs"), "{incomplete}");
+    assert!(
+        incomplete.contains("complete-sync-and-preserve-logs"),
+        "{incomplete}"
+    );
 
     let missing_drift = eval_guard(
         r#"(захист-синхронізувати-вікно (quote open) (quote completed) (quote missing)
              (quote (git sync)))"#,
     );
     assert!(missing_drift.contains("(decision warn)"), "{missing_drift}");
-    assert!(missing_drift.contains("record-drift-and-continue"), "{missing_drift}");
+    assert!(
+        missing_drift.contains("record-drift-and-continue"),
+        "{missing_drift}"
+    );
 }
 
 #[test]
@@ -267,7 +272,6 @@ fn unknown_script_routes_instead_of_guessing() {
     assert!(tool.contains("(route research-web)"));
 }
 
-
 #[test]
 fn guard_compare_reuses_exact_structural_equality_for_nested_states() {
     let same = eval_guard(
@@ -305,10 +309,17 @@ fn guard_compare_uses_current_ukrainian_d1_d3_d4_and_executes_in_sens() {
     let start = GUARD_SOURCE
         .find("(визначити захист-порівняти\n")
         .expect("чинний Lisp має визначати захист-порівняти");
-    let end = GUARD_SOURCE[start..].find("\n(визначити захист-синхронізувати-вікно")
-        .map(|offset| start + offset).expect("замкнена межа одного DEFINE");
+    let end = GUARD_SOURCE[start..]
+        .find("\n(визначити захист-синхронізувати-вікно")
+        .map(|offset| start + offset)
+        .expect("замкнена межа одного DEFINE");
     let definition = &GUARD_SOURCE[start..end];
-    assert_eq!(parse_mixed_exact_domain(definition).expect("точний читач").len(), 1);
+    assert_eq!(
+        parse_mixed_exact_domain(definition)
+            .expect("точний читач")
+            .len(),
+        1
+    );
     assert!(definition.contains("(сторожа--рівні? очікуване спостережене)"));
     assert!(!definition.contains("(11110111 "));
     assert!(!definition.contains("(визначити guard-compare"));
@@ -316,12 +327,13 @@ fn guard_compare_uses_current_ukrainian_d1_d3_d4_and_executes_in_sens() {
         ("(як-є ((status ready)))", "(decision allow)"),
         ("(як-є ((status broken)))", "(decision warn)"),
     ] {
-        let program = format!(
-            "(захист-порівняти (як-є build) (як-є ((status ready))) {observed} (як-є ()))"
-        );
+        let program =
+            format!("(захист-порівняти (як-є build) (як-є ((status ready))) {observed} (як-є ()))");
         let actual = eval_guard_ukr(&program);
-        assert!(actual.contains(verdict),
-            "test_id=guard-compare layer=SENS input={program} expected={verdict} actual={actual}");
+        assert!(
+            actual.contains(verdict),
+            "test_id=guard-compare layer=SENS input={program} expected={verdict} actual={actual}"
+        );
     }
 }
 
@@ -330,25 +342,38 @@ fn guard_reference_field_uses_current_ukrainian_lisp_and_executes_in_sens() {
     let start = GUARD_SOURCE
         .find("(визначити захист-еталон-поле\n")
         .expect("чинний український захист-еталон-поле");
-    let end = GUARD_SOURCE[start..].find("\n(визначити ")
-        .map(|offset| start + offset).expect("завершення визначення");
+    let end = GUARD_SOURCE[start..]
+        .find("\n(визначити ")
+        .map(|offset| start + offset)
+        .expect("завершення визначення");
     let definition = &GUARD_SOURCE[start..end];
-    assert_eq!(parse_mixed_exact_domain(definition).expect("точний SENS-читач").len(), 1);
+    assert_eq!(
+        parse_mixed_exact_domain(definition)
+            .expect("точний SENS-читач")
+            .len(),
+        1
+    );
     assert!(definition.contains("(функція (поле посилання)"));
     assert!(definition.contains("(захист-еталон-поле-із-запису"));
-    assert!(!definition.contains("((функція"), "виклик D5 FUNCTION як значення заборонено");
+    assert!(
+        !definition.contains("((функція"),
+        "виклик D5 FUNCTION як значення заборонено"
+    );
     assert!(GUARD_SOURCE.contains("(визначити захист-знайти-запис-у-рядку\n"));
     assert!(GUARD_SOURCE.contains("(визначити захист-еталон-поле-із-запису\n"));
     assert!(definition.contains("(захист-знайти-запис поле (решта посилання))"));
     for forbidden in ["(знайти-за-ключем ", "(001000 ", "(11110111 ", "(assoc "] {
-        assert!(!definition.contains(forbidden), "застаріла викличність: {forbidden}");
+        assert!(
+            !definition.contains(forbidden),
+            "застаріла викличність: {forbidden}"
+        );
     }
     let found = eval_guard_ukr(
-        "(захист-еталон-поле (як-є decision) (як-є (guard-finding (decision allow))))"
+        "(захист-еталон-поле (як-є decision) (як-є (guard-finding (decision allow))))",
     );
     assert_eq!(found, "allow", "дійсне SENS-поле: {found}");
     let absent = eval_guard_ukr(
-        "(захист-еталон-поле (як-є missing) (як-є (guard-finding (decision allow))))"
+        "(захист-еталон-поле (як-є missing) (як-є (guard-finding (decision allow))))",
     );
     assert_eq!(absent, "()", "відсутнє поле не вигадує значення: {absent}");
 }
@@ -381,7 +406,10 @@ fn guard_reference_data_reader_is_path_pinned_and_keeps_the_directory_as_data() 
         source,
     )
     .expect("Guard reference data-only entrypoint");
-    assert!(parsed.len() > 1, "the directory and its callable lookup definitions remain distinct top-level forms");
+    assert!(
+        parsed.len() > 1,
+        "the directory and its callable lookup definitions remain distinct top-level forms"
+    );
     assert!(
         sens::parse_mixed_exact_domain_guard_reference_source("lib/guard.lisp", source).is_err(),
         "the legacy W8 data wrapper must not become a general reader"
@@ -390,23 +418,23 @@ fn guard_reference_data_reader_is_path_pinned_and_keeps_the_directory_as_data() 
     assert!(rendered.contains("довідник-гвардії"));
 }
 
-
 #[test]
 fn mechanism_selector_named_d4_helpers_execute_real_sens_positive_and_negative() {
     // Не імітуємо SENS у Rust. Перевіряємо саме DEFINE із чинного Lisp.
     // Зовнішній читач каталогу D9 перевіряється окремо: тут D4 ядро
     // мусить виконати обидва нові іменовані замикання.
     let source = include_str!("../../../lib/mechanism-selector.lisp");
-    let start = source.find("(визначити механізм-зіставити-маршрут")
+    let start = source
+        .find("(визначити механізм-зіставити-маршрут")
         .expect("чинне визначення першого D4 helper-а");
-    let end = source.find("\n(визначити вибрати-механізм")
+    let end = source
+        .find("\n(визначити вибрати-механізм")
         .expect("межа helper-ів у чинному Lisp");
     let helpers = &source[start..end];
     let mut session = Session::default();
     sens::eval_core_library_source(include_str!("../../../lib/core.lisp"), &mut session)
         .expect("SENS D3–D5 core для виконуваних українських імен");
-    let definitions = parse_mixed_exact_domain(helpers)
-        .expect("парсер SENS: чинні D4 DEFINE");
+    let definitions = parse_mixed_exact_domain(helpers).expect("парсер SENS: чинні D4 DEFINE");
     sens::eval_parsed_expressions(&definitions, &mut session)
         .expect("два D4 helper-и реально завантажуються SENS");
 

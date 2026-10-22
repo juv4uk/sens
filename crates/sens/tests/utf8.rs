@@ -1,4 +1,7 @@
-use sens::{eval_parsed_expressions, load_core_library, load_process_library, parse_mixed_exact_domain_utf8_source, Session};
+use sens::{
+    eval_parsed_expressions, load_core_library, load_process_library,
+    parse_mixed_exact_domain_utf8_source, Session,
+};
 
 fn utf8_session() -> Session {
     let mut session = Session::default();
@@ -28,12 +31,20 @@ fn qualify_test_numeric_atoms(expression: sens::Expr) -> sens::Expr {
     let sens::Expr { kind, span } = expression;
     let kind = match kind {
         sens::ExprKind::Number(value, sens::Exactness::Exact)
-            if value.is_finite() && value.fract() == 0.0 => qualify_test_integer(value as i64),
+            if value.is_finite() && value.fract() == 0.0 =>
+        {
+            qualify_test_integer(value as i64)
+        }
         sens::ExprKind::Rational(value) if value.is_integer() => {
             qualify_test_integer(value.as_precise_i64().expect("small test integer"))
         }
         sens::ExprKind::List(items) => sens::ExprKind::List(std::rc::Rc::from(
-            items.iter().cloned().map(qualify_test_numeric_atoms).collect::<Vec<_>>().into_boxed_slice(),
+            items
+                .iter()
+                .cloned()
+                .map(qualify_test_numeric_atoms)
+                .collect::<Vec<_>>()
+                .into_boxed_slice(),
         )),
         sens::ExprKind::Pair(head, tail) => sens::ExprKind::Pair(
             std::rc::Rc::new(qualify_test_numeric_atoms((*head).clone())),
@@ -46,7 +57,10 @@ fn qualify_test_numeric_atoms(expression: sens::Expr) -> sens::Expr {
 
 fn qualify_test_integer(value: i64) -> sens::ExprKind {
     let encoded = (value as u64) & 0x00ff_ffff;
-    let bits = (0..24).rev().map(|shift| ((encoded >> shift) & 1) as u8).collect::<Vec<_>>();
+    let bits = (0..24)
+        .rev()
+        .map(|shift| ((encoded >> shift) & 1) as u8)
+        .collect::<Vec<_>>();
     sens::ExprKind::BinaryNumber(
         sens::BinaryNumber::from_numeric_domain_bits(24, &bits).expect("UTF-8 test D24 value"),
     )
@@ -56,16 +70,19 @@ fn qualify_test_integer(value: i64) -> sens::ExprKind {
 fn utf8_pinned_reader_explicitly_admits_decimal_constants_as_d24() {
     let parsed = parse_mixed_exact_domain_utf8_source("lib/utf8.lisp", "255")
         .expect("the pinned UTF-8 numerical boundary accepts its decimal source value");
-    assert!(matches!(
-        parsed[0].kind,
-        sens::ExprKind::BinaryNumber(ref value) if value.numeric_domain_width() == Some(24)
-    ), "only the UTF-8-pinned source boundary may qualify this value as D24+");
+    assert!(
+        matches!(
+            parsed[0].kind,
+            sens::ExprKind::BinaryNumber(ref value) if value.numeric_domain_width() == Some(24)
+        ),
+        "only the UTF-8-pinned source boundary may qualify this value as D24+"
+    );
 
     let ordinary = sens::parse_mixed_exact_domain("255").expect("ordinary source parses");
-    assert!(matches!(
-        ordinary[0].kind,
-        sens::ExprKind::Number(255.0, _)
-    ), "the ordinary reader must retain the unqualified compatibility number");
+    assert!(
+        matches!(ordinary[0].kind, sens::ExprKind::Number(255.0, _)),
+        "the ordinary reader must retain the unqualified compatibility number"
+    );
 
     let alias = parse_mixed_exact_domain_utf8_source(
         "lib/utf8.lisp",
@@ -75,15 +92,26 @@ fn utf8_pinned_reader_explicitly_admits_decimal_constants_as_d24() {
     let sens::ExprKind::List(items) = &alias[0].kind else {
         panic!("expected expanded lambda application");
     };
-    assert!(matches!(&items[0].kind, sens::ExprKind::List(_)), "LET* lowers to a lambda application");
-    let compact = parse_mixed_exact_domain_utf8_source(
-        "lib/utf8.lisp", "(нехай* ((значення 255)) значення)",
-    ).expect("compact Ukrainian projection parses");
-    let sens::ExprKind::List(compact_items) = &compact[0].kind else { panic!("expected compact call") };
-    assert!(matches!(&compact_items[0].kind, sens::ExprKind::DomainIdentity(_)), "compact head must project");
+    assert!(
+        matches!(&items[0].kind, sens::ExprKind::List(_)),
+        "LET* lowers to a lambda application"
+    );
+    let compact =
+        parse_mixed_exact_domain_utf8_source("lib/utf8.lisp", "(нехай* ((значення 255)) значення)")
+            .expect("compact Ukrainian projection parses");
+    let sens::ExprKind::List(compact_items) = &compact[0].kind else {
+        panic!("expected compact call")
+    };
+    assert!(
+        matches!(&compact_items[0].kind, sens::ExprKind::DomainIdentity(_)),
+        "compact head must project"
+    );
     let mut session = utf8_session();
     assert_eq!(
-        eval_parsed_expressions(&alias, &mut session).expect("expanded D4 LET* call").value.to_string(),
+        eval_parsed_expressions(&alias, &mut session)
+            .expect("expanded D4 LET* call")
+            .value
+            .to_string(),
         "255",
     );
 }
@@ -93,25 +121,54 @@ fn utf8_d1_predicates_run_in_sens_without_unbound_truth_symbols() {
     // Positive and negative witnesses execute through the current SENS
     // runtime. Rust observes typed results; it does not implement UTF-8 laws.
     let source = include_str!("../../../lib/utf8.lisp");
-    for line in source.lines().filter(|line| !line.trim_start().starts_with(';')) {
-        assert!(!line.trim_end().ends_with(" так)"), "bare truth in executable Lisp: {line}");
-        assert!(!line.trim_end().ends_with(" ні)"), "bare false in executable Lisp: {line}");
+    for line in source
+        .lines()
+        .filter(|line| !line.trim_start().starts_with(';'))
+    {
+        assert!(
+            !line.trim_end().ends_with(" так)"),
+            "bare truth in executable Lisp: {line}"
+        );
+        assert!(
+            !line.trim_end().ends_with(" ні)"),
+            "bare false in executable Lisp: {line}"
+        );
     }
     for (program, expected) in [
-        ("(кодова-одиниця-кодування-юнікод-8-у-допустимому-діапазоні? 128 128 191)", "1"),
-        ("(кодова-одиниця-кодування-юнікод-8-у-допустимому-діапазоні? 192 128 191)", "0"),
+        (
+            "(кодова-одиниця-кодування-юнікод-8-у-допустимому-діапазоні? 128 128 191)",
+            "1",
+        ),
+        (
+            "(кодова-одиниця-кодування-юнікод-8-у-допустимому-діапазоні? 192 128 191)",
+            "0",
+        ),
         ("(це-байт-продовження-кодування-юнікод-8? 128)", "1"),
         ("(це-байт-продовження-кодування-юнікод-8? 127)", "0"),
         ("(це-допустимий-байт-кодування-юнікод-8? 255)", "1"),
         ("(це-допустимий-байт-кодування-юнікод-8? 256)", "0"),
-        ("(усі-елементи-є-байтами-кодування-юнікод-8? (quote ()))", "1"),
-        ("(усі-елементи-є-байтами-кодування-юнікод-8? (quote (65 256)))", "0"),
-        ("(наявні-два-байти-продовження-кодування-юнікод-8? 128 191)", "1"),
-        ("(наявні-два-байти-продовження-кодування-юнікод-8? 128 65)", "0"),
+        (
+            "(усі-елементи-є-байтами-кодування-юнікод-8? (quote ()))",
+            "1",
+        ),
+        (
+            "(усі-елементи-є-байтами-кодування-юнікод-8? (quote (65 256)))",
+            "0",
+        ),
+        (
+            "(наявні-два-байти-продовження-кодування-юнікод-8? 128 191)",
+            "1",
+        ),
+        (
+            "(наявні-два-байти-продовження-кодування-юнікод-8? 128 65)",
+            "0",
+        ),
     ] {
         let actual = eval(program);
-        assert_eq!(actual, expected,
-            "test_id=utf8-d1 layer=SENS input={program} expected={expected} actual={actual}");
+        assert_eq!(
+            actual, expected,
+            "test_id=utf8-d1 layer=SENS input={program} expected={expected} actual={actual}"
+        );
     }
 }
 
@@ -120,7 +177,10 @@ fn utf8_d1_predicates_run_in_sens_without_unbound_truth_symbols() {
 #[test]
 fn utf8_integer_quotient_and_remainder_execute_in_sens_with_d1_branch() {
     let source = include_str!("../../../lib/utf8.lisp");
-    assert!(!source.contains("      (так\\n"), "неприпустимий невизначений предикат у мовному COND");
+    assert!(
+        !source.contains("      (так\\n"),
+        "неприпустимий невизначений предикат у мовному COND"
+    );
     for (program, expected) in [
         ("(кодування-юнікод-8-ціла-частка 0 64)", "0"),
         ("(кодування-юнікод-8-ціла-частка 63 64)", "0"),
@@ -139,7 +199,10 @@ fn utf8_integer_quotient_and_remainder_execute_in_sens_with_d1_branch() {
 
 #[test]
 fn utf8_decodes_ascii_exactly() {
-    assert_eq!(eval("(utf8-decode (quote (65 66 67)))"), "(decoded (65 66 67))");
+    assert_eq!(
+        eval("(utf8-decode (quote (65 66 67)))"),
+        "(decoded (65 66 67))"
+    );
 }
 
 #[test]
@@ -153,7 +216,10 @@ fn utf8_decodes_multibyte_scalars_exactly() {
 
 #[test]
 fn utf8_decodes_valid_bytes_to_a_runtime_string_without_lossy_host_policy() {
-    assert_eq!(eval("(unicode-scalars->string (quote (65 162 8364 128512)))"), "\"A¢€😀\"");
+    assert_eq!(
+        eval("(unicode-scalars->string (quote (65 162 8364 128512)))"),
+        "\"A¢€😀\""
+    );
     assert_eq!(
         eval("(utf8-decode-string (quote (65 194 162 226 130 172 240 159 152 128)))"),
         "(decoded \"A¢€😀\")"
@@ -210,9 +276,9 @@ fn utf8_encode_decode_round_trip_is_language_owned() {
 #[test]
 fn utf8_rejects_overlong_surrogate_and_out_of_range_sequences() {
     for bytes in [
-        "(192 128)",       // overlong 2-byte form
-        "(224 128 128)",   // overlong 3-byte form
-        "(237 160 128)",   // UTF-16 surrogate U+D800
+        "(192 128)",         // overlong 2-byte form
+        "(224 128 128)",     // overlong 3-byte form
+        "(237 160 128)",     // UTF-16 surrogate U+D800
         "(244 144 128 128)", // above U+10FFFF
     ] {
         assert_eq!(
@@ -244,18 +310,15 @@ fn utf8_rejects_non_bytes_before_protocol_interpretation() {
     );
 }
 
-
 fn explicitly_typed_d8_equal_call(d3: &[sens::Expr]) -> Vec<sens::Expr> {
     let sens::ExprKind::List(items) = &d3[0].kind else {
         panic!("потрібна форма-виклик")
     };
     let mut parts = items.to_vec();
     parts[0] = sens::Expr {
-        kind: sens::ExprKind::DomainIdentity(sens::DomainIdentity::D8(
-            sens::CoreD8::from_word(
-                sens::Bit8::new(0b11110111).expect("ратифікована D8-координата"),
-            ),
-        )),
+        kind: sens::ExprKind::DomainIdentity(sens::DomainIdentity::D8(sens::CoreD8::from_word(
+            sens::Bit8::new(0b11110111).expect("ратифікована D8-координата"),
+        ))),
         span: parts[0].span,
     };
     vec![sens::Expr {
@@ -267,9 +330,8 @@ fn explicitly_typed_d8_equal_call(d3: &[sens::Expr]) -> Vec<sens::Expr> {
 #[test]
 fn utf8_atomic_d3_eq_exhaustive_256_bytes_at_five_boundaries() {
     // Збіг восьми бітів із ратифікованим D8 не дає права auto-lift.
-    let opaque = parse_mixed_exact_domain_utf8_source(
-        "lib/utf8.lisp", "(11110111 0 0)",
-    ).expect("історичні слова залишаються неявно невикличними");
+    let opaque = parse_mixed_exact_domain_utf8_source("lib/utf8.lisp", "(11110111 0 0)")
+        .expect("історичні слова залишаються неявно невикличними");
     let sens::ExprKind::List(opaque_items) = &opaque[0].kind else {
         panic!("потрібна форма-виклик")
     };
@@ -285,16 +347,18 @@ fn utf8_atomic_d3_eq_exhaustive_256_bytes_at_five_boundaries() {
     for byte in 0_u16..=255 {
         for boundary in [0_u16, 224, 237, 240, 244] {
             let source = format!("(101 {byte} {boundary})");
-            let parsed = parse_mixed_exact_domain_utf8_source(
-                "lib/utf8.lisp", &source,
-            ).expect("точний виклик D3 EQ");
+            let parsed = parse_mixed_exact_domain_utf8_source("lib/utf8.lisp", &source)
+                .expect("точний виклик D3 EQ");
             let sens::ExprKind::List(items) = &parsed[0].kind else {
                 panic!("потрібна форма-виклик")
             };
-            assert!(matches!(
-                &items[0].kind,
-                sens::ExprKind::DomainIdentity(identity) if identity.width() == 3
-            ), "{source}: ширина EQ мусить дорівнювати рівно трьом бітам");
+            assert!(
+                matches!(
+                    &items[0].kind,
+                    sens::ExprKind::DomainIdentity(identity) if identity.width() == 3
+                ),
+                "{source}: ширина EQ мусить дорівнювати рівно трьом бітам"
+            );
             let result = eval_parsed_expressions(&parsed, &mut session)
                 .unwrap_or_else(|error| panic!("{source}: {error}"));
             assert_eq!(
@@ -311,9 +375,8 @@ fn utf8_atomic_d3_eq_exhaustive_256_bytes_at_five_boundaries() {
 #[test]
 fn utf8_d3_eq_rejects_nonatoms_and_d8_equal_remains_unadmitted() {
     let mut session = Session::default();
-    let d3 = parse_mixed_exact_domain_utf8_source(
-        "lib/utf8.lisp", "(101 (001 (a b)) (001 (a b)))",
-    ).expect("синтаксис допустимий");
+    let d3 = parse_mixed_exact_domain_utf8_source("lib/utf8.lisp", "(101 (001 (a b)) (001 (a b)))")
+        .expect("синтаксис допустимий");
     let error = eval_parsed_expressions(&d3, &mut session)
         .expect_err("D3 EQ є функцією лише атомарної рівності");
     assert_eq!(error.kind, sens::ErrorKind::Type);
@@ -331,7 +394,11 @@ fn utf8_d3_eq_rejects_nonatoms_and_d8_equal_remains_unadmitted() {
     let blocked = eval_parsed_expressions(&d8, &mut session)
         .expect_err("існування D8:11110111 не є дозволом виконання");
     assert_eq!(blocked.kind, sens::ErrorKind::Type);
-    assert!(blocked.message.contains("D8 11110111"), "{}", blocked.message);
+    assert!(
+        blocked.message.contains("D8 11110111"),
+        "{}",
+        blocked.message
+    );
 }
 
 #[test]
@@ -365,24 +432,27 @@ fn utf8_helper_returns_exact_d1_predicate_on_boundaries() {
     ] {
         let actual = eval_in_utf8_context(source, &mut session);
         assert_eq!(
-            actual.as_predicate_bit(), Some(expected),
+            actual.as_predicate_bit(),
+            Some(expected),
             "{source}: expected an exact D1 bit, never ordinary Number 0/1"
         );
     }
 }
 
-const UTF8_D1_LAW: &str =
-    include_str!("../../../tests/semantic/utf8-direct-d1-law.lisp");
+const UTF8_D1_LAW: &str = include_str!("../../../tests/semantic/utf8-direct-d1-law.lisp");
 
 /// The executable SENS program compares actual/expected D1 itself.
 /// Rust only transports the fixture, executes it, and observes the final bit.
 /// No Python or Rust function duplicates the UTF-8 predicate oracle.
 #[test]
 fn utf8_direct_d1_self_verdict_and_one_bit_mutant() {
-    let program = sens::parse_mixed_exact_domain_utf8_source(
-        "lib/utf8.lisp", UTF8_D1_LAW,
-    ).expect("the current pinned UTF-8 reader must parse binary SENS law");
-    assert_eq!(program.len(), 2, "two structural SENS-owned UTF-8 verdicts; numeric D24 boundaries remain transitional");
+    let program = sens::parse_mixed_exact_domain_utf8_source("lib/utf8.lisp", UTF8_D1_LAW)
+        .expect("the current pinned UTF-8 reader must parse binary SENS law");
+    assert_eq!(
+        program.len(),
+        2,
+        "two structural SENS-owned UTF-8 verdicts; numeric D24 boundaries remain transitional"
+    );
 
     let mut session = utf8_session();
     for (index, form) in program.iter().enumerate() {
@@ -404,16 +474,17 @@ fn utf8_direct_d1_self_verdict_and_one_bit_mutant() {
     let original = "(як-є не-список)) ні) так)";
     let flipped = "(як-є не-список)) так) так)";
     assert_eq!(
-        UTF8_D1_LAW.matches(original).count(), 1,
+        UTF8_D1_LAW.matches(original).count(),
+        1,
         "має існувати рівно один чинний D1-свідок для мутації"
     );
     let mutant_source = UTF8_D1_LAW.replacen(original, flipped, 1);
-    let mutant = sens::parse_mixed_exact_domain_utf8_source(
-        "lib/utf8.lisp", &mutant_source,
-    ).expect("one-bit mutant remains valid SENS source");
+    let mutant = sens::parse_mixed_exact_domain_utf8_source("lib/utf8.lisp", &mutant_source)
+        .expect("one-bit mutant remains valid SENS source");
     let mut mutant_session = utf8_session();
     assert!(
-        sens::eval_parsed_expressions(std::slice::from_ref(&mutant[0]), &mut mutant_session).is_err(),
+        sens::eval_parsed_expressions(std::slice::from_ref(&mutant[0]), &mut mutant_session)
+            .is_err(),
         "SENS itself must fail closed on the one-bit false verdict"
     );
 }

@@ -2,8 +2,7 @@
 //! Ці перевірки не симулюють evaluator: джерело Lisp завантажується через SENS.
 
 use sens::{
-    eval_parsed_expressions, load_core_library,
-    parse_mixed_exact_domain_machine_source, Session,
+    eval_parsed_expressions, load_core_library, parse_mixed_exact_domain_machine_source, Session,
 };
 
 fn execute_current_sens(path: &str, library: &str, source: &str) -> String {
@@ -90,7 +89,6 @@ fn malformed_native_result_tag_rejects_in_native_route() {
         "(execution-route native (status rejected) (detail (rejected неприпустиме-кодування)))",
     );
 }
-
 
 /// Окремий завантажуваний SENS модуль точних доменних ключів.
 fn execute_domain_key(source: &str) -> String {

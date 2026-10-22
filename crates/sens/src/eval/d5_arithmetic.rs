@@ -30,9 +30,8 @@ pub(super) fn invoke(
         0b01011 => arithmetic::arithmetic_on_values("-", args, environment, span), // DIFFERENCE
         0b10110 => arithmetic::arithmetic_on_values("*", args, environment, span), // TIMES
         0b10111 => arithmetic::division_on_values(args, args.len(), environment, span), // QUOTIENT
-        0b11010 => arithmetic::comparison_on_values("<", args, span), // LESSP
-        0b11011 => arithmetic::comparison_on_values(">", args, span), // GREATERP
+        0b11010 => arithmetic::comparison_on_values("<", args, span),              // LESSP
+        0b11011 => arithmetic::comparison_on_values(">", args, span),              // GREATERP
         _ => return None,
     })
 }
-

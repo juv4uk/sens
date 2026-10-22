@@ -14,11 +14,23 @@ fn eval_translation(source: &str) -> String {
     for (path, library) in [
         ("lib/unify.lisp", include_str!("../../../lib/unify.lisp")),
         ("lib/reason.lisp", include_str!("../../../lib/reason.lisp")),
-        ("lib/forward.lisp", include_str!("../../../lib/forward.lisp")),
-        ("lib/knowledge.lisp", include_str!("../../../lib/knowledge.lisp")),
+        (
+            "lib/forward.lisp",
+            include_str!("../../../lib/forward.lisp"),
+        ),
+        (
+            "lib/knowledge.lisp",
+            include_str!("../../../lib/knowledge.lisp"),
+        ),
         ("lib/world.lisp", include_str!("../../../lib/world.lisp")),
-        ("lib/result-status.lisp", include_str!("../../../lib/result-status.lisp")),
-        ("lib/translation.lisp", include_str!("../../../lib/translation.lisp")),
+        (
+            "lib/result-status.lisp",
+            include_str!("../../../lib/result-status.lisp"),
+        ),
+        (
+            "lib/translation.lisp",
+            include_str!("../../../lib/translation.lisp"),
+        ),
     ] {
         if path == "lib/world.lisp" {
             // World — чинний власник рішення про допустимість поради.
@@ -27,8 +39,7 @@ fn eval_translation(source: &str) -> String {
             sens::eval_pinned_reasoning_source(path, library, &mut session)
                 .expect("чинний SENS World повинен завантажитися");
         } else {
-            let forms = parse_mixed_exact_domain(library)
-                .expect("чинний доменний SENS reader");
+            let forms = parse_mixed_exact_domain(library).expect("чинний доменний SENS reader");
             eval_parsed_expressions(&forms, &mut session)
                 .expect("чинна бібліотека виконується SENS");
         }
@@ -38,9 +49,9 @@ fn eval_translation(source: &str) -> String {
             .unwrap_or_else(|error| panic!("чинний D1–D10 reader: {error}; source: {source}")),
         &mut session,
     )
-        .unwrap_or_else(|e| panic!("translation evaluation failed: {e}\nsource: {source}"))
-        .value
-        .to_string()
+    .unwrap_or_else(|e| panic!("translation evaluation failed: {e}\nsource: {source}"))
+    .value
+    .to_string()
 }
 
 #[test]
@@ -91,7 +102,10 @@ fn world_direct_opposite_only_facts_not_unproved_rules() {
     // передумовою не стає доказом самої себе.
     for (clauses, expected) in [
         ("(((not? (human socrates))))", "conflict"),
-        ("(((not? (human socrates)) (unknown-premise socrates)))", "accepted"),
+        (
+            "(((not? (human socrates)) (unknown-premise socrates)))",
+            "accepted",
+        ),
     ] {
         let source = format!(
             "(визначити світ-для-перевірки \
@@ -99,7 +113,11 @@ fn world_direct_opposite_only_facts_not_unproved_rules() {
              (перше (порада-рішення-у-світ світ-для-перевірки \
                (як-є corpus) (як-є ((human socrates)))))"
         );
-        assert_eq!(eval_translation(&source), expected, "SENS clauses: {clauses}");
+        assert_eq!(
+            eval_translation(&source),
+            expected,
+            "SENS clauses: {clauses}"
+        );
     }
 }
 
@@ -120,8 +138,11 @@ fn d10_advice_decisions_are_pure_world_derived_sens_functions() {
           (перше пакетне-рішення)
           (однакові? журнал-до *knowledge-journal*))
     "#;
-    assert_eq!(eval_translation(source), "(accepted accepted 1)",
-               "обидва D10 рішення лише читають immutable World");
+    assert_eq!(
+        eval_translation(source),
+        "(accepted accepted 1)",
+        "обидва D10 рішення лише читають immutable World"
+    );
 }
 
 #[test]
@@ -129,10 +150,22 @@ fn translation_content_validity_is_exact_d1_in_real_sens() {
     // Кожна гілка валідатора повертає D1:1/0, а не D3 NIL;
     // перевіряється реальним SENS eval з чинними бібліотеками.
     for (source, expected) in [
-        ("(вміст-кандидата-перекладу-коректний? (як-є clause) (як-є ((human socrates))))", "1"),
-        ("(вміст-кандидата-перекладу-коректний? (як-є clause) (як-є ((human (var)))))", "0"),
-        ("(вміст-кандидата-перекладу-коректний? (як-є batch) (як-є ()))", "0"),
-        ("(вміст-кандидата-перекладу-коректний? (як-є невідомий-вид) (як-є ((human socrates))))", "0"),
+        (
+            "(вміст-кандидата-перекладу-коректний? (як-є clause) (як-є ((human socrates))))",
+            "1",
+        ),
+        (
+            "(вміст-кандидата-перекладу-коректний? (як-є clause) (як-є ((human (var)))))",
+            "0",
+        ),
+        (
+            "(вміст-кандидата-перекладу-коректний? (як-є batch) (як-є ()))",
+            "0",
+        ),
+        (
+            "(вміст-кандидата-перекладу-коректний? (як-є невідомий-вид) (як-є ((human socrates))))",
+            "0",
+        ),
     ] {
         assert_eq!(eval_translation(source), expected, "D1 валідатор: {source}");
     }
@@ -304,8 +337,11 @@ fn translation_alternatives_reject_improper_d3_tail_in_live_sens() {
         let expression = format!(
             "(альтернативні-варіанти-перекладу-коректні? (як-є clause) (як-є {alternatives}))"
         );
-        assert_eq!(eval_translation(&expression), expected,
-                   "SENS неправильно прийняв хвіст: {expression}");
+        assert_eq!(
+            eval_translation(&expression),
+            expected,
+            "SENS неправильно прийняв хвіст: {expression}"
+        );
     }
 }
 
@@ -322,10 +358,7 @@ fn one_alternative_is_not_allowed_to_masquerade_as_ambiguity() {
           (переклад-перевірка-код review)
           (переклад-допуск-вміст review))
     "#;
-    assert_eq!(
-        eval_translation(source),
-        "(rejected invalid-ambiguity ())"
-    );
+    assert_eq!(eval_translation(source), "(rejected invalid-ambiguity ())");
 }
 
 #[test]
@@ -374,10 +407,8 @@ fn translation_symbol_law_rejects_non_symbols_in_live_sens() {
         include_str!("../../../lib/result-status.lisp"),
         include_str!("../../../lib/translation.lisp"),
     ] {
-        let forms = parse_mixed_exact_domain(library)
-            .expect("чинний доменний SENS reader");
-        eval_parsed_expressions(&forms, &mut session)
-            .expect("чинна бібліотека SENS");
+        let forms = parse_mixed_exact_domain(library).expect("чинний доменний SENS reader");
+        eval_parsed_expressions(&forms, &mut session).expect("чинна бібліотека SENS");
     }
     for (expression, expected) in [
         ("(як-є candidate)", true),
@@ -388,11 +419,11 @@ fn translation_symbol_law_rejects_non_symbols_in_live_sens() {
     ] {
         let source = format!("(переклад-внутрішній-символ? {expression})");
         let actual = eval_parsed_expressions(
-            &parse_mixed_exact_domain(&source)
-                .unwrap_or_else(|error| panic!("{source}: {error}")),
+            &parse_mixed_exact_domain(&source).unwrap_or_else(|error| panic!("{source}: {error}")),
             &mut session,
         )
-            .unwrap_or_else(|error| panic!("{source}: {error}")).value;
+        .unwrap_or_else(|error| panic!("{source}: {error}"))
+        .value;
         assert_eq!(actual.as_predicate_bit(), Some(expected), "{source}");
     }
 }
@@ -409,10 +440,8 @@ fn translation_exact_five_fields_rejects_short_long_and_dotted_lists() {
         include_str!("../../../lib/result-status.lisp"),
         include_str!("../../../lib/translation.lisp"),
     ] {
-        let forms = parse_mixed_exact_domain(library)
-            .expect("чинний доменний SENS reader");
-        eval_parsed_expressions(&forms, &mut session)
-            .expect("чинна бібліотека SENS");
+        let forms = parse_mixed_exact_domain(library).expect("чинний доменний SENS reader");
+        eval_parsed_expressions(&forms, &mut session).expect("чинна бібліотека SENS");
     }
     for (value, expected) in [
         ("(а б в г ґ)", true),
@@ -424,11 +453,11 @@ fn translation_exact_five_fields_rejects_short_long_and_dotted_lists() {
     ] {
         let source = format!("(переклад-рівно-п'ять-полів? (як-є {value}))");
         let actual = eval_parsed_expressions(
-            &parse_mixed_exact_domain(&source)
-                .unwrap_or_else(|error| panic!("{source}: {error}")),
+            &parse_mixed_exact_domain(&source).unwrap_or_else(|error| panic!("{source}: {error}")),
             &mut session,
         )
-            .unwrap_or_else(|error| panic!("{source}: {error}")).value;
+        .unwrap_or_else(|error| panic!("{source}: {error}"))
+        .value;
         assert_eq!(actual.as_predicate_bit(), Some(expected), "{source}");
     }
 }
@@ -498,7 +527,6 @@ fn versioned_translation_corpus_is_data_only_and_contains_all_b4_modes() {
         );
     }
 }
-
 
 #[test]
 fn translation_review_evidence_named_sens_functions_execute_positive_and_negative() {

@@ -18,9 +18,11 @@
 //! This module does not reinterpret 24-bit payload as a D24 function or
 //! invent numeric literals, resident occupancy, signedness, or widening.
 
-use crate::{parse_canonical_word_sequence, BinarySourceWord, Bit1};
 use crate::domain_words::DomainD10;
-use crate::frame3_grammar::{count_inner, rank_binary_source_words, unrank_binary_source_words, ExactWord, MAX_INNER_BITS};
+use crate::frame3_grammar::{
+    count_inner, rank_binary_source_words, unrank_binary_source_words, ExactWord, MAX_INNER_BITS,
+};
+use crate::{parse_canonical_word_sequence, BinarySourceWord, Bit1};
 
 const MAGIC: [u8; 3] = [b'S', b'3', 3];
 const RAW: u8 = 0;
@@ -38,7 +40,10 @@ pub enum Word {
     Core(BinarySourceWord),
     /// Exact D10 coordinate. A u16 host slot carries only ten semantic bits.
     D10(DomainD10),
-    Numeric { level: u8, bytes: Vec<u8> },
+    Numeric {
+        level: u8,
+        bytes: Vec<u8>,
+    },
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -56,7 +61,9 @@ impl Word {
     /// `level=0` means D24; `1` D48; `2` D96, ... . Explicitly supplied
     /// domain identity is retained even if the magnitude has leading zeros.
     pub fn numeric(level: u8, bytes: Vec<u8>) -> Result<Self, Error> {
-        if bytes.len() != numeric_bytes(level)? { return Err(Error::Malformed); }
+        if bytes.len() != numeric_bytes(level)? {
+            return Err(Error::Malformed);
+        }
         Ok(Self::Numeric { level, bytes })
     }
 
@@ -77,15 +84,24 @@ impl Word {
 }
 
 fn numeric_bytes(level: u8) -> Result<usize, Error> {
-    if level > MAX_NUMERIC_LEVEL { return Err(Error::TooLarge); }
-    let bytes = 3usize.checked_shl(u32::from(level)).ok_or(Error::TooLarge)?;
-    if bytes > MAX_BYTES { return Err(Error::TooLarge); }
+    if level > MAX_NUMERIC_LEVEL {
+        return Err(Error::TooLarge);
+    }
+    let bytes = 3usize
+        .checked_shl(u32::from(level))
+        .ok_or(Error::TooLarge)?;
+    if bytes > MAX_BYTES {
+        return Err(Error::TooLarge);
+    }
     Ok(bytes)
 }
 
 fn uleb_len(mut x: usize) -> usize {
     let mut n = 1;
-    while x >= 128 { n += 1; x >>= 7; }
+    while x >= 128 {
+        n += 1;
+        x >>= 7;
+    }
     n
 }
 
@@ -106,7 +122,9 @@ fn read_uleb(input: &[u8], cursor: &mut usize) -> Result<usize, Error> {
         n |= u64::from(byte & 127) << (7 * step);
         if byte & 128 == 0 {
             let value = usize::try_from(n).map_err(|_| Error::TooLarge)?;
-            if *cursor - start != uleb_len(value) { return Err(Error::NonCanonical); }
+            if *cursor - start != uleb_len(value) {
+                return Err(Error::NonCanonical);
+            }
             return Ok(value);
         }
     }
@@ -139,13 +157,21 @@ fn descriptor(input: &[u8], at: &mut usize) -> Result<Word, Error> {
     let kind = *input.get(*at).ok_or(Error::Truncated)?;
     *at += 1;
     match kind {
-        1..=9 => Ok(Word::Core(ExactWord::new(kind, 0)
-            .map_err(|_| Error::Malformed)?.to_binary_source())),
-        10 => Ok(Word::D10(DomainD10::new(0).expect("valid ten-bit D10 placeholder"))),
+        1..=9 => Ok(Word::Core(
+            ExactWord::new(kind, 0)
+                .map_err(|_| Error::Malformed)?
+                .to_binary_source(),
+        )),
+        10 => Ok(Word::D10(
+            DomainD10::new(0).expect("valid ten-bit D10 placeholder"),
+        )),
         NUMERIC_DESCRIPTOR => {
             let level = read_uleb(input, at)?;
             let level = u8::try_from(level).map_err(|_| Error::TooLarge)?;
-            Ok(Word::Numeric { level, bytes: vec![0; numeric_bytes(level)?] })
+            Ok(Word::Numeric {
+                level,
+                bytes: vec![0; numeric_bytes(level)?],
+            })
         }
         _ => Err(Error::Malformed),
     }
@@ -166,7 +192,9 @@ fn write_packed(words: &[Word], out: &mut Vec<u8>) {
     let mut offset = 0usize;
     for word in words {
         for bit in 0..word.width_bits() {
-            if word_bit(word, bit) == 1 { out[start + offset / 8] |= 1 << (7 - offset % 8); }
+            if word_bit(word, bit) == 1 {
+                out[start + offset / 8] |= 1 << (7 - offset % 8);
+            }
             offset += 1;
         }
     }
@@ -175,11 +203,15 @@ fn write_packed(words: &[Word], out: &mut Vec<u8>) {
 fn read_packed(templates: &mut [Word], input: &[u8], pos: &mut usize) -> Result<(), Error> {
     let total: usize = templates.iter().map(Word::width_bits).sum();
     let end = pos.checked_add(total.div_ceil(8)).ok_or(Error::TooLarge)?;
-    if end > input.len() { return Err(Error::Truncated); }
+    if end > input.len() {
+        return Err(Error::Truncated);
+    }
     let body = &input[*pos..end];
     if !total.is_multiple_of(8) && !body.is_empty() {
         let mask = (1 << (8 - total % 8)) - 1;
-        if body[body.len() - 1] & mask != 0 { return Err(Error::NonCanonical); }
+        if body[body.len() - 1] & mask != 0 {
+            return Err(Error::NonCanonical);
+        }
     }
     let mut bit_pos = 0;
     for template in templates.iter_mut() {
@@ -192,7 +224,8 @@ fn read_packed(templates: &mut [Word], input: &[u8], pos: &mut usize) -> Result<
                     bit_pos += 1;
                 }
                 *old = ExactWord::new(width as u8, value)
-                    .map_err(|_| Error::Malformed)?.to_binary_source();
+                    .map_err(|_| Error::Malformed)?
+                    .to_binary_source();
             }
             Word::D10(old) => {
                 let mut value = 0u16;
@@ -223,19 +256,33 @@ fn read_packed(templates: &mut [Word], input: &[u8], pos: &mut usize) -> Result<
 /// substituted W1 is never exposed as a semantic identity or encoded byte.
 /// No claim about an executable numeric operation follows from this check.
 fn valid_structure(words: &[Word]) -> Result<(), Error> {
-    let surrogate = words.iter().map(|w| match w {
-        Word::Core(core) => *core,
-        Word::D10(_) | Word::Numeric { .. } => BinarySourceWord::W1(Bit1::new(0).unwrap()),
-    }).collect::<Vec<_>>();
-    parse_canonical_word_sequence(&surrogate).map(|_| ()).map_err(|_| Error::InvalidD2)
+    let surrogate = words
+        .iter()
+        .map(|w| match w {
+            Word::Core(core) => *core,
+            Word::D10(_) | Word::Numeric { .. } => BinarySourceWord::W1(Bit1::new(0).unwrap()),
+        })
+        .collect::<Vec<_>>();
+    parse_canonical_word_sequence(&surrogate)
+        .map(|_| ())
+        .map_err(|_| Error::InvalidD2)
 }
 
 fn grammar(words: &[Word]) -> Option<(usize, u128, usize)> {
-    if words.len() < 2 { return None; }
-    let core = words.iter().map(|w| match w { Word::Core(x) => Some(*x), _ => None })
+    if words.len() < 2 {
+        return None;
+    }
+    let core = words
+        .iter()
+        .map(|w| match w {
+            Word::Core(x) => Some(*x),
+            _ => None,
+        })
         .collect::<Option<Vec<_>>>()?;
     let inner_bits = core.get(1..core.len() - 1)?.iter().map(|w| w.width()).sum();
-    if inner_bits > MAX_INNER_BITS { return None; }
+    if inner_bits > MAX_INNER_BITS {
+        return None;
+    }
     let ordinal = rank_binary_source_words(&core).ok()?.ordinal;
     let count = count_inner(inner_bits).ok()?;
     let required_bits = (128 - (count - 1).leading_zeros()) as usize;
@@ -243,14 +290,30 @@ fn grammar(words: &[Word]) -> Option<(usize, u128, usize)> {
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord)]
-enum Mode { Raw, Repeat, NumericRun, Grammar }
+enum Mode {
+    Raw,
+    Repeat,
+    NumericRun,
+    Grammar,
+}
 
 #[derive(Clone, Copy)]
-struct Step { cost: usize, end: usize, mode: Mode }
+struct Step {
+    cost: usize,
+    end: usize,
+    mode: Mode,
+}
 
 fn plan(words: &[Word]) -> Vec<Step> {
     let n = words.len();
-    let mut dp = vec![Step { cost: usize::MAX, end: n, mode: Mode::Raw }; n + 1];
+    let mut dp = vec![
+        Step {
+            cost: usize::MAX,
+            end: n,
+            mode: Mode::Raw
+        };
+        n + 1
+    ];
     dp[n].cost = 0;
     for i in (0..n).rev() {
         let mut payload_bits = 0usize;
@@ -262,17 +325,29 @@ fn plan(words: &[Word]) -> Vec<Step> {
             payload_bits += current.width_bits();
             desc_bytes += current.descriptor_cost();
             all_repeat &= current == &words[i];
-            let level = match current { Word::Numeric { level, .. } => Some(*level), _ => None };
-            if j == i + 1 { same_numeric = level; }
-            else if same_numeric != level { same_numeric = None; }
+            let level = match current {
+                Word::Numeric { level, .. } => Some(*level),
+                _ => None,
+            };
+            if j == i + 1 {
+                same_numeric = level;
+            } else if same_numeric != level {
+                same_numeric = None;
+            }
             let count = j - i;
             let overhead = 1 + uleb_len(count);
             let mut options = vec![(overhead + desc_bytes + payload_bits.div_ceil(8), Mode::Raw)];
             if all_repeat {
-                options.push((overhead + words[i].descriptor_cost() + words[i].width_bits().div_ceil(8), Mode::Repeat));
+                options.push((
+                    overhead + words[i].descriptor_cost() + words[i].width_bits().div_ceil(8),
+                    Mode::Repeat,
+                ));
             }
             if let Some(level) = same_numeric {
-                options.push((overhead + uleb_len(level as usize) + payload_bits.div_ceil(8), Mode::NumericRun));
+                options.push((
+                    overhead + uleb_len(level as usize) + payload_bits.div_ceil(8),
+                    Mode::NumericRun,
+                ));
             }
             // The only ranked profile whose exact D2 population is independently proved.
             if payload_bits <= MAX_INNER_BITS + 4 {
@@ -283,9 +358,15 @@ fn plan(words: &[Word]) -> Vec<Step> {
             for (block_cost, mode) in options {
                 let total = block_cost + dp[j].cost;
                 let old = dp[i];
-                if total < old.cost ||
-                    (total == old.cost && (mode, usize::MAX - j) < (old.mode, usize::MAX - old.end)) {
-                    dp[i] = Step { cost: total, end: j, mode };
+                if total < old.cost
+                    || (total == old.cost
+                        && (mode, usize::MAX - j) < (old.mode, usize::MAX - old.end))
+                {
+                    dp[i] = Step {
+                        cost: total,
+                        end: j,
+                        mode,
+                    };
                 }
             }
         }
@@ -294,15 +375,23 @@ fn plan(words: &[Word]) -> Vec<Step> {
 }
 
 pub fn encode(words: &[Word]) -> Result<Vec<u8>, Error> {
-    if words.len() > MAX_WORDS { return Err(Error::TooLarge); }
+    if words.len() > MAX_WORDS {
+        return Err(Error::TooLarge);
+    }
     let mut total_bits = 0usize;
     for word in words {
         if let Word::Numeric { level, bytes } = word {
-            if bytes.len() != numeric_bytes(*level)? { return Err(Error::Malformed); }
+            if bytes.len() != numeric_bytes(*level)? {
+                return Err(Error::Malformed);
+            }
         }
-        total_bits = total_bits.checked_add(word.width_bits()).ok_or(Error::TooLarge)?;
+        total_bits = total_bits
+            .checked_add(word.width_bits())
+            .ok_or(Error::TooLarge)?;
     }
-    if total_bits.div_ceil(8) > MAX_BYTES { return Err(Error::TooLarge); }
+    if total_bits.div_ceil(8) > MAX_BYTES {
+        return Err(Error::TooLarge);
+    }
     valid_structure(words)?;
     let steps = plan(words);
     let mut output = Vec::new();
@@ -316,7 +405,9 @@ pub fn encode(words: &[Word]) -> Result<Vec<u8>, Error> {
         write_uleb(block.len(), &mut output);
         match step.mode {
             Mode::Raw => {
-                for word in block { put_descriptor(word, &mut output); }
+                for word in block {
+                    put_descriptor(word, &mut output);
+                }
                 write_packed(block, &mut output);
             }
             Mode::Repeat => {
@@ -324,7 +415,9 @@ pub fn encode(words: &[Word]) -> Result<Vec<u8>, Error> {
                 write_packed(&block[..1], &mut output);
             }
             Mode::NumericRun => {
-                let Word::Numeric { level, .. } = &block[0] else { return Err(Error::Malformed); };
+                let Word::Numeric { level, .. } = &block[0] else {
+                    return Err(Error::Malformed);
+                };
                 write_uleb(*level as usize, &mut output);
                 write_packed(block, &mut output);
             }
@@ -333,29 +426,48 @@ pub fn encode(words: &[Word]) -> Result<Vec<u8>, Error> {
                 write_uleb(inner, &mut output);
                 let begin = output.len();
                 output.resize(begin + size, 0);
-                for byte in output[begin..].iter_mut().rev() { *byte = ordinal as u8; ordinal >>= 8; }
-                if ordinal != 0 { return Err(Error::Malformed); }
+                for byte in output[begin..].iter_mut().rev() {
+                    *byte = ordinal as u8;
+                    ordinal >>= 8;
+                }
+                if ordinal != 0 {
+                    return Err(Error::Malformed);
+                }
             }
         }
-        if output.len() > MAX_BYTES - 4 { return Err(Error::TooLarge); }
+        if output.len() > MAX_BYTES - 4 {
+            return Err(Error::TooLarge);
+        }
         i = step.end;
     }
     let checksum = crc32(&output);
     output.extend_from_slice(&checksum.to_be_bytes());
-    if output.len() > MAX_BYTES { return Err(Error::TooLarge); }
+    if output.len() > MAX_BYTES {
+        return Err(Error::TooLarge);
+    }
     Ok(output)
 }
 
 pub fn decode(input: &[u8]) -> Result<Vec<Word>, Error> {
-    if input.len() > MAX_BYTES { return Err(Error::TooLarge); }
-    if input.len() < 8 { return Err(Error::Truncated); }
-    if input[..3] != MAGIC { return Err(Error::BadVersion); }
+    if input.len() > MAX_BYTES {
+        return Err(Error::TooLarge);
+    }
+    if input.len() < 8 {
+        return Err(Error::Truncated);
+    }
+    if input[..3] != MAGIC {
+        return Err(Error::BadVersion);
+    }
     let end = input.len() - 4;
     let expected = u32::from_be_bytes(input[end..].try_into().map_err(|_| Error::Truncated)?);
-    if expected != crc32(&input[..end]) { return Err(Error::Integrity); }
+    if expected != crc32(&input[..end]) {
+        return Err(Error::Integrity);
+    }
     let mut pos = 3;
     let words_count = read_uleb(&input[..end], &mut pos)?;
-    if words_count > MAX_WORDS { return Err(Error::TooLarge); }
+    if words_count > MAX_WORDS {
+        return Err(Error::TooLarge);
+    }
     let mut result = Vec::with_capacity(words_count);
     let mut decoded_bits = 0usize;
     while result.len() < words_count {
@@ -371,18 +483,28 @@ pub fn decode(input: &[u8]) -> Result<Vec<Word>, Error> {
                 let mut pending_bits = 0usize;
                 for _ in 0..count {
                     let item = descriptor(&input[..end], &mut pos)?;
-                    pending_bits = pending_bits.checked_add(item.width_bits()).ok_or(Error::TooLarge)?;
-                    if pending_bits > MAX_BYTES * 8 - decoded_bits { return Err(Error::TooLarge); }
+                    pending_bits = pending_bits
+                        .checked_add(item.width_bits())
+                        .ok_or(Error::TooLarge)?;
+                    if pending_bits > MAX_BYTES * 8 - decoded_bits {
+                        return Err(Error::TooLarge);
+                    }
                     items.push(item);
                 }
                 items
             }
             REPEAT => {
                 let item = descriptor(&input[..end], &mut pos)?;
-                if item.width_bits().checked_mul(count).ok_or(Error::TooLarge)?
-                    > MAX_BYTES * 8 - decoded_bits { return Err(Error::TooLarge); }
+                if item
+                    .width_bits()
+                    .checked_mul(count)
+                    .ok_or(Error::TooLarge)?
+                    > MAX_BYTES * 8 - decoded_bits
+                {
+                    return Err(Error::TooLarge);
+                }
                 vec![item]
-            },
+            }
             NUMERIC_RUN => {
                 let level = read_uleb(&input[..end], &mut pos)?;
                 let level = u8::try_from(level).map_err(|_| Error::TooLarge)?;
@@ -390,41 +512,69 @@ pub fn decode(input: &[u8]) -> Result<Vec<Word>, Error> {
                 if size.checked_mul(count).ok_or(Error::TooLarge)? > MAX_BYTES {
                     return Err(Error::TooLarge);
                 }
-                vec![Word::Numeric { level, bytes: vec![0; size] }; count]
+                vec![
+                    Word::Numeric {
+                        level,
+                        bytes: vec![0; size]
+                    };
+                    count
+                ]
             }
             GRAMMAR => {
                 let inner = read_uleb(&input[..end], &mut pos)?;
                 let cap = count_inner(inner).map_err(|_| Error::Malformed)?;
                 let size = ((128 - (cap - 1).leading_zeros()) as usize).div_ceil(8);
                 let stop = pos.checked_add(size).ok_or(Error::TooLarge)?;
-                if stop > end { return Err(Error::Truncated); }
+                if stop > end {
+                    return Err(Error::Truncated);
+                }
                 let mut ordinal = 0u128;
-                for &byte in &input[pos..stop] { ordinal = (ordinal << 8) | u128::from(byte); }
+                for &byte in &input[pos..stop] {
+                    ordinal = (ordinal << 8) | u128::from(byte);
+                }
                 pos = stop;
-                let core = unrank_binary_source_words(inner, ordinal)
-                    .map_err(|_| Error::NonCanonical)?;
-                if core.len() != count { return Err(Error::NonCanonical); }
+                let core =
+                    unrank_binary_source_words(inner, ordinal).map_err(|_| Error::NonCanonical)?;
+                if core.len() != count {
+                    return Err(Error::NonCanonical);
+                }
                 let recovered_bits: usize = core.iter().map(|word| word.width()).sum();
-                decoded_bits = decoded_bits.checked_add(recovered_bits).ok_or(Error::TooLarge)?;
-                if decoded_bits.div_ceil(8) > MAX_BYTES { return Err(Error::TooLarge); }
+                decoded_bits = decoded_bits
+                    .checked_add(recovered_bits)
+                    .ok_or(Error::TooLarge)?;
+                if decoded_bits.div_ceil(8) > MAX_BYTES {
+                    return Err(Error::TooLarge);
+                }
                 result.extend(core.into_iter().map(Word::Core));
                 continue;
             }
             _ => return Err(Error::Malformed),
         };
         let block_bits = block.iter().map(Word::width_bits).sum::<usize>();
-        let expanded_bits = block_bits.checked_mul(if mode == REPEAT { count } else { 1 })
+        let expanded_bits = block_bits
+            .checked_mul(if mode == REPEAT { count } else { 1 })
             .ok_or(Error::TooLarge)?;
-        decoded_bits = decoded_bits.checked_add(expanded_bits).ok_or(Error::TooLarge)?;
-        if decoded_bits.div_ceil(8) > MAX_BYTES { return Err(Error::TooLarge); }
+        decoded_bits = decoded_bits
+            .checked_add(expanded_bits)
+            .ok_or(Error::TooLarge)?;
+        if decoded_bits.div_ceil(8) > MAX_BYTES {
+            return Err(Error::TooLarge);
+        }
         read_packed(&mut block, &input[..end], &mut pos)?;
-        if mode == REPEAT { result.resize(result.len() + count, block[0].clone()); }
-        else { result.extend(block); }
+        if mode == REPEAT {
+            result.resize(result.len() + count, block[0].clone());
+        } else {
+            result.extend(block);
+        }
     }
-    if pos != end { return Err(Error::NonCanonical); }
+    if pos != end {
+        return Err(Error::NonCanonical);
+    }
     valid_structure(&result)?;
     // Reject all alternative block partitions, width-map aliases and padding.
-    if encode(&result)?.as_slice() != input { return Err(Error::NonCanonical); }
+    if encode(&result)?.as_slice() != input {
+        return Err(Error::NonCanonical);
+    }
     Ok(result)
 }
 
@@ -434,21 +584,36 @@ mod tests {
     use crate::parse_binary_source_words;
 
     fn core(source: &str) -> Vec<Word> {
-        parse_binary_source_words(source).unwrap().into_iter().map(|x| Word::Core(x.word)).collect()
+        parse_binary_source_words(source)
+            .unwrap()
+            .into_iter()
+            .map(|x| Word::Core(x.word))
+            .collect()
     }
     fn check(words: Vec<Word>) -> Vec<u8> {
         let physical = encode(&words).unwrap();
         assert_eq!(decode(&physical).unwrap(), words);
         assert_eq!(encode(&decode(&physical).unwrap()).unwrap(), physical);
-        for i in 0..physical.len() { assert!(decode(&physical[..i]).is_err()); }
-        let mut extra = physical.clone(); extra.push(0);
+        for i in 0..physical.len() {
+            assert!(decode(&physical[..i]).is_err());
+        }
+        let mut extra = physical.clone();
+        extra.push(0);
         assert!(decode(&extra).is_err());
         physical
     }
 
     #[test]
     fn small_core_and_grammar_are_byte_exact() {
-        for source in ["", "0", "1", "10 01", "10 001 00 000 01", "10 01 10 01", "10 0 11 1 01"] {
+        for source in [
+            "",
+            "0",
+            "1",
+            "10 01",
+            "10 001 00 000 01",
+            "10 01 10 01",
+            "10 0 11 1 01",
+        ] {
             let bytes = check(core(source));
             assert_eq!(&bytes[..3], &MAGIC);
         }
@@ -458,8 +623,18 @@ mod tests {
 
     #[test]
     fn equal_magnitude_d24_and_d48_are_distinct_and_unchanged() {
-        let one24 = Word::numeric(0, { let mut b = vec![0; 3]; b[2] = 1; b }).unwrap();
-        let one48 = Word::numeric(1, { let mut b = vec![0; 6]; b[5] = 1; b }).unwrap();
+        let one24 = Word::numeric(0, {
+            let mut b = vec![0; 3];
+            b[2] = 1;
+            b
+        })
+        .unwrap();
+        let one48 = Word::numeric(1, {
+            let mut b = vec![0; 6];
+            b[5] = 1;
+            b
+        })
+        .unwrap();
         assert_ne!(one24, one48);
         let mut source = core("10 001 00");
         source.push(one24.clone());
@@ -477,7 +652,9 @@ mod tests {
         let repeated = vec![one24.clone(); 32];
         let bytes = check(repeated);
         assert_eq!(bytes[4], REPEAT);
-        let numbers = (0..20u8).map(|v| Word::numeric(0, vec![0, 0, v]).unwrap()).collect::<Vec<_>>();
+        let numbers = (0..20u8)
+            .map(|v| Word::numeric(0, vec![0, 0, v]).unwrap())
+            .collect::<Vec<_>>();
         let bytes = check(numbers);
         assert_eq!(bytes[4], NUMERIC_RUN);
     }
@@ -486,9 +663,8 @@ mod tests {
     fn independently_pinned_non_grammar_wire_vectors() {
         // Produced by the standalone Python v3 reference; no Rust encoder
         // is used to create these expected physical bytes.
-        let samples: &[(&[Word], &[u8])] = &[
-            (&[], &[0x53, 0x33, 0x03, 0x00, 0xf5, 0xfc, 0x77, 0x5a]),
-        ];
+        let samples: &[(&[Word], &[u8])] =
+            &[(&[], &[0x53, 0x33, 0x03, 0x00, 0xf5, 0xfc, 0x77, 0x5a])];
         for (words, expected) in samples {
             assert_eq!(encode(words).unwrap().as_slice(), *expected);
             assert_eq!(decode(expected).unwrap().as_slice(), *words);
@@ -496,9 +672,27 @@ mod tests {
         let one24 = Word::numeric(0, vec![0, 0, 1]).unwrap();
         let one48 = Word::numeric(1, vec![0, 0, 0, 0, 0, 1]).unwrap();
         let pairs: &[(Vec<Word>, &[u8])] = &[
-            (vec![one24.clone()], &[0x53,0x33,0x03,0x01,0x02,0x01,0x00,0x00,0x00,0x01,0x89,0x42,0x1d,0x50]),
-            (vec![one48], &[0x53,0x33,0x03,0x01,0x02,0x01,0x01,0x00,0x00,0x00,0x00,0x00,0x01,0x9d,0x8f,0xe7,0xcc]),
-            (vec![one24; 5], &[0x53,0x33,0x03,0x05,0x01,0x05,0x80,0x00,0x00,0x00,0x01,0x48,0x29,0x1b,0x50]),
+            (
+                vec![one24.clone()],
+                &[
+                    0x53, 0x33, 0x03, 0x01, 0x02, 0x01, 0x00, 0x00, 0x00, 0x01, 0x89, 0x42, 0x1d,
+                    0x50,
+                ],
+            ),
+            (
+                vec![one48],
+                &[
+                    0x53, 0x33, 0x03, 0x01, 0x02, 0x01, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01,
+                    0x9d, 0x8f, 0xe7, 0xcc,
+                ],
+            ),
+            (
+                vec![one24; 5],
+                &[
+                    0x53, 0x33, 0x03, 0x05, 0x01, 0x05, 0x80, 0x00, 0x00, 0x00, 0x01, 0x48, 0x29,
+                    0x1b, 0x50,
+                ],
+            ),
         ];
         for (words, expected) in pairs {
             assert_eq!(encode(words).unwrap().as_slice(), *expected);
@@ -542,17 +736,23 @@ mod tests {
     fn wide_values_and_wrong_domain_or_corrupted_frames_are_rejected() {
         for level in 0..=4 {
             let mut bits = vec![0; numeric_bytes(level).unwrap()];
-            bits[0] = 0x80; let last = bits.len() - 1; bits[last] = 0x55;
+            bits[0] = 0x80;
+            let last = bits.len() - 1;
+            bits[last] = 0x55;
             check(vec![Word::numeric(level, bits).unwrap()]);
         }
-        assert_eq!(Word::numeric(MAX_NUMERIC_LEVEL + 1, vec![]), Err(Error::TooLarge));
+        assert_eq!(
+            Word::numeric(MAX_NUMERIC_LEVEL + 1, vec![]),
+            Err(Error::TooLarge)
+        );
         let good = check(core("10 001 01"));
-        let mut mutated = good.clone(); mutated[3] = 0x80;
+        let mut mutated = good.clone();
+        mutated[3] = 0x80;
         assert!(decode(&mutated).is_err());
-        let mut changed = good.clone(); changed[2] = 1;
+        let mut changed = good.clone();
+        changed[2] = 1;
         assert_eq!(decode(&changed), Err(Error::BadVersion));
     }
-
 
     /// Вичерпний свідок 1024/1024 координат D10: разом із D2/D3/D8 вони
     /// займають точно 25 змістовних бітів, не 32, без внутрішніх padding.
@@ -565,10 +765,19 @@ mod tests {
         for payload in 0u16..1024 {
             let d10 = Word::D10(DomainD10::new(payload).unwrap());
             assert_eq!(d10.width_bits(), 10);
-            assert_ne!(d10, Word::Core(BinarySourceWord::W8(
-                crate::Bit8::new((payload & 0xff) as u8).unwrap()
-            )));
-            let sequence = vec![open.clone(), quote.clone(), d10.clone(), d8.clone(), close.clone()];
+            assert_ne!(
+                d10,
+                Word::Core(BinarySourceWord::W8(
+                    crate::Bit8::new((payload & 0xff) as u8).unwrap()
+                ))
+            );
+            let sequence = vec![
+                open.clone(),
+                quote.clone(),
+                d10.clone(),
+                d8.clone(),
+                close.clone(),
+            ];
             let mut packed = Vec::new();
             write_packed(&sequence, &mut packed);
             assert_eq!(packed.len(), 4);
@@ -577,8 +786,11 @@ mod tests {
             let expected = format!("10001{payload:010b}1010100001");
             assert_eq!(expected.len(), 25);
             for (offset, expected_bit) in expected.bytes().enumerate() {
-                assert_eq!((packed[offset / 8] >> (7 - offset % 8)) & 1, expected_bit - b'0',
-                    "D10={payload}, зсув={offset}");
+                assert_eq!(
+                    (packed[offset / 8] >> (7 - offset % 8)) & 1,
+                    expected_bit - b'0',
+                    "D10={payload}, зсув={offset}"
+                );
             }
             let encoded = encode(&sequence).expect("канонічний E3 має приймати D10");
             assert_eq!(decode(&encoded).unwrap(), sequence);
@@ -621,12 +833,16 @@ mod tests {
 
     #[test]
     fn no_numeric_width_can_steal_d2_structure() {
-        let good = vec![Word::Core(crate::BinarySourceWord::W2(crate::Bit2::new(0b10).unwrap())),
+        let good = vec![
+            Word::Core(crate::BinarySourceWord::W2(crate::Bit2::new(0b10).unwrap())),
             Word::numeric(0, vec![0; 3]).unwrap(),
-            Word::Core(crate::BinarySourceWord::W2(crate::Bit2::new(0b01).unwrap()))];
+            Word::Core(crate::BinarySourceWord::W2(crate::Bit2::new(0b01).unwrap())),
+        ];
         check(good);
-        let bad = vec![Word::Core(crate::BinarySourceWord::W2(crate::Bit2::new(0b01).unwrap())),
-            Word::numeric(0, vec![0; 3]).unwrap()];
+        let bad = vec![
+            Word::Core(crate::BinarySourceWord::W2(crate::Bit2::new(0b01).unwrap())),
+            Word::numeric(0, vec![0; 3]).unwrap(),
+        ];
         assert_eq!(encode(&bad), Err(Error::InvalidD2));
     }
 }

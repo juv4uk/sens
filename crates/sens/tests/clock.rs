@@ -34,8 +34,8 @@ fn core_integer_quotient_and_mod_keep_exact_lisp_laws() {
 
     // D5 ЧАСТКА є точною раціональною операцією; 10/3 не дорівнює
     // цілочисельній FLOOR-частці і не має вдавати такий результат.
-    let exact = eval_program("(частка 10 3)", &mut session)
-        .expect("адмітоване математичне D24+ ділення");
+    let exact =
+        eval_program("(частка 10 3)", &mut session).expect("адмітоване математичне D24+ ділення");
     assert!(
         matches!(exact.value, Value::NumericComposition(_)),
         "дробове D5 ділення не можна підміняти цілочисельною часткою"
@@ -178,8 +178,9 @@ fn utc_now_exists_only_after_language_time_layer_loads() {
     let mut session = Session::default();
     load_core_library(&mut session).unwrap();
 
-    let utc_sid = semantic_registry_export::semantic_id_for_admitted_surface("узгоджений-час-зараз")
-        .expect("узгоджений-час-зараз must remain admitted by sr-2");
+    let utc_sid =
+        semantic_registry_export::semantic_id_for_admitted_surface("узгоджений-час-зараз")
+            .expect("узгоджений-час-зараз must remain admitted by sr-2");
     assert_eq!(
         session.environment.get("узгоджений-час-зараз"),
         None,
@@ -208,7 +209,11 @@ fn utc_now_exists_only_after_language_time_layer_loads() {
         .value
         .to_string();
     let fields: Vec<&str> = value.trim_matches(['(', ')']).split_whitespace().collect();
-    assert_eq!(fields.len(), 8, "language-owned узгоджений-час-зараз shape: {value}");
+    assert_eq!(
+        fields.len(),
+        8,
+        "language-owned узгоджений-час-зараз shape: {value}"
+    );
     assert_eq!(fields[0], "utc");
 }
 
@@ -477,18 +482,24 @@ fn timezone_detection_is_explicit_and_ntp_requires_host_string() {
     assert!(timezone.starts_with("(detected ") || timezone.starts_with("(unknown "));
     assert!(eval_program("(інтернет-час-синхронізувати 123 100)", &mut session).is_err());
     assert_eq!(
-        eval_program("(створити-перевірене-значення-поясу \"Europe/Kyiv\" 7200)", &mut session)
-            .unwrap()
-            .value
-            .to_string(),
+        eval_program(
+            "(створити-перевірене-значення-поясу \"Europe/Kyiv\" 7200)",
+            &mut session
+        )
+        .unwrap()
+        .value
+        .to_string(),
         "(accepted (timezone \"Europe/Kyiv\" 7200))"
     );
 
     assert_eq!(
-        eval_program("(створити-перевірене-значення-поясу 123 7200)", &mut session)
-            .unwrap()
-            .value
-            .to_string(),
+        eval_program(
+            "(створити-перевірене-значення-поясу 123 7200)",
+            &mut session
+        )
+        .unwrap()
+        .value
+        .to_string(),
         "(rejected invalid-name)"
     );
 }

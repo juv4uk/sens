@@ -4,9 +4,9 @@ use std::fs;
 use std::io::{Read, Write};
 use std::process;
 use std::rc::Rc;
-mod lsp_entry;
 mod island_invoke;
 mod islands;
+mod lsp_entry;
 mod repl;
 mod swarm;
 mod tcp_repl;
@@ -128,8 +128,8 @@ fn extract_cli_core(args: Vec<String>) -> Result<(Vec<String>, CliCore), String>
 }
 
 /// Людська українська .lisp-проєкція належить SENS, а не GUI/TUI.
- /// Звичайні десяткові операнди набувають точного домену D24+ перед
- /// обчисленням. Фізичний .sens іде окремим T5M шляхом, без цього reader.
+/// Звичайні десяткові операнди набувають точного домену D24+ перед
+/// обчисленням. Фізичний .sens іде окремим T5M шляхом, без цього reader.
 fn parse_human_lisp_file(source: &str) -> Result<Vec<sens::Expr>, sens::LanguageError> {
     let parsed = parse(source)?;
     sens::source_projection::project_ukr_decimal_integer_literals(&parsed, source)
@@ -149,13 +149,12 @@ fn bootstrap_core(
 /// Lisp libraries or installing host capabilities. A .sens file is bytes,
 /// NEVER legacy textual Lisp or a source string with a new extension.
 fn physical_t5_request(args: &[String]) -> Option<Result<&str, &'static str>> {
-    let (position, path) = args
-        .iter()
-        .enumerate()
-        .skip(1)
-        .find(|(_, argument)| {
-            std::path::Path::new(argument).extension().and_then(|ext| ext.to_str()) == Some("sens")
-        })?;
+    let (position, path) = args.iter().enumerate().skip(1).find(|(_, argument)| {
+        std::path::Path::new(argument)
+            .extension()
+            .and_then(|ext| ext.to_str())
+            == Some("sens")
+    })?;
     if position != 1 || args.len() != 2 {
         return Some(Err(
             "physical .sens accepts exactly one file argument; use sens-trit for explicit Core4 evaluation",
@@ -193,7 +192,11 @@ fn t5m_file_request(args: &[String]) -> Option<Result<&str, &'static str>> {
     }
     // Фізичні .sens — це байти T5M, не людський Lisp навіть у режимі
     // --t5m-file. Не дозволяємо обійти двійковий reader текстовим шляхом.
-    if std::path::Path::new(&args[2]).extension().and_then(|ext| ext.to_str()) != Some("lisp") {
+    if std::path::Path::new(&args[2])
+        .extension()
+        .and_then(|ext| ext.to_str())
+        != Some("lisp")
+    {
         return Some(Err("--t5m-file accepts only .lisp sources; run physical .sens through the binary entry point"));
     }
     Some(Ok(args[2].as_str()))
@@ -226,7 +229,9 @@ fn t5m_binding_paths(args: &[String]) -> Result<Vec<&str>, &'static str> {
     let mut paths = Vec::new();
     for pair in args[4..].chunks_exact(2) {
         if pair[0] != "--binding-source"
-            || std::path::Path::new(&pair[1]).extension().and_then(|ext| ext.to_str())
+            || std::path::Path::new(&pair[1])
+                .extension()
+                .and_then(|ext| ext.to_str())
                 != Some("lisp")
         {
             return Err("only --binding-source <source.lisp> is permitted");
@@ -237,10 +242,13 @@ fn t5m_binding_paths(args: &[String]) -> Result<Vec<&str>, &'static str> {
 }
 
 fn read_t5m_binding_sources(paths: &[&str]) -> Result<Vec<String>, String> {
-    paths.iter().map(|path| {
-        fs::read_to_string(path)
-            .map_err(|error| format!("read SENS binding source {path}: {error}"))
-    }).collect()
+    paths
+        .iter()
+        .map(|path| {
+            fs::read_to_string(path)
+                .map_err(|error| format!("read SENS binding source {path}: {error}"))
+        })
+        .collect()
 }
 
 /// Створити фізичний T5M та читабельні біти за одним SENS-reader/Zig
@@ -268,7 +276,9 @@ fn write_new_t5m_pair(path: &str, bytes: &[u8], view: &str) -> Result<(), String
     let physical = std::path::Path::new(path);
     let readable = physical.with_extension("");
     let mut binary = fs::OpenOptions::new()
-        .write(true).create_new(true).open(physical)
+        .write(true)
+        .create_new(true)
+        .open(physical)
         .map_err(|error| format!("T5M_PAIR_CARRIER_CREATE: {error}"))?;
     if let Err(error) = binary.write_all(bytes).and_then(|_| binary.sync_all()) {
         drop(binary);
@@ -277,7 +287,9 @@ fn write_new_t5m_pair(path: &str, bytes: &[u8], view: &str) -> Result<(), String
     }
     drop(binary);
     let mut readable_file = match fs::OpenOptions::new()
-        .write(true).create_new(true).open(&readable)
+        .write(true)
+        .create_new(true)
+        .open(&readable)
     {
         Ok(file) => file,
         Err(error) => {
@@ -285,7 +297,8 @@ fn write_new_t5m_pair(path: &str, bytes: &[u8], view: &str) -> Result<(), String
             return Err(format!("T5M_PAIR_VIEW_CREATE: {error}"));
         }
     };
-    if let Err(error) = readable_file.write_all(view.as_bytes())
+    if let Err(error) = readable_file
+        .write_all(view.as_bytes())
         .and_then(|_| readable_file.sync_all())
     {
         drop(readable_file);
@@ -312,7 +325,9 @@ fn t5m_pair_request(args: &[String]) -> Option<Result<(&str, &str, Vec<&str>), &
     if source.extension().and_then(|part| part.to_str()) != Some("lisp")
         || physical.extension().and_then(|part| part.to_str()) != Some("sens")
     {
-        return Some(Err("--t5m-pair requires .lisp source and physical .sens bytes"));
+        return Some(Err(
+            "--t5m-pair requires .lisp source and physical .sens bytes",
+        ));
     }
     Some(t5m_binding_paths(args).map(|bindings| (&args[2][..], &args[3][..], bindings)))
 }
@@ -352,7 +367,8 @@ fn eval_physical_t5(bytes: &[u8]) -> Result<sens::EvalResult, String> {
     // D5:00011 MACRO вже має ратифікований вузький механізм SENS.
     // Не завантажуємо жодного текстового Core або host-можливостей.
     sens::install_ratified_d5_macro_mechanism(&pure);
-    program.execute(&mut pure)
+    program
+        .execute(&mut pure)
         .map_err(|err| format!("current SENS execution rejected: {err}"))
 }
 
@@ -413,14 +429,14 @@ fn contract_source_zig_only() -> Result<String, String> {
     }
 }
 
-
 /// Byte-only carrier for SENS REPL core (lib/repl-core.lisp). Zig owns transport.
-
 
 /// Explicit REPL-only switches must not be confused with the implicit
 /// Ukrainian REPL default: file execution never requested a surface.
 fn explicit_repl_surface_flag(args: &[String]) -> bool {
-    args.iter().skip(1).any(|arg| arg == "--surface" || arg.starts_with("--surface="))
+    args.iter()
+        .skip(1)
+        .any(|arg| arg == "--surface" || arg.starts_with("--surface="))
 }
 
 fn main() {
@@ -480,8 +496,10 @@ fn main() {
                         Err("--t5m-mint requires the Zig T5M transport corridor".into())
                     }
                 })
-                .and_then(|bytes| fs::write(physical_path, bytes)
-                    .map_err(|error| format!("write physical T5M .sens: {error}"))),
+                .and_then(|bytes| {
+                    fs::write(physical_path, bytes)
+                        .map_err(|error| format!("write physical T5M .sens: {error}"))
+                }),
             Err(message) => Err(message.to_owned()),
         };
         if let Err(error) = result {
@@ -798,12 +816,7 @@ fn main() {
                 .and_then(|p| p.parse::<u16>().ok()) // projection-human: TCP port is human transport configuration, not a SENS domain identity.
                 .unwrap_or(9999);
             if sexpr_protocol {
-                run_tcp_repl_sexpr(
-                    port,
-                    allowed_for_tcp,
-                    contract_major,
-                    contract_minor,
-                );
+                run_tcp_repl_sexpr(port, allowed_for_tcp, contract_major, contract_minor);
             } else {
                 run_tcp_repl(port, core_lib, &allowed_for_tcp);
             }
@@ -1020,7 +1033,6 @@ fn main() {
     }
 }
 
-
 #[cfg(test)]
 mod core_profile_bootstrap_tests {
     use super::*;
@@ -1044,12 +1056,17 @@ mod core_profile_bootstrap_tests {
             .expect("SENS reader + pinned Zig must mint the physical pair");
         let restored = zig_transport::decode_t5_exact_words(&physical)
             .expect("Zig must decode its own carrier");
-        let expected = restored.iter()
-            .map(|word| word.bits.iter()
-                .map(|bit| if *bit == 0 { '0' } else { '1' })
-                .collect::<String>())
+        let expected = restored
+            .iter()
+            .map(|word| {
+                word.bits
+                    .iter()
+                    .map(|bit| if *bit == 0 { '0' } else { '1' })
+                    .collect::<String>()
+            })
             .collect::<Vec<_>>()
-            .join(" ") + "\n";
+            .join(" ")
+            + "\n";
         assert_eq!(view, expected, "view must use exact Zig-returned words");
         repl::eval_t5m_paired_file(source, &physical)
             .expect("real SENS evaluator must execute source-verified bytes");
@@ -1058,34 +1075,49 @@ mod core_profile_bootstrap_tests {
             .duration_since(std::time::UNIX_EPOCH)
             .expect("system time")
             .as_nanos();
-        let dir = std::env::temp_dir()
-            .join(format!("sens-native-pair-{}-{unique}", std::process::id()));
+        let dir =
+            std::env::temp_dir().join(format!("sens-native-pair-{}-{unique}", std::process::id()));
         fs::create_dir(&dir).expect("create isolated output directory");
         let path = dir.join("single.sens");
         let result = write_new_t5m_pair(
-            path.to_str().expect("utf8 temporary path"), &physical, &view,
+            path.to_str().expect("utf8 temporary path"),
+            &physical,
+            &view,
         );
         assert!(result.is_ok(), "publish exact carrier and view: {result:?}");
         assert_eq!(fs::read(&path).unwrap(), physical);
         assert_eq!(fs::read(path.with_extension("")).unwrap(), view.as_bytes());
-        assert!(write_new_t5m_pair(
-            path.to_str().unwrap(), &physical, &view,
-        ).is_err(), "cannot overwrite a committed pair");
+        assert!(
+            write_new_t5m_pair(path.to_str().unwrap(), &physical, &view,).is_err(),
+            "cannot overwrite a committed pair"
+        );
         // Дійсне SENS-означення перевіряємо тим самим Zig/T5M.
         let bindings = vec!["(визначити помічник (функція (аргумент) аргумент))".to_owned()];
         let source = "(помічник (як-є ()))";
-        let (bound_physical, _) = repl::mint_t5m_source_pair_with_bindings(
-            source, &bindings,
-        ).expect("SENS must resolve a preload-defined function without Python or JSON");
+        let (bound_physical, _) = repl::mint_t5m_source_pair_with_bindings(source, &bindings)
+            .expect("SENS must resolve a preload-defined function without Python or JSON");
         repl::eval_t5m_paired_file_with_bindings(source, &bound_physical, &bindings)
             .expect("the physically paired program runs with native SENS definitions");
-        assert!(repl::eval_t5m_paired_file_with_bindings(
-            "(як-є (()))", &bound_physical, &bindings,
-        ).is_err(), "another source must not reuse the T5M carrier");
-        let args = ["sens", "--t5m-pair", "program.lisp", "program.sens",
-                    "--binding-source", "helper.lisp"]
-            .into_iter().map(str::to_owned).collect::<Vec<_>>();
-        assert_eq!(t5m_pair_request(&args).unwrap().unwrap().2, vec!["helper.lisp"]);
+        assert!(
+            repl::eval_t5m_paired_file_with_bindings("(як-є (()))", &bound_physical, &bindings,)
+                .is_err(),
+            "another source must not reuse the T5M carrier"
+        );
+        let args = [
+            "sens",
+            "--t5m-pair",
+            "program.lisp",
+            "program.sens",
+            "--binding-source",
+            "helper.lisp",
+        ]
+        .into_iter()
+        .map(str::to_owned)
+        .collect::<Vec<_>>();
+        assert_eq!(
+            t5m_pair_request(&args).unwrap().unwrap().2,
+            vec!["helper.lisp"]
+        );
         let mut invalid = args.clone();
         invalid[4] = "--python-resolver".into();
         assert!(t5m_pair_request(&invalid).unwrap().is_err());
@@ -1096,7 +1128,9 @@ mod core_profile_bootstrap_tests {
     fn human_lisp_file_uses_d24_source_projection_in_real_core_evaluation() {
         let source = "(додати 2 3)\n(додати 4 5)\n";
         let parsed = parse_human_lisp_file(source).expect("десяткове .lisp джерело");
-        let mut session = Session { environment: Environment::root() };
+        let mut session = Session {
+            environment: Environment::root(),
+        };
         bootstrap_core(&mut session, CliCore::Core4).expect("той самий Core4, що у CLI");
         let result = eval_parsed_expressions(&parsed, &mut session)
             .expect("самі визначення SENS обчислюють людські числа");
@@ -1109,48 +1143,54 @@ mod core_profile_bootstrap_tests {
         let sens::ExprKind::List(items) = &parsed[0].kind else {
             panic!("очікувано один виклик D5");
         };
-        let digits: Vec<_> = items.iter().filter_map(|item| match &item.kind {
-            sens::ExprKind::BinaryNumber(number) => Some(number.to_decimal_string()), // projection-human
-            _ => None,
-        }).collect();
+        let digits: Vec<_> = items
+            .iter()
+            .filter_map(|item| match &item.kind {
+                sens::ExprKind::BinaryNumber(number) => Some(number.to_decimal_string()), // projection-human
+                _ => None,
+            })
+            .collect();
         assert_eq!(digits, ["-2", "5"]);
     }
 
     #[test]
     fn implicit_ukrainian_repl_default_does_not_reject_file_mode() {
         let file_args = vec!["sens".to_owned(), "програма.lisp".to_owned()];
-        let (_, default_surface) = extract_repl_surface(file_args.clone())
-            .expect("implicit surface default");
+        let (_, default_surface) =
+            extract_repl_surface(file_args.clone()).expect("implicit surface default");
         assert_eq!(default_surface, repl::ReplSurface::UkrainianFull);
-        assert!(!explicit_repl_surface_flag(&file_args),
-            "default REPL preference is not a user-requested file flag");
+        assert!(
+            !explicit_repl_surface_flag(&file_args),
+            "default REPL preference is not a user-requested file flag"
+        );
 
-        let explicit = vec!["sens".to_owned(), "--surface=укр".to_owned(), "програма.lisp".to_owned()];
+        let explicit = vec![
+            "sens".to_owned(),
+            "--surface=укр".to_owned(),
+            "програма.lisp".to_owned(),
+        ];
         assert!(explicit_repl_surface_flag(&explicit));
         assert!(explicit_repl_surface_flag(&[
-            "sens".to_owned(), "--surface".to_owned(), "укр".to_owned(), "програма.lisp".to_owned()
+            "sens".to_owned(),
+            "--surface".to_owned(),
+            "укр".to_owned(),
+            "програма.lisp".to_owned()
         ]));
     }
 
     #[test]
     fn default_repl_surface_is_full_ukr_and_compact_remains_explicit() {
-        let (args, surface) = extract_repl_surface(vec!["sens".to_owned()])
-            .expect("default surface");
+        let (args, surface) =
+            extract_repl_surface(vec!["sens".to_owned()]).expect("default surface");
         assert_eq!(args, vec!["sens".to_owned()]);
         assert_eq!(surface, repl::ReplSurface::UkrainianFull);
 
-        let (_, compact) = extract_repl_surface(vec![
-            "sens".to_owned(),
-            "--surface=ук".to_owned(),
-        ])
-        .expect("explicit compact surface");
+        let (_, compact) = extract_repl_surface(vec!["sens".to_owned(), "--surface=ук".to_owned()])
+            .expect("explicit compact surface");
         assert_eq!(compact, repl::ReplSurface::Ukrainian);
 
-        let (_, core) = extract_repl_surface(vec![
-            "sens".to_owned(),
-            "--surface=core".to_owned(),
-        ])
-        .expect("explicit core surface");
+        let (_, core) = extract_repl_surface(vec!["sens".to_owned(), "--surface=core".to_owned()])
+            .expect("explicit core surface");
         assert_eq!(core, repl::ReplSurface::Core);
 
         let (_, no_args) = extract_repl_surface(Vec::new()).expect("empty arg vector");
@@ -1159,10 +1199,18 @@ mod core_profile_bootstrap_tests {
 
     #[test]
     fn t5m_source_mode_requires_ukrainian_lisp_not_physical_bytes() {
-        let admitted = vec!["sens".to_owned(), "--t5m-file".to_owned(), "програма.lisp".to_owned()];
+        let admitted = vec![
+            "sens".to_owned(),
+            "--t5m-file".to_owned(),
+            "програма.lisp".to_owned(),
+        ];
         assert_eq!(t5m_file_request(&admitted), Some(Ok("програма.lisp")));
         for invalid in ["програма.sens", "програма.lisp.sens", "програма"] {
-            let args = vec!["sens".to_owned(), "--t5m-file".to_owned(), invalid.to_owned()];
+            let args = vec![
+                "sens".to_owned(),
+                "--t5m-file".to_owned(),
+                invalid.to_owned(),
+            ];
             assert!(
                 matches!(t5m_file_request(&args), Some(Err(_))),
                 "physical/untyped file must not enter textual Lisp parser: {invalid}"
@@ -1179,7 +1227,9 @@ mod core_profile_bootstrap_tests {
         let legacy = vec!["sens".to_owned(), "program.lisp".to_owned()];
         assert_eq!(physical_t5_request(&legacy), None);
         let flags = vec![
-            "sens".to_owned(), "--core=4".to_owned(), "program.sens".to_owned(),
+            "sens".to_owned(),
+            "--core=4".to_owned(),
+            "program.sens".to_owned(),
         ];
         assert!(matches!(physical_t5_request(&flags), Some(Err(_))));
     }
@@ -1222,15 +1272,13 @@ mod core_profile_bootstrap_tests {
         // SENS owns exact source words and D2 admission. The Zig turnstile,
         // rather than a Rust fixture embed or Rust T5 decoder, mints bytes.
         let source = "10 001 00 000 01";
-        let tokens = sens::parse_binary_source_words(source)
-            .expect("SENS exact binary source");
+        let tokens = sens::parse_binary_source_words(source).expect("SENS exact binary source");
         let words: Vec<_> = tokens.into_iter().map(|token| token.word).collect();
-        let forms = sens::parse_canonical_word_sequence(&words)
-            .expect("SENS canonical D2 program");
+        let forms = sens::parse_canonical_word_sequence(&words).expect("SENS canonical D2 program");
         assert!(!forms.is_empty());
 
-        let physical = zig_transport::encode_t5_direct(&words)
-            .expect("only Zig may create physical T5M");
+        let physical =
+            zig_transport::encode_t5_direct(&words).expect("only Zig may create physical T5M");
         assert_eq!(physical, [0x63, 0x89, 0x06, 0xa1]);
         // The exact-byte checked Zig adapter is used by sens-trit in
         // production. Exercise that same adapter in this sens test binary:
@@ -1242,25 +1290,35 @@ mod core_profile_bootstrap_tests {
         one_bit_mutant[0] ^= 0b0000_0001;
         let error = zig_transport::encode_t5(&words, &one_bit_mutant)
             .expect_err("mutated physical T5 may not match the original words");
-        assert!(error.contains("physical byte"), "unexpected mismatch: {error}");
-        let restored = decode_physical_t5_words(&physical)
-            .expect("physical T5 re-enters through Zig ABI");
-        let expected: Vec<_> = words.iter()
-            .map(|word| (word.width(), word.packed_bits())).collect();
-        let observed: Vec<_> = restored.iter()
+        assert!(
+            error.contains("physical byte"),
+            "unexpected mismatch: {error}"
+        );
+        let restored =
+            decode_physical_t5_words(&physical).expect("physical T5 re-enters through Zig ABI");
+        let expected: Vec<_> = words
+            .iter()
+            .map(|word| (word.width(), word.packed_bits()))
+            .collect();
+        let observed: Vec<_> = restored
+            .iter()
             .map(|word| match word {
                 sens::ExactDomainWord::Identity(identity) => {
                     (identity.width(), identity.packed_bits())
                 }
                 sens::ExactDomainWord::Number(number) => {
                     let bits = number.exact_numeric_domain_bits().expect("qualified D24+");
-                    let payload = bits.iter().fold(0u16, |value, &bit| {
-                        (value << 1) | u16::from(bit)
-                    });
+                    let payload = bits
+                        .iter()
+                        .fold(0u16, |value, &bit| (value << 1) | u16::from(bit));
                     (bits.len(), payload)
                 }
-            }).collect();
-        assert_eq!(observed, expected, "exact-width domain identities survive Zig");
+            })
+            .collect();
+        assert_eq!(
+            observed, expected,
+            "exact-width domain identities survive Zig"
+        );
         assert!(sens::PhysicalT5Program::from_exact_domain_words(&restored).is_ok());
         // A malformed physical carrier is rejected before SENS D2 evaluation.
         assert!(decode_physical_t5_words(&[0xf3]).is_err());
@@ -1273,15 +1331,24 @@ mod core_profile_bootstrap_tests {
         // Zig transports [width, MSB, LSB]; SENS alone judges D2 and eval.
         let physical = [0x63, 0x89, 0x06, 0xa1];
         let words = decode_physical_t5_words(&physical).expect("Zig ABI v2 ingress");
-        let widths: Vec<_> = words.iter().map(|word| match word {
-            sens::ExactDomainWord::Identity(identity) => identity.width(),
-            sens::ExactDomainWord::Number(number) => number.numeric_domain_width().unwrap(),
-        }).collect();
-        let bits: Vec<_> = words.iter().map(|word| match word {
-            sens::ExactDomainWord::Identity(identity) => identity.packed_bits(),
-            sens::ExactDomainWord::Number(number) => number.exact_numeric_domain_bits().unwrap()
-                .iter().fold(0u16, |value, &bit| (value << 1) | u16::from(bit)),
-        }).collect();
+        let widths: Vec<_> = words
+            .iter()
+            .map(|word| match word {
+                sens::ExactDomainWord::Identity(identity) => identity.width(),
+                sens::ExactDomainWord::Number(number) => number.numeric_domain_width().unwrap(),
+            })
+            .collect();
+        let bits: Vec<_> = words
+            .iter()
+            .map(|word| match word {
+                sens::ExactDomainWord::Identity(identity) => identity.packed_bits(),
+                sens::ExactDomainWord::Number(number) => number
+                    .exact_numeric_domain_bits()
+                    .unwrap()
+                    .iter()
+                    .fold(0u16, |value, &bit| (value << 1) | u16::from(bit)),
+            })
+            .collect();
         assert_eq!(widths, [2, 3, 2, 3, 2]);
         assert_eq!(bits, [2, 1, 0, 0, 1]);
         assert!(sens::PhysicalT5Program::from_exact_domain_words(&words).is_ok());
@@ -1294,8 +1361,14 @@ mod core_profile_bootstrap_tests {
         // Two zero physical bytes are a valid all-zero T5M stream, not a
         // malformed carrier. Empty input is the actual third invalid case.
         for invalid in [&[0xf3][..], &[0xf2][..], &[][..]] {
-            assert!(decode_physical_t5_words(invalid).is_err(), "invalid {invalid:?}");
-            assert!(eval_physical_t5(invalid).is_err(), "invalid carrier executed: {invalid:?}");
+            assert!(
+                decode_physical_t5_words(invalid).is_err(),
+                "invalid {invalid:?}"
+            );
+            assert!(
+                eval_physical_t5(invalid).is_err(),
+                "invalid carrier executed: {invalid:?}"
+            );
         }
     }
 
@@ -1311,10 +1384,13 @@ mod core_profile_bootstrap_tests {
     #[test]
     fn zig_linter_carrier_transports_real_source_without_rust_embed() {
         let src = linter_source_zig_only().expect("live Zig C ABI must carry linter bytes");
-        let raw = zig_transport::linter_source_bytes()
-            .expect("repeat exact Zig ABI byte copy");
+        let raw = zig_transport::linter_source_bytes().expect("repeat exact Zig ABI byte copy");
         assert!(!src.is_empty());
-        assert_eq!(src.as_bytes(), raw.as_slice(), "Zig ABI must preserve every source byte");
+        assert_eq!(
+            src.as_bytes(),
+            raw.as_slice(),
+            "Zig ABI must preserve every source byte"
+        );
         assert!(
             src.contains("(визначити аналіз-форма-голова"),
             "current Ukrainian linter source, not a stub"
@@ -1322,7 +1398,10 @@ mod core_profile_bootstrap_tests {
         // Parsing and execution are distinct SENS-owned admission tests.
         // Do not turn this transport witness red for an unrelated legacy
         // mixed-source parser rejection, nor falsely claim semantic PASS.
-        println!("ZIG_LINTER_CARRIER_PASS bytes={} semantic_admission=NOT_TESTED", raw.len());
+        println!(
+            "ZIG_LINTER_CARRIER_PASS bytes={} semantic_admission=NOT_TESTED",
+            raw.len()
+        );
         assert!(!include_str!("main.rs").contains("include_str!(\\\"../../../lib/linter.lisp\\\")"));
     }
 
@@ -1340,8 +1419,14 @@ mod core_profile_bootstrap_tests {
         let text = contract_source_zig_only().expect("live Zig ABI");
         let bytes = zig_transport::contract_source_bytes().expect("second Zig ABI copy");
         assert_eq!(text.as_bytes(), bytes.as_slice(), "exact contract bytes");
-        assert!(text.starts_with("; language-contract.lisp"), "unexpected asset");
-        println!("ZIG_CONTRACT_CARRIER_PASS bytes={} semantic_admission=NOT_TESTED", bytes.len());
+        assert!(
+            text.starts_with("; language-contract.lisp"),
+            "unexpected asset"
+        );
+        println!(
+            "ZIG_CONTRACT_CARRIER_PASS bytes={} semantic_admission=NOT_TESTED",
+            bytes.len()
+        );
     }
 
     #[cfg(not(feature = "zig-transport"))]
@@ -1353,8 +1438,7 @@ mod core_profile_bootstrap_tests {
 
     #[test]
     fn cli_core_selector_defaults_to_core4_and_accepts_only_3_or_4() {
-        let (args, core) =
-            extract_cli_core(vec!["sens".to_string()]).expect("default selector");
+        let (args, core) = extract_cli_core(vec!["sens".to_string()]).expect("default selector");
         assert_eq!(args, vec!["sens"]);
         assert_eq!(core, CliCore::Core4);
 
@@ -1403,8 +1487,7 @@ fn repl_core_source_zig_only() -> Result<String, String> {
     #[cfg(feature = "zig-transport")]
     {
         let bytes = zig_transport::repl_core_source_bytes()?;
-        String::from_utf8(bytes)
-            .map_err(|e| format!("ZIG_SENS_REPL_CORE UTF-8: {e}"))
+        String::from_utf8(bytes).map_err(|e| format!("ZIG_SENS_REPL_CORE UTF-8: {e}"))
     }
     #[cfg(not(feature = "zig-transport"))]
     {

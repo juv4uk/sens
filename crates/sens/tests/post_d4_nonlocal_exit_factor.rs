@@ -448,5 +448,7 @@ fn nonlocal_exit_factor_verdict_is_width_conservative() {
     assert_eq!(PROVEN_INDEPENDENT_ROOTS, 0);
     assert_eq!(NEW_D5_RESIDENTS, 0);
     assert_eq!(COORDINATES_ALLOCATED, 0);
-    const { assert!(!WIDTH_PRESSURE_RATIFIED); }
+    const {
+        assert!(!WIDTH_PRESSURE_RATIFIED);
+    }
 }

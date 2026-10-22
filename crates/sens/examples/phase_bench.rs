@@ -29,7 +29,13 @@ fn main() -> ExitCode {
     eval_lowered_expressions(&setup, &mut session).expect("setup evaluates");
     match eval_lowered_expressions(&call, &mut session) {
         Ok(r) if r.value.to_string() == expected => ExitCode::SUCCESS,
-        Ok(r) => { eprintln!("{name}/{form}: expected {expected}, got {}", r.value); ExitCode::from(3) }
-        Err(e) => { eprintln!("{name}/{form}: {e}"); ExitCode::from(4) }
+        Ok(r) => {
+            eprintln!("{name}/{form}: expected {expected}, got {}", r.value);
+            ExitCode::from(3)
+        }
+        Err(e) => {
+            eprintln!("{name}/{form}: {e}");
+            ExitCode::from(4)
+        }
     }
 }

@@ -14,7 +14,10 @@
 //! the same packed payload; a grammar or explicit framing layer must supply
 //! widths when reconstruction requires them.
 
-use crate::{domain_ladder::DomainCoordinate, BinarySourceToken, BinarySourceWord, BitPacker, PackedBitstream};
+use crate::{
+    domain_ladder::DomainCoordinate, BinarySourceToken, BinarySourceWord, BitPacker,
+    PackedBitstream,
+};
 
 /// Accounting for one canonical densely-packed semantic payload.
 ///
@@ -250,18 +253,27 @@ mod tests {
         for (token, &coordinate) in tokens.iter().zip(&coordinates) {
             assert_eq!(token.word.width(), usize::from(coordinate.width()));
             assert_eq!(token.word.packed_bits(), coordinate.bits());
-            assert_eq!(append_binary_source_word(&mut packer, token.word), bit_offset);
+            assert_eq!(
+                append_binary_source_word(&mut packer, token.word),
+                bit_offset
+            );
             bit_offset += usize::from(coordinate.width());
         }
 
         let source_packed = packer.finish();
         let domain_packed = pack_domain_coordinates(&coordinates);
         assert_eq!(source_packed.bit_len(), expected_bits);
-        assert!(source_packed == domain_packed, "all exact-width bits and total length must match");
+        assert!(
+            source_packed == domain_packed,
+            "all exact-width bits and total length must match"
+        );
         assert_eq!(source_packed.byte_len(), expected_bits.div_ceil(8));
 
         let widths: Vec<_> = tokens.iter().map(|token| token.word.width()).collect();
-        let domain_widths: Vec<_> = coordinates.iter().map(|coordinate| coordinate.width()).collect();
+        let domain_widths: Vec<_> = coordinates
+            .iter()
+            .map(|coordinate| coordinate.width())
+            .collect();
         assert_eq!(
             unpack_binary_source_words(&source_packed, &widths),
             Some(tokens.iter().map(|token| token.word).collect()),
@@ -274,9 +286,7 @@ mod tests {
 
     #[test]
     fn d9_high_bit_and_leading_zeros_never_alias_eight_bit_source() {
-        let words = parse_binary_source_words(
-            "000000001 100000001 111111111 00000001",
-        ).unwrap();
+        let words = parse_binary_source_words("000000001 100000001 111111111 00000001").unwrap();
         let packed = pack_binary_source_tokens(&words);
         assert_eq!(packed.bit_len(), 35);
         assert_eq!(
@@ -300,28 +310,44 @@ mod tests {
             .map(|width| DomainCoordinate::new(width, (1u16 << width) - 1).unwrap())
             .collect();
         let packed = pack_domain_coordinates(&coordinates);
-        let widths: Vec<_> = coordinates.iter().map(|coordinate| coordinate.width()).collect();
+        let widths: Vec<_> = coordinates
+            .iter()
+            .map(|coordinate| coordinate.width())
+            .collect();
         assert_eq!(packed.bit_len(), 55);
         assert_eq!(packed.byte_len(), 7);
         assert_eq!(packed.valid_bits_in_last_byte(), 7);
         assert_eq!(packed.bytes()[6] & 1, 0);
-        assert_eq!(unpack_domain_coordinates(&packed, &widths), Some(coordinates));
+        assert_eq!(
+            unpack_domain_coordinates(&packed, &widths),
+            Some(coordinates)
+        );
     }
 
     #[test]
     fn d1_d9_domain_coordinates_preserve_source_packer_bytes() {
-        let tokens = parse_binary_source_words(
-            "1 10 101 1010 10101 101010 1010101 10101010 100000001",
-        ).unwrap();
-        let coordinates: Vec<_> = tokens.iter().map(|token| {
-            DomainCoordinate::from_domain_identity(token.word.domain_identity())
-        }).collect();
+        let tokens =
+            parse_binary_source_words("1 10 101 1010 10101 101010 1010101 10101010 100000001")
+                .unwrap();
+        let coordinates: Vec<_> = tokens
+            .iter()
+            .map(|token| DomainCoordinate::from_domain_identity(token.word.domain_identity()))
+            .collect();
         let packed = pack_domain_coordinates(&coordinates);
-        assert!(packed == pack_binary_source_tokens(&tokens), "source and domain packers must emit identical physical bits");
+        assert!(
+            packed == pack_binary_source_tokens(&tokens),
+            "source and domain packers must emit identical physical bits"
+        );
         assert_eq!(packed.bit_len(), 45);
         assert_eq!(packed.byte_len(), 6);
-        let widths: Vec<_> = coordinates.iter().map(|coordinate| coordinate.width()).collect();
-        assert_eq!(unpack_domain_coordinates(&packed, &widths), Some(coordinates));
+        let widths: Vec<_> = coordinates
+            .iter()
+            .map(|coordinate| coordinate.width())
+            .collect();
+        assert_eq!(
+            unpack_domain_coordinates(&packed, &widths),
+            Some(coordinates)
+        );
     }
 
     #[test]
@@ -356,7 +382,10 @@ mod tests {
         assert!(unpack_domain_coordinates(&packed, &[3]).is_none());
         assert!(unpack_domain_coordinates(&packed, &[3, 9]).is_none());
         assert!(unpack_domain_coordinates(&packed, &[3, 10, 1]).is_none());
-        assert_eq!(unpack_domain_coordinates(&packed, &[3, 10]), Some(coordinates.to_vec()));
+        assert_eq!(
+            unpack_domain_coordinates(&packed, &[3, 10]),
+            Some(coordinates.to_vec())
+        );
         let empty = pack_domain_coordinates(&[]);
         assert_eq!(empty.bit_len(), 0);
         assert_eq!(unpack_domain_coordinates(&empty, &[]), Some(vec![]));
@@ -364,11 +393,20 @@ mod tests {
 
     #[test]
     fn raw_payload_cannot_determine_domain_boundaries() {
-        let a = [DomainCoordinate::new(1, 0).unwrap(), DomainCoordinate::new(2, 0).unwrap()];
+        let a = [
+            DomainCoordinate::new(1, 0).unwrap(),
+            DomainCoordinate::new(2, 0).unwrap(),
+        ];
         let b = [DomainCoordinate::new(3, 0).unwrap()];
         let packed = pack_domain_coordinates(&a);
-        assert!(packed == pack_domain_coordinates(&b), "equal bits with distinct schedules share payload, not identity");
-        assert_eq!(unpack_domain_coordinates(&packed, &[1, 2]), Some(a.to_vec()));
+        assert!(
+            packed == pack_domain_coordinates(&b),
+            "equal bits with distinct schedules share payload, not identity"
+        );
+        assert_eq!(
+            unpack_domain_coordinates(&packed, &[1, 2]),
+            Some(a.to_vec())
+        );
         assert_eq!(unpack_domain_coordinates(&packed, &[3]), Some(b.to_vec()));
         assert_ne!(a[0], b[0]);
     }
@@ -378,14 +416,20 @@ mod tests {
         let tokens = parse_binary_source_words("10 001 01").unwrap();
 
         assert_eq!(semantic_source_bits(&tokens), 7);
-        assert_eq!(tokens.iter().map(|token| token.word.width()).collect::<Vec<_>>(), [2, 3, 2]);
+        assert_eq!(
+            tokens
+                .iter()
+                .map(|token| token.word.width())
+                .collect::<Vec<_>>(),
+            [2, 3, 2]
+        );
     }
 
     #[test]
     fn semantic_source_measure_matches_dense_payload_across_d1_d9() {
-        let tokens = parse_binary_source_words(
-            "1 10 101 1010 10101 101010 1010101 10101010 100000001"
-        ).unwrap();
+        let tokens =
+            parse_binary_source_words("1 10 101 1010 10101 101010 1010101 10101010 100000001")
+                .unwrap();
         let packed = pack_binary_source_tokens(&tokens);
 
         assert_eq!(semantic_source_bits(&tokens), 45);
@@ -424,7 +468,10 @@ mod tests {
         let tokens = parse_binary_source_words("1 01 001 0001").unwrap();
         let packed = pack_binary_source_tokens(&tokens);
 
-        assert_eq!(tokens.iter().map(|t| t.word.width()).collect::<Vec<_>>(), [1, 2, 3, 4]);
+        assert_eq!(
+            tokens.iter().map(|t| t.word.width()).collect::<Vec<_>>(),
+            [1, 2, 3, 4]
+        );
         assert_eq!(packed.bit_len(), 10);
         assert_eq!(packed.bytes(), &[0b1010_0100, 0b0100_0000]);
     }
@@ -463,7 +510,16 @@ mod tests {
         assert_eq!(payload_bits, 36);
         assert_eq!(packed.bit_len(), payload_bits);
         assert_eq!(packed.byte_len(), payload_bits.div_ceil(8));
-        assert_eq!(packed.bytes(), &[0b1101_0110, 0b1010_1011, 0b0101_0101, 0b0101_1010, 0b1010_0000]);
+        assert_eq!(
+            packed.bytes(),
+            &[
+                0b1101_0110,
+                0b1010_1011,
+                0b0101_0101,
+                0b0101_1010,
+                0b1010_0000
+            ]
+        );
     }
 
     #[test]
@@ -490,11 +546,17 @@ mod tests {
         let single = parse_binary_source_words("000").unwrap();
 
         assert_eq!(
-            split.iter().map(|token| token.word.width()).collect::<Vec<_>>(),
+            split
+                .iter()
+                .map(|token| token.word.width())
+                .collect::<Vec<_>>(),
             [1, 2]
         );
         assert_eq!(
-            single.iter().map(|token| token.word.width()).collect::<Vec<_>>(),
+            single
+                .iter()
+                .map(|token| token.word.width())
+                .collect::<Vec<_>>(),
             [3]
         );
 
@@ -605,7 +667,11 @@ mod tests {
         for (source, expected_bits, expected_bytes) in [
             ("10101 10101 10101 10101 10101 10101 10101 10101", 40, 5),
             ("101010 101010 101010 101010", 24, 3),
-            ("1010101 1010101 1010101 1010101 1010101 1010101 1010101 1010101", 56, 7),
+            (
+                "1010101 1010101 1010101 1010101 1010101 1010101 1010101 1010101",
+                56,
+                7,
+            ),
         ] {
             let tokens = parse_binary_source_words(source).unwrap();
             let packed = pack_binary_source_tokens(&tokens);

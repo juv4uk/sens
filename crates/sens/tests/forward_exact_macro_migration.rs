@@ -1,5 +1,5 @@
 use sens::{
-    eval_parsed_expressions, eval_core_library_source, eval_program,
+    eval_core_library_source, eval_parsed_expressions, eval_program,
     parse_mixed_exact_domain_reasoning_source, Session, Value,
 };
 
@@ -27,10 +27,8 @@ fn load_reasoning(session: &mut Session, path: &str, source: &str) {
 
 fn session() -> Session {
     let mut session = Session::default();
-    eval_core_library_source(include_str!("../../../lib/core.lisp"),
-        &mut session,
-    )
-    .expect("exact-domain core bootstrap");
+    eval_core_library_source(include_str!("../../../lib/core.lisp"), &mut session)
+        .expect("exact-domain core bootstrap");
 
     load_reasoning(
         &mut session,
@@ -114,9 +112,18 @@ fn forward_macro_cutover_uses_native_d5() {
         "forward.lisp must have no executable eight-bit compatibility heads: {heads:?}"
     );
 
-    assert_eq!(FORWARD.matches("(як-є визначити)").count(), MIGRATED_MACROS.len());
-    assert!(!FORWARD.contains("(як-є def)"), "legacy def macro expansion forbidden");
-    assert!(!FORWARD.contains("(make-macro"), "старий макроконструктор відсутній");
+    assert_eq!(
+        FORWARD.matches("(як-є визначити)").count(),
+        MIGRATED_MACROS.len()
+    );
+    assert!(
+        !FORWARD.contains("(як-є def)"),
+        "legacy def macro expansion forbidden"
+    );
+    assert!(
+        !FORWARD.contains("(make-macro"),
+        "старий макроконструктор відсутній"
+    );
     for name in MIGRATED_MACROS {
         let define = format!("(визначити {name}\n  (макрос\n    (функція ");
         assert!(
@@ -124,7 +131,6 @@ fn forward_macro_cutover_uses_native_d5() {
             "{name} must be D4 DEFINE -> D5 МАКРОС -> D4 ФУНКЦІЯ"
         );
     }
-
 }
 
 #[test]
@@ -182,7 +188,11 @@ fn ratified_d9_macro_heads_execute_the_same_sens_laws() {
     for (old_name, ukr, arguments) in [
         ("axiom", "аксіома", "(як-є факт)"),
         ("run-tms", "запустити-система-істини", "(як-є ()) (як-є ())"),
-        ("run-jtms", "запустити-система-обґрунтувань", "(як-є ()) (як-є ())"),
+        (
+            "run-jtms",
+            "запустити-система-обґрунтувань",
+            "(як-є ()) (як-є ())",
+        ),
         (
             "run-jtms-multi",
             "запустити-система-обґрунтувань-мульти",
@@ -191,7 +201,10 @@ fn ratified_d9_macro_heads_execute_the_same_sens_laws() {
     ] {
         let existing_law = eval(&mut session, &format!("({old_name} {arguments})"));
         let ratified = eval(&mut session, &format!("({ukr} {arguments})"));
-        assert_eq!(ratified, existing_law, "D9 українська проєкція {ukr} змінила закон");
+        assert_eq!(
+            ratified, existing_law,
+            "D9 українська проєкція {ukr} змінила закон"
+        );
     }
 }
 
@@ -208,7 +221,11 @@ fn jtms_real_sens_retains_independent_proofs_and_filters_only_unsupported() {
               (список (як-є друга-причина))
               (список (як-є перша-причина)))))
     "#;
-    assert_eq!(eval(&mut session, distinct_proofs), "1", "друге незалежне обґрунтування має залишитися");
+    assert_eq!(
+        eval(&mut session, distinct_proofs),
+        "1",
+        "друге незалежне обґрунтування має залишитися"
+    );
 
     let duplicate_proof = r#"
         (однакові?
@@ -216,7 +233,11 @@ fn jtms_real_sens_retains_independent_proofs_and_filters_only_unsupported() {
             (додати-обґрунтування (як-є факт) (список (як-є причина)) (як-є ())))
           (список (список (як-є факт) (список (як-є причина)))))
     "#;
-    assert_eq!(eval(&mut session, duplicate_proof), "1", "повторний доказ не повинен створювати дубль");
+    assert_eq!(
+        eval(&mut session, duplicate_proof),
+        "1",
+        "повторний доказ не повинен створювати дубль"
+    );
 
     let filter_proofs = r#"
         (однакові?
@@ -230,7 +251,11 @@ fn jtms_real_sens_retains_independent_proofs_and_filters_only_unsupported() {
             (сполучити (як-є з-підтвердженням) так)
             (список (як-є з-доказом) (список (як-є причина)))))
     "#;
-    assert_eq!(eval(&mut session, filter_proofs), "1", "не можна викидати підтриманий факт");
+    assert_eq!(
+        eval(&mut session, filter_proofs),
+        "1",
+        "не можна викидати підтриманий факт"
+    );
 
     let orphaned = r#"
         (однакові?
@@ -242,5 +267,9 @@ fn jtms_real_sens_retains_independent_proofs_and_filters_only_unsupported() {
               (список (як-є з-доказом) (список (як-є причина)))))
           (список (як-є без-доказу) (як-є порожня-підстава)))
     "#;
-    assert_eq!(eval(&mut session, orphaned), "1", "до каскадного відкликання надходять лише факти без підстав");
+    assert_eq!(
+        eval(&mut session, orphaned),
+        "1",
+        "до каскадного відкликання надходять лише факти без підстав"
+    );
 }

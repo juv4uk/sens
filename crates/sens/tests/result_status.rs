@@ -110,12 +110,21 @@ fn make_invalid_keeps_reason_and_payload() {
 #[test]
 fn result_status_extracts_every_canonical_tag() {
     for (source, expected) in [
-        ("(результат-стан (створити-доведений (quote x) (quote ())))", "proved"),
+        (
+            "(результат-стан (створити-доведений (quote x) (quote ())))",
+            "proved",
+        ),
         ("(результат-стан (створити-невідоме (quote x)))", "unknown"),
         ("(результат-стан (створити-частковий 1 2))", "partial"),
-        ("(результат-стан (створити-заблокований (quote x)))", "blocked"),
+        (
+            "(результат-стан (створити-заблокований (quote x)))",
+            "blocked",
+        ),
         ("(результат-стан (створити-спірний (quote ())))", "disputed"),
-        ("(результат-стан (створити-некоректний (quote x) 1))", "invalid"),
+        (
+            "(результат-стан (створити-некоректний (quote x) 1))",
+            "invalid",
+        ),
     ] {
         assert_eq!(eval_result_status(source), expected);
     }
@@ -143,13 +152,29 @@ fn український_символ_результату_виконуєтьс
     // Вхідні значення оцінює сам SENS: не Rust-перевірка типів.
     // Кожне значення має той самий D1 закон, що й публічна перевірка цілі.
     for (case, source, expected) in [
-        ("символ", "(результат-внутрішній-символ? (як-є планета))", true),
+        (
+            "символ",
+            "(результат-внутрішній-символ? (як-є планета))",
+            true,
+        ),
         ("порожнє", "(результат-внутрішній-символ? (як-є ()))", false),
-        ("пара", "(результат-внутрішній-символ? (як-є (планета земля)))", false),
+        (
+            "пара",
+            "(результат-внутрішній-символ? (як-є (планета земля)))",
+            false,
+        ),
         ("число", "(результат-внутрішній-символ? 42)", false),
         ("ціль", "(результат-ціль? (як-є (планета земля)))", true),
-        ("складена-голова", "(результат-ціль? (як-є ((планета) земля)))", false),
-        ("числова-голова", "(результат-ціль? (як-є (42 земля)))", false),
+        (
+            "складена-голова",
+            "(результат-ціль? (як-є ((планета) земля)))",
+            false,
+        ),
+        (
+            "числова-голова",
+            "(результат-ціль? (як-є (42 земля)))",
+            false,
+        ),
     ] {
         let value = eval_result_status_value(source);
         assert_eq!(
@@ -158,13 +183,18 @@ fn український_символ_результату_виконуєтьс
         );
     }
     for (source, expected) in [
-        ("(міркувати-у-спостерігати (як-є ()) (як-є (планета земля)))",
-         "(invalid invalid-module ())"),
-        ("(міркувати-у-спостерігати 42 (як-є (планета земля)))",
-         "(invalid invalid-module 42)"),
+        (
+            "(міркувати-у-спостерігати (як-є ()) (як-є (планета земля)))",
+            "(invalid invalid-module ())",
+        ),
+        (
+            "(міркувати-у-спостерігати 42 (як-є (планета земля)))",
+            "(invalid invalid-module 42)",
+        ),
     ] {
         assert_eq!(
-            eval_result_status(source), expected,
+            eval_result_status(source),
+            expected,
             "test_id=result-status-module-symbol-d1 layer=real-SENS input={source}"
         );
     }
@@ -180,9 +210,7 @@ fn ukrainian_status_predicate_rejects_composite_head_as_d1_no() {
         "Складена голова не є протокольною міткою: {actual}"
     );
 
-    let valid = eval_result_status_value(
-        "(результат-позначений? (як-є (proved твердження ())))"
-    );
+    let valid = eval_result_status_value("(результат-позначений? (як-є (proved твердження ())))");
     assert_eq!(valid.as_predicate_bit(), Some(true));
 }
 
@@ -190,11 +218,26 @@ fn ukrainian_status_predicate_rejects_composite_head_as_d1_no() {
 fn позначений_результат_вимагає_правильного_списку_не_крапкової_пари() {
     // Виконує справжній SENS. Зовнішній Rust тільки читає однобітний D1.
     for (source, expected) in [
-        ("(результат-позначений? (як-є (proved твердження ())))", true),
-        ("(результат-позначений? (як-є (proved (поле . значення) ())))", true),
-        ("(результат-позначений? (як-є (proved . зіпсований-хвіст)))", false),
-        ("(результат-позначений? (як-є (proved твердження . зіпсований-хвіст)))", false),
-        ("(результат-позначений? (як-є (невідома-мітка дані)))", false),
+        (
+            "(результат-позначений? (як-є (proved твердження ())))",
+            true,
+        ),
+        (
+            "(результат-позначений? (як-є (proved (поле . значення) ())))",
+            true,
+        ),
+        (
+            "(результат-позначений? (як-є (proved . зіпсований-хвіст)))",
+            false,
+        ),
+        (
+            "(результат-позначений? (як-є (proved твердження . зіпсований-хвіст)))",
+            false,
+        ),
+        (
+            "(результат-позначений? (як-є (невідома-мітка дані)))",
+            false,
+        ),
     ] {
         let actual = eval_result_status_value(source);
         assert_eq!(
@@ -208,7 +251,10 @@ fn позначений_результат_вимагає_правильного
 #[test]
 fn result_status_predicates_are_exact_d1_bits() {
     for (source, expected) in [
-        ("(результат-позначений? (створити-невідоме (quote x)))", true),
+        (
+            "(результат-позначений? (створити-невідоме (quote x)))",
+            true,
+        ),
         ("(результат-позначений? 42)", false),
         ("(результат-є-правильним-списком? (quote (a b)))", true),
         ("(результат-є-правильним-списком? (quote (a . b)))", false),
@@ -217,8 +263,14 @@ fn result_status_predicates_are_exact_d1_bits() {
         ("(результат-не-є-головою-правила? (quote other))", false),
         // D3 EQ не можна застосовувати до складених даних: це точна
         // негативна відповідь D1, а не помилка або host truthiness.
-        ("(результат-не-є-головою-правила? (quote (not? (a))))", false),
-        ("(результат-не-є-головою-правила? (quote ((not?) a)))", false),
+        (
+            "(результат-не-є-головою-правила? (quote (not? (a))))",
+            false,
+        ),
+        (
+            "(результат-не-є-головою-правила? (quote ((not?) a)))",
+            false,
+        ),
     ] {
         let value = eval_result_status_value(source);
         assert_eq!(
@@ -252,10 +304,7 @@ fn reason_observe_reports_an_explicit_negative_as_proved_opposite() {
         (нехай ((rules (quote (((not? (mortal socrates)))))))
           (друге (міркувати-спостерігати (quote (mortal socrates)) rules)))
     "#;
-    assert_eq!(
-        eval_reason_observation(source),
-        "(not? (mortal socrates))"
-    );
+    assert_eq!(eval_reason_observation(source), "(not? (mortal socrates))");
 }
 
 #[test]
@@ -293,9 +342,18 @@ fn ukrainian_negated_goal_must_have_exactly_one_nested_goal() {
     for (source, expected) in [
         ("(результат-ціль? (як-є (not? (planet earth))))", true),
         ("(результат-ціль? (як-є (not?)))", false),
-        ("(результат-ціль? (як-є (not? (planet earth) extra)))", false),
-        ("(результат-ціль? (як-є (not? (not? (planet earth)))))", true),
-        ("(результат-заперечений-ціль? (як-є (not? (planet earth))))", true),
+        (
+            "(результат-ціль? (як-є (not? (planet earth) extra)))",
+            false,
+        ),
+        (
+            "(результат-ціль? (як-є (not? (not? (planet earth)))))",
+            true,
+        ),
+        (
+            "(результат-заперечений-ціль? (як-є (not? (planet earth))))",
+            true,
+        ),
         ("(результат-заперечений-ціль? (як-є (not?)))", false),
     ] {
         let actual = eval_result_status_value(source);

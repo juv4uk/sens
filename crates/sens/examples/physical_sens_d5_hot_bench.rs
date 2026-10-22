@@ -32,12 +32,16 @@ fn visible_hex(data: &str) -> String {
 fn main() {
     let argv = env::args().collect::<Vec<_>>();
     assert_eq!(
-        argv.len(), 5,
+        argv.len(),
+        5,
         "usage: physical_sens_d5_hot_bench FILE.sens CASE ITERATIONS SAMPLES"
     );
     let case = &argv[2];
     assert!(
-        matches!(case.as_str(), "d5-label-recursion" | "d5-label-copy" | "d5-label-map"),
+        matches!(
+            case.as_str(),
+            "d5-label-recursion" | "d5-label-copy" | "d5-label-map"
+        ),
         "only admitted D5 program corpus may be measured"
     );
     let iterations: usize = argv[3].parse().expect("iterations");
@@ -52,16 +56,20 @@ fn main() {
     let lowered = lower_program(&ast);
 
     // Check the two real evaluator entrypoints before admitting timings.
-    let expected = eval_parsed_expressions(&ast, &mut Session::default())
-        .expect("D5 semantic execution");
-    let lowered_expected = eval_lowered_expressions(&lowered, &mut Session::default())
-        .expect("lowered D5 execution");
-    assert_eq!(expected, lowered_expected, "D5 AST/lowered observable mismatch");
+    let expected =
+        eval_parsed_expressions(&ast, &mut Session::default()).expect("D5 semantic execution");
+    let lowered_expected =
+        eval_lowered_expressions(&lowered, &mut Session::default()).expect("lowered D5 execution");
+    assert_eq!(
+        expected, lowered_expected,
+        "D5 AST/lowered observable mismatch"
+    );
     let value = expected.value.to_string();
     let value_hex = visible_hex(&value);
     println!(
         "HOT_D5_OBSERVABLE\tcase={case}\tvalue_hex={value_hex}\tphysical_bytes={}\tword_count={}",
-        physical.len(), words.len()
+        physical.len(),
+        words.len()
     );
 
     for phase in ["t5_decode_parse", "eval_parsed", "eval_lowered"] {
@@ -71,10 +79,7 @@ fn main() {
                 || {
                     let decoded = decode_ternary_words(black_box(&physical))
                         .expect("measured physical T5 decoder");
-                    black_box(
-                        parse_canonical_word_sequence(&decoded)
-                            .expect("measured D2 parser"),
-                    );
+                    black_box(parse_canonical_word_sequence(&decoded).expect("measured D2 parser"));
                 },
                 iterations,
                 samples,
@@ -100,7 +105,10 @@ fn main() {
             "eval_lowered" => {
                 let first = eval_lowered_expressions(&lowered, &mut session)
                     .expect("pre-measure lowered D5 execution");
-                assert_eq!(first, expected, "lowered D5 observable changed before timing");
+                assert_eq!(
+                    first, expected,
+                    "lowered D5 observable changed before timing"
+                );
                 let observations = measure(
                     || {
                         let answer = eval_lowered_expressions(black_box(&lowered), &mut session)

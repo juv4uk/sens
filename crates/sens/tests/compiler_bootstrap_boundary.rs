@@ -4,8 +4,7 @@
 //! regression: production host glue may transport/load/execute SENS, but must
 //! not regain identity->meaning authority.
 
-const BOUNDARY: &str =
-    include_str!("../../../contracts/compiler-bootstrap-boundary-v1.lisp");
+const BOUNDARY: &str = include_str!("../../../contracts/compiler-bootstrap-boundary-v1.lisp");
 const BOOTSTRAP: &str = include_str!("../src/compiler_bootstrap.rs");
 const LANGUAGE: &str = include_str!("../src/compiler_language.rs");
 const ORACLE: &str = include_str!("../src/compiler_role.rs");
@@ -100,10 +99,11 @@ fn historical_core1_compiler_prelude_is_donor_not_current_nucleus() {
     );
 }
 
-
 #[test]
 fn core1_historical_prelude_has_executable_ukr_closure_not_english_alias() {
-    use sens::{eval_parsed_expressions, eval_program, load_core_library, parse_mixed_exact_domain, Session};
+    use sens::{
+        eval_parsed_expressions, eval_program, load_core_library, parse_mixed_exact_domain, Session,
+    };
 
     // Джерелом істини є саме виконаний SENS, а не Rust/Python-копія NOT.
     let mut session = Session::default();
@@ -118,8 +118,15 @@ fn core1_historical_prelude_has_executable_ukr_closure_not_english_alias() {
         .expect("test_id=core1-prelude-ukr layer=SENS actual invocation");
     let expected = eval_program("(як-є ())", &mut session)
         .expect("test_id=core1-prelude-ukr layer=SENS quoted historical result");
-    assert_eq!(real.value, expected.value,
-        "test_id=core1-prelude-ukr layer=SENS input=D1:1 expected=historical empty actual={}", real.value);
-    assert!(!source.lines().any(|line| line.starts_with("(визначити not ")),
-        "test_id=core1-prelude-ukr source no legacy English DEFINE");
+    assert_eq!(
+        real.value, expected.value,
+        "test_id=core1-prelude-ukr layer=SENS input=D1:1 expected=historical empty actual={}",
+        real.value
+    );
+    assert!(
+        !source
+            .lines()
+            .any(|line| line.starts_with("(визначити not ")),
+        "test_id=core1-prelude-ukr source no legacy English DEFINE"
+    );
 }

@@ -12,17 +12,21 @@ use std::fmt::Write as _;
 use std::hint::black_box;
 use std::time::Instant;
 
+use sens::frame3_grammar::{encode_body_at_known_length, ExactWord};
+use sens::universal_frame3::{decode, decode_v2, encode, encode_v2};
 use sens::{
     decode_ternary_words, encode_ternary_words, parse_binary_source_words, BinarySourceWord,
 };
-use sens::frame3_grammar::{encode_body_at_known_length, ExactWord};
-use sens::universal_frame3::{decode, decode_v2, encode, encode_v2};
 
 const SAMPLES: usize = 21;
 const REPETITIONS: usize = 12;
 const LANES: [&str; 6] = [
-    "t5-encode", "s3-v1-encode", "s3-v2-encode",
-    "t5-decode", "s3-v1-decode", "s3-v2-decode",
+    "t5-encode",
+    "s3-v1-encode",
+    "s3-v2-encode",
+    "t5-decode",
+    "s3-v1-decode",
+    "s3-v2-decode",
 ];
 
 fn tick(state: &mut u64) -> u64 {
@@ -40,20 +44,26 @@ fn choose_words(source: &str) -> Vec<BinarySourceWord> {
         .collect()
 }
 
-fn lane_call(
-    lane: usize,
-    words: &[BinarySourceWord],
-    t5: &[u8],
-    v1: &[u8],
-    v2: &[u8],
-) {
+fn lane_call(lane: usize, words: &[BinarySourceWord], t5: &[u8], v1: &[u8], v2: &[u8]) {
     match lane {
-        0 => { black_box(encode_ternary_words(black_box(words)).unwrap()); }
-        1 => { black_box(encode(black_box(words)).unwrap()); }
-        2 => { black_box(encode_v2(black_box(words)).unwrap()); }
-        3 => { black_box(decode_ternary_words(black_box(t5)).unwrap()); }
-        4 => { black_box(decode(black_box(v1)).unwrap()); }
-        5 => { black_box(decode_v2(black_box(v2)).unwrap()); }
+        0 => {
+            black_box(encode_ternary_words(black_box(words)).unwrap());
+        }
+        1 => {
+            black_box(encode(black_box(words)).unwrap());
+        }
+        2 => {
+            black_box(encode_v2(black_box(words)).unwrap());
+        }
+        3 => {
+            black_box(decode_ternary_words(black_box(t5)).unwrap());
+        }
+        4 => {
+            black_box(decode(black_box(v1)).unwrap());
+        }
+        5 => {
+            black_box(decode_v2(black_box(v2)).unwrap());
+        }
         _ => unreachable!(),
     }
 }
@@ -70,13 +80,16 @@ fn bench_case(index: usize, label: &str, source: &str, raw: &mut String) {
 
     // Separately measured lossless grammar-only body. This number is NOT
     // a standalone physical file and must not be compared with whole-file T5.
-    let exact = words.iter().copied()
+    let exact = words
+        .iter()
+        .copied()
         .map(ExactWord::from_binary_source)
         .collect::<Vec<_>>();
     let grammar = encode_body_at_known_length(&exact).ok();
-    let (grammar_bits, grammar_body_bytes) = grammar
-        .as_ref()
-        .map_or((-1i32, -1i32), |(bits, body)| (*bits as i32, body.len() as i32));
+    let (grammar_bits, grammar_body_bytes) =
+        grammar.as_ref().map_or((-1i32, -1i32), |(bits, body)| {
+            (*bits as i32, body.len() as i32)
+        });
 
     // Prewarm all six pipelines before recording any sample.
     for lane in 0..LANES.len() {
@@ -102,7 +115,8 @@ fn bench_case(index: usize, label: &str, source: &str, raw: &mut String) {
                 raw,
                 "{label}\t{round}\t{position}\t{}\t{total_ns}\t{per_call_ns}",
                 LANES[lane]
-            ).unwrap();
+            )
+            .unwrap();
         }
     }
     let mut med = [0u128; 6];
@@ -143,7 +157,10 @@ fn mixed_w9(count: usize) -> String {
 
 fn main() {
     let mut raw = String::from("case\tround\tlane_position\tlane\tbatch_total_ns\tns_per_call\n");
-    println!("# sha\t{}", std::env::var("GITHUB_SHA").unwrap_or_else(|_| "local-unpinned".into()));
+    println!(
+        "# sha\t{}",
+        std::env::var("GITHUB_SHA").unwrap_or_else(|_| "local-unpinned".into())
+    );
     println!("# methodology\tSHA-bound release; true full-file bytes for T5/S3v1/S3v2, grammar-only bytes separate (not physical); {} samples x {} calls; deterministic shuffled six-lane order; same process and corpus; no execution; p50 and nearest-rank p95; CPU contention not eliminated", SAMPLES, REPETITIONS);
     println!("case\twords\tt5_bytes\tv1_bytes\tv2_bytes\tgrammar_inner_bits\tgrammar_body_bytes_only\tt5_encode_p50_ns\tt5_encode_p95_ns\tv1_encode_p50_ns\tv1_encode_p95_ns\tv2_encode_p50_ns\tv2_encode_p95_ns\tt5_decode_p50_ns\tt5_decode_p95_ns\tv1_decode_p50_ns\tv1_decode_p95_ns\tv2_decode_p50_ns\tv2_decode_p95_ns");
 
@@ -162,7 +179,10 @@ fn main() {
         ("w9-repeat-512", list_of("000000001", 512)),
         ("w9-mixed-128", mixed_w9(128)),
         ("w9-mixed-512", mixed_w9(512)),
-    ].into_iter().enumerate() {
+    ]
+    .into_iter()
+    .enumerate()
+    {
         bench_case(i, label, &source, &mut raw);
     }
 

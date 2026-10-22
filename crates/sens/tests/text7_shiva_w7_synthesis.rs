@@ -2,8 +2,8 @@
 //! Historical Shiva-sutra sound assignments must not be imported as current D7.
 
 use sens::{
-    encode_text7, render_text7, BinarySourceWord, Bit7, BitPacker,
-    Text7, Text7Layout, Text7W7Error, Text7WordError, Value,
+    encode_text7, render_text7, BinarySourceWord, Bit7, BitPacker, Text7, Text7Layout,
+    Text7W7Error, Text7WordError, Value,
 };
 
 #[test]
@@ -26,7 +26,10 @@ fn eight_current_text_cells_use_exactly_seven_dense_bytes() {
     assert_eq!(packed.bit_len(), 56);
     assert_eq!(packed.byte_len(), 7);
     let restored = Text7::from_packed_w7(&packed).unwrap();
-    assert_eq!(render_text7(&restored, Text7Layout::Uk).unwrap(), "Привіт! ");
+    assert_eq!(
+        render_text7(&restored, Text7Layout::Uk).unwrap(),
+        "Привіт! "
+    );
 }
 
 #[test]
@@ -55,9 +58,7 @@ fn keyboard_d7_is_not_an_arithmetic_number_or_callable_function() {
     assert_eq!(exclamation.cells(), &[33]);
     assert_eq!(exclamation.to_canonical_wire_token(), "#t7:21");
     assert_ne!(Value::Text7(exclamation), Value::Nil);
-    let w7 = sens::DomainIdentity::from_source_word(
-        BinarySourceWord::W7(Bit7::new(33).unwrap())
-    );
+    let w7 = sens::DomainIdentity::from_source_word(BinarySourceWord::W7(Bit7::new(33).unwrap()));
     assert_eq!(w7.core_operation(), None);
     assert_eq!((w7.width(), w7.packed_bits()), (7, 33));
 }

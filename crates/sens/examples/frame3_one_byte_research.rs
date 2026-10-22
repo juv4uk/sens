@@ -36,8 +36,8 @@ fn verify_one(code: u8) -> Result<(usize, String, Frame3MicroExpr), String> {
 
     let expected = eval_parsed_expressions(&parsed, &mut Session::default())
         .map_err(|error| format!("evaluator: {error:?}"))?;
-    let t5_program = PhysicalT5Program::decode(&t5)
-        .map_err(|error| format!("physical reader: {error:?}"))?;
+    let t5_program =
+        PhysicalT5Program::decode(&t5).map_err(|error| format!("physical reader: {error:?}"))?;
     if t5_program.form_count() != 1 {
         return Err(format!("not one physical T5 form: {source}"));
     }
@@ -51,12 +51,7 @@ fn verify_one(code: u8) -> Result<(usize, String, Frame3MicroExpr), String> {
     Ok((t5.len(), format!("{:?}", actual.value), expr))
 }
 
-fn bench_speed_one(
-    label: &str,
-    mut operation: impl FnMut(),
-    samples: usize,
-    inner: usize,
-) {
+fn bench_speed_one(label: &str, mut operation: impl FnMut(), samples: usize, inner: usize) {
     use std::{hint::black_box, time::Instant};
 
     for _ in 0..inner {
@@ -94,15 +89,13 @@ fn bench_speed() -> Result<(), Box<dyn std::error::Error>> {
     let visible = exact.join(" ");
     let tokens = parse_binary_source_words(&visible)?;
     let typed = tokens.iter().map(|token| token.word).collect::<Vec<_>>();
-    let full_t5 = encode_ternary_words(&typed)
-        .map_err(|error| format!("T5 physical encode: {error:?}"))?;
+    let full_t5 =
+        encode_ternary_words(&typed).map_err(|error| format!("T5 physical encode: {error:?}"))?;
     if full_t5.len() != 5 || encode_expr(&expr)? != one_byte {
         return Err("wrong physical size or broken dense roundtrip".into());
     }
-    let expected = eval_parsed_expressions(
-        &parse_canonical_binary(&visible)?,
-        &mut Session::default(),
-    )?;
+    let expected =
+        eval_parsed_expressions(&parse_canonical_binary(&visible)?, &mut Session::default())?;
     let t5_value = PhysicalT5Program::decode(&full_t5)
         .map_err(|error| format!("T5 physical decode: {error:?}"))?
         .execute(&mut Session::default())?;
@@ -182,10 +175,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     if trophy.human_projection() != "CAR(CONS(1,NIL))" {
         return Err("dense trophy did not reconstruct CAR(CONS(1,NIL))".into());
     }
-    let expected = eval_parsed_expressions(
-        &parse_canonical_binary("1")?,
-        &mut Session::default(),
-    )?;
+    let expected = eval_parsed_expressions(&parse_canonical_binary("1")?, &mut Session::default())?;
     let actual = eval_parsed_expressions(
         &parse_canonical_binary(&trophy.exact_words().join(" "))?,
         &mut Session::default(),

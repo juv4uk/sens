@@ -32,10 +32,7 @@ fn unique_temp_dir(label: &str) -> PathBuf {
         .duration_since(UNIX_EPOCH)
         .expect("system clock should be after Unix epoch")
         .as_nanos();
-    std::env::temp_dir().join(format!(
-        "sens-{label}-{}-{nonce}",
-        std::process::id()
-    ))
+    std::env::temp_dir().join(format!("sens-{label}-{}-{nonce}", std::process::id()))
 }
 
 #[test]
@@ -122,11 +119,14 @@ fn authoritative_inputs_are_explicit_and_projection_stays_draft() {
         "the generated artifact must state both authoritative inputs: conformance data and generator-owned canonical axiom text"
     );
     assert!(
-        constitution.contains("Edit tests/fixtures/conformance.lisp or scripts/build-constitution.lisp"),
+        constitution
+            .contains("Edit tests/fixtures/conformance.lisp or scripts/build-constitution.lisp"),
         "the generated artifact must preserve the source-authority -> regenerate mutation path"
     );
     assert!(
-        constitution.contains("(status . \"draft — not yet ratified; will become read-only once ratified\")"),
+        constitution.contains(
+            "(status . \"draft — not yet ratified; will become read-only once ratified\")"
+        ),
         "issue #22 must not ratify or promote the generated constitution to semantic authority"
     );
     assert!(

@@ -30,8 +30,7 @@
 
 use sens::{
     eval_lowered_expressions, fasl_decode_program, fasl_encode_program, lower_program, parse,
-    parse_exact_domain_source, Expr,
-    Session,
+    parse_exact_domain_source, Expr, Session,
 };
 use std::{env, fs, path::Path, process::ExitCode};
 
@@ -45,7 +44,8 @@ fn main() -> ExitCode {
     }
     let file = |part: &str, ext: &str| dir.join(format!("{name}-{form}.{part}.{ext}"));
     let text = |part: &str| {
-        fs::read_to_string(file(part, "lisp")).unwrap_or_else(|e| panic!("{name}-{form}.{part}: {e}"))
+        fs::read_to_string(file(part, "lisp"))
+            .unwrap_or_else(|e| panic!("{name}-{form}.{part}: {e}"))
     };
 
     if mode == "encode" {
@@ -54,8 +54,11 @@ fn main() -> ExitCode {
         // став би числом 11, а не D5 DIFFERENCE.
         for part in ["setup", "call"] {
             let program = parse_exact_domain_source(&text(part)).expect("exact sens text parses");
-            fs::write(file(part, "fasl"), fasl_encode_program(&program, &[0u8; 32]))
-                .expect("fasl written");
+            fs::write(
+                file(part, "fasl"),
+                fasl_encode_program(&program, &[0u8; 32]),
+            )
+            .expect("fasl written");
         }
         return ExitCode::SUCCESS;
     }

@@ -50,11 +50,7 @@ mod raw_windows_exec {
             old_protect: *mut u32,
         ) -> i32;
         fn VirtualFree(address: *mut c_void, size: usize, free_type: u32) -> i32;
-        fn FlushInstructionCache(
-            process: *mut c_void,
-            address: *const c_void,
-            size: usize,
-        ) -> i32;
+        fn FlushInstructionCache(process: *mut c_void, address: *const c_void, size: usize) -> i32;
         fn GetCurrentProcess() -> *mut c_void;
     }
 
@@ -87,9 +83,8 @@ mod raw_windows_exec {
             }
 
             let mut old_protect: u32 = 0;
-            let protected = unsafe {
-                VirtualProtect(memory, length, PAGE_EXECUTE_READ, &mut old_protect)
-            };
+            let protected =
+                unsafe { VirtualProtect(memory, length, PAGE_EXECUTE_READ, &mut old_protect) };
             assert_ne!(protected, 0, "VirtualProtect RW->RX must succeed");
 
             let flushed = unsafe { FlushInstructionCache(GetCurrentProcess(), memory, length) };

@@ -43,12 +43,6 @@ fn divmod_returns_quotient_and_remainder() {
 
 #[test]
 fn thread_macros_have_english_names() {
-    assert_eq!(
-        eval("(thread-first 5 (- 2))"),
-        eval("(-> 5 (- 2))")
-    );
-    assert_eq!(
-        eval("(thread-last 5 (- 2))"),
-        eval("(->> 5 (- 2))")
-    );
+    assert_eq!(eval("(thread-first 5 (- 2))"), eval("(-> 5 (- 2))"));
+    assert_eq!(eval("(thread-last 5 (- 2))"), eval("(->> 5 (- 2))"));
 }

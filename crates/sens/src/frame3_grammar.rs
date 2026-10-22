@@ -54,9 +54,7 @@ impl ExactWord {
 
     /// Exact typed restoration, with no lossy 8-bit cast for W9.
     pub fn to_binary_source(self) -> crate::BinarySourceWord {
-        use crate::{
-            BinarySourceWord, Bit1, Bit2, Bit3, Bit4, Bit5, Bit6, Bit7, Bit8, Bit9,
-        };
+        use crate::{BinarySourceWord, Bit1, Bit2, Bit3, Bit4, Bit5, Bit6, Bit7, Bit8, Bit9};
         // Private fields and the checked constructor make these valid.
         match self.width {
             1 => BinarySourceWord::W1(Bit1::new(self.bits as u8).unwrap()),
@@ -155,11 +153,8 @@ thread_local! {
 }
 
 fn cached_count_suffix(remaining: usize, stack: &[u8]) -> u128 {
-    GRAMMAR_COUNTS.with(|memo| {
-        count_suffix(remaining, stack, &mut memo.borrow_mut())
-    })
+    GRAMMAR_COUNTS.with(|memo| count_suffix(remaining, stack, &mut memo.borrow_mut()))
 }
-
 
 fn count_suffix(remaining: usize, stack: &[u8], memo: &mut Memo) -> u128 {
     if remaining == 0 {
@@ -213,9 +208,8 @@ pub fn unrank_binary_source_words(
     inner_bits: usize,
     ordinal: u128,
 ) -> Result<Vec<crate::BinarySourceWord>, GrammarRankError> {
-    unrank_single_root(inner_bits, ordinal).map(|words| {
-        words.into_iter().map(ExactWord::to_binary_source).collect()
-    })
+    unrank_single_root(inner_bits, ordinal)
+        .map(|words| words.into_iter().map(ExactWord::to_binary_source).collect())
 }
 
 pub fn count_inner(inner_bits: usize) -> Result<u128, GrammarRankError> {
@@ -233,11 +227,17 @@ pub fn rank_single_root(words: &[ExactWord]) -> Result<GrammarRank, GrammarRankE
     if words.len() < 2 || words.first() != Some(&boundary) || words.last() != Some(&end) {
         return Err(GrammarRankError::InvalidD2);
     }
-    if words.iter().any(|word| ExactWord::new(word.width, word.bits).is_err()) {
+    if words
+        .iter()
+        .any(|word| ExactWord::new(word.width, word.bits).is_err())
+    {
         return Err(GrammarRankError::InvalidWord);
     }
     let inner = &words[1..words.len() - 1];
-    let bits = inner.iter().map(|word| usize::from(word.width)).sum::<usize>();
+    let bits = inner
+        .iter()
+        .map(|word| usize::from(word.width))
+        .sum::<usize>();
     let capacity = count_inner(bits)?;
     let mut remaining = bits;
     let mut state = root();
@@ -249,7 +249,10 @@ pub fn rank_single_root(words: &[ExactWord]) -> Result<GrammarRank, GrammarRankE
             if width == 2 {
                 // All D2 words are distinct structural transitions.
                 for value in 0..4 {
-                    let candidate = ExactWord { width: 2, bits: value };
+                    let candidate = ExactWord {
+                        width: 2,
+                        bits: value,
+                    };
                     let Some(next) = advance(&state, candidate) else {
                         continue;
                     };
@@ -269,7 +272,10 @@ pub fn rank_single_root(words: &[ExactWord]) -> Result<GrammarRank, GrammarRankE
                 // All 2^width non-D2 values have the SAME successor and
                 // completion count. Count the earlier numeric coordinates
                 // algebraically instead of enumerating up to 512 choices.
-                let representative = ExactWord { width: width as u8, bits: 0 };
+                let representative = ExactWord {
+                    width: width as u8,
+                    bits: 0,
+                };
                 let Some(next) = advance(&state, representative) else {
                     continue;
                 };
@@ -317,7 +323,10 @@ pub fn unrank_single_root(
         'widths: for width in 1..=remaining.min(9) {
             if width == 2 {
                 for value in 0..4 {
-                    let candidate = ExactWord { width: 2, bits: value };
+                    let candidate = ExactWord {
+                        width: 2,
+                        bits: value,
+                    };
                     let Some(next) = advance(&state, candidate) else {
                         continue;
                     };
@@ -335,7 +344,10 @@ pub fn unrank_single_root(
                     ordinal -= suffixes;
                 }
             } else {
-                let representative = ExactWord { width: width as u8, bits: 0 };
+                let representative = ExactWord {
+                    width: width as u8,
+                    bits: 0,
+                };
                 let Some(next) = advance(&state, representative) else {
                     continue;
                 };
@@ -347,7 +359,10 @@ pub fn unrank_single_root(
                 if ordinal < group {
                     let value = (ordinal / suffixes) as u16;
                     ordinal %= suffixes;
-                    words.push(ExactWord { width: width as u8, bits: value });
+                    words.push(ExactWord {
+                        width: width as u8,
+                        bits: value,
+                    });
                     state = next;
                     remaining -= width;
                     found = true;

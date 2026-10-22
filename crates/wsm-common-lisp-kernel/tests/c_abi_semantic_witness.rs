@@ -49,7 +49,10 @@ fn legacy_abi_id_crosses_c_abi_and_returns_native_common_lisp_result() {
 
     assert_eq!(status, WsmStatus::Ok);
     assert_eq!(String::from_utf8_lossy(&output[..written]).trim(), "LEFT");
-    assert_eq!(adapter.last_legacy_abi_id(), Some(LegacyAbiSemanticId(CAR_ID)));
+    assert_eq!(
+        adapter.last_legacy_abi_id(),
+        Some(LegacyAbiSemanticId(CAR_ID))
+    );
 
     assert_eq!(unsafe { stop(vtable.context) }, WsmStatus::Ok);
 }

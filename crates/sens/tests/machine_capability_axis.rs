@@ -14,7 +14,10 @@ fn repo_root() -> PathBuf {
 
 /// Джерельні десяткові числа — лише людська проєкція точних D24+ слів.
 /// Виконує справжній SENS; цитовані протокольні дані лишаються недоторканими.
-fn eval_axis_program(source: &str, session: &mut Session) -> Result<sens::EvalResult, sens::LanguageError> {
+fn eval_axis_program(
+    source: &str,
+    session: &mut Session,
+) -> Result<sens::EvalResult, sens::LanguageError> {
     let parsed = parse(source)?;
     let exact = sens::source_projection::project_ukr_decimal_integer_literals(&parsed, source)?;
     sens::eval_parsed_expressions(&exact, session)
@@ -35,13 +38,19 @@ fn current_exact_domain_identities_project_to_target_neutral_capabilities() {
     let ExprKind::DomainCall(add_identity, _) = lowered[0].kind else {
         panic!("current PLUS surface must lower to DomainCall");
     };
-    assert_eq!((add_identity.width(), add_identity.packed_bits()), (5, 0b01010));
+    assert_eq!(
+        (add_identity.width(), add_identity.packed_bits()),
+        (5, 0b01010)
+    );
 
     let lowered = lower_program(&parse("(перше '(a b))").expect("CAR source"));
     let ExprKind::DomainCall(car_identity, _) = lowered[0].kind else {
         panic!("current CAR surface must lower to DomainCall");
     };
-    assert_eq!((car_identity.width(), car_identity.packed_bits()), (3, 0b100));
+    assert_eq!(
+        (car_identity.width(), car_identity.packed_bits()),
+        (3, 0b100)
+    );
 
     let mut s = session();
     let add = eval_axis_program(
@@ -72,11 +81,8 @@ fn current_exact_domain_identities_project_to_target_neutral_capabilities() {
 
     // Текст «01010» не можна маскувати під D24+ число. Чинний SENS
     // відхиляє несумісний тип; ERROR не тотожне семантичному NO/().
-    let quoted_shadow = eval_axis_program(
-        r#"(спроможності-для-домену 5 "01010")"#,
-        &mut s,
-    )
-    .expect_err("text data cannot impersonate a D24+ numerical domain coordinate");
+    let quoted_shadow = eval_axis_program(r#"(спроможності-для-домену 5 "01010")"#, &mut s)
+        .expect_err("text data cannot impersonate a D24+ numerical domain coordinate");
     assert_eq!(quoted_shadow.kind, sens::ErrorKind::Type);
     assert!(
         quoted_shadow.message.contains("D24+"),
@@ -156,7 +162,6 @@ fn packed_bits_do_not_cross_domain_widths() {
         "()"
     );
 
-
     assert_eq!(
         eval_axis_program("(спроможності-для-домену 6 14)", &mut s)
             .expect("D6:001110 ADD1")
@@ -186,7 +191,6 @@ fn packed_bits_do_not_cross_domain_widths() {
         "()"
     );
 }
-
 
 #[test]
 fn machine_capability_shapes_use_real_sens_d1_truth_and_falsehood() {
@@ -270,13 +274,10 @@ fn unsupported_targets_are_explicitly_unwitnessed() {
         assert_eq!(value, "absent");
     }
 
-    let x86 = eval_axis_program(
-        "(статус-свідка-цілі-машини (як-є x86-64))",
-        &mut s,
-    )
-    .expect("x86 witness status")
-    .value
-    .to_string();
+    let x86 = eval_axis_program("(статус-свідка-цілі-машини (як-є x86-64))", &mut s)
+        .expect("x86 witness status")
+        .value
+        .to_string();
     assert_eq!(x86, "witnessed");
 }
 
@@ -284,8 +285,9 @@ fn unsupported_targets_are_explicitly_unwitnessed() {
 fn x86_target_witnesses_reference_existing_lowering_names_without_owning_meaning() {
     let source = fs::read_to_string(repo_root().join("lib/machine/capability-axis.lisp"))
         .expect("capability axis");
-    let lowering = fs::read_to_string(repo_root().join("lib/machine/lowering/semantic-x86-64.lisp"))
-        .expect("x86 semantic lowering");
+    let lowering =
+        fs::read_to_string(repo_root().join("lib/machine/lowering/semantic-x86-64.lisp"))
+            .expect("x86 semantic lowering");
 
     for name in [
         "машина-знизити-перевірку-нуля-64",

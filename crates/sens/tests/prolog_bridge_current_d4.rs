@@ -5,14 +5,19 @@ use sens::{eval_program, load_core_library, Session};
 fn session() -> Session {
     let mut session = Session::default();
     load_core_library(&mut session).expect("чинна бібліотека Core SENS");
-    eval_program(include_str!("../../../lib/bridge/prolog-to-datalog.lisp"), &mut session)
-        .expect("завантажити іменований D4 міст справжнім SENS");
+    eval_program(
+        include_str!("../../../lib/bridge/prolog-to-datalog.lisp"),
+        &mut session,
+    )
+    .expect("завантажити іменований D4 міст справжнім SENS");
     session
 }
 
 fn eval(source: &str, session: &mut Session) -> String {
     eval_program(source, session)
-        .unwrap_or_else(|error| panic!("test_id=prolog-d10-d4 layer=real-SENS input={source} actual={error}"))
+        .unwrap_or_else(|error| {
+            panic!("test_id=prolog-d10-d4 layer=real-SENS input={source} actual={error}")
+        })
         .value
         .to_string()
 }
@@ -38,7 +43,10 @@ fn d4_bridge_rejects_missing_source_and_malformed_observation() {
         "(projection-failure missing-source-ref)",
     );
     assert_eq!(
-        eval("(перетворити-підстановки-пролог-на-факти-даталог (як-є ()))", &mut s),
+        eval(
+            "(перетворити-підстановки-пролог-на-факти-даталог (як-є ()))",
+            &mut s
+        ),
         "(projection-failure malformed-observation)",
     );
 }
@@ -52,9 +60,8 @@ fn d4_bridge_rejects_wrong_or_nonatomic_observation_head() {
         "(other-observation (source-ref observation-42) (variable ancestor) (values bob))",
         "((unadmitted-head) (source-ref observation-42) (variable ancestor) (values bob))",
     ] {
-        let input = format!(
-            "(перетворити-підстановки-пролог-на-факти-даталог (як-є {observation}))"
-        );
+        let input =
+            format!("(перетворити-підстановки-пролог-на-факти-даталог (як-є {observation}))");
         assert_eq!(
             eval(&input, &mut state),
             "(projection-failure malformed-observation)",
@@ -89,10 +96,22 @@ fn d4_bridge_d1_field_shape_rejects_truncated_extra_and_dotted_rows() {
 fn d4_bridge_returns_named_errors_for_incomplete_or_surplus_fields() {
     let mut state = session();
     for (fields, expected) in [
-        ("(source-ref) (variable ancestor) (values bob)", "(projection-failure malformed-source-ref)"),
-        ("(source-ref observation-42 extra) (variable ancestor) (values bob)", "(projection-failure malformed-source-ref)"),
-        ("(source-ref observation-42) (variable) (values bob)", "(projection-failure malformed-variable-role)"),
-        ("(source-ref observation-42) (variable ancestor extra) (values bob)", "(projection-failure malformed-variable-role)"),
+        (
+            "(source-ref) (variable ancestor) (values bob)",
+            "(projection-failure malformed-source-ref)",
+        ),
+        (
+            "(source-ref observation-42 extra) (variable ancestor) (values bob)",
+            "(projection-failure malformed-source-ref)",
+        ),
+        (
+            "(source-ref observation-42) (variable) (values bob)",
+            "(projection-failure malformed-variable-role)",
+        ),
+        (
+            "(source-ref observation-42) (variable ancestor extra) (values bob)",
+            "(projection-failure malformed-variable-role)",
+        ),
     ] {
         let program = format!(
             "(перетворити-підстановки-пролог-на-факти-даталог (як-є (prolog-substitution-observation {fields})))"

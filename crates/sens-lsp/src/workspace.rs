@@ -71,8 +71,13 @@ impl WorkspaceIndex {
                 }
                 let is_source = matches!(
                     path.extension().and_then(|e| e.to_str()),
-                    Some("sens") | Some("wsm") | Some("my") | Some("lisp")
-                        | Some("всм") | Some("мій") | Some("лісп")
+                    Some("sens")
+                        | Some("wsm")
+                        | Some("my")
+                        | Some("lisp")
+                        | Some("всм")
+                        | Some("мій")
+                        | Some("лісп")
                 );
                 if !is_source {
                     continue;
@@ -200,10 +205,8 @@ mod sens_extension_tests {
 
     #[test]
     fn scan_root_recognizes_sens_extension_without_widening_filter() {
-        let dir = std::env::temp_dir().join(format!(
-            "sens-lsp-extension-test-{}",
-            std::process::id()
-        ));
+        let dir =
+            std::env::temp_dir().join(format!("sens-lsp-extension-test-{}", std::process::id()));
         std::fs::create_dir_all(&dir).expect("create temp workspace dir");
 
         std::fs::write(dir.join("example.sens"), "(def sens-example 42)")
@@ -237,17 +240,13 @@ mod cyrillic_extension_tests {
 
     #[test]
     fn scan_root_recognizes_all_three_cyrillic_extensions() {
-        let dir = std::env::temp_dir().join(format!(
-            "sens-lsp-cyrillic-ext-test-{}",
-            std::process::id()
-        ));
+        let dir =
+            std::env::temp_dir().join(format!("sens-lsp-cyrillic-ext-test-{}", std::process::id()));
         std::fs::create_dir_all(&dir).expect("create temp workspace dir");
 
-        std::fs::write(dir.join("визначення.мій"), "(def приклад 42)")
-            .expect("write .мій fixture");
+        std::fs::write(dir.join("визначення.мій"), "(def приклад 42)").expect("write .мій fixture");
         std::fs::write(dir.join("контракт.всм"), "(def інший 7)").expect("write .всм fixture");
-        std::fs::write(dir.join("програма.лісп"), "(def третій 1)")
-            .expect("write .лісп fixture");
+        std::fs::write(dir.join("програма.лісп"), "(def третій 1)").expect("write .лісп fixture");
         // A non-source extension must still be ignored, exactly as for the
         // Latin extensions — this proves the addition didn't accidentally
         // widen the filter to "everything."

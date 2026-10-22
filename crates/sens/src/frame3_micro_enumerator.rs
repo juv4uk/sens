@@ -114,12 +114,14 @@ impl Frame3MicroExpr {
             Self::QuoteNil => unary_call("001", vec!["000"]),
             Self::Atom(value) => unary_call("010", value.exact_words()),
             Self::Cons(left, right) => binary_call("111", left.exact_words(), right.exact_words()),
-            Self::CarCons(left, right) => {
-                unary_call("100", binary_call("111", left.exact_words(), right.exact_words()))
-            }
-            Self::CdrCons(left, right) => {
-                unary_call("011", binary_call("111", left.exact_words(), right.exact_words()))
-            }
+            Self::CarCons(left, right) => unary_call(
+                "100",
+                binary_call("111", left.exact_words(), right.exact_words()),
+            ),
+            Self::CdrCons(left, right) => unary_call(
+                "011",
+                binary_call("111", left.exact_words(), right.exact_words()),
+            ),
             Self::EqAtom(left, right) => binary_call(
                 "101",
                 unary_call("010", left.exact_words()),
@@ -149,7 +151,11 @@ impl Frame3MicroExpr {
             Self::QuoteNil => "QUOTE(NIL)".into(),
             Self::Atom(value) => format!("ATOM({})", value.human_projection()),
             Self::Cons(left, right) => {
-                format!("CONS({},{})", left.human_projection(), right.human_projection())
+                format!(
+                    "CONS({},{})",
+                    left.human_projection(),
+                    right.human_projection()
+                )
             }
             Self::CarCons(left, right) => format!(
                 "CAR(CONS({},{}))",
@@ -176,7 +182,6 @@ impl Frame3MicroExpr {
         }
     }
 
-
     /// Semantic constructor classes exercised by this closed micro-program.
     ///
     /// CAR(CONS(...)) and CDR(CONS(...)) count both the selector and CONS,
@@ -186,9 +191,7 @@ impl Frame3MicroExpr {
             Self::Zero | Self::One | Self::Nil => 0,
             Self::QuoteZero | Self::QuoteOne | Self::QuoteNil => CAP_QUOTE,
             Self::Atom(value) => CAP_ATOM | value.capability_mask(),
-            Self::Cons(left, right) => {
-                CAP_CONS | left.capability_mask() | right.capability_mask()
-            }
+            Self::Cons(left, right) => CAP_CONS | left.capability_mask() | right.capability_mask(),
             Self::CarCons(left, right) => {
                 CAP_CAR | CAP_CONS | left.capability_mask() | right.capability_mask()
             }
@@ -598,11 +601,7 @@ pub fn first_global_rank_with_capabilities(
                     .ok_or(Frame3MicroEnumerateError::InternalCountOverflow)?;
             }
 
-            let families = [
-                CAP_CONS,
-                CAP_CONS | CAP_CAR,
-                CAP_CONS | CAP_CDR,
-            ];
+            let families = [CAP_CONS, CAP_CONS | CAP_CAR, CAP_CONS | CAP_CDR];
             for (family_index, family_mask) in families.into_iter().enumerate() {
                 let mut split_offset = 0u128;
                 for left_nodes in 1..nodes - 1 {
@@ -619,15 +618,11 @@ pub fn first_global_rank_with_capabilities(
                                 .checked_add(
                                     (family_index as u128)
                                         .checked_mul(binary_pairs)
-                                        .ok_or(
-                                            Frame3MicroEnumerateError::InternalCountOverflow,
-                                        )?,
+                                        .ok_or(Frame3MicroEnumerateError::InternalCountOverflow)?,
                                 )
                                 .and_then(|value| value.checked_add(split_offset))
                                 .and_then(|value| {
-                                    value.checked_add(
-                                        left_rank.checked_mul(counts[right_nodes])?,
-                                    )
+                                    value.checked_add(left_rank.checked_mul(counts[right_nodes])?)
                                 })
                                 .and_then(|value| value.checked_add(right_rank))
                                 .ok_or(Frame3MicroEnumerateError::InternalCountOverflow)?;
@@ -680,14 +675,11 @@ pub fn first_global_rank_with_capabilities(
                                         value.checked_add(test_rank.checked_mul(then_else)?)
                                     })
                                     .and_then(|value| {
-                                        value.checked_add(
-                                            then_rank.checked_mul(counts[else_nodes])?,
-                                        )
+                                        value
+                                            .checked_add(then_rank.checked_mul(counts[else_nodes])?)
                                     })
                                     .and_then(|value| value.checked_add(else_rank))
-                                    .ok_or(
-                                        Frame3MicroEnumerateError::InternalCountOverflow,
-                                    )?;
+                                    .ok_or(Frame3MicroEnumerateError::InternalCountOverflow)?;
                                 let mask = usize::from(CAP_COND | CAP_ATOM)
                                     | test_mask
                                     | then_mask
@@ -880,10 +872,7 @@ mod tests {
         );
         assert_eq!(profile_global_offset(Frame3MicroProfile::F3M2), 256);
         assert_eq!(profile_global_offset(Frame3MicroProfile::F3M3), 65_792);
-        assert_eq!(
-            profile_global_offset(Frame3MicroProfile::F3M4),
-            16_843_008
-        );
+        assert_eq!(profile_global_offset(Frame3MicroProfile::F3M4), 16_843_008);
     }
 
     #[test]
@@ -919,21 +908,23 @@ mod tests {
 
     #[test]
     fn census_one_byte_cool_programs() {
-        let mut best_overall: Option<
-            ((u32, usize, usize, usize, usize, usize, u32), Frame3MicroExpr),
-        > = None;
-        let mut deepest: Option<
-            ((usize, usize, u32, usize, usize, u32), Frame3MicroExpr),
-        > = None;
-        let mut best_car: Option<
-            ((u32, usize, usize, usize, usize, usize, u32), Frame3MicroExpr),
-        > = None;
-        let mut best_cdr: Option<
-            ((u32, usize, usize, usize, usize, usize, u32), Frame3MicroExpr),
-        > = None;
-        let mut best_cons: Option<
-            ((u32, usize, usize, usize, usize, usize, u32), Frame3MicroExpr),
-        > = None;
+        let mut best_overall: Option<(
+            (u32, usize, usize, usize, usize, usize, u32),
+            Frame3MicroExpr,
+        )> = None;
+        let mut deepest: Option<((usize, usize, u32, usize, usize, u32), Frame3MicroExpr)> = None;
+        let mut best_car: Option<(
+            (u32, usize, usize, usize, usize, usize, u32),
+            Frame3MicroExpr,
+        )> = None;
+        let mut best_cdr: Option<(
+            (u32, usize, usize, usize, usize, usize, u32),
+            Frame3MicroExpr,
+        )> = None;
+        let mut best_cons: Option<(
+            (u32, usize, usize, usize, usize, usize, u32),
+            Frame3MicroExpr,
+        )> = None;
         let mut conditional_count_total = 0usize;
 
         for local in 0u32..=u8::MAX as u32 {
@@ -1085,22 +1076,22 @@ mod tests {
 
     #[test]
     fn census_two_byte_cool_programs() {
-        let mut best_overall: Option<
-            ((u32, usize, usize, usize, usize, usize, u32), Frame3MicroExpr),
-        > = None;
-        let mut best_conditional: Option<
-            ((u32, usize, usize, usize, usize, usize, u32), Frame3MicroExpr),
-        > = None;
-        let mut deepest: Option<
-            ((usize, usize, u32, usize, usize, u32), Frame3MicroExpr),
-        > = None;
-        let mut most_words: Option<
-            ((usize, usize, u32, usize, usize, u32), Frame3MicroExpr),
-        > = None;
+        let mut best_overall: Option<(
+            (u32, usize, usize, usize, usize, usize, u32),
+            Frame3MicroExpr,
+        )> = None;
+        let mut best_conditional: Option<(
+            (u32, usize, usize, usize, usize, usize, u32),
+            Frame3MicroExpr,
+        )> = None;
+        let mut deepest: Option<((usize, usize, u32, usize, usize, u32), Frame3MicroExpr)> = None;
+        let mut most_words: Option<((usize, usize, u32, usize, usize, u32), Frame3MicroExpr)> =
+            None;
         let mut first_conditional: Option<(u32, Frame3MicroExpr)> = None;
-        let mut best_selector_pair: Option<
-            ((u32, usize, usize, usize, usize, usize, u32), Frame3MicroExpr),
-        > = None;
+        let mut best_selector_pair: Option<(
+            (u32, usize, usize, usize, usize, usize, u32),
+            Frame3MicroExpr,
+        )> = None;
 
         for local in 0u32..=u16::MAX as u32 {
             let payload = (local as u16).to_be_bytes();
@@ -1241,10 +1232,7 @@ mod tests {
         );
 
         assert_eq!(first_cond_code, 0x00c8);
-        assert_eq!(
-            first_cond_expr.human_projection(),
-            "IF-ATOM(0,0,0)"
-        );
+        assert_eq!(first_cond_expr.human_projection(), "IF-ATOM(0,0,0)");
 
         assert_eq!(selector_score.6, 0xfb4d);
         assert_eq!(
@@ -1401,7 +1389,10 @@ mod tests {
 
         eprintln!(
             "F3M5_ALL_D1_D3_LAMBDA={}\tnodes={}\twords={}\t{}",
-            payload.iter().map(|byte| format!("{byte:02X}")).collect::<String>(),
+            payload
+                .iter()
+                .map(|byte| format!("{byte:02X}"))
+                .collect::<String>(),
             expr.node_count(),
             expr.exact_words().len(),
             expr.human_projection()
@@ -1483,7 +1474,10 @@ mod tests {
 
         eprintln!(
             "F3M4_DEADBEEF={}\tnodes={}\twords={}\t{}",
-            payload.iter().map(|byte| format!("{byte:02x}")).collect::<String>(),
+            payload
+                .iter()
+                .map(|byte| format!("{byte:02x}"))
+                .collect::<String>(),
             expr.node_count(),
             expr.exact_words().len(),
             expr.human_projection()
@@ -1493,9 +1487,7 @@ mod tests {
     fn encoded_operation_count(expr: &Frame3MicroExpr) -> usize {
         let own = match expr {
             Frame3MicroExpr::Zero | Frame3MicroExpr::One | Frame3MicroExpr::Nil => 0,
-            Frame3MicroExpr::QuoteZero
-            | Frame3MicroExpr::QuoteOne
-            | Frame3MicroExpr::QuoteNil => 1,
+            Frame3MicroExpr::QuoteZero | Frame3MicroExpr::QuoteOne | Frame3MicroExpr::QuoteNil => 1,
             Frame3MicroExpr::Atom(_)
             | Frame3MicroExpr::Cons(_, _)
             | Frame3MicroExpr::Lambda0(_) => 1,
@@ -1656,8 +1648,11 @@ mod tests {
             }
         }
 
-        (1..=max_nodes)
-            .find_map(|nodes| best[nodes][target_conditionals].clone().map(|expr| (nodes, expr)))
+        (1..=max_nodes).find_map(|nodes| {
+            best[nodes][target_conditionals]
+                .clone()
+                .map(|expr| (nodes, expr))
+        })
     }
 
     #[test]
@@ -1705,8 +1700,10 @@ mod tests {
 
     #[test]
     fn strongest_last_64k_f3m4_rank_is_executable() {
-        let mut best: Option<((u32, usize, usize, usize, usize, usize, u32), Frame3MicroExpr)> =
-            None;
+        let mut best: Option<(
+            (u32, usize, usize, usize, usize, usize, u32),
+            Frame3MicroExpr,
+        )> = None;
         for local in 0xffff_0000u32..=0xffff_ffff {
             let payload = local.to_be_bytes();
             let expr = decode_payload(&payload).unwrap();
@@ -1809,11 +1806,8 @@ mod tests {
             Box::new(q.clone()),
             Box::new(q.clone()),
         );
-        let outer_if = Frame3MicroExpr::IfAtom(
-            Box::new(q.clone()),
-            Box::new(q.clone()),
-            Box::new(inner_if),
-        );
+        let outer_if =
+            Frame3MicroExpr::IfAtom(Box::new(q.clone()), Box::new(q.clone()), Box::new(inner_if));
         let cdr = Frame3MicroExpr::CdrCons(Box::new(q.clone()), Box::new(outer_if));
         let car = Frame3MicroExpr::CarCons(Box::new(q), Box::new(cdr));
         let expr = Frame3MicroExpr::Atom(Box::new(car));
@@ -1850,8 +1844,10 @@ mod tests {
         // Transparent lexicographic search score:
         // capability diversity, COND count, encoded operation count, depth,
         // exact-word count, node count, then the later physical rank.
-        let mut best: Option<((u32, usize, usize, usize, usize, usize, u32), Frame3MicroExpr)> =
-            None;
+        let mut best: Option<(
+            (u32, usize, usize, usize, usize, usize, u32),
+            Frame3MicroExpr,
+        )> = None;
         for local in 0xff_00_00u32..=0xff_ff_ff {
             let payload = [
                 ((local >> 16) & 0xff) as u8,

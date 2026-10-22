@@ -286,11 +286,8 @@ fn tcp_connect_rejects_a_non_string_host() {
 #[test]
 fn tcp_connect_rejects_an_out_of_range_port() {
     install();
-    let error = eval_program(
-        r#"(tcp-connect "127.0.0.1" 99999)"#,
-        &mut tcp_session(),
-    )
-    .expect_err("a port past 65535 must fail named, not panic");
+    let error = eval_program(r#"(tcp-connect "127.0.0.1" 99999)"#, &mut tcp_session())
+        .expect_err("a port past 65535 must fail named, not panic");
     assert_eq!(error.kind, ErrorKind::Type);
 }
 
@@ -315,9 +312,7 @@ fn tcp_raw_read_preserves_non_utf8_bytes_and_public_read_rejects_them_in_lisp() 
 
     let mut raw_session = tcp_session();
     let raw = eval_program(
-        &format!(
-            r#"(def c (tcp-connect "127.0.0.1" {port})) (tcp-read-raw c)"#
-        ),
+        &format!(r#"(def c (tcp-connect "127.0.0.1" {port})) (tcp-read-raw c)"#),
         &mut raw_session,
     )
     .unwrap();

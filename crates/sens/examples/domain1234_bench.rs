@@ -16,16 +16,36 @@ enum MixedWord {
 
 fn verify_foundation_mechanics() {
     for raw in 0..=1 {
-        assert_eq!(PredicateBit::from_word(Bit1::new(raw).unwrap()).word().packed_bits(), raw);
+        assert_eq!(
+            PredicateBit::from_word(Bit1::new(raw).unwrap())
+                .word()
+                .packed_bits(),
+            raw
+        );
     }
     for raw in 0..=3 {
-        assert_eq!(Racana2::from_word(Bit2::new(raw).unwrap()).word().packed_bits(), raw);
+        assert_eq!(
+            Racana2::from_word(Bit2::new(raw).unwrap())
+                .word()
+                .packed_bits(),
+            raw
+        );
     }
     for raw in 0..=7 {
-        assert_eq!(Bija3::from_word(Bit3::new(raw).unwrap()).word().packed_bits(), raw);
+        assert_eq!(
+            Bija3::from_word(Bit3::new(raw).unwrap())
+                .word()
+                .packed_bits(),
+            raw
+        );
     }
     for raw in 0..=15 {
-        assert_eq!(CoreD4::from_word(Bit4::new(raw).unwrap()).word().packed_bits(), raw);
+        assert_eq!(
+            CoreD4::from_word(Bit4::new(raw).unwrap())
+                .word()
+                .packed_bits(),
+            raw
+        );
     }
 
     // Exact-width anti-collapse is carried by the Rust types, not numeric value.

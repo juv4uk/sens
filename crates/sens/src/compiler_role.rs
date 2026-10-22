@@ -39,9 +39,7 @@ pub enum CompilerLoweringRole {
 /// No D3/D4 bit patterns or language laws are decoded here. Execute the
 /// language-owned compiler role projection and fail closed if it is unavailable.
 /// This API is kept for existing GPU/host packet callers during migration.
-pub fn compiler_execution_role(
-    identity: CoreDomainIdentity,
-) -> Option<CompilerExecutionRole> {
+pub fn compiler_execution_role(identity: CoreDomainIdentity) -> Option<CompilerExecutionRole> {
     crate::compiler_language::compiler_execution_role_from_sens(identity)
         .ok()
         .flatten()

@@ -40,7 +40,9 @@ fn main() {
         .collect();
     names.sort();
 
-    println!("AST\tworkload\tform\teval_ns_median\teval_ns_min\teval_ns_max\tparse_ns_median\titers");
+    println!(
+        "AST\tworkload\tform\teval_ns_median\teval_ns_min\teval_ns_max\tparse_ns_median\titers"
+    );
     for name in &names {
         let expected = read(dir, &format!("{name}.expected")).trim().to_owned();
         let mut sessions = Vec::new();

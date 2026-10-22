@@ -143,13 +143,12 @@ impl Parser<'_> {
                             let number = match element.kind {
                                 ExprKind::Number(_, _) => {
                                     let spelling = &self.source[span.start..span.end];
-                                    let spelling_with_dot = if spelling.contains(',')
-                                        && !spelling.contains('.')
-                                    {
-                                        Some(spelling.replace(',', "."))
-                                    } else {
-                                        None
-                                    };
+                                    let spelling_with_dot =
+                                        if spelling.contains(',') && !spelling.contains('.') {
+                                            Some(spelling.replace(',', "."))
+                                        } else {
+                                            None
+                                        };
                                     spelling_with_dot
                                         .as_deref()
                                         .unwrap_or(spelling)
@@ -393,7 +392,10 @@ impl Parser<'_> {
             if let Some(identity) = crate::semantic_registry::d1_value_for_uk_surface(token) {
                 return Ok(Expr {
                     kind: ExprKind::DomainIdentity(identity),
-                    span: Span { start, end: self.cursor },
+                    span: Span {
+                        start,
+                        end: self.cursor,
+                    },
                 });
             }
         }
@@ -425,7 +427,10 @@ impl Parser<'_> {
             let word = words[0].word;
             return Ok(Expr {
                 kind: ExprKind::DomainIdentity(crate::DomainIdentity::from_source_word(word)),
-                span: Span { start, end: self.cursor },
+                span: Span {
+                    start,
+                    end: self.cursor,
+                },
             });
         }
 
@@ -449,10 +454,15 @@ impl Parser<'_> {
                 }
                 let words: Vec<u8> = bits.bytes().map(|byte| byte - b'0').collect();
                 let number = crate::BinaryNumber::from_numeric_domain_bits(width.unwrap(), &words)
-                    .ok_or_else(|| self.error("invalid exact numeric domain word", start, self.cursor))?;
+                    .ok_or_else(|| {
+                        self.error("invalid exact numeric domain word", start, self.cursor)
+                    })?;
                 return Ok(Expr {
                     kind: ExprKind::BinaryNumber(number),
-                    span: Span { start, end: self.cursor },
+                    span: Span {
+                        start,
+                        end: self.cursor,
+                    },
                 });
             }
         }
@@ -461,16 +471,20 @@ impl Parser<'_> {
         // ширино-залежну DomainIdentity. Історичний 8-бітний payload
         // тут не дає права на виклик; це вирішує окремий domain law.
         if self.mode == ReaderMode::ExactDomain {
-            if !token.is_empty()
-                && token.bytes().all(|byte| matches!(byte, b'0' | b'1'))
-            {
+            if !token.is_empty() && token.bytes().all(|byte| matches!(byte, b'0' | b'1')) {
                 let identity = if token.len() == 10 {
-                    let coordinate = crate::domain_ladder::DomainCoordinate::з_видимих_бітів(token)
-                        .ok_or_else(|| self.error("непідтримане точне слово D10", start, self.cursor))?;
+                    let coordinate =
+                        crate::domain_ladder::DomainCoordinate::з_видимих_бітів(token).ok_or_else(
+                            || self.error("непідтримане точне слово D10", start, self.cursor),
+                        )?;
                     crate::DomainIdentity::from_coordinate(coordinate)
                 } else {
                     let words = crate::parse_binary_source_words(token).map_err(|_| {
-                        self.error("непідтримана точна ширина або невідоме доменне слово", start, self.cursor)
+                        self.error(
+                            "непідтримана точна ширина або невідоме доменне слово",
+                            start,
+                            self.cursor,
+                        )
                     })?;
                     crate::DomainIdentity::from_source_word(words[0].word)
                 };
@@ -489,10 +503,7 @@ impl Parser<'_> {
             let first = token.as_bytes().first().copied();
             let numeric_prefix = first.is_some_and(|b| b.is_ascii_digit())
                 || matches!(first, Some(b'+' | b'-'))
-                    && token
-                        .as_bytes()
-                        .get(1)
-                        .is_some_and(|b| b.is_ascii_digit());
+                    && token.as_bytes().get(1).is_some_and(|b| b.is_ascii_digit());
             if numeric_prefix
                 || token.starts_with("#b")
                 || token.starts_with("#d")
@@ -516,7 +527,10 @@ impl Parser<'_> {
             };
             return Ok(Expr {
                 kind,
-                span: Span { start, end: self.cursor },
+                span: Span {
+                    start,
+                    end: self.cursor,
+                },
             });
         }
 
@@ -525,7 +539,10 @@ impl Parser<'_> {
                 .map_err(|_| self.error("invalid canonical binary Number", start, self.cursor))?;
             return Ok(Expr {
                 kind: ExprKind::BinaryNumber(number),
-                span: Span { start, end: self.cursor },
+                span: Span {
+                    start,
+                    end: self.cursor,
+                },
             });
         }
 
@@ -533,7 +550,9 @@ impl Parser<'_> {
             let Some((numerator, denominator)) = wire.split_once('/') else {
                 return Err(self.error("invalid #q2 exact-rational wire", start, self.cursor));
             };
-            let Some(rational) = crate::value::Rational::from_binary_wire_parts(numerator, denominator) else {
+            let Some(rational) =
+                crate::value::Rational::from_binary_wire_parts(numerator, denominator)
+            else {
                 return Err(self.error("invalid #q2 exact-rational wire", start, self.cursor));
             };
             let kind = match rational.as_precise_i64() {
@@ -542,7 +561,10 @@ impl Parser<'_> {
             };
             return Ok(Expr {
                 kind,
-                span: Span { start, end: self.cursor },
+                span: Span {
+                    start,
+                    end: self.cursor,
+                },
             });
         }
 
@@ -555,7 +577,10 @@ impl Parser<'_> {
             // The exact-domain reader handles modern W8 using its explicit mode.
             return Ok(Expr {
                 kind: ExprKind::Symbol(Rc::from(token)),
-                span: Span { start, end: self.cursor },
+                span: Span {
+                    start,
+                    end: self.cursor,
+                },
             });
         }
 
@@ -686,8 +711,16 @@ mod tests {
     #[test]
     fn exact_domain_reader_preserves_all_supported_word_widths() {
         for source in [
-            "0", "1", "10", "001", "0010", "10101", "101000",
-            "1010101", "11110111", "110011100",
+            "0",
+            "1",
+            "10",
+            "001",
+            "0010",
+            "10101",
+            "101000",
+            "1010101",
+            "11110111",
+            "110011100",
         ] {
             let forms = parse_exact_domain_source(source)
                 .expect("точне бінарне слово має власну доменну тотожність");
@@ -705,11 +738,14 @@ mod tests {
         for (surface, bits) in [("ні", 0), ("так", 1)] {
             let forms = parse_exact_domain_source(surface)
                 .expect("українська проєкція D1 має читатися як точне значення");
-            assert!(matches!(
-                forms.as_slice(),
-                [Expr { kind: ExprKind::DomainIdentity(identity), .. }]
-                    if identity.width() == 1 && identity.packed_bits() == bits
-            ), "{surface} має бути значенням D1:{bits}, а не символом чи викличною головою");
+            assert!(
+                matches!(
+                    forms.as_slice(),
+                    [Expr { kind: ExprKind::DomainIdentity(identity), .. }]
+                        if identity.width() == 1 && identity.packed_bits() == bits
+                ),
+                "{surface} має бути значенням D1:{bits}, а не символом чи викличною головою"
+            );
         }
     }
 
@@ -719,33 +755,41 @@ mod tests {
         // видимі слова можуть бути іменами локальних параметрів Core4.
         // Сам eval сумісного Lisp розрізняє їх за наявністю binding.
         for (surface, bits) in [("ні", 0), ("так", 1)] {
-            let exact = parse_exact_domain_source(surface)
-                .expect("поточний читач Д1");
+            let exact = parse_exact_domain_source(surface).expect("поточний читач Д1");
             assert!(matches!(
                 exact.as_slice(),
                 [Expr { kind: ExprKind::DomainIdentity(identity), .. }]
                     if identity.width() == 1 && identity.packed_bits() == bits
             ));
             let lexical = parse(surface).expect("сумісний лексичний читач");
-            assert!(matches!(
-                lexical.as_slice(),
-                [Expr { kind: ExprKind::Symbol(symbol), .. }] if symbol.as_ref() == surface
-            ), "не перетворювати Core4 локальні параметри на незмінний Д1");
+            assert!(
+                matches!(
+                    lexical.as_slice(),
+                    [Expr { kind: ExprKind::Symbol(symbol), .. }] if symbol.as_ref() == surface
+                ),
+                "не перетворювати Core4 локальні параметри на незмінний Д1"
+            );
 
             let mut session = crate::Session::default();
             let actual = crate::eval_program(surface, &mut session)
                 .unwrap_or_else(|error| panic!("живий SENS Д1:{bits}: {error}"));
-            assert_eq!(actual.value.as_predicate_bit(), Some(bits == 1),
-                "не ототожнювати D1 з Number/host Bool/структурним ()");
+            assert_eq!(
+                actual.value.as_predicate_bit(),
+                Some(bits == 1),
+                "не ототожнювати D1 з Number/host Bool/структурним ()"
+            );
         }
 
         for data in ["0", "1", "()"] {
             let forms = parse(data).expect("старе джерело допускає число або список");
-            assert!(!matches!(
-                forms.as_slice(),
-                [Expr { kind: ExprKind::DomainIdentity(identity), .. }]
-                    if identity.width() == 1
-            ), "числа чи () не набувають Д1 за виглядом: {data}");
+            assert!(
+                !matches!(
+                    forms.as_slice(),
+                    [Expr { kind: ExprKind::DomainIdentity(identity), .. }]
+                        if identity.width() == 1
+                ),
+                "числа чи () не набувають Д1 за виглядом: {data}"
+            );
         }
     }
 
@@ -757,38 +801,49 @@ mod tests {
         assert!(matches!(&old[0].kind, ExprKind::Symbol(name)
             if name.as_ref() == "11110111"));
 
-        let current = parse_exact_domain_source("11110111")
-            .expect("поточна D8 тотожність в явному режимі");
-        assert!(matches!(&current[0].kind, ExprKind::DomainIdentity(identity)
-            if identity.width() == 8 && identity.packed_bits() == 0b11110111));
+        let current =
+            parse_exact_domain_source("11110111").expect("поточна D8 тотожність в явному режимі");
+        assert!(
+            matches!(&current[0].kind, ExprKind::DomainIdentity(identity)
+            if identity.width() == 8 && identity.packed_bits() == 0b11110111)
+        );
 
-        let not_callable = parse_exact_domain_source("11110110")
-            .expect("D8 резидентність не тотожна виклику");
-        assert!(matches!(&not_callable[0].kind, ExprKind::DomainIdentity(identity)
-            if identity.core_operation().is_none()));
+        let not_callable =
+            parse_exact_domain_source("11110110").expect("D8 резидентність не тотожна виклику");
+        assert!(
+            matches!(&not_callable[0].kind, ExprKind::DomainIdentity(identity)
+            if identity.core_operation().is_none())
+        );
     }
 
     #[test]
     fn exact_reader_preserves_quote_data_and_symbolic_binders() {
         let tree = parse_exact_domain_source("(0010 (x) (001 (11110111 x)))")
             .expect("точні D4/D3 форми й символ-параметр");
-        let ExprKind::List(root) = &tree[0].kind else { panic!("форма"); };
+        let ExprKind::List(root) = &tree[0].kind else {
+            panic!("форма");
+        };
         assert!(matches!(&root[0].kind, ExprKind::DomainIdentity(id)
             if id.width() == 4 && id.packed_bits() == 0b0010));
-        let ExprKind::List(parameters) = &root[1].kind else { panic!("параметри"); };
+        let ExprKind::List(parameters) = &root[1].kind else {
+            panic!("параметри");
+        };
         assert!(matches!(&parameters[0].kind, ExprKind::Symbol(symbol) if &**symbol == "x"));
-        let ExprKind::List(quote) = &root[2].kind else { panic!("цитата"); };
+        let ExprKind::List(quote) = &root[2].kind else {
+            panic!("цитата");
+        };
         assert!(matches!(&quote[0].kind, ExprKind::DomainIdentity(id)
             if id.width() == 3 && id.packed_bits() == 0b001));
-        let ExprKind::List(data) = &quote[1].kind else { panic!("цитовані дані"); };
+        let ExprKind::List(data) = &quote[1].kind else {
+            panic!("цитовані дані");
+        };
         assert!(matches!(&data[0].kind, ExprKind::DomainIdentity(id)
             if id.width() == 8 && id.packed_bits() == 0b11110111));
     }
 
     #[test]
     fn exact_reader_rejects_unknown_width_and_unqualified_arithmetic() {
-        for source in ["42", "-1", "1/2", "#d10", "#b1010",
-                       "#q2:101/1", "010120"] {
+        for source in ["42", "-1", "1/2", "#d10", "#b1010", "#q2:101/1", "010120"] {
             let error = parse_exact_domain_source(source)
                 .expect_err("непідтверджене слово чи число не допускається");
             assert_eq!(error.kind, ErrorKind::Parse, "{source}");
@@ -826,7 +881,10 @@ mod tests {
             ExprKind::Symbol(name) if name.as_ref() == "00001100"
         ));
 
-        assert!(parse("#b-1010").is_err(), "signed canonical Number is not admitted by #3022");
+        assert!(
+            parse("#b-1010").is_err(),
+            "signed canonical Number is not admitted by #3022"
+        );
         assert!(matches!(
             parse_one("#d-10").kind,
             ExprKind::Number(value, Exactness::Exact) if value == -10.0
@@ -1105,11 +1163,19 @@ mod tests {
             match &expr.kind {
                 ExprKind::Symbol(name) => &**name == ".",
                 ExprKind::List(items) => items.iter().any(contains_dot_symbol),
-                ExprKind::Pair(head, tail) => contains_dot_symbol(head) || contains_dot_symbol(tail),
+                ExprKind::Pair(head, tail) => {
+                    contains_dot_symbol(head) || contains_dot_symbol(tail)
+                }
                 _ => false,
             }
         }
-        for source in ["(1 . 2)", "(a b . c)", "(1 .(2))", "(1 . (2 . 3))", "((1 . 2) . (3 . 4))"] {
+        for source in [
+            "(1 . 2)",
+            "(a b . c)",
+            "(1 .(2))",
+            "(1 . (2 . 3))",
+            "((1 . 2) . (3 . 4))",
+        ] {
             for expression in parse(source).expect(source) {
                 assert!(!contains_dot_symbol(&expression), "source: {source}");
             }
@@ -1128,7 +1194,10 @@ mod tests {
     #[test]
     fn tokens_that_merely_start_with_a_dot_are_not_the_marker() {
         // `.5` is a decimal; `..` and `.b` are ordinary words for now.
-        assert!(matches!(parse_one(".5").kind, ExprKind::Number(_, _) | ExprKind::Rational(_)));
+        assert!(matches!(
+            parse_one(".5").kind,
+            ExprKind::Number(_, _) | ExprKind::Rational(_)
+        ));
         let ExprKind::List(items) = parse_one("(a .b)").kind else {
             panic!("expected a two-element list, not a dotted pair");
         };

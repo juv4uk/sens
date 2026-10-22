@@ -222,12 +222,7 @@ fn both_share_the_same_fail_closed_missing_binding_policy() {
         Err(MutationError::MissingBinding("missing"))
     );
     assert_eq!(
-        set(
-            &store,
-            &TargetExpr::Literal("missing"),
-            &target_env,
-            "NEW"
-        ),
+        set(&store, &TargetExpr::Literal("missing"), &target_env, "NEW"),
         Err(MutationError::MissingBinding("missing"))
     );
 }
@@ -312,10 +307,7 @@ fn factorization_accounting() -> FactorizationAccounting {
 #[test]
 fn factorization_verdict_is_width_conservative() {
     let accounting = factorization_accounting();
-    assert_eq!(
-        accounting.mutation_factor,
-        "shared-nearest-existing-fail"
-    );
+    assert_eq!(accounting.mutation_factor, "shared-nearest-existing-fail");
     assert_eq!(accounting.target_acquisition, "separate-d4-composable");
     assert_eq!(accounting.set_surface_width, None);
     assert_eq!(accounting.coordinate, None);

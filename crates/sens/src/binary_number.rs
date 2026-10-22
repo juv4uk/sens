@@ -82,16 +82,25 @@ impl BinaryNumber {
                 bits: bits[index..].to_vec(),
                 numeric_domain_width: None,
             },
-            None => Self { bits: vec![0], numeric_domain_width: None },
+            None => Self {
+                bits: vec![0],
+                numeric_domain_width: None,
+            },
         }
     }
 
     pub fn zero() -> Self {
-        Self { bits: vec![0], numeric_domain_width: None }
+        Self {
+            bits: vec![0],
+            numeric_domain_width: None,
+        }
     }
 
     pub fn one() -> Self {
-        Self { bits: vec![1], numeric_domain_width: None }
+        Self {
+            bits: vec![1],
+            numeric_domain_width: None,
+        }
     }
 
     pub fn is_zero(&self) -> bool {
@@ -138,13 +147,17 @@ impl BinaryNumber {
         let mut word = self.exact_numeric_domain_bits()?;
         let negative = word[0] == 1;
         if negative {
-            for bit in &mut word { *bit ^= 1; }
+            for bit in &mut word {
+                *bit ^= 1;
+            }
             let mut carry = 1u8;
             for bit in word.iter_mut().rev() {
                 let sum = *bit + carry;
                 *bit = sum & 1;
                 carry = sum >> 1;
-                if carry == 0 { break; }
+                if carry == 0 {
+                    break;
+                }
             }
         }
         Some((negative, Self::normalize(word)))
@@ -168,18 +181,24 @@ impl BinaryNumber {
         } else {
             magnitude.width() < width
         };
-        if !fits { return None; }
+        if !fits {
+            return None;
+        }
 
         let mut word = vec![0; width - magnitude.width()];
         word.extend_from_slice(magnitude.as_bits());
         if negative && !magnitude.is_zero() {
-            for bit in &mut word { *bit ^= 1; }
+            for bit in &mut word {
+                *bit ^= 1;
+            }
             let mut carry = 1u8;
             for bit in word.iter_mut().rev() {
                 let sum = *bit + carry;
                 *bit = sum & 1;
                 carry = sum >> 1;
-                if carry == 0 { break; }
+                if carry == 0 {
+                    break;
+                }
             }
         }
         Self::from_numeric_domain_bits(width, &word)
@@ -219,7 +238,9 @@ impl BinaryNumber {
 
     fn compute_admitted_integer(&self, other: &Self, operator: &str) -> Option<Self> {
         let width = self.numeric_domain_width?;
-        if other.numeric_domain_width != Some(width) { return None; }
+        if other.numeric_domain_width != Some(width) {
+            return None;
+        }
         match crate::domain_numeric::compute(
             operator,
             &crate::Value::BinaryNumber(self.clone()),
@@ -240,14 +261,15 @@ impl BinaryNumber {
         }
         let (left_negative, left_magnitude) = self.signed_magnitude()?;
         let (right_negative, right_magnitude) = other.signed_magnitude()?;
-        if left_negative || right_negative { return None; }
+        if left_negative || right_negative {
+            return None;
+        }
         // Raw div_rem is intentionally a magnitude mechanism. Explicitly
         // strip tags only inside this private calculation and RE-ADMIT both
         // results into their original Dn at its boundary.
         let (quotient, remainder) = left_magnitude.div_rem(&right_magnitude)?;
-        let admit = |value: Self| -> Option<Self> {
-            Self::from_signed_magnitude(width, false, &value)
-        };
+        let admit =
+            |value: Self| -> Option<Self> { Self::from_signed_magnitude(width, false, &value) };
         Some((admit(quotient)?, admit(remainder)?))
     }
 
@@ -294,7 +316,9 @@ impl BinaryNumber {
         }
         let (numerator_negative, n) = numerator.signed_magnitude()?;
         let (denominator_negative, d) = denominator.signed_magnitude()?;
-        if numerator_negative || denominator_negative { return None; }
+        if numerator_negative || denominator_negative {
+            return None;
+        }
 
         // Exact gcd uses private unqualified magnitudes only AFTER same-Dn
         // admission. The public result reattaches that very same domain.
@@ -368,7 +392,6 @@ impl BinaryNumber {
         }
         result
     }
-
 
     /// Magnitude ordering is deliberately distinct from semantic identity
     /// ordering: Ord includes the exact numeric domain, while these private
@@ -496,7 +519,11 @@ impl BinaryNumber {
         };
         let (negative, magnitude) = self.signed_magnitude().expect("valid Dn width");
         let decimal = magnitude.to_unsigned_decimal_string();
-        if negative && !magnitude.is_zero() { format!("-{decimal}") } else { decimal }
+        if negative && !magnitude.is_zero() {
+            format!("-{decimal}")
+        } else {
+            decimal
+        }
     }
 
     /// Decimal projection of an unsigned bit magnitude, including private
@@ -569,7 +596,12 @@ mod tests {
         maximum[0] = 0;
         let positive = BinaryNumber::from_numeric_domain_bits(24, &maximum).unwrap();
         assert_eq!(positive.to_decimal_string(), "8388607");
-        assert_eq!(BinaryNumber::from_numeric_domain_bits(24, &[0; 24]).unwrap().to_decimal_string(), "0");
+        assert_eq!(
+            BinaryNumber::from_numeric_domain_bits(24, &[0; 24])
+                .unwrap()
+                .to_decimal_string(),
+            "0"
+        );
     }
 
     #[test]
@@ -607,7 +639,6 @@ mod tests {
         assert_eq!(BinaryNumber::parse("0011").unwrap(), three);
     }
 
-
     #[test]
     fn natural_subtraction_division_and_gcd_are_exact_bits() {
         let a = BinaryNumber::parse("110").unwrap();
@@ -641,7 +672,10 @@ mod tests {
         assert_ne!(six, BinaryNumber::parse("110").unwrap());
         assert_eq!(six.numeric_domain_width(), Some(24));
 
-        assert_eq!(six.checked_sub(&four).unwrap(), BinaryNumber::parse("10").unwrap());
+        assert_eq!(
+            six.checked_sub(&four).unwrap(),
+            BinaryNumber::parse("10").unwrap()
+        );
         assert_eq!(four.checked_sub(&six), None);
         let (quotient, remainder) = six.div_rem(&four).unwrap();
         assert_eq!(quotient, BinaryNumber::one());
@@ -671,9 +705,10 @@ mod tests {
                     a.checked_sub(b).map(|n| format!("{n:b}"))
                 );
                 assert_eq!(
-                    left.div_rem(&right)
-                        .map(|(q, r)| (q.bits(), r.bits())),
-                    if b == 0 { None } else {
+                    left.div_rem(&right).map(|(q, r)| (q.bits(), r.bits())),
+                    if b == 0 {
+                        None
+                    } else {
                         Some((format!("{:b}", a / b), format!("{:b}", a % b)))
                     }
                 );
@@ -713,7 +748,10 @@ mod tests {
         // Mechanism reduction to host integers is strictly an independent
         // oracle; the SENS result remains full exact D48 bits.
         let result = BinaryNumber::from_numeric_domain_bits(width, &exact_bits).unwrap();
-        assert_eq!(result.to_decimal_string(), (2u64 * ((1u64 << 23) - 1)).to_string());
+        assert_eq!(
+            result.to_decimal_string(),
+            (2u64 * ((1u64 << 23) - 1)).to_string()
+        );
 
         // Carry must not trigger promotion when a same-domain sum still fits.
         let mut one_word = vec![0; 24];
@@ -763,8 +801,14 @@ mod tests {
             assert_eq!(unqualified.add_in_numeric_domain(&qualified, width), None);
             assert_eq!(qualified.add_in_numeric_domain(&unqualified, width), None);
             let unqualified_zero = BinaryNumber::zero();
-            assert_eq!(unqualified_zero.add_in_numeric_domain(&qualified, width), None);
-            assert_eq!(qualified.add_in_numeric_domain(&unqualified_zero, width), None);
+            assert_eq!(
+                unqualified_zero.add_in_numeric_domain(&qualified, width),
+                None
+            );
+            assert_eq!(
+                qualified.add_in_numeric_domain(&unqualified_zero, width),
+                None
+            );
             let (result_width, result_bits) =
                 qualified.add_in_numeric_domain(&qualified, width).unwrap();
             assert_eq!(result_width, width);
@@ -794,7 +838,11 @@ mod tests {
         assert_eq!(a.exact_numeric_domain_bits(), Some(d24.clone()));
         assert_eq!(b.exact_numeric_domain_bits(), Some(d48.clone()));
         assert_ne!(a, b, "different admitted numeric domains must never alias");
-        assert_ne!(a, BinaryNumber::one(), "legacy unqualified value is not D24");
+        assert_ne!(
+            a,
+            BinaryNumber::one(),
+            "legacy unqualified value is not D24"
+        );
         assert_eq!(a.cmp(&b), std::cmp::Ordering::Less);
         assert!(BinaryNumber::from_numeric_domain_bits(24, &[0; 23]).is_none());
         assert!(BinaryNumber::from_numeric_domain_bits(24, &[0; 25]).is_none());
@@ -806,9 +854,14 @@ mod tests {
 
     #[test]
     fn admitted_d24_arithmetic_uses_twos_complement_and_widens_signed_overflow() {
-        let admitted = |bits: Vec<u8>| BinaryNumber::from_numeric_domain_bits(bits.len(), &bits).unwrap();
+        let admitted =
+            |bits: Vec<u8>| BinaryNumber::from_numeric_domain_bits(bits.len(), &bits).unwrap();
         let minus_one = admitted(vec![1; 24]);
-        let one = admitted({ let mut bits = vec![0; 24]; bits[23] = 1; bits });
+        let one = admitted({
+            let mut bits = vec![0; 24];
+            bits[23] = 1;
+            bits
+        });
         let zero = minus_one.add_admitted_numeric(&one).unwrap();
         assert_eq!(zero.to_decimal_string(), "0");
         assert_eq!(zero.numeric_domain_width(), Some(24));
@@ -818,10 +871,25 @@ mod tests {
             bits[23] = 0;
             bits
         });
-        let three = admitted({ let mut bits = vec![0; 24]; bits[22] = 1; bits[23] = 1; bits });
-        assert_eq!(minus_two.mul_admitted_numeric(&three).unwrap().to_decimal_string(), "-6");
+        let three = admitted({
+            let mut bits = vec![0; 24];
+            bits[22] = 1;
+            bits[23] = 1;
+            bits
+        });
+        assert_eq!(
+            minus_two
+                .mul_admitted_numeric(&three)
+                .unwrap()
+                .to_decimal_string(),
+            "-6"
+        );
 
-        let minimum = admitted({ let mut bits = vec![0; 24]; bits[0] = 1; bits });
+        let minimum = admitted({
+            let mut bits = vec![0; 24];
+            bits[0] = 1;
+            bits
+        });
         let below_minimum = minimum.checked_sub_admitted_numeric(&one).unwrap();
         assert_eq!(below_minimum.numeric_domain_width(), Some(48));
         assert_eq!(below_minimum.to_decimal_string(), "-8388609");
@@ -837,7 +905,8 @@ mod tests {
 
         let mut maximum_positive_bits = vec![1; 24];
         maximum_positive_bits[0] = 0;
-        let maximum_positive = BinaryNumber::from_numeric_domain_bits(24, &maximum_positive_bits).unwrap();
+        let maximum_positive =
+            BinaryNumber::from_numeric_domain_bits(24, &maximum_positive_bits).unwrap();
         let small = BinaryNumber::from_numeric_domain_bits(24, &vec![0; 24]).unwrap();
         let same = small.add_admitted_numeric(&small).unwrap();
         assert_eq!(same.numeric_domain_width(), Some(24));
@@ -848,9 +917,13 @@ mod tests {
         let widened = maximum_positive.add_admitted_numeric(&one).unwrap();
         assert_eq!(widened.numeric_domain_width(), Some(48));
         assert_eq!(widened.to_decimal_string(), (1i64 << 23).to_string());
-        assert!(maximum_positive.add_admitted_numeric(&BinaryNumber::one()).is_none());
+        assert!(maximum_positive
+            .add_admitted_numeric(&BinaryNumber::one())
+            .is_none());
         let another_domain = BinaryNumber::from_numeric_domain_bits(48, &vec![0; 48]).unwrap();
-        assert!(maximum_positive.add_admitted_numeric(&another_domain).is_none());
+        assert!(maximum_positive
+            .add_admitted_numeric(&another_domain)
+            .is_none());
     }
 
     #[test]
@@ -868,14 +941,34 @@ mod tests {
             let six = admitted(width, 6);
             let two = admitted(width, 2);
             assert_eq!(six.mul_admitted_numeric(&two).unwrap(), admitted(width, 12));
-            assert_eq!(six.checked_sub_admitted_numeric(&two).unwrap(), admitted(width, 4));
+            assert_eq!(
+                six.checked_sub_admitted_numeric(&two).unwrap(),
+                admitted(width, 4)
+            );
             assert_eq!(six.checked_sub_admitted_numeric(&six).unwrap(), z);
-            assert_eq!(two.checked_sub_admitted_numeric(&six).unwrap().to_decimal_string(), "-4");
-            assert_eq!(six.div_rem_admitted_numeric(&two).unwrap(), (admitted(width, 3), z.clone()));
-            assert_eq!(one.div_rem_admitted_numeric(&six).unwrap(), (z.clone(), one.clone()));
+            assert_eq!(
+                two.checked_sub_admitted_numeric(&six)
+                    .unwrap()
+                    .to_decimal_string(),
+                "-4"
+            );
+            assert_eq!(
+                six.div_rem_admitted_numeric(&two).unwrap(),
+                (admitted(width, 3), z.clone())
+            );
+            assert_eq!(
+                one.div_rem_admitted_numeric(&six).unwrap(),
+                (z.clone(), one.clone())
+            );
             assert!(six.div_rem_admitted_numeric(&z).is_none());
-            assert_eq!(six.signed_difference_parts_admitted_numeric(&two).unwrap(), (false, BinaryNumber::parse("100").unwrap()));
-            assert_eq!(two.signed_difference_parts_admitted_numeric(&six).unwrap(), (true, BinaryNumber::parse("100").unwrap()));
+            assert_eq!(
+                six.signed_difference_parts_admitted_numeric(&two).unwrap(),
+                (false, BinaryNumber::parse("100").unwrap())
+            );
+            assert_eq!(
+                two.signed_difference_parts_admitted_numeric(&six).unwrap(),
+                (true, BinaryNumber::parse("100").unwrap())
+            );
             let (negative, magnitude) = one.signed_difference_parts_admitted_numeric(&one).unwrap();
             assert!(!negative);
             assert!(magnitude.is_zero());
@@ -897,10 +990,10 @@ mod tests {
             max_word[0] = 0;
             let max = BinaryNumber::from_numeric_domain_bits(width, &max_word).unwrap();
             let product = max.mul_admitted_numeric(&max).unwrap();
-            assert_eq!(product.numeric_domain_width(), Some(2*width));
-            assert!(product.width() <= 2*width);
+            assert_eq!(product.numeric_domain_width(), Some(2 * width));
+            assert!(product.width() <= 2 * width);
             let product_word = product.exact_numeric_domain_bits().unwrap();
-            assert_eq!(product_word.len(), 2*width);
+            assert_eq!(product_word.len(), 2 * width);
             // Dn's positive maximum is 2^(n-1)-1; compare its exact square.
             let magnitude = BinaryNumber::from_bits(vec![1; width - 1]).unwrap();
             let raw_square = magnitude.mul(&magnitude);
@@ -908,35 +1001,49 @@ mod tests {
             expected.extend_from_slice(raw_square.as_bits());
             assert_eq!(product_word, expected);
             let zero = BinaryNumber::from_numeric_domain_bits(width, &vec![0; width]).unwrap();
-            assert_eq!(max.mul_admitted_numeric(&zero).unwrap().numeric_domain_width(), Some(width));
+            assert_eq!(
+                max.mul_admitted_numeric(&zero)
+                    .unwrap()
+                    .numeric_domain_width(),
+                Some(width)
+            );
         }
     }
 
     #[test]
     fn d24_plus_arithmetic_matches_independent_small_integer_oracle() {
         let make = |n: u32| {
-            let mut bits = vec![0u8;24];
-            for i in 0..24 { bits[23-i] = ((n >> i)&1) as u8; }
-            BinaryNumber::from_numeric_domain_bits(24,&bits).unwrap()
+            let mut bits = vec![0u8; 24];
+            for i in 0..24 {
+                bits[23 - i] = ((n >> i) & 1) as u8;
+            }
+            BinaryNumber::from_numeric_domain_bits(24, &bits).unwrap()
         };
         for a in 0u32..64 {
             for b in 0u32..64 {
                 let left = make(a);
                 let right = make(b);
                 let product = left.mul_admitted_numeric(&right).unwrap();
-                assert_eq!(product.to_decimal_string(), (a*b).to_string());
+                assert_eq!(product.to_decimal_string(), (a * b).to_string());
                 assert_eq!(product.numeric_domain_width(), Some(24));
-                assert_eq!(left.checked_sub_admitted_numeric(&right).map(|n|n.to_decimal_string()),
-                    Some((a as i64 - b as i64).to_string()));
-                assert_eq!(left.signed_difference_parts_admitted_numeric(&right)
-                    .map(|(negative,n)|(negative,n.to_decimal_string())),
-                    Some((a<b,a.abs_diff(b).to_string())));
+                assert_eq!(
+                    left.checked_sub_admitted_numeric(&right)
+                        .map(|n| n.to_decimal_string()),
+                    Some((a as i64 - b as i64).to_string())
+                );
+                assert_eq!(
+                    left.signed_difference_parts_admitted_numeric(&right)
+                        .map(|(negative, n)| (negative, n.to_decimal_string())),
+                    Some((a < b, a.abs_diff(b).to_string()))
+                );
                 if b == 0 {
                     assert!(left.div_rem_admitted_numeric(&right).is_none());
                 } else {
-                    let (q,r) = left.div_rem_admitted_numeric(&right).unwrap();
-                    assert_eq!((q.to_decimal_string(),r.to_decimal_string()),
-                        ((a/b).to_string(),(a%b).to_string()));
+                    let (q, r) = left.div_rem_admitted_numeric(&right).unwrap();
+                    assert_eq!(
+                        (q.to_decimal_string(), r.to_decimal_string()),
+                        ((a / b).to_string(), (a % b).to_string())
+                    );
                 }
             }
         }
@@ -961,8 +1068,10 @@ mod tests {
             assert_eq!(zero.to_decimal_string(), "0");
             assert!(zero.can_be_negated_in_numeric_domain());
         }
-        assert!(!BinaryNumber::one().can_be_negated_in_numeric_domain(),
-            "unqualified historic Number cannot claim D24 NEG law");
+        assert!(
+            !BinaryNumber::one().can_be_negated_in_numeric_domain(),
+            "unqualified historic Number cannot claim D24 NEG law"
+        );
     }
 
     #[test]
@@ -993,16 +1102,24 @@ mod tests {
             assert_eq!(zn, zero);
             assert_eq!(zd, admitted(width, 1)); // Canonical Value collapses zero.
             let (an, ad) = BinaryNumber::reduce_numeric_domain_ratio_parts(
-                &admitted(width, 15), &admitted(width, 3))
-                .expect("same-Dn unit denominator");
+                &admitted(width, 15),
+                &admitted(width, 3),
+            )
+            .expect("same-Dn unit denominator");
             assert_eq!(an, admitted(width, 5));
             assert_eq!(ad, admitted(width, 1));
-            assert!(BinaryNumber::reduce_numeric_domain_ratio_parts(
-                &two, &zero).is_none(), "D{width}: division by zero must fail");
-            assert!(BinaryNumber::reduce_numeric_domain_ratio_parts(
-                &BinaryNumber::one(), &four).is_none());
-            assert!(BinaryNumber::reduce_numeric_domain_ratio_parts(
-                &two, &BinaryNumber::one()).is_none());
+            assert!(
+                BinaryNumber::reduce_numeric_domain_ratio_parts(&two, &zero).is_none(),
+                "D{width}: division by zero must fail"
+            );
+            assert!(
+                BinaryNumber::reduce_numeric_domain_ratio_parts(&BinaryNumber::one(), &four)
+                    .is_none()
+            );
+            assert!(
+                BinaryNumber::reduce_numeric_domain_ratio_parts(&two, &BinaryNumber::one())
+                    .is_none()
+            );
         }
         for (numerator, denominator) in [
             (admitted(24, 2), admitted(48, 4)),
@@ -1012,14 +1129,19 @@ mod tests {
             (admitted(24, 15), admitted(48, 3)),
             (admitted(48, 15), admitted(24, 3)),
         ] {
-            assert!(BinaryNumber::reduce_numeric_domain_ratio_parts(
-                &numerator, &denominator).is_none(),
-                "mixed exact Dn identities are not a rational composition");
+            assert!(
+                BinaryNumber::reduce_numeric_domain_ratio_parts(&numerator, &denominator).is_none(),
+                "mixed exact Dn identities are not a rational composition"
+            );
         }
-        assert!(BinaryNumber::reduce_numeric_domain_ratio_parts(
-            &BinaryNumber::parse("10").unwrap(),
-            &BinaryNumber::parse("100").unwrap(),
-        ).is_none(), "two unqualified Number values are not D24+");
+        assert!(
+            BinaryNumber::reduce_numeric_domain_ratio_parts(
+                &BinaryNumber::parse("10").unwrap(),
+                &BinaryNumber::parse("100").unwrap(),
+            )
+            .is_none(),
+            "two unqualified Number values are not D24+"
+        );
     }
 
     #[test]
@@ -1039,8 +1161,11 @@ mod tests {
         };
         for numerator in 0..32 {
             for denominator in 1..32 {
-                let (n,d) = BinaryNumber::reduce_numeric_domain_ratio_parts(
-                    &admitted(numerator), &admitted(denominator)).unwrap();
+                let (n, d) = BinaryNumber::reduce_numeric_domain_ratio_parts(
+                    &admitted(numerator),
+                    &admitted(denominator),
+                )
+                .unwrap();
                 let divisor = gcd(numerator, denominator);
                 assert_eq!(n.to_decimal_string(), (numerator / divisor).to_string());
                 assert_eq!(d.to_decimal_string(), (denominator / divisor).to_string());
@@ -1054,7 +1179,9 @@ mod tests {
     fn human_decimal_projection_is_not_semantic_identity() {
         assert_eq!(BinaryNumber::parse("101").unwrap().to_decimal_string(), "5");
         assert_eq!(
-            BinaryNumber::parse("1111111111111111").unwrap().to_decimal_string(),
+            BinaryNumber::parse("1111111111111111")
+                .unwrap()
+                .to_decimal_string(),
             "65535"
         );
     }

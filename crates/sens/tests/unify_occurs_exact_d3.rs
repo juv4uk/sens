@@ -1,23 +1,20 @@
 //! Живий oracle: реальний Lisp-owned occurs-check, без симуляції helper.
 //! D6 LET вилучений, body перенесений до точної D4 LAMBDA.
 use sens::{
-    eval_parsed_expressions, eval_core_library_source,
-    parse_mixed_exact_domain, parse_mixed_exact_domain_reasoning_source, Session,
+    eval_core_library_source, eval_parsed_expressions, parse_mixed_exact_domain,
+    parse_mixed_exact_domain_reasoning_source, Session,
 };
 
 fn session() -> Session {
     let mut session = Session::default();
-    eval_core_library_source(include_str!("../../../lib/core.lisp"),
-        &mut session,
-    )
-    .expect("legacy bootstrap must load by pinned path");
+    eval_core_library_source(include_str!("../../../lib/core.lisp"), &mut session)
+        .expect("legacy bootstrap must load by pinned path");
     let expressions = parse_mixed_exact_domain_reasoning_source(
         "lib/unify.lisp",
         include_str!("../../../lib/unify.lisp"),
     )
     .expect("real exact D3/D4 unify source must parse");
-    eval_parsed_expressions(&expressions, &mut session)
-        .expect("real Lisp unifier must load");
+    eval_parsed_expressions(&expressions, &mut session).expect("real Lisp unifier must load");
     session
 }
 
@@ -25,17 +22,30 @@ fn observed(session: &mut Session, source: &str) -> String {
     let expressions = parse_mixed_exact_domain(source).expect("query exact-domain parse");
     eval_parsed_expressions(&expressions, session)
         .unwrap_or_else(|error| panic!("occurs-check failed for {source}: {error:?}"))
-        .value.to_string()
+        .value
+        .to_string()
 }
 
 #[test]
 fn occurs_check_rejects_self_reference_and_accepts_acyclic_term() {
     let mut session = session();
     for (source, expected) in [
-        ("(входить-перевірити? (як-є (var x)) (як-є (var x)) (як-є ()))", "1"),
-        ("(входить-перевірити? (як-є (var x)) (як-є (f (var x))) (як-є ()))", "1"),
-        ("(входить-перевірити? (як-є (var x)) (як-є (f y)) (як-є ()))", "0"),
-        ("(входить-перевірити? (як-є (var x)) (як-є y) (як-є ()))", "0"),
+        (
+            "(входить-перевірити? (як-є (var x)) (як-є (var x)) (як-є ()))",
+            "1",
+        ),
+        (
+            "(входить-перевірити? (як-є (var x)) (як-є (f (var x))) (як-є ()))",
+            "1",
+        ),
+        (
+            "(входить-перевірити? (як-є (var x)) (як-є (f y)) (як-є ()))",
+            "0",
+        ),
+        (
+            "(входить-перевірити? (як-є (var x)) (як-є y) (як-є ()))",
+            "0",
+        ),
     ] {
         assert_eq!(observed(&mut session, source), expected, "{source}");
     }

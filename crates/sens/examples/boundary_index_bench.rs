@@ -66,14 +66,30 @@ fn build_words(case: &str, count: usize) -> Option<Vec<Word>> {
 
 fn push_word(packer: &mut BitPacker, word: Word) {
     match word.width {
-        1 => { packer.push(Bit1::new(word.raw).unwrap()); }
-        2 => { packer.push(Bit2::new(word.raw).unwrap()); }
-        3 => { packer.push(Bit3::new(word.raw).unwrap()); }
-        4 => { packer.push(Bit4::new(word.raw).unwrap()); }
-        5 => { packer.push(Bit5::new(word.raw).unwrap()); }
-        6 => { packer.push(Bit6::new(word.raw).unwrap()); }
-        7 => { packer.push(Bit7::new(word.raw).unwrap()); }
-        8 => { packer.push(Bit8::new(word.raw).unwrap()); }
+        1 => {
+            packer.push(Bit1::new(word.raw).unwrap());
+        }
+        2 => {
+            packer.push(Bit2::new(word.raw).unwrap());
+        }
+        3 => {
+            packer.push(Bit3::new(word.raw).unwrap());
+        }
+        4 => {
+            packer.push(Bit4::new(word.raw).unwrap());
+        }
+        5 => {
+            packer.push(Bit5::new(word.raw).unwrap());
+        }
+        6 => {
+            packer.push(Bit6::new(word.raw).unwrap());
+        }
+        7 => {
+            packer.push(Bit7::new(word.raw).unwrap());
+        }
+        8 => {
+            packer.push(Bit8::new(word.raw).unwrap());
+        }
         _ => unreachable!(),
     }
 }
@@ -215,12 +231,7 @@ fn nth_set_bit(mut word: u64, ordinal: usize) -> usize {
     word.trailing_zeros() as usize
 }
 
-fn select_boundary(
-    bits: &[u64],
-    checkpoints: &[u32],
-    k: usize,
-    index: usize,
-) -> (usize, u64) {
+fn select_boundary(bits: &[u64], checkpoints: &[u32], k: usize, index: usize) -> (usize, u64) {
     let block = index / k;
     let within = index % k;
     let checkpoint = checkpoints[block] as usize;
@@ -243,10 +254,7 @@ fn select_boundary(
         probes += 1;
         let count = word.count_ones() as usize;
         if remaining <= count {
-            return (
-                word_index * 64 + nth_set_bit(word, remaining),
-                probes,
-            );
+            return (word_index * 64 + nth_set_bit(word, remaining), probes);
         }
         remaining -= count;
         word_index += 1;
@@ -263,10 +271,7 @@ fn next_boundary(bits: &[u64], start: usize, total: usize) -> (usize, u64) {
         let word = bits[word_index] & (u64::MAX << bit_in_word);
         probes += 1;
         if word != 0 {
-            return (
-                word_index * 64 + word.trailing_zeros() as usize,
-                probes,
-            );
+            return (word_index * 64 + word.trailing_zeros() as usize, probes);
         }
         cursor = (word_index + 1) * 64;
     }
@@ -274,9 +279,15 @@ fn next_boundary(bits: &[u64], start: usize, total: usize) -> (usize, u64) {
 }
 
 enum Index {
-    Formula { width: u8 },
-    FullUsize { offsets: Vec<usize> },
-    FullU32 { offsets: Vec<u32> },
+    Formula {
+        width: u8,
+    },
+    FullUsize {
+        offsets: Vec<usize>,
+    },
+    FullU32 {
+        offsets: Vec<u32>,
+    },
     CheckpointU8 {
         k: usize,
         checkpoints: Vec<u32>,
@@ -316,30 +327,32 @@ impl Index {
             Self::Formula { .. } => 0,
             Self::FullUsize { offsets } => offsets.len() * size_of::<usize>(),
             Self::FullU32 { offsets } => offsets.len() * size_of::<u32>(),
-            Self::CheckpointU8 { checkpoints, widths, .. } => {
-                checkpoints.len() * size_of::<u32>() + widths.len()
-            }
-            Self::CheckpointW2 { checkpoints, widths, .. } => {
-                checkpoints.len() * size_of::<u32>() + widths.byte_len()
-            }
-            Self::CheckpointW3 { checkpoints, widths, .. } => {
-                checkpoints.len() * size_of::<u32>() + widths.byte_len()
-            }
+            Self::CheckpointU8 {
+                checkpoints,
+                widths,
+                ..
+            } => checkpoints.len() * size_of::<u32>() + widths.len(),
+            Self::CheckpointW2 {
+                checkpoints,
+                widths,
+                ..
+            } => checkpoints.len() * size_of::<u32>() + widths.byte_len(),
+            Self::CheckpointW3 {
+                checkpoints,
+                widths,
+                ..
+            } => checkpoints.len() * size_of::<u32>() + widths.byte_len(),
             Self::TieredW2 {
                 checkpoints,
                 locals,
                 widths,
                 ..
-            } => {
-                checkpoints.len() * size_of::<u32>() + locals.len() + widths.byte_len()
-            }
+            } => checkpoints.len() * size_of::<u32>() + locals.len() + widths.byte_len(),
             Self::BoundarySelect {
                 checkpoints,
                 boundaries,
                 ..
-            } => {
-                checkpoints.len() * size_of::<u32>() + boundaries.len() * size_of::<u64>()
-            }
+            } => checkpoints.len() * size_of::<u32>() + boundaries.len() * size_of::<u64>(),
             Self::Cache2 { widths, raws } => widths.len() + raws.len(),
         }
     }
@@ -364,7 +377,11 @@ impl Index {
                 let width = (offsets[index + 1] - offsets[index]) as u8;
                 (width, read_word(packed, start, width), 0)
             }
-            Self::CheckpointU8 { k, checkpoints, widths } => {
+            Self::CheckpointU8 {
+                k,
+                checkpoints,
+                widths,
+            } => {
                 let block_start = (index / *k) * *k;
                 let mut offset = checkpoints[index / *k] as usize;
                 let mut steps = 0u64;
@@ -376,7 +393,11 @@ impl Index {
                 steps += 1;
                 (width, read_word(packed, offset, width), steps)
             }
-            Self::CheckpointW2 { k, checkpoints, widths } => {
+            Self::CheckpointW2 {
+                k,
+                checkpoints,
+                widths,
+            } => {
                 let block_start = (index / *k) * *k;
                 let mut offset = checkpoints[index / *k] as usize;
                 let mut steps = 0u64;
@@ -388,7 +409,11 @@ impl Index {
                 steps += 1;
                 (width, read_word(packed, offset, width), steps)
             }
-            Self::CheckpointW3 { k, checkpoints, widths } => {
+            Self::CheckpointW3 {
+                k,
+                checkpoints,
+                widths,
+            } => {
                 let block_start = (index / *k) * *k;
                 let mut offset = checkpoints[index / *k] as usize;
                 let mut steps = 0u64;
@@ -416,8 +441,7 @@ impl Index {
                 boundaries,
                 total_bits,
             } => {
-                let (start, select_probes) =
-                    select_boundary(boundaries, checkpoints, *k, index);
+                let (start, select_probes) = select_boundary(boundaries, checkpoints, *k, index);
                 let (end, next_probes) = next_boundary(boundaries, start, *total_bits);
                 let width = u8::try_from(end - start).expect("bounded width");
                 (
@@ -438,7 +462,12 @@ fn parse_checkpoint(candidate: &str, prefix: &str) -> Option<usize> {
         .filter(|&k| k > 0)
 }
 
-fn build_index(candidate: &str, case: &str, words: &[Word], packed: &PackedBitstream) -> Option<Index> {
+fn build_index(
+    candidate: &str,
+    case: &str,
+    words: &[Word],
+    packed: &PackedBitstream,
+) -> Option<Index> {
     if candidate == "formula" {
         return fixed_width(case).map(|width| Index::Formula { width });
     }
@@ -507,7 +536,12 @@ fn build_index(candidate: &str, case: &str, words: &[Word], packed: &PackedBitst
     None
 }
 
-fn query_index(index: &Index, packed: &PackedBitstream, queries: &[usize], repeats: usize) -> (u64, u64) {
+fn query_index(
+    index: &Index,
+    packed: &PackedBitstream,
+    queries: &[usize],
+    repeats: usize,
+) -> (u64, u64) {
     let mut checksum = 0u64;
     let mut steps = 0u64;
     for rep in 0..repeats {
@@ -529,8 +563,14 @@ fn main() -> ExitCode {
     let case = args.next().unwrap_or_else(|| "d1234".to_owned());
     let candidate = args.next().unwrap_or_else(|| "u32".to_owned());
     let mode = args.next().unwrap_or_else(|| "prepare".to_owned());
-    let count = args.next().and_then(|s| s.parse().ok()).unwrap_or(65_536usize);
-    let queries = args.next().and_then(|s| s.parse().ok()).unwrap_or(4_096usize);
+    let count = args
+        .next()
+        .and_then(|s| s.parse().ok())
+        .unwrap_or(65_536usize);
+    let queries = args
+        .next()
+        .and_then(|s| s.parse().ok())
+        .unwrap_or(4_096usize);
     let repeats = args.next().and_then(|s| s.parse().ok()).unwrap_or(1usize);
 
     if count == 0 || queries == 0 || repeats == 0 {

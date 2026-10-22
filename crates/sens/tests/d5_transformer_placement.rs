@@ -48,11 +48,8 @@ fn d5_transformer_placement_changes_call_mode_not_body_payload() {
     )
     .expect("base and staged views should share one closure body");
 
-    let ordinary = eval_program(
-        "(однакове-тіло (як-є ok) невідоме-імя)",
-        &mut session,
-    )
-    .expect_err("ordinary closure must eagerly evaluate невідоме-імя");
+    let ordinary = eval_program("(однакове-тіло (як-є ok) невідоме-імя)", &mut session)
+        .expect_err("ordinary closure must eagerly evaluate невідоме-імя");
     assert_eq!(ordinary.kind, ErrorKind::UnknownSymbol);
 
     let staged = eval_program(
@@ -90,5 +87,9 @@ fn d5_macro_uses_only_the_ratified_d5_identity() {
     for form in &parsed {
         collect_d5(form, &mut identities);
     }
-    assert_eq!(identities, vec![0b00011], "D5 «макрос» має власну точну ширину й координату");
+    assert_eq!(
+        identities,
+        vec![0b00011],
+        "D5 «макрос» має власну точну ширину й координату"
+    );
 }

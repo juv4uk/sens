@@ -78,7 +78,9 @@ fn rc_dyn_any_is_a_viable_opaque_tcp_payload_experiment() {
         let mut stream = TcpStream::connect(("127.0.0.1", port)).expect("peer connects");
         stream.write_all(b"x").expect("peer writes request byte");
         let mut reply = [0u8; 1];
-        stream.read_exact(&mut reply).expect("peer reads reply byte");
+        stream
+            .read_exact(&mut reply)
+            .expect("peer reads reply byte");
         assert_eq!(reply, *b"y");
     });
 

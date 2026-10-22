@@ -2,12 +2,20 @@
 //! binary width and payload, never a human spelling or historical SID8.
 //! Ratified language laws remain in lib/domains/*.lisp and their oracles.
 
-use sens::{eval_parsed_expressions, load_core_library, parse_canonical_binary, wire_decode_program, wire_encode_program, Expr, ExprKind, Session, Value};
+use sens::{
+    eval_parsed_expressions, load_core_library, parse_canonical_binary, wire_decode_program,
+    wire_encode_program, Expr, ExprKind, Session, Value,
+};
 
 fn binary_trace(expression: &Expr) -> String {
     match &expression.kind {
         ExprKind::DomainIdentity(identity) => {
-            format!("D{}:{:0width$b}", identity.width(), identity.packed_bits(), width = identity.width())
+            format!(
+                "D{}:{:0width$b}",
+                identity.width(),
+                identity.packed_bits(),
+                width = identity.width()
+            )
         }
         ExprKind::List(items) => {
             let children = items.iter().map(binary_trace).collect::<Vec<_>>();
@@ -63,7 +71,10 @@ fn every_nonempty_d3_binary_head_round_trips_without_english_or_sid() {
         let ExprKind::DomainIdentity(identity) = items[0].kind else {
             panic!("D3 head was routed through legacy SID");
         };
-        assert_eq!((identity.width(), identity.packed_bits()), (3, u16::from(bits)));
+        assert_eq!(
+            (identity.width(), identity.packed_bits()),
+            (3, u16::from(bits))
+        );
         let expected = binary_trace(&expressions[0]);
         let recovered = wire_decode_program(&wire_encode_program(&expressions))
             .expect("width-preserving program wire");
@@ -96,13 +107,16 @@ fn mixed_width_binary_words_do_not_collapse_to_eight_bit_ids() {
     let ExprKind::List(items) = &expression.kind else {
         panic!("width-qualified words must remain D2 structural children");
     };
-    let widths = items.iter().map(|item| match item.kind {
-        ExprKind::DomainIdentity(identity) => identity.width(),
-        ref other => panic!("binary word silently coerced to flat SID: {other:?}"),
-    }).collect::<Vec<_>>();
+    let widths = items
+        .iter()
+        .map(|item| match item.kind {
+            ExprKind::DomainIdentity(identity) => identity.width(),
+            ref other => panic!("binary word silently coerced to flat SID: {other:?}"),
+        })
+        .collect::<Vec<_>>();
     assert_eq!(widths, [1, 3, 4, 5, 6, 7, 8, 9]);
-    let decoded = wire_decode_program(&wire_encode_program(&[expression]))
-        .expect("mixed width wire");
+    let decoded =
+        wire_decode_program(&wire_encode_program(&[expression])).expect("mixed width wire");
     assert_eq!(binary_trace(&decoded[0]), expected);
 }
 
@@ -119,7 +133,9 @@ fn current_cond_reference_is_valid_binary_and_executes_without_legacy_sid() {
     let words = source.split_whitespace().collect::<Vec<_>>();
     assert!(!words.is_empty());
     assert!(
-        words.iter().all(|word| word.bytes().all(|byte| matches!(byte, b'0' | b'1'))),
+        words
+            .iter()
+            .all(|word| word.bytes().all(|byte| matches!(byte, b'0' | b'1'))),
         "the reference file must contain only visible binary words and whitespace"
     );
     assert!(
@@ -134,7 +150,6 @@ fn current_cond_reference_is_valid_binary_and_executes_without_legacy_sid() {
     assert!(matches!(result.value, Value::Nil));
     assert!(result.output.is_empty());
 }
-
 
 /// Regression for obsolete numeric local-binding heads in mirrored Core files.
 /// The lexical `let` macro is Lisp-owned; 10011100 is not its current identity.
@@ -156,11 +171,16 @@ fn core4_local_binding_heads_are_current_and_postcore_libraries_load() {
         }
         .unwrap_or_else(|error| panic!("{library} parse: {error}"));
         for (index, form) in forms.iter().enumerate() {
-            eval_parsed_expressions(std::slice::from_ref(form), &mut session)
-                .unwrap_or_else(|error| panic!(
-                    "{library} form {} byte {} failed: {}",
-                    index + 1, form.span.start, error
-                ));
+            eval_parsed_expressions(std::slice::from_ref(form), &mut session).unwrap_or_else(
+                |error| {
+                    panic!(
+                        "{library} form {} byte {} failed: {}",
+                        index + 1,
+                        form.span.start,
+                        error
+                    )
+                },
+            );
         }
     }
 }
@@ -176,18 +196,30 @@ fn time_library_reader_rejects_foreign_path_instead_of_inferring_domain_from_bit
 fn process_library_reader_is_path_bound_and_preserves_quoted_data() {
     let source = "(0011 probe (0010 (x) (001 (101 x))))";
     assert!(sens::parse_mixed_exact_domain_process_tcp_source("lib/time.lisp", source).is_err());
-    assert!(sens::parse_mixed_exact_domain_process_tcp_source("lib/not-process.lisp", source).is_err());
+    assert!(
+        sens::parse_mixed_exact_domain_process_tcp_source("lib/not-process.lisp", source).is_err()
+    );
 
     let parsed = sens::parse_mixed_exact_domain_process_tcp_source("lib/process.lisp", source)
         .expect("owner-bound process source");
     assert_eq!(parsed.len(), 1);
-    let ExprKind::List(definition) = &parsed[0].kind else { panic!("definition"); };
-    let ExprKind::List(lambda) = &definition[2].kind else { panic!("lambda"); };
-    let ExprKind::List(quote_form) = &lambda[2].kind else { panic!("quoted body"); };
-    assert!(matches!(&quote_form[0].kind, ExprKind::DomainIdentity(id)
+    let ExprKind::List(definition) = &parsed[0].kind else {
+        panic!("definition");
+    };
+    let ExprKind::List(lambda) = &definition[2].kind else {
+        panic!("lambda");
+    };
+    let ExprKind::List(quote_form) = &lambda[2].kind else {
+        panic!("quoted body");
+    };
+    assert!(
+        matches!(&quote_form[0].kind, ExprKind::DomainIdentity(id)
         if id.width() == 3 && id.packed_bits() == 0b001),
-        "D3 QUOTE remains an exact identity");
-    let ExprKind::List(payload) = &quote_form[1].kind else { panic!("quoted payload"); };
+        "D3 QUOTE remains an exact identity"
+    );
+    let ExprKind::List(payload) = &quote_form[1].kind else {
+        panic!("quoted payload");
+    };
     assert!(
         !matches!(&payload[0].kind, ExprKind::DomainIdentity(_)),
         "numeric-looking payload under QUOTE must not become an executable identity"
@@ -206,8 +238,7 @@ fn time_library_top_level_replay_reports_first_noncallable_form() {
         .expect("time library through its admitted exact-domain reader");
 
     for (index, expression) in parsed.iter().enumerate() {
-        if let Err(error) =
-            eval_parsed_expressions(std::slice::from_ref(expression), &mut session)
+        if let Err(error) = eval_parsed_expressions(std::slice::from_ref(expression), &mut session)
         {
             let start = (expression.span.start as usize).min(source.len());
             let end = (expression.span.end as usize).min(source.len()).max(start);
@@ -224,7 +255,6 @@ fn time_library_top_level_replay_reports_first_noncallable_form() {
         }
     }
 }
-
 
 /// Compare the actual whole-file loader route with the successful formwise
 /// replay above. This diagnostic prints the first enclosing top-level form
@@ -249,14 +279,27 @@ fn time_library_loader_reports_first_failing_form() {
         let (form_label, snippet) = form
             .map(|(index, expression)| {
                 let form_start = (expression.span.start as usize).min(source.len());
-                let form_end = (expression.span.end as usize).min(source.len()).max(form_start);
+                let form_end = (expression.span.end as usize)
+                    .min(source.len())
+                    .max(form_start);
                 let preview_end = form_end.min(form_start.saturating_add(180));
                 (
-                    format!("{}:{}..{}", index + 1, expression.span.start, expression.span.end),
-                    String::from_utf8_lossy(&source.as_bytes()[form_start..preview_end]).replace('\n', " "),
+                    format!(
+                        "{}:{}..{}",
+                        index + 1,
+                        expression.span.start,
+                        expression.span.end
+                    ),
+                    String::from_utf8_lossy(&source.as_bytes()[form_start..preview_end])
+                        .replace('\n', " "),
                 )
             })
-            .unwrap_or_else(|| ("unmapped".to_owned(), "<no containing top-level form>".to_owned()));
+            .unwrap_or_else(|| {
+                (
+                    "unmapped".to_owned(),
+                    "<no containing top-level form>".to_owned(),
+                )
+            });
         panic!(
             "TIME-LOADER-REGRESSION: error_span={}..{} enclosing_form={} source={:?} error={:?}",
             start, end, form_label, snippet, error

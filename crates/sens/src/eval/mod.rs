@@ -10,12 +10,12 @@
 pub(crate) use special_forms::digest::sha256 as digest_sha256;
 
 mod arithmetic;
-mod d5_arithmetic;
-mod d6_arithmetic;
 pub(crate) mod builtins;
 pub(crate) mod canon;
 mod capabilities;
 mod closures;
+mod d5_arithmetic;
+mod d6_arithmetic;
 pub(crate) mod lower;
 mod macro_substrate;
 pub(crate) mod necessary_forms;
@@ -57,8 +57,11 @@ pub(crate) fn runtime_codepoint_to_string(
     special_forms::codepoint_to_string_values(args, span)
 }
 
-use crate::{parse, Environment, ErrorKind, Expr, ExprKind, LanguageError, Session, CoreDomainIdentity, Span, Value};
 use crate::canonical_reader::text7_binding_key;
+use crate::{
+    parse, CoreDomainIdentity, Environment, ErrorKind, Expr, ExprKind, LanguageError, Session,
+    Span, Value,
+};
 
 #[cfg(feature = "benchmark-ast-visits")]
 std::thread_local! {
@@ -198,13 +201,19 @@ pub(crate) fn validate_exact_executable_heads(expressions: &[Expr]) -> Result<()
                 ));
             }
             ExprKind::List(items) => {
-                if let Some(Expr { kind: ExprKind::Symbol(head), span }) = items.first() {
+                if let Some(Expr {
+                    kind: ExprKind::Symbol(head),
+                    span,
+                }) = items.first()
+                {
                     if crate::semantic_registry::admitted_semantic_id_for_surface(head).is_some()
                         && crate::semantic_registry::domain_identity_for_surface(head).is_none()
                     {
                         return Err(LanguageError::new(
                             ErrorKind::InvalidForm,
-                            format!("historical-only call surface is not a ratified Dn head: {head}"),
+                            format!(
+                                "historical-only call surface is not a ratified Dn head: {head}"
+                            ),
                             *span,
                         ));
                     }
@@ -634,9 +643,7 @@ fn dispatch_domain_call(
     // language-owned closure bound to the same resident (for compatibility
     // callers) shadow its ratified arithmetic law. All other D5 definitions
     // retain the ordinary language-defined fast path below.
-    if !d5_arithmetic::has_mechanism(identity)
-        && !selector_law::is_selector(identity.into())
-    {
+    if !d5_arithmetic::has_mechanism(identity) && !selector_law::is_selector(identity.into()) {
         if let Some(bound) = environment.domain_code_slot(identity) {
             match &bound {
                 Value::Macro(closure) => {
@@ -700,7 +707,8 @@ fn dispatch_call(
         return closures::create_lambda(arguments, environment, span).map(EvalStep::Value);
     }
     if necessary_head == Some(necessary_forms::NecessaryFormIdentity::Define) {
-        return special_forms::evaluate_definition(arguments, environment, span).map(EvalStep::Value);
+        return special_forms::evaluate_definition(arguments, environment, span)
+            .map(EvalStep::Value);
     }
 
     // One mathematically admitted selector family needs no D10 DEFINE for
@@ -708,10 +716,14 @@ fn dispatch_call(
     // apply the exact CAR/CDR composition; no English/SID8/JSON shortcut.
     if let Some(identity) = head_name
         .and_then(crate::semantic_registry::exact_uk_callable_for_source_head)
-        .filter(|id| matches!(
-            id, crate::DomainIdentity::D8(_) | crate::DomainIdentity::D9(_)
-                | crate::DomainIdentity::D10(_)
-        ) && selector_law::is_selector(*id))
+        .filter(|id| {
+            matches!(
+                id,
+                crate::DomainIdentity::D8(_)
+                    | crate::DomainIdentity::D9(_)
+                    | crate::DomainIdentity::D10(_)
+            ) && selector_law::is_selector(*id)
+        })
     {
         let mut values = Vec::with_capacity(arguments.len());
         for argument in arguments {
@@ -723,8 +735,7 @@ fn dispatch_call(
     }
 
     if let Some(name) = head_name {
-        if let Some(result) =
-            capabilities::dispatch_capability(name, arguments, environment, span)
+        if let Some(result) = capabilities::dispatch_capability(name, arguments, environment, span)
         {
             return result;
         }
@@ -781,7 +792,9 @@ fn dispatch_call(
                 ));
             };
             match &bound {
-                Value::Macro(closure) => closures::apply_macro(closure.clone(), arguments, environment, span),
+                Value::Macro(closure) => {
+                    closures::apply_macro(closure.clone(), arguments, environment, span)
+                }
                 Value::Closure(_) => closures::apply(bound.clone(), arguments, environment, span),
                 Value::Builtin(builtin) => {
                     let mut values = Vec::with_capacity(arguments.len());
@@ -792,7 +805,11 @@ fn dispatch_call(
                 }
                 _ => Err(LanguageError::new(
                     ErrorKind::Type,
-                    format!("exact domain mechanism slot is not callable: D{} {}", identity.width(), identity),
+                    format!(
+                        "exact domain mechanism slot is not callable: D{} {}",
+                        identity.width(),
+                        identity
+                    ),
                     span,
                 )),
             }
@@ -802,7 +819,12 @@ fn dispatch_call(
             if !canon::has_primitive(*sid) {
                 match &environment.code_slot(*sid) {
                     Some(Value::Macro(closure)) => {
-                        return closures::apply_macro(closure.clone(), arguments, environment, span);
+                        return closures::apply_macro(
+                            closure.clone(),
+                            arguments,
+                            environment,
+                            span,
+                        );
                     }
                     // A language-defined function reached through its code
                     // takes the same path as a call by name: arguments and
@@ -818,8 +840,7 @@ fn dispatch_call(
             for argument in arguments {
                 values.push(evaluate(argument, environment)?);
             }
-            canon::invoke_semantic_ref(*sid, &values, environment, span)
-                .map(EvalStep::Value)
+            canon::invoke_semantic_ref(*sid, &values, environment, span).map(EvalStep::Value)
         }
         Value::Builtin(builtin) => {
             let mut values = Vec::with_capacity(arguments.len());
@@ -928,7 +949,11 @@ mod exact_domain_program_tests {
         let error = eval_exact_domain_program("(def x (001 1))", &mut session)
             .expect_err("unadmitted English `def` is not the Ukrainian D4 DEFINE surface");
         assert_eq!(error.kind, ErrorKind::UnknownSymbol);
-        assert!(error.message.contains("unknown symbol"), "{}", error.message);
+        assert!(
+            error.message.contains("unknown symbol"),
+            "{}",
+            error.message
+        );
         assert_eq!(&"(def x (001 1))"[error.span.start..error.span.end], "def");
         assert!(session.environment.get("x").is_none());
     }
@@ -946,7 +971,10 @@ mod exact_domain_program_tests {
         let mut session = Session::bare();
         let error = eval_exact_domain_program("(00000001 (001 1))", &mut session)
             .expect_err("D8:00000001 is not historical W8 QUOTE");
-        assert!(matches!(error.kind, ErrorKind::Type | ErrorKind::MechanismUnavailable));
+        assert!(matches!(
+            error.kind,
+            ErrorKind::Type | ErrorKind::MechanismUnavailable
+        ));
     }
 
     #[test]
@@ -977,12 +1005,11 @@ mod domain_eval_cutover_necessary_forms {
         let env = Environment::root();
         let via_source = dispatch_call(Some("функція"), None, None, &args, &env, span)
             .expect("джерельна проєкція D4:0010");
-        let identity = necessary_forms::domain_identity_for_symbol("функція")
-            .expect("ратифікована функція");
+        let identity =
+            necessary_forms::domain_identity_for_symbol("функція").expect("ратифікована функція");
         assert!(matches!(via_source, EvalStep::Value(Value::Closure(_))));
         assert!(matches!(
-            dispatch_domain_call(identity, &args, &env, span)
-                .expect("точна D4:0010"),
+            dispatch_domain_call(identity, &args, &env, span).expect("точна D4:0010"),
             EvalStep::Value(Value::Closure(_))
         ));
         assert_eq!(identity.width(), 4);
@@ -993,12 +1020,11 @@ mod domain_eval_cutover_necessary_forms {
         let (args, span) = arguments("(визначити перевірка ())");
         let source_env = Environment::root();
         let exact_env = Environment::root();
-        let identity = necessary_forms::domain_identity_for_symbol("визначити")
-            .expect("ратифікована D4:0011");
+        let identity =
+            necessary_forms::domain_identity_for_symbol("визначити").expect("ратифікована D4:0011");
         dispatch_call(Some("визначити"), None, None, &args, &source_env, span)
             .expect("визначення через доменну таблицю");
-        dispatch_domain_call(identity, &args, &exact_env, span)
-            .expect("пряме визначення D4:0011");
+        dispatch_domain_call(identity, &args, &exact_env, span).expect("пряме визначення D4:0011");
         assert!(matches!(source_env.get("перевірка"), Some(Value::Nil)));
         assert!(matches!(exact_env.get("перевірка"), Some(Value::Nil)));
     }
@@ -1018,7 +1044,7 @@ mod domain_eval_cutover_necessary_forms {
     fn exact_d9_string_mechanism_takes_precedence_over_its_surface_wrapper_slot() {
         let domain_identity =
             crate::semantic_registry::d9_binding_identity_for_definition("рядок-порожній?")
-            .expect("ратифікований D9 резидент");
+                .expect("ратифікований D9 резидент");
         let identity = domain_identity
             .core_operation()
             .expect("допущений D9 механізм");
@@ -1042,17 +1068,36 @@ mod domain_eval_cutover_d3_compatibility {
     #[test]
     fn only_ratified_d3_projection_bridges_historical_quote_and_cond() {
         for (legacy, bits) in [
-            (crate::CoreDomainIdentity::D3(crate::Bija3::from_word(crate::Bit3::new(0b001).expect("quote"))), 0b001u8),
-            (crate::CoreDomainIdentity::D3(crate::Bija3::from_word(crate::Bit3::new(0b110).expect("cond"))), 0b110u8),
+            (
+                crate::CoreDomainIdentity::D3(crate::Bija3::from_word(
+                    crate::Bit3::new(0b001).expect("quote"),
+                )),
+                0b001u8,
+            ),
+            (
+                crate::CoreDomainIdentity::D3(crate::Bija3::from_word(
+                    crate::Bit3::new(0b110).expect("cond"),
+                )),
+                0b110u8,
+            ),
         ] {
-            let identity = crate::semantic_registry::compatibility_d3_route_from_ratified_domains(legacy)
-                .expect("історичний W8 має доказову проєкцію в D3");
+            let identity =
+                crate::semantic_registry::compatibility_d3_route_from_ratified_domains(legacy)
+                    .expect("історичний W8 має доказову проєкцію в D3");
             assert!(is_d3(identity, bits));
             assert_eq!(identity.width(), 3);
         }
-        for unrelated in [crate::CoreDomainIdentity::D8(crate::CoreD8::from_word(crate::Bit8::new(0b10101000).expect("legacy W8 payload"))), crate::CoreDomainIdentity::D6(crate::CoreD6::from_word(crate::Bit6::new(0b110111).expect("unrelated D6 value")))] {
+        for unrelated in [
+            crate::CoreDomainIdentity::D8(crate::CoreD8::from_word(
+                crate::Bit8::new(0b10101000).expect("legacy W8 payload"),
+            )),
+            crate::CoreDomainIdentity::D6(crate::CoreD6::from_word(
+                crate::Bit6::new(0b110111).expect("unrelated D6 value"),
+            )),
+        ] {
             assert!(
-                crate::semantic_registry::compatibility_d3_route_from_ratified_domains(unrelated).is_none(),
+                crate::semantic_registry::compatibility_d3_route_from_ratified_domains(unrelated)
+                    .is_none(),
                 "невідома W8-комірка не може стати чинним D3/D8"
             );
         }
@@ -1072,8 +1117,9 @@ mod domain_eval_cutover_d3_compatibility {
     #[test]
     fn legacy_cond_rejects_three_part_clause_by_current_d3_contract() {
         let mut session = Session::bare();
-        let err = eval_exact_domain_program("(110 ((010 (001 ())) (001 yes) (001 no)))", &mut session)
-            .expect_err("двопольний D3 COND забороняє тричастинну клаузу");
+        let err =
+            eval_exact_domain_program("(110 ((010 (001 ())) (001 yes) (001 no)))", &mut session)
+                .expect_err("двопольний D3 COND забороняє тричастинну клаузу");
         assert_eq!(err.kind, ErrorKind::InvalidForm);
         assert!(err.message.contains("D3:110"), "{}", err.message);
     }

@@ -22,7 +22,11 @@ fn core4_point_witness_crosses_predicates_strings_macros_and_fresh_symbols() {
         let value = eval_program(source, &mut session)
             .unwrap_or_else(|e| panic!("{source} failed: {e:?}"))
             .value;
-        assert_eq!(value.as_predicate_bit(), Some(expected), "{source} -> {value}");
+        assert_eq!(
+            value.as_predicate_bit(),
+            Some(expected),
+            "{source} -> {value}"
+        );
     }
 
     for (source, expected) in [
@@ -108,7 +112,10 @@ fn core4_d6_sublis_prioritizes_complete_tree_before_descending() {
             .unwrap_or_else(|error| panic!("SENS SUBLIS {source}: {error:?}"))
             .value
             .to_string();
-        assert_eq!(actual, expected, "D6 exact SUBLIS whole-tree precedence: {source}");
+        assert_eq!(
+            actual, expected,
+            "D6 exact SUBLIS whole-tree precedence: {source}"
+        );
     }
 }
 
@@ -126,10 +133,9 @@ fn core4_ukrainian_structural_equality_executes_both_d1_bits() {
         ("(однакові? (як-є а) (як-є (а)))", false),
         ("(однакові? (як-є (а)) (як-є (а б)))", false),
     ] {
-        let result = eval_program(source, &mut session)
-            .unwrap_or_else(|error| panic!(
-                "test_id=core4-equal-exec layer=SENS input={source} error={error}"
-            ));
+        let result = eval_program(source, &mut session).unwrap_or_else(|error| {
+            panic!("test_id=core4-equal-exec layer=SENS input={source} error={error}")
+        });
         assert_eq!(
             result.value.as_predicate_bit(),
             Some(expected),
@@ -156,10 +162,13 @@ fn core4_ukrainian_order_predicates_recurse_until_empty_tail_in_sens() {
     ] {
         // Числові літерали стають точними D24+ у чинній проєкції мови
         // ДО виконання. Цитований список голих Number не є D24.
-        let parsed = sens::parse(source)
-            .unwrap_or_else(|error| panic!("test_id=core4-order-d1 parse input={source} error={error}"));
+        let parsed = sens::parse(source).unwrap_or_else(|error| {
+            panic!("test_id=core4-order-d1 parse input={source} error={error}")
+        });
         let exact = sens::source_projection::project_ukr_decimal_integer_literals(&parsed, source)
-            .unwrap_or_else(|error| panic!("test_id=core4-order-d1 numeric projection input={source} error={error}"));
+            .unwrap_or_else(|error| {
+                panic!("test_id=core4-order-d1 numeric projection input={source} error={error}")
+            });
         let result = sens::eval_parsed_expressions(&exact, &mut session)
             .unwrap_or_else(|error| panic!("test_id=core4-order-d1 source={source} error={error}"));
         assert_eq!(
@@ -191,10 +200,9 @@ fn core4_ukrainian_association_search_handles_later_and_missing_keys() {
         ),
         ("(знайти-за-ключем (як-є немає) (як-є ()))", "()"),
     ] {
-        let result = eval_program(source, &mut session)
-            .unwrap_or_else(|error| panic!(
-                "test_id=core4-assoc-exec layer=SENS input={source} error={error}"
-            ));
+        let result = eval_program(source, &mut session).unwrap_or_else(|error| {
+            panic!("test_id=core4-assoc-exec layer=SENS input={source} error={error}")
+        });
         assert_eq!(
             result.value.to_string(),
             expected,
@@ -214,13 +222,18 @@ fn core4_ukrainian_member_executes_positive_negative_and_recursive_d1() {
         ("(значення-у-списку? (як-є в) (як-є (а б в)))", true),
         ("(значення-у-списку? (як-є г) (як-є (а б в)))", false),
         ("(значення-у-списку? (як-є а) (як-є ()))", false),
-        ("(значення-у-списку? (як-є (а б)) (як-є ((в г) (а б))))", true),
-        ("(значення-у-списку? (як-є (а б)) (як-є ((в г) (а в))))", false),
+        (
+            "(значення-у-списку? (як-є (а б)) (як-є ((в г) (а б))))",
+            true,
+        ),
+        (
+            "(значення-у-списку? (як-є (а б)) (як-є ((в г) (а в))))",
+            false,
+        ),
     ] {
-        let result = eval_program(source, &mut session)
-            .unwrap_or_else(|error| panic!(
-                "test_id=core4-member-exec layer=SENS input={source} error={error}"
-            ));
+        let result = eval_program(source, &mut session).unwrap_or_else(|error| {
+            panic!("test_id=core4-member-exec layer=SENS input={source} error={error}")
+        });
         assert_eq!(
             result.value.as_predicate_bit(),
             Some(expected),
@@ -240,10 +253,15 @@ fn core4_ukrainian_d10_mklist_preserves_empty_atom_and_existing_pair() {
         ("(утворити-список (як-є (а б)))", "(а б)"),
         ("(утворити-список (сполучити (як-є а) (як-є б)))", "(а . б)"),
     ] {
-        let result = eval_program(source, &mut session)
-            .unwrap_or_else(|error| panic!("test_id=d10-mklist-sens layer=SENS input={source} error={error}"));
-        assert_eq!(result.value.to_string(), expected,
-            "test_id=d10-mklist-sens layer=SENS input={source} expected={expected} actual={}", result.value);
+        let result = eval_program(source, &mut session).unwrap_or_else(|error| {
+            panic!("test_id=d10-mklist-sens layer=SENS input={source} error={error}")
+        });
+        assert_eq!(
+            result.value.to_string(),
+            expected,
+            "test_id=d10-mklist-sens layer=SENS input={source} expected={expected} actual={}",
+            result.value
+        );
     }
 }
 
@@ -257,10 +275,15 @@ fn core4_ukrainian_d10_listp_returns_exact_d1_for_nil_atom_and_cons() {
         ("(список? (як-є (а б)))", true),
         ("(список? (сполучити (як-є а) (як-є б)))", true),
     ] {
-        let result = eval_program(source, &mut session)
-            .unwrap_or_else(|error| panic!("test_id=d10-listp-sens layer=SENS input={source} error={error}"));
-        assert_eq!(result.value.as_predicate_bit(), Some(expected),
-            "test_id=d10-listp-sens layer=SENS input={source} expected={expected} actual={}", result.value);
+        let result = eval_program(source, &mut session).unwrap_or_else(|error| {
+            panic!("test_id=d10-listp-sens layer=SENS input={source} error={error}")
+        });
+        assert_eq!(
+            result.value.as_predicate_bit(),
+            Some(expected),
+            "test_id=d10-listp-sens layer=SENS input={source} expected={expected} actual={}",
+            result.value
+        );
     }
 }
 
@@ -289,21 +312,35 @@ fn core4_ukrainian_d10_mappend_and_one_level_flatten_execute_in_sens() {
     // рівно один рівень вкладеності та fail-closed атомарний вхід.
     let mut session = migrated_core();
     for (source, expected) in [
-        ("(відобразити-й-додати (функція (x) (список x)) (як-є (а б в)))", "(а б в)"),
-        ("(відобразити-й-додати (функція (x) (список x)) (як-є ()))", "()"),
+        (
+            "(відобразити-й-додати (функція (x) (список x)) (як-є (а б в)))",
+            "(а б в)",
+        ),
+        (
+            "(відобразити-й-додати (функція (x) (список x)) (як-є ()))",
+            "()",
+        ),
         ("(сплющити (як-є ((а б) (в г))))", "(а б в г)"),
         ("(сплющити (як-є (((а б) в))) )", "((а б) в)"),
     ] {
-        let result = eval_program(source, &mut session)
-            .unwrap_or_else(|error| panic!("test_id=d10-mappend-sens layer=SENS input={source} error={error}"));
-        assert_eq!(result.value.to_string(), expected,
-            "test_id=d10-mappend-sens layer=SENS input={source} expected={expected} actual={}", result.value);
+        let result = eval_program(source, &mut session).unwrap_or_else(|error| {
+            panic!("test_id=d10-mappend-sens layer=SENS input={source} error={error}")
+        });
+        assert_eq!(
+            result.value.to_string(),
+            expected,
+            "test_id=d10-mappend-sens layer=SENS input={source} expected={expected} actual={}",
+            result.value
+        );
     }
     let invalid = "(відобразити-й-додати (функція (x) (список x)) (як-є а))";
     let error = eval_program(invalid, &mut session)
         .expect_err("test_id=d10-mappend-invalid layer=SENS atom must fail closed");
-    assert_eq!(error.kind, sens::ErrorKind::Type,
-        "test_id=d10-mappend-invalid layer=SENS input={invalid} expected=Type actual={error:?}");
+    assert_eq!(
+        error.kind,
+        sens::ErrorKind::Type,
+        "test_id=d10-mappend-invalid layer=SENS input={invalid} expected=Type actual={error:?}"
+    );
 }
 
 #[test]
@@ -352,12 +389,17 @@ fn core4_ukrainian_answer_algebra_executes_both_sides_of_distinctions() {
         ("(відповідь-і (список ні ні) (список ні))", "(0)"),
         ("(відповідь-і (список так) (список так так))", "(1 1)"),
         ("(відповідь-послабити (список так))", "(1 1)"),
-        ("(відповідь-послабити (список так так так так так так так))", "()"),
+        (
+            "(відповідь-послабити (список так так так так так так так))",
+            "()",
+        ),
     ] {
-        let result = eval_program(source, &mut session)
-            .unwrap_or_else(|error| panic!("test_id=core4-answer-algebra layer=SENS input={source} error={error}"));
+        let result = eval_program(source, &mut session).unwrap_or_else(|error| {
+            panic!("test_id=core4-answer-algebra layer=SENS input={source} error={error}")
+        });
         assert_eq!(
-            result.value.to_string(), expected,
+            result.value.to_string(),
+            expected,
             "test_id=core4-answer-algebra layer=SENS input={source} expected={expected} actual={}",
             result.value
         );
@@ -376,7 +418,9 @@ fn core4_ukrainian_rest_args_are_executed_after_d7_dotted_tail_removal() {
         ("(найбільше 8 3 5)", "8"),
     ] {
         let value = eval_program(program, &mut session)
-            .unwrap_or_else(|error| panic!("test_id=core4-ukr-varargs layer=SENS input={program} error={error}"))
+            .unwrap_or_else(|error| {
+                panic!("test_id=core4-ukr-varargs layer=SENS input={program} error={error}")
+            })
             .value;
         assert_eq!(
             value.to_string(), expected,

@@ -1,4 +1,7 @@
-use sens::{eval_program, eval_parsed_expressions, parse_mixed_exact_domain_machine_source, load_core_library, Session};
+use sens::{
+    eval_parsed_expressions, eval_program, load_core_library,
+    parse_mixed_exact_domain_machine_source, Session,
+};
 use std::fs;
 use std::path::PathBuf;
 
@@ -13,18 +16,22 @@ fn load_lisp_file(path: &str, session: &mut Session) {
     let path = repo_root().join(path);
     let source = fs::read_to_string(&path)
         .unwrap_or_else(|error| panic!("{} must exist: {error}", path.display()));
-    let relative = path.strip_prefix(repo_root())
+    let relative = path
+        .strip_prefix(repo_root())
         .expect("Lisp fixture path must be inside the SENS repository");
-    let source_path = relative.to_str()
+    let source_path = relative
+        .to_str()
         .expect("machine fixture path must be valid UTF-8");
     if source_path.starts_with("lib/machine/") {
         let parsed = parse_mixed_exact_domain_machine_source(source_path, &source)
             .unwrap_or_else(|error| panic!("{source_path}: exact-domain read failed: {error}"));
-        eval_parsed_expressions(&parsed, session)
-            .unwrap_or_else(|error| panic!("{source_path}: exact-domain execution failed: {error}"));
+        eval_parsed_expressions(&parsed, session).unwrap_or_else(|error| {
+            panic!("{source_path}: exact-domain execution failed: {error}")
+        });
     } else {
-        eval_program(&source, session)
-            .unwrap_or_else(|error| panic!("{} must load as ordinary sens: {error}", path.display()));
+        eval_program(&source, session).unwrap_or_else(|error| {
+            panic!("{} must load as ordinary sens: {error}", path.display())
+        });
     }
 }
 
@@ -38,7 +45,10 @@ fn profile_session() -> Session {
     load_lisp_file("lib/machine/admission/x86-64.lisp", &mut session);
     load_lisp_file("lib/machine/atoms/x86-64.lisp", &mut session);
     load_lisp_file("lib/machine/lowering/semantic-x86-64.lisp", &mut session);
-    load_lisp_file("lib/machine/profile/minimal-runtime-x86-64.lisp", &mut session);
+    load_lisp_file(
+        "lib/machine/profile/minimal-runtime-x86-64.lisp",
+        &mut session,
+    );
     session
 }
 
@@ -127,15 +137,19 @@ fn structural_car_profile_reaches_bytes_only_through_closed_admission() {
         &mut session,
     );
 
-    assert!(encoded.starts_with('('), "expected encoded byte list, got {encoded}");
+    assert!(
+        encoded.starts_with('('),
+        "expected encoded byte list, got {encoded}"
+    );
     assert!(
         !encoded.contains("rejected"),
         "minimal profile must not bypass or fail current admission: {encoded}"
     );
 
     let bytes = parse_byte_list(&encoded);
-    let decoded = x86_64_block_decoder::decode_machine_block(&bytes)
-        .unwrap_or_else(|error| panic!("independent decoder rejected #196 witness {bytes:?}: {error}"));
+    let decoded = x86_64_block_decoder::decode_machine_block(&bytes).unwrap_or_else(|error| {
+        panic!("independent decoder rejected #196 witness {bytes:?}: {error}")
+    });
     assert_eq!(render_forms(&decoded), forms);
 }
 
@@ -169,7 +183,10 @@ fn bounded_cond_profile_matches_lisp_owned_machine_lowering() {
     );
     assert_eq!(families, "(mov-r64-imm64 cmp-r64-r64 jnz-rel8 ret)");
     assert_eq!(
-        eval_value("(мінімальна-машина-рівність-умова-сімейства-залежностей)", &mut session),
+        eval_value(
+            "(мінімальна-машина-рівність-умова-сімейства-залежностей)",
+            &mut session
+        ),
         families
     );
 }
@@ -178,7 +195,10 @@ fn bounded_cond_profile_matches_lisp_owned_machine_lowering() {
 fn bounded_cond_profile_has_typed_jnz_atom_and_fails_closed_outside_disp8() {
     let mut session = profile_session();
 
-    assert_eq!(eval_value("(x86-jnz-rel8 11)", &mut session), "(jnz-rel8 11)");
+    assert_eq!(
+        eval_value("(x86-jnz-rel8 11)", &mut session),
+        "(jnz-rel8 11)"
+    );
     assert_eq!(
         eval_value("(x86-jnz-rel8 128)", &mut session),
         "(rejected machine-operand disp8 128)"
@@ -197,14 +217,18 @@ fn bounded_cond_profile_reaches_bytes_only_through_closed_admission_and_round_tr
         &mut session,
     );
 
-    assert!(encoded.starts_with('('), "expected encoded byte list, got {encoded}");
+    assert!(
+        encoded.starts_with('('),
+        "expected encoded byte list, got {encoded}"
+    );
     assert!(
         !encoded.contains("rejected"),
         "conditional minimal profile must pass current closed admission: {encoded}"
     );
 
     let bytes = parse_byte_list(&encoded);
-    let decoded = x86_64_block_decoder::decode_machine_block(&bytes)
-        .unwrap_or_else(|error| panic!("independent decoder rejected bounded COND witness {bytes:?}: {error}"));
+    let decoded = x86_64_block_decoder::decode_machine_block(&bytes).unwrap_or_else(|error| {
+        panic!("independent decoder rejected bounded COND witness {bytes:?}: {error}")
+    });
     assert_eq!(render_forms(&decoded), forms);
 }

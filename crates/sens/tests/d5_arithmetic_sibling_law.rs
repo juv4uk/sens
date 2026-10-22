@@ -65,10 +65,16 @@ fn classification_separates_value_law_from_full_protocol_scope() {
     let result = include_str!("../../../benchmarks/d5-arithmetic-sibling-law/result.json");
 
     assert!(result.contains(r#""additive_value_semantics_classification": "LOCAL-SIBLING-LAW""#));
-    assert!(result.contains(r#""multiplicative_value_semantics_classification": "LOCAL-SIBLING-LAW""#));
-    assert!(result.contains(r#""additive_full_protocol_classification": "MULTI-DELTA-NOT-ONE-SIBLING-LAW""#));
-    assert!(result.contains(r#""multiplicative_full_protocol_classification": "MULTI-DELTA-NOT-ONE-SIBLING-LAW""#));
-    assert!(result.contains(r#""relation_class": "VALUE-LOCAL-LAW_PLUS_FULL-PROTOCOL-COORDINATE-SCOPE""#));
+    assert!(
+        result.contains(r#""multiplicative_value_semantics_classification": "LOCAL-SIBLING-LAW""#)
+    );
+    assert!(result
+        .contains(r#""additive_full_protocol_classification": "MULTI-DELTA-NOT-ONE-SIBLING-LAW""#));
+    assert!(result.contains(
+        r#""multiplicative_full_protocol_classification": "MULTI-DELTA-NOT-ONE-SIBLING-LAW""#
+    ));
+    assert!(result
+        .contains(r#""relation_class": "VALUE-LOCAL-LAW_PLUS_FULL-PROTOCOL-COORDINATE-SCOPE""#));
     assert!(result.contains(r#""core_math_inverse_law_transfer": "FORBIDDEN-WITHOUT-BRIDGE""#));
     assert!(result.contains(r#""owner_map_mutation": "NONE""#));
 }

@@ -115,7 +115,10 @@ fn advice_taker_can_reason_about_an_admitted_scientific_constant() {
                 (quote si:speed-of-light)
                 expected-unit))))
     "#;
-    assert_eq!(eval_science_knowledge(source), "(accepted proved proved proved)");
+    assert_eq!(
+        eval_science_knowledge(source),
+        "(accepted proved proved proved)"
+    );
 }
 
 #[test]
@@ -158,7 +161,10 @@ fn si_source_does_not_reintroduce_a_second_literal_authority_for_numeric_views()
         "сі:стала-авогадро (сі:значення-константи сі:визначальна-стала-авогадро)",
         "сі:світлова-ефективність (сі:значення-константи сі:визначальна-світлова-ефективність)",
     ] {
-        assert!(si_defines(si, derived), "missing derived SI numeric view: {derived}");
+        assert!(
+            si_defines(si, derived),
+            "missing derived SI numeric view: {derived}"
+        );
     }
 }
 
@@ -172,8 +178,7 @@ fn d11_si_три_закони_запису_значення_та_одиниці(
         include_str!("../../../lib/quantity.lisp"),
         include_str!("../../../lib/si.lisp"),
     ] {
-        eval_ukr(library, &mut session)
-            .expect("завантажити чинні бібліотечні закони SENS");
+        eval_ukr(library, &mut session).expect("завантажити чинні бібліотечні закони SENS");
     }
     eval_ukr(
         r#"
@@ -187,18 +192,37 @@ fn d11_si_три_закони_запису_значення_та_одиниці(
             (як-є (unit-1 (dimension-1 second -1)))))
         "#,
         &mut session,
-    ).expect("два відмінні правильні записи створює SENS");
+    )
+    .expect("два відмінні правильні записи створює SENS");
 
     for (case, source, expected) in [
-        ("конструктор-а", "(науковий-константа-ім'я д11-сі-перше)", "перше-вимірювання"),
-        ("конструктор-б", "(науковий-константа-ім'я д11-сі-друге)", "друге-вимірювання"),
+        (
+            "конструктор-а",
+            "(науковий-константа-ім'я д11-сі-перше)",
+            "перше-вимірювання",
+        ),
+        (
+            "конструктор-б",
+            "(науковий-константа-ім'я д11-сі-друге)",
+            "друге-вимірювання",
+        ),
         ("значення-а", "(сі:значення-константи д11-сі-перше)", "17"),
         ("значення-б", "(сі:значення-константи д11-сі-друге)", "19"),
-        ("одиниця-а", "(сі:одиниця-константи д11-сі-перше)", "(unit-1 (dimension-1 metre 1))"),
-        ("одиниця-б", "(сі:одиниця-константи д11-сі-друге)", "(unit-1 (dimension-1 second -1))"),
+        (
+            "одиниця-а",
+            "(сі:одиниця-константи д11-сі-перше)",
+            "(unit-1 (dimension-1 metre 1))",
+        ),
+        (
+            "одиниця-б",
+            "(сі:одиниця-константи д11-сі-друге)",
+            "(unit-1 (dimension-1 second -1))",
+        ),
     ] {
         let observed = eval_ukr(source, &mut session)
-            .unwrap_or_else(|error| panic!("test_id=D11-SI-{case} layer=SENS source={source} error={error}"))
+            .unwrap_or_else(|error| {
+                panic!("test_id=D11-SI-{case} layer=SENS source={source} error={error}")
+            })
             .value
             .to_string();
         assert_eq!(

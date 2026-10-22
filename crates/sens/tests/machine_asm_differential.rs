@@ -1,4 +1,7 @@
-use sens::{eval_parsed_expressions, eval_program, load_core_library, parse_mixed_exact_domain_machine_source, Session};
+use sens::{
+    eval_parsed_expressions, eval_program, load_core_library,
+    parse_mixed_exact_domain_machine_source, Session,
+};
 use std::fs;
 use std::path::{Path, PathBuf};
 use std::process::{Command, Output};
@@ -15,8 +18,10 @@ fn load_lisp_file(path: &str, session: &mut Session) {
     let file_path = repo_root().join(path);
     let source = fs::read_to_string(&file_path)
         .unwrap_or_else(|error| panic!("{} must exist: {error}", file_path.display()));
-    let expressions = parse_mixed_exact_domain_machine_source(path, &source)
-        .unwrap_or_else(|error| panic!("{path} must parse as exact-domain machine source: {error}"));
+    let expressions =
+        parse_mixed_exact_domain_machine_source(path, &source).unwrap_or_else(|error| {
+            panic!("{path} must parse as exact-domain machine source: {error}")
+        });
     eval_parsed_expressions(&expressions, session)
         .unwrap_or_else(|error| panic!("{path} must load through exact-domain reader: {error}"));
 }
@@ -52,7 +57,9 @@ fn run(command: &str, args: &[&str]) -> Output {
     Command::new(command)
         .args(args)
         .output()
-        .unwrap_or_else(|error| panic!("required external witness tool {command} is unavailable: {error}"))
+        .unwrap_or_else(|error| {
+            panic!("required external witness tool {command} is unavailable: {error}")
+        })
 }
 
 fn run_ok(command: &str, args: &[&str]) -> Output {
@@ -73,7 +80,10 @@ fn tool_version(command: &str, args: &[&str]) -> String {
     } else {
         String::from_utf8_lossy(&output.stdout).into_owned()
     };
-    text.lines().next().unwrap_or("<no version line>").to_string()
+    text.lines()
+        .next()
+        .unwrap_or("<no version line>")
+        .to_string()
 }
 
 fn extract_text(object: &Path, binary: &Path) -> Vec<u8> {
@@ -89,7 +99,8 @@ fn extract_text(object: &Path, binary: &Path) -> Vec<u8> {
             binary_s.as_ref(),
         ],
     );
-    fs::read(binary).unwrap_or_else(|error| panic!("{} must be readable: {error}", binary.display()))
+    fs::read(binary)
+        .unwrap_or_else(|error| panic!("{} must be readable: {error}", binary.display()))
 }
 
 fn gas_bytes(dir: &Path, name: &str, body: &str) -> Vec<u8> {
@@ -141,9 +152,7 @@ fn gas_and_nasm_match_lisp_owned_encoder_for_admitted_corpus() {
     let nasm_version = tool_version("nasm", &["-v"]);
     let objcopy_version = tool_version("objcopy", &["--version"]);
 
-    eprintln!(
-        "external witness tools: {gas_version} | {nasm_version} | {objcopy_version}"
-    );
+    eprintln!("external witness tools: {gas_version} | {nasm_version} | {objcopy_version}");
 
     assert!(
         gas_version.ends_with(" 2.42"),
@@ -248,7 +257,6 @@ fn gas_and_nasm_match_lisp_owned_encoder_for_admitted_corpus() {
     fs::remove_dir_all(&temp).expect("clean witness temp directory");
 }
 
-
 // Окремий від зовнішніх асемблерів етапний свідок виклику.
 // Якщо реальна збірка ще заблокована, звіт показує перший несправний вузол.
 #[test]
@@ -295,10 +303,9 @@ fn x86_encoder_callability_stage_probe() {
     let mut failed = Vec::new();
     for (stage, source) in stages {
         match eval_program(source, &mut session) {
-            Ok(observation) => eprintln!(
-                "X86_ЕТАП_УСПІХ stage={stage} value={}",
-                observation.value
-            ),
+            Ok(observation) => {
+                eprintln!("X86_ЕТАП_УСПІХ stage={stage} value={}", observation.value)
+            }
             Err(error) => {
                 eprintln!("X86_ЕТАП_БЛОКУВАННЯ stage={stage} error={error}");
                 failed.push(stage);
@@ -310,7 +317,6 @@ fn x86_encoder_callability_stage_probe() {
         "Не доведено виклики x86-кодувальника на етапах: {failed:?}"
     );
 }
-
 
 // Незалежна атестація всіх 16 механічних номерів регістрів.
 // Перевіряємо точний результат, а не тільки відсутність помилки виклику.
@@ -336,11 +342,12 @@ fn x86_register_fields_have_exact_values_for_all_16_codes() {
             (code / 8).to_string(),
             "Невірний старший біт регістра {code}"
         );
-        eprintln!("X86_ПОЛЯ_РЕГІСТРА_УСПІХ code={code} low3={} high1={}",
-                  low.value, high.value);
+        eprintln!(
+            "X86_ПОЛЯ_РЕГІСТРА_УСПІХ code={code} low3={} high1={}",
+            low.value, high.value
+        );
     }
 }
-
 
 // Атестуємо саме генератор ADD, окремо від ще заблокованого admission.
 // Кожне байтове очікування порівнюється також із двома незалежними асемблерами.
@@ -362,13 +369,14 @@ fn x86_direct_add_byte_parity_with_gas_nasm() {
         ("r8_r9", "r8", "r9", "add r8, r9", &[77, 1, 200]),
     ];
     for (name, destination, source, instruction, expected) in cases {
-        let expression = format!(
-            "(x86-encode-add-r64-r64 (quote {destination}) (quote {source}))"
-        );
+        let expression = format!("(x86-encode-add-r64-r64 (quote {destination}) (quote {source}))");
         let observed = eval_program(&expression, &mut session)
             .unwrap_or_else(|error| panic!("Недоступний прямий ADD {name}: {error}"));
         let bytes = parse_byte_list(&observed.value.to_string());
-        assert_eq!(bytes, expected, "{name}: невірні незалежні байтові очікування");
+        assert_eq!(
+            bytes, expected,
+            "{name}: невірні незалежні байтові очікування"
+        );
         let gas = gas_bytes(&temp, name, instruction);
         let nasm = nasm_bytes(&temp, name, instruction);
         assert_eq!(bytes, gas, "{name}: різниця з GAS");
@@ -378,7 +386,6 @@ fn x86_direct_add_byte_parity_with_gas_nasm() {
     fs::remove_dir_all(&temp).expect("очистити фізичне свідчення");
 }
 
-
 // Перевірка етапу складання фізичних байтів — незалежно від admission.
 // Порожній, один та два блоки: точний порядок без англійських macro-підмін.
 #[test]
@@ -387,7 +394,11 @@ fn x86_byte_program_stitches_without_legacy_callable() {
     let mut session = machine_session();
     let cases = [
         ("порожня", "(x86-encode-program (quote ()))", "()"),
-        ("одна", "(x86-encode-program (quote ((72 1 200))))", "(72 1 200)"),
+        (
+            "одна",
+            "(x86-encode-program (quote ((72 1 200))))",
+            "(72 1 200)",
+        ),
         (
             "дві",
             "(x86-encode-program (quote ((72 1 200) (195))))",
@@ -406,13 +417,13 @@ fn x86_byte_program_stitches_without_legacy_callable() {
     }
     // Довільний атом не є ознакою EOF; він повинен відхилятися, а не
     // матеріалізуватися у порожній машинний потік.
-    let malformed = eval_program(
-        "(x86-encode-program (quote не-список))",
-        &mut session,
-    )
-    .expect("non-list instruction input must return the explicit SENS rejection envelope");
+    let malformed = eval_program("(x86-encode-program (quote не-список))", &mut session)
+        .expect("non-list instruction input must return the explicit SENS rejection envelope");
     assert!(
-        malformed.value.to_string().starts_with("(rejected machine-operand instruction-list"),
+        malformed
+            .value
+            .to_string()
+            .starts_with("(rejected machine-operand instruction-list"),
         "Неспискова структура має повернути явне SENS-відхилення, а не порожній потік: {}",
         malformed.value
     );

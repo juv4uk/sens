@@ -52,7 +52,10 @@ mod imp {
             )
         };
         if memory as isize == -1 {
-            return Err(format!("mmap RW failed: {}", std::io::Error::last_os_error()));
+            return Err(format!(
+                "mmap RW failed: {}",
+                std::io::Error::last_os_error()
+            ));
         }
         Ok(ExecutableMemory {
             pointer: memory,
@@ -72,7 +75,10 @@ mod imp {
 
     pub(crate) fn release(memory: &ExecutableMemory) -> Result<(), String> {
         if unsafe { munmap(memory.pointer, memory.length) } != 0 {
-            return Err(format!("munmap failed: {}", std::io::Error::last_os_error()));
+            return Err(format!(
+                "munmap failed: {}",
+                std::io::Error::last_os_error()
+            ));
         }
         Ok(())
     }
@@ -104,11 +110,7 @@ mod imp {
             old_protect: *mut u32,
         ) -> i32;
         fn VirtualFree(address: *mut c_void, size: usize, free_type: u32) -> i32;
-        fn FlushInstructionCache(
-            process: *mut c_void,
-            address: *const c_void,
-            size: usize,
-        ) -> i32;
+        fn FlushInstructionCache(process: *mut c_void, address: *const c_void, size: usize) -> i32;
         fn GetCurrentProcess() -> *mut c_void;
     }
 
@@ -149,9 +151,8 @@ mod imp {
                 std::io::Error::last_os_error()
             ));
         }
-        let flushed = unsafe {
-            FlushInstructionCache(GetCurrentProcess(), memory.pointer, memory.length)
-        };
+        let flushed =
+            unsafe { FlushInstructionCache(GetCurrentProcess(), memory.pointer, memory.length) };
         if flushed == 0 {
             return Err(format!(
                 "FlushInstructionCache failed: {}",

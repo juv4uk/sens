@@ -65,4 +65,3 @@ fn large_module_projection_and_existence_scan_are_stack_safe_on_default_thread()
         format!("f{}", N - 1)
     );
 }
-

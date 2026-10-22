@@ -1,4 +1,7 @@
-#![cfg(all(any(target_os = "linux", target_os = "windows"), target_arch = "x86_64"))]
+#![cfg(all(
+    any(target_os = "linux", target_os = "windows"),
+    target_arch = "x86_64"
+))]
 
 use sens::{eval_program, load_core_library, Session};
 use sens_host::install;
@@ -38,8 +41,9 @@ fn execute_clobbering_guest(register: &str) {
     let source = format!(
         "(викликати-допущену-машинну-програму (quote ((mov-r64-imm64 {register} 42) (mov-r64-imm64 rax 7) (ret))) 0)"
     );
-    let result = eval_program(&source, &mut session)
-        .unwrap_or_else(|error| panic!("admitted guest clobbering {register} must return safely: {error}"));
+    let result = eval_program(&source, &mut session).unwrap_or_else(|error| {
+        panic!("admitted guest clobbering {register} must return safely: {error}")
+    });
 
     assert_eq!(
         result.value.to_string(),
@@ -129,7 +133,9 @@ fn arena_rdi_survives_sysv64_callee_saved_guest_clobber() {
             .args(["--exact", ARENA_TEST_NAME, "--nocapture"])
             .env(CHILD_ARENA_REGISTER_ENV, register)
             .status()
-            .unwrap_or_else(|error| panic!("must spawn isolated arena/{register} ABI witness: {error}"));
+            .unwrap_or_else(|error| {
+                panic!("must spawn isolated arena/{register} ABI witness: {error}")
+            });
 
         assert!(
             status.success(),

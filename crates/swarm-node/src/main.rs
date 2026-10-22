@@ -973,10 +973,7 @@ fn handle_connection(node: Arc<Node>, mut stream: TcpStream, initiator: bool) {
                             Sexp::atom("epoch"),
                             Sexp::atom(node.identity.epoch.to_string()),
                         ]),
-                        Sexp::list(vec![
-                            Sexp::atom("swarm-id"),
-                            Sexp::atom("sens-ecosystem"),
-                        ]),
+                        Sexp::list(vec![Sexp::atom("swarm-id"), Sexp::atom("sens-ecosystem")]),
                         Sexp::list(vec![Sexp::atom("protocol"), Sexp::atom("swarm-1")]),
                         Sexp::list(vec![
                             Sexp::atom("listen-port"),

@@ -37,8 +37,8 @@ fn owned_workspace_crates_point_directly_to_the_single_root_license_file() {
     let root = workspace_root();
     let root_license = fs::canonicalize(root.join("LICENSE"))
         .expect("root LICENSE must exist and be canonicalizable");
-    let root_manifest = fs::read_to_string(root.join("Cargo.toml"))
-        .expect("workspace Cargo.toml must be readable");
+    let root_manifest =
+        fs::read_to_string(root.join("Cargo.toml")).expect("workspace Cargo.toml must be readable");
 
     assert!(
         !root_manifest
@@ -53,7 +53,9 @@ fn owned_workspace_crates_point_directly_to_the_single_root_license_file() {
             .unwrap_or_else(|err| panic!("failed to read {relative}: {err}"));
 
         assert!(
-            manifest.lines().any(|line| line.trim() == "license-file = \"../../LICENSE\""),
+            manifest
+                .lines()
+                .any(|line| line.trim() == "license-file = \"../../LICENSE\""),
             "{relative} must point directly to the single root LICENSE"
         );
         assert!(
@@ -61,7 +63,9 @@ fn owned_workspace_crates_point_directly_to_the_single_root_license_file() {
             "{relative} must not inherit license metadata through [workspace.package]"
         );
         assert!(
-            !manifest.lines().any(|line| line.trim_start().starts_with("license =")),
+            !manifest
+                .lines()
+                .any(|line| line.trim_start().starts_with("license =")),
             "{relative} must not declare a second package license"
         );
 

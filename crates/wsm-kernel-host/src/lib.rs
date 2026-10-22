@@ -143,7 +143,10 @@ impl fmt::Display for KernelHostError {
             Self::NotRunning => write!(formatter, "kernel is not running"),
             Self::UnknownHandle(handle) => write!(formatter, "unknown kernel handle {handle}"),
             Self::InvalidLifecycle { action, state } => {
-                write!(formatter, "cannot {action} kernel while lifecycle state is {state:?}")
+                write!(
+                    formatter,
+                    "cannot {action} kernel while lifecycle state is {state:?}"
+                )
             }
             Self::Driver(message) => write!(formatter, "kernel driver error: {message}"),
         }
@@ -365,10 +368,7 @@ impl KernelRouter {
                 .handles
                 .get(&handle)
                 .ok_or(KernelHostError::UnknownHandle(handle.id()))?;
-            (
-                observation.producer.as_str().to_string(),
-                observation.state,
-            )
+            (observation.producer.as_str().to_string(), observation.state)
         };
 
         match state {
@@ -404,10 +404,7 @@ impl KernelRouter {
                 .handles
                 .get(&handle)
                 .ok_or(KernelHostError::UnknownHandle(handle.id()))?;
-            (
-                observation.producer.as_str().to_string(),
-                observation.state,
-            )
+            (observation.producer.as_str().to_string(), observation.state)
         };
 
         if state != KernelLifecycleState::Started {
@@ -432,10 +429,7 @@ impl KernelRouter {
                 .handles
                 .get(&handle)
                 .ok_or(KernelHostError::UnknownHandle(handle.id()))?;
-            (
-                observation.producer.as_str().to_string(),
-                observation.state,
-            )
+            (observation.producer.as_str().to_string(), observation.state)
         };
 
         match state {
@@ -467,10 +461,7 @@ impl KernelRouter {
                 .handles
                 .get(&handle)
                 .ok_or(KernelHostError::UnknownHandle(handle.id()))?;
-            (
-                observation.producer.as_str().to_string(),
-                observation.state,
-            )
+            (observation.producer.as_str().to_string(), observation.state)
         };
 
         if state == KernelLifecycleState::Unloaded {
@@ -628,8 +619,12 @@ mod tests {
         }
 
         lisp.submit(None, b"3)".to_vec(), vec![]).unwrap();
-        clips.submit(None, b"(asserted hot))".to_vec(), vec![]).unwrap();
-        prolog.submit(None, b"X=alice;X=bob".to_vec(), vec![]).unwrap();
+        clips
+            .submit(None, b"(asserted hot))".to_vec(), vec![])
+            .unwrap();
+        prolog
+            .submit(None, b"X=alice;X=bob".to_vec(), vec![])
+            .unwrap();
         datalog
             .submit(None, b"ancestor(alice,bob)".to_vec(), vec![])
             .unwrap();
@@ -723,8 +718,7 @@ mod tests {
         assert_eq!(response.kernel.as_str(), "prolog");
         assert_eq!(response.payload, b"answers:ancestor(alice,X)");
         assert_eq!(
-            response.provenance,
-            b"sid:10000111",
+            response.provenance, b"sid:10000111",
             "host must transport SID/provenance bytes without interpretation"
         );
 

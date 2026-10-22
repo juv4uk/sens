@@ -3,7 +3,9 @@
 
 use crate::environment::Environment;
 use crate::eval::arithmetic::exact_value;
-use crate::eval::special_forms::{string_first_values, string_rest_values, string_to_codepoint_values};
+use crate::eval::special_forms::{
+    string_first_values, string_rest_values, string_to_codepoint_values,
+};
 use crate::{Rational, Span, Value};
 
 fn exact_args(args: &[Value], expected: usize, span: Span) -> Result<(), crate::LanguageError> {
@@ -84,11 +86,7 @@ fn is_empty_string(value: &Value) -> bool {
 }
 
 fn string_empty_answer(value: &Value, span: Span) -> Result<Value, crate::LanguageError> {
-    super::special_forms::eq_values(
-        value.clone(),
-        Value::String(std::rc::Rc::from("")),
-        span,
-    )
+    super::special_forms::eq_values(value.clone(), Value::String(std::rc::Rc::from("")), span)
 }
 
 fn string_prefix_answer(

@@ -35,9 +35,7 @@ fn numeric_row_id_list(source: &str) -> Vec<u32> {
 fn named_function_table_ids(source: &str) -> Vec<u32> {
     source
         .lines()
-        .filter(|line| {
-            !line.contains("(ук ()) (укр ()) (en ()) (sa ()) (sym ())")
-        })
+        .filter(|line| !line.contains("(ук ()) (укр ()) (en ()) (sa ()) (sym ())"))
         .flat_map(numeric_row_id_list)
         .collect()
 }
@@ -103,9 +101,9 @@ fn ukr_candidate_rows(source: &str, ids_by_ukr: &BTreeMap<String, u32>) -> Vec<U
             continue;
         };
         let id = sens_code(key).unwrap_or_else(|| {
-            *ids_by_ukr
-                .get(ukr)
-                .unwrap_or_else(|| panic!("profile full Ukrainian name has no function identity: {ukr}"))
+            *ids_by_ukr.get(ukr).unwrap_or_else(|| {
+                panic!("profile full Ukrainian name has no function identity: {ukr}")
+            })
         });
         rows.push(UkrCandidateRow {
             id,
@@ -183,10 +181,13 @@ fn ukr_candidate_collisions_require_explicit_alias_targets() {
         .expect("generated function table must be readable");
     let rows = ukr_candidate_rows(&profile, &function_table_ukr_ids(&function_table));
     let unique_ids: BTreeSet<u32> = rows.iter().map(|row| row.id).collect();
-    assert_eq!(rows.len(), unique_ids.len(), "each staging row resolves to one identity");
+    assert_eq!(
+        rows.len(),
+        unique_ids.len(),
+        "each staging row resolves to one identity"
+    );
 
-    let by_id: BTreeMap<u32, &UkrCandidateRow> =
-        rows.iter().map(|row| (row.id, row)).collect();
+    let by_id: BTreeMap<u32, &UkrCandidateRow> = rows.iter().map(|row| (row.id, row)).collect();
     let aliases = ukr_aliases(&profile);
 
     for (&source_id, &target_id) in &aliases {
@@ -258,7 +259,11 @@ fn ukr_candidates_need_no_latin_keyboard_layout() {
     let offenders = ukr_candidate_rows(&profile, &function_table_ukr_ids(&function_table))
         .into_iter()
         .filter(|row| row.ukr != "—")
-        .filter(|row| row.ukr.chars().any(|character| character.is_ascii_alphabetic()))
+        .filter(|row| {
+            row.ukr
+                .chars()
+                .any(|character| character.is_ascii_alphabetic())
+        })
         .map(|row| format!("{}:{}", row.id, row.ukr))
         .collect::<Vec<_>>();
 
@@ -308,7 +313,10 @@ fn keyboard_projection_findings(source: &str, path: &str) -> Vec<String> {
         }
         for column in ["ук", "укр", "sym"] {
             let Some(value) = projection_token(line, column) else {
-                findings.push(format!("{path}:{} {bits} malformed {column} projection", line_number + 1));
+                findings.push(format!(
+                    "{path}:{} {bits} malformed {column} projection",
+                    line_number + 1
+                ));
                 continue;
             };
             for character in value

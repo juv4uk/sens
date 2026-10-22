@@ -65,21 +65,20 @@ pub(crate) fn string_to_codepoint_values(
 fn exact_scalar_value(value: &Value, span: Span) -> Result<u32, LanguageError> {
     let integer = match value {
         // Canonical result of D8:11100000 CHAR-CODE, exact-width D24.
-        Value::BinaryNumber(bits) if bits.numeric_domain_width() == Some(24) => {
-            bits.as_bits()
-                .iter()
-                .fold(0u32, |scalar, &bit| (scalar << 1) | u32::from(bit))
-        }
-        Value::Number(number, Exactness::Exact)
-            if number.is_finite() && number.fract() == 0.0 =>
-        {
+        Value::BinaryNumber(bits) if bits.numeric_domain_width() == Some(24) => bits
+            .as_bits()
+            .iter()
+            .fold(0u32, |scalar, &bit| (scalar << 1) | u32::from(bit)),
+        Value::Number(number, Exactness::Exact) if number.is_finite() && number.fract() == 0.0 => {
             if *number < 0.0 || *number > 0x10ffff as f64 {
                 return Err(invalid_scalar(span));
             }
             *number as u32
         }
         Value::Rational(rational) if rational.is_integer() => {
-            let number = rational.as_precise_i64().ok_or_else(|| invalid_scalar(span))?;
+            let number = rational
+                .as_precise_i64()
+                .ok_or_else(|| invalid_scalar(span))?;
             u32::try_from(number).map_err(|_| invalid_scalar(span))?
         }
         _ => return Err(invalid_scalar(span)),
@@ -115,11 +114,9 @@ mod exact_d24_char_code_tests {
     #[test]
     fn scalar_bridge_preserves_legacy_shape_and_accepts_exact_d24_inverse() {
         for source in ["a", "ї", "𐐷"] {
-            let observed = string_to_codepoint_values(
-                &[Value::String(Rc::from(source))],
-                Span::default(),
-            )
-            .expect("one Unicode scalar is admissible");
+            let observed =
+                string_to_codepoint_values(&[Value::String(Rc::from(source))], Span::default())
+                    .expect("one Unicode scalar is admissible");
             assert!(
                 matches!(&observed, Value::Number(_, Exactness::Exact)),
                 "lower bridge must leave explicit D24 qualification to D8 CHAR-CODE"
@@ -131,11 +128,9 @@ mod exact_d24_char_code_tests {
                 .collect::<Vec<_>>();
             let qualified = BinaryNumber::from_numeric_domain_bits(24, &bits)
                 .expect("Unicode scalar admits a D24 carrier");
-            let back = codepoint_to_string_values(
-                &[Value::BinaryNumber(qualified)],
-                Span::default(),
-            )
-            .expect("explicit exact D24 scalar round-trips");
+            let back =
+                codepoint_to_string_values(&[Value::BinaryNumber(qualified)], Span::default())
+                    .expect("explicit exact D24 scalar round-trips");
             assert!(matches!(&back, Value::String(value) if value.as_ref() == source));
         }
     }
@@ -143,10 +138,8 @@ mod exact_d24_char_code_tests {
     #[test]
     fn char_code_rejects_non_scalar_strings() {
         for source in ["", "ab"] {
-            let result = string_to_codepoint_values(
-                &[Value::String(Rc::from(source))],
-                Span::default(),
-            );
+            let result =
+                string_to_codepoint_values(&[Value::String(Rc::from(source))], Span::default());
             assert!(result.is_err());
         }
     }
@@ -159,10 +152,7 @@ mod exact_d24_char_code_tests {
             .collect::<Vec<_>>();
         let qualified = BinaryNumber::from_numeric_domain_bits(24, &bits)
             .expect("the carrier exists but is not a Unicode scalar");
-        let result = codepoint_to_string_values(
-            &[Value::BinaryNumber(qualified)],
-            Span::default(),
-        );
+        let result = codepoint_to_string_values(&[Value::BinaryNumber(qualified)], Span::default());
         assert!(result.is_err());
     }
 }

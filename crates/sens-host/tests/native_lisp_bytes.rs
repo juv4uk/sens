@@ -1,5 +1,7 @@
-#![cfg(all(any(target_os = "linux", target_os = "windows"), target_arch = "x86_64"))]
-
+#![cfg(all(
+    any(target_os = "linux", target_os = "windows"),
+    target_arch = "x86_64"
+))]
 
 use sens::{
     eval_parsed_expressions, eval_program, load_core_library, parse_mixed_exact_domain,
@@ -41,10 +43,13 @@ fn load_lisp_file(path: &str, session: &mut Session) {
     let file_path = repo_root().join(path);
     let source = fs::read_to_string(&file_path)
         .unwrap_or_else(|error| panic!("{} must exist: {error}", file_path.display()));
-    let expressions = parse_mixed_exact_domain_machine_source(path, &source)
-        .unwrap_or_else(|error| panic!("{path} must parse as exact-domain machine source: {error}"));
-    eval_parsed_expressions(&expressions, session)
-        .unwrap_or_else(|error| panic!("{path} must load through the machine-source reader: {error}"));
+    let expressions =
+        parse_mixed_exact_domain_machine_source(path, &source).unwrap_or_else(|error| {
+            panic!("{path} must parse as exact-domain machine source: {error}")
+        });
+    eval_parsed_expressions(&expressions, session).unwrap_or_else(|error| {
+        panic!("{path} must load through the machine-source reader: {error}")
+    });
 }
 
 fn eval_uk_program(source: &str, session: &mut Session) -> sens::EvalResult {
@@ -72,7 +77,11 @@ fn assert_bounded_x86_field_encoders_cover_every_admitted_tuple(session: &mut Se
                     let source = format!("(x86-encode-rex {w} {r} {x} {b})");
                     let result = eval_program(&source, session)
                         .unwrap_or_else(|error| panic!("{source} must evaluate: {error}"));
-                    assert_eq!(result.value.to_string(), (64 + 8*w + 4*r + 2*x + b).to_string(), "{source}");
+                    assert_eq!(
+                        result.value.to_string(),
+                        (64 + 8 * w + 4 * r + 2 * x + b).to_string(),
+                        "{source}"
+                    );
                 }
             }
         }
@@ -85,7 +94,11 @@ fn assert_bounded_x86_field_encoders_cover_every_admitted_tuple(session: &mut Se
                 let source = format!("(x86-encode-modrm {mode} {reg} {rm})");
                 let result = eval_program(&source, session)
                     .unwrap_or_else(|error| panic!("{source} must evaluate: {error}"));
-                assert_eq!(result.value.to_string(), (64*mode + 8*reg + rm).to_string(), "{source}");
+                assert_eq!(
+                    result.value.to_string(),
+                    (64 * mode + 8 * reg + rm).to_string(),
+                    "{source}"
+                );
             }
         }
     }
@@ -97,7 +110,11 @@ fn assert_bounded_x86_field_encoders_cover_every_admitted_tuple(session: &mut Se
                 let source = format!("(x86-encode-sib {scale} {index} {base})");
                 let result = eval_program(&source, session)
                     .unwrap_or_else(|error| panic!("{source} must evaluate: {error}"));
-                assert_eq!(result.value.to_string(), (64*scale + 8*index + base).to_string(), "{source}");
+                assert_eq!(
+                    result.value.to_string(),
+                    (64 * scale + 8 * index + base).to_string(),
+                    "{source}"
+                );
             }
         }
     }
@@ -108,7 +125,11 @@ fn assert_bounded_x86_field_encoders_cover_every_admitted_tuple(session: &mut Se
         let source = format!("(x86-disp8-byte {displacement})");
         let result = eval_program(&source, session)
             .unwrap_or_else(|error| panic!("{source} must evaluate: {error}"));
-        let expected = if displacement < 0 { displacement + 256 } else { displacement };
+        let expected = if displacement < 0 {
+            displacement + 256
+        } else {
+            displacement
+        };
         assert_eq!(result.value.to_string(), expected.to_string(), "{source}");
     }
 
@@ -127,7 +148,11 @@ fn assert_bounded_x86_field_encoders_cover_every_admitted_tuple(session: &mut Se
     ] {
         let result = eval_program(source, session)
             .unwrap_or_else(|error| panic!("{source} should return a fail-closed value: {error}"));
-        assert_eq!(result.value.to_string(), "()", "{source} must fail closed without coercion");
+        assert_eq!(
+            result.value.to_string(),
+            "()",
+            "{source} must fail closed without coercion"
+        );
     }
 }
 
@@ -135,7 +160,8 @@ fn assert_bounded_x86_field_encoders_cover_every_admitted_tuple(session: &mut Se
 fn bounded_x86_field_encoders_cover_every_admitted_tuple_without_math() {
     let _serial = test_lock();
     let mut session = Session::default();
-    load_core_library(&mut session).expect("core must bootstrap before finite x86 transducer checks");
+    load_core_library(&mut session)
+        .expect("core must bootstrap before finite x86 transducer checks");
     load_lisp_file("lib/machine/encoding/x86-64.lisp", &mut session);
     assert_bounded_x86_field_encoders_cover_every_admitted_tuple(&mut session);
 }
@@ -235,14 +261,18 @@ fn semantic_lowering_must_produce_structured_forms_before_admission_and_executio
     let _serial = test_lock();
     install();
     let mut session = Session::default();
-    load_core_library(&mut session).expect("core must bootstrap before structured machine lowering");
+    load_core_library(&mut session)
+        .expect("core must bootstrap before structured machine lowering");
     load_lisp_file("lib/machine/layout/pair-x86-64.lisp", &mut session);
     load_lisp_file("lib/machine/encoding/x86-64.lisp", &mut session);
     load_lisp_file("lib/machine/admission/x86-64.lisp", &mut session);
     load_lisp_file("lib/machine/lowering/semantic-x86-64.lisp", &mut session);
 
-    let add_forms = eval_program("(машина-знизити-додавання-беззнакових-64-до-форм 2 3)", &mut session)
-        .expect("semantic lowering must expose structured admitted machine forms before bytes");
+    let add_forms = eval_program(
+        "(машина-знизити-додавання-беззнакових-64-до-форм 2 3)",
+        &mut session,
+    )
+    .expect("semantic lowering must expose structured admitted machine forms before bytes");
     assert_eq!(
         add_forms.value.to_string(),
         "((mov-r64-imm64 rax 2) (mov-r64-imm64 rcx 3) (add-r64-r64 rax rcx) (ret))"
@@ -272,8 +302,9 @@ fn semantic_lowering_must_produce_structured_forms_before_admission_and_executio
     assert_eq!(native_car.value, interpreter_car.value);
     assert_eq!(native_cdr.value, interpreter_cdr.value);
 
-    let lowering_source = fs::read_to_string(repo_root().join("lib/machine/lowering/semantic-x86-64.lisp"))
-        .expect("semantic lowerer source must be readable");
+    let lowering_source =
+        fs::read_to_string(repo_root().join("lib/machine/lowering/semantic-x86-64.lisp"))
+            .expect("semantic lowerer source must be readable");
     for forbidden in [
         "(def x86-lower-add-u64\n",
         "(def x86-lower-cons-car-u64\n",
@@ -294,11 +325,9 @@ fn x86_pair_layout_is_one_lisp_owned_machine_readable_authority() {
     let source = fs::read_to_string(&path)
         .unwrap_or_else(|error| panic!("{} must exist: {error}", path.display()));
 
-    let expressions = parse_mixed_exact_domain_machine_source(
-        "lib/machine/layout/pair-x86-64.lisp",
-        &source,
-    )
-    .expect("x86 pair layout must parse through the exact-domain machine-source reader");
+    let expressions =
+        parse_mixed_exact_domain_machine_source("lib/machine/layout/pair-x86-64.lisp", &source)
+            .expect("x86 pair layout must parse through the exact-domain machine-source reader");
     for required in [
         "(визначити машинна-пара-байти-комірки 16)",
         "(визначити машинна-пара-зсув-першого 0)",
@@ -308,7 +337,10 @@ fn x86_pair_layout_is_one_lisp_owned_machine_readable_authority() {
         "(lifetime native-call)",
         "(escape forbidden)",
     ] {
-        assert!(source.contains(required), "pair layout authority missing {required}");
+        assert!(
+            source.contains(required),
+            "pair layout authority missing {required}"
+        );
     }
     assert!(
         !source.contains("(00001001"),
@@ -322,8 +354,9 @@ fn x86_pair_layout_is_one_lisp_owned_machine_readable_authority() {
 
     let mut session = Session::default();
     load_core_library(&mut session).expect("core must bootstrap before layout authority");
-    eval_parsed_expressions(&expressions, &mut session)
-        .expect("pair layout authority must evaluate through the exact-domain machine-source reader");
+    eval_parsed_expressions(&expressions, &mut session).expect(
+        "pair layout authority must evaluate through the exact-domain machine-source reader",
+    );
 
     for (name, expected) in [
         ("машинна-пара-байти-комірки", "16"),
@@ -375,8 +408,7 @@ fn raw_executor_accepts_mixed_legacy_and_binary_machine_byte_carriers() {
     let _serial = test_lock();
     install();
     let mut session = Session::default();
-    load_core_library(&mut session)
-        .expect("core must bootstrap before mixed machine-byte witness");
+    load_core_library(&mut session).expect("core must bootstrap before mixed machine-byte witness");
 
     // Same bounded program, deliberately mixing canonical BinaryNumber with
     // the historical exact-integer carrier. This is byte-boundary decoding,
@@ -398,17 +430,12 @@ fn raw_executor_rejects_binary_number_wider_than_one_byte() {
     load_core_library(&mut session)
         .expect("core must bootstrap before over-width machine-byte witness");
 
-    let error = eval_program(
-        "(native-call-u64-raw (quote (#b100000000)))",
-        &mut session,
-    )
-    .expect_err("9-bit BinaryNumber must fail closed before executable memory");
+    let error = eval_program("(native-call-u64-raw (quote (#b100000000)))", &mut session)
+        .expect_err("9-bit BinaryNumber must fail closed before executable memory");
 
     assert_eq!(error.kind, sens::ErrorKind::Type);
     assert!(
-        error
-            .to_string()
-            .contains("<=8-bit BinaryNumber"),
+        error.to_string().contains("<=8-bit BinaryNumber"),
         "error must identify the bounded machine-byte carrier: {error}"
     );
 }
@@ -477,7 +504,6 @@ fn native_pair_car_cdr_match_the_interpreter_reference_witness() {
     let interpreter_car = eval_uk_program("(перше (сполучити 2 3))", &mut session);
     let interpreter_cdr = eval_uk_program("(решта (сполучити 2 3))", &mut session);
 
-
     // Failure-only stage inventory for Contract 11.8 callability diagnosis.
     // These probes report but never turn a failed stage into a passing test.
     for (name, source) in [
@@ -542,7 +568,10 @@ fn native_pair_car_cdr_match_the_interpreter_reference_witness() {
         ("rex", "(x86-encode-rex 1 0 0 0)"),
         ("u64-bytes", "(x86-u64-bytes 2)"),
         ("mov-imm", "(x86-encode-mov-r64-imm64 (00000001 rax) 2)"),
-        ("store", "(x86-encode-mov-mem-disp8-r64 (00000001 rdi) 0 (00000001 rax))"),
+        (
+            "store",
+            "(x86-encode-mov-mem-disp8-r64 (00000001 rdi) 0 (00000001 rax))",
+        ),
     ] {
         match eval_program(probe, &mut session) {
             Ok(output) => println!("MACHINE-ENCODE-PROBE {stage}: OK {:?}", output.value),
@@ -607,9 +636,8 @@ fn native_execution_mechanism_is_not_a_language_semantic_identity() {
 #[test]
 fn rust_native_executor_may_grow_local_semantics_and_still_exposes_real_memory_mechanism() {
     let _serial = test_lock();
-    let mut source =
-        fs::read_to_string(repo_root().join("crates/sens-host/src/native_exec.rs"))
-            .expect("native execution mechanism source must be readable");
+    let mut source = fs::read_to_string(repo_root().join("crates/sens-host/src/native_exec.rs"))
+        .expect("native execution mechanism source must be readable");
     source.push_str(
         &fs::read_to_string(repo_root().join("crates/sens-host/src/platform.rs"))
             .expect("host memory-adapter source must be readable"),
@@ -685,7 +713,11 @@ fn jcc_actually_branches_on_real_hardware_for_equal_and_ordering_conditions() {
 
     // JLE/JNLE: signed less-or-equal.
     assert_eq!(run("jle", 5, 5), "5", "JLE must branch when equal");
-    assert_eq!(run("jnle", 6, 5), "6", "JNLE must branch when strictly greater");
+    assert_eq!(
+        run("jnle", 6, 5),
+        "6",
+        "JNLE must branch when strictly greater"
+    );
     assert_eq!(run("jnle", 5, 5), "999", "JNLE must not branch when equal");
 }
 

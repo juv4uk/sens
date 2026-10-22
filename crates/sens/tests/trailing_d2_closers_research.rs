@@ -41,7 +41,10 @@ fn ratified_d1_through_d9_roundtrip_through_real_reader() {
                 vec!["10", "0", "11", payload.as_str(), "01"],
             ] {
                 let raw = words.join(" ");
-                assert!(parse_canonical_binary(&raw).is_ok(), "valid W{width}: {raw}");
+                assert!(
+                    parse_canonical_binary(&raw).is_ok(),
+                    "valid W{width}: {raw}"
+                );
                 let compact = remove_terminal_close(&words);
                 let back = complete_from_depth(&compact);
                 assert_eq!(
@@ -50,7 +53,10 @@ fn ratified_d1_through_d9_roundtrip_through_real_reader() {
                     "W{width}: {raw}"
                 );
                 let reproduced = back.join(" ");
-                assert!(parse_canonical_binary(&reproduced).is_ok(), "reader: {reproduced}");
+                assert!(
+                    parse_canonical_binary(&reproduced).is_ok(),
+                    "reader: {reproduced}"
+                );
                 if compact.len() != words.len() {
                     assert!(parse_canonical_binary(&compact.join(" ")).is_err());
                 }
@@ -73,7 +79,10 @@ fn d2_separator_and_dotted_pair_require_explicit_canonical_reconstruction() {
         assert!(parse_canonical_binary(&words.join(" ")).is_ok());
         let compact = remove_terminal_close(&words);
         let restored = complete_from_depth(&compact);
-        assert_eq!(restored.iter().map(String::as_str).collect::<Vec<_>>(), words);
+        assert_eq!(
+            restored.iter().map(String::as_str).collect::<Vec<_>>(),
+            words
+        );
     }
     for invalid in [
         "10 0 11 01",
@@ -101,7 +110,6 @@ fn bare_eof_after_an_unclosed_list_is_not_admitted_by_canonical_reader() {
         vec!["10", "10", "01", "01"]
     );
 }
-
 
 /// Лише справжні структурні слова D2, не довільні 10 усередині D3–D9.
 fn all_leading_opens(words: &[&str]) -> usize {
@@ -147,7 +155,10 @@ fn all_initial_opens_and_all_terminal_closes_are_reversible_with_explicit_count(
             assert_eq!(count, depth);
             assert_eq!(short, [payload]);
             let recovered = restore_all_ends(&short, count);
-            assert_eq!(recovered.iter().map(String::as_str).collect::<Vec<_>>(), program);
+            assert_eq!(
+                recovered.iter().map(String::as_str).collect::<Vec<_>>(),
+                program
+            );
             assert!(parse_canonical_binary(&recovered.join(" ")).is_ok());
         }
     }
@@ -155,13 +166,19 @@ fn all_initial_opens_and_all_terminal_closes_are_reversible_with_explicit_count(
         vec!["10", "01", "10", "01"], // два корені, префікс видаляємо із лічильником
         vec!["10", "10", "000", "01", "01", "10", "1", "01"],
         vec!["10", "0", "11", "1", "01"], // крапкова пара
-        vec!["000", "10", "0", "01"], // атом спочатку: count=0
-        vec!["10", "01", "00"], // кінцевий D2 пропуск
+        vec!["000", "10", "0", "01"],     // атом спочатку: count=0
+        vec!["10", "01", "00"],           // кінцевий D2 пропуск
     ] {
-        assert!(parse_canonical_binary(&words.join(" ")).is_ok(), "{words:?}");
+        assert!(
+            parse_canonical_binary(&words.join(" ")).is_ok(),
+            "{words:?}"
+        );
         let (k, short) = trim_all_ends(&words);
         let recovered = restore_all_ends(&short, k);
-        assert_eq!(recovered.iter().map(String::as_str).collect::<Vec<_>>(), words);
+        assert_eq!(
+            recovered.iter().map(String::as_str).collect::<Vec<_>>(),
+            words
+        );
         assert!(parse_canonical_binary(&recovered.join(" ")).is_ok());
     }
 }

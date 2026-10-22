@@ -1,7 +1,9 @@
 //! Д3/Д9: перевірка справжнього виконання українських функцій виведення і знань.
 //! Джерельні свідки вже перейшли на українські викличні назви.
 //! Точні значення Д1 і доменні закони не підміняються історичним W8.
-use sens::{eval_parsed_expressions, eval_program, parse_mixed_exact_domain_reasoning_source, Session};
+use sens::{
+    eval_parsed_expressions, eval_program, parse_mixed_exact_domain_reasoning_source, Session,
+};
 
 const CORE: &str = include_str!("../../../lib/core.lisp");
 const UNIFY: &str = include_str!("../../../lib/unify.lisp");
@@ -46,10 +48,25 @@ fn ukrainian_forward_and_knowledge_keep_d3_laws_without_retired_w8() {
             witness.contains(expected_definition),
             "у вихідному свідку втрачено українське визначення: {expected_definition}"
         );
-        assert!(!witness.contains("(00000111"), "свідок не повинен повертати W8");
-        assert!(!current.contains("(00000111"), "чинна бібліотека не повинна повертати W8");
-        for head in ["(визначити ", "(як-є ", "(атом? ", "(за-умовою", "(тотожне? "] {
-            assert!(current.contains(head), "відсутня чинна голова Д3/Д4: {head}");
+        assert!(
+            !witness.contains("(00000111"),
+            "свідок не повинен повертати W8"
+        );
+        assert!(
+            !current.contains("(00000111"),
+            "чинна бібліотека не повинна повертати W8"
+        );
+        for head in [
+            "(визначити ",
+            "(як-є ",
+            "(атом? ",
+            "(за-умовою",
+            "(тотожне? ",
+        ] {
+            assert!(
+                current.contains(head),
+                "відсутня чинна голова Д3/Д4: {head}"
+            );
         }
     }
 }
@@ -126,14 +143,19 @@ fn compound_success_bypasses_atom_only_eq_and_skips_atomic_no_match() {
     }
 }
 
-
 // Живий D1 свідок для точних fallback-гілок Forward: більше немає
 // (так ...) як викличної голови. «так» — ратифіковане значення D1,
 // а не глобальний host-псевдонім чи обов'язкова змінна.
 #[test]
 fn forward_fallback_branches_execute_ratified_d1_without_tak_call() {
-    assert!(!FORWARD_D3.contains("(так "), "Forward must not call textual так");
-    assert!(!FORWARD_D3.contains("(так\n"), "Forward must not call textual так");
+    assert!(
+        !FORWARD_D3.contains("(так "),
+        "Forward must not call textual так"
+    );
+    assert!(
+        !FORWARD_D3.contains("(так\n"),
+        "Forward must not call textual так"
+    );
     let mut runtime = session();
     let truth = eval_program("так", &mut runtime)
         .expect("ратифіковане D1 значення має обчислюватися самим SENS")

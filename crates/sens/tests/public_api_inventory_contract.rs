@@ -50,7 +50,10 @@ fn scanner_finds_only_top_level_defs_and_macros() {
         .lines()
         .filter_map(|line| line.split('\t').nth(2))
         .collect::<Vec<_>>();
-    assert_eq!(names, vec!["visible-fn", "visible-macro", "visible-sid", "wrapper"]);
+    assert_eq!(
+        names,
+        vec!["visible-fn", "visible-macro", "visible-sid", "wrapper"]
+    );
     assert!(!stdout.contains("commented-out"));
     assert!(!stdout.contains("text-only"));
     assert!(!stdout.contains("nested-definition"));

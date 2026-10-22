@@ -1,5 +1,5 @@
 use sens::syntax::Expr;
-use sens::{ExprKind, parse};
+use sens::{parse, ExprKind};
 use std::collections::HashMap;
 use std::sync::OnceLock;
 
@@ -193,7 +193,8 @@ fn find_entries<'a>(entries: &'a [SurfaceEntry], requested: &str) -> Vec<&'a Sur
 
 // Repeated lookups during a real T5M mint must be constant-time even for large
 // Lisp libraries; every entry remains owned by the exact Dn coordinate.
-static SURFACE_INDEX: OnceLock<Result<HashMap<(String, String), Option<String>>, String>> = OnceLock::new();
+static SURFACE_INDEX: OnceLock<Result<HashMap<(String, String), Option<String>>, String>> =
+    OnceLock::new();
 static UKR_INDEX: OnceLock<Result<HashMap<String, String>, String>> = OnceLock::new();
 
 fn surface_index() -> Result<&'static HashMap<(String, String), Option<String>>, String> {
@@ -228,8 +229,7 @@ fn ukr_index() -> Result<&'static HashMap<String, String>, String> {
         .get_or_init(|| {
             let mut index = HashMap::new();
             for entry in registry_entries()? {
-                if let Some(name) = surface_name(entry, "укр")
-                    .and_then(|name| name.name.as_ref())
+                if let Some(name) = surface_name(entry, "укр").and_then(|name| name.name.as_ref())
                 {
                     index.insert(entry.identity.clone(), name.clone());
                 }

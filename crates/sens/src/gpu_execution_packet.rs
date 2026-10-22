@@ -4,8 +4,8 @@
 //! by SENS. This module defines bytes, handles, dependencies and provenance.
 
 use crate::{
-    compiler_execution_role, BinarySourceWord, Bit3, Bit4, Bit5, Bit6, Bit8,
-    CompilerExecutionRole, CoreDomainIdentity, DomainIdentity,
+    compiler_execution_role, BinarySourceWord, Bit3, Bit4, Bit5, Bit6, Bit8, CompilerExecutionRole,
+    CoreDomainIdentity, DomainIdentity,
 };
 
 const MAGIC: [u8; 4] = *b"SGP\x01";
@@ -56,10 +56,16 @@ impl std::fmt::Display for GpuExecutionPacketError {
                 write!(f, "payload {payload} does not fit exact width {width}")
             }
             Self::UnsupportedOpcode { opcode } => {
-                write!(f, "SENS opcode is not admitted for GPU execution: {opcode:?}")
+                write!(
+                    f,
+                    "SENS opcode is not admitted for GPU execution: {opcode:?}"
+                )
             }
             Self::UnsupportedWidth { width } => {
-                write!(f, "exact identity width {width} has no admitted GPU opcode projection")
+                write!(
+                    f,
+                    "exact identity width {width} has no admitted GPU opcode projection"
+                )
             }
             Self::NonCanonicalVarint { offset } => {
                 write!(f, "non-canonical input-count varint at byte {offset}")
@@ -70,7 +76,9 @@ impl std::fmt::Display for GpuExecutionPacketError {
             Self::InputCountTooLarge => write!(f, "input handle count exceeds packet bound"),
             Self::InvalidOutputTag { tag } => write!(f, "invalid GPU output tag {tag}"),
             Self::InvalidDependencyTag { tag } => write!(f, "invalid GPU dependency tag {tag}"),
-            Self::TrailingBytes { offset } => write!(f, "unexpected trailing packet bytes at {offset}"),
+            Self::TrailingBytes { offset } => {
+                write!(f, "unexpected trailing packet bytes at {offset}")
+            }
         }
     }
 }
@@ -92,7 +100,13 @@ impl GpuExecutionPacketV1 {
         if compiler_execution_role(opcode).is_none() {
             return Err(GpuExecutionPacketError::UnsupportedOpcode { opcode });
         }
-        Ok(Self { opcode, input_handles, output, dependency, provenance })
+        Ok(Self {
+            opcode,
+            input_handles,
+            output,
+            dependency,
+            provenance,
+        })
     }
 
     pub fn encode(&self) -> Result<Vec<u8>, GpuExecutionPacketError> {
@@ -100,7 +114,9 @@ impl GpuExecutionPacketV1 {
             return Err(GpuExecutionPacketError::InputCountTooLarge);
         }
         if compiler_execution_role(self.opcode).is_none() {
-            return Err(GpuExecutionPacketError::UnsupportedOpcode { opcode: self.opcode });
+            return Err(GpuExecutionPacketError::UnsupportedOpcode {
+                opcode: self.opcode,
+            });
         }
 
         let (width, payload) = identity_parts(self.opcode);
@@ -171,23 +187,31 @@ impl GpuExecutionPacketV1 {
         provenance.copy_from_slice(provenance_bytes);
 
         if !reader.is_at_end() {
-            return Err(GpuExecutionPacketError::TrailingBytes { offset: reader.offset });
+            return Err(GpuExecutionPacketError::TrailingBytes {
+                offset: reader.offset,
+            });
         }
 
-        Ok(Self { opcode, input_handles, output, dependency, provenance })
+        Ok(Self {
+            opcode,
+            input_handles,
+            output,
+            dependency,
+            provenance,
+        })
     }
 
     /// The role is fetched from SENS authority; it is not decoded from a local table.
     pub fn admitted_role(&self) -> CompilerExecutionRole {
-        compiler_execution_role(self.opcode)
-            .expect("packet constructor/decoder enforces admission")
+        compiler_execution_role(self.opcode).expect("packet constructor/decoder enforces admission")
     }
 }
 
 fn identity_parts(opcode: CoreDomainIdentity) -> (usize, u8) {
     (
         opcode.width(),
-        u8::try_from(opcode.packed_bits()).expect("admitted GPU opcodes fit their one-byte payload"),
+        u8::try_from(opcode.packed_bits())
+            .expect("admitted GPU opcodes fit their one-byte payload"),
     )
 }
 
@@ -199,21 +223,21 @@ fn decode_admitted_opcode(
     // Відмова до побудови callable identity: ширина не надає механізму.
     let source = match width {
         1 | 2 | 7 => return Err(GpuExecutionPacketError::UnsupportedWidth { width }),
-        3 => BinarySourceWord::W3(Bit3::new(payload).ok_or(
-            GpuExecutionPacketError::InvalidPayload { width, payload },
-        )?),
-        4 => BinarySourceWord::W4(Bit4::new(payload).ok_or(
-            GpuExecutionPacketError::InvalidPayload { width, payload },
-        )?),
-        5 => BinarySourceWord::W5(Bit5::new(payload).ok_or(
-            GpuExecutionPacketError::InvalidPayload { width, payload },
-        )?),
-        6 => BinarySourceWord::W6(Bit6::new(payload).ok_or(
-            GpuExecutionPacketError::InvalidPayload { width, payload },
-        )?),
-        8 => BinarySourceWord::W8(Bit8::new(payload).ok_or(
-            GpuExecutionPacketError::InvalidPayload { width, payload },
-        )?),
+        3 => BinarySourceWord::W3(
+            Bit3::new(payload).ok_or(GpuExecutionPacketError::InvalidPayload { width, payload })?,
+        ),
+        4 => BinarySourceWord::W4(
+            Bit4::new(payload).ok_or(GpuExecutionPacketError::InvalidPayload { width, payload })?,
+        ),
+        5 => BinarySourceWord::W5(
+            Bit5::new(payload).ok_or(GpuExecutionPacketError::InvalidPayload { width, payload })?,
+        ),
+        6 => BinarySourceWord::W6(
+            Bit6::new(payload).ok_or(GpuExecutionPacketError::InvalidPayload { width, payload })?,
+        ),
+        8 => BinarySourceWord::W8(
+            Bit8::new(payload).ok_or(GpuExecutionPacketError::InvalidPayload { width, payload })?,
+        ),
         _ => return Err(GpuExecutionPacketError::InvalidWidth { width }),
     };
 
@@ -241,7 +265,9 @@ struct Reader<'a> {
 }
 
 impl<'a> Reader<'a> {
-    fn new(bytes: &'a [u8]) -> Self { Self { bytes, offset: 0 } }
+    fn new(bytes: &'a [u8]) -> Self {
+        Self { bytes, offset: 0 }
+    }
 
     fn take_u8(&mut self) -> Result<u8, GpuExecutionPacketError> {
         let offset = self.offset;
@@ -258,9 +284,16 @@ impl<'a> Reader<'a> {
     }
 
     fn take_exact(&mut self, len: usize) -> Result<&'a [u8], GpuExecutionPacketError> {
-        let end = self.offset.checked_add(len).ok_or(GpuExecutionPacketError::Truncated { offset: self.offset })?;
+        let end = self
+            .offset
+            .checked_add(len)
+            .ok_or(GpuExecutionPacketError::Truncated {
+                offset: self.offset,
+            })?;
         if end > self.bytes.len() {
-            return Err(GpuExecutionPacketError::Truncated { offset: self.offset });
+            return Err(GpuExecutionPacketError::Truncated {
+                offset: self.offset,
+            });
         }
         let start = self.offset;
         self.offset = end;
@@ -289,7 +322,9 @@ impl<'a> Reader<'a> {
         Err(GpuExecutionPacketError::VarintOverflow { offset: start })
     }
 
-    fn is_at_end(&self) -> bool { self.offset == self.bytes.len() }
+    fn is_at_end(&self) -> bool {
+        self.offset == self.bytes.len()
+    }
 }
 
 #[cfg(test)]
@@ -309,13 +344,17 @@ mod tests {
             GpuOutputRequest::HandleSlot(42),
             Some(9),
             [7u8; 32],
-        ).unwrap();
+        )
+        .unwrap();
 
         let encoded = packet.encode().unwrap();
         assert_eq!(&encoded[..6], b"SGP\x01\x03\x07");
         let decoded = GpuExecutionPacketV1::decode(&encoded).unwrap();
         assert_eq!(decoded, packet);
-        assert_eq!(decoded.admitted_role(), CompilerExecutionRole::PairConstruct);
+        assert_eq!(
+            decoded.admitted_role(),
+            CompilerExecutionRole::PairConstruct
+        );
     }
 
     #[test]
@@ -350,7 +389,8 @@ mod tests {
             GpuOutputRequest::Materialize,
             None,
             [0xAA; 32],
-        ).unwrap();
+        )
+        .unwrap();
         let encoded = packet.encode().unwrap();
 
         let mut wrong_magic = encoded.clone();
@@ -383,8 +423,12 @@ mod tests {
             GpuOutputRequest::Materialize,
             None,
             [0; 32],
-        ).unwrap();
-        assert_eq!(GpuExecutionPacketV1::decode(&packet.encode().unwrap()).unwrap(), packet);
+        )
+        .unwrap();
+        assert_eq!(
+            GpuExecutionPacketV1::decode(&packet.encode().unwrap()).unwrap(),
+            packet
+        );
 
         let too_many = GpuExecutionPacketV1::try_new(
             d3(0b111),
@@ -393,7 +437,10 @@ mod tests {
             None,
             [0; 32],
         );
-        assert!(matches!(too_many, Err(GpuExecutionPacketError::InputCountTooLarge)));
+        assert!(matches!(
+            too_many,
+            Err(GpuExecutionPacketError::InputCountTooLarge)
+        ));
     }
 
     #[test]
@@ -404,7 +451,8 @@ mod tests {
             GpuOutputRequest::Materialize,
             None,
             [0; 32],
-        ).unwrap();
+        )
+        .unwrap();
         let mut encoded = packet.encode().unwrap();
         // Byte 6 is the zero input-count varint. Expand it to the non-canonical
         // two-byte spelling 0x80 0x00 by inserting one byte.
@@ -418,8 +466,22 @@ mod tests {
     }
     #[test]
     fn provenance_is_opaque_transport_not_admission() {
-        let a = GpuExecutionPacketV1::try_new(d3(0b111), vec![], GpuOutputRequest::Materialize, None, [1; 32]).unwrap();
-        let b = GpuExecutionPacketV1::try_new(d3(0b111), vec![], GpuOutputRequest::Materialize, None, [2; 32]).unwrap();
+        let a = GpuExecutionPacketV1::try_new(
+            d3(0b111),
+            vec![],
+            GpuOutputRequest::Materialize,
+            None,
+            [1; 32],
+        )
+        .unwrap();
+        let b = GpuExecutionPacketV1::try_new(
+            d3(0b111),
+            vec![],
+            GpuOutputRequest::Materialize,
+            None,
+            [2; 32],
+        )
+        .unwrap();
         assert_eq!(a.opcode, b.opcode);
         assert_ne!(a.provenance, b.provenance);
         assert_eq!(a.admitted_role(), b.admitted_role());
@@ -501,8 +563,10 @@ mod tests {
         // Мутант: чотири payload-біти не вміщаються в D3.
         assert!(matches!(
             decode_admitted_opcode(3, 0b1000),
-            Err(GpuExecutionPacketError::InvalidPayload { width: 3, payload: 8 }),
+            Err(GpuExecutionPacketError::InvalidPayload {
+                width: 3,
+                payload: 8
+            }),
         ));
     }
-
 }

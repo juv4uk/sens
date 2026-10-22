@@ -56,8 +56,8 @@ fn read_and_eval_preserve_named_failure_classes() {
         .expect_err("read-all must reject non-string input");
     assert_eq!(read_all_type.kind, ErrorKind::Type);
 
-    let eval_arity = eval_program("(eval)", &mut Session::default())
-        .expect_err("eval must retain exact arity");
+    let eval_arity =
+        eval_program("(eval)", &mut Session::default()).expect_err("eval must retain exact arity");
     assert_eq!(eval_arity.kind, ErrorKind::Arity);
 }
 

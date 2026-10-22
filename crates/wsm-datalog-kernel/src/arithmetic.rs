@@ -70,9 +70,15 @@ impl NumericExpr {
                 Some(value) => return Err(DatalogMathError::NonIntegerValue(value.clone())),
                 None => return Err(DatalogMathError::MissingVariable(name.clone())),
             },
-            Add(left, right) => integer(left)?.checked_add(integer(right)?).ok_or(DatalogMathError::Overflow)?,
-            Sub(left, right) => integer(left)?.checked_sub(integer(right)?).ok_or(DatalogMathError::Overflow)?,
-            Mul(left, right) => integer(left)?.checked_mul(integer(right)?).ok_or(DatalogMathError::Overflow)?,
+            Add(left, right) => integer(left)?
+                .checked_add(integer(right)?)
+                .ok_or(DatalogMathError::Overflow)?,
+            Sub(left, right) => integer(left)?
+                .checked_sub(integer(right)?)
+                .ok_or(DatalogMathError::Overflow)?,
+            Mul(left, right) => integer(left)?
+                .checked_mul(integer(right)?)
+                .ok_or(DatalogMathError::Overflow)?,
             Div(left, right) | Quotient(left, right) => {
                 let lhs = integer(left)?;
                 let rhs = integer(right)?;
@@ -95,7 +101,9 @@ impl NumericExpr {
                     }
                 })?
             }
-            Abs(value) => integer(value)?.checked_abs().ok_or(DatalogMathError::Overflow)?,
+            Abs(value) => integer(value)?
+                .checked_abs()
+                .ok_or(DatalogMathError::Overflow)?,
             Min(left, right) => integer(left)?.min(integer(right)?),
             Max(left, right) => integer(left)?.max(integer(right)?),
         };
@@ -117,9 +125,13 @@ pub enum DatalogMathError {
 impl fmt::Display for DatalogMathError {
     fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            Self::MissingVariable(name) => write!(formatter, "datalog-math-missing-variable:{name}"),
+            Self::MissingVariable(name) => {
+                write!(formatter, "datalog-math-missing-variable:{name}")
+            }
             Self::NonIntegerValue(value) => write!(formatter, "datalog-math-non-integer:{value:?}"),
-            Self::InvalidArgument(value) => write!(formatter, "datalog-math-invalid-argument:{value}"),
+            Self::InvalidArgument(value) => {
+                write!(formatter, "datalog-math-invalid-argument:{value}")
+            }
             Self::UnsupportedLegacyAbiId(sid) => {
                 write!(formatter, "datalog-math-unsupported-semantic-id:{sid:08b}")
             }
@@ -213,33 +225,51 @@ mod tests {
     fn basic_integer_operations() {
         let bindings = HashMap::new();
         assert_eq!(
-            NumericExpr::Add(Box::new(NumericExpr::Literal(2)), Box::new(NumericExpr::Literal(3)))
-                .evaluate(&bindings),
+            NumericExpr::Add(
+                Box::new(NumericExpr::Literal(2)),
+                Box::new(NumericExpr::Literal(3))
+            )
+            .evaluate(&bindings),
             Ok(Value::Int(5))
         );
         assert_eq!(
-            NumericExpr::Sub(Box::new(NumericExpr::Literal(7)), Box::new(NumericExpr::Literal(3)))
-                .evaluate(&bindings),
+            NumericExpr::Sub(
+                Box::new(NumericExpr::Literal(7)),
+                Box::new(NumericExpr::Literal(3))
+            )
+            .evaluate(&bindings),
             Ok(Value::Int(4))
         );
         assert_eq!(
-            NumericExpr::Mul(Box::new(NumericExpr::Literal(6)), Box::new(NumericExpr::Literal(7)))
-                .evaluate(&bindings),
+            NumericExpr::Mul(
+                Box::new(NumericExpr::Literal(6)),
+                Box::new(NumericExpr::Literal(7))
+            )
+            .evaluate(&bindings),
             Ok(Value::Int(42))
         );
         assert_eq!(
-            NumericExpr::Div(Box::new(NumericExpr::Literal(8)), Box::new(NumericExpr::Literal(2)))
-                .evaluate(&bindings),
+            NumericExpr::Div(
+                Box::new(NumericExpr::Literal(8)),
+                Box::new(NumericExpr::Literal(2))
+            )
+            .evaluate(&bindings),
             Ok(Value::Int(4))
         );
         assert_eq!(
-            NumericExpr::Mod(Box::new(NumericExpr::Literal(7)), Box::new(NumericExpr::Literal(3)))
-                .evaluate(&bindings),
+            NumericExpr::Mod(
+                Box::new(NumericExpr::Literal(7)),
+                Box::new(NumericExpr::Literal(3))
+            )
+            .evaluate(&bindings),
             Ok(Value::Int(1))
         );
         assert_eq!(
-            NumericExpr::Quotient(Box::new(NumericExpr::Literal(7)), Box::new(NumericExpr::Literal(3)))
-                .evaluate(&bindings),
+            NumericExpr::Quotient(
+                Box::new(NumericExpr::Literal(7)),
+                Box::new(NumericExpr::Literal(3))
+            )
+            .evaluate(&bindings),
             Ok(Value::Int(2))
         );
         assert_eq!(
@@ -247,13 +277,19 @@ mod tests {
             Ok(Value::Int(5))
         );
         assert_eq!(
-            NumericExpr::Min(Box::new(NumericExpr::Literal(4)), Box::new(NumericExpr::Literal(9)))
-                .evaluate(&bindings),
+            NumericExpr::Min(
+                Box::new(NumericExpr::Literal(4)),
+                Box::new(NumericExpr::Literal(9))
+            )
+            .evaluate(&bindings),
             Ok(Value::Int(4))
         );
         assert_eq!(
-            NumericExpr::Max(Box::new(NumericExpr::Literal(4)), Box::new(NumericExpr::Literal(9)))
-                .evaluate(&bindings),
+            NumericExpr::Max(
+                Box::new(NumericExpr::Literal(4)),
+                Box::new(NumericExpr::Literal(9))
+            )
+            .evaluate(&bindings),
             Ok(Value::Int(9))
         );
     }
@@ -272,8 +308,11 @@ mod tests {
     fn arithmetic_failures_are_named() {
         let bindings = HashMap::new();
         assert_eq!(
-            NumericExpr::Div(Box::new(NumericExpr::Literal(1)), Box::new(NumericExpr::Literal(0)))
-                .evaluate(&bindings),
+            NumericExpr::Div(
+                Box::new(NumericExpr::Literal(1)),
+                Box::new(NumericExpr::Literal(0))
+            )
+            .evaluate(&bindings),
             Err(DatalogMathError::DivisionByZero)
         );
         assert_eq!(

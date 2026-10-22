@@ -65,7 +65,9 @@ fn check_directory_domain(expressions: &[Expr]) -> Result<(), String> {
     for name in ["*guard-reference-directory*", "*guard-script-directory*"] {
         let mut found = false;
         for expression in expressions {
-            let ExprKind::List(items) = &expression.kind else { continue };
+            let ExprKind::List(items) = &expression.kind else {
+                continue;
+            };
             if !matches!(
                 items.get(1),
                 Some(Expr { kind: ExprKind::Symbol(symbol), .. })
@@ -79,16 +81,24 @@ fn check_directory_domain(expressions: &[Expr]) -> Result<(), String> {
                 Some(Expr { kind: ExprKind::DomainIdentity(id), .. })
                     if id.width() == 4 && id.packed_bits() == 0b0011
             ) {
-                return Err(format!("{name} requires exact D4:0011 DEFINE; W8 is not D4"));
+                return Err(format!(
+                    "{name} requires exact D4:0011 DEFINE; W8 is not D4"
+                ));
             }
-            let Some(Expr { kind: ExprKind::List(quoted), .. }) = items.get(2) else {
+            let Some(Expr {
+                kind: ExprKind::List(quoted),
+                ..
+            }) = items.get(2)
+            else {
                 return Err(format!("{name} requires an exact D3:001 quoted directory"));
             };
-            if quoted.len() != 2 || !matches!(
-                quoted.first(),
-                Some(Expr { kind: ExprKind::DomainIdentity(id), .. })
-                    if id.width() == 3 && id.packed_bits() == 0b001
-            ) {
+            if quoted.len() != 2
+                || !matches!(
+                    quoted.first(),
+                    Some(Expr { kind: ExprKind::DomainIdentity(id), .. })
+                        if id.width() == 3 && id.packed_bits() == 0b001
+                )
+            {
                 return Err(format!("{name} requires exact D3:001 QUOTE; W8 is not D3"));
             }
         }
@@ -104,13 +114,15 @@ fn parse_guard_reference(file_path: &Path) -> Result<Vec<TopicEntry>, String> {
         .map_err(|e| format!("cannot read {}: {}", file_path.display(), e))?;
 
     // Спільний path-bound exact-domain reader; без байтових припущень.
-    let parsed = parse_mixed_exact_domain_guard_reference_source(
-        "knowledge/guard-reference.lisp",
-        &content,
-    )
-    .map_err(|error| {
-        format!("cannot parse {}: {}", file_path.display(), error.render(&content))
-    })?;
+    let parsed =
+        parse_mixed_exact_domain_guard_reference_source("knowledge/guard-reference.lisp", &content)
+            .map_err(|error| {
+                format!(
+                    "cannot parse {}: {}",
+                    file_path.display(),
+                    error.render(&content)
+                )
+            })?;
     check_directory_domain(&parsed)
         .map_err(|reason| format!("invalid exact-domain {}: {reason}", file_path.display()))?;
 
@@ -425,7 +437,10 @@ mod tests {
             .to_string();
         let path = temp_file(&source, "missing-script-directory");
         let failure = parse_guard_reference(&path).unwrap_err();
-        assert!(failure.contains("missing exact-domain directory definition"), "{failure}");
+        assert!(
+            failure.contains("missing exact-domain directory definition"),
+            "{failure}"
+        );
         assert!(failure.contains("*guard-script-directory*"), "{failure}");
         fs::remove_file(path).unwrap();
     }

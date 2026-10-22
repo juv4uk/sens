@@ -2,7 +2,7 @@
 // Authority: lib/function-table-mechanisms.lisp (profile-routes)
 // Generator: scripts/generate-rust-profile-mechanism-routes.lisp
 
-use crate::{CoreProfile, CoreDomainIdentity};
+use crate::{CoreDomainIdentity, CoreProfile};
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 #[allow(dead_code)]
@@ -17,8 +17,7 @@ struct ProfileMechanismRoute {
     kind: ProfileMechanismRouteKind,
 }
 
-const PROFILE_MECHANISM_ROUTES: &[ProfileMechanismRoute] = &[
-];
+const PROFILE_MECHANISM_ROUTES: &[ProfileMechanismRoute] = &[];
 
 pub(crate) fn profile_mechanism_route(
     profile: CoreProfile,

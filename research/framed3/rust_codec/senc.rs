@@ -919,7 +919,9 @@ mod tests {
             (words(&["10", "01"]), "64", "00"),
             (words(&["10", "001", "00", "000", "01"]), "638906a1", "4060"),
             (
-                words(&["10", "100", "00", "10", "111", "00", "1", "00", "0", "01", "01"]),
+                words(&[
+                    "10", "100", "00", "10", "111", "00", "1", "00", "0", "01", "01",
+                ]),
                 "66386789893b35",
                 "365f1bd0c9",
             ),
@@ -927,10 +929,7 @@ mod tests {
         for (case, t5_hex, frame_hex) in cases {
             assert_eq!(hex(&t5_encode(&case).unwrap()), t5_hex);
             assert_eq!(hex(&frame_encode(&case).unwrap()), frame_hex);
-            assert_eq!(
-                frame_decode(&frame_encode(&case).unwrap()).unwrap(),
-                case
-            );
+            assert_eq!(frame_decode(&frame_encode(&case).unwrap()).unwrap(), case);
             assert_eq!(t5_decode(&t5_encode(&case).unwrap()).unwrap(), case);
         }
     }

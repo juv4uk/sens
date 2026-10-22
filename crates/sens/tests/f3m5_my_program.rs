@@ -2,7 +2,8 @@
 //! Ім'я: "six-class-pick" — if atom(NIL)==atom(1) then CAR(CONS(NIL,NIL)) else CDR(CONS(NIL,NIL)).
 //! Несе всі 6 capability-класів: COND, EQ, ATOM, CAR, CDR, CONS.
 use sens::{
-    eval_parsed_expressions, frame3_micro_enumerator::{decode_payload, encode_expr, Frame3MicroExpr as E},
+    eval_parsed_expressions,
+    frame3_micro_enumerator::{decode_payload, encode_expr, Frame3MicroExpr as E},
     parse_canonical_binary, Session,
 };
 
@@ -20,7 +21,15 @@ fn my_f3m5_program_encodes_to_five_bytes_and_round_trips() {
     let expr = six_class_pick();
     assert_eq!(expr.node_count(), 12, "must fit the 13-node F3M-5 window");
     let bytes = encode_expr(&expr).expect("encode");
-    println!("six-class-pick bytes = {} ({})", bytes.len(), bytes.iter().map(|b| format!("{b:02X}")).collect::<Vec<_>>().join(" "));
+    println!(
+        "six-class-pick bytes = {} ({})",
+        bytes.len(),
+        bytes
+            .iter()
+            .map(|b| format!("{b:02X}"))
+            .collect::<Vec<_>>()
+            .join(" ")
+    );
     assert_eq!(bytes.len(), 5, "must be an F3M-5 payload (5 bytes)");
     let back = decode_payload(&bytes).expect("decode");
     assert_eq!(back, expr, "decode(encode(x)) == x");

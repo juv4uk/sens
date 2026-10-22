@@ -1,7 +1,6 @@
 use sens::{eval_program, Session};
 
-const УКРАЇНСЬКА_ПРОГРАМА: &str =
-    include_str!("../../../tests/fixtures/rivnopravnist-uk.lisp");
+const УКРАЇНСЬКА_ПРОГРАМА: &str = include_str!("../../../tests/fixtures/rivnopravnist-uk.lisp");
 
 // україномовна_програма_приймання_не_потребує_латинської_розкладки was a
 // keyboard/text-policy lint, relocated to `cargo xtask verify` per

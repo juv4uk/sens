@@ -16,7 +16,10 @@ const SURFACE_PREREQUISITES: &[(&str, &str)] = &[
     ("unify.lisp", include_str!("../../../lib/unify.lisp")),
     ("reason.lisp", include_str!("../../../lib/reason.lisp")),
     ("forward.lisp", include_str!("../../../lib/forward.lisp")),
-    ("knowledge.lisp", include_str!("../../../lib/knowledge.lisp")),
+    (
+        "knowledge.lisp",
+        include_str!("../../../lib/knowledge.lisp"),
+    ),
     (
         "persistent-map.lisp",
         include_str!("../../../lib/persistent-map.lisp"),
@@ -26,7 +29,10 @@ const SURFACE_PREREQUISITES: &[(&str, &str)] = &[
         include_str!("../../../lib/persistent-vector.lisp"),
     ),
     ("time.lisp", include_str!("../../../lib/time.lisp")),
-    ("epistemic.lisp", include_str!("../../../lib/epistemic.lisp")),
+    (
+        "epistemic.lisp",
+        include_str!("../../../lib/epistemic.lisp"),
+    ),
 ];
 const UK_SURFACE: &str = include_str!("../../../lib/surface/uk.lisp");
 const UKR_SURFACE: &str = include_str!("../../../lib/surface/ukr.lisp");
@@ -75,21 +81,29 @@ impl WebSurface {
 
 fn build_surface_layer(base: &Environment, surface: WebSurface) -> Result<Environment, String> {
     let layer = base.child();
-    if matches!(surface, WebSurface::Ukrainian | WebSurface::UkrainianFull | WebSurface::Sanskrit) {
+    if matches!(
+        surface,
+        WebSurface::Ukrainian | WebSurface::UkrainianFull | WebSurface::Sanskrit
+    ) {
         let mut session = Session {
             environment: layer.clone(),
         };
         for (name, source) in SURFACE_PREREQUISITES {
             (if *name == "time.lisp" {
                 sens::load_time_library(&mut session)
-            } else if matches!(*name, "unify.lisp" | "reason.lisp" | "forward.lisp" | "knowledge.lisp" | "persistent-map.lisp") {
-                sens::eval_pinned_reasoning_source(
-                    &format!("lib/{name}"), source, &mut session
-                )
+            } else if matches!(
+                *name,
+                "unify.lisp"
+                    | "reason.lisp"
+                    | "forward.lisp"
+                    | "knowledge.lisp"
+                    | "persistent-map.lisp"
+            ) {
+                sens::eval_pinned_reasoning_source(&format!("lib/{name}"), source, &mut session)
             } else {
                 eval_program(source, &mut session)
             })
-                .map_err(|error| format!("failed to load {name}: {}", error.render(source)))?;
+            .map_err(|error| format!("failed to load {name}: {}", error.render(source)))?;
         }
         let (name, source) = match surface {
             WebSurface::Ukrainian => ("uk.lisp", UK_SURFACE),
@@ -113,7 +127,8 @@ struct WebSession {
 impl WebSession {
     fn new(mut session: Session) -> Result<Self, String> {
         let base_environment = session.environment.clone();
-        let surface_environment = build_surface_layer(&base_environment, WebSurface::UkrainianFull)?;
+        let surface_environment =
+            build_surface_layer(&base_environment, WebSurface::UkrainianFull)?;
         let user_environment = surface_environment.child();
         session.environment = user_environment.clone();
         Ok(Self {
@@ -211,10 +226,8 @@ pub fn evaluate(source: &str, mode: JsValue) -> Result<JsValue, JsValue> {
             state.surface,
             WebSurface::Ukrainian | WebSurface::UkrainianFull
         ) {
-            let (code, offset_maps) = sens_literate::extract_code(
-                source,
-                source_mode == SourceMode::Literate,
-            );
+            let (code, offset_maps) =
+                sens_literate::extract_code(source, source_mode == SourceMode::Literate);
             if source_mode == SourceMode::Literate && offset_maps.is_empty() {
                 (
                     sens::EvalResult {
@@ -235,13 +248,13 @@ pub fn evaluate(source: &str, mode: JsValue) -> Result<JsValue, JsValue> {
                 let projected =
                     sens::source_projection::project_ukr_decimal_integer_literals(&parsed, &code)
                         .map_err(|error| {
-                            let error = remap_literate_error(error, &offset_maps);
-                            JsValue::from_str(&render_error_for_presentation(
-                                &error,
-                                source,
-                                state.surface.presentation(),
-                            ))
-                        })?;
+                        let error = remap_literate_error(error, &offset_maps);
+                        JsValue::from_str(&render_error_for_presentation(
+                            &error,
+                            source,
+                            state.surface.presentation(),
+                        ))
+                    })?;
                 sens::load_core_library(&mut state.session).map_err(|error| {
                     let error = remap_literate_error(error, &offset_maps);
                     JsValue::from_str(&render_error_for_presentation(

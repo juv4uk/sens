@@ -1,7 +1,9 @@
 //! Реальний SENS-виконавець: українські предикати знань із точним D1.
 //! Історичний SID8, #d1-текст і старий зріз 6 форм не є доказом.
-use sens::{eval_parsed_expressions, eval_program, parse_mixed_exact_domain_reasoning_source,
-           Session, Value};
+use sens::{
+    eval_parsed_expressions, eval_program, parse_mixed_exact_domain_reasoning_source, Session,
+    Value,
+};
 
 fn session() -> Session {
     let mut s = Session::default();
@@ -9,8 +11,14 @@ fn session() -> Session {
     for (path, text) in [
         ("lib/unify.lisp", include_str!("../../../lib/unify.lisp")),
         ("lib/reason.lisp", include_str!("../../../lib/reason.lisp")),
-        ("lib/forward.lisp", include_str!("../../../lib/forward.lisp")),
-        ("lib/knowledge.lisp", include_str!("../../../lib/knowledge.lisp")),
+        (
+            "lib/forward.lisp",
+            include_str!("../../../lib/forward.lisp"),
+        ),
+        (
+            "lib/knowledge.lisp",
+            include_str!("../../../lib/knowledge.lisp"),
+        ),
     ] {
         let forms = parse_mixed_exact_domain_reasoning_source(path, text)
             .unwrap_or_else(|error| panic!("SENS reader {path}: {error:?}"));
@@ -30,7 +38,9 @@ fn eval(s: &mut Session, code: &str) -> Value {
 fn ukrainian_negation_heads_preserve_exact_d1() {
     let mut s = session();
     for (head, expected) in [
-        ("not", true), ("not?", true), ("plain", false),
+        ("not", true),
+        ("not?", true),
+        ("plain", false),
         // Складена форма — не атомний протокольний маркер not/not?.
         ("(not? (radio))", false),
         ("((not?) radio)", false),
@@ -38,7 +48,11 @@ fn ukrainian_negation_heads_preserve_exact_d1() {
     ] {
         let code = format!("(голова-твердження-знань-заперечена? (як-є {head}))");
         let answer = eval(&mut s, &code);
-        assert_eq!(answer.as_predicate_bit(), Some(expected), "{code}: {answer}");
+        assert_eq!(
+            answer.as_predicate_bit(),
+            Some(expected),
+            "{code}: {answer}"
+        );
     }
 }
 
@@ -56,9 +70,7 @@ fn knowledge_opposite_head_guards_malformed_negation() {
         ("((not?) radio)", "(not? ((not?) radio))"),
         ("((nested) signal)", "(not? ((nested) signal))"),
     ] {
-        let query = format!(
-            "(отримати-протилежну-голову-твердження-знання (як-є {head}))"
-        );
+        let query = format!("(отримати-протилежну-голову-твердження-знання (як-є {head}))");
         let actual = eval(&mut s, &query);
         assert_eq!(actual.to_string(), expected, "{query}");
     }
@@ -67,11 +79,15 @@ fn knowledge_opposite_head_guards_malformed_negation() {
 #[test]
 fn package_field_returns_data_and_missing_field_is_d3_empty() {
     let mut s = session();
-    let found = eval(&mut s,
-        "(отримати-поле-пакета-знань (як-є author) (як-є ((author a) (version b))))");
+    let found = eval(
+        &mut s,
+        "(отримати-поле-пакета-знань (як-є author) (як-є ((author a) (version b))))",
+    );
     assert_eq!(found.to_string(), "(a)");
-    let missing = eval(&mut s,
-        "(отримати-поле-пакета-знань (як-є missing) (як-є ((author a) (version b))))");
+    let missing = eval(
+        &mut s,
+        "(отримати-поле-пакета-знань (як-є missing) (як-є ((author a) (version b))))",
+    );
     assert!(matches!(missing, Value::Nil));
     assert_eq!(missing.as_predicate_bit(), None);
 }
@@ -85,14 +101,13 @@ fn malformed_package_rows_are_skipped_before_d4_caar() {
         "(як-є (() (author a)))",
         "(як-є (((nested k) wrong) (author a)))",
     ] {
-        let query = format!(
-            "(отримати-поле-пакета-знань (як-є author) {rows})"
-        );
+        let query = format!("(отримати-поле-пакета-знань (як-є author) {rows})");
         let value = eval(&mut s, &query);
         assert_eq!(value.to_string(), "(a)", "{query}: {value}");
     }
-    let missing = eval(&mut s,
-        "(отримати-поле-пакета-знань (як-є missing) (як-є (пошкоджений ((nested k) wrong))))"
+    let missing = eval(
+        &mut s,
+        "(отримати-поле-пакета-знань (як-є missing) (як-є (пошкоджений ((nested k) wrong))))",
     );
     assert!(matches!(missing, Value::Nil));
 }
@@ -146,7 +161,11 @@ fn ukrainian_clause_validation_is_exact_d1() {
         ("(клаузи-бази-знань-коректні? (як-є ((p x))))", false),
     ] {
         let answer = eval(&mut s, code);
-        assert_eq!(answer.as_predicate_bit(), Some(expected), "{code}: {answer}");
+        assert_eq!(
+            answer.as_predicate_bit(),
+            Some(expected),
+            "{code}: {answer}"
+        );
     }
 }
 
@@ -154,8 +173,10 @@ fn ukrainian_clause_validation_is_exact_d1() {
 fn predicate_false_is_not_d3_empty() {
     let mut s = session();
     let no = eval(&mut s, "(голова-твердження-знань-заперечена? (як-є plain))");
-    let empty = eval(&mut s,
-        "(отримати-поле-пакета-знань (як-є missing) (як-є ()))");
+    let empty = eval(
+        &mut s,
+        "(отримати-поле-пакета-знань (як-є missing) (як-є ()))",
+    );
     assert_eq!(no.as_predicate_bit(), Some(false));
     assert_eq!(empty.as_predicate_bit(), None);
 }
@@ -165,10 +186,7 @@ fn ukrainian_knowledge_clause_kind_is_evaluated() {
     // Обидва випадки виконує SENS, результат є структурою даних, не host-bool.
     let mut s = session();
     for (code, expected) in [
-        (
-            "(є-факт? (як-є ((planet earth))))",
-            "(clause-kind fact)",
-        ),
+        ("(є-факт? (як-є ((planet earth))))", "(clause-kind fact)"),
         (
             "(є-факт? (як-є ((ancestor (var x) (var y)) (parent (var x) (var y)))))",
             "(clause-kind rule)",

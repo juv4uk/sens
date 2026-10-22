@@ -67,7 +67,9 @@ fn every_admitted_extension_iclass_pair_has_exactly_one_coverage_entry() {
         let mut extension: Option<String> = None;
         let mut iclass: Option<String> = None;
         let mut pairs = Vec::new();
-        let flush = |extension: &mut Option<String>, iclass: &mut Option<String>, pairs: &mut Vec<(String, String)>| {
+        let flush = |extension: &mut Option<String>,
+                     iclass: &mut Option<String>,
+                     pairs: &mut Vec<(String, String)>| {
             if let (Some(e), Some(i)) = (extension.take(), iclass.take()) {
                 pairs.push((e, i));
             }
@@ -86,9 +88,10 @@ fn every_admitted_extension_iclass_pair_has_exactly_one_coverage_entry() {
         pairs
     }
 
-    let evidence =
-        std::fs::read_to_string(repo_root().join("lib/machine/xed/generated/machine-evidence.lisp"))
-            .expect("read machine-evidence.lisp");
+    let evidence = std::fs::read_to_string(
+        repo_root().join("lib/machine/xed/generated/machine-evidence.lisp"),
+    )
+    .expect("read machine-evidence.lisp");
     let coverage = std::fs::read_to_string(repo_root().join("lib/machine/encoding/coverage.lisp"))
         .expect("read coverage.lisp");
 
@@ -137,10 +140,8 @@ fn every_coverage_entry_has_an_allowed_status() {
 /// being reported against a nonexistent form.
 #[test]
 fn stale_partial_iclass_not_in_evidence_fails_closed() {
-    let temp_dir = std::env::temp_dir().join(format!(
-        "encoder-coverage-stale-{}",
-        std::process::id()
-    ));
+    let temp_dir =
+        std::env::temp_dir().join(format!("encoder-coverage-stale-{}", std::process::id()));
     std::fs::create_dir_all(&temp_dir).expect("create temp dir");
     let out = temp_dir.join("coverage.lisp");
 
@@ -166,10 +167,8 @@ fn stale_partial_iclass_not_in_evidence_fails_closed() {
 /// that does admit RET_NEAR imports cleanly and marks it partial.
 #[test]
 fn minimal_evidence_with_ret_near_is_marked_partial() {
-    let temp_dir = std::env::temp_dir().join(format!(
-        "encoder-coverage-minimal-{}",
-        std::process::id()
-    ));
+    let temp_dir =
+        std::env::temp_dir().join(format!("encoder-coverage-minimal-{}", std::process::id()));
     std::fs::create_dir_all(&temp_dir).expect("create temp dir");
     let out = temp_dir.join("coverage.lisp");
 

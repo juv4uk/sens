@@ -18,10 +18,14 @@ fn integration_enabled() -> bool {
 
 #[test]
 fn common_lisp_car_witness_preserves_legacy_abi_coordinate() {
-    if !integration_enabled() { return; }
+    if !integration_enabled() {
+        return;
+    }
     let kernel = CommonLispKernel::default();
     let request = CommonLispRequest::new(LegacyAbiSemanticId(CAR_ID), "(car '(left right))");
-    let result = kernel.evaluate(&request).expect("SBCL must execute CAR witness");
+    let result = kernel
+        .evaluate(&request)
+        .expect("SBCL must execute CAR witness");
 
     assert_eq!(result.semantic_id, LegacyAbiSemanticId(CAR_ID));
     assert_eq!(stdout_text(&result.stdout), "LEFT");
@@ -29,10 +33,14 @@ fn common_lisp_car_witness_preserves_legacy_abi_coordinate() {
 
 #[test]
 fn common_lisp_cdr_witness_preserves_legacy_abi_coordinate() {
-    if !integration_enabled() { return; }
+    if !integration_enabled() {
+        return;
+    }
     let kernel = CommonLispKernel::default();
     let request = CommonLispRequest::new(LegacyAbiSemanticId(CDR_ID), "(cdr '(left right))");
-    let result = kernel.evaluate(&request).expect("SBCL must execute CDR witness");
+    let result = kernel
+        .evaluate(&request)
+        .expect("SBCL must execute CDR witness");
 
     assert_eq!(result.semantic_id, LegacyAbiSemanticId(CDR_ID));
     assert_eq!(stdout_text(&result.stdout), "(RIGHT)");
@@ -40,19 +48,25 @@ fn common_lisp_cdr_witness_preserves_legacy_abi_coordinate() {
 
 #[test]
 fn common_lisp_cons_then_car_reproduces_the_car_cons_law_slice() {
-    if !integration_enabled() { return; }
+    if !integration_enabled() {
+        return;
+    }
     let kernel = CommonLispKernel::default();
 
     // The form exercises CL:CONS and CL:CAR while the externally observed
     // semantic identity is CAR. sens still owns the car(cons(x,y)) = x law.
-    let request =
-        CommonLispRequest::new(LegacyAbiSemanticId(CAR_ID), "(car (cons 'left 'right))");
-    let result = kernel.evaluate(&request).expect("SBCL must execute witness");
+    let request = CommonLispRequest::new(LegacyAbiSemanticId(CAR_ID), "(car (cons 'left 'right))");
+    let result = kernel
+        .evaluate(&request)
+        .expect("SBCL must execute witness");
 
     assert_eq!(result.semantic_id, LegacyAbiSemanticId(CAR_ID));
     assert_eq!(stdout_text(&result.stdout), "LEFT");
 
     // Keep the related registry identity visible in the executable witness
     // without teaching the adapter what CONS means.
-    assert_eq!(LegacyAbiSemanticId(CONS_ID), LegacyAbiSemanticId(0b0000_0100));
+    assert_eq!(
+        LegacyAbiSemanticId(CONS_ID),
+        LegacyAbiSemanticId(0b0000_0100)
+    );
 }

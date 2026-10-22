@@ -1,6 +1,7 @@
 use sens::{
-    eval_parsed_expressions, eval_program, load_core_library, parse_mixed_exact_domain_machine_source,
-    register_capability, Environment, Exactness, Expr, LanguageError, Session, Span, Value,
+    eval_parsed_expressions, eval_program, load_core_library,
+    parse_mixed_exact_domain_machine_source, register_capability, Environment, Exactness, Expr,
+    LanguageError, Session, Span, Value,
 };
 use std::fs;
 use std::path::PathBuf;
@@ -22,10 +23,13 @@ fn load_lisp_file(path: &str, session: &mut Session) {
         fs::read_to_string(&file_path)
             .unwrap_or_else(|error| panic!("{} must exist: {error}", file_path.display()))
     };
-    let expressions = parse_mixed_exact_domain_machine_source(path, &source)
-        .unwrap_or_else(|error| panic!("{path} must parse as exact-domain machine source: {error}"));
-    eval_parsed_expressions(&expressions, session)
-        .unwrap_or_else(|error| panic!("{path} must load through the machine-source reader: {error}"));
+    let expressions =
+        parse_mixed_exact_domain_machine_source(path, &source).unwrap_or_else(|error| {
+            panic!("{path} must parse as exact-domain machine source: {error}")
+        });
+    eval_parsed_expressions(&expressions, session).unwrap_or_else(|error| {
+        panic!("{path} must load through the machine-source reader: {error}")
+    });
 }
 
 fn spy_executor(
@@ -36,7 +40,6 @@ fn spy_executor(
     EXECUTOR_CALLS.fetch_add(1, Ordering::SeqCst);
     Ok(Value::Number(999.0, Exactness::Exact))
 }
-
 
 #[test]
 fn exhausted_instruction_patterns_return_exact_d1_no_not_structural_empty() {
@@ -50,8 +53,8 @@ fn exhausted_instruction_patterns_return_exact_d1_no_not_structural_empty() {
         "(машина-команда-відповідає-допуску? (00000001 ()) (00000001 ud2))",
         "(машина-команда-відповідає-допуску? (00000001 ()) (00000001 ()))",
     ] {
-        let result = eval_program(source, &mut session)
-            .unwrap_or_else(|error| panic!("{source}: {error}"));
+        let result =
+            eval_program(source, &mut session).unwrap_or_else(|error| panic!("{source}: {error}"));
         assert_eq!(
             result.value.as_predicate_bit(),
             Some(false),
@@ -78,10 +81,13 @@ fn x86_exact_integer_wire_checks_return_typed_d1() {
         ("(машина-допуск-точне-ціле? \"7\")", false),
         ("(машина-допуск-точне-ціле? \"#q2:111/1\")", false),
         ("(машина-допуск-точне-ціле? (як-є ()))", false),
-        ("(машина-допуск-точне-ціле? (00000001 not-an-integer))", false),
+        (
+            "(машина-допуск-точне-ціле? (00000001 not-an-integer))",
+            false,
+        ),
     ] {
-        let result = eval_program(source, &mut session)
-            .unwrap_or_else(|error| panic!("{source}: {error}"));
+        let result =
+            eval_program(source, &mut session).unwrap_or_else(|error| panic!("{source}: {error}"));
         // На невідповідності — реальні SENS D6/D24+ і D1, без текстового wire.
         // Жодної паралельної семантики чи Python/JSON-оракула.
         let diagnosis = if result.value.as_predicate_bit() != Some(expected) {
@@ -131,8 +137,8 @@ fn x86_pattern_mismatches_are_exact_d1_no_not_empty() {
     ];
 
     for (source, expected) in cases {
-        let result = eval_program(source, &mut session)
-            .unwrap_or_else(|error| panic!("{source}: {error}"));
+        let result =
+            eval_program(source, &mut session).unwrap_or_else(|error| panic!("{source}: {error}"));
         assert_eq!(
             result.value.as_predicate_bit(),
             Some(expected),
@@ -140,8 +146,6 @@ fn x86_pattern_mismatches_are_exact_d1_no_not_empty() {
         );
     }
 }
-
-
 
 #[test]
 fn x86_xmm_name_predicate_returns_exact_d1_for_known_and_unknown_names() {
@@ -157,8 +161,8 @@ fn x86_xmm_name_predicate_returns_exact_d1_for_known_and_unknown_names() {
         ("(x86-xmm-name? notaxmm)", false),
         ("(x86-xmm-name? 42)", false),
     ] {
-        let result = eval_program(source, &mut session)
-            .unwrap_or_else(|error| panic!("{source}: {error}"));
+        let result =
+            eval_program(source, &mut session).unwrap_or_else(|error| panic!("{source}: {error}"));
         assert_eq!(
             result.value.as_predicate_bit(),
             Some(expected),
@@ -166,7 +170,6 @@ fn x86_xmm_name_predicate_returns_exact_d1_for_known_and_unknown_names() {
         );
     }
 }
-
 
 #[test]
 fn x86_admitted_program_rejects_ud2_with_typed_d1_no() {

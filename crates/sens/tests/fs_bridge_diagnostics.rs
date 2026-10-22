@@ -1,6 +1,6 @@
 //! Path-pinned witness for Lisp-owned filesystem adapter semantics.
 //! This narrows full store failures to package lookup or lambda binding.
-use sens::{eval_program, eval_core_library_source, eval_pinned_reasoning_source, Session};
+use sens::{eval_core_library_source, eval_pinned_reasoning_source, eval_program, Session};
 
 fn session() -> Session {
     let mut s = Session::default();
@@ -8,12 +8,27 @@ fn session() -> Session {
     for (path, source) in [
         ("lib/unify.lisp", include_str!("../../../lib/unify.lisp")),
         ("lib/reason.lisp", include_str!("../../../lib/reason.lisp")),
-        ("lib/forward.lisp", include_str!("../../../lib/forward.lisp")),
-        ("lib/knowledge.lisp", include_str!("../../../lib/knowledge.lisp")),
-        ("lib/persistent-map.lisp", include_str!("../../../lib/persistent-map.lisp")),
+        (
+            "lib/forward.lisp",
+            include_str!("../../../lib/forward.lisp"),
+        ),
+        (
+            "lib/knowledge.lisp",
+            include_str!("../../../lib/knowledge.lisp"),
+        ),
+        (
+            "lib/persistent-map.lisp",
+            include_str!("../../../lib/persistent-map.lisp"),
+        ),
         ("lib/world.lisp", include_str!("../../../lib/world.lisp")),
-        ("lib/content-store.lisp", include_str!("../../../lib/content-store.lisp")),
-        ("lib/lisp-fs.lisp", include_str!("../../../lib/lisp-fs.lisp")),
+        (
+            "lib/content-store.lisp",
+            include_str!("../../../lib/content-store.lisp"),
+        ),
+        (
+            "lib/lisp-fs.lisp",
+            include_str!("../../../lib/lisp-fs.lisp"),
+        ),
     ] {
         eval_pinned_reasoning_source(path, source, &mut s)
             .unwrap_or_else(|e| panic!("bootstrap {path}: {e:?}"));
@@ -24,7 +39,8 @@ fn session() -> Session {
 fn observe(s: &mut Session, source: &str) -> String {
     eval_program(source, s)
         .unwrap_or_else(|e| panic!("filesystem witness {source}: {e:?}"))
-        .value.to_string()
+        .value
+        .to_string()
 }
 
 #[test]
@@ -57,8 +73,9 @@ fn filesystem_commit_stage_has_executable_d1_and_rejects_unknown_stage() {
         let source = format!(
             "(відновити-завершену-фіксацію-файлової-системи (як-є before) (як-є after) (як-є {stage}))"
         );
-        let result = eval_program(&source, &mut s)
-            .unwrap_or_else(|e| panic!("test_id=fs-commit-recovery layer=SENS input={source} error={e:?}"));
+        let result = eval_program(&source, &mut s).unwrap_or_else(|e| {
+            panic!("test_id=fs-commit-recovery layer=SENS input={source} error={e:?}")
+        });
         assert_eq!(
             result.value.to_string(),
             expected,
@@ -73,8 +90,11 @@ fn filesystem_commit_stage_has_executable_d1_and_rejects_unknown_stage() {
         let result = eval_program(&source, &mut s)
             .unwrap_or_else(|e| panic!("SENS негативний структурний етап {invalid}: {e:?}"))
             .value;
-        assert_eq!(result.as_predicate_bit(), Some(false),
-            "test_id=fs-stage-invalid layer=SENS input={source} expected=D1:0 actual={result}");
+        assert_eq!(
+            result.as_predicate_bit(),
+            Some(false),
+            "test_id=fs-stage-invalid layer=SENS input={source} expected=D1:0 actual={result}"
+        );
     }
 }
 
@@ -83,7 +103,11 @@ fn filesystem_root_recovery_rejects_compound_stage_before_d3_eq() {
     let mut s = session();
     // Справжній SENS evaluator, не статична перевірка тексту.
     // Навіть root-pointer усередині пари не стає атомарним етапом.
-    for invalid in ["(root-pointer)", "(root-pointer journal)", "(root-pointer . journal)"] {
+    for invalid in [
+        "(root-pointer)",
+        "(root-pointer journal)",
+        "(root-pointer . journal)",
+    ] {
         let source = format!(
             "(відновити-кореневий-пакет-файлової-системи (як-є previous) (як-є candidate) (як-є {invalid}))"
         );
@@ -106,8 +130,14 @@ fn filesystem_alists_and_journal_version_evaluate_real_d1_without_unbound_truth_
     // присутнє, порожній ключ — не поле, обидві версії — точні D1.
     let mut s = session();
     for (source, expected) in [
-        ("(фс-пакет-має-поле? (як-є format) (як-є ((format . ()))) )", true),
-        ("(фс-пакет-має-поле? (як-є missing) (як-є ((format . ()))))", false),
+        (
+            "(фс-пакет-має-поле? (як-є format) (як-є ((format . ()))) )",
+            true,
+        ),
+        (
+            "(фс-пакет-має-поле? (як-є missing) (як-є ((format . ()))))",
+            false,
+        ),
         ("(фс-пакет-має-поле? (як-є format) (як-є ()))", false),
         ("(фс-журнал-список-пар? (як-є ()))", true),
         ("(фс-журнал-список-пар? (як-є ((name . value))))", true),
@@ -117,28 +147,36 @@ fn filesystem_alists_and_journal_version_evaluate_real_d1_without_unbound_truth_
         ("(фс-версія-журналу-чинна? (як-є ()))", false),
     ] {
         let value = eval_program(source, &mut s)
-            .unwrap_or_else(|e| panic!(
+            .unwrap_or_else(|e| {
+                panic!(
                 "test_id=fs-journal-d1 layer=SENS input={source} expected={expected} error={e:?}"
-            )).value;
-        assert_eq!(value.as_predicate_bit(), Some(expected),
-            "test_id=fs-journal-d1 layer=SENS input={source} expected=D1:{expected} actual={value}");
+            )
+            })
+            .value;
+        assert_eq!(
+            value.as_predicate_bit(),
+            Some(expected),
+            "test_id=fs-journal-d1 layer=SENS input={source} expected=D1:{expected} actual={value}"
+        );
     }
     // Джерельні мітки (ні 1) — дані протоколу, не D1:NO у COND.
-    assert_eq!(
-        observe(&mut s, "*версія-журналу-фс*"),
-        "(ні 1)"
-    );
+    assert_eq!(observe(&mut s, "*версія-журналу-фс*"), "(ні 1)");
 }
 
 #[test]
 fn journal_event_fields_are_retrieved_from_a_real_alist() {
     let mut s = session();
-    for (field, expected) in [("format","wsm-fs-event"), ("op","future-op")] {
-        let source = format!("(фс-пакет-поле (quote {field}) (фс-журнал-подія (quote future-op) (quote ())))");
+    for (field, expected) in [("format", "wsm-fs-event"), ("op", "future-op")] {
+        let source = format!(
+            "(фс-пакет-поле (quote {field}) (фс-журнал-подія (quote future-op) (quote ())))"
+        );
         assert_eq!(observe(&mut s, &source), expected, "assoc field {field}");
     }
     assert_eq!(
-        observe(&mut s, "(фс-пакет-поле (quote missing) (фс-журнал-подія (quote future-op) (quote ())))"),
+        observe(
+            &mut s,
+            "(фс-пакет-поле (quote missing) (фс-журнал-подія (quote future-op) (quote ())))"
+        ),
         "()",
         "unknown envelope keys remain absent, never synthesized"
     );
@@ -148,7 +186,10 @@ fn journal_event_fields_are_retrieved_from_a_real_alist() {
 fn object_package_and_nonempty_map_addresses_are_structurally_consistent() {
     let mut session = session();
     assert_eq!(
-        observe(&mut session, "(car (рішення-щодо-пакета-об'єкта-файлової-системи (фс-об'єкт-пакет (quote hello))))"),
+        observe(
+            &mut session,
+            "(car (рішення-щодо-пакета-об'єкта-файлової-системи (фс-об'єкт-пакет (quote hello))))"
+        ),
         "accepted",
         "a canonical object envelope must be valid without foreign EQUAL semantics"
     );
@@ -203,8 +244,11 @@ fn world_dedup_can_import_its_exported_knowledge_package() {
     // record (accepted (module ...) (knowledge ...)), not a bare symbol.
     // Probe only its D3 CAR tag, retaining the richer language-owned receipt.
     let src = "(let ((source (світ-повідомити (порожній-світ) (quote zoo) (quote ((has-fur cat)))))) (car (car (імпорт-знання-пакет-світ (порожній-світ) (створити-світ-знання-пакет source (quote zoo))))))";
-    assert_eq!(observe(&mut session, src), "accepted",
-        "an exported immutable world package must be reimportable");
+    assert_eq!(
+        observe(&mut session, src),
+        "accepted",
+        "an exported immutable world package must be reimportable"
+    );
 }
 
 #[test]
@@ -218,8 +262,11 @@ fn world_dedup_two_equal_world_contents_share_one_key() {
 fn object_package_fold_consumes_every_valid_package() {
     let mut session = session();
     let source = "(let ((decision (фс-побудувати-об'єкт-сховище (list (фс-об'єкт-пакет (quote first)) (фс-об'єкт-пакет (quote second))) (порожній-вміст-сховище)))) (list (car decision) (вміст-сховище-розмір (second decision))))";
-    assert_eq!(observe(&mut session, source), "(accepted 2)",
-        "nonempty packages may not be accepted without insertion");
+    assert_eq!(
+        observe(&mut session, source),
+        "(accepted 2)",
+        "nonempty packages may not be accepted without insertion"
+    );
 }
 
 #[test]
@@ -233,7 +280,10 @@ fn object_package_fold_rejects_invalid_second_package_without_partial_success() 
 fn object_package_fold_rejects_an_improper_tail() {
     let mut session = session();
     let source = "(фс-побудувати-об'єкт-сховище (cons (фс-об'єкт-пакет (quote first)) (quote broken-tail)) (порожній-вміст-сховище))";
-    assert_eq!(observe(&mut session, source), "(rejected invalid-object-packages)");
+    assert_eq!(
+        observe(&mut session, source),
+        "(rejected invalid-object-packages)"
+    );
 }
 
 #[test]
@@ -253,7 +303,9 @@ fn referenced_root_has_both_address_lists_in_its_supplied_store() {
     let prefix = "(let* ((value (quote (hello world))) (written (фс-записати (фс-порожній) \"notes/today\" value)) (fs (car written)) (root (фс-корінь-пакет fs)))";
     let source = format!("{prefix} (list (усі-адреси-об'єктів-файлової-системи-наявні? (фс-пакет-поле (quote objects) root) (фс-об'єкти fs)) (усі-адреси-зв'язувань-у-файловій-системі-наявні? (фс-пакет-поле (quote bindings) root) (фс-об'єкти fs))))");
     let result = eval_program(&source, &mut session)
-        .unwrap_or_else(|e| panic!("referenced root D1 validators {source}: {e:?}")).value.to_string();
+        .unwrap_or_else(|e| panic!("referenced root D1 validators {source}: {e:?}"))
+        .value
+        .to_string();
     assert_eq!(result, "(1 1)");
 }
 
@@ -269,15 +321,27 @@ fn referenced_root_decisions_isolate_the_rejected_stage() {
     let mut session = session();
     let prefix = "(let* ((value (quote (hello world))) (written (фс-записати (фс-порожній) \"notes/today\" value)) (fs (car written)) (root (фс-корінь-пакет fs)) (object (фс-об'єкт-пакет value)))";
     let cases = [
-        ("(рішення-щодо-кореневого-пакета-файлової-системи root)", "accepted"),
-        ("(рішення-щодо-пакета-об'єкта-файлової-системи object)", "accepted"),
-        ("(фс-побудувати-об'єкт-сховище (list object) (порожній-вміст-сховище))", "accepted"),
+        (
+            "(рішення-щодо-кореневого-пакета-файлової-системи root)",
+            "accepted",
+        ),
+        (
+            "(рішення-щодо-пакета-об'єкта-файлової-системи object)",
+            "accepted",
+        ),
+        (
+            "(фс-побудувати-об'єкт-сховище (list object) (порожній-вміст-сховище))",
+            "accepted",
+        ),
         ("(фс-відновити-корінь root (list object))", "accepted"),
     ];
     for (form, expected_tag) in cases {
         let expression = format!("{prefix} (car {form}))");
         let actual = observe(&mut session, &expression);
-        assert_eq!(actual, expected_tag, "decision diverged at {form}; use full envelopes to locate rejection");
+        assert_eq!(
+            actual, expected_tag,
+            "decision diverged at {form}; use full envelopes to locate rejection"
+        );
     }
 }
 
@@ -309,7 +373,10 @@ fn one_object_store_has_a_bounded_reconstruction_witness() {
 fn empty_root_can_be_reconstructed_without_object_packages() {
     let mut session = session();
     assert_eq!(
-        observe(&mut session, "(car (фс-відновити-корінь (фс-корінь-пакет (фс-порожній)) (quote ())))"),
+        observe(
+            &mut session,
+            "(car (фс-відновити-корінь (фс-корінь-пакет (фс-порожній)) (quote ())))"
+        ),
         "accepted",
         "an empty root has no missing-address proof obligation"
     );
@@ -346,8 +413,11 @@ fn root_proper_list_validation_is_exact_d1_and_rejects_dotted_tails() {
         let actual = eval_program(&expr, &mut session)
             .unwrap_or_else(|e| panic!("D1 proper list predicate {expr}: {e:?}"))
             .value;
-        assert_eq!(actual.as_predicate_bit(), Some(expected),
-            "proper list checks must never consume host T/NIL or force empty tails");
+        assert_eq!(
+            actual.as_predicate_bit(),
+            Some(expected),
+            "proper list checks must never consume host T/NIL or force empty tails"
+        );
     }
 }
 
@@ -381,7 +451,8 @@ fn world_module_name_symbol_law_is_d1_and_rejects_non_symbols() {
     ] {
         let code = format!("(внутрішній-символ? {value})");
         let observed = eval_program(&code, &mut session)
-            .unwrap_or_else(|e| panic!("world module name {code}: {e:?}")).value;
+            .unwrap_or_else(|e| panic!("world module name {code}: {e:?}"))
+            .value;
         assert_eq!(observed.as_predicate_bit(), Some(expected), "{code}");
     }
 }
@@ -392,15 +463,20 @@ fn world_d1_symbol_guard_must_precede_d8_write() {
     // тому світ мусить відхилити предикат ще до цього механізму.
     let mut s = session();
     let bare = "(значення-у-текст (атом? (як-є ())))";
-    assert!(eval_program(bare, &mut s).is_err(),
-        "test_id=world-d1-d8-bare expected=TYPE_ERROR input={bare}");
+    assert!(
+        eval_program(bare, &mut s).is_err(),
+        "test_id=world-d1-d8-bare expected=TYPE_ERROR input={bare}"
+    );
     for value in ["(атом? (як-є ()))", "(хибне? (атом? (як-є ())))"] {
         let source = format!("(внутрішній-символ? {value})");
         let actual = eval_program(&source, &mut s)
             .unwrap_or_else(|e| panic!("test_id=world-d1-d8-guard input={source} error={e:?}"))
             .value;
-        assert_eq!(actual.as_predicate_bit(), Some(false),
-            "test_id=world-d1-d8-guard input={source} expected=D1:0 actual={actual}");
+        assert_eq!(
+            actual.as_predicate_bit(),
+            Some(false),
+            "test_id=world-d1-d8-guard input={source} expected=D1:0 actual={actual}"
+        );
     }
 }
 
@@ -413,9 +489,7 @@ fn world_knowledge_package_version_is_pair_safe_and_exact_d1() {
         ("(0 1)", "(0)", false),
         ("(0 1)", "()", false),
     ] {
-        let code = format!(
-            "(внутрішня-рівність-версій (quote {left}) (quote {right}))"
-        );
+        let code = format!("(внутрішня-рівність-версій (quote {left}) (quote {right}))");
         let value = eval_program(&code, &mut session)
             .unwrap_or_else(|e| panic!("pair-safe package version {code}: {e:?}"))
             .value;
@@ -426,7 +500,7 @@ fn world_knowledge_package_version_is_pair_safe_and_exact_d1() {
 #[test]
 fn root_commit_equality_is_structural_and_d1_only() {
     let mut session = session();
-    for (a,b,expected) in [
+    for (a, b, expected) in [
         ("(a (b . c))", "(a (b . c))", true),
         ("(a (b . c))", "(a (b . d))", false),
         ("()", "()", true),
@@ -437,8 +511,11 @@ fn root_commit_equality_is_structural_and_d1_only() {
         let value = eval_program(&source, &mut session)
             .unwrap_or_else(|e| panic!("structural D1 comparison {source}: {e:?}"))
             .value;
-        assert_eq!(value.as_predicate_bit(), Some(expected),
-            "root commit must compare full data, not SHA or host truth");
+        assert_eq!(
+            value.as_predicate_bit(),
+            Some(expected),
+            "root commit must compare full data, not SHA or host truth"
+        );
     }
 }
 
@@ -451,7 +528,10 @@ fn root_envelope_accepts_its_own_schema_without_object_only_fields() {
         "root metadata consists of format/version/revision/bindings/objects, not an address/value pair"
     );
     assert_eq!(
-        observe(&mut session, "(фс-пакет-поле (quote address) (фс-корінь-пакет (фс-порожній)))"),
+        observe(
+            &mut session,
+            "(фс-пакет-поле (quote address) (фс-корінь-пакет (фс-порожній)))"
+        ),
         "()",
         "the absent object address remains absent in a root envelope"
     );
@@ -461,7 +541,10 @@ fn root_envelope_accepts_its_own_schema_without_object_only_fields() {
 fn empty_object_store_uses_an_admitted_two_argument_lisp_closure() {
     let mut s = session();
     assert_eq!(
-        observe(&mut s, "(фс-побудувати-об'єкт-сховище (quote ()) (порожній-вміст-сховище))"),
+        observe(
+            &mut s,
+            "(фс-побудувати-об'єкт-сховище (quote ()) (порожній-вміст-сховище))"
+        ),
         "(accepted ())",
         "nested reconstruction must not shadow the two-argument closure"
     );
@@ -498,14 +581,13 @@ fn journal_module_probe_fail_closed_on_malformed_event() {
         ("((tell чужий факт) (tell зоря факт))", true),
         ("((tell зоря факт))", true),
     ] {
-        let code = format!(
-            "(журнал-містить-записи-модуля? (як-є зоря) (як-є {journal}))"
-        );
+        let code = format!("(журнал-містить-записи-модуля? (як-є зоря) (як-є {journal}))");
         let actual = eval_program(&code, &mut s)
             .unwrap_or_else(|error| panic!("SENS не виконав {code}: {error:?}"))
             .value;
         assert_eq!(
-            actual.as_predicate_bit(), Some(expected),
+            actual.as_predicate_bit(),
+            Some(expected),
             "хибне або недоведене членство модуля: {journal}"
         );
     }

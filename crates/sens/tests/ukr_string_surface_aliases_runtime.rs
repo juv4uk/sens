@@ -1,6 +1,6 @@
 //! Українські текстові назви визначаються в SENS до встановлення D9.
 //! Реальне виконання, не Python-оракул і не побайтовий тест коментарів.
-use sens::{Session, eval_parsed_expressions, load_core_library, parse_mixed_exact_domain};
+use sens::{eval_parsed_expressions, load_core_library, parse_mixed_exact_domain, Session};
 
 const SOURCE: &str = include_str!("../../../lib/string-surface-aliases.lisp");
 

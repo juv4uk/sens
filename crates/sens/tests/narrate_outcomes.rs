@@ -1,14 +1,13 @@
 //! B2: presentation regressions use the current exact-domain source readers.
 
 use sens::{
-    eval_parsed_expressions, load_core_library, parse_exact_domain_source, parse_mixed_exact_domain,
-    parse_mixed_exact_domain_reasoning_source, Session,
+    eval_parsed_expressions, load_core_library, parse_exact_domain_source,
+    parse_mixed_exact_domain, parse_mixed_exact_domain_reasoning_source, Session,
 };
 
 fn eval_outcome_narration(source: &str) -> String {
     let mut session = Session::default();
-    load_core_library(&mut session)
-        .expect("canonical Core4 bootstrap must load");
+    load_core_library(&mut session).expect("canonical Core4 bootstrap must load");
     for (path, source) in [
         ("lib/unify.lisp", include_str!("../../../lib/unify.lisp")),
         ("lib/reason.lisp", include_str!("../../../lib/reason.lisp")),
@@ -19,8 +18,14 @@ fn eval_outcome_narration(source: &str) -> String {
             .unwrap_or_else(|error| panic!("{path}: exact reasoning evaluator: {error}"));
     }
     for (path, source) in [
-        ("lib/result-status.lisp", include_str!("../../../lib/result-status.lisp")),
-        ("lib/narrate.lisp", include_str!("../../../lib/narrate.lisp")),
+        (
+            "lib/result-status.lisp",
+            include_str!("../../../lib/result-status.lisp"),
+        ),
+        (
+            "lib/narrate.lisp",
+            include_str!("../../../lib/narrate.lisp"),
+        ),
     ] {
         let parsed = parse_exact_domain_source(source)
             .unwrap_or_else(|error| panic!("{path}: exact-domain reader: {error}"));
@@ -58,7 +63,11 @@ fn current_named_narration_helpers_execute_without_anonymous_d5_value_call() {
             "(planet . earth)",
         ),
     ] {
-        assert_eq!(eval_outcome_narration(source), expected, "живий SENS: {source}");
+        assert_eq!(
+            eval_outcome_narration(source),
+            expected,
+            "живий SENS: {source}"
+        );
     }
 }
 

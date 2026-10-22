@@ -48,11 +48,8 @@ fn env_names(snapshot: &Value) -> Vec<String> {
 #[test]
 fn env_reflection_enumerates_visible_binding() {
     let mut session = Session::default();
-    let result = eval_program(
-        "(define __d8_env_probe__ 41) (env)",
-        &mut session,
-    )
-    .expect("ENV reflection should execute");
+    let result = eval_program("(define __d8_env_probe__ 41) (env)", &mut session)
+        .expect("ENV reflection should execute");
 
     let value = env_lookup(&result.value, "__d8_env_probe__")
         .expect("ENV must enumerate a newly visible binding");
@@ -105,5 +102,8 @@ fn env_reflection_has_deterministic_name_order() {
     let names = env_names(&result.value);
     let mut sorted = names.clone();
     sorted.sort();
-    assert_eq!(names, sorted, "ENV snapshot order must be canonical by name");
+    assert_eq!(
+        names, sorted,
+        "ENV snapshot order must be canonical by name"
+    );
 }

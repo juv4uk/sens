@@ -183,18 +183,12 @@ fn nested_scopes_use_distinct_explicit_exit_values() {
     let mut s = session();
 
     assert_eq!(
-        run(
-            &mut s,
-            "(post-d4-nested-scope (quote early) (quote x))"
-        ),
+        run(&mut s, "(post-d4-nested-scope (quote early) (quote x))"),
         "(inner-returned x)"
     );
 
     assert_eq!(
-        run(
-            &mut s,
-            "(post-d4-nested-scope (quote normal) (quote x))"
-        ),
+        run(&mut s, "(post-d4-nested-scope (quote normal) (quote x))"),
         "(inner-after x)"
     );
 }

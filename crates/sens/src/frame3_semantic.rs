@@ -78,12 +78,15 @@ fn impossible_d3_fixed_arity(bits: u8, arguments: &[Expr]) -> bool {
 mod exact_d3_frame3_admission_tests {
     use super::{check_executable_code, AdmissionWitness};
     use crate::domain_ladder::DomainCoordinate;
-    use crate::{Bija3, Bit1, Bit3, CoreDomainIdentity, DomainIdentity, PredicateBit};
     use crate::syntax::{Expr, ExprKind, Span};
+    use crate::{Bija3, Bit1, Bit3, CoreDomainIdentity, DomainIdentity, PredicateBit};
     use std::rc::Rc;
 
     fn expr(kind: ExprKind) -> Expr {
-        Expr { kind, span: Span::default() }
+        Expr {
+            kind,
+            span: Span::default(),
+        }
     }
 
     fn value() -> Expr {
@@ -97,7 +100,10 @@ mod exact_d3_frame3_admission_tests {
     }
 
     fn lowered(bits: u8, args: Vec<Expr>) -> Expr {
-        expr(ExprKind::DomainCall(CoreDomainIdentity::D3(d3(bits)), Rc::from(args)))
+        expr(ExprKind::DomainCall(
+            CoreDomainIdentity::D3(d3(bits)),
+            Rc::from(args),
+        ))
     }
 
     fn source_list(bits: u8, args: Vec<Expr>) -> Expr {

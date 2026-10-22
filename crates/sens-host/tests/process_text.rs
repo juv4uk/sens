@@ -17,10 +17,7 @@ fn process_result_text_decoding_is_language_owned() {
     )
     .expect("pure process-result interpretation should succeed");
 
-    assert_eq!(
-        result.value.to_string(),
-        "(decoded-process 0 \"A¢\" \"€\")"
-    );
+    assert_eq!(result.value.to_string(), "(decoded-process 0 \"A¢\" \"€\")");
 }
 
 #[test]
@@ -69,6 +66,7 @@ fn public_process_run_binding_is_already_a_lisp_closure() {
           "python3"
           (quote ("-c" "print('language-owned')")))
     "#;
-    let result = eval_program(source, &mut session).expect("language-owned process closure should run");
+    let result =
+        eval_program(source, &mut session).expect("language-owned process closure should run");
     assert_eq!(result.value.to_string(), "(0 \"language-owned\\n\" \"\")");
 }

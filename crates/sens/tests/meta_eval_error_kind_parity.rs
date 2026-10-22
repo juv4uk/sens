@@ -21,9 +21,7 @@ fn meta_eval(source: &str) -> String {
 fn meta_program_result(program: &str) -> String {
     let mut session = meta_session();
     eval_program(
-        &format!(
-            "(решта (обчислити-послідовність-форм (quote ({program})) (quote ())))"
-        ),
+        &format!("(решта (обчислити-послідовність-форм (quote ({program})) (quote ())))"),
         &mut session,
     )
     .unwrap_or_else(|error| panic!("host failure while meta-evaluating program {program}: {error}"))
@@ -59,12 +57,24 @@ fn current_required_meta_error_kinds_have_paired_reference_witnesses() {
         ("(відсутнє)", ErrorKind::UnknownSymbol, "unbound-symbol"),
         ("(42)", ErrorKind::Type, "not-callable"),
         ("((функція (аргумент) аргумент))", ErrorKind::Arity, "arity"),
-        ("(функція (аргумент аргумент) аргумент)", ErrorKind::InvalidForm, "invalid-form"),
-        ("(функція (атом?) атом?)", ErrorKind::InvalidForm, "invalid-form"),
+        (
+            "(функція (аргумент аргумент) аргумент)",
+            ErrorKind::InvalidForm,
+            "invalid-form",
+        ),
+        (
+            "(функція (атом?) атом?)",
+            ErrorKind::InvalidForm,
+            "invalid-form",
+        ),
     ];
 
     for (source, reference_kind, meta_kind) in cases {
-        assert_eq!(native_error_kind(source), reference_kind, "source: {source}");
+        assert_eq!(
+            native_error_kind(source),
+            reference_kind,
+            "source: {source}"
+        );
         assert_eq!(
             meta_error_kind(&meta_eval(source)),
             Some(meta_kind),

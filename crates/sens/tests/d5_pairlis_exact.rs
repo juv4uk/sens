@@ -90,8 +90,7 @@ fn same_low_payload_in_d4_does_not_inherit_pairlis_meaning() {
         "unexpected D4 firewall error: {d4_error}"
     );
     assert_eq!(
-        d5,
-        "((x . first) (y . second) (z . third))",
+        d5, "((x . first) (y . second) (z . third))",
         "D5:11110 remains the only PAIRLIS witness in this comparison"
     );
 }

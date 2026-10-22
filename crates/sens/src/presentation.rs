@@ -80,10 +80,14 @@ fn render_uk(value: &Value) -> String {
             let (negative, numerator, denominator) = number.as_parts();
             let sign = if negative { "-" } else { "" };
             match denominator {
-                Some(d) => format!("{sign}{}/{}", numerator.to_unsigned_decimal_string(), d.to_unsigned_decimal_string()),
+                Some(d) => format!(
+                    "{sign}{}/{}",
+                    numerator.to_unsigned_decimal_string(),
+                    d.to_unsigned_decimal_string()
+                ),
                 None => format!("-{}", numerator.to_unsigned_decimal_string()),
             }
-        },
+        }
         Value::Sid(sid) => {
             // Історичний W8 має окремий простір від D8. Лише доведена
             // семантична відповідність D3 дозволяє показати його чинну
@@ -95,15 +99,27 @@ fn render_uk(value: &Value) -> String {
                     .map(str::to_string)
                     .unwrap_or_else(|| format!("#<домен D{}:{domain}>", domain.width()))
             } else {
-                let ukrainian_surface = semantic_registry::admitted_surfaces_with_namespace_for_semantic_id(*sid)
-                    .into_iter()
-                    .find_map(|(namespace, name)| (namespace == "ук").then_some(name.to_string()));
-                format!("#<сумісний W8:{} {}>", sid, ukrainian_surface.unwrap_or_else(|| format!("W8:{}", semantic_registry::semantic_id_bits(*sid))))
+                let ukrainian_surface =
+                    semantic_registry::admitted_surfaces_with_namespace_for_semantic_id(*sid)
+                        .into_iter()
+                        .find_map(|(namespace, name)| {
+                            (namespace == "ук").then_some(name.to_string())
+                        });
+                format!(
+                    "#<сумісний W8:{} {}>",
+                    sid,
+                    ukrainian_surface.unwrap_or_else(|| format!(
+                        "W8:{}",
+                        semantic_registry::semantic_id_bits(*sid)
+                    ))
+                )
             }
         }
-        Value::DomainIdentity(identity) => semantic_registry::surface_for_domain_identity(*identity, "uk")
-            .map(str::to_string)
-            .unwrap_or_else(|| format!("#<домен D{}:{identity}>", identity.width())),
+        Value::DomainIdentity(identity) => {
+            semantic_registry::surface_for_domain_identity(*identity, "uk")
+                .map(str::to_string)
+                .unwrap_or_else(|| format!("#<домен D{}:{identity}>", identity.width()))
+        }
         Value::String(text) => {
             let mut escaped = String::with_capacity(text.len() + 2);
             escaped.push('"');
@@ -164,9 +180,11 @@ fn unchanged_non_domain_presentation(value: &Value) -> String {
 
 fn render_sa(value: &Value) -> String {
     match value {
-        Value::DomainIdentity(identity) => semantic_registry::surface_for_domain_identity(*identity, "sa")
-            .map(str::to_string)
-            .unwrap_or_else(|| value.to_string()),
+        Value::DomainIdentity(identity) => {
+            semantic_registry::surface_for_domain_identity(*identity, "sa")
+                .map(str::to_string)
+                .unwrap_or_else(|| value.to_string())
+        }
         Value::Pair(_, _) => {
             let mut output = String::from("(");
             let mut current = value;
@@ -397,58 +415,106 @@ mod tests {
 
     #[test]
     fn exact_domain_human_presentation_round_trips_d1_d4_surfaces() {
-        let yes = Value::DomainIdentity(crate::DomainIdentity::D1(
-            crate::PredicateBit::from_word(crate::Bit1::new(1).unwrap()),
-        ));
-        let open = Value::DomainIdentity(crate::DomainIdentity::D2(
-            crate::Racana2::from_word(crate::Bit2::new(0b10).unwrap()),
-        ));
-        let empty = Value::DomainIdentity(crate::DomainIdentity::D3(
-            crate::Bija3::from_word(crate::Bit3::new(0b000).unwrap()),
-        ));
-        let lambda = Value::DomainIdentity(crate::DomainIdentity::D4(
-            crate::CoreD4::from_word(crate::Bit4::new(0b0010).unwrap()),
-        ));
+        let yes = Value::DomainIdentity(crate::DomainIdentity::D1(crate::PredicateBit::from_word(
+            crate::Bit1::new(1).unwrap(),
+        )));
+        let open = Value::DomainIdentity(crate::DomainIdentity::D2(crate::Racana2::from_word(
+            crate::Bit2::new(0b10).unwrap(),
+        )));
+        let empty = Value::DomainIdentity(crate::DomainIdentity::D3(crate::Bija3::from_word(
+            crate::Bit3::new(0b000).unwrap(),
+        )));
+        let lambda = Value::DomainIdentity(crate::DomainIdentity::D4(crate::CoreD4::from_word(
+            crate::Bit4::new(0b0010).unwrap(),
+        )));
 
-        assert_eq!(render_value_for_presentation(&yes, PresentationLanguage::Ukrainian), "так");
-        assert_eq!(render_value_for_presentation(&yes, PresentationLanguage::Sanskrit), "ām");
-        assert_eq!(render_value_for_presentation(&open, PresentationLanguage::Ukrainian), "відкрити");
+        assert_eq!(
+            render_value_for_presentation(&yes, PresentationLanguage::Ukrainian),
+            "так"
+        );
+        assert_eq!(
+            render_value_for_presentation(&yes, PresentationLanguage::Sanskrit),
+            "ām"
+        );
+        assert_eq!(
+            render_value_for_presentation(&open, PresentationLanguage::Ukrainian),
+            "відкрити"
+        );
         // D3:000 is the same literal structural () in every human view.
-        assert_eq!(render_value_for_presentation(&empty, PresentationLanguage::Ukrainian), "()");
-        assert_eq!(render_value_for_presentation(&empty, PresentationLanguage::Sanskrit), "()");
-        assert_eq!(render_value_for_presentation(&lambda, PresentationLanguage::Ukrainian), "функція");
-        assert_eq!(render_value_for_presentation(&lambda, PresentationLanguage::Sanskrit), "phalana");
+        assert_eq!(
+            render_value_for_presentation(&empty, PresentationLanguage::Ukrainian),
+            "()"
+        );
+        assert_eq!(
+            render_value_for_presentation(&empty, PresentationLanguage::Sanskrit),
+            "()"
+        );
+        assert_eq!(
+            render_value_for_presentation(&lambda, PresentationLanguage::Ukrainian),
+            "функція"
+        );
+        assert_eq!(
+            render_value_for_presentation(&lambda, PresentationLanguage::Sanskrit),
+            "phalana"
+        );
 
-        assert_eq!(render_value_for_presentation(&lambda, PresentationLanguage::Canonical), "0010");
+        assert_eq!(
+            render_value_for_presentation(&lambda, PresentationLanguage::Canonical),
+            "0010"
+        );
         assert_eq!(lambda.to_string(), "0010");
     }
 
     #[test]
     fn d1_human_projection_keeps_machine_bits_separate_from_words() {
-        let no = Value::DomainIdentity(crate::DomainIdentity::D1(
-            crate::PredicateBit::from_word(crate::Bit1::new(0).unwrap()),
-        ));
-        let yes = Value::DomainIdentity(crate::DomainIdentity::D1(
-            crate::PredicateBit::from_word(crate::Bit1::new(1).unwrap()),
-        ));
+        let no = Value::DomainIdentity(crate::DomainIdentity::D1(crate::PredicateBit::from_word(
+            crate::Bit1::new(0).unwrap(),
+        )));
+        let yes = Value::DomainIdentity(crate::DomainIdentity::D1(crate::PredicateBit::from_word(
+            crate::Bit1::new(1).unwrap(),
+        )));
 
-        assert_eq!(render_value_for_presentation(&no, PresentationLanguage::Canonical), "0");
-        assert_eq!(render_value_for_presentation(&yes, PresentationLanguage::Canonical), "1");
+        assert_eq!(
+            render_value_for_presentation(&no, PresentationLanguage::Canonical),
+            "0"
+        );
+        assert_eq!(
+            render_value_for_presentation(&yes, PresentationLanguage::Canonical),
+            "1"
+        );
         // No English D1 surface is currently admitted; EN therefore remains
         // the exact machine fallback until the domain table says otherwise.
-        assert_eq!(render_value_for_presentation(&no, PresentationLanguage::English), "0");
-        assert_eq!(render_value_for_presentation(&yes, PresentationLanguage::English), "1");
-        assert_eq!(render_value_for_presentation(&no, PresentationLanguage::Ukrainian), "ні");
-        assert_eq!(render_value_for_presentation(&yes, PresentationLanguage::Ukrainian), "так");
-        assert_eq!(render_value_for_presentation(&no, PresentationLanguage::Sanskrit), "na");
-        assert_eq!(render_value_for_presentation(&yes, PresentationLanguage::Sanskrit), "ām");
+        assert_eq!(
+            render_value_for_presentation(&no, PresentationLanguage::English),
+            "0"
+        );
+        assert_eq!(
+            render_value_for_presentation(&yes, PresentationLanguage::English),
+            "1"
+        );
+        assert_eq!(
+            render_value_for_presentation(&no, PresentationLanguage::Ukrainian),
+            "ні"
+        );
+        assert_eq!(
+            render_value_for_presentation(&yes, PresentationLanguage::Ukrainian),
+            "так"
+        );
+        assert_eq!(
+            render_value_for_presentation(&no, PresentationLanguage::Sanskrit),
+            "na"
+        );
+        assert_eq!(
+            render_value_for_presentation(&yes, PresentationLanguage::Sanskrit),
+            "ām"
+        );
     }
 
     #[test]
     fn d9_without_runtime_surface_renders_exact_canonical_bits() {
-        let d9 = Value::DomainIdentity(crate::DomainIdentity::D9(
-            crate::CoreD9::from_word(crate::Bit9::new(0b1_00000001).unwrap()),
-        ));
+        let d9 = Value::DomainIdentity(crate::DomainIdentity::D9(crate::CoreD9::from_word(
+            crate::Bit9::new(0b1_00000001).unwrap(),
+        )));
 
         assert_eq!(d9.to_string(), "100000001");
         assert_eq!(
@@ -470,12 +536,12 @@ mod tests {
 
     #[test]
     fn sanskrit_presentation_projects_domain_identities_inside_lists() {
-        let yes = Value::DomainIdentity(crate::DomainIdentity::D1(
-            crate::PredicateBit::from_word(crate::Bit1::new(1).unwrap()),
-        ));
-        let lambda = Value::DomainIdentity(crate::DomainIdentity::D4(
-            crate::CoreD4::from_word(crate::Bit4::new(0b0010).unwrap()),
-        ));
+        let yes = Value::DomainIdentity(crate::DomainIdentity::D1(crate::PredicateBit::from_word(
+            crate::Bit1::new(1).unwrap(),
+        )));
+        let lambda = Value::DomainIdentity(crate::DomainIdentity::D4(crate::CoreD4::from_word(
+            crate::Bit4::new(0b0010).unwrap(),
+        )));
         let value = Value::list([lambda, yes]);
         assert_eq!(
             render_value_for_presentation(&value, PresentationLanguage::Sanskrit),
@@ -485,12 +551,12 @@ mod tests {
 
     #[test]
     fn equal_payload_d3_d4_identities_remain_visibly_distinct() {
-        let d3_quote = Value::DomainIdentity(crate::DomainIdentity::D3(
-            crate::Bija3::from_word(crate::Bit3::new(0b001).unwrap()),
-        ));
-        let d4_eval = Value::DomainIdentity(crate::DomainIdentity::D4(
-            crate::CoreD4::from_word(crate::Bit4::new(0b0001).unwrap()),
-        ));
+        let d3_quote = Value::DomainIdentity(crate::DomainIdentity::D3(crate::Bija3::from_word(
+            crate::Bit3::new(0b001).unwrap(),
+        )));
+        let d4_eval = Value::DomainIdentity(crate::DomainIdentity::D4(crate::CoreD4::from_word(
+            crate::Bit4::new(0b0001).unwrap(),
+        )));
 
         // Same integer payload does not erase exact domain width: 001 != 0001.
         assert_eq!(d3_quote.to_string(), "001");
@@ -517,9 +583,8 @@ mod tests {
     fn історичне_w8_не_підвищується_до_чинного_callable_d8() {
         // Старий восьмибітний запис — джерельне слово, не виконувана
         // ідентичність Core і не доказ ратифікації сучасного D8.
-        let історичне_слово = crate::BinarySourceWord::W8(
-            crate::Bit8::new(0b10101000).expect("точні вісім бітів"),
-        );
+        let історичне_слово =
+            crate::BinarySourceWord::W8(crate::Bit8::new(0b10101000).expect("точні вісім бітів"));
         assert_eq!(історичне_слово.width(), 8);
         assert_eq!(історичне_слово.packed_bits(), 0b10101000);
         assert!(
@@ -539,7 +604,9 @@ mod tests {
 
     #[test]
     fn ратифікований_d3_міст_не_дає_w8_довільної_семантики() {
-        let historical_quote = Value::Sid(crate::CoreDomainIdentity::D3(crate::Bija3::from_word(crate::Bit3::new(0b001).expect("quote"))));
+        let historical_quote = Value::Sid(crate::CoreDomainIdentity::D3(crate::Bija3::from_word(
+            crate::Bit3::new(0b001).expect("quote"),
+        )));
         let current_quote = Value::DomainIdentity(crate::DomainIdentity::D3(
             crate::Bija3::from_word(crate::Bit3::new(0b001).unwrap()),
         ));
@@ -607,9 +674,9 @@ mod tests {
     #[test]
     fn ukrainian_presentation_projects_d3_atom_and_function_markers() {
         let mut session = Session::default();
-        let atom = Value::DomainIdentity(crate::DomainIdentity::D3(
-            crate::Bija3::from_word(crate::Bit3::new(0b010).unwrap()),
-        ));
+        let atom = Value::DomainIdentity(crate::DomainIdentity::D3(crate::Bija3::from_word(
+            crate::Bit3::new(0b010).unwrap(),
+        )));
         assert_eq!(atom.to_string(), "010");
         assert_eq!(
             render_value_for_presentation(&atom, PresentationLanguage::Ukrainian),
@@ -677,16 +744,18 @@ mod tests {
             // Human Lisp and exact-domain binary source have distinct readers.
             // The ordinary Lisp reader must not reinterpret 010 as a D3 word.
             let error = if source == "(010)" {
-                let exact = crate::parse_mixed_exact_domain(source)
-                    .expect("exact D3 call head");
+                let exact = crate::parse_mixed_exact_domain(source).expect("exact D3 call head");
                 crate::eval_parsed_expressions(&exact, &mut session).expect_err("arity")
             } else {
                 eval_program(source, &mut session).expect_err("arity")
             };
             assert_eq!(error.kind, ErrorKind::Arity, "{source}: {}", error.message);
             assert!(
-                error.message.starts_with("010: expected 1 arguments; received 0"),
-                "{source}: {}", error.message
+                error
+                    .message
+                    .starts_with("010: expected 1 arguments; received 0"),
+                "{source}: {}",
+                error.message
             );
             let rendered =
                 render_error_for_presentation(&error, source, PresentationLanguage::Ukrainian);

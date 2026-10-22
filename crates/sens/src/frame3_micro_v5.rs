@@ -221,10 +221,7 @@ fn unrank_legacy(
     Err(Frame3MicroEnumerateError::RankOutOfRange)
 }
 
-fn rank_legacy(
-    expr: &Frame3MicroExpr,
-    counts: &Counts,
-) -> Result<u128, Frame3MicroEnumerateError> {
+fn rank_legacy(expr: &Frame3MicroExpr, counts: &Counts) -> Result<u128, Frame3MicroEnumerateError> {
     let nodes = expr.node_count();
     if nodes == 1 {
         return leaf_rank(expr).ok_or(Frame3MicroEnumerateError::RankOutOfRange);
@@ -365,19 +362,13 @@ fn unrank_state(
             let right_nodes = nodes - 1 - left_nodes;
             for (left_extended, right_extended) in extended_pairs {
                 let right_count = counts[right_nodes][usize::from(right_extended)];
-                let block = checked_mul(
-                    counts[left_nodes][usize::from(left_extended)],
-                    right_count,
-                )?;
+                let block =
+                    checked_mul(counts[left_nodes][usize::from(left_extended)], right_count)?;
                 if rank < block {
                     let left_rank = rank / right_count;
                     let right_rank = rank % right_count;
-                    let left = Box::new(unrank_state(
-                        left_nodes,
-                        left_extended,
-                        left_rank,
-                        counts,
-                    )?);
+                    let left =
+                        Box::new(unrank_state(left_nodes, left_extended, left_rank, counts)?);
                     let right = Box::new(unrank_state(
                         right_nodes,
                         right_extended,
@@ -401,20 +392,12 @@ fn unrank_state(
         let right_nodes = nodes - 1 - left_nodes;
         for (left_extended, right_extended) in all_pairs {
             let right_count = counts[right_nodes][usize::from(right_extended)];
-            let block = checked_mul(
-                counts[left_nodes][usize::from(left_extended)],
-                right_count,
-            )?;
+            let block = checked_mul(counts[left_nodes][usize::from(left_extended)], right_count)?;
             if rank < block {
                 let left_rank = rank / right_count;
                 let right_rank = rank % right_count;
                 return Ok(Frame3MicroExpr::EqAtom(
-                    Box::new(unrank_state(
-                        left_nodes,
-                        left_extended,
-                        left_rank,
-                        counts,
-                    )?),
+                    Box::new(unrank_state(left_nodes, left_extended, left_rank, counts)?),
                     Box::new(unrank_state(
                         right_nodes,
                         right_extended,
@@ -441,34 +424,16 @@ fn unrank_state(
                 let then_count = counts[then_nodes][usize::from(then_extended)];
                 let else_count = counts[else_nodes][usize::from(else_extended)];
                 let then_else = checked_mul(then_count, else_count)?;
-                let block = checked_mul(
-                    counts[test_nodes][usize::from(test_extended)],
-                    then_else,
-                )?;
+                let block = checked_mul(counts[test_nodes][usize::from(test_extended)], then_else)?;
                 if rank < block {
                     let test_rank = rank / then_else;
                     let remainder = rank % then_else;
                     let then_rank = remainder / else_count;
                     let else_rank = remainder % else_count;
                     return Ok(Frame3MicroExpr::IfAtom(
-                        Box::new(unrank_state(
-                            test_nodes,
-                            test_extended,
-                            test_rank,
-                            counts,
-                        )?),
-                        Box::new(unrank_state(
-                            then_nodes,
-                            then_extended,
-                            then_rank,
-                            counts,
-                        )?),
-                        Box::new(unrank_state(
-                            else_nodes,
-                            else_extended,
-                            else_rank,
-                            counts,
-                        )?),
+                        Box::new(unrank_state(test_nodes, test_extended, test_rank, counts)?),
+                        Box::new(unrank_state(then_nodes, then_extended, then_rank, counts)?),
+                        Box::new(unrank_state(else_nodes, else_extended, else_rank, counts)?),
                     ));
                 }
                 rank -= block;
@@ -583,10 +548,7 @@ fn rank_extended_exact(
                     };
                     rank = checked_add(
                         rank,
-                        checked_mul(
-                            left_rank,
-                            counts[right_nodes][usize::from(right_extended)],
-                        )?,
+                        checked_mul(left_rank, counts[right_nodes][usize::from(right_extended)])?,
                     )?;
                     return checked_add(rank, right_rank);
                 }
@@ -626,9 +588,7 @@ fn rank_extended_exact(
                         )?,
                         counts[else_nodes][usize::from(else_extended)],
                     )?;
-                    if (test_nodes, then_nodes, else_nodes) == actual_nodes
-                        && mask == actual_mask
-                    {
+                    if (test_nodes, then_nodes, else_nodes) == actual_nodes && mask == actual_mask {
                         let test_rank = if test_extended {
                             rank_extended_exact(test, counts)?
                         } else {
@@ -651,10 +611,7 @@ fn rank_extended_exact(
                         rank = checked_add(rank, checked_mul(test_rank, then_else)?)?;
                         rank = checked_add(
                             rank,
-                            checked_mul(
-                                then_rank,
-                                counts[else_nodes][usize::from(else_extended)],
-                            )?,
+                            checked_mul(then_rank, counts[else_nodes][usize::from(else_extended)])?,
                         )?;
                         return checked_add(rank, else_rank);
                     }
@@ -685,9 +642,7 @@ pub(crate) fn decode_extension(
     Err(Frame3MicroEnumerateError::RankOutOfRange)
 }
 
-pub(crate) fn encode_extension(
-    expr: &Frame3MicroExpr,
-) -> Result<u128, Frame3MicroEnumerateError> {
+pub(crate) fn encode_extension(expr: &Frame3MicroExpr) -> Result<u128, Frame3MicroEnumerateError> {
     if !contains_extension(expr) {
         return Err(Frame3MicroEnumerateError::RankOutOfRange);
     }

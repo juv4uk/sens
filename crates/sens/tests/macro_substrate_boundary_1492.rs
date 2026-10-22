@@ -39,10 +39,14 @@ fn бібліотека_макросів_не_викликає_англійсь�
     assert!(
         !MACRO_SOURCE.lines().any(|line| {
             let line = line.trim_start();
-            line.starts_with("(000") || line.starts_with("(001") ||
-            line.starts_with("(010") || line.starts_with("(011") ||
-            line.starts_with("(100") || line.starts_with("(101") ||
-            line.starts_with("(110") || line.starts_with("(111")
+            line.starts_with("(000")
+                || line.starts_with("(001")
+                || line.starts_with("(010")
+                || line.starts_with("(011")
+                || line.starts_with("(100")
+                || line.starts_with("(101")
+                || line.starts_with("(110")
+                || line.starts_with("(111")
         }),
         "lib/macro.lisp не повинен мати сирих бітових викличних голів"
     );

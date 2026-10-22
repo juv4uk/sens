@@ -3,14 +3,54 @@ use sens::{eval_program, Session};
 fn eval_store(source: &str) -> String {
     let mut session = Session::default();
     sens::eval_core_library_source(include_str!("../../../lib/core.lisp"), &mut session).unwrap();
-    sens::eval_pinned_reasoning_source("lib/unify.lisp", include_str!("../../../lib/unify.lisp"), &mut session).unwrap();
-    sens::eval_pinned_reasoning_source("lib/reason.lisp", include_str!("../../../lib/reason.lisp"), &mut session).unwrap();
-    sens::eval_pinned_reasoning_source("lib/forward.lisp", include_str!("../../../lib/forward.lisp"), &mut session).unwrap();
-    sens::eval_pinned_reasoning_source("lib/knowledge.lisp", include_str!("../../../lib/knowledge.lisp"), &mut session).unwrap();
-    sens::eval_pinned_reasoning_source("lib/persistent-map.lisp", include_str!("../../../lib/persistent-map.lisp"), &mut session).unwrap();
-    sens::eval_pinned_reasoning_source("lib/world.lisp", include_str!("../../../lib/world.lisp"), &mut session).unwrap();
-    sens::eval_pinned_reasoning_source("lib/content-store.lisp", include_str!("../../../lib/content-store.lisp"), &mut session).unwrap();
-    sens::eval_pinned_reasoning_source("lib/lisp-fs.lisp", include_str!("../../../lib/lisp-fs.lisp"), &mut session).unwrap();
+    sens::eval_pinned_reasoning_source(
+        "lib/unify.lisp",
+        include_str!("../../../lib/unify.lisp"),
+        &mut session,
+    )
+    .unwrap();
+    sens::eval_pinned_reasoning_source(
+        "lib/reason.lisp",
+        include_str!("../../../lib/reason.lisp"),
+        &mut session,
+    )
+    .unwrap();
+    sens::eval_pinned_reasoning_source(
+        "lib/forward.lisp",
+        include_str!("../../../lib/forward.lisp"),
+        &mut session,
+    )
+    .unwrap();
+    sens::eval_pinned_reasoning_source(
+        "lib/knowledge.lisp",
+        include_str!("../../../lib/knowledge.lisp"),
+        &mut session,
+    )
+    .unwrap();
+    sens::eval_pinned_reasoning_source(
+        "lib/persistent-map.lisp",
+        include_str!("../../../lib/persistent-map.lisp"),
+        &mut session,
+    )
+    .unwrap();
+    sens::eval_pinned_reasoning_source(
+        "lib/world.lisp",
+        include_str!("../../../lib/world.lisp"),
+        &mut session,
+    )
+    .unwrap();
+    sens::eval_pinned_reasoning_source(
+        "lib/content-store.lisp",
+        include_str!("../../../lib/content-store.lisp"),
+        &mut session,
+    )
+    .unwrap();
+    sens::eval_pinned_reasoning_source(
+        "lib/lisp-fs.lisp",
+        include_str!("../../../lib/lisp-fs.lisp"),
+        &mut session,
+    )
+    .unwrap();
     eval_program(source, &mut session)
         .unwrap()
         .value
@@ -20,14 +60,54 @@ fn eval_store(source: &str) -> String {
 fn eval_store_fixture(source: &str) -> String {
     let mut session = Session::default();
     sens::eval_core_library_source(include_str!("../../../lib/core.lisp"), &mut session).unwrap();
-    sens::eval_pinned_reasoning_source("lib/unify.lisp", include_str!("../../../lib/unify.lisp"), &mut session).unwrap();
-    sens::eval_pinned_reasoning_source("lib/reason.lisp", include_str!("../../../lib/reason.lisp"), &mut session).unwrap();
-    sens::eval_pinned_reasoning_source("lib/forward.lisp", include_str!("../../../lib/forward.lisp"), &mut session).unwrap();
-    sens::eval_pinned_reasoning_source("lib/knowledge.lisp", include_str!("../../../lib/knowledge.lisp"), &mut session).unwrap();
-    sens::eval_pinned_reasoning_source("lib/persistent-map.lisp", include_str!("../../../lib/persistent-map.lisp"), &mut session).unwrap();
-    sens::eval_pinned_reasoning_source("lib/world.lisp", include_str!("../../../lib/world.lisp"), &mut session).unwrap();
-    sens::eval_pinned_reasoning_source("lib/content-store.lisp", include_str!("../../../lib/content-store.lisp"), &mut session).unwrap();
-    sens::eval_pinned_reasoning_source("lib/lisp-fs.lisp", include_str!("../../../lib/lisp-fs.lisp"), &mut session).unwrap();
+    sens::eval_pinned_reasoning_source(
+        "lib/unify.lisp",
+        include_str!("../../../lib/unify.lisp"),
+        &mut session,
+    )
+    .unwrap();
+    sens::eval_pinned_reasoning_source(
+        "lib/reason.lisp",
+        include_str!("../../../lib/reason.lisp"),
+        &mut session,
+    )
+    .unwrap();
+    sens::eval_pinned_reasoning_source(
+        "lib/forward.lisp",
+        include_str!("../../../lib/forward.lisp"),
+        &mut session,
+    )
+    .unwrap();
+    sens::eval_pinned_reasoning_source(
+        "lib/knowledge.lisp",
+        include_str!("../../../lib/knowledge.lisp"),
+        &mut session,
+    )
+    .unwrap();
+    sens::eval_pinned_reasoning_source(
+        "lib/persistent-map.lisp",
+        include_str!("../../../lib/persistent-map.lisp"),
+        &mut session,
+    )
+    .unwrap();
+    sens::eval_pinned_reasoning_source(
+        "lib/world.lisp",
+        include_str!("../../../lib/world.lisp"),
+        &mut session,
+    )
+    .unwrap();
+    sens::eval_pinned_reasoning_source(
+        "lib/content-store.lisp",
+        include_str!("../../../lib/content-store.lisp"),
+        &mut session,
+    )
+    .unwrap();
+    sens::eval_pinned_reasoning_source(
+        "lib/lisp-fs.lisp",
+        include_str!("../../../lib/lisp-fs.lisp"),
+        &mut session,
+    )
+    .unwrap();
     sens::eval_pinned_fs_fixture_source(
         "tests/fixtures/lisp-fs-conformance.lisp",
         source,
@@ -41,14 +121,54 @@ fn eval_store_fixture(source: &str) -> String {
 fn eval_store_error(source: &str) -> String {
     let mut session = Session::default();
     sens::eval_core_library_source(include_str!("../../../lib/core.lisp"), &mut session).unwrap();
-    sens::eval_pinned_reasoning_source("lib/unify.lisp", include_str!("../../../lib/unify.lisp"), &mut session).unwrap();
-    sens::eval_pinned_reasoning_source("lib/reason.lisp", include_str!("../../../lib/reason.lisp"), &mut session).unwrap();
-    sens::eval_pinned_reasoning_source("lib/forward.lisp", include_str!("../../../lib/forward.lisp"), &mut session).unwrap();
-    sens::eval_pinned_reasoning_source("lib/knowledge.lisp", include_str!("../../../lib/knowledge.lisp"), &mut session).unwrap();
-    sens::eval_pinned_reasoning_source("lib/persistent-map.lisp", include_str!("../../../lib/persistent-map.lisp"), &mut session).unwrap();
-    sens::eval_pinned_reasoning_source("lib/world.lisp", include_str!("../../../lib/world.lisp"), &mut session).unwrap();
-    sens::eval_pinned_reasoning_source("lib/content-store.lisp", include_str!("../../../lib/content-store.lisp"), &mut session).unwrap();
-    sens::eval_pinned_reasoning_source("lib/lisp-fs.lisp", include_str!("../../../lib/lisp-fs.lisp"), &mut session).unwrap();
+    sens::eval_pinned_reasoning_source(
+        "lib/unify.lisp",
+        include_str!("../../../lib/unify.lisp"),
+        &mut session,
+    )
+    .unwrap();
+    sens::eval_pinned_reasoning_source(
+        "lib/reason.lisp",
+        include_str!("../../../lib/reason.lisp"),
+        &mut session,
+    )
+    .unwrap();
+    sens::eval_pinned_reasoning_source(
+        "lib/forward.lisp",
+        include_str!("../../../lib/forward.lisp"),
+        &mut session,
+    )
+    .unwrap();
+    sens::eval_pinned_reasoning_source(
+        "lib/knowledge.lisp",
+        include_str!("../../../lib/knowledge.lisp"),
+        &mut session,
+    )
+    .unwrap();
+    sens::eval_pinned_reasoning_source(
+        "lib/persistent-map.lisp",
+        include_str!("../../../lib/persistent-map.lisp"),
+        &mut session,
+    )
+    .unwrap();
+    sens::eval_pinned_reasoning_source(
+        "lib/world.lisp",
+        include_str!("../../../lib/world.lisp"),
+        &mut session,
+    )
+    .unwrap();
+    sens::eval_pinned_reasoning_source(
+        "lib/content-store.lisp",
+        include_str!("../../../lib/content-store.lisp"),
+        &mut session,
+    )
+    .unwrap();
+    sens::eval_pinned_reasoning_source(
+        "lib/lisp-fs.lisp",
+        include_str!("../../../lib/lisp-fs.lisp"),
+        &mut session,
+    )
+    .unwrap();
     eval_program(source, &mut session)
         .expect_err("malformed serialized data must fail closed")
         .to_string()
@@ -513,18 +633,32 @@ fn lisp_fs_journal_replay_rejects_malformed_field_entries_sens_owned() {
     // Semantic cases/branches are SENS code in the fixture, not Rust logic.
     // Rust only runs the pre-existing pinned library chain and observes output.
     let mut session = Session::default();
-    sens::eval_core_library_source(include_str!("../../../lib/core.lisp"),
-        &mut session,
-    ).expect("ratified core loader");
+    sens::eval_core_library_source(include_str!("../../../lib/core.lisp"), &mut session)
+        .expect("ratified core loader");
     for (path, source) in [
         ("lib/unify.lisp", include_str!("../../../lib/unify.lisp")),
         ("lib/reason.lisp", include_str!("../../../lib/reason.lisp")),
-        ("lib/forward.lisp", include_str!("../../../lib/forward.lisp")),
-        ("lib/knowledge.lisp", include_str!("../../../lib/knowledge.lisp")),
-        ("lib/persistent-map.lisp", include_str!("../../../lib/persistent-map.lisp")),
+        (
+            "lib/forward.lisp",
+            include_str!("../../../lib/forward.lisp"),
+        ),
+        (
+            "lib/knowledge.lisp",
+            include_str!("../../../lib/knowledge.lisp"),
+        ),
+        (
+            "lib/persistent-map.lisp",
+            include_str!("../../../lib/persistent-map.lisp"),
+        ),
         ("lib/world.lisp", include_str!("../../../lib/world.lisp")),
-        ("lib/content-store.lisp", include_str!("../../../lib/content-store.lisp")),
-        ("lib/lisp-fs.lisp", include_str!("../../../lib/lisp-fs.lisp")),
+        (
+            "lib/content-store.lisp",
+            include_str!("../../../lib/content-store.lisp"),
+        ),
+        (
+            "lib/lisp-fs.lisp",
+            include_str!("../../../lib/lisp-fs.lisp"),
+        ),
     ] {
         sens::eval_pinned_reasoning_source(path, source, &mut session)
             .unwrap_or_else(|error| panic!("pinned SENS library {path}: {error}"));

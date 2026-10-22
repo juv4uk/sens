@@ -39,8 +39,8 @@ fn main() {
     if env::var_os("CARGO_FEATURE_ZIG_SOURCE").is_none() {
         return;
     }
-    let root = PathBuf::from(env::var_os("CARGO_MANIFEST_DIR").expect("CARGO_MANIFEST_DIR"))
-        .join("../..");
+    let root =
+        PathBuf::from(env::var_os("CARGO_MANIFEST_DIR").expect("CARGO_MANIFEST_DIR")).join("../..");
     let pinned = include_str!("../../.zig-version").trim();
     let compiler = pinned_zig_compiler(pinned);
     let compiler_label = PathBuf::from(&compiler).display().to_string();
@@ -55,16 +55,17 @@ fn main() {
                     "`.\\scripts\\with-pinned-zig.ps1 cargo build` from the repository root, ",
                     "or set ZIG to the pinned zig.exe."
                 ),
-                pinned,
-                compiler_label,
-                error
+                pinned, compiler_label, error
             )
         });
     assert!(probe.status.success(), "Guard Zig version probe failed");
     let actual = std::str::from_utf8(&probe.stdout)
         .expect("Zig version is not UTF-8")
         .trim();
-    assert_eq!(actual, pinned, "Guard source transport Zig version mismatch");
+    assert_eq!(
+        actual, pinned,
+        "Guard source transport Zig version mismatch"
+    );
 
     let out = PathBuf::from(env::var_os("OUT_DIR").expect("OUT_DIR"));
     let target_env = env::var("CARGO_CFG_TARGET_ENV").unwrap_or_default();

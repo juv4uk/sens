@@ -167,7 +167,9 @@ fn not_yet_implemented_reason(admitted_extension: &str) -> &'static str {
         "SSE" | "SSE2" | "SSE3" | "SSSE3" | "SSE4.1+SSE4.2" => {
             "Кодування обов'язкового префікса й ModRM для SSE ще не реалізовано"
         }
-        "AES-NI" | "PCLMULQDQ" => "Кодування криптографічних команд із префіксом SSE ще не реалізовано",
+        "AES-NI" | "PCLMULQDQ" => {
+            "Кодування криптографічних команд із префіксом SSE ще не реалізовано"
+        }
         "XSAVE" => "Кодування стану керування XSAVE ще не реалізовано",
         "MPX" => "Кодування регістрів BND ще не реалізовано",
         "SGX" => "Кодування підфункцій ENCLS/ENCLU ще не реалізовано",
@@ -287,10 +289,7 @@ pub fn render(entries: &[CoverageEntry]) -> String {
             "    (iclass \"{}\")\n",
             escape_lisp_string(&entry.iclass)
         ));
-        out.push_str(&format!(
-            "    (extension {})\n",
-            entry.admitted_extension
-        ));
+        out.push_str(&format!("    (extension {})\n", entry.admitted_extension));
         out.push_str(&format!("    (status {})\n", entry.status));
         out.push_str(&format!(
             "    (reason \"{}\"))\n",

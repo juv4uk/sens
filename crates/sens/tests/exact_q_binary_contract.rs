@@ -68,7 +68,10 @@ fn escape_lisp_string(value: &str) -> String {
 
 fn actual(row: &Row, session: &mut Session) -> String {
     match eval_program(&row.expr, session) {
-        Ok(result) => format!("(value \"{}\")", escape_lisp_string(&result.value.to_string())),
+        Ok(result) => format!(
+            "(value \"{}\")",
+            escape_lisp_string(&result.value.to_string())
+        ),
         Err(error) => format!("(error \"{:?}\")", error.kind),
     }
 }

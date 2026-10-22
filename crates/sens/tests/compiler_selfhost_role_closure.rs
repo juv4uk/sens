@@ -5,9 +5,9 @@
 
 use sens::syntax::{Expr, ExprKind};
 use sens::{
-    compiler_execution_role_from_sens, compiler_lowering_role_from_sens, lower_program, parse_mixed_exact_domain,
-    Bit4, Bit5, Bit8, CompilerExecutionRole, CompilerLoweringRole, CoreD4, CoreD5, CoreD8,
-    CoreDomainIdentity,
+    compiler_execution_role_from_sens, compiler_lowering_role_from_sens, lower_program,
+    parse_mixed_exact_domain, Bit4, Bit5, Bit8, CompilerExecutionRole, CompilerLoweringRole,
+    CoreD4, CoreD5, CoreD8, CoreDomainIdentity,
 };
 
 const NUCLEUS: &str = include_str!("../../../lib/compiler-nucleus.lisp");
@@ -78,7 +78,11 @@ fn real_compiler_nucleus_is_closed_over_nine_sens_derived_roles() {
         );
     }
 
-    assert_eq!(roles.len(), 9, "bounded current nucleus closure must stay explicit");
+    assert_eq!(
+        roles.len(),
+        9,
+        "bounded current nucleus closure must stay explicit"
+    );
 }
 
 #[test]
@@ -139,5 +143,8 @@ fn established_three_role_execution_api_remains_compatibility_stable() {
     for expr in &lowered {
         walk(expr, &mut saw_old_role);
     }
-    assert!(saw_old_role, "current nucleus must still exercise the merged three-role vertical");
+    assert!(
+        saw_old_role,
+        "current nucleus must still exercise the merged three-role vertical"
+    );
 }

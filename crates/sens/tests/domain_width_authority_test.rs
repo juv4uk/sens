@@ -1,24 +1,20 @@
 use sens::{parse_binary_source_words, DomainIdentity};
 use serde_json::Value;
 
-const CERTIFICATE: &str =
-    include_str!("../../../knowledge/domain-width-authority.generated.json");
+const CERTIFICATE: &str = include_str!("../../../knowledge/domain-width-authority.generated.json");
 
 #[test]
 fn generated_sens_width_certificate_matches_exact_rust_carriers() {
     let certificate: Value = serde_json::from_str(CERTIFICATE).expect("valid width certificate");
     assert_eq!(
-        certificate["status"],
-        "generated-projection-non-authoritative",
+        certificate["status"], "generated-projection-non-authoritative",
         "Rust must consume a projection, never become width authority"
     );
 
     let current = certificate["current_domains"]
         .as_array()
         .expect("current_domains array");
-    let domains = certificate["domains"]
-        .as_object()
-        .expect("domains object");
+    let domains = certificate["domains"].as_object().expect("domains object");
 
     assert_eq!(current.len(), domains.len());
 

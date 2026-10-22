@@ -1,7 +1,7 @@
 //! Exact-width Text7 and D2 reader boundaries only.
 //! Contextual DEFINE/LAMBDA binding behavior is proved by SENS/Lisp witnesses.
 
-use sens::{parse_canonical_binary, DomainIdentity, syntax::ExprKind};
+use sens::{parse_canonical_binary, syntax::ExprKind, DomainIdentity};
 
 fn text7_frame(cells: &[u8]) -> String {
     let body = cells
@@ -58,8 +58,7 @@ fn packed_text7_candidate_retains_cell_widths_without_retyping_reader_ast() {
         panic!("D2 framing must retain list structure");
     };
     assert_eq!(items.len(), 2);
-    assert!(items.iter().all(|item| matches!(
-        &item.kind,
-        ExprKind::DomainIdentity(DomainIdentity::D7(_))
-    )));
+    assert!(items
+        .iter()
+        .all(|item| matches!(&item.kind, ExprKind::DomainIdentity(DomainIdentity::D7(_)))));
 }

@@ -22,7 +22,9 @@ pub struct DomainNumericComposition {
 
 impl DomainNumericComposition {
     pub fn domain_width(&self) -> usize {
-        self.numerator.numeric_domain_width().expect("admitted domain")
+        self.numerator
+            .numeric_domain_width()
+            .expect("admitted domain")
     }
 
     pub fn as_parts(&self) -> (bool, &BinaryNumber, Option<&BinaryNumber>) {
@@ -75,9 +77,11 @@ fn canonical(
         width = width.checked_mul(2)?;
     }
     if n.is_zero() {
-        return Some(Value::BinaryNumber(
-            BinaryNumber::from_signed_magnitude(minimum_width, false, &n)?,
-        ));
+        return Some(Value::BinaryNumber(BinaryNumber::from_signed_magnitude(
+            minimum_width,
+            false,
+            &n,
+        )?));
     }
     if denominator_is_one {
         return Some(Value::BinaryNumber(
@@ -88,7 +92,9 @@ fn canonical(
     // Only an actual fraction needs a fully qualified Dn denominator.
     let d = own_word(d, width)?;
     Some(Value::NumericComposition(DomainNumericComposition {
-        negative, numerator: n, denominator: Some(d),
+        negative,
+        numerator: n,
+        denominator: Some(d),
     }))
 }
 
@@ -102,8 +108,12 @@ fn ingredients(value: &Value) -> Option<(usize, bool, BinaryNumber, BinaryNumber
         Value::NumericComposition(c) => {
             let width = c.domain_width();
             Some((
-                width, c.negative, normalized(&c.numerator),
-                c.denominator.as_ref().map_or_else(BinaryNumber::one, normalized),
+                width,
+                c.negative,
+                normalized(&c.numerator),
+                c.denominator
+                    .as_ref()
+                    .map_or_else(BinaryNumber::one, normalized),
             ))
         }
         _ => None,
@@ -118,8 +128,15 @@ pub fn canonical_parts(
     denominator: &BinaryNumber,
 ) -> Option<Value> {
     let width = numerator.numeric_domain_width()?;
-    if denominator.numeric_domain_width() != Some(width) { return None; }
-    canonical(negative, normalized(numerator), normalized(denominator), width)
+    if denominator.numeric_domain_width() != Some(width) {
+        return None;
+    }
+    canonical(
+        negative,
+        normalized(numerator),
+        normalized(denominator),
+        width,
+    )
 }
 
 /// Fast, non-semantic Dn admission. No rational cross-product, host magnitude
@@ -146,27 +163,40 @@ pub fn is_domain_value(v: &Value) -> bool {
 /// Точне зростання D24->D48 і D48->D96, без f64 і змішаних доменів.
 fn signed_small_integer_fast(op: &str, lhs: &BinaryNumber, rhs: &BinaryNumber) -> Option<Value> {
     let width = lhs.numeric_domain_width()?;
-    if !matches!(width, 24 | 48) || rhs.numeric_domain_width() != Some(width) { return None; }
+    if !matches!(width, 24 | 48) || rhs.numeric_domain_width() != Some(width) {
+        return None;
+    }
     let decode = |number: &BinaryNumber| -> Option<i64> {
         let bits = number.exact_numeric_domain_bits()?;
-        if bits.len() != width { return None; }
+        if bits.len() != width {
+            return None;
+        }
         let raw = bits.into_iter().fold(0_u64, |v, b| (v << 1) | u64::from(b));
         let shift = 64 - width;
         Some(((raw as i64) << shift) >> shift)
     };
     let (left, right) = (decode(lhs)?, decode(rhs)?);
     let math: i128 = match (width, op) {
-        (24 | 48, "/") =>
-            i128::from(crate::machine_math::exact_small_integer_quotient(width, left, right)?),
+        (24 | 48, "/") => i128::from(crate::machine_math::exact_small_integer_quotient(
+            width, left, right,
+        )?),
         (24, _) => i128::from(crate::machine_math::exact_i24_integer_op(op, left, right)?),
         (48, _) => crate::machine_math::exact_i48_integer_op(op, left, right)?,
         _ => return None,
     };
     let limit = 1_i128 << (width - 1);
-    let out_width = if (-limit..=limit - 1).contains(&math) { width } else { 2 * width };
-    let bits = (0..out_width).rev()
-        .map(|shift| ((math >> shift) & 1) as u8).collect::<Vec<_>>();
-    Some(Value::BinaryNumber(BinaryNumber::from_numeric_domain_bits(out_width, &bits)?))
+    let out_width = if (-limit..=limit - 1).contains(&math) {
+        width
+    } else {
+        2 * width
+    };
+    let bits = (0..out_width)
+        .rev()
+        .map(|shift| ((math >> shift) & 1) as u8)
+        .collect::<Vec<_>>();
+    Some(Value::BinaryNumber(BinaryNumber::from_numeric_domain_bits(
+        out_width, &bits,
+    )?))
 }
 
 /// Точний D96 × D96 -> D96 або D192, включно зі знаком і переповненням.
@@ -177,17 +207,21 @@ fn signed_d96_mul_fast(lhs: &BinaryNumber, rhs: &BinaryNumber) -> Option<Value> 
     }
     let decode = |number: &BinaryNumber| -> Option<i128> {
         let word = number.exact_numeric_domain_bits()?;
-        if word.len() != 96 { return None; }
-        let raw = word.into_iter().fold(0_u128, |acc, bit| (acc << 1) | u128::from(bit));
+        if word.len() != 96 {
+            return None;
+        }
+        let raw = word
+            .into_iter()
+            .fold(0_u128, |acc, bit| (acc << 1) | u128::from(bit));
         Some(((raw as i128) << 32) >> 32)
     };
-    let (a,b) = (decode(lhs)?,decode(rhs)?);
+    let (a, b) = (decode(lhs)?, decode(rhs)?);
     let mut limbs = crate::machine_math::exact_u96_multiply(a.unsigned_abs(), b.unsigned_abs())?;
-    let negative = (a < 0) != (b < 0) && limbs != [0,0,0];
+    let negative = (a < 0) != (b < 0) && limbs != [0, 0, 0];
     // Межа двійково-доповняльного D96: додатні <2^95,
     // від'ємні можуть дорівнювати -2^95.
-    let fits = limbs[2] == 0 && (limbs[1] < (1_u64 << 31) ||
-        (negative && limbs[1] == (1_u64 << 31) && limbs[0] == 0));
+    let fits = limbs[2] == 0
+        && (limbs[1] < (1_u64 << 31) || (negative && limbs[1] == (1_u64 << 31) && limbs[0] == 0));
     let width = if fits { 96 } else { 192 };
     if negative {
         let mut carry = 1_u128;
@@ -197,10 +231,13 @@ fn signed_d96_mul_fast(lhs: &BinaryNumber, rhs: &BinaryNumber) -> Option<Value> 
             carry = result >> 64;
         }
     }
-    let bits = (0..width).rev().map(|shift| {
-        ((limbs[shift / 64] >> (shift % 64)) & 1) as u8
-    }).collect::<Vec<_>>();
-    Some(Value::BinaryNumber(BinaryNumber::from_numeric_domain_bits(width, &bits)?))
+    let bits = (0..width)
+        .rev()
+        .map(|shift| ((limbs[shift / 64] >> (shift % 64)) & 1) as u8)
+        .collect::<Vec<_>>();
+    Some(Value::BinaryNumber(BinaryNumber::from_numeric_domain_bits(
+        width, &bits,
+    )?))
 }
 
 /// Машинна сума/різниця двох допущених D96 з точним виходом D96/D192.
@@ -211,17 +248,34 @@ fn signed_d96_add_sub_fast(op: &str, lhs: &BinaryNumber, rhs: &BinaryNumber) -> 
     }
     let decode = |number: &BinaryNumber| -> Option<i128> {
         let bits = number.exact_numeric_domain_bits()?;
-        if bits.len() != 96 { return None; }
-        let word = bits.into_iter().fold(0_u128, |v, bit| (v << 1) | u128::from(bit));
+        if bits.len() != 96 {
+            return None;
+        }
+        let word = bits
+            .into_iter()
+            .fold(0_u128, |v, bit| (v << 1) | u128::from(bit));
         Some(((word as i128) << 32) >> 32)
     };
     let value = crate::machine_math::exact_i96_add_sub(op, decode(lhs)?, decode(rhs)?)?;
     let limit = 1_i128 << 95;
-    let out_width = if (-limit..=limit - 1).contains(&value) { 96 } else { 192 };
-    let bits = (0..out_width).rev().map(|shift| {
-        if shift >= 128 { u8::from(value < 0) } else { ((value >> shift) & 1) as u8 }
-    }).collect::<Vec<_>>();
-    Some(Value::BinaryNumber(BinaryNumber::from_numeric_domain_bits(out_width, &bits)?))
+    let out_width = if (-limit..=limit - 1).contains(&value) {
+        96
+    } else {
+        192
+    };
+    let bits = (0..out_width)
+        .rev()
+        .map(|shift| {
+            if shift >= 128 {
+                u8::from(value < 0)
+            } else {
+                ((value >> shift) & 1) as u8
+            }
+        })
+        .collect::<Vec<_>>();
+    Some(Value::BinaryNumber(BinaryNumber::from_numeric_domain_bits(
+        out_width, &bits,
+    )?))
 }
 
 /// Точний ASM ADD/SUB для знакових D192 та наступних D(24·2^k).
@@ -237,11 +291,15 @@ fn signed_wide_add_sub_fast(op: &str, lhs: &BinaryNumber, rhs: &BinaryNumber) ->
     let words_count = width / 64;
     let read = |n: &BinaryNumber| -> Option<Vec<u64>> {
         let bits = n.exact_numeric_domain_bits()?;
-        if bits.len() != width { return None; }
+        if bits.len() != width {
+            return None;
+        }
         let mut words = Vec::with_capacity(words_count + 1);
         for block in bits.rchunks(64) {
             let mut value = 0_u64;
-            for bit in block { value = (value << 1) | u64::from(*bit); }
+            for bit in block {
+                value = (value << 1) | u64::from(*bit);
+            }
             words.push(value);
         }
         words.push(if bits[0] == 1 { u64::MAX } else { 0 });
@@ -264,12 +322,19 @@ fn signed_wide_add_sub_fast(op: &str, lhs: &BinaryNumber, rhs: &BinaryNumber) ->
         full.resize(result_width / 64, if top_sign { u64::MAX } else { 0 });
         full
     };
-    if output_words.len().checked_mul(64)? != result_width { return None; }
+    if output_words.len().checked_mul(64)? != result_width {
+        return None;
+    }
     let mut bits = Vec::with_capacity(result_width);
     for word in output_words.drain(..).rev() {
-        for shift in (0..64).rev() { bits.push(((word >> shift) & 1) as u8); }
+        for shift in (0..64).rev() {
+            bits.push(((word >> shift) & 1) as u8);
+        }
     }
-    Some(Value::BinaryNumber(BinaryNumber::from_numeric_domain_bits(result_width, &bits)?))
+    Some(Value::BinaryNumber(BinaryNumber::from_numeric_domain_bits(
+        result_width,
+        &bits,
+    )?))
 }
 
 /// Точне ASM-множення знакових D192/D384/... без семантичного дублювання.
@@ -285,10 +350,16 @@ fn signed_wide_mul_fast(lhs: &BinaryNumber, rhs: &BinaryNumber) -> Option<Value>
     let double_width = width.checked_mul(2)?;
     let unsigned_magnitude = |number: &BinaryNumber| -> Option<(bool, Vec<u64>)> {
         let bits = number.exact_numeric_domain_bits()?;
-        if bits.len() != width { return None; }
+        if bits.len() != width {
+            return None;
+        }
         let negative = bits[0] == 1;
-        let mut limbs = bits.rchunks(64)
-            .map(|part| part.iter().fold(0_u64, |acc, bit| (acc << 1) | u64::from(*bit)))
+        let mut limbs = bits
+            .rchunks(64)
+            .map(|part| {
+                part.iter()
+                    .fold(0_u64, |acc, bit| (acc << 1) | u64::from(*bit))
+            })
             .collect::<Vec<_>>();
         if negative {
             let mut carry = true;
@@ -303,11 +374,14 @@ fn signed_wide_mul_fast(lhs: &BinaryNumber, rhs: &BinaryNumber) -> Option<Value>
     let (left_sign, left) = unsigned_magnitude(lhs)?;
     let (right_sign, right) = unsigned_magnitude(rhs)?;
     let mut product = crate::machine_math::exact_words_mul_unsigned(&left, &right)?;
-    if product.len() != n.checked_mul(2)? { return None; }
+    if product.len() != n.checked_mul(2)? {
+        return None;
+    }
     let negative = left_sign != right_sign && product.iter().any(|&word| word != 0);
     let fits = product[n..].iter().all(|&word| word == 0)
         && (product[n - 1] < (1_u64 << 63)
-            || (negative && product[n - 1] == (1_u64 << 63)
+            || (negative
+                && product[n - 1] == (1_u64 << 63)
                 && product[..n - 1].iter().all(|&word| word == 0)));
     let out_width = if fits { width } else { double_width };
     if negative {
@@ -321,9 +395,13 @@ fn signed_wide_mul_fast(lhs: &BinaryNumber, rhs: &BinaryNumber) -> Option<Value>
     let result_words = if fits { &product[..n] } else { &product[..] };
     let mut bits = Vec::with_capacity(out_width);
     for &word in result_words.iter().rev() {
-        for shift in (0..64).rev() { bits.push(((word >> shift) & 1) as u8); }
+        for shift in (0..64).rev() {
+            bits.push(((word >> shift) & 1) as u8);
+        }
     }
-    Some(Value::BinaryNumber(BinaryNumber::from_numeric_domain_bits(out_width, &bits)?))
+    Some(Value::BinaryNumber(BinaryNumber::from_numeric_domain_bits(
+        out_width, &bits,
+    )?))
 }
 
 /// Точна цілочисельна частка двох вже допущених знакових D96+.
@@ -331,15 +409,23 @@ fn signed_wide_mul_fast(lhs: &BinaryNumber, rhs: &BinaryNumber) -> Option<Value>
 /// виконується попередній канонічний закон RATIO — без округлення.
 fn signed_wide_div_exact_fast(lhs: &BinaryNumber, rhs: &BinaryNumber) -> Option<Value> {
     let width = lhs.numeric_domain_width()?;
-    if width < 96 || rhs.numeric_domain_width() != Some(width) { return None; }
+    if width < 96 || rhs.numeric_domain_width() != Some(width) {
+        return None;
+    }
     let (a_negative, a) = lhs.signed_magnitude()?;
     let (b_negative, b) = rhs.signed_magnitude()?;
-    if b.is_zero() { return None; }
+    if b.is_zero() {
+        return None;
+    }
     // Довільна ширина дільника: маленький використовує DIVQ, широкий SBB.
     // Ідентичність числового домену вже перевірена, жодного f64.
     let unpack = |n: &BinaryNumber| -> Vec<u64> {
-        n.as_bits().rchunks(64)
-            .map(|part| part.iter().fold(0_u64, |bits, bit| (bits << 1) | u64::from(*bit)))
+        n.as_bits()
+            .rchunks(64)
+            .map(|part| {
+                part.iter()
+                    .fold(0_u64, |bits, bit| (bits << 1) | u64::from(*bit))
+            })
             .collect()
     };
     let mut limbs = unpack(&a);
@@ -349,14 +435,17 @@ fn signed_wide_div_exact_fast(lhs: &BinaryNumber, rhs: &BinaryNumber) -> Option<
     divisor.resize(n, 0);
     let (quotient, remainder) =
         crate::machine_math::exact_words_div_rem_unsigned(&limbs, &divisor)?;
-    if remainder.iter().any(|&word| word != 0) { return None; }
-    let bits = quotient.iter().rev()
+    if remainder.iter().any(|&word| word != 0) {
+        return None;
+    }
+    let bits = quotient
+        .iter()
+        .rev()
         .flat_map(|limb| (0..64).rev().map(move |shift| ((limb >> shift) & 1) as u8))
         .collect::<Vec<_>>();
     let magnitude = BinaryNumber::from_bits(bits).ok()?;
-    let signed = BinaryNumber::from_signed_magnitude_growing(
-        width, a_negative != b_negative, &magnitude
-    )?;
+    let signed =
+        BinaryNumber::from_signed_magnitude_growing(width, a_negative != b_negative, &magnitude)?;
     Some(Value::BinaryNumber(signed))
 }
 
@@ -382,7 +471,9 @@ pub fn compute(operator: &str, lhs: &Value, rhs: &Value) -> Option<Value> {
             if let Some(result) = signed_small_integer_fast(operator, left, right) {
                 return Some(result);
             }
-            if operator != "/" { return None; }
+            if operator != "/" {
+                return None;
+            }
         }
     }
     // Два допущені цілі D96: +/- через ADC/SBB, * через повний 192-бітний MUL.
@@ -425,7 +516,9 @@ pub fn compute(operator: &str, lhs: &Value, rhs: &Value) -> Option<Value> {
         }
         "*" => (x_neg ^ y_neg, x_num.mul(&y_num), x_den.mul(&y_den)),
         "/" => {
-            if y_num.is_zero() { return None; }
+            if y_num.is_zero() {
+                return None;
+            }
             (x_neg ^ y_neg, x_num.mul(&y_den), x_den.mul(&y_num))
         }
         _ => return None,
@@ -462,7 +555,11 @@ pub fn compare(operator: &str, lhs: &Value, rhs: &Value) -> Option<bool> {
             (false, true) => Ordering::Greater,
             (negative, _) => {
                 let magnitude_order = left_magnitude.cmp(&right_magnitude);
-                if negative { magnitude_order.reverse() } else { magnitude_order }
+                if negative {
+                    magnitude_order.reverse()
+                } else {
+                    magnitude_order
+                }
             }
         };
         return Some(match operator {
@@ -483,7 +580,11 @@ pub fn compare(operator: &str, lhs: &Value, rhs: &Value) -> Option<bool> {
         (false, true) => Ordering::Greater,
         (left_neg, _) => {
             let cmp = xn.mul(&yd).cmp(&yn.mul(&xd));
-            if left_neg { cmp.reverse() } else { cmp }
+            if left_neg {
+                cmp.reverse()
+            } else {
+                cmp
+            }
         }
     };
     Some(match operator {
@@ -500,7 +601,9 @@ mod tests {
 
     fn d(width: usize, u: u64) -> BinaryNumber {
         let mut bits = vec![0; width];
-        for i in 0..width.min(64) { bits[width - 1 - i] = ((u >> i) & 1) as u8; }
+        for i in 0..width.min(64) {
+            bits[width - 1 - i] = ((u >> i) & 1) as u8;
+        }
         BinaryNumber::from_numeric_domain_bits(width, &bits).unwrap()
     }
 
@@ -508,7 +611,9 @@ mod tests {
     fn wide_divisor_machine_path_preserves_exact_domain_and_ratio() {
         let word = |width: usize, powers: &[usize]| -> Value {
             let mut bits = vec![0_u8; width];
-            for &bit in powers { bits[width - 1 - bit] = 1; }
+            for &bit in powers {
+                bits[width - 1 - bit] = 1;
+            }
             Value::BinaryNumber(BinaryNumber::from_numeric_domain_bits(width, &bits).unwrap())
         };
         // Дільник у кожному випадку ширший за одне машинне слово.
@@ -530,9 +635,8 @@ mod tests {
             let actual = compute("/", &fractional, &divisor).unwrap();
             let (_, a_neg, a_num, a_den) = ingredients(&fractional).unwrap();
             let (_, b_neg, b_num, b_den) = ingredients(&divisor).unwrap();
-            let previous_law = canonical(
-                a_neg ^ b_neg, a_num.mul(&b_den), a_den.mul(&b_num), width
-            ).unwrap();
+            let previous_law =
+                canonical(a_neg ^ b_neg, a_num.mul(&b_den), a_den.mul(&b_num), width).unwrap();
             assert_eq!(actual, previous_law, "D{width}: остача не загублена");
             assert!(compute("/", &numerator, &word(width * 2, &[1])).is_none());
             assert!(compute("/", &numerator, &word(width, &[])).is_none());
@@ -542,17 +646,28 @@ mod tests {
     #[test]
     fn wide_divrem_respects_full_d96_plus_semantics_and_fractions() {
         let admitted = |width: usize, n: i64| -> Value {
-            let bits = (0..width).rev()
-                .map(|shift| if shift >= 64 { u8::from(n < 0) }
-                     else { ((n >> shift) & 1) as u8 })
+            let bits = (0..width)
+                .rev()
+                .map(|shift| {
+                    if shift >= 64 {
+                        u8::from(n < 0)
+                    } else {
+                        ((n >> shift) & 1) as u8
+                    }
+                })
                 .collect::<Vec<_>>();
             Value::BinaryNumber(BinaryNumber::from_numeric_domain_bits(width, &bits).unwrap())
         };
         for width in [96_usize, 192, 384, 768] {
             for (a, b, expected) in [
-                (6, 3, "2"), (-6, 3, "-2"), (6, -3, "-2"),
-                (-6, -3, "2"), (0, 3, "0"),
-                (7, 3, "7/3"), (-7, 3, "-7/3"), (7, -3, "-7/3")
+                (6, 3, "2"),
+                (-6, 3, "-2"),
+                (6, -3, "-2"),
+                (-6, -3, "2"),
+                (0, 3, "0"),
+                (7, 3, "7/3"),
+                (-7, 3, "-7/3"),
+                (7, -3, "-7/3"),
             ] {
                 let left = admitted(width, a);
                 let right = admitted(width, b);
@@ -566,9 +681,12 @@ mod tests {
             let mut min_bits = vec![0; width];
             min_bits[0] = 1;
             let min = Value::BinaryNumber(
-                BinaryNumber::from_numeric_domain_bits(width, &min_bits).unwrap());
+                BinaryNumber::from_numeric_domain_bits(width, &min_bits).unwrap(),
+            );
             let out = compute("/", &min, &admitted(width, -1)).unwrap();
-            let Value::BinaryNumber(ref number) = out else { panic!("ціле Dn"); };
+            let Value::BinaryNumber(ref number) = out else {
+                panic!("ціле Dn");
+            };
             assert_eq!(number.numeric_domain_width(), Some(width * 2));
             let mut expected_bits = vec![0; width * 2];
             expected_bits[width] = 1;
@@ -581,32 +699,56 @@ mod tests {
     #[test]
     fn d24_d48_idiv_integrates_without_losing_rational_or_domain_laws() {
         let number = |width: usize, value: i64| -> Value {
-            let bits = (0..width).rev().map(|i| ((value >> i) & 1) as u8).collect::<Vec<_>>();
+            let bits = (0..width)
+                .rev()
+                .map(|i| ((value >> i) & 1) as u8)
+                .collect::<Vec<_>>();
             Value::BinaryNumber(BinaryNumber::from_numeric_domain_bits(width, &bits).unwrap())
         };
         for width in [24_usize, 48] {
             let min = -(1_i64 << (width - 1));
             for (a, b, expected, overflow) in [
-                (6, 3, "2", false), (-6, 3, "-2", false),
-                (6, -3, "-2", false), (-6, -3, "2", false),
-                (0, 3, "0", false), (min, -1, "wide", true),
-                (7, 3, "7/3", false), (-7, 3, "-7/3", false),
-                (7, -3, "-7/3", false), (-7, -3, "7/3", false)
+                (6, 3, "2", false),
+                (-6, 3, "-2", false),
+                (6, -3, "-2", false),
+                (-6, -3, "2", false),
+                (0, 3, "0", false),
+                (min, -1, "wide", true),
+                (7, 3, "7/3", false),
+                (-7, 3, "-7/3", false),
+                (7, -3, "-7/3", false),
+                (-7, -3, "7/3", false),
             ] {
                 let value = compute("/", &number(width, a), &number(width, b)).unwrap();
-                assert_eq!(value.to_string(), if overflow {
-                    (1_i64 << (width - 1)).to_string()
-                } else { expected.to_owned() });
+                assert_eq!(
+                    value.to_string(),
+                    if overflow {
+                        (1_i64 << (width - 1)).to_string()
+                    } else {
+                        expected.to_owned()
+                    }
+                );
                 if a % b == 0 {
-                    let Value::BinaryNumber(ref integer) = value else { panic!("точна ціла частка"); };
-                    assert_eq!(integer.numeric_domain_width(),
-                               Some(if overflow { width * 2 } else { width }));
-                } else { assert!(matches!(value, Value::NumericComposition(_))); }
+                    let Value::BinaryNumber(ref integer) = value else {
+                        panic!("точна ціла частка");
+                    };
+                    assert_eq!(
+                        integer.numeric_domain_width(),
+                        Some(if overflow { width * 2 } else { width })
+                    );
+                } else {
+                    assert!(matches!(value, Value::NumericComposition(_)));
+                }
             }
             assert!(compute("/", &number(width, 1), &number(width, 0)).is_none());
         }
         assert!(compute("/", &number(24, 6), &number(48, 3)).is_none());
-        assert!(compute("/", &Value::BinaryNumber(BinaryNumber::one()), &number(24, 1)).is_none());
+        assert!(compute(
+            "/",
+            &Value::BinaryNumber(BinaryNumber::one()),
+            &number(24, 1)
+        )
+        .is_none());
     }
 
     #[test]
@@ -622,8 +764,9 @@ mod tests {
                 *state ^= *state << 17;
                 bits.push((*state >> 63) as u8);
             }
-            Value::BinaryNumber(BinaryNumber::from_numeric_domain_bits(width, &bits)
-                .expect("точний D24+ домен"))
+            Value::BinaryNumber(
+                BinaryNumber::from_numeric_domain_bits(width, &bits).expect("точний D24+ домен"),
+            )
         }
         let mut state = 0xc3a5_c85c_97cb_3127_u64;
         for width in [24_usize, 48, 96, 192, 384, 768] {
@@ -647,13 +790,16 @@ mod tests {
                                 (y_sign, yn.checked_sub(&xn).unwrap(), d)
                             }
                         }
-                        "*" => (x_negative ^ y_negative, x_num.mul(&y_num), x_den.mul(&y_den)),
+                        "*" => (
+                            x_negative ^ y_negative,
+                            x_num.mul(&y_num),
+                            x_den.mul(&y_den),
+                        ),
                         _ => unreachable!(),
                     };
                     let expected = canonical(negative, numerator, denominator, width)
                         .expect("точний нормативний механізм");
-                    let actual = compute(op, &left, &right)
-                        .expect("чинне виконання домену");
+                    let actual = compute(op, &left, &right).expect("чинне виконання домену");
                     assert_eq!(actual, expected, "D{width}, набір {case}, операція {op}");
                     // Перевіряємо не лише десятковий вигляд, а й домен
                     // і кожен біт — через точну структурну рівність Value.
@@ -666,17 +812,23 @@ mod tests {
             let mut min_word = vec![0; width];
             min_word[0] = 1;
             let negative_min = Value::BinaryNumber(
-                BinaryNumber::from_numeric_domain_bits(width, &min_word).unwrap());
+                BinaryNumber::from_numeric_domain_bits(width, &min_word).unwrap(),
+            );
             let minus_one = Value::BinaryNumber(
-                BinaryNumber::from_numeric_domain_bits(width, &vec![1; width]).unwrap());
+                BinaryNumber::from_numeric_domain_bits(width, &vec![1; width]).unwrap(),
+            );
             let positive = compute("*", &negative_min, &minus_one).unwrap();
-            let Value::BinaryNumber(ref result) = positive else { panic!("цілий Dn"); };
+            let Value::BinaryNumber(ref result) = positive else {
+                panic!("цілий Dn");
+            };
             assert_eq!(result.numeric_domain_width(), Some(width * 2));
             let mut expected_bits = vec![0; width * 2];
             expected_bits[width] = 1; // +2^(width-1)
             assert_eq!(result.exact_numeric_domain_bits().unwrap(), expected_bits);
             let more_negative = compute("+", &negative_min, &minus_one).unwrap();
-            let Value::BinaryNumber(ref widened) = more_negative else { panic!("знаковий Dn"); };
+            let Value::BinaryNumber(ref widened) = more_negative else {
+                panic!("знаковий Dn");
+            };
             assert_eq!(widened.numeric_domain_width(), Some(width * 2));
         }
 
@@ -686,10 +838,12 @@ mod tests {
             bits[width - 1] = 1;
             Value::BinaryNumber(BinaryNumber::from_numeric_domain_bits(width, &bits).unwrap())
         };
-        for (small, large) in [(24,48), (48,96), (96,192), (192,384), (384,768)] {
+        for (small, large) in [(24, 48), (48, 96), (96, 192), (192, 384), (384, 768)] {
             for op in ["+", "-", "*"] {
-                assert!(compute(op, &one(small), &one(large)).is_none(),
-                    "змішані D{small}/D{large}, {op}");
+                assert!(
+                    compute(op, &one(small), &one(large)).is_none(),
+                    "змішані D{small}/D{large}, {op}"
+                );
             }
         }
     }
@@ -701,17 +855,44 @@ mod tests {
         };
         for width in [192_usize, 384, 768] {
             let zero = vec![0; width];
-            let one = { let mut x = zero.clone(); x[width - 1] = 1; x };
+            let one = {
+                let mut x = zero.clone();
+                x[width - 1] = 1;
+                x
+            };
             let neg_one = vec![1; width];
-            let max = { let mut x = neg_one.clone(); x[0] = 0; x };
-            let min = { let mut x = zero.clone(); x[0] = 1; x };
-            let two = { let mut x = zero.clone(); x[width - 2] = 1; x };
+            let max = {
+                let mut x = neg_one.clone();
+                x[0] = 0;
+                x
+            };
+            let min = {
+                let mut x = zero.clone();
+                x[0] = 1;
+                x
+            };
+            let two = {
+                let mut x = zero.clone();
+                x[width - 2] = 1;
+                x
+            };
             let inputs = [zero, one, neg_one, max, min, two];
-            for (i,j) in [(0,0),(0,3),(1,1),(1,4),(2,2),(2,3),(3,3),(3,4),(4,4),(5,2)] {
+            for (i, j) in [
+                (0, 0),
+                (0, 3),
+                (1, 1),
+                (1, 4),
+                (2, 2),
+                (2, 3),
+                (3, 3),
+                (3, 4),
+                (4, 4),
+                (5, 2),
+            ] {
                 let a = admitted(width, inputs[i].clone());
                 let b = admitted(width, inputs[j].clone());
-                let (_,an,am,ad) = ingredients(&a).unwrap();
-                let (_,bn,bm,bd) = ingredients(&b).unwrap();
+                let (_, an, am, ad) = ingredients(&a).unwrap();
+                let (_, bn, bm, bd) = ingredients(&b).unwrap();
                 let old = canonical(an ^ bn, am.mul(&bm), ad.mul(&bd), width)
                     .expect("попередній точний математичний закон");
                 let new = compute("*", &a, &b).expect("повний ASM-добуток");
@@ -719,7 +900,8 @@ mod tests {
             }
         }
         let one = |w: usize| {
-            let mut bits = vec![0; w]; bits[w - 1] = 1;
+            let mut bits = vec![0; w];
+            bits[w - 1] = 1;
             admitted(w, bits)
         };
         assert!(compute("*", &one(192), &one(384)).is_none());
@@ -734,14 +916,26 @@ mod tests {
         };
         for width in [192_usize, 384, 768] {
             let zero = vec![0; width];
-            let one = { let mut bits = zero.clone(); bits[width - 1] = 1; bits };
+            let one = {
+                let mut bits = zero.clone();
+                bits[width - 1] = 1;
+                bits
+            };
             let minus_one = vec![1; width];
-            let max = { let mut bits = minus_one.clone(); bits[0] = 0; bits };
-            let min = { let mut bits = zero.clone(); bits[0] = 1; bits };
+            let max = {
+                let mut bits = minus_one.clone();
+                bits[0] = 0;
+                bits
+            };
+            let min = {
+                let mut bits = zero.clone();
+                bits[0] = 1;
+                bits
+            };
             let v = |data: &[u8]| signed(width, data);
-            let verify = |op: &str, a: &[u8], b: &[u8], result_width: usize,
-                          expected: Vec<u8>| {
-                let Value::BinaryNumber(ref n) = compute(op, &v(a), &v(b)).expect("точна сума Dn") else {
+            let verify = |op: &str, a: &[u8], b: &[u8], result_width: usize, expected: Vec<u8>| {
+                let Value::BinaryNumber(ref n) = compute(op, &v(a), &v(b)).expect("точна сума Dn")
+                else {
                     panic!("результат має бути цілим");
                 };
                 assert_eq!(n.numeric_domain_width(), Some(result_width));
@@ -770,8 +964,16 @@ mod tests {
                 bits
             });
         }
-        let d192_one = { let mut b = vec![0; 192]; b[191] = 1; signed(192, &b) };
-        let d384_one = { let mut b = vec![0; 384]; b[383] = 1; signed(384, &b) };
+        let d192_one = {
+            let mut b = vec![0; 192];
+            b[191] = 1;
+            signed(192, &b)
+        };
+        let d384_one = {
+            let mut b = vec![0; 384];
+            b[383] = 1;
+            signed(384, &b)
+        };
         assert!(compute("+", &d192_one, &d384_one).is_none());
         assert_eq!(compute("/", &d192_one, &d192_one).unwrap().to_string(), "1");
     }
@@ -781,24 +983,33 @@ mod tests {
         const MIN: i128 = -(1_i128 << 95);
         const MAX: i128 = (1_i128 << 95) - 1;
         let word = |width: usize, value: i128| -> Value {
-            let bits = (0..width).rev().map(|shift| {
-                if shift >= 128 { u8::from(value < 0) }
-                else { ((value >> shift) & 1) as u8 }
-            }).collect::<Vec<_>>();
+            let bits = (0..width)
+                .rev()
+                .map(|shift| {
+                    if shift >= 128 {
+                        u8::from(value < 0)
+                    } else {
+                        ((value >> shift) & 1) as u8
+                    }
+                })
+                .collect::<Vec<_>>();
             Value::BinaryNumber(BinaryNumber::from_numeric_domain_bits(width, &bits).unwrap())
         };
         for a in [MIN, MIN + 1, -2, -1, 0, 1, 2, MAX - 1, MAX] {
             for b in [MIN, -1, 0, 1, MAX] {
-                let actual = compute("*", &word(96,a), &word(96,b)).expect("D96*D96");
+                let actual = compute("*", &word(96, a), &word(96, b)).expect("D96*D96");
                 let got = actual.to_string();
                 let expected_negative = (a < 0) != (b < 0) && a != 0 && b != 0;
                 // Високобітний знак контролюється незалежною композицією,
                 // а мала частина — вбудованим точним i128 оракулом.
-                if a == 0 || b == 0 { assert_eq!(got, "0"); }
-                else if a.unsigned_abs() <= (1 << 32) && b.unsigned_abs() <= (1 << 32) {
-                    assert_eq!(got, (a*b).to_string());
+                if a == 0 || b == 0 {
+                    assert_eq!(got, "0");
+                } else if a.unsigned_abs() <= (1 << 32) && b.unsigned_abs() <= (1 << 32) {
+                    assert_eq!(got, (a * b).to_string());
                 }
-                let Value::BinaryNumber(ref bits) = actual else { panic!("D96 or D192") };
+                let Value::BinaryNumber(ref bits) = actual else {
+                    panic!("D96 or D192")
+                };
                 let w = bits.numeric_domain_width().unwrap();
                 assert!(w == 96 || w == 192);
                 assert_eq!(bits.exact_numeric_domain_bits().unwrap().len(), w);
@@ -806,14 +1017,21 @@ mod tests {
                 assert_eq!(negative, expected_negative);
             }
         }
-        let big = compute("*", &word(96,MIN), &word(96,MIN)).unwrap();
-        let Value::BinaryNumber(ref big_word) = big else { panic!("D192 full word"); };
+        let big = compute("*", &word(96, MIN), &word(96, MIN)).unwrap();
+        let Value::BinaryNumber(ref big_word) = big else {
+            panic!("D192 full word");
+        };
         assert_eq!(big_word.numeric_domain_width(), Some(192));
         let bits = big_word.exact_numeric_domain_bits().unwrap();
         assert_eq!(bits.iter().filter(|&&x| x == 1).count(), 1);
         assert_eq!(bits[1], 1); // 2^190 in a 192-bit D192 word
-        assert!(compute("*", &word(96,1), &word(48,1)).is_none());
-        assert_eq!(compute("/", &word(96,1), &word(96,2)).unwrap().to_string(), "1/2");
+        assert!(compute("*", &word(96, 1), &word(48, 1)).is_none());
+        assert_eq!(
+            compute("/", &word(96, 1), &word(96, 2))
+                .unwrap()
+                .to_string(),
+            "1/2"
+        );
     }
 
     #[test]
@@ -821,9 +1039,16 @@ mod tests {
         const MIN: i128 = -(1_i128 << 95);
         const MAX: i128 = (1_i128 << 95) - 1;
         let word = |w: usize, n: i128| -> Value {
-            let bits = (0..w).rev().map(|shift| {
-                if shift >= 128 { u8::from(n < 0) } else { ((n >> shift) & 1) as u8 }
-            }).collect::<Vec<_>>();
+            let bits = (0..w)
+                .rev()
+                .map(|shift| {
+                    if shift >= 128 {
+                        u8::from(n < 0)
+                    } else {
+                        ((n >> shift) & 1) as u8
+                    }
+                })
+                .collect::<Vec<_>>();
             Value::BinaryNumber(BinaryNumber::from_numeric_domain_bits(w, &bits).unwrap())
         };
         for a in [MIN, MIN + 1, -1, 0, 1, MAX - 1, MAX] {
@@ -831,9 +1056,15 @@ mod tests {
                 for (op, oracle) in [("+", a + b), ("-", a - b)] {
                     let result = compute(op, &word(96, a), &word(96, b)).unwrap();
                     assert_eq!(result.to_string(), oracle.to_string());
-                    let Value::BinaryNumber(ref bits) = result else { panic!("integer D96/D192") };
+                    let Value::BinaryNumber(ref bits) = result else {
+                        panic!("integer D96/D192")
+                    };
                     let limit = 1_i128 << 95;
-                    let width = if (-limit..=limit - 1).contains(&oracle) { 96 } else { 192 };
+                    let width = if (-limit..=limit - 1).contains(&oracle) {
+                        96
+                    } else {
+                        192
+                    };
                     assert_eq!(bits.numeric_domain_width(), Some(width));
                     assert_eq!(bits.exact_numeric_domain_bits().unwrap().len(), width);
                 }
@@ -841,8 +1072,18 @@ mod tests {
         }
         assert!(compute("+", &word(96, 1), &word(48, 1)).is_none());
         assert!(compute("+", &word(96, 1), &word(192, 1)).is_none());
-        assert_eq!(compute("/", &word(96, 1), &word(96, 2)).unwrap().to_string(), "1/2");
-        assert_eq!(compute("*", &word(96, 3), &word(96, 7)).unwrap().to_string(), "21");
+        assert_eq!(
+            compute("/", &word(96, 1), &word(96, 2))
+                .unwrap()
+                .to_string(),
+            "1/2"
+        );
+        assert_eq!(
+            compute("*", &word(96, 3), &word(96, 7))
+                .unwrap()
+                .to_string(),
+            "21"
+        );
     }
 
     #[test]
@@ -850,19 +1091,31 @@ mod tests {
         const MIN: i64 = -(1_i64 << 47);
         const MAX: i64 = (1_i64 << 47) - 1;
         let make = |w: usize, v: i128| -> Value {
-            let bits = (0..w).rev().map(|i| ((v >> i) & 1) as u8).collect::<Vec<_>>();
+            let bits = (0..w)
+                .rev()
+                .map(|i| ((v >> i) & 1) as u8)
+                .collect::<Vec<_>>();
             Value::BinaryNumber(BinaryNumber::from_numeric_domain_bits(w, &bits).unwrap())
         };
         for a in [MIN, MIN + 1, -1, 0, 1, MAX] {
             for b in [MIN, -1, 0, 1, MAX] {
-                for (op, oracle) in [("+", i128::from(a) + i128::from(b)),
-                                    ("-", i128::from(a) - i128::from(b)),
-                                    ("*", i128::from(a) * i128::from(b))] {
-                    let output = compute(op, &make(48, i128::from(a)), &make(48, i128::from(b))).unwrap();
+                for (op, oracle) in [
+                    ("+", i128::from(a) + i128::from(b)),
+                    ("-", i128::from(a) - i128::from(b)),
+                    ("*", i128::from(a) * i128::from(b)),
+                ] {
+                    let output =
+                        compute(op, &make(48, i128::from(a)), &make(48, i128::from(b))).unwrap();
                     assert_eq!(output.to_string(), oracle.to_string());
-                    let Value::BinaryNumber(ref word) = output else { panic!("D48/D96 word"); };
+                    let Value::BinaryNumber(ref word) = output else {
+                        panic!("D48/D96 word");
+                    };
                     let limit = 1_i128 << 47;
-                    let w = if (-limit..=limit - 1).contains(&oracle) { 48 } else { 96 };
+                    let w = if (-limit..=limit - 1).contains(&oracle) {
+                        48
+                    } else {
+                        96
+                    };
                     assert_eq!(word.numeric_domain_width(), Some(w));
                     assert_eq!(word.exact_numeric_domain_bits().unwrap().len(), w);
                 }
@@ -870,8 +1123,18 @@ mod tests {
         }
         assert!(compute("+", &make(24, 1), &make(48, 1)).is_none());
         assert!(compute("*", &make(48, 1), &make(96, 1)).is_none());
-        assert_eq!(compute("/", &make(48, 1), &make(48, 2)).unwrap().to_string(), "1/2");
-        assert_eq!(compute("+", &make(96, 1), &make(96, 2)).unwrap().to_string(), "3");
+        assert_eq!(
+            compute("/", &make(48, 1), &make(48, 2))
+                .unwrap()
+                .to_string(),
+            "1/2"
+        );
+        assert_eq!(
+            compute("+", &make(96, 1), &make(96, 2))
+                .unwrap()
+                .to_string(),
+            "3"
+        );
     }
 
     #[test]
@@ -887,26 +1150,41 @@ mod tests {
                 let left = d24_signed(a);
                 let right = d24_signed(b);
                 for (operator, expected) in [("+", a + b), ("-", a - b), ("*", a * b)] {
-                    let value = compute(operator, &left, &right).expect("точна машинна операція D24");
-                    assert_eq!(value.to_string(), expected.to_string(), "{a} {operator} {b}");
-                    let Value::BinaryNumber(ref result) = value else { panic!("ціле D24+"); };
-                    let width = if (-(1_i64 << 23)..=(1_i64 << 23) - 1).contains(&expected) { 24 } else { 48 };
+                    let value =
+                        compute(operator, &left, &right).expect("точна машинна операція D24");
+                    assert_eq!(
+                        value.to_string(),
+                        expected.to_string(),
+                        "{a} {operator} {b}"
+                    );
+                    let Value::BinaryNumber(ref result) = value else {
+                        panic!("ціле D24+");
+                    };
+                    let width = if (-(1_i64 << 23)..=(1_i64 << 23) - 1).contains(&expected) {
+                        24
+                    } else {
+                        48
+                    };
                     assert_eq!(result.numeric_domain_width(), Some(width));
                     assert_eq!(result.exact_numeric_domain_bits().unwrap().len(), width);
                 }
             }
         }
         let d48 = Value::BinaryNumber(d(48, 1));
-        assert!(compute("+", &d24_signed(1), &d48).is_none(), "суміш D24 і D48 недопустима");
-        let half = compute("/", &d24_signed(1), &d24_signed(2)).expect("дробова композиція лишилась");
+        assert!(
+            compute("+", &d24_signed(1), &d48).is_none(),
+            "суміш D24 і D48 недопустима"
+        );
+        let half =
+            compute("/", &d24_signed(1), &d24_signed(2)).expect("дробова композиція лишилась");
         assert_eq!(half.to_string(), "1/2");
     }
 
     #[test]
     fn d24_twos_complement_arithmetic_decodes_sign_before_exact_growth() {
-        let word = |bits: Vec<u8>| Value::BinaryNumber(
-            BinaryNumber::from_numeric_domain_bits(24, &bits).unwrap()
-        );
+        let word = |bits: Vec<u8>| {
+            Value::BinaryNumber(BinaryNumber::from_numeric_domain_bits(24, &bits).unwrap())
+        };
         let zero = word(vec![0; 24]);
         let one = Value::BinaryNumber(d(24, 1));
         let minus_one = word(vec![1; 24]);
@@ -915,15 +1193,27 @@ mod tests {
             bits[23] = 0;
             bits
         });
-        let maximum = word({ let mut bits = vec![1; 24]; bits[0] = 0; bits });
+        let maximum = word({
+            let mut bits = vec![1; 24];
+            bits[0] = 0;
+            bits
+        });
 
         assert_eq!(compute("-", &zero, &one).unwrap().to_string(), "-1");
         assert_eq!(compute("+", &minus_one, &one), Some(zero.clone()));
-        assert_eq!(compute("*", &minus_two, &Value::BinaryNumber(d(24, 3))).unwrap().to_string(), "-6");
+        assert_eq!(
+            compute("*", &minus_two, &Value::BinaryNumber(d(24, 3)))
+                .unwrap()
+                .to_string(),
+            "-6"
+        );
 
-        let carried = compute("+", &maximum, &one).expect("positive signed overflow widens exactly");
+        let carried =
+            compute("+", &maximum, &one).expect("positive signed overflow widens exactly");
         assert_eq!(carried.to_string(), "8388608");
-        let Value::BinaryNumber(ref carried_word) = carried else { panic!("integer result") };
+        let Value::BinaryNumber(ref carried_word) = carried else {
+            panic!("integer result")
+        };
         assert_eq!(carried_word.numeric_domain_width(), Some(48));
 
         let third = compute("/", &minus_one, &Value::BinaryNumber(d(24, 3)))
@@ -946,9 +1236,7 @@ mod tests {
                 (&three, &two, false, false, true),
                 (&three, &three, true, false, false),
             ] {
-                for (operator, expected) in [
-                    ("=", equal), ("<", less), (">", greater),
-                ] {
+                for (operator, expected) in [("=", equal), ("<", less), (">", greater)] {
                     let actual = compare(operator, left, right);
                     assert_eq!(
                         actual, Some(expected),
@@ -966,8 +1254,8 @@ mod tests {
 
             // Signed compositions must continue through the existing
             // rational/signed comparison mechanism, not this shortcut.
-            let neg_two = canonical_parts(true, &d(width, 2), &d(width, 1))
-                .expect("admitted signed Dn");
+            let neg_two =
+                canonical_parts(true, &d(width, 2), &d(width, 1)).expect("admitted signed Dn");
             assert_eq!(compare("<", &neg_two, &zero), Some(true));
             assert_eq!(compare("=", &neg_two, &two), Some(false));
         }
@@ -993,11 +1281,20 @@ mod tests {
             assert_eq!(numeric_value_domain_width(&signed), Some(width));
             for lhs in [&one, &fraction, &signed] {
                 for rhs in [&two, &fraction, &signed] {
-                    assert_eq!(shared_numeric_domain_width(lhs, rhs), Some(width),
-                        "D{width}: admission depends only on exact Dn tags");
+                    assert_eq!(
+                        shared_numeric_domain_width(lhs, rhs),
+                        Some(width),
+                        "D{width}: admission depends only on exact Dn tags"
+                    );
                 }
-                assert_eq!(shared_numeric_domain_width(lhs, &same_magnitude_doubled_width), None);
-                assert_eq!(shared_numeric_domain_width(&same_magnitude_doubled_width, lhs), None);
+                assert_eq!(
+                    shared_numeric_domain_width(lhs, &same_magnitude_doubled_width),
+                    None
+                );
+                assert_eq!(
+                    shared_numeric_domain_width(&same_magnitude_doubled_width, lhs),
+                    None
+                );
                 assert_eq!(shared_numeric_domain_width(lhs, &unqualified), None);
                 assert_eq!(shared_numeric_domain_width(&unqualified, lhs), None);
             }
@@ -1013,11 +1310,9 @@ mod tests {
                 .expect("ratified negative Dn rational");
             let positive_fraction = canonical_parts(false, &d(width, 2), &d(width, 3))
                 .expect("ratified positive Dn rational");
-            for (op, expected_forward, expected_reverse) in [
-                ("=", false, false),
-                ("<", false, true),
-                (">", true, false),
-            ] {
+            for (op, expected_forward, expected_reverse) in
+                [("=", false, false), ("<", false, true), (">", true, false)]
+            {
                 for natural in [&zero, &two] {
                     let forward = compare(op, natural, &neg_fraction);
                     let reverse = compare(op, &neg_fraction, natural);
@@ -1050,13 +1345,22 @@ mod tests {
     fn composition_normalizes_sign_gcd_unit_and_zero() {
         let zero = Value::BinaryNumber(d(24, 0));
         assert_eq!(unary("-", &zero), Some(zero.clone()));
-        assert_eq!(compute("/", &zero, &Value::BinaryNumber(d(24, 3))), Some(zero));
-        assert_eq!(canonical_parts(false, &d(24, 2), &d(24, 4)),
-            canonical_parts(false, &d(24, 1), &d(24, 2)));
-        assert_eq!(canonical_parts(false, &d(24, 6), &d(24, 3)),
-            Some(Value::BinaryNumber(d(24, 2))));
-        assert_eq!(canonical_parts(true, &d(24, 5), &d(24, 1)),
-            unary("-", &Value::BinaryNumber(d(24, 5))));
+        assert_eq!(
+            compute("/", &zero, &Value::BinaryNumber(d(24, 3))),
+            Some(zero)
+        );
+        assert_eq!(
+            canonical_parts(false, &d(24, 2), &d(24, 4)),
+            canonical_parts(false, &d(24, 1), &d(24, 2))
+        );
+        assert_eq!(
+            canonical_parts(false, &d(24, 6), &d(24, 3)),
+            Some(Value::BinaryNumber(d(24, 2)))
+        );
+        assert_eq!(
+            canonical_parts(true, &d(24, 5), &d(24, 1)),
+            unary("-", &Value::BinaryNumber(d(24, 5)))
+        );
         assert!(canonical_parts(false, &d(24, 1), &d(24, 0)).is_none());
         assert!(canonical_parts(false, &d(24, 1), &d(48, 2)).is_none());
     }
@@ -1078,7 +1382,8 @@ mod tests {
             let three_bits = three.exact_numeric_domain_bits().expect("exact Dn(3)");
             assert_eq!(one_bits.len(), width);
             assert_eq!(three_bits.len(), width);
-            let bit_distance: usize = one_bits.iter()
+            let bit_distance: usize = one_bits
+                .iter()
                 .zip(three_bits.iter())
                 .map(|(a, b)| usize::from(a != b))
                 .sum();
@@ -1086,11 +1391,14 @@ mod tests {
 
             let integer = canonical_parts(false, &two, &one)
                 .expect("unit denominator reduces to an admitted integer Dn");
-            assert_eq!(integer, Value::BinaryNumber(two.clone()),
-                "D{width}: RATIO(2,1) must not survive as an extra tag");
+            assert_eq!(
+                integer,
+                Value::BinaryNumber(two.clone()),
+                "D{width}: RATIO(2,1) must not survive as an extra tag"
+            );
 
-            let negative = canonical_parts(true, &two, &one)
-                .expect("negative integer still uses exact Dn");
+            let negative =
+                canonical_parts(true, &two, &one).expect("negative integer still uses exact Dn");
             let Value::BinaryNumber(ref neg) = negative else {
                 panic!("D{width}: negative integer is a two's-complement Dn word")
             };
@@ -1107,29 +1415,40 @@ mod tests {
             assert_eq!(fraction.domain_width(), width);
             let (_, numerator, denominator) = fraction.as_parts();
             assert_eq!(numerator.numeric_domain_width(), Some(width));
-            assert_eq!(denominator.expect("actual fraction").numeric_domain_width(), Some(width));
+            assert_eq!(
+                denominator.expect("actual fraction").numeric_domain_width(),
+                Some(width)
+            );
 
             let divided = compute(
-                "/", &Value::BinaryNumber(d(width, 6)),
+                "/",
+                &Value::BinaryNumber(d(width, 6)),
                 &Value::BinaryNumber(d(width, 3)),
-            ).expect("same domain 6/3");
-            assert_eq!(divided, Value::BinaryNumber(two),
-                "D{width}: reduced division becomes exactly Dn(2)");
+            )
+            .expect("same domain 6/3");
+            assert_eq!(
+                divided,
+                Value::BinaryNumber(two),
+                "D{width}: reduced division becomes exactly Dn(2)"
+            );
             assert_eq!(
                 canonical_parts(true, &zero, &one),
                 Some(Value::BinaryNumber(zero)),
                 "D{width}: negative zero must not allocate a sign or denominator"
             );
-            assert!(canonical_parts(
-                false, &d(width, 2), &d(width * 2, 1)
-            ).is_none(), "D{width}: mixed Dn values are forbidden");
+            assert!(
+                canonical_parts(false, &d(width, 2), &d(width * 2, 1)).is_none(),
+                "D{width}: mixed Dn values are forbidden"
+            );
         }
     }
 
     #[test]
     fn signed_rational_arithmetic_matches_independent_exact_i128_oracle() {
         let gcd = |mut a: i128, mut b: i128| -> i128 {
-            while b != 0 { (a,b) = (b,a%b); }
+            while b != 0 {
+                (a, b) = (b, a % b);
+            }
             a.abs()
         };
         let mut seed = 0x1234_5678_9abc_def1u64;
@@ -1146,44 +1465,53 @@ mod tests {
             let d0 = (next() % 32 + 1) as i128;
             let left_negative = next() & 1 != 0;
             let right_negative = next() & 1 != 0;
-            let left = canonical_parts(left_negative, &d(24,a as u64), &d(24,b as u64)).unwrap();
-            let right = canonical_parts(right_negative, &d(24,c as u64), &d(24,d0 as u64)).unwrap();
+            let left = canonical_parts(left_negative, &d(24, a as u64), &d(24, b as u64)).unwrap();
+            let right =
+                canonical_parts(right_negative, &d(24, c as u64), &d(24, d0 as u64)).unwrap();
             let x = if left_negative { -a } else { a };
             let y = if right_negative { -c } else { c };
-            for op in ["+","-","*","/"] {
+            for op in ["+", "-", "*", "/"] {
                 let pair = match op {
-                    "+" => (x*d0 + y*b, b*d0),
-                    "-" => (x*d0 - y*b, b*d0),
-                    "*" => (x*y, b*d0),
-                    "/" if y != 0 => (x*d0, b*y),
-                    "/" => { assert!(compute(op,&left,&right).is_none()); continue; }
+                    "+" => (x * d0 + y * b, b * d0),
+                    "-" => (x * d0 - y * b, b * d0),
+                    "*" => (x * y, b * d0),
+                    "/" if y != 0 => (x * d0, b * y),
+                    "/" => {
+                        assert!(compute(op, &left, &right).is_none());
+                        continue;
+                    }
                     _ => unreachable!(),
                 };
-                let (mut n,mut den) = pair;
-                if den < 0 { n = -n; den = -den; }
-                let common = gcd(n.abs(),den);
-                let n = n/common;
-                let den = den/common;
-                let expected = if den == 1 { n.to_string() } else {
+                let (mut n, mut den) = pair;
+                if den < 0 {
+                    n = -n;
+                    den = -den;
+                }
+                let common = gcd(n.abs(), den);
+                let n = n / common;
+                let den = den / common;
+                let expected = if den == 1 {
+                    n.to_string()
+                } else {
                     format!("{n}/{den}")
                 };
                 let got = compute(op, &left, &right).unwrap();
                 assert_eq!(got.to_string(), expected, "input {x}/{b} {op} {y}/{d0}");
                 if let Value::NumericComposition(c) = &got {
-                    assert_eq!(c.domain_width(),24);
-                    let (negative,num,denominator) = c.as_parts();
-                    assert_eq!(negative,n<0);
+                    assert_eq!(c.domain_width(), 24);
+                    let (negative, num, denominator) = c.as_parts();
+                    assert_eq!(negative, n < 0);
                     assert!(!num.is_zero());
-                    assert_eq!(num.numeric_domain_width(),Some(24));
+                    assert_eq!(num.numeric_domain_width(), Some(24));
                     if let Some(denominator) = denominator {
-                        assert_eq!(denominator.numeric_domain_width(),Some(24));
+                        assert_eq!(denominator.numeric_domain_width(), Some(24));
                         assert!(denominator.as_bits() != [0] && denominator.as_bits() != [1]);
                     }
                     assert!(got.to_canonical_wire_string().contains("WIRE-UNSUPPORTED"));
                 }
             }
-            assert_eq!(compare("=", &left, &right), Some(x*d0 == y*b));
-            assert_eq!(compare("<", &left, &right), Some(x*d0 < y*b));
+            assert_eq!(compare("=", &left, &right), Some(x * d0 == y * b));
+            assert_eq!(compare("<", &left, &right), Some(x * d0 < y * b));
         }
     }
 
@@ -1191,43 +1519,55 @@ mod tests {
     fn rational_high_bit_products_promote_components_from_d24_to_d48_without_loss() {
         let n = (1u64 << 24) - 1;
         let den = n - 1;
-        let ratio = canonical_parts(false, &d(24,n), &d(24,den)).unwrap();
+        let ratio = canonical_parts(false, &d(24, n), &d(24, den)).unwrap();
         assert_eq!(ratio.to_string(), format!("{n}/{den}"));
-        let squared = compute("*",&ratio,&ratio).unwrap();
-        let Value::NumericComposition(ref r) = squared else { panic!("exact RATIO") };
-        assert_eq!(r.domain_width(),48);
+        let squared = compute("*", &ratio, &ratio).unwrap();
+        let Value::NumericComposition(ref r) = squared else {
+            panic!("exact RATIO")
+        };
+        assert_eq!(r.domain_width(), 48);
         let (neg, numerator, denominator) = r.as_parts();
         assert!(!neg);
         let denominator = denominator.expect("reduced RATIO requires denominator");
-        assert_eq!(numerator.numeric_domain_width(),Some(48));
-        assert_eq!(denominator.numeric_domain_width(),Some(48));
-        assert_eq!(numerator.to_unsigned_decimal_string(), (n*n).to_string());
-        assert_eq!(denominator.to_unsigned_decimal_string(), (den*den).to_string());
-        assert_eq!(squared.to_string(), format!("{}/{}",n*n,den*den));
-        let negated = unary("-",&squared).unwrap();
-        assert_eq!(negated.to_string(),format!("-{}/{}",n*n,den*den));
-        assert_eq!(compute("+",&squared,&negated),Some(Value::BinaryNumber(
-            BinaryNumber::from_numeric_domain_bits(48,&vec![0;48]).unwrap()
-        )));
+        assert_eq!(numerator.numeric_domain_width(), Some(48));
+        assert_eq!(denominator.numeric_domain_width(), Some(48));
+        assert_eq!(numerator.to_unsigned_decimal_string(), (n * n).to_string());
+        assert_eq!(
+            denominator.to_unsigned_decimal_string(),
+            (den * den).to_string()
+        );
+        assert_eq!(squared.to_string(), format!("{}/{}", n * n, den * den));
+        let negated = unary("-", &squared).unwrap();
+        assert_eq!(negated.to_string(), format!("-{}/{}", n * n, den * den));
+        assert_eq!(
+            compute("+", &squared, &negated),
+            Some(Value::BinaryNumber(
+                BinaryNumber::from_numeric_domain_bits(48, &vec![0; 48]).unwrap()
+            ))
+        );
         // The original operand still belongs to D24. No generic D24 <-> D48 bridge.
-        assert!(compute("+",&squared,&ratio).is_none());
+        assert!(compute("+", &squared, &ratio).is_none());
     }
 
     #[test]
     fn composite_domain_is_not_inferred_and_overflow_retains_all_bits() {
-        let a = Value::BinaryNumber(d(24, (1<<23)-1));
+        let a = Value::BinaryNumber(d(24, (1 << 23) - 1));
         let b = Value::BinaryNumber(d(24, 2));
-        let result = compute("*",&a,&b).unwrap();
-        let Value::BinaryNumber(ref bits) = result else { panic!("integer"); };
-        assert_eq!(bits.numeric_domain_width(),Some(48));
-        let neg = unary("-",&result).unwrap();
-        assert_eq!(neg.to_string(), format!("-{}", ((1u64<<23)-1)*2));
-        let Value::BinaryNumber(ref negative_integer) = neg else { panic!("signed integer"); };
+        let result = compute("*", &a, &b).unwrap();
+        let Value::BinaryNumber(ref bits) = result else {
+            panic!("integer");
+        };
+        assert_eq!(bits.numeric_domain_width(), Some(48));
+        let neg = unary("-", &result).unwrap();
+        assert_eq!(neg.to_string(), format!("-{}", ((1u64 << 23) - 1) * 2));
+        let Value::BinaryNumber(ref negative_integer) = neg else {
+            panic!("signed integer");
+        };
         assert_eq!(negative_integer.numeric_domain_width(), Some(48));
-        let other = Value::BinaryNumber(d(48,2));
-        assert!(compute("+",&neg,&other).is_some());
-        assert!(compute("+",&neg,&b).is_none());
-        assert!(compare("=",&neg,&b).is_none());
+        let other = Value::BinaryNumber(d(48, 2));
+        assert!(compute("+", &neg, &other).is_some());
+        assert!(compute("+", &neg, &b).is_none());
+        assert!(compare("=", &neg, &b).is_none());
     }
 
     #[test]
@@ -1258,8 +1598,11 @@ mod tests {
                 panic!("ціле натуральне має залишитися доменним числом")
             };
             assert_eq!(fitted.numeric_domain_width(), Some(width), "D{width}: fit");
-            assert_eq!(fitted.exact_numeric_domain_bits(), Some(maximum_word.clone()),
-                "D{width}: iN максимум має зберегти точні біти");
+            assert_eq!(
+                fitted.exact_numeric_domain_bits(),
+                Some(maximum_word.clone()),
+                "D{width}: iN максимум має зберегти точні біти"
+            );
 
             let crossing = compute("+", &maximum, &unit).expect("точне перенесення");
             let Value::BinaryNumber(carried) = &crossing else {
@@ -1267,18 +1610,24 @@ mod tests {
             };
             let mut expected = vec![0u8; 2 * width];
             expected[width] = 1;
-            assert_eq!(carried.numeric_domain_width(), Some(2 * width),
-                "D{width}: не можна обрізати старший біт");
-            assert_eq!(carried.exact_numeric_domain_bits(), Some(expected),
-                "D{width}: єдиний біт перенесення на точній D(2n) позиції");
+            assert_eq!(
+                carried.numeric_domain_width(),
+                Some(2 * width),
+                "D{width}: не можна обрізати старший біт"
+            );
+            assert_eq!(
+                carried.exact_numeric_domain_bits(),
+                Some(expected),
+                "D{width}: єдиний біт перенесення на точній D(2n) позиції"
+            );
 
-            let unchanged = compute("*", &maximum, &unit)
-                .expect("множення на одиницю того самого домену");
+            let unchanged =
+                compute("*", &maximum, &unit).expect("множення на одиницю того самого домену");
             assert_eq!(unchanged, maximum, "D{width}: natural MUL path");
             let mut two = vec![0u8; width];
             two[width - 2] = 1;
-            let doubled = compute("*", &maximum, &admitted(&two))
-                .expect("точне множення з перенесенням");
+            let doubled =
+                compute("*", &maximum, &admitted(&two)).expect("точне множення з перенесенням");
             let Value::BinaryNumber(product) = &doubled else {
                 panic!("добуток має залишитися точним натуральним словом")
             };
@@ -1289,16 +1638,21 @@ mod tests {
 
             let legacy_one = Value::BinaryNumber(BinaryNumber::one());
             for op in ["+", "*"] {
-                assert!(compute(op, &maximum, &legacy_one).is_none(),
-                    "D{width}: {op} must reject unqualified one");
-                assert!(compute(op, &legacy_one, &maximum).is_none(),
-                    "D{width}: {op} must reject unqualified first operand");
-                let other_domain = Value::BinaryNumber(
-                    BinaryNumber::from_numeric_domain_bits(2 * width, &vec![0; 2 * width])
-                        .unwrap(),
+                assert!(
+                    compute(op, &maximum, &legacy_one).is_none(),
+                    "D{width}: {op} must reject unqualified one"
                 );
-                assert!(compute(op, &maximum, &other_domain).is_none(),
-                    "D{width}: {op} must reject mixed Dn/D(2n)");
+                assert!(
+                    compute(op, &legacy_one, &maximum).is_none(),
+                    "D{width}: {op} must reject unqualified first operand"
+                );
+                let other_domain = Value::BinaryNumber(
+                    BinaryNumber::from_numeric_domain_bits(2 * width, &vec![0; 2 * width]).unwrap(),
+                );
+                assert!(
+                    compute(op, &maximum, &other_domain).is_none(),
+                    "D{width}: {op} must reject mixed Dn/D(2n)"
+                );
             }
         }
     }
@@ -1314,7 +1668,10 @@ mod tests {
         let sixth = compute("/", &half, &three).unwrap();
         assert_eq!(compute("+", &third, &sixth), Some(half.clone()));
         let negative = compute("-", &one, &three).unwrap();
-        assert_eq!(compute("+", &negative, &two), Some(Value::BinaryNumber(d(24, 0))));
+        assert_eq!(
+            compute("+", &negative, &two),
+            Some(Value::BinaryNumber(d(24, 0)))
+        );
         assert_eq!(compute("*", &negative, &half), unary("-", &one));
         assert_eq!(compute("/", &one, &half), Some(two));
         assert_eq!(compare("<", &negative, &half), Some(true));

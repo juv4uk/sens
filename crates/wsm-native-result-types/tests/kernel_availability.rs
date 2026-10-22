@@ -1,13 +1,7 @@
 use wsm_common_lisp_kernel::CommonLispKernel;
-use wsm_kernel_host::{
-    AvailabilityState, KernelAvailabilityObservation, KernelRouter,
-};
+use wsm_kernel_host::{AvailabilityState, KernelAvailabilityObservation, KernelRouter};
 
-fn record_probe(
-    router: &mut KernelRouter,
-    producer: &str,
-    probe: Result<String, String>,
-) {
+fn record_probe(router: &mut KernelRouter, producer: &str, probe: Result<String, String>) {
     let observation = match probe {
         Ok(detail) => KernelAvailabilityObservation::available(producer, Some(detail)),
         Err(detail) => KernelAvailabilityObservation::unavailable(producer, Some(detail)),
@@ -30,12 +24,10 @@ fn missing_external_runtime_is_named_unavailable_without_start_or_semantic_mutat
         .expect("bounded availability observation");
     assert_eq!(observation.state, AvailabilityState::Unavailable);
     assert!(!observation.started);
-    assert!(
-        observation
-            .detail
-            .as_deref()
-            .is_some_and(|detail| detail.contains("failed to start Common Lisp runtime"))
-    );
+    assert!(observation
+        .detail
+        .as_deref()
+        .is_some_and(|detail| detail.contains("failed to start Common Lisp runtime")));
 
     // Availability is execution metadata only. No runtime was registered or started.
     assert!(router.registered_kernels().is_empty());

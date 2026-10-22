@@ -11,7 +11,8 @@ fn eval_source(source: &str) -> Result<Value, sens::LanguageError> {
 #[test]
 fn canonical_w1_zero_and_one_are_exact_d1_values() {
     for (source, expected) in [("0", false), ("1", true)] {
-        let parsed = parse_canonical_binary(source).expect("W1 source must parse as exact D1 value");
+        let parsed =
+            parse_canonical_binary(source).expect("W1 source must parse as exact D1 value");
         assert_eq!(parsed.len(), 1);
 
         let ExprKind::DomainIdentity(DomainIdentity::D1(_)) = parsed[0].kind else {
@@ -64,7 +65,10 @@ fn human_numeric_parser_does_not_alias_canonical_d1_source() {
 
         let binary = parse_canonical_binary(source).expect("canonical W1 source");
         assert!(
-            matches!(binary[0].kind, ExprKind::DomainIdentity(DomainIdentity::D1(_))),
+            matches!(
+                binary[0].kind,
+                ExprKind::DomainIdentity(DomainIdentity::D1(_))
+            ),
             "canonical binary reader must keep {source} in D1"
         );
     }

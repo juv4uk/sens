@@ -43,19 +43,23 @@ fn ratified_ukr_name_resolves_to_same_identity_as_current_uk() {
 fn admitted_ukr_registry_spellings_never_require_latin_layout() {
     let mut admitted = 0usize;
     for semantic_id in sens::semantic_registry_export::admitted_semantic_ids() {
-        for row in sens::semantic_registry_export::admitted_surfaces_for_semantic_id(semantic_id)
-        {
+        for row in sens::semantic_registry_export::admitted_surfaces_for_semantic_id(semantic_id) {
             if row.namespace == "укр" {
                 admitted += 1;
                 assert!(
-                    !row.name.chars().any(|character| character.is_ascii_alphabetic()),
+                    !row.name
+                        .chars()
+                        .any(|character| character.is_ascii_alphabetic()),
                     "admitted ukr spelling requires Latin layout: {}",
                     row.name
                 );
             }
         }
     }
-    assert!(admitted > 0, "registry must contain at least one admitted ukr spelling");
+    assert!(
+        admitted > 0,
+        "registry must contain at least one admitted ukr spelling"
+    );
 }
 
 #[test]
@@ -65,9 +69,18 @@ fn full_ukr_names_preserve_action_protocol_and_representation_semantics() {
         ("00001101", "відняти"),
         ("01010100", "буфер-32-бітних-цілих-зі-знаком"),
         ("10100000", "розібрати-текст-формату-джейсон"),
-        ("10100001", "обчислити-хеш-ша-256-тексту-у-шістнадцятковому-записі"),
-        ("10100011", "прочитати-текст-з-з'єднання-протоколу-керування-передаванням"),
-        ("10100100", "записати-текст-у-з'єднання-протоколу-керування-передаванням"),
+        (
+            "10100001",
+            "обчислити-хеш-ша-256-тексту-у-шістнадцятковому-записі",
+        ),
+        (
+            "10100011",
+            "прочитати-текст-з-з'єднання-протоколу-керування-передаванням",
+        ),
+        (
+            "10100100",
+            "записати-текст-у-з'єднання-протоколу-керування-передаванням",
+        ),
         ("10100101", "слухати-порт-протоколу-керування-передаванням"),
     ];
 
@@ -127,11 +140,15 @@ fn generated_function_table_uses_uk_then_ukr_without_duplicate_full_uk_column() 
 
     let markdown = include_str!("../../../docs/generated/function-table.md");
     assert!(
-        markdown.contains("| ID | ук | укр | English | Sanskrit | Symbol | Intel Core i5-6400 / Skylake |"),
+        markdown.contains(
+            "| ID | ук | укр | English | Sanskrit | Symbol | Intel Core i5-6400 / Skylake |"
+        ),
         "human function table must expose exactly uk and ukr Ukrainian columns"
     );
     assert!(
-        markdown.contains("| `00111100` | текст-порожній? | порожній-текст? | string-empty? | śūnya? | () | () |"),
+        markdown.contains(
+            "| `00111100` | текст-порожній? | порожній-текст? | string-empty? | śūnya? | () | () |"
+        ),
         "human row must show uk followed by full Ukrainian ukr"
     );
     assert!(

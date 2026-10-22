@@ -24,7 +24,9 @@ fn compact_exact_integer_boundary_is_exactly_two_pow_53() {
     ];
 
     for (source, compact) in cases {
-        let form = parse(source).expect("boundary integer must parse").remove(0);
+        let form = parse(source)
+            .expect("boundary integer must parse")
+            .remove(0);
         match (compact, form.kind) {
             (true, ExprKind::Number(_, Exactness::Exact)) => {}
             (false, ExprKind::Rational(_)) => {}

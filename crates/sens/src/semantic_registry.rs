@@ -45,12 +45,12 @@ mod d10_definition_bindings_generated {
     include!("d10_definition_bindings_generated.rs");
 }
 
+use d10_definition_bindings_generated::D10_DEFINITION_BINDINGS;
 use d5_definition_bindings_generated::D5_DEFINITION_BINDINGS;
 use d6_definition_bindings_generated::D6_DEFINITION_BINDINGS;
-use d9_definition_bindings_generated::D9_DEFINITION_BINDINGS;
-use d10_definition_bindings_generated::D10_DEFINITION_BINDINGS;
-use domain_surface_generated::{DomainSurfaceRow, DOMAIN_SURFACE_ROWS};
 use d7_display_generated::D7_DISPLAY_ROWS;
+use d9_definition_bindings_generated::D9_DEFINITION_BINDINGS;
+use domain_surface_generated::{DomainSurfaceRow, DOMAIN_SURFACE_ROWS};
 use generated::{SemanticRow, SEMANTIC_ROWS};
 
 /// Only the historical W8 surface-table slot. Although the carrier type can
@@ -77,7 +77,8 @@ fn exact_identity_for_row(row: &SemanticRow) -> Option<CoreDomainIdentity> {
 }
 
 pub(crate) fn exact_identity_for_legacy_registry_slot(slot: u8) -> Option<CoreDomainIdentity> {
-    SEMANTIC_ROWS.get(usize::from(slot))
+    SEMANTIC_ROWS
+        .get(usize::from(slot))
         .filter(|row| row.semantic_id == slot)
         .and_then(exact_identity_for_row)
 }
@@ -89,7 +90,9 @@ pub(crate) fn legacy_slot_for_exact_identity(identity: CoreDomainIdentity) -> Op
     let mut matched = None;
     for row in SEMANTIC_ROWS {
         if exact_identity_for_row(row) == Some(identity) {
-            if matched.is_some() { return None; }
+            if matched.is_some() {
+                return None;
+            }
             matched = Some(row.semantic_id);
         }
     }
@@ -174,7 +177,12 @@ fn exact_source_index() -> &'static ExactDomainSourceIndex {
 /// Source human names select only the exact D3/D4/D5/D6 projection.
 /// A name conflict cannot silently pick the first generated row.
 fn direct_domain_identity_for_surface(name: &str) -> Option<CoreDomainIdentity> {
-    exact_source_index().all.get(name).copied().flatten()?.core_operation()
+    exact_source_index()
+        .all
+        .get(name)
+        .copied()
+        .flatten()?
+        .core_operation()
 }
 
 /// Сумісний SID лише знаходить рядок surface-реєстру; координату D3
@@ -219,7 +227,9 @@ pub(crate) fn exact_uk_callable_for_source_head(name: &str) -> Option<crate::Dom
     if let Some(identity) = exact_source_index().uk.get(name).copied().flatten() {
         return Some(identity);
     }
-    higher_selector_uk_index().get(name).copied()
+    higher_selector_uk_index()
+        .get(name)
+        .copied()
         .or_else(|| d8_selector_uk_index().get(name).copied())
 }
 
@@ -256,20 +266,23 @@ fn d8_selector_uk_index() -> &'static HashMap<String, DomainIdentity> {
     static INDEX: OnceLock<HashMap<String, DomainIdentity>> = OnceLock::new();
     INDEX.get_or_init(|| {
         let mut names = HashMap::new();
-        for (root, initial, full) in [
-            (0b011u8, "р", "решта"), (0b100u8, "п", "перше")
-        ] {
+        for (root, initial, full) in [(0b011u8, "р", "решта"), (0b100u8, "п", "перше")]
+        {
             for suffix in 0..(1u8 << 5) {
                 let bits = (root << 5) | suffix;
-                let id = DomainIdentity::D8(
-                    crate::CoreD8::from_word(crate::Bit8::new(bits).unwrap()));
+                let id =
+                    DomainIdentity::D8(crate::CoreD8::from_word(crate::Bit8::new(bits).unwrap()));
                 let mut short = initial.to_owned();
                 let mut long = full.to_owned();
                 for shift in (0..5).rev() {
                     let rest = (suffix >> shift) & 1 == 1;
                     short.push('-');
                     short.push(if rest { 'р' } else { 'п' });
-                    long.push_str(if rest { "-від-решта" } else { "-від-перше" });
+                    long.push_str(if rest {
+                        "-від-решта"
+                    } else {
+                        "-від-перше"
+                    });
                 }
                 names.insert(short, id);
                 names.insert(long, id);
@@ -284,13 +297,15 @@ fn d8_selector_uk_index() -> &'static HashMap<String, DomainIdentity> {
 #[cfg(test)]
 pub(crate) fn selector_ukr_for_exact(identity: DomainIdentity) -> Option<&'static str> {
     match identity {
-        DomainIdentity::D9(word) => D9_DEFINITION_BINDINGS.iter()
-            .find(|row| row.bits == word.word().packed_bits()
-                && matches!(row.bits >> 6, 0b011 | 0b100))
+        DomainIdentity::D9(word) => D9_DEFINITION_BINDINGS
+            .iter()
+            .find(|row| {
+                row.bits == word.word().packed_bits() && matches!(row.bits >> 6, 0b011 | 0b100)
+            })
             .and_then(|row| (row.names.len() == 5).then(|| row.names[1])),
-        DomainIdentity::D10(word) => D10_DEFINITION_BINDINGS.iter()
-            .find(|row| row.bits == word.packed_bits()
-                && matches!(row.bits >> 7, 0b011 | 0b100))
+        DomainIdentity::D10(word) => D10_DEFINITION_BINDINGS
+            .iter()
+            .find(|row| row.bits == word.packed_bits() && matches!(row.bits >> 7, 0b011 | 0b100))
             .and_then(|row| (row.names.len() == 5).then(|| row.names[1])),
         _ => None,
     }
@@ -335,9 +350,11 @@ pub(crate) fn d9_binding_identity_for_definition(name: &str) -> Option<DomainIde
     D9_DEFINITION_BINDINGS
         .iter()
         .find(|row| row.names.iter().any(|candidate| *candidate == name))
-        .map(|row| DomainIdentity::D9(CoreD9::from_word(
-            Bit9::new(row.bits).expect("generated D9 binding is exactly nine bits"),
-        )))
+        .map(|row| {
+            DomainIdentity::D9(CoreD9::from_word(
+                Bit9::new(row.bits).expect("generated D9 binding is exactly nine bits"),
+            ))
+        })
 }
 
 /// Resolve an owner-ratified **Ukrainian source head** from the D9 ladder.
@@ -348,9 +365,11 @@ pub(crate) fn d9_uk_source_identity(name: &str) -> Option<DomainIdentity> {
     D9_DEFINITION_BINDINGS
         .iter()
         .find(|row| row.names.first().copied() == Some(name))
-        .map(|row| DomainIdentity::D9(CoreD9::from_word(
-            Bit9::new(row.bits).expect("ratified D9 source word has exactly nine bits"),
-        )))
+        .map(|row| {
+            DomainIdentity::D9(CoreD9::from_word(
+                Bit9::new(row.bits).expect("ratified D9 source word has exactly nine bits"),
+            ))
+        })
 }
 
 /// Binding-only D10 lookup. A domain-table name maps to an exact coordinate,
@@ -359,9 +378,11 @@ pub(crate) fn d10_binding_identity_for_definition(name: &str) -> Option<DomainId
     D10_DEFINITION_BINDINGS
         .iter()
         .find(|row| row.names.iter().any(|candidate| *candidate == name))
-        .map(|row| DomainIdentity::D10(
-            crate::DomainD10::new(row.bits).expect("generated D10 binding is exactly ten bits"),
-        ))
+        .map(|row| {
+            DomainIdentity::D10(
+                crate::DomainD10::new(row.bits).expect("generated D10 binding is exactly ten bits"),
+            )
+        })
 }
 
 /// Канонічний surface → domain маршрут читає тільки ратифіковану
@@ -412,9 +433,9 @@ pub(crate) fn surface_for_domain_identity(
     // D7 is a sound/text *display* projection only. Its exact W7 coordinate
     // is already known; no reverse name lookup or callable status is inferred.
     if matches!(identity, DomainIdentity::D7(_)) {
-        let row = D7_DISPLAY_ROWS.iter().find(|row|
-            u16::from(row.bits) == identity.packed_bits()
-        )?;
+        let row = D7_DISPLAY_ROWS
+            .iter()
+            .find(|row| u16::from(row.bits) == identity.packed_bits())?;
         return match namespace {
             "uk" => row.uk,
             "sa" => row.sa,
@@ -441,8 +462,6 @@ pub(crate) fn semantic_id_bits(semantic_id: LegacyRegistrySlot) -> String {
 fn live_rows() -> &'static [SemanticRow] {
     SEMANTIC_ROWS
 }
-
-
 
 pub(crate) fn admitted_semantic_ids() -> Vec<LegacyRegistrySlot> {
     live_rows()
@@ -499,7 +518,9 @@ pub(crate) fn lexical_peer_spellings_for_documented_name(name: &str) -> Vec<&'st
             matched = Some(row);
         }
     }
-    let Some(row) = matched else { return Vec::new(); };
+    let Some(row) = matched else {
+        return Vec::new();
+    };
     let mut names: Vec<_> = row.surfaces.iter().map(|surface| surface.name).collect();
     names.sort_unstable();
     names.dedup();
@@ -568,10 +589,10 @@ mod exact_registry_vs_historical_slot_tests {
 
     #[test]
     fn historical_w8_slot_cannot_become_current_d8_round() {
-        let historical: LegacyRegistrySlot = crate::CoreDomainIdentity::D8(crate::CoreD8::from_word(crate::Bit8::new(0b10101000).expect("legacy W8 payload")));
-        let current = DomainIdentity::D8(
-            CoreD8::from_word(Bit8::new(0b10101000).unwrap()),
+        let historical: LegacyRegistrySlot = crate::CoreDomainIdentity::D8(
+            crate::CoreD8::from_word(crate::Bit8::new(0b10101000).expect("legacy W8 payload")),
         );
+        let current = DomainIdentity::D8(CoreD8::from_word(Bit8::new(0b10101000).unwrap()));
         // Bit-for-bit equality of the mechanical payload is insufficient.
         assert_eq!(historical.packed_bits() as u16, current.packed_bits());
         assert_eq!(current.width(), 8);
@@ -583,10 +604,8 @@ mod exact_registry_vs_historical_slot_tests {
 
     #[test]
     fn surface_domain_projection_never_requires_the_legacy_byte_slot() {
-        for (surface, width, bits) in [
-            ("атом?", 3usize, 0b010u16),
-            ("як-є", 3usize, 0b001u16),
-        ] {
+        for (surface, width, bits) in [("атом?", 3usize, 0b010u16), ("як-є", 3usize, 0b001u16)]
+        {
             let identity = domain_identity_for_surface(surface)
                 .expect("generated ratified D3 surface must have an exact domain");
             assert_eq!(identity.width(), width);
@@ -606,13 +625,18 @@ mod exact_d6_binding_projection_tests {
             .expect("ratified D6 REDUCE must have binding-only identity");
         assert_eq!(identity.width(), 6);
         assert_eq!(identity.packed_bits(), 0b101110);
-        assert!(identity.core_operation().is_none(),
-            "binding authority must not grant generic D6 callability");
+        assert!(
+            identity.core_operation().is_none(),
+            "binding authority must not grant generic D6 callability"
+        );
     }
 
     #[test]
     fn unknown_definition_does_not_gain_d6_identity() {
-        assert_eq!(d6_binding_identity_for_definition("__unknown_d6_binding__"), None);
+        assert_eq!(
+            d6_binding_identity_for_definition("__unknown_d6_binding__"),
+            None
+        );
     }
 }
 
@@ -656,10 +680,12 @@ mod exact_d5_binding_projection_tests {
 
     #[test]
     fn unknown_definition_does_not_gain_a_d5_coordinate() {
-        assert_eq!(d5_binding_identity_for_definition("__unknown_d5_binding__"), None);
+        assert_eq!(
+            d5_binding_identity_for_definition("__unknown_d5_binding__"),
+            None
+        );
     }
 }
-
 
 #[cfg(test)]
 mod exact_d3_compatibility_migration_tests {
@@ -676,11 +702,7 @@ mod exact_d3_compatibility_migration_tests {
             assert_eq!(identity.width(), 3);
             assert_eq!(identity.packed_bits(), u16::from(bits));
         }
-        for legacy_byte in [
-            0b00000001,
-            0b00000111,
-            0b00000101,
-        ] {
+        for legacy_byte in [0b00000001, 0b00000111, 0b00000101] {
             let historical_slot = CoreDomainIdentity::D8(crate::CoreD8::from_word(
                 crate::Bit8::new(legacy_byte).expect("D8 resident payload"),
             ));
@@ -701,8 +723,8 @@ mod exact_d3_compatibility_migration_tests {
 
 #[cfg(test)]
 mod domain_source_projection_anti_collision_tests {
-    use super::*;
     use super::domain_surface_generated::DomainSurfaceName;
+    use super::*;
 
     static SHARED_UK: [DomainSurfaceName; 1] = [DomainSurfaceName {
         namespace: "uk",
@@ -716,10 +738,16 @@ mod domain_source_projection_anti_collision_tests {
     #[test]
     fn different_d3_and_d4_coordinates_with_same_name_fail_closed_in_either_order() {
         let d3 = DomainSurfaceRow {
-            width: 3, bits: 0b001, source_routable: true, surfaces: &SHARED_UK,
+            width: 3,
+            bits: 0b001,
+            source_routable: true,
+            surfaces: &SHARED_UK,
         };
         let d4 = DomainSurfaceRow {
-            width: 4, bits: 0b0001, source_routable: true, surfaces: &SHARED_UK,
+            width: 4,
+            bits: 0b0001,
+            source_routable: true,
+            surfaces: &SHARED_UK,
         };
         // The low numeric payload is equal. The domain widths are not.
         for rows in [[d3, d4, d3], [d4, d3, d4]] {
@@ -732,10 +760,16 @@ mod domain_source_projection_anti_collision_tests {
     #[test]
     fn invalid_width_or_payload_cannot_become_a_callable_d3_word() {
         let invalid_width = DomainSurfaceRow {
-            width: 8, bits: 0b001, source_routable: true, surfaces: &SHARED_UK,
+            width: 8,
+            bits: 0b001,
+            source_routable: true,
+            surfaces: &SHARED_UK,
         };
         let invalid_payload = DomainSurfaceRow {
-            width: 3, bits: 0b1000, source_routable: true, surfaces: &AMBIGUOUS_SANSKRIT,
+            width: 3,
+            bits: 0b1000,
+            source_routable: true,
+            surfaces: &AMBIGUOUS_SANSKRIT,
         };
         let index = build_exact_source_index(&[invalid_width, invalid_payload]);
         assert_eq!(index.all.get("однакова-назва"), Some(&None));
@@ -766,7 +800,10 @@ mod domain_source_projection_anti_collision_tests {
                     "a generated surface lost its exact domain identity"
                 );
                 if matches!(surface.namespace, "uk" | "ukr") {
-                    assert_eq!(index.uk.get(surface.name).copied().flatten(), Some(expected));
+                    assert_eq!(
+                        index.uk.get(surface.name).copied().flatten(),
+                        Some(expected)
+                    );
                 } else {
                     assert!(!index.uk.contains_key(surface.name));
                 }
@@ -796,7 +833,10 @@ mod domain_source_projection_anti_collision_tests {
                     .expect("власні біти кожного домену");
                 assert_eq!(coordinate.width(), width);
                 assert_eq!(coordinate.bits(), bits);
-                assert!(unique.insert(coordinate), "два домени злилися в одну координату");
+                assert!(
+                    unique.insert(coordinate),
+                    "два домени злилися в одну координату"
+                );
 
                 if width > 1 && bits < (1u16 << (width - 1)) {
                     let narrower = crate::domain_ladder::DomainCoordinate::new(width - 1, bits)
@@ -843,7 +883,8 @@ mod domain_source_projection_anti_collision_tests {
                         insert_exact_source(&mut index, "суперечлива-назва", Some(identity));
                         if step > 0 {
                             assert_eq!(
-                                index.get("суперечлива-назва"), Some(&None),
+                                index.get("суперечлива-назва"),
+                                Some(&None),
                                 "колізія {width}:{bits} відновилася на кроці {step}"
                             );
                         }
@@ -867,13 +908,20 @@ mod domain_source_projection_anti_collision_tests {
     #[test]
     fn never_route_d1_d2_or_historical_w8_from_domain_surface_index() {
         let index = exact_source_index();
-        for name in ["ні", "так", "відкрити", "закрити", "пропуск", "крапка"] {
+        for name in ["ні", "так", "відкрити", "закрити", "пропуск", "крапка"]
+        {
             assert!(!index.all.contains_key(name));
             assert_eq!(direct_domain_identity_for_surface(name), None);
         }
         assert_eq!(direct_domain_identity_for_surface("def"), None);
         assert_eq!(direct_domain_identity_for_surface("00000001"), None);
-        assert_eq!(direct_domain_identity_for_surface("атом?").map(|d| d.width()), Some(3));
-        assert_eq!(direct_domain_identity_for_surface("як-є").map(|d| d.packed_bits()), Some(0b001));
+        assert_eq!(
+            direct_domain_identity_for_surface("атом?").map(|d| d.width()),
+            Some(3)
+        );
+        assert_eq!(
+            direct_domain_identity_for_surface("як-є").map(|d| d.packed_bits()),
+            Some(0b001)
+        );
     }
 }

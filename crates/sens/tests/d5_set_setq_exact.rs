@@ -96,8 +96,8 @@ fn exact_d5_set_family_fails_closed_on_missing_binding() {
 fn d4_define_and_d5_setq_do_not_collapse() {
     let env = Environment::root();
 
-    let d5_err = run_exact(&env, 5, 0b00111, "fresh 5")
-        .expect_err("D5 SETQ must fail on missing binding");
+    let d5_err =
+        run_exact(&env, 5, 0b00111, "fresh 5").expect_err("D5 SETQ must fail on missing binding");
     assert!(format!("{d5_err:?}").contains("UnknownSymbol"));
     assert_eq!(env.get("fresh"), None);
 
@@ -111,8 +111,8 @@ fn set_requires_symbol_result_and_setq_requires_literal_symbol() {
     let env = Environment::root();
     env.define("x", exact_number(1.0));
 
-    let set_err = run_exact(&env, 5, 0b00110, "42 9")
-        .expect_err("SET target result must be symbol");
+    let set_err =
+        run_exact(&env, 5, 0b00110, "42 9").expect_err("SET target result must be symbol");
     assert!(format!("{set_err:?}").contains("Type"));
 
     let setq_err = run_exact(&env, 5, 0b00111, "(quote x) 9")

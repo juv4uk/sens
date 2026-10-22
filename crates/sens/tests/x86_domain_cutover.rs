@@ -10,20 +10,37 @@ const OPERANDS: &str = include_str!("../../../lib/machine/operands/x86-64.lisp")
 
 #[test]
 fn all_28_x86_let_bindings_are_exact_one_argument_d4_lambda_calls() {
-    assert!(!ATOMS.contains("(001000 "), "D6 LET must not reappear as an executable head");
+    assert!(
+        !ATOMS.contains("(001000 "),
+        "D6 LET must not reappear as an executable head"
+    );
     let expressions = parse_mixed_exact_domain_machine_source(ATOMS_PATH, ATOMS)
         .expect("точні D3/D4 координати в основному x86-файлі");
-    assert_eq!(expressions.len(), 132, "набір верхніх форм x86 не можна скорочувати");
+    assert_eq!(
+        expressions.len(),
+        132,
+        "набір верхніх форм x86 не можна скорочувати"
+    );
 
     fn inspect(node: &Expr, converted: &mut usize) {
-        let ExprKind::List(items) = &node.kind else { return };
-        if let Some(Expr { kind: ExprKind::List(head), .. }) = items.first() {
+        let ExprKind::List(items) = &node.kind else {
+            return;
+        };
+        if let Some(Expr {
+            kind: ExprKind::List(head),
+            ..
+        }) = items.first()
+        {
             if matches!(
                 head.first().map(|v| &v.kind),
                 Some(ExprKind::DomainIdentity(identity))
                     if identity.width() == 4 && identity.packed_bits() == 0b0010
             ) {
-                assert_eq!(items.len(), 2, "одне ініціалізоване зв'язування, як у старому LET");
+                assert_eq!(
+                    items.len(),
+                    2,
+                    "одне ініціалізоване зв'язування, як у старому LET"
+                );
                 assert_eq!(head.len(), 3, "одна LAMBDA із єдиним тілом");
                 let ExprKind::List(parameters) = &head[1].kind else {
                     panic!("параметри мають бути списком")
@@ -33,12 +50,19 @@ fn all_28_x86_let_bindings_are_exact_one_argument_d4_lambda_calls() {
                 *converted += 1;
             }
         }
-        for child in items.iter() { inspect(child, converted); }
+        for child in items.iter() {
+            inspect(child, converted);
+        }
     }
 
     let mut migrated = 0;
-    for expression in &expressions { inspect(expression, &mut migrated); }
-    assert_eq!(migrated, 28, "кожне старе LET має мати рівно одну нову D4-форму");
+    for expression in &expressions {
+        inspect(expression, &mut migrated);
+    }
+    assert_eq!(
+        migrated, 28,
+        "кожне старе LET має мати рівно одну нову D4-форму"
+    );
 }
 
 #[test]
@@ -47,8 +71,7 @@ fn machine_rejection_returns_exact_d1_yes_or_no_instead_of_legacy_nil() {
         .expect("точні координати в бібліотеці операндів");
     let mut session = Session::default();
     load_core_library(&mut session).expect("міграційний базовий Lisp");
-    eval_parsed_expressions(&forms, &mut session)
-        .expect("визначення Lisp-owned операндів");
+    eval_parsed_expressions(&forms, &mut session).expect("визначення Lisp-owned операндів");
 
     for (argument, expected) in [
         ("(quote ())", false),
@@ -56,8 +79,8 @@ fn machine_rejection_returns_exact_d1_yes_or_no_instead_of_legacy_nil() {
         ("(quote (rejected machine-operand gpr64 invalid))", true),
     ] {
         let query = format!("(x86-machine-rejected? {argument})");
-        let answer = eval_program(&query, &mut session)
-            .unwrap_or_else(|error| panic!("{query}: {error}"));
+        let answer =
+            eval_program(&query, &mut session).unwrap_or_else(|error| panic!("{query}: {error}"));
         assert_eq!(
             answer.value.as_predicate_bit(),
             Some(expected),
@@ -65,7 +88,6 @@ fn machine_rejection_returns_exact_d1_yes_or_no_instead_of_legacy_nil() {
         );
     }
 }
-
 
 #[test]
 fn xmm_sentinel_shortens_quoted_data_without_collapsing_d3_and_d8() {
@@ -112,17 +134,28 @@ fn x86_lowerer_is_exact_domain_only_and_has_seven_d4_local_apps() {
     assert!(!source.contains("#d11"));
     assert!(!source.contains("#d24"));
     let ast = parse_mixed_exact_domain_machine_source(
-        "lib/machine/lowering/semantic-x86-64.lisp", source
-    ).expect("точнодоменний x86");
-    assert_eq!(ast.len(), 36, "active forms contain no SID8 provenance table");
+        "lib/machine/lowering/semantic-x86-64.lisp",
+        source,
+    )
+    .expect("точнодоменний x86");
+    assert_eq!(
+        ast.len(),
+        36,
+        "active forms contain no SID8 provenance table"
+    );
     // Шість мігрованих LET + одна раніше ратифікована локальна LAMBDA.
     assert_eq!(source.matches("((0010 (forms)").count(), 7);
-    let encoded_rows = source.lines().filter(|line| {
-        let row = line.trim().trim_start_matches('(').as_bytes();
-        row.len() > 9 && row[8] == b' '
-            && row[..8].iter().all(|v| *v == b'0' || *v == b'1')
-    }).count();
-    assert_eq!(encoded_rows, 0, "активний lowerer не містить восьмибітних ключів");
+    let encoded_rows = source
+        .lines()
+        .filter(|line| {
+            let row = line.trim().trim_start_matches('(').as_bytes();
+            row.len() > 9 && row[8] == b' ' && row[..8].iter().all(|v| *v == b'0' || *v == b'1')
+        })
+        .count();
+    assert_eq!(
+        encoded_rows, 0,
+        "активний lowerer не містить восьмибітних ключів"
+    );
 }
 
 #[test]
@@ -140,8 +173,9 @@ fn x86_exact_width_witness_checks_2046_coordinates_and_18434_bits() {
                 let mut mutant = spelling.as_bytes().to_vec();
                 mutant[i] = if mutant[i] == b'0' { b'1' } else { b'0' };
                 let changed = DomainCoordinate::з_видимих_бітів(
-                    std::str::from_utf8(&mutant).unwrap()
-                ).unwrap();
+                    std::str::from_utf8(&mutant).unwrap(),
+                )
+                .unwrap();
                 assert_eq!(changed.width(), width);
                 assert_ne!(changed, c, "D{width}:{spelling}, bit {i}");
                 flips += 1;

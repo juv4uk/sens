@@ -190,8 +190,7 @@ fn append_t5m_expression_context(
             if let ExprKind::Symbol(name) = &tail.kind {
                 // Цитата не змінює структури: W7/D7 glyph-list не є
                 // атомом хвоста ані в даних, ані в звичайній формі.
-                if sens::semantic_registry_export::admitted_core_domain_for_surface(name)
-                    .is_none()
+                if sens::semantic_registry_export::admitted_core_domain_for_surface(name).is_none()
                 {
                     return Err(format!(
                         "T5M_DOTTED_TEXT_TAIL_NOT_ATOMIC symbol={name:?}: D7 glyph-list cannot replace a dotted-pair atom"
@@ -1402,7 +1401,9 @@ fn render_repl_ast_node(source: &str, expression: &Expr, depth: usize, lines: &m
         ExprKind::BinaryNumber(..) => lines.push(format!("{indent}Двійкове число: {excerpt}")),
         ExprKind::NumericBuffer(..) => lines.push(format!("{indent}Числовий буфер: {excerpt}")),
         ExprKind::Sid(identity) => {
-            lines.push(format!("{indent}Історична identity {identity:?}: {excerpt}"));
+            lines.push(format!(
+                "{indent}Історична identity {identity:?}: {excerpt}"
+            ));
         }
         ExprKind::DomainIdentity(identity) => {
             lines.push(format!("{indent}Доменна identity {identity:?}: {excerpt}"));
@@ -1410,7 +1411,9 @@ fn render_repl_ast_node(source: &str, expression: &Expr, depth: usize, lines: &m
         ExprKind::String(..) => lines.push(format!("{indent}Рядок: {excerpt}")),
         ExprKind::Symbol(..) => lines.push(format!("{indent}Символ: {excerpt}")),
         ExprKind::Local { depth, index } => {
-            lines.push(format!("{indent}Локальний слот: depth={depth}, index={index}"));
+            lines.push(format!(
+                "{indent}Локальний слот: depth={depth}, index={index}"
+            ));
         }
     }
 }
@@ -1527,10 +1530,7 @@ fn handle_meta_command(line: &str, state: &mut ReplState) -> bool {
                                 }
                                 println!(
                                     "{}",
-                                    render_repl_reply(
-                                        &result.value,
-                                        state.surface.presentation()
-                                    )
+                                    render_repl_reply(&result.value, state.surface.presentation())
                                 );
                             }
                             Err(error) => eprintln!("Помилка виконання SENS:\n{error}"),
@@ -1711,13 +1711,12 @@ mod tests {
         )
         .expect("перегляд має перевірити форму без виконання");
 
-        let error = eval_t5m_repl_line(
-            "відповідь",
-            &mut session,
-            ReplSurface::UkrainianFull,
-        )
-        .expect_err("простий перегляд не має створювати прив'язку");
-        assert!(error.contains("unknown symbol") || error.contains("not callable"), "{error}");
+        let error = eval_t5m_repl_line("відповідь", &mut session, ReplSurface::UkrainianFull)
+            .expect_err("простий перегляд не має створювати прив'язку");
+        assert!(
+            error.contains("unknown symbol") || error.contains("not callable"),
+            "{error}"
+        );
     }
 
     #[cfg(feature = "zig-transport")]
@@ -1734,11 +1733,8 @@ mod tests {
             surface: ReplSurface::UkrainianFull,
             sens_loop: false,
         };
-        let (preview, result) = render_repl_ast_and_eval(
-            "(визначити відповідь 40)",
-            &mut state,
-        )
-        .expect("команда має показати дерево й виконати форму");
+        let (preview, result) = render_repl_ast_and_eval("(визначити відповідь 40)", &mut state)
+            .expect("команда має показати дерево й виконати форму");
 
         assert!(preview.contains("T5M Zig roundtrip"), "{preview}");
         assert!(preview.contains("визначити"), "{preview}");
@@ -1748,12 +1744,8 @@ mod tests {
         };
         assert_eq!(number.to_decimal_string(), "40");
 
-        let next = eval_t5m_repl_line(
-            "(додати відповідь 2)",
-            &mut state.session,
-            state.surface,
-        )
-        .expect("виконана прив'язка має лишитися в поточній сесії");
+        let next = eval_t5m_repl_line("(додати відповідь 2)", &mut state.session, state.surface)
+            .expect("виконана прив'язка має лишитися в поточній сесії");
         let Value::BinaryNumber(ref number) = next.value else {
             panic!("наступне обчислення має повернути точне число");
         };
@@ -2139,10 +2131,7 @@ mod tests {
             span: Default::default(),
         };
         let pair = |tail: Expr| Expr {
-            kind: ExprKind::Pair(
-                std::rc::Rc::new(nil()),
-                std::rc::Rc::new(tail),
-            ),
+            kind: ExprKind::Pair(std::rc::Rc::new(nil()), std::rc::Rc::new(tail)),
             span: Default::default(),
         };
         for quoted_data in [false, true] {
@@ -2159,7 +2148,10 @@ mod tests {
                 quoted_data,
             )
             .expect_err("D7 glyph-list must not replace an atomic dotted tail");
-            assert!(error.starts_with("T5M_DOTTED_TEXT_TAIL_NOT_ATOMIC"), "{error}");
+            assert!(
+                error.starts_with("T5M_DOTTED_TEXT_TAIL_NOT_ATOMIC"),
+                "{error}"
+            );
 
             let exact_tail = pair(nil());
             let mut valid = Vec::new();

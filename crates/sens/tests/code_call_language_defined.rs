@@ -23,11 +23,21 @@ fn language_defined_functions_are_callable_by_code() {
     // list = 00100111, member? = 00101100, quotient = 00010100, append = 00101001
     for (by_code, by_name) in [
         ("(00100111 1 2 3)", "(list 1 2 3)"),
-        ("(00101100 2 (00000001 (1 2 3)))", "(member? 2 (00000001 (1 2 3)))"),
+        (
+            "(00101100 2 (00000001 (1 2 3)))",
+            "(member? 2 (00000001 (1 2 3)))",
+        ),
         ("(00010100 17 5)", "(quotient 17 5)"),
-        ("(00101001 (00000001 (1 2)) (00000001 (3)))", "(append (00000001 (1 2)) (00000001 (3)))"),
+        (
+            "(00101001 (00000001 (1 2)) (00000001 (3)))",
+            "(append (00000001 (1 2)) (00000001 (3)))",
+        ),
     ] {
-        assert_eq!(eval(&mut session, by_code), eval(&mut session, by_name), "{by_code}");
+        assert_eq!(
+            eval(&mut session, by_code),
+            eval(&mut session, by_name),
+            "{by_code}"
+        );
     }
 }
 
@@ -65,13 +75,19 @@ fn a_code_used_as_a_value_is_callable_through_its_definition() {
 fn a_macro_bound_to_a_code_expands_before_its_arguments_are_evaluated() {
     let mut session = core_session();
     // and = 10011010: другий аргумент не обчислюється, якщо перший хибний.
-    assert_eq!(eval(&mut session, "(10011010 () (never-defined-function))"), "()");
+    assert_eq!(
+        eval(&mut session, "(10011010 () (never-defined-function))"),
+        "()"
+    );
     assert_eq!(
         eval(&mut session, "(10011010 1 2)"),
         eval(&mut session, "(and 1 2)")
     );
     // let = 10011100
-    assert_eq!(eval(&mut session, "(10011100 ((x 40)) (00001100 x 2))"), "42");
+    assert_eq!(
+        eval(&mut session, "(10011100 ((x 40)) (00001100 x 2))"),
+        "42"
+    );
 }
 
 #[test]
@@ -101,4 +117,3 @@ fn defmacro_itself_is_callable_by_its_code() {
     );
     assert_eq!(eval(&mut session, "(quoted (a b))"), "(a b)");
 }
-

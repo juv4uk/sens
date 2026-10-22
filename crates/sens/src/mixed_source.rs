@@ -55,8 +55,12 @@ pub fn parse_mixed_exact_domain_machine_source(
     // Only the admission/encoding wire paths need these four ratified D9
     // string operations. Pin callability to those exact source files; this is
     // not general D9 call-head inference for machine code.
-    if matches!(path, "lib/machine/admission/x86-64.lisp" | "lib/machine/encoding/x86-64.lisp") {
-        parsed.into_iter()
+    if matches!(
+        path,
+        "lib/machine/admission/x86-64.lisp" | "lib/machine/encoding/x86-64.lisp"
+    ) {
+        parsed
+            .into_iter()
             .map(|expr| lift_pinned_machine_wire_d9_strings(source, expr, 0))
             .collect()
     } else {
@@ -69,11 +73,7 @@ pub fn parse_mixed_exact_domain_machine_source(
 /// admitted reader/serializer identities; identical eight-bit payloads never
 /// become current D8 merely because of their width. Historical W8 QUOTE
 /// remains opaque, and binder names remain source data.
-fn lift_pinned_d8_io(
-    source: &str,
-    expression: Expr,
-    depth: u32,
-) -> Result<Expr, LanguageError> {
+fn lift_pinned_d8_io(source: &str, expression: Expr, depth: u32) -> Result<Expr, LanguageError> {
     if depth > MAX_STRUCTURE_DEPTH {
         return Err(LanguageError::new(
             ErrorKind::Parse,
@@ -86,7 +86,10 @@ fn lift_pinned_d8_io(
         return Ok(Expr { kind, span });
     };
     if items.is_empty() {
-        return Ok(Expr { kind: ExprKind::List(items), span });
+        return Ok(Expr {
+            kind: ExprKind::List(items),
+            span,
+        });
     }
     let mut lifted = items.to_vec();
     let head_spelling = source_spelling(source, &lifted[0]);
@@ -94,7 +97,10 @@ fn lift_pinned_d8_io(
         || is_exact_quote(&lifted[0])
         || head_spelling == Some("'")
     {
-        return Ok(Expr { kind: ExprKind::List(items), span });
+        return Ok(Expr {
+            kind: ExprKind::List(items),
+            span,
+        });
     }
 
     if head_spelling == Some("код-символу") {
@@ -131,10 +137,12 @@ fn lift_pinned_d8_io(
         head_spelling,
         Some("11100000" | "11110100" | "11101010" | "11101101" | "11101110")
     ) {
-        let words = parse_binary_source_words(
-            head_spelling.expect("known ratified D8 mechanism head")
-        )?;
-        let word = words.first().expect("one static ratified D8 source word").word;
+        let words =
+            parse_binary_source_words(head_spelling.expect("known ratified D8 mechanism head"))?;
+        let word = words
+            .first()
+            .expect("one static ratified D8 source word")
+            .word;
         lifted[0] = Expr {
             kind: ExprKind::DomainIdentity(DomainIdentity::from_source_word(word)),
             span: lifted[0].span,
@@ -187,7 +195,10 @@ fn lift_pinned_machine_wire_d9_strings(
         return Ok(Expr { kind, span });
     };
     if items.is_empty() {
-        return Ok(Expr { kind: ExprKind::List(items), span });
+        return Ok(Expr {
+            kind: ExprKind::List(items),
+            span,
+        });
     }
 
     let mut lifted = items.to_vec();
@@ -196,7 +207,10 @@ fn lift_pinned_machine_wire_d9_strings(
         || is_exact_quote(&lifted[0])
         || spelling == Some("'")
     {
-        return Ok(Expr { kind: ExprKind::List(items), span });
+        return Ok(Expr {
+            kind: ExprKind::List(items),
+            span,
+        });
     }
 
     if spelling.is_some_and(|head| ADMITTED.contains(&head)) {
@@ -208,9 +222,7 @@ fn lift_pinned_machine_wire_d9_strings(
             span: lifted[0].span,
         };
     } else if matches!(&lifted[0].kind, ExprKind::List(_)) {
-        lifted[0] = lift_pinned_machine_wire_d9_strings(
-            source, lifted[0].clone(), depth + 1,
-        )?;
+        lifted[0] = lift_pinned_machine_wire_d9_strings(source, lifted[0].clone(), depth + 1)?;
     }
 
     let skip_binding_slot = is_legacy_w8_define_head(source, &items[0])
@@ -222,9 +234,8 @@ fn lift_pinned_machine_wire_d9_strings(
         if skip_binding_slot && index == 1 {
             continue;
         }
-        lifted[index] = lift_pinned_machine_wire_d9_strings(
-            source, lifted[index].clone(), depth + 1,
-        )?;
+        lifted[index] =
+            lift_pinned_machine_wire_d9_strings(source, lifted[index].clone(), depth + 1)?;
     }
     Ok(Expr {
         kind: ExprKind::List(Rc::from(lifted.into_boxed_slice())),
@@ -242,7 +253,11 @@ fn parse_mixed_pinned_d8_io(source: &str) -> Result<Vec<Expr>, LanguageError> {
 /// Migrate only explicitly pinned sources. W8 syntax containers remain
 /// compatible while approved exact D9 mechanisms are lifted from their
 /// Ukrainian projection. D9 residency alone never grants callability.
-fn lift_pinned_d9_language_calls(source: &str, expression: Expr, depth: u32) -> Result<Expr, LanguageError> {
+fn lift_pinned_d9_language_calls(
+    source: &str,
+    expression: Expr,
+    depth: u32,
+) -> Result<Expr, LanguageError> {
     const UKRAINIAN_D9_MECHANISMS: [&str; 6] = [
         "рядок-додати",
         "рядок-порожній?",
@@ -252,24 +267,48 @@ fn lift_pinned_d9_language_calls(source: &str, expression: Expr, depth: u32) -> 
         "рядок?",
     ];
     if depth > MAX_STRUCTURE_DEPTH {
-        return Err(LanguageError::new(ErrorKind::Parse, "pinned D9 reasoning source exceeds structure depth", expression.span));
+        return Err(LanguageError::new(
+            ErrorKind::Parse,
+            "pinned D9 reasoning source exceeds structure depth",
+            expression.span,
+        ));
     }
     let Expr { kind, span } = expression;
-    let ExprKind::List(items) = kind else { return Ok(Expr { kind, span }); };
-    if items.is_empty() { return Ok(Expr { kind: ExprKind::List(items), span }); }
+    let ExprKind::List(items) = kind else {
+        return Ok(Expr { kind, span });
+    };
+    if items.is_empty() {
+        return Ok(Expr {
+            kind: ExprKind::List(items),
+            span,
+        });
+    }
 
     let mut lifted = items.to_vec();
     let spelling = source_spelling(source, &lifted[0]);
-    if is_legacy_w8_quote_head(source, &lifted[0]) || is_exact_quote(&lifted[0]) || spelling == Some("'") {
-        return Ok(Expr { kind: ExprKind::List(items), span });
+    if is_legacy_w8_quote_head(source, &lifted[0])
+        || is_exact_quote(&lifted[0])
+        || spelling == Some("'")
+    {
+        return Ok(Expr {
+            kind: ExprKind::List(items),
+            span,
+        });
     }
     if spelling.is_some_and(|s| s.len() == 9 && s.bytes().all(|b| matches!(b, b'0' | b'1'))) {
         let word = parse_binary_source_words(spelling.expect("D9 spelling"))?[0].word;
         let identity = DomainIdentity::from_source_word(word);
         if identity.width() != 9 {
-            return Err(LanguageError::new(ErrorKind::Parse, "nine-bit reasoning head must be D9", lifted[0].span));
+            return Err(LanguageError::new(
+                ErrorKind::Parse,
+                "nine-bit reasoning head must be D9",
+                lifted[0].span,
+            ));
         }
-        lifted[0] = Expr { kind: ExprKind::DomainIdentity(identity), span: lifted[0].span };
+        lifted[0] = Expr {
+            kind: ExprKind::DomainIdentity(identity),
+            span: lifted[0].span,
+        };
     } else if spelling.is_some_and(|name| UKRAINIAN_D9_MECHANISMS.contains(&name)) {
         if let Some(identity) = spelling
             .and_then(crate::semantic_registry::d9_binding_identity_for_definition)
@@ -277,7 +316,10 @@ fn lift_pinned_d9_language_calls(source: &str, expression: Expr, depth: u32) -> 
         {
             // The source projection and concrete mechanism must both agree.
             // D9 residency alone never promotes an arbitrary surface to a call.
-            lifted[0] = Expr { kind: ExprKind::DomainIdentity(identity), span: lifted[0].span };
+            lifted[0] = Expr {
+                kind: ExprKind::DomainIdentity(identity),
+                span: lifted[0].span,
+            };
         }
     } else if matches!(&lifted[0].kind, ExprKind::List(_)) {
         lifted[0] = lift_pinned_d9_language_calls(source, lifted[0].clone(), depth + 1)?;
@@ -288,28 +330,58 @@ fn lift_pinned_d9_language_calls(source: &str, expression: Expr, depth: u32) -> 
         || is_legacy_w8_macro_head(source, &items[0])
         || is_exact_d4_binding_head(&items[0]);
     for index in 1..lifted.len() {
-        if skip_binding && index == 1 { continue; }
+        if skip_binding && index == 1 {
+            continue;
+        }
         lifted[index] = lift_pinned_d9_language_calls(source, lifted[index].clone(), depth + 1)?;
     }
-    Ok(Expr { kind: ExprKind::List(Rc::from(lifted.into_boxed_slice())), span })
+    Ok(Expr {
+        kind: ExprKind::List(Rc::from(lifted.into_boxed_slice())),
+        span,
+    })
 }
 
 /// Path-pinned reasoning reader. Materializing a D9 identity here does not make
 /// it callable: dispatch still requires a concrete mechanism slot installed by
 /// its evaluated Lisp definition.
-pub fn parse_mixed_exact_domain_reasoning_source(path: &str, source: &str) -> Result<Vec<Expr>, LanguageError> {
-    if !matches!(path, "lib/world.lisp" | "lib/forward.lisp" | "lib/knowledge.lisp" | "lib/unify.lisp" | "lib/reason.lisp" | "lib/result-status.lisp" | "lib/persistent-map.lisp" | "lib/content-store.lisp" | "lib/lisp-fs.lisp" | "lib/clips-import.lisp") {
-        return Err(LanguageError::new(ErrorKind::Parse, "reasoning-source exact-domain reader requires a pinned source path", Span::default()));
+pub fn parse_mixed_exact_domain_reasoning_source(
+    path: &str,
+    source: &str,
+) -> Result<Vec<Expr>, LanguageError> {
+    if !matches!(
+        path,
+        "lib/world.lisp"
+            | "lib/forward.lisp"
+            | "lib/knowledge.lisp"
+            | "lib/unify.lisp"
+            | "lib/reason.lisp"
+            | "lib/result-status.lisp"
+            | "lib/persistent-map.lisp"
+            | "lib/content-store.lisp"
+            | "lib/lisp-fs.lisp"
+            | "lib/clips-import.lisp"
+    ) {
+        return Err(LanguageError::new(
+            ErrorKind::Parse,
+            "reasoning-source exact-domain reader requires a pinned source path",
+            Span::default(),
+        ));
     }
     let base = if matches!(
         path,
-        "lib/world.lisp" | "lib/knowledge.lisp" | "lib/persistent-map.lisp" | "lib/lisp-fs.lisp" | "lib/clips-import.lisp"
+        "lib/world.lisp"
+            | "lib/knowledge.lisp"
+            | "lib/persistent-map.lisp"
+            | "lib/lisp-fs.lisp"
+            | "lib/clips-import.lisp"
     ) {
         parse_mixed_pinned_d8_io(source)?
     } else {
         parse_mixed_source(source, true)?
     };
-    base.into_iter().map(|expr| lift_pinned_d9_language_calls(source, expr, 0)).collect()
+    base.into_iter()
+        .map(|expr| lift_pinned_d9_language_calls(source, expr, 0))
+        .collect()
 }
 
 /// Parse the curated Guard reference directory as data, not as a source file.
@@ -366,9 +438,17 @@ fn lift_pinned_utf8_d9_strings(
         ));
     }
     let Expr { kind, span } = expression;
-    let ExprKind::List(items) = kind else { return Ok(Expr { kind, span }); };
-    if items.is_empty() || is_exact_quote(&items[0]) || source_spelling(source, &items[0]) == Some("'") {
-        return Ok(Expr { kind: ExprKind::List(items), span });
+    let ExprKind::List(items) = kind else {
+        return Ok(Expr { kind, span });
+    };
+    if items.is_empty()
+        || is_exact_quote(&items[0])
+        || source_spelling(source, &items[0]) == Some("'")
+    {
+        return Ok(Expr {
+            kind: ExprKind::List(items),
+            span,
+        });
     }
     let mut lifted = items.to_vec();
     if source_spelling(source, &items[0]) == Some("рядок-додати") {
@@ -383,10 +463,15 @@ fn lift_pinned_utf8_d9_strings(
         || is_legacy_w8_macro_head(source, &items[0])
         || is_exact_d4_binding_head(&items[0]);
     for index in 1..lifted.len() {
-        if skip_binding && index == 1 { continue; }
+        if skip_binding && index == 1 {
+            continue;
+        }
         lifted[index] = lift_pinned_utf8_d9_strings(source, lifted[index].clone(), depth + 1)?;
     }
-    Ok(Expr { kind: ExprKind::List(Rc::from(lifted.into_boxed_slice())), span })
+    Ok(Expr {
+        kind: ExprKind::List(Rc::from(lifted.into_boxed_slice())),
+        span,
+    })
 }
 
 pub fn parse_mixed_exact_domain_utf8_source(
@@ -426,34 +511,64 @@ fn expand_pinned_utf8_let_star(
         ));
     }
     let Expr { kind, span } = expression;
-    let ExprKind::List(items) = kind else { return Ok(Expr { kind, span }); };
-    if items.is_empty() { return Ok(Expr { kind: ExprKind::List(items), span }); }
+    let ExprKind::List(items) = kind else {
+        return Ok(Expr { kind, span });
+    };
+    if items.is_empty() {
+        return Ok(Expr {
+            kind: ExprKind::List(items),
+            span,
+        });
+    }
 
     if is_exact_quote(&items[0]) || source_spelling(source, &items[0]) == Some("'") {
-        return Ok(Expr { kind: ExprKind::List(items), span });
+        return Ok(Expr {
+            kind: ExprKind::List(items),
+            span,
+        });
     }
-    if matches!(source_spelling(source, &items[0]), Some("нехай-послідовно" | "нехай")) {
+    if matches!(
+        source_spelling(source, &items[0]),
+        Some("нехай-послідовно" | "нехай")
+    ) {
         if items.len() != 3 {
-            return Err(LanguageError::new(ErrorKind::Parse,
-                "pinned UTF-8 sequential binding expects bindings and one body form", span));
+            return Err(LanguageError::new(
+                ErrorKind::Parse,
+                "pinned UTF-8 sequential binding expects bindings and one body form",
+                span,
+            ));
         }
         let ExprKind::List(bindings) = &items[1].kind else {
-            return Err(LanguageError::new(ErrorKind::Parse,
-                "pinned UTF-8 sequential binding requires a proper binding list", items[1].span));
+            return Err(LanguageError::new(
+                ErrorKind::Parse,
+                "pinned UTF-8 sequential binding requires a proper binding list",
+                items[1].span,
+            ));
         };
         let lambda = crate::semantic_registry::exact_uk_callable_for_source_head("функція")
             .filter(|identity| identity.width() == 4)
-            .ok_or_else(|| LanguageError::new(ErrorKind::Parse,
-                "pinned UTF-8 LET* expansion requires the admitted D4 lambda identity", items[0].span))?;
+            .ok_or_else(|| {
+                LanguageError::new(
+                    ErrorKind::Parse,
+                    "pinned UTF-8 LET* expansion requires the admitted D4 lambda identity",
+                    items[0].span,
+                )
+            })?;
         let mut body = expand_pinned_utf8_let_star(source, items[2].clone(), depth + 1)?;
         for binding in bindings.iter().rev() {
             let ExprKind::List(parts) = &binding.kind else {
-                return Err(LanguageError::new(ErrorKind::Parse,
-                    "pinned UTF-8 sequential binding entry must be a two-item list", binding.span));
+                return Err(LanguageError::new(
+                    ErrorKind::Parse,
+                    "pinned UTF-8 sequential binding entry must be a two-item list",
+                    binding.span,
+                ));
             };
             if parts.len() != 2 || !matches!(parts[0].kind, ExprKind::Symbol(_)) {
-                return Err(LanguageError::new(ErrorKind::Parse,
-                    "pinned UTF-8 sequential binding entry must contain a name and value", binding.span));
+                return Err(LanguageError::new(
+                    ErrorKind::Parse,
+                    "pinned UTF-8 sequential binding entry must contain a name and value",
+                    binding.span,
+                ));
             }
             let name = parts[0].clone();
             let value = expand_pinned_utf8_let_star(source, parts[1].clone(), depth + 1)?;
@@ -462,11 +577,17 @@ fn expand_pinned_utf8_let_star(
                 span: binding.span,
             };
             let lambda_form = Expr {
-                kind: ExprKind::List(Rc::from(vec![
-                    Expr { kind: ExprKind::DomainIdentity(lambda), span: items[0].span },
-                    parameters,
-                    body,
-                ].into_boxed_slice())),
+                kind: ExprKind::List(Rc::from(
+                    vec![
+                        Expr {
+                            kind: ExprKind::DomainIdentity(lambda),
+                            span: items[0].span,
+                        },
+                        parameters,
+                        body,
+                    ]
+                    .into_boxed_slice(),
+                )),
                 span,
             };
             body = Expr {
@@ -483,10 +604,15 @@ fn expand_pinned_utf8_let_star(
         || is_legacy_w8_macro_head(source, &items[0])
         || is_exact_d4_binding_head(&items[0]);
     for index in 1..lifted.len() {
-        if skip_binding && index == 1 { continue; }
+        if skip_binding && index == 1 {
+            continue;
+        }
         lifted[index] = expand_pinned_utf8_let_star(source, lifted[index].clone(), depth + 1)?;
     }
-    Ok(Expr { kind: ExprKind::List(Rc::from(lifted.into_boxed_slice())), span })
+    Ok(Expr {
+        kind: ExprKind::List(Rc::from(lifted.into_boxed_slice())),
+        span,
+    })
 }
 
 /// UTF-8's byte/scalar arithmetic is explicitly admitted on D24+. This
@@ -497,13 +623,16 @@ fn qualify_pinned_utf8_numbers(expression: Expr) -> Result<Expr, LanguageError> 
     let Expr { kind, span } = expression;
     let kind = match kind {
         ExprKind::Number(value, Exactness::Exact)
-            if value.is_finite() && value.fract() == 0.0
+            if value.is_finite()
+                && value.fract() == 0.0
                 && (-8_388_608.0..=8_388_607.0).contains(&value) =>
         {
             utf8_d24_integer(value as i64, span)?
         }
         ExprKind::Rational(value) if value.is_integer() => {
-            let integer = value.as_precise_i64().filter(|n| (-8_388_608..=8_388_607).contains(n))
+            let integer = value
+                .as_precise_i64()
+                .filter(|n| (-8_388_608..=8_388_607).contains(n))
                 .ok_or_else(|| utf8_numeric_error(span))?;
             utf8_d24_integer(integer, span)?
         }
@@ -511,8 +640,12 @@ fn qualify_pinned_utf8_numbers(expression: Expr) -> Result<Expr, LanguageError> 
             return Err(utf8_numeric_error(span));
         }
         ExprKind::List(items) => ExprKind::List(Rc::from(
-            items.iter().cloned().map(qualify_pinned_utf8_numbers)
-                .collect::<Result<Vec<_>, _>>()?.into_boxed_slice(),
+            items
+                .iter()
+                .cloned()
+                .map(qualify_pinned_utf8_numbers)
+                .collect::<Result<Vec<_>, _>>()?
+                .into_boxed_slice(),
         )),
         ExprKind::Pair(head, tail) => ExprKind::Pair(
             Rc::new(qualify_pinned_utf8_numbers((*head).clone())?),
@@ -525,7 +658,10 @@ fn qualify_pinned_utf8_numbers(expression: Expr) -> Result<Expr, LanguageError> 
 
 fn utf8_d24_integer(value: i64, span: Span) -> Result<ExprKind, LanguageError> {
     let encoded = (value as u64) & 0x00ff_ffff;
-    let bits = (0..24).rev().map(|shift| ((encoded >> shift) & 1) as u8).collect::<Vec<_>>();
+    let bits = (0..24)
+        .rev()
+        .map(|shift| ((encoded >> shift) & 1) as u8)
+        .collect::<Vec<_>>();
     let number = crate::BinaryNumber::from_numeric_domain_bits(24, &bits)
         .ok_or_else(|| utf8_numeric_error(span))?;
     Ok(ExprKind::BinaryNumber(number))
@@ -675,7 +811,8 @@ fn binding_form(source: &str, head: &Expr) -> Option<u16> {
         _ => {}
     }
     let identity = crate::semantic_registry::exact_uk_callable_for_source_head(spelling)?;
-    (identity.width() == 4).then_some(identity.packed_bits())
+    (identity.width() == 4)
+        .then_some(identity.packed_bits())
         .filter(|bits| matches!(bits, 2 | 3))
 }
 
@@ -701,7 +838,9 @@ fn collect_source_bindings(
     names: &mut HashSet<String>,
     descend_legacy_machine_wrappers: bool,
 ) {
-    let ExprKind::List(items) = &expression.kind else { return };
+    let ExprKind::List(items) = &expression.kind else {
+        return;
+    };
     let Some(head) = items.first() else { return };
     if is_source_quote(source, head)
         || (is_opaque_legacy_w8_head(source, head)
@@ -718,24 +857,16 @@ fn collect_source_bindings(
             }
         }
         for child in items.iter().skip(2) {
-            collect_source_bindings(
-                source,
-                child,
-                names,
-                descend_legacy_machine_wrappers,
-            );
+            collect_source_bindings(source, child, names, descend_legacy_machine_wrappers);
         }
         return;
     }
-    if descend_legacy_machine_wrappers && (is_legacy_w8_lambda_head(source, head) || is_legacy_w8_macro_head(source, head)) {
+    if descend_legacy_machine_wrappers
+        && (is_legacy_w8_lambda_head(source, head) || is_legacy_w8_macro_head(source, head))
+    {
         // W8 lambda parameter lists are binding data, not call-head positions.
         for child in items.iter().skip(2) {
-            collect_source_bindings(
-                source,
-                child,
-                names,
-                descend_legacy_machine_wrappers,
-            );
+            collect_source_bindings(source, child, names, descend_legacy_machine_wrappers);
         }
         return;
     }
@@ -820,7 +951,10 @@ fn lift_expression(
                     span,
                 });
             }
-            if descend_legacy_machine_wrappers && (is_legacy_w8_lambda_head(source, &lifted[0]) || is_legacy_w8_macro_head(source, &lifted[0])) {
+            if descend_legacy_machine_wrappers
+                && (is_legacy_w8_lambda_head(source, &lifted[0])
+                    || is_legacy_w8_macro_head(source, &lifted[0]))
+            {
                 for item in lifted.iter_mut().skip(2) {
                     *item = lift_expression(
                         source,
@@ -876,9 +1010,7 @@ fn lift_expression(
             // Legacy W8 heads remain opaque in ordinary mixed source. The
             // machine-source mode descends only through non-QUOTE wrappers
             // under its explicit caller contract; it never infers current D8.
-            if is_opaque_legacy_w8_head(source, &lifted[0])
-                && !descend_legacy_machine_wrappers
-            {
+            if is_opaque_legacy_w8_head(source, &lifted[0]) && !descend_legacy_machine_wrappers {
                 return Ok(Expr {
                     kind: ExprKind::List(Rc::from(lifted.into_boxed_slice())),
                     span,
@@ -893,7 +1025,13 @@ fn lift_expression(
             if !quote_data {
                 if is_exact_cond(&lifted[0]) {
                     for clause in lifted.iter_mut().skip(1) {
-                        *clause = lift_cond_clause(source, clause.clone(), depth + 1, bound_names, descend_legacy_machine_wrappers)?;
+                        *clause = lift_cond_clause(
+                            source,
+                            clause.clone(),
+                            depth + 1,
+                            bound_names,
+                            descend_legacy_machine_wrappers,
+                        )?;
                     }
                 } else {
                     // D4 LAMBDA parameter declarations and D4 DEFINE binding
@@ -905,7 +1043,13 @@ fn lift_expression(
                         if binding_head && index == 1 {
                             continue;
                         }
-                        *item = lift_expression(source, item.clone(), depth + 1, bound_names, descend_legacy_machine_wrappers)?;
+                        *item = lift_expression(
+                            source,
+                            item.clone(),
+                            depth + 1,
+                            bound_names,
+                            descend_legacy_machine_wrappers,
+                        )?;
                     }
                 }
             }
@@ -932,7 +1076,11 @@ fn lift_expression(
     }
 }
 
-fn lift_head(source: &str, head: Expr, bound_names: &HashSet<String>) -> Result<Expr, LanguageError> {
+fn lift_head(
+    source: &str,
+    head: Expr,
+    bound_names: &HashSet<String>,
+) -> Result<Expr, LanguageError> {
     let Some(spelling) = source_spelling(source, &head) else {
         return Ok(head);
     };
@@ -958,7 +1106,6 @@ fn lift_head(source: &str, head: Expr, bound_names: &HashSet<String>) -> Result<
         }
         return Ok(head);
     }
-
 
     match spelling.len() {
         3..=6 => {
@@ -997,7 +1144,13 @@ fn lift_cond_clause(
         ExprKind::List(items) => {
             let mut lifted = items.to_vec();
             for item in &mut lifted {
-                *item = lift_expression(source, item.clone(), depth + 1, bound_names, descend_legacy_machine_wrappers)?;
+                *item = lift_expression(
+                    source,
+                    item.clone(),
+                    depth + 1,
+                    bound_names,
+                    descend_legacy_machine_wrappers,
+                )?;
             }
             Ok(Expr {
                 kind: ExprKind::List(Rc::from(lifted.into_boxed_slice())),
@@ -1082,11 +1235,14 @@ mod tests {
                 parse_mixed_exact_domain(surface)
                     .expect("людська проєкція D1 має розбиратися як значення"),
             );
-            assert!(matches!(
-                parsed.kind,
-                ExprKind::DomainIdentity(identity)
-                    if identity.width() == 1 && identity.packed_bits() == bits
-            ), "{surface} має лишитися значенням D1:{bits}");
+            assert!(
+                matches!(
+                    parsed.kind,
+                    ExprKind::DomainIdentity(identity)
+                        if identity.width() == 1 && identity.packed_bits() == bits
+                ),
+                "{surface} має лишитися значенням D1:{bits}"
+            );
         }
     }
 
@@ -1107,16 +1263,27 @@ mod tests {
         let source = "(визначити рядок-порожній? (функція (текст) (рядок-порожній? текст)))";
         let expressions = parse_mixed_exact_domain_core_source("lib/core4.lisp", source)
             .expect("Core4's explicit D9 mechanism projection is admitted");
-        let ExprKind::List(definition) = &expressions[0].kind else { panic!("definition"); };
-        assert!(matches!(&definition[1].kind, ExprKind::Symbol(name) if name.as_ref() == "рядок-порожній?"),
-            "the definition target remains a surface binding");
-        let ExprKind::List(lambda) = &definition[2].kind else { panic!("lambda"); };
-        let ExprKind::List(body_call) = &lambda[2].kind else { panic!("body call"); };
-        assert!(matches!(
-            &body_call[0].kind,
-            ExprKind::DomainIdentity(identity)
-                if identity.width() == 9 && identity.packed_bits() == 0b110011100
-        ), "the explicitly admitted D9 mechanism head must bypass its same-spelled wrapper");
+        let ExprKind::List(definition) = &expressions[0].kind else {
+            panic!("definition");
+        };
+        assert!(
+            matches!(&definition[1].kind, ExprKind::Symbol(name) if name.as_ref() == "рядок-порожній?"),
+            "the definition target remains a surface binding"
+        );
+        let ExprKind::List(lambda) = &definition[2].kind else {
+            panic!("lambda");
+        };
+        let ExprKind::List(body_call) = &lambda[2].kind else {
+            panic!("body call");
+        };
+        assert!(
+            matches!(
+                &body_call[0].kind,
+                ExprKind::DomainIdentity(identity)
+                    if identity.width() == 9 && identity.packed_bits() == 0b110011100
+            ),
+            "the explicitly admitted D9 mechanism head must bypass its same-spelled wrapper"
+        );
 
         for (head, source) in [
             ("string-empty?", "(string-empty? text)"),
@@ -1126,9 +1293,13 @@ mod tests {
                 parse_mixed_exact_domain_core_source("lib/core4.lisp", source)
                     .expect("non-admitted heads remain ordinary source"),
             );
-            let ExprKind::List(call) = parsed.kind else { panic!("call"); };
-            assert!(matches!(&call[0].kind, ExprKind::Symbol(name) if name.as_ref() == head),
-                "{head} must not be promoted by D9 residency or an English projection");
+            let ExprKind::List(call) = parsed.kind else {
+                panic!("call");
+            };
+            assert!(
+                matches!(&call[0].kind, ExprKind::Symbol(name) if name.as_ref() == head),
+                "{head} must not be promoted by D9 residency or an English projection"
+            );
         }
     }
 
@@ -1139,21 +1310,30 @@ mod tests {
             ("символ-у-текст", 0b11101110),
             ("значення-у-текст", 0b11110100),
         ] {
-            let source = format!(
-                "(визначити {surface} (функція (текст) ({surface} текст)))"
-            );
+            let source = format!("(визначити {surface} (функція (текст) ({surface} текст)))");
             let expressions = parse_mixed_exact_domain_core_source("lib/core4.lisp", &source)
                 .expect("Core4 may use already-admitted D8 string mechanisms");
-            let ExprKind::List(definition) = &expressions[0].kind else { panic!("definition"); };
-            assert!(matches!(&definition[1].kind, ExprKind::Symbol(name) if name.as_ref() == surface),
-                "the definition target remains a surface binding");
-            let ExprKind::List(lambda) = &definition[2].kind else { panic!("lambda"); };
-            let ExprKind::List(body_call) = &lambda[2].kind else { panic!("body call"); };
-            assert!(matches!(
-                &body_call[0].kind,
-                ExprKind::DomainIdentity(identity)
-                    if identity.width() == 8 && identity.packed_bits() == bits
-            ), "{surface} must select only its exact D8 identity");
+            let ExprKind::List(definition) = &expressions[0].kind else {
+                panic!("definition");
+            };
+            assert!(
+                matches!(&definition[1].kind, ExprKind::Symbol(name) if name.as_ref() == surface),
+                "the definition target remains a surface binding"
+            );
+            let ExprKind::List(lambda) = &definition[2].kind else {
+                panic!("lambda");
+            };
+            let ExprKind::List(body_call) = &lambda[2].kind else {
+                panic!("body call");
+            };
+            assert!(
+                matches!(
+                    &body_call[0].kind,
+                    ExprKind::DomainIdentity(identity)
+                        if identity.width() == 8 && identity.packed_bits() == bits
+                ),
+                "{surface} must select only its exact D8 identity"
+            );
         }
     }
 
@@ -1164,21 +1344,31 @@ mod tests {
             parse_mixed_exact_domain_reasoning_source("lib/clips-import.lisp", literal)
                 .expect("CLIPS is explicitly pinned for D8 mechanism heads"),
         );
-        let ExprKind::List(call) = &exact.kind else { panic!("executable CLIPS call"); };
-        assert!(matches!(
-            &call[0].kind,
-            ExprKind::DomainIdentity(identity)
-                if identity.width() == 8 && identity.packed_bits() == 0b11101110
-        ), "only path-pinned source gets the exact D8 identity");
+        let ExprKind::List(call) = &exact.kind else {
+            panic!("executable CLIPS call");
+        };
+        assert!(
+            matches!(
+                &call[0].kind,
+                ExprKind::DomainIdentity(identity)
+                    if identity.width() == 8 && identity.packed_bits() == 0b11101110
+            ),
+            "only path-pinned source gets the exact D8 identity"
+        );
 
         let quoted = only(
             parse_mixed_exact_domain_reasoning_source(
                 "lib/clips-import.lisp",
                 "(001 (11101110 word))",
-            ).expect("CLIPS quoted data parses"),
+            )
+            .expect("CLIPS quoted data parses"),
         );
-        let ExprKind::List(quote) = &quoted.kind else { panic!("D3 quote"); };
-        let ExprKind::List(data) = &quote[1].kind else { panic!("quote list datum"); };
+        let ExprKind::List(quote) = &quoted.kind else {
+            panic!("D3 quote");
+        };
+        let ExprKind::List(data) = &quote[1].kind else {
+            panic!("quote list datum");
+        };
         assert!(
             !matches!(&data[0].kind, ExprKind::DomainIdentity(_)),
             "quoted eight-bit-looking data never gains a callable D8 identity"
@@ -1188,7 +1378,9 @@ mod tests {
             parse_mixed_exact_domain_reasoning_source("lib/unify.lisp", literal)
                 .expect("other admitted source remains readable"),
         );
-        let ExprKind::List(legacy) = &unpinned.kind else { panic!("unify source"); };
+        let ExprKind::List(legacy) = &unpinned.kind else {
+            panic!("unify source");
+        };
         assert!(
             !matches!(&legacy[0].kind, ExprKind::DomainIdentity(_)),
             "same eight bits in another file do not authorize a D8 identity"
@@ -1223,31 +1415,58 @@ mod tests {
         let expressions = parse_mixed_exact_domain_core_source("lib/core4.lisp", source)
             .expect("український Core4 reader");
         assert_eq!(expressions.len(), 2);
-        let ExprKind::List(definition) = &expressions[0].kind else { panic!("D4 визначити"); };
-        let ExprKind::List(lambda) = &definition[2].kind else { panic!("D4 функція"); };
-        let ExprKind::List(quoted) = &lambda[2].kind else { panic!("D3 як-є"); };
-        assert!(matches!(
-            &quoted[1].kind,
-            ExprKind::Symbol(name) if name.as_ref() == "за-умовою"
-        ), "цитоване ім'я не стає викличною координатою");
+        let ExprKind::List(definition) = &expressions[0].kind else {
+            panic!("D4 визначити");
+        };
+        let ExprKind::List(lambda) = &definition[2].kind else {
+            panic!("D4 функція");
+        };
+        let ExprKind::List(quoted) = &lambda[2].kind else {
+            panic!("D3 як-є");
+        };
+        assert!(
+            matches!(
+                &quoted[1].kind,
+                ExprKind::Symbol(name) if name.as_ref() == "за-умовою"
+            ),
+            "цитоване ім'я не стає викличною координатою"
+        );
 
-        let ExprKind::List(call) = &expressions[1].kind else { panic!("D3 виклик"); };
-        assert!(matches!(
-            &call[0].kind,
-            ExprKind::DomainIdentity(identity)
-                if identity.width() == 3 && identity.packed_bits() == 0b110
-        ), "виконувана голова має бути D3:110, а не історичним W8");
+        let ExprKind::List(call) = &expressions[1].kind else {
+            panic!("D3 виклик");
+        };
+        assert!(
+            matches!(
+                &call[0].kind,
+                ExprKind::DomainIdentity(identity)
+                    if identity.width() == 3 && identity.packed_bits() == 0b110
+            ),
+            "виконувана голова має бути D3:110, а не історичним W8"
+        );
         assert!(parse_mixed_exact_domain_core_source("lib/untrusted.lisp", source).is_err());
     }
 
     #[test]
     fn reasoning_source_is_path_bound_and_preserves_w8_macro_data() {
         let src = "(00001010 preserve (x) (110 ((010 x) (001 (101 x x)))))";
-        for path in ["lib/world.lisp", "lib/forward.lisp", "lib/knowledge.lisp", "lib/unify.lisp", "lib/reason.lisp", "lib/persistent-map.lisp", "lib/content-store.lisp", "lib/lisp-fs.lisp"] {
+        for path in [
+            "lib/world.lisp",
+            "lib/forward.lisp",
+            "lib/knowledge.lisp",
+            "lib/unify.lisp",
+            "lib/reason.lisp",
+            "lib/persistent-map.lisp",
+            "lib/content-store.lisp",
+            "lib/lisp-fs.lisp",
+        ] {
             let tree = parse_mixed_exact_domain_reasoning_source(path, src)
                 .expect("one of three authorized reasoning source files");
-            let ExprKind::List(parts) = &tree[0].kind else { panic!("macro"); };
-            let ExprKind::List(cond) = &parts[3].kind else { panic!("body"); };
+            let ExprKind::List(parts) = &tree[0].kind else {
+                panic!("macro");
+            };
+            let ExprKind::List(cond) = &parts[3].kind else {
+                panic!("body");
+            };
             assert!(matches!(&cond[0].kind, ExprKind::DomainIdentity(id)
                 if id.width() == 3 && id.packed_bits() == 0b110));
         }
@@ -1260,47 +1479,86 @@ mod tests {
     fn reasoning_reader_lifts_d9_heads_only_on_pinned_paths() {
         let src = "(0011 probe (0010 (a b s) (101010000 a b s)))";
         let parsed = parse_mixed_exact_domain_reasoning_source("lib/unify.lisp", src).unwrap();
-        let ExprKind::List(defn) = &parsed[0].kind else { panic!("def"); };
-        let ExprKind::List(lambda) = &defn[2].kind else { panic!("lambda"); };
-        let ExprKind::List(call) = &lambda[2].kind else { panic!("call"); };
+        let ExprKind::List(defn) = &parsed[0].kind else {
+            panic!("def");
+        };
+        let ExprKind::List(lambda) = &defn[2].kind else {
+            panic!("lambda");
+        };
+        let ExprKind::List(call) = &lambda[2].kind else {
+            panic!("call");
+        };
         assert!(matches!(&call[0].kind, ExprKind::DomainIdentity(id)
             if id.width() == 9 && id.packed_bits() == 0b101010000));
 
         let ordinary = only(parse_mixed_exact_domain("(101010000 a b s)").unwrap());
-        let ExprKind::List(call) = &ordinary.kind else { panic!("call"); };
+        let ExprKind::List(call) = &ordinary.kind else {
+            panic!("call");
+        };
         assert!(!matches!(&call[0].kind, ExprKind::DomainIdentity(_)));
 
         let quoted = parse_mixed_exact_domain_reasoning_source(
-            "lib/unify.lisp", "(0011 datum (0010 () (001 (101010000 a b s))))"
-        ).unwrap();
-        let ExprKind::List(defn) = &quoted[0].kind else { panic!("def"); };
-        let ExprKind::List(lambda) = &defn[2].kind else { panic!("lambda"); };
-        let ExprKind::List(quote) = &lambda[2].kind else { panic!("quote"); };
-        let ExprKind::List(data) = &quote[1].kind else { panic!("data"); };
+            "lib/unify.lisp",
+            "(0011 datum (0010 () (001 (101010000 a b s))))",
+        )
+        .unwrap();
+        let ExprKind::List(defn) = &quoted[0].kind else {
+            panic!("def");
+        };
+        let ExprKind::List(lambda) = &defn[2].kind else {
+            panic!("lambda");
+        };
+        let ExprKind::List(quote) = &lambda[2].kind else {
+            panic!("quote");
+        };
+        let ExprKind::List(data) = &quote[1].kind else {
+            panic!("data");
+        };
         assert!(!matches!(&data[0].kind, ExprKind::DomainIdentity(_)));
     }
 
     #[test]
     fn w8_macro_wrapper_lifts_only_executable_d3_body() {
         let source = "(00001010 m (value) (110 ((010 value) (001 (101 value value)))))";
-        let parsed = parse_mixed_exact_domain_machine_source("lib/machine/dispatch/macro-probe.lisp", source)
-            .expect("W8 macro bodies are executable while their binders remain data");
-        let ExprKind::List(defmacro) = &parsed[0].kind else { panic!("macro"); };
-        assert!(!matches!(&defmacro[0].kind, ExprKind::DomainIdentity(_)),
-            "an unratified eight-bit wrapper must not acquire a current domain identity");
-        let ExprKind::List(params) = &defmacro[2].kind else { panic!("macro parameter data"); };
+        let parsed = parse_mixed_exact_domain_machine_source(
+            "lib/machine/dispatch/macro-probe.lisp",
+            source,
+        )
+        .expect("W8 macro bodies are executable while their binders remain data");
+        let ExprKind::List(defmacro) = &parsed[0].kind else {
+            panic!("macro");
+        };
+        assert!(
+            !matches!(&defmacro[0].kind, ExprKind::DomainIdentity(_)),
+            "an unratified eight-bit wrapper must not acquire a current domain identity"
+        );
+        let ExprKind::List(params) = &defmacro[2].kind else {
+            panic!("macro parameter data");
+        };
         assert!(matches!(&params[0].kind, ExprKind::Symbol(_)));
-        let ExprKind::List(cond) = &defmacro[3].kind else { panic!("macro body"); };
+        let ExprKind::List(cond) = &defmacro[3].kind else {
+            panic!("macro body");
+        };
         assert!(matches!(&cond[0].kind, ExprKind::DomainIdentity(id)
             if id.width() == 3 && id.packed_bits() == 0b110));
-        let ExprKind::List(clause) = &cond[1].kind else { panic!("clause"); };
-        let ExprKind::List(test) = &clause[0].kind else { panic!("test"); };
+        let ExprKind::List(clause) = &cond[1].kind else {
+            panic!("clause");
+        };
+        let ExprKind::List(test) = &clause[0].kind else {
+            panic!("test");
+        };
         assert!(matches!(&test[0].kind, ExprKind::DomainIdentity(id)
             if id.width() == 3 && id.packed_bits() == 0b010));
-        let ExprKind::List(quoted) = &clause[1].kind else { panic!("quoted data"); };
-        let ExprKind::List(data) = &quoted[1].kind else { panic!("data"); };
-        assert!(!matches!(&data[0].kind, ExprKind::DomainIdentity(_)),
-            "macro templates inside QUOTE cannot become evaluated code");
+        let ExprKind::List(quoted) = &clause[1].kind else {
+            panic!("quoted data");
+        };
+        let ExprKind::List(data) = &quoted[1].kind else {
+            panic!("data");
+        };
+        assert!(
+            !matches!(&data[0].kind, ExprKind::DomainIdentity(_)),
+            "macro templates inside QUOTE cannot become evaluated code"
+        );
     }
 
     #[test]
@@ -1309,53 +1567,89 @@ mod tests {
         assert!(parse_mixed_exact_domain_time_source("lib/not-time.lisp", fixture).is_err());
         let parsed = parse_mixed_exact_domain_time_source("lib/time.lisp", fixture)
             .expect("time loader must lift exact calls inside W8 bootstrap wrappers");
-        let ExprKind::List(defined) = &parsed[0].kind else { panic!("definition"); };
-        let ExprKind::List(lambda) = &defined[2].kind else { panic!("lambda"); };
-        let ExprKind::List(cond) = &lambda[2].kind else { panic!("cond"); };
+        let ExprKind::List(defined) = &parsed[0].kind else {
+            panic!("definition");
+        };
+        let ExprKind::List(lambda) = &defined[2].kind else {
+            panic!("lambda");
+        };
+        let ExprKind::List(cond) = &lambda[2].kind else {
+            panic!("cond");
+        };
         assert!(matches!(&cond[0].kind, ExprKind::DomainIdentity(id)
             if id.width() == 3 && id.packed_bits() == 0b110));
-        let ExprKind::List(first_clause) = &cond[1].kind else { panic!("clause"); };
-        let ExprKind::List(atom) = &first_clause[0].kind else { panic!("atom"); };
+        let ExprKind::List(first_clause) = &cond[1].kind else {
+            panic!("clause");
+        };
+        let ExprKind::List(atom) = &first_clause[0].kind else {
+            panic!("atom");
+        };
         assert!(matches!(&atom[0].kind, ExprKind::DomainIdentity(id)
             if id.width() == 3 && id.packed_bits() == 0b010));
-        let ExprKind::List(second_clause) = &cond[2].kind else { panic!("clause"); };
-        let ExprKind::List(eq) = &second_clause[0].kind else { panic!("eq"); };
+        let ExprKind::List(second_clause) = &cond[2].kind else {
+            panic!("clause");
+        };
+        let ExprKind::List(eq) = &second_clause[0].kind else {
+            panic!("eq");
+        };
         assert!(matches!(&eq[0].kind, ExprKind::DomainIdentity(id)
             if id.width() == 3 && id.packed_bits() == 0b101));
         let quoted = "(00001001 datum (00001000 (x) (00000001 (110 (010 x)))))";
         let parsed = parse_mixed_exact_domain_time_source("lib/time.lisp", quoted)
             .expect("legacy W8 QUOTE remains data");
-        let ExprKind::List(root) = &parsed[0].kind else { panic!("define"); };
-        let ExprKind::List(lambda) = &root[2].kind else { panic!("lambda"); };
-        let ExprKind::List(quote) = &lambda[2].kind else { panic!("quote"); };
-        let ExprKind::List(data) = &quote[1].kind else { panic!("quoted list"); };
-        assert!(!matches!(&data[0].kind, ExprKind::DomainIdentity(_)),
-            "quoted 110 must not become executable D3 COND");
+        let ExprKind::List(root) = &parsed[0].kind else {
+            panic!("define");
+        };
+        let ExprKind::List(lambda) = &root[2].kind else {
+            panic!("lambda");
+        };
+        let ExprKind::List(quote) = &lambda[2].kind else {
+            panic!("quote");
+        };
+        let ExprKind::List(data) = &quote[1].kind else {
+            panic!("quoted list");
+        };
+        assert!(
+            !matches!(&data[0].kind, ExprKind::DomainIdentity(_)),
+            "quoted 110 must not become executable D3 COND"
+        );
     }
 
     #[test]
     fn ukrainian_callable_heads_lower_to_exact_domain_without_rewriting_lisp() {
         let source = "(визначити хід (функція (x) (перше x)))";
         let parsed = only(parse_mixed_exact_domain(source).expect("ratified ук surface"));
-        let ExprKind::List(defined) = parsed.kind else { panic!("definition"); };
+        let ExprKind::List(defined) = parsed.kind else {
+            panic!("definition");
+        };
         assert!(matches!(&defined[0].kind,
             ExprKind::DomainIdentity(id) if id.width() == 4 && id.packed_bits() == 0b0011));
         // Owner-ratified binding targets are lexical DATA, not callable heads.
         assert!(!matches!(&defined[1].kind, ExprKind::DomainIdentity(_)));
-        let ExprKind::List(lambda) = &defined[2].kind else { panic!("звʼязування"); };
+        let ExprKind::List(lambda) = &defined[2].kind else {
+            panic!("звʼязування");
+        };
         assert!(matches!(&lambda[0].kind,
             ExprKind::DomainIdentity(id) if id.width() == 4 && id.packed_bits() == 0b0010));
-        let ExprKind::List(body) = &lambda[2].kind else { panic!("lambda body"); };
+        let ExprKind::List(body) = &lambda[2].kind else {
+            panic!("lambda body");
+        };
         assert!(matches!(&body[0].kind,
             ExprKind::DomainIdentity(id) if id.width() == 3 && id.packed_bits() == 0b100));
 
         let byte_source = "(0011 хід (0010 (x) (100 x)))";
         let exact = only(parse_mixed_exact_domain(byte_source).expect("exact source"));
-        let ExprKind::List(encoded) = exact.kind else { panic!("exact definition"); };
-        let ExprKind::List(encoded_lambda) = &encoded[2].kind else { panic!("exact lambda"); };
+        let ExprKind::List(encoded) = exact.kind else {
+            panic!("exact definition");
+        };
+        let ExprKind::List(encoded_lambda) = &encoded[2].kind else {
+            panic!("exact lambda");
+        };
         assert_eq!(defined[0].kind, encoded[0].kind);
         assert_eq!(lambda[0].kind, encoded_lambda[0].kind);
-        let ExprKind::List(encoded_body) = &encoded_lambda[2].kind else { panic!("exact body"); };
+        let ExprKind::List(encoded_body) = &encoded_lambda[2].kind else {
+            panic!("exact body");
+        };
         assert_eq!(body[0].kind, encoded_body[0].kind);
     }
 
@@ -1363,21 +1657,34 @@ mod tests {
     fn ukrainian_quote_data_and_binding_position_are_not_retyped() {
         let source = "(як-є (перше x))";
         let quoted = only(parse_mixed_exact_domain(source).expect("quoted data"));
-        let ExprKind::List(outer) = quoted.kind else { panic!("цитування"); };
+        let ExprKind::List(outer) = quoted.kind else {
+            panic!("цитування");
+        };
         assert!(matches!(&outer[0].kind,
             ExprKind::DomainIdentity(id) if id.width() == 3 && id.packed_bits() == 0b001));
-        let ExprKind::List(data) = &outer[1].kind else { panic!("quoted data"); };
+        let ExprKind::List(data) = &outer[1].kind else {
+            panic!("quoted data");
+        };
         assert!(!matches!(&data[0].kind, ExprKind::DomainIdentity(_)));
 
-        let binder = only(parse_mixed_exact_domain(
-            "(визначити перше (функція (перше) (атом? перше)))"
-        ).expect("binder data"));
-        let ExprKind::List(definition) = binder.kind else { panic!("definition"); };
+        let binder = only(
+            parse_mixed_exact_domain("(визначити перше (функція (перше) (атом? перше)))")
+                .expect("binder data"),
+        );
+        let ExprKind::List(definition) = binder.kind else {
+            panic!("definition");
+        };
         assert!(!matches!(&definition[1].kind, ExprKind::DomainIdentity(_)));
-        let ExprKind::List(lambda) = &definition[2].kind else { panic!("звʼязування"); };
-        let ExprKind::List(parameters) = &lambda[1].kind else { panic!("parameters"); };
+        let ExprKind::List(lambda) = &definition[2].kind else {
+            panic!("звʼязування");
+        };
+        let ExprKind::List(parameters) = &lambda[1].kind else {
+            panic!("parameters");
+        };
         assert!(!matches!(&parameters[0].kind, ExprKind::DomainIdentity(_)));
-        let ExprKind::List(call) = &lambda[2].kind else { panic!("call"); };
+        let ExprKind::List(call) = &lambda[2].kind else {
+            panic!("call");
+        };
         assert!(matches!(&call[0].kind,
             ExprKind::DomainIdentity(id) if id.width() == 3 && id.packed_bits() == 0b010));
     }
@@ -1386,12 +1693,22 @@ mod tests {
     fn unknown_english_and_legacy_heads_get_no_new_current_identity() {
         // Literal legacy-English negative input is DATA, not executable Rust
         // or SENS. Keep its rejection test while avoiding false language-debt.
-        let legacy_english_case = include_str!("../../../tests/fixtures/unknown-english-head.txt").trim();
-        for source in [legacy_english_case, "(CONS x y)", "(00000101 x)", "(невідоме x)"] {
+        let legacy_english_case =
+            include_str!("../../../tests/fixtures/unknown-english-head.txt").trim();
+        for source in [
+            legacy_english_case,
+            "(CONS x y)",
+            "(00000101 x)",
+            "(невідоме x)",
+        ] {
             let expr = only(parse_mixed_exact_domain(source).expect("bounded mixed syntax"));
-            let ExprKind::List(items) = expr.kind else { panic!("список"); };
-            assert!(!matches!(&items[0].kind, ExprKind::DomainIdentity(_)),
-                "{source} must not become a ratified current domain from spelling");
+            let ExprKind::List(items) = expr.kind else {
+                panic!("список");
+            };
+            assert!(
+                !matches!(&items[0].kind, ExprKind::DomainIdentity(_)),
+                "{source} must not become a ratified current domain from spelling"
+            );
         }
     }
 
@@ -1399,55 +1716,80 @@ mod tests {
     fn local_callable_shadows_ratified_uk_surface_in_lambda_body() {
         let forms = parse_mixed_exact_domain("(функція (перше) (перше x))")
             .expect("local shadowing remains valid source");
-        let ExprKind::List(lambda) = &forms[0].kind else { panic!("звʼязування"); };
+        let ExprKind::List(lambda) = &forms[0].kind else {
+            panic!("звʼязування");
+        };
         assert!(matches!(&lambda[0].kind, ExprKind::DomainIdentity(id)
             if id.width() == 4 && id.packed_bits() == 0b0010));
-        let ExprKind::List(body) = &lambda[2].kind else { panic!("body"); };
-        assert!(matches!(&body[0].kind, ExprKind::Symbol(name)
-            if &**name == "перше"), "shadowed head must NOT become D3 CAR");
+        let ExprKind::List(body) = &lambda[2].kind else {
+            panic!("body");
+        };
+        assert!(
+            matches!(&body[0].kind, ExprKind::Symbol(name)
+            if &**name == "перше"),
+            "shadowed head must NOT become D3 CAR"
+        );
     }
 
     #[test]
     fn globally_defined_callable_shadows_builtin_even_before_its_definition() {
-        let forms = parse_mixed_exact_domain(
-            "(перше x) (визначити перше (функція (x) x)) (перше y)"
-        ).expect("whole source binding inventory");
+        let forms =
+            parse_mixed_exact_domain("(перше x) (визначити перше (функція (x) x)) (перше y)")
+                .expect("whole source binding inventory");
         assert_eq!(forms.len(), 3);
         for index in [0, 2] {
-            let ExprKind::List(call) = &forms[index].kind else { panic!("call"); };
-            assert!(matches!(&call[0].kind, ExprKind::Symbol(name)
-                if &**name == "перше"), "user callable wins over ratified built-in");
+            let ExprKind::List(call) = &forms[index].kind else {
+                panic!("call");
+            };
+            assert!(
+                matches!(&call[0].kind, ExprKind::Symbol(name)
+                if &**name == "перше"),
+                "user callable wins over ratified built-in"
+            );
         }
     }
 
     #[test]
     fn quoted_definition_is_data_and_does_not_shadow_builtin() {
-        let forms = parse_mixed_exact_domain(
-            "(як-є (визначити перше (функція (x) x))) (перше x)"
-        ).expect("quote remains data");
-        let ExprKind::List(call) = &forms[1].kind else { panic!("call"); };
-        assert!(matches!(&call[0].kind, ExprKind::DomainIdentity(id)
+        let forms = parse_mixed_exact_domain("(як-є (визначити перше (функція (x) x))) (перше x)")
+            .expect("quote remains data");
+        let ExprKind::List(call) = &forms[1].kind else {
+            panic!("call");
+        };
+        assert!(
+            matches!(&call[0].kind, ExprKind::DomainIdentity(id)
             if id.width() == 3 && id.packed_bits() == 0b100),
-            "quoted pseudo-definition must not bind source");
+            "quoted pseudo-definition must not bind source"
+        );
     }
 
     #[test]
     fn nested_local_shadowed_callable_is_not_promoted_inside_cond_clause() {
-        let parsed = parse_mixed_exact_domain(
-            "(функція (перше) (за-умовою ((атом? x) (перше x))))"
-        ).expect("nested clause");
-        let ExprKind::List(lambda) = &parsed[0].kind else { panic!("звʼязування"); };
-        let ExprKind::List(cond) = &lambda[2].kind else { panic!("умова"); };
-        let ExprKind::List(clause) = &cond[1].kind else { panic!("clause"); };
-        let ExprKind::List(body) = &clause[1].kind else { panic!("branch"); };
-        assert!(matches!(&body[0].kind, ExprKind::Symbol(name)
-            if &**name == "перше"), "local binding is not D3 CAR even in COND");
+        let parsed =
+            parse_mixed_exact_domain("(функція (перше) (за-умовою ((атом? x) (перше x))))")
+                .expect("nested clause");
+        let ExprKind::List(lambda) = &parsed[0].kind else {
+            panic!("звʼязування");
+        };
+        let ExprKind::List(cond) = &lambda[2].kind else {
+            panic!("умова");
+        };
+        let ExprKind::List(clause) = &cond[1].kind else {
+            panic!("clause");
+        };
+        let ExprKind::List(body) = &clause[1].kind else {
+            panic!("branch");
+        };
+        assert!(
+            matches!(&body[0].kind, ExprKind::Symbol(name)
+            if &**name == "перше"),
+            "local binding is not D3 CAR even in COND"
+        );
     }
 
     #[test]
     fn mixed_lambda_preserves_symbol_binder_and_exact_d3_d4_heads() {
-        let expression =
-            only(parse_mixed_exact_domain("(0010 (x) (100 x))").expect("mixed parse"));
+        let expression = only(parse_mixed_exact_domain("(0010 (x) (100 x))").expect("mixed parse"));
 
         let ExprKind::List(items) = &expression.kind else {
             panic!("expected list");
@@ -1475,10 +1817,8 @@ mod tests {
 
     #[test]
     fn exact_d4_define_and_lambda_execute_through_mixed_bridge() {
-        let parsed = parse_mixed_exact_domain(
-            "(0011 f (0010 (x) (010 x)))\n(f (001 a))",
-        )
-        .expect("mixed exact DEFINE/LAMBDA parse");
+        let parsed = parse_mixed_exact_domain("(0011 f (0010 (x) (010 x)))\n(f (001 a))")
+            .expect("mixed exact DEFINE/LAMBDA parse");
 
         let mut session = crate::Session::default();
         let result = crate::eval::eval_parsed_expressions(&parsed, &mut session)
@@ -1506,10 +1846,8 @@ mod tests {
     #[test]
     fn exact_cond_lifts_test_and_branch_heads_inside_clause_structure() {
         let expression = only(
-            parse_mixed_exact_domain(
-                "(110 ((101 x 0) (01010 x 1)) ((101 0 0) 0))",
-            )
-            .expect("mixed COND parse"),
+            parse_mixed_exact_domain("(110 ((101 x 0) (01010 x 1)) ((101 0 0) 0))")
+                .expect("mixed COND parse"),
         );
         let ExprKind::List(items) = expression.kind else {
             panic!("expected COND list");
@@ -1537,12 +1875,14 @@ mod tests {
 
     #[test]
     fn exact_binary_data_outside_head_position_stays_data() {
-        let expression =
-            only(parse_mixed_exact_domain("(0010 (x) 100)").expect("mixed parse"));
+        let expression = only(parse_mixed_exact_domain("(0010 (x) 100)").expect("mixed parse"));
         let ExprKind::List(items) = expression.kind else {
             panic!("expected list");
         };
-        assert!(matches!(&items[2].kind, ExprKind::BinaryNumber(number) if number.numeric_domain_width() == Some(24) && number.bits() == "000000000000000001100100"), "ordinary decimal data is an exact D24+ value");
+        assert!(
+            matches!(&items[2].kind, ExprKind::BinaryNumber(number) if number.numeric_domain_width() == Some(24) && number.bits() == "000000000000000001100100"),
+            "ordinary decimal data is an exact D24+ value"
+        );
     }
 
     #[test]
@@ -1561,8 +1901,7 @@ mod tests {
 
     #[test]
     fn exact8_head_stays_opaque_to_current_domain_identity() {
-        let expression =
-            only(parse_mixed_exact_domain("(00000001 x)").expect("mixed parse"));
+        let expression = only(parse_mixed_exact_domain("(00000001 x)").expect("mixed parse"));
         let ExprKind::List(items) = expression.kind else {
             panic!("expected list");
         };
@@ -1593,8 +1932,7 @@ mod tests {
         ));
 
         // The ratified exact D6 mechanism 001110 is callable.
-        let current = parse_mixed_exact_domain("(001110 x)")
-            .expect("ratified D6 mechanism source");
+        let current = parse_mixed_exact_domain("(001110 x)").expect("ratified D6 mechanism source");
         let admitted = only(lower_program(&current));
         assert!(matches!(
             admitted.kind,
@@ -1622,10 +1960,13 @@ mod tests {
         let ExprKind::List(quoted) = &outer[1].kind else {
             panic!("expected quoted list data");
         };
-        assert!(matches!(
-            &quoted[0].kind,
-            ExprKind::Number(value, _) if *value == 100.0
-        ), "quoted source must not become a D3 executable identity");
+        assert!(
+            matches!(
+                &quoted[0].kind,
+                ExprKind::Number(value, _) if *value == 100.0
+            ),
+            "quoted source must not become a D3 executable identity"
+        );
 
         // Non-QUOTE W8 is also opaque: its owner/era is not yet proven.
         let unknown = parse_mixed_exact_domain("(11111111 (011 x))").unwrap();
@@ -1643,8 +1984,7 @@ mod tests {
         // Binder declarations may be structural lists whose first atom
         // looks like a D3 word; it is not an executable CAR/COND call.
         let expression = only(
-            parse_mixed_exact_domain("(0010 ((100 x)) (011 x))")
-                .expect("exact D4 lambda parse"),
+            parse_mixed_exact_domain("(0010 ((100 x)) (011 x))").expect("exact D4 lambda parse"),
         );
         let ExprKind::List(lambda) = &expression.kind else {
             panic!("lambda list");
@@ -1665,10 +2005,8 @@ mod tests {
                 if identity.width() == 3 && identity.packed_bits() == 0b011
         ));
 
-        let defined = only(
-            parse_mixed_exact_domain("(0011 (100 x) (011 x))")
-                .expect("D4 define parse"),
-        );
+        let defined =
+            only(parse_mixed_exact_domain("(0011 (100 x) (011 x))").expect("D4 define parse"));
         let ExprKind::List(items) = &defined.kind else {
             panic!("define list");
         };
@@ -1684,8 +2022,7 @@ mod tests {
 
     #[test]
     fn ordinary_symbol_call_still_lifts_proven_nested_current_heads() {
-        let parsed = parse_mixed_exact_domain("(local-f (100 x))")
-            .expect("mixed ordinary call");
+        let parsed = parse_mixed_exact_domain("(local-f (100 x))").expect("mixed ordinary call");
         let ExprKind::List(outer) = &parsed[0].kind else {
             panic!("outer call");
         };
@@ -1706,31 +2043,38 @@ mod tests {
         let ExprKind::List(ordinary_items) = &ordinary[0].kind else {
             panic!("очікується структура виклику");
         };
-        assert!(matches!(
-            &ordinary_items[0].kind,
-            ExprKind::Number(_, _) | ExprKind::Rational(_)
-        ), "звичайний Lisp-читач не надає числу D4-ідентичності");
+        assert!(
+            matches!(
+                &ordinary_items[0].kind,
+                ExprKind::Number(_, _) | ExprKind::Rational(_)
+            ),
+            "звичайний Lisp-читач не надає числу D4-ідентичності"
+        );
 
         let mixed = parse_mixed_exact_domain(source).expect("точний змішаний читач");
         let ExprKind::List(mixed_items) = &mixed[0].kind else {
             panic!("очікується структура D4-виклику");
         };
-        assert!(matches!(
-            &mixed_items[0].kind,
-            ExprKind::DomainIdentity(id)
-                if id.width() == 4 && id.packed_bits() == 0b1111
-        ), "тільки типізований D4:1111 є власником APPEND");
+        assert!(
+            matches!(
+                &mixed_items[0].kind,
+                ExprKind::DomainIdentity(id)
+                    if id.width() == 4 && id.packed_bits() == 0b1111
+            ),
+            "тільки типізований D4:1111 є власником APPEND"
+        );
 
         let mut session = crate::Session::default();
         let result = crate::eval::eval_parsed_expressions(&mixed, &mut session)
             .expect("ратифікований APPEND має об'єднати правильні списки");
         assert_eq!(result.value.to_string(), "(a b)");
 
-        let invalid = parse_mixed_exact_domain("(1111 42)")
-            .expect("структурно допустиме джерело");
+        let invalid = parse_mixed_exact_domain("(1111 42)").expect("структурно допустиме джерело");
         let error = crate::eval::eval_parsed_expressions(&invalid, &mut session)
             .expect_err("APPEND не приймає числовий аргумент як список");
-        assert!(error.message.contains("D4:1111 APPEND requires proper lists"));
+        assert!(error
+            .message
+            .contains("D4:1111 APPEND requires proper lists"));
     }
 
     #[test]
@@ -1747,19 +2091,19 @@ mod tests {
     }
     #[test]
     fn machine_source_mode_has_no_unquoted_numeric_d3_car_heads_in_x86_libraries() {
-        fn walk(
-            source: &str,
-            expression: &Expr,
-            quoted: bool,
-            path: &str,
-            hits: &mut Vec<String>,
-        ) {
-            let ExprKind::List(items) = &expression.kind else { return; };
-            if items.is_empty() { return; }
+        fn walk(source: &str, expression: &Expr, quoted: bool, path: &str, hits: &mut Vec<String>) {
+            let ExprKind::List(items) = &expression.kind else {
+                return;
+            };
+            if items.is_empty() {
+                return;
+            }
 
             let head_spelling = source_spelling(source, &items[0]);
             let quote_head = matches!(head_spelling, Some("00000001" | "001" | "як-є"));
-            if quoted || quote_head { return; }
+            if quoted || quote_head {
+                return;
+            }
 
             if matches!(&items[0].kind, ExprKind::Number(value, _) if *value == 100.0)
                 || matches!(&items[0].kind, ExprKind::BinaryNumber(number) if number.bits() == "000000000000000001100100")
@@ -1782,18 +2126,54 @@ mod tests {
         }
 
         let files = [
-            ("lib/machine/effects/u64.lisp", include_str!("../../../lib/machine/effects/u64.lisp")),
-            ("lib/machine/lowering/semantic-effects.lisp", include_str!("../../../lib/machine/lowering/semantic-effects.lisp")),
-            ("lib/machine/encoding/x86-64.lisp", include_str!("../../../lib/machine/encoding/x86-64.lisp")),
-            ("lib/machine/operands/x86-64.lisp", include_str!("../../../lib/machine/operands/x86-64.lisp")),
-            ("lib/machine/admission/x86-64.lisp", include_str!("../../../lib/machine/admission/x86-64.lisp")),
-            ("lib/machine/atoms/x86-64.lisp", include_str!("../../../lib/machine/atoms/x86-64.lisp")),
-            ("lib/machine/projection/x86-64.lisp", include_str!("../../../lib/machine/projection/x86-64.lisp")),
-            ("lib/machine/layout/pair-x86-64.lisp", include_str!("../../../lib/machine/layout/pair-x86-64.lisp")),
-            ("lib/machine/lowering/semantic-x86-64.lisp", include_str!("../../../lib/machine/lowering/semantic-x86-64.lisp")),
-            ("lib/machine/capability-axis.lisp", include_str!("../../../lib/machine/capability-axis.lisp")),
-            ("lib/machine/profile/current-domain-x86-64.lisp", include_str!("../../../lib/machine/profile/current-domain-x86-64.lisp")),
-            ("lib/machine/authority-boundary.lisp", include_str!("../../../lib/machine/authority-boundary.lisp")),
+            (
+                "lib/machine/effects/u64.lisp",
+                include_str!("../../../lib/machine/effects/u64.lisp"),
+            ),
+            (
+                "lib/machine/lowering/semantic-effects.lisp",
+                include_str!("../../../lib/machine/lowering/semantic-effects.lisp"),
+            ),
+            (
+                "lib/machine/encoding/x86-64.lisp",
+                include_str!("../../../lib/machine/encoding/x86-64.lisp"),
+            ),
+            (
+                "lib/machine/operands/x86-64.lisp",
+                include_str!("../../../lib/machine/operands/x86-64.lisp"),
+            ),
+            (
+                "lib/machine/admission/x86-64.lisp",
+                include_str!("../../../lib/machine/admission/x86-64.lisp"),
+            ),
+            (
+                "lib/machine/atoms/x86-64.lisp",
+                include_str!("../../../lib/machine/atoms/x86-64.lisp"),
+            ),
+            (
+                "lib/machine/projection/x86-64.lisp",
+                include_str!("../../../lib/machine/projection/x86-64.lisp"),
+            ),
+            (
+                "lib/machine/layout/pair-x86-64.lisp",
+                include_str!("../../../lib/machine/layout/pair-x86-64.lisp"),
+            ),
+            (
+                "lib/machine/lowering/semantic-x86-64.lisp",
+                include_str!("../../../lib/machine/lowering/semantic-x86-64.lisp"),
+            ),
+            (
+                "lib/machine/capability-axis.lisp",
+                include_str!("../../../lib/machine/capability-axis.lisp"),
+            ),
+            (
+                "lib/machine/profile/current-domain-x86-64.lisp",
+                include_str!("../../../lib/machine/profile/current-domain-x86-64.lisp"),
+            ),
+            (
+                "lib/machine/authority-boundary.lisp",
+                include_str!("../../../lib/machine/authority-boundary.lisp"),
+            ),
         ];
 
         let mut hits = Vec::new();
@@ -1818,11 +2198,21 @@ mod tests {
             "(00001001 probe (00001000 (x) (00000111 ((0100 x) 0) ((00000001 (0100 x)) 0))))";
 
         let ordinary = only(parse_mixed_exact_domain(source).expect("ordinary mixed source"));
-        let ExprKind::List(ordinary_def) = &ordinary.kind else { panic!("definition"); };
-        let ExprKind::List(ordinary_lambda) = &ordinary_def[2].kind else { panic!("lambda"); };
-        let ExprKind::List(ordinary_cond) = &ordinary_lambda[2].kind else { panic!("COND"); };
-        let ExprKind::List(ordinary_clause) = &ordinary_cond[1].kind else { panic!("clause"); };
-        let ExprKind::List(ordinary_test) = &ordinary_clause[0].kind else { panic!("test"); };
+        let ExprKind::List(ordinary_def) = &ordinary.kind else {
+            panic!("definition");
+        };
+        let ExprKind::List(ordinary_lambda) = &ordinary_def[2].kind else {
+            panic!("lambda");
+        };
+        let ExprKind::List(ordinary_cond) = &ordinary_lambda[2].kind else {
+            panic!("COND");
+        };
+        let ExprKind::List(ordinary_clause) = &ordinary_cond[1].kind else {
+            panic!("clause");
+        };
+        let ExprKind::List(ordinary_test) = &ordinary_clause[0].kind else {
+            panic!("test");
+        };
         assert!(matches!(&ordinary_test[0].kind, ExprKind::BinaryNumber(number) if number.bits() == "000000000000000001100100"),
             "ordinary reader remains backward-compatible and keeps 0100 numeric inside opaque W8 wrappers");
 
@@ -1830,22 +2220,44 @@ mod tests {
             parse_mixed_exact_domain_core_source("lib/core4.lisp", source)
                 .expect("approved Core4 reader"),
         );
-        let ExprKind::List(def) = &mixed.kind else { panic!("definition"); };
-        let ExprKind::List(lambda) = &def[2].kind else { panic!("lambda"); };
-        let ExprKind::List(cond) = &lambda[2].kind else { panic!("COND"); };
-        let ExprKind::List(clause) = &cond[1].kind else { panic!("clause"); };
-        let ExprKind::List(test) = &clause[0].kind else { panic!("test"); };
-        assert!(matches!(&test[0].kind, ExprKind::DomainIdentity(id)
+        let ExprKind::List(def) = &mixed.kind else {
+            panic!("definition");
+        };
+        let ExprKind::List(lambda) = &def[2].kind else {
+            panic!("lambda");
+        };
+        let ExprKind::List(cond) = &lambda[2].kind else {
+            panic!("COND");
+        };
+        let ExprKind::List(clause) = &cond[1].kind else {
+            panic!("clause");
+        };
+        let ExprKind::List(test) = &clause[0].kind else {
+            panic!("test");
+        };
+        assert!(
+            matches!(&test[0].kind, ExprKind::DomainIdentity(id)
             if id.width() == 4 && id.packed_bits() == 0b0100),
-            "Core4's executable 0100 head is typed D4:0100 NOT, not Number(100)");
+            "Core4's executable 0100 head is typed D4:0100 NOT, not Number(100)"
+        );
 
-        let ExprKind::List(quoted_clause) = &cond[2].kind else { panic!("quoted clause"); };
-        let ExprKind::List(quote_form) = &quoted_clause[0].kind else { panic!("quote form"); };
-        assert!(!matches!(&quote_form[0].kind, ExprKind::DomainIdentity(_)),
-            "unratified eight-bit quote spelling stays opaque, not a current identity");
-        let ExprKind::List(quoted_data) = &quote_form[1].kind else { panic!("quoted data"); };
-        assert!(matches!(&quoted_data[0].kind, ExprKind::Number(value, _) if *value == 100.0),
-            "0100 under W8 QUOTE is data and is not promoted to a callable identity");
+        let ExprKind::List(quoted_clause) = &cond[2].kind else {
+            panic!("quoted clause");
+        };
+        let ExprKind::List(quote_form) = &quoted_clause[0].kind else {
+            panic!("quote form");
+        };
+        assert!(
+            !matches!(&quote_form[0].kind, ExprKind::DomainIdentity(_)),
+            "unratified eight-bit quote spelling stays opaque, not a current identity"
+        );
+        let ExprKind::List(quoted_data) = &quote_form[1].kind else {
+            panic!("quoted data");
+        };
+        assert!(
+            matches!(&quoted_data[0].kind, ExprKind::Number(value, _) if *value == 100.0),
+            "0100 under W8 QUOTE is data and is not promoted to a callable identity"
+        );
 
         let wrong_path = parse_mixed_exact_domain_core_source("lib/core.lisp", source)
             .expect_err("Core4 exact-width lifting must not apply to another source file");
@@ -1855,8 +2267,12 @@ mod tests {
     #[test]
     fn core4_source_has_no_numeric_0100_in_executable_call_head_positions() {
         fn walk(source: &str, expression: &Expr, hits: &mut Vec<String>) {
-            let ExprKind::List(items) = &expression.kind else { return; };
-            let Some(head) = items.first() else { return; };
+            let ExprKind::List(items) = &expression.kind else {
+                return;
+            };
+            let Some(head) = items.first() else {
+                return;
+            };
             let spelling = source_spelling(source, head);
             if spelling == Some("00000001") {
                 return; // W8 QUOTE owns its entire payload as data.
@@ -1888,7 +2304,11 @@ mod tests {
         assert!(
             hits.is_empty(),
             "Core4 still has an unlifted numeric 0100 call head:\\n{}",
-            hits.iter().take(30).cloned().collect::<Vec<_>>().join("\\n")
+            hits.iter()
+                .take(30)
+                .cloned()
+                .collect::<Vec<_>>()
+                .join("\\n")
         );
     }
 
@@ -1898,41 +2318,79 @@ mod tests {
             "(00001001 probe (00001000 (x) (00000111 ((100 x) 0) ((00000001 (100 x)) 0))))";
 
         let ordinary = only(parse_mixed_exact_domain(source).expect("ordinary mixed source"));
-        let ExprKind::List(ordinary_def) = &ordinary.kind else { panic!("definition"); };
-        let ExprKind::List(ordinary_lambda) = &ordinary_def[2].kind else { panic!("lambda"); };
-        let ExprKind::List(ordinary_cond) = &ordinary_lambda[2].kind else { panic!("COND"); };
-        let ExprKind::List(ordinary_clause) = &ordinary_cond[1].kind else { panic!("clause"); };
-        let ExprKind::List(ordinary_test) = &ordinary_clause[0].kind else { panic!("test"); };
-        assert!(matches!(&ordinary_test[0].kind, ExprKind::BinaryNumber(number) if number.bits() == "000000000000000001100100"),
-            "the ordinary mixed reader leaves legacy wrappers opaque");
+        let ExprKind::List(ordinary_def) = &ordinary.kind else {
+            panic!("definition");
+        };
+        let ExprKind::List(ordinary_lambda) = &ordinary_def[2].kind else {
+            panic!("lambda");
+        };
+        let ExprKind::List(ordinary_cond) = &ordinary_lambda[2].kind else {
+            panic!("COND");
+        };
+        let ExprKind::List(ordinary_clause) = &ordinary_cond[1].kind else {
+            panic!("clause");
+        };
+        let ExprKind::List(ordinary_test) = &ordinary_clause[0].kind else {
+            panic!("test");
+        };
+        assert!(
+            matches!(&ordinary_test[0].kind, ExprKind::BinaryNumber(number) if number.bits() == "000000000000000001100100"),
+            "the ordinary mixed reader leaves legacy wrappers opaque"
+        );
 
         let machine = only(
             parse_mixed_exact_domain_machine_source("lib/machine/probe.lisp", source)
                 .expect("machine-only mixed source"),
         );
-        let ExprKind::List(def) = &machine.kind else { panic!("definition"); };
-        let ExprKind::List(lambda) = &def[2].kind else { panic!("lambda"); };
-        let ExprKind::List(cond) = &lambda[2].kind else { panic!("COND"); };
-        let ExprKind::List(clause) = &cond[1].kind else { panic!("clause"); };
-        let ExprKind::List(test) = &clause[0].kind else { panic!("test"); };
-        assert!(matches!(&test[0].kind, ExprKind::DomainIdentity(id)
+        let ExprKind::List(def) = &machine.kind else {
+            panic!("definition");
+        };
+        let ExprKind::List(lambda) = &def[2].kind else {
+            panic!("lambda");
+        };
+        let ExprKind::List(cond) = &lambda[2].kind else {
+            panic!("COND");
+        };
+        let ExprKind::List(clause) = &cond[1].kind else {
+            panic!("clause");
+        };
+        let ExprKind::List(test) = &clause[0].kind else {
+            panic!("test");
+        };
+        assert!(
+            matches!(&test[0].kind, ExprKind::DomainIdentity(id)
             if id.width() == 3 && id.packed_bits() == 0b100),
-            "W8 COND's first clause item is executable code and must be exact D3 CAR");
+            "W8 COND's first clause item is executable code and must be exact D3 CAR"
+        );
 
-        let ExprKind::List(quoted_clause) = &cond[2].kind else { panic!("quoted clause"); };
-        let ExprKind::List(quoted_test) = &quoted_clause[0].kind else { panic!("quoted test"); };
-        assert!(!matches!(&quoted_test[0].kind, ExprKind::DomainIdentity(_)),
-            "unratified quote spelling stays opaque, not a current identity");
-        let ExprKind::List(quoted_data) = &quoted_test[1].kind else { panic!("quoted data"); };
-        assert!(matches!(&quoted_data[0].kind, ExprKind::Number(value, _) if *value == 100.0),
-            "quoted data must not be lifted as executable code");
+        let ExprKind::List(quoted_clause) = &cond[2].kind else {
+            panic!("quoted clause");
+        };
+        let ExprKind::List(quoted_test) = &quoted_clause[0].kind else {
+            panic!("quoted test");
+        };
+        assert!(
+            !matches!(&quoted_test[0].kind, ExprKind::DomainIdentity(_)),
+            "unratified quote spelling stays opaque, not a current identity"
+        );
+        let ExprKind::List(quoted_data) = &quoted_test[1].kind else {
+            panic!("quoted data");
+        };
+        assert!(
+            matches!(&quoted_data[0].kind, ExprKind::Number(value, _) if *value == 100.0),
+            "quoted data must not be lifted as executable code"
+        );
     }
 
     #[test]
     fn machine_source_mode_descends_w8_function_bodies_but_preserves_quote_and_number_data() {
         fn definition_body(expression: &Expr) -> &Expr {
-            let ExprKind::List(definition) = &expression.kind else { panic!("definition"); };
-            let ExprKind::List(lambda) = &definition[2].kind else { panic!("legacy lambda wrapper"); };
+            let ExprKind::List(definition) = &expression.kind else {
+                panic!("definition");
+            };
+            let ExprKind::List(lambda) = &definition[2].kind else {
+                panic!("legacy lambda wrapper");
+            };
             &lambda[2]
         }
 
@@ -1941,8 +2399,10 @@ mod tests {
         let ExprKind::List(ordinary_call) = &definition_body(&ordinary).kind else {
             panic!("ordinary executable body");
         };
-        assert!(matches!(&ordinary_call[0].kind, ExprKind::BinaryNumber(number) if number.bits() == "000000000000000001100100"),
-            "ordinary bridge keeps legacy W8 containers opaque");
+        assert!(
+            matches!(&ordinary_call[0].kind, ExprKind::BinaryNumber(number) if number.bits() == "000000000000000001100100"),
+            "ordinary bridge keeps legacy W8 containers opaque"
+        );
 
         let machine = only(
             parse_mixed_exact_domain_machine_source("lib/machine/test-probe.lisp", executable)
@@ -1951,14 +2411,16 @@ mod tests {
         let ExprKind::List(machine_call) = &definition_body(&machine).kind else {
             panic!("machine executable body");
         };
-        assert!(matches!(
-            &machine_call[0].kind,
-            ExprKind::DomainIdentity(identity)
-                if identity.width() == 3 && identity.packed_bits() == 0b100
-        ), "only an executable 3-bit head inside the approved wrapper is lifted");
+        assert!(
+            matches!(
+                &machine_call[0].kind,
+                ExprKind::DomainIdentity(identity)
+                    if identity.width() == 3 && identity.packed_bits() == 0b100
+            ),
+            "only an executable 3-bit head inside the approved wrapper is lifted"
+        );
 
-        let quoted_source =
-            "(00001001 probe (00001000 (x) (00000001 (100 x))))";
+        let quoted_source = "(00001001 probe (00001000 (x) (00000001 (100 x))))";
         let quoted = only(
             parse_mixed_exact_domain_machine_source("lib/machine/test-probe.lisp", quoted_source)
                 .expect("machine source with historical quote"),
@@ -1966,111 +2428,196 @@ mod tests {
         let ExprKind::List(quote_form) = &definition_body(&quoted).kind else {
             panic!("quote form");
         };
-        assert!(!matches!(&quote_form[0].kind, ExprKind::DomainIdentity(_)),
-            "unratified quote spelling stays opaque and keeps its payload as data");
-        let ExprKind::List(payload) = &quote_form[1].kind else { panic!("quote payload"); };
-        assert!(matches!(&payload[0].kind, ExprKind::Number(value, _) if *value == 100.0),
-            "quoted 100 remains a number, never a callable D3 head");
+        assert!(
+            !matches!(&quote_form[0].kind, ExprKind::DomainIdentity(_)),
+            "unratified quote spelling stays opaque and keeps its payload as data"
+        );
+        let ExprKind::List(payload) = &quote_form[1].kind else {
+            panic!("quote payload");
+        };
+        assert!(
+            matches!(&payload[0].kind, ExprKind::Number(value, _) if *value == 100.0),
+            "quoted 100 remains a number, never a callable D3 head"
+        );
 
-        let number_data_source =
-            "(00001001 probe (00001000 (x) (ordinary-list 100 x)))";
+        let number_data_source = "(00001001 probe (00001000 (x) (ordinary-list 100 x)))";
         let number_data = only(
-            parse_mixed_exact_domain_machine_source("lib/machine/test-probe.lisp", number_data_source)
-                .expect("machine source numeric data"),
+            parse_mixed_exact_domain_machine_source(
+                "lib/machine/test-probe.lisp",
+                number_data_source,
+            )
+            .expect("machine source numeric data"),
         );
         let ExprKind::List(data_call) = &definition_body(&number_data).kind else {
             panic!("data call");
         };
-        assert!(matches!(&data_call[1].kind, ExprKind::BinaryNumber(number) if number.bits() == "000000000000000001100100"),
-            "non-head decimal data remains unchanged");
+        assert!(
+            matches!(&data_call[1].kind, ExprKind::BinaryNumber(number) if number.bits() == "000000000000000001100100"),
+            "non-head decimal data remains unchanged"
+        );
     }
 
-    
     #[test]
     fn machine_reader_lifts_only_admitted_d8_io_and_preserves_quoted_data() {
         let source = "(0011 wire (0010 (value) (11110100 value)))";
-        let parsed = only(parse_mixed_exact_domain_machine_source(
-            "lib/machine/tests/d8-wire.lisp", source
-        ).expect("trusted machine-source reader"));
-        let ExprKind::List(definition) = &parsed.kind else { panic!("DEFINE"); };
-        let ExprKind::List(lambda) = &definition[2].kind else { panic!("LAMBDA"); };
-        let ExprKind::List(call) = &lambda[2].kind else { panic!("call"); };
-        assert!(matches!(
-            &call[0].kind, ExprKind::DomainIdentity(id)
-                if id.width() == 8 && id.packed_bits() == 0b11110100
-        ), "trusted machine D8 WRITE-TO-STRING must carry exact identity");
+        let parsed = only(
+            parse_mixed_exact_domain_machine_source("lib/machine/tests/d8-wire.lisp", source)
+                .expect("trusted machine-source reader"),
+        );
+        let ExprKind::List(definition) = &parsed.kind else {
+            panic!("DEFINE");
+        };
+        let ExprKind::List(lambda) = &definition[2].kind else {
+            panic!("LAMBDA");
+        };
+        let ExprKind::List(call) = &lambda[2].kind else {
+            panic!("call");
+        };
+        assert!(
+            matches!(
+                &call[0].kind, ExprKind::DomainIdentity(id)
+                    if id.width() == 8 && id.packed_bits() == 0b11110100
+            ),
+            "trusted machine D8 WRITE-TO-STRING must carry exact identity"
+        );
 
         let ordinary = only(parse_mixed_exact_domain("(11110100 2)").expect("ordinary reader"));
-        let ExprKind::List(ordinary_call) = &ordinary.kind else { panic!("ordinary call"); };
-        assert!(!matches!(&ordinary_call[0].kind, ExprKind::DomainIdentity(_)),
-            "ordinary source never infers D8 from eight bits");
+        let ExprKind::List(ordinary_call) = &ordinary.kind else {
+            panic!("ordinary call");
+        };
+        assert!(
+            !matches!(&ordinary_call[0].kind, ExprKind::DomainIdentity(_)),
+            "ordinary source never infers D8 from eight bits"
+        );
 
-        let quoted = only(parse_mixed_exact_domain_machine_source(
-            "lib/machine/tests/d8-wire.lisp", "(001 (11110100 2))"
-        ).expect("quoted data"));
-        let ExprKind::List(quote) = &quoted.kind else { panic!("QUOTE"); };
-        let ExprKind::List(payload) = &quote[1].kind else { panic!("quoted payload"); };
-        assert!(!matches!(&payload[0].kind, ExprKind::DomainIdentity(_)),
-            "quoted D8-shaped data must never become callable");
+        let quoted = only(
+            parse_mixed_exact_domain_machine_source(
+                "lib/machine/tests/d8-wire.lisp",
+                "(001 (11110100 2))",
+            )
+            .expect("quoted data"),
+        );
+        let ExprKind::List(quote) = &quoted.kind else {
+            panic!("QUOTE");
+        };
+        let ExprKind::List(payload) = &quote[1].kind else {
+            panic!("quoted payload");
+        };
+        assert!(
+            !matches!(&payload[0].kind, ExprKind::DomainIdentity(_)),
+            "quoted D8-shaped data must never become callable"
+        );
 
-        let other = only(parse_mixed_exact_domain_machine_source(
-            "lib/machine/tests/d8-wire.lisp", "(11110000 2)"
-        ).expect("other W8 call head"));
-        let ExprKind::List(other_call) = &other.kind else { panic!("other call"); };
-        assert!(!matches!(&other_call[0].kind, ExprKind::DomainIdentity(_)),
-            "no general D8 callability expansion");
+        let other = only(
+            parse_mixed_exact_domain_machine_source(
+                "lib/machine/tests/d8-wire.lisp",
+                "(11110000 2)",
+            )
+            .expect("other W8 call head"),
+        );
+        let ExprKind::List(other_call) = &other.kind else {
+            panic!("other call");
+        };
+        assert!(
+            !matches!(&other_call[0].kind, ExprKind::DomainIdentity(_)),
+            "no general D8 callability expansion"
+        );
     }
 
     #[test]
     fn machine_admission_lifts_only_four_pinned_d9_string_heads() {
         let cases = [
-            ("110011100", "(110011100 text)"), // string-empty?
-            ("110011101", "(110011101 text)"), // string-rest
+            ("110011100", "(110011100 text)"),          // string-empty?
+            ("110011101", "(110011101 text)"),          // string-rest
             ("110101010", "(110101010 \"#q2:\" text)"), // string-prefix?
-            ("110101011", "(110101011 text)"), // string-first
+            ("110101011", "(110101011 text)"),          // string-first
         ];
         for (word, call_source) in cases {
             let source = format!("(0011 probe (0010 (text) {call_source}))");
-            let parsed = only(parse_mixed_exact_domain_machine_source(
-                "lib/machine/admission/x86-64.lisp", &source,
-            ).expect("pinned machine-admission D9 string head"));
-            let ExprKind::List(definition) = &parsed.kind else { panic!("DEFINE"); };
-            let ExprKind::List(lambda) = &definition[2].kind else { panic!("LAMBDA"); };
-            let ExprKind::List(call) = &lambda[2].kind else { panic!("call"); };
-            assert!(matches!(
-                &call[0].kind, ExprKind::DomainIdentity(id)
-                    if id.width() == 9 && id.packed_bits() == u16::from_str_radix(word, 2).unwrap()
-            ), "ratified D9 head {word} must retain its exact width");
+            let parsed = only(
+                parse_mixed_exact_domain_machine_source(
+                    "lib/machine/admission/x86-64.lisp",
+                    &source,
+                )
+                .expect("pinned machine-admission D9 string head"),
+            );
+            let ExprKind::List(definition) = &parsed.kind else {
+                panic!("DEFINE");
+            };
+            let ExprKind::List(lambda) = &definition[2].kind else {
+                panic!("LAMBDA");
+            };
+            let ExprKind::List(call) = &lambda[2].kind else {
+                panic!("call");
+            };
+            assert!(
+                matches!(
+                    &call[0].kind, ExprKind::DomainIdentity(id)
+                        if id.width() == 9 && id.packed_bits() == u16::from_str_radix(word, 2).unwrap()
+                ),
+                "ratified D9 head {word} must retain its exact width"
+            );
         }
 
         let source = "(0011 probe (0010 (text) (110101010 \"#q2:\" text)))";
-        let encoding_path = only(parse_mixed_exact_domain_machine_source(
-            "lib/machine/encoding/x86-64.lisp", source,
-        ).expect("encoding's exact wire reader admits the same bounded D9 string heads"));
-        let ExprKind::List(definition) = &encoding_path.kind else { panic!("DEFINE"); };
-        let ExprKind::List(lambda) = &definition[2].kind else { panic!("LAMBDA"); };
-        let ExprKind::List(call) = &lambda[2].kind else { panic!("call"); };
-        assert!(matches!(&call[0].kind, ExprKind::DomainIdentity(id)
+        let encoding_path = only(
+            parse_mixed_exact_domain_machine_source("lib/machine/encoding/x86-64.lisp", source)
+                .expect("encoding's exact wire reader admits the same bounded D9 string heads"),
+        );
+        let ExprKind::List(definition) = &encoding_path.kind else {
+            panic!("DEFINE");
+        };
+        let ExprKind::List(lambda) = &definition[2].kind else {
+            panic!("LAMBDA");
+        };
+        let ExprKind::List(call) = &lambda[2].kind else {
+            panic!("call");
+        };
+        assert!(
+            matches!(&call[0].kind, ExprKind::DomainIdentity(id)
             if id.width() == 9 && id.packed_bits() == 0b110101010),
-            "encoding can call only the exact D9 prefix mechanism for canonical wire validation");
+            "encoding can call only the exact D9 prefix mechanism for canonical wire validation"
+        );
 
-        let other_machine_path = only(parse_mixed_exact_domain_machine_source(
-            "lib/machine/lowering/semantic-x86-64.lisp", source,
-        ).expect("unrelated trusted machine source remains D9-closed"));
-        let ExprKind::List(definition) = &other_machine_path.kind else { panic!("DEFINE"); };
-        let ExprKind::List(lambda) = &definition[2].kind else { panic!("LAMBDA"); };
-        let ExprKind::List(call) = &lambda[2].kind else { panic!("call"); };
-        assert!(!matches!(&call[0].kind, ExprKind::DomainIdentity(id) if id.width() == 9),
-            "D9 callability must not leak to other machine files");
+        let other_machine_path = only(
+            parse_mixed_exact_domain_machine_source(
+                "lib/machine/lowering/semantic-x86-64.lisp",
+                source,
+            )
+            .expect("unrelated trusted machine source remains D9-closed"),
+        );
+        let ExprKind::List(definition) = &other_machine_path.kind else {
+            panic!("DEFINE");
+        };
+        let ExprKind::List(lambda) = &definition[2].kind else {
+            panic!("LAMBDA");
+        };
+        let ExprKind::List(call) = &lambda[2].kind else {
+            panic!("call");
+        };
+        assert!(
+            !matches!(&call[0].kind, ExprKind::DomainIdentity(id) if id.width() == 9),
+            "D9 callability must not leak to other machine files"
+        );
 
         let quoted_source = "(001 (110101010 \"#q2:\" text))";
-        let quoted = only(parse_mixed_exact_domain_machine_source(
-            "lib/machine/admission/x86-64.lisp", quoted_source,
-        ).expect("quoted D9-looking datum remains opaque"));
-        let ExprKind::List(quote) = &quoted.kind else { panic!("QUOTE"); };
-        let ExprKind::List(payload) = &quote[1].kind else { panic!("quoted payload"); };
-        assert!(!matches!(&payload[0].kind, ExprKind::DomainIdentity(id) if id.width() == 9),
-            "quoted data must never gain D9 callability");
+        let quoted = only(
+            parse_mixed_exact_domain_machine_source(
+                "lib/machine/admission/x86-64.lisp",
+                quoted_source,
+            )
+            .expect("quoted D9-looking datum remains opaque"),
+        );
+        let ExprKind::List(quote) = &quoted.kind else {
+            panic!("QUOTE");
+        };
+        let ExprKind::List(payload) = &quote[1].kind else {
+            panic!("quoted payload");
+        };
+        assert!(
+            !matches!(&payload[0].kind, ExprKind::DomainIdentity(id) if id.width() == 9),
+            "quoted data must never gain D9 callability"
+        );
     }
 
     #[test]
@@ -2078,30 +2625,52 @@ mod tests {
         let source = "((0010 (x) (101 (100 x) (001 alpha))) (001 (alpha beta)))";
         let forms = parse_mixed_exact_domain(source).expect("current D4 Lambda application");
         assert_eq!(forms.len(), 1);
-        let ExprKind::List(call) = &forms[0].kind else { panic!("outer application"); };
-        let ExprKind::List(lambda) = &call[0].kind else { panic!("computed lambda"); };
-        assert!(matches!(&lambda[0].kind, ExprKind::DomainIdentity(id)
+        let ExprKind::List(call) = &forms[0].kind else {
+            panic!("outer application");
+        };
+        let ExprKind::List(lambda) = &call[0].kind else {
+            panic!("computed lambda");
+        };
+        assert!(
+            matches!(&lambda[0].kind, ExprKind::DomainIdentity(id)
             if id.width() == 4 && id.packed_bits() == 0b0010),
-            "D4:0010 must retain its width in a computed executable head");
-        let ExprKind::List(eq) = &lambda[2].kind else { panic!("lambda body"); };
+            "D4:0010 must retain its width in a computed executable head"
+        );
+        let ExprKind::List(eq) = &lambda[2].kind else {
+            panic!("lambda body");
+        };
         assert!(matches!(&eq[0].kind, ExprKind::DomainIdentity(id)
             if id.width() == 3 && id.packed_bits() == 0b101));
         let mut session = crate::Session::default();
         let evaluated = crate::eval_parsed_expressions(&forms, &mut session)
             .expect("SENS must execute its current D4 lambda and D3 EQ");
-        assert_eq!(evaluated.value.as_predicate_bit(), Some(true),
-            "SENS D3 EQ returns its own exact D1:YES verdict");
+        assert_eq!(
+            evaluated.value.as_predicate_bit(),
+            Some(true),
+            "SENS D3 EQ returns its own exact D1:YES verdict"
+        );
 
-        let quoted = only(parse_mixed_exact_domain(
-            "((0010 (x) (001 (100 x))) (001 (a b)))"
-        ).expect("quote remains data inside computed lambda"));
-        let ExprKind::List(outer) = quoted.kind else { panic!("outer application"); };
-        let ExprKind::List(inner_lambda) = &outer[0].kind else { panic!("computed lambda"); };
-        let ExprKind::List(quote) = &inner_lambda[2].kind else { panic!("D3 QUOTE"); };
+        let quoted = only(
+            parse_mixed_exact_domain("((0010 (x) (001 (100 x))) (001 (a b)))")
+                .expect("quote remains data inside computed lambda"),
+        );
+        let ExprKind::List(outer) = quoted.kind else {
+            panic!("outer application");
+        };
+        let ExprKind::List(inner_lambda) = &outer[0].kind else {
+            panic!("computed lambda");
+        };
+        let ExprKind::List(quote) = &inner_lambda[2].kind else {
+            panic!("D3 QUOTE");
+        };
         assert!(is_exact_quote(&quote[0]));
-        let ExprKind::List(data) = &quote[1].kind else { panic!("quoted data"); };
-        assert!(!matches!(&data[0].kind, ExprKind::DomainIdentity(_)),
-            "W3-looking word inside quoted data cannot become callable");
+        let ExprKind::List(data) = &quote[1].kind else {
+            panic!("quoted data");
+        };
+        assert!(
+            !matches!(&data[0].kind, ExprKind::DomainIdentity(_)),
+            "W3-looking word inside quoted data cannot become callable"
+        );
     }
 
     #[test]
@@ -2110,24 +2679,42 @@ mod tests {
 
         // The ordinary mixed reader leaves the legacy lambda wrapper opaque.
         let ordinary = only(parse_mixed_exact_domain(source).expect("ordinary parse"));
-        let ExprKind::List(ordinary_call) = &ordinary.kind else { panic!("outer application"); };
-        let ExprKind::List(ordinary_lambda) = &ordinary_call[0].kind else { panic!("lambda head"); };
-        let ExprKind::List(ordinary_body) = &ordinary_lambda[2].kind else { panic!("lambda body"); };
-        assert!(matches!(&ordinary_body[0].kind, ExprKind::BinaryNumber(number) if number.bits() == "000000000000000001100100"),
-            "ordinary mixed source must not opt into machine-source lifting");
+        let ExprKind::List(ordinary_call) = &ordinary.kind else {
+            panic!("outer application");
+        };
+        let ExprKind::List(ordinary_lambda) = &ordinary_call[0].kind else {
+            panic!("lambda head");
+        };
+        let ExprKind::List(ordinary_body) = &ordinary_lambda[2].kind else {
+            panic!("lambda body");
+        };
+        assert!(
+            matches!(&ordinary_body[0].kind, ExprKind::BinaryNumber(number) if number.bits() == "000000000000000001100100"),
+            "ordinary mixed source must not opt into machine-source lifting"
+        );
 
         let machine = only(
             parse_mixed_exact_domain_machine_source("lib/machine/test-probe.lisp", source)
                 .expect("approved machine-source parse"),
         );
-        let ExprKind::List(call) = &machine.kind else { panic!("outer application"); };
-        let ExprKind::List(lambda) = &call[0].kind else { panic!("lambda head"); };
-        let ExprKind::List(body) = &lambda[2].kind else { panic!("lambda body"); };
-        assert!(matches!(&body[0].kind, ExprKind::DomainIdentity(id)
+        let ExprKind::List(call) = &machine.kind else {
+            panic!("outer application");
+        };
+        let ExprKind::List(lambda) = &call[0].kind else {
+            panic!("lambda head");
+        };
+        let ExprKind::List(body) = &lambda[2].kind else {
+            panic!("lambda body");
+        };
+        assert!(
+            matches!(&body[0].kind, ExprKind::DomainIdentity(id)
             if id.width() == 3 && id.packed_bits() == 0b100),
-            "nested executable CAR must be an exact D3 identity");
-        assert!(matches!(&call[1].kind, ExprKind::BinaryNumber(number) if number.bits() == "000000000000000000000111"),
-            "numeric call arguments remain data");
+            "nested executable CAR must be an exact D3 identity"
+        );
+        assert!(
+            matches!(&call[1].kind, ExprKind::BinaryNumber(number) if number.bits() == "000000000000000000000111"),
+            "numeric call arguments remain data"
+        );
     }
 
     #[test]
@@ -2138,14 +2725,23 @@ mod tests {
                 parse_mixed_exact_domain_process_tcp_source(path, source)
                     .expect("approved process/TCP reader"),
             );
-            let ExprKind::List(definition) = &parsed.kind else { panic!("definition"); };
-            let ExprKind::List(lambda) = &definition[2].kind else { panic!("lambda"); };
-            let ExprKind::List(call) = &lambda[2].kind else { panic!("body call"); };
-            assert!(matches!(
-                &call[0].kind,
-                ExprKind::DomainIdentity(identity)
-                    if identity.width() == 3 && identity.packed_bits() == 0b101
-            ), "exact D3 EQ call head in approved process/TCP source must be typed");
+            let ExprKind::List(definition) = &parsed.kind else {
+                panic!("definition");
+            };
+            let ExprKind::List(lambda) = &definition[2].kind else {
+                panic!("lambda");
+            };
+            let ExprKind::List(call) = &lambda[2].kind else {
+                panic!("body call");
+            };
+            assert!(
+                matches!(
+                    &call[0].kind,
+                    ExprKind::DomainIdentity(identity)
+                        if identity.width() == 3 && identity.packed_bits() == 0b101
+                ),
+                "exact D3 EQ call head in approved process/TCP source must be typed"
+            );
         }
 
         let quoted_source = "(0011 probe (0010 (x) (001 (101 x))))";
@@ -2153,12 +2749,23 @@ mod tests {
             parse_mixed_exact_domain_process_tcp_source("lib/process.lisp", quoted_source)
                 .expect("approved source with quote"),
         );
-        let ExprKind::List(definition) = &quoted.kind else { panic!("definition"); };
-        let ExprKind::List(lambda) = &definition[2].kind else { panic!("lambda"); };
-        let ExprKind::List(quote_form) = &lambda[2].kind else { panic!("quoted body"); };
-        assert!(matches!(&quote_form[0].kind, ExprKind::DomainIdentity(id)
-            if id.width() == 3 && id.packed_bits() == 0b001), "D3 QUOTE remains an identity");
-        let ExprKind::List(payload) = &quote_form[1].kind else { panic!("quoted payload"); };
+        let ExprKind::List(definition) = &quoted.kind else {
+            panic!("definition");
+        };
+        let ExprKind::List(lambda) = &definition[2].kind else {
+            panic!("lambda");
+        };
+        let ExprKind::List(quote_form) = &lambda[2].kind else {
+            panic!("quoted body");
+        };
+        assert!(
+            matches!(&quote_form[0].kind, ExprKind::DomainIdentity(id)
+            if id.width() == 3 && id.packed_bits() == 0b001),
+            "D3 QUOTE remains an identity"
+        );
+        let ExprKind::List(payload) = &quote_form[1].kind else {
+            panic!("quoted payload");
+        };
         assert!(
             !matches!(&payload[0].kind, ExprKind::DomainIdentity(_)),
             "quoted numeric-looking payload must not become executable domain identity"
@@ -2172,16 +2779,27 @@ mod tests {
 
     #[test]
     fn utf8_reader_materializes_current_short_and_d9_heads_without_touching_quotes() {
-        let source = "(0011 probe (0010 (x) (110 ((010 x) (110011100 \"\")) ((010 ()) (110011101 x)))))";
+        let source =
+            "(0011 probe (0010 (x) (110 ((010 x) (110011100 \"\")) ((010 ()) (110011101 x)))))";
         let parsed = parse_mixed_exact_domain_utf8_source("lib/utf8.lisp", source)
             .expect("pinned UTF8 source");
-        let ExprKind::List(defn) = &parsed[0].kind else { panic!("DEFINE"); };
-        let ExprKind::List(lambda) = &defn[2].kind else { panic!("LAMBDA"); };
-        let ExprKind::List(cond) = &lambda[2].kind else { panic!("COND"); };
+        let ExprKind::List(defn) = &parsed[0].kind else {
+            panic!("DEFINE");
+        };
+        let ExprKind::List(lambda) = &defn[2].kind else {
+            panic!("LAMBDA");
+        };
+        let ExprKind::List(cond) = &lambda[2].kind else {
+            panic!("COND");
+        };
         assert!(matches!(&cond[0].kind, ExprKind::DomainIdentity(id)
             if id.width() == 3 && id.packed_bits() == 0b110));
-        let ExprKind::List(first_clause) = &cond[1].kind else { panic!("clause"); };
-        let ExprKind::List(d9_call) = &first_clause[1].kind else { panic!("D9 call"); };
+        let ExprKind::List(first_clause) = &cond[1].kind else {
+            panic!("clause");
+        };
+        let ExprKind::List(d9_call) = &first_clause[1].kind else {
+            panic!("D9 call");
+        };
         assert!(matches!(&d9_call[0].kind, ExprKind::DomainIdentity(id)
             if id.width() == 9 && id.packed_bits() == 0b110011100));
 
@@ -2191,8 +2809,11 @@ mod tests {
     #[test]
     fn core_macro_code_names_are_ordinary_quoted_ukrainian_data() {
         let source = "(як-є функція)";
-        let exact = only(parse_mixed_exact_domain(source).expect("generic exact-domain source parse"));
-        let ExprKind::List(quote) = &exact.kind else { panic!("QUOTE"); };
+        let exact =
+            only(parse_mixed_exact_domain(source).expect("generic exact-domain source parse"));
+        let ExprKind::List(quote) = &exact.kind else {
+            panic!("QUOTE");
+        };
         assert!(matches!(&quote[0].kind,
             ExprKind::DomainIdentity(id) if id.width() == 3 && id.packed_bits() == 0b001));
         assert!(matches!(&quote[1].kind,
@@ -2207,16 +2828,24 @@ mod tests {
         assert_eq!(parsed.len(), 2);
 
         for (expression, expected) in parsed.iter().zip(["визначити", "функція"]) {
-            let ExprKind::List(form) = &expression.kind else { panic!("QUOTE form"); };
-            assert!(matches!(
-                &form[0].kind,
-                ExprKind::DomainIdentity(identity)
-                    if identity.width() == 3 && identity.packed_bits() == 0b001
-            ), "code-data constructor must be the exact D3 QUOTE resident");
-            assert!(matches!(
-                &form[1].kind,
-                ExprKind::Symbol(name) if name.as_ref() == expected
-            ), "{expected} is ordinary quoted source data until macro expansion");
+            let ExprKind::List(form) = &expression.kind else {
+                panic!("QUOTE form");
+            };
+            assert!(
+                matches!(
+                    &form[0].kind,
+                    ExprKind::DomainIdentity(identity)
+                        if identity.width() == 3 && identity.packed_bits() == 0b001
+                ),
+                "code-data constructor must be the exact D3 QUOTE resident"
+            );
+            assert!(
+                matches!(
+                    &form[1].kind,
+                    ExprKind::Symbol(name) if name.as_ref() == expected
+                ),
+                "{expected} is ordinary quoted source data until macro expansion"
+            );
         }
 
         assert!(!crate::MACRO_LIBRARY_SOURCE.contains("(як-є 0010)"));
@@ -2230,9 +2859,15 @@ mod tests {
             parse_mixed_exact_domain_process_tcp_source("lib/process.lisp", source)
                 .expect("approved process/TCP D6 LET* source"),
         );
-        let ExprKind::List(definition) = &parsed.kind else { panic!("DEFINE"); };
-        let ExprKind::List(lambda) = &definition[2].kind else { panic!("LAMBDA"); };
-        let ExprKind::List(let_star) = &lambda[2].kind else { panic!("LET* body"); };
+        let ExprKind::List(definition) = &parsed.kind else {
+            panic!("DEFINE");
+        };
+        let ExprKind::List(lambda) = &definition[2].kind else {
+            panic!("LAMBDA");
+        };
+        let ExprKind::List(let_star) = &lambda[2].kind else {
+            panic!("LET* body");
+        };
         assert!(
             matches!(&let_star[0].kind, ExprKind::DomainIdentity(identity)
                 if identity.width() == 6 && identity.packed_bits() == 0b001001),
@@ -2244,10 +2879,18 @@ mod tests {
             parse_mixed_exact_domain_process_tcp_source("lib/process.lisp", quoted_source)
                 .expect("quoted D6 LET* data"),
         );
-        let ExprKind::List(quoted_definition) = &quoted.kind else { panic!("DEFINE"); };
-        let ExprKind::List(quoted_lambda) = &quoted_definition[2].kind else { panic!("LAMBDA"); };
-        let ExprKind::List(quote_form) = &quoted_lambda[2].kind else { panic!("QUOTE"); };
-        let ExprKind::List(payload) = &quote_form[1].kind else { panic!("quoted payload"); };
+        let ExprKind::List(quoted_definition) = &quoted.kind else {
+            panic!("DEFINE");
+        };
+        let ExprKind::List(quoted_lambda) = &quoted_definition[2].kind else {
+            panic!("LAMBDA");
+        };
+        let ExprKind::List(quote_form) = &quoted_lambda[2].kind else {
+            panic!("QUOTE");
+        };
+        let ExprKind::List(payload) = &quote_form[1].kind else {
+            panic!("quoted payload");
+        };
         assert!(
             !matches!(&payload[0].kind, ExprKind::DomainIdentity(_)),
             "quoted D6-shaped spelling remains opaque data; no call-head projection runs beneath QUOTE"
@@ -2259,11 +2902,11 @@ mod tests {
         let process_ast = parse_mixed_exact_domain_process_tcp_source(
             "lib/process.lisp",
             crate::PROCESS_LIBRARY_SOURCE,
-        ).expect("actual process.lisp parses through its path-bound reader");
-        let tcp_ast = parse_mixed_exact_domain_process_tcp_source(
-            "lib/tcp.lisp",
-            crate::TCP_LIBRARY_SOURCE,
-        ).expect("actual tcp.lisp parses through its path-bound reader");
+        )
+        .expect("actual process.lisp parses through its path-bound reader");
+        let tcp_ast =
+            parse_mixed_exact_domain_process_tcp_source("lib/tcp.lisp", crate::TCP_LIBRARY_SOURCE)
+                .expect("actual tcp.lisp parses through its path-bound reader");
         assert!(!process_ast.is_empty() && !tcp_ast.is_empty());
 
         let mut session = crate::Session::default();
@@ -2271,5 +2914,4 @@ mod tests {
         crate::load_process_library(&mut session)
             .expect("process/TCP Lisp libraries must load via the path-bound exact-domain reader");
     }
-
 }

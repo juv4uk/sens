@@ -33,11 +33,17 @@ fn equal_payloads_do_not_collapse_across_payload_domains() {
         })
         .collect::<Vec<_>>();
     assert_eq!(
-        coordinates.iter().map(|(_, bits)| *bits).collect::<Vec<_>>(),
+        coordinates
+            .iter()
+            .map(|(_, bits)| *bits)
+            .collect::<Vec<_>>(),
         vec![1; PAYLOAD_WIDTHS.len()]
     );
     assert_eq!(
-        coordinates.iter().map(|(width, _)| *width).collect::<Vec<_>>(),
+        coordinates
+            .iter()
+            .map(|(width, _)| *width)
+            .collect::<Vec<_>>(),
         PAYLOAD_WIDTHS.to_vec()
     );
     for left in 0..coordinates.len() {

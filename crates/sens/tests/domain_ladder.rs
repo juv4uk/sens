@@ -2,8 +2,8 @@
 //! Закони resident-ів та значення бітів визначаються Lisp-контрактами SENS.
 
 use sens::{
-    Bit1, Bit2, Bit3, Bit4, Bit5, Bit6, Bit7, Bit8, Bit9, BinarySourceWord,
-    BitPacker, DomainD10, DomainIdentity, PackedBitstream,
+    BinarySourceWord, Bit1, Bit2, Bit3, Bit4, Bit5, Bit6, Bit7, Bit8, Bit9, BitPacker, DomainD10,
+    DomainIdentity, PackedBitstream,
 };
 
 fn assert_ladder_round_trip(source: BinarySourceWord, width: usize, payload: u16) {
@@ -77,8 +77,7 @@ fn width_carriers_reject_payloads_that_do_not_fit() {
 #[test]
 fn d10_public_carrier_preserves_all_ten_bits_without_ast_admission() {
     use sens::{
-        domain_ladder::DomainCoordinate, parse_canonical_binary,
-        parse_domain_ladder_source_words,
+        domain_ladder::DomainCoordinate, parse_canonical_binary, parse_domain_ladder_source_words,
     };
 
     // Exhaust the public type, and independently confirm the source/coordinate boundary.
@@ -143,4 +142,3 @@ fn d10_uses_ten_dense_bits_across_physical_byte_boundaries() {
     assert_eq!(size_of::<DomainD10>(), 2);
     assert!(PackedBitstream::from_parts(vec![0xB5, 0x53, 0x01], 17).is_none());
 }
-

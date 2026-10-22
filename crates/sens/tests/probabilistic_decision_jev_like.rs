@@ -4,7 +4,12 @@
 //! provider identity, new SID, or Rust Value variant.
 
 use sens::{eval_program, load_core_library, Session};
-use std::{io::{Read, Write}, net::TcpListener, thread, time::Duration};
+use std::{
+    io::{Read, Write},
+    net::TcpListener,
+    thread,
+    time::Duration,
+};
 
 fn eval_probabilistic_decision(source: &str) -> String {
     let mut session = Session::default();
@@ -330,8 +335,14 @@ fn system_one_validates_one_state_with_parallel_typed_questions_and_answers() {
     // Без посередництва Python/JSON: SENS сам має відрізняти прямі Д1
     // «так» / «ні», а не успадковувати historical T/NIL truthiness.
     for (source, expected) in [
-        ("(за-умовою (ні (як-є помилка)) (так (як-є гаразд)))", "гаразд"),
-        ("(за-умовою (так (як-є гаразд)) (ні (як-є помилка)))", "гаразд"),
+        (
+            "(за-умовою (ні (як-є помилка)) (так (як-є гаразд)))",
+            "гаразд",
+        ),
+        (
+            "(за-умовою (так (як-є гаразд)) (ні (як-є помилка)))",
+            "гаразд",
+        ),
     ] {
         assert_eq!(
             eval_probabilistic_decision(source),
@@ -506,7 +517,9 @@ fn system_one_validates_one_state_with_parallel_typed_questions_and_answers() {
             payload.len(),
             payload
         );
-        stream.write_all(response.as_bytes()).expect("write fixture response");
+        stream
+            .write_all(response.as_bytes())
+            .expect("write fixture response");
         String::from_utf8(request).expect("request is UTF-8 JSON")
     });
 
@@ -557,5 +570,4 @@ fn system_one_validates_one_state_with_parallel_typed_questions_and_answers() {
     assert!(request.contains("\"top_logprobs\":20"));
     assert!(request.contains("\"structured_outputs\":"));
     assert!(request.contains("\"fixture-model\""));
-
 }

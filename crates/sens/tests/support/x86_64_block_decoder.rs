@@ -1,6 +1,6 @@
 const REGISTERS: [&str; 16] = [
-    "rax", "rcx", "rdx", "rbx", "rsp", "rbp", "rsi", "rdi", "r8", "r9", "r10", "r11",
-    "r12", "r13", "r14", "r15",
+    "rax", "rcx", "rdx", "rbx", "rsp", "rbp", "rsi", "rdi", "r8", "r9", "r10", "r11", "r12", "r13",
+    "r14", "r15",
 ];
 
 fn register_name(code: u8) -> Result<&'static str, String> {
@@ -98,13 +98,9 @@ fn decode_mov_mem_disp8(bytes: &[u8], offset: usize) -> Result<Option<(String, u
     let displacement = i8::from_ne_bytes([disp_byte]) as i32;
 
     let form = if opcode == 0x8B {
-        format!(
-            "(mov-r64-mem-disp8 {data_register} {base_register} {displacement})"
-        )
+        format!("(mov-r64-mem-disp8 {data_register} {base_register} {displacement})")
     } else {
-        format!(
-            "(mov-mem-disp8-r64 {base_register} {displacement} {data_register})"
-        )
+        format!("(mov-mem-disp8-r64 {base_register} {displacement} {data_register})")
     };
 
     Ok(Some((form, next)))

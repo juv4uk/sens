@@ -259,7 +259,9 @@ fn derivation_uses_only_existing_d3_d4_semantic_primitives() {
         }
     }
 
-    for forbidden in ["SETQ", " SET ", "RefCell", "Rc<", "PROG", "RETURN", "FEXPR", "FSUBR"] {
+    for forbidden in [
+        "SETQ", " SET ", "RefCell", "Rc<", "PROG", "RETURN", "FEXPR", "FSUBR",
+    ] {
         assert!(
             !DERIVED_STATE.contains(forbidden),
             "derived source must not import hidden state/control surface {forbidden}"

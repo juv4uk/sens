@@ -60,14 +60,21 @@ fn exact_d6_add1_sub1_have_width_safe_machine_capabilities() {
     }
 }
 
-
 #[test]
 fn admitted_d6_domain_identity_drives_machine_key_without_source_width_recovery() {
     let mut session = machine_session();
 
     for (bits, input, expected) in [
-        (0b001110, 41u64, "(72 184 41 0 0 0 0 0 0 0 72 185 1 0 0 0 0 0 0 0 72 1 200 195)"),
-        (0b001111, 41u64, "(72 184 41 0 0 0 0 0 0 0 72 185 1 0 0 0 0 0 0 0 72 41 200 195)"),
+        (
+            0b001110,
+            41u64,
+            "(72 184 41 0 0 0 0 0 0 0 72 185 1 0 0 0 0 0 0 0 72 1 200 195)",
+        ),
+        (
+            0b001111,
+            41u64,
+            "(72 184 41 0 0 0 0 0 0 0 72 185 1 0 0 0 0 0 0 0 72 41 200 195)",
+        ),
     ] {
         let identity = DomainIdentity::D6(CoreD6::from_word(
             Bit6::new(bits).expect("D6 identity bits"),
@@ -187,12 +194,8 @@ fn current_profile_records_only_exact_d6_width_safe_rows() {
         fs::read_to_string(repo_root().join("lib/machine/profile/current-domain-x86-64.lisp"))
             .expect("current exact-domain machine profile");
 
-    assert!(profile.contains(
-        "(6 14 fast-path \"ADD / exact u64 input <= u64-2, RHS=1\")"
-    ));
-    assert!(profile.contains(
-        "(6 15 fast-path \"SUB / exact u64 input >=1, RHS=1\")"
-    ));
+    assert!(profile.contains("(6 14 fast-path \"ADD / exact u64 input <= u64-2, RHS=1\")"));
+    assert!(profile.contains("(6 15 fast-path \"SUB / exact u64 input >=1, RHS=1\")"));
     assert!(!profile.contains("(5 14 fast-path"));
     assert!(!profile.contains("(5 15 fast-path"));
     assert!(!profile.contains("semantic-registry"));

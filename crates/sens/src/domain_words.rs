@@ -226,7 +226,9 @@ impl DomainD10 {
     }
 
     /// A D9 or D8 coordinate cannot become D10 by matching its payload.
-    pub const fn from_coordinate(coordinate: crate::domain_ladder::DomainCoordinate) -> Option<Self> {
+    pub const fn from_coordinate(
+        coordinate: crate::domain_ladder::DomainCoordinate,
+    ) -> Option<Self> {
         if coordinate.width() == 10 {
             Self::new(coordinate.bits())
         } else {
@@ -253,8 +255,8 @@ mod tests {
 
     #[test]
     fn d10_all_1024_coordinates_pack_in_ten_bits_without_byte_alignment() {
-        use crate::{BitPacker, PackedBitstream};
         use crate::domain_ladder::DomainCoordinate;
+        use crate::{BitPacker, PackedBitstream};
 
         // 3 + 10 + 8 + 4 = 25 meaningful bits, not four padded cells.
         let d3 = DomainCoordinate::new(3, 0b001).unwrap();
@@ -267,9 +269,11 @@ mod tests {
             assert_eq!(exact.width(), 10);
             assert_eq!(exact.bits(), bits);
             assert_eq!(DomainD10::from_coordinate(exact), Some(d10));
-            assert_eq!(DomainD10::from_coordinate(
-                DomainCoordinate::new(9, bits & 0b1_1111_1111).unwrap()
-            ), None, "same numeric bits in D9 must not become D10");
+            assert_eq!(
+                DomainD10::from_coordinate(DomainCoordinate::new(9, bits & 0b1_1111_1111).unwrap()),
+                None,
+                "same numeric bits in D9 must not become D10"
+            );
 
             let mut packer = BitPacker::new();
             assert_eq!(packer.push_coordinate(d3), 0);
@@ -287,8 +291,11 @@ mod tests {
                 _ => None,
             };
             if let Some(golden) = golden {
-                assert_eq!(packed.bytes(), golden.as_slice(),
-                    "bit order or cross-word boundary changed at D10={bits}");
+                assert_eq!(
+                    packed.bytes(),
+                    golden.as_slice(),
+                    "bit order or cross-word boundary changed at D10={bits}"
+                );
             }
             assert_eq!(packed.bit_len(), 25);
             assert_eq!(packed.byte_len(), 4);
@@ -297,11 +304,15 @@ mod tests {
             for (offset, word) in [(0, d3), (3, exact), (13, d8), (21, d4)] {
                 assert_eq!(packed.read_coordinate(offset, word.width()), Some(word));
             }
-            assert_eq!(DomainD10::from_coordinate(
-                packed.read_coordinate(3, 10).unwrap()
-            ), Some(d10));
-            assert_eq!(packed.bytes()[3] & 0b0111_1111, 0,
-                "seven non-payload bits at end must be zero");
+            assert_eq!(
+                DomainD10::from_coordinate(packed.read_coordinate(3, 10).unwrap()),
+                Some(d10)
+            );
+            assert_eq!(
+                packed.bytes()[3] & 0b0111_1111,
+                0,
+                "seven non-payload bits at end must be zero"
+            );
 
             // A nonzero physical padding bit is not an alternate valid word.
             let mut corrupted = packed.bytes().to_vec();
@@ -313,8 +324,11 @@ mod tests {
 
         assert_eq!(DomainD10::new(1024), None);
         assert_eq!(DomainD10::new(u16::MAX), None);
-        assert_eq!(std::mem::size_of::<DomainD10>(), 2,
-            "two host bytes do not imply 16 meaningful wire bits");
+        assert_eq!(
+            std::mem::size_of::<DomainD10>(),
+            2,
+            "two host bytes do not imply 16 meaningful wire bits"
+        );
     }
 
     #[test]
@@ -380,6 +394,4 @@ mod tests {
         assert_eq!(size_of::<CoreD9>(), 2);
         assert_eq!(size_of::<DomainD10>(), 2);
     }
-
-    
 }

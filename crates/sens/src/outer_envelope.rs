@@ -23,8 +23,8 @@
 //! this codec never interprets it as a transport escape.
 
 use crate::{
-    BinaryNumber, BinarySourceWord, Bit1, Bit2, Bit3, Bit4, Bit5, Bit6, Bit7, Bit8,
-    BitPacker, DomainIdentity, PackedBitstream, Text7,
+    BinaryNumber, BinarySourceWord, Bit1, Bit2, Bit3, Bit4, Bit5, Bit6, Bit7, Bit8, BitPacker,
+    DomainIdentity, PackedBitstream, Text7,
 };
 
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -52,7 +52,10 @@ pub struct OuterEnvelope {
 }
 
 impl OuterEnvelope {
-    pub fn from_parts(bytes: Vec<u8>, meaningful_bit_len: usize) -> Result<Self, OuterEnvelopeError> {
+    pub fn from_parts(
+        bytes: Vec<u8>,
+        meaningful_bit_len: usize,
+    ) -> Result<Self, OuterEnvelopeError> {
         let packed = PackedBitstream::from_parts(bytes, meaningful_bit_len)
             .ok_or(OuterEnvelopeError::NonCanonicalContainer)?;
         Ok(Self { packed })
@@ -100,7 +103,9 @@ pub fn encode_outer_records(records: &[OuterRecord]) -> Result<OuterEnvelope, Ou
     for record in records {
         encode_record(record, &mut packed)?;
     }
-    Ok(OuterEnvelope { packed: packed.finish() })
+    Ok(OuterEnvelope {
+        packed: packed.finish(),
+    })
 }
 
 fn encode_record(record: &OuterRecord, out: &mut BitPacker) -> Result<(), OuterEnvelopeError> {
@@ -157,18 +162,24 @@ fn decode_record(cursor: &mut BitCursor<'_>) -> Result<OuterRecord, OuterEnvelop
     if root < 0b111 {
         let width = usize::from(root) + 1;
         let payload = cursor.read_u8(width)?;
-        return domain_from_parts(width, payload)
-            .map(OuterRecord::D)
-            .ok_or(OuterEnvelopeError::InvalidDomain { width, payload: u16::from(payload) });
+        return domain_from_parts(width, payload).map(OuterRecord::D).ok_or(
+            OuterEnvelopeError::InvalidDomain {
+                width,
+                payload: u16::from(payload),
+            },
+        );
     }
 
     // 1110 -> D8
     if cursor.read_bit()? == 0 {
         let width = 8;
         let payload = cursor.read_u8(width)?;
-        return domain_from_parts(width, payload)
-            .map(OuterRecord::D)
-            .ok_or(OuterEnvelopeError::InvalidDomain { width, payload: u16::from(payload) });
+        return domain_from_parts(width, payload).map(OuterRecord::D).ok_or(
+            OuterEnvelopeError::InvalidDomain {
+                width,
+                payload: u16::from(payload),
+            },
+        );
     }
 
     // 11110 -> N
@@ -187,10 +198,10 @@ fn decode_record(cursor: &mut BitCursor<'_>) -> Result<OuterRecord, OuterEnvelop
     if cursor.read_bit()? == 0 {
         let depth = cursor.read_gamma0()?;
         let index = cursor.read_gamma0()?;
-        let depth = u32::try_from(depth)
-            .map_err(|_| OuterEnvelopeError::LengthOverflow { bit: start })?;
-        let index = u32::try_from(index)
-            .map_err(|_| OuterEnvelopeError::LengthOverflow { bit: start })?;
+        let depth =
+            u32::try_from(depth).map_err(|_| OuterEnvelopeError::LengthOverflow { bit: start })?;
+        let index =
+            u32::try_from(index).map_err(|_| OuterEnvelopeError::LengthOverflow { bit: start })?;
         return Ok(OuterRecord::L { depth, index });
     }
 
@@ -209,8 +220,8 @@ fn decode_record(cursor: &mut BitCursor<'_>) -> Result<OuterRecord, OuterEnvelop
         for _ in 0..count {
             cells.push(cursor.read_u8(7)?);
         }
-        let value = Text7::from_cells(cells)
-            .map_err(|_| OuterEnvelopeError::InvalidText { bit: start })?;
+        let value =
+            Text7::from_cells(cells).map_err(|_| OuterEnvelopeError::InvalidText { bit: start })?;
         return Ok(OuterRecord::T(value));
     }
 
@@ -335,9 +346,7 @@ impl<'a> BitCursor<'a> {
 
         if self.position == self.packed.bit_len()
             && self.packed.bit_len() > 0
-            && ((self.packed.bytes()[(self.position - 1) / 8]
-                >> (7 - (self.position - 1) % 8))
-                & 1)
+            && ((self.packed.bytes()[(self.position - 1) / 8] >> (7 - (self.position - 1) % 8)) & 1)
                 == 0
         {
             return Err(OuterEnvelopeError::UnexpectedEnd { bit: self.position });
@@ -428,27 +437,41 @@ mod tests {
                     let visible = format!("{header}{bits:0w$b}", w = usize::from(width));
                     let reference_bits = visible.bytes().map(|b| b - b'0').collect::<Vec<_>>();
                     let independently_packed = pack_bits(&reference_bits);
-                    assert_eq!(packed.bytes(), independently_packed.bytes(),
-                        "first physical byte mismatch D{width} bits={bits}");
-                    assert_eq!(packed.meaningful_bit_len(), reference_bits.len(),
-                        "first exact-width mismatch D{width} bits={bits}");
-                    assert_eq!(packed.decode().unwrap(), vec![record.clone()],
-                        "first decode identity mismatch D{width} bits={bits}");
+                    assert_eq!(
+                        packed.bytes(),
+                        independently_packed.bytes(),
+                        "first physical byte mismatch D{width} bits={bits}"
+                    );
+                    assert_eq!(
+                        packed.meaningful_bit_len(),
+                        reference_bits.len(),
+                        "first exact-width mismatch D{width} bits={bits}"
+                    );
+                    assert_eq!(
+                        packed.decode().unwrap(),
+                        vec![record.clone()],
+                        "first decode identity mismatch D{width} bits={bits}"
+                    );
                     batch.push(record);
                     admitted += 1;
                 } else if width == 9 {
                     // D9 is valid *mechanical* source data, but the #2189
                     // prefix tree has no D9 record. Never narrow through u8.
-                    let identity = BinarySourceWord::W9(
-                        crate::Bit9::new(bits).expect("D9 carrier")
-                    ).domain_identity();
+                    let identity =
+                        BinarySourceWord::W9(crate::Bit9::new(bits).expect("D9 carrier"))
+                            .domain_identity();
                     let error = match encode_outer_records(&[OuterRecord::D(identity)]) {
                         Err(error) => error,
                         Ok(_) => panic!("D9:{bits:09b} falsely admitted into draft D1..D8 tree"),
                     };
-                    assert_eq!(error, OuterEnvelopeError::InvalidDomain {
-                        width: 9, payload: bits,
-                    }, "D9:{bits:09b} was narrowed or misreported");
+                    assert_eq!(
+                        error,
+                        OuterEnvelopeError::InvalidDomain {
+                            width: 9,
+                            payload: bits,
+                        },
+                        "D9:{bits:09b} was narrowed or misreported"
+                    );
                     rejected += 1;
                 } else {
                     // D10 exists as an owner-ratified coordinate, not as a
@@ -466,8 +489,11 @@ mod tests {
         // Sum(width*2^width + prefix*2^width) for candidate S D1..D8.
         assert_eq!(stream.meaningful_bit_len(), 5_372);
         assert_eq!(stream.bytes().len(), 672);
-        assert_eq!(stream.decode().unwrap(), batch,
-            "cross-byte concatenation changed one of the 510 coordinates");
+        assert_eq!(
+            stream.decode().unwrap(),
+            batch,
+            "cross-byte concatenation changed one of the 510 coordinates"
+        );
     }
 
     #[test]
@@ -514,8 +540,18 @@ mod tests {
 
     #[test]
     fn candidate_s_keeps_expected_mechanical_record_costs() {
-        assert_eq!(encode_outer_records(&[d(3, 0b001)]).unwrap().meaningful_bit_len(), 6);
-        assert_eq!(encode_outer_records(&[d(8, 0)]).unwrap().meaningful_bit_len(), 12);
+        assert_eq!(
+            encode_outer_records(&[d(3, 0b001)])
+                .unwrap()
+                .meaningful_bit_len(),
+            6
+        );
+        assert_eq!(
+            encode_outer_records(&[d(8, 0)])
+                .unwrap()
+                .meaningful_bit_len(),
+            12
+        );
 
         let w16 = BinaryNumber::parse(&format!("1{}", "0".repeat(15))).unwrap();
         assert_eq!(

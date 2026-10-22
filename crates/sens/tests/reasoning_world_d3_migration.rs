@@ -30,7 +30,8 @@ fn ukrainian_world_preserves_quoted_protocol_without_old_w8_calls() {
     }
     assert_eq!(
         parse_mixed_exact_domain_reasoning_source("lib/not-world.lisp", WORLD)
-            .expect_err("сторонній шлях має відхилятися").kind,
+            .expect_err("сторонній шлях має відхилятися")
+            .kind,
         ErrorKind::Parse
     );
 }
@@ -40,19 +41,27 @@ fn world_shape_uses_ukrainian_d3_d4_law_and_checks_exact_arity() {
     let forms = parse_mixed_exact_domain_reasoning_source("lib/world.lisp", WORLD)
         .expect("чинне джерело світу має розбиратися");
     let definition = forms.iter().find(|form| {
-        let ExprKind::List(items) = &form.kind else { return false };
+        let ExprKind::List(items) = &form.kind else {
+            return false;
+        };
         matches!(
             items.get(1),
             Some(Expr { kind: ExprKind::Symbol(name), .. }) if name.as_ref() == "світ?"
         )
     });
-    assert!(definition.is_some(), "у світі відсутнє українське визначення світ?");
+    assert!(
+        definition.is_some(),
+        "у світі відсутнє українське визначення світ?"
+    );
 
     // Точні координати беруться лише з ратифікованої драбини;
     // застарілі голі восьмибітні виклики не підміняють D3/D4.
     for row in [
-        "(001 (ук як-є)", "(010 (ук атом?)", "(011 (ук решта)",
-        "(101 (ук тотожне?)", "(110 (ук за-умовою)",
+        "(001 (ук як-є)",
+        "(010 (ук атом?)",
+        "(011 (ук решта)",
+        "(101 (ук тотожне?)",
+        "(110 (ук за-умовою)",
     ] {
         assert!(D3.contains(row), "відсутній закон третього домену: {row}");
     }

@@ -1,6 +1,4 @@
-use sens::{
-    eval_program, load_core_library, lower_program, parse, ExprKind, Session,
-};
+use sens::{eval_program, load_core_library, lower_program, parse, ExprKind, Session};
 use std::fs;
 use std::path::PathBuf;
 
@@ -45,19 +43,8 @@ struct ZeroTail {
 fn decode_zero_tail(bytes: &[u8]) -> Option<ZeroTail> {
     // Two MOV r64,imm64 instructions: input + literal zero.
     let tail = bytes.get(20..)?;
-    let [
-        cmp_rex,
-        cmp_opcode,
-        cmp_modrm,
-        set_prefix,
-        set_opcode,
-        set_modrm,
-        movzx_rex,
-        movzx_prefix,
-        movzx_opcode,
-        movzx_modrm,
-        ret,
-    ] = tail
+    let [cmp_rex, cmp_opcode, cmp_modrm, set_prefix, set_opcode, set_modrm, movzx_rex, movzx_prefix, movzx_opcode, movzx_modrm, ret] =
+        tail
     else {
         return None;
     };
@@ -178,9 +165,8 @@ fn zerop_native_slice_fails_closed_outside_exact_integer_rectangle() {
 
 #[test]
 fn zerop_machine_proof_does_not_publish_numeric_boolean_language_semantics() {
-    let source =
-        fs::read_to_string(repo_root().join("lib/machine/lowering/semantic-x86-64.lisp"))
-            .expect("semantic x86 lowering");
+    let source = fs::read_to_string(repo_root().join("lib/machine/lowering/semantic-x86-64.lisp"))
+        .expect("semantic x86 lowering");
     let marker = "exact D5:01000 ZEROP bounded machine proof.";
     let start = source
         .find(marker)
@@ -208,8 +194,7 @@ fn zerop_machine_proof_does_not_publish_numeric_boolean_language_semantics() {
     let profile =
         fs::read_to_string(repo_root().join("lib/machine/profile/current-domain-x86-64.lisp"))
             .expect("current profile");
-    assert!(profile.contains(
-        "(5 8 proof \"CMP+SETE+MOVZX / exact integer internal bit; D1 boundary\")"
-    ));
+    assert!(profile
+        .contains("(5 8 proof \"CMP+SETE+MOVZX / exact integer internal bit; D1 boundary\")"));
     assert!(!profile.contains("00001000 direct"));
 }

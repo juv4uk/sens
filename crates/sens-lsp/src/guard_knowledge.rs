@@ -18,8 +18,8 @@
 
 use sens::{Arity, Expr, ExprKind, LanguageItemKind, Span};
 use std::collections::HashMap;
-use std::path::PathBuf;
 use std::path::Path;
+use std::path::PathBuf;
 
 /// One entry of the reference bureau directory.
 #[derive(Clone, Debug)]
@@ -188,9 +188,7 @@ fn surface_domain_coordinate(surface: &str) -> Option<(usize, u16)> {
 /// Дозволені людські написання лише проєктують уже відому координату.
 fn head_has_exact_domain(expr: &Expr, domain: (usize, u16)) -> bool {
     match &expr.kind {
-        ExprKind::DomainIdentity(identity) => {
-            (identity.width(), identity.packed_bits()) == domain
-        }
+        ExprKind::DomainIdentity(identity) => (identity.width(), identity.packed_bits()) == domain,
         ExprKind::Symbol(surface) => surface_domain_coordinate(surface) == Some(domain),
         _ => false,
     }
@@ -218,9 +216,7 @@ fn as_list(expr: &Expr) -> Option<&[Expr]> {
 }
 
 /// Read `(field value...)` pairs from a list of expressions.
-fn read_fields<'a>(
-    items: &'a [Expr],
-) -> impl Iterator<Item = (&'a str, Vec<&'a Expr>)> + 'a {
+fn read_fields<'a>(items: &'a [Expr]) -> impl Iterator<Item = (&'a str, Vec<&'a Expr>)> + 'a {
     items.iter().filter_map(|item| {
         let list = as_list(item)?;
         let field = as_symbol(list.first()?)?;
@@ -261,7 +257,9 @@ fn parse_topics(source: &str) -> HashMap<String, GuardReference> {
             continue;
         };
         for entry in data {
-            let Some(fields) = as_list(entry) else { continue };
+            let Some(fields) = as_list(entry) else {
+                continue;
+            };
             if fields.first().and_then(as_symbol) != Some("reference") {
                 continue;
             }
@@ -352,7 +350,11 @@ fn parse_functions(source: &str) -> HashMap<String, GuardFunction> {
         if !head.first().is_some_and(is_define_head) {
             continue;
         }
-        let Some(Expr { kind: ExprKind::Symbol(name), .. }) = head.get(1) else {
+        let Some(Expr {
+            kind: ExprKind::Symbol(name),
+            ..
+        }) = head.get(1)
+        else {
             continue;
         };
         let Some(lambda) = head.get(2).and_then(as_list) else {
@@ -407,13 +409,17 @@ mod tests {
         // Позитивний свідок: D4 DEFINE містить D3 QUOTE і лише дані.
         let exact = "(0011 *guard-reference-directory* (001 ((reference (topic точний-домен) (summary \"дані\")))))";
         let topics = parse_topics(exact);
-        assert!(topics.contains_key("точний-домен"),
-            "D3:001 має зберегти цитований довідник");
+        assert!(
+            topics.contains_key("точний-домен"),
+            "D3:001 має зберегти цитований довідник"
+        );
 
         // Негативний свідок: рівний payload W8 не є D3 QUOTE.
         let legacy = exact.replacen("(001 ((", "(00000001 ((", 1);
-        assert!(parse_topics(&legacy).is_empty(),
-            "W8:00000001 не може підміняти D3:001");
+        assert!(
+            parse_topics(&legacy).is_empty(),
+            "W8:00000001 не може підміняти D3:001"
+        );
 
         let exact_define = "(0011 точна-функція (0010 (x) x))";
         let functions = parse_functions(exact_define);
@@ -421,8 +427,10 @@ mod tests {
 
         // Так само D4:0011/0010 не тотожні W8:00000011/00000010.
         let wrong_width_define = "(00000011 точна-функція (00000010 (x) x))";
-        assert!(parse_functions(wrong_width_define).is_empty(),
-            "ширина D4 є частиною ідентичності");
+        assert!(
+            parse_functions(wrong_width_define).is_empty(),
+            "ширина D4 є частиною ідентичності"
+        );
     }
 
     #[test]
@@ -440,26 +448,32 @@ mod tests {
             let form = source[start..].split("\n\n").next().unwrap();
             let head_bits = |code: &str| {
                 let tree = sens::parse_mixed_exact_domain(code).expect("exact D3/D4 source");
-                let ExprKind::List(definition) = &tree[0].kind else { panic!("DEFINE list") };
-                let ExprKind::List(lambda) = &definition[2].kind else { panic!("LAMBDA list") };
-                let ExprKind::List(call) = &lambda[2].kind else { panic!("field call") };
-                let ExprKind::List(quoted) = &call[1].kind else { panic!("QUOTE list") };
-                assert!(matches!(&quoted[1].kind, ExprKind::Symbol(name) if name.as_ref() == field),
-                    "{getter} changed its literal field name");
+                let ExprKind::List(definition) = &tree[0].kind else {
+                    panic!("DEFINE list")
+                };
+                let ExprKind::List(lambda) = &definition[2].kind else {
+                    panic!("LAMBDA list")
+                };
+                let ExprKind::List(call) = &lambda[2].kind else {
+                    panic!("field call")
+                };
+                let ExprKind::List(quoted) = &call[1].kind else {
+                    panic!("QUOTE list")
+                };
+                assert!(
+                    matches!(&quoted[1].kind, ExprKind::Symbol(name) if name.as_ref() == field),
+                    "{getter} changed its literal field name"
+                );
                 matches!(&quoted[0].kind, ExprKind::DomainIdentity(id)
                     if id.width() == 3 && id.packed_bits() == 0b001)
             };
             assert!(head_bits(form), "{getter}: D3:001 QUOTE required");
-            let mutant = form.replacen(
-                &format!("(001 {field})"),
-                &format!("(00000001 {field})"),
-                1,
-            );
+            let mutant =
+                form.replacen(&format!("(001 {field})"), &format!("(00000001 {field})"), 1);
             assert_ne!(mutant, form, "{getter}: missing mutation site");
             assert!(!head_bits(&mutant), "{getter}: W8 cannot alias D3:001");
         }
     }
-
 
     #[test]
     fn guard_evidence_status_uses_exact_d3_data_without_w8_alias() {
@@ -477,7 +491,9 @@ mod tests {
 
         fn count_d3_quote(section: &str) -> usize {
             fn visit(node: &Expr) -> usize {
-                let ExprKind::List(items) = &node.kind else { return 0 };
+                let ExprKind::List(items) = &node.kind else {
+                    return 0;
+                };
                 let this = usize::from(matches!(
                     items.first(),
                     Some(Expr { kind: ExprKind::DomainIdentity(id), .. })
@@ -486,21 +502,27 @@ mod tests {
                 this + items.iter().map(visit).sum::<usize>()
             }
             sens::parse_mixed_exact_domain_guard_reference_source(
-                "knowledge/guard-reference.lisp", section
+                "knowledge/guard-reference.lisp",
+                section,
             )
             .expect("Guard source must parse by its pinned exact-domain reader")
-            .iter().map(visit).sum()
+            .iter()
+            .map(visit)
+            .sum()
         }
 
         assert_eq!(count_d3_quote(section), 2, "D3:001 field and fallback");
         for field in ["evidence-status", "unresolved"] {
             let from = format!("(001 {field})");
-            assert_eq!(section.matches(&from).count(), 1, "unique source site: {field}");
-            let wrong_width = section.replacen(
-                &from, &format!("(00000001 {field})"), 1
-            );
             assert_eq!(
-                count_d3_quote(&wrong_width), 1,
+                section.matches(&from).count(),
+                1,
+                "unique source site: {field}"
+            );
+            let wrong_width = section.replacen(&from, &format!("(00000001 {field})"), 1);
+            assert_eq!(
+                count_d3_quote(&wrong_width),
+                1,
                 "{field}: W8 QUOTE must not acquire D3 identity"
             );
         }
@@ -542,8 +564,16 @@ mod tests {
             .sum()
         }
 
-        assert_eq!(form.matches("(001 ())").count(), 2, "two explicit nil quotations");
-        assert_eq!(form.matches("(001 topic)").count(), 1, "one field-name quotation");
+        assert_eq!(
+            form.matches("(001 ())").count(),
+            2,
+            "two explicit nil quotations"
+        );
+        assert_eq!(
+            form.matches("(001 topic)").count(),
+            1,
+            "one field-name quotation"
+        );
         assert_eq!(d3_quotes(form), 3, "all three quotes must retain D3 width");
 
         let mut mutant_count = 0;
@@ -562,9 +592,11 @@ mod tests {
                 mutant_count += 1;
             }
         }
-        assert_eq!(mutant_count, 3, "both nil sites and field-name site checked");
+        assert_eq!(
+            mutant_count, 3,
+            "both nil sites and field-name site checked"
+        );
     }
-
 
     #[test]
     fn guard_script_ten_data_quotes_keep_d3_identity_against_w8_mutants() {
@@ -582,11 +614,13 @@ mod tests {
         fn exact_quote_heads(form: &str) -> usize {
             fn visit(expr: &Expr) -> usize {
                 match &expr.kind {
-                    ExprKind::List(items) => usize::from(matches!(
-                        items.first(),
-                        Some(Expr { kind: ExprKind::DomainIdentity(id), .. })
-                            if id.width() == 3 && id.packed_bits() == 0b001
-                    )) + items.iter().map(visit).sum::<usize>(),
+                    ExprKind::List(items) => {
+                        usize::from(matches!(
+                            items.first(),
+                            Some(Expr { kind: ExprKind::DomainIdentity(id), .. })
+                                if id.width() == 3 && id.packed_bits() == 0b001
+                        )) + items.iter().map(visit).sum::<usize>()
+                    }
                     _ => 0,
                 }
             }
@@ -628,7 +662,6 @@ mod tests {
         assert_eq!(mutations, 10, "all ten single-width mutations exercised");
     }
 
-
     #[test]
     fn guard_reference_missing_evidence_has_22_exact_d3_quote_heads_not_w8() {
         // Structural width protection only. Native SENS is the semantic authority.
@@ -656,7 +689,8 @@ mod tests {
                 }
             }
             sens::parse_mixed_exact_domain_guard_reference_source(
-                "knowledge/guard-reference.lisp", code
+                "knowledge/guard-reference.lisp",
+                code,
             )
             .expect("canonical pinned Guard reader")
             .iter()
@@ -664,12 +698,24 @@ mod tests {
             .sum()
         }
 
-        assert_eq!(exact_quote_count(form), 22, "eleven field/value atoms in two branches");
+        assert_eq!(
+            exact_quote_count(form),
+            22,
+            "eleven field/value atoms in two branches"
+        );
 
         let quoted_symbols = [
-            "reference-missing", "schema", "guard-reference-1",
-            "topic", "decision", "unknown", "evidence-status",
-            "unresolved", "guidance", "choose-unknown-route", "unknown-routes",
+            "reference-missing",
+            "schema",
+            "guard-reference-1",
+            "topic",
+            "decision",
+            "unknown",
+            "evidence-status",
+            "unresolved",
+            "guidance",
+            "choose-unknown-route",
+            "unknown-routes",
         ];
         let mut mutants = 0;
         for symbol in quoted_symbols {
@@ -681,13 +727,17 @@ mod tests {
                 let mut mutant = form.to_owned();
                 mutant.replace_range(at..at + correct.len(), &historical);
                 assert_eq!(
-                    exact_quote_count(&mutant), 21,
+                    exact_quote_count(&mutant),
+                    21,
                     "W8:00000001 must never alias D3:001 at {symbol}, byte {at}"
                 );
                 mutants += 1;
             }
         }
-        assert_eq!(mutants, 22, "all 22 single-site width mutants were exercised");
+        assert_eq!(
+            mutants, 22,
+            "all 22 single-site width mutants were exercised"
+        );
     }
 
     #[test]
@@ -711,7 +761,8 @@ mod tests {
                 }
             }
             sens::parse_mixed_exact_domain_guard_reference_source(
-                "knowledge/guard-reference.lisp", source
+                "knowledge/guard-reference.lisp",
+                source,
             )
             .expect("pinned Guard exact-domain reader")
             .iter()
@@ -721,7 +772,11 @@ mod tests {
 
         let quote_sites: Vec<_> = form.match_indices("(001 ").map(|(at, _)| at).collect();
         assert_eq!(quote_sites.len(), 48, "guard-ask D3 quote sites");
-        assert_eq!(exact_quote_count(form), 48, "all 48 exact D3:001 identities");
+        assert_eq!(
+            exact_quote_count(form),
+            48,
+            "all 48 exact D3:001 identities"
+        );
         let mut seen = std::collections::BTreeMap::new();
         for at in quote_sites {
             // Each quoted value here is a bare atom, never a nested form.
@@ -737,37 +792,60 @@ mod tests {
             let mut mutant = form.to_owned();
             mutant.replace_range(at..after_head, "(00000001 ");
             assert_eq!(
-                exact_quote_count(&mutant), 47,
+                exact_quote_count(&mutant),
+                47,
                 "W8 QUOTE must remain distinct from D3 at {atom}, offset {at}"
             );
         }
         for atom in [
-            "not-found", "query", "decision", "unknown", "unknown-routes",
-            "result", "type", "reference-topic", "source", "entry",
-            "knowledge/guard-reference.lisp", "tool", "guard-script-directory",
-            "ambiguous"
+            "not-found",
+            "query",
+            "decision",
+            "unknown",
+            "unknown-routes",
+            "result",
+            "type",
+            "reference-topic",
+            "source",
+            "entry",
+            "knowledge/guard-reference.lisp",
+            "tool",
+            "guard-script-directory",
+            "ambiguous",
         ] {
-            assert!(seen.contains_key(atom), "missing Guard response field: {atom}");
+            assert!(
+                seen.contains_key(atom),
+                "missing Guard response field: {atom}"
+            );
         }
-        assert_eq!(seen.values().sum::<usize>(), 48, "all data symbols accounted for");
+        assert_eq!(
+            seen.values().sum::<usize>(),
+            48,
+            "all data symbols accounted for"
+        );
     }
-
 
     #[test]
     fn guard_topics_exact_d3_list_ops_reject_three_independent_w8_mutants() {
         // Exact-domain AST transport check. Native SENS, not Rust, owns semantics.
         let full = include_str!("../../../knowledge/guard-reference.lisp");
-        let start = full.find("(0011 guard-topics\n")
+        let start = full
+            .find("(0011 guard-topics\n")
             .expect("D4 guard-topics definition missing");
         let rest = &full[start..];
-        let end = rest.find("\n; One canonical entry point for a cold agent:")
+        let end = rest
+            .find("\n; One canonical entry point for a cold agent:")
             .expect("guard-topics section terminator missing");
         let form = rest[..end].trim();
 
         fn exact_list_ops(code: &str) -> [usize; 3] {
             fn visit(expr: &Expr, tally: &mut [usize; 3]) {
                 if let ExprKind::List(items) = &expr.kind {
-                    if let Some(Expr { kind: ExprKind::DomainIdentity(id), .. }) = items.first() {
+                    if let Some(Expr {
+                        kind: ExprKind::DomainIdentity(id),
+                        ..
+                    }) = items.first()
+                    {
                         if id.width() == 3 {
                             let expected = match id.packed_bits() {
                                 0b111 => Some((0, 3)), // CONS plus two operands
@@ -787,8 +865,10 @@ mod tests {
                 }
             }
             let trees = sens::parse_mixed_exact_domain_guard_reference_source(
-                "knowledge/guard-reference.lisp", code
-            ).expect("pinned Guard exact-domain reader");
+                "knowledge/guard-reference.lisp",
+                code,
+            )
+            .expect("pinned Guard exact-domain reader");
             let mut tally = [0; 3];
             for expr in &trees {
                 visit(expr, &mut tally);
@@ -806,12 +886,12 @@ mod tests {
             assert_eq!(form.matches(exact).count(), 1, "unique head {exact}");
             let mutant = form.replacen(exact, historical, 1);
             assert_eq!(
-                exact_list_ops(&mutant), expected,
+                exact_list_ops(&mutant),
+                expected,
                 "eight source bits cannot impersonate exact D3 {exact}"
             );
         }
     }
-
 
     #[test]
     fn guard_reference_stronger_definition_has_exact_d4_width_not_w8() {
@@ -828,8 +908,10 @@ mod tests {
 
         fn definition_head_is_d4(code: &str) -> bool {
             let parsed = sens::parse_mixed_exact_domain_guard_reference_source(
-                "knowledge/guard-reference.lisp", code
-            ).expect("pinned Guard exact-domain reader");
+                "knowledge/guard-reference.lisp",
+                code,
+            )
+            .expect("pinned Guard exact-domain reader");
             assert_eq!(parsed.len(), 1, "one definition");
             let ExprKind::List(def) = &parsed[0].kind else {
                 panic!("definition list expected");
@@ -840,21 +922,27 @@ mod tests {
             let ExprKind::List(lambda) = &def[2].kind else {
                 panic!("value must remain a lambda form");
             };
-            assert!(matches!(lambda.first(),
-                Some(Expr { kind: ExprKind::DomainIdentity(id), .. })
-                    if id.width() == 4 && id.packed_bits() == 0b0010
-            ), "lambda retains exact D4:0010 identity");
+            assert!(
+                matches!(lambda.first(),
+                    Some(Expr { kind: ExprKind::DomainIdentity(id), .. })
+                        if id.width() == 4 && id.packed_bits() == 0b0010
+                ),
+                "lambda retains exact D4:0010 identity"
+            );
             matches!(def.first(),
                 Some(Expr { kind: ExprKind::DomainIdentity(id), .. })
                     if id.width() == 4 && id.packed_bits() == 0b0011
             )
         }
 
-        assert!(definition_head_is_d4(form), "ratified exact D4:0011 required");
+        assert!(
+            definition_head_is_d4(form),
+            "ratified exact D4:0011 required"
+        );
         let mutant = form.replacen(
             "(0011 guard-reference-stronger",
             "(00001011 guard-reference-stronger",
-            1
+            1,
         );
         assert_ne!(mutant, form, "mutation must change exactly one head");
         assert!(
@@ -863,34 +951,44 @@ mod tests {
         );
     }
 
-
     #[test]
     fn guard_last_two_define_heads_use_exact_d4_and_reject_w8_width() {
         // Structural readback, never a replacement for native SENS evaluation.
         let source = include_str!("../../../knowledge/guard-reference.lisp");
         let cases = [
             ("guard-script", "\n(0011 guard-scripts"),
-            ("guard-reference-evidence-status", "\n(0011 guard-evidence-status-strength"),
+            (
+                "guard-reference-evidence-status",
+                "\n(0011 guard-evidence-status-strength",
+            ),
         ];
 
         fn has_exact_d4_define_and_lambda(code: &str, name: &str) -> bool {
             let trees = sens::parse_mixed_exact_domain_guard_reference_source(
-                "knowledge/guard-reference.lisp", code,
-            ).expect("pinned Guard reader must parse this source");
+                "knowledge/guard-reference.lisp",
+                code,
+            )
+            .expect("pinned Guard reader must parse this source");
             assert_eq!(trees.len(), 1, "exactly one top-level definition: {name}");
             let ExprKind::List(def) = &trees[0].kind else {
                 panic!("expected one definition form: {name}");
             };
             assert_eq!(def.len(), 3, "DEFINE target and value: {name}");
-            assert!(matches!(&def[1].kind, ExprKind::Symbol(symbol)
-                if symbol.as_ref() == name), "must not rename definition target");
+            assert!(
+                matches!(&def[1].kind, ExprKind::Symbol(symbol)
+                if symbol.as_ref() == name),
+                "must not rename definition target"
+            );
             let ExprKind::List(lambda) = &def[2].kind else {
                 panic!("lambda body must be retained for {name}");
             };
-            assert!(matches!(lambda.first(),
-                Some(Expr { kind: ExprKind::DomainIdentity(id), .. })
-                    if id.width() == 4 && id.packed_bits() == 0b0010
-            ), "D4:0010 lambda must remain exact for {name}");
+            assert!(
+                matches!(lambda.first(),
+                    Some(Expr { kind: ExprKind::DomainIdentity(id), .. })
+                        if id.width() == 4 && id.packed_bits() == 0b0010
+                ),
+                "D4:0010 lambda must remain exact for {name}"
+            );
             matches!(def.first(),
                 Some(Expr { kind: ExprKind::DomainIdentity(id), .. })
                     if id.width() == 4 && id.packed_bits() == 0b0011
@@ -901,10 +999,17 @@ mod tests {
             let exact = format!("(0011 {name}\n");
             let historical = format!("(00001011 {name}\n");
             assert_eq!(source.matches(&exact).count(), 1, "{name} must be unique");
-            assert!(!source.contains(&historical), "{name} must have no historical DEFINE");
-            let from = source.find(&exact).expect("ratified Guard definition present");
-            let next = source[from..].find(next_marker)
-                .expect("following Guard definition present") + from;
+            assert!(
+                !source.contains(&historical),
+                "{name} must have no historical DEFINE"
+            );
+            let from = source
+                .find(&exact)
+                .expect("ratified Guard definition present");
+            let next = source[from..]
+                .find(next_marker)
+                .expect("following Guard definition present")
+                + from;
             let form = source[from..next].trim();
             assert!(has_exact_d4_define_and_lambda(form, name), "{name} uses D4");
             let mutant = form.replacen(&exact, &historical, 1);
@@ -916,38 +1021,55 @@ mod tests {
         }
     }
 
-
     #[test]
     fn all_sixteen_guard_definitions_are_exact_d4_and_reject_historical_w8() {
         // AST-width witness only: native binary SENS owns semantics.
         let source = include_str!("../../../knowledge/guard-reference.lisp");
         let names = [
-            "guard-script-find", "guard-script", "guard-scripts",
-            "guard-reference-evidence-status", "guard-evidence-status-strength",
-            "guard-reference-stronger", "guard-reference-all",
-            "guard-reference-find-strongest", "guard-reference-find",
-            "guard-reference", "guard-explain", "guard-how-to",
-            "guard-authority", "guard-verify", "guard-topics", "guard-ask",
+            "guard-script-find",
+            "guard-script",
+            "guard-scripts",
+            "guard-reference-evidence-status",
+            "guard-evidence-status-strength",
+            "guard-reference-stronger",
+            "guard-reference-all",
+            "guard-reference-find-strongest",
+            "guard-reference-find",
+            "guard-reference",
+            "guard-explain",
+            "guard-how-to",
+            "guard-authority",
+            "guard-verify",
+            "guard-topics",
+            "guard-ask",
         ];
 
         fn is_exact_d4_definition(source: &str, name: &str) -> bool {
             let parsed = sens::parse_mixed_exact_domain_guard_reference_source(
-                "knowledge/guard-reference.lisp", source
-            ).expect("the pinned Guard reader must parse each function");
+                "knowledge/guard-reference.lisp",
+                source,
+            )
+            .expect("the pinned Guard reader must parse each function");
             assert_eq!(parsed.len(), 1, "single Guard definition: {name}");
             let ExprKind::List(def) = &parsed[0].kind else {
                 panic!("definition must be a list: {name}");
             };
             assert_eq!(def.len(), 3, "DEFINE must have two operands: {name}");
-            assert!(matches!(&def[1].kind, ExprKind::Symbol(symbol)
-                if symbol.as_ref() == name), "definition name changed: {name}");
+            assert!(
+                matches!(&def[1].kind, ExprKind::Symbol(symbol)
+                if symbol.as_ref() == name),
+                "definition name changed: {name}"
+            );
             let ExprKind::List(lambda) = &def[2].kind else {
                 panic!("LAMBDA missing from definition: {name}");
             };
-            assert!(matches!(lambda.first(),
-                Some(Expr { kind: ExprKind::DomainIdentity(id), .. })
-                    if id.width() == 4 && id.packed_bits() == 0b0010
-            ), "exact D4:0010 LAMBDA required for {name}");
+            assert!(
+                matches!(lambda.first(),
+                    Some(Expr { kind: ExprKind::DomainIdentity(id), .. })
+                        if id.width() == 4 && id.packed_bits() == 0b0010
+                ),
+                "exact D4:0010 LAMBDA required for {name}"
+            );
             matches!(def.first(),
                 Some(Expr { kind: ExprKind::DomainIdentity(id), .. })
                     if id.width() == 4 && id.packed_bits() == 0b0011
@@ -958,20 +1080,32 @@ mod tests {
         for (i, name) in names.iter().enumerate() {
             let exact = format!("(0011 {name}\n");
             let historical = format!("(00001011 {name}\n");
-            assert_eq!(source.matches(&exact).count(), 1, "one D4 definition: {name}");
-            assert!(!source.contains(&historical), "historical W8 DEFINE remains: {name}");
+            assert_eq!(
+                source.matches(&exact).count(),
+                1,
+                "one D4 definition: {name}"
+            );
+            assert!(
+                !source.contains(&historical),
+                "historical W8 DEFINE remains: {name}"
+            );
             let begin = source.find(&exact).expect("existing Guard definition");
             let end = match names.get(i + 1) {
                 Some(next_name) => {
                     let next = format!("(0011 {next_name}\n");
-                    begin + exact.len() +
-                        source[begin + exact.len()..].find(&next)
+                    begin
+                        + exact.len()
+                        + source[begin + exact.len()..]
+                            .find(&next)
                             .expect("next exact Guard definition")
                 }
                 None => source.len(),
             };
             let form = source[begin..end].trim();
-            assert!(is_exact_d4_definition(form, name), "{name} must have D4 identity");
+            assert!(
+                is_exact_d4_definition(form, name),
+                "{name} must have D4 identity"
+            );
             let mutant = form.replacen(&exact, &historical, 1);
             assert_ne!(mutant, form, "{name} width mutation changed source");
             assert!(
@@ -1001,7 +1135,10 @@ mod tests {
             semantics.authority,
             vec!["language-contract.lisp", "docs/language-core-axioms.md"]
         );
-        assert_eq!(semantics.how_to, vec!["read-contract", "run-conformance-fixtures"]);
+        assert_eq!(
+            semantics.how_to,
+            vec!["read-contract", "run-conformance-fixtures"]
+        );
         assert_eq!(
             semantics.verify,
             vec!["cargo-test-workspace", "evidence/README.md"]
@@ -1012,10 +1149,7 @@ mod tests {
 
     #[test]
     fn ignores_entries_without_topic() {
-        let broken = SAMPLE_REFERENCE.replace(
-            "(topic language-semantics)",
-            "(topic )",
-        );
+        let broken = SAMPLE_REFERENCE.replace("(topic language-semantics)", "(topic )");
         let topics = parse_topics(&broken);
         assert_eq!(topics.len(), 1);
         assert!(topics.contains_key("second-topic"));
@@ -1043,7 +1177,8 @@ mod tests {
         // Real evidence: the actual repo's lib/guard.lisp must yield the
         // guard functions. This is the cheap half (milliseconds).
         let root = std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR"))
-            .join("..").join("..");
+            .join("..")
+            .join("..");
         let knowledge = GuardKnowledge::load_functions(&root);
         assert!(
             knowledge.functions.contains_key("guard-unknown"),
@@ -1053,7 +1188,9 @@ mod tests {
             knowledge.functions.contains_key("make-guard-finding"),
             "make-guard-finding function missing"
         );
-        assert!(knowledge.source_of(&knowledge.functions["guard-unknown"]).is_some());
+        assert!(knowledge
+            .source_of(&knowledge.functions["guard-unknown"])
+            .is_some());
     }
 
     #[test]
@@ -1063,9 +1200,13 @@ mod tests {
         // in the live canonical directory. Slower than a normal unit test,
         // so it stays explicit rather than slowing every `cargo test`.
         let root = std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR"))
-            .join("..").join("..");
+            .join("..")
+            .join("..");
         let knowledge = GuardKnowledge::load(&root);
-        assert!(knowledge.topics.contains_key("guard"), "guard topic missing");
+        assert!(
+            knowledge.topics.contains_key("guard"),
+            "guard topic missing"
+        );
         assert!(
             knowledge.topics.contains_key("swarm-coordination"),
             "swarm-coordination topic missing"

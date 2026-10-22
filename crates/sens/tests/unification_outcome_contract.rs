@@ -6,7 +6,9 @@ use std::fs;
 use std::path::PathBuf;
 
 fn repo_file(relative: &str) -> PathBuf {
-    PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../..").join(relative)
+    PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+        .join("../..")
+        .join(relative)
 }
 
 fn escape_lisp_string(value: &str) -> String {
@@ -17,13 +19,20 @@ fn escape_lisp_string(value: &str) -> String {
 fn completed_unification_queries_report_explicit_outcomes() {
     let source = include_str!("../../../tests/fixtures/unification-outcome-v1.lisp");
     let forms = parse(source).expect("unification-outcome-v1.lisp must parse");
-    assert_eq!(forms.len(), 4, "#219 unification slice must contain four rows");
+    assert_eq!(
+        forms.len(),
+        4,
+        "#219 unification slice must contain four rows"
+    );
 
     let mut session = Session::default();
     eval_program(include_str!("../../../lib/core.lisp"), &mut session).expect("core library");
     eval_program(include_str!("../../../lib/unify.lisp"), &mut session).expect("unify library");
-    eval_program(include_str!("../../../lib/unify-observe.lisp"), &mut session)
-        .expect("unification observation layer");
+    eval_program(
+        include_str!("../../../lib/unify-observe.lisp"),
+        &mut session,
+    )
+    .expect("unification observation layer");
     let witness = fs::read_to_string(repo_file("tests/fixtures/witness-runner.lisp"))
         .expect("Lisp-owned witness runner");
     eval_program(&witness, &mut session).expect("witness runner must load");
@@ -53,7 +62,10 @@ fn completed_unification_queries_report_explicit_outcomes() {
 
         let row_source = &source[form.span.start..form.span.end];
         let actual = match eval_program(&expr, &mut session) {
-            Ok(result) => format!("(value \"{}\")", escape_lisp_string(&result.value.to_string())),
+            Ok(result) => format!(
+                "(value \"{}\")",
+                escape_lisp_string(&result.value.to_string())
+            ),
             Err(error) => format!("(error \"{:?}\")", error.kind),
         };
         let verdict = format!(

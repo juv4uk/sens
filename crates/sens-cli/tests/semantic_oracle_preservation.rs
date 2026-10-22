@@ -27,7 +27,9 @@ fn spawn_oracle() -> (Child, u16) {
             .read_line(&mut line)
             .expect("oracle stderr should be readable");
         if bytes == 0 {
-            panic!("semantic oracle exited before announcing a listening port; stderr={diagnostics:?}");
+            panic!(
+                "semantic oracle exited before announcing a listening port; stderr={diagnostics:?}"
+            );
         }
 
         diagnostics.push(line.trim_end().to_string());
@@ -105,10 +107,7 @@ fn semantic_oracle_surface_survives_coordination_removal() {
     assert!(parse.contains("(status ok)"), "{parse}");
     assert!(parse.contains("(value (тотожність 3))"), "{parse}");
 
-    let diagnose = request(
-        port,
-        r#"(request (id 4) (op diagnose) (source "(car 1)"))"#,
-    );
+    let diagnose = request(port, r#"(request (id 4) (op diagnose) (source "(car 1)"))"#);
     assert!(diagnose.contains("(status error)"), "{diagnose}");
     assert!(diagnose.contains("(kind type-error)"), "{diagnose}");
 
@@ -118,10 +117,7 @@ fn semantic_oracle_surface_survives_coordination_removal() {
         port,
         r#"(request (id 5) (op eval) (source "(def c5-private 999)"))"#,
     );
-    let isolated = request(
-        port,
-        r#"(request (id 6) (op eval) (source "c5-private"))"#,
-    );
+    let isolated = request(port, r#"(request (id 6) (op eval) (source "c5-private"))"#);
     assert!(isolated.contains("(status error)"), "{isolated}");
     assert!(isolated.contains("unknown-symbol"), "{isolated}");
 

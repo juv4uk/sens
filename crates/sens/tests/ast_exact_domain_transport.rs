@@ -1,16 +1,19 @@
 //! Незалежні свідки поточної доменної AST без збірки чужих unit-тестів.
 
-use sens::{
-    Bija3, Bit3, Bit4, Bit8, Bit9, BinaryNumber, CoreD4, CoreD8, CoreD9,
-    DomainIdentity, Expr, ExprKind, Exactness, Span,
-};
 use sens::syntax::{
-    decode_exact_fasl_program, decode_exact_wire_program,
-    encode_exact_fasl_program, encode_exact_wire_program,
+    decode_exact_fasl_program, decode_exact_wire_program, encode_exact_fasl_program,
+    encode_exact_wire_program,
+};
+use sens::{
+    Bija3, BinaryNumber, Bit3, Bit4, Bit8, Bit9, CoreD4, CoreD8, CoreD9, DomainIdentity, Exactness,
+    Expr, ExprKind, Span,
 };
 
 fn expression(kind: ExprKind) -> Expr {
-    Expr { kind, span: Span::default() }
+    Expr {
+        kind,
+        span: Span::default(),
+    }
 }
 
 #[test]
@@ -51,26 +54,28 @@ fn історичний_w8_під_цитатою_не_стає_d8() {
     // The original historical W8:10101000 has no callable D8 projection.
     // Do not turn a raw eight-bit source word into a machine function.
     assert!(
-        sens::CoreDomainIdentity::from_source_word(
-            sens::BinarySourceWord::W8(Bit8::new(0b10101000).unwrap())
-        ).is_none(),
+        sens::CoreDomainIdentity::from_source_word(sens::BinarySourceWord::W8(
+            Bit8::new(0b10101000).unwrap()
+        ))
+        .is_none(),
         "historical unadmitted W8 must not become a D8 operation"
     );
-    let quoted = expression(ExprKind::List(vec![
-        expression(ExprKind::DomainIdentity(DomainIdentity::D3(
-            Bija3::from_word(Bit3::new(0b001).unwrap()),
-        ))),
-        expression(ExprKind::Pair(
-            std::rc::Rc::new(expression(ExprKind::String("дані".into()))),
-            std::rc::Rc::new(expression(ExprKind::Sid(
-                // Even an admitted D8 payload is not canonical when carried
-                // inside the historical Sid AST variant.
-                sens::CoreDomainIdentity::D8(
-                    CoreD8::from_word(Bit8::new(0b11100000).unwrap()),
-                ),
+    let quoted = expression(ExprKind::List(
+        vec![
+            expression(ExprKind::DomainIdentity(DomainIdentity::D3(
+                Bija3::from_word(Bit3::new(0b001).unwrap()),
             ))),
-        )),
-    ].into()));
+            expression(ExprKind::Pair(
+                std::rc::Rc::new(expression(ExprKind::String("дані".into()))),
+                std::rc::Rc::new(expression(ExprKind::Sid(
+                    // Even an admitted D8 payload is not canonical when carried
+                    // inside the historical Sid AST variant.
+                    sens::CoreDomainIdentity::D8(CoreD8::from_word(Bit8::new(0b11100000).unwrap())),
+                ))),
+            )),
+        ]
+        .into(),
+    ));
     assert!(encode_exact_wire_program(std::slice::from_ref(&quoted)).is_none());
     assert!(encode_exact_fasl_program(std::slice::from_ref(&quoted), &[0; 32]).is_none());
     let old_wire = sens::wire_encode_program(std::slice::from_ref(&quoted));
@@ -85,7 +90,9 @@ fn історичний_w8_під_цитатою_не_стає_d8() {
 fn тільки_d24_або_більше_є_числом_у_новому_форматі() {
     let number = expression(ExprKind::Number(2.0, Exactness::Exact));
     assert!(encode_exact_wire_program(&[number]).is_none());
-    let raw = expression(ExprKind::BinaryNumber(BinaryNumber::from_bits([1, 0, 1]).unwrap()));
+    let raw = expression(ExprKind::BinaryNumber(
+        BinaryNumber::from_bits([1, 0, 1]).unwrap(),
+    ));
     assert!(encode_exact_wire_program(&[raw]).is_none());
     let bits = vec![0u8; 24];
     let qualified = expression(ExprKind::BinaryNumber(
@@ -98,9 +105,7 @@ fn тільки_d24_або_більше_є_числом_у_новому_форм
 
 #[test]
 fn відсутній_d8_механізм_не_стає_виконуваним() {
-    let d8 = sens::CoreDomainIdentity::D8(
-        CoreD8::from_word(Bit8::new(0b10101000).unwrap()),
-    );
+    let d8 = sens::CoreDomainIdentity::D8(CoreD8::from_word(Bit8::new(0b10101000).unwrap()));
     let data = expression(ExprKind::DomainIdentity(d8.into()));
     assert!(encode_exact_wire_program(&[data]).is_some());
     let call = expression(ExprKind::DomainCall(d8, [].into()));
@@ -110,16 +115,13 @@ fn відсутній_d8_механізм_не_стає_виконуваним()
 
 #[test]
 fn точний_ast_wire_fasl_d24_d5_sens_d1_з_раціональним_наслідком() {
+    use sens::{decode_packed_numeric_value, encode_packed_numeric_value, eval_parsed_expressions};
     use sens::{Bit5, CoreD5, CoreDomainIdentity, ErrorKind, Session, Value};
-    use sens::{
-        decode_packed_numeric_value, encode_packed_numeric_value, eval_parsed_expressions,
-    };
 
     // Код операції завжди є ратифікованою п'ятибітною координатою D5.
     let d5 = |bits: u8, args: Vec<Expr>| -> Expr {
-        let identity = CoreDomainIdentity::D5(
-            CoreD5::from_word(Bit5::new(bits).expect("точна ширина D5")),
-        );
+        let identity =
+            CoreDomainIdentity::D5(CoreD5::from_word(Bit5::new(bits).expect("точна ширина D5")));
         let mut items = Vec::with_capacity(args.len() + 1);
         items.push(expression(ExprKind::DomainIdentity(identity.into())));
         items.extend(args);
@@ -136,16 +138,11 @@ fn точний_ast_wire_fasl_d24_d5_sens_d1_з_раціональним_нас�
             _ => panic!("тільки точні двійкові цифри"),
         }));
         expression(ExprKind::BinaryNumber(
-            BinaryNumber::from_numeric_domain_bits(24, &word)
-                .expect("явний ратифікований D24"),
+            BinaryNumber::from_numeric_domain_bits(24, &word).expect("явний ратифікований D24"),
         ))
     };
-    let quotient = |denominator: &str| {
-        d5(0b10111, vec![d24("1"), d24(denominator)])
-    };
-    let sum = |denominator: &str| {
-        d5(0b01010, vec![quotient("11"), quotient(denominator)])
-    };
+    let quotient = |denominator: &str| d5(0b10111, vec![d24("1"), d24(denominator)]);
+    let sum = |denominator: &str| d5(0b01010, vec![quotient("11"), quotient(denominator)]);
     let half = || quotient("10");
 
     // Обидва фізичні AST-контейнери вже існують. Жодного нового
@@ -154,15 +151,21 @@ fn точний_ast_wire_fasl_d24_d5_sens_d1_з_раціональним_нас�
         let original = vec![code];
         let wire = encode_exact_wire_program(&original).expect("точні AST wire-байти");
         let decoded = decode_exact_wire_program(&wire).expect("точний wire decode");
-        assert_eq!(decoded[0].kind, original[0].kind, "id={id} layer=transport wire");
+        assert_eq!(
+            decoded[0].kind, original[0].kind,
+            "id={id} layer=transport wire"
+        );
 
         let source_hash = [0b10101010u8; 32];
-        let fasl = encode_exact_fasl_program(&original, &source_hash)
-            .expect("точні AST FASL-байти");
-        let (fasl_program, actual_hash) = decode_exact_fasl_program(&fasl)
-            .expect("точний FASL decode");
+        let fasl =
+            encode_exact_fasl_program(&original, &source_hash).expect("точні AST FASL-байти");
+        let (fasl_program, actual_hash) =
+            decode_exact_fasl_program(&fasl).expect("точний FASL decode");
         assert_eq!(actual_hash, source_hash, "id={id} layer=transport hash");
-        assert_eq!(fasl_program[0].kind, original[0].kind, "id={id} layer=transport fasl");
+        assert_eq!(
+            fasl_program[0].kind, original[0].kind,
+            "id={id} layer=transport fasl"
+        );
 
         let mut session = Session::default();
         let wire_result = eval_parsed_expressions(&decoded, &mut session)?;
@@ -180,13 +183,26 @@ fn точний_ast_wire_fasl_d24_d5_sens_d1_з_раціональним_нас�
     // SENS сам визначає D1:YES/NO точним порівнянням двох раціональних
     // результатів. Мутант змінює лише останній біт 110 → 111.
     for (id, predicate, expected) in [
-        ("equal-not-less", d5(0b11010, vec![sum("110"), half()]), false),
-        ("equal-not-greater", d5(0b11011, vec![sum("110"), half()]), false),
-        ("one-bit-mutant-less", d5(0b11010, vec![sum("111"), half()]), true),
+        (
+            "equal-not-less",
+            d5(0b11010, vec![sum("110"), half()]),
+            false,
+        ),
+        (
+            "equal-not-greater",
+            d5(0b11011, vec![sum("110"), half()]),
+            false,
+        ),
+        (
+            "one-bit-mutant-less",
+            d5(0b11010, vec![sum("111"), half()]),
+            true,
+        ),
     ] {
         let actual = run(id, predicate).expect("двійкове D5 виконання");
         assert_eq!(
-            actual.as_predicate_bit(), Some(expected),
+            actual.as_predicate_bit(),
+            Some(expected),
             "REGRESSION id={id} layer=eval expected=D1:{expected} actual={actual:?}; \
              reproduce=cargo test --locked -p sens --test ast_exact_domain_transport \
              точний_ast_wire_fasl_d24_d5_sens_d1_з_раціональним_наслідком -- --nocapture"
@@ -198,13 +214,19 @@ fn точний_ast_wire_fasl_d24_d5_sens_d1_з_раціональним_нас�
     // пакує його біти. Це не граматика фізичного T5 .sens.
     for (id, program, expected_fraction) in [
         ("ratio-result", quotient("11"), true),
-        ("signed-integer-result", d5(0b01011, vec![d24("1"), d24("11")]), false),
+        (
+            "signed-integer-result",
+            d5(0b01011, vec![d24("1"), d24("11")]),
+            false,
+        ),
         ("sum-ratio-result", sum("110"), true),
     ] {
         let result = run(id, program).expect("допущена точна математика");
         if expected_fraction {
-            assert!(matches!(&result, Value::NumericComposition(_)),
-                "test_id={id} layer=eval expected=canonical-RATIO actual={result:?}");
+            assert!(
+                matches!(&result, Value::NumericComposition(_)),
+                "test_id={id} layer=eval expected=canonical-RATIO actual={result:?}"
+            );
         } else {
             // Ратифікація 18.10.2026: цілі D24+ є знаковими словами
             // у доповняльному коді. 1 - 3 = -2, а не історична NEG-композиція.
@@ -214,14 +236,20 @@ fn точний_ast_wire_fasl_d24_d5_sens_d1_з_раціональним_нас�
             assert_eq!(signed.numeric_domain_width(), Some(24), "id={id} domain");
             let mut expected_word = vec![1u8; 24];
             expected_word[23] = 0;
-            assert_eq!(signed.exact_numeric_domain_bits(), Some(expected_word),
-                "test_id={id} layer=eval expected=exact-D24-minus-two");
+            assert_eq!(
+                signed.exact_numeric_domain_bits(),
+                Some(expected_word),
+                "test_id={id} layer=eval expected=exact-D24-minus-two"
+            );
             assert_eq!(signed.to_decimal_string(), "-2", "id={id} human projection");
         }
         let packed = encode_packed_numeric_value(&result).expect("наявний кадр D24+");
-        let recovered = decode_packed_numeric_value(&packed)
-            .expect("канонічне відновлення NEG/RATIO");
-        assert_eq!(recovered, result, "id={id} layer=transport exact-value identity");
+        let recovered =
+            decode_packed_numeric_value(&packed).expect("канонічне відновлення NEG/RATIO");
+        assert_eq!(
+            recovered, result,
+            "id={id} layer=transport exact-value identity"
+        );
         let (mut bytes, bit_len) = packed.into_parts();
         if bit_len % 8 != 0 {
             *bytes.last_mut().unwrap() |= 1;
@@ -246,9 +274,21 @@ fn точний_ast_wire_fasl_d24_d5_sens_d1_з_раціональним_нас�
     let мінус_половина = || d5(0b01011, vec![нуль(), половина()]);
 
     for (id, lhs, rhs) in [
-        ("seed-derived-minus-two-less-minus-one", мінус_два(), мінус_один()),
-        ("seed-derived-minus-one-less-minus-half", мінус_один(), мінус_половина()),
-        ("seed-derived-minus-half-less-zero", мінус_половина(), нуль()),
+        (
+            "seed-derived-minus-two-less-minus-one",
+            мінус_два(),
+            мінус_один(),
+        ),
+        (
+            "seed-derived-minus-one-less-minus-half",
+            мінус_один(),
+            мінус_половина(),
+        ),
+        (
+            "seed-derived-minus-half-less-zero",
+            мінус_половина(),
+            нуль(),
+        ),
         ("seed-derived-zero-less-half", нуль(), половина()),
         ("seed-derived-half-less-one", половина(), один()),
         ("seed-derived-one-less-two", один(), два()),
@@ -258,7 +298,8 @@ fn точний_ast_wire_fasl_d24_d5_sens_d1_з_раціональним_нас�
         let actual = run(id, d5(0b11010, vec![lhs, rhs]))
             .expect("SENS D5 повинен вивести порядок засновків");
         assert_eq!(
-            actual.as_predicate_bit(), Some(true),
+            actual.as_predicate_bit(),
+            Some(true),
             "REGRESSION id={id} layer=eval expected=D1:YES actual={actual:?}; \
              reproduce=cargo test --locked -p sens --test ast_exact_domain_transport \
              точний_ast_wire_fasl_d24_d5_sens_d1_з_раціональним_наслідком -- --nocapture"
@@ -272,10 +313,11 @@ fn точний_ast_wire_fasl_d24_d5_sens_d1_з_раціональним_нас�
         ("seed-derived-zero-not-greater", 0b11011),
     ] {
         let zero_from_seed = d5(0b01010, vec![один(), мінус_один()]);
-        let actual = run(id, d5(opcode, vec![zero_from_seed, нуль()]))
-            .expect("SENS D5 точна рівність нуля");
+        let actual =
+            run(id, d5(opcode, vec![zero_from_seed, нуль()])).expect("SENS D5 точна рівність нуля");
         assert_eq!(
-            actual.as_predicate_bit(), Some(false),
+            actual.as_predicate_bit(),
+            Some(false),
             "REGRESSION id={id} layer=eval expected=D1:NO actual={actual:?}"
         );
     }
@@ -283,17 +325,27 @@ fn точний_ast_wire_fasl_d24_d5_sens_d1_з_раціональним_нас�
     // Заборонені числові операнди не отримують допуску навіть після
     // фізичного exact AST wire/FASL round-trip.
     for (id, source, kind) in [
-        ("zero-divisor", d5(0b10111, vec![d24("1"), d24("0")]), ErrorKind::DivisionByZero),
+        (
+            "zero-divisor",
+            d5(0b10111, vec![d24("1"), d24("0")]),
+            ErrorKind::DivisionByZero,
+        ),
         (
             "mixed-width",
-            d5(0b10111, vec![
-                d24("1"),
-                expression(ExprKind::BinaryNumber(
-                    BinaryNumber::from_numeric_domain_bits(
-                        48, &{ let mut bits = vec![0u8;48]; bits[47] = 1; bits }
-                    ).expect("явний D48"),
-                )),
-            ]),
+            d5(
+                0b10111,
+                vec![
+                    d24("1"),
+                    expression(ExprKind::BinaryNumber(
+                        BinaryNumber::from_numeric_domain_bits(48, &{
+                            let mut bits = vec![0u8; 48];
+                            bits[47] = 1;
+                            bits
+                        })
+                        .expect("явний D48"),
+                    )),
+                ],
+            ),
             ErrorKind::Type,
         ),
     ] {
@@ -307,7 +359,10 @@ fn точний_ast_wire_fasl_d24_d5_sens_d1_з_раціональним_нас�
     // Ніякого обходу через історичне Number: точний AST відмовляє раніше.
     let unqualified = d5(
         0b10111,
-        vec![d24("1"), expression(ExprKind::Number(1.0, Exactness::Exact))],
+        vec![
+            d24("1"),
+            expression(ExprKind::Number(1.0, Exactness::Exact)),
+        ],
     );
     assert!(encode_exact_wire_program(&[unqualified.clone()]).is_none());
     assert!(encode_exact_fasl_program(&[unqualified], &[0; 32]).is_none());

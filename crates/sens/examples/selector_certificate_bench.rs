@@ -27,10 +27,7 @@ fn encode(root_choice: u8, depth: u8, path: u16) -> Option<Cert> {
         return None;
     }
     let bit_len = 4 + depth;
-    let payload =
-        ((root_choice as u16) << (depth + 3))
-        | ((depth as u16) << depth)
-        | path;
+    let payload = ((root_choice as u16) << (depth + 3)) | ((depth as u16) << depth) | path;
     Some(Cert { payload, bit_len })
 }
 
@@ -83,8 +80,14 @@ fn malformed_selftest() -> usize {
     let mut rejected = 0usize;
 
     for bad in [
-        Cert { payload: 0, bit_len: 3 },
-        Cert { payload: 0, bit_len: 10 },
+        Cert {
+            payload: 0,
+            bit_len: 3,
+        },
+        Cert {
+            payload: 0,
+            bit_len: 10,
+        },
         Cert {
             payload: good.payload | (1u16 << good.bit_len),
             bit_len: good.bit_len,
@@ -208,7 +211,13 @@ fn main() -> ExitCode {
 
     let corpus = corpus();
     assert_eq!(corpus.len(), 126);
-    assert_eq!(corpus.iter().filter(|(_, word, _, _)| word.width == 8).count(), 64);
+    assert_eq!(
+        corpus
+            .iter()
+            .filter(|(_, word, _, _)| word.width == 8)
+            .count(),
+        64
+    );
     for &(cert, expected, _, _) in &corpus {
         assert!(verify(cert, expected));
     }

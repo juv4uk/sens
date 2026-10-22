@@ -1,33 +1,45 @@
 //! D9 map coordinates without admitted mechanisms must remain fail-closed.
 //! These tests exercise separately named Lisp-owned AVL closures only.
 use sens::{
-    eval_program, eval_core_library_source, eval_pinned_reasoning_source,
-    eval_parsed_expressions, Bit9, CoreD9, DomainIdentity, Expr, ExprKind, Session, Span,
+    eval_core_library_source, eval_parsed_expressions, eval_pinned_reasoning_source, eval_program,
+    Bit9, CoreD9, DomainIdentity, Expr, ExprKind, Session, Span,
 };
 
 fn session() -> Session {
     let mut session = Session::default();
-    eval_core_library_source(include_str!("../../../lib/core.lisp"), &mut session
-    ).expect("derived core bootstrap");
+    eval_core_library_source(include_str!("../../../lib/core.lisp"), &mut session)
+        .expect("derived core bootstrap");
     eval_pinned_reasoning_source(
-        "lib/persistent-map.lisp", include_str!("../../../lib/persistent-map.lisp"), &mut session
-    ).expect("Lisp-owned persistent map bootstrap");
+        "lib/persistent-map.lisp",
+        include_str!("../../../lib/persistent-map.lisp"),
+        &mut session,
+    )
+    .expect("Lisp-owned persistent map bootstrap");
     session
 }
 
 #[test]
 fn exact_d9_string_append_executes_through_the_core_operation_projection() {
     let call = Expr {
-        kind: ExprKind::List(vec![
-            Expr {
-                kind: ExprKind::DomainIdentity(DomainIdentity::D9(
-                    CoreD9::from_word(Bit9::new(0b110011110).unwrap()),
-                )),
-                span: Span::default(),
-            },
-            Expr { kind: ExprKind::String("sens-".into()), span: Span::default() },
-            Expr { kind: ExprKind::String("d9".into()), span: Span::default() },
-        ].into()),
+        kind: ExprKind::List(
+            vec![
+                Expr {
+                    kind: ExprKind::DomainIdentity(DomainIdentity::D9(CoreD9::from_word(
+                        Bit9::new(0b110011110).unwrap(),
+                    ))),
+                    span: Span::default(),
+                },
+                Expr {
+                    kind: ExprKind::String("sens-".into()),
+                    span: Span::default(),
+                },
+                Expr {
+                    kind: ExprKind::String("d9".into()),
+                    span: Span::default(),
+                },
+            ]
+            .into(),
+        ),
         span: Span::default(),
     };
     let result = eval_parsed_expressions(&[call], &mut Session::default())
@@ -43,9 +55,21 @@ fn exact_d9_string_append_executes_through_the_core_operation_projection() {
 #[test]
 fn source_cutover_blocks_old_d6_let_and_unadmitted_d9_map_heads() {
     for (path, source, expected_macro_count) in [
-        ("lib/persistent-map.lisp", include_str!("../../../lib/persistent-map.lisp"), 0),
-        ("lib/content-store.lisp", include_str!("../../../lib/content-store.lisp"), 0),
-        ("lib/lisp-fs.lisp", include_str!("../../../lib/lisp-fs.lisp"), 13),
+        (
+            "lib/persistent-map.lisp",
+            include_str!("../../../lib/persistent-map.lisp"),
+            0,
+        ),
+        (
+            "lib/content-store.lisp",
+            include_str!("../../../lib/content-store.lisp"),
+            0,
+        ),
+        (
+            "lib/lisp-fs.lisp",
+            include_str!("../../../lib/lisp-fs.lisp"),
+            13,
+        ),
     ] {
         for head in [
             "001000",    // D6 LET: replaced with the Lisp-owned ЛІХТАР macro
@@ -87,13 +111,13 @@ fn persistent_map_core_uses_only_exact_d3_d4_heads_and_no_numeric_ordering() {
     let source = include_str!("../../../lib/persistent-map.lisp");
 
     for forbidden in [
-        "01010",      // D5 PLUS / historical arithmetic path
-        "01011",      // D5 DIFFERENCE
-        "11010",      // D5 LESSP
-        "110011100",  // D9 STRING-EMPTY?
-        "110101011",  // D9 STRING-FIRST
-        "110011101",  // D9 STRING-REST
-        "11100000",   // D8 CHAR-CODE
+        "01010",     // D5 PLUS / historical arithmetic path
+        "01011",     // D5 DIFFERENCE
+        "11010",     // D5 LESSP
+        "110011100", // D9 STRING-EMPTY?
+        "110101011", // D9 STRING-FIRST
+        "110011101", // D9 STRING-REST
+        "11100000",  // D8 CHAR-CODE
     ] {
         assert!(
             !source.contains(&format!("({forbidden} ")),
@@ -101,18 +125,18 @@ fn persistent_map_core_uses_only_exact_d3_d4_heads_and_no_numeric_ordering() {
         );
     }
 
-    let parsed = sens::parse_mixed_exact_domain_reasoning_source(
-        "lib/persistent-map.lisp",
-        source,
-    )
-    .expect("persistent map must parse as exact-domain source");
+    let parsed = sens::parse_mixed_exact_domain_reasoning_source("lib/persistent-map.lisp", source)
+        .expect("persistent map must parse as exact-domain source");
 
     let mut heads = Vec::new();
     for expr in &parsed {
         collect_exact_head_identities(expr, &mut heads);
     }
 
-    assert!(!heads.is_empty(), "proof must inspect executable exact-domain heads");
+    assert!(
+        !heads.is_empty(),
+        "proof must inspect executable exact-domain heads"
+    );
     assert!(
         heads.iter().all(|(width, _)| matches!(width, 3 | 4)),
         "persistent map execution must be D3/D4-only; got {heads:?}"
@@ -153,9 +177,7 @@ fn persistent_map_bounded_update_space_matches_independent_model() {
             let key = keys[n % keys.len()];
             n /= keys.len();
             let value = format!("v{step}");
-            source = format!(
-                "(внутрішня-мапа-вставити \"{key}\" \"{value}\" {source})"
-            );
+            source = format!("(внутрішня-мапа-вставити \"{key}\" \"{value}\" {source})");
             model.insert(key, value);
         }
 
@@ -192,8 +214,7 @@ fn persistent_map_bounded_update_space_matches_independent_model() {
 #[test]
 fn persistent_map_replaces_equal_key_without_growing_a_duplicate_entry() {
     let mut session = session();
-    let source =
-        "(внутрішня-мапа-список
+    let source = "(внутрішня-мапа-список
            (внутрішня-мапа-вставити \"a\" \"new\"
              (внутрішня-мапа-вставити \"b\" \"bee\"
                (внутрішня-мапа-вставити \"a\" \"old\" мапа-порожній))))";
@@ -209,12 +230,14 @@ fn internal_map_facade_inserts_and_reads_one_element() {
     let mut session = session();
     let inserted = eval_program(
         "(внутрішня-мапа-отримати \"a\" (внутрішня-мапа-вставити \"a\" 7 мапа-порожній))",
-        &mut session
-    ).expect("one-key persistent map insert and read use Lisp closures");
+        &mut session,
+    )
+    .expect("one-key persistent map insert and read use Lisp closures");
     assert_eq!(inserted.value.to_string(), "(7)");
     let listed = eval_program(
         "(внутрішня-мапа-список (внутрішня-мапа-вставити \"a\" 7 мапа-порожній))",
-        &mut session
-    ).expect("one-key persistent map should traverse without D9 dispatch");
+        &mut session,
+    )
+    .expect("one-key persistent map should traverse without D9 dispatch");
     assert_eq!(listed.value.to_string(), "((\"a\" . 7))");
 }

@@ -22,9 +22,13 @@ fn scan(width: u8, capacity: u16, iterations: usize) -> usize {
 
 fn main() {
     let iterations = env::var("SENS_OCCUPANCY_ITERATIONS")
-        .ok().and_then(|s| s.parse::<usize>().ok()).unwrap_or(100_000);
+        .ok()
+        .and_then(|s| s.parse::<usize>().ok())
+        .unwrap_or(100_000);
     let samples = env::var("SENS_OCCUPANCY_SAMPLES")
-        .ok().and_then(|s| s.parse::<usize>().ok()).unwrap_or(9);
+        .ok()
+        .and_then(|s| s.parse::<usize>().ok())
+        .unwrap_or(9);
     assert!(iterations >= 1_000 && samples >= 5);
 
     println!("domain\tcapacity\tsamples\titerations\tresident_per_cycle\tp50_ns_per_lookup\tp95_ns_per_lookup");

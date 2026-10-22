@@ -12,7 +12,8 @@
 //! - D8 exact identity is current; a packed transport byte never establishes its domain.
 
 use crate::{
-    Bija3, BinarySourceWord, CoreD4, CoreD5, CoreD6, CoreD8, CoreD9, PredicateBit, Racana2, D7DataWord,
+    Bija3, BinarySourceWord, CoreD4, CoreD5, CoreD6, CoreD8, CoreD9, D7DataWord, PredicateBit,
+    Racana2,
 };
 use std::fmt;
 
@@ -79,7 +80,9 @@ impl DomainIdentity {
     /// inferring meaning or callability from width.
     pub fn from_coordinate(coordinate: crate::domain_ladder::DomainCoordinate) -> Self {
         match coordinate.width() {
-            10 => Self::D10(crate::DomainD10::new(coordinate.bits()).expect("valid D10 coordinate")),
+            10 => {
+                Self::D10(crate::DomainD10::new(coordinate.bits()).expect("valid D10 coordinate"))
+            }
             1..=9 => Self::from_source_word(coordinate.source_word().expect("D1-D9 coordinate")),
             _ => panic!("unsupported domain identity coordinate"),
         }
@@ -127,27 +130,42 @@ impl DomainIdentity {
             {
                 Some(CoreDomainIdentity::D6(value))
             }
-            Self::D8(value) if matches!(
-                value.word().packed_bits(),
-                0b11100000 | 0b11101010 | 0b11101101 | 0b11101110 | 0b11110100
-            ) => {
+            Self::D8(value)
+                if matches!(
+                    value.word().packed_bits(),
+                    0b11100000 | 0b11101010 | 0b11101101 | 0b11101110 | 0b11110100
+                ) =>
+            {
                 // Only the exact admitted D8 CHAR-CODE, READ, STRING-TO-SYMBOL,
                 // SYMBOL-TO-STRING and WRITE-TO-STRING can project here. Residency alone
                 // never grants callability to any other D8 coordinate.
                 Some(CoreDomainIdentity::D8(value))
             }
-            Self::D9(value) if matches!(
-                value.word().packed_bits(),
-                0b110011110 | 0b110011100 | 0b110011101 | 0b110101010 | 0b110101011 | 0b110100110
-            ) => Some(CoreDomainIdentity::D9(value)),
+            Self::D9(value)
+                if matches!(
+                    value.word().packed_bits(),
+                    0b110011110
+                        | 0b110011100
+                        | 0b110011101
+                        | 0b110101010
+                        | 0b110101011
+                        | 0b110100110
+                ) =>
+            {
+                Some(CoreDomainIdentity::D9(value))
+            }
             // The ratified selector family is a proof of one exact
             // callable mechanism, not a blanket admission of D8/D9.
-            Self::D8(value) if matches!(value.word().packed_bits() >> 5, 0b011 | 0b100) =>
-                Some(CoreDomainIdentity::D8(value)),
-            Self::D9(value) if matches!(value.word().packed_bits() >> 6, 0b011 | 0b100) =>
-                Some(CoreDomainIdentity::D9(value)),
+            Self::D8(value) if matches!(value.word().packed_bits() >> 5, 0b011 | 0b100) => {
+                Some(CoreDomainIdentity::D8(value))
+            }
+            Self::D9(value) if matches!(value.word().packed_bits() >> 6, 0b011 | 0b100) => {
+                Some(CoreDomainIdentity::D9(value))
+            }
             Self::D9(_) => None,
-            Self::D1(_) | Self::D2(_) | Self::D6(_) | Self::D7(_) | Self::D8(_) | Self::D10(_) => None,
+            Self::D1(_) | Self::D2(_) | Self::D6(_) | Self::D7(_) | Self::D8(_) | Self::D10(_) => {
+                None
+            }
         }
     }
 }
@@ -241,50 +259,80 @@ impl fmt::Display for CoreDomainIdentity {
 }
 
 impl From<PredicateBit> for DomainIdentity {
-    fn from(value: PredicateBit) -> Self { Self::D1(value) }
+    fn from(value: PredicateBit) -> Self {
+        Self::D1(value)
+    }
 }
 impl From<Racana2> for DomainIdentity {
-    fn from(value: Racana2) -> Self { Self::D2(value) }
+    fn from(value: Racana2) -> Self {
+        Self::D2(value)
+    }
 }
 impl From<Bija3> for DomainIdentity {
-    fn from(value: Bija3) -> Self { Self::D3(value) }
+    fn from(value: Bija3) -> Self {
+        Self::D3(value)
+    }
 }
 impl From<CoreD4> for DomainIdentity {
-    fn from(value: CoreD4) -> Self { Self::D4(value) }
+    fn from(value: CoreD4) -> Self {
+        Self::D4(value)
+    }
 }
 impl From<CoreD5> for DomainIdentity {
-    fn from(value: CoreD5) -> Self { Self::D5(value) }
+    fn from(value: CoreD5) -> Self {
+        Self::D5(value)
+    }
 }
 impl From<CoreD6> for DomainIdentity {
-    fn from(value: CoreD6) -> Self { Self::D6(value) }
+    fn from(value: CoreD6) -> Self {
+        Self::D6(value)
+    }
 }
 impl From<D7DataWord> for DomainIdentity {
-    fn from(value: D7DataWord) -> Self { Self::D7(value) }
+    fn from(value: D7DataWord) -> Self {
+        Self::D7(value)
+    }
 }
 impl From<CoreD8> for DomainIdentity {
-    fn from(value: CoreD8) -> Self { Self::D8(value) }
+    fn from(value: CoreD8) -> Self {
+        Self::D8(value)
+    }
 }
 impl From<CoreD9> for DomainIdentity {
-    fn from(value: CoreD9) -> Self { Self::D9(value) }
+    fn from(value: CoreD9) -> Self {
+        Self::D9(value)
+    }
 }
 
 impl From<Bija3> for CoreDomainIdentity {
-    fn from(value: Bija3) -> Self { Self::D3(value) }
+    fn from(value: Bija3) -> Self {
+        Self::D3(value)
+    }
 }
 impl From<CoreD4> for CoreDomainIdentity {
-    fn from(value: CoreD4) -> Self { Self::D4(value) }
+    fn from(value: CoreD4) -> Self {
+        Self::D4(value)
+    }
 }
 impl From<CoreD5> for CoreDomainIdentity {
-    fn from(value: CoreD5) -> Self { Self::D5(value) }
+    fn from(value: CoreD5) -> Self {
+        Self::D5(value)
+    }
 }
 impl From<CoreD6> for CoreDomainIdentity {
-    fn from(value: CoreD6) -> Self { Self::D6(value) }
+    fn from(value: CoreD6) -> Self {
+        Self::D6(value)
+    }
 }
 impl From<CoreD8> for CoreDomainIdentity {
-    fn from(value: CoreD8) -> Self { Self::D8(value) }
+    fn from(value: CoreD8) -> Self {
+        Self::D8(value)
+    }
 }
 impl From<CoreD9> for CoreDomainIdentity {
-    fn from(value: CoreD9) -> Self { Self::D9(value) }
+    fn from(value: CoreD9) -> Self {
+        Self::D9(value)
+    }
 }
 
 impl From<CoreDomainIdentity> for DomainIdentity {
@@ -309,64 +357,94 @@ mod tests {
     fn all_d1_d9_source_words_round_trip_through_domain_identity() {
         for raw in 0..=1 {
             let source = BinarySourceWord::W1(Bit1::new(raw).unwrap());
-            assert_eq!(DomainIdentity::from_source_word(source).source_word(), source);
+            assert_eq!(
+                DomainIdentity::from_source_word(source).source_word(),
+                source
+            );
         }
         for raw in 0..=3 {
             let source = BinarySourceWord::W2(Bit2::new(raw).unwrap());
-            assert_eq!(DomainIdentity::from_source_word(source).source_word(), source);
+            assert_eq!(
+                DomainIdentity::from_source_word(source).source_word(),
+                source
+            );
         }
         for raw in 0..=7 {
             let source = BinarySourceWord::W3(Bit3::new(raw).unwrap());
-            assert_eq!(DomainIdentity::from_source_word(source).source_word(), source);
+            assert_eq!(
+                DomainIdentity::from_source_word(source).source_word(),
+                source
+            );
         }
         for raw in 0..=15 {
             let source = BinarySourceWord::W4(Bit4::new(raw).unwrap());
-            assert_eq!(DomainIdentity::from_source_word(source).source_word(), source);
+            assert_eq!(
+                DomainIdentity::from_source_word(source).source_word(),
+                source
+            );
         }
         for raw in 0..=31 {
             let source = BinarySourceWord::W5(Bit5::new(raw).unwrap());
-            assert_eq!(DomainIdentity::from_source_word(source).source_word(), source);
+            assert_eq!(
+                DomainIdentity::from_source_word(source).source_word(),
+                source
+            );
         }
         for raw in 0..=63 {
             let source = BinarySourceWord::W6(Bit6::new(raw).unwrap());
-            assert_eq!(DomainIdentity::from_source_word(source).source_word(), source);
+            assert_eq!(
+                DomainIdentity::from_source_word(source).source_word(),
+                source
+            );
         }
         for raw in 0..=127 {
             let source = BinarySourceWord::W7(Bit7::new(raw).unwrap());
-            assert_eq!(DomainIdentity::from_source_word(source).source_word(), source);
+            assert_eq!(
+                DomainIdentity::from_source_word(source).source_word(),
+                source
+            );
         }
         for raw in 0..=255 {
             let source = BinarySourceWord::W8(Bit8::new(raw).unwrap());
-            assert_eq!(DomainIdentity::from_source_word(source).source_word(), source);
+            assert_eq!(
+                DomainIdentity::from_source_word(source).source_word(),
+                source
+            );
         }
         for raw in 0..=511 {
             let source = BinarySourceWord::W9(Bit9::new(raw).unwrap());
-            assert_eq!(DomainIdentity::from_source_word(source).source_word(), source);
+            assert_eq!(
+                DomainIdentity::from_source_word(source).source_word(),
+                source
+            );
         }
     }
 
-
     #[test]
     fn d8_symbol_to_string_exact_core_mechanism_excludes_one_bit_neighbor() {
-        let admitted = DomainIdentity::from_source_word(
-            BinarySourceWord::W8(Bit8::new(0b11101110).unwrap()),
+        let admitted =
+            DomainIdentity::from_source_word(BinarySourceWord::W8(Bit8::new(0b11101110).unwrap()));
+        assert!(
+            matches!(
+                admitted.core_operation(),
+                Some(CoreDomainIdentity::D8(word))
+                    if word.word().packed_bits() == 0b11101110
+            ),
+            "ratified exact D8 SYMBOL-TO-STRING has its existing mechanism"
         );
-        assert!(matches!(
-            admitted.core_operation(),
-            Some(CoreDomainIdentity::D8(word))
-                if word.word().packed_bits() == 0b11101110
-        ), "ratified exact D8 SYMBOL-TO-STRING has its existing mechanism");
 
-        let neighbor = DomainIdentity::from_source_word(
-            BinarySourceWord::W8(Bit8::new(0b11101111).unwrap()),
+        let neighbor =
+            DomainIdentity::from_source_word(BinarySourceWord::W8(Bit8::new(0b11101111).unwrap()));
+        assert!(
+            neighbor.core_operation().is_none(),
+            "single-bit adjacent D8 residence is not implicitly callable"
         );
-        assert!(neighbor.core_operation().is_none(),
-            "single-bit adjacent D8 residence is not implicitly callable");
-        let other_domain = DomainIdentity::from_source_word(
-            BinarySourceWord::W9(Bit9::new(0b011101110).unwrap()),
+        let other_domain =
+            DomainIdentity::from_source_word(BinarySourceWord::W9(Bit9::new(0b011101110).unwrap()));
+        assert!(
+            other_domain.core_operation().is_none(),
+            "identical payload in another domain grants no D8 callability"
         );
-        assert!(other_domain.core_operation().is_none(),
-            "identical payload in another domain grants no D8 callability");
     }
 
     #[test]
@@ -379,19 +457,20 @@ mod tests {
             0b110101011, // STRING-FIRST
             0b110100110, // STRINGP
         ] {
-            let operation = DomainIdentity::from_source_word(
-                BinarySourceWord::W9(Bit9::new(raw).unwrap()),
-            ).core_operation();
+            let operation =
+                DomainIdentity::from_source_word(BinarySourceWord::W9(Bit9::new(raw).unwrap()))
+                    .core_operation();
             assert!(matches!(operation, Some(CoreDomainIdentity::D9(word))
                 if word.word().packed_bits() == raw));
         }
 
         for raw in [0b110011111, 0b110101001, 0b111011110] {
-            let other = DomainIdentity::from_source_word(
-                BinarySourceWord::W9(Bit9::new(raw).unwrap()),
+            let other =
+                DomainIdentity::from_source_word(BinarySourceWord::W9(Bit9::new(raw).unwrap()));
+            assert!(
+                other.core_operation().is_none(),
+                "unadmitted D9:{raw:09b} must remain fail-closed"
             );
-            assert!(other.core_operation().is_none(),
-                "unadmitted D9:{raw:09b} must remain fail-closed");
         }
     }
 
@@ -409,18 +488,13 @@ mod tests {
 
     #[test]
     fn d9_does_not_collapse_to_equal_low_payload_in_d1_d8() {
-        let d9 = DomainIdentity::from_source_word(
-            BinarySourceWord::W9(Bit9::new(1).unwrap())
-        );
-        let d8 = DomainIdentity::from_source_word(
-            BinarySourceWord::W8(Bit8::new(1).unwrap())
-        );
+        let d9 = DomainIdentity::from_source_word(BinarySourceWord::W9(Bit9::new(1).unwrap()));
+        let d8 = DomainIdentity::from_source_word(BinarySourceWord::W8(Bit8::new(1).unwrap()));
         assert_eq!(d9.packed_bits(), d8.packed_bits());
         assert_ne!(d9, d8);
 
-        let high = DomainIdentity::from_source_word(
-            BinarySourceWord::W9(Bit9::new(0x101).unwrap())
-        );
+        let high =
+            DomainIdentity::from_source_word(BinarySourceWord::W9(Bit9::new(0x101).unwrap()));
         assert_eq!(high.packed_bits(), 0x101);
         assert_ne!(high, d9);
     }
@@ -438,7 +512,9 @@ mod tests {
             DomainIdentity::from_source_word(BinarySourceWord::W8(Bit8::new(1).unwrap())),
             DomainIdentity::from_source_word(BinarySourceWord::W9(Bit9::new(1).unwrap())),
         ];
-        for id in ids { assert_eq!(id.packed_bits(), 1); }
+        for id in ids {
+            assert_eq!(id.packed_bits(), 1);
+        }
         for left in 0..ids.len() {
             for right in left + 1..ids.len() {
                 assert_ne!(ids[left], ids[right]);

@@ -36,37 +36,55 @@ fn d5_d6_owner_pairs_follow_their_own_local_laws() {
     let mut session = Session::default();
     load_core_library(&mut session).expect("load actual SENS core4 source");
     for (law, left, right) in [
-        ("D5 REVERSE(x)=REVERSE-ONTO(x,())",
-         "(зворот (як-є (а б в)))",
-         "(зворот-до (як-є (а б в)) (як-є ()))"),
-        ("D5 APPEND(x,y)=REVERSE-ONTO(REVERSE(x),y)",
-         "(приєднати (як-є (а б)) (як-є (в г)))",
-         "(зворот-до (зворот (як-є (а б))) (як-є (в г)))"),
-        ("D6 LENGTH(x)=LENGTH-ONTO(x,0)",
-         "(довжина (як-є (а б в)))",
-         "(довжина-до (як-є (а б в)) 0)"),
-        ("D6 MAP(f,x)=MAP-ONTO(f,x,())",
-         "(відобразити (функція (елемент) елемент) (як-є (а б в)))",
-         "(відобразити-до (функція (елемент) елемент) (як-є (а б в)) (як-є ()))"),
-        ("D6 FILTER(p,x)=FILTER-ONTO(p,x,())",
-         "(відсіяти (функція (елемент) (атом? елемент)) (як-є (а (б) в)))",
-         "(відсіяти-до (функція (елемент) (атом? елемент)) (як-є (а (б) в)) (як-є ()))"),
-        ("D6 ODDP(n)=NOT(EVENP(n))",
-         "(непарне? 3)",
-         "(хибне? (парне? 3))"),
-        ("D6 TAKE/DROP partition",
-         "(приєднати (взяти 2 (як-є (а б в г))) (відкинути 2 (як-є (а б в г))))",
-         "(як-є (а б в г))"),
-        ("D6 ALL(p,x)=NOT(ANY(NOT p,x))",
-         "(усі? (функція (елемент) (атом? елемент)) (як-є (а (б) в)))",
-         "(хибне? (будь-яке? (функція (елемент) (хибне? (атом? елемент))) (як-є (а (б) в))))"),
+        (
+            "D5 REVERSE(x)=REVERSE-ONTO(x,())",
+            "(зворот (як-є (а б в)))",
+            "(зворот-до (як-є (а б в)) (як-є ()))",
+        ),
+        (
+            "D5 APPEND(x,y)=REVERSE-ONTO(REVERSE(x),y)",
+            "(приєднати (як-є (а б)) (як-є (в г)))",
+            "(зворот-до (зворот (як-є (а б))) (як-є (в г)))",
+        ),
+        (
+            "D6 LENGTH(x)=LENGTH-ONTO(x,0)",
+            "(довжина (як-є (а б в)))",
+            "(довжина-до (як-є (а б в)) 0)",
+        ),
+        (
+            "D6 MAP(f,x)=MAP-ONTO(f,x,())",
+            "(відобразити (функція (елемент) елемент) (як-є (а б в)))",
+            "(відобразити-до (функція (елемент) елемент) (як-є (а б в)) (як-є ()))",
+        ),
+        (
+            "D6 FILTER(p,x)=FILTER-ONTO(p,x,())",
+            "(відсіяти (функція (елемент) (атом? елемент)) (як-є (а (б) в)))",
+            "(відсіяти-до (функція (елемент) (атом? елемент)) (як-є (а (б) в)) (як-є ()))",
+        ),
+        (
+            "D6 ODDP(n)=NOT(EVENP(n))",
+            "(непарне? 3)",
+            "(хибне? (парне? 3))",
+        ),
+        (
+            "D6 TAKE/DROP partition",
+            "(приєднати (взяти 2 (як-є (а б в г))) (відкинути 2 (як-є (а б в г))))",
+            "(як-є (а б в г))",
+        ),
+        (
+            "D6 ALL(p,x)=NOT(ANY(NOT p,x))",
+            "(усі? (функція (елемент) (атом? елемент)) (як-є (а (б) в)))",
+            "(хибне? (будь-яке? (функція (елемент) (хибне? (атом? елемент))) (як-є (а (б) в))))",
+        ),
     ] {
-        let lhs = eval_program(left, &mut session)
-            .unwrap_or_else(|error| panic!("{law} lhs: {error}"));
-        let rhs = eval_program(right, &mut session)
-            .unwrap_or_else(|error| panic!("{law} rhs: {error}"));
-        assert_eq!(lhs.value, rhs.value,
-            "test_id=other-domain-family layer=SENS law={law} lhs={left} rhs={right}");
+        let lhs =
+            eval_program(left, &mut session).unwrap_or_else(|error| panic!("{law} lhs: {error}"));
+        let rhs =
+            eval_program(right, &mut session).unwrap_or_else(|error| panic!("{law} rhs: {error}"));
+        assert_eq!(
+            lhs.value, rhs.value,
+            "test_id=other-domain-family layer=SENS law={law} lhs={left} rhs={right}"
+        );
     }
 }
 
@@ -113,20 +131,30 @@ fn d8_do_while_product_two_axes_are_observable_in_native_sens() {
     let mut actuals = Vec::new();
     for (law, source, expected_source) in cases {
         let actual = eval_program(source, &mut session)
-            .unwrap_or_else(|err| panic!("test_id=d8-loop-product law={law} input={source} error={err}")).value;
+            .unwrap_or_else(|err| {
+                panic!("test_id=d8-loop-product law={law} input={source} error={err}")
+            })
+            .value;
         let expected = eval_program(expected_source, &mut session)
-            .unwrap_or_else(|err| panic!("test_id=d8-loop-product expected={expected_source} error={err}")).value;
+            .unwrap_or_else(|err| {
+                panic!("test_id=d8-loop-product expected={expected_source} error={err}")
+            })
+            .value;
         assert_eq!(actual, expected,
             "test_id=d8-loop-product layer=SENS law={law} expected={expected_source} actual={source}");
-        assert!(actuals.iter().all(|prior| prior != &actual),
-            "test_id=d8-loop-product layer=SENS distinct-corners law={law}");
+        assert!(
+            actuals.iter().all(|prior| prior != &actual),
+            "test_id=d8-loop-product layer=SENS distinct-corners law={law}"
+        );
         actuals.push(actual);
     }
 
     // Д1 предикат, що повертає список, не перетворюється на істину хостом.
     let invalid = "(зупинити-коли-істина-й-повернути-стан (функція (стан) (як-є ())) (функція (с) (решта с)) (як-є (а)))";
-    assert!(eval_program(invalid, &mut session).is_err(),
-        "test_id=d8-loop-product layer=SENS expected=D1-type-rejection actual=accepted");
+    assert!(
+        eval_program(invalid, &mut session).is_err(),
+        "test_id=d8-loop-product layer=SENS expected=D1-type-rejection actual=accepted"
+    );
 }
 
 #[test]
@@ -141,15 +169,24 @@ fn d8_eight_product_invariants_reuse_executable_ukrainian_laws() {
         if !line.contains("owner-ratified-product-invariant PRODUCT-INVARIANT") {
             continue;
         }
-        let bits = line.split('"').nth(1)
+        let bits = line
+            .split('"')
+            .nth(1)
             .expect("D8 resident carries its exact binary coordinate");
         assert_eq!(bits.len(), 8, "test_id=d8-product-geometry width={bits}");
-        assert!(bits.ends_with("11"),
-            "test_id=d8-product-geometry invariant must be the commuting 11 corner: {bits}");
-        let row = surfaces.lines()
+        assert!(
+            bits.ends_with("11"),
+            "test_id=d8-product-geometry invariant must be the commuting 11 corner: {bits}"
+        );
+        let row = surfaces
+            .lines()
             .find(|line| line.trim_start().starts_with(&format!("({bits} ")))
-            .unwrap_or_else(|| panic!("test_id=d8-product-geometry no Ukrainian projection for {bits}"));
-        let ukr = row.split("(укр ").nth(1)
+            .unwrap_or_else(|| {
+                panic!("test_id=d8-product-geometry no Ukrainian projection for {bits}")
+            });
+        let ukr = row
+            .split("(укр ")
+            .nth(1)
             .and_then(|rest| rest.split(')').next())
             .expect("each ratified product invariant has Ukrainian source spelling");
         let definition = format!("(визначити {ukr}");
@@ -159,6 +196,8 @@ fn d8_eight_product_invariants_reuse_executable_ukrainian_laws() {
         );
         invariant_count += 1;
     }
-    assert_eq!(invariant_count, 8,
-        "test_id=d8-product-authority expected=8 proof-anchored-corners actual={invariant_count}");
+    assert_eq!(
+        invariant_count, 8,
+        "test_id=d8-product-authority expected=8 proof-anchored-corners actual={invariant_count}"
+    );
 }

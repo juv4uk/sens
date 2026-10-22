@@ -16,7 +16,6 @@ fn existing_selector_surfaces_execute_after_d4_domain_cutover() {
     assert_eq!(eval("(cddr '(11 12 13))"), "(13)");
 }
 
-
 #[test]
 fn historical_selector_bytes_delegate_to_domain_slots_without_dual_binding() {
     assert_eq!(eval("(00110011 '((11 12) 13))"), "11");

@@ -13,7 +13,8 @@ fn records(bytes: &[u8]) -> Result<Vec<&[u8]>, String> {
     while at < bytes.len() {
         let end_len = at.checked_add(4).ok_or("record header overflow")?;
         let header = bytes.get(at..end_len).ok_or("truncated record header")?;
-        let len = u32::from_le_bytes(header.try_into().map_err(|_| "invalid record header")?) as usize;
+        let len =
+            u32::from_le_bytes(header.try_into().map_err(|_| "invalid record header")?) as usize;
         at = end_len;
         let end = at.checked_add(len).ok_or("record length overflow")?;
         let record = bytes.get(at..end).ok_or("truncated record payload")?;

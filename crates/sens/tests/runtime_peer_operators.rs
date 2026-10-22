@@ -53,7 +53,10 @@ fn migrated_surface_files_do_not_build_stable_operator_peers_through_symbols() {
         "(define більше? >)",
         "(define рівне? =)",
     ] {
-        assert!(!UK_SURFACE.contains(forbidden), "UK alias leaked back: {forbidden}");
+        assert!(
+            !UK_SURFACE.contains(forbidden),
+            "UK alias leaked back: {forbidden}"
+        );
     }
     for forbidden in [
         "(define viyoga -)",
@@ -63,7 +66,10 @@ fn migrated_surface_files_do_not_build_stable_operator_peers_through_symbols() {
         "(define adhika? >)",
         "(define sama? =)",
     ] {
-        assert!(!SA_SURFACE.contains(forbidden), "SA alias leaked back: {forbidden}");
+        assert!(
+            !SA_SURFACE.contains(forbidden),
+            "SA alias leaked back: {forbidden}"
+        );
     }
 }
 
@@ -81,9 +87,15 @@ fn runtime_peer_slice_matches_numeric_registry_rows() {
             Some(sid)
         );
         let surfaces = sens::semantic_registry_export::admitted_surfaces_for_semantic_id(sid);
-        assert!(surfaces.iter().any(|row| row.namespace == "ук" && row.name == case.uk));
-        assert!(surfaces.iter().any(|row| row.namespace == "sa" && row.name == case.sa));
-        assert!(surfaces.iter().any(|row| row.namespace == "sym" && row.name == case.sym));
+        assert!(surfaces
+            .iter()
+            .any(|row| row.namespace == "ук" && row.name == case.uk));
+        assert!(surfaces
+            .iter()
+            .any(|row| row.namespace == "sa" && row.name == case.sa));
+        assert!(surfaces
+            .iter()
+            .any(|row| row.namespace == "sym" && row.name == case.sym));
     }
 }
 

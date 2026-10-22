@@ -89,8 +89,7 @@ fn d2_dot_retains_pair_not_text7_identifier() {
 
 #[test]
 fn malformed_structures_do_not_implicitly_frame_text7() {
-    for source in ["10 1000001", "10 1000001 11 01",
-                   "10 11 1000001 01", "01"] {
+    for source in ["10 1000001", "10 1000001 11 01", "10 11 1000001 01", "01"] {
         assert!(parse_canonical_binary(source).is_err(), "{source}");
     }
 }

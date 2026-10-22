@@ -17,10 +17,13 @@ fn run_exact(bits: u8, args_source: &str) -> Result<String, String> {
     };
     let mut items = items.to_vec();
     items[0] = Expr {
-        kind: ExprKind::DomainIdentity(DomainIdentity::D5(
-            CoreD5::from_word(Bit5::new(bits).unwrap()),
-        )),
-        span: Span { start: 0, end: "__d5__".len() },
+        kind: ExprKind::DomainIdentity(DomainIdentity::D5(CoreD5::from_word(
+            Bit5::new(bits).unwrap(),
+        ))),
+        span: Span {
+            start: 0,
+            end: "__d5__".len(),
+        },
     };
     form.kind = ExprKind::List(items.into());
 
@@ -34,7 +37,10 @@ fn exact_d5_existing_definitions_execute() {
     assert_eq!(run_exact(0b10100, "'(a b c)").unwrap(), "(c b a)");
     assert_eq!(run_exact(0b10101, "'(a b) '(c d)").unwrap(), "(b a c d)");
     assert_eq!(run_exact(0b10111, "6 3").unwrap(), "2");
-    assert_eq!(run_exact(0b11100, "'b '((a . 1) (b . 2))").unwrap(), "(b . 2)");
+    assert_eq!(
+        run_exact(0b11100, "'b '((a . 1) (b . 2))").unwrap(),
+        "(b . 2)"
+    );
     assert_eq!(run_exact(0b11101, "'b '(a b c)").unwrap(), "1");
     assert_eq!(run_exact(0b11111, "'x 'b '(a b c)").unwrap(), "(a x c)");
 }

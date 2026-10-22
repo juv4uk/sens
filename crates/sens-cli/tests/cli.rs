@@ -926,8 +926,7 @@ fn core_lib_is_preloaded_before_running_a_file() {
     // the CLI has loaded the current core before evaluating user source.
     let dir = std::env::temp_dir();
     let path = dir.join("sens-cli-test-core-lib.lisp");
-    std::fs::write(&path, "(нехай ((значення 5)) значення)")
-        .expect("should write temp file");
+    std::fs::write(&path, "(нехай ((значення 5)) значення)").expect("should write temp file");
 
     let output = sens().arg(&path).output().expect("binary should run");
     let _ = std::fs::remove_file(&path);
@@ -1496,14 +1495,22 @@ fn t5m_physical_pair_repair_uses_sens_mint_and_executes_real_pair() {
 
     // Дві українські програми: залежність DEFINE і її реальний SENS-споживач.
     let helper = dir.join("допоміжний.lisp");
-    fs::write(&helper, "(визначити локальний-помічник (функція (значення) значення))\n")
-        .expect("потрібне українське визначення");
-    fs::write(&src, "(локальний-помічник (як-є ()))\n")
-        .expect("користувач DEFINE");
+    fs::write(
+        &helper,
+        "(визначити локальний-помічник (функція (значення) значення))\n",
+    )
+    .expect("потрібне українське визначення");
+    fs::write(&src, "(локальний-помічник (як-є ()))\n").expect("користувач DEFINE");
     let missing_binding = run();
-    assert!(!missing_binding.status.success(), "невідомий виклик не можна вважати виконаним");
-    assert_eq!(fs::read(&physical).unwrap(), new_physical,
-        "невдала пара не повинна псувати попередню T5M");
+    assert!(
+        !missing_binding.status.success(),
+        "невідомий виклик не можна вважати виконаним"
+    );
+    assert_eq!(
+        fs::read(&physical).unwrap(),
+        new_physical,
+        "невдала пара не повинна псувати попередню T5M"
+    );
     let repaired_binding = Command::new("bash")
         .arg(&script)
         .arg(&src)
@@ -1514,10 +1521,12 @@ fn t5m_physical_pair_repair_uses_sens_mint_and_executes_real_pair() {
         .current_dir(repo)
         .output()
         .expect("SENS/Zig виконання реальної DEFINE-залежності");
-    assert!(repaired_binding.status.success(),
+    assert!(
+        repaired_binding.status.success(),
         "test_id=t5m-repair-binding-source layer=SENS/Zig stderr={} stdout={}",
         String::from_utf8_lossy(&repaired_binding.stderr),
-        String::from_utf8_lossy(&repaired_binding.stdout));
+        String::from_utf8_lossy(&repaired_binding.stdout)
+    );
     assert!(String::from_utf8_lossy(&repaired_binding.stdout).contains("T5M_REPAIR_OK"));
     let paired_with_binding = sens()
         .arg("--t5m-pair")
@@ -1527,10 +1536,15 @@ fn t5m_physical_pair_repair_uses_sens_mint_and_executes_real_pair() {
         .arg(&helper)
         .output()
         .expect("живе SENS виконання фізичної пари з DEFINE");
-    assert!(paired_with_binding.status.success(),
+    assert!(
+        paired_with_binding.status.success(),
         "test_id=t5m-repair-binding-execute layer=SENS stderr={}",
-        String::from_utf8_lossy(&paired_with_binding.stderr));
-    assert_eq!(String::from_utf8_lossy(&paired_with_binding.stdout).trim(), "()");
+        String::from_utf8_lossy(&paired_with_binding.stderr)
+    );
+    assert_eq!(
+        String::from_utf8_lossy(&paired_with_binding.stdout).trim(),
+        "()"
+    );
 
     let _ = fs::remove_dir_all(&dir);
 }

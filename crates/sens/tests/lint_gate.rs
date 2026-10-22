@@ -1,7 +1,6 @@
 use sens::{
-    eval_parsed_expressions, eval_core_library_source, eval_program,
-    parse_mixed_exact_domain, parse_mixed_exact_domain_fs_source,
-    parse_mixed_exact_domain_utf8_source, Session,
+    eval_core_library_source, eval_parsed_expressions, eval_program, parse_mixed_exact_domain,
+    parse_mixed_exact_domain_fs_source, parse_mixed_exact_domain_utf8_source, Session,
 };
 use std::fs;
 
@@ -35,8 +34,7 @@ fn linter_gate() {
     // Reuse the existing mixed typed-reader, not a new byte/semantic table.
     let linter_forms = parse_mixed_exact_domain(&linter_src)
         .expect("linter source preserves exact D1-D10 head widths");
-    eval_parsed_expressions(&linter_forms, &mut session)
-        .expect("load exact-domain linter");
+    eval_parsed_expressions(&linter_forms, &mut session).expect("load exact-domain linter");
 
     // Check if linter.my works by defining the threshold script
     let runner_src = r#"

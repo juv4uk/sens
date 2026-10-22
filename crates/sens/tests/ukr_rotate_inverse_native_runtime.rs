@@ -24,7 +24,8 @@ fn wrong_right_rotation_rejects_inverse_law_in_real_sens() {
     const CORRECT: &str = "(сполучити (останній-для-зсуву елементи)";
     const WRONG: &str = "(сполучити (перше елементи)";
     assert_eq!(
-        SOURCE.matches(CORRECT).count(), 1,
+        SOURCE.matches(CORRECT).count(),
+        1,
         "test_id=ukr-rotate layer=mutation expected=one-site"
     );
     let mutant = SOURCE.replacen(CORRECT, WRONG, 1);

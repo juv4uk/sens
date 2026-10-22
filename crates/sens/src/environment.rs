@@ -1,5 +1,10 @@
 use crate::{DomainIdentity, Value};
-use std::{cell::RefCell, collections::{hash_map::Entry, HashMap}, path::PathBuf, rc::Rc};
+use std::{
+    cell::RefCell,
+    collections::{hash_map::Entry, HashMap},
+    path::PathBuf,
+    rc::Rc,
+};
 
 /// Dropping a deeply nested `Environment` chain (thousands of `let`/currying
 /// levels) would otherwise recurse through `Rc<RefCell<Frame>>`'s default
@@ -49,7 +54,10 @@ impl Frame {
     }
 
     fn slot_index(&self, name: &str) -> Option<usize> {
-        self.slot_names.as_ref()?.iter().position(|slot| **slot == *name)
+        self.slot_names
+            .as_ref()?
+            .iter()
+            .position(|slot| **slot == *name)
     }
 }
 
@@ -221,10 +229,7 @@ impl Environment {
     }
 
     /// Canonical exact-domain language slot.
-    pub(crate) fn domain_code_slot(
-        &self,
-        identity: impl Into<DomainIdentity>,
-    ) -> Option<Value> {
+    pub(crate) fn domain_code_slot(&self, identity: impl Into<DomainIdentity>) -> Option<Value> {
         let identity = identity.into();
         self.2.borrow().domain_code_slots.get(&identity).cloned()
     }
@@ -254,11 +259,7 @@ impl Environment {
     /// Kept under the old method name so this slice does not grow CoreDomainIdentity API
     /// surface. New canonical code uses domain_code_slot.
     pub(crate) fn code_slot(&self, sid: crate::CoreDomainIdentity) -> Option<Value> {
-        self.2
-            .borrow()
-            .legacy_code_slots
-            .get(&sid)
-            .cloned()
+        self.2.borrow().legacy_code_slots.get(&sid).cloned()
     }
 
     /// Transitional historical exact-eight compatibility binding.
@@ -287,7 +288,12 @@ impl Environment {
     }
 
     /// Кадр виклику замикання: значення параметрів за номером слота.
-    pub(crate) fn child_with_slots(&self, names: Rc<[Rc<str>]>, slots: Vec<Value>, pure: bool) -> Self {
+    pub(crate) fn child_with_slots(
+        &self,
+        names: Rc<[Rc<str>]>,
+        slots: Vec<Value>,
+        pure: bool,
+    ) -> Self {
         let mut frame = Frame::empty(Some(self.clone()));
         frame.slot_names = Some(names);
         frame.slots = slots;
@@ -299,7 +305,11 @@ impl Environment {
     pub(crate) fn get_local(&self, depth: u32, index: u32) -> Option<Value> {
         let mut frame = Rc::clone(&self.0);
         for _ in 0..depth {
-            let parent = frame.borrow().parent.as_ref().map(|parent| Rc::clone(&parent.0))?;
+            let parent = frame
+                .borrow()
+                .parent
+                .as_ref()
+                .map(|parent| Rc::clone(&parent.0))?;
             frame = parent;
         }
         let current = frame.borrow();
@@ -315,7 +325,9 @@ impl Environment {
         loop {
             let parent = {
                 let current = frame.borrow();
-                let Some(names) = &current.slot_names else { break };
+                let Some(names) = &current.slot_names else {
+                    break;
+                };
                 scopes.push(Rc::clone(names));
                 if !current.pure {
                     break;
@@ -378,7 +390,10 @@ impl Environment {
         let mut out: Vec<(Rc<str>, Value)> = Vec::new();
         for frame in frames.iter().rev() {
             let f = frame.borrow();
-            let slots = f.slot_names.iter().flat_map(|names| names.iter().zip(f.slots.iter()));
+            let slots = f
+                .slot_names
+                .iter()
+                .flat_map(|names| names.iter().zip(f.slots.iter()));
             for (name, value) in slots.chain(f.values.iter()) {
                 match out.iter_mut().find(|(n, _)| n == name) {
                     Some(slot) => slot.1 = value.clone(),
@@ -556,14 +571,8 @@ mod tests {
         let d3 = CoreDomainIdentity::from(Bija3::from_word(Bit3::new(1).unwrap()));
         let d4 = CoreDomainIdentity::from(CoreD4::from_word(Bit4::new(1).unwrap()));
 
-        assert!(env.bind_domain_code_slot_once(
-            d3,
-            Value::Symbol(Rc::from("d3-one"))
-        ));
-        assert!(env.bind_domain_code_slot_once(
-            d4,
-            Value::Symbol(Rc::from("d4-one"))
-        ));
+        assert!(env.bind_domain_code_slot_once(d3, Value::Symbol(Rc::from("d3-one"))));
+        assert!(env.bind_domain_code_slot_once(d4, Value::Symbol(Rc::from("d4-one"))));
 
         assert_eq!(
             env.domain_code_slot(d3),
@@ -608,8 +617,8 @@ mod tests {
     #[test]
     fn all_2046_coordinates_preserve_width_and_both_bind_once_keyspaces() {
         use crate::{
-            domain_ladder::DomainCoordinate, BinarySourceWord, Bit1, Bit2, Bit3,
-            Bit4, Bit5, Bit6, Bit7, Bit8, Bit9, CoreDomainIdentity,
+            domain_ladder::DomainCoordinate, BinarySourceWord, Bit1, Bit2, Bit3, Bit4, Bit5, Bit6,
+            Bit7, Bit8, Bit9, CoreDomainIdentity,
         };
         use std::collections::HashSet;
 
@@ -621,10 +630,12 @@ mod tests {
 
         for width in 1u8..=10 {
             for bits in 0..(1u16 << width) {
-                let coordinate = DomainCoordinate::new(width, bits)
-                    .expect("in-range exact coordinate");
-                assert!(coordinates.insert(coordinate),
-                    "coordinate collision at D{width}:{bits:010b}");
+                let coordinate =
+                    DomainCoordinate::new(width, bits).expect("in-range exact coordinate");
+                assert!(
+                    coordinates.insert(coordinate),
+                    "coordinate collision at D{width}:{bits:010b}"
+                );
                 assert_eq!(coordinate.width(), width);
                 assert_eq!(coordinate.bits(), bits);
                 examined += 1;
@@ -653,16 +664,24 @@ mod tests {
                 };
                 let identity = DomainIdentity::from_source_word(source);
                 assert_eq!(
-                    DomainCoordinate::from_domain_identity(identity), coordinate,
+                    DomainCoordinate::from_domain_identity(identity),
+                    coordinate,
                     "lost width on D{width}:{bits:010b}"
                 );
                 let marker = Value::Symbol(Rc::from(format!("D{width}:{bits}")));
-                assert!(environment.bind_domain_code_slot_once(identity, marker.clone()),
-                    "unexpected prebound coordinate D{width}:{bits:010b}");
-                assert!(!environment.bind_domain_code_slot_once(identity, Value::Nil),
-                    "overwrote exact identity D{width}:{bits:010b}");
-                assert_eq!(environment.domain_code_slot(identity), Some(marker),
-                    "key or payload collision D{width}:{bits:010b}");
+                assert!(
+                    environment.bind_domain_code_slot_once(identity, marker.clone()),
+                    "unexpected prebound coordinate D{width}:{bits:010b}"
+                );
+                assert!(
+                    !environment.bind_domain_code_slot_once(identity, Value::Nil),
+                    "overwrote exact identity D{width}:{bits:010b}"
+                );
+                assert_eq!(
+                    environment.domain_code_slot(identity),
+                    Some(marker),
+                    "key or payload collision D{width}:{bits:010b}"
+                );
                 current_slots += 1;
             }
         }
@@ -677,17 +696,24 @@ mod tests {
             let sid = CoreDomainIdentity::D8(crate::CoreD8::from_word(
                 crate::Bit8::new(bits as u8).expect("historical registry-slot payload"),
             ));
-            let identity = DomainIdentity::from_source_word(
-                crate::BinarySourceWord::W8(crate::Bit8::new(bits as u8).unwrap()));
+            let identity = DomainIdentity::from_source_word(crate::BinarySourceWord::W8(
+                crate::Bit8::new(bits as u8).unwrap(),
+            ));
             let current = environment.domain_code_slot(identity);
-            assert_eq!(environment.code_slot(sid), None,
-                "historical W8 silently lifted to D8 at {bits:08b}");
+            assert_eq!(
+                environment.code_slot(sid),
+                None,
+                "historical W8 silently lifted to D8 at {bits:08b}"
+            );
             let historical = Value::Symbol(Rc::from(format!("legacy-W8:{bits}")));
             assert!(environment.bind_code_slot_once(sid, historical.clone()));
             assert!(!environment.bind_code_slot_once(sid, Value::Nil));
             assert_eq!(environment.code_slot(sid), Some(historical));
-            assert_eq!(environment.domain_code_slot(identity), current,
-                "historical W8 overwrote current D8 at {bits:08b}");
+            assert_eq!(
+                environment.domain_code_slot(identity),
+                current,
+                "historical W8 overwrote current D8 at {bits:08b}"
+            );
         }
         assert_eq!(environment.2.borrow().domain_code_slots.len(), 1022);
         assert_eq!(environment.2.borrow().legacy_code_slots.len(), 256);
@@ -801,10 +827,7 @@ mod tests {
                     return true;
                 }
 
-                current
-                    .parent
-                    .as_ref()
-                    .map(|parent| Rc::clone(&parent.0))
+                current.parent.as_ref().map(|parent| Rc::clone(&parent.0))
             };
 
             match parent {
@@ -900,10 +923,7 @@ mod tests {
             Value::Number(3.0, Exactness::Exact)
         ));
 
-        assert_eq!(
-            leaf.get("x"),
-            Some(Value::Number(3.0, Exactness::Exact))
-        );
+        assert_eq!(leaf.get("x"), Some(Value::Number(3.0, Exactness::Exact)));
         assert_eq!(
             middle.get("x"),
             Some(Value::Number(3.0, Exactness::Exact)),

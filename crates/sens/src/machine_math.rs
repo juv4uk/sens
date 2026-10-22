@@ -14,16 +14,12 @@ pub enum MathError {
 }
 
 #[cfg(all(target_arch = "x86_64", target_os = "linux"))]
-core::arch::global_asm!(
-    include_str!("machine_math_skylake.S"),
-    options(att_syntax)
-);
+core::arch::global_asm!(include_str!("machine_math_skylake.S"), options(att_syntax));
 
 #[cfg(all(target_arch = "x86_64", target_os = "linux"))]
 unsafe extern "C" {
     fn sens_dot_avx2(a: *const f64, b: *const f64, n: usize) -> f64;
 }
-
 
 #[cfg(all(target_arch = "x86_64", target_os = "linux"))]
 unsafe extern "C" {
@@ -32,16 +28,39 @@ unsafe extern "C" {
     fn sens_i24_mul_exact(left: i64, right: i64) -> i64;
     fn sens_i48_mul_exact(left: i64, right: i64, high: *mut i64) -> i64;
     fn sens_i64_divrem_exact(left: i64, right: i64, remainder: *mut i64) -> i64;
-    fn sens_i96_add_exact(a_low: u64, a_high: i64, b_low: u64, b_high: i64, out_high: *mut i64) -> u64;
-    fn sens_i96_sub_exact(a_low: u64, a_high: i64, b_low: u64, b_high: i64, out_high: *mut i64) -> u64;
-    fn sens_u96_mul_exact(a_low: u64, a_high: u64, b_low: u64, b_high: u64,
-                           out_middle: *mut u64, out_high: *mut u64) -> u64;
+    fn sens_i96_add_exact(
+        a_low: u64,
+        a_high: i64,
+        b_low: u64,
+        b_high: i64,
+        out_high: *mut i64,
+    ) -> u64;
+    fn sens_i96_sub_exact(
+        a_low: u64,
+        a_high: i64,
+        b_low: u64,
+        b_high: i64,
+        out_high: *mut i64,
+    ) -> u64;
+    fn sens_u96_mul_exact(
+        a_low: u64,
+        a_high: u64,
+        b_low: u64,
+        b_high: u64,
+        out_middle: *mut u64,
+        out_high: *mut u64,
+    ) -> u64;
     // Багатослівна арифметика: на відміну від двослівних D96, довільна довжина.
     fn sens_words_add_exact(left: *const u64, right: *const u64, output: *mut u64, words: usize);
     fn sens_words_sub_exact(left: *const u64, right: *const u64, output: *mut u64, words: usize);
     fn sens_words_mul_exact(left: *const u64, right: *const u64, output: *mut u64, words: usize);
-    fn sens_words_divrem_u64(input: *const u64, output: *mut u64, words: usize,
-                             divisor: u64, remainder: *mut u64);
+    fn sens_words_divrem_u64(
+        input: *const u64,
+        output: *mut u64,
+        words: usize,
+        divisor: u64,
+        remainder: *mut u64,
+    );
 }
 
 /// Цілочисельний механізм для рівно двох НАЯВНИХ знакових слів D24.
@@ -78,14 +97,15 @@ pub(crate) fn exact_i24_integer_op(operator: &str, left: i64, right: i64) -> Opt
     }
 }
 
-
 /// Точний D48 механізм. Доменний допуск/ріст D48->D96 виконує SENS.
 /// 64-бітні ADD/SUB існуючого x86-ядра не усікають D48-суми;
 /// IMUL використовує RDX:RAX та повертає 128 бітів через ABI-адаптер.
 pub(crate) fn exact_i48_integer_op(op: &str, left: i64, right: i64) -> Option<i128> {
     const MIN: i64 = -(1_i64 << 47);
     const MAX: i64 = (1_i64 << 47) - 1;
-    if !(MIN..=MAX).contains(&left) || !(MIN..=MAX).contains(&right) { return None; }
+    if !(MIN..=MAX).contains(&left) || !(MIN..=MAX).contains(&right) {
+        return None;
+    }
     #[cfg(all(target_arch = "x86_64", target_os = "linux"))]
     {
         // SAFETY: D48 аргументи знакові, ABI System V, &mut high
@@ -112,13 +132,14 @@ pub(crate) fn exact_i48_integer_op(op: &str, left: i64, right: i64) -> Option<i1
     }
 }
 
-
 /// Точні знакові D96 +/−: 97-бітний результат без усічення й f64.
 /// Результат i128 є лише носієм, вибір D96/D192 належить SENS.
 pub(crate) fn exact_i96_add_sub(op: &str, left: i128, right: i128) -> Option<i128> {
     const MIN: i128 = -(1_i128 << 95);
     const MAX: i128 = (1_i128 << 95) - 1;
-    if !(MIN..=MAX).contains(&left) || !(MIN..=MAX).contains(&right) { return None; }
+    if !(MIN..=MAX).contains(&left) || !(MIN..=MAX).contains(&right) {
+        return None;
+    }
     #[cfg(all(target_arch = "x86_64", target_os = "linux"))]
     {
         let mut high = 0_i64;
@@ -126,10 +147,20 @@ pub(crate) fn exact_i96_add_sub(op: &str, left: i128, right: i128) -> Option<i12
         // є чинним місцем для старшого машинного слова.
         let low = unsafe {
             match op {
-                "+" => sens_i96_add_exact(left as u64, (left >> 64) as i64,
-                                           right as u64, (right >> 64) as i64, &mut high),
-                "-" => sens_i96_sub_exact(left as u64, (left >> 64) as i64,
-                                           right as u64, (right >> 64) as i64, &mut high),
+                "+" => sens_i96_add_exact(
+                    left as u64,
+                    (left >> 64) as i64,
+                    right as u64,
+                    (right >> 64) as i64,
+                    &mut high,
+                ),
+                "-" => sens_i96_sub_exact(
+                    left as u64,
+                    (left >> 64) as i64,
+                    right as u64,
+                    (right >> 64) as i64,
+                    &mut high,
+                ),
                 _ => return None,
             }
         };
@@ -143,35 +174,39 @@ pub(crate) fn exact_i96_add_sub(op: &str, left: i128, right: i128) -> Option<i12
     }
 }
 
-
 /// Повні 192 біти множення двох БЕЗЗНАКОВИХ механічних модулів до 96 біт.
 /// Підписи, ратифіковані домени й композиції НЕ вирішуються асемблером.
 /// Результат: [молодші 64, середні 64, старші 64] без усічення.
 pub(crate) fn exact_u96_multiply(a: u128, b: u128) -> Option<[u64; 3]> {
-    if (a >> 96) != 0 || (b >> 96) != 0 { return None; }
+    if (a >> 96) != 0 || (b >> 96) != 0 {
+        return None;
+    }
     #[cfg(all(target_arch = "x86_64", target_os = "linux"))]
     {
         let (mut middle, mut high) = (0_u64, 0_u64);
         // SAFETY: a,b мають не більше 96 бітів, SysV ABI,
         // обидва вихідні вказівники чинні й не перекриваються.
         let low = unsafe {
-            sens_u96_mul_exact(a as u64, (a >> 64) as u64,
-                               b as u64, (b >> 64) as u64,
-                               &mut middle, &mut high)
+            sens_u96_mul_exact(
+                a as u64,
+                (a >> 64) as u64,
+                b as u64,
+                (b >> 64) as u64,
+                &mut middle,
+                &mut high,
+            )
         };
         return Some([low, middle, high]);
     }
     #[cfg(not(all(target_arch = "x86_64", target_os = "linux")))]
     {
-        let (a0,a1,b0,b1) = (a as u64 as u128,(a >> 64),
-                              b as u64 as u128,(b >> 64));
-        let (p00,p01,p10,p11) = (a0*b0,a0*b1,a1*b0,a1*b1);
+        let (a0, a1, b0, b1) = (a as u64 as u128, (a >> 64), b as u64 as u128, (b >> 64));
+        let (p00, p01, p10, p11) = (a0 * b0, a0 * b1, a1 * b0, a1 * b1);
         let middle = (p00 >> 64) + u128::from(p01 as u64) + u128::from(p10 as u64);
         let high = (middle >> 64) + (p01 >> 64) + (p10 >> 64) + p11;
         Some([p00 as u64, middle as u64, high as u64])
     }
 }
-
 
 /// Точний багатослівний ADD/SUB з переносом, молодше слово перше.
 ///
@@ -188,8 +223,12 @@ pub(crate) fn exact_words_add_sub(operator: &str, left: &[u64], right: &[u64]) -
         // SAFETY: обидва входи та вихід містять рівно len чинних
         // елементів u64; вихідний буфер окремий; системний ABI x86-64.
         match operator {
-            "+" => sens_words_add_exact(left.as_ptr(), right.as_ptr(), out.as_mut_ptr(), left.len()),
-            "-" => sens_words_sub_exact(left.as_ptr(), right.as_ptr(), out.as_mut_ptr(), left.len()),
+            "+" => {
+                sens_words_add_exact(left.as_ptr(), right.as_ptr(), out.as_mut_ptr(), left.len())
+            }
+            "-" => {
+                sens_words_sub_exact(left.as_ptr(), right.as_ptr(), out.as_mut_ptr(), left.len())
+            }
             _ => unreachable!(),
         }
     }
@@ -214,20 +253,26 @@ pub(crate) fn exact_words_add_sub(operator: &str, left: &[u64], right: &[u64]) -
     Some(out)
 }
 
-
 /* Unsigned full-width product, 64*N × 64*N -> 128*N.
  * SENS alone admits exact Dn operands and selects Dn/D(2n).
  * Caller supplies equal nonempty little-endian limb arrays.
  * No rounding, truncation or float conversion. */
 pub(crate) fn exact_words_mul_unsigned(left: &[u64], right: &[u64]) -> Option<Vec<u64>> {
-    if left.is_empty() || left.len() != right.len() { return None; }
+    if left.is_empty() || left.len() != right.len() {
+        return None;
+    }
     let out_len = left.len().checked_mul(2)?;
     let mut output = vec![0_u64; out_len];
     #[cfg(all(target_arch = "x86_64", target_os = "linux"))]
     unsafe {
         // SAFETY: output is 2*n elements and never aliases inputs.
         // ASM preserves callee-saved registers under x86-64 System V ABI.
-        sens_words_mul_exact(left.as_ptr(), right.as_ptr(), output.as_mut_ptr(), left.len());
+        sens_words_mul_exact(
+            left.as_ptr(),
+            right.as_ptr(),
+            output.as_mut_ptr(),
+            left.len(),
+        );
     }
     #[cfg(not(all(target_arch = "x86_64", target_os = "linux")))]
     {
@@ -235,8 +280,7 @@ pub(crate) fn exact_words_mul_unsigned(left: &[u64], right: &[u64]) -> Option<Ve
             let mut carry = 0_u128;
             for (j, &b) in right.iter().enumerate() {
                 let k = i + j;
-                let part = u128::from(a) * u128::from(b)
-                    + u128::from(output[k]) + carry;
+                let part = u128::from(a) * u128::from(b) + u128::from(output[k]) + carry;
                 output[k] = part as u64;
                 carry = part >> 64;
             }
@@ -249,7 +293,9 @@ pub(crate) fn exact_words_mul_unsigned(left: &[u64], right: &[u64]) -> Option<Ve
 /// Точна механічна частка та остача багатослівного БЕЗЗНАКОВОГО числа.
 /// Молодше слово перше, довжина ненульова; рішення про Dn та RATIO — за SENS.
 pub(crate) fn exact_words_div_rem_u64(input: &[u64], divisor: u64) -> Option<(Vec<u64>, u64)> {
-    if input.is_empty() || divisor == 0 { return None; }
+    if input.is_empty() || divisor == 0 {
+        return None;
+    }
     let mut output = vec![0_u64; input.len()];
     #[cfg(all(target_arch = "x86_64", target_os = "linux"))]
     {
@@ -257,8 +303,13 @@ pub(crate) fn exact_words_div_rem_u64(input: &[u64], divisor: u64) -> Option<(Ve
         // SAFETY: окремі буфери рівної довжини, дільник >0;
         // старша половина перед DIVQ завжди строго менша за дільник.
         unsafe {
-            sens_words_divrem_u64(input.as_ptr(), output.as_mut_ptr(),
-                                  input.len(), divisor, &mut remainder);
+            sens_words_divrem_u64(
+                input.as_ptr(),
+                output.as_mut_ptr(),
+                input.len(),
+                divisor,
+                &mut remainder,
+            );
         }
         return Some((output, remainder));
     }
@@ -284,7 +335,9 @@ pub(crate) fn exact_words_div_rem_unsigned(
     input: &[u64],
     divisor: &[u64],
 ) -> Option<(Vec<u64>, Vec<u64>)> {
-    if input.is_empty() || input.len() != divisor.len() { return None; }
+    if input.is_empty() || input.len() != divisor.len() {
+        return None;
+    }
     let n = input.len();
     let highest = divisor.iter().rposition(|&word| word != 0)?;
     if highest == 0 {
@@ -309,14 +362,14 @@ pub(crate) fn exact_words_div_rem_unsigned(
             *limb = (*limb << 1) | carry;
             carry = next;
         }
-        if remainder.iter().rev().cmp(extended_divisor.iter().rev())
-            != std::cmp::Ordering::Less
-        {
+        if remainder.iter().rev().cmp(extended_divisor.iter().rev()) != std::cmp::Ordering::Less {
             remainder = exact_words_add_sub("-", &remainder, &extended_divisor)?;
             quotient[bit / 64] |= 1_u64 << (bit % 64);
         }
     }
-    if remainder[n] != 0 { return None; }
+    if remainder[n] != 0 {
+        return None;
+    }
     remainder.pop();
     Some((quotient, remainder))
 }
@@ -325,11 +378,13 @@ pub(crate) fn exact_words_div_rem_unsigned(
 /// Не зараховує ділення з остачею: воно йде до канонічного RATIO у SENS.
 /// Навіть D48 minimum/-1 вміщується в i64, але домен виходу має розширитися.
 pub(crate) fn exact_small_integer_quotient(width: usize, a: i64, b: i64) -> Option<i64> {
-    if !matches!(width, 24 | 48) { return None; }
+    if !matches!(width, 24 | 48) {
+        return None;
+    }
     let bound = 1_i64 << (width - 1);
-    if !(-bound..=bound - 1).contains(&a)
-        || !(-bound..=bound - 1).contains(&b)
-        || b == 0 { return None; }
+    if !(-bound..=bound - 1).contains(&a) || !(-bound..=bound - 1).contains(&b) || b == 0 {
+        return None;
+    }
     #[cfg(all(target_arch = "x86_64", target_os = "linux"))]
     {
         // SAFETY: b != 0, обидва операнди <= 48 знакових бітів,
@@ -374,7 +429,10 @@ fn dot_same_length(a: &[f64], b: &[f64]) -> f64 {
 /// Скалярний добуток наближених чисел; для різних довжин — явна помилка.
 pub fn dot_f64(a: &[f64], b: &[f64]) -> Result<f64, MathError> {
     if a.len() != b.len() {
-        return Err(MathError::LengthMismatch { left: a.len(), right: b.len() });
+        return Err(MathError::LengthMismatch {
+            left: a.len(),
+            right: b.len(),
+        });
     }
     Ok(dot_same_length(a, b))
 }
@@ -389,16 +447,21 @@ mod tests {
     use super::*;
 
     fn close(actual: f64, expected: f64) {
-        assert!((actual - expected).abs() <= 1e-10 * (expected.abs() + 1.0),
-            "actual={actual:?}, expected={expected:?}, backend={:?}", backend());
+        assert!(
+            (actual - expected).abs() <= 1e-10 * (expected.abs() + 1.0),
+            "actual={actual:?}, expected={expected:?}, backend={:?}",
+            backend()
+        );
     }
 
     #[test]
     fn empty_signed_and_length_mismatch() {
         assert_eq!(dot_f64(&[], &[]), Ok(0.0));
         assert_eq!(squared_norm_f64(&[]), 0.0);
-        assert_eq!(dot_f64(&[1.0, 2.0], &[3.0]),
-                   Err(MathError::LengthMismatch { left: 2, right: 1 }));
+        assert_eq!(
+            dot_f64(&[1.0, 2.0], &[3.0]),
+            Err(MathError::LengthMismatch { left: 2, right: 1 })
+        );
         close(dot_f64(&[2.0, -3.0], &[4.0, 5.0]).unwrap(), -7.0);
         close(squared_norm_f64(&[3.0, 4.0]), 25.0);
     }
@@ -406,8 +469,12 @@ mod tests {
     #[test]
     fn avx2_tails_and_unaligned_slices() {
         for n in [1, 2, 3, 7, 15, 16, 17, 31, 32, 33, 65, 257, 1024] {
-            let left: Vec<f64> = (0..n + 1).map(|i| ((i % 97) as f64 - 44.0) * 0.003).collect();
-            let right: Vec<f64> = (0..n + 1).map(|i| ((i % 89) as f64 + 1.0) * 0.002).collect();
+            let left: Vec<f64> = (0..n + 1)
+                .map(|i| ((i % 97) as f64 - 44.0) * 0.003)
+                .collect();
+            let right: Vec<f64> = (0..n + 1)
+                .map(|i| ((i % 89) as f64 + 1.0) * 0.002)
+                .collect();
             let a = &left[1..];
             let b = &right[..n];
             close(dot_f64(a, b).unwrap(), scalar_dot(a, b));
@@ -418,8 +485,10 @@ mod tests {
     #[test]
     fn backend_detected_before_invoking_avx2() {
         #[cfg(all(target_arch = "x86_64", target_os = "linux"))]
-        assert_eq!(backend() == Backend::Avx2Fma,
-                   std::is_x86_feature_detected!("avx2") && std::is_x86_feature_detected!("fma"));
+        assert_eq!(
+            backend() == Backend::Avx2Fma,
+            std::is_x86_feature_detected!("avx2") && std::is_x86_feature_detected!("fma")
+        );
         #[cfg(not(all(target_arch = "x86_64", target_os = "linux")))]
         assert_eq!(backend(), Backend::Scalar);
     }
@@ -430,8 +499,16 @@ mod tests {
         for a in [MIN, MIN + 1, -1, 0, 1, MAX - 1, MAX] {
             for b in [MIN, MIN + 1, -1, 0, 1, MAX - 1, MAX] {
                 assert_eq!(exact_i24_integer_op("+", a, b), Some(a + b), "sum {a} {b}");
-                assert_eq!(exact_i24_integer_op("-", a, b), Some(a - b), "difference {a} {b}");
-                assert_eq!(exact_i24_integer_op("*", a, b), Some(a * b), "product {a} {b}");
+                assert_eq!(
+                    exact_i24_integer_op("-", a, b),
+                    Some(a - b),
+                    "difference {a} {b}"
+                );
+                assert_eq!(
+                    exact_i24_integer_op("*", a, b),
+                    Some(a * b),
+                    "product {a} {b}"
+                );
             }
         }
         assert_eq!(exact_i24_integer_op("+", MAX + 1, 0), None);
@@ -464,9 +541,18 @@ mod tests {
         const MAX: i64 = (1_i64 << 47) - 1;
         for a in [MIN, MIN + 1, -1, 0, 1, MAX - 1, MAX] {
             for b in [MIN, -1, 0, 1, MAX] {
-                assert_eq!(exact_i48_integer_op("+", a, b), Some(i128::from(a) + i128::from(b)));
-                assert_eq!(exact_i48_integer_op("-", a, b), Some(i128::from(a) - i128::from(b)));
-                assert_eq!(exact_i48_integer_op("*", a, b), Some(i128::from(a) * i128::from(b)));
+                assert_eq!(
+                    exact_i48_integer_op("+", a, b),
+                    Some(i128::from(a) + i128::from(b))
+                );
+                assert_eq!(
+                    exact_i48_integer_op("-", a, b),
+                    Some(i128::from(a) - i128::from(b))
+                );
+                assert_eq!(
+                    exact_i48_integer_op("*", a, b),
+                    Some(i128::from(a) * i128::from(b))
+                );
             }
         }
         assert_eq!(exact_i48_integer_op("*", MIN, MIN), Some(1_i128 << 94));
@@ -479,13 +565,19 @@ mod tests {
     fn d48_asm_matches_i128_oracle_in_4096_cases() {
         let mut seed = 0x9e37_79b9_82a1_c365_u64;
         for _ in 0..4096 {
-            seed ^= seed << 13; seed ^= seed >> 7; seed ^= seed << 17;
+            seed ^= seed << 13;
+            seed ^= seed >> 7;
+            seed ^= seed << 17;
             let a = ((seed & ((1_u64 << 48) - 1)) as i64) - (1_i64 << 47);
-            seed ^= seed << 13; seed ^= seed >> 7; seed ^= seed << 17;
+            seed ^= seed << 13;
+            seed ^= seed >> 7;
+            seed ^= seed << 17;
             let b = ((seed & ((1_u64 << 48) - 1)) as i64) - (1_i64 << 47);
-            for (op, value) in [("+", i128::from(a) + i128::from(b)),
-                                ("-", i128::from(a) - i128::from(b)),
-                                ("*", i128::from(a) * i128::from(b))] {
+            for (op, value) in [
+                ("+", i128::from(a) + i128::from(b)),
+                ("-", i128::from(a) - i128::from(b)),
+                ("*", i128::from(a) * i128::from(b)),
+            ] {
                 assert_eq!(exact_i48_integer_op(op, a, b), Some(value));
             }
         }
@@ -511,7 +603,9 @@ mod tests {
     fn d96_asm_matches_independent_i128_seeded_oracle() {
         let mut state = 0x63b9_8af5_1d0c_27e4_u64;
         let mut next = || {
-            state ^= state << 13; state ^= state >> 7; state ^= state << 17;
+            state ^= state << 13;
+            state ^= state >> 7;
+            state ^= state << 17;
             state
         };
         for _ in 0..4096 {
@@ -526,12 +620,19 @@ mod tests {
     #[test]
     fn d96_full_unsigned_product_retains_all_192_bits() {
         const MAX: u128 = (1_u128 << 96) - 1;
-        assert_eq!(exact_u96_multiply(0, MAX), Some([0,0,0]));
-        assert_eq!(exact_u96_multiply(1, MAX), Some([u64::MAX, u32::MAX as u64, 0]));
-        assert_eq!(exact_u96_multiply(1_u128 << 95, 1_u128 << 95),
-                   Some([0, 0, 1_u64 << 62]));
-        assert_eq!(exact_u96_multiply(MAX, MAX),
-                   Some([1, 0xffff_fffe_0000_0000, u64::MAX]));
+        assert_eq!(exact_u96_multiply(0, MAX), Some([0, 0, 0]));
+        assert_eq!(
+            exact_u96_multiply(1, MAX),
+            Some([u64::MAX, u32::MAX as u64, 0])
+        );
+        assert_eq!(
+            exact_u96_multiply(1_u128 << 95, 1_u128 << 95),
+            Some([0, 0, 1_u64 << 62])
+        );
+        assert_eq!(
+            exact_u96_multiply(MAX, MAX),
+            Some([1, 0xffff_fffe_0000_0000, u64::MAX])
+        );
         assert_eq!(exact_u96_multiply(1_u128 << 96, 1), None);
     }
 
@@ -539,12 +640,16 @@ mod tests {
     fn d96_multiply_exact_matches_independent_u128_oracle() {
         let mut state = 0x9e37_41c6_f02a_b8d5_u64;
         for _ in 0..4096 {
-            state ^= state << 13; state ^= state >> 7; state ^= state << 17;
+            state ^= state << 13;
+            state ^= state >> 7;
+            state ^= state << 17;
             let a = u128::from(state & ((1_u64 << 60) - 1));
-            state ^= state << 13; state ^= state >> 7; state ^= state << 17;
+            state ^= state << 13;
+            state ^= state >> 7;
+            state ^= state << 17;
             let b = u128::from(state & ((1_u64 << 60) - 1));
             let result = a * b;
-            let limbs = exact_u96_multiply(a,b).unwrap();
+            let limbs = exact_u96_multiply(a, b).unwrap();
             assert_eq!(limbs, [result as u64, (result >> 64) as u64, 0]);
         }
     }
@@ -556,12 +661,16 @@ mod tests {
             let mut b = vec![0_u64; len];
             b[0] = 1;
             assert_eq!(exact_words_add_sub("+", &a, &b), Some(vec![0; len]));
-            assert_eq!(exact_words_add_sub("-", &vec![0; len], &b),
-                       Some(vec![u64::MAX; len]));
+            assert_eq!(
+                exact_words_add_sub("-", &vec![0; len], &b),
+                Some(vec![u64::MAX; len])
+            );
             a[0] = 0;
             let diff = exact_words_add_sub("-", &a, &b).unwrap();
             assert_eq!(diff[0], u64::MAX);
-            assert!(diff[1..].iter().all(|&x| x == u64::MAX - 1 || x == u64::MAX));
+            assert!(diff[1..]
+                .iter()
+                .all(|&x| x == u64::MAX - 1 || x == u64::MAX));
         }
         assert_eq!(exact_words_add_sub("+", &[], &[]), None);
         assert_eq!(exact_words_add_sub("-", &[1], &[1, 2]), None);
@@ -597,8 +706,10 @@ mod tests {
             let zero = vec![0_u64; n];
             let one = [vec![1_u64], vec![0; n.saturating_sub(1)]].concat();
             assert_eq!(exact_words_mul_unsigned(&max, &zero), Some(vec![0; 2 * n]));
-            assert_eq!(exact_words_mul_unsigned(&max, &one),
-                       Some([max.clone(), vec![0; n]].concat()));
+            assert_eq!(
+                exact_words_mul_unsigned(&max, &one),
+                Some([max.clone(), vec![0; n]].concat())
+            );
             // Алгебраїчна тотожність (2^(64*n)-1)^2 = 2^(128*n)-2^(64*n+1)+1.
             // У молодшому слові 1, у слові n значення MAX-1,
             // у решті старших слів MAX. Для n=1 найстарше саме MAX-1.
@@ -606,8 +717,11 @@ mod tests {
             expected[0] = 1;
             expected[n] = u64::MAX - 1;
             expected[n + 1..].fill(u64::MAX);
-            assert_eq!(exact_words_mul_unsigned(&max, &max), Some(expected),
-                       "повний квадрат (2^(64*{n})-1)");
+            assert_eq!(
+                exact_words_mul_unsigned(&max, &max),
+                Some(expected),
+                "повний квадрат (2^(64*{n})-1)"
+            );
         }
         assert_eq!(exact_words_mul_unsigned(&[], &[]), None);
         assert_eq!(exact_words_mul_unsigned(&[1], &[1, 2]), None);
@@ -621,9 +735,13 @@ mod tests {
                 let mut left = vec![0_u64; n];
                 let mut right = vec![0_u64; n];
                 for i in 0..n {
-                    seed ^= seed << 13; seed ^= seed >> 7; seed ^= seed << 17;
+                    seed ^= seed << 13;
+                    seed ^= seed >> 7;
+                    seed ^= seed << 17;
                     left[i] = if repeat % 11 == 0 { u64::MAX } else { seed };
-                    seed ^= seed << 13; seed ^= seed >> 7; seed ^= seed << 17;
+                    seed ^= seed << 13;
+                    seed ^= seed >> 7;
+                    seed ^= seed << 17;
                     right[i] = if repeat % 13 == 0 { u64::MAX } else { seed };
                 }
                 let mut oracle = vec![0_u64; 2 * n];
@@ -632,14 +750,18 @@ mod tests {
                     for j in 0..n {
                         let k = i + j;
                         let value = u128::from(left[i]) * u128::from(right[j])
-                            + u128::from(oracle[k]) + carry;
+                            + u128::from(oracle[k])
+                            + carry;
                         oracle[k] = value as u64;
                         carry = value >> 64;
                     }
                     oracle[i + n] = carry as u64;
                 }
-                assert_eq!(exact_words_mul_unsigned(&left, &right), Some(oracle),
-                           "words={n} repetition={repeat}");
+                assert_eq!(
+                    exact_words_mul_unsigned(&left, &right),
+                    Some(oracle),
+                    "words={n} repetition={repeat}"
+                );
             }
         }
     }
@@ -650,8 +772,16 @@ mod tests {
             let xs = [-bound, -bound + 1, -17, -3, -1, 0, 1, 3, 17, bound - 1];
             for a in xs {
                 for b in xs {
-                    let expected = if b == 0 || a % b != 0 { None } else { Some(a / b) };
-                    assert_eq!(exact_small_integer_quotient(width, a, b), expected, "D{width} {a}/{b}");
+                    let expected = if b == 0 || a % b != 0 {
+                        None
+                    } else {
+                        Some(a / b)
+                    };
+                    assert_eq!(
+                        exact_small_integer_quotient(width, a, b),
+                        expected,
+                        "D{width} {a}/{b}"
+                    );
                 }
             }
             assert_eq!(exact_small_integer_quotient(width, -bound, -1), Some(bound));
@@ -667,11 +797,19 @@ mod tests {
     fn exact_idiv_matches_independent_integer_oracle_4096_cases() {
         let mut seed = 0xd8a7_6f59_c213_4e0b_u64;
         for _ in 0..4096 {
-            seed ^= seed << 13; seed ^= seed >> 7; seed ^= seed << 17;
+            seed ^= seed << 13;
+            seed ^= seed >> 7;
+            seed ^= seed << 17;
             let a = ((seed & ((1_u64 << 48) - 1)) as i64) - (1_i64 << 47);
-            seed ^= seed << 13; seed ^= seed >> 7; seed ^= seed << 17;
+            seed ^= seed << 13;
+            seed ^= seed >> 7;
+            seed ^= seed << 17;
             let b = ((seed & ((1_u64 << 48) - 1)) as i64) - (1_i64 << 47);
-            let expected = if b == 0 || a % b != 0 { None } else { Some(a / b) };
+            let expected = if b == 0 || a % b != 0 {
+                None
+            } else {
+                Some(a / b)
+            };
             assert_eq!(exact_small_integer_quotient(48, a, b), expected);
         }
     }
@@ -687,16 +825,24 @@ mod tests {
             let mut one = vec![0_u64; n];
             one[0] = 1;
             let zero = vec![0_u64; n];
-            assert_eq!(exact_words_div_rem_unsigned(&divisor, &divisor),
-                       Some((one.clone(), zero.clone())));
-            assert_eq!(exact_words_div_rem_unsigned(&one, &divisor),
-                       Some((zero.clone(), one.clone())));
-            assert_eq!(exact_words_div_rem_unsigned(&zero, &divisor),
-                       Some((zero.clone(), zero)));
+            assert_eq!(
+                exact_words_div_rem_unsigned(&divisor, &divisor),
+                Some((one.clone(), zero.clone()))
+            );
+            assert_eq!(
+                exact_words_div_rem_unsigned(&one, &divisor),
+                Some((zero.clone(), one.clone()))
+            );
+            assert_eq!(
+                exact_words_div_rem_unsigned(&zero, &divisor),
+                Some((zero.clone(), zero))
+            );
             let dividend = vec![u64::MAX; n];
             let (q, r) = exact_words_div_rem_unsigned(&dividend, &divisor).unwrap();
-            assert_eq!(r.iter().rev().cmp(divisor.iter().rev()),
-                       std::cmp::Ordering::Less);
+            assert_eq!(
+                r.iter().rev().cmp(divisor.iter().rev()),
+                std::cmp::Ordering::Less
+            );
             // Алгебраїчна тотожність незалежно від конкретного алгоритму:
             // dividend = quotient * divisor + remainder.
             let product = exact_words_mul_unsigned(&q, &divisor).unwrap();
@@ -712,25 +858,42 @@ mod tests {
     fn full_width_division_matches_independent_u128_oracle() {
         let mut seed = 0x4f79_1ab3_8052_dc6e_u64;
         for case in 0..4096 {
-            seed ^= seed << 13; seed ^= seed >> 7; seed ^= seed << 17;
+            seed ^= seed << 13;
+            seed ^= seed >> 7;
+            seed ^= seed << 17;
             let a0 = seed;
-            seed ^= seed << 13; seed ^= seed >> 7; seed ^= seed << 17;
+            seed ^= seed << 13;
+            seed ^= seed >> 7;
+            seed ^= seed << 17;
             let a1 = seed;
-            seed ^= seed << 13; seed ^= seed >> 7; seed ^= seed << 17;
+            seed ^= seed << 13;
+            seed ^= seed >> 7;
+            seed ^= seed << 17;
             let d0 = seed;
-            seed ^= seed << 13; seed ^= seed >> 7; seed ^= seed << 17;
+            seed ^= seed << 13;
+            seed ^= seed >> 7;
+            seed ^= seed << 17;
             let d1 = seed | 1; // справжній широкий ненульовий дільник
             let numerator = (u128::from(a1) << 64) | u128::from(a0);
             let denominator = (u128::from(d1) << 64) | u128::from(d0);
             let (q, r) = exact_words_div_rem_unsigned(&[a0, a1], &[d0, d1]).unwrap();
             let expected_q = numerator / denominator;
             let expected_r = numerator % denominator;
-            assert_eq!(q, vec![expected_q as u64, (expected_q >> 64) as u64], "case {case}");
-            assert_eq!(r, vec![expected_r as u64, (expected_r >> 64) as u64], "case {case}");
+            assert_eq!(
+                q,
+                vec![expected_q as u64, (expected_q >> 64) as u64],
+                "case {case}"
+            );
+            assert_eq!(
+                r,
+                vec![expected_r as u64, (expected_r >> 64) as u64],
+                "case {case}"
+            );
         }
-        assert_eq!(exact_words_div_rem_unsigned(&[u64::MAX, 1], &[3, 0]),
-                   exact_words_div_rem_u64(&[u64::MAX, 1], 3)
-                       .map(|(q, r)| (q, vec![r, 0])));
+        assert_eq!(
+            exact_words_div_rem_unsigned(&[u64::MAX, 1], &[3, 0]),
+            exact_words_div_rem_u64(&[u64::MAX, 1], 3).map(|(q, r)| (q, vec![r, 0]))
+        );
     }
 
     #[test]
@@ -760,10 +923,14 @@ mod tests {
             for _ in 0..1024 {
                 let mut input = Vec::new();
                 for _ in 0..n {
-                    seed ^= seed << 13; seed ^= seed >> 7; seed ^= seed << 17;
+                    seed ^= seed << 13;
+                    seed ^= seed >> 7;
+                    seed ^= seed << 17;
                     input.push(seed);
                 }
-                seed ^= seed << 13; seed ^= seed >> 7; seed ^= seed << 17;
+                seed ^= seed << 13;
+                seed ^= seed >> 7;
+                seed ^= seed << 17;
                 let divisor = seed | 1;
                 let (quot, rem) = exact_words_div_rem_u64(&input, divisor).unwrap();
                 assert!(rem < divisor);
@@ -775,12 +942,17 @@ mod tests {
                 }
                 assert_eq!(carry, 0);
                 if n <= 2 {
-                    let value = u128::from(input[0]) | if n == 2 {
-                        u128::from(input[1]) << 64
-                    } else { 0 };
+                    let value = u128::from(input[0])
+                        | if n == 2 {
+                            u128::from(input[1]) << 64
+                        } else {
+                            0
+                        };
                     let expect = value / u128::from(divisor);
                     assert_eq!(quot[0], expect as u64);
-                    if n == 2 { assert_eq!(quot[1], (expect >> 64) as u64); }
+                    if n == 2 {
+                        assert_eq!(quot[1], (expect >> 64) as u64);
+                    }
                     assert_eq!(rem, (value % u128::from(divisor)) as u64);
                 }
             }

@@ -99,10 +99,7 @@ struct Review {
 }
 
 fn validate_review(review: &Review) -> Result<(), String> {
-    for (name, value) in [
-        ("topic", &review.topic),
-        ("reviewer", &review.reviewer),
-    ] {
+    for (name, value) in [("topic", &review.topic), ("reviewer", &review.reviewer)] {
         if value.trim().is_empty() {
             return Err(format!("{name} must not be empty"));
         }
@@ -396,7 +393,11 @@ mod tests {
         let text = format!("{reviewed}\n{still_pending}\n{verdict}\n");
 
         let all = list_lines(&text, false);
-        assert_eq!(all.len(), 3, "unfiltered list keeps candidates and verdicts");
+        assert_eq!(
+            all.len(),
+            3,
+            "unfiltered list keeps candidates and verdicts"
+        );
 
         let pending = list_lines(&text, true);
         assert_eq!(pending, vec![still_pending]);

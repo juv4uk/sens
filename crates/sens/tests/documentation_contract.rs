@@ -39,9 +39,15 @@ fn tracked_function_reference_tracks_live_library_definitions() {
     let reference = include_str!("../../../docs/FUNCTIONS.md");
 
     for (file, source) in [
-        ("result-status.lisp", include_str!("../../../lib/result-status.lisp")),
+        (
+            "result-status.lisp",
+            include_str!("../../../lib/result-status.lisp"),
+        ),
         ("narrate.lisp", include_str!("../../../lib/narrate.lisp")),
-        ("translation.lisp", include_str!("../../../lib/translation.lisp")),
+        (
+            "translation.lisp",
+            include_str!("../../../lib/translation.lisp"),
+        ),
         ("quantity.lisp", include_str!("../../../lib/quantity.lisp")),
         ("si.lisp", include_str!("../../../lib/si.lisp")),
     ] {

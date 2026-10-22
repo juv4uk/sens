@@ -1,6 +1,12 @@
-#![cfg(all(any(target_os = "linux", target_os = "windows"), target_arch = "x86_64"))]
+#![cfg(all(
+    any(target_os = "linux", target_os = "windows"),
+    target_arch = "x86_64"
+))]
 
-use sens::{eval_parsed_expressions, eval_program, load_core_library, parse_mixed_exact_domain_machine_source, Exactness, Session, Value};
+use sens::{
+    eval_parsed_expressions, eval_program, load_core_library,
+    parse_mixed_exact_domain_machine_source, Exactness, Session, Value,
+};
 use sens_host::install;
 use std::fs;
 use std::path::PathBuf;
@@ -17,10 +23,13 @@ fn load_lisp_file(path: &str, session: &mut Session) {
     let file_path = repo_root().join(path);
     let source = fs::read_to_string(&file_path)
         .unwrap_or_else(|error| panic!("{} must exist: {error}", file_path.display()));
-    let expressions = parse_mixed_exact_domain_machine_source(path, &source)
-        .unwrap_or_else(|error| panic!("{path} must parse as exact-domain machine source: {error}"));
-    eval_parsed_expressions(&expressions, session)
-        .unwrap_or_else(|error| panic!("{path} must load through the machine-source reader: {error}"));
+    let expressions =
+        parse_mixed_exact_domain_machine_source(path, &source).unwrap_or_else(|error| {
+            panic!("{path} must parse as exact-domain machine source: {error}")
+        });
+    eval_parsed_expressions(&expressions, session).unwrap_or_else(|error| {
+        panic!("{path} must load through the machine-source reader: {error}")
+    });
 }
 
 #[test]
@@ -36,10 +45,7 @@ fn bounded_eq_cond_native_execution_follows_generated_cmp_jnz_branches() {
     // emits CMP + JNZ with two concrete u64 branch payloads. SENS EQ/COND
     // semantics are owned by the language contracts and Lisp/SENS witnesses,
     // not reconstructed here from a compatibility evaluator.
-    for (left, right, expected_branch_value) in [
-        (2_u64, 2_u64, 111_u64),
-        (2_u64, 3_u64, 222_u64),
-    ] {
+    for (left, right, expected_branch_value) in [(2_u64, 2_u64, 111_u64), (2_u64, 3_u64, 222_u64)] {
         let native_source = format!(
             "(викликати-допущену-машинну-програму (машина-знизити-рівність-та-умову-64 {left} {right} 111 222) 0)"
         );

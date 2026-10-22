@@ -1,5 +1,5 @@
 //! Macro-produced code must carry exact domain identities, not flat SID bytes.
-use sens::{eval_exact_domain_program, DomainIdentity, DomainD10, ErrorKind, Session, Value};
+use sens::{eval_exact_domain_program, DomainD10, DomainIdentity, ErrorKind, Session, Value};
 
 #[test]
 fn generated_quote_stage_preserves_the_exact_domain_coordinate() {
@@ -24,22 +24,17 @@ fn transported_d10_definition_remains_callable_only_when_bound() {
     let mut session = Session::bare();
     sens::load_core_library(&mut session).expect("current Core definitions load");
 
-    let result = eval_exact_domain_program(
-        "(((0010 (head) head) 0100001100) (001 ()))",
-        &mut session,
-    )
-    .expect("transported concrete D10 LISTP closure remains callable");
+    let result =
+        eval_exact_domain_program("(((0010 (head) head) 0100001100) (001 ()))", &mut session)
+            .expect("transported concrete D10 LISTP closure remains callable");
     assert!(matches!(
         result.value,
         Value::DomainIdentity(DomainIdentity::D1(bit)) if bit.word().packed_bits() == 1
     ));
 
     let mut bare = Session::bare();
-    let error = eval_exact_domain_program(
-        "(((0010 (head) head) 0100001100) (001 ()))",
-        &mut bare,
-    )
-    .expect_err("identity transport alone must not install a callable mechanism");
+    let error = eval_exact_domain_program("(((0010 (head) head) 0100001100) (001 ()))", &mut bare)
+        .expect_err("identity transport alone must not install a callable mechanism");
     assert_eq!(error.kind, ErrorKind::Type);
 }
 

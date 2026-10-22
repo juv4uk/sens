@@ -100,7 +100,8 @@ fn read_file_rejects_invalid_utf8_without_lossy_replacement() {
     fs::write(&path, [0xFFu8]).unwrap();
 
     let source = format!(r#"(read-file "{}")"#, lisp_path(&path));
-    let result = eval_program(&source, &mut session).expect("invalid UTF-8 must be a language-level rejection value, not a Rust panic/error");
+    let result = eval_program(&source, &mut session)
+        .expect("invalid UTF-8 must be a language-level rejection value, not a Rust panic/error");
     assert_eq!(result.value.to_string(), "(rejected invalid-utf8)");
 
     fs::remove_file(&path).ok();

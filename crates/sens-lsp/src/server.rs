@@ -181,25 +181,27 @@ impl Server {
     fn publish(&self, uri: &str) -> String {
         let diagnostics = match self.documents.get(uri) {
             Some(text) => match analysis::analyze(text) {
-                Ok(_) => match analysis::arity_diagnostics_with_items(text, &self.guard.arity_items()) {
-                    Ok(diagnostics) => diagnostics
-                        .into_iter()
-                        .map(|diagnostic| {
-                            protocol::diagnostic(
-                                text,
-                                &diagnostic.message,
-                                diagnostic.span.start,
-                                diagnostic.span.end,
-                            )
-                        })
-                        .collect(),
-                    Err(err) => vec![protocol::diagnostic(
-                        text,
-                        &err.message,
-                        err.span.start,
-                        err.span.end,
-                    )],
-                },
+                Ok(_) => {
+                    match analysis::arity_diagnostics_with_items(text, &self.guard.arity_items()) {
+                        Ok(diagnostics) => diagnostics
+                            .into_iter()
+                            .map(|diagnostic| {
+                                protocol::diagnostic(
+                                    text,
+                                    &diagnostic.message,
+                                    diagnostic.span.start,
+                                    diagnostic.span.end,
+                                )
+                            })
+                            .collect(),
+                        Err(err) => vec![protocol::diagnostic(
+                            text,
+                            &err.message,
+                            err.span.start,
+                            err.span.end,
+                        )],
+                    }
+                }
                 Err(err) => vec![protocol::diagnostic(
                     text,
                     &err.message,

@@ -1,5 +1,5 @@
 use wsm_datalog_kernel::{
-    Atom, Database, DatalogAbiAdapter, Program, Rule, LegacyAbiSemanticId, Term, Value,
+    Atom, Database, DatalogAbiAdapter, LegacyAbiSemanticId, Program, Rule, Term, Value,
 };
 use wsm_kernel_c_abi::{
     WsmByteSpan, WsmKernelKind, WsmKernelRequest, WsmMutableByteSpan, WsmStatus,
@@ -69,7 +69,10 @@ fn opaque_legacy_abi_id_crosses_same_c_abi_into_datalog_fixpoint() {
         String::from_utf8_lossy(&output[..written]),
         "path(1,2)\npath(1,3)\npath(1,4)\npath(2,3)\npath(2,4)\npath(3,4)\n"
     );
-    assert_eq!(adapter.last_legacy_abi_id(), Some(LegacyAbiSemanticId(PROBE_ID)));
+    assert_eq!(
+        adapter.last_legacy_abi_id(),
+        Some(LegacyAbiSemanticId(PROBE_ID))
+    );
 
     assert_eq!(
         unsafe { vtable.stop.expect("stop")(vtable.context) },
@@ -114,7 +117,10 @@ fn datalog_native_relations_preserve_zero_one_many_without_truth_projection() {
 
     let (zero_status, zero) = exchange_relation(&adapter, b"missing");
     assert_eq!(zero_status, WsmStatus::Ok);
-    assert!(zero.is_empty(), "empty relation stays an empty Datalog observation");
+    assert!(
+        zero.is_empty(),
+        "empty relation stays an empty Datalog observation"
+    );
 
     let (one_status, one) = exchange_relation(&adapter, b"singleton");
     assert_eq!(one_status, WsmStatus::Ok);
@@ -124,7 +130,10 @@ fn datalog_native_relations_preserve_zero_one_many_without_truth_projection() {
     assert_eq!(many_status, WsmStatus::Ok);
     assert_eq!(many.iter().filter(|byte| **byte == b'\n').count(), 6);
 
-    assert_eq!(adapter.last_legacy_abi_id(), Some(LegacyAbiSemanticId(PROBE_ID)));
+    assert_eq!(
+        adapter.last_legacy_abi_id(),
+        Some(LegacyAbiSemanticId(PROBE_ID))
+    );
     assert_eq!(
         unsafe { vtable.stop.expect("stop")(vtable.context) },
         WsmStatus::Ok

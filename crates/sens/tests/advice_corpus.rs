@@ -3,7 +3,7 @@
 //! The cases are chosen for distinct failure/derivation modes, not fixture count.
 
 use sens::{
-    eval_parsed_expressions, eval_core_library_source, eval_pinned_reasoning_source,
+    eval_core_library_source, eval_parsed_expressions, eval_pinned_reasoning_source,
     parse_exact_domain_source, parse_mixed_exact_domain, Session,
 };
 
@@ -11,27 +11,38 @@ fn eval_advice_corpus(source: &str) -> String {
     let mut session = Session::default();
     // Legacy eval_program treats bare 0011 as an arithmetic literal. The
     // repository-pinned Core reader keeps the original D4 DEFINE identity.
-    eval_core_library_source(include_str!("../../../lib/core.lisp"),
-        &mut session,
-    )
-    .expect("pinned exact-width SENS core bootstrap");
+    eval_core_library_source(include_str!("../../../lib/core.lisp"), &mut session)
+        .expect("pinned exact-width SENS core bootstrap");
     for (library_path, library) in [
         ("lib/unify.lisp", include_str!("../../../lib/unify.lisp")),
         ("lib/reason.lisp", include_str!("../../../lib/reason.lisp")),
-        ("lib/forward.lisp", include_str!("../../../lib/forward.lisp")),
-        ("lib/knowledge.lisp", include_str!("../../../lib/knowledge.lisp")),
+        (
+            "lib/forward.lisp",
+            include_str!("../../../lib/forward.lisp"),
+        ),
+        (
+            "lib/knowledge.lisp",
+            include_str!("../../../lib/knowledge.lisp"),
+        ),
         // Admission and package-import policies now belong to immutable World.
         // The host only loads the exact-domain SENS source; it defines no law.
         ("lib/world.lisp", include_str!("../../../lib/world.lisp")),
-        ("lib/understand.lisp", include_str!("../../../lib/understand.lisp")),
-        ("lib/result-status.lisp", include_str!("../../../lib/result-status.lisp")),
-        ("lib/narrate.lisp", include_str!("../../../lib/narrate.lisp")),
+        (
+            "lib/understand.lisp",
+            include_str!("../../../lib/understand.lisp"),
+        ),
+        (
+            "lib/result-status.lisp",
+            include_str!("../../../lib/result-status.lisp"),
+        ),
+        (
+            "lib/narrate.lisp",
+            include_str!("../../../lib/narrate.lisp"),
+        ),
     ] {
         let result = match library_path {
-            "lib/unify.lisp" | "lib/reason.lisp" | "lib/forward.lisp"
-            | "lib/knowledge.lisp" | "lib/world.lisp" => {
-                eval_pinned_reasoning_source(library_path, library, &mut session)
-            }
+            "lib/unify.lisp" | "lib/reason.lisp" | "lib/forward.lisp" | "lib/knowledge.lisp"
+            | "lib/world.lisp" => eval_pinned_reasoning_source(library_path, library, &mut session),
             "lib/understand.lisp" => {
                 let parsed = parse_mixed_exact_domain(library)
                     .unwrap_or_else(|error| panic!("{library_path}: source reader: {error}"));
@@ -44,8 +55,9 @@ fn eval_advice_corpus(source: &str) -> String {
             }
             _ => unreachable!("only the pinned corpus libraries are admitted"),
         };
-        result
-            .unwrap_or_else(|error| panic!("SENS corpus dependency {library_path} failed: {error}"));
+        result.unwrap_or_else(|error| {
+            panic!("SENS corpus dependency {library_path} failed: {error}")
+        });
     }
     // The authored corpus contains literal 3-bit QUOTE/CAR heads. The mixed
     // legacy reader may reinterpret 001/100 as numeric values (#q2:1/1).

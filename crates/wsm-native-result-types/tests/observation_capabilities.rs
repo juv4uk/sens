@@ -1,10 +1,12 @@
 use wsm_clips_kernel::{ClipsExecutionResult, LegacyAbiSemanticId as ClipsLegacyAbiSemanticId};
-use wsm_common_lisp_kernel::{CommonLispResult, LegacyAbiSemanticId as CommonLispLegacyAbiSemanticId};
+use wsm_common_lisp_kernel::{
+    CommonLispResult, LegacyAbiSemanticId as CommonLispLegacyAbiSemanticId,
+};
 use wsm_datalog_kernel::{Database, Value};
 use wsm_native_result_types::{
     FourKernelObservation, ObservationCapability, ObservationCapabilityError, ProducerSlot,
 };
-use wsm_prolog_kernel::{PrologExecutionResult, LegacyAbiSemanticId as PrologLegacyAbiSemanticId};
+use wsm_prolog_kernel::{LegacyAbiSemanticId as PrologLegacyAbiSemanticId, PrologExecutionResult};
 
 fn observation() -> FourKernelObservation {
     let mut datalog = Database::new();

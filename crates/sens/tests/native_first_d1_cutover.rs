@@ -1,9 +1,6 @@
 //! Runtime witness for thirty exact-D1 native-first source cuts.
 //! Історичні обгортки D1 фізично вилучено: використовуємо тільки прямі D1.
-use sens::{
-    eval_parsed_expressions, parse_mixed_exact_domain_machine_source, ErrorKind,
-    Session,
-};
+use sens::{eval_parsed_expressions, parse_mixed_exact_domain_machine_source, ErrorKind, Session};
 
 const PATH: &str = "lib/machine/dispatch/native-first.lisp";
 const SOURCE: &str = include_str!("../../../lib/machine/dispatch/native-first.lisp");
@@ -38,8 +35,10 @@ fn real_native_first_classifier_still_rejects_unlowerable_forms() {
     for argument in ["(як-є ())", "(як-є (symbol))"] {
         let source = format!("(класифікувати-нативний-вираз {argument})");
         let value = eval(&mut s, &source).expect("native-first evaluation for unsupported form");
-        assert!(value.to_string().starts_with("(evaluator-fallback "),
-            "{source} must use evaluator-fallback; got {value}");
+        assert!(
+            value.to_string().starts_with("(evaluator-fallback "),
+            "{source} must use evaluator-fallback; got {value}"
+        );
     }
 }
 
@@ -53,8 +52,8 @@ fn real_native_first_classifier_handles_atomic_and_compound_heads() {
         "(класифікувати-нативний-вираз (як-є (перше 1)))",
         "(класифікувати-нативний-вираз (як-є ((функція (значення) значення) 1)))",
     ] {
-        let value = eval(&mut s, source)
-            .expect("SENS classifier must not apply D3 EQ to a pair head");
+        let value =
+            eval(&mut s, source).expect("SENS classifier must not apply D3 EQ to a pair head");
         assert!(
             value.to_string().starts_with("(evaluator-fallback "),
             "{source} must preserve evaluator fallback; got {value}"
@@ -94,8 +93,11 @@ fn typed_native_operands_use_named_sens_execution_not_anonymous_d5_value_call() 
     assert_eq!(lexical.to_string(), "джерело");
     // Негативний мутант: те саме замикання не надає CAR права
     // застосовувати селектор пари до атома.
-    let error = eval(&mut s, "((функція (значення) (перше значення)) (як-є джерело))")
-        .expect_err("SENS D3 CAR відхиляє атом");
+    let error = eval(
+        &mut s,
+        "((функція (значення) (перше значення)) (як-є джерело))",
+    )
+    .expect_err("SENS D3 CAR відхиляє атом");
     assert_eq!(error.kind, ErrorKind::Type);
 }
 
@@ -117,7 +119,11 @@ fn typed_native_operands_reject_short_long_and_dotted_shapes_before_lowering() {
         );
         let answer = eval(&mut s, &program)
             .unwrap_or_else(|error| panic!("SENS відхиляє неповний операнд: {program}: {error}"));
-        assert_eq!(answer.to_string(), "(evaluator-fallback джерело)", "{program}");
+        assert_eq!(
+            answer.to_string(),
+            "(evaluator-fallback джерело)",
+            "{program}"
+        );
     }
 }
 
@@ -137,7 +143,6 @@ fn exact_reader_does_not_generalize_machine_source_paths() {
     assert!(!SOURCE.contains("(визначити native-first-domain-false"));
     assert!(parse_mixed_exact_domain_machine_source("lib/untrusted.lisp", SOURCE).is_err());
 }
-
 
 #[test]
 fn lexical_shape_callback_preserves_exact_d3_width_and_predicate_bits() {
@@ -159,13 +164,12 @@ fn lexical_shape_callback_preserves_exact_d3_width_and_predicate_bits() {
             ("нативний-домен-сполучити?", expected_cons),
         ] {
             let source = format!("({head} {callback} (як-є довільне))");
-            let actual = eval(&mut s, &source)
-                .expect("SENS must apply the lexically bound shape callback");
+            let actual =
+                eval(&mut s, &source).expect("SENS must apply the lexically bound shape callback");
             assert_eq!(actual.as_predicate_bit(), Some(expected), "{source}");
         }
     }
 }
-
 
 /// Виконуваний український Lisp, а не host-side лексична імітація.
 /// Ратифіковане D1:0 пропускається, позитивний D3 ATOM(QUOTE NIL)
@@ -173,7 +177,10 @@ fn lexical_shape_callback_preserves_exact_d3_width_and_predicate_bits() {
 #[test]
 fn migrated_ukrainian_cond_file_executes_exact_d1_on_sens() {
     let source = include_str!("../../../examples/migrated/smoke-cond.lisp");
-    assert!(!source.contains("(так "), "текстове так не має бути викличною головою");
+    assert!(
+        !source.contains("(так "),
+        "текстове так не має бути викличною головою"
+    );
     let mut session = sens::Session::default();
     let result = sens::eval_program(source, &mut session)
         .expect("SENS має виконати фізичне джерело української умовної форми");
@@ -182,6 +189,7 @@ fn migrated_ukrainian_cond_file_executes_exact_d1_on_sens() {
     let reject = sens::eval_program(
         "(за-умовою ((атом? (як-є ())) ні) ((атом? (як-є ())) так))",
         &mut session,
-    ).expect("SENS COND має виконати лише першу істинну гілку");
+    )
+    .expect("SENS COND має виконати лише першу істинну гілку");
     assert_eq!(reject.value.as_predicate_bit(), Some(false));
 }

@@ -3,8 +3,8 @@
 //! swarm.rs. Moved verbatim from main.rs (2026-08-22 mechanical split).
 
 use sens::{
-    eval_parsed_expressions, eval_parsed_expressions_incremental,
-    load_macro_library, load_process_library, parse, Environment, Session,
+    eval_parsed_expressions, eval_parsed_expressions_incremental, load_macro_library,
+    load_process_library, parse, Environment, Session,
 };
 use std::io::{BufRead, BufReader, Write};
 use std::net::{Ipv4Addr, TcpListener};

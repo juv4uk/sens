@@ -352,8 +352,7 @@ impl Unsupported {
 }
 
 fn translate_source(source: &str) -> Result<String, Unsupported> {
-    let expressions =
-        sens::parse(source).map_err(|_| Unsupported::new("external-oracle/parse"))?;
+    let expressions = sens::parse(source).map_err(|_| Unsupported::new("external-oracle/parse"))?;
     if expressions.len() != 1 {
         return Err(Unsupported::new("external-oracle/top-level-arity"));
     }
@@ -383,9 +382,7 @@ fn translate_expr(expr: &Expr) -> Result<String, Unsupported> {
         // conversion is arbitrary-width and never passes through a host integer.
         ExprKind::BinaryNumber(number) => Ok(number.to_decimal_string()),
         ExprKind::Sid(sid) => Ok(sid.to_string()),
-        ExprKind::DomainIdentity(_) => {
-            Err(Unsupported::new("external-oracle/domain-identity"))
-        }
+        ExprKind::DomainIdentity(_) => Err(Unsupported::new("external-oracle/domain-identity")),
         ExprKind::String(_) => Err(Unsupported::new("external-oracle/string")),
         ExprKind::Pair(_, _) => Err(Unsupported::new("external-oracle/pair")),
         ExprKind::NumericBuffer(_) => Err(Unsupported::new("external-oracle/numeric-buffer")),
@@ -393,9 +390,7 @@ fn translate_expr(expr: &Expr) -> Result<String, Unsupported> {
         ExprKind::List(items) => translate_call(items),
         // Парсер не породжує зведених викликів; сюди надходить лише parse().
         ExprKind::Call(_, _) => Err(Unsupported::new("external-oracle/lowered-call")),
-        ExprKind::DomainCall(_, _) => {
-            Err(Unsupported::new("external-oracle/domain-lowered-call"))
-        }
+        ExprKind::DomainCall(_, _) => Err(Unsupported::new("external-oracle/domain-lowered-call")),
         ExprKind::Local { .. } => Err(Unsupported::new("external-oracle/slot-local")),
     }
 }
@@ -486,10 +481,7 @@ mod tests {
     #[test]
     fn exact_quotient_and_quotient_remainder_are_distinct_current_operations() {
         assert!(admitted_core_domain_for_surface("частка").is_some());
-        assert_eq!(
-            translate_source("(частка 8 3)").unwrap(),
-            "Divide[8, 3]"
-        );
+        assert_eq!(translate_source("(частка 8 3)").unwrap(), "Divide[8, 3]");
         assert_eq!(
             translate_source("(частка (частка (частка 5 6) 8) 7)").unwrap(),
             "Divide[Divide[Divide[5, 6], 8], 7]"
@@ -506,13 +498,19 @@ mod tests {
 
     #[test]
     fn addition_uses_total_and_exact_zero_identity() {
-        assert_eq!(translate_source("(додати 1 2 3)").unwrap(), "Total[{1, 2, 3}]");
+        assert_eq!(
+            translate_source("(додати 1 2 3)").unwrap(),
+            "Total[{1, 2, 3}]"
+        );
         assert_eq!(translate_source("(додати)").unwrap(), "Total[{}]");
     }
 
     #[test]
     fn multiplication_uses_times_and_exact_one_identity() {
-        assert_eq!(translate_source("(помножити 2 3 4)").unwrap(), "Times[2, 3, 4]");
+        assert_eq!(
+            translate_source("(помножити 2 3 4)").unwrap(),
+            "Times[2, 3, 4]"
+        );
         assert_eq!(translate_source("(помножити)").unwrap(), "Times[]");
     }
 
@@ -539,16 +537,22 @@ mod tests {
             assert_eq!(
                 translate_source(&format!("({canonical_surface} 8 2)")).unwrap(),
                 expected,
-            "surface {canonical_surface} must project through current identity {semantic_id}"
+                "surface {canonical_surface} must project through current identity {semantic_id}"
             );
         }
     }
 
     #[test]
     fn canonical_binary_number_projects_exactly_without_host_integer_identity() {
-        assert_eq!(translate_source("(додати #b10 #b11)").unwrap(), "Total[{2, 3}]");
         assert_eq!(
-            translate_source("(додати #b1111111111111111111111111111111111111111111111111111111111111111 1)").unwrap(),
+            translate_source("(додати #b10 #b11)").unwrap(),
+            "Total[{2, 3}]"
+        );
+        assert_eq!(
+            translate_source(
+                "(додати #b1111111111111111111111111111111111111111111111111111111111111111 1)"
+            )
+            .unwrap(),
             "Total[{18446744073709551615, 1}]"
         );
     }

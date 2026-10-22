@@ -51,13 +51,15 @@ fn current_eq_and_cond_surfaces_lower_to_exact_d3_identities() {
     };
     assert_eq!((eq_identity.width(), eq_identity.packed_bits()), (3, 0b101));
 
-    let cond_source =
-        "(за-умовою ((тотожне? 2 3) #d111) (1 #d222))";
+    let cond_source = "(за-умовою ((тотожне? 2 3) #d111) (1 #d222))";
     let cond = lower_program(&parse(cond_source).expect("COND source"));
     let ExprKind::DomainCall(cond_identity, clauses) = &cond[0].kind else {
         panic!("current COND surface must lower to DomainCall");
     };
-    assert_eq!((cond_identity.width(), cond_identity.packed_bits()), (3, 0b110));
+    assert_eq!(
+        (cond_identity.width(), cond_identity.packed_bits()),
+        (3, 0b110)
+    );
 
     let ExprKind::List(first_clause) = &clauses[0].kind else {
         panic!("COND first clause must remain structured");
@@ -116,10 +118,8 @@ fn eq_cond_composition_fails_closed_on_wrong_exact_identity() {
 
 #[test]
 fn current_eq_cond_route_does_not_publish_numeric_boolean_as_language_result() {
-    let source = fs::read_to_string(
-        repo_root().join("lib/machine/lowering/semantic-x86-64.lisp"),
-    )
-    .expect("semantic x86 lowering");
+    let source = fs::read_to_string(repo_root().join("lib/machine/lowering/semantic-x86-64.lisp"))
+        .expect("semantic x86 lowering");
 
     let start = source
         .find("(00001001 машина-знизити-поточну-рівність-та-умову-64")

@@ -148,12 +148,8 @@ pub fn load_or_init_identity(data_dir: &Path, node_id: &str) -> std::io::Result<
     let path = data_dir.join("node.lisp");
     let (epoch, stored_incarnation) = if path.exists() {
         let text = fs::read_to_string(&path)?;
-        let parsed = parse(&text).map_err(|e| {
-            invalid_data(format!(
-                "invalid node identity {}: {e}",
-                path.display()
-            ))
-        })?;
+        let parsed = parse(&text)
+            .map_err(|e| invalid_data(format!("invalid node identity {}: {e}", path.display())))?;
         if parsed.head() != Some("node") {
             return Err(invalid_data(format!(
                 "invalid node identity {}: expected node form",
@@ -529,7 +525,9 @@ mod incarnation_tests {
         let before = format!("{first}\n(event (node n)\n");
         fs::write(&path, &before).unwrap();
 
-        let err = Journal::open(&dir).err().expect("corrupt journal must fail closed");
+        let err = Journal::open(&dir)
+            .err()
+            .expect("corrupt journal must fail closed");
 
         assert_eq!(err.kind(), std::io::ErrorKind::InvalidData);
         assert!(err.to_string().contains("line 2"));
@@ -545,7 +543,9 @@ mod incarnation_tests {
         let before = "(event (node n) (seq 1) (type x))\n";
         fs::write(&path, before).unwrap();
 
-        let err = Journal::open(&dir).err().expect("invalid event must fail closed");
+        let err = Journal::open(&dir)
+            .err()
+            .expect("invalid event must fail closed");
 
         assert_eq!(err.kind(), std::io::ErrorKind::InvalidData);
         assert!(err.to_string().contains("event missing lamport"));
@@ -594,10 +594,7 @@ mod incarnation_tests {
         let mut journal = Journal::open(&dir).unwrap();
         journal.append(event("old", Some("AAA"), 1)).unwrap();
 
-        let replacement = vec![
-            event("new", Some("BBB"), 1),
-            event("new", Some("BBB"), 2),
-        ];
+        let replacement = vec![event("new", Some("BBB"), 1), event("new", Some("BBB"), 2)];
         let expected_replacement_ids: Vec<String> = replacement.iter().map(Event::id).collect();
         journal.replace_all(replacement).unwrap();
 
@@ -635,7 +632,10 @@ mod incarnation_tests {
         let replay = Journal::open(&dir).expect("stale temp must not become authority");
         assert_eq!(replay.events.len(), 1);
         assert_eq!(replay.events[0].id(), authoritative_id);
-        assert!(temp_path.exists(), "open must not confuse or publish the temp file");
+        assert!(
+            temp_path.exists(),
+            "open must not confuse or publish the temp file"
+        );
         let _ = fs::remove_dir_all(dir);
     }
 }

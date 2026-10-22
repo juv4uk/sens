@@ -49,7 +49,9 @@ fn spawn_oracle() -> (Child, u16) {
             .read_line(&mut line)
             .expect("oracle stderr should be readable");
         if bytes == 0 {
-            panic!("semantic oracle exited before announcing a listening port; stderr={diagnostics:?}");
+            panic!(
+                "semantic oracle exited before announcing a listening port; stderr={diagnostics:?}"
+            );
         }
 
         diagnostics.push(line.trim_end().to_string());
@@ -109,10 +111,7 @@ fn every_retired_coordination_op_is_rejected_by_the_semantic_oracle() {
         let response = request(port, &message);
 
         assert!(response.contains("(status error)"), "{op}: {response}");
-        assert!(
-            response.contains("(kind invalid-form)"),
-            "{op}: {response}"
-        );
+        assert!(response.contains("(kind invalid-form)"), "{op}: {response}");
         assert!(
             response.contains(&format!("unknown op `{op}`")),
             "retired op was not rejected as unknown: {op}: {response}"

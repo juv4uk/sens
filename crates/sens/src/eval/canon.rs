@@ -9,7 +9,9 @@ use super::{
     profile_mechanisms_generated::{profile_mechanism_route, ProfileMechanismRouteKind},
     special_forms,
 };
-use crate::{semantic_registry, Environment, ErrorKind, LanguageError, CoreDomainIdentity, Span, Value};
+use crate::{
+    semantic_registry, CoreDomainIdentity, Environment, ErrorKind, LanguageError, Span, Value,
+};
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub(crate) enum SidRouteKind {
@@ -86,7 +88,10 @@ fn immutable_surface_error(surface: &str, sid: CoreDomainIdentity, span: Span) -
     )
 }
 
-pub(crate) fn ensure_bindable_sid(sid: CoreDomainIdentity, span: Span) -> Result<(), LanguageError> {
+pub(crate) fn ensure_bindable_sid(
+    sid: CoreDomainIdentity,
+    span: Span,
+) -> Result<(), LanguageError> {
     Err(LanguageError::new(
         ErrorKind::InvalidForm,
         format!(
@@ -151,9 +156,7 @@ pub(crate) enum DomainPrimitiveKind {
 /// projects a current identity onto historical CoreDomainIdentity/Function8 bytes. The four
 /// D9 string operations below are a bounded mechanism cut, not general D9
 /// callability: every other D9 resident remains fail-closed.
-pub(crate) fn domain_primitive_kind(
-    identity: CoreDomainIdentity,
-) -> Option<DomainPrimitiveKind> {
+pub(crate) fn domain_primitive_kind(identity: CoreDomainIdentity) -> Option<DomainPrimitiveKind> {
     match identity {
         CoreDomainIdentity::D3(word) => match word.word().packed_bits() {
             0b010 => Some(DomainPrimitiveKind::AtomPredicate),
@@ -199,7 +202,10 @@ fn invoke_domain_primitive(
         if matches!(kind, DomainPrimitiveKind::Read) && args.len() > 1 {
             return Err(LanguageError::new(
                 ErrorKind::Arity,
-                format!("{identity}: expected at most 1 argument; received {}", args.len()),
+                format!(
+                    "{identity}: expected at most 1 argument; received {}",
+                    args.len()
+                ),
                 span,
             ));
         }
@@ -239,9 +245,7 @@ fn invoke_domain_primitive(
                 // unqualified scalar; neither escapes this canonical route.
                 let scalar = builtins::string_to_codepoint(args, environment, span)?;
                 match &scalar {
-                    Value::BinaryNumber(numeric)
-                        if numeric.numeric_domain_width() == Some(24) =>
-                    {
+                    Value::BinaryNumber(numeric) if numeric.numeric_domain_width() == Some(24) => {
                         Ok(scalar.clone())
                     }
                     Value::Number(codepoint, crate::Exactness::Exact)
@@ -265,7 +269,7 @@ fn invoke_domain_primitive(
                     )),
                 }
             }
-                        DomainPrimitiveKind::Read => {
+            DomainPrimitiveKind::Read => {
                 // D8:11101010 owns canonical READ, not the historical SID.
                 special_forms::read_values(args, environment, span)
             }
@@ -332,7 +336,10 @@ pub(crate) fn invoke_d9_string_mechanism(
         if args.len() != expected {
             return Err(LanguageError::new(
                 ErrorKind::Arity,
-                format!("D9 {identity}: expected {expected} arguments; received {}", args.len()),
+                format!(
+                    "D9 {identity}: expected {expected} arguments; received {}",
+                    args.len()
+                ),
                 span,
             ));
         }
@@ -340,24 +347,22 @@ pub(crate) fn invoke_d9_string_mechanism(
             D9StringPrimitiveKind::Append => {
                 super::special_forms::string_append_values(args, span)?
             }
-            D9StringPrimitiveKind::Empty => {
-                super::builtins::string_empty(args, environment, span)?
-            }
-            D9StringPrimitiveKind::Rest => {
-                super::builtins::string_rest(args, environment, span)?
-            }
+            D9StringPrimitiveKind::Empty => super::builtins::string_empty(args, environment, span)?,
+            D9StringPrimitiveKind::Rest => super::builtins::string_rest(args, environment, span)?,
             D9StringPrimitiveKind::Prefix => {
                 super::builtins::string_prefix(args, environment, span)?
             }
-            D9StringPrimitiveKind::First => {
-                super::builtins::string_first(args, environment, span)?
-            }
+            D9StringPrimitiveKind::First => super::builtins::string_first(args, environment, span)?,
             D9StringPrimitiveKind::StringP => {
                 Value::predicate_bit(matches!(&args[0], Value::String(_)))
             }
         };
-        if matches!(kind, D9StringPrimitiveKind::Empty | D9StringPrimitiveKind::Prefix | D9StringPrimitiveKind::StringP)
-            && value.as_predicate_bit().is_none()
+        if matches!(
+            kind,
+            D9StringPrimitiveKind::Empty
+                | D9StringPrimitiveKind::Prefix
+                | D9StringPrimitiveKind::StringP
+        ) && value.as_predicate_bit().is_none()
         {
             return Err(LanguageError::new(
                 ErrorKind::Type,
@@ -521,7 +526,9 @@ pub(crate) fn invoke_domain_identity(
         // populated only by an actual callable definition.
         if let Some(bound) = environment.domain_code_slot(domain_identity) {
             let result = match &bound {
-                Value::Closure(closure) => Some(closures::apply_values(closure.clone(), args, span)?),
+                Value::Closure(closure) => {
+                    Some(closures::apply_values(closure.clone(), args, span)?)
+                }
                 Value::Builtin(builtin) => Some((builtin.func)(args, environment, span)?),
                 _ => None,
             };
@@ -531,11 +538,13 @@ pub(crate) fn invoke_domain_identity(
         }
 
         return invoke_d9_string_mechanism(domain_identity, args, environment, span)
-            .unwrap_or_else(|| Err(LanguageError::new(
-                ErrorKind::Type,
-                format!("D9 identity has no admitted value-call mechanism: {identity}"),
-                span,
-            )));
+            .unwrap_or_else(|| {
+                Err(LanguageError::new(
+                    ErrorKind::Type,
+                    format!("D9 identity has no admitted value-call mechanism: {identity}"),
+                    span,
+                ))
+            });
     }
 
     if let Some(result) = invoke_d4_eval(identity, args, environment, span) {
@@ -598,7 +607,9 @@ pub(crate) fn invoke_semantic_ref(
     // Execution requires an exact current mechanism or a concrete callable
     // bound to this domain-qualified identity. No historical W8 dispatch.
     match &environment.code_slot(sid) {
-        Some(Value::Closure(closure)) => return closures::apply_values(closure.clone(), args, span),
+        Some(Value::Closure(closure)) => {
+            return closures::apply_values(closure.clone(), args, span)
+        }
         Some(Value::Builtin(builtin)) => return (builtin.func)(args, environment, span),
         _ => {}
     }
@@ -608,12 +619,8 @@ pub(crate) fn invoke_semantic_ref(
             profile_mechanism_route(profile, sid),
             Some(ProfileMechanismRouteKind::RegisteredHostMechanism)
         ) {
-            return match super::capabilities::dispatch_sens_capability(
-                sid,
-                args,
-                environment,
-                span,
-            ) {
+            return match super::capabilities::dispatch_sens_capability(sid, args, environment, span)
+            {
                 Some(result) => result,
                 None => Err(LanguageError::new(
                     ErrorKind::MechanismUnavailable,
@@ -640,7 +647,12 @@ pub(crate) fn has_primitive(identity: CoreDomainIdentity) -> bool {
 /// має примітиву й не є особливою формою, стає механізмом цього коду. Лише
 /// перше визначення; затінення назви пізніше слот не змінює.
 pub(crate) fn bind_language_definition(name: &str, value: &Value, environment: &Environment) {
-    if !environment.is_root() || !matches!(value, Value::Closure(_) | Value::Builtin(_) | Value::Macro(_)) {
+    if !environment.is_root()
+        || !matches!(
+            value,
+            Value::Closure(_) | Value::Builtin(_) | Value::Macro(_)
+        )
+    {
         return;
     }
 
@@ -712,7 +724,6 @@ pub(crate) fn bind_language_definition(name: &str, value: &Value, environment: &
     environment.bind_code_slot_once(sid, value.clone());
 }
 
-
 #[cfg(test)]
 mod exact_domain_primitive_tests {
     use super::*;
@@ -760,11 +771,15 @@ mod exact_domain_primitive_tests {
             name: "test-d9-definition",
             func: std::rc::Rc::new(marker),
         }));
-        assert!(environment.bind_domain_code_slot_once(crate::DomainIdentity::from(identity), bound));
+        assert!(
+            environment.bind_domain_code_slot_once(crate::DomainIdentity::from(identity), bound)
+        );
 
         let result = invoke_domain_identity(identity, &[], &environment, Span::default())
             .expect("exact D9 slot should be callable");
-        assert!(matches!(result, Value::String(ref value) if value.as_ref() == "bound-d9-definition"));
+        assert!(
+            matches!(result, Value::String(ref value) if value.as_ref() == "bound-d9-definition")
+        );
     }
 
     #[test]
@@ -776,14 +791,8 @@ mod exact_domain_primitive_tests {
         // builtins or on an unqualified numeric operator.
         let represented_program = Value::list([
             Value::Symbol("cons".into()),
-            Value::list([
-                Value::Symbol("quote".into()),
-                Value::Symbol("a".into()),
-            ]),
-            Value::list([
-                Value::Symbol("quote".into()),
-                Value::Nil,
-            ]),
+            Value::list([Value::Symbol("quote".into()), Value::Symbol("a".into())]),
+            Value::list([Value::Symbol("quote".into()), Value::Nil]),
         ]);
 
         let result = invoke_domain_identity(
@@ -802,17 +811,19 @@ mod exact_domain_primitive_tests {
             let error = invoke_domain_identity(d4(0b0001), &arguments, &environment, span)
                 .expect_err("D4:0001 EVAL requires exactly one represented expression");
             assert_eq!(error.kind, ErrorKind::Arity);
-            assert!(error.message.starts_with("D4:0001: expected /"), "{}", error.message);
+            assert!(
+                error.message.starts_with("D4:0001: expected /"),
+                "{}",
+                error.message
+            );
         }
 
-        let collision = invoke_domain_identity(
-            d3(0b001),
-            &[represented_program],
-            &environment,
-            span,
-        )
-        .expect_err("D3:001 QUOTE must not inherit D4:0001 EVAL's value-call mechanism");
-        assert!(collision.message.contains("no admitted value-call mechanism"));
+        let collision =
+            invoke_domain_identity(d3(0b001), &[represented_program], &environment, span)
+                .expect_err("D3:001 QUOTE must not inherit D4:0001 EVAL's value-call mechanism");
+        assert!(collision
+            .message
+            .contains("no admitted value-call mechanism"));
     }
 
     #[test]
@@ -909,7 +920,9 @@ mod exact_domain_primitive_tests {
             &[Value::String(std::rc::Rc::from(""))],
             &environment,
             span,
-        ).expect("D9 STRING-EMPTY? route").expect("D9 STRING-EMPTY? value");
+        )
+        .expect("D9 STRING-EMPTY? route")
+        .expect("D9 STRING-EMPTY? value");
         assert_eq!(empty.as_predicate_bit(), Some(true));
 
         let nonempty = invoke_d9_string_mechanism(
@@ -917,7 +930,9 @@ mod exact_domain_primitive_tests {
             &[Value::String(std::rc::Rc::from("q2:7/1"))],
             &environment,
             span,
-        ).expect("D9 STRING-EMPTY? route").expect("D9 STRING-EMPTY? value");
+        )
+        .expect("D9 STRING-EMPTY? route")
+        .expect("D9 STRING-EMPTY? value");
         assert_eq!(nonempty.as_predicate_bit(), Some(false));
 
         let starts = invoke_d9_string_mechanism(
@@ -928,7 +943,9 @@ mod exact_domain_primitive_tests {
             ],
             &environment,
             span,
-        ).expect("D9 STRING-PREFIX? route").expect("D9 STRING-PREFIX? value");
+        )
+        .expect("D9 STRING-PREFIX? route")
+        .expect("D9 STRING-PREFIX? value");
         assert_eq!(starts.as_predicate_bit(), Some(true));
 
         let does_not_start = invoke_d9_string_mechanism(
@@ -939,7 +956,9 @@ mod exact_domain_primitive_tests {
             ],
             &environment,
             span,
-        ).expect("D9 STRING-PREFIX? route").expect("D9 STRING-PREFIX? value");
+        )
+        .expect("D9 STRING-PREFIX? route")
+        .expect("D9 STRING-PREFIX? value");
         assert_eq!(does_not_start.as_predicate_bit(), Some(false));
 
         let first = invoke_d9_string_mechanism(
@@ -947,7 +966,9 @@ mod exact_domain_primitive_tests {
             &[Value::String(std::rc::Rc::from("#q2:7/1"))],
             &environment,
             span,
-        ).expect("D9 STRING-FIRST route").expect("D9 STRING-FIRST value");
+        )
+        .expect("D9 STRING-FIRST route")
+        .expect("D9 STRING-FIRST value");
         assert!(matches!(first, Value::String(ref value) if value.as_ref() == "#"));
 
         let rest = invoke_d9_string_mechanism(
@@ -955,22 +976,30 @@ mod exact_domain_primitive_tests {
             &[Value::String(std::rc::Rc::from("#q2:7/1"))],
             &environment,
             span,
-        ).expect("D9 STRING-REST route").expect("D9 STRING-REST value");
+        )
+        .expect("D9 STRING-REST route")
+        .expect("D9 STRING-REST value");
         assert!(matches!(rest, Value::String(ref value) if value.as_ref() == "q2:7/1"));
 
-        assert!(!has_d9_string_mechanism(d9(0b110111111)),
-            "other D9 residents stay fail-closed");
-        assert!(!has_d9_string_mechanism(crate::DomainIdentity::D8(
-            crate::CoreD8::from_word(crate::Bit8::new(0b00111100).expect("D8 word"))
-        )), "D8 coordinates never alias D9 mechanisms");
+        assert!(
+            !has_d9_string_mechanism(d9(0b110111111)),
+            "other D9 residents stay fail-closed"
+        );
+        assert!(
+            !has_d9_string_mechanism(crate::DomainIdentity::D8(crate::CoreD8::from_word(
+                crate::Bit8::new(0b00111100).expect("D8 word")
+            ))),
+            "D8 coordinates never alias D9 mechanisms"
+        );
 
         let arity_error = invoke_d9_string_mechanism(
             d9(0b110101010),
             &[Value::String(std::rc::Rc::from("#q2:"))],
             &environment,
             span,
-        ).expect("D9 STRING-PREFIX? route")
-         .expect_err("exact two-argument arity");
+        )
+        .expect("D9 STRING-PREFIX? route")
+        .expect_err("exact two-argument arity");
         assert_eq!(arity_error.kind, ErrorKind::Arity);
         assert!(arity_error.message.contains(&d9(0b110101010).to_string()));
         assert!(!arity_error.message.contains("00111101"));
@@ -1005,15 +1034,17 @@ mod exact_domain_primitive_tests {
         // exact D8:01011010 is "без-останнього" (BUTLAST), while the clock has
         // its own D10:0011110110 identity. An empty call must never return a
         // clock reading via the old W8 backend.
-        let identity = CoreDomainIdentity::D8(
-            crate::CoreD8::from_word(
-                crate::Bit8::new(0b01011010).expect("exact D8 coordinate"),
-            ),
+        let identity = CoreDomainIdentity::D8(crate::CoreD8::from_word(
+            crate::Bit8::new(0b01011010).expect("exact D8 coordinate"),
+        ));
+        assert!(
+            domain_primitive_kind(identity).is_none(),
+            "D8:01011010 has no native primitive merely from residency"
         );
-        assert!(domain_primitive_kind(identity).is_none(),
-            "D8:01011010 has no native primitive merely from residency");
-        assert!(!has_primitive(identity),
-            "D8:01011010 must not inherit old W8 mono-ns callability");
+        assert!(
+            !has_primitive(identity),
+            "D8:01011010 must not inherit old W8 mono-ns callability"
+        );
 
         let environment = Environment::root();
         let error = invoke_semantic_ref(identity, &[], &environment, Span::default())
@@ -1039,7 +1070,9 @@ mod exact_domain_primitive_tests {
         let arity = invoke_domain_identity(d3(0b010), &[], &environment, span)
             .expect_err("D3 ATOM must enforce current exact arity");
         assert_eq!(arity.kind, ErrorKind::Arity);
-        assert!(arity.message.contains("010: expected 1 arguments; received 0"));
+        assert!(arity
+            .message
+            .contains("010: expected 1 arguments; received 0"));
     }
 
     #[test]

@@ -6,18 +6,21 @@
 //! A PASS narrows #4774's "machine-block-one" failure to global/closure/list
 //! binding or a more specific current runtime path, not generic D3 QUOTE.
 
-use sens::{encode_binary_projection_ternary, eval_parsed_expressions,
-           open_ternary_program, parse_canonical_binary, Session};
+use sens::{
+    encode_binary_projection_ternary, eval_parsed_expressions, open_ternary_program,
+    parse_canonical_binary, Session,
+};
 
 fn current_value(source: &str) -> Result<String, String> {
     // Prove actual FILE T5 physical codec bytes, not English evaluator parsing
     // or an extensionless text shortcut.
     let packed = encode_binary_projection_ternary(source)
         .map_err(|error| format!("T5 encode: {error:?}"))?;
-    let visible = open_ternary_program(&packed)
-        .map_err(|error| format!("T5 decode: {error:?}"))?;
+    let visible = open_ternary_program(&packed).map_err(|error| format!("T5 decode: {error:?}"))?;
     if visible != source {
-        return Err(format!("exact typed word surface changed: {visible} != {source}"));
+        return Err(format!(
+            "exact typed word surface changed: {visible} != {source}"
+        ));
     }
     let words = parse_canonical_binary(&visible)
         .map_err(|error| format!("D2 parse: {}", error.render(&visible)))?;

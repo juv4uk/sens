@@ -31,13 +31,20 @@ impl TemporaryPair {
         file.write_all(source.as_bytes())
             .expect("тимчасовий доказовий вхід");
         assert!(!physical.exists(), "фізичний свідок не може вже існувати");
-        Self { source: source_path, physical }
+        Self {
+            source: source_path,
+            physical,
+        }
     }
 
     fn trit(&self, command: &str) -> Output {
         Command::new(env!("CARGO_BIN_EXE_sens-trit"))
             .arg(command)
-            .arg(if command == "encode" { &self.source } else { &self.physical })
+            .arg(if command == "encode" {
+                &self.source
+            } else {
+                &self.physical
+            })
             .output()
             .expect("запустити справжній sens-trit")
     }
@@ -53,8 +60,14 @@ impl Drop for TemporaryPair {
 fn rejected_without_physical_file(source: &str) {
     let pair = TemporaryPair::new(source);
     let rejected = pair.trit("encode");
-    assert!(!rejected.status.success(), "неканонічний текст не є SENS T5");
-    assert!(rejected.stdout.is_empty(), "відхилений файл не дає позитивного доказу");
+    assert!(
+        !rejected.status.success(),
+        "неканонічний текст не є SENS T5"
+    );
+    assert!(
+        rejected.stdout.is_empty(),
+        "відхилений файл не дає позитивного доказу"
+    );
     assert!(
         String::from_utf8_lossy(&rejected.stderr).contains("InvalidBinaryProjection"),
         "очікувана іменована відмова, stderr={:?}",
@@ -108,15 +121,26 @@ fn exact_d2_projection_reaches_physical_t5_and_current_sens() {
     assert!(!physical.is_empty());
     assert!(physical.iter().all(|byte| *byte < 243));
     assert_eq!(sens::open_ternary_program(&physical).unwrap(), WORDS);
-    assert_eq!(sens::encode_binary_projection_ternary(WORDS).unwrap(), physical);
+    assert_eq!(
+        sens::encode_binary_projection_ternary(WORDS).unwrap(),
+        physical
+    );
     let opened = pair.trit("open");
-    assert!(opened.status.success(), "physical open: {:?}", opened.stderr);
+    assert!(
+        opened.status.success(),
+        "physical open: {:?}",
+        opened.stderr
+    );
     assert_eq!(opened.stdout, format!("{WORDS}\n").as_bytes());
     let executed = Command::new(env!("CARGO_BIN_EXE_sens"))
         .arg(&pair.physical)
         .output()
         .expect("фізичне виконання через SENS");
-    assert!(executed.status.success(), "physical eval: {:?}", executed.stderr);
+    assert!(
+        executed.status.success(),
+        "physical eval: {:?}",
+        executed.stderr
+    );
     assert_eq!(executed.stdout, b"()\n");
 }
 
@@ -127,8 +151,7 @@ fn ratified_uk_d1_cond_triplet_is_physical_without_text_fallback() {
         include_str!("../../../tests/fixtures/migration-d1-cond-cohort/branch.lisp");
     const PHYSICAL: &[u8] =
         include_bytes!("../../../tests/fixtures/migration-d1-cond-cohort/branch.sens");
-    const VIEW: &str =
-        include_str!("../../../tests/fixtures/migration-d1-cond-cohort/branch");
+    const VIEW: &str = include_str!("../../../tests/fixtures/migration-d1-cond-cohort/branch");
 
     assert!(SOURCE.contains("за-умовою"));
     assert!(SOURCE.contains("перше"));
@@ -149,10 +172,24 @@ fn ratified_uk_d1_cond_triplet_is_physical_without_text_fallback() {
         .output()
         .expect("фізичний SENS");
     let explicit = physical_file.trit("eval");
-    assert!(bare.status.success(), "physical SENS stderr={:?}", bare.stderr);
-    assert!(explicit.status.success(), "physical eval stderr={:?}", explicit.stderr);
-    assert_eq!(bare.stdout, explicit.stdout, "незалежні публічні CLI бачать той самий T5");
-    assert!(!bare.stdout.is_empty(), "фізичне виконання має видимий результат");
+    assert!(
+        bare.status.success(),
+        "physical SENS stderr={:?}",
+        bare.stderr
+    );
+    assert!(
+        explicit.status.success(),
+        "physical eval stderr={:?}",
+        explicit.stderr
+    );
+    assert_eq!(
+        bare.stdout, explicit.stdout,
+        "незалежні публічні CLI бачать той самий T5"
+    );
+    assert!(
+        !bare.stdout.is_empty(),
+        "фізичне виконання має видимий результат"
+    );
 
     // Людська українська проєкція авторизована ТІЛЬКИ через доказану трійку.
     // Низькорівневий encode не є компілятором і не може її мовчки прийняти.

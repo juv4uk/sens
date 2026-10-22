@@ -36,7 +36,10 @@ use std::io::Write;
 use std::path::{Path, PathBuf};
 
 fn repo_root() -> PathBuf {
-    Path::new(env!("CARGO_MANIFEST_DIR")).join("../..").canonicalize().unwrap()
+    Path::new(env!("CARGO_MANIFEST_DIR"))
+        .join("../..")
+        .canonicalize()
+        .unwrap()
 }
 
 /// Англійські імена з таблиці функцій.
@@ -49,7 +52,11 @@ fn english_names() -> BTreeSet<String> {
         .map(|rest| rest.chars().take_while(|c| *c != '"').collect::<String>())
         .filter(|name| !name.is_empty())
         .collect();
-    assert!(names.len() > 100, "англійські імена не прочитано ({})", names.len());
+    assert!(
+        names.len() > 100,
+        "англійські імена не прочитано ({})",
+        names.len()
+    );
     names
 }
 
@@ -84,7 +91,9 @@ fn is_historical_benchmark_data(rel: &str) -> bool {
     ];
     LEGACY_FIXTURES.contains(&rel)
         || (rel.ends_with(".lisp")
-            && PINNED_RESULT_PREFIXES.iter().any(|prefix| rel.starts_with(prefix)))
+            && PINNED_RESULT_PREFIXES
+                .iter()
+                .any(|prefix| rel.starts_with(prefix)))
 }
 
 /// Таблиця функцій і її проєкції — джерело імен, не код.
@@ -114,7 +123,12 @@ fn is_table_source(rel: &str) -> bool {
 }
 
 fn explicit_nonsemantic_lisp_evidence(text: &str) -> bool {
-    let header = text.lines().take(24).collect::<Vec<_>>().join("\n").to_lowercase();
+    let header = text
+        .lines()
+        .take(24)
+        .collect::<Vec<_>>()
+        .join("\n")
+        .to_lowercase();
     header.contains("research-only")
         || header.contains("(semantic-authority-change none)")
         || header.contains("inventory only")
@@ -125,11 +139,13 @@ fn rust_test_is_semantic_authority(rel: &str) -> bool {
     if !rel.starts_with("crates/") || !rel.contains("/tests/") || !rel.ends_with(".rs") {
         return false;
     }
-    let inventory = fs::read_to_string(repo_root().join("tests/authority-inventory.tsv"))
-        .unwrap_or_default();
+    let inventory =
+        fs::read_to_string(repo_root().join("tests/authority-inventory.tsv")).unwrap_or_default();
     inventory.lines().any(|line| {
         let mut fields = line.split('\t');
-        let Some(path) = fields.next() else { return false };
+        let Some(path) = fields.next() else {
+            return false;
+        };
         let _site = fields.next();
         let class = fields.next().unwrap_or_default();
         let normalized = path.replace("crates/my-lisp/", "crates/sens/");
@@ -146,7 +162,10 @@ fn is_operational_doctrine_data(rel: &str, text: &str) -> bool {
         && text.lines().take(8).any(|line| {
             line.trim() == "; Status: operational doctrine (not language-contract authority)."
         })
-        && text.lines().take(20).any(|line| line.trim() == "(sens-primary-2")
+        && text
+            .lines()
+            .take(20)
+            .any(|line| line.trim() == "(sens-primary-2")
 }
 
 fn classified_kind(rel: &str, text: &str, base_kind: &'static str) -> &'static str {
@@ -168,15 +187,15 @@ fn classified_kind(rel: &str, text: &str, base_kind: &'static str) -> &'static s
 fn ratchet_enforced_kind(kind: &str) -> bool {
     !matches!(
         kind,
-        "rust-test-instrument" | "lisp-evidence" | "rust-contract-data" | "rust-evidence-data" | "rust-cli-surface"
+        "rust-test-instrument"
+            | "lisp-evidence"
+            | "rust-contract-data"
+            | "rust-evidence-data"
+            | "rust-cli-surface"
     )
 }
 
-fn rust_nonsemantic_data_kind(
-    rel: &str,
-    line_text: &str,
-    literal: &str,
-) -> Option<&'static str> {
+fn rust_nonsemantic_data_kind(rel: &str, line_text: &str, literal: &str) -> Option<&'static str> {
     let source = literal.trim_start();
 
     if rel == "crates/xtask/src/compiler_export.rs"
@@ -218,18 +237,29 @@ fn rust_nonsemantic_data_kind(
 
 fn files() -> Vec<(PathBuf, String)> {
     fn walk(root: &Path, dir: &Path, out: &mut Vec<(PathBuf, String)>) {
-        let Ok(entries) = fs::read_dir(dir) else { return };
+        let Ok(entries) = fs::read_dir(dir) else {
+            return;
+        };
         for entry in entries.flatten() {
             let path = entry.path();
             let name = entry.file_name().to_string_lossy().into_owned();
             if path.is_dir() {
-                if name == "vendor" || name == ".git" || name == "node_modules" || name.starts_with("target") {
+                if name == "vendor"
+                    || name == ".git"
+                    || name == "node_modules"
+                    || name.starts_with("target")
+                {
                     continue;
                 }
                 walk(root, &path, out);
             } else if let Some(ext) = path.extension().and_then(|e| e.to_str()) {
-                if ["lisp", "sens", "my", "wsm", "всм", "мій", "лісп", "rs"].contains(&ext) {
-                    let rel = path.strip_prefix(root).unwrap_or(&path).display().to_string();
+                if ["lisp", "sens", "my", "wsm", "всм", "мій", "лісп", "rs"].contains(&ext)
+                {
+                    let rel = path
+                        .strip_prefix(root)
+                        .unwrap_or(&path)
+                        .display()
+                        .to_string();
                     if !is_table_source(&rel) {
                         out.push((path, rel));
                     }
@@ -348,7 +378,8 @@ fn rust_strings(text: &str) -> Vec<(usize, String)> {
             } else {
                 i += 1;
             }
-        } else if c == 'r' && (next == Some('"') || next == Some('#'))
+        } else if c == 'r'
+            && (next == Some('"') || next == Some('#'))
             && (i == 0 || !(chars[i - 1].is_alphanumeric() || chars[i - 1] == '_'))
         {
             let mut j = i + 1;
@@ -376,7 +407,10 @@ fn rust_strings(text: &str) -> Vec<(usize, String)> {
                 }
                 j += 1;
             }
-            out.push((start_line, chars[start..j.min(chars.len())].iter().collect()));
+            out.push((
+                start_line,
+                chars[start..j.min(chars.len())].iter().collect(),
+            ));
             i = j + 1 + hashes;
         } else if c == '"' {
             let start_line = line;
@@ -419,21 +453,26 @@ fn places() -> Vec<Place> {
     let names = english_names();
     let mut out = Vec::new();
     for (path, rel) in files() {
-        let Ok(text) = fs::read_to_string(&path) else { continue };
+        let Ok(text) = fs::read_to_string(&path) else {
+            continue;
+        };
         if rel.ends_with(".rs") {
             for (line, literal) in rust_strings(&text) {
                 let line_text = text.lines().nth(line.saturating_sub(1)).unwrap_or("");
                 let data_kind = rust_nonsemantic_data_kind(&rel, line_text, &literal);
                 if names.contains(literal.as_str()) {
-                    let kind =
-                        data_kind.unwrap_or_else(|| classified_kind(&rel, &text, "rust"));
+                    let kind = data_kind.unwrap_or_else(|| classified_kind(&rel, &text, "rust"));
                     out.push((kind, rel.clone(), line, literal));
                 } else if rust_literal_has_lisp_source(&literal) {
                     for (l, token, data) in lisp_tokens(&literal, line) {
                         if names.contains(&token) {
-                            let base_kind = if data { "rust-lisp-дані" } else { "rust-lisp" };
-                            let kind =
-                                data_kind.unwrap_or_else(|| classified_kind(&rel, &text, base_kind));
+                            let base_kind = if data {
+                                "rust-lisp-дані"
+                            } else {
+                                "rust-lisp"
+                            };
+                            let kind = data_kind
+                                .unwrap_or_else(|| classified_kind(&rel, &text, base_kind));
                             out.push((kind, rel.clone(), l, token));
                         }
                     }
@@ -474,7 +513,10 @@ fn debt_metrics(places: &[Place]) -> DebtMetrics {
         .iter()
         .filter(|(kind, _, _, _)| ratchet_enforced_kind(kind))
         .collect();
-    let files: BTreeSet<&str> = enforced.iter().map(|(_, file, _, _)| file.as_str()).collect();
+    let files: BTreeSet<&str> = enforced
+        .iter()
+        .map(|(_, file, _, _)| file.as_str())
+        .collect();
     DebtMetrics {
         sites: enforced.len(),
         files: files.len(),
@@ -483,8 +525,12 @@ fn debt_metrics(places: &[Place]) -> DebtMetrics {
 
 fn baseline_entry_enforced(key: &str) -> bool {
     let mut fields = key.splitn(3, '\t');
-    let Some(kind) = fields.next() else { return false };
-    let Some(file) = fields.next() else { return false };
+    let Some(kind) = fields.next() else {
+        return false;
+    };
+    let Some(file) = fields.next() else {
+        return false;
+    };
     let _name = fields.next();
 
     if !ratchet_enforced_kind(kind) || is_table_source(file) {
@@ -593,7 +639,11 @@ fn summary(places: &[Place]) -> String {
     }
     let mut top: Vec<_> = by_name.into_iter().collect();
     top.sort_by(|a, b| b.1.cmp(&a.1).then(a.0.cmp(b.0)));
-    let top: Vec<String> = top.iter().take(15).map(|(n, c)| format!("{n} {c}")).collect();
+    let top: Vec<String> = top
+        .iter()
+        .take(15)
+        .map(|(n, c)| format!("{n} {c}"))
+        .collect();
     format!(
         "англійських імен у коді: {} місць у {} файлах; за видом: {:?}; найчастіші: {}",
         places.len(),
@@ -606,13 +656,20 @@ fn summary(places: &[Place]) -> String {
 #[test]
 fn human_cli_eval_dispatch_cannot_mint_an_english_function_exemption() {
     let relative = "crates/sens-cli/src/bin/sens-trit.rs";
-    let source = fs::read_to_string(repo_root().join(relative))
-        .expect("read exact real CLI");
-    let arms: Vec<_> = source.lines()
+    let source = fs::read_to_string(repo_root().join(relative)).expect("read exact real CLI");
+    let arms: Vec<_> = source
+        .lines()
         .filter(|line| line.trim() == "\"eval\" => {")
         .collect();
-    assert_eq!(arms.len(), 1, "the reviewed CLI dispatch shape must not drift");
-    assert!(english_names().contains("eval"), "keep the real semantic name scanned");
+    assert_eq!(
+        arms.len(),
+        1,
+        "the reviewed CLI dispatch shape must not drift"
+    );
+    assert!(
+        english_names().contains("eval"),
+        "keep the real semantic name scanned"
+    );
     assert_eq!(
         rust_nonsemantic_data_kind(relative, arms[0], "eval"),
         Some("rust-cli-surface"),
@@ -638,11 +695,7 @@ fn embedded_mixed_source_negative_fixture_is_test_input_only() {
     let fixture_line =
         r#"for source in ["(car x)", "(CONS x y)", "(00000101 x)", "(невідоме x)"] {"#;
     assert_eq!(
-        rust_nonsemantic_data_kind(
-            "crates/sens/src/mixed_source.rs",
-            fixture_line,
-            "(car x)",
-        ),
+        rust_nonsemantic_data_kind("crates/sens/src/mixed_source.rs", fixture_line, "(car x)",),
         Some("rust-test-instrument"),
     );
 
@@ -653,11 +706,7 @@ fn embedded_mixed_source_negative_fixture_is_test_input_only() {
         r#"parse_mixed_exact_domain("(car x)")"#,
     ] {
         assert_eq!(
-            rust_nonsemantic_data_kind(
-                "crates/sens/src/mixed_source.rs",
-                line,
-                "(car x)",
-            ),
+            rust_nonsemantic_data_kind("crates/sens/src/mixed_source.rs", line, "(car x)",),
             None,
         );
     }
@@ -680,7 +729,10 @@ fn english_names_in_code_never_grow() {
         return;
     }
     let baseline = read_baseline();
-    assert!(!baseline.is_empty(), "бази немає: SENS_BASELINE_UPDATE=1 cargo test ...");
+    assert!(
+        !baseline.is_empty(),
+        "бази немає: SENS_BASELINE_UPDATE=1 cargo test ..."
+    );
     let current_debt = debt_metrics(&places);
     let baseline_debt = baseline_debt_metrics(&baseline);
     let mut grown = Vec::new();
@@ -691,7 +743,11 @@ fn english_names_in_code_never_grow() {
         let base = baseline.get(key).copied().unwrap_or(0);
         if *count > base {
             let mut parts = key.splitn(3, '\t');
-            let (kind, file, name) = (parts.next().unwrap(), parts.next().unwrap(), parts.next().unwrap());
+            let (kind, file, name) = (
+                parts.next().unwrap(),
+                parts.next().unwrap(),
+                parts.next().unwrap(),
+            );
             let lines: Vec<String> = places
                 .iter()
                 .filter(|(k, f, _, n)| *k == kind && f == file && n == name)
@@ -700,7 +756,10 @@ fn english_names_in_code_never_grow() {
             growth_sites += *count - base;
             growth_files.insert(file.to_owned());
             growth_keys += 1;
-            grown.push(format!("{file}:{} {name} ({kind}): {base} -> {count}", lines.join(",")));
+            grown.push(format!(
+                "{file}:{} {name} ({kind}): {base} -> {count}",
+                lines.join(",")
+            ));
         }
     }
     emit_debt_metric(
@@ -726,7 +785,12 @@ fn no_english_names_in_code() {
         .iter()
         .map(|(kind, file, line, name)| format!("{file}:{line}\t{name}\t{kind}"))
         .collect();
-    assert!(places.is_empty(), "{}\n{}", summary(&places), listing.join("\n"));
+    assert!(
+        places.is_empty(),
+        "{}\n{}",
+        summary(&places),
+        listing.join("\n")
+    );
 }
 
 #[test]
@@ -735,27 +799,46 @@ fn sens_primary_operational_doctrine_does_not_count_as_executable_english() {
     let content = fs::read_to_string(repo_root().join(rel)).unwrap();
     assert!(is_operational_doctrine_data(rel, &content));
     assert_eq!(classified_kind(rel, &content, "lisp"), "lisp-evidence");
-    assert!(!ratchet_enforced_kind(classified_kind(rel, &content, "lisp")));
+    assert!(!ratchet_enforced_kind(classified_kind(
+        rel, &content, "lisp"
+    )));
 
     // A different executable source with identical Lisp-shaped content is
     // never automatically exempted; nor is a source lacking the header.
     assert!(!is_operational_doctrine_data("lib/core.lisp", &content));
-    assert!(ratchet_enforced_kind(classified_kind("lib/core.lisp", &content, "lisp")));
-    assert!(ratchet_enforced_kind(classified_kind(rel, "(identity 1)", "lisp")));
+    assert!(ratchet_enforced_kind(classified_kind(
+        "lib/core.lisp",
+        &content,
+        "lisp"
+    )));
+    assert!(ratchet_enforced_kind(classified_kind(
+        rel,
+        "(identity 1)",
+        "lisp"
+    )));
 }
 
 #[test]
 fn scanners_find_names_in_lisp_and_rust() {
-    let lisp = lisp_tokens("(map car xs) ; cdr\n\"cons\" '(length 1) (quote (list)) (00000001 reverse) (f x)", 1);
+    let lisp = lisp_tokens(
+        "(map car xs) ; cdr\n\"cons\" '(length 1) (quote (list)) (00000001 reverse) (f x)",
+        1,
+    );
     let tokens: Vec<(&str, bool)> = lisp.iter().map(|(_, t, d)| (t.as_str(), *d)).collect();
     assert_eq!(
         tokens,
         [
-            ("map", false), ("car", false), ("xs", false),
-            ("length", true), ("1", true),
-            ("quote", false), ("list", true),
-            ("00000001", false), ("reverse", true),
-            ("f", false), ("x", false),
+            ("map", false),
+            ("car", false),
+            ("xs", false),
+            ("length", true),
+            ("1", true),
+            ("quote", false),
+            ("list", true),
+            ("00000001", false),
+            ("reverse", true),
+            ("f", false),
+            ("x", false),
         ]
     );
     assert_eq!(lisp[3].0, 2);
@@ -765,14 +848,22 @@ fn scanners_find_names_in_lisp_and_rust() {
         "rust-test-instrument"
     );
     assert_eq!(
-        classified_kind("crates/sens-host/tests/native_lisp_bytes.rs", "", "rust-lisp"),
+        classified_kind(
+            "crates/sens-host/tests/native_lisp_bytes.rs",
+            "",
+            "rust-lisp"
+        ),
         "rust-test-instrument",
         "tests in other crates are instruments unless explicitly semantic-authority"
     );
     assert!(is_table_source("lib/domains/d9.lisp"));
-    assert!(is_table_source("lib/machine/encoding/admitted-iclass-index.lisp"));
+    assert!(is_table_source(
+        "lib/machine/encoding/admitted-iclass-index.lisp"
+    ));
     assert!(is_table_source("lib/machine/encoding/coverage.lisp"));
-    assert!(is_table_source("contracts/compiler-gpu-execution-packet-v1.lisp"));
+    assert!(is_table_source(
+        "contracts/compiler-gpu-execution-packet-v1.lisp"
+    ));
     assert!(is_table_source("contracts/d8-ratification.lisp"));
     assert!(is_table_source("contracts/d9-ratification.lisp"));
     assert!(!is_table_source("contracts/core-universal-contract.lisp"));
@@ -786,11 +877,17 @@ fn scanners_find_names_in_lisp_and_rust() {
     ));
     assert!(!is_table_source("benchmarks/new-executable.lisp"));
     assert!(!is_table_source("benchmarks/new-module/src/main.rs"));
-    assert!(!is_table_source("benchmarks/sens-surface/results/20261010-new/programs/fib-en.lisp"));
+    assert!(!is_table_source(
+        "benchmarks/sens-surface/results/20261010-new/programs/fib-en.lisp"
+    ));
     assert!(!is_table_source("archive/new-executable.lisp"));
     assert!(!is_table_source("crates/xtask.bak/src/main.rs"));
-    assert!(!rust_literal_has_lisp_source("CDR: list accessor (structural)"));
-    assert!(!rust_literal_has_lisp_source("CONS: pair construction (structural)"));
+    assert!(!rust_literal_has_lisp_source(
+        "CDR: list accessor (structural)"
+    ));
+    assert!(!rust_literal_has_lisp_source(
+        "CONS: pair construction (structural)"
+    ));
     assert!(rust_literal_has_lisp_source("(атом? x)"));
     assert!(rust_literal_has_lisp_source("  (як-є radio)"));
     assert_eq!(
@@ -804,7 +901,11 @@ fn scanners_find_names_in_lisp_and_rust() {
     let red_research_probe = "; #432 research-only RED probe.\n(def pair-value (cons x y))";
     assert!(explicit_nonsemantic_lisp_evidence(red_research_probe));
     assert_eq!(
-        classified_kind("docs/research/432/church-pair-car-red.lisp", red_research_probe, "lisp"),
+        classified_kind(
+            "docs/research/432/church-pair-car-red.lisp",
+            red_research_probe,
+            "lisp"
+        ),
         "lisp-evidence",
         "an explicitly labelled research-only witness is evidence, not current executable source",
     );
@@ -838,17 +939,12 @@ fn scanners_find_names_in_lisp_and_rust() {
         "the same record-shaped text in another production file must not be exempt"
     );
     assert_eq!(
-        rust_nonsemantic_data_kind(
-            "crates/xtask/src/compiler_export.rs",
-            "",
-            "(car x)",
-        ),
+        rust_nonsemantic_data_kind("crates/xtask/src/compiler_export.rs", "", "(car x)",),
         None,
         "ordinary embedded Lisp in compiler_export remains enforced"
     );
 
-    let gpu_evidence =
-        "forbidden_legacy_operation: \"numeric-buffer-map\".to_string()";
+    let gpu_evidence = "forbidden_legacy_operation: \"numeric-buffer-map\".to_string()";
     assert_eq!(
         rust_nonsemantic_data_kind(
             "crates/sens/src/gpu_oracle.rs",
@@ -877,14 +973,20 @@ fn scanners_find_names_in_lisp_and_rust() {
         "the negative-control exemption is path-specific"
     );
 
-    let rust = rust_strings("let a = \"car\"; // \"cdr\"\nlet c = '\"'; let s = r#\"(cons 1 ())\"#;");
+    let rust =
+        rust_strings("let a = \"car\"; // \"cdr\"\nlet c = '\"'; let s = r#\"(cons 1 ())\"#;");
     let literals: Vec<&str> = rust.iter().map(|(_, s)| s.as_str()).collect();
     assert_eq!(literals, ["car", "(cons 1 ())"]);
     assert_eq!(rust[1].0, 2);
 
     let metric_fixture = vec![
         ("rust", "lib/a.rs".to_owned(), 1, "car".to_owned()),
-        ("rust-test-instrument", "crates/sens/tests/a.rs".to_owned(), 1, "car".to_owned()),
+        (
+            "rust-test-instrument",
+            "crates/sens/tests/a.rs".to_owned(),
+            1,
+            "car".to_owned(),
+        ),
         ("lisp", "lib/b.lisp".to_owned(), 1, "cdr".to_owned()),
     ];
     assert_eq!(

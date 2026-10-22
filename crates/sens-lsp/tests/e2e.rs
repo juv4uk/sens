@@ -358,7 +358,8 @@ fn t11_completion_offers_builtins_and_local_defs() {
 
     // Empty prefix → builtins are offered.
     server.feed(&[did_open("file:///w2.lisp", "\n")]);
-    let params2 = r#"{"textDocument":{"uri":"file:///w2.lisp"},"position":{"line":0,"character":0}}"#;
+    let params2 =
+        r#"{"textDocument":{"uri":"file:///w2.lisp"},"position":{"line":0,"character":0}}"#;
     let replies2 = server.feed(&[raw(&request(9, "textDocument/completion", params2))]);
     let r2 = replies2[0].as_str();
     assert!(
@@ -624,7 +625,9 @@ fn t16_workspace_scan_recognizes_lisp_extension() {
 /// workspace root so initialize loads guard knowledge from the REAL
 /// lib/guard.lisp and knowledge/guard-reference.lisp.
 fn sens_repo_root() -> PathBuf {
-    PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("..").join("..")
+    PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+        .join("..")
+        .join("..")
 }
 
 fn init_with_root(root: &Path) -> String {
@@ -656,9 +659,13 @@ fn t17_g3_guard_function_hover_from_live_lib_guard_wsm() {
     assert!(r.contains("**guard function**"), "{r}");
     // The canonical source must be the live def, structurally provable.
     assert!(
-        ["(00001001 guard-unknown", "(00001011 guard-unknown", "(def guard-unknown"]
-            .iter()
-            .any(|form| r.contains(form)),
+        [
+            "(00001001 guard-unknown",
+            "(00001011 guard-unknown",
+            "(def guard-unknown"
+        ]
+        .iter()
+        .any(|form| r.contains(form)),
         "{r}"
     );
     assert!(r.contains("lib/guard.lisp"), "{r}");
@@ -679,10 +686,7 @@ fn t18_g3_guard_function_wrong_arity_is_diagnosed() {
     let r = replies[1].as_str();
     assert!(r.contains("publishDiagnostics"), "{r}");
     assert!(r.contains("arity: guard-unknown expects"), "{r}");
-    assert!(
-        !r.contains("\"diagnostics\":[]"),
-        "must not be empty: {r}"
-    );
+    assert!(!r.contains("\"diagnostics\":[]"), "must not be empty: {r}");
 }
 
 /// Hover over a guard topic symbol surfaces the reference-bureau entry.

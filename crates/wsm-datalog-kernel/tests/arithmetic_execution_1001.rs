@@ -1,15 +1,13 @@
 //! #1001 native Datalog arithmetic witnesses.
 
 use wsm_datalog_kernel::{
+    Atom, Database, DatalogAbiAdapter, Evaluator, Program, Rule, Term, Value,
     arithmetic::{
         DatalogMathError, NumericExpr, SID_ABS, SID_ADD, SID_DIV, SID_MAX, SID_MIN, SID_MOD,
         SID_MUL, SID_QUOTIENT, SID_SUB,
     },
-    Atom, Database, DatalogAbiAdapter, Evaluator, Program, Rule, Term, Value,
 };
-use wsm_kernel_c_abi::{
-    WsmByteSpan, WsmKernelRequest, WsmMutableByteSpan, WsmStatus,
-};
+use wsm_kernel_c_abi::{WsmByteSpan, WsmKernelRequest, WsmMutableByteSpan, WsmStatus};
 
 fn exchange_math(
     adapter: &DatalogAbiAdapter,

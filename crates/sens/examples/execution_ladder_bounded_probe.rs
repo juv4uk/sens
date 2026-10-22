@@ -129,8 +129,8 @@ fn run() -> Result<(), String> {
         ));
     }
 
-    let source = fs::read_to_string(&args[1])
-        .map_err(|error| format!("read {}: {error}", args[1]))?;
+    let source =
+        fs::read_to_string(&args[1]).map_err(|error| format!("read {}: {error}", args[1]))?;
     let source = source.trim();
 
     let tokens = parse_binary_source_words(source).map_err(|error| format!("{error:?}"))?;

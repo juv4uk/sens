@@ -17,8 +17,8 @@
 //! CRC32 виявляє випадкові пошкодження, але НЕ є криптографічним MAC.
 
 use crate::{
-    parse_canonical_word_sequence, BinarySourceWord,
-    Bit1, Bit2, Bit3, Bit4, Bit5, Bit6, Bit7, Bit8, Bit9,
+    parse_canonical_word_sequence, BinarySourceWord, Bit1, Bit2, Bit3, Bit4, Bit5, Bit6, Bit7,
+    Bit8, Bit9,
 };
 
 #[path = "frame3_v2.rs"]
@@ -44,7 +44,10 @@ pub enum Frame3Error {
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
-enum Mode { Raw, Repeat }
+enum Mode {
+    Raw,
+    Repeat,
+}
 
 #[derive(Clone, Copy, Debug)]
 struct Step {
@@ -55,7 +58,10 @@ struct Step {
 
 fn varint_len(mut n: usize) -> usize {
     let mut bytes = 1;
-    while n >= 128 { n >>= 7; bytes += 1; }
+    while n >= 128 {
+        n >>= 7;
+        bytes += 1;
+    }
     bytes
 }
 
@@ -132,25 +138,26 @@ fn bits_to_bytes(words: &[BinarySourceWord]) -> Vec<u8> {
     bytes
 }
 
-fn bytes_to_words(
-    widths: &[usize],
-    bytes: &[u8],
-) -> Result<Vec<BinarySourceWord>, Frame3Error> {
+fn bytes_to_words(widths: &[usize], bytes: &[u8]) -> Result<Vec<BinarySourceWord>, Frame3Error> {
     let nbits: usize = widths.iter().sum();
-    if bytes.len() != nbits.div_ceil(8) { return Err(Frame3Error::Malformed); }
+    if bytes.len() != nbits.div_ceil(8) {
+        return Err(Frame3Error::Malformed);
+    }
     if !nbits.is_multiple_of(8) && !bytes.is_empty() {
         let mask = (1u8 << (8 - nbits % 8)) - 1;
-        if bytes[bytes.len() - 1] & mask != 0 { return Err(Frame3Error::NonCanonical); }
+        if bytes[bytes.len() - 1] & mask != 0 {
+            return Err(Frame3Error::NonCanonical);
+        }
     }
     let mut offset = 0usize;
     let mut words = Vec::with_capacity(widths.len());
     for &width in widths {
-        if !(1..=9).contains(&width) { return Err(Frame3Error::Malformed); }
+        if !(1..=9).contains(&width) {
+            return Err(Frame3Error::Malformed);
+        }
         let mut value = 0u16;
         for _ in 0..width {
-            value = (value << 1) | u16::from(
-                (bytes[offset / 8] >> (7 - offset % 8)) & 1
-            );
+            value = (value << 1) | u16::from((bytes[offset / 8] >> (7 - offset % 8)) & 1);
             offset += 1;
         }
         words.push(new_word(width, value)?);
@@ -162,7 +169,14 @@ fn choose_plan(words: &[BinarySourceWord]) -> Vec<Step> {
     // Повний DP за всіма межами 1..128 слів і двома допустимими режимами.
     // Постійні magic/count/checksum теж входять у фізичний підсумок.
     let n = words.len();
-    let mut dp = vec![Step { bytes: usize::MAX, end: n, mode: Mode::Raw }; n + 1];
+    let mut dp = vec![
+        Step {
+            bytes: usize::MAX,
+            end: n,
+            mode: Mode::Raw
+        };
+        n + 1
+    ];
     dp[n].bytes = 0;
     for i in (0..n).rev() {
         let mut bits = 0usize;
@@ -176,7 +190,9 @@ fn choose_plan(words: &[BinarySourceWord]) -> Vec<Step> {
             let mut winner = (raw_cost, Mode::Raw);
             if all_equal {
                 let repeat_cost = 1 + varint_len(count) + 1 + word.width().div_ceil(8);
-                if repeat_cost < raw_cost { winner = (repeat_cost, Mode::Repeat); }
+                if repeat_cost < raw_cost {
+                    winner = (repeat_cost, Mode::Repeat);
+                }
             }
             let total = winner.0 + dp[j].bytes;
             let old = dp[i];
@@ -184,7 +200,11 @@ fn choose_plan(words: &[BinarySourceWord]) -> Vec<Step> {
             let earlier = (winner.1 as u8, usize::MAX - j);
             let existing = (old.mode as u8, usize::MAX - old.end);
             if total < old.bytes || (total == old.bytes && earlier < existing) {
-                dp[i] = Step { bytes: total, end: j, mode: winner.1 };
+                dp[i] = Step {
+                    bytes: total,
+                    end: j,
+                    mode: winner.1,
+                };
             }
         }
     }
@@ -192,7 +212,9 @@ fn choose_plan(words: &[BinarySourceWord]) -> Vec<Step> {
 }
 
 pub fn encode(words: &[BinarySourceWord]) -> Result<Vec<u8>, Frame3Error> {
-    if words.len() > MAX_WORDS { return Err(Frame3Error::TooLarge); }
+    if words.len() > MAX_WORDS {
+        return Err(Frame3Error::TooLarge);
+    }
     parse_canonical_word_sequence(words).map_err(|_| Frame3Error::InvalidD2)?;
     let dp = choose_plan(words);
     let mut result = Vec::with_capacity(3 + varint_len(words.len()) + dp[0].bytes + 4);
@@ -202,7 +224,10 @@ pub fn encode(words: &[BinarySourceWord]) -> Result<Vec<u8>, Frame3Error> {
     while i < words.len() {
         let step = dp[i];
         let chunk = &words[i..step.end];
-        result.push(match step.mode { Mode::Raw => RAW, Mode::Repeat => REPEAT });
+        result.push(match step.mode {
+            Mode::Raw => RAW,
+            Mode::Repeat => REPEAT,
+        });
         put_varint(chunk.len(), &mut result);
         match step.mode {
             Mode::Raw => {
@@ -222,23 +247,36 @@ pub fn encode(words: &[BinarySourceWord]) -> Result<Vec<u8>, Frame3Error> {
     }
     let crc = physical_crc32(&result);
     result.extend_from_slice(&crc.to_be_bytes());
-    if result.len() > MAX_FILE_BYTES { return Err(Frame3Error::TooLarge); }
+    if result.len() > MAX_FILE_BYTES {
+        return Err(Frame3Error::TooLarge);
+    }
     Ok(result)
 }
 
 pub fn decode(bytes: &[u8]) -> Result<Vec<BinarySourceWord>, Frame3Error> {
-    if bytes.len() > MAX_FILE_BYTES { return Err(Frame3Error::TooLarge); }
-    if bytes.len() < MAGIC.len() + 1 + 4 { return Err(Frame3Error::Truncated); }
-    if bytes[..3] != MAGIC { return Err(Frame3Error::BadVersion); }
+    if bytes.len() > MAX_FILE_BYTES {
+        return Err(Frame3Error::TooLarge);
+    }
+    if bytes.len() < MAGIC.len() + 1 + 4 {
+        return Err(Frame3Error::Truncated);
+    }
+    if bytes[..3] != MAGIC {
+        return Err(Frame3Error::BadVersion);
+    }
     let cutoff = bytes.len() - 4;
-    let expected = u32::from_be_bytes(bytes[cutoff..].try_into()
-        .map_err(|_| Frame3Error::Truncated)?);
+    let expected = u32::from_be_bytes(
+        bytes[cutoff..]
+            .try_into()
+            .map_err(|_| Frame3Error::Truncated)?,
+    );
     if physical_crc32(&bytes[..cutoff]) != expected {
         return Err(Frame3Error::Integrity);
     }
     let mut pos = 3usize;
     let target = get_varint(&bytes[..cutoff], &mut pos)?;
-    if target > MAX_WORDS { return Err(Frame3Error::TooLarge); }
+    if target > MAX_WORDS {
+        return Err(Frame3Error::TooLarge);
+    }
     let mut words = Vec::with_capacity(target);
     while words.len() < target {
         let mode = *bytes.get(pos).ok_or(Frame3Error::Truncated)?;
@@ -250,7 +288,9 @@ pub fn decode(bytes: &[u8]) -> Result<Vec<BinarySourceWord>, Frame3Error> {
         let widths = if mode == RAW {
             let map_bytes = count.div_ceil(2);
             let finish = pos.checked_add(map_bytes).ok_or(Frame3Error::Malformed)?;
-            if finish > cutoff { return Err(Frame3Error::Truncated); }
+            if finish > cutoff {
+                return Err(Frame3Error::Truncated);
+            }
             let mut list = Vec::with_capacity(count);
             for &byte in &bytes[pos..finish] {
                 list.push((byte >> 4) as usize);
@@ -273,8 +313,12 @@ pub fn decode(bytes: &[u8]) -> Result<Vec<BinarySourceWord>, Frame3Error> {
             return Err(Frame3Error::Malformed);
         }
         let nbits: usize = widths.iter().sum();
-        let end = pos.checked_add(nbits.div_ceil(8)).ok_or(Frame3Error::Malformed)?;
-        if end > cutoff { return Err(Frame3Error::Truncated); }
+        let end = pos
+            .checked_add(nbits.div_ceil(8))
+            .ok_or(Frame3Error::Malformed)?;
+        if end > cutoff {
+            return Err(Frame3Error::Truncated);
+        }
         let restored = bytes_to_words(&widths, &bytes[pos..end])?;
         pos = end;
         if mode == REPEAT {
@@ -283,10 +327,14 @@ pub fn decode(bytes: &[u8]) -> Result<Vec<BinarySourceWord>, Frame3Error> {
             words.extend(restored);
         }
     }
-    if pos != cutoff { return Err(Frame3Error::NonCanonical); }
+    if pos != cutoff {
+        return Err(Frame3Error::NonCanonical);
+    }
     parse_canonical_word_sequence(&words).map_err(|_| Frame3Error::InvalidD2)?;
     // Відхиляємо всі alias: альтернативні режими, блоки, padding, varint.
-    if encode(&words)?.as_slice() != bytes { return Err(Frame3Error::NonCanonical); }
+    if encode(&words)?.as_slice() != bytes {
+        return Err(Frame3Error::NonCanonical);
+    }
     Ok(words)
 }
 
@@ -299,10 +347,14 @@ pub struct Frame3Decoder {
 }
 
 impl Frame3Decoder {
-    pub fn new() -> Self { Self::default() }
+    pub fn new() -> Self {
+        Self::default()
+    }
 
     pub fn push(&mut self, chunk: &[u8]) -> Result<(), Frame3Error> {
-        if self.failed { return Err(Frame3Error::TooLarge); }
+        if self.failed {
+            return Err(Frame3Error::TooLarge);
+        }
         if chunk.len() > MAX_FILE_BYTES.saturating_sub(self.buffer.len()) {
             // Помилка необоротна: finish не прийме попередній валідний префікс.
             self.failed = true;
@@ -313,7 +365,9 @@ impl Frame3Decoder {
     }
 
     pub fn finish(self) -> Result<Vec<BinarySourceWord>, Frame3Error> {
-        if self.failed { return Err(Frame3Error::TooLarge); }
+        if self.failed {
+            return Err(Frame3Error::TooLarge);
+        }
         decode(&self.buffer)
     }
 }
@@ -324,7 +378,11 @@ mod tests {
     use crate::parse_binary_source_words;
 
     fn source(s: &str) -> Vec<BinarySourceWord> {
-        parse_binary_source_words(s).unwrap().into_iter().map(|t| t.word).collect()
+        parse_binary_source_words(s)
+            .unwrap()
+            .into_iter()
+            .map(|t| t.word)
+            .collect()
     }
 
     fn roundtrip(s: &str) {
@@ -334,7 +392,9 @@ mod tests {
         assert_eq!(encode(&decode(&encoded).unwrap()).unwrap(), encoded);
         for size in [1, 2, 3, 7, 64] {
             let mut reader = Frame3Decoder::new();
-            for chunk in encoded.chunks(size) { reader.push(chunk).unwrap(); }
+            for chunk in encoded.chunks(size) {
+                reader.push(chunk).unwrap();
+            }
             assert_eq!(reader.finish().unwrap(), words);
         }
         for end in 0..encoded.len() {
@@ -348,8 +408,13 @@ mod tests {
     #[test]
     fn exact_widths_and_multiple_roots() {
         for sample in [
-            "", "0", "1", "10 01", "10 001 01",
-            "10 000000001 01", "10 111111111 01",
+            "",
+            "0",
+            "1",
+            "10 01",
+            "10 001 01",
+            "10 000000001 01",
+            "10 111111111 01",
             "10 01 10 01",
             "10 0 01 10 1 01",
         ] {
@@ -369,7 +434,9 @@ mod tests {
     #[test]
     fn long_repeats_and_mixed_byte_blocks() {
         let mut text = String::from("10 ");
-        for _ in 0..150 { text.push_str("000000001 "); }
+        for _ in 0..150 {
+            text.push_str("000000001 ");
+        }
         text.push_str("01");
         roundtrip(&text);
         let words = source(&text);
@@ -381,8 +448,10 @@ mod tests {
     fn physical_overhead_and_corruption() {
         let bytes = encode(&source("10 001 01")).unwrap();
         assert_eq!(&bytes[..3], &MAGIC);
-        assert_eq!(physical_crc32(&bytes[..bytes.len()-4]).to_be_bytes(),
-            bytes[bytes.len()-4..]);
+        assert_eq!(
+            physical_crc32(&bytes[..bytes.len() - 4]).to_be_bytes(),
+            bytes[bytes.len() - 4..]
+        );
         for i in 0..bytes.len() {
             let mut damaged = bytes.clone();
             damaged[i] ^= 0x40;
@@ -395,42 +464,51 @@ mod tests {
         // Cross-implementation physical fixture, not a Rust semantic verdict.
         let words = source("10 001 01");
         let bytes = [
-            0x53, 0x33, 0x01, 0x03, 0x00, 0x03, 0x23, 0x20,
-            0x8a, 0x36, 0x20, 0x5d, 0x52,
+            0x53, 0x33, 0x01, 0x03, 0x00, 0x03, 0x23, 0x20, 0x8a, 0x36, 0x20, 0x5d, 0x52,
         ];
         assert_eq!(encode(&words).unwrap(), bytes);
         assert_eq!(decode(&bytes).unwrap(), words);
     }
 
-
     #[test]
     fn e1_zig_rust_shared_physical_corpus() {
         // Independent byte parity ONLY: native binary SENS owns admission/eval.
         let corpus = include_str!(concat!(
-            env!("CARGO_MANIFEST_DIR"), "/../../research/zig-codecs/transport/fixtures/e1-v1.bits"
+            env!("CARGO_MANIFEST_DIR"),
+            "/../../research/zig-codecs/transport/fixtures/e1-v1.bits"
         ));
         let mut tested = 0;
-        for line in corpus.lines().filter(|s| !s.is_empty() && !s.starts_with('#')) {
+        for line in corpus
+            .lines()
+            .filter(|s| !s.is_empty() && !s.starts_with('#'))
+        {
             let mut columns = line.split('|');
             let label = columns.next().expect("corpus case");
             let bits = columns.next().expect("exact binary words");
             let hex = columns.next().expect("physical E1 carrier hex");
             assert!(columns.next().is_none(), "too many columns case={label}");
             assert_eq!(hex.len() % 2, 0, "odd hex case={label}");
-            let expected = hex.as_bytes().chunks_exact(2).map(|pair| {
-                let digits = std::str::from_utf8(pair).expect("physical hex ASCII");
-                u8::from_str_radix(digits, 16).expect("valid physical hex")
-            }).collect::<Vec<_>>();
+            let expected = hex
+                .as_bytes()
+                .chunks_exact(2)
+                .map(|pair| {
+                    let digits = std::str::from_utf8(pair).expect("physical hex ASCII");
+                    u8::from_str_radix(digits, 16).expect("valid physical hex")
+                })
+                .collect::<Vec<_>>();
             let words = source(bits);
             let actual = encode(&words).expect("physical encoder accepts corpus");
             if actual != expected {
-                let offset = actual.iter().zip(&expected)
+                let offset = actual
+                    .iter()
+                    .zip(&expected)
                     .position(|(left, right)| left != right)
                     .unwrap_or_else(|| actual.len().min(expected.len()));
                 panic!(
                     "E1_BYTE_PARITY_FAIL case={label} first_diff_offset={offset} \
                      expected_len={} actual_len={} expected={expected:02x?} actual={actual:02x?}",
-                    expected.len(), actual.len()
+                    expected.len(),
+                    actual.len()
                 );
             }
             assert_eq!(
@@ -464,7 +542,10 @@ mod tests {
         let mut t5_smaller = 0usize;
         let mut equal = 0usize;
 
-        for line in corpus.lines().filter(|line| !line.is_empty() && !line.starts_with('#')) {
+        for line in corpus
+            .lines()
+            .filter(|line| !line.is_empty() && !line.starts_with('#'))
+        {
             let mut parts = line.split('|');
             let label = parts.next().expect("fixture label");
             let binary = parts.next().expect("exact-width binary fixture");
@@ -473,26 +554,33 @@ mod tests {
             let words = source(binary);
             let bits: usize = words.iter().map(|w| w.width()).sum();
             let physical_e1 = encode(&words).expect("admitted E1 fixture");
-            let encoded_hex = physical_e1.iter().map(|byte| format!("{byte:02x}"))
+            let encoded_hex = physical_e1
+                .iter()
+                .map(|byte| format!("{byte:02x}"))
                 .collect::<String>();
             assert_eq!(encoded_hex, expected_hex, "E1 fixture changed: {label}");
-            assert_eq!(decode(&physical_e1).unwrap(), words, "E1 width loss: {label}");
+            assert_eq!(
+                decode(&physical_e1).unwrap(),
+                words,
+                "E1 width loss: {label}"
+            );
 
             let t5 = encode_ternary_words(&words).ok().filter(|bytes| {
                 decode_ternary_words(bytes).is_ok_and(|recovered| recovered == words)
             });
             let f3c = t5.as_ref().and_then(|bytes| {
                 crate::frame3_small::encode_explicit_small_f3(bytes)
-                    .ok().flatten().filter(|packed| {
+                    .ok()
+                    .flatten()
+                    .filter(|packed| {
                         crate::frame3_small::decode_explicit_small_f3(packed)
                             .is_ok_and(|recovered| recovered == *bytes)
                     })
             });
             let t5_bytes = t5.as_ref().map(|v| v.len());
             let f3c_bytes = f3c.as_ref().map(|v| v.len());
-            let size_repr = |n: Option<usize>| {
-                n.map_or_else(|| "NA".to_string(), |size| size.to_string())
-            };
+            let size_repr =
+                |n: Option<usize>| n.map_or_else(|| "NA".to_string(), |size| size.to_string());
             println!(
                 "E1_SIZE_RECORD case={label} words={} exact_bits={bits} e1_bytes={} t5_bytes={} f3c_bytes={}",
                 words.len(), physical_e1.len(), size_repr(t5_bytes), size_repr(f3c_bytes)
@@ -501,11 +589,17 @@ mod tests {
             if let Some(t5_size) = t5_bytes {
                 t5_cases += 1;
                 total_t5 += t5_size;
-                if physical_e1.len() < t5_size { e1_smaller += 1; }
-                else if physical_e1.len() > t5_size { t5_smaller += 1; }
-                else { equal += 1; }
+                if physical_e1.len() < t5_size {
+                    e1_smaller += 1;
+                } else if physical_e1.len() > t5_size {
+                    t5_smaller += 1;
+                } else {
+                    equal += 1;
+                }
             }
-            if f3c_bytes.is_some() { f3c_cases += 1; }
+            if f3c_bytes.is_some() {
+                f3c_cases += 1;
+            }
             cases += 1;
         }
         // A separately proven SENS tiny F3C witness is included to avoid
@@ -513,8 +607,8 @@ mod tests {
         // This is NOT a 17th case in the immutable E1 byte-parity corpus.
         let tiny_t5 = [0x63, 0x89, 0x06, 0xa1];
         let tiny_f3c = [0xf3, 0x40, 0x60];
-        let tiny_words = decode_ternary_words(&tiny_t5)
-            .expect("original tiny SENS fixture must decode exactly");
+        let tiny_words =
+            decode_ternary_words(&tiny_t5).expect("original tiny SENS fixture must decode exactly");
         let e1_tiny = encode(&tiny_words).expect("E1 physical carrier for tiny fixture");
         assert_eq!(decode(&e1_tiny).unwrap(), tiny_words);
         assert_eq!(encode_ternary_words(&tiny_words).unwrap(), tiny_t5);
@@ -530,9 +624,14 @@ mod tests {
         println!(
             "E1_F3C_TINY_REFERENCE case=admitted_quote words={} exact_bits={} \
              e1_bytes={} t5_bytes=4 f3c_bytes=3 semantic_authority=SENS",
-            tiny_words.len(), tiny_bits, e1_tiny.len()
+            tiny_words.len(),
+            tiny_bits,
+            e1_tiny.len()
         );
-        assert_eq!(cases, 16, "the fixed byte parity corpus cannot silently shrink");
+        assert_eq!(
+            cases, 16,
+            "the fixed byte parity corpus cannot silently shrink"
+        );
         assert_eq!(e1_smaller + t5_smaller + equal, t5_cases);
         println!(
             "E1_SIZE_SUMMARY cases={cases} t5_representable={t5_cases} f3c_eligible={f3c_cases} \
@@ -546,7 +645,10 @@ mod tests {
     fn wrong_d2_rejected() {
         assert_eq!(encode(&source("01")), Err(Frame3Error::InvalidD2));
         assert_eq!(encode(&source("10")), Err(Frame3Error::InvalidD2));
-        assert_eq!(decode(b"T5 not a universal frame"), Err(Frame3Error::BadVersion));
+        assert_eq!(
+            decode(b"T5 not a universal frame"),
+            Err(Frame3Error::BadVersion)
+        );
     }
 
     #[test]
@@ -577,14 +679,19 @@ mod tests {
         let valid = encode(&source("0")).unwrap();
         let mut decoder = Frame3Decoder::new();
         decoder.push(&valid).unwrap();
-        assert_eq!(decoder.push(&vec![0; MAX_FILE_BYTES]), Err(Frame3Error::TooLarge));
+        assert_eq!(
+            decoder.push(&vec![0; MAX_FILE_BYTES]),
+            Err(Frame3Error::TooLarge)
+        );
         assert_eq!(decoder.finish(), Err(Frame3Error::TooLarge));
     }
 
     #[test]
     fn dp_matches_independent_bounded_enumeration() {
         fn brute(words: &[BinarySourceWord]) -> usize {
-            if words.is_empty() { return 0; }
+            if words.is_empty() {
+                return 0;
+            }
             let mut best = usize::MAX;
             for n in 1..=words.len().min(MAX_BLOCK_WORDS) {
                 let chunk = &words[..n];
@@ -601,7 +708,8 @@ mod tests {
         for width in 1..=9 {
             for n in 0..=7 {
                 let words = std::iter::repeat(new_word(width, 0).unwrap())
-                    .take(n).collect::<Vec<_>>();
+                    .take(n)
+                    .collect::<Vec<_>>();
                 assert_eq!(choose_plan(&words)[0].bytes, brute(&words));
             }
         }

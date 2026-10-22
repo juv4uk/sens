@@ -37,7 +37,8 @@ fn native_error_kind(program: &str, probe: &str) -> ErrorKind {
 
 #[test]
 fn later_binding_in_the_same_definition_frame_is_visible() {
-    let program = "(визначити перша-функція (функція () пізніша-функція)) (визначити пізніша-функція 42)";
+    let program =
+        "(визначити перша-функція (функція () пізніша-функція)) (визначити пізніша-функція 42)";
     assert_eq!(native_value(program, "(перша-функція)"), "42");
     assert_eq!(meta_eval_program(program, "(перша-функція)"), "42");
 }
@@ -65,7 +66,10 @@ fn one_way_later_lambda_binding_is_visible_without_inventing_an_scc() {
 #[test]
 fn call_before_the_later_binding_remains_unresolved() {
     let program = "(визначити перша-функція (функція () (пізніша-функція)))";
-    assert_eq!(native_error_kind(program, "(перша-функція)"), ErrorKind::UnknownSymbol);
+    assert_eq!(
+        native_error_kind(program, "(перша-функція)"),
+        ErrorKind::UnknownSymbol
+    );
     assert_eq!(
         meta_eval_program(program, "(перша-функція)"),
         "(error unbound-symbol пізніша-функція)"

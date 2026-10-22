@@ -1,8 +1,8 @@
 //! sens#3838 — ratchet the existing SW\x01 wire as C1 program-data transport.
 
 use sens::{
-    lower_program, parse_mixed_exact_domain, wire_decode_program, wire_encode_program, Bija3, Bit3, Bit4, Bit8,
-    CoreD4, CoreD8, CoreDomainIdentity, DomainIdentity, Expr, ExprKind, Span,
+    lower_program, parse_mixed_exact_domain, wire_decode_program, wire_encode_program, Bija3, Bit3,
+    Bit4, Bit8, CoreD4, CoreD8, CoreDomainIdentity, DomainIdentity, Expr, ExprKind, Span,
 };
 use std::rc::Rc;
 
@@ -27,7 +27,10 @@ fn contract_reuses_existing_wire_and_forbids_semantic_host_work() {
         "host-role-selection . forbidden",
         "compiler-admission . fail-closed",
     ] {
-        assert!(CONTRACT.contains(required), "missing program-data law: {required}");
+        assert!(
+            CONTRACT.contains(required),
+            "missing program-data law: {required}"
+        );
     }
 }
 
@@ -37,11 +40,7 @@ fn same_payload_wrong_domain_remains_distinct_on_program_wire() {
     let d4: DomainIdentity = CoreD4::from_word(Bit4::new(0b0010).unwrap()).into();
     let d8: DomainIdentity = CoreD8::from_word(Bit8::new(0b0000_0010).unwrap()).into();
 
-    let program = vec![
-        identity_expr(d3),
-        identity_expr(d4),
-        identity_expr(d8),
-    ];
+    let program = vec![identity_expr(d3), identity_expr(d4), identity_expr(d8)];
     let wire = wire_encode_program(&program);
     let decoded = wire_decode_program(&wire).expect("canonical program-data wire");
     assert_eq!(decoded, program);
@@ -84,7 +83,10 @@ fn current_nucleus_lowered_program_wire_is_deterministic() {
     let first = wire_encode_program(&lowered);
     let decoded = wire_decode_program(&first).expect("current nucleus wire decodes");
     let second = wire_encode_program(&decoded);
-    assert_eq!(second, first, "C1 program-data transport must be byte deterministic");
+    assert_eq!(
+        second, first,
+        "C1 program-data transport must be byte deterministic"
+    );
 
     fn reject_legacy(expr: &Expr) {
         match &expr.kind {

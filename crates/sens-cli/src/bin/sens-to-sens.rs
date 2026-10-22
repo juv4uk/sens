@@ -98,11 +98,7 @@ fn push_head_edit(head: &Expr, spelling: &str, analysis: &mut Analysis) {
     analysis.edits.push(Edit {
         start: head.span.start,
         end: head.span.end,
-        replacement: format!(
-            "{:0width$b}",
-            exact.packed_bits(),
-            width = exact.width(),
-        ),
+        replacement: format!("{:0width$b}", exact.packed_bits(), width = exact.width(),),
     });
 }
 
@@ -132,13 +128,7 @@ fn walk_sequence(
     top_level: bool,
 ) {
     for expression in expressions {
-        walk_expr(
-            expression,
-            bound,
-            host_capabilities,
-            analysis,
-            top_level,
-        );
+        walk_expr(expression, bound, host_capabilities, analysis, top_level);
     }
 }
 
@@ -152,13 +142,7 @@ fn walk_cond_clauses(
         match &clause.kind {
             ExprKind::List(parts) => {
                 let mut clause_bound = bound.clone();
-                walk_sequence(
-                    parts,
-                    &mut clause_bound,
-                    host_capabilities,
-                    analysis,
-                    false,
-                );
+                walk_sequence(parts, &mut clause_bound, host_capabilities, analysis, false);
             }
             _ => {
                 let mut local = bound.clone();
@@ -289,13 +273,7 @@ fn walk_expr(
                         bound.insert(name.to_string());
                     }
                 }
-                walk_sequence(
-                    &arguments[1..],
-                    bound,
-                    host_capabilities,
-                    analysis,
-                    false,
-                );
+                walk_sequence(&arguments[1..], bound, host_capabilities, analysis, false);
                 return;
             }
             HeadKind::Defmacro => {
@@ -321,23 +299,11 @@ fn walk_expr(
                 return;
             }
             HeadKind::Let => {
-                walk_let(
-                    arguments,
-                    bound,
-                    host_capabilities,
-                    analysis,
-                    false,
-                );
+                walk_let(arguments, bound, host_capabilities, analysis, false);
                 return;
             }
             HeadKind::LetStar => {
-                walk_let(
-                    arguments,
-                    bound,
-                    host_capabilities,
-                    analysis,
-                    true,
-                );
+                walk_let(arguments, bound, host_capabilities, analysis, true);
                 return;
             }
             HeadKind::Cond => {
@@ -348,24 +314,12 @@ fn walk_expr(
         }
     } else {
         let mut head_bound = bound.clone();
-        walk_expr(
-            head,
-            &mut head_bound,
-            host_capabilities,
-            analysis,
-            false,
-        );
+        walk_expr(head, &mut head_bound, host_capabilities, analysis, false);
     }
 
     for argument in arguments {
         let mut local = bound.clone();
-        walk_expr(
-            argument,
-            &mut local,
-            host_capabilities,
-            analysis,
-            false,
-        );
+        walk_expr(argument, &mut local, host_capabilities, analysis, false);
     }
 }
 
@@ -373,19 +327,15 @@ fn walk_expr(
 /// Rust primitive and no special form. Its first top-level definition binds
 /// the code slot (#1468), so code and name reach the same function.
 fn is_language_definition(name: &str) -> bool {
-    semantic_registry_export::semantic_id_for_admitted_surface(name)
-        .is_some_and(|sens| {
-            !matches!(
-                semantic_registry_export::function_role(sens),
-                Some("primitive") | Some("syntax")
-            )
-        })
+    semantic_registry_export::semantic_id_for_admitted_surface(name).is_some_and(|sens| {
+        !matches!(
+            semantic_registry_export::function_role(sens),
+            Some("primitive") | Some("syntax")
+        )
+    })
 }
 
-fn analyze(
-    source: &str,
-    host_capabilities: &HashSet<String>,
-) -> Result<Analysis, String> {
+fn analyze(source: &str, host_capabilities: &HashSet<String>) -> Result<Analysis, String> {
     analyze_with(source, host_capabilities, false)
 }
 
@@ -395,7 +345,10 @@ fn analyze_with(
     language: bool,
 ) -> Result<Analysis, String> {
     let expressions = parse(source).map_err(|error| error.render(source))?;
-    let mut analysis = Analysis { language, ..Analysis::default() };
+    let mut analysis = Analysis {
+        language,
+        ..Analysis::default()
+    };
     let mut bound = HashSet::new();
     walk_sequence(
         &expressions,
@@ -445,7 +398,9 @@ fn main() {
             language = true;
         } else if argument == "-h" || argument == "--help" {
             println!("Usage: sens-to-sens [--check] [--language] <file>...");
-            println!("Parser-aware repository migration from admitted surfaces to exact SENS functions.");
+            println!(
+                "Parser-aware repository migration from admitted surfaces to exact SENS functions."
+            );
             println!("--check reports candidates without writing and exits 1 when changes are available.");
             println!("--language: the files are the language's own first definitions of table");
             println!("  functions (code slots, #1468); calls to them become codes too.");
@@ -578,8 +533,15 @@ mod tests {
         let source = "(визначити звязок (функція (x) (сполучити (перше x) (решта x))))\n";
         let host = no_host();
         let inspected = analyze(source, &host).expect("canonical Ukrainian source");
-        assert!(inspected.named_calls >= 5, "the legacy auditor still sees the calls");
-        assert_eq!(inspected.edits.len(), 0, "no Ukrainian exact head can be rewritten to SID8");
+        assert!(
+            inspected.named_calls >= 5,
+            "the legacy auditor still sees the calls"
+        );
+        assert_eq!(
+            inspected.edits.len(),
+            0,
+            "no Ukrainian exact head can be rewritten to SID8"
+        );
         assert_eq!(rewrite(source), source);
 
         let mixed = sens::parse_mixed_exact_domain(source).expect("current exact reader");
@@ -599,24 +561,21 @@ mod tests {
 
     #[test]
     fn derived_functions_and_current_macros_use_exact_codes() {
-        let source =
-            "(let ((xs (list 1 2 3))) (and (member? 2 xs) (or () (length xs))))";
+        let source = "(let ((xs (list 1 2 3))) (and (member? 2 xs) (or () (length xs))))";
         let expected = source;
         assert_eq!(rewrite(source), expected);
     }
 
     #[test]
     fn defmacro_head_is_exact_and_its_target_shadows_later_surface_calls() {
-        let source =
-            "(defmacro list (x) (quote shadowed)) (list (never-defined-function))";
+        let source = "(defmacro list (x) (quote shadowed)) (list (never-defined-function))";
         let expected = source;
         assert_eq!(rewrite(source), expected);
     }
 
     #[test]
     fn local_bindings_shadow_registry_surfaces() {
-        let source =
-            "(lambda (list) (list 1 2)) (let ((car (lambda (x) x))) (car (list 1 2)))";
+        let source = "(lambda (list) (list 1 2)) (let ((car (lambda (x) x))) (car (list 1 2)))";
         let expected = source;
         assert_eq!(rewrite(source), expected);
     }
@@ -684,24 +643,43 @@ mod tests {
     fn unbound_unratified_head_is_blocked_without_minting_a_code() {
         let source = "(never-ratified-operation x)";
         let audit = analyze(source, &no_host()).expect("well-formed unratified source");
-        assert_eq!(audit.blocked_unratified, 1, "unknown head remains visible as migration debt");
+        assert_eq!(
+            audit.blocked_unratified, 1,
+            "unknown head remains visible as migration debt"
+        );
         assert!(audit.edits.is_empty(), "an unknown head has no domain code");
-        assert_eq!(rewrite(source), source, "unknown source stays byte-for-byte unchanged");
+        assert_eq!(
+            rewrite(source),
+            source,
+            "unknown source stays byte-for-byte unchanged"
+        );
     }
 
     #[test]
     fn ratified_exact_width_is_the_only_replacement_authority() {
         // The current source index intentionally admits uk/sa, never
         // English display words through historical SID8.
-        assert_eq!(semantic_registry_export::admitted_core_domain_for_surface("car"), None);
+        assert_eq!(
+            semantic_registry_export::admitted_core_domain_for_surface("car"),
+            None
+        );
         let source = "(let ((x (write-to-string v))) (string->symbol x))";
         let audit = analyze(source, &no_host()).expect("well-formed historical source");
         assert!(audit.edits.is_empty(), "no historical W8 source write");
-        assert!(audit.blocked_unratified >= 3, "every unratified call remains visible");
+        assert!(
+            audit.blocked_unratified >= 3,
+            "every unratified call remains visible"
+        );
         assert_eq!(rewrite(source), source);
         assert!(!rewrite(source).contains("10011100"));
         assert!(!rewrite(source).contains("01001100"));
-        assert_eq!(semantic_registry_export::admitted_core_domain_for_surface("write-to-string"), None);
-        assert_eq!(semantic_registry_export::admitted_core_domain_for_surface("string->symbol"), None);
+        assert_eq!(
+            semantic_registry_export::admitted_core_domain_for_surface("write-to-string"),
+            None
+        );
+        assert_eq!(
+            semantic_registry_export::admitted_core_domain_for_surface("string->symbol"),
+            None
+        );
     }
 }

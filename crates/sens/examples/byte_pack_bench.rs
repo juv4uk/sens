@@ -4,8 +4,8 @@
 //! exact-width words. It does not assign semantic meaning to any bit pattern.
 
 use sens::{
-    append_binary_source_word, Bit1, Bit2, Bit3, Bit4, Bit5, Bit6, Bit7, Bit8, Bit9,
-    BinarySourceWord, BitPacker, PackedBitstream,
+    append_binary_source_word, BinarySourceWord, Bit1, Bit2, Bit3, Bit4, Bit5, Bit6, Bit7, Bit8,
+    Bit9, BitPacker, PackedBitstream,
 };
 use std::{env, hint::black_box, process::ExitCode};
 
@@ -87,9 +87,7 @@ fn unpacked_scan(words: &[BinarySourceWord], reps: usize) -> u64 {
 fn pack_scan(words: &[BinarySourceWord], reps: usize) -> u64 {
     let mut checksum = 0u64;
     for _ in 0..reps {
-        let mut packer = BitPacker::with_capacity_bits(
-            words.iter().map(|w| w.width()).sum(),
-        );
+        let mut packer = BitPacker::with_capacity_bits(words.iter().map(|w| w.width()).sum());
         for &w in words {
             checksum = checksum.wrapping_add(append_binary_source_word(&mut packer, w) as u64);
         }

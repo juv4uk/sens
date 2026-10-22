@@ -7,8 +7,8 @@
 #[test]
 fn committed_core_fasl_matches_current_core_source() {
     let fasl = include_bytes!("../../../lib/core4.lisp.fasl");
-    let (snapshot_expressions, embedded_hash) = sens::fasl_decode_program(fasl)
-        .expect("committed lib/core4.lisp.fasl must decode");
+    let (snapshot_expressions, embedded_hash) =
+        sens::fasl_decode_program(fasl).expect("committed lib/core4.lisp.fasl must decode");
     let current_source = sens::CORE_LIBRARY_SOURCE;
     let current_hash = sens::sha256_source(current_source.as_bytes());
 
@@ -25,16 +25,14 @@ fn committed_core_fasl_matches_current_core_source() {
     // the same format so the comparison checks semantic nodes/domains, not
     // transport-only byte offsets.
     let expected_fasl = sens::fasl_encode(&current_expressions, &current_hash);
-    let (expected_snapshot_expressions, expected_hash) =
-        sens::fasl_decode_program(&expected_fasl)
-            .expect("fresh path-bound Core4 AST must encode/decode as FASL");
+    let (expected_snapshot_expressions, expected_hash) = sens::fasl_decode_program(&expected_fasl)
+        .expect("fresh path-bound Core4 AST must encode/decode as FASL");
     assert_eq!(expected_hash, current_hash);
     assert_eq!(
         snapshot_expressions, expected_snapshot_expressions,
         "Core4 FASL must preserve exact-domain parser output, not an ordinary-parse AST; regenerate with gen-fasl"
     );
 }
-
 
 /// #5408: порожня, одна й дві послідовні прив'язки мають працювати з
 /// поточного Lisp-макросу, незалежно від людської поверхні імен.
@@ -48,24 +46,26 @@ fn poslidovni_pryviazky_d6_vykonuiutsia_i_ne_prykhovuiut_nevidome_imia() {
         "(нехай* ((x 7) (y x)) y)",
     ] {
         let mut session = sens::Session::default();
-        sens::load_core_library(&mut session)
-            .expect("чинний Core4 мусить завантажитися");
+        sens::load_core_library(&mut session).expect("чинний Core4 мусить завантажитися");
         let expressions = sens::parse(source).expect("допущена форма D6");
         let outcome = sens::eval_parsed_expressions(&expressions, &mut session)
             .unwrap_or_else(|err| panic!("нехай* не створило лексичну рамку для {source}: {err}"));
-        assert_eq!(outcome.value.to_string(), "7", "неправильне значення для {source}");
+        assert_eq!(
+            outcome.value.to_string(),
+            "7",
+            "неправильне значення для {source}"
+        );
     }
 
     let mut session = sens::Session::default();
     sens::load_core_library(&mut session).expect("поточний Core4");
-    let unknown = sens::parse("(нехай* ((основа 7)) наслідок)")
-        .expect("допущений негативний свідок");
+    let unknown =
+        sens::parse("(нехай* ((основа 7)) наслідок)").expect("допущений негативний свідок");
     assert!(
         sens::eval_parsed_expressions(&unknown, &mut session).is_err(),
         "невідомий символ повинен завершуватися помилкою, а не прихованим допуском"
     );
 }
-
 
 #[test]
 fn core4_length_terminates_on_exact_d4_null_not_on_nonempty_atom_negation() {

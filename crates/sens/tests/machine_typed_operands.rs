@@ -1,4 +1,7 @@
-use sens::{eval_program, eval_parsed_expressions, parse_mixed_exact_domain_machine_source, load_core_library, Session};
+use sens::{
+    eval_parsed_expressions, eval_program, load_core_library,
+    parse_mixed_exact_domain_machine_source, Session,
+};
 use std::fs;
 use std::path::PathBuf;
 
@@ -10,18 +13,22 @@ fn load_lisp_file(path: &str, session: &mut Session) {
     let path = repo_root().join(path);
     let source = fs::read_to_string(&path)
         .unwrap_or_else(|error| panic!("{} must exist: {error}", path.display()));
-    let relative = path.strip_prefix(repo_root())
+    let relative = path
+        .strip_prefix(repo_root())
         .expect("Lisp fixture path must be inside the SENS repository");
-    let source_path = relative.to_str()
+    let source_path = relative
+        .to_str()
         .expect("machine fixture path must be valid UTF-8");
     if source_path.starts_with("lib/machine/") {
         let parsed = parse_mixed_exact_domain_machine_source(source_path, &source)
             .unwrap_or_else(|error| panic!("{source_path}: exact-domain read failed: {error}"));
-        eval_parsed_expressions(&parsed, session)
-            .unwrap_or_else(|error| panic!("{source_path}: exact-domain execution failed: {error}"));
+        eval_parsed_expressions(&parsed, session).unwrap_or_else(|error| {
+            panic!("{source_path}: exact-domain execution failed: {error}")
+        });
     } else {
-        eval_program(&source, session)
-            .unwrap_or_else(|error| panic!("{} must load as ordinary sens: {error}", path.display()));
+        eval_program(&source, session).unwrap_or_else(|error| {
+            panic!("{} must load as ordinary sens: {error}", path.display())
+        });
     }
 }
 
@@ -76,7 +83,10 @@ fn machine_operand_exact_d1_inclusive_bounds_use_admitted_d5_d4() {
         ("(машинний-операнд-в-межах? -129 -128 127)", false),
         ("(машинний-операнд-в-межах? 128 -128 127)", false),
         ("(машинний-операнд-в-межах? 0 0 18446744073709551615)", true),
-        ("(машинний-операнд-в-межах? 18446744073709551616 0 18446744073709551615)", false),
+        (
+            "(машинний-операнд-в-межах? 18446744073709551616 0 18446744073709551615)",
+            false,
+        ),
     ] {
         let actual = eval_program(source, &mut session)
             .unwrap_or_else(|e| panic!("SENS D1 for {source}: {e}"))
@@ -94,10 +104,7 @@ fn invalid_operand_values_fail_closed_before_machine_form_creation() {
             "(x86-gpr64 (quote xmm0))",
             "(rejected machine-operand gpr64 xmm0)",
         ),
-        (
-            "(x86-u64-imm -1)",
-            "(rejected machine-operand u64-imm -1)",
-        ),
+        ("(x86-u64-imm -1)", "(rejected machine-operand u64-imm -1)"),
         (
             "(x86-u64-imm 18446744073709551616)",
             "(rejected machine-operand u64-imm 18446744073709551616)",
@@ -106,19 +113,12 @@ fn invalid_operand_values_fail_closed_before_machine_form_creation() {
             "(x86-u64-imm 1/2)",
             "(rejected machine-operand u64-imm 1/2)",
         ),
-        (
-            "(x86-disp8 128)",
-            "(rejected machine-operand disp8 128)",
-        ),
-        (
-            "(x86-disp8 -129)",
-            "(rejected machine-operand disp8 -129)",
-        ),
+        ("(x86-disp8 128)", "(rejected machine-operand disp8 128)"),
+        ("(x86-disp8 -129)", "(rejected machine-operand disp8 -129)"),
     ] {
         assert_eq!(eval_value(source, &mut session), expected, "{source}");
     }
 }
-
 
 #[test]
 fn ukrainian_machine_register_shapes_return_exact_d1_and_never_trust_extra_fields() {
@@ -127,12 +127,24 @@ fn ukrainian_machine_register_shapes_return_exact_d1_and_never_trust_extra_field
     let mut session = machine_session();
     for (source, expected) in [
         ("(машинний-регістр-8 (quote al))", "(gpr8 al)"),
-        ("(машинний-регістр-8 (quote rax))", "(rejected machine-operand gpr8 rax)"),
+        (
+            "(машинний-регістр-8 (quote rax))",
+            "(rejected machine-operand gpr8 rax)",
+        ),
         ("(машинний-регістр-32 (quote rax))", "(gpr32 rax)"),
-        ("(машинний-регістр-32 (quote xmm0))", "(rejected machine-operand gpr32 xmm0)"),
+        (
+            "(машинний-регістр-32 (quote xmm0))",
+            "(rejected machine-operand gpr32 xmm0)",
+        ),
         ("(машинний-векторний-регістр (quote xmm0))", "(xmm xmm0)"),
-        ("(машинний-векторний-регістр (quote rax))", "(rejected machine-operand xmm rax)"),
-        ("(x86-gpr64 (quote al))", "(rejected machine-operand gpr64 al)"),
+        (
+            "(машинний-векторний-регістр (quote rax))",
+            "(rejected machine-operand xmm rax)",
+        ),
+        (
+            "(x86-gpr64 (quote al))",
+            "(rejected machine-operand gpr64 al)",
+        ),
     ] {
         assert_eq!(eval_value(source, &mut session), expected, "{source}");
     }
@@ -144,7 +156,10 @@ fn ukrainian_machine_register_shapes_return_exact_d1_and_never_trust_extra_field
 fn machine_operand_predicates_execute_exact_d1_without_legacy_truth_names() {
     let mut session = machine_session();
     for (source, expected) in [
-        ("(машинний-операнд-відхилено? (як-є (rejected machine-operand gpr8 rax)))", true),
+        (
+            "(машинний-операнд-відхилено? (як-є (rejected machine-operand gpr8 rax)))",
+            true,
+        ),
         ("(машинний-операнд-відхилено? (як-є (gpr8 al)))", false),
         ("(назва-машинного-регістра-8? (як-є al))", true),
         ("(назва-машинного-регістра-8? (як-є rax))", false),
@@ -153,8 +168,9 @@ fn machine_operand_predicates_execute_exact_d1_without_legacy_truth_names() {
         ("(машинний-регістр-8? (як-є (gpr8 al extra)))", false),
         ("(машинний-регістр-8? (як-є ()))", false),
     ] {
-        let result = eval_program(source, &mut session)
-            .unwrap_or_else(|err| panic!("SENS machine operand evaluation failed for {source}: {err}"));
+        let result = eval_program(source, &mut session).unwrap_or_else(|err| {
+            panic!("SENS machine operand evaluation failed for {source}: {err}")
+        });
         assert_eq!(
             result.value.as_predicate_bit(),
             Some(expected),
@@ -287,10 +303,7 @@ fn new_family_atoms_keep_typed_rejection_fail_closed() {
     let mut session = machine_session();
 
     assert_eq!(
-        eval_value(
-            "(x86-push-r64 (x86-gpr64 (quote xmm0)))",
-            &mut session,
-        ),
+        eval_value("(x86-push-r64 (x86-gpr64 (quote xmm0)))", &mut session,),
         "(rejected machine-operand gpr64 xmm0)"
     );
     assert_eq!(
@@ -304,7 +317,13 @@ fn new_family_atoms_keep_typed_rejection_fail_closed() {
 
 #[test]
 fn machine_operand_type_names_do_not_mint_semantic_surfaces() {
-    for machine_only in ["x86-gpr64","x86-u64-imm","x86-disp8","x86-mem64-disp8","mem64-disp8"] {
+    for machine_only in [
+        "x86-gpr64",
+        "x86-u64-imm",
+        "x86-disp8",
+        "x86-mem64-disp8",
+        "mem64-disp8",
+    ] {
         assert!(
             sens::semantic_registry_export::semantic_id_for_admitted_surface(machine_only)
                 .is_none(),

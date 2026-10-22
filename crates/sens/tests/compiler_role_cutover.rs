@@ -7,9 +7,9 @@
 
 use sens::syntax::{Expr, ExprKind, Span};
 use sens::{
-    domain_identity_shape_mechanism, eval_parsed_expressions, load_core_library, parse_mixed_exact_domain,
-    sha256_source, Bija3, Bit3, Bit4, Bit8, CoreD4, CoreD8, DomainIdentity, Exactness, Session,
-    Value,
+    domain_identity_shape_mechanism, eval_parsed_expressions, load_core_library,
+    parse_mixed_exact_domain, sha256_source, Bija3, Bit3, Bit4, Bit8, CoreD4, CoreD8,
+    DomainIdentity, Exactness, Session, Value,
 };
 use std::collections::BTreeSet;
 use std::rc::Rc;
@@ -240,15 +240,14 @@ fn production_request_roles_are_derived_by_sens_from_generated_law_structure() {
 
         let prov = list_values(row[3]).expect("provenance is a proper list");
         assert_eq!(prov.len(), 3);
-        assert!(
-            matches!(prov[0], Value::String(value) if value.as_ref() == law.authority_sha256)
-        );
-        assert!(
-            matches!(prov[1], Value::String(value) if value.as_ref() == law.projection_sha256)
-        );
+        assert!(matches!(prov[0], Value::String(value) if value.as_ref() == law.authority_sha256));
+        assert!(matches!(prov[1], Value::String(value) if value.as_ref() == law.projection_sha256));
     }
 
-    assert_eq!(admitted, 3, "bounded compiler slice has exactly three roles");
+    assert_eq!(
+        admitted, 3,
+        "bounded compiler slice has exactly three roles"
+    );
     assert_eq!(
         roles,
         BTreeSet::from([

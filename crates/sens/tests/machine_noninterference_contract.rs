@@ -8,7 +8,8 @@ fn repo_file(path: &str) -> PathBuf {
 }
 
 fn read(path: &str) -> String {
-    fs::read_to_string(repo_file(path)).unwrap_or_else(|error| panic!("#150 requires {path}: {error}"))
+    fs::read_to_string(repo_file(path))
+        .unwrap_or_else(|error| panic!("#150 requires {path}: {error}"))
 }
 
 #[test]

@@ -81,10 +81,7 @@ impl KernelDriver for MockPrologIsland {
             return Err(KernelHostError::NotRunning);
         }
         let query = String::from_utf8_lossy(payload);
-        Ok(format!(
-            "prolog-answers:unify({query})=[Subst(X=carol),Subst(X=dave)]"
-        )
-        .into_bytes())
+        Ok(format!("prolog-answers:unify({query})=[Subst(X=carol),Subst(X=dave)]").into_bytes())
     }
 
     fn snapshot(&self) -> Result<Vec<u8>, KernelHostError> {
@@ -110,13 +107,10 @@ fn real_sens_composes_local_evaluation_with_two_autonomous_island_calls() {
     let mut session = Session::default();
     load_core_library(&mut session).expect("real sens core library");
 
-    let local = eval_program(
-        "(cons \"query-target\" \"person(alice)\")",
-        &mut session,
-    )
-    .expect("real sens local evaluation")
-    .value
-    .to_string();
+    let local = eval_program("(cons \"query-target\" \"person(alice)\")", &mut session)
+        .expect("real sens local evaluation")
+        .value
+        .to_string();
 
     let datalog = router
         .exchange("datalog", b"person(alice)", b"sens-orchestrator")

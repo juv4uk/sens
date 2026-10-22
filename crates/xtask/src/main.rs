@@ -88,10 +88,7 @@ fn run_compiler_compile(mut args: impl Iterator<Item = String>) -> ExitCode {
         compiler_compile::run_triplet(&repo_root, &sens_path, output.as_deref())
     } else {
         let input = input.expect("exactly one input mode was checked");
-        compiler_compile::run(
-            &repo_root,
-            compiler_compile::RunOptions { input, output },
-        )
+        compiler_compile::run(&repo_root, compiler_compile::RunOptions { input, output })
     };
 
     match result {
@@ -153,8 +150,8 @@ fn run_generate_encoder_coverage(args: impl Iterator<Item = String>) -> ExitCode
     let repo_root = locate_repo_root();
     let mut evidence_path = std::path::PathBuf::from(&repo_root)
         .join("lib/machine/xed/generated/machine-evidence.lisp");
-    let mut out_path = std::path::PathBuf::from(&repo_root)
-        .join("lib/machine/encoding/coverage.lisp");
+    let mut out_path =
+        std::path::PathBuf::from(&repo_root).join("lib/machine/encoding/coverage.lisp");
     let mut check = false;
 
     let remaining: Vec<String> = args.collect();
@@ -242,7 +239,6 @@ fn run_import_xed_evidence(args: impl Iterator<Item = String>) -> ExitCode {
         check,
     })
 }
-
 
 /// Handle `cargo xtask external-oracle <subcommand> [args]`
 ///

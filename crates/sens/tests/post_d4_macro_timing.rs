@@ -1,4 +1,4 @@
-use sens::{Session, eval_program};
+use sens::{eval_program, Session};
 
 fn eval(source: &str) -> String {
     let mut session = Session::default();

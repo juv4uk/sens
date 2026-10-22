@@ -5,8 +5,8 @@
 
 use sens::{
     eval_parsed_expressions, eval_program, parse_mixed_exact_domain, BinaryNumber,
-    BinarySourceWord, Bit1, Bit2, Bit3, Bit4, Bit5, Bit6, Bit7, Bit8, Bit9,
-    DomainIdentity, ErrorKind, Exactness, Rational, Session, Value,
+    BinarySourceWord, Bit1, Bit2, Bit3, Bit4, Bit5, Bit6, Bit7, Bit8, Bit9, DomainIdentity,
+    ErrorKind, Exactness, Rational, Session, Value,
 };
 
 fn numeric(width: usize, magnitude: u32) -> Value {
@@ -17,8 +17,7 @@ fn numeric(width: usize, magnitude: u32) -> Value {
         }
     }
     Value::BinaryNumber(
-        BinaryNumber::from_numeric_domain_bits(width, &bits)
-            .expect("D24+ qualified numeric word"),
+        BinaryNumber::from_numeric_domain_bits(width, &bits).expect("D24+ qualified numeric word"),
     )
 }
 
@@ -43,26 +42,51 @@ fn all_representable_non_numeric_domain_words_are_rejected_by_math() {
     let mut session = Session::default();
     for word in words {
         let identity = DomainIdentity::from_source_word(word);
-        session.environment.define("left", Value::DomainIdentity(identity));
-        session.environment.define("right", Value::DomainIdentity(identity));
+        session
+            .environment
+            .define("left", Value::DomainIdentity(identity));
+        session
+            .environment
+            .define("right", Value::DomainIdentity(identity));
 
         // Exact D5 operation identities; the arithmetic entry point must
         // refuse the operands rather than reinterpret their packed bits.
         for source in [
-            "(01010 left right)", "(01011 left right)",
-            "(10110 left right)", "(10111 left right)",
-            "(11010 left right)", "(11011 left right)",
+            "(01010 left right)",
+            "(01011 left right)",
+            "(10110 left right)",
+            "(10111 left right)",
+            "(11010 left right)",
+            "(11011 left right)",
         ] {
             let error = exact_call(source, &mut session)
                 .expect_err("D1-D9 identity must not become an arithmetic operand");
-            assert_eq!(error.kind, ErrorKind::Type, "D{}: {source}", identity.width());
-            assert!(error.message.contains("D24+"), "D{}: {error}", identity.width());
+            assert_eq!(
+                error.kind,
+                ErrorKind::Type,
+                "D{}: {source}",
+                identity.width()
+            );
+            assert!(
+                error.message.contains("D24+"),
+                "D{}: {error}",
+                identity.width()
+            );
         }
         for source in ["(001110 left)", "(001111 left)"] {
             let error = exact_call(source, &mut session)
                 .expect_err("D6 successor/predecessor requires a D24+ operand");
-            assert_eq!(error.kind, ErrorKind::Type, "D{}: {source}", identity.width());
-            assert!(error.message.contains("D24+"), "D{}: {error}", identity.width());
+            assert_eq!(
+                error.kind,
+                ErrorKind::Type,
+                "D{}: {source}",
+                identity.width()
+            );
+            assert!(
+                error.message.contains("D24+"),
+                "D{}: {error}",
+                identity.width()
+            );
         }
     }
 }
@@ -78,8 +102,10 @@ fn bare_numbers_and_numeric_spelling_cannot_bypass_d24_admission() {
         session.environment.define("left", value.clone());
         session.environment.define("right", value);
         for source in [
-            "(01010 left right)", "(10110 left right)",
-            "(10111 left right)", "(11010 left right)",
+            "(01010 left right)",
+            "(10110 left right)",
+            "(10111 left right)",
+            "(11010 left right)",
         ] {
             let error = exact_call(source, &mut session).unwrap_err();
             assert_eq!(error.kind, ErrorKind::Type, "{name}: {source}");
@@ -131,7 +157,9 @@ fn d5_d6_operator_codes_compute_without_literals_across_d24_d384() {
             Value::predicate_bit(false),
         );
         assert_eq!(
-            exact_call("(10111 left right)", &mut session).unwrap().to_string(),
+            exact_call("(10111 left right)", &mut session)
+                .unwrap()
+                .to_string(),
             "7/2",
         );
     }
@@ -140,8 +168,12 @@ fn d5_d6_operator_codes_compute_without_literals_across_d24_d384() {
 #[test]
 fn d1_predicates_and_d3_eq_remain_non_arithmetic_laws() {
     let mut session = Session::default();
-    session.environment.define("left", Value::predicate_bit(true));
-    session.environment.define("right", Value::predicate_bit(false));
+    session
+        .environment
+        .define("left", Value::predicate_bit(true));
+    session
+        .environment
+        .define("right", Value::predicate_bit(false));
 
     // D3 EQ tests exact atom identity; it is not numeric '='.
     assert_eq!(
@@ -174,7 +206,10 @@ fn ten_bit_domain_ratification_does_not_invent_d10_callability_or_arithmetic() {
     // callable merely because its binary spelling fits ten bits.
     for expression in ["(0000000001 number)", "(1111111111 number)"] {
         let result = exact_call(expression, &mut session);
-        assert!(result.is_err(), "{expression} must fail closed before D10 admission");
+        assert!(
+            result.is_err(),
+            "{expression} must fail closed before D10 admission"
+        );
     }
 
     // Nor can a ten-digit spelling be a substitute for a qualified
@@ -246,11 +281,12 @@ fn lisp_owned_d24_length_fold_uses_ratified_d6_add1_without_number_literals() {
         }),
     );
     let carried = eval_program("(довжина-д24-до items seed)", &mut session)
-        .expect("Lisp-owned fold must retain carry into D48").value;
+        .expect("Lisp-owned fold must retain carry into D48")
+        .value;
     // D24's positive maximum is 2^23 - 1. Two Lisp-owned ADD1 steps cross
     // the signed D24 boundary and remain exact in D48.
     assert_eq!(carried, numeric(48, (1 << 23) + 1));
-    
+
     // An unqualified seed never becomes D24 just because it is called 0.
     session.environment.define(
         "items",
@@ -259,7 +295,9 @@ fn lisp_owned_d24_length_fold_uses_ratified_d6_add1_without_number_literals() {
             std::rc::Rc::new(Value::Nil),
         ),
     );
-    session.environment.define("seed", Value::Rational(Rational::integer(0)));
+    session
+        .environment
+        .define("seed", Value::Rational(Rational::integer(0)));
     let err = eval_program("(довжина-д24-до items seed)", &mut session)
         .expect_err("unqualified zero must not enter D6 ADD1");
     assert_eq!(err.kind, ErrorKind::Type);
@@ -300,13 +338,16 @@ fn lisp_owned_d24_nth_uses_d3_identity_and_d6_sub1_without_number_literals() {
     for (index, answer) in ["перший", "другий", "третій"].iter().enumerate() {
         session.environment.define("i", numeric(24, index as u32));
         let actual = eval_program("(елемент-д24 i xs zero)", &mut session)
-            .expect("D24 index accepted through D3 EQ / D6 SUB1").value;
+            .expect("D24 index accepted through D3 EQ / D6 SUB1")
+            .value;
         assert_eq!(actual, Value::Symbol(std::rc::Rc::from(*answer)));
     }
 
     // A same-looking unqualified zero is NOT D24(0); it must never act
     // as an index in the arithmetic decrement branch.
-    session.environment.define("i", Value::Rational(Rational::integer(1)));
+    session
+        .environment
+        .define("i", Value::Rational(Rational::integer(1)));
     let error = eval_program("(елемент-д24 i xs zero)", &mut session)
         .expect_err("unqualified index refused by exact D6 SUB1");
     assert_eq!(error.kind, ErrorKind::Type);
@@ -319,8 +360,10 @@ fn different_numeric_domains_do_not_implicitly_coerce() {
     session.environment.define("left", numeric(24, 7));
     session.environment.define("right", numeric(48, 7));
     for source in [
-        "(01010 left right)", "(10110 left right)",
-        "(10111 left right)", "(11010 left right)",
+        "(01010 left right)",
+        "(10110 left right)",
+        "(10111 left right)",
+        "(11010 left right)",
     ] {
         let error = exact_call(source, &mut session).unwrap_err();
         assert_eq!(error.kind, ErrorKind::Type, "{source}");

@@ -113,7 +113,8 @@ fn collect_roles(expr: &Expr, roles: &mut Vec<CompilerLoweringRole>) {
 
 #[test]
 fn every_exact_domain_call_in_current_compiler_nucleus_has_a_sens_owned_role() {
-    let parsed = parse_mixed_exact_domain(NUCLEUS).expect("current compiler nucleus source must parse");
+    let parsed =
+        parse_mixed_exact_domain(NUCLEUS).expect("current compiler nucleus source must parse");
     let lowered = lower_program(&parsed);
 
     let mut roles = Vec::new();
@@ -141,7 +142,8 @@ fn every_exact_domain_call_in_current_compiler_nucleus_has_a_sens_owned_role() {
 
 #[test]
 fn every_exact_cond_in_current_compiler_nucleus_has_two_part_clauses() {
-    let parsed = parse_mixed_exact_domain(NUCLEUS).expect("current compiler nucleus source must parse");
+    let parsed =
+        parse_mixed_exact_domain(NUCLEUS).expect("current compiler nucleus source must parse");
     let lowered = lower_program(&parsed);
 
     for expr in &lowered {

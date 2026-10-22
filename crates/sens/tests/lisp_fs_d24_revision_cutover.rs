@@ -3,22 +3,37 @@
 //! Початковий fs-empty все ще містить історичний 0; цей тест не приписує
 //! йому неіснуючого source-конструктора D24 і не послаблює арифметичний закон.
 
-use sens::{BinaryNumber, ErrorKind, Session, Value, eval_program};
+use sens::{eval_program, BinaryNumber, ErrorKind, Session, Value};
 use std::rc::Rc;
 
 fn load_filesystem() -> Session {
     let mut session = Session::default();
-    sens::eval_core_library_source(include_str!("../../../lib/core.lisp"), &mut session,
-    ).expect("ядро");
+    sens::eval_core_library_source(include_str!("../../../lib/core.lisp"), &mut session)
+        .expect("ядро");
     for (path, source) in [
         ("lib/unify.lisp", include_str!("../../../lib/unify.lisp")),
         ("lib/reason.lisp", include_str!("../../../lib/reason.lisp")),
-        ("lib/forward.lisp", include_str!("../../../lib/forward.lisp")),
-        ("lib/knowledge.lisp", include_str!("../../../lib/knowledge.lisp")),
-        ("lib/persistent-map.lisp", include_str!("../../../lib/persistent-map.lisp")),
+        (
+            "lib/forward.lisp",
+            include_str!("../../../lib/forward.lisp"),
+        ),
+        (
+            "lib/knowledge.lisp",
+            include_str!("../../../lib/knowledge.lisp"),
+        ),
+        (
+            "lib/persistent-map.lisp",
+            include_str!("../../../lib/persistent-map.lisp"),
+        ),
         ("lib/world.lisp", include_str!("../../../lib/world.lisp")),
-        ("lib/content-store.lisp", include_str!("../../../lib/content-store.lisp")),
-        ("lib/lisp-fs.lisp", include_str!("../../../lib/lisp-fs.lisp")),
+        (
+            "lib/content-store.lisp",
+            include_str!("../../../lib/content-store.lisp"),
+        ),
+        (
+            "lib/lisp-fs.lisp",
+            include_str!("../../../lib/lisp-fs.lisp"),
+        ),
     ] {
         sens::eval_pinned_reasoning_source(path, source, &mut session)
             .unwrap_or_else(|error| panic!("{path}: {error}"));
@@ -32,8 +47,7 @@ fn dnumber(width: usize, one: bool) -> Value {
         bits[width - 1] = 1;
     }
     Value::BinaryNumber(
-        BinaryNumber::from_numeric_domain_bits(width, &bits)
-            .expect("ратифікований числовий домен"),
+        BinaryNumber::from_numeric_domain_bits(width, &bits).expect("ратифікований числовий домен"),
     )
 }
 
@@ -53,7 +67,10 @@ fn revision_of(snapshot: Value) -> Value {
     let Value::Pair(revision, tail) = rest.as_ref() else {
         panic!("snapshot: missing revision");
     };
-    assert!(matches!(tail.as_ref(), Value::Nil), "snapshot has extra fields");
+    assert!(
+        matches!(tail.as_ref(), Value::Nil),
+        "snapshot has extra fields"
+    );
     revision.as_ref().clone()
 }
 
@@ -109,7 +126,11 @@ fn fs_unbind_rejects_unqualified_revision() {
     let mut session = load_filesystem();
     session.environment.define(
         "snapshot",
-        list(vec![Value::Nil, Value::Nil, Value::BinaryNumber(BinaryNumber::one())]),
+        list(vec![
+            Value::Nil,
+            Value::Nil,
+            Value::BinaryNumber(BinaryNumber::one()),
+        ]),
     );
     let error = eval_program("(фс-розв'язати snapshot \"absent\")", &mut session)
         .expect_err("невідомий домен числа не можна припускати");

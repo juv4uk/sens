@@ -25,5 +25,7 @@ fn utf8_materialization_stays_stack_safe_on_a_worker_thread() {
         })
         .expect("worker thread should start");
 
-    handle.join().expect("UTF-8 worker must not overflow its stack");
+    handle
+        .join()
+        .expect("UTF-8 worker must not overflow its stack");
 }

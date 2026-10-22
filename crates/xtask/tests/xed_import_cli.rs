@@ -11,7 +11,11 @@ fn repo_root() -> PathBuf {
 }
 
 fn fixture(name: &str) -> PathBuf {
-    PathBuf::from(concat!(env!("CARGO_MANIFEST_DIR"), "/tests/fixtures/xed-import")).join(name)
+    PathBuf::from(concat!(
+        env!("CARGO_MANIFEST_DIR"),
+        "/tests/fixtures/xed-import"
+    ))
+    .join(name)
 }
 
 fn run_import(vendor_root: &std::path::Path, out_path: &std::path::Path) -> std::process::Output {
@@ -58,18 +62,23 @@ fn check_flag_passes_against_committed_evidence() {
 /// not change the normalized digest.
 #[test]
 fn reordering_upstream_lines_does_not_change_digest() {
-    let temp_dir = std::env::temp_dir().join(format!(
-        "xed-import-reorder-{}",
-        std::process::id()
-    ));
+    let temp_dir = std::env::temp_dir().join(format!("xed-import-reorder-{}", std::process::id()));
     std::fs::create_dir_all(&temp_dir).expect("create temp dir");
     let out_a = temp_dir.join("a.lisp");
     let out_b = temp_dir.join("b.lisp");
 
     let output_a = run_import(&fixture("order-a"), &out_a);
-    assert!(output_a.status.success(), "order-a run must succeed: {}", String::from_utf8_lossy(&output_a.stderr));
+    assert!(
+        output_a.status.success(),
+        "order-a run must succeed: {}",
+        String::from_utf8_lossy(&output_a.stderr)
+    );
     let output_b = run_import(&fixture("order-b"), &out_b);
-    assert!(output_b.status.success(), "order-b run must succeed: {}", String::from_utf8_lossy(&output_b.stderr));
+    assert!(
+        output_b.status.success(),
+        "order-b run must succeed: {}",
+        String::from_utf8_lossy(&output_b.stderr)
+    );
 
     let rendered_a = std::fs::read_to_string(&out_a).expect("read a.lisp");
     let rendered_b = std::fs::read_to_string(&out_b).expect("read b.lisp");
@@ -87,10 +96,8 @@ fn reordering_upstream_lines_does_not_change_digest() {
 /// closed rather than being silently admitted or skipped.
 #[test]
 fn malformed_form_fails_closed() {
-    let temp_dir = std::env::temp_dir().join(format!(
-        "xed-import-malformed-{}",
-        std::process::id()
-    ));
+    let temp_dir =
+        std::env::temp_dir().join(format!("xed-import-malformed-{}", std::process::id()));
     std::fs::create_dir_all(&temp_dir).expect("create temp dir");
     let out = temp_dir.join("out.lisp");
 
@@ -105,7 +112,10 @@ fn malformed_form_fails_closed() {
         stderr.contains("VBROKENFORM") && stderr.contains("EXTENSION"),
         "failure must name the offending ICLASS and missing field: {stderr}"
     );
-    assert!(!out.exists(), "a failed import must not write a partial output file");
+    assert!(
+        !out.exists(),
+        "a failed import must not write a partial output file"
+    );
 
     let _ = std::fs::remove_dir_all(&temp_dir);
 }
@@ -117,10 +127,8 @@ fn malformed_form_fails_closed() {
 /// in this repository.
 #[test]
 fn synthetic_mnemonic_cannot_mint_a_semantic_id_or_peer_surface() {
-    let temp_dir = std::env::temp_dir().join(format!(
-        "xed-import-synthetic-{}",
-        std::process::id()
-    ));
+    let temp_dir =
+        std::env::temp_dir().join(format!("xed-import-synthetic-{}", std::process::id()));
     std::fs::create_dir_all(&temp_dir).expect("create temp dir");
     let out = temp_dir.join("out.lisp");
 
@@ -133,8 +141,9 @@ fn synthetic_mnemonic_cannot_mint_a_semantic_id_or_peer_surface() {
     let rendered = std::fs::read_to_string(&out).expect("read out.lisp");
     assert!(rendered.contains("ZZZ_NOT_A_REAL_MNEMONIC"));
 
-    let registry = std::fs::read_to_string(repo_root().join("lib/generated/meta-semantic-registry.lisp"))
-        .unwrap_or_default();
+    let registry =
+        std::fs::read_to_string(repo_root().join("lib/generated/meta-semantic-registry.lisp"))
+            .unwrap_or_default();
     assert!(
         !registry.contains("ZZZ_NOT_A_REAL_MNEMONIC"),
         "the semantic registry must never contain an XED-imported mnemonic"
@@ -197,10 +206,7 @@ fn provenance_extension_mapping_matches_every_admitted_extension() {
 /// normalized forms produce an authority-boundary diagnostic.
 #[test]
 fn duplicate_conflicting_form_produces_authority_boundary_diagnostic() {
-    let temp_dir = std::env::temp_dir().join(format!(
-        "xed-import-conflict-{}",
-        std::process::id()
-    ));
+    let temp_dir = std::env::temp_dir().join(format!("xed-import-conflict-{}", std::process::id()));
     std::fs::create_dir_all(&temp_dir).expect("create temp dir");
     let out = temp_dir.join("out.lisp");
 

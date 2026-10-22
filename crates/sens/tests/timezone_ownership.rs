@@ -27,8 +27,10 @@ fn timezone_detect_public_binding_is_language_owned_over_raw_declarations() {
     assert!(session.environment.get("timezone-detect-raw").is_none());
     // Після #1477 — примітив за кодом СЕНС, не прив'язка Value::Builtin.
     assert_eq!(
-        sens::semantic_registry_export::semantic_id_for_admitted_surface("timezone-declarations-raw")
-            .and_then(sens::semantic_registry_export::function_role),
+        sens::semantic_registry_export::semantic_id_for_admitted_surface(
+            "timezone-declarations-raw"
+        )
+        .and_then(sens::semantic_registry_export::function_role),
         Some("primitive")
     );
 
@@ -41,8 +43,10 @@ fn timezone_detect_public_binding_is_language_owned_over_raw_declarations() {
     assert!(session.environment.get("timezone-detect-raw").is_none());
     // Після #1477 — примітив за кодом СЕНС, не прив'язка Value::Builtin.
     assert_eq!(
-        sens::semantic_registry_export::semantic_id_for_admitted_surface("timezone-declarations-raw")
-            .and_then(sens::semantic_registry_export::function_role),
+        sens::semantic_registry_export::semantic_id_for_admitted_surface(
+            "timezone-declarations-raw"
+        )
+        .and_then(sens::semantic_registry_export::function_role),
         Some("primitive")
     );
 }

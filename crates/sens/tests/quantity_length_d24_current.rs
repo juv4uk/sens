@@ -7,9 +7,11 @@ use sens::{
 const LIB: &str = include_str!("../../../lib/quantity.lisp");
 
 fn length_definition() -> &'static str {
-    let begin = LIB.find("(визначити науковий-список-довжина-дорівнює?")
+    let begin = LIB
+        .find("(визначити науковий-список-довжина-дорівнює?")
         .expect("українська функція чинної бібліотеки");
-    let end = LIB[begin..].find("\n(визначити науковий-шостий")
+    let end = LIB[begin..]
+        .find("\n(визначити науковий-шостий")
         .map(|offset| begin + offset)
         .expect("наступне визначення");
     &LIB[begin..end]
@@ -27,9 +29,18 @@ fn evaluate(session: &mut Session, expression: &str) -> sens::Value {
 #[test]
 fn quantity_length_d24_uses_real_sens_d1_and_rejects_malformed_tails() {
     let source = length_definition();
-    assert!(!source.contains("(тотожне? залишок 0)"), "D3 EQ не є числовою рівністю");
-    assert!(!source.contains("(так"), "не можна підміняти D1 голою назвою");
-    assert!(!source.contains("(ні"), "не можна підміняти D1 голою назвою");
+    assert!(
+        !source.contains("(тотожне? залишок 0)"),
+        "D3 EQ не є числовою рівністю"
+    );
+    assert!(
+        !source.contains("(так"),
+        "не можна підміняти D1 голою назвою"
+    );
+    assert!(
+        !source.contains("(ні"),
+        "не можна підміняти D1 голою назвою"
+    );
 
     let mut session = Session::default();
     load_core_library(&mut session).expect("справжній Core4");
@@ -49,20 +60,25 @@ fn quantity_length_d24_uses_real_sens_d1_and_rejects_malformed_tails() {
         ("(a b . tail)", "2", false),
         ("tail", "0", false),
     ] {
-        let call = format!(
-            "(науковий-список-довжина-дорівнює? (як-є {items}) {expected_length})"
-        );
+        let call = format!("(науковий-список-довжина-дорівнює? (як-є {items}) {expected_length})");
         let value = evaluate(&mut session, &call);
-        assert_eq!(value.as_predicate_bit(), Some(expected),
-            "test_id=quantity-length layer=SENS input={call} expected=D1:{expected} actual={value}");
+        assert_eq!(
+            value.as_predicate_bit(),
+            Some(expected),
+            "test_id=quantity-length layer=SENS input={call} expected=D1:{expected} actual={value}"
+        );
     }
 }
 
 fn unit_definition(name: &str) -> &'static str {
     let marker = format!("(визначити {name}");
-    let begin = LIB.find(&marker).expect("визначення одиниці з чинного Lisp");
-    let end = LIB[begin..].find("\n(визначити ")
-        .map(|offset| begin + offset).unwrap_or(LIB.len());
+    let begin = LIB
+        .find(&marker)
+        .expect("визначення одиниці з чинного Lisp");
+    let end = LIB[begin..]
+        .find("\n(визначити ")
+        .map(|offset| begin + offset)
+        .unwrap_or(LIB.len());
     &LIB[begin..end]
 }
 
@@ -79,11 +95,15 @@ fn quantity_unit_constructor_selector_roundtrips_in_real_sens() {
         unit_definition("схема-одиниці-виміру"),
         unit_definition("створити-одиниця"),
         unit_definition("одиниця-розмірності"),
-    ].join("\n");
+    ]
+    .join("\n");
 
     let old = "(список схема-одиниці-виміру розмірності)";
     let new = "(сполучити схема-одиниці-виміру розмірності)";
-    assert!(current.contains(new), "чинний конструктор мусить зберігати плоскі виміри");
+    assert!(
+        current.contains(new),
+        "чинний конструктор мусить зберігати плоскі виміри"
+    );
     let mutant = current.replacen(new, old, 1);
     assert_ne!(current, mutant);
 
@@ -97,19 +117,24 @@ fn quantity_unit_constructor_selector_roundtrips_in_real_sens() {
         let roundtrip = format!(
             "(однакові? (одиниця-розмірності (створити-одиниця (як-є {dimensions}))) (як-є {dimensions}))"
         );
-        let full_record = format!(
-            "(однакові? (створити-одиниця (як-є {dimensions})) (як-є {expected_record}))"
-        );
+        let full_record =
+            format!("(однакові? (створити-одиниця (як-є {dimensions})) (як-є {expected_record}))");
         let actual = evaluate(&mut correct, &roundtrip);
-        assert_eq!(actual.as_predicate_bit(), Some(true),
-            "test_id=quantity-unit-roundtrip input={roundtrip} expected=D1:YES actual={actual}");
+        assert_eq!(
+            actual.as_predicate_bit(),
+            Some(true),
+            "test_id=quantity-unit-roundtrip input={roundtrip} expected=D1:YES actual={actual}"
+        );
         let actual_record = evaluate(&mut correct, &full_record);
         assert_eq!(actual_record.as_predicate_bit(), Some(true),
             "test_id=quantity-unit-record input={full_record} expected=D1:YES actual={actual_record}");
         // Порожній випадок у старого конструктора теж неправильний: (unit-1 ()).
         let wrong = evaluate(&mut legacy, &roundtrip);
-        assert_eq!(wrong.as_predicate_bit(), Some(false),
-            "test_id=quantity-unit-mutant input={roundtrip} expected=D1:NO actual={wrong}");
+        assert_eq!(
+            wrong.as_predicate_bit(),
+            Some(false),
+            "test_id=quantity-unit-mutant input={roundtrip} expected=D1:NO actual={wrong}"
+        );
     }
 }
 
@@ -128,15 +153,25 @@ fn quantity_unit_rejects_non_dimensions_in_real_sens() {
         "створити-одиниця",
         "науковий-всі-розмірності-коректні?",
         "одиниця-виміру?",
-    ].iter().map(|name| unit_definition(name)).collect::<Vec<_>>().join("\n");
+    ]
+    .iter()
+    .map(|name| unit_definition(name))
+    .collect::<Vec<_>>()
+    .join("\n");
 
     let mut session = prepare_unit_session(&current);
     for (record, admitted) in [
         ("(створити-одиниця (як-є ()))", true),
-        ("(створити-одиниця (список (створити-розмірність (як-є метр) 1)))", true),
+        (
+            "(створити-одиниця (список (створити-розмірність (як-є метр) 1)))",
+            true,
+        ),
         ("(створити-одиниця (як-є (невідома)))", false),
         ("(створити-одиниця (як-є ((dimension-1 метр))))", false),
-        ("(створити-одиниця (як-є ((dimension-1 метр 1) . недопустимий-хвіст)))", false),
+        (
+            "(створити-одиниця (як-є ((dimension-1 метр 1) . недопустимий-хвіст)))",
+            false,
+        ),
     ] {
         let input = format!("(одиниця-виміру? {record})");
         let actual = evaluate(&mut session, &input);
@@ -158,6 +193,9 @@ fn quantity_unit_rejects_non_dimensions_in_real_sens() {
     let mut old = prepare_unit_session(&mutant);
     let bad = "(одиниця-виміру? (створити-одиниця (як-є (невідома))))";
     let incorrect = evaluate(&mut old, bad);
-    assert_eq!(incorrect.as_predicate_bit(), Some(true),
-        "test_id=quantity-unit-old-mutant layer=SENS має виявляти хибний допуск");
+    assert_eq!(
+        incorrect.as_predicate_bit(),
+        Some(true),
+        "test_id=quantity-unit-old-mutant layer=SENS має виявляти хибний допуск"
+    );
 }

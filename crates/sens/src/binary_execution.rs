@@ -48,7 +48,9 @@ impl ExactDomainWord {
             return Err("physical SENS word must have exact positive width and 0/1 bits".into());
         }
         if (1..=10).contains(&width) {
-            let payload = bits.iter().fold(0u16, |value, &bit| (value << 1) | u16::from(bit));
+            let payload = bits
+                .iter()
+                .fold(0u16, |value, &bit| (value << 1) | u16::from(bit));
             let coordinate = crate::domain_ladder::DomainCoordinate::new(width as u8, payload)
                 .ok_or_else(|| "invalid exact D1–D10 coordinate".to_string())?;
             return Ok(Self::Identity(DomainIdentity::from_coordinate(coordinate)));
@@ -58,7 +60,9 @@ impl ExactDomainWord {
                 .ok_or_else(|| "invalid exact D24+ numeric word".to_string())?;
             return Self::number(number).map_err(str::to_owned);
         }
-        Err(format!("no ratified SENS identity for exact word width {width}"))
+        Err(format!(
+            "no ratified SENS identity for exact word width {width}"
+        ))
     }
 }
 
@@ -319,20 +323,23 @@ mod exact_t5_cutover_tests {
             let words = parse_binary_source_words(source)
                 .expect("valid exact-width words")
                 .into_iter()
-                .map(|token| ExactDomainWord::identity(
-                    DomainIdentity::from_source_word(token.word)
-                ))
+                .map(|token| {
+                    ExactDomainWord::identity(DomainIdentity::from_source_word(token.word))
+                })
                 .collect::<Vec<_>>();
             parse_exact_domain_words(&words)
         }
 
         fn shape(expr: &Expr) -> String {
             match &expr.kind {
-                ExprKind::List(items) => format!("({})",
-                    items.iter().map(shape).collect::<Vec<_>>().join(" ")),
+                ExprKind::List(items) => format!(
+                    "({})",
+                    items.iter().map(shape).collect::<Vec<_>>().join(" ")
+                ),
                 ExprKind::Pair(head, tail) => format!("({} . {})", shape(head), shape(tail)),
-                ExprKind::DomainIdentity(word) =>
-                    format!("D{}:{}", word.width(), word.packed_bits()),
+                ExprKind::DomainIdentity(word) => {
+                    format!("D{}:{}", word.width(), word.packed_bits())
+                }
                 other => format!("{other:?}"),
             }
         }
@@ -345,33 +352,43 @@ mod exact_t5_cutover_tests {
             "10 10 100 11 111 01 00 000 01",
             "00 10 100 00 111 01 00",
         ] {
-            let canonical = crate::parse_canonical_binary(source)
-                .expect("exact D2 canonical read");
-            let physical = physical_read(source)
-                .expect("same exact D2 structure after T5M restoration");
+            let canonical = crate::parse_canonical_binary(source).expect("exact D2 canonical read");
+            let physical =
+                physical_read(source).expect("same exact D2 structure after T5M restoration");
             assert_eq!(physical.len(), canonical.len(), "{source}");
             for (left, right) in physical.iter().zip(canonical.iter()) {
-                assert_eq!(shape(left), shape(right),
-                    "D2 AST mismatch: {source}");
+                assert_eq!(shape(left), shape(right), "D2 AST mismatch: {source}");
             }
         }
         for source in [
-            "01", "11", "10 11 100 01", "10 100 11 01",
-            "10 100 11 111 00 000 01", "10 100 00 01 01",
-            "10 100", "10 100 11 111",
+            "01",
+            "11",
+            "10 11 100 01",
+            "10 100 11 01",
+            "10 100 11 111 00 000 01",
+            "10 100 00 01 01",
+            "10 100",
+            "10 100 11 111",
         ] {
-            assert!(crate::parse_canonical_binary(source).is_err(),
-                "canonical reader cannot admit malformed D2: {source}");
-            assert!(physical_read(source).is_err(),
-                "Zig-restored reader cannot admit malformed D2: {source}");
+            assert!(
+                crate::parse_canonical_binary(source).is_err(),
+                "canonical reader cannot admit malformed D2: {source}"
+            );
+            assert!(
+                physical_read(source).is_err(),
+                "Zig-restored reader cannot admit malformed D2: {source}"
+            );
         }
 
         for depth in [1usize, 16, 64, 128, 130] {
             let source = format!("{}001{}", "10 ".repeat(depth), " 01".repeat(depth));
             let canonical = crate::parse_canonical_binary(&source);
             let physical = physical_read(&source);
-            assert_eq!(canonical.is_ok(), physical.is_ok(),
-                "D2 nesting policy diverged at depth={depth}");
+            assert_eq!(
+                canonical.is_ok(),
+                physical.is_ok(),
+                "D2 nesting policy diverged at depth={depth}"
+            );
             assert_eq!(physical.is_ok(), depth <= 128);
         }
     }

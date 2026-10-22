@@ -3,7 +3,10 @@ use std::io::Write;
 use std::process::{Command, Stdio};
 
 fn translate(source: &str, from: &str, to: &str) -> String {
-    let script = concat!(env!("CARGO_MANIFEST_DIR"), "/../../scripts/translate-program.py");
+    let script = concat!(
+        env!("CARGO_MANIFEST_DIR"),
+        "/../../scripts/translate-program.py"
+    );
     let mut child = Command::new("python3")
         .args([script, "--from", from, "--to", to, "-"])
         // Force UTF-8 I/O regardless of the host console codepage (e.g.
@@ -43,14 +46,11 @@ fn translated_programs_execute_with_the_same_result_on_all_table_surfaces() {
     let mut sanskrit_session = Session::default();
 
     let english_result = eval_program(english, &mut english_session).expect("English program");
-    let ukrainian_compact_result =
-        eval_program(&ukrainian_compact, &mut ukrainian_compact_session)
-            .expect("compact Ukrainian program");
+    let ukrainian_compact_result = eval_program(&ukrainian_compact, &mut ukrainian_compact_session)
+        .expect("compact Ukrainian program");
     let ukrainian_full_result =
-        eval_program(&ukrainian_full, &mut ukrainian_full_session)
-            .expect("full Ukrainian program");
-    let sanskrit_result =
-        eval_program(&sanskrit, &mut sanskrit_session).expect("Sanskrit program");
+        eval_program(&ukrainian_full, &mut ukrainian_full_session).expect("full Ukrainian program");
+    let sanskrit_result = eval_program(&sanskrit, &mut sanskrit_session).expect("Sanskrit program");
 
     assert_eq!(english_result.value.to_string(), "cat");
     assert_eq!(ukrainian_compact_result.value.to_string(), "cat");

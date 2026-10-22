@@ -16,8 +16,10 @@ fn всі_1024_координати_d10_не_згортаються_у_вось�
         assert_eq!(token.coordinate.bits(), bits as u16);
         assert_eq!(token.coordinate.owner_residency(), Some(true));
         assert_eq!(token.span.end - token.span.start, 10);
-        assert_eq!(&words[token.span.start..token.span.end],
-            format!("{bits:010b}").as_str());
+        assert_eq!(
+            &words[token.span.start..token.span.end],
+            format!("{bits:010b}").as_str()
+        );
     }
     // Старий carrier D1–D9 цю саму D10 форму читати НЕ повинен.
     assert!(parse_binary_source_words("0000000001").is_err());
@@ -25,11 +27,13 @@ fn всі_1024_координати_d10_не_згортаються_у_вось�
 
 #[test]
 fn однаковий_payload_різної_ширини_не_є_однією_функцією() {
-    let result = parse_domain_ladder_source_words(
-        "1 01 001 0001 00000001 000000001 0000000001",
-    ).unwrap();
+    let result =
+        parse_domain_ladder_source_words("1 01 001 0001 00000001 000000001 0000000001").unwrap();
     assert_eq!(
-        result.iter().map(|v| v.coordinate.width()).collect::<Vec<_>>(),
+        result
+            .iter()
+            .map(|v| v.coordinate.width())
+            .collect::<Vec<_>>(),
         [1, 2, 3, 4, 8, 9, 10]
     );
     assert!(result.iter().all(|v| v.coordinate.bits() == 1));
@@ -44,7 +48,10 @@ fn бінарні_слова_мають_точні_байтові_span_післ�
     let result = parse_domain_ladder_source_words(source).unwrap();
     assert_eq!(result.len(), 3);
     assert_eq!(
-        result.iter().map(|x| x.coordinate.width()).collect::<Vec<_>>(),
+        result
+            .iter()
+            .map(|x| x.coordinate.width())
+            .collect::<Vec<_>>(),
         [3, 10, 2]
     );
     for token in result {
@@ -61,12 +68,20 @@ fn бінарні_слова_мають_точні_байтові_span_післ�
 #[test]
 fn небінарні_й_надширокі_джерела_блокуються_без_здогадок() {
     for source in [
-        "00000000000", "000000000000000000000000", "10000000001", 
-        "001 10101010101", "12", "#b1010", "001 X", "(001)", "1/2",
+        "00000000000",
+        "000000000000000000000000",
+        "10000000001",
+        "001 10101010101",
+        "12",
+        "#b1010",
+        "001 X",
+        "(001)",
+        "1/2",
     ] {
-        let error = parse_domain_ladder_source_words(source)
-            .expect_err("це не D1–D10 координата");
+        let error = parse_domain_ladder_source_words(source).expect_err("це не D1–D10 координата");
         assert_eq!(error.kind, ErrorKind::Parse, "{source}");
     }
-    assert!(parse_domain_ladder_source_words(" ; лише коментар\n ").unwrap().is_empty());
+    assert!(parse_domain_ladder_source_words(" ; лише коментар\n ")
+        .unwrap()
+        .is_empty());
 }

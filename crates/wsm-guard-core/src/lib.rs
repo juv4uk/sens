@@ -2,7 +2,10 @@
 //! Rust loads the executable WSM policy and validates the returned value's
 //! outer protocol shape. Meaning and policy remain in lib/guard.lisp.
 
-use sens::{eval_pinned_reasoning_source, eval_parsed_expressions, eval_program, parse_mixed_exact_domain, Session, Value};
+use sens::{
+    Session, Value, eval_parsed_expressions, eval_pinned_reasoning_source, eval_program,
+    parse_mixed_exact_domain,
+};
 
 // Three exact source byte transfers. Zig copies bytes and never decides
 // what a SENS word, Guard policy or executable function means.
@@ -22,13 +25,17 @@ fn exact_source_copy(copy: ZigSourceCopy, label: &str) -> Result<String, String>
     // Size probe: the Zig carrier must not touch a zero-capacity destination.
     let required = unsafe { copy(std::ptr::NonNull::<u8>::dangling().as_ptr(), 0) };
     if required <= 0 {
-        return Err(format!("ZIG_GUARD_SOURCE_INVALID label={label} size={required}"));
+        return Err(format!(
+            "ZIG_GUARD_SOURCE_INVALID label={label} size={required}"
+        ));
     }
     let len = usize::try_from(required)
         .map_err(|_| format!("ZIG_GUARD_SOURCE_OVERFLOW label={label}"))?;
     // This is a host allocation bound, NOT a SENS domain or semantic limit.
     if len > 8 * 1024 * 1024 {
-        return Err(format!("ZIG_GUARD_SOURCE_HOST_CAP label={label} size={len}"));
+        return Err(format!(
+            "ZIG_GUARD_SOURCE_HOST_CAP label={label} size={len}"
+        ));
     }
     let mut bytes = vec![0u8; len];
     let copied = unsafe { copy(bytes.as_mut_ptr(), bytes.len()) };
@@ -37,7 +44,8 @@ fn exact_source_copy(copy: ZigSourceCopy, label: &str) -> Result<String, String>
             "ZIG_GUARD_SOURCE_COPY_MISMATCH label={label} expected={required} actual={copied}"
         ));
     }
-    String::from_utf8(bytes).map_err(|error| format!("ZIG_GUARD_SOURCE_UTF8 label={label}: {error}"))
+    String::from_utf8(bytes)
+        .map_err(|error| format!("ZIG_GUARD_SOURCE_UTF8 label={label}: {error}"))
 }
 
 #[cfg(feature = "zig-source")]
@@ -79,8 +87,7 @@ pub fn load_session() -> Result<Session, String> {
     let core = core_source()?;
     let core_forms =
         parse_mixed_exact_domain(&core).map_err(|error| format!("core-parse: {error}"))?;
-    eval_parsed_expressions(&core_forms, &mut session)
-        .map_err(|error| format!("core: {error}"))?;
+    eval_parsed_expressions(&core_forms, &mut session).map_err(|error| format!("core: {error}"))?;
     // Guard reuses the existing exact-D1 structural comparator. Load the
     // domain-aware reasoning source through its pinned reader.
     let unify = unify_source()?;
@@ -199,14 +206,20 @@ mod tests {
             let length = unsafe { copy(std::ptr::NonNull::<u8>::dangling().as_ptr(), 0) };
             assert!(length > 1, "invalid Zig {label} source length={length}");
             let mut short = [0xa5u8];
-            assert_eq!(unsafe { copy(short.as_mut_ptr(), short.len()) }, -2,
-                "short {label} buffer must be rejected");
+            assert_eq!(
+                unsafe { copy(short.as_mut_ptr(), short.len()) },
+                -2,
+                "short {label} buffer must be rejected"
+            );
             assert_eq!(short, [0xa5u8], "short {label} buffer was mutated");
             let first = exact_source_copy(copy, label).expect("Zig exact source");
             let second = exact_source_copy(copy, label).expect("Zig repeat source");
             assert!(!first.is_empty(), "{label} source empty");
-            assert_eq!(first.as_bytes(), second.as_bytes(),
-                "{label} source byte transport changed between calls");
+            assert_eq!(
+                first.as_bytes(),
+                second.as_bytes(),
+                "{label} source byte transport changed between calls"
+            );
         }
     }
 

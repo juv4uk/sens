@@ -149,7 +149,11 @@ fn witness_rows() -> Vec<WitnessRow> {
 fn d3_predicate_boundary_rows() -> Vec<D3PredicateBoundaryRow> {
     let source = include_str!("../../../tests/fixtures/d3-predicate-boundary-cases.lisp");
     let forms = parse(source).expect("D3 predicate boundary corpus must parse as Lisp data");
-    assert_eq!(forms.len(), 1, "D3 predicate boundary corpus must be one data form");
+    assert_eq!(
+        forms.len(),
+        1,
+        "D3 predicate boundary corpus must be one data form"
+    );
 
     let ExprKind::List(rows) = &forms[0].kind else {
         panic!("D3 predicate boundary corpus root must be a list");
@@ -259,7 +263,8 @@ fn transport_island_compat_document(session: &mut Session) {
 
     fn project_result_count_fields(expression: &Expr, source: &str) -> Expr {
         match &expression.kind {
-            ExprKind::Pair(key, value) if matches!(&key.kind, ExprKind::Symbol(name) if name.as_ref() == "result-count") => {
+            ExprKind::Pair(key, value) if matches!(&key.kind, ExprKind::Symbol(name) if name.as_ref() == "result-count") =>
+            {
                 let projected = match value.kind {
                     ExprKind::Number(..) | ExprKind::Rational(_) => {
                         sens::source_projection::project_ukr_decimal_integer_literals(
@@ -374,9 +379,8 @@ fn transport_life_substrate_parity_document(session: &mut Session) {
     );
     let form = &forms[0];
     let exact_form_source = &source[form.span.start..form.span.end];
-    let transport = format!(
-        "(визначити документ-паритету-основи-життя (як-є {exact_form_source}))"
-    );
+    let transport =
+        format!("(визначити документ-паритету-основи-життя (як-є {exact_form_source}))");
     eval_program(&transport, session)
         .expect("host observer must transport #809 contract bytes into Lisp data");
 }
@@ -891,8 +895,7 @@ fn sid_kernel_witness_735_separates_semantic_execution_from_opaque_transport() {
         let mut witnesses: Vec<Expr> = Vec::new();
         for field in &fields[1..] {
             match &field.kind {
-                ExprKind::Pair(key, value)
-                    if matches!(&key.kind, ExprKind::Symbol(s) if &**s == "sid") =>
+                ExprKind::Pair(key, value) if matches!(&key.kind, ExprKind::Symbol(s) if &**s == "sid") =>
                 {
                     sid = Some(w8_binary_source(value));
                 }
@@ -907,7 +910,10 @@ fn sid_kernel_witness_735_separates_semantic_execution_from_opaque_transport() {
         }
 
         let sid = sid.expect("every semantic witness row needs a SID");
-        assert!(seen_sids.insert(sid.clone()), "duplicate binary witness value {sid}");
+        assert!(
+            seen_sids.insert(sid.clone()),
+            "duplicate binary witness value {sid}"
+        );
 
         for witness in witnesses {
             let fields = match witness.kind {
@@ -1061,7 +1067,10 @@ fn sid_kernel_witness_735_separates_semantic_execution_from_opaque_transport() {
             "opaque transport probes must never masquerade as semantic witnesses"
         );
         let evidence = evidence.expect("opaque probe needs mechanism evidence");
-        assert!(repo_file(&evidence).is_file(), "missing probe evidence: {evidence}");
+        assert!(
+            repo_file(&evidence).is_file(),
+            "missing probe evidence: {evidence}"
+        );
         probe_kernels.insert(kernel);
     }
 

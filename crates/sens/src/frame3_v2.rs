@@ -14,13 +14,12 @@
 //! or a semantic validity oracle for executable D3 applications.
 
 use super::{
-    bits_to_bytes, bytes_to_words, get_varint, physical_crc32,
-    put_varint, varint_len, Frame3Error, MAX_BLOCK_WORDS, MAX_FILE_BYTES,
-    MAX_WORDS, RAW, REPEAT,
+    bits_to_bytes, bytes_to_words, get_varint, physical_crc32, put_varint, varint_len, Frame3Error,
+    MAX_BLOCK_WORDS, MAX_FILE_BYTES, MAX_WORDS, RAW, REPEAT,
 };
 use crate::frame3_grammar::{
-    count_inner, rank_binary_source_words,
-    unrank_binary_source_words, GrammarRankError, MAX_INNER_BITS,
+    count_inner, rank_binary_source_words, unrank_binary_source_words, GrammarRankError,
+    MAX_INNER_BITS,
 };
 use crate::{parse_canonical_word_sequence, BinarySourceWord};
 
@@ -60,8 +59,10 @@ fn grammar_block(words: &[BinarySourceWord]) -> Option<(usize, u128)> {
     let first = words.first()?;
     let last = words.last()?;
     if words.len() < 2
-        || first.width() != 2 || first.packed_bits() != 0b10
-        || last.width() != 2 || last.packed_bits() != 0b01
+        || first.width() != 2
+        || first.packed_bits() != 0b10
+        || last.width() != 2
+        || last.packed_bits() != 0b01
     {
         return None;
     }
@@ -127,7 +128,11 @@ fn plan_v2(words: &[BinarySourceWord]) -> Vec<Step> {
                         && (order(mode), usize::MAX - j)
                             < (order(current.mode), usize::MAX - current.end))
                 {
-                    steps[i] = Step { bytes: total, end: j, mode };
+                    steps[i] = Step {
+                        bytes: total,
+                        end: j,
+                        mode,
+                    };
                 }
             }
         }
@@ -176,9 +181,7 @@ pub fn encode_v2(words: &[BinarySourceWord]) -> Result<Vec<u8>, Frame3Error> {
         return Ok(bytes);
     }
     let plan = plan_v2(words);
-    let mut result = Vec::with_capacity(
-        3 + varint_len(words.len()) + plan[0].bytes + 4,
-    );
+    let mut result = Vec::with_capacity(3 + varint_len(words.len()) + plan[0].bytes + 4);
     result.extend_from_slice(&MAGIC_V2);
     put_varint(words.len(), &mut result);
     let mut at = 0usize;
@@ -244,7 +247,9 @@ pub fn decode_v2(bytes: &[u8]) -> Result<Vec<BinarySourceWord>, Frame3Error> {
     }
     let cutoff = bytes.len() - 4;
     let expected = u32::from_be_bytes(
-        bytes[cutoff..].try_into().map_err(|_| Frame3Error::Truncated)?,
+        bytes[cutoff..]
+            .try_into()
+            .map_err(|_| Frame3Error::Truncated)?,
     );
     if physical_crc32(&bytes[..cutoff]) != expected {
         return Err(Frame3Error::Integrity);
@@ -283,7 +288,8 @@ pub fn decode_v2(bytes: &[u8]) -> Result<Vec<BinarySourceWord>, Frame3Error> {
                 }
                 at = map_end;
                 let bit_len = widths.iter().sum::<usize>();
-                let payload_end = at.checked_add(bit_len.div_ceil(8))
+                let payload_end = at
+                    .checked_add(bit_len.div_ceil(8))
                     .ok_or(Frame3Error::Malformed)?;
                 if payload_end > cutoff {
                     return Err(Frame3Error::Truncated);
@@ -297,7 +303,8 @@ pub fn decode_v2(bytes: &[u8]) -> Result<Vec<BinarySourceWord>, Frame3Error> {
                 if !(1..=9).contains(&width) {
                     return Err(Frame3Error::Malformed);
                 }
-                let end = at.checked_add(width.div_ceil(8))
+                let end = at
+                    .checked_add(width.div_ceil(8))
                     .ok_or(Frame3Error::Malformed)?;
                 if end > cutoff {
                     return Err(Frame3Error::Truncated);
@@ -376,7 +383,11 @@ mod tests {
     use crate::parse_binary_source_words;
 
     fn words(s: &str) -> Vec<BinarySourceWord> {
-        parse_binary_source_words(s).unwrap().into_iter().map(|x| x.word).collect()
+        parse_binary_source_words(s)
+            .unwrap()
+            .into_iter()
+            .map(|x| x.word)
+            .collect()
     }
 
     fn wrap(mut payload: Vec<u8>) -> Vec<u8> {
@@ -415,11 +426,19 @@ mod tests {
     #[test]
     fn exact_roundtrip_raw_repeat_grammar_and_multiple_roots() {
         for s in [
-            "", "0", "1", "10 01", "10 0 01", "10 001 00 000 01",
-            "10 00 00 01", "10 1 11 0 01",
+            "",
+            "0",
+            "1",
+            "10 01",
+            "10 0 01",
+            "10 001 00 000 01",
+            "10 00 00 01",
+            "10 1 11 0 01",
             "10 001 10 10 010 01 01 01", // QUOTE preserves unreadable executable body.
-            "10 10 010 01 01", // syntax is preserved; callability is not inferred.
-            "10 01 10 01", "10 0 01 10 1 01", "0 10 001 01",
+            "10 10 010 01 01",           // syntax is preserved; callability is not inferred.
+            "10 01 10 01",
+            "10 0 01 10 1 01",
+            "0 10 001 01",
         ] {
             roundtrip(s);
         }
@@ -439,7 +458,10 @@ mod tests {
         assert_eq!(v2[4], GRAMMAR, "one-block fixture must use grammar tag");
         assert_eq!(v1[2], 1);
         assert_eq!(v2[2], 2);
-        assert!(v2.len() < v1.len(), "whole-file v2 must win for this D2 fixture");
+        assert!(
+            v2.len() < v1.len(),
+            "whole-file v2 must win for this D2 fixture"
+        );
         assert_eq!(decode_v2(&v2).unwrap(), source);
     }
 
@@ -455,7 +477,10 @@ mod tests {
         let wrong_word_count = wrap(vec![b'S', b'3', 2, 4, GRAMMAR, 4, 2, 4]);
         assert_eq!(decode_v2(&wrong_word_count), Err(Frame3Error::NonCanonical));
         let nonminimal_varint = wrap(vec![b'S', b'3', 2, 0x83, 0, GRAMMAR, 3, 2, 4]);
-        assert_eq!(decode_v2(&nonminimal_varint), Err(Frame3Error::NonCanonical));
+        assert_eq!(
+            decode_v2(&nonminimal_varint),
+            Err(Frame3Error::NonCanonical)
+        );
         let unknown_tag = wrap(vec![b'S', b'3', 2, 1, 0xff, 1, 1, 0]);
         assert_eq!(decode_v2(&unknown_tag), Err(Frame3Error::Malformed));
         let prefix = &packed[..packed.len() - 1];
@@ -466,8 +491,13 @@ mod tests {
     #[test]
     fn v2_cost_never_exceeds_v1_on_the_same_exact_word_stream() {
         for s in [
-            "", "0", "10 01", "10 0 01", "10 001 00 000 01",
-            "10 01 10 01", "10 0 11 1 01",
+            "",
+            "0",
+            "10 01",
+            "10 0 01",
+            "10 001 00 000 01",
+            "10 01 10 01",
+            "10 0 11 1 01",
             "10 001 10 10 010 01 01 01",
         ] {
             let src = words(s);
@@ -480,7 +510,11 @@ mod tests {
 
     #[test]
     fn no_grammar_candidate_is_exactly_the_v1_optimum_with_new_magic() {
-        for sample in ["0", "000000001", "10 111111111 111111111 111111111 111111111 111111111 01"] {
+        for sample in [
+            "0",
+            "000000001",
+            "10 111111111 111111111 111111111 111111111 111111111 01",
+        ] {
             let source = words(sample);
             assert!(!any_possible_grammar_block(&source));
             let v1 = super::super::encode(&source).unwrap();
@@ -520,16 +554,22 @@ mod tests {
                     best = best.min(repeated + brute(&src[n..]));
                 }
                 if let Some((bits, _)) = grammar_block(block) {
-                    let ranked = 1 + varint_len(n) + varint_len(bits)
-                        + grammar_body_bytes(bits).unwrap();
+                    let ranked =
+                        1 + varint_len(n) + varint_len(bits) + grammar_body_bytes(bits).unwrap();
                     best = best.min(ranked + brute(&src[n..]));
                 }
             }
             best
         }
         for s in [
-            "", "0", "10 01", "10 0 01", "10 01 10 01",
-            "10 001 00 000 01", "10 0 11 1 01", "10 0 00 1 01",
+            "",
+            "0",
+            "10 01",
+            "10 0 01",
+            "10 01 10 01",
+            "10 001 00 000 01",
+            "10 0 11 1 01",
+            "10 0 00 1 01",
         ] {
             let src = words(s);
             let optimal = 3 + varint_len(src.len()) + brute(&src) + 4;

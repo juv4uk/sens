@@ -11,8 +11,7 @@ use sens::{
 use std::path::Path;
 
 const NUCLEUS: &str = include_str!("../../../lib/compiler-nucleus.lisp");
-const CORPUS: &str =
-    include_str!("../../../contracts/compiler-nucleus-identity-corpus-v1.tsv");
+const CORPUS: &str = include_str!("../../../contracts/compiler-nucleus-identity-corpus-v1.tsv");
 
 #[derive(Debug, Clone)]
 pub struct ExportOptions {
@@ -70,17 +69,29 @@ fn parse_identity(domain: &str, bits: &str) -> Result<CoreDomainIdentity, String
     // No untyped integer sits between the visible bits and the D3/D4 carrier.
     match (domain, bits.len()) {
         ("D3", 3) | ("D4", 4) => {}
-        ("D3", _) => return Err(format!("D3 compiler identity requires 3 bits, got {bits:?}")),
-        ("D4", _) => return Err(format!("D4 compiler identity requires 4 bits, got {bits:?}")),
-        (other, _) => return Err(format!(
-            "unsupported compiler export domain {other:?}; only current D3/D4 are admitted"
-        )),
+        ("D3", _) => {
+            return Err(format!(
+                "D3 compiler identity requires 3 bits, got {bits:?}"
+            ))
+        }
+        ("D4", _) => {
+            return Err(format!(
+                "D4 compiler identity requires 4 bits, got {bits:?}"
+            ))
+        }
+        (other, _) => {
+            return Err(format!(
+                "unsupported compiler export domain {other:?}; only current D3/D4 are admitted"
+            ))
+        }
     }
 
     let tokens = parse_binary_source_words(bits)
         .map_err(|_| format!("invalid compiler identity bits {bits:?}"))?;
     if tokens.len() != 1 {
-        return Err(format!("compiler identity must be one exact binary word: {bits:?}"));
+        return Err(format!(
+            "compiler identity must be one exact binary word: {bits:?}"
+        ));
     }
 
     match (domain, tokens[0].word) {
@@ -92,9 +103,7 @@ fn parse_identity(domain: &str, bits: &str) -> Result<CoreDomainIdentity, String
     }
 }
 
-fn parse_fixture_rows(
-    fixture: Option<&str>,
-) -> Result<Vec<(String, CoreDomainIdentity)>, String> {
+fn parse_fixture_rows(fixture: Option<&str>) -> Result<Vec<(String, CoreDomainIdentity)>, String> {
     let mut rows = Vec::new();
     for line in CORPUS.lines() {
         let line = line.trim();
@@ -135,11 +144,7 @@ fn identity_transport(identity: CoreDomainIdentity) -> (&'static str, String) {
     }
 }
 
-fn render_request(
-    fixture_id: &str,
-    input: &CompilerSemanticInput,
-    source_commit: &str,
-) -> String {
+fn render_request(fixture_id: &str, input: &CompilerSemanticInput, source_commit: &str) -> String {
     let (domain, bits) = identity_transport(input.identity);
     format!(
         "(compiler-semantic-request\n           (schema . compiler-semantic-input/1)\n           (fixture-id . \"{fixture_id}\")\n           (ідентичність . ((domain . {domain}) (bits . {bits})))\n           (law . ((authority-ref . \"{}\") (proof-ref . \"{}\") (semantic-status . {})))\n           (mechanism . ((execution-role . {}) (mechanism-status . unknown) (mechanism-ref . ())))\n           (походження . ((repository . \"juv4uk/sens\") (revision . \"{source_commit}\") (authority-path . \"{}\") (authority-sha256 . \"{}\") (compiler-nucleus-sha256 . \"{}\") (contract . {}))))",
@@ -232,7 +237,9 @@ mod tests {
         assert!(artifact.contains("(artifact-status . canonical-backend-neutral)"));
         assert!(request.contains("(ідентичність . ((domain . D3) (bits . 010)))"));
         assert!(request.contains("(походження . ((repository . \"juv4uk/sens\")"));
-        let legacy_a: String = ['i', 'd', 'e', 'n', 't', 'i', 't', 'y'].into_iter().collect();
+        let legacy_a: String = ['i', 'd', 'e', 'n', 't', 'i', 't', 'y']
+            .into_iter()
+            .collect();
         let legacy_b: String = ['p', 'r', 'o', 'v', 'e', 'n', 'a', 'n', 'c', 'e']
             .into_iter()
             .collect();
@@ -245,7 +252,11 @@ mod tests {
         let input = compiler_semantic_input_from_sens(parse_identity("D4", "0010").unwrap())
             .unwrap()
             .expect("LAMBDA compiler input");
-        let request = render_request("d4-0010", &input, "0123456789abcdef0123456789abcdef01234567");
+        let request = render_request(
+            "d4-0010",
+            &input,
+            "0123456789abcdef0123456789abcdef01234567",
+        );
         let artifact = render_artifact("d4-0010", &request).to_ascii_lowercase();
 
         for forbidden in [

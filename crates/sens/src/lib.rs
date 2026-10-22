@@ -7,26 +7,24 @@
 //! installed into this core's registry at startup by whichever embedder
 //! wants them (the CLI does; WASM does not). See eval/capabilities.rs.
 
-
 mod bignum;
-mod bit9;
 mod binary_number;
-mod domain_numeric;
-pub mod machine_math;
+mod bit9;
 mod bits;
-pub mod d7_keyboard;
 mod canonical_reader;
-pub mod universal_frame3;
+pub mod d7_keyboard;
+mod domain_numeric;
 pub mod frame3_domain;
 pub mod frame3_grammar;
-pub mod frame3_semantic;
-pub mod frame3_small;
 pub mod frame3_micro;
 pub mod frame3_micro_enumerator;
 pub mod frame3_micro_v5;
 pub mod frame3_micro_v5_lambda;
 pub mod frame3_micro_v5_lambda_app;
-
+pub mod frame3_semantic;
+pub mod frame3_small;
+pub mod machine_math;
+pub mod universal_frame3;
 
 /// Public names for the self-contained, metadata-heavy transport experiments.
 ///
@@ -43,8 +41,7 @@ pub mod envelope_e1 {
 /// Historical wire/research name: S3/v2.
 pub mod envelope_e2 {
     pub use crate::universal_frame3::{
-        decode_v2 as decode, encode_v2 as encode, Frame3Error as Error,
-        Frame3V2Decoder as Decoder,
+        decode_v2 as decode, encode_v2 as encode, Frame3Error as Error, Frame3V2Decoder as Decoder,
     };
 }
 
@@ -53,36 +50,36 @@ pub mod envelope_e2 {
 pub mod envelope_e3 {
     pub use crate::frame3_domain::{decode, encode, Error, Word};
 }
-mod program_data;
-mod compiler_role;
 mod compiler_bootstrap;
 mod compiler_language;
-mod domain_words;
+mod compiler_role;
 mod domain_identity;
 pub mod domain_ladder;
+mod domain_words;
+mod program_data;
 pub use domain_ladder::DomainD10;
-pub mod domain_projection_catalog;
+mod binary_execution;
+mod binary_framing;
+#[cfg(test)]
+mod bootstrap_measurement;
 #[allow(dead_code)]
 mod domain_owner_generated;
-mod packed_bits;
-mod outer_envelope;
-mod binary_framing;
-mod gpu_execution_packet;
+pub mod domain_projection_catalog;
 mod environment;
 mod error;
 pub(crate) mod eval;
+mod gpu_execution_packet;
 mod language_items;
-mod parser;
 mod mixed_source;
+mod outer_envelope;
+mod packed_bits;
+mod parser;
 mod presentation;
 mod semantic_registry;
-mod source_words;
-mod source_packing;
-mod ternary_transport;
-mod binary_execution;
-#[cfg(test)]
-mod bootstrap_measurement;
 pub mod sens;
+mod source_packing;
+mod source_words;
+mod ternary_transport;
 /// Deliberately thin, crate-external view onto `semantic_registry` — exposes
 /// exactly the (namespace, spelling) pairs a consumer like the CML semantic
 /// export needs, without making the internal parsing/index machinery public.
@@ -124,12 +121,13 @@ pub mod semantic_registry_export {
     pub fn admitted_surfaces_for_semantic_id(
         semantic_id: impl ProjectionSidInput,
     ) -> Vec<SurfaceRow> {
-        semantic_id.into_projection_sid()
-        .map(super::semantic_registry::admitted_surfaces_with_namespace_for_semantic_id)
-        .unwrap_or_default()
-        .into_iter()
-        .map(|(namespace, name)| SurfaceRow { namespace, name })
-        .collect()
+        semantic_id
+            .into_projection_sid()
+            .map(super::semantic_registry::admitted_surfaces_with_namespace_for_semantic_id)
+            .unwrap_or_default()
+            .into_iter()
+            .map(|(namespace, name)| SurfaceRow { namespace, name })
+            .collect()
     }
 
     /// Повертає opaque semantic ID для stable або compatibility-only surface.
@@ -149,15 +147,12 @@ pub mod semantic_registry_export {
         super::semantic_registry::exact_uk_callable_for_source_head(name)
     }
 
-
     /// Current domain-ladder lookup for admitted callable surfaces.
     ///
     /// Unlike historical CoreDomainIdentity, this returns the exact D3/D4/D5/D6/D8
     /// identity; an equal packed payload from another domain cannot alias it.
     /// Unadmitted or ambiguous surfaces fail closed.
-    pub fn admitted_core_domain_for_surface(
-        name: &str,
-    ) -> Option<super::CoreDomainIdentity> {
+    pub fn admitted_core_domain_for_surface(name: &str) -> Option<super::CoreDomainIdentity> {
         super::semantic_registry::domain_identity_for_surface(name)
     }
 
@@ -191,13 +186,14 @@ pub mod semantic_registry_export {
 
     /// Canonical 8-bit textual serialization for provenance/export.
     pub fn semantic_id_bits(semantic_id: impl ProjectionSidInput) -> String {
-        semantic_id.into_projection_sid()
+        semantic_id
+            .into_projection_sid()
             .map(super::semantic_registry::semantic_id_bits)
             .unwrap_or_else(|| "UNQUALIFIED-LEGACY-SLOT".to_string())
     }
 }
-pub mod syntax;
 pub mod source_projection;
+pub mod syntax;
 mod text7;
 mod text7_projection;
 mod value;
@@ -206,7 +202,9 @@ pub use binary_number::{BinaryNumber, BinaryNumberError};
 /// Canonical constructor for an existing domain-qualified exact rational.
 /// Do not use this to mint a language identity: it only preserves the admitted Dn
 /// identity carried by the numerator and denominator.
-pub use domain_numeric::{canonical_parts as exact_domain_fraction_parts, DomainNumericComposition};
+pub use domain_numeric::{
+    canonical_parts as exact_domain_fraction_parts, DomainNumericComposition,
+};
 
 /// Host embedding adapter for already-ratified exact same-Dn + - * /
 /// Value operations. Does not introduce any SENS callable identity, opcode,
@@ -215,11 +213,16 @@ pub fn domain_numeric_value(operator: &str, lhs: &Value, rhs: &Value) -> Option<
     domain_numeric::compute(operator, lhs, rhs)
 }
 
+pub use binary_framing::{
+    decode_binary_frame, decode_binary_program, decode_numeric_value_frame,
+    decode_packed_numeric_value, encode_binary_frame, encode_binary_program,
+    encode_numeric_value_frame, encode_packed_numeric_value, BinaryFrame, BinaryFrameError,
+};
 pub use bit9::Bit9;
 pub use bits::{Bit1, Bit2, Bit3, Bit4, Bit5, Bit6, Bit7, Bit8, Bits};
-pub use canonical_reader::{parse_canonical_binary, parse_canonical_packed_words, parse_canonical_word_sequence};
-pub use mixed_source::{parse_mixed_exact_domain, parse_mixed_exact_domain_core_source, parse_mixed_exact_domain_machine_source, parse_mixed_exact_domain_time_source, parse_mixed_exact_domain_reasoning_source, parse_mixed_exact_domain_fs_fixture_source, parse_mixed_exact_domain_process_tcp_source, parse_mixed_exact_domain_utf8_source, parse_mixed_exact_domain_fs_source, parse_mixed_exact_domain_guard_reference_source};
-pub use compiler_role::{compiler_execution_role, CompilerExecutionRole, CompilerLoweringRole};
+pub use canonical_reader::{
+    parse_canonical_binary, parse_canonical_packed_words, parse_canonical_word_sequence,
+};
 pub use compiler_bootstrap::{
     canonical_value_sha256_mechanism, compiler_evidence_canonical_bytes,
     compiler_evidence_from_canonical_bytes, domain_identity_shape_mechanism,
@@ -232,49 +235,49 @@ pub use compiler_language::{
     verify_compiler_program_artifact_from_sens, CompilerProgramBootstrapBundle,
     CompilerSemanticInput, VerifiedCompilerProgramArtifact, VerifiedCompilerProgramRequest,
 };
+pub use compiler_role::{compiler_execution_role, CompilerExecutionRole, CompilerLoweringRole};
 pub use domain_identity::{CoreDomainIdentity, DomainIdentity};
-pub use domain_words::{Bija3, CoreD4, CoreD5, CoreD6, D7DataWord, CoreD8, CoreD9, PredicateBit, Racana2};
-pub use packed_bits::{BitPacker, PackedBitstream};
-pub use outer_envelope::{encode_outer_records, OuterEnvelope, OuterEnvelopeError, OuterRecord};
-pub use binary_framing::{
-    decode_binary_frame, decode_binary_program, encode_binary_frame, encode_binary_program,
-    decode_numeric_value_frame, encode_numeric_value_frame,
-    decode_packed_numeric_value, encode_packed_numeric_value,
-    BinaryFrame, BinaryFrameError,
-};
-pub use gpu_execution_packet::{
-    GpuExecutionPacketError, GpuExecutionPacketV1, GpuOutputRequest,
+pub use domain_words::{
+    Bija3, CoreD4, CoreD5, CoreD6, CoreD8, CoreD9, D7DataWord, PredicateBit, Racana2,
 };
 pub use environment::{CoreProfile, Environment, Session};
 pub use error::{Classification, ErrorKind, LanguageError};
+pub use gpu_execution_packet::{GpuExecutionPacketError, GpuExecutionPacketV1, GpuOutputRequest};
 pub use language_items::{language_items, Arity, LanguageItem, LanguageItemKind};
-pub use source_words::{
-    parse_binary_source_words, parse_domain_ladder_source_words, BinarySourceToken,
-    BinarySourceWord, DomainLadderSourceToken, CANONICAL_SOURCE_EXTENSION,
+pub use mixed_source::{
+    parse_mixed_exact_domain, parse_mixed_exact_domain_core_source,
+    parse_mixed_exact_domain_fs_fixture_source, parse_mixed_exact_domain_fs_source,
+    parse_mixed_exact_domain_guard_reference_source, parse_mixed_exact_domain_machine_source,
+    parse_mixed_exact_domain_process_tcp_source, parse_mixed_exact_domain_reasoning_source,
+    parse_mixed_exact_domain_time_source, parse_mixed_exact_domain_utf8_source,
 };
-pub use ternary_transport::{
-    decode_ternary_program, decode_ternary_words, encode_binary_projection_ternary,
-    encode_ternary_words, open_ternary_program, render_ternary_words_spaced,
-    render_ternary_words_vertical, ternary_transport_accounting,
-    TernaryTransportAccounting, TernaryTransportError,
-    encode_d7_uk_t5, decode_d7_uk_t5, encode_d7_uk_words, decode_d7_uk_words, D7T5Error,
-};
+pub use outer_envelope::{encode_outer_records, OuterEnvelope, OuterEnvelopeError, OuterRecord};
+pub use packed_bits::{BitPacker, PackedBitstream};
 pub use source_packing::{
     append_binary_source_word, pack_binary_source_tokens, pack_binary_source_words,
     pack_domain_coordinates, packed_transport_accounting, semantic_source_bits,
     unpack_binary_source_words, unpack_domain_coordinates, PackedTransportAccounting,
 };
-pub use text7::{Text7, Text7CellError, Text7W7Error, Text7WireError, Text7WordError};
-pub use text7_projection::{
-    encode_text7, render_text7, Text7Layout, Text7ProjectionError,
+pub use source_words::{
+    parse_binary_source_words, parse_domain_ladder_source_words, BinarySourceToken,
+    BinarySourceWord, DomainLadderSourceToken, CANONICAL_SOURCE_EXTENSION,
 };
+pub use ternary_transport::{
+    decode_d7_uk_t5, decode_d7_uk_words, decode_ternary_program, decode_ternary_words,
+    encode_binary_projection_ternary, encode_d7_uk_t5, encode_d7_uk_words, encode_ternary_words,
+    open_ternary_program, render_ternary_words_spaced, render_ternary_words_vertical,
+    ternary_transport_accounting, D7T5Error, TernaryTransportAccounting, TernaryTransportError,
+};
+pub use text7::{Text7, Text7CellError, Text7W7Error, Text7WireError, Text7WordError};
+pub use text7_projection::{encode_text7, render_text7, Text7Layout, Text7ProjectionError};
 
 pub use binary_execution::{
-    eval_t5_program, eval_e1_program, ExactDomainWord, PhysicalT5Program, T5ExecutionError,
-    E1ExecutionError,
+    eval_e1_program, eval_t5_program, E1ExecutionError, ExactDomainWord, PhysicalT5Program,
+    T5ExecutionError,
 };
 
 pub use eval::exact_arity;
+pub use eval::lower::lower_program;
 pub use eval::parse_json;
 pub use eval::{
     capability_installed, installed_capabilities, register_capability,
@@ -282,16 +285,15 @@ pub use eval::{
     unregister_sens_capability,
 };
 pub use eval::{
-    eval_lowered_expressions, eval_parsed_expressions, eval_parsed_expressions_incremental,
-    eval_exact_domain_program, eval_program, evaluate as eval_expr, EvalResult,
+    eval_exact_domain_program, eval_lowered_expressions, eval_parsed_expressions,
+    eval_parsed_expressions_incremental, eval_program, evaluate as eval_expr, EvalResult,
 };
-pub use eval::lower::lower_program;
 pub use parser::{parse, parse_exact_domain_source};
-pub use program_data::{expr_to_exact_program_data, lowered_program_to_exact_data};
 pub use presentation::{
     present_system_message, render_error_for_presentation, render_value_for_presentation,
     PresentationLanguage,
 };
+pub use program_data::{expr_to_exact_program_data, lowered_program_to_exact_data};
 pub use syntax::fasl::{
     decode_program as fasl_decode_program, encode_program as fasl_encode_program,
 };
@@ -475,10 +477,8 @@ fn canonical_core4_fasl_bytes() -> Option<std::rc::Rc<[u8]>> {
     }
     EXPECTED.with(|slot| {
         slot.get_or_init(|| {
-            let expressions = parse_mixed_exact_domain_core_source(
-                "lib/core4.lisp",
-                CORE_LIBRARY_SOURCE,
-            ).ok()?;
+            let expressions =
+                parse_mixed_exact_domain_core_source("lib/core4.lisp", CORE_LIBRARY_SOURCE).ok()?;
             let hash = sha256_source(CORE_LIBRARY_SOURCE.as_bytes());
             Some(std::rc::Rc::<[u8]>::from(fasl_encode(&expressions, &hash)))
         })
@@ -576,9 +576,7 @@ fn bind_core_runtime_mechanisms(environment: &Environment) {
     if environment.domain_code_slot(identity).is_none() {
         let _ = environment.bind_domain_code_slot_once(identity, candidate.clone());
     }
-    let mechanism = environment
-        .domain_code_slot(identity)
-        .unwrap_or(candidate);
+    let mechanism = environment.domain_code_slot(identity).unwrap_or(candidate);
     if environment.get(SURFACE).is_none() {
         environment.define(SURFACE, mechanism);
     }
@@ -597,10 +595,14 @@ fn bind_core_runtime_mechanisms(environment: &Environment) {
 /// This is a mechanism migration bridge, never a width-based callability grant.
 fn bind_existing_d9_language_mechanisms(environment: &Environment) {
     for (name, value) in environment.snapshot() {
-        if !matches!(value, Value::Builtin(_) | Value::Closure(_) | Value::Macro(_)) {
+        if !matches!(
+            value,
+            Value::Builtin(_) | Value::Closure(_) | Value::Macro(_)
+        ) {
             continue;
         }
-        let Some(identity) = semantic_registry::d9_binding_identity_for_definition(name.as_ref()) else {
+        let Some(identity) = semantic_registry::d9_binding_identity_for_definition(name.as_ref())
+        else {
             continue;
         };
         if environment.domain_code_slot(identity).is_none() {
@@ -665,9 +667,7 @@ pub fn load_core3_library(session: &mut Session) -> Result<EvalResult, LanguageE
 /// Завантажити явний метакруговий свідок SENS після звичайного ядра.
 /// Реєстр SID/Sens8 не завантажується: поверхні й семантичні ідентичності
 /// належать чинним доменним таблицям, а MetaEval використовує українські імена.
-pub fn load_meta_evaluator_library(
-    session: &mut Session,
-) -> Result<EvalResult, LanguageError> {
+pub fn load_meta_evaluator_library(session: &mut Session) -> Result<EvalResult, LanguageError> {
     load_meta_evaluator_library_from_source(session, META_EVAL_LIBRARY_SOURCE)
 }
 
@@ -780,7 +780,9 @@ fn bind_process_tcp_lisp_owned_macros(session: &mut Session) -> Result<(), Langu
                     Span::default(),
                 ));
             }
-            None if session.environment.bind_domain_code_slot_once(identity, implementation) => {}
+            None if session
+                .environment
+                .bind_domain_code_slot_once(identity, implementation) => {}
             None => {
                 return Err(LanguageError::new(
                     ErrorKind::InvalidForm,
@@ -809,10 +811,8 @@ pub fn load_process_library(session: &mut Session) -> Result<EvalResult, Languag
     }
     let utf8 = parse_mixed_exact_domain_utf8_source("lib/utf8.lisp", UTF8_LIBRARY_SOURCE)?;
     eval_parsed_expressions(&utf8, session)?;
-    let process = parse_mixed_exact_domain_process_tcp_source(
-        "lib/process.lisp",
-        PROCESS_LIBRARY_SOURCE,
-    )?;
+    let process =
+        parse_mixed_exact_domain_process_tcp_source("lib/process.lisp", PROCESS_LIBRARY_SOURCE)?;
     eval_parsed_expressions(&process, session)?;
     let tcp = parse_mixed_exact_domain_process_tcp_source("lib/tcp.lisp", TCP_LIBRARY_SOURCE)?;
     let result = eval_parsed_expressions(&tcp, session)?;
@@ -929,11 +929,9 @@ pub fn string_slice_text(text: &str, start: usize, end: usize) -> String {
     chars[start..end].iter().collect()
 }
 
-
 #[cfg(test)]
 mod core4_bootstrap_cache_tests {
     use super::*;
-
 
     /// Measurement, not a language law. Each sample executes the identical
     /// Lisp-owned macro/Core4 bootstrap in a fresh bare Session; the *only*
@@ -978,8 +976,8 @@ mod core4_bootstrap_cache_tests {
             start.elapsed().as_nanos() as f64 / iterations as f64
         }
 
-        let exact_d3 = parse_canonical_binary("10 001 00 000 01")
-            .expect("ratified D2/D3 quoted empty");
+        let exact_d3 =
+            parse_canonical_binary("10 001 00 000 01").expect("ratified D2/D3 quoted empty");
         assert!(
             core_library_fasl_is_current(),
             "only a verified up-to-date Core4 FASL can be benchmarked"
@@ -1036,8 +1034,9 @@ mod core4_bootstrap_cache_tests {
 
     #[test]
     fn valid_fasl_path_selects_core4_and_evaluates_current_core() {
-        let expressions = parse_mixed_exact_domain_core_source("lib/core4.lisp", CORE_LIBRARY_SOURCE)
-            .expect("current Core4 parses with exact-domain call heads");
+        let expressions =
+            parse_mixed_exact_domain_core_source("lib/core4.lisp", CORE_LIBRARY_SOURCE)
+                .expect("current Core4 parses with exact-domain call heads");
         let hash = sha256_source(CORE_LIBRARY_SOURCE.as_bytes());
         let fasl = fasl_encode(&expressions, &hash);
         let mut session = Session::default();
@@ -1138,12 +1137,11 @@ mod core4_bootstrap_cache_tests {
             .expect("empty sequential bindings must return their body");
         assert_eq!(empty_sequential.value.to_string(), "11");
 
-        let dependent_sequential =
-            eval_core_library_source(
-                "(нехай-послідовно ((перший 7) (другий перший)) другий)",
-                &mut session,
-            )
-                .expect("sequential bindings must see previous values");
+        let dependent_sequential = eval_core_library_source(
+            "(нехай-послідовно ((перший 7) (другий перший)) другий)",
+            &mut session,
+        )
+        .expect("sequential bindings must see previous values");
         assert_eq!(dependent_sequential.value.to_string(), "7");
     }
 }
@@ -1154,8 +1152,8 @@ mod exact_surface_domain_query_migration_tests {
 
     #[test]
     fn surface_query_is_domain_qualified_not_packed_byte() {
-        let quote = semantic_registry::domain_identity_for_surface("як-є")
-            .expect("ратифікована D3 QUOTE");
+        let quote =
+            semantic_registry::domain_identity_for_surface("як-є").expect("ратифікована D3 QUOTE");
         let cons = semantic_registry::domain_identity_for_surface("сполучити")
             .expect("ратифікована D3 CONS");
         assert_ne!(quote, cons);

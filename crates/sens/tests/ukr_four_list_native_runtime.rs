@@ -3,12 +3,7 @@
 //! Позитив і адресна помилка мутації перевіряються в справжній SENS-сесії.
 use sens::{eval_program, Session};
 
-fn execute_with_negative(
-    source_name: &str,
-    source: &str,
-    original: &str,
-    changed: &str,
-) {
+fn execute_with_negative(source_name: &str, source: &str, original: &str, changed: &str) {
     assert_eq!(
         source.matches(original).count(),
         1,
@@ -18,11 +13,15 @@ fn execute_with_negative(
     // Core4 не потрібен для цих самостійних виконуваних програм.
     let mut session = Session::default();
     let expected = eval_program("(атом? (як-є ()))", &mut session)
-        .expect("native D1:так").value;
+        .expect("native D1:так")
+        .value;
     let actual = eval_program(source, &mut session)
-        .unwrap_or_else(|error| panic!(
-            "test_id=ukr-four-list layer=SENS source={source_name} case=positive error={error}"
-        )).value;
+        .unwrap_or_else(|error| {
+            panic!(
+                "test_id=ukr-four-list layer=SENS source={source_name} case=positive error={error}"
+            )
+        })
+        .value;
     assert_eq!(
         actual, expected,
         "test_id=ukr-four-list layer=SENS source={source_name} case=positive expected=D1:так"
@@ -60,7 +59,6 @@ fn swap_second_third_preserves_outer_positions_and_rejects_identity_swap() {
         "(перше (решта четвірка))",
     );
 }
-
 
 #[test]
 fn pair_swap_executes_car_cdr_involution_and_rejects_identity() {
@@ -131,7 +129,6 @@ fn insert_second_executes_insertion_and_rejects_duplicate_first() {
         "(сполучити (перше елементи) (решта елементи))",
     );
 }
-
 
 #[test]
 fn swap_neighbors_four_executes_involution_and_rejects_duplicate_first() {
@@ -212,7 +209,6 @@ fn replace_fourth_executes_preservation_and_rejects_corrupted_third() {
         "(друге четвірка)",
     );
 }
-
 
 #[test]
 fn rotate_three_right_executes_exact_d3_without_append_dependency() {

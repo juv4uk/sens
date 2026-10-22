@@ -7,9 +7,8 @@
 
 use sens::syntax::{Expr, ExprKind, Span};
 use sens::{
-    domain_identity_shape_mechanism, eval_parsed_expressions,
-    load_core_library, parse_mixed_exact_domain, Bija3, Bit3, Bit4, CoreD4,
-    DomainIdentity, Exactness, Session, Value,
+    domain_identity_shape_mechanism, eval_parsed_expressions, load_core_library,
+    parse_mixed_exact_domain, Bija3, Bit3, Bit4, CoreD4, DomainIdentity, Exactness, Session, Value,
 };
 use std::rc::Rc;
 
@@ -183,7 +182,6 @@ fn d3_empty_identity_decomposes_to_exact_shape() {
     assert_eq!(bit1.as_predicate_bit(), Some(false));
     assert_eq!(bit2.as_predicate_bit(), Some(false));
 }
-
 
 #[test]
 fn equal_payload_in_d4_does_not_inherit_d3_compiler_role() {

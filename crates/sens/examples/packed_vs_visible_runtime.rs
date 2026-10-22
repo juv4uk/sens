@@ -2,9 +2,9 @@
 //! No historical SID8 routing, invented domain law, or text conversion.
 //! Framing word widths are caller supplied and excluded from byte claims.
 use sens::{
-    eval_lowered_expressions, eval_parsed_expressions, lower_program,
-    pack_binary_source_tokens, parse_binary_source_words, parse_canonical_binary,
-    parse_canonical_packed_words, Session, Value,
+    eval_lowered_expressions, eval_parsed_expressions, lower_program, pack_binary_source_tokens,
+    parse_binary_source_words, parse_canonical_binary, parse_canonical_packed_words, Session,
+    Value,
 };
 use std::{hint::black_box, time::Instant};
 
@@ -91,13 +91,16 @@ fn emit(
 }
 
 fn benchmark(case: &str, source: &str, forms: usize, samples: usize) -> Result<(), String> {
-    let text = std::iter::repeat(source).take(forms).collect::<Vec<_>>().join("\n");
-    let tokens = parse_binary_source_words(&text)
-        .map_err(|e| format!("{case}: source lex: {e:?}"))?;
+    let text = std::iter::repeat(source)
+        .take(forms)
+        .collect::<Vec<_>>()
+        .join("\n");
+    let tokens =
+        parse_binary_source_words(&text).map_err(|e| format!("{case}: source lex: {e:?}"))?;
     let widths = tokens.iter().map(|t| t.word.width()).collect::<Vec<_>>();
     let physical = pack_binary_source_tokens(&tokens);
-    let from_text = parse_canonical_binary(&text)
-        .map_err(|e| format!("{case}: visible D2: {e:?}"))?;
+    let from_text =
+        parse_canonical_binary(&text).map_err(|e| format!("{case}: visible D2: {e:?}"))?;
     let from_bytes = parse_canonical_packed_words(&physical, &widths)
         .map_err(|e| format!("{case}: packed D2: {e:?}"))?;
     if from_text.len() != forms || from_bytes.len() != forms {
@@ -138,8 +141,7 @@ fn benchmark(case: &str, source: &str, forms: usize, samples: usize) -> Result<(
     let mut session_bytes = Session::default();
     let (warm_a, warm_b) = paired(
         || {
-            let ast = parse_canonical_binary(black_box(&text))
-                .expect("preflighted visible D2");
+            let ast = parse_canonical_binary(black_box(&text)).expect("preflighted visible D2");
             let out = eval_parsed_expressions(&ast, &mut session_text)
                 .expect("preflighted visible execution");
             black_box(out.value);
@@ -154,33 +156,54 @@ fn benchmark(case: &str, source: &str, forms: usize, samples: usize) -> Result<(
         iterations,
         samples,
     );
-    emit(case, "warm-session-parse-lower-eval", forms, samples, iterations,
-         physical.bit_len(), physical.byte_len(), text.len(), widths.len(),
-         eval_only, &warm_a, &warm_b)?;
+    emit(
+        case,
+        "warm-session-parse-lower-eval",
+        forms,
+        samples,
+        iterations,
+        physical.bit_len(),
+        physical.byte_len(),
+        text.len(),
+        widths.len(),
+        eval_only,
+        &warm_a,
+        &warm_b,
+    )?;
 
     let (cold_a, cold_b) = paired(
         || {
             let mut session = Session::default();
-            let ast = parse_canonical_binary(black_box(&text))
-                .expect("preflighted visible D2");
-            let out = eval_parsed_expressions(&ast, &mut session)
-                .expect("preflighted visible execution");
+            let ast = parse_canonical_binary(black_box(&text)).expect("preflighted visible D2");
+            let out =
+                eval_parsed_expressions(&ast, &mut session).expect("preflighted visible execution");
             black_box(out.value);
         },
         || {
             let mut session = Session::default();
             let ast = parse_canonical_packed_words(black_box(&physical), black_box(&widths))
                 .expect("preflighted packed D2");
-            let out = eval_parsed_expressions(&ast, &mut session)
-                .expect("preflighted packed execution");
+            let out =
+                eval_parsed_expressions(&ast, &mut session).expect("preflighted packed execution");
             black_box(out.value);
         },
         iterations,
         samples,
     );
-    emit(case, "fresh-session-parse-lower-eval", forms, samples, iterations,
-         physical.bit_len(), physical.byte_len(), text.len(), widths.len(),
-         eval_only, &cold_a, &cold_b)
+    emit(
+        case,
+        "fresh-session-parse-lower-eval",
+        forms,
+        samples,
+        iterations,
+        physical.bit_len(),
+        physical.byte_len(),
+        text.len(),
+        widths.len(),
+        eval_only,
+        &cold_a,
+        &cold_b,
+    )
 }
 
 fn main() {

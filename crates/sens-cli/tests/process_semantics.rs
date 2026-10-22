@@ -36,7 +36,10 @@ fn cli_literal_process_run_rejects_invalid_utf8_in_lisp_instead_of_lossy_host_de
     );
     let stdout = String::from_utf8(output.stdout).expect("CLI stdout itself should be UTF-8");
     assert_eq!(stdout.trim(), "(rejected stdout-invalid-utf8)");
-    assert!(!stdout.contains('�'), "lossy host replacement leaked into CLI output");
+    assert!(
+        !stdout.contains('�'),
+        "lossy host replacement leaked into CLI output"
+    );
 }
 
 #[test]

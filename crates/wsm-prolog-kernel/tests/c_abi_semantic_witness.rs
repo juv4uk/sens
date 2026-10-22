@@ -3,7 +3,7 @@ use std::path::PathBuf;
 use wsm_kernel_c_abi::{
     WsmByteSpan, WsmKernelKind, WsmKernelRequest, WsmMutableByteSpan, WsmStatus,
 };
-use wsm_prolog_kernel::{PrologAbiAdapter, PrologKernel, LegacyAbiSemanticId};
+use wsm_prolog_kernel::{LegacyAbiSemanticId, PrologAbiAdapter, PrologKernel};
 
 const PROBE_ID: u8 = 0b0000_0011;
 
@@ -58,14 +58,16 @@ fn opaque_legacy_abi_id_crosses_same_c_abi_into_real_prolog_backtracking() {
         String::from_utf8_lossy(&output[..written]).trim(),
         "[bob,dave,carol]"
     );
-    assert_eq!(adapter.last_legacy_abi_id(), Some(LegacyAbiSemanticId(PROBE_ID)));
+    assert_eq!(
+        adapter.last_legacy_abi_id(),
+        Some(LegacyAbiSemanticId(PROBE_ID))
+    );
 
     assert_eq!(
         unsafe { vtable.stop.expect("stop")(vtable.context) },
         WsmStatus::Ok
     );
 }
-
 
 fn exchange_with_sid(
     adapter: &PrologAbiAdapter,
@@ -143,8 +145,7 @@ fn semantic_add_uses_sid8_and_arguments_only() {
     assert_eq!(status, WsmStatus::Ok);
     assert_eq!(String::from_utf8_lossy(&output).trim(), "[5]");
 
-    let (status, output) =
-        exchange_with_sid(&adapter, 0b0000_1100, b"X is 7 - 3");
+    let (status, output) = exchange_with_sid(&adapter, 0b0000_1100, b"X is 7 - 3");
     assert_eq!(
         status,
         WsmStatus::InvalidArgument,
@@ -177,7 +178,16 @@ fn prolog_native_substitutions_preserve_zero_one_many_without_truth_projection()
 
     // These are native Prolog answer lists. This witness deliberately does
     // not reinterpret [] as false or [..] as truth.
-    assert_eq!(zero.last_legacy_abi_id(), Some(LegacyAbiSemanticId(PROBE_ID)));
-    assert_eq!(one.last_legacy_abi_id(), Some(LegacyAbiSemanticId(PROBE_ID)));
-    assert_eq!(many.last_legacy_abi_id(), Some(LegacyAbiSemanticId(PROBE_ID)));
+    assert_eq!(
+        zero.last_legacy_abi_id(),
+        Some(LegacyAbiSemanticId(PROBE_ID))
+    );
+    assert_eq!(
+        one.last_legacy_abi_id(),
+        Some(LegacyAbiSemanticId(PROBE_ID))
+    );
+    assert_eq!(
+        many.last_legacy_abi_id(),
+        Some(LegacyAbiSemanticId(PROBE_ID))
+    );
 }

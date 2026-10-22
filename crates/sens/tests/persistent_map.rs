@@ -32,8 +32,7 @@ fn порожня_мапа_не_повертає_вигаданих_значен
         "()"
     );
     assert_eq!(
-        observe(&mut session, "(мапа-містить? (як-є a) мапа-порожній)")
-            .as_predicate_bit(),
+        observe(&mut session, "(мапа-містить? (як-є a) мапа-порожній)").as_predicate_bit(),
         Some(false),
     );
 }
@@ -45,9 +44,15 @@ fn вставлення_та_пошук_виконуються_українсь�
     let get = format!("(мапа-отримати (як-є a) {m})");
     assert_eq!(observe(&mut session, &get).to_string(), "(v)");
     let contains = format!("(мапа-містить? (як-є a) {m})");
-    assert_eq!(observe(&mut session, &contains).as_predicate_bit(), Some(true));
+    assert_eq!(
+        observe(&mut session, &contains).as_predicate_bit(),
+        Some(true)
+    );
     let absent = format!("(мапа-містить? (як-є b) {m})");
-    assert_eq!(observe(&mut session, &absent).as_predicate_bit(), Some(false));
+    assert_eq!(
+        observe(&mut session, &absent).as_predicate_bit(),
+        Some(false)
+    );
 }
 
 #[test]

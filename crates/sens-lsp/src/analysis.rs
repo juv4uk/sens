@@ -112,7 +112,7 @@ fn is_quote_head(expr: &Expr) -> bool {
         ExprKind::Sid(identity) => {
             // No historical eight-bit payload can establish D3 QUOTE.
             (identity.width(), u16::from(identity.packed_bits())) == D3_QUOTE
-        },
+        }
         ExprKind::Symbol(surface) => surface_domain_coordinate(surface) == Some(D3_QUOTE),
         _ => false,
     }
@@ -170,10 +170,8 @@ fn collect_arity_diagnostics(
             });
             if let Some(name) = head_name {
                 if let Some((kind, arity)) = items.get(name) {
-                    let shadowable = matches!(
-                        kind,
-                        LanguageItemKind::Builtin | LanguageItemKind::Macro
-                    );
+                    let shadowable =
+                        matches!(kind, LanguageItemKind::Builtin | LanguageItemKind::Macro);
                     let shadowed = shadowable && local_defs.contains(name);
                     let received = elements.len().saturating_sub(1);
                     if !shadowed && !arity.accepts(received) {
@@ -237,11 +235,7 @@ fn walk_symbols(expr: &Expr, in_quote: bool, out: &mut Vec<SymbolOccurrence>) {
             // parser output is a compatibility-only fallback.
             let head_is_quote = items.first().is_some_and(is_quote_head);
             for (i, item) in items.iter().enumerate() {
-                walk_symbols(
-                    item,
-                    in_quote || (head_is_quote && i > 0),
-                    out,
-                );
+                walk_symbols(item, in_quote || (head_is_quote && i > 0), out);
             }
         }
         ExprKind::Pair(head, tail) => {

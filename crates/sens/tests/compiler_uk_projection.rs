@@ -59,31 +59,47 @@ fn український_приклад_піднімає_лише_ратифі�
     let форми = parse_mixed_exact_domain(джерело).expect("чинна українська проєкція");
     assert_eq!(форми.len(), 1);
 
-    let ExprKind::List(визначення) = &форми[0].kind else { panic!("визначення"); };
+    let ExprKind::List(визначення) = &форми[0].kind else {
+        panic!("визначення");
+    };
     assert!(matches!(&визначення[0].kind, ExprKind::DomainIdentity(id)
         if id.width() == 4 && id.packed_bits() == 0b0011));
-    assert!(!matches!(&визначення[1].kind, ExprKind::DomainIdentity(_)),
-        "ім'я має лишитися даними");
+    assert!(
+        !matches!(&визначення[1].kind, ExprKind::DomainIdentity(_)),
+        "ім'я має лишитися даними"
+    );
 
-    let ExprKind::List(лямбда) = &визначення[2].kind else { panic!("лямбда"); };
+    let ExprKind::List(лямбда) = &визначення[2].kind else {
+        panic!("лямбда");
+    };
     assert!(matches!(&лямбда[0].kind, ExprKind::DomainIdentity(id)
         if id.width() == 4 && id.packed_bits() == 0b0010));
 
-    let ExprKind::List(умова) = &лямбда[2].kind else { panic!("умова"); };
+    let ExprKind::List(умова) = &лямбда[2].kind else {
+        panic!("умова");
+    };
     assert!(matches!(&умова[0].kind, ExprKind::DomainIdentity(id)
         if id.width() == 3 && id.packed_bits() == 0b110));
 
-    let ExprKind::List(гілка) = &умова[1].kind else { panic!("гілка"); };
+    let ExprKind::List(гілка) = &умова[1].kind else {
+        panic!("гілка");
+    };
     assert_eq!(гілка.len(), 2, "COND завжди має точні двопольові гілки");
-    let ExprKind::List(перевірка) = &гілка[0].kind else { panic!("предикат"); };
+    let ExprKind::List(перевірка) = &гілка[0].kind else {
+        panic!("предикат");
+    };
     assert!(matches!(&перевірка[0].kind, ExprKind::DomainIdentity(id)
         if id.width() == 3 && id.packed_bits() == 0b010));
 
-    let ExprKind::List(пара) = &гілка[1].kind else { panic!("CONS"); };
+    let ExprKind::List(пара) = &гілка[1].kind else {
+        panic!("CONS");
+    };
     assert!(matches!(&пара[0].kind, ExprKind::DomainIdentity(id)
         if id.width() == 3 && id.packed_bits() == 0b111));
 
-    let ExprKind::List(цитата) = &пара[2].kind else { panic!("QUOTE"); };
+    let ExprKind::List(цитата) = &пара[2].kind else {
+        panic!("QUOTE");
+    };
     assert!(matches!(&цитата[0].kind, ExprKind::DomainIdentity(id)
         if id.width() == 3 && id.packed_bits() == 0b001));
 }
@@ -94,30 +110,63 @@ fn compiler_nucleus_uses_ukrainian_callable_heads() {
         ("compiler-nucleus", "ядро-компілятора"),
         ("compiler-domain-shape", "форма-домену-компілятора"),
         ("compiler-list-end?", "кінець-списку-компілятора?"),
-        ("compiler-role-from-l1-l5-bits", "роль-компілятора-за-бітами-л1-л5"),
-        ("compiler-lowering-role-from-l1-l5-bits", "роль-пониження-компілятора-за-бітами-л1-л5"),
+        (
+            "compiler-role-from-l1-l5-bits",
+            "роль-компілятора-за-бітами-л1-л5",
+        ),
+        (
+            "compiler-lowering-role-from-l1-l5-bits",
+            "роль-пониження-компілятора-за-бітами-л1-л5",
+        ),
         ("compiler-role-from-l1-l5", "роль-компілятора-за-л1-л5"),
-        ("compiler-lowering-role-from-l1-l5", "роль-пониження-компілятора-за-л1-л5"),
-        ("compiler-lowering-role-from-laws", "роль-пониження-компілятора-за-законами"),
+        (
+            "compiler-lowering-role-from-l1-l5",
+            "роль-пониження-компілятора-за-л1-л5",
+        ),
+        (
+            "compiler-lowering-role-from-laws",
+            "роль-пониження-компілятора-за-законами",
+        ),
         ("compiler-request-from-role", "запит-компілятора-за-роллю"),
         ("compiler-request-from-l1-l5", "запит-компілятора-за-л1-л5"),
-        ("compiler-request-from-laws", "запит-компілятора-за-законами"),
+        (
+            "compiler-request-from-laws",
+            "запит-компілятора-за-законами",
+        ),
         ("compiler-merge-results", "об'єднати-результати-компілятора"),
         ("compiler-request-role", "роль-запиту-компілятора"),
         ("compiler-exactly-one", "рівно-один-аргумент-компілятора"),
         ("compiler-exactly-two", "рівно-два-аргументи-компілятора"),
         ("compiler-proper-tail?", "правильний-хвіст-компілятора?"),
-        ("compiler-at-least-two", "щонайменше-два-аргументи-компілятора"),
-        ("compiler-cond-clauses-valid", "клаузи-умов-компілятора-чинні?"),
+        (
+            "compiler-at-least-two",
+            "щонайменше-два-аргументи-компілятора",
+        ),
+        (
+            "compiler-cond-clauses-valid",
+            "клаузи-умов-компілятора-чинні?",
+        ),
         ("compiler-role-shape-valid", "форма-ролі-компілятора-чинна?"),
-        ("compiler-domain-children", "дочірні-форми-домену-компілятора"),
+        (
+            "compiler-domain-children",
+            "дочірні-форми-домену-компілятора",
+        ),
         ("compiler-domain-result", "результат-домену-компілятора"),
         ("compiler-program-node", "вузол-програми-компілятора"),
         ("compiler-program-list", "список-програми-компілятора"),
-        ("compiler-compile-program", "скомпілювати-програму-компілятора"),
+        (
+            "compiler-compile-program",
+            "скомпілювати-програму-компілятора",
+        ),
         ("compiler-artifact-field", "поле-артефакту-компілятора"),
-        ("compiler-artifact-from-result", "артефакт-компілятора-за-результатом"),
-        ("compiler-compile-program-artifact", "скомпілювати-артефакт-програми-компілятора"),
+        (
+            "compiler-artifact-from-result",
+            "артефакт-компілятора-за-результатом",
+        ),
+        (
+            "compiler-compile-program-artifact",
+            "скомпілювати-артефакт-програми-компілятора",
+        ),
     ];
     for (legacy, ukr) in names {
         assert!(

@@ -1,4 +1,7 @@
-use sens::{eval_program, eval_parsed_expressions, load_core_library, parse_mixed_exact_domain_machine_source, Session};
+use sens::{
+    eval_parsed_expressions, eval_program, load_core_library,
+    parse_mixed_exact_domain_machine_source, Session,
+};
 use std::fs;
 use std::path::PathBuf;
 
@@ -13,18 +16,22 @@ fn load_lisp_file(path: &str, session: &mut Session) {
     let path = repo_root().join(path);
     let source = fs::read_to_string(&path)
         .unwrap_or_else(|error| panic!("{} must exist: {error}", path.display()));
-    let relative = path.strip_prefix(repo_root())
+    let relative = path
+        .strip_prefix(repo_root())
         .expect("Lisp fixture path must be inside the SENS repository");
-    let source_path = relative.to_str()
+    let source_path = relative
+        .to_str()
         .expect("machine fixture path must be valid UTF-8");
     if source_path.starts_with("lib/machine/") {
         let parsed = parse_mixed_exact_domain_machine_source(source_path, &source)
             .unwrap_or_else(|error| panic!("{source_path}: exact-domain read failed: {error}"));
-        eval_parsed_expressions(&parsed, session)
-            .unwrap_or_else(|error| panic!("{source_path}: exact-domain execution failed: {error}"));
+        eval_parsed_expressions(&parsed, session).unwrap_or_else(|error| {
+            panic!("{source_path}: exact-domain execution failed: {error}")
+        });
     } else {
-        eval_program(&source, session)
-            .unwrap_or_else(|error| panic!("{} must load as ordinary sens: {error}", path.display()));
+        eval_program(&source, session).unwrap_or_else(|error| {
+            panic!("{} must load as ordinary sens: {error}", path.display())
+        });
     }
 }
 

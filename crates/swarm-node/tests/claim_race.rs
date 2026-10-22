@@ -33,10 +33,7 @@ fn test_root() -> PathBuf {
         .duration_since(UNIX_EPOCH)
         .expect("clock should be after Unix epoch")
         .as_nanos();
-    std::env::temp_dir().join(format!(
-        "swarm-claim-race-{}-{nonce}",
-        std::process::id()
-    ))
+    std::env::temp_dir().join(format!("swarm-claim-race-{}-{nonce}", std::process::id()))
 }
 
 fn reserve_ports(count: usize) -> Vec<u16> {
@@ -80,9 +77,7 @@ fn spawn(port: u16, node_id: &str, data_dir: &Path, connect: Option<u16>) -> Nod
 fn wait_for_start(port: u16, data_dir: &Path, log: &Path) {
     let deadline = Instant::now() + Duration::from_secs(3);
     while Instant::now() < deadline {
-        if data_dir.join("node.lisp").is_file()
-            && TcpStream::connect(("127.0.0.1", port)).is_ok()
-        {
+        if data_dir.join("node.lisp").is_file() && TcpStream::connect(("127.0.0.1", port)).is_ok() {
             return;
         }
         std::thread::sleep(Duration::from_millis(20));
@@ -168,8 +163,8 @@ fn simultaneous_claims_commit_exactly_one_owner_and_converge() {
         barrier.wait();
         let response_a = a.join().expect("claim thread A");
         let response_b = b.join().expect("claim thread B");
-        let success_count = usize::from(response_a.starts_with("(ok"))
-            + usize::from(response_b.starts_with("(ok"));
+        let success_count =
+            usize::from(response_a.starts_with("(ok")) + usize::from(response_b.starts_with("(ok"));
 
         assert_eq!(
             success_count, 1,

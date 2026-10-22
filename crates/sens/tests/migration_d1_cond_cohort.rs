@@ -6,16 +6,16 @@ use sens::{
     render_ternary_words_spaced, TernaryTransportError,
 };
 
-const T5: &[u8] =
-    include_bytes!("../../../tests/fixtures/migration-d1-cond-cohort/branch.sens");
-const SPACED_VIEW: &str =
-    include_str!("../../../tests/fixtures/migration-d1-cond-cohort/branch");
-const WORDS: &str =
-    "10 110 00 10 0 00 10 100 00 000 01 01 00 10 1 00 1 01 01";
+const T5: &[u8] = include_bytes!("../../../tests/fixtures/migration-d1-cond-cohort/branch.sens");
+const SPACED_VIEW: &str = include_str!("../../../tests/fixtures/migration-d1-cond-cohort/branch");
+const WORDS: &str = "10 110 00 10 0 00 10 100 00 000 01 01 00 10 1 00 1 01 01";
 
 #[test]
 fn physical_t5_d1_cond_preserves_source_and_transport_views() {
-    assert_eq!(T5, [0x67, 0x38, 0x65, 0x15, 0xbf, 0x12, 0x3b, 0x2d, 0xc4, 0xa9, 0xb1, 0xa1]);
+    assert_eq!(
+        T5,
+        [0x67, 0x38, 0x65, 0x15, 0xbf, 0x12, 0x3b, 0x2d, 0xc4, 0xa9, 0xb1, 0xa1]
+    );
     let words = decode_ternary_program(T5).expect("committed file must be canonical T5");
     let current = render_ternary_words_spaced(&words);
     assert_eq!(current, WORDS);

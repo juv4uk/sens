@@ -1,9 +1,8 @@
 //! Current D7 keyboard/v2 exact W7 data through physical T5.
 //! In code, quoted function identities come from the domain ladder first.
 use sens::{
-    decode_d7_uk_t5, decode_ternary_words, encode_d7_uk_t5,
-    encode_ternary_words, Bit2, Bit7, BinarySourceWord, D7T5Error,
-    TernaryTransportError,
+    decode_d7_uk_t5, decode_ternary_words, encode_d7_uk_t5, encode_ternary_words, BinarySourceWord,
+    Bit2, Bit7, D7T5Error, TernaryTransportError,
 };
 
 #[test]
@@ -32,9 +31,8 @@ fn ukrainian_uppercase_is_one_seven_bit_cell() {
 #[test]
 fn old_reserved_coordinates_are_current_text_data() {
     for (bits, glyph) in [(33, "!"), (42, "*"), (97, "ф")] {
-        let physical = encode_ternary_words(&[
-            BinarySourceWord::W7(Bit7::new(bits).unwrap()),
-        ]).unwrap();
+        let physical =
+            encode_ternary_words(&[BinarySourceWord::W7(Bit7::new(bits).unwrap())]).unwrap();
         assert_eq!(decode_d7_uk_t5(&physical).unwrap(), glyph);
     }
 }
@@ -42,13 +40,15 @@ fn old_reserved_coordinates_are_current_text_data() {
 #[test]
 fn d2_grammar_words_do_not_become_d7_text_even_for_same_characters() {
     for bits in [0b00, 0b01, 0b10, 0b11] {
-        let bytes = encode_ternary_words(&[
-            BinarySourceWord::W2(Bit2::new(bits).unwrap()),
-        ]).unwrap();
+        let bytes =
+            encode_ternary_words(&[BinarySourceWord::W2(Bit2::new(bits).unwrap())]).unwrap();
         assert_eq!(decode_d7_uk_t5(&bytes), Err(D7T5Error::NonD7Word));
     }
     for text in ["(", ")", ".", " ", "\n"] {
-        assert_eq!(decode_d7_uk_t5(&encode_d7_uk_t5(text).unwrap()).unwrap(), text);
+        assert_eq!(
+            decode_d7_uk_t5(&encode_d7_uk_t5(text).unwrap()).unwrap(),
+            text
+        );
     }
 }
 
@@ -60,17 +60,29 @@ fn d7_stack_glyph_projection_preserves_t5_and_multibyte_error_offset() {
     let source = "Кіт! (.)\n";
     let physical = encode_d7_uk_t5(source).expect("admitted Ukrainian D7");
     let words = decode_ternary_words(&physical).expect("canonical T5");
-    assert_eq!(words.len(), source.chars().count(), "one D7 word per Unicode scalar");
+    assert_eq!(
+        words.len(),
+        source.chars().count(),
+        "one D7 word per Unicode scalar"
+    );
     assert!(words.iter().all(|word| word.width() == 7), "no D2/D8 alias");
-    assert_eq!(decode_d7_uk_t5(&physical), Ok(source.to_string()),
-               "same exact W7 identities after physical roundtrip");
-    assert_eq!(encode_ternary_words(&words).unwrap(), physical,
-               "stack projection must not modify packed T5 bytes");
+    assert_eq!(
+        decode_d7_uk_t5(&physical),
+        Ok(source.to_string()),
+        "same exact W7 identities after physical roundtrip"
+    );
+    assert_eq!(
+        encode_ternary_words(&words).unwrap(),
+        physical,
+        "stack projection must not modify packed T5 bytes"
+    );
 
     // 'К' and 'і' occupy two UTF-8 bytes each. The third scalar is not D7;
     // offset reports the first byte, not a character ordinal or host number.
-    assert_eq!(encode_d7_uk_t5("Кі🙂"),
-               Err(D7T5Error::UnassignedKeyboardGlyph { byte_offset: 4 }));
+    assert_eq!(
+        encode_d7_uk_t5("Кі🙂"),
+        Err(D7T5Error::UnassignedKeyboardGlyph { byte_offset: 4 })
+    );
 }
 
 /// Точковий фізичний свідок: однаковий потік точних W7 слів має
@@ -81,21 +93,40 @@ fn d7_repeated_utf8_uses_exact_words_without_post_encode_decode() {
     let segment = "Кіт! (.)\n";
     let source = segment.repeat(31);
     let segment_words = decode_ternary_words(&encode_d7_uk_t5(segment).unwrap()).unwrap();
-    let expected_words: Vec<_> = (0..31).flat_map(|_| segment_words.iter().copied()).collect();
+    let expected_words: Vec<_> = (0..31)
+        .flat_map(|_| segment_words.iter().copied())
+        .collect();
     let packed = encode_d7_uk_t5(&source).unwrap();
-    assert_eq!(packed, encode_ternary_words(&expected_words).unwrap(),
-               "T5 bytes must match the independent W7 encoding");
+    assert_eq!(
+        packed,
+        encode_ternary_words(&expected_words).unwrap(),
+        "T5 bytes must match the independent W7 encoding"
+    );
     let actual = decode_ternary_words(&packed).unwrap();
     assert_eq!(actual, expected_words, "all W7 bits and boundaries survive");
-    assert!(actual.iter().all(|word| word.width() == 7), "no implicit D2/D8");
+    assert!(
+        actual.iter().all(|word| word.width() == 7),
+        "no implicit D2/D8"
+    );
     assert_eq!(decode_d7_uk_t5(&packed).unwrap(), source);
-    assert_eq!(encode_d7_uk_t5(&(source.clone() + "🙂")),
-               Err(D7T5Error::UnassignedKeyboardGlyph { byte_offset: source.len() }));
+    assert_eq!(
+        encode_d7_uk_t5(&(source.clone() + "🙂")),
+        Err(D7T5Error::UnassignedKeyboardGlyph {
+            byte_offset: source.len()
+        })
+    );
 }
 
 #[test]
 fn invalid_unicode_or_bad_physical_byte_fails_closed() {
-    assert!(matches!(encode_d7_uk_t5("🙂"), Err(D7T5Error::UnassignedKeyboardGlyph { .. })));
-    assert_eq!(decode_d7_uk_t5(&[243]),
-               Err(D7T5Error::Transport(TernaryTransportError::InvalidPhysicalByte)));
+    assert!(matches!(
+        encode_d7_uk_t5("🙂"),
+        Err(D7T5Error::UnassignedKeyboardGlyph { .. })
+    ));
+    assert_eq!(
+        decode_d7_uk_t5(&[243]),
+        Err(D7T5Error::Transport(
+            TernaryTransportError::InvalidPhysicalByte
+        ))
+    );
 }

@@ -50,12 +50,8 @@ fn compiler_export_emits_full_sens_owned_d3_d4_closure() {
     assert!(stdout.contains(
         "(authority-ref . \"lib/compiler-nucleus.lisp:роль-пониження-компілятора-за-законами\")"
     ));
-    assert!(stdout.contains(
-        "(proof-ref . \"contracts/bija3-l1-l5-ratification.lisp\")"
-    ));
-    assert!(stdout.contains(
-        "(proof-ref . \"contracts/d4-bootstrap-ratification.lisp\")"
-    ));
+    assert!(stdout.contains("(proof-ref . \"contracts/bija3-l1-l5-ratification.lisp\")"));
+    assert!(stdout.contains("(proof-ref . \"contracts/d4-bootstrap-ratification.lisp\")"));
     assert!(stdout.contains("(authority-path . \"language-contract.lisp\")"));
     assert!(stdout.contains("(repository . \"juv4uk/sens\")"));
     assert!(stdout.contains("(contract . 11.9)"));
@@ -82,7 +78,10 @@ fn compiler_export_emits_full_sens_owned_d3_d4_closure() {
     }
 
     let output2 = compiler_export(&[]);
-    assert_eq!(output.stdout, output2.stdout, "export must be deterministic");
+    assert_eq!(
+        output.stdout, output2.stdout,
+        "export must be deterministic"
+    );
 }
 
 #[test]

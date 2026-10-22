@@ -70,8 +70,8 @@ fn main() {
     if env::var_os("CARGO_FEATURE_ZIG_TRANSPORT").is_none() {
         return;
     }
-    let root = PathBuf::from(env::var_os("CARGO_MANIFEST_DIR").expect("CARGO_MANIFEST_DIR"))
-        .join("../..");
+    let root =
+        PathBuf::from(env::var_os("CARGO_MANIFEST_DIR").expect("CARGO_MANIFEST_DIR")).join("../..");
     let out = PathBuf::from(env::var_os("OUT_DIR").expect("OUT_DIR"));
     let target_env = env::var("CARGO_CFG_TARGET_ENV").unwrap_or_default();
     let target_os = env::var("CARGO_CFG_TARGET_OS").unwrap_or_default();
@@ -89,10 +89,17 @@ fn main() {
         .arg("version")
         .output()
         .expect("zig-transport requires the pinned Zig compiler");
-    assert!(version.status.success(), "zig-transport: Zig version probe failed");
+    assert!(
+        version.status.success(),
+        "zig-transport: Zig version probe failed"
+    );
     let actual = std::str::from_utf8(&version.stdout)
-        .expect("zig-transport: Zig version output is not UTF-8").trim();
-    assert_eq!(actual, pinned, "zig-transport: wrong Zig version, expected repository .zig-version");
+        .expect("zig-transport: Zig version output is not UTF-8")
+        .trim();
+    assert_eq!(
+        actual, pinned,
+        "zig-transport: wrong Zig version, expected repository .zig-version"
+    );
     let mut command = Command::new(&compiler);
     command
         .current_dir(&root)
@@ -119,7 +126,10 @@ fn main() {
         .arg(format!("-femit-bin={}", archive.display()))
         .status()
         .expect("zig-transport requested: Zig compiler unavailable");
-    assert!(result.success(), "zig-transport requested: Zig C ABI compile failed");
+    assert!(
+        result.success(),
+        "zig-transport requested: Zig C ABI compile failed"
+    );
     println!("cargo:rustc-link-search=native={}", out.display());
     println!("cargo:rustc-link-lib=static=sens_zig_transport");
 }

@@ -427,9 +427,7 @@ pub(crate) fn oracle_check(source: &str, contract_version: &Value) -> (Value, bo
 /// answer.
 pub(crate) fn oracle_help(session: &mut Session, topic: Option<&str>) -> Result<Value, String> {
     let reference = std::fs::read_to_string("knowledge/guard-reference.lisp").map_err(|error| {
-        format!(
-            "cannot read knowledge/guard-reference.lisp (run from the sens repo root): {error}"
-        )
+        format!("cannot read knowledge/guard-reference.lisp (run from the sens repo root): {error}")
     })?;
     // The static Guard source crosses the Zig byte corridor, not Rust include.
     // The mutable reference directory stays dynamically reloaded as before.

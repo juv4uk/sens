@@ -1,14 +1,15 @@
 //! Реальний Rust-оракул мігрованого Advice Taker Lisp джерела.
 //! Без обхідних host-макетів: завантажуємо source-pinned ядро й справжній
 //! `lib/understand.lisp` через точнодоменний D3/D4 reader.
-use sens::{eval_parsed_expressions, load_core_library, lower_program, parse_mixed_exact_domain, Session};
+use sens::{
+    eval_parsed_expressions, load_core_library, lower_program, parse_mixed_exact_domain, Session,
+};
 
 fn loaded() -> Session {
     let mut session = Session::default();
     // Канонічне ядро SENS завантажується своїм чинним механізмом:
     // окреме обчислення core.lisp не має всіх його залежностей.
-    load_core_library(&mut session)
-        .expect("точнодоменне ядро SENS має завантажитись");
+    load_core_library(&mut session).expect("точнодоменне ядро SENS має завантажитись");
     let forms = parse_mixed_exact_domain(include_str!("../../../lib/understand.lisp"))
         .expect("D3/D4 заголовки мають розпізнаватися без W8-підміни");
     // Лексичні українські D1 значення потрібні у виконуваній
@@ -31,7 +32,8 @@ fn run(session: &mut Session, source: &str) -> String {
 #[test]
 fn empty_word_lists_never_evaluate_car() {
     let mut session = loaded();
-    for name in ["прибрати-артикль", "розібрати", "розібрати-запит"] {
+    for name in ["прибрати-артикль", "розібрати", "розібрати-запит"]
+    {
         let program = format!("({name} (001 ()))");
         assert_eq!(run(&mut session, &program), "()", "{name}");
     }
@@ -67,11 +69,26 @@ fn ordinary_nonempty_words_preserve_exact_advice_taker_laws() {
         ("(прибрати-артикль (001 (an mars)))", "(mars)"),
         ("(прибрати-артикль (001 (mars)))", "(mars)"),
         ("(розібрати (001 (mars orbits sun)))", "((orbits mars sun))"),
-        ("(розібрати-запит (001 (is mars a planet)))", "(planet mars)"),
-        ("(розібрати (001 (all planets have mass)))", "((has (var w) mass) (planets (var w)))"),
-        ("(розібрати-запит (001 (does mars orbit sun)))", "(orbit mars sun)"),
-        ("(розібрати-загальний (001 (all planets have mass)))", "((has (var w) mass) (planets (var w)))"),
-        ("(розібрати-запит-відношення (001 (does mars orbit sun)))", "(orbit mars sun)"),
+        (
+            "(розібрати-запит (001 (is mars a planet)))",
+            "(planet mars)",
+        ),
+        (
+            "(розібрати (001 (all planets have mass)))",
+            "((has (var w) mass) (planets (var w)))",
+        ),
+        (
+            "(розібрати-запит (001 (does mars orbit sun)))",
+            "(orbit mars sun)",
+        ),
+        (
+            "(розібрати-загальний (001 (all planets have mass)))",
+            "((has (var w) mass) (planets (var w)))",
+        ),
+        (
+            "(розібрати-запит-відношення (001 (does mars orbit sun)))",
+            "(orbit mars sun)",
+        ),
     ] {
         assert_eq!(run(&mut session, program), expected, "{program}");
     }

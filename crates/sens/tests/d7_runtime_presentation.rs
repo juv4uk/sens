@@ -1,8 +1,8 @@
 //! Presentation from the current 128/128 D7 v2 keyboard map only.
 //! No phonetic D7 v1 residents or reserved-cell exceptions.
 use sens::{
-    Bit7, BinarySourceWord, DomainIdentity, PresentationLanguage, Value,
-    render_value_for_presentation,
+    render_value_for_presentation, BinarySourceWord, Bit7, DomainIdentity, PresentationLanguage,
+    Value,
 };
 
 #[test]
@@ -16,20 +16,33 @@ fn all_128_w7_cells_preserve_identity_and_project_from_the_owner_keyboard() {
         let value = Value::DomainIdentity(identity);
         let exact = format!("{raw:07b}");
         assert_eq!(value.to_string(), exact);
-        assert_eq!(render_value_for_presentation(&value, PresentationLanguage::Canonical), exact);
-        assert_eq!(render_value_for_presentation(&value, PresentationLanguage::English), exact);
+        assert_eq!(
+            render_value_for_presentation(&value, PresentationLanguage::Canonical),
+            exact
+        );
+        assert_eq!(
+            render_value_for_presentation(&value, PresentationLanguage::English),
+            exact
+        );
         let uk = sens::d7_keyboard::project(raw, sens::d7_keyboard::D7Mode::Uk).unwrap();
         let san_iast = sens::render_text7(
             &sens::Text7::from_cells(vec![raw]).unwrap(),
             sens::Text7Layout::SaIast,
-        ).unwrap();
-        assert_eq!(render_value_for_presentation(&value, PresentationLanguage::Ukrainian),
-                   uk.to_string());
-        assert_eq!(render_value_for_presentation(&value, PresentationLanguage::Sanskrit),
-                   san_iast);
+        )
+        .unwrap();
+        assert_eq!(
+            render_value_for_presentation(&value, PresentationLanguage::Ukrainian),
+            uk.to_string()
+        );
+        assert_eq!(
+            render_value_for_presentation(&value, PresentationLanguage::Sanskrit),
+            san_iast
+        );
         // No printable Devanagari survives the canonical human D7 display.
         if (32..=126).contains(&raw) {
-            assert!(!san_iast.chars().any(|ch| ('\u{0900}'..='\u{097f}').contains(&ch)));
+            assert!(!san_iast
+                .chars()
+                .any(|ch| ('\u{0900}'..='\u{097f}').contains(&ch)));
         }
     }
 }

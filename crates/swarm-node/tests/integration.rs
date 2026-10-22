@@ -1649,8 +1649,7 @@ fn failed_delivery_is_redelivered_after_peer_reconnects() {
 
     // First connection: a peer that gets the push-event but never acks
     // (the connection-cycling / silent-loss scenario from the wire).
-    let silent =
-        hand_speak_peer_hello_and_keep_connected(port_a, "zzz-retry-peer", 17788, None);
+    let silent = hand_speak_peer_hello_and_keep_connected(port_a, "zzz-retry-peer", 17788, None);
     let event_id = emit_event(port_a, "test-redeliver-event");
 
     // After ACK_TIMEOUT the delivery must be captured in the durable
@@ -1678,8 +1677,7 @@ fn failed_delivery_is_redelivered_after_peer_reconnects() {
     // Reconnect as the SAME node id, but this time a cooperative peer that
     // acks what it receives. `register_peer` must drain the queue and
     // re-push the lost event onto this fresh stream.
-    let mut conn =
-        hand_speak_peer_hello_and_keep_connected(port_a, "zzz-retry-peer", 17788, None);
+    let mut conn = hand_speak_peer_hello_and_keep_connected(port_a, "zzz-retry-peer", 17788, None);
     let mut line = String::new();
     let mut redelivered = false;
     for _ in 0..50 {
@@ -1704,10 +1702,17 @@ fn failed_delivery_is_redelivered_after_peer_reconnects() {
     // `(queued-retries ...)` section (the last, after `recent-failures`)
     // no longer lists it.
     let done = eventually(port_a, "(delivery-status)", Duration::from_secs(15), |r| {
-        !r.split("queued-retries").nth(1).unwrap_or("").contains(&event_id)
+        !r.split("queued-retries")
+            .nth(1)
+            .unwrap_or("")
+            .contains(&event_id)
     });
     assert!(
-        !done.split("queued-retries").nth(1).unwrap_or("").contains(&event_id),
+        !done
+            .split("queued-retries")
+            .nth(1)
+            .unwrap_or("")
+            .contains(&event_id),
         "an acked redelivery must clear the retry queue: {done}"
     );
 
@@ -1757,7 +1762,10 @@ fn p2p_presence_work_visibility_help_request_offer_and_reconnect() {
         port_a,
         "(emit (type work-state) (payload ((node agent-a) (repo sens) (task macro-semantics) (current-action \"auditing eq/macro value roundtrip\") (status working))))",
     );
-    assert!(announce.starts_with("(ok"), "A's work-state announce should succeed: {announce}");
+    assert!(
+        announce.starts_with("(ok"),
+        "A's work-state announce should succeed: {announce}"
+    );
 
     // P2P-WORK-VISIBILITY-PASS: B sees A's work-state, purely through
     // gossip/anti-entropy -- B never talked to A about this directly
@@ -1766,7 +1774,9 @@ fn p2p_presence_work_visibility_help_request_offer_and_reconnect() {
         r.contains("agent-a") && r.contains("macro-semantics")
     });
     assert!(
-        b_sees_a.contains("agent-a") && b_sees_a.contains("macro-semantics") && b_sees_a.contains("working"),
+        b_sees_a.contains("agent-a")
+            && b_sees_a.contains("macro-semantics")
+            && b_sees_a.contains("working"),
         "P2P-WORK-VISIBILITY-PASS failed: agent-b never saw agent-a's work-state: {b_sees_a}"
     );
 
@@ -1775,7 +1785,10 @@ fn p2p_presence_work_visibility_help_request_offer_and_reconnect() {
         port_a,
         "(emit (type help-request) (payload ((id request-x) (requester agent-a) (need \"need independent witness for macro value roundtrip\"))))",
     );
-    assert!(req.starts_with("(ok"), "A's help-request should succeed: {req}");
+    assert!(
+        req.starts_with("(ok"),
+        "A's help-request should succeed: {req}"
+    );
 
     // P2P-HELP-REQUEST-PASS: C sees the request.
     let c_sees_request = eventually(port_c, "(list-help)", Duration::from_secs(3), |r| {
@@ -1791,7 +1804,10 @@ fn p2p_presence_work_visibility_help_request_offer_and_reconnect() {
         port_c,
         "(emit (type help-offer) (payload ((request request-x) (agent agent-c) (capability testing))))",
     );
-    assert!(offer.starts_with("(ok"), "C's help-offer should succeed: {offer}");
+    assert!(
+        offer.starts_with("(ok"),
+        "C's help-offer should succeed: {offer}"
+    );
 
     // P2P-HELP-OFFER-PASS: A sees C's offer nested under its own request --
     // an offer is a proposal, not an assignment: this assertion only
@@ -1856,7 +1872,10 @@ fn compaction_preserves_work_state_and_help_requests() {
     let before_help = request(port, "(list-help)");
 
     let compacted = request(port, "(compact)");
-    assert!(compacted.starts_with("(ok"), "compact should succeed: {compacted}");
+    assert!(
+        compacted.starts_with("(ok"),
+        "compact should succeed: {compacted}"
+    );
 
     let after_work = request(port, "(list-work-state)");
     let after_help = request(port, "(list-help)");

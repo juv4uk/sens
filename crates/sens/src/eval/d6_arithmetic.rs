@@ -8,7 +8,8 @@
 //! with an exact ONE in the SAME admitted D24+ domain as the operand.
 
 use crate::{
-    BinaryNumber, Bit5, CoreD5, CoreDomainIdentity, Environment, ErrorKind, LanguageError, Span, Value,
+    BinaryNumber, Bit5, CoreD5, CoreDomainIdentity, Environment, ErrorKind, LanguageError, Span,
+    Value,
 };
 
 fn d5(bits: u8) -> CoreDomainIdentity {
@@ -39,7 +40,10 @@ pub(super) fn invoke(
         if args.len() != 1 {
             return Some(Err(LanguageError::new(
                 ErrorKind::Arity,
-                format!("{identity}: D6 INTEGERP expects 1 argument; received {}", args.len()),
+                format!(
+                    "{identity}: D6 INTEGERP expects 1 argument; received {}",
+                    args.len()
+                ),
                 span,
             )));
         }
@@ -102,9 +106,7 @@ mod tests {
         for i in 0..24 {
             bits[23 - i] = ((encoded >> i) & 1) as u8;
         }
-        Value::BinaryNumber(
-            BinaryNumber::from_numeric_domain_bits(24, &bits).unwrap()
-        )
+        Value::BinaryNumber(BinaryNumber::from_numeric_domain_bits(24, &bits).unwrap())
     }
 
     #[test]
@@ -119,7 +121,8 @@ mod tests {
 
         // D24 max-positive + 1 widens; all-ones is now D24(-1), not a maximum.
         let carried = invoke(add1, &[d24((1 << 23) - 1)], &env, Span::default())
-            .unwrap().unwrap();
+            .unwrap()
+            .unwrap();
         let Value::BinaryNumber(ref number) = carried else {
             panic!("D24 carry must stay an exact numeric domain word");
         };
@@ -131,25 +134,32 @@ mod tests {
         // After a D24 carry, ADD1 must continue in the new exact D48 domain.
         // The successor must not become a source literal, wrap, or stall.
         let resumed = invoke(add1, &[carried.clone()], &env, Span::default())
-            .unwrap().unwrap();
+            .unwrap()
+            .unwrap();
         let Value::BinaryNumber(ref resumed_number) = resumed else {
             panic!("D48 ADD1 after carry must remain a numeric-domain value");
         };
         assert_eq!(resumed_number.numeric_domain_width(), Some(48));
         let mut advanced_bits = next_bits.clone();
         advanced_bits[47] = 1; // 2^23 + 1, not a D24 or unqualified literal
-        assert_eq!(resumed_number.exact_numeric_domain_bits().unwrap(), advanced_bits);
+        assert_eq!(
+            resumed_number.exact_numeric_domain_bits().unwrap(),
+            advanced_bits
+        );
 
         // 0 - 1 is the ordinary D24 two's-complement word for -1.
         let negative = invoke(sub1, &[d24(0)], &env, Span::default())
-            .unwrap().unwrap();
+            .unwrap()
+            .unwrap();
         let Value::BinaryNumber(ref negative_word) = negative else {
             panic!("D24 SUB1 below zero must return a signed D24 word");
         };
         assert_eq!(negative_word.numeric_domain_width(), Some(24));
         assert_eq!(negative.to_string(), "-1");
         assert_eq!(
-            invoke(add1, &[negative], &env, Span::default()).unwrap().unwrap(),
+            invoke(add1, &[negative], &env, Span::default())
+                .unwrap()
+                .unwrap(),
             d24(0),
         );
     }
@@ -164,7 +174,9 @@ mod tests {
             .expect("D5 yields an exact noninteger fraction");
         assert!(matches!(fraction, Value::NumericComposition(_)));
         for (input, expected) in [
-            (d24(7), true), (d24(-7), true), (d24(0), true),
+            (d24(7), true),
+            (d24(-7), true),
+            (d24(0), true),
             (fraction, false),
             (Value::String(std::rc::Rc::from("7")), false),
             (Value::String(std::rc::Rc::from("#q2:111/1")), false),
@@ -172,11 +184,15 @@ mod tests {
             (Value::Rational(crate::Rational::integer(7)), false),
         ] {
             let output = invoke(integerp, &[input], &env, Span::default())
-                .expect("D6 INTEGERP resident").expect("D6 INTEGERP executes");
+                .expect("D6 INTEGERP resident")
+                .expect("D6 INTEGERP executes");
             assert_eq!(output.as_predicate_bit(), Some(expected));
         }
         assert_eq!(
-            invoke(integerp, &[], &env, Span::default()).unwrap().unwrap_err().kind,
+            invoke(integerp, &[], &env, Span::default())
+                .unwrap()
+                .unwrap_err()
+                .kind,
             ErrorKind::Arity
         );
     }
@@ -185,18 +201,20 @@ mod tests {
     fn add1_sub1_use_same_d24_numeric_domain_not_legacy_one() {
         let env = Environment::root();
         for (bits, expected) in [(0b001110, d24(8)), (0b001111, d24(6))] {
-            let identity = CoreDomainIdentity::D6(crate::CoreD6::from_word(
-                crate::Bit6::new(bits).unwrap(),
-            ));
+            let identity =
+                CoreDomainIdentity::D6(crate::CoreD6::from_word(crate::Bit6::new(bits).unwrap()));
             let actual = invoke(identity, &[d24(7)], &env, Span::default())
-                .unwrap().unwrap();
+                .unwrap()
+                .unwrap();
             assert_eq!(actual, expected);
             let blocked = invoke(
                 identity,
                 &[Value::Rational(crate::Rational::integer(7))],
                 &env,
                 Span::default(),
-            ).unwrap().unwrap_err();
+            )
+            .unwrap()
+            .unwrap_err();
             assert_eq!(blocked.kind, ErrorKind::Type);
         }
     }

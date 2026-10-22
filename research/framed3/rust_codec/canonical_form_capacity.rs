@@ -54,17 +54,21 @@ pub const CAPACITY_TABLES: &[(u32, u64, u64, u64)] = &[
 
 /// Структурна ємність для даної трит-довжини.
 pub fn structural_capacity(n: u32) -> Option<u64> {
-    CAPACITY_TABLES.iter().find(|(len, _, _, _)| *len == n).map(|(_, s, _, _)| *s)
+    CAPACITY_TABLES
+        .iter()
+        .find(|(len, _, _, _)| *len == n)
+        .map(|(_, s, _, _)| *s)
 }
 
 /// Канонічна ємність для даної трит-довжини та профілю.
 pub fn canonical_capacity(n: u32, profile: FormProfile) -> Option<u64> {
-    CAPACITY_TABLES.iter().find(|(len, _, _, _)| *len == n).map(|(_, _, c, s)| {
-        match profile {
+    CAPACITY_TABLES
+        .iter()
+        .find(|(len, _, _, _)| *len == n)
+        .map(|(_, _, c, s)| match profile {
             FormProfile::D3Profile => *s,
             FormProfile::FullProfile => *c,
-        }
-    })
+        })
 }
 
 /// Розмір блоку в байтах для даної трит-довжини.

@@ -25,7 +25,10 @@ pub struct WsmByteSpan {
 
 impl WsmByteSpan {
     pub const fn empty() -> Self {
-        Self { ptr: core::ptr::null(), len: 0 }
+        Self {
+            ptr: core::ptr::null(),
+            len: 0,
+        }
     }
 }
 
@@ -38,7 +41,10 @@ pub struct WsmMutableByteSpan {
 
 impl WsmMutableByteSpan {
     pub const fn empty() -> Self {
-        Self { ptr: core::ptr::null_mut(), len: 0 }
+        Self {
+            ptr: core::ptr::null_mut(),
+            len: 0,
+        }
     }
 }
 
@@ -115,15 +121,21 @@ pub extern "C" fn wsm_kernel_kind_name(kind: WsmKernelKind) -> *const c_char {
 mod tests {
     use super::*;
 
-    unsafe extern "C" fn ok_start(_: *mut c_void) -> WsmStatus { WsmStatus::Ok }
-    unsafe extern "C" fn ok_stop(_: *mut c_void) -> WsmStatus { WsmStatus::Ok }
+    unsafe extern "C" fn ok_start(_: *mut c_void) -> WsmStatus {
+        WsmStatus::Ok
+    }
+    unsafe extern "C" fn ok_stop(_: *mut c_void) -> WsmStatus {
+        WsmStatus::Ok
+    }
     unsafe extern "C" fn echo_exchange(
         _: *mut c_void,
         request: WsmKernelRequest,
         response: WsmMutableByteSpan,
         written: *mut usize,
     ) -> WsmStatus {
-        if written.is_null() { return WsmStatus::InvalidArgument; }
+        if written.is_null() {
+            return WsmStatus::InvalidArgument;
+        }
         if request.payload.len != 0 && request.payload.ptr.is_null() {
             return WsmStatus::InvalidArgument;
         }
@@ -133,10 +145,14 @@ mod tests {
             unsafe { core::slice::from_raw_parts(request.payload.ptr, request.payload.len) }
         };
         if response.len < input.len() {
-            unsafe { *written = input.len(); }
+            unsafe {
+                *written = input.len();
+            }
             return WsmStatus::BufferTooSmall;
         }
-        if !input.is_empty() && response.ptr.is_null() { return WsmStatus::InvalidArgument; }
+        if !input.is_empty() && response.ptr.is_null() {
+            return WsmStatus::InvalidArgument;
+        }
         unsafe {
             core::ptr::copy_nonoverlapping(input.as_ptr(), response.ptr, input.len());
             *written = input.len();
@@ -148,8 +164,12 @@ mod tests {
         _: WsmMutableByteSpan,
         written: *mut usize,
     ) -> WsmStatus {
-        if written.is_null() { return WsmStatus::InvalidArgument; }
-        unsafe { *written = 0; }
+        if written.is_null() {
+            return WsmStatus::InvalidArgument;
+        }
+        unsafe {
+            *written = 0;
+        }
         WsmStatus::Ok
     }
 
@@ -198,9 +218,15 @@ mod tests {
                 vt.context,
                 WsmKernelRequest {
                     semantic_id: 0b0000_0011,
-                    payload: WsmByteSpan { ptr: input.as_ptr(), len: input.len() },
+                    payload: WsmByteSpan {
+                        ptr: input.as_ptr(),
+                        len: input.len(),
+                    },
                 },
-                WsmMutableByteSpan { ptr: output.as_mut_ptr(), len: output.len() },
+                WsmMutableByteSpan {
+                    ptr: output.as_mut_ptr(),
+                    len: output.len(),
+                },
                 &mut written,
             )
         };

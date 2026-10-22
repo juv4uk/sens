@@ -478,7 +478,6 @@ impl Evaluator {
     }
 }
 
-
 // -----------------------------------------------------------------------------
 // Semantic-neutral C ABI adapter
 // -----------------------------------------------------------------------------
@@ -490,8 +489,8 @@ impl Evaluator {
 
 use std::ffi::c_void;
 use wsm_kernel_c_abi::{
-    WsmKernelKind, WsmKernelRequest, WsmKernelVTable, WsmMutableByteSpan, WsmStatus,
-    WSM_KERNEL_ABI_VERSION,
+    WSM_KERNEL_ABI_VERSION, WsmKernelKind, WsmKernelRequest, WsmKernelVTable, WsmMutableByteSpan,
+    WsmStatus,
 };
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
@@ -671,7 +670,6 @@ unsafe extern "C" fn datalog_exchange(
     }
     WsmStatus::Ok
 }
-
 
 #[cfg(test)]
 mod tests {

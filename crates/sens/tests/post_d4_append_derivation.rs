@@ -32,8 +32,7 @@ fn session_with_derived_append() -> Session {
         );
     }
 
-    eval_program(DERIVED_APPEND, &mut session)
-        .expect("independent structural APPEND should load");
+    eval_program(DERIVED_APPEND, &mut session).expect("independent structural APPEND should load");
     session
 }
 
@@ -44,17 +43,10 @@ fn eval_in(session: &mut Session, source: &str) -> String {
         .to_string()
 }
 
-fn assert_matches_canonical(
-    session: &mut Session,
-    left: &str,
-    right: &str,
-    expected: &str,
-) {
+fn assert_matches_canonical(session: &mut Session, left: &str, right: &str, expected: &str) {
     let derived = eval_in(
         session,
-        &format!(
-            "(приєднати-структурно (00000001 {left}) (00000001 {right}))"
-        ),
+        &format!("(приєднати-структурно (00000001 {left}) (00000001 {right}))"),
     );
     let canonical = eval_in(
         session,
@@ -72,21 +64,11 @@ fn append_is_reproducible_by_structural_recursion() {
     assert_matches_canonical(&mut session, "()", "(a b)", "(a b)");
     assert_matches_canonical(&mut session, "(a)", "(b c)", "(a b c)");
     assert_matches_canonical(&mut session, "(a b)", "()", "(a b)");
-    assert_matches_canonical(
-        &mut session,
-        "((a b) c)",
-        "(d)",
-        "((a b) c d)",
-    );
+    assert_matches_canonical(&mut session, "((a b) c)", "(d)", "((a b) c d)");
 
     // APPEND must not inspect or normalize the right payload. Rebuilding only
     // the left spine naturally preserves an improper/dotted right tail.
-    assert_matches_canonical(
-        &mut session,
-        "(a b)",
-        "(c . d)",
-        "(a b c . d)",
-    );
+    assert_matches_canonical(&mut session, "(a b)", "(c . d)", "(a b c . d)");
 }
 
 #[test]
@@ -110,12 +92,12 @@ fn append_needs_no_cons_family_generator_semantics() {
         "(приєднати-структурно (00000001 (a . b)) (00000001 (c)))",
         &mut session,
     );
-    let canonical = eval_program(
-        "(append (00000001 (a . b)) (00000001 (c)))",
-        &mut session,
-    );
+    let canonical = eval_program("(append (00000001 (a . b)) (00000001 (c)))", &mut session);
 
-    assert!(derived.is_err(), "derived APPEND accepted improper left spine");
+    assert!(
+        derived.is_err(),
+        "derived APPEND accepted improper left spine"
+    );
     assert!(
         canonical.is_err(),
         "canonical APPEND accepted improper left spine unexpectedly"

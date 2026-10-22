@@ -10,12 +10,12 @@
 //! this 40-bit research space.
 
 use crate::frame3_micro_enumerator::{
-    Frame3MicroEnumerateError, CAP_ATOM, CAP_CAR, CAP_CDR, CAP_COND, CAP_CONS,
-    CAP_EQ, CAP_LAMBDA, CAP_QUOTE,
+    Frame3MicroEnumerateError, CAP_ATOM, CAP_CAR, CAP_CDR, CAP_COND, CAP_CONS, CAP_EQ, CAP_LAMBDA,
+    CAP_QUOTE,
 };
 use crate::{
-    Bija3, Bit1, Bit3, Bit4, CoreD4, CoreDomainIdentity, DomainIdentity, ErrorKind, Expr,
-    ExprKind, LanguageError, PredicateBit, Session, Span, Value,
+    Bija3, Bit1, Bit3, Bit4, CoreD4, CoreDomainIdentity, DomainIdentity, ErrorKind, Expr, ExprKind,
+    LanguageError, PredicateBit, Session, Span, Value,
 };
 use std::{rc::Rc, sync::OnceLock};
 
@@ -171,7 +171,11 @@ impl F3m5LambdaExpr {
             Self::EqAtom(a, b) => CAP_EQ | CAP_ATOM | a.capability_mask() | b.capability_mask(),
             Self::Lambda(x) => CAP_LAMBDA | x.capability_mask(),
             Self::IfAtom(a, b, c) => {
-                CAP_COND | CAP_ATOM | a.capability_mask() | b.capability_mask() | c.capability_mask()
+                CAP_COND
+                    | CAP_ATOM
+                    | a.capability_mask()
+                    | b.capability_mask()
+                    | c.capability_mask()
             }
         }
     }
@@ -188,13 +192,25 @@ impl F3m5LambdaExpr {
             Self::Atom(x) => format!("ATOM({})", x.human_projection()),
             Self::Cons(a, b) => format!("CONS({},{})", a.human_projection(), b.human_projection()),
             Self::CarCons(a, b) => {
-                format!("CAR(CONS({},{}))", a.human_projection(), b.human_projection())
+                format!(
+                    "CAR(CONS({},{}))",
+                    a.human_projection(),
+                    b.human_projection()
+                )
             }
             Self::CdrCons(a, b) => {
-                format!("CDR(CONS({},{}))", a.human_projection(), b.human_projection())
+                format!(
+                    "CDR(CONS({},{}))",
+                    a.human_projection(),
+                    b.human_projection()
+                )
             }
             Self::EqAtom(a, b) => {
-                format!("EQ(ATOM({}),ATOM({}))", a.human_projection(), b.human_projection())
+                format!(
+                    "EQ(ATOM({}),ATOM({}))",
+                    a.human_projection(),
+                    b.human_projection()
+                )
             }
             Self::Lambda(x) => format!("λ.{}", x.human_projection()),
             Self::IfAtom(a, b, c) => format!(
@@ -245,7 +261,12 @@ fn unrank_old(
 
     let block = c[n - 1][d][0];
     if rank < block {
-        return Ok(F3m5LambdaExpr::Atom(Box::new(unrank_old(n - 1, d, rank, c)?)));
+        return Ok(F3m5LambdaExpr::Atom(Box::new(unrank_old(
+            n - 1,
+            d,
+            rank,
+            c,
+        )?)));
     }
     rank -= block;
 
@@ -290,11 +311,7 @@ fn unrank_old(
     Err(Frame3MicroEnumerateError::RankOutOfRange)
 }
 
-fn rank_old(
-    e: &F3m5LambdaExpr,
-    d: usize,
-    c: &Counts,
-) -> Result<u128, Frame3MicroEnumerateError> {
+fn rank_old(e: &F3m5LambdaExpr, d: usize, c: &Counts) -> Result<u128, Frame3MicroEnumerateError> {
     if e.contains_extension() {
         return Err(Frame3MicroEnumerateError::RankOutOfRange);
     }
@@ -376,7 +393,12 @@ fn unrank_new(
 
     let block = c[n - 1][d][1];
     if rank < block {
-        return Ok(F3m5LambdaExpr::Atom(Box::new(unrank_new(n - 1, d, rank, c)?)));
+        return Ok(F3m5LambdaExpr::Atom(Box::new(unrank_new(
+            n - 1,
+            d,
+            rank,
+            c,
+        )?)));
     }
     rank -= block;
 
@@ -403,8 +425,16 @@ fn unrank_new(
                 if rank < block {
                     let ar = rank / rc;
                     let br = rank % rc;
-                    let a = if ln { unrank_new(l, d, ar, c)? } else { unrank_old(l, d, ar, c)? };
-                    let b = if rn { unrank_new(r, d, br, c)? } else { unrank_old(r, d, br, c)? };
+                    let a = if ln {
+                        unrank_new(l, d, ar, c)?
+                    } else {
+                        unrank_old(l, d, ar, c)?
+                    };
+                    let b = if rn {
+                        unrank_new(r, d, br, c)?
+                    } else {
+                        unrank_old(r, d, br, c)?
+                    };
                     return Ok(match family {
                         0 => F3m5LambdaExpr::Cons(Box::new(a), Box::new(b)),
                         1 => F3m5LambdaExpr::CarCons(Box::new(a), Box::new(b)),
@@ -424,8 +454,16 @@ fn unrank_new(
             if rank < block {
                 let ar = rank / rc;
                 let br = rank % rc;
-                let a = if ln { unrank_new(l, d, ar, c)? } else { unrank_old(l, d, ar, c)? };
-                let b = if rn { unrank_new(r, d, br, c)? } else { unrank_old(r, d, br, c)? };
+                let a = if ln {
+                    unrank_new(l, d, ar, c)?
+                } else {
+                    unrank_old(l, d, ar, c)?
+                };
+                let b = if rn {
+                    unrank_new(r, d, br, c)?
+                } else {
+                    unrank_old(r, d, br, c)?
+                };
                 return Ok(F3m5LambdaExpr::EqAtom(Box::new(a), Box::new(b)));
             }
             rank -= block;
@@ -469,11 +507,7 @@ fn unrank_new(
     Err(Frame3MicroEnumerateError::RankOutOfRange)
 }
 
-fn rank_new(
-    e: &F3m5LambdaExpr,
-    d: usize,
-    c: &Counts,
-) -> Result<u128, Frame3MicroEnumerateError> {
+fn rank_new(e: &F3m5LambdaExpr, d: usize, c: &Counts) -> Result<u128, Frame3MicroEnumerateError> {
     if !e.contains_extension() {
         return Err(Frame3MicroEnumerateError::RankOutOfRange);
     }
@@ -517,8 +551,16 @@ fn rank_new(
                         && l == a.node_count()
                         && (ln, rn) == (a.contains_extension(), b.contains_extension())
                     {
-                        let ar = if ln { rank_new(a, d, c)? } else { rank_old(a, d, c)? };
-                        let br = if rn { rank_new(b, d, c)? } else { rank_old(b, d, c)? };
+                        let ar = if ln {
+                            rank_new(a, d, c)?
+                        } else {
+                            rank_old(a, d, c)?
+                        };
+                        let br = if rn {
+                            rank_new(b, d, c)?
+                        } else {
+                            rank_old(b, d, c)?
+                        };
                         rank = add(rank, mul(ar, c[r][d][usize::from(rn)])?)?;
                         return add(rank, br);
                     }
@@ -536,8 +578,16 @@ fn rank_new(
                 if l == a.node_count()
                     && (ln, rn) == (a.contains_extension(), b.contains_extension())
                 {
-                    let ar = if ln { rank_new(a, d, c)? } else { rank_old(a, d, c)? };
-                    let br = if rn { rank_new(b, d, c)? } else { rank_old(b, d, c)? };
+                    let ar = if ln {
+                        rank_new(a, d, c)?
+                    } else {
+                        rank_old(a, d, c)?
+                    };
+                    let br = if rn {
+                        rank_new(b, d, c)?
+                    } else {
+                        rank_old(b, d, c)?
+                    };
                     rank = add(rank, mul(ar, c[r][d][usize::from(rn)])?)?;
                     return add(rank, br);
                 }
@@ -567,7 +617,11 @@ fn rank_new(
                     )?;
                     if (t, y, zz) == actual_nodes && mask == actual_mask {
                         let rr = |x: &F3m5LambdaExpr, is_new| {
-                            if is_new { rank_new(x, d, c) } else { rank_old(x, d, c) }
+                            if is_new {
+                                rank_new(x, d, c)
+                            } else {
+                                rank_old(x, d, c)
+                            }
                         };
                         let yz = mul(c[y][d][usize::from(yn)], c[zz][d][usize::from(zn)])?;
                         rank = add(rank, mul(rr(a, tn)?, yz)?)?;
@@ -651,15 +705,19 @@ fn eval_env(
             let _ = eval_env(a, env)?;
             eval_env(b, env)
         }
-        F3m5LambdaExpr::EqAtom(a, b) => {
-            Ok(F3m5LambdaValue::Bit(atom(&eval_env(a, env)?) == atom(&eval_env(b, env)?)))
-        }
+        F3m5LambdaExpr::EqAtom(a, b) => Ok(F3m5LambdaValue::Bit(
+            atom(&eval_env(a, env)?) == atom(&eval_env(b, env)?),
+        )),
         F3m5LambdaExpr::Lambda(body) => Ok(F3m5LambdaValue::Closure {
             body: body.clone(),
             env: env.to_vec(),
         }),
         F3m5LambdaExpr::IfAtom(test, yes, no) => {
-            if atom(&eval_env(test, env)?) { eval_env(yes, env) } else { eval_env(no, env) }
+            if atom(&eval_env(test, env)?) {
+                eval_env(yes, env)
+            } else {
+                eval_env(no, env)
+            }
         }
     }
 }
@@ -680,7 +738,6 @@ pub fn apply_candidate(
     bound.extend(env);
     eval_env(&body, &bound)
 }
-
 
 /// Internal evaluator-only binder token used solely to allocate one call-frame
 /// slot for a nameless lambda.  F3M-5λ semantic identity never contains this
@@ -724,10 +781,7 @@ fn runtime_lambda(body: Expr) -> Expr {
     ))
 }
 
-fn lower_runtime(
-    expression: &F3m5LambdaExpr,
-    lexical_depth: usize,
-) -> Result<Expr, LanguageError> {
+fn lower_runtime(expression: &F3m5LambdaExpr, lexical_depth: usize) -> Result<Expr, LanguageError> {
     Ok(match expression {
         F3m5LambdaExpr::Zero => runtime_d1(false),
         F3m5LambdaExpr::One => runtime_d1(true),
@@ -739,9 +793,7 @@ fn lower_runtime(
             if usize::from(*index) >= lexical_depth {
                 return Err(LanguageError::new(
                     ErrorKind::InvalidForm,
-                    format!(
-                        "F3M-5λ BOUND({index}) is free at lexical depth {lexical_depth}"
-                    ),
+                    format!("F3M-5λ BOUND({index}) is free at lexical depth {lexical_depth}"),
                     Span::default(),
                 ));
             }
@@ -785,9 +837,7 @@ fn lower_runtime(
             let right = runtime_d3(0b010, vec![lower_runtime(right, lexical_depth)?]);
             runtime_d3(0b101, vec![left, right])
         }
-        F3m5LambdaExpr::Lambda(body) => {
-            runtime_lambda(lower_runtime(body, lexical_depth + 1)?)
-        }
+        F3m5LambdaExpr::Lambda(body) => runtime_lambda(lower_runtime(body, lexical_depth + 1)?),
         F3m5LambdaExpr::IfAtom(test, yes, no) => {
             let predicate = runtime_d3(0b010, vec![lower_runtime(test, lexical_depth)?]);
             let yes_clause = runtime_list(vec![predicate, lower_runtime(yes, lexical_depth)?]);
@@ -804,9 +854,7 @@ fn lower_runtime(
 /// The only temporary string is the evaluator-private lambda-list sentinel
 /// required by the current Closure arity/frame allocator.  It is never
 /// referenced by the body and therefore cannot affect semantic identity.
-pub fn lower_candidate_to_sens_expr(
-    expression: &F3m5LambdaExpr,
-) -> Result<Expr, LanguageError> {
+pub fn lower_candidate_to_sens_expr(expression: &F3m5LambdaExpr) -> Result<Expr, LanguageError> {
     lower_runtime(expression, 0)
 }
 
@@ -887,7 +935,10 @@ mod tests {
 
         let o = apply_candidate(eval_candidate(&outer).unwrap(), one.clone()).unwrap();
         assert_eq!(apply_candidate(o, zero).unwrap(), one);
-        assert_ne!(encode_candidate(&nearest).unwrap(), encode_candidate(&outer).unwrap());
+        assert_ne!(
+            encode_candidate(&nearest).unwrap(),
+            encode_candidate(&outer).unwrap()
+        );
     }
 
     #[test]
@@ -898,7 +949,15 @@ mod tests {
 
     #[test]
     fn stratified_full_window_roundtrip() {
-        for value in [0u64, 1, 6, 0x12_34_56_78, 0x80_00_00_00_00, 0xde_ad_be_ef_01, 0xff_ff_ff_ff_ff] {
+        for value in [
+            0u64,
+            1,
+            6,
+            0x12_34_56_78,
+            0x80_00_00_00_00,
+            0xde_ad_be_ef_01,
+            0xff_ff_ff_ff_ff,
+        ] {
             let p = [
                 ((value >> 32) & 0xff) as u8,
                 ((value >> 24) & 0xff) as u8,
@@ -960,18 +1019,16 @@ mod tests {
                 .map(|byte| format!("{byte:02X}"))
                 .collect::<String>()
         };
-        eprintln!(
-            "F3M5L_I={}\tK={}\tKI={}",
-            hex(pi),
-            hex(pk),
-            hex(pki)
-        );
+        eprintln!("F3M5L_I={}\tK={}\tKI={}", hex(pi), hex(pk), hex(pki));
     }
 
     #[test]
     fn five_byte_lambda_behavioral_trophy_catalog() {
         fn hex(payload: [u8; 5]) -> String {
-            payload.iter().map(|b| format!("{b:02X}")).collect::<String>()
+            payload
+                .iter()
+                .map(|b| format!("{b:02X}"))
+                .collect::<String>()
         }
         fn trophy(name: &str, expr: F3m5LambdaExpr) -> [u8; 5] {
             let payload = encode_candidate(&expr).expect("trophy must fit F3M-5λ");
@@ -1091,7 +1148,8 @@ mod tests {
             apply_candidate(eq1, zero.clone()).unwrap(),
             F3m5LambdaValue::Bit(true)
         );
-        let eq2 = apply_candidate(eval_candidate(&same_atom_kind).unwrap(), pair_value.clone()).unwrap();
+        let eq2 =
+            apply_candidate(eval_candidate(&same_atom_kind).unwrap(), pair_value.clone()).unwrap();
         assert_eq!(
             apply_candidate(eq2, one.clone()).unwrap(),
             F3m5LambdaValue::Bit(false)
@@ -1129,7 +1187,10 @@ mod tests {
             (runtime_d1(false), "0"),
             (runtime_d1(true), "1"),
             (runtime_list(vec![]), "()"),
-            (runtime_d3(0b111, vec![runtime_d1(true), runtime_list(vec![])]), "(1)"),
+            (
+                runtime_d3(0b111, vec![runtime_d1(true), runtime_list(vec![])]),
+                "(1)",
+            ),
         ] {
             let call = runtime_list(vec![lowered.clone(), argument]);
             let session = Session::bare();
@@ -1179,8 +1240,10 @@ mod tests {
     fn tracked_five_byte_lambda_trophies_are_exact_physical_payloads() {
         const I: &[u8; 5] = include_bytes!("../../../research/framed3/fixtures/f3m5-lambda-i.f3m");
         const K: &[u8; 5] = include_bytes!("../../../research/framed3/fixtures/f3m5-lambda-k.f3m");
-        const KI: &[u8; 5] = include_bytes!("../../../research/framed3/fixtures/f3m5-lambda-ki.f3m");
-        const ALL: &[u8; 5] = include_bytes!("../../../research/framed3/fixtures/f3m5-all-d1-d3-lambda.f3m");
+        const KI: &[u8; 5] =
+            include_bytes!("../../../research/framed3/fixtures/f3m5-lambda-ki.f3m");
+        const ALL: &[u8; 5] =
+            include_bytes!("../../../research/framed3/fixtures/f3m5-all-d1-d3-lambda.f3m");
 
         assert_eq!(*I, [0x00, 0x00, 0x00, 0x00, 0x00]);
         assert_eq!(*K, [0x00, 0x00, 0x00, 0x00, 0x10]);
@@ -1192,7 +1255,10 @@ mod tests {
         let ki = decode_candidate(*KI).expect("tracked KI");
         let all = decode_candidate(*ALL).expect("tracked all-capability witness");
 
-        assert_eq!(i, F3m5LambdaExpr::Lambda(Box::new(F3m5LambdaExpr::Bound(0))));
+        assert_eq!(
+            i,
+            F3m5LambdaExpr::Lambda(Box::new(F3m5LambdaExpr::Bound(0)))
+        );
         assert_eq!(encode_candidate(&i).unwrap(), *I);
         assert_eq!(encode_candidate(&k).unwrap(), *K);
         assert_eq!(encode_candidate(&ki).unwrap(), *KI);
@@ -1201,7 +1267,10 @@ mod tests {
 
         let one = F3m5LambdaValue::Bit(true);
         let zero = F3m5LambdaValue::Bit(false);
-        assert_eq!(apply_candidate(eval_candidate(&i).unwrap(), one.clone()).unwrap(), one);
+        assert_eq!(
+            apply_candidate(eval_candidate(&i).unwrap(), one.clone()).unwrap(),
+            one
+        );
         let k1 = apply_candidate(eval_candidate(&k).unwrap(), one.clone()).unwrap();
         assert_eq!(apply_candidate(k1, zero.clone()).unwrap(), one);
         let ki1 = apply_candidate(eval_candidate(&ki).unwrap(), one).unwrap();
@@ -1212,8 +1281,7 @@ mod tests {
     fn alpha_equivalent_surface_names_collapse_to_one_nameless_identity() {
         // The candidate has no symbol/name constructor for binders at all:
         // λx.x, λy.y and λfoo.foo all lower to this single closed term.
-        let canonical_identity =
-            F3m5LambdaExpr::Lambda(Box::new(F3m5LambdaExpr::Bound(0)));
+        let canonical_identity = F3m5LambdaExpr::Lambda(Box::new(F3m5LambdaExpr::Bound(0)));
         assert_eq!(canonical_identity.human_projection(), "λ.BOUND(0)");
         assert_eq!(encode_candidate(&canonical_identity).unwrap(), [0; 5]);
     }

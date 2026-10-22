@@ -1,8 +1,8 @@
 //! #3379 — exact D5:10101 REVERSE-ONTO mechanism witness.
 
 use sens::{
-    eval_parsed_expressions, eval_program, load_core_library, parse, Bit5, CoreD5,
-    DomainIdentity, Expr, ExprKind, Session, Span,
+    eval_parsed_expressions, eval_program, load_core_library, parse, Bit5, CoreD5, DomainIdentity,
+    Expr, ExprKind, Session, Span,
 };
 
 fn exact_reverse_onto(arguments_source: &str) -> String {
@@ -32,10 +32,7 @@ fn exact_reverse_onto(arguments_source: &str) -> String {
 
 #[test]
 fn reverse_onto_executes_from_exact_d5_identity() {
-    assert_eq!(
-        exact_reverse_onto("'(a b) '(c d)"),
-        "(b a c d)"
-    );
+    assert_eq!(exact_reverse_onto("'(a b) '(c d)"), "(b a c d)");
 }
 
 #[test]
@@ -44,13 +41,10 @@ fn compatibility_alias_and_exact_d5_share_behavior() {
 
     let mut session = Session::default();
     load_core_library(&mut session).expect("active Core should load");
-    let compatibility = eval_program(
-        "(reverse-onto (quote (a b c)) (quote (z)))",
-        &mut session,
-    )
-    .expect("compatibility alias should remain usable")
-    .value
-    .to_string();
+    let compatibility = eval_program("(reverse-onto (quote (a b c)) (quote (z)))", &mut session)
+        .expect("compatibility alias should remain usable")
+        .value
+        .to_string();
 
     assert_eq!(exact, compatibility);
     assert_eq!(exact, "(c b a z)");

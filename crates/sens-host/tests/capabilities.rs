@@ -4,8 +4,8 @@
 //! registry. Public `process-run` is now a Lisp wrapper over `process-run-raw`.
 
 use sens::{
-    eval_program, load_core_library, load_fs_library, load_process_library, Environment,
-    ErrorKind, Exactness, Session, Value,
+    eval_program, load_core_library, load_fs_library, load_process_library, Environment, ErrorKind,
+    Exactness, Session, Value,
 };
 use sens_host::install;
 
@@ -71,10 +71,8 @@ fn write_file_then_read_file_round_trips_the_same_content() {
 // Python-перевірку імен. Іменований Lisp-читач зберігає I/O та D1-відмови.
 #[test]
 fn ukrainian_fs_named_reader_roundtrips_and_rejects_wrong_arity() {
-    let path = std::env::temp_dir().join(format!(
-        "sens-ukr-fs-{}-roundtrip.txt",
-        std::process::id()
-    ));
+    let path =
+        std::env::temp_dir().join(format!("sens-ukr-fs-{}-roundtrip.txt", std::process::id()));
     let path_str = path
         .to_str()
         .expect("temporary FS path must be valid UTF-8")
@@ -88,11 +86,8 @@ fn ukrainian_fs_named_reader_roundtrips_and_rejects_wrong_arity() {
     .expect("українська функція записати-файл повинна виконатися у SENS");
     assert_eq!(written.value, Value::String(content.into()));
 
-    let read = eval_program(
-        &format!(r#"(читати-файл "{path_str}")"#),
-        &mut session,
-    )
-    .expect("іменоване українське читати-файл повинно виконатися у SENS");
+    let read = eval_program(&format!(r#"(читати-файл "{path_str}")"#), &mut session)
+        .expect("іменоване українське читати-файл повинно виконатися у SENS");
     assert_eq!(read.value, Value::String(content.into()));
 
     let error = eval_program("(читати-файл)", &mut session)
@@ -145,8 +140,11 @@ fn write_file_rejects_a_non_string_content_argument() {
 
 #[test]
 fn write_file_wrong_arity_is_an_arity_error() {
-    let error = eval_program(r#"(write-file "only-a-path.txt")"#, &mut capability_session())
-        .expect_err("write-file with one argument must fail named, not panic");
+    let error = eval_program(
+        r#"(write-file "only-a-path.txt")"#,
+        &mut capability_session(),
+    )
+    .expect_err("write-file with one argument must fail named, not panic");
     assert_eq!(error.kind, ErrorKind::Arity);
 }
 
@@ -291,11 +289,8 @@ fn read_file_bytes_wrong_arity_is_an_arity_error() {
 #[test]
 fn process_run_is_unrestricted_in_a_native_root_session() {
     let mut session = process_session(Environment::root());
-    let result = eval_program(
-        r#"(process-run "git" (quote ("--version")))"#,
-        &mut session,
-    )
-    .expect("the trusted native root session should run a named program");
+    let result = eval_program(r#"(process-run "git" (quote ("--version")))"#, &mut session)
+        .expect("the trusted native root session should run a named program");
     let Value::Pair(ref exit_code, ref rest) = result.value else {
         panic!("process-run should return a 3-element list");
     };
@@ -311,9 +306,8 @@ fn process_run_is_unrestricted_in_a_native_root_session() {
 
 #[test]
 fn process_run_succeeds_for_an_explicitly_allowed_program() {
-    let mut session = process_session(
-        Environment::root().with_process_allowlist(vec!["git".to_string()]),
-    );
+    let mut session =
+        process_session(Environment::root().with_process_allowlist(vec!["git".to_string()]));
     let source = r#"(process-run "git" (quote ("--version")))"#;
     let result =
         eval_program(source, &mut session).expect("an explicitly allowed program should run");
@@ -340,9 +334,8 @@ fn process_run_is_deny_all_for_an_explicit_empty_allowlist() {
 
 #[test]
 fn process_run_rejects_a_program_not_on_the_allowlist() {
-    let mut session = process_session(
-        Environment::root().with_process_allowlist(vec!["git".to_string()]),
-    );
+    let mut session =
+        process_session(Environment::root().with_process_allowlist(vec!["git".to_string()]));
     let error = eval_program(
         r#"(process-run "cmd" (quote ("/C" "echo" "hi")))"#,
         &mut session,
@@ -353,9 +346,8 @@ fn process_run_rejects_a_program_not_on_the_allowlist() {
 
 #[test]
 fn process_run_rejects_a_non_string_program() {
-    let mut session = process_session(
-        Environment::root().with_process_allowlist(vec!["git".to_string()]),
-    );
+    let mut session =
+        process_session(Environment::root().with_process_allowlist(vec!["git".to_string()]));
     let error = eval_program("(process-run 42 (list \"x\"))", &mut session)
         .expect_err("a non-string program name must fail named, not panic");
     assert_eq!(error.kind, ErrorKind::Type);
@@ -363,9 +355,8 @@ fn process_run_rejects_a_non_string_program() {
 
 #[test]
 fn process_run_rejects_a_non_list_args_argument() {
-    let mut session = process_session(
-        Environment::root().with_process_allowlist(vec!["git".to_string()]),
-    );
+    let mut session =
+        process_session(Environment::root().with_process_allowlist(vec!["git".to_string()]));
     let error = eval_program(r#"(process-run "git" "not-a-list")"#, &mut session)
         .expect_err("a non-list args argument must fail named, not panic");
     assert_eq!(error.kind, ErrorKind::Type);
@@ -373,9 +364,8 @@ fn process_run_rejects_a_non_list_args_argument() {
 
 #[test]
 fn process_run_rejects_a_non_string_element_in_args() {
-    let mut session = process_session(
-        Environment::root().with_process_allowlist(vec!["git".to_string()]),
-    );
+    let mut session =
+        process_session(Environment::root().with_process_allowlist(vec!["git".to_string()]));
     let error = eval_program("(process-run \"git\" (quote (42)))", &mut session)
         .expect_err("a non-string element in args must fail named, not panic");
     assert_eq!(error.kind, ErrorKind::Type);
@@ -383,9 +373,8 @@ fn process_run_rejects_a_non_string_element_in_args() {
 
 #[test]
 fn process_run_wrong_arity_is_an_arity_error() {
-    let mut session = process_session(
-        Environment::root().with_process_allowlist(vec!["git".to_string()]),
-    );
+    let mut session =
+        process_session(Environment::root().with_process_allowlist(vec!["git".to_string()]));
     let error = eval_program(r#"(process-run "git")"#, &mut session)
         .expect_err("process-run with one argument must fail named, not panic");
     assert_eq!(error.kind, ErrorKind::Arity);

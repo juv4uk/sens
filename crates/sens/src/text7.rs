@@ -175,9 +175,8 @@ impl Text7 {
                 .expect("validated W7 offset remains inside payload");
             cells.push(word.packed_bits());
         }
-        Self::from_cells(cells).map_err(|_| {
-            unreachable!("Bit7 read cannot produce a value wider than seven bits")
-        })
+        Self::from_cells(cells)
+            .map_err(|_| unreachable!("Bit7 read cannot produce a value wider than seven bits"))
     }
 
     /// Project every Text7 cell to an exact W7 source word.
@@ -378,9 +377,10 @@ mod tests {
         assert_eq!(cells.cells(), &(0u8..=127).collect::<Vec<_>>());
         assert_eq!(cells.to_ascii_projection(), ascii);
         assert_eq!(cells.to_source_words().len(), 128);
-        assert!(cells.to_source_words().iter().all(
-            |word| matches!(word, BinarySourceWord::W7(_))
-        ));
+        assert!(cells
+            .to_source_words()
+            .iter()
+            .all(|word| matches!(word, BinarySourceWord::W7(_))));
         let packed = cells.to_packed_w7();
         assert_eq!(packed.bit_len(), 128 * 7);
         assert_eq!(packed.byte_len(), 112);
@@ -403,10 +403,20 @@ mod tests {
         let physical = name.to_packed_w7();
         assert_eq!(physical.bit_len(), 56);
         assert_eq!(physical.byte_len(), 7);
-        assert_eq!(physical.bytes(), &[0xd3, 0x93, 0x2e, 0xee, 0x9a, 0x7a, 0x79]);
-        assert_eq!(Text7::from_packed_w7(&physical).unwrap().to_ascii_projection(), "identity");
+        assert_eq!(
+            physical.bytes(),
+            &[0xd3, 0x93, 0x2e, 0xee, 0x9a, 0x7a, 0x79]
+        );
+        assert_eq!(
+            Text7::from_packed_w7(&physical)
+                .unwrap()
+                .to_ascii_projection(),
+            "identity"
+        );
 
-        let unaligned = Text7::from_ascii_projection("value").unwrap().to_packed_w7();
+        let unaligned = Text7::from_ascii_projection("value")
+            .unwrap()
+            .to_packed_w7();
         assert_eq!(unaligned.bit_len(), 35);
         assert_eq!(unaligned.bytes(), &[0xed, 0x87, 0x67, 0x5c, 0xa0]);
         assert_eq!(unaligned.valid_bits_in_last_byte(), 3);
@@ -425,11 +435,20 @@ mod tests {
     fn d7_v2_unicode_requires_explicit_non_ascii_keyboard_projection() {
         for source in ["ї", "ґ", "क", "🙂", "aї"] {
             let error = Text7::from_ascii_projection(source).unwrap_err();
-            let index = source.as_bytes().iter().position(|byte| *byte >= 128).unwrap();
+            let index = source
+                .as_bytes()
+                .iter()
+                .position(|byte| *byte >= 128)
+                .unwrap();
             assert_eq!(error.index(), index);
             assert_eq!(error.packed_byte(), source.as_bytes()[index]);
         }
-        assert_eq!(Text7::from_ascii_projection("a'b").unwrap().to_ascii_projection(), "a'b");
+        assert_eq!(
+            Text7::from_ascii_projection("a'b")
+                .unwrap()
+                .to_ascii_projection(),
+            "a'b"
+        );
         assert_eq!(Text7::from_ascii_projection("").unwrap().len(), 0);
     }
 

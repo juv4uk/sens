@@ -11,10 +11,9 @@
 
 use sens::{
     compiler_evidence_canonical_bytes, compiler_evidence_from_canonical_bytes,
-    compiler_program_artifact_from_sens, lower_program,
-    lowered_program_to_exact_data, parse_canonical_binary,
-    parse_mixed_exact_domain, sha256_source, verify_compiler_program_artifact_from_sens,
-    wire_decode_program, wire_encode_program, Value,
+    compiler_program_artifact_from_sens, lower_program, lowered_program_to_exact_data,
+    parse_canonical_binary, parse_mixed_exact_domain, sha256_source,
+    verify_compiler_program_artifact_from_sens, wire_decode_program, wire_encode_program, Value,
 };
 use sens_cli::zig_transport::{decode_t5_exact_words, encode_t5_exact_words};
 use std::fs::{self, OpenOptions};
@@ -30,16 +29,16 @@ const MAX_INPUT_BYTES: u64 = 64 * 1024 * 1024;
 // boundary; SENS Value (Rc-backed) never becomes Send or an authority table.
 const SENS_COMPILER_STACK_BYTES: usize = 64 * 1024 * 1024;
 
-fn on_compiler_stack<T: Send>(
-    operation: impl FnOnce() -> T + Send,
-) -> Result<T, String> {
+fn on_compiler_stack<T: Send>(operation: impl FnOnce() -> T + Send) -> Result<T, String> {
     std::thread::scope(|scope| {
         let worker = std::thread::Builder::new()
             .name("sens-compiler-transport".to_owned())
             .stack_size(SENS_COMPILER_STACK_BYTES)
             .spawn_scoped(scope, operation)
             .map_err(|error| format!("cannot start SENS compiler worker: {error}"))?;
-        worker.join().map_err(|_| "SENS compiler worker panicked".to_owned())
+        worker
+            .join()
+            .map_err(|_| "SENS compiler worker panicked".to_owned())
     })
 }
 
@@ -88,10 +87,10 @@ fn artifact_schema(value: &Value) -> Result<&str, String> {
         return Err("SENS compiler artifact must start with a schema symbol".into());
     };
     match schema.as_ref() {
-        "compiler-compilation-artifact-1" | "compiler-compilation-error-1" => {
-            Ok(schema.as_ref())
-        }
-        other => Err(format!("SENS compiler returned unknown artifact schema: {other}")),
+        "compiler-compilation-artifact-1" | "compiler-compilation-error-1" => Ok(schema.as_ref()),
+        other => Err(format!(
+            "SENS compiler returned unknown artifact schema: {other}"
+        )),
     }
 }
 
@@ -108,15 +107,17 @@ fn compile_program_data(
         .map_err(|error| format!("SENS compiler invocation failed: {error}"))?;
     let schema = artifact_schema(&artifact)?;
     let accepted = schema == "compiler-compilation-artifact-1";
-    let canonical_bytes = compiler_evidence_canonical_bytes(&artifact)
-        .map_err(|error| format!("cannot encode SENS artifact as canonical evidence bytes: {error}"))?;
+    let canonical_bytes = compiler_evidence_canonical_bytes(&artifact).map_err(|error| {
+        format!("cannot encode SENS artifact as canonical evidence bytes: {error}")
+    })?;
 
     // Defend the producer boundary as well: the exact bytes we emit must decode
     // and re-encode identically through the existing canonical evidence codec.
     let decoded = compiler_evidence_from_canonical_bytes(&canonical_bytes)
         .map_err(|error| format!("emitted artifact failed canonical evidence decode: {error}"))?;
-    let reencoded_artifact = compiler_evidence_canonical_bytes(&decoded)
-        .map_err(|error| format!("emitted artifact failed canonical evidence re-encode: {error}"))?;
+    let reencoded_artifact = compiler_evidence_canonical_bytes(&decoded).map_err(|error| {
+        format!("emitted artifact failed canonical evidence re-encode: {error}")
+    })?;
     if reencoded_artifact != canonical_bytes {
         return Err("emitted compiler artifact is not byte-canonical".into());
     }
@@ -124,14 +125,10 @@ fn compile_program_data(
         return Err("compiler artifact schema changed across canonical byte round-trip".into());
     }
     if accepted {
-        verify_compiler_program_artifact_from_sens(
-            &decoded,
-            program_wire_sha256,
-            sens_revision,
-        )
-        .map_err(|error| {
-            format!("SENS compiler artifact failed current-authority verification: {error}")
-        })?;
+        verify_compiler_program_artifact_from_sens(&decoded, program_wire_sha256, sens_revision)
+            .map_err(|error| {
+                format!("SENS compiler artifact failed current-authority verification: {error}")
+            })?;
     }
 
     Ok((canonical_bytes, accepted))
@@ -146,9 +143,9 @@ fn compile_t5m_triplet_bytes(
     visible_view: &[u8],
     sens_revision: &str,
 ) -> Result<(Vec<u8>, bool), String> {
-    on_compiler_stack(|| compile_t5m_triplet_on_worker(
-        lisp_source, physical_t5m, visible_view, sens_revision,
-    ))?
+    on_compiler_stack(|| {
+        compile_t5m_triplet_on_worker(lisp_source, physical_t5m, visible_view, sens_revision)
+    })?
 }
 
 fn compile_t5m_triplet_on_worker(
@@ -166,7 +163,10 @@ fn compile_t5m_triplet_on_worker(
             return Err(format!("{name} input is empty"));
         }
         if bytes.len() as u64 > MAX_INPUT_BYTES {
-            return Err(format!("{name} input exceeds the {}-byte resource cap", MAX_INPUT_BYTES));
+            return Err(format!(
+                "{name} input exceeds the {}-byte resource cap",
+                MAX_INPUT_BYTES
+            ));
         }
     }
 
@@ -174,10 +174,14 @@ fn compile_t5m_triplet_on_worker(
     // точні слова для незалежного SENS-парсера й не вводить власний кодек.
     let exact = decode_t5_exact_words(physical_t5m)
         .map_err(|error| format!("Zig T5M відхилив фізичний носій: {error}"))?;
-    let visible = exact.iter()
-        .map(|word| word.bits.iter()
-             .map(|bit| char::from(b'0' + *bit))
-             .collect::<String>())
+    let visible = exact
+        .iter()
+        .map(|word| {
+            word.bits
+                .iter()
+                .map(|bit| char::from(b'0' + *bit))
+                .collect::<String>()
+        })
         .collect::<Vec<_>>()
         .join(" ");
     let mut canonical_view = visible.as_bytes().to_vec();
@@ -259,8 +263,9 @@ fn compile_sw1_on_worker(input: &[u8], sens_revision: &str) -> Result<(Vec<u8>, 
         ));
     }
 
-    let expressions = wire_decode_program(input)
-        .ok_or_else(|| "canonical sens-syntax-wire-1 decode failed: invalid physical wire".to_string())?;
+    let expressions = wire_decode_program(input).ok_or_else(|| {
+        "canonical sens-syntax-wire-1 decode failed: invalid physical wire".to_string()
+    })?;
 
     // Decode acceptance alone is not treated as proof of canonicality. The
     // exact wire must survive a decode/encode round-trip byte-for-byte.
@@ -317,17 +322,27 @@ fn read_triplet_member(path: &Path, role: &str) -> Result<Vec<u8>, String> {
     let mut cursor = PathBuf::new();
     for component in absolute.components() {
         cursor.push(component.as_os_str());
-        let metadata = fs::symlink_metadata(&cursor)
-            .map_err(|error| format!("cannot inspect {role} path component {}: {error}", cursor.display()))?;
+        let metadata = fs::symlink_metadata(&cursor).map_err(|error| {
+            format!(
+                "cannot inspect {role} path component {}: {error}",
+                cursor.display()
+            )
+        })?;
         if metadata.file_type().is_symlink() {
-            return Err(format!("{role} path contains a symlink: {}", cursor.display()));
+            return Err(format!(
+                "{role} path contains a symlink: {}",
+                cursor.display()
+            ));
         }
     }
 
     let metadata = fs::symlink_metadata(&absolute)
         .map_err(|error| format!("cannot inspect {role} {}: {error}", absolute.display()))?;
     if !metadata.is_file() {
-        return Err(format!("{role} must be a regular file: {}", absolute.display()));
+        return Err(format!(
+            "{role} must be a regular file: {}",
+            absolute.display()
+        ));
     }
     if metadata.len() > MAX_INPUT_BYTES {
         return Err(format!(
@@ -347,8 +362,15 @@ pub fn run_triplet(
     sens_path: &Path,
     output: Option<&Path>,
 ) -> Result<bool, String> {
-    if sens_path.extension().and_then(|extension| extension.to_str()) != Some("sens") {
-        return Err(format!("--triplet requires a physical .sens path: {}", sens_path.display()));
+    if sens_path
+        .extension()
+        .and_then(|extension| extension.to_str())
+        != Some("sens")
+    {
+        return Err(format!(
+            "--triplet requires a physical .sens path: {}",
+            sens_path.display()
+        ));
     }
     let lisp_path = sens_path.with_extension("lisp");
     let view_path = sens_path.with_extension("");
@@ -368,7 +390,10 @@ pub fn run(repo_root: &str, options: RunOptions) -> Result<bool, String> {
     let metadata = fs::metadata(&options.input)
         .map_err(|error| format!("cannot stat SW1 input {}: {error}", options.input.display()))?;
     if !metadata.is_file() {
-        return Err(format!("SW1 input is not a regular file: {}", options.input.display()));
+        return Err(format!(
+            "SW1 input is not a regular file: {}",
+            options.input.display()
+        ));
     }
     if metadata.len() > MAX_INPUT_BYTES {
         return Err(format!(
@@ -392,8 +417,8 @@ pub fn run(repo_root: &str, options: RunOptions) -> Result<bool, String> {
 mod tests {
     use super::*;
     use sens::{
-        parse_mixed_exact_domain, lower_program,
-        CoreD8, Bit8, DomainIdentity, Expr, ExprKind, Span, CompilerLoweringRole,
+        lower_program, parse_mixed_exact_domain, Bit8, CompilerLoweringRole, CoreD8,
+        DomainIdentity, Expr, ExprKind, Span,
     };
     use std::rc::Rc;
 
@@ -404,10 +429,9 @@ mod tests {
         let bytes = b"no extra copy of caller SW1/T5 input";
         let observed = on_compiler_stack(|| bytes.as_ptr() as usize).unwrap();
         assert_eq!(observed, bytes.as_ptr() as usize);
-        let err = on_compiler_stack(|| -> () {
-            panic!("deliberate worker panic must become an error")
-        })
-        .expect_err("panicking compiler worker cannot report an artifact");
+        let err =
+            on_compiler_stack(|| -> () { panic!("deliberate worker panic must become an error") })
+                .expect_err("panicking compiler worker cannot report an artifact");
         assert!(err.contains("panicked"), "{err}");
     }
 
@@ -431,7 +455,11 @@ mod tests {
         assert_ne!(w3, w4, "width is part of the canonical identity");
         for (wire, original) in [(w3, d3), (w4, d4)] {
             let decoded = wire_decode_program(&wire).expect("canonical SW1 wire parses");
-            let [Expr { kind: ExprKind::DomainIdentity(actual), .. }] = decoded.as_slice() else {
+            let [Expr {
+                kind: ExprKind::DomainIdentity(actual),
+                ..
+            }] = decoded.as_slice()
+            else {
                 panic!("exact domain identity must not become a legacy SID")
             };
             assert_eq!(*actual, original);
@@ -451,17 +479,20 @@ mod tests {
         let (second, accepted_again) =
             compile_sw1_bytes(&input, revision).expect("repeat compile succeeds");
         assert!(accepted && accepted_again);
-        assert_eq!(first, second, "same SW1 bytes/provenance must yield exact same artifact bytes");
+        assert_eq!(
+            first, second,
+            "same SW1 bytes/provenance must yield exact same artifact bytes"
+        );
 
         let artifact = compiler_evidence_from_canonical_bytes(&first)
             .expect("canonical evidence bytes decode");
-        assert_eq!(artifact_schema(&artifact).unwrap(), "compiler-compilation-artifact-1");
-        let verified = verify_compiler_program_artifact_from_sens(
-            &artifact,
-            &sha256_hex(&input),
-            revision,
-        )
-        .expect("artifact verifies against current SENS law/provenance");
+        assert_eq!(
+            artifact_schema(&artifact).unwrap(),
+            "compiler-compilation-artifact-1"
+        );
+        let verified =
+            verify_compiler_program_artifact_from_sens(&artifact, &sha256_hex(&input), revision)
+                .expect("artifact verifies against current SENS law/provenance");
         for role in [
             CompilerLoweringRole::QuoteForm,
             CompilerLoweringRole::AtomPredicate,
@@ -474,7 +505,10 @@ mod tests {
             CompilerLoweringRole::DefineForm,
         ] {
             assert!(
-                verified.requests.iter().any(|request| request.lowering_role == role),
+                verified
+                    .requests
+                    .iter()
+                    .any(|request| request.lowering_role == role),
                 "SENS artifact omitted current compiler role {role:?}"
             );
         }
@@ -485,7 +519,8 @@ mod tests {
         assert!(compile_sw1_bytes(
             b"not-an-sw1-stream",
             "0123456789abcdef0123456789abcdef01234567"
-        ).is_err());
+        )
+        .is_err());
 
         let empty_program = wire_encode_program(&[]);
         let mut with_trailing_byte = empty_program;
@@ -493,17 +528,21 @@ mod tests {
         assert!(compile_sw1_bytes(
             &with_trailing_byte,
             "0123456789abcdef0123456789abcdef01234567"
-        ).is_err());
+        )
+        .is_err());
     }
 
     #[test]
     fn d8_input_emits_semantic_rejection_artifact_not_a_compilable_artifact() {
         let d8: DomainIdentity = CoreD8::from_word(Bit8::new(0b0000_0010).unwrap()).into();
         let node = Expr {
-            kind: ExprKind::List(Rc::from(vec![Expr {
-                kind: ExprKind::DomainIdentity(d8),
-                span: Span::default(),
-            }].into_boxed_slice())),
+            kind: ExprKind::List(Rc::from(
+                vec![Expr {
+                    kind: ExprKind::DomainIdentity(d8),
+                    span: Span::default(),
+                }]
+                .into_boxed_slice(),
+            )),
             span: Span::default(),
         };
         let input = wire_encode_program(&[node]);
@@ -511,51 +550,67 @@ mod tests {
             compile_sw1_bytes(&input, "0123456789abcdef0123456789abcdef01234567")
                 .expect("semantic rejection is a typed artifact, not a host reinterpretation");
         assert!(!accepted);
-        let artifact = compiler_evidence_from_canonical_bytes(&bytes)
-            .expect("error artifact is canonical");
-        assert_eq!(artifact_schema(&artifact).unwrap(), "compiler-compilation-error-1");
+        let artifact =
+            compiler_evidence_from_canonical_bytes(&bytes).expect("error artifact is canonical");
+        assert_eq!(
+            artifact_schema(&artifact).unwrap(),
+            "compiler-compilation-error-1"
+        );
     }
 
     #[test]
     fn canonical_t5m_triplet_compiles_only_when_all_three_projections_match() {
         let source = "(як-є ())\n".as_bytes();
         let view = b"10 001 00 000 01\n";
-        let exact = std::str::from_utf8(view).expect("точний двійковий перегляд")
-            .trim_end_matches('\n').split(' ')
-            .map(|word| sens_cli::zig_transport::ExactT5Word::new(
-                word.len(), word.bytes().map(|bit| bit - b'0').collect(),
-            ).expect("точне бітове слово"))
+        let exact = std::str::from_utf8(view)
+            .expect("точний двійковий перегляд")
+            .trim_end_matches('\n')
+            .split(' ')
+            .map(|word| {
+                sens_cli::zig_transport::ExactT5Word::new(
+                    word.len(),
+                    word.bytes().map(|bit| bit - b'0').collect(),
+                )
+                .expect("точне бітове слово")
+            })
             .collect::<Vec<_>>();
         let physical = encode_t5_exact_words(&exact).expect("Zig T5M");
 
         let revision = "0123456789abcdef0123456789abcdef01234567";
-        let (bytes, accepted) = compile_t5m_triplet_bytes(
-            source, &physical, view, revision,
-        ).expect("three matching projections compile through SENS");
+        let (bytes, accepted) = compile_t5m_triplet_bytes(source, &physical, view, revision)
+            .expect("three matching projections compile through SENS");
         assert!(accepted);
-        let artifact = compiler_evidence_from_canonical_bytes(&bytes)
-            .expect("canonical compiler evidence");
-        assert_eq!(artifact_schema(&artifact).unwrap(), "compiler-compilation-artifact-1");
-        let parsed_view = parse_canonical_binary(
-            std::str::from_utf8(view).expect("ASCII canonical view"),
-        ).expect("parse compiled view");
+        let artifact =
+            compiler_evidence_from_canonical_bytes(&bytes).expect("canonical compiler evidence");
+        assert_eq!(
+            artifact_schema(&artifact).unwrap(),
+            "compiler-compilation-artifact-1"
+        );
+        let parsed_view =
+            parse_canonical_binary(std::str::from_utf8(view).expect("ASCII canonical view"))
+                .expect("parse compiled view");
         let lowered_view = lower_program(&parsed_view);
         let canonical_wire = wire_encode_program(&lowered_view);
         verify_compiler_program_artifact_from_sens(
             &artifact,
             &sha256_hex(&canonical_wire),
             revision,
-        ).expect("artifact provenance is pinned to canonical program wire, not mislabeled T5 bytes");
+        )
+        .expect("artifact provenance is pinned to canonical program wire, not mislabeled T5 bytes");
 
-        assert!(compile_t5m_triplet_bytes(
-            source, &physical, b"10 100 00 000 01\n", revision,
-        ).is_err(), "a mismatched extensionless view must block");
-        assert!(compile_t5m_triplet_bytes(
-            source, &physical, b"10 001 00 000 01", revision,
-        ).is_err(), "the canonical extensionless view requires exactly one trailing LF");
-        assert!(compile_t5m_triplet_bytes(
-            "(інакше ())\n".as_bytes(), &physical, view, revision,
-        ).is_err(), "a source that lowers to a different exact program must block");
+        assert!(
+            compile_t5m_triplet_bytes(source, &physical, b"10 100 00 000 01\n", revision,).is_err(),
+            "a mismatched extensionless view must block"
+        );
+        assert!(
+            compile_t5m_triplet_bytes(source, &physical, b"10 001 00 000 01", revision,).is_err(),
+            "the canonical extensionless view requires exactly one trailing LF"
+        );
+        assert!(
+            compile_t5m_triplet_bytes("(інакше ())\n".as_bytes(), &physical, view, revision,)
+                .is_err(),
+            "a source that lowers to a different exact program must block"
+        );
     }
 
     #[test]

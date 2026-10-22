@@ -485,8 +485,7 @@ fn owner_i5_6400_executes_admitted_safe_sweep_and_emits_evidence() {
         &mut session,
     );
     assert_eq!(
-        rejected,
-        "(rejected unadmitted-machine-form (ud2))",
+        rejected, "(rejected unadmitted-machine-form (ud2))",
         "unsafe/unadmitted control must fail closed before host execution"
     );
 

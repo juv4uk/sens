@@ -1,4 +1,7 @@
-use sens::{eval_parsed_expressions, eval_program, load_core_library, parse_mixed_exact_domain_machine_source, Session};
+use sens::{
+    eval_parsed_expressions, eval_program, load_core_library,
+    parse_mixed_exact_domain_machine_source, Session,
+};
 use std::fs;
 use std::path::PathBuf;
 
@@ -13,8 +16,9 @@ fn encoder_session() -> Session {
 
     let mut session = Session::default();
     load_core_library(&mut session).expect("core must bootstrap before machine encoder");
-    let expressions = parse_mixed_exact_domain_machine_source("lib/machine/encoding/x86-64.lisp", &source)
-        .expect("x86-64 encoder must parse through the exact-domain machine-source reader");
+    let expressions =
+        parse_mixed_exact_domain_machine_source("lib/machine/encoding/x86-64.lisp", &source)
+            .expect("x86-64 encoder must parse through the exact-domain machine-source reader");
     eval_parsed_expressions(&expressions, &mut session)
         .expect("x86-64 encoder must load through the exact-domain machine-source reader");
     session
@@ -32,30 +36,37 @@ fn admitted_encoder_session() -> Session {
     let path = repo_root().join("lib/machine/admission/x86-64.lisp");
     let source = fs::read_to_string(&path)
         .unwrap_or_else(|error| panic!("{} must exist: {error}", path.display()));
-    let expressions = parse_mixed_exact_domain_machine_source("lib/machine/admission/x86-64.lisp", &source)
-        .expect("x86-64 admission must parse through the exact-domain machine-source reader");
+    let expressions =
+        parse_mixed_exact_domain_machine_source("lib/machine/admission/x86-64.lisp", &source)
+            .expect("x86-64 admission must parse through the exact-domain machine-source reader");
     eval_parsed_expressions(&expressions, &mut session)
         .expect("x86-64 admission must load through the exact-domain machine-source reader");
     session
 }
 
-
 #[test]
 fn exact_d24_u3_machine_field_projection_is_total_and_fail_closed() {
     let mut session = encoder_session();
     for (source, expected) in [
-        ("-1", "()"), ("0", "0"), ("1", "1"), ("2", "2"),
-        ("3", "3"), ("4", "4"), ("5", "5"), ("6", "6"),
-        ("7", "7"), ("8", "()"),
+        ("-1", "()"),
+        ("0", "0"),
+        ("1", "1"),
+        ("2", "2"),
+        ("3", "3"),
+        ("4", "4"),
+        ("5", "5"),
+        ("6", "6"),
+        ("7", "7"),
+        ("8", "()"),
     ] {
         let form = format!("(x86-project-bin3-to-mechanism-u3 {source})");
         let parsed = sens::parse(&form).expect("український Lisp");
-        let exact = sens::source_projection::project_ukr_decimal_integer_literals(
-            &parsed, &form,
-        ).expect("reader надає D24+ операнди");
+        let exact = sens::source_projection::project_ukr_decimal_integer_literals(&parsed, &form)
+            .expect("reader надає D24+ операнди");
         let actual = eval_parsed_expressions(&exact, &mut session)
             .unwrap_or_else(|error| panic!("SENS x86 u3 {form}: {error}"))
-            .value.to_string();
+            .value
+            .to_string();
         assert_eq!(actual, expected, "form: {form}");
     }
 }
@@ -117,10 +128,22 @@ fn parity_condition_wrappers_preserve_decimal_codes_10_and_11() {
         ("(x86-encode-jnp-rel8 0)", "(x86-encode-jcc-rel8 #d11 0)"),
         ("(x86-encode-jp-rel32 0)", "(x86-encode-jcc-rel32 #d10 0)"),
         ("(x86-encode-jnp-rel32 0)", "(x86-encode-jcc-rel32 #d11 0)"),
-        ("(x86-encode-setp-r8 (quote al))", "(x86-encode-setcc-r8 #d10 (quote al))"),
-        ("(x86-encode-setnp-r8 (quote al))", "(x86-encode-setcc-r8 #d11 (quote al))"),
-        ("(x86-encode-cmovp-r64-r64 (quote rax) (quote rbx))", "(x86-encode-cmovcc-r64-r64 #d10 (quote rax) (quote rbx))"),
-        ("(x86-encode-cmovnp-r64-r64 (quote rax) (quote rbx))", "(x86-encode-cmovcc-r64-r64 #d11 (quote rax) (quote rbx))"),
+        (
+            "(x86-encode-setp-r8 (quote al))",
+            "(x86-encode-setcc-r8 #d10 (quote al))",
+        ),
+        (
+            "(x86-encode-setnp-r8 (quote al))",
+            "(x86-encode-setcc-r8 #d11 (quote al))",
+        ),
+        (
+            "(x86-encode-cmovp-r64-r64 (quote rax) (quote rbx))",
+            "(x86-encode-cmovcc-r64-r64 #d10 (quote rax) (quote rbx))",
+        ),
+        (
+            "(x86-encode-cmovnp-r64-r64 (quote rax) (quote rbx))",
+            "(x86-encode-cmovcc-r64-r64 #d11 (quote rax) (quote rbx))",
+        ),
     ] {
         assert_eq!(
             eval_bytes(wrapper, &mut session),
@@ -141,10 +164,17 @@ fn movq_xmm_r64_keeps_opcode_byte_0x6e_as_decimal_110() {
         .trim_start_matches('(')
         .trim_end_matches(')')
         .split_whitespace()
-        .map(|token| token.parse::<u8>().expect("MOVQ byte must stay in u8 range"))
+        .map(|token| {
+            token
+                .parse::<u8>()
+                .expect("MOVQ byte must stay in u8 range")
+        })
         .collect::<Vec<_>>();
     assert_eq!(bytes, vec![102, 72, 15, 110, 192]);
-    assert_eq!(bytes[3], 110, "0x6E opcode must not become binary 110 = decimal 6");
+    assert_eq!(
+        bytes[3], 110,
+        "0x6E opcode must not become binary 110 = decimal 6"
+    );
 }
 
 #[test]
@@ -160,9 +190,16 @@ fn lisp_encodes_mov_eax_imm32_little_endian() {
         ("(x86-encode-mov-eax-imm32 0)", "(184 0 0 0 0)"),
         ("(x86-encode-mov-eax-imm32 42)", "(184 42 0 0 0)"),
         ("(x86-encode-mov-eax-imm32 305419896)", "(184 120 86 52 18)"),
-        ("(x86-encode-mov-eax-imm32 4294967295)", "(184 255 255 255 255)"),
+        (
+            "(x86-encode-mov-eax-imm32 4294967295)",
+            "(184 255 255 255 255)",
+        ),
     ] {
-        assert_eq!(eval_bytes(source, &mut session), expected, "source: {source}");
+        assert_eq!(
+            eval_bytes(source, &mut session),
+            expected,
+            "source: {source}"
+        );
     }
 }
 
@@ -318,7 +355,11 @@ fn lisp_encodes_push_and_pop_with_pinned_opcodes_and_independent_decode() {
             );
 
             if register_code < 8 {
-                assert_eq!(bytes.len(), 1, "{form} for a low register must need no REX prefix");
+                assert_eq!(
+                    bytes.len(),
+                    1,
+                    "{form} for a low register must need no REX prefix"
+                );
             } else {
                 assert_eq!(bytes.len(), 2, "{form} for r8-r15 must carry REX.B");
                 assert_eq!(bytes[0], 0x41, "REX.B-only prefix must be exactly 0x41");
@@ -345,7 +386,9 @@ fn lisp_encodes_push_and_pop_with_pinned_opcodes_and_independent_decode() {
 /// operand. A from-scratch decode, independent of the encoder's own
 /// construction arithmetic.
 fn decode_inc_or_dec(bytes: &[u8]) -> Option<(&'static str, u8)> {
-    let [rex, opcode, modrm] = bytes else { return None };
+    let [rex, opcode, modrm] = bytes else {
+        return None;
+    };
     if *opcode != 0xFF {
         return None;
     }
@@ -389,8 +432,15 @@ fn lisp_encodes_inc_and_dec_via_group5_modrm_never_the_not64_legacy_form() {
                 .map(|token| token.parse().expect("byte must be a small integer"))
                 .collect();
 
-            assert_eq!(bytes.len(), 3, "{form} must always be REX+0xFF+ModRM, 3 bytes");
-            assert_eq!(bytes[1], 255, "{form} must use group-5 opcode 0xFF, never the not64 legacy form");
+            assert_eq!(
+                bytes.len(),
+                3,
+                "{form} must always be REX+0xFF+ModRM, 3 bytes"
+            );
+            assert_eq!(
+                bytes[1], 255,
+                "{form} must use group-5 opcode 0xFF, never the not64 legacy form"
+            );
 
             let decoded = decode_inc_or_dec(&bytes)
                 .unwrap_or_else(|| panic!("{form} produced undecodable bytes {bytes:?}"));
@@ -424,7 +474,9 @@ fn lisp_encodes_inc_and_dec_via_group5_modrm_never_the_not64_legacy_form() {
 /// (2) vs NEG (3), an opcode extension, not a register operand. From
 /// scratch, independent of the encoder's own construction arithmetic.
 fn decode_not_or_neg(bytes: &[u8]) -> Option<(&'static str, u8)> {
-    let [rex, opcode, modrm] = bytes else { return None };
+    let [rex, opcode, modrm] = bytes else {
+        return None;
+    };
     if *opcode != 0xF7 {
         return None;
     }
@@ -466,7 +518,11 @@ fn lisp_encodes_not_and_neg_via_group3_modrm_with_independent_decode() {
                 .map(|token| token.parse().expect("byte must be a small integer"))
                 .collect();
 
-            assert_eq!(bytes.len(), 3, "{form} must always be REX+0xF7+ModRM, 3 bytes");
+            assert_eq!(
+                bytes.len(),
+                3,
+                "{form} must always be REX+0xF7+ModRM, 3 bytes"
+            );
             assert_eq!(bytes[1], 247, "{form} must use group-3 opcode 0xF7");
 
             let decoded = decode_not_or_neg(&bytes)
@@ -536,7 +592,7 @@ fn decode_mov_mem_disp8(bytes: &[u8]) -> Option<(&'static str, u8, u8, i32)> {
     i += 1;
     let opcode = *bytes.get(i)?;
     let direction = match opcode {
-        0x8B => "load", // MOV r64, [mem]
+        0x8B => "load",  // MOV r64, [mem]
         0x89 => "store", // MOV [mem], r64
         _ => return None,
     };
@@ -692,7 +748,11 @@ fn lisp_encodes_the_full_jcc_rel8_family_with_correct_condition_codes_and_displa
                 .map(|token| token.parse().expect("byte must be a small integer"))
                 .collect();
 
-            assert_eq!(bytes.len(), 2, "{form} must always be opcode+disp8, 2 bytes");
+            assert_eq!(
+                bytes.len(),
+                2,
+                "{form} must always be opcode+disp8, 2 bytes"
+            );
             let (condition_code, decoded_disp) = decode_jcc_rel8(&bytes)
                 .unwrap_or_else(|| panic!("{form} produced undecodable bytes {bytes:?}"));
             assert_eq!(condition_code, expected_cc, "{form}: {bytes:?}");
@@ -902,7 +962,11 @@ fn lisp_encodes_jmp_rel8_with_the_pinned_opcode_and_correct_displacement() {
             .map(|token| token.parse().expect("byte must be a small integer"))
             .collect();
 
-        assert_eq!(bytes.len(), 2, "{form} must always be opcode+disp8, 2 bytes");
+        assert_eq!(
+            bytes.len(),
+            2,
+            "{form} must always be opcode+disp8, 2 bytes"
+        );
         assert_eq!(bytes[0], 0xEB, "{form}: {bytes:?}");
         let decoded_disp = decode_jmp_rel8(&bytes)
             .unwrap_or_else(|| panic!("{form} produced undecodable bytes {bytes:?}"));
@@ -959,9 +1023,8 @@ fn lisp_group8_bitops_imm8_round_trip_independently_and_match_xed_extensions() {
     for (mnemonic, expected_extension) in operations {
         for (register_name, register_code) in registers {
             for bit_index in [0u8, 3, 63, 255] {
-                let form = format!(
-                    "(x86-encode-{mnemonic}-r64-imm8 (quote {register_name}) {bit_index})"
-                );
+                let form =
+                    format!("(x86-encode-{mnemonic}-r64-imm8 (quote {register_name}) {bit_index})");
                 let rendered = eval_bytes(&form, &mut session);
                 let bytes: Vec<u8> = rendered
                     .trim_start_matches('(')
@@ -971,7 +1034,11 @@ fn lisp_group8_bitops_imm8_round_trip_independently_and_match_xed_extensions() {
                     .collect();
 
                 assert_eq!(bytes.len(), 5, "{form} must be REX+0F+BA+ModRM+imm8");
-                assert_eq!((bytes[3] >> 3) & 0b111, expected_extension, "{form}: {bytes:?}");
+                assert_eq!(
+                    (bytes[3] >> 3) & 0b111,
+                    expected_extension,
+                    "{form}: {bytes:?}"
+                );
 
                 let decoded = decode_group8_bitop_imm8(&bytes)
                     .unwrap_or_else(|| panic!("{form} produced undecodable bytes {bytes:?}"));
@@ -1014,7 +1081,14 @@ fn encoder_source_contains_no_process_or_assembler_escape_hatch() {
         .unwrap_or_else(|error| panic!("{} must exist: {error}", path.display()));
     let lower = source.to_ascii_lowercase();
 
-    for forbidden in ["process-run", "nasm", " as ", "objcopy", "keystone", "iced-x86"] {
+    for forbidden in [
+        "process-run",
+        "nasm",
+        " as ",
+        "objcopy",
+        "keystone",
+        "iced-x86",
+    ] {
         assert!(
             !lower.contains(forbidden),
             "proof encoder must construct bytes in Lisp, not escape through {forbidden}"

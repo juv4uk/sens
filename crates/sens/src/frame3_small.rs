@@ -9,8 +9,7 @@
 mod original_f3;
 
 use crate::{
-    decode_ternary_words, encode_ternary_words, parse_binary_source_words,
-    PhysicalT5Program,
+    decode_ternary_words, encode_ternary_words, parse_binary_source_words, PhysicalT5Program,
 };
 
 pub const MAX_TINY_T5_BYTES: usize = 16;
@@ -23,26 +22,23 @@ pub enum SmallF3Error {
     NotSmallerThanT5,
 }
 
-
 /// Choose original F3 only for a canonical single-root tiny program if the
 /// complete physical carrier (including 0xf3) saves bytes. Other canonical
 /// T5 programs remain T5. This never mutates the input or falls back at decode.
 pub fn encode_explicit_small_f3(t5_input: &[u8]) -> Result<Option<Vec<u8>>, SmallF3Error> {
-    let parsed = PhysicalT5Program::decode(t5_input)
-        .map_err(|_| SmallF3Error::InvalidProgram)?;
+    let parsed = PhysicalT5Program::decode(t5_input).map_err(|_| SmallF3Error::InvalidProgram)?;
     if parsed.form_count() != 1 || t5_input.len() > MAX_TINY_T5_BYTES {
         return Ok(None);
     }
-    let typed = decode_ternary_words(t5_input)
-        .map_err(|_| SmallF3Error::InvalidProgram)?;
-    let current = encode_ternary_words(&typed)
-        .map_err(|_| SmallF3Error::InvalidProgram)?;
+    let typed = decode_ternary_words(t5_input).map_err(|_| SmallF3Error::InvalidProgram)?;
+    let current = encode_ternary_words(&typed).map_err(|_| SmallF3Error::InvalidProgram)?;
     if current != t5_input {
         return Err(SmallF3Error::InvalidProgram);
     }
-    let exact = typed.iter().map(|w| {
-        format!("{:0width$b}", w.packed_bits(), width = w.width())
-    }).collect::<Vec<_>>();
+    let exact = typed
+        .iter()
+        .map(|w| format!("{:0width$b}", w.packed_bits(), width = w.width()))
+        .collect::<Vec<_>>();
     let body = match original_f3::frame_encode(&exact) {
         Ok(data) => data,
         Err(_) => return Ok(None),
@@ -64,29 +60,26 @@ pub fn encode_explicit_small_f3(t5_input: &[u8]) -> Result<Option<Vec<u8>>, Smal
 /// .senc extension and an explicit F3 command, not byte autodetection.
 pub fn decode_explicit_small_f3(input: &[u8]) -> Result<Vec<u8>, SmallF3Error> {
     // A 16B F3 file cannot be smaller than the permitted <=16B T5 input.
-    if input.len() < 2 || input.len() >= MAX_TINY_T5_BYTES
+    if input.len() < 2
+        || input.len() >= MAX_TINY_T5_BYTES
         || input.first() != Some(&original_f3::FRAME_LABEL)
     {
         return Err(SmallF3Error::WrongCarrier);
     }
-    let words = original_f3::decode_senc(input)
-        .map_err(|_| SmallF3Error::InvalidFrame)?;
-    let tokens = parse_binary_source_words(&words.join(" "))
-        .map_err(|_| SmallF3Error::InvalidProgram)?;
+    let words = original_f3::decode_senc(input).map_err(|_| SmallF3Error::InvalidFrame)?;
+    let tokens =
+        parse_binary_source_words(&words.join(" ")).map_err(|_| SmallF3Error::InvalidProgram)?;
     let typed = tokens.into_iter().map(|t| t.word).collect::<Vec<_>>();
-    let t5 = encode_ternary_words(&typed)
-        .map_err(|_| SmallF3Error::InvalidProgram)?;
+    let t5 = encode_ternary_words(&typed).map_err(|_| SmallF3Error::InvalidProgram)?;
 
     if t5.len() > MAX_TINY_T5_BYTES || input.len() >= t5.len() {
         return Err(SmallF3Error::NotSmallerThanT5);
     }
-    let parsed = PhysicalT5Program::decode(&t5)
-        .map_err(|_| SmallF3Error::InvalidProgram)?;
+    let parsed = PhysicalT5Program::decode(&t5).map_err(|_| SmallF3Error::InvalidProgram)?;
     if parsed.form_count() != 1 {
         return Err(SmallF3Error::InvalidProgram);
     }
-    let validated = decode_ternary_words(&t5)
-        .map_err(|_| SmallF3Error::InvalidProgram)?;
+    let validated = decode_ternary_words(&t5).map_err(|_| SmallF3Error::InvalidProgram)?;
     if validated != typed {
         return Err(SmallF3Error::InvalidProgram);
     }
@@ -107,7 +100,9 @@ mod tests {
         assert_eq!(parsed.form_count(), 1);
         let a = parsed.execute(&mut crate::Session::default()).unwrap();
         let b = PhysicalT5Program::decode(&[0x63, 0x89, 0x06, 0xa1])
-            .unwrap().execute(&mut crate::Session::default()).unwrap();
+            .unwrap()
+            .execute(&mut crate::Session::default())
+            .unwrap();
         assert_eq!(a.value, b.value);
         assert_eq!(a.output, b.output);
     }
@@ -127,9 +122,12 @@ mod tests {
     #[test]
     fn invalid_physical_profiles_are_rejected() {
         for bad in [
-            vec![], vec![0xf3], vec![0xf4, 0x40, 0x60],
+            vec![],
+            vec![0xf3],
+            vec![0xf4, 0x40, 0x60],
             vec![0x63, 0x89, 0x06, 0xa1],
-            vec![0xff, 0x40, 0x60], vec![0xf3; 16],
+            vec![0xff, 0x40, 0x60],
+            vec![0xf3; 16],
         ] {
             assert!(decode_explicit_small_f3(&bad).is_err(), "{bad:02x?}");
         }
@@ -138,6 +136,9 @@ mod tests {
     #[test]
     fn original_f3_is_not_silently_parsed_as_t5() {
         assert!(PhysicalT5Program::decode(&[0xf3, 0x40, 0x60]).is_err());
-        assert_eq!(decode_explicit_small_f3(&[0xf3, 0x40, 0x60]).unwrap().len(), 4);
+        assert_eq!(
+            decode_explicit_small_f3(&[0xf3, 0x40, 0x60]).unwrap().len(),
+            4
+        );
     }
 }

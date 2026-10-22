@@ -66,16 +66,18 @@ fn benchmark(case: &str, form: &str, forms: usize, samples: usize) -> Result<(),
     let visible = std::iter::repeat_n(form, forms)
         .collect::<Vec<_>>()
         .join("\n");
-    let tokens = parse_binary_source_words(&visible)
-        .map_err(|e| format!("{case}: source lexing: {e:?}"))?;
+    let tokens =
+        parse_binary_source_words(&visible).map_err(|e| format!("{case}: source lexing: {e:?}"))?;
     let widths: Vec<usize> = tokens.iter().map(|token| token.word.width()).collect();
     let packed = pack_binary_source_tokens(&tokens);
-    let visual_ast = parse_canonical_binary(&visible)
-        .map_err(|e| format!("{case}: visible D2: {e:?}"))?;
+    let visual_ast =
+        parse_canonical_binary(&visible).map_err(|e| format!("{case}: visible D2: {e:?}"))?;
     let physical_ast = parse_canonical_packed_words(&packed, &widths)
         .map_err(|e| format!("{case}: packed D2: {e:?}"))?;
     if fingerprint(&visual_ast) != fingerprint(&physical_ast) {
-        return Err(format!("{case}: D2/domain AST parity failed: no performance claim"));
+        return Err(format!(
+            "{case}: D2/domain AST parity failed: no performance claim"
+        ));
     }
     if visual_ast.len() != forms || physical_ast.len() != forms {
         return Err(format!("{case}: expected {forms} complete D2 forms"));
@@ -84,12 +86,12 @@ fn benchmark(case: &str, form: &str, forms: usize, samples: usize) -> Result<(),
     // Same AST grammar and compiled binary. Packed-width boundaries are already
     // known and *not* included in the timed ingest; report their count instead.
     // Both closures allocate their parsed AST on each measured invocation.
-    let mut visible_read = || parse_canonical_binary(black_box(&visible))
-        .expect("preflighted visible input");
-    let mut packed_read = || parse_canonical_packed_words(
-        black_box(&packed),
-        black_box(&widths),
-    ).expect("preflighted packed input");
+    let mut visible_read =
+        || parse_canonical_binary(black_box(&visible)).expect("preflighted visible input");
+    let mut packed_read = || {
+        parse_canonical_packed_words(black_box(&packed), black_box(&widths))
+            .expect("preflighted packed input")
+    };
 
     let iterations = (16_384 / forms).clamp(32, 2_048);
     for _ in 0..32 {

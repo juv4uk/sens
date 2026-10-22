@@ -20,7 +20,10 @@ fn historical_eq_cond_images_preserve_typed_transport_without_evaluating_old_log
         let words = decode_ternary_program(physical).expect("canonical physical T5");
         let visible = render_ternary_words_spaced(&words);
         assert_eq!(open_ternary_program(physical).unwrap(), visible);
-        assert_eq!(encode_binary_projection_ternary(&visible).unwrap(), physical);
+        assert_eq!(
+            encode_binary_projection_ternary(&visible).unwrap(),
+            physical
+        );
     }
 }
 

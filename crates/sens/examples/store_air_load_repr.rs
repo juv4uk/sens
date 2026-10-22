@@ -21,8 +21,8 @@ fn run() -> Result<(), String> {
         ));
     }
 
-    let source = fs::read_to_string(&args[1])
-        .map_err(|error| format!("read {}: {error}", args[1]))?;
+    let source =
+        fs::read_to_string(&args[1]).map_err(|error| format!("read {}: {error}", args[1]))?;
     let framing_bits = if let Some(raw) = args.get(2) {
         raw.parse::<usize>()
             .map_err(|error| format!("invalid framing-bits: {error}"))?
@@ -30,8 +30,7 @@ fn run() -> Result<(), String> {
         0
     };
 
-    let tokens =
-        parse_binary_source_words(&source).map_err(|error| format!("parse: {error:?}"))?;
+    let tokens = parse_binary_source_words(&source).map_err(|error| format!("parse: {error:?}"))?;
     if tokens.is_empty() {
         return Err("canonical source must contain at least one exact-width word".to_owned());
     }

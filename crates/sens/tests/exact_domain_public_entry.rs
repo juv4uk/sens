@@ -1,8 +1,8 @@
 //! Public exact-domain migration boundary for host consumers.
 //! The historical reader is never a fallback for this API.
 use sens::{
-    eval_exact_domain_program, load_core_library, parse, parse_exact_domain_source, ErrorKind, ExprKind,
-    Session, Value,
+    eval_exact_domain_program, load_core_library, parse, parse_exact_domain_source, ErrorKind,
+    ExprKind, Session, Value,
 };
 
 #[test]
@@ -16,10 +16,11 @@ fn public_reader_keeps_d9_width_and_is_not_the_historical_byte_reader() {
     ));
 
     let historical = parse("11110111").expect("historical source is isolated");
-    let current8 = parse_exact_domain_source("11110111")
-        .expect("current D8 source is explicit");
-    assert_ne!(historical[0].kind, current8[0].kind,
-        "the legacy reader must not silently acquire the exact-domain AST identity");
+    let current8 = parse_exact_domain_source("11110111").expect("current D8 source is explicit");
+    assert_ne!(
+        historical[0].kind, current8[0].kind,
+        "the legacy reader must not silently acquire the exact-domain AST identity"
+    );
     assert!(matches!(
         &current8[0].kind,
         ExprKind::DomainIdentity(identity)
@@ -36,8 +37,10 @@ fn d10_core4_defined_listp_executes_by_its_exact_word_identity() {
     // its result must be exact D1:YES, not a host bool or a width-coerced D8.
     let result = eval_exact_domain_program("(0100001100 (001 ()))", &mut session)
         .expect("a concrete Core4-defined D10 function has an execution path");
-    assert!(matches!(result.value, Value::DomainIdentity(sens::DomainIdentity::D1(bit))
-        if bit.word().packed_bits() == 1));
+    assert!(
+        matches!(result.value, Value::DomainIdentity(sens::DomainIdentity::D1(bit))
+        if bit.word().packed_bits() == 1)
+    );
 
     // MKLIST is another concrete Core4 D10 definition. Passing a quoted atom
     // must produce a list, proving this is closure invocation, not a D10 opcode.

@@ -276,128 +276,129 @@ fn main() -> ExitCode {
     let semantic_bits: usize = words.iter().map(|word| word.width as usize).sum();
     let unpacked_bytes = words.len();
 
-    let (checksum, packed_bytes, cache_bytes, offset_index_bytes, access_index_bytes) = match mode.as_str() {
-        "prepare-logical" => {
-            black_box(&words);
-            (words.len() as u64, 0usize, 0usize, 0usize, 0usize)
-        }
-        "prepare-unpacked" => {
-            let bytes = materialize_unpacked_bytes(&words);
-            let len = bytes.len();
-            black_box(&bytes);
-            (len as u64, 0usize, len, 0usize, 0usize)
-        }
-        "prepare-packed" => {
-            let packed = pack_words(&words);
-            let bytes = packed.byte_len();
-            black_box(&packed);
-            (packed.bit_len() as u64, bytes, 0, 0usize, 0usize)
-        }
-        "prepare-cached" => {
-            let packed = pack_words(&words);
-            let bytes = packed.byte_len();
-            let cache = decode_cache(&words, &packed);
-            let cache_len = cache.len();
-            black_box(&cache);
-            (cache_len as u64, bytes, cache_len, 0usize, 0usize)
-        }
-        "scan-unpacked" => {
-            let bytes = materialize_unpacked_bytes(&words);
-            let len = bytes.len();
-            let checksum = scan_unpacked(&bytes, repeats);
-            (checksum, 0, len, 0usize, 0usize)
-        }
-        "scan-packed" => {
-            let packed = pack_words(&words);
-            let bytes = packed.byte_len();
-            let checksum = scan_packed(&words, &packed, repeats);
-            (checksum, bytes, 0, 0usize, 0usize)
-        }
-        "scan-cached" => {
-            let packed = pack_words(&words);
-            let bytes = packed.byte_len();
-            let cache = decode_cache(&words, &packed);
-            let cache_len = cache.len();
-            let checksum = scan_cache(&cache, repeats);
-            (checksum, bytes, cache_len, 0usize, 0usize)
-        }
-        "prepare-random-unpacked" => {
-            let bytes = materialize_unpacked_bytes(&words);
-            let indices = build_random_indices(count, random_accesses);
-            let index_bytes = indices.len() * std::mem::size_of::<usize>();
-            let len = bytes.len();
-            black_box((&bytes, &indices));
-            (len as u64, 0usize, len, 0usize, index_bytes)
-        }
-        "prepare-random-packed" => {
-            let (packed, offsets) = match fixed_width(&case) {
-                Some(_) => (pack_words(&words), Vec::new()),
-                None => pack_words_with_offsets(&words),
-            };
-            let indices = build_random_indices(count, random_accesses);
-            let packed_bytes = packed.byte_len();
-            let offset_bytes = offsets.len() * std::mem::size_of::<usize>();
-            let index_bytes = indices.len() * std::mem::size_of::<usize>();
-            black_box((&packed, &offsets, &indices));
-            (
-                packed.bit_len() as u64,
-                packed_bytes,
-                0usize,
-                offset_bytes,
-                index_bytes,
-            )
-        }
-        "prepare-random-cached" => {
-            let packed = pack_words(&words);
-            let cache = decode_cache(&words, &packed);
-            let indices = build_random_indices(count, random_accesses);
-            let packed_bytes = packed.byte_len();
-            let cache_bytes = cache.len();
-            let index_bytes = indices.len() * std::mem::size_of::<usize>();
-            black_box((&cache, &indices));
-            (
-                cache_bytes as u64,
-                packed_bytes,
-                cache_bytes,
-                0usize,
-                index_bytes,
-            )
-        }
-        "random-unpacked" => {
-            let bytes = materialize_unpacked_bytes(&words);
-            let indices = build_random_indices(count, random_accesses);
-            let index_bytes = indices.len() * std::mem::size_of::<usize>();
-            let checksum = random_unpacked(&bytes, &indices, repeats);
-            (checksum, 0usize, bytes.len(), 0usize, index_bytes)
-        }
-        "random-packed" => {
-            let fixed = fixed_width(&case);
-            let (packed, offsets) = match fixed {
-                Some(_) => (pack_words(&words), Vec::new()),
-                None => pack_words_with_offsets(&words),
-            };
-            let indices = build_random_indices(count, random_accesses);
-            let packed_bytes = packed.byte_len();
-            let offset_bytes = offsets.len() * std::mem::size_of::<usize>();
-            let index_bytes = indices.len() * std::mem::size_of::<usize>();
-            let checksum = random_packed(&words, &packed, &offsets, fixed, &indices, repeats);
-            (checksum, packed_bytes, 0usize, offset_bytes, index_bytes)
-        }
-        "random-cached" => {
-            let packed = pack_words(&words);
-            let cache = decode_cache(&words, &packed);
-            let indices = build_random_indices(count, random_accesses);
-            let packed_bytes = packed.byte_len();
-            let cache_bytes = cache.len();
-            let index_bytes = indices.len() * std::mem::size_of::<usize>();
-            let checksum = random_cache(&cache, &indices, repeats);
-            (checksum, packed_bytes, cache_bytes, 0usize, index_bytes)
-        }
-        _ => {
-            eprintln!("unknown mode: {mode}");
-            return ExitCode::from(2);
-        }
-    };
+    let (checksum, packed_bytes, cache_bytes, offset_index_bytes, access_index_bytes) =
+        match mode.as_str() {
+            "prepare-logical" => {
+                black_box(&words);
+                (words.len() as u64, 0usize, 0usize, 0usize, 0usize)
+            }
+            "prepare-unpacked" => {
+                let bytes = materialize_unpacked_bytes(&words);
+                let len = bytes.len();
+                black_box(&bytes);
+                (len as u64, 0usize, len, 0usize, 0usize)
+            }
+            "prepare-packed" => {
+                let packed = pack_words(&words);
+                let bytes = packed.byte_len();
+                black_box(&packed);
+                (packed.bit_len() as u64, bytes, 0, 0usize, 0usize)
+            }
+            "prepare-cached" => {
+                let packed = pack_words(&words);
+                let bytes = packed.byte_len();
+                let cache = decode_cache(&words, &packed);
+                let cache_len = cache.len();
+                black_box(&cache);
+                (cache_len as u64, bytes, cache_len, 0usize, 0usize)
+            }
+            "scan-unpacked" => {
+                let bytes = materialize_unpacked_bytes(&words);
+                let len = bytes.len();
+                let checksum = scan_unpacked(&bytes, repeats);
+                (checksum, 0, len, 0usize, 0usize)
+            }
+            "scan-packed" => {
+                let packed = pack_words(&words);
+                let bytes = packed.byte_len();
+                let checksum = scan_packed(&words, &packed, repeats);
+                (checksum, bytes, 0, 0usize, 0usize)
+            }
+            "scan-cached" => {
+                let packed = pack_words(&words);
+                let bytes = packed.byte_len();
+                let cache = decode_cache(&words, &packed);
+                let cache_len = cache.len();
+                let checksum = scan_cache(&cache, repeats);
+                (checksum, bytes, cache_len, 0usize, 0usize)
+            }
+            "prepare-random-unpacked" => {
+                let bytes = materialize_unpacked_bytes(&words);
+                let indices = build_random_indices(count, random_accesses);
+                let index_bytes = indices.len() * std::mem::size_of::<usize>();
+                let len = bytes.len();
+                black_box((&bytes, &indices));
+                (len as u64, 0usize, len, 0usize, index_bytes)
+            }
+            "prepare-random-packed" => {
+                let (packed, offsets) = match fixed_width(&case) {
+                    Some(_) => (pack_words(&words), Vec::new()),
+                    None => pack_words_with_offsets(&words),
+                };
+                let indices = build_random_indices(count, random_accesses);
+                let packed_bytes = packed.byte_len();
+                let offset_bytes = offsets.len() * std::mem::size_of::<usize>();
+                let index_bytes = indices.len() * std::mem::size_of::<usize>();
+                black_box((&packed, &offsets, &indices));
+                (
+                    packed.bit_len() as u64,
+                    packed_bytes,
+                    0usize,
+                    offset_bytes,
+                    index_bytes,
+                )
+            }
+            "prepare-random-cached" => {
+                let packed = pack_words(&words);
+                let cache = decode_cache(&words, &packed);
+                let indices = build_random_indices(count, random_accesses);
+                let packed_bytes = packed.byte_len();
+                let cache_bytes = cache.len();
+                let index_bytes = indices.len() * std::mem::size_of::<usize>();
+                black_box((&cache, &indices));
+                (
+                    cache_bytes as u64,
+                    packed_bytes,
+                    cache_bytes,
+                    0usize,
+                    index_bytes,
+                )
+            }
+            "random-unpacked" => {
+                let bytes = materialize_unpacked_bytes(&words);
+                let indices = build_random_indices(count, random_accesses);
+                let index_bytes = indices.len() * std::mem::size_of::<usize>();
+                let checksum = random_unpacked(&bytes, &indices, repeats);
+                (checksum, 0usize, bytes.len(), 0usize, index_bytes)
+            }
+            "random-packed" => {
+                let fixed = fixed_width(&case);
+                let (packed, offsets) = match fixed {
+                    Some(_) => (pack_words(&words), Vec::new()),
+                    None => pack_words_with_offsets(&words),
+                };
+                let indices = build_random_indices(count, random_accesses);
+                let packed_bytes = packed.byte_len();
+                let offset_bytes = offsets.len() * std::mem::size_of::<usize>();
+                let index_bytes = indices.len() * std::mem::size_of::<usize>();
+                let checksum = random_packed(&words, &packed, &offsets, fixed, &indices, repeats);
+                (checksum, packed_bytes, 0usize, offset_bytes, index_bytes)
+            }
+            "random-cached" => {
+                let packed = pack_words(&words);
+                let cache = decode_cache(&words, &packed);
+                let indices = build_random_indices(count, random_accesses);
+                let packed_bytes = packed.byte_len();
+                let cache_bytes = cache.len();
+                let index_bytes = indices.len() * std::mem::size_of::<usize>();
+                let checksum = random_cache(&cache, &indices, repeats);
+                (checksum, packed_bytes, cache_bytes, 0usize, index_bytes)
+            }
+            _ => {
+                eprintln!("unknown mode: {mode}");
+                return ExitCode::from(2);
+            }
+        };
 
     println!(
         "case={case} mode={mode} count={count} repeats={repeats} random_accesses={random_accesses} semantic_bits={semantic_bits} unpacked_bytes={unpacked_bytes} packed_bytes={packed_bytes} cache_bytes={cache_bytes} offset_index_bytes={offset_index_bytes} access_index_bytes={access_index_bytes} checksum={checksum}"

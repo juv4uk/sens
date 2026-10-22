@@ -1,5 +1,5 @@
 use sens::{
-    eval_parsed_expressions, eval_core_library_source, eval_program,
+    eval_core_library_source, eval_parsed_expressions, eval_program,
     parse_mixed_exact_domain_reasoning_source, Session,
 };
 
@@ -14,15 +14,16 @@ fn load_reasoning(session: &mut Session, path: &str, source: &str) {
 
 fn session() -> Session {
     let mut session = Session::default();
-    eval_core_library_source(include_str!("../../../lib/core.lisp"),
-        &mut session,
-    )
-    .expect("exact-domain core bootstrap");
+    eval_core_library_source(include_str!("../../../lib/core.lisp"), &mut session)
+        .expect("exact-domain core bootstrap");
 
     for (path, source) in [
         ("lib/unify.lisp", include_str!("../../../lib/unify.lisp")),
         ("lib/reason.lisp", include_str!("../../../lib/reason.lisp")),
-        ("lib/forward.lisp", include_str!("../../../lib/forward.lisp")),
+        (
+            "lib/forward.lisp",
+            include_str!("../../../lib/forward.lisp"),
+        ),
         ("lib/knowledge.lisp", KNOWLEDGE),
     ] {
         load_reasoning(&mut session, path, source);

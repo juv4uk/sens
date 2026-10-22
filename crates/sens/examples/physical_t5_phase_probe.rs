@@ -10,8 +10,12 @@ use sens::{
 use std::{env, fs, hint::black_box, process::ExitCode, time::Instant};
 
 const PHASES: [&str; 6] = [
-    "session", "decode_t5", "parse_d2", "eval_hot",
-    "eval_fresh", "full_in_memory",
+    "session",
+    "decode_t5",
+    "parse_d2",
+    "eval_hot",
+    "eval_fresh",
+    "full_in_memory",
 ];
 
 fn hex_value(input: &str) -> String {
@@ -33,13 +37,24 @@ fn main() -> ExitCode {
 
 fn measure() -> Result<(), String> {
     let mut args = env::args().skip(1);
-    let source = args.next().ok_or("usage: physical_t5_phase_probe FILE.sens WARMUP REPS INNER")?;
-    let warmup: usize = args.next().ok_or("missing warmup")?
-        .parse().map_err(|_| "warmup must be integer")?;
-    let reps: usize = args.next().ok_or("missing reps")?
-        .parse().map_err(|_| "reps must be integer")?;
-    let inner: usize = args.next().ok_or("missing inner")?
-        .parse().map_err(|_| "inner must be integer")?;
+    let source = args
+        .next()
+        .ok_or("usage: physical_t5_phase_probe FILE.sens WARMUP REPS INNER")?;
+    let warmup: usize = args
+        .next()
+        .ok_or("missing warmup")?
+        .parse()
+        .map_err(|_| "warmup must be integer")?;
+    let reps: usize = args
+        .next()
+        .ok_or("missing reps")?
+        .parse()
+        .map_err(|_| "reps must be integer")?;
+    let inner: usize = args
+        .next()
+        .ok_or("missing inner")?
+        .parse()
+        .map_err(|_| "inner must be integer")?;
     if args.next().is_some() || reps < 5 || inner == 0 || inner > 100_000 || warmup > 100 {
         return Err("expected FILE.sens WARMUP REPS INNER, reps>=5 and 1<=inner<=100000".into());
     }
@@ -53,12 +68,13 @@ fn measure() -> Result<(), String> {
     if encode_ternary_words(&words).map_err(|error| format!("T5 encode: {error:?}"))? != bytes {
         return Err("physical byte parity mismatch".into());
     }
-    let forms = parse_canonical_word_sequence(&words)
-        .map_err(|error| format!("D2 syntax: {error}"))?;
+    let forms =
+        parse_canonical_word_sequence(&words).map_err(|error| format!("D2 syntax: {error}"))?;
     let mut truth_session = Session::default();
     let expected = eval_parsed_expressions(&forms, &mut truth_session)
         .map_err(|error| format!("SENS oracle: {error}"))?
-        .value.to_string();
+        .value
+        .to_string();
     if expected.is_empty() {
         return Err("empty observable result is not an admitted benchmark oracle".into());
     }
@@ -120,7 +136,8 @@ fn measure() -> Result<(), String> {
                 let mut verify_session = Session::default();
                 let got = eval_parsed_expressions(&forms, &mut verify_session)
                     .map_err(|e| format!("per-sample oracle: {e}"))?
-                    .value.to_string();
+                    .value
+                    .to_string();
                 if got != expected {
                     return Err(format!("nondeterministic execution in {phase} at {sample}"));
                 }

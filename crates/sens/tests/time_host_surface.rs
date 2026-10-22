@@ -1,6 +1,5 @@
 use sens::{eval_program, load_core_library, load_time_library, Session, Value};
 
-
 /// Назва з таблиці функцій веде до коду, що має примітив (хостовий механізм).
 fn is_raw_primitive(name: &str) -> bool {
     sens::semantic_registry_export::semantic_id_for_admitted_surface(name)
@@ -20,10 +19,18 @@ fn raw_host_time_surface_is_small_and_semantic_names_are_absent() {
     ] {
         // Після #1477 сирі хостові механізми — примітиви за кодом СЕНС,
         // а не прив'язки Value::Builtin за назвою.
-        assert!(is_raw_primitive(name), "{name} must remain a raw host primitive");
+        assert!(
+            is_raw_primitive(name),
+            "{name} must remain a raw host primitive"
+        );
     }
 
-    for name in ["mono-ms", "utc-now", "internet-time-sync", "timezone-detect"] {
+    for name in [
+        "mono-ms",
+        "utc-now",
+        "internet-time-sync",
+        "timezone-detect",
+    ] {
         assert!(
             session.environment.get(name).is_none(),
             "{name} is semantic policy and must not reappear in the root host surface"
@@ -37,7 +44,12 @@ fn time_library_builds_public_meanings_over_raw_host_observations() {
     load_core_library(&mut session).unwrap();
     load_time_library(&mut session).unwrap();
 
-    for name in ["mono-ms", "utc-now", "internet-time-sync", "timezone-detect"] {
+    for name in [
+        "mono-ms",
+        "utc-now",
+        "internet-time-sync",
+        "timezone-detect",
+    ] {
         assert!(
             matches!(session.environment.get(name), Some(Value::Closure(_))),
             "{name} must be language-owned after lib/time.my loads"
@@ -50,11 +62,12 @@ fn time_library_builds_public_meanings_over_raw_host_observations() {
         "ntp-query-raw",
         "timezone-declarations-raw",
     ] {
-        assert!(is_raw_primitive(name), "{name} must stay the underlying raw host mechanism");
+        assert!(
+            is_raw_primitive(name),
+            "{name} must stay the underlying raw host mechanism"
+        );
     }
 }
-
-
 
 #[test]
 fn raw_time_primitives_are_not_redefined_as_self_recursive_lisp_functions() {
@@ -98,7 +111,10 @@ fn time_stable_peers_reuse_the_same_lisp_closures() {
         ("mono-ms", "монотонний-мс"),
         ("timezone-name", "назва-часового-поясу"),
         ("timezone-detect", "визначити-часовий-пояс"),
-        ("timezone-offset-seconds", "зміщення-часового-поясу-в-секундах"),
+        (
+            "timezone-offset-seconds",
+            "зміщення-часового-поясу-в-секундах",
+        ),
         ("deadline-reached?", "дедлайн-досягнуто?"),
         ("deadline-reached-at?", "дедлайн-досягнуто-на-момент?"),
         ("elapsed-ns", "минуло-нс"),
@@ -116,14 +132,11 @@ fn time_stable_peers_reuse_the_same_lisp_closures() {
                 );
             }
             (left, right) => {
-                panic!(
-                    "Втрата стабільної часової проєкції {source}/{peer}: {left:?} та {right:?}"
-                );
+                panic!("Втрата стабільної часової проєкції {source}/{peer}: {left:?} та {right:?}");
             }
         }
     }
 }
-
 
 fn eval_exact_time_source(
     source: &str,
@@ -151,12 +164,13 @@ fn ntp_mode_and_stratum_execute_exact_d1_and_reject_lists() {
         ("(інтернет-час-рівень-припустимий? (як-є (1)))", false),
     ] {
         let result = eval_program(source, &mut session)
-            .unwrap_or_else(|error| panic!(
-                "test_id=ntp-d1 layer=SENS input={source} error={error}"
-            ))
+            .unwrap_or_else(|error| {
+                panic!("test_id=ntp-d1 layer=SENS input={source} error={error}")
+            })
             .value;
         assert_eq!(
-            result.as_predicate_bit(), Some(expected),
+            result.as_predicate_bit(),
+            Some(expected),
             "test_id=ntp-d1 layer=SENS input={source} expected=D1:{expected} actual={result}"
         );
     }
@@ -205,7 +219,11 @@ fn time_predicates_use_exact_d1_literals_and_keep_boundary_laws() {
     }
     for source in ["0", "1"] {
         let value = eval_program(source, &mut session).unwrap().value;
-        assert_eq!(value.as_predicate_bit(), None, "{source} must remain numeric");
+        assert_eq!(
+            value.as_predicate_bit(),
+            None,
+            "{source} must remain numeric"
+        );
     }
 
     let code: String = include_str!("../../../lib/time.lisp")
@@ -213,14 +231,23 @@ fn time_predicates_use_exact_d1_literals_and_keep_boundary_laws() {
         .filter(|line| !line.trim_start().starts_with(';'))
         .collect::<Vec<_>>()
         .join("\n");
-    assert_eq!(code.matches("(010 (001 ()))").count(), 0,
-        "no redundant ATOM(QUOTE empty) truth constructors");
-    assert_eq!(code.matches("(101 (001 (0)) (001 (1)))").count(), 0,
-        "no redundant EQ(QUOTE 0, QUOTE 1) false constructors");
+    assert_eq!(
+        code.matches("(010 (001 ()))").count(),
+        0,
+        "no redundant ATOM(QUOTE empty) truth constructors"
+    );
+    assert_eq!(
+        code.matches("(101 (001 (0)) (001 (1)))").count(),
+        0,
+        "no redundant EQ(QUOTE 0, QUOTE 1) false constructors"
+    );
     // Текстові теги ширини не належать нинішній українській граматиці.
     // Виконуваний D1 закон вище перевіряємо за типом, а не підрахунком
     // застарілих #d1-літералів у файлі.
-    assert!(!code.contains("#d1:"), "застарілий текстовий D1-тег у lib/time.lisp");
+    assert!(
+        !code.contains("#d1:"),
+        "застарілий текстовий D1-тег у lib/time.lisp"
+    );
     assert!(
         code.contains("(хибне? (менше? поточні-нс граничні-нс))"),
         "точна D24+ межа повинна лишатися у Lisp без D3 EQ чисел"

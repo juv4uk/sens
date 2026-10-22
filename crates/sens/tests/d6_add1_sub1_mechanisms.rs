@@ -1,9 +1,13 @@
 use sens::{
-    eval_parsed_expressions, Bit5, Bit6, Bit7, Bit8, CoreD5, CoreD6, CoreD8, DomainIdentity,
-    Expr, ExprKind, Rational, Session, D7DataWord, Span,
+    eval_parsed_expressions, Bit5, Bit6, Bit7, Bit8, CoreD5, CoreD6, CoreD8, D7DataWord,
+    DomainIdentity, Expr, ExprKind, Rational, Session, Span,
 };
 
-fn exact_d6_call(bits: u8, args: &str, session: &mut Session) -> Result<String, sens::LanguageError> {
+fn exact_d6_call(
+    bits: u8,
+    args: &str,
+    session: &mut Session,
+) -> Result<String, sens::LanguageError> {
     let mut parsed = sens::parse(&format!("(__d6_probe__ {args})")).expect("probe payload");
     let mut form = parsed.remove(0);
     let ExprKind::List(items) = form.kind else {

@@ -5,8 +5,8 @@
 //! Жодних SID8/SENS8 перекладів або семантики з голого packed-byte.
 
 use sens::{
-    domain_ladder::DomainCoordinate, pack_domain_coordinates,
-    packed_transport_accounting, unpack_domain_coordinates,
+    domain_ladder::DomainCoordinate, pack_domain_coordinates, packed_transport_accounting,
+    unpack_domain_coordinates,
 };
 
 #[test]
@@ -42,7 +42,8 @@ fn всі_2046_координат_д1_д10_зберігають_ширину_і_
                 assert_ne!(
                     coordinate,
                     DomainCoordinate::new(width - 1, bits).unwrap(),
-                    "D{width}:{bits:b} не може успадкувати роль D{}", width - 1
+                    "D{width}:{bits:b} не може успадкувати роль D{}",
+                    width - 1
                 );
             }
             coordinates.push(coordinate);
@@ -91,17 +92,15 @@ fn атомарна_довжина_має_справжній_d3_так_ні_а_�
 
     fn run(source: &str) -> Result<String, String> {
         let forms = parse_mixed_exact_domain(source).map_err(|e| e.to_string())?;
-        let value = eval_parsed_expressions(&forms, &mut Session::default())
-            .map_err(|e| e.to_string())?;
+        let value =
+            eval_parsed_expressions(&forms, &mut Session::default()).map_err(|e| e.to_string())?;
         Ok(value.value.to_string())
     }
 
     // Д3 EQ перевіряємо окремо: D6 LENGTH нині не має
     // підтвердженого механізму виклику, тому не вдаємо, що тестували його.
-    let five = run("(101 5 5)")
-        .expect("D3 EQ атомарних чисел 5 та 5");
-    let four = run("(101 5 4)")
-        .expect("D3 EQ атомарних чисел 5 та 4");
+    let five = run("(101 5 5)").expect("D3 EQ атомарних чисел 5 та 5");
+    let four = run("(101 5 4)").expect("D3 EQ атомарних чисел 5 та 4");
     assert_ne!(five, four, "D3 EQ мусить розрізняти 5 і 4");
 
     // Відмінність від D8 EQUAL принципова: D3 EQ не порівнює пари.

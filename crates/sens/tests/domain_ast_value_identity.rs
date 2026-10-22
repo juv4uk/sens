@@ -1,8 +1,8 @@
 use sens::{
     fasl_decode_program, fasl_encode_program, wire_decode_program, wire_encode_program, Bija3,
-    Bit1, Bit2, Bit3, Bit4, Bit5, Bit6, Bit7, Bit8, Bit9, CoreD4, CoreD5, CoreD6, CoreD8,
-    CoreD9, CoreDomainIdentity, DomainIdentity, Exactness, Expr, ExprKind, PredicateBit, Racana2,
-    D7DataWord, Span, Value,
+    Bit1, Bit2, Bit3, Bit4, Bit5, Bit6, Bit7, Bit8, Bit9, CoreD4, CoreD5, CoreD6, CoreD8, CoreD9,
+    CoreDomainIdentity, D7DataWord, DomainIdentity, Exactness, Expr, ExprKind, PredicateBit,
+    Racana2, Span, Value,
 };
 use std::rc::Rc;
 
@@ -72,7 +72,17 @@ fn predicate_value_bridge_uses_only_exact_d1_domain_identity() {
 
 #[test]
 fn same_payload_across_all_d1_d9_remains_distinct_in_ast_and_value() {
-    let identities = [d1(1), d2(1), d3(1), d4(1), d5(1), d6(1), d7(1), d8(1), d9(1)];
+    let identities = [
+        d1(1),
+        d2(1),
+        d3(1),
+        d4(1),
+        d5(1),
+        d6(1),
+        d7(1),
+        d8(1),
+        d9(1),
+    ];
 
     for identity in identities {
         assert_eq!(identity.packed_bits(), 1);

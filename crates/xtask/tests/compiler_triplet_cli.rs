@@ -82,7 +82,10 @@ fn publish_triplet(tree: &TempTree, source_relative: &str) -> Triplet {
     let view = lisp.with_extension("");
     assert!(lisp.is_file(), "publisher must stage canonical .lisp");
     assert!(sens.is_file(), "publisher must stage physical .sens");
-    assert!(view.is_file(), "publisher must stage the extensionless bit view");
+    assert!(
+        view.is_file(),
+        "publisher must stage the extensionless bit view"
+    );
 
     Triplet { lisp, sens, view }
 }
@@ -128,7 +131,9 @@ fn real_three_projection_nested_program_reaches_the_sens_compiler() {
         String::from_utf8_lossy(&output.stderr)
     );
     assert!(
-        !fs::read(&artifact).expect("nested compiler artifact").is_empty(),
+        !fs::read(&artifact)
+            .expect("nested compiler artifact")
+            .is_empty(),
         "nested source must produce a canonical compiler artifact"
     );
 }

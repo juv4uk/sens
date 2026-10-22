@@ -4,9 +4,9 @@ use std::process::Command;
 
 fn definition<'a>(source: &'a str, name: &str) -> &'a str {
     let tag = format!("(визначити {name}\n");
-    let start = source.find(&tag).unwrap_or_else(|| {
-        panic!("у чинному lib/core1.lisp немає визначення {name}")
-    });
+    let start = source
+        .find(&tag)
+        .unwrap_or_else(|| panic!("у чинному lib/core1.lisp немає визначення {name}"));
     let following = &source[start..];
     let end = following.find("\n(визначити ").unwrap_or(following.len());
     &following[..end]
@@ -15,16 +15,14 @@ fn definition<'a>(source: &'a str, name: &str) -> &'a str {
 #[test]
 fn українські_масиви_core1_виконують_перевірку_меж_у_sens() {
     let root = concat!(env!("CARGO_MANIFEST_DIR"), "/../..");
-    let donor = std::fs::read_to_string(concat!(
-        env!("CARGO_MANIFEST_DIR"), "/../../lib/core1.lisp"
-    ))
-    .expect("чинний український Lisp");
+    let donor =
+        std::fs::read_to_string(concat!(env!("CARGO_MANIFEST_DIR"), "/../../lib/core1.lisp"))
+            .expect("чинний український Lisp");
     // Реальна залежність Core1: Д1-істина/хиба надходить із виконуваного
     // lib/core.lisp, а не з текстових заглушок тесту чи host-bool.
-    let mut program = std::fs::read_to_string(concat!(
-        env!("CARGO_MANIFEST_DIR"), "/../../lib/core.lisp"
-    ))
-    .expect("реальний lib/core.lisp через транспорт, не Rust include_str!");
+    let mut program =
+        std::fs::read_to_string(concat!(env!("CARGO_MANIFEST_DIR"), "/../../lib/core.lisp"))
+            .expect("реальний lib/core.lisp через транспорт, не Rust include_str!");
     program.push('\n');
     for name in [
         "ядро1-створити-помилку",
@@ -41,14 +39,42 @@ fn українські_масиви_core1_виконують_перевірку
         program.push('\n');
     }
     for (index, (expression, expected, is_error)) in [
-        ("(ядро1-елемент-масиву (як-є (весна літо)) 0)", "весна", false),
-        ("(ядро1-елемент-масиву (як-є (весна літо)) 1)", "літо", false),
-        ("(ядро1-змінити-елемент-масиву (як-є (весна літо)) 1 (як-є осінь))", "(весна осінь)", false),
+        (
+            "(ядро1-елемент-масиву (як-є (весна літо)) 0)",
+            "весна",
+            false,
+        ),
+        (
+            "(ядро1-елемент-масиву (як-є (весна літо)) 1)",
+            "літо",
+            false,
+        ),
+        (
+            "(ядро1-змінити-елемент-масиву (як-є (весна літо)) 1 (як-є осінь))",
+            "(весна осінь)",
+            false,
+        ),
         ("(ядро1-створити-масив 2)", "(0 0)", false),
-        ("(ядро1-елемент-масиву (як-є ()) 0)", "індекс-поза-масивом", true),
-        ("(ядро1-елемент-масиву (як-є (весна)) 2)", "індекс-поза-масивом", true),
-        ("(ядро1-елемент-масиву (як-є (весна)) -1)", "індекс-поза-масивом", true),
-        ("(ядро1-змінити-елемент-масиву (як-є ()) 0 (як-є осінь))", "індекс-поза-масивом", true),
+        (
+            "(ядро1-елемент-масиву (як-є ()) 0)",
+            "індекс-поза-масивом",
+            true,
+        ),
+        (
+            "(ядро1-елемент-масиву (як-є (весна)) 2)",
+            "індекс-поза-масивом",
+            true,
+        ),
+        (
+            "(ядро1-елемент-масиву (як-є (весна)) -1)",
+            "індекс-поза-масивом",
+            true,
+        ),
+        (
+            "(ядро1-змінити-елемент-масиву (як-є ()) 0 (як-є осінь))",
+            "індекс-поза-масивом",
+            true,
+        ),
         ("(ядро1-створити-масив -1)", "відємний-розмір-масиву", true),
         // D1-механізм істини/хиби в чинній українській бібліотеці.
         ("(ядро1-пара? (як-є ()))", "0", false),
@@ -61,12 +87,15 @@ fn українські_масиви_core1_виконують_перевірку
         ("(ядро1-нуль? -1)", "0", false),
         ("(ядро1-нуль? 0)", "1", false),
         ("(ядро1-нуль? 2)", "0", false),
-    ].into_iter().enumerate() {
+    ]
+    .into_iter()
+    .enumerate()
+    {
         let file = std::env::temp_dir().join(format!(
-            "sens-uk-core1-array-{}-{index}.lisp", std::process::id()
+            "sens-uk-core1-array-{}-{index}.lisp",
+            std::process::id()
         ));
-        std::fs::write(&file, format!("{program}\n{expression}\n"))
-            .expect("тимчасовий Lisp-файл");
+        std::fs::write(&file, format!("{program}\n{expression}\n")).expect("тимчасовий Lisp-файл");
         // Жоден завислий рекурсивний Lisp не повинен займати CI безмежно.
         // Очікувані значення не змінюємо; timeout друкує конкретний вираз.
         let mut child = Command::new(env!("CARGO_BIN_EXE_sens"))
@@ -76,8 +105,7 @@ fn українські_масиви_core1_виконують_перевірку
             .stderr(std::process::Stdio::piped())
             .spawn()
             .expect("справжній SENS CLI");
-        let deadline = std::time::Instant::now()
-            + std::time::Duration::from_secs(6);
+        let deadline = std::time::Instant::now() + std::time::Duration::from_secs(6);
         loop {
             if child.try_wait().expect("стан процесу SENS").is_some() {
                 break;
@@ -100,11 +128,16 @@ fn українські_масиви_core1_виконують_перевірку
         );
         let stdout = String::from_utf8_lossy(&output.stdout);
         if is_error {
-            assert!(stdout.contains(expected),
-                "очікували мовний результат {expected}, отримали {stdout}");
+            assert!(
+                stdout.contains(expected),
+                "очікували мовний результат {expected}, отримали {stdout}"
+            );
         } else {
-            assert_eq!(stdout.trim(), expected,
-                "SENS повернув інший результат для {expression}");
+            assert_eq!(
+                stdout.trim(),
+                expected,
+                "SENS повернув інший результат для {expression}"
+            );
         }
     }
 }

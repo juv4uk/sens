@@ -3,9 +3,7 @@
 //! This module owns source token shape only. It deliberately does not assign
 //! D1-D9 meaning; semantic wrappers consume these exact-width words later.
 
-use crate::{
-    Bit1, Bit2, Bit3, Bit4, Bit5, Bit6, Bit7, Bit8, Bit9, ErrorKind, LanguageError, Span,
-};
+use crate::{Bit1, Bit2, Bit3, Bit4, Bit5, Bit6, Bit7, Bit8, Bit9, ErrorKind, LanguageError, Span};
 use std::fmt;
 
 /// Canonical SENS source extension. The extension identifies the language;
@@ -92,7 +90,6 @@ impl BinarySourceWord {
         }
     }
 
-
     /// Lift an exact four-bit source word into the typed Core.D4 carrier.
     ///
     /// Occupancy and operation meaning remain owned by the D4 contract.
@@ -174,7 +171,6 @@ impl From<crate::Bija3> for BinarySourceWord {
         Self::W3(value.word())
     }
 }
-
 
 impl From<crate::CoreD4> for BinarySourceWord {
     fn from(value: crate::CoreD4) -> Self {
@@ -271,11 +267,7 @@ pub fn parse_binary_source_words(source: &str) -> Result<Vec<BinarySourceToken>,
                     } else {
                         "canonical SENS source accepts only exact-width binary words"
                     };
-                    LanguageError::new(
-                        ErrorKind::Parse,
-                        message,
-                        Span { start, end: cursor },
-                    )
+                    LanguageError::new(ErrorKind::Parse, message, Span { start, end: cursor })
                 })?;
                 tokens.push(BinarySourceToken {
                     word,
@@ -339,10 +331,9 @@ pub fn parse_domain_ladder_source_words(
                 for &bit in token {
                     bits = (bits << 1) | u16::from(bit - b'0');
                 }
-                let coordinate = crate::domain_ladder::DomainCoordinate::new(
-                    token.len() as u8, bits,
-                )
-                .expect("перевірені 1–10 бітів утворюють механічну координату");
+                let coordinate =
+                    crate::domain_ladder::DomainCoordinate::new(token.len() as u8, bits)
+                        .expect("перевірені 1–10 бітів утворюють механічну координату");
                 result.push(DomainLadderSourceToken {
                     coordinate,
                     span: Span { start, end: cursor },
@@ -352,7 +343,6 @@ pub fn parse_domain_ladder_source_words(
     }
     Ok(result)
 }
-
 
 fn parse_word(token: &str) -> Option<BinarySourceWord> {
     if token.is_empty() || token.len() > 9 {
@@ -581,6 +571,8 @@ mod tests {
     #[test]
     fn empty_and_comment_only_source_are_valid_empty_programs() {
         assert!(parse_binary_source_words("").unwrap().is_empty());
-        assert!(parse_binary_source_words(" ; comment only\n").unwrap().is_empty());
+        assert!(parse_binary_source_words(" ; comment only\n")
+            .unwrap()
+            .is_empty());
     }
 }

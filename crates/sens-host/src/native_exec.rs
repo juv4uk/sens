@@ -1,6 +1,4 @@
-use sens::{
-    eval_expr, Environment, ErrorKind, Exactness, Expr, LanguageError, Span, Value,
-};
+use sens::{eval_expr, Environment, ErrorKind, Exactness, Expr, LanguageError, Span, Value};
 
 const MAX_EXACT_LISP_INTEGER: u64 = 9_007_199_254_740_991;
 const MAX_NATIVE_ARENA_BYTES: usize = 1_048_576;
@@ -110,9 +108,7 @@ fn expect_machine_bytes(
             _ => {
                 return Err(LanguageError::new(
                     ErrorKind::Type,
-                    format!(
-                        "{operation} expects a proper list of exact byte integers 0-255"
-                    ),
+                    format!("{operation} expects a proper list of exact byte integers 0-255"),
                     span,
                 ));
             }
@@ -128,15 +124,10 @@ fn expect_arena_length(value: &Value, span: Span) -> Result<usize, LanguageError
             span,
         ));
     };
-    if number.fract() != 0.0
-        || *number < 1.0
-        || *number > MAX_NATIVE_ARENA_BYTES as f64
-    {
+    if number.fract() != 0.0 || *number < 1.0 || *number > MAX_NATIVE_ARENA_BYTES as f64 {
         return Err(LanguageError::new(
             ErrorKind::InvalidForm,
-            format!(
-                "native-call-u64-raw arena byte count must be 1..={MAX_NATIVE_ARENA_BYTES}"
-            ),
+            format!("native-call-u64-raw arena byte count must be 1..={MAX_NATIVE_ARENA_BYTES}"),
             span,
         ));
     }
@@ -175,10 +166,7 @@ fn execute_u64(bytes: &[u8], span: Span) -> Result<u64, LanguageError> {
     let operation = "native-call-u64-raw";
     let memory = prepare_executable(bytes, operation, span)?;
     let result = unsafe {
-        call_guest_preserving_sysv64_nonvolatile(
-            memory.as_ptr().cast::<u8>(),
-            std::ptr::null_mut(),
-        )
+        call_guest_preserving_sysv64_nonvolatile(memory.as_ptr().cast::<u8>(), std::ptr::null_mut())
     };
 
     platform::release(&memory)

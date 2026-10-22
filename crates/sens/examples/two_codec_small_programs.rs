@@ -15,9 +15,8 @@ use std::{
 };
 
 use sens::{
-    decode_ternary_words, encode_ternary_words, eval_parsed_expressions,
-    parse_binary_source_words, parse_canonical_binary, parse_canonical_word_sequence,
-    PhysicalT5Program, Session,
+    decode_ternary_words, encode_ternary_words, eval_parsed_expressions, parse_binary_source_words,
+    parse_canonical_binary, parse_canonical_word_sequence, PhysicalT5Program, Session,
 };
 
 #[path = "../../../research/framed3/rust_codec/senc.rs"]
@@ -60,22 +59,20 @@ fn read_t5_canon(raw: &[u8]) -> Result<Vec<sens::BinarySourceWord>, String> {
     if p.form_count() == 0 {
         return Err("zero canonical forms: not a program".into());
     }
-    let words = decode_ternary_words(raw)
-        .map_err(|e| format!("T5 transport: {e:?}"))?;
-    let repeated = encode_ternary_words(&words)
-        .map_err(|e| format!("T5 re-encode: {e:?}"))?;
+    let words = decode_ternary_words(raw).map_err(|e| format!("T5 transport: {e:?}"))?;
+    let repeated = encode_ternary_words(&words).map_err(|e| format!("T5 re-encode: {e:?}"))?;
     if repeated != raw {
         return Err("noncanonical T5 physical bytes".into());
     }
-    parse_canonical_word_sequence(&words)
-        .map_err(|e| format!("D2 canonical grammar: {e:?}"))?;
+    parse_canonical_word_sequence(&words).map_err(|e| format!("D2 canonical grammar: {e:?}"))?;
     Ok(words)
 }
 
 fn exact_strings(words: &[sens::BinarySourceWord]) -> Vec<String> {
-    words.iter().map(|w| {
-        format!("{:0width$b}", w.packed_bits(), width = w.width())
-    }).collect()
+    words
+        .iter()
+        .map(|w| format!("{:0width$b}", w.packed_bits(), width = w.width()))
+        .collect()
 }
 
 fn select_from_t5(raw: &[u8]) -> Result<Choice, String> {
@@ -112,9 +109,11 @@ fn select_from_t5(raw: &[u8]) -> Result<Choice, String> {
     let source = exact.join(" ");
     let retyped = parse_binary_source_words(&source)
         .map_err(|e| format!("source word parse: {e:?}"))?
-        .into_iter().map(|w| w.word).collect::<Vec<_>>();
-    if encode_ternary_words(&retyped)
-        .map_err(|e| format!("independent bridge encode: {e:?}"))? != raw
+        .into_iter()
+        .map(|w| w.word)
+        .collect::<Vec<_>>();
+    if encode_ternary_words(&retyped).map_err(|e| format!("independent bridge encode: {e:?}"))?
+        != raw
     {
         return Err("F3 bridge not bit-exact against production physical T5".into());
     }
@@ -138,14 +137,16 @@ fn explicit_decode(raw: &[u8], extension: &str) -> Result<Vec<u8>, String> {
             if raw.first() != Some(&senc::FRAME_LABEL) {
                 return Err("F3 extension requires original 0xF3 marker".into());
             }
-            let exact = senc::decode_senc(raw)
-                .map_err(|e| format!("strict original F3 decoder: {e:?}"))?;
+            let exact =
+                senc::decode_senc(raw).map_err(|e| format!("strict original F3 decoder: {e:?}"))?;
             let source = exact.join(" ");
             let words = parse_binary_source_words(&source)
                 .map_err(|e| format!("F3 exact words: {e:?}"))?
-                .into_iter().map(|t| t.word).collect::<Vec<_>>();
-            let reconstructed = encode_ternary_words(&words)
-                .map_err(|e| format!("F3 -> production T5: {e:?}"))?;
+                .into_iter()
+                .map(|t| t.word)
+                .collect::<Vec<_>>();
+            let reconstructed =
+                encode_ternary_words(&words).map_err(|e| format!("F3 -> production T5: {e:?}"))?;
             read_t5_canon(&reconstructed)?;
             let selected = select_from_t5(&reconstructed)?;
             if selected.codec != Codec::OriginalFrame3 || selected.physical != raw {
@@ -175,27 +176,31 @@ fn self_test() -> Result<(), String> {
     let sample = "10 001 00 000 01"; // QUOTE(000), D2 separator retained.
     let words = parse_binary_source_words(sample)
         .map_err(|e| format!("self-test source: {e:?}"))?
-        .into_iter().map(|x| x.word).collect::<Vec<_>>();
-    let raw = encode_ternary_words(&words)
-        .map_err(|e| format!("self-test T5: {e:?}"))?;
+        .into_iter()
+        .map(|x| x.word)
+        .collect::<Vec<_>>();
+    let raw = encode_ternary_words(&words).map_err(|e| format!("self-test T5: {e:?}"))?;
     let chosen = select_from_t5(&raw)?;
     verify_roundtrip(&raw, &chosen)?;
     // Prove this is executable SENS code, not merely a balanced D2 tree.
     // Execute the same admitted QUOTE program independently after both routes.
-    let parsed = parse_canonical_binary(sample)
-        .map_err(|e| format!("SENS AST: {e:?}"))?;
+    let parsed = parse_canonical_binary(sample).map_err(|e| format!("SENS AST: {e:?}"))?;
     let expected = eval_parsed_expressions(&parsed, &mut Session::default())
         .map_err(|e| format!("direct SENS oracle: {e:?}"))?;
     let recovered = explicit_decode(&chosen.physical, "senc")?;
     let physical_program = PhysicalT5Program::decode(&recovered)
         .map_err(|e| format!("recovered physical SENS program: {e:?}"))?;
-    let actual = physical_program.execute(&mut Session::default())
+    let actual = physical_program
+        .execute(&mut Session::default())
         .map_err(|e| format!("recovered SENS execution: {e:?}"))?;
     if expected.value != actual.value || expected.output != actual.output {
         return Err("F3 decoded program evaluation differs from canonical SENS oracle".into());
     }
     if chosen.codec != Codec::OriginalFrame3 {
-        return Err(format!("small F3 proof was not selected: {}", chosen.reason));
+        return Err(format!(
+            "small F3 proof was not selected: {}",
+            chosen.reason
+        ));
     }
     if explicit_decode(&chosen.physical, "sens").is_ok() {
         return Err("F3 body was silently accepted as T5".into());
@@ -214,12 +219,15 @@ fn self_test() -> Result<(), String> {
     // Over-threshold fully canonical source must stay on T5 even if F3
     // could offer a shorter body. No arbitrary forced F3 execution.
     let mut large_text = Vec::new();
-    for _ in 0..50 { large_text.push("1"); }
+    for _ in 0..50 {
+        large_text.push("1");
+    }
     let huge_words = parse_binary_source_words(&large_text.join(" "))
         .map_err(|e| format!("large source: {e:?}"))?
-        .into_iter().map(|t| t.word).collect::<Vec<_>>();
-    let huge = encode_ternary_words(&huge_words)
-        .map_err(|e| format!("large T5: {e:?}"))?;
+        .into_iter()
+        .map(|t| t.word)
+        .collect::<Vec<_>>();
+    let huge = encode_ternary_words(&huge_words).map_err(|e| format!("large T5: {e:?}"))?;
     let large = select_from_t5(&huge)?;
     if large.codec != Codec::T5 || large.reason != "T5_OVER_16B" {
         return Err("large T5 was not preserved".into());
@@ -231,12 +239,17 @@ fn self_test() -> Result<(), String> {
 
 fn report() -> Result<(), String> {
     self_test()?;
-    let git = Command::new("git").args(["ls-files", "-z", "--", "*.sens"])
-        .output().map_err(|e| format!("git ls-files: {e}"))?;
+    let git = Command::new("git")
+        .args(["ls-files", "-z", "--", "*.sens"])
+        .output()
+        .map_err(|e| format!("git ls-files: {e}"))?;
     if !git.status.success() {
         return Err("failed to collect full git-tracked physical .sens inventory".into());
     }
-    let mut paths = git.stdout.split(|&b| b == 0).filter(|s| !s.is_empty())
+    let mut paths = git
+        .stdout
+        .split(|&b| b == 0)
+        .filter(|s| !s.is_empty())
         .map(|s| String::from_utf8(s.to_vec()).map_err(|e| e.to_string()))
         .collect::<Result<Vec<_>, _>>()?;
     paths.sort();
@@ -244,7 +257,9 @@ fn report() -> Result<(), String> {
         return Err("no tracked physical files; no supporting proof".into());
     }
     println!("# policy=canonical T5 .sens by default; F3 .senc only <=16B original T5 and strict smaller full carrier");
-    println!("# profile=original research F3 with 0xF3 byte label; not S3/v1-v3; not .f3m micro profile");
+    println!(
+        "# profile=original research F3 with 0xF3 byte label; not S3/v1-v3; not .f3m micro profile"
+    );
     println!("# extension-dispatched strict decoder; canonical production T5 proof; no implicit fallback");
     println!("file\tt5_bytes\tcodec\tselected_bytes\textension\treason\tverified_f3_bytes");
     let (mut scanned, mut small, mut f3, mut original, mut selected) = (0, 0, 0, 0, 0);
@@ -253,15 +268,27 @@ fn report() -> Result<(), String> {
         let c = select_from_t5(&raw).map_err(|e| format!("{path}: {e}"))?;
         verify_roundtrip(&raw, &c).map_err(|e| format!("{path}: {e}"))?;
         scanned += 1;
-        if raw.len() <= MAX_SMALL_T5_BYTES { small += 1; }
-        if c.codec == Codec::OriginalFrame3 { f3 += 1; }
+        if raw.len() <= MAX_SMALL_T5_BYTES {
+            small += 1;
+        }
+        if c.codec == Codec::OriginalFrame3 {
+            f3 += 1;
+        }
         original += raw.len();
         selected += c.physical.len();
-        let candidate = c.available_f3_bytes
-            .map(|n| n.to_string()).unwrap_or_else(|| "NA".into());
-        println!("{path}\t{}\t{}\t{}\t.{}\t{}\t{}",
-                 raw.len(), c.codec.name(), c.physical.len(), c.codec.extension(),
-                 c.reason, candidate);
+        let candidate = c
+            .available_f3_bytes
+            .map(|n| n.to_string())
+            .unwrap_or_else(|| "NA".into());
+        println!(
+            "{path}\t{}\t{}\t{}\t.{}\t{}\t{}",
+            raw.len(),
+            c.codec.name(),
+            c.physical.len(),
+            c.codec.extension(),
+            c.reason,
+            candidate
+        );
     }
     eprintln!("TWO_CODEC_REAL_FILE_PASS: tracked={scanned}, small_T5_<=16B={small}, selected_F3={f3}, original_T5={original}B, selected_total={selected}B, all_exact_roundtrips={scanned}");
     if small == 0 || f3 == 0 || selected >= original {
@@ -284,24 +311,35 @@ fn convert(input: &Path, output_stem: &Path) -> Result<(), String> {
     if destination == input {
         return Err("refuse to overwrite source file".into());
     }
-    let mut f = OpenOptions::new().write(true).create_new(true).open(&destination)
+    let mut f = OpenOptions::new()
+        .write(true)
+        .create_new(true)
+        .open(&destination)
         .map_err(|e| format!("create-new {}: {e}", destination.display()))?;
-    f.write_all(&c.physical).map_err(|e| format!("write: {e}"))?;
+    f.write_all(&c.physical)
+        .map_err(|e| format!("write: {e}"))?;
     f.sync_all().map_err(|e| format!("sync: {e}"))?;
     let on_disk = fs::read(&destination).map_err(|e| format!("verify read: {e}"))?;
     if on_disk != c.physical {
         return Err("written file differs from verified bytes".into());
     }
-    println!("{}\t{}\t{}B\t{}\t{}",
-        destination.display(), c.codec.name(), c.physical.len(),
-        c.reason, c.codec.extension());
+    println!(
+        "{}\t{}\t{}B\t{}\t{}",
+        destination.display(),
+        c.codec.name(),
+        c.physical.len(),
+        c.reason,
+        c.codec.extension()
+    );
     Ok(())
 }
 
 /// Offline-only exact restore of an explicitly selected file. This must never
 /// be wired into production .sens content auto-detection.
 fn restore_to_t5(input: &Path, output_stem: &Path) -> Result<(), String> {
-    let extension = input.extension().and_then(|x| x.to_str())
+    let extension = input
+        .extension()
+        .and_then(|x| x.to_str())
         .ok_or("missing .sens/.senc source extension")?;
     if output_stem.extension().is_some() {
         return Err("restore destination must be an extension-free output stem".into());
@@ -313,14 +351,22 @@ fn restore_to_t5(input: &Path, output_stem: &Path) -> Result<(), String> {
     if destination == input {
         return Err("restore cannot overwrite its input".into());
     }
-    let mut out = OpenOptions::new().write(true).create_new(true)
-        .open(&destination).map_err(|e| format!("restore create-new: {e}"))?;
-    out.write_all(&restored).map_err(|e| format!("restore write: {e}"))?;
+    let mut out = OpenOptions::new()
+        .write(true)
+        .create_new(true)
+        .open(&destination)
+        .map_err(|e| format!("restore create-new: {e}"))?;
+    out.write_all(&restored)
+        .map_err(|e| format!("restore write: {e}"))?;
     out.sync_all().map_err(|e| format!("restore sync: {e}"))?;
     if fs::read(&destination).map_err(|e| format!("restore read: {e}"))? != restored {
         return Err("restored physical bytes disagree with decoded T5".into());
     }
-    println!("{}\tRESTORED_T5\t{}B", destination.display(), restored.len());
+    println!(
+        "{}\tRESTORED_T5\t{}B",
+        destination.display(),
+        restored.len()
+    );
     Ok(())
 }
 

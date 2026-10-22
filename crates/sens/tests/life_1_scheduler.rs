@@ -11,15 +11,14 @@ fn виконати_двійковий_свідок_life_1() {
     let scheduler = include_str!("../../../lib/life-1-scheduler.lisp");
     let scheduler = parse_mixed_exact_domain(scheduler)
         .expect("транспорт: розібрати точні D3/D4 функції LIFE-1");
-    eval_parsed_expressions(&scheduler, &mut session)
-        .expect("транспорт: завантажити LIFE-1");
+    eval_parsed_expressions(&scheduler, &mut session).expect("транспорт: завантажити LIFE-1");
 
     // Єдиний оракул семантики: сама двійкова SENS-програма.
     let witness = include_str!("../../../tests/fixtures/life-1-exact-d3-semantic.lisp");
-    let witness = parse_mixed_exact_domain(witness)
-        .expect("транспорт: розібрати точний SENS-свідок");
-    let result = eval_parsed_expressions(&witness, &mut session)
-        .expect("транспорт: виконати SENS-свідок");
+    let witness =
+        parse_mixed_exact_domain(witness).expect("транспорт: розібрати точний SENS-свідок");
+    let result =
+        eval_parsed_expressions(&witness, &mut session).expect("транспорт: виконати SENS-свідок");
 
     // D1:NO is a real SENS failure. Ask SENS to expose its own 16 case bits;
     // Rust only prints the already-authored verdicts and NEVER changes truth.

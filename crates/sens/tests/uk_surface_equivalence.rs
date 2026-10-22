@@ -7,21 +7,22 @@
 //! `runtime_peer_operators.rs` already assert is no longer executable
 //! authority (TEST-ARCHITECTURE-1 step 2 migration, 2026-09-12).
 
-use sens::{eval_program, load_core_library, lower_program, parse, ErrorKind, Session};
 use sens::syntax::ExprKind;
+use sens::{eval_program, load_core_library, lower_program, parse, ErrorKind, Session};
 
 fn registry_rows() -> Vec<(String, Vec<Surface>)> {
     sens::semantic_registry_export::admitted_semantic_ids()
         .into_iter()
         .map(|semantic_id| {
             let id = sens::semantic_registry_export::semantic_id_bits(semantic_id);
-            let surfaces = sens::semantic_registry_export::admitted_surfaces_for_semantic_id(semantic_id)
-                .into_iter()
-                .map(|row| Surface {
-                    namespace: row.namespace.to_owned(),
-                    name: Some(row.name.to_owned()),
-                })
-                .collect();
+            let surfaces =
+                sens::semantic_registry_export::admitted_surfaces_for_semantic_id(semantic_id)
+                    .into_iter()
+                    .map(|row| Surface {
+                        namespace: row.namespace.to_owned(),
+                        name: Some(row.name.to_owned()),
+                    })
+                    .collect();
             (id, surfaces)
         })
         .collect()
@@ -33,7 +34,9 @@ struct Surface {
 }
 
 fn surface<'a>(surfaces: &'a [Surface], namespace: &str) -> Option<&'a Surface> {
-    surfaces.iter().find(|surface| surface.namespace == namespace)
+    surfaces
+        .iter()
+        .find(|surface| surface.namespace == namespace)
 }
 
 /// Every byte SID whose EN spelling AND UK spelling are both present.
@@ -175,12 +178,10 @@ fn ukrainian_surface_status_counts_are_internally_consistent() {
 // keyboard/text-policy lints, relocated to `cargo xtask verify` per
 // TEST-ARCHITECTURE-1 step 4 -- see crates/xtask/src/checks.rs.
 
-
 #[test]
 fn admitted_invoke_surfaces_lower_to_one_exact_sens_without_bare_value_fallback() {
-    let invoke_sens =
-        sens::semantic_registry_export::semantic_id_for_admitted_surface("invoke")
-            .expect("invoke must be admitted by the single registry");
+    let invoke_sens = sens::semantic_registry_export::semantic_id_for_admitted_surface("invoke")
+        .expect("invoke must be admitted by the single registry");
     let ukrainian_sens =
         sens::semantic_registry_export::semantic_id_for_admitted_surface("викликати")
             .expect("викликати must be admitted by the single registry");

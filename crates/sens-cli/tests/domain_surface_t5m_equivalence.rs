@@ -8,10 +8,7 @@ fn поле_проєкції<'a>(рядок: &'a str, namespace: &str) -> &'a st
         .split_once(&початок)
         .unwrap_or_else(|| panic!("немає поля {namespace} у D5-рядку"))
         .1;
-    решта
-        .split_once(')')
-        .expect("закрите поле проєкції")
-        .0
+    решта.split_once(')').expect("закрите поле проєкції").0
 }
 
 #[test]

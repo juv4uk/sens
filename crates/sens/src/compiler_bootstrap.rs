@@ -146,7 +146,6 @@ pub fn compiler_evidence_canonical_bytes(value: &Value) -> Result<Vec<u8>, Strin
     Ok(encoded)
 }
 
-
 const MAX_CANONICAL_COMPILER_DEPTH: usize = 4096;
 
 struct CanonicalCompilerDecoder<'a> {
@@ -214,15 +213,14 @@ impl<'a> CanonicalCompilerDecoder<'a> {
                 let high = self.take_byte()?;
                 u16::from_le_bytes([low, high])
             }
-            _ => return Err(format!(
-                "canonical compiler domain identity width must be 1..=9, got {width}"
-            )),
+            _ => {
+                return Err(format!(
+                    "canonical compiler domain identity width must be 1..=9, got {width}"
+                ))
+            }
         };
-        let invalid = || {
-            format!(
-                "canonical compiler domain identity has invalid D{width} payload {packed}"
-            )
-        };
+        let invalid =
+            || format!("canonical compiler domain identity has invalid D{width} payload {packed}");
         let source = match width {
             1 => BinarySourceWord::W1(Bit1::new(packed as u8).ok_or_else(invalid)?),
             2 => BinarySourceWord::W2(Bit2::new(packed as u8).ok_or_else(invalid)?),
@@ -235,7 +233,9 @@ impl<'a> CanonicalCompilerDecoder<'a> {
             9 => BinarySourceWord::W9(crate::Bit9::new(packed).ok_or_else(invalid)?),
             _ => unreachable!("width checked before reading payload"),
         };
-        Ok(Value::DomainIdentity(DomainIdentity::from_source_word(source)))
+        Ok(Value::DomainIdentity(DomainIdentity::from_source_word(
+            source,
+        )))
     }
 
     fn decode_value(&mut self, depth: usize) -> Result<Value, String> {
@@ -306,7 +306,6 @@ pub fn canonical_value_sha256_mechanism() -> Value {
     }))
 }
 
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -329,15 +328,10 @@ mod tests {
             DomainIdentity::from_source_word(BinarySourceWord::W9(crate::Bit9::new(1).unwrap())),
         ];
 
-        let value = Value::list(
-            identities
-                .into_iter()
-                .map(Value::DomainIdentity)
-                .chain([
-                    Value::Symbol(Rc::from("compiler-compilation-artifact-1")),
-                    Value::String(Rc::from("точні-bytes")),
-                ]),
-        );
+        let value = Value::list(identities.into_iter().map(Value::DomainIdentity).chain([
+            Value::Symbol(Rc::from("compiler-compilation-artifact-1")),
+            Value::String(Rc::from("точні-bytes")),
+        ]));
         let encoded = compiler_evidence_canonical_bytes(&value).unwrap();
         let decoded = compiler_evidence_from_canonical_bytes(&encoded).unwrap();
         assert_eq!(decoded, value);
@@ -356,17 +350,15 @@ mod tests {
         }
     }
 
-
     /// Exact D1–D9 compiler evidence = 1022 independently addressed values.
     /// All D10 coordinates (1024) must stay outside this Value ABI:
     /// 2046 coordinates are NOT 2046 executable functions.
     #[test]
     fn compiler_evidence_exhaustive_2046_coordinates_exact_width() {
-        use crate::{
-            BinarySourceWord, Bit1, Bit2, Bit3, Bit4, Bit5, Bit6, Bit7, Bit8, Bit9,
-            DomainIdentity,
-        };
         use crate::domain_ladder::DomainCoordinate;
+        use crate::{
+            BinarySourceWord, Bit1, Bit2, Bit3, Bit4, Bit5, Bit6, Bit7, Bit8, Bit9, DomainIdentity,
+        };
 
         let mut checked = 0usize;
         for width in 1u8..=9 {
@@ -436,9 +428,9 @@ mod tests {
 
     #[test]
     fn compiler_evidence_binary_layout_is_stable() {
-        let identity = crate::CoreDomainIdentity::D3(
-            crate::Bija3::from_word(crate::Bit3::new(0b010).expect("D3 word")),
-        );
+        let identity = crate::CoreDomainIdentity::D3(crate::Bija3::from_word(
+            crate::Bit3::new(0b010).expect("D3 word"),
+        ));
         let value = Value::list([
             Value::DomainIdentity(identity.into()),
             Value::Symbol(Rc::from("x")),
@@ -451,13 +443,8 @@ mod tests {
         assert_eq!(
             encoded,
             vec![
-                0x04,
-                0x01, 0x03, 0x02,
-                0x04,
-                0x02, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, b'x',
-                0x04,
-                0x03, 0x02, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, b'o', b'k',
-                0x00,
+                0x04, 0x01, 0x03, 0x02, 0x04, 0x02, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                b'x', 0x04, 0x03, 0x02, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, b'o', b'k', 0x00,
             ],
             "compiler evidence encoding is a cross-substrate digest ABI"
         );

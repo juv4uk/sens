@@ -1,9 +1,9 @@
 use crate::bignum::BigInt;
-use crate::BinaryNumber;
 use crate::domain_numeric::DomainNumericComposition;
 use crate::semantic_registry::LegacyRegistrySlot;
-use crate::{CoreDomainIdentity, Environment, Exactness, Expr, Text7};
+use crate::BinaryNumber;
 use crate::DomainIdentity;
+use crate::{CoreDomainIdentity, Environment, Exactness, Expr, Text7};
 use std::{
     cell::RefCell, cmp::Ordering, fmt, net::TcpListener, net::TcpStream, ops::Neg, rc::Rc,
     str::FromStr,
@@ -669,9 +669,7 @@ impl Value {
     /// Number 0/1, host Bool, NIL, symbols, and every non-D1 domain are rejected.
     pub fn as_predicate_bit(&self) -> Option<bool> {
         match self {
-            Self::DomainIdentity(DomainIdentity::D1(bit)) => {
-                Some(bit.word().packed_bits() == 1)
-            }
+            Self::DomainIdentity(DomainIdentity::D1(bit)) => Some(bit.word().packed_bits() == 1),
             _ => None,
         }
     }
@@ -681,7 +679,8 @@ impl Value {
     /// D1/D2/D7 return None; D8 returns a Core identity only as a coordinate,
     /// and execution still requires a separately admitted law.
     pub fn as_core_domain_identity(&self) -> Option<CoreDomainIdentity> {
-        self.as_domain_identity().and_then(DomainIdentity::core_operation)
+        self.as_domain_identity()
+            .and_then(DomainIdentity::core_operation)
     }
 
     /// Builds one host-provided callable value without adding a new evaluator
@@ -718,8 +717,6 @@ impl Value {
     pub fn is_atom(&self) -> bool {
         !matches!(self, Value::Pair(_, _))
     }
-
-
 }
 
 impl fmt::Display for Value {
@@ -824,10 +821,14 @@ fn render(value: &Value, quote_strings: bool) -> String {
             let (negative, numerator, denominator) = composite.as_parts();
             let prefix = if negative { "-" } else { "" };
             match denominator {
-                Some(d) => format!("{prefix}{}/{}", numerator.to_unsigned_decimal_string(), d.to_unsigned_decimal_string()),
+                Some(d) => format!(
+                    "{prefix}{}/{}",
+                    numerator.to_unsigned_decimal_string(),
+                    d.to_unsigned_decimal_string()
+                ),
                 None => format!("-{}", numerator.to_unsigned_decimal_string()),
             }
-        },
+        }
         Value::Sid(sid) => sid.to_string(),
         Value::DomainIdentity(identity) => identity.to_string(),
         Value::String(text) => {
@@ -868,7 +869,9 @@ fn render_canonical_wire(value: &Value) -> String {
         }
         Value::Rational(number) => number.to_binary_wire_token(),
         Value::NumericComposition(composite) => format!(
-            "#<D{}-NEG-RATIO-WIRE-UNSUPPORTED>", composite.domain_width()),
+            "#<D{}-NEG-RATIO-WIRE-UNSUPPORTED>",
+            composite.domain_width()
+        ),
         Value::BinaryNumber(number) => match number.numeric_domain_width() {
             // Explicitly non-reader token. This string API cannot return a
             // typed error, so make the unsupported Dn transport unmistakable
@@ -878,7 +881,11 @@ fn render_canonical_wire(value: &Value) -> String {
         },
         Value::Pair(_, _) => render_pair_canonical_wire(value),
         Value::Vector(values) => {
-            let items = values.borrow().iter().map(render_canonical_wire).collect::<Vec<_>>();
+            let items = values
+                .borrow()
+                .iter()
+                .map(render_canonical_wire)
+                .collect::<Vec<_>>();
             format!("#({})", items.join(" "))
         }
         // Canonical Text transport carries the exact UPC-7 cell stream.
@@ -895,12 +902,17 @@ fn render_pair_canonical_wire(value: &Value) -> String {
     loop {
         match current {
             Value::Pair(head, tail) => {
-                if !first { out.push(' '); }
+                if !first {
+                    out.push(' ');
+                }
                 out.push_str(&render_canonical_wire(head));
                 current = tail;
                 first = false;
             }
-            Value::Nil => { out.push(')'); return out; }
+            Value::Nil => {
+                out.push(')');
+                return out;
+            }
             tail => {
                 out.push_str(" . ");
                 out.push_str(&render_canonical_wire(tail));
@@ -976,7 +988,7 @@ impl Drop for Value {
 #[cfg(test)]
 mod exact_domain_value_tests {
     use super::Value;
-    use crate::{Bit3, Bit4, Bit8, Bija3, CoreD4, CoreD8, DomainIdentity};
+    use crate::{Bija3, Bit3, Bit4, Bit8, CoreD4, CoreD8, DomainIdentity};
 
     #[test]
     fn one_payload_never_collapses_d3_d4_and_d8_values() {
@@ -988,7 +1000,10 @@ mod exact_domain_value_tests {
         for (index, identity) in values.iter().enumerate() {
             let value = Value::DomainIdentity(*identity);
             assert_eq!(value.as_domain_identity(), Some(*identity));
-            assert_eq!(value.as_domain_identity().unwrap().width(), [3, 4, 8][index]);
+            assert_eq!(
+                value.as_domain_identity().unwrap().width(),
+                [3, 4, 8][index]
+            );
             assert_eq!(value.as_domain_identity().unwrap().packed_bits(), 1);
         }
         assert_ne!(values[0], values[1]);

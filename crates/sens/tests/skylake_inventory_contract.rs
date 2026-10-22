@@ -2,11 +2,14 @@ use std::fs;
 use std::path::PathBuf;
 
 fn repo_file(path: &str) -> PathBuf {
-    PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../..").join(path)
+    PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+        .join("../..")
+        .join(path)
 }
 
 fn read(path: &str) -> String {
-    fs::read_to_string(repo_file(path)).unwrap_or_else(|error| panic!("#174 requires {path}: {error}"))
+    fs::read_to_string(repo_file(path))
+        .unwrap_or_else(|error| panic!("#174 requires {path}: {error}"))
 }
 
 #[test]
@@ -38,12 +41,18 @@ fn admitted_inventory_names_only_existing_lisp_machine_catalogues() {
         .filter_map(|tail| tail.strip_suffix(')'))
         .collect::<Vec<_>>();
 
-    assert!(!admitted.is_empty(), "#174 requires an explicit admitted-extension set");
+    assert!(
+        !admitted.is_empty(),
+        "#174 requires an explicit admitted-extension set"
+    );
 
     for extension in admitted {
         let filename = extension.to_ascii_lowercase();
         let path = format!("lib/machine/isa/{filename}.lisp");
-        assert!(repo_file(&path).is_file(), "#174 admits {extension} without Lisp-owned catalogue {path}");
+        assert!(
+            repo_file(&path).is_file(),
+            "#174 admits {extension} without Lisp-owned catalogue {path}"
+        );
     }
 }
 

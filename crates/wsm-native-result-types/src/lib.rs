@@ -10,7 +10,6 @@ use wsm_common_lisp_kernel::CommonLispResult;
 use wsm_datalog_kernel::Database;
 use wsm_prolog_kernel::PrologExecutionResult;
 
-
 /// Mechanical producer slot inside one four-kernel observation.
 ///
 /// This identifies where a producer-native result is stored. It does not
@@ -49,16 +48,13 @@ impl std::fmt::Display for ObservationCapabilityError {
 
 impl std::error::Error for ObservationCapabilityError {}
 
-const COMMON_LISP_CAPABILITIES: &[ObservationCapability] =
-    &[ObservationCapability::NativeBytes];
-const PROLOG_CAPABILITIES: &[ObservationCapability] =
-    &[ObservationCapability::NativeBytes];
+const COMMON_LISP_CAPABILITIES: &[ObservationCapability] = &[ObservationCapability::NativeBytes];
+const PROLOG_CAPABILITIES: &[ObservationCapability] = &[ObservationCapability::NativeBytes];
 const CLIPS_CAPABILITIES: &[ObservationCapability] = &[
     ObservationCapability::FiringCount,
     ObservationCapability::WorkingMemoryCounts,
 ];
-const DATALOG_CAPABILITIES: &[ObservationCapability] =
-    &[ObservationCapability::RelationCount];
+const DATALOG_CAPABILITIES: &[ObservationCapability] = &[ObservationCapability::RelationCount];
 
 /// Opaque address of one producer-owned result inside an observation.
 ///
@@ -190,7 +186,6 @@ impl FourKernelObservation {
         }
     }
 
-
     /// Return graph-safe references to the four producer-owned result slots.
     ///
     /// The caller chooses the observation identity. This crate only couples
@@ -198,10 +193,22 @@ impl FourKernelObservation {
     /// semantic relation to the references.
     pub const fn result_refs(observation_id: u64) -> [NativeResultRef; 4] {
         [
-            NativeResultRef { observation_id, producer: ProducerSlot::CommonLisp },
-            NativeResultRef { observation_id, producer: ProducerSlot::Prolog },
-            NativeResultRef { observation_id, producer: ProducerSlot::Clips },
-            NativeResultRef { observation_id, producer: ProducerSlot::Datalog },
+            NativeResultRef {
+                observation_id,
+                producer: ProducerSlot::CommonLisp,
+            },
+            NativeResultRef {
+                observation_id,
+                producer: ProducerSlot::Prolog,
+            },
+            NativeResultRef {
+                observation_id,
+                producer: ProducerSlot::Clips,
+            },
+            NativeResultRef {
+                observation_id,
+                producer: ProducerSlot::Datalog,
+            },
         ]
     }
 
@@ -259,10 +266,7 @@ impl FourKernelObservation {
         }
     }
 
-    pub fn supports(
-        producer: ProducerSlot,
-        capability: ObservationCapability,
-    ) -> bool {
+    pub fn supports(producer: ProducerSlot, capability: ObservationCapability) -> bool {
         Self::capabilities(producer).contains(&capability)
     }
 
@@ -307,23 +311,20 @@ impl FourKernelObservation {
         Self::require(producer, ObservationCapability::RelationCount)?;
         match producer {
             ProducerSlot::Datalog => Ok(self.datalog.relation(relation).len()),
-            ProducerSlot::CommonLisp | ProducerSlot::Prolog | ProducerSlot::Clips => unreachable!(
-                "capability table admitted RelationCount for a non-Datalog producer"
-            ),
+            ProducerSlot::CommonLisp | ProducerSlot::Prolog | ProducerSlot::Clips => {
+                unreachable!("capability table admitted RelationCount for a non-Datalog producer")
+            }
         }
     }
 
     /// Return CLIPS' native agenda firing count without mapping it to truth.
-    pub fn firing_count(
-        &self,
-        producer: ProducerSlot,
-    ) -> Result<i64, ObservationCapabilityError> {
+    pub fn firing_count(&self, producer: ProducerSlot) -> Result<i64, ObservationCapabilityError> {
         Self::require(producer, ObservationCapability::FiringCount)?;
         match producer {
             ProducerSlot::Clips => Ok(self.clips.fired),
-            ProducerSlot::CommonLisp | ProducerSlot::Prolog | ProducerSlot::Datalog => unreachable!(
-                "capability table admitted FiringCount for a non-CLIPS producer"
-            ),
+            ProducerSlot::CommonLisp | ProducerSlot::Prolog | ProducerSlot::Datalog => {
+                unreachable!("capability table admitted FiringCount for a non-CLIPS producer")
+            }
         }
     }
 
@@ -335,9 +336,11 @@ impl FourKernelObservation {
         Self::require(producer, ObservationCapability::WorkingMemoryCounts)?;
         match producer {
             ProducerSlot::Clips => Ok((self.clips.facts_before, self.clips.facts_after)),
-            ProducerSlot::CommonLisp | ProducerSlot::Prolog | ProducerSlot::Datalog => unreachable!(
-                "capability table admitted WorkingMemoryCounts for a non-CLIPS producer"
-            ),
+            ProducerSlot::CommonLisp | ProducerSlot::Prolog | ProducerSlot::Datalog => {
+                unreachable!(
+                    "capability table admitted WorkingMemoryCounts for a non-CLIPS producer"
+                )
+            }
         }
     }
 }
@@ -366,8 +369,10 @@ mod tests {
             Database::new(),
         );
 
-        assert_eq!(FourKernelObservation::producer_names(),
-            ["common-lisp", "prolog", "clips", "datalog"]);
+        assert_eq!(
+            FourKernelObservation::producer_names(),
+            ["common-lisp", "prolog", "clips", "datalog"]
+        );
         assert_eq!(observation.common_lisp.stdout, b"LEFT\n");
         assert_eq!(observation.prolog.stdout, b"[bob,dave,carol]\n");
         assert_eq!(observation.clips.fired, 1);

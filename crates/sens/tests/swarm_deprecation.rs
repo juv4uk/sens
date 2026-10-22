@@ -50,7 +50,10 @@ fn legacy_coordination_deprecation_records_retired_physical_surface() {
         "machine marker must point to the runtime rejection witness"
     );
     for op in RETIRED_COORDINATION_OPS {
-        assert!(value.contains(op), "retired operation {op} is missing: {value}");
+        assert!(
+            value.contains(op),
+            "retired operation {op} is missing: {value}"
+        );
     }
 }
 

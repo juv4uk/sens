@@ -31,8 +31,14 @@ fn legacy_abi_form_for_request(semantic_id: u8, payload: &str) -> Result<String,
     }
 
     let mut parts = payload.split_whitespace();
-    let left = parts.next().and_then(|value| value.parse::<i64>().ok()).ok_or(())?;
-    let right = parts.next().and_then(|value| value.parse::<i64>().ok()).ok_or(())?;
+    let left = parts
+        .next()
+        .and_then(|value| value.parse::<i64>().ok())
+        .ok_or(())?;
+    let right = parts
+        .next()
+        .and_then(|value| value.parse::<i64>().ok())
+        .ok_or(())?;
     if parts.next().is_some() {
         return Err(());
     }
@@ -353,9 +359,12 @@ mod tests {
 
     #[test]
     fn request_keeps_semantic_id_opaque() {
-        let request = CommonLispRequest::new(LegacyAbiSemanticId(0b0000_0101), "(car '(left right))");
+        let request =
+            CommonLispRequest::new(LegacyAbiSemanticId(0b0000_0101), "(car '(left right))");
         assert_eq!(request.semantic_id, LegacyAbiSemanticId(0b0000_0101));
-        assert!(request.printable_eval_form().contains("(car '(left right))"));
+        assert!(request
+            .printable_eval_form()
+            .contains("(car '(left right))"));
     }
 
     #[test]
@@ -378,7 +387,8 @@ mod tests {
     #[test]
     fn missing_runtime_is_a_transport_failure_not_a_semantic_result() {
         let kernel = CommonLispKernel::new("__wsm_common_lisp_that_does_not_exist__");
-        let request = CommonLispRequest::new(LegacyAbiSemanticId(0b0000_0101), "(car '(left right))");
+        let request =
+            CommonLispRequest::new(LegacyAbiSemanticId(0b0000_0101), "(car '(left right))");
         assert!(matches!(
             kernel.evaluate(&request),
             Err(CommonLispKernelError::Spawn(_))
@@ -437,7 +447,10 @@ mod tests {
         };
         assert_eq!(status, WsmStatus::Ok);
         assert_eq!(String::from_utf8_lossy(&output[..written]).trim(), "5");
-        assert_eq!(adapter.last_legacy_abi_id(), Some(LegacyAbiSemanticId(SID_ADD)));
+        assert_eq!(
+            adapter.last_legacy_abi_id(),
+            Some(LegacyAbiSemanticId(SID_ADD))
+        );
 
         let override_text = b"(- 7 3)";
         written = 0;

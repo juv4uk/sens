@@ -139,8 +139,8 @@ fn nearest_existing_update_selects_the_nearest_shadow_not_the_root_location() {
     let leaf = child_frame(&middle);
     assert!(!leaf.borrow().bindings.contains_key("x"));
 
-    let updated = nearest_existing_update(&leaf, "x", "middle-new")
-        .expect("nearest middle x should exist");
+    let updated =
+        nearest_existing_update(&leaf, "x", "middle-new").expect("nearest middle x should exist");
 
     assert!(Rc::ptr_eq(&updated, &middle_x));
     assert!(!Rc::ptr_eq(&updated, &root_x));

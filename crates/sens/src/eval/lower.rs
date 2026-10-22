@@ -184,15 +184,17 @@ fn lower(expression: &Expr, depth: u32, mode: LowerMode) -> Expr {
         return expression.clone();
     }
     let kind = match &expression.kind {
-        ExprKind::Call(sid, arguments) if mode == LowerMode::Historical => {
-            ExprKind::Call(*sid, lower_historical_arguments(*sid, arguments, depth, mode))
-        }
+        ExprKind::Call(sid, arguments) if mode == LowerMode::Historical => ExprKind::Call(
+            *sid,
+            lower_historical_arguments(*sid, arguments, depth, mode),
+        ),
         // Exact-domain lowering never interprets a pre-existing historical
         // Call as an admitted current-domain operation.
         ExprKind::Call(sid, arguments) => ExprKind::Call(*sid, arguments.clone()),
-        ExprKind::DomainCall(identity, arguments) => {
-            ExprKind::DomainCall(*identity, lower_domain_arguments(*identity, arguments, depth, mode))
-        }
+        ExprKind::DomainCall(identity, arguments) => ExprKind::DomainCall(
+            *identity,
+            lower_domain_arguments(*identity, arguments, depth, mode),
+        ),
         ExprKind::List(items) if !items.is_empty() => {
             let arguments = &items[1..];
 
@@ -217,7 +219,8 @@ fn lower(expression: &Expr, depth: u32, mode: LowerMode) -> Expr {
                     // D9 here has an explicitly admitted resident mechanism.
                     // Lower once to its typed call, not to an intermediate
                     // List(D9 head) that changes on a second lowering pass.
-                    let core = identity.core_operation()
+                    let core = identity
+                        .core_operation()
                         .expect("admitted D9 string identity keeps its exact core carrier");
                     return Expr {
                         kind: ExprKind::DomainCall(
@@ -238,10 +241,9 @@ fn lower(expression: &Expr, depth: u32, mode: LowerMode) -> Expr {
             }
 
             match head_sid(&items[0]) {
-                Some(sid) => ExprKind::Call(
-                    sid,
-                    lower_historical_arguments(sid, arguments, depth, mode),
-                ),
+                Some(sid) => {
+                    ExprKind::Call(sid, lower_historical_arguments(sid, arguments, depth, mode))
+                }
                 None => ExprKind::List(lower_all(items, depth, mode)),
             }
         }
@@ -262,11 +264,18 @@ mod ratified_d9_string_surface_tests {
         let source = "(рядок-додати \"Привіт, \" \"світе\")";
         let parsed = crate::parse(source).expect("канонічна українська Lisp-форма");
         let lowered = lower_program(&parsed);
-        assert!(matches!(&lowered[0].kind,
-            ExprKind::DomainCall(crate::CoreDomainIdentity::D9(word), args)
-                if word.word().packed_bits() == 0b110011110 && args.len() == 2
-        ), "D9 call must have exact nine-bit identity without an old SID8 row");
-        assert_eq!(lower_program(&lowered), lowered, "D9 source lowering is idempotent");
+        assert!(
+            matches!(&lowered[0].kind,
+                ExprKind::DomainCall(crate::CoreDomainIdentity::D9(word), args)
+                    if word.word().packed_bits() == 0b110011110 && args.len() == 2
+            ),
+            "D9 call must have exact nine-bit identity without an old SID8 row"
+        );
+        assert_eq!(
+            lower_program(&lowered),
+            lowered,
+            "D9 source lowering is idempotent"
+        );
 
         let result = crate::eval_parsed_expressions(&parsed, &mut crate::Session::default())
             .expect("реальний D9 механізм складає обидва Unicode рядки");
@@ -282,8 +291,10 @@ mod ratified_d9_string_surface_tests {
         assert_eq!(result.value, crate::Value::String("[їжак]".into()));
 
         let short = crate::parse("(рядок-додати \"тільки один\")").unwrap();
-        assert!(crate::eval_parsed_expressions(&short, &mut crate::Session::default()).is_err(),
-            "не підміняти D9 виклик мовчазним поверненням останнього аргументу");
+        assert!(
+            crate::eval_parsed_expressions(&short, &mut crate::Session::default()).is_err(),
+            "не підміняти D9 виклик мовчазним поверненням останнього аргументу"
+        );
     }
 }
 
@@ -309,8 +320,15 @@ mod exact_domain_lowering_tests {
         };
         let canonical = lower_program(&parsed);
         let lowered = lower_program(&[partial]);
-        assert_eq!(lowered, canonical, "typed and source heads must lower alike");
-        assert_eq!(lower_program(&lowered), lowered, "lowering must be idempotent");
+        assert_eq!(
+            lowered, canonical,
+            "typed and source heads must lower alike"
+        );
+        assert_eq!(
+            lower_program(&lowered),
+            lowered,
+            "lowering must be idempotent"
+        );
     }
 
     #[test]
@@ -334,19 +352,26 @@ mod exact_domain_lowering_tests {
     }
 }
 
-
 #[cfg(test)]
 mod domain_ladder_lowering_migration_tests {
     use super::*;
 
     fn lowered_one(source: &str) -> Expr {
         let parsed = crate::parse(source).expect("сумісний читач");
-        lower_program(&parsed).into_iter().next().expect("одна форма")
+        lower_program(&parsed)
+            .into_iter()
+            .next()
+            .expect("одна форма")
     }
 
     #[test]
     fn raw_eight_bit_tokens_do_not_gain_historical_callability() {
-        for source in ["(00000001 x)", "(00000111 x)", "(00001000 x)", "(10101000 x)"] {
+        for source in [
+            "(00000001 x)",
+            "(00000111 x)",
+            "(00001000 x)",
+            "(10101000 x)",
+        ] {
             let lowered = lowered_one(source);
             assert!(
                 !matches!(lowered.kind, ExprKind::Call(_, _)),
@@ -361,8 +386,8 @@ mod exact_lowering_isolation_tests {
     use super::*;
 
     fn lower_current(source: &str) -> Expr {
-        let parsed = crate::parser::parse_exact_domain_source(source)
-            .expect("explicit exact-width source");
+        let parsed =
+            crate::parser::parse_exact_domain_source(source).expect("explicit exact-width source");
         lower_exact_domain_program(&parsed)
             .into_iter()
             .next()
@@ -376,7 +401,10 @@ mod exact_lowering_isolation_tests {
             panic!("Lisp-owned def compatibility surface must lower to D4 DEFINE");
         };
         assert_eq!(word.word().packed_bits(), 0b0011);
-        assert!(matches!(&arguments[1].kind, ExprKind::DomainCall(CoreDomainIdentity::D3(_), _)));
+        assert!(matches!(
+            &arguments[1].kind,
+            ExprKind::DomainCall(CoreDomainIdentity::D3(_), _)
+        ));
     }
 
     #[test]
@@ -397,9 +425,9 @@ mod exact_lowering_isolation_tests {
 
     #[test]
     fn exact_lowering_remains_idempotent_with_nested_calls() {
-        let parsed = crate::parser::parse_exact_domain_source(
-            "(111 (100 (001 000)) (011 (001 000)))"
-        ).unwrap();
+        let parsed =
+            crate::parser::parse_exact_domain_source("(111 (100 (001 000)) (011 (001 000)))")
+                .unwrap();
         let lowered = lower_exact_domain_program(&parsed);
         assert_eq!(lower_exact_domain_program(&lowered), lowered);
     }

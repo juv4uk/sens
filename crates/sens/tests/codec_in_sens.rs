@@ -15,7 +15,10 @@ fn codec_session() -> Session {
     session
 }
 fn eval(source: &str, session: &mut Session) -> String {
-    eval_program(source, session).unwrap_or_else(|e| panic!("{source} failed: {e}")).value.to_string()
+    eval_program(source, session)
+        .unwrap_or_else(|e| panic!("{source} failed: {e}"))
+        .value
+        .to_string()
 }
 
 #[test]
@@ -24,7 +27,10 @@ fn codec_emits_symbolic_d2_order_but_not_machine_words() {
     // README: (CAR (CONS () ())) -> 10 100 00 10 111 00 000 00 000 01 01
     assert_eq!(
         eval("(кодувати-структуру-д2 (quote (100 (111 () ()))))", &mut s),
-        eval("(quote (d2-open 100 d2-sep d2-open 111 d2-sep () d2-sep () d2-close d2-close))", &mut s)
+        eval(
+            "(quote (d2-open 100 d2-sep d2-open 111 d2-sep () d2-sep () d2-close d2-close))",
+            &mut s
+        )
     );
 }
 
@@ -44,7 +50,10 @@ fn codec_distinguishes_d2_dot_from_separator() {
             encoded, expected_stream,
             "D2 marker order mismatch: source={source} expected={expected}"
         );
-        let returned = eval(&format!("(перевірити-обертання-д2 (quote {source}))"), &mut s);
+        let returned = eval(
+            &format!("(перевірити-обертання-д2 (quote {source}))"),
+            &mut s,
+        );
         let wanted = eval(&format!("(quote {source})"), &mut s);
         assert_eq!(returned, wanted, "D2 roundtrip mismatch: source={source}");
     }
@@ -54,14 +63,20 @@ fn codec_distinguishes_d2_dot_from_separator() {
 fn codec_round_trips_every_shape() {
     let mut s = codec_session();
     for src in [
-        "101", "()", "(100 111 000)", "(100 . 111)", "((100) 111)",
-        "((100 . 111) . 000)", "(100 (111 . 000))",
+        "101",
+        "()",
+        "(100 111 000)",
+        "(100 . 111)",
+        "((100) 111)",
+        "((100 . 111) . 000)",
+        "(100 (111 . 000))",
         "((100 . 111) (000 . 101))",
         "((100 . 111) . (000 . 101))",
         "(100 (111 . 000) . 101)",
         "(((100 . 111) . 000) . 101)",
         // Крапка всередині й зовні вкладеної пари не може стати D2 separator.
-        "(100 (111 . 000) . 101)", "((100 . 111) (000 . 001))",
+        "(100 (111 . 000) . 101)",
+        "((100 . 111) (000 . 001))",
         "(())",
         // Пара вкладена у крапкову пару: усі D2 крапки мають пережити кодек.
         "((100 . 111) . (000 . 001))",
@@ -88,7 +103,8 @@ fn exact_d2_quote_of_dotted_pair_executes_without_text7_marker_proxies() {
     let program = PhysicalT5Program::from_exact_words(&words)
         .expect("all four D2 markers interpreted as structure");
     assert_eq!(program.form_count(), 1);
-    let result = program.execute(&mut Session::default())
+    let result = program
+        .execute(&mut Session::default())
         .expect("real SENS QUOTE executes dotted D2 pair");
     let Value::Pair(head, tail) = &result.value else {
         panic!("D2:11 must produce a dotted SENS pair, not a proxy list");
@@ -105,16 +121,22 @@ fn exact_d2_quote_of_dotted_pair_executes_without_text7_marker_proxies() {
     // Negative forms must be rejected by the SAME exact reader used after
     // Zig/T5M: never reinterpret a stray D2 marker as D7 text or Lisp data.
     for bad in [
-        "11", "01", "10 11 100 01", "10 100 11 01",
-        "10 100 11 111 00 000 01", "10 100",
+        "11",
+        "01",
+        "10 11 100 01",
+        "10 100 11 01",
+        "10 100 11 111 00 000 01",
+        "10 100",
     ] {
         let words = parse_binary_source_words(bad)
             .expect("well-formed exact words; wrong structural grammar")
             .into_iter()
             .map(|token| token.word)
             .collect::<Vec<_>>();
-        assert!(PhysicalT5Program::from_exact_words(&words).is_err(),
-            "malformed D2 admitted as SENS data: {bad}");
+        assert!(
+            PhysicalT5Program::from_exact_words(&words).is_err(),
+            "malformed D2 admitted as SENS data: {bad}"
+        );
     }
 }
 

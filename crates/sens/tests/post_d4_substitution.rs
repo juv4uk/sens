@@ -103,11 +103,7 @@ fn subst_is_ordinary_recursive_tree_transformation() {
     let cases = [
         ("(quote replacement)", "(quote a)", "(quote a)"),
         ("(quote replacement)", "(quote a)", "(quote b)"),
-        (
-            "(quote (new tree))",
-            "(quote a)",
-            "(quote (a (b a) . a))",
-        ),
+        ("(quote (new tree))", "(quote a)", "(quote (a (b a) . a))"),
         ("(quote x)", "(quote b)", "(quote (a . b))"),
     ];
 
@@ -123,22 +119,10 @@ fn sublis_reconstructs_first_match_association_search_and_tree_walk() {
     let mut s = session();
 
     let cases = [
-        (
-            "(quote ((x first) (x second)))",
-            "(quote x)",
-        ),
-        (
-            "(quote ((x alpha) (y beta)))",
-            "(quote ((x y) . x))",
-        ),
-        (
-            "(quote ((x (a b))))",
-            "(quote (x z))",
-        ),
-        (
-            "(quote ())",
-            "(quote (x y))",
-        ),
+        ("(quote ((x first) (x second)))", "(quote x)"),
+        ("(quote ((x alpha) (y beta)))", "(quote ((x y) . x))"),
+        ("(quote ((x (a b))))", "(quote (x z))"),
+        ("(quote ())", "(quote (x y))"),
     ];
 
     for (pairs, tree) in cases {

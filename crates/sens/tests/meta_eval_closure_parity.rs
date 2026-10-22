@@ -2,7 +2,9 @@
 //! Keep the native evaluator as oracle and verify that the metacircular
 //! evaluator preserves closure semantics.
 
-use sens::{eval_parsed_expressions, eval_program, load_core_library, parse_mixed_exact_domain, Session};
+use sens::{
+    eval_parsed_expressions, eval_program, load_core_library, parse_mixed_exact_domain, Session,
+};
 
 fn native(expr: &str) -> String {
     let mut session = Session::bare();
@@ -17,8 +19,7 @@ fn native(expr: &str) -> String {
 fn meta(expr: &str) -> String {
     let mut session = Session::bare();
     sens::load_core_library(&mut session).expect("core should load");
-    sens::load_meta_evaluator_library(&mut session)
-        .expect("meta evaluator should load");
+    sens::load_meta_evaluator_library(&mut session).expect("meta evaluator should load");
 
     let source = format!("(обчислити-мета-вираз (quote {}) (quote ()))", expr);
     eval_program(&source, &mut session)
@@ -50,10 +51,19 @@ fn mutual_group_closure_d1_is_computed_by_sens_not_bare_truth_names() {
 
     for (source, expected) in [
         ("(це-замикання-рекурсивної-групи? (як-є ()))", false),
-        ("(це-замикання-рекурсивної-групи? (як-є (ordinary-closure a)))", false),
-        ("(це-замикання-рекурсивної-групи? (як-є (recursive-group-closure a)))", true),
+        (
+            "(це-замикання-рекурсивної-групи? (як-є (ordinary-closure a)))",
+            false,
+        ),
+        (
+            "(це-замикання-рекурсивної-групи? (як-є (recursive-group-closure a)))",
+            true,
+        ),
         ("(визначення-лямбди-на-верхньому-рівні? (як-є ()))", false),
-        ("(визначення-лямбди-на-верхньому-рівні? (як-є (unknown a b)))", false),
+        (
+            "(визначення-лямбди-на-верхньому-рівні? (як-є (unknown a b)))",
+            false,
+        ),
     ] {
         let forms = parse_mixed_exact_domain(source).expect("D3/D1 форма");
         let verdict = eval_parsed_expressions(&forms, &mut session)

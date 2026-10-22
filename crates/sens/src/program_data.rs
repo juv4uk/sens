@@ -128,21 +128,23 @@ mod тести_міграції_чисел_d24 {
         let старе = вузол(ExprKind::Number(3.0, Exactness::Exact));
         let список = вузол(ExprKind::List(Rc::from([старе.clone()])));
         assert!(expr_to_exact_program_data(&список).is_err());
-        let пара = вузол(ExprKind::Pair(Rc::new(кваліфіковане_число(24)), Rc::new(старе.clone())));
+        let пара = вузол(ExprKind::Pair(
+            Rc::new(кваліфіковане_число(24)),
+            Rc::new(старе.clone()),
+        ));
         assert!(expr_to_exact_program_data(&пара).is_err());
-        let quote = CoreDomainIdentity::D3(
-            Bija3::from_word(Bit3::new(0b001).unwrap()),
-        );
+        let quote = CoreDomainIdentity::D3(Bija3::from_word(Bit3::new(0b001).unwrap()));
         let виклик = вузол(ExprKind::DomainCall(quote, Rc::from([старе])));
         assert!(expr_to_exact_program_data(&виклик).is_err());
     }
 
     #[test]
     fn точний_доменний_виклик_з_числом_d24_залишається_програмою() {
-        let quote = CoreDomainIdentity::D3(
-            Bija3::from_word(Bit3::new(0b001).unwrap()),
-        );
-        let source = вузол(ExprKind::DomainCall(quote, Rc::from([кваліфіковане_число(24)])));
+        let quote = CoreDomainIdentity::D3(Bija3::from_word(Bit3::new(0b001).unwrap()));
+        let source = вузол(ExprKind::DomainCall(
+            quote,
+            Rc::from([кваліфіковане_число(24)]),
+        ));
         let result = expr_to_exact_program_data(&source).expect("доведена форма");
         assert!(matches!(result, Value::Pair(_, _)));
     }

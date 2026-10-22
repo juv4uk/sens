@@ -6,8 +6,8 @@ use wsm_datalog_kernel::{Atom, Database, Evaluator, Program, Rule, Term, Value};
 use wsm_native_result_types::{
     FourKernelObservation, ProducerSlot, ProvenanceEdge, ProvenanceEdgeType,
 };
-use wsm_prolog_kernel::{LegacyAbiSemanticId,
-    decode_canonical_atom_list, PrologKernel, PrologQuery, PrologRequest,
+use wsm_prolog_kernel::{
+    decode_canonical_atom_list, LegacyAbiSemanticId, PrologKernel, PrologQuery, PrologRequest,
 };
 
 const INVOKE_ID: u8 = 0b1010_1000;
@@ -65,7 +65,10 @@ fn projected_facts(projected: &str) -> (String, Vec<(String, String)>) {
         .iter()
         .skip(1)
         .map(list_items)
-        .find(|row| row.first().is_some_and(|entry| symbol(entry) == "source-ref"))
+        .find(|row| {
+            row.first()
+                .is_some_and(|entry| symbol(entry) == "source-ref")
+        })
         .expect("projection must preserve source-ref");
     assert_eq!(source_ref_row.len(), 2);
     let source_ref = symbol(&source_ref_row[1]).to_string();
@@ -83,7 +86,10 @@ fn projected_facts(projected: &str) -> (String, Vec<(String, String)>) {
         .map(|fact| {
             let fields = list_items(fact);
             assert_eq!(fields.len(), 2);
-            (symbol(&fields[0]).to_string(), symbol(&fields[1]).to_string())
+            (
+                symbol(&fields[0]).to_string(),
+                symbol(&fields[1]).to_string(),
+            )
         })
         .collect();
 
@@ -102,8 +108,8 @@ fn real_prolog_lisp_projection_real_datalog_preserves_domains() {
         )
         .expect("real SWI-Prolog runtime");
 
-    let values = decode_canonical_atom_list(&prolog.stdout)
-        .expect("bounded Prolog canonical atom list");
+    let values =
+        decode_canonical_atom_list(&prolog.stdout).expect("bounded Prolog canonical atom list");
     assert_eq!(values, ["bob", "dave", "carol"]);
 
     let source_observation = format!(
@@ -154,9 +160,15 @@ fn real_prolog_lisp_projection_real_datalog_preserves_domains() {
     Evaluator::naive_fixpoint(&program, &mut db);
 
     assert_eq!(db.relation("life-ancestor").len(), 3);
-    assert!(db.relation("life-ancestor").contains(&vec![Value::sym("bob")]));
-    assert!(db.relation("life-ancestor").contains(&vec![Value::sym("dave")]));
-    assert!(db.relation("life-ancestor").contains(&vec![Value::sym("carol")]));
+    assert!(db
+        .relation("life-ancestor")
+        .contains(&vec![Value::sym("bob")]));
+    assert!(db
+        .relation("life-ancestor")
+        .contains(&vec![Value::sym("dave")]));
+    assert!(db
+        .relation("life-ancestor")
+        .contains(&vec![Value::sym("carol")]));
     assert!(db.generation_count() >= 2);
 
     // LIFE-1 trace mechanics retain only stable identities and the admitted
@@ -194,14 +206,14 @@ fn real_prolog_lisp_projection_real_datalog_preserves_domains() {
         source_ref,
         INVOKE_ID
     );
-    let projection_ready =
-        format!("(projection-ready {} {})", edge.bridge_contract_ref, source_ref);
+    let projection_ready = format!(
+        "(projection-ready {} {})",
+        edge.bridge_contract_ref, source_ref
+    );
 
     assert_eq!(
         eval_text(
-            &format!(
-                "(життя-проєкція-готова? (quote {invocation}) (quote ({projection_ready})))"
-            ),
+            &format!("(життя-проєкція-готова? (quote {invocation}) (quote ({projection_ready})))"),
             &mut session,
         ),
         "present"
@@ -228,9 +240,7 @@ fn real_prolog_lisp_projection_real_datalog_preserves_domains() {
     );
 
     let selection = eval_text(
-        &format!(
-            "(життя-обрати-готове (list (quote {invocation})) (quote ({projection_ready})))"
-        ),
+        &format!("(життя-обрати-готове (list (quote {invocation})) (quote ({projection_ready})))"),
         &mut session,
     );
     assert!(
@@ -261,9 +271,7 @@ fn empty_or_atomic_observation_returns_named_failure_not_host_error() {
     // Positive execution of the negative inputs: reader and evaluator must
     // return named data, never rely on Rust to replace an evaluator error.
     for observation in ["(як-є ())", "(як-є непридатне)"] {
-        let program = format!(
-            "(перетворити-підстановки-пролог-на-факти-даталог {observation})"
-        );
+        let program = format!("(перетворити-підстановки-пролог-на-факти-даталог {observation})");
         let actual = eval_program(&program, &mut session)
             .unwrap_or_else(|error| panic!("SENS program must execute: {program}: {error}"))
             .value
@@ -288,8 +296,10 @@ fn improper_prolog_values_do_not_disappear_from_datalog_projection() {
             .unwrap_or_else(|error| panic!("SENS bridge failed to execute: {program}: {error}"))
             .value
             .to_string();
-        assert_eq!(actual, "(projection-failure malformed-values)",
-            "improper tail must fail closed: {program}");
+        assert_eq!(
+            actual, "(projection-failure malformed-values)",
+            "improper tail must fail closed: {program}"
+        );
     }
 }
 

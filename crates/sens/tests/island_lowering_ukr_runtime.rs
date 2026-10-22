@@ -59,9 +59,7 @@ fn truncated_mechanism_selected_is_named_failure_not_cdr_error() {
         "(як-є (mechanism-selected id common-lisp))",
         "(як-є (mechanism-selected . хвіст))",
     ] {
-        let query = format!(
-            "(острів-обробити-вибір (як-є id) (як-є common-lisp) 2 3 {selected})"
-        );
+        let query = format!("(острів-обробити-вибір (як-є id) (як-є common-lisp) 2 3 {selected})");
         assert_eq!(
             observed(&mut s, &query),
             "(island-lowering-failure malformed-selection id common-lisp)",

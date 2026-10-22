@@ -4,7 +4,6 @@
 use sens::{eval_program, load_core_library, Environment, Session, Value};
 use std::io::{self, Read};
 
-
 #[cfg(feature = "zig-transport")]
 use sens_cli::zig_transport;
 
@@ -29,7 +28,16 @@ fn zig_bootstrap_sources() -> Result<[String; 8], String> {
             .map_err(|error| format!("ZIG_F6_CONTENT_STORE_CARRIER invalid UTF-8: {error}"))?;
         let lisp_fs = String::from_utf8(zig_transport::lisp_fs_source_bytes()?)
             .map_err(|error| format!("ZIG_F6_LISP_FS_CARRIER invalid UTF-8: {error}"))?;
-        Ok([unify, reason, forward, knowledge, persistent_map, world, content_store, lisp_fs])
+        Ok([
+            unify,
+            reason,
+            forward,
+            knowledge,
+            persistent_map,
+            world,
+            content_store,
+            lisp_fs,
+        ])
     }
     #[cfg(not(feature = "zig-transport"))]
     {
@@ -75,7 +83,17 @@ fn main() {
         ("lib/content-store.lisp", sources[6].as_str()),
         ("lib/lisp-fs.lisp", sources[7].as_str()),
     ] {
-        if matches!(path, "lib/unify.lisp" | "lib/reason.lisp" | "lib/forward.lisp" | "lib/knowledge.lisp" | "lib/world.lisp" | "lib/persistent-map.lisp" | "lib/content-store.lisp" | "lib/lisp-fs.lisp") {
+        if matches!(
+            path,
+            "lib/unify.lisp"
+                | "lib/reason.lisp"
+                | "lib/forward.lisp"
+                | "lib/knowledge.lisp"
+                | "lib/world.lisp"
+                | "lib/persistent-map.lisp"
+                | "lib/content-store.lisp"
+                | "lib/lisp-fs.lisp"
+        ) {
             sens::eval_pinned_reasoning_source(path, source, &mut session).unwrap();
         } else {
             eval_program(source, &mut session).unwrap();

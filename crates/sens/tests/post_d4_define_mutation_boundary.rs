@@ -81,11 +81,8 @@ fn define_in_child_frame_shadows_inherited_binding_instead_of_updating_parent_sl
 fn define_target_is_syntax_fixed_not_runtime_selected() {
     let mut s = session();
 
-    let error = eval_program(
-        "(00001001 (00000001 x) (00000001 new))",
-        &mut s,
-    )
-    .expect_err("DEFINE target must be a syntax-level symbol");
+    let error = eval_program("(00001001 (00000001 x) (00000001 new))", &mut s)
+        .expect_err("DEFINE target must be a syntax-level symbol");
 
     assert_eq!(error.kind, ErrorKind::InvalidForm);
 }

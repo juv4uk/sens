@@ -1,6 +1,9 @@
 //! Реальне виконання SENS REPL після завантаження чинного core/meta-eval.
 //! Незаконні атомарні хвости не мають виглядати як кінець списку.
-use sens::{eval_parsed_expressions, eval_program, load_core_library, load_meta_evaluator_library, parse_mixed_exact_domain, Session};
+use sens::{
+    eval_parsed_expressions, eval_program, load_core_library, load_meta_evaluator_library,
+    parse_mixed_exact_domain, Session,
+};
 
 fn repl_session() -> Session {
     let mut session = Session::default();
@@ -26,7 +29,11 @@ fn repl_bit_and_label_comparisons_reject_improper_tails() {
         let result = eval_program(source, &mut session)
             .unwrap_or_else(|error| panic!("SENS REPL failed on {source}: {error:?}"))
             .value;
-        assert_eq!(result.as_predicate_bit(), Some(expected), "{source}: {result}");
+        assert_eq!(
+            result.as_predicate_bit(),
+            Some(expected),
+            "{source}: {result}"
+        );
     }
 }
 
@@ -126,7 +133,8 @@ fn repl_duplicate_name_rejects_ambiguous_d4_code() {
         .unwrap_or_else(|error| panic!("SENS D4 ambiguity witness: {error:?}"))
         .value;
     assert_eq!(
-        result.to_string(), "()",
+        result.to_string(),
+        "()",
         "test_id=repl-d4-ambiguous layer=SENS input={source} expected=() actual={result}"
     );
 }
@@ -187,9 +195,9 @@ fn d11_four_repl_library_laws_run_inside_sens() {
     for (name, actual_source, law_source, different_source) in laws {
         let evaluate = |src: &str, session: &mut Session| {
             eval_program(src, session)
-                .unwrap_or_else(|error| panic!(
-                    "test_id=D11-REPL-{name} layer=SENS input={src} error={error}"
-                ))
+                .unwrap_or_else(|error| {
+                    panic!("test_id=D11-REPL-{name} layer=SENS input={src} error={error}")
+                })
                 .value
                 .to_string()
         };

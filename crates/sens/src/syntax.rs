@@ -99,7 +99,10 @@ pub enum ExprKind {
     /// саме координати.
     /// A closure parameter by numeric lexical coordinates only; the human name
     /// lives in the closure's debug metadata, never in the node.
-    Local { depth: u32, index: u32 },
+    Local {
+        depth: u32,
+        index: u32,
+    },
 }
 
 // CoreDomainIdentity holds a domain tag plus its bits and is not a one-byte
@@ -130,9 +133,7 @@ mod exact_domain_codec {
         let bits = identity.packed_bits();
         out.push(width);
         match width {
-            1..=8 => out.push(
-                u8::try_from(bits).expect("D1–D8 payload must not lose high bits"),
-            ),
+            1..=8 => out.push(u8::try_from(bits).expect("D1–D8 payload must not lose high bits")),
             9 => out.extend_from_slice(&bits.to_le_bytes()),
             10 => out.extend_from_slice(&bits.to_le_bytes()),
             _ => unreachable!("unsupported exact domain identity width"),
@@ -173,7 +174,11 @@ mod exact_domain_codec {
             7 => BinarySourceWord::W7(crate::Bit7::new(small()?)?),
             8 => BinarySourceWord::W8(crate::Bit8::new(small()?)?),
             9 => BinarySourceWord::W9(crate::Bit9::new(bits)?),
-            10 => return Some(DomainIdentity::from_coordinate(crate::domain_ladder::DomainCoordinate::new(10, bits)?)),
+            10 => {
+                return Some(DomainIdentity::from_coordinate(
+                    crate::domain_ladder::DomainCoordinate::new(10, bits)?,
+                ))
+            }
             _ => return None,
         };
         Some(DomainIdentity::from_source_word(source))
@@ -253,8 +258,11 @@ pub(crate) mod fasl {
                     // normalized-magnitude inference. Old FASL remains exact.
                     out.push(TAG_NUMERIC_DOMAIN_NUMBER);
                     put_u32(out, domain_width as u32);
-                    out.extend_from_slice(&number.exact_numeric_domain_bits()
-                        .expect("qualified Number owns exact Dn bits"));
+                    out.extend_from_slice(
+                        &number
+                            .exact_numeric_domain_bits()
+                            .expect("qualified Number owns exact Dn bits"),
+                    );
                 } else {
                     out.push(TAG_BINARY_NUMBER);
                     put_u32(out, number.width() as u32);
@@ -364,9 +372,14 @@ pub(crate) mod fasl {
             TAG_BINARY => {
                 let value = *bytes.get(*pos)?;
                 *pos += 1;
-                { let _ = value; return None; }
+                {
+                    let _ = value;
+                    return None;
+                }
             }
-            TAG_DOMAIN_IDENTITY => ExprKind::DomainIdentity(super::exact_domain_codec::get(bytes, pos)?),
+            TAG_DOMAIN_IDENTITY => {
+                ExprKind::DomainIdentity(super::exact_domain_codec::get(bytes, pos)?)
+            }
             TAG_STRING => ExprKind::String(get_str(bytes, pos)?.into()),
             TAG_SYMBOL => ExprKind::Symbol(get_str(bytes, pos)?.into()),
             TAG_LOCAL => {
@@ -574,8 +587,11 @@ pub(crate) mod wire {
                 if let Some(domain_width) = number.numeric_domain_width() {
                     out.push(TAG_NUMERIC_DOMAIN_NUMBER);
                     put_varint(out, domain_width as u64);
-                    out.extend_from_slice(&number.exact_numeric_domain_bits()
-                        .expect("qualified Number owns exact Dn bits"));
+                    out.extend_from_slice(
+                        &number
+                            .exact_numeric_domain_bits()
+                            .expect("qualified Number owns exact Dn bits"),
+                    );
                 } else {
                     out.push(TAG_BINARY_NUMBER);
                     put_varint(out, number.width() as u64);
@@ -675,7 +691,9 @@ pub(crate) mod wire {
                         if *remaining > 0 {
                             break;
                         }
-                        let Some(Open::List { items, .. }) = stack.pop() else { unreachable!() };
+                        let Some(Open::List { items, .. }) = stack.pop() else {
+                            unreachable!()
+                        };
                         done = expr(ExprKind::List(items.into()));
                     }
                     Some(Open::Pair { head }) => {
@@ -683,7 +701,9 @@ pub(crate) mod wire {
                             *head = Some(done);
                             break;
                         }
-                        let Some(Open::Pair { head: Some(head) }) = stack.pop() else { unreachable!() };
+                        let Some(Open::Pair { head: Some(head) }) = stack.pop() else {
+                            unreachable!()
+                        };
                         done = expr(ExprKind::Pair(Rc::new(head), Rc::new(done)));
                     }
                 }
@@ -723,7 +743,10 @@ pub(crate) mod wire {
             TAG_BINARY => {
                 let value = *bytes.get(*pos)?;
                 *pos += 1;
-                { let _ = value; return None; }
+                {
+                    let _ = value;
+                    return None;
+                }
             }
             TAG_DOMAIN_IDENTITY => {
                 ExprKind::DomainIdentity(super::exact_domain_codec::get(bytes, pos)?)
@@ -817,7 +840,9 @@ fn exact_ast_transport_admitted(expressions: &[Expr]) -> bool {
     let mut pending: Vec<(&Expr, u32)> = expressions.iter().map(|expr| (expr, 0)).collect();
     while let Some((expr, depth)) = pending.pop() {
         match &expr.kind {
-            ExprKind::DomainIdentity(_) | ExprKind::String(_) | ExprKind::Symbol(_)
+            ExprKind::DomainIdentity(_)
+            | ExprKind::String(_)
+            | ExprKind::Symbol(_)
             | ExprKind::Local { .. } => {}
             ExprKind::BinaryNumber(number) => {
                 if number.numeric_domain_width().is_none()
@@ -839,8 +864,12 @@ fn exact_ast_transport_admitted(expressions: &[Expr]) -> bool {
                 pending.push((head, depth + 1));
                 pending.push((tail, depth + 1));
             }
-            ExprKind::Number(..) | ExprKind::Rational(_) | ExprKind::NumericBuffer(_)
-            | ExprKind::Sid(_) | ExprKind::Call(..) | ExprKind::DomainCall(..) => {
+            ExprKind::Number(..)
+            | ExprKind::Rational(_)
+            | ExprKind::NumericBuffer(_)
+            | ExprKind::Sid(_)
+            | ExprKind::Call(..)
+            | ExprKind::DomainCall(..) => {
                 return false;
             }
         }
@@ -861,10 +890,7 @@ pub fn decode_exact_wire_program(bytes: &[u8]) -> Option<Vec<Expr>> {
 }
 
 /// Source-hashed FASL envelope with the same exact-domain admission gate.
-pub fn encode_exact_fasl_program(
-    expressions: &[Expr],
-    source_hash: &[u8; 32],
-) -> Option<Vec<u8>> {
+pub fn encode_exact_fasl_program(expressions: &[Expr], source_hash: &[u8; 32]) -> Option<Vec<u8>> {
     exact_ast_transport_admitted(expressions)
         .then(|| fasl::encode_program(expressions, source_hash))
 }
@@ -978,7 +1004,13 @@ mod wire_tests {
         assert_eq!(encoded.len(), 3 + 1 + (1 + 1 + 1) + (1 + 1 + 2));
         let decoded = decode_program(&encoded).expect("wire decodes local coordinates");
         assert_eq!(decoded[0].kind, ExprKind::Local { depth: 2, index: 3 });
-        assert_eq!(decoded[1].kind, ExprKind::Local { depth: 0, index: 200 });
+        assert_eq!(
+            decoded[1].kind,
+            ExprKind::Local {
+                depth: 0,
+                index: 200
+            }
+        );
         assert_eq!(encode_program(&decoded), encoded);
     }
 
@@ -1005,9 +1037,9 @@ mod wire_tests {
     #[test]
     fn w9_domain_identity_round_trips_through_wire_and_fasl_without_byte_alias() {
         let expr = Expr {
-            kind: ExprKind::DomainIdentity(crate::DomainIdentity::D9(
-                crate::CoreD9::from_word(crate::Bit9::new(0b1_00000001).unwrap()),
-            )),
+            kind: ExprKind::DomainIdentity(crate::DomainIdentity::D9(crate::CoreD9::from_word(
+                crate::Bit9::new(0b1_00000001).unwrap(),
+            ))),
             span: crate::Span { start: 0, end: 9 },
         };
 
@@ -1038,7 +1070,10 @@ mod wire_tests {
         assert_eq!(encode_program(&decoded), encoded);
         // Той самий вміст, що й через fasl — отже програма та сама.
         let hash = [0u8; 32];
-        assert_eq!(fasl::encode_program(&decoded, &hash), fasl::encode_program(&expressions, &hash));
+        assert_eq!(
+            fasl::encode_program(&decoded, &hash),
+            fasl::encode_program(&expressions, &hash)
+        );
     }
 
     #[test]
@@ -1047,8 +1082,18 @@ mod wire_tests {
         let expressions = parse(source).expect("parses");
         let wire = encode_program(&expressions);
         let fasl = fasl::encode_program(&expressions, &[0u8; 32]);
-        assert!(wire.len() < source.len(), "wire {} >= text {}", wire.len(), source.len());
-        assert!(wire.len() < fasl.len(), "wire {} vs fasl {}", wire.len(), fasl.len());
+        assert!(
+            wire.len() < source.len(),
+            "wire {} >= text {}",
+            wire.len(),
+            source.len()
+        );
+        assert!(
+            wire.len() < fasl.len(),
+            "wire {} vs fasl {}",
+            wire.len(),
+            fasl.len()
+        );
     }
 
     #[test]
@@ -1072,7 +1117,10 @@ mod wire_tests {
         let expressions = parse(SAMPLE).expect("sample parses");
         let encoded = encode_program(&expressions);
         for cut in 0..encoded.len() {
-            assert!(decode_program(&encoded[..cut]).is_none(), "prefix {cut} decoded");
+            assert!(
+                decode_program(&encoded[..cut]).is_none(),
+                "prefix {cut} decoded"
+            );
         }
     }
 }
@@ -1127,13 +1175,17 @@ mod fasl_tests {
         let encoded = encode_program(&expressions, &source_hash);
 
         const FORBIDDEN_SURFACES: &[&[u8]] = &[
-            &[110, 117, 109, 101, 114, 105, 99, 45, 98, 117, 102, 102, 101, 114, 45, 109, 97, 112],
+            &[
+                110, 117, 109, 101, 114, 105, 99, 45, 98, 117, 102, 102, 101, 114, 45, 109, 97, 112,
+            ],
             &[108, 97, 109, 98, 100, 97],
             &[105, 51, 50, 45, 98, 117, 102, 102, 101, 114],
         ];
         for forbidden in FORBIDDEN_SURFACES {
             assert!(
-                !encoded.windows(forbidden.len()).any(|bytes| bytes == *forbidden),
+                !encoded
+                    .windows(forbidden.len())
+                    .any(|bytes| bytes == *forbidden),
                 "людська назва просочилася в бінарний транспорт: {:?}",
                 forbidden
             );
@@ -1147,10 +1199,14 @@ mod fasl_tests {
         let ExprKind::List(outer) = &decoded[0].kind else {
             panic!("D9 numeric-buffer-map program must stay a list");
         };
-        assert!(matches!(
-            &outer[0].kind,
-            ExprKind::DomainIdentity(identity) if *identity == crate::DomainIdentity::D9(crate::CoreD9::from_word(crate::Bit9::new(0b110011111).expect("D9 numeric-buffer-map")))
-        ), "expected exact D9 numeric-buffer-map identity, got {:?}", outer[0].kind);
+        assert!(
+            matches!(
+                &outer[0].kind,
+                ExprKind::DomainIdentity(identity) if *identity == crate::DomainIdentity::D9(crate::CoreD9::from_word(crate::Bit9::new(0b110011111).expect("D9 numeric-buffer-map")))
+            ),
+            "expected exact D9 numeric-buffer-map identity, got {:?}",
+            outer[0].kind
+        );
         let ExprKind::NumericBuffer(crate::NumericBuffer::I32(values)) = &outer[2].kind else {
             panic!("third argument must stay an i32 buffer");
         };

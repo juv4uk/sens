@@ -10,8 +10,8 @@ fn eval_ukr(source: &str, session: &mut Session) -> Result<sens::Value, sens::La
 }
 
 fn load_core(session: &mut Session) {
-    let forms = parse_mixed_exact_domain(SOURCE)
-        .expect("актуальний Core читається загальним SENS reader");
+    let forms =
+        parse_mixed_exact_domain(SOURCE).expect("актуальний Core читається загальним SENS reader");
     eval_parsed_expressions(&forms, session)
         .expect("актуальний Core виконується без адаптера SID8/Sens8");
 }
@@ -20,7 +20,10 @@ fn load_core(session: &mut Session) {
 fn current_core_uses_the_generic_exact_domain_reader() {
     let mut session = Session::default();
     load_core(&mut session);
-    assert_eq!(eval_ukr("(додати 2 3)", &mut session).unwrap().to_string(), "5");
+    assert_eq!(
+        eval_ukr("(додати 2 3)", &mut session).unwrap().to_string(),
+        "5"
+    );
 }
 
 #[test]
@@ -34,15 +37,15 @@ fn derived_let_macro_preserves_parallel_bindings_and_lexical_scope() {
             "(нехай-похідне ((x 7) (y 9)) (сполучити x (сполучити y (як-є ())))))",
             "(7 9)",
         ),
-        (
-            "((функція (x) ((функція (y) (додати x y)) 9)) 7)",
-            "16",
-        ),
+        ("((функція (x) ((функція (y) (додати x y)) 9)) 7)", "16"),
     ] {
         let actual = eval_ukr(source, &mut session)
             .unwrap_or_else(|error| panic!("українське зв'язування {source}: {error:?}"))
             .to_string();
-        assert_eq!(actual, expected, "лексична область / макророзгортання: {source}");
+        assert_eq!(
+            actual, expected,
+            "лексична область / макророзгортання: {source}"
+        );
     }
 }
 
@@ -69,7 +72,8 @@ fn d6_map_resident_does_not_gain_callability_without_a_language_mechanism() {
     let error = eval_ukr(
         "(відобразити (функція (x) x) (сполучити 1 (як-є ())))",
         &mut session,
-    ).expect_err("D6 identity residency alone must not invent an evaluator mechanism");
+    )
+    .expect_err("D6 identity residency alone must not invent an evaluator mechanism");
     assert!(
         error.message.contains("domain identity is not callable"),
         "expected an explicit exact-domain callability error: {error:?}"

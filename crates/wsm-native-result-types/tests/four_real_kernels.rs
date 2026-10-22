@@ -3,7 +3,8 @@
 use std::path::PathBuf;
 
 use wsm_clips_kernel::{
-    ClipsAbiAdapter, ClipsExecutionResult, ClipsKernel, LegacyAbiSemanticId as ClipsLegacyAbiSemanticId,
+    ClipsAbiAdapter, ClipsExecutionResult, ClipsKernel,
+    LegacyAbiSemanticId as ClipsLegacyAbiSemanticId,
 };
 use wsm_common_lisp_kernel::{
     CommonLispAbiAdapter, CommonLispKernel, CommonLispRequest,
@@ -17,13 +18,12 @@ use wsm_kernel_c_abi::{
 };
 use wsm_native_result_types::{FourKernelObservation, ProducerSlot};
 use wsm_prolog_kernel::{
-    LegacyAbiSemanticId as PrologLegacyAbiSemanticId, PrologAbiAdapter, PrologKernel,
-    PrologQuery, PrologRequest,
+    LegacyAbiSemanticId as PrologLegacyAbiSemanticId, PrologAbiAdapter, PrologKernel, PrologQuery,
+    PrologRequest,
 };
 
 fn prolog_fixture() -> PathBuf {
-    PathBuf::from(env!("CARGO_MANIFEST_DIR"))
-        .join("../wsm-prolog-kernel/tests/fixtures/family.pl")
+    PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../wsm-prolog-kernel/tests/fixtures/family.pl")
 }
 
 fn datalog_closure() -> Database {
@@ -103,12 +103,7 @@ fn four_real_kernels_keep_their_native_results_side_by_side() {
         .contains(&vec![Value::sym("a"), Value::sym("c")]));
     assert!(datalog.generation_count() >= 2);
 
-    let observation = FourKernelObservation::new(
-        common_lisp,
-        prolog,
-        clips,
-        datalog,
-    );
+    let observation = FourKernelObservation::new(common_lisp, prolog, clips, datalog);
 
     // Producer identity is retained by concrete field type and field name.
     assert_eq!(
@@ -149,8 +144,6 @@ fn four_real_kernels_keep_their_native_results_side_by_side() {
     assert_eq!(observation.clips.fired, 1);
 }
 
-
-
 const INVOKE_ID: u8 = 0b1010_1000;
 
 fn invoke_vtable(vtable: WsmKernelVTable, payload: &[u8]) -> Vec<u8> {
@@ -190,12 +183,8 @@ fn invoke_vtable(vtable: WsmKernelVTable, payload: &[u8]) -> Vec<u8> {
 #[cfg(feature = "native-clips")]
 fn one_invoke_sid_crosses_all_four_kernel_boundaries_without_owning_payload_semantics() {
     let common_lisp = CommonLispAbiAdapter::default();
-    let common_lisp_output =
-        invoke_vtable(common_lisp.vtable(), b"(car (cons 'left 'right))");
-    assert_eq!(
-        String::from_utf8_lossy(&common_lisp_output).trim(),
-        "LEFT"
-    );
+    let common_lisp_output = invoke_vtable(common_lisp.vtable(), b"(car (cons 'left 'right))");
+    assert_eq!(String::from_utf8_lossy(&common_lisp_output).trim(), "LEFT");
     assert_eq!(
         common_lisp.last_legacy_abi_id().map(|id| id.0),
         Some(INVOKE_ID)
@@ -239,10 +228,7 @@ fn one_invoke_sid_crosses_all_four_kernel_boundaries_without_owning_payload_sema
     let datalog_output = invoke_vtable(datalog.vtable(), b"path");
     let datalog_text = String::from_utf8_lossy(&datalog_output);
     assert!(datalog_text.contains("path(1,4)"));
-    assert_eq!(
-        datalog.last_legacy_abi_id().map(|id| id.0),
-        Some(INVOKE_ID)
-    );
+    assert_eq!(datalog.last_legacy_abi_id().map(|id| id.0), Some(INVOKE_ID));
 
     // One shared SID names only the act of invocation. Payload interpretation
     // and native result domains remain producer-owned.

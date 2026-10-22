@@ -13,7 +13,7 @@
 //! a build that never calls the installer cannot reach it.
 
 use super::EvalStep;
-use crate::{Environment, ErrorKind, Expr, LanguageError, CoreDomainIdentity, Span, Value};
+use crate::{CoreDomainIdentity, Environment, ErrorKind, Expr, LanguageError, Span, Value};
 use std::collections::{BTreeMap, HashMap};
 use std::sync::{OnceLock, RwLock};
 
@@ -23,8 +23,7 @@ use std::sync::{OnceLock, RwLock};
 /// the `Environment`, exactly like every kernel primitive.
 pub type HostFn = fn(&[Expr], &Environment, Span) -> Result<Value, LanguageError>;
 
-type EvaluatedHostFn =
-    fn(&[(Value, Span)], &Environment, Span) -> Result<Value, LanguageError>;
+type EvaluatedHostFn = fn(&[(Value, Span)], &Environment, Span) -> Result<Value, LanguageError>;
 
 #[derive(Clone, Copy)]
 enum HostHandler {
@@ -229,9 +228,10 @@ mod honesty_tests {
     #[test]
     fn lookup_distinguishes_present_absent_and_unreadable_registry() {
         let lock = RwLock::new(BTreeMap::new());
-        lock.write()
-            .expect("fresh local registry")
-            .insert("demo".to_string(), HostHandler::Raw(dummy_handler as HostFn));
+        lock.write().expect("fresh local registry").insert(
+            "demo".to_string(),
+            HostHandler::Raw(dummy_handler as HostFn),
+        );
 
         assert!(matches!(
             lookup_capability(&lock, "demo"),
@@ -264,33 +264,26 @@ mod honesty_tests {
     #[test]
     fn evaluated_handler_checks_arity_before_evaluating_arguments() {
         let lock = RwLock::new(BTreeMap::new());
-        lock.write()
-            .expect("fresh local registry")
-            .insert(
-                "demo".to_string(),
-                HostHandler::Evaluated {
-                    arity: 1,
-                    handler: evaluated_handler,
-                },
-            );
+        lock.write().expect("fresh local registry").insert(
+            "demo".to_string(),
+            HostHandler::Evaluated {
+                arity: 1,
+                handler: evaluated_handler,
+            },
+        );
 
         let program = crate::parse("(demo missing extra)").expect("probe parses");
         let crate::ExprKind::List(items) = &program[0].kind else {
             panic!("probe must be a call");
         };
         let span = program[0].span;
-        let error = match dispatch_capability_from(
-            &lock,
-            "demo",
-            &items[1..],
-            &Environment::root(),
-            span,
-        )
-        .expect("registered evaluated handler")
-        {
-            Err(error) => error,
-            Ok(_) => panic!("wrong arity must fail before callback"),
-        };
+        let error =
+            match dispatch_capability_from(&lock, "demo", &items[1..], &Environment::root(), span)
+                .expect("registered evaluated handler")
+            {
+                Err(error) => error,
+                Ok(_) => panic!("wrong arity must fail before callback"),
+            };
 
         assert_eq!(error.kind, ErrorKind::Arity);
         assert_eq!(error.span, span);
@@ -309,34 +302,25 @@ mod honesty_tests {
     fn sens_registry_is_keyed_by_exact_identity_without_ordering() {
         // A mechanism key is an admitted, exact-width Core identity; D10
         // coordinates have no callable Rust CoreDomainIdentity projection.
-        let sens = CoreDomainIdentity::D4(
-            crate::CoreD4::from_word(crate::Bit4::new(0b0011).expect("D4 DEFINE")),
-        );
-        let same_payload_different_width = CoreDomainIdentity::D3(
-            crate::Bija3::from_word(crate::Bit3::new(0b011).expect("D3 CDR")),
-        );
+        let sens = CoreDomainIdentity::D4(crate::CoreD4::from_word(
+            crate::Bit4::new(0b0011).expect("D4 DEFINE"),
+        ));
+        let same_payload_different_width = CoreDomainIdentity::D3(crate::Bija3::from_word(
+            crate::Bit3::new(0b011).expect("D3 CDR"),
+        ));
         assert_ne!(sens, same_payload_different_width);
         unregister_sens_capability(sens);
         register_sens_capability(sens, sens_handler);
 
-        let result = dispatch_sens_capability(
-            sens,
-            &[],
-            &Environment::root(),
-            Span::default(),
-        )
-        .expect("registered SENS mechanism")
-        .expect("mechanism succeeds");
+        let result = dispatch_sens_capability(sens, &[], &Environment::root(), Span::default())
+            .expect("registered SENS mechanism")
+            .expect("mechanism succeeds");
         assert_eq!(result.to_string(), "0011");
 
         unregister_sens_capability(sens);
-        assert!(dispatch_sens_capability(
-            sens,
-            &[],
-            &Environment::root(),
-            Span::default(),
-        )
-        .is_none());
+        assert!(
+            dispatch_sens_capability(sens, &[], &Environment::root(), Span::default(),).is_none()
+        );
     }
 
     #[test]

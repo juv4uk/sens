@@ -5,7 +5,9 @@
 //! deferring, or rejecting the observation. Only loopback HTTP is accepted: this boundary
 //! is for a local vLLM-compatible model, not arbitrary network exfiltration.
 
-use sens::{exact_domain_fraction_parts, BinaryNumber, ErrorKind, Environment, LanguageError, Span, Value};
+use sens::{
+    exact_domain_fraction_parts, BinaryNumber, Environment, ErrorKind, LanguageError, Span, Value,
+};
 use serde_json::{json, Value as Json};
 use std::{
     collections::HashMap,
@@ -152,7 +154,12 @@ fn parse_loopback_endpoint(endpoint: &str, span: Span) -> Result<LocalEndpoint, 
             span,
         )
     })?;
-    if port == 0 || path_suffix.is_empty() || path_suffix.chars().any(|ch| matches!(ch, '\r' | '\n' | '#' | '?')) {
+    if port == 0
+        || path_suffix.is_empty()
+        || path_suffix
+            .chars()
+            .any(|ch| matches!(ch, '\r' | '\n' | '#' | '?'))
+    {
         return Err(fail(
             ErrorKind::InvalidForm,
             "local model endpoint path or port is not canonical",
@@ -192,11 +199,7 @@ fn chunked_body(mut body: &[u8]) -> Result<Vec<u8>, String> {
     }
 }
 
-fn post_json(
-    endpoint: &str,
-    payload: &Json,
-    span: Span,
-) -> Result<Json, LanguageError> {
+fn post_json(endpoint: &str, payload: &Json, span: Span) -> Result<Json, LanguageError> {
     let endpoint = parse_loopback_endpoint(endpoint, span)?;
     let body = serde_json::to_vec(payload).map_err(|error| {
         fail(
@@ -210,8 +213,7 @@ fn post_json(
         std::net::IpAddr::V4(std::net::Ipv4Addr::LOCALHOST),
         endpoint.port,
     );
-    let mut stream = TcpStream::connect_timeout(&address, CONNECT_TIMEOUT)
-    .map_err(|error| {
+    let mut stream = TcpStream::connect_timeout(&address, CONNECT_TIMEOUT).map_err(|error| {
         fail(
             ErrorKind::InvalidForm,
             format!("could not connect to the local model: {error}"),
@@ -225,13 +227,15 @@ fn post_json(
             span,
         )
     })?;
-    stream.set_write_timeout(Some(IO_TIMEOUT)).map_err(|error| {
-        fail(
-            ErrorKind::InvalidForm,
-            format!("could not set local model write timeout: {error}"),
-            span,
-        )
-    })?;
+    stream
+        .set_write_timeout(Some(IO_TIMEOUT))
+        .map_err(|error| {
+            fail(
+                ErrorKind::InvalidForm,
+                format!("could not set local model write timeout: {error}"),
+                span,
+            )
+        })?;
 
     let mut request = format!(
         "POST {} HTTP/1.1\r\nHost: 127.0.0.1:{}\r\nContent-Type: application/json\r\nAccept: application/json\r\nConnection: close\r\nContent-Length: {}\r\n",
@@ -283,7 +287,13 @@ fn post_json(
     let header_end = response
         .windows(4)
         .position(|window| window == b"\r\n\r\n")
-        .ok_or_else(|| fail(ErrorKind::InvalidForm, "malformed local model HTTP response", span))?;
+        .ok_or_else(|| {
+            fail(
+                ErrorKind::InvalidForm,
+                "malformed local model HTTP response",
+                span,
+            )
+        })?;
     let header = std::str::from_utf8(&response[..header_end]).map_err(|_| {
         fail(
             ErrorKind::InvalidForm,
@@ -296,7 +306,13 @@ fn post_json(
         .next()
         .and_then(|line| line.split_whitespace().nth(1))
         .and_then(|code| code.parse::<u16>().ok())
-        .ok_or_else(|| fail(ErrorKind::InvalidForm, "local model returned an invalid HTTP status", span))?;
+        .ok_or_else(|| {
+            fail(
+                ErrorKind::InvalidForm,
+                "local model returned an invalid HTTP status",
+                span,
+            )
+        })?;
     if !(200..300).contains(&status) {
         return Err(fail(
             ErrorKind::InvalidForm,
@@ -444,7 +460,10 @@ fn exact_distribution(
             span,
         ));
     }
-    let maximum = log_probabilities.iter().copied().fold(f64::NEG_INFINITY, f64::max);
+    let maximum = log_probabilities
+        .iter()
+        .copied()
+        .fold(f64::NEG_INFINITY, f64::max);
     let exponentials: Vec<f64> = log_probabilities
         .iter()
         .map(|value| (value - maximum).exp())
@@ -468,13 +487,15 @@ fn exact_distribution(
         .collect();
     let mut counts: Vec<u64> = scaled.iter().map(|value| value.floor() as u64).collect();
     let assigned: u64 = counts.iter().sum();
-    let remaining = PROBABILITY_DENOMINATOR.checked_sub(assigned).ok_or_else(|| {
-        fail(
-            ErrorKind::InvalidForm,
-            "local model probability quantization overflowed",
-            span,
-        )
-    })?;
+    let remaining = PROBABILITY_DENOMINATOR
+        .checked_sub(assigned)
+        .ok_or_else(|| {
+            fail(
+                ErrorKind::InvalidForm,
+                "local model probability quantization overflowed",
+                span,
+            )
+        })?;
     if remaining as usize > counts.len() {
         return Err(fail(
             ErrorKind::InvalidForm,
@@ -496,13 +517,14 @@ fn exact_distribution(
     let mut entries = Vec::with_capacity(criteria.len());
     for (criterion, count) in criteria.iter().zip(counts.iter()) {
         let numerator = domain_word(*count, span)?;
-        let exact = exact_domain_fraction_parts(false, &numerator, &denominator).ok_or_else(|| {
-            fail(
-                ErrorKind::NumericOverflow,
-                "could not encode normalized model probability as an exact D48 fraction",
-                span,
-            )
-        })?;
+        let exact =
+            exact_domain_fraction_parts(false, &numerator, &denominator).ok_or_else(|| {
+                fail(
+                    ErrorKind::NumericOverflow,
+                    "could not encode normalized model probability as an exact D48 fraction",
+                    span,
+                )
+            })?;
         entries.push(Value::list([criterion.label.clone(), exact]));
     }
     Ok(Value::list(entries))
@@ -527,7 +549,10 @@ pub(crate) fn evaluate_choice_distribution(
         ));
     }
     let criteria = parse_criteria(&arguments[4].0, arguments[4].1)?;
-    let letters: Vec<String> = criteria.iter().map(|criterion| criterion.letter.clone()).collect();
+    let letters: Vec<String> = criteria
+        .iter()
+        .map(|criterion| criterion.letter.clone())
+        .collect();
     let prompt_criteria = criteria
         .iter()
         .map(|criterion| {
@@ -576,10 +601,7 @@ pub(crate) fn evaluate_choice_distribution(
             symbol("quantization"),
             Value::String(Rc::from("exact-rational-largest-remainder-1e9")),
         ]),
-        Value::list([
-            symbol("endpoint"),
-            Value::String(Rc::from(endpoint_record)),
-        ]),
+        Value::list([symbol("endpoint"), Value::String(Rc::from(endpoint_record))]),
     ]);
     Ok(Value::list([
         symbol("model-distribution/1"),

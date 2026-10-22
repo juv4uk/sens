@@ -2,8 +2,7 @@ use std::path::PathBuf;
 use std::process::Command;
 
 fn manifest() -> PathBuf {
-    PathBuf::from(env!("CARGO_MANIFEST_DIR"))
-        .join("../../tests/fixtures/islands-manifest-v1.json")
+    PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../tests/fixtures/islands-manifest-v1.json")
 }
 
 #[test]
@@ -20,7 +19,11 @@ fn islands_plan_describes_requested_runtimes_without_installing_them() {
         .output()
         .expect("sens CLI must run");
 
-    assert!(output.status.success(), "stderr: {}", String::from_utf8_lossy(&output.stderr));
+    assert!(
+        output.status.success(),
+        "stderr: {}",
+        String::from_utf8_lossy(&output.stderr)
+    );
     let stdout = String::from_utf8(output.stdout).expect("UTF-8 output");
     for required in [
         "prolog",
@@ -62,7 +65,10 @@ fn islands_manifest_rejects_retired_my_lisp_protocol_id() {
         .expect("sens CLI must run");
 
     let stderr = String::from_utf8_lossy(&output.stderr);
-    assert!(!output.status.success(), "retired protocol was accepted: {stderr}");
+    assert!(
+        !output.status.success(),
+        "retired protocol was accepted: {stderr}"
+    );
     assert!(
         stderr.contains("unsupported manifest protocol: my-lisp-islands-manifest-1"),
         "unexpected rejection: {stderr}"
@@ -81,10 +87,17 @@ fn islands_plan_uses_four_kernel_profile_by_default() {
         .output()
         .expect("sens CLI must run");
 
-    assert!(output.status.success(), "stderr: {}", String::from_utf8_lossy(&output.stderr));
+    assert!(
+        output.status.success(),
+        "stderr: {}",
+        String::from_utf8_lossy(&output.stderr)
+    );
     let stdout = String::from_utf8(output.stdout).expect("UTF-8 output");
     for required in ["common-lisp", "prolog", "clips", "datalog"] {
-        assert!(stdout.contains(required), "default four-kernel plan omits {required}: {stdout}");
+        assert!(
+            stdout.contains(required),
+            "default four-kernel plan omits {required}: {stdout}"
+        );
     }
 }
 
@@ -106,7 +119,11 @@ fn top_level_install_alias_delegates_to_island_bootstrap() {
         .output()
         .expect("sens CLI must run");
 
-    assert!(output.status.success(), "stderr: {}", String::from_utf8_lossy(&output.stderr));
+    assert!(
+        output.status.success(),
+        "stderr: {}",
+        String::from_utf8_lossy(&output.stderr)
+    );
     let stdout = String::from_utf8(output.stdout).expect("UTF-8 output");
     assert!(stdout.contains("dry-run"));
     assert!(!root.exists(), "dry-run created {root:?}");
@@ -116,14 +133,21 @@ fn top_level_install_alias_delegates_to_island_bootstrap() {
 fn islands_plan_expands_the_four_kernel_profile_from_manifest() {
     let output = Command::new(env!("CARGO_BIN_EXE_sens"))
         .args([
-            "islands", "plan", "--manifest",
+            "islands",
+            "plan",
+            "--manifest",
             manifest().to_str().expect("UTF-8 manifest path"),
-            "--profile", "four-kernel",
+            "--profile",
+            "four-kernel",
         ])
         .output()
         .expect("sens CLI must run");
 
-    assert!(output.status.success(), "stderr: {}", String::from_utf8_lossy(&output.stderr));
+    assert!(
+        output.status.success(),
+        "stderr: {}",
+        String::from_utf8_lossy(&output.stderr)
+    );
     let stdout = String::from_utf8(output.stdout).expect("UTF-8 output");
     assert!(stdout.contains("prolog"), "{stdout}");
     assert!(stdout.contains("clips"), "{stdout}");
@@ -135,15 +159,24 @@ fn islands_install_dry_run_plans_versioned_paths_without_creating_them() {
     let _ = std::fs::remove_dir_all(&root);
     let output = Command::new(env!("CARGO_BIN_EXE_sens"))
         .args([
-            "islands", "install", "--manifest",
+            "islands",
+            "install",
+            "--manifest",
             manifest().to_str().expect("UTF-8 manifest path"),
-            "--profile", "four-kernel", "--root",
-            root.to_str().expect("UTF-8 root path"), "--dry-run",
+            "--profile",
+            "four-kernel",
+            "--root",
+            root.to_str().expect("UTF-8 root path"),
+            "--dry-run",
         ])
         .output()
         .expect("sens CLI must run");
 
-    assert!(output.status.success(), "stderr: {}", String::from_utf8_lossy(&output.stderr));
+    assert!(
+        output.status.success(),
+        "stderr: {}",
+        String::from_utf8_lossy(&output.stderr)
+    );
     let stdout = String::from_utf8(output.stdout).expect("UTF-8 output");
     assert!(stdout.contains("dry-run"), "{stdout}");
     assert!(
@@ -161,28 +194,78 @@ fn islands_install_apply_verifies_file_artifact_before_publishing_it() {
     std::fs::create_dir_all(&base).expect("temporary fixture directory");
     let artifact = base.join("runtime.bin");
     std::fs::write(&artifact, b"island-runtime").expect("fixture artifact");
-    let digest = sens::sha256_source(b"island-runtime").iter().map(|byte| format!("{byte:02x}")).collect::<String>();
+    let digest = sens::sha256_source(b"island-runtime")
+        .iter()
+        .map(|byte| format!("{byte:02x}"))
+        .collect::<String>();
     let manifest_path = base.join("manifest.json");
     std::fs::write(&manifest_path, format!(r#"{{"protocol":"sens-islands-manifest-1","profiles":[{{"key":"one","islands":["demo"]}}],"islands":[{{"key":"demo","runtime_version":"1","abi_compatibility":"test-abi-1","install_key":"demo","license":"test","provenance":"test","platforms":[{{"target":"linux-x86_64","provider":"release-asset","url":"file://{}","checksum_algorithm":"sha256","sha256":"{}","artifact":"file","artifact_format":"file","entrypoint":"runtime.bin","probe":["/bin/sh","-c","exit 0"]}}]}}]}}"#, artifact.display(), digest)).expect("manifest");
     let root = base.join("installed");
     let output = Command::new(env!("CARGO_BIN_EXE_sens"))
-        .args(["islands", "install", "--manifest", manifest_path.to_str().unwrap(), "--profile", "one", "--root", root.to_str().unwrap(), "--apply"])
-        .output().expect("CLI");
-    assert!(output.status.success(), "{}", String::from_utf8_lossy(&output.stderr));
-    assert_eq!(std::fs::read(root.join("demo/1/linux-x86_64/runtime.bin")).unwrap(), b"island-runtime");
+        .args([
+            "islands",
+            "install",
+            "--manifest",
+            manifest_path.to_str().unwrap(),
+            "--profile",
+            "one",
+            "--root",
+            root.to_str().unwrap(),
+            "--apply",
+        ])
+        .output()
+        .expect("CLI");
+    assert!(
+        output.status.success(),
+        "{}",
+        String::from_utf8_lossy(&output.stderr)
+    );
+    assert_eq!(
+        std::fs::read(root.join("demo/1/linux-x86_64/runtime.bin")).unwrap(),
+        b"island-runtime"
+    );
     let status = Command::new(env!("CARGO_BIN_EXE_sens"))
-        .args(["islands", "status", "--manifest", manifest_path.to_str().unwrap(), "--root", root.to_str().unwrap()])
-        .output().expect("status CLI");
-    assert!(status.status.success(), "{}", String::from_utf8_lossy(&status.stderr));
+        .args([
+            "islands",
+            "status",
+            "--manifest",
+            manifest_path.to_str().unwrap(),
+            "--root",
+            root.to_str().unwrap(),
+        ])
+        .output()
+        .expect("status CLI");
+    assert!(
+        status.status.success(),
+        "{}",
+        String::from_utf8_lossy(&status.stderr)
+    );
     let status_stdout = String::from_utf8(status.stdout).unwrap();
     assert!(status_stdout.contains("demo 1 linux-x86_64"));
     assert!(status_stdout.contains(": available"));
 
     let second = Command::new(env!("CARGO_BIN_EXE_sens"))
-        .args(["islands", "install", "--manifest", manifest_path.to_str().unwrap(), "--profile", "one", "--root", root.to_str().unwrap(), "--apply"])
-        .output().expect("idempotent install CLI");
-    assert!(second.status.success(), "{}", String::from_utf8_lossy(&second.stderr));
-    assert!(String::from_utf8(second.stdout).unwrap().contains("already installed"));
+        .args([
+            "islands",
+            "install",
+            "--manifest",
+            manifest_path.to_str().unwrap(),
+            "--profile",
+            "one",
+            "--root",
+            root.to_str().unwrap(),
+            "--apply",
+        ])
+        .output()
+        .expect("idempotent install CLI");
+    assert!(
+        second.status.success(),
+        "{}",
+        String::from_utf8_lossy(&second.stderr)
+    );
+    assert!(String::from_utf8(second.stdout)
+        .unwrap()
+        .contains("already installed"));
 }
 
 #[test]
@@ -193,18 +276,24 @@ fn islands_manifest_rejects_malformed_release_checksum() {
     let manifest_path = base.join("manifest.json");
     std::fs::write(&manifest_path, r#"{"protocol":"sens-islands-manifest-1","islands":[{"key":"demo","runtime_version":"1","abi_compatibility":"test-abi-1","install_key":"demo","license":"test","provenance":"test","platforms":[{"target":"linux-x86_64","provider":"release-asset","url":"https://example.invalid/runtime.bin","checksum_algorithm":"sha256","sha256":"bad"}]}]}"#).expect("manifest");
     let output = Command::new(env!("CARGO_BIN_EXE_sens"))
-        .args(["islands", "plan", "--manifest", manifest_path.to_str().unwrap(), "--with", "demo"])
-        .output().expect("CLI");
+        .args([
+            "islands",
+            "plan",
+            "--manifest",
+            manifest_path.to_str().unwrap(),
+            "--with",
+            "demo",
+        ])
+        .output()
+        .expect("CLI");
     assert!(!output.status.success());
     assert!(String::from_utf8_lossy(&output.stderr).contains("invalid SHA-256"));
 }
 
 #[test]
 fn islands_manifest_rejects_missing_release_metadata() {
-    let base = std::env::temp_dir().join(format!(
-        "sens-islands-missing-meta-{}",
-        std::process::id()
-    ));
+    let base =
+        std::env::temp_dir().join(format!("sens-islands-missing-meta-{}", std::process::id()));
     let _ = std::fs::remove_dir_all(&base);
     std::fs::create_dir_all(&base).expect("temporary fixture directory");
     let manifest_path = base.join("manifest.json");
@@ -232,10 +321,7 @@ fn islands_manifest_rejects_missing_release_metadata() {
 
 #[test]
 fn islands_manifest_rejects_unknown_provider_without_fallback() {
-    let base = std::env::temp_dir().join(format!(
-        "sens-islands-provider-{}",
-        std::process::id()
-    ));
+    let base = std::env::temp_dir().join(format!("sens-islands-provider-{}", std::process::id()));
     let _ = std::fs::remove_dir_all(&base);
     std::fs::create_dir_all(&base).expect("temporary fixture directory");
     let manifest_path = base.join("manifest.json");
@@ -268,20 +354,53 @@ fn islands_status_reports_probe_failure_without_hiding_version_identity() {
     std::fs::create_dir_all(&base).expect("temporary fixture directory");
     let artifact = base.join("runtime.bin");
     std::fs::write(&artifact, b"runtime").expect("artifact");
-    let digest = sens::sha256_source(b"runtime").iter().map(|byte| format!("{byte:02x}")).collect::<String>();
+    let digest = sens::sha256_source(b"runtime")
+        .iter()
+        .map(|byte| format!("{byte:02x}"))
+        .collect::<String>();
     let manifest_path = base.join("manifest.json");
     std::fs::write(&manifest_path, format!(r#"{{"protocol":"sens-islands-manifest-1","islands":[{{"key":"demo","runtime_version":"2","abi_compatibility":"test-abi-1","install_key":"demo","license":"test","provenance":"release","platforms":[{{"target":"linux-x86_64","provider":"release-asset","url":"file://{}","checksum_algorithm":"sha256","sha256":"{}","artifact":"file","artifact_format":"file","entrypoint":"runtime.bin","probe":["/bin/sh","-c","exit 7"]}}]}}]}}"#, artifact.display(), digest)).expect("manifest");
     let root = base.join("installed");
-    let install = Command::new(env!("CARGO_BIN_EXE_sens")).args(["islands", "install", "--manifest", manifest_path.to_str().unwrap(), "--with", "demo", "--root", root.to_str().unwrap(), "--apply"]).output().expect("install");
-    assert!(install.status.success(), "{}", String::from_utf8_lossy(&install.stderr));
+    let install = Command::new(env!("CARGO_BIN_EXE_sens"))
+        .args([
+            "islands",
+            "install",
+            "--manifest",
+            manifest_path.to_str().unwrap(),
+            "--with",
+            "demo",
+            "--root",
+            root.to_str().unwrap(),
+            "--apply",
+        ])
+        .output()
+        .expect("install");
+    assert!(
+        install.status.success(),
+        "{}",
+        String::from_utf8_lossy(&install.stderr)
+    );
     let install_stdout = String::from_utf8(install.stdout).unwrap();
     assert!(install_stdout.contains("published"));
     assert!(install_stdout.contains(": probe-failed"));
     assert!(!install_stdout.contains(": available"));
 
-    let status = Command::new(env!("CARGO_BIN_EXE_sens")).args(["islands", "status", "--manifest", manifest_path.to_str().unwrap(), "--root", root.to_str().unwrap()]).output().expect("status");
+    let status = Command::new(env!("CARGO_BIN_EXE_sens"))
+        .args([
+            "islands",
+            "status",
+            "--manifest",
+            manifest_path.to_str().unwrap(),
+            "--root",
+            root.to_str().unwrap(),
+        ])
+        .output()
+        .expect("status");
     let stdout = String::from_utf8(status.stdout).unwrap();
-    assert!(stdout.contains("demo 2 linux-x86_64 release: probe-failed"), "{stdout}");
+    assert!(
+        stdout.contains("demo 2 linux-x86_64 release: probe-failed"),
+        "{stdout}"
+    );
 }
 
 #[test]
@@ -298,12 +417,15 @@ fn islands_status_keeps_absent_and_unsupported_distinct_for_selected_target() {
         .output()
         .expect("sens CLI must run");
 
-    assert!(output.status.success(), "stderr: {}", String::from_utf8_lossy(&output.stderr));
+    assert!(
+        output.status.success(),
+        "stderr: {}",
+        String::from_utf8_lossy(&output.stderr)
+    );
     let stdout = String::from_utf8(output.stdout).expect("UTF-8 output");
     assert!(stdout.contains("prolog: unsupported"), "{stdout}");
     assert!(stdout.contains("clips: unsupported"), "{stdout}");
 }
-
 
 #[test]
 fn islands_plan_reports_exact_destination_and_verified_state_without_mutation() {
@@ -329,7 +451,11 @@ fn islands_plan_reports_exact_destination_and_verified_state_without_mutation() 
         .output()
         .expect("CLI");
 
-    assert!(output.status.success(), "{}", String::from_utf8_lossy(&output.stderr));
+    assert!(
+        output.status.success(),
+        "{}",
+        String::from_utf8_lossy(&output.stderr)
+    );
     let stdout = String::from_utf8(output.stdout).expect("UTF-8 output");
     for required in [
         "abi: wsm-kernel-c-abi/1",
@@ -377,9 +503,7 @@ fn islands_manifest_rejects_empty_provenance() {
         .output()
         .expect("CLI");
     assert!(!output.status.success());
-    assert!(
-        String::from_utf8_lossy(&output.stderr).contains("missing required release metadata")
-    );
+    assert!(String::from_utf8_lossy(&output.stderr).contains("missing required release metadata"));
 }
 
 #[test]
@@ -410,8 +534,15 @@ fn islands_install_requires_explicit_license_acceptance_before_download() {
 
     let rejected = Command::new(env!("CARGO_BIN_EXE_sens"))
         .args([
-            "islands","install","--manifest",manifest_path.to_str().unwrap(),
-            "--profile","one","--root",root.to_str().unwrap(),"--apply",
+            "islands",
+            "install",
+            "--manifest",
+            manifest_path.to_str().unwrap(),
+            "--profile",
+            "one",
+            "--root",
+            root.to_str().unwrap(),
+            "--apply",
         ])
         .output()
         .expect("install without acceptance");
@@ -420,20 +551,41 @@ fn islands_install_requires_explicit_license_acceptance_before_download() {
     assert!(!root.join("demo/3/linux-x86_64/runtime.bin").exists());
 
     let status = Command::new(env!("CARGO_BIN_EXE_sens"))
-        .args(["islands","status","--manifest",manifest_path.to_str().unwrap(),"--root",root.to_str().unwrap()])
+        .args([
+            "islands",
+            "status",
+            "--manifest",
+            manifest_path.to_str().unwrap(),
+            "--root",
+            root.to_str().unwrap(),
+        ])
         .output()
         .expect("status");
-    assert!(String::from_utf8(status.stdout).unwrap().contains("demo 3 linux-x86_64 release: failed-install"));
+    assert!(String::from_utf8(status.stdout)
+        .unwrap()
+        .contains("demo 3 linux-x86_64 release: failed-install"));
 
     let accepted = Command::new(env!("CARGO_BIN_EXE_sens"))
         .args([
-            "islands","install","--manifest",manifest_path.to_str().unwrap(),
-            "--profile","one","--root",root.to_str().unwrap(),"--apply",
-            "--accept-license","demo",
+            "islands",
+            "install",
+            "--manifest",
+            manifest_path.to_str().unwrap(),
+            "--profile",
+            "one",
+            "--root",
+            root.to_str().unwrap(),
+            "--apply",
+            "--accept-license",
+            "demo",
         ])
         .output()
         .expect("install with acceptance");
-    assert!(accepted.status.success(), "{}", String::from_utf8_lossy(&accepted.stderr));
+    assert!(
+        accepted.status.success(),
+        "{}",
+        String::from_utf8_lossy(&accepted.stderr)
+    );
     assert!(root.join("demo/3/linux-x86_64/runtime.bin").is_file());
 }
 
@@ -465,22 +617,44 @@ fn islands_verified_artifact_survives_probe_failure_and_status_is_explicit() {
 
     let install = Command::new(env!("CARGO_BIN_EXE_sens"))
         .args([
-            "islands","install","--manifest",manifest_path.to_str().unwrap(),
-            "--profile","one","--root",root.to_str().unwrap(),"--apply",
+            "islands",
+            "install",
+            "--manifest",
+            manifest_path.to_str().unwrap(),
+            "--profile",
+            "one",
+            "--root",
+            root.to_str().unwrap(),
+            "--apply",
         ])
         .output()
         .expect("install");
-    assert!(install.status.success(), "{}", String::from_utf8_lossy(&install.stderr));
+    assert!(
+        install.status.success(),
+        "{}",
+        String::from_utf8_lossy(&install.stderr)
+    );
     let stdout = String::from_utf8(install.stdout).unwrap();
     assert!(stdout.contains(": probe-failed"), "{stdout}");
     assert!(root.join("demo/4/linux-x86_64/runtime.bin").is_file());
-    assert!(root.join("demo/4/linux-x86_64/install-record.txt").is_file());
+    assert!(root
+        .join("demo/4/linux-x86_64/install-record.txt")
+        .is_file());
 
     let status = Command::new(env!("CARGO_BIN_EXE_sens"))
-        .args(["islands","status","--manifest",manifest_path.to_str().unwrap(),"--root",root.to_str().unwrap()])
+        .args([
+            "islands",
+            "status",
+            "--manifest",
+            manifest_path.to_str().unwrap(),
+            "--root",
+            root.to_str().unwrap(),
+        ])
         .output()
         .expect("status");
-    assert!(String::from_utf8(status.stdout).unwrap().contains("demo 4 linux-x86_64 release: probe-failed"));
+    assert!(String::from_utf8(status.stdout)
+        .unwrap()
+        .contains("demo 4 linux-x86_64 release: probe-failed"));
 }
 
 #[test]
@@ -509,23 +683,45 @@ fn concurrent_release_asset_installs_publish_one_verified_runtime() {
     .expect("manifest");
     let root = base.join("installed");
     let args = [
-        "islands","install","--manifest",manifest_path.to_str().unwrap(),
-        "--profile","one","--root",root.to_str().unwrap(),"--apply",
+        "islands",
+        "install",
+        "--manifest",
+        manifest_path.to_str().unwrap(),
+        "--profile",
+        "one",
+        "--root",
+        root.to_str().unwrap(),
+        "--apply",
     ];
 
-    let first = Command::new(env!("CARGO_BIN_EXE_sens")).args(args).spawn().expect("first");
-    let second = Command::new(env!("CARGO_BIN_EXE_sens")).args(args).spawn().expect("second");
+    let first = Command::new(env!("CARGO_BIN_EXE_sens"))
+        .args(args)
+        .spawn()
+        .expect("first");
+    let second = Command::new(env!("CARGO_BIN_EXE_sens"))
+        .args(args)
+        .spawn()
+        .expect("second");
     let first = first.wait_with_output().expect("first output");
     let second = second.wait_with_output().expect("second output");
-    assert!(first.status.success(), "{}", String::from_utf8_lossy(&first.stderr));
-    assert!(second.status.success(), "{}", String::from_utf8_lossy(&second.stderr));
+    assert!(
+        first.status.success(),
+        "{}",
+        String::from_utf8_lossy(&first.stderr)
+    );
+    assert!(
+        second.status.success(),
+        "{}",
+        String::from_utf8_lossy(&second.stderr)
+    );
     assert_eq!(
         std::fs::read(root.join("demo/5/linux-x86_64/runtime.bin")).unwrap(),
         b"concurrent-runtime"
     );
-    assert!(root.join("demo/5/linux-x86_64/install-record.txt").is_file());
+    assert!(root
+        .join("demo/5/linux-x86_64/install-record.txt")
+        .is_file());
 }
-
 
 #[test]
 fn islands_install_provisions_embedded_datalog_through_transactional_installer() {
@@ -554,10 +750,8 @@ fn islands_install_provisions_embedded_datalog_through_transactional_installer()
         "{}",
         String::from_utf8_lossy(&dry_run.stderr)
     );
-    assert!(
-        String::from_utf8_lossy(&dry_run.stdout)
-            .contains("install datalog builtin as part of the sens distribution")
-    );
+    assert!(String::from_utf8_lossy(&dry_run.stdout)
+        .contains("install datalog builtin as part of the sens distribution"));
     assert!(!root.exists(), "embedded dry-run created {root:?}");
 
     let apply = Command::new(env!("CARGO_BIN_EXE_sens"))
@@ -579,10 +773,8 @@ fn islands_install_provisions_embedded_datalog_through_transactional_installer()
         "{}",
         String::from_utf8_lossy(&apply.stderr)
     );
-    assert!(
-        String::from_utf8_lossy(&apply.stdout)
-            .contains("installed datalog builtin: available (embedded)")
-    );
+    assert!(String::from_utf8_lossy(&apply.stdout)
+        .contains("installed datalog builtin: available (embedded)"));
 
     let target = if cfg!(target_os = "windows") {
         "windows-x86_64"
@@ -637,10 +829,8 @@ fn islands_install_provisions_embedded_datalog_through_transactional_installer()
         .output()
         .expect("second apply");
     assert!(second.status.success());
-    assert!(
-        String::from_utf8_lossy(&second.stdout)
-            .contains("already installed datalog builtin: available (embedded)")
-    );
+    assert!(String::from_utf8_lossy(&second.stdout)
+        .contains("already installed datalog builtin: available (embedded)"));
 
     let _ = std::fs::remove_dir_all(&root);
 }

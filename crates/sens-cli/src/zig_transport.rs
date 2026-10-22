@@ -15,38 +15,59 @@ unsafe extern "C" {
     fn sens_zig_codec_abi_version() -> u32;
     fn sens_zig_t5m_validate(input: *const u8, len: usize) -> i32;
     fn sens_zig_t5m_encode_be3(
-        input: *const u8, byte_len: usize, output: *mut u8, capacity: usize
+        input: *const u8,
+        byte_len: usize,
+        output: *mut u8,
+        capacity: usize,
     ) -> isize;
     fn sens_zig_t5m_decode_be3(
-        input: *const u8, byte_len: usize, output: *mut u8, capacity: usize
+        input: *const u8,
+        byte_len: usize,
+        output: *mut u8,
+        capacity: usize,
     ) -> isize;
     fn sens_zig_t5m_encode_words(
-        input: *const u8, byte_len: usize, output: *mut u8, capacity: usize
+        input: *const u8,
+        byte_len: usize,
+        output: *mut u8,
+        capacity: usize,
     ) -> isize;
     fn sens_zig_t5m_decode_words(
-        input: *const u8, byte_len: usize, output: *mut u8, capacity: usize
+        input: *const u8,
+        byte_len: usize,
+        output: *mut u8,
+        capacity: usize,
     ) -> isize;
     fn sens_zig_t5_validate(input: *const u8, len: usize) -> i32;
     // Coordinate-only D1..D10 physical validation; no runnable D10 admission.
     fn sens_zig_t5_validate_coordinates(input: *const u8, len: usize) -> i32;
     fn sens_zig_t5_encode_be3(
-        input: *const u8, byte_len: usize, output: *mut u8, capacity: usize
+        input: *const u8,
+        byte_len: usize,
+        output: *mut u8,
+        capacity: usize,
     ) -> isize;
     fn sens_zig_t5_decode_be3(
-        input: *const u8, byte_len: usize, output: *mut u8, capacity: usize
+        input: *const u8,
+        byte_len: usize,
+        output: *mut u8,
+        capacity: usize,
     ) -> isize;
     fn sens_zig_e1_encode_be3(
-        input: *const u8, byte_len: usize, output: *mut u8, capacity: usize
+        input: *const u8,
+        byte_len: usize,
+        output: *mut u8,
+        capacity: usize,
     ) -> isize;
     fn sens_zig_e1_decode_be3(
-        input: *const u8, byte_len: usize, output: *mut u8, capacity: usize
+        input: *const u8,
+        byte_len: usize,
+        output: *mut u8,
+        capacity: usize,
     ) -> isize;
-    fn sens_zig_f3c_pack(
-        input: *const u8, len: usize, output: *mut u8, capacity: usize
-    ) -> isize;
-    fn sens_zig_f3c_unpack(
-        input: *const u8, len: usize, output: *mut u8, capacity: usize
-    ) -> isize;
+    fn sens_zig_f3c_pack(input: *const u8, len: usize, output: *mut u8, capacity: usize) -> isize;
+    fn sens_zig_f3c_unpack(input: *const u8, len: usize, output: *mut u8, capacity: usize)
+        -> isize;
 }
 
 fn version() -> Result<(), String> {
@@ -67,29 +88,47 @@ pub struct ExactT5Word {
 impl ExactT5Word {
     pub fn new(width: usize, bits: Vec<u8>) -> Result<Self, String> {
         if width == 0 || bits.len() != width || bits.iter().any(|&bit| bit > 1) {
-            return Err("точне слово T5M потребує додатну ширину й рівно стільки байтів-бітів 0/1".into());
+            return Err(
+                "точне слово T5M потребує додатну ширину й рівно стільки байтів-бітів 0/1".into(),
+            );
         }
         Ok(Self { width, bits })
     }
 
-    pub fn width(&self) -> usize { self.width }
-    pub fn bits(&self) -> &[u8] { &self.bits }
+    pub fn width(&self) -> usize {
+        self.width
+    }
+    pub fn bits(&self) -> &[u8] {
+        &self.bits
+    }
 }
 
 /// Кодує точні слова через фізичний кодек Zig T5M без стелі BE3 W1–W9.
 pub fn encode_t5_exact_words(words: &[ExactT5Word]) -> Result<Vec<u8>, String> {
     version()?;
-    if words.is_empty() { return Err("Zig T5M cannot encode an empty word sequence".into()); }
-    if words.iter().any(|word| word.width == 0 || word.bits.len() != word.width || word.bits.iter().any(|&bit| bit > 1)) {
+    if words.is_empty() {
+        return Err("Zig T5M cannot encode an empty word sequence".into());
+    }
+    if words.iter().any(|word| {
+        word.width == 0 || word.bits.len() != word.width || word.bits.iter().any(|&bit| bit > 1)
+    }) {
         return Err("точне слово T5M має містити рівно width байтів зі значенням 0/1".into());
     }
-    let trits = words.iter().try_fold(words.len() - 1, |n, word| n.checked_add(word.width))
+    let trits = words
+        .iter()
+        .try_fold(words.len() - 1, |n, word| n.checked_add(word.width))
         .ok_or("exact T5M trit count overflow")?;
-    let physical_capacity = trits.checked_add(4).ok_or("exact T5M byte count overflow")? / 5;
-    let record_capacity = words.iter().try_fold(0usize, |n, word| n.checked_add(4)?.checked_add(word.width))
+    let physical_capacity = trits
+        .checked_add(4)
+        .ok_or("exact T5M byte count overflow")?
+        / 5;
+    let record_capacity = words
+        .iter()
+        .try_fold(0usize, |n, word| n.checked_add(4)?.checked_add(word.width))
         .ok_or("exact T5M ABI record length overflow")?;
     let mut records = Vec::new();
-    records.try_reserve_exact(record_capacity)
+    records
+        .try_reserve_exact(record_capacity)
         .map_err(|_| "не вдалося виділити буфер записів T5M")?;
     for word in words {
         let width = u32::try_from(word.width).map_err(|_| "exact T5M word exceeds u32 width")?;
@@ -98,14 +137,26 @@ pub fn encode_t5_exact_words(words: &[ExactT5Word]) -> Result<Vec<u8>, String> {
     }
     let mut physical = vec![0u8; physical_capacity];
     let written = unsafe {
-        sens_zig_t5m_encode_words(records.as_ptr(), records.len(), physical.as_mut_ptr(), physical.len())
+        sens_zig_t5m_encode_words(
+            records.as_ptr(),
+            records.len(),
+            physical.as_mut_ptr(),
+            physical.len(),
+        )
     };
-    if written <= 0 || usize::try_from(written).ok().filter(|&n| n <= physical.len()).is_none() {
+    if written <= 0
+        || usize::try_from(written)
+            .ok()
+            .filter(|&n| n <= physical.len())
+            .is_none()
+    {
         return Err(format!("Zig exact T5M encode rejected: code={written}"));
     }
     physical.truncate(written as usize);
     let restored = decode_t5_exact_words(&physical)?;
-    if restored != words { return Err("Zig T5M змінив ширину слова або його біти".into()); }
+    if restored != words {
+        return Err("Zig T5M змінив ширину слова або його біти".into());
+    }
     Ok(physical)
 }
 
@@ -113,27 +164,52 @@ pub fn encode_t5_exact_words(words: &[ExactT5Word]) -> Result<Vec<u8>, String> {
 pub fn decode_t5_exact_words(physical: &[u8]) -> Result<Vec<ExactT5Word>, String> {
     version()?;
     validate_t5(physical)?;
-    let trits = physical.len().checked_mul(5).ok_or("exact T5M trit count overflow")?;
-    let capacity = trits.checked_mul(5).ok_or("exact T5M decoded capacity overflow")?;
+    let trits = physical
+        .len()
+        .checked_mul(5)
+        .ok_or("exact T5M trit count overflow")?;
+    let capacity = trits
+        .checked_mul(5)
+        .ok_or("exact T5M decoded capacity overflow")?;
     let mut records = vec![0u8; capacity];
     let written = unsafe {
-        sens_zig_t5m_decode_words(physical.as_ptr(), physical.len(), records.as_mut_ptr(), records.len())
+        sens_zig_t5m_decode_words(
+            physical.as_ptr(),
+            physical.len(),
+            records.as_mut_ptr(),
+            records.len(),
+        )
     };
-    let len = usize::try_from(written).ok().filter(|&n| n > 0 && n <= records.len())
+    let len = usize::try_from(written)
+        .ok()
+        .filter(|&n| n > 0 && n <= records.len())
         .ok_or_else(|| format!("Zig exact T5M decode rejected: code={written}"))?;
     records.truncate(len);
     let mut words = Vec::new();
     let mut offset = 0usize;
     while offset < records.len() {
-        if records.len() - offset < 4 { return Err("Zig exact T5M returned truncated width".into()); }
-        let width = u32::from_be_bytes(records[offset..offset + 4].try_into().expect("four-byte width")) as usize;
+        if records.len() - offset < 4 {
+            return Err("Zig exact T5M returned truncated width".into());
+        }
+        let width = u32::from_be_bytes(
+            records[offset..offset + 4]
+                .try_into()
+                .expect("four-byte width"),
+        ) as usize;
         offset += 4;
-        let end = offset.checked_add(width).ok_or("Zig exact T5M width overflow")?;
-        let bits = records.get(offset..end).ok_or("Zig exact T5M returned truncated word")?.to_vec();
+        let end = offset
+            .checked_add(width)
+            .ok_or("Zig exact T5M width overflow")?;
+        let bits = records
+            .get(offset..end)
+            .ok_or("Zig exact T5M returned truncated word")?
+            .to_vec();
         words.push(ExactT5Word::new(width, bits)?);
         offset = end;
     }
-    if words.is_empty() { return Err("Zig exact T5M returned no words".into()); }
+    if words.is_empty() {
+        return Err("Zig exact T5M returned no words".into());
+    }
     Ok(words)
 }
 
@@ -148,15 +224,17 @@ fn opaque_zig_asset(
     if required <= 0 {
         return Err(format!("{label}: no Zig-owned source bytes ({required})"));
     }
-    let len = usize::try_from(required)
-        .map_err(|_| format!("{label}: Zig source length overflow"))?;
+    let len =
+        usize::try_from(required).map_err(|_| format!("{label}: Zig source length overflow"))?;
     if len > 8 * 1024 * 1024 {
         return Err(format!("{label}: exceeds host byte bound"));
     }
     let mut bytes = vec![0u8; len];
     let copied = unsafe { copy(bytes.as_mut_ptr(), len) };
     if copied != required {
-        return Err(format!("{label}: incomplete Zig byte copy expected={required} actual={copied}"));
+        return Err(format!(
+            "{label}: incomplete Zig byte copy expected={required} actual={copied}"
+        ));
     }
     Ok(bytes)
 }
@@ -186,7 +264,9 @@ pub fn linter_source_bytes() -> Result<Vec<u8>, String> {
     let mut bytes = vec![0u8; len];
     let copied = unsafe { asset_ffi::sens_zig_linter_bytes_copy(bytes.as_mut_ptr(), bytes.len()) };
     if copied != required {
-        return Err(format!("ZIG_LINTER_CARRIER byte copy rejected: code={copied}"));
+        return Err(format!(
+            "ZIG_LINTER_CARRIER byte copy rejected: code={copied}"
+        ));
     }
     Ok(bytes)
 }
@@ -197,12 +277,19 @@ pub fn contract_source_bytes() -> Result<Vec<u8>, String> {
     let required = unsafe {
         asset_ffi::sens_zig_contract_bytes_copy(std::ptr::NonNull::<u8>::dangling().as_ptr(), 0)
     };
-    if required <= 0 { return Err("ZIG_CONTRACT_CARRIER invalid length".into()); }
+    if required <= 0 {
+        return Err("ZIG_CONTRACT_CARRIER invalid length".into());
+    }
     let len = usize::try_from(required).map_err(|_| "ZIG_CONTRACT_CARRIER overflow")?;
-    if len > 8 * 1024 * 1024 { return Err("ZIG_CONTRACT_CARRIER host byte cap".into()); }
+    if len > 8 * 1024 * 1024 {
+        return Err("ZIG_CONTRACT_CARRIER host byte cap".into());
+    }
     let mut bytes = vec![0u8; len];
-    let copied = unsafe { asset_ffi::sens_zig_contract_bytes_copy(bytes.as_mut_ptr(), bytes.len()) };
-    if copied != required { return Err(format!("ZIG_CONTRACT_CARRIER mismatch: {copied}")); }
+    let copied =
+        unsafe { asset_ffi::sens_zig_contract_bytes_copy(bytes.as_mut_ptr(), bytes.len()) };
+    if copied != required {
+        return Err(format!("ZIG_CONTRACT_CARRIER mismatch: {copied}"));
+    }
     Ok(bytes)
 }
 
@@ -212,12 +299,19 @@ pub fn sanskrit_surface_bytes() -> Result<Vec<u8>, String> {
     let required = unsafe {
         asset_ffi::sens_zig_sanskrit_bytes_copy(std::ptr::NonNull::<u8>::dangling().as_ptr(), 0)
     };
-    if required <= 0 { return Err("ZIG_SANSKRIT_CARRIER invalid length".into()); }
+    if required <= 0 {
+        return Err("ZIG_SANSKRIT_CARRIER invalid length".into());
+    }
     let len = usize::try_from(required).map_err(|_| "ZIG_SANSKRIT_CARRIER length overflow")?;
-    if len > 8 * 1024 * 1024 { return Err("ZIG_SANSKRIT_CARRIER host byte limit".into()); }
+    if len > 8 * 1024 * 1024 {
+        return Err("ZIG_SANSKRIT_CARRIER host byte limit".into());
+    }
     let mut bytes = vec![0u8; len];
-    let copied = unsafe { asset_ffi::sens_zig_sanskrit_bytes_copy(bytes.as_mut_ptr(), bytes.len()) };
-    if copied != required { return Err(format!("ZIG_SANSKRIT_CARRIER copy mismatch: {copied}")); }
+    let copied =
+        unsafe { asset_ffi::sens_zig_sanskrit_bytes_copy(bytes.as_mut_ptr(), bytes.len()) };
+    if copied != required {
+        return Err(format!("ZIG_SANSKRIT_CARRIER copy mismatch: {copied}"));
+    }
     Ok(bytes)
 }
 
@@ -227,12 +321,18 @@ pub fn ukr_surface_bytes() -> Result<Vec<u8>, String> {
     let required = unsafe {
         asset_ffi::sens_zig_ukr_bytes_copy(std::ptr::NonNull::<u8>::dangling().as_ptr(), 0)
     };
-    if required <= 0 { return Err("ZIG_UKR_CARRIER invalid length".into()); }
+    if required <= 0 {
+        return Err("ZIG_UKR_CARRIER invalid length".into());
+    }
     let len = usize::try_from(required).map_err(|_| "ZIG_UKR_CARRIER overflow")?;
-    if len > 8 * 1024 * 1024 { return Err("ZIG_UKR_CARRIER host limit".into()); }
+    if len > 8 * 1024 * 1024 {
+        return Err("ZIG_UKR_CARRIER host limit".into());
+    }
     let mut bytes = vec![0u8; len];
     let copied = unsafe { asset_ffi::sens_zig_ukr_bytes_copy(bytes.as_mut_ptr(), bytes.len()) };
-    if copied != required { return Err(format!("ZIG_UKR_CARRIER copy mismatch: {copied}")); }
+    if copied != required {
+        return Err(format!("ZIG_UKR_CARRIER copy mismatch: {copied}"));
+    }
     Ok(bytes)
 }
 
@@ -242,12 +342,18 @@ pub fn uk_surface_bytes() -> Result<Vec<u8>, String> {
     let required = unsafe {
         asset_ffi::sens_zig_uk_bytes_copy(std::ptr::NonNull::<u8>::dangling().as_ptr(), 0)
     };
-    if required <= 0 { return Err("ZIG_UK_CARRIER invalid length".into()); }
+    if required <= 0 {
+        return Err("ZIG_UK_CARRIER invalid length".into());
+    }
     let len = usize::try_from(required).map_err(|_| "ZIG_UK_CARRIER size overflow")?;
-    if len > 8 * 1024 * 1024 { return Err("ZIG_UK_CARRIER host bound".into()); }
+    if len > 8 * 1024 * 1024 {
+        return Err("ZIG_UK_CARRIER host bound".into());
+    }
     let mut bytes = vec![0u8; len];
     let copied = unsafe { asset_ffi::sens_zig_uk_bytes_copy(bytes.as_mut_ptr(), bytes.len()) };
-    if copied != required { return Err(format!("ZIG_UK_CARRIER mismatch: {copied}")); }
+    if copied != required {
+        return Err(format!("ZIG_UK_CARRIER mismatch: {copied}"));
+    }
     Ok(bytes)
 }
 
@@ -257,7 +363,8 @@ pub fn islands_manifest_bytes() -> Result<Vec<u8>, String> {
     version()?;
     let required = unsafe {
         asset_ffi::sens_zig_islands_manifest_bytes_copy(
-            std::ptr::NonNull::<u8>::dangling().as_ptr(), 0
+            std::ptr::NonNull::<u8>::dangling().as_ptr(),
+            0,
         )
     };
     if required <= 0 {
@@ -269,11 +376,12 @@ pub fn islands_manifest_bytes() -> Result<Vec<u8>, String> {
         return Err("ZIG_ISLANDS_MANIFEST_CARRIER host byte cap exceeded".into());
     }
     let mut bytes = vec![0u8; len];
-    let copied = unsafe {
-        asset_ffi::sens_zig_islands_manifest_bytes_copy(bytes.as_mut_ptr(), bytes.len())
-    };
+    let copied =
+        unsafe { asset_ffi::sens_zig_islands_manifest_bytes_copy(bytes.as_mut_ptr(), bytes.len()) };
     if copied != required {
-        return Err(format!("ZIG_ISLANDS_MANIFEST_CARRIER exact copy failed: {copied}"));
+        return Err(format!(
+            "ZIG_ISLANDS_MANIFEST_CARRIER exact copy failed: {copied}"
+        ));
     }
     Ok(bytes)
 }
@@ -283,24 +391,21 @@ pub fn islands_manifest_bytes() -> Result<Vec<u8>, String> {
 pub fn uk_docs_source_bytes() -> Result<Vec<u8>, String> {
     version()?;
     let required = unsafe {
-        asset_ffi::sens_zig_uk_docs_bytes_copy(
-            std::ptr::NonNull::<u8>::dangling().as_ptr(), 0
-        )
+        asset_ffi::sens_zig_uk_docs_bytes_copy(std::ptr::NonNull::<u8>::dangling().as_ptr(), 0)
     };
     if required <= 0 {
         return Err("ZIG_UK_DOCS_CARRIER invalid source length".into());
     }
-    let len = usize::try_from(required)
-        .map_err(|_| "ZIG_UK_DOCS_CARRIER length overflow")?;
+    let len = usize::try_from(required).map_err(|_| "ZIG_UK_DOCS_CARRIER length overflow")?;
     if len > 8 * 1024 * 1024 {
         return Err("ZIG_UK_DOCS_CARRIER source exceeds host byte limit".into());
     }
     let mut bytes = vec![0u8; len];
-    let copied = unsafe {
-        asset_ffi::sens_zig_uk_docs_bytes_copy(bytes.as_mut_ptr(), bytes.len())
-    };
+    let copied = unsafe { asset_ffi::sens_zig_uk_docs_bytes_copy(bytes.as_mut_ptr(), bytes.len()) };
     if copied != required {
-        return Err(format!("ZIG_UK_DOCS_CARRIER byte copy rejected: code={copied}"));
+        return Err(format!(
+            "ZIG_UK_DOCS_CARRIER byte copy rejected: code={copied}"
+        ));
     }
     Ok(bytes)
 }
@@ -322,7 +427,9 @@ pub fn unify_source_bytes() -> Result<Vec<u8>, String> {
     let mut bytes = vec![0u8; len];
     let copied = unsafe { asset_ffi::sens_zig_unify_bytes_copy(bytes.as_mut_ptr(), bytes.len()) };
     if copied != required {
-        return Err(format!("ZIG_UNIFY_CARRIER exact byte copy failed: {copied}"));
+        return Err(format!(
+            "ZIG_UNIFY_CARRIER exact byte copy failed: {copied}"
+        ));
     }
     Ok(bytes)
 }
@@ -332,23 +439,21 @@ pub fn unify_source_bytes() -> Result<Vec<u8>, String> {
 pub fn reason_source_bytes() -> Result<Vec<u8>, String> {
     version()?;
     let required = unsafe {
-        asset_ffi::sens_zig_reason_bytes_copy(
-            std::ptr::NonNull::<u8>::dangling().as_ptr(), 0)
+        asset_ffi::sens_zig_reason_bytes_copy(std::ptr::NonNull::<u8>::dangling().as_ptr(), 0)
     };
     if required <= 0 {
         return Err("ZIG_REASON_CARRIER invalid source byte length".into());
     }
-    let len = usize::try_from(required)
-        .map_err(|_| "ZIG_REASON_CARRIER source length overflow")?;
+    let len = usize::try_from(required).map_err(|_| "ZIG_REASON_CARRIER source length overflow")?;
     if len > 8 * 1024 * 1024 {
         return Err("ZIG_REASON_CARRIER host byte limit exceeded".into());
     }
     let mut bytes = vec![0u8; len];
-    let copied = unsafe {
-        asset_ffi::sens_zig_reason_bytes_copy(bytes.as_mut_ptr(), bytes.len())
-    };
+    let copied = unsafe { asset_ffi::sens_zig_reason_bytes_copy(bytes.as_mut_ptr(), bytes.len()) };
     if copied != required {
-        return Err(format!("ZIG_REASON_CARRIER exact byte copy failed: {copied}"));
+        return Err(format!(
+            "ZIG_REASON_CARRIER exact byte copy failed: {copied}"
+        ));
     }
     Ok(bytes)
 }
@@ -358,23 +463,22 @@ pub fn reason_source_bytes() -> Result<Vec<u8>, String> {
 pub fn forward_source_bytes() -> Result<Vec<u8>, String> {
     version()?;
     let required = unsafe {
-        asset_ffi::sens_zig_forward_bytes_copy(
-            std::ptr::NonNull::<u8>::dangling().as_ptr(), 0)
+        asset_ffi::sens_zig_forward_bytes_copy(std::ptr::NonNull::<u8>::dangling().as_ptr(), 0)
     };
     if required <= 0 {
         return Err("ZIG_FORWARD_CARRIER invalid source byte length".into());
     }
-    let len = usize::try_from(required)
-        .map_err(|_| "ZIG_FORWARD_CARRIER source length overflow")?;
+    let len =
+        usize::try_from(required).map_err(|_| "ZIG_FORWARD_CARRIER source length overflow")?;
     if len > 8 * 1024 * 1024 {
         return Err("ZIG_FORWARD_CARRIER host byte limit exceeded".into());
     }
     let mut bytes = vec![0u8; len];
-    let copied = unsafe {
-        asset_ffi::sens_zig_forward_bytes_copy(bytes.as_mut_ptr(), bytes.len())
-    };
+    let copied = unsafe { asset_ffi::sens_zig_forward_bytes_copy(bytes.as_mut_ptr(), bytes.len()) };
     if copied != required {
-        return Err(format!("ZIG_FORWARD_CARRIER exact byte copy failed: {copied}"));
+        return Err(format!(
+            "ZIG_FORWARD_CARRIER exact byte copy failed: {copied}"
+        ));
     }
     Ok(bytes)
 }
@@ -384,53 +488,54 @@ pub fn forward_source_bytes() -> Result<Vec<u8>, String> {
 pub fn knowledge_source_bytes() -> Result<Vec<u8>, String> {
     version()?;
     let required = unsafe {
-        asset_ffi::sens_zig_knowledge_bytes_copy(
-            std::ptr::NonNull::<u8>::dangling().as_ptr(), 0)
+        asset_ffi::sens_zig_knowledge_bytes_copy(std::ptr::NonNull::<u8>::dangling().as_ptr(), 0)
     };
     if required <= 0 {
         return Err("ZIG_KNOWLEDGE_CARRIER invalid source length".into());
     }
-    let len = usize::try_from(required)
-        .map_err(|_| "ZIG_KNOWLEDGE_CARRIER length overflow")?;
+    let len = usize::try_from(required).map_err(|_| "ZIG_KNOWLEDGE_CARRIER length overflow")?;
     if len > 8 * 1024 * 1024 {
         return Err("ZIG_KNOWLEDGE_CARRIER host byte cap exceeded".into());
     }
     let mut bytes = vec![0u8; len];
-    let copied = unsafe {
-        asset_ffi::sens_zig_knowledge_bytes_copy(bytes.as_mut_ptr(), bytes.len())
-    };
+    let copied =
+        unsafe { asset_ffi::sens_zig_knowledge_bytes_copy(bytes.as_mut_ptr(), bytes.len()) };
     if copied != required {
-        return Err(format!("ZIG_KNOWLEDGE_CARRIER byte copy rejected: {copied}"));
+        return Err(format!(
+            "ZIG_KNOWLEDGE_CARRIER byte copy rejected: {copied}"
+        ));
     }
     Ok(bytes)
 }
 
- 
 /// Project-authored lib/persistent-map.lisp is only opaque bytes at this edge.
 /// Root Zig adapter carries them; the host does not interpret source identity.
 pub fn persistent_map_source_bytes() -> Result<Vec<u8>, String> {
     version()?;
     let required = unsafe {
-        asset_ffi::sens_zig_persistent_map_bytes_copy(std::ptr::NonNull::<u8>::dangling().as_ptr(), 0)
+        asset_ffi::sens_zig_persistent_map_bytes_copy(
+            std::ptr::NonNull::<u8>::dangling().as_ptr(),
+            0,
+        )
     };
     if required <= 0 {
         return Err("ZIG_PERSISTENT_MAP_CARRIER invalid length".into());
     }
-    let len = usize::try_from(required)
-        .map_err(|_| "ZIG_PERSISTENT_MAP_CARRIER length overflow")?;
+    let len =
+        usize::try_from(required).map_err(|_| "ZIG_PERSISTENT_MAP_CARRIER length overflow")?;
     if len > 8 * 1024 * 1024 {
         return Err("ZIG_PERSISTENT_MAP_CARRIER host byte cap exceeded".into());
     }
     let mut bytes = vec![0u8; len];
-    let copied = unsafe {
-        asset_ffi::sens_zig_persistent_map_bytes_copy(bytes.as_mut_ptr(), bytes.len())
-    };
+    let copied =
+        unsafe { asset_ffi::sens_zig_persistent_map_bytes_copy(bytes.as_mut_ptr(), bytes.len()) };
     if copied != required {
-        return Err(format!("ZIG_PERSISTENT_MAP_CARRIER byte-copy mismatch: {copied}"));
+        return Err(format!(
+            "ZIG_PERSISTENT_MAP_CARRIER byte-copy mismatch: {copied}"
+        ));
     }
     Ok(bytes)
 }
-
 
 /// Root Zig copies the World source byte-for-byte; SENS alone evaluates it.
 pub fn world_source_bytes() -> Result<Vec<u8>, String> {
@@ -441,15 +546,12 @@ pub fn world_source_bytes() -> Result<Vec<u8>, String> {
     if required <= 0 {
         return Err("ZIG_WORLD_CARRIER invalid length".into());
     }
-    let len = usize::try_from(required)
-        .map_err(|_| "ZIG_WORLD_CARRIER length overflow")?;
+    let len = usize::try_from(required).map_err(|_| "ZIG_WORLD_CARRIER length overflow")?;
     if len > 8 * 1024 * 1024 {
         return Err("ZIG_WORLD_CARRIER host byte cap exceeded".into());
     }
     let mut bytes = vec![0u8; len];
-    let copied = unsafe {
-        asset_ffi::sens_zig_world_bytes_copy(bytes.as_mut_ptr(), bytes.len())
-    };
+    let copied = unsafe { asset_ffi::sens_zig_world_bytes_copy(bytes.as_mut_ptr(), bytes.len()) };
     if copied != required {
         return Err(format!("ZIG_WORLD_CARRIER byte-copy mismatch: {copied}"));
     }
@@ -462,13 +564,19 @@ pub fn lisp_fs_source_bytes() -> Result<Vec<u8>, String> {
     let required = unsafe {
         asset_ffi::sens_zig_lisp_fs_bytes_copy(std::ptr::NonNull::<u8>::dangling().as_ptr(), 0)
     };
-    if required <= 0 { return Err("ZIG_F6_LISP_FS_CARRIER invalid source length".into()); }
+    if required <= 0 {
+        return Err("ZIG_F6_LISP_FS_CARRIER invalid source length".into());
+    }
     let len = usize::try_from(required).map_err(|_| "ZIG_F6_LISP_FS_CARRIER length overflow")?;
-    if len > 8 * 1024 * 1024 { return Err("ZIG_F6_LISP_FS_CARRIER host byte cap exceeded".into()); }
+    if len > 8 * 1024 * 1024 {
+        return Err("ZIG_F6_LISP_FS_CARRIER host byte cap exceeded".into());
+    }
     let mut bytes = vec![0u8; len];
     let copied = unsafe { asset_ffi::sens_zig_lisp_fs_bytes_copy(bytes.as_mut_ptr(), bytes.len()) };
     if copied != required {
-        return Err(format!("ZIG_F6_LISP_FS_CARRIER byte copy rejected: {copied}"));
+        return Err(format!(
+            "ZIG_F6_LISP_FS_CARRIER byte copy rejected: {copied}"
+        ));
     }
     Ok(bytes)
 }
@@ -526,12 +634,14 @@ pub fn validate_t5_coordinates(bytes: &[u8]) -> Result<(), String> {
 /// [width, payload-MSB, payload-LSB] — байти ABI, НЕ фізичний T5/E1
 /// і НЕ визначення значення або викличності домену.
 fn exact_words_to_be3(words: &[sens::BinarySourceWord]) -> Result<Vec<u8>, String> {
-    let capacity = words.len().checked_mul(3)
+    let capacity = words
+        .len()
+        .checked_mul(3)
         .ok_or("Zig BE3 input length overflow")?;
     let mut be3 = Vec::with_capacity(capacity);
     for word in words {
-        let width = u8::try_from(word.width())
-            .map_err(|_| "Zig BE3 width exceeds one-byte ABI range")?;
+        let width =
+            u8::try_from(word.width()).map_err(|_| "Zig BE3 width exceeds one-byte ABI range")?;
         if width == 0 || width > 9 {
             return Err(format!("Zig BE3 unsupported exact word width={width}"));
         }
@@ -556,7 +666,10 @@ pub fn encode_t5_direct(words: &[sens::BinarySourceWord]) -> Result<Vec<u8>, Str
     let used_trits = semantic_trits
         .checked_add(words.len() - 1)
         .ok_or("Zig T5 separator count overflow")?;
-    let physical_capacity = used_trits.checked_add(4).ok_or("Zig T5M byte count overflow")? / 5;
+    let physical_capacity = used_trits
+        .checked_add(4)
+        .ok_or("Zig T5M byte count overflow")?
+        / 5;
     let be3 = exact_words_to_be3(words)?;
     let mut bytes = vec![0u8; physical_capacity];
     let len = unsafe {
@@ -573,13 +686,18 @@ pub fn encode_t5_direct(words: &[sens::BinarySourceWord]) -> Result<Vec<u8>, Str
 
 fn encode_legacy_t5(words: &[sens::BinarySourceWord]) -> Result<Vec<u8>, String> {
     version()?;
-    if words.is_empty() { return Err("legacy T5 cannot encode empty record".into()); }
-    let trits = words.iter().try_fold(words.len() - 1, |n, word| n.checked_add(word.width()))
+    if words.is_empty() {
+        return Err("legacy T5 cannot encode empty record".into());
+    }
+    let trits = words
+        .iter()
+        .try_fold(words.len() - 1, |n, word| n.checked_add(word.width()))
         .ok_or("legacy T5 trit count overflow")?;
     let capacity = trits.checked_add(4).ok_or("legacy T5 capacity overflow")? / 5;
     let be3 = exact_words_to_be3(words)?;
     let mut bytes = vec![0u8; capacity];
-    let written = unsafe { sens_zig_t5_encode_be3(be3.as_ptr(), be3.len(), bytes.as_mut_ptr(), bytes.len()) };
+    let written =
+        unsafe { sens_zig_t5_encode_be3(be3.as_ptr(), be3.len(), bytes.as_mut_ptr(), bytes.len()) };
     if written < 0 || usize::try_from(written).ok() != Some(bytes.len()) {
         return Err(format!("legacy T5 Zig encode rejected: code={written}"));
     }
@@ -599,7 +717,10 @@ pub fn encode_t5(
 
 pub fn decode_t5_words(bytes: &[u8]) -> Result<Vec<sens::BinarySourceWord>, String> {
     validate_t5(bytes)?;
-    let trits = bytes.len().checked_mul(5).ok_or("T5M input length overflow")?;
+    let trits = bytes
+        .len()
+        .checked_mul(5)
+        .ok_or("T5M input length overflow")?;
     let max_words = trits.checked_add(1).ok_or("T5 word count overflow")? / 2;
     let capacity = max_words.checked_mul(3).ok_or("T5 BE3 capacity overflow")?;
     let mut be3 = vec![0u8; capacity];
@@ -607,7 +728,10 @@ pub fn decode_t5_words(bytes: &[u8]) -> Result<Vec<sens::BinarySourceWord>, Stri
         sens_zig_t5m_decode_be3(bytes.as_ptr(), bytes.len(), be3.as_mut_ptr(), be3.len())
     };
     if written <= 0
-        || usize::try_from(written).ok().filter(|&n| n <= be3.len()).is_none()
+        || usize::try_from(written)
+            .ok()
+            .filter(|&n| n <= be3.len())
+            .is_none()
         || written % 3 != 0
     {
         if let Ok(exact_words) = decode_t5_exact_words(bytes) {
@@ -646,7 +770,9 @@ pub fn decode_t5_words(bytes: &[u8]) -> Result<Vec<sens::BinarySourceWord>, Stri
             8 => sens::Bit8::new(low).map(sens::BinarySourceWord::W8),
             9 => sens::Bit9::new(payload).map(sens::BinarySourceWord::W9),
             10 => {
-                return Err("Zig BE3 width=10 is a mechanical coordinate, not program ingress".into())
+                return Err(
+                    "Zig BE3 width=10 is a mechanical coordinate, not program ingress".into(),
+                )
             }
             _ => None,
         }
@@ -658,12 +784,22 @@ pub fn decode_t5_words(bytes: &[u8]) -> Result<Vec<sens::BinarySourceWord>, Stri
 
 fn decode_legacy_t5_words(bytes: &[u8]) -> Result<Vec<sens::BinarySourceWord>, String> {
     validate_legacy_t5(bytes)?;
-    let capacity = bytes.len().checked_mul(5).and_then(|n| n.checked_add(1))
-        .and_then(|n| n.checked_div(2)).and_then(|n| n.checked_mul(3))
+    let capacity = bytes
+        .len()
+        .checked_mul(5)
+        .and_then(|n| n.checked_add(1))
+        .and_then(|n| n.checked_div(2))
+        .and_then(|n| n.checked_mul(3))
         .ok_or("legacy T5 BE3 capacity overflow")?;
     let mut be3 = vec![0u8; capacity];
-    let written = unsafe { sens_zig_t5_decode_be3(bytes.as_ptr(), bytes.len(), be3.as_mut_ptr(), be3.len()) };
-    if written <= 0 || usize::try_from(written).ok().filter(|&n| n <= be3.len() && n % 3 == 0).is_none() {
+    let written =
+        unsafe { sens_zig_t5_decode_be3(bytes.as_ptr(), bytes.len(), be3.as_mut_ptr(), be3.len()) };
+    if written <= 0
+        || usize::try_from(written)
+            .ok()
+            .filter(|&n| n <= be3.len() && n % 3 == 0)
+            .is_none()
+    {
         return Err(format!("legacy T5 Zig decode rejected: code={written}"));
     }
     be3.truncate(written as usize);
@@ -686,7 +822,8 @@ fn decode_legacy_t5_words(bytes: &[u8]) -> Result<Vec<sens::BinarySourceWord>, S
             8 => sens::Bit8::new(low).map(sens::BinarySourceWord::W8),
             9 => sens::Bit9::new(payload).map(sens::BinarySourceWord::W9),
             _ => None,
-        }.ok_or_else(|| format!("legacy T5 BE3 invalid exact word width={width}"))?;
+        }
+        .ok_or_else(|| format!("legacy T5 BE3 invalid exact word width={width}"))?;
         words.push(word);
     }
     Ok(words)
@@ -707,7 +844,12 @@ pub fn encode_e1_direct(words: &[sens::BinarySourceWord]) -> Result<Vec<u8>, Str
     let written = unsafe {
         sens_zig_e1_encode_be3(be3.as_ptr(), be3.len(), output.as_mut_ptr(), output.len())
     };
-    if written <= 0 || usize::try_from(written).ok().filter(|&n| n <= output.len()).is_none() {
+    if written <= 0
+        || usize::try_from(written)
+            .ok()
+            .filter(|&n| n <= output.len())
+            .is_none()
+    {
         return Err(format!("Zig E1 physical encode rejected: code={written}"));
     }
     output.truncate(written as usize);
@@ -730,9 +872,8 @@ pub fn decode_e1_words(bytes: &[u8]) -> Result<Vec<sens::BinarySourceWord>, Stri
     }
     const MAX_E1_WORDS: usize = 4096;
     let mut be3 = vec![0u8; MAX_E1_WORDS * 3];
-    let written = unsafe {
-        sens_zig_e1_decode_be3(bytes.as_ptr(), bytes.len(), be3.as_mut_ptr(), be3.len())
-    };
+    let written =
+        unsafe { sens_zig_e1_decode_be3(bytes.as_ptr(), bytes.len(), be3.as_mut_ptr(), be3.len()) };
     if written <= 0
         || usize::try_from(written)
             .ok()
@@ -778,13 +919,24 @@ pub fn encode_f3(t5: &[u8]) -> Result<Option<Vec<u8>>, String> {
         return Ok(None);
     }
     let mut bytes = vec![0u8; 16];
-    let len = unsafe { sens_zig_f3c_pack(legacy.as_ptr(), legacy.len(), bytes.as_mut_ptr(), bytes.len()) };
+    let len = unsafe {
+        sens_zig_f3c_pack(
+            legacy.as_ptr(),
+            legacy.len(),
+            bytes.as_mut_ptr(),
+            bytes.len(),
+        )
+    };
     if len == -3 {
         return Ok(None);
     }
     // Fail closed on non-positive, capacity overreport, or non-smaller framing.
     // Zig may never claim more bytes than the caller-owned buffer.
-    if len <= 0 || usize::try_from(len).ok().filter(|&n| n < legacy.len() && n <= bytes.len()).is_none()
+    if len <= 0
+        || usize::try_from(len)
+            .ok()
+            .filter(|&n| n < legacy.len() && n <= bytes.len())
+            .is_none()
     {
         return Err(format!("Zig F3C pack rejected: code={len}"));
     }
@@ -796,10 +948,20 @@ pub fn decode_f3(carrier: &[u8]) -> Result<Vec<u8>, String> {
     version()?;
     let mut output = vec![0u8; 16];
     let len = unsafe {
-        sens_zig_f3c_unpack(carrier.as_ptr(), carrier.len(), output.as_mut_ptr(), output.len())
+        sens_zig_f3c_unpack(
+            carrier.as_ptr(),
+            carrier.len(),
+            output.as_mut_ptr(),
+            output.len(),
+        )
     };
     // Fail closed on non-positive or capacity overreport before any truncate.
-    if len <= 0 || usize::try_from(len).ok().filter(|&n| n <= output.len()).is_none() {
+    if len <= 0
+        || usize::try_from(len)
+            .ok()
+            .filter(|&n| n <= output.len())
+            .is_none()
+    {
         return Err(format!("explicit Zig F3C rejected: code={len}"));
     }
     output.truncate(len as usize);
@@ -809,7 +971,11 @@ pub fn decode_f3(carrier: &[u8]) -> Result<Vec<u8>, String> {
 
 #[cfg(test)]
 mod zig_exact_egress_tests {
-    use super::{decode_e1_words, decode_f3, decode_t5_exact_words, decode_t5_words, encode_e1_direct, encode_f3, encode_t5_direct, exact_words_to_be3, require_same_exact_words, validate_t5, validate_t5_coordinates};
+    use super::{
+        decode_e1_words, decode_f3, decode_t5_exact_words, decode_t5_words, encode_e1_direct,
+        encode_f3, encode_t5_direct, exact_words_to_be3, require_same_exact_words, validate_t5,
+        validate_t5_coordinates,
+    };
 
     fn words(source: &str) -> Vec<sens::BinarySourceWord> {
         sens::parse_binary_source_words(source)
@@ -865,11 +1031,19 @@ mod zig_exact_egress_tests {
     fn exact_t5m_bridge_roundtrips_variable_width_binary_values() {
         use super::{decode_t5_exact_words, encode_t5_exact_words, ExactT5Word};
         let source = [5usize, 8, 10, 11, 12, 14, 24, 48, 96, 192].map(|width| {
-            ExactT5Word::new(width, (0..width).map(|bit| ((bit * 7 + width) % 3 == 0) as u8).collect())
-                .expect("binary T5M source word")
+            ExactT5Word::new(
+                width,
+                (0..width)
+                    .map(|bit| ((bit * 7 + width) % 3 == 0) as u8)
+                    .collect(),
+            )
+            .expect("binary T5M source word")
         });
         let physical = encode_t5_exact_words(&source).expect("Zig transports exact words");
-        assert_eq!(decode_t5_exact_words(&physical).expect("Zig restores exact words"), source);
+        assert_eq!(
+            decode_t5_exact_words(&physical).expect("Zig restores exact words"),
+            source
+        );
     }
 
     #[test]
@@ -890,8 +1064,10 @@ mod zig_exact_egress_tests {
         // D11=eleven exact zero bits and canonical tail, or bad trits,
         // is never accepted as D10 physical data.
         for invalid in [&[0x00, 0x00, 0x50][..], &[0xff][..], &[][..]] {
-            assert!(validate_t5_coordinates(invalid).is_err(),
-                "invalid D10 coordinate candidate: {invalid:?}");
+            assert!(
+                validate_t5_coordinates(invalid).is_err(),
+                "invalid D10 coordinate candidate: {invalid:?}"
+            );
         }
     }
 
@@ -912,8 +1088,7 @@ mod zig_exact_egress_tests {
         assert!(failure.contains("Zig physical T5M rejected"));
 
         // Positive tiny F3C stays on Zig's byte-exact physical path.
-        let small = encode_t5_direct(&words("10 001 00 000 01"))
-            .expect("canonical small T5M");
+        let small = encode_t5_direct(&words("10 001 00 000 01")).expect("canonical small T5M");
         assert_eq!(small, [0x63, 0x89, 0x06, 0xa1]);
         let packed = encode_f3(&small)
             .expect("Zig F3C validation and encode")
@@ -944,8 +1119,7 @@ mod zig_exact_egress_tests {
             .and_then(|s| s.split("#[cfg(test)]").next())
             .expect("decode_f3 route");
         assert!(
-            unpack.contains("usize::try_from(len)")
-                && unpack.contains("n <= output.len()"),
+            unpack.contains("usize::try_from(len)") && unpack.contains("n <= output.len()"),
             "decode_f3 must reject overreported F3C lengths before truncate"
         );
 
@@ -998,14 +1172,20 @@ mod zig_exact_egress_tests {
         // W1:1 and W2:01 have the same low payload but different identities.
         // D9 retains nine physical bits including its leading zero.
         let source = words("1 01 001 010101000");
-        let frame = encode_e1_direct(&source)
-            .expect("SENS exact words -> Zig E1 encode -> Zig E1 decode");
+        let frame =
+            encode_e1_direct(&source).expect("SENS exact words -> Zig E1 encode -> Zig E1 decode");
         let restored = decode_e1_words(&frame).expect("canonical Zig E1 ingress");
         require_same_exact_words(&source, &restored)
             .expect("byte-for-byte exact width and payload preservation");
         assert_eq!(source.len(), restored.len());
-        assert_eq!(restored.iter().copied().map(sens::BinarySourceWord::width)
-            .collect::<Vec<_>>(), [1, 2, 3, 9]);
+        assert_eq!(
+            restored
+                .iter()
+                .copied()
+                .map(sens::BinarySourceWord::width)
+                .collect::<Vec<_>>(),
+            [1, 2, 3, 9]
+        );
 
         // CRC mutation must fail before any Rust host can admit SENS meaning.
         let mut damaged = frame.clone();
@@ -1015,19 +1195,30 @@ mod zig_exact_egress_tests {
 
         // A carrier can be canonical yet represent the WRONG exact words.
         // Fail closed on each domain-width, payload and word-count mismatch.
-        assert!(require_same_exact_words(&source, &words("01 01 001 010101000"))
-            .unwrap_err().contains("expected_width=1"));
-        assert!(require_same_exact_words(&source, &words("0 01 001 010101000"))
-            .unwrap_err().contains("index=0"));
+        assert!(
+            require_same_exact_words(&source, &words("01 01 001 010101000"))
+                .unwrap_err()
+                .contains("expected_width=1")
+        );
+        assert!(
+            require_same_exact_words(&source, &words("0 01 001 010101000"))
+                .unwrap_err()
+                .contains("index=0")
+        );
         assert!(require_same_exact_words(&source, &words("1 01 001"))
-            .unwrap_err().contains("word_count"));
+            .unwrap_err()
+            .contains("word_count"));
 
         // Scope proof: this production egress has neither Rust E1 codec
         // nor a silent reference fallback after Zig produces bytes.
         let code = include_str!("zig_transport.rs");
-        let route = code.split("pub fn encode_e1_direct(").nth(1)
+        let route = code
+            .split("pub fn encode_e1_direct(")
+            .nth(1)
             .expect("E1 Zig egress")
-            .split("pub fn decode_e1_words(").next().expect("next route");
+            .split("pub fn decode_e1_words(")
+            .next()
+            .expect("next route");
         assert!(route.contains("sens_zig_e1_encode_be3("));
         assert!(route.contains("decode_e1_words(&output)?"));
         assert!(route.contains("require_same_exact_words(words, &restored)?"));
@@ -1043,11 +1234,14 @@ mod zig_exact_egress_tests {
         assert!(changed_width.contains("expected_width=1"));
         assert!(changed_width.contains("actual_width=2"));
         assert!(require_same_exact_words(&expected, &words("0 01"))
-            .unwrap_err().contains("index=0"));
+            .unwrap_err()
+            .contains("index=0"));
         assert!(require_same_exact_words(&expected, &words("1"))
-            .unwrap_err().contains("word_count expected=2 actual=1"));
+            .unwrap_err()
+            .contains("word_count expected=2 actual=1"));
         assert!(require_same_exact_words(&expected, &words("1 01 0"))
-            .unwrap_err().contains("word_count expected=2 actual=3"));
+            .unwrap_err()
+            .contains("word_count expected=2 actual=3"));
     }
 }
 
@@ -1055,22 +1249,25 @@ mod zig_exact_egress_tests {
 pub fn content_store_source_bytes() -> Result<Vec<u8>, String> {
     version()?;
     let required = unsafe {
-        asset_ffi::sens_zig_content_store_bytes_copy(std::ptr::NonNull::<u8>::dangling().as_ptr(), 0)
+        asset_ffi::sens_zig_content_store_bytes_copy(
+            std::ptr::NonNull::<u8>::dangling().as_ptr(),
+            0,
+        )
     };
     if required <= 0 {
         return Err("ZIG_CONTENT_STORE_CARRIER invalid length".into());
     }
-    let len = usize::try_from(required)
-        .map_err(|_| "ZIG_CONTENT_STORE_CARRIER length overflow")?;
+    let len = usize::try_from(required).map_err(|_| "ZIG_CONTENT_STORE_CARRIER length overflow")?;
     if len > 8 * 1024 * 1024 {
         return Err("ZIG_CONTENT_STORE_CARRIER host byte cap exceeded".into());
     }
     let mut bytes = vec![0u8; len];
-    let copied = unsafe {
-        asset_ffi::sens_zig_content_store_bytes_copy(bytes.as_mut_ptr(), bytes.len())
-    };
+    let copied =
+        unsafe { asset_ffi::sens_zig_content_store_bytes_copy(bytes.as_mut_ptr(), bytes.len()) };
     if copied != required {
-        return Err(format!("ZIG_CONTENT_STORE_CARRIER byte-copy mismatch: {copied}"));
+        return Err(format!(
+            "ZIG_CONTENT_STORE_CARRIER byte-copy mismatch: {copied}"
+        ));
     }
     Ok(bytes)
 }

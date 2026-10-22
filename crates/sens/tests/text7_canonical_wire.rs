@@ -10,15 +10,11 @@ use std::cell::RefCell;
 use std::rc::Rc;
 
 use sens::{
-    encode_binary_frame, decode_binary_frame, encode_text7, render_text7, BinaryFrame, Exactness,
+    decode_binary_frame, encode_binary_frame, encode_text7, render_text7, BinaryFrame, Exactness,
     Text7, Text7Layout, Text7WireError, Value,
 };
 
-const LAYOUTS: [Text7Layout; 3] = [
-    Text7Layout::Uk,
-    Text7Layout::SaDeva,
-    Text7Layout::En,
-];
+const LAYOUTS: [Text7Layout; 3] = [Text7Layout::Uk, Text7Layout::SaDeva, Text7Layout::En];
 
 fn cells(values: &[u8]) -> Text7 {
     Text7::from_cells(values.to_vec()).expect("test cells are exact UPC-7 cells")
@@ -102,9 +98,12 @@ fn canonical_transport_is_layout_independent_while_human_render_is_not() {
 
     let mut spellings = Vec::new();
     for layout in LAYOUTS {
-        let spelling = render_text7(&text, layout)
-            .expect("Current W7 cell has a ratified v2 projection");
-        assert_ne!(spelling, token, "human layout must not equal canonical wire");
+        let spelling =
+            render_text7(&text, layout).expect("Current W7 cell has a ratified v2 projection");
+        assert_ne!(
+            spelling, token,
+            "human layout must not equal canonical wire"
+        );
         assert!(
             Text7::from_canonical_wire_token(&spelling).is_err(),
             "human projection cannot be reinterpreted as canonical transport"

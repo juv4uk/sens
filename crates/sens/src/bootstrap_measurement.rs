@@ -35,7 +35,6 @@ fn decode_current_core() -> Vec<Expr> {
     expressions
 }
 
-
 fn measurement_level() -> u8 {
     let raw = std::env::var("SENS_BOOTSTRAP_MEASURE_LEVEL")
         .expect("SENS_BOOTSTRAP_MEASURE_LEVEL must select a diagnostic prefix level");
@@ -95,8 +94,8 @@ fn bootstrap_measure_dispatch() {
         return;
     }
 
-    let result = eval_parsed_expressions(&expressions, &mut session)
-        .expect("decoded Core must evaluate");
+    let result =
+        eval_parsed_expressions(&expressions, &mut session).expect("decoded Core must evaluate");
     if level == 4 {
         black_box(result);
         black_box(session);

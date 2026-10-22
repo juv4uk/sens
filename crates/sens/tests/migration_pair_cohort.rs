@@ -1,8 +1,10 @@
 //! #4455 — bounded historical fixture transport through exact D3/D2 words.
 use sens::{decode_ternary_program, encode_binary_projection_ternary, open_ternary_program};
 
-const CAR_CDR_T5: &[u8] = include_bytes!("../../../tests/fixtures/migration-pair-cohort/pair-car-cdr.sens");
-const CONS_T5: &[u8] = include_bytes!("../../../tests/fixtures/migration-pair-cohort/pair-cons.sens");
+const CAR_CDR_T5: &[u8] =
+    include_bytes!("../../../tests/fixtures/migration-pair-cohort/pair-car-cdr.sens");
+const CONS_T5: &[u8] =
+    include_bytes!("../../../tests/fixtures/migration-pair-cohort/pair-cons.sens");
 
 #[test]
 fn car_cdr_fixture_preserves_exact_current_words_and_physical_t5() {
@@ -10,8 +12,18 @@ fn car_cdr_fixture_preserves_exact_current_words_and_physical_t5() {
     let words = decode_ternary_program(CAR_CDR_T5).expect("canonical physical T5");
     let visible = open_ternary_program(CAR_CDR_T5).expect("canonical T5 opens");
     assert_eq!(visible, expected);
-    assert_eq!(encode_binary_projection_ternary(&visible).unwrap(), CAR_CDR_T5);
-    assert_eq!(words.iter().map(ToString::to_string).collect::<Vec<_>>().join(" "), expected);
+    assert_eq!(
+        encode_binary_projection_ternary(&visible).unwrap(),
+        CAR_CDR_T5
+    );
+    assert_eq!(
+        words
+            .iter()
+            .map(ToString::to_string)
+            .collect::<Vec<_>>()
+            .join(" "),
+        expected
+    );
 }
 
 #[test]
@@ -21,7 +33,14 @@ fn cons_fixture_preserves_exact_current_words_and_physical_t5() {
     let visible = open_ternary_program(CONS_T5).expect("canonical T5 opens");
     assert_eq!(visible, expected);
     assert_eq!(encode_binary_projection_ternary(&visible).unwrap(), CONS_T5);
-    assert_eq!(words.iter().map(ToString::to_string).collect::<Vec<_>>().join(" "), expected);
+    assert_eq!(
+        words
+            .iter()
+            .map(ToString::to_string)
+            .collect::<Vec<_>>()
+            .join(" "),
+        expected
+    );
 }
 
 #[test]

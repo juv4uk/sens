@@ -58,8 +58,6 @@ fn transport_failure_becomes_blocked_result_with_evidence() {
     assert!(!rendered.contains("UNEXPECTED-SUCCESS"), "{rendered}");
 }
 
-
-
 #[test]
 fn yantra_json_key_symbol_predicate_is_real_d1_not_unbound_d9() {
     // Реальний SENS, не Rust/Python-імітація SYMBOLP.
@@ -78,15 +76,22 @@ fn yantra_json_key_symbol_predicate_is_real_d1_not_unbound_d9() {
         ("d1-no", "(хибне? (атом? (як-є ())))", false),
     ] {
         let code = format!("(янтра-внутрішній-символ? {input})");
-        let result = eval_program(&code, &mut session)
-            .unwrap_or_else(|e| panic!("test_id=yantra-json-symbol case={case} input={code} error={e}"));
-        assert_eq!(result.value.as_predicate_bit(), Some(expected),
-            "test_id=yantra-json-symbol case={case} input={code} expected=D1:{expected} actual={}", result.value);
+        let result = eval_program(&code, &mut session).unwrap_or_else(|e| {
+            panic!("test_id=yantra-json-symbol case={case} input={code} error={e}")
+        });
+        assert_eq!(
+            result.value.as_predicate_bit(),
+            Some(expected),
+            "test_id=yantra-json-symbol case={case} input={code} expected=D1:{expected} actual={}",
+            result.value
+        );
     }
     // Негативна перевірка: D8 справді не серіалізує D1,
     // отже SENS-охорона повинна спрацювати до D8.
-    assert!(eval_program("(значення-у-текст (атом? (як-є ())))", &mut session).is_err(),
-        "test_id=yantra-json-symbol-bare-d8 expected=TYPE_ERROR");
+    assert!(
+        eval_program("(значення-у-текст (атом? (як-є ())))", &mut session).is_err(),
+        "test_id=yantra-json-symbol-bare-d8 expected=TYPE_ERROR"
+    );
 }
 
 #[test]
@@ -148,7 +153,10 @@ fn yantra_json_string_classifier_yields_d1_condition_from_structured_witness() {
         let expected = eval_program(oracle, &mut session)
             .unwrap_or_else(|error| panic!("SENS oracle {oracle}: {error}"))
             .value;
-        assert_eq!(actual, expected, "класифікатор не може повертати хибну або неповну трійку");
+        assert_eq!(
+            actual, expected,
+            "класифікатор не може повертати хибну або неповну трійку"
+        );
     }
     // Порядок кодових точок: після непорожнього лівого рядка
     // гілка AFTER дозволена лише для порожнього правого.
@@ -184,7 +192,10 @@ fn yantra_json_string_classifier_yields_d1_condition_from_structured_witness() {
         let expected = eval_program(oracle, &mut session)
             .unwrap_or_else(|error| panic!("SENS order oracle {oracle}: {error}"))
             .value;
-        assert_eq!(actual, expected, "D9 порівняння повинне дійти до коду символів");
+        assert_eq!(
+            actual, expected,
+            "D9 порівняння повинне дійти до коду символів"
+        );
     }
     for (expression, oracle) in [
         (
@@ -202,7 +213,10 @@ fn yantra_json_string_classifier_yields_d1_condition_from_structured_witness() {
         let expected = eval_program(oracle, &mut session)
             .unwrap_or_else(|error| panic!("SENS оракул {oracle}: {error}"))
             .value;
-        assert_eq!(actual, expected, "D8 class-membership не може бути умовою D3");
+        assert_eq!(
+            actual, expected,
+            "D8 class-membership не може бути умовою D3"
+        );
     }
 }
 
@@ -218,10 +232,12 @@ fn yantra_json_d1_boolean_values_are_distinct() {
     let expected = r#"(список "true" "false" "null")"#;
     let actual = eval_program(source, &mut session)
         .expect("SENS повинен кодувати всі три точні значення")
-        .value.to_string();
+        .value
+        .to_string();
     let oracle = eval_program(expected, &mut session)
         .expect("SENS повинен обчислити незалежну очікувану структуру")
-        .value.to_string();
+        .value
+        .to_string();
     assert_eq!(actual, oracle, "D1:NO не можна зливати з D3:EMPTY");
 }
 
@@ -231,7 +247,10 @@ fn yantra_json_object_predicate_is_actual_d1_behavior() {
     // тим самим SENS evaluator, що й інші інтеграційні свідки.
     let mut session = agent_session();
     for (source, expected) in [
-        ("(об'єкт-формат-обміну-даними? (як-є ((назва . сонце))))", true),
+        (
+            "(об'єкт-формат-обміну-даними? (як-є ((назва . сонце))))",
+            true,
+        ),
         (
             "(об'єкт-формат-обміну-даними? (як-є ((назва . ((тип . зоря))))))",
             true,
@@ -250,7 +269,6 @@ fn yantra_json_object_predicate_is_actual_d1_behavior() {
     }
 }
 
-
 #[test]
 fn yantra_message_and_tool_accessors_execute_with_ukrainian_bindings() {
     // Справжній SENS reader/evaluator завантажує повний lib/yantra.lisp.
@@ -260,7 +278,11 @@ fn yantra_message_and_tool_accessors_execute_with_ukrainian_bindings() {
         ("роль-повідомлення", "роль", "людина"),
         ("зміст-повідомлення", "зміст", "вміст"),
         ("виклики-повідомлення", "виклики-інструментів", "виклики"),
-        ("ідентифікатор-виклику-повідомлення", "ідентифікатор-виклику", "ідентифікатор"),
+        (
+            "ідентифікатор-виклику-повідомлення",
+            "ідентифікатор-виклику",
+            "ідентифікатор",
+        ),
         ("ідентифікатор-виклику", "ідентифікатор", "ідентифікатор"),
         ("назва-інструмента", "назва", "назва"),
         ("аргументи-виклику", "аргументи", "параметри"),
@@ -273,7 +295,6 @@ fn yantra_message_and_tool_accessors_execute_with_ukrainian_bindings() {
         assert_eq!(actual, expected, "SENS accessor {reader} must select {key}");
     }
 }
-
 
 #[test]
 fn yantra_tool_call_encoding_uses_exact_d10_ukrainian_function() {
@@ -304,11 +325,16 @@ fn yantra_tool_call_encoding_uses_exact_d10_ukrainian_function() {
     "#;
     let actual = eval_program(source, &mut session)
         .unwrap_or_else(|error| panic!("D10 ENCODE-MESSAGE failed: {error}"))
-        .value.to_string();
+        .value
+        .to_string();
     let expected = eval_program(oracle, &mut session)
         .unwrap_or_else(|error| panic!("SENS oracle failed: {error}"))
-        .value.to_string();
-    assert_eq!(actual, expected, "tool-call encoding must preserve all fields");
+        .value
+        .to_string();
+    assert_eq!(
+        actual, expected,
+        "tool-call encoding must preserve all fields"
+    );
 }
 
 #[test]
@@ -356,7 +382,8 @@ fn yantra_evidence_cannot_use_partial_tool_results() {
     ] {
         let actual = eval_program(source, &mut session)
             .unwrap_or_else(|error| panic!("Помилка SENS при перевірці власності: {error}"))
-            .value.as_predicate_bit();
+            .value
+            .as_predicate_bit();
         assert_eq!(actual, Some(expected), "порушено закон доказу: {source}");
     }
 }
@@ -371,7 +398,8 @@ fn yantra_blocked_transport_is_not_a_completed_answer() {
               (як-є ())
               0))"#,
         &mut session,
-    ).expect("справжній SENS має завершити цикл заблокованим статусом");
+    )
+    .expect("справжній SENS має завершити цикл заблокованим статусом");
     assert_eq!(result.value.to_string(), "заблоковано");
 }
 
@@ -431,7 +459,10 @@ fn yantra_named_agent_cycle_preserves_blocked_reply_without_tool_execution() {
     let expected = eval_program("(як-є заблоковано)", &mut session)
         .expect("точний D7 символ стану заблоковано")
         .value;
-    assert_eq!(observed, expected, "заблокований результат не завершує задачу успішно");
+    assert_eq!(
+        observed, expected,
+        "заблокований результат не завершує задачу успішно"
+    );
 }
 
 #[test]
@@ -449,7 +480,10 @@ fn yantra_model_transport_failure_and_empty_response_are_blocked_in_real_sens() 
         let expected = eval_program("(як-є заблоковано)", &mut session)
             .expect("чинний SENS мусить читати заблокований стан")
             .value;
-        assert_eq!(actual, expected, "відмову/порожню відповідь не можна вважати успіхом: {source}");
+        assert_eq!(
+            actual, expected,
+            "відмову/порожню відповідь не можна вважати успіхом: {source}"
+        );
     }
 }
 
@@ -459,10 +493,10 @@ fn yantra_missing_json_key_is_safe_and_empty() {
     let actual = eval_program(
         "(знайти-значення-за-ключем (як-є відсутній) (як-є ((наявний . значення))))",
         &mut session,
-    ).expect("відсутній ключ не повинен викликати помилку SENS");
+    )
+    .expect("відсутній ключ не повинен викликати помилку SENS");
     assert_eq!(actual.value.to_string(), "()");
 }
-
 
 #[test]
 fn yantra_rejects_duplicate_evidence_identifiers() {
@@ -474,7 +508,7 @@ fn yantra_rejects_duplicate_evidence_identifiers() {
         ((роль . "tool") (ідентифікатор-виклику . а))
         ((роль . "assistant") (зміст . "виконано"))
       )))"#;
-    let actual = eval_program(source, &mut session)
-        .expect("справжній SENS перевіряє власність результатів");
+    let actual =
+        eval_program(source, &mut session).expect("справжній SENS перевіряє власність результатів");
     assert_eq!(actual.value.as_predicate_bit(), Some(false));
 }

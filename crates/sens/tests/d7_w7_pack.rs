@@ -14,7 +14,10 @@ fn text7_dense_w7_round_trips_without_interior_padding() {
     assert_eq!(recovered.cells(), &cells[..]);
 
     // Canonical Text7 wire authority is unchanged by the W7 mechanism.
-    assert_eq!(recovered.to_canonical_wire_token(), text.to_canonical_wire_token());
+    assert_eq!(
+        recovered.to_canonical_wire_token(),
+        text.to_canonical_wire_token()
+    );
 }
 
 #[test]
@@ -46,7 +49,9 @@ fn source_words_require_exact_w7_and_preserve_cells() {
     let words = text.to_source_words();
 
     assert_eq!(words.len(), 3);
-    assert!(words.iter().all(|word| matches!(word, BinarySourceWord::W7(_))));
+    assert!(words
+        .iter()
+        .all(|word| matches!(word, BinarySourceWord::W7(_))));
     assert_eq!(Text7::from_source_words(&words).unwrap(), text);
 
     let bad = [

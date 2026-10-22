@@ -14,10 +14,8 @@ fn same_macro_value_under_two_heads_sees_same_operand_дані() {
     )
     .expect("shared macro aliases should be definable");
 
-    let a = eval_program("(макрос-а (як-є дані))", &mut session)
-        .expect("макрос-а should expand");
-    let b = eval_program("(макрос-б (як-є дані))", &mut session)
-        .expect("макрос-б should expand");
+    let a = eval_program("(макрос-а (як-є дані))", &mut session).expect("макрос-а should expand");
+    let b = eval_program("(макрос-б (як-є дані))", &mut session).expect("макрос-б should expand");
 
     assert_eq!(a.value.to_string(), "дані");
     assert_eq!(b.value.to_string(), "дані");

@@ -13,8 +13,7 @@ static UNIQUE: AtomicU64 = AtomicU64::new(0);
 
 #[test]
 fn sens_trit_eval_executes_physical_t5m_d24_without_the_source_file() {
-    let path = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
-        .join("../../tests/fixtures/приклад.sens");
+    let path = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../tests/fixtures/приклад.sens");
     let output = Command::new(env!("CARGO_BIN_EXE_sens-trit"))
         .arg("eval")
         .arg(path)
@@ -187,7 +186,6 @@ fn corrupt_physical_t5m_is_rejected_before_sens_evaluation() {
     );
 }
 
-
 struct SourceTriplet {
     source: PathBuf,
     physical: PathBuf,
@@ -203,13 +201,21 @@ impl SourceTriplet {
         let source = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
             .join("../..")
             .join(relative);
-        assert!(source.is_file(), "actual Ukrainian SENS source missing: {name}");
+        assert!(
+            source.is_file(),
+            "actual Ukrainian SENS source missing: {name}"
+        );
         let id = UNIQUE.fetch_add(1, Ordering::Relaxed);
         let physical = std::env::temp_dir().join(format!(
-            "sens-live-ukr-{}-{}-{id}.sens", name.replace('/', "-"), std::process::id()
+            "sens-live-ukr-{}-{}-{id}.sens",
+            name.replace('/', "-"),
+            std::process::id()
         ));
         let view = physical.with_extension("");
-        assert!(!physical.exists() && !view.exists(), "test must not overwrite files");
+        assert!(
+            !physical.exists() && !view.exists(),
+            "test must not overwrite files"
+        );
 
         // The SENS source reader resolves exact domain words; Zig alone
         // manufactures the physical T5M carrier and its canonical bit view.
@@ -219,8 +225,15 @@ impl SourceTriplet {
             .arg(&physical)
             .output()
             .expect("execute current SENS/Zig mint");
-        assert!(minted.status.success(), "{name}: native SENS mint: {}", error(&minted));
-        assert!(physical.is_file() && view.is_file(), "{name}: both physical files");
+        assert!(
+            minted.status.success(),
+            "{name}: native SENS mint: {}",
+            error(&minted)
+        );
+        assert!(
+            physical.is_file() && view.is_file(),
+            "{name}: both physical files"
+        );
 
         let checked = Command::new(env!("CARGO_BIN_EXE_sens-trit"))
             .arg("verify-view")
@@ -254,14 +267,21 @@ impl SourceTriplet {
             fs::read(&view).expect("newly minted exact-bit view"),
             "{name}: checked-in exact-bit view is stale",
         );
-        Self { source, physical, view }
+        Self {
+            source,
+            physical,
+            view,
+        }
     }
     fn run_sens(&self, paired: bool) -> Output {
         let mut command = Command::new(env!("CARGO_BIN_EXE_sens"));
         if paired {
             command.arg("--t5m-pair").arg(&self.source);
         }
-        command.arg(&self.physical).output().expect("run native SENS")
+        command
+            .arg(&self.physical)
+            .output()
+            .expect("run native SENS")
     }
 }
 impl Drop for SourceTriplet {
@@ -270,7 +290,6 @@ impl Drop for SourceTriplet {
         let _ = fs::remove_file(&self.view);
     }
 }
-
 
 // Перевіряємо реальне виконання ще не опублікованих фізичних трійок.
 // Український Lisp є джерелом; exact-слова читає SENS, T5M пакує Zig.
@@ -308,15 +327,12 @@ fn verify_unpaired_ukrainian_libs_natively() {
         "list-unique-stable",
         "розділити-до-першого-входження",
         "list-interleave-two-pairs",
-
-
         "list-zip-general",
         "pair-zip-unzip-three",
-
         "виключне-або-д1",
-            "поміняти-кожну-пару",
-            "вилучити-перше-входження",
-            "взяти-через-один",
+        "поміняти-кожну-пару",
+        "вилучити-перше-входження",
+        "взяти-через-один",
         "list-subsequence-atoms-general",
         "list-rotate-inverse-general",
         "list-middle-even",
@@ -353,7 +369,8 @@ fn verify_unpaired_ukrainian_libs_natively() {
         assert!(source.is_file(), "{stem}: українське джерело відсутнє");
         let sequence = UNIQUE.fetch_add(1, Ordering::Relaxed);
         let scratch = std::env::temp_dir().join(format!(
-            "sens-native-unpaired-{}-{sequence}", std::process::id()
+            "sens-native-unpaired-{}-{sequence}",
+            std::process::id()
         ));
         fs::create_dir(&scratch).expect("створити ізольоване місце SENS-програми");
         let physical = scratch.join("програма.sens");
@@ -366,9 +383,13 @@ fn verify_unpaired_ukrainian_libs_natively() {
             .expect("SENS reader -> Zig/T5M");
         assert!(
             minted.status.success(),
-            "test_id=ukr-lib-mint source={stem} stderr={}", error(&minted)
+            "test_id=ukr-lib-mint source={stem} stderr={}",
+            error(&minted)
         );
-        assert!(physical.is_file() && view.is_file(), "{stem}: створено фізичну пару");
+        assert!(
+            physical.is_file() && view.is_file(),
+            "{stem}: створено фізичну пару"
+        );
         // Оборотні трійки нових прикладів мають бути тотожні байт-в-байт
         // реальному пакуванню Zig, а не лише текстовому звіту.
         if matches!(
@@ -446,7 +467,8 @@ fn verify_unpaired_ukrainian_libs_natively() {
             .expect("Zig verify-view");
         assert!(
             verify.status.success(),
-            "test_id=ukr-lib-inverse source={stem} stderr={}", error(&verify)
+            "test_id=ukr-lib-inverse source={stem} stderr={}",
+            error(&verify)
         );
         let pair = Command::new(env!("CARGO_BIN_EXE_sens"))
             .arg("--t5m-pair")
@@ -456,10 +478,12 @@ fn verify_unpaired_ukrainian_libs_natively() {
             .expect("реальне парне виконання SENS");
         assert!(
             pair.status.success(),
-            "test_id=ukr-lib-pair source={stem} stderr={}", error(&pair)
+            "test_id=ukr-lib-pair source={stem} stderr={}",
+            error(&pair)
         );
         assert_eq!(
-            observed(&pair).trim(), "1",
+            observed(&pair).trim(),
+            "1",
             "test_id=ukr-lib-d1 source={stem}: правильний виконуваний закон"
         );
         let bare = Command::new(env!("CARGO_BIN_EXE_sens"))
@@ -468,7 +492,8 @@ fn verify_unpaired_ukrainian_libs_natively() {
             .expect("самостійне виконання фізичного SENS");
         assert!(
             bare.status.success(),
-            "test_id=ukr-lib-bare source={stem} stderr={}", error(&bare)
+            "test_id=ukr-lib-bare source={stem} stderr={}",
+            error(&bare)
         );
         assert_eq!(
             bare.stdout, pair.stdout,
@@ -485,8 +510,7 @@ fn verify_unpaired_ukrainian_libs_natively() {
             .output()
             .expect("негативний SENS-мутант");
         assert!(
-            !mismatch.status.success() &&
-                error(&mismatch).contains("T5M_PHYSICAL_PAIR_MISMATCH"),
+            !mismatch.status.success() && error(&mismatch).contains("T5M_PHYSICAL_PAIR_MISMATCH"),
             "test_id=ukr-lib-mutant source={stem} actual={}",
             error(&mismatch)
         );
@@ -610,7 +634,7 @@ fn ukrainian_d3_d4_existing_files_mint_verify_and_execute() {
         "d4-list-one-symbol",
         "d4-append-second-symbol",
         "d4-null-not-cons",
-            "cdr-dotted-tail-domain-identity",
+        "cdr-dotted-tail-domain-identity",
         "cons-two-projections-joint-domain-identity",
         "d4-append-empty-left-preserves-head",
         "d4-append-empty-right-preserves-second",
@@ -623,14 +647,14 @@ fn ukrainian_d3_d4_existing_files_mint_verify_and_execute() {
         "d4-append-empty-left",
         "d4-append-empty-left-law",
         "d4-append-three-associative-third-law",
-        "d4-append-two-lists-order",        "cdr-cdr-two-element-tail",
+        "d4-append-two-lists-order",
+        "cdr-cdr-two-element-tail",
         "car-car-nested-pair-atom",
         "cdr-car-inner-tail-eq",
         "cond-two-false-structural-guards",
         "d4-cddr-third-atom",
         "d4-cdar-dotted-tail-atom",
         "d4-append-associative-third",
-
         "d4-not-atom-cons",
         "d4-double-not-atom-nil",
         "d4-null-after-cdr-one",
@@ -642,11 +666,11 @@ fn ukrainian_d3_d4_existing_files_mint_verify_and_execute() {
         "d4-not-eq-distinct-symbols",
         "d4-cdar-cadr-independent-head-tail",
         "d4-null-not-double-inversion",
-        "d4-null-cdr-two-preserves-second",        "d4-caar-after-append-nested",
+        "d4-null-cdr-two-preserves-second",
+        "d4-caar-after-append-nested",
         "d4-cdar-nonempty-structural-tail",
         "d4-cddr-append-third-exact",
         "d4-null-after-cddr-two",
-
         "d4-append-nested-pair-preserved",
         "lib/d3-pair-laws",
         "lib/pair-associativity-law",
@@ -716,7 +740,11 @@ fn ukrainian_d3_d4_existing_files_mint_verify_and_execute() {
     ] {
         let triple = SourceTriplet::mint(name);
         let paired = triple.run_sens(true);
-        assert!(paired.status.success(), "{name}: paired SENS: {}", error(&paired));
+        assert!(
+            paired.status.success(),
+            "{name}: paired SENS: {}",
+            error(&paired)
+        );
         let expected = match name {
             "d5-ukr-drop-until-recursive-program" => "(((()) ()) ((()) ()) () ())",
             "d5-ukr-take-before-recursive-program" => "(() (()) (() () ()) ())",

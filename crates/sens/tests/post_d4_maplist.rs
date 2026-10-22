@@ -68,10 +68,7 @@ fn maplist_is_successive_tail_recursion() {
         ("(quote (a b c))", "(lambda (tail) tail)"),
         ("(quote (a b c))", "(lambda (tail) (car tail))"),
     ] {
-        let derived = run(
-            &mut s,
-            &format!("(post-d4-maplist {values} {function})"),
-        );
+        let derived = run(&mut s, &format!("(post-d4-maplist {values} {function})"));
         let canonical = run(&mut s, &format!("(maplist {values} {function})"));
         assert_eq!(derived, canonical, "values={values} function={function}");
     }

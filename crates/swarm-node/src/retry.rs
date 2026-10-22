@@ -70,7 +70,10 @@ impl RetryQueue {
             }
             _ => None,
         }) {
-            let peer = item.iter().find_map(|f| f.field_atom("peer")).map(String::from);
+            let peer = item
+                .iter()
+                .find_map(|f| f.field_atom("peer"))
+                .map(String::from);
             let ev = item
                 .iter()
                 .find_map(|f| f.field_atom("event-id"))
@@ -86,10 +89,15 @@ impl RetryQueue {
     /// queued, persisting the update. Bounded by `RETRY_CAP` (dropping the
     /// oldest entries first when over capacity).
     pub fn push(&mut self, peer_id: &str, event_id: &str) {
-        if self.pending.iter().any(|(p, e)| p == peer_id && e == event_id) {
+        if self
+            .pending
+            .iter()
+            .any(|(p, e)| p == peer_id && e == event_id)
+        {
             return;
         }
-        self.pending.push((peer_id.to_string(), event_id.to_string()));
+        self.pending
+            .push((peer_id.to_string(), event_id.to_string()));
         while self.pending.len() > RETRY_CAP {
             self.pending.remove(0);
         }

@@ -10,7 +10,10 @@
 //! which that value was found, so adding a peer name does not invent another
 //! operation signature.
 
-use crate::{semantic_registry::{self, LegacyRegistrySlot}, CoreDomainIdentity};
+use crate::{
+    semantic_registry::{self, LegacyRegistrySlot},
+    CoreDomainIdentity,
+};
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum LanguageItemKind {
@@ -71,7 +74,9 @@ fn semantic_language_items_with(
         // The generated signature table is a HISTORICAL W8 ledger, not a
         // source of current D8 or any other domain identity. It may supply
         // documentation, never the authority for a current operation.
-        let Some(semantic_id) = semantic_registry::exact_identity_for_legacy_registry_slot(row.semantic_id) else {
+        let Some(semantic_id) =
+            semantic_registry::exact_identity_for_legacy_registry_slot(row.semantic_id)
+        else {
             continue; // no ratified exact identity, no callable metadata
         };
         let surfaces = if row.admitted_surfaces {
@@ -97,7 +102,10 @@ fn semantic_language_items_with(
 pub(crate) fn signature_kind(semantic_id: LegacyRegistrySlot) -> Option<LanguageItemKind> {
     generated::FUNCTION_SIGNATURES
         .iter()
-        .find(|row| semantic_registry::exact_identity_for_legacy_registry_slot(row.semantic_id) == Some(semantic_id))
+        .find(|row| {
+            semantic_registry::exact_identity_for_legacy_registry_slot(row.semantic_id)
+                == Some(semantic_id)
+        })
         .map(|row| row.kind)
 }
 
@@ -107,7 +115,6 @@ pub fn language_items() -> Vec<LanguageItem> {
         semantic_registry::admitted_surfaces_for_semantic_id,
     )
 }
-
 
 /// Інструментальна проєкція лише ратифікованих точних тотожностей.
 ///
@@ -131,7 +138,8 @@ mod exact_domain_metadata_migration_tests {
         let items = language_items();
         for name in ["як-є", "атом?", "перше", "решта", "сполучити"] {
             if let Some(row) = items.iter().find(|item| item.name == name) {
-                let identity = row.domain_identity
+                let identity = row
+                    .domain_identity
                     .expect("ратифікована функція не може мати нетипізований metadata ID");
                 assert_eq!(
                     semantic_registry::domain_identity_for_surface(name),

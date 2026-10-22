@@ -8,8 +8,8 @@
 
 use sens::syntax::{Expr, ExprKind, Span};
 use sens::{
-    compiler_execution_role, eval_parsed_expressions, load_core_library,
-    lower_program, parse_mixed_exact_domain, Bija3, Bit3, CompilerExecutionRole, CoreDomainIdentity,
+    compiler_execution_role, eval_parsed_expressions, load_core_library, lower_program,
+    parse_mixed_exact_domain, Bija3, Bit3, CompilerExecutionRole, CoreDomainIdentity,
     DomainIdentity, Session, Value,
 };
 use std::rc::Rc;
@@ -51,10 +51,7 @@ fn list(items: Vec<Expr>) -> Expr {
 
 fn quote(expr: Expr) -> Expr {
     Expr {
-        kind: ExprKind::DomainCall(
-            d3_core(0b001),
-            Rc::from(vec![expr].into_boxed_slice()),
-        ),
+        kind: ExprKind::DomainCall(d3_core(0b001), Rc::from(vec![expr].into_boxed_slice())),
         span: span(),
     }
 }
@@ -154,23 +151,23 @@ fn list_values(value: &Value) -> Option<Vec<&Value>> {
 fn nucleus_source_lowers_without_legacy_sid_or_call_nodes() {
     let parsed = parse_mixed_exact_domain(NUCLEUS).expect("compiler nucleus source parses");
     let lowered = lower_program(&parsed);
-    assert!(lowered.len() >= 2, "compiler nucleus contains executable language definitions");
+    assert!(
+        lowered.len() >= 2,
+        "compiler nucleus contains executable language definitions"
+    );
     for (top_level_index, expression) in lowered.iter().enumerate() {
         assert_no_legacy_identity(expression, top_level_index);
     }
 }
 
-
 #[test]
 fn nucleus_top_level_form_failure_is_localized() {
-    let expressions =
-        parse_mixed_exact_domain(NUCLEUS).expect("compiler nucleus source parses");
+    let expressions = parse_mixed_exact_domain(NUCLEUS).expect("compiler nucleus source parses");
     let mut session = Session::default();
     load_core_library(&mut session).expect("active core loads");
 
     for (index, expression) in expressions.iter().enumerate() {
-        if let Err(error) =
-            eval_parsed_expressions(std::slice::from_ref(expression), &mut session)
+        if let Err(error) = eval_parsed_expressions(std::slice::from_ref(expression), &mut session)
         {
             panic!(
                 "compiler nucleus top-level form {index} failed: {error:?}; expression={expression:?}"
@@ -179,14 +176,12 @@ fn nucleus_top_level_form_failure_is_localized() {
     }
 }
 
-
 #[test]
 fn nucleus_looks_up_current_d3_roles_by_exact_identity_and_fails_closed() {
     let mut session = Session::default();
     load_core_library(&mut session).expect("active core loads");
     let expressions = parse_mixed_exact_domain(NUCLEUS).expect("compiler nucleus parses");
-    eval_parsed_expressions(&expressions, &mut session)
-        .expect("SENS compiler nucleus loads");
+    eval_parsed_expressions(&expressions, &mut session).expect("SENS compiler nucleus loads");
 
     for raw in 0u8..=0b111 {
         let expected_role = compiler_execution_role(d3_core(raw));
@@ -217,7 +212,6 @@ fn nucleus_looks_up_current_d3_roles_by_exact_identity_and_fails_closed() {
         }
     }
 }
-
 
 const COMPILER_VARIADIC_D1_LAW: &str =
     include_str!("../../../tests/semantic/compiler-variadic-tail-d1-law.lisp");
@@ -292,8 +286,7 @@ fn compiler_program_list_fail_closed_is_sens_owned() {
         .expect("mutated SENS source must remain syntactically valid");
     assert_eq!(mutant.len(), forms.len());
     assert!(
-        eval_parsed_expressions(std::slice::from_ref(&mutant[0]), &mut session)
-            .is_err(),
+        eval_parsed_expressions(std::slice::from_ref(&mutant[0]), &mut session).is_err(),
         "one-bit D1 mutation must select SENS-owned fail-closed CAR(QUOTE EMPTY)"
     );
 
@@ -318,12 +311,11 @@ fn compiler_program_list_fail_closed_is_sens_owned() {
         COMPILER_ARITY_D1_LAW.replacen("#d1:0", "#d1:1", 1),
         COMPILER_ARITY_D1_MUTANT
     );
-    let mutant = parse_mixed_exact_domain(COMPILER_ARITY_D1_MUTANT)
-        .expect("one-bit SENS mutant must parse");
+    let mutant =
+        parse_mixed_exact_domain(COMPILER_ARITY_D1_MUTANT).expect("one-bit SENS mutant must parse");
     assert_eq!(mutant.len(), exact.len());
     assert!(
-        eval_parsed_expressions(std::slice::from_ref(&mutant[0]), &mut session)
-            .is_err(),
+        eval_parsed_expressions(std::slice::from_ref(&mutant[0]), &mut session).is_err(),
         "SENS must reject the false success of improper one-argument dotted tail"
     );
 
@@ -351,8 +343,7 @@ fn compiler_program_list_fail_closed_is_sens_owned() {
         .expect("one-bit SENS variadic mutant parses");
     assert_eq!(mutant.len(), variadic.len());
     assert!(
-        eval_parsed_expressions(std::slice::from_ref(&mutant[0]), &mut session)
-            .is_err(),
+        eval_parsed_expressions(std::slice::from_ref(&mutant[0]), &mut session).is_err(),
         "SENS must itself reject the one-bit variadic verdict mutant"
     );
 }

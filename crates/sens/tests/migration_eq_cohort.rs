@@ -5,8 +5,7 @@ use sens::{decode_ternary_program, encode_binary_projection_ternary, open_ternar
 
 const HISTORICAL: &[u8] =
     include_bytes!("../../../tests/fixtures/migration-eq-cohort/eq-legacy-sid.sens");
-const LISP15: &[u8] =
-    include_bytes!("../../../tests/fixtures/migration-eq-cohort/eq-lisp15.sens");
+const LISP15: &[u8] = include_bytes!("../../../tests/fixtures/migration-eq-cohort/eq-lisp15.sens");
 const VISIBLE: &str = "10 101 00 000 00 000 01";
 const PHYSICAL: &[u8] = &[0x66, 0x89, 0x06, 0x36, 0xb3];
 
@@ -23,7 +22,10 @@ fn both_migrated_equality_programs_preserve_canonical_transport() {
             .collect::<Vec<_>>()
             .join(" ");
         assert_eq!(words_spaced, VISIBLE);
-        assert_eq!(encode_binary_projection_ternary(&visible).unwrap(), physical);
+        assert_eq!(
+            encode_binary_projection_ternary(&visible).unwrap(),
+            physical
+        );
     }
 }
 

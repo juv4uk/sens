@@ -9,7 +9,10 @@ fn readme_explains_the_two_ukrainian_surfaces() {
         "`укр` — повна українська поверхня",
         "docs/generated/function-table.md",
     ] {
-        assert!(README.contains(required), "README missing Ukrainian surface contract: {required}");
+        assert!(
+            README.contains(required),
+            "README missing Ukrainian surface contract: {required}"
+        );
     }
 }
 
@@ -75,11 +78,17 @@ fn every_documented_identity_shows_uk_ukr_and_one_behavior_description() {
     );
 
     let ids = documented_ids();
-    assert!(!ids.is_empty(), "machine docs index must document semantic identities");
+    assert!(
+        !ids.is_empty(),
+        "machine docs index must document semantic identities"
+    );
 
     let rows = reference
         .lines()
-        .filter(|line| line.starts_with("| `") && line.chars().filter(|character| *character == '|').count() == 8)
+        .filter(|line| {
+            line.starts_with("| `")
+                && line.chars().filter(|character| *character == '|').count() == 8
+        })
         .collect::<Vec<_>>();
     assert_eq!(
         rows.len(),

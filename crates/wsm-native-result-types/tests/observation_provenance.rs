@@ -78,10 +78,12 @@ fn missing_or_mismatched_native_storage_is_named_not_semantic_falsehood() {
         .collect();
     assert_eq!(
         prolog.resolve_native_ref(&without_prolog),
-        Err(ObservationStorageError::MissingNativePayload(NativeResultRef {
-            observation_id: 42,
-            producer: ProducerSlot::Prolog,
-        }))
+        Err(ObservationStorageError::MissingNativePayload(
+            NativeResultRef {
+                observation_id: 42,
+                producer: ProducerSlot::Prolog,
+            }
+        ))
     );
 
     let mismatched = ObservationRef {

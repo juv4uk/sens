@@ -9,11 +9,20 @@ use sens::{
     eval_expr, exact_arity, register_capability, register_evaluated_capability, Environment,
     ErrorKind, Exactness, Expr, LanguageError, Span, Value,
 };
-use std::{path::{Path, PathBuf}, rc::Rc};
+use std::{
+    path::{Path, PathBuf},
+    rc::Rc,
+};
 
-#[cfg(all(any(target_os = "linux", target_os = "windows"), target_arch = "x86_64"))]
+#[cfg(all(
+    any(target_os = "linux", target_os = "windows"),
+    target_arch = "x86_64"
+))]
 mod native_exec;
-#[cfg(all(any(target_os = "linux", target_os = "windows"), target_arch = "x86_64"))]
+#[cfg(all(
+    any(target_os = "linux", target_os = "windows"),
+    target_arch = "x86_64"
+))]
 mod platform;
 mod process_raw;
 mod system_one_model;
@@ -78,7 +87,9 @@ fn canonical_write_target(path: &Path) -> Option<PathBuf> {
         .filter(|parent| !parent.as_os_str().is_empty())
         .unwrap_or_else(|| Path::new("."));
     let file_name = path.file_name()?;
-    std::fs::canonicalize(parent).ok().map(|p| p.join(file_name))
+    std::fs::canonicalize(parent)
+        .ok()
+        .map(|p| p.join(file_name))
 }
 
 #[cfg(not(target_arch = "wasm32"))]
@@ -420,7 +431,9 @@ fn evaluate_tcp_connect(
         return Err(denied("tcp-connect", format!("{host}:{port}"), span));
     }
     let stream = tcp_connect(host, port, span)?;
-    Ok(Value::TcpConnection(Rc::new(std::cell::RefCell::new(stream))))
+    Ok(Value::TcpConnection(Rc::new(std::cell::RefCell::new(
+        stream,
+    ))))
 }
 
 fn evaluate_tcp_listen_raw(
@@ -459,7 +472,9 @@ fn evaluate_tcp_accept(
         ));
     };
     let stream = tcp_accept(listener, span)?;
-    Ok(Value::TcpConnection(Rc::new(std::cell::RefCell::new(stream))))
+    Ok(Value::TcpConnection(Rc::new(std::cell::RefCell::new(
+        stream,
+    ))))
 }
 
 fn evaluate_tcp_read_raw(
@@ -601,13 +616,16 @@ fn tcp_accept(
     listener: &std::net::TcpListener,
     span: Span,
 ) -> Result<std::net::TcpStream, LanguageError> {
-    listener.accept().map(|(stream, _)| stream).map_err(|error| {
-        LanguageError::new(
-            ErrorKind::InvalidForm,
-            format!("tcp-accept: failed to accept a connection: {error}"),
-            span,
-        )
-    })
+    listener
+        .accept()
+        .map(|(stream, _)| stream)
+        .map_err(|error| {
+            LanguageError::new(
+                ErrorKind::InvalidForm,
+                format!("tcp-accept: failed to accept a connection: {error}"),
+                span,
+            )
+        })
 }
 
 fn tcp_read_raw(
@@ -697,16 +715,26 @@ pub fn install() {
     register_capability("записати-байти-файла", evaluate_write_file_bytes);
     register_capability("process-run-raw", process_raw::evaluate_process_run_raw);
     // Та сама сира можливість процесу для українського виконуваного Lisp.
-    register_capability("процес-запустити-сирий", process_raw::evaluate_process_run_raw);
+    register_capability(
+        "процес-запустити-сирий",
+        process_raw::evaluate_process_run_raw,
+    );
     register_evaluated_capability("load", 1, evaluate_load);
     // Українська виклична назва того самого механізму читання та обчислення файла.
     register_evaluated_capability("завантажити-файл", 1, evaluate_load);
     register_capability("tcp-connect", evaluate_tcp_connect);
     register_capability("tcp-listen-raw", evaluate_tcp_listen_raw);
-    register_capability("протокол-передавання-сире-слухання", evaluate_tcp_listen_raw);
+    register_capability(
+        "протокол-передавання-сире-слухання",
+        evaluate_tcp_listen_raw,
+    );
     register_evaluated_capability("tcp-accept", 1, evaluate_tcp_accept);
     register_evaluated_capability("tcp-read-raw", 1, evaluate_tcp_read_raw);
-    register_evaluated_capability("протокол-передавання-сире-читання", 1, evaluate_tcp_read_raw);
+    register_evaluated_capability(
+        "протокол-передавання-сире-читання",
+        1,
+        evaluate_tcp_read_raw,
+    );
     register_capability("tcp-write-raw", evaluate_tcp_write_raw);
     register_capability("протокол-передавання-сирий-запис", evaluate_tcp_write_raw);
     register_evaluated_capability("tcp-close", 1, evaluate_tcp_close);
@@ -716,7 +744,10 @@ pub fn install() {
         5,
         system_one_model::evaluate_choice_distribution,
     );
-    #[cfg(all(any(target_os = "linux", target_os = "windows"), target_arch = "x86_64"))]
+    #[cfg(all(
+        any(target_os = "linux", target_os = "windows"),
+        target_arch = "x86_64"
+    ))]
     register_capability(
         "native-call-u64-raw",
         native_exec::evaluate_native_call_u64_raw,
@@ -750,8 +781,7 @@ mod install_tests {
                 .map(|shift| ((value >> shift) & 1) as u8)
                 .collect::<Vec<_>>();
             Value::BinaryNumber(
-                sens::BinaryNumber::from_numeric_domain_bits(24, &bits)
-                    .expect("exact D24 number"),
+                sens::BinaryNumber::from_numeric_domain_bits(24, &bits).expect("exact D24 number"),
             )
         }
 
@@ -787,12 +817,8 @@ mod install_tests {
         assert_eq!(b.numeric_domain_width(), Some(96));
         assert!(a <= b, "monotonic observations must not move backward");
 
-        let error = super::observe_monotonic_nanoseconds(
-            &[(Value::Nil, span)],
-            &env,
-            span,
-        )
-        .expect_err("wrong arity must fail closed");
+        let error = super::observe_monotonic_nanoseconds(&[(Value::Nil, span)], &env, span)
+            .expect_err("wrong arity must fail closed");
         assert_eq!(error.kind, ErrorKind::Arity);
     }
 
@@ -842,10 +868,7 @@ mod install_tests {
     #[test]
     fn ukrainian_process_raw_name_preserves_fail_closed_arity() {
         super::install();
-        for form in [
-            "(process-run-raw)",
-            "(процес-запустити-сирий)",
-        ] {
+        for form in ["(process-run-raw)", "(процес-запустити-сирий)"] {
             let mut session = sens::Session::default();
             let error = sens::eval_program(form, &mut session)
                 .expect_err("недостатня кількість аргументів не має запускати зовнішній процес");

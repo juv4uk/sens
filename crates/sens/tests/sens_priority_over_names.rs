@@ -26,10 +26,9 @@ fn repo_root() -> PathBuf {
 
 /// (code, namespace, spelling) from the generated registry used by lowering.
 fn registry() -> Vec<(String, String, String)> {
-    let text = fs::read_to_string(
-        repo_root().join("crates/sens/src/semantic_registry_generated.rs"),
-    )
-    .unwrap();
+    let text =
+        fs::read_to_string(repo_root().join("crates/sens/src/semantic_registry_generated.rs"))
+            .unwrap();
     let mut rows = Vec::new();
     for line in text.lines() {
         let Some(rest) = line.split("semantic_id: 0b").nth(1) else {
@@ -39,10 +38,7 @@ fn registry() -> Vec<(String, String, String)> {
             .chars()
             .take_while(|c| *c == '0' || *c == '1')
             .collect();
-        for surface in rest
-            .split("SemanticSurface { namespace: \"")
-            .skip(1)
-        {
+        for surface in rest.split("SemanticSurface { namespace: \"").skip(1) {
             let mut parts = surface.splitn(2, "\", name: \"");
             let namespace = parts.next().unwrap_or("").to_owned();
             let name: String = parts
@@ -84,14 +80,14 @@ fn every_registry_surface_lowers_to_its_one_byte_sens_function() {
                 let lowered = lower_program(&parsed);
                 match &lowered[0].kind {
                     ExprKind::Call(sid, _) if sid.to_string() == code => {}
-                    other => offenders.push(format!(
-                        "{code} {namespace} {name}: lowered to {other:?}"
-                    )),
+                    other => {
+                        offenders.push(format!("{code} {namespace} {name}: lowered to {other:?}"))
+                    }
                 }
             }
-            Err(error) => offenders.push(format!(
-                "{code} {namespace} {name}: parse failed: {error}"
-            )),
+            Err(error) => {
+                offenders.push(format!("{code} {namespace} {name}: parse failed: {error}"))
+            }
         }
     }
 

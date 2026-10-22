@@ -1,6 +1,6 @@
 use sens::{
-    eval_parsed_expressions, eval_program, load_core_library, lower_program,
-    parse, parse_mixed_exact_domain_machine_source, ExprKind, Session,
+    eval_parsed_expressions, eval_program, load_core_library, lower_program, parse,
+    parse_mixed_exact_domain_machine_source, ExprKind, Session,
 };
 use std::fs;
 use std::path::PathBuf;
@@ -23,10 +23,13 @@ fn load_lisp_file(path: &str, session: &mut Session) {
         "machine-source reader is restricted to lib/machine/** fixtures: {path}"
     );
     let source = read(path);
-    let expressions = parse_mixed_exact_domain_machine_source(path, &source)
-        .unwrap_or_else(|error| panic!("{path} must parse as exact-domain machine source: {error}"));
-    eval_parsed_expressions(&expressions, session)
-        .unwrap_or_else(|error| panic!("{path} must load through the machine-source reader: {error}"));
+    let expressions =
+        parse_mixed_exact_domain_machine_source(path, &source).unwrap_or_else(|error| {
+            panic!("{path} must parse as exact-domain machine source: {error}")
+        });
+    eval_parsed_expressions(&expressions, session).unwrap_or_else(|error| {
+        panic!("{path} must load through the machine-source reader: {error}")
+    });
 }
 
 fn eval_value(source: &str, session: &mut Session) -> String {
@@ -275,7 +278,10 @@ fn bounded_mul_effect_projects_with_form_and_byte_parity() {
             &format!("(машина-знизити-множення-беззнакових-64-до-форм {left} {right})"),
             &mut session,
         );
-        assert_eq!(projected, donor, "IMUL projection must preserve donor forms");
+        assert_eq!(
+            projected, donor,
+            "IMUL projection must preserve donor forms"
+        );
 
         let projected_bytes = eval_value(
             &format!("(закодувати-машинний-ефект-на-х86 (quote {effect}))"),
@@ -328,10 +334,22 @@ fn memory_operand_three_fields_are_checked_before_acceptance() {
     // Виконання справжньої мови СЕНС, а не Python-імітація семантики.
     let mut session = machine_session();
     for (source, expected) in [
-        ("(машинна-память-64-зсув-8? (як-є (mem64-disp8 (gpr64 rax) (disp8 4))))", true),
-        ("(машинна-память-64-зсув-8? (як-є (mem64-disp8 (gpr64 rax))))", false),
-        ("(машинна-память-64-зсув-8? (як-є (mem64-disp8 (gpr64 rax) (disp8 4) зайве)))", false),
-        ("(машинна-память-64-зсув-8? (як-є (unknown (gpr64 rax) (disp8 4))))", false),
+        (
+            "(машинна-память-64-зсув-8? (як-є (mem64-disp8 (gpr64 rax) (disp8 4))))",
+            true,
+        ),
+        (
+            "(машинна-память-64-зсув-8? (як-є (mem64-disp8 (gpr64 rax))))",
+            false,
+        ),
+        (
+            "(машинна-память-64-зсув-8? (як-є (mem64-disp8 (gpr64 rax) (disp8 4) зайве)))",
+            false,
+        ),
+        (
+            "(машинна-память-64-зсув-8? (як-є (unknown (gpr64 rax) (disp8 4))))",
+            false,
+        ),
     ] {
         let answer = eval_program(source, &mut session)
             .unwrap_or_else(|error| panic!("{source}: {error}"))
@@ -346,11 +364,26 @@ fn machine_effect_shape_predicates_use_live_exact_d1_not_legacy_true_false() {
     // «так»/«ні» без зв'язування більше не можуть маскувати D1-семантику.
     let mut session = machine_session();
     for (source, expected) in [
-        ("(машинний-ефект-форма-додавання-64? (як-є (bounded-u64-add 2 3)))", true),
-        ("(машинний-ефект-форма-додавання-64? (як-є (bounded-u64-mul 2 3)))", false),
-        ("(машинний-ефект-форма-віднімання-64? (як-є (bounded-u64-sub 5 3)))", true),
-        ("(машинний-ефект-форма-віднімання-64? (як-є (bounded-u64-add 5 3)))", false),
-        ("(машинний-ефект-форма-множення-64? (як-є (bounded-u64-mul 4 6)))", true),
+        (
+            "(машинний-ефект-форма-додавання-64? (як-є (bounded-u64-add 2 3)))",
+            true,
+        ),
+        (
+            "(машинний-ефект-форма-додавання-64? (як-є (bounded-u64-mul 2 3)))",
+            false,
+        ),
+        (
+            "(машинний-ефект-форма-віднімання-64? (як-є (bounded-u64-sub 5 3)))",
+            true,
+        ),
+        (
+            "(машинний-ефект-форма-віднімання-64? (як-є (bounded-u64-add 5 3)))",
+            false,
+        ),
+        (
+            "(машинний-ефект-форма-множення-64? (як-є (bounded-u64-mul 4 6)))",
+            true,
+        ),
         ("(машинний-ефект-форма-множення-64? (як-є ()))", false),
     ] {
         let value = eval_program(source, &mut session)
@@ -379,7 +412,10 @@ fn bounded_effect_source_keeps_exact_d1_controls() {
         );
     }
     for legacy in ["(00000010 ", "(00000011 ", "(00100010 "] {
-        assert!(!source.contains(legacy), "Стара машинна виклична голова: {legacy}");
+        assert!(
+            !source.contains(legacy),
+            "Стара машинна виклична голова: {legacy}"
+        );
     }
 
     let mut session = Session::default();
@@ -389,8 +425,14 @@ fn bounded_effect_source_keeps_exact_d1_controls() {
         ("(машинний-ефект-ціле-в-межах? 5 0 10)", true),
         ("(машинний-ефект-ціле-в-межах? -1 0 10)", false),
         ("(машинний-ефект-ціле-в-межах? 11 0 10)", false),
-        ("(машинний-ефект-форма-додавання-64? (як-є (bounded-u64-add 2 3)))", true),
-        ("(машинний-ефект-форма-додавання-64? (як-є (bounded-u64-sub 2 3)))", false),
+        (
+            "(машинний-ефект-форма-додавання-64? (як-є (bounded-u64-add 2 3)))",
+            true,
+        ),
+        (
+            "(машинний-ефект-форма-додавання-64? (як-є (bounded-u64-sub 2 3)))",
+            false,
+        ),
     ] {
         let actual = eval_program(expression, &mut session)
             .unwrap_or_else(|error| panic!("Справжній SENS не виконав {expression}: {error}"))
@@ -477,12 +519,30 @@ fn bounded_effect_structural_forms_return_exact_d1_for_matching_and_mismatched_k
     load_core_library(&mut session).expect("ядро");
     load_lisp_file("lib/machine/effects/u64.lisp", &mut session);
     for (source, expected) in [
-        ("(машинний-ефект-форма-додавання-64? (як-є (bounded-u64-add 2 3)))", true),
-        ("(машинний-ефект-форма-віднімання-64? (як-є (bounded-u64-sub 5 3)))", true),
-        ("(машинний-ефект-форма-множення-64? (як-є (bounded-u64-mul 2 3)))", true),
-        ("(машинний-ефект-форма-додавання-64? (як-є (bounded-u64-sub 5 3)))", false),
-        ("(машинний-ефект-форма-віднімання-64? (як-є (bounded-u64-mul 2 3)))", false),
-        ("(машинний-ефект-форма-множення-64? (як-є (bounded-u64-add 2 3)))", false),
+        (
+            "(машинний-ефект-форма-додавання-64? (як-є (bounded-u64-add 2 3)))",
+            true,
+        ),
+        (
+            "(машинний-ефект-форма-віднімання-64? (як-є (bounded-u64-sub 5 3)))",
+            true,
+        ),
+        (
+            "(машинний-ефект-форма-множення-64? (як-є (bounded-u64-mul 2 3)))",
+            true,
+        ),
+        (
+            "(машинний-ефект-форма-додавання-64? (як-є (bounded-u64-sub 5 3)))",
+            false,
+        ),
+        (
+            "(машинний-ефект-форма-віднімання-64? (як-є (bounded-u64-mul 2 3)))",
+            false,
+        ),
+        (
+            "(машинний-ефект-форма-множення-64? (як-є (bounded-u64-add 2 3)))",
+            false,
+        ),
     ] {
         let actual = eval_program(source, &mut session)
             .unwrap_or_else(|error| panic!("{source}: {error}"))
@@ -494,7 +554,6 @@ fn bounded_effect_structural_forms_return_exact_d1_for_matching_and_mismatched_k
         );
     }
 }
-
 
 /// Окремий falsifier: ратифіковані D5/D6 порівняння повинні
 /// відрізняти арифметичний носій від точного предиката D1.

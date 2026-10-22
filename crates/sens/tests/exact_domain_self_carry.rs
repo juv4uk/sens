@@ -1,13 +1,10 @@
 //! Exact D1–24+ coordinates survive a language-level carry without byte aliases.
-use sens::{eval_exact_domain_program, DomainIdentity, DomainD10, ErrorKind, Session, Value};
+use sens::{eval_exact_domain_program, DomainD10, DomainIdentity, ErrorKind, Session, Value};
 
 #[test]
 fn exact_identity_is_carried_through_a_d4_lambda_and_quote() {
-    let result = eval_exact_domain_program(
-        "((0010 (f) f) (001 0100001100))",
-        &mut Session::bare(),
-    )
-    .expect("the exact D4 lambda and quote forms carry D10 as data");
+    let result = eval_exact_domain_program("((0010 (f) f) (001 0100001100))", &mut Session::bare())
+        .expect("the exact D4 lambda and quote forms carry D10 as data");
 
     assert!(matches!(
         result.value,
@@ -37,22 +34,14 @@ fn carried_concrete_definition_executes_only_after_core_binding() {
 #[test]
 fn unbound_d10_identity_is_still_carried_without_becoming_callable() {
     let mut session = Session::bare();
-    let carried = eval_exact_domain_program(
-        "((0010 (f) f) (001 1111111111))",
-        &mut session,
-    )
-    .expect("arbitrary exact D10 identity is data even when unbound");
+    let carried = eval_exact_domain_program("((0010 (f) f) (001 1111111111))", &mut session)
+        .expect("arbitrary exact D10 identity is data even when unbound");
     assert_eq!(
         carried.value,
-        Value::DomainIdentity(DomainIdentity::D10(
-            DomainD10::new(0b1111111111).unwrap()
-        ))
+        Value::DomainIdentity(DomainIdentity::D10(DomainD10::new(0b1111111111).unwrap()))
     );
 
-    let error = eval_exact_domain_program(
-        "(((0010 (f) f) 1111111111) (001 ()))",
-        &mut session,
-    )
-    .expect_err("carrying identity does not admit a callable mechanism");
+    let error = eval_exact_domain_program("(((0010 (f) f) 1111111111) (001 ()))", &mut session)
+        .expect_err("carrying identity does not admit a callable mechanism");
     assert_eq!(error.kind, ErrorKind::Type);
 }

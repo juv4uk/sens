@@ -212,9 +212,18 @@ fn current_machine_effect_key_has_exact_d1_predicate_results() {
     load_core_library(&mut session).expect("ядро");
     load_lisp_file("lib/machine/lowering/semantic-effects.lisp", &mut session);
     for (source, expected) in [
-        ("(машинний-ефект-збігається-поточний-домен? 5 10 5 10)", true),
-        ("(машинний-ефект-збігається-поточний-домен? 4 10 5 10)", false),
-        ("(машинний-ефект-збігається-поточний-домен? 5 11 5 10)", false),
+        (
+            "(машинний-ефект-збігається-поточний-домен? 5 10 5 10)",
+            true,
+        ),
+        (
+            "(машинний-ефект-збігається-поточний-домен? 4 10 5 10)",
+            false,
+        ),
+        (
+            "(машинний-ефект-збігається-поточний-домен? 5 11 5 10)",
+            false,
+        ),
     ] {
         let actual = eval_program(source, &mut session)
             .unwrap_or_else(|error| panic!("{source}: {error}"))

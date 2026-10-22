@@ -40,11 +40,8 @@ fn core_empty_predicate_returns_exact_d1_for_nil_atom_and_pair() {
 #[test]
 fn core_zero_arity_and_or_return_real_d1_bits() {
     let mut session = Session::default();
-    sens::eval_core_library_source(
-        include_str!("../../../lib/core.lisp"),
-        &mut session,
-    )
-    .expect("чинне українське ядро повинне виконуватися в SENS");
+    sens::eval_core_library_source(include_str!("../../../lib/core.lisp"), &mut session)
+        .expect("чинне українське ядро повинне виконуватися в SENS");
     for (source, expected) in [("(та)", true), ("(або)", false)] {
         let value = eval_program(source, &mut session)
             .unwrap_or_else(|error| panic!("SENS відхилив {source}: {error}"))
@@ -77,13 +74,17 @@ fn core_peer_binding_presence_and_absence_are_observable() {
     let mut session = core_session();
     let bindings = "(як-є ((\"перший\" альфа) (\"другий\" бета)))";
     assert_eq!(
-        execute(&mut session,
-            &format!("(стан-привязки-відповідника (як-є другий) {bindings})")),
+        execute(
+            &mut session,
+            &format!("(стан-привязки-відповідника (як-є другий) {bindings})")
+        ),
         "present"
     );
     assert_eq!(
-        execute(&mut session,
-            &format!("(стан-привязки-відповідника (як-є третій) {bindings})")),
+        execute(
+            &mut session,
+            &format!("(стан-привязки-відповідника (як-є третій) {bindings})")
+        ),
         "absent"
     );
 }
@@ -102,8 +103,10 @@ fn core_missing_peers_skip_existing_and_retain_source_order() {
 fn core_constructs_only_ukrainian_d4_define_expressions() {
     let mut session = core_session();
     assert_eq!(
-        execute(&mut session,
-            "(побудувати-визначення-відповідників (як-є джерело) (як-є (перший другий)))"),
+        execute(
+            &mut session,
+            "(побудувати-визначення-відповідників (як-є джерело) (як-є (перший другий)))"
+        ),
         "(визначити перший (визначити другий джерело))"
     );
 }
@@ -134,22 +137,27 @@ fn core_nth_member_follow_current_d6_d5_semantics() {
 fn core_sublis_and_maplist_execute_in_sens_without_host_oracle() {
     let mut session = core_session();
     assert_eq!(
-        execute(&mut session,
-            "(підставити-пари (список (сполучити (як-є а) (як-є б))) (як-є (а в а)))"),
+        execute(
+            &mut session,
+            "(підставити-пари (список (сполучити (як-є а) (як-є б))) (як-є (а в а)))"
+        ),
         execute(&mut session, "(як-є (б в б))")
     );
     assert_eq!(
-        execute(&mut session,
-            "(підставити-пари (список (сполучити (як-є (а в)) (як-є ціле))) (як-є (а в)))"),
+        execute(
+            &mut session,
+            "(підставити-пари (список (сполучити (як-є (а в)) (як-є ціле))) (як-є (а в)))"
+        ),
         execute(&mut session, "(як-є ціле)")
     );
     assert_eq!(
-        execute(&mut session,
-            "(відобразити-залишки (як-є (а б)) (функція (хвіст) (перше хвіст)))"),
+        execute(
+            &mut session,
+            "(відобразити-залишки (як-є (а б)) (функція (хвіст) (перше хвіст)))"
+        ),
         execute(&mut session, "(як-є (а б))")
     );
 }
-
 
 // Живий SENS-метаобчислювач: атомарні мітки даних і справжні
 // складені замикання мають повертати біт D1, не Lisp-символ "так"/"ні".
@@ -164,7 +172,10 @@ fn meta_eval_predicates_are_actual_d1_bits() {
         ("(це-замикання? (як-є приклад))", false),
         ("(це-замикання? (як-є (closure приклад)))", true),
         ("(це-рекурсивне-замикання? (як-є приклад))", false),
-        ("(це-рекурсивне-замикання? (як-є (recursive-closure приклад)))", true),
+        (
+            "(це-рекурсивне-замикання? (як-є (recursive-closure приклад)))",
+            true,
+        ),
         ("(лямбда-має-параметр-залишку? (як-є ()))", false),
         ("(лямбда-має-параметр-залишку? (як-є (x y)))", false),
         ("(лямбда-має-параметр-залишку? (як-є залишок))", true),
@@ -185,14 +196,23 @@ fn meta_eval_predicates_are_actual_d1_bits() {
 #[test]
 fn meta_eval_graph_exact_d1_law_and_negative_mutant_execute_in_sens() {
     for (name, source, expected) in [
-        ("закон", include_str!("../../../tests/semantic/meta-eval-graph-d1-law.lisp"), true),
-        ("мутант", include_str!("../../../tests/semantic/meta-eval-graph-d1-mutant.lisp"), false),
+        (
+            "закон",
+            include_str!("../../../tests/semantic/meta-eval-graph-d1-law.lisp"),
+            true,
+        ),
+        (
+            "мутант",
+            include_str!("../../../tests/semantic/meta-eval-graph-d1-mutant.lisp"),
+            false,
+        ),
     ] {
         let mut session = core_session();
         sens::load_meta_evaluator_library(&mut session)
             .expect("MetaEval має завантажитися у справжній SENS");
-        let result = eval_program(source, &mut session)
-            .unwrap_or_else(|err| panic!("test_id=meta-eval-graph-d1 case={name} actual=execution-error: {err}"));
+        let result = eval_program(source, &mut session).unwrap_or_else(|err| {
+            panic!("test_id=meta-eval-graph-d1 case={name} actual=execution-error: {err}")
+        });
         assert_eq!(
             result.value.as_predicate_bit(),
             Some(expected),
@@ -207,27 +227,35 @@ fn meta_eval_graph_exact_d1_law_and_negative_mutant_execute_in_sens() {
 #[test]
 fn meta_eval_lexical_eight_laws_and_eight_mutants_execute_in_sens() {
     fn forms(source: &str) -> Vec<&str> {
-        source.lines()
+        source
+            .lines()
             .map(str::trim)
             .filter(|line| !line.is_empty() && !line.starts_with(';'))
             .collect()
     }
-    let laws = forms(include_str!("../../../tests/semantic/meta-eval-lexical-shadow-d1-law.lisp"));
-    let mutants = forms(include_str!("../../../tests/semantic/meta-eval-lexical-shadow-d1-mutants.lisp"));
-    let first = forms(include_str!("../../../tests/semantic/meta-eval-lexical-shadow-d1-mutant.lisp"));
+    let laws = forms(include_str!(
+        "../../../tests/semantic/meta-eval-lexical-shadow-d1-law.lisp"
+    ));
+    let mutants = forms(include_str!(
+        "../../../tests/semantic/meta-eval-lexical-shadow-d1-mutants.lisp"
+    ));
+    let first = forms(include_str!(
+        "../../../tests/semantic/meta-eval-lexical-shadow-d1-mutant.lisp"
+    ));
     assert_eq!((laws.len(), mutants.len(), first.len()), (8, 8, 8));
     assert_eq!(first[0], mutants[0]);
     assert_eq!(&first[1..], &laws[1..]);
     let mut session = core_session();
-    sens::load_meta_evaluator_library(&mut session)
-        .expect("живе українське визначення MetaEval");
+    sens::load_meta_evaluator_library(&mut session).expect("живе українське визначення MetaEval");
     for (index, (law, mutant)) in laws.iter().zip(mutants.iter()).enumerate() {
-        for (case, source, expected) in [("закон", *law, true), ("мутант", *mutant, false)] {
-            let result = eval_program(source, &mut session)
-                .unwrap_or_else(|error| panic!(
+        for (case, source, expected) in [("закон", *law, true), ("мутант", *mutant, false)]
+        {
+            let result = eval_program(source, &mut session).unwrap_or_else(|error| {
+                panic!(
                     "test_id=meta-eval-lexical-shadow-d1 case={} role={case} SENS: {error}",
                     index + 1
-                ));
+                )
+            });
             assert_eq!(
                 result.value.as_predicate_bit(),
                 Some(expected),

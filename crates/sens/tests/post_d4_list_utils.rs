@@ -127,13 +127,9 @@ fn append_is_reconstructible_from_structure_and_recursion() {
         assert_eq!(derived, canonical, "left={left} right={right}");
     }
 
-    let derived_error = eval_program(
-        "(post-d4-append (quote atom) (quote (tail)))",
-        &mut s,
-    )
-    .unwrap_err();
-    let canonical_error =
-        eval_program("(append (quote atom) (quote (tail)))", &mut s).unwrap_err();
+    let derived_error =
+        eval_program("(post-d4-append (quote atom) (quote (tail)))", &mut s).unwrap_err();
+    let canonical_error = eval_program("(append (quote atom) (quote (tail)))", &mut s).unwrap_err();
     assert_eq!(derived_error.kind, canonical_error.kind);
 }
 
@@ -141,11 +137,7 @@ fn append_is_reconstructible_from_structure_and_recursion() {
 fn subst_is_reconstructible_from_d3_structure() {
     let mut s = session();
     let cases = [
-        (
-            "(quote (x . a))",
-            "(quote b)",
-            "(quote ((a . b) . c))",
-        ),
+        ("(quote (x . a))", "(quote b)", "(quote ((a . b) . c))"),
         ("(quote replacement)", "(quote a)", "(quote (a (b a)))"),
         ("(quote x)", "(quote absent)", "(quote (a b c))"),
     ];
@@ -161,15 +153,9 @@ fn subst_is_reconstructible_from_d3_structure() {
 fn sublis_is_reconstructible_from_pair_recursion() {
     let mut s = session();
     let cases = [
-        (
-            "(quote ((x (a b)) (y (b c))))",
-            "(quote (x y z))",
-        ),
+        ("(quote ((x (a b)) (y (b c))))", "(quote (x y z))"),
         ("(quote ())", "(quote (x y))"),
-        (
-            "(quote ((x alpha) (y beta)))",
-            "(quote ((x y) (z x)))",
-        ),
+        ("(quote ((x alpha) (y beta)))", "(quote ((x y) (z x)))"),
     ];
 
     for (pairs, tree) in cases {
@@ -183,25 +169,13 @@ fn sublis_is_reconstructible_from_pair_recursion() {
 fn maplist_is_reconstructible_from_lambda_application_and_list_recursion() {
     let mut s = session();
     let cases = [
-        (
-            "(quote (a b c))",
-            "(lambda (tail) tail)",
-        ),
-        (
-            "(quote (a b c))",
-            "(lambda (tail) (car tail))",
-        ),
-        (
-            "(quote ())",
-            "(lambda (tail) tail)",
-        ),
+        ("(quote (a b c))", "(lambda (tail) tail)"),
+        ("(quote (a b c))", "(lambda (tail) (car tail))"),
+        ("(quote ())", "(lambda (tail) tail)"),
     ];
 
     for (values, function) in cases {
-        let derived = run(
-            &mut s,
-            &format!("(post-d4-maplist {values} {function})"),
-        );
+        let derived = run(&mut s, &format!("(post-d4-maplist {values} {function})"));
         let canonical = run(&mut s, &format!("(maplist {values} {function})"));
         assert_eq!(derived, canonical, "values={values} function={function}");
     }

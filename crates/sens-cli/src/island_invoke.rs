@@ -5,7 +5,8 @@
 //! Kernel names and payloads are data at this boundary, never function identities.
 
 use sens::{
-    register_sens_capability, CoreDomainIdentity, Environment, ErrorKind, LanguageError, Span, Value,
+    register_sens_capability, CoreDomainIdentity, Environment, ErrorKind, LanguageError, Span,
+    Value,
 };
 use std::fs;
 use std::path::PathBuf;
@@ -16,9 +17,7 @@ use wsm_clips_kernel::ClipsKernel;
 use wsm_common_lisp_kernel::{
     CommonLispKernel, CommonLispRequest, LegacyAbiSemanticId as CommonLispLegacyAbiSemanticId,
 };
-use wsm_datalog_kernel::{
-    Atom, Database, Evaluator, Program, Rule, Term, Value as DatalogValue,
-};
+use wsm_datalog_kernel::{Atom, Database, Evaluator, Program, Rule, Term, Value as DatalogValue};
 use wsm_prolog_kernel::{
     LegacyAbiSemanticId as PrologLegacyAbiSemanticId, PrologKernel, PrologQuery, PrologRequest,
 };
@@ -27,7 +26,11 @@ use wsm_prolog_kernel::{
 const FOREIGN_KERNEL_ABI_SLOT: u8 = 0b10101000;
 
 fn language_error(kind: ErrorKind, message: impl Into<String>, span: Span) -> LanguageError {
-    LanguageError::new(kind, format!("raw island mechanism: {}", message.into()), span)
+    LanguageError::new(
+        kind,
+        format!("raw island mechanism: {}", message.into()),
+        span,
+    )
 }
 
 fn text_argument(value: &Value, role: &str, span: Span) -> Result<String, LanguageError> {
@@ -92,10 +95,7 @@ ancestor(X,Z) :- parent(X,Y), ancestor(Y,Z).
 
 fn invoke_common_lisp(id: CommonLispLegacyAbiSemanticId, payload: &str) -> Result<Vec<u8>, String> {
     CommonLispKernel::default()
-        .evaluate(&CommonLispRequest::new(
-            id,
-            payload,
-        ))
+        .evaluate(&CommonLispRequest::new(id, payload))
         .map(|result| result.stdout)
         .map_err(|error| error.to_string())
 }
@@ -105,10 +105,7 @@ fn invoke_prolog(id: PrologLegacyAbiSemanticId, payload: &str) -> Result<Vec<u8>
     let program = prolog_fixture_path()?;
     let result = PrologKernel::default().execute(
         &program,
-        &PrologRequest::new(
-            id,
-            PrologQuery::new(payload, template),
-        ),
+        &PrologRequest::new(id, PrologQuery::new(payload, template)),
     );
     let _ = fs::remove_file(&program);
     result
@@ -216,7 +213,10 @@ fn evaluate_raw_invoke(
         // Окрема історична ABI-межа: W8 тут не є D8:10101000 ROUND.
         "common-lisp" => (
             "common-lisp",
-            invoke_common_lisp(CommonLispLegacyAbiSemanticId(FOREIGN_KERNEL_ABI_SLOT), &payload),
+            invoke_common_lisp(
+                CommonLispLegacyAbiSemanticId(FOREIGN_KERNEL_ABI_SLOT),
+                &payload,
+            ),
         ),
         "prolog" => (
             "prolog",
@@ -249,7 +249,9 @@ fn evaluate_raw_invoke(
 pub fn install() {
     // The host does not invent callability from the old external W8 ABI.
     // Only a currently ratified, callable SENS surface may activate this hook.
-    if let Some(identity) = sens::semantic_registry_export::admitted_core_domain_for_surface("raw-invoke") {
+    if let Some(identity) =
+        sens::semantic_registry_export::admitted_core_domain_for_surface("raw-invoke")
+    {
         register_sens_capability(identity, evaluate_raw_invoke);
     }
 }

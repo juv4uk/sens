@@ -4,7 +4,9 @@
 use std::hint::black_box;
 use std::time::Instant;
 
-use sens::{decode_ternary_words, encode_ternary_words, parse_binary_source_words, BinarySourceWord};
+use sens::{
+    decode_ternary_words, encode_ternary_words, parse_binary_source_words, BinarySourceWord,
+};
 
 #[global_allocator]
 static ALLOCATOR: std::alloc::System = std::alloc::System;
@@ -60,7 +62,10 @@ fn main() {
         assert_eq!(recovered, words, "mechanical T5 parity");
         println!(
             "fixture impl=rust forms={} words={} bytes={} fnv64={:x}",
-            forms, words.len(), physical.len(), fnv64(&physical)
+            forms,
+            words.len(),
+            physical.len(),
+            fnv64(&physical)
         );
         print!("physical impl=rust forms={} hex=", forms);
         for byte in &physical {

@@ -57,13 +57,21 @@ fn balance(bytes: &[u8]) -> Balance {
     for &byte in bytes {
         if byte == b'\n' {
             line += 1;
-            if in_comment { in_comment = false; }
+            if in_comment {
+                in_comment = false;
+            }
         }
-        if in_comment { continue; }
+        if in_comment {
+            continue;
+        }
         if in_string {
-            if escaped { escaped = false; }
-            else if byte == b'\\' { escaped = true; }
-            else if byte == b'"' { in_string = false; }
+            if escaped {
+                escaped = false;
+            } else if byte == b'\\' {
+                escaped = true;
+            } else if byte == b'"' {
+                in_string = false;
+            }
         } else {
             match byte {
                 b';' => in_comment = true,
@@ -79,7 +87,11 @@ fn balance(bytes: &[u8]) -> Balance {
             }
         }
     }
-    Balance { depth, first_negative_line, unclosed_string: in_string }
+    Balance {
+        depth,
+        first_negative_line,
+        unclosed_string: in_string,
+    }
 }
 
 fn critical_contract(relative: &str) -> Option<(usize, &'static [&'static str])> {
@@ -92,10 +104,15 @@ fn critical_contract(relative: &str) -> Option<(usize, &'static [&'static str])>
 }
 
 fn check_critical(relative: &str, source: &str) -> Vec<String> {
-    let Some((minimum, forms)) = critical_contract(relative) else { return vec![] };
+    let Some((minimum, forms)) = critical_contract(relative) else {
+        return vec![];
+    };
     let mut errors = Vec::new();
     if source.len() < minimum {
-        errors.push(format!("critical source unexpectedly short ({} bytes)", source.len()));
+        errors.push(format!(
+            "critical source unexpectedly short ({} bytes)",
+            source.len()
+        ));
     }
     for marker in FORBIDDEN {
         if source.contains(*marker) {
@@ -117,7 +134,10 @@ fn collect(base: &Path, files: &mut Vec<PathBuf>, errors: &mut Vec<String>) {
     let metadata = match fs::symlink_metadata(base) {
         Ok(metadata) => metadata,
         Err(e) => {
-            errors.push(format!("{}: requested scan path missing: {e}", base.display()));
+            errors.push(format!(
+                "{}: requested scan path missing: {e}",
+                base.display()
+            ));
             return;
         }
     };
@@ -144,7 +164,10 @@ fn collect(base: &Path, files: &mut Vec<PathBuf>, errors: &mut Vec<String>) {
         for entry in entries {
             match entry {
                 Ok(entry) => children.push(entry.path()),
-                Err(e) => errors.push(format!("{}: unreadable directory entry: {e}", base.display())),
+                Err(e) => errors.push(format!(
+                    "{}: unreadable directory entry: {e}",
+                    base.display()
+                )),
             }
         }
         children.sort();
@@ -168,19 +191,27 @@ fn check_sources(root: &Path, selected: &[String]) -> (usize, Vec<String>) {
     }
     files.sort();
     files.dedup();
-    if selected.iter().any(|p| p.trim_end_matches('/') == "lib" || p == ".") {
+    if selected
+        .iter()
+        .any(|p| p.trim_end_matches('/') == "lib" || p == ".")
+    {
         for path in [LOWERING, ENCODING, ADMISSION] {
             let target = root.join(path);
             match fs::symlink_metadata(&target) {
-                Ok(m) if m.file_type().is_symlink() =>
-                    errors.push(format!("{path}: mandatory machine authority cannot be a symlink")),
+                Ok(m) if m.file_type().is_symlink() => errors.push(format!(
+                    "{path}: mandatory machine authority cannot be a symlink"
+                )),
                 Ok(m) if m.is_file() => {}
                 _ => errors.push(format!("{path}: mandatory machine authority file missing")),
             }
         }
     }
     for path in &files {
-        let relative = path.strip_prefix(root).unwrap_or(path).to_string_lossy().replace('\\', "/");
+        let relative = path
+            .strip_prefix(root)
+            .unwrap_or(path)
+            .to_string_lossy()
+            .replace('\\', "/");
         let data = match fs::read(path) {
             Ok(data) => data,
             Err(e) => {
@@ -197,7 +228,10 @@ fn check_sources(root: &Path, selected: &[String]) -> (usize, Vec<String>) {
         };
         let b = balance(&data);
         if b.depth != 0 || b.unclosed_string || b.first_negative_line.is_some() {
-            errors.push(format!("{relative}: unbalanced; depth={} first-negative-line={:?} unclosed-string={}", b.depth, b.first_negative_line, b.unclosed_string));
+            errors.push(format!(
+                "{relative}: unbalanced; depth={} first-negative-line={:?} unclosed-string={}",
+                b.depth, b.first_negative_line, b.unclosed_string
+            ));
         }
         for error in check_critical(&relative, source) {
             errors.push(format!("{relative}: {error}"));
@@ -225,20 +259,33 @@ fn run() -> Result<(), String> {
                 }
                 continue;
             }
-            other => return Err(format!("unknown argument: {other}; use --root DIR --paths PATH...")),
+            other => {
+                return Err(format!(
+                    "unknown argument: {other}; use --root DIR --paths PATH..."
+                ))
+            }
         }
         i += 1;
     }
-    if selected.is_empty() { selected.push("lib".to_owned()); }
-    let root = root.canonicalize().map_err(|e| format!("cannot open root: {e}"))?;
+    if selected.is_empty() {
+        selected.push("lib".to_owned());
+    }
+    let root = root
+        .canonicalize()
+        .map_err(|e| format!("cannot open root: {e}"))?;
     let (count, errors) = check_sources(&root, &selected);
     println!("lisp-source-guard: scanned {count} file(s)");
-    for error in &errors { eprintln!("INTEGRITY-FAIL {error}"); }
+    for error in &errors {
+        eprintln!("INTEGRITY-FAIL {error}");
+    }
     if errors.is_empty() {
         println!("lisp-source-guard: PASS");
         Ok(())
     } else {
-        Err(format!("lisp-source-guard: FAIL ({} defect(s))", errors.len()))
+        Err(format!(
+            "lisp-source-guard: FAIL ({} defect(s))",
+            errors.len()
+        ))
     }
 }
 
@@ -255,8 +302,14 @@ mod tests {
 
     #[test]
     fn lexical_balance_ignores_comments_and_escaped_strings() {
-        assert_eq!(balance(b"(a \"; not a comment (\\\"ok\\\")\" ; ) ignored\n (b))"),
-                   Balance { depth: 0, first_negative_line: None, unclosed_string: false });
+        assert_eq!(
+            balance(b"(a \"; not a comment (\\\"ok\\\")\" ; ) ignored\n (b))"),
+            Balance {
+                depth: 0,
+                first_negative_line: None,
+                unclosed_string: false
+            }
+        );
         let b = balance(b"(a))");
         assert_eq!(b.first_negative_line, Some(1));
         assert_eq!(b.depth, -1);
@@ -274,13 +327,19 @@ mod tests {
             assert!(check_critical(relative, &baseline).is_empty(), "{relative}");
             for marker in FORBIDDEN {
                 let changed = format!("{baseline}\n; {marker}");
-                assert!(check_critical(relative, &changed).iter().any(|e| e.contains(*marker)));
+                assert!(check_critical(relative, &changed)
+                    .iter()
+                    .any(|e| e.contains(*marker)));
             }
             for form in forms {
                 let changed = baseline.replacen(*form, "ВИЛУЧЕНО", 1);
-                assert!(check_critical(relative, &changed).iter().any(|e| e.contains("missing required entry point")));
+                assert!(check_critical(relative, &changed)
+                    .iter()
+                    .any(|e| e.contains("missing required entry point")));
             }
-            assert!(check_critical(relative, "()").iter().any(|e| e.contains("unexpectedly short")));
+            assert!(check_critical(relative, "()")
+                .iter()
+                .any(|e| e.contains("unexpectedly short")));
         }
     }
 
@@ -290,7 +349,13 @@ mod tests {
         let _ = fs::remove_dir_all(&root);
         fs::create_dir_all(root.join("lib")).unwrap();
         let (_, errors) = check_sources(&root, &["lib".into()]);
-        assert_eq!(errors.iter().filter(|e| e.contains("mandatory machine authority file missing")).count(), 3);
+        assert_eq!(
+            errors
+                .iter()
+                .filter(|e| e.contains("mandatory machine authority file missing"))
+                .count(),
+            3
+        );
         fs::remove_dir_all(&root).unwrap();
     }
 }

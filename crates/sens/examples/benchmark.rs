@@ -119,7 +119,8 @@ fn run_benchmarks() {
         .ok()
         .and_then(|value| value.parse().ok())
         .unwrap_or(1_000);
-    let parser_source = fs::read_to_string("benchmarks/parser.lisp").expect("read parser benchmark");
+    let parser_source =
+        fs::read_to_string("benchmarks/parser.lisp").expect("read parser benchmark");
     let parser_ns = measure(iterations, || {
         black_box(parse(black_box(&parser_source)).expect("parse benchmark"));
     });

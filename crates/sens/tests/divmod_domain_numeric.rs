@@ -41,15 +41,18 @@ fn truncate_executes_named_sens_sign_logic_for_d24() {
         ("(округлити-до-нуля ділене дільник)", "2"),
         ("(округлити-до-нуля (змінити-знак ділене) дільник)", "-2"),
         ("(округлити-до-нуля ділене (змінити-знак дільник))", "-2"),
-        ("(округлити-до-нуля (змінити-знак ділене) (змінити-знак дільник))", "2"),
+        (
+            "(округлити-до-нуля (змінити-знак ділене) (змінити-знак дільник))",
+            "2",
+        ),
         ("(остача-зі-знаком ділене дільник)", "1"),
     ] {
-        let result = eval_program(program, &mut session)
-            .unwrap_or_else(|error| panic!(
-                "test_id=d8-truncate-named layer=SENS input={program} error={error}"
-            ));
+        let result = eval_program(program, &mut session).unwrap_or_else(|error| {
+            panic!("test_id=d8-truncate-named layer=SENS input={program} error={error}")
+        });
         assert_eq!(
-            result.value.to_string(), expected,
+            result.value.to_string(),
+            expected,
             "test_id=d8-truncate-named layer=SENS input={program} expected={expected} actual={}",
             result.value
         );

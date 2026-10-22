@@ -90,12 +90,7 @@ fn assoc_is_reproducible_by_structure_without_lookup() {
         "(x . first)",
     );
 
-    assert_matches_canonical(
-        &mut session,
-        "z",
-        "((x . first) (y . second))",
-        "()",
-    );
+    assert_matches_canonical(&mut session, "z", "((x . first) (y . second))", "()");
 
     // Association-list lookup is left-biased: the first matching pair wins.
     assert_matches_canonical(

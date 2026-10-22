@@ -100,7 +100,10 @@ fn domain_identity_for_legacy_semantic_id(
     }
     let mechanism = generated::NECESSARY_FORM_DISPATCH
         .iter()
-        .find(|row| semantic_registry::exact_identity_for_legacy_registry_slot(row.semantic_id) == Some(legacy))
+        .find(|row| {
+            semantic_registry::exact_identity_for_legacy_registry_slot(row.semantic_id)
+                == Some(legacy)
+        })
         .map(|row| row.mechanism)?;
     canonical_domain_identity(mechanism)
 }
@@ -108,8 +111,7 @@ fn domain_identity_for_legacy_semantic_id(
 pub(crate) fn identity_for_semantic_id(
     semantic_id: LegacyRegistrySlot,
 ) -> Option<NecessaryFormIdentity> {
-    domain_identity_for_legacy_semantic_id(semantic_id)
-        .and_then(identity_for_domain_identity)
+    domain_identity_for_legacy_semantic_id(semantic_id).and_then(identity_for_domain_identity)
 }
 
 /// Resolve an executable list-head symbol through the shared authority
@@ -124,15 +126,14 @@ pub(crate) fn identity_for_symbol(name: &str) -> Option<NecessaryFormIdentity> {
     domain_identity_for_symbol(name).and_then(identity_for_domain_identity)
 }
 
-
 #[cfg(test)]
 mod exact_d4_necessary_form_migration_tests {
     use super::*;
 
     fn d4(bits: u8) -> CoreDomainIdentity {
-        CoreDomainIdentity::D4(
-            CoreD4::from_word(Bit4::new(bits).expect("test D4 coordinate must fit")),
-        )
+        CoreDomainIdentity::D4(CoreD4::from_word(
+            Bit4::new(bits).expect("test D4 coordinate must fit"),
+        ))
     }
 
     #[test]

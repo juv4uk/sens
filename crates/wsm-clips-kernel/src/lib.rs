@@ -52,7 +52,9 @@ impl fmt::Display for ClipsKernelError {
             #[cfg(feature = "native-clips")]
             Self::LibraryLoad(message) => write!(f, "unable to load CLIPS runtime: {message}"),
             #[cfg(feature = "native-clips")]
-            Self::MissingSymbol(message) => write!(f, "CLIPS runtime is missing a required symbol: {message}"),
+            Self::MissingSymbol(message) => {
+                write!(f, "CLIPS runtime is missing a required symbol: {message}")
+            }
             #[cfg(feature = "native-clips")]
             Self::CreateEnvironmentFailed => write!(f, "CLIPS CreateEnvironment returned null"),
             #[cfg(feature = "native-clips")]
@@ -111,12 +113,10 @@ mod native {
     type DestroyEnvironmentFn = unsafe extern "C" fn(*mut Environment) -> bool;
     type BuildFn = unsafe extern "C" fn(*mut Environment, *const c_char) -> u32;
     type EvalFn = unsafe extern "C" fn(*mut Environment, *const c_char, *mut c_void) -> u32;
-    type RouterQueryFn =
-        unsafe extern "C" fn(*mut Environment, *const c_char, *mut c_void) -> bool;
+    type RouterQueryFn = unsafe extern "C" fn(*mut Environment, *const c_char, *mut c_void) -> bool;
     type RouterWriteFn =
         unsafe extern "C" fn(*mut Environment, *const c_char, *const c_char, *mut c_void);
-    type RouterReadFn =
-        unsafe extern "C" fn(*mut Environment, *const c_char, *mut c_void) -> i32;
+    type RouterReadFn = unsafe extern "C" fn(*mut Environment, *const c_char, *mut c_void) -> i32;
     type RouterUnreadFn =
         unsafe extern "C" fn(*mut Environment, *const c_char, i32, *mut c_void) -> i32;
     type RouterExitFn = unsafe extern "C" fn(*mut Environment, i32, *mut c_void);
@@ -199,7 +199,9 @@ mod native {
                     return Err(last_error());
                 }
                 if std::mem::size_of::<T>() != std::mem::size_of::<*mut c_void>() {
-                    return Err("function pointer size does not match dynamic symbol pointer".to_string());
+                    return Err(
+                        "function pointer size does not match dynamic symbol pointer".to_string(),
+                    );
                 }
                 Ok(unsafe { std::mem::transmute_copy::<*mut c_void, T>(&ptr) })
             }
@@ -222,7 +224,9 @@ mod native {
             if ptr.is_null() {
                 "dynamic loader returned no error text".to_string()
             } else {
-                unsafe { CStr::from_ptr(ptr) }.to_string_lossy().into_owned()
+                unsafe { CStr::from_ptr(ptr) }
+                    .to_string_lossy()
+                    .into_owned()
             }
         }
     }
@@ -250,7 +254,9 @@ mod native {
                 wide.push(0);
                 let handle = unsafe { LoadLibraryW(wide.as_ptr()) };
                 if handle.is_null() {
-                    return Err(format!("LoadLibraryW failed with code {}", unsafe { GetLastError() }));
+                    return Err(format!("LoadLibraryW failed with code {}", unsafe {
+                        GetLastError()
+                    }));
                 }
                 Ok(Self { handle })
             }
@@ -258,10 +264,14 @@ mod native {
             pub unsafe fn symbol<T: Copy>(&self, name: &'static [u8]) -> Result<T, String> {
                 let ptr = unsafe { GetProcAddress(self.handle, name.as_ptr()) };
                 if ptr.is_null() {
-                    return Err(format!("GetProcAddress failed with code {}", unsafe { GetLastError() }));
+                    return Err(format!("GetProcAddress failed with code {}", unsafe {
+                        GetLastError()
+                    }));
                 }
                 if std::mem::size_of::<T>() != std::mem::size_of::<*mut c_void>() {
-                    return Err("function pointer size does not match dynamic symbol pointer".to_string());
+                    return Err(
+                        "function pointer size does not match dynamic symbol pointer".to_string(),
+                    );
                 }
                 Ok(unsafe { std::mem::transmute_copy::<*mut c_void, T>(&ptr) })
             }
@@ -380,7 +390,11 @@ mod native {
                 if path
                     .file_name()
                     .and_then(|name| name.to_str())
-                    .is_some_and(|name| names.iter().any(|candidate| candidate.eq_ignore_ascii_case(name)))
+                    .is_some_and(|name| {
+                        names
+                            .iter()
+                            .any(|candidate| candidate.eq_ignore_ascii_case(name))
+                    })
                 {
                     output.push(path);
                 }
@@ -430,7 +444,12 @@ mod native {
         #[cfg(windows)]
         {
             if let Some(local_app_data) = std::env::var_os("LOCALAPPDATA") {
-                roots.push(PathBuf::from(local_app_data).join("sens").join("islands").join("clips"));
+                roots.push(
+                    PathBuf::from(local_app_data)
+                        .join("sens")
+                        .join("islands")
+                        .join("clips"),
+                );
             }
             if let Ok(executable) = std::env::current_exe() {
                 if let Some(parent) = executable.parent() {
@@ -442,7 +461,12 @@ mod native {
         #[cfg(not(windows))]
         {
             if let Some(data_home) = std::env::var_os("XDG_DATA_HOME") {
-                roots.push(PathBuf::from(data_home).join("sens").join("islands").join("clips"));
+                roots.push(
+                    PathBuf::from(data_home)
+                        .join("sens")
+                        .join("islands")
+                        .join("clips"),
+                );
             } else if let Some(home) = std::env::var_os("HOME") {
                 roots.push(
                     PathBuf::from(home)
@@ -573,10 +597,8 @@ impl ClipsEnvironment {
     /// Rust never decodes a CLIPS value or reconstructs its semantics.
     pub fn eval_bytes(&self, expression: &str) -> Result<Vec<u8>, ClipsKernelError> {
         let request = format!("(printout sens-eval-capture {expression})");
-        let request =
-            std::ffi::CString::new(request).map_err(|_| ClipsKernelError::NulInput)?;
-        let router_name =
-            std::ffi::CString::new("sens-eval-capture").expect("static router name");
+        let request = std::ffi::CString::new(request).map_err(|_| ClipsKernelError::NulInput)?;
+        let router_name = std::ffi::CString::new("sens-eval-capture").expect("static router name");
         let mut capture = native::RouterCapture { bytes: Vec::new() };
 
         let installed = unsafe {
@@ -597,11 +619,7 @@ impl ClipsEnvironment {
         }
 
         let code = unsafe {
-            (self.inner.api.eval)(
-                self.inner.raw,
-                request.as_ptr(),
-                std::ptr::null_mut(),
-            )
+            (self.inner.api.eval)(self.inner.raw, request.as_ptr(), std::ptr::null_mut())
         };
         let removed =
             unsafe { (self.inner.api.delete_router)(self.inner.raw, router_name.as_ptr()) };
@@ -656,9 +674,7 @@ pub struct ClipsFact {
 impl Drop for ClipsFact {
     fn drop(&mut self) {
         if self.retained && !self.raw.is_null() {
-            unsafe {
-                (self.environment.api.release_fact)(self.raw)
-            };
+            unsafe { (self.environment.api.release_fact)(self.raw) };
             self.retained = false;
         }
     }
@@ -674,8 +690,14 @@ const SID_ADD: u8 = 0b0000_1100;
 
 fn legacy_abi_add_expression(payload: &str) -> Result<String, ()> {
     let mut parts = payload.split_whitespace();
-    let left = parts.next().and_then(|value| value.parse::<i64>().ok()).ok_or(())?;
-    let right = parts.next().and_then(|value| value.parse::<i64>().ok()).ok_or(())?;
+    let left = parts
+        .next()
+        .and_then(|value| value.parse::<i64>().ok())
+        .ok_or(())?;
+    let right = parts
+        .next()
+        .and_then(|value| value.parse::<i64>().ok())
+        .ok_or(())?;
     if parts.next().is_some() {
         return Err(());
     }
@@ -702,7 +724,12 @@ impl ClipsExecutionResult {
         facts_before: std::ffi::c_ulong,
         facts_after: std::ffi::c_ulong,
     ) -> Self {
-        Self { semantic_id, fired, facts_before, facts_after }
+        Self {
+            semantic_id,
+            fired,
+            facts_before,
+            facts_after,
+        }
     }
 }
 
@@ -832,9 +859,13 @@ fn copy_response(bytes: &[u8], response: WsmMutableByteSpan, written: *mut usize
     if written.is_null() {
         return WsmStatus::InvalidArgument;
     }
-    unsafe { *written = 0; }
+    unsafe {
+        *written = 0;
+    }
     if response.len < bytes.len() {
-        unsafe { *written = bytes.len(); }
+        unsafe {
+            *written = bytes.len();
+        }
         return WsmStatus::BufferTooSmall;
     }
     if !bytes.is_empty() && response.ptr.is_null() {
@@ -845,7 +876,9 @@ fn copy_response(bytes: &[u8], response: WsmMutableByteSpan, written: *mut usize
             std::ptr::copy_nonoverlapping(bytes.as_ptr(), response.ptr, bytes.len());
         }
     }
-    unsafe { *written = bytes.len(); }
+    unsafe {
+        *written = bytes.len();
+    }
     WsmStatus::Ok
 }
 
@@ -858,7 +891,9 @@ unsafe extern "C" fn clips_exchange(
     if written.is_null() {
         return WsmStatus::InvalidArgument;
     }
-    unsafe { *written = 0; }
+    unsafe {
+        *written = 0;
+    }
 
     let Some(context) = (unsafe { clips_context_mut(context) }) else {
         return WsmStatus::InvalidArgument;
@@ -934,8 +969,6 @@ unsafe extern "C" fn clips_snapshot(
     copy_response(&bytes, response, written)
 }
 
-
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -971,10 +1004,8 @@ mod tests {
 
     #[test]
     fn c_abi_adapter_declares_clips_without_semantic_mapping() {
-        let adapter = ClipsAbiAdapter::new(
-            "(defrule seen (signal) => (assert (observed)))",
-            "(signal)",
-        );
+        let adapter =
+            ClipsAbiAdapter::new("(defrule seen (signal) => (assert (observed)))", "(signal)");
         let vtable = adapter.vtable();
         assert_eq!(vtable.abi_version, WSM_KERNEL_ABI_VERSION);
         assert_eq!(vtable.kernel, WsmKernelKind::Clips);
@@ -983,5 +1014,4 @@ mod tests {
         assert_eq!(adapter.last_fired(), None);
         assert_eq!(adapter.last_eval_output(), None);
     }
-
 }

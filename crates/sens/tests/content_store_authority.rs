@@ -6,19 +6,44 @@ fn store_session() -> Session {
         ("lib/core.lisp", include_str!("../../../lib/core.lisp")),
         ("lib/unify.lisp", include_str!("../../../lib/unify.lisp")),
         ("lib/reason.lisp", include_str!("../../../lib/reason.lisp")),
-        ("lib/forward.lisp", include_str!("../../../lib/forward.lisp")),
-        ("lib/knowledge.lisp", include_str!("../../../lib/knowledge.lisp")),
-        ("lib/persistent-map.lisp", include_str!("../../../lib/persistent-map.lisp")),
+        (
+            "lib/forward.lisp",
+            include_str!("../../../lib/forward.lisp"),
+        ),
+        (
+            "lib/knowledge.lisp",
+            include_str!("../../../lib/knowledge.lisp"),
+        ),
+        (
+            "lib/persistent-map.lisp",
+            include_str!("../../../lib/persistent-map.lisp"),
+        ),
         ("lib/world.lisp", include_str!("../../../lib/world.lisp")),
-        ("lib/content-store.lisp", include_str!("../../../lib/content-store.lisp")),
-        ("lib/lisp-fs.lisp", include_str!("../../../lib/lisp-fs.lisp")),
+        (
+            "lib/content-store.lisp",
+            include_str!("../../../lib/content-store.lisp"),
+        ),
+        (
+            "lib/lisp-fs.lisp",
+            include_str!("../../../lib/lisp-fs.lisp"),
+        ),
     ] {
         if path == "lib/core.lisp" {
             let core_forms = sens::parse_mixed_exact_domain(source)
                 .expect("current Core source must parse through SENS");
             sens::eval_parsed_expressions(&core_forms, &mut session)
                 .expect("current Core must evaluate through SENS");
-        } else if matches!(path, "lib/unify.lisp" | "lib/reason.lisp" | "lib/forward.lisp" | "lib/knowledge.lisp" | "lib/world.lisp" | "lib/persistent-map.lisp" | "lib/content-store.lisp" | "lib/lisp-fs.lisp") {
+        } else if matches!(
+            path,
+            "lib/unify.lisp"
+                | "lib/reason.lisp"
+                | "lib/forward.lisp"
+                | "lib/knowledge.lisp"
+                | "lib/world.lisp"
+                | "lib/persistent-map.lisp"
+                | "lib/content-store.lisp"
+                | "lib/lisp-fs.lisp"
+        ) {
             sens::eval_pinned_reasoning_source(path, source, &mut session)
                 .expect("pinned reasoning dependency must load");
         } else {
@@ -86,8 +111,7 @@ fn content_store_mechanism_keeps_deterministic_images_and_distinct_history_entri
     let history = observe(&mut session, history_cardinality);
     eprintln!("CONTENT-STORE-PROBE: history_cardinality END => {history}");
     assert_eq!(
-        history,
-        "2",
+        history, "2",
         "equal current projections with distinct histories must occupy two store entries"
     );
 }

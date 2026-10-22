@@ -2,8 +2,8 @@
 //! Post-ratification executable witness for D5 Contract 11.3.
 
 use sens::{
-    eval_parsed_expressions, eval_program, load_core_library, parse, Bit4, CoreD4,
-    DomainIdentity, Expr, ExprKind, Session, Span,
+    eval_parsed_expressions, eval_program, load_core_library, parse, Bit4, CoreD4, DomainIdentity,
+    Expr, ExprKind, Session, Span,
 };
 
 fn run(source: &str) -> Result<String, String> {
@@ -47,7 +47,10 @@ fn assert_same(a: &str, b: &str) {
 
 fn assert_err(source: &str) {
     let result = run(source);
-    assert!(result.is_err(), "{source} unexpectedly succeeded as {result:?}");
+    assert!(
+        result.is_err(),
+        "{source} unexpectedly succeeded as {result:?}"
+    );
 }
 
 #[test]
@@ -62,7 +65,7 @@ fn reverse_is_closed_reverse_onto() {
 
 #[test]
 fn reverse_onto_is_append_of_reverse() {
-    for (x,y) in [
+    for (x, y) in [
         ("()", "()"),
         ("(a)", "(z)"),
         ("(a b)", "(c d)"),
@@ -78,7 +81,7 @@ fn reverse_onto_is_append_of_reverse() {
 
 #[test]
 fn append_is_generated_by_reverse_and_reverse_onto() {
-    for (x,y) in [
+    for (x, y) in [
         ("()", "()"),
         ("()", "(a b)"),
         ("(a)", "()"),
@@ -137,6 +140,9 @@ fn print_examples() {
         "(reverse-onto (quote (a b)) (quote (c d)))",
         "(reverse-onto (quote (a b)) (quote (c . d)))",
     ] {
-        println!("REVERSE-ONTO-LAW source={source:?} result={:?}", run(source));
+        println!(
+            "REVERSE-ONTO-LAW source={source:?} result={:?}",
+            run(source)
+        );
     }
 }

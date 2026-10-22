@@ -26,9 +26,8 @@ fn meta_eval(expr: &str) -> String {
 
 fn meta_eval_with_hostile_binding(expr: &str, name: &str) -> String {
     let mut session = session_with_meta();
-    let source = format!(
-        "(обчислити-мета-вираз (quote {expr}) (список (сполучити (як-є {name}) 99)))"
-    );
+    let source =
+        format!("(обчислити-мета-вираз (quote {expr}) (список (сполучити (як-є {name}) 99)))");
     eval_program(&source, &mut session)
         .unwrap_or_else(|error| panic!("hostile MetaEval environment failed for {expr}: {error}"))
         .value
@@ -37,9 +36,7 @@ fn meta_eval_with_hostile_binding(expr: &str, name: &str) -> String {
 
 fn meta_program(program: &str) -> String {
     let mut session = session_with_meta();
-    let source = format!(
-        "(решта (обчислити-послідовність-форм (quote ({program})) (quote ())))"
-    );
+    let source = format!("(решта (обчислити-послідовність-форм (quote ({program})) (quote ())))");
     eval_program(&source, &mut session)
         .unwrap_or_else(|error| panic!("MetaEval program failed for {program}: {error}"))
         .value
@@ -48,7 +45,14 @@ fn meta_program(program: &str) -> String {
 
 #[test]
 fn native_and_meta_reject_canonical_lambda_binders() {
-    for name in ["атом?", "перше", "за-умовою", "функція", "визначити", "як-є"] {
+    for name in [
+        "атом?",
+        "перше",
+        "за-умовою",
+        "функція",
+        "визначити",
+        "як-є",
+    ] {
         let source = format!("(функція ({name}) {name})");
         let error = eval_program(&source, &mut native_session())
             .expect_err("native evaluator must reject a canonical binder");

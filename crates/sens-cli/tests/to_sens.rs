@@ -35,7 +35,10 @@ fn check_reports_without_writing_then_apply_preserves_formatting() {
         .output()
         .expect("run check");
     assert_eq!(check.status.code(), Some(1));
-    assert_eq!(std::fs::read_to_string(&path).expect("read unchanged"), source);
+    assert_eq!(
+        std::fs::read_to_string(&path).expect("read unchanged"),
+        source
+    );
     let check_out = String::from_utf8_lossy(&check.stdout);
     assert!(check_out.contains("convertible=4"), "{check_out}");
 
@@ -56,8 +59,7 @@ fn check_reports_without_writing_then_apply_preserves_formatting() {
 
 #[test]
 fn derived_functions_and_macros_keep_runtime_result_after_rewrite() {
-    let source =
-        "(let* ((xs (list 1 2 3)) (n (length xs))) (and (member? 2 xs) (or () (+ n 39))))";
+    let source = "(let* ((xs (list 1 2 3)) (n (length xs))) (and (member? 2 xs) (or () (+ n 39))))";
     let path = temp_file("derived-parity", source);
 
     let original = eval_core(source);
@@ -82,8 +84,7 @@ fn derived_functions_and_macros_keep_runtime_result_after_rewrite() {
 
 #[test]
 fn exact_defmacro_rewrite_preserves_unevaluated_argument_semantics() {
-    let source =
-        "(defmacro keep-first (x y) x)\n(keep-first 7 (never-defined-function))\n";
+    let source = "(defmacro keep-first (x y) x)\n(keep-first 7 (never-defined-function))\n";
     let path = temp_file("defmacro-exact", source);
 
     let original = eval_core(source);
@@ -105,8 +106,7 @@ fn exact_defmacro_rewrite_preserves_unevaluated_argument_semantics() {
 #[test]
 fn defmacro_target_shadowing_preserves_surface_dispatch_after_migration() {
     // The macro returns data: its expansion is (quote shadowed).
-    let source =
-        "(defmacro list (x) (quote (quote shadowed)))\n(list (never-defined-function))\n";
+    let source = "(defmacro list (x) (quote (quote shadowed)))\n(list (never-defined-function))\n";
     let path = temp_file("defmacro-shadow", source);
 
     let original = eval_core(source);
@@ -144,7 +144,6 @@ fn check_is_clean_after_all_currently_convertible_heads_are_migrated() {
     assert!(stdout.contains("convertible=0"), "{stdout}");
 }
 
-
 #[test]
 fn current_core_library_is_already_fully_migrated() {
     // M1 (#1447) and the --language pass (#1520) moved every call head of the
@@ -172,11 +171,9 @@ fn current_core_library_is_already_fully_migrated() {
     }
 }
 
-
 #[test]
 fn top_level_surface_redefinition_has_identical_result_after_migration() {
-    let source =
-        "(define list (lambda args (quote shadowed)))\n(list 1 2)\n";
+    let source = "(define list (lambda args (quote shadowed)))\n(list 1 2)\n";
     let path = temp_file("top-level-shadow", source);
 
     let mut baseline = Session::default();

@@ -31,7 +31,10 @@
 //!   one of those SA spellings (viyoga/guṇana/haraṇa/hīna?/adhika?/sama?)
 //!   against their UK/symbolic peers.
 
-use sens::{eval_parsed_expressions, eval_program, load_core_library, lower_program, parse_mixed_exact_domain, Session};
+use sens::{
+    eval_parsed_expressions, eval_program, load_core_library, lower_program,
+    parse_mixed_exact_domain, Session,
+};
 
 fn load_surface_prerequisites(session: &mut Session) {
     for source in [

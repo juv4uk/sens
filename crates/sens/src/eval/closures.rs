@@ -5,7 +5,9 @@
 use super::{canon, capabilities, evaluate, necessary_forms, special_forms::quoted, EvalStep};
 use crate::canonical_reader::text7_binding_key;
 use crate::semantic_registry;
-use crate::{Closure, Environment, ErrorKind, Expr, ExprKind, LanguageError, CoreDomainIdentity, Span, Value};
+use crate::{
+    Closure, CoreDomainIdentity, Environment, ErrorKind, Expr, ExprKind, LanguageError, Span, Value,
+};
 use std::{
     collections::HashSet,
     rc::Rc,
@@ -195,7 +197,9 @@ pub(super) fn create_lambda(
     let (parameters, rest) = parse_lambda_list(&arguments[0])?;
     let slot_names: Rc<[Rc<str>]> = parameters.iter().chain(rest.iter()).cloned().collect();
     let body: Rc<[Expr]> = arguments[1..].into();
-    let pure = body.iter().all(|expression| is_pure(expression, &slot_names, environment));
+    let pure = body
+        .iter()
+        .all(|expression| is_pure(expression, &slot_names, environment));
     let resolved = resolve_body(&body, &slot_names, pure, environment);
     Ok(Value::Closure(Rc::new(Closure {
         parameters,
@@ -284,7 +288,10 @@ fn domain_head(identity: CoreDomainIdentity, environment: &Environment) -> Head 
         _ => Head::Call,
     };
     if matches!(routed, Head::Call)
-        && matches!(environment.domain_code_slot(identity), Some(Value::Macro(_)))
+        && matches!(
+            environment.domain_code_slot(identity),
+            Some(Value::Macro(_))
+        )
     {
         Head::Opaque
     } else {
@@ -371,7 +378,7 @@ fn is_pure(expression: &Expr, own: &[Rc<str>], environment: &Environment) -> boo
         ExprKind::Call(sid, arguments) => (sid_head(*sid, environment), &arguments[..]),
         ExprKind::DomainCall(identity, arguments) => {
             (domain_head(*identity, environment), &arguments[..])
-        },
+        }
         _ => return true,
     };
     match head {
@@ -408,16 +415,17 @@ fn resolve_body(
 fn local_for(name: &Rc<str>, scopes: &[Rc<[Rc<str>]>]) -> Option<ExprKind> {
     // Exact-domain immutable heads are never captured as lambda locals.
     // Keep the historical byte route only as a fallback for unmigrated heads.
-    if canon::is_reserved_surface(name)
-        || necessary_forms::identity_for_symbol(name).is_some()
-    {
+    if canon::is_reserved_surface(name) || necessary_forms::identity_for_symbol(name).is_some() {
         return None;
     }
     scopes.iter().enumerate().find_map(|(depth, names)| {
-        names.iter().position(|slot| **slot == **name).map(|index| ExprKind::Local {
-            depth: depth as u32,
-            index: index as u32,
-        })
+        names
+            .iter()
+            .position(|slot| **slot == **name)
+            .map(|index| ExprKind::Local {
+                depth: depth as u32,
+                index: index as u32,
+            })
     })
 }
 
@@ -428,7 +436,10 @@ fn resolve(
     changed: &mut bool,
 ) -> Expr {
     let resolve_all = |items: &[Expr], changed: &mut bool| -> Rc<[Expr]> {
-        items.iter().map(|item| resolve(item, scopes, environment, changed)).collect()
+        items
+            .iter()
+            .map(|item| resolve(item, scopes, environment, changed))
+            .collect()
     };
     let kind = match &expression.kind {
         ExprKind::Symbol(name) => match local_for(name, scopes) {
@@ -440,7 +451,9 @@ fn resolve(
         },
         ExprKind::List(items) if !items.is_empty() => {
             match classify_head(&items[0], &scopes[0], environment) {
-                Head::Quote | Head::Lambda | Head::Define | Head::Opaque => return expression.clone(),
+                Head::Quote | Head::Lambda | Head::Define | Head::Opaque => {
+                    return expression.clone()
+                }
                 Head::Cond => {
                     let mut out = Vec::with_capacity(items.len());
                     out.push(items[0].clone());
@@ -454,12 +467,16 @@ fn resolve(
                     let head = match &items[0].kind {
                         ExprKind::Symbol(_) | ExprKind::Sid(_) | ExprKind::DomainIdentity(_) => {
                             items[0].clone()
-                        },
+                        }
                         _ => resolve(&items[0], scopes, environment, changed),
                     };
                     let mut out = Vec::with_capacity(items.len());
                     out.push(head);
-                    out.extend(items[1..].iter().map(|item| resolve(item, scopes, environment, changed)));
+                    out.extend(
+                        items[1..]
+                            .iter()
+                            .map(|item| resolve(item, scopes, environment, changed)),
+                    );
                     ExprKind::List(out.into())
                 }
             }
@@ -668,7 +685,9 @@ pub(super) fn apply_values(
     )?;
     let mut slots: Vec<Value> = arguments[..closure.parameters.len()].to_vec();
     if closure.rest.is_some() {
-        slots.push(Value::list(arguments[closure.parameters.len()..].iter().cloned()));
+        slots.push(Value::list(
+            arguments[closure.parameters.len()..].iter().cloned(),
+        ));
     }
     let local_environment = call_frame(&closure, slots);
     let mut result = Value::Nil;
@@ -747,11 +766,13 @@ pub(super) fn apply_macro(
     // tokens or a path-specific reader.
     let mut exact_expansion =
         super::lower::lower_exact_domain_program(std::slice::from_ref(&expanded_expr));
-    let expanded_expr = exact_expansion.pop().ok_or_else(|| LanguageError::new(
-        ErrorKind::InvalidForm,
-        "macro expansion produced no expression",
-        span,
-    ))?;
+    let expanded_expr = exact_expansion.pop().ok_or_else(|| {
+        LanguageError::new(
+            ErrorKind::InvalidForm,
+            "macro expansion produced no expression",
+            span,
+        )
+    })?;
 
     Ok(EvalStep::TailCall {
         expression: expanded_expr,
@@ -887,9 +908,7 @@ mod exact_d4_eval_head_migration_tests {
         let env = Environment::root();
         assert!(matches!(domain_head(d4(0b0001), &env), Head::Opaque));
         // Equal numeric payload in a different domain never becomes D4 EVAL.
-        let d3 = CoreDomainIdentity::D3(crate::Bija3::from_word(
-            crate::Bit3::new(0b001).unwrap(),
-        ));
+        let d3 = CoreDomainIdentity::D3(crate::Bija3::from_word(crate::Bit3::new(0b001).unwrap()));
         assert!(matches!(domain_head(d3, &env), Head::Quote));
         // D4:0010 and D4:0011 are ratified syntax mechanisms, not
         // ordinary calls. The historical assertion expected the opposite.
@@ -905,7 +924,15 @@ mod exact_d4_eval_head_migration_tests {
         assert_eq!(identity.width(), 4);
         assert_eq!(identity.packed_bits(), 0b0001);
         assert!(matches!(sid_head(identity, &env), Head::Opaque));
-        assert!(!matches!(sid_head(crate::CoreDomainIdentity::D8(crate::CoreD8::from_word(crate::Bit8::new(0b10101000).expect("legacy W8 payload"))), &env), Head::Opaque));
+        assert!(!matches!(
+            sid_head(
+                crate::CoreDomainIdentity::D8(crate::CoreD8::from_word(
+                    crate::Bit8::new(0b10101000).expect("legacy W8 payload")
+                )),
+                &env
+            ),
+            Head::Opaque
+        ));
     }
 
     #[test]
@@ -945,7 +972,10 @@ mod exact_domain_head_classification_tests {
                 | (Head::Define, "define") => true,
                 _ => false,
             };
-            assert!(valid, "surface {source} must use ratified domain head policy");
+            assert!(
+                valid,
+                "surface {source} must use ratified domain head policy"
+            );
         }
     }
 }

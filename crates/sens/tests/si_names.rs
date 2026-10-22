@@ -47,12 +47,16 @@ fn admitted_si_derived_faraday_is_computed_in_actual_sens() {
         .expect("визначальні константи SI мають завантажитися");
     let src = include_str!("../../../lib/si-derived.lisp");
     let start = src.find("(визначити сі:стала-фарадея").expect("Фарадей");
-    let end = src.find("(визначити сі:молярна-газова-стала").expect("газова стала");
+    let end = src
+        .find("(визначити сі:молярна-газова-стала")
+        .expect("газова стала");
     eval_program(&src[start..end], &mut session)
         .expect("закон Фарадея виконується у справжньому SENS");
     assert_eq!(
         eval_program("сі:стала-фарадея", &mut session)
-            .expect("обчислена константа існує").value.to_string(),
+            .expect("обчислена константа існує")
+            .value
+            .to_string(),
         "120606665154137523/1250000000000"
     );
 }
@@ -63,25 +67,32 @@ fn si_double_charge_is_real_sens_and_josephson_requires_unadmitted_domain_bridge
     eval_program(include_str!("../../../lib/si.lisp"), &mut session)
         .expect("визначальні сталі SI завантажуються");
     let src = include_str!("../../../lib/si-derived.lisp");
-    let start = src.find("(визначити сі:подвоєний-заряд").expect("подвоєний заряд");
-    let end = src.find("(визначити сі:стала-джозефсона").expect("Джозефсон");
+    let start = src
+        .find("(визначити сі:подвоєний-заряд")
+        .expect("подвоєний заряд");
+    let end = src
+        .find("(визначити сі:стала-джозефсона")
+        .expect("Джозефсон");
     eval_program(&src[start..end], &mut session)
         .expect("точне подвоєння виконується самою мовою SENS");
 
     let actual = eval_program("сі:подвоєний-заряд", &mut session)
-        .expect("подвоєний заряд доступний").value.to_string();
+        .expect("подвоєний заряд доступний")
+        .value
+        .to_string();
     let independent = eval_program(
         "(додати сі:елементарний-заряд сі:елементарний-заряд)",
         &mut session,
-    ).expect("справжня арифметика D5").value.to_string();
+    )
+    .expect("справжня арифметика D5")
+    .value
+    .to_string();
     assert_eq!(actual, independent);
 
     // Це реальна негативна семантична перевірка, НЕ ігнорування RED:
     // власник ще не ратифікував Dn->D(2n) перехід для змішаних операндів.
-    let err = eval_program(
-        "(частка сі:подвоєний-заряд сі:стала-планка)",
-        &mut session,
-    ).expect_err("міждоменне ділення має залишатися явною відмовою");
+    let err = eval_program("(частка сі:подвоєний-заряд сі:стала-планка)", &mut session)
+        .expect_err("міждоменне ділення має залишатися явною відмовою");
     assert_eq!(err.kind, sens::ErrorKind::Type);
     assert!(err.message.contains("same-Dn"), "{err}");
 }

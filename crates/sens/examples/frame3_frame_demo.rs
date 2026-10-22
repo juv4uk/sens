@@ -1,10 +1,10 @@
 //! Демонстрація: одна проста програма -> транспортні трити -> байти кожної рамки.
 //! Показує саме те, як Т5 має роздільник 2 між словами, а Рамка-3 (F3) його прибирає.
+use sens::frame3_domain::{decode as decode_v3, encode as encode_v3, Word};
+use sens::universal_frame3::{decode, decode_v2, encode, encode_v2};
 use sens::{
     decode_ternary_words, encode_ternary_words, parse_binary_source_words, BinarySourceWord,
 };
-use sens::universal_frame3::{decode, decode_v2, encode, encode_v2};
-use sens::frame3_domain::{encode as encode_v3, decode as decode_v3, Word};
 
 #[path = "../../../research/framed3/rust_codec/senc.rs"]
 mod senc;
@@ -42,11 +42,19 @@ fn f3_trits(words: &[String]) -> Vec<u8> {
 }
 
 fn show_trits(trits: &[u8]) -> String {
-    trits.iter().map(|t| t.to_string()).collect::<Vec<_>>().join(" ")
+    trits
+        .iter()
+        .map(|t| t.to_string())
+        .collect::<Vec<_>>()
+        .join(" ")
 }
 
 fn hex(bytes: &[u8]) -> String {
-    bytes.iter().map(|b| format!("{b:02x}")).collect::<Vec<_>>().join(" ")
+    bytes
+        .iter()
+        .map(|b| format!("{b:02x}"))
+        .collect::<Vec<_>>()
+        .join(" ")
 }
 
 fn demo(name: &str, source: &str) {
@@ -60,7 +68,10 @@ fn demo(name: &str, source: &str) {
         .map(|w| {
             let packed = w.packed_bits();
             let width = w.width();
-            (0..width).rev().map(|i| if (packed >> i) & 1 == 1 { '1' } else { '0' }).collect()
+            (0..width)
+                .rev()
+                .map(|i| if (packed >> i) & 1 == 1 { '1' } else { '0' })
+                .collect()
         })
         .collect();
 
@@ -82,8 +93,16 @@ fn demo(name: &str, source: &str) {
 
     println!("=== {name} ===");
     println!("  слова        : {}", strings.join(" "));
-    println!("  T5  трити    : {}  ({} трит)", show_trits(&t5_trits(&strings)), t5_trits(&strings).len());
-    println!("  F3  трити    : {}  ({} трит)", show_trits(&f3_trits(&strings)), f3_trits(&strings).len());
+    println!(
+        "  T5  трити    : {}  ({} трит)",
+        show_trits(&t5_trits(&strings)),
+        t5_trits(&strings).len()
+    );
+    println!(
+        "  F3  трити    : {}  ({} трит)",
+        show_trits(&f3_trits(&strings)),
+        f3_trits(&strings).len()
+    );
     println!("  T5  байти    : {} ({} Б)", hex(&t5), t5.len());
     println!("  S3/v1 байти   : {} ({} Б)", hex(&v1), v1.len());
     println!("  S3/v2 байти   : {} ({} Б)", hex(&v2), v2.len());

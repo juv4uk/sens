@@ -1,23 +1,22 @@
 use std::path::Path;
 
 fn repo_root() -> std::path::PathBuf {
-    Path::new(env!("CARGO_MANIFEST_DIR"))
-        .join("../..")
+    Path::new(env!("CARGO_MANIFEST_DIR")).join("../..")
 }
 
 #[test]
 fn legacy_i5_6400_profile_is_provenance_not_current_authority() {
     let root = repo_root();
     let profile_path = root.join("lib/machine/intel-core-i5-6400.lisp");
-    let profile = std::fs::read_to_string(&profile_path)
-        .unwrap_or_else(|error| panic!("missing i5-6400 compatibility profile at {profile_path:?}: {error}"));
+    let profile = std::fs::read_to_string(&profile_path).unwrap_or_else(|error| {
+        panic!("missing i5-6400 compatibility profile at {profile_path:?}: {error}")
+    });
 
     sens::parse(&profile).expect("legacy i5-6400 profile must remain valid sens data");
 
     assert!(profile.contains("Legacy Intel Core i5-6400 / Skylake SID8 compatibility projection."));
     assert!(profile.contains("NOT current semantic authority"));
     assert!(profile.contains("lib/machine/profile/current-domain-x86-64.lisp"));
-
 }
 
 #[test]
@@ -30,17 +29,17 @@ fn current_i5_6400_profile_uses_width_safe_domain_keys_for_migrated_cpu_slice() 
 
     for (width, packed_bits, expected_machine_path) in [
         (5, 8, "CMP+SETE+MOVZX"), // D5 ZEROP
-        (5, 10, "ADD"),       // D5 PLUS
-        (5, 11, "SUB"),       // D5 DIFFERENCE
-        (5, 22, "IMUL"),      // D5 TIMES
-        (5, 23, "CQO+IDIV"),  // D5 QUOTIENT
-        (5, 26, "CMP+SETL"),  // D5 LESSP
-        (5, 27, "CMP+SETG"),  // D5 GREATERP
-        (6, 14, "ADD"),        // D6 ADD1
-        (6, 15, "SUB"),        // D6 SUB1
-        (3, 5, "CMP/SETE"),   // D3 EQ
-        (3, 6, "CMP+Jcc"),    // D3 COND
-        (3, 7, "STORE-pair"), // D3 CONS
+        (5, 10, "ADD"),           // D5 PLUS
+        (5, 11, "SUB"),           // D5 DIFFERENCE
+        (5, 22, "IMUL"),          // D5 TIMES
+        (5, 23, "CQO+IDIV"),      // D5 QUOTIENT
+        (5, 26, "CMP+SETL"),      // D5 LESSP
+        (5, 27, "CMP+SETG"),      // D5 GREATERP
+        (6, 14, "ADD"),           // D6 ADD1
+        (6, 15, "SUB"),           // D6 SUB1
+        (3, 5, "CMP/SETE"),       // D3 EQ
+        (3, 6, "CMP+Jcc"),        // D3 COND
+        (3, 7, "STORE-pair"),     // D3 CONS
         (3, 4, "LOAD-pair-head"), // D3 CAR
         (3, 3, "LOAD-pair-tail"), // D3 CDR
     ] {
@@ -62,7 +61,10 @@ fn current_i5_6400_profile_uses_width_safe_domain_keys_for_migrated_cpu_slice() 
     for packed_bits in [8, 10, 11] {
         let row_prefix = format!("(4 {packed_bits} ");
         assert!(
-            !current.lines().map(str::trim_start).any(|line| line.starts_with(&row_prefix)),
+            !current
+                .lines()
+                .map(str::trim_start)
+                .any(|line| line.starts_with(&row_prefix)),
             "D4 packed payload {packed_bits} must not inherit a D5 machine row"
         );
     }
@@ -71,7 +73,10 @@ fn current_i5_6400_profile_uses_width_safe_domain_keys_for_migrated_cpu_slice() 
     for packed_bits in [14, 15] {
         let row_prefix = format!("(5 {packed_bits} ");
         assert!(
-            !current.lines().map(str::trim_start).any(|line| line.starts_with(&row_prefix)),
+            !current
+                .lines()
+                .map(str::trim_start)
+                .any(|line| line.starts_with(&row_prefix)),
             "D5 packed payload {packed_bits} must not inherit a D6 machine row"
         );
     }

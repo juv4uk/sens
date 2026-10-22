@@ -157,8 +157,8 @@ impl DomainCoordinate {
         // Generated D3..D7 bitmap positions follow exact widths (index=width-3).
         // A mismatch must fail closed rather than reinterpret another domain.
         // This removes the per-lookup linear scan over all bitmap descriptors.
-        let mask = crate::domain_owner_generated::DOMAIN_OWNER_BITMAPS
-            .get(usize::from(self.width - 3))?;
+        let mask =
+            crate::domain_owner_generated::DOMAIN_OWNER_BITMAPS.get(usize::from(self.width - 3))?;
         if mask.width != self.width {
             return None;
         }
@@ -198,7 +198,10 @@ mod tests {
         assert_eq!(DomainCoordinate::з_видимих_бітів("0010"), Some(d4));
         assert_eq!(DomainCoordinate::з_видимих_бітів("00010"), Some(d5));
         assert_eq!(DomainCoordinate::з_видимих_бітів("2"), None);
-        assert_eq!(DomainCoordinate::з_видимих_бітів("10"), DomainCoordinate::new(2, 0b10));
+        assert_eq!(
+            DomainCoordinate::з_видимих_бітів("10"),
+            DomainCoordinate::new(2, 0b10)
+        );
     }
 
     /// Механічна перевірка прямого lookup на межах бітмап.
@@ -247,19 +250,19 @@ mod tests {
             assert_eq!(coordinate.bits(), bits);
             let admission = coordinate.owner_residency().expect("D7 has owner rows");
             assert_eq!(
-                admission,
-                true,
+                admission, true,
                 "every exact W7 keyboard coordinate is ratified data"
             );
             admitted += usize::from(admission);
-            let typed = crate::DomainIdentity::from_source_word(
-                crate::BinarySourceWord::W7(
-                    crate::Bit7::new(bits as u8).expect("seven-bit word"),
-                ),
-            );
+            let typed = crate::DomainIdentity::from_source_word(crate::BinarySourceWord::W7(
+                crate::Bit7::new(bits as u8).expect("seven-bit word"),
+            ));
             assert_eq!(typed.width(), 7);
             assert_eq!(typed.packed_bits(), bits);
-            assert!(typed.core_operation().is_none(), "D7 residency is not callability");
+            assert!(
+                typed.core_operation().is_none(),
+                "D7 residency is not callability"
+            );
         }
         assert_eq!(admitted, 128);
         // Equal payload in another domain never inherits the D7 identity.
@@ -269,12 +272,16 @@ mod tests {
             "same payload in D6 and D7 is not the same coordinate"
         );
         assert_eq!(
-            DomainCoordinate::new(8, 0b0100001).unwrap().owner_residency(),
+            DomainCoordinate::new(8, 0b0100001)
+                .unwrap()
+                .owner_residency(),
             Some(true),
             "D8 is separately owner-ratified, not inherited from D7"
         );
         assert_eq!(
-            DomainCoordinate::new(10, 0b0100001).unwrap().owner_residency(),
+            DomainCoordinate::new(10, 0b0100001)
+                .unwrap()
+                .owner_residency(),
             Some(true)
         );
     }
@@ -301,9 +308,15 @@ mod tests {
     fn d10_stays_exactly_ten_bits_with_no_callable_projection() {
         assert_eq!(DomainCoordinate::new(10, 1023).unwrap().bits(), 1023);
         assert_eq!(DomainCoordinate::new(10, 1024), None);
-        assert_ne!(DomainCoordinate::new(9, 511), DomainCoordinate::new(10, 511));
+        assert_ne!(
+            DomainCoordinate::new(9, 511),
+            DomainCoordinate::new(10, 511)
+        );
         for bits in 0..1024 {
-            assert_eq!(DomainCoordinate::new(10, bits).unwrap().owner_residency(), Some(true));
+            assert_eq!(
+                DomainCoordinate::new(10, bits).unwrap().owner_residency(),
+                Some(true)
+            );
         }
         assert_eq!(DomainCoordinate::new(0, 0), None);
         assert_eq!(DomainCoordinate::new(11, 0), None);
@@ -368,9 +381,10 @@ mod tests {
         let еталонні_байти: Vec<u8> = очікувані_біти
             .chunks(8)
             .map(|частина| {
-                частина.iter().enumerate().fold(0u8, |acc, (індекс, bit)| {
-                    acc | (bit << (7 - індекс))
-                })
+                частина
+                    .iter()
+                    .enumerate()
+                    .fold(0u8, |acc, (індекс, bit)| acc | (bit << (7 - індекс)))
             })
             .collect();
         assert_eq!(фактичний.bytes(), еталонні_байти.as_slice());
@@ -378,18 +392,19 @@ mod tests {
         let розібрані = crate::parse_domain_ladder_source_words(&джерело)
             .expect("усі точні слова повинні розбиратися");
         assert_eq!(розібрані.len(), кількість);
-        for ((зміщення, очікувана), токен) in адреси.into_iter().zip(розібрані) {
+        for ((зміщення, очікувана), токен) in адреси.into_iter().zip(розібрані)
+        {
             assert_eq!(токен.coordinate, очікувана);
             assert_eq!(
                 фактичний.read_coordinate(зміщення, очікувана.width()),
                 Some(очікувана),
-                "transport D{} at {зміщення}", очікувана.width()
+                "transport D{} at {зміщення}",
+                очікувана.width()
             );
         }
         assert!(
-            crate::PackedBitstream::from_parts(
-                фактичний.bytes().to_vec(), фактичний.bit_len()
-            ) == Some(фактичний),
+            crate::PackedBitstream::from_parts(фактичний.bytes().to_vec(), фактичний.bit_len())
+                == Some(фактичний),
             "мінімальне фізичне пакування повинно бути канонічним"
         );
     }
@@ -397,7 +412,10 @@ mod tests {
     #[test]
     fn некоректна_бітність_відхиляється_без_вгадування_домену() {
         for слово in ["", "2", "01x", "01 1", "10101010101", "０", "①", "0\\n"] {
-            assert!(DomainCoordinate::з_видимих_бітів(слово).is_none(), "{слово:?}");
+            assert!(
+                DomainCoordinate::з_видимих_бітів(слово).is_none(),
+                "{слово:?}"
+            );
         }
         for ширина in 1u8..=10 {
             assert_eq!(
@@ -426,8 +444,14 @@ mod tests {
             let coordinate = DomainCoordinate::from_domain_identity(identity);
 
             assert!(matches!(identity, DomainIdentity::D7(_)));
-            assert_eq!(coordinate, DomainCoordinate::new(7, u16::from(bits)).unwrap());
-            assert_ne!(coordinate, DomainCoordinate::new(8, u16::from(bits)).unwrap());
+            assert_eq!(
+                coordinate,
+                DomainCoordinate::new(7, u16::from(bits)).unwrap()
+            );
+            assert_ne!(
+                coordinate,
+                DomainCoordinate::new(8, u16::from(bits)).unwrap()
+            );
         }
     }
 }

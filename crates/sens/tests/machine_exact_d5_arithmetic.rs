@@ -1,6 +1,4 @@
-use sens::{
-    eval_program, load_core_library, lower_program, parse, ExprKind, Session,
-};
+use sens::{eval_program, load_core_library, lower_program, parse, ExprKind, Session};
 use std::fs;
 use std::path::PathBuf;
 
@@ -15,7 +13,6 @@ fn load_lisp_file(path: &str, session: &mut Session) {
     eval_program(&source, session)
         .unwrap_or_else(|error| panic!("{} must load as ordinary sens: {error}", path.display()));
 }
-
 
 fn machine_session() -> Session {
     let mut session = Session::default();
@@ -76,7 +73,8 @@ fn decode_arithmetic_tail(bytes: &[u8]) -> Option<ArithmeticTail> {
 
 #[test]
 fn current_surfaces_lower_to_exact_d5_difference_and_times() {
-    for (source, expected_bits) in [("(відняти 9 4)", 0b01011), ("(помножити 6 7)", 0b10110)] {
+    for (source, expected_bits) in [("(відняти 9 4)", 0b01011), ("(помножити 6 7)", 0b10110)]
+    {
         let lowered = lower_program(&parse(source).expect("current D5 source"));
         let ExprKind::DomainCall(identity, args) = &lowered[0].kind else {
             panic!("{source} must lower to exact DomainCall");
@@ -92,14 +90,8 @@ fn exact_d5_difference_and_times_reach_admitted_x86_bytes() {
     let mut session = machine_session();
 
     for (packed_bits, expected_capability) in [
-        (
-            11,
-            "((integer-subtract bounded-u64 no-underflow))",
-        ),
-        (
-            22,
-            "((integer-multiply bounded-u32-inputs u64-result))",
-        ),
+        (11, "((integer-subtract bounded-u64 no-underflow))"),
+        (22, "((integer-multiply bounded-u32-inputs u64-result))"),
     ] {
         let capability = eval_program(
             &format!("(machine-capabilities-for-domain 5 {packed_bits})"),
@@ -189,8 +181,9 @@ fn exact_d5_fast_paths_fail_closed_when_u64_would_change_meaning() {
 
 #[test]
 fn current_profile_only_admits_difference_and_times_after_witnesses_exist() {
-    let profile = fs::read_to_string(repo_root().join("lib/machine/profile/current-domain-x86-64.lisp"))
-        .expect("current exact-domain machine profile");
+    let profile =
+        fs::read_to_string(repo_root().join("lib/machine/profile/current-domain-x86-64.lisp"))
+            .expect("current exact-domain machine profile");
 
     assert!(profile.contains("(5 11 fast-path \"SUB / u64, left>=right\")"));
     assert!(profile.contains("(5 22 fast-path \"IMUL / u32 inputs -> exact u64 result\")"));

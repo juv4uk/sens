@@ -52,9 +52,20 @@ fn sens_trit_open_reads_default_t5m_fixtures_without_execution_or_mutation() {
             .unwrap_or_else(|error| panic!("{relative}: exact-width reference decode: {error:?}"));
         let expected = format!("{}\n", sens::render_ternary_words_spaced(&words));
         let opened = trit_open(&file);
-        assert!(opened.status.success(), "{relative}: {}", String::from_utf8_lossy(&opened.stderr));
-        assert_eq!(opened.stdout, expected.as_bytes(), "{relative}: default T5M projection");
-        assert!(opened.stderr.is_empty(), "{relative}: open must not execute or warn");
+        assert!(
+            opened.status.success(),
+            "{relative}: {}",
+            String::from_utf8_lossy(&opened.stderr)
+        );
+        assert_eq!(
+            opened.stdout,
+            expected.as_bytes(),
+            "{relative}: default T5M projection"
+        );
+        assert!(
+            opened.stderr.is_empty(),
+            "{relative}: open must not execute or warn"
+        );
         assert_eq!(
             fs::read(&file).unwrap(),
             original,

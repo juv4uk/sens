@@ -110,13 +110,10 @@ fn exact_d5_quotient_semantics_exist_beyond_the_native_proof_rectangle() {
 fn equal_positive_i64_quotient_reaches_admitted_idiv_bytes() {
     let mut session = machine_session();
 
-    let capability = eval_program(
-        "(machine-capabilities-for-domain 5 23)",
-        &mut session,
-    )
-    .expect("D5 QUOTIENT capability")
-    .value
-    .to_string();
+    let capability = eval_program("(machine-capabilities-for-domain 5 23)", &mut session)
+        .expect("D5 QUOTIENT capability")
+        .value
+        .to_string();
     assert_eq!(
         capability,
         "((integer-quotient bounded-positive-i64 equal-operands-only))"
@@ -142,7 +139,12 @@ fn equal_positive_i64_quotient_reaches_admitted_idiv_bytes() {
     .value
     .to_string();
     let decoded = decode_cqo_idiv_tail(&parse_bytes(&rendered)).expect("CQO+IDIV tail");
-    assert_eq!(decoded, IdivTail { divisor_register: 1 });
+    assert_eq!(
+        decoded,
+        IdivTail {
+            divisor_register: 1
+        }
+    );
 }
 
 #[test]
@@ -180,12 +182,11 @@ fn quotient_native_slice_fails_closed_outside_the_proved_equal_operand_relation(
 
 #[test]
 fn current_profile_admits_only_the_witnessed_quotient_slice() {
-    let profile = fs::read_to_string(repo_root().join("lib/machine/profile/current-domain-x86-64.lisp"))
-        .expect("current exact-domain machine profile");
+    let profile =
+        fs::read_to_string(repo_root().join("lib/machine/profile/current-domain-x86-64.lisp"))
+            .expect("current exact-domain machine profile");
 
-    assert!(
-        profile.contains("(5 23 fast-path \"CQO+IDIV / positive i64 equal operands\")")
-    );
+    assert!(profile.contains("(5 23 fast-path \"CQO+IDIV / positive i64 equal operands\")"));
     assert!(
         !profile.contains("00010100 fast-path"),
         "historical byte SID QUOTIENT must not become current profile authority"

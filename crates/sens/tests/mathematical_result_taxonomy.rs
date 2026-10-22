@@ -99,7 +99,11 @@ fn transport_taxonomy(session: &mut Session) {
 #[test]
 fn existing_arithmetic_results_remain_mathematical_values() {
     let rows = rows();
-    assert_eq!(rows.len(), 4, "#225 current-result anchor must retain four rows");
+    assert_eq!(
+        rows.len(),
+        4,
+        "#225 current-result anchor must retain four rows"
+    );
 
     let mut session = Session::default();
     load_core_library(&mut session).expect("core library");
@@ -108,7 +112,10 @@ fn existing_arithmetic_results_remain_mathematical_values() {
     for row in &rows {
         let result = eval_program(&row.expr, &mut session)
             .unwrap_or_else(|error| panic!("mathematical result {} failed: {error}", row.expr));
-        let actual = format!("(value \"{}\")", escape_lisp_string(&result.value.to_string()));
+        let actual = format!(
+            "(value \"{}\")",
+            escape_lisp_string(&result.value.to_string())
+        );
         let program = format!(
             "(свідок-проходить? (свідок-висновок (як-є {}) (як-є {})))",
             row.source, actual
@@ -117,7 +124,11 @@ fn existing_arithmetic_results_remain_mathematical_values() {
             .unwrap_or_else(|error| panic!("Lisp verdict failed for {}: {error}", row.expr))
             .value
             .to_string();
-        assert_eq!(verdict, "1", "#225 Lisp witness rejected {} as a mathematical value", row.expr);
+        assert_eq!(
+            verdict, "1",
+            "#225 Lisp witness rejected {} as a mathematical value",
+            row.expr
+        );
     }
 }
 
@@ -131,10 +142,13 @@ fn lisp_owned_mathematical_result_taxonomy_is_self_consistent() {
     ))
     .expect("#225 mathematical taxonomy witness");
     eval_program(&witness, &mut session).expect("mathematical taxonomy witness must load");
-    let verdict = eval_program("(свідок-класифікації-математичного-результату)", &mut session)
-        .expect("mathematical taxonomy witness must execute")
-        .value
-        .to_string();
+    let verdict = eval_program(
+        "(свідок-класифікації-математичного-результату)",
+        &mut session,
+    )
+    .expect("mathematical taxonomy witness must execute")
+    .value
+    .to_string();
     assert!(
         verdict.starts_with("(mathematical-result-taxonomy-witness (status pass)"),
         "Lisp-owned mathematical taxonomy rejected itself: {verdict}"

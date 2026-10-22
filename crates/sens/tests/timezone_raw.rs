@@ -21,13 +21,12 @@ fn current_d3_time_observation_and_cons_arity_are_executed_by_sens() {
     assert_eq!(observed.value.to_string(), "(detected \"Europe/Kyiv\" TZ)");
 
     // Замість старого W8/fixture — живий негативний закон D3 CONS.
-    let error = eval_program(
-        "(сполучити (як-є а) (як-є б) (як-є в))",
-        &mut session,
-    )
-    .expect_err("D3 CONS повинен відхилити третій аргумент");
+    let error = eval_program("(сполучити (як-є а) (як-є б) (як-є в))", &mut session)
+        .expect_err("D3 CONS повинен відхилити третій аргумент");
     assert!(
-        error.to_string().contains("expected 2 arguments; received 3"),
+        error
+            .to_string()
+            .contains("expected 2 arguments; received 3"),
         "D3 CONS повернув неочікувану помилку: {error}"
     );
 }

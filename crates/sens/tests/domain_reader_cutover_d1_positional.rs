@@ -35,21 +35,25 @@ fn bare_d1_bits_inside_d2_structure_are_canonical_without_width_tags() {
 
 #[test]
 fn tagged_d1_is_not_canonical_binary_source() {
-    for source in [
-        "10 110 00 #d1:1 00 0 01",
-        "10 110 00 1 00 #d1:0 01",
-    ] {
-        assert!(parse_canonical_binary(source).is_err(),
-            "canonical reader must reject redundant carrier notation");
-        assert!(parse_exact_domain_source(source).is_err(),
-            "exact-domain reader must not silently accept a legacy tag");
+    for source in ["10 110 00 #d1:1 00 0 01", "10 110 00 1 00 #d1:0 01"] {
+        assert!(
+            parse_canonical_binary(source).is_err(),
+            "canonical reader must reject redundant carrier notation"
+        );
+        assert!(
+            parse_exact_domain_source(source).is_err(),
+            "exact-domain reader must not silently accept a legacy tag"
+        );
     }
 }
 
 #[test]
 fn old_compatibility_reader_still_needs_temporary_d1_projection() {
     let human = parse("1").expect("legacy numeric reader must remain distinct");
-    assert!(matches!(human[0].kind, ExprKind::Number(_, Exactness::Exact)));
+    assert!(matches!(
+        human[0].kind,
+        ExprKind::Number(_, Exactness::Exact)
+    ));
     let tagged = parse("#d1:1").expect("TEMPORARY compatibility D1 carrier");
     assert_d1(&tagged[0], 1);
     let bare = parse_canonical_binary("1").expect("canonical bare D1");
@@ -60,15 +64,24 @@ fn old_compatibility_reader_still_needs_temporary_d1_projection() {
 fn original_d1_identity_survives_t5_word_roundtrip_without_tags() {
     let words: Vec<_> = parse_binary_source_words(BARE_D1_D2_FRAME)
         .expect("canonical width-bearing words")
-        .into_iter().map(|t| t.word).collect();
-    assert_eq!(words.iter().map(|w| w.width()).collect::<Vec<_>>(),
-               vec![2, 3, 2, 1, 2, 1, 2]);
+        .into_iter()
+        .map(|t| t.word)
+        .collect();
+    assert_eq!(
+        words.iter().map(|w| w.width()).collect::<Vec<_>>(),
+        vec![2, 3, 2, 1, 2, 1, 2]
+    );
     let physical = encode_ternary_words(&words).expect("mechanical T5 encode");
     let decoded = decode_ternary_words(&physical).expect("mechanical T5 decode");
-    assert_eq!(decoded, words, "T5 must preserve full exact widths and bits");
+    assert_eq!(
+        decoded, words,
+        "T5 must preserve full exact widths and bits"
+    );
     let parsed = parse_canonical_word_sequence(&decoded)
         .expect("SENS D2 structure reader after T5 physical words");
-    let ExprKind::List(items) = &parsed[0].kind else { panic!("D2 list"); };
+    let ExprKind::List(items) = &parsed[0].kind else {
+        panic!("D2 list");
+    };
     assert_d1(&items[1], 1);
     assert_d1(&items[2], 0);
 }
@@ -80,7 +93,9 @@ fn bit_width_mutations_do_not_silently_preserve_d1_identity() {
     assert!(parse_canonical_binary("10 110 00 01 00 0 01").is_err());
     // D3 EMPTY and D1 NO are distinct, even when their packed value is zero.
     let empty = parse_canonical_binary("000").unwrap();
-    let ExprKind::List(items) = &empty[0].kind else { panic!("D3 EMPTY is list"); };
+    let ExprKind::List(items) = &empty[0].kind else {
+        panic!("D3 EMPTY is list");
+    };
     assert!(items.is_empty());
     let no = parse_canonical_binary("0").unwrap();
     assert_d1(&no[0], 0);

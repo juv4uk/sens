@@ -98,11 +98,10 @@ fn exact_d2_reader_matches_independent_grammar_on_every_short_typed_word_stream(
             words.extend(body.iter().cloned());
             words.push("01".to_owned());
             let expected_accept = independent_accepts(&words);
-            let rust_accept = parse_canonical_binary(&words.join(" "))
-                .is_ok_and(|forms| forms.len() == 1);
+            let rust_accept =
+                parse_canonical_binary(&words.join(" ")).is_ok_and(|forms| forms.len() == 1);
             assert_eq!(
-                rust_accept,
-                expected_accept,
+                rust_accept, expected_accept,
                 "D2 reader parity on inner bits={bits} exact words={words:?}"
             );
             seen += 1;
@@ -128,13 +127,13 @@ fn d2_token_roles_dot_tail_and_reserved_widths_are_not_silently_coerced() {
         assert!(parse_canonical_binary(accepted).is_ok(), "{accepted}");
     }
     for rejected in [
-        "10 11 01",            // dot without a head
-        "10 01 01",            // extra close
-        "10 0 11 01",          // dot missing its tail
-        "10 0 11 1 0 01",      // two dotted tails
-        "10 10 01",            // nested close missing
-        "10 0 11 1",           // truncated
-        "10 0000000000 01",   // unframed W10 is out of scope
+        "10 11 01",         // dot without a head
+        "10 01 01",         // extra close
+        "10 0 11 01",       // dot missing its tail
+        "10 0 11 1 0 01",   // two dotted tails
+        "10 10 01",         // nested close missing
+        "10 0 11 1",        // truncated
+        "10 0000000000 01", // unframed W10 is out of scope
     ] {
         assert!(parse_canonical_binary(rejected).is_err(), "{rejected}");
     }

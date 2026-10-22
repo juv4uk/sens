@@ -17,7 +17,10 @@ fn eval_native_error(source: &str, expected_kind: ErrorKind, normalized: &str) -
     let mut session = Session::bare();
     load_core_library(&mut session).expect("core bootstrap");
     let error = eval_program(source, &mut session).unwrap_err();
-    assert_eq!(error.kind, expected_kind, "wrong native error kind for {source}: {error}");
+    assert_eq!(
+        error.kind, expected_kind,
+        "wrong native error kind for {source}: {error}"
+    );
 
     // Error wording and source spans are presentation details. S2 contracts the
     // named category; tests normalize only the semantic observation shared with
@@ -27,7 +30,8 @@ fn eval_native_error(source: &str, expected_kind: ErrorKind, normalized: &str) -
 
 #[test]
 fn unresolved_callable_has_named_error_parity() {
-    for symbol in ["відсутнє", "майбутня-функція", "ще-не-визначене"] {
+    for symbol in ["відсутнє", "майбутня-функція", "ще-не-визначене"]
+    {
         let source = format!("({symbol})");
         let expected = format!("(error unbound-symbol {symbol})");
         let via_meta = eval_meta(&source);
@@ -71,7 +75,10 @@ fn fixed_lambda_arity_mismatch_is_named_lisp_data() {
         let via_meta = eval_meta(source);
         let via_native = eval_native_error(source, ErrorKind::Arity, expected);
 
-        assert_eq!(via_meta, via_native, "fixed arity parity failed for {source}");
+        assert_eq!(
+            via_meta, via_native,
+            "fixed arity parity failed for {source}"
+        );
     }
 }
 
@@ -83,7 +90,10 @@ fn dotted_lambda_reports_minimum_arity_not_exact_arity() {
     let via_meta = eval_meta(source);
     let via_native = eval_native_error(source, ErrorKind::Arity, expected);
 
-    assert_eq!(via_meta, via_native, "dotted arity parity failed for {source}");
+    assert_eq!(
+        via_meta, via_native,
+        "dotted arity parity failed for {source}"
+    );
 }
 
 #[test]

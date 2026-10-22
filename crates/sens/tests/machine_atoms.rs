@@ -1,4 +1,7 @@
-use sens::{eval_program, eval_parsed_expressions, parse_mixed_exact_domain_machine_source, load_core_library, Session};
+use sens::{
+    eval_parsed_expressions, eval_program, load_core_library,
+    parse_mixed_exact_domain_machine_source, Session,
+};
 use std::fs;
 use std::path::PathBuf;
 
@@ -10,18 +13,22 @@ fn load_lisp_file(path: &str, session: &mut Session) {
     let path = repo_root().join(path);
     let source = fs::read_to_string(&path)
         .unwrap_or_else(|error| panic!("{} must exist: {error}", path.display()));
-    let relative = path.strip_prefix(repo_root())
+    let relative = path
+        .strip_prefix(repo_root())
         .expect("Lisp fixture path must be inside the SENS repository");
-    let source_path = relative.to_str()
+    let source_path = relative
+        .to_str()
         .expect("machine fixture path must be valid UTF-8");
     if source_path.starts_with("lib/machine/") {
         let parsed = parse_mixed_exact_domain_machine_source(source_path, &source)
             .unwrap_or_else(|error| panic!("{source_path}: exact-domain read failed: {error}"));
-        eval_parsed_expressions(&parsed, session)
-            .unwrap_or_else(|error| panic!("{source_path}: exact-domain execution failed: {error}"));
+        eval_parsed_expressions(&parsed, session).unwrap_or_else(|error| {
+            panic!("{source_path}: exact-domain execution failed: {error}")
+        });
     } else {
-        eval_program(&source, session)
-            .unwrap_or_else(|error| panic!("{} must load as ordinary sens: {error}", path.display()));
+        eval_program(&source, session).unwrap_or_else(|error| {
+            panic!("{} must load as ordinary sens: {error}", path.display())
+        });
     }
 }
 
@@ -116,7 +123,13 @@ fn unadmitted_machine_atom_fails_closed_before_byte_materialization() {
 
 #[test]
 fn machine_atom_names_do_not_mint_public_semantic_surfaces() {
-    for machine_only in ["x86-ret","x86-mov-r64-imm64","x86-add-r64-r64","x86-jnz-rel8","машинний-блок"] {
+    for machine_only in [
+        "x86-ret",
+        "x86-mov-r64-imm64",
+        "x86-add-r64-r64",
+        "x86-jnz-rel8",
+        "машинний-блок",
+    ] {
         assert!(
             sens::semantic_registry_export::semantic_id_for_admitted_surface(machine_only)
                 .is_none(),

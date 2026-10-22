@@ -7,7 +7,9 @@ use std::fs;
 use std::path::PathBuf;
 
 fn repo_file(relative: &str) -> PathBuf {
-    PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../..").join(relative)
+    PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+        .join("../..")
+        .join(relative)
 }
 
 fn escape_lisp_string(value: &str) -> String {
@@ -52,7 +54,10 @@ fn assert_one_row_fixture(source: &str, libraries: &[(&str, &str)], label: &str)
     eval_program(&witness, &mut session).expect("witness runner must load");
 
     let actual = match eval_program(&expr, &mut session) {
-        Ok(result) => format!("(value \"{}\")", escape_lisp_string(&result.value.to_string())),
+        Ok(result) => format!(
+            "(value \"{}\")",
+            escape_lisp_string(&result.value.to_string())
+        ),
         Err(error) => format!("(error \"{:?}\")", error.kind),
     };
     let verdict = format!(
@@ -93,7 +98,10 @@ fn missing_module_is_blocked_by_established_precondition() {
             ("reason", include_str!("../../../lib/reason.lisp")),
             ("forward", include_str!("../../../lib/forward.lisp")),
             ("knowledge", include_str!("../../../lib/knowledge.lisp")),
-            ("result-status", include_str!("../../../lib/result-status.lisp")),
+            (
+                "result-status",
+                include_str!("../../../lib/result-status.lisp"),
+            ),
         ],
         "#219 missing-module-is-blocked",
     );
@@ -107,7 +115,10 @@ fn absence_of_reasoning_evidence_does_not_fabricate_unknown() {
             ("core", include_str!("../../../lib/core.lisp")),
             ("unify", include_str!("../../../lib/unify.lisp")),
             ("reason", include_str!("../../../lib/reason.lisp")),
-            ("result-status", include_str!("../../../lib/result-status.lisp")),
+            (
+                "result-status",
+                include_str!("../../../lib/result-status.lisp"),
+            ),
         ],
         "#219 no-evidence-is-not-unknown",
     );

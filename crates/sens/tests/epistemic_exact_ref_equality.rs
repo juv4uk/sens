@@ -1,6 +1,9 @@
 //! Виконуваний SENS-свідок української Lisp-проєкції епістемічних законів.
 
-use sens::{eval_parsed_expressions, load_core_library, lower_program, parse, parse_mixed_exact_domain, Session};
+use sens::{
+    eval_parsed_expressions, load_core_library, lower_program, parse, parse_mixed_exact_domain,
+    Session,
+};
 
 const SOURCES: &[&str] = &[
     include_str!("../../../lib/unify.lisp"),
@@ -13,7 +16,10 @@ const SOURCES: &[&str] = &[
     include_str!("../../../lib/epistemic.lisp"),
 ];
 
-fn evaluate_ukr(source: &str, session: &mut Session) -> Result<sens::EvalResult, sens::LanguageError> {
+fn evaluate_ukr(
+    source: &str,
+    session: &mut Session,
+) -> Result<sens::EvalResult, sens::LanguageError> {
     // D1 «так»/«ні» — ратифіковані однобітні слова, а не глобальні
     // незв'язані Lisp-символи. Чинний mixed reader зберігає quoted data.
     let parsed = parse_mixed_exact_domain(source)?;
@@ -62,29 +68,65 @@ fn український_свідок_епістеміки_розбираєть
 fn посилання_на_джерело_повертає_точні_значення_d1() {
     let mut session = epistemic_session();
     for (source, expected) in [
-        ("(це-належне-посилання-на-джерело? (як-є (digest packet)))", true),
-        ("(це-належне-посилання-на-джерело? (як-є (proof packet)))", true),
-        ("(це-належне-посилання-на-джерело? (як-є (unknown packet)))", false),
-        ("(це-належне-посилання-на-джерело? (як-є ((digest) packet)))", false),
+        (
+            "(це-належне-посилання-на-джерело? (як-є (digest packet)))",
+            true,
+        ),
+        (
+            "(це-належне-посилання-на-джерело? (як-є (proof packet)))",
+            true,
+        ),
+        (
+            "(це-належне-посилання-на-джерело? (як-є (unknown packet)))",
+            false,
+        ),
+        (
+            "(це-належне-посилання-на-джерело? (як-є ((digest) packet)))",
+            false,
+        ),
         ("(це-належне-посилання-на-джерело? (як-є ()))", false),
-        ("(це-належне-посилання-на-джерело? (як-є (digest packet extra)))", false),
-        ("(це-належне-посилання-на-джерело? (як-є (digest packet . пошкоджений-хвіст)))", false),
-        ("(це-належне-посилання-на-джерело? (як-є (proof packet . пошкоджений-хвіст)))", false),
+        (
+            "(це-належне-посилання-на-джерело? (як-є (digest packet extra)))",
+            false,
+        ),
+        (
+            "(це-належне-посилання-на-джерело? (як-є (digest packet . пошкоджений-хвіст)))",
+            false,
+        ),
+        (
+            "(це-належне-посилання-на-джерело? (як-є (proof packet . пошкоджений-хвіст)))",
+            false,
+        ),
     ] {
-        let result = evaluate_ukr(source, &mut session)
-            .unwrap_or_else(|error| panic!("{source}: {error}"));
+        let result =
+            evaluate_ukr(source, &mut session).unwrap_or_else(|error| panic!("{source}: {error}"));
         assert_eq!(result.value.as_predicate_bit(), Some(expected), "{source}");
     }
 
     for (source, expected) in [
-        ("(епістеміка--посилання-на-твердження? (як-є (claim-ref packet)))", true),
-        ("(епістеміка--посилання-на-твердження? (як-є (other-ref packet)))", false),
-        ("(епістеміка--посилання-на-твердження? (як-є (claim-ref packet extra)))", false),
-        ("(епістеміка--посилання-на-твердження? (як-є (claim-ref packet . пошкоджений-хвіст)))", false),
-        ("(епістеміка--посилання-на-твердження? (як-є (claim-ref)))", false),
+        (
+            "(епістеміка--посилання-на-твердження? (як-є (claim-ref packet)))",
+            true,
+        ),
+        (
+            "(епістеміка--посилання-на-твердження? (як-є (other-ref packet)))",
+            false,
+        ),
+        (
+            "(епістеміка--посилання-на-твердження? (як-є (claim-ref packet extra)))",
+            false,
+        ),
+        (
+            "(епістеміка--посилання-на-твердження? (як-є (claim-ref packet . пошкоджений-хвіст)))",
+            false,
+        ),
+        (
+            "(епістеміка--посилання-на-твердження? (як-є (claim-ref)))",
+            false,
+        ),
     ] {
-        let result = evaluate_ukr(source, &mut session)
-            .unwrap_or_else(|error| panic!("{source}: {error}"));
+        let result =
+            evaluate_ukr(source, &mut session).unwrap_or_else(|error| panic!("{source}: {error}"));
         assert_eq!(result.value.as_predicate_bit(), Some(expected), "{source}");
     }
 }
@@ -94,7 +136,11 @@ fn український_файл_законів_посилання_повер�
     let mut session = epistemic_session();
     let source = include_str!("../../../tests/semantic/epistemic-source-ref-d1-law.lisp");
     let parsed = parse(source).expect("українські закони розбираються");
-    assert_eq!(parsed.len(), 6, "файл містить п'ять законів і відмовний випадок");
+    assert_eq!(
+        parsed.len(),
+        6,
+        "файл містить п'ять законів і відмовний випадок"
+    );
 
     for (index, form) in parsed.iter().enumerate() {
         let projected = lower_program(std::slice::from_ref(form));
@@ -111,13 +157,25 @@ fn неправильний_хвіст_вимог_не_створює_хибно
     let mut session = epistemic_session();
     for (source, expected) in [
         ("(епістеміка--усі-вимоги-наявні? (як-є ()) (як-є ()))", true),
-        ("(епістеміка--усі-вимоги-наявні? (як-є (читання)) (як-є (читання)))", true),
-        ("(епістеміка--усі-вимоги-наявні? (як-є (читання)) (як-є (запис)))", false),
-        ("(епістеміка--усі-вимоги-наявні? (як-є хибний-хвіст) (як-є (читання)))", false),
-        ("(епістеміка--усі-вимоги-наявні? (як-є (читання . хибний-хвіст)) (як-є (читання)))", false),
+        (
+            "(епістеміка--усі-вимоги-наявні? (як-є (читання)) (як-є (читання)))",
+            true,
+        ),
+        (
+            "(епістеміка--усі-вимоги-наявні? (як-є (читання)) (як-є (запис)))",
+            false,
+        ),
+        (
+            "(епістеміка--усі-вимоги-наявні? (як-є хибний-хвіст) (як-є (читання)))",
+            false,
+        ),
+        (
+            "(епістеміка--усі-вимоги-наявні? (як-є (читання . хибний-хвіст)) (як-є (читання)))",
+            false,
+        ),
     ] {
-        let result = evaluate_ukr(source, &mut session)
-            .unwrap_or_else(|error| panic!("{source}: {error}"));
+        let result =
+            evaluate_ukr(source, &mut session).unwrap_or_else(|error| panic!("{source}: {error}"));
         assert_eq!(
             result.value.as_predicate_bit(),
             Some(expected),
@@ -130,13 +188,22 @@ fn неправильний_хвіст_вимог_не_створює_хибно
 fn рівність_вкладених_посилань_розрізняє_форму_та_значення() {
     let mut session = epistemic_session();
     for (source, expected) in [
-        ("(епістеміка--рівні-посилання? (як-є (а (б в))) (як-є (а (б в))))", true),
-        ("(епістеміка--рівні-посилання? (як-є (а (б в))) (як-є (а (б г))))", false),
-        ("(епістеміка--рівні-посилання? (як-є (а (б))) (як-є (а б)))", false),
+        (
+            "(епістеміка--рівні-посилання? (як-є (а (б в))) (як-є (а (б в))))",
+            true,
+        ),
+        (
+            "(епістеміка--рівні-посилання? (як-є (а (б в))) (як-є (а (б г))))",
+            false,
+        ),
+        (
+            "(епістеміка--рівні-посилання? (як-є (а (б))) (як-є (а б)))",
+            false,
+        ),
         ("(епістеміка--рівні-посилання? (як-є ()) (як-є ()))", true),
     ] {
-        let result = evaluate_ukr(source, &mut session)
-            .unwrap_or_else(|error| panic!("{source}: {error}"));
+        let result =
+            evaluate_ukr(source, &mut session).unwrap_or_else(|error| panic!("{source}: {error}"));
         assert_eq!(result.value.as_predicate_bit(), Some(expected), "{source}");
     }
 }

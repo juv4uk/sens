@@ -154,7 +154,9 @@ fn fetch_artifact(url: &str, temporary: &Path) -> Result<(), String> {
             if status.success() {
                 Ok(())
             } else {
-                Err(format!("download failed for {url}: powershell exit {status}"))
+                Err(format!(
+                    "download failed for {url}: powershell exit {status}"
+                ))
             }
         }
         Err(curl_error) if cfg!(target_os = "linux") => {
@@ -222,14 +224,18 @@ fn fetch_artifact(url: &str, temporary: &Path) -> Result<(), String> {
                     url,
                 ])
                 .status()
-                .map_err(|error| format!("curl bootstrap succeeded but download failed for {url}: {error}"))?;
+                .map_err(|error| {
+                    format!("curl bootstrap succeeded but download failed for {url}: {error}")
+                })?;
             if status.success() {
                 Ok(())
             } else {
                 Err(format!("download failed for {url}: curl exit {status}"))
             }
         }
-        Err(error) => Err(format!("download failed for {url}: curl unavailable: {error}")),
+        Err(error) => Err(format!(
+            "download failed for {url}: curl unavailable: {error}"
+        )),
     }
 }
 
@@ -307,7 +313,10 @@ fn load_manifest_str(source: &str, origin: &str) -> Result<Manifest, String> {
         .map_err(|error| format!("invalid manifest {origin}: {error}"))?;
 
     if manifest.protocol != "sens-islands-manifest-1" {
-        return Err(format!("unsupported manifest protocol: {}", manifest.protocol));
+        return Err(format!(
+            "unsupported manifest protocol: {}",
+            manifest.protocol
+        ));
     }
 
     let known_targets = [
@@ -397,16 +406,10 @@ fn load_manifest_str(source: &str, origin: &str) -> Result<Manifest, String> {
                     let sha256 = entry.sha256.as_deref().ok_or_else(|| {
                         format!("island {} release asset is missing SHA-256", island.key)
                     })?;
-                    if sha256.len() != 64
-                        || !sha256.bytes().all(|byte| byte.is_ascii_hexdigit())
-                    {
+                    if sha256.len() != 64 || !sha256.bytes().all(|byte| byte.is_ascii_hexdigit()) {
                         return Err(format!("island {} has invalid SHA-256", island.key));
                     }
-                    if entry
-                        .artifact_format
-                        .as_deref()
-                        .is_none_or(str::is_empty)
-                    {
+                    if entry.artifact_format.as_deref().is_none_or(str::is_empty) {
                         return Err(format!(
                             "island {} release asset is missing artifact format",
                             island.key
@@ -461,8 +464,8 @@ fn load_manifest_str(source: &str, origin: &str) -> Result<Manifest, String> {
 }
 
 fn load_manifest_file(path: &str) -> Result<Manifest, String> {
-    let source =
-        fs::read_to_string(path).map_err(|error| format!("cannot read manifest {path}: {error}"))?;
+    let source = fs::read_to_string(path)
+        .map_err(|error| format!("cannot read manifest {path}: {error}"))?;
     load_manifest_str(&source, path)
 }
 
@@ -664,7 +667,10 @@ fn install_system_package(island: &Island, entry: &PlatformEntry) -> Result<Stri
         .ok_or_else(|| format!("system package {} has no package id", island.key))?;
 
     if system_package_available(entry) {
-        return Ok(format!("already available {} {}", island.key, island.runtime_version));
+        return Ok(format!(
+            "already available {} {}",
+            island.key, island.runtime_version
+        ));
     }
 
     match (std::env::consts::OS, entry.provider.as_str()) {
@@ -712,7 +718,9 @@ fn install_system_package(island: &Island, entry: &PlatformEntry) -> Result<Stri
             let mut winget_version = Command::new("winget");
             winget_version.arg("--version");
             if !command_output_contains(&mut winget_version, "v") {
-                return Err("winget is required for automatic Windows package bootstrap".to_string());
+                return Err(
+                    "winget is required for automatic Windows package bootstrap".to_string()
+                );
             }
 
             let mut install = Command::new("winget");
@@ -745,15 +753,13 @@ fn install_system_package(island: &Island, entry: &PlatformEntry) -> Result<Stri
             {
                 return Err(
                     "Homebrew (brew) is required for automatic macOS island bootstrap. \
-                     Install from https://brew.sh".to_string(),
+                     Install from https://brew.sh"
+                        .to_string(),
                 );
             }
             let mut install = Command::new("brew");
             install.args(["install", package]);
-            run_status_command(
-                &mut install,
-                &format!("brew install {package} failed"),
-            )?;
+            run_status_command(&mut install, &format!("brew install {package} failed"))?;
         }
         ("linux", "dnf") => {
             let dnf_bin = if Command::new("dnf5")
@@ -776,10 +782,7 @@ fn install_system_package(island: &Island, entry: &PlatformEntry) -> Result<Stri
                 c
             };
             install.args(["install", "-y", package]);
-            run_status_command(
-                &mut install,
-                &format!("{dnf_bin} install {package} failed"),
-            )?;
+            run_status_command(&mut install, &format!("{dnf_bin} install {package} failed"))?;
         }
         ("linux", "pacman") => {
             let mut install = if running_as_root() {
@@ -790,19 +793,13 @@ fn install_system_package(island: &Island, entry: &PlatformEntry) -> Result<Stri
                 c
             };
             install.args(["-S", "--noconfirm", package]);
-            run_status_command(
-                &mut install,
-                &format!("pacman -S {package} failed"),
-            )?;
+            run_status_command(&mut install, &format!("pacman -S {package} failed"))?;
         }
         ("linux", "guix") => {
             // Guix always runs as the current user — no sudo needed.
             let mut install = Command::new("guix");
             install.args(["install", package]);
-            run_status_command(
-                &mut install,
-                &format!("guix install {package} failed"),
-            )?;
+            run_status_command(&mut install, &format!("guix install {package} failed"))?;
         }
         _ => {
             return Err(format!(
@@ -823,10 +820,7 @@ fn install_system_package(island: &Island, entry: &PlatformEntry) -> Result<Stri
         if island.key == "clips" {
             return build_clips_from_source();
         }
-        Err(format!(
-            "installed {} but bounded probe failed",
-            island.key
-        ))
+        Err(format!("installed {} but bounded probe failed", island.key))
     }
 }
 
@@ -882,7 +876,10 @@ fn build_clips_from_source() -> Result<String, String> {
     // Locate the clips_core_source directory (the tarball has a subdirectory).
     let src_dir = {
         let mut found: Option<PathBuf> = None;
-        for entry in fs::read_dir(&build_dir).map_err(|e| e.to_string())?.flatten() {
+        for entry in fs::read_dir(&build_dir)
+            .map_err(|e| e.to_string())?
+            .flatten()
+        {
             let p = entry.path();
             if p.is_dir()
                 && p.file_name()
@@ -896,7 +893,11 @@ fn build_clips_from_source() -> Result<String, String> {
         found.unwrap_or_else(|| build_dir.join("clips_core_source_642"))
     };
 
-    let cc = if cfg!(target_os = "macos") { "clang" } else { "gcc" };
+    let cc = if cfg!(target_os = "macos") {
+        "clang"
+    } else {
+        "gcc"
+    };
     let cflags = "-std=c99 -O3 -fPIC -fno-strict-aliasing";
 
     // Build shared library via shell for *.c glob expansion.
@@ -908,7 +909,6 @@ fn build_clips_from_source() -> Result<String, String> {
         lib_path.to_string_lossy()
     ));
     run_status_command(&mut link_sh, "CLIPS shared library compilation failed")?;
-
 
     // Build standalone CLI executable
     let mut cli_sh = Command::new("sh");
@@ -1028,8 +1028,7 @@ fn write_install_record(
         "protocol=sens-island-install-record/1\nisland={}\nruntime_version={}\ntarget={}\nprovider={}\nprovenance={}\nsha256={}\nverified=true\n",
         island.key, island.runtime_version, entry.target, entry.provider, island.provenance, digest
     );
-    fs::write(target_dir.join("install-record.txt"), record)
-        .map_err(|error| error.to_string())
+    fs::write(target_dir.join("install-record.txt"), record).map_err(|error| error.to_string())
 }
 
 fn install_release_asset(
@@ -1165,7 +1164,12 @@ fn install_release_asset(
                 run_status_command(&mut command, "Windows ZIP extraction failed")?;
             } else {
                 let mut command = Command::new("unzip");
-                command.args(["-q", &temporary.to_string_lossy(), "-d", &staging.to_string_lossy()]);
+                command.args([
+                    "-q",
+                    &temporary.to_string_lossy(),
+                    "-d",
+                    &staging.to_string_lossy(),
+                ]);
                 run_status_command(&mut command, "ZIP extraction failed")?;
             }
 
@@ -1179,7 +1183,11 @@ fn install_release_asset(
                 return Err(format!("MSI release asset {} is Windows-only", island.key));
             }
             let mut command = Command::new("msiexec.exe");
-            command.arg("/i").arg(&temporary).arg("/qn").arg("/norestart");
+            command
+                .arg("/i")
+                .arg(&temporary)
+                .arg("/qn")
+                .arg("/norestart");
             command.args(&entry.installer_args);
             run_status_command(
                 &mut command,
@@ -1443,7 +1451,10 @@ pub fn run(args: &[String]) -> Result<String, String> {
                 {
                     "available".to_string()
                 } else if let Some(state) = read_install_state(&root, &island, target) {
-                    if matches!(state.as_str(), "installing" | "failed-install" | "probe-failed") {
+                    if matches!(
+                        state.as_str(),
+                        "installing" | "failed-install" | "probe-failed"
+                    ) {
                         state
                     } else if installed_locally {
                         "probe-failed".to_string()

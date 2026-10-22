@@ -178,7 +178,10 @@ impl PackedBitstream {
     ///
     /// Width comes from the caller's grammar. No payload grants callability.
     pub fn read_coordinate(&self, bit_offset: usize, width: u8) -> Option<DomainCoordinate> {
-        DomainCoordinate::new(width, self.read_bounded_window(bit_offset, usize::from(width))?)
+        DomainCoordinate::new(
+            width,
+            self.read_bounded_window(bit_offset, usize::from(width))?,
+        )
     }
 
     /// Read a bounded MSB-first chunk without interpreting its semantic role.
@@ -711,16 +714,33 @@ mod tests {
         assert_eq!(packed.read::<3>(offsets[2]).unwrap().packed_bits(), 0b101);
         assert_eq!(packed.read::<4>(offsets[3]).unwrap().packed_bits(), 0b1010);
         assert_eq!(packed.read::<5>(offsets[4]).unwrap().packed_bits(), 0b10101);
-        assert_eq!(packed.read::<6>(offsets[5]).unwrap().packed_bits(), 0b101010);
-        assert_eq!(packed.read::<7>(offsets[6]).unwrap().packed_bits(), 0b1010101);
-        assert_eq!(packed.read::<8>(offsets[7]).unwrap().packed_bits(), 0b10101010);
+        assert_eq!(
+            packed.read::<6>(offsets[5]).unwrap().packed_bits(),
+            0b101010
+        );
+        assert_eq!(
+            packed.read::<7>(offsets[6]).unwrap().packed_bits(),
+            0b1010101
+        );
+        assert_eq!(
+            packed.read::<8>(offsets[7]).unwrap().packed_bits(),
+            0b10101010
+        );
     }
- 
+
     #[test]
     fn exact_d1_through_d10_are_dense_with_only_one_final_tail() {
         let coordinates: Vec<_> = [
-            (1u8, 1u16), (2, 2), (3, 5), (4, 10), (5, 21),
-            (6, 42), (7, 85), (8, 170), (9, 257), (10, 1023),
+            (1u8, 1u16),
+            (2, 2),
+            (3, 5),
+            (4, 10),
+            (5, 21),
+            (6, 42),
+            (7, 85),
+            (8, 170),
+            (9, 257),
+            (10, 1023),
         ]
         .into_iter()
         .map(|(width, bits)| DomainCoordinate::new(width, bits).unwrap())
@@ -732,9 +752,17 @@ mod tests {
         }
         let packed = packer.finish();
         assert_eq!(packed.bit_len(), 55, "1+2+...+10 must be 55 semantic bits");
-        assert_eq!(packed.byte_len(), 7, "only seven physical bytes, not ten words");
+        assert_eq!(
+            packed.byte_len(),
+            7,
+            "only seven physical bytes, not ten words"
+        );
         assert_eq!(packed.valid_bits_in_last_byte(), 7);
-        assert_eq!(packed.bytes()[6] & 1, 0, "only final container slack may be zeroed");
+        assert_eq!(
+            packed.bytes()[6] & 1,
+            0,
+            "only final container slack may be zeroed"
+        );
         for (coordinate, offset) in coordinates.iter().zip(offsets) {
             assert_eq!(
                 packed.read_coordinate(offset, coordinate.width()),
@@ -775,8 +803,11 @@ mod tests {
                             expected[position / 8] |= 1 << (7 - position % 8);
                         }
                     }
-                    assert_eq!(packed.bytes(), expected.as_slice(),
-                        "D{width} payload={bits:b} offset={prefix}");
+                    assert_eq!(
+                        packed.bytes(),
+                        expected.as_slice(),
+                        "D{width} payload={bits:b} offset={prefix}"
+                    );
                     assert_eq!(packed.bit_len(), prefix + usize::from(width));
                     assert_eq!(packed.read_coordinate(prefix, width), Some(coordinate));
                 }
@@ -837,10 +868,10 @@ mod tests {
             let joined = destination.finish();
             assert_eq!(joined.bit_len(), prefix + source.bit_len());
             assert_eq!(joined.byte_len(), (joined.bit_len() + 7) / 8);
-            assert!(PackedBitstream::from_parts(
-                joined.bytes().to_vec(),
-                joined.bit_len()
-            ).is_some(), "joined tail must be canonical");
+            assert!(
+                PackedBitstream::from_parts(joined.bytes().to_vec(), joined.bit_len()).is_some(),
+                "joined tail must be canonical"
+            );
 
             for index in 0..source.bit_len() {
                 assert!(
@@ -854,10 +885,7 @@ mod tests {
     #[test]
     fn stream_concatenation_handles_empty_aligned_and_partial_tail_inputs() {
         let empty = PackedBitstream::from_parts(Vec::new(), 0).unwrap();
-        let aligned = PackedBitstream::from_parts(
-            vec![0b1010_1100, 0b0111_0001],
-            16,
-        ).unwrap();
+        let aligned = PackedBitstream::from_parts(vec![0b1010_1100, 0b0111_0001], 16).unwrap();
         let partial = PackedBitstream::from_parts(vec![0b1010_1000], 5).unwrap();
 
         let mut packer = BitPacker::new();

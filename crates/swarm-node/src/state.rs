@@ -341,7 +341,10 @@ pub fn help_requests(journal: &Journal) -> Vec<HelpRequest> {
                 let Some(id) = ev.payload.field_atom("id") else {
                     continue;
                 };
-                let existing_offers = requests.get(id).map(|r| r.offers.clone()).unwrap_or_default();
+                let existing_offers = requests
+                    .get(id)
+                    .map(|r| r.offers.clone())
+                    .unwrap_or_default();
                 if !requests.contains_key(id) {
                     order.push(id.to_string());
                 }

@@ -223,7 +223,10 @@ pub fn compact(
                 Sexp::list(vec![Sexp::atom("agent"), Sexp::atom(&offer.agent)]),
             ];
             if let Some(cap) = &offer.capability {
-                ofields.push(Sexp::list(vec![Sexp::atom("capability"), Sexp::string(cap)]));
+                ofields.push(Sexp::list(vec![
+                    Sexp::atom("capability"),
+                    Sexp::string(cap),
+                ]));
             }
             new_events.push(Event {
                 node: self_node_id.to_string(),

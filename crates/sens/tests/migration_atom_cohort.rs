@@ -1,8 +1,10 @@
 //! Physical T5 transport canary; ATOM's result law remains SENS/Lisp-owned.
-use sens::{decode_ternary_program, encode_binary_projection_ternary, open_ternary_program, render_ternary_words_spaced};
+use sens::{
+    decode_ternary_program, encode_binary_projection_ternary, open_ternary_program,
+    render_ternary_words_spaced,
+};
 
-const T5: &[u8] =
-    include_bytes!("../../../tests/fixtures/migration-atom-cohort/atom-empty.sens");
+const T5: &[u8] = include_bytes!("../../../tests/fixtures/migration-atom-cohort/atom-empty.sens");
 
 #[test]
 fn physical_atom_fixture_roundtrips_exact_t5_transport() {
@@ -13,7 +15,6 @@ fn physical_atom_fixture_roundtrips_exact_t5_transport() {
     assert_eq!(visible, "10 010 00 000 01");
     assert_eq!(open_ternary_program(T5).unwrap(), visible);
     assert_eq!(encode_binary_projection_ternary(&visible).unwrap(), T5);
-
 }
 
 #[test]

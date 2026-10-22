@@ -193,11 +193,10 @@ mod tests {
         let actual = crate::eval_program(&format!("({name} {nested})"), &mut session)
             .expect("SENS must execute a generated D10 CAR chain");
         let mut oracle = crate::Session::default();
-        let expected = crate::eval_program("(як-є атом?)", &mut oracle)
-            .expect("ratified D3 quoted atom");
+        let expected =
+            crate::eval_program("(як-є атом?)", &mut oracle).expect("ratified D3 quoted atom");
         assert_eq!(actual.value, expected.value);
     }
-
 
     #[test]
     fn ukrainian_selector_names_agree_with_ratified_tables() {
@@ -210,10 +209,8 @@ mod tests {
         ];
         let mut witnessed = 0;
         for (width, table) in tables {
-            for (root, prefix, ukrainian) in [
-                (0b011u16, "р", "решта"),
-                (0b100u16, "п", "перше"),
-            ] {
+            for (root, prefix, ukrainian) in [(0b011u16, "р", "решта"), (0b100u16, "п", "перше")]
+            {
                 for suffix in 0..(1u16 << (width - 3)) {
                     let bits = (root << (width - 3)) | suffix;
                     let exact = identity(width, bits);
@@ -223,14 +220,22 @@ mod tests {
                         let tail = (suffix >> shift) & 1 == 1;
                         small.push('-');
                         small.push(if tail { 'р' } else { 'п' });
-                        full.push_str(if tail { "-від-решта" } else { "-від-перше" });
+                        full.push_str(if tail {
+                            "-від-решта"
+                        } else {
+                            "-від-перше"
+                        });
                     }
                     let owner_row = format!("({bits:0width$b} (ук {small}) (укр {full})");
-                    assert!(table.contains(&owner_row), "D{width} missing owner row: {owner_row}");
+                    assert!(
+                        table.contains(&owner_row),
+                        "D{width} missing owner row: {owner_row}"
+                    );
                     for name in [small, full] {
                         assert_eq!(
                             crate::semantic_registry::exact_uk_callable_for_source_head(&name),
-                            Some(exact), "D{width} source inverse: {name}"
+                            Some(exact),
+                            "D{width} source inverse: {name}"
                         );
                     }
                     witnessed += 1;
@@ -238,9 +243,10 @@ mod tests {
             }
         }
         assert_eq!(witnessed, 448);
-        assert!(crate::semantic_registry::exact_uk_callable_for_source_head(
-            "caaaaaaaar"
-        ).is_none(), "English spelling cannot be promoted to Ukrainian source");
+        assert!(
+            crate::semantic_registry::exact_uk_callable_for_source_head("caaaaaaaar").is_none(),
+            "English spelling cannot be promoted to Ukrainian source"
+        );
     }
 
     #[test]
@@ -282,9 +288,13 @@ mod tests {
                 );
                 let program = format!("({name} {tree})");
                 let value = crate::eval_program(&program, &mut crate::Session::default())
-                    .unwrap_or_else(|error| panic!("D{width}:{bits:b} {program}: {error}")).value;
-                assert_eq!(value, Value::Symbol("ціль".into()),
-                    "D{width} selector {name} must execute");
+                    .unwrap_or_else(|error| panic!("D{width}:{bits:b} {program}: {error}"))
+                    .value;
+                assert_eq!(
+                    value,
+                    Value::Symbol("ціль".into()),
+                    "D{width} selector {name} must execute"
+                );
             }
         }
     }
@@ -294,10 +304,13 @@ mod tests {
         // D7:1000000 must never be treated as an extension of D3 CAR.
         assert!(decode(DomainIdentity::D7(crate::D7DataWord::from_word(
             crate::Bit7::new(0b1000000).unwrap()
-        ))).is_none());
+        )))
+        .is_none());
         assert!(decode(identity(8, 0b10100000)).is_none());
         let d10 = identity(10, 0b1000000000);
         assert!(invoke(d10, &[], Span::default()).unwrap().is_err());
-        assert!(invoke(d10, &[Value::Nil, Value::Nil], Span::default()).unwrap().is_err());
+        assert!(invoke(d10, &[Value::Nil, Value::Nil], Span::default())
+            .unwrap()
+            .is_err());
     }
 }

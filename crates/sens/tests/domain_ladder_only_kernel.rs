@@ -35,7 +35,10 @@ fn exact_domain_route_has_no_retired_cond_or_graded_predicate_engine() {
 #[test]
 fn rust_domain_identity_stays_width_qualified_not_a_second_meaning_table() {
     for rung in 1..=9 {
-        assert!(DOMAIN.contains(&format!("D{rung}(")), "missing D{rung} carrier");
+        assert!(
+            DOMAIN.contains(&format!("D{rung}(")),
+            "missing D{rung} carrier"
+        );
     }
     assert!(DOMAIN.contains("BinarySourceWord"));
     assert!(DOMAIN.contains("pub const fn packed_bits"));
@@ -75,7 +78,6 @@ fn flat_sid8_cannot_choose_a_rung_or_call_a_domain_mechanism() {
     );
 }
 
-
 #[test]
 fn legacy_d5_byte_cannot_mint_a_domain_law() {
     // Rust перевіряє лише походження проєкції, а не власноруч описує закон D5.
@@ -104,7 +106,10 @@ fn legacy_host_oracle_schema_is_not_part_of_rust_core() {
         "pub mod program_compiler;",
         "pub mod selfhost_lineage;",
     ] {
-        assert!(!LIB.contains(forbidden), "retired Rust-owned oracle returned: {forbidden}");
+        assert!(
+            !LIB.contains(forbidden),
+            "retired Rust-owned oracle returned: {forbidden}"
+        );
     }
 }
 

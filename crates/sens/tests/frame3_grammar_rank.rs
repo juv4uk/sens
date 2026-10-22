@@ -4,19 +4,15 @@
 use std::collections::HashSet;
 
 use sens::frame3_grammar::{
-    count_inner, decode_body_at_known_length, encode_body_at_known_length, rank_single_root,
-    unrank_binary_source_words, unrank_single_root, rank_binary_source_words,
+    count_inner, decode_body_at_known_length, encode_body_at_known_length,
+    rank_binary_source_words, rank_single_root, unrank_binary_source_words, unrank_single_root,
     ExactWord, GrammarRankError, MAX_INNER_BITS,
 };
-use sens::{parse_binary_source_words, parse_canonical_binary};
 use sens::frame3_semantic::{check_executable_code, AdmissionWitness};
+use sens::{parse_binary_source_words, parse_canonical_binary};
 
 fn word(bits: &str) -> ExactWord {
-    ExactWord::new(
-        bits.len() as u8,
-        u16::from_str_radix(bits, 2).unwrap(),
-    )
-    .unwrap()
+    ExactWord::new(bits.len() as u8, u16::from_str_radix(bits, 2).unwrap()).unwrap()
 }
 
 fn words(source: &str) -> Vec<ExactWord> {
@@ -36,11 +32,7 @@ fn checked(source: &str) {
     assert_eq!(parse_canonical_binary(source).unwrap().len(), 1);
 }
 
-fn enumerate_exact_words(
-    bits: usize,
-    current: &mut Vec<String>,
-    done: &mut impl FnMut(&[String]),
-) {
+fn enumerate_exact_words(bits: usize, current: &mut Vec<String>, done: &mut impl FnMut(&[String])) {
     if bits == 0 {
         done(current);
         return;
@@ -90,16 +82,16 @@ fn exact_d2_rank_matches_real_rust_reader_for_every_short_source() {
                 count += 1;
                 assert!(ranks.insert(rank.ordinal), "duplicate rank: {source}");
                 assert_eq!(rank.inner_bits as usize, bits);
-                assert_eq!(
-                    unrank_single_root(bits, rank.ordinal).unwrap(),
-                    exact_words
-                );
+                assert_eq!(unrank_single_root(bits, rank.ordinal).unwrap(), exact_words);
             }
         });
         assert_eq!(count, expected_count, "bit length {bits}");
         assert_eq!(ranks.len(), expected_count);
         for i in 0..count {
-            assert!(ranks.contains(&(i as u128)), "missing rank {i} for {bits} bits");
+            assert!(
+                ranks.contains(&(i as u128)),
+                "missing rank {i} for {bits} bits"
+            );
         }
     }
 }
@@ -129,7 +121,10 @@ fn nested_dot_and_quoted_nonexecutable_structure_stay_exact() {
 
 #[test]
 fn fail_closed_on_unknown_lengths_ambiguous_roots_and_unused_codes() {
-    assert_eq!(count_inner(MAX_INNER_BITS + 1), Err(GrammarRankError::TooLarge));
+    assert_eq!(
+        count_inner(MAX_INNER_BITS + 1),
+        Err(GrammarRankError::TooLarge)
+    );
     assert_eq!(ExactWord::new(2, 4), Err(GrammarRankError::InvalidWord));
     assert_eq!(ExactWord::new(10, 0), Err(GrammarRankError::InvalidWord));
 
@@ -154,9 +149,15 @@ fn fail_closed_on_unknown_lengths_ambiguous_roots_and_unused_codes() {
         decode_body_at_known_length(2, &[0, 0]),
         Err(GrammarRankError::NonCanonical)
     );
-    assert_eq!(encode_body_at_known_length(&words("10 01")).unwrap(), (0, vec![]));
+    assert_eq!(
+        encode_body_at_known_length(&words("10 01")).unwrap(),
+        (0, vec![])
+    );
     assert_eq!(decode_body_at_known_length(0, &[]).unwrap(), words("10 01"));
-    assert_eq!(decode_body_at_known_length(0, &[0]), Err(GrammarRankError::NonCanonical));
+    assert_eq!(
+        decode_body_at_known_length(0, &[0]),
+        Err(GrammarRankError::NonCanonical)
+    );
 }
 
 #[test]
@@ -176,11 +177,8 @@ fn codec_typed_word_bridge_preserves_every_domain_and_d2_marker() {
                 .map(|token| token.word)
                 .collect::<Vec<_>>();
             let number = rank_binary_source_words(&original).unwrap();
-            let restored = unrank_binary_source_words(
-                number.inner_bits as usize,
-                number.ordinal,
-            )
-            .unwrap();
+            let restored =
+                unrank_binary_source_words(number.inner_bits as usize, number.ordinal).unwrap();
             assert_eq!(restored, original, "{source}");
         }
     }
@@ -213,18 +211,19 @@ fn code_data_arity_redundancy_witness_is_contextual_and_fail_conservative() {
     let dead = AdmissionWitness::ProvablyImpossible;
     let unknown = AdmissionWitness::NotProvenImpossible;
 
-    assert_eq!(verdict("10 010 01"), dead);  // ATOM has no argument.
+    assert_eq!(verdict("10 010 01"), dead); // ATOM has no argument.
     assert_eq!(verdict("10 10 010 01 01"), dead); // ((ATOM))
-    assert_eq!(verdict("10 001 01"), dead);  // QUOTE has no argument.
+    assert_eq!(verdict("10 001 01"), dead); // QUOTE has no argument.
     assert_eq!(verdict("10 001 0 1 01"), dead); // QUOTE has two arguments.
     assert_eq!(verdict("10 101 0 01"), dead); // EQ needs two arguments.
     assert_eq!(verdict("10 111 0 01"), dead); // CONS needs two arguments.
     assert_eq!(verdict("10 010 10 010 01 01"), dead); // invalid evaluated operand.
     assert_eq!(
-        verdict("10 001 10 10 010 01 01 01"), unknown,
+        verdict("10 001 10 10 010 01 01 01"),
+        unknown,
         "QUOTE preserves invalid-to-execute nested syntax as data"
     );
-    assert_eq!(verdict("10 010 0 01"), unknown);  // Arity alone is not full validity.
+    assert_eq!(verdict("10 010 0 01"), unknown); // Arity alone is not full validity.
     assert_eq!(verdict("10 110 10 010 01 01"), unknown); // COND owns clauses.
     assert_eq!(verdict("10 000 01"), unknown); // Empty D3 is NOT a callable identity.
     assert_eq!(verdict("10 01"), unknown); // () is a value.

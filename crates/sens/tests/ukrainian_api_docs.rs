@@ -43,7 +43,8 @@ fn stari_nazvy_dvokh_predykativ_lyshaiutsia_aliasamy_symisnosti() {
 
 #[test]
 fn dovidnyk_poiasniuie_ne_predykaty_shcho_mozhut_povernuty_pustyi_spysok() {
-    for name in ["отримати-з-карти", "підтримувальний-доказ", "та", "або"] {
+    for name in ["отримати-з-карти", "підтримувальний-доказ", "та", "або"]
+    {
         let kind = documented_kind(name)
             .unwrap_or_else(|| panic!("немає документаційного запису для {name}"));
         assert_ne!(kind, "predicate");

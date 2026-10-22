@@ -5,11 +5,11 @@
 //! structural law, and lifts W1 plus W3-W9 payloads directly into DomainIdentity.
 //! D8/D9 stay domain-qualified; no unqualified flat-byte function identity is constructed.
 
+use crate::syntax::ExprKind;
 use crate::{
     parse_binary_source_words, BinarySourceToken, BinarySourceWord, ErrorKind, Expr, LanguageError,
     Span,
 };
-use crate::syntax::ExprKind;
 use std::rc::Rc;
 
 const D2_SEPARATOR: u8 = 0b00;
@@ -60,7 +60,6 @@ pub fn parse_canonical_packed_words(
     })?;
 
     parse_canonical_word_sequence(&words)
-
 }
 
 /// Read an already-decoded sequence of *typed* binary domain words.
@@ -87,7 +86,10 @@ pub fn parse_canonical_word_sequence(
         })?;
         tokens.push(BinarySourceToken {
             word,
-            span: Span { start, end: bit_offset.div_ceil(8) },
+            span: Span {
+                start,
+                end: bit_offset.div_ceil(8),
+            },
         });
     }
     CanonicalReader::new(&tokens, bit_offset.div_ceil(8)).parse_program()
@@ -251,14 +253,10 @@ impl<'a> CanonicalReader<'a> {
                         self.skip_separators();
 
                         let Some(tail_start) = self.tokens.get(self.cursor).copied() else {
-                            return Err(self.error(
-                                "D2 dot word 11 requires one tail expression",
-                                token.span,
-                            ));
+                            return Err(self
+                                .error("D2 dot word 11 requires one tail expression", token.span));
                         };
-                        if is_d2(tail_start.word, D2_CLOSE)
-                            || is_d2(tail_start.word, D2_DOT)
-                        {
+                        if is_d2(tail_start.word, D2_CLOSE) || is_d2(tail_start.word, D2_DOT) {
                             return Err(self.error(
                                 "D2 dot word 11 requires one tail expression",
                                 tail_start.span,
@@ -393,7 +391,10 @@ mod tests {
             }
         }
         let collisions = parse_canonical_binary("10101000 010101000").unwrap();
-        assert_eq!(domain(&collisions[0]).packed_bits(), domain(&collisions[1]).packed_bits());
+        assert_eq!(
+            domain(&collisions[0]).packed_bits(),
+            domain(&collisions[1]).packed_bits()
+        );
         assert_ne!(domain(&collisions[0]), domain(&collisions[1]));
     }
 
@@ -407,20 +408,32 @@ mod tests {
         assert_eq!(packed.bit_len(), 20);
         assert_eq!(packed.bytes(), &[0x88, 0xC0, 0x50]);
         let root = parse_canonical_packed_words(&packed, &[2, 3, 4, 9, 2]).unwrap();
-        let ExprKind::List(items) = &root[0].kind else { panic!("D2 opening structure"); };
+        let ExprKind::List(items) = &root[0].kind else {
+            panic!("D2 opening structure");
+        };
         assert_eq!(items.len(), 3);
         for (node, (width, bits)) in items.iter().zip([(3, 1), (4, 1), (9, 257)]) {
-            assert_eq!((domain(node).width(), domain(node).packed_bits()), (width, bits));
+            assert_eq!(
+                (domain(node).width(), domain(node).packed_bits()),
+                (width, bits)
+            );
         }
-        assert!(crate::PackedBitstream::from_parts(vec![0x88, 0xC0, 0x51], 20).is_none(),
-            "nonzero trailing padding may not spell the same 20 bits");
+        assert!(
+            crate::PackedBitstream::from_parts(vec![0x88, 0xC0, 0x51], 20).is_none(),
+            "nonzero trailing padding may not spell the same 20 bits"
+        );
         // A dense payload has no self-describing word boundaries.
         // Both schedules total 20 bits and are structurally valid, but
         // different exact widths select different domain identities.
         let alternate = parse_canonical_packed_words(&packed, &[2, 3, 5, 8, 2])
             .expect("the second complete width schedule is mechanically valid");
-        let ExprKind::List(other) = &alternate[0].kind else { panic!("same D2 frame"); };
-        assert_eq!((domain(&other[1]).width(), domain(&other[2]).width()), (5, 8));
+        let ExprKind::List(other) = &alternate[0].kind else {
+            panic!("same D2 frame");
+        };
+        assert_eq!(
+            (domain(&other[1]).width(), domain(&other[2]).width()),
+            (5, 8)
+        );
         assert_ne!(domain(&items[1]), domain(&other[1]));
         assert_ne!(domain(&items[2]), domain(&other[2]));
     }
@@ -436,7 +449,10 @@ mod tests {
         let mut valid = "10 ".repeat(moderate);
         valid.push_str("001");
         valid.push_str(&" 01".repeat(moderate));
-        assert!(parse_canonical_binary(&valid).is_ok(), "звичайна вкладеність працює");
+        assert!(
+            parse_canonical_binary(&valid).is_ok(),
+            "звичайна вкладеність працює"
+        );
 
         let err = parse_canonical_binary(&source).expect_err("надмірна глибина D2");
         assert_eq!(err.kind, ErrorKind::Parse);
@@ -456,11 +472,8 @@ mod tests {
         // D3 EMPTY (000), D2 CLOSE (01). Last six physical pad bits are zero.
         // This Rust test proves byte decoding and exact AST structure only;
         // the language result law belongs to the independent Lisp-owned witness.
-        let packed = crate::PackedBitstream::from_parts(
-            vec![0b1000_1000, 0b0100_0000],
-            10,
-        )
-        .expect("canonical MSB-first binary bytes");
+        let packed = crate::PackedBitstream::from_parts(vec![0b1000_1000, 0b0100_0000], 10)
+            .expect("canonical MSB-first binary bytes");
         let forms = parse_canonical_packed_words(&packed, &[2, 3, 3, 2])
             .expect("D2 parses directly from packed binary");
         assert_eq!(forms.len(), 1);
@@ -468,7 +481,10 @@ mod tests {
             panic!("expected D2-framed form");
         };
         assert_eq!(call.len(), 2);
-        assert_eq!((domain(&call[0]).width(), domain(&call[0]).packed_bits()), (3, 1));
+        assert_eq!(
+            (domain(&call[0]).width(), domain(&call[0]).packed_bits()),
+            (3, 1)
+        );
         assert!(matches!(call[1].kind, ExprKind::List(ref items) if items.is_empty()));
     }
 
@@ -477,7 +493,10 @@ mod tests {
         let visible = "10 101 00 10 110 01 01";
         let source_tokens = crate::parse_binary_source_words(visible).unwrap();
         let packed = crate::pack_binary_source_tokens(&source_tokens);
-        let widths: Vec<usize> = source_tokens.iter().map(|token| token.word.width()).collect();
+        let widths: Vec<usize> = source_tokens
+            .iter()
+            .map(|token| token.word.width())
+            .collect();
 
         let direct = parse_canonical_packed_words(&packed, &widths).unwrap();
         let visual = parse_canonical_binary(visible).unwrap();
@@ -503,22 +522,21 @@ mod tests {
 
     #[test]
     fn packed_boundary_mismatch_fails_closed_without_legacy_fallback() {
-        let packed = crate::PackedBitstream::from_parts(
-            vec![0b1000_1000, 0b0100_0000],
-            10,
-        ).unwrap();
-        for wrong in [&[2usize, 3, 3][..], &[2, 3, 0, 5], &[2, 3, 3, 3], &[2, 3, 3, 10]] {
+        let packed =
+            crate::PackedBitstream::from_parts(vec![0b1000_1000, 0b0100_0000], 10).unwrap();
+        for wrong in [
+            &[2usize, 3, 3][..],
+            &[2, 3, 0, 5],
+            &[2, 3, 3, 3],
+            &[2, 3, 3, 10],
+        ] {
             let err = parse_canonical_packed_words(&packed, wrong).unwrap_err();
             assert_eq!(err.kind, ErrorKind::Parse);
             assert!(err.message.contains("word-boundary schedule"));
         }
         assert!(parse_canonical_packed_words(&packed, &[2, 3, 3, 2]).is_ok());
         assert!(
-            crate::PackedBitstream::from_parts(
-                vec![0b1000_1000, 0b0100_0001],
-                10,
-            )
-            .is_none(),
+            crate::PackedBitstream::from_parts(vec![0b1000_1000, 0b0100_0001], 10,).is_none(),
             "nonzero unused padding bits are not a second spelling"
         );
     }
@@ -564,13 +582,19 @@ mod tests {
             panic!("expected outer list");
         };
         assert_eq!(items.len(), 2);
-        assert_eq!((domain(&items[0]).width(), domain(&items[0]).packed_bits()), (3, 0b101));
+        assert_eq!(
+            (domain(&items[0]).width(), domain(&items[0]).packed_bits()),
+            (3, 0b101)
+        );
 
         let ExprKind::List(inner) = &items[1].kind else {
             panic!("expected nested list");
         };
         assert_eq!(inner.len(), 1);
-        assert_eq!((domain(&inner[0]).width(), domain(&inner[0]).packed_bits()), (3, 0b110));
+        assert_eq!(
+            (domain(&inner[0]).width(), domain(&inner[0]).packed_bits()),
+            (3, 0b110)
+        );
     }
 
     #[test]
@@ -579,13 +603,22 @@ mod tests {
         let ExprKind::Pair(first, rest) = expression.kind else {
             panic!("expected first pair");
         };
-        assert_eq!((domain(&first).width(), domain(&first).packed_bits()), (3, 0b101));
+        assert_eq!(
+            (domain(&first).width(), domain(&first).packed_bits()),
+            (3, 0b101)
+        );
 
         let ExprKind::Pair(second, tail) = &rest.kind else {
             panic!("expected second pair");
         };
-        assert_eq!((domain(second).width(), domain(second).packed_bits()), (3, 0b110));
-        assert_eq!((domain(tail).width(), domain(tail).packed_bits()), (3, 0b001));
+        assert_eq!(
+            (domain(second).width(), domain(second).packed_bits()),
+            (3, 0b110)
+        );
+        assert_eq!(
+            (domain(tail).width(), domain(tail).packed_bits()),
+            (3, 0b001)
+        );
     }
 
     #[test]
@@ -603,10 +636,7 @@ mod tests {
 
     #[test]
     fn w3_through_w8_reach_ast_with_exact_domain_preserved() {
-        let parsed = parse_canonical_binary(
-            "001 0001 00001 000001 0000001 00000001",
-        )
-        .unwrap();
+        let parsed = parse_canonical_binary("001 0001 00001 000001 0000001 00000001").unwrap();
         let observed = parsed
             .iter()
             .map(|expr| {
@@ -654,7 +684,10 @@ mod tests {
         let ExprKind::Pair(first, rest) = expression.kind else {
             panic!("D2 dotted W7 sequence must remain a Pair");
         };
-        assert_eq!((domain(&first).width(), domain(&first).packed_bits()), (7, 1));
+        assert_eq!(
+            (domain(&first).width(), domain(&first).packed_bits()),
+            (7, 1)
+        );
         assert_eq!((domain(&rest).width(), domain(&rest).packed_bits()), (7, 2));
         assert!(domain(&first).core_operation().is_none());
         assert!(domain(&rest).core_operation().is_none());
@@ -678,11 +711,9 @@ mod tests {
     fn dotted_structure_rejects_extra_tail_expression() {
         let error = parse_canonical_binary("10 001 11 010 100 01").unwrap_err();
         assert_eq!(error.kind, ErrorKind::Parse);
-        assert!(
-            error
-                .message
-                .contains("exactly one tail expression before 01")
-        );
+        assert!(error
+            .message
+            .contains("exactly one tail expression before 01"));
     }
 
     #[test]
@@ -707,8 +738,14 @@ mod tests {
             panic!("D2 must retain the original two-cell list");
         };
         assert_eq!(items.len(), 2);
-        assert_eq!((domain(&items[0]).width(), domain(&items[0]).packed_bits()), (7, 65));
-        assert_eq!((domain(&items[1]).width(), domain(&items[1]).packed_bits()), (7, 66));
+        assert_eq!(
+            (domain(&items[0]).width(), domain(&items[0]).packed_bits()),
+            (7, 65)
+        );
+        assert_eq!(
+            (domain(&items[1]).width(), domain(&items[1]).packed_bits()),
+            (7, 66)
+        );
         assert_eq!(
             super::text7_binding_key(&expression).as_deref(),
             Some("#t7:4142"),
@@ -723,8 +760,14 @@ mod tests {
             panic!("single-cell D2 frame must remain a structural list");
         };
         assert_eq!(items.len(), 1);
-        assert_eq!((domain(&items[0]).width(), domain(&items[0]).packed_bits()), (7, 106));
-        assert_eq!(super::text7_binding_key(&expression).as_deref(), Some("#t7:6a"));
+        assert_eq!(
+            (domain(&items[0]).width(), domain(&items[0]).packed_bits()),
+            (7, 106)
+        );
+        assert_eq!(
+            super::text7_binding_key(&expression).as_deref(),
+            Some("#t7:6a")
+        );
     }
 
     #[test]
@@ -761,7 +804,13 @@ mod tests {
     fn separators_may_separate_top_level_expressions_without_becoming_values() {
         let parsed = parse_canonical_binary("001 00 010").unwrap();
         assert_eq!(parsed.len(), 2);
-        assert_eq!((domain(&parsed[0]).width(), domain(&parsed[0]).packed_bits()), (3, 1));
-        assert_eq!((domain(&parsed[1]).width(), domain(&parsed[1]).packed_bits()), (3, 2));
+        assert_eq!(
+            (domain(&parsed[0]).width(), domain(&parsed[0]).packed_bits()),
+            (3, 1)
+        );
+        assert_eq!(
+            (domain(&parsed[1]).width(), domain(&parsed[1]).packed_bits()),
+            (3, 2)
+        );
     }
 }

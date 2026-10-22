@@ -1,11 +1,8 @@
 use sens::{eval_program, Session};
 
-const SOURCE: &str =
-    include_str!("../../../fixtures/emrg/v1/station-checkin-v1.source.lisp");
-const WIRE: &str =
-    include_str!("../../../fixtures/emrg/v1/station-checkin-v1.wire");
-const SURFACES: &str =
-    include_str!("../../../fixtures/emrg/v1/station-checkin-v1.surfaces.tsv");
+const SOURCE: &str = include_str!("../../../fixtures/emrg/v1/station-checkin-v1.source.lisp");
+const WIRE: &str = include_str!("../../../fixtures/emrg/v1/station-checkin-v1.wire");
+const SURFACES: &str = include_str!("../../../fixtures/emrg/v1/station-checkin-v1.surfaces.tsv");
 
 const EXPECTED_WIRE_HEX: &str =
     "282371323a312f31202371323a302f3120226d2d30303031222022323032362d31302d30345430303a30303a30305a2220282371323a302f312920282371323a302f312929";
@@ -33,9 +30,7 @@ fn station_checkin_v1_has_runtime_verified_canonical_wire() {
     let program = format!("(write-to-string (quote {SOURCE}))");
     assert_eq!(eval(&program), format!("{WIRE:?}"));
 
-    let round_trip = format!(
-        "(write-to-string (read (write-to-string (quote {SOURCE}))))"
-    );
+    let round_trip = format!("(write-to-string (read (write-to-string (quote {SOURCE}))))");
     assert_eq!(eval(&round_trip), format!("{WIRE:?}"));
 }
 

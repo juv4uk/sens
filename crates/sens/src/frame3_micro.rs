@@ -95,10 +95,7 @@ mod tests {
     #[test]
     fn byte_contents_never_select_profile() {
         for byte in 0u8..=u8::MAX {
-            assert_eq!(
-                frame3_micro_profile(&[byte]),
-                Ok(Frame3MicroProfile::F3M1)
-            );
+            assert_eq!(frame3_micro_profile(&[byte]), Ok(Frame3MicroProfile::F3M1));
         }
         assert_eq!(
             frame3_micro_profile(&[0xF3, 0x00]),

@@ -26,7 +26,10 @@ fn cond_expected_result_is_data_not_a_parameter() {
 
 #[test]
 fn nested_closure_captures_outer_parameters() {
-    assert_eq!(run("(((00001000 (x) (00001000 (y) (00001100 x y))) 3) 4)"), "7");
+    assert_eq!(
+        run("(((00001000 (x) (00001000 (y) (00001100 x y))) 3) 4)"),
+        "7"
+    );
     assert_eq!(
         run("((((00001000 (a) (00001000 (b) (00001000 (c) (00001101 (00001100 a b) c)))) 10) 20) 5)"),
         "25"
@@ -45,7 +48,10 @@ fn eval_in_inner_frame_shadows_outer_parameter() {
 
 #[test]
 fn def_in_inner_frame_shadows_outer_parameter() {
-    assert_eq!(run("((00001000 (x) ((00001000 () (00001011 x 9) x))) 1)"), "9");
+    assert_eq!(
+        run("((00001000 (x) ((00001000 () (00001011 x 9) x))) 1)"),
+        "9"
+    );
 }
 
 #[test]
@@ -68,8 +74,10 @@ fn rest_parameter_is_a_slot() {
 #[test]
 fn deep_tail_recursion_through_slots_stays_off_the_stack() {
     assert_eq!(
-        run("(00001011 down (00001000 (n acc) (00000111 ((00000011 n 0) acc) \
-             (t (down (00001101 n 1) (00001100 acc 1)))))) (down 100000 0)"),
+        run(
+            "(00001011 down (00001000 (n acc) (00000111 ((00000011 n 0) acc) \
+             (t (down (00001101 n 1) (00001100 acc 1)))))) (down 100000 0)"
+        ),
         "100000"
     );
 }
@@ -79,7 +87,10 @@ fn deep_tail_recursion_through_slots_stays_off_the_stack() {
 #[test]
 fn quote_of_a_parameter_name_stays_a_symbol_after_names_left_the_node() {
     assert_eq!(run("((00001000 (alpha) (00000001 alpha)) 5)"), "alpha");
-    assert_eq!(run("((00001000 (alpha) (00000001 (alpha beta))) 5)"), "(alpha beta)");
+    assert_eq!(
+        run("((00001000 (alpha) (00000001 (alpha beta))) 5)"),
+        "(alpha beta)"
+    );
 }
 
 #[test]
@@ -102,5 +113,8 @@ fn a_parameter_cannot_take_an_admitted_function_code() {
     // ніколи не перехопить, бо параметр із таким іменем відхиляється на вході.
     let mut session = Session::default();
     let result = eval_program("((00001000 (00000010) 00000010) 1)", &mut session);
-    assert!(result.is_err(), "a function code must not be bindable as a local");
+    assert!(
+        result.is_err(),
+        "a function code must not be bindable as a local"
+    );
 }

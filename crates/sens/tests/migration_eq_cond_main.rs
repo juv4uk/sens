@@ -31,6 +31,9 @@ fn corrupt_physical_and_legacy_text_are_rejected() {
     );
     let mut bad = SELECT_T5.to_vec();
     bad.push(242);
-    assert_eq!(decode_ternary_program(&bad), Err(TernaryTransportError::InvalidTail));
+    assert_eq!(
+        decode_ternary_program(&bad),
+        Err(TernaryTransportError::InvalidTail)
+    );
     assert!(encode_binary_projection_ternary(HISTORICAL_SOURCE).is_err());
 }

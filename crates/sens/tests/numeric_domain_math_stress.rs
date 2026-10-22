@@ -29,7 +29,10 @@ fn integer(value: Value) -> (usize, i128) {
     };
     (
         number.numeric_domain_width().expect("explicit Dn identity"),
-        number.to_decimal_string().parse().expect("exact signed decimal oracle view"),
+        number
+            .to_decimal_string()
+            .parse()
+            .expect("exact signed decimal oracle view"),
     )
 }
 
@@ -56,16 +59,19 @@ fn independent_oracle_18000_cases_of_signed_d24_d48_arithmetic() {
             let left = Value::BinaryNumber(signed_word(width, a));
             let right = Value::BinaryNumber(signed_word(width, b));
 
-            for (operator, expected) in [
-                ("+", a + b),
-                ("-", a - b),
-                ("*", a * b),
-            ] {
+            for (operator, expected) in [("+", a + b), ("-", a - b), ("*", a * b)] {
                 let result = domain_numeric_value(operator, &left, &right)
                     .unwrap_or_else(|| panic!("D{width} {a} {operator} {b} rejected"));
                 let (actual_width, actual) = integer(result);
                 assert_eq!(actual, expected, "D{width}: {a} {operator} {b}");
-                assert_eq!(actual_width, if fits_signed(expected, width) { width } else { 2 * width });
+                assert_eq!(
+                    actual_width,
+                    if fits_signed(expected, width) {
+                        width
+                    } else {
+                        2 * width
+                    }
+                );
             }
         }
     }
@@ -87,24 +93,41 @@ fn signed_d24_plus_boundaries_extend_without_wrap_or_lost_bits() {
             Value::BinaryNumber(BinaryNumber::from_numeric_domain_bits(width, bits).unwrap())
         };
         let max_plus_one = domain_numeric_value("+", &admit(&maximum), &admit(&one)).unwrap();
-        let Value::BinaryNumber(ref carried) = max_plus_one else { panic!("integer result") };
+        let Value::BinaryNumber(ref carried) = max_plus_one else {
+            panic!("integer result")
+        };
         assert_eq!(carried.numeric_domain_width(), Some(2 * width));
         let mut positive_carry = vec![0; 2 * width];
         positive_carry[width] = 1; // +2^(width-1), exact two's-complement D(2n)
-        assert_eq!(carried.exact_numeric_domain_bits(), Some(positive_carry.clone()));
+        assert_eq!(
+            carried.exact_numeric_domain_bits(),
+            Some(positive_carry.clone())
+        );
 
         let min_minus_one = domain_numeric_value("-", &admit(&minimum), &admit(&one)).unwrap();
-        let Value::BinaryNumber(ref widened_negative) = min_minus_one else { panic!("integer result") };
+        let Value::BinaryNumber(ref widened_negative) = min_minus_one else {
+            panic!("integer result")
+        };
         assert_eq!(widened_negative.numeric_domain_width(), Some(2 * width));
         let mut negative_below_minimum = vec![1; 2 * width];
         negative_below_minimum[width] = 0; // -(2^(width-1)+1)
-        assert_eq!(widened_negative.exact_numeric_domain_bits(), Some(negative_below_minimum));
+        assert_eq!(
+            widened_negative.exact_numeric_domain_bits(),
+            Some(negative_below_minimum)
+        );
 
-        let negated_minimum = domain_numeric_value("*", &admit(&minimum), &admit(&minus_one)).unwrap();
-        let Value::BinaryNumber(ref positive_minimum) = negated_minimum else { panic!("integer result") };
-        assert_eq!(positive_minimum.exact_numeric_domain_bits(), Some(positive_carry));
+        let negated_minimum =
+            domain_numeric_value("*", &admit(&minimum), &admit(&minus_one)).unwrap();
+        let Value::BinaryNumber(ref positive_minimum) = negated_minimum else {
+            panic!("integer result")
+        };
+        assert_eq!(
+            positive_minimum.exact_numeric_domain_bits(),
+            Some(positive_carry)
+        );
 
-        let all_ones_plus_one = domain_numeric_value("+", &admit(&minus_one), &admit(&one)).unwrap();
+        let all_ones_plus_one =
+            domain_numeric_value("+", &admit(&minus_one), &admit(&one)).unwrap();
         assert_eq!(all_ones_plus_one, admit(&zero));
     }
 }
@@ -117,7 +140,10 @@ fn domain_inference_and_mixed_width_coercion_remain_forbidden() {
     for (left, right) in [
         (d24.clone(), d48.clone()),
         (d48.clone(), d24.clone()),
-        (d24.clone(), Value::BinaryNumber(BinaryNumber::from_bits([1, 0, 0, 0, 1]).unwrap())),
+        (
+            d24.clone(),
+            Value::BinaryNumber(BinaryNumber::from_bits([1, 0, 0, 0, 1]).unwrap()),
+        ),
     ] {
         for operator in ["+", "-", "*", "/"] {
             assert!(domain_numeric_value(operator, &left, &right).is_none());
@@ -128,17 +154,31 @@ fn domain_inference_and_mixed_width_coercion_remain_forbidden() {
 #[test]
 fn real_core_session_runs_signed_math_and_ratio_composition() {
     let mut session = Session::default();
-    session.environment.define("a", Value::BinaryNumber(signed_word(24, -2)));
-    session.environment.define("b", Value::BinaryNumber(signed_word(24, 3)));
+    session
+        .environment
+        .define("a", Value::BinaryNumber(signed_word(24, -2)));
+    session
+        .environment
+        .define("b", Value::BinaryNumber(signed_word(24, 3)));
 
     for (expression, expected) in [("(+ a b)", "1"), ("(* a b)", "-6"), ("(- a b)", "-5")] {
-        let result = eval_program(expression, &mut session).expect("Core signed D24 math").value;
+        let result = eval_program(expression, &mut session)
+            .expect("Core signed D24 math")
+            .value;
         assert_eq!(result.to_string(), expected, "{expression}");
     }
 
-    let ratio = domain_numeric_value("/", &Value::BinaryNumber(signed_word(24, -2)),
-        &Value::BinaryNumber(signed_word(24, 3))).expect("exact signed ratio");
+    let ratio = domain_numeric_value(
+        "/",
+        &Value::BinaryNumber(signed_word(24, -2)),
+        &Value::BinaryNumber(signed_word(24, 3)),
+    )
+    .expect("exact signed ratio");
     assert_eq!(ratio.to_string(), "-2/3");
-    assert!(domain_numeric_value("/", &Value::BinaryNumber(signed_word(24, 1)),
-        &Value::BinaryNumber(signed_word(24, 0))).is_none());
+    assert!(domain_numeric_value(
+        "/",
+        &Value::BinaryNumber(signed_word(24, 1)),
+        &Value::BinaryNumber(signed_word(24, 0))
+    )
+    .is_none());
 }

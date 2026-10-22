@@ -86,17 +86,30 @@ fn sens_decode(bytes: &[u8]) -> Vec<Vec<u8>> {
     words
 }
 
-fn trial(operation: &str, words: &[BinarySourceWord], physical: &[u8], forms: usize, repetitions: usize) {
+fn trial(
+    operation: &str,
+    words: &[BinarySourceWord],
+    physical: &[u8],
+    forms: usize,
+    repetitions: usize,
+) {
     let begin = Instant::now();
     for _ in 0..repetitions {
         match operation {
-            "encode" => { black_box(sens_encode(black_box(words))); }
-            "decode" => { black_box(sens_decode(black_box(physical))); }
+            "encode" => {
+                black_box(sens_encode(black_box(words)));
+            }
+            "decode" => {
+                black_box(sens_decode(black_box(physical)));
+            }
             _ => panic!("unsupported benchmark operation"),
         }
     }
     let elapsed = begin.elapsed().as_nanos();
-    println!("sample impl=sens forms={} op={} elapsed_ns={} reps={}", forms, operation, elapsed, repetitions);
+    println!(
+        "sample impl=sens forms={} op={} elapsed_ns={} reps={}",
+        forms, operation, elapsed, repetitions
+    );
 }
 
 fn main() {
@@ -117,11 +130,22 @@ fn main() {
         let recovered = sens_decode(&physical);
         let expected: Vec<Vec<u8>> = words.iter().map(|w| word_bits(*w)).collect();
         assert_eq!(recovered, expected, "mechanical SENS T5 parity");
-        println!("fixture impl=sens forms={} words={} bytes={} fnv64={:x}", forms, words.len(), physical.len(), fnv64(&physical));
+        println!(
+            "fixture impl=sens forms={} words={} bytes={} fnv64={:x}",
+            forms,
+            words.len(),
+            physical.len(),
+            fnv64(&physical)
+        );
         print!("physical impl=sens forms={} hex=", forms);
-        for byte in &physical { print!("{byte:02x}"); }
+        for byte in &physical {
+            print!("{byte:02x}");
+        }
         println!();
-        for _ in 0..3 { black_box(sens_encode(&words)); black_box(sens_decode(&physical)); }
+        for _ in 0..3 {
+            black_box(sens_encode(&words));
+            black_box(sens_decode(&physical));
+        }
         for _ in 0..5 {
             trial("encode", &words, &physical, forms, repetitions);
             trial("decode", &words, &physical, forms, repetitions);

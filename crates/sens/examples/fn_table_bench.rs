@@ -22,9 +22,20 @@ const KNOWN_SENS_PANIC: &[&str] = &["/"];
 
 /// Результат залежить від часу/лічильника — звіряється лише факт виклику.
 const NONDETERMINISTIC: &[&str] = &[
-    "mono-ns", "unix-time-now", "utc-now", "mono-ms", "elapsed-ns", "створити-символ", "env",
-    "deadline-reached?", "deadline-reached-at?", "deadline-from", "deadline-after-ns",
-    "timezone-detect", "timezone-name", "timezone-offset-seconds",
+    "mono-ns",
+    "unix-time-now",
+    "utc-now",
+    "mono-ms",
+    "elapsed-ns",
+    "створити-символ",
+    "env",
+    "deadline-reached?",
+    "deadline-reached-at?",
+    "deadline-from",
+    "deadline-after-ns",
+    "timezone-detect",
+    "timezone-name",
+    "timezone-offset-seconds",
 ];
 
 /// Кандидати аргументів, від порожнього до складних; береться перший,
@@ -76,7 +87,14 @@ fn try_eval(src: &str, session: &mut Session) -> Result<String, String> {
         .map_err(|e| e.to_string().lines().next().unwrap_or("").to_owned())
 }
 
-fn bench(src_a: &str, src_b: &str, sa: &mut Session, sb: &mut Session, samples: usize, target_ms: f64) -> (f64, f64, f64, f64) {
+fn bench(
+    src_a: &str,
+    src_b: &str,
+    sa: &mut Session,
+    sb: &mut Session,
+    samples: usize,
+    target_ms: f64,
+) -> (f64, f64, f64, f64) {
     let fa = parse(src_a).unwrap();
     let fb = parse(src_b).unwrap();
     // Калібрування на SENS-формі.
@@ -88,7 +106,9 @@ fn bench(src_a: &str, src_b: &str, sa: &mut Session, sb: &mut Session, samples: 
         }
         let ms = t.elapsed().as_secs_f64() * 1e3;
         if ms >= target_ms / 4.0 || iters >= 1 << 24 {
-            iters = ((iters as f64) * (target_ms / ms.max(1e-6))).ceil().max(1.0) as usize;
+            iters = ((iters as f64) * (target_ms / ms.max(1e-6)))
+                .ceil()
+                .max(1.0) as usize;
             break;
         }
         iters *= 4;
@@ -140,7 +160,11 @@ fn main() {
             continue;
         }
         if KNOWN_SENS_PANIC.contains(&en) {
-            row("sens-panics", "4 2", "arithmetic.rs:237 unreachable!(known arithmetic operator)");
+            row(
+                "sens-panics",
+                "4 2",
+                "arithmetic.rs:237 unreachable!(known arithmetic operator)",
+            );
             continue;
         }
         let mut sa = fresh();
@@ -151,7 +175,9 @@ fn main() {
         let mut first_sens_err: Option<(&str, String)> = None;
         let mut found: Option<(&str, String, String)> = None;
         for a in CANDIDATES {
-            let Ok(ev) = try_eval(&format!("({en} {a})"), &mut sa) else { continue };
+            let Ok(ev) = try_eval(&format!("({en} {a})"), &mut sa) else {
+                continue;
+            };
             en_ok_any = true;
             match try_eval(&format!("({code} {a})"), &mut sb) {
                 Ok(sv) => {
@@ -167,7 +193,11 @@ fn main() {
         }
         let Some((a, en_value, sens_value)) = found else {
             if !en_ok_any {
-                row("no-working-args", "", "жоден кандидат аргументів не підійшов англійській формі");
+                row(
+                    "no-working-args",
+                    "",
+                    "жоден кандидат аргументів не підійшов англійській формі",
+                );
             } else {
                 let (a, e) = first_sens_err.unwrap();
                 let status = if e.contains("no callable mechanism") {
@@ -181,15 +211,29 @@ fn main() {
         };
         let sens_src = format!("({code} {a})");
         if sens_value != en_value && !NONDETERMINISTIC.contains(&en) {
-            row("results-differ", a, &format!("en={en_value} sens={sens_value}").replace('\t', " "));
+            row(
+                "results-differ",
+                a,
+                &format!("en={en_value} sens={sens_value}").replace('\t', " "),
+            );
             continue;
         }
-        let (en_ns, sens_ns, rmin, rmax) =
-            bench(&format!("({en} {a})"), &sens_src, &mut sa, &mut sb, samples, target_ms);
+        let (en_ns, sens_ns, rmin, rmax) = bench(
+            &format!("({en} {a})"),
+            &sens_src,
+            &mut sa,
+            &mut sb,
+            samples,
+            target_ms,
+        );
         println!(
             "FN\t{code}\t{en}\tok\t{a}\t{en_ns:.1}\t{sens_ns:.1}\t{:.3}\t{rmin:.3}\t{rmax:.3}\t{}",
             en_ns / sens_ns,
-            if NONDETERMINISTIC.contains(&en) { "nondeterministic" } else { "" }
+            if NONDETERMINISTIC.contains(&en) {
+                "nondeterministic"
+            } else {
+                ""
+            }
         );
     }
 }

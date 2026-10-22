@@ -16,8 +16,8 @@
 //! String-Primitive nötig.
 
 use sens::{
-    eval_parsed_expressions, eval_core_library_source, eval_pinned_reasoning_source,
-    eval_program, load_core_library, parse_mixed_exact_domain, Session,
+    eval_core_library_source, eval_parsed_expressions, eval_pinned_reasoning_source, eval_program,
+    load_core_library, parse_mixed_exact_domain, Session,
 };
 
 fn eval_import(source: &str) -> String {
@@ -29,18 +29,27 @@ fn eval_import(source: &str) -> String {
     for (path, library) in [
         ("lib/unify.lisp", include_str!("../../../lib/unify.lisp")),
         ("lib/reason.lisp", include_str!("../../../lib/reason.lisp")),
-        ("lib/forward.lisp", include_str!("../../../lib/forward.lisp")),
-        ("lib/knowledge.lisp", include_str!("../../../lib/knowledge.lisp")),
+        (
+            "lib/forward.lisp",
+            include_str!("../../../lib/forward.lisp"),
+        ),
+        (
+            "lib/knowledge.lisp",
+            include_str!("../../../lib/knowledge.lisp"),
+        ),
     ] {
-        eval_pinned_reasoning_source(path, library, &mut session)
-            .unwrap_or_else(|err| panic!("test_id=clips-defrule-d4-split: {path} failed to load: {err}"));
+        eval_pinned_reasoning_source(path, library, &mut session).unwrap_or_else(|err| {
+            panic!("test_id=clips-defrule-d4-split: {path} failed to load: {err}")
+        });
     }
     eval_pinned_reasoning_source(
         "lib/clips-import.lisp",
         include_str!("../../../lib/clips-import.lisp"),
         &mut session,
     )
-    .expect("test_id=clips-defrule-d4-split: CLIPS library must load through pinned exact D9 reader");
+    .expect(
+        "test_id=clips-defrule-d4-split: CLIPS library must load through pinned exact D9 reader",
+    );
     // Test inputs retain their historical data spelling. Only executable
     // library source is parsed as current exact-domain SENS.
     eval_program(source, &mut session)
@@ -62,10 +71,26 @@ fn clips_text_data_uses_current_sens_d7_d8_d9_without_legacy_string_literals() {
     for (case, expression, expected) in [
         ("empty", "(кліпс-рядок-порожній? \"\")", "1"),
         ("not-empty", "(кліпс-рядок-порожній? \"р\")", "0"),
-        ("question", "(кліпс-символ-починається-з-питальника? (як-є ?x))", "1"),
-        ("other-atom", "(кліпс-символ-починається-з-питальника? (як-є x))", "0"),
-        ("colons", "(кліпс-рядок-починається-з-подвійної-двокрапки? \"::x\")", "1"),
-        ("one-colon", "(кліпс-рядок-починається-з-подвійної-двокрапки? \":x\")", "0"),
+        (
+            "question",
+            "(кліпс-символ-починається-з-питальника? (як-є ?x))",
+            "1",
+        ),
+        (
+            "other-atom",
+            "(кліпс-символ-починається-з-питальника? (як-є x))",
+            "0",
+        ),
+        (
+            "colons",
+            "(кліпс-рядок-починається-з-подвійної-двокрапки? \"::x\")",
+            "1",
+        ),
+        (
+            "one-colon",
+            "(кліпс-рядок-починається-з-подвійної-двокрапки? \":x\")",
+            "0",
+        ),
     ] {
         let actual = eval_import(expression);
         assert_eq!(actual, expected,
@@ -125,11 +150,31 @@ fn clips_double_colon_prefix_is_an_exact_d1_total_predicate() {
     // The SENS library, not Rust, computes all predicates. One removed ':'
     // is the negative witness. Failure must be D1:NO, never the NIL datum.
     for (label, source, expected) in [
-        ("positive", "(кліпс-рядок-починається-з-подвійної-двокрапки? \"::sensor\")", "1"),
-        ("one-character-mutant", "(кліпс-рядок-починається-з-подвійної-двокрапки? \":sensor\")", "0"),
-        ("non-prefix", "(кліпс-рядок-починається-з-подвійної-двокрапки? \"sensor::value\")", "0"),
-        ("empty", "(кліпс-рядок-починається-з-подвійної-двокрапки? \"\")", "0"),
-        ("short", "(кліпс-рядок-починається-з-подвійної-двокрапки? \":\")", "0"),
+        (
+            "positive",
+            "(кліпс-рядок-починається-з-подвійної-двокрапки? \"::sensor\")",
+            "1",
+        ),
+        (
+            "one-character-mutant",
+            "(кліпс-рядок-починається-з-подвійної-двокрапки? \":sensor\")",
+            "0",
+        ),
+        (
+            "non-prefix",
+            "(кліпс-рядок-починається-з-подвійної-двокрапки? \"sensor::value\")",
+            "0",
+        ),
+        (
+            "empty",
+            "(кліпс-рядок-починається-з-подвійної-двокрапки? \"\")",
+            "0",
+        ),
+        (
+            "short",
+            "(кліпс-рядок-починається-з-подвійної-двокрапки? \":\")",
+            "0",
+        ),
     ] {
         let actual = eval_import(source);
         assert_eq!(
@@ -181,7 +226,9 @@ fn clips_defrule_exact_pipeline_probes() {
     let mut seen = Vec::new();
     for (label, source) in samples {
         let result = eval_import(source);
-        println!("SENS_CLIPS_INTERMEDIATE test_id=clips-defrule-d4-split step={label} actual={result}");
+        println!(
+            "SENS_CLIPS_INTERMEDIATE test_id=clips-defrule-d4-split step={label} actual={result}"
+        );
         seen.push((label, result));
     }
     for (label, result) in seen {
@@ -581,10 +628,8 @@ fn eval_exact_clips_slot_lookup(source: &str) -> String {
     let mut session = Session::default();
     // Old eval_program(lib/core.lisp) interprets migrated binary heads as
     // numbers. This path uses the already proven, source-pinned D3/D4 loader.
-    sens::eval_core_library_source(include_str!("../../../lib/core.lisp"),
-        &mut session,
-    )
-    .expect("canonical source-pinned bootstrap");
+    sens::eval_core_library_source(include_str!("../../../lib/core.lisp"), &mut session)
+        .expect("canonical source-pinned bootstrap");
 
     // Execute both original production definitions: slot-value-of + lookup.
     // Other historical CLIPS importer functions have separate migration
@@ -599,8 +644,7 @@ fn eval_exact_clips_slot_lookup(source: &str) -> String {
         .expect("real D3/D4 CLIPS definition parses");
     sens::eval_parsed_expressions(&definitions, &mut session)
         .expect("real CLIPS slot definition loads");
-    let request = sens::parse_mixed_exact_domain(source)
-        .expect("D3 quoted test input parses");
+    let request = sens::parse_mixed_exact_domain(source).expect("D3 quoted test input parses");
     sens::eval_parsed_expressions(&request, &mut session)
         .expect("real D3 EQ slot lookup executes")
         .value
@@ -629,9 +673,11 @@ fn clips_defrule_deftemplate_d1_self_verdict_and_mutant() {
     eval_core_library_source(include_str!("../../../lib/core.lisp"), &mut session)
         .expect("test_id=clips-deftemplate-d1: чинний SENS Core");
     let library = include_str!("../../../lib/clips-import.lisp");
-    let start = library.find("(визначити кліпс-визначити-шаблон-форма?\n")
+    let start = library
+        .find("(визначити кліпс-визначити-шаблон-форма?\n")
         .expect("test_id=clips-deftemplate-d1: чинне українське визначення");
-    let end = library[start..].find("(визначити кліпс-рядок-порожній?")
+    let end = library[start..]
+        .find("(визначити кліпс-рядок-порожній?")
         .map(|offset| start + offset)
         .expect("test_id=clips-deftemplate-d1: межа українського визначення");
     let definitions = parse_mixed_exact_domain(&library[start..end])
@@ -640,16 +686,19 @@ fn clips_defrule_deftemplate_d1_self_verdict_and_mutant() {
         .expect("test_id=clips-deftemplate-d1: SENS завантажує визначення");
 
     let fixture = include_str!("../../../tests/semantic/clips-deftemplate-d1-law.lisp");
-    let laws = parse_mixed_exact_domain(fixture)
-        .expect("test_id=clips-deftemplate-d1: читач SENS");
+    let laws = parse_mixed_exact_domain(fixture).expect("test_id=clips-deftemplate-d1: читач SENS");
     assert_eq!(laws.len(), 3, "два позитивні закони і негативний D1 мутант");
     for (index, expected) in [true, true, false].into_iter().enumerate() {
         let observed = eval_parsed_expressions(std::slice::from_ref(&laws[index]), &mut session)
-            .unwrap_or_else(|error| panic!(
-                "test_id=clips-deftemplate-d1 layer=eval law={index} error={error}"
-            )).value;
-        assert_eq!(observed.as_predicate_bit(), Some(expected),
-            "test_id=clips-deftemplate-d1 layer=eval law={index}: exact D1 verdict");
+            .unwrap_or_else(|error| {
+                panic!("test_id=clips-deftemplate-d1 layer=eval law={index} error={error}")
+            })
+            .value;
+        assert_eq!(
+            observed.as_predicate_bit(),
+            Some(expected),
+            "test_id=clips-deftemplate-d1 layer=eval law={index}: exact D1 verdict"
+        );
     }
 }
 
@@ -661,9 +710,11 @@ fn clips_defrule_form_dispatch_d1_self_verdict_and_one_bit_mutant() {
     eval_core_library_source(include_str!("../../../lib/core.lisp"), &mut session)
         .expect("test_id=clips-form-dispatch-d1: чинний SENS Core");
     let library = include_str!("../../../lib/clips-import.lisp");
-    let start = library.find("(визначити кліпс-форма-клаузи\n")
+    let start = library
+        .find("(визначити кліпс-форма-клаузи\n")
         .expect("test_id=clips-form-dispatch-d1: чинне українське визначення");
-    let end = library[start..].find("(визначити кліпс-сполучити-кожен-дописати\n")
+    let end = library[start..]
+        .find("(визначити кліпс-сполучити-кожен-дописати\n")
         .map(|offset| start + offset)
         .expect("test_id=clips-form-dispatch-d1: наступне українське визначення");
     let definitions = parse_mixed_exact_domain(&library[start..end])
@@ -674,13 +725,21 @@ fn clips_defrule_form_dispatch_d1_self_verdict_and_one_bit_mutant() {
     let fixture = include_str!("../../../tests/semantic/clips-form-dispatch-d1-law.lisp");
     let laws = parse_mixed_exact_domain(fixture)
         .expect("test_id=clips-form-dispatch-d1: чинний D3/D4 reader");
-    assert_eq!(laws.len(), 4, "три позитивні закони й один негативний D1 мутант");
+    assert_eq!(
+        laws.len(),
+        4,
+        "три позитивні закони й один негативний D1 мутант"
+    );
     for (index, expected) in [true, true, true, false].into_iter().enumerate() {
         let observed = eval_parsed_expressions(std::slice::from_ref(&laws[index]), &mut session)
-            .unwrap_or_else(|error| panic!(
-                "test_id=clips-form-dispatch-d1 layer=eval law={index} error={error}"
-            )).value;
-        assert_eq!(observed.as_predicate_bit(), Some(expected),
-            "test_id=clips-form-dispatch-d1 layer=eval law={index}: exact D1 verdict");
+            .unwrap_or_else(|error| {
+                panic!("test_id=clips-form-dispatch-d1 layer=eval law={index} error={error}")
+            })
+            .value;
+        assert_eq!(
+            observed.as_predicate_bit(),
+            Some(expected),
+            "test_id=clips-form-dispatch-d1 layer=eval law={index}: exact D1 verdict"
+        );
     }
 }

@@ -17,14 +17,23 @@ pub enum Text7Layout {
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum Text7ProjectionError {
-    UnknownSpelling { layout: Text7Layout, byte_offset: usize },
+    UnknownSpelling {
+        layout: Text7Layout,
+        byte_offset: usize,
+    },
     UnassignedSpelling {
         layout: Text7Layout,
         byte_offset: usize,
         spelling: &'static str,
     },
-    UnrenderableCell { layout: Text7Layout, index: usize, cell: u8 },
-    AmbiguousGlyphSequence { layout: Text7Layout },
+    UnrenderableCell {
+        layout: Text7Layout,
+        index: usize,
+        cell: u8,
+    },
+    AmbiguousGlyphSequence {
+        layout: Text7Layout,
+    },
 }
 
 /// Only the actual v2 keyboard surfaces are mappings. The former phonemic
@@ -42,19 +51,26 @@ fn current_mode(layout: Text7Layout) -> Option<d7_keyboard::D7Mode> {
 /// D2 punctuation is structural only in the *source grammar*, not in a text value.
 pub fn encode_text7(text: &str, layout: Text7Layout) -> Result<Text7, Text7ProjectionError> {
     let mode = current_mode(layout).ok_or(Text7ProjectionError::UnknownSpelling {
-        layout, byte_offset: 0,
+        layout,
+        byte_offset: 0,
     })?;
     let words = d7_keyboard::encode(text, mode).map_err(|err| {
         let byte_offset = match err {
-            d7_keyboard::D7CodecError::CharacterNotAdmitted(ch) =>
-                text.char_indices().find(|(_, candidate)| *candidate == ch)
-                    .map(|(offset, _)| offset).unwrap_or(0),
+            d7_keyboard::D7CodecError::CharacterNotAdmitted(ch) => text
+                .char_indices()
+                .find(|(_, candidate)| *candidate == ch)
+                .map(|(offset, _)| offset)
+                .unwrap_or(0),
             _ => 0,
         };
-        Text7ProjectionError::UnknownSpelling { layout, byte_offset }
+        Text7ProjectionError::UnknownSpelling {
+            layout,
+            byte_offset,
+        }
     })?;
     Text7::from_cells(words).map_err(|_| Text7ProjectionError::UnknownSpelling {
-        layout, byte_offset: 0,
+        layout,
+        byte_offset: 0,
     })
 }
 
@@ -65,42 +81,64 @@ pub fn render_text7(text: &Text7, layout: Text7Layout) -> Result<String, Text7Pr
     if layout == Text7Layout::SaIast {
         let mut out = String::new();
         for (index, &cell) in text.cells().iter().enumerate() {
-            let word = crate::BinarySourceWord::W7(
-                crate::Bit7::new(cell).ok_or(
-                    Text7ProjectionError::UnrenderableCell { layout, index, cell }
-                )?
-            );
+            let word = crate::BinarySourceWord::W7(crate::Bit7::new(cell).ok_or(
+                Text7ProjectionError::UnrenderableCell {
+                    layout,
+                    index,
+                    cell,
+                },
+            )?);
             let identity = crate::DomainIdentity::from_source_word(word);
-            let glyph = crate::semantic_registry::surface_for_domain_identity(
-                identity, "sa"
-            ).ok_or(Text7ProjectionError::UnrenderableCell {
-                layout, index, cell,
-            })?;
+            let glyph = crate::semantic_registry::surface_for_domain_identity(identity, "sa")
+                .ok_or(Text7ProjectionError::UnrenderableCell {
+                    layout,
+                    index,
+                    cell,
+                })?;
             out.push_str(glyph);
         }
         return Ok(out);
     }
     let mode = current_mode(layout).ok_or(Text7ProjectionError::UnknownSpelling {
-        layout, byte_offset: 0,
+        layout,
+        byte_offset: 0,
     })?;
-    d7_keyboard::decode(text.cells(), mode).map_err(|_| {
-        Text7ProjectionError::UnrenderableCell {
-            layout, index: 0, cell: text.cells().first().copied().unwrap_or(0),
-        }
+    d7_keyboard::decode(text.cells(), mode).map_err(|_| Text7ProjectionError::UnrenderableCell {
+        layout,
+        index: 0,
+        cell: text.cells().first().copied().unwrap_or(0),
     })
 }
 
 impl fmt::Display for Text7ProjectionError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            Self::UnknownSpelling { layout, byte_offset } =>
-                write!(f, "{layout:?} has no current D7 v2 glyph at byte {byte_offset}"),
-            Self::UnassignedSpelling { layout, byte_offset, spelling } =>
-                write!(f, "{layout:?} unsupported {spelling:?} at byte {byte_offset}"),
-            Self::UnrenderableCell { layout, index, cell } =>
-                write!(f, "{layout:?} cannot display W7:{cell:07b} at index {index}"),
-            Self::AmbiguousGlyphSequence { layout } =>
-                write!(f, "{layout:?} loses exact W7 cell boundaries"),
+            Self::UnknownSpelling {
+                layout,
+                byte_offset,
+            } => write!(
+                f,
+                "{layout:?} has no current D7 v2 glyph at byte {byte_offset}"
+            ),
+            Self::UnassignedSpelling {
+                layout,
+                byte_offset,
+                spelling,
+            } => write!(
+                f,
+                "{layout:?} unsupported {spelling:?} at byte {byte_offset}"
+            ),
+            Self::UnrenderableCell {
+                layout,
+                index,
+                cell,
+            } => write!(
+                f,
+                "{layout:?} cannot display W7:{cell:07b} at index {index}"
+            ),
+            Self::AmbiguousGlyphSequence { layout } => {
+                write!(f, "{layout:?} loses exact W7 cell boundaries")
+            }
         }
     }
 }
@@ -133,8 +171,10 @@ mod tests {
     #[test]
     fn no_legacy_phonetic_profile_is_used_as_v2_keyboard() {
         for layout in [Text7Layout::SaSlp1, Text7Layout::SaIast, Text7Layout::EnIpa] {
-            assert!(matches!(encode_text7("k", layout),
-                Err(Text7ProjectionError::UnknownSpelling { .. })));
+            assert!(matches!(
+                encode_text7("k", layout),
+                Err(Text7ProjectionError::UnknownSpelling { .. })
+            ));
         }
     }
 

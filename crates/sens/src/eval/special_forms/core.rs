@@ -4,7 +4,10 @@
 
 use crate::eval::canon;
 use crate::eval::{evaluate, evaluate_step, EvalStep};
-use crate::{Bit4, CoreD4, CoreDomainIdentity, Environment, ErrorKind, Expr, ExprKind, LanguageError, Span, Value};
+use crate::{
+    Bit4, CoreD4, CoreDomainIdentity, Environment, ErrorKind, Expr, ExprKind, LanguageError, Span,
+    Value,
+};
 
 use std::rc::Rc;
 
@@ -81,9 +84,9 @@ pub(crate) fn evaluate_definition(
     span: Span,
 ) -> Result<Value, LanguageError> {
     // DEFINE — точна D4:0011, а не історична W8:00001011.
-    let identity = CoreDomainIdentity::D4(
-        CoreD4::from_word(Bit4::new(0b0011).expect("ратифікована координата D4 DEFINE")),
-    );
+    let identity = CoreDomainIdentity::D4(CoreD4::from_word(
+        Bit4::new(0b0011).expect("ратифікована координата D4 DEFINE"),
+    ));
     exact_domain_arity(identity, arguments, 2, span)?;
 
     // A D2-framed W7 sequence is a Text7 identifier only in this explicit
@@ -335,9 +338,9 @@ mod exact_d4_define_arity_tests {
     #[test]
     fn quote_of_canonical_d3_empty_coordinate_is_structural_nil() {
         let empty = Expr {
-            kind: ExprKind::DomainIdentity(crate::DomainIdentity::D3(
-                crate::Bija3::from_word(crate::Bit3::new(0).unwrap()),
-            )),
+            kind: ExprKind::DomainIdentity(crate::DomainIdentity::D3(crate::Bija3::from_word(
+                crate::Bit3::new(0).unwrap(),
+            ))),
             span: Span::default(),
         };
         assert!(matches!(quoted(&empty).unwrap(), Value::Nil));
@@ -371,14 +374,11 @@ mod exact_d4_define_arity_tests {
 
     #[test]
     fn правильна_арність_і_неоднакові_ширини_доменів() {
-        let d4 = CoreDomainIdentity::D4(
-            CoreD4::from_word(Bit4::new(0b0011).unwrap()),
-        );
+        let d4 = CoreDomainIdentity::D4(CoreD4::from_word(Bit4::new(0b0011).unwrap()));
         let two = vec![expression(), expression()];
         assert!(exact_domain_arity(d4, &two, 2, Span::default()).is_ok());
-        let wrong = CoreDomainIdentity::D3(
-            crate::Bija3::from_word(crate::Bit3::new(0b011).unwrap()),
-        );
+        let wrong =
+            CoreDomainIdentity::D3(crate::Bija3::from_word(crate::Bit3::new(0b011).unwrap()));
         let error = exact_domain_arity(wrong, &[], 1, Span::default()).unwrap_err();
         assert!(error.message.contains("D3:011"), "{error:?}");
         assert!(!error.message.contains("D4:0011"), "{error:?}");

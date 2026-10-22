@@ -13,8 +13,8 @@
 
 use crate::{
     canonical_value_sha256_mechanism, domain_identity_shape_mechanism,
-    domain_identity_shape_or_empty_mechanism, eval_parsed_expressions, parse_mixed_exact_domain,
-    load_core_library, sha256_source, CompilerExecutionRole, CompilerLoweringRole,
+    domain_identity_shape_or_empty_mechanism, eval_parsed_expressions, load_core_library,
+    parse_mixed_exact_domain, sha256_source, CompilerExecutionRole, CompilerLoweringRole,
     CoreDomainIdentity, DomainIdentity, ErrorKind, Exactness, Expr, ExprKind, LanguageError,
     Session, Span, Value,
 };
@@ -59,7 +59,6 @@ pub struct CompilerProgramBootstrapBundle {
     pub language_contract_version: &'static str,
     pub compiler_nucleus_sha256: String,
 }
-
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct VerifiedCompilerProgramRequest {
@@ -131,7 +130,9 @@ fn projection_width() -> Result<usize, LanguageError> {
         .take_while(|ch| ch.is_ascii_digit())
         .collect::<String>();
     if digits.is_empty() {
-        return Err(invalid_projection("generated law domain width is not numeric"));
+        return Err(invalid_projection(
+            "generated law domain width is not numeric",
+        ));
     }
     digits
         .parse()
@@ -153,7 +154,9 @@ fn projection_width_from(source: &str) -> Result<usize, LanguageError> {
         .take_while(|ch| ch.is_ascii_digit())
         .collect::<String>();
     if digits.is_empty() {
-        return Err(invalid_projection("generated law domain width is not numeric"));
+        return Err(invalid_projection(
+            "generated law domain width is not numeric",
+        ));
     }
     digits
         .parse()
@@ -162,10 +165,9 @@ fn projection_width_from(source: &str) -> Result<usize, LanguageError> {
 
 fn projection_string_array(source: &str, key: &str) -> Result<Vec<String>, LanguageError> {
     let marker = format!("\"{key}\": [");
-    let start = source
-        .find(&marker)
-        .ok_or_else(|| invalid_projection(format!("generated law projection has no {key} array")))?
-        + marker.len();
+    let start = source.find(&marker).ok_or_else(|| {
+        invalid_projection(format!("generated law projection has no {key} array"))
+    })? + marker.len();
     let tail = &source[start..];
     let end = tail
         .find(']')
@@ -202,7 +204,6 @@ fn sha256_hex(bytes: &[u8]) -> String {
         .map(|byte| format!("{byte:02x}"))
         .collect()
 }
-
 
 fn compiler_artifact_list<'a>(
     value: &'a Value,
@@ -336,16 +337,13 @@ fn verify_compiler_program_request(
 }
 
 fn authority_sha256_from(projection: &str) -> Result<String, LanguageError> {
-    let authority = projection
-        .find("\"semantic_authority\"")
-        .ok_or_else(|| invalid_projection("generated law projection has no authority provenance"))?;
+    let authority = projection.find("\"semantic_authority\"").ok_or_else(|| {
+        invalid_projection("generated law projection has no authority provenance")
+    })?;
     quoted_json_string(&projection[authority..], "sha256")
 }
 
-fn verify_projection_authority(
-    projection: &str,
-    authority: &str,
-) -> Result<(), LanguageError> {
+fn verify_projection_authority(projection: &str, authority: &str) -> Result<(), LanguageError> {
     let expected_authority_sha = authority_sha256_from(projection)?;
     let actual_authority_sha = sha256_hex(authority.as_bytes());
     if expected_authority_sha != actual_authority_sha {
@@ -504,7 +502,8 @@ fn compiler_d4_bootstrap_law_value() -> Result<Value, LanguageError> {
 /// bundle contains only already-verified structural-law values, proof
 /// references, and immutable provenance bytes needed to install that nucleus
 /// in another substrate.
-pub fn compiler_program_bootstrap_bundle() -> Result<CompilerProgramBootstrapBundle, LanguageError> {
+pub fn compiler_program_bootstrap_bundle() -> Result<CompilerProgramBootstrapBundle, LanguageError>
+{
     let authority_sha256 = sha256_hex(LANGUAGE_CONTRACT.as_bytes());
     Ok(CompilerProgramBootstrapBundle {
         d3_law: compiler_l1_l5_law_value()?,
@@ -885,11 +884,10 @@ pub fn verify_compiler_program_artifact_from_sens(
         ));
     }
 
-    let provenance =
-        compiler_artifact_list(
-            compiler_artifact_field(&rows[1..], "authority-provenance")?,
-            "compiler artifact authority provenance",
-        )?;
+    let provenance = compiler_artifact_list(
+        compiler_artifact_field(&rows[1..], "authority-provenance")?,
+        "compiler artifact authority provenance",
+    )?;
     if provenance.len() != 5 {
         return Err(invalid_projection(
             "compiler artifact authority provenance must contain revision, path, authority digest, contract version and nucleus digest",
@@ -914,8 +912,7 @@ pub fn verify_compiler_program_artifact_from_sens(
         ));
     }
 
-    let semantic_requests =
-        compiler_artifact_field(&rows[1..], "semantic-requests")?.clone();
+    let semantic_requests = compiler_artifact_field(&rows[1..], "semantic-requests")?.clone();
     let requests = compiler_artifact_list(&semantic_requests, "compiler semantic requests")?;
     if requests.is_empty() {
         return Err(invalid_projection(
@@ -926,8 +923,8 @@ pub fn verify_compiler_program_artifact_from_sens(
         compiler_artifact_field(&rows[1..], "semantic-requests-sha256")?,
         "semantic-requests-sha256",
     )?;
-    let canonical_requests = crate::compiler_evidence_canonical_bytes(&semantic_requests)
-        .map_err(invalid_projection)?;
+    let canonical_requests =
+        crate::compiler_evidence_canonical_bytes(&semantic_requests).map_err(invalid_projection)?;
     if sha256_hex(&canonical_requests) != semantic_requests_sha256 {
         return Err(invalid_projection(
             "compiler artifact semantic request digest mismatch",
@@ -1014,34 +1011,27 @@ pub fn compiler_execution_role_from_sens(
     identity: CoreDomainIdentity,
 ) -> Result<Option<CompilerExecutionRole>, LanguageError> {
     match compiler_lowering_role_from_sens(identity)? {
-        Some(CompilerLoweringRole::SelectorHead) => {
-            Ok(Some(CompilerExecutionRole::SelectorHead))
-        }
-        Some(CompilerLoweringRole::SelectorTail) => {
-            Ok(Some(CompilerExecutionRole::SelectorTail))
-        }
-        Some(CompilerLoweringRole::PairConstruct) => {
-            Ok(Some(CompilerExecutionRole::PairConstruct))
-        }
+        Some(CompilerLoweringRole::SelectorHead) => Ok(Some(CompilerExecutionRole::SelectorHead)),
+        Some(CompilerLoweringRole::SelectorTail) => Ok(Some(CompilerExecutionRole::SelectorTail)),
+        Some(CompilerLoweringRole::PairConstruct) => Ok(Some(CompilerExecutionRole::PairConstruct)),
         Some(_) | None => Ok(None),
     }
 }
-
 
 #[cfg(test)]
 mod tests {
     use super::*;
 
     fn d3(raw: u8) -> CoreDomainIdentity {
-        CoreDomainIdentity::D3(
-            crate::Bija3::from_word(crate::Bit3::new(raw).expect("D3 test word")),
-        )
+        CoreDomainIdentity::D3(crate::Bija3::from_word(
+            crate::Bit3::new(raw).expect("D3 test word"),
+        ))
     }
 
     fn d4(raw: u8) -> CoreDomainIdentity {
-        CoreDomainIdentity::D4(
-            crate::CoreD4::from_word(crate::Bit4::new(raw).expect("D4 test word")),
-        )
+        CoreDomainIdentity::D4(crate::CoreD4::from_word(
+            crate::Bit4::new(raw).expect("D4 test word"),
+        ))
     }
 
     #[test]
@@ -1063,7 +1053,8 @@ mod tests {
 
     #[test]
     fn compiled_driver_bootstrap_bundle_contains_verified_representation_only_inputs() {
-        let bundle = compiler_program_bootstrap_bundle().expect("verified compiler bootstrap bundle");
+        let bundle =
+            compiler_program_bootstrap_bundle().expect("verified compiler bootstrap bundle");
 
         assert_eq!(bundle.d3_law, compiler_l1_l5_law_value().unwrap());
         assert_eq!(bundle.d4_law, compiler_d4_bootstrap_law_value().unwrap());
@@ -1071,7 +1062,10 @@ mod tests {
         assert_eq!(bundle.d4_proof_ref, COMPILER_D4_PROOF_REF);
         assert_eq!(bundle.authority_path, COMPILER_AUTHORITY_PATH);
         assert_eq!(bundle.language_contract_version, COMPILER_CONTRACT_VERSION);
-        assert_eq!(bundle.authority_sha256, sha256_hex(LANGUAGE_CONTRACT.as_bytes()));
+        assert_eq!(
+            bundle.authority_sha256,
+            sha256_hex(LANGUAGE_CONTRACT.as_bytes())
+        );
         assert_eq!(
             bundle.compiler_nucleus_sha256,
             sha256_hex(COMPILER_NUCLEUS_SOURCE.as_bytes())
@@ -1161,19 +1155,15 @@ mod tests {
         assert_eq!(d4_input.proof_ref, COMPILER_D4_PROOF_REF);
         assert_eq!(d4_input.authority_sha256, d3_input.authority_sha256);
 
-        assert!(
-            compiler_semantic_input_from_sens(d3(0b000))
-                .expect("D3 empty transport")
-                .is_none()
-        );
+        assert!(compiler_semantic_input_from_sens(d3(0b000))
+            .expect("D3 empty transport")
+            .is_none());
         let d8 = CoreDomainIdentity::D8(crate::CoreD8::from_word(
             crate::Bit8::new(0b0000_0010).expect("D8 word"),
         ));
-        assert!(
-            compiler_semantic_input_from_sens(d8)
-                .expect("D8 must fail closed as no compiler input")
-                .is_none()
-        );
+        assert!(compiler_semantic_input_from_sens(d8)
+            .expect("D8 must fail closed as no compiler input")
+            .is_none());
     }
 
     fn list_values(value: &Value) -> Vec<&Value> {
@@ -1203,8 +1193,7 @@ mod tests {
     fn field_value<'a>(artifact: &'a Value, field: &str) -> &'a Value {
         for entry in list_values(artifact).into_iter().skip(1) {
             let parts = list_values(entry);
-            if parts.len() == 2
-                && matches!(parts[0], Value::Symbol(name) if name.as_ref() == field)
+            if parts.len() == 2 && matches!(parts[0], Value::Symbol(name) if name.as_ref() == field)
             {
                 return parts[1];
             }
@@ -1215,8 +1204,12 @@ mod tests {
     #[test]
     fn whole_program_artifact_verifier_rejects_duplicate_fields_before_execution() {
         for field in [
-            "artifact-kind", "program-wire-sha256", "semantic-requests-sha256",
-            "authority-provenance", "semantic-requests", "required-capabilities",
+            "artifact-kind",
+            "program-wire-sha256",
+            "semantic-requests-sha256",
+            "authority-provenance",
+            "semantic-requests",
+            "required-capabilities",
             "artifact-status",
         ] {
             let repeated = Value::Symbol(Rc::from(field));
@@ -1233,7 +1226,9 @@ mod tests {
             .expect_err("duplicate authority field must be rejected");
             assert_eq!(error.kind, ErrorKind::InvalidForm);
             assert!(
-                error.to_string().contains("duplicate compiler artifact field"),
+                error
+                    .to_string()
+                    .contains("duplicate compiler artifact field"),
                 "unexpected duplicate-field error for {field}: {error}"
             );
         }
@@ -1242,19 +1237,20 @@ mod tests {
             Value::Symbol(Rc::from("compiler-compilation-artifact-1")),
             Value::list([Value::Symbol(Rc::from("unknown-backend")), Value::Nil]),
         ]);
-        assert!(
-            verify_compiler_program_artifact_from_sens(
-                &unknown,
-                &"00".repeat(32),
-                "0123456789abcdef0123456789abcdef01234567",
-            )
-            .unwrap_err().to_string().contains("unsupported field")
-        );
+        assert!(verify_compiler_program_artifact_from_sens(
+            &unknown,
+            &"00".repeat(32),
+            "0123456789abcdef0123456789abcdef01234567",
+        )
+        .unwrap_err()
+        .to_string()
+        .contains("unsupported field"));
     }
 
     #[test]
     fn whole_program_artifact_verifier_binds_requests_to_current_sens_authority() {
-        let parsed = parse_mixed_exact_domain(COMPILER_NUCLEUS_SOURCE).expect("compiler nucleus parses");
+        let parsed =
+            parse_mixed_exact_domain(COMPILER_NUCLEUS_SOURCE).expect("compiler nucleus parses");
         let lowered = crate::lower_program(&parsed);
         let wire = crate::wire_encode_program(&lowered);
         let decoded = crate::wire_decode_program(&wire).expect("canonical SW\\x01 program wire");
@@ -1294,7 +1290,10 @@ mod tests {
         assert_eq!(verified.program_wire_sha256, digest);
         assert_eq!(verified.sens_revision, revision);
         assert_eq!(verified.authority_path, COMPILER_AUTHORITY_PATH);
-        assert_eq!(verified.language_contract_version, COMPILER_CONTRACT_VERSION);
+        assert_eq!(
+            verified.language_contract_version,
+            COMPILER_CONTRACT_VERSION
+        );
         assert!(!verified.requests.is_empty());
         for role in [
             CompilerLoweringRole::QuoteForm,
@@ -1308,7 +1307,10 @@ mod tests {
             CompilerLoweringRole::DefineForm,
         ] {
             assert!(
-                verified.requests.iter().any(|request| request.lowering_role == role),
+                verified
+                    .requests
+                    .iter()
+                    .any(|request| request.lowering_role == role),
                 "verified whole-program artifact omitted role {role:?}"
             );
         }
@@ -1329,7 +1331,8 @@ mod tests {
 
     #[test]
     fn whole_program_artifact_verifier_rejects_tampering_and_target_smuggling() {
-        let parsed = parse_mixed_exact_domain(COMPILER_NUCLEUS_SOURCE).expect("compiler nucleus parses");
+        let parsed =
+            parse_mixed_exact_domain(COMPILER_NUCLEUS_SOURCE).expect("compiler nucleus parses");
         let lowered = crate::lower_program(&parsed);
         let wire = crate::wire_encode_program(&lowered);
         let decoded = crate::wire_decode_program(&wire).expect("canonical SW\\x01 program wire");
@@ -1340,21 +1343,15 @@ mod tests {
             .expect("SENS whole-program artifact");
 
         assert!(
-            verify_compiler_program_artifact_from_sens(
-                &artifact,
-                &"00".repeat(32),
-                revision
-            )
-            .is_err()
+            verify_compiler_program_artifact_from_sens(&artifact, &"00".repeat(32), revision)
+                .is_err()
         );
-        assert!(
-            verify_compiler_program_artifact_from_sens(
-                &artifact,
-                &digest,
-                "fedcba9876543210fedcba9876543210fedcba98"
-            )
-            .is_err()
-        );
+        assert!(verify_compiler_program_artifact_from_sens(
+            &artifact,
+            &digest,
+            "fedcba9876543210fedcba9876543210fedcba98"
+        )
+        .is_err());
 
         let mut rows = list_values(&artifact)
             .into_iter()
@@ -1365,10 +1362,7 @@ mod tests {
             Value::String(Rc::from("sm_61")),
         ]));
         let smuggled = Value::list(rows);
-        assert!(
-            verify_compiler_program_artifact_from_sens(&smuggled, &digest, revision)
-                .is_err()
-        );
+        assert!(verify_compiler_program_artifact_from_sens(&smuggled, &digest, revision).is_err());
     }
 
     #[test]
@@ -1436,7 +1430,10 @@ mod tests {
 
         let request_value = field_value(&artifact, "semantic-requests");
         let requests = list_values(request_value);
-        assert!(!requests.is_empty(), "whole artifact must carry SENS-produced requests");
+        assert!(
+            !requests.is_empty(),
+            "whole artifact must carry SENS-produced requests"
+        );
         let expected_request_digest = match crate::eval::invoke_value(
             &canonical_value_sha256_mechanism(),
             std::slice::from_ref(request_value),
@@ -1518,19 +1515,16 @@ mod tests {
             "0123456789abcdef0123456789abcdef01234567",
         )
         .expect_err("malformed mechanical provenance must fail before SENS invocation");
-        assert!(
-            error
-                .to_string()
-                .contains("64 lowercase hexadecimal characters")
-        );
+        assert!(error
+            .to_string()
+            .contains("64 lowercase hexadecimal characters"));
 
-        let error = compiler_program_artifact_from_sens(
-            program,
-            &"00".repeat(32),
-            "not-a-revision",
-        )
-        .expect_err("malformed SENS revision must fail before SENS invocation");
-        assert!(error.to_string().contains("40 lowercase hexadecimal characters"));
+        let error =
+            compiler_program_artifact_from_sens(program, &"00".repeat(32), "not-a-revision")
+                .expect_err("malformed SENS revision must fail before SENS invocation");
+        assert!(error
+            .to_string()
+            .contains("40 lowercase hexadecimal characters"));
     }
 
     #[test]
@@ -1571,7 +1565,10 @@ mod tests {
                 }
             })
             .collect::<Vec<_>>();
-        assert_eq!(observed_roles, ["lambda-form", "quote-form", "atom-predicate"]);
+        assert_eq!(
+            observed_roles,
+            ["lambda-form", "quote-form", "atom-predicate"]
+        );
     }
 
     #[test]
@@ -1581,8 +1578,7 @@ mod tests {
             exact_value(d3(0b010)),
             Value::Symbol(Rc::from("x")),
         ])]);
-        let d3_result =
-            compiler_program_requests_from_sens(d3_program).expect("D3 atom traversal");
+        let d3_result = compiler_program_requests_from_sens(d3_program).expect("D3 atom traversal");
         let d3_rows = list_values(&d3_result);
         assert_eq!(d3_rows[0].as_predicate_bit(), Some(true));
 
@@ -1620,7 +1616,8 @@ mod tests {
         ));
         let program = Value::list([Value::list([exact_value(d8)])]);
 
-        let result = compiler_program_requests_from_sens(program).expect("normal fail-closed result");
+        let result =
+            compiler_program_requests_from_sens(program).expect("normal fail-closed result");
         let rows = list_values(&result);
         assert_eq!(rows.len(), 1);
         assert_eq!(rows[0].as_predicate_bit(), Some(false));
