@@ -87,3 +87,8 @@ benchmarks/contest-uk/факторіал-компакт.lisp
 lib/list-drop-every-third-general.lisp
 lib/list-drop-every-third-compact-general.lisp
 lib/залишити-точні-числа.lisp
+benchmarks/contest-uk/довжина-списку-одинарна.lisp
+benchmarks/contest-uk/довжина-списку-стисло.lisp
+benchmarks/contest-uk/сума-до-n-формула.lisp
+lib/list-drop-leading-compounds-zero-copy-general.lisp
+lib/list-first-adjacent-equal-atom-suffix-general.lisp
