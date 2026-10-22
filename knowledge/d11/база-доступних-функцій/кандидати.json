@@ -1638,17 +1638,20 @@
       "source_family": "rules",
       "source_kind": "SENS_LIBRARY_SNAPSHOT",
       "provenance": {
-        "repo_file": "docs/FUNCTIONS.md",
-        "blob_sha": "7c63cb47699937f6a6c12c21e2b9929cdd583362",
+        "repo_file": "lib/forward.lisp",
+        "blob_sha": "48f8bd53955176e60e48ca3121c0b5fa0cbf8c1e",
         "original_file": "lib/forward.lisp",
-        "snapshot_not_live_proof": true
+        "snapshot_not_live_proof": false,
+        "historical_snapshot": "docs/FUNCTIONS.md"
       },
       "domain_candidate": "D11_OR_LIBRARY_REVIEW",
       "coordinate": null,
       "exact_bit_width_if_admitted": 11,
-      "review_status": "NAME_FOUND_BEHAVIORAL_DEDUP_REQUIRED",
+      "review_status": "LIVE_SENS_LAW_TEST_ADDED_CI_PENDING",
       "ratified": false,
-      "callable": false
+      "callable": false,
+      "native_law_test_pending": "crates/sens/tests/reasoning_forward_knowledge_d3_migration.rs::d11_jtms_знайти_запис_за_фактом_зберігає_докази_й_перший_збіг",
+      "research_coordinate": "00110001100"
     },
     {
       "surface_name": "GET-THRESHOLD",
