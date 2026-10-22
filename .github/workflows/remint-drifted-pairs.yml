@@ -10,6 +10,7 @@ on:
     paths:
       - "benchmarks/contest-uk/*.lisp"
       - "lib/list-*.lisp"
+      - "lib/tree-*.lisp"
       - ".github/workflows/remint-drifted-pairs.yml"
   workflow_dispatch:
     inputs:
@@ -53,14 +54,14 @@ jobs:
             # Лише реально додані/змінені .lisp у цьому push, не весь
             # історичний список. Видалені під час promotion не перемайнювати.
             if [[ "$BEFORE" =~ ^0+$ ]]; then
-              list="$(git -c core.quotePath=false diff-tree --no-commit-id --diff-filter=AM --name-only -r HEAD -- 'benchmarks/contest-uk/*.lisp' 'lib/list-*.lisp')"
+              list="$(git -c core.quotePath=false diff-tree --no-commit-id --diff-filter=AM --name-only -r HEAD -- 'benchmarks/contest-uk/*.lisp' 'lib/list-*.lisp' 'lib/tree-*.lisp')"
             else
-              list="$(git -c core.quotePath=false diff --diff-filter=AM --name-only "$BEFORE" "$AFTER" -- 'benchmarks/contest-uk/*.lisp' 'lib/list-*.lisp')"
+              list="$(git -c core.quotePath=false diff --diff-filter=AM --name-only "$BEFORE" "$AFTER" -- 'benchmarks/contest-uk/*.lisp' 'lib/list-*.lisp' 'lib/tree-*.lisp')"
             fi
             # Навіть якщо push містить одну змінену програму, інші
             # непарні Lisp з попереднього RED не повинні губитися.
             # Це той самий нативний SENS/Zig mint, без повторів і Python.
-            for source in benchmarks/contest-uk/*.lisp lib/list-*.lisp; do
+            for source in benchmarks/contest-uk/*.lisp lib/list-*.lisp lib/tree-*.lisp; do
               [[ -f "$source" && ! -L "$source" ]] || continue
               pair="${source%.lisp}.sens"
               view="${source%.lisp}"
