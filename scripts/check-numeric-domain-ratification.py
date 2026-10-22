@@ -261,9 +261,9 @@ def validate_runtime_boundary(arithmetic, d6):
          "D6 must accept canonical D24+ composite width")
     need("Value::BinaryNumber(number) => number.numeric_domain_width()" in d6,
          "D6 must require an exact D24+ numeric natural")
-    need("BinaryNumber::from_numeric_domain_bits(width, &one_bits)" in d6,
+    need("BinaryNumber::from_numeric_domain_bits(width, &constant_bits)" in d6,
          "D6 unit must preserve the exact operand domain")
-    need("Value::BinaryNumber(one)" in d6, "D6 must not insert unqualified Rational(1)")
+    need("Value::BinaryNumber(constant)" in d6, "D6 must not insert unqualified Rational(1)")
     need("Value::Rational(Rational::integer(1))" not in d6,
          "D6 historical unqualified one was reintroduced")
 
@@ -283,7 +283,7 @@ def selftest_runtime(arithmetic, d6):
             raise ValueError("NUMERIC-DOMAIN-RATIFICATION: invalid runtime boundary admitted")
     try:
         validate_runtime_boundary(arithmetic, d6.replace(
-            "Value::BinaryNumber(one)", "Value::Rational(Rational::integer(1))", 1))
+            "Value::BinaryNumber(constant)", "Value::Rational(Rational::integer(1))", 1))
     except ValueError:
         pass
     else:

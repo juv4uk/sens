@@ -615,7 +615,7 @@
       "stable_id": "d9.lib.def50f3329f1d739",
       "semantic_name": "MILLISECONDS-FROM-NANOSECONDS",
       "source_name": "мілісекунди-з-наносекунди",
-      "source_file": "lib/time.lisp",
+      "source_file": "lib/core4.lisp",
       "relation_class": "TIME-SEMANTIC-ALGEBRA",
       "behavior": "convert nonnegative nanoseconds to whole milliseconds",
       "decision": "SELECT-D9-CANDIDATE",
