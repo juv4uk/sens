@@ -322,7 +322,7 @@ jobs:
           if grep -Eq '^(lib/translation\.lisp|lib/world\.lisp|lib/knowledge\.lisp|lib/core\.lisp|crates/sens/tests/translation_boundary\.rs|tests/test_code_runs\.py|lib/domains/d9[.]lisp|crates/sens/src/d9_definition_bindings_generated[.]rs|crates/sens/tests/d9_binary_surface_native[.]rs|tests/semantic/d9-four-uk-projections-laws[.]lisp|\.github/workflows/ci\.yml)$' "$changed_all"; then
             echo 'translation_tests=true' >> "$GITHUB_OUTPUT"
           fi
-          if grep -Eq '^(crates/sens-cli/src/(main|repl)\.rs|crates/sens-cli/src/bin/sens-trit\.rs|crates/sens-cli/tests/(cli|physical_core4_sequence_cli)\.rs|scripts/execute_changed_lisp_t5m\.sh|scripts/refresh-verified-t5m-pair\.sh|scripts/refresh-executed-t5m-pair\.sh|benchmarks/contest-uk/(run-native\.sh|judge\.sh|[^/]+\.(lisp|sens))|\.github/workflows/ci\.yml)$' "$changed_all"; then
+          if grep -Eq '^(crates/sens-cli/src/(main|repl)\.rs|crates/sens-cli/src/bin/sens-trit\.rs|crates/sens-cli/tests/(cli|physical_core4_sequence_cli|physical_bare_session_cli)\.rs|scripts/execute_changed_lisp_t5m\.sh|scripts/refresh-verified-t5m-pair\.sh|scripts/refresh-executed-t5m-pair\.sh|benchmarks/contest-uk/(run-native\.sh|judge\.sh|[^/]+\.(lisp|sens))|\.github/workflows/ci\.yml)$' "$changed_all"; then
             echo 't5m_cli_tests=true' >> "$GITHUB_OUTPUT"
           fi
           # D11: тільки зміни селекторів, SENS-реалізації або їхніх тестів.
@@ -722,6 +722,7 @@ jobs:
           set -euo pipefail
           cargo test --locked -p sens-cli --test cli t5m_file_mode_ -- --nocapture
           cargo test --locked -p sens-cli --test cli t5m_physical_pair_ -- --nocapture
+          cargo test --locked -p sens-cli --test physical_bare_session_cli part_ii_exact_carrier_preserves_value_across_ukrainian_projection -- --exact --nocapture
           cargo test --locked -p sens-cli --test physical_core4_sequence_cli ukrainian_d3_d4_existing_files_mint_verify_and_execute -- --exact --nocapture
           cargo test --locked -p sens-cli --test physical_core4_sequence_cli contest_uk_all_physical_programs_have_native_execution_and_peers -- --exact --nocapture
           cargo test --locked -p sens-cli --bin sens-trit exact_bit_view_maps_to_its_existing_sens_physical_companion -- --exact --nocapture
