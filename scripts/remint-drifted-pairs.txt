@@ -102,3 +102,7 @@ benchmarks/contest-uk/кількість-атомів-компакт.lisp
 benchmarks/contest-uk/лише-атоми-один-guard.lisp
 lib/list-every-fifth-linear-general.lisp
 benchmarks/contest-uk/збільшити-всі.lisp
+lib/list-last-adjacent-different-atom-suffix-zero-copy-general.lisp
+lib/list-tail-after-nth-atom-zero-copy-general.lisp
+benchmarks/contest-uk/сума-четвертих-степенів-без-лямбди.lisp
+benchmarks/contest-uk/факторіал-д6-стислий.lisp
