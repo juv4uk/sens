@@ -501,7 +501,14 @@ jobs:
                     safe_rebase=0
                     break
                   fi
-                  echo "REMINT_NEW_UNPAIRED_CONTESTANT source=$changed status=NOT_EXECUTED mint=NEXT_PUSH"
+                  # Вхідний push для нового конкурсанта вже був скасований
+                  # concurrency: single. Після швидкого rebase не лишати його
+                  # назавжди без .sens: майнити НА ЦЬОМУ HEAD справжнім
+                  # SENS/Zig із точним inverse, paired/standalone й мутантом.
+                  # Статус переможця НЕ присвоюється без окремого judge.
+                  fast_mint_sources+=("$changed")
+                  REMINT_CONTEST=true
+                  echo "REMINT_FAST_NATIVE_NEW_CONTESTANT source=$changed status=PENDING_REAL_SENS_ZIG winner=NOT_JUDGED"
                   ;;
                 lib/d11-*.lisp|lib/list-*.lisp|lib/tree-*.lisp|tests/semantic/*.lisp|tests/fixtures/*.lisp)
                   # Перемайн лише коли змінилося ВИКОРИСТАНЕ джерело.
