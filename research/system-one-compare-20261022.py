@@ -13,6 +13,7 @@ import importlib.util
 import json
 import math
 import sys
+import unicodedata
 from pathlib import Path
 from typing import Any
 
@@ -164,6 +165,47 @@ def validate_transformer_predictions(
     }
 
 
+
+def _normalized_text(value: str) -> str:
+    return " ".join(unicodedata.normalize("NFKC", value).casefold().split())
+
+
+def validate_challenge_corpus(
+    path: Path, seed_rows: list[dict[str, Any]]
+) -> tuple[list[dict[str, Any]], str]:
+    """Accept only a clearly marked, disjoint, evaluation-only challenge set."""
+    rows, raw = read_rows(path)
+    if not rows:
+        raise ComparisonError("challenge corpus порожній")
+    seed_ids = {str(row["id"]) for row in seed_rows}
+    seed_texts = {_normalized_text(str(row["text"])) for row in seed_rows}
+    seen_ids: set[str] = set()
+    seen_texts: set[str] = set()
+    observed_labels: set[str] = set()
+    for row in rows:
+        row_id = str(row.get("id", ""))
+        text = row.get("text")
+        gold = row.get("gold")
+        if not row_id or row_id in seen_ids or row_id in seed_ids:
+            raise ComparisonError(f"challenge має відсутній/повторений або seed ID: {row_id!r}")
+        if row.get("split") != "test" or row.get("evaluation_only") is not True:
+            raise ComparisonError(f"{row_id}: challenge має бути тільки test з evaluation_only=true")
+        if row.get("source") != "synthetic-adversarial-challenge":
+            raise ComparisonError(f"{row_id}: невідоме походження challenge-запису")
+        if not isinstance(text, str) or not text.strip() or gold not in LABELS:
+            raise ComparisonError(f"{row_id}: некоректний текст або еталонна мітка challenge")
+        normalized = _normalized_text(text)
+        if normalized in seen_texts or normalized in seed_texts:
+            raise ComparisonError(f"{row_id}: нормалізований текст повторюється в challenge або seed")
+        seen_ids.add(row_id)
+        seen_texts.add(normalized)
+        observed_labels.add(gold)
+    if observed_labels != set(LABELS):
+        raise ComparisonError(
+            f"challenge має охоплювати всі класи: отримано {sorted(observed_labels)}"
+        )
+    return rows, sha256(raw)
+
 def write_model(path: Path, model: dict[str, Any], overwrite: bool) -> str:
     rendered = json.dumps(model, ensure_ascii=False, sort_keys=True, separators=(",", ":")) + "\n"
     student.atomic_write(path, rendered, overwrite=overwrite)
@@ -244,7 +286,22 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
         if transformer_validation_path is not None and transformer_test_path is not None
         else []
     )
-    input_paths = [seed_path, *teacher_paths.values(), *transformer_paths]
+    challenge_input_value = getattr(args, "challenge_input", None)
+    challenge_teacher_value = getattr(args, "challenge_teacher", None)
+    challenge_transformer_value = getattr(args, "challenge_transformer_predictions", None)
+    if challenge_input_value is None:
+        if challenge_teacher_value is not None or challenge_transformer_value is not None:
+            raise ComparisonError("challenge-teacher/transformer не можна передати без challenge-input")
+    elif challenge_teacher_value is None:
+        raise ComparisonError("для challenge-input обов'язковий окремий challenge-teacher")
+    if challenge_input_value is not None and bool(transformer_paths) != (challenge_transformer_value is not None):
+        raise ComparisonError("challenge-трансформер має бути поданий тоді й лише тоді, коли трансформер є в базовому порівнянні")
+    challenge_paths = []
+    if challenge_input_value is not None:
+        challenge_paths = [Path(challenge_input_value).resolve(), Path(challenge_teacher_value).resolve()]
+        if challenge_transformer_value is not None:
+            challenge_paths.append(Path(challenge_transformer_value).resolve())
+    input_paths = [seed_path, *teacher_paths.values(), *transformer_paths, *challenge_paths]
     if len(set(input_paths)) != len(input_paths):
         raise ComparisonError("seed, teacher і transformer-файли мають бути різними файлами")
     if any(path == output_dir or output_dir in path.parents for path in input_paths):
@@ -275,6 +332,13 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
     if any(not split_rows[split] for split in split_rows):
         raise ComparisonError("seed має містити непорожні train, validation і test")
 
+    challenge_rows = None
+    challenge_sha = None
+    challenge_transformer_records = None
+    challenge_transformer_report = None
+    if challenge_input_value is not None:
+        challenge_rows, challenge_sha = validate_challenge_corpus(Path(challenge_input_value), seed_rows)
+
     # Перевірити готові трансформерні holdout-прогнози ДО будь-якого навчання/запису моделей.
     transformer_records: dict[str, list[dict[str, Any]]] = {}
     transformer_report: dict[str, Any] | None = None
@@ -293,6 +357,14 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
             raise ComparisonError("validation/test трансформера походять від різних базових моделей")
         if transformer_report["validation"]["temperature"] != transformer_report["test"]["temperature"]:
             raise ComparisonError("validation/test трансформера мають різну температуру")
+        if challenge_input_value is not None:
+            challenge_transformer_records, challenge_transformer_report = validate_transformer_predictions(
+                Path(challenge_transformer_value), challenge_rows, "test", dataset_sha
+            )
+            if challenge_transformer_report["base_model"] != transformer_report["test"]["base_model"]:
+                raise ComparisonError("challenge-трансформер походить від іншої базової моделі")
+            if challenge_transformer_report["temperature"] != transformer_report["test"]["temperature"]:
+                raise ComparisonError("challenge-трансформер має іншу температуру")
 
     teacher_records: dict[str, list[dict[str, Any]]] = {}
     teachers: set[str] = set()
@@ -310,6 +382,15 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
         raise ComparisonError("teacher-файли мають походити від однієї моделі та версії prompt")
     teacher_name = next(iter(teachers))
     prompt_version = next(iter(prompt_versions))
+    challenge_teacher_records = None
+    challenge_teacher_sha = None
+    if challenge_input_value is not None:
+        challenge_teacher_records, challenge_teacher_name, challenge_prompt_version = validate_teacher_file(
+            Path(challenge_teacher_value), challenge_rows, "test", challenge_sha
+        )
+        if challenge_teacher_name != teacher_name or challenge_prompt_version != prompt_version:
+            raise ComparisonError("challenge-teacher має походити від тієї самої моделі та версії prompt")
+        challenge_teacher_sha = sha256(Path(challenge_teacher_value).read_bytes())
 
     # Model training can see only seed train and teacher train. Holdout observations
     # are used only for measuring the teacher and are never supplied to the trainer.
@@ -380,6 +461,58 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
             for model_name, result in evaluations.items()
         }
 
+    challenge_report = None
+    if challenge_input_value is not None:
+        challenge_evaluations: dict[str, dict[str, Any]] = {}
+        challenge_evaluations["teacher"] = evaluate_rows(
+            challenge_teacher_records, "test", args.threshold, args.bins
+        )
+        for kind, model_path in model_paths.items():
+            records = predict_split(
+                model_path,
+                Path(challenge_input_value),
+                "test",
+                output_dir / f"challenge-student-{kind}.jsonl",
+                overwrite=args.overwrite,
+            )
+            challenge_evaluations["student_gold" if kind == "gold" else "student_soft"] = evaluate_rows(
+                records, "test", args.threshold, args.bins
+            )
+        if challenge_transformer_records is not None:
+            challenge_evaluations["student_transformer"] = evaluate_rows(
+                challenge_transformer_records, "test", args.threshold, args.bins
+            )
+        challenge_metric_keys = (
+            "accuracy",
+            "macro_f1",
+            "multiclass_brier_sum_over_examples",
+            "top_class_ece",
+            "coverage_at_threshold",
+            "selective_risk_at_threshold",
+        )
+        challenge_report = {
+            "result": "measured",
+            "evaluation_only": True,
+            "dataset_sha256": challenge_sha,
+            "record_count": len(challenge_rows),
+            "class_counts": {label: sum(row["gold"] == label for row in challenge_rows) for label in LABELS},
+            "teacher_observation_sha256": challenge_teacher_sha,
+            "transformer_predictions_sha256": challenge_transformer_report["predictions_sha256"] if challenge_transformer_report else None,
+            "threshold": args.threshold,
+            "threshold_selected_on_challenge": False,
+            "test_used_for_training_or_calibration": False,
+            "evaluations": challenge_evaluations,
+            "comparison": {
+                model_name: {key: value["metrics"][key] for key in challenge_metric_keys}
+                for model_name, value in challenge_evaluations.items()
+            },
+            "limitations": [
+                "Набір синтетичний і використовується лише як challenge-test.",
+                "Поріг має бути зафіксований до перегляду challenge-результатів.",
+                "Цей набір не доводить якість на реальних зверненнях.",
+            ],
+        }
+
     report = {
         "schema": "sens.system-one.teacher-student-comparison/1",
         "result": "measured",
@@ -394,6 +527,7 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
         "threshold": args.threshold,
         "calibration": calibration_reports,
         "transformer_student": transformer_report,
+        "challenge": challenge_report,
         "evaluations": evaluations,
         "comparison": comparisons,
         "models": {
@@ -422,6 +556,9 @@ def main() -> int:
     parser.add_argument("--teacher-test", type=Path, required=True)
     parser.add_argument("--transformer-validation-predictions", type=Path)
     parser.add_argument("--transformer-test-predictions", type=Path)
+    parser.add_argument("--challenge-input", type=Path, help="необов'язковий незалежний evaluation-only challenge-test")
+    parser.add_argument("--challenge-teacher", type=Path, help="окремі вчительські оцінки для challenge-input")
+    parser.add_argument("--challenge-transformer-predictions", type=Path, help="прогнози того самого трансформера на challenge-test")
     parser.add_argument("--output-dir", type=Path, required=True)
     parser.add_argument("--threshold", type=float, default=0.80)
     parser.add_argument("--bins", type=int, default=10)
