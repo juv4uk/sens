@@ -695,6 +695,91 @@ fn dispatch_domain_call(
 
 /// Спільний compatibility-диспетчер виклику. Для `ExprKind::Call` ім'я голови відсутнє:
 /// функція — лише 1 байт `head_sid`.
+/// Єдина семантика першокласного доменного коду для прямої голови
+/// та контекстного Д7-зв'язування. Резидент без механізму не викликається.
+pub(super) fn apply_exact_domain_value(
+    identity: &crate::DomainIdentity,
+    arguments: &[Expr],
+    environment: &Environment,
+    span: Span,
+) -> Result<EvalStep, LanguageError> {
+    // Точні селектори Д3–Д10 мають однаковий закон і як голова,
+    // і як передане значення; особливо Д9 не губиться в Core-маршруті.
+    if selector_law::is_selector(*identity) {
+        let mut values = Vec::with_capacity(arguments.len());
+        for argument in arguments {
+            values.push(evaluate(argument, environment)?);
+        }
+        return selector_law::invoke(*identity, &values, span)
+            .expect("exact selector family was checked above")
+            .map(EvalStep::Value);
+    }
+    if let Some(core_identity) = identity.core_operation() {
+        let mut values = Vec::with_capacity(arguments.len());
+        for argument in arguments {
+            values.push(evaluate(argument, environment)?);
+        }
+        return canon::invoke_domain_identity(core_identity, &values, environment, span)
+            .map(EvalStep::Value);
+    }
+    // The ratified D10 selector family is generated from D3 CAR/CDR
+    // without a hand-written D10 function, name map or new opcode.
+    // D7 and all nonselector D10 residents remain fail-closed.
+    if selector_law::is_selector(*identity) {
+        let mut values = Vec::with_capacity(arguments.len());
+        for argument in arguments {
+            values.push(evaluate(argument, environment)?);
+        }
+        return selector_law::invoke(*identity, &values, span)
+            .expect("ratified selector shape was checked above")
+            .map(EvalStep::Value);
+    }
+    // Лише D9-резиденти з реалізованим механізмом мають прямий виклик.
+    // Решта проходять звичайний шлях пошуку доменного слота.
+    if canon::has_d9_mechanism(*identity) {
+        let mut values = Vec::with_capacity(arguments.len());
+        for argument in arguments {
+            values.push(evaluate(argument, environment)?);
+        }
+        return canon::invoke_d9_mechanism(*identity, &values, environment, span)
+            .expect("exact D9 string-mechanism route was checked above")
+            .map(EvalStep::Value);
+    }
+    let Some(bound) = environment.domain_code_slot(*identity) else {
+        return Err(LanguageError::new(
+            ErrorKind::Type,
+            format!(
+                "domain identity is not callable under its ratified law: D{} {}",
+                identity.width(),
+                identity
+            ),
+            span,
+        ));
+    };
+    match &bound {
+        Value::Macro(closure) => {
+            closures::apply_macro(closure.clone(), arguments, environment, span)
+        }
+        Value::Closure(_) => closures::apply(bound.clone(), arguments, environment, span),
+        Value::Builtin(builtin) => {
+            let mut values = Vec::with_capacity(arguments.len());
+            for argument in arguments {
+                values.push(evaluate(argument, environment)?);
+            }
+            (builtin.func)(&values, environment, span).map(EvalStep::Value)
+        }
+        _ => Err(LanguageError::new(
+            ErrorKind::Type,
+            format!(
+                "exact domain mechanism slot is not callable: D{} {}",
+                identity.width(),
+                identity
+            ),
+            span,
+        )),
+    }
+}
+
 fn dispatch_call(
     head_name: Option<&str>,
     head_sid: Option<CoreDomainIdentity>,
@@ -772,83 +857,7 @@ fn dispatch_call(
         )?,
     };
     match &function {
-        Value::DomainIdentity(identity) => {
-            // Точні селектори Д3–Д10 мають однаковий закон і як голова,
-            // і як передане значення; особливо Д9 не губиться в Core-маршруті.
-            if selector_law::is_selector(*identity) {
-                let mut values = Vec::with_capacity(arguments.len());
-                for argument in arguments {
-                    values.push(evaluate(argument, environment)?);
-                }
-                return selector_law::invoke(*identity, &values, span)
-                    .expect("exact selector family was checked above")
-                    .map(EvalStep::Value);
-            }
-            if let Some(core_identity) = identity.core_operation() {
-                let mut values = Vec::with_capacity(arguments.len());
-                for argument in arguments {
-                    values.push(evaluate(argument, environment)?);
-                }
-                return canon::invoke_domain_identity(core_identity, &values, environment, span)
-                    .map(EvalStep::Value);
-            }
-            // The ratified D10 selector family is generated from D3 CAR/CDR
-            // without a hand-written D10 function, name map or new opcode.
-            // D7 and all nonselector D10 residents remain fail-closed.
-            if selector_law::is_selector(*identity) {
-                let mut values = Vec::with_capacity(arguments.len());
-                for argument in arguments {
-                    values.push(evaluate(argument, environment)?);
-                }
-                return selector_law::invoke(*identity, &values, span)
-                    .expect("ratified selector shape was checked above")
-                    .map(EvalStep::Value);
-            }
-            // Лише D9-резиденти з реалізованим механізмом мають прямий виклик.
-            // Решта проходять звичайний шлях пошуку доменного слота.
-            if canon::has_d9_mechanism(*identity) {
-                let mut values = Vec::with_capacity(arguments.len());
-                for argument in arguments {
-                    values.push(evaluate(argument, environment)?);
-                }
-                return canon::invoke_d9_mechanism(*identity, &values, environment, span)
-                    .expect("exact D9 string-mechanism route was checked above")
-                    .map(EvalStep::Value);
-            }
-            let Some(bound) = environment.domain_code_slot(*identity) else {
-                return Err(LanguageError::new(
-                    ErrorKind::Type,
-                    format!(
-                        "domain identity is not callable under its ratified law: D{} {}",
-                        identity.width(),
-                        identity
-                    ),
-                    span,
-                ));
-            };
-            match &bound {
-                Value::Macro(closure) => {
-                    closures::apply_macro(closure.clone(), arguments, environment, span)
-                }
-                Value::Closure(_) => closures::apply(bound.clone(), arguments, environment, span),
-                Value::Builtin(builtin) => {
-                    let mut values = Vec::with_capacity(arguments.len());
-                    for argument in arguments {
-                        values.push(evaluate(argument, environment)?);
-                    }
-                    (builtin.func)(&values, environment, span).map(EvalStep::Value)
-                }
-                _ => Err(LanguageError::new(
-                    ErrorKind::Type,
-                    format!(
-                        "exact domain mechanism slot is not callable: D{} {}",
-                        identity.width(),
-                        identity
-                    ),
-                    span,
-                )),
-            }
-        }
+        Value::DomainIdentity(identity) => apply_exact_domain_value(identity, arguments, environment, span),
         Value::Sid(sid) => {
             // #1455: макрос, прив'язаний до коду, розгортається до обчислення аргументів.
             if !canon::has_primitive(*sid) {
