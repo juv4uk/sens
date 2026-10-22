@@ -305,12 +305,7 @@ for path in "${inputs[@]}"; do
     printf 'CONTEST_PROOF_ONLY_PASS path=%s inputs=%s native=SENS_ZIG_T5M\n' "$path" "$witness_index"
   else
     bytes="$(wc -c < "$path")"
-    rows+="$task"
-\t'"$bytes"
-\t'"$nodes"
-\t'"$visits"
-\t'"$path"
-\n'
+    rows+="$task"$'\t'"$bytes"$'\t'"$nodes"$'\t'"$visits"$'\t'"$path"$'\n'
     printf "CONTEST_EXECUTED_PASS path=%s T5M=%s AST=%s visits=%s result=%s\n" "$path" "$bytes" "$nodes" "$visits" "$result"
   fi
   rm -rf -- "$tmp"
@@ -320,8 +315,7 @@ if [[ "${SENS_CONTEST_PROOF_ONLY:-false}" == true ]]; then
   printf "CONTEST_NATIVE_WITNESSES_PASS count=%s native=SENS_ZIG_T5M metrics=NOT_MEASURED\n" "${#seen[@]}"
 else
   printf "\nЗадача | T5M байти | AST | visits | Файл\n"
-  printf "%s" "$rows" | sort -t 
-\t' -k1,1 -k2,2n -k3,3n -k4,4n
+  printf "%s" "$rows" | sort -t $'\t' -k1,1 -k2,2n -k3,3n -k4,4n
   printf "CONTEST_NATIVE_PASS count=%s\n" "${#seen[@]}"
 fi
 printf "CONTEST_PENDING_NATIVE_PAIR_COUNT count=%s status=NOT_EXECUTED\n" "$pending_native_pair"
