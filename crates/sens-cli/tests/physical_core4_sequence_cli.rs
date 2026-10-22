@@ -320,6 +320,8 @@ fn verify_unpaired_ukrainian_libs_natively() {
     let mut independently_executed = std::collections::BTreeSet::new();
     for stem in [
         "d1-direct-values",
+        "d3-pair-laws",
+        "d4-second-two-tails-law",
         "pair-replace-first",
         "pair-replace-rest",
         "поміняти-перші-два",
@@ -503,7 +505,9 @@ fn verify_unpaired_ukrainian_libs_natively() {
         // реальному пакуванню Zig, а не лише текстовому звіту.
         if matches!(
             stem,
-            "вилучити-середнє-з-трійки"
+            "d3-pair-laws"
+                | "d4-second-two-tails-law"
+                | "вилучити-середнє-з-трійки"
                 | "вставити-посеред-пари"
                 | "розділити-четвірку-на-пари"
                 | "list-swap-ends-five"
