@@ -118,8 +118,21 @@ while IFS= read -r -d '' source; do
   (( sources += 1 ))
   physical="${source%.lisp}.sens"
   view="${source%.lisp}"
-  if [[ ! -s "$physical" || ! -f "$view" ||
-        -L "$source" || -L "$physical" || -L "$view" ]]; then
+  # Розрізняємо джерело без фізичної пари (робота для remint)
+  # і вже створену, але пошкоджену/підмінену пару (справжній RED).
+  # Раніше порожній T5M, напівпара або symlink потрапляли до missing
+  # та не збільшували failed, приховуючи помилку оборотності.
+  if [[ -L "$source" || -L "$physical" || -L "$view" ]] ||
+     { [[ -e "$physical" ]] && [[ ! -f "$physical" || ! -s "$physical" ]]; } ||
+     { [[ -e "$view" ]] && [[ ! -f "$view" || ! -s "$view" ]]; } ||
+     { [[ -e "$physical" ]] && [[ ! -e "$view" ]]; } ||
+     { [[ -e "$view" ]] && [[ ! -e "$physical" ]]; }; then
+    (( bad += 1 ))
+    printf 'NATIVE_INVALID_TRIPLE\t%s\tphysical=%s view=%s expected=complete_regular_nonempty_pair actual=invalid_or_partial\n' \
+      "$source" "$physical" "$view" >&2
+    continue
+  fi
+  if [[ ! -s "$physical" || ! -f "$view" ]]; then
     (( missing += 1 ))
     printf 'NATIVE_MISSING_TRIPLE\t%s\n' "$source" >&2
     continue
