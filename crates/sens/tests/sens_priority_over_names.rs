@@ -7,7 +7,7 @@ use sens::{
 };
 
 #[test]
-fn українські_поверхні_зводяться_до_точних_ратифікованих_доменів() {
+fn ukrainian_surfaces_lower_to_exact_ratified_domains() {
     let a = "#d24:000000000000000000000001";
     let b = "#d24:000000000000000000000010";
     for (surface, domain_width, bits) in [
@@ -33,7 +33,7 @@ fn українські_поверхні_зводяться_до_точних_р
 }
 
 #[test]
-fn українське_імя_поза_головою_виклику_не_стає_доменом() {
+fn ukrainian_name_outside_call_head_is_not_a_domain() {
     for surface in ["додати", "відняти", "помножити", "частка", "атом?"] {
         let parsed = parse(surface).expect("назва має залишатися допустимими даними");
         let lowered = lower_program(&parsed);
@@ -51,7 +51,7 @@ fn українське_імя_поза_головою_виклику_не_ст�
 }
 
 #[test]
-fn звязування_з_іменем_операції_не_змінює_виконавчого_закону_d5() {
+fn binding_operation_name_does_not_change_executable_d5_law() {
     let mut session = Session::default();
     // Чинний SENS може відхилити зв'язування імені примітива;
     // в обох випадках виклична голова вже має власну D5 identity.
@@ -59,7 +59,7 @@ fn звязування_з_іменем_операції_не_змінює_ви�
     let source = "(додати #d24:000000000000000000000001 #d24:000000000000000000000010)";
     let result = eval_program(source, &mut session)
         .expect("жива арифметика D5 не підміняється текстовим ім'ям");
-    let Value::BinaryNumber(number) = result.value else {
+    let Value::BinaryNumber(ref number) = result.value else {
         panic!("додавання має повернути точний числовий домен");
     };
     assert_eq!(number.numeric_domain_width(), Some(24));
@@ -74,7 +74,7 @@ fn звязування_з_іменем_операції_не_змінює_ви�
 }
 
 #[test]
-fn та_сама_двійкова_величина_у_d5_і_d8_не_є_однією_тотожністю() {
+fn same_binary_value_in_d5_and_d8_is_not_the_same_identity() {
     let d5 = sens::parse_exact_domain_source("01010").expect("D5");
     let d8 = sens::parse_exact_domain_source("00001010").expect("D8");
     assert!(matches!(&d5[0].kind, ExprKind::DomainIdentity(DomainIdentity::D5(_))));
