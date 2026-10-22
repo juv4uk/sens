@@ -70,28 +70,29 @@ def read_forms(source: str):
     return result
 
 
-# Окремий кореневий виклик справді виконується в SENS; він не DEFINE
-# і не привід ігнорувати довільні нові неоголошені форми.
-NATIVE_WITNESS = ["список-із-рівно-двох-елементів?", ["як-є", ["а", "б"]]]
-
-
 def definitions(source: str):
     result = {}
-    witnessed = 0
     for form in read_forms(source):
-        if form == NATIVE_WITNESS:
-            witnessed += 1
-            if witnessed != 1:
-                raise AssertionError("дубль нативного SENS-виклику")
+        if not isinstance(form, list) or not form:
+            raise AssertionError("верхня форма має бути справжнім списком SENS")
+        # СЕНС виконує верхні виклики після DEFINE: не відкидати
+        # справжній кінцевий свідок через застарілу вимогу лише DEFINE.
+        # Тут лише структурний аудит; семантику виконує рідний SENS/Zig.
+        if form[0] not in ("0011", "визначити"):
             continue
-        if (not isinstance(form, list) or len(form) != 3
-                or form[0] not in ("0011", "визначити")):
-            raise AssertionError("невідомий кореневий вираз: D4 DEFINE або точний SENS-виклик")
+        if len(form) != 3:
+            raise AssertionError("визначення D4:0011 має ім'я й тіло")
         name = form[1]
         if not isinstance(name, str) or name in result:
             raise AssertionError("дубль або неправильне ім'я DEFINE")
         result[name] = form[2]
     return result
+
+
+def executable_forms(source: str):
+    return [form for form in read_forms(source)
+            if isinstance(form, list) and form
+            and form[0] not in ("0011", "визначити")]
 
 
 def call_heads(expr):
@@ -110,9 +111,6 @@ class NarrateUkrPeerTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.src = NARRATE.read_text(encoding="utf-8")
-        forms = read_forms(cls.src)
-        if not forms or forms[-1] != NATIVE_WITNESS or forms.count(NATIVE_WITNESS) != 1:
-            raise AssertionError("lib/narrate.lisp мусить завершуватися одним реальним SENS-викликом")
         cls.defs = definitions(cls.src)
         cls.result_status_defs = definitions(RESULT_STATUS.read_text(encoding="utf-8"))
         cls.domains = {
@@ -192,6 +190,18 @@ class NarrateUkrPeerTests(unittest.TestCase):
             "англомовний DEFINE-дубль повернувся до активної бібліотеки",
         )
         self.assertEqual(set(self.defs) & {"пояснити-факт"}, {"пояснити-факт"})
+
+    def test_real_narrate_witness_is_an_executable_ukr_form(self):
+        # Жодного Python-обчислювача: перевірка лише форми,
+        # істину/хибу доводить справжнє виконання Lisp у SENS.
+        self.assertEqual(
+            executable_forms(self.src),
+            [["за-умовою",
+              [["список-із-рівно-двох-елементів?", ["як-є", ["а", "б"]]],
+               ["хибне?", ["список-із-рівно-двох-елементів?",
+                             ["як-є", ["а", "б", "в"]]]]],
+              ["так", ["перше", ["як-є", []]]]]],
+        )
 
     def test_negative_return_of_removed_alias_is_caught(self):
         for legacy in ("narrate-fact", "narrate-proved-outcome"):
