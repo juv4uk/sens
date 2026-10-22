@@ -3,7 +3,8 @@
 use wsm_datalog_kernel::{
     Atom, Database, DatalogAbiAdapter, Evaluator, Program, Rule, Term, Value,
     arithmetic::{
-        DatalogMathError, NumericExpr, SID_ABS, SID_ADD, SID_DIV, SID_MAX, SID_MIN, SID_MOD,
+        DatalogMathError, NumericExpr, parse_exact_domain_request,
+        SID_ABS, SID_ADD, SID_DIV, SID_MAX, SID_MIN, SID_MOD,
         SID_MUL, SID_QUOTIENT, SID_SUB,
     },
 };
@@ -36,6 +37,37 @@ fn exchange_math(
     };
     output.truncate(written.min(output.len()));
     (status, output)
+}
+
+/// Current SENS ownership is D5/D6 exact-domain words and their full укр
+/// projection, not the flat historical one-byte C-ABI mechanism slot.
+#[test]
+fn present_day_domain_ladder_executes_exact_ukr_math_without_sid8() {
+    for (width, bits, ukr, input, expected) in [
+        (5, "01010", "додати", "2 3", 5),
+        (5, "01011", "відняти", "7 3", 4),
+        (5, "10110", "помножити", "6 7", 42),
+        (6, "010011", "модуль", "-5", 5),
+        (6, "110101", "найменше", "4 9", 4),
+        (6, "110111", "найбільше", "4 9", 9),
+    ] {
+        let operation = parse_exact_domain_request(width, bits, input)
+            .unwrap_or_else(|error| panic!("D{width}:{bits} {ukr}: {error}"));
+        assert_eq!(operation.evaluate(&std::collections::HashMap::new()),
+            Ok(Value::int(expected)), "D{width}:{bits} {ukr}");
+    }
+    for (width, bits, input) in [
+        (8, "00001100", "2 3"), // old W8 ADD != D8 resident
+        (5, "00001100", "2 3"), // incorrect width
+        (5, "10111", "7 3"),    // D5 quotient needs SENS rational-law parity
+        (6, "010100", "7 3"),   // D6 remainder needs signed-law parity
+        (8, "11110110", "7 3"), // D8 division needs separate callability proof
+    ] {
+        assert!(matches!(
+            parse_exact_domain_request(width, bits, input),
+            Err(DatalogMathError::UnsupportedDomainOperation { .. })
+        ), "cannot infer current identity from historical SID8: D{width}:{bits}");
+    }
 }
 
 #[test]
