@@ -94,7 +94,7 @@ while IFS= read -r -d '' source; do
   if [[ -n "$data_schema" && -f "$source" && ! -L "$source" ]] &&
      LC_ALL=C grep -Eq "^[[:space:]]*\\($data_schema([[:space:]]|$)" -- "$source"; then
     (( nonprogram_data += 1 ))
-    printf 'NATIVE_DATA_ONLY\\t%s\\tclassification=EXACT_SCHEMA:%s\\n' "$source" "$data_schema" >&2
+    printf 'NATIVE_DATA_ONLY\t%s\tclassification=EXACT_SCHEMA:%s\n' "$source" "$data_schema" >&2
     continue
   fi
   # Історичні бенчмарки входять до діагностики, не у підтверджені PASS.
