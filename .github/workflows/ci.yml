@@ -1208,6 +1208,25 @@ jobs:
             echo "D11_T5M_EXACT_PASS source=$source"
           done
 
+          # Ще не опублікована фізична трійка GROUP-BY: довести
+          # чинний native mint/обернення до відокремлених T5M/view.
+          # Не називати це перевіркою комітнутої пари: вона окрема.
+          group_source="lib/d11-clojure-group-by.lisp"
+          group_physical="$temp_d11/group-by.sens"
+          group_view="$temp_d11/group-by"
+          target/debug/sens --t5m-mint "$group_source" "$group_physical" || {
+            echo "D11_GROUP_BY_MINT_RED layer=SENS_ZIG source=$group_source" >&2
+            exit 1
+          }
+          test -s "$group_physical" || { echo "D11_GROUP_BY_EMPTY_CARRIER source=$group_source" >&2; exit 1; }
+          target/debug/sens-trit view "$group_physical" > "$group_view"
+          test -s "$group_view" || { echo "D11_GROUP_BY_EMPTY_VIEW source=$group_source" >&2; exit 1; }
+          target/debug/sens-trit verify-view "$group_physical" > /dev/null || {
+            echo "D11_GROUP_BY_ROUNDTRIP_RED layer=Zig_T5M source=$group_source" >&2
+            exit 1
+          }
+          echo "D11_GROUP_BY_STAGED_T5M_PASS source=$group_source status=temporary_not_committed"
+
       - name: "Reason: SENS перевіряє індекс і лексичне застосування функцій"
         if: ${{ always() && (steps.changed-t5m-lisp.outputs.reason_tests == 'true' || (github.event_name == 'push' && startsWith(github.event.head_commit.message, 'Reason:'))) }}
         shell: bash
