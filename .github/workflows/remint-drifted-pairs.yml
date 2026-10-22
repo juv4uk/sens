@@ -267,6 +267,32 @@ jobs:
                 fi
               done
             fi
+            # Якщо попередні queued push скасовано, після rebase потрібно
+            # забрати й нові бібліотечні Lisp. Інакше незмінений старий
+            # кандидат-список ніколи не помітить їхні відсутні T5M пари.
+            # Тільки непарні або новіші за носій: без масового перемайну.
+            for source in lib/list-*.lisp lib/tree-*.lisp lib/d11-*.lisp; do
+              [[ -f "$source" && ! -L "$source" ]] || continue
+              pair="${source%.lisp}.sens"
+              view="${source%.lisp}"
+              needs_pair=0
+              if [[ ! -s "$pair" || ! -f "$view" ||
+                    -L "$pair" || -L "$view" ]]; then
+                needs_pair=1
+              else
+                source_commit="$(git log -1 --format=%H -- "$source")"
+                pair_commit="$(git log -1 --format=%H -- "$pair")"
+                if [[ -n "$source_commit" && -n "$pair_commit" ]] &&
+                   ! git merge-base --is-ancestor "$source_commit" "$pair_commit"; then
+                  needs_pair=1
+                fi
+              fi
+              if (( needs_pair )) &&
+                 ! grep -Fxq -- "$source" "$RUNNER_TEMP/sens-remint-candidates.list"; then
+                printf '%s\n' "$source" >> "$RUNNER_TEMP/sens-remint-candidates.list"
+                echo "REMINT_RECOVER_LIBRARY_SOURCE source=$source"
+              fi
+            done
             while IFS= read -r f; do
               [[ -n "$f" ]] || continue
               if [[ ! -f "$f" ]]; then
