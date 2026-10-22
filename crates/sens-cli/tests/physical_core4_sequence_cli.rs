@@ -521,6 +521,7 @@ fn verify_unpaired_ukrainian_libs_natively() {
         // Два нові алгоритми одразу виконуються нативним SENS, навіть
         // доки їхні фізичні T5M-трійки допубліковує Zig remint.
         "list-tail-after-fifth-atom-zero-copy-general",
+        "list-tail-after-last-adjacent-different-atom-pair-zero-copy-general",
         "list-penultimate-atomic-suffix-zero-copy-general",
         "суфікс-останнього-предиката-без-копії",
         "залишити-точні-числа",

@@ -14,6 +14,16 @@ permissions:
   contents: read
 
 jobs:
+  remint-native:
+    name: Канонічний SENS/Zig remint у тому самому CI запуску
+    # Рівно один автоматичний workflow на push, без другого незалежного
+    # remint-drifted-pairs.yml. Викликаний job зберігає нативний mint,
+    # оберненість, SENS execution, суддівство й запис реальних T5M пар.
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    permissions:
+      contents: write
+    uses: ./.github/workflows/remint-drifted-pairs.yml
+
   runtime-shards:
     name: Реальне виконання — частина ${{ matrix.shard }}
     # Дев'ятнадцять ресурсомістких частин — лише за ручним дозволом власника.
