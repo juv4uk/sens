@@ -362,6 +362,7 @@ fn verify_unpaired_ukrainian_libs_natively() {
         "list-subsequence-atoms-general",
         "list-rotate-inverse-general",
         "list-middle-even",
+        "list-middle-suffix-two-pointers-zero-copy-general",
         "list-common-suffix-general",
         "list-chunk-triplets-general",
         "list-stable-difference-general",
