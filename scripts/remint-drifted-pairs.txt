@@ -80,4 +80,4 @@ lib/list-interleave-three-general.lisp
 benchmarks/contest-uk/факторіал.lisp
 benchmarks/contest-uk/сума-до-n.lisp
 benchmarks/contest-uk/довжина-списку.lisp
-lib/list-interleave-three-rotation-general.lisp
+benchmarks/sens-program-size/fixtures/konkurs-polynomial-compact.lisp
