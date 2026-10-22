@@ -22,10 +22,10 @@
   },
   "gate": "Визначені SENS-композиції є переможцями законів у геометрії D11, але це не допускає прямий машинний opcode і не створює новий примітив; 43 тестові ідентичності незмінні.",
   "counts": {
-    "total": 218,
+    "total": 220,
     "historical": 17,
-    "library": 201,
-    "distinct_families": 35
+    "library": 203,
+    "distinct_families": 36
   },
   "excluded": {
     "present_in_current_domains": 413,
@@ -5491,6 +5491,46 @@
       "review_status": "SENS_COMPOSITION_IMPLEMENTED_NATIVE_CI_PENDING",
       "ratified": false,
       "callable": false
+    },
+    {
+      "surface_name": "застосувати-набір-одномісних-функцій",
+      "source_family": "clojure-juxt-unary-sens",
+      "source_kind": "SENS_LIBRARY_SNAPSHOT",
+      "provenance": {
+        "repo_file": "lib/d11-clojure-juxt.lisp",
+        "blob_sha": "45735de0f10ebebd2a4c6d92733906c70def712b",
+        "historical_source": "https://clojure.github.io/clojure/branch-master/clojure.core-api.html",
+        "snapshot_not_live_proof": false
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "SENS_COMPOSITION_IMPLEMENTED_NATIVE_CI_PENDING",
+      "ratified": false,
+      "callable": false,
+      "proposed_law_uk": "Для скінченного proper-list чистих одномісних SENS-замикань застосувати кожне до того самого значення і повернути proper-list результатів у порядку функцій; зберігати вкладені структури й структурне (); для нульового набору повертати (). Не ототожнювати з D10 відобразити-й-додати, який сплющує підсписки.",
+      "native_law_test": "crates/sens/tests/d11_clojure_juxt.rs::d11_clojure_juxt_unary_closures_and_negative_laws_native",
+      "native_ci_status": "NOT_YET_CONFIRMED"
+    },
+    {
+      "surface_name": "побудувати-зіставлення-функцій",
+      "source_family": "clojure-juxt-unary-sens",
+      "source_kind": "SENS_LIBRARY_SNAPSHOT",
+      "provenance": {
+        "repo_file": "lib/d11-clojure-juxt.lisp",
+        "blob_sha": "45735de0f10ebebd2a4c6d92733906c70def712b",
+        "historical_source": "https://clojure.github.io/clojure/branch-master/clojure.core-api.html",
+        "snapshot_not_live_proof": false
+      },
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "SENS_COMPOSITION_IMPLEMENTED_NATIVE_CI_PENDING",
+      "ratified": false,
+      "callable": false,
+      "proposed_law_uk": "Повертає лексичне SENS-замикання, що зберігає список одномісних функцій; за майбутнього виклику з одним значенням застосовує кожну до цього значення і зберігає порядок їх результатів. Відрізняється від попередньо обчисленого списку результатів.",
+      "native_law_test": "crates/sens/tests/d11_clojure_juxt.rs::d11_clojure_juxt_unary_closures_and_negative_laws_native",
+      "native_ci_status": "NOT_YET_CONFIRMED"
     }
   ],
   "winners_20261022": {
