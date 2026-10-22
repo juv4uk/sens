@@ -22,10 +22,10 @@
   },
   "gate": "Визначені SENS-композиції є переможцями законів у геометрії D11, але це не допускає прямий машинний opcode і не створює новий примітив; 43 тестові ідентичності незмінні.",
   "counts": {
-    "total": 205,
+    "total": 207,
     "historical": 17,
-    "library": 188,
-    "distinct_families": 27
+    "library": 190,
+    "distinct_families": 28
   },
   "excluded": {
     "present_in_current_domains": 413,
@@ -5187,6 +5187,46 @@
         "selection_basis": "Реальні SENS-виклики, канонічно побудований спільний кадр; нативний адресний CI PASS і відсутність точних українських дублів D1–D10",
         "historical_research_alias": "замінити-спільний-кадр"
       }
+    },
+    {
+      "surface_name": "розділити-поки-умова",
+      "source_family": "scheme-srfi1-list-splitting",
+      "source_kind": "SENS_LIBRARY_SNAPSHOT",
+      "provenance": {
+        "repo_file": "lib/d11-srfi1-span-break.lisp",
+        "blob_sha": "5ad10a09fe2f4296c2ca2fb2f61231801c49ef8d",
+        "snapshot_not_live_proof": false,
+        "historical_spec": "https://srfi.schemers.org/srfi-1/srfi-1.html"
+      },
+      "proposed_law_uk": "SRFI-1 SPAN: взяти найдовший proper-list префікс, для якого D1-предикат істинний; результат (префікс . незмінений-суфікс), зупинитися на першому D1:0.",
+      "native_law_test": "crates/sens/tests/d11_srfi1_span_break.rs::d11_srfi1_span_break_preserve_prefix_suffix_and_short_circuit",
+      "native_ci_status": "NOT_YET_CONFIRMED",
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "SENS_COMPOSITION_IMPLEMENTED_NATIVE_CI_PENDING",
+      "ratified": false,
+      "callable": false
+    },
+    {
+      "surface_name": "розділити-перед-умовою",
+      "source_family": "scheme-srfi1-list-splitting",
+      "source_kind": "SENS_LIBRARY_SNAPSHOT",
+      "provenance": {
+        "repo_file": "lib/d11-srfi1-span-break.lisp",
+        "blob_sha": "5ad10a09fe2f4296c2ca2fb2f61231801c49ef8d",
+        "snapshot_not_live_proof": false,
+        "historical_spec": "https://srfi.schemers.org/srfi-1/srfi-1.html"
+      },
+      "proposed_law_uk": "SRFI-1 BREAK: взяти найдовший proper-list префікс, для якого D1-предикат хибний; суфікс починається першим D1:1, пізніший ввід не читати.",
+      "native_law_test": "crates/sens/tests/d11_srfi1_span_break.rs::d11_srfi1_span_break_preserve_prefix_suffix_and_short_circuit",
+      "native_ci_status": "NOT_YET_CONFIRMED",
+      "domain_candidate": "D11_OR_LIBRARY_REVIEW",
+      "coordinate": null,
+      "exact_bit_width_if_admitted": 11,
+      "review_status": "SENS_COMPOSITION_IMPLEMENTED_NATIVE_CI_PENDING",
+      "ratified": false,
+      "callable": false
     }
   ],
   "winners_20261022": {
