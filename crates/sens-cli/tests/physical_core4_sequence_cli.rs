@@ -364,6 +364,7 @@ fn verify_unpaired_ukrainian_libs_natively() {
         "list-unzip-pairs-general",
         "list-palindrome-atoms-general",
         "list-palindrome-linear-atoms-general",
+        "list-trailing-equal-atomic-run-general",
         "list-multiset-difference-general",
         "list-stable-union-general",
         "list-cartesian-product-general",
@@ -506,6 +507,7 @@ fn verify_unpaired_ukrainian_libs_natively() {
                 | "list-unzip-pairs-general"
                 | "list-palindrome-atoms-general"
                 | "list-palindrome-linear-atoms-general"
+                | "list-trailing-equal-atomic-run-general"
                 | "list-multiset-difference-general"
                 | "list-stable-union-general"
                 | "list-cartesian-product-general"
@@ -873,6 +875,7 @@ fn ukrainian_d3_d4_existing_files_mint_verify_and_execute() {
         "lib/list-last-repeated-atom-by-final-occurrence-general",
         "lib/list-all-subsets-by-position-general",
         "lib/list-palindrome-linear-atoms-general",
+        "lib/list-trailing-equal-atomic-run-general",
         "lib/list-all-slices-ends-general",
         "lib/list-atom-sequence-equal-general",
         "lib/list-rotation-inverse-general",
