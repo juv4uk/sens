@@ -486,13 +486,15 @@ fn compiler_corpus_native_actuals_are_judged_only_by_lisp_owned_witness_logic() 
         named_errors > 0,
         "#113 corpus slice must contain at least one Lisp-authored named error witness"
     );
+    // Чинні форми D5 засвідчує виконуваний SENS, а не пошук
+    // скасованих латинських call-heads lambda/defmacro у тексті.
     assert!(
-        rows.iter().any(|row| row.expr.contains("lambda")),
-        "#113 compiler slice must retain lambda/application or closure evidence"
+        rows.iter().any(|row| row.expr.contains("(функція ")),
+        "test_id=compiler-d5-lambda evidence=Ukrainian-Lisp"
     );
     assert!(
-        rows.iter().any(|row| row.expr.contains("defmacro")),
-        "#113 compiler slice must retain macro evidence"
+        rows.iter().any(|row| row.expr.contains("(нехай ")),
+        "test_id=compiler-d5-binding evidence=Ukrainian-Lisp"
     );
 }
 
@@ -595,30 +597,17 @@ fn same_committed_corpus_drives_meta_eval_for_rows_admitted_to_that_backend() {
         checked_values > 0,
         "meta witness slice must contain value witnesses"
     );
-    // A class counts by its SENS code or, for rows not yet migrated, its name.
-    for (required_head, code) in [
-        ("quote", "00000001"),
-        ("atom", "00000010"),
-        ("eq", "00000011"),
-        ("car", "00000101"),
-        ("cdr", "00000110"),
-        ("cons", "00000100"),
-        ("cond", "00000111"),
-    ] {
-        let by_code = format!("({code}");
-        let by_name = format!("({required_head} ");
-        assert!(
-            rows.iter().any(|row| {
-                let expr = row.expr.trim_start();
-                expr.starts_with(&by_code) || expr.starts_with(&by_name)
-            }),
-            "meta witness slice lost McCarthy-7/Canon-0 class `{required_head}` ({code})"
-        );
-    }
+    // Це перехідні D3-свідки актуальних COND і QUOTE.
+    // Повний D3: QUOTE/ATOM/EQ/CAR/CDR/CONS засвідчено окремими
+    // нативними структурами та D3 -> D1 boundary вище; не вимагати
+    // 8-бітних SID8 і латинських голів там, де вони скасовані.
     assert!(
-        rows.iter()
-            .any(|row| row.expr.trim_start().starts_with("((lambda")),
-        "meta witness slice must contain lambda application"
+        rows.iter().any(|row| row.expr.trim_start().starts_with("(за-умовою ")),
+        "test_id=meta-current-d3-cond witness missing"
+    );
+    assert!(
+        rows.iter().any(|row| row.expr.contains("(як-є ")),
+        "test_id=meta-current-d3-quote witness missing"
     );
 }
 
