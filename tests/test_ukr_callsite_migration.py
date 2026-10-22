@@ -442,7 +442,7 @@ class PersistentMapLifeUkrWitnessTests(unittest.TestCase):
         self.assertNotIn("#d1:0", life_source)
         self.assertIn("(нехай-послідовно ", life_source)
         # Чинний LIFE-1 виводить D1 без голих host-істин.
-        # Позитивний та негативний біти будуються живими D3 ATOM.
+        # Керування перевіряє D3 ATOM, негативні гілки повертають D1 «ні».
         # Коментарі можуть містити історичний приклад (так ні);
         # перевіряємо лише виконуваний Lisp, зберігаючи рядки без змін.
         source_without_comments = []
@@ -473,7 +473,10 @@ class PersistentMapLifeUkrWitnessTests(unittest.TestCase):
                     in_string = True
         self.assertNotIn("(так ні)", "".join(source_without_comments))
         self.assertIn("(атом? (як-є ()))", life_source)
-        self.assertIn("(атом? (як-є (()))", life_source)
+        # Чинні негативні гілки повертають точний D1 «ні» без
+        # обхідного D3 ATOM від цитованої пари.
+        self.assertIn("((атом? (як-є ())) ні)", life_source)
+        self.assertNotIn("(атом? (як-є (()))", life_source)
         self.assertIn("(хибне? (атом? проєкції))", life_source)
         sample = "(як-є (100 цитоване)) (сполучити (як-є ліве) (як-є ()))"
         heads = [x.text for x in mod.candidate_heads(mod.parse(sample))]
