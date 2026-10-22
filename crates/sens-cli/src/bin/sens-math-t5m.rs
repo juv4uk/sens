@@ -17,7 +17,7 @@
 #[cfg(feature = "zig-transport")]
 mod paired {
     use sens::{BinaryNumber, Expr, ExprKind, Session, Value};
-    use sens_cli::zig_transport::{self, ExactT5Word};
+    use sens_cli::zig_transport::{self, ExactT5MWord};
     use std::{
         env, fs,
         fs::OpenOptions,
@@ -84,13 +84,13 @@ mod paired {
         Ok(root.clone())
     }
 
-    fn word(width: usize, bits: Vec<u8>) -> Result<ExactT5Word, String> {
-        ExactT5Word::new(width, bits)
+    fn word(width: usize, bits: Vec<u8>) -> Result<ExactT5MWord, String> {
+        ExactT5MWord::new(width, bits)
     }
 
     // Existing D2 OPEN / D5 function / subexpressions / D2 CLOSE.
     // The T5M word schema and physical encoder remain unchanged.
-    fn append_words(expr: &Expr, out: &mut Vec<ExactT5Word>) -> Result<(), String> {
+    fn append_words(expr: &Expr, out: &mut Vec<ExactT5MWord>) -> Result<(), String> {
         match &expr.kind {
             ExprKind::BinaryNumber(number) => {
                 let width = number
@@ -122,7 +122,7 @@ mod paired {
         Ok(())
     }
 
-    fn expected_words(root: &Expr) -> Result<Vec<ExactT5Word>, String> {
+    fn expected_words(root: &Expr) -> Result<Vec<ExactT5MWord>, String> {
         admit(root, 0)?;
         let mut out = Vec::new();
         append_words(root, &mut out)?;
@@ -133,7 +133,7 @@ mod paired {
     // The separately-validated source AST grants D5/D24 identity and structure.
     fn reconstruct(
         source: &Expr,
-        physical: &[ExactT5Word],
+        physical: &[ExactT5MWord],
         cursor: &mut usize,
     ) -> Result<Expr, String> {
         let kind = match &source.kind {
@@ -180,7 +180,7 @@ mod paired {
         let qualified = qualify(source)?;
         let expected = expected_words(&qualified)?;
         // Only Zig physically encodes or decodes T5M; no W1–W9 truncation.
-        let restored = zig_transport::decode_t5_exact_words(physical)?;
+        let restored = zig_transport::decode_t5m_exact_words(physical)?;
         if restored != expected {
             let index = restored.iter().zip(&expected).position(|(a, b)| a != b);
             return Err(format!(
@@ -216,7 +216,7 @@ mod paired {
             "encode" => {
                 let admitted = qualify(&source)?;
                 let expected = expected_words(&admitted)?;
-                let physical = zig_transport::encode_t5_exact_words(&expected)?;
+                let physical = zig_transport::encode_t5m_exact_words(&expected)?;
                 // Verify the same pair before publishing physical data.
                 eval_verified(&source, &physical)?;
                 let mut output = OpenOptions::new()
@@ -276,9 +276,9 @@ mod paired {
                 let qualified = qualify(&source).expect("ratified D5 and D24 source");
                 let words = expected_words(&qualified).unwrap();
                 let physical =
-                    zig_transport::encode_t5_exact_words(&words).expect("real Zig T5M egress");
+                    zig_transport::encode_t5m_exact_words(&words).expect("real Zig T5M egress");
                 let restored =
-                    zig_transport::decode_t5_exact_words(&physical).expect("real Zig T5M ingress");
+                    zig_transport::decode_t5m_exact_words(&physical).expect("real Zig T5M ingress");
                 assert_eq!(words, restored, "id={id} layer=transport");
                 let result = eval_verified(&source, &physical)
                     .unwrap_or_else(|error| panic!("id={id} layer=eval {error}"));
@@ -306,9 +306,9 @@ mod paired {
             ] {
                 let words = expected_words(&qualify(text).unwrap()).unwrap();
                 assert_eq!(words[2].width, input_width, "test_id={id} layer=source");
-                let packed = zig_transport::encode_t5_exact_words(&words).unwrap();
+                let packed = zig_transport::encode_t5m_exact_words(&words).unwrap();
                 assert_eq!(
-                    zig_transport::decode_t5_exact_words(&packed).unwrap(),
+                    zig_transport::decode_t5m_exact_words(&packed).unwrap(),
                     words
                 );
                 let got = eval_verified(text, &packed).unwrap();
@@ -334,7 +334,7 @@ mod paired {
             // The physical T5M words are two D24 integers, never a flat fraction.
             let source_expr = source("частка", 1, 3);
             let words = expected_words(&qualify(&source_expr).unwrap()).unwrap();
-            let physical = zig_transport::encode_t5_exact_words(&words).unwrap();
+            let physical = zig_transport::encode_t5m_exact_words(&words).unwrap();
             let value = eval_verified(&source_expr, &physical)
                 .expect("SENS exact division must form canonical reduced RATIO");
             assert!(
@@ -344,7 +344,7 @@ mod paired {
 
             let zero_source = source("частка", 1, 0);
             let zero_words = expected_words(&qualify(&zero_source).unwrap()).unwrap();
-            let zero_physical = zig_transport::encode_t5_exact_words(&zero_words).unwrap();
+            let zero_physical = zig_transport::encode_t5m_exact_words(&zero_words).unwrap();
             let error = eval_verified(&zero_source, &zero_physical)
                 .expect_err("SENS must reject division by D24 zero");
             assert!(
@@ -364,8 +364,11 @@ mod paired {
             let root = qualify(&nested).expect("ratified nested math");
             let words = expected_words(&root).unwrap();
             assert_eq!(words.len(), 13, "three D5 applications and four D24 leaves");
-            let bytes = zig_transport::encode_t5_exact_words(&words).unwrap();
-            assert_eq!(zig_transport::decode_t5_exact_words(&bytes).unwrap(), words);
+            let bytes = zig_transport::encode_t5m_exact_words(&words).unwrap();
+            assert_eq!(
+                zig_transport::decode_t5m_exact_words(&bytes).unwrap(),
+                words
+            );
             let actual = eval_verified(&nested, &bytes).unwrap();
             assert!(
                 matches!(actual, Value::NumericComposition(_)),
@@ -379,7 +382,7 @@ mod paired {
             let mut changed = words.clone();
             let final_number = changed.iter_mut().rfind(|word| word.width == 24).unwrap();
             final_number.bits[23] ^= 1;
-            let malformed_pair = zig_transport::encode_t5_exact_words(&changed).unwrap();
+            let malformed_pair = zig_transport::encode_t5m_exact_words(&changed).unwrap();
             assert!(eval_verified(&nested, &malformed_pair)
                 .unwrap_err()
                 .contains("T5M_PAIR_MISMATCH"));
@@ -407,10 +410,10 @@ mod paired {
                     vec![2, 5, 24, 2],
                     "test_id={id} layer=carrier"
                 );
-                let physical = zig_transport::encode_t5_exact_words(&words)
+                let physical = zig_transport::encode_t5m_exact_words(&words)
                     .expect("Zig encodes unary exact D5/D24 words");
                 assert_eq!(
-                    zig_transport::decode_t5_exact_words(&physical).unwrap(),
+                    zig_transport::decode_t5m_exact_words(&physical).unwrap(),
                     words
                 );
                 let value = eval_verified(&source, &physical)
@@ -438,7 +441,7 @@ mod paired {
         fn unary_d5_zero_normalizes_and_zero_reciprocal_fails() {
             let neg_zero = format!("(відняти #d24:{})", bits(0));
             let words = expected_words(&qualify(&neg_zero).unwrap()).unwrap();
-            let packed = zig_transport::encode_t5_exact_words(&words).unwrap();
+            let packed = zig_transport::encode_t5m_exact_words(&words).unwrap();
             let result = eval_verified(&neg_zero, &packed).unwrap();
             let Value::BinaryNumber(ref number) = result else {
                 panic!("test_id=negative-zero layer=eval expected=D24 zero");
@@ -448,7 +451,7 @@ mod paired {
 
             let zero_reciprocal = format!("(частка #d24:{})", bits(0));
             let words = expected_words(&qualify(&zero_reciprocal).unwrap()).unwrap();
-            let packed = zig_transport::encode_t5_exact_words(&words).unwrap();
+            let packed = zig_transport::encode_t5m_exact_words(&words).unwrap();
             let error =
                 eval_verified(&zero_reciprocal, &packed).expect_err("zero reciprocal is undefined");
             assert!(
@@ -497,7 +500,7 @@ mod paired {
             ] {
                 let source = source(head, left, right);
                 let words = expected_words(&qualify(&source).unwrap()).unwrap();
-                let physical = zig_transport::encode_t5_exact_words(&words).unwrap();
+                let physical = zig_transport::encode_t5m_exact_words(&words).unwrap();
                 let value = eval_verified(&source, &physical)
                     .unwrap_or_else(|error| panic!("test_id={head} layer=eval actual={error}"));
                 assert_eq!(
@@ -519,7 +522,7 @@ mod paired {
             );
             let root = qualify(&source).expect("source words each qualified");
             let words = expected_words(&root).expect("physical structure is valid");
-            let physical = zig_transport::encode_t5_exact_words(&words).unwrap();
+            let physical = zig_transport::encode_t5m_exact_words(&words).unwrap();
             let error = eval_verified(&source, &physical)
                 .expect_err("SENS may never silently coerce D48 to D24");
             assert!(
@@ -541,10 +544,10 @@ mod paired {
                 let words = expected_words(&admitted).expect("exact D5 and D24 structure");
                 assert_eq!(words[2].width, 24, "test_id={id} layer=physical width");
                 assert_eq!(words[2].bits[0], 1, "test_id={id} layer=physical sign");
-                let physical = zig_transport::encode_t5_exact_words(&words)
+                let physical = zig_transport::encode_t5m_exact_words(&words)
                     .expect("Zig must encode all original 24 bits");
                 assert_eq!(
-                    zig_transport::decode_t5_exact_words(&physical).unwrap(),
+                    zig_transport::decode_t5m_exact_words(&physical).unwrap(),
                     words
                 );
                 let value = eval_verified(&input, &physical)
@@ -582,9 +585,9 @@ mod paired {
                 expected.iter().map(|w| w.width).collect::<Vec<_>>(),
                 vec![2, 5, 48, 48, 2]
             );
-            let physical = zig_transport::encode_t5_exact_words(&expected).unwrap();
+            let physical = zig_transport::encode_t5m_exact_words(&expected).unwrap();
             assert_eq!(
-                zig_transport::decode_t5_exact_words(&physical).unwrap(),
+                zig_transport::decode_t5m_exact_words(&physical).unwrap(),
                 expected
             );
             let value = eval_verified(&source, &physical).unwrap();
@@ -610,7 +613,7 @@ mod paired {
                 ("width", {
                     let mut words = words.clone();
                     // Same unsigned payload at another width is NOT same Dn.
-                    words[2] = ExactT5Word::new(48, [vec![0; 24], words[2].bits.clone()].concat())
+                    words[2] = ExactT5MWord::new(48, [vec![0; 24], words[2].bits.clone()].concat())
                         .unwrap();
                     words
                 }),
@@ -620,7 +623,7 @@ mod paired {
                     words
                 }),
             ] {
-                let physical = zig_transport::encode_t5_exact_words(&mutated)
+                let physical = zig_transport::encode_t5m_exact_words(&mutated)
                     .expect("mutation stays a physically valid T5M carrier");
                 let failure = eval_verified(&original, &physical)
                     .expect_err("physical changes must not receive source admission");
@@ -646,14 +649,14 @@ mod paired {
             let mut altered = words.clone();
             altered[3].bits[23] ^= 1;
             let alien =
-                zig_transport::encode_t5_exact_words(&altered).expect("valid but wrong T5M data");
+                zig_transport::encode_t5m_exact_words(&altered).expect("valid but wrong T5M data");
             assert!(eval_verified(&admitted, &alien)
                 .unwrap_err()
                 .contains("T5M_PAIR_MISMATCH"));
 
             // Exactly equal bare 24-bit payload does NOT carry proof of
             // source identity: without its Lisp companion, this is not runnable.
-            let bare = zig_transport::encode_t5_exact_words(&[words[2].clone()]).unwrap();
+            let bare = zig_transport::encode_t5m_exact_words(&[words[2].clone()]).unwrap();
             assert!(eval_verified(&admitted, &bare)
                 .unwrap_err()
                 .contains("T5M_PAIR_MISMATCH"));

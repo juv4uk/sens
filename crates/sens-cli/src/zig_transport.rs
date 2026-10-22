@@ -80,12 +80,12 @@ fn version() -> Result<(), String> {
 /// Exact-width physical word for the Zig T5M bridge. Each bit is one byte
 /// whose value is 0 or 1; it carries no domain identity.
 #[derive(Clone, Debug, Eq, PartialEq)]
-pub struct ExactT5Word {
+pub struct ExactT5MWord {
     pub width: usize,
     pub bits: Vec<u8>,
 }
 
-impl ExactT5Word {
+impl ExactT5MWord {
     pub fn new(width: usize, bits: Vec<u8>) -> Result<Self, String> {
         if width == 0 || bits.len() != width || bits.iter().any(|&bit| bit > 1) {
             return Err(
@@ -104,7 +104,7 @@ impl ExactT5Word {
 }
 
 /// Кодує точні слова через фізичний кодек Zig T5M без стелі BE3 W1–W9.
-pub fn encode_t5_exact_words(words: &[ExactT5Word]) -> Result<Vec<u8>, String> {
+pub fn encode_t5m_exact_words(words: &[ExactT5MWord]) -> Result<Vec<u8>, String> {
     version()?;
     if words.is_empty() {
         return Err("Zig T5M cannot encode an empty word sequence".into());
@@ -153,7 +153,7 @@ pub fn encode_t5_exact_words(words: &[ExactT5Word]) -> Result<Vec<u8>, String> {
         return Err(format!("Zig exact T5M encode rejected: code={written}"));
     }
     physical.truncate(written as usize);
-    let restored = decode_t5_exact_words(&physical)?;
+    let restored = decode_t5m_exact_words(&physical)?;
     if restored != words {
         return Err("Zig T5M змінив ширину слова або його біти".into());
     }
@@ -161,9 +161,9 @@ pub fn encode_t5_exact_words(words: &[ExactT5Word]) -> Result<Vec<u8>, String> {
 }
 
 /// Декодує T5M через Zig зі збереженням довільних точних додатних ширин.
-pub fn decode_t5_exact_words(physical: &[u8]) -> Result<Vec<ExactT5Word>, String> {
+pub fn decode_t5m_exact_words(physical: &[u8]) -> Result<Vec<ExactT5MWord>, String> {
     version()?;
-    validate_t5(physical)?;
+    validate_t5m(physical)?;
     let trits = physical
         .len()
         .checked_mul(5)
@@ -208,7 +208,7 @@ pub fn decode_t5_exact_words(physical: &[u8]) -> Result<Vec<ExactT5Word>, String
             .get(offset..end)
             .ok_or("Zig exact T5M returned truncated word")?
             .to_vec();
-        words.push(ExactT5Word::new(width, bits)?);
+        words.push(ExactT5MWord::new(width, bits)?);
         offset = end;
     }
     if words.is_empty() {
@@ -625,7 +625,7 @@ fn require_same_exact_words(
     Ok(())
 }
 
-pub fn validate_t5(bytes: &[u8]) -> Result<(), String> {
+pub fn validate_t5m(bytes: &[u8]) -> Result<(), String> {
     version()?;
     if unsafe { sens_zig_t5m_validate(bytes.as_ptr(), bytes.len()) } != 0 {
         return Err("Zig physical T5M rejected; no SENS execution".into());
@@ -676,10 +676,10 @@ fn exact_words_to_be3(words: &[sens::BinarySourceWord]) -> Result<Vec<u8>, Strin
     Ok(be3)
 }
 
-pub fn encode_t5_direct(words: &[sens::BinarySourceWord]) -> Result<Vec<u8>, String> {
+pub fn encode_t5m_direct(words: &[sens::BinarySourceWord]) -> Result<Vec<u8>, String> {
     version()?;
     if words.is_empty() {
-        return Err("Zig physical T5 cannot encode an empty record".into());
+        return Err("Zig physical T5M cannot encode an empty record".into());
     }
     let semantic_trits = words
         .iter()
@@ -701,7 +701,7 @@ pub fn encode_t5_direct(words: &[sens::BinarySourceWord]) -> Result<Vec<u8>, Str
         return Err(format!("Zig physical T5M encode rejected: code={len}"));
     }
     // Обидва напрями проходять тільки стерильний Zig ABI, без Rust T5 codec.
-    let restored = decode_t5_words(&bytes)?;
+    let restored = decode_t5m_words(&bytes)?;
     require_same_exact_words(words, &restored)?;
     Ok(bytes)
 }
@@ -726,25 +726,27 @@ fn encode_legacy_t5(words: &[sens::BinarySourceWord]) -> Result<Vec<u8>, String>
     Ok(bytes)
 }
 
-pub fn encode_t5(
+pub fn verify_t5m_encoding(
     words: &[sens::BinarySourceWord],
     expected_bytes: &[u8],
 ) -> Result<Vec<u8>, String> {
-    let bytes = encode_t5_direct(words)?;
+    let bytes = encode_t5m_direct(words)?;
     if bytes != expected_bytes {
-        return Err("Zig T5 and admitted SENS reference differ at a physical byte".into());
+        return Err("Zig T5M and admitted SENS reference differ at a physical byte".into());
     }
     Ok(bytes)
 }
 
-pub fn decode_t5_words(bytes: &[u8]) -> Result<Vec<sens::BinarySourceWord>, String> {
-    validate_t5(bytes)?;
+pub fn decode_t5m_words(bytes: &[u8]) -> Result<Vec<sens::BinarySourceWord>, String> {
+    validate_t5m(bytes)?;
     let trits = bytes
         .len()
         .checked_mul(5)
         .ok_or("T5M input length overflow")?;
-    let max_words = trits.checked_add(1).ok_or("T5 word count overflow")? / 2;
-    let capacity = max_words.checked_mul(3).ok_or("T5 BE3 capacity overflow")?;
+    let max_words = trits.checked_add(1).ok_or("T5M word count overflow")? / 2;
+    let capacity = max_words
+        .checked_mul(3)
+        .ok_or("T5M BE3 capacity overflow")?;
     let mut be3 = vec![0u8; capacity];
     let written = unsafe {
         sens_zig_t5m_decode_be3(bytes.as_ptr(), bytes.len(), be3.as_mut_ptr(), be3.len())
@@ -756,7 +758,7 @@ pub fn decode_t5_words(bytes: &[u8]) -> Result<Vec<sens::BinarySourceWord>, Stri
             .is_none()
         || written % 3 != 0
     {
-        if let Ok(exact_words) = decode_t5_exact_words(bytes) {
+        if let Ok(exact_words) = decode_t5m_exact_words(bytes) {
             let mut widths: Vec<usize> = exact_words
                 .iter()
                 .map(|word| word.width)
@@ -812,7 +814,7 @@ fn decode_legacy_t5_words(bytes: &[u8]) -> Result<Vec<sens::BinarySourceWord>, S
         .and_then(|n| n.checked_add(1))
         .and_then(|n| n.checked_div(2))
         .and_then(|n| n.checked_mul(3))
-        .ok_or("legacy T5 BE3 capacity overflow")?;
+        .ok_or("legacy T5M BE3 capacity overflow")?;
     let mut be3 = vec![0u8; capacity];
     let written =
         unsafe { sens_zig_t5_decode_be3(bytes.as_ptr(), bytes.len(), be3.as_mut_ptr(), be3.len()) };
@@ -935,7 +937,7 @@ pub fn encode_f3(t5: &[u8]) -> Result<Option<Vec<u8>>, String> {
     version()?;
     // F3C is the explicit legacy-T5 compact container. Convert the current
     // T5M words through Zig before asking its legacy physical optimizer.
-    let logical_words = decode_t5_words(t5)?;
+    let logical_words = decode_t5m_words(t5)?;
     let legacy = encode_legacy_t5(&logical_words)?;
     if legacy.len() > 16 {
         return Ok(None);
@@ -988,15 +990,15 @@ pub fn decode_f3(carrier: &[u8]) -> Result<Vec<u8>, String> {
     }
     output.truncate(len as usize);
     let words = decode_legacy_t5_words(&output)?;
-    encode_t5_direct(&words)
+    encode_t5m_direct(&words)
 }
 
 #[cfg(test)]
 mod zig_exact_egress_tests {
     use super::{
-        decode_e1_words, decode_f3, decode_t5_exact_words, decode_t5_words, encode_e1_direct,
-        encode_f3, encode_t5_direct, exact_words_to_be3, require_same_exact_words, validate_t5,
-        validate_t5_coordinates,
+        decode_e1_words, decode_f3, decode_t5m_exact_words, decode_t5m_words, encode_e1_direct,
+        encode_f3, encode_t5m_direct, exact_words_to_be3, require_same_exact_words,
+        validate_t5_coordinates, validate_t5m,
     };
 
     #[test]
@@ -1033,20 +1035,20 @@ mod zig_exact_egress_tests {
 
     #[test]
     fn exact_t5m_bridge_preserves_domain_width_including_d5_d8_and_d10_plus() {
-        use super::{decode_t5_exact_words, encode_t5_exact_words, ExactT5Word};
+        use super::{decode_t5m_exact_words, encode_t5m_exact_words, ExactT5MWord};
 
         // Equal payloads are not interchangeable: D5's 00001 must never be
         // padded into D8's 00000001. Higher D1–24+ words remain opaque here.
         let source = [
-            ExactT5Word::new(5, vec![0, 0, 0, 0, 1]).unwrap(),
-            ExactT5Word::new(8, vec![0, 0, 0, 0, 0, 0, 0, 1]).unwrap(),
-            ExactT5Word::new(10, vec![0, 0, 0, 0, 0, 0, 0, 0, 0, 1]).unwrap(),
-            ExactT5Word::new(24, [vec![0; 23], vec![1]].concat()).unwrap(),
-            ExactT5Word::new(48, [vec![0; 47], vec![1]].concat()).unwrap(),
+            ExactT5MWord::new(5, vec![0, 0, 0, 0, 1]).unwrap(),
+            ExactT5MWord::new(8, vec![0, 0, 0, 0, 0, 0, 0, 1]).unwrap(),
+            ExactT5MWord::new(10, vec![0, 0, 0, 0, 0, 0, 0, 0, 0, 1]).unwrap(),
+            ExactT5MWord::new(24, [vec![0; 23], vec![1]].concat()).unwrap(),
+            ExactT5MWord::new(48, [vec![0; 47], vec![1]].concat()).unwrap(),
         ];
 
-        let physical = encode_t5_exact_words(&source).expect("Zig T5M exact encode");
-        let restored = decode_t5_exact_words(&physical).expect("Zig T5M exact decode");
+        let physical = encode_t5m_exact_words(&source).expect("Zig T5M exact encode");
+        let restored = decode_t5m_exact_words(&physical).expect("Zig T5M exact decode");
         assert_eq!(restored, source);
         assert_eq!(restored[0].width(), 5);
         assert_eq!(restored[1].width(), 8);
@@ -1055,19 +1057,19 @@ mod zig_exact_egress_tests {
 
     #[test]
     fn exact_t5m_decoder_preserves_wide_bits_without_inferring_identity() {
-        use super::{encode_t5_exact_words, ExactT5Word};
+        use super::{encode_t5m_exact_words, ExactT5MWord};
         let source = [
-            ExactT5Word::new(10, vec![0, 0, 0, 0, 0, 0, 0, 0, 0, 1]).unwrap(),
-            ExactT5Word::new(24, [vec![0; 23], vec![1]].concat()).unwrap(),
+            ExactT5MWord::new(10, vec![0, 0, 0, 0, 0, 0, 0, 0, 0, 1]).unwrap(),
+            ExactT5MWord::new(24, [vec![0; 23], vec![1]].concat()).unwrap(),
         ];
-        let bytes = encode_t5_exact_words(&source).expect("current T5M bytes");
-        let decoded = decode_t5_exact_words(&bytes).expect("Zig must return numeric exact bits");
+        let bytes = encode_t5m_exact_words(&source).expect("current T5M bytes");
+        let decoded = decode_t5m_exact_words(&bytes).expect("Zig must return numeric exact bits");
         assert!(decoded.iter().any(|word| word.width == 10));
         assert!(decoded.iter().any(|word| word.width == 24));
         assert!(decoded.iter().all(|word| {
             word.bits.len() == word.width && word.bits.iter().all(|&bit| bit <= 1)
         }));
-        let error = super::decode_t5_words(&bytes).expect_err("legacy W1–W9 adapter fails closed");
+        let error = super::decode_t5m_words(&bytes).expect_err("legacy W1–W9 adapter fails closed");
         assert!(error.contains("точні ширини слів [10, 24]"));
         assert!(error.contains("Ширина не є доменною identity"));
         assert!(error.contains("належність до D1–24+ або викличність не виведено"));
@@ -1075,9 +1077,9 @@ mod zig_exact_egress_tests {
 
     #[test]
     fn exact_t5m_bridge_roundtrips_variable_width_binary_values() {
-        use super::{decode_t5_exact_words, encode_t5_exact_words, ExactT5Word};
+        use super::{decode_t5m_exact_words, encode_t5m_exact_words, ExactT5MWord};
         let source = [5usize, 8, 10, 11, 12, 14, 24, 48, 96, 192].map(|width| {
-            ExactT5Word::new(
+            ExactT5MWord::new(
                 width,
                 (0..width)
                     .map(|bit| ((bit * 7 + width) % 3 == 0) as u8)
@@ -1085,9 +1087,9 @@ mod zig_exact_egress_tests {
             )
             .expect("binary T5M source word")
         });
-        let physical = encode_t5_exact_words(&source).expect("Zig transports exact words");
+        let physical = encode_t5m_exact_words(&source).expect("Zig transports exact words");
         assert_eq!(
-            decode_t5_exact_words(&physical).expect("Zig restores exact words"),
+            decode_t5m_exact_words(&physical).expect("Zig restores exact words"),
             source
         );
     }
@@ -1098,14 +1100,14 @@ mod zig_exact_egress_tests {
         // coordinate-only Zig witness; Rust never decodes their meaning.
         let d10 = [0x00, 0x00];
         validate_t5_coordinates(&d10).expect("legacy D10 exact physical coordinate");
-        validate_t5(&d10).expect("T5M validates physical bytes, not call admission");
+        validate_t5m(&d10).expect("T5M validates physical bytes, not call admission");
 
         // T5M is the current .sens wire; the old T5 byte remains an explicit
         // coordinate-only compatibility witness, not the default decoder.
         let d1_t5 = [0xa1];
         validate_t5_coordinates(&d1_t5).expect("legacy T5 D1 coordinate");
-        let d1_t5m = encode_t5_direct(&words("1")).expect("T5M D1 word");
-        validate_t5(&d1_t5m).expect("default T5M carrier");
+        let d1_t5m = encode_t5m_direct(&words("1")).expect("T5M D1 word");
+        validate_t5m(&d1_t5m).expect("default T5M carrier");
 
         // D11=eleven exact zero bits and canonical tail, or bad trits,
         // is never accepted as D10 physical data.
@@ -1122,7 +1124,7 @@ mod zig_exact_egress_tests {
         // Nine D9 coordinates need >16 canonical T5 bytes, with leading
         // zeros intact. Only Zig decides their physical validity.
         let long_words = words(&["010101000"; 9].join(" "));
-        let long_t5 = encode_t5_direct(&long_words).expect("Zig canonical T5M");
+        let long_t5 = encode_t5m_direct(&long_words).expect("Zig canonical T5M");
         assert!(long_t5.len() > 16);
         assert!(encode_f3(&long_t5).expect("valid large Zig T5").is_none());
 
@@ -1134,7 +1136,7 @@ mod zig_exact_egress_tests {
         assert!(failure.contains("Zig physical T5M rejected"));
 
         // Positive tiny F3C stays on Zig's byte-exact physical path.
-        let small = encode_t5_direct(&words("10 001 00 000 01")).expect("canonical small T5M");
+        let small = encode_t5m_direct(&words("10 001 00 000 01")).expect("canonical small T5M");
         assert_eq!(small, [0x63, 0x89, 0x06, 0xa1]);
         let packed = encode_f3(&small)
             .expect("Zig F3C validation and encode")
@@ -1170,7 +1172,7 @@ mod zig_exact_egress_tests {
         );
 
         // Live golden still round-trips under the stricter bound.
-        let small = encode_t5_direct(&words("10 001 00 000 01")).expect("T5");
+        let small = encode_t5m_direct(&words("10 001 00 000 01")).expect("T5");
         let packed = encode_f3(&small).expect("pack").expect("saves");
         assert_eq!(packed, [0xf3, 0x40, 0x60]);
         let recovered = decode_f3(&packed).expect("unpack validates");
@@ -1183,15 +1185,15 @@ mod zig_exact_egress_tests {
         let original = words("1 01 001 010101000");
         let be3 = exact_words_to_be3(&original).expect("single BE3 ABI projection");
         assert_eq!(be3, [1, 0, 1, 2, 0, 1, 3, 0, 1, 9, 0, 0xa8]);
-        let t5 = encode_t5_direct(&original).expect("Zig physical T5");
+        let t5 = encode_t5m_direct(&original).expect("Zig physical T5M");
         let e1 = encode_e1_direct(&original).expect("Zig physical E1");
-        require_same_exact_words(&original, &decode_t5_words(&t5).unwrap()).unwrap();
+        require_same_exact_words(&original, &decode_t5m_words(&t5).unwrap()).unwrap();
         require_same_exact_words(&original, &decode_e1_words(&e1).unwrap()).unwrap();
 
         // Both production egress paths must call ONE helper and must not
         // separately rebuild BE3 or use Rust physical encoders.
         let source = include_str!("zig_transport.rs");
-        for name in ["encode_t5_direct", "encode_e1_direct"] {
+        for name in ["encode_t5m_direct", "encode_e1_direct"] {
             let start = source.find(&format!("pub fn {name}(")).unwrap();
             let body = &source[start..];
             let end = body.find("\n}\n").unwrap();
@@ -1207,8 +1209,8 @@ mod zig_exact_egress_tests {
     #[test]
     fn t5_egress_uses_zig_for_exact_roundtrip() {
         let expected = words("1 01 001 010101000");
-        let physical = encode_t5_direct(&expected).expect("Zig T5 encode");
-        let recovered = decode_t5_words(&physical).expect("Zig T5 decode");
+        let physical = encode_t5m_direct(&expected).expect("Zig T5M encode");
+        let recovered = decode_t5m_words(&physical).expect("Zig T5M decode");
         require_same_exact_words(&expected, &recovered).unwrap();
         assert_eq!(physical.len(), 4);
     }

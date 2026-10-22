@@ -491,7 +491,7 @@ fn collect_repl_binders(expression: &Expr, names: &mut Vec<std::rc::Rc<str>>) {
 
 fn exact_t5m_carrier_words(
     words: &[ExactDomainWord],
-) -> Result<Vec<crate::zig_transport::ExactT5Word>, String> {
+) -> Result<Vec<crate::zig_transport::ExactT5MWord>, String> {
     words
         .iter()
         .map(|word| match word {
@@ -501,13 +501,13 @@ fn exact_t5m_carrier_words(
                     .rev()
                     .map(|shift| ((identity.packed_bits() >> shift) & 1) as u8)
                     .collect();
-                crate::zig_transport::ExactT5Word::new(width, bits)
+                crate::zig_transport::ExactT5MWord::new(width, bits)
             }
             ExactDomainWord::Number(number) => {
                 let width = number
                     .numeric_domain_width()
                     .ok_or("T5M number lost its D24+ identity")?;
-                crate::zig_transport::ExactT5Word::new(
+                crate::zig_transport::ExactT5MWord::new(
                     width,
                     number
                         .exact_numeric_domain_bits()
@@ -520,7 +520,7 @@ fn exact_t5m_carrier_words(
 
 fn restore_t5m_words(
     expected: &[ExactDomainWord],
-    restored: &[crate::zig_transport::ExactT5Word],
+    restored: &[crate::zig_transport::ExactT5MWord],
 ) -> Result<Vec<ExactDomainWord>, String> {
     if expected.len() != restored.len() {
         // Замість двох лічильників показуємо перше точне слово, на якому
@@ -582,8 +582,8 @@ fn restore_t5m_words(
 #[cfg(feature = "zig-transport")]
 fn t5m_roundtrip_words(words: &[ExactDomainWord]) -> Result<Vec<ExactDomainWord>, String> {
     let carrier = exact_t5m_carrier_words(words)?;
-    let physical = crate::zig_transport::encode_t5_exact_words(&carrier)?;
-    let decoded = crate::zig_transport::decode_t5_exact_words(&physical)?;
+    let physical = crate::zig_transport::encode_t5m_exact_words(&carrier)?;
+    let decoded = crate::zig_transport::decode_t5m_exact_words(&physical)?;
     restore_t5m_words(words, &decoded)
 }
 
@@ -815,8 +815,8 @@ pub(crate) fn mint_t5m_source_pair_with_bindings(
     preload_t5m_binding_sources(&mut session, bindings)?;
     let words = prepare_t5m_repl_words(source, ReplSurface::UkrainianFull, &session)?;
     let carrier = exact_t5m_carrier_words(&words)?;
-    let physical = crate::zig_transport::encode_t5_exact_words(&carrier)?;
-    let restored = crate::zig_transport::decode_t5_exact_words(&physical)?;
+    let physical = crate::zig_transport::encode_t5m_exact_words(&carrier)?;
+    let restored = crate::zig_transport::decode_t5m_exact_words(&physical)?;
     restore_t5m_words(&words, &restored)?;
 
     // Читабельний файл не є іншим кодеком: це точні слова, які
@@ -865,12 +865,12 @@ pub(crate) fn eval_t5m_paired_file_with_bindings(
     let mut session = Session::default();
     preload_t5m_binding_sources(&mut session, bindings)?;
     let expected = prepare_t5m_repl_words(source, ReplSurface::UkrainianFull, &session)?;
-    let actual = crate::zig_transport::decode_t5_exact_words(physical)?;
+    let actual = crate::zig_transport::decode_t5m_exact_words(physical)?;
     let restored = restore_t5m_words(&expected, &actual)
         .map_err(|error| format!("T5M_PHYSICAL_PAIR_MISMATCH: {error}"))?;
     // Fail closed on noncanonical physical encoding: no equal-looking alternate
     // byte sequence may be executed as the committed source's transport.
-    let encoded = crate::zig_transport::encode_t5_exact_words(&actual)?;
+    let encoded = crate::zig_transport::encode_t5m_exact_words(&actual)?;
     if encoded != physical {
         return Err("T5M_PHYSICAL_PAIR_MISMATCH: noncanonical T5M bytes".into());
     }
@@ -2076,7 +2076,8 @@ mod tests {
             sens::domain_ladder::DomainCoordinate::new(5, 0b01010).unwrap(),
         );
         let expected = vec![ExactDomainWord::Identity(identity)];
-        let altered = vec![crate::zig_transport::ExactT5Word::new(5, vec![0, 1, 0, 1, 1]).unwrap()];
+        let altered =
+            vec![crate::zig_transport::ExactT5MWord::new(5, vec![0, 1, 0, 1, 1]).unwrap()];
 
         let error = restore_t5m_words(&expected, &altered).expect_err("bit drift fails closed");
         assert!(error.starts_with("T5M_WORD_MISMATCH index=0"), "{error}");

@@ -335,10 +335,10 @@ fn t5m_pair_request(args: &[String]) -> Option<Result<(&str, &str, Vec<&str>), &
 /// Фізичний вхід: байти -> стерильний Zig ABI v2 -> точні слова SENS.
 /// T5M зберігає ширину слова, доки правила SENS не встановлять D1–D10
 /// або числову родину D24+; обмеження BE3/W1–W9 тут немає.
-fn decode_physical_t5_words(bytes: &[u8]) -> Result<Vec<sens::ExactDomainWord>, String> {
+fn decode_physical_t5m_words(bytes: &[u8]) -> Result<Vec<sens::ExactDomainWord>, String> {
     #[cfg(feature = "zig-transport")]
     {
-        return zig_transport::decode_t5_exact_words(bytes)?
+        return zig_transport::decode_t5m_exact_words(bytes)?
             .into_iter()
             .map(|word| sens::ExactDomainWord::from_physical_width_bits(word.width, &word.bits))
             .collect();
@@ -354,7 +354,7 @@ fn decode_physical_t5_words(bytes: &[u8]) -> Result<Vec<sens::ExactDomainWord>, 
 /// Тут немає людських назв чи сумісного восьмибітного читача; фізичний файл
 /// не отримує неявних host-можливостей або Core4.
 fn eval_physical_t5(bytes: &[u8]) -> Result<sens::EvalResult, String> {
-    let words = decode_physical_t5_words(bytes)?;
+    let words = decode_physical_t5m_words(bytes)?;
     let program = sens::PhysicalT5Program::from_exact_domain_words_owned(words)
         .map_err(|err| format!("exact SENS domain reader rejected: {err}"))?;
 
@@ -390,7 +390,7 @@ fn count_physical_ast_nodes(expression: &sens::Expr) -> usize {
 fn eval_physical_t5_with_benchmark_metrics(
     bytes: &[u8],
 ) -> Result<(sens::EvalResult, usize, u64), String> {
-    let words = decode_physical_t5_words(bytes)?;
+    let words = decode_physical_t5m_words(bytes)?;
     let program = sens::PhysicalT5Program::from_exact_domain_words_owned(words)
         .map_err(|err| format!("exact SENS domain reader rejected: {err}"))?;
     let ast_nodes = program.forms().iter().map(count_physical_ast_nodes).sum();
@@ -1054,7 +1054,7 @@ mod core_profile_bootstrap_tests {
         let source = "(як-є ())";
         let (physical, view) = repl::mint_t5m_source_pair(source)
             .expect("SENS reader + pinned Zig must mint the physical pair");
-        let restored = zig_transport::decode_t5_exact_words(&physical)
+        let restored = zig_transport::decode_t5m_exact_words(&physical)
             .expect("Zig must decode its own carrier");
         let expected = restored
             .iter()
@@ -1278,24 +1278,24 @@ mod core_profile_bootstrap_tests {
         assert!(!forms.is_empty());
 
         let physical =
-            zig_transport::encode_t5_direct(&words).expect("only Zig may create physical T5M");
+            zig_transport::encode_t5m_direct(&words).expect("only Zig may create physical T5M");
         assert_eq!(physical, [0x63, 0x89, 0x06, 0xa1]);
         // The exact-byte checked Zig adapter is used by sens-trit in
         // production. Exercise that same adapter in this sens test binary:
         // it must accept the unchanged carrier and reject one flipped bit.
-        let checked = zig_transport::encode_t5(&words, &physical)
+        let checked = zig_transport::verify_t5m_encoding(&words, &physical)
             .expect("Zig physical carrier matches the admitted exact words");
         assert_eq!(checked, physical);
         let mut one_bit_mutant = physical.clone();
         one_bit_mutant[0] ^= 0b0000_0001;
-        let error = zig_transport::encode_t5(&words, &one_bit_mutant)
-            .expect_err("mutated physical T5 may not match the original words");
+        let error = zig_transport::verify_t5m_encoding(&words, &one_bit_mutant)
+            .expect_err("mutated physical T5M may not match the original words");
         assert!(
             error.contains("physical byte"),
             "unexpected mismatch: {error}"
         );
         let restored =
-            decode_physical_t5_words(&physical).expect("physical T5 re-enters through Zig ABI");
+            decode_physical_t5m_words(&physical).expect("physical T5M re-enters through Zig ABI");
         let expected: Vec<_> = words
             .iter()
             .map(|word| (word.width(), word.packed_bits()))
@@ -1321,7 +1321,7 @@ mod core_profile_bootstrap_tests {
         );
         assert!(sens::PhysicalT5Program::from_exact_domain_words(&restored).is_ok());
         // A malformed physical carrier is rejected before SENS D2 evaluation.
-        assert!(decode_physical_t5_words(&[0xf3]).is_err());
+        assert!(decode_physical_t5m_words(&[0xf3]).is_err());
     }
 
     #[cfg(feature = "zig-transport")]
@@ -1330,7 +1330,7 @@ mod core_profile_bootstrap_tests {
         // This canonical T5M carrier holds five exact D2/D3 words.
         // Zig transports [width, MSB, LSB]; SENS alone judges D2 and eval.
         let physical = [0x63, 0x89, 0x06, 0xa1];
-        let words = decode_physical_t5_words(&physical).expect("Zig ABI v2 ingress");
+        let words = decode_physical_t5m_words(&physical).expect("Zig ABI v2 ingress");
         let widths: Vec<_> = words
             .iter()
             .map(|word| match word {
@@ -1362,7 +1362,7 @@ mod core_profile_bootstrap_tests {
         // malformed carrier. Empty input is the actual third invalid case.
         for invalid in [&[0xf3][..], &[0xf2][..], &[][..]] {
             assert!(
-                decode_physical_t5_words(invalid).is_err(),
+                decode_physical_t5m_words(invalid).is_err(),
                 "invalid {invalid:?}"
             );
             assert!(
@@ -1376,7 +1376,8 @@ mod core_profile_bootstrap_tests {
     #[test]
     fn physical_main_refuses_to_bypass_unavailable_zig_transport() {
         let physical = [0x63, 0x89, 0x06, 0xa1];
-        let error = decode_physical_t5_words(&physical).expect_err("no Zig means no .sens ingress");
+        let error =
+            decode_physical_t5m_words(&physical).expect_err("no Zig means no .sens ingress");
         assert!(error.contains("no Rust fallback"));
     }
 
