@@ -1182,6 +1182,22 @@ class ThreePassMigrationTests(unittest.TestCase):
                 mod.reject_reviewed_nonprogram_source(ROOT / f"lib/domains/{domain}.lisp")
 
 
+    def test_evolving_d11_table_is_data_without_historical_sha_lock(self):
+        # Поточний D11 — тестовий словник, не виконуваний SENS і не
+        # ратифікація. Старий запис blob у маніфесті не блокує дані.
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            source = root / "lib/domains/d11.lisp"
+            source.parent.mkdir(parents=True)
+            current = (ROOT / "lib/domains/d11.lisp").read_text(encoding="utf-8")
+            source.write_text(current, encoding="utf-8")
+            with self.assertRaisesRegex(mod.SensT5Error, "NONPROGRAM_DATA_NOT_EXECUTABLE"):
+                mod.reject_reviewed_nonprogram_source(source, root)
+            # Стороння програма не може сховатися після таблиці.
+            source.write_text(current + "\\n(визначити підміна так)\\n", encoding="utf-8")
+            with self.assertRaisesRegex(mod.SensT5Error, "NONPROGRAM_D11_TABLE_INVALID"):
+                mod.reject_reviewed_nonprogram_source(source, root)
+
     def test_reviewed_data_and_comment_only_are_not_failed_programs(self):
         # Both are read-only positive classifications, not executable .sens.
         for name, reason in (("lib/domains/d4.lisp", "NONPROGRAM_DATA_NOT_EXECUTABLE"),
