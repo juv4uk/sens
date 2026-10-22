@@ -84,3 +84,4 @@ benchmarks/sens-program-size/fixtures/konkurs-polynomial-compact.lisp
 lib/list-interleave-three-rotation-general.lisp
 lib/list-reverse-tail-general.lisp
 benchmarks/contest-uk/факторіал-компакт.lisp
+lib/list-drop-every-third-general.lisp
