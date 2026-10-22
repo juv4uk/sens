@@ -196,6 +196,8 @@ run_native_t5m_program() {
          ! timeout "$native_timeout" "$binary" --t5m-mint-pair \
           "$dir/core1-gc-negative.lisp" "$dir/core1-gc-negative.sens" \
           --binding-source lib/core1.lisp >"$dir/core1-gc-negative-mint.stdout" 2>"$dir/core1-gc-negative-mint.stderr" ||
+         ! timeout "$native_timeout" "$native_open" verify-view \
+          "$dir/core1-gc-negative.sens" >"$dir/core1-gc-negative-view.stdout" 2>"$dir/core1-gc-negative-view.stderr" ||
          ! timeout "$native_timeout" "$binary" --t5m-pair \
           "$dir/core1-gc-negative.lisp" "$dir/core1-gc-negative.sens" \
           --binding-source lib/core1.lisp >"$dir/core1-gc-negative-paired.stdout" 2>"$dir/core1-gc-negative-paired.stderr"; then
