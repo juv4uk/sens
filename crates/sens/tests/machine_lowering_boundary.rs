@@ -1,4 +1,4 @@
-use sens::{eval_program, load_core_library, Session};
+use sens::{eval_program, load_core_library, lower_program, parse, ExprKind, Session};
 use std::fs;
 use std::path::PathBuf;
 
@@ -17,14 +17,28 @@ fn load_lisp_file(path: &str, session: &mut Session) {
 }
 
 #[test]
-#[ignore = "legacy-transition: hard-coded pre-rebuild SID assignment; registry identity is being compacted"]
-fn portable_monotonic_time_keeps_language_semantic_identity() {
-    let sid = sens::semantic_registry_export::semantic_id_for_admitted_surface("mono-ns")
-        .expect("mono-ns must remain registry-admitted");
-    assert_eq!(
-        sens::semantic_registry_export::semantic_id_bits(sid),
-        "01011010"
+fn ukrainian_d5_plus_is_exact_domain_not_a_legacy_eight_bit_slot() {
+    let expressions = lower_program(
+        &parse("(додати 2 3)").expect("чинне українське додати читає сам SENS"),
     );
+    assert_eq!(expressions.len(), 1);
+    match &expressions[0].kind {
+        ExprKind::DomainCall(identity, args) => {
+            assert_eq!(identity.width(), 5, "додавання має точну ширину Д5");
+            assert_eq!(identity.packed_bits(), 0b01010);
+            assert_eq!(args.len(), 2);
+        }
+        other => panic!("очікується виклик чинного Д5, отримано {other:?}"),
+    }
+
+    // Реальне виконання: не оголошувати парсер або кодек оракулом семантики.
+    let mut session = Session::default();
+    load_core_library(&mut session).expect("поточне ядро SENS");
+    let value = eval_program("(додати 2 3)", &mut session)
+        .expect("мовне Д5-додавання має виконатися самим SENS")
+        .value
+        .to_string();
+    assert_eq!(value, "5");
 }
 #[test]
 fn raw_machine_identity_never_becomes_a_language_semantic() {
@@ -200,21 +214,21 @@ fn lisp_owned_encoder_is_part_of_the_vertical_boundary_proof() {
 }
 
 #[test]
-#[ignore = "legacy-transition: hard-coded pre-rebuild ADD SID; keep machine lowering mechanics, not obsolete semantic numbering"]
-fn semantic_sid_00001100_lowers_through_structured_forms_without_legacy_byte_wrappers() {
-    let sid = sens::semantic_registry_export::semantic_id_for_admitted_surface("додати")
-        .expect("ADD semantic surface must remain admitted");
-    assert_eq!(
-        sens::semantic_registry_export::semantic_id_bits(sid),
-        "00001100"
+fn ukrainian_d5_addition_lowers_through_real_sens_machine_forms() {
+    let calls = lower_program(
+        &parse("(додати 2 3)").expect("чинна українська Д5-поверхня"),
     );
+    let ExprKind::DomainCall(identity, args) = &calls[0].kind else {
+        panic!("тільки точне D5-додавання допускається до машинного lowering");
+    };
+    assert_eq!((identity.width(), identity.packed_bits(), args.len()), (5, 0b01010, 2));
 
     let lowering_path = repo_root().join("lib/machine/lowering/semantic-x86-64.lisp");
     let lowering_source = fs::read_to_string(&lowering_path)
         .unwrap_or_else(|error| panic!("{} must exist: {error}", lowering_path.display()));
 
     assert!(
-        lowering_source.contains("(def машина-знизити-додавання-беззнакових-64-до-форм"),
+        lowering_source.contains("(визначити машина-знизити-додавання-беззнакових-64-до-форм"),
         "semantic lowerer must expose structured machine forms"
     );
     assert!(
