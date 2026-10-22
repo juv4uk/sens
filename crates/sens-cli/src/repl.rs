@@ -1841,6 +1841,38 @@ mod tests {
         );
     }
 
+    /// #1968: no UTF-8 source evaluator is allowed to decide the physical
+    /// D3 COND outcome. Zig mints the exact words, SENS executes both cases.
+    #[cfg(feature = "zig-transport")]
+    #[test]
+    fn zig_t5m_paired_cond_accepts_only_d1_and_reports_physical_error_form() {
+        let valid = "(за-умовою (ні (атом? (як-є ()))) (так (атом? (як-є ()))))";
+        let (physical, exact_view) =
+            mint_t5m_source_pair(valid).expect("SENS/Zig має видати точний T5M");
+        assert!(!physical.is_empty());
+        assert!(!exact_view.trim().is_empty());
+        let result = eval_t5m_paired_file(valid, &physical)
+            .expect("точний D1:0 пропускає гілку у фізичному SENS");
+        assert_eq!(
+            result.value.as_predicate_bit(),
+            Some(true),
+            "test_id=1968-ZIG-COND-D1 layer=SENS expected=D1:1 actual={}",
+            result.value
+        );
+
+        let invalid =
+            "(за-умовою ((як-є ()) (атом? (як-є ()))) (так (атом? (як-є ()))))";
+        let (invalid_physical, _) =
+            mint_t5m_source_pair(invalid).expect("навіть недопустима умова має кодуватися");
+        let error = eval_t5m_paired_file(invalid, &invalid_physical)
+            .expect_err("D3:000 як COND test має бути Type, а не D1:NO");
+        assert!(
+            error.contains("D3:110 COND expects exact D1")
+                && error.contains("physical_form_index=0"),
+            "test_id=1968-ZIG-COND-EMPTY layer=SENS expected=Type/form-0 actual={error}"
+        );
+    }
+
     #[cfg(feature = "zig-transport")]
     #[test]
     fn quoted_integer_in_t5m_source_preserves_exact_d24_word() {
