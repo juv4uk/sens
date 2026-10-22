@@ -84,66 +84,54 @@ vllm serve Qwen/Qwen3.5-2B --host 127.0.0.1 --port 8000 --api-key "$SENS_SYSTEM_
 
 Інший термінал, з кореня репозиторію:
 
-```bash
-# 1) Еталонна базова лінія: навчання лише на gold-мітках.
-python3 research/system-one-compact-student-20261022.py train \
-  --input research/system-one-support-seed-20261022.jsonl \
-  --output /tmp/system-one-gold-student.json
+Інший термінал, з кореня репозиторію — зібрати три незалежні порції оцінок і порівняти всі підходи:
 
-# 2) Зібрати оцінки вчителя ТІЛЬКИ для train.
+```bash
+# 1) Учитель оцінює train — тільки ця порція може йти в навчання учня.
 python3 research/system-one-teacher-observe-20261022.py \
-  --model Qwen/Qwen3.5-2B \
-  --split train \
+  --model Qwen/Qwen3.5-2B --split train \
   --input research/system-one-support-seed-20261022.jsonl \
   --output /tmp/system-one-teacher-train.jsonl
 
-# 3) Навчити другого компактного учня на м'яких оцінках і gold-мітках.
-python3 research/system-one-compact-student-20261022.py train \
+# 2) Окрема оцінка validation для виміру та калібрування.
+python3 research/system-one-teacher-observe-20261022.py \
+  --model Qwen/Qwen3.5-2B --split validation --allow-holdout \
   --input research/system-one-support-seed-20261022.jsonl \
-  --teacher /tmp/system-one-teacher-train.jsonl \
-  --gold-weight 0.25 \
-  --output /tmp/system-one-distilled-student.json
+  --output /tmp/system-one-teacher-validation.jsonl
 
-# 4) Навчити температуру лише на validation; вихід — окремий артефакт.
-python3 research/system-one-calibrate-20261022.py \
-  --model /tmp/system-one-distilled-student.json \
+# 3) Окрема оцінка test — лише для остаточного порівняння.
+python3 research/system-one-teacher-observe-20261022.py \
+  --model Qwen/Qwen3.5-2B --split test --allow-holdout \
   --input research/system-one-support-seed-20261022.jsonl \
-  --output /tmp/system-one-distilled-calibrated.json
+  --output /tmp/system-one-teacher-test.jsonl
 
-# 5) Запустити каліброваного учня як локальний сумісний HTTP-вузол.
-export SENS_SYSTEM_ONE_STUDENT_API_KEY='локальний-тимчасовий-ключ'
+# 4) Один відтворюваний запуск: учитель проти gold-учня і учня з м'якими оцінками.
+# Калібрування обох учнів використовує validation; test не входить у навчання.
+python3 research/system-one-compare-20261022.py \
+  --input research/system-one-support-seed-20261022.jsonl \
+  --teacher-train /tmp/system-one-teacher-train.jsonl \
+  --teacher-validation /tmp/system-one-teacher-validation.jsonl \
+  --teacher-test /tmp/system-one-teacher-test.jsonl \
+  --output-dir /tmp/system-one-comparison \
+  --threshold 0.80 --bins 10
+
+# Звіт: /tmp/system-one-comparison/comparison.json
+# Містить accuracy, macro-F1, Brier, ECE, coverage та selective risk
+# для вчителя, gold-учня й учня з м'якими цілями на validation і test.
+
+# 5) Запустити каліброваного компактного учня як локальний HTTP-вузол.
+export SENS_SYSTEM_ONE_STUDENT_API_KEY="$SENS_SYSTEM_ONE_API_KEY"
 python3 research/system-one-compact-student-20261022.py serve \
-  --model-path /tmp/system-one-distilled-calibrated.json \
+  --model-path /tmp/system-one-comparison/student-soft-calibrated.json \
   --port 8100
-# У терміналі SENS встановити той самий ключ для адаптера:
-export SENS_SYSTEM_ONE_API_KEY="$SENS_SYSTEM_ONE_STUDENT_API_KEY"
-# У новому терміналі SENS може викликати учня:
+
+# SENS host adapter використовує той самий ключ і endpoint:
 # (модельний-розподіл-вибору-сире
 #   "http://127.0.0.1:8100/v1/chat/completions"
-#   "system-one-naive-bayes/1" "текст звернення" instruction criteria)
-
-# 6) Оцінити validation і підібрати поріг ЛИШЕ на цій вибірці.
-python3 research/system-one-compact-student-20261022.py predict \
-  --model /tmp/system-one-distilled-calibrated.json \
-  --input research/system-one-support-seed-20261022.jsonl \
-  --split validation \
-  --output /tmp/system-one-validation.jsonl
-python3 research/system-one-evaluate-20261022.py \
-  --input /tmp/system-one-validation.jsonl \
-  --expected-split validation --threshold 0.80
-
-# 7) Остаточний test запуск — лише після фіксації порога на validation.
-python3 research/system-one-compact-student-20261022.py predict \
-  --model /tmp/system-one-distilled-calibrated.json \
-  --input research/system-one-support-seed-20261022.jsonl \
-  --split test \
-  --output /tmp/system-one-test.jsonl
-python3 research/system-one-evaluate-20261022.py \
-  --input /tmp/system-one-test.jsonl \
-  --expected-split test --threshold 0.80
-python3 research/system-one-evaluate-20261022.py \
-  --input /tmp/system-one-test.jsonl \
-  --expected-split test --threshold 0.80
+#   "sens.system-one.naive-bayes/1" "текст звернення"
+#   "інструкція запитання" ((оплата "платіж") (доставка "посилка")
+#                            (технічне "помилка") (обліковий-запис "вхід")
+#                            (невизначено "замало даних")))
 ```
 
 Обробник учителя відхиляє будь-яку адресу, крім `127.0.0.1`, не підставляє відсутні оцінки і записує точний розподіл із сумою `1_000_000_000 / 1_000_000_000`. Для `validation` або `test` збір вчительських оцінок вимагає явного `--allow-holdout`; для навчання учня такі приклади відхиляються. Вихідні дані моделей зберігаються окремо в `/tmp`, не додаються до seed-корпусу.
