@@ -1133,10 +1133,42 @@ fn contest_uk_all_physical_programs_have_native_execution_and_peers() {
         "SENS конкурс має справжню помилку: {unexpected:?}; stdout={report} stderr={}",
         error(&output)
     );
-    assert_eq!(
+    // Source-only учасники законно очікують нативний remint у stderr,
+    // але сам скрипт має завершуватися GREEN, коли всі фізичні програми
+    // реально виконалися. Попереднє порівняння з pending.is_empty()
+    // перетворювало чесне очікування на штучний CI RED.
+    for line in error(&output).lines() {
+        if let Some(rest) = line.strip_prefix("CONTEST_PENDING_NATIVE_PAIR source=") {
+            let source_path = rest
+                .strip_suffix(" status=NOT_EXECUTED")
+                .expect("точний стан непарного джерела");
+            let source = PathBuf::from(source_path);
+            assert!(
+                source.starts_with(&dir) && source.is_file() && !source.is_symlink(),
+                "неправильне джерело у stderr: {source_path}"
+            );
+            let name = source.file_stem()
+                .and_then(|stem| stem.to_str())
+                .expect("українська назва source-only Lisp");
+            assert!(
+                !source.with_extension("sens").exists()
+                    && !source.with_extension("").exists(),
+                "source-only не може мати напівпари: {source_path}"
+            );
+            assert!(pending.insert(name.to_owned()), "дубль pending: {name}");
+        } else if !line.is_empty() {
+            unexpected.push(format!("stderr: {line}"));
+        }
+    }
+    assert!(
+        unexpected.is_empty(),
+        "нативний конкурс приховав помилку: {unexpected:?}; stdout={report} stderr={}",
+        error(&output)
+    );
+    assert!(
         output.status.success(),
-        pending.is_empty(),
-        "скрипт конкурсу приховав невиконуване джерело чи помилку: {report}"
+        "жодне pending джерело не скасовує RED справжньої фізичної програми: {report}; stderr={}",
+        error(&output)
     );
 
     let mut tracked: BTreeSet<String> = BTreeSet::new();
