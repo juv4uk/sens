@@ -169,8 +169,10 @@ class CoreUkrPrimaryProjectionTests(unittest.TestCase):
         registry_anchor = source("scripts/generate-rust-semantic-registry.lisp")
         with self.subTest(file="scripts/generate-rust-semantic-registry.lisp",
                           migration="retired generator stays unverified"):
-            self.assertIn("(визначити якір", registry_anchor)
-            self.assertIn("(status not-verified)", registry_anchor)
+            # Вилучений генератор не є ні програмою, ні доказовим якорем.
+            self.assertIn("ФАЙЛ ВИВЕДЕНО З УЖИТКУ", registry_anchor)
+            self.assertIn("Не свідок. Не якір.", registry_anchor)
+            self.assertNotRegex(registry_anchor, r"(?m)^\s*\(")
             self.assertNotIn("(status pass)", registry_anchor)
             self.assertNotIn("класифікувати-рядкове-значення", registry_anchor)
         inventory = source("lib/surface/uk-inventory.lisp")
