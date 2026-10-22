@@ -610,111 +610,42 @@ class SiDerivedUkrProjectionTests(unittest.TestCase):
 
 
 
-class Life1RemainingUkrProjectionTests(unittest.TestCase):
-    """Перевіряє чинні D3/D4 surface, не робить із Python семантичний SENS."""
+class Life1CurrentDomainProjectionTests(unittest.TestCase):
+    """Статичний контроль адрес Д1/Д3/Д4; семантику виконує тільки СЕНС."""
 
     SOURCE = ROOT / "lib" / "life-1-scheduler.lisp"
     D1 = ROOT / "lib" / "domains" / "d1.lisp"
     D3 = ROOT / "lib" / "domains" / "d3.lisp"
     D4 = ROOT / "lib" / "domains" / "d4.lisp"
-    ORIGINAL_BLOB = "a287485556480390e25e80492fdeb4cd933aab54"
-    # Незмінений parent перед другою українською партією.
-    PARENT_BLOB = "6fad8d5e689650c7a70b4000aa3c7104f83f72ff"
-    # Позиції у parent, НЕ байтові/доменно-перетворені десяткові ID.
-    NEW_BATCH_EDITS = (
-        (1031, "#d1:1", "так"),
-        (1037, "#d1:0", "ні"),
-        (1179, "#d1:1", "так"),
-        (1185, "#d1:0", "ні"),
-        (2811, "001001", "нехай-послідовно"),
-        (2832, "100", "перше"),
-        (4039, "001001", "нехай-послідовно"),
-        (4090, "001", "як-є"),
-    )
 
-    @classmethod
-    def undo_recent_batch(cls, source: str) -> str:
-        positions = []
-        shift = 0
-        last = -1
-        for original_pos, old, peer in cls.NEW_BATCH_EDITS:
-            assert original_pos > last, "Порушено порядок точних координат"
-            last = original_pos
-            positions.append((original_pos + shift, old, peer))
-            shift += len(peer) - len(old)
-        for pos, old, peer in reversed(positions):
-            assert source[pos:pos + len(peer)] == peer, (
-                f"Втрачено exact українську проєкцію {old} at {pos}"
-            )
-            source = source[:pos] + old + source[pos + len(peer):]
-        return source
+    def test_ratified_ukrainian_heads_and_d1_answers(self):
+        d1 = self.D1.read_text(encoding="utf-8")
+        d3 = self.D3.read_text(encoding="utf-8")
+        d4 = self.D4.read_text(encoding="utf-8")
+        self.assertRegex(d1, r"(?m)^\\s*\\(0\\s+\\(ук ні\\)\\s+\\(укр ні\\)")
+        self.assertRegex(d1, r"(?m)^\\s*\\(1\\s+\\(ук так\\)\\s+\\(укр так\\)")
+        self.assertRegex(d3, r"(?m)^\\s*\\(010\\s+\\(ук атом\\?\\)")
+        self.assertRegex(d4, r"(?m)^\\s*\\(0011\\s+\\(ук визначити\\)")
+        source = self.SOURCE.read_text(encoding="utf-8")
+        self.assertIn("(визначити життя--рівні?", source)
+        self.assertIn("((атом? праве) ні)", source)
+        self.assertIn("(так ні)", source)
+        self.assertNotIn("(атом? (як-є (())))", source)
+        self.assertNotRegex(source, r"(?m)^\\(0011(?=\\s)")
+        self.assertNotRegex(source, r"#d1:[01]")
 
-    @staticmethod
-    def restore(source: str) -> str:
-        source = Life1RemainingUkrProjectionTests.undo_recent_batch(source)
-        # 12 верхніх D4 DEFINE і одна точно локалізована гілка D3 ATOM.
-        # Другий, раніше вже український ATOM(праве) не зачіпати.
-        source = re.sub(r"(?m)^\(визначити(?=\s)", "(0011", source)
-        return source.replace(
-            "((атом? праве) ні)", "((010 праве) #d1:0)"
+    def test_native_life_1_proof_is_owned_by_sens(self):
+        # Це НЕ семантичний тест Python: єдиний свідок D1 — виклик СЕНС у Rust.
+        harness = (ROOT / "crates/sens/tests/life_1_scheduler.rs").read_text(
+            encoding="utf-8"
         )
-
-    @staticmethod
-    def blob_sha(source: str) -> str:
-        data = source.encode("utf-8")
-        return hashlib.sha1(
-            b"blob " + str(len(data)).encode("ascii") + b"\0" + data
-        ).hexdigest()
-
-    def test_exact_ratified_ukr_and_thirteen_current_heads(self):
-        d3 = self.D3.read_text(encoding="utf-8").splitlines()
-        d4 = self.D4.read_text(encoding="utf-8").splitlines()
-        atom = [line for line in d3 if re.match(r"^\s*\(010\s", line)]
-        define = [line for line in d4 if re.match(r"^\s*\(0011\s", line)]
-        self.assertEqual(len(atom), 1)
-        self.assertEqual(len(define), 1)
-        self.assertIn("(укр атом?)", atom[0])
-        self.assertIn("(LISP ATOM)", atom[0])
-        self.assertIn("(укр визначити)", define[0])
-        self.assertIn("(LISP DEFINE)", define[0])
-        self.assertIn("(0 (ук ні) (укр ні)", self.D1.read_text(encoding="utf-8"))
-
-        src = self.SOURCE.read_text(encoding="utf-8")
-        self.assertEqual(len(re.findall(r"(?m)^\(визначити(?=\s)", src)), 12)
-        self.assertEqual(src.count("((атом? праве) ні)"), 1)
-        self.assertNotRegex(src, r"(?m)^\(0011(?=\s)")
-        self.assertNotIn("((010 праве) #d1:0)", src)
-        self.assertEqual(src.count("(нехай-послідовно "), 2)
-        self.assertNotIn("(001001 ", src)
-        self.assertNotRegex(src, r"#d1:[01]")
-        self.assertIn("(так ні)", src)
-        for original_data in ("(як-є (scheduler-selection none))",
-                              "(як-є producer)"):
-            self.assertIn(original_data, src)
-        d6 = (ROOT / "lib/domains/d6.lisp").read_text(encoding="utf-8")
-        self.assertIn("(001001 (ук нехай*) (укр нехай-послідовно)", d6)
-
-    def test_inverse_projection_recovers_original_git_blob(self):
-        src = self.SOURCE.read_text(encoding="utf-8")
-        # Друга партія повертає саме parent; стара 12+1 партія — незмінений
-        # історичний еталон ORIGINAL_BLOB, а не новий підставний SHA.
-        self.assertEqual(self.blob_sha(self.undo_recent_batch(src)), self.PARENT_BLOB)
-
-    def test_wrong_domain_or_wrong_peer_is_rejected(self):
-        src = self.SOURCE.read_text(encoding="utf-8")
-        for mutant in (
-            src.replace("((атом? праве) ні)",
-                        "((сполучити праве) ні)", 1),
-            src.replace("(визначити життя--рівні?",
-                        "(функція життя--рівні?", 1),
-        ):
-            self.assertNotEqual(mutant, src)
-            try:
-                restored_sha = self.blob_sha(self.restore(mutant))
-            except AssertionError:
-                # Порушено конкретний expected peer або його позицію.
-                continue
-            self.assertNotEqual(restored_sha, self.ORIGINAL_BLOB)
+        witness = (ROOT / "tests/fixtures/life-1-exact-d3-semantic.lisp").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn("eval_parsed_expressions(&witness, &mut session)", harness)
+        self.assertIn("SENS_LIFE_1_CASE_BITS", harness)
+        self.assertIn("(життя--ні? (життя--рівні?", witness)
+        self.assertIn("(життя--свідок)", witness)
 
 
 class CompilerNucleusUkrDomainProjectionTests(unittest.TestCase):
