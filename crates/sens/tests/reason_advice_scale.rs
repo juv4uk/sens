@@ -55,7 +55,7 @@ fn eval_session(session: &mut Session, source: &str) -> String {
 /// Without predicate/head indexing, each proof level still scans the whole
 /// projected clause list.
 fn install_mixed_module(session: &mut Session, distractors: usize) -> usize {
-    let mut source = String::from("(defmodule bench (quote (");
+    let mut source = String::from("(визначити-модуль bench (як-є (");
     for i in 0..distractors {
         match i % 4 {
             0 => source.push_str(&format!("((planet f{i}))")),
@@ -94,20 +94,20 @@ fn profile_size(distractors: usize) -> (u128, u128, u128, u128, u128, usize) {
     let mut session = loaded_session();
     let clauses = install_mixed_module(&mut session, distractors);
 
-    let projection = "(length (module-clauses-now (quote bench)))";
+    let projection = "(довжина (модуль-клаузи-зараз (як-є bench)))";
     let expected_len = clauses.to_string();
     assert_eq!(eval_session(&mut session, projection), expected_len);
 
     // Pre-project once so the direct reasoning comparison excludes journal replay.
     eval_session(
         &mut session,
-        "(def bench-rules (module-clauses-now (quote bench)))",
+        "(визначити правила-лави (модуль-клаузи-зараз (як-є bench)))",
     );
 
-    let indexed_direct = "(length (міркувати (quote (valuable target)) bench-rules))";
-    let linear_direct = "(length (довести-ціль (quote (valuable target)) bench-rules (quote ()) (лінійний-індекс-міркування bench-rules) 0))";
-    let raw_reason = "(результат-стан (reason-observe (quote (valuable target)) bench-rules))";
-    let end_to_end = "(результат-стан (reason-in-observe (quote bench) (quote (valuable target))))";
+    let indexed_direct = "(довжина (міркувати (як-є (valuable target)) правила-лави))";
+    let linear_direct = "(довжина (довести-ціль (як-є (valuable target)) правила-лави (як-є ()) (лінійний-індекс-міркування правила-лави) 0))";
+    let raw_reason = "(результат-стан (міркувати-спостерігати (як-є (valuable target)) правила-лави))";
+    let end_to_end = "(результат-стан (міркувати-у-спостерігати (як-є bench) (як-є (valuable target))))";
 
     // Warm every measured reasoning path before the three-sample median. The
     // direct pair intentionally has the same projected corpus, goal and result
@@ -171,11 +171,11 @@ const REPEATED_GOALS: [&str; 6] = [
 ];
 
 fn public_observe_source(goal: &str) -> String {
-    format!("(reason-in-observe (quote bench) (quote {goal}))")
+    format!("(міркувати-у-спостерігати (як-є bench) (як-є {goal}))")
 }
 
 fn prepared_observe_source(goal: &str) -> String {
-    format!("(reason-observe (quote {goal}) bench-index)")
+    format!("(міркувати-спостерігати (як-є {goal}) індекс-лави)")
 }
 
 fn timed_query_batch(session: &mut Session, prepared: bool) -> u128 {
@@ -205,18 +205,18 @@ fn profile_repeated_queries(distractors: usize) {
 
     eval_session(
         &mut session,
-        "(def bench-rules (module-clauses-now (quote bench)))",
+        "(визначити правила-лави (модуль-клаузи-зараз (як-є bench)))",
     );
     assert_eq!(
-        eval_session(&mut session, "(length bench-rules)"),
+        eval_session(&mut session, "(довжина правила-лави)"),
         clauses.to_string()
     );
     eval_session(
         &mut session,
-        "(def bench-index (побудувати-індекс-міркування bench-rules))",
+        "(визначити індекс-лави (побудувати-індекс-міркування правила-лави))",
     );
     assert_eq!(
-        eval_session(&mut session, "(режим-індексу-міркування bench-index)"),
+        eval_session(&mut session, "(режим-індексу-міркування індекс-лави)"),
         "indexed"
     );
 
@@ -225,7 +225,7 @@ fn profile_repeated_queries(distractors: usize) {
     // through the same `reason-observe` entry point ordinary callers use.
     for goal in REPEATED_GOALS {
         let parity = format!(
-            "(equal? {} {})",
+            "(однакові? {} {})",
             public_observe_source(goal),
             prepared_observe_source(goal)
         );
@@ -246,14 +246,14 @@ fn profile_repeated_queries(distractors: usize) {
     let projection_batch_ns = median_ns(|| {
         timed_repeated_eval(
             &mut session,
-            "(length (module-clauses-now (quote bench)))",
+            "(довжина (модуль-клаузи-зараз (як-є bench)))",
             &clauses.to_string(),
         )
     });
     let index_batch_ns = median_ns(|| {
         timed_repeated_eval(
             &mut session,
-            "(режим-індексу-міркування (побудувати-індекс-міркування bench-rules))",
+            "(режим-індексу-міркування (побудувати-індекс-міркування правила-лави))",
             "indexed",
         )
     });
