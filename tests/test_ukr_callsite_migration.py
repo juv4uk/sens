@@ -1658,14 +1658,9 @@ class ConstitutionAndRustGeneratorUkrProjectionTests(unittest.TestCase):
                        "010": 12
                        },
         },
-        "scripts/generate-rust-function-signatures.lisp": {
-            # Чинна коротка Lisp-версія: доказ тільки точності проєкції
-            # трьох активних голів, а НЕ успішного генератора Rust.
-            # Історичний складний генератор і його застарілі лічильники
-            # не можуть лишатися блокером для нового коректного SENS.
-            "blob": "acc5804e321e2797c4d96a4aba2224b8cfb6af86",
-            "counts": {"0011": 1, "0010": 1, "001": 1},
-        },
+        # Живий генератор має перевірку реальної поверхні й алгоритму
+        # нижче, а не зафіксований SHA історичної мініатюри.
+        "scripts/generate-rust-function-signatures.lisp": {},
     }
 
     @classmethod
