@@ -11,6 +11,7 @@ on:
       - "benchmarks/contest-uk/*.lisp"
       - "lib/list-*.lisp"
       - "lib/tree-*.lisp"
+      - "lib/d11-*.lisp"
       - ".github/workflows/remint-drifted-pairs.yml"
   workflow_dispatch:
     inputs:
@@ -57,9 +58,9 @@ jobs:
             # Лише реально додані/змінені .lisp у цьому push, не весь
             # історичний список. Видалені під час promotion не перемайнювати.
             if [[ "$BEFORE" =~ ^0+$ ]]; then
-              list="$(git -c core.quotePath=false diff-tree --no-commit-id --diff-filter=AM --name-only -r HEAD -- 'benchmarks/contest-uk/*.lisp' 'lib/list-*.lisp' 'lib/tree-*.lisp')"
+              list="$(git -c core.quotePath=false diff-tree --no-commit-id --diff-filter=AM --name-only -r HEAD -- 'benchmarks/contest-uk/*.lisp' 'lib/list-*.lisp' 'lib/tree-*.lisp' 'lib/d11-*.lisp')"
             else
-              list="$(git -c core.quotePath=false diff --diff-filter=AM --name-only "$BEFORE" "$AFTER" -- 'benchmarks/contest-uk/*.lisp' 'lib/list-*.lisp' 'lib/tree-*.lisp')"
+              list="$(git -c core.quotePath=false diff --diff-filter=AM --name-only "$BEFORE" "$AFTER" -- 'benchmarks/contest-uk/*.lisp' 'lib/list-*.lisp' 'lib/tree-*.lisp' 'lib/d11-*.lisp')"
             fi
             # Не втрачати непарні програми після скасованого queued run.
             # Змінений конкурсний .lisp уже є у git diff вище, навіть якщо
@@ -67,7 +68,7 @@ jobs:
             # при кожному незалежному push: це відтягує обернення нових Lisp.
             # Джерело без .sens або view залишається в черзі; нативний
             # суддя як і раніше відхиляє drift та хибне виконання.
-            for source in benchmarks/contest-uk/*.lisp lib/list-*.lisp lib/tree-*.lisp; do
+            for source in benchmarks/contest-uk/*.lisp lib/list-*.lisp lib/tree-*.lisp lib/d11-*.lisp; do
               [[ -f "$source" && ! -L "$source" ]] || continue
               pair="${source%.lisp}.sens"
               view="${source%.lisp}"
@@ -118,6 +119,7 @@ jobs:
             bs=()
             case "$f" in
               lib/reason.lisp|lib/forward.lisp) bs=(--binding-source lib/unify.lisp);;
+              lib/d11-clojure-partition-by.lisp) bs=(--binding-source lib/d11-srfi1-span-break.lisp);;
               lib/narrate.lisp) bs=(--binding-source lib/unify.lisp --binding-source lib/reason.lisp);;
               lib/result-status.lisp) bs=(--binding-source lib/unify.lisp --binding-source lib/knowledge.lisp --binding-source lib/reason.lisp);;
               lib/translation.lisp) bs=(--binding-source lib/unify.lisp --binding-source lib/knowledge.lisp --binding-source lib/reason.lisp --binding-source lib/world.lisp --binding-source lib/yantra.lisp --binding-source lib/result-status.lisp);;
@@ -208,6 +210,7 @@ jobs:
               bs=()
               case "$f" in
                 lib/reason.lisp|lib/forward.lisp) bs=(--binding-source lib/unify.lisp);;
+              lib/d11-clojure-partition-by.lisp) bs=(--binding-source lib/d11-srfi1-span-break.lisp);;
                 lib/narrate.lisp) bs=(--binding-source lib/unify.lisp --binding-source lib/reason.lisp);;
                 lib/result-status.lisp) bs=(--binding-source lib/unify.lisp --binding-source lib/knowledge.lisp --binding-source lib/reason.lisp);;
                 lib/translation.lisp) bs=(--binding-source lib/unify.lisp --binding-source lib/knowledge.lisp --binding-source lib/reason.lisp --binding-source lib/world.lisp --binding-source lib/yantra.lisp --binding-source lib/result-status.lisp);;
