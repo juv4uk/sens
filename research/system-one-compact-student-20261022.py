@@ -229,6 +229,13 @@ def train(args: argparse.Namespace) -> int:
         "teacher_used": has_teacher,
         "training_count": len(rows),
         "training_split": "train",
+        "calibration_temperature": 1.0,
+        "calibration": {
+            "method": "none",
+            "split": None,
+            "count": 0,
+            "dataset_sha256": None,
+        },
         "training_dataset_sha256": seed_sha,
         "teacher_observations_sha256": teacher_sha,
         "class_log_prior": class_log_prior,
@@ -275,10 +282,23 @@ def class_scores(model: dict[str, Any], text: str) -> dict[str, float]:
     return scores
 
 
-def probabilities(model: dict[str, Any], text: str) -> dict[str, Fraction]:
+def normalized_log_probabilities(model: dict[str, Any], text: str) -> dict[str, float]:
+    raw_temperature = model.get("calibration_temperature", 1.0)
+    if isinstance(raw_temperature, bool) or not isinstance(raw_temperature, (int, float)):
+        raise StudentError("температура калібрування має бути числом")
+    temperature = float(raw_temperature)
+    if not math.isfinite(temperature) or temperature <= 0:
+        raise StudentError("температура калібрування має бути скінченною та додатною")
     scores = class_scores(model, text)
-    maximum = max(scores.values())
-    exps = {label: math.exp(scores[label] - maximum) for label in LABELS}
+    scaled = {label: scores[label] / temperature for label in LABELS}
+    maximum = max(scaled.values())
+    log_total = maximum + math.log(sum(math.exp(value - maximum) for value in scaled.values()))
+    return {label: scaled[label] - log_total for label in LABELS}
+
+
+def probabilities(model: dict[str, Any], text: str) -> dict[str, Fraction]:
+    log_probabilities = normalized_log_probabilities(model, text)
+    exps = {label: math.exp(log_probabilities[label]) for label in LABELS}
     total = sum(exps.values())
     if not math.isfinite(total) or total <= 0:
         raise StudentError("оцінки компактної моделі не утворюють розподіл")
@@ -394,11 +414,7 @@ def create_local_server(
                 if not isinstance(model_name, str) or not model_name.strip():
                     raise StudentError("model name is required")
                 scores = class_scores(model, user_texts[-1])
-                maximum = max(scores.values())
-                log_total = maximum + math.log(sum(math.exp(value - maximum) for value in scores.values()))
-                log_probabilities = {
-                    label: scores[label] - log_total for label in LABELS
-                }
+                log_probabilities = normalized_log_probabilities(model, user_texts[-1])
                 predicted_index = max(
                     range(len(LABELS)),
                     key=lambda index: (scores[LABELS[index]], -index),
