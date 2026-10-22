@@ -5413,13 +5413,18 @@
         "вилучити-елементи-з-ключем"
       ],
       "native_law_test": "crates/sens/tests/d11_clojure_group_by.rs::d11_clojure_group_by_non_adjacent_keys_native_sens",
-      "native_ci_status": "NOT_YET_CONFIRMED",
+      "native_ci_status": "NATIVE_SENS_PASS_47_CASES_TARGETED_STEP_RELEASE_NOT_CERTIFIED",
       "domain_candidate": "D11_OR_LIBRARY_REVIEW",
       "coordinate": null,
       "exact_bit_width_if_admitted": 11,
-      "review_status": "SENS_COMPOSITION_IMPLEMENTED_NATIVE_CI_PENDING",
+      "review_status": "SENS_COMPOSITION_NATIVE_CI_PASS_NOT_ADMITTED",
       "ratified": false,
-      "callable": false
+      "callable": false,
+      "native_ci_run": "https://github.com/juv4uk/sens/actions/runs/39756401834",
+      "native_ci_job": 119749378458,
+      "native_ci_step": "Д11 / Scheme + Clojure — нативні закони списків і стану",
+      "physical_t5m_status": "COMMITTED_PAIR_FOUND_EXACT_SHA_CI_PENDING",
+      "physical_t5m_source": "lib/d11-clojure-group-by.sens"
     }
   ],
   "winners_20261022": {
