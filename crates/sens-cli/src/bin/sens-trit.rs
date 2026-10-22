@@ -1001,28 +1001,15 @@ mod eval_tests {
 
     #[cfg(feature = "zig-transport")]
     #[test]
-    fn original_tiny_f3_requires_explicit_route_and_preserves_quote_execution() {
-        let bytes = [0xf3, 0x40, 0x60];
-        let canonical = sens::frame3_small::decode_explicit_small_f3(&bytes).unwrap();
+    fn explicit_f3_codec_roundtrip_is_zig_owned() {
         let legacy_path = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
             .join("../../tests/fixtures/migration-quote-cohort-main/quote-legacy.sens");
         let t5 = std::fs::read(legacy_path).unwrap();
-        assert_eq!(canonical.as_slice(), t5.as_slice());
-        let mut direct_session = sens::Session::default();
-        let mut framed_session = sens::Session::default();
-        let direct_words = sens::decode_ternary_words(&t5).unwrap();
-        let framed_words = sens::decode_ternary_words(&canonical).unwrap();
-        let direct = sens::PhysicalT5Program::from_exact_words(&direct_words)
-            .unwrap()
-            .execute(&mut direct_session)
-            .unwrap();
-        let framed = sens::PhysicalT5Program::from_exact_words(&framed_words)
-            .unwrap()
-            .execute(&mut framed_session)
-            .unwrap();
-        assert_eq!(direct.value, framed.value);
-        assert_eq!(direct.output, framed.output);
-        assert!(zig_transport::decode_t5m_exact_words(&bytes).is_err());
+        let carrier = encode_f3_carrier(&t5)
+            .expect("Zig owns explicit F3C encoding")
+            .expect("fixture fits the explicit compact carrier");
+        let restored = decode_f3_carrier(&carrier).expect("Zig owns explicit F3C decoding");
+        assert_eq!(restored, t5, "F3C must preserve the canonical T5M bytes");
         assert!(USAGE.contains("eval-f3 path.senc"));
         assert!(USAGE.contains("encode-f3 path.sens"));
     }

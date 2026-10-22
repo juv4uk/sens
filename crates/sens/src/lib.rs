@@ -22,7 +22,9 @@ pub mod frame3_micro_v5;
 pub mod frame3_micro_v5_lambda;
 pub mod frame3_micro_v5_lambda_app;
 pub mod frame3_semantic;
-pub mod frame3_small;
+// Старий Rust F3 залишений лише як unit-test еталон; production-коридор F3C — Zig.
+#[cfg(test)]
+mod frame3_small;
 pub mod machine_math;
 pub mod universal_frame3;
 

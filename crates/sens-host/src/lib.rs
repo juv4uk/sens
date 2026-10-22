@@ -18,18 +18,25 @@ use std::{
 
 static NEXT_TCP_HANDLE_TOKEN: AtomicU64 = AtomicU64::new(1);
 
-fn next_tcp_handle_token(span: Span) -> Result<u64, LanguageError> {
-    NEXT_TCP_HANDLE_TOKEN
-        .try_update(Ordering::Relaxed, Ordering::Relaxed, |token| {
-            token.checked_add(1)
-        })
-        .map_err(|_| {
-            LanguageError::new(
+fn allocate_tcp_handle_token(counter: &AtomicU64, span: Span) -> Result<u64, LanguageError> {
+    let mut current = counter.load(Ordering::Relaxed);
+    loop {
+        let Some(next) = current.checked_add(1) else {
+            return Err(LanguageError::new(
                 ErrorKind::NumericOverflow,
                 "TCP host-resource identity space exhausted",
                 span,
-            )
-        })
+            ));
+        };
+        match counter.compare_exchange_weak(current, next, Ordering::Relaxed, Ordering::Relaxed) {
+            Ok(previous) => return Ok(previous),
+            Err(observed) => current = observed,
+        }
+    }
+}
+
+fn next_tcp_handle_token(span: Span) -> Result<u64, LanguageError> {
+    allocate_tcp_handle_token(&NEXT_TCP_HANDLE_TOKEN, span)
 }
 
 fn tcp_connection_value(
@@ -800,6 +807,26 @@ pub fn install() {
 #[cfg(test)]
 mod install_tests {
     use sens::{Environment, ErrorKind, Exactness, Span, Value};
+    use std::sync::atomic::AtomicU64;
+
+    #[test]
+    fn tcp_handle_token_allocator_is_atomic_and_rejects_overflow() {
+        let span = Span { start: 4, end: 9 };
+        let counter = AtomicU64::new(1);
+        assert_eq!(super::allocate_tcp_handle_token(&counter, span).unwrap(), 1);
+        assert_eq!(super::allocate_tcp_handle_token(&counter, span).unwrap(), 2);
+        assert_eq!(counter.load(std::sync::atomic::Ordering::Relaxed), 3);
+
+        let exhausted = AtomicU64::new(u64::MAX);
+        let error = super::allocate_tcp_handle_token(&exhausted, span)
+            .expect_err("the handle identity counter must not wrap");
+        assert_eq!(error.kind, ErrorKind::NumericOverflow);
+        assert_eq!(error.span, span);
+        assert_eq!(
+            exhausted.load(std::sync::atomic::Ordering::Relaxed),
+            u64::MAX
+        );
+    }
 
     #[test]
     fn tcp_close_value_handler_keeps_argument_local_span() {
