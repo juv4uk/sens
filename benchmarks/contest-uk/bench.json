@@ -1,0 +1,25 @@
+{
+  "schema": "sens-benchmark-manifest/v1",
+  "stand": "contest-uk",
+  "wing": "Implementation and physical-cost research",
+  "roles": [
+    "RESEARCH",
+    "CONFORMANCE",
+    "MEASUREMENT"
+  ],
+  "question": "For a fixed behaviour, which Ukrainian-projection SENS program carries the smallest physical T5M .sens while staying reversible and correctly executing?",
+  "claim": "For every committed benchmarks/contest-uk/*.sens the native judge mints the carrier with --t5m-mint and requires cmp byte identity (reversibility), opens and verifies the spaced view with Zig, requires --t5m-pair and standalone execution to agree, rejects a negative mutant with T5M_PHYSICAL_PAIR_MISMATCH, and then reports physical T5M bytes, AST nodes, evaluator visits and the result. Python and JSON take no part in measuring or judging. A win is a smaller physical carrier for the same result, not a different behaviour or a hardcoded constant for one input.",
+  "witness": [
+    "benchmarks/contest-uk/judge.sh",
+    "benchmarks/contest-uk/run-native.sh",
+    "benchmarks/contest-uk/факторіал.lisp",
+    "benchmarks/contest-uk/факторіал-компакт.lisp",
+    "benchmarks/contest-uk/сума-до-n.lisp",
+    "benchmarks/contest-uk/довжина-списку.lisp",
+    ".github/workflows/konkurs-measure.yml"
+  ],
+  "status": "ACTIVE-OPTIMIZATION-CONTEST",
+  "generation": "native judge standings 2026-10-22: факторіал-компакт 80 B < факторіал 100 B < сума-до-n 119 B < довжина-списку 132 B",
+  "axis": "sens/physical-t5m-bytes-per-fixed-behaviour",
+  "reproduce": "bash benchmarks/contest-uk/judge.sh"
+}
