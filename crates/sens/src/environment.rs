@@ -6,27 +6,63 @@ use std::{
     rc::Rc,
 };
 
+/// Session-wide print transcript plus a consumer cursor, so hot hosts
+/// (REPL, LSP, swarm TCP) can take only the lines appended since their
+/// last read instead of re-cloning the whole history per evaluation.
+///
+/// The transcript is no longer a separate `Rc` inside every `Environment`:
+/// it now lives in the shared session state (`SessionState`), so each
+/// environment carries only its lexical frame and that one session handle.
+/// `cap` is an opt-in ceiling on retained lines for long sessions; `None`
+/// keeps the historical unbounded behaviour bit-for-bit.
+#[derive(Debug, Default)]
+pub struct Transcript {
+    lines: Vec<String>,
+    taken: usize,
+    cap: Option<usize>,
+}
+
+impl Transcript {
+    fn push(&mut self, line: String) {
+        if let Some(cap) = self.cap {
+            if cap == 0 {
+                return;
+            }
+            if self.lines.len() >= cap {
+                // Rotation: the oldest line is evicted and the consumer
+                // cursor shifts with it, so `output_take_new` still returns
+                // exactly the lines the consumer has not seen yet.
+                self.lines.remove(0);
+                self.taken = self.taken.saturating_sub(1);
+            }
+        }
+        self.lines.push(line);
+    }
+
+    fn snapshot(&self) -> Vec<String> {
+        self.lines.clone()
+    }
+
+    fn take_new(&mut self) -> Vec<String> {
+        let new = self.lines[self.taken..].to_vec();
+        self.taken = self.lines.len();
+        new
+    }
+}
+
 /// Dropping a deeply nested `Environment` chain (thousands of `let`/currying
 /// levels) would otherwise recurse through `Rc<RefCell<Frame>>`'s default
 /// `Drop` one stack frame per level and could overflow the stack. `Environment`
 /// has its own `Drop` below (mirroring `Value::Pair`'s iterative Drop in
 /// `value.rs`) that walks the parent chain with an explicit worklist instead,
 /// so this is fixed, not just documented as a live risk.
-/// Session-wide print transcript plus a consumer cursor, so hot hosts
-/// (REPL, LSP, swarm TCP) can take only the lines appended since their
-/// last read instead of re-cloning the whole history per evaluation.
-#[derive(Debug)]
-pub struct Transcript {
-    lines: Vec<String>,
-    taken: usize,
-}
-
+///
+/// Layout is `(frame, _, session_state)`. The middle slot used to hold a
+/// per-environment `Rc<RefCell<Transcript>>`; the transcript now belongs to the
+/// shared `SessionState`, so the slot is a zero-sized placeholder that keeps the
+/// historical field order without adding any per-environment weight.
 #[derive(Clone, Debug)]
-pub struct Environment(
-    Rc<RefCell<Frame>>,
-    Rc<RefCell<Transcript>>,
-    Rc<RefCell<Limits>>,
-);
+pub struct Environment(Rc<RefCell<Frame>>, (), Rc<RefCell<SessionState>>);
 
 #[derive(Debug)]
 struct Frame {
@@ -74,8 +110,10 @@ pub enum CoreProfile {
     Core4,
 }
 
+/// Shared session state: the opt-in resource/capability limits plus the print
+/// transcript, allocated once per session and shared by every lexical child.
 #[derive(Debug, Default)]
-struct Limits {
+struct SessionState {
     selected_core_profile: Option<CoreProfile>,
     cons_limit: Option<usize>,
     cons_count: usize,
@@ -97,17 +135,17 @@ struct Limits {
     /// separate storage so a legacy byte can never collide with a canonical
     /// domain identity merely from its packed payload.
     legacy_code_slots: HashMap<crate::CoreDomainIdentity, Value>,
+    /// Сесійний транскрипт друку. Живе тут, у спільному стані сесії, а не
+    /// окремим `Rc` у кожному `Environment`.
+    transcript: Transcript,
 }
 
 impl Environment {
     pub fn root() -> Self {
         Self(
             Rc::new(RefCell::new(Frame::empty(None))),
-            Rc::new(RefCell::new(Transcript {
-                lines: Vec::new(),
-                taken: 0,
-            })),
-            Rc::new(RefCell::new(Limits::default())),
+            (),
+            Rc::new(RefCell::new(SessionState::default())),
         )
     }
 
@@ -115,6 +153,15 @@ impl Environment {
     /// `cons` returns `ErrorKind::OutOfMemory` instead of succeeding.
     pub fn with_cons_limit(self, limit: usize) -> Self {
         self.2.borrow_mut().cons_limit = Some(limit);
+        self
+    }
+
+    /// Opts this session into a bounded print transcript: at most `limit`
+    /// lines are retained, evicting oldest-first. `output_take_new` still
+    /// returns only the lines the consumer has not seen yet. Without this
+    /// call the transcript stays unbounded (the historical behaviour).
+    pub fn with_transcript_cap(self, limit: usize) -> Self {
+        self.2.borrow_mut().transcript.cap = Some(limit);
         self
     }
 
@@ -278,11 +325,12 @@ impl Environment {
     }
 
     /// A child frame is the future lexical boundary captured by a closure. It
-    /// shares transcript and all session policy/limits with its parent.
+    /// shares all session policy/limits (and thus the transcript) with its
+    /// parent.
     pub fn child(&self) -> Self {
         Self(
             Rc::new(RefCell::new(Frame::empty(Some(self.clone())))),
-            self.1.clone(),
+            (),
             self.2.clone(),
         )
     }
@@ -299,7 +347,7 @@ impl Environment {
         // Slots are immutable after parameter binding: discard unused Vec capacity.
         frame.slots = slots.into_boxed_slice();
         frame.pure = pure;
-        Self(Rc::new(RefCell::new(frame)), self.1.clone(), self.2.clone())
+        Self(Rc::new(RefCell::new(frame)), (), self.2.clone())
     }
 
     /// Значення `Local(depth, index)`: слот `index` кадру на `depth` кроків вище.
@@ -346,10 +394,10 @@ impl Environment {
     /// Перепід'єднує лише безпосереднього lexical parent цього frame.
     /// Це host/UI-механізм для стабільного user-frame поверх змінної
     /// програмної поверхні; Lisp-семантику він не розширює.
-    /// Відхиляє цикли та parent з іншими transcript/limits.
+    /// Відхиляє цикли та parent з іншим станом сесії.
     pub fn reparent(&self, parent: Environment) -> Result<(), &'static str> {
-        if !Rc::ptr_eq(&self.1, &parent.1) || !Rc::ptr_eq(&self.2, &parent.2) {
-            return Err("new parent must share transcript and limits");
+        if !Rc::ptr_eq(&self.2, &parent.2) {
+            return Err("new parent must share session state");
         }
 
         let mut current = Some(parent.clone());
@@ -365,18 +413,15 @@ impl Environment {
     }
 
     pub fn print(&self, line: String) {
-        self.1.borrow_mut().lines.push(line);
+        self.2.borrow_mut().transcript.push(line);
     }
 
     pub fn output_snapshot(&self) -> Vec<String> {
-        self.1.borrow().lines.clone()
+        self.2.borrow().transcript.snapshot()
     }
 
     pub fn output_take_new(&self) -> Vec<String> {
-        let mut transcript = self.1.borrow_mut();
-        let new = transcript.lines[transcript.taken..].to_vec();
-        transcript.taken = transcript.lines.len();
-        new
+        self.2.borrow_mut().transcript.take_new()
     }
 
     /// Snapshot of every visible binding, root-first, shadowed names resolved
