@@ -192,6 +192,14 @@ jobs:
             # queued/rebase список не має майнити порожню програму:
             # T5M_REPL_EMPTY тут є хибним адміністративним RED.
             # Symlink і реальне джерело з формами НЕ обходити.
+            # Схемний реєстр сайтів є інвентарем, а не виконуваним Lisp.
+            # Перевіряємо і точний шлях, і форму даних: зміна на програму
+            # не може бути непомітно пропущена.
+            if [[ "$f" == knowledge/silent-fallback-inventory.lisp && ! -L "$f" ]] &&
+               LC_ALL=C grep -Eq '^[[:space:]]*\(silent-fallback-inventory([[:space:]]|$)' -- "$f"; then
+              echo "REMINT_DATA_ONLY source=$f classification=SCHEMA_INVENTORY"
+              continue
+            fi
             if [[ ! -L "$f" ]] &&
                ! LC_ALL=C grep -Eq '^[[:space:]]*[^[:space:];]' -- "$f"; then
               echo "REMINT_DATA_ONLY source=$f classification=COMMENT_ONLY"
@@ -361,6 +369,14 @@ jobs:
               fi
               # Перевірка повторюється після перемикання на новий main:
               # джерело могло стати суто описовим, не створюємо бутафорію.
+              # Схемний реєстр сайтів є інвентарем, а не виконуваним Lisp.
+              # Перевіряємо і точний шлях, і форму даних: зміна на програму
+              # не може бути непомітно пропущена.
+              if [[ "$f" == knowledge/silent-fallback-inventory.lisp && ! -L "$f" ]] &&
+                 LC_ALL=C grep -Eq '^[[:space:]]*\(silent-fallback-inventory([[:space:]]|$)' -- "$f"; then
+                echo "REMINT_CURRENT_MAIN_DATA_ONLY source=$f classification=SCHEMA_INVENTORY"
+                continue
+              fi
               if [[ ! -L "$f" ]] &&
                  ! LC_ALL=C grep -Eq '^[[:space:]]*[^[:space:];]' -- "$f"; then
                 echo "REMINT_CURRENT_MAIN_DATA_ONLY source=$f classification=COMMENT_ONLY"
