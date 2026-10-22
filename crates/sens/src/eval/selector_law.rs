@@ -46,10 +46,22 @@ pub(super) fn is_selector(identity: DomainIdentity) -> bool {
 }
 
 #[inline]
-fn select(step: Step, value: &Value, span: Span) -> Result<Value, LanguageError> {
-    match step {
-        Step::Car => special_forms::car_value(value, span),
-        Step::Cdr => special_forms::cdr_value(value, span),
+fn select<'a>(step: Step, value: &'a Value, span: Span) -> Result<&'a Value, LanguageError> {
+    match value {
+        // Проміжні кроки тільки читають пару: жодного клону її піддерева.
+        // Закон CAR/CDR і тип помилки залишаються спільними з D3.
+        Value::Pair(head, tail) => Ok(match step {
+            Step::Car => head.as_ref(),
+            Step::Cdr => tail.as_ref(),
+        }),
+        _ => Err(match step {
+            // На непридатному вході використовуємо саме чинний D3-механізм
+            // помилки, не дублюємо контракт повідомлення в генераторі.
+            Step::Car => special_forms::car_value(value, span)
+                .expect_err("D3 CAR must reject a non-pair"),
+            Step::Cdr => special_forms::cdr_value(value, span)
+                .expect_err("D3 CDR must reject a non-pair"),
+        }),
     }
 }
 
@@ -103,7 +115,8 @@ pub(super) fn invoke(
             Err(error) => return Some(Err(error)),
         };
     }
-    Some(Ok(value))
+    // Єдиний клон — кінцеве значення, а не кожен проміжний вузол шляху.
+    Some(Ok(value.clone()))
 }
 
 #[cfg(test)]
