@@ -55,7 +55,7 @@ Seed-корпус — лише перевірка формату та почат
 У звіті показати:
 - точність та macro-F1 загалом і за кожним класом;
 - матрицю помилок, зокрема помилки маршруту «невизначено»;
-- Brier score та Expected Calibration Error (ECE) для ймовірностей;
+- Brier score та Expected Calibration Error (ECE) для ймовірностей; калібрування температурою на окремому validation;
 - coverage (частку запитів, які політика прийняла) і selective risk (помилки серед прийнятих);
 - затримку p50/p95, пропускну здатність, пам'ять і розмір моделі;
 - порівняння вчителя, учня без донавчання та кожного способу донавчання.
@@ -104,10 +104,16 @@ python3 research/system-one-compact-student-20261022.py train \
   --gold-weight 0.25 \
   --output /tmp/system-one-distilled-student.json
 
-# 4) Запустити компактного учня як локальний сумісний HTTP-вузол.
+# 4) Навчити температуру лише на validation; вихід — окремий артефакт.
+python3 research/system-one-calibrate-20261022.py \
+  --model /tmp/system-one-distilled-student.json \
+  --input research/system-one-support-seed-20261022.jsonl \
+  --output /tmp/system-one-distilled-calibrated.json
+
+# 5) Запустити каліброваного учня як локальний сумісний HTTP-вузол.
 export SENS_SYSTEM_ONE_STUDENT_API_KEY='локальний-тимчасовий-ключ'
 python3 research/system-one-compact-student-20261022.py serve \
-  --model-path /tmp/system-one-distilled-student.json \
+  --model-path /tmp/system-one-distilled-calibrated.json \
   --port 8100
 # У терміналі SENS встановити той самий ключ для адаптера:
 export SENS_SYSTEM_ONE_API_KEY="$SENS_SYSTEM_ONE_STUDENT_API_KEY"
@@ -116,9 +122,9 @@ export SENS_SYSTEM_ONE_API_KEY="$SENS_SYSTEM_ONE_STUDENT_API_KEY"
 #   "http://127.0.0.1:8100/v1/chat/completions"
 #   "system-one-naive-bayes/1" "текст звернення" instruction criteria)
 
-# 5) Вибрати поріг ТІЛЬКИ на validation.
+# 6) Оцінити validation і підібрати поріг ЛИШЕ на цій вибірці.
 python3 research/system-one-compact-student-20261022.py predict \
-  --model /tmp/system-one-distilled-student.json \
+  --model /tmp/system-one-distilled-calibrated.json \
   --input research/system-one-support-seed-20261022.jsonl \
   --split validation \
   --output /tmp/system-one-validation.jsonl
@@ -126,18 +132,21 @@ python3 research/system-one-evaluate-20261022.py \
   --input /tmp/system-one-validation.jsonl \
   --expected-split validation --threshold 0.80
 
-# 5) Остаточний test запуск окремо після фіксації порога.
+# 7) Остаточний test запуск — лише після фіксації порога на validation.
 python3 research/system-one-compact-student-20261022.py predict \
-  --model /tmp/system-one-distilled-student.json \
+  --model /tmp/system-one-distilled-calibrated.json \
   --input research/system-one-support-seed-20261022.jsonl \
   --split test \
   --output /tmp/system-one-test.jsonl
 python3 research/system-one-evaluate-20261022.py \
   --input /tmp/system-one-test.jsonl \
   --expected-split test --threshold 0.80
+python3 research/system-one-evaluate-20261022.py \
+  --input /tmp/system-one-test.jsonl \
+  --expected-split test --threshold 0.80
 ```
 
-Обробник учителя відхиляє будь-яку адресу, крім `127.0.0.1`, не підставляє відсутні оцінки і записує точний розподіл із сумою `1_000_000_000 / 1_000_000_000). Для `validation` або `test` збір вчительських оцінок вимагає явного `--allow-holdout`; для навчання учня такі приклади відхиляються. Вихідні дані моделей зберігаються окремо в `/tmp`, не додаються до seed-корпусу.
+Обробник учителя відхиляє будь-яку адресу, крім `127.0.0.1`, не підставляє відсутні оцінки і записує точний розподіл із сумою `1_000_000_000 / 1_000_000_000`. Для `validation` або `test` збір вчительських оцінок вимагає явного `--allow-holdout`; для навчання учня такі приклади відхиляються. Вихідні дані моделей зберігаються окремо в `/tmp`, не додаються до seed-корпусу.
 
 Перший учень — малий багатокласовий наївний баєсів класифікатор зі словником і логарифмами ймовірностей; він навмисно написаний без сторонніх залежностей, щоб перевірити користь м'яких міток без GPU. Він тепер має вузький HTTP-вузол, який слухає лише 127.0.0.1, перевіряє послідовність п'яти класів і повертає розподіл у форматі, який розуміє SENS host adapter. Це лише базова лінія, не трансформер і не заміна справжньої компактної мовної моделі. Лише якщо вона показує відтворюваний приріст на validation, є сенс переходити до донавчання трансформера Qwen3.5-0.8B або іншого компактного учня.
 
