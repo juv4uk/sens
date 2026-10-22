@@ -63,7 +63,7 @@ def verify_migration_source_shapes():
                 "((атом? вхідне-значення) ні)",
                 "((порожній? вхідне-значення) ні)",
                 "((атом? (перше вхідне-значення))",
-                "((тотожне? (перше вхідне-значення) *схема-індексу-міркування*)",
+                "((тотожне? (перше вхідне-значення) схема-індексу-міркування)",
             )
             positions = [body.find(token) for token in ordered]
             if any(position < 0 for position in positions) or positions != sorted(positions):
