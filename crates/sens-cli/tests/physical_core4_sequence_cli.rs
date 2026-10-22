@@ -393,6 +393,7 @@ fn verify_unpaired_ukrainian_libs_natively() {
         "list-all-prefixes-general",
         "list-all-distinct-atoms-general",
         "list-first-adjacent-repeat-atom-general",
+        "tree-leaf-tally-unary",
         "list-keep-all-matching-atoms-general",
         "list-replace-first-atom-general",
         "list-remove-interior-matching-atoms-general",
@@ -519,6 +520,7 @@ fn verify_unpaired_ukrainian_libs_natively() {
                 | "замінити-всі-входження"
                 | "list-deduplicate-neighbors"
                 | "list-first-adjacent-repeat-atom-general"
+                | "tree-leaf-tally-unary"
                 | "list-alternating-split-four"
                 | "list-remove-first-atom"
                 | "list-prefix-atoms-general"
