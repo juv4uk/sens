@@ -84,5 +84,45 @@ class TranslateProgramTests(unittest.TestCase):
         )
 
 
+    def test_quoted_data_and_argument_atoms_are_not_reinterpreted(self):
+        source = "(cons car (quote (map (car x))))\n'(map (car x))\n"
+        mapping = MODULE.translation_map("en", "укр")
+        self.assertEqual(
+            MODULE.translate_program(source, mapping),
+            "(сполучити car (як-є (map (car x))))\n'(map (car x))\n",
+        )
+        self.assertEqual(
+            MODULE.translate_program(
+                "(сполучити car (як-є (map (car x))))\n'(map (car x))\n",
+                MODULE.translation_map("укр", "en"),
+            ),
+            source,
+        )
+
+    def test_lambda_formals_and_sanskrit_quote_are_data_not_calls(self):
+        self.assertEqual(
+            MODULE.translate_program(
+                "(lambda (car cdr) (cons car cdr))",
+                MODULE.translation_map("en", "укр"),
+            ),
+            "(функція (car cdr) (сполучити car cdr))",
+        )
+        self.assertEqual(
+            MODULE.translate_program(
+                "(svarūpa (map (car x)))",
+                MODULE.translation_map("sa", "укр"),
+            ),
+            "(як-є (map (car x)))",
+        )
+
+    def test_invalid_parentheses_fail_closed(self):
+        mapping = MODULE.translation_map("en", "укр")
+        with self.assertRaisesRegex(ValueError, "дужка"):
+            MODULE.translate_program("(car x", mapping)
+        with self.assertRaisesRegex(ValueError, "дужка"):
+            MODULE.translate_program("(car x))", mapping)
+
+
+
 if __name__ == "__main__":
     unittest.main()

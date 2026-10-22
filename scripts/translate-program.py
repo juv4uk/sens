@@ -86,14 +86,46 @@ def translation_map(
     return translations
 
 
-def translate_program(source: str, translations: dict[str, str]) -> str:
-    """Rewrite symbols while preserving layout, comments, strings and shared symbols."""
+def translate_program(source: str, translations: dict[str, str | None]) -> str:
+    """Перекладаємо викличні голови, не дані, цитати чи формальні параметри.
+
+    Це лише текстова допоміжна проєкція: жодного runtime, D7-кодування
+    або перетворення історичних байтів SID8 у сучасні координати.
+    """
+    protected_quote_heads: set[str] = set()
+    protected_formal_heads: set[str] = set()
+    for row in read_domain_tables(
+        tuple(path for path in PROGRAM_TABLES if path.stem in {"d3", "d4"})
+    ):
+        if (row.domain, row.bits) not in {
+            ("D3", "001"), ("D4", "0010"), ("D4", "0011")
+        }:
+            continue
+        names = {
+            name for name in (row.uk, row.ukr, row.san, row.en) if name
+        }
+        if (row.domain, row.bits) == ("D3", "001"):
+            protected_quote_heads.update(names)
+        else:
+            # FUNCTION/LAMBDA parameters and DEFINE declaration head
+            # are syntax/bindings, not callable expressions.
+            protected_formal_heads.update(names)
+
     output: list[str] = []
     index = 0
     length = len(source)
+    frames = [
+        {"head": False, "literal": False, "next_literal": False, "apostrophe": False}
+    ]
+
+    def finish_expression(frame: dict[str, bool]) -> None:
+        frame["head"] = False
+        frame["next_literal"] = False
+        frame["apostrophe"] = False
 
     while index < length:
         character = source[index]
+        frame = frames[-1]
         if character == ";":
             end = source.find("\n", index)
             if end == -1:
@@ -106,31 +138,60 @@ def translate_program(source: str, translations: dict[str, str]) -> str:
             index += 1
             while index < length:
                 if source[index] == "\\":
-                    index += 2
+                    index = min(index + 2, length)
                 elif source[index] == '"':
                     index += 1
                     break
                 else:
                     index += 1
             output.append(source[start:index])
-        elif character.isspace() or character in "()":
+            finish_expression(frame)
+        elif character.isspace():
             output.append(character)
             index += 1
         elif character == "'":
+            output.append(character)
+            index += 1
+            frame["apostrophe"] = True
+        elif character == "(":
+            literal = frame["literal"] or frame["next_literal"] or frame["apostrophe"]
+            finish_expression(frame)
+            frames.append(
+                {"head": True, "literal": literal, "next_literal": False, "apostrophe": False}
+            )
+            output.append(character)
+            index += 1
+        elif character == ")":
+            if len(frames) == 1:
+                raise ValueError("зайва закривальна дужка у проєкції")
+            frames.pop()
             output.append(character)
             index += 1
         else:
             start = index
             while index < length:
                 current = source[index]
-                if current.isspace() or current in "();\"":
+                if current.isspace() or current in '();\"':
                     break
                 index += 1
             token = source[start:index]
-            if token in translations and translations[token] is None:
-                raise ValueError(f"неоднозначна сучасна доменна проєкція: {token!r}")
-            output.append(translations.get(token, token))
+            callable_head = frame["head"] and not (
+                frame["literal"] or frame["next_literal"] or frame["apostrophe"]
+            )
+            if callable_head and token in translations and translations[token] is None:
+                raise ValueError(
+                    f"неоднозначна сучасна доменна проєкція: {token!r}"
+                )
+            output.append(translations.get(token, token) if callable_head else token)
+            protect_next = callable_head and (
+                token in protected_quote_heads or token in protected_formal_heads
+            )
+            finish_expression(frame)
+            if protect_next:
+                frame["next_literal"] = True
 
+    if len(frames) != 1:
+        raise ValueError("незакрита дужка у проєкції")
     return "".join(output)
 
 
