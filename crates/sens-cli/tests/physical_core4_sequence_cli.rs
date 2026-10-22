@@ -429,6 +429,8 @@ fn verify_unpaired_ukrainian_libs_natively() {
         "tree-replace-atom-general",
         "list-first-repeated-atom-general",
         "tree-prune-matching-leaves-general",
+        "list-keep-last-unique-atoms-general",
+        "list-move-first-match-to-front-general",
     ] {
         let source = root.join("lib").join(format!("{stem}.lisp"));
         assert!(source.is_file(), "{stem}: українське джерело відсутнє");
@@ -555,6 +557,8 @@ fn verify_unpaired_ukrainian_libs_natively() {
                 | "tree-replace-atom-general"
                 | "list-first-repeated-atom-general"
                 | "tree-prune-matching-leaves-general"
+                | "list-keep-last-unique-atoms-general"
+                | "list-move-first-match-to-front-general"
         ) {
             let committed_physical = root.join("lib").join(format!("{stem}.sens"));
             let committed_view = root.join("lib").join(stem);
