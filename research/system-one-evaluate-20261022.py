@@ -10,7 +10,9 @@ import argparse
 import hashlib
 import json
 import math
+import os
 import sys
+import tempfile
 from fractions import Fraction
 from pathlib import Path
 from typing import Any
@@ -215,13 +217,28 @@ def main() -> int:
     args = parser.parse_args()
     try:
         raw_bytes = args.input.read_bytes()
+        if args.output and args.output.resolve() == args.input.resolve():
+            raise EvaluationError("звіт не може перезаписати файл прогнозів")
         rows = read_rows(args.input)
         report = score(rows, args.threshold, args.bins, args.expected_split)
         report["input_path"] = str(args.input)
         report["input_sha256"] = hashlib.sha256(raw_bytes).hexdigest()
         rendered = json.dumps(report, ensure_ascii=False, indent=2, sort_keys=True) + "\n"
         if args.output:
-            args.output.write_text(rendered, encoding="utf-8")
+            args.output.parent.mkdir(parents=True, exist_ok=True)
+            handle = tempfile.NamedTemporaryFile(
+                mode="w", encoding="utf-8", newline="\\n",
+                dir=args.output.parent, prefix=f".{args.output.name}.", suffix=".tmp",
+                delete=False,
+            )
+            temp_path = Path(handle.name)
+            try:
+                with handle:
+                    handle.write(rendered)
+                os.replace(temp_path, args.output)
+            except Exception:
+                temp_path.unlink(missing_ok=True)
+                raise
         else:
             sys.stdout.write(rendered)
         return 0
