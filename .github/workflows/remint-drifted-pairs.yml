@@ -450,10 +450,12 @@ jobs:
               case "$changed" in
                 docs/*.md|benchmarks/contest-uk/RESULTS.md|.github/workflows/*.yml|.github/workflows/*.yaml)
                   ;;
-                crates/sens/tests/*.rs|crates/sens-cli/tests/*.rs|crates/xtask/tests/*.rs)
-                  # Інтеграційні тестові модулі не входять у sens/sens-trit runtime.
-                  # Не повторювати довгий native judge через незалежний test-only commit.
-                  # Rust src, Zig, .lisp і фізичні .sens як раніше потребують перевірки.
+                crates/sens/tests/*.rs|crates/sens-cli/tests/*.rs|crates/xtask/tests/*.rs|tests/*.py)
+                  # Тести Python, як і Rust integration tests, не входять у
+                  # sens/sens-trit runtime та не визначають семантики SENS.
+                  # Їхні окремі перевірки виконує CI; для попередньо
+                  # доведених SENS/Zig пар не потрібен повторний native judge.
+                  # Rust src, Zig, Lisp та фізичні .sens і далі вимагають remint.
                   ;;
                 benchmarks/contest-uk/*.lisp|lib/d11-*.lisp|lib/list-*.lisp|lib/tree-*.lisp)
                   # Лише A незалежного джерела без фізичної пари:
