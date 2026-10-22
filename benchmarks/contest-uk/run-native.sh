@@ -49,6 +49,19 @@ for source in "$here"/*.lisp; do
     fail=1
     continue
   fi
+  # Конкурс рахує лише закомічену *ту саму* фізичну програму,
+  # а не тимчасово згенеровані байти, що можуть приховати застарілу пару.
+  committed_physical="$here/$name.sens"
+  committed_view="$here/$name"
+  if [[ ! -f "$committed_physical" || -L "$committed_physical" ||
+        ! -f "$committed_view" || -L "$committed_view" ]] ||
+     ! cmp -s "$physical" "$committed_physical" ||
+     ! cmp -s "$view" "$committed_view"; then
+    printf '%s\t-\t-\t0\tЗАСТАРІЛА_АБО_ВІДСУТНЯ_ФІЗИЧНА_ПАРА\n' "$name"
+    echo "CONTEST_TRIPLET_DRIFT name=$name expected_current=Zig/T5M source=$source" >&2
+    fail=1
+    continue
+  fi
   samples=()
   for ((i=0; i<repeats; i++)); do
     start="$(date +%s%N)"
