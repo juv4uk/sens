@@ -979,3 +979,33 @@ fn ukr_cond_skips_unsafe_branch_and_preserves_exact_t5m_triplet() {
     assert!(direct.status.success(), "{}", error(&direct));
     assert_eq!(direct.stdout, paired.stdout, "носій не змінює SENS семантики");
 }
+
+
+#[test]
+fn contest_uk_three_real_programs_have_current_physical_peers() {
+    // Справжній виконавець SENS, Zig/T5M inverse та однакові результати
+    // з комітованих пар; Python/JSON не виконують законів конкурсу.
+    let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../..");
+    let script = root.join("benchmarks/contest-uk/run-native.sh");
+    let output = Command::new("bash")
+        .arg(script)
+        .env("SENS_BINARY", env!("CARGO_BIN_EXE_sens"))
+        .env("SENS_TRIT_BINARY", env!("CARGO_BIN_EXE_sens-trit"))
+        .env("SENS_CONTEST_REPEATS", "1")
+        .output()
+        .expect("виконати наявний нативний конкурс");
+    assert!(
+        output.status.success(),
+        "SENS contest failed: stdout={} stderr={}",
+        observed(&output),
+        error(&output)
+    );
+    let report = observed(&output);
+    for stem in ["довжина-списку", "сума-до-n", "факторіал"] {
+        assert!(
+            report.lines().any(|line|
+                line.starts_with(&format!("{stem}\\t")) && line.ends_with("ПІДТВЕРДЖЕНО")),
+            "конкурс не довів нативне виконання {stem}: {report}"
+        );
+    }
+}
