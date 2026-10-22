@@ -1,4 +1,5 @@
 //! Independent SWI-Prolog island.
+//! Historical C ABI byte tags are not exact D5/D6/D8 SENS identities.
 //!
 //! This crate does not implement Prolog semantics in Rust. It launches a real
 //! SWI-Prolog process, consults a Prolog program, and asks Prolog itself to
@@ -18,7 +19,7 @@ use wsm_kernel_c_abi::{
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub struct LegacyAbiSemanticId(pub u8);
 
-const SID_ADD: u8 = 0b0000_1100;
+const LEGACY_ABI_ADD: u8 = 0b0000_1100;
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct PrologQuery {
@@ -47,7 +48,7 @@ fn legacy_abi_query_for_request(
     payload: &str,
     template: &str,
 ) -> Result<PrologQuery, ()> {
-    if semantic_id != SID_ADD {
+    if semantic_id != LEGACY_ABI_ADD {
         return Ok(PrologQuery::new(payload, template));
     }
 
