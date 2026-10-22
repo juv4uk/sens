@@ -16,7 +16,7 @@ pub(super) use core::{
     atom_value, car_ref, cdr_ref, cons_values, eq_values, evaluate_definition,
     evaluate_domain_cond, quoted,
 };
-pub(super) use io::{eval_values, read_values, write_to_string_values};
+pub(super) use io::{eval_values, read_all_values, read_values, write_to_string_values};
 pub(super) use strings::{
     string_append_values, string_first_values, string_rest_values, string_to_symbol_values,
     symbol_to_string_values,

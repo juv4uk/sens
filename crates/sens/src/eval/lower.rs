@@ -214,7 +214,7 @@ fn lower(expression: &Expr, depth: u32, mode: LowerMode) -> Expr {
             // The text remains a projection, never an historical W8 byte.
             if let ExprKind::Symbol(head) = &items[0].kind {
                 if let Some(identity) = semantic_registry::d9_uk_source_identity(head)
-                    .filter(|identity| canon::has_d9_string_mechanism(*identity))
+                    .filter(|identity| canon::has_d9_mechanism(*identity))
                 {
                     // D9 here has an explicitly admitted resident mechanism.
                     // Lower once to its typed call, not to an intermediate

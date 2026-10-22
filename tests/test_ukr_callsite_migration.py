@@ -181,6 +181,31 @@ class CallsiteAuditTests(unittest.TestCase):
         self.assertEqual(report['unclassified_files'], [])
         self.assertEqual(report['metadata_files_excluded'], 3)
 
+    def test_machine_and_island_evidence_are_data_not_callable_lisp(self):
+        # Historical executor labels and ABI keys belong to protocol data.
+        # They must not become false Latin call-head failures or new D7 APIs.
+        self.row(3, '101', 'коротко', 'повне', 'equal')
+        self.put('lib/island-math-evidence.lisp',
+                 '( (schema island-math-evidence/1) (rows (додати prolog proof)) )\n')
+        self.put('lib/machine/authority-boundary.lisp',
+                 '(machine-authority-boundary-1 (reverse-authority forbidden))\n')
+        self.put('lib/active.lisp', '(foreign-live-call x)\n')
+        report = mod.measure(self.root)
+        self.assertEqual(report['metadata_files_excluded'], 3)
+        self.assertEqual(report['active_latin_heads'], 1)
+        self.assertEqual(
+            [(site['file'], site['head']) for site in report['latin_sites']],
+            [('lib/active.lisp', 'foreign-live-call')],
+        )
+        # The actual documents must remain declarative and readable;
+        # no execution or remint is falsely claimed for metadata.
+        repo = SCRIPT.resolve().parents[1]
+        for path in ('lib/island-math-evidence.lisp',
+                     'lib/machine/authority-boundary.lisp'):
+            content = (repo / path).read_text(encoding='utf-8')
+            self.assertTrue(mod.parse(content), path)
+            self.assertNotIn('(визначити ', content)
+
     def test_canon_d9_witness_calls_exact_ukrainian_surfaces_and_preserves_quoted_tag(self):
         repo_root = SCRIPT.resolve().parents[1]
         source = (repo_root / "lib" / "canon.lisp").read_text(encoding="utf-8")

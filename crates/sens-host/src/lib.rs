@@ -39,10 +39,16 @@ fn next_tcp_handle_token(span: Span) -> Result<u64, LanguageError> {
     allocate_tcp_handle_token(&NEXT_TCP_HANDLE_TOKEN, span)
 }
 
-fn tcp_connection_value(
-    stream: std::net::TcpStream,
-    span: Span,
-) -> Result<Value, LanguageError> {
+/// Represent one host I/O byte as its exact nonnegative D24+ mathematical value.
+fn d24_byte_value(byte: u8) -> Value {
+    let mut bits = vec![0; 16];
+    bits.extend((0..8).rev().map(|shift| (byte >> shift) & 1));
+    let number = BinaryNumber::from_numeric_domain_bits(24, &bits)
+        .expect("an unsigned byte is representable as a nonnegative D24+ integer");
+    Value::BinaryNumber(number)
+}
+
+fn tcp_connection_value(stream: std::net::TcpStream, span: Span) -> Result<Value, LanguageError> {
     Ok(Value::host_resource(
         "tcp-connection",
         next_tcp_handle_token(span)?,
@@ -50,10 +56,7 @@ fn tcp_connection_value(
     ))
 }
 
-fn tcp_listener_value(
-    listener: std::net::TcpListener,
-    span: Span,
-) -> Result<Value, LanguageError> {
+fn tcp_listener_value(listener: std::net::TcpListener, span: Span) -> Result<Value, LanguageError> {
     Ok(Value::host_resource(
         "tcp-listener",
         next_tcp_handle_token(span)?,
@@ -555,13 +558,7 @@ fn evaluate_tcp_read_raw(
     let bytes = tcp_read_raw(connection, span)?;
     // The Lisp UTF-8 decoder performs D24+ arithmetic. Qualify each physical
     // byte explicitly as its nonnegative mathematical value at this boundary.
-    Ok(Value::list(bytes.into_iter().map(|byte| {
-        let mut bits = vec![0; 16];
-        bits.extend((0..8).rev().map(|shift| (byte >> shift) & 1));
-        let number = BinaryNumber::from_numeric_domain_bits(24, &bits)
-            .expect("an unsigned byte is representable as a nonnegative D24+ integer");
-        Value::BinaryNumber(number)
-    })))
+    Ok(Value::list(bytes.into_iter().map(d24_byte_value)))
 }
 
 fn evaluate_tcp_write_raw(
@@ -602,8 +599,7 @@ fn evaluate_tcp_close(
         ));
     }
     let (value, argument_span) = &arguments[0];
-    let Some(connection) =
-        value.as_host_resource::<RefCell<std::net::TcpStream>>("tcp-connection")
+    let Some(connection) = value.as_host_resource::<RefCell<std::net::TcpStream>>("tcp-connection")
     else {
         return Err(LanguageError::new(
             ErrorKind::Type,
@@ -617,21 +613,38 @@ fn evaluate_tcp_close(
 
 fn expect_port(expr: &Expr, environment: &Environment) -> Result<u16, LanguageError> {
     let value = eval_expr(expr, environment)?;
-    let Value::Number(port, _) = value else {
-        return Err(LanguageError::new(
-            ErrorKind::Type,
-            "expected a port number · ochikuvavsia nomer portu · erwartete eine Portnummer",
-            expr.span,
-        ));
+    let port = match &value {
+        Value::Number(port, _)
+            if port.is_finite()
+                && port.fract() == 0.0
+                && (0.0..=u16::MAX as f64).contains(port) =>
+        {
+            Some(*port as u16)
+        }
+        Value::BinaryNumber(number) if number.numeric_domain_width().is_some() => {
+            number.exact_numeric_domain_bits().and_then(|bits| {
+                if bits[0] != 0 {
+                    return None;
+                }
+                let mut port = 0u32;
+                for bit in bits {
+                    port = port.checked_mul(2)?.checked_add(u32::from(bit))?;
+                    if port > u16::MAX as u32 {
+                        return None;
+                    }
+                }
+                Some(port as u16)
+            })
+        }
+        _ => None,
     };
-    if port.fract() != 0.0 || port < 0.0 || port > u16::MAX as f64 {
-        return Err(LanguageError::new(
+    port.ok_or_else(|| {
+        LanguageError::new(
             ErrorKind::Type,
-            "port must be an integer between 0 and 65535 · port maie buty tsilym chyslom vid 0 do 65535 · Port muss eine Ganzzahl zwischen 0 und 65535 sein",
+            "port must be an exact nonnegative D24+ integer or legacy host integer between 0 and 65535",
             expr.span,
-        ));
-    }
-    Ok(port as u16)
+        )
+    })
 }
 
 #[cfg(not(target_arch = "wasm32"))]
@@ -729,10 +742,7 @@ fn tcp_write_raw(
     })
 }
 
-fn tcp_close(
-    connection: &RefCell<std::net::TcpStream>,
-    span: Span,
-) -> Result<(), LanguageError> {
+fn tcp_close(connection: &RefCell<std::net::TcpStream>, span: Span) -> Result<(), LanguageError> {
     connection
         .borrow()
         .shutdown(std::net::Shutdown::Both)

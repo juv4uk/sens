@@ -12,7 +12,7 @@ fn process_session() -> Session {
 fn process_result_text_decoding_is_language_owned() {
     let mut session = process_session();
     let result = eval_program(
-        "(process-result->text (quote (process-result 0 (65 194 162) (226 130 172))))",
+        "(процес-результат-текст (список (як-є process-result) 0 (список 65 194 162) (список 226 130 172)))",
         &mut session,
     )
     .expect("pure process-result interpretation should succeed");
@@ -24,7 +24,7 @@ fn process_result_text_decoding_is_language_owned() {
 fn process_result_text_rejects_invalid_utf8_without_lossy_replacement() {
     let mut session = process_session();
     let result = eval_program(
-        "(process-result->text (quote (process-result 0 (255) ())))",
+        "(процес-результат-текст (список (як-є process-result) 0 (список 255) (список)))",
         &mut session,
     )
     .expect("invalid UTF-8 should be a language-level rejection value");
@@ -36,10 +36,9 @@ fn process_result_text_rejects_invalid_utf8_without_lossy_replacement() {
 fn process_run_text_composes_raw_host_bytes_with_lisp_utf8() {
     let mut session = process_session();
     let source = r#"
-        (process-run-text
-          "python3"
-          (quote ("-c"
-                   "import sys; sys.stdout.buffer.write('€'.encode()); sys.stderr.buffer.write('¢'.encode())")))
+        (процес-запустити-текст
+          "sh"
+          (як-є ("-c" "printf '€'; printf '¢' >&2")))
     "#;
 
     let result = eval_program(source, &mut session).expect("process text adapter should succeed");
@@ -50,7 +49,7 @@ fn process_run_text_composes_raw_host_bytes_with_lisp_utf8() {
 fn public_process_run_binding_is_already_a_lisp_closure() {
     let mut session = process_session();
     assert!(matches!(
-        session.environment.get("process-run"),
+        session.environment.get("процес-запустити"),
         Some(Value::Closure(_))
     ));
 
@@ -61,10 +60,10 @@ fn public_process_run_binding_is_already_a_lisp_closure() {
     // already implements the public compatibility result shape through
     // `process-run-raw`.
     let source = r#"
-        (def language-process-run process-run)
-        (language-process-run
-          "python3"
-          (quote ("-c" "print('language-owned')")))
+        (визначити мовний-запуск-процесу процес-запустити)
+        (мовний-запуск-процесу
+          "sh"
+          (як-є ("-c" "printf 'language-owned\\n'")))
     "#;
     let result =
         eval_program(source, &mut session).expect("language-owned process closure should run");

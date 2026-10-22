@@ -314,11 +314,8 @@ mod tests {
             for child_head in ["перше", "решта"] {
                 for input in ["(як-є опора)", "(як-є ())"] {
                     let program = format!("({name} ({child_head} {input}))");
-                    let error = crate::eval_program(
-                        &program,
-                        &mut crate::Session::default(),
-                    )
-                    .expect_err("CAR/CDR-derived selector is undefined on non-pairs");
+                    let error = crate::eval_program(&program, &mut crate::Session::default())
+                        .expect_err("CAR/CDR-derived selector is undefined on non-pairs");
                     assert_eq!(
                         error.kind,
                         ErrorKind::Type,

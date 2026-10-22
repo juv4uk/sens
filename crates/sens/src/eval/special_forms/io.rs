@@ -13,7 +13,9 @@ use std::rc::Rc;
 fn contains_predicate_bit(value: &Value) -> bool {
     match value {
         Value::DomainIdentity(crate::DomainIdentity::D1(_)) => true,
-        Value::Pair(node) => contains_predicate_bit(&node.head) || contains_predicate_bit(&node.tail),
+        Value::Pair(node) => {
+            contains_predicate_bit(&node.head) || contains_predicate_bit(&node.tail)
+        }
         Value::Vector(values) => values.borrow().iter().any(contains_predicate_bit),
         _ => false,
     }
@@ -76,6 +78,32 @@ pub(crate) fn read_values(
             span,
         )),
     }
+}
+
+/// Parse every top-level source form as data. Numeric source values use the
+/// exact D24+ projection selected by the current mixed-domain reader.
+pub(crate) fn read_all_values(
+    arguments: &[Value],
+    _environment: &Environment,
+    span: Span,
+) -> Result<Value, LanguageError> {
+    exact_values("read-all", arguments, 1, span)?;
+    let Value::String(source) = &arguments[0] else {
+        return Err(LanguageError::new(
+            ErrorKind::Type,
+            "read-all expects a source string",
+            span,
+        ));
+    };
+    let expressions = crate::parse_mixed_exact_domain(source).map_err(|mut error| {
+        error.span = span;
+        error
+    })?;
+    expressions
+        .iter()
+        .map(quoted)
+        .collect::<Result<Vec<_>, _>>()
+        .map(Value::list)
 }
 
 #[cfg(not(target_arch = "wasm32"))]
@@ -160,5 +188,42 @@ mod tests {
         )
         .expect("ordinary exact Number wire remains supported");
         assert_eq!(number, Value::String(Rc::from("#q2:1/1")));
+    }
+
+    #[test]
+    fn read_all_returns_all_forms_as_data_with_exact_d24_numbers() {
+        let result = read_all_values(
+            &[Value::String(Rc::from("alpha 42"))],
+            &Environment::root(),
+            Span::default(),
+        )
+        .expect("D9 read-all parses all source forms as data");
+        let Value::Pair(first) = &result else {
+            panic!("two forms must produce a two-element list");
+        };
+        assert_eq!(first.head, Value::Symbol(Rc::from("alpha")));
+        let Value::Pair(rest) = &first.tail else {
+            panic!("the second source form must remain in the result list");
+        };
+        assert!(
+            matches!(&rest.head, Value::BinaryNumber(value) if value.numeric_domain_width() == Some(24) && value.to_string() == "42")
+        );
+        assert!(matches!(&rest.tail, Value::Nil));
+
+        let empty = read_all_values(
+            &[Value::String(Rc::from(""))],
+            &Environment::root(),
+            Span::default(),
+        )
+        .expect("empty source has no forms");
+        assert!(matches!(empty, Value::Nil));
+
+        let type_error = read_all_values(
+            &[Value::Symbol(Rc::from("not-text"))],
+            &Environment::root(),
+            Span::default(),
+        )
+        .expect_err("read-all accepts source text only");
+        assert_eq!(type_error.kind, ErrorKind::Type);
     }
 }

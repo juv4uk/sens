@@ -4,11 +4,7 @@ use sens::{
 use std::rc::Rc;
 
 fn bytes_to_value(bytes: &[u8]) -> Value {
-    Value::list(
-        bytes
-            .iter()
-            .map(|byte| Value::Number(*byte as f64, Exactness::Exact)),
-    )
+    Value::list(bytes.iter().map(|byte| super::d24_byte_value(*byte)))
 }
 
 fn expect_string_list(value: &Value, span: Span) -> Result<Vec<String>, LanguageError> {

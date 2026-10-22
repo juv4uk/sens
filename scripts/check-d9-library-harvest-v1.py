@@ -46,7 +46,8 @@ expected_sources={
     "lib/unify.lisp":6,
     "lib/epistemic.lisp":7,
     "lib/knowledge.lisp":6,
-    "lib/time.lisp":14,
+    "lib/core4.lisp":1,
+    "lib/time.lisp":13,
 }
 actual_sources={}
 for row in rows:

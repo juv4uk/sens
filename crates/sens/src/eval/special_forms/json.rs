@@ -143,7 +143,10 @@ impl<'a> JsonParser<'a> {
         let mut alist = Value::Nil;
         for (key, value) in pairs.into_iter().rev() {
             alist = Value::Pair(Rc::new(PairNode {
-                head: Value::Pair(Rc::new(PairNode { head: key, tail: value })),
+                head: Value::Pair(Rc::new(PairNode {
+                    head: key,
+                    tail: value,
+                })),
                 tail: alist,
             }));
         }

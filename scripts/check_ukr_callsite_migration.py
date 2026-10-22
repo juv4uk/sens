@@ -313,6 +313,10 @@ def excluded_metadata(path: Path) -> bool:
             or path.as_posix() in {
                 'lib/surface/semantic-registry.lisp',
                 'lib/surface/semantic-registry-experiment.lisp',
+                # Named policy and evidence documents; English keys are data,
+                # not executable SENS call heads. Do not rewrite their ABI.
+                'lib/island-math-evidence.lisp',
+                'lib/machine/authority-boundary.lisp',
             })
 
 
