@@ -602,21 +602,22 @@ def build_text7(data, projection_path: Path):
     return _keyboard_v2(projection_path)
 
 
-def text7_encode(spelling: str,candidates,tok: Tok):
+def text7_encode(spelling: str,candidates,tok: Tok, *, identifier: bool = True):
     if "keyboard-v2" in candidates:
         if not spelling:
             # Порожній рядок — це D2-пропуск (порожнє/пропуск у D2), а не
             # D7-ідентифікатор і не D3:000. () — це D3; "" — це D2.
             return []
-        # lisp-symbol-replacement-plan.uk.md: em/en dash and box glyphs used in an
-        # identifier map to keyboard glyphs. Scoped to the identifier path only.
-        spelling = spelling.translate({0x2014: "-", 0x2013: "-", 0x2500: "-", 0x2550: "="})
+        # Імена можуть мати клавіатурні синоніми; рядки — точні дані.
+        # Не змінювати символи рядка заради нормалізації ідентифікатора.
+        if identifier:
+            spelling = spelling.translate({0x2014: "-", 0x2013: "-", 0x2500: "-", 0x2550: "="})
         view = _keyboard_v2_mode(spelling, tok)
         indexes = candidates["keyboard-v2"]
         chosen = indexes[view]
         # The san view is Devanagari; sources spell san in IAST Latin. Transliterate
         # (reversible) when the raw spelling is not directly on the keyboard.
-        if view == "san" and any(chosen.get(g) is None for g in spelling):
+        if identifier and view == "san" and any(chosen.get(g) is None for g in spelling):
             deva = iast_to_devanagari(spelling)
             if deva is not None:
                 spelling = deva
@@ -1208,7 +1209,7 @@ def encode_string(node: String, text7):
         lambda match: escapes.get(match.group(1), match.group(1)),
         raw,
     )
-    cells = text7_encode(value, text7, node.tok)
+    cells = text7_encode(value, text7, node.tok, identifier=False)
     return frame_text7(cells, node.tok)
 
 def encode_clause(node,resolver,text7,lexical_env=()):
