@@ -135,6 +135,10 @@ jobs:
         run: bash benchmarks/contest-uk/promote.sh
 
       - name: Commit refreshed pairs (only real byte changes)
+        # Навіть якщо нативне суддівство виявило чужий червоний внесок,
+        # зберегти незалежні пари, вже доведені Zig/SENS на кроці remint.
+        # Червоний judge лишається червоним; жодної підміни результату.
+        if: ${{ !cancelled() && steps.remint.outcome == 'success' }}
         run: |
           git config user.name "sens-remint-bot"
           git config user.email "sens-remint-bot@users.noreply.github.com"
