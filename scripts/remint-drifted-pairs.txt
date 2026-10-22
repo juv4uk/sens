@@ -36,8 +36,6 @@ lib/list-zip-with-tails-general.lisp
 research/probabilistic-decision-auto-choice-20261021.lisp
 scripts/check-core3-profile-contract.lisp
 scripts/oracle-batch.lisp
-scripts/release.lisp
-scripts/semantic-authority-guard.lisp
 lib/list-collapse-adjacent-runs-general.lisp
 lib/tree-replace-atom-general.lisp
 tests/fixtures/push-proof-uk.lisp
@@ -86,10 +84,7 @@ lib/list-drop-last-two-linear.lisp
 lib/list-select-longer-zero-copy-general.lisp
 lib/list-suffix-after-last-atom-match-zero-copy-general.lisp
 benchmarks/contest-uk/фібоначчі-одинарний.lisp
-knowledge/meta-eval-evidence.lisp
-lib/domains/d6.lisp
 lib/axioms-d1-principle-five.lisp
-benchmarks/contest-uk/сума-четвертих-степенів-добуток.lisp
 benchmarks/contest-uk/добуток-сусідів-добуток.lisp
 benchmarks/contest-uk/добуток-сусідів-сума.lisp
 benchmarks/contest-uk/семикутне-трикутні.lisp
