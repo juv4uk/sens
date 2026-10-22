@@ -27,6 +27,7 @@ judge_output="$(bash "$dir/judge.sh")"
 
 # 2) Ранжування за нативними (T5M, AST, visits), без Python/JSON.
 declare -A best bestbytes bestnodes bestvisits seen
+winner_count=0
 while IFS= read -r line; do
   if [[ "$line" =~ ^CONTEST_EXECUTED_PASS[[:space:]]path=([^[:space:]]+)[[:space:]]T5M=([0-9]+)[[:space:]]AST=([0-9]+)[[:space:]]visits=([0-9]+)[[:space:]]result= ]]; then
     path="${BASH_REMATCH[1]}"
@@ -50,6 +51,7 @@ while IFS= read -r line; do
       replace=1
     fi
     if (( replace )); then
+      if [[ -z "${best[$task]:-}" ]]; then winner_count=$((winner_count + 1)); fi
       best[$task]="$path"
       bestbytes[$task]="$bytes"
       bestnodes[$task]="$nodes"
@@ -61,8 +63,23 @@ for path in "$dir"/*.sens; do
   [[ -f "$path" ]] || continue
   [[ -n "${seen[$path]+yes}" ]] || { echo "PROMOTE_UNJUDGED $path" >&2; exit 2; }
 done
-(( ${#best[@]} > 0 )) || { echo "PROMOTE_NO_ENTRIES" >&2; exit 2; }
+(( winner_count > 0 )) || { echo "PROMOTE_NO_ENTRIES" >&2; exit 2; }
 # 3) Виключити не-переможців: перенести трійку (.sens/.lisp/в'ю) у superseded/.
+# Усі цілі архівації перевіряємо перед першим move:
+# ніколи не перезаписувати старі оптимізації або неповну трійку.
+for path in "$dir"/*.sens; do
+  [[ -f "$path" ]] || continue
+  name="${path##*/}"; name="${name%.sens}"
+  task="$(task_of "$name")" || continue
+  [[ "$path" == "${best[$task]}" ]] && continue
+  for f in "$path" "${path%.sens}.lisp" "${path%.sens}"; do
+    [[ -f "$f" && ! -L "$f" ]] || { echo "PROMOTE_INCOMPLETE_TRIPLE $f" >&2; exit 2; }
+    [[ ! -e "$sup/${f##*/}" && ! -L "$sup/${f##*/}" ]] || {
+      echo "PROMOTE_ARCHIVE_COLLISION $sup/${f##*/}" >&2; exit 2;
+    }
+  done
+done
+
 mkdir -p "$sup"
 excluded=0
 for path in "$dir"/*.sens; do
@@ -85,4 +102,4 @@ for task in довжина-списку сума-до-n факторіал; do
   [[ -n "${best[$task]:-}" ]] || continue
   echo "PROMOTED $task ${best[$task]} T5M=${bestbytes[$task]} AST=${bestnodes[$task]} visits=${bestvisits[$task]}"
 done
-echo "CONTEST_PROMOTED excluded=$excluded active=${#best[@]}"
+echo "CONTEST_PROMOTED excluded=$excluded active=$winner_count"
