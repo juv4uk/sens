@@ -19,6 +19,19 @@ scratch="$(mktemp -d)"
 trap 'rm -rf -- "$scratch"' EXIT
 printf 'програма\tбайти_T5M\tмедіана_нс\tповторів\tстан\n'
 fail=0
+# Навіть без окремого Rust-тесту суддя не має пропускати осиротілий
+# фізичний носій: кожен активний T5M зобов'язаний мати власний Lisp.
+# Нові source-only кандидати нижче залишаються чесним NOT_EXECUTED,
+# але байти без джерела не можуть отримати успішний verdict.
+for physical_peer in "$here"/*.sens; do
+  [[ -e "$physical_peer" || -L "$physical_peer" ]] || continue
+  stem="${physical_peer%.sens}"
+  if [[ ! -s "$physical_peer" || -L "$physical_peer" ||
+        ! -f "$stem.lisp" || -L "$stem.lisp" ]]; then
+    echo "CONTEST_ORPHAN_PHYSICAL path=$physical_peer source=$stem.lisp" >&2
+    fail=1
+  fi
+done
 for source in "$here"/*.lisp; do
   [[ -f "$source" && ! -L "$source" ]] || continue
   name="$(basename -- "$source" .lisp)"
