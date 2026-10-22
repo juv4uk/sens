@@ -424,6 +424,7 @@ fn verify_unpaired_ukrainian_libs_natively() {
         "list-remove-last-matching-atom-general",
         "list-run-length-unary-general",
         "tree-contains-atom-general",
+        "list-count-matching-atoms-unary",
         "tree-replace-atom-general",
     ] {
         let source = root.join("lib").join(format!("{stem}.lisp"));
@@ -546,6 +547,7 @@ fn verify_unpaired_ukrainian_libs_natively() {
                 | "list-split-before-every-atom-general"
                 | "list-run-length-unary-general"
                 | "tree-contains-atom-general"
+                | "list-count-matching-atoms-unary"
                 | "tree-replace-atom-general"
         ) {
             let committed_physical = root.join("lib").join(format!("{stem}.sens"));
