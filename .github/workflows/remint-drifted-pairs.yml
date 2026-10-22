@@ -444,6 +444,30 @@ jobs:
                 echo "REMINT_RECOVER_LIBRARY_SOURCE source=$source"
               fi
             done
+            # Відновлення після зсуву main: нові українські конкурсні
+            # програми без T5M мають бути першими у короткому пакеті.
+            # Інакше старий список із 24 бібліотечних записів витісняє
+            # всіх нових учасників, і число виконуваних файлів не росте.
+            # Це тільки черга файлів, НЕ оцінювання семантики хостом.
+            priority_list="$RUNNER_TEMP/sens-remint-unpaired-contest.list"
+            deferred_list="$RUNNER_TEMP/sens-remint-other-candidates.list"
+            : > "$priority_list"
+            : > "$deferred_list"
+            while IFS= read -r candidate; do
+              [[ -n "$candidate" ]] || continue
+              if [[ "$candidate" == benchmarks/contest-uk/*.lisp &&
+                    -f "$candidate" && ! -L "$candidate" ]] &&
+                 { [[ ! -s "${candidate%.lisp}.sens" ||
+                       ! -f "${candidate%.lisp}" ||
+                       -L "${candidate%.lisp}.sens" ||
+                       -L "${candidate%.lisp}" ]]; }; then
+                printf '%s\n' "$candidate" >> "$priority_list"
+              else
+                printf '%s\n' "$candidate" >> "$deferred_list"
+              fi
+            done < "$RUNNER_TEMP/sens-remint-candidates.list"
+            cat "$priority_list" "$deferred_list" > "$RUNNER_TEMP/sens-remint-candidates.list"
+            rm -- "$priority_list" "$deferred_list"
             # При конкурентних push повторний native recovery не повинен
             # перетворювати пакет на сотні незалежних програм. Решта —
             # явно PENDING, ніколи не зараховується як обернена/виконана.
