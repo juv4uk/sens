@@ -79,6 +79,24 @@ while IFS= read -r -d '' source; do
     printf 'NATIVE_DATA_ONLY\t%s\tclassification=COMMENT_ONLY\n' "$source" >&2
     continue
   fi
+  # Точно розпізнаний реєстр/профіль є ДАНИМИ, не виконуваним
+  # Lisp. Не плодити помилкові missing-triple, які не допомагають SENS.
+  # Це не виключення за шляхом: якщо схема зміниться на програму,
+  # вона знову піде до справжнього SENS/Zig mint, inverse та eval.
+  data_schema=""
+  case "$source" in
+    lib/generated/function-table.lisp) data_schema="ft-2" ;;
+    lib/generated/uk-surface-audit.lisp) data_schema="uk-surface-audit-2" ;;
+    lib/surface/uk-sa-coverage.lisp) data_schema="uk-sa-coverage" ;;
+    lib/machine/intel-core-i5-6400.lisp) data_schema="machine-profile-1" ;;
+    lib/machine/profile/current-domain-x86-64.lisp) data_schema="machine-domain-profile-2" ;;
+  esac
+  if [[ -n "$data_schema" && -f "$source" && ! -L "$source" ]] &&
+     LC_ALL=C grep -Eq "^[[:space:]]*\\($data_schema([[:space:]]|$)" -- "$source"; then
+    (( nonprogram_data += 1 ))
+    printf 'NATIVE_DATA_ONLY\\t%s\\tclassification=EXACT_SCHEMA:%s\\n' "$source" "$data_schema" >&2
+    continue
+  fi
   # Історичні бенчмарки входять до діагностики, не у підтверджені PASS.
   (( sources += 1 ))
   physical="${source%.lisp}.sens"
