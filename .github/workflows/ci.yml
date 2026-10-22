@@ -1174,7 +1174,7 @@ jobs:
           set -euo pipefail
           CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 cargo test --locked -p sens --test d11_srfi1_span_break --test d11_srfi1_unfold --test d11_clojure_partition_by --test d11_historical_scan_fold --test d11_clojure_group_by -- --nocapture
 
-          # Три нові українські Lisp-композиції: відтворити exact фізичні
+          # Чотири нові українські Lisp-композиції: відтворити exact фізичні
           # T5M байти тільки поточним SENS reader + Zig writer; жодного
           # Python/JSON, жодного висновку про повний release з цього кроку.
           CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 cargo build --locked -p sens-cli --bin sens --bin sens-trit
@@ -1183,7 +1183,8 @@ jobs:
           for source in \
             lib/d11-srfi1-span-break.lisp \
             lib/d11-clojure-partition-by.lisp \
-            lib/d11-srfi1-unfold.lisp; do
+            lib/d11-srfi1-unfold.lisp \
+            lib/d11-clojure-group-by.lisp; do
             physical="${source%.lisp}.sens"
             bitview="${source%.lisp}"
             test -s "$physical" || { echo "D11_T5M_MISSING layer=physical input=$source expected=nonempty actual=missing" >&2; exit 1; }
@@ -1207,25 +1208,6 @@ jobs:
             }
             echo "D11_T5M_EXACT_PASS source=$source"
           done
-
-          # Ще не опублікована фізична трійка GROUP-BY: довести
-          # чинний native mint/обернення до відокремлених T5M/view.
-          # Не називати це перевіркою комітнутої пари: вона окрема.
-          group_source="lib/d11-clojure-group-by.lisp"
-          group_physical="$temp_d11/group-by.sens"
-          group_view="$temp_d11/group-by"
-          target/debug/sens --t5m-mint "$group_source" "$group_physical" || {
-            echo "D11_GROUP_BY_MINT_RED layer=SENS_ZIG source=$group_source" >&2
-            exit 1
-          }
-          test -s "$group_physical" || { echo "D11_GROUP_BY_EMPTY_CARRIER source=$group_source" >&2; exit 1; }
-          target/debug/sens-trit view "$group_physical" > "$group_view"
-          test -s "$group_view" || { echo "D11_GROUP_BY_EMPTY_VIEW source=$group_source" >&2; exit 1; }
-          target/debug/sens-trit verify-view "$group_physical" > /dev/null || {
-            echo "D11_GROUP_BY_ROUNDTRIP_RED layer=Zig_T5M source=$group_source" >&2
-            exit 1
-          }
-          echo "D11_GROUP_BY_STAGED_T5M_PASS source=$group_source status=temporary_not_committed"
 
       - name: "Reason: SENS перевіряє індекс і лексичне застосування функцій"
         if: ${{ always() && (steps.changed-t5m-lisp.outputs.reason_tests == 'true' || (github.event_name == 'push' && startsWith(github.event.head_commit.message, 'Reason:'))) }}
