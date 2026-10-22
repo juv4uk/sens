@@ -112,3 +112,7 @@ benchmarks/contest-uk/кількість-атомів-пряма.lisp
 benchmarks/contest-uk/розгорнути-один-компакт.lisp
 benchmarks/contest-uk/семикутне-через-трикутне.lisp
 benchmarks/contest-uk/центроване-шестикутне-різниця.lisp
+lib/list-drop-three-zero-copy-general.lisp
+lib/list-every-second-general.lisp
+benchmarks/contest-uk/кількість-атомів-компакт.lisp
+benchmarks/contest-uk/лише-атоми-один-guard.lisp
