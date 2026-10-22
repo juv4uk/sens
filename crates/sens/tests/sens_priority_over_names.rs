@@ -1,138 +1,83 @@
-//! #1413 / #1905: admitted human surfaces are lowering-only.
-//!
-//! Current binary-default law:
-//! 1. in executable head position, every admitted surface lowers exactly once
-//!    to its one-byte Function8;
-//! 2. outside executable head position, a human spelling is not Function8
-//!    identity and the evaluator must not recreate Function8 from that spelling;
-//! 3. a user/global binding that happens to reuse a surface spelling cannot
-//!    retarget an executable call, because lowering has already fixed the
-//!    Function8 before evaluation.
-//!
-//! Source-migration coverage is owned by the role-aware active-SENS inventory;
-//! this file deliberately does not re-scan contracts/evidence/generated data
-//! as though every parenthesized datum were executable code.
+//! Чинний закон: українські викличні голови → точні D3/D4/D5,
+//! а не старий восьмибітний Function8. Дані й вільні імена не переписуються.
+//! Семантику перевіряє лише справжній evaluator SENS.
 
-use sens::{eval_program, load_core_library, lower_program, parse, ExprKind, Session, Value};
-use std::fs;
-use std::path::{Path, PathBuf};
+use sens::{
+    eval_program, lower_program, parse, DomainIdentity, ExprKind, Session, Value,
+};
 
-fn repo_root() -> PathBuf {
-    Path::new(env!("CARGO_MANIFEST_DIR"))
-        .join("../..")
-        .canonicalize()
-        .unwrap()
-}
-
-/// (code, namespace, spelling) from the generated registry used by lowering.
-fn registry() -> Vec<(String, String, String)> {
-    let text =
-        fs::read_to_string(repo_root().join("crates/sens/src/semantic_registry_generated.rs"))
-            .unwrap();
-    let mut rows = Vec::new();
-    for line in text.lines() {
-        let Some(rest) = line.split("semantic_id: 0b").nth(1) else {
-            continue;
+#[test]
+fn українські_поверхні_зводяться_до_точних_ратифікованих_доменів() {
+    let a = "#d24:000000000000000000000001";
+    let b = "#d24:000000000000000000000010";
+    for (surface, domain_width, bits) in [
+        ("додати", 5, 0b01010),
+        ("відняти", 5, 0b01011),
+        ("помножити", 5, 0b10110),
+        ("частка", 5, 0b10111),
+    ] {
+        let source = format!("({surface} {a} {b})");
+        let lowered = lower_program(&parse(&source).expect("читач СЕНС"));
+        let [expr] = lowered.as_slice() else {
+            panic!("потрібен один виклик: {surface}");
         };
-        let code: String = rest
-            .chars()
-            .take_while(|c| *c == '0' || *c == '1')
-            .collect();
-        for surface in rest.split("SemanticSurface { namespace: \"").skip(1) {
-            let mut parts = surface.splitn(2, "\", name: \"");
-            let namespace = parts.next().unwrap_or("").to_owned();
-            let name: String = parts
-                .next()
-                .unwrap_or("")
-                .chars()
-                .take_while(|c| *c != '"')
-                .collect();
-            if !name.is_empty() {
-                rows.push((code.clone(), namespace, name));
-            }
+        match &expr.kind {
+            ExprKind::DomainCall(identity, _) => assert_eq!(
+                (identity.width(), identity.packed_bits()),
+                (domain_width, bits),
+                "поверхня {surface}: неправильний ратифікований код",
+            ),
+            other => panic!("голова {surface} не стала точним доменом: {other:?}"),
         }
     }
-    rows
-}
-
-fn report(title: &str, offenders: &[String]) {
-    assert!(
-        offenders.is_empty(),
-        "{title}: {}\n{}",
-        offenders.len(),
-        offenders
-            .iter()
-            .take(60)
-            .cloned()
-            .collect::<Vec<_>>()
-            .join("\n")
-    );
 }
 
 #[test]
-fn every_registry_surface_lowers_to_its_one_byte_sens_function() {
-    let mut offenders = Vec::new();
-
-    for (code, namespace, name) in registry() {
-        let source = format!("({name})");
-        match parse(&source) {
-            Ok(parsed) => {
-                let lowered = lower_program(&parsed);
-                match &lowered[0].kind {
-                    ExprKind::Call(sid, _) if sid.to_string() == code => {}
-                    other => {
-                        offenders.push(format!("{code} {namespace} {name}: lowered to {other:?}"))
-                    }
-                }
-            }
-            Err(error) => {
-                offenders.push(format!("{code} {namespace} {name}: parse failed: {error}"))
-            }
-        }
-    }
-
-    report(
-        "admitted surfaces that do not lower to their Function8",
-        &offenders,
-    );
-}
-
-#[test]
-fn bare_human_surface_is_not_function8_identity_after_lowering() {
-    let representatives = ["+", "atom?", "додати", "викликати"];
-
-    for source in representatives {
-        let parsed = parse(source).unwrap_or_else(|error| panic!("{source}: {error}"));
+fn українське_імя_поза_головою_виклику_не_стає_доменом() {
+    for surface in ["додати", "відняти", "помножити", "частка", "атом?"] {
+        let parsed = parse(surface).expect("назва має залишатися допустимими даними");
         let lowered = lower_program(&parsed);
-        assert_eq!(lowered.len(), 1, "{source}");
-        assert!(
-            !matches!(lowered[0].kind, ExprKind::Sid(_)),
-            "{source}: bare human spelling must not materialize Function8"
-        );
+        assert_eq!(lowered.len(), 1, "{surface}");
+        assert!(matches!(&lowered[0].kind, ExprKind::Symbol(name) if name.as_ref() == surface),
+            "вільне ім'я не є машинною тотожністю: {surface}");
     }
+
+    // Цитоване ім'я залишається даними — обов'язкова негативна межа.
+    let lowered = lower_program(&parse("(як-є додати)").expect("цитата"));
+    let ExprKind::DomainCall(_, args) = &lowered[0].kind else {
+        panic!("цитування має знижуватися до ратифікованої D3:001");
+    };
+    assert!(matches!(&args[0].kind, ExprKind::Symbol(name) if name.as_ref() == "додати"));
 }
 
 #[test]
-fn a_surface_named_binding_cannot_retarget_an_executable_call() {
+fn звязування_з_іменем_операції_не_змінює_виконавчого_закону_d5() {
     let mut session = Session::default();
-    load_core_library(&mut session).expect("core loads");
-
-    // A human/global binding is a separate transition role. Even if the host
-    // currently permits it, executable (+ ...) is lowered to 00001100 before
-    // environment lookup and therefore cannot be redirected to this binding.
-    let _ = eval_program("(def + 1)", &mut session);
-
-    let result = eval_program("(+ 1 2)", &mut session)
-        .expect("surface call must still lower to exact plus Function8");
-    assert_eq!(
-        result.value,
-        Value::Number(3.0, sens::Exactness::Exact),
-        "a binding named '+' must not retarget executable Function8 00001100"
-    );
-
-    let lowered = lower_program(&parse("(+ 1 2)").expect("parse plus call"));
-    let ExprKind::Call(sid, _) = &lowered[0].kind else {
-        panic!("plus call did not lower to Function8");
+    // Чинний SENS може відхилити зв'язування імені примітива;
+    // в обох випадках виклична голова вже має власну D5 identity.
+    let _ = eval_program("(визначити додати 7)", &mut session);
+    let source = "(додати #d24:000000000000000000000001 #d24:000000000000000000000010)";
+    let result = eval_program(source, &mut session)
+        .expect("жива арифметика D5 не підміняється текстовим ім'ям");
+    let Value::BinaryNumber(number) = result.value else {
+        panic!("додавання має повернути точний числовий домен");
     };
-    assert_eq!(sid.to_string(), "00001100");
+    assert_eq!(number.numeric_domain_width(), Some(24));
+    assert_eq!(number.to_decimal_string(), "3");
+
+    let lowered = lower_program(&parse(source).expect("читач D24+"));
+    assert!(matches!(
+        &lowered[0].kind,
+        ExprKind::DomainCall(identity, _)
+            if (identity.width(), identity.packed_bits()) == (5, 0b01010)
+    ));
+}
+
+#[test]
+fn та_сама_двійкова_величина_у_d5_і_d8_не_є_однією_тотожністю() {
+    let d5 = sens::parse_exact_domain_source("01010").expect("D5");
+    let d8 = sens::parse_exact_domain_source("00001010").expect("D8");
+    assert!(matches!(&d5[0].kind, ExprKind::DomainIdentity(DomainIdentity::D5(_))));
+    assert!(matches!(&d8[0].kind, ExprKind::DomainIdentity(DomainIdentity::D8(_))));
+    assert_ne!(d5[0].kind, d8[0].kind);
 }
