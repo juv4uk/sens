@@ -412,6 +412,7 @@ fn verify_unpaired_ukrainian_libs_natively() {
         "list-stable-bipartition-general",
         "вилучити-всі-входження",
         "замінити-всі-входження",
+        "list-all-cuts-general",
         "list-split-before-every-atom-general",
     ] {
         let source = root.join("lib").join(format!("{stem}.lisp"));
@@ -523,6 +524,7 @@ fn verify_unpaired_ukrainian_libs_natively() {
                 | "list-all-suffixes-general"
                 | "list-all-prefixes-general"
                 | "замінити-третій-в-четвірці"
+                | "list-all-cuts-general"
                 | "list-split-before-every-atom-general"
         ) {
             let committed_physical = root.join("lib").join(format!("{stem}.sens"));
