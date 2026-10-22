@@ -52,9 +52,22 @@ for row in rows:
     actual_sources[row["source_file"]]=actual_sources.get(row["source_file"],0)+1
 assert actual_sources==expected_sources
 
+# Тільки чинна людська D4-голова DEFINE належить діючому Lisp.
+# Старі вісім бітів лишаються історією, не синонімом «визначити».
+SOURCE_DEFINE = re.compile(r'^[ \t]*\(визначити\s+([^\s()]+)\s+', re.MULTILINE)
+assert {m.group(1) for m in SOURCE_DEFINE.finditer(
+    "(визначити чинне (функція (х) х))\n"
+)} == {"чинне"}
+for obsolete in (
+    "(00001001 старе (00001000 (х) х))\n",
+    "(00000001 старе ())\n",
+    "; (визначити не-код ())\n",
+):
+    assert list(SOURCE_DEFINE.finditer(obsolete)) == [], obsolete
+
 for source_file,count in expected_sources.items():
     text=(root/source_file).read_text(encoding="utf-8")
-    defs={m.group(1) for m in re.finditer(r'^\((?:[01]{8}|визначити)\s+([^\s()]+)\s+', text, re.MULTILINE)}
+    defs={m.group(1) for m in SOURCE_DEFINE.finditer(text)}
     claimed={row["source_name"] for row in rows if row["source_file"]==source_file}
     assert len(claimed)==count
     assert claimed <= defs
