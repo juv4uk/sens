@@ -434,6 +434,7 @@ fn verify_unpaired_ukrainian_libs_natively() {
         "list-move-first-match-to-front-general",
         "list-all-unordered-position-pairs-general",
         "list-split-atomic-prefix-general",
+        "list-first-compound-general",
         "tree-pair-tally-unary-general",
         "list-all-subsets-by-position-general",
         "list-all-matching-positions-unary-general",
