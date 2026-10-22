@@ -317,31 +317,6 @@ fn assert_same_bytes(
 
 fn verify_unpaired_ukrainian_libs_natively() {
     let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../..");
-    // Тимчасовий точний Zig/T5M payload для ремонту двох дрейфуючих Git-пар.
-    // Після публікації канонічних байтів цей вивід треба прибрати.
-    for stem in [
-        "list-first-globally-unique-atom-general",
-        "list-prefix-before-repeat-general",
-    ] {
-        let source = root.join("lib").join(format!("{stem}.lisp"));
-        let serial = UNIQUE.fetch_add(1, Ordering::Relaxed);
-        let temp = std::env::temp_dir().join(format!("sens-remint-{}-{serial}", std::process::id()));
-        fs::create_dir(&temp).expect("create native remint scratch");
-        let physical = temp.join("pair.sens");
-        let minted = Command::new(env!("CARGO_BIN_EXE_sens"))
-            .arg("--t5m-mint-pair").arg(&source).arg(&physical)
-            .output().expect("mint native SENS/Zig");
-        assert!(minted.status.success(), "native remint {stem}: {}", error(&minted));
-        let view = physical.with_extension("");
-        let bytes = fs::read(&physical).expect("Zig physical bytes");
-        let text = fs::read(&view).expect("Zig exact-bit view");
-        let hex = |payload: &[u8]| -> String {
-            payload.iter().map(|byte| format!("{byte:02x}")).collect()
-        };
-        println!("SENS_REPAIR_PHYSICAL_HEX stem={stem} hex={}", hex(&bytes));
-        println!("SENS_REPAIR_VIEW_HEX stem={stem} hex={}", hex(&text));
-        fs::remove_dir_all(&temp).expect("remove own scratch");
-    }
     let mut independently_executed = std::collections::BTreeSet::new();
     for stem in [
         "d1-direct-values",
