@@ -557,3 +557,59 @@ fn cons_tree_growth_is_observably_nonassociative_with_atom_and_selectors() {
         }
     }
 }
+
+
+
+/// #1968: тотожність атомних значень не залежить від адреси двох окремих CONS.
+/// Rust створює лише вхідні носії; сам EQ/COND виконується рушієм SENS.
+/// Це не припущення про інтернування та не дозвіл EQ для складених пар.
+#[test]
+fn eq_equal_atoms_in_separately_built_pairs_are_value_equal_in_sens() {
+    let mut session = Session::default();
+    session.environment.define(
+        "лівий-носій",
+        sens::Value::list([sens::Value::Symbol("спільний-атом".into())]),
+    );
+    session.environment.define(
+        "правий-носій",
+        sens::Value::list([sens::Value::Symbol("спільний-атом".into())]),
+    );
+    session.environment.define(
+        "відмінний-носій",
+        sens::Value::list([sens::Value::Symbol("інший-атом".into())]),
+    );
+
+    for (id, source, expected) in [
+        (
+            "same-value-other-carrier",
+            "(тотожне? (перше лівий-носій) (перше правий-носій))",
+            true,
+        ),
+        (
+            "distinct-value-other-carrier",
+            "(тотожне? (перше лівий-носій) (перше відмінний-носій))",
+            false,
+        ),
+        (
+            "cond-on-separate-carriers",
+            "(за-умовою ((тотожне? (перше лівий-носій) (перше правий-носій)) так) (так ні))",
+            true,
+        ),
+    ] {
+        let result = eval_program(source, &mut session).unwrap_or_else(|error| panic!(
+            "test_id=1968-EQ-CARRIERS-{id} layer=SENS input={source} actual_error={error}"
+        )).value;
+        assert_eq!(
+            result.as_predicate_bit(), Some(expected),
+            "test_id=1968-EQ-CARRIERS-{id} layer=SENS input={source} expected=D1:{expected} actual={result}"
+        );
+    }
+
+    let invalid = "(тотожне? лівий-носій правий-носій)";
+    let error = eval_program(invalid, &mut session)
+        .expect_err("test_id=1968-EQ-CARRIERS-PAIRS expected=Type");
+    assert_eq!(
+        error.kind, sens::ErrorKind::Type,
+        "test_id=1968-EQ-CARRIERS-PAIRS layer=SENS input={invalid} expected=Type actual={error}"
+    );
+}
