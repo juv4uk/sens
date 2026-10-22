@@ -1275,8 +1275,9 @@ fn d9_native_witness_executes_current_lisp_with_zig_t5m() {
     let id = UNIQUE.fetch_add(1, Ordering::Relaxed);
     let stem = format!("sens-d9-{}-{id}", std::process::id());
     let physical = std::env::temp_dir().join(format!("{stem}.sens"));
+    let view = physical.with_extension("");
     let altered = std::env::temp_dir().join(format!("{stem}.lisp"));
-    assert!(!physical.exists() && !altered.exists(), "конфлікт тимчасового SENS-носія");
+    assert!(!physical.exists() && !view.exists() && !altered.exists(), "конфлікт тимчасового SENS-носія");
 
     let mint = Command::new(env!("CARGO_BIN_EXE_sens"))
         .arg("--t5m-mint").arg(&source).arg(&physical)
@@ -1289,6 +1290,7 @@ fn d9_native_witness_executes_current_lisp_with_zig_t5m() {
         .expect("Zig T5M open");
     assert!(opened.status.success(), "Zig open: {}", error(&opened));
     assert!(!opened.stdout.is_empty(), "Zig повернув порожню фізичну проєкцію");
+    fs::write(&view, &opened.stdout).expect("зафіксувати точне Zig-бітове в\u0027ю");
     let verified = Command::new(env!("CARGO_BIN_EXE_sens-trit"))
         .arg("verify-view").arg(&physical).output()
         .expect("Zig verify-view");
@@ -1319,4 +1321,5 @@ fn d9_native_witness_executes_current_lisp_with_zig_t5m() {
 
     fs::remove_file(&altered).expect("прибрати негативний Lisp");
     fs::remove_file(&physical).expect("прибрати тимчасовий T5M");
+    fs::remove_file(&view).expect("прибрати точний Zig-вигляд");
 }
