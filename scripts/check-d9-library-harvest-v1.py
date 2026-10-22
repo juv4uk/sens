@@ -53,12 +53,11 @@ for row in rows:
     actual_sources[row["source_file"]]=actual_sources.get(row["source_file"],0)+1
 assert actual_sources==expected_sources
 
-# Дозволені лише дві доведені форми верхньорівневого визначення:
-# чинна D4:0011 DEFINE та історичний W8:00001001 DEFINE.
-# Довжина 8 сама по собі НЕ дозволяє вважати будь-який старий виклик
-# визначенням, і не прирівнює D8 до історичного Function8.
+# Єдина чинна людська голова ратифікованого D4 DEFINE — «визначити».
+# Історичні W8:00001001 і текстові бітові голови не є доказом
+# сьогоднішньої виконуваної прив'язки, навіть коли збігаються назви.
 TOP_LEVEL_DEFINE = re.compile(
-    r'^[ \t]*\((?:визначити|0011|00001001)\s+([^\s()]+)\s+', re.MULTILINE
+    r'^[ \t]*\\(визначити\\s+([^\\s()]+)\\s+', re.MULTILINE
 )
 
 
@@ -66,15 +65,18 @@ def top_level_definitions(text: str) -> set[str]:
     return {match.group(1) for match in TOP_LEVEL_DEFINE.finditer(text)}
 
 
-# Позитивні та негативні самосвідки входять у той самий CI-гейт.
-assert top_level_definitions("(0011 точне (0010 (x) x))\n") == {"точне"}
-assert top_level_definitions("(0011 багаторядкове\n  (0010 (x) x))\n") == {"багаторядкове"}
-assert top_level_definitions("(00001001 старе (00001000 (x) x))\n") == {"старе"}
-assert top_level_definitions("(0010 не-визначення ())\n") == set()
-assert top_level_definitions("(00001010 макрос (x) x)\n") == set()
-assert top_level_definitions("(00000001 цитата ())\n") == set()
-assert top_level_definitions("(110011100 рядок ())\n") == set()
-assert top_level_definitions("; (0011 коментар ())\n") == set()
+# Чинні позитивні та історичні негативні свідки.
+assert top_level_definitions("(визначити точне (функція (х) х))\\n") == {"точне"}
+assert top_level_definitions("(визначити багаторядкове\\n  (функція (х) х))\\n") == {"багаторядкове"}
+for legacy in (
+    "(0011 старе (0010 (х) х))\\n",
+    "(00001001 старе (00001000 (х) х))\\n",
+    "(00001010 макрос (х) х)\\n",
+    "(00000001 цитата ())\\n",
+    "(110011100 рядок ())\\n",
+):
+    assert top_level_definitions(legacy) == set(), legacy
+assert top_level_definitions("; (визначити коментар ())\\n") == set()
 
 # Історичні source_name повинні бути живими визначеннями, навіть після
 # точнодоменного cutover вихідного .lisp.
