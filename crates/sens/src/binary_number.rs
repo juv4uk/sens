@@ -8,7 +8,7 @@
 //! projection. Explicit D24+ values interpret their exact-width words as
 //! two's-complement integers; ratio components use private unsigned magnitudes.
 
-use std::{cmp::Ordering, fmt};
+use std::{cmp::Ordering, fmt, sync::Arc};
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum BinaryNumberError {
@@ -19,7 +19,7 @@ pub enum BinaryNumberError {
 
 #[derive(Clone, Eq, Hash, PartialEq)]
 pub struct BinaryNumber {
-    bits: Vec<u8>,
+    bits: Arc<Vec<u8>>,
     // None is the historic/unqualified normalized Number pathway.
     // Some(n) is an explicitly admitted numeric domain Dn (n=24*2^k).
     // The field is authority-bearing and therefore participates in Eq/Hash.
@@ -70,7 +70,7 @@ impl BinaryNumber {
             return Err(BinaryNumberError::NonCanonicalLeadingZero);
         }
         Ok(Self {
-            bits: bits.to_vec(),
+            bits: Arc::new(bits.to_vec()),
             numeric_domain_width: None,
         })
     }
@@ -79,11 +79,11 @@ impl BinaryNumber {
         let first_one = bits.iter().position(|bit| *bit == 1);
         match first_one {
             Some(index) => Self {
-                bits: bits[index..].to_vec(),
+                bits: Arc::new(bits[index..].to_vec()),
                 numeric_domain_width: None,
             },
             None => Self {
-                bits: vec![0],
+                bits: Arc::new(vec![0]),
                 numeric_domain_width: None,
             },
         }
@@ -91,14 +91,14 @@ impl BinaryNumber {
 
     pub fn zero() -> Self {
         Self {
-            bits: vec![0],
+            bits: Arc::new(vec![0]),
             numeric_domain_width: None,
         }
     }
 
     pub fn one() -> Self {
         Self {
-            bits: vec![1],
+            bits: Arc::new(vec![1]),
             numeric_domain_width: None,
         }
     }
@@ -387,7 +387,7 @@ impl BinaryNumber {
                 result = result.add(&shifted);
             }
             if !shifted.is_zero() {
-                shifted.bits.push(0);
+                Arc::make_mut(&mut shifted.bits).push(0);
             }
         }
         result
@@ -442,11 +442,11 @@ impl BinaryNumber {
         }
         let mut quotient = Vec::with_capacity(self.width());
         let mut remainder = Self::zero();
-        for &bit in &self.bits {
+        for &bit in self.bits.iter() {
             if remainder.is_zero() {
-                remainder.bits[0] = bit;
+                Arc::make_mut(&mut remainder.bits)[0] = bit;
             } else {
-                remainder.bits.push(bit);
+                Arc::make_mut(&mut remainder.bits).push(bit);
             }
             if remainder.cmp_magnitude(divisor) != Ordering::Less {
                 remainder = remainder.checked_sub(divisor)?;
@@ -463,8 +463,8 @@ impl BinaryNumber {
         // GCD returns a private magnitude even if either source carries Dn.
         // Otherwise gcd(x, 0) would accidentally return a domain-qualified
         // value and later remainder comparisons could interpret tags as size.
-        let mut a = Self::normalize(self.bits.clone());
-        let mut b = Self::normalize(other.bits.clone());
+        let mut a = Self::normalize(self.bits.as_ref().clone());
+        let mut b = Self::normalize(other.bits.as_ref().clone());
         while !b.is_zero() {
             let (_, remainder) = a.div_rem(&b).expect("nonzero divisor");
             a = b;
@@ -612,6 +612,19 @@ mod tests {
             BinaryNumber::from_canonical_bits(&[0, 1]),
             Err(BinaryNumberError::NonCanonicalLeadingZero)
         );
+    }
+
+    #[test]
+    fn cloning_an_immutable_binary_number_shares_its_bit_storage() {
+        let original = BinaryNumber::parse(&format!("1{}", "0".repeat(4095))).unwrap();
+        let cloned = original.clone();
+
+        assert!(
+            std::ptr::eq(original.bits.as_ptr(), cloned.bits.as_ptr()),
+            "evaluation clones should share immutable exact-number bits instead of copying them"
+        );
+        assert_eq!(original, cloned);
+        assert_eq!(original.as_bits().len(), 4096);
     }
 
     #[test]

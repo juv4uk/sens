@@ -161,7 +161,11 @@ fn real_core_session_runs_signed_math_and_ratio_composition() {
         .environment
         .define("b", Value::BinaryNumber(signed_word(24, 3)));
 
-    for (expression, expected) in [("(+ a b)", "1"), ("(* a b)", "-6"), ("(- a b)", "-5")] {
+    for (expression, expected) in [
+        ("(додати a b)", "1"),
+        ("(помножити a b)", "-6"),
+        ("(відняти a b)", "-5"),
+    ] {
         let result = eval_program(expression, &mut session)
             .expect("Core signed D24 math")
             .value;
