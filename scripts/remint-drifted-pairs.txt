@@ -65,3 +65,4 @@ lib/list-move-first-match-to-front-general.lisp
 lib/tree-prune-matching-leaves-general.lisp
 lib/list-first-repeated-atom-general.lisp
 lib/list-keep-last-unique-atoms-general.lisp
+lib/list-all-unordered-position-pairs-general.lisp
