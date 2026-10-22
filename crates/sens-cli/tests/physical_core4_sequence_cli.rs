@@ -1019,7 +1019,7 @@ fn ukr_cond_skips_unsafe_branch_and_preserves_exact_t5m_triplet() {
 
 
 #[test]
-fn contest_uk_three_real_programs_have_current_physical_peers() {
+fn contest_uk_four_real_program_categories_have_current_physical_peers() {
     // Справжній виконавець SENS, Zig/T5M inverse та однакові результати
     // з комітованих пар; Python/JSON не виконують законів конкурсу.
     let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../..");
@@ -1041,7 +1041,7 @@ fn contest_uk_three_real_programs_have_current_physical_peers() {
     // Після нативного конкурсу переможець може замінити стару програму
     // (факторіал-компакт замість факторіал): перевіряємо саме категорію.
     // Не повертати старе ім'я чи симулювати зелений результат.
-    for stem in ["довжина-списку", "сума-до-n", "факторіал"] {
+    for stem in ["довжина-списку", "сума-до-n", "факторіал", "фібоначчі"] {
         assert!(
             report.lines().any(|line| {
                 let Some((name, _)) = line.split_once('\t') else {
