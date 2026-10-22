@@ -28,7 +28,7 @@ REQUIRED = (
     "tell-knowledge",
     "module-clauses-now",
     "reason-in",
-    "*knowledge-journal*",
+    "журнал-знань",
     "check-conflict",
 )
 
