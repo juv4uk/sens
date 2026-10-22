@@ -33,6 +33,9 @@ student = load_research_module(
 evaluator = load_research_module(
     "system-one-evaluate-20261022.py", "system_one_evaluate"
 )
+calibrator = load_research_module(
+    "system-one-calibrate-20261022.py", "system_one_calibrate"
+)
 
 
 def write_jsonl(path: Path, rows: list[dict]) -> bytes:
@@ -503,6 +506,52 @@ class SystemOneResearchPipelineTests(unittest.TestCase):
             )
             self.assertEqual(report["count"], 10)
             self.assertEqual(report["split"], "test")
+
+    def test_temperature_calibration_uses_validation_only_and_nll_does_not_worsen(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            seed_path = ROOT / "research" / "system-one-support-seed-20261022.jsonl"
+            model_path = root / "uncalibrated.json"
+            self.assertEqual(
+                student.train(
+                    Namespace(
+                        input=seed_path,
+                        teacher=None,
+                        output=model_path,
+                        smoothing=1.0,
+                        min_count=1,
+                        gold_weight=None,
+                        overwrite=False,
+                    )
+                ),
+                0,
+            )
+            model = json.loads(model_path.read_text(encoding="utf-8"))
+            rows, raw = student.read_jsonl(seed_path)
+            corpus_sha = hashlib.sha256(raw).hexdigest()
+            calibrated, report = calibrator.fit_temperature(
+                model, rows, corpus_sha, grid_points=101
+            )
+            self.assertEqual(calibrated["calibration"]["split"], "validation")
+            self.assertEqual(calibrated["calibration"]["count"], 10)
+            self.assertFalse(calibrated["calibration"]["used_test_split"])
+            self.assertGreater(calibrated["calibration_temperature"], 0.0)
+            self.assertTrue(report["nll_not_worsened"])
+            self.assertLessEqual(report["nll_after"], report["nll_before"] + 1e-12)
+            test_row = next(row for row in rows if row["split"] == "test")
+            distribution = student.probabilities(calibrated, test_row["text"])
+            self.assertEqual(sum(distribution.values()), 1)
+            with self.assertRaises(calibrator.CalibrationError):
+                calibrator.fit_temperature(
+                    model,
+                    [row for row in rows if row["split"] == "test"],
+                    corpus_sha,
+                    grid_points=101,
+                )
+            with self.assertRaises(calibrator.CalibrationError):
+                calibrator.fit_temperature(
+                    model, rows, "wrong-corpus-sha", grid_points=101
+                )
 
     def test_evaluator_refuses_wrong_split_and_incomplete_distribution(self):
         row = {
