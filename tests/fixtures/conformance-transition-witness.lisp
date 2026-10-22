@@ -27,9 +27,9 @@
 
 ((supersedes-expr . "(= 3 3.0)")
  (expr . "(= 3 3.0)")
- (expected . "1")
+ (error . "Type")
  (compiler-corpus . t)
- (reason . exact-q-result-algebra-supersedes-truth-sentinel)
+ (reason . unqualified-decimal-fraction-is-not-an-admitted-same-dn-operand)
  (owner . "216/220/631"))
 
 ((supersedes-expr . "(cond (() (quote first)) (() (quote second)) (t (quote third)))")
