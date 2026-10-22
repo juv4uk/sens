@@ -442,3 +442,82 @@ fn eq_no_witness_composes_with_cond_without_truthiness() {
         "test_id=2015-EQ-COND layer=SENS input={wrong_domain} expected=wrong-domain-error actual={result:?}"
     );
 }
+/// #1968 / #3161: one SENS condition distinguishes a selected D1:1,
+/// a skipped D1:0, and an *absent* D3:000 answer from partial D3 EQ.
+/// No Rust EQ/COND oracle, host truthiness, or new generator word.
+#[test]
+fn eq_three_answer_states_drive_cond_without_host_truthiness() {
+    let mut session = Session::default();
+    let yes = "(тотожне? (як-є ліве) (як-є ліве))";
+    let no = "(тотожне? (як-є ліве) (як-є праве))";
+    let no_witnesses = [
+        "(тотожне? (сполучити (як-є ліве) (як-є ())) (сполучити (як-є ліве) (як-є ())))",
+        "(тотожне? (сполучити (як-є ліве) (як-є ())) (як-є ліве))",
+    ];
+
+    for (id, query, expected) in [
+        ("eq-yes", yes, Some(true)),
+        ("eq-no", no, Some(false)),
+        ("eq-pair-pair", no_witnesses[0], None),
+        ("eq-pair-atom", no_witnesses[1], None),
+    ] {
+        let value = eval_program(query, &mut session)
+            .unwrap_or_else(|error| panic!(
+                "test_id=1968-EQ-COND-{id} layer=SENS input={query} actual_error={error}"
+            ))
+            .value;
+        assert_eq!(
+            value.as_predicate_bit(),
+            expected,
+            "test_id=1968-EQ-COND-{id} layer=SENS input={query} expected=D1:{expected:?} actual={value}"
+        );
+        if expected.is_none() {
+            assert!(
+                matches!(value, sens::Value::Nil),
+                "test_id=1968-EQ-COND-{id} expected=D3:000-no-witness actual={value}"
+            );
+        }
+    }
+
+    // A non-atom EQ result cannot select a branch or force evaluation
+    // of its invalid CAR(NIL) body. Control must continue to the D1:1 clause.
+    for (id, condition) in [
+        ("eq-no", no),
+        ("eq-pair-pair", no_witnesses[0]),
+        ("eq-pair-atom", no_witnesses[1]),
+    ] {
+        let source = format!(
+            "(за-умовою ({condition} (перше (як-є ()))) (так (як-є резерв)))"
+        );
+        let value = eval_program(&source, &mut session)
+            .unwrap_or_else(|error| panic!(
+                "test_id=1968-EQ-COND-SKIP-{id} layer=SENS input={source} actual_error={error}"
+            ))
+            .value;
+        assert_eq!(
+            value, sens::Value::Symbol("резерв".into()),
+            "test_id=1968-EQ-COND-SKIP-{id} layer=SENS expected=резерв actual={value}"
+        );
+    }
+
+    let source = format!(
+        "(за-умовою ({yes} (як-є вибрано)) (так (перше (як-є ()))))"
+    );
+    let selected = eval_program(&source, &mut session)
+        .unwrap_or_else(|error| panic!(
+            "test_id=1968-EQ-COND-SELECT layer=SENS input={source} actual_error={error}"
+        ))
+        .value;
+    assert_eq!(selected, sens::Value::Symbol("вибрано".into()));
+
+    // The other boundary is strict: a quoted symbol is neither D1 nor
+    // D3:000 and must not be silently accepted as host-true.
+    let invalid = "(за-умовою ((як-є сторонній-символ) (як-є недопустимо)))";
+    let error = eval_program(invalid, &mut session)
+        .expect_err("test_id=1968-EQ-COND-TYPE expected=Type actual=success");
+    assert_eq!(
+        error.kind,
+        sens::ErrorKind::Type,
+        "test_id=1968-EQ-COND-TYPE layer=SENS input={invalid} expected=Type actual={error}"
+    );
+}
