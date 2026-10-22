@@ -1702,7 +1702,13 @@ jobs:
           rejected=0
           data_only=0
           for source in lib/*.lisp; do
-            [[ -f "$source" && ! -L "$source" ]] || continue
+            [[ -e "$source" || -L "$source" ]] || continue
+            if [[ ! -f "$source" || -L "$source" ]]; then
+              printf '::error::LIB_NATIVE_SOURCE_NOT_REGULAR path=%s\n' "$source" >&2
+              printf '%s\tNATIVE_REJECTED\t-\t-\t-\n' "$source" >> "$report"
+              rejected=$((rejected + 1))
+              continue
+            fi
             # Коментарні джерела — не програми; хибні трійки заборонені.
             if ! LC_ALL=C grep -Eq '^[[:space:]]*[^[:space:];]' -- "$source"; then
               data_only=$((data_only + 1))
