@@ -27,6 +27,7 @@ for source in "$here"/*.lisp; do
     сума-до-n|сума-до-n-*) expected=5050 ;;
     факторіал|факторіал-*) expected=3628800 ;;
     фібоначчі|фібоначчі-*) expected=55 ;;
+    степінь-двійки|степінь-двійки-*) expected=1024 ;;
     *) echo "CONTEST_SKIP: немає перевіреного очікуваного результату: $source" >&2; continue ;;
   esac
   physical="$scratch/$name.sens"
