@@ -29,8 +29,8 @@ PHYSICAL = HERE / "second.sens"
 # Pin the CURRENT Ukrainian Core1 binding. The retired C1-SECOND/SID8
 # spelling is history, not a live source identity.
 CURRENT_SECOND = re.compile(
-    r"\(визначити\s+ядро1-другий-елемент\s+"
-    r"\(функція\s+\(передане-значення\)\s+"
+    r"[(]визначити\s+ядро1-другий-елемент\s+"
+    r"[(]функція\s+\(передане-значення\)\s+"
     r"\(друге\s+передане-значення\)\s*\)\s*\)"
 )
 RETIRED_SECOND = re.compile(r"\(\s*(?:00001001\s+)?C1-SECOND\b")
