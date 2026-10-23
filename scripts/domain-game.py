@@ -267,9 +267,23 @@ def d13_candidates(source: str) -> list[tuple[str, str]]:
         if match is None:
             raise ValueError("D13: кандидат не має пари укр/en")
         ukr, en = match.groups()
-        for field in ("(signature .", "(law .", "(counterexample ."):
+        fields = {}
+        for field, label in (
+            ("(signature .", "signature"),
+            ("(law .", "law"),
+            ("(counterexample .", "counterexample"),
+        ):
             if block.count(field) != 1:
                 raise ValueError(f"D13: {ukr} не має єдиного поля {field}")
+            found = re.search(re.escape(field) + r'\s*"([^"]*)"\)', block)
+            if found is None or not found.group(1).strip():
+                raise ValueError(f"D13: {ukr} має порожнє або некоректне поле {label}")
+            fields[label] = found.group(1).strip()
+        signature = fields["signature"]
+        if "Z*" in signature or "Q*" in signature:
+            raise ValueError(f"D13: {ukr} має неоднозначне скорочення Z*/Q*; задайте точну область")
+        if not any(token in signature for token in ("ℤ", "ℚ", "ℕ₀")):
+            raise ValueError(f"D13: {ukr} не задає точну числову область")
         if ukr in seen_ukr or en in seen_en:
             raise ValueError(f"D13: дубльована назва {ukr}/{en}")
         seen_ukr.add(ukr)

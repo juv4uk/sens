@@ -20,6 +20,15 @@
        (provenance "Конкурс Драбина: D13 як двобітне продовження D11, 2026-10-24")
        (unknown-route ask-owner))
       (reference
+       (topic d13-exact-function-hypotheses)
+       (summary "D13 function ideas are ten exact-number research candidates, not a ratified numeric domain or callable surface. D12/D24/D48... carry exact signed integers and canonical reduced RATIO; floats are not an implicit substitute. Each signature must state its true domain and handle zero/degenerate cases, especially extended gcd and ax+by=c. Research functions receive no coordinates or runtime admission until an owner-approved domain law, native Lisp/SENS positive and negative witnesses, and an exact transport proof exist.")
+       (authority (contracts/numeric-domains-ratification.lisp research/d13/function-candidates.lisp scripts/domain-game.py tests/test_domain_game.py))
+       (how-to (reuse-ratified-d12-plus-integer-and-ratio-laws specify-exact-signed-integer-and-rational-domains avoid-ambiguous-Z-star-Q-star-notation validate-zero-and-degenerate-cases search-D1-through-D12-for-existing-surfaces keep-coordinates-unassigned add-positive-and-counterexample-Lisp-SENS-witnesses-before-admission ask-owner-for-domain-admission))
+       (verify (ten-unique-candidates explicit-numeric-signatures exact-laws-and-counterexamples no-float-substitution no-coordinates no-callability no-D13-ratification))
+       (lifecycle research-candidate-not-ratified)
+       (provenance "D13 exact-domain candidate review, 2026-10-24")
+       (unknown-route ask-owner))
+      (reference
        (topic ladder-memory-domain-isolation)
        (summary "Оцінка одного раунду Драбини має враховувати лише відповіді його точної доменної ширини; чужі D3-відповіді не можуть змінювати correct, wrong, duplicate, unknown або structural раунду D11. Загальна grade без доменного фільтра лишається окремим режимом. Пам'ять назв не є доказом викличності SENS.")
        (authority (research/zig-codecs/ladder_memory_game.zig lib/domains/d11.lisp AGENTS.md))
