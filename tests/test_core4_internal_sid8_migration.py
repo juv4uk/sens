@@ -28,10 +28,10 @@ FORBIDDEN_ACTIVE = {
     "10110001",  # historical recursive STRING< slot
 }
 D9_REQUIRED = {
-    "110011100": "STRING-EMPTY?",
-    "110011101": "STRING-REST",
-    "110011110": "STRING-APPEND",
-    "110101011": "STRING-FIRST",
+    "110011100": ("STRING-EMPTY?", "рядок-порожній?"),
+    "110011101": ("STRING-REST", "рядок-решта"),
+    "110011110": ("STRING-APPEND", "рядок-додати"),
+    "110101011": ("STRING-FIRST", "рядок-перший"),
 }
 
 
@@ -101,11 +101,28 @@ def verify(source: str) -> None:
             raise ValueError("active 8-bit head is not a D8 resident: " + head)
 
     d9 = domain_rows(9)
-    for bits, name in D9_REQUIRED.items():
-        if heads[bits] < 1:
-            raise ValueError(f"Core4 lost exact D9 head {bits} {name}")
-        if d9.get(bits) != name:
-            raise ValueError(f"D9 authority drift: {bits} -> {d9.get(bits)!r}, expected {name}")
+    for bits, (legacy_name, укр_name) in D9_REQUIRED.items():
+        if heads[bits]:
+            raise ValueError(f"raw D9 binary head survived in Core4: {bits}")
+        if heads[укр_name] < 1:
+            raise ValueError(f"Core4 lost Ukrainian D9 projection: {укр_name}")
+        if d9.get(bits) != legacy_name:
+            raise ValueError(f"D9 authority drift: {bits} -> {d9.get(bits)!r}, expected {legacy_name}")
+
+    # The stable-identity lookup carries domain + the ratified full Ukrainian
+    # projection, not an embedded binary coordinate. Domain tables alone retain
+    # the canonical coordinate registry.
+    start = source.index("(визначити сталі-відповідники-за-ідентичностями")
+    end = source.index("(визначити знайти-групу-відповідників-за-ідентичністю", start)
+    projection_block = source[start:end]
+    if re.search(r"\\(д9\\s+[01]{9}(?=[\\s)])", projection_block):
+        raise ValueError("stable D9 identity map still contains a binary coordinate literal")
+    named_rows = re.findall(r"^\\s*\\(д9\\s+([^\\s()]+)\\s+\\(([^\\s()]+)\\)\\)\\s*$",
+                            projection_block, flags=re.MULTILINE)
+    if len(named_rows) != 20:
+        raise ValueError(f"expected 20 named D9 projections, found {len(named_rows)}")
+    if any(key != alias for key, alias in named_rows):
+        raise ValueError("stable D9 identity key differs from its Ukrainian alias projection")
 
     if heads["mono-ns"] != 1:
         raise ValueError("Core4 must retain exactly one honest MONO-NS mechanism boundary")
@@ -129,6 +146,14 @@ class Core4WidthFirewall(unittest.TestCase):
 
     def test_core4_obeys_domain_width_firewall(self):
         verify(self.source)
+
+    def test_stable_d9_identity_map_uses_ukrainian_names_not_binary_literals(self):
+        start = self.source.index("(визначити сталі-відповідники-за-ідентичностями")
+        end = self.source.index("(визначити знайти-групу-відповідників-за-ідентичністю", start)
+        block = self.source[start:end]
+        self.assertNotRegex(block, r"\\(д9\\s+[01]{9}(?=[\\s)])")
+        for _, (_, ukr_name) in D9_REQUIRED.items():
+            self.assertIn(f"(д9 {ukr_name} ({ukr_name}))", block)
 
     def test_seven_macros_are_language_owned_not_w8_defmacro(self):
         heads = active_heads(self.source)
