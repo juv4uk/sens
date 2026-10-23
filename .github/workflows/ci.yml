@@ -195,6 +195,12 @@ jobs:
                   "tests/semantic/utf8-quotient-mutant.lisp",
                   "tests/semantic/result-status-laws.lisp",
                   "tests/semantic/d11-srfi1-span-break-laws.lisp",
+                  # D7/D8 епістемічні закони залежать від Lisp-бібліотеки.
+                  # Вони завжди запускаються через реальний T5M law bundle нижче.
+                  "tests/semantic/d7-epistemic-structural-tag-law.lisp",
+                  "tests/semantic/d7-epistemic-structural-tag-mutant.lisp",
+                  "tests/semantic/language-law-epistemic-records.lisp",
+                  "tests/semantic/language-mutant-epistemic-records.lisp",
                   "tests/semantic/ukr-lists-d24-language-law.lisp",
                   "tests/semantic/d24-polynomial-language-law.lisp",
                   "tests/semantic/d24-polynomial-language-mutant.lisp",
