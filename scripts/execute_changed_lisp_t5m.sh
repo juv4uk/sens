@@ -413,6 +413,26 @@ run_native_t5m_program() {
     # Для двох D3-законів виконуємо окремий САМОДОСТАТНІЙ фізичний
     # носій із тим самим чинним джерелом визначень. Жодного mock/host oracle.
     local standalone_physical="$physical"
+    if [[ "$file" == "lib/persistent-vector.lisp" ]]; then
+      # Автономний SENS повинен одержати ті самі чинні Lisp-корені D24+,
+      # що й парне виконання; source-only носій лишається для byte-parity.
+      local vector_complete_source="$dir/vector-dependency-complete.lisp"
+      standalone_physical="$dir/vector-dependency-complete.sens"
+      if ! cat -- "$vector_math_roots" "$file" > "$vector_complete_source" ||
+         ! timeout "$native_timeout" "$binary" --t5m-mint "$vector_complete_source" "$standalone_physical" \
+           >"$dir/vector-complete-mint.stdout" 2>"$dir/vector-complete-mint.stderr" ||
+         ! timeout "$native_timeout" "$native_open" open "$standalone_physical" \
+           >"$dir/vector-complete.view" 2>"$dir/vector-complete-open.stderr" ||
+         ! timeout "$native_timeout" "$native_open" verify-view "$standalone_physical" \
+           >"$dir/vector-complete-verify.stdout" 2>"$dir/vector-complete-verify.stderr"; then
+        for diagnostic in "$dir/vector-complete-mint.stderr" "$dir/vector-complete-open.stderr" "$dir/vector-complete-verify.stderr"; do
+          [[ ! -f "$diagnostic" ]] || sed 's/^/SENS vector dependency bundle: /' "$diagnostic" >&2
+        done
+        echo "::error::T5M_VECTOR_DEPENDENCY_COMPLETE_FAILED source=$file" >&2
+        mark_file_failed
+        return
+      fi
+    fi
     if [[ "$file" == "tests/semantic/language-law-epistemic-records.lisp" ||
           "$file" == "tests/semantic/language-mutant-epistemic-records.lisp" ]]; then
       local epistemic_complete_source="$dir/epistemic-dependency-complete.lisp"
