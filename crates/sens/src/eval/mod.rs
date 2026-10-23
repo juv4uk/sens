@@ -611,6 +611,22 @@ mod tests {
 
         assert_eq!(result.value.as_predicate_bit(), Some(true));
     }
+
+    #[test]
+    fn exact_d8_read_surface_runs_the_admitted_reader_mechanism() {
+        let mut session = Session::bare();
+        let result = eval_program(r#"(прочитати "(alpha beta)")"#, &mut session)
+            .expect("the exact Ukrainian D8 READ projection is executable");
+        let Value::Pair(pair) = result.value else {
+            panic!("READ of a two-item list must return a structural pair");
+        };
+        assert_eq!(pair.head, Value::Symbol(std::rc::Rc::from("alpha")));
+        let Value::Pair(rest) = pair.tail else {
+            panic!("READ must preserve the second list element");
+        };
+        assert_eq!(rest.head, Value::Symbol(std::rc::Rc::from("beta")));
+        assert!(matches!(rest.tail, Value::Nil));
+    }
 }
 
 fn is_d3(identity: CoreDomainIdentity, bits: u8) -> bool {
