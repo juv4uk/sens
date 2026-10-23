@@ -47,12 +47,20 @@ fn main() {
     }
     let mut elapsed_ns = [0u128; SAMPLES];
     let mut checksum: usize = 0;
+
+    // Прогрівальний пакет виконується поза часовими пробами.
+    for _ in 0..ITERATIONS {
+        let result = inspect_frames(black_box(&data)).expect("corpus changed");
+        assert_eq!(result, expected, "frame count/size drift during warmup");
+        checksum = checksum.wrapping_add(black_box(result.1));
+    }
+
     for sample in &mut elapsed_ns {
         let start = Instant::now();
         for _ in 0..ITERATIONS {
             let result = inspect_frames(black_box(&data)).expect("corpus changed");
             assert_eq!(result, expected, "frame count/size drift");
-            checksum ^= black_box(result.1);
+            checksum = checksum.wrapping_add(black_box(result.1));
         }
         *sample = start.elapsed().as_nanos();
     }
@@ -60,8 +68,8 @@ fn main() {
     sorted.sort_unstable();
     assert!(sorted[0] > 0, "clock resolution insufficient");
     println!(
-        "RUST_FRAME_BENCH frames={} payload_bytes={} iterations={} samples={} p50_ns={} p90_ns={} min_ns={} max_ns={} checksum={} scope=rust-framing-only",
-        expected.0, expected.1, ITERATIONS, SAMPLES,
+        "RUST_FRAME_BENCH frames={} payload_bytes={} iterations={} warmup_iterations={} samples={} p50_ns={} p90_ns={} min_ns={} max_ns={} checksum={} scope=rust-framing-only",
+        expected.0, expected.1, ITERATIONS, ITERATIONS, SAMPLES,
         sorted[5], sorted[9], sorted[0], sorted[10], checksum
     );
     for (index, value) in elapsed_ns.into_iter().enumerate() {
