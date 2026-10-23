@@ -1,5 +1,38 @@
 # SENS-owned semantic tests
 
+## Новий закон: найкоротший фізичний шлях
+
+Мовні закони пишемо в `tests/semantic/*.lisp`, а не в Rust, Zig чи Python.
+Для нового `приклад-law.lisp` додаємо `приклад-mutant.lisp`:
+перший мусить дійти до точного D1:1, другий — до точного D1:0.
+Якщо бібліотека потрібна, складаємо її оригінальний Lisp-текст
+із кожним свідком; хост не відтворює логіку.
+
+У `scripts/prove-lisp-semantic-t5m.sh` реєструємо ОБИДВА випадки:
+
+```bash
+run_case run_law приклад-positive tests/semantic/приклад-law.lisp 1
+run_case run_law приклад-mutant tests/semantic/приклад-mutant.lisp 0
+```
+
+Для залежного тесту `cat -- lib/потрібна-бібліотека.lisp tests/semantic/приклад-law.lisp > "$law_bundle"`
+і `run_case run_law ... "$law_bundle" 1`; мутант має окремий бандл.
+Саме `run_case` виконує direct SENS → Zig/T5M mint/open/verify →
+парний SENS → фізичний SENS. Просто `echo`, коментар, успішний
+`cargo test` або `semantic=NOT_CERTIFIED` не є семантичним доказом.
+
+`scripts/guard_native_semantic_ownership.py --base BASE_SHA --head HEAD`
+автоматично зупиняє новий, але незареєстрований мовний тест та відсутню
+пару закон/мутант. Перевірка охоронця:
+
+```bash
+python3 -m unittest tests/test_native_semantic_ownership_gate.py -v
+```
+
+Охоронець відповідає тільки за маршрут. Семантичний PASS підтверджує
+виключно сам SENS; якщо фізичний код відхилено, RED залишається RED.
+
+
 These are executable language-owned semantic witnesses, not host-language
 semantic oracles.
 
