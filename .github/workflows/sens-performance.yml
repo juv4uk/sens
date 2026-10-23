@@ -108,6 +108,19 @@ jobs:
           test "$(grep -c '^RUST_PHYSICAL_T5_SAMPLE[[:space:]]' "$out/physical-t5-process.tsv")" -eq 504
           test "$(grep -c '^RUST_PHYSICAL_T5_SUMMARY[[:space:]]' "$out/physical-t5-process.tsv")" -eq 24
           grep -E '^RUST_PHYSICAL_T5_(PREFLIGHT|SUMMARY)[[:space:]]' "$out/physical-t5-process.tsv"
+      - name: Measure amortized Zig/T5M session cost against cold Rust CLI processes
+        shell: bash
+        run: |
+          set -euo pipefail
+          out="$RUNNER_TEMP/sens-mechanisms"
+          cargo test --locked --release -p sens-cli --test t5m_session_benchmark -- --ignored --nocapture \
+            > "$out/t5m-session.tsv" 2>&1 || {
+              cat "$out/t5m-session.tsv" >&2
+              exit 1
+            }
+          test "$(grep -c 'T5M_SESSION_SAMPLE lane=' "$out/t5m-session.tsv")" -eq 10
+          test "$(grep -c 'T5M_SESSION_BENCH cold_p50_amortized_ns=' "$out/t5m-session.tsv")" -eq 1
+          grep 'T5M_SESSION_BENCH cold_p50_amortized_ns=' "$out/t5m-session.tsv"
       - name: Measure Rust and Zig T5 mechanics against identical bytes
         shell: bash
         run: |
