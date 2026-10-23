@@ -61,10 +61,19 @@ def mapping():
         for w in (3, 4, 5, 6, 8, 9, 10)
         for row in read_domain_table(ROOT / "lib/domains" / f"d{w}.lisp")
     }
+    # Тільки допущені механізмом native Core операції, не просто DEFINE.
+    # Source DEFINE за допомогою D7 лексичного зв'язування не перетворює
+    # D8/D9 резидента на самостійний машинний callable code.
     d8 = set(engine.CORE_OPERATION_D8)
-    d8.update(bits for bits, w, _ in engine.core4_d1_d8_defined_rows() if w == 8)
-    d9 = set(engine.CORE_OPERATION_D9) | set(engine.core4_d9_callable_rows())
-    d10 = set(engine.core4_d10_defined_rows())
+    d9 = set(engine.CORE_OPERATION_D9)
+    # Д10 — ратифікований словник; native reader не допускає довільні
+    # Д10 голови, навіть коли Core4 має одноіменне бібліотечне DEFINE.
+    d6_not_callable = {
+        bits for bits, name in owner["domains"]["D6"]["residents"].items()
+        if name in {"LET", "LET*"}
+    }
+    if len(d6_not_callable) != 2:
+        raise ValueError("змінився закон недопущених D6 LET/LET*")
     result, withheld = {}, {}
     # Історичний ledger більше НЕ є активним lib-файлом. Читати точний
     # Git-об'єкт після перевірки SHA, не створюючи мостів сумісності.
@@ -87,10 +96,10 @@ def mapping():
         if not ukr or ukr == "()" or any(c not in UKRAINIAN_KEYBOARD_OUTPUTS for c in ukr):
             withheld[old] = f"{dom}:{bits} — немає придатної повної колонки укр"
             continue
-        admitted = (dom in {"D3", "D4", "D5", "D6"}
+        admitted = (dom in {"D3", "D4", "D5"}
+                    or (dom == "D6" and bits not in d6_not_callable)
                     or (dom == "D8" and bits in d8)
-                    or (dom == "D9" and bits in d9)
-                    or (dom == "D10" and bits in d10))
+                    or (dom == "D9" and bits in d9))
         if not admitted:
             withheld[old] = f"{dom}:{bits} — немає підтвердженого callable-механізму"
             continue
