@@ -2749,6 +2749,43 @@ mod tests {
     }
 
     #[test]
+    fn t5m_quoted_single_glyph_is_d7_atom_but_nested_singleton_is_d2_list() {
+        // A one-cell quoted symbol has a scalar D7 datum identity.
+        // Parentheses remain D2 syntax, so (б) is not confused with б.
+        let source = "(як-є (а (б)))";
+        let forms = sens::parse_mixed_exact_domain(source)
+            .expect("the Ukrainian quote and D7 glyphs parse");
+        let mut actual = Vec::new();
+        append_t5m_expression(&forms[0], sens::Text7Layout::Uk, &mut actual, 0)
+            .expect("single-cell D7 datum is exactly representable");
+
+        let identity = |width, bits| {
+            ExactDomainWord::Identity(t5m_domain_identity(width, bits).unwrap())
+        };
+        let expected = vec![
+            identity(2, 0b10),       // source QUOTE list
+            identity(3, 0b001),      // canonical quote identity
+            identity(2, 0b00),
+            identity(2, 0b10),       // quoted proper list
+            identity(7, 0b1100110),  // а: scalar W7 datum, not (а)
+            identity(2, 0b00),
+            identity(2, 0b10),       // nested singleton list (б)
+            identity(7, 0b0101100),  // б: scalar *inside* the D2 list
+            identity(2, 0b01),
+            identity(2, 0b01),
+            identity(2, 0b01),
+        ];
+        assert_eq!(actual, expected, "D7 scalar identity must not erase D2 nesting");
+
+        #[cfg(feature = "zig-transport")]
+        {
+            let restored = t5m_roundtrip_words(&actual)
+                .expect("Zig/T5M transports the exact D7 and D2 widths");
+            assert_eq!(restored, expected);
+        }
+    }
+
+    #[test]
     fn t5m_uk_projection_separates_quoted_ascii_data_from_executable_names() {
         // Дані зовнішнього протоколу не є викличними іменами української
         // програми. Мають проходити точним D7/en маршрутом через W7 клітини.
