@@ -312,6 +312,10 @@ cat lib/result-status.lisp tests/semantic/result-status-laws.lisp > "$result_sta
 run_case run_law result-status-source "$result_status_bundle" 1
 # Локалізуємо фізичну розбіжність: форма змінної → входження → повна уніфікація.
 # Визначення й закон належать тільки Lisp, Shell лише додає lib/unify.lisp.
+# Незалежно локалізуємо D3/D4 форму змінної: позитив, негатив і мутант.
+run_case run_bound_law unification-variable-shape-positive tests/semantic/unification-variable-shape-positive.lisp 1
+run_case run_bound_law unification-variable-shape-negative tests/semantic/unification-variable-shape-negative.lisp 1
+run_case run_bound_law unification-variable-shape-mutant tests/semantic/unification-variable-shape-mutant.lisp 0
 run_case run_bound_law unification-variable-shape tests/semantic/unification-variable-shape-law.lisp 1
 run_case run_bound_law unification-occurs-predicate-positive tests/semantic/unification-occurs-predicate-law.lisp 1
 run_case run_bound_law unification-occurs-predicate-mutant tests/semantic/unification-occurs-predicate-mutant.lisp 0
