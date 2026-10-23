@@ -29,6 +29,7 @@ from __future__ import annotations
 
 import argparse
 import importlib.util
+import json
 import re
 import subprocess
 import sys
@@ -70,7 +71,8 @@ def ladder_names(root: Path) -> set[str]:
 
 
 def definitions(text: str) -> list[str]:
-    return [m.group(1) for m in DEF.finditer(text)]
+    """Лише виконувані Lisp DEFINE: цитовані дані, коментарі й рядки ігноруємо."""
+    return [m.group(1) for m in DEF.finditer(_mask_quotes(text))]
 
 
 
@@ -236,8 +238,9 @@ def project_definition_sites(root: Path) -> dict[str, set[str]]:
             continue
         path = root / rel
         if path.is_file():
-            for m in DEF.finditer(path.read_text(encoding="utf-8", errors="ignore")):
-                sites.setdefault(m.group(1), set()).add(rel)
+            # Цитована DEFINE є даними, а не ще одним визначенням функції.
+            for name in definitions(path.read_text(encoding="utf-8", errors="ignore")):
+                sites.setdefault(name, set()).add(rel)
     return sites
 
 
