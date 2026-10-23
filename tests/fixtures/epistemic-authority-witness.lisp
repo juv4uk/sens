@@ -9,49 +9,52 @@
 
 (визначити епістемічні-рядки
   (функція ()
-    (нехай-послідовно ((епістемічне-число-один (довжина (як-є (а))))
-           (епістемічне-число-два (довжина (як-є (а б))))
-           (просте-посилання-на-твердження (як-є (claim-ref cml-build-available)))
-           (простий-доказ
-             (створити-доказ
-               просте-посилання-на-твердження
-               (як-є live-test)
-               (як-є supports)
-               (як-є (digest "d"))))
-           (структурне-посилання-на-твердження
-             (як-є
-               (claim-ref
-                 (claim
-                   (statement (build cml succeeds))
-                   (source (observation local-run))
-                   (review proposed)))))
-           (структурний-доказ
-             (створити-доказ
-               структурне-посилання-на-твердження
-               (як-є live-test)
-               (як-є supports)
-               (як-є (digest "d"))))
-           (спостереження
-             (створити-спостереження
-               (як-є (digest "sha256:abc"))
-               (як-є (build cml succeeds))))
-           (твердження
-             (створити-структуроване-твердження
-               (як-є (build cml succeeds))
-               (як-є (observation local-run))
-               (як-є proposed)))
-           (доказ
-             (створити-доказ
-               (як-є (claim-ref cml-build-available))
-               (як-є live-test)
-               (як-є supports)
-               (як-є (test (fixture conformance.my) (case exact-rational-division)))))
-           (намір
-             (створити-намір
-               (як-є (build cml))
-               (як-є (process:cargo tcp-client))
-               (як-є (missing-capability))
-               (як-є (build-artifact cml)))))
+    ; Незалежні джерела обчислюються одним паралельним Д6 НЕХАЙ.
+    ; Лише два докази залежать від уже зв'язаних посилань.
+    ; Це не змінює жодного D1-закону, а зменшує глибину макророзгортання LET*.
+    (нехай
+      ((просте-посилання-на-твердження (як-є (claim-ref cml-build-available)))
+       (структурне-посилання-на-твердження
+         (як-є
+           (claim-ref
+             (claim
+               (statement (build cml succeeds))
+               (source (observation local-run))
+               (review proposed)))))
+       (спостереження
+         (створити-спостереження
+           (як-є (digest "sha256:abc"))
+           (як-є (build cml succeeds))))
+       (твердження
+         (створити-структуроване-твердження
+           (як-є (build cml succeeds))
+           (як-є (observation local-run))
+           (як-є proposed)))
+       (доказ
+         (створити-доказ
+           (як-є (claim-ref cml-build-available))
+           (як-є live-test)
+           (як-є supports)
+           (як-є (test (fixture conformance.my) (case exact-rational-division)))))
+       (намір
+         (створити-намір
+           (як-є (build cml))
+           (як-є (process:cargo tcp-client))
+           (як-є (missing-capability))
+           (як-є (build-artifact cml)))))
+      (нехай
+        ((простий-доказ
+           (створити-доказ
+             просте-посилання-на-твердження
+             (як-є live-test)
+             (як-є supports)
+             (як-є (digest "d"))))
+         (структурний-доказ
+           (створити-доказ
+             структурне-посилання-на-твердження
+             (як-є live-test)
+             (як-є supports)
+             (як-є (digest "d")))))
       (список
         (список
           (як-є supporting-evidence-simple)
@@ -173,7 +176,7 @@
           епістеміка--ні)
         (список (як-є nested-reference-empty-equal)
           (епістеміка--рівні-посилання? (як-є ()) (як-є ()))
-          епістеміка--так)))))
+          епістеміка--так))))))
 
 (визначити перевірити-епістемічні-рядки
   (функція (рядки)
