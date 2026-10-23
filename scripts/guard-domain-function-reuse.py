@@ -2,24 +2,25 @@
 """Guard: програма мусить спиратися на драбини D1–D10, а не винаходити наново.
 
 Правило (AGENTS.md): при написанні програм функції беруться з D1–D10.
-  • якщо потрібна операція вже визначена — вжити наявну (дубль заборонено);
-  • якщо функція ще не визначена в програмі — визначити її;
-  • якщо такої функції немає в жодній драбині — додати її як кандидата D11
-    (а коли з'явиться D12 — як кандидата D12), а не писати локальний дубль.
+  • наявне — вжити (дубль заборонено);
+  • немає в програмі — визначити;
+  • немає в жодній драбині — кандидат D11 (далі D12…), а не локальний дубль.
 
-Що перевіряє цей guard (статика, fail-closed):
-  1. Кожне нове top-level визначення `(визначити <ім'я> …)` у змінених .lisp,
-     чиє ім'я ЗБІГАЄТЬСЯ з уже ратифікованою поверхнею D1–D10, — це ДУБЛЬ
-     (BLOCKED), бо наявне треба вживати, а не перевизначати.
-  2. Нові імена, яких немає в драбинах, друкуються як КАНДИДАТИ D11 —
-     інформативно, щоб їх було внесено в пропозиції, а не загублено в коді.
+ЄДИНИЙ механізм. Цей охоронець НЕ читає драбини сам і НЕ має власної логіки
+розпізнавання поверхонь — він ІМПОРТУЄ наявний
+`scripts/discover_domain_function_candidates.py` (load_domain_tables + aliases)
+і користується ним. Так само має робити будь-який новий інструмент: спершу
+шукай наявний механізм, а не плоди дубль.
 
-Джерело влади над поверхнями: lib/domains/d1.lisp … d10.lisp.
+Статика, fail-closed:
+  • нове `(визначити <ім'я> …)` у зміненому .lisp, чиє ім'я збігається з
+    ратифікованою поверхнею D1–D10 → BLOCKED (це дубль);
+  • нові імена, яких немає в драбинах → КАНДИДАТИ D11 (інформативно).
 
 Використання:
   python3 scripts/guard-domain-function-reuse.py --staged
   python3 scripts/guard-domain-function-reuse.py --paths-from FILE
-  python3 scripts/guard-domain-function-reuse.py --file lib/x.lisp [--file ...]
+  python3 scripts/guard-domain-function-reuse.py --file lib/x.lisp
   python3 scripts/guard-domain-function-reuse.py --self-test
 
 Код виходу: 0 — дублів немає; 1 — знайдено дубль (BLOCKED); 2 — помилка вживання.
@@ -27,34 +28,40 @@
 from __future__ import annotations
 
 import argparse
+import importlib.util
 import re
 import subprocess
 import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
+DISCOVER = ROOT / "scripts" / "discover_domain_function_candidates.py"
+
 EXCLUDED_PREFIXES = (
     "lib/generated/", "lib/surface/", "lib/domains/", "lib/machine/",
     "vendor/", "benchmarks/", "tests/",
 )
-ROW = re.compile(r"^\s*\(([01]{3,})\s+(.*)\)\s*$")
-COL = re.compile(r"\((ук|укр|san|en|LISP|sym)\s+(.*?)\)")
 DEF = re.compile(r"\(визначити\s+([^\s()]+)")
 
 
-def ladder_names() -> set[str]:
+def _load_discover():
+    """Імпорт ЄДИНОГО механізму виявлення поверхонь — без власної копії логіки."""
+    spec = importlib.util.spec_from_file_location("discover_domain_function_candidates", DISCOVER)
+    if spec is None or spec.loader is None:
+        raise SystemExit("GUARD-DOMAIN-REUSE: не вдалося завантажити discover_domain_function_candidates.py")
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[spec.name] = module
+    spec.loader.exec_module(module)
+    return module
+
+
+def ladder_names(root: Path) -> set[str]:
+    """Усі людські назви поверхонь драбин — через наявний механізм."""
+    discover = _load_discover()
     names: set[str] = set()
-    for path in sorted((ROOT / "lib" / "domains").glob("d*.lisp")):
-        if not re.fullmatch(r"d\d+", path.stem):
-            continue
-        for line in path.read_text(encoding="utf-8").splitlines():
-            m = ROW.match(line)
-            if not m:
-                continue
-            for cm in COL.finditer(m.group(2)):
-                v = cm.group(2).strip()
-                if re.fullmatch(r"[^()\s]+", v):
-                    names.add(v)
+    for _domain, rows in discover.load_domain_tables(root).items():
+        for row in rows:
+            names.update(discover.aliases(row))
     return names
 
 
@@ -84,11 +91,11 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--self-test", action="store_true")
     args = ap.parse_args(argv)
 
-    ladder = ladder_names()
+    ladder = ladder_names(ROOT)
 
     if args.self_test:
-        ok = len(ladder) > 1000  # драбини D1–D10 разом дають тисячі людських назв
-        print(f"GUARD-DOMAIN-REUSE self-test: {'OK' if ok else 'FAIL'} (поверхонь у драбинах: {len(ladder)})")
+        ok = len(ladder) > 1000
+        print(f"GUARD-DOMAIN-REUSE self-test: {'OK' if ok else 'FAIL'} (поверхонь у драбинах: {len(ladder)}, джерело: discover_domain_function_candidates)")
         return 0 if ok else 1
 
     if not (args.staged or args.paths_from or args.file):
@@ -107,10 +114,7 @@ def main(argv: list[str] | None = None) -> int:
             continue
         checked += 1
         for name in definitions(path.read_text(encoding="utf-8")):
-            if name in ladder:
-                blocked.append((rel, name))
-            else:
-                candidates.append((rel, name))
+            (blocked if name in ladder else candidates).append((rel, name))
 
     for rel, name in candidates:
         print(f"КАНДИДАТ D11: {rel}: {name} — немає в драбинах; внеси в пропозиції D11 (далі D12…), не лишай локальним дублем")
