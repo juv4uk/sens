@@ -190,6 +190,7 @@ jobs:
                   "tests/semantic/ukr-d3-structural-selftest.lisp",
                   "tests/semantic/language-law-d1-d4-ukr.lisp",
                   "tests/semantic/language-law-d4-closure-shadow-ukr.lisp",
+                  "tests/semantic/language-mutant-d4-closure-shadow-ukr.lisp",
                   "tests/semantic/lisp-d4-lexical-closure-laws.lisp",
                   "tests/semantic/lisp-d4-recursive-list-laws.lisp",
                   "tests/semantic/lisp-d4-recursive-list-mutant.lisp",
@@ -239,7 +240,7 @@ jobs:
           set -euo pipefail
           cargo test --locked -p wsm-guard-slice --bin wsm-guard-slice event_frame_rejects_overlong_duplicate_unknown_and_non_ascii_fields -- --exact --nocapture
           cargo test --locked -p sens-lsp --lib transport::tests:: -- --nocapture
-          cargo test --locked -p sens --test d5_list_search_laws parser_rejects_an_unclosed_form_before_evaluation -- --exact --nocapture
+          cargo test --locked -p sens --test d5_list_search_laws -- --nocapture
           # Семантика D11 перевіряється в окремому Lisp-кроці через SENS/T5M.
           # Не дублюємо мовний оракул у механічному Rust-шарі.
 
