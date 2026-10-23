@@ -1,4 +1,4 @@
-name: D11 ladder contest · Zig (targeted)
+name: D11/D13 ladder contest · Zig (targeted)
 # Ручний вузький запуск експерименту; не оцінює семантику SENS.
 on:
   workflow_dispatch:
@@ -25,6 +25,8 @@ jobs:
           "$RUNNER_TEMP/zig-x86_64-linux-0.16.0/zig" version
       - name: Гра пам'яті — відтворюваний раунд усіх 512 функцій D11
         run: zig test -lc research/zig-codecs/ladder_memory_game.zig
+      - name: Дослідна D13 — 2048 композицій з чинних 512 селекторів D11
+        run: zig test -lc research/zig-codecs/d13_selector_game.zig
       - name: Тести кодеку — 512 координат, roundtrip і негативні випадки
         run: zig test -lc research/zig-codecs/d11_selector_contest.zig
       - name: Зібрати змагання оптимізовано
