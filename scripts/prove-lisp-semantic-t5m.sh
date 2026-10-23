@@ -384,6 +384,13 @@ cat -- lib/meta-eval.lisp tests/semantic/d11-meta-sixth-laws.lisp > "$meta_sixth
 cat -- lib/meta-eval.lisp tests/semantic/d11-meta-sixth-mutant.lisp > "$meta_sixth_mutant_bundle"
 run_case run_law d11-meta-sixth-positive "$meta_sixth_law_bundle" 1
 run_case run_law d11-meta-sixth-mutant "$meta_sixth_mutant_bundle" 0
+# LAST-DEFINE: D7-текст має D8-рівність у нормативному Lisp, не D3 EQ Rust.
+last_define_positive_bundle="$evidence/d11-meta-last-define-positive-complete.lisp"
+last_define_mutant_bundle="$evidence/d11-meta-last-define-mutant-complete.lisp"
+cat -- lib/meta-eval.lisp tests/semantic/d11-meta-last-define-laws.lisp > "$last_define_positive_bundle"
+cat -- lib/meta-eval.lisp tests/semantic/d11-meta-last-define-mutant.lisp > "$last_define_mutant_bundle"
+run_case run_law d11-meta-last-define-positive "$last_define_positive_bundle" 1
+run_case run_law d11-meta-last-define-mutant "$last_define_mutant_bundle" 0
 # Д11 Clojure: два комплекти законів перенесено з Rust у справжній Lisp.
 # Їхня залежність SRFI-1 SPAN завантажується перед DEFINE групування.
 for suite in d11-clojure-partition-by d11-clojure-dedupe; do

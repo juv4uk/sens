@@ -1,66 +1,25 @@
-//! D11 00000111010 — бібліотечна композиція останнього імені DEFINE.
-//! Перевірка виконує чинний MetaEval у SENS, без Rust/Python-семантики.
-//! Дослідна геометрична координата не є прямим D11 opcode.
+//! Rust відповідає тільки за механіку завантаження UTF-8 і запуск SENS.
+//! Вісім законів останнього DEFINE, D7/D8 і негативний мутант — у Lisp.
 
 use sens::{eval_program, load_core_library, load_meta_evaluator_library, Session};
+use std::path::PathBuf;
 
 #[test]
-fn d11_останнє_імя_визначення_читає_саме_останній_вузол() {
+fn rust_mechanism_executes_last_define_lisp_witnesses() {
     let mut session = Session::bare();
-    load_core_library(&mut session).expect("ядро SENS");
-    load_meta_evaluator_library(&mut session).expect("визначення MetaEval");
+    load_core_library(&mut session).expect("завантажити чинне ядро SENS");
+    load_meta_evaluator_library(&mut session).expect("завантажити MetaEval SENS");
 
-    for (case, source, expected) in [
-        (
-            "одне-правильно",
-            "(тотожне? (останнє-ім'я-визначення-лямбди (як-є ((визначити альфа форма)))) (як-є альфа))",
-            true,
-        ),
-        (
-            "два-правильно",
-            "(тотожне? (останнє-ім'я-визначення-лямбди (як-є ((визначити альфа форма) (визначити бета форма)))) (як-є бета))",
-            true,
-        ),
-        (
-            "два-не-перше",
-            "(тотожне? (останнє-ім'я-визначення-лямбди (як-є ((визначити альфа форма) (визначити бета форма)))) (як-є альфа))",
-            false,
-        ),
-        (
-            "три-правильно",
-            "(тотожне? (останнє-ім'я-визначення-лямбди (як-є ((визначити альфа форма) (визначити бета форма) (визначити гамма форма)))) (як-є гамма))",
-            true,
-        ),
-        (
-            "три-не-перше",
-            "(тотожне? (останнє-ім'я-визначення-лямбди (як-є ((визначити альфа форма) (визначити бета форма) (визначити гамма форма)))) (як-є альфа))",
-            false,
-        ),
-        (
-            "три-не-середнє",
-            "(тотожне? (останнє-ім'я-визначення-лямбди (як-є ((визначити альфа форма) (визначити бета форма) (визначити гамма форма)))) (як-є бета))",
-            false,
-        ),
-        (
-            "повторене-останнє",
-            "(тотожне? (останнє-ім'я-визначення-лямбди (як-є ((визначити альфа форма) (визначити бета форма) (визначити альфа форма)))) (як-є альфа))",
-            true,
-        ),
-        (
-            "повторене-не-середнє",
-            "(тотожне? (останнє-ім'я-визначення-лямбди (як-є ((визначити альфа форма) (визначити бета форма) (визначити альфа форма)))) (як-є бета))",
-            false,
-        ),
+    let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../..");
+    for witness in [
+        "tests/semantic/d11-meta-last-define-laws.lisp",
+        "tests/semantic/d11-meta-last-define-mutant.lisp",
     ] {
-        let verdict = eval_program(source, &mut session)
-            .unwrap_or_else(|error| {
-                panic!("test_id=D11-META-LAST-DEFINE-{case} layer=SENS input={source} actual_error={error}")
-            })
-            .value;
-        assert_eq!(
-            verdict.as_predicate_bit(),
-            Some(expected),
-            "test_id=D11-META-LAST-DEFINE-{case} layer=SENS input={source} expected=D1:{expected} actual={verdict}"
-        );
+        let path = root.join(witness);
+        let source = std::fs::read_to_string(&path).unwrap_or_else(|error| {
+            panic!("test_id=D11-LAST-DEFINE-IO layer=Rust path={} actual={error}", path.display())
+        });
+        eval_program(&source, &mut session)
+            .unwrap_or_else(|error| panic!("test_id=D11-LAST-DEFINE-EXEC layer=SENS source={witness} actual={error}"));
     }
 }
