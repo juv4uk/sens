@@ -18,4 +18,4 @@ printf 'bad\trow\n' >> "$tmp/ev/law-stage-timings.tsv"
 if bash "$tool" "$tmp/ev" "$tmp/invalid.md" > "$tmp/invalid.out" 2>&1; then
  echo 'REPORTER_TEST_FAILED: malformed evidence was accepted' >&2; exit 1
 fi
-echo 'REPORTER_TEST_PASS checks=9 evidence=synthetic reporting_only=true'
+echo 'REPORTER_TEST_PASS checks=8 evidence=synthetic reporting_only=true'
