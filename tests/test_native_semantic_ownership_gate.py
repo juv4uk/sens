@@ -81,6 +81,28 @@ class LanguageOwnershipRouting(unittest.TestCase):
         self.assertEqual(self.audit([positive, negative], runner=runner,
                                     files=[positive, negative]), [])
 
+    def test_multiline_cat_dashdash_counts_only_with_live_run_case(self):
+        positive = "tests/semantic/language-law-multiline.lisp"
+        mutant = "tests/semantic/language-mutant-multiline.lisp"
+        cat_commands = (
+            'cat -- lib/epistemic.lisp \\\n'
+            f'  "{positive}" > "$positive_bundle"\n'
+            'cat -- lib/epistemic.lisp \\\n'
+            f'  "{mutant}" > "$mutant_bundle"\n'
+        )
+        live = (RUNNER + cat_commands
+                + 'run_case run_law multiline-positive "$positive_bundle" 1\n'
+                + 'run_case run_law multiline-mutant "$mutant_bundle" 0\n')
+        self.assertEqual(
+            self.audit([positive, mutant], runner=live, files=[positive, mutant]), []
+        )
+        # Згадка імен у реальному cat не є доказом без run_case.
+        fake = RUNNER + cat_commands + 'echo "$positive_bundle" "$mutant_bundle"\n'
+        failures = self.audit([positive, mutant], runner=fake,
+                              files=[positive, mutant])
+        self.assertTrue(any("SENS_LAW_NOT_REGISTERED" in error for error in failures))
+        self.assertTrue(any("SENS_LAW_MUTANT_NOT_ROUTED" in error for error in failures))
+
     def test_echo_and_unused_cat_do_not_forge_native_execution(self):
         runner = RUNNER + (
             f"echo {'tests/semantic/hidden-law.lisp'}\n"

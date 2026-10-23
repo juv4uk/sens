@@ -26,15 +26,26 @@ def declared_sources(runner: str) -> set[str]:
     # Сама згадка шляху, echo чи коментар не є виконанням.
     live = [line.split("#", 1)[0].strip()
             for line in runner.splitlines() if line.split("#", 1)[0].strip()]
-    invocations = [line for line in live
+    # Bash об'єднує зворотним слешем кілька фізичних рядків однієї
+    # команди. Без цього реальні cat -- + run_case ставали хибним RED.
+    commands: list[str] = []
+    pending = ""
+    for line in live:
+        continuation = line.endswith("\\")
+        fragment = line[:-1].rstrip() if continuation else line
+        pending += (" " if pending else "") + fragment
+        if not continuation:
+            commands.append(pending)
+            pending = ""
+    invocations = [line for line in commands
                    if re.match(r"^run_case\s+run_(?:law|bound_law|type_rejection)\s+", line)]
     declared: set[str] = set()
     for line in invocations:
         declared.update(SEMANTIC_PATH.findall(line))
     # Залежні DEFINE збираються cat у тимчасове джерело;
     # цей bundle зараховується лише якщо run_case справді його викликає.
-    for line in live:
-        if not re.match(r"^cat\s+", line):
+    for line in commands:
+        if not re.match(r"^cat(?:\s+--)?\s+", line):
             continue
         sources = SEMANTIC_PATH.findall(line)
         destination = re.search(r">\s*[\"']?\$([A-Za-z_][A-Za-z_0-9]*)", line)
