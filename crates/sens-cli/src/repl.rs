@@ -2158,9 +2158,22 @@ mod tests {
             .expect("exact D24+ root-reference program");
         let result = program.execute(&mut session)
             .expect("nested root lookup through physical SENS");
+        let Value::BinaryNumber(expected) = session
+            .environment
+            .get("число-нуль")
+            .expect("Core4 zero root")
+        else {
+            panic!("Core4 zero root must retain exact D24+ number identity");
+        };
+        let Value::BinaryNumber(actual) = result.value else {
+            panic!("physical definition must return an exact D24+ number");
+        };
+        assert_eq!(actual.numeric_domain_width(), Some(24));
+        assert_eq!(actual.numeric_domain_width(), expected.numeric_domain_width());
         assert_eq!(
-            result.value,
-            session.environment.get("число-нуль").expect("Core4 zero root")
+            actual.exact_numeric_domain_bits().expect("actual D24+ bits"),
+            expected.exact_numeric_domain_bits().expect("expected D24+ bits"),
+            "physical root lookup must preserve the exact typed word"
         );
     }
 
