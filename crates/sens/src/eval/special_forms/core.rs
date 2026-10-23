@@ -246,6 +246,19 @@ pub(crate) fn quoted(expression: &Expr) -> Result<Value, LanguageError> {
             },
             ExprKind::NumericBuffer(buffer) => Value::NumericBuffer(buffer.clone()),
             ExprKind::String(value) => Value::String(value.clone()),
+            // Канонічний носій D7 має відновлювати точні W7-комірки під час
+            // READ(WRITE(...)), зокрема всередині вкладених списків.
+            // Пошкоджений #t7-запис не перетворюється мовчки на Symbol.
+            ExprKind::Symbol(symbol) if symbol.starts_with(crate::Text7::WIRE_TAG) => {
+                let text = crate::Text7::from_canonical_wire_token(symbol).map_err(|error| {
+                    LanguageError::new(
+                        ErrorKind::Parse,
+                        format!("неканонічний носій D7: {error:?}"),
+                        expression.span,
+                    )
+                })?;
+                Value::Text7(text)
+            }
             ExprKind::Symbol(symbol) => Value::Symbol(symbol.clone()),
             // Слот — координата виконання, не дані: у quote-позиції його не буває
             // (розв'язувач її не чіпає), тож така поява — порушення інваріанта.
@@ -402,6 +415,28 @@ mod exact_d4_define_arity_tests {
                 .expect("ratified ASCII display"),
             "at"
         );
+    }
+
+    #[test]
+    fn цитоване_канонічне_d7_слово_зберігає_комірки_і_вкладеність() {
+        let mut expressions = crate::parse("(#t7:6174 (#t7:))")
+            .expect("канонічний D7-носій повинен читатися як джерело");
+        let actual = quoted(&expressions.remove(0)).expect("точне цитування D7");
+        let expected = Value::list([
+            Value::Text7(crate::Text7::from_cells(vec![0x61, 0x74]).unwrap()),
+            Value::list([Value::Text7(crate::Text7::from_cells(Vec::new()).unwrap())]),
+        ]);
+        assert_eq!(actual, expected);
+    }
+
+    #[test]
+    fn пошкоджений_канонічний_d7_носій_не_стає_символом() {
+        for source in ["#t7:0", "#t7:80", "#t7:4A", "#t7:gg"] {
+            let mut expressions = crate::parse(source).expect("лексичний носій");
+            let error = quoted(&expressions.remove(0))
+                .expect_err("пошкоджений D7 повинен мати іменовану помилку");
+            assert_eq!(error.kind, ErrorKind::Parse, "{source}");
+        }
     }
 
     #[test]
