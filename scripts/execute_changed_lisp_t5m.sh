@@ -159,6 +159,17 @@ run_native_t5m_program() {
         return
       fi
     fi
+    # Закон цитування/замикання сформульовано у Lisp, тут — лише точний D1.
+    # Exit=0 та довільний друк НЕ засвідчують виконання мовного закону.
+    if [[ "$file" == "tests/semantic/власні-закони-цитування-замикання.lisp" ]]; then
+      printf '1\n' > "$dir/ukr-lisp-law.expected"
+      if ! cmp -s "$dir/native-paired.stdout" "$dir/ukr-lisp-law.expected"; then
+        echo "::error file=$file,title=SENS мовний закон::REGRESSION id=d3-d4-lisp layer=semantics expected=D1:1 actual=$(cat "$dir/native-paired.stdout")" >&2
+        mark_file_failed
+        return
+      fi
+      echo "SENS_LISP_SEMANTIC_LAW_CHECKED source=$file expected=D1:1 actual=D1:1 oracle=SENS carrier=Zig/T5M"
+    fi
     # Принцип 5: дві РІЗНІ фізичні форми того самого обчислення.
     # 1) живий український Lisp, без T5M; 2) точні байти Zig/T5M,
     # виконані SENS після контролю оборотності. Ніякого Python-оракула.
