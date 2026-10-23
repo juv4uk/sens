@@ -105,7 +105,7 @@ class DomainFunctionReuseRule(unittest.TestCase):
             lib.mkdir()
             quote = "(" + "як-є" + " ((" + "визначити" + " уявна (" + "функція" + " (х) х))))"
             real = "(" + "визначити" + " справжня (" + "функція" + " (х) х))"
-            (lib / "one.lisp").write_text(quote + "\\n" + real + "\\n", encoding="utf-8")
+            (lib / "one.lisp").write_text(quote + "\n" + real + "\n", encoding="utf-8")
             subprocess.run(["git", "init", "-q"], cwd=root, check=True)
             subprocess.run(["git", "add", "lib/one.lisp"], cwd=root, check=True)
             sites = guard.project_definition_sites(root)
