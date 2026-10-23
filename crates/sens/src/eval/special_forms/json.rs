@@ -302,6 +302,12 @@ mod extraction_tests {
     }
 
     #[test]
+    fn parse_json_keeps_false_distinct_from_null() {
+        assert!(matches!(parse_json("false"), Ok(Value::Bool(false))));
+        assert!(matches!(parse_json("null"), Ok(Value::Nil)));
+    }
+
+    #[test]
     fn parse_json_rejects_trailing_garbage() {
         assert!(parse_json("{} x").is_err());
         assert!(parse_json("").is_err());
