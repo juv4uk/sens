@@ -1350,6 +1350,30 @@ mod exact_surface_domain_query_migration_tests {
     }
 
     #[test]
+    fn bare_cli_session_recovers_lisp_macros_through_d7_and_exact_d6_slots() {
+        // CLI використовує голий Environment::root(), НЕ Session::default().
+        // Тут Rust перевіряє лише фізичне встановлення механізму; закон макроса —
+        // тільки у виконуваних Lisp/SENS-свідках.
+        let mut session = Session {
+            environment: Environment::root(),
+        };
+        load_core_library(&mut session).expect("CLI Core4 bootstrap");
+        load_utf8_library(&mut session)
+            .expect("UTF-8 requires the two Lisp-owned D6 macros from physical Core4");
+        for name in ["нехай", "нехай*"] {
+            let identity = semantic_registry::exact_uk_callable_for_source_head(name)
+                .expect("ратифікований код D6 макроса");
+            assert_eq!(identity.width(), 6, "D6 identity for {name}");
+            assert!(
+                matches!(session.environment.domain_code_slot(identity), Some(Value::Macro(_))),
+                "test_id=BARE-CLI-D6-MACRO-INSTALL missing exact macro for {name}"
+            );
+        }
+        load_process_library(&mut session)
+            .expect("process/TCP adapters must reuse the installed Lisp macros");
+    }
+
+    #[test]
     fn filesystem_library_loads_from_zig_restored_t5m_words() {
         let mut session = Session::default();
         load_core_library(&mut session).expect("Core4 bootstrap");
