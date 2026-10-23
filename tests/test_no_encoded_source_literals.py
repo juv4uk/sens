@@ -647,6 +647,10 @@ class ResearchBatchUkrProjectionTests(unittest.TestCase):
             "tests/semantic/d8-div-zero-divisor-negative.lisp",
             "tests/semantic/d8-signum-reciprocal-composition-laws.lisp",
             "tests/semantic/d8-truncate-rem-derived-laws.lisp",
+            "tests/semantic/d8-d24-one-step-laws.lisp",
+            "tests/semantic/d8-floor-lognot-d24-laws.lisp",
+            "tests/semantic/d8-logand-logior-logxor-d24-laws.lisp",
+            "tests/semantic/d9-number-d24-text-invalid.lisp",
         ):
             with self.subTest(path=relative):
                 source_path = ROOT / relative
