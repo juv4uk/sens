@@ -284,8 +284,9 @@ def rewrite(src, mapping, blocked):
                     edits.append((start, i, mapping[historical]))
                 else:
                     problems.append(token + ": " + blocked.get(historical, "unknown"))
-            if (token in {"00000001", "001", "QUOTE", "quote", "як-є"}
-                    or (tagged and mapping.get(historical) == "як-є")):
+            if (not quote and (
+                    token in {"00000001", "001", "QUOTE", "quote", "як-є"}
+                    or (tagged and mapping.get(historical) == "як-є"))):
                 f["quote_children"] = True
         quote = False
     if stack:
