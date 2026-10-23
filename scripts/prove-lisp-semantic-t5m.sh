@@ -68,4 +68,9 @@ run_law d3-selection-positive tests/semantic/d3-d4-logic-selection-law.lisp 1
 run_law d3-selection-mutant tests/semantic/d3-d4-logic-selection-mutant.lisp 0
 run_law d3-quote-short-circuit-positive tests/semantic/d3-cond-quote-lazy-law.lisp 1
 run_law d3-quote-short-circuit-mutant tests/semantic/d3-cond-quote-lazy-mutant.lisp 0
-echo "SENS_LISP_T5M_LAWS_PASS count=4 positive=2 mutants=2 physical=ZIG_T5M"
+run_law d4-late-binding-positive tests/semantic/d4-late-definition-binding-law.lisp 1
+run_law d4-escaped-closure-positive tests/semantic/d4-escaped-lexical-closure-law.lisp 1
+run_law d4-escaped-closure-mutant tests/semantic/d4-escaped-lexical-closure-mutant.lisp 0
+run_law d5-exact-arithmetic-positive tests/semantic/d5-arithmetic-native-t5m-law.lisp 1
+run_law d5-exact-arithmetic-mutant tests/semantic/d5-arithmetic-native-t5m-mutant.lisp 0
+echo "SENS_LISP_T5M_LAWS_PASS count=9 positive=5 mutants=4 physical=ZIG_T5M"
