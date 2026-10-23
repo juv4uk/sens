@@ -456,6 +456,25 @@ jobs:
             echo "::error file=bench_domain_codebook.zig,title=Zig DWC1 A/B::REGRESSION layer=codec-experiment expected=paired-measurements actual=failed"
             zig_failed=1
           fi
+          # Дослідний багатобайтовий T33 — окремо від production T5M та DWC1.
+          if zig test -O ReleaseFast -lc research/zig-codecs/t33_experiment.zig \
+              > "$RUNNER_TEMP/zig-t33-tests.log" 2>&1; then
+            cat "$RUNNER_TEMP/zig-t33-tests.log"
+            echo "::notice title=Zig T33 experiment::PASS layer=mechanism semantics=NOT_TESTED"
+          else
+            cat "$RUNNER_TEMP/zig-t33-tests.log" >&2
+            echo "::error file=research/zig-codecs/t33_experiment.zig,title=Zig T33 tests::REGRESSION layer=codec-experiment expected=exact-roundtrip-and-fail-closed actual=failed"
+            zig_failed=1
+          fi
+          if zig run -O ReleaseFast -lc bench_t33.zig \
+              > "$RUNNER_TEMP/zig-t33-benchmark.log" 2>&1; then
+            cat "$RUNNER_TEMP/zig-t33-benchmark.log"
+            echo "::notice title=Zig T33 A/B::MEASURED corpora=4 provenance=$(git rev-parse HEAD) semantics=NOT_TESTED"
+          else
+            cat "$RUNNER_TEMP/zig-t33-benchmark.log" >&2
+            echo "::error file=bench_t33.zig,title=Zig T33 A/B::REGRESSION layer=codec-experiment expected=paired-measurements actual=failed"
+            zig_failed=1
+          fi
           exit "$zig_failed"
 
       # Окремі бенчмарки MECHANISM_COPY_BENCH: не змішувати з Lisp-законами.
