@@ -411,6 +411,19 @@ jobs:
             "$PWD/target/debug/sens" "$PWD/target/debug/sens-trit" \
             "$RUNNER_TEMP/changed-t5m-pairs/lisp-laws"
 
+      # Один набір реальних SENS/Zig вимірів, навіть коли один закон RED.
+      # Shell тільки агрегує наявні дані; нового запуску SENS немає.
+      - name: Профіль вузьких місць SENS/Zig з наявних бенчмарків
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          bash scripts/tests/test-report-sens-law-hotspots.sh
+          evidence="$RUNNER_TEMP/changed-t5m-pairs/lisp-laws"
+          report="$RUNNER_TEMP/sens-law-hotspots.md"
+          bash scripts/report-sens-law-hotspots.sh "$evidence" "$report"
+          cat "$report" >> "$GITHUB_STEP_SUMMARY"
+
       # Логіка перевірки всередині Lisp. Bash лише звіряє фактичний D1-вивід.
       # Rust відповідає за механізми Rust, Zig — за власний T5M/ABI.
       - name: Lisp-семантика Д1/Д3/Д4 — позитив і негатив у справжньому SENS
