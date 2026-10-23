@@ -40,7 +40,7 @@ class HistoricalScriptSourceDelta(unittest.TestCase):
     def test_ratifed_current_authority_and_unresolved_holds(self):
         mapping, blocked = MIGRATION["authority"](ROOT)
         self.assertEqual(len(mapping), 171)
-        self.assertEqual(mapping["00001001"], "0011")
+        self.assertEqual(mapping["00001001"], "визначити")
         self.assertNotIn("01011010", mapping)
         self.assertNotIn("01000111", mapping)
         self.assertEqual(blocked["01011010"], "D10-RECOVERY-CANDIDATE")
