@@ -55,8 +55,9 @@ class D11SelectorSeedAuditTests(unittest.TestCase):
         self.assertFalse(report["historical_pin_matches_current"])
         self.assertIn("all 256 derived parents revalidated", report["source_pin_note"])
 
-    def test_canonical_d11_table_stays_the_43_row_testing_vocabulary(self):
+    def test_current_d11_table_has_512_derived_and_43_legacy_rows_stay_archived(self):
         report = MOD.validate_documents(self.documents)
+        self.assertEqual(report["derived_count"], 512)
         self.assertEqual(report["testing_only_rows"], 43)
         self.assertEqual(self.documents["seed"]["accounting"]["new_ratified_residents"], 0)
         self.assertEqual(self.documents["seed"]["accounting"]["callable"], 0)
@@ -85,15 +86,19 @@ class D11SelectorSeedAuditTests(unittest.TestCase):
         docs["seed"]["rows"][1][1] = docs["seed"]["rows"][0][1]
         self.assert_rejected(docs, "DERIVED_DUP_NAME")
 
-    def test_rejects_collision_with_ratified_d11_testing_coordinate(self):
+    def test_rejects_current_d11_table_coordinate_drift(self):
         docs = self.changed()
-        docs["seed"]["rows"][0][0] = docs["d11_vocabulary"]["table"][0]["bits"]
-        self.assert_rejected(docs, "D11_TEST_COORD_COLLISION")
+        self.assertIn("  (01100000000 (ук ", docs["d11_table"])
+        docs["d11_table"] = docs["d11_table"].replace(
+            "  (01100000000 (ук ", "  (00000000000 (ук ", 1)
+        self.assert_rejected(docs, "D11_TABLE_DERIVATION")
 
-    def test_rejects_collision_with_ratified_d11_testing_name(self):
+    def test_rejects_current_d11_table_name_drift(self):
         docs = self.changed()
-        docs["seed"]["rows"][0][1] = docs["d11_vocabulary"]["table"][0]["lisp"]
-        self.assert_rejected(docs, "D11_TEST_NAME_COLLISION")
+        self.assertIn("(LISP CDAAAAAAAAR)", docs["d11_table"])
+        docs["d11_table"] = docs["d11_table"].replace(
+            "(LISP CDAAAAAAAAR)", "(LISP WRONGSELECTOR)", 1)
+        self.assert_rejected(docs, "D11_TABLE_DERIVATION")
 
     def test_rejects_wrong_selector_suffix_name(self):
         docs = self.changed()
