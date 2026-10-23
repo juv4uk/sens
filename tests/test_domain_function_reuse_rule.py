@@ -10,10 +10,13 @@
 from __future__ import annotations
 
 import importlib.util
+from contextlib import redirect_stdout
+from io import StringIO
 import subprocess
 import sys
 import tempfile
 import unittest
+from unittest import mock
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -46,6 +49,28 @@ class DomainFunctionReuseRule(unittest.TestCase):
         result = run(GUARD, "--file", str(PROBE.relative_to(ROOT)))
         self.assertEqual(result.returncode, 1, "дубль наявної поверхні мусить валити guard")
         self.assertIn("BLOCKED", result.stdout)
+
+    def test_blocked_batch_cannot_register_d11_candidates(self) -> None:
+        # Якщо поряд із кандидатом є дубль D3, відмова має бути без побічного запису.
+        PROBE.write_text(
+            "(визначити сполучити (функція (х у) х))\n"
+            "(визначити нова-проба-реєстру-охоронця "
+            "(функція (х) (сполучити х (як-є ()))))\n",
+            encoding="utf-8",
+        )
+        spec = importlib.util.spec_from_file_location("guard_registration_test", GUARD)
+        self.assertIsNotNone(spec)
+        self.assertIsNotNone(spec.loader)
+        guard = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(guard)
+        output = StringIO()
+        with mock.patch.object(guard, "register_candidates", return_value=1) as register:
+            with redirect_stdout(output):
+                status = guard.main(["--file", str(PROBE.relative_to(ROOT)), "--register"])
+        self.assertEqual(status, 1, output.getvalue())
+        self.assertIn("КАНДИДАТ D11", output.getvalue())
+        self.assertIn("НЕ ЗАРЕЄСТРОВАНО", output.getvalue())
+        register.assert_not_called()
 
     def test_new_name_without_ladder_call_or_marker_is_blocked(self) -> None:
         # Свідомий вибір: або вживай поверхню драбини, або познач пропозицію D11.
