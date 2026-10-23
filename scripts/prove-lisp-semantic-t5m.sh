@@ -113,8 +113,13 @@ run_law d3-quote-short-circuit-mutant tests/semantic/d3-cond-quote-lazy-mutant.l
 run_law d4-late-binding-positive tests/semantic/d4-late-definition-binding-law.lisp 1
 run_law d4-escaped-closure-positive tests/semantic/d4-escaped-lexical-closure-law.lisp 1
 run_law d4-escaped-closure-mutant tests/semantic/d4-escaped-lexical-closure-mutant.lisp 0
-run_law d5-exact-arithmetic-positive tests/semantic/d5-arithmetic-native-t5m-law.lisp 1
-run_law d5-exact-arithmetic-mutant tests/semantic/d5-arithmetic-native-t5m-mutant.lisp 0
+# Фізичні закони Д3 не залежать від недопущеного виклику D6 LENGTH.
+run_law d3-structural-positive tests/semantic/d3-structural-native-t5m-law.lisp 1
+run_law d3-structural-mutant tests/semantic/d3-structural-native-t5m-mutant.lisp 0
+# TRANSITIONAL #5854: арифметичні Lisp-свідки існують і перевіряються
+# прямим SENS у ci.yml, але фізичний T5M не атестовано до реалізації LENGTH.
+# Не оголошувати PASS і не замінювати семантику D6 хостовим оракулом.
+echo "::warning file=tests/semantic/d5-arithmetic-native-t5m-law.lisp,title=TRANSITIONAL #5854::D6 LENGTH (D6 000000) поки невикличний у фізичному SENS; D5 T5M=NOT_CERTIFIED"
 # The result-status law stays in Ukrainian Lisp; only the runner bundles its admitted library.
 result_status_bundle="$evidence/result-status-bundle.lisp"
 cat lib/result-status.lisp tests/semantic/result-status-laws.lisp > "$result_status_bundle"
