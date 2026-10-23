@@ -705,8 +705,17 @@ jobs:
               printf '| `%s` | %s | %s | %s | %s | `%s` |\n' "$file" "$source_bytes" "$t5m_bytes" "$nodes" "$visits" "$result" >> "$report"
               measured=$((measured + 1))
             done < "$RUNNER_TEMP/changed-t5m-lisp.txt"
-            echo "::notice title=SENS фізичний коридор::PASS measured=$measured unmeasured=$missed release=NOT_CERTIFIED"
-            echo "Виміряно: **$measured**; без AST-метрики: **$missed**. Релізний допуск не встановлено." >> "$report"
+            if (( missed > 0 )); then
+              ast_status=PARTIAL
+              echo "::warning title=SENS фізичний коридор::PARTIAL measured=$measured unmeasured=$missed release=NOT_CERTIFIED"
+            elif (( measured == 0 )); then
+              ast_status=NOT_MEASURED
+              echo "::notice title=SENS фізичний коридор::NOT_MEASURED measured=0 source=empty-or-no-executable-Lisp release=NOT_CERTIFIED"
+            else
+              ast_status=PASS
+              echo "::notice title=SENS фізичний коридор::PASS measured=$measured unmeasured=0 release=NOT_CERTIFIED"
+            fi
+            echo "AST-статус: **$ast_status**. Виміряно: **$measured**; без AST-метрики: **$missed**. Релізний допуск не встановлено." >> "$report"
           fi
           cat "$report" >> "$GITHUB_STEP_SUMMARY"
 
