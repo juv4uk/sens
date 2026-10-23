@@ -159,17 +159,60 @@ run_native_t5m_program() {
         return
       fi
     fi
-    # Закон цитування/замикання сформульовано у Lisp, тут — лише точний D1.
-    # Exit=0 та довільний друк НЕ засвідчують виконання мовного закону.
-    if [[ "$file" == "tests/semantic/language-law-quote-closure-ukr.lisp" ]]; then
-      printf '1\n' > "$dir/ukr-lisp-law.expected"
-      if ! cmp -s "$dir/native-paired.stdout" "$dir/ukr-lisp-law.expected"; then
-        echo "::error file=$file,title=SENS мовний закон::REGRESSION id=d3-d4-lisp layer=semantics expected=D1:1 actual=$(cat "$dir/native-paired.stdout")" >&2
+    # Мовні самовердикти належать Lisp/SENS, а не Rust, Zig чи Python.
+    # Shell перевіряє лише точний кінцевий D1:1 від фізичного виконавця.
+    if [[ "$file" == tests/semantic/language-law-*.lisp ||
+          "$file" == "tests/semantic/lisp-d4-lexical-closure-laws.lisp" ]]; then
+      printf '1\n' > "$dir/language-d1.expected"
+      if ! cmp -s "$dir/native-paired.stdout" "$dir/language-d1.expected"; then
+        echo "::error file=$file,title=SENS language law::WRONG_D1 expected=1 actual=$(cat "$dir/native-paired.stdout")" >&2
         mark_file_failed
         return
       fi
-      echo "SENS_LISP_SEMANTIC_LAW_CHECKED source=$file expected=D1:1 actual=D1:1 oracle=SENS carrier=Zig/T5M"
+      echo "::notice file=$file,title=SENS language law::PASS native=SENS result=D1:1 carrier=Zig/T5M"
     fi
+    # Негативна мутація є коректною SENS-програмою з точним результатом Д1:ні.
+    # Вона теж проходить Zig/T5M, paired і standalone; логіку тут не моделюємо.
+    if [[ "$file" == tests/semantic/language-mutant-*.lisp ]]; then
+      printf '0\n' > "$dir/language-d1-mutant.expected"
+      if ! cmp -s "$dir/native-paired.stdout" "$dir/language-d1-mutant.expected"; then
+        echo "::error file=$file,title=SENS language mutant::WRONG_D1 expected=0 actual=$(cat "$dir/native-paired.stdout")" >&2
+        mark_file_failed
+        return
+      fi
+      echo "::notice file=$file,title=SENS language mutant::PASS native=SENS result=D1:0 carrier=Zig/T5M"
+    fi
+    # Закони CAR/CDR/CONS/COND/NULL належать виконуваному Lisp.
+    # Shell порівнює тільки кінцевий точний D1-біт нативного SENS.
+    # Це не стороння модель EQ, COND або структурних правил.
+    case "$file" in
+      tests/semantic/ukr-d3-pair-identity-law.lisp|tests/semantic/ukr-d3-cond-control-law.lisp|tests/semantic/ukr-d3-structural-selftest.lisp|tests/semantic/d11-clojure-juxt-laws.lisp)
+        echo 1 > "$dir/ukr-d3-law.expected"
+        if ! cmp -s "$dir/native-paired.stdout" "$dir/ukr-d3-law.expected"; then
+          echo "::error::SENS_LISP_SEMANTIC_LAW_WRONG_D1 source=$file expected=D1:1 actual=$(cat "$dir/native-paired.stdout")" >&2
+          mark_file_failed
+          return
+        fi
+        echo "SENS_LISP_SEMANTIC_LAW_PASS source=$file result=D1:1 oracle=SENS carrier=ZIG_T5M"
+        ;;
+    esac
+    # Нативний Д5 закон та його мутант: вердикт формулює Lisp,
+    # Zig пакує, SENS виконує фізичний T5M, Shell лише звіряє D1.
+    case "$file" in
+      tests/semantic/d5-arithmetic-native-t5m-law.lisp|tests/semantic/d5-arithmetic-native-t5m-mutant.lisp)
+        local_expected=1
+        if [[ "$file" == "tests/semantic/d5-arithmetic-native-t5m-mutant.lisp" ]]; then
+          local_expected=0
+        fi
+        printf '%s\n' "$local_expected" > "$dir/d5-language.expected"
+        if ! cmp -s "$dir/native-paired.stdout" "$dir/d5-language.expected"; then
+          echo "::error file=$file,title=SENS D5 language::REGRESSION layer=semantics expected=D1:$local_expected actual=$(cat "$dir/native-paired.stdout")" >&2
+          mark_file_failed
+          return
+        fi
+        echo "::notice file=$file,title=SENS D5 language::PASS native=SENS carrier=Zig/T5M result=D1:$local_expected"
+        ;;
+    esac
     # Принцип 5: дві РІЗНІ фізичні форми того самого обчислення.
     # 1) живий український Lisp, без T5M; 2) точні байти Zig/T5M,
     # виконані SENS після контролю оборотності. Ніякого Python-оракула.
@@ -235,6 +278,17 @@ run_native_t5m_program() {
         echo "::error::T5M_NATIVE_EXECUTION_OUTPUT_DRIFT source=$file" >&2
         mark_file_failed
         return
+      fi
+      # Lisp-свідок сам визначає кожен закон і завершує D1:1.
+      # Хост звіряє лише точний фізичний результат після Zig/T5M + SENS.
+      if [[ "$file" == "tests/semantic/lisp-d5-list-self-verdict.lisp" ]]; then
+        printf '1\n' > "$dir/lisp-d5-self-verdict.expected"
+        if ! cmp -s "$dir/native-standalone.stdout" "$dir/lisp-d5-self-verdict.expected"; then
+          echo "::error file=$file,title=SENS Lisp D5::REGRESSION id=d5-list-self-verdict layer=semantics expected=D1:1 actual=$(cat "$dir/native-standalone.stdout")" >&2
+          mark_file_failed
+          return
+        fi
+        echo "::notice file=$file,title=SENS Lisp D5::PASS id=d5-list-self-verdict physical=Zig/T5M semantic=SENS result=D1:1"
       fi
       # Виконувані аксіоми: тільки D1:1, не структурне D3 () чи host truthiness.
       # Негативний змінений текст повинен дати саме D1:0 через SENS/Zig.
@@ -399,6 +453,9 @@ while IFS= read -r file || [[ -n "$file" ]]; do
   elif [[ "$file" == "tests/semantic/core1-gc-reachability-laws.lisp" ]]; then
     # Обхід коренів і циклів виконує лише наявний Core1 Lisp.
     binding_sources=(--binding-source lib/core1.lisp)
+  elif [[ "$file" == "tests/semantic/d11-clojure-juxt-laws.lisp" ]]; then
+    # Реальні DEFINE мови, не дубль Rust-реалізації закону.
+    binding_sources=(--binding-source lib/d11-clojure-juxt.lisp)
   elif [[ "$file" == "tests/semantic/meta-fc-predicates-d1-law.lisp" ||
           "$file" == "tests/semantic/meta-fc-predicates-d1-mutant.lisp" ]]; then
     binding_sources=(--binding-source lib/meta-eval-first-class.lisp)
