@@ -592,6 +592,17 @@ fn bind_core_runtime_mechanisms(environment: &Environment) {
             environment.define(surface, write_to_string.clone());
         }
     }
+
+    // D8:11101101 уже має точний примітив і Type-перевірку в SENS.
+    // Фізичне виконання за кодом працює; звичайний український Lisp
+    // потребує того самого механізму за лексичною D7-проєкцією.
+    // Не встановлюємо нової семантики або нератифікованого коду.
+    let string_to_symbol = eval::d8_string_to_symbol_builtin();
+    for surface in ["текст-у-символ", "string->symbol"] {
+        if environment.get(surface).is_none() {
+            environment.define(surface, string_to_symbol.clone());
+        }
+    }
 }
 
 /// Attach only already-existing callable values to their ratified D9 identities.
@@ -1050,6 +1061,22 @@ mod core4_bootstrap_cache_tests {
                 "D6 {surface} завантажено тільки як реальний Lisp-макрос"
             );
         }
+    }
+
+    // Перевіряється лише видимість уже ратифікованого D8 механізму:
+    // закони розпізнавання символу перевіряє сам Lisp/SENS через Zig/T5M.
+    #[test]
+    fn d8_string_to_symbol_projection_is_installed_after_core4() {
+        let mut session = Session::bare();
+        load_core_library(&mut session).expect("чинний Core4 завантажується фізично");
+        let identity = semantic_registry::domain_identity_for_surface("текст-у-символ")
+            .expect("українська D8 проєкція має точну координату");
+        assert_eq!(identity.width(), 8);
+        assert_eq!(identity.packed_bits(), 0b11101101);
+        assert!(
+            matches!(session.environment.get("текст-у-символ"), Some(Value::Builtin(_))),
+            "вже реалізований D8 механізм має бути доступним звичайному Lisp"
+        );
     }
 
     #[test]
