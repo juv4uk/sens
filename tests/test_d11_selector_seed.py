@@ -333,6 +333,9 @@ class D11SelectorSeedAuditTests(unittest.TestCase):
             "reusable_fixed_buffers=YES",
             "timed_allocations=0",
             "alternating_process_order=YES",
+            "expected_impl",
+            "checksum_value != \"9\"",
+            "seen[\"rust\" SUBSEP i]",
             "D11_FAMILIES_SUMMARY",
         ):
             with self.subTest(layer="runner", token=token):
