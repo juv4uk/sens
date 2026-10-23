@@ -1,4 +1,4 @@
-name: SENS — легкий контроль проєкції Lisp
+name: SENS — український Lisp і фізичний коридор
 
 on:
   push:
@@ -7,18 +7,17 @@ on:
     branches: [main]
   workflow_dispatch:
 
-# Єдиний автоматичний workflow. На push зміненого Lisp запускаються
-# три адресні бенчмарки й фізичний Zig/T5M → SENS, а решта важких
-# наборів залишається у ci-heavy.yml (лише вручну).
-# Структурна перевірка не підміняє SENS і не допускає реліз.
+# Спрощений ci.yml за версією 22.10.2026.
+# Один автоматичний workflow; важкі дослідження — лише вручну в ci-heavy.yml.
+# PASS коридору не є релізним допуском.
 permissions:
   contents: read
 
 jobs:
-  lisp-guards:
-    name: Легкий контроль кодів і українських проєкцій
+  sens:
+    name: Українська проєкція, 3 бенчмарки та SENS/Zig/T5M
     runs-on: ubuntu-24.04
-    timeout-minutes: 5
+    timeout-minutes: 35
     steps:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5, pinned
         with:
@@ -73,21 +72,6 @@ jobs:
                   print(f"{row['status']}: {row['path']}: " +
                         "; ".join(row.get("reasons", [])))
           PY
-
-
-  lisp-corridor:
-    name: Три Lisp-бенчмарки та фізичний Rust → Zig → SENS
-    needs: [lisp-guards]
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    runs-on: ubuntu-24.04
-    timeout-minutes: 30
-    outputs:
-      has_lisp: ${{ steps.changed-t5m-lisp.outputs.has_lisp }}
-      has_files: ${{ steps.changed-t5m-lisp.outputs.has_files }}
-    steps:
-      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5, pinned
-        with:
-          persist-credentials: false
 
       - name: Знайти змінені Lisp-програми, а не історичні таблиці
         id: changed-t5m-lisp
@@ -210,141 +194,80 @@ jobs:
               "$RUNNER_TEMP/changed-t5m-pairs"
 
 
-      # Повернуто з ci.yml за 22.10.2026: реальні метрики AST і розміру.
-      # На відміну від старого лише Step Summary, тепер є й file-анотації.
-      - name: BENCH-LISP→SENS — анотації, AST і розмір фізичних програм
+
+      # Учорашній BENCH-LISP→SENS: анотації лише зі справжніх нативних метрик.
+      - name: Lisp → T5M → SENS — анотації розміру й AST
         if: ${{ always() && steps.changed-t5m-lisp.outputs.has_files == 'true' }}
+        env:
+          CORRIDOR_RESULT: ${{ steps.t5m_changed_execute.outcome }}
         shell: bash
         timeout-minutes: 5
         run: |
           set -euo pipefail
-          sources="$RUNNER_TEMP/changed-t5m-lisp.txt"
           staged="$RUNNER_TEMP/changed-t5m-pairs"
-          report="$RUNNER_TEMP/lisp-ast-size"
-          mkdir -p "$report"
-          printf 'source\tsource_bytes\tt5m_bytes\tast_nodes\teval_visits\tresult\n' > "$report/measurements.tsv"
+          mkdir -p "$staged"
+          report="$staged/ast-size.md"
           {
-            echo '## Змінений Lisp → фізичний Zig/T5M → SENS: розмір та AST'
+            echo '## Змінені Lisp → Zig/T5M → SENS'
             echo
-            echo '| Джерело | Lisp, байт | T5M, байт | AST | Відвідування | Результат |'
+            echo '| Lisp | Lisp, байт | T5M, байт | AST | Відвідування | Результат |'
             echo '|---|---:|---:|---:|---:|---|'
-          } > "$report/report.md"
-
-          # RED іншого кроку не може створити в анотаціях удаваний PASS.
-          if [[ "${{ steps.t5m_changed_execute.outcome }}" != success ]]; then
-            echo "::warning title=SENS T5M corridor::physical=NOT_VERIFIED execution=${{ steps.t5m_changed_execute.outcome }}; release=NOT_CERTIFIED"
-            echo 'Нативний коридор не підтверджений, вимірювання відсутні.' >> "$report/report.md"
-            cat "$report/report.md" >> "$GITHUB_STEP_SUMMARY"
-            exit 0
+          } > "$report"
+          if [[ "$CORRIDOR_RESULT" != success ]]; then
+            echo "::warning title=SENS T5M::Коридор не пройдено; AST=NOT_MEASURED; release=NOT_CERTIFIED"
+            echo '| — | — | — | — | — | NOT_VERIFIED |' >> "$report"
+          else
+            measured=0
+            missed=0
+            while IFS= read -r file || [[ -n "$file" ]]; do
+              [[ -n "$file" ]] || continue
+              id="$(printf '%s' "$file" | sha256sum | cut -c1-16)"
+              dir="$staged/$id"
+              physical="$dir/$(basename "$file" .lisp).sens"
+              if [[ ! -s "$physical" || ! -f "$dir/native-standalone.stdout" ||
+                    ! -f "$dir/native-paired.stdout" ]] ||
+                 ! cmp -s "$dir/native-standalone.stdout" "$dir/native-paired.stdout"; then
+                echo "::warning file=$file,title=SENS AST::NOT_MEASURED: самостійність/парність не доведена"
+                missed=$((missed + 1))
+                continue
+              fi
+              if ! timeout 45s "$PWD/target/debug/sens-trit" verify-view "$physical" >"$dir/ast-verify.stdout" 2>"$dir/ast-verify.stderr" ||
+                 ! timeout 90s "$PWD/target/debug/sens" --benchmark-physical "$physical" >"$dir/ast.stdout" 2>"$dir/ast.stderr"; then
+                echo "::warning file=$file,title=SENS AST::NOT_MEASURED: нативний виконавець відхилив вимір"
+                missed=$((missed + 1))
+                continue
+              fi
+              record="$(grep '^SENS_BINARY_BENCH ' "$dir/ast.stderr" || true)"
+              if [[ "$record" =~ ^SENS_BINARY_BENCH[[:space:]]AST_NODES=([0-9]+)[[:space:]]EVAL_VISITS=([0-9]+)[[:space:]]RESULT=(.+)$ ]]; then
+                nodes="${BASH_REMATCH[1]}"
+                visits="${BASH_REMATCH[2]}"
+                result="${BASH_REMATCH[3]}"
+              else
+                echo "::warning file=$file,title=SENS AST::NOT_MEASURED: відсутні нативні лічильники"
+                missed=$((missed + 1))
+                continue
+              fi
+              if ! cmp -s "$dir/ast.stdout" "$dir/native-standalone.stdout" ||
+                 [[ "$result" != "$(tail -n 1 "$dir/ast.stdout")" ]]; then
+                echo "::error file=$file,title=SENS AST::Результат виміру не збігається з фізичним виконанням"
+                exit 1
+              fi
+              source_bytes="$(wc -c < "$file" | tr -d '[:space:]')"
+              t5m_bytes="$(wc -c < "$physical" | tr -d '[:space:]')"
+              echo "::notice file=$file,title=SENS Lisp→T5M::PASS lisp_bytes=$source_bytes t5m_bytes=$t5m_bytes ast_nodes=$nodes eval_visits=$visits result=$result"
+              printf '| `%s` | %s | %s | %s | %s | `%s` |\n' "$file" "$source_bytes" "$t5m_bytes" "$nodes" "$visits" "$result" >> "$report"
+              measured=$((measured + 1))
+            done < "$RUNNER_TEMP/changed-t5m-lisp.txt"
+            echo "::notice title=SENS фізичний коридор::PASS measured=$measured unmeasured=$missed release=NOT_CERTIFIED"
+            echo "Виміряно: **$measured**; без AST-метрики: **$missed**. Релізний допуск не встановлено." >> "$report"
           fi
-          echo "::notice title=SENS Zig/T5M corridor::PASS changed-Lisp physical roundtrip and paired execution; release=NOT_CERTIFIED"
-          sens="$PWD/target/debug/sens"
-          trit="$PWD/target/debug/sens-trit"
-          test -x "$sens"
-          test -x "$trit"
-          test -s "$sources"
-          measured=0
-          unmeasured=0
-          checked=0
-          while IFS= read -r source || [[ -n "$source" ]]; do
-            [[ -n "$source" ]] || continue
-            checked=$((checked + 1))
-            id="$(printf '%s' "$source" | sha256sum | cut -c1-16)"
-            dir="$staged/$id"
-            physical="$dir/$(basename "$source" .lisp).sens"
-            if [[ ! -f "$source" || -L "$source" || ! -s "$physical" || -L "$physical" ||
-                  ! -f "$dir/native-paired.stdout" || ! -f "$dir/native-standalone.stdout" ]] ||
-               ! cmp -s "$dir/native-paired.stdout" "$dir/native-standalone.stdout"; then
-              echo "::notice file=$source,title=SENS T5M AST::paired=CHECKED standalone=NOT_VERIFIED AST=NOT_MEASURED release=NOT_CERTIFIED"
-              printf '| `%s` | — | — | — | — | парність/самостійність не доведено для виміру |\n' "$source" >> "$report/report.md"
-              unmeasured=$((unmeasured + 1))
-              continue
-            fi
-            # Жодних Python-чисел: SENS видає AST_NODES/EVAL_VISITS і сам результат.
-            if ! timeout 45s "$trit" verify-view "$physical" >"$dir/size-verify.stdout" 2>"$dir/size-verify.stderr"; then
-              echo "::warning file=$source,title=SENS T5M AST::physical view inverse failed; AST=NOT_MEASURED"
-              unmeasured=$((unmeasured + 1))
-              continue
-            fi
-            if ! timeout 90s "$sens" --benchmark-physical "$physical" >"$dir/size-bench.stdout" 2>"$dir/size-bench.stderr"; then
-              echo "::warning file=$source,title=SENS T5M AST::native SENS physical benchmark rejected; AST=NOT_MEASURED"
-              unmeasured=$((unmeasured + 1))
-              continue
-            fi
-            entry="$(grep '^SENS_BINARY_BENCH ' "$dir/size-bench.stderr" || true)"
-            if [[ "$entry" =~ ^SENS_BINARY_BENCH[[:space:]]AST_NODES=([0-9]+)[[:space:]]EVAL_VISITS=([0-9]+)[[:space:]]RESULT=(.+)$ ]]; then
-              nodes="${BASH_REMATCH[1]}"
-              visits="${BASH_REMATCH[2]}"
-              result="${BASH_REMATCH[3]}"
-            else
-              echo "::warning file=$source,title=SENS T5M AST::native AST counters absent; AST=NOT_MEASURED"
-              unmeasured=$((unmeasured + 1))
-              continue
-            fi
-            if [[ "$result" != "$(tail -n 1 "$dir/size-bench.stdout")" ]] ||
-               ! cmp -s "$dir/native-standalone.stdout" "$dir/size-bench.stdout"; then
-              echo "::error file=$source,title=SENS T5M AST::physical measured result differs from executed SENS output"
-              exit 1
-            fi
-            source_bytes="$(wc -c < "$source" | tr -d '[:space:]')"
-            t5m_bytes="$(wc -c < "$physical" | tr -d '[:space:]')"
-            printf '%s\t%s\t%s\t%s\t%s\t%s\n' "$source" "$source_bytes" "$t5m_bytes" "$nodes" "$visits" "$result" >> "$report/measurements.tsv"
-            printf '| `%s` | %s | %s | %s | %s | `%s` |\n' "$source" "$source_bytes" "$t5m_bytes" "$nodes" "$visits" "$result" >> "$report/report.md"
-            echo "::notice file=$source,title=SENS Lisp→T5M AST::PASS lisp_bytes=$source_bytes t5m_bytes=$t5m_bytes ast_nodes=$nodes eval_visits=$visits result=$result native=SENS/Zig"
-            measured=$((measured + 1))
-          done < "$sources"
-          {
-            echo
-            echo "Файлів: **$checked**; виміряно: **$measured**; без AST-метрики: **$unmeasured**."
-            echo
-            echo 'Ці метрики не є p50/p95 та не надають релізного допуску.'
-          } >> "$report/report.md"
-          cat "$report/report.md" >> "$GITHUB_STEP_SUMMARY"
-          echo "::notice title=SENS Lisp physical summary::checked=$checked measured=$measured unmeasured=$unmeasured runtime=native-SENS/Zig release=NOT_CERTIFIED"
+          cat "$report" >> "$GITHUB_STEP_SUMMARY"
 
-      - name: Зберегти фізичні T5M-свідки після SENS виконання
-        if: always() && steps.changed-t5m-lisp.outputs.has_files == 'true'
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4, pinned
-        with:
-          name: sens-t5m-corridor-${{ github.sha }}
-          path: ${{ runner.temp }}/changed-t5m-pairs/
-          if-no-files-found: ignore
-          retention-days: 1
-
-      - name: BENCH-LISP→SENS — звіт AST та розміру
+      - name: Зберегти фізичні свідки та AST-звіт
         if: ${{ always() && steps.changed-t5m-lisp.outputs.has_files == 'true' }}
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4, pinned
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4 pinned
         with:
-          name: sens-lisp-ast-size-${{ github.sha }}
-          path: ${{ runner.temp }}/lisp-ast-size/
+          name: sens-lisp-t5m-${{ github.sha }}
+          path: ${{ runner.temp }}/changed-t5m-pairs/
           if-no-files-found: warn
           retention-days: 14
-
-  lisp-surface:
-    name: Підсумковий гейт перевірок SENS
-    if: ${{ always() }}
-    needs: [lisp-guards, lisp-corridor]
-    runs-on: ubuntu-24.04
-    timeout-minutes: 2
-    steps:
-      - name: Не видавати структурний PASS за перевірену семантику
-        env:
-          GUARDS_RESULT: ${{ needs.lisp-guards.result }}
-          CORRIDOR_RESULT: ${{ needs.lisp-corridor.result }}
-          CORRIDOR_HAS_LISP: ${{ needs.lisp-corridor.outputs.has_lisp }}
-          CORRIDOR_HAS_FILES: ${{ needs.lisp-corridor.outputs.has_files }}
-        run: |
-          set -euo pipefail
-          if [[ "$GUARDS_RESULT" != success ]]; then
-            echo "::error::SENS LIGHT CHECKS FAIL: guards=$GUARDS_RESULT"
-            exit 1
-          fi
-          if [[ "$CORRIDOR_RESULT" != success && "$CORRIDOR_RESULT" != skipped ]]; then
-            echo "::error::SENS CORRIDOR FAIL: status=$CORRIDOR_RESULT"
-            exit 1
-          fi
-          if [[ "$CORRIDOR_RESULT" == success && "$CORRIDOR_HAS_LISP" == true ]]; then
-            echo "SENS THREE BENCHMARKS PASS; corridor=$([[ "$CORRIDOR_HAS_FILES" == true ]] && echo PASS || echo NO_EXECUTABLE_CHANGE); release=NOT_CERTIFIED"
-          else
-            echo "SENS LIGHT CHECKS PASS; runtime=NOT_TESTED; release=NOT_CERTIFIED"
-          fi
