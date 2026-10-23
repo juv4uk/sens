@@ -443,6 +443,7 @@ run_case run_type_rejection d3-eq-nonatom-type-negative tests/semantic/d3-eq-non
 run_case run_type_rejection d3-car-empty-list-type-negative tests/semantic/d3-car-empty-list-type-negative.lisp 'car expects a non-empty list'
 run_case run_type_rejection d3-car-atomic-dotted-tail-type-negative tests/semantic/d3-car-atomic-dotted-tail-type-negative.lisp 'car expects a non-empty list'
 run_case run_type_rejection d3-cdr-empty-list-type-negative tests/semantic/d3-cdr-empty-list-type-negative.lisp 'cdr expects a non-empty list'
+run_case run_type_rejection d3-cdr-atom-type-negative tests/semantic/d3-cdr-atom-type-negative.lisp 'cdr expects a non-empty list'
 run_case run_type_rejection d3-cond-nil-condition-type-negative tests/semantic/d3-cond-nil-condition-type-negative.lisp 'D3:110 COND expects exact D1:1 / D1:0'
 # D4 NOT — часткова функція тільки над D1 PredicateBit, ніколи над структурним NIL.
 run_case run_type_rejection d4-not-nonpredicate-type-negative tests/semantic/d4-not-nonpredicate-type-negative.lisp 'NOT requires an exact D1 PredicateBit'
