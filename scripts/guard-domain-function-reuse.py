@@ -363,7 +363,7 @@ def main(argv: list[str] | None = None) -> int:
             known = {n for n, _, _ in definitions_with_bodies(old_text)}
         active_text = _mask_quotes(text)
         usage[rel] = sum(
-            1 for head in re.findall(r"\\(\\s*([^\\s()]{2,})", active_text)
+            1 for head in re.findall(r"\(\s*([^\s()]{2,})", active_text)
             if head in ladder and head not in STRUCTURAL
         )
         for name, body, marked in definitions_with_bodies(text):
