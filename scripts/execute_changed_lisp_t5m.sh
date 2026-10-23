@@ -156,6 +156,23 @@ run_native_t5m_program() {
   esac
   if [[ -n "$negative_type_diagnostic" ]]; then
     local rejection_status
+    # Третій незалежний свідок: пряме українське Lisp-джерело.
+    # Помилка Type має збігатися до і після фізичного Zig/T5M.
+    if timeout "$native_timeout" "$binary" "$file" \
+        >"$dir/native-direct.stdout" 2>"$dir/native-direct.stderr"; then
+      echo "::error::T5M_EXPECTED_TYPE_DIRECT_ACCEPTED source=$file" >&2
+      mark_file_failed
+      return
+    else
+      rejection_status=$?
+    fi
+    if (( rejection_status == 124 || rejection_status == 137 )) ||
+       ! grep -Fq "$negative_type_diagnostic" "$dir/native-direct.stderr"; then
+      sed 's/^/SENS negative direct: /' "$dir/native-direct.stderr" >&2
+      echo "::error::T5M_EXPECTED_TYPE_DIRECT_MISMATCH source=$file status=$rejection_status" >&2
+      mark_file_failed
+      return
+    fi
     if timeout "$native_timeout" "$binary" --t5m-pair "$file" "$physical" "${binding_sources[@]}" \
         >"$dir/native-paired.stdout" 2>"$dir/native-paired.stderr"; then
       echo "::error::T5M_EXPECTED_TYPE_PAIRED_ACCEPTED source=$file" >&2
@@ -187,7 +204,11 @@ run_native_t5m_program() {
       mark_file_failed
       return
     fi
-    echo "::notice file=$file,title=SENS negative Type::PASS physical=Zig/T5M paired=REJECTED standalone=REJECTED diagnostic=$negative_type_diagnostic"
+    # Обидва фізичні способи СЕНС реально виконано й незалежно
+    # відхилено саме з очікуваною помилкою. Лічильники не гублять негативи.
+    native_paired_executed_paths["$file"]=1
+    native_standalone_parity_paths["$file"]=1
+    echo "::notice file=$file,title=SENS negative Type::PASS physical=Zig/T5M direct=REJECTED paired=REJECTED standalone=REJECTED diagnostic=$negative_type_diagnostic"
     return
   fi
 
