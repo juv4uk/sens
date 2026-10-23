@@ -7,7 +7,7 @@
 use sens::{
     BinarySourceWord, Bit1, Bit2, Bit3, Bit4, Bit5, Bit6, Bit7, Bit8, Bit9, DomainIdentity,
 };
-use std::{env, hint::black_box, process::ExitCode};
+use std::{env, hint::black_box, process::ExitCode, time::Instant};
 
 fn source_word(width: u8, raw: u16) -> BinarySourceWord {
     let low = raw as u8;
@@ -130,10 +130,98 @@ fn run_case(case: &str, iterations: u64) -> Option<u64> {
     })
 }
 
+fn run_series(case: &str, iterations: u64, samples: usize) -> Result<(), String> {
+    const TARGET_SAMPLE_NS: u128 = 25_000_000;
+    const MAX_BATCH_REPS: u64 = 10_000_000;
+
+    if iterations == 0 || samples < 5 || samples.is_multiple_of(2) {
+        return Err("iterations must be positive; samples must be odd and >= 5".into());
+    }
+    if run_case(case, iterations).is_none() {
+        return Err(format!("unknown case: {case}"));
+    }
+
+    // Invariants were proven by verify_invariants before entering this path.
+    for _ in 0..3 {
+        black_box(run_case(case, iterations).expect("validated benchmark case"));
+    }
+    let mut values = Vec::with_capacity(samples);
+    for sample in 0..samples {
+        let mut reps = 1u64;
+        let (elapsed_ns, checksum) = loop {
+            let started = Instant::now();
+            let mut checksum = 0u64;
+            for _ in 0..reps {
+                checksum = checksum.wrapping_add(
+                    run_case(case, iterations).expect("validated benchmark case")
+                );
+            }
+            black_box(checksum);
+            let elapsed = started.elapsed().as_nanos();
+            if elapsed >= TARGET_SAMPLE_NS {
+                break (elapsed, checksum);
+            }
+            if reps >= MAX_BATCH_REPS {
+                return Err(format!(
+                    "adaptive sample too short: case={case} reps={reps} elapsed_ns={elapsed}"
+                ));
+            }
+            let factor = TARGET_SAMPLE_NS.div_ceil(elapsed.max(1));
+            let factor = u64::try_from(factor).unwrap_or(u64::MAX);
+            reps = reps.saturating_mul(factor).clamp(reps.saturating_add(1), MAX_BATCH_REPS);
+        };
+        let operations = u128::from(iterations) * u128::from(reps);
+        let ns_per_iteration = elapsed_ns as f64 / operations as f64;
+        if !ns_per_iteration.is_finite() || ns_per_iteration <= 0.0 {
+            return Err(format!("invalid timing sample: case={case}"));
+        }
+        values.push(ns_per_iteration);
+        println!(
+            "RUST_DOMAIN_SAMPLE\tcase={case}\tsample={}\titerations={iterations}\treps={reps}\telapsed_ns={elapsed_ns}\tns_per_iteration={ns_per_iteration:.3}\tchecksum={checksum}\ttarget_sample_ns={TARGET_SAMPLE_NS}",
+            sample + 1,
+        );
+    }
+    let mut sorted = values.clone();
+    sorted.sort_by(f64::total_cmp);
+    let median_index = (sorted.len() - 1) / 2;
+    let p90_index = ((sorted.len() * 9).div_ceil(10)).saturating_sub(1).min(sorted.len() - 1);
+    println!(
+        "RUST_DOMAIN_SUMMARY\tcase={case}\tsamples={samples}\tp50_ns_per_iteration={:.3}\tp90_ns_per_iteration={:.3}\titerations_per_repetition={iterations}\tinvariant=exact-width-roundtrip\ttarget_sample_ns={TARGET_SAMPLE_NS}",
+        sorted[median_index],
+        sorted[p90_index],
+    );
+    Ok(())
+}
+
 fn main() -> ExitCode {
     verify_invariants();
 
-    let mut args = env::args().skip(1);
+    let args: Vec<String> = env::args().collect();
+    if args.len() == 5 && args[1] == "series" {
+        let iterations = match args[3].parse::<u64>() {
+            Ok(value) if value > 0 => value,
+            _ => {
+                eprintln!("RUST_DOMAIN_INVALID_INPUT: iterations must be positive");
+                return ExitCode::from(2);
+            }
+        };
+        let samples = match args[4].parse::<usize>() {
+            Ok(value) if value >= 5 && value % 2 == 1 => value,
+            _ => {
+                eprintln!("RUST_DOMAIN_INVALID_INPUT: samples must be odd and >= 5");
+                return ExitCode::from(2);
+            }
+        };
+        return match run_series(&args[2], iterations, samples) {
+            Ok(()) => ExitCode::SUCCESS,
+            Err(error) => {
+                eprintln!("RUST_DOMAIN_INVALID_INPUT_OR_TIMING: {error}");
+                ExitCode::from(2)
+            }
+        };
+    }
+
+    let mut args = args.into_iter().skip(1);
     let case = args.next().unwrap_or_else(|| "empty".to_owned());
     let iterations = args
         .next()
