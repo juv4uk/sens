@@ -589,14 +589,18 @@ while IFS= read -r file || [[ -n "$file" ]]; do
   elif [[ "$file" == "tests/semantic/meta-fc-predicates-d1-law.lisp" ||
           "$file" == "tests/semantic/meta-fc-predicates-d1-mutant.lisp" ]]; then
     binding_sources=(--binding-source lib/meta-eval-first-class.lisp)
-  elif [[ "$file" == "tests/semantic/d11-meta-compare-laws.lisp" ||
-          "$file" == "tests/semantic/d11-meta-compare-mutant.lisp" ||
-          "$file" == "tests/semantic/d11-meta-sixth-laws.lisp" ||
+  elif [[ "$file" == "tests/semantic/d11-meta-sixth-laws.lisp" ||
           "$file" == "tests/semantic/d11-meta-sixth-mutant.lisp" ||
           "$file" == "tests/semantic/d11-meta-last-define-laws.lisp" ||
           "$file" == "tests/semantic/d11-meta-last-define-mutant.lisp" ]]; then
     # Мовне джерело не містить дубля D11: чинне DEFINE шостого — в MetaEval.
     binding_sources=(--binding-source lib/meta-eval.lisp)
+  elif [[ "$file" == "tests/semantic/d11-family-association-law.lisp" ||
+          "$file" == "tests/semantic/d11-family-association-mutant.lisp" ]]; then
+    binding_sources=(--binding-source lib/d11-srfi1-alist-protocol.lisp)
+  elif [[ "$file" == "tests/semantic/d11-family-aggregation-law.lisp" ||
+          "$file" == "tests/semantic/d11-family-aggregation-mutant.lisp" ]]; then
+    binding_sources=(--binding-source lib/d11-clojure-frequencies-unary.lisp)
   elif [[ "$file" == "tests/semantic/d11-family-selection-law.lisp" ||
           "$file" == "tests/semantic/d11-family-selection-mutant.lisp" ]]; then
     # Ядро сімейства відбору Д11 — у lib/d11-family-selection.lisp.
