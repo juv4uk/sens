@@ -385,8 +385,9 @@ jobs:
             # Пари може ще не бути — refresh створює її канонічно (mint + view).
             bs=()
             case "$f" in
-              lib/persistent-vector.lisp) bs=(--binding-source "$RUNNER_TEMP/sens-core4-d24-roots.lisp");;
-              lib/reason.lisp|lib/forward.lisp) bs=(--binding-source lib/unify.lisp);;
+              lib/persistent-vector.lisp|lib/knowledge.lisp) bs=(--binding-source "$RUNNER_TEMP/sens-core4-d24-roots.lisp");;
+              lib/reason.lisp) bs=(--binding-source "$RUNNER_TEMP/sens-core4-d24-roots.lisp" --binding-source lib/unify.lisp);;
+              lib/forward.lisp) bs=(--binding-source lib/unify.lisp);;
               lib/d11-clojure-partition-by.lisp) bs=(--binding-source lib/d11-srfi1-span-break.lisp);;
                 lib/d11-clojure-frequencies-unary.lisp) bs=(--binding-source lib/d11-clojure-group-by.lisp);;
               lib/narrate.lisp) bs=(--binding-source lib/unify.lisp --binding-source lib/reason.lisp);;
@@ -676,8 +677,9 @@ jobs:
               fi
               bs=()
               case "$f" in
-                lib/persistent-vector.lisp) bs=(--binding-source "$RUNNER_TEMP/sens-core4-d24-roots.lisp");;
-                lib/reason.lisp|lib/forward.lisp) bs=(--binding-source lib/unify.lisp);;
+                lib/persistent-vector.lisp|lib/knowledge.lisp) bs=(--binding-source "$RUNNER_TEMP/sens-core4-d24-roots.lisp");;
+                lib/reason.lisp) bs=(--binding-source "$RUNNER_TEMP/sens-core4-d24-roots.lisp" --binding-source lib/unify.lisp);;
+              lib/forward.lisp) bs=(--binding-source lib/unify.lisp);;
               lib/d11-clojure-partition-by.lisp) bs=(--binding-source lib/d11-srfi1-span-break.lisp);;
                 lib/d11-clojure-frequencies-unary.lisp) bs=(--binding-source lib/d11-clojure-group-by.lisp);;
                 lib/narrate.lisp) bs=(--binding-source lib/unify.lisp --binding-source lib/reason.lisp);;
