@@ -151,6 +151,45 @@ class EncodedSourceLiteralTests(unittest.TestCase):
             "чинний машинний Lisp-профіль має іменні ключі без числових токенів",
         )
 
+    def test_live_library_projection_has_no_numeric_or_encoded_source_tokens(self):
+        # Перевіряємо всю живу бібліотеку, не лише рядки нового diff.
+        # Винятки нижче — таблиці/звіти/свідки даних, не виконувана проєкція.
+        schema_data = {
+            "lib/island-math-evidence.lisp",  # свідчення з ідентифікаторами задач
+            "lib/machine/encoding/admission-iclass-projection.lisp",  # згенерований звіт покриття
+            "lib/machine/encoding/coverage.lisp",
+            "lib/machine/encoding/admitted-iclass-index.lisp",
+            "lib/machine/dispatch/native-first-coverage.lisp",
+            "lib/surface/function-signatures.lisp",  # зафіксований не програмний контракт
+            "lib/surface/uk-docs.lisp",  # індекс документації з лічильником записів
+            "lib/surface/uk-name-audit.lisp",  # історична статистика аудиту назв
+            "lib/surface/uk-sa-coverage.lisp",  # історичний звіт покриття, не authority
+        }
+        violations = []
+        for path in sorted((ROOT / "lib").rglob("*.lisp")):
+            rel = path.relative_to(ROOT).as_posix()
+            if (
+                rel in schema_data
+                or rel.startswith("lib/domains/")
+                or rel.startswith("lib/generated/")
+                or rel.startswith("lib/machine/xed/generated/")
+                or (
+                    rel.startswith("lib/machine/isa/")
+                    and path.name.endswith(".lisp")
+                )
+            ):
+                continue
+            source = path.read_text(encoding="utf-8")
+            found = CHECK.find_forbidden_literals(source, path=rel)
+            if found:
+                violations.append(f"{rel}: {found}")
+        self.assertEqual(
+            violations,
+            [],
+            "жива Lisp-проєкція lib/ не повинна містити цифрових голів, "
+            "числових літералів або закодованих W8/D-domain токенів",
+        )
+
     def test_unquoted_numeric_literals_are_rejected(self):
         found = CHECK.find_forbidden_literals("(сума 235 2.1564)\n")
         self.assertEqual(
