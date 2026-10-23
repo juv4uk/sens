@@ -758,9 +758,16 @@ epistemic_sources=(lib/epistemic.lisp tests/fixtures/witness-runner.lisp
                    tests/fixtures/epistemic-authority-witness.lisp)
 epistemic_law_bundle="$evidence/epistemic-record-logic-positive-complete.lisp"
 epistemic_mutant_bundle="$evidence/epistemic-record-logic-mutant-complete.lisp"
-cat -- "$epistemic_constructor_source" "${epistemic_sources[@]}" tests/semantic/language-law-epistemic-records.lisp > "$epistemic_law_bundle"
-cat -- "$epistemic_constructor_source" "${epistemic_sources[@]}" tests/semantic/language-mutant-epistemic-records.lisp > "$epistemic_mutant_bundle"
-sha256sum "$epistemic_constructor_source" "${epistemic_sources[@]}" tests/semantic/language-law-epistemic-records.lisp tests/semantic/language-mutant-epistemic-records.lisp > "$evidence/epistemic-record-logic-inputs.sha256"
+# Явні D1 імена, потрібні чинним D9 Lisp-предикатам із core4.
+# Самостійному корпусу заборонено покладатися на неявні host-зв'язування.
+epistemic_d1_source="tests/fixtures/epistemic-d1-names.lisp"
+test -f "$epistemic_d1_source" && test ! -L "$epistemic_d1_source" || {
+  echo "::error::EPISTEMIC_D1_NAMES_MISSING source=$epistemic_d1_source" >&2
+  exit 2
+}
+cat -- "$epistemic_d1_source" "$epistemic_constructor_source" "${epistemic_sources[@]}" tests/semantic/language-law-epistemic-records.lisp > "$epistemic_law_bundle"
+cat -- "$epistemic_d1_source" "$epistemic_constructor_source" "${epistemic_sources[@]}" tests/semantic/language-mutant-epistemic-records.lisp > "$epistemic_mutant_bundle"
+sha256sum "$epistemic_d1_source" "$epistemic_constructor_source" "${epistemic_sources[@]}" tests/semantic/language-law-epistemic-records.lisp tests/semantic/language-mutant-epistemic-records.lisp > "$evidence/epistemic-record-logic-inputs.sha256"
 run_case run_law epistemic-record-logic-positive "$epistemic_law_bundle" "(epistemic-authority-witness (status pass))"
 run_case run_law epistemic-record-logic-mutant "$epistemic_mutant_bundle" "(epistemic-authority-witness (status fail) (case source-ref-valid-mutant) (actual 1) (expected 0))"
 # Д7/D8: окремі малі закони про текстові теги без LET чи числових літералів.
