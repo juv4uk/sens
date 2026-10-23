@@ -475,6 +475,14 @@ cat -- "$meta_compare_definition" tests/semantic/d11-meta-compare-laws.lisp > "$
 cat -- "$meta_compare_definition" tests/semantic/d11-meta-compare-mutant.lisp > "$meta_compare_mutant_bundle"
 run_case run_law d11-meta-compare-positive "$meta_compare_law_bundle" 1
 run_case run_law d11-meta-compare-mutant "$meta_compare_mutant_bundle" 0
+# Незалежна пара Д11 без D6 LENGTH: точна Д1-рівність і нерівність.
+# Визначення з lib/meta-eval.lisp незмінне: Lisp-дані й Lisp-закон, не Rust-оракул.
+meta_compare_d1_law_bundle="$evidence/d11-meta-compare-d1-positive-complete.lisp"
+meta_compare_d1_mutant_bundle="$evidence/d11-meta-compare-d1-mutant-complete.lisp"
+cat -- "$meta_compare_definition" tests/semantic/d11-meta-compare-d1-law.lisp > "$meta_compare_d1_law_bundle"
+cat -- "$meta_compare_definition" tests/semantic/d11-meta-compare-d1-mutant.lisp > "$meta_compare_d1_mutant_bundle"
+run_case run_law d11-meta-compare-d1-positive "$meta_compare_d1_law_bundle" 1
+run_case run_law d11-meta-compare-d1-mutant "$meta_compare_d1_mutant_bundle" 0
 # LAST-DEFINE: D7-текст має D8-рівність у нормативному Lisp, не D3 EQ Rust.
 # Повний MetaEval починається з невикличного D6 LENGTH (#5854). Для цієї
 # незалежної функції беремо ТОЧНО її визначення з чинного Lisp-файлу.
