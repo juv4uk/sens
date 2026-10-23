@@ -62,6 +62,11 @@ jobs:
             else
               list="$(git -c core.quotePath=false diff --diff-filter=AM --name-only "$BEFORE" "$AFTER" -- 'benchmarks/contest-uk/*.lisp'  ':(top,glob)lib/*.lisp' 'lib/core*.lisp' 'lib/list-*.lisp' 'lib/interleave-pairs.lisp' 'lib/tree-*.lisp' 'lib/d11-*.lisp' 'lib/meta-eval-first-class.lisp' 'tests/semantic/*.lisp' 'lib/reverse-three.lisp' 'lib/axioms-d1-principle-five.lisp' 'lib/life-1-scheduler.lisp' 'lib/lisp-fs.lisp' 'lib/world.lisp' 'lib/reason.lisp' 'lib/forward.lisp' 'lib/knowledge.lisp' 'lib/unify.lisp' 'lib/clips-import.lisp' 'lib/yantra.lisp' 'lib/machine/projection/x86-64.lisp' 'lib/machine/lowering/semantic-x86-64.lisp' ':(exclude)lib/core2.lisp' ':(exclude)lib/core-math.lisp' ':(exclude)tests/semantic/meta-fc-predicates-d1-mutant.lisp')"
             fi
+            # Обʼєднати точну push-різницю зі списком, отриманим від CI-вибору.
+            # Жодне джерело з вхідного маніфесту не губиться через повторний diff.
+            if [[ -n "$FILES" ]]; then
+              list="$(printf '%s\n%s\n' "$list" "$FILES" | awk 'NF && !seen[$0]++')"
+            fi
             # Зміна самого SENS-нижувача потребує перевірки його
             # СПОЖИВАЧА навіть коли вихідний свідок і байти ще не змінювались.
             # Не намагатись виконати бібліотеку як невідомий текстовий виклик.
@@ -852,6 +857,48 @@ jobs:
             echo "REMINT_CURRENT_MAIN_NATIVE_RECOVERED sha=$(git rev-parse HEAD) verified=YES"
           fi
 
+      # Показуємо реальний залишок трійок після нативного ремонту.
+      # Це облік фізичних файлів; він не оголошує мовний закон доведеним.
+      - name: Облік Lisp-трійок після нативного ремайнту
+        if: always()
+        shell: bash
+        run: |
+          set -uo pipefail
+          census="$RUNNER_TEMP/lisp-triplet-census.json"
+          stdout="$RUNNER_TEMP/lisp-triplet-census.stdout"
+          census_status=0
+          python3 scripts/audit_all_lisp_triplets.py --limit 12 --json "$census" > "$stdout" || census_status=$?
+          if (( census_status != 0 )); then
+            cat "$stdout" >&2 || true
+            echo "::warning title=SENS triplet census::НЕ ПЕРЕВІРЕНО census_status=$census_status"
+            exit 0
+          fi
+          python3 - "$census" "$GITHUB_STEP_SUMMARY" <<'PY'
+          import json
+          import sys
+          from pathlib import Path
+
+          report = json.loads(Path(sys.argv[1]).read_text(encoding="utf-8"))
+          fields = (
+              "total_lisp_files",
+              "potential_program_files",
+              "complete_triplets",
+              "potential_program_missing_sens",
+              "potential_program_missing_complete_triplet",
+              "reviewed_nonprogram_lisp",
+              "comment_only_nonprogram_lisp",
+          )
+          line = "SENS_LISP_TRIPLET_CENSUS " + " ".join(
+              f"{key}={report.get(key, 'NOT_REPORTED')}" for key in fields
+          ) + f" semantic_runtime_proven={report.get('semantic_runtime_proven')} release_ready={report.get('release_ready')}"
+          print(line)
+          with open(sys.argv[2], "a", encoding="utf-8") as summary:
+              summary.write("## Облік Lisp-трійок після нативного ремайнту\n\n")
+              summary.write("| Показник | Значення |\n|---|---:|\n")
+              for key in fields:
+                  summary.write(f"| `{key}` | {report.get(key, 'NOT_REPORTED')} |\n")
+              summary.write("\nЦе перепис фізичних джерел і супутників; він не засвідчує семантичний допуск.\n")
+          PY
       # Не оголошувати GREEN, коли SENS відхилив джерело; але не губити
       # незалежні вже доведені Zig/T5M пари через одного конкурсанта.
       - name: Зафіксувати адресні відмови після публікації справних пар
