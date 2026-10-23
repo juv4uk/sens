@@ -299,5 +299,47 @@ class D11SelectorSeedAuditTests(unittest.TestCase):
         self.assertIn("research-candidate-not-ratified", guard_ref)
 
 
+
+    def test_d11_rust_zig_benchmark_uses_identical_preflight_and_timed_contract(self):
+        rust = (ROOT / "benchmarks/native/d11_families.rs").read_text(encoding="utf-8")
+        zig = (ROOT / "benchmarks/native/d11_families.zig").read_text(encoding="utf-8")
+        runner = (ROOT / "benchmarks/native/run-d11-families.sh").read_text(encoding="utf-8")
+        workflow = (ROOT / ".github/workflows/ci.yml").read_text(encoding="utf-8")
+        for token in (
+            "const SAMPLE_COUNT: usize = 15",
+            "MIN_SAMPLE_NS",
+            "CLOCK_MONOTONIC",
+            "D11_FAMILIES_PREFLIGHT impl=rust",
+            "D11_FAMILIES_SAMPLE impl=rust",
+            "allocations=0",
+            "black_box",
+        ):
+            with self.subTest(layer="rust", token=token):
+                self.assertIn(token, rust)
+        for token in (
+            "const sample_count: usize = 15",
+            "minimum_sample_ns",
+            "clock_monotonic",
+            "D11_FAMILIES_PREFLIGHT impl=zig",
+            "D11_FAMILIES_SAMPLE impl=zig",
+            "allocations=0",
+            "doNotOptimizeAway",
+        ):
+            with self.subTest(layer="zig", token=token):
+                self.assertIn(token, zig)
+        for token in (
+            "same_workload=YES",
+            "same_timed_boundary=YES",
+            "reusable_fixed_buffers=YES",
+            "timed_allocations=0",
+            "alternating_process_order=YES",
+            "D11_FAMILIES_SUMMARY",
+        ):
+            with self.subTest(layer="runner", token=token):
+                self.assertIn(token, runner)
+        self.assertIn("benchmarks/native/run-d11-families.sh", workflow)
+
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -646,6 +646,17 @@ jobs:
           zig test -O ReleaseFast -lc benchmarks/mechanism/zig-byte-copy-bench.zig
           echo "::notice title=Rust Zig mechanism benchmarks::MEASURED samples=11 batch=512 source=lib/core4.lisp semantic=NOT_ASSERTED"
 
+      # Д11: Rust і Zig виконують ті самі три операції з тими самими даними.
+      # Однакова часова межа, повторно використовувані буфери, 15 чергованих зразків.
+      - name: Rust/Zig — порівнюваний бенчмарк сімейств D11
+        if: ${{ always() }}
+        shell: bash
+        timeout-minutes: 5
+        run: |
+          set -euo pipefail
+          bash benchmarks/native/run-d11-families.sh "$RUNNER_TEMP/d11-families"
+          cat "$RUNNER_TEMP/d11-families/summary.tsv" >> "$GITHUB_STEP_SUMMARY"
+
       # Rust тут перевіряє тільки механізм CLI. Жоден результат арифметики
       # або Lisp-закон не визначається Rust-тестами.
       - name: Rust CLI — механізм запуску бенчмарків, без мовного оракула

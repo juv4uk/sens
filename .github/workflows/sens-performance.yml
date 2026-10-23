@@ -159,6 +159,13 @@ jobs:
           zig run -O ReleaseFast -lc bench_t5m.zig \
             > "$RUNNER_TEMP/sens-mechanisms/zig-t5m-benchmark.tsv" 2>&1
           cat "$RUNNER_TEMP/sens-mechanisms/zig-t5m-benchmark.tsv"
+      - name: Compare D11 family operations in Rust and Zig
+        shell: bash
+        run: |
+          set -euo pipefail
+          bash benchmarks/native/run-d11-families.sh "$RUNNER_TEMP/sens-mechanisms/d11-families"
+          cat "$RUNNER_TEMP/sens-mechanisms/d11-families/summary.tsv" >> "$GITHUB_STEP_SUMMARY"
+
       - name: Publish native mechanism samples
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4 pinned
