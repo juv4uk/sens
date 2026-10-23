@@ -191,6 +191,16 @@ class EncodedSourceLiteralTests(unittest.TestCase):
             "чинний машинний Lisp-профіль має іменні ключі без числових токенів",
         )
 
+    def test_core4_carrier_matrix_has_no_numeric_source_literals(self):
+        # Живий дослід має використовувати іменовані D24+ значення.
+        path = ROOT / "experiments/core4-predicate-answer-carrier-matrix.lisp"
+        source = path.read_text(encoding="utf-8")
+        self.assertEqual(
+            CHECK.find_forbidden_literals(source, path=path),
+            [],
+            "матриця носіїв не повинна містити числових атомів",
+        )
+
     def test_live_library_projection_has_no_numeric_or_encoded_source_tokens(self):
         # Перевіряємо всю живу бібліотеку, не лише рядки нового diff.
         # Винятки нижче — таблиці/звіти/свідки даних, не виконувана проєкція.
