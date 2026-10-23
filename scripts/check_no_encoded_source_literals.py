@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
-"""Reject machine/domain word literals newly added to textual Lisp sources.
+"""Reject numeric and encoded literals newly added to executable Lisp sources.
 
-Decimal numerals in the human mathematical Lisp projection are lowered to
-exact D24+ domain words by the source/migration reader (with an explicit
-mathematical role). T5M only physically packs already-formed exact-width words;
-it neither infers domains nor decides semantic callability.
-The gate checks every changed Lisp path in a Git range (or the working-tree
-diff by default), while allowing the repository's pre-existing migration
-corpus to be removed incrementally rather than making unrelated edits fail.
+The public projection uses named Ukrainian forms and named D24+ values.
+Numeric function heads are distinct from scalar numeric literals so
+diagnostics show whether a coordinate or operand leaked into live source.
+Comments, strings, explicitly quoted data, canonical domain-table keys,
+frozen donor snapshots, and legacy signature metadata are handled as data,
+not as executable SENS expressions.
+The gate checks changed Lisp lines in a Git range so historical debt can be
+removed incrementally without disguising new numeric literals as clean.
 """
 from __future__ import annotations
 
@@ -166,11 +167,7 @@ def _quoted_data_numeric_head_offsets(code: str) -> set[int]:
 
 
 def find_forbidden_literals(source: str, path: str | Path | None = None) -> list[Finding]:
-    """Find raw typed-wire spellings and numeric call heads in Lisp code.
-
-    A decimal number in argument/data position (for example ``(сума 235)``)
-    is a human-projection value, not a domain-word literal, and is allowed.
-    """
+    """Find raw typed-wire spellings, numeric call heads and scalar literals."""
     code = _mask_comments_and_strings(source)
     findings: list[Finding] = []
     for match in ENCODED_WORD.finditer(code):
@@ -178,18 +175,34 @@ def find_forbidden_literals(source: str, path: str | Path | None = None) -> list
         column = match.start() - code.rfind("\n", 0, match.start())
         findings.append(Finding(line, column, match.group(), "encoded domain/wire word"))
     quoted_numeric_heads = _quoted_data_numeric_head_offsets(code)
-    for match in NUMERIC_CALL_HEAD.finditer(code):
-        start = match.start(1)
+    numeric_heads = {match.start(1): match for match in NUMERIC_CALL_HEAD.finditer(code)}
+    # Ban every numeric atom in live source, not merely numeric function heads.
+    # Keep the head diagnostic as the more specific error for a numeric opcode.
+    for match in re.finditer(r"[^\s()]+", code):
+        token = match.group()
+        start = match.start()
+        if not re.fullmatch(NUMBER, token):
+            continue
+        if start in quoted_numeric_heads or start in numeric_heads:
+            continue
+        if (_is_domain_table_key_head(source, path, start)
+                or _is_legacy_signature_key(source, path, start)
+                or _is_frozen_source_snapshot(path)):
+            continue
+        line = code.count("\\n", 0, start) + 1
+        column = start - code.rfind("\\n", 0, start)
+        findings.append(Finding(line, column, token, "numeric source literal"))
+    for start, match in numeric_heads.items():
         if start in quoted_numeric_heads:
             continue
         if (_is_domain_table_key_head(source, path, start)
                 or _is_legacy_signature_key(source, path, start)
                 or _is_frozen_source_snapshot(path)):
             continue
-        line = code.count("\n", 0, start) + 1
-        column = start - code.rfind("\n", 0, start)
+        line = code.count("\\n", 0, start) + 1
+        column = start - code.rfind("\\n", 0, start)
         findings.append(Finding(line, column, match.group(1), "numeric function/opcode head"))
-    return sorted(findings, key=lambda item: (item.line, item.column))
+        return sorted(findings, key=lambda item: (item.line, item.column))
 
 
 def added_lisp_lines_from_diff(diff: str) -> list[tuple[str, int, str]]:
