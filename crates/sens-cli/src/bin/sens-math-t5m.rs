@@ -435,36 +435,35 @@ mod paired {
                     assert_eq!(word.numeric_domain_width(), Some(expected_width));
                 }
             }
+
+            // Чинне українське джерело: лише десяткові значення, без #d24.
+            // Одномісні D5:01011 та D5:10111 — справжні виконувані закони.
+            for (id, source, expected) in [
+                ("decimal-negation", "(відняти 2)", "-2"),
+                ("decimal-reciprocal", "(частка 2)", "1/2"),
+            ] {
+                let words = expected_words(&qualify(source).unwrap()).unwrap();
+                assert_eq!(
+                    words.iter().map(|w| w.width).collect::<Vec<_>>(),
+                    vec![2, 5, 24, 2],
+                    "test_id={id} layer=domain"
+                );
+                let physical = zig_transport::encode_t5m_exact_words(&words).unwrap();
+                assert_eq!(
+                    zig_transport::decode_t5m_exact_words(&physical).unwrap(),
+                    words,
+                    "test_id={id} layer=transport"
+                );
+                assert_eq!(
+                    eval_verified(source, &physical).unwrap().to_string(),
+                    expected,
+                    "test_id={id} layer=SENS"
+                );
+            }
         }
 
-        // Чинне українське джерело: лише десяткові значення, без #d24.
-        // Одномісні D5:01011 та D5:10111 — справжні виконувані закони.
-        for (id, source, expected) in [
-            ("decimal-negation", "(відняти 2)", "-2"),
-            ("decimal-reciprocal", "(частка 2)", "1/2"),
-        ] {
-            let words = expected_words(&qualify(source).unwrap()).unwrap();
-            assert_eq!(
-                words.iter().map(|w| w.width).collect::<Vec<_>>(),
-                vec![2, 5, 24, 2],
-                "test_id={id} layer=domain"
-            );
-            let physical = zig_transport::encode_t5m_exact_words(&words).unwrap();
-            assert_eq!(
-                zig_transport::decode_t5m_exact_words(&physical).unwrap(),
-                words,
-                "test_id={id} layer=transport"
-            );
-            assert_eq!(
-                eval_verified(source, &physical).unwrap().to_string(),
-                expected,
-                "test_id={id} layer=SENS"
-            );
-        }
-    }
-
-    #[test]
-    fn unary_d5_zero_normalizes_and_zero_reciprocal_fails() {
+        #[test]
+        fn unary_d5_zero_normalizes_and_zero_reciprocal_fails() {
             let neg_zero = format!("(відняти #d24:{})", bits(0));
             let words = expected_words(&qualify(&neg_zero).unwrap()).unwrap();
             let packed = zig_transport::encode_t5m_exact_words(&words).unwrap();
