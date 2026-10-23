@@ -155,6 +155,7 @@ jobs:
                   "tests/semantic/meta-eval-graph-d1-law.lisp",
                   "tests/semantic/meta-eval-graph-d1-mutant.lisp",
                   "tests/semantic/meta-fc-predicates-d1-mutant.lisp",
+                  "tests/semantic/core-d3-car-cdr-cons-mutant.lisp",
                   "tests/fixtures/conformance-transition-witness.lisp",
               }:
                   print(f"T5M_DEPENDENT_FIXTURE path={name} status=NOT_STANDALONE")
@@ -297,6 +298,40 @@ jobs:
           check_lisp_law d3-d4-selection-mutant tests/semantic/d3-d4-logic-selection-mutant.lisp '0'
           check_lisp_law d4-selector-domain-positive tests/semantic/d4-selector-domain-law.lisp '(d4-selector-domain-law (status pass) (projection ukr))'
           check_lisp_law exact-arithmetic-positive tests/semantic/exact-arithmetic-laws.lisp '(exact-arithmetic-law (status pass) (authority lisp))'
+
+      # Негативний свідок не є позитивним входом загального T5M-коридору.
+      - name: Lisp D3 — CAR/CDR/CONS закон і негативний мутант
+        if: steps.changed-t5m-lisp.outputs.has_lisp == 'true'
+        shell: bash
+        timeout-minutes: 3
+        run: |
+          set -euo pipefail
+          binary="$PWD/target/debug/sens"
+          law="tests/semantic/core-d3-car-cdr-cons-law.lisp"
+          mutant="tests/semantic/core-d3-car-cdr-cons-mutant.lisp"
+          test -x "$binary"
+          if ! timeout 45s "$binary" "$law" > "$RUNNER_TEMP/d3-core-law.out" 2> "$RUNNER_TEMP/d3-core-law.err"; then
+            echo "::error file=$law,title=SENS D3 law::REGRESSION layer=eval expected=D1:1 actual=execution-failure"
+            cat "$RUNNER_TEMP/d3-core-law.err" >&2
+            exit 1
+          fi
+          actual="$(tail -n 1 "$RUNNER_TEMP/d3-core-law.out")"
+          if [[ "$actual" != "1" ]]; then
+            echo "::error file=$law,title=SENS D3 law::REGRESSION layer=eval expected=D1:1 actual=$actual"
+            exit 1
+          fi
+          if timeout 45s "$binary" "$mutant" > "$RUNNER_TEMP/d3-core-mutant.out" 2> "$RUNNER_TEMP/d3-core-mutant.err"; then
+            echo "::error file=$mutant,title=SENS D3 mutant::REGRESSION layer=eval expected=CAR-type-rejection actual=unexpected-success"
+            exit 1
+          else
+            status=$?
+          fi
+          if [[ "$status" -eq 124 ]] || ! grep -Fq 'car expects a non-empty list' "$RUNNER_TEMP/d3-core-mutant.err"; then
+            echo "::error file=$mutant,title=SENS D3 mutant::UNINFORMATIVE-NEGATIVE layer=eval expected=CAR-type-rejection actual=other-error status=$status"
+            cat "$RUNNER_TEMP/d3-core-mutant.err" >&2
+            exit 1
+          fi
+          echo "::notice file=$law,title=SENS D3 language law::PASS native=SENS expected=D1:1 observed=$actual mutant=CAR-type-rejected"
 
       # Учорашній BENCH-LISP→SENS: анотації лише зі справжніх нативних метрик.
       - name: Lisp → T5M → SENS — анотації розміру й AST
