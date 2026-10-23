@@ -437,6 +437,44 @@ sha256sum lib/d11-family-selection.lisp lib/d11-srfi1-alist-protocol.lisp \
   tests/semantic/d11-families-benchmark-mutant.lisp > "$evidence/d11-families-inputs.sha256"
 run_case run_law d11-families-benchmark-positive "$d11_families_law" 1
 run_case run_law d11-families-benchmark-mutant "$d11_families_mutant" 0
+# Вимірюємо ТІЛЬКИ справжній фізичний SENS, після доведеного D1 закону.
+# Це p50 цілого процесу на shared runner, не ізольований час eval.
+# Сирі зразки + SHA залишаються в артефакті CI; червоне не маскуємо.
+d11_bench_evidence="$evidence/d11-families-benchmark-positive"
+if [[ -s "$d11_bench_evidence/program.sens" &&
+      -f "$d11_bench_evidence/physical.out" ]]; then
+  d11_bench_samples="$evidence/d11-families-physical-wall-us.tsv"
+  : > "$d11_bench_samples"
+  for iteration in 1 2 3 4 5; do
+    start_ns="$(date +%s%N)"
+    if ! timeout 45s "$sens" "$d11_bench_evidence/program.sens" > "$evidence/d11-families-physical-$iteration.out" 2>"$evidence/d11-families-physical-$iteration.err"; then
+      cat "$evidence/d11-families-physical-$iteration.err" >&2
+      echo "::error title=SENS D11 benchmark::REGRESSION layer=physical-repeatability iteration=$iteration expected=SENS-execution actual=rejected" >&2
+      exit 1
+    fi
+    end_ns="$(date +%s%N)"
+    if ! cmp -s "$d11_bench_evidence/physical.out" "$evidence/d11-families-physical-$iteration.out"; then
+      echo "::error title=SENS D11 benchmark::REGRESSION layer=output-parity iteration=$iteration expected=byte-exact-SENS actual=divergent" >&2
+      exit 1
+    fi
+    printf '%s\t%s\n' "$iteration" "$(((end_ns - start_ns) / 1000))" >> "$d11_bench_samples"
+  done
+  mapfile -t sorted_wall < <(cut -f2 "$d11_bench_samples" | sort -n)
+  if (( ${#sorted_wall[@]} != 5 )); then
+    echo "::error title=SENS D11 benchmark::REGRESSION layer=sample-count expected=5 actual=${#sorted_wall[@]}" >&2
+    exit 1
+  fi
+  source_bytes="$(wc -c < "$d11_families_law" | tr -d '[:space:]')"
+  physical_bytes="$(wc -c < "$d11_bench_evidence/program.sens" | tr -d '[:space:]')"
+  echo "::notice title=SENS D11 physical benchmark::MEASURED p50_us=${sorted_wall[2]} max_us=${sorted_wall[4]} source_bytes=$source_bytes physical_bytes=$physical_bytes samples=5 native=SENS semantic=D1:1 verified=YES"
+  printf 'p50_us\t%s\nmax_us\t%s\nsource_bytes\t%s\nphysical_bytes\t%s\n' \
+    "${sorted_wall[2]}" "${sorted_wall[4]}" "$source_bytes" "$physical_bytes" > "$evidence/d11-families-benchmark-metrics.tsv"
+  if (( sorted_wall[2] > 0 && sorted_wall[4] > sorted_wall[2] * 3 )); then
+    echo "::warning title=SENS D11 physical benchmark::NOISY_SAMPLES p50_us=${sorted_wall[2]} max_us=${sorted_wall[4]}" >&2
+  fi
+else
+  echo "::warning title=SENS D11 physical benchmark::NOT_MEASURED reason=law-not-physically-certified release=NOT_CERTIFIED"
+fi
 # Дев'ять D11 законів шостого елемента належать самому Lisp/SENS.
 # Повний MetaEval починає з D6 LENGTH, ще невикличного у фізичному T5M:
 # він не є передумовою цієї незалежної композиції п'яти CDR і одного CAR.
