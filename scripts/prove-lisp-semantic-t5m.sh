@@ -372,6 +372,14 @@ cat -- lib/result-status.lisp tests/semantic/result-status-dotted-law.lisp > "$r
 cat -- lib/result-status.lisp tests/semantic/result-status-dotted-mutant.lisp > "$result_status_dotted_mutant_bundle"
 run_case run_law result-status-dotted-positive "$result_status_dotted_law_bundle" 1
 run_case run_law result-status-dotted-mutant "$result_status_dotted_mutant_bundle" 0
+# Д9: окремий Lisp-доказ D1 для правильних/крапкових міток і цілей NOT.
+# Реальний SENS після Zig/T5M перевіряє весь набір, без очікувань у Rust.
+result_status_goal_tags_bundle="$evidence/result-status-goal-tags-positive.lisp"
+result_status_goal_tags_mutant_bundle="$evidence/result-status-goal-tags-mutant.lisp"
+cat -- lib/result-status.lisp tests/semantic/result-status-goal-tags-law.lisp > "$result_status_goal_tags_bundle"
+cat -- lib/result-status.lisp tests/semantic/result-status-goal-tags-mutant.lisp > "$result_status_goal_tags_mutant_bundle"
+run_case run_law result-status-goal-tags-positive "$result_status_goal_tags_bundle" 1
+run_case run_law result-status-goal-tags-mutant "$result_status_goal_tags_mutant_bundle" 0
 # Локалізуємо фізичну розбіжність: форма змінної → входження → повна уніфікація.
 # Визначення й закон належать тільки Lisp, Shell лише додає lib/unify.lisp.
 # Незалежно локалізуємо D3/D4 форму змінної: позитив, негатив і мутант.
