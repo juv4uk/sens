@@ -40,12 +40,12 @@ fn trial(name: &str, op: &str, t5: &[u8], f3c: &[u8], reps: usize) -> u128 {
 }
 fn main() {
     let cases: [(&str, &[u8], &[u8], usize); 2] = [
-        ("quote", &[0x63, 0x89, 0x06, 0xa1], &[0xf3, 0x40, 0x60], 512),
+        ("quote", &[0x63, 0x89, 0x06, 0xa1], &[0xf3, 0x40, 0x60], 24_000),
         (
             "car_cons",
             &[0x66, 0x38, 0x67, 0x89, 0x89, 0x3b, 0x35],
             &[0xf3, 0x36, 0x5f, 0x1b, 0xd0, 0xc9],
-            256,
+            12_000,
         ),
     ];
     // Неканонічний F3C не допускається, а T5 fallback не припустимий.

@@ -75,6 +75,8 @@ def main():
 
     rng = random.Random(meta["seed"])
     samples = []
+    # Дані з різним числом повторів не можна називати порівнюваними.
+    matched_repetitions = defaultdict(dict)
     fixture_count = defaultdict(set)
     with (out / "samples.jsonl").open("w") as handle:
         for pair in range(args.pairs):
@@ -102,10 +104,18 @@ def main():
                             "reps": int(row["reps"]), "elapsed_ns": int(row["elapsed_ns"])}
                     if item["reps"] <= 0 or item["elapsed_ns"] <= 0:
                         raise RuntimeError(f"invalid sample {item}")
+                    old_reps = matched_repetitions[(pair, item["case"], item["op"])].get(impl)
+                    if old_reps is not None and old_reps != item["reps"]:
+                        raise RuntimeError(f"BLOCKED_NO_TIMING inconsistent repetitions {item}")
+                    matched_repetitions[(pair, item["case"], item["op"])][impl] = item["reps"]
                     item["ns_per_op"] = item["elapsed_ns"] / item["reps"]
                     samples.append(item)
                     handle.write(json.dumps(item) + "\n")
             for case in CASES:
+                for op in ("encode", "decode"):
+                    rep_count = matched_repetitions.get((pair, case, op), {})
+                    if set(rep_count) != {"zig", "rust"} or rep_count["zig"] != rep_count["rust"]:
+                        raise RuntimeError(f"BLOCKED_NO_TIMING unequal repetitions pair={pair} case={case} op={op} reps={rep_count}")
                 if phys[case].get("zig") is None or phys[case].get("zig") != phys[case].get("rust"):
                     (out / "STATUS").write_text(f"BLOCKED_NO_TIMING physical mismatch case={case}\n")
                     raise RuntimeError(f"BLOCKED_NO_TIMING physical F3C mismatch {case}")
@@ -119,7 +129,8 @@ def main():
         grouped[(s["case"], s["op"], s["impl"])].append(s["ns_per_op"])
     report = ["# Zig ↔ Rust F3C real benchmark", "",
               f"Zig {args.zig_pin} ReleaseFast vs existing Rust --release; F3C byte parity verified.",
-              "3+ process-pairs, same GitHub runner; no independently repeated host runs.",
+              "3+ process-pairs, same runner, 11 samples/op, warmup=5, matched repetitions.",
+              "Each sample: quote=24000 operations; car_cons=12000; no independently repeated host runs.",
               "NOT a SENS semantic oracle; research only, 95% K-J CI NOT_MEASURED.", "",
               "| Case | Operation | Zig p50 ns/op | Rust p50 ns/op | Rust/Zig |",
               "|---|---|---:|---:|---:|"]
