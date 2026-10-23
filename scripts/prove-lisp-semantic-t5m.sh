@@ -24,7 +24,7 @@ fail() {
 # Показуємо обидва реальні потоки й першу різницю, не лише "divergent".
 report_output_divergence() {
   local id="$1" left_name="$2" left="$3" right_name="$4" right="$5"
-  printf 'T5M_OUTPUT_DIVERGENCE id=%s layer=carrier left=%s right=%s\\n' \
+  printf 'T5M_OUTPUT_DIVERGENCE id=%s layer=carrier left=%s right=%s\n' \
     "$id" "$left_name" "$right_name" >&2
   wc -c "$left" "$right" >&2
   sha256sum "$left" "$right" >&2
