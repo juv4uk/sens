@@ -70,12 +70,19 @@ def main(argv: list[str] | None = None) -> int:
         bar = "█" * min(n // 5, 20)
         print(f"{dom:<6} {n:>7}  {bar} {desc}")
     print(f"\nУсього мовних законів: {total}")
-    print("\nНАСТУПНИЙ КВЕСТ:")
-    print("  • обери рівень із найменшим числом законів вище;")
-    print("  • створи пару: python3 scripts/new-program.py <назва> (він сам шукає наявне);")
-    print("  • напиши закон ліспом у tests/semantic/ (закон → D1:1, мутант → D1:0);")
-    print("  • охоронець перевірить, кодек перетворить у SENS.")
-    print("\nПриклад: D3 «списки» — напиши закон про перше/решта/сполучити.")
+    # АВТОКВЕСТ: гра сама обирає найпорожніший рівень — не треба вгадувати.
+    ranked = sorted(LEVELS, key=lambda kv: prog.get(kv[0], 0))
+    gaps = ranked[:3]
+    print("\nНАСТУПНИЙ КВЕСТ (обрано за найменшим числом законів):")
+    for dom, desc in gaps:
+        n = prog.get(dom, 0)
+        print(f"  ★ {dom} — лише {n} законів. {desc}")
+    dom, desc = gaps[0]
+    print(f"\n  Бери {dom}. Кроки:")
+    print("    1) python3 scripts/new-program.py <назва>   # сам шукає наявне")
+    print("    2) напиши закон ліспом: закон → D1:1, мутант → D1:0")
+    print("    3) охоронець перевірить → кодек перетворить у SENS")
+    print(f"\n  Обери щось із теми «{desc}» і додай першу пару.")
     return 0
 
 
