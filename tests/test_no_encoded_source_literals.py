@@ -624,6 +624,10 @@ class ResearchBatchUkrProjectionTests(unittest.TestCase):
             "tests/semantic/d9-d10-justified-numeric-laws.lisp",
             "tests/semantic/d5-arithmetic-surface-laws.lisp",
             "tests/semantic/d8-integer-length-signed-laws.lisp",
+            "tests/semantic/d8-div-quotient-remainder-native-laws.lisp",
+            "tests/semantic/d8-div-zero-divisor-negative.lisp",
+            "tests/semantic/d8-signum-reciprocal-composition-laws.lisp",
+            "tests/semantic/d8-truncate-rem-derived-laws.lisp",
         ):
             with self.subTest(path=relative):
                 source_path = ROOT / relative
