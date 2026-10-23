@@ -361,20 +361,19 @@ def run(root, write=False, selected=None):
                 continue
         has_legacy_definition = bool(active_heads & {"00001001", "00001011"})
         if not has_legacy_definition:
-            if not possible_legacy:
-                # No old 8-bit executable candidate: this file has nothing
-                # to migrate. Do not call a current Ukrainian D3/D4 source
-                # "source-era-unproved" merely because it lacks legacy DEFINE.
+            # A textual eight-bit pattern in a comment, quoted datum, or
+            # source template is not an executable SID8 call. Only parser-
+            # confirmed live W8 heads may need a provenance decision.
+            unproved = sorted(h for h in active_heads if BITS.fullmatch(h))
+            if not unproved:
                 report.append({"path": path, "status": "unchanged",
                                "potential_heads": 0, "reasons": []})
                 continue
-            # An unmatched 8-bit head may be contemporary D8 or historical W8;
-            # neither a missing DEFINE nor a bit-pattern match proves its era.
-            unproved = sorted(h for h in active_heads if BITS.fullmatch(h))
+            # An actual unmatched 8-bit call may be modern D8 or legacy SID8;
+            # neither its bytes nor absence of old DEFINE proves the era.
             report.append({"path": path, "status": "source-era-unproved",
                            "potential_heads": len(unproved),
-                           "reasons": (["unattributed 8-bit executable heads: " + ", ".join(unproved)]
-                                       if unproved else ["no historical DEFINE/DEF call head"])})
+                           "reasons": ["unattributed 8-bit executable heads: " + ", ".join(unproved)]})
             continue
         if "GENERATED" in original[:360] or "do not hand-edit" in original[:360]:
             report.append({"path": path, "status": "source-era-unproved",
