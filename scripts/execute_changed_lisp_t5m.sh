@@ -575,6 +575,11 @@ while IFS= read -r file || [[ -n "$file" ]]; do
                      --binding-source lib/epistemic.lisp
                      --binding-source tests/fixtures/witness-runner.lisp
                      --binding-source tests/fixtures/epistemic-authority-witness.lisp)
+  elif [[ "$file" == "tests/semantic/utf8-numeric-foundations-law.lisp" ||
+          "$file" == "tests/semantic/utf8-numeric-foundations-mutant.lisp" ]]; then
+    # Джерелом D24+ числових тотожностей є чинна Lisp-бібліотека UTF-8.
+    # Zig не вигадує значення, а фізичний SENS перевіряє їх після T5M.
+    binding_sources=(--binding-source lib/utf8.lisp)
   elif [[ "$file" == "tests/semantic/d11-srfi1-find-tail-laws.lisp" ]]; then
     # Лише визначення із справжньої бібліотеки SENS, без host-оракула.
     binding_sources=(--binding-source lib/d11-srfi1-find-tail.lisp)
