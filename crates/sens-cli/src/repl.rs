@@ -599,9 +599,12 @@ fn project_repl_surface_expression_in_scope(
 
     if let ExprKind::DomainIdentity(identity) = &expression.kind {
         if let Some(name) = source.get(expression.span.start..expression.span.end) {
-            if bound.iter().any(|candidate| candidate.as_ref() == name)
-                && session.environment.get(name).is_none()
-            {
+            // The source-binding collector has already removed names whose
+            // unoccupied exact D9/D10 target must remain a domain identity.
+            // Every remaining lexical or source-local binding shadows a
+            // pre-resolved projection, even when the outer Core environment
+            // already has the same name or its exact domain-code slot occupied.
+            if bound.iter().any(|candidate| candidate.as_ref() == name) {
                 return Ok(Expr {
                     kind: ExprKind::Symbol(name.into()),
                     span: expression.span,
@@ -2250,6 +2253,29 @@ mod tests {
         let result = program
             .execute(&mut session)
             .expect("local Text7 binding shadows the existing D10 mechanism");
+        assert_eq!(result.value.to_string(), "40");
+    }
+
+    #[cfg(feature = "zig-transport")]
+    #[test]
+    fn t5m_local_d9_definition_shadows_an_occupied_exact_identity() {
+        let name = "результат-ціль?";
+        let source = format!(
+            "(визначити {name} (функція (локальне-значення) локальне-значення))\\n({name} 40)"
+        );
+        let mut session = Session::bare();
+        sens::load_core_library(&mut session).expect("Core4 occupies the exact D9 slot");
+        let identity = selected_surface_callable(ReplSurface::UkrainianFull, name)
+            .unwrap()
+            .expect("ratified D9 result-goal identity");
+        assert_eq!(identity.width(), 9);
+        assert!(session.environment.has_domain_code_slot(identity));
+
+        let program = prepare_t5m_repl_program(&source, ReplSurface::UkrainianFull, &session)
+            .expect("source-local D9 definition shadows an occupied exact identity");
+        let result = program
+            .execute(&mut session)
+            .expect("local Text7 binding must win over the outer D9 slot");
         assert_eq!(result.value.to_string(), "40");
     }
 
