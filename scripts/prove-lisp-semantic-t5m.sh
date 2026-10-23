@@ -256,10 +256,10 @@ run_bound_law() {
 
 # Негатив типу: мовний текст застосовує EQ до пари й атома.
 # Не перетворюємо Type у false; транспорт лише зберігає фізичну форму.
-run_type_rejection() {
-  # Для очікуваного Type ненульовий код direct/paired/standalone є правильним.
-  # Профайлер зберігає справжній код процесу й час; PASS визначає тільки SENS.
-  local id="$1" source="$2" diagnostic="$3" dir physical
+run_error_rejection() {
+  # Перевіряємо названий клас помилки на прямому, парному та фізичному шляху.
+  # Bash лише класифікує справжню діагностику SENS, не створює семантичний вирок.
+  local id="$1" source="$2" expected_kind="$3" diagnostic="$4" dir physical
   dir="$evidence/$id"
   physical="$dir/program.sens"
   mkdir -p "$dir"
@@ -267,11 +267,11 @@ run_type_rejection() {
     fail "$id" source "regular-Lisp" "missing-or-symlink"
 
   if profile_stage "$id" direct timeout 45s "$sens" "$source" >"$dir/direct.out" 2>"$dir/direct.err"; then
-    fail "$id" sens-direct "Type-rejection" "unexpected-success"
+    fail "$id" sens-direct "$expected_kind-rejection" "unexpected-success"
   fi
   if ! grep -Fq "$diagnostic" "$dir/direct.err"; then
     cat "$dir/direct.err" >&2
-    fail "$id" sens-direct "expected-Type-diagnostic" "unclassified-rejection"
+    fail "$id" sens-direct "expected-$expected_kind-diagnostic" "unclassified-rejection"
   fi
 
   if ! profile_stage "$id" codec-mint timeout 45s "$sens" --t5m-mint-pair "$source" "$physical" >"$dir/mint.out" 2>"$dir/mint.err"; then
@@ -288,24 +288,32 @@ run_type_rejection() {
   fi
 
   if profile_stage "$id" sens-paired timeout 45s "$sens" --t5m-pair "$source" "$physical" >"$dir/paired.out" 2>"$dir/paired.err"; then
-    fail "$id" sens-physical "Type-rejection" "paired-accepted"
+    fail "$id" sens-physical "$expected_kind-rejection" "paired-accepted"
   fi
   if ! grep -Fq "$diagnostic" "$dir/paired.err" ||
-     ! grep -Fq 'kind=Type' "$dir/paired.err"; then
+     ! grep -Fq "kind=$expected_kind" "$dir/paired.err"; then
     cat "$dir/paired.err" >&2
-    fail "$id" sens-physical "Type" "unexpected-paired-error"
+    fail "$id" sens-physical "$expected_kind" "unexpected-paired-error"
   fi
   if profile_stage "$id" sens-standalone timeout 45s "$sens" "$physical" >"$dir/physical.out" 2>"$dir/physical.err"; then
-    fail "$id" sens-physical "Type-rejection" "standalone-accepted"
+    fail "$id" sens-physical "$expected_kind-rejection" "standalone-accepted"
   fi
   if ! grep -Fq "$diagnostic" "$dir/physical.err"; then
     cat "$dir/physical.err" >&2
-    fail "$id" sens-physical "Type" "unexpected-standalone-error"
+    fail "$id" sens-physical "$expected_kind" "unexpected-standalone-error"
   fi
 
   sha256sum "$source" "$physical" >"$dir/sha256.txt"
-  echo "::notice file=$source,title=SENS Lisp→T5M→SENS::PASS id=$id expected=Type diagnostic=$diagnostic direct=REJECTED paired=REJECTED physical=REJECTED"
-  printf '%s\n' "id=$id source=$source expected=Type actual=Type" >>"$evidence/results.txt"
+  echo "::notice file=$source,title=SENS Lisp→T5M→SENS::PASS id=$id expected=$expected_kind diagnostic=$diagnostic direct=REJECTED paired=REJECTED physical=REJECTED"
+  printf '%s\n' "id=$id source=$source expected=$expected_kind actual=$expected_kind" >>"$evidence/results.txt"
+}
+
+run_type_rejection() {
+  run_error_rejection "$1" "$2" Type "$3"
+}
+
+run_division_by_zero_rejection() {
+  run_error_rejection "$1" "$2" DivisionByZero "$3"
 }
 
 : >"$evidence/results.txt"
@@ -565,6 +573,8 @@ run_case run_law utf8-numeric-foundations-mutant "$utf8_roots_mutant" 0
 run_case run_type_rejection d8-string-symbol-nontext-type-negative tests/semantic/d8-string-symbol-nontext-type-negative.lisp 'string->symbol expects a string'
 # Окремий Type-закон: контекстний D1 предикат заборонено записувати як дані.
 run_case run_type_rejection d8-contextual-d1-serialize-type-negative tests/semantic/d8-contextual-d1-serialize-type-negative.lisp 'write-to-string cannot serialize contextual predicate results'
+# Ділення на обчислений нуль є мовним DivisionByZero, не довільною помилкою reader-а.
+run_case run_division_by_zero_rejection d24-computed-zero-denominator tests/semantic/d24-reader-zero-denominator-negative.lisp 'division by zero'
 # D1 хибне значення як голова CONS ≠ порожній D3-список.
 # Обидва результати вираховує Lisp/SENS; Zig лише фізично переносить слова.
 run_case run_law d3-d1-false-cons-head-positive tests/semantic/language-law-d3-d1-false-head-ukr.lisp 1
