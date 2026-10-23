@@ -1456,7 +1456,7 @@ NONPROGRAM_MANIFESTS = (
     ("schema", "knowledge/migration-nonprogram-schema-manifest-2026-10-08.json", 19),
     ("evidence", "knowledge/migration-nonprogram-evidence-manifest-2026-10-08.json", 8),
     ("expr-record", "knowledge/migration-nonprogram-expr-records-2026-10-08.json", 13),
-    ("knowledge-record", "knowledge/migration-nonprogram-knowledge-records-2026-10-08.json", 13),
+    ("knowledge-record", "knowledge/migration-nonprogram-knowledge-records-2026-10-08.json", 12),
 )
 
 
@@ -1470,7 +1470,7 @@ NONPROGRAM_MANIFEST_BLOB_SHA = {
     "knowledge/migration-nonprogram-schema-manifest-2026-10-08.json": "ef7cf48cf53f48beaa49fdc3c9e130e6a7a69d7d",
     "knowledge/migration-nonprogram-evidence-manifest-2026-10-08.json": "413c9dee025bb56b9fd346701e46d7ae4fb9ea89",
     "knowledge/migration-nonprogram-expr-records-2026-10-08.json": "07c53b8dc76c2f35911f323966fdc2587d9224a9",
-    "knowledge/migration-nonprogram-knowledge-records-2026-10-08.json": "a30007250574b8e9c1c206b880b52c696b6cce73",
+    "knowledge/migration-nonprogram-knowledge-records-2026-10-08.json": "0f710c434d4b142107dde66659b223b15ec33e1b",
 }
 
 
