@@ -14,6 +14,10 @@ set -euo pipefail
 
 src="${1:?вкажи source.lisp}"
 repeats="${2:-11}"
+if ! [[ "$repeats" =~ ^[1-9][0-9]*$ ]]; then
+  echo "НЕВІРНИЙ ПАРАМЕТР: repeats має бути додатним цілим числом" >&2
+  exit 2
+fi
 legacy_exec_us="${3:-}"
 if [ -n "$legacy_exec_us" ]; then
   echo "УВАГА: старий аргумент c_exec_us ігнорується: FASL-експорт не вимірює спеціалізацію" >&2
