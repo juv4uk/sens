@@ -183,31 +183,38 @@ def authority(root):
     return mapping, blocked
 
 def ukrainian_projection(root, mapping):
-    """Resolve proved legacy successors through current exact-domain укр rows.
+    """Recheck historical successor spellings against exact current domain rows.
 
-    Historical bytes only select a reviewed crosswalk entry. A current
-    domain-qualified row supplies the human spelling; no byte-sized D8
-    inference, text fallback, or executable admission is performed here.
+    authority() has already matched the dated SID8 donor to its ratified
+    (domain, bits) identity and returned the canonical full «укр» head.
+    Its values are *spellings*, not bit strings: looking up row.bits here
+    lost every successor and stopped the source migration.
     """
     required = set(mapping.values())
-    words = {}
-    for width in range(1, 11):
+    coordinates = {}
+    for width in (3, 4, 5, 6, 8, 9):
         for row in read_domain_table(root / f"lib/domains/d{width}.lisp"):
-            if row.bits not in required:
+            name = row.ukr
+            if name not in required:
                 continue
-            value = row.ukr
-            if (row.role == "display" or not isinstance(value, str)
-                    or not value or value == "()"
-                    or any(c.isspace() or c in "()\\\"';" for c in value)):
-                raise ValueError(f"D{width}:{row.bits}: missing callable укр projection")
-            if row.bits in words and words[row.bits] != value:
-                raise ValueError(f"D{width}:{row.bits}: conflicting укр projection")
-            words[row.bits] = value
-    if set(words) != required:
-        raise ValueError("historical successor without an exact укр domain row: "
-                         + ", ".join(sorted(required - set(words))))
-    return {legacy: words[bits] for legacy, bits in mapping.items()}
-
+            # D3 NIL and display-only/text residents cannot become call heads.
+            # An apostrophe is a valid Ukrainian keyboard glyph (п'ятий).
+            if (row.role == "display" or not isinstance(name, str)
+                    or not name or name == "()"
+                    or any(c.isspace() or c in ("(", ")", chr(92), chr(34), ";")
+                           for c in name)):
+                raise ValueError(f"D{width}:{row.bits}: invalid executable укр projection")
+            identity = (f"D{width}", row.bits)
+            previous = coordinates.get(name)
+            if previous is not None and previous != identity:
+                raise ValueError(f"ambiguous exact-domain укр projection: {name}")
+            coordinates[name] = identity
+    if set(coordinates) != required:
+        raise ValueError("historical successor without a ratified укр domain row: "
+                         + ", ".join(sorted(required - set(coordinates))))
+    # No second raw-byte -> D8 conversion: the historical crosswalk already
+    # resolved exact semantic identity. Human source receives only its «укр».
+    return dict(mapping)
 
 def rewrite(src, mapping, blocked):
     stack, edits, problems = [], [], []
