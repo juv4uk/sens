@@ -270,7 +270,7 @@ jobs:
             fi
             echo "::notice file=$source,title=SENS Lisp law::PASS id=$id native=SENS result=$actual"
           }
-          check_lisp_law d3-d4-positive tests/semantic/d3-d4-ukr-native-laws.lisp '(1 1 1 1 1 1 1 1 1 1)'
+          check_lisp_law d3-d4-positive tests/semantic/d3-d4-ukr-native-laws.lisp '(1 1 1 1 1 1 1 1 1 1 1 1)'
           check_lisp_law d3-d4-negative tests/semantic/d3-d4-ukr-native-mutant.lisp '0'
 
       # Учорашній BENCH-LISP→SENS: анотації лише зі справжніх нативних метрик.
