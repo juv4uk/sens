@@ -458,20 +458,26 @@ class BatchSourceTests(unittest.TestCase):
             "атом?", "тотожне?", "однакові?", "символ?",
             "рядок?", "числовий-буфер?", "за-умовою",
         }
-        projections = re.findall(
-            r"\\(укр-проєкція\\s+\\.\\s+([^\\s)]+)\\)", source
-        )
+        prefix = "((укр-проєкція . "
+        projections = [
+            line.strip()[len(prefix):].split(")", 1)[0]
+            for line in source.splitlines()
+            if line.strip().startswith(prefix)
+        ]
         self.assertEqual(len(projections), len(expected))
         self.assertEqual(set(projections), expected)
         self.assertIn("(function-field . ukr-projection-only)", source)
         self.assertIn("(legacy-addresses . omitted)", source)
-        self.assertNotRegex(source, r"\\(\\s*function\\s*\\.\\s*[01]{8}\\s*\\)")
-        domains = "\\n".join(
+        self.assertNotRegex(source, r"\\b[01]{8}\\b")
+        domains = [
             (ROOT / f"lib/domains/d{width}.lisp").read_text(encoding="utf-8")
             for width in (3, 8, 9)
-        )
+        ]
         for projection in expected:
-            self.assertIn(f"(укр {projection})", domains)
+            self.assertTrue(
+                any(f"(укр {projection})" in domain for domain in domains),
+                f"missing ratified укр projection: {projection}",
+            )
 
     def test_forward_assert_fact_uses_current_ukr_d3_cons(self):
         source = (ROOT / "lib/forward.lisp").read_text(encoding="utf-8")
