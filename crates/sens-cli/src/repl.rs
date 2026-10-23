@@ -218,18 +218,29 @@ fn append_t5m_expression_context(
             words.push(control(0b01)?);
         }
         ExprKind::Pair(head, tail) => {
-            // D7-символ із кількох glyph-ів нині має D2-рамку списку.
-            // У *хвості* крапкової пари це робить improper пару
-            // правильним списком без жодної помилки. Не проголошуємо
-            // таку зміну структури оборотною: атомний текстовий носій
-            // мусить бути доведений окремо, а не вигаданий у Rust.
+            // Multi-glyph Text7 still lowers as a D2/W7 sequence and cannot
+            // stand in for an atomic improper tail. In quoted data, one glyph
+            // is the exact scalar D7 datum encoded above, so that case is safe.
             if let ExprKind::Symbol(name) = &tail.kind {
-                // Цитата не змінює структури: W7/D7 glyph-list не є
-                // атомом хвоста ані в даних, ані в звичайній формі.
+                let single_glyph_datum = if quoted_data
+                    && sens::semantic_registry_export::admitted_core_domain_for_surface(name)
+                        .is_none()
+                {
+                    let symbol_layout = if name.is_ascii() {
+                        sens::Text7Layout::En
+                    } else {
+                        layout
+                    };
+                    sens::encode_text7(name, symbol_layout)
+                        .is_ok_and(|text| text.len() == 1)
+                } else {
+                    false
+                };
                 if sens::semantic_registry_export::admitted_core_domain_for_surface(name).is_none()
+                    && !single_glyph_datum
                 {
                     return Err(format!(
-                        "T5M_DOTTED_TEXT_TAIL_NOT_ATOMIC symbol={name:?}: D7 glyph-list cannot replace a dotted-pair atom"
+                        "T5M_DOTTED_TEXT_TAIL_NOT_ATOMIC symbol={name:?}: multi-glyph D7 sequence cannot replace a dotted-pair atom"
                     ));
                 }
             }
@@ -2777,6 +2788,28 @@ mod tests {
             identity(2, 0b01),
         ];
         assert_eq!(actual, expected, "D7 scalar identity must not erase D2 nesting");
+
+        let dotted_source = "(як-є (а . б))";
+        let dotted = sens::parse_mixed_exact_domain(dotted_source)
+            .expect("quoted D7 scalar dotted pair parses");
+        let mut dotted_words = Vec::new();
+        append_t5m_expression(&dotted[0], sens::Text7Layout::Uk, &mut dotted_words, 0)
+            .expect("one-cell D7 datum remains an atomic dotted tail");
+        assert_eq!(
+            dotted_words,
+            vec![
+                identity(2, 0b10),
+                identity(3, 0b001),
+                identity(2, 0b00),
+                identity(2, 0b10),
+                identity(7, 0b1100110),
+                identity(2, 0b11),
+                identity(7, 0b0101100),
+                identity(2, 0b01),
+                identity(2, 0b01),
+            ],
+            "only real one-cell D7 scalars may occupy an atomic dotted tail",
+        );
 
         #[cfg(feature = "zig-transport")]
         {
