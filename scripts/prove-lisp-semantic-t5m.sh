@@ -107,11 +107,11 @@ run_law() {
 
   actual="$(cat "$dir/physical.out")"
   if [[ "$actual" != "$expected" ]]; then
-    fail "$id" sens-logic "D1:$expected" "$actual"
+    fail "$id" sens-logic "result:$expected" "$actual"
   fi
-  echo "::notice file=$source,title=SENS Lisp→T5M→SENS::PASS id=$id D1=$actual native=SENS"
+  echo "::notice file=$source,title=SENS Lisp→T5M→SENS::PASS id=$id result=$actual native=SENS"
   sha256sum "$source" "$physical" >"$dir/sha256.txt"
-  printf '%s\n' "id=$id source=$source expected=D1:$expected actual=D1:$actual" >>"$evidence/results.txt"
+  printf '%s\n' "id=$id source=$source expected=$expected actual=$actual" >>"$evidence/results.txt"
 }
 
 # Логічний шар уніфікації — окремий Lisp-свідок із чинною бібліотекою.
@@ -538,6 +538,20 @@ cat -- lib/result-status.lisp tests/semantic/result-status-goal-tags-law.lisp > 
 cat -- lib/result-status.lisp tests/semantic/result-status-goal-tags-mutant.lisp > "$result_status_goal_tags_mutant_bundle"
 run_case run_law result-status-goal-tags-positive "$result_status_goal_tags_bundle" 1
 run_case run_law result-status-goal-tags-mutant "$result_status_goal_tags_mutant_bundle" 0
+
+# Епістемічні закони належать Lisp: посилання, вимоги та вкладена рівність.
+# Той самий живий SENS-корпус спрацьовує на позитиві, а хибне очікування
+# повертає named fail із самого Lisp. Rust не містить таблиці очікувань.
+epistemic_sources=(lib/unify.lisp lib/reason.lisp lib/forward.lisp lib/knowledge.lisp
+                   lib/persistent-map.lisp lib/persistent-vector.lisp lib/time.lisp
+                   lib/epistemic.lisp tests/fixtures/epistemic-authority-witness.lisp)
+epistemic_law_bundle="$evidence/epistemic-record-logic-positive-complete.lisp"
+epistemic_mutant_bundle="$evidence/epistemic-record-logic-mutant-complete.lisp"
+cat -- "${epistemic_sources[@]}" tests/semantic/language-law-epistemic-records.lisp > "$epistemic_law_bundle"
+cat -- "${epistemic_sources[@]}" tests/semantic/language-mutant-epistemic-records.lisp > "$epistemic_mutant_bundle"
+sha256sum "${epistemic_sources[@]}" tests/semantic/language-law-epistemic-records.lisp tests/semantic/language-mutant-epistemic-records.lisp > "$evidence/epistemic-record-logic-inputs.sha256"
+run_case run_law epistemic-record-logic-positive "$epistemic_law_bundle" "(epistemic-authority-witness (status pass))"
+run_case run_law epistemic-record-logic-mutant "$epistemic_mutant_bundle" "(epistemic-authority-witness (status fail) (case source-ref-valid-mutant) (actual 1) (expected 0))"
 # Локалізуємо фізичну розбіжність: форма змінної → входження → повна уніфікація.
 # Визначення й закон належать тільки Lisp, Shell лише додає lib/unify.lisp.
 # Незалежно локалізуємо D3/D4 форму змінної: позитив, негатив і мутант.
