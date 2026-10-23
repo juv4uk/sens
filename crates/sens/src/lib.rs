@@ -7,6 +7,7 @@
 //! installed into this core's registry at startup by whichever embedder
 //! wants them (the CLI does; WASM does not). See eval/capabilities.rs.
 
+mod arena;
 mod bignum;
 mod binary_number;
 mod bit9;
