@@ -51,7 +51,23 @@ class DomainGameTests(unittest.TestCase):
         self.assertEqual(len(candidates), 10)
         self.assertEqual(len({name for name, _ in candidates}), 10)
         self.assertIn(("розширений-нсд", "extended-gcd"), candidates)
-        self.assertIn(("цілий-корінь", "integer-square-root"), candidates)
+        self.assertIn(("ланцюговий-дріб", "continued-fraction-expansion"), candidates)
+        self.assertNotIn(("цілий-корінь", "integer-square-root"), candidates)
+
+    def test_d13_candidates_cannot_reuse_ratified_domain_function_surfaces(self) -> None:
+        source = (ROOT / "research/d13/function-candidates.lisp").read_text(encoding="utf-8")
+        candidates = game.d13_candidates(source)
+        ratified = game.ratified_domain_surfaces()
+        for ukrainian, english in candidates:
+            with self.subTest(surface=ukrainian):
+                self.assertNotIn(ukrainian.casefold(), ratified)
+            with self.subTest(surface=english):
+                self.assertNotIn(english.casefold(), ratified)
+
+        # A previously ratified D9 function must not be proposed as a new D13 idea.
+        duplicate = source.replace("(укр ланцюговий-дріб)", "(укр цілий-корінь)", 1)
+        with self.assertRaisesRegex(ValueError, "дублює чинну поверхню"):
+            game.d13_candidates(duplicate)
 
     def test_d13_research_rejects_implicit_ratification_and_missing_law(self) -> None:
         source = (ROOT / "research/d13/function-candidates.lisp").read_text(encoding="utf-8")
@@ -77,7 +93,8 @@ class DomainGameTests(unittest.TestCase):
         self.assertIn("ℤ", source)
         self.assertIn("ℚ", source)
         self.assertIn("a=b=0,c=0 — ALL_PAIRS", source)
-        self.assertIn("n=15", source)
+        self.assertIn("-1/2", source)
+        self.assertIn("continued-fraction", source)
         ambiguous = source.replace('(signature . "ℤ × ℤ ->', '(signature . "Z* × Z* ->', 1)
         with self.assertRaises(ValueError):
             game.d13_candidates(ambiguous)

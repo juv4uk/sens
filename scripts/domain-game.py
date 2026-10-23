@@ -285,6 +285,25 @@ def codec_game(
     return return_code
 
 
+def ratified_domain_surfaces() -> set[str]:
+    """Exact names from current ratified domains; D7 is keyboard/data, not callable code."""
+    names: set[str] = set()
+    for width in range(1, 12):
+        if width == 7:
+            continue
+        path = ROOT / "lib" / "domains" / f"d{width}.lisp"
+        if not path.is_file():
+            continue
+        for line in path.read_text(encoding="utf-8").splitlines():
+            if re.match(r"^\s*\([01]{1,11}\s+", line) is None:
+                continue
+            for field in ("ук", "укр", "en", "LISP"):
+                found = re.search(r"\(" + re.escape(field) + r"\s+([^()\s]+)\)", line)
+                if found is not None and found.group(1) != "()":
+                    names.add(found.group(1).casefold())
+    return names
+
+
 def d13_candidates(source: str) -> list[tuple[str, str]]:
     """Рахувати гіпотези D13, не присвоюючи координат чи викличності."""
     for required in (
@@ -303,6 +322,7 @@ def d13_candidates(source: str) -> list[tuple[str, str]]:
     entries: list[tuple[str, str]] = []
     seen_ukr: set[str] = set()
     seen_en: set[str] = set()
+    ratified_surfaces = ratified_domain_surfaces()
     for block in blocks:
         match = re.match(r"\(укр\s+([^\s()]+)\)\s+\(en\s+([^\s()]+)\)", block)
         if match is None:
@@ -325,10 +345,15 @@ def d13_candidates(source: str) -> list[tuple[str, str]]:
             raise ValueError(f"D13: {ukr} має неоднозначне скорочення Z*/Q*; задайте точну область")
         if not any(token in signature for token in ("ℤ", "ℚ", "ℕ₀")):
             raise ValueError(f"D13: {ukr} не задає точну числову область")
-        if ukr in seen_ukr or en in seen_en:
+        for surface in (ukr, en):
+            if surface.casefold() in ratified_surfaces:
+                raise ValueError(
+                    f"D13: {ukr}/{en} дублює чинну поверхню D1–D11: {surface}"
+                )
+        if ukr.casefold() in seen_ukr or en.casefold() in seen_en:
             raise ValueError(f"D13: дубльована назва {ukr}/{en}")
-        seen_ukr.add(ukr)
-        seen_en.add(en)
+        seen_ukr.add(ukr.casefold())
+        seen_en.add(en.casefold())
         entries.append((ukr, en))
     return entries
 
