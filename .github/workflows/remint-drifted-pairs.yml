@@ -397,7 +397,7 @@ jobs:
               lib/translation.lisp) bs=(--binding-source "$RUNNER_TEMP/sens-core4-d24-roots.lisp" --binding-source lib/unify.lisp --binding-source lib/knowledge.lisp --binding-source lib/reason.lisp --binding-source lib/world.lisp --binding-source lib/yantra.lisp --binding-source lib/result-status.lisp);;
               tests/fixtures/mechanism-selector-1047-witness.lisp) bs=(--binding-source lib/mechanism-selector.lisp);;
               tests/fixtures/island-lowering-1048-witness.lisp) bs=(--binding-source lib/mechanism-selector.lisp --binding-source lib/island-lowering.lisp);;
-              tests/semantic/d11-clojure-juxt-laws.lisp) bs=(--binding-source lib/d11-clojure-juxt.lisp);;
+              tests/semantic/d11-clojure-juxt-laws.lisp|tests/semantic/d11-clojure-juxt-mutant.lisp) bs=(--binding-source lib/d11-clojure-juxt.lisp);;
               tests/semantic/d11-clojure-dedupe-laws.lisp) bs=(--binding-source lib/d11-srfi1-span-break.lisp --binding-source lib/d11-clojure-partition-by.lisp);;
               tests/semantic/d11-clojure-partition-by-laws.lisp|tests/semantic/d11-clojure-partition-by-d7-parity.lisp) bs=(--binding-source lib/d11-srfi1-span-break.lisp --binding-source lib/d11-clojure-partition-by.lisp);;
               tests/semantic/d11-srfi1-find-tail-laws.lisp) bs=(--binding-source lib/d11-srfi1-find-tail.lisp);;
@@ -692,7 +692,7 @@ jobs:
                 lib/translation.lisp) bs=(--binding-source "$RUNNER_TEMP/sens-core4-d24-roots.lisp" --binding-source lib/unify.lisp --binding-source lib/knowledge.lisp --binding-source lib/reason.lisp --binding-source lib/world.lisp --binding-source lib/yantra.lisp --binding-source lib/result-status.lisp);;
                 tests/fixtures/mechanism-selector-1047-witness.lisp) bs=(--binding-source lib/mechanism-selector.lisp);;
               tests/fixtures/island-lowering-1048-witness.lisp) bs=(--binding-source lib/mechanism-selector.lisp --binding-source lib/island-lowering.lisp);;
-                tests/semantic/d11-clojure-juxt-laws.lisp) bs=(--binding-source lib/d11-clojure-juxt.lisp);;
+                tests/semantic/d11-clojure-juxt-laws.lisp|tests/semantic/d11-clojure-juxt-mutant.lisp) bs=(--binding-source lib/d11-clojure-juxt.lisp);;
                 tests/semantic/d11-clojure-dedupe-laws.lisp) bs=(--binding-source lib/d11-srfi1-span-break.lisp --binding-source lib/d11-clojure-partition-by.lisp);;
                 tests/semantic/d11-clojure-partition-by-laws.lisp|tests/semantic/d11-clojure-partition-by-d7-parity.lisp) bs=(--binding-source lib/d11-srfi1-span-break.lisp --binding-source lib/d11-clojure-partition-by.lisp);;
                 tests/semantic/d11-srfi1-find-tail-laws.lisp) bs=(--binding-source lib/d11-srfi1-find-tail.lisp);;

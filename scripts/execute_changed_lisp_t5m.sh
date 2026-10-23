@@ -745,7 +745,7 @@ while IFS= read -r file || [[ -n "$file" ]]; do
   elif [[ "$file" == "tests/semantic/core1-gc-reachability-laws.lisp" ]]; then
     # Обхід коренів і циклів виконує лише наявний Core1 Lisp.
     binding_sources=(--binding-source lib/core1.lisp)
-  elif [[ "$file" == "tests/semantic/d11-clojure-juxt-laws.lisp" ]]; then
+  elif [[ "$file" == "tests/semantic/d11-clojure-juxt-laws.lisp" || "$file" == "tests/semantic/d11-clojure-juxt-mutant.lisp" ]]; then
     # Реальні DEFINE мови, не дубль Rust-реалізації закону.
     binding_sources=(--binding-source lib/d11-clojure-juxt.lisp)
   elif [[ "$file" == "tests/semantic/meta-fc-predicates-d1-law.lisp" ||
