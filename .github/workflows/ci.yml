@@ -242,11 +242,26 @@ jobs:
           PY
 
       - name: Вживати функції драбин D1–D10, а не винаходити дублі
+        env:
+          BEFORE_SHA: ${{ github.event.before }}
         run: |
           set -euo pipefail
           manifest="$RUNNER_TEMP/changed-t5m-lisp.txt"
           if [[ -s "$manifest" ]]; then
-            python3 scripts/guard-domain-function-reuse.py --paths-from "$manifest"
+            # Guard має перевіряти НОВІ DEFINE, а не повторно оголошувати
+            # старий Core4 дублем після будь-якої зміни коментаря чи джерела.
+            base="$BEFORE_SHA"
+            if [[ "$GITHUB_EVENT_NAME" == "pull_request" ]]; then
+              base="$(git rev-parse "$GITHUB_SHA^1")"
+            fi
+            if [[ -z "$base" || "$base" =~ ^0+$ ]]; then
+              base="$(git rev-parse HEAD^)"
+            fi
+            if ! git cat-file -e "$base^{commit}" 2>/dev/null; then
+              timeout 60s git fetch --no-tags --depth=1 origin "$base"
+            fi
+            git cat-file -e "$base^{commit}"
+            python3 scripts/guard-domain-function-reuse.py --paths-from "$manifest" --base "$base"
           else
             echo "немає змінених .lisp-програм — охоронець не має що перевіряти"
           fi
