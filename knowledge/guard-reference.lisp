@@ -13,8 +13,8 @@
     ((reference
        (topic d13-selector-double-suffix-research)
        (summary "D13 наразі не має ратифікованої доменної таблиці. Дослідний закон: із 512 селекторів D11 вивести по чотири двокрокові композиції p(s_a(s_b(x))), де s_0=CAR, s_1=CDR; кандидат координати дорівнює 11 біт батька та суфіксу ab. Це 2048 унікальних 13-бітних пропозицій із 8192 можливих місць, але НЕ прямі opcode, НЕ нативно доведена семантика і НЕ рішення власника. Математична драбина D12→D24→D48 не включає D13; дослідний транспорт ESC13 теж не є доменом D13.")
-       (authority (AGENTS.md lib/domains/d11.lisp scripts/check_d11_selector_seed.py contracts/numeric-domains-ratification.lisp research/zig-codecs/esc13_ladder_game.md))
-       (how-to (derive-from-exact-d11-parent keep-13-bit-proposal-separate-from-ratified-table check-d1-through-d12-duplicates prove-car-cdr-composition-in-sens reject-swapped-01-and-10 do-not-confuse-esc13-with-d13 ask-owner-for-domain-admission))
+       (authority (AGENTS.md lib/domains/d11.lisp scripts/check_d11_selector_seed.py contracts/numeric-domains-ratification.lisp research/zig-codecs/esc13_ladder_game.md research/zig-codecs/d13_selector_game.zig .github/workflows/d11-ladder-contest.yml))
+       (how-to (derive-from-exact-d11-parent run-d13-selector-game-zig-test keep-13-bit-proposal-separate-from-ratified-table check-d1-through-d12-duplicates prove-car-cdr-composition-in-sens reject-swapped-01-and-10 do-not-confuse-esc13-with-d13 ask-owner-for-domain-admission))
        (verify (exactly-512-d11-selector-parents exactly-four-suffixes-per-parent exactly-2048-unique-candidate-codes native-sens-positive-and-mutant-witness native-zig-physical-boundary-witness))
        (lifecycle research-candidate-not-ratified)
        (provenance "Конкурс Драбина: D13 як двобітне продовження D11, 2026-10-24")
