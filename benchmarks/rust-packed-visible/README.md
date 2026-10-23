@@ -9,7 +9,7 @@ their respective readers, then verifies exact D2/domain-AST parity. The width
 schedule is caller-supplied metadata and is excluded from the packed payload;
 this experiment is not a self-describing container format.
 
-Each case uses 32 paired warm-ups and an odd number of alternating visible/packed
+Each case uses 32 paired warm-ups and 15 alternating visible/packed
 measurements. Each timed lane adapts its batch count until it reaches at least
 25 ms, emits raw samples, and reports p50/p90 nanoseconds per program, exact
 source/payload sizes, and semantic bit count. No timing result establishes a
