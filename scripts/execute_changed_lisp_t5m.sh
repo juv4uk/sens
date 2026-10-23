@@ -376,7 +376,7 @@ run_native_t5m_program() {
       standalone_physical="$dir/epistemic-dependency-complete.sens"
       cat -- lib/unify.lisp lib/reason.lisp lib/forward.lisp lib/knowledge.lisp \
         lib/persistent-map.lisp lib/persistent-vector.lisp lib/time.lisp lib/epistemic.lisp \
-        tests/fixtures/epistemic-authority-witness.lisp "$file" > "$epistemic_complete_source"
+        tests/fixtures/witness-runner.lisp tests/fixtures/epistemic-authority-witness.lisp "$file" > "$epistemic_complete_source"
       if ! timeout "$native_timeout" "$binary" --t5m-mint "$epistemic_complete_source" "$standalone_physical" \
           >"$dir/epistemic-mint.stdout" 2>"$dir/epistemic-mint.stderr" ||
          ! timeout "$native_timeout" "$native_open" open "$standalone_physical" \
@@ -569,6 +569,7 @@ while IFS= read -r file || [[ -n "$file" ]]; do
                      --binding-source lib/persistent-vector.lisp
                      --binding-source lib/time.lisp
                      --binding-source lib/epistemic.lisp
+                     --binding-source tests/fixtures/witness-runner.lisp
                      --binding-source tests/fixtures/epistemic-authority-witness.lisp)
   elif [[ "$file" == "tests/semantic/d11-srfi1-find-tail-laws.lisp" ]]; then
     # Лише визначення із справжньої бібліотеки SENS, без host-оракула.
