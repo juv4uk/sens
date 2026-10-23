@@ -261,6 +261,8 @@ jobs:
           cargo test --locked -p wsm-guard-slice --bin wsm-guard-slice event_frame_rejects_overlong_duplicate_unknown_and_non_ascii_fields -- --exact --nocapture
           cargo test --locked -p sens-lsp --lib transport::tests:: -- --nocapture
           cargo test --locked -p sens --test d5_list_search_laws -- --nocapture
+          # Rust перевіряє механізм завантаження/виконання Lisp, без власних семантичних очікувань.
+          cargo test --locked -p sens --test d11_srfi1_find_tail -- --nocapture
           # Семантика D11 перевіряється в окремому Lisp-кроці через SENS/T5M.
           # Не дублюємо мовний оракул у механічному Rust-шарі.
 
