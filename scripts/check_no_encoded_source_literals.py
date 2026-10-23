@@ -121,7 +121,7 @@ def _is_legacy_signature_metadata_row(
     if path is None or Path(path).as_posix() != LEGACY_SIGNATURE_PATH:
         return False
     start, end = _source_line_bounds(source, offset)
-    return LEGACY_SIGNATURE_ROW.fullmatch(source[start:end].rstrip("\\r")) is not None
+    return LEGACY_SIGNATURE_ROW.fullmatch(source[start:end].rstrip("\r")) is not None
 
 
 def _is_numeric_data_exemption(source: str, path: str | Path | None, offset: int) -> bool:
