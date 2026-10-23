@@ -202,6 +202,24 @@ fn t5m_file_request(args: &[String]) -> Option<Result<&str, &'static str>> {
     Some(Ok(args[2].as_str()))
 }
 
+fn t5m_files_request(args: &[String]) -> Option<Result<&[String], &'static str>> {
+    let position = args.iter().position(|argument| argument == "--t5m-files")?;
+    if position != 1 || args.len() < 3 {
+        return Some(Err(
+            "usage: sens --t5m-files <source1.lisp> [source2.lisp ...]",
+        ));
+    }
+    if args[2..].iter().any(|path| {
+        std::path::Path::new(path)
+            .extension()
+            .and_then(|ext| ext.to_str())
+            != Some("lisp")
+    }) {
+        return Some(Err("--t5m-files accepts only ordered .lisp sources"));
+    }
+    Some(Ok(&args[2..]))
+}
+
 /// Генерувати фізичні байти SENS за тим самим reader, що --t5m-pair.
 /// Zig пакує точні слова T5M; жодного Python-eval чи старого T5.
 fn t5m_mint_request(args: &[String]) -> Option<Result<(&str, &str), &'static str>> {
@@ -479,6 +497,47 @@ fn main() {
     // This reports the actual Cargo-compiled executable's pinned version.
     if raw_args.len() == 2 && matches!(raw_args[1].as_str(), "--version" | "-V" | "-v") {
         println!("sens {}", env!("CARGO_PKG_VERSION"));
+        return;
+    }
+    if let Some(request) = t5m_files_request(&raw_args) {
+        let result = match request {
+            Ok(paths) => paths
+                .iter()
+                .map(|path| {
+                    fs::read_to_string(path)
+                        .map(|source| (path.as_str(), source))
+                        .map_err(|error| format!("read T5M source {path}: {error}"))
+                })
+                .collect::<Result<Vec<_>, _>>()
+                .and_then(|sources| {
+                    let borrowed = sources
+                        .iter()
+                        .map(|(path, source)| (*path, source.as_str()))
+                        .collect::<Vec<_>>();
+                    #[cfg(feature = "zig-transport")]
+                    {
+                        repl::eval_t5m_source_files(&borrowed)
+                    }
+                    #[cfg(not(feature = "zig-transport"))]
+                    {
+                        let _ = borrowed;
+                        Err("--t5m-files requires the Zig T5M transport corridor".into())
+                    }
+                }),
+            Err(message) => Err(message.to_owned()),
+        };
+        match result {
+            Ok(result) => {
+                for output in result.output {
+                    println!("{output}");
+                }
+                println!("{}", result.value);
+            }
+            Err(error) => {
+                eprintln!("sens: T5M multi-file execution failed: {error}");
+                process::exit(1);
+            }
+        }
         return;
     }
     if let Some(request) = t5m_file_request(&raw_args) {
@@ -822,6 +881,7 @@ fn main() {
             println!("Textual compatibility source: .lisp and historical aliases; physical .sens is packed T5M, not UTF-8 Lisp.");
             println!("  sens program.sens            Run exact physical T5M with pure SENS (no implicit Core4/host effects)");
             println!("  sens --t5m-file program.lisp Run Ukrainian Lisp source through Zig T5M and execute its SENS words");
+            println!("  sens --t5m-files a.lisp b.lisp Load ordered Lisp parts through T5M in one SENS session");
             println!("  sens --t5m-mint program.lisp program.sens Mint physical Zig/T5M from the same SENS reader as --t5m-pair");
             println!("  sens-trit open program.sens  Display exact binary words without running");
             println!("\nOptions:");
@@ -1253,6 +1313,28 @@ mod core_profile_bootstrap_tests {
         }
         let incomplete = vec!["sens".to_owned(), "--t5m-file".to_owned()];
         assert!(matches!(t5m_file_request(&incomplete), Some(Err(_))));
+    }
+
+    #[test]
+    fn t5m_files_mode_accepts_ordered_lisp_sources_only() {
+        let valid = vec![
+            "sens".to_owned(),
+            "--t5m-files".to_owned(),
+            "lib/core4-parts/core4-language.lisp".to_owned(),
+            "lib/core4-parts/core4-d6.lisp".to_owned(),
+        ];
+        assert_eq!(t5m_files_request(&valid), Some(Ok(&valid[2..])));
+
+        let invalid = vec![
+            "sens".to_owned(),
+            "--t5m-files".to_owned(),
+            "lib/core4-parts/core4-language.lisp".to_owned(),
+            "lib/core4.sens".to_owned(),
+        ];
+        assert!(matches!(t5m_files_request(&invalid), Some(Err(_))));
+
+        let incomplete = vec!["sens".to_owned(), "--t5m-files".to_owned()];
+        assert!(matches!(t5m_files_request(&incomplete), Some(Err(_))));
     }
 
     #[test]

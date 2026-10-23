@@ -1506,6 +1506,29 @@ pub(crate) fn eval_t5m_source_file(source: &str) -> Result<sens::EvalResult, Str
     eval_t5m_repl_line(source, &mut session, ReplSurface::UkrainianFull)
 }
 
+/// Виконати впорядковані Lisp-частини через Zig/T5M в одній SENS-сесії.
+/// Кожен файл проходить окремий фізичний T5M roundtrip; визначення з попередніх
+/// файлів лишаються доступними наступним. Це композиція файлів у CLI, не
+/// мовний `include` і не дозвіл на виклик D7-резидентів.
+#[cfg(feature = "zig-transport")]
+pub(crate) fn eval_t5m_source_files(
+    files: &[(&str, &str)],
+) -> Result<sens::EvalResult, String> {
+    if files.is_empty() {
+        return Err("T5M_FILES_EMPTY: pass at least one .lisp source".into());
+    }
+    let mut session = Session::default();
+    let mut value = Value::Nil;
+    let mut output = Vec::new();
+    for (path, source) in files {
+        let mut result = eval_t5m_repl_line(source, &mut session, ReplSurface::UkrainianFull)
+            .map_err(|error| format!("T5M source {path}: {error}"))?;
+        value = result.value;
+        output.append(&mut result.output);
+    }
+    Ok(sens::EvalResult { value, output })
+}
+
 /// Initialise the SENS loop from `repl-core` (`репл-почати`).
 fn init_sens_loop(session: &mut Session) -> Result<(), String> {
     if session.environment.get("репл-крок").is_none() {
@@ -2286,6 +2309,25 @@ mod tests {
                 .value;
             assert_eq!(binary_value.to_string(), source_value.to_string(), "{probe}");
         }
+    }
+
+    #[cfg(feature = "zig-transport")]
+    #[test]
+    fn t5m_core4_parts_load_sequentially_through_one_session() {
+        let parts = [
+            ("language", include_str!("../../../lib/core4-parts/core4-language.lisp")),
+            ("d6", include_str!("../../../lib/core4-parts/core4-d6.lisp")),
+            ("codec", include_str!("../../../lib/core4-parts/core4-codec.lisp")),
+            ("d6b", include_str!("../../../lib/core4-parts/core4-d6b.lisp")),
+            ("d8-d9", include_str!("../../../lib/core4-parts/core4-d8-d9.lisp")),
+        ];
+        let mut sources = parts
+            .iter()
+            .map(|(name, source)| (*name, *source))
+            .collect::<Vec<_>>();
+        sources.push(("probe", "(додати-1 число-один)"));
+        let result = eval_t5m_source_files(&sources).expect("sequential T5M loading");
+        assert_eq!(result.value.to_string(), "2");
     }
 
     #[cfg(feature = "zig-transport")]
