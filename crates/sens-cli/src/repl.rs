@@ -243,10 +243,9 @@ fn append_t5m_expression_context(
             // У цитаті ратифікована тотожність має пріоритет над текстом.
             // Нова викличність з одного лише збігу напису не виникає.
             if quoted_data {
-                if let Some(identity) =
-                    sens::semantic_registry_export::admitted_core_domain_for_surface(name)
+                if let Some(identity) = sens::semantic_registry_export::exact_uk_domain_identity(name)
                 {
-                    words.push(ExactDomainWord::Identity(DomainIdentity::from(identity)));
+                    words.push(ExactDomainWord::Identity(identity));
                     return Ok(());
                 }
             }
@@ -2772,6 +2771,35 @@ mod tests {
         assert!(actual.iter().any(|word| matches!(word,
             ExactDomainWord::Identity(identity)
                 if identity.width() == 9 && identity.packed_bits() == 0b110011110)));
+    }
+
+    #[test]
+    fn t5m_quote_preserves_domain_identity_without_granting_callability() {
+        let source = sens::parse_mixed_exact_domain("(як-є розгорнути-макрос)")
+            .expect("quote of a ratified but non-core projection");
+        let mut actual = Vec::new();
+        append_t5m_expression(&source[0], sens::Text7Layout::Uk, &mut actual, 0)
+            .expect("quoted domain name remains an exact domain word");
+        let identity =
+            sens::semantic_registry_export::exact_uk_domain_identity("розгорнути-макрос")
+                .expect("D6 projection has an exact resident identity");
+        assert_eq!(identity.width(), 6);
+        assert!(
+            sens::semantic_registry_export::admitted_core_domain_for_surface("розгорнути-макрос")
+                .is_none(),
+            "identity lookup must not rely on an admitted core-callability projection"
+        );
+        assert_eq!(
+            actual,
+            vec![
+                ExactDomainWord::Identity(t5m_domain_identity(2, 0b10).unwrap()),
+                ExactDomainWord::Identity(t5m_domain_identity(3, 0b001).unwrap()),
+                ExactDomainWord::Identity(t5m_domain_identity(2, 0b00).unwrap()),
+                ExactDomainWord::Identity(identity),
+                ExactDomainWord::Identity(t5m_domain_identity(2, 0b01).unwrap()),
+            ],
+            "quotation transports identity and does not infer a callable mechanism"
+        );
     }
 
     #[cfg(feature = "zig-transport")]
