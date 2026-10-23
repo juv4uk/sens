@@ -702,6 +702,14 @@ run_case run_bound_law unification-occurs-check-mutant tests/semantic/unificatio
 # Звіт із фактично завершених програм: дорогі та червоні свідки поруч.
 # Семантику визначав Lisp/SENS; shell тільки заміряє тривалість і сортує.
 echo "SENS_LAW_BENCHMARK_SUMMARY measured=$checked failed=$failed file=$evidence/law-timings.tsv"
+# Профілювання фаз за реальними CSV/TSV-вимірами, без повторного запуску SENS.
+# Навіть за RED звіт має показувати, де саме був найдорожчий етап.
+stage_report="$evidence/law-stage-benchmark-report.md"
+bash scripts/report-sens-law-stage-benchmarks.sh "$evidence/law-stage-timings.tsv" > "$stage_report"
+echo "SENS_LAW_STAGE_BENCHMARK_REPORT source=$evidence/law-stage-timings.tsv file=$stage_report"
+if [[ -n "${GITHUB_STEP_SUMMARY:-}" ]]; then
+  cat "$stage_report" >> "$GITHUB_STEP_SUMMARY"
+fi
 if [[ -n "${GITHUB_STEP_SUMMARY:-}" ]]; then
   {
     echo '## Час фізичних Lisp-законів — direct + T5M + paired + standalone'
