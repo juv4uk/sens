@@ -40,6 +40,22 @@ test "ukrainian SENS REPL source crosses Zig byte-exact, short buffer is untouch
     try std.testing.expectEqualSlices(u8, repl_core_asset[0..repl_core_asset.len], &exact);
 }
 
+test "Zig REPL transport refuses one-byte-short destination without a partial write" {
+    // Перевіряємо виключно байтову межу, не семантику Lisp чи коди доменів.
+    var output: [repl_core_asset.len]u8 = undefined;
+    @memset(output[0..], 0xA5);
+    try std.testing.expectEqual(
+        @as(isize, -2),
+        sens_zig_repl_core_bytes_copy(&output, output.len - 1),
+    );
+    for (output) |byte| {
+        try std.testing.expectEqual(@as(u8, 0xA5), byte);
+    }
+    const expected: isize = @intCast(repl_core_asset.len);
+    try std.testing.expectEqual(expected, sens_zig_repl_core_bytes_copy(&output, output.len));
+    try std.testing.expectEqualSlices(u8, repl_core_asset, &output);
+}
+
 // SENS owns the metacircular evaluator and its generated semantic registry.
 // Zig is only the exact byte carrier; no name interpretation, semantics or
 // admission tables live here.
