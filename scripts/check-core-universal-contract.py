@@ -20,6 +20,7 @@ from __future__ import annotations
 import argparse
 import glob
 import os
+import re
 import sys
 
 CONTRACT = "contracts/core-universal-contract.lisp"
@@ -29,13 +30,13 @@ CORPUS_DIR = "tests/fixtures/semantic"
 GOVERNING = [
     ("predicate-answer", "#1699"),
     ("010", "#1704"),
-    ("111", "#1705"),
-    ("011", "#1713"),
+    ("101", "#1705"),
+    ("110", "#1713"),
     ("reader", "#1709"),
 ]
 
 REQUIRED_SECTIONS = [
-    "scope", "predicate-answer", "010", "111", "011", "reader",
+    "scope", "predicate-answer", "010", "101", "110", "reader",
     "shared-identities", "negative-laws", "profile-coverage",
 ]
 
@@ -46,19 +47,19 @@ EXPECTED_LAW = {
         "empty-list-as-predicate-result": "forbidden",
         "host-boolean-defines-semantics": "forbidden",
     },
-    "010": {"compat-function8": "00000010", "empty-structure": 1,
+    "010": {"identity": "D3:010", "укр": "атом?", "empty-structure": 1,
             "non-pair": 1, "pair-structure": 0},
-    "111": {"compat-function8": "00000011", "same-admitted-atom": 1,
+    "101": {"identity": "D3:101", "укр": "тотожне?", "same-admitted-atom": 1,
             "distinct-admitted-atom": 0, "pair-operand": "named-error"},
-    "011": {"compat-function8": "00000111", "clause-shape": "two-part",
+    "110": {"identity": "D3:110", "укр": "за-умовою", "clause-shape": "two-part",
             "test-1": "select", "test-0": "skip",
             "unselected-expression": "not-evaluated",
             "exhaustion": [], "three-part-clause": "rejected"},
     "reader": {"malformed-source": "rejected-not-repaired"},
 }
 
-SHARED_IDENTITIES = ["00000001", "00000010", "00000011", "00000100",
-                     "00000101", "00000110", "00000111"]
+SHARED_IDENTITIES = ["D3:001", "D3:010", "D3:101", "D3:011",
+                     "D3:100", "D3:111", "D3:110"]
 
 NEGATIVE_LAWS = ["graded-predicate-answer", "empty-list-predicate-result",
                  "structural-kind-substitution", "host-truth-substitution"]
@@ -68,6 +69,9 @@ PROFILE_COVERAGE = {"native": "proven", "core3": "proven", "core2": "measured-bl
 
 ROW_FIELDS = ["expect", "expr", "expected", "active", "name", "semantic-id", "governs", "note"]
 ASSERTION_KINDS = {"expect-value", "expect-error", "expect-rejected"}
+# Лише статичний захист метаданих. Семантичний вердикт дає SENS.
+LEGACY_HEAD = re.compile(r"\(\s*(?:(?:sid8|sens8):)?[01]{8}(?=[\s()])", re.I)
+EXACT_ID = re.compile(r"D([1-9]|10|11):([01]+)\Z")
 
 
 # --------------------------------------------------------------------------
@@ -246,8 +250,16 @@ def check_corpus(fail):
             governs = as_str(row.get("governs", ""))
             if not governs.startswith("#"):
                 fail(f"{where}: unanchored governs {governs!r}")
-            if not as_str(row.get("semantic-id", "")).strip():
-                fail(f"{where}: empty semantic-id")
+            expr = row.get("expr")
+            if not isinstance(expr, str) or isinstance(expr, Sym):
+                fail(f"{where}: expr must contain a source string")
+            elif LEGACY_HEAD.search(expr):
+                fail(f"{where}: legacy SID8/Sens8 executable head in expr")
+            semantic_id = row.get("semantic-id")
+            identity = EXACT_ID.fullmatch(semantic_id) if isinstance(semantic_id, str) else None
+            if semantic_id != "reader" and (identity is None or
+                    len(identity.group(2)) != int(identity.group(1))):
+                fail(f"{where}: semantic-id must be current exact domain coordinate")
             if not as_str(row.get("note", "")).strip():
                 fail(f"{where}: empty note")
             rows.append(row)

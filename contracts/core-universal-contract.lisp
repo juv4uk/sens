@@ -9,8 +9,8 @@
 ; викличної назви. Доказовий корпус міститься в
 ; tests/fixtures/semantic/ (#1709): контракт посилається на нього,
 ; але не створює другої копії.
-; Назви полів і буквальні значення всередині контракту залишено
-; незмінними, бо це дані чинної схеми.
+; Чинні функціональні ідентичності — Д3 із повною проєкцією укр.
+; Історична Function8/SID8 схема лишається лише в історії Git.
 ;
 (core-universal-contract-1
 
@@ -27,19 +27,22 @@
    (host-boolean-defines-semantics . forbidden)
    (governs . "#1699"))
 
-  (("010" . ((compat-function8 . "00000010")
+  (("010" . ((identity . "D3:010")
+             (укр . атом?)
              (empty-structure . 1)
              (non-pair . 1)
              (pair-structure . 0)))
    (governs . "#1704"))
 
-  (("111" . ((compat-function8 . "00000011")
+  (("101" . ((identity . "D3:101")
+             (укр . тотожне?)
              (same-admitted-atom . 1)
              (distinct-admitted-atom . 0)
              (pair-operand . named-error)))
    (governs . "#1705"))
 
-  (("011" . ((compat-function8 . "00000111")
+  (("110" . ((identity . "D3:110")
+             (укр . за-умовою)
              (clause-shape . two-part)
              (test-1 . select)
              (test-0 . skip)
@@ -51,8 +54,8 @@
   ((reader . ((malformed-source . rejected-not-repaired)))
    (governs . "#1709"))
 
-  ((shared-identities . ("00000001" "00000010" "00000011" "00000100"
-                         "00000101" "00000110" "00000111"))
+  ((shared-identities . ("D3:001" "D3:010" "D3:101" "D3:011"
+                         "D3:100" "D3:111" "D3:110"))
    (identity-scope . observable-law-not-spelling))
 
   ((negative-laws . (graded-predicate-answer
