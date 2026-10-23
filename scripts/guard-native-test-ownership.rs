@@ -114,7 +114,7 @@ fn audit(added: &[String], runner: &str, ci: &str,
         if path.starts_with(PREFIX) && path.ends_with(".lisp") {
             if !exists(path) { errs.push(format!("SENS_LAW_SOURCE_MISSING source={path}")); continue; }
             if !routes.contains(path.as_str()) {
-                errs.push(format!("SENS_LAW_NOT_REGISTERED source={path}"));
+                errs.push(format!("SENS_LAW_NOT_REGISTERED id=semantic-law-route layer=test-authority input={path} source={path} expected=registered-Lisp-T5M-SENS-route actual=absent"));
             }
             if let Some(other) = counterpart(path) {
                 if !exists(&other) { errs.push(format!("SENS_LAW_MUTANT_MISSING source={path} expected={other}")); }
@@ -311,8 +311,14 @@ run_case run_division_by_zero_rejection d24-computed-zero-denominator tests/sema
     }
     let orphan = audit(&["tests/semantic/orphan-law.lisp".into()], runner, ci,
         |_| true, |_| Ok(String::new()));
-    if !orphan.iter().any(|e| e.contains("SENS_LAW_NOT_REGISTERED")) {
+    let Some(receipt) = orphan.iter().find(|e| e.contains("SENS_LAW_NOT_REGISTERED")) else {
         return Err("unrouted Lisp law incorrectly admitted".into());
+    };
+    // Кожен RED має сам пояснювати ідентичність, шар, вхід і розбіжність.
+    for field in ["id=", "layer=", "input=", "expected=", "actual="] {
+        if !receipt.contains(field) {
+            return Err(format!("unrouted Lisp law receipt lacks {field}: {receipt}"));
+        }
     }
     Ok(())
 }
