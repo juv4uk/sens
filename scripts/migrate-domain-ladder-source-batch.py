@@ -146,6 +146,9 @@ def authority(root):
     for width in (3, 4, 5, 6, 8, 9):
         domain = f"D{width}"
         for row in read_domain_table(root / "lib/domains" / f"d{width}.lisp"):
+            # D3:000 is the structural empty datum, never a call head.
+            if domain == "D3" and row.bits == "000":
+                continue
             if not row.ukr or row.ukr == "()":
                 raise ValueError(f"missing executable Ukrainian projection: {domain}:{row.bits}")
             projected[(domain, row.bits)] = row.ukr
