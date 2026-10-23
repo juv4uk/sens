@@ -587,6 +587,24 @@ def _emit_item(out, words, need_separator):
     out.extend(words)
 
 
+def seed_forward_definitions(source: str, code_map: dict[str, Entry]) -> set[str]:
+    """Seed known D4 DEFINE binders through the ratified exact-width surfaces.
+
+    In particular, full Ukrainian `визначити` must resolve mutual/forward
+    references just like the historic DEFINE spelling. Source spelling does
+    not invent a new identity: every admitted spelling belongs to D4:0011.
+    """
+    definitions = sorted(
+        (surface for surface, entry in code_map.items()
+         if entry.domain == "D4" and entry.bits == "0011"),
+        key=len, reverse=True,
+    )
+    if not definitions:
+        raise BinaryMigrationError("D4:0011 DEFINE missing from ratified domain projection")
+    pattern = r"\(\s*(?:" + "|".join(re.escape(x) for x in definitions) + r")\s+([^\s()]+)"
+    return set(re.findall(pattern, source, flags=re.IGNORECASE))
+
+
 def binary_rewrite(
     text,
     code_map,
@@ -619,9 +637,7 @@ def binary_rewrite(
     # introduces with an admitted DEFINE is a legal call head even before its
     # defining form is reached. Seed the binding set from the source so only
     # those names are admitted; every other unbound head stays fail-closed.
-    global_bindings: set[str] = set(
-        re.findall(r"\(\s*(?:0011|(?i:DEFINE))\s+([^\s()]+)", source)
-    )
+    global_bindings: set[str] = seed_forward_definitions(source, code_map)
 
     def require_resolved_identity(resolution, token: str, offset: int):
         """A resolver's positive verdict MUST carry a current exact identity.
