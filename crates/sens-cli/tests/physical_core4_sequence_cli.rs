@@ -910,6 +910,55 @@ fn d11_selector_suffix_law_runs_in_native_sens() {
 }
 
 #[test]
+fn first_adjacent_atomic_triple_is_native_sens_and_zig_exact() {
+    // Новий український алгоритм виконує SENS, а не Rust:
+    // Zig перевіряє точні фізичні байти, SENS — закон Д1.
+    let name = "lib/list-first-adjacent-atomic-triple-zero-copy-general";
+    let triple = SourceTriplet::mint(name);
+    let paired = triple.run_sens(true);
+    assert!(
+        paired.status.success(),
+        "test_id=first-atomic-triple-paired source={name} stderr={}",
+        error(&paired)
+    );
+    assert_eq!(observed(&paired).trim(), "1", "test_id=first-atomic-triple-d1");
+
+    let standalone = triple.run_sens(false);
+    assert!(
+        standalone.status.success(),
+        "test_id=first-atomic-triple-standalone source={name} stderr={}",
+        error(&standalone)
+    );
+    assert_eq!(
+        standalone.stdout, paired.stdout,
+        "test_id=first-atomic-triple-parity: SENS paired and standalone must agree"
+    );
+
+    // Інша справна українська програма НЕ може запозичити цю фізичну пару.
+    let id = UNIQUE.fetch_add(1, Ordering::Relaxed);
+    let mutant = std::env::temp_dir().join(format!(
+        "sens-first-atomic-triple-mutant-{}-{id}.lisp",
+        std::process::id()
+    ));
+    let mut changed = fs::read(&triple.source).expect("original Ukrainian source");
+    changed.extend_from_slice("\n(як-є ())\n".as_bytes());
+    fs::write(&mutant, changed).expect("write one test-owned negative source");
+    let rejected = Command::new(env!("CARGO_BIN_EXE_sens"))
+        .arg("--t5m-pair")
+        .arg(&mutant)
+        .arg(&triple.physical)
+        .output()
+        .expect("SENS must refuse a different source");
+    fs::remove_file(&mutant).expect("remove test-owned negative source");
+    assert!(
+        !rejected.status.success()
+            && error(&rejected).contains("T5M_PHYSICAL_PAIR_MISMATCH"),
+        "test_id=first-atomic-triple-negative stderr={}",
+        error(&rejected)
+    );
+}
+
+#[test]
 fn ukrainian_d3_d4_existing_files_mint_verify_and_execute() {
     verify_unpaired_ukrainian_libs_natively();
     // Executable Ukrainian D3/D4 .lisp programs; the stable test
