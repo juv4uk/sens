@@ -167,6 +167,7 @@ jobs:
                   "tests/semantic/meta-eval-graph-d1-mutant.lisp",
                   "tests/semantic/meta-fc-predicates-d1-mutant.lisp",
                   "tests/semantic/core-d3-car-cdr-cons-mutant.lisp",
+                  "tests/semantic/result-status-laws.lisp",
                   "tests/fixtures/conformance-transition-witness.lisp",
               }:
                   print(f"T5M_DEPENDENT_FIXTURE path={name} status=NOT_STANDALONE")
