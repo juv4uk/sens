@@ -3,8 +3,8 @@
 ; застаріла часткова пара зберігається в похідній 122-парній проєкції, що належить Lisp.
 
 (encoder-coverage-legacy-parity-1
-  (legacy-pair-count #b100000)
-  (successor-pair-count #b1111010)
+  (legacy-pair-count 32)
+  (successor-pair-count 122)
   (legacy X86-BASE "ADD")
   (legacy X86-BASE "AND")
   (legacy X86-BASE "CMP")
