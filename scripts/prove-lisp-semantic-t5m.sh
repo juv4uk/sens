@@ -685,6 +685,15 @@ cat -- "${epistemic_sources[@]}" tests/semantic/language-mutant-epistemic-record
 sha256sum "${epistemic_sources[@]}" tests/semantic/language-law-epistemic-records.lisp tests/semantic/language-mutant-epistemic-records.lisp > "$evidence/epistemic-record-logic-inputs.sha256"
 run_case run_law epistemic-record-logic-positive "$epistemic_law_bundle" "(epistemic-authority-witness (status pass))"
 run_case run_law epistemic-record-logic-mutant "$epistemic_mutant_bundle" "(epistemic-authority-witness (status fail) (case source-ref-valid-mutant) (actual 1) (expected 0))"
+# Д7/D8: окремі малі закони про текстові теги без LET чи числових літералів.
+# Бібліотека та предикати — Lisp; Zig відповідає лише за фізичний носій.
+d7_tag_sources=(lib/unify.lisp lib/reason.lisp lib/forward.lisp lib/knowledge.lisp lib/epistemic.lisp)
+d7_tag_positive="$evidence/d7-epistemic-structural-tag-positive.lisp"
+d7_tag_mutant="$evidence/d7-epistemic-structural-tag-mutant.lisp"
+cat -- "${d7_tag_sources[@]}" tests/semantic/d7-epistemic-structural-tag-law.lisp > "$d7_tag_positive"
+cat -- "${d7_tag_sources[@]}" tests/semantic/d7-epistemic-structural-tag-mutant.lisp > "$d7_tag_mutant"
+run_case run_law d7-epistemic-structural-tag-positive "$d7_tag_positive" 1
+run_case run_law d7-epistemic-structural-tag-mutant "$d7_tag_mutant" 0
 # Локалізуємо фізичну розбіжність: форма змінної → входження → повна уніфікація.
 # Визначення й закон належать тільки Lisp, Shell лише додає lib/unify.lisp.
 # Незалежно локалізуємо D3/D4 форму змінної: позитив, негатив і мутант.
