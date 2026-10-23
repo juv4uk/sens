@@ -69,6 +69,12 @@ direct_failure_layer() {
   local log="$1"
   if grep -Fq 'a lexical slot has no source datum' "$log"; then
     printf '%s\n' 'sens-lexical-binding'
+  elif grep -Fq 'macros must return proper lists' "$log"; then
+    printf '%s\n' 'sens-macro-expansion'
+  elif grep -Fq 'domain identity is not callable under its ratified law: D6 ' "$log"; then
+    printf '%s\n' 'sens-d6-admission'
+  elif grep -Fq 'domain identity is not callable under its ratified law: D7 ' "$log"; then
+    printf '%s\n' 'sens-d7-admission'
   elif grep -Fq 'domain identity is not callable under its ratified law' "$log"; then
     printf '%s\n' 'sens-admission'
   elif grep -Fq 'unknown symbol' "$log"; then
@@ -86,7 +92,11 @@ direct_failure_layer() {
 # Це лише точні шари діагностики: кожен випадок лишається RED.
 paired_failure_layer() {
   local log="$1"
-  if grep -Fq 'domain identity is not callable under its ratified law' "$log"; then
+  if grep -Fq 'domain identity is not callable under its ratified law: D6 ' "$log"; then
+    printf '%s\n' 'sens-d6-admission'
+  elif grep -Fq 'domain identity is not callable under its ratified law: D7 ' "$log"; then
+    printf '%s\n' 'sens-d7-admission'
+  elif grep -Fq 'domain identity is not callable under its ratified law' "$log"; then
     printf '%s\n' 'sens-admission'
   elif grep -Fq 'unknown Text7 binding' "$log"; then
     printf '%s\n' 'sens-binding'
