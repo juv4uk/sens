@@ -220,18 +220,27 @@ checked=0
 passed=0
 failed=0
 failed_ids=()
+# Час кожного реального SENS→Zig/T5M→SENS виконання; не мовний оракул.
+# Одна проба на свідок: діагностичний wall-time, не p50 і не порівняння мов.
+printf 'id\tstatus\twall_ms\n' > "$evidence/law-timings.tsv"
 run_case() {
-  local id="$2"
+  local id="$2" start_ns end_ns wall_ms status
+  start_ns="$(date +%s%N)"
   checked=$((checked + 1))
   if ( "$@" ); then
+    status=PASS
     passed=$((passed + 1))
   else
+    status=RED
     failed=$((failed + 1))
     failed_ids+=("$id")
-    # Помилка завантаження спільного Core/process/macro шару не є незалежною
-    # регресією кожного Lisp-свідка. Нативний SENS уже записав справжню
-    # причину у direct.err. Зупиняємо цей набір без 69 повторних запусків,
-    # але з обов'язковим RED; звичайні мовні збої надалі збираємо всі.
+  fi
+  end_ns="$(date +%s%N)"
+  wall_ms="$(((end_ns - start_ns) / 1000000))"
+  printf '%s\t%s\t%s\n' "$id" "$status" "$wall_ms" >> "$evidence/law-timings.tsv"
+  echo "SENS_LAW_WALL_TIME id=$id status=$status wall_ms=$wall_ms scope=full-execution"
+  if [[ "$status" == RED ]]; then
+    # Спільне падіння bootstrap — не 69 незалежних семантичних регресій.
     if [[ -f "$evidence/$id/direct.err" ]] &&
        grep -Eq '^Error loading (process|core|macro|utf8|fs)[.]lisp:' "$evidence/$id/direct.err"; then
       echo "::error title=SENS bootstrap::REGRESSION id=$id layer=bootstrap expected=language-libraries-installed actual=startup-rejected remaining_witnesses=NOT_RUN" >&2
@@ -548,6 +557,25 @@ run_case run_bound_law unification-occurs-predicate-positive tests/semantic/unif
 run_case run_bound_law unification-occurs-predicate-mutant tests/semantic/unification-occurs-predicate-mutant.lisp 0
 run_case run_bound_law unification-occurs-check-positive tests/semantic/unification-occurs-check-law.lisp 1
 run_case run_bound_law unification-occurs-check-mutant tests/semantic/unification-occurs-check-mutant.lisp 0
+# Звіт із фактично завершених програм: дорогі та червоні свідки поруч.
+# Семантику визначав Lisp/SENS; shell тільки заміряє тривалість і сортує.
+echo "SENS_LAW_BENCHMARK_SUMMARY measured=$checked failed=$failed file=$evidence/law-timings.tsv"
+if [[ -n "${GITHUB_STEP_SUMMARY:-}" ]]; then
+  {
+    echo '## Час фізичних Lisp-законів — direct + T5M + paired + standalone'
+    echo
+    echo "Завершено свідків: **$checked**, червоних: **$failed**. Це одноразовий wall-time кожного повного коридору, не p50."
+    echo
+    echo '| Свідок | Статус | wall-time, мс |'
+    echo '|---|---|---:|'
+    tail -n +2 "$evidence/law-timings.tsv" |
+      sort -t "$(printf '\t')" -k3,3nr |
+      sed -n '1,8p' |
+      while IFS="$(printf '\t')" read -r id status ms; do
+        printf '| `%s` | %s | %s |\n' "$id" "$status" "$ms"
+      done
+  } >> "$GITHUB_STEP_SUMMARY"
+fi
 if (( failed > 0 )); then
   echo "::error title=SENS Lisp/T5M::REGRESSION checked=$checked passed=$passed failed=$failed ids=${failed_ids[*]}" >&2
   exit 1
