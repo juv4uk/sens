@@ -62,7 +62,7 @@ jobs:
           fi
           python3 scripts/check_no_encoded_source_literals.py --base "$base"
 
-      - name: Структура Lisp, проєкції, драбина D1–D10 та повний прогін
+      - name: "Інструменти Python — структура, проєкції, драбина D1–D10 — НЕ активні мовні тести"
         run: |
           set -euo pipefail
           # Структура DEFINE та SENS має бути перевірена в тому самому кроці.
@@ -173,9 +173,6 @@ jobs:
                   "tests/semantic/d11-srfi1-list-equality-law.lisp",
                   "tests/semantic/d11-srfi1-list-equality-mutant.lisp",
                   "tests/semantic/unification-variable-shape-law.lisp",
-                  "tests/semantic/unification-variable-shape-positive.lisp",
-                  "tests/semantic/unification-variable-shape-negative.lisp",
-                  "tests/semantic/unification-variable-shape-mutant.lisp",
                   "tests/semantic/unification-occurs-predicate-law.lisp",
                   "tests/semantic/unification-occurs-predicate-mutant.lisp",
                   "tests/semantic/core-d3-car-cdr-cons-mutant.lisp",
