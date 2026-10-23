@@ -10,24 +10,43 @@ source_file="$1"
 shift
 binary="target/debug/sens"
 reader="target/debug/sens-trit"
-if (( $# > 0 )) && [[ "$1" != --binding-source ]]; then
+if (( $# > 0 )) && [[ "$1" != --binding-source && "$1" != --expect-error ]]; then
   binary="$1"
   shift
 fi
-if (( $# > 0 )) && [[ "$1" != --binding-source ]]; then
+if (( $# > 0 )) && [[ "$1" != --binding-source && "$1" != --expect-error ]]; then
   reader="$1"
   shift
 fi
 # Залежності — чинні українські DEFINE у SENS, не хостова семантика.
+# Очікувана помилка є частиною негативного свідка, а не успішним виконанням.
 binding_args=()
+binding_sources=()
+expected_error=""
 while (( $# > 0 )); do
-  if (( $# < 2 )) || [[ "$1" != --binding-source || "$2" != *.lisp ||
-                         ! -f "$2" || -L "$2" ]]; then
-    echo "T5M_REPAIR_BINDING_SOURCE_INVALID argument=${1:-missing}" >&2
-    exit 2
-  fi
-  binding_args+=(--binding-source "$2")
-  shift 2
+  case "${1:-}" in
+    --binding-source)
+      if (( $# < 2 )) || [[ "$2" != *.lisp || ! -f "$2" || -L "$2" ]]; then
+        echo "T5M_REPAIR_BINDING_SOURCE_INVALID argument=${2:-missing}" >&2
+        exit 2
+      fi
+      binding_args+=(--binding-source "$2")
+      binding_sources+=("$2")
+      shift 2
+      ;;
+    --expect-error)
+      if (( $# < 2 )) || [[ -z "$2" || -n "$expected_error" ]]; then
+        echo "T5M_REPAIR_EXPECTED_ERROR_ARGUMENT_INVALID" >&2
+        exit 2
+      fi
+      expected_error="$2"
+      shift 2
+      ;;
+    *)
+      echo "T5M_REPAIR_ARGUMENT_INVALID argument=${1:-missing}" >&2
+      exit 2
+      ;;
+  esac
 done
 if [[ "$source_file" != *.lisp || ! -f "$source_file" || -L "$source_file" ]]; then
   echo "T5M_REPAIR_SOURCE_INVALID path=$source_file" >&2
@@ -67,6 +86,61 @@ trap 'rm -rf "$scratch"' EXIT
 snapshot="$(sha256sum "$source_file" | cut -d' ' -f1)"
 staged="$scratch/program.sens"
 staged_view="$scratch/program"
+direct_source="$source_file"
+if (( ${#binding_sources[@]} != 0 )); then
+  direct_source="$scratch/direct-bundle.lisp"
+  : > "$direct_source"
+  for dependency in "${binding_sources[@]}"; do
+    cat -- "$dependency" >> "$direct_source"
+    printf '\\n' >> "$direct_source"
+  done
+  cat -- "$source_file" >> "$direct_source"
+fi
+# Негативні мовні свідки теж потребують фізичної трійки.
+# У цьому режимі очікувану відмову перевіряємо окремо на Lisp і парному T5M;
+# лише після точного повідомлення публікуємо verified view + фізичний файл.
+if [[ -n "$expected_error" ]]; then
+  if timeout "$native_timeout" "$binary" "$direct_source" > "$scratch/direct.out" 2> "$scratch/direct.err"; then
+    echo "T5M_REPAIR_EXPECTED_ERROR_DIRECT_ACCEPTED source=$source_file expected=$expected_error" >&2
+    exit 2
+  else
+    direct_status=$?
+  fi
+  if (( direct_status == 124 || direct_status == 137 )) ||
+     ! grep -Fq "$expected_error" "$scratch/direct.err"; then
+    cat "$scratch/direct.err" >&2
+    echo "T5M_REPAIR_EXPECTED_ERROR_DIRECT_MISMATCH source=$source_file status=$direct_status expected=$expected_error" >&2
+    exit 2
+  fi
+  if timeout "$native_timeout" "$binary" --t5m-pair "$source_file" "$staged" "${binding_args[@]}" > "$scratch/paired.out" 2> "$scratch/paired.err"; then
+    echo "T5M_REPAIR_EXPECTED_ERROR_PAIRED_ACCEPTED source=$source_file expected=$expected_error" >&2
+    exit 2
+  else
+    paired_status=$?
+  fi
+  if (( paired_status == 124 || paired_status == 137 )) ||
+     ! grep -Fq "$expected_error" "$scratch/paired.err"; then
+    cat "$scratch/paired.err" >&2
+    echo "T5M_REPAIR_EXPECTED_ERROR_PAIRED_MISMATCH source=$source_file status=$paired_status expected=$expected_error" >&2
+    exit 2
+  fi
+  mode=expected-error-paired-only
+  if (( ${#binding_sources[@]} == 0 )); then
+    if timeout "$native_timeout" "$binary" "$staged" > "$scratch/standalone.out" 2> "$scratch/standalone.err"; then
+      echo "T5M_REPAIR_EXPECTED_ERROR_STANDALONE_ACCEPTED source=$source_file expected=$expected_error" >&2
+      exit 2
+    else
+      standalone_status=$?
+    fi
+    if (( standalone_status == 124 || standalone_status == 137 )) ||
+       ! grep -Fq "$expected_error" "$scratch/standalone.err"; then
+      cat "$scratch/standalone.err" >&2
+      echo "T5M_REPAIR_EXPECTED_ERROR_STANDALONE_MISMATCH source=$source_file status=$standalone_status expected=$expected_error" >&2
+      exit 2
+    fi
+    mode=expected-error-paired-and-standalone
+  fi
+else
 # SENS власноруч створює слова, Zig єдиний пакує T5M.
 mint_flag=--t5m-mint
 if (( ${#binding_args[@]} != 0 )); then
@@ -121,6 +195,7 @@ else
     echo "T5M_REPAIR_STANDALONE_UNEXPECTED_FAIL source=$source_file status=$status physical=NOT_CERTIFIED" >&2
     exit 2
   fi
+fi
 fi
 # Негативна перевірка проводить іншу програму через той самий SENS.
 { cat "$source_file"; printf '\n(як-є ())\n'; } > "$scratch/mutant.lisp"
@@ -256,4 +331,8 @@ if [[ "$snapshot" != "$(sha256sum "$source_file" | cut -d' ' -f1)" ]]; then
 fi
 trap - EXIT INT TERM
 rm -rf -- "$publish_dir" "$scratch"
-echo "T5M_REPAIR_OK source=$source_file physical=$physical view=$view mode=$mode exact=ZIG_AND_SENS negative=REJECTED semantic_parity=NOT_CERTIFIED release=NOT_CERTIFIED"
+if [[ -n "$expected_error" ]]; then
+  echo "T5M_REPAIR_EXPECTED_ERROR_OK source=$source_file physical=$physical view=$view mode=$mode expected=$expected_error exact=ZIG_AND_SENS semantic_parity=NEGATIVE_WITNESS_RELEASE=NOT_CERTIFIED"
+else
+  echo "T5M_REPAIR_OK source=$source_file physical=$physical view=$view mode=$mode exact=ZIG_AND_SENS negative=REJECTED semantic_parity=NOT_CERTIFIED release=NOT_CERTIFIED"
+fi
