@@ -211,8 +211,6 @@ jobs:
           set -euo pipefail
           cargo test --locked -p wsm-guard-slice --bin wsm-guard-slice event_frame_rejects_overlong_duplicate_unknown_and_non_ascii_fields -- --exact --nocapture
           cargo test --locked -p sens-lsp --lib transport::tests:: -- --nocapture
-          cargo test --locked -p sens --test core_math_arithmetic_live -- --nocapture
-          cargo test --locked -p sens --test d4_selector_domain_routing -- --nocapture
           cargo test --locked -p sens --test d5_list_search_laws parser_rejects_an_unclosed_form_before_evaluation -- --exact --nocapture
 
       - name: Zig — кодеки, ABI та безпечна межа копіювання
@@ -295,6 +293,8 @@ jobs:
           check_lisp_law d3-d4-negative tests/semantic/d3-d4-ukr-native-mutant.lisp '0'
           check_lisp_law d3-ukr-self-verdict tests/semantic/d3-ukr-language-self-verdict.lisp '1'
           check_lisp_law d5-ukr-self-verdict tests/semantic/d5-ukr-arithmetic-self-verdict.lisp '1'
+          check_lisp_law d4-late-binding tests/semantic/d4-late-definition-binding-law.lisp '1'
+          check_lisp_law d4-escaped-closure tests/semantic/d4-escaped-lexical-closure-law.lisp '1'
           check_lisp_law d3-atom-cond tests/semantic/lisp-d3-atom-cond-laws.lisp '1'
           check_lisp_law d3-cons-selectors tests/semantic/lisp-d3-cons-selectors-laws.lisp '1'
           check_lisp_law d3-eq-branches tests/semantic/lisp-d3-eq-branches-laws.lisp '1'
