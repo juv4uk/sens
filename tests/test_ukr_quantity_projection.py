@@ -49,15 +49,24 @@ def parse_forms(source: str) -> tuple:
 
 def definitions(forms: tuple) -> dict[str, tuple]:
     result = {}
+    # Живий файл завершується виконуваним SENS-свідком, а не ще одним
+    # DEFINE. Структурна перевірка не має відкидати справжнє виконання.
+    executable_witness = ("науковий-список-правильний?", ("як-є", ("а", "б")))
+    witnessed = False
     for form in forms:
+        if form == executable_witness and not witnessed:
+            witnessed = True
+            continue
         if not isinstance(form, tuple) or len(form) != 3 or form[0] != "визначити":
-            raise AssertionError("чинні верхньорівневі форми мають бути українськими DEFINE")
+            raise AssertionError("очікувався український DEFINE або справжній SENS-свідок")
         name = form[1]
         if not isinstance(name, str):
             raise AssertionError("некоректне ім'я визначення")
         if name in result:
             raise AssertionError(f"дубльоване визначення: {name}")
         result[name] = form[2]
+    if not witnessed:
+        raise AssertionError("зник виконуваний SENS-свідок перевірки списку")
     return result
 
 
