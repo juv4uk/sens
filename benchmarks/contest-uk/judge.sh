@@ -104,7 +104,13 @@ for path in "${inputs[@]}"; do
   esac
   tmp="$(mktemp -d)"
   "$sens" --t5m-mint "$source" "$tmp/minted.sens" >/dev/null || error "mint $path"
-  cmp -s "$path" "$tmp/minted.sens" || error "необоротний T5M $path"
+  if ! cmp -s "$path" "$tmp/minted.sens"; then
+    # Це невідповідність committed носія поточному нативному mint,
+    # а не доказ несправності Zig inverse (до open/verify ще не дійшли).
+    expected_sha="$(sha256sum "$tmp/minted.sens" | cut -d ' ' -f1)"
+    actual_sha="$(sha256sum "$path" | cut -d ' ' -f1)"
+    error "REGRESSION id=contest-native-mint-parity layer=physical-pair source=$source physical=$path expected_minted_sha256=$expected_sha actual_committed_sha256=$actual_sha"
+  fi
   "$trit" open "$path" > "$tmp/view" || error "Zig open $path"
   cmp -s "$view" "$tmp/view" || error "необоротний вигляд $path"
   "$trit" verify-view "$path" >/dev/null || error "Zig verify-view $path"
