@@ -215,6 +215,17 @@ run_native_t5m_program() {
     else
       rejection_status=$?
     fi
+    # D11-бібліотечне DEFINE передається як binding-source для парного
+    # виконання, але не є частиною автономного файла. Тому standalone
+    # може чесно відхилити невідому D7-проєкцію імені, ще не дійшовши
+    # до тестованої помилки Type. Це не семантичний PASS: прямий та
+    # парний SENS уже мають збігтися з точним Type-діагнозом вище.
+    if (( ${#binding_sources[@]} != 0 )) &&
+       grep -Fq 'unknown Text7 binding:' "$dir/native-standalone.stderr"; then
+      native_paired_executed_paths["$file"]=1
+      echo "::notice file=$file,title=SENS negative Type::PASS direct=REJECTED paired=REJECTED standalone=NOT_APPLICABLE reason=external-D11-binding diagnostic=$negative_type_diagnostic"
+      return
+    fi
     if (( rejection_status == 124 || rejection_status == 137 )) ||
        ! grep -Fq "$negative_type_diagnostic" "$dir/native-standalone.stderr"; then
       sed 's/^/SENS negative standalone: /' "$dir/native-standalone.stderr" >&2
@@ -222,8 +233,8 @@ run_native_t5m_program() {
       mark_file_failed
       return
     fi
-    # Обидва фізичні способи СЕНС реально виконано й незалежно
-    # відхилено саме з очікуваною помилкою. Лічильники не гублять негативи.
+    # У випадках, де standalone має всі зв'язування, три шляхи
+    # відхиляються незалежно з однаковою очікуваною Type-помилкою.
     native_paired_executed_paths["$file"]=1
     native_standalone_parity_paths["$file"]=1
     echo "::notice file=$file,title=SENS negative Type::PASS physical=Zig/T5M direct=REJECTED paired=REJECTED standalone=REJECTED diagnostic=$negative_type_diagnostic"
