@@ -388,7 +388,7 @@ run_case run_law d11-srfi1-span-break-physical "$d11_span_bundle" 1
 # або дубль її DEFINE є жорсткою помилкою, не SKIP.
 meta_sixth_definition="$evidence/d11-meta-sixth-source-definition.lisp"
 if ! awk '
-  /^\\(визначити шосте-значення-групи$/ {
+  /^\(визначити шосте-значення-групи$/ {
     if (found++) exit 2
     copying = 1
   }
@@ -403,7 +403,14 @@ if ! awk '
   echo "::error::D11_META_SIXTH_SOURCE_NOT_ISOLATABLE source=lib/meta-eval.lisp" >&2
   exit 2
 fi
-grep -q '^[(]визначити шосте-значення-групи
+test -s "$meta_sixth_definition" || { echo "::error::D11_META_SIXTH_SOURCE_EMPTY" >&2; exit 2; }
+sha256sum lib/meta-eval.lisp "$meta_sixth_definition" > "$evidence/d11-meta-sixth-source.sha256"
+meta_sixth_law_bundle="$evidence/d11-meta-sixth-positive-complete.lisp"
+meta_sixth_mutant_bundle="$evidence/d11-meta-sixth-mutant-complete.lisp"
+cat -- "$meta_sixth_definition" tests/semantic/d11-meta-sixth-laws.lisp > "$meta_sixth_law_bundle"
+cat -- "$meta_sixth_definition" tests/semantic/d11-meta-sixth-mutant.lisp > "$meta_sixth_mutant_bundle"
+run_case run_law d11-meta-sixth-positive "$meta_sixth_law_bundle" 1
+run_case run_law d11-meta-sixth-mutant "$meta_sixth_mutant_bundle" 0
 # LAST-DEFINE: D7-текст має D8-рівність у нормативному Lisp, не D3 EQ Rust.
 last_define_positive_bundle="$evidence/d11-meta-last-define-positive-complete.lisp"
 last_define_mutant_bundle="$evidence/d11-meta-last-define-mutant-complete.lisp"
