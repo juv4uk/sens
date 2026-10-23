@@ -10,7 +10,7 @@
   "entries": [
     {
       "path": "knowledge/agent-discoveries.lisp",
-      "git_blob_sha1": "73b9ad451c15978e1cc350c984aa4c6fd54fbd7a",
+      "git_blob_sha1": "9627e744a71d8395d382570fd8ef7f450714bb3b",
       "record_head": "agent-discoveries"
     },
     {
@@ -77,6 +77,15 @@
       "path": "knowledge/structure-not-ontology-inventory.lisp",
       "git_blob_sha1": "e0dc5d7a489cfc19011698c50684ee022d339e13",
       "record_head": "structure-not-ontology-1"
+    }
+  ],
+  "reviewed_post_snapshot_changes": [
+    {
+      "path": "knowledge/agent-discoveries.lisp",
+      "previous_git_blob_sha1": "73b9ad451c15978e1cc350c984aa4c6fd54fbd7a",
+      "current_git_blob_sha1": "9627e744a71d8395d382570fd8ef7f450714bb3b",
+      "reviewed_commit": "dfb73c10b0c12c0f6817352285463cb76648de60",
+      "reason": "Застарілі твердження Call(SID) та однобайтної FASL-тотожності замінені чинним контрактом: точна (домен, біти), виклична поверхня «укр», .sens транспортує сформовані T5M-слова, CI не є доказом runtime parity. Запис лишається декларативними даними без runtime admission."
     }
   ]
 }
