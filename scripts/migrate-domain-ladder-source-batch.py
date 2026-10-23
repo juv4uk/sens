@@ -256,7 +256,17 @@ def rewrite(src, mapping, blocked):
             continue
 
         start = i
-        while i < len(src) and not src[i].isspace() and src[i] not in "()'\",;" + chr(96) and not src.startswith("#|", i):
+        while i < len(src):
+            # Український апостроф між літерами — частина імені
+            # (об'єкт, п'ятий), а не операція читача QUOTE.
+            if (src[i] == "'" and i > start and i + 1 < len(src)
+                    and src[i - 1].isalpha() and src[i + 1].isalpha()):
+                i += 1
+                continue
+            if (src[i].isspace()
+                    or src[i] in ("(", ")", "'", chr(34), chr(92), ",", ";", chr(96))
+                    or src.startswith("#|", i)):
+                break
             i += 1
         if i == start:
             i += 1
