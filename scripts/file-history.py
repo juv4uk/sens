@@ -28,6 +28,37 @@ def git(*args: str) -> str:
                           cwd=ROOT, capture_output=True, text=True, check=False).stdout
 
 
+
+def important_changes(rel: str, top: int) -> list[tuple[int, int, str, str, str]]:
+    """Ранжувати зміни файлу за СУТТЮ, а не за порядком.
+
+    Важливе = великий диф (+додано/-видалено рядків) і/або зміна визначень.
+    Масова міграція (309 правок одного дня) відсіюється, бо кожна правка дрібна.
+    Повертає [(додано, видалено, sha, дата, тема)] за спаданням обсягу.
+    """
+    out = git("log", "--follow", "--numstat", "--format=@@%h|%ad|%s", "--date=short", "--", rel)
+    rows: list[tuple[int, int, str, str, str]] = []
+    sha = date = subj = ""
+    add = dele = 0
+    for line in out.splitlines():
+        if line.startswith("@@"):
+            if sha:
+                rows.append((add, dele, sha, date, subj))
+            sha, date, subj = line[2:].split("|", 2)
+            add = dele = 0
+        elif line.strip():
+            parts = line.split("\t")
+            if len(parts) >= 2:
+                try:
+                    add += int(parts[0]); dele += int(parts[1])
+                except ValueError:
+                    pass
+    if sha:
+        rows.append((add, dele, sha, date, subj))
+    rows.sort(key=lambda r: -(r[0] + r[1]))
+    return rows[:top]
+
+
 def load_index() -> dict:
     try:
         return json.loads(INDEX.read_text(encoding="utf-8"))
@@ -40,6 +71,7 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("path", help="шлях до файлу, напр. lib/core4.lisp")
     ap.add_argument("--limit", type=int, default=25, help="скільки останніх змін показати")
     ap.add_argument("--defs", action="store_true", help="показати, коли з'явилось кожне визначення")
+    ap.add_argument("--important", type=int, metavar="N", help="показати N найВАЖЛИВІШИХ змін (за обсягом), а не останні")
     args = ap.parse_args(argv)
 
     rel = args.path
@@ -83,6 +115,12 @@ def main(argv: list[str] | None = None) -> int:
             print(f"\nВИЗНАЧЕННЯ ({len(defs)}) — коли з'явилось кожне:")
             for name, v in sorted(defs, key=lambda kv: kv[1]["date"]):
                 print(f"  {v['date']} {v['sha']}  {name}")
+
+    if args.important:
+        imp = important_changes(rel, args.important)
+        print(f"\nВАЖЛИВІ ЗМІНИ (топ-{len(imp)} за обсягом; масові міграції відсіяно):")
+        for add, dele, sha, date, subj in imp:
+            print(f"  +{add:<5} -{dele:<5} {date} {sha}  {subj[:76]}")
 
     print(f"\nХРОНОЛОГІЯ (останні {min(args.limit, len(rows))} із {len(rows)}):")
     for sha, date, subj in rows[:args.limit]:
