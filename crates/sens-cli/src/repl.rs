@@ -264,6 +264,18 @@ fn append_t5m_expression_context(
                     expression.span.start
                 )
             })?;
+            // A single quoted free glyph is one exact D7 datum. Do not
+            // wrap it as a one-element D2 list: ATOM would then observe a
+            // pair instead of the source-level atomic glyph. Multi-glyph
+            // quoted names remain a D2/W7 sequence; only explicit binding
+            // positions derive a Text7 key from such a frame.
+            if quoted_data && text.len() == 1 {
+                words.push(ExactDomainWord::Identity(t5m_domain_identity(
+                    7,
+                    u16::from(text.cells()[0]),
+                )?));
+                return Ok(());
+            }
             words.push(control(0b10)?);
             for (index, cell) in text.cells().iter().enumerate() {
                 if index > 0 {
