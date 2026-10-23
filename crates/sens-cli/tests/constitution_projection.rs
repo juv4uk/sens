@@ -36,6 +36,16 @@ fn unique_temp_dir(label: &str) -> PathBuf {
 }
 
 #[test]
+fn ukrainian_constitution_example_runs_in_real_sens() {
+    let root = repo_root();
+    let output = run_generator(&root, Path::new("racket/examples/constitution.lisp"));
+    assert!(
+        !output.stdout.is_empty(),
+        "the SENS example must produce an observable result"
+    );
+}
+
+#[test]
 fn generator_reproduces_checked_in_constitution_byte_for_byte() {
     let root = repo_root();
     let generated = run_generator(&root, Path::new("scripts/build-constitution.lisp"));

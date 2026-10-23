@@ -71,6 +71,14 @@ class EncodedSourceLiteralTests(unittest.TestCase):
             "числа файлової гвардії мають бути іменованими значеннями СЕНС",
         )
 
+    def test_constitution_example_has_no_numeric_source_literals(self):
+        path = ROOT / "racket/examples/constitution.lisp"
+        source = path.read_text(encoding="utf-8")
+        self.assertEqual(
+            CHECK.find_forbidden_literals(source, path="racket/examples/constitution.lisp"),
+            [],
+        )
+
     def test_guard_reference_ranks_are_named_not_numeric(self):
         # Порядок станів збережено; числові ранги мають іменовані D24+ значення.
         path = ROOT / "knowledge/guard-reference.lisp"
