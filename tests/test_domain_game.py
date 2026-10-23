@@ -31,13 +31,13 @@ class DomainGameTests(TestCase):
         self.assertIn("наявність файлів не означає PASS", result)
         self.assertIn("НАСТУПНИЙ КВЕСТ", result)
 
-    def test_default_progress_labels_files_not_proven_laws(self):
+    def test_default_progress_labels_scenarios_not_proven_laws(self):
         with patch.object(game, "tracked", return_value=["tests/semantic/d12-signed-width-law.lisp"]):
             out = io.StringIO()
             with contextlib.redirect_stdout(out):
                 code = game.main(["--brief"])
         self.assertEqual(code, 0)
-        self.assertIn("файлів-свідків", out.getvalue())
+        self.assertIn("сценаріїв", out.getvalue())
         self.assertNotIn("законів", out.getvalue())
 
     def test_codec_brief_has_quest_counter(self):
