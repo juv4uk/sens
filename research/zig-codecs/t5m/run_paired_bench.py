@@ -56,6 +56,16 @@ def records(output: str, kind: str) -> list[dict[str, str]]:
     return rows
 
 
+def percentile_nearest_rank(values: list[float], percentile: int) -> float:
+    """Nearest-rank percentile; keep small exploratory samples explicit."""
+    if not values:
+        raise ValueError("percentile requires at least one sample")
+    if not 1 <= percentile <= 100:
+        raise ValueError("percentile must be between 1 and 100")
+    rank = (percentile * len(values) + 99) // 100
+    return sorted(values)[rank - 1]
+
+
 def build_binaries(out: Path, impls: list[str]) -> dict[str, Path]:
     binaries: dict[str, Path] = {}
     if "zig" in impls:
@@ -179,12 +189,14 @@ def main() -> int:
     grouped = defaultdict(list)
     for row in batches:
         grouped[(row["forms"], row["op"], row["impl"])].append(row["ns_per_op"])
-    header = "| Форми | Операція | " + " | ".join(f"{name} p50 нс/оп" for name in impls) + " |"
-    sep = "|---:|---|" + "---:|" * len(impls)
+    metrics = [(name, stat) for name in impls for stat in ("p50", "p90")]
+    header = "| Форми | Операція | " + " | ".join(f"{name} {stat} нс/оп" for name, stat in metrics) + " |"
+    sep = "|---:|---|" + "---:|" * len(metrics)
     lines = ["# Zig ↔ asm ↔ Rust T5M · механічний A/B", "",
              "**ТІЛЬКИ transport**, не SENS semantic oracle. T5M = 5 трітів/байт.",
              "Фізичні bytes/FNV-1a matched між усіма бекендами; усі бекенди міряють "
-             "word→byte end-to-end. **Статистика дослідницька, не K–J CI.**", "",
+             "word→byte end-to-end. p50 — медіана, p90 — nearest-rank над сирими пробами. "
+             "**Статистика дослідницька, не K–J CI і не доказ швидкості мови.**", "",
              header, sep]
     for forms in (1, 16, 128, 1024):
         for op in ("encode", "decode"):
@@ -195,7 +207,9 @@ def main() -> int:
                 if len(vals) != 5 * args.pairs:
                     ok = False
                     break
-                cells.append(f"{statistics.median(vals):.1f}")
+                p50 = statistics.median(vals)
+                p90 = percentile_nearest_rank(vals, 90)
+                cells.extend((f"{p50:.1f}", f"{p90:.1f}"))
             if not ok:
                 raise RuntimeError(f"BLOCKED_NO_TIMING missing paired samples {forms}/{op}")
             lines.append(f"| {forms} | {op} | " + " | ".join(cells) + " |")
