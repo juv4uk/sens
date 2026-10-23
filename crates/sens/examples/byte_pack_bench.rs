@@ -114,10 +114,111 @@ fn packed_decode(words: &[BinarySourceWord], reps: usize) -> u64 {
     black_box(checksum)
 }
 
+fn run_mode(mode: &str, words: &[BinarySourceWord], reps: usize) -> u64 {
+    match mode {
+        "base" => black_box(words.len() as u64),
+        "unpacked" => unpacked_scan(words, reps),
+        "pack" => pack_scan(words, reps),
+        "decode" => packed_decode(words, reps),
+        _ => unreachable!("validated Rust benchmark mode"),
+    }
+}
+
+fn percentile(sorted: &[f64], numerator: usize, denominator: usize) -> f64 {
+    let index = ((sorted.len() - 1) * numerator).div_ceil(denominator);
+    sorted[index]
+}
+
+fn run_series(workload: &str, n: usize, samples: usize) -> Result<(), String> {
+    const TARGET_SAMPLE_NS: u128 = 25_000_000;
+    const MAX_BATCH_REPS: usize = 10_000_000;
+
+    if n == 0 || samples < 5 || samples.is_multiple_of(2) {
+        return Err("N must be positive and SAMPLES must be odd and >= 5".into());
+    }
+    let words = corpus(workload, n);
+    let (packed_bits, packed_bytes, checksum) = verify(&words);
+    let semantic_bits: usize = words.iter().map(|w| w.width()).sum();
+    let minimum_bytes = semantic_bits.div_ceil(8);
+    if packed_bits != semantic_bits || packed_bytes != minimum_bytes {
+        return Err(format!(
+            "exact-width parity failed: semantic_bits={semantic_bits} packed_bits={packed_bits} packed_bytes={packed_bytes}"
+        ));
+    }
+    println!(
+        "PACK_BENCH_PREFLIGHT\tworkload={workload}\tn={n}\tsemantic_bits={semantic_bits}\tphysical_bytes={packed_bytes}\tchecksum={checksum}\tparity=exact"
+    );
+
+    for mode in ["unpacked", "pack", "decode"] {
+        // Each mode gets its own warm-up outside all timed samples.
+        black_box(run_mode(mode, &words, 1));
+        let mut values = Vec::with_capacity(samples);
+        for sample in 0..samples {
+            let mut reps = 1usize;
+            let (elapsed_ns, checksum) = loop {
+                let started = Instant::now();
+                let checksum = black_box(run_mode(mode, &words, reps));
+                let elapsed = started.elapsed().as_nanos();
+                if elapsed >= TARGET_SAMPLE_NS {
+                    break (elapsed, checksum);
+                }
+                if reps >= MAX_BATCH_REPS {
+                    return Err(format!(
+                        "adaptive sample too short: mode={mode} reps={reps} elapsed_ns={elapsed}"
+                    ));
+                }
+                let factor = TARGET_SAMPLE_NS.div_ceil(elapsed.max(1));
+                let scaled = reps.saturating_mul(usize::try_from(factor).unwrap_or(usize::MAX));
+                reps = scaled.clamp(reps.saturating_add(1), MAX_BATCH_REPS);
+            };
+            let ns_per_word = elapsed_ns as f64 / (n.saturating_mul(reps)) as f64;
+            if !ns_per_word.is_finite() || ns_per_word <= 0.0 {
+                return Err(format!("invalid timing sample: mode={mode}"));
+            }
+            values.push(ns_per_word);
+            println!(
+                "PACK_BENCH_SAMPLE\tworkload={workload}\tmode={mode}\tsample={}\tn={n}\treps={reps}\telapsed_ns={elapsed_ns}\tns_per_word={ns_per_word:.3}\tsemantic_bits={semantic_bits}\tphysical_bytes={packed_bytes}\tchecksum={checksum}\ttarget_sample_ns={TARGET_SAMPLE_NS}",
+                sample + 1,
+            );
+        }
+        let mut sorted = values.clone();
+        sorted.sort_by(f64::total_cmp);
+        println!(
+            "PACK_BENCH_SUMMARY\tworkload={workload}\tmode={mode}\tsamples={samples}\tp50_ns_per_word={:.3}\tp90_ns_per_word={:.3}\tsemantic_bits={semantic_bits}\tphysical_bytes={packed_bytes}\tparity=exact\ttarget_sample_ns={TARGET_SAMPLE_NS}",
+            percentile(&sorted, 1, 2),
+            percentile(&sorted, 9, 10),
+        );
+    }
+    Ok(())
+}
+
 fn main() -> ExitCode {
     let args: Vec<String> = env::args().collect();
+    if args.len() == 5 && args[1] == "series" {
+        let n = match args[3].parse::<usize>() {
+            Ok(value) if value > 0 => value,
+            _ => {
+                eprintln!("PACK_BENCH_INVALID_INPUT: N must be positive");
+                return ExitCode::from(2);
+            }
+        };
+        let samples = match args[4].parse::<usize>() {
+            Ok(value) if value >= 5 && value % 2 == 1 => value,
+            _ => {
+                eprintln!("PACK_BENCH_INVALID_INPUT: SAMPLES must be odd and >= 5");
+                return ExitCode::from(2);
+            }
+        };
+        return match run_series(&args[2], n, samples) {
+            Ok(()) => ExitCode::SUCCESS,
+            Err(error) => {
+                eprintln!("PACK_BENCH_INVALID_INPUT_OR_PARITY: {error}");
+                ExitCode::from(2)
+            }
+        };
+    }
     if args.len() != 5 {
-        eprintln!("usage: byte_pack_bench MODE WORKLOAD N REPS");
+        eprintln!("usage: byte_pack_bench MODE WORKLOAD N REPS | series WORKLOAD N ODD_SAMPLES");
         return ExitCode::from(2);
     }
     let mode = &args[1];
