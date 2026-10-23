@@ -325,6 +325,10 @@ run_case run_law d8-d7-equal-physical-mutant tests/semantic/d8-d7-equal-physical
 # Обидва результати вираховує Lisp/SENS; Zig лише фізично переносить слова.
 run_case run_law d3-d1-false-cons-head-positive tests/semantic/language-law-d3-d1-false-head-ukr.lisp 1
 run_case run_law d3-d1-false-cons-head-mutant tests/semantic/language-mutant-d3-d1-false-head-ukr.lisp 0
+# D1:ні — точний однобітний предикат, D3:() — структурні дані.
+# Позитив і негатив виконуються самою мовою SENS після Zig/T5M.
+run_case run_law d1-d3-nil-distinction-positive tests/semantic/d1-d3-nil-distinction-law.lisp 1
+run_case run_law d1-d3-nil-distinction-mutant tests/semantic/d1-d3-nil-distinction-mutant.lisp 0
 # Д3: два різні атоми в CONS мають зберігати позиції; негатив ловить їх підміну.
 run_case run_law d3-cons-ordered-atoms-positive tests/semantic/language-law-d3-cons-order-ukr.lisp 1
 run_case run_law d3-cons-ordered-atoms-mutant tests/semantic/language-mutant-d3-cons-order-ukr.lisp 0
