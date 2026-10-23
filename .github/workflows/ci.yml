@@ -213,6 +213,7 @@ jobs:
           cargo test --locked -p sens-lsp --lib transport::tests:: -- --nocapture
           cargo test --locked -p sens --test core_math_arithmetic_live -- --nocapture
           cargo test --locked -p sens --test d4_selector_domain_routing -- --nocapture
+          cargo test --locked -p sens --test d5_list_search_laws parser_rejects_an_unclosed_form_before_evaluation -- --exact --nocapture
 
       - name: Zig — кодеки, ABI та безпечна межа копіювання
         if: steps.changed-t5m-lisp.outputs.has_zig == 'true'

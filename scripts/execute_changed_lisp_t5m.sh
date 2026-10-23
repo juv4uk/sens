@@ -174,7 +174,7 @@ run_native_t5m_program() {
     # Shell порівнює тільки кінцевий точний D1-біт нативного SENS.
     # Це не стороння модель EQ, COND або структурних правил.
     case "$file" in
-      tests/semantic/ukr-d3-pair-identity-law.lisp|tests/semantic/ukr-d3-cond-control-law.lisp)
+      tests/semantic/ukr-d3-pair-identity-law.lisp|tests/semantic/ukr-d3-cond-control-law.lisp|tests/semantic/ukr-d3-structural-selftest.lisp)
         echo 1 > "$dir/ukr-d3-law.expected"
         if ! cmp -s "$dir/native-paired.stdout" "$dir/ukr-d3-law.expected"; then
           echo "::error::SENS_LISP_SEMANTIC_LAW_WRONG_D1 source=$file expected=D1:1 actual=$(cat "$dir/native-paired.stdout")" >&2
