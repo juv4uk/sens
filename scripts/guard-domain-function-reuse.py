@@ -135,6 +135,8 @@ def main(argv: list[str] | None = None) -> int:
         ap.error("потрібен --staged / --paths-from / --file")
 
     blocked: list[tuple[str, str, str]] = []
+    usage: dict[str, int] = {}
+    new_defs: dict[str, int] = {}
     candidates: list[tuple[str, str]] = []
     checked = 0
     for rel in changed_files(args):
@@ -156,9 +158,11 @@ def main(argv: list[str] | None = None) -> int:
             except Exception:
                 old_text = ""
             known = {n for n, _, _ in definitions_with_bodies(old_text)}
+        usage[rel] = len((set(re.findall(r"\(\s*([^\s()]{2,})", text)) & ladder) - STRUCTURAL)
         for name, body, marked in definitions_with_bodies(text):
             if args.base and name in known:
                 continue  # не чіпаємо те, що вже було до зміни
+            new_defs[rel] = new_defs.get(rel, 0) + 1
             if name in ladder:
                 blocked.append((rel, name, "дубль наявної поверхні"))
                 continue
@@ -168,6 +172,14 @@ def main(argv: list[str] | None = None) -> int:
                 blocked.append((rel, name, "нове ім'я без виклику драбини і без маркера D11-пропозиції"))
                 continue
             candidates.append((rel, name))
+
+    # Вживання драбин: скільки разів змінений файл кличе НАЯВНІ поверхні.
+    if usage:
+        idle = sorted(r for r in usage if usage[r] == 0 and new_defs.get(r, 0) > 0)
+        for rel in sorted(usage):
+            print(f"ВЖИВАННЯ ДРАБИН: {rel}: {usage[rel]} викликів наявних поверхонь, {new_defs.get(rel,0)} нових визначень")
+        if idle:
+            print("УВАГА: файли з новими визначеннями, але БЕЗ жодного вживання наявних функцій D1–D10: " + ", ".join(idle))
 
     for rel, name in candidates:
         print(f"КАНДИДАТ D11: {rel}: {name} — немає в драбинах; зареєстровано як пропозицію D11 (далі D12…)")
