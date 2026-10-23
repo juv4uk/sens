@@ -26,20 +26,6 @@ struct D3PredicateBoundaryRow {
     expected_bit: bool,
 }
 
-fn w8_binary_source(value: &Expr) -> String {
-    match &value.kind {
-        ExprKind::Symbol(bits) => {
-            let words = sens::parse_binary_source_words(bits)
-                .expect("8-bit corpus value must parse as a binary source word");
-            assert_eq!(words.len(), 1, "corpus value must be one binary word");
-            let word = words[0].word;
-            assert_eq!(word.width(), 8, "corpus value must retain exact W8 width");
-            bits.to_string()
-        }
-        other => panic!("corpus value must be a binary source token, got {other:?}"),
-    }
-}
-
 fn exact_domain_source(value: &Expr) -> String {
     // Лише механічна перевірка точного доменного слова, не його семантики.
     let ExprKind::String(identity) = &value.kind else {
@@ -957,7 +943,6 @@ fn domain_kernel_witness_735_separates_semantic_execution_from_opaque_transport(
 
             let mut kernel: Option<String> = None;
             let mut status: Option<String> = None;
-            let mut probe_id: Option<String> = None;
             let mut evidence_class: Option<String> = None;
             let mut evidence: Option<String> = None;
 
@@ -979,7 +964,7 @@ fn domain_kernel_witness_735_separates_semantic_execution_from_opaque_transport(
                             }
                         }
                         "probe-id" => {
-                            probe_id = Some(w8_binary_source(value));
+                            panic!("semantic witness must not depend on a historical W8 probe-id");
                         }
                         "evidence-class" => {
                             if let ExprKind::Symbol(s) = &value.kind {
@@ -1010,8 +995,6 @@ fn domain_kernel_witness_735_separates_semantic_execution_from_opaque_transport(
                     Some("semantic-execution"),
                     "external live semantic witness must explicitly prove semantic execution"
                 );
-                assert!(probe_id.is_some(),
-                    "external semantic witness must retain its opaque provenance probe");
                 let evidence = evidence.expect("semantic execution witness needs evidence");
                 assert!(
                     repo_file(&evidence).is_file(),
