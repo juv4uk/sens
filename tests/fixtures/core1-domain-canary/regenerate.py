@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Bounded domain-native specialization of the EXISTING Core1 C1-SECOND helper.
+"""Bounded D2/D3 fixture linked to the CURRENT Ukrainian Core1 second-element helper.
 
 No evaluator is created here. Canonical semantic identities come from the pinned
 SENS foundation. Existing physical bytes are checked read-only by the historical reference codec.
@@ -26,13 +26,14 @@ HUMAN = HERE / "second.lisp"
 CURRENT_HUMAN_LISP = "(перше\n  (решта\n    (сполучити\n      (як-є ())\n      (сполучити (як-є ()) (як-є ())))))\n"
 PHYSICAL = HERE / "second.sens"
 
-# An already implemented Core1 helper; preserve its source and semantics.
-# Its historic сід8 words are evidence, NOT modern D8 identity.
-C1_SECOND = re.compile(
-    r"\(00001001\s+C1-SECOND\s+"
-    r"\(00001000\s+\(X\)\s+"
-    r"\(00000101\s+\(00000110\s+X\)\s*\)\s*\)\s*\)"
+# Pin the CURRENT Ukrainian Core1 binding. The retired C1-SECOND/SID8
+# spelling is history, not a live source identity.
+CURRENT_SECOND = re.compile(
+    r"\(визначити\s+ядро1-другий-елемент\s+"
+    r"\(функція\s+\(передане-значення\)\s+"
+    r"\(друге\s+передане-значення\)\s*\)\s*\)"
 )
+RETIRED_SECOND = re.compile(r"\(\s*(?:00001001\s+)?C1-SECOND\b")
 
 # This closed call specializes X to a two-element proper list of empty values.
 # Therefore it requires no unratified symbol/binder/Text7 representation.
@@ -52,8 +53,10 @@ CANONICAL_D2 = {
 
 def words_from_existing_core1(root: Path = ROOT) -> list[str]:
     historical = (root / "lib" / "core1.lisp").read_text(encoding="utf-8")
-    if len(C1_SECOND.findall(historical)) != 1:
-        raise ValueError("BLOCK: existing Core1 C1-SECOND has drifted or is ambiguous")
+    if len(CURRENT_SECOND.findall(historical)) != 1:
+        raise ValueError("BLOCK: current Ukrainian Core1 second-element helper has drifted or is ambiguous")
+    if RETIRED_SECOND.search(historical):
+        raise ValueError("BLOCK: retired C1-SECOND source head is still executable")
 
     foundation = json.loads(
         (root / "knowledge" / "d1-d9-foundation.json").read_text(encoding="utf-8")
@@ -125,7 +128,7 @@ def main() -> int:
         ap.error("Заборонено mint через Python: фізичний T5M створює лише Zig")
     size, typed_digest = verify_checked_in()
     physical_sha = hashlib.sha256(PHYSICAL.read_bytes()).hexdigest()
-    print(f"PASS: C1-SECOND existing-source -> exact D2/D3 -> T5 {size} bytes "
+    print(f"PASS: current Ukrainian Core1 helper pinned -> exact D2/D3 -> archival T5 {size} bytes "
           f"typed_sha256={typed_digest} physical_sha256={physical_sha}")
     print("NOTE: current SENS oracle checked independently in Rust CI; native WSM parity PENDING")
     return 0

@@ -21,9 +21,10 @@ spec.loader.exec_module(mod)
 
 
 class ExistingCore1DomainCanaryTests(unittest.TestCase):
-    def test_actual_core1_helper_is_the_only_donor(self):
+    def test_current_ukrainian_core1_helper_is_pinned(self):
         source = (ROOT / "lib" / "core1.lisp").read_text(encoding="utf-8")
-        self.assertEqual(len(mod.C1_SECOND.findall(source)), 1)
+        self.assertEqual(len(mod.CURRENT_SECOND.findall(source)), 1)
+        self.assertIsNone(mod.RETIRED_SECOND.search(source))
         words = mod.words_from_existing_core1()
         self.assertEqual(words[:3], ["10", "100", "00"])
         self.assertIn("011", words)  # CDR from current D3
@@ -84,14 +85,14 @@ class ExistingCore1DomainCanaryTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "BLOCK"):
                 mod.words_from_existing_core1(root)
 
-    def test_unproved_core1_source_change_blocks_canary(self):
+    def test_unproved_current_core1_helper_change_blocks_canary(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             (root / "lib").mkdir()
             (root / "knowledge").mkdir()
             historical = (ROOT / "lib" / "core1.lisp").read_text(encoding="utf-8")
             (root / "lib" / "core1.lisp").write_text(
-                historical.replace("C1-SECOND", "C1-OTHER", 1), encoding="utf-8"
+                historical.replace("ядро1-другий-елемент", "ядро1-інший-елемент", 1), encoding="utf-8"
             )
             (root / "knowledge" / "d1-d9-foundation.json").write_bytes(
                 (ROOT / "knowledge" / "d1-d9-foundation.json").read_bytes()

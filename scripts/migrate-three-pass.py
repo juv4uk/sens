@@ -1483,7 +1483,7 @@ NONPROGRAM_MANIFEST_BLOB_SHA = {
     "knowledge/migration-nonprogram-schema-manifest-2026-10-08.json": "53689013243182a3087f05781c6cc88be5814900",
     "knowledge/migration-nonprogram-evidence-manifest-2026-10-08.json": "413c9dee025bb56b9fd346701e46d7ae4fb9ea89",
     "knowledge/migration-nonprogram-expr-records-2026-10-08.json": "07c53b8dc76c2f35911f323966fdc2587d9224a9",
-    "knowledge/migration-nonprogram-knowledge-records-2026-10-08.json": "f6ea570869558c91f4437f3b04c4300afced076f",
+    "knowledge/migration-nonprogram-knowledge-records-2026-10-08.json": "b9fd8cae5d24679892c53a8b84a76fa669db4055",
 }
 
 
