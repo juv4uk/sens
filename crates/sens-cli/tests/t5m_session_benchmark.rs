@@ -1,6 +1,8 @@
-//! Діагностичний Rust-бенчмарк ціни запуску SENS: N процесів проти N форм в одній сесії.
+//! Діагностичний Rust-бенчмарк CLI wall-time: N процесів проти N форм в одній сесії.
 //! Обидві смуги виконують той самий Lisp через реальні Zig T5M і SENS.
 //! Це вимір механізму, а не новий семантичний оракул чи обіцянка прискорення.
+//! Cold друкує N результатів, warm — лише останній: це два CLI-режими,
+//! а не ізольовані витрати bootstrap або latency одного SENS-кроку.
 
 use std::{
     fs::{self, OpenOptions},
@@ -148,7 +150,7 @@ fn zig_t5m_one_session_vs_process_per_form() {
         }
         for (lane, wall_ns) in [("cold", cold_ns[round]), ("warm", warm_ns[round])] {
             eprintln!(
-                "T5M_SESSION_SAMPLE lane={lane} round={} forms={CALLS} wall_ns={wall_ns} amortized_ns={} parity=42 scope=process-wall",
+                "T5M_SESSION_SAMPLE lane={lane} round={} forms={CALLS} wall_ns={wall_ns} amortized_ns={} parity=final-result-42 scope=cli-process-wall",
                 round + 1,
                 wall_ns / CALLS as u128
             );
@@ -161,6 +163,6 @@ fn zig_t5m_one_session_vs_process_per_form() {
     let warm_p50 = warm_p50_batch / CALLS as u128;
     let warm_p90 = warm_p90_batch / CALLS as u128;
     eprintln!(
-        "T5M_SESSION_BENCH cold_p50_amortized_ns={cold_p50} cold_p90_amortized_ns={cold_p90} warm_p50_amortized_ns={warm_p50} warm_p90_amortized_ns={warm_p90} cold_p50_batch_ns={cold_p50_batch} cold_p90_batch_ns={cold_p90_batch} warm_p50_batch_ns={warm_p50_batch} warm_p90_batch_ns={warm_p90_batch} forms={CALLS} rounds={ROUNDS} warmup_batches=1 path=Zig-T5M-SENS parity=42 scope=process-wall claim=measurement-only"
+        "T5M_SESSION_BENCH cold_p50_amortized_ns={cold_p50} cold_p90_amortized_ns={cold_p90} warm_p50_amortized_ns={warm_p50} warm_p90_amortized_ns={warm_p90} cold_p50_batch_ns={cold_p50_batch} cold_p90_batch_ns={cold_p90_batch} warm_p50_batch_ns={warm_p50_batch} warm_p90_batch_ns={warm_p90_batch} forms={CALLS} rounds={ROUNDS} warmup_batches=1 path=Zig-T5M-SENS parity=final-result-42 scope=cli-process-wall claim=measurement-only"
     );
 }
