@@ -5,6 +5,7 @@
     python3 scripts/domain-game.py --brief
     python3 scripts/domain-game.py --track codec
     python3 scripts/domain-game.py --track codec --verify
+    python3 scripts/domain-game.py --track d11-codec --verify
     python3 scripts/domain-game.py --track memory --domain D3 --list
     python3 scripts/domain-game.py --track d13-candidates --brief
     python3 scripts/domain-game.py --track memory --domain ALL --count 20 --seed 42
@@ -77,6 +78,32 @@ D13_CODEC_LEVELS = [
     )),
     ("R5", "Сім неканонічних хвостів і повний байт", (
         "D13 research: all seven padding residues fail closed; aligned eight-word run succeeds",
+    )),
+]
+
+# Дослідний codec конкурс лише для явного 512-селекторного підпотоку D11.
+D11_CODEC = Path("research/zig-codecs/d11_selector_contest.zig")
+D11_CODEC_LEVELS = [
+    ("S1", "Точне кодування кожного окремого селектора", (
+        "D11 Драбина: усі 512 селекторів мають точний roundtrip",
+    )),
+    ("S2", "Golden-вектор порядку бітів на межі байта", (
+        "D11 Драбина: selector9 зберігає порядок бітів на межі байта",
+    )),
+    ("S3", "Один канонічний потік із усіх 512 селекторів", (
+        "D11 Драбина: один потік selector9 переносить усі 512 слів",
+    )),
+    ("S4", "Звірка всіх кодів та імен із таблицею D11", (
+        "D11 Драбина: запам'ятати всі 512 координат і Lisp-імен таблиці",
+    )),
+    ("S5", "Однаковий облік payload для 9/11/16 бітів", (
+        "D11 Драбина: 9, 11 і 16 біт — чесний облік байтів",
+    )),
+    ("S6", "Повний 512-слівний raw16 базис без обрізання", (
+        "D11 Драбина: повний raw16 раунд 512 селекторів у буфері конкурсу",
+    )),
+    ("S7", "Відхилення чужих координат і неканонічного хвоста", (
+        "D11 Драбина: чужі координати, обрізання та хвіст не змінюють вихід",
     )),
 ]
 
@@ -168,9 +195,18 @@ def semantic_game(brief: bool) -> int:
     return 0
 
 
-def codec_game(brief: bool, verify: bool, experimental_d13: bool = False) -> int:
-    selected = D13_DENSE if experimental_d13 else DENSE
-    levels = D13_CODEC_LEVELS if experimental_d13 else CODEC_LEVELS
+def codec_game(
+    brief: bool,
+    verify: bool,
+    experimental_d13: bool = False,
+    experimental_d11: bool = False,
+) -> int:
+    if experimental_d13:
+        selected, levels, track, heading = D13_DENSE, D13_CODEC_LEVELS, "D13", "D13 RESEARCH"
+    elif experimental_d11:
+        selected, levels, track, heading = D11_CODEC, D11_CODEC_LEVELS, "D11", "D11 SELECTOR CODEC"
+    else:
+        selected, levels, track, heading = DENSE, CODEC_LEVELS, "D12", "DENSE-D12"
     source_path = ROOT / selected
     source = source_path.read_text(encoding="utf-8") if source_path.is_file() else ""
     declared = set(re.findall(r'^test "([^"]+)"', source, flags=re.MULTILINE))
@@ -208,12 +244,16 @@ def codec_game(brief: bool, verify: bool, experimental_d13: bool = False) -> int
     score = sum(1 for code, _, _ in levels if tested and present[code])
     proof = "PASS" if tested else ("FAIL" if verify else "NOT_RUN")
     if brief:
-        print(f"ДРАБИНА/CODEC{'-D13' if experimental_d13 else '-D12'}: verified={score}/{len(levels)} "
+        print(f"ДРАБИНА/CODEC-{track}: verified={score}/{len(levels)} "
               f"native={proof} semantics=NOT_TESTED")
         return return_code
 
-    print("═══ ГРА «ДРАБИНА» / " + ("D13 RESEARCH" if experimental_d13 else "DENSE-D12") + " ═══")
-    print("Фізичний " + ("13" if experimental_d13 else "12") + "-бітний payload; не самодостатній кадр.")
+    print("═══ ГРА «ДРАБИНА» / " + heading + " ═══")
+    if experimental_d11:
+        print("Явний селекторний підпотік D11: локальний 9-бітний індекс проти щільних 11 і raw16.")
+        print("Не загальний codec D1–24+ і не самодостатній кадр.")
+    else:
+        print("Фізичний " + ("13" if experimental_d13 else "12") + "-бітний payload; не самодостатній кадр.")
     if experimental_d13:
         print("D13 НЕ ратифіковано як математичний чи викличний домен.")
     print("Семантика чисел і SENS: NOT_TESTED.\n")
@@ -232,13 +272,14 @@ def codec_game(brief: bool, verify: bool, experimental_d13: bool = False) -> int
         ).stdout.strip()
         print(f"Свідчення запуску: commit={sha or 'UNKNOWN'} blob={blob or 'UNKNOWN'} zig={zig_version}")
         print(f"Команда: zig test -lc {selected}")
+    next_track = "d11-codec" if experimental_d11 else "d13" if experimental_d13 else "codec"
     if not tested:
-        print("\nНАСТУПНИЙ ХІД: zig test -lc "
-              f"{selected}  (або --track {'d13' if experimental_d13 else 'codec'} --verify)")
+        print("\nНАСТУПНИЙ ХІД: "
+              f"python3 scripts/domain-game.py --track {next_track} --verify")
     else:
         missing = next((code for code, _, _ in levels if not present[code]), None)
         if missing:
-            print(f"\nНАСТУПНИЙ КВЕСТ: {missing} — реалізуй і перевір нативним Zig.")
+            print(f"\nНАСТУПНИЙ КВЕСТ: {missing} — додай точний Zig test у {selected}.")
         else:
             print("\nУсі описані щаблі пройшли нативну перевірку.")
     return return_code
@@ -410,9 +451,9 @@ def memory_game(brief: bool, domain: str, surface: str,
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description="гра «Драбина»")
     ap.add_argument("--brief", action="store_true")
-    ap.add_argument("--track", choices=("semantic", "codec", "d13", "d13-candidates", "memory"), default="semantic")
+    ap.add_argument("--track", choices=("semantic", "codec", "d11-codec", "d13", "d13-candidates", "memory"), default="semantic")
     ap.add_argument("--verify", action="store_true",
-                    help="запустити нативний Zig test для --track codec або d13")
+                    help="запустити нативні Zig-тести для --track codec, d11-codec або d13")
     ap.add_argument("--domain", choices=("ALL",) + MEMORY_DOMAINS, default="D3",
                     help="домен для конкурсу пам'яті")
     ap.add_argument("--surface", choices=MEMORY_SURFACES, default="укр",
@@ -426,13 +467,15 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--list", action="store_true",
                     help="показати довідник координат у режимі пам'яті")
     args = ap.parse_args(argv)
-    if args.verify and args.track not in ("codec", "d13"):
-        ap.error("--verify дозволено лише з --track codec або d13")
+    if args.verify and args.track not in ("codec", "d11-codec", "d13"):
+        ap.error("--verify дозволено лише з --track codec, d11-codec або d13")
     if args.track == "memory":
         return memory_game(args.brief, args.domain, args.surface,
                            args.mode, args.count, args.seed, args.list)
     if args.track == "codec":
         return codec_game(args.brief, args.verify)
+    if args.track == "d11-codec":
+        return codec_game(args.brief, args.verify, experimental_d11=True)
     if args.track == "d13":
         return codec_game(args.brief, args.verify, experimental_d13=True)
     if args.track == "d13-candidates":

@@ -90,6 +90,23 @@ class DomainGameTests(unittest.TestCase):
         self.assertIn("кандидатів=10", shown)
         self.assertIn("семантика=НЕ_ДОВЕДЕНО", shown)
 
+    def test_d11_codec_game_lists_native_gates_and_needs_a_run_for_points(self) -> None:
+        output = io.StringIO()
+        with contextlib.redirect_stdout(output):
+            self.assertEqual(game.main(["--track", "d11-codec", "--brief"]), 0)
+        self.assertIn("CODEC-D11: verified=0/7 native=NOT_RUN", output.getvalue())
+
+        output = io.StringIO()
+        with contextlib.redirect_stdout(output):
+            self.assertEqual(game.main(["--track", "d11-codec"]), 0)
+        self.assertIn("--track d11-codec --verify", output.getvalue())
+
+        source = (ROOT / "research/zig-codecs/d11_selector_contest.zig").read_text(encoding="utf-8")
+        declared = set(game.re.findall(r'^test "([^"]+)"', source, flags=game.re.MULTILINE))
+        for _, _, tests in game.D11_CODEC_LEVELS:
+            self.assertIsNotNone(tests)
+            self.assertTrue(all(name in declared for name in tests or ()))
+
     def test_codec_quest_and_d12_remain_visible(self) -> None:
         # Злам: виправлення табло прибрало чинний дослід D2 та щабель D12.
         output = io.StringIO()
