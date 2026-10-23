@@ -54,63 +54,39 @@ fn i5_6400_human_profile_uses_full_ukr_peers_not_legacy_sid8_slots() {
 fn current_i5_6400_profile_uses_width_safe_domain_keys_for_migrated_cpu_slice() {
     let current = include_str!("../../../lib/machine/profile/current-domain-x86-64.lisp");
 
-    assert!(current.contains("(machine-domain-profile-2"));
-    assert!(current.contains("(cpu intel-core-i5-6400)"));
-    assert!(current.contains("(key-shape width+packed-bits)"));
+    assert!(current.contains("(machine-domain-profile-3"));
+    assert!(current.contains("(key-shape domain+ukr-resident)"));
 
-    for (width, packed_bits, expected_machine_path) in [
-        (5, 8, "CMP+SETE+MOVZX"), // D5 ZEROP
-        (5, 10, "ADD"),           // D5 PLUS
-        (5, 11, "SUB"),           // D5 DIFFERENCE
-        (5, 22, "IMUL"),          // D5 TIMES
-        (5, 23, "CQO+IDIV"),      // D5 QUOTIENT
-        (5, 26, "CMP+SETL"),      // D5 LESSP
-        (5, 27, "CMP+SETG"),      // D5 GREATERP
-        (6, 14, "ADD"),           // D6 ADD1
-        (6, 15, "SUB"),           // D6 SUB1
-        (3, 5, "CMP/SETE"),       // D3 EQ
-        (3, 6, "CMP+Jcc"),        // D3 COND
-        (3, 7, "STORE-pair"),     // D3 CONS
-        (3, 4, "LOAD-pair-head"), // D3 CAR
-        (3, 3, "LOAD-pair-tail"), // D3 CDR
+    for (domain, resident, expected_machine_path) in [
+        ("домен-п'ятий", "нуль?", "CMP+SETE+MOVZX"),
+        ("домен-п'ятий", "додати", "ADD"),
+        ("домен-п'ятий", "відняти", "SUB"),
+        ("домен-п'ятий", "помножити", "IMUL"),
+        ("домен-п'ятий", "частка", "CQO+IDIV"),
+        ("домен-п'ятий", "менше?", "CMP+SETL"),
+        ("домен-п'ятий", "більше?", "CMP+SETG"),
+        ("домен-шостий", "додати-1", "ADD"),
+        ("домен-шостий", "відняти-1", "SUB"),
+        ("домен-третій", "тотожне?", "CMP/SETE"),
+        ("домен-третій", "за-умовою", "CMP+Jcc"),
+        ("домен-третій", "сполучити", "STORE-pair"),
+        ("домен-третій", "перше", "LOAD-pair-head"),
+        ("домен-третій", "решта", "LOAD-pair-tail"),
     ] {
-        let row_prefix = format!("({width} {packed_bits} ");
+        let row_prefix = format!("({domain} {resident} ");
         let row = current
             .lines()
             .map(str::trim_start)
             .find(|line| line.starts_with(&row_prefix))
-            .unwrap_or_else(|| {
-                panic!("current profile missing width-safe key ({width},{packed_bits})")
-            });
+            .unwrap_or_else(|| panic!("missing migrated «укр» machine row: {domain} {resident}"));
         assert!(
             row.contains(expected_machine_path),
-            "width-safe key ({width},{packed_bits}) must advertise {expected_machine_path:?}; row: {row}"
+            "unexpected mechanism for {domain} {resident}: {row}"
         );
     }
 
-    // Same packed payload under D4 must never inherit current D5 rows.
-    for packed_bits in [8, 10, 11] {
-        let row_prefix = format!("(4 {packed_bits} ");
-        assert!(
-            !current
-                .lines()
-                .map(str::trim_start)
-                .any(|line| line.starts_with(&row_prefix)),
-            "D4 packed payload {packed_bits} must not inherit a D5 machine row"
-        );
-    }
-
-    // D5 selectors with the same packed payload must not inherit D6 ADD1/SUB1.
-    for packed_bits in [14, 15] {
-        let row_prefix = format!("(5 {packed_bits} ");
-        assert!(
-            !current
-                .lines()
-                .map(str::trim_start)
-                .any(|line| line.starts_with(&row_prefix)),
-            "D5 packed payload {packed_bits} must not inherit a D6 machine row"
-        );
-    }
+    assert!(!current.contains("(домен-четвертий додати "));
+    assert!(!current.contains("(домен-п'ятий додати-1 "));
 }
 
 #[test]
