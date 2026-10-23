@@ -66,6 +66,16 @@ class EncodedSourceLiteralTests(unittest.TestCase):
         ):
             self.assertIn(fragment, source)
 
+    def test_domain_bitness_law_has_no_numeric_source_literals(self):
+        # Координати драбини перевіряються як точні текстові ключі, не числа.
+        path = ROOT / "scripts/check-domain-bitness-laws.lisp"
+        source = path.read_text(encoding="utf-8")
+        self.assertEqual(
+            CHECK.find_forbidden_literals(source, path="scripts/check-domain-bitness-laws.lisp"),
+            [],
+            "закон ширини доменів не має числових голів або літералів",
+        )
+
     def test_machine_effect_live_source_uses_named_coordinates(self):
         # Лексична перевірка; обчислення маршруту перевіряють нативні тести SENS.
         path = ROOT / "lib/machine/lowering/semantic-effects.lisp"
