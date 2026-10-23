@@ -112,6 +112,26 @@ class DomainFunctionReuseRule(unittest.TestCase):
             self.assertNotIn("уявна", sites)
             self.assertEqual(sites["справжня"], {"lib/one.lisp"})
 
+    def test_scanner_ignores_comments_strings_and_quoted_definitions(self) -> None:
+        # Коментар, рядок і (як-є ...) не можуть додати псевдо-DEFINE або
+        # обрізати тіло, в якому після цитати стоїть справжній виклик драбини.
+        spec = importlib.util.spec_from_file_location("guard_scanner_test", GUARD)
+        self.assertIsNotNone(spec)
+        self.assertIsNotNone(spec.loader)
+        guard = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(guard)
+        source = (
+            "; (як-є ((визначити з-коментаря (функція (х) х))))\n"
+            '(визначити перша (функція (х)\n'
+            '  "(визначити з-рядка (функція (а) а))"\n'
+            '  (як-є ((визначити з-цитати (функція (а) а))))\n'
+            '  (сполучити х (як-є ())))\n'
+            '(визначити друга (функція (х) х))\n'
+        )
+        found = guard.definitions_with_bodies(source)
+        self.assertEqual([name for name, _, _ in found], ["перша", "друга"])
+        self.assertTrue(guard._calls_ladder(found[0][1], {"сполучити"}))
+
     def test_search_finds_an_existing_surface_by_name(self) -> None:
         result = run(SEARCH, "сполучити")
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)

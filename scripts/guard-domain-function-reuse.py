@@ -93,31 +93,82 @@ def introduced_at(rel: str, name: str) -> str:
 
 
 def _mask_quotes(text: str) -> str:
-    """Затерти синтаксично цитовані форми, щоб не брати DEFINE з даних.
+    """Затерти коментарі, рядки та цитовані форми перед пошуком DEFINE.
 
-    Вкладене визначення в цитаті не є новою виконуваною функцією.
-    Обробляємо лише структурний контекст; семантика лишається в SENS.
+    Це лише структурний сканер джерела: вирази всередині (як-є ...) є
+    даними, не визначеннями коду. Довжина й позиції рядків зберігаються,
+    щоб діагностика та межі тіл лишалися прив'язаними до початкового тексту.
     """
     out = list(text)
-    i = 0
-    while True:
-        j = text.find("(" + "як-є", i)
-        if j < 0:
-            break
+    n = len(text)
+
+    def blank(start: int, stop: int) -> None:
+        for pos in range(start, stop):
+            if text[pos] != "\n":
+                out[pos] = " "
+
+    def string_end(start: int) -> int | None:
+        pos = start + 1
+        while pos < n:
+            if text[pos] == "\\":
+                pos += 2
+                continue
+            if text[pos] == '"':
+                return pos + 1
+            pos += 1
+        return None
+
+    def form_end(start: int) -> int | None:
+        """Кінець збалансованої форми з пропуском рядків і коментарів."""
         depth = 0
-        k = j
-        while k < len(text):
-            if text[k] == "(":
+        pos = start
+        while pos < n:
+            char = text[pos]
+            if char == ";":
+                newline = text.find("\n", pos)
+                pos = n if newline < 0 else newline + 1
+                continue
+            if char == '"':
+                after = string_end(pos)
+                if after is None:
+                    return None
+                pos = after
+                continue
+            if char == "(":
                 depth += 1
-            elif text[k] == ")":
+            elif char == ")":
                 depth -= 1
                 if depth == 0:
-                    break
-            k += 1
-        for x in range(j, min(k + 1, len(text))):
-            if out[x] != "\n":
-                out[x] = " "
-        i = k + 1
+                    return pos + 1
+            pos += 1
+        return None
+
+    pos = 0
+    while pos < n:
+        char = text[pos]
+        if char == ";":
+            newline = text.find("\n", pos)
+            stop = n if newline < 0 else newline
+            blank(pos, stop)
+            pos = stop
+            continue
+        if char == '"':
+            stop = string_end(pos)
+            if stop is None:
+                blank(pos, n)
+                break
+            blank(pos, stop)
+            pos = stop
+            continue
+        if text.startswith("(як-є", pos):
+            boundary = pos + len("(як-є")
+            if boundary == n or text[boundary].isspace() or text[boundary] in "()":
+                stop = form_end(pos)
+                if stop is not None:
+                    blank(pos, stop)
+                    pos = stop
+                    continue
+        pos += 1
     return "".join(out)
 
 
@@ -130,9 +181,11 @@ def definitions_with_bodies(text: str):
         # маркер у 200 символах перед визначенням
         before = text[max(0, m.start() - 200):m.start()]
         marked = bool(MARKER.search(before))
-        rest = text[m.end():]
-        nxt = rest.find("(" + "визначити ")
-        body = rest[:nxt] if nxt > 0 else rest
+        # Search boundaries in the same code-only view: DEFINE forms inside
+        # comments, strings or quoted data must not truncate executable bodies.
+        rest = masked[m.end():]
+        nxt_match = DEF.search(rest)
+        body = rest[:nxt_match.start()] if nxt_match else rest
         out.append((name, body, marked))
     return out
 
