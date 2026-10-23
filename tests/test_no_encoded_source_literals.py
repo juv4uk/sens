@@ -763,7 +763,7 @@ class ResearchBatchUkrProjectionTests(unittest.TestCase):
                     f"{relative}: семантичні очікування мають бути Lisp-значеннями, не кодованими літералами",
                 )
                 self.assertIsNone(
-                    re.search(r"\\(\\s*(?:[01]{8}|(?:sid8|sens8):[01]{8})(?=[\\s)])", source, re.I),
+                    re.search(r"\(\s*(?:[01]{8}|(?:sid8|sens8):[01]{8})(?=[\s)])", source, re.I),
                     f"{relative}: цифрова/SID8-виклична голова не допускається",
                 )
         fixture = (ROOT / "tests/fixtures/epistemic-authority-witness.lisp").read_text(encoding="utf-8")
