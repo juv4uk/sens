@@ -95,13 +95,16 @@ def inspect(root: Path, *, base: str) -> dict:
     for name in sorted(targets):
         entry = by_sens.get(name)
         if name not in tracked:
-            rows.append({"sens": name, "status": "BLOCKED",
+            rows.append({"sens": name, "status": "NOT_PROVEN",
+                         "reason_code": "PHYSICAL_PROGRAM_DELETED_OR_UNTRACKED",
                          "reason": "physical program deleted/not Git-tracked"})
         elif entry is None:
-            rows.append({"sens": name, "status": "BLOCKED",
+            rows.append({"sens": name, "status": "NOT_PROVEN",
+                         "reason_code": "PHYSICAL_SOURCE_PAIR_MISSING",
                          "reason": "no canonical physical/source pair"})
         elif entry["view_status"] != "PHYSICAL_VIEW_PASS":
-            rows.append({"sens": name, "status": "BLOCKED",
+            rows.append({"sens": name, "status": "NOT_PROVEN",
+                         "reason_code": entry["view_status"],
                          "view_status": entry["view_status"],
                          "reason": entry.get("reason", "T5↔view check failed")})
         else:
@@ -120,7 +123,8 @@ def inspect(root: Path, *, base: str) -> dict:
                 except (ProjectionBlocked, OSError, ValueError) as exc:
                     rows.append({
                         "sens": name,
-                        "status": "BLOCKED",
+                        "status": "NOT_PROVEN",
+                        "reason_code": "UKRAINIAN_SOURCE_PARITY_NOT_PROVEN",
                         "reason": "UK_SOURCE_DELTA: " + str(exc)[:320],
                         "view_status": "PHYSICAL_VIEW_PASS",
                         "uk_oracle": "NOT_VERIFIED",
@@ -128,7 +132,8 @@ def inspect(root: Path, *, base: str) -> dict:
                     continue
                 if not proof.get("canonical_uk_roundtrip"):
                     rows.append({
-                        "sens": name, "status": "BLOCKED",
+                        "sens": name, "status": "NOT_PROVEN",
+                        "reason_code": "UKRAINIAN_SOURCE_PARITY_NOT_PROVEN",
                         "reason": "UK_SOURCE_DELTA: bounded canonical witness missing",
                     })
                     continue
@@ -144,16 +149,16 @@ def inspect(root: Path, *, base: str) -> dict:
                 ),
                 "uk_oracle": "NOT_VERIFIED", "release_admitted": False,
             })
-    blocked = sum(row["status"] == "BLOCKED" for row in rows)
+    not_proven = sum(row["status"] == "NOT_PROVEN" for row in rows)
     return {
         "schema": SCHEMA,
         "base_commit": base,
         "head_commit": git(root, "rev-parse", "HEAD").decode("ascii").strip(),
-        "status": "BLOCKED" if blocked else "DELTA_PHYSICAL_VIEW_ONLY_UK_PENDING",
+        "status": "DELTA_NOT_VERIFIED" if not_proven else "DELTA_PHYSICAL_VIEW_ONLY_UK_PENDING",
         "summary": {
             "changed_pairs": len(rows),
-            "changed_verified_transport": len(rows) - blocked,
-            "changed_blocked": blocked,
+            "changed_verified_transport": len(rows) - not_proven,
+            "changed_not_proven": not_proven,
             "historical_missing_views_remain_release_debt": census["summary"]["view_missing"],
             "uk_oracle_verified": 0,
             "original_executable_migrations_certified": 0,
@@ -176,9 +181,9 @@ def main(argv: list[str] | None = None) -> int:
     try:
         report = inspect(args.root, base=args.base_sha)
         print(json.dumps(report, ensure_ascii=False, sort_keys=True))
-        return 2 if report["status"] == "BLOCKED" else 0
+        return 2 if report["status"] == "DELTA_NOT_VERIFIED" else 0
     except (OSError, ValueError, UnicodeError, subprocess.SubprocessError) as exc:
-        print("TRIPLET DELTA BLOCKED: " + str(exc), file=sys.stderr)
+        print("TRIPLET_DELTA_INPUT_INVALID: " + str(exc), file=sys.stderr)
         return 2
 
 
