@@ -71,6 +71,15 @@ class DomainFunctionReuseRule(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         self.assertIn("сполучити", result.stdout)
 
+    def test_search_reuses_guard_scanner_for_existing_lisp_definitions(self) -> None:
+        # Перевіряємо механіку пошуковика, а не семантичний результат SENS.
+        # Ім'я є визначенням чинної lib/fs.lisp, не новою функцією в Python.
+        result = run(SEARCH, "читати-файл-із-декодованого")
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertIn("УЖЕ ВИЗНАЧЕНО", result.stdout)
+        self.assertIn("lib/fs.lisp", result.stdout)
+        self.assertIn("ВЕРДИКТ: точний збіг", result.stdout)
+
 
 if __name__ == "__main__":
     unittest.main()
