@@ -216,14 +216,20 @@ def main():
                     if table is None:
                         scanner, table, withheld = mapping()
                     edits = scanner.plan(text, {}, legacy_heads=table, unresolved=unknown)
-                old_codes = {e.source for e in edits} | {code for _, code in unknown}
+                # Історичний proof прив'язує SID8/Sens8-мітки лише до їхніх
+                # старих 8 бітів, жодного вгадування сучасного D8.
+                old_tokens = {e.source for e in edits} | {code for _, code in unknown}
+                old_codes = {scanner.LEGACY_W8_HEAD.fullmatch(token).group(1)
+                             for token in old_tokens}
                 proof = (prove(args.source_ref, args.historical_path or rel, old_codes, scanner, table)
                          if old_codes else None)
                 new = scanner.apply_edits(text, edits).encode("utf-8")
                 if args.write and new != original:
                     replace_atomic(file, original, new)
                 pending = [{"offset": at, "old": word,
-                            "reason": withheld.get(word, "немає доведеного моста")}
+                            "reason": withheld.get(
+                                scanner.LEGACY_W8_HEAD.fullmatch(word).group(1),
+                                "немає доведеного моста")}
                            for at, word in unknown]
                 item = {
                     "file": str(rel), "status": "partial" if pending else "ok",
