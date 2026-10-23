@@ -453,8 +453,8 @@ fn order_machine_proof_does_not_publish_a_numeric_boolean_language_api() {
     let profile =
         fs::read_to_string(repo_root().join("lib/machine/profile/current-domain-x86-64.lisp"))
             .expect("current profile");
-    assert!(profile.contains("(5 26 proof \"CMP+SETL+MOVZX / internal bit; D1 boundary\")"));
-    assert!(profile.contains("(5 27 proof \"CMP+SETG+MOVZX / internal bit; D1 boundary\")"));
+    assert!(profile.contains("(домен-п'ятий менше? proof \"CMP+SETL+MOVZX / internal bit; D1 boundary\")"));
+    assert!(profile.contains("(домен-п'ятий більше? proof \"CMP+SETG+MOVZX / internal bit; D1 boundary\")"));
     assert!(!profile.contains("00011010 direct"));
     assert!(!profile.contains("00011011 direct"));
 }
