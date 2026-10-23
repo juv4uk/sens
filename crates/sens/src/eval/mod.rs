@@ -1344,3 +1344,52 @@ mod domain_eval_cutover_d3_compatibility {
         assert!(err.message.contains("D3:110"), "{}", err.message);
     }
 }
+
+
+#[cfg(test)]
+mod physical_d7_existing_binding_regressions {
+    use super::*;
+
+    // Mechanism-only proof: a physical D2 frame of exact W7 words refers
+    // to an already-installed Ukrainian binding, never grants the glyphs
+    // a callable identity or a new semantic law.
+    #[test]
+    fn physical_d7_frame_reads_existing_ukrainian_binding_without_host_oracle() {
+        let spelling = "число-нуль";
+        let text = crate::encode_text7(spelling, crate::Text7Layout::Uk)
+            .expect("ratified D7 keyboard admits this source spelling");
+        let glyphs = text
+            .cells()
+            .iter()
+            .map(|&cell| Expr {
+                kind: ExprKind::DomainIdentity(crate::DomainIdentity::from_coordinate(
+                    crate::domain_ladder::DomainCoordinate::new(7, u16::from(cell))
+                        .expect("all exact W7 cells are admitted"),
+                )),
+                span: Span::default(),
+            })
+            .collect::<Vec<_>>();
+        let reference = Expr {
+            kind: ExprKind::List(glyphs.into()),
+            span: Span::default(),
+        };
+
+        // The exact physical key is deliberately absent: this models a
+        // bootstrap binding installed by its source spelling.
+        let environment = Environment::root();
+        environment.define(spelling, Value::Nil);
+        assert!(environment
+            .get(&text.to_canonical_wire_token())
+            .is_none());
+
+        let value = evaluate(&reference, &environment)
+            .expect("a previously defined source name is readable from D7");
+        assert_eq!(value, Value::Nil, "existing binding keeps its exact value");
+
+        let unknown = Environment::root();
+        assert!(
+            evaluate(&reference, &unknown).is_err(),
+            "unbound glyph frames must not become executable functions"
+        );
+    }
+}
