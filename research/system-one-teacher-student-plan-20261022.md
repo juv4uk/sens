@@ -268,11 +268,13 @@ python3 research/system-one-evaluate-20261022.py \
 
 ## Офлайн-сигнал першої базової моделі
 
-У `tests/test_system_one_research_pipeline.py` тепер є один адресний запуск, який навчає CPU-наївного баєсового учня **лише на 40 train-прикладах**, далі окремо вимірює 10 validation, 10 seed-test і 60 прикладів незалежного синтетичного challenge-набору. Після запуску тест друкує один рядок `SYSTEM_ONE_SYNTHETIC_CPU_BASELINE=<JSON>` з SHA корпусів/моделі, кількістю прикладів, точністю, macro-F1, Brier, ECE, coverage і selective risk.
+У `tests/test_system_one_research_pipeline.py` тепер є один адресний запуск, який навчає CPU-наївного баєсового учня **лише на 40 train-прикладах**, далі окремо вимірює 10 validation, 10 seed-test і 60 прикладів незалежного синтетичного challenge-набору. Після запуску тест друкує один рядок `SYSTEM_ONE_SYNTHETIC_CPU_BASELINE=<JSON>` з SHA корпусів/моделі, кількістю прикладів, точністю, macro-F1, Brier, ECE, coverage, selective risk і рішенням validation-only добору порога. Для малих 10 validation-прикладів очікується `no-safe-threshold`: тест не оцінює test за неіснуючим «безпечним» порогом.
 
 Це вимірювання навмисно:
 - не запускає мережу й не завантажує моделі;
 - не навчається на validation, seed-test або challenge;
+- добирає поріг лише на validation із наперед визначеної сітки 101 порога й поправкою Бонферроні;
+- не оцінює test за validation-порогом, якщо безпечного порога не знайдено;
 - не підбирає поріг за challenge;
 - має явний прапорець `real_world_claim=false`;
 - показує `0.80` тільки як фіксований діагностичний поріг, а не виробниче рішення.
