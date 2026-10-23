@@ -23,7 +23,7 @@ import tempfile
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 from domain_tables import read_domain_table
-from report_ukr_projection_progress import UKRAINIAN_KEYBOARD_OUTPUTS
+from report_ukr_projection_progress import UKRAINIAN_KEYBOARD_OUTPUTS, _contains_source_definitions
 
 # Тільки ІСТОРИЧНЕ свідчення: цей Git commit передує фізичному вилученню
 # сід8-реєстру з main. Данні використовує ВИКЛЮЧНО одноразовий мігратор.
@@ -135,8 +135,14 @@ def files(paths):
                 raise ValueError(f"шлях поза SENS: {p}")
             rel = resolved.relative_to(ROOT)
             if rel.parts[0] != "lib" or (len(rel.parts) > 1 and rel.parts[1] in
-                    {"domains", "surface", "generated", "staged-out"}):
-                continue  # це таблиці/дані, а не виконувані джерела
+                    {"domains", "generated", "staged-out"}):
+                continue  # таблиці доменів та згенеровані дані — не програми
+            # У surface є і проєкційні таблиці, і справжні DEFINE-програми.
+            # Колишнє виключення всього каталогу приховувало їхні W8-голови.
+            # Та сама AST-класифікація вже діє в аудиті української проєкції.
+            if (len(rel.parts) > 1 and rel.parts[1] == "surface"
+                    and not _contains_source_definitions(resolved)):
+                continue
             selected.add(resolved)
     return sorted(selected)
 
