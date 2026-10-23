@@ -195,6 +195,10 @@ run_case run_law d4-selector-composition-positive tests/semantic/d4-selector-com
 run_case run_law d4-selector-composition-mutant tests/semantic/d4-selector-composition-mutant.lisp 0
 run_case run_law d4-escaped-closure-positive tests/semantic/d4-escaped-lexical-closure-law.lisp 1
 run_case run_law d4-escaped-closure-mutant tests/semantic/d4-escaped-lexical-closure-mutant.lisp 0
+# D4 lexical capture/shadowing: SENS Lisp — єдиний семантичний оракул.
+# Замінює колишню Rust-перевірку арифметичного результату замикання.
+run_case run_law d4-lexical-scope-positive tests/semantic/d4-lexical-scope-law.lisp 1
+run_case run_law d4-lexical-scope-mutant tests/semantic/d4-lexical-scope-mutant.lisp 0
 # Фізичні закони Д3 не залежать від недопущеного виклику D6 LENGTH.
 run_case run_law d3-structural-positive tests/semantic/d3-structural-native-t5m-law.lisp 1
 run_case run_law d3-structural-mutant tests/semantic/d3-structural-native-t5m-mutant.lisp 0
