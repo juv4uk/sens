@@ -181,6 +181,8 @@ run_native_t5m_program() {
       negative_type_diagnostic='cdr expects a non-empty list' ;;
     tests/semantic/d8-string-symbol-nontext-type-negative.lisp)
       negative_type_diagnostic='string->symbol expects a string' ;;
+    tests/semantic/d8-contextual-d1-serialize-type-negative.lisp)
+      negative_type_diagnostic='write-to-string cannot serialize contextual predicate results' ;;
   esac
   if [[ -n "$negative_type_diagnostic" ]]; then
     local rejection_status
