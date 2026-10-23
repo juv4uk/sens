@@ -1849,7 +1849,7 @@ jobs:
           cargo test --locked --release -p sens-cli --test t5m_session_benchmark -- --nocapture
           cargo test --locked --release -p sens-cli --test t5m_session_benchmark -- --ignored --nocapture 2>&1 | tee "$RUNNER_TEMP/t5m-session.log"
           grep -Fq 'T5M_SESSION_BENCH cold_p50_amortized_ns=' "$RUNNER_TEMP/t5m-session.log"
-          samples="$(grep -c '^T5M_SESSION_SAMPLE ' "$RUNNER_TEMP/t5m-session.log")"
+          samples="$(grep -Fc 'T5M_SESSION_SAMPLE lane=' "$RUNNER_TEMP/t5m-session.log" || true)"
           if [[ "$samples" != 22 ]]; then
             echo "::error::T5M_SESSION_BENCH_INCOMPLETE expected_samples=22 actual_samples=$samples"
             exit 1
