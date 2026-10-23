@@ -138,7 +138,7 @@ jobs:
             # Повертаємо не лише конкурс, а й D11/list/tree, коли
             # проміжний queued push було замінено найновішим.
             if [[ "$EVENT_NAME" == push ]]; then
-              for source in benchmarks/contest-uk/*.lisp lib/core1.lisp lib/core3.lisp lib/list-*.lisp lib/*-д1.lisp lib/викликати-доменний-код.lisp lib/narrate.lisp lib/interleave-pairs.lisp lib/tree-*.lisp lib/d11-*.lisp lib/meta-eval-first-class.lisp tests/semantic/d9-four-uk-projections-laws.lisp tests/semantic/core1-gc-reachability-laws.lisp tests/semantic/біджа3-уточнення-атома-1968.lisp tests/semantic/meta-fc-predicates-d1-law.lisp tests/semantic/repl-uk-queue-law.lisp tests/semantic/repl-uk-queue-mutant.lisp lib/reverse-three.lisp lib/axioms-d1-principle-five.lisp lib/life-1-scheduler.lisp lib/lisp-fs.lisp lib/world.lisp lib/reason.lisp lib/forward.lisp lib/knowledge.lisp lib/unify.lisp lib/clips-import.lisp lib/machine/projection/x86-64.lisp lib/machine/lowering/semantic-x86-64.lisp; do
+              for source in benchmarks/contest-uk/*.lisp lib/core1.lisp lib/core3.lisp lib/list-*.lisp lib/*-д1.lisp lib/викликати-доменний-код.lisp lib/застосувати-ланцюг-доменних-функцій.lisp lib/повторити-доменну-функцію.lisp lib/narrate.lisp lib/interleave-pairs.lisp lib/tree-*.lisp lib/d11-*.lisp lib/meta-eval-first-class.lisp tests/semantic/d9-four-uk-projections-laws.lisp tests/semantic/core1-gc-reachability-laws.lisp tests/semantic/біджа3-уточнення-атома-1968.lisp tests/semantic/meta-fc-predicates-d1-law.lisp tests/semantic/repl-uk-queue-law.lisp tests/semantic/repl-uk-queue-mutant.lisp lib/reverse-three.lisp lib/axioms-d1-principle-five.lisp lib/life-1-scheduler.lisp lib/lisp-fs.lisp lib/world.lisp lib/reason.lisp lib/forward.lisp lib/knowledge.lisp lib/unify.lisp lib/clips-import.lisp lib/machine/projection/x86-64.lisp lib/machine/lowering/semantic-x86-64.lisp; do
                 [[ -f "$source" && ! -L "$source" ]] || continue
                 pair="${source%.lisp}.sens"
                 view="${source%.lisp}"
@@ -207,7 +207,27 @@ jobs:
           fi
           # Початковий native mint також має бути коротким: сотні повних
           # SENS/Zig перевірок раніше не встигали опублікуватись до нового push.
-          # Першими лишаються джерела, змінені у push, а тоді непарні.
+          # Непарні українські програми мають пріоритет у ліміті 24:
+          # інакше десятки старих drift-джерел витісняють кожну нову.
+          # Це тільки порядок native mint, НЕ мовний закон і НЕ PASS.
+          if [[ "$EVENT_NAME" == push ]]; then
+            pending_sources=()
+            other_sources=()
+            declare -A queued_sources=()
+            while IFS= read -r source; do
+              [[ -n "$source" && -z "${queued_sources[$source]+seen}" ]] || continue
+              queued_sources["$source"]=1
+              stem="${source%.lisp}"
+              if [[ "$source" == *.lisp && -f "$source" && ! -L "$source" &&
+                    ( ! -s "$stem.sens" || ! -f "$stem" ) ]]; then
+                pending_sources+=("$source")
+              else
+                other_sources+=("$source")
+              fi
+            done <<< "$list"
+            list="$(printf '%s\n' "${pending_sources[@]}" "${other_sources[@]}")"
+            echo "REMINT_PENDING_FIRST sources=${#pending_sources[@]} actual_execution=REQUIRES_SENS_ZIG"
+          fi
           # Незавершений хвіст — PENDING, не виданий за PASS чи реліз.
           list="$(printf '%s\n' "$list" | sed '/^$/d')"
           initial_total="$(printf '%s\n' "$list" | sed '/^$/d' | wc -l)"
@@ -425,8 +445,13 @@ jobs:
             # забрати й нові бібліотечні Lisp. Інакше незмінений старий
             # кандидат-список ніколи не помітить їхні відсутні T5M пари.
             # Тільки непарні або новіші за носій: без масового перемайну.
-            for source in lib/core1.lisp lib/core3.lisp lib/list-*.lisp lib/*-д1.lisp lib/викликати-доменний-код.lisp lib/narrate.lisp lib/interleave-pairs.lisp lib/tree-*.lisp lib/d11-*.lisp lib/meta-eval-first-class.lisp tests/semantic/d9-four-uk-projections-laws.lisp tests/semantic/core1-gc-reachability-laws.lisp tests/semantic/біджа3-уточнення-атома-1968.lisp tests/semantic/meta-fc-predicates-d1-law.lisp tests/semantic/repl-uk-queue-law.lisp tests/semantic/repl-uk-queue-mutant.lisp lib/reverse-three.lisp lib/axioms-d1-principle-five.lisp lib/life-1-scheduler.lisp lib/lisp-fs.lisp lib/world.lisp lib/reason.lisp lib/forward.lisp lib/knowledge.lisp lib/unify.lisp lib/clips-import.lisp lib/machine/projection/x86-64.lisp lib/machine/lowering/semantic-x86-64.lisp; do
+            for source in lib/*.lisp tests/semantic/d9-four-uk-projections-laws.lisp tests/semantic/core1-gc-reachability-laws.lisp tests/semantic/біджа3-уточнення-атома-1968.lisp tests/semantic/meta-fc-predicates-d1-law.lisp tests/semantic/repl-uk-queue-law.lisp tests/semantic/repl-uk-queue-mutant.lisp lib/reverse-three.lisp lib/axioms-d1-principle-five.lisp lib/life-1-scheduler.lisp lib/lisp-fs.lisp lib/world.lisp lib/reason.lisp lib/forward.lisp lib/knowledge.lisp lib/unify.lisp lib/clips-import.lisp lib/machine/projection/x86-64.lisp lib/machine/lowering/semantic-x86-64.lisp; do
               [[ -f "$source" && ! -L "$source" ]] || continue
+              # Незмінні описові й окремо діагностовані великі модулі
+              # не запускаються при чужому push; власна зміна — у diff вище.
+              case "$source" in
+                lib/core2.lisp|lib/core-math.lisp|lib/core4.lisp|lib/yantra.lisp) continue ;;
+              esac
               pair="${source%.lisp}.sens"
               view="${source%.lisp}"
               needs_pair=0
@@ -464,6 +489,16 @@ jobs:
                        ! -f "${candidate%.lisp}" ||
                        -L "${candidate%.lisp}.sens" ||
                        -L "${candidate%.lisp}" ]]; }; then
+                printf '%s\n' "$candidate" >> "$priority_list"
+              elif [[ "$candidate" == lib/*.lisp &&
+                      "$candidate" != lib/*/*.lisp &&
+                      -f "$candidate" && ! -L "$candidate" ]] &&
+                   { [[ ! -s "${candidate%.lisp}.sens" ||
+                         ! -f "${candidate%.lisp}" ||
+                         -L "${candidate%.lisp}.sens" ||
+                         -L "${candidate%.lisp}" ]]; }; then
+                # Новий першокласний код Д3/Д5 також чекає фізичну пару:
+                # не витісняти його сотнею старих повних файлів.
                 printf '%s\n' "$candidate" >> "$priority_list"
               else
                 printf '%s\n' "$candidate" >> "$deferred_list"

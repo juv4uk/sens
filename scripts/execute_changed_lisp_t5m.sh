@@ -236,7 +236,15 @@ run_native_t5m_program() {
         fi
         negative_source="$dir/axioms-mutant.lisp"
         negative_physical="$dir/axioms-mutant.sens"
-        sed 's/(earth is a planet))))/(earth was a planet))))/' "$file" > "$negative_source"
+        # Нові аксіоми містять також свідки GC після текстового закону.
+        # Заміна раннього прикладу не змінює останній результат: він лишається 1.
+        # Запитати НЕГАТИВНИЙ закон у самому SENS останньою формою,
+        # на тому самому джерелі з усіма нинішніми визначеннями.
+        cat -- "$file" > "$negative_source"
+        cat >> "$negative_source" <<'SENS_D1_NEGATIVE'
+(перевірити-принцип-п'ять
+ (принцип-п'ять-факт (як-є (earth was a planet))))
+SENS_D1_NEGATIVE
         if cmp -s "$file" "$negative_source"; then
           echo "::error::SENS_D1_AXIOMS_P5_MUTANT_NOT_CREATED source=$file" >&2
           mark_file_failed
