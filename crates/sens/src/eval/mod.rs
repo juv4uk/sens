@@ -502,6 +502,24 @@ fn evaluate_list(
     environment: &Environment,
     span: Span,
 ) -> Result<EvalStep, LanguageError> {
+    // Фізичний односимвольний D7 токен може бути ВЖЕ зв'язаним Text7 ім'ям.
+    // Тільки в позиції голови виклику, і тільки за точним наявним binding,
+    // розгортаємо його у той самий D2/W7 ключ, що й багатогліфове ім'я.
+    // Не робимо D7 викличним доменом і не торкаємося цитованих даних.
+    if matches!(
+        items[0].kind,
+        ExprKind::DomainIdentity(crate::DomainIdentity::D7(_))
+    ) {
+        let framed = Expr {
+            kind: ExprKind::List(std::rc::Rc::from(vec![items[0].clone()].into_boxed_slice())),
+            span: items[0].span,
+        };
+        if let Some(key) = text7_binding_key(&framed) {
+            if environment.get(&key).is_some() {
+                return dispatch_call(None, None, Some(&framed), &items[1..], environment, span);
+            }
+        }
+    }
     if let Some(identity) = binary_head_domain_identity(&items[0]) {
         return dispatch_domain_call(identity, &items[1..], environment, span);
     }
