@@ -351,6 +351,20 @@ run_case run_law d8-d7-equal-physical-mutant tests/semantic/d8-d7-equal-physical
 # Точні результати пари формує сам Lisp; Zig лише переносить T5M.
 run_case run_law d8-string-symbol-roundtrip-positive tests/semantic/d8-string-symbol-roundtrip-law.lisp 1
 run_case run_law d8-string-symbol-roundtrip-mutant tests/semantic/d8-string-symbol-roundtrip-mutant.lisp 0
+# UTF-8 межі та D24+ частка/остача — мовні закони, не Rust-таблиця очікувань.
+# Bash лише додає наявну Lisp-бібліотеку; пряме й фізичне виконання — справжній SENS.
+utf8_boundary_law_bundle="$evidence/utf8-boundary-positive-complete.lisp"
+utf8_boundary_mutant_bundle="$evidence/utf8-boundary-negative-complete.lisp"
+cat -- lib/utf8.lisp tests/semantic/utf8-boundary-laws.lisp > "$utf8_boundary_law_bundle"
+cat -- lib/utf8.lisp tests/semantic/utf8-boundary-mutant.lisp > "$utf8_boundary_mutant_bundle"
+run_case run_law utf8-boundary-positive "$utf8_boundary_law_bundle" 1
+run_case run_law utf8-boundary-mutant "$utf8_boundary_mutant_bundle" 0
+utf8_quotient_law_bundle="$evidence/utf8-quotient-positive-complete.lisp"
+utf8_quotient_mutant_bundle="$evidence/utf8-quotient-negative-complete.lisp"
+cat -- lib/utf8.lisp tests/semantic/utf8-quotient-laws.lisp > "$utf8_quotient_law_bundle"
+cat -- lib/utf8.lisp tests/semantic/utf8-quotient-mutant.lisp > "$utf8_quotient_mutant_bundle"
+run_case run_law utf8-quotient-positive "$utf8_quotient_law_bundle" 1
+run_case run_law utf8-quotient-mutant "$utf8_quotient_mutant_bundle" 0
 # Негативний тип перевіряє сама мова; Rust/Zig не є семантичним оракулом.
 run_case run_type_rejection d8-string-symbol-nontext-type-negative tests/semantic/d8-string-symbol-nontext-type-negative.lisp 'string->symbol expects a string'
 # D1 хибне значення як голова CONS ≠ порожній D3-список.
