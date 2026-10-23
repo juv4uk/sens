@@ -40,7 +40,7 @@ test "ukrainian SENS REPL source crosses Zig byte-exact, short buffer is untouch
     try std.testing.expectEqualSlices(u8, repl_core_asset[0..repl_core_asset.len], &exact);
 }
 
-test "Zig REPL transport refuses one-byte-short destination without a partial write" {
+test "Zig byte carrier refuses one-byte-short destinations without partial writes" {
     // Перевіряємо виключно байтову межу, не семантику Lisp чи коди доменів.
     var output: [repl_core_asset.len]u8 = undefined;
     @memset(output[0..], 0xA5);
@@ -54,6 +54,21 @@ test "Zig REPL transport refuses one-byte-short destination without a partial wr
     const expected: isize = @intCast(repl_core_asset.len);
     try std.testing.expectEqual(expected, sens_zig_repl_core_bytes_copy(&output, output.len));
     try std.testing.expectEqualSlices(u8, repl_core_asset, &output);
+
+    // Meta-eval так само є лише непрозорим джерелом байтів.
+    // Буфер із нестачею одного байта не може бути змінено навіть частково.
+    var meta_out: [meta_eval_asset.len]u8 = undefined;
+    @memset(meta_out[0..], 0xA5);
+    try std.testing.expectEqual(
+        @as(isize, -2),
+        sens_zig_meta_eval_bytes_copy(&meta_out, meta_out.len - 1),
+    );
+    for (meta_out) |byte| {
+        try std.testing.expectEqual(@as(u8, 0xA5), byte);
+    }
+    const meta_expected: isize = @intCast(meta_eval_asset.len);
+    try std.testing.expectEqual(meta_expected, sens_zig_meta_eval_bytes_copy(&meta_out, meta_out.len));
+    try std.testing.expectEqualSlices(u8, meta_eval_asset, &meta_out);
 }
 
 // SENS owns the metacircular evaluator and its generated semantic registry.

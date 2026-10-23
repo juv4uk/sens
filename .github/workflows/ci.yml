@@ -259,7 +259,7 @@ jobs:
         if: ${{ always() && steps.changed-t5m-lisp.outputs.has_zig == 'true' }}
         run: |
           zig test -lc research/zig-codecs/tests.zig
-          zig test -lc zig_transport_root.zig --test-filter 'Zig REPL transport refuses one-byte-short destination without a partial write'
+          zig test -lc zig_transport_root.zig --test-filter 'Zig byte carrier refuses one-byte-short destinations without partial writes'
 
       - name: Три бенчмарки — lists, arithmetic, parser у справжньому SENS
         if: ${{ always() && steps.changed-t5m-lisp.outputs.has_lisp == 'true' }}
