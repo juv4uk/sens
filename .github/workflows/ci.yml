@@ -216,6 +216,10 @@ jobs:
                   "tests/semantic/d24-reader-zero-denominator-negative.lisp",
                   "tests/semantic/d4-recursion-benchmark-law.lisp",
                   "tests/semantic/d4-recursion-benchmark-mutant.lisp",
+                  # Ці D3 свідки залежать від DEFINE в benchmarks/d3-proper-tail-hot.lisp.
+                  # Тільки bundle проходить Lisp → Zig/T5M → SENS, не самотній .lisp.
+                  "tests/semantic/d3-proper-tail-hot-law.lisp",
+                  "tests/semantic/d3-proper-tail-hot-mutant.lisp",
                   # Ці фікстури потребують DEFINE обійти із benchmarks/recursion.lisp.
                   # Повний бандл law/mutant запускається через SENS/Zig/T5M нижче;
                   # окремий змінений-файл без бібліотеки помилково дає UnknownSymbol.
