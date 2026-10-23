@@ -133,6 +133,7 @@ jobs:
             timeout 60s git fetch --no-tags --depth=1 origin "$base"
           fi
           git -c core.quotePath=false diff --name-only --diff-filter=ACMRT "$base" "$GITHUB_SHA" -- '*.lisp' '*.sens' '*.rs' '*.zig' '.github/workflows/ci.yml' 'scripts/prove-lisp-semantic-t5m.sh' 'scripts/prove-lisp-language-laws.sh' 'scripts/execute_changed_lisp_t5m.sh' > "$raw"
+          printf '%s\n' "$base" > "$RUNNER_TEMP/native-semantic-base.sha"
           python3 - "$raw" "$manifest" "$GITHUB_OUTPUT" <<'PY'
           from pathlib import Path
           import sys
@@ -279,6 +280,18 @@ jobs:
           for name in selected:
               print(f"T5M_CHANGED_FILE {name}")
           PY
+
+      # Інженерний бар'єр: новий мовний закон не рахується перевіреним
+      # від одного успішного mint чи Rust assert. Вимагаємо явний нативний маршрут.
+      - name: Власність тестів — нові Lisp-закони тільки через фізичний SENS
+        if: ${{ always() && steps.changed-t5m-lisp.outcome == 'success' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m unittest tests/test_native_semantic_ownership_gate.py -v
+          python3 scripts/guard_native_semantic_ownership.py \
+            --base "$(cat "$RUNNER_TEMP/native-semantic-base.sha")" \
+            --head "$GITHUB_SHA"
 
       - name: Вживати функції драбин D1–D10, а не винаходити дублі
         env:
