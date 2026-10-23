@@ -21,7 +21,7 @@ fi
 tmp="$(mktemp -d)"
 trap 'rm -rf "$tmp"' EXIT
 printf 'NATIVE_SENS_EXECUTOR test_id=lisp-language-laws path=%s version=%s\n' "$cli" "$("$cli" --version)"
-for id in d1-not d2-cond-laziness d3-structure d4-lexical-scope d4-second-selector d4-closure-pair d4-nested-pair-selectors d3-dotted-pair d3-cons-pair-roundtrip d3-cond-demand d4-parameter-shadowing quote-inertness d5-recursive-list; do
+for id in d1-not d2-cond-laziness d3-structure d4-lexical-scope d4-second-selector d4-closure-pair d4-nested-pair-selectors d3-dotted-pair d3-cons-pair-roundtrip d3-nested-cons-reconstruction d3-cond-demand d4-parameter-shadowing quote-inertness d5-recursive-list; do
   case "$id" in
     d3-cond-demand|d4-parameter-shadowing|quote-inertness)
       law="tests/semantic/language-law-$id.lisp"
@@ -73,4 +73,4 @@ for id in d1-not d2-cond-laziness d3-structure d4-lexical-scope d4-second-select
     printf 'NATIVE_SENS_PASS test_id=%s kind=%s expected=D1:%s executor=SENS carrier=Zig/T5M standalone=NOT_CLAIMED\n' "$id" "$kind" "$expected"
   done
 done
-printf 'NATIVE_SENS_SUITE_PASS suite=lisp-language-laws laws=13 mutants=13 authority=SENS\n'
+printf 'NATIVE_SENS_SUITE_PASS suite=lisp-language-laws laws=14 mutants=14 authority=SENS\n'
