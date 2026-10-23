@@ -39,6 +39,20 @@ class DomainFunctionReuseRule(unittest.TestCase):
         result = run(GUARD, "--self-test")
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
 
+    def test_guard_fails_closed_when_ladder_discovery_is_incomplete(self) -> None:
+        spec = importlib.util.spec_from_file_location("guard_empty_ladder_test", GUARD)
+        self.assertIsNotNone(spec)
+        self.assertIsNotNone(spec.loader)
+        guard = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(guard)
+        output = StringIO()
+        with mock.patch.object(guard, "ladder_names", return_value=set()):
+            with redirect_stderr(output):
+                status = guard.main(["--file", "lib/core4.lisp"])
+        self.assertEqual(status, 2, output.getvalue())
+        self.assertIn("НЕ ПЕРЕВІРЕНО", output.getvalue())
+        self.assertIn("щонайменше 1000", output.getvalue())
+
     def test_search_self_test_is_green(self) -> None:
         result = run(SEARCH, "--self-test")
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
