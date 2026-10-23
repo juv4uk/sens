@@ -42,6 +42,8 @@ fn routed(script: &str) -> BTreeSet<String> {
         s.starts_with("run_case run_law ")
             || s.starts_with("run_case run_bound_law ")
             || s.starts_with("run_case run_type_rejection ")
+            || s.starts_with("run_case run_error_rejection ")
+            || s.starts_with("run_case run_division_by_zero_rejection ")
     ).collect();
     let mut result = BTreeSet::new();
     for call in &calls { result.extend(paths_in(call)); }
@@ -272,6 +274,24 @@ run_case run_law sample-mut tests/semantic/sample-mutant.lisp 0\n\
     if !braced.is_empty() {
         return Err(format!("braced native Lisp bundle was rejected: {braced:?}"));
     }
+
+    // Named runtime-error laws are semantic witnesses too: they travel through
+    // the same Lisp -> T5M -> SENS corridor and must be discovered by this gate.
+    let mut error_runner = runner.to_string();
+    error_runner.push_str(
+        "run_case run_division_by_zero_rejection d24-computed-zero-denominator \\\n",
+    );
+    error_runner.push_str(
+        "  tests/semantic/d24-reader-zero-denominator-negative.lisp 'division by zero'\\\n",
+    );
+    let error_route = audit(
+        &["tests/semantic/d24-reader-zero-denominator-negative.lisp".into()],
+        &error_runner, ci, |_| true, |_| Ok(String::new()),
+    );
+    if !error_route.is_empty() {
+        return Err(format!("typed-error witness route was rejected: {error_route:?}"));
+    }
+
     let invalid = audit(&["tests/semantic/not-a-law.py".into()], runner, ci,
         |_| true, |_| Ok(String::new()));
     if !invalid.iter().any(|e| e.contains("HOST_SEMANTIC_TEST_ADDED")) {
