@@ -11,5 +11,7 @@ python3 "$repo_root/scripts/guard_ukr_lisp_keyboard.py" --staged
 # коміту, він бачить лише ДОДАНІ визначення (--staged) і не дає закомітити дубль
 # наявної поверхні. Доти він біг тільки в CI (після роботи), тож агенти його
 # практично не бачили — і затінення драбини накопичувались.
-python3 "$repo_root/scripts/guard-domain-function-reuse.py" --staged --advise
+# Чисті нові функції реєструються як нератифіковані кандидати D11; охоронець
+# не додає файл у Git index і не призначає бітову координату.
+python3 "$repo_root/scripts/guard-domain-function-reuse.py" --staged --advise --register
 "$repo_root/scripts/check-bilingual-docs"
