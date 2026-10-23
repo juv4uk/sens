@@ -7,9 +7,10 @@ on:
     branches: [main]
   workflow_dispatch:
 
-# Єдиний автоматичний workflow. Жодних важких збірок, remint, матриць,
-# бенчмарків чи встановлення інтерпретаторів. Важке: ci-heavy.yml (ручний запуск).
-# Структурні перевірки НЕ доводять семантику SENS і не допускають реліз.
+# Єдиний автоматичний workflow. На push зміненого Lisp запускаються
+# три адресні бенчмарки й фізичний Zig/T5M → SENS, а решта важких
+# наборів залишається у ci-heavy.yml (лише вручну).
+# Структурна перевірка не підміняє SENS і не допускає реліз.
 permissions:
   contents: read
 
@@ -81,15 +82,15 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     outputs:
-      has_lisp: ${{ steps.changed-lisp.outputs.has_lisp }}
-      has_files: ${{ steps.changed-lisp.outputs.has_files }}
+      has_lisp: ${{ steps.changed-t5m-lisp.outputs.has_lisp }}
+      has_files: ${{ steps.changed-t5m-lisp.outputs.has_files }}
     steps:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5, pinned
         with:
           persist-credentials: false
 
       - name: Знайти змінені Lisp-програми, а не історичні таблиці
-        id: changed-lisp
+        id: changed-t5m-lisp
         shell: bash
         env:
           BEFORE_SHA: ${{ github.event.before }}
@@ -104,7 +105,7 @@ jobs:
             fi
             git -c core.quotePath=false diff --name-only --diff-filter=ACMRT "$base" "$GITHUB_SHA" -- '*.lisp' '*.sens' '.github/workflows/ci.yml' > "$raw"
           else
-            git -c core.quotePath=false diff-tree --root --no-commit-id --name-only --diff-filter=ACMRT -r "$GITHUB_SHA" -- '*.lisp' '*.sens' '.github/workflows/ci.yml' > "$raw"
+            git -c core.quotePath=false diff-tree --no-commit-id --root --name-only --diff-filter=ACMRT -r "$GITHUB_SHA" -- '*.lisp' '*.sens' '.github/workflows/ci.yml' > "$raw"
           fi
           python3 - "$raw" "$manifest" "$GITHUB_OUTPUT" <<'PY'
           from pathlib import Path
@@ -128,14 +129,14 @@ jobs:
               name = original[:-5] + ".lisp" if original.endswith(".sens") else original
               if not name.endswith(".lisp") or name.startswith(data_prefixes) or name in data_paths:
                   continue
-              source = Path(name)
-              if not source.is_file() or source.is_symlink():
+              path = Path(name)
+              if not path.is_file() or path.is_symlink():
                   raise SystemExit(f"T5M_CHANGED_SOURCE_INVALID path={name}")
-              if name.startswith("lib/surface/") and not _contains_source_definitions(source):
+              if name.startswith("lib/surface/") and not _contains_source_definitions(path):
                   print(f"T5M_NONPROGRAM_SURFACE path={name}")
                   continue
               try:
-                  if not tokenize_lisp(source.read_text(encoding="utf-8")):
+                  if not tokenize_lisp(path.read_text(encoding="utf-8")):
                       continue
               except (OSError, UnicodeError, ValueError):
                   pass  # malformed Lisp must reach the real SENS reader and fail closed
@@ -160,13 +161,13 @@ jobs:
           PY
 
       - uses: dtolnay/rust-toolchain@1.99.0
-        if: steps.changed-lisp.outputs.has_lisp == 'true'
+        if: steps.changed-t5m-lisp.outputs.has_lisp == 'true'
 
       - uses: ./.github/actions/install-zig
-        if: steps.changed-lisp.outputs.has_lisp == 'true'
+        if: steps.changed-t5m-lisp.outputs.has_lisp == 'true'
 
       - name: Три бенчмарки — lists, arithmetic, parser у справжньому SENS
-        if: steps.changed-lisp.outputs.has_lisp == 'true'
+        if: steps.changed-t5m-lisp.outputs.has_lisp == 'true'
         shell: bash
         timeout-minutes: 15
         run: |
@@ -180,7 +181,7 @@ jobs:
 
       - name: Виконати змінені Lisp через поточний Zig T5M і справжній SENS
         id: t5m_changed_execute
-        if: steps.changed-lisp.outputs.has_files == 'true'
+        if: steps.changed-t5m-lisp.outputs.has_files == 'true'
         shell: bash
         timeout-minutes: 15
         run: |
@@ -194,7 +195,7 @@ jobs:
               "$RUNNER_TEMP/changed-t5m-pairs"
 
       - name: Зберегти фізичні T5M-свідки після SENS виконання
-        if: always() && steps.changed-lisp.outputs.has_files == 'true'
+        if: always() && steps.changed-t5m-lisp.outputs.has_files == 'true'
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4, pinned
         with:
           name: sens-t5m-corridor-${{ github.sha }}
