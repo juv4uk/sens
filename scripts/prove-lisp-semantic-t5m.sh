@@ -36,6 +36,22 @@ fail() {
   exit 1
 }
 
+# Діагностичний бенчмарк етапів *реального* Lisp → Zig/T5M → SENS.
+# Вимірюємо повний процес кожного етапу (запуск CLI включно), без host-оракула.
+# Одна проба на етап: це профіль для пошуку вузького місця, НЕ p50 або speedup.
+profile_stage() {
+  local id="$1" stage="$2" started_ns ended_ns elapsed_us code=0
+  shift 2
+  started_ns="$(date +%s%N)"
+  "$@" || code=$?
+  ended_ns="$(date +%s%N)"
+  elapsed_us="$(((ended_ns - started_ns) / 1000))"
+  printf '%s\\t%s\\t%s\\t%s\\n' "$id" "$stage" "$code" "$elapsed_us" >> "$evidence/law-stage-timings.tsv"
+  printf 'SENS_LAW_STAGE id=%s stage=%s exit=%s elapsed_us=%s scope=full-process\\n' \\
+    "$id" "$stage" "$code" "$elapsed_us"
+  return "$code"
+}
+
 # Доказовий розбір червоного маршруту: жодних підмін вердикту чи допуску.
 # Показуємо обидва реальні потоки й першу різницю, не лише "divergent".
 report_output_divergence() {
@@ -92,18 +108,18 @@ run_law() {
     fail "$id" source "regular-Lisp" "missing-or-symlink"
 
   # Семантичний доказ не записує очікувану логіку іншою мовою.
-  if ! timeout 45s "$sens" "$source" >"$dir/direct.out" 2>"$dir/direct.err"; then
+  if ! profile_stage "$id" direct timeout 45s "$sens" "$source" >"$dir/direct.out" 2>"$dir/direct.err"; then
     cat "$dir/direct.err" >&2
     fail "$id" "$(direct_failure_layer "$dir/direct.err")" "SENS-execution" "rejected"
   fi
   # Кодек створює байти T5M; Zig відкриває і перевіряє точне подання.
-  if ! timeout 45s "$sens" --t5m-mint "$source" "$physical" >"$dir/mint.out" 2>"$dir/mint.err"; then
+  if ! profile_stage "$id" codec-mint timeout 45s "$sens" --t5m-mint "$source" "$physical" >"$dir/mint.out" 2>"$dir/mint.err"; then
     cat "$dir/mint.err" >&2
     fail "$id" codec "T5M-mint" "rejected"
   fi
   test -s "$physical" || fail "$id" codec "nonempty-T5M" "empty"
-  if ! timeout 45s "$trit" open "$physical" >"$dir/program" 2>"$dir/open.err" ||
-     ! timeout 45s "$trit" verify-view "$physical" >"$dir/inverse.out" 2>"$dir/inverse.err"; then
+  if ! profile_stage "$id" zig-open timeout 45s "$trit" open "$physical" >"$dir/program" 2>"$dir/open.err" ||
+     ! profile_stage "$id" zig-verify timeout 45s "$trit" verify-view "$physical" >"$dir/inverse.out" 2>"$dir/inverse.err"; then
     for error_log in "$dir/open.err" "$dir/inverse.err"; do
       if [[ -f "$error_log" ]]; then cat "$error_log" >&2; fi
     done
@@ -111,11 +127,11 @@ run_law() {
   fi
   # Розрізняємо помилку парного виконання та standalone: це різні шари.
   # Нативний SENS надає діагностику; shell не підміняє жоден Lisp-вердикт.
-  if ! timeout 45s "$sens" --t5m-pair "$source" "$physical" >"$dir/paired.out" 2>"$dir/paired.err"; then
+  if ! profile_stage "$id" sens-paired timeout 45s "$sens" --t5m-pair "$source" "$physical" >"$dir/paired.out" 2>"$dir/paired.err"; then
     cat "$dir/paired.err" >&2
     fail "$id" "$(paired_failure_layer "$dir/paired.err")" "source-matched-physical-execution" "rejected"
   fi
-  if ! timeout 45s "$sens" "$physical" >"$dir/physical.out" 2>"$dir/physical.err"; then
+  if ! profile_stage "$id" sens-standalone timeout 45s "$sens" "$physical" >"$dir/physical.out" 2>"$dir/physical.err"; then
     cat "$dir/physical.err" >&2
     fail "$id" sens-standalone "standalone-physical-execution" "rejected"
   fi
@@ -143,17 +159,17 @@ run_bound_law() {
   mkdir -p "$dir"
   cat -- lib/unify.lisp "$source" > "$combined"
 
-  if ! timeout 45s "$sens" "$combined" >"$dir/direct.out" 2>"$dir/direct.err"; then
+  if ! profile_stage "$id" direct timeout 45s "$sens" "$combined" >"$dir/direct.out" 2>"$dir/direct.err"; then
     cat "$dir/direct.err" >&2
     fail "$id" "$(direct_failure_layer "$dir/direct.err")" "SENS-execution" "rejected"
   fi
-  if ! timeout 45s "$sens" --t5m-mint "$combined" "$physical" >"$dir/mint.out" 2>"$dir/mint.err"; then
+  if ! profile_stage "$id" codec-mint timeout 45s "$sens" --t5m-mint "$combined" "$physical" >"$dir/mint.out" 2>"$dir/mint.err"; then
     cat "$dir/mint.err" >&2
     fail "$id" codec "T5M-mint" "rejected"
   fi
   test -s "$physical" || fail "$id" codec "nonempty-T5M" "empty"
-  if ! timeout 45s "$trit" open "$physical" >"$dir/program" 2>"$dir/open.err" ||
-     ! timeout 45s "$trit" verify-view "$physical" >"$dir/inverse.out" 2>"$dir/inverse.err"; then
+  if ! profile_stage "$id" zig-open timeout 45s "$trit" open "$physical" >"$dir/program" 2>"$dir/open.err" ||
+     ! profile_stage "$id" zig-verify timeout 45s "$trit" verify-view "$physical" >"$dir/inverse.out" 2>"$dir/inverse.err"; then
     for error_log in "$dir/open.err" "$dir/inverse.err"; do
       if [[ -f "$error_log" ]]; then cat "$error_log" >&2; fi
     done
@@ -161,11 +177,11 @@ run_bound_law() {
   fi
   # Розрізняємо помилку парного виконання та standalone: це різні шари.
   # Нативний SENS надає діагностику; shell не підміняє жоден Lisp-вердикт.
-  if ! timeout 45s "$sens" --t5m-pair "$combined" "$physical" >"$dir/paired.out" 2>"$dir/paired.err"; then
+  if ! profile_stage "$id" sens-paired timeout 45s "$sens" --t5m-pair "$combined" "$physical" >"$dir/paired.out" 2>"$dir/paired.err"; then
     cat "$dir/paired.err" >&2
     fail "$id" "$(paired_failure_layer "$dir/paired.err")" "source-matched-physical-execution" "rejected"
   fi
-  if ! timeout 45s "$sens" "$physical" >"$dir/physical.out" 2>"$dir/physical.err"; then
+  if ! profile_stage "$id" sens-standalone timeout 45s "$sens" "$physical" >"$dir/physical.out" 2>"$dir/physical.err"; then
     cat "$dir/physical.err" >&2
     fail "$id" sens-standalone "standalone-physical-execution" "rejected"
   fi
@@ -242,6 +258,7 @@ failed_ids=()
 # Час кожного реального SENS→Zig/T5M→SENS виконання; не мовний оракул.
 # Одна проба на свідок: діагностичний wall-time, не p50 і не порівняння мов.
 printf 'id\tstatus\twall_ms\n' > "$evidence/law-timings.tsv"
+printf 'id\\tstage\\texit\\telapsed_us\\n' > "$evidence/law-stage-timings.tsv"
 run_case() {
   local id="$2" start_ns end_ns wall_ms status
   start_ns="$(date +%s%N)"
