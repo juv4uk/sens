@@ -737,36 +737,6 @@ if [[ -n "${GITHUB_STEP_SUMMARY:-}" ]]; then
         printf '| `%s` | %s | %s |\n' "$id" "$status" "$ms"
       done
     echo
-    echo '### Повільні етапи Lisp → Zig/T5M → SENS'
-    echo
-    echo 'Одна процесна проба на етап, мікросекунди. Порівнювати як p50 або заявляти speedup заборонено.'
-    echo
-    echo '| Свідок | Фаза | Код виходу | мкс |'
-    echo '|---|---|---:|---:|'
-    tail -n +2 "$evidence/law-stage-timings.tsv" |
-      sort -t "$(printf '\t')" -k4,4nr |
-      sed -n '1,10p' |
-      while IFS="$(printf '\t')" read -r id stage exit_code duration_us; do
-        printf '| %s | %s | %s | %s |\n' "$id" "$stage" "$exit_code" "$duration_us"
-      done
-  } >> "$GITHUB_STEP_SUMMARY"
-fi
-# Профіль видимий і при RED: не потрібен другий workflow або повторні прогони.
-# Форму та вердикт визначив Lisp/SENS, тут лише сортування часових проб.
-if [[ -n "${GITHUB_STEP_SUMMARY:-}" ]] && [[ -s "$evidence/law-stage-timings.tsv" ]]; then
-  {
-    echo
-    echo '## Найдорожчі механічні етапи Lisp → Zig/T5M → SENS'
-    echo 'Одна реальна проба на етап у мікросекундах, включно зі стартом процесу; це не p50.'
-    echo
-    echo '| Lisp-свідок | Етап | Exit | wall-time, мкс |'
-    echo '|---|---|---:|---:|'
-    tail -n +2 "$evidence/law-stage-timings.tsv" |
-      sort -t "$(printf '\t')" -k4,4nr |
-      sed -n '1,12p' |
-      while IFS="$(printf '\t')" read -r id stage stage_exit elapsed_us; do
-        printf '| `%s` | %s | %s | %s |\n' "$id" "$stage" "$stage_exit" "$elapsed_us"
-      done
   } >> "$GITHUB_STEP_SUMMARY"
 fi
 
