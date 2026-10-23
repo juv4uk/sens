@@ -14,6 +14,22 @@ evidence="$3"
 test -x "$sens" && test -x "$trit"
 mkdir -p "$evidence"
 
+# Спочатку перевіряємо працездатність самого SENS-виконавця на наявному
+# Lisp-свідку. Це перевірка запуску, НЕ семантичний оракул: точний D1
+# нижче доводить run_law. Якщо Core4/reader зламаний глобально, не
+# класифікуємо десятки залежних тестів як незалежні мовні REGRESSION.
+bootstrap_source="tests/semantic/d1-not-law.lisp"
+if [[ ! -f "$bootstrap_source" || -L "$bootstrap_source" ]]; then
+  echo "::error::SENS_BOOTSTRAP_SOURCE_INVALID source=$bootstrap_source" >&2
+  exit 2
+fi
+if ! timeout 45s "$sens" "$bootstrap_source" >"$evidence/bootstrap.stdout" 2>"$evidence/bootstrap.stderr"; then
+  cat "$evidence/bootstrap.stderr" >&2
+  echo "::error::SENS_BOOTSTRAP_BLOCKED layer=executor source=$bootstrap_source checked=0 semantic=NOT_CERTIFIED release=NOT_CERTIFIED" >&2
+  exit 2
+fi
+echo "SENS_BOOTSTRAP_EXECUTABLE source=$bootstrap_source semantic=NOT_CERTIFIED"
+
 fail() {
   local id="$1" layer="$2" expected="$3" actual="$4"
   echo "::error title=SENS Lisp/T5M::REGRESSION id=$id layer=$layer expected=$expected actual=$actual" >&2
