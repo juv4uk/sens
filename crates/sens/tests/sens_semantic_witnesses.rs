@@ -1,9 +1,8 @@
-//! Mechanical runner for SENS-owned semantic witnesses.
+//! Backend runner for Lisp/SENS-owned semantic witnesses.
 //!
-//! The semantic expectation is encoded inside each binary SENS program.
-//! Rust loads admitted language libraries and reports only whether the
-//! self-verdict program executes successfully. It contains no truth table,
-//! expected result value, or duplicate language law.
+//! Language laws and their self-verdicts live in Lisp/SENS programs. Rust
+//! checks framing, parsing, execution, and runtime rejection boundaries; it
+//! does not inspect positive result values or duplicate language truth tables.
 
 use sens::{
     eval_core_library_source, eval_parsed_expressions, parse_canonical_binary,
