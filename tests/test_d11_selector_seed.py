@@ -86,6 +86,39 @@ class D11SelectorSeedAuditTests(unittest.TestCase):
         docs["seed"]["rows"][1][1] = docs["seed"]["rows"][0][1]
         self.assert_rejected(docs, "DERIVED_DUP_NAME")
 
+    def test_rejects_d11_projection_drift_in_every_surface(self):
+        row = next(line for line in self.documents["d11_table"].splitlines()
+                   if line.startswith("  (01100000000 "))
+        for column in ("ук", "укр", "san", "en"):
+            with self.subTest(column=column):
+                docs = self.changed()
+                import re
+                damaged = re.sub(r"(\(" + column + r"\s+)[^()\s]+",
+                                 r"\1wrong-projection", row, count=1)
+                self.assertNotEqual(damaged, row)
+                docs["d11_table"] = docs["d11_table"].replace(row, damaged, 1)
+                self.assert_rejected(docs, "D11_TABLE_PROJECTION")
+
+        docs = self.changed()
+        damaged = row.replace("(sym ())", "(sym +)", 1)
+        self.assertNotEqual(damaged, row)
+        docs["d11_table"] = docs["d11_table"].replace(row, damaged, 1)
+        self.assert_rejected(docs, "D11_TABLE_PROJECTION")
+
+    def test_rejects_d11_projection_column_order_and_duplicate(self):
+        row = next(line for line in self.documents["d11_table"].splitlines()
+                   if line.startswith("  (01100000000 "))
+        for damaged in (
+            row.replace("(ук ", "(tmp ", 1).replace("(укр ", "(ук ", 1).replace("(tmp ", "(укр ", 1),
+            row.replace("(san ", "(uk ", 1),
+            row.replace("(sym ())", "(sym ()) (sym ())", 1),
+        ):
+            with self.subTest(damaged=damaged[:100]):
+                self.assertNotEqual(damaged, row)
+                docs = self.changed()
+                docs["d11_table"] = docs["d11_table"].replace(row, damaged, 1)
+                self.assert_rejected(docs, "D11_TABLE_PROJECTION")
+
     def test_rejects_current_d11_table_coordinate_drift(self):
         docs = self.changed()
         self.assertIn("  (01100000000 (ук ", docs["d11_table"])

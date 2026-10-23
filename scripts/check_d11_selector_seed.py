@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import importlib.util
 import json
 import re
 import sys
@@ -75,6 +76,58 @@ def parse_domain_rows(source: str, label: str) -> list[tuple[str, str]]:
     rows = [(m.group("bits"), m.group("name")) for m in DOMAIN_ROW.finditer(source)]
     require(bool(rows), "TABLE_EMPTY", f"{label} has no parseable domain-table rows")
     return rows
+
+
+def validate_d11_table_projections(source: str) -> None:
+    """Звірити всі шість поверхонь Д11 з композицією CAR/CDR.
+
+    Використовує той самий S-expression reader, що й відкриття доменних
+    функцій. Неправильний порядок або зайві колонки не можуть бути пропущені.
+    """
+    parser_path = ROOT / "scripts" / "discover_domain_function_candidates.py"
+    spec = importlib.util.spec_from_file_location("sens_d11_row_parser", parser_path)
+    require(spec is not None and spec.loader is not None, "D11_TABLE_PARSER",
+            f"cannot load exact domain-table parser {parser_path}")
+    parser = importlib.util.module_from_spec(spec)
+    sys.modules[spec.name] = parser
+    spec.loader.exec_module(parser)
+
+    checked = 0
+    for line_no, line in enumerate(source.splitlines(), 1):
+        if not re.match(r"^\s*\([01]{11}\s+", line):
+            continue
+        try:
+            row = parser.parse_domain_row(line, 11, line_no)
+        except parser.AuditError as exc:
+            raise AuditError("D11_TABLE_PROJECTION",
+                             f"line {line_no}: malformed six-column D11 row: {exc}") from exc
+        require(row is not None, "D11_TABLE_PROJECTION",
+                f"line {line_no}: row cannot be parsed")
+        name = row["LISP"]
+        require(re.fullmatch(r"C[AD]{9}R", name) is not None,
+                "D11_TABLE_PROJECTION",
+                f"line {line_no} code={row['bits']}: invalid selector name {name!r}")
+        require(not row["LISP_quoted"], "D11_TABLE_PROJECTION",
+                f"line {line_no} code={row['bits']}: LISP name must not be quoted")
+        steps = name[1:-1]
+        ukrainian = "-від-".join("перше" if ch == "A" else "решта" for ch in steps)
+        sanskrit = "-".join("ādi" if ch == "A" else "śeṣa" for ch in steps)
+        expected = {
+            "ук": ukrainian,
+            "укр": ukrainian,
+            "san": sanskrit,
+            "en": name.lower(),
+            "sym": "()",
+        }
+        for column, value in expected.items():
+            require(row[column] == value and not row[column + "_quoted"],
+                    "D11_TABLE_PROJECTION",
+                    f"line {line_no} code={row['bits']} column={column}"
+                    f" expected={value!r} actual={row[column]!r}"
+                    f" quoted={row[column + '_quoted']}")
+        checked += 1
+    require(checked == 512, "D11_TABLE_PROJECTION",
+            f"expected 512 complete D11 projections, found {checked}")
 
 
 def validate_documents(documents: dict[str, Any]) -> dict[str, Any]:
@@ -201,6 +254,7 @@ def validate_documents(documents: dict[str, Any]) -> dict[str, Any]:
         d11_map[bits] = name
         d11_names.add(name.casefold())
     # Звірку з похідними (deriveds) робимо нижче, після їх побудови.
+    validate_d11_table_projections(documents["d11_table"])
 
     derived_rows = seed.get("rows")
     require(isinstance(derived_rows, list) and len(derived_rows) == 512,
