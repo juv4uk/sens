@@ -157,6 +157,25 @@ class MultisourceDomainCutover(unittest.TestCase):
                     self.assertIn("визначити", heads, f"{rel} not on full укр")
                     self.assertNotIn("0011", heads, f"{rel} stale D4 encoded call")
 
+    def test_all_active_ukr_lisp_libraries_have_no_legacy_w8_heads(self):
+        # Жоден новий живий .lisp з повною викличною поверхнею «укр»
+        # не може нишком повернути плоскі SID8 / Sens8 call-heads.
+        # Це лише перевірка source; виконання здійснює сам SENS.
+        scanned = 0
+        for path in sorted((ROOT / "lib").rglob("*.lisp")):
+            rel = path.relative_to(ROOT)
+            if {"domains", "generated", "staged-out"} & set(rel.parts):
+                continue  # Таблиці й архіви — дані, а не виконавчі голови.
+            source = path.read_text(encoding="utf-8")
+            if not re.search(r"(?m)^\\s*\\(визначити\\s+", source):
+                continue  # Декларативна таблиця, без виконуваних DEFINE.
+            scanned += 1
+            with self.subTest(path=str(rel)):
+                heads = list(executable_heads(source))
+                old = [head for head in heads if re.fullmatch(r"[01]{8}", head)]
+                self.assertFalse(old, f"{rel} has historical W8 heads: {old[:8]}")
+        self.assertGreaterEqual(scanned, 40, "Active Ukrainian Lisp inventory unexpectedly shrank")
+
     def test_domain_authority_is_unchanged(self):
         import json
         foundation = json.loads((ROOT / "knowledge/d1-d9-foundation.json").read_text())
