@@ -159,6 +159,33 @@ def authority(root):
         raise ValueError("D10 whole-domain ratification is not executable SID8 admission")
     return mapping, blocked
 
+def ukrainian_projection(root, mapping):
+    """Resolve proved legacy successors through current exact-domain укр rows.
+
+    Historical bytes only select a reviewed crosswalk entry. A current
+    domain-qualified row supplies the human spelling; no byte-sized D8
+    inference, text fallback, or executable admission is performed here.
+    """
+    required = set(mapping.values())
+    words = {}
+    for width in range(1, 11):
+        for row in read_domain_table(root / f"lib/domains/d{width}.lisp"):
+            if row.bits not in required:
+                continue
+            value = row.ukr
+            if (row.role == "display" or not isinstance(value, str)
+                    or not value or value == "()"
+                    or any(c.isspace() or c in "()\\\"';" for c in value)):
+                raise ValueError(f"D{width}:{row.bits}: missing callable укр projection")
+            if row.bits in words and words[row.bits] != value:
+                raise ValueError(f"D{width}:{row.bits}: conflicting укр projection")
+            words[row.bits] = value
+    if set(words) != required:
+        raise ValueError("historical successor without an exact укр domain row: "
+                         + ", ".join(sorted(required - set(words))))
+    return {legacy: words[bits] for legacy, bits in mapping.items()}
+
+
 def rewrite(src, mapping, blocked):
     stack, edits, problems = [], [], []
     quote = False
@@ -289,6 +316,9 @@ def guard_module(root):
 
 def run(root, write=False, selected=None):
     mapping, blocked = authority(root)
+    # Executable human Lisp uses the full ратифікована «укр» column.
+    # Keep rewrite(..., mapping, ...) available only for historical bit-delta witnesses.
+    surface_mapping = ukrainian_projection(root, mapping)
     guard = guard_module(root)
     # Повторно використовуємо канонічні Git-blob pins із #4460.
     # Будь-яка зміна навіть одного байта в джерелі залишається BLOCK, а не skip.
@@ -347,7 +377,7 @@ def run(root, write=False, selected=None):
                            "potential_heads": 0,
                            "reasons": ["generated carrier needs generator migration"]})
             continue
-        updated, n, problems = rewrite(original, mapping, blocked)
+        updated, n, problems = rewrite(original, surface_mapping, blocked)
         if n:
             try:
                 problems.extend(x.rule + " at line " + str(x.line)
