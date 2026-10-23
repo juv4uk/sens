@@ -2,6 +2,7 @@ name: Verify #549 Trilingual Surface Lisp Migration
 
 on:
   workflow_dispatch:
+
 jobs:
   parity:
     runs-on: ubuntu-latest
@@ -13,34 +14,35 @@ jobs:
       - name: Build release SENS CLI
         run: cargo build --release -p sens-cli --bin sens
 
-      - name: Positive Python and Lisp reports
+      - name: Current D1–D10 projections agree between Python inventory and SENS Lisp
         shell: bash
         run: |
           set -euo pipefail
           python3 scripts/check_trilingual_surface.py > /tmp/tri-python.txt
           ./target/release/sens scripts/check-trilingual-surface.lisp > /tmp/tri-lisp.txt
-          cat /tmp/tri-python.txt
-          cat /tmp/tri-lisp.txt
 
-          public="$(awk -F': ' '/^public semantic identities:/ {print $2}' /tmp/tri-python.txt)"
-          symbolic="$(awk -F': ' '/^shared symbolic identities:/ {print $2}' /tmp/tri-python.txt)"
-          common="$(awk -F'[:/]' '/^trilingual stable identities:/ {gsub(/ /, "", $2); print $2}' /tmp/tri-python.txt)"
-          release="$(awk -F': ' '/^release parity:/ {print tolower($2)}' /tmp/tri-python.txt)"
+          rows="$(sed -nE 's/^точнодоменних рядків: ([0-9]+);.*/\1/p' /tmp/tri-python.txt)"
+          test "$rows" = "2046"
+          grep -Fq "(точнодоменні-рядки $rows)" /tmp/tri-lisp.txt
 
-          grep -Fq "(public-semantic-identities $public)" /tmp/tri-lisp.txt
-          grep -Fq "(shared-symbolic-identities $symbolic)" /tmp/tri-lisp.txt
-          grep -Fq "(trilingual-stable-identities $common $public)" /tmp/tri-lisp.txt
-          grep -Fq "(release-parity $release)" /tmp/tri-lisp.txt
-
-          for lang in UK EN SA; do
-            read -r stable candidate missing compatibility < <(
-              awk -v wanted="$lang" '$1 == wanted {print $2, $3, $4, $5}' /tmp/tri-python.txt
+          for language in ук укр san en lisp sym; do
+            read -r present missing < <(
+              awk -v lang="$language" '$1 == lang {print $2, $3}' /tmp/tri-python.txt
             )
-            lower="$(printf '%s' "$lang" | tr '[:upper:]' '[:lower:]')"
-            grep -Fq "($lower (stable $stable) (candidate $candidate) (missing $missing) (compatibility-only $compatibility))" /tmp/tri-lisp.txt
+            test -n "$present"
+            test -n "$missing"
+            test $((present + missing)) -eq "$rows"
+            canonical="$language"
+            if [ "$canonical" = "lisp" ]; then canonical="LISP"; fi
+            grep -Fq "($canonical (наявні $present) (порожні $missing))" /tmp/tri-lisp.txt
           done
 
-      - name: Require-complete parity
+          shared="$(sed -nE 's/^укр\/en\/san заповнені разом: ([0-9]+)\/.*/\1/p' /tmp/tri-python.txt)"
+          test -n "$shared"
+          grep -Fq "(спільні-укр-en-san $shared)" /tmp/tri-lisp.txt
+          grep -Fq "(релізний-статус не-встановлюється)" /tmp/tri-lisp.txt
+
+      - name: Incomplete human projections fail closed without claiming release status
         shell: bash
         run: |
           set -euo pipefail
@@ -52,23 +54,24 @@ jobs:
           set -e
           test "$py_rc" -ne 0
           test "$lisp_rc" -ne 0
-          grep -Fq "(release-parity open)" /tmp/tri-lisp-complete.txt
+          grep -Fq "(релізний-статус не-встановлюється)" /tmp/tri-lisp-complete.txt
 
-      - name: Missing-SA mutation fails closed in both
+      - name: D3 Ukrainian projection mutation is detected by both counters
         shell: bash
         run: |
           set -euo pipefail
-          cp lib/surface/semantic-registry.lisp /tmp/semantic-registry.lisp
-          sed -i '0,/(sa svarūpa stable)/s// /' lib/surface/semantic-registry.lisp
+          file="lib/domains/d3.lisp"
+          cp "$file" /tmp/tri-d3-original.lisp
+          trap 'cp /tmp/tri-d3-original.lisp "$file"' EXIT
 
-          set +e
-          python3 scripts/check_trilingual_surface.py > /tmp/tri-python-negative.txt 2>&1
-          py_rc=$?
-          ./target/release/sens scripts/check-trilingual-surface.lisp > /tmp/tri-lisp-negative.txt 2>&1
-          lisp_rc=$?
-          set -e
+          before="$(python3 scripts/check_trilingual_surface.py | awk '$1 == "укр" {print $2}')"
+          test -n "$before"
+          sed -i 's/(001 (ук як-є) (укр як-є)/(001 (ук як-є) (укр ())/g' "$file"
+          grep -Fq '(001 (ук як-є) (укр ())' "$file"
 
-          mv /tmp/semantic-registry.lisp lib/surface/semantic-registry.lisp
-          test "$py_rc" -ne 0
-          test "$lisp_rc" -ne 0
-          grep -Fq "missing-human-surface" /tmp/tri-lisp-negative.txt
+          python3 scripts/check_trilingual_surface.py > /tmp/tri-python-mutated.txt
+          ./target/release/sens scripts/check-trilingual-surface.lisp > /tmp/tri-lisp-mutated.txt
+          after="$(awk '$1 == "укр" {print $2}' /tmp/tri-python-mutated.txt)"
+          test -n "$after"
+          test "$after" -eq "$((before - 1))"
+          grep -Fq "(укр (наявні $after)" /tmp/tri-lisp-mutated.txt
