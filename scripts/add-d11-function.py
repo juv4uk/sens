@@ -118,15 +118,18 @@ def main(argv: list[str] | None = None) -> int:
     # Складені імена: порівнюємо ще й за головою (перший складник до «-»),
     # бо «частота» і «частоти-елементів-унарно» різняться лише закінченням голови.
     heads = {n: n.split("-")[0].split(":")[-1] for n in pool if n != name}
-    fuzzy = set(difflib.get_close_matches(name, list(heads.values()), n=12, cutoff=0.75))
+    fuzzy = set(difflib.get_close_matches(name, list(heads.values()), n=12, cutoff=0.82))
     by_head = {n for n, h in heads.items() if h in fuzzy}
-    fuzzy_full = set(difflib.get_close_matches(name, [n for n in pool if n != name], n=12, cutoff=0.6))
-    near = sorted(substr | fuzzy_full | by_head)
+    fuzzy_full = set(difflib.get_close_matches(name, [n for n in pool if n != name], n=12, cutoff=0.72))
+    # Сортуємо за релевантністю: підрядок → голова → решта; і обмежуємо 8.
+    ordered = sorted(substr, key=str.lower) + sorted(by_head - substr, key=str.lower) + \
+              sorted(fuzzy_full - substr - by_head, key=str.lower)
+    near = ordered[:8]
     if near:
-        print(f"\nСХОЖІ назви ({len(near)}) — перевір, чи це та сама операція:")
-        for n in near[:12]:
+        print(f"\nСХОЖІ назви — перевір, чи це та сама операція:")
+        for n in near:
             where = "драбина" if n in ladder else (project.get(n, "D11-кандидат"))
-            print(f"   {n}   ← {where}")
+            print(f"   • {n:<34} ← {where}")
 
     print("\n" + "─" * 62)
     if on_ladder:
