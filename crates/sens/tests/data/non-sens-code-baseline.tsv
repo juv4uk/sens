@@ -310,7 +310,7 @@ source	contracts/core-special-form-profile-policy.lisp	1
 source	contracts/core1-bootstrap-contract.lisp	13
 source	contracts/core1-generation-manifest.lisp	1
 source	contracts/core1-s2-compiler-admission.lisp	3
-source	contracts/core1-s3-compiler-prelude.lisp	1
+source	contracts/core1-s3-compiler-prelude.lisp	0
 source	contracts/core2-profile-contract.lisp	7
 source	contracts/core3-profile-contract.lisp	6
 source	contracts/core4-predicate-answer-scale.lisp	3
