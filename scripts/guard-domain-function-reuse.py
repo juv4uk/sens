@@ -131,6 +131,46 @@ def duplicates_project_definition(sites: dict[str, set[str]], name: str, rel: st
     return bool(sites.get(name, set()) - {rel})
 
 
+
+CANDIDATES_TSV = ROOT / "knowledge" / "d11" / "база-доступних-функцій" / "внутрішні-визначення-SENS-для-D11-20261022.tsv"
+
+
+def register_candidates(cands: list[tuple[str, str]]) -> int:
+    """Дописати виявлених кандидатів D11 у чинний реєстр — явно й без дублів.
+
+    Власник: механіка має бути комфортна й нею активно користуються. Тому
+    «виявив» одразу стає «додав»: рядок із джерелом і статусом
+    «КАНДИДАТ (не ратифіковано)», координата порожня (опкоду не дає).
+    """
+    if not CANDIDATES_TSV.is_file():
+        return 0
+    lines = CANDIDATES_TSV.read_text(encoding="utf-8").splitlines()
+    header = None
+    existing: set[str] = set()
+    for ln in lines:
+        if ln.startswith("#") or not ln.strip():
+            continue
+        if header is None:
+            header = ln
+            continue
+        existing.add(ln.split("\t")[0].strip())
+    ncol = len(header.split("\t")) if header else 12
+    added: list[str] = []
+    for rel, name in cands:
+        if name in existing:
+            continue
+        row = [name, rel, "", "family/невідомо", "КАНДИДАТ (не ратифіковано)",
+               "", "так", "ні", "", "", "", "низька"]
+        while len(row) < ncol:
+            row.append("")
+        added.append("\t".join(row[:ncol]))
+        existing.add(name)
+    if added:
+        with open(CANDIDATES_TSV, "a", encoding="utf-8") as f:
+            f.write("\n" + "\n".join(added) + "\n")
+    return len(added)
+
+
 def changed_files(args) -> list[str]:
     if args.file:
         return list(args.file)
@@ -152,6 +192,7 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--base", help="базовий SHA; перевіряти лише ДОДАНІ визначення")
     ap.add_argument("--file", action="append")
     ap.add_argument("--self-test", action="store_true")
+    ap.add_argument("--register", action="store_true", help="дописати виявлених кандидатів у реєстр D11")
     args = ap.parse_args(argv)
 
     ladder = ladder_names(ROOT)
@@ -220,7 +261,11 @@ def main(argv: list[str] | None = None) -> int:
             print("УВАГА: файли з новими визначеннями, але БЕЗ жодного вживання наявних функцій D1–D10: " + ", ".join(idle))
 
     for rel, name in candidates:
-        print(f"КАНДИДАТ D11: {rel}: {name} — немає в драбинах; зареєстровано як пропозицію D11 (далі D12…)")
+        print(f"КАНДИДАТ D11: {rel}: {name} — немає в драбинах; пропозиція D11 (далі D12…)")
+    if args.register and candidates:
+        n = register_candidates(candidates)
+        print(f"ЗАРЕЄСТРОВАНО в D11: {n} нових кандидатів → реєстр кандидатів D11 "
+              f"(наявні не дублювались)")
 
     if blocked:
         for rel, name, why in blocked:
