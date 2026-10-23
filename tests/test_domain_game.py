@@ -44,6 +44,35 @@ class DomainGameTests(unittest.TestCase):
                 self.assertEqual(game.main(["--brief"]), 0)
         self.assertIn("рівнів 14, файлів Lisp 5", output.getvalue())
 
+    def test_d13_research_candidates_are_distinct_and_not_ratified(self) -> None:
+        # Лише дослідницькі гіпотези: жодна координата чи викличність не виникає.
+        source = (ROOT / "research/d13/function-candidates.lisp").read_text(encoding="utf-8")
+        candidates = game.d13_candidates(source)
+        self.assertEqual(len(candidates), 9)
+        self.assertEqual(len({name for name, _ in candidates}), 9)
+        self.assertIn(("розширений-нсд", "extended-gcd"), candidates)
+
+    def test_d13_research_rejects_implicit_ratification_and_missing_law(self) -> None:
+        source = (ROOT / "research/d13/function-candidates.lisp").read_text(encoding="utf-8")
+        for broken in (
+            source.replace("(status . experimental-unratified)",
+                           "(status . owner-ratified)", 1),
+            source.replace("(coordinates . unassigned)",
+                           "(coordinates . assigned)", 1),
+            source.replace("(law .", "(missing-law .", 1),
+        ):
+            with self.subTest(broken=broken[:80]):
+                with self.assertRaises(ValueError):
+                    game.d13_candidates(broken)
+
+    def test_d13_game_shows_candidates_without_semantic_points(self) -> None:
+        output = io.StringIO()
+        with contextlib.redirect_stdout(output):
+            self.assertEqual(game.main(["--track", "d13-candidates", "--brief"]), 0)
+        shown = output.getvalue()
+        self.assertIn("кандидатів=9", shown)
+        self.assertIn("семантика=НЕ_ДОВЕДЕНО", shown)
+
     def test_codec_quest_and_d12_remain_visible(self) -> None:
         # Злам: виправлення табло прибрало чинний дослід D2 та щабель D12.
         output = io.StringIO()

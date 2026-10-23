@@ -6,6 +6,7 @@
     python3 scripts/domain-game.py --track codec
     python3 scripts/domain-game.py --track codec --verify
     python3 scripts/domain-game.py --track memory --domain D3 --list
+    python3 scripts/domain-game.py --track d13-candidates --brief
     python3 scripts/domain-game.py --track memory --domain ALL --count 20 --seed 42
 
 Мовні файли — не тотожні доведеним законам. Codec-щабель зараховується
@@ -24,6 +25,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 DENSE = Path("research/zig-codecs/d12_dense_experiment.zig")
 D13_DENSE = Path("research/zig-codecs/d13_dense_experiment.zig")
+D13_RESEARCH = Path("research/d13/function-candidates.lisp")
 
 LEVELS = [
     ("D1", "основа: тотожність, атом, хибне/істинне"),
@@ -242,6 +244,59 @@ def codec_game(brief: bool, verify: bool, experimental_d13: bool = False) -> int
     return return_code
 
 
+def d13_candidates(source: str) -> list[tuple[str, str]]:
+    """Рахувати гіпотези D13, не присвоюючи координат чи викличності."""
+    for required in (
+        "(schema . d13-experimental-function-candidates-1)",
+        "(status . experimental-unratified)",
+        "(domain . D13)",
+        "(coordinates . unassigned)",
+        "(callable . no)",
+        "(semantic-proof . not-run)",
+    ):
+        if source.count(required) != 1:
+            raise ValueError(f"D13: відсутнє або повторене поле {required}")
+    blocks = re.split(r"(?m)^[ \t]*\(candidate[ \t]+", source)[1:]
+    if not blocks:
+        raise ValueError("D13: немає жодної дослідницької функції")
+    entries: list[tuple[str, str]] = []
+    seen_ukr: set[str] = set()
+    seen_en: set[str] = set()
+    for block in blocks:
+        match = re.match(r"\(укр\s+([^\s()]+)\)\s+\(en\s+([^\s()]+)\)", block)
+        if match is None:
+            raise ValueError("D13: кандидат не має пари укр/en")
+        ukr, en = match.groups()
+        for field in ("(signature .", "(law .", "(counterexample ."):
+            if block.count(field) != 1:
+                raise ValueError(f"D13: {ukr} не має єдиного поля {field}")
+        if ukr in seen_ukr or en in seen_en:
+            raise ValueError(f"D13: дубльована назва {ukr}/{en}")
+        seen_ukr.add(ukr)
+        seen_en.add(en)
+        entries.append((ukr, en))
+    return entries
+
+
+def d13_game(brief: bool) -> int:
+    """Дослідницька дошка D13: кандидати ≠ призначені коди ≠ доказ."""
+    try:
+        source = (ROOT / D13_RESEARCH).read_text(encoding="utf-8")
+        entries = d13_candidates(source)
+    except (OSError, ValueError) as exc:
+        print(f"ДРАБИНА/D13: помилка каталогу: {exc}", file=sys.stderr)
+        return 2
+    print(f"ДРАБИНА/D13: кандидатів={len(entries)} координат=0 "
+          "викличних=0 семантика=НЕ_ДОВЕДЕНО")
+    if not brief:
+        print("Експериментальні сімейства над точними D12+; "
+              "це не ратифікація і не таблиця кодів.")
+        for ukr, en in entries:
+            print(f"  ★ {ukr} / {en}")
+        print("Закони та контрприклади: research/d13/function-candidates.lisp")
+    return 0
+
+
 # Конкурс пам'яті читає тільки канонічні людиночитані таблиці.
 # Це перевірка знання координат, не перевірка семантики або викличності SENS.
 MEMORY_DOMAINS = ("D1", "D2", "D3", "D4", "D5", "D6", "D8", "D9", "D10", "D11")
@@ -341,7 +396,7 @@ def memory_game(brief: bool, domain: str, surface: str,
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description="гра «Драбина»")
     ap.add_argument("--brief", action="store_true")
-    ap.add_argument("--track", choices=("semantic", "codec", "d13", "memory"), default="semantic")
+    ap.add_argument("--track", choices=("semantic", "codec", "d13", "d13-candidates", "memory"), default="semantic")
     ap.add_argument("--verify", action="store_true",
                     help="запустити нативний Zig test для --track codec або d13")
     ap.add_argument("--domain", choices=("ALL",) + MEMORY_DOMAINS, default="D3",
@@ -366,6 +421,8 @@ def main(argv: list[str] | None = None) -> int:
         return codec_game(args.brief, args.verify)
     if args.track == "d13":
         return codec_game(args.brief, args.verify, experimental_d13=True)
+    if args.track == "d13-candidates":
+        return d13_game(args.brief)
     return semantic_game(args.brief)
 
 
