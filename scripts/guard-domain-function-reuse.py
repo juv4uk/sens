@@ -442,12 +442,14 @@ def main(argv: list[str] | None = None) -> int:
             for r, n in shadow[:12]:
                 when = f"  [уведено {introduced_at(r, n)}]" if args.when else ""
                 print(f"     {r}: «{n}» уже є поверхнею драбини — прибери своє визначення й клич драбину{when}")
+                print(f"        де саме: python3 scripts/search-domain-function.py {n}")
             if len(shadow) > 12:
                 print(f"     … ще {len(shadow) - 12}")
         if project:
             print(f"\n  Б) ЗАТІНЮЄ ПРОЄКТ ({len(project)}) — ужий наявне визначення проєкту:")
             for r, n in project[:8]:
-                print(f"     {r}: «{n}» уже визначено в проєкті")
+                print(f"     {r}: «{n}» уже визначено в проєкті — не перевизначай")
+                print(f"        де саме: python3 scripts/search-domain-function.py {n}")
         if fresh:
             print(f"\n  В) БЕЗ ДРАБИНИ ({len(fresh)}) — або вжий наявну поверхню, або познач причину:")
             for r, n in fresh[:12]:
