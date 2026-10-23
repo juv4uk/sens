@@ -34,7 +34,7 @@ Totals: **49 declarative**, **79 executable-candidate** (of 128 `lib/` files).
 | `x86-admitted-iclass-index/2` | 1 |
 | `x86-encoder-coverage/1` | 1 |
 | `machine-profile/1` | 1 |
-| `machine-domain-profile/2` | 1 |
+| `machine-domain-profile/3` | 1 |
 | `xed-machine-evidence/1` | 1 |
 | `xed-provenance/1` | 1 |
 
@@ -86,7 +86,7 @@ Totals: **49 declarative**, **79 executable-candidate** (of 128 `lib/` files).
 - `lib/machine/isa/x86-base.lisp`  — head `isa-catalogue/1`
 - `lib/machine/isa/x87.lisp`  — head `isa-catalogue/1`
 - `lib/machine/isa/xsave.lisp`  — head `isa-catalogue/1`
-- `lib/machine/profile/current-domain-x86-64.lisp`  — head `machine-domain-profile/2`
+- `lib/machine/profile/current-domain-x86-64.lisp`  — head `machine-domain-profile/3`
 - `lib/machine/xed/generated/machine-evidence.lisp`  — head `xed-machine-evidence/1`
 - `lib/machine/xed/provenance.lisp`  — head `xed-provenance/1`
 
