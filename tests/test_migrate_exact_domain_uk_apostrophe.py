@@ -58,5 +58,28 @@ class УкраїнськийАпострофПриМіграції(unittest.Test
                          "'(00001100 2 3)\n(додати 1 2)\n")
 
 
+    def test_явні_історичні_sid8_sens8_мають_одну_українську_голову(self):
+        identity = scanner.Identity("D5", "01010", "PLUS", "додати")
+        for prefix in ("sid8", "sens8", "SID8", "Sens8"):
+            with self.subTest(prefix=prefix):
+                old = f"{prefix}:00001100"
+                source = f"({old} 1 2)\n"
+                edits = scanner.plan(
+                    source, {}, legacy_heads={"00001100": identity}
+                )
+                self.assertEqual(len(edits), 1)
+                self.assertEqual(
+                    scanner.apply_edits(source, edits), "(додати 1 2)\n"
+                )
+
+    def test_недоведений_sid8_не_перетворюється_на_d8(self):
+        unresolved = []
+        source = "(sid8:00000000 1)\n"
+        edits = scanner.plan(
+            source, {}, legacy_heads={}, unresolved=unresolved
+        )
+        self.assertEqual(edits, [])
+        self.assertEqual(unresolved[0][1], "sid8:00000000")
+
 if __name__ == "__main__":
     unittest.main()
