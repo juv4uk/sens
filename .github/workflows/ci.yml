@@ -436,6 +436,26 @@ jobs:
             echo "::error file=bench_t5m.zig,title=Zig benchmark::REGRESSION layer=codec-benchmark expected=canonical-roundtrip actual=failed"
             zig_failed=1
           fi
+          # Драбина кодеків: D12 dense проти BE16 на тих самих 4096 словах.
+          # Це тільки payload-механіка Zig; SENS-значення і D12-допуск не заявляємо.
+          if zig test -O ReleaseFast -lc research/zig-codecs/d12_dense_experiment.zig \
+              > "$RUNNER_TEMP/zig-d12-dense-tests.log" 2>&1; then
+            cat "$RUNNER_TEMP/zig-d12-dense-tests.log"
+            echo "::notice title=Zig D12 dense::PASS layer=mechanism semantics=NOT_TESTED"
+          else
+            cat "$RUNNER_TEMP/zig-d12-dense-tests.log" >&2
+            echo "::error file=research/zig-codecs/d12_dense_experiment.zig,title=Zig D12 dense::REGRESSION layer=codec-test expected=roundtrip actual=failed"
+            zig_failed=1
+          fi
+          if zig run -O ReleaseFast -lc bench_d12_dense.zig \
+              > "$RUNNER_TEMP/zig-d12-dense-bench.log" 2>&1; then
+            cat "$RUNNER_TEMP/zig-d12-dense-bench.log"
+            echo "::notice title=Zig D12 A/B::MEASURED provenance=$(git rev-parse HEAD) scope=raw-payload-only"
+          else
+            cat "$RUNNER_TEMP/zig-d12-dense-bench.log" >&2
+            echo "::error file=bench_d12_dense.zig,title=Zig D12 A/B::REGRESSION layer=codec-benchmark expected=preflight-and-measurement actual=failed"
+            zig_failed=1
+          fi
           # Дослідний кодек DWC1 — окремий від production Zig/T5M.
           # На кожному корпусі перевіряємо exact (width,bits) перед AB/BA замірами.
           if zig test -O ReleaseFast -lc research/zig-codecs/domain_codebook_experiment.zig \

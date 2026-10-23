@@ -34,10 +34,13 @@ def ladder_names() -> set[str]:
     spec = importlib.util.spec_from_file_location("disc", ROOT / "scripts" / "discover_domain_function_candidates.py")
     disc = importlib.util.module_from_spec(spec); sys.modules["disc"] = disc; spec.loader.exec_module(disc)
     names: set[str] = set()
-    cols = ("ук", "укр", "san", "en", "LISP", "sym")
-    for _d, rows in disc.load_domain_tables(ROOT).items():
+    # D11 містить похідні та дослідні назви, але НЕ є ратифікованою
+    # драбиною D1–D10. Єдиний механізм проєкцій — aliases() з discover.
+    for domain, rows in disc.load_domain_tables(ROOT).items():
+        if domain > 10:
+            continue
         for row in rows:
-            names |= {row[c] for c in cols if isinstance(row.get(c), str) and row[c] not in ("()", "")}
+            names.update(disc.aliases(row))
     return names
 
 
@@ -54,15 +57,27 @@ def project_names() -> dict[str, str]:
 
 
 def d11_candidates() -> set[str]:
+    """Лише чинний JSON, а не архівні TSV чи старі пропозиції."""
+    path = ROOT / "knowledge" / "d11" / "база-доступних-функцій" / "кандидати.json"
+    data = json.loads(path.read_text(encoding="utf-8"))
+    if data.get("schema") != "sens.available-functions/v1" or not isinstance(data.get("rows"), list):
+        raise ValueError(f"невідомий формат чинного реєстру D11: {path}")
+    rows = data["rows"]
     out: set[str] = set()
-    base = ROOT / "knowledge" / "d11"
-    for p in base.rglob("*.tsv"):
-        for line in p.read_text(encoding="utf-8", errors="ignore").splitlines():
-            if line.startswith("#") or not line.strip():
-                continue
-            name = line.split("\t")[0].strip()
-            if name and name != "назва_укр":
-                out.add(name)
+    for row in rows:
+        if not isinstance(row, dict):
+            raise ValueError(f"неправильний рядок чинного реєстру D11: {path}")
+        for key in ("surface_name", "uk_surface_proposal"):
+            name = row.get(key)
+            if isinstance(name, str) and name.strip():
+                out.add(name.strip())
+    recorded = data.get("counts", {}).get("total")
+    if recorded != len(rows):
+        print(
+            f"УВАГА D11: metadata counts.total={recorded}, фактичних rows={len(rows)}; "
+            "для пошуку використано лише rows чинного JSON",
+            file=sys.stderr,
+        )
     return out
 
 
@@ -109,7 +124,7 @@ def main(argv: list[str] | None = None) -> int:
 
     print(f"1) Драбини D1–D10 : {'Є — ВЖИЙ, не визначай' if on_ladder else 'немає'}")
     print(f"2) Проєкт (lib)    : {'Є у ' + project[name] + ' — ВЖИЙ' if in_project else 'немає'}")
-    print(f"3) D11-кандидати   : {'Є в реєстрі кандидатів' if in_cands else 'немає'}")
+    print(f"3) D11-кандидати   : {'Є в чинному JSON (назва, не доказ закону)' if in_cands else 'немає в чинному JSON'}")
 
     # СХОЖІ (не точні) назви — щоб агент не створив дубль під іншим ім'ям.
     import difflib
