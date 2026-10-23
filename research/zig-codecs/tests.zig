@@ -28,6 +28,7 @@ test "import exact-width transport suites" {
     _ = t5;
     _ = t5m;
     _ = d12_dense_experiment;
+    _ = @import("d13_raw_experiment.zig");
     _ = t5m3;
     _ = physical_cycle;
     _ = ladder;
