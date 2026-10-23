@@ -60,7 +60,7 @@
     },
     {
       "path": "knowledge/silent-fallback-inventory.lisp",
-      "git_blob_sha1": "054f01c98212a8130cc9c367978da2bc80b4463e",
+      "git_blob_sha1": "4f93ff14b51be11d595b2b40164553ce2adc39dc",
       "record_head": "silent-fallback-inventory"
     },
     {
@@ -118,6 +118,13 @@
       "current_git_blob_sha1": "054f01c98212a8130cc9c367978da2bc80b4463e",
       "reviewed_commit": "d3a292d2bfed52ba087376b7d6f89a64357531d6",
       "reason": "Інвентар доповнено конкретними місцями тихого серіалізаторного fallback; фрагменти джерела зберігаються як текст походження, а не виконувані голови."
+    },
+    {
+      "path": "knowledge/silent-fallback-inventory.lisp",
+      "previous_git_blob_sha1": "054f01c98212a8130cc9c367978da2bc80b4463e",
+      "current_git_blob_sha1": "4f93ff14b51be11d595b2b40164553ce2adc39dc",
+      "reviewed_commit": "fb8bce900a33e1d5bdf95f34a0fbf3b6c359a293",
+      "reason": "Після виведення з ужитку плоских SID8-аудитів перевірено всі scripts/generate*.lisp та lib/generated/*.lisp: жодного активного старого шаблону COND не залишилося. Видалено лише застарілі рядки quoted-key класу silent-regeneration; актуальні fallback-сайти збережено."
     }
   ],
   "retired_post_snapshot_sources": [
