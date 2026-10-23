@@ -199,6 +199,8 @@ run_bound_law() {
 # Негатив типу: мовний текст застосовує EQ до пари й атома.
 # Не перетворюємо Type у false; транспорт лише зберігає фізичну форму.
 run_type_rejection() {
+  # Для очікуваного Type ненульовий код direct/paired/standalone є правильним.
+  # Профайлер зберігає справжній код процесу й час; PASS визначає тільки SENS.
   local id="$1" source="$2" diagnostic="$3" dir physical
   dir="$evidence/$id"
   physical="$dir/program.sens"
@@ -206,26 +208,26 @@ run_type_rejection() {
   test -f "$source" && test ! -L "$source" ||
     fail "$id" source "regular-Lisp" "missing-or-symlink"
 
-  if timeout 45s "$sens" "$source" >"$dir/direct.out" 2>"$dir/direct.err"; then
+  if profile_stage "$id" direct timeout 45s "$sens" "$source" >"$dir/direct.out" 2>"$dir/direct.err"; then
     fail "$id" sens-direct "Type-rejection" "unexpected-success"
   fi
   grep -Fq "$diagnostic" "$dir/direct.err" ||
     fail "$id" sens-direct "expected-Type-diagnostic" "unclassified-rejection"
 
-  if ! timeout 45s "$sens" --t5m-mint "$source" "$physical" >"$dir/mint.out" 2>"$dir/mint.err"; then
+  if ! profile_stage "$id" codec-mint timeout 45s "$sens" --t5m-mint "$source" "$physical" >"$dir/mint.out" 2>"$dir/mint.err"; then
     cat "$dir/mint.err" >&2
     fail "$id" codec "T5M-mint" "rejected"
   fi
   test -s "$physical" || fail "$id" codec "nonempty-T5M" "empty"
-  if ! timeout 45s "$trit" open "$physical" >"$dir/program" 2>"$dir/open.err" ||
-     ! timeout 45s "$trit" verify-view "$physical" >"$dir/inverse.out" 2>"$dir/inverse.err"; then
+  if ! profile_stage "$id" zig-open timeout 45s "$trit" open "$physical" >"$dir/program" 2>"$dir/open.err" ||
+     ! profile_stage "$id" zig-verify timeout 45s "$trit" verify-view "$physical" >"$dir/inverse.out" 2>"$dir/inverse.err"; then
     for error_log in "$dir/open.err" "$dir/inverse.err"; do
       if [[ -f "$error_log" ]]; then cat "$error_log" >&2; fi
     done
     fail "$id" zig-transport "canonical-roundtrip" "rejected"
   fi
 
-  if timeout 45s "$sens" --t5m-pair "$source" "$physical" >"$dir/paired.out" 2>"$dir/paired.err"; then
+  if profile_stage "$id" sens-paired timeout 45s "$sens" --t5m-pair "$source" "$physical" >"$dir/paired.out" 2>"$dir/paired.err"; then
     fail "$id" sens-physical "Type-rejection" "paired-accepted"
   fi
   if ! grep -Fq "$diagnostic" "$dir/paired.err" ||
@@ -233,7 +235,7 @@ run_type_rejection() {
     cat "$dir/paired.err" >&2
     fail "$id" sens-physical "Type" "unexpected-paired-error"
   fi
-  if timeout 45s "$sens" "$physical" >"$dir/physical.out" 2>"$dir/physical.err"; then
+  if profile_stage "$id" sens-standalone timeout 45s "$sens" "$physical" >"$dir/physical.out" 2>"$dir/physical.err"; then
     fail "$id" sens-physical "Type-rejection" "standalone-accepted"
   fi
   if ! grep -Fq "$diagnostic" "$dir/physical.err"; then
