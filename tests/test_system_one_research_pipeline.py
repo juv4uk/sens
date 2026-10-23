@@ -558,30 +558,111 @@ class SystemOneResearchPipelineTests(unittest.TestCase):
             self.assertEqual(model["training_count"], 40)
             self.assertEqual(model["training_dataset_sha256"], hashlib.sha256(raw).hexdigest())
 
-            prediction_path = root / "seed-test-predictions.jsonl"
+            measured: dict[str, dict] = {}
+            for split in ("validation", "test"):
+                prediction_path = root / f"seed-{split}-predictions.jsonl"
+                self.assertEqual(
+                    student.predict(
+                        Namespace(
+                            model=model_path,
+                            input=seed_path,
+                            split=split,
+                            output=prediction_path,
+                            overwrite=False,
+                        )
+                    ),
+                    0,
+                )
+                predictions = [
+                    json.loads(line)
+                    for line in prediction_path.read_text(encoding="utf-8").splitlines()
+                ]
+                expected_count = 10
+                self.assertEqual(len(predictions), expected_count)
+                self.assertTrue(all(row["split"] == split for row in predictions))
+                report = evaluator.score(
+                    predictions, threshold=0.8, bins=10, expected_split=split
+                )
+                self.assertEqual(report["count"], expected_count)
+                self.assertEqual(report["split"], split)
+                measured[f"seed_{split}"] = {
+                    "count": report["count"],
+                    "metrics": report["metrics"],
+                    "per_class": report["per_class"],
+                }
+
+            # Окремий challenge: тільки прогнози після навчання; ніколи не передається train.
+            challenge_path = ROOT / "research" / "system-one-support-challenge-20261022.jsonl"
+            challenge_rows, challenge_raw = student.read_jsonl(challenge_path)
+            self.assertEqual(len(challenge_rows), 60)
+            self.assertTrue(all(row.get("split") == "test" for row in challenge_rows))
+            self.assertTrue(all(row.get("evaluation_only") is True for row in challenge_rows))
+            self.assertTrue(all(row.get("source") == "synthetic-adversarial-challenge" for row in challenge_rows))
+            seed_ids = {str(row["id"]) for row in rows}
+            challenge_ids = {str(row["id"]) for row in challenge_rows}
+            seed_texts = {
+                unicodedata.normalize("NFKC", row["text"]).casefold().strip()
+                for row in rows
+            }
+            challenge_texts = {
+                unicodedata.normalize("NFKC", row["text"]).casefold().strip()
+                for row in challenge_rows
+            }
+            self.assertTrue(seed_ids.isdisjoint(challenge_ids))
+            self.assertTrue(seed_texts.isdisjoint(challenge_texts))
+
+            challenge_prediction_path = root / "challenge-test-predictions.jsonl"
             self.assertEqual(
                 student.predict(
                     Namespace(
                         model=model_path,
-                        input=seed_path,
+                        input=challenge_path,
                         split="test",
-                        output=prediction_path,
+                        output=challenge_prediction_path,
                         overwrite=False,
                     )
                 ),
                 0,
             )
-            predictions = [
+            challenge_predictions = [
                 json.loads(line)
-                for line in prediction_path.read_text(encoding="utf-8").splitlines()
+                for line in challenge_prediction_path.read_text(encoding="utf-8").splitlines()
             ]
-            self.assertEqual(len(predictions), 10)
-            self.assertTrue(all(row["split"] == "test" for row in predictions))
-            report = evaluator.score(
-                predictions, threshold=0.8, bins=10, expected_split="test"
+            self.assertEqual(len(challenge_predictions), 60)
+            self.assertTrue(all(row["split"] == "test" for row in challenge_predictions))
+            challenge_report = evaluator.score(
+                challenge_predictions, threshold=0.8, bins=10, expected_split="test"
             )
-            self.assertEqual(report["count"], 10)
-            self.assertEqual(report["split"], "test")
+            measured["synthetic_challenge_test"] = {
+                "count": challenge_report["count"],
+                "metrics": challenge_report["metrics"],
+                "per_class": challenge_report["per_class"],
+            }
+
+            # Одна машинно-читана мітка у CI-лозі. Це лише синтетичний CPU-baseline,
+            # а не метрика реального продукту й не результат моделі-вчителя/трансформера.
+            print(
+                "SYSTEM_ONE_SYNTHETIC_CPU_BASELINE="
+                + json.dumps(
+                    {
+                        "status": "measured_synthetic_only",
+                        "model_kind": model["model_kind"],
+                        "training_count": model["training_count"],
+                        "training_split": "train",
+                        "training_dataset_sha256": model["training_dataset_sha256"],
+                        "student_model_sha256": hashlib.sha256(model_path.read_bytes()).hexdigest(),
+                        "seed_dataset_sha256": hashlib.sha256(raw).hexdigest(),
+                        "challenge_dataset_sha256": hashlib.sha256(challenge_raw).hexdigest(),
+                        "calibrated": False,
+                        "threshold": 0.8,
+                        "threshold_note": "fixed diagnostic threshold; not claimed to be selected for production",
+                        "real_world_claim": False,
+                        "results": measured,
+                    },
+                    ensure_ascii=False,
+                    sort_keys=True,
+                )
+            )
 
     def test_challenge_comparison_rejects_seed_overlap_and_non_holdout_rows(self):
         seed_path = ROOT / "research" / "system-one-support-seed-20261022.jsonl"
