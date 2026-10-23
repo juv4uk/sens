@@ -266,26 +266,30 @@ def main():
                 else:
                     proof = None
                 new = scanner.apply_edits(text, edits).encode("utf-8")
-                if args.write and new != original:
-                    replace_atomic(file, original, new)
                 pending = [{"offset": at, "old": word,
                             "reason": withheld.get(
                                 scanner.LEGACY_W8_HEAD.fullmatch(word).group(1),
                                 "немає доведеного моста")}
                            for at, word in unknown]
+                # Невизначені голови залишають увесь конкретний файл
+                # незмінним: не публікуємо напівпереписаний Lisp.
+                written = bool(args.write and edits and not pending and new != original)
+                if written:
+                    replace_atomic(file, original, new)
                 item = {
                     "file": str(rel), "status": "partial" if pending else "ok",
                     "sha256_before": hashlib.sha256(original).hexdigest(),
-                    "sha256_after": hashlib.sha256(new).hexdigest(),
+                    "sha256_after": hashlib.sha256(new if written else original).hexdigest(),
                     "historical_source": proof,
                     "replacements": [{"offset": e.start, "old": e.source,
                                       "domain": e.identity.domain, "bits": e.identity.bits,
                                       "ukr": e.identity.українська} for e in edits],
-                    "unresolved": pending, "written": bool(args.write and edits),
+                    "unresolved": pending, "written": written,
                 }
                 report.append(item)
                 if edits or pending:
-                    print(f"{rel}: {'замінено' if args.write else 'заплановано'} {len(edits)}, невідомо {len(pending)}")
+                    action = "замінено" if written else "не змінено" if pending else "заплановано"
+                    print(f"{rel}: {action} {len(edits)}, невідомо {len(pending)}")
                     for x in pending:
                         print(f"  НЕ ВГАДУЮ {x['old']} @ {x['offset']}: {x['reason']}")
             except (OSError, UnicodeError, ValueError) as error:
