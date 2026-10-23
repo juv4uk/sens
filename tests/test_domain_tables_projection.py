@@ -92,6 +92,26 @@ class NumericDomains(unittest.TestCase):
             (("D12", 12), ("D24", 24), ("D48", 48), ("D96", 96), ("D192", 192)),
         )
 
+    def test_duplicate_numeric_first_domain_is_rejected(self):
+        source = (ROOT / "contracts/numeric-domains-ratification.lisp").read_text(encoding="utf-8")
+        field = "(first-domain . D12)"
+        self.assertEqual(source.count(field), 1)
+
+        class MutantContract:
+            def __init__(self, content):
+                self.content = content
+
+            def read_text(self, encoding="utf-8"):
+                return self.content
+
+        for duplicate in ("D12", "D13"):
+            with self.subTest(duplicate=duplicate):
+                mutated = source.replace(
+                    field, field + "\n  (first-domain . " + duplicate + ")", 1
+                )
+                with self.assertRaisesRegex(ValueError, "first-domain"):
+                    number_domains(MutantContract(mutated))
+
     def test_only_the_d12_ladder_widths_are_numeric(self):
         for width in (12, 24, 48, 96, 192, 384):
             self.assertTrue(is_number_width(width))

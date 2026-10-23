@@ -39,6 +39,9 @@ def validate(ratification, lang):
     marker = "(schema . numeric-d12-start-extension-1)"
     need(ratification.count(marker) == 1, "unique current D12 ratification")
     current = ratification.split(marker, 1)[1]
+    first_domains = re.findall(r"\(first-domain\s*\.\s*([^()\s]+)\)", current)
+    need(first_domains == ["D12"],
+         f"reason=duplicate-or-conflicting-first-domain expected=[D12] actual={first_domains!r}")
     required = (
         "(status . owner-ratified)",
         '(date . "2026-10-24")',
@@ -232,6 +235,8 @@ def selftest(ratification, lang):
         return prefix + marker + current.replace(old, new, 1)
     mutants = (
         (damage("(first-domain . D12)", "(first-domain . D13)"), lang),
+        (damage("(first-domain . D12)", "(first-domain . D12)\n  (first-domain . D13)"), lang),
+        (damage("(first-domain . D12)", "(first-domain . D12)\n  (first-domain . D12)"), lang),
         (damage("D(12 * 2^n)", "D(16 * 2^n)"), lang),
         (damage("(fraction-law .", "(lost-fraction-law ."), lang),
         (damage("two's-complement", "unsigned-only"), lang),
