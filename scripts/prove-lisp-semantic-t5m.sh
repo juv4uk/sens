@@ -184,10 +184,16 @@ run_case run_law d3-cond-first-match-false-positive tests/semantic/d3-cond-first
 run_case run_law d3-cond-first-match-false-mutant tests/semantic/d3-cond-first-match-false-mutant.lisp 0
 run_case run_law d3-quote-short-circuit-positive tests/semantic/d3-cond-quote-lazy-law.lisp 1
 run_case run_law d3-quote-short-circuit-mutant tests/semantic/d3-cond-quote-lazy-mutant.lisp 0
+# QUOTE не обчислює цитовану форму: структура лишається даними.
+run_case run_law d3-quote-inert-data-positive tests/semantic/language-law-quote-inertness.lisp 1
+run_case run_law d3-quote-inert-data-mutant tests/semantic/language-mutant-quote-inertness.lisp 0
 # Д4 EVAL: цитований Lisp повертає порожнечу, а мутант підміняє результат.
 run_case run_law d4-eval-quote-positive tests/semantic/d4-eval-value-call-laws.lisp 1
 run_case run_law d4-eval-quote-mutant tests/semantic/d4-eval-value-call-mutant.lisp 0
 run_case run_law d4-late-binding-positive tests/semantic/d4-late-definition-binding-law.lisp 1
+# D4: параметр внутрішньої LAMBDA повинен затінити зовнішній.
+run_case run_law d4-parameter-shadow-positive tests/semantic/language-law-d4-parameter-shadowing.lisp 1
+run_case run_law d4-parameter-shadow-mutant tests/semantic/language-mutant-d4-parameter-shadowing.lisp 0
 # Передавання першокласного предиката — виключно Lisp-закон Д4.
 run_case run_law d4-first-class-predicate-positive tests/semantic/d4-first-class-predicate-law.lisp 1
 run_case run_law d4-first-class-predicate-mutant tests/semantic/d4-first-class-predicate-mutant.lisp 0
