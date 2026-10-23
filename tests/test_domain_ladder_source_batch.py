@@ -270,6 +270,22 @@ class BatchSourceTests(unittest.TestCase):
         self.assertEqual(result["summary"]["scanned"], 1)
         self.assertEqual(check.call_args.kwargs["selected_paths"], selection)
 
+    def test_live_surface_programs_are_included_in_sid8_migration(self):
+        # Стара заборона всього lib/surface/ приховувала чинні DEFINE.
+        sources = {"lib/surface/function-signatures.lisp",
+                   "lib/surface/uk-acceptance.lisp"}
+        report = MOD.run(ROOT, False, sources)
+        self.assertEqual({row["path"] for row in report["files"]}, sources)
+        for row in report["files"]:
+            self.assertEqual(row["status"], "unchanged", row)
+            self.assertEqual(row["reasons"], [], row)
+
+        # Історична таблиця зі старими восьмибітними ключами — дані,
+        # не виконавча програма і не джерело нової D8-семантики.
+        data = MOD.run(ROOT, False, {"lib/surface/semantic-registry.lisp"})
+        self.assertEqual(data["summary"]["scanned"], 0)
+        self.assertEqual(data["summary"]["admitted_heads"], 0)
+
     def test_live_function_table_has_no_nonprogram_exemption(self):
         path = "lib/function-table-mechanisms.lisp"
         report = MOD.run(ROOT, False, {path})
