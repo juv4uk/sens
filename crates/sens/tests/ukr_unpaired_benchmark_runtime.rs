@@ -104,6 +104,12 @@ fn арифметика_та_бенчмарки_без_числових_токе
         ("списки", include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/../../benchmarks/lists.lisp"))),
         ("арифметика", include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/../../benchmarks/arithmetic.lisp"))),
         ("читач", include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/../../benchmarks/parser.lisp"))),
+        ("fib.setup.lisp", include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/../../benchmarks/cross-language/sens-vs-python/sens/fib.setup.lisp"))),
+        ("fib.call.lisp", include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/../../benchmarks/cross-language/sens-vs-python/sens/fib.call.lisp"))),
+        ("ackermann.setup.lisp", include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/../../benchmarks/cross-language/sens-vs-python/sens/ackermann.setup.lisp"))),
+        ("ackermann.call.lisp", include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/../../benchmarks/cross-language/sens-vs-python/sens/ackermann.call.lisp"))),
+        ("binary-trees.setup.lisp", include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/../../benchmarks/cross-language/sens-vs-python/sens/binary-trees.setup.lisp"))),
+        ("binary-trees.call.lisp", include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/../../benchmarks/cross-language/sens-vs-python/sens/binary-trees.call.lisp"))),
     ];
     for (назва, джерело) in програми {
         for (індекс, рядок) in джерело.lines().enumerate() {
