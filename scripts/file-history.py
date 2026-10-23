@@ -30,11 +30,12 @@ def git(*args: str) -> str:
 
 
 def important_changes(rel: str, top: int) -> list[tuple[int, int, str, str, str]]:
-    """Ранжувати зміни файлу за СУТТЮ, а не за порядком.
+    """Ранжувати зміни за обсягом: +додано/-видалено рядків.
 
-    Важливе = великий диф (+додано/-видалено рядків) і/або зміна визначень.
-    Масова міграція (309 правок одного дня) відсіюється, бо кожна правка дрібна.
-    Повертає [(додано, видалено, sha, дата, тема)] за спаданням обсягу.
+    Простота первинна: --numstat швидкий навіть на 7321-рядковому core4.
+    (Спроба брати ще й зміну визначень через git log -p виявилась занадто
+    повільною — 694 коміти × повний патч не вкладаються в розумний час.)
+    Масова міграція (багато дрібних правок) відсіюється сама: кожна дрібна.
     """
     out = git("log", "--follow", "--numstat", "--format=@@%h|%ad|%s", "--date=short", "--", rel)
     rows: list[tuple[int, int, str, str, str]] = []
@@ -74,18 +75,16 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--important", type=int, metavar="N", help="показати N найВАЖЛИВІШИХ змін (за обсягом), а не останні")
     args = ap.parse_args(argv)
 
+    # Простота первинна: одне попередження НА ПОЧАТКУ, до будь-якого виводу,
+    # щоб жоден режим (--important, --defs, хронологія) не брехав мовчки.
+    if git("rev-parse", "--is-shallow-repository").strip() == "true":
+        print("УВАГА: клон SHALLOW — числа нижче занижені (лише останні коміти).")
+        print("       Повна історія: git fetch --unshallow origin main\n")
     rel = args.path
     if not (ROOT / rel).is_file():
         print(f"немає такого файлу: {rel}", file=sys.stderr)
         return 2
 
-    # Чесно про середовище: на shallow-клоні хронологія НЕПОВНА (це вже раз
-    # давало «1 зміну» замість 634). Попереджаємо, а не брешемо мовчки.
-    shallow = git("rev-parse", "--is-shallow-repository").strip() == "true"
-    if shallow:
-        print("УВАГА: клон SHALLOW — хронологія нижче неповна (лише останні коміти).")
-        print("       Повна історія: git fetch --unshallow origin main")
-        print("       Числа з ІНДЕКСУ (нижче) правильні, бо індекс будували на повній історії.\n")
 
     # Хронологія (з --follow — крізь перейменування)
     log = git("log", "--follow", "--format=%h|%ad|%s", "--date=short", "--", rel).splitlines()
@@ -120,7 +119,7 @@ def main(argv: list[str] | None = None) -> int:
         imp = important_changes(rel, args.important)
         print(f"\nВАЖЛИВІ ЗМІНИ (топ-{len(imp)} за обсягом; масові міграції відсіяно):")
         for add, dele, sha, date, subj in imp:
-            print(f"  +{add:<5} -{dele:<5} {date} {sha}  {subj[:76]}")
+            print(f"  +{add:<5} -{dele:<5} {date} {sha}  {subj[:70]}")
 
     print(f"\nХРОНОЛОГІЯ (останні {min(args.limit, len(rows))} із {len(rows)}):")
     for sha, date, subj in rows[:args.limit]:
