@@ -410,14 +410,39 @@ fn selected_surface_callable(
     )
 }
 
-fn project_repl_surface_expression(
-    expression: &Expr,
-    session: &Session,
-    surface: ReplSurface,
-    source: &str,
-    depth: usize,
-) -> Result<Expr, String> {
-    project_repl_surface_expression_in_scope(expression, session, surface, source, depth, &[])
+/// Collect source-local DEFINE names before projection. A local definition
+/// shadows a same-spelled domain projection throughout the source unit, just
+/// as the mixed-source reader already does; only an unoccupied exact target
+/// can install a new language-owned domain mechanism.
+fn collect_t5m_source_bindings(source: &str, expression: &Expr, names: &mut Vec<std::rc::Rc<str>>) {
+    let ExprKind::List(items) = &expression.kind else {
+        match &expression.kind {
+            ExprKind::Pair(head, tail) => {
+                collect_t5m_source_bindings(source, head, names);
+                collect_t5m_source_bindings(source, tail, names);
+            }
+            _ => {}
+        }
+        return;
+    };
+    if matches!(
+        items.first().map(|item| &item.kind),
+        Some(ExprKind::DomainIdentity(identity))
+            if identity.width() == 3 && identity.packed_bits() == 0b001
+    ) {
+        return;
+    }
+    if matches!(items.first().map(|item| &item.kind), Some(ExprKind::DomainIdentity(DomainIdentity::D4(word))) if word.word().packed_bits() == 0b0011)
+    {
+        if let Some(target) = items.get(1) {
+            if let Some(name) = source.get(target.span.start..target.span.end) {
+                names.push(name.into());
+            }
+        }
+    }
+    for item in items.iter() {
+        collect_t5m_source_bindings(source, item, names);
+    }
 }
 
 fn project_repl_surface_expression_in_scope(
@@ -531,7 +556,8 @@ fn project_repl_surface_expression_in_scope(
                         if let Some(identity) = selected_surface_callable(surface, target_name)? {
                             if sens::semantic_registry_export::is_admitted_exact_definition_target(
                                 identity,
-                            ) {
+                            ) && session.environment.get(target_name).is_none()
+                            {
                                 projected[1] = Expr {
                                     kind: ExprKind::DomainIdentity(identity),
                                     span: target.span,
@@ -995,9 +1021,22 @@ fn prepare_t5m_repl_words(
     session: &Session,
 ) -> Result<Vec<ExactDomainWord>, String> {
     let parsed = sens::parse_mixed_exact_domain(line).map_err(|error| error.render(line))?;
+    let mut source_bindings = Vec::new();
+    for expression in &parsed {
+        collect_t5m_source_bindings(line, expression, &mut source_bindings);
+    }
     let expressions = parsed
         .iter()
-        .map(|expression| project_repl_surface_expression(expression, session, surface, line, 0))
+        .map(|expression| {
+            project_repl_surface_expression_in_scope(
+                expression,
+                session,
+                surface,
+                line,
+                0,
+                &source_bindings,
+            )
+        })
         .collect::<Result<Vec<_>, _>>()?;
     if expressions.is_empty() {
         return Err("T5M_REPL_EMPTY: no SENS form".into());
@@ -1054,7 +1093,15 @@ pub(crate) fn mint_t5m_source_pair_with_bindings(
 ) -> Result<(Vec<u8>, String), String> {
     let mut session = Session::default();
     preload_t5m_binding_sources(&mut session, bindings)?;
-    let words = prepare_t5m_repl_words(source, ReplSurface::UkrainianFull, &session)?;
+    mint_t5m_source_pair_in_session(source, &session)
+}
+
+#[cfg(feature = "zig-transport")]
+fn mint_t5m_source_pair_in_session(
+    source: &str,
+    session: &Session,
+) -> Result<(Vec<u8>, String), String> {
+    let words = prepare_t5m_repl_words(source, ReplSurface::UkrainianFull, session)?;
     let carrier = exact_t5m_carrier_words(&words)?;
     let physical = crate::zig_transport::encode_t5m_exact_words(&carrier)?;
     let restored = crate::zig_transport::decode_t5m_exact_words(&physical)?;
@@ -1862,6 +1909,30 @@ pub(crate) fn run_repl(session: Session, initial_surface: ReplSurface, sens_loop
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[cfg(feature = "zig-transport")]
+    #[test]
+    fn t5m_local_definition_shadows_an_occupied_d10_identity() {
+        let name = "відібрати-визначення-іменованої-групи";
+        let source = format!("(визначити {name} (функція (значення) значення))\n({name} 40)");
+        let mut session = Session::bare();
+        sens::load_core_library(&mut session).expect("Core4 installs the D10 mechanism");
+        let identity = selected_surface_callable(ReplSurface::UkrainianFull, name)
+            .unwrap()
+            .expect("exact D10 projection");
+        assert_eq!(identity.width(), 10);
+        assert!(
+            session.environment.get(name).is_some(),
+            "fixture must exercise an already occupied language-owned D10 slot"
+        );
+
+        let program = prepare_t5m_repl_program(&source, ReplSurface::UkrainianFull, &session)
+            .expect("source-local D10 name stays a Text7 binding through Zig T5M");
+        let result = program
+            .execute(&mut session)
+            .expect("local Text7 binding shadows the existing D10 mechanism");
+        assert_eq!(result.value.to_string(), "40");
+    }
 
     #[test]
     fn repl_projects_admitted_ukr_define_targets_to_exact_domain_words() {
