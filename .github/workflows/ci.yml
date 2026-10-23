@@ -197,11 +197,11 @@ jobs:
 
       - name: Rust — перевірити лише механізм читача
         if: steps.changed-t5m-lisp.outputs.has_rust == 'true'
-        run: cargo test --locked -p sens --test d5_list_search_laws -- --nocapture
+        run: cargo test --locked -p wsm-guard-slice -- --nocapture
 
       - name: Zig — перевірити фізичні кодеки й ABI
         if: steps.changed-t5m-lisp.outputs.has_zig == 'true'
-        run: zig test research/zig-codecs/tests.zig
+        run: zig test -lc research/zig-codecs/tests.zig
 
       - name: Три бенчмарки — lists, arithmetic, parser у справжньому SENS
         if: steps.changed-t5m-lisp.outputs.has_lisp == 'true'
