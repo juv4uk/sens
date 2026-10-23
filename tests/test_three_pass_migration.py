@@ -889,9 +889,9 @@ class ThreePassMigrationTests(unittest.TestCase):
             mod.frame_text7(mod.text7_encode("аб", self.text7, multi), multi),
         )
 
-    def test_quoted_symbol_datum_is_transported_as_ratified_d7_text(self):
+    def test_quoted_single_glyph_datum_stays_scalar_inside_dotted_pair(self):
         # One-cell D7 data is a scalar; the surrounding dotted pair remains
-        # explicit D2 structure. Multi-cell names still use contextual Text7 frames.
+        # explicit D2 structure. Multi-cell Text7 data still uses a frame.
         out, _ = self.migrate("'(a . b)\n")
         self.assertEqual(
             out, "10 001 00 10 1100001 11 1100010 01 01\n"
