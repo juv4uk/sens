@@ -560,7 +560,7 @@ fn t5m_text7_surface_name(expression: &Expr, layout: sens::Text7Layout) -> Optio
         })
         .collect::<Option<Vec<_>>>()?;
     let text = sens::Text7::from_cells(cells).ok()?;
-    sens::text7_projection::render_text7(&text, layout).ok()
+    sens::render_text7(&text, layout).ok()
 }
 
 fn project_repl_surface_expression_in_scope(
@@ -584,12 +584,14 @@ fn project_repl_surface_expression_in_scope(
         if matches!(name.as_str(), "число-нуль" | "число-один")
             && !bound.iter().any(|candidate| candidate.as_ref() == name)
         {
-            if let Some(Value::BinaryNumber(number)) = session.environment.get(&name) {
-                if number.numeric_domain_width() == Some(24) {
-                    return Ok(Expr {
-                        kind: ExprKind::BinaryNumber(number),
-                        span: expression.span,
-                    });
+            if let Some(value) = session.environment.get(&name) {
+                if let Value::BinaryNumber(number) = &value {
+                    if number.numeric_domain_width() == Some(24) {
+                        return Ok(Expr {
+                            kind: ExprKind::BinaryNumber(number.clone()),
+                            span: expression.span,
+                        });
+                    }
                 }
             }
         }
