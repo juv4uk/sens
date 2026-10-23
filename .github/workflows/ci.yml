@@ -178,6 +178,7 @@ jobs:
                   "tests/semantic/core-d3-car-cdr-cons-mutant.lisp",
                   "tests/semantic/result-status-laws.lisp",
                   "tests/semantic/d11-srfi1-span-break-laws.lisp",
+                  "tests/semantic/ukr-lists-d24-language-law.lisp",
                   "tests/semantic/d4-recursion-benchmark-law.lisp",
                   "tests/semantic/d4-recursion-benchmark-mutant.lisp",
                   "tests/fixtures/conformance-transition-witness.lisp",
@@ -269,7 +270,6 @@ jobs:
         run: |
           set -euo pipefail
           export CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0
-          cargo test --locked -p sens --test ukr_unpaired_benchmark_runtime довжина_списку_відкидає_пошкоджений_хвіст_і_зберігає_d24_нуль -- --exact --nocapture
           cargo test --locked -p sens --test ukr_unpaired_benchmark_runtime арифметика_та_бенчмарки_без_числових_токенів_виконуються_в_sens -- --exact --nocapture
           cargo test --locked -p sens-cli --test arithmetic_benchmark_cli -- --nocapture
           cargo test --locked -p sens --test ukr_unpaired_benchmark_runtime український_читач_виконує_цитовані_дані_й_точний_d24_дріб -- --exact --nocapture
@@ -379,6 +379,10 @@ jobs:
           check_lisp_law d3-d4-positive tests/semantic/d3-d4-ukr-native-laws.lisp '(1 1 1 1 1 1 1 1 1 1 1 1)'
           check_lisp_law d3-d4-negative tests/semantic/d3-d4-ukr-native-mutant.lisp '0'
           bash scripts/prove-lisp-language-laws.sh "$binary"
+          # Д24 списки: усі очікування належать Lisp; Rust більше не порівнює 10/0/2.
+          # Фізичний D6 LENGTH ще не атестовано (#5854): direct=SENS, T5M=NOT_CERTIFIED.
+          cat -- benchmarks/lists.lisp tests/semantic/ukr-lists-d24-language-law.lisp > "$RUNNER_TEMP/ukr-lists-d24-native.lisp"
+          check_lisp_law d24-list-language "$RUNNER_TEMP/ukr-lists-d24-native.lisp" '1'
           check_lisp_law d3-ukr-self-verdict tests/semantic/d3-ukr-language-self-verdict.lisp '1'
           check_lisp_law d5-ukr-self-verdict tests/semantic/d5-ukr-arithmetic-self-verdict.lisp '1'
           check_lisp_law d5-physical-law tests/semantic/d5-arithmetic-native-t5m-law.lisp '1'
