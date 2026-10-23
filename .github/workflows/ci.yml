@@ -62,6 +62,8 @@ jobs:
           python3 scripts/check_no_encoded_source_literals.py --base "$base"
 
       - name: Структура визначень Lisp та SENS
+        run: python3 scripts/check-sens-definitions.py
+
       - name: Проєкції, ратифікована D1–D10 і повний прогін
         run: |
           set -euo pipefail
@@ -82,8 +84,6 @@ jobs:
           # Повний прогін: self-test пошуку й охоронця драбин.
           python3 scripts/search-domain-function.py --self-test
           python3 scripts/guard-domain-function-reuse.py --self-test
-
-        run: python3 scripts/check-sens-definitions.py
 
       - name: УКР-ПРОЄКЦІЯ — вчорашні анотації прогресу Lisp
         if: ${{ always() }}
