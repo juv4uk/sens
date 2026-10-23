@@ -275,12 +275,17 @@ jobs:
 
       # Інженерний бар'єр: новий мовний закон не рахується перевіреним
       # від одного успішного mint чи Rust assert. Вимагаємо явний нативний маршрут.
-      - name: Власність тестів — нові Lisp-закони тільки через фізичний SENS
+      - uses: dtolnay/rust-toolchain@1.99.0
+        if: ${{ always() }}
+
+      - name: Власність тестів — Rust охоронець фізичних Lisp-законів
         if: ${{ always() && steps.changed-t5m-lisp.outcome == 'success' }}
         shell: bash
         run: |
           set -euo pipefail
-          python3 scripts/guard_native_semantic_ownership.py \
+          rustc --edition=2021 -O scripts/guard-native-test-ownership.rs -o "$RUNNER_TEMP/sens-native-law-guard"
+          "$RUNNER_TEMP/sens-native-law-guard" --self-test
+          "$RUNNER_TEMP/sens-native-law-guard" \
             --base "$(cat "$RUNNER_TEMP/native-semantic-base.sha")" \
             --head "$GITHUB_SHA"
 
@@ -309,9 +314,6 @@ jobs:
             echo "немає змінених .lisp-програм — охоронець не має що перевіряти"
           fi
 
-
-      - uses: dtolnay/rust-toolchain@1.99.0
-        if: ${{ always() }}
 
       - uses: ./.github/actions/install-zig
         if: ${{ always() }}
