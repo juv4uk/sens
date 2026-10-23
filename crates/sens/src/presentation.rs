@@ -20,12 +20,13 @@ fn uk_operation_name(name: &str) -> String {
         "PRIM_CONS" => "сполучити".to_string(),
         "PRIM_CAR" => "перше".to_string(),
         "PRIM_CDR" => "решта".to_string(),
-        other => semantic_registry::semantic_id_for_surface(other)
-            .and_then(|semantic_id| {
-                semantic_registry::admitted_surfaces_with_namespace_for_semantic_id(semantic_id)
-                    .into_iter()
-                    .find_map(|(namespace, name)| (namespace == "ук").then_some(name.to_string()))
+        // Виключно чинна точнодоменна проєкція: старі W8/SID8
+        // та англомовний історичний реєстр не визначають українську назву.
+        other => semantic_registry::domain_identity_for_surface(other)
+            .and_then(|identity| {
+                semantic_registry::surface_for_domain_identity(identity.into(), "ukr")
             })
+            .map(str::to_string)
             .unwrap_or_else(|| other.to_string()),
     }
 }
@@ -99,7 +100,7 @@ fn render_uk(value: &Value) -> String {
             if let Some(domain) =
                 semantic_registry::compatibility_d3_route_from_ratified_domains(*sid)
             {
-                semantic_registry::surface_for_domain_identity(domain.into(), "uk")
+                semantic_registry::surface_for_domain_identity(domain.into(), "ukr")
                     .map(str::to_string)
                     .unwrap_or_else(|| format!("#<домен D{}:{domain}>", domain.width()))
             } else {
@@ -107,7 +108,7 @@ fn render_uk(value: &Value) -> String {
                     semantic_registry::admitted_surfaces_with_namespace_for_semantic_id(*sid)
                         .into_iter()
                         .find_map(|(namespace, name)| {
-                            (namespace == "ук").then_some(name.to_string())
+                            (namespace == "укр").then_some(name.to_string())
                         });
                 format!(
                     "#<сумісний W8:{} {}>",
@@ -120,7 +121,7 @@ fn render_uk(value: &Value) -> String {
             }
         }
         Value::DomainIdentity(identity) => {
-            semantic_registry::surface_for_domain_identity(*identity, "uk")
+            semantic_registry::surface_for_domain_identity(*identity, "ukr")
                 .map(str::to_string)
                 .unwrap_or_else(|| format!("#<домен D{}:{identity}>", identity.width()))
         }
@@ -579,6 +580,27 @@ mod tests {
             render_value_for_presentation(&d4_eval, PresentationLanguage::Sanskrit),
             "vicāraṇa"
         );
+    }
+
+    #[test]
+    fn українська_повна_проєкція_д5_не_підмінюється_коротким_іменем_чи_сід8() {
+        // Д5:01100 має різні «ук» і «укр». Інтерфейс людини показує
+        // винятково повну ратифіковану «укр», не коротке чи старе W8.
+        let identity = crate::DomainIdentity::D5(crate::CoreD5::from_word(
+            crate::Bit5::new(0b01100).unwrap(),
+        ));
+        let value = Value::DomainIdentity(identity);
+        assert_eq!(
+            render_value_for_presentation(&value, PresentationLanguage::Ukrainian),
+            "решта-двох-перших"
+        );
+        assert_ne!(
+            render_value_for_presentation(&value, PresentationLanguage::Ukrainian),
+            "решта-п-п"
+        );
+        // Машинний точнодоменний код залишився тим самим.
+        assert_eq!(value.to_string(), "01100");
+        assert_eq!(uk_operation_name("невідомий-символ"), "невідомий-символ");
     }
 
     #[test]
