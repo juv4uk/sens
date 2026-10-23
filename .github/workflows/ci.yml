@@ -440,6 +440,59 @@ jobs:
             echo "::error file=bench_t5m.zig,title=Zig benchmark::REGRESSION layer=codec-benchmark expected=canonical-roundtrip actual=failed"
             zig_failed=1
           fi
+          # Гра пам'яті використовує чинні Lisp-таблиці та доводить повне покриття D11.
+          # Тут перевіряється тільки механіка гри; мовні закони виконуються SENS.
+          if zig test -lc research/zig-codecs/ladder_memory_game.zig \
+              > "$RUNNER_TEMP/zig-ladder-memory-game.log" 2>&1; then
+            cat "$RUNNER_TEMP/zig-ladder-memory-game.log"
+            echo "::notice title=Zig ladder memory game::PASS D11 questions=512 reproducible=YES semantics=NOT_TESTED"
+          else
+            cat "$RUNNER_TEMP/zig-ladder-memory-game.log" >&2
+            echo "::error file=research/zig-codecs/ladder_memory_game.zig,title=Zig ladder memory game::REGRESSION layer=game expected=512-question-complete-round actual=failed"
+            zig_failed=1
+          fi
+          if zig test -lc research/zig-codecs/d11_selector_contest.zig \
+              > "$RUNNER_TEMP/zig-d11-selector-tests.log" 2>&1; then
+            cat "$RUNNER_TEMP/zig-d11-selector-tests.log"
+            echo "::notice title=Zig D11 selector codec::PASS selectors=512 modes=9-bit,11-bit,raw16 semantics=NOT_TESTED"
+          else
+            cat "$RUNNER_TEMP/zig-d11-selector-tests.log" >&2
+            echo "::error file=research/zig-codecs/d11_selector_contest.zig,title=Zig D11 selector codec::REGRESSION layer=codec-test expected=exact-roundtrip actual=failed"
+            zig_failed=1
+          fi
+          # Той самий потік D11 міряється трьома поданнями; preflight перевіряє точний roundtrip.
+          # 15 чергованих зразків, p50/p90; цифри — payload+encode/decode, не SENS semantics.
+          if zig build-exe -lc -O ReleaseFast research/zig-codecs/d11_selector_contest.zig \
+              -femit-bin="$RUNNER_TEMP/sens-d11-selector-contest"; then
+            if "$RUNNER_TEMP/sens-d11-selector-contest" > "$RUNNER_TEMP/zig-d11-selector-benchmark.log" 2>&1; then
+              cat "$RUNNER_TEMP/zig-d11-selector-benchmark.log"
+              if grep -Fq 'mode=selector9 words=64 bytes=72' "$RUNNER_TEMP/zig-d11-selector-benchmark.log" &&
+                 grep -Fq 'mode=dense11 words=64 bytes=88' "$RUNNER_TEMP/zig-d11-selector-benchmark.log" &&
+                 grep -Fq 'mode=raw16 words=64 bytes=128' "$RUNNER_TEMP/zig-d11-selector-benchmark.log" &&
+                 grep -Fq 'mode=selector9 words=512 bytes=576' "$RUNNER_TEMP/zig-d11-selector-benchmark.log" &&
+                 grep -Fq 'mode=dense11 words=512 bytes=704' "$RUNNER_TEMP/zig-d11-selector-benchmark.log" &&
+                 grep -Fq 'mode=raw16 words=512 bytes=1024' "$RUNNER_TEMP/zig-d11-selector-benchmark.log" &&
+                 [[ "$(grep -c '^D11_CONTEST mode=' "$RUNNER_TEMP/zig-d11-selector-benchmark.log")" -eq 6 ]] &&
+                 grep -Fq 'samples=15' "$RUNNER_TEMP/zig-d11-selector-benchmark.log" &&
+                 grep -Fq 'p50_ns_per_roundtrip=' "$RUNNER_TEMP/zig-d11-selector-benchmark.log" &&
+                 grep -Fq 'p90_ns_per_roundtrip=' "$RUNNER_TEMP/zig-d11-selector-benchmark.log" &&
+                 grep -Fq 'D11_CONTEST_METHOD paired=YES alternating=YES samples=15' "$RUNNER_TEMP/zig-d11-selector-benchmark.log" &&
+                 [[ "$(grep -c 'roundtrip=EXACT paired=YES' "$RUNNER_TEMP/zig-d11-selector-benchmark.log")" -eq 6 ]]; then
+                cat "$RUNNER_TEMP/zig-d11-selector-benchmark.log" >> "$GITHUB_STEP_SUMMARY"
+                echo "::notice title=Zig D11 codec benchmark::MEASURED sizes=64,512 modes=selector9,dense11,raw16 samples=15 exact_parity=YES"
+              else
+                echo "::error title=Zig D11 codec benchmark::REGRESSION layer=benchmark-contract expected=6-exact-paired-p50-p90-rows actual=missing-or-invalid"
+                zig_failed=1
+              fi
+            else
+              cat "$RUNNER_TEMP/zig-d11-selector-benchmark.log" >&2
+              echo "::error title=Zig D11 codec benchmark::REGRESSION layer=benchmark-run expected=success actual=nonzero"
+              zig_failed=1
+            fi
+          else
+            echo "::error title=Zig D11 codec benchmark::REGRESSION layer=benchmark-build expected=success actual=nonzero"
+            zig_failed=1
+          fi
           # Драбина кодеків: D12 dense проти BE16 на тих самих 4096 словах.
           # Це тільки payload-механіка Zig; SENS-значення і D12-допуск не заявляємо.
           if zig test -O ReleaseFast -lc research/zig-codecs/d12_dense_experiment.zig \
