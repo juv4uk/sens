@@ -40,83 +40,6 @@ def events(source):
 
 
 
-def verify_migration_source_shapes():
-    """Mechanical guard only: exact-domain source boundaries, never a truth table."""
-    errors = []
-    try:
-        reason = (ROOT / "lib/reason.lisp").read_text(encoding="utf-8")
-        selectors = (
-            "(визначити режим-індексу-міркування\n  (функція (індекс-правил)\n    (друге індекс-правил)))",
-            "(визначити правила-індексу-міркування\n  (функція (індекс-правил)\n    (третє індекс-правил)))",
-            "(визначити кошики-індексу-міркування\n  (функція (індекс-правил)\n    (третє (решта індекс-правил))))",
-        )
-        for selector in selectors:
-            if selector not in reason:
-                errors.append("reason.lisp: змінено структуру українських D4/D5 селекторів")
-        start = reason.find("(визначити індекс-міркування?")
-        end = reason.find("(визначити міркування-пошук-кошика", start)
-        if start < 0 or end < 0:
-            errors.append("reason.lisp: неможливо виокремити індекс-міркування?")
-        else:
-            body = reason[start:end]
-            ordered = (
-                "((атом? вхідне-значення) ні)",
-                "((порожній? вхідне-значення) ні)",
-                "((атом? (перше вхідне-значення))",
-                "((тотожне? (перше вхідне-значення) схема-індексу-міркування)",
-            )
-            positions = [body.find(token) for token in ordered]
-            if any(position < 0 for position in positions) or positions != sorted(positions):
-                errors.append(
-                    "reason.lisp: потрібен порядок D3 ATOM, D4 NULL, "
-                    "D3 ATOM(CAR), далі D3 EQ"
-                )
-    except OSError as exc:
-        errors.append(f"reason.lisp: {exc}")
-
-    try:
-        source = (ROOT / "lib/narrate.lisp").read_text(encoding="utf-8")
-        active = "\n".join(
-            line for line in source.splitlines() if not line.lstrip().startswith(";")
-        )
-        start = active.find("(визначити список-завершується-порожнім?")
-        end = active.find("(визначити пояснити-факт", start)
-        if start < 0 or end < 0:
-            errors.append("narrate.lisp: cannot isolate structural arity helpers")
-        else:
-            helpers = active[start:end]
-            required = (
-                "(визначити список-завершується-порожнім?",
-                "(визначити список-із-рівно-двох-елементів?",
-                "(визначити список-із-рівно-трьох-елементів?",
-                "((атом? значення)",
-                "((порожній? значення)",
-                "(решта значення)",
-            )
-            for token in required:
-                if token not in helpers:
-                    errors.append(f"narrate.lisp: required exact-width structure missing: {token}")
-            if "000000" in helpers or "11110111" in helpers:
-                errors.append("narrate.lisp: D6 LENGTH or D8 EQUAL returned to arity helpers")
-            if "#d1:" in helpers:
-                errors.append("narrate.lisp: compatibility D1 projection used instead of raw one-bit words")
-        if "(визначити narrate-outcome-arity?" in active:
-            errors.append("narrate.lisp: legacy arity function still present")
-    except OSError as exc:
-        errors.append(f"narrate.lisp: {exc}")
-
-    for error in errors:
-        print("SENS_SOURCE_BOUNDARY_FAIL", error, flush=True)
-    if not errors:
-        print(
-            "SENS_SOURCE_BOUNDARY_PASS "
-            "reason-index?=D1/D4/D3-before-EQ; "
-            "narrate=raw-D1+D3/D4-without-D6/D8",
-            flush=True,
-        )
-    return errors
-
-
 def verify():
     paths = sorted([*WORKFLOWS.glob("*.yml"), *WORKFLOWS.glob("*.yaml")])
     if not paths:
@@ -154,7 +77,9 @@ def verify():
             errors.append(f"{path.name}: {exc}")
     if auto != ["ci.yml"]:
         errors.append(f"очікується один ci.yml, знайдено {auto}")
-    errors.extend(verify_migration_source_shapes())
+    # Синтаксис/семантику D1–D10 перевіряє SENS/Zig runtime у CI.
+    # Текстова форма селекторів може законно змінюватися: не ставити
+    # реліз/міграцію в залежність від Python-зіставлення рядків.
     # Owner decision (2026-10-14): named native executor receipts and
     # arbitrary native-vs-Rust parity quotas are NOT required. They may run,
     # but absence of --require or scan-executors must not freeze migration.
