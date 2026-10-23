@@ -276,6 +276,33 @@ jobs:
           check_lisp_law d3-d4-positive tests/semantic/d3-d4-ukr-native-laws.lisp '(1 1 1 1 1 1 1 1 1 1 1 1)'
           check_lisp_law d3-d4-negative tests/semantic/d3-d4-ukr-native-mutant.lisp '0'
 
+      # Логічні очікування записано в Lisp; оболонка звіряє тільки D1-вихід
+      # справжнього SENS (не реалізує EQ/ATOM/COND у Rust, Zig чи Python).
+      - name: SENS Lisp — логічний закон і мутаційний контроль D3/D4
+        if: steps.changed-t5m-lisp.outputs.has_files == 'true'
+        shell: bash
+        timeout-minutes: 3
+        run: |
+          set -euo pipefail
+          binary="$PWD/target/debug/sens"
+          test -x "$binary"
+          law="tests/semantic/d3-d4-logic-selection-law.lisp"
+          mutant="tests/semantic/d3-d4-logic-selection-mutant.lisp"
+          timeout 45s "$binary" "$law" > "$RUNNER_TEMP/sens-law-d1.out"
+          timeout 45s "$binary" "$mutant" > "$RUNNER_TEMP/sens-mutant-d1.out"
+          actual_law="$(cat "$RUNNER_TEMP/sens-law-d1.out")"
+          actual_mutant="$(cat "$RUNNER_TEMP/sens-mutant-d1.out")"
+          if [[ "$actual_law" != 1 ]]; then
+            echo "::error file=$law,title=SENS law::expected=D1:1 actual=$actual_law layer=eval"
+            exit 1
+          fi
+          if [[ "$actual_mutant" != 0 ]]; then
+            echo "::error file=$mutant,title=SENS mutant::expected=D1:0 actual=$actual_mutant layer=eval"
+            exit 1
+          fi
+          echo "::notice file=$law,title=SENS language laws::PASS D1:1; mutant D1:0; native=SENS"
+          echo 'SENS Lisp D3/D4: закон **D1:1**, мутант **D1:0** (нативний виконавець).' >> "$GITHUB_STEP_SUMMARY"
+
       # Учорашній BENCH-LISP→SENS: анотації лише зі справжніх нативних метрик.
       - name: Lisp → T5M → SENS — анотації розміру й AST
         if: ${{ always() && steps.changed-t5m-lisp.outputs.has_files == 'true' }}
