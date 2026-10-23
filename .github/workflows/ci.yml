@@ -94,6 +94,9 @@ jobs:
           python3 scripts/check-domain-ladder-identity.py --check
           python3 scripts/check-numeric-domain-ratification.py
           python3 scripts/check_d10_owner_whole_domain_ratification.py
+          # D11: тотожність усіх 512 похідних координат і негативні мутанти.
+          python3 scripts/check_d11_selector_seed.py --json
+          python3 -m unittest discover -s tests -p test_d11_selector_seed.py
 
       - name: УКР-ПРОЄКЦІЯ — вчорашні анотації прогресу Lisp
         if: ${{ always() }}
