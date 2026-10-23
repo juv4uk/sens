@@ -73,20 +73,160 @@ jobs:
                         "; ".join(row.get("reasons", [])))
           PY
 
+
+  lisp-corridor:
+    name: Три Lisp-бенчмарки та фізичний Rust → Zig → SENS
+    needs: [lisp-guards]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    outputs:
+      has_lisp: ${{ steps.changed-lisp.outputs.has_lisp }}
+      has_files: ${{ steps.changed-lisp.outputs.has_files }}
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5, pinned
+        with:
+          persist-credentials: false
+
+      - name: Знайти змінені Lisp-програми, а не історичні таблиці
+        id: changed-lisp
+        shell: bash
+        env:
+          BEFORE_SHA: ${{ github.event.before }}
+        run: |
+          set -euo pipefail
+          raw="$RUNNER_TEMP/changed-lisp-raw.txt"
+          manifest="$RUNNER_TEMP/changed-t5m-lisp.txt"
+          base="$BEFORE_SHA"
+          if [[ -n "$base" && ! "$base" =~ ^0+$ ]]; then
+            if ! git cat-file -e "$base^{commit}" 2>/dev/null; then
+              timeout 60s git fetch --no-tags --depth=1 origin "$base"
+            fi
+            git -c core.quotePath=false diff --name-only --diff-filter=ACMRT "$base" "$GITHUB_SHA" -- '*.lisp' '*.sens' '.github/workflows/ci.yml' > "$raw"
+          else
+            git -c core.quotePath=false diff-tree --root --no-commit-id --name-only --diff-filter=ACMRT -r "$GITHUB_SHA" -- '*.lisp' '*.sens' '.github/workflows/ci.yml' > "$raw"
+          fi
+          python3 - "$raw" "$manifest" "$GITHUB_OUTPUT" <<'PY'
+          from pathlib import Path
+          import sys
+          sys.path.insert(0, "scripts")
+          from report_ukr_projection_progress import tokenize_lisp, _contains_source_definitions
+
+          raw, manifest, output = map(Path, sys.argv[1:])
+          data_prefixes = ("lib/domains/", "lib/generated/", "knowledge/", "docs/",
+                           "research/", "contracts/", "lib/machine/xed/generated/")
+          data_paths = {"language-contract.lisp"}
+          selected = []
+          has_lisp = False
+          workflow_changed = False
+          for original in raw.read_text(encoding="utf-8").splitlines():
+              if original == ".github/workflows/ci.yml":
+                  workflow_changed = True
+                  continue
+              if original.endswith(".lisp"):
+                  has_lisp = True
+              name = original[:-5] + ".lisp" if original.endswith(".sens") else original
+              if not name.endswith(".lisp") or name.startswith(data_prefixes) or name in data_paths:
+                  continue
+              source = Path(name)
+              if not source.is_file() or source.is_symlink():
+                  raise SystemExit(f"T5M_CHANGED_SOURCE_INVALID path={name}")
+              if name.startswith("lib/surface/") and not _contains_source_definitions(source):
+                  print(f"T5M_NONPROGRAM_SURFACE path={name}")
+                  continue
+              try:
+                  if not tokenize_lisp(source.read_text(encoding="utf-8")):
+                      continue
+              except (OSError, UnicodeError, ValueError):
+                  pass  # malformed Lisp must reach the real SENS reader and fail closed
+              # Ці law/mutant є залежними фікстурами, не автономними програмами.
+              if name in {
+                  "tests/semantic/meta-eval-graph-d1-law.lisp",
+                  "tests/semantic/meta-eval-graph-d1-mutant.lisp",
+                  "tests/semantic/meta-fc-predicates-d1-mutant.lisp",
+                  "tests/fixtures/conformance-transition-witness.lisp",
+              }:
+                  print(f"T5M_DEPENDENT_FIXTURE path={name} status=NOT_STANDALONE")
+                  continue
+              if name not in selected:
+                  selected.append(name)
+          manifest.write_text("".join(name + "\n" for name in selected), encoding="utf-8")
+          with output.open("a", encoding="utf-8") as out:
+              out.write(f"has_lisp={'true' if has_lisp or workflow_changed else 'false'}\n")
+              out.write(f"has_files={'true' if selected else 'false'}\n")
+          print(f"T5M_CHANGED_EXECUTABLE_LISP count={len(selected)}")
+          for name in selected:
+              print(f"T5M_CHANGED_FILE {name}")
+          PY
+
+      - uses: dtolnay/rust-toolchain@1.99.0
+        if: steps.changed-lisp.outputs.has_lisp == 'true'
+
+      - uses: ./.github/actions/install-zig
+        if: steps.changed-lisp.outputs.has_lisp == 'true'
+
+      - name: Три бенчмарки — lists, arithmetic, parser у справжньому SENS
+        if: steps.changed-lisp.outputs.has_lisp == 'true'
+        shell: bash
+        timeout-minutes: 15
+        run: |
+          set -euo pipefail
+          export CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0
+          cargo test --locked -p sens --test ukr_unpaired_benchmark_runtime довжина_списку_відкидає_пошкоджений_хвіст_і_зберігає_d24_нуль -- --exact --nocapture
+          cargo test --locked -p sens --test ukr_unpaired_benchmark_runtime арифметика_та_бенчмарки_без_числових_токенів_виконуються_в_sens -- --exact --nocapture
+          cargo test --locked -p sens-cli --test arithmetic_benchmark_cli -- --nocapture
+          cargo test --locked -p sens --test ukr_unpaired_benchmark_runtime український_читач_виконує_цитовані_дані_й_точний_d24_дріб -- --exact --nocapture
+          cargo test --locked -p sens --lib український_парсер_виконує_точний_дріб_та_відхиляє_ділення_на_нуль -- --nocapture
+
+      - name: Виконати змінені Lisp через поточний Zig T5M і справжній SENS
+        id: t5m_changed_execute
+        if: steps.changed-lisp.outputs.has_files == 'true'
+        shell: bash
+        timeout-minutes: 15
+        run: |
+          set -euo pipefail
+          export CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0
+          cargo build --locked -p sens-cli --bin sens --bin sens-trit --features benchmark-ast-visits
+          binary="$PWD/target/debug/sens"
+          SENS_NATIVE_T5M=1 SENS_T5M_OPEN="$PWD/target/debug/sens-trit" \
+            bash scripts/execute_changed_lisp_t5m.sh \
+              "$binary" "$RUNNER_TEMP/changed-t5m-lisp.txt" \
+              "$RUNNER_TEMP/changed-t5m-pairs"
+
+      - name: Зберегти фізичні T5M-свідки після SENS виконання
+        if: always() && steps.changed-lisp.outputs.has_files == 'true'
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4, pinned
+        with:
+          name: sens-t5m-corridor-${{ github.sha }}
+          path: ${{ runner.temp }}/changed-t5m-pairs/
+          if-no-files-found: ignore
+          retention-days: 1
+
   lisp-surface:
     name: Підсумковий гейт перевірок SENS
     if: ${{ always() }}
-    needs: [lisp-guards]
+    needs: [lisp-guards, lisp-corridor]
     runs-on: ubuntu-24.04
     timeout-minutes: 2
     steps:
       - name: Не видавати структурний PASS за перевірену семантику
         env:
           GUARDS_RESULT: ${{ needs.lisp-guards.result }}
+          CORRIDOR_RESULT: ${{ needs.lisp-corridor.result }}
+          CORRIDOR_HAS_LISP: ${{ needs.lisp-corridor.outputs.has_lisp }}
+          CORRIDOR_HAS_FILES: ${{ needs.lisp-corridor.outputs.has_files }}
         run: |
           set -euo pipefail
           if [[ "$GUARDS_RESULT" != success ]]; then
             echo "::error::SENS LIGHT CHECKS FAIL: guards=$GUARDS_RESULT"
             exit 1
           fi
-          echo "SENS LIGHT CHECKS PASS; runtime=NOT_TESTED; release=NOT_CERTIFIED"
+          if [[ "$CORRIDOR_RESULT" != success && "$CORRIDOR_RESULT" != skipped ]]; then
+            echo "::error::SENS CORRIDOR FAIL: status=$CORRIDOR_RESULT"
+            exit 1
+          fi
+          if [[ "$CORRIDOR_RESULT" == success && "$CORRIDOR_HAS_LISP" == true ]]; then
+            echo "SENS THREE BENCHMARKS PASS; corridor=$([[ "$CORRIDOR_HAS_FILES" == true ]] && echo PASS || echo NO_EXECUTABLE_CHANGE); release=NOT_CERTIFIED"
+          else
+            echo "SENS LIGHT CHECKS PASS; runtime=NOT_TESTED; release=NOT_CERTIFIED"
+          fi
