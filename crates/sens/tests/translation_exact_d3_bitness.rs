@@ -1,28 +1,12 @@
-//! Доказ атомарної міграції двох перевірок довжини у translation.lisp.
+//! Перевірки механізму exact-width перенесення доменних координат.
 //!
-//! 2046 перевірок = УСІ можливі пари (width, payload) D1–D10,
-//! а не 2046 виконуваних чи семантично ратифікованих функцій.
-//! Жодних SID8/SENS8 перекладів або семантики з голого packed-byte.
+//! Мовні закони EQ/ATOM/COND перевіряються Lisp-свідками в
+//! tests/semantic/; цей файл не визначає очікувану семантику SENS.
 
 use sens::{
     domain_ladder::DomainCoordinate, pack_domain_coordinates, packed_transport_accounting,
     unpack_domain_coordinates,
 };
-
-#[test]
-fn переклад_довжини_має_дві_точні_трибітні_голови() {
-    let source = include_str!("../../../lib/translation.lisp");
-
-    // Обидві форми порівнюють атомарний результат D6 LENGTH із 5;
-    // D3 EQ не застосовується до структурних пар.
-    assert_eq!(source.matches("(101 (000000 proposal) 5)").count(), 1);
-    assert_eq!(source.matches("(101 (000000 review) 5)").count(), 1);
-    assert!(!source.contains("(11110111 (000000 proposal) 5)"));
-    assert!(!source.contains("(11110111 (000000 review) 5)"));
-
-    // До міграції було 2 × 8 source-бітів, після — 2 × 3.
-    assert_eq!(2 * (8usize - 3), 10);
-}
 
 #[test]
 fn всі_2046_координат_д1_д10_зберігають_ширину_і_біти_без_padding() {
@@ -83,29 +67,5 @@ fn всі_2046_координат_д1_д10_зберігають_ширину_і_
     assert_ne!(
         DomainCoordinate::new(8, 0b11110111),
         DomainCoordinate::new(3, 0b101)
-    );
-}
-
-#[test]
-fn атомарна_довжина_має_справжній_d3_так_ні_а_не_порівняння_пар() {
-    use sens::{eval_parsed_expressions, parse_mixed_exact_domain, Session};
-
-    fn run(source: &str) -> Result<String, String> {
-        let forms = parse_mixed_exact_domain(source).map_err(|e| e.to_string())?;
-        let value =
-            eval_parsed_expressions(&forms, &mut Session::default()).map_err(|e| e.to_string())?;
-        Ok(value.value.to_string())
-    }
-
-    // Д3 EQ перевіряємо окремо: D6 LENGTH нині не має
-    // підтвердженого механізму виклику, тому не вдаємо, що тестували його.
-    let five = run("(101 5 5)").expect("D3 EQ атомарних чисел 5 та 5");
-    let four = run("(101 5 4)").expect("D3 EQ атомарних чисел 5 та 4");
-    assert_ne!(five, four, "D3 EQ мусить розрізняти 5 і 4");
-
-    // Відмінність від D8 EQUAL принципова: D3 EQ не порівнює пари.
-    assert!(
-        run("(101 (001 (a b)) (001 (a b)))").is_err(),
-        "D3 EQ не повинен silently порівнювати структурні Pair"
     );
 }
