@@ -146,6 +146,28 @@ mod tests {
     }
 
     #[test]
+    fn event_frame_rejects_overlong_duplicate_unknown_and_non_ascii_fields() {
+        // Лише Rust-механізм межі вводу; не перевіряємо рішення SENS.
+        let oversized = format!(
+            "kind=read subject={} evidence=ok",
+            "a".repeat(MAX_EVENT_BYTES)
+        );
+        assert_eq!(parse_event(&oversized), Err("event-too-large".into()));
+        assert_eq!(
+            parse_event("kind=read subject=docs evidence=ok extra=x"),
+            Err("unknown-field".into())
+        );
+        assert_eq!(
+            parse_event("kind=read subject=docs evidence=ok evidence=other"),
+            Err("duplicate-field".into())
+        );
+        assert_eq!(
+            parse_event("kind=read subject=ціль evidence=ok"),
+            Err("invalid-identifier".into())
+        );
+    }
+
+    #[test]
     fn real_wsm_policy_returns_structured_decision() {
         let result = evaluate(
             ALLOW_POLICY,
