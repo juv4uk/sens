@@ -187,6 +187,10 @@ jobs:
                   "tests/semantic/ukr-lists-d24-language-law.lisp",
                   "tests/semantic/d24-polynomial-language-law.lisp",
                   "tests/semantic/d24-polynomial-language-mutant.lisp",
+                  "tests/semantic/d24-ackermann-language-law.lisp",
+                  "tests/semantic/d24-ackermann-language-mutant.lisp",
+                  "tests/semantic/d24-fibonacci-language-law.lisp",
+                  "tests/semantic/d24-fibonacci-language-mutant.lisp",
                   "tests/semantic/d24-reader-fraction-language-law.lisp",
                   "tests/semantic/d24-reader-fraction-language-mutant.lisp",
                   "tests/semantic/d24-reader-zero-denominator-negative.lisp",
@@ -285,6 +289,7 @@ jobs:
           cargo test --locked -p sens --test d5_list_search_laws -- --nocapture
           # Rust перевіряє механізм завантаження/виконання Lisp, без власних семантичних очікувань.
           cargo test --locked -p sens --test d11_srfi1_find_tail -- --nocapture
+          cargo test --locked -p sens --test ukr_unpaired_benchmark_runtime два_українські_рекурсивні_джерела_завантажуються_як_lisp -- --exact --nocapture
           # Rust перевіряє тільки ідемпотентність точного D6 зв'язування Lisp-макроса.
           # Сам закон LET/LET* лишається мовним SENS-свідком.
           cargo test --locked -p sens --lib core4_bootstrap_cache_tests::d6_macro_mechanism_rebinding_is_idempotent_after_core4 -- --exact --nocapture
@@ -447,6 +452,16 @@ jobs:
           check_lisp_law d24-reader-fraction-language-positive "$RUNNER_TEMP/d24-reader-positive.lisp" '1'
           cat -- benchmarks/parser.lisp tests/semantic/d24-reader-fraction-language-mutant.lisp > "$RUNNER_TEMP/d24-reader-mutant.lisp"
           check_lisp_law d24-reader-fraction-language-mutant "$RUNNER_TEMP/d24-reader-mutant.lisp" '0'
+          # Д24: закон, базові випадки та незалежний контрприклад визначає Lisp.
+          # Фізичний D6 LENGTH/T5M ще не сертифіковано (#5854).
+          cat -- benchmarks/cross-language/sens-vs-python/sens/ackermann.setup.lisp tests/semantic/d24-ackermann-language-law.lisp > "$RUNNER_TEMP/ackermann-law.lisp"
+          check_lisp_law d24-ackermann-positive "$RUNNER_TEMP/ackermann-law.lisp" '1'
+          cat -- benchmarks/cross-language/sens-vs-python/sens/ackermann.setup.lisp tests/semantic/d24-ackermann-language-mutant.lisp > "$RUNNER_TEMP/ackermann-mutant.lisp"
+          check_lisp_law d24-ackermann-mutant "$RUNNER_TEMP/ackermann-mutant.lisp" '0'
+          cat -- benchmarks/cross-language/sens-vs-python/sens/fib.setup.lisp tests/semantic/d24-fibonacci-language-law.lisp > "$RUNNER_TEMP/fibonacci-law.lisp"
+          check_lisp_law d24-fibonacci-positive "$RUNNER_TEMP/fibonacci-law.lisp" '1'
+          cat -- benchmarks/cross-language/sens-vs-python/sens/fib.setup.lisp tests/semantic/d24-fibonacci-language-mutant.lisp > "$RUNNER_TEMP/fibonacci-mutant.lisp"
+          check_lisp_law d24-fibonacci-mutant "$RUNNER_TEMP/fibonacci-mutant.lisp" '0'
           # Відмова з нульовим знаменником має бути діленням на нуль,
           # а не загальним невдалим bootstrap чи помилкою синтаксису.
           cat -- benchmarks/parser.lisp tests/semantic/d24-reader-zero-denominator-negative.lisp > "$RUNNER_TEMP/d24-reader-denominator.lisp"

@@ -3,13 +3,6 @@
 //! Ці тести не створюють .sens і не надають релізного допуску.
 use sens::{eval_program, load_core_library, Session};
 
-fn запустити_джерело(джерело: &str, сеанс: &mut Session) -> String {
-    eval_program(джерело, сеанс)
-        .unwrap_or_else(|помилка| panic!("SENS runtime відхилив програму: {помилка}"))
-        .value
-        .to_string()
-}
-
 // Семантику рекурсивного обходу перенесено в українські Lisp-закони.
 // Rust не визначає очікувані результати функції «обійти».
 // Негативна семантика D4 NOT тепер у Lisp/SENS:
@@ -20,59 +13,26 @@ fn запустити_джерело(джерело: &str, сеанс: &mut Sess
 // Перевірку полінома перенесено в українські Lisp-закон і мутант Д24.
 // Семантику точних дробів, читача та D7 цитат перенесено в Lisp-закони.
 // Rust тут не має друкувати очікуваний мовний результат.
+// Rust перевіряє лише механізм приймання Lisp-джерела, не його результати.
+// Чотири D24-мовні вердикти живуть у tests/semantic/d24-*-language-*.lisp.
 #[test]
-fn незалежне_виконання_аккермана_та_фібоначчі_у_sens() {
-    // В обліку корпусу обидва джерела наразі без фізичних .sens.
-    // Доведено лише виконання самих Lisp-програм через SENS; ні Zig/T5M,
-    // ні оберненість від цих тверджень не стають автоматично PASS.
+fn два_українські_рекурсивні_джерела_завантажуються_як_lisp() {
     let mut сеанс = Session::default();
-    load_core_library(&mut сеанс).expect("чинний Core4 SENS");
-    let аккерман = include_str!(concat!(
-        env!("CARGO_MANIFEST_DIR"),
-        "/../../benchmarks/cross-language/sens-vs-python/sens/ackermann.setup.lisp"
-    ));
-    let аккерман_виклик = include_str!(concat!(
-        env!("CARGO_MANIFEST_DIR"),
-        "/../../benchmarks/cross-language/sens-vs-python/sens/ackermann.call.lisp"
-    ));
-    eval_program(аккерман, &mut сеанс)
-        .expect("визначення Аккермана — справжня виконувана D4 форма SENS");
-    assert_eq!(
-        запустити_джерело("(аккерман 0 3)", &mut сеанс),
-        "4",
-        "перший базовий випадок D24+"
-    );
-    assert_eq!(
-        запустити_джерело("(аккерман 1 2)", &mut сеанс),
-        "4",
-        "другий базовий випадок D24+"
-    );
-    assert_eq!(
-        запустити_джерело(аккерман_виклик, &mut сеанс),
-        "61",
-        "вкладена рекурсія не замінена Python або host-оракулом"
-    );
-
-    let фібоначчі = include_str!(concat!(
-        env!("CARGO_MANIFEST_DIR"),
-        "/../../benchmarks/cross-language/sens-vs-python/sens/fib.setup.lisp"
-    ));
-    let фібоначчі_виклик = include_str!(concat!(
-        env!("CARGO_MANIFEST_DIR"),
-        "/../../benchmarks/cross-language/sens-vs-python/sens/fib.call.lisp"
-    ));
-    eval_program(фібоначчі, &mut сеанс)
-        .expect("визначення Фібоначчі — справжня виконувана D4 форма SENS");
-    for (вхід, вихід) in [
-        ("(фібоначчі 0)", "0"),
-        ("(фібоначчі 1)", "1"),
-        ("(фібоначчі 2)", "1"),
-        (фібоначчі_виклик, "987"),
+    load_core_library(&mut сеанс).expect("Core4 bootstrap");
+    for (назва, джерело) in [
+        (
+            "ackermann.setup.lisp",
+            include_str!(concat!(env!("CARGO_MANIFEST_DIR"),
+                "/../../benchmarks/cross-language/sens-vs-python/sens/ackermann.setup.lisp")),
+        ),
+        (
+            "fib.setup.lisp",
+            include_str!(concat!(env!("CARGO_MANIFEST_DIR"),
+                "/../../benchmarks/cross-language/sens-vs-python/sens/fib.setup.lisp")),
+        ),
     ] {
-        assert_eq!(
-            запустити_джерело(вхід, &mut сеанс),
-            вихід,
-            "test_id=unpaired-fib-d24 layer=real-sens input={вхід} expected={вихід}"
+        eval_program(джерело, &mut сеанс).unwrap_or_else(|помилка|
+            panic!("test_id=recursive-lisp-load layer=rust-api source={назва} actual={помилка}")
         );
     }
 }
