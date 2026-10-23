@@ -250,7 +250,7 @@ jobs:
           zig test -lc zig_transport_root.zig --test-filter 'Zig REPL transport refuses one-byte-short destination without a partial write'
 
       - name: Три бенчмарки — lists, arithmetic, parser у справжньому SENS
-        if: ${{ always() && steps.native-build.outcome == 'success' && steps.changed-t5m-lisp.outputs.has_lisp == 'true' }}
+        if: ${{ always() && steps.changed-t5m-lisp.outputs.has_lisp == 'true' }}
         shell: bash
         timeout-minutes: 15
         run: |
@@ -286,6 +286,7 @@ jobs:
         run: |
           set -euo pipefail
           export CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0
+          cargo build --locked -p sens-cli --bin sens --bin sens-trit --features benchmark-ast-visits
           test -x "$PWD/target/debug/sens"
           test -x "$PWD/target/debug/sens-trit"
 
@@ -306,7 +307,6 @@ jobs:
             exit 1
           fi
           export CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0
-          cargo build --locked -p sens-cli --bin sens --bin sens-trit --features benchmark-ast-visits
           binary="$PWD/target/debug/sens"
           SENS_NATIVE_T5M=1 SENS_T5M_OPEN="$PWD/target/debug/sens-trit" \
             bash scripts/execute_changed_lisp_t5m.sh \
@@ -332,13 +332,13 @@ jobs:
       # Логіка перевірки всередині Lisp. Bash лише звіряє фактичний D1-вивід.
       # Rust відповідає за механізми Rust, Zig — за власний T5M/ABI.
       - name: Lisp-семантика Д1/Д3/Д4 — позитив і негатив у справжньому SENS
-        if: ${{ always() && steps.changed-t5m-lisp.outputs.has_lisp == 'true' }}
+        if: ${{ always() && steps.native-build.outcome == 'success' && steps.changed-t5m-lisp.outputs.has_lisp == 'true' }}
         shell: bash
         timeout-minutes: 10
         run: |
           set -euo pipefail
           binary="$PWD/target/debug/sens"
-          # Коміт лише з ci.yml теж запускає цей закон: збираємо CLI явно.
+          # Бінарники зібрано один раз вище, тут перевіряється лише SENS-семантика.
           export CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0
           test -x "$binary"
           check_lisp_law() {
