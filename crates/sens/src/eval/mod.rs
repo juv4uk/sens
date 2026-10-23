@@ -466,6 +466,20 @@ pub(crate) fn evaluate_step(
                 if let Some(value) = environment.get(&key) {
                     return Ok(EvalStep::Value(value));
                 }
+                // Legacy source-bound names (including bootstrap D24 roots)
+                // may already live under their Ukrainian surface spelling.
+                // In an *executable reference position* only, use the
+                // owner-ratified reversible D7 keyboard projection to find
+                // that existing binding. Never invent a value or a callable
+                // identity from a glyph list. D3 QUOTE bypasses evaluation
+                // and continues to preserve the literal W7/D2 structure.
+                if let Ok(text7) = crate::Text7::from_canonical_wire_token(&key) {
+                    if let Ok(name) = crate::render_text7(&text7, crate::Text7Layout::Uk) {
+                        if let Some(value) = environment.get(&name) {
+                            return Ok(EvalStep::Value(value));
+                        }
+                    }
+                }
             }
             evaluate_list(items, environment, expression.span)
         },
