@@ -392,9 +392,9 @@ jobs:
               lib/forward.lisp) bs=(--binding-source lib/unify.lisp);;
               lib/d11-clojure-partition-by.lisp) bs=(--binding-source lib/d11-srfi1-span-break.lisp);;
                 lib/d11-clojure-frequencies-unary.lisp) bs=(--binding-source lib/d11-clojure-group-by.lisp);;
-              lib/narrate.lisp) bs=(--binding-source lib/unify.lisp --binding-source lib/reason.lisp);;
-              lib/result-status.lisp) bs=(--binding-source lib/unify.lisp --binding-source lib/knowledge.lisp --binding-source lib/reason.lisp);;
-              lib/translation.lisp) bs=(--binding-source lib/unify.lisp --binding-source lib/knowledge.lisp --binding-source lib/reason.lisp --binding-source lib/world.lisp --binding-source lib/yantra.lisp --binding-source lib/result-status.lisp);;
+              lib/narrate.lisp) bs=(--binding-source "$RUNNER_TEMP/sens-core4-d24-roots.lisp" --binding-source lib/unify.lisp --binding-source lib/reason.lisp);;
+              lib/result-status.lisp) bs=(--binding-source "$RUNNER_TEMP/sens-core4-d24-roots.lisp" --binding-source lib/unify.lisp --binding-source lib/knowledge.lisp --binding-source lib/reason.lisp);;
+              lib/translation.lisp) bs=(--binding-source "$RUNNER_TEMP/sens-core4-d24-roots.lisp" --binding-source lib/unify.lisp --binding-source lib/knowledge.lisp --binding-source lib/reason.lisp --binding-source lib/world.lisp --binding-source lib/yantra.lisp --binding-source lib/result-status.lisp);;
               tests/fixtures/mechanism-selector-1047-witness.lisp) bs=(--binding-source lib/mechanism-selector.lisp);;
               tests/fixtures/island-lowering-1048-witness.lisp) bs=(--binding-source lib/mechanism-selector.lisp --binding-source lib/island-lowering.lisp);;
               tests/semantic/d11-clojure-juxt-laws.lisp) bs=(--binding-source lib/d11-clojure-juxt.lisp);;
@@ -686,9 +686,9 @@ jobs:
               lib/forward.lisp) bs=(--binding-source lib/unify.lisp);;
               lib/d11-clojure-partition-by.lisp) bs=(--binding-source lib/d11-srfi1-span-break.lisp);;
                 lib/d11-clojure-frequencies-unary.lisp) bs=(--binding-source lib/d11-clojure-group-by.lisp);;
-                lib/narrate.lisp) bs=(--binding-source lib/unify.lisp --binding-source lib/reason.lisp);;
-                lib/result-status.lisp) bs=(--binding-source lib/unify.lisp --binding-source lib/knowledge.lisp --binding-source lib/reason.lisp);;
-                lib/translation.lisp) bs=(--binding-source lib/unify.lisp --binding-source lib/knowledge.lisp --binding-source lib/reason.lisp --binding-source lib/world.lisp --binding-source lib/yantra.lisp --binding-source lib/result-status.lisp);;
+                lib/narrate.lisp) bs=(--binding-source "$RUNNER_TEMP/sens-core4-d24-roots.lisp" --binding-source lib/unify.lisp --binding-source lib/reason.lisp);;
+                lib/result-status.lisp) bs=(--binding-source "$RUNNER_TEMP/sens-core4-d24-roots.lisp" --binding-source lib/unify.lisp --binding-source lib/knowledge.lisp --binding-source lib/reason.lisp);;
+                lib/translation.lisp) bs=(--binding-source "$RUNNER_TEMP/sens-core4-d24-roots.lisp" --binding-source lib/unify.lisp --binding-source lib/knowledge.lisp --binding-source lib/reason.lisp --binding-source lib/world.lisp --binding-source lib/yantra.lisp --binding-source lib/result-status.lisp);;
                 tests/fixtures/mechanism-selector-1047-witness.lisp) bs=(--binding-source lib/mechanism-selector.lisp);;
               tests/fixtures/island-lowering-1048-witness.lisp) bs=(--binding-source lib/mechanism-selector.lisp --binding-source lib/island-lowering.lisp);;
                 tests/semantic/d11-clojure-juxt-laws.lisp) bs=(--binding-source lib/d11-clojure-juxt.lisp);;
