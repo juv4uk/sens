@@ -480,6 +480,8 @@ while IFS= read -r file || [[ -n "$file" ]]; do
     binding_sources=(--binding-source lib/unify.lisp)
   elif [[ "$file" == "tests/semantic/result-status-dotted-law.lisp" ||
           "$file" == "tests/semantic/result-status-dotted-mutant.lisp" ||
+          "$file" == "tests/semantic/result-status-proper-list-d3-law.lisp" ||
+          "$file" == "tests/semantic/result-status-proper-list-d3-mutant.lisp" ||
           "$file" == "tests/semantic/result-status-goal-tags-law.lisp" ||
           "$file" == "tests/semantic/result-status-goal-tags-mutant.lisp" ]]; then
     # Мовний закон міток вимагає справжніх визначень Result Status.

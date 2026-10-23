@@ -385,6 +385,12 @@ cat -- lib/result-status.lisp tests/semantic/result-status-dotted-law.lisp > "$r
 cat -- lib/result-status.lisp tests/semantic/result-status-dotted-mutant.lisp > "$result_status_dotted_mutant_bundle"
 run_case run_law result-status-dotted-positive "$result_status_dotted_law_bundle" 1
 run_case run_law result-status-dotted-mutant "$result_status_dotted_mutant_bundle" 0
+result_status_d3_law_bundle="$evidence/result-status-proper-list-d3-positive.lisp"
+result_status_d3_mutant_bundle="$evidence/result-status-proper-list-d3-mutant.lisp"
+cat -- lib/result-status.lisp tests/semantic/result-status-proper-list-d3-law.lisp > "$result_status_d3_law_bundle"
+cat -- lib/result-status.lisp tests/semantic/result-status-proper-list-d3-mutant.lisp > "$result_status_d3_mutant_bundle"
+run_case run_law result-status-proper-list-d3-positive "$result_status_d3_law_bundle" 1
+run_case run_law result-status-proper-list-d3-mutant "$result_status_d3_mutant_bundle" 0
 # Д9: окремий Lisp-доказ D1 для правильних/крапкових міток і цілей NOT.
 # Реальний SENS після Zig/T5M перевіряє весь набір, без очікувань у Rust.
 result_status_goal_tags_bundle="$evidence/result-status-goal-tags-positive.lisp"
