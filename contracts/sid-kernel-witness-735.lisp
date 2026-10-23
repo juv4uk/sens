@@ -1,54 +1,38 @@
-; #735 — Експериментальна карта SID → kernel witness.
-; Повноваження: цей файл відображає, *хто може виконати* семантичну
-; ідентичність, а НЕ *що вона означає*. Семантична влада лишається у
-; lib/surface/semantic-registry.lisp (sr-2) та законах мови.
-;
-; Схема одного запису:
-;   (sid-witness
-;     (sid        . BITSTRING)       ; непрозорий 8-бітний SID з sr-2
-;     (en-name    . SYMBOL)            ; лише довідково, поле en з registry
-;     (witnesses  . LIST)              ; нуль або більше executable witness-ів
-;     (note       . "STRING"))         ; необов'язкове пояснення
-;
-; Кожен semantic witness:
-;   (witness
-;     (kernel    . SYMBOL)   ; sens | common-lisp | prolog | clips | datalog
-;     (probe-id  . BITSTRING) ; SID intentionally used by this semantic witness
-;     (status    . SYMBOL))  ; live | integration-gated | historical | absent
-;
-; ВАЖЛИВО: механічний ABI-тест, що лише зберігає непрозорий байт, НЕ є
-; семантичним свідком, навіть якщо цей байт випадково дорівнює SID реєстру.
-; Такі проби записано окремо під opaque-kernel-probe-evidence-1.
-;
-; Відсутність witness-а коректна: вона фіксує, що жодне ядро поки не
-; виконує цю ідентичність, а не те, що ідентичність не визначена.
-;
-; Зміни карти не можуть перенумеровувати SID. Колонка SID read-only;
-; колонку witnesses можна змінювати вільно.
+; #735 — Свідки точнодоменних функцій SENS та окреме походження ABI.
+; Семантичні координати і повні імена «укр» походять винятково з
+; ратифікованих lib/domains/d3.lisp, d4.lisp, d6.lisp.
+; Відображення свідка не створює функції чи механізму виконання.
+; identity — (домен, точні біти) у перевірюваному записі «D*:біти»;
+; probe-id — старий 8-бітний ключ **лише** історичного ABI-випробування,
+; він не дорівнює identity і не може переадресувати виклик у SENS.
+; Живе виконання SENS має бути підтверджене незалежним runtime-свідком.
 
-(sid-kernel-witness-map-1
+(domain-kernel-witness-map-2
 
   ; --- Canon 0 ---
 
-  (sid-witness
-    (sid      . 00000000)
+  (domain-witness
+    (identity . "D3:000")
+    (укр . ())
     (en-name  . ())
     (witnesses
-      (witness (kernel . sens)     (probe-id . 00000000) (status . live)))
+      (witness (kernel . sens)     (probe-id . 00000000) (status . historical)))
     (note . "Canon 0 — первинний ground object. Жоден island поки не виконує ()."))
 
-  ; --- Сім примітивів Маккарті (SID 00000001..00000111) ---
+  ; --- Примітиви Д3 з українськими викличними іменами ---
 
-  (sid-witness
-    (sid      . 00000001)
+  (domain-witness
+    (identity . "D3:001")
+    (укр . як-є)
     (en-name  . quote)
     (witnesses
       (witness (kernel . sens)     (probe-id . 00000001) (status . live))
       (witness (kernel . common-lisp) (probe-id . 00000001) (status . integration-gated)))
     (note . "quote: my-lisp evaluator є live witness; CL gated через WSM_COMMON_LISP_INTEGRATION."))
 
-  (sid-witness
-    (sid      . 00000010)
+  (domain-witness
+    (identity . "D3:010")
+    (укр . атом?)
     (en-name  . atom)
     (witnesses
       (witness (kernel . sens)     (probe-id . 00000010) (status . live))
@@ -56,39 +40,44 @@
       (witness (kernel . clips)       (probe-id . 00000010) (status . absent)))
     (note . "atom: Prolog/CLIPS мають native atom-check, але ABI witness ще не відображено."))
 
-  (sid-witness
-    (sid      . 00000011)
+  (domain-witness
+    (identity . "D3:101")
+    (укр . тотожне?)
     (en-name  . eq)
     (witnesses
       (witness (kernel . sens)     (probe-id . 00000011) (status . live)))
     (note . "eq: current Prolog PROBE_ID=00000011 is transport provenance only; no Prolog EQ semantic witness is claimed."))
 
-  (sid-witness
-    (sid      . 00000100)
+  (domain-witness
+    (identity . "D3:111")
+    (укр . сполучити)
     (en-name  . cons)
     (witnesses
       (witness (kernel . sens)     (probe-id . 00000100) (status . live))
       (witness (kernel . common-lisp) (probe-id . 00000100) (status . integration-gated)))
     (note . "cons: CL is a bounded semantic witness. Datalog PROBE_ID=00000100 is transport provenance only."))
 
-  (sid-witness
-    (sid      . 00000101)
+  (domain-witness
+    (identity . "D3:100")
+    (укр . перше)
     (en-name  . car)
     (witnesses
       (witness (kernel . sens)     (probe-id . 00000101) (status . live))
       (witness (kernel . common-lisp) (probe-id . 00000101) (status . integration-gated)))
     (note . "car: CL witness live коли задано WSM_COMMON_LISP_INTEGRATION — CL:CAR adapter."))
 
-  (sid-witness
-    (sid      . 00000110)
+  (domain-witness
+    (identity . "D3:011")
+    (укр . решта)
     (en-name  . cdr)
     (witnesses
       (witness (kernel . sens)     (probe-id . 00000110) (status . live))
       (witness (kernel . common-lisp) (probe-id . 00000110) (status . integration-gated)))
     (note . "cdr: CL is a bounded semantic witness. CLIPS PROBE_ID=00000110 is transport provenance only."))
 
-  (sid-witness
-    (sid      . 00000111)
+  (domain-witness
+    (identity . "D3:110")
+    (укр . за-умовою)
     (en-name  . cond)
     (witnesses
       (witness (kernel . sens)     (probe-id . 00000111) (status . live))
@@ -96,25 +85,28 @@
       (witness (kernel . clips)       (probe-id . 00000111) (status . absent)))
     (note . "cond: Prolog/CLIPS мають native branching, але ABI probe ще немає."))
 
-  ; --- Родина lambda / def / let (SID 00001000..00001010) ---
+  ; --- Д4 функція/визначити та Д6 нехай ---
 
-  (sid-witness
-    (sid      . 00001000)
+  (domain-witness
+    (identity . "D4:0010")
+    (укр . функція)
     (en-name  . lambda)
     (witnesses
       (witness (kernel . sens)     (probe-id . 00001000) (status . live))
       (witness (kernel . common-lisp) (probe-id . 00001000) (status . integration-gated)))
     (note . "lambda: CL має native lambda; witness gated через integration env var."))
 
-  (sid-witness
-    (sid      . 00001001)
+  (domain-witness
+    (identity . "D4:0011")
+    (укр . визначити)
     (en-name  . def)
     (witnesses
       (witness (kernel . sens)     (probe-id . 00001001) (status . live)))
     (note . "def: my-lisp-owned binding form. Island-відповідник не відображено."))
 
-  (sid-witness
-    (sid      . 00001010)
+  (domain-witness
+    (identity . "D6:001000")
+    (укр . нехай)
     (en-name  . let)
     (witnesses
       (witness (kernel . sens)     (probe-id . 00001010) (status . live))
@@ -122,15 +114,8 @@
       (witness (kernel . prolog)      (probe-id . 00001010) (status . absent)))
     (note . "let: CL має native let. Prolog не має прямого відповідника."))
 
-  ; --- defmacro (SID 00001011) ---
-
-  (sid-witness
-    (sid      . 00001011)
-    (en-name  . defmacro)
-    (witnesses
-      (witness (kernel . sens)     (probe-id . 00001011) (status . live))
-      (witness (kernel . common-lisp) (probe-id . 00001011) (status . integration-gated)))
-    (note . "defmacro: CL має defmacro, але CL ABI witness ще його не виконує."))
+  ; Старий DEFMACRO/SID8:00001011 не отримує вигаданої сучасної
+  ; координати. Історичний witness лишається у попередньому Git blob.
 
 )
 
