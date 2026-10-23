@@ -253,10 +253,13 @@ jobs:
       - name: Lisp-семантика Д1/Д3/Д4 — позитив і негатив у справжньому SENS
         if: steps.changed-t5m-lisp.outputs.has_lisp == 'true'
         shell: bash
-        timeout-minutes: 3
+        timeout-minutes: 10
         run: |
           set -euo pipefail
           binary="$PWD/target/debug/sens"
+          # Коміт лише з ci.yml теж запускає цей закон: збираємо CLI явно.
+          export CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0
+          cargo build --locked -p sens-cli --bin sens
           test -x "$binary"
           check_lisp_law() {
             local id="$1" source="$2" expected="$3" actual
