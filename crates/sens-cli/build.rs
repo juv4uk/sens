@@ -36,9 +36,13 @@ fn main() {
     // Zig @embedFile holds the linter source: never serve a stale asset in Cargo.
     println!("cargo:rerun-if-changed=../../lib/linter.lisp");
     println!("cargo:rerun-if-changed=../../lib/unify.lisp");
+    println!("cargo:rerun-if-changed=../../lib/unify.sens");
     println!("cargo:rerun-if-changed=../../lib/reason.lisp");
+    println!("cargo:rerun-if-changed=../../lib/reason.sens");
     println!("cargo:rerun-if-changed=../../lib/forward.lisp");
+    println!("cargo:rerun-if-changed=../../lib/forward.sens");
     println!("cargo:rerun-if-changed=../../lib/knowledge.lisp");
+    println!("cargo:rerun-if-changed=../../lib/knowledge.sens");
     println!("cargo:rerun-if-changed=../../lib/persistent-map.lisp");
     println!("cargo:rerun-if-changed=../../lib/persistent-map.sens");
     println!("cargo:rerun-if-changed=../../lib/world.lisp");

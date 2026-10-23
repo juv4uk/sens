@@ -81,6 +81,36 @@ pub export fn sens_zig_meta_eval_t5m_bytes_copy(dst: [*]u8, capacity: usize) isi
     return @intCast(meta_eval_t5m_asset.len);
 }
 
+// REPL reasoning modules are already physical T5M. Zig copies bytes only.
+const repl_unify_t5m_asset = @embedFile("lib/unify.sens");
+const repl_reason_t5m_asset = @embedFile("lib/reason.sens");
+const repl_forward_t5m_asset = @embedFile("lib/forward.sens");
+const repl_knowledge_t5m_asset = @embedFile("lib/knowledge.sens");
+
+fn copy_repl_t5m_asset(asset: []const u8, dst: [*]u8, capacity: usize) isize {
+    if (asset.len == 0) return -1;
+    if (capacity == 0) return @intCast(asset.len);
+    if (capacity < asset.len) return -2;
+    @memcpy(dst[0..asset.len], asset);
+    return @intCast(asset.len);
+}
+
+pub export fn sens_zig_repl_unify_t5m_bytes_copy(dst: [*]u8, capacity: usize) isize {
+    return copy_repl_t5m_asset(repl_unify_t5m_asset, dst, capacity);
+}
+
+pub export fn sens_zig_repl_reason_t5m_bytes_copy(dst: [*]u8, capacity: usize) isize {
+    return copy_repl_t5m_asset(repl_reason_t5m_asset, dst, capacity);
+}
+
+pub export fn sens_zig_repl_forward_t5m_bytes_copy(dst: [*]u8, capacity: usize) isize {
+    return copy_repl_t5m_asset(repl_forward_t5m_asset, dst, capacity);
+}
+
+pub export fn sens_zig_repl_knowledge_t5m_bytes_copy(dst: [*]u8, capacity: usize) isize {
+    return copy_repl_t5m_asset(repl_knowledge_t5m_asset, dst, capacity);
+}
+
 test "SENS meta-evaluator T5M bytes cross Zig exactly, short buffer is untouched" {
     const expected: isize = @intCast(meta_eval_t5m_asset.len);
     try std.testing.expectEqual(expected, sens_zig_meta_eval_t5m_bytes_copy(undefined, 0));

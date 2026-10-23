@@ -292,6 +292,41 @@ pub fn persistent_map_t5m_bytes() -> Result<Vec<u8>, String> {
     )
 }
 
+/// Ordered physical T5M assets for the REPL's reasoning prerequisites.
+/// Rust receives exact bytes; the SENS binary reader/evaluator owns meaning.
+pub fn repl_reasoning_t5m_assets() -> Result<Vec<(&'static str, Vec<u8>)>, String> {
+    Ok(vec![
+        (
+            "unify",
+            opaque_zig_asset(
+                asset_ffi::sens_zig_repl_unify_t5m_bytes_copy,
+                "ZIG_REPL_UNIFY_T5M",
+            )?,
+        ),
+        (
+            "reason",
+            opaque_zig_asset(
+                asset_ffi::sens_zig_repl_reason_t5m_bytes_copy,
+                "ZIG_REPL_REASON_T5M",
+            )?,
+        ),
+        (
+            "forward",
+            opaque_zig_asset(
+                asset_ffi::sens_zig_repl_forward_t5m_bytes_copy,
+                "ZIG_REPL_FORWARD_T5M",
+            )?,
+        ),
+        (
+            "knowledge",
+            opaque_zig_asset(
+                asset_ffi::sens_zig_repl_knowledge_t5m_bytes_copy,
+                "ZIG_REPL_KNOWLEDGE_T5M",
+            )?,
+        ),
+    ])
+}
+
 /// Opaque D9 witness source bytes carried through the Zig root ABI.
 pub fn d9_witness_source_bytes() -> Result<Vec<u8>, String> {
     opaque_zig_asset(asset_ffi::sens_zig_d9_witness_bytes_copy, "ZIG_D9_WITNESS")
