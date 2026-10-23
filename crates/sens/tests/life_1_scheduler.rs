@@ -31,9 +31,9 @@ fn виконати_двійковий_свідок_life_1() {
         // Діагностику обчислює той самий SENS, Rust лише показує значення.
         // Це не новий host-оракул і не спосіб перетворити D1:0 на PASS.
         for (label, source) in [
-            ("provenance", "(життя-поле-запису (як-є (pending-invocation (producer datalog) (trigger (projection-ready prolog-to-datalog)) (provenance-ref observation-42) (priority ordinary) (semantic-id 12))) (як-є provenance-ref))"),
+            ("provenance", "(життя-поле-запису (як-є (pending-invocation (producer datalog) (trigger (projection-ready prolog-to-datalog)) (provenance-ref observation-42) (priority ordinary) (semantic-id додати))) (як-є provenance-ref))"),
             ("projection-match", "(життя-збіг-проєкції? (як-є (projection-ready prolog-to-datalog observation-42)) (як-є ((projection-ready prolog-to-datalog observation-42))))"),
-            ("ready", "(життя-проєкція-готова? (як-є (pending-invocation (producer datalog) (trigger (projection-ready prolog-to-datalog)) (provenance-ref observation-42) (priority ordinary) (semantic-id 12))) (як-є ((projection-ready prolog-to-datalog observation-42))))"),
+            ("ready", "(життя-проєкція-готова? (як-є (pending-invocation (producer datalog) (trigger (projection-ready prolog-to-datalog)) (provenance-ref observation-42) (priority ordinary) (semantic-id додати))) (як-є ((projection-ready prolog-to-datalog observation-42))))"),
         ] {
             let form = parse_mixed_exact_domain(source)
                 .expect("транспорт: діагностичний SENS вираз");
