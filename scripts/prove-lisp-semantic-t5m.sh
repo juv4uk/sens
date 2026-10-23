@@ -152,16 +152,18 @@ run_law() {
     done
     fail "$id" zig-transport "canonical-roundtrip" "rejected"
   fi
-  # Розрізняємо помилку парного виконання та standalone: це різні шари.
-  # Нативний SENS надає діагностику; shell не підміняє жоден Lisp-вердикт.
+  # Розрізняємо парний і самостійний фізичні шляхи, але профіль Core4
+  # має відповідати прямому Lisp та парному виконавцю. Байтам усе ще немає
+  # доступу до source чи binding-source: sens-trit декодує лише фізичний
+  # .sens, а Core4 явно підвантажує SENS, як вимагає контракт цих законів.
   if ! profile_stage "$id" sens-paired timeout 45s "$sens" --t5m-pair "$source" "$physical" >"$dir/paired.out" 2>"$dir/paired.err"; then
     cat "$dir/paired.err" >&2
     report_physical_red_source "$id" "$source" "$physical" "$dir/paired.err"
     fail "$id" "$(paired_failure_layer "$dir/paired.err")" "source-matched-physical-execution" "rejected"
   fi
-  if ! profile_stage "$id" sens-standalone timeout 45s "$sens" "$physical" >"$dir/physical.out" 2>"$dir/physical.err"; then
+  if ! profile_stage "$id" sens-standalone timeout 45s "$trit" eval-core4 "$physical" >"$dir/physical.out" 2>"$dir/physical.err"; then
     cat "$dir/physical.err" >&2
-    fail "$id" sens-standalone "standalone-physical-execution" "rejected"
+    fail "$id" sens-standalone "standalone-physical-execution-core4" "rejected"
   fi
   cmp -s "$dir/direct.out" "$dir/paired.out" ||
     report_output_divergence "$id" direct "$dir/direct.out" paired "$dir/paired.out"
