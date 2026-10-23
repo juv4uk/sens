@@ -140,6 +140,17 @@ class EncodedSourceLiteralTests(unittest.TestCase):
             "виконувана проєкція машинного зниження не має числових атомів",
         )
 
+    def test_current_machine_profile_uses_named_ukr_residents_without_numeric_literals(self):
+        path = ROOT / "lib/machine/profile/current-domain-x86-64.lisp"
+        source = path.read_text(encoding="utf-8")
+        self.assertIn("(machine-domain-profile-3", source)
+        self.assertIn("(key-shape domain+ukr-resident)", source)
+        self.assertEqual(
+            CHECK.find_forbidden_literals(source, path=path),
+            [],
+            "чинний машинний Lisp-профіль має іменні ключі без числових токенів",
+        )
+
     def test_unquoted_numeric_literals_are_rejected(self):
         found = CHECK.find_forbidden_literals("(сума 235 2.1564)\n")
         self.assertEqual(
