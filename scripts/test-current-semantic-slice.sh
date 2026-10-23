@@ -193,6 +193,20 @@ if [[ "$quantity_status" != "(quantity-arithmetic (status pass))" ]]; then
 fi
 printf 'QUANTITY-NATIVE-PASS source=%s authority=SENS domain=D24+\n' "$quantity_witness"
 
+# Мовна семантика й логіка перевіряються виконуваним українським Lisp-свідком.
+# Тут немає Rust-очікувань для CAR/CDR/CONS/ATOM/EQ/COND: shell лише
+# перевіряє підсумок, який сформувала сама програма SENS.
+language_laws_witness="tests/fixtures/domain-ladder-language-laws-witness.lisp"
+if ! language_laws_status="$(cargo run --quiet -p sens-cli --bin sens -- "$language_laws_witness" 2>&1)"; then
+  printf 'LANGUAGE-LAWS-RED source=%s actual=execution-error diagnostic=%s\n' "$language_laws_witness" "$language_laws_status" >&2
+  exit 1
+fi
+if [[ "$language_laws_status" != "(закон-драбини-мови (стан пройдено))" ]]; then
+  printf 'LANGUAGE-LAWS-RED source=%s expected=%s actual=%s\n' "$language_laws_witness" "(закон-драбини-мови (стан пройдено))" "$language_laws_status" >&2
+  exit 1
+fi
+printf 'LANGUAGE-LAWS-PASS source=%s authority=ukr-lisp laws=ATOM/EQ/CONS/CAR/CDR/COND\n' "$language_laws_witness"
+
 # #305 / TASK-001: empty meta-program semantics are owned by Lisp. The shell
 # observes only the named pass envelope; environment/result meaning stays in
 # the witness and no replacement Rust semantic assertion is introduced.
