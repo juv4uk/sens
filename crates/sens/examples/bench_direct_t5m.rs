@@ -2,7 +2,8 @@
 //! visible-source baseline, and repeated interpretation on the SAME hardware.
 //! Reports observations, never asserts a synthetic speedup or a native ISA.
 use sens::{
-    eval_parsed_expressions, lower_program, open_ternary_program, parse_canonical_binary, Session,
+    decode_ternary_words, eval_parsed_expressions, lower_program, open_ternary_program,
+    parse_canonical_binary, PhysicalT5Program, Session,
 };
 #[path = "support/reference_t5m.rs"]
 mod reference_t5m;
@@ -29,8 +30,9 @@ fn main() {
     eprintln!(
         "measurement only; ns/op includes allocations and host overhead; iterations={iterations}"
     );
-    println!("fixture,bytes,forms,t5m_reference_decode_parse_lower_ns,visible_parse_lower_ns,cached_lowered_eval_ns");
+    println!("fixture,bytes,forms,t5m_reference_decode_only_ns,t5m_exact_word_admission_ns,t5m_reference_decode_parse_lower_ns,visible_parse_lower_ns,cached_lowered_eval_ns");
     for (label, bytes) in [("quote", QUOTE), ("atom", ATOM), ("cond", COND)] {
+        let words = decode_ternary_words(bytes).unwrap();
         let program = reference_t5m::program(bytes).unwrap();
         let visible = open_ternary_program(bytes).unwrap();
         let reference = parse_canonical_binary(&visible).unwrap();
@@ -40,12 +42,26 @@ fn main() {
         assert_eq!(expected.output, actual.output);
         // Untimed warmups. No reliance on timing to establish semantics.
         for _ in 0..100 {
+            black_box(decode_ternary_words(black_box(bytes)).unwrap());
+            black_box(PhysicalT5Program::from_exact_words(black_box(&words)).unwrap());
             black_box(reference_t5m::program(black_box(bytes)).unwrap());
             black_box(lower_program(
                 &parse_canonical_binary(black_box(&visible)).unwrap(),
             ));
             black_box(program.execute(&mut Session::default()).unwrap());
         }
+        let decode_ns = measure(
+            || {
+                black_box(decode_ternary_words(black_box(bytes)).unwrap());
+            },
+            iterations,
+        );
+        let admission_ns = measure(
+            || {
+                black_box(PhysicalT5Program::from_exact_words(black_box(&words)).unwrap());
+            },
+            iterations,
+        );
         let direct_ns = measure(
             || {
                 black_box(reference_t5m::program(black_box(bytes)).unwrap());
@@ -70,7 +86,7 @@ fn main() {
             iterations,
         );
         println!(
-            "{label},{},{},{direct_ns:.2},{visible_ns:.2},{cached_ns:.2}",
+            "{label},{},{},{decode_ns:.2},{admission_ns:.2},{direct_ns:.2},{visible_ns:.2},{cached_ns:.2}",
             bytes.len(),
             program.form_count()
         );

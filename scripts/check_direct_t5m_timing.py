@@ -14,7 +14,8 @@ from pathlib import Path
 import sys
 
 COLUMNS = (
-    "fixture", "bytes", "forms", "t5m_reference_decode_parse_lower_ns",
+    "fixture", "bytes", "forms", "t5m_reference_decode_only_ns",
+    "t5m_exact_word_admission_ns", "t5m_reference_decode_parse_lower_ns",
     "visible_parse_lower_ns", "cached_lowered_eval_ns",
 )
 FIXTURES = {

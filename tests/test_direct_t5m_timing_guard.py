@@ -71,6 +71,8 @@ class DirectT5mTimingGuard(unittest.TestCase):
             lambda rows: rows[0].__setitem__(module.TIMINGS[0], "nan"),
             lambda rows: rows[0].__setitem__(module.TIMINGS[1], "inf"),
             lambda rows: rows[0].__setitem__(module.TIMINGS[2], "-5"),
+            lambda rows: rows[0].__setitem__(module.TIMINGS[3], "0"),
+            lambda rows: rows[0].__setitem__(module.TIMINGS[4], "nan"),
         )
         for index, mutate in enumerate(mutations):
             rows = [dict(row) for row in self.rows]
