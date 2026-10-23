@@ -423,6 +423,24 @@ fn selected_surface_callable(
         ReplSurface::Lisp => name.to_uppercase(),
         _ => name.to_owned(),
     };
+
+    // In a Ukrainian source position, the owner-ratified source-head index
+    // outranks the compatibility surface catalog. The latter may not contain
+    // every D4/D5/D8 callable (or may name an older route); falling through to
+    // Text7 would turn a valid Ukrainian call head into a non-callable D7 glyph.
+    if matches!(surface, ReplSurface::UkrainianFull | ReplSurface::Ukrainian) {
+        if let Some(identity) =
+            sens::semantic_registry_export::exact_uk_callable_for_source_head(&projected_name)
+        {
+            if let Some(core) = identity.core_operation() {
+                return Ok(Some(DomainIdentity::from(core)));
+            }
+            if sens::semantic_registry_export::is_admitted_exact_definition_target(identity) {
+                return Ok(Some(identity));
+            }
+        }
+    }
+
     let Some(identity_text) =
         surface_catalog::identity_for_surface_name(surface.code(), &projected_name)?
     else {
@@ -2543,6 +2561,15 @@ mod tests {
             )),
             "D8 EQUAL must not be lowered to D3 EQ: {equality_words:?}"
         );
+    }
+
+    #[test]
+    fn ukrainian_d4_not_uses_owner_ratified_source_head_before_compatibility_lookup() {
+        let not = selected_surface_callable(ReplSurface::UkrainianFull, "хибне?")
+            .expect("Ukrainian source-head lookup")
+            .expect("D4 NOT must be selected from the current owner table");
+        assert_eq!(not.width(), 4);
+        assert_eq!(not.packed_bits(), 0b0100);
     }
 
     #[cfg(feature = "zig-transport")]
