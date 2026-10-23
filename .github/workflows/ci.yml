@@ -283,7 +283,9 @@ jobs:
           cargo test --locked -p sens --test ukr_unpaired_benchmark_runtime український_читач_виконує_цитовані_дані_й_точний_d24_дріб -- --exact --nocapture
           cargo test --locked -p sens --lib український_парсер_виконує_точний_дріб_та_відхиляє_ділення_на_нуль -- --nocapture
           # Анотації GitHub Actions — лише результати реально виконаних тестів.
-          echo "::notice file=benchmarks/lists.lisp,title=SENS Lisp benchmark::PASS source=lists.lisp result=10 native=SENS physical_T5M=NOT_TESTED"
+          # Довжина списку вже не перевіряється числовим Rust-оракулом. Її D1-закон — нижче.
+          # Поки Lisp-свідок не виконано, не оголошувати фіктивного PASS.
+          echo "::notice file=benchmarks/lists.lisp,title=SENS Lisp benchmark::PENDING_LANGUAGE_LAW source=lists.lisp verifier=d24-list-language physical_T5M=NOT_CERTIFIED"
           echo "::notice file=benchmarks/arithmetic.lisp,title=SENS Lisp benchmark::PASS source=arithmetic.lisp result=15505 native=SENS negative=CHECKED physical_T5M=NOT_TESTED"
           echo "::notice file=benchmarks/parser.lisp,title=SENS Lisp benchmark::PASS source=parser.lisp result=5/336 native=SENS negative=CHECKED physical_T5M=NOT_TESTED"
           {
@@ -291,11 +293,11 @@ jobs:
             echo
             echo '| Українська програма | Перевірений результат | Шлях |'
             echo '|---|---:|---|'
-            echo '| `benchmarks/lists.lisp` | `10` | SENS Lisp-eval |'
+            echo '| `benchmarks/lists.lisp` | очікує окремого мовного кроку | tests/semantic/ukr-lists-d24-language-law.lisp |'
             echo '| `benchmarks/arithmetic.lisp` | `15505` | SENS Lisp-eval, негатив перевірено |'
             echo '| `benchmarks/parser.lisp` | `5/336` | SENS Lisp-eval, негатив перевірено |'
             echo
-            echo 'Це фактично перевірені значення, не заміри часу. Для цих трьох джерел T5M-пари окремо не заявлені.'
+            echo 'Значення arithmetic/parser перевірені вище. Lists перевіряється лише пізнішим Lisp-законом; це не заміри часу. T5M для трьох джерел не атестовано.'
           } >> "$GITHUB_STEP_SUMMARY"
 
       # Одного білда з AST вистачає для коридору, фізичних Lisp-законів та звіту.
