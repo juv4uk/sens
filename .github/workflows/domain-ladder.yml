@@ -1,5 +1,4 @@
-# Виведено з карантину 14.10.2026 після фіксу тесту: test_two_negative_mutations_are_rejected
-# хибно падав через коментар із #d1:1 (мутація била в коментар, не в код). Тест полагоджено.
+# Поточні українські проєкції перевіряємо окремо від нативного SENS runtime.
 name: Драбина доменів — точна ширина та механіка
 
 on:
@@ -9,7 +8,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
-      - name: UTF-8 точний D1 без підміни числових аргументів — 14 результатів
+      - name: Статичний аудит української UTF-8 проєкції без SID8
         run: python3 -m unittest discover -s tests -p test_utf8_d1_predicate_migration.py -v
       - uses: dtolnay/rust-toolchain@stable
       - name: Перевірити побітове пакування D1–D10 без вирівнювання
