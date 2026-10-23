@@ -430,10 +430,22 @@ jobs:
             echo 'system_one_research_tests=true' >> "$GITHUB_OUTPUT"
           fi
 
+          # Адресний нативний SENS/Zig свідок при зміні D5/D24.
+          if grep -Eq '^(crates/sens-cli/src/bin/sens-math-t5m[.]rs|crates/sens/src/source_projection[.]rs|crates/sens/src/eval/d5_arithmetic[.]rs|[.]github/workflows/ci[.]yml)$' "$changed_all"; then
+            echo 'math_t5m_tests=true' >> "$GITHUB_OUTPUT"
+          fi
+
           # Обов'язковий повнофайловий AST/T5M smoke використовує live Zig codec.
           echo 'needs_zig=true' >> "$GITHUB_OUTPUT"
 
       - uses: ./.github/actions/install-zig
+
+      - name: D5 математика — фізична парність SENS/Zig T5M
+        if: ${{ !cancelled() && steps.changed-t5m-lisp.outputs.math_t5m_tests == 'true' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          cargo test --locked -p sens-cli --bin sens-math-t5m -- --nocapture
 
       - name: "System One research — один адресний тест учителя, учня та метрик"
         if: ${{ always() && steps.changed-t5m-lisp.outputs.system_one_research_tests == 'true' }}
@@ -1842,8 +1854,8 @@ jobs:
 
       - name: Побудувати SENS/T5M виконавець
         env:
-          CARGO_BUILD_JOBS: 2
-          CARGO_INCREMENTAL: 0
+          CARGO_BUILD_JOBS: '2'
+          CARGO_INCREMENTAL: '0'
         run: |
           cargo build --locked -p sens-cli --bin sens-trit
           cargo build --locked -p sens --example sens_numeric_memory_bench

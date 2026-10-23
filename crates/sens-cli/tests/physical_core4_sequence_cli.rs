@@ -352,12 +352,12 @@ fn verify_unpaired_ukrainian_libs_natively() {
         "list-reverse-tail-general",
         "list-last-adjacent-equal-atom-suffix-general",
         "list-first-adjacent-equal-atom-suffix-general",
+        "list-first-adjacent-atomic-triple-zero-copy-general",
         "list-domain-first-class-compose",
         "list-first-class-predicate-suffix-zero-copy-general",
         "list-foundation-compositions",
         "list-last-atomic-run-first-class-zero-copy-general",
         "викликати-доменний-код",
-        "list-first-adjacent-atomic-triple-zero-copy-general",
         "list-every-fifth-linear-general",
         "list-every-fourth-linear-general",
         "list-every-second-general",
@@ -532,6 +532,7 @@ fn verify_unpaired_ukrainian_libs_natively() {
         "суфікс-останнього-предиката-без-копії",
         "відобразити-першокласний-доменний-код-на-список",
         "відібрати-за-першокласним-предикатом",
+        "квантори-першокласного-предиката-без-копії",
         "залишити-точні-числа",
     ] {
         let source = root.join("lib").join(format!("{stem}.lisp"));

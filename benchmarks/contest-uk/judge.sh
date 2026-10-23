@@ -47,7 +47,11 @@ fi
 declare -A seen
 rows=""
 for path in "${inputs[@]}"; do
-  [[ "$path" == benchmarks/contest-uk/*.sens && "$path" != *"/../"* ]] || error "некоректний шлях: $path"
+  # Ручний запуск приймає тільки чинних учасників безпосередньо в contest-uk/.
+  # Bash-шаблон *.sens у [[ ]] збігається також із вкладеним superseded/*.sens:
+  # він помилково повертав архівні програми до активного суду.
+  [[ "$path" == benchmarks/contest-uk/*.sens &&
+     "${path#benchmarks/contest-uk/}" != */* ]] || error "некоректний шлях: $path"
   [[ -z "${seen[$path]+yes}" ]] || continue
   seen[$path]=1
   source="${path%.sens}.lisp"; view="${path%.sens}"
