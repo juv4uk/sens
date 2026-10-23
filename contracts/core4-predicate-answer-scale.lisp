@@ -2,9 +2,9 @@
 ;
 ; Два ортогональні простори:
 ;   логічні відповіді: 0^n | 1^n | (), n=1..7
-;   функції SENS: 00000000..11111111
+;   функції SENS: точні D1–D10, повні викличні назви «укр».
 ;
-; Шлях оцінювання ніколи не входить у 8-бітовий простір функцій SENS.
+; Історичний простір із 256 байтових адрес не є чинним D8.
 ; Більше повторюваних бітів означає меншу визначеність і збіжність до ().
 ;
 ; Санскритські мітки — термінологічні якорі SENS/Core4, а не твердження, що
@@ -24,7 +24,9 @@
    (answer-grammar . "0^n | 1^n | (), n=1..7")
    (answer-count . 15)
    (semantic-form . homogeneous-bits)
-   (sens-function-space . separate-00000000-through-11111111)
+   (current-function-space . exact-domain-ladder-d1-d10)
+   (current-call-surface . укр)
+   (legacy-byte-space . historical-only)
    (probability-model . forbidden)
    (confidence-score . forbidden)
    (record-wrapper . forbidden))
@@ -46,8 +48,8 @@
    (meaning-en . "unknown")
    (direction . none)
    (sens-function . none)
-   (convergence-functions . (00000000 11111111))
-   (function-result . ()))
+   (convergence-functions . historical-only)
+   (function-result . not-implied-for-current-domains))
 
   ((direction . yes)
    (bit . "1")
@@ -64,8 +66,8 @@
    (not-law . same-width-bit-inversion)
    (weakening-law . append-same-bit)
    (boundary-law . seven-directed-grades-converge-to-empty-list)
-   (eighth-bit-law . belongs-to-sens-function-space)
-   (function-convergence-law . distinct-functions-same-empty-result)
+   (eighth-bit-law . historical-model-only)
+   (function-convergence-law . not-established-for-current-domains)
    ; Усі 15 відповідей лежать на одній лінії істинності:
    ;   0 < 00 < … < 0000000 < () < 1111111 < … < 11 < 1
    (truth-order . "0 < 00 < 000 < 0000 < 00000 < 000000 < 0000000 < () < 1111111 < 111111 < 11111 < 1111 < 111 < 11 < 1")
@@ -120,14 +122,11 @@
   ((predicate-projection . core4)
    (atom? . ((on-atom (1)) (on-pair (0)) (on-empty-list ())))
    (eq? . ((on-same-atoms (1)) (on-distinct-atoms (0))))
-   (runtime-status . installed)
-   (answer-functions .
-     ((10110001 answer-not)
-      (10110010 answer-and)
-      (10110011 answer-or)
-      (10110100 answer-weaken)
-      (10110101 answer-atom)
-      (10110110 answer-eq)))
+   (runtime-status . historical-only)
+   ; Колишні байтові координати цих імен належать історії, не D8.
+   (historical-answer-names .
+     (answer-not answer-and answer-or answer-weaken answer-atom answer-eq))
+   (current-answer-function-callability . unproved)
    (record-predicates . retired-2026-09-26)
    (cond-two-part-clause . selects-only-yes)
    (core1-core3-answer-domain . grade-1-only)
