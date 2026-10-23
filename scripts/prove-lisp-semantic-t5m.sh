@@ -364,6 +364,13 @@ run_case run_law d4-recursion-input-shapes-mutant tests/semantic/d4-recursion-in
 run_case run_law d4-recursion-d7-atom-parity tests/semantic/d4-recursion-d7-atom-parity-law.lisp 1
 run_case run_law d4-recursion-benchmark-positive "$recursion_law_bundle" 1
 run_case run_law d4-recursion-benchmark-mutant "$recursion_mutant_bundle" 0
+# D3 гарячий SENS-бенчмарк: семантика належить Lisp, Zig тільки T5M.
+d3_hot_law="$evidence/d3-proper-tail-hot-positive.lisp"
+d3_hot_mutant="$evidence/d3-proper-tail-hot-mutant.lisp"
+cat -- benchmarks/d3-proper-tail-hot.lisp tests/semantic/d3-proper-tail-hot-law.lisp > "$d3_hot_law"
+cat -- benchmarks/d3-proper-tail-hot.lisp tests/semantic/d3-proper-tail-hot-mutant.lisp > "$d3_hot_mutant"
+run_case run_law d3-proper-tail-hot-positive "$d3_hot_law" 1
+run_case run_law d3-proper-tail-hot-mutant "$d3_hot_mutant" 0
 # Ізолюємо D3 атомну рівність від D8 структурної рівності в тому самому обході.
 # Це окрема позитивна/негативна пара SENS, не підміна червоного D8-тесту.
 recursion_atom_law_bundle="$evidence/d4-recursion-atom-positive.lisp"
