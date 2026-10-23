@@ -526,6 +526,18 @@ fn project_repl_surface_expression_in_scope(
                     span: expression.span,
                 });
             }
+            // The mixed source reader can pre-resolve a human spelling through
+            // the generated callable index before this projection runs.
+            // In source position, the selected owner table is authoritative:
+            // D8 structural equality must not stay a stale D3 EQ identity.
+            // Quote/data is shielded by the enclosing QUOTE branch above; bound
+            // lexical names are shielded by the binder check immediately above.
+            if let Some(projected) = selected_surface_callable(surface, name)? {
+                return Ok(Expr {
+                    kind: ExprKind::DomainIdentity(projected),
+                    span: expression.span,
+                });
+            }
         }
         return Ok(Expr {
             kind: ExprKind::DomainIdentity(*identity),
@@ -2407,6 +2419,7 @@ mod tests {
             ("текст-у-символ", 0b11101101),
             ("символ-у-текст", 0b11101110),
             ("значення-у-текст", 0b11110100),
+            ("однакові?", 0b11110111),
         ] {
             let actual = selected_surface_callable(ReplSurface::UkrainianFull, name)
                 .expect("ratified Ukrainian ladder must parse")
@@ -2448,6 +2461,24 @@ mod tests {
             ExactDomainWord::Identity(DomainIdentity::D8(id))
                 if id.word().packed_bits() == 0b11110100
         )));
+
+        // Structural EQUAL is D8:11110111, not the superficially similar D3 EQ.
+        // The mixed reader may already have represented its source head as a
+        // DomainIdentity, so assert the complete projection-to-T5M route.
+        let equality_words = prepare_t5m_repl_words(
+            "(однакові? x y)",
+            ReplSurface::UkrainianFull,
+            &session,
+        )
+        .expect("D8 structural equality retains its exact identity in T5M");
+        assert!(
+            equality_words.iter().any(|word| matches!(
+                word,
+                ExactDomainWord::Identity(DomainIdentity::D8(id))
+                    if id.word().packed_bits() == 0b11110111
+            )),
+            "D8 EQUAL must not be lowered to D3 EQ: {equality_words:?}"
+        );
     }
 
     #[cfg(feature = "zig-transport")]
