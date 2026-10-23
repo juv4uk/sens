@@ -1136,6 +1136,20 @@ class SystemOneResearchPipelineTests(unittest.TestCase):
         self.assertIsNone(no_safe_threshold["threshold"])
         self.assertEqual(no_safe_threshold["accepted"], 0)
 
+        too_few_validation = evaluator.select_threshold(
+            rows,
+            max_selective_risk=0.50,
+            min_accepted=7,
+        )
+        self.assertEqual(too_few_validation["status"], "no-safe-threshold")
+        self.assertIsNone(too_few_validation["threshold"])
+        self.assertEqual(too_few_validation["candidate_threshold_count"], 0)
+        self.assertIsNone(too_few_validation["per_candidate_confidence_level"])
+        self.assertEqual(
+            too_few_validation["reason"],
+            "validation count is below minimum accepted count",
+        )
+
         wrong_split = [dict(row) for row in rows]
         wrong_split[0]["split"] = "test"
         with self.assertRaises(evaluator.EvaluationError):
