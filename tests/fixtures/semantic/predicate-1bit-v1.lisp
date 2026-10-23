@@ -1,12 +1,13 @@
 ; tests/fixtures/semantic/predicate-1bit-v1.lisp — #1709, закон #1699.
-; Українська проєкція. Результат предиката — рівно один біт Д1.
+; Українська проєкція Д3. Результат предиката — рівно один біт Д1.
+; Ідентичності походять із ратифікованих доменів, не SID8-чисел.
 
 ((expect . expect-value)
  (expr . "(тотожне? 1 1)")
  (expected . (value (1)))
  (active . t)
  (name . "тотожне? 1 1 — YES")
- (semantic-id . 34)
+ (semantic-id . "D3:101")
  (governs . "#1699")
  (note . "Один біт YES."))
 
@@ -15,7 +16,7 @@
  (expected . (value (0)))
  (active . t)
  (name . "тотожне? 1 2 — NO")
- (semantic-id . 34)
+ (semantic-id . "D3:101")
  (governs . "#1699")
  (note . "Один біт NO."))
 
@@ -24,7 +25,7 @@
  (expected . (value (1)))
  (active . t)
  (name . "ATOM не-пара — YES")
- (semantic-id . 181)
+ (semantic-id . "D3:010")
  (governs . "#1704")
  (note . "Не-пара → YES."))
 
@@ -33,7 +34,7 @@
  (expected . (value (0)))
  (active . t)
  (name . "ATOM пара — NO")
- (semantic-id . 181)
+ (semantic-id . "D3:010")
  (governs . "#1704")
  (note . "Пара → NO."))
 
@@ -42,7 +43,7 @@
  (expected . (value (1)))
  (active . ())
  (name . "ATOM () — YES")
- (semantic-id . 181)
+ (semantic-id . "D3:010")
  (governs . "#1704 #1709")
  (note . "Неактивний доки main може відповідати ()."))
 
@@ -51,6 +52,6 @@
  (expected . (value (1)))
  (active . t)
  (name . "тотожне? зберігає PredicateBit")
- (semantic-id . 34)
+ (semantic-id . "D3:101")
  (governs . "#1699 #218")
  (note . "Структурна рівність predicate result."))
