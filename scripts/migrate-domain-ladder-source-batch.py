@@ -26,6 +26,7 @@ from report_original_migration_candidates import load_nonprogram_classification
 from domain_tables import read_domain_table
 from report_ukr_projection_progress import _contains_source_definitions
 BITS = re.compile(r"[01]{8}\Z")
+TAGGED_W8 = re.compile(r"(?:sid8|sens8):([01]{8})\Z", re.IGNORECASE)
 TARGET = re.compile(r"D(10|[1-9]):([01]+)")
 ALLOW = {"DIRECT-CURRENT-IDENTITY", "CURRENT-PROJECTION-DERIVED"}
 SCOPES = ("lib/", "knowledge/", "scripts/", "experiments/", "racket/boot/")
@@ -276,12 +277,15 @@ def rewrite(src, mapping, blocked):
         f = stack[-1] if stack else None
         if f and f["first"]:
             f["first"] = False
-            if not f["quoted"] and not quote and BITS.fullmatch(token):
-                if token in mapping:
-                    edits.append((start, i, mapping[token]))
+            tagged = TAGGED_W8.fullmatch(token)
+            historical = tagged.group(1) if tagged else token
+            if not f["quoted"] and not quote and (tagged or BITS.fullmatch(token)):
+                if historical in mapping:
+                    edits.append((start, i, mapping[historical]))
                 else:
-                    problems.append(token + ": " + blocked.get(token, "unknown"))
-            if token in {"00000001", "001", "QUOTE", "quote", "як-є"}:
+                    problems.append(token + ": " + blocked.get(historical, "unknown"))
+            if (token in {"00000001", "001", "QUOTE", "quote", "як-є"}
+                    or (tagged and mapping.get(historical) == "як-є")):
                 f["quote_children"] = True
         quote = False
     if stack:
@@ -354,7 +358,8 @@ def run(root, write=False, selected=None):
         # Every exact-eight executable candidate needs an actual parse, even
         # when a source file contains no historical DEFINE/DEF anchor.
         possible_legacy = bool(re.search(
-            r"\(\s*[01]{8}(?=[\s)])", original))
+            r"\(\s*(?:[01]{8}|(?:sid8|sens8):[01]{8})(?=[\s)])",
+            original, flags=re.IGNORECASE))
         active_heads = set()
         if possible_legacy:
             try:
@@ -365,21 +370,22 @@ def run(root, write=False, selected=None):
                                "reasons": ["source-era parser incomplete: " + str(err)]})
                 continue
         has_legacy_definition = bool(active_heads & {"00001001", "00001011"})
+        explicit_legacy = sorted(h for h in active_heads if TAGGED_W8.fullmatch(h))
+        unproved = sorted(h for h in active_heads if BITS.fullmatch(h))
         if not has_legacy_definition:
-            # A textual eight-bit pattern in a comment, quoted datum, or
-            # source template is not an executable SID8 call. Only parser-
-            # confirmed live W8 heads may need a provenance decision.
-            unproved = sorted(h for h in active_heads if BITS.fullmatch(h))
-            if not unproved:
+            if not explicit_legacy and not unproved:
                 report.append({"path": path, "status": "unchanged",
                                "potential_heads": 0, "reasons": []})
                 continue
-            # An actual unmatched 8-bit call may be modern D8 or legacy SID8;
-            # neither its bytes nor absence of old DEFINE proves the era.
-            report.append({"path": path, "status": "source-era-unproved",
-                           "potential_heads": len(unproved),
-                           "reasons": ["unattributed 8-bit executable heads: " + ", ".join(unproved)]})
-            continue
+            if unproved:
+                # SID8/Sens8 tags prove only their own historical identity.
+                # The same file's bare W8 words may be modern D8: fail closed.
+                report.append({"path": path, "status": "source-era-unproved",
+                               "potential_heads": len(unproved),
+                               "reasons": ["unattributed 8-bit executable heads: " + ", ".join(unproved)]})
+                continue
+            # Explicit live legacy labels are valid migration candidates
+            # without inventing the presence of a historical DEFINE.
         if "GENERATED" in original[:360] or "do not hand-edit" in original[:360]:
             report.append({"path": path, "status": "source-era-unproved",
                            "potential_heads": 0,
