@@ -128,6 +128,13 @@ report_physical_red_source() {
 
 run_law() {
   local id="$1" source="$2" expected="$3" dir physical actual
+  local profile="${4:-clean}"
+  local -a paired_args=()
+  case "$profile" in
+    clean) ;;
+    core4) paired_args=(--core4-runtime) ;;
+    *) fail "$id" harness "profile=clean-or-core4" "$profile" ;;
+  esac
   dir="$evidence/$id"
   physical="$dir/program.sens"
   mkdir -p "$dir"
@@ -156,13 +163,13 @@ run_law() {
   # має відповідати прямому Lisp та парному виконавцю. Байтам усе ще немає
   # доступу до source чи binding-source: sens-trit декодує лише фізичний
   # .sens, а Core4 явно підвантажує SENS, як вимагає контракт цих законів.
-  if ! profile_stage "$id" sens-paired timeout 45s "$sens" --t5m-pair "$source" "$physical" >"$dir/paired.out" 2>"$dir/paired.err"; then
+  if ! profile_stage "$id" sens-paired timeout 45s "$sens" --t5m-pair "$source" "$physical" "${paired_args[@]}" >"$dir/paired.out" 2>"$dir/paired.err"; then
     cat "$dir/paired.err" >&2
     report_physical_red_source "$id" "$source" "$physical" "$dir/paired.err"
     # Діагностика відмінності середовищ: прямий файл має Core4,
     # а парний фізичний маршрут запускається в чистому SENS.
     # Додатковий запуск ніколи не змінює RED на PASS.
-    if grep -Fq 'domain identity is not callable under its ratified law: D7 ' "$dir/paired.err"; then
+    if [[ "$profile" == clean ]] && grep -Fq 'domain identity is not callable under its ratified law: D7 ' "$dir/paired.err"; then
       if profile_stage "$id" sens-paired-core4-diagnostic timeout 45s "$sens" \
         --t5m-pair "$source" "$physical" --core4-runtime \
         >"$dir/paired-core4.out" 2>"$dir/paired-core4.err"; then
@@ -871,10 +878,10 @@ test -f "$epistemic_d1_source" && test ! -L "$epistemic_d1_source" || {
 cat -- "$epistemic_d1_source" "$epistemic_constructor_source" "${epistemic_sources[@]}" tests/semantic/language-law-epistemic-records.lisp > "$epistemic_law_bundle"
 cat -- "$epistemic_d1_source" "$epistemic_constructor_source" "${epistemic_sources[@]}" tests/semantic/language-mutant-epistemic-records.lisp > "$epistemic_mutant_bundle"
 sha256sum "$epistemic_d1_source" "$epistemic_constructor_source" "${epistemic_sources[@]}" tests/semantic/language-law-epistemic-records.lisp tests/semantic/language-mutant-epistemic-records.lisp > "$evidence/epistemic-record-logic-inputs.sha256"
-run_case run_law epistemic-record-logic-positive "$epistemic_law_bundle" "(epistemic-authority-witness (status pass))"
+run_case run_law epistemic-record-logic-positive "$epistemic_law_bundle" "(epistemic-authority-witness (status pass))" core4
 # Назва, статус, фактичний та очікуваний D1 доведені D8 всередині Lisp.
 # Перевіряємо рівно один D1:1 від усіх фізичних виконавців без host-проєкції D7.
-run_case run_law epistemic-record-logic-mutant "$epistemic_mutant_bundle" 1
+run_case run_law epistemic-record-logic-mutant "$epistemic_mutant_bundle" 1 core4
 # Д7/D8: окремі малі закони про текстові теги без LET чи числових літералів.
 # Бібліотека та предикати — Lisp; Zig відповідає лише за фізичний носій.
 # Сам модуль Epistemic при завантаженні зв'язує чинне ім'я
