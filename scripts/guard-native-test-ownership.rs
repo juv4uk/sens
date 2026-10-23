@@ -151,7 +151,7 @@ fn file_exists(path: &str) -> bool {
 fn changed_since_in(repo: &Path, base: &str, head: &str) -> Result<Vec<String>,String> {
     let out = Command::new("git").current_dir(repo)
         .args(["diff", "--no-ext-diff", "--name-only", "-z",
-            "--diff-filter=ACMRT", base, head, "--", "tests/semantic/", "crates/"])
+            "--diff-filter=ACDMRT", base, head, "--", "tests/semantic/", "crates/"])
         .output().map_err(|e| e.to_string())?;
     if !out.status.success() { return Err(format!("git diff {}: {}",
         out.status, String::from_utf8_lossy(&out.stderr))); }
@@ -186,6 +186,8 @@ fn test_git_change_filter() -> Result<(),String> {
         fs::create_dir_all(dir.join("crates/sens/tests")).map_err(|e| e.to_string())?;
         fs::write(dir.join("tests/semantic/old-law.lisp"), "(первинний-закон)\n")
             .map_err(|e| e.to_string())?;
+        fs::write(dir.join("tests/semantic/deleted-law.lisp"), "(закон-для-вилучення)\n")
+            .map_err(|e| e.to_string())?;
         fs::write(dir.join("crates/sens/tests/carrier.rs"), "// механізм\n")
             .map_err(|e| e.to_string())?;
         git(&["add", "."])?;
@@ -198,7 +200,9 @@ fn test_git_change_filter() -> Result<(),String> {
             .map_err(|e| e.to_string())?;
         fs::write(dir.join("tests/semantic/новий-law.lisp"), "(новий-закон)\n")
             .map_err(|e| e.to_string())?;
-        git(&["add", "."])?;
+        fs::remove_file(dir.join("tests/semantic/deleted-law.lisp"))
+            .map_err(|e| e.to_string())?;
+        git(&["add", "-A"])?;
         git(&["-c", "user.name=SensGuard", "-c",
             "user.email=sens-guard@example.invalid", "commit", "-qm", "change"])?;
         let changed = changed_since_in(&dir, &base, "HEAD")?;
@@ -206,12 +210,13 @@ fn test_git_change_filter() -> Result<(),String> {
             "tests/semantic/old-law.lisp",
             "crates/sens/tests/carrier.rs",
             "tests/semantic/новий-law.lisp",
+            "tests/semantic/deleted-law.lisp",
         ] {
             if !changed.iter().any(|item| item == path) {
                 return Err(format!("Не побачено Git-зміну: {path}; знайдено={changed:?}"));
             }
         }
-        if changed.len() != 3 {
+        if changed.len() != 4 {
             return Err(format!("Неочікуваний набір Git-змін: {changed:?}"));
         }
         Ok(())
@@ -290,6 +295,13 @@ run_case run_law sample-mut tests/semantic/sample-mutant.lisp 0\n\
     );
     if !error_route.is_empty() {
         return Err(format!("typed-error witness route was rejected: {error_route:?}"));
+    }
+    let deleted = audit(
+        &["tests/semantic/deleted-law.lisp".into()], runner, ci,
+        |path| path != "tests/semantic/deleted-law.lisp", |_| Ok(String::new()),
+    );
+    if !deleted.iter().any(|err| err.contains("SENS_LAW_SOURCE_MISSING")) {
+        return Err("deleted semantic source was silently treated as unchanged".into());
     }
 
     let invalid = audit(&["tests/semantic/not-a-law.py".into()], runner, ci,
