@@ -82,42 +82,42 @@
       "previous_git_blob_sha1": "461e45a4c196d4705661e9b6023a0d00faf89ffb",
       "current_git_blob_sha1": "2cff16d6e5d25cec1d7dd1533707c9513a601ca7",
       "reviewed_commit": "2ac707cccbf9044bfd65e7182df63b0cc3ea937e",
-      "reason": "Прибрано посилання на зняті Rust-оракули; наявні Lisp-свідки збережено. Це інвентар доказів, не виконувана програма."
+      "reason": "Вилучено посилання на зняті Rust-оракули; лишено наявні Lisp-свідки. Це декларативний інвентар доказів, не викличний код."
     },
     {
       "path": "knowledge/repo-tooling-inventory.lisp",
       "previous_git_blob_sha1": "db460f4fe86de9a9f40d5f1623d6a760a291d6d8",
       "current_git_blob_sha1": "5476417a88666148ba04313ea9dc389845926d37",
       "reviewed_commit": "8eb7aac293f636cf587598897093a2113da21b65",
-      "reason": "Оновлено інвентар інструментів: старі #b-літерали метаданих замінено; це governance-дані, не право виконання."
+      "reason": "Прибрано старі двійкові метадані та зняті SID8-інструменти; лишається декларативним інвентарем керування, а не семантичним авторитетом."
     },
     {
       "path": "knowledge/semantic-lineage-core-v1.lisp",
       "previous_git_blob_sha1": "c0feb271de0c60f83e3ba7ce6d44040e445b89cf",
       "current_git_blob_sha1": "de2496d6fa81e0ca3e84e6680f9172df75e91a6e",
       "reviewed_commit": "d84bfc1352db5dec942e530f0a9e520c04f4d004",
-      "reason": "Історичний простір SID явно обмежено походженням; актуальні концепти мають точні доменні ідентичності та українські назви."
+      "reason": "Плоский простір старих SID явно переведено в historical-only; запис більше не подає його як сучасну тотожність або поверхню виклику."
     },
     {
       "path": "knowledge/semantic-ownership.lisp",
       "previous_git_blob_sha1": "0cc7ed16e8489abdaba51a1230ab934a7c99aebe",
       "current_git_blob_sha1": "bc2eee9409cb4ad44f9c3cb03b31f86ce1e3fade",
       "reviewed_commit": "793c7e3c0c54328a05b444d800209483b5175836",
-      "reason": "Складений макрос описано українською композицією «визначити» + «макрос», а не старим кодом."
+      "reason": "Опис макросу використовує українську композицію «визначити» + «макрос» замість історичного коду; файл є інвентарем ownership, не викличною програмою."
     },
     {
       "path": "knowledge/sens-primary.lisp",
       "previous_git_blob_sha1": "1d91443fa81fb651cfc40864d787b9102dfbaaee",
       "current_git_blob_sha1": "ccc8c47db86157d8b1eb64041943c17865e0777d",
       "reviewed_commit": "da4002aaaa6b7233d938d0f1436fb2650a08fbcd",
-      "reason": "Числа аксіом подано як дані, не голови виклику Lisp; файл лишається доктриною без семантичних повноважень."
+      "reason": "Номери аксіом явно подано як дані через мітку «аксіома», а не як викличні голови Lisp; файл фіксує доктрину, а не семантичні повноваження."
     },
     {
       "path": "knowledge/silent-fallback-inventory.lisp",
       "previous_git_blob_sha1": "94970575b9ff92f446dc308a6ba7dfb6c252a326",
       "current_git_blob_sha1": "054f01c98212a8130cc9c367978da2bc80b4463e",
       "reviewed_commit": "d3a292d2bfed52ba087376b7d6f89a64357531d6",
-      "reason": "Інвентар доповнено двома підтвердженими сайтами тихого відкату; вкладені ключі є даними аудиту, а не виконуваними головами."
+      "reason": "Інвентар доповнено конкретними місцями тихого серіалізаторного fallback; фрагменти джерела зберігаються як текст походження, а не виконувані голови."
     }
   ],
   "retired_post_snapshot_sources": [
