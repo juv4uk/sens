@@ -14,6 +14,7 @@ const SOURCES: &[&str] = &[
     include_str!("../../../lib/persistent-vector.lisp"),
     include_str!("../../../lib/time.lisp"),
     include_str!("../../../lib/epistemic.lisp"),
+    include_str!("../../../tests/fixtures/witness-runner.lisp"),
 ];
 
 fn evaluate_ukr(
