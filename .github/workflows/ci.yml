@@ -353,13 +353,13 @@ jobs:
           fi
           # Вимірюємо ТІЛЬКИ T5M transport Zig, без виконання мовних законів.
           # У Zig 0.16 — Io.Clock.awake, а не видалений std.time.Timer.
-          if zig run -O ReleaseFast -lc research/zig-codecs/bench_t5m.zig \
+          if zig run -O ReleaseFast -lc bench_t5m.zig \
               > "$RUNNER_TEMP/zig-t5m-benchmark.log" 2>&1; then
             cat "$RUNNER_TEMP/zig-t5m-benchmark.log"
             echo "::notice title=Zig T5M benchmark::MEASURED provenance=$(git rev-parse HEAD) physical=benchmarks/lists.sens language_truth=NOT_ASSERTED"
           else
             cat "$RUNNER_TEMP/zig-t5m-benchmark.log" >&2
-            echo "::error file=research/zig-codecs/bench_t5m.zig,title=Zig benchmark::REGRESSION layer=codec-benchmark expected=canonical-roundtrip actual=failed"
+            echo "::error file=bench_t5m.zig,title=Zig benchmark::REGRESSION layer=codec-benchmark expected=canonical-roundtrip actual=failed"
             zig_failed=1
           fi
           exit "$zig_failed"

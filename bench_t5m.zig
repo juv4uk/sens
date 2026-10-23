@@ -3,8 +3,8 @@
 //! Замість видаленого std.time.Timer використовується Io.Clock.awake.
 
 const std = @import("std");
-const codec = @import("t5m.zig");
-const physical: []const u8 = @embedFile("../../benchmarks/lists.sens");
+const codec = @import("research/zig-codecs/t5m.zig");
+const physical: []const u8 = @embedFile("benchmarks/lists.sens");
 
 fn sortedCopy(values: [11]u64) [11]u64 {
     var sorted = values;
