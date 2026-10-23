@@ -56,7 +56,8 @@ jobs:
           python3 -m unittest \
             tests/test_no_encoded_source_literals.py \
             tests/test_ukrainian_domain_projection_rules.py \
-            tests/test_sid8_broad_source_cutover.py -v
+            tests/test_sid8_broad_source_cutover.py \
+            tests/test_domain_ladder_source_batch.py -v
 
   lisp-surface:
     name: Підсумковий гейт перевірок SENS
