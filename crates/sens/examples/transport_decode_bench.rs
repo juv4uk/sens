@@ -81,25 +81,32 @@ fn main() -> ExitCode {
         }
     }
 
-    let start = Instant::now();
-    for _ in 0..rounds {
-        for record in &records {
-            if let Err(e) = decode_one(form, record) {
-                eprintln!("{e}");
-                return ExitCode::FAILURE;
+    // 11 однакових проб decode-only (як у Criterion/Hyperfine).
+    // Корпус, I/O та прогрів — поза вимірюваною секцією.
+    let mut samples_ns = Vec::with_capacity(11);
+    for sample in 0..11 {
+        let start = Instant::now();
+        for _ in 0..rounds {
+            for record in &records {
+                if let Err(e) = decode_one(form, record) {
+                    eprintln!("sample={sample} {e}");
+                    return ExitCode::FAILURE;
+                }
             }
         }
+        let elapsed_ns = start.elapsed().as_nanos();
+        samples_ns.push(elapsed_ns);
+        println!("sample form={form} index={} records={} rounds={} elapsed_ns={elapsed_ns}", sample + 1, records.len(), rounds);
     }
-    let elapsed = start.elapsed();
-    let messages = records.len() * rounds;
-    let ns_per_message = elapsed.as_secs_f64() * 1e9 / messages as f64;
-    let msg_per_sec = messages as f64 / elapsed.as_secs_f64();
-
+    let mut sorted = samples_ns.clone();
+    sorted.sort_unstable();
+    let messages = records.len() * rounds * samples_ns.len();
+    let total_ns: u128 = samples_ns.iter().sum();
+    let ns_per_message = total_ns as f64 / messages as f64;
+    let msg_per_sec = messages as f64 * 1e9 / total_ns as f64;
     println!(
-        "form={form} messages={messages} elapsed_ns={:.0} ns_per_message={:.3} msg_per_sec={:.3}",
-        elapsed.as_secs_f64() * 1e9,
-        ns_per_message,
-        msg_per_sec
+        "form={form} messages={messages} elapsed_ns={total_ns} ns_per_message={ns_per_message:.3} msg_per_sec={msg_per_sec:.3} samples=11 warmups=1 p50_batch_ns={} p90_batch_ns={} scope=decode-only",
+        sorted[5], sorted[9]
     );
     ExitCode::SUCCESS
 }

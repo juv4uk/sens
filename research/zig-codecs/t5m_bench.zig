@@ -128,9 +128,11 @@ pub fn main() !void {
     // Два точні механічні негативи T5M: 243 поза base-3 групою,
     // 242 — п'ять роздільників замість припустимого завершення слова.
     // Їхні проби не входять до порівняння encode/decode позитивних фікстур.
+    const malformed_empty = [_]u8{};
     const malformed_byte = [_]u8{243};
     const malformed_tail = [_]u8{242};
     for (0..3) |_| {
+        try trialRejected(allocator, "empty-program", &malformed_empty, t5m.Error.EmptyProgram, 12000);
         try trialRejected(allocator, "invalid-byte", &malformed_byte, t5m.Error.InvalidPhysicalByte, 12000);
         try trialRejected(allocator, "invalid-tail", &malformed_tail, t5m.Error.InvalidTail, 12000);
     }

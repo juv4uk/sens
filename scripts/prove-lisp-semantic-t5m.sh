@@ -739,6 +739,15 @@ run_case run_bound_law unification-occurs-predicate-positive tests/semantic/unif
 run_case run_bound_law unification-occurs-predicate-mutant tests/semantic/unification-occurs-predicate-mutant.lisp 0
 run_case run_bound_law unification-occurs-check-positive tests/semantic/unification-occurs-check-law.lisp 1
 run_case run_bound_law unification-occurs-check-mutant tests/semantic/unification-occurs-check-mutant.lisp 0
+# Д3: нативний структурний бенчмарк — позитив і мутант через Zig/T5M.
+d3_hot_law="$evidence/d3-structural-bench-positive.lisp"
+d3_hot_mutant="$evidence/d3-structural-bench-mutant.lisp"
+cat -- benchmarks/d3-structural-bench.lisp tests/semantic/d3-structural-bench-law.lisp > "$d3_hot_law"
+cat -- benchmarks/d3-structural-bench.lisp tests/semantic/d3-structural-bench-mutant.lisp > "$d3_hot_mutant"
+sha256sum benchmarks/d3-structural-bench.lisp tests/semantic/d3-structural-bench-law.lisp tests/semantic/d3-structural-bench-mutant.lisp > "$evidence/d3-structural-bench-inputs.sha256"
+run_case run_law d3-structural-bench-positive "$d3_hot_law" 1
+run_case run_law d3-structural-bench-mutant "$d3_hot_mutant" 0
+
 # Звіт із фактично завершених програм: дорогі та червоні свідки поруч.
 # Семантику визначав Lisp/SENS; shell тільки заміряє тривалість і сортує.
 echo "SENS_LAW_BENCHMARK_SUMMARY measured=$checked failed=$failed file=$evidence/law-timings.tsv"
