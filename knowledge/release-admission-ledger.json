@@ -9,7 +9,7 @@
       "f2_negative_witness": "juv4uk/sens@20543d438e81c6937c35c8d5e1950d72bac42a33:tests/semantic/meta-eval-graph-d1-mutant.lisp:1",
       "f3_dedup": "D1-D9@09d1d71c39d1484dfd005a5068dbb18b76f0f0d4=NO-MATCH;D10@73dd518469f972c55411e004b70b054ba8b3ec86=NO-MATCH",
       "f4_t5_execution": "juv4uk/sens@20543d438e81c6937c35c8d5e1950d72bac42a33:scripts/prove-meta-eval-graph-d1.sh:65",
-      "ratified": 0
+      "ratified": 1
     },
     {
       "sens": "tests/semantic/meta-eval-lexical-shadow-d1-law.sens",
@@ -19,7 +19,7 @@
       "f2_negative_witness": "juv4uk/sens@20543d438e81c6937c35c8d5e1950d72bac42a33:tests/semantic/meta-eval-lexical-shadow-d1-mutant.lisp:1",
       "f3_dedup": "D1-D9@09d1d71c39d1484dfd005a5068dbb18b76f0f0d4=NO-MATCH;D10@73dd518469f972c55411e004b70b054ba8b3ec86=NO-MATCH",
       "f4_t5_execution": "juv4uk/sens@20543d438e81c6937c35c8d5e1950d72bac42a33:scripts/prove-meta-eval-lexical-shadow-d1.sh:92",
-      "ratified": 0
+      "ratified": 1
     },
     {
       "sens": "tests/semantic/meta-eval-predicates-d1-law.sens",
@@ -29,7 +29,7 @@
       "f2_negative_witness": "juv4uk/sens@20543d438e81c6937c35c8d5e1950d72bac42a33:tests/semantic/meta-eval-predicates-d1-mutant.lisp:1",
       "f3_dedup": "D1-D9@09d1d71c39d1484dfd005a5068dbb18b76f0f0d4=NO-MATCH;D10@73dd518469f972c55411e004b70b054ba8b3ec86=NO-MATCH",
       "f4_t5_execution": "juv4uk/sens@20543d438e81c6937c35c8d5e1950d72bac42a33:scripts/prove-meta-eval-predicates-d1.sh:57",
-      "ratified": 0
+      "ratified": 1
     },
     {
       "sens": "tests/semantic/meta-eval-mutual-d4-law.sens",
@@ -39,7 +39,7 @@
       "f2_negative_witness": "juv4uk/sens@20543d438e81c6937c35c8d5e1950d72bac42a33:tests/semantic/meta-eval-mutual-d4-mutant.bits:1",
       "f3_dedup": "D1-D9@09d1d71c39d1484dfd005a5068dbb18b76f0f0d4=NO-MATCH;D10@73dd518469f972c55411e004b70b054ba8b3ec86=NO-MATCH",
       "f4_t5_execution": "juv4uk/sens@20543d438e81c6937c35c8d5e1950d72bac42a33:scripts/prove-meta-eval-mutual-d4.sh:57",
-      "ratified": 0
+      "ratified": 1
     },
     {
       "sens": "tests/semantic/d4-selector-width-law.sens",
@@ -49,7 +49,7 @@
       "f2_negative_witness": "juv4uk/sens@20543d438e81c6937c35c8d5e1950d72bac42a33:tests/semantic/d4-selector-width-mutant.bits:1",
       "f3_dedup": "D1-D9@09d1d71c39d1484dfd005a5068dbb18b76f0f0d4=NO-MATCH;D10@73dd518469f972c55411e004b70b054ba8b3ec86=NO-MATCH",
       "f4_t5_execution": "juv4uk/sens@20543d438e81c6937c35c8d5e1950d72bac42a33:scripts/prove-d4-selector-width.sh:54",
-      "ratified": 0
+      "ratified": 1
     }
   ]
 }
