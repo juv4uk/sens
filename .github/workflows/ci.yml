@@ -251,7 +251,7 @@ jobs:
       # Логіка перевірки всередині Lisp. Bash лише звіряє фактичний D1-вивід.
       # Rust відповідає за механізми Rust, Zig — за власний T5M/ABI.
       - name: Lisp-семантика Д1/Д3/Д4 — позитив і негатив у справжньому SENS
-        if: steps.changed-t5m-lisp.outputs.has_lisp == 'true'
+        if: ${{ always() && steps.changed-t5m-lisp.outputs.has_lisp == 'true' }}
         shell: bash
         timeout-minutes: 10
         run: |
