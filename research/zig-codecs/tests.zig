@@ -218,45 +218,72 @@ fn benchMonotonicNs() !u64 {
 
 test "benchmark Zig T5 ABI exact-width throughput (diagnostic, no Lisp verdict)" {
     const samples_count = 7;
-    const words_per_sample = 256 * 16;
-    var samples: [samples_count]u64 = undefined;
+    const batch_words = 256 * 16;
+    const target_sample_ns: u64 = 25_000_000;
+    const max_batches: usize = 100_000;
+    var elapsed_samples: [samples_count]u64 = undefined;
+    var word_samples: [samples_count]u64 = undefined;
+    var ns_per_word_samples: [samples_count]u64 = undefined;
     var checksum: u64 = 0;
     var output: [2]u8 = undefined;
 
-    // Прогрів одного й того самого механізму без таймера.
-    for (0..256) |payload| {
-        const input: [3]u8 = .{ 8, 0, @intCast(payload) };
-        const n = abi.sens_zig_t5_encode_be3(&input, input.len, &output, output.len);
-        try std.testing.expectEqual(@as(isize, 2), n);
-        checksum +%= output[0];
-    }
-    for (0..samples_count) |sample| {
-        const start = try benchMonotonicNs();
-        for (0..16) |_| {
-            for (0..256) |payload| {
-                const input: [3]u8 = .{ 8, 0, @intCast(payload) };
-                const n = abi.sens_zig_t5_encode_be3(&input, input.len, &output, output.len);
-                if (n != 2) return error.TransportRegression;
-                checksum +%= output[0];
-            }
+    // Прогріваємо той самий ABI й ту саму кількість слів, що в одному batch.
+    for (0..16) |_| {
+        for (0..256) |payload| {
+            const input: [3]u8 = .{ 8, 0, @intCast(payload) };
+            const n = abi.sens_zig_t5_encode_be3(&input, input.len, &output, output.len);
+            try std.testing.expectEqual(@as(isize, 2), n);
+            checksum +%= output[0];
         }
-        const finish = try benchMonotonicNs();
-        if (finish <= start) return error.NonMonotonicClock;
-        samples[sample] = finish - start;
     }
-    // 7 фіксованих проб; медіана та 90-й порядковий елемент (6/7).
-    // Не вдаємо статистичної значущості та не вимірюємо Rust/SENS.
+
+    // Семпли калібруються за тривалістю, а не фіксованими 4096 операціями:
+    // на швидкому runner це дає достатній часовий інтервал; на повільному
+    // runner число операцій автоматично зменшиться. Абсолютних speed gates нема.
+    for (0..samples_count) |sample| {
+        const start_ns = try benchMonotonicNs();
+        var elapsed_ns: u64 = 0;
+        var word_count: u64 = 0;
+        var batches: usize = 0;
+        while (elapsed_ns < target_sample_ns) {
+            for (0..16) |_| {
+                for (0..256) |payload| {
+                    const input: [3]u8 = .{ 8, 0, @intCast(payload) };
+                    const n = abi.sens_zig_t5_encode_be3(&input, input.len, &output, output.len);
+                    if (n != 2) return error.TransportRegression;
+                    checksum +%= output[0];
+                }
+            }
+            word_count += batch_words;
+            batches += 1;
+            const finish_ns = try benchMonotonicNs();
+            if (finish_ns <= start_ns) return error.NonMonotonicClock;
+            elapsed_ns = finish_ns - start_ns;
+            if (batches >= max_batches and elapsed_ns < target_sample_ns)
+                return error.SampleBudgetExceeded;
+        }
+
+        elapsed_samples[sample] = elapsed_ns;
+        word_samples[sample] = word_count;
+        ns_per_word_samples[sample] = elapsed_ns / word_count;
+        std.debug.print(
+            "ZIG_TRANSPORT_SAMPLE id=t5-abi-d8 sample={d} elapsed_ns={d} words={d} ns_per_word={d} batches={d} target_sample_ns={d}\n",
+            .{ sample + 1, elapsed_ns, word_count, ns_per_word_samples[sample], batches, target_sample_ns },
+        );
+    }
+
+    var ordered = ns_per_word_samples;
     for (1..samples_count) |i| {
         var j = i;
-        while (j > 0 and samples[j - 1] > samples[j]) : (j -= 1) {
-            const prior = samples[j - 1];
-            samples[j - 1] = samples[j];
-            samples[j] = prior;
+        while (j > 0 and ordered[j - 1] > ordered[j]) : (j -= 1) {
+            const prior = ordered[j - 1];
+            ordered[j - 1] = ordered[j];
+            ordered[j] = prior;
         }
     }
     std.mem.doNotOptimizeAway(checksum);
     std.debug.print(
-        "ZIG_TRANSPORT_BENCH id=t5-abi-d8 samples={d} words_per_sample={d} p50_ns_per_word={d} p90_ns_per_word={d} checksum={d} semantics=NOT_TESTED status=MEASURED\n",
-        .{ samples_count, words_per_sample, samples[3] / words_per_sample, samples[6] / words_per_sample, checksum },
+        "ZIG_TRANSPORT_BENCH id=t5-abi-d8 samples={d} target_sample_ns={d} min_ns_per_word={d} p50_ns_per_word={d} p90_ns_per_word={d} max_ns_per_word={d} checksum={d} semantics=NOT_TESTED status=MEASURED\\n",
+        .{ samples_count, target_sample_ns, ordered[0], ordered[3], ordered[6], ordered[samples_count - 1], checksum },
     );
 }
