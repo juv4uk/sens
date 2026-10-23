@@ -68,6 +68,14 @@ jobs:
       - name: "Інструменти Python — структура, проєкції, драбина D1–D10 — НЕ активні мовні тести"
         run: |
           set -euo pipefail
+          # Якщо охоронець чи його тести обнулені, сам запуск Python
+          # може пройти без перевірки драбин. Fail-closed ДО інших кроків.
+          for required in scripts/guard-domain-function-reuse.py tests/test_domain_function_reuse_rule.py; do
+            if [[ ! -s "$required" ]]; then
+              echo "::error file=$required,title=ARCHITECTURE-GUARD-MISSING::REGRESSION layer=ci-structure expected=nonempty-guard actual=empty-or-missing"
+              exit 1
+            fi
+          done
           # Структура DEFINE та SENS має бути перевірена в тому самому кроці.
           python3 scripts/check-sens-definitions.py
           # Проєкції та заборони D1–D11 (злито, без повторів).
