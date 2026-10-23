@@ -251,7 +251,7 @@ class D11SelectorSeedAuditTests(unittest.TestCase):
         catalog_path = ROOT / "knowledge/d13/селекторні-кандидати-2048-20261024.lisp"
         catalog = catalog_path.read_text(encoding="utf-8")
         parent_pattern = re.compile(
-            r"^\\s+\\(([01]{11})\\s+.*?\\(LISP ([^()\\s]+)\\)", re.MULTILINE
+            r"^\s+\(([01]{11})\s+.*?\(LISP ([^()\s]+)\)", re.MULTILINE
         )
         parents = [
             (bits, name)
@@ -263,7 +263,7 @@ class D11SelectorSeedAuditTests(unittest.TestCase):
         self.assertEqual(512, len({bits for bits, _ in parents}))
         self.assertEqual(512, len({name for _, name in parents}))
 
-        source_pin = re.search(r'\\(parent-source-blob-sha "([0-9a-f]{40})"\\)', catalog)
+        source_pin = re.search(r'\(parent-source-blob-sha "([0-9a-f]{40})"\)', catalog)
         self.assertIsNotNone(source_pin)
         self.assertEqual(MOD.git_blob_sha1(d11_source.encode("utf-8")), source_pin.group(1))
         self.assertIn("(status research-candidate-not-ratified)", catalog)
@@ -271,7 +271,7 @@ class D11SelectorSeedAuditTests(unittest.TestCase):
         self.assertIn("(opcode-admission NO)", catalog)
 
         row_pattern = re.compile(
-            r"^\\s+\\(([01]{13}) \\(LISP ([^()\\s]+)\\) \\(parent ([01]{11})\\) \\(suffix ([01]{2})\\)\\)$",
+            r"^\s+\(([01]{13}) \(LISP ([^()\s]+)\) \(parent ([01]{11})\) \(suffix ([01]{2})\)\)$",
             re.MULTILINE,
         )
         actual = row_pattern.findall(catalog)
