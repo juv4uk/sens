@@ -77,6 +77,21 @@ def definitions(text: str) -> list[str]:
 MARKER = re.compile(r";\s*D11-пропозиція\s*:", re.IGNORECASE)
 
 
+def introduced_at(rel: str, name: str) -> str:
+    """Коли й яким комітом уведено визначення — з історії комітів.
+
+    git log -S шукає коміт, де рядок «(визначити <ім'я>» вперше з'явився.
+    """
+    try:
+        out = subprocess.run(
+            ["git", "-c", "core.quotepath=false", "log", "-S", f"(визначити {name}",
+             "--format=%h %ad", "--date=short", "-1", "--", rel],
+            cwd=ROOT, capture_output=True, text=True, check=False).stdout.strip()
+        return out or "?"
+    except Exception:
+        return "?"
+
+
 def _mask_quotes(text: str) -> str:
     """Затерти вміст (як-є …) — щоб не брати визначення з ДАНИХ.
 
@@ -224,6 +239,7 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--self-test", action="store_true")
     ap.add_argument("--register", action="store_true", help="дописати виявлених кандидатів у реєстр D11")
     ap.add_argument("--advise", action="store_true", help="замість BLOCKED — конкретні поради, що виправити")
+    ap.add_argument("--when", action="store_true", help="додати, коли й яким комітом уведено кожне визначення")
     args = ap.parse_args(argv)
 
     ladder = ladder_names(ROOT)
@@ -306,7 +322,8 @@ def main(argv: list[str] | None = None) -> int:
         if shadow:
             print(f"\n  А) ЗАТІНЮЄ ДРАБИНУ ({len(shadow)}) — ужий наявну поверхню, не перевизначай:")
             for r, n in shadow[:12]:
-                print(f"     {r}: «{n}» уже є поверхнею драбини — прибери своє визначення й клич драбину")
+                when = f"  [уведено {introduced_at(r, n)}]" if args.when else ""
+                print(f"     {r}: «{n}» уже є поверхнею драбини — прибери своє визначення й клич драбину{when}")
             if len(shadow) > 12:
                 print(f"     … ще {len(shadow) - 12}")
         if project:
@@ -316,7 +333,8 @@ def main(argv: list[str] | None = None) -> int:
         if fresh:
             print(f"\n  В) БЕЗ ДРАБИНИ ({len(fresh)}) — або вжий наявну поверхню, або познач причину:")
             for r, n in fresh[:12]:
-                print(f"     {r}: «{n}» — додай вживання поверхні драбини, або `; D11-пропозиція: <причина>`")
+                when = f"  [уведено {introduced_at(r, n)}]" if args.when else ""
+                print(f"     {r}: «{n}» — додай вживання поверхні драбини, або `; D11-пропозиція: <причина>`{when}")
             if len(fresh) > 12:
                 print(f"     … ще {len(fresh) - 12}")
         print()
