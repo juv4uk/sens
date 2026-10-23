@@ -2,21 +2,11 @@
   "schema": 1,
   "source": "lib/core4.lisp",
   "contract": "11.9",
-  "status": "known-source-debt-NOT-admitted-arithmetic",
-  "scope": "Direct scalar numeric spellings in executable D5/D6 mathematical call arguments plus length-onto seed; comments, strings, and explicit QUOTE data excluded",
+  "status": "named-exact-values-source-token-inventory-empty",
+  "scope": "Direct scalar numeric spellings in executable D5/D6 mathematical call arguments plus length-onto seed; comments and strings excluded. Numeric values now use named D24+ bindings in lib/core4.lisp.",
   "key_format": "class|exact-head|one-based-argument-index|source-token",
-  "note": "Exact-source inventory, not admission or execution proof. A source migration must change this baseline with independent runtime evidence. Source-token spelling cannot infer a D24 domain. Apostrophe shorthand and indirect numeric calls are outside this narrow audit.",
-  "counts": {
-    "math|01010|2|1": 1,
-    "math|01011|1|0": 1,
-    "math|01011|2|1": 2,
-    "math|10111|2|#d10": 1,
-    "math|10111|2|1": 1,
-    "math|10111|2|2": 2,
-    "math|11010|2|0": 3,
-    "math|11010|2|2": 2,
-    "seed|length-onto|2|0": 1
-  },
-  "blocking_migration": "length-onto's initial zero plus D5 PLUS accumulator increment need explicit D24+ values, never auto-literal promotion",
-  "beyond_scope": "Other indirect numeric calls, source quotations, runtime binding proofs and physical T5 source admission require separate evidence."
+  "note": "The executable Core4 source contains no numeric tokens. Named numeric bindings are built from existing D6 length and ratified D5 multiplication operations; the independent SENS runtime witness is crates/sens/tests/core4_migration_point.rs. This exact-source inventory is not physical codec or release certification.",
+  "counts": {},
+  "blocking_migration": "Resolved in source: no direct mathematical numeric spelling or length-onto numeric seed remains. Runtime witness checks named values and a T5M three-byte projection.",
+  "beyond_scope": "The structural audit remains narrow; it does not prove the full physical codec or all runtime paths. Existing tests/fixtures may use decimal values as explicit expected inputs."
 }
