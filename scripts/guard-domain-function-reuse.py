@@ -39,8 +39,12 @@ DISCOVER = ROOT / "scripts" / "discover_domain_function_candidates.py"
 
 EXCLUDED_PREFIXES = (
     "lib/generated/", "lib/surface/", "lib/domains/", "lib/machine/",
-    "vendor/", "benchmarks/", "tests/",
+    "vendor/", "benchmarks/",
 )
+# tests/semantic/** — це МОВНІ ЗАКОНИ (Lisp), а не службові тести. Саме там рій
+# визначає функції за принципом «мова тесту відповідає шару», тож охоронець
+# мусить їх бачити. Решта tests/** лишається поза увагою (фікстури, помічники).
+SEMANTIC_PREFIX = "tests/semantic/"
 DEF = re.compile(r"\(" + "визначити" + r"\s+([^\s()]+)")
 
 
@@ -172,6 +176,8 @@ def main(argv: list[str] | None = None) -> int:
         if not rel.endswith(".lisp"):
             continue
         if any(rel.startswith(p) for p in EXCLUDED_PREFIXES):
+            continue
+        if rel.startswith("tests/") and not rel.startswith(SEMANTIC_PREFIX):
             continue
         path = ROOT / rel
         if not path.is_file():
