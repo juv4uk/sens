@@ -1,7 +1,9 @@
 //! Чинний український інвентар є виконуваною SENS-програмою, не плоским
 //! списком старих SID8/Function8. Перевіряємо його живим evaluator SENS.
-use sens::{eval_program, load_core_library, parse, ExprKind, Session, CORE_LIBRARY_SOURCE};
+use sens::{eval_program, load_core_library, parse, ExprKind, Session};
 use std::collections::BTreeSet;
+
+const CORE_LIBRARY_SOURCE: &str = include_str!("../../../lib/core4.lisp");
 
 const INVENTORY: &str = include_str!("../../../lib/surface/uk-inventory.lisp");
 

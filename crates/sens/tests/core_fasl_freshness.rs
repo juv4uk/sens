@@ -4,12 +4,14 @@
 //! that embed only the snapshot must never be allowed to build from a green
 //! repository with a stale snapshot in the first place.
 
+const CORE_LIBRARY_SOURCE: &str = include_str!("../../../lib/core4.lisp");
+
 #[test]
 fn committed_core_fasl_matches_current_core_source() {
     let fasl = include_bytes!("../../../lib/core4.lisp.fasl");
     let (snapshot_expressions, embedded_hash) =
         sens::fasl_decode_program(fasl).expect("committed lib/core4.lisp.fasl must decode");
-    let current_source = sens::CORE_LIBRARY_SOURCE;
+    let current_source = CORE_LIBRARY_SOURCE;
     let current_hash = sens::sha256_source(current_source.as_bytes());
 
     assert_eq!(

@@ -45,16 +45,12 @@ class RustLispSensEdgesTests(unittest.TestCase):
             self.assertEqual(edge["status"], "RED")
             self.assertEqual(edge["violation"], "DIRECT_RUST_PROJECT_EMBED")
 
-    def test_live_repo_reports_red_debt_until_cutover(self) -> None:
-        """Honest RED: debt is visible, not greenwashed."""
+    def test_live_repo_has_no_production_lisp_or_sens_embeds(self) -> None:
+        """The production Rust boundary is Zig-only; test fixtures are separate."""
         data = self.mod.inventory(ROOT)
-        self.assertGreater(
-            data["forbidden_edge_count"],
-            0,
-            "expected production embeds still present as RED isolation debt",
-        )
-        self.assertEqual(data["verdict"], "EDGES_BLOCKED")
-        self.assertEqual(self.mod.main(["--root", str(ROOT)]), 1)
+        self.assertEqual(data["forbidden_edge_count"], 0, data["edges"])
+        self.assertEqual(data["verdict"], "EDGES_OK")
+        self.assertEqual(self.mod.main(["--root", str(ROOT)]), 0)
 
     def test_literal_concat_embeds_are_exact_direct_rust_sens_edges(self) -> None:
         """Compiler expands concat! before embed; split paths must stay RED."""
@@ -167,6 +163,31 @@ class RustLispSensEdgesTests(unittest.TestCase):
                 data = self.mod.inventory(root)
             finally:
                 self.mod.git_tracked = real_git  # type: ignore
+            self.assertEqual(data["forbidden_edge_count"], 0)
+            self.assertEqual(data["verdict"], "EDGES_OK")
+
+    def test_uncompiled_staged_out_snapshot_is_not_a_production_edge(self) -> None:
+        """Parked Rust snapshots are not compiled by Cargo and must not block isolation."""
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            parked = root / "crates/demo/src/staged-out"
+            parked.mkdir(parents=True)
+            (root / "lib").mkdir()
+            (root / "lib/core.lisp").write_text("(001)\n", encoding="utf-8")
+            path = parked / "old.rs"
+            path.write_text(
+                'const OLD: &str = include_str!("../../../../lib/core.lisp");\n',
+                encoding="utf-8",
+            )
+            real_git = self.mod.git_tracked
+            self.mod.git_tracked = lambda _root: {
+                "crates/demo/src/staged-out/old.rs",
+                "lib/core.lisp",
+            }  # type: ignore[assignment]
+            try:
+                data = self.mod.inventory(root)
+            finally:
+                self.mod.git_tracked = real_git  # type: ignore[assignment]
             self.assertEqual(data["forbidden_edge_count"], 0)
             self.assertEqual(data["verdict"], "EDGES_OK")
 

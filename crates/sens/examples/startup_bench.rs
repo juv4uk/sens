@@ -11,9 +11,10 @@
 //! Незалежні process modes не є вкладеними таймерами.
 use sens::{
     fasl_decode_program, load_core_library, load_macro_library, parse, Environment, Session,
-    CORE_LIBRARY_SOURCE,
 };
 use std::{env, fs, hint::black_box, process::ExitCode};
+
+const CORE_LIBRARY_SOURCE: &str = include_str!("../../../lib/core4.lisp");
 
 fn root_session() -> Session {
     Session {

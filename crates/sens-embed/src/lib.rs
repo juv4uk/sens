@@ -51,7 +51,7 @@ fn new_session() -> Result<SensEmbedSession, String> {
     let mut session = Session {
         environment: Environment::root(),
     };
-    load_core_library(&mut session).map_err(|error| error.render(sens::CORE_LIBRARY_SOURCE))?;
+    load_core_library(&mut session).map_err(|error| error.render(""))?;
     Ok(SensEmbedSession { session })
 }
 

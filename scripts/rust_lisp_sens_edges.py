@@ -68,6 +68,10 @@ def is_sens_path(path: str) -> bool:
 def is_production_rust(rel: str) -> bool:
     if "/tests/" in f"/{rel}/" or "/examples/" in f"/{rel}/":
         return False
+    # Snapshots parked under src/staged-out are not Cargo modules. Counting
+    # their historical includes as live production edges creates false debt.
+    if "/staged-out/" in f"/{rel}/":
+        return False
     if rel.endswith("build.rs"):
         return True
     return "/src/" in f"/{rel}/"

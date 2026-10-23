@@ -311,11 +311,13 @@ pub use syntax::wire::{
 };
 
 /// The current Core4 sens bootstrap library, evaluated after the macro layer.
+#[cfg(test)]
 pub const CORE_LIBRARY_SOURCE: &str = include_str!("../../../lib/core4.lisp");
 
 /// Parse-output кеш для точного вбудованого Core4 source. Це лише bootstrap-
 /// оптимізація: hash source перевіряється перед використанням, а stale/invalid
 /// bytes переходять на parsing CORE_LIBRARY_SOURCE.
+#[cfg(test)]
 const CORE_LIBRARY_FASL: &[u8] = include_bytes!("../../../lib/core4.lisp.fasl");
 
 /// Process-result interpretation owned by Lisp. The host contributes only the
@@ -449,6 +451,7 @@ fn bind_missing_stable_surface_peers(environment: &Environment) {
 /// Canonical Core4 FASL is determined by the path-bound exact-domain reader,
 /// never by a source hash alone. Cache only this mechanical reference encoding
 /// per thread, independently of the decoded/lowered bootstrap cache.
+#[cfg(test)]
 fn canonical_core4_fasl_bytes() -> Option<std::rc::Rc<[u8]>> {
     thread_local! {
         static EXPECTED: std::cell::OnceCell<Option<std::rc::Rc<[u8]>>> =
@@ -468,6 +471,7 @@ fn canonical_core4_fasl_bytes() -> Option<std::rc::Rc<[u8]>> {
 /// A forged or incorrectly parsed FASL may carry the correct source hash but
 /// represent short D3/D4 callable heads as Numbers. Admit only the exact
 /// canonical path-bound Core4 encoding; otherwise fall back to source.
+#[cfg(test)]
 fn decode_verified_core4_fasl(fasl: &[u8]) -> Option<Vec<Expr>> {
     let expected = canonical_core4_fasl_bytes()?;
     if fasl != expected.as_ref() {
@@ -655,6 +659,7 @@ pub fn load_core_library(session: &mut Session) -> Result<EvalResult, LanguageEr
 
 /// Read-only діагностика для embedder-а: чи відповідає Core4 FASL точному
 /// вбудованому source. Не вибирає profile і не змінює bootstrap.
+#[cfg(test)]
 pub fn core_library_fasl_is_current() -> bool {
     decode_verified_core4_fasl(CORE_LIBRARY_FASL).is_some()
 }

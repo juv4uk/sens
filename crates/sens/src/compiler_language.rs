@@ -19,7 +19,11 @@ use crate::{
 };
 use std::rc::Rc;
 
-const COMPILER_NUCLEUS_SOURCE: &str = include_str!("../../../lib/compiler-nucleus.lisp");
+// Джерельний свідок потрібен лише тестам, які перевіряють компіляцію
+// програмної поверхні. У production ядро надходить через Zig/T5M.
+#[cfg(test)]
+const COMPILER_NUCLEUS_TEST_SOURCE: &str = include_str!("../../../lib/compiler-nucleus.lisp");
+
 const LANGUAGE_CONTRACT_SHA256: &str = crate::binary_bootstrap::LANGUAGE_CONTRACT_SHA256;
 
 pub const COMPILER_ROLE_LAW_REF: &str =
@@ -56,7 +60,6 @@ pub struct CompilerProgramBootstrapBundle {
     pub authority_path: &'static str,
     pub authority_sha256: String,
     pub language_contract_version: &'static str,
-    pub compiler_nucleus_sha256: String,
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -73,7 +76,6 @@ pub struct VerifiedCompilerProgramArtifact {
     pub authority_path: String,
     pub authority_sha256: String,
     pub language_contract_version: String,
-    pub compiler_nucleus_sha256: String,
     pub semantic_requests_sha256: String,
     pub semantic_requests: Value,
     pub requests: Vec<VerifiedCompilerProgramRequest>,
@@ -512,8 +514,9 @@ fn compiler_d4_bootstrap_law_value() -> Result<Value, LanguageError> {
 /// This function does not expose or compute any DomainIdentity -> role mapping.
 /// D3/D4 role meaning remains inside the SENS-written compiler nucleus. The
 /// bundle contains only already-verified structural-law values, proof
-/// references, and immutable provenance bytes needed to install that nucleus
-/// in another substrate.
+/// references and language-authority provenance needed to install that nucleus
+/// in another substrate. The executable nucleus itself travels as exact T5M
+/// domain words; no host digest substitutes for that stream.
 pub fn compiler_program_bootstrap_bundle() -> Result<CompilerProgramBootstrapBundle, LanguageError>
 {
     let authority_sha256 = LANGUAGE_CONTRACT_SHA256.to_owned();
@@ -530,7 +533,6 @@ pub fn compiler_program_bootstrap_bundle() -> Result<CompilerProgramBootstrapBun
         authority_path: COMPILER_AUTHORITY_PATH,
         authority_sha256,
         language_contract_version: COMPILER_CONTRACT_VERSION,
-        compiler_nucleus_sha256: sha256_hex(COMPILER_NUCLEUS_SOURCE.as_bytes()),
     })
 }
 
@@ -778,7 +780,6 @@ pub fn compiler_program_artifact_from_sens(
             Value::String(Rc::from(COMPILER_AUTHORITY_PATH)),
             Value::String(Rc::from(LANGUAGE_CONTRACT_SHA256)),
             Value::String(Rc::from(COMPILER_CONTRACT_VERSION)),
-            Value::String(Rc::from(sha256_hex(COMPILER_NUCLEUS_SOURCE.as_bytes()))),
         ]),
     );
     eval_compiler_nucleus(&mut session)?;
@@ -894,9 +895,9 @@ pub fn verify_compiler_program_artifact_from_sens(
         compiler_artifact_field(&rows[1..], "authority-provenance")?,
         "compiler artifact authority provenance",
     )?;
-    if provenance.len() != 5 {
+    if provenance.len() != 4 {
         return Err(invalid_projection(
-            "compiler artifact authority provenance must contain revision, path, authority digest, contract version and nucleus digest",
+            "compiler artifact authority provenance must contain revision, path, authority digest and contract version",
         ));
     }
     let sens_revision = compiler_artifact_string(provenance[0], "SENS revision")?;
@@ -904,14 +905,10 @@ pub fn verify_compiler_program_artifact_from_sens(
     let authority_sha256 = compiler_artifact_string(provenance[2], "authority digest")?;
     let language_contract_version =
         compiler_artifact_string(provenance[3], "language contract version")?;
-    let compiler_nucleus_sha256 =
-        compiler_artifact_string(provenance[4], "compiler nucleus digest")?;
-
     if sens_revision != expected_sens_revision
         || authority_path != COMPILER_AUTHORITY_PATH
         || authority_sha256 != LANGUAGE_CONTRACT_SHA256
         || language_contract_version != COMPILER_CONTRACT_VERSION
-        || compiler_nucleus_sha256 != sha256_hex(COMPILER_NUCLEUS_SOURCE.as_bytes())
     {
         return Err(invalid_projection(
             "compiler artifact authority provenance disagrees with current SENS authority",
@@ -961,7 +958,6 @@ pub fn verify_compiler_program_artifact_from_sens(
         authority_path,
         authority_sha256,
         language_contract_version,
-        compiler_nucleus_sha256,
         semantic_requests_sha256,
         semantic_requests,
         requests: verified_requests,
@@ -1064,8 +1060,10 @@ mod tests {
 
     #[test]
     fn compiler_nucleus_loads_each_definition_without_an_opaque_binding_failure() {
-        let expressions = crate::parse_mixed_exact_domain(COMPILER_NUCLEUS_SOURCE)
-            .expect("compiler nucleus parses");
+        let expressions = crate::binary_bootstrap::compiler_nucleus_program()
+            .expect("compiler nucleus T5M words")
+            .forms()
+            .to_vec();
         let mut session = Session::bare();
         load_core_library(&mut session).expect("active core loads");
         for (index, expression) in expressions.iter().enumerate() {
@@ -1115,10 +1113,6 @@ mod tests {
         assert_eq!(bundle.authority_path, COMPILER_AUTHORITY_PATH);
         assert_eq!(bundle.language_contract_version, COMPILER_CONTRACT_VERSION);
         assert_eq!(bundle.authority_sha256, LANGUAGE_CONTRACT_SHA256);
-        assert_eq!(
-            bundle.compiler_nucleus_sha256,
-            sha256_hex(COMPILER_NUCLEUS_SOURCE.as_bytes())
-        );
 
         let provenance = list_values(&bundle.request_provenance);
         assert_eq!(provenance.len(), 3);
@@ -1297,8 +1291,8 @@ mod tests {
 
     #[test]
     fn whole_program_artifact_verifier_binds_requests_to_current_sens_authority() {
-        let parsed = crate::parse_mixed_exact_domain(COMPILER_NUCLEUS_SOURCE)
-            .expect("compiler nucleus parses");
+        let parsed = crate::parse_mixed_exact_domain(COMPILER_NUCLEUS_TEST_SOURCE)
+            .expect("compiler nucleus source fixture parses");
         let lowered = crate::lower_program(&parsed);
         let wire = crate::wire_encode_program(&lowered);
         let decoded = crate::wire_decode_program(&wire).expect("canonical SW\\x01 program wire");
@@ -1379,8 +1373,8 @@ mod tests {
 
     #[test]
     fn whole_program_artifact_verifier_rejects_tampering_and_target_smuggling() {
-        let parsed = crate::parse_mixed_exact_domain(COMPILER_NUCLEUS_SOURCE)
-            .expect("compiler nucleus parses");
+        let parsed = crate::parse_mixed_exact_domain(COMPILER_NUCLEUS_TEST_SOURCE)
+            .expect("compiler nucleus source fixture parses");
         let lowered = crate::lower_program(&parsed);
         let wire = crate::wire_encode_program(&lowered);
         let decoded = crate::wire_decode_program(&wire).expect("canonical SW\\x01 program wire");
@@ -1415,8 +1409,8 @@ mod tests {
 
     #[test]
     fn whole_program_artifact_wraps_real_wire_traversal_inside_sens() {
-        let parsed = crate::parse_mixed_exact_domain(COMPILER_NUCLEUS_SOURCE)
-            .expect("compiler nucleus parses through exact-domain seam");
+        let parsed = crate::parse_mixed_exact_domain(COMPILER_NUCLEUS_TEST_SOURCE)
+            .expect("compiler nucleus source fixture parses");
         let lowered = crate::lower_program(&parsed);
         let wire = crate::wire_encode_program(&lowered);
         let decoded = crate::wire_decode_program(&wire).expect("canonical SW\\x01 program wire");
@@ -1444,7 +1438,7 @@ mod tests {
             Some("whole-program")
         );
         let provenance = list_values(field_value(&artifact, "authority-provenance"));
-        assert_eq!(provenance.len(), 5);
+        assert_eq!(provenance.len(), 4);
         assert!(matches!(
             provenance[0],
             Value::String(found) if found.as_ref() == revision
@@ -1461,11 +1455,6 @@ mod tests {
         assert!(matches!(
             provenance[3],
             Value::String(found) if found.as_ref() == COMPILER_CONTRACT_VERSION
-        ));
-        assert!(matches!(
-            provenance[4],
-            Value::String(found)
-                if found.as_ref() == sha256_hex(COMPILER_NUCLEUS_SOURCE.as_bytes())
         ));
         assert!(matches!(
             field_value(&artifact, "required-capabilities"),
