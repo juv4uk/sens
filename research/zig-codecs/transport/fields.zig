@@ -11,7 +11,7 @@ pub const Error = error{
 fn bytesForBits(bits: usize) usize {
     return bits / 8 + @as(usize, @intFromBool(bits % 8 != 0));
 }
-// Caller-owned packed bytes must not overlap the structured source/destination.
+// Caller-owned packed_bytes bytes must not overlap the structured source/destination.
 // Compare address differences, not sums, to avoid pointer-range overflow.
 fn overlaps(source: []const u8, destination: []const u8) bool {
     if (source.len == 0 or destination.len == 0) return false;
@@ -246,17 +246,17 @@ test "exact-width field envelope refuses truncated and trailing bytes" {
 }
 
 // Zig owns wire integrity, never the meaning of a SENS function.
-test "packed envelope CRC detects one changed physical bit" {
+test "packed_bytes envelope CRC detects one changed physical bit" {
     const fields = [_]Field{
         .{ .width = 3, .bits = 0b001 },
         .{ .width = 5, .bits = 0b10101 },
         .{ .width = 4, .bits = 0b0010 },
     };
-    var packed: [2]u8 = undefined;
-    try std.testing.expectEqual(@as(usize, 12), try pack(&packed, &fields));
-    const checksum = crc32(&packed);
-    try verifyCrc32(&packed, checksum);
-    var corrupted = packed;
+    var packed_bytes: [2]u8 = undefined;
+    try std.testing.expectEqual(@as(usize, 12), try pack(&packed_bytes, &fields));
+    const checksum = crc32(&packed_bytes);
+    try verifyCrc32(&packed_bytes, checksum);
+    var corrupted = packed_bytes;
     corrupted[0] ^= 0b10000000;
     try std.testing.expectError(error.IntegrityMismatch, verifyCrc32(&corrupted, checksum));
 }
