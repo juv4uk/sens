@@ -76,5 +76,5 @@ run_law d5-exact-arithmetic-mutant tests/semantic/d5-arithmetic-native-t5m-mutan
 # The result-status law stays in Ukrainian Lisp; only the runner bundles its admitted library.
 result_status_bundle="$evidence/result-status-bundle.lisp"
 cat lib/result-status.lisp tests/semantic/result-status-laws.lisp > "$result_status_bundle"
-run_law result-status-source tests/semantic/result-status-laws.lisp 1
+run_law result-status-source "$result_status_bundle" 1
 echo "SENS_LISP_T5M_LAWS_PASS count=10 positive=6 mutants=4 physical=ZIG_T5M"
