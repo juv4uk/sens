@@ -1,10 +1,6 @@
 name: D11 ladder contest · Zig (targeted)
-# Один вузький запуск на зміну експерименту; не оцінює семантику SENS.
+# Ручний вузький запуск експерименту; не оцінює семантику SENS.
 on:
-  push:
-    paths:
-      - research/zig-codecs/d11_selector_contest.zig
-      - .github/workflows/d11-ladder-contest.yml
   workflow_dispatch:
 
 permissions:
