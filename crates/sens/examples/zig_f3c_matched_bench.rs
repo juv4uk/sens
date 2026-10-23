@@ -14,7 +14,7 @@ fn hex(bytes: &[u8]) -> String {
     s
 }
 
-fn trial(name: &str, op: &str, t5: &[u8], f3c: &[u8], reps: usize) {
+fn trial(name: &str, op: &str, t5: &[u8], f3c: &[u8], reps: usize) -> u128 {
     let start = Instant::now();
     for _ in 0..reps {
         match op {
@@ -31,19 +31,21 @@ fn trial(name: &str, op: &str, t5: &[u8], f3c: &[u8], reps: usize) {
             _ => panic!("unsupported operation"),
         }
     }
+    let elapsed_ns = start.elapsed().as_nanos();
     println!(
         "sample impl=rust case={name} op={op} elapsed_ns={} reps={reps}",
-        start.elapsed().as_nanos()
+        elapsed_ns
     );
+    elapsed_ns
 }
 fn main() {
     let cases: [(&str, &[u8], &[u8], usize); 2] = [
-        ("quote", &[0x63, 0x89, 0x06, 0xa1], &[0xf3, 0x40, 0x60], 24),
+        ("quote", &[0x63, 0x89, 0x06, 0xa1], &[0xf3, 0x40, 0x60], 512),
         (
             "car_cons",
             &[0x66, 0x38, 0x67, 0x89, 0x89, 0x3b, 0x35],
             &[0xf3, 0x36, 0x5f, 0x1b, 0xd0, 0xc9],
-            12,
+            256,
         ),
     ];
     for (name, input, expected, reps) in cases {
@@ -59,13 +61,24 @@ fn main() {
             input.len(),
             encoded.len()
         );
-        for _ in 0..3 {
-            black_box(encode_explicit_small_f3(input).unwrap());
-            black_box(decode_explicit_small_f3(expected).unwrap());
-        }
+        // Прогрів відділений від вимірювання; F3C — транспорт, не Lisp.
         for _ in 0..5 {
-            trial(name, "encode", input, expected, reps);
-            trial(name, "decode", input, expected, reps);
+            black_box(encode_explicit_small_f3(black_box(input)).unwrap());
+            black_box(decode_explicit_small_f3(black_box(expected)).unwrap());
+        }
+        let mut encode_ns = [0_u128; 11];
+        let mut decode_ns = [0_u128; 11];
+        for i in 0..11 {
+            encode_ns[i] = trial(name, "encode", input, expected, reps);
+            decode_ns[i] = trial(name, "decode", input, expected, reps);
+        }
+        for (op, mut samples) in [("encode", encode_ns), ("decode", decode_ns)] {
+            samples.sort_unstable();
+            println!(
+                "summary impl=rust case={name} op={op} p50_ns_per_op={} p90_ns_per_op={}                  samples=11 warmup=5 reps={reps} scope=allocating_transport_only release=NOT_CERTIFIED",
+                samples[5] / reps as u128,
+                samples[9] / reps as u128
+            );
         }
     }
 }
