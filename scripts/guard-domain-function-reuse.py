@@ -116,31 +116,81 @@ def introduced_at(rel: str, name: str) -> str:
 
 
 def _mask_quotes(text: str) -> str:
-    """Затерти вміст (як-є …) — щоб не брати визначення з ДАНИХ.
+    """Mask comments, strings and quoted forms before looking for executable DEFINEs.
 
-    У законах часто є (як-є ((визначити а тіло-а) …)) — це тестові дані,
-    а не справжні визначення. Без цього охоронець скаржився б на «а», «б», «в».
+    A quoted Lisp form is data, not a new function definition. This scanner is
+    deliberately structural: it preserves offsets/newlines and does not decide
+    language semantics.
     """
     out = list(text)
-    i = 0
-    while True:
-        j = text.find("(як-є", i)
-        if j < 0:
-            break
+    n = len(text)
+
+    def blank(start: int, stop: int) -> None:
+        for pos in range(start, stop):
+            if text[pos] != "\n":
+                out[pos] = " "
+
+    def string_end(start: int) -> int | None:
+        pos = start + 1
+        while pos < n:
+            if text[pos] == "\\":
+                pos += 2
+                continue
+            if text[pos] == '"':
+                return pos + 1
+            pos += 1
+        return None
+
+    def form_end(start: int) -> int | None:
         depth = 0
-        k = j
-        while k < len(text):
-            if text[k] == "(":
+        pos = start
+        while pos < n:
+            char = text[pos]
+            if char == ";":
+                newline = text.find("\n", pos)
+                pos = n if newline < 0 else newline + 1
+                continue
+            if char == '"':
+                after = string_end(pos)
+                if after is None:
+                    return None
+                pos = after
+                continue
+            if char == "(":
                 depth += 1
-            elif text[k] == ")":
+            elif char == ")":
                 depth -= 1
                 if depth == 0:
-                    break
-            k += 1
-        for x in range(j, min(k + 1, len(text))):
-            if out[x] != "\n":
-                out[x] = " "
-        i = k + 1
+                    return pos + 1
+            pos += 1
+        return None
+
+    pos = 0
+    while pos < n:
+        char = text[pos]
+        if char == ";":
+            newline = text.find("\n", pos)
+            stop = n if newline < 0 else newline
+            blank(pos, stop)
+            pos = stop
+            continue
+        if char == '"':
+            stop = string_end(pos)
+            if stop is None:
+                blank(pos, n)
+                break
+            blank(pos, stop)
+            pos = stop
+            continue
+        if text.startswith("(як-є", pos):
+            boundary = pos + len("(як-є")
+            if boundary == n or text[boundary].isspace() or text[boundary] in "()":
+                stop = form_end(pos)
+                if stop is not None:
+                    blank(pos, stop)
+                    pos = stop
+                    continue
+        pos += 1
     return "".join(out)
 
 
@@ -153,9 +203,11 @@ def definitions_with_bodies(text: str):
         # маркер у 200 символах перед визначенням
         before = text[max(0, m.start() - 200):m.start()]
         marked = bool(MARKER.search(before))
-        rest = text[m.end():]
-        nxt = rest.find("(" + "визначити ")
-        body = rest[:nxt] if nxt > 0 else rest
+        # Use the same code-only view for body boundaries: quoted/commented
+        # DEFINE forms must not truncate a real function's executable body.
+        rest = masked[m.end():]
+        nxt_match = DEF.search(rest)
+        body = rest[:nxt_match.start()] if nxt_match else rest
         out.append((name, body, marked))
     return out
 
