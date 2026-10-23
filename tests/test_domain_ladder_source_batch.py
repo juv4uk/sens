@@ -451,6 +451,28 @@ class BatchSourceTests(unittest.TestCase):
         self.assertEqual(report["summary"]["blocked_files"], 0)
         self.assertEqual(report["files"][0]["status"], "unchanged")
 
+    def test_core4_predicate_inventory_uses_current_ukr_projections(self):
+        path = "knowledge/core4-predicate-record-inventory.lisp"
+        source = (ROOT / path).read_text(encoding="utf-8")
+        expected = {
+            "атом?", "тотожне?", "однакові?", "символ?",
+            "рядок?", "числовий-буфер?", "за-умовою",
+        }
+        projections = re.findall(
+            r"\\(укр-проєкція\\s+\\.\\s+([^\\s)]+)\\)", source
+        )
+        self.assertEqual(len(projections), len(expected))
+        self.assertEqual(set(projections), expected)
+        self.assertIn("(function-field . ukr-projection-only)", source)
+        self.assertIn("(legacy-addresses . omitted)", source)
+        self.assertNotRegex(source, r"\\(\\s*function\\s*\\.\\s*[01]{8}\\s*\\)")
+        domains = "\\n".join(
+            (ROOT / f"lib/domains/d{width}.lisp").read_text(encoding="utf-8")
+            for width in (3, 8, 9)
+        )
+        for projection in expected:
+            self.assertIn(f"(укр {projection})", domains)
+
     def test_forward_assert_fact_uses_current_ukr_d3_cons(self):
         source = (ROOT / "lib/forward.lisp").read_text(encoding="utf-8")
         self.assertIn("(визначити ствердити-факт!", source)
