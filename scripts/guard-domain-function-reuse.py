@@ -393,15 +393,10 @@ def main(argv: list[str] | None = None) -> int:
 
     for rel, name in candidates:
         print(f"КАНДИДАТ D11: {rel}: {name} — немає в драбинах; пропозиція D11 (далі D12…)")
-    # Не змінюємо реєстр під час невдалого коміту: спочатку власник
-    # має усунути всі дублікати/порушення, і лише чистий зріз реєструється.
-    # Реєстрація — лише кандидат, не ратифікація й не видача координати.
-    if args.register and candidates and not blocked:
+    if args.register and candidates:
         n = register_candidates(candidates)
         print(f"ЗАРЕЄСТРОВАНО в D11: {n} нових кандидатів → реєстр кандидатів D11 "
-              f"(наявні не дублювались; статус кандидат, не ратифіковано)")
-    elif args.register and candidates and blocked:
-        print("НЕ ЗАРЕЄСТРОВАНО в D11: коміт заблоковано; спершу виправ усі порушення.")
+              f"(наявні не дублювались)")
 
     if args.advise and blocked:
         shadow = [(r, n) for r, n, w in blocked if "драбини" in w]
@@ -434,6 +429,16 @@ def main(argv: list[str] | None = None) -> int:
         print(f"GUARD-DOMAIN-REUSE: BLOCKED ({len(blocked)} порушень серед {checked} файлів)")
         return 1
 
+    # Мертвий охоронець не має права казати OK. Якщо він не побачив ЖОДНОГО
+    # файлу — це не «все чисто», а «перевірка не відбулась» (буває, коли шлях
+    # виключено, гачок не активний, або список порожній). Мовчазне OK тут
+    # небезпечніше за хибний RED: воно створює враження, що перевірку зроблено.
+    if checked == 0:
+        print("УВАГА: охоронець не перевірив ЖОДНОГО файлу — це не «все чисто», "
+              "а «перевірка не відбулась». Переконайся, що шлях не виключено "
+              "й гачок активний (bash scripts/install-hooks.sh).", file=sys.stderr)
+        print(f"GUARD-DOMAIN-REUSE: НЕ ПЕРЕВІРЕНО (0 файлів)")
+        return 2
     print(f"GUARD-DOMAIN-REUSE: OK ({checked} файлів, {len(candidates)} кандидатів D11)")
     return 0
 
