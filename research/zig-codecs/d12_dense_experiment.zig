@@ -111,6 +111,27 @@ test "D12 dense exact byte ordering and run lengths" {
     }
 }
 
+test "D12 dense long and odd runs preserve bytes on reencode" {
+    const counts = [_]usize{ 1, 2, 3, 5, 16, 127, 128, 129, 4095, 4096 };
+    var words: [4096]u16 = undefined;
+    var decoded: [4096]u16 = undefined;
+    var bytes: [6144]u8 = undefined;
+    var replay: [6144]u8 = undefined;
+
+    for (counts) |count| {
+        for (0..count) |i| {
+            words[i] = @intCast((i * 73 + (i >> 1) * 137) & 0x0fff);
+        }
+        const n = try encode(words[0..count], &bytes);
+        try decode(bytes[0..n], count, decoded[0..count]);
+        try std.testing.expectEqualSlices(u16, words[0..count], decoded[0..count]);
+
+        const replay_n = try encode(decoded[0..count], &replay);
+        try std.testing.expectEqual(n, replay_n);
+        try std.testing.expectEqualSlices(u8, bytes[0..n], replay[0..replay_n]);
+    }
+}
+
 test "D12 dense rejects invalid payload without modifying output" {
     var bytes = [_]u8{0xa5} ** 3;
     try std.testing.expectError(Error.InvalidWord, encode(&.{ 0x1000, 0x000 }, &bytes));
@@ -125,6 +146,14 @@ test "D12 dense rejects invalid payload without modifying output" {
     try std.testing.expectError(Error.InvalidLength, decode(&.{0xab}, 1, &decoded));
     try std.testing.expectError(Error.InvalidLength, decode(&.{ 0xab, 0xc0, 0x00 }, 1, &decoded));
     try std.testing.expectEqualSlices(u16, &.{0xaaaa}, &decoded);
+
+    var short_decoded = [_]u16{0xbeef};
+    try std.testing.expectError(Error.OutputTooSmall, decode(&.{ 0xab, 0xc1, 0x23 }, 2, &short_decoded));
+    try std.testing.expectEqualSlices(u16, &.{0xbeef}, &short_decoded);
+
+    var untouched = [_]u8{0xa5} ** 5;
+    try std.testing.expectError(Error.InvalidWord, encode(&.{ 0xabc, 0x123, 0x1000 }, &untouched));
+    try std.testing.expectEqualSlices(u8, &.{ 0xa5, 0xa5, 0xa5, 0xa5, 0xa5 }, &untouched);
 
     try std.testing.expectError(Error.EmptyRun, packedLen(0));
     try std.testing.expectError(Error.TooLarge, packedLen(std.math.maxInt(usize)));
