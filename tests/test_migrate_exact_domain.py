@@ -370,6 +370,38 @@ class ExactDomainMigrationTests(unittest.TestCase):
             self.assertEqual(path.read_text(encoding="utf-8"), "(перше (решта x))\n")
 
 
+    def test_sid8_ukr_migrator_includes_all_active_program_scopes(self):
+        # Перевірка лише переліку джерел, НЕ симуляція виконання SENS.
+        entry = SCRIPTS / "migrate-legacy-w8-ukr.py"
+        spec = importlib.util.spec_from_file_location("sens_legacy_w8_all_scopes", entry)
+        self.assertIsNotNone(spec)
+        migrate = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(migrate)
+        with tempfile.TemporaryDirectory(prefix="sens-ukr-scopes-") as folder:
+            root = Path(folder)
+            include = (
+                "lib/виконуване.lisp",
+                "scripts/виконуване.lisp",
+                "tests/fixtures/виконуване.lisp",
+                "benchmarks/contest-uk/виконуване.lisp",
+            )
+            excluded = (
+                "lib/domains/d8.lisp",
+                "lib/generated/не-виконуване.lisp",
+                "tests/не-fixture.lisp",
+                "knowledge/не-виконуване.lisp",
+                "contracts/не-виконуване.lisp",
+            )
+            for name in include + excluded:
+                path = root / name
+                path.parent.mkdir(parents=True, exist_ok=True)
+                path.write_text("(визначити ф (атом? (як-є ())))\n", encoding="utf-8")
+            with patch.object(migrate, "ROOT", root):
+                actual = set(migrate.files([root / part for part in
+                                          ("lib", "scripts", "tests",
+                                           "benchmarks", "knowledge", "contracts")]))
+            self.assertEqual(actual, {root / part for part in include})
+
     def test_sid8_ukr_migrator_scans_current_program_without_historical_bridge(self):
         # Інструментальна перевірка відбору, не емуляція виконання СЕНС.
         entry = SCRIPTS / "migrate-legacy-w8-ukr.py"

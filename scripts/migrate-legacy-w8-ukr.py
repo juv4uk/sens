@@ -2,7 +2,7 @@
 """Перенести доведені SID8/Sens8 викличні голови у повну проєкцію «укр».
 
     python3 scripts/migrate-legacy-w8-ukr.py lib/core1.lisp --source-ref <старий-40-символьний-SHA>
-    python3 scripts/migrate-legacy-w8-ukr.py lib/core1.lisp --source-ref <SHA> --write
+    python3 scripts/migrate-legacy-w8-ukr.py lib scripts tests/fixtures benchmarks/contest-uk --source-ref <SHA> --write
 
 За замовчуванням dry-run. Немає виведення D8 з байта, запису .sens
 або виконання Lisp через Python. Недоведені голови залишаються без змін.
@@ -148,15 +148,25 @@ def files(paths):
             if not resolved.is_relative_to(ROOT):
                 raise ValueError(f"шлях поза SENS: {p}")
             rel = resolved.relative_to(ROOT)
-            if rel.parts[0] != "lib" or (len(rel.parts) > 1 and rel.parts[1] in
-                    {"domains", "generated", "staged-out"}):
-                continue  # таблиці доменів та згенеровані дані — не програми
-            # У surface є і проєкційні таблиці, і справжні DEFINE-програми.
-            # Колишнє виключення всього каталогу приховувало їхні W8-голови.
-            # Та сама AST-класифікація вже діє в аудиті української проєкції.
-            if (len(rel.parts) > 1 and rel.parts[1] == "surface"
-                    and not _contains_source_definitions(resolved)):
-                continue
+            # Історичні W8-голови трапляються не лише у lib: мігруємо
+            # ВИКОНУВАНІ сценарії, fixtures і конкурсні програми тим самим
+            # AST-сканером, не перетворюючи записи знань / контракти на код.
+            if rel.parts[0] == "lib":
+                if len(rel.parts) > 1 and rel.parts[1] in {
+                        "domains", "generated", "staged-out"}:
+                    continue
+                # У surface є й невиконувані таблиці проєкцій.
+                if (len(rel.parts) > 1 and rel.parts[1] == "surface"
+                        and not _contains_source_definitions(resolved)):
+                    continue
+            elif rel.parts[0] == "scripts":
+                pass
+            elif rel.parts[:2] == ("tests", "fixtures"):
+                pass
+            elif rel.parts[:2] == ("benchmarks", "contest-uk"):
+                pass
+            else:
+                continue  # архів, knowledge, data, contracts — не runtime
             selected.add(resolved)
     return sorted(selected)
 
