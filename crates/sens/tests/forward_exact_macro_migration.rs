@@ -213,7 +213,7 @@ fn jtms_real_sens_retains_independent_proofs_and_filters_only_unsupported() {
     // СЕНС сам обчислює кожен закон. Rust тільки звіряє точний результат Д1.
     let mut session = session();
     let distinct_proofs = r#"
-        (однакові?
+        (уніфікація-рівні?
           (додати-обґрунтування (як-є факт) (список (як-є друга-причина))
             (додати-обґрунтування (як-є факт) (список (як-є перша-причина)) (як-є ())))
           (список
@@ -228,7 +228,7 @@ fn jtms_real_sens_retains_independent_proofs_and_filters_only_unsupported() {
     );
 
     let duplicate_proof = r#"
-        (однакові?
+        (уніфікація-рівні?
           (додати-обґрунтування (як-є факт) (список (як-є причина))
             (додати-обґрунтування (як-є факт) (список (як-є причина)) (як-є ())))
           (список (список (як-є факт) (список (як-є причина)))))
@@ -240,7 +240,7 @@ fn jtms_real_sens_retains_independent_proofs_and_filters_only_unsupported() {
     );
 
     let filter_proofs = r#"
-        (однакові?
+        (уніфікація-рівні?
           (відкинути-непідтримані
             (список
               (сполучити (як-є без-доказу) ні)
@@ -258,7 +258,7 @@ fn jtms_real_sens_retains_independent_proofs_and_filters_only_unsupported() {
     );
 
     let orphaned = r#"
-        (однакові?
+        (уніфікація-рівні?
           (непідтримані-факти
             (список
               (сполучити (як-є без-доказу) ні)
