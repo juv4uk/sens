@@ -33,7 +33,7 @@ def parse_words(source: str) -> list[str]:
     if not words:
         raise SensT5Error("empty/unsupported binary program")
     for i, word in enumerate(words, 1):
-        if not BITS.fullmatch(word) or len(word) < 1:  # T5M: слова будь-якої довжини
+        if not BITS.fullmatch(word) or not 1 <= len(word) <= 11:
             raise SensT5Error(
                 f"word {i}: requires exact W1..W11 0/1 word, got {word[:64]!r}"
             )
@@ -81,8 +81,8 @@ def encode_words(words: list[str]) -> bytes:
     if not words:
         raise SensT5Error("empty program")
     for i, word in enumerate(words, 1):
-        if not BITS.fullmatch(word) or len(word) < 1:  # T5M: слова будь-якої довжини
-            raise SensT5Error(f"word {i}: not an exact 0/1 word")
+        if not BITS.fullmatch(word) or not 1 <= len(word) <= 11:
+            raise SensT5Error(f"word {i}: requires exact W1..W11 0/1 word")
     trits = "2".join(words)
     trits += "2" * (-len(trits) % 5)
     if len(trits) // 5 > MAX_FILE_BYTES:
