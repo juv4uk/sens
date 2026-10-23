@@ -25,8 +25,16 @@ class EncodedSourceLiteralTests(unittest.TestCase):
             [(item.token, item.reason) for item in found],
             [("235", "numeric source literal"), ("2.1564", "numeric source literal")],
         )
-        # Explicitly quoted numbers are inert data, not evaluated operands.
-        self.assertEqual(CHECK.find_forbidden_literals("(сума (як-є (235 2.1564)))\n"), [])
+        # Quotation prevents execution, but does not make numeric source tokens canonical.
+        quoted = CHECK.find_forbidden_literals("(сума (як-є (235 2.1564)))\n")
+        self.assertEqual(
+            [(item.token, item.reason) for item in quoted],
+            [("235", "numeric source literal"), ("2.1564", "numeric source literal")],
+        )
+        self.assertEqual(
+            [item.token for item in CHECK.find_forbidden_literals("(як-є 235)\n")],
+            ["235"],
+        )
 
     def test_d24_human_projection_fixture_contains_no_encoded_domain_words(self):
         fixture = ROOT / "tests" / "semantic" / "ukr-d24-existing-functions.lisp"
@@ -48,31 +56,34 @@ class EncodedSourceLiteralTests(unittest.TestCase):
         found = CHECK.find_forbidden_literals("(110 (аргумент))\n")
         self.assertEqual([item.token for item in found], ["110"])
 
-    def test_ratified_d3_quote_list_numbers_are_data_not_calls(self):
+    def test_quote_data_is_not_a_call_but_numeric_tokens_are_still_forbidden(self):
         source = (
             "(визначити x (як-є (1 2 3)))\n"
             "(визначити y (як-є (1 2 . 3)))\n"
             "(визначити z (як-є ((110 a) (1 b))))\n"
         )
-        self.assertEqual(CHECK.find_forbidden_literals(source), [])
+        self.assertEqual(
+            [item.token for item in CHECK.find_forbidden_literals(source)],
+            ["1", "2", "3", "1", "2", "3", "110", "1"],
+        )
 
     def test_quote_scope_keeps_real_numeric_heads_forbidden(self):
         source = "(список (як-є (1 2 3)) (110 (аргумент)))\n"
         self.assertEqual(
             [item.token for item in CHECK.find_forbidden_literals(source)],
-            ["110"],
+            ["1", "2", "3", "110"],
         )
-        # A legacy numeric QUOTE head is still an executable numeric head.
+        # A legacy numeric QUOTE head and quoted numeric atoms are all forbidden literals.
         self.assertEqual(
             [item.token for item in CHECK.find_forbidden_literals("(001 (1 2 3))\n")],
-            ["001"],
+            ["001", "1", "2", "3"],
         )
-        # Only the single QUOTE operand is data, not further invalid operands.
+        # Only the single QUOTE operand is data; the extra numeric operand is still invalid.
         self.assertEqual(
             [item.token for item in CHECK.find_forbidden_literals(
                 "(як-є (1 2 3) (110 unexpected))\n"
             )],
-            ["110"],
+            ["1", "2", "3", "110"],
         )
 
     def test_legacy_signature_table_keys_are_metadata_not_calls(self):
@@ -84,7 +95,7 @@ class EncodedSourceLiteralTests(unittest.TestCase):
         self.assertEqual(CHECK.find_forbidden_literals(row, path=source), [])
         self.assertEqual(
             [v.token for v in CHECK.find_forbidden_literals(row, path="lib/core.lisp")],
-            ["00001100"],
+            ["00001100", "0"],
         )
         self.assertEqual(
             [v.token for v in CHECK.find_forbidden_literals("(00001100 x)\n", path=source)],
@@ -93,7 +104,7 @@ class EncodedSourceLiteralTests(unittest.TestCase):
         malformed = row.replace("(kind builtin)", "(kind unknown)")
         self.assertEqual(
             [v.token for v in CHECK.find_forbidden_literals(malformed, path=source)],
-            ["00001100"],
+            ["00001100", "0"],
         )
         tagged = row + "(сума #d1:1)\n"
         self.assertEqual(
