@@ -207,6 +207,8 @@ jobs:
           set -euo pipefail
           cargo test --locked -p wsm-guard-slice --bin wsm-guard-slice event_frame_rejects_overlong_duplicate_unknown_and_non_ascii_fields -- --exact --nocapture
           cargo test --locked -p sens-lsp --lib transport::tests:: -- --nocapture
+          cargo test --locked -p sens --test core_math_arithmetic_live -- --nocapture
+          cargo test --locked -p sens --test d4_selector_domain_routing -- --nocapture
 
       - name: Zig — кодеки, ABI та безпечна межа копіювання
         if: steps.changed-t5m-lisp.outputs.has_zig == 'true'
@@ -293,6 +295,8 @@ jobs:
           check_lisp_law d3-eq-branches tests/semantic/lisp-d3-eq-branches-laws.lisp '1'
           check_lisp_law d3-d4-selection-positive tests/semantic/d3-d4-logic-selection-law.lisp '1'
           check_lisp_law d3-d4-selection-mutant tests/semantic/d3-d4-logic-selection-mutant.lisp '0'
+          check_lisp_law d4-selector-domain-positive tests/semantic/d4-selector-domain-law.lisp '(d4-selector-domain-law (status pass) (projection ukr))'
+          check_lisp_law exact-arithmetic-positive tests/semantic/exact-arithmetic-laws.lisp '(exact-arithmetic-law (status pass) (authority lisp))'
 
       # Учорашній BENCH-LISP→SENS: анотації лише зі справжніх нативних метрик.
       - name: Lisp → T5M → SENS — анотації розміру й AST
