@@ -462,6 +462,8 @@ run_case run_law utf8-numeric-foundations-positive "$utf8_roots_positive" 1
 run_case run_law utf8-numeric-foundations-mutant "$utf8_roots_mutant" 0
 # Негативний тип перевіряє сама мова; Rust/Zig не є семантичним оракулом.
 run_case run_type_rejection d8-string-symbol-nontext-type-negative tests/semantic/d8-string-symbol-nontext-type-negative.lisp 'string->symbol expects a string'
+# Окремий Type-закон: контекстний D1 предикат заборонено записувати як дані.
+run_case run_type_rejection d8-contextual-d1-serialize-type-negative tests/semantic/d8-contextual-d1-serialize-type-negative.lisp 'write-to-string cannot serialize contextual predicate results'
 # D1 хибне значення як голова CONS ≠ порожній D3-список.
 # Обидва результати вираховує Lisp/SENS; Zig лише фізично переносить слова.
 run_case run_law d3-d1-false-cons-head-positive tests/semantic/language-law-d3-d1-false-head-ukr.lisp 1
