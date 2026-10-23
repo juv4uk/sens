@@ -597,6 +597,25 @@ class ResearchBatchUkrProjectionTests(unittest.TestCase):
                 str(path),
             )
 
+    def test_active_semantic_numeric_laws_use_ukrainian_constructors(self):
+        # Виконувані математичні свідки будують числа через українські дані.
+        # Точнодоменні wire-свідки D24/D48 перевіряються окремо, бо ширина
+        # є частиною їхнього контракту і не може бути виведена зі значення.
+        for relative in (
+            "tests/semantic/d9-numeric-cdr-derived-laws.lisp",
+            "tests/semantic/d9-d10-justified-numeric-laws.lisp",
+            "tests/semantic/d5-arithmetic-surface-laws.lisp",
+            "tests/semantic/d8-integer-length-signed-laws.lisp",
+        ):
+            with self.subTest(path=relative):
+                source_path = ROOT / relative
+                source = source_path.read_text(encoding="utf-8")
+                self.assertEqual(
+                    CHECK.find_forbidden_literals(source, path=relative),
+                    [],
+                    f"{relative}: виконувані числові дані мають бути сконструйовані, не записані цифрами",
+                )
+
     def test_reintroduced_binary_call_head_is_detected(self):
         # Негативний контроль відтворює саме заборонений регрес:
         # викличну українську голову замінили сирим словом домену.
