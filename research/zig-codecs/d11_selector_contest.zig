@@ -6,6 +6,11 @@
 
 const std = @import("std");
 
+const CFile = opaque {};
+extern "c" fn fopen([*:0]const u8, [*:0]const u8) ?*CFile;
+extern "c" fn fclose(*CFile) c_int;
+extern "c" fn fgets([*]u8, c_int, *CFile) ?[*]u8;
+
 pub const selector_first: u16 = 0b01100000000;
 pub const selector_last: u16 = 0b10011111111;
 pub const selector_count: usize = 512;
@@ -112,10 +117,13 @@ test "D11 Драбина: усі 512 селекторів мають точни�
 }
 
 test "D11 Драбина: запам'ятати всі 512 координат і Lisp-імен таблиці" {
-    const table = @embedFile("../../lib/domains/d11.lisp");
-    var lines = std.mem.splitScalar(u8, table, '\n');
+    const file = fopen("lib/domains/d11.lisp", "rb") orelse return error.TableNotFound;
+    defer _ = fclose(file);
+    var line_buffer: [2048]u8 = undefined;
     var next: u16 = selector_first;
-    while (lines.next()) |line| {
+    while (fgets(line_buffer[0..].ptr, @intCast(line_buffer.len), file) != null) {
+        const end = std.mem.indexOfScalar(u8, &line_buffer, 0) orelse return error.LineTooLong;
+        const line = line_buffer[0..end];
         if (!std.mem.startsWith(u8, line, "  (")) continue;
         if (line.len < 15 or line[14] != ' ') continue;
         const bits = line[3..14];
