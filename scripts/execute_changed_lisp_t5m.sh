@@ -170,6 +170,20 @@ run_native_t5m_program() {
       fi
       echo "::notice file=$file,title=SENS language law::PASS native=SENS result=D1:1 carrier=Zig/T5M"
     fi
+    # Закони CAR/CDR/CONS/COND/NULL належать виконуваному Lisp.
+    # Shell порівнює тільки кінцевий точний D1-біт нативного SENS.
+    # Це не стороння модель EQ, COND або структурних правил.
+    case "$file" in
+      tests/semantic/ukr-d3-pair-identity-law.lisp|tests/semantic/ukr-d3-cond-control-law.lisp)
+        printf '1\\n' > "$dir/ukr-d3-law.expected"
+        if ! cmp -s "$dir/native-paired.stdout" "$dir/ukr-d3-law.expected"; then
+          echo "::error::SENS_LISP_SEMANTIC_LAW_WRONG_D1 source=$file expected=D1:1 actual=$(cat "$dir/native-paired.stdout")" >&2
+          mark_file_failed
+          return
+        fi
+        echo "SENS_LISP_SEMANTIC_LAW_PASS source=$file result=D1:1 oracle=SENS carrier=ZIG_T5M"
+        ;;
+    esac
     # Принцип 5: дві РІЗНІ фізичні форми того самого обчислення.
     # 1) живий український Lisp, без T5M; 2) точні байти Zig/T5M,
     # виконані SENS після контролю оборотності. Ніякого Python-оракула.
