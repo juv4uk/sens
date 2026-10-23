@@ -311,6 +311,15 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
         "test": args.teacher_test.resolve(),
     }
     output_dir = args.output_dir.resolve()
+    policy_max_selective_risk = float(getattr(args, "policy_max_selective_risk", 0.10))
+    policy_min_accepted = getattr(args, "policy_min_accepted", 5)
+    policy_confidence_level = float(getattr(args, "policy_confidence_level", 0.95))
+    if not math.isfinite(policy_max_selective_risk) or not 0.0 <= policy_max_selective_risk <= 1.0:
+        raise ComparisonError("policy-max-selective-risk має бути скінченним числом у [0,1]")
+    if isinstance(policy_min_accepted, bool) or not isinstance(policy_min_accepted, int) or policy_min_accepted < 1:
+        raise ComparisonError("policy-min-accepted має бути додатним цілим числом")
+    if not math.isfinite(policy_confidence_level) or not 0.0 < policy_confidence_level < 1.0:
+        raise ComparisonError("policy-confidence-level має бути строго між 0 та 1")
     transformer_validation_path = getattr(args, "transformer_validation_predictions", None)
     transformer_test_path = getattr(args, "transformer_test_predictions", None)
     if (transformer_validation_path is None) != (transformer_test_path is None):
@@ -454,6 +463,8 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
         "student_gold": {},
         "student_soft": {},
     }
+    policy_validation_records: dict[str, list[dict[str, Any]]] = {"teacher": teacher_records["validation"]}
+    policy_test_records: dict[str, list[dict[str, Any]]] = {"teacher": teacher_records["test"]}
     for split in ("validation", "test"):
         evaluations["teacher"][split] = evaluate_rows(
             teacher_records[split], split, args.threshold, args.bins
@@ -467,11 +478,17 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
                 overwrite=args.overwrite,
             )
             target = "student_gold" if kind == "gold" else "student_soft"
+            if split == "validation":
+                policy_validation_records[target] = predictions
+            else:
+                policy_test_records[target] = predictions
             evaluations[target][split] = evaluate_rows(
                 predictions, split, args.threshold, args.bins
             )
 
     if transformer_report is not None:
+        policy_validation_records["student_transformer"] = transformer_records["validation"]
+        policy_test_records["student_transformer"] = transformer_records["test"]
         evaluations["student_transformer"] = {
             split: evaluate_rows(records, split, args.threshold, args.bins)
             for split, records in transformer_records.items()
@@ -495,9 +512,43 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
             for model_name, result in evaluations.items()
         }
 
+    validation_policy_models: dict[str, Any] = {}
+    for model_name, validation_records in policy_validation_records.items():
+        selection = evaluator.select_threshold(
+            validation_records,
+            max_selective_risk=policy_max_selective_risk,
+            min_accepted=policy_min_accepted,
+            expected_split="validation",
+            confidence_level=policy_confidence_level,
+        )
+        selected_threshold = selection["threshold"]
+        test_evaluation = None
+        if selected_threshold is not None:
+            numeric_threshold = selected_threshold["numerator"] / selected_threshold["denominator"]
+            test_evaluation = evaluate_rows(
+                policy_test_records[model_name], "test", numeric_threshold, args.bins
+            )
+        validation_policy_models[model_name] = {
+            "selection": selection,
+            "selected_threshold": selected_threshold,
+            "test_evaluation": test_evaluation,
+            "test_used_for_selection": False,
+        }
+
+    validation_selected_policy = {
+        "selection_split": "validation",
+        "max_selective_risk": policy_max_selective_risk,
+        "minimum_accepted": policy_min_accepted,
+        "familywise_confidence_level": policy_confidence_level,
+        "test_used_for_threshold_selection": False,
+        "challenge_used_for_threshold_selection": False,
+        "models": validation_policy_models,
+    }
+
     challenge_report = None
     if challenge_input_value is not None:
         challenge_evaluations: dict[str, dict[str, Any]] = {}
+        challenge_policy_records: dict[str, list[dict[str, Any]]] = {"teacher": challenge_teacher_records}
         challenge_evaluations["teacher"] = evaluate_rows(
             challenge_teacher_records, "test", args.threshold, args.bins
         )
@@ -509,10 +560,13 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
                 output_dir / f"challenge-student-{kind}.jsonl",
                 overwrite=args.overwrite,
             )
-            challenge_evaluations["student_gold" if kind == "gold" else "student_soft"] = evaluate_rows(
+            challenge_model_name = "student_gold" if kind == "gold" else "student_soft"
+            challenge_policy_records[challenge_model_name] = records
+            challenge_evaluations[challenge_model_name] = evaluate_rows(
                 records, "test", args.threshold, args.bins
             )
         if challenge_transformer_records is not None:
+            challenge_policy_records["student_transformer"] = challenge_transformer_records
             challenge_evaluations["student_transformer"] = evaluate_rows(
                 challenge_transformer_records, "test", args.threshold, args.bins
             )
@@ -524,6 +578,26 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
             "coverage_at_threshold",
             "selective_risk_at_threshold",
         )
+        challenge_validation_policy_models: dict[str, Any] = {}
+        for model_name, policy_model in validation_policy_models.items():
+            selected_threshold = policy_model["selected_threshold"]
+            challenge_evaluation = None
+            if selected_threshold is not None:
+                numeric_threshold = selected_threshold["numerator"] / selected_threshold["denominator"]
+                challenge_evaluation = evaluate_rows(
+                    challenge_policy_records[model_name], "test", numeric_threshold, args.bins
+                )
+            challenge_validation_policy_models[model_name] = {
+                "selection_status": policy_model["selection"]["status"],
+                "selected_threshold": selected_threshold,
+                "evaluation": challenge_evaluation,
+            }
+        challenge_validation_policy = {
+            "selected_on": "validation",
+            "threshold_selected_on_challenge": False,
+            "models": challenge_validation_policy_models,
+        }
+
         challenge_report = {
             "result": "measured",
             "evaluation_only": True,
@@ -535,6 +609,7 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
             "transformer_predictions_sha256": challenge_transformer_report["predictions_sha256"] if challenge_transformer_report else None,
             "threshold": args.threshold,
             "threshold_selected_on_challenge": False,
+            "validation_selected_policy": challenge_validation_policy,
             "test_used_for_training_or_calibration": False,
             "evaluations": challenge_evaluations,
             "comparison": {
@@ -564,6 +639,7 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
         "validation_used_for_calibration": True,
         "test_used_for_training_or_calibration": False,
         "threshold": args.threshold,
+        "validation_selected_policy": validation_selected_policy,
         "calibration": calibration_reports,
         "transformer_student": transformer_report,
         "challenge": challenge_report,
@@ -599,7 +675,10 @@ def main() -> int:
     parser.add_argument("--challenge-teacher", type=Path, help="окремі вчительські оцінки для challenge-input")
     parser.add_argument("--challenge-transformer-predictions", type=Path, help="прогнози того самого трансформера на challenge-test")
     parser.add_argument("--output-dir", type=Path, required=True)
-    parser.add_argument("--threshold", type=float, default=0.80)
+    parser.add_argument("--threshold", type=float, default=0.80, help="фіксований діагностичний поріг")
+    parser.add_argument("--policy-max-selective-risk", type=float, default=0.10)
+    parser.add_argument("--policy-min-accepted", type=int, default=5)
+    parser.add_argument("--policy-confidence-level", type=float, default=0.95, help="сімейний рівень довіри з поправкою Бонферроні")
     parser.add_argument("--bins", type=int, default=10)
     parser.add_argument("--smoothing", type=float, default=1.0)
     parser.add_argument("--min-count", type=int, default=1)
@@ -623,6 +702,22 @@ def main() -> int:
                     "dataset_count_by_split": report["dataset_count_by_split"],
                     "comparison": report["comparison"],
                     "teacher_decoding_agreement": report["teacher_decoding_agreement"],
+                    "validation_selected_policy": {
+                        "selection_split": report["validation_selected_policy"]["selection_split"],
+                        "test_used_for_threshold_selection": report["validation_selected_policy"]["test_used_for_threshold_selection"],
+                        "models": {
+                            name: {
+                                "selection_status": policy["selection"]["status"],
+                                "selected_threshold": policy["selected_threshold"],
+                                "test_metrics": (
+                                    policy["test_evaluation"]["metrics"]
+                                    if policy["test_evaluation"] is not None
+                                    else None
+                                ),
+                            }
+                            for name, policy in report["validation_selected_policy"]["models"].items()
+                        },
+                    },
                     "challenge": (
                         {
                             "dataset_sha256": report["challenge"]["dataset_sha256"],
