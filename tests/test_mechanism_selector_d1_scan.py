@@ -106,7 +106,7 @@ class УкраїнськийДобірМеханізмів(unittest.TestCase):
             "(як-є доменного-коду-немає-в-таблиці)",
         ):
             self.assertIn(фрагмент, self.джерело)
-        self.assertNotIn("(як-є sid-not-in-function-table)", self.код)
+        self.assertNotIn("(як-є identity-not-in-function-table)", self.код)
 
     def test_внутрішній_предикат_повертає_точний_d1(self) -> None:
         істина = "(атом? (як-є ()))"
