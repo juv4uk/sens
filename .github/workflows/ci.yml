@@ -321,6 +321,9 @@ jobs:
           # Канарейка саме bare CLI Environment::root(): Core4 → D7 макрос → D6 слоти → UTF-8/TCP.
           # Rust тут перевіряє встановлення, не мовний вирок LET.
           cargo test --locked -p sens --lib exact_surface_domain_query_migration_tests::bare_cli_session_recovers_lisp_macros_through_d7_and_exact_d6_slots -- --exact --nocapture
+          # Rust бенчмарк тільки реального I/O байтів Lisp. Він не обчислює D1.
+          # 11 проб із прогрівом, p50/p90, явно запускаємо ignored benchmark.
+          cargo test --locked -p sens-cli --test mechanism_file_io_benchmark -- --include-ignored --nocapture
           # Семантика D11 перевіряється в окремому Lisp-кроці через SENS/T5M.
           # Не дублюємо мовний оракул у механічному Rust-шарі.
 
