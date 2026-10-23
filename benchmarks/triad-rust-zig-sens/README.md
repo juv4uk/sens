@@ -7,7 +7,7 @@
 | Шар | Реалізація | Фактична операція | Проби | Метрика |
 |---|---|---|---|---|
 | Rust / I/O | `crates/sens-cli/tests/mechanism_file_io_benchmark.rs` | `std::fs::read` байтів справжнього `benchmarks/lists.lisp` | 3 warmup + 11 timed samples; кожен ≥25 ms | raw sample + p50/p90/min/max ns/read, bytes |
-| Rust / exact-width ingest | `crates/sens/examples/packed_vs_visible_bench.rs` | Видимі exact-width слова проти packed-носія, той самий D2 AST; межі ширин передаються явно | 32 парні warmup + 9 чергованих проб; кількість ітерацій залежить від корпусу | сирі проби, медіана ns/program, співвідношення, байти й semantic bits |
+| Rust / exact-width ingest | `crates/sens/examples/packed_vs_visible_bench.rs` | Видимі exact-width слова проти packed-носія, той самий D2 AST; межі ширин передаються явно | 32 парні warmup + 9 чергованих проб у кожному напрямку, кожна ≥25 ms | Сирі проби, p50/p90 ns/program, співвідношення, байти й semantic bits |
 | Zig / ABI | `research/zig-codecs/tests.zig` | `transport_abi.zig`: точний D8 BE3 → T5 | 1 batch warmup + 7 timed samples; кожен ≥25 ms, batches адаптивні | raw elapsed/word counts + p50/p90/min/max ns/word |
 | Zig / T5M | `bench_t5m.zig` (виконується центральним `ci.yml`) | Реальний `benchmarks/lists.sens`: encode/decode з канонічною byte parity | прогрів + 11 адаптивних проб, кожна ≥25 ms | raw elapsed/operation counts + min/p50/p90/max ns/op; фізичні негативи окремо |
 | Lisp → Zig/T5M → SENS | `benchmarks/{lists,arithmetic,parser,recursion}.lisp` і `tests/semantic/` | Чотири мовні навантаження, вимір лише після успішного Lisp-закону | 11 + контрольний прогін | p50/p90 wall-time повного процесу (CLI + bootstrap + eval), AST та фізичний розмір |
@@ -25,7 +25,7 @@
 cargo test --locked -p sens-cli --test mechanism_file_io_benchmark -- --include-ignored --nocapture
 
 # Rust: exact-width visible/packed ingestion; verifies matching D2 AST before timing.
-cargo run --release -p sens --example packed_vs_visible_bench -- --samples 9
+bash benchmarks/rust-packed-visible/run.sh /tmp/rust-packed-visible
 
 # Zig 0.16: точний ABI і adaptive ≥25 ms samples, без SENS-семантики.
 zig test -lc research/zig-codecs/tests.zig
@@ -43,9 +43,10 @@ bash scripts/prove-lisp-semantic-t5m.sh \
 ## Правила достовірності
 
 1. Rust/I/O міряє лише файлове читання **warm-cache**, без SENS bootstrap чи семантики.
-   Rust exact-width ingestion заздалегідь перевіряє однакову D2/domain-AST форму;
+   Rust exact-width ingestion перевіряє однакову D2/domain-AST форму до таймера;
    межі ширин подано окремим розкладом і вони **не входять** у packed payload.
-   Це порівняння двох reader paths, не self-describing container і не вимір семантики.
+   Кожна проба адаптивно триває щонайменше 25 ms. Це порівняння reader paths,
+   не self-describing container і не вимір семантики.
 2. Zig вимірює **реальний** ABI T5 encode, не імітацію D8. Час
    `CLOCK_MONOTONIC` включає виклик кодувальника, перевірку статусу та
    накладні витрати циклу; це не незалежне вимірювання CPU instructions.
