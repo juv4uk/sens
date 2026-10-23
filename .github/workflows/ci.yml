@@ -265,6 +265,11 @@ jobs:
             bash scripts/execute_changed_lisp_t5m.sh \
               "$binary" "$RUNNER_TEMP/changed-t5m-lisp.txt" \
               "$RUNNER_TEMP/changed-t5m-pairs"
+          # Чотири мовні D1-вердикти через кодек, Zig і фізичний SENS.
+          # Жоден хост не обчислює тут семантику Lisp.
+          bash scripts/prove-lisp-semantic-t5m.sh \
+            "$binary" "$PWD/target/debug/sens-trit" \
+            "$RUNNER_TEMP/changed-t5m-pairs/lisp-laws"
 
 
 
