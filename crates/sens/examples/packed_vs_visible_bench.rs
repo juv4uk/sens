@@ -171,7 +171,7 @@ fn benchmark(case: &str, form: &str, forms: usize, samples: usize) -> Result<(),
 }
 
 fn main() {
-    let mut samples = 9usize;
+    let mut samples = 15usize;
     let args: Vec<String> = std::env::args().collect();
     if args.len() == 3 && args[1] == "--samples" {
         samples = args[2].parse().unwrap_or(0);
