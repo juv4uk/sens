@@ -358,6 +358,16 @@ jobs:
           fi
           # Вимірюємо ТІЛЬКИ T5M transport Zig, без виконання мовних законів.
           # У Zig 0.16 — Io.Clock.awake, а не видалений std.time.Timer.
+          # Фізичні позитивні/негативні контрприклади Zig не залежать від бенчмарка.
+          if zig test -O ReleaseFast -lc bench_t5m_test.zig \
+              > "$RUNNER_TEMP/zig-t5m-mechanism-tests.log" 2>&1; then
+            cat "$RUNNER_TEMP/zig-t5m-mechanism-tests.log"
+            echo "::notice title=Zig T5M mechanism::PASS codec=physical-roundtrip-and-fail-closed semantics=NOT_TESTED"
+          else
+            cat "$RUNNER_TEMP/zig-t5m-mechanism-tests.log" >&2
+            echo "::error file=bench_t5m_test.zig,title=Zig T5M mechanism::REGRESSION layer=codec-test expected=physical-parity actual=failed"
+            zig_failed=1
+          fi
           if zig run -O ReleaseFast -lc bench_t5m.zig \
               > "$RUNNER_TEMP/zig-t5m-benchmark.log" 2>&1; then
             cat "$RUNNER_TEMP/zig-t5m-benchmark.log"

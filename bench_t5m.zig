@@ -111,23 +111,3 @@ pub fn main(init: std.process.Init) !void {
         .{ physical.len, words.len, sample_count, min_sample_ns, d[0], d[5], d[9], d[sample_count - 1], e[0], e[5], e[9], e[sample_count - 1], guard },
     );
 }
-
-test "physical T5M fixture is canonical and malformed bytes fail closed" {
-    const allocator = std.testing.allocator;
-    var decoded = try codec.decode(allocator, physical);
-    defer decoded.deinit(allocator);
-    const words = try allocator.alloc(codec.Word, decoded.words.len);
-    defer allocator.free(words);
-    for (decoded.words, 0..) |word, i| {
-        words[i] = .{ .width = word.width, .bits = word.bits };
-    }
-    const replay = try codec.encode(allocator, words);
-    defer allocator.free(replay);
-    try std.testing.expectEqualSlices(u8, physical, replay);
-
-    // Fail-closed negative controls match the active T5M codec error categories.
-    // These test transport mechanics only; they are not SENS D1 false values.
-    try std.testing.expectError(error.EmptyProgram, codec.decode(allocator, &.{}));
-    try std.testing.expectError(error.InvalidPhysicalByte, codec.decode(allocator, &.{243}));
-    try std.testing.expectError(error.InvalidTail, codec.decode(allocator, &.{242}));
-}
