@@ -275,7 +275,7 @@ def rewrite(src, mapping, blocked):
         f = stack[-1] if stack else None
         if f and f["first"]:
             f["first"] = False
-            if not f["quoted"] and BITS.fullmatch(token):
+            if not f["quoted"] and not quote and BITS.fullmatch(token):
                 if token in mapping:
                     edits.append((start, i, mapping[token]))
                 else:
