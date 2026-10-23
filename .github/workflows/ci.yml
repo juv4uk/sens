@@ -502,6 +502,8 @@ jobs:
         run: |
           set -euo pipefail
           export CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0
+          # Перевірити механічну прив'язку індексу до Lisp-рядка до RED-прогону.
+          bash scripts/tests/test-diagnose-sens-physical-form.sh
           bash scripts/prove-lisp-semantic-t5m.sh \
             "$PWD/target/debug/sens" "$PWD/target/debug/sens-trit" \
             "$RUNNER_TEMP/changed-t5m-pairs/lisp-laws"

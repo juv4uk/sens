@@ -112,19 +112,16 @@ paired_failure_layer() {
 # Перелік форм із дужкою в першій колонці є лише candidate mapping.
 report_physical_red_source() {
   local id="$1" source="$2" physical="$3" error_log="$4"
-  local index line excerpt
-  index="$(grep -o -m1 'physical_form_index=[0-9]*' "$error_log" | head -n1 | cut -d= -f2 || true)"
-  [[ "$index" =~ ^[0-9]+$ ]] || return 0
-  line="$(awk -v wanted="$index" '/^\(/ {if (number++ == wanted) {print NR; exit}}' "$source")"
-  if [[ -n "$line" ]]; then
-    excerpt="$(sed -n "${line}p" "$source" | cut -c1-180)"
-    printf 'SENS_RED_SOURCE id=%s source=%s physical_form_index=%s candidate_line=%s mapping=column-zero-form heuristic=NON_NORMATIVE\n' \
-      "$id" "$source" "$index" "$line" >&2
-    printf 'SENS_RED_FORM %s\n' "$excerpt" >&2
-    echo "::error file=$source,line=$line,title=SENS physical failure::RED id=$id physical_form_index=$index candidate-only" >&2
-  else
-    printf 'SENS_RED_SOURCE id=%s source=%s physical_form_index=%s candidate_line=UNRESOLVED mapping=column-zero-form\n' \
-      "$id" "$source" "$index" >&2
+  local report="$evidence/$id/form-location.txt" line
+  # Лексично скануємо КОЖНУ верхньорівневу форму, а не /^(/ першої колонки.
+  # Коментарі, цитовані рядки та екрановані дужки не додають форм.
+  if ! bash scripts/diagnose-sens-physical-form.sh "$source" "$error_log" "$id" >"$report" 2>&1; then
+    echo "::warning title=SENS form-location::id=$id candidate=UNRESOLVED status=RED" >&2
+  fi
+  cat "$report" >&2
+  line="$(sed -n 's/.* source_line=\([0-9][0-9]*\) lexical_form_count=.*/\1/p' "$report" | head -n1)"
+  if [[ "$line" =~ ^[0-9]+$ ]]; then
+    echo "::error file=$source,line=$line,title=SENS physical failure::RED id=$id source_form=CANDIDATE semantic=NOT_ASSERTED" >&2
   fi
   sha256sum "$source" "$physical" >&2
 }
