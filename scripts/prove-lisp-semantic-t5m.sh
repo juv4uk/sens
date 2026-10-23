@@ -195,6 +195,9 @@ run_case run_law d4-late-binding-positive tests/semantic/d4-late-definition-bind
 run_case run_law d4-parameter-shadow-positive tests/semantic/language-law-d4-parameter-shadowing.lisp 1
 run_case run_law d4-parameter-shadow-mutant tests/semantic/language-mutant-d4-parameter-shadowing.lisp 0
 # Передавання першокласного предиката — виключно Lisp-закон Д4.
+# Композицію двох першокласних функцій і контрприклад формулює Lisp/SENS.
+run_case run_law d4-higher-order-composition-positive tests/semantic/d4-higher-order-composition-law.lisp 1
+run_case run_law d4-higher-order-composition-mutant tests/semantic/d4-higher-order-composition-mutant.lisp 0
 run_case run_law d4-first-class-predicate-positive tests/semantic/d4-first-class-predicate-law.lisp 1
 run_case run_law d4-first-class-predicate-mutant tests/semantic/d4-first-class-predicate-mutant.lisp 0
 # D4 рекурсивна правильність списків: позитив та навмисне порушення.
