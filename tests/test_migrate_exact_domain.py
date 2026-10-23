@@ -6,6 +6,7 @@ from pathlib import Path
 import sys
 import tempfile
 import unittest
+from unittest.mock import patch
 
 ROOT = Path(__file__).resolve().parents[1]
 SCRIPTS = ROOT / "scripts"
@@ -367,6 +368,57 @@ class ExactDomainMigrationTests(unittest.TestCase):
             self.assertEqual(path.read_text(encoding="utf-8"), "(перше (решта x))\n")
             mod.main(["--write", str(path)])
             self.assertEqual(path.read_text(encoding="utf-8"), "(перше (решта x))\n")
+
+
+    def test_sid8_ukr_migrator_scans_current_program_without_historical_bridge(self):
+        # Інструментальна перевірка відбору, не емуляція виконання СЕНС.
+        entry = SCRIPTS / "migrate-legacy-w8-ukr.py"
+        spec = importlib.util.spec_from_file_location("sens_legacy_w8_scope_test", entry)
+        self.assertIsNotNone(spec)
+        migrate = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(migrate)
+        with tempfile.TemporaryDirectory(prefix="sens-ukr-current-") as folder:
+            root = Path(folder)
+            file = root / "lib/surface/виконуване.lisp"
+            file.parent.mkdir(parents=True)
+            original = "(визначити відповідь (атом? (як-є ())))\\n"
+            file.write_text(original, encoding="utf-8")
+            with (
+                patch.object(migrate, "ROOT", root),
+                patch.object(migrate, "shared", return_value=mod),
+                patch.object(migrate, "mapping", side_effect=AssertionError(
+                    "чистий файл не повинен читати історичний SID8-міст"
+                )),
+                patch.object(sys, "argv", ["migrate-legacy-w8-ukr.py", str(file)]),
+            ):
+                self.assertEqual(migrate.main(), 0)
+            self.assertEqual(file.read_text(encoding="utf-8"), original)
+
+    def test_sid8_ukr_migrator_proves_prefixed_historical_head(self):
+        # Порівнюємо восьмибітне походження, а не ототожнюємо з D8.
+        entry = SCRIPTS / "migrate-legacy-w8-ukr.py"
+        spec = importlib.util.spec_from_file_location("sens_legacy_w8_proof_test", entry)
+        self.assertIsNotNone(spec)
+        migrate = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(migrate)
+        revision = "a" * 40
+        source_path = Path("lib/історичне.lisp")
+        table = {"00001100": mod.Identity("D5", "01010", "PLUS", "додати")}
+
+        def archived_git(*args):
+            if args[:3] == ("show", "-s", "--format=%cI"):
+                return "2026-09-30T12:00:00+00:00\\n"
+            if args == ("show", f"{revision}:{source_path.as_posix()}"):
+                return "(SeNs8:00001100 2 3)\\n"
+            raise AssertionError(f"неочікуване звернення git: {args}")
+
+        with patch.object(migrate, "git", side_effect=archived_git):
+            evidence = migrate.prove(revision, source_path,
+                                     {"00001100"}, mod, table)
+            self.assertEqual(evidence["path"], source_path.as_posix())
+            with self.assertRaisesRegex(ValueError, "не містить"):
+                migrate.prove(revision, source_path, {"11111111"}, mod, table)
+
 
 
 if __name__ == "__main__":
