@@ -1,55 +1,33 @@
-//! Д11: вузькі Interlisp DWIM/Masterscope-підзакони — лише нативний SENS.
-//! Немає повної історичної DWIM/MASTERSCOPE реалізації або хостового оракула.
+//! Rust доводить лише механізм завантаження українських Lisp-свідків.
+//! Семантика DWIM і Masterscope належить Lisp → Zig/T5M → SENS.
+
 use sens::{eval_program, load_core_library, Session};
-fn setup() -> Session {
+use std::path::PathBuf;
+
+#[test]
+fn interlisp_lisp_witnesses_execute_in_sens() {
     let mut session = Session::bare();
-    load_core_library(&mut session).expect("test_id=D11-INTERLISP-CORE");
-    eval_program(include_str!("../../../lib/d11-interlisp-safe-analysis.lisp"), &mut session)
-        .expect("test_id=D11-INTERLISP-LOAD");
-    session
-}
-#[test]
-fn d11_interlisp_dwim_does_not_silently_choose_or_edit() {
-    let mut session = setup();
-    for (id, form, rhs, expected) in [
-      ("порожньо", "(підказка-з-контексту (як-є хибне?) (як-є ()))", "(без-пропозиції хибне?)", true),
-      ("не-знайдено", "(підказка-з-контексту (як-є хибне?) (як-є ((атом? решта))))", "(без-пропозиції хибне?)", true),
-      ("один", "(підказка-з-контексту (як-є хибне?) (як-є ((хибне? атом?))))", "(пропозиція хибне? атом?)", true),
-      ("дві-однакові", "(підказка-з-контексту (як-є хибне?) (як-є ((хибне? атом?) (хибне? атом?))))", "(пропозиція хибне? атом?)", true),
-      ("неоднозначне", "(підказка-з-контексту (як-є хибне?) (як-є ((хибне? атом?) (хибне? решта))))", "(неоднозначно хибне?)", true),
-      ("чужі-не-рахувати", "(підказка-з-контексту (як-є хибне?) (як-є ((інше за-умовою) (хибне? атом?))))", "(пропозиція хибне? атом?)", true),
-      ("не-виправляти-вхід", "(підказка-з-контексту (як-є хибне?) (як-є ((хибне? атом?))))", "(пропозиція атом?)", false),
-      ("не-вгадувати", "(підказка-з-контексту (як-є хибне?) (як-є ((хибне? атом?) (хибне? решта))))", "(пропозиція хибне? атом?)", false),
+    load_core_library(&mut session).expect("чинний Core4 SENS");
+    eval_program(
+        include_str!("../../../lib/d11-interlisp-safe-analysis.lisp"),
+        &mut session,
+    )
+    .expect("чинні українські визначення Interlisp у SENS");
+
+    let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../..");
+    for witness in [
+        "tests/semantic/d11-interlisp-dwim-laws.lisp",
+        "tests/semantic/d11-interlisp-dwim-mutant.lisp",
+        "tests/semantic/d11-interlisp-masterscope-laws.lisp",
+        "tests/semantic/d11-interlisp-masterscope-mutant.lisp",
     ] {
-        let program = format!("(однакові? {form} (як-є {rhs}))");
-        let value = eval_program(&program, &mut session)
-            .unwrap_or_else(|e| panic!("test_id=D11-DWIM-{id} layer=SENS input={program} expected={expected} error={e}")).value;
-        assert_eq!(value.as_predicate_bit(), Some(expected),
-            "test_id=D11-DWIM-{id} layer=SENS input={program} expected=D1:{expected} actual={value}");
-    }
-}
-#[test]
-fn d11_interlisp_masterscope_quoted_and_shadowed_are_not_calls() {
-    let mut session = setup();
-    for (id, form, expected) in [
-      ("порожня-форма", "(мастерскоп-знайти-прямий-виклик? (як-є атом?) (як-є ()))", false),
-      ("атом-без-виклику", "(мастерскоп-знайти-прямий-виклик? (як-є атом?) (як-є атом?))", false),
-      ("прямий", "(мастерскоп-знайти-прямий-виклик? (як-є атом?) (як-є (атом? решта)))", true),
-      ("через-аргумент", "(мастерскоп-знайти-прямий-виклик? (як-є атом?) (як-є (сполучити (атом? решта) порожній?)))", true),
-      ("інша-ціль", "(мастерскоп-знайти-прямий-виклик? (як-є атом?) (як-є (сполучити решта)))", false),
-      ("цитата", "(мастерскоп-знайти-прямий-виклик? (як-є атом?) (як-є (як-є (атом? решта))))", false),
-      ("цитата-в-аргументі", "(мастерскоп-знайти-прямий-виклик? (як-є атом?) (як-є (сполучити (як-є (атом? решта)))))", false),
-      ("лямбда-вільний-виклик", "(мастерскоп-знайти-прямий-виклик? (як-є атом?) (як-є (функція (х) (атом? х))))", true),
-      ("лямбда-затінена", "(мастерскоп-знайти-прямий-виклик? (як-є атом?) (як-є (функція (атом?) (атом? решта))))", false),
-      ("вкладене-затінення", "(мастерскоп-знайти-прямий-виклик? (як-є атом?) (як-є (функція (х) (функція (атом?) (атом? х)))))", false),
-      ("вільний-поза-вкладенням", "(мастерскоп-знайти-прямий-виклик? (як-є атом?) (як-є (сполучити (функція (атом?) (атом? х)) (атом? решта))))", true),
-      ("параметр-не-є-викликом", "(мастерскоп-знайти-прямий-виклик? (як-є атом?) (як-є (функція (атом?) (решта х))))", false),
-      ("цитата-не-виклик", "(мастерскоп-знайти-прямий-виклик? (як-є атом?) (як-є (сполучити (як-є (атом? решта)) (решта х))))", false),
-      ("локальний-не-глобальний", "(мастерскоп-знайти-прямий-виклик? (як-є атом?) (як-є (функція (атом?) (сполучити (атом? решта) порожній?))))", false),
-    ] {
-        let value = eval_program(form, &mut session)
-            .unwrap_or_else(|e| panic!("test_id=D11-MASTERSCOPE-{id} layer=SENS input={form} expected={expected} error={e}")).value;
-        assert_eq!(value.as_predicate_bit(), Some(expected),
-            "test_id=D11-MASTERSCOPE-{id} layer=SENS input={form} expected=D1:{expected} actual={value}");
+        let path = root.join(witness);
+        let source = std::fs::read_to_string(&path).unwrap_or_else(|error| {
+            panic!("test_id=D11-INTERLISP-IO layer=Rust path={} actual={error}", path.display())
+        });
+        // У Rust немає істиннісної таблиці, лише реальне SENS виконання.
+        eval_program(&source, &mut session).unwrap_or_else(|error| {
+            panic!("test_id=D11-INTERLISP-EXEC layer=SENS source={witness} actual={error}")
+        });
     }
 }

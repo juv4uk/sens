@@ -490,6 +490,16 @@ cat -- "$meta_compare_definition" tests/semantic/d11-meta-compare-laws.lisp > "$
 cat -- "$meta_compare_definition" tests/semantic/d11-meta-compare-mutant.lisp > "$meta_compare_mutant_bundle"
 run_case run_law d11-meta-compare-positive "$meta_compare_law_bundle" 1
 run_case run_law d11-meta-compare-mutant "$meta_compare_mutant_bundle" 0
+# Interlisp DWIM / Masterscope — 22 мовні закони і два контрприклади.
+# Ці DEFINE фізично пакуються Zig/T5M, D1 вирішує лише SENS.
+for suite in dwim masterscope; do
+  interlisp_positive="$evidence/d11-interlisp-$suite-positive-complete.lisp"
+  interlisp_mutant="$evidence/d11-interlisp-$suite-mutant-complete.lisp"
+  cat -- lib/d11-interlisp-safe-analysis.lisp "tests/semantic/d11-interlisp-$suite-laws.lisp" > "$interlisp_positive"
+  cat -- lib/d11-interlisp-safe-analysis.lisp "tests/semantic/d11-interlisp-$suite-mutant.lisp" > "$interlisp_mutant"
+  run_case run_law "d11-interlisp-$suite-positive" "$interlisp_positive" 1
+  run_case run_law "d11-interlisp-$suite-mutant" "$interlisp_mutant" 0
+done
 # LAST-DEFINE: D7-текст має D8-рівність у нормативному Lisp, не D3 EQ Rust.
 # Повний MetaEval починається з невикличного D6 LENGTH (#5854). Для цієї
 # незалежної функції беремо ТОЧНО її визначення з чинного Lisp-файлу.
