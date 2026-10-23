@@ -746,3 +746,27 @@ class ResearchBatchUkrProjectionTests(unittest.TestCase):
                         f"{where}: заборонена цифрова/SID8 виклична голова",
                     )
 
+
+    def test_epistemic_language_witnesses_have_no_encoded_literals(self):
+        # Логічні очікування зберігаються в Lisp-рядках даних свідка,
+        # але сама програма не повинна кодувати істину числовими/бітовими головами.
+        for relative in (
+            "tests/fixtures/epistemic-authority-witness.lisp",
+            "tests/semantic/language-law-epistemic-records.lisp",
+            "tests/semantic/language-mutant-epistemic-records.lisp",
+        ):
+            with self.subTest(path=relative):
+                source = (ROOT / relative).read_text(encoding="utf-8")
+                self.assertEqual(
+                    CHECK.find_forbidden_literals(source, path=relative),
+                    [],
+                    f"{relative}: семантичні очікування мають бути Lisp-значеннями, не кодованими літералами",
+                )
+                self.assertIsNone(
+                    re.search(r"\\(\\s*(?:[01]{8}|(?:sid8|sens8):[01]{8})(?=[\\s)])", source, re.I),
+                    f"{relative}: цифрова/SID8-виклична голова не допускається",
+                )
+        fixture = (ROOT / "tests/fixtures/epistemic-authority-witness.lisp").read_text(encoding="utf-8")
+        self.assertIn("(свідок-рівні? (друге рядок) (третє рядок))", fixture)
+        self.assertNotIn("structural-relation", fixture)
+
