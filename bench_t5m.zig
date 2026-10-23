@@ -110,6 +110,7 @@ pub fn main(init: std.process.Init) !void {
         "ZIG_T5M_BENCH physical_bytes={d} words={d} samples={d} min_sample_ns={d} decode_min_ns_per_op={d} decode_p50_ns_per_op={d} decode_p90_ns_per_op={d} decode_max_ns_per_op={d} encode_min_ns_per_op={d} encode_p50_ns_per_op={d} encode_p90_ns_per_op={d} encode_max_ns_per_op={d} scope=zig-codec-only guard={d}\n",
         .{ physical.len, words.len, sample_count, min_sample_ns, d[0], d[5], d[9], d[sample_count - 1], e[0], e[5], e[9], e[sample_count - 1], guard },
     );
+}
 
 test "physical T5M fixture is canonical and malformed bytes fail closed" {
     const allocator = std.testing.allocator;
