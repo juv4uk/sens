@@ -178,6 +178,10 @@ run_case run_law d3-selection-positive tests/semantic/d3-d4-logic-selection-law.
 run_case run_law d3-selection-mutant tests/semantic/d3-d4-logic-selection-mutant.lisp 0
 run_case run_law d3-demorgan-four-cases tests/semantic/d3-demorgan-truth-table-law.lisp 1
 run_case run_law d3-demorgan-mutant tests/semantic/d3-demorgan-truth-table-mutant.lisp 0
+# Д3: перша істинна гілка COND має пріоритет навіть коли повертає Д1:ні.
+# Позитив і мутант проходять однаковий фізичний SENS/Zig/T5M коридор.
+run_case run_law d3-cond-first-match-false-positive tests/semantic/d3-cond-first-match-false-law.lisp 1
+run_case run_law d3-cond-first-match-false-mutant tests/semantic/d3-cond-first-match-false-mutant.lisp 0
 run_case run_law d3-quote-short-circuit-positive tests/semantic/d3-cond-quote-lazy-law.lisp 1
 run_case run_law d3-quote-short-circuit-mutant tests/semantic/d3-cond-quote-lazy-mutant.lisp 0
 # Д4 EVAL: цитований Lisp повертає порожнечу, а мутант підміняє результат.
