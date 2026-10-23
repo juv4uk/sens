@@ -11,6 +11,24 @@
 (визначити *довідник-гвардії*
   (як-є
     ((reference
+       (topic d13-selector-double-suffix-research)
+       (summary "D13 наразі не має ратифікованої доменної таблиці. Дослідний закон: із 512 селекторів D11 вивести по чотири двокрокові композиції p(s_a(s_b(x))), де s_0=CAR, s_1=CDR; кандидат координати дорівнює 11 біт батька та суфіксу ab. Це 2048 унікальних 13-бітних пропозицій із 8192 можливих місць, але НЕ прямі opcode, НЕ нативно доведена семантика і НЕ рішення власника. Математична драбина D12→D24→D48 не включає D13; дослідний транспорт ESC13 теж не є доменом D13.")
+       (authority (AGENTS.md lib/domains/d11.lisp scripts/check_d11_selector_seed.py contracts/numeric-domains-ratification.lisp research/zig-codecs/esc13_ladder_game.md))
+       (how-to (derive-from-exact-d11-parent keep-13-bit-proposal-separate-from-ratified-table check-d1-through-d12-duplicates prove-car-cdr-composition-in-sens reject-swapped-01-and-10 do-not-confuse-esc13-with-d13 ask-owner-for-domain-admission))
+       (verify (exactly-512-d11-selector-parents exactly-four-suffixes-per-parent exactly-2048-unique-candidate-codes native-sens-positive-and-mutant-witness native-zig-physical-boundary-witness))
+       (lifecycle research-candidate-not-ratified)
+       (provenance "Конкурс Драбина: D13 як двобітне продовження D11, 2026-10-24")
+       (unknown-route ask-owner))
+      (reference
+       (topic ladder-memory-domain-isolation)
+       (summary "Оцінка одного раунду Драбини має враховувати лише відповіді його точної доменної ширини; чужі D3-відповіді не можуть змінювати correct, wrong, duplicate, unknown або structural раунду D11. Загальна grade без доменного фільтра лишається окремим режимом. Пам'ять назв не є доказом викличності SENS.")
+       (authority (research/zig-codecs/ladder_memory_game.zig lib/domains/d11.lisp AGENTS.md))
+       (how-to (filter-guesses-by-exact-domain-before-scoring preserve-global-grade-semantics keep-answered-and-missing-on-same-domain write-zig-mixed-domain-negative-witness))
+       (verify (foreign-wrong-does-not-count foreign-duplicate-does-not-count foreign-unknown-does-not-count foreign-structural-does-not-count d11-first-correct-leaves-511-missing native-zig-execution))
+       (lifecycle code-fix-written-native-verification-pending)
+       (provenance "Драбина: точна ізоляція доменних раундів, 2026-10-24")
+       (unknown-route ask-agent))
+      (reference
        (topic d11-family-candidates-evidence)
        (summary "У конкурсі Драбина пам'ять 512 чинних селекторів D11 не дорівнює появі 512 нових примітивів. Бібліотечні композиції filter-map, alist presence/update-first, lset-equal/adjoin, group-by, unary frequencies, partition-by та adjacent dedupe мають реальні вихідні Lisp-файли, але не мають автоматично виданих 11-бітних opcode. Дублікати FILTER, UNION, INTERSECTION, ASSOC, SET-DIFFERENCE, SUBSETP, PARTITION-IF уже присутні в D1-D10. Новий рядок потребує точного сімейного закону, позитивного і негативного SENS-свідка та власникового рішення.")
        (authority (AGENTS.md lib/domains/d11.lisp knowledge/d11/гра-драбина-конкурс-20261024.uk.md knowledge/d11/закони-пропозиція-20261023.uk.md lib/d11-srfi1-filter-map.lisp lib/d11-srfi1-alist-protocol.lisp lib/d11-srfi1-set-relations.lisp lib/d11-clojure-group-by.lisp lib/d11-clojure-frequencies-unary.lisp lib/d11-clojure-partition-by.lisp))
