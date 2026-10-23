@@ -112,6 +112,22 @@ class EncodedSourceLiteralTests(unittest.TestCase):
             "проєкція перевірки ABI не має числових голів або літералів",
         )
 
+    def test_core3_inventory_and_kernel_guards_have_no_encoded_literals(self):
+        # These are live Ukrainian Lisp projections; their metadata must use
+        # textual identifiers or values derived from named list data.
+        for relative in (
+            "lib/core3.lisp",
+            "scripts/check-kernel-abi-transport-boundary.lisp",
+            "scripts/check-repo-tooling-inventory.lisp",
+        ):
+            path = ROOT / relative
+            source = path.read_text(encoding="utf-8")
+            self.assertEqual(
+                CHECK.find_forbidden_literals(source, path=relative),
+                [],
+                relative,
+            )
+
     def test_machine_effect_live_source_uses_named_coordinates(self):
         # Лексична перевірка; обчислення маршруту перевіряють нативні тести SENS.
         path = ROOT / "lib/machine/lowering/semantic-effects.lisp"
