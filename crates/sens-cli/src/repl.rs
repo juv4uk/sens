@@ -404,11 +404,6 @@ fn append_t5m_expression_context(
                 // Порожній Text7 поки не має окремої фізичної тотожності:
                 // залишаємо його чинний носій до ратифікації закону.
                 if text7.cells().is_empty() {
-                    // D3 QUOTE is already emitted by the enclosing form.
-                // Another QUOTE would turn nonempty D7 text into a Lisp list.
-                // Preserve the historical empty carrier until a distinct
-                // zero-cell D7 datum is representable in the physical reader.
-                if text7.is_empty() {
                     words.push(control(0b10)?);
                     words.push(ExactDomainWord::identity(t5m_domain_identity(3, 0b001)?));
                     words.push(control(0b00)?);
@@ -424,7 +419,7 @@ fn append_t5m_expression_context(
                     )?));
                 }
                 words.push(control(0b01)?);
-                if text7.is_empty() {
+                if text7.cells().is_empty() {
                     words.push(control(0b01)?);
                 }
             } else {
