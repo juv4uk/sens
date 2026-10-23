@@ -2,7 +2,7 @@
 ; Це дані, не семантичний контракт. Вони вимірюють лише вже аудитовану власність.
 ; Точний код Dn:слово походить із чинної таблиці lib/domains/dn.lisp,
 ; у споживачів діє її укр-проєкція, а не старий восьмибітний slot.
-; Складений макрос = визначити(D4:0011) + макрос(D5:00011), не окремий SID8.
+; Складений макрос подає українську композицію «визначити» + «макрос» — не окремий старий код.
 ; Один рядок = одна поведінка/відповідальність. Без LOC-claim і без "self-hosting %".
 (schema semantic-ownership/2)
 (as-of "2026-10-22")
@@ -57,6 +57,6 @@
 (migration necessary-form-surface-authority host-hardcoded registry-data confirmed 3fa2ae1f5e5786cd5c0b41489648a23bb1f405f5 "LAMBDA/DEFINE stable surface routing перенесено з Rust spelling tables у numeric registry projection" "crates/sens/src/eval/necessary_forms.rs;crates/sens/src/semantic_registry.rs")
 (migration canon-surface-authority host-hardcoded registry-data confirmed 668794caf6f3e2e1d0d6c8e740f218cc6ef04db9 "Canon stable surface routing перенесено у shared numeric semantic registry projection" "crates/sens/src/eval/canon.rs;crates/sens/src/semantic_registry.rs")
 (migration peer-builtin-surface-authority host-hardcoded registry-data confirmed dd4d9ae7d7bccbe465a0ae8ceb1b2f17f5f80f4e "Arithmetic/comparison peer names перенесено з Rust arrays у registry-derived bindings" "crates/sens/src/eval/builtins.rs;crates/sens/tests/runtime_peer_operators.rs")
-(migration macro-peer-surface-authority host-hardcoded registry-data confirmed baa03b7acf0793bec3184a48099c484231922bea "00001010 stable і compatibility peer names перенесено з loader literals у registry admission" "crates/sens/src/lib.rs;crates/sens/tests/macro_derivation.rs")
+(migration macro-peer-surface-authority host-hardcoded registry-data confirmed baa03b7acf0793bec3184a48099c484231922bea "визначити + макрос: стабільні та сумісні назви перенесено з літералів завантажувача до допуску реєстру" "crates/sens/src/lib.rs;crates/sens/tests/macro_derivation.rs")
 (migration tooling-human-key-to-semantic-id human-spelling-tooling semantic-id-tooling confirmed e8f60f659199686205376ca4fd1c570034c05de6 "Tooling syntax discovery перенесено з human spelling keys на semantic identities" "crates/sens/src/language_items.rs;crates/sens/tests/uk_surface_inventory.rs")
 (migration core-host-capability-split core-os-code host-adapter confirmed f565f6692c36a97f80afe0233f0bdb8dca506b81 "OS-touching filesystem/process/TCP операції перенесено з my-lisp core у my-lisp-host" "crates/sens/src/eval/capabilities.rs;crates/sens-host/src/lib.rs;crates/sens-host/tests/portable_substrate.rs")
