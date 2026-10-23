@@ -54,6 +54,33 @@ fn trial(
     });
 }
 
+// Шлях відмови — така сама механіка кодека, не мовний оракул SENS.
+// Публікуємо окремі negative-зразки: драйвер A/B читає тільки sample.
+fn trialRejected(
+    allocator: std.mem.Allocator,
+    name: []const u8,
+    malformed: []const u8,
+    expected: t5m.Error,
+    repetitions: usize,
+) !void {
+    const begin = nanoseconds();
+    for (0..repetitions) |_| {
+        if (t5m.decode(allocator, std.mem.doNotOptimizeAway(malformed))) |decoded| {
+            var unexpected = decoded;
+            unexpected.deinit(allocator);
+            return error.InvalidCarrierUnexpectedlyAccepted;
+        } else |actual| {
+            if (actual != expected) return error.WrongTransportError;
+        }
+    }
+    const elapsed = nanoseconds() - begin;
+    if (elapsed == 0) return error.InvalidMeasurement;
+    std.debug.print(
+        "negative impl=zig case={s} op=decode-reject error={s} elapsed_ns={d} reps={d}\\n",
+        .{ name, @errorName(expected), elapsed, repetitions },
+    );
+}
+
 pub fn main() !void {
     const allocator = std.heap.c_allocator;
     const cases = [_]usize{ 1, 16, 128, 1024 };
@@ -96,5 +123,14 @@ pub fn main() !void {
             try trial(.encode, allocator, words, physical, forms, reps[i]);
             try trial(.decode, allocator, words, physical, forms, reps[i]);
         }
+    }
+    // Два точні механічні негативи T5M: 243 поза base-3 групою,
+    // 242 — п'ять роздільників замість припустимого завершення слова.
+    // Їхні проби не входять до порівняння encode/decode позитивних фікстур.
+    const malformed_byte = [_]u8{243};
+    const malformed_tail = [_]u8{242};
+    for (0..3) |_| {
+        try trialRejected(allocator, "invalid-byte", &malformed_byte, t5m.Error.InvalidPhysicalByte, 12000);
+        try trialRejected(allocator, "invalid-tail", &malformed_tail, t5m.Error.InvalidTail, 12000);
     }
 }
