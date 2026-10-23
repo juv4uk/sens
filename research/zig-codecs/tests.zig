@@ -7,6 +7,7 @@ const d12_dense_experiment = @import("d12_dense_experiment.zig");
 const t5m3 = @import("t5m3.zig");
 const physical_cycle = @import("physical_cycle.zig");
 const ladder = @import("domain_ladder.zig");
+const ladder_memory_game = @import("ladder_memory_game.zig");
 const ladder_e1 = @import("domain_e1.zig");
 const domain_sequence = @import("domain_sequence.zig");
 const f3c = @import("f3c/f3c.zig");
@@ -30,6 +31,7 @@ test "import exact-width transport suites" {
     _ = t5m3;
     _ = physical_cycle;
     _ = ladder;
+    _ = ladder_memory_game;
     _ = ladder_e1;
     _ = domain_sequence;
     _ = f3c;
