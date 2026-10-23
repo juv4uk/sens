@@ -10,7 +10,7 @@
   "entries": [
     {
       "path": "knowledge/agent-discoveries.lisp",
-      "git_blob_sha1": "075f19ef8559889e9358e99073b23cc9eae36843",
+      "git_blob_sha1": "73b9ad451c15978e1cc350c984aa4c6fd54fbd7a",
       "record_head": "agent-discoveries"
     },
     {
