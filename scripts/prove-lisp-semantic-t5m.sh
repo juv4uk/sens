@@ -221,8 +221,10 @@ run_type_rejection() {
   if profile_stage "$id" direct timeout 45s "$sens" "$source" >"$dir/direct.out" 2>"$dir/direct.err"; then
     fail "$id" sens-direct "Type-rejection" "unexpected-success"
   fi
-  grep -Fq "$diagnostic" "$dir/direct.err" ||
+  if ! grep -Fq "$diagnostic" "$dir/direct.err"; then
+    cat "$dir/direct.err" >&2
     fail "$id" sens-direct "expected-Type-diagnostic" "unclassified-rejection"
+  fi
 
   if ! profile_stage "$id" codec-mint timeout 45s "$sens" --t5m-mint "$source" "$physical" >"$dir/mint.out" 2>"$dir/mint.err"; then
     cat "$dir/mint.err" >&2
@@ -674,8 +676,10 @@ for kind in partition dedupe; do
   invalid="$evidence/d11-clojure-${kind}-improper-d1-tail-complete.lisp"
   cat -- lib/d11-srfi1-span-break.lisp lib/d11-clojure-partition-by.lisp \
     "tests/semantic/d11-clojure-${kind}-improper-d1-tail-negative.lisp" > "$invalid"
+  # D1-атом не є NIL; спочатку оцінюється CDR у перевірці singleton,
+  # тому нормативний Type тут належить D3 CDR, а не D3 CAR.
   run_case run_type_rejection "d11-clojure-${kind}-improper-d1-type-negative" \
-    "$invalid" 'car expects a non-empty list'
+    "$invalid" 'cdr expects a non-empty list'
 done
 # Один quoted D7-гліф має бути точним W7-атомом; вкладений список лишається D2.
 # Багатогліфовий Text7 далі є послідовністю, а не таємно interned-атомом.
