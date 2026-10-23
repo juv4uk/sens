@@ -45,6 +45,15 @@ use std::rc::Rc;
 /// Дескриптор комірки в арені. Це `ім'я` комірки з моделі `core1`.
 pub(crate) type CellRef = u32;
 
+/// Зворотна карта «адреса `Rc<PairNode>` → (слабкий власник, дескриптор
+/// комірки)» — міст від чинного `Value` до комірки арени.
+///
+/// Значення — саме [`std::rc::Weak`], а не голий `CellRef`: слабкий власник
+/// тримає алокацію `Rc<PairNode>` живучою, тож її адреса не перевикористовується,
+/// доки запис існує. Це закриває дефект, коли звільнена адреса `Rc` збігалася з
+/// новою парою і `cons` зшивав ребро на чужу комірку.
+pub(crate) type ArenaHandles = std::collections::HashMap<usize, (std::rc::Weak<PairNode>, CellRef)>;
+
 /// Відсутнє ребро (`()` у моделі `core1`). Ніколи не індексує живу комірку;
 /// [`Arena::cell`] на ньому завжди дає `None`.
 pub(crate) const NO_CELL: CellRef = CellRef::MAX;
@@ -384,11 +393,7 @@ impl Arena {
     /// арени, а наступний `cons` мусить знати, у якій комірці воно живе, щоб
     /// зшити ребро-`Cell`, а не розсипати весь підграф у листові `Atom`.
     /// Окремого подання арени в самому `Value` для цього не заводимо.
-    pub(crate) fn to_value_registered(
-        &self,
-        root: CellRef,
-        handles: &mut std::collections::HashMap<usize, CellRef>,
-    ) -> Value {
+    pub(crate) fn to_value_registered(&self, root: CellRef, handles: &mut ArenaHandles) -> Value {
         self.to_value_registered_guarded(root, &mut Vec::new(), handles)
     }
 
@@ -396,7 +401,7 @@ impl Arena {
         &self,
         root: CellRef,
         seen: &mut Vec<CellRef>,
-        handles: &mut std::collections::HashMap<usize, CellRef>,
+        handles: &mut ArenaHandles,
     ) -> Value {
         if seen.contains(&root) {
             return Value::Nil; // цикл: `Rc<PairNode>` його не подає
@@ -409,7 +414,10 @@ impl Arena {
         let tail = self.edge_to_value_registered(&slot.tail, seen, handles);
         seen.pop();
         let node = Rc::new(PairNode { head, tail });
-        handles.insert(Rc::as_ptr(&node) as usize, root);
+        // Слабкий власник (не сильний!): він лише закріплює адресу `Rc`,
+        // щоб вона не перевикористалася під чужу пару, але не подовжує
+        // життя самого значення.
+        handles.insert(Rc::as_ptr(&node) as usize, (Rc::downgrade(&node), root));
         Value::Pair(node)
     }
 
@@ -417,7 +425,7 @@ impl Arena {
         &self,
         edge: &Edge,
         seen: &mut Vec<CellRef>,
-        handles: &mut std::collections::HashMap<usize, CellRef>,
+        handles: &mut ArenaHandles,
     ) -> Value {
         match edge {
             Edge::None => Value::Nil,

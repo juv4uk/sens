@@ -1,4 +1,4 @@
-use crate::arena::{Arena, CellRef, Edge};
+use crate::arena::{Arena, ArenaHandles, CellRef, Edge};
 use crate::{DomainIdentity, Value};
 use std::{
     cell::RefCell,
@@ -113,7 +113,7 @@ pub enum CoreProfile {
 
 /// Shared session state: the opt-in resource/capability limits plus the print
 /// transcript, allocated once per session and shared by every lexical child.
-#[derive(Debug, Default)]
+#[derive(Debug)]
 struct SessionState {
     selected_core_profile: Option<CoreProfile>,
     cons_limit: Option<usize>,
@@ -126,10 +126,17 @@ struct SessionState {
     /// Арена комірок, що обслуговує шов `cons_values` за увімкненого
     /// перемикача. Порожня, доки перемикач вимкнено.
     arena: Arena,
-    /// Відповідність «адреса `Rc<PairNode>` → дескриптор комірки» для
-    /// значень, відновлених із арени. Дає змогу зшивати ребра-`Cell` між
-    /// комірками, не заводячи окремого подання арени в самому `Value`.
-    arena_handles: HashMap<usize, CellRef>,
+    /// Відповідність «адреса `Rc<PairNode>` → (слабкий власник, дескриптор
+    /// комірки)» для значень, відновлених із арени. Слабкий власник
+    /// ([`std::rc::Weak`]) тримає САМУ алокацію `Rc<PairNode>` живучою, тож
+    /// її адреса не може бути перевикористана, поки запис існує. Без цього
+    /// звільнена адреса `Rc` збігалася б із новою парою, і `cons` зшивав би
+    /// ребро на чужу (застарілу) комірку — саме це й ламало bootstrap FASL.
+    /// Сам `Value` при цьому не змінюється.
+    arena_handles: ArenaHandles,
+    /// Високий поріг для періодичного прибирання мертвих записів у
+    /// `arena_handles`, щоб карта не росла назавжди.
+    arena_handles_hwm: usize,
     numeric_bit_limit: Option<usize>,
     /// Exact program-name policy. `None` = unrestricted, `Some([])` = deny all.
     process_allowlist: Option<Vec<String>>,
@@ -151,6 +158,32 @@ struct SessionState {
     /// Сесійний транскрипт друку. Живе тут, у спільному стані сесії, а не
     /// окремим `Rc` у кожному `Environment`.
     transcript: Transcript,
+}
+
+impl Default for SessionState {
+    fn default() -> Self {
+        SessionState {
+            selected_core_profile: None,
+            cons_limit: None,
+            cons_count: 0,
+            // Арена — ТИПОВЕ подання `cons`: кожна сесія народжується з
+            // увімкненим швом арени. `Rc`-подання `Value` лишається
+            // незмінним; арена стоїть поверх нього.
+            arena_enabled: true,
+            arena: Arena::default(),
+            arena_handles: ArenaHandles::new(),
+            arena_handles_hwm: 2048,
+            numeric_bit_limit: None,
+            process_allowlist: None,
+            fs_read_roots: None,
+            fs_write_roots: None,
+            tcp_connect_allowlist: None,
+            tcp_listen_allowlist: None,
+            domain_code_slots: HashMap::new(),
+            legacy_code_slots: HashMap::new(),
+            transcript: Transcript::default(),
+        }
+    }
 }
 
 impl Environment {
@@ -284,8 +317,16 @@ impl Environment {
     pub(crate) fn arena_cons(&self, head: Value, tail: Value) -> Value {
         let mut guard = self.2.borrow_mut();
         let state: &mut SessionState = &mut guard;
-        let head_edge = arena_edge_for(&state.arena_handles, &head);
-        let tail_edge = arena_edge_for(&state.arena_handles, &tail);
+        // Періодичне прибирання мертвих записів: слабкий власник тримає
+        // алокацію живою, тож без прибирання карта росла б назавжди.
+        if state.arena_handles.len() >= state.arena_handles_hwm {
+            state
+                .arena_handles
+                .retain(|_, (owner, _)| owner.strong_count() > 0);
+            state.arena_handles_hwm = state.arena_handles.len().saturating_mul(2).max(2048);
+        }
+        let head_edge = arena_edge_for(&state.arena, &state.arena_handles, &head);
+        let tail_edge = arena_edge_for(&state.arena, &state.arena_handles, &tail);
         let cell = state.arena.alloc_with(head_edge, tail_edge);
         state
             .arena
@@ -302,7 +343,9 @@ impl Environment {
         let state = self.2.borrow();
         match value {
             Value::Pair(node) => match state.arena_handles.get(&(Rc::as_ptr(node) as usize)) {
-                Some(&cell) => state.arena.cell(cell).is_some(),
+                Some((owner, cell)) => {
+                    owner.strong_count() > 0 && state.arena.cell(*cell).is_some()
+                }
                 None => false,
             },
             _ => false,
@@ -624,23 +667,33 @@ impl Drop for Environment {
     }
 }
 
-/// Ребро арени для значення-дитини: `Edge::Cell`, якщо дитина вже має комірку
-/// в арені, інакше листове `Edge::Atom` (вузол без комірки не чорніє).
-fn arena_edge_for(handles: &HashMap<usize, CellRef>, value: &Value) -> Edge {
+/// Ребро арени для значення-дитини: `Edge::Cell`, якщо дитина вже має ЖИВУ
+/// комірку в арені, інакше листове `Edge::Atom` (вузол без комірки не чорніє).
+///
+/// Запис визнається чинним лише коли слабкий власник ще живий
+/// (`strong_count() > 0`) І комірку не вигріб колектор. Завдяки тому, що
+/// `Weak` тримає алокацію `Rc` живою, адреса не перевикористовується, тож
+/// застарілий запис фізично не може збігтися з новою парою.
+fn arena_edge_for(arena: &Arena, handles: &ArenaHandles, value: &Value) -> Edge {
     if let Value::Pair(node) = value {
-        if let Some(&cell) = handles.get(&(Rc::as_ptr(node) as usize)) {
-            return Edge::Cell(cell);
+        if let Some((owner, cell)) = handles.get(&(Rc::as_ptr(node) as usize)) {
+            if owner.strong_count() > 0 && arena.cell(*cell).is_some() {
+                return Edge::Cell(*cell);
+            }
         }
     }
     Edge::Atom(value.clone())
 }
 
-/// Дескриптори-корені для значень: беруться лише ті, що мають комірку в арені.
-fn arena_root_cells(handles: &HashMap<usize, CellRef>, roots: &[Value]) -> Vec<CellRef> {
+/// Дескриптори-корені для значень: беруться лише ті, що мають живу комірку в арені.
+fn arena_root_cells(handles: &ArenaHandles, roots: &[Value]) -> Vec<CellRef> {
     roots
         .iter()
         .filter_map(|value| match value {
-            Value::Pair(node) => handles.get(&(Rc::as_ptr(node) as usize)).copied(),
+            Value::Pair(node) => handles
+                .get(&(Rc::as_ptr(node) as usize))
+                .filter(|(owner, _)| owner.strong_count() > 0)
+                .map(|(_, cell)| *cell),
             _ => None,
         })
         .collect()
