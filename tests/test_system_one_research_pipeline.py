@@ -1087,7 +1087,7 @@ class SystemOneResearchPipelineTests(unittest.TestCase):
 
         selected = evaluator.select_threshold(
             rows,
-            max_selective_risk=0.70,
+            max_selective_risk=0.75,
             min_accepted=4,
         )
         self.assertEqual(selected["status"], "selected")
@@ -1096,12 +1096,14 @@ class SystemOneResearchPipelineTests(unittest.TestCase):
         self.assertEqual(selected["accepted"], 5)
         self.assertEqual(selected["errors"], 1)
         self.assertEqual(selected["achieved_selective_risk"], {"numerator": 1, "denominator": 5})
-        self.assertLessEqual(selected["selective_risk_upper_confidence_bound"], 0.70)
-        self.assertAlmostEqual(selected["selective_risk_upper_confidence_bound"], 0.657408318001, places=8)
-        self.assertEqual(selected["confidence_level"], 0.95)
+        self.assertLessEqual(selected["selective_risk_upper_confidence_bound"], 0.75)
+        self.assertAlmostEqual(selected["selective_risk_upper_confidence_bound"], 0.716417936118, places=8)
+        self.assertEqual(selected["familywise_confidence_level"], 0.95)
+        self.assertEqual(selected["candidate_threshold_count"], 2)
+        self.assertAlmostEqual(selected["per_candidate_confidence_level"], 0.975, places=12)
         self.assertEqual(
             selected["risk_bound_method"],
-            "one-sided exact Clopper-Pearson binomial upper confidence limit",
+            "Bonferroni-corrected one-sided exact Clopper-Pearson binomial upper confidence limit",
         )
         self.assertEqual(selected["coverage"], {"numerator": 5, "denominator": 6})
         self.assertFalse(selected["test_used"])
@@ -1120,7 +1122,7 @@ class SystemOneResearchPipelineTests(unittest.TestCase):
         wrong_split = [dict(row) for row in rows]
         wrong_split[0]["split"] = "test"
         with self.assertRaises(evaluator.EvaluationError):
-            evaluator.select_threshold(wrong_split, max_selective_risk=0.70, min_accepted=4)
+            evaluator.select_threshold(wrong_split, max_selective_risk=0.75, min_accepted=4)
 
         # CLI перевіряє запис JSON: атомарний файл, точний поріг і правильний newline.
         from unittest.mock import patch
@@ -1140,7 +1142,7 @@ class SystemOneResearchPipelineTests(unittest.TestCase):
                     "--mode",
                     "select-threshold",
                     "--max-selective-risk",
-                    "0.70",
+                    "0.75",
                     "--min-accepted",
                     "4",
                     "--output",
@@ -1151,8 +1153,8 @@ class SystemOneResearchPipelineTests(unittest.TestCase):
             report = json.loads(output_path.read_text(encoding="utf-8"))
             self.assertEqual(report["status"], "selected")
             self.assertEqual(report["threshold"], {"numerator": 17, "denominator": 20})
-            self.assertLessEqual(report["selective_risk_upper_confidence_bound"], 0.70)
-            self.assertEqual(report["risk_bound_method"], "one-sided exact Clopper-Pearson binomial upper confidence limit")
+            self.assertLessEqual(report["selective_risk_upper_confidence_bound"], 0.75)
+            self.assertEqual(report["risk_bound_method"], "Bonferroni-corrected one-sided exact Clopper-Pearson binomial upper confidence limit")
             self.assertEqual(
                 report["input_sha256"],
                 hashlib.sha256(input_bytes).hexdigest(),
