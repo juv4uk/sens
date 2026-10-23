@@ -1,5 +1,7 @@
-name: Benchmark registry
+name: Benchmark registry — metadata and discovery only
 
+# This workflow validates discovery metadata and coverage.
+# Measurements belong only to the native Rust/Zig/SENS performance workflow.
 on:
   workflow_dispatch:
 
@@ -8,163 +10,16 @@ permissions:
 
 jobs:
   registry:
-    name: benchmark discovery registry
+    name: Registry schema, source-backed exemptions, and current index
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5 pinned
         with:
-          fetch-depth: 0
-
-      - name: Validate registry, explicit exemptions, and remaining coverage debt
+          persist-credentials: false
+      - name: Validate manifests and the generated discovery index
+        shell: bash
         run: |
           set -euo pipefail
           python3 -m unittest discover -s scripts -p 'test_benchmark_registry.py' -v
-          python3 -m unittest discover -s benchmarks/cross-language -p 'test_*.py' -v
           python3 scripts/benchmark_registry.py --strict --check --coverage
-
-      - name: Verify historical paired effect methodology (synthetic falsifiers only)
-        shell: bash
-        run: |
-          set -euo pipefail
-          python3 -m unittest discover -s benchmarks/bench-methodology -p 'test_paired_effect.py' -v
-          python3 -m unittest discover -s tests -p 'test_paired_effect_ci.py' -v
-
-      - name: Verify and measure bounded T21/T22/T33 research candidate
-        shell: bash
-        run: |
-          set -euo pipefail
-          python3 benchmarks/byte-pack/носій22.py --verify
-          python3 benchmarks/byte-pack/носій22.py --bench --ntrits 4620 --reps 15 --out "$RUNNER_TEMP/t22-results.json"
-          test -s "$RUNNER_TEMP/t22-results.json"
-
-      - name: Publish raw T22 timing evidence
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f
-        with:
-          name: t22-carrier-benchmark-${{ github.sha }}
-          path: ${{ runner.temp }}/t22-results.json
-          if-no-files-found: error
-
-      - name: Decide whether Rust exact-width ingest evidence is relevant
-        id: rust_packed_visible
-        shell: bash
-        env:
-          EVENT_NAME: ${{ github.event_name }}
-          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
-          HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
-        run: |
-          set -euo pipefail
-          run_bench=false
-          if [[ "$EVENT_NAME" == "workflow_dispatch" ]]; then
-            run_bench=true
-          elif [[ -n "$BASE_SHA" && -n "$HEAD_SHA" ]] && git diff --name-only "$BASE_SHA" "$HEAD_SHA" | grep -Eq '^(benchmarks/rust-packed-visible/|crates/sens/examples/packed_vs_visible_bench\.rs$|crates/sens/Cargo\.toml$|Cargo\.lock$)'; then
-            run_bench=true
-          fi
-          echo "run=$run_bench" >> "$GITHUB_OUTPUT"
-
-      - name: Install Rust for exact-width source-ingestion benchmark
-        if: steps.rust_packed_visible.outputs.run == 'true'
-        uses: dtolnay/rust-toolchain@stable
-
-      - name: Benchmark Rust visible/packed exact-width ingestion
-        if: steps.rust_packed_visible.outputs.run == 'true'
-        shell: bash
-        run: |
-          set -euo pipefail
-          bash benchmarks/rust-packed-visible/run.sh "$RUNNER_TEMP/rust-packed-visible"
-          cat "$RUNNER_TEMP/rust-packed-visible/summary.md" >> "$GITHUB_STEP_SUMMARY"
-
-      - name: Publish raw Rust visible/packed ingest evidence
-        if: always() && steps.rust_packed_visible.outputs.run == 'true'
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f
-        with:
-          name: rust-packed-visible-${{ github.sha }}
-          path: ${{ runner.temp }}/rust-packed-visible/
-          if-no-files-found: warn
-          retention-days: 14
-
-      - name: Reject newly created unmanifested stands
-        if: github.event_name == 'pull_request'
-        env:
-          BASE_SHA: ${{ github.event.pull_request.base.sha }}
-          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
-        run: python3 scripts/benchmark_registry.py --check-new "$BASE_SHA" "$HEAD_SHA"
-
-  sweep:
-    name: "Усі стенди, частина ${{ matrix.shard }}"
-    strategy:
-      fail-fast: false
-      matrix:
-        shard: [0, 1, 2, 3, 4, 5, 6, 7]
-    runs-on: ubuntu-24.04
-    timeout-minutes: 40
-    steps:
-      - uses: actions/checkout@v5
-        with:
-          fetch-depth: 0
-      - uses: dtolnay/rust-toolchain@stable
-      - name: Облік стендів і точного коміту
-        shell: bash
-        run: |
-          set -euo pipefail
-          python3 scripts/test_benchmark_sweep.py
-          python3 scripts/benchmark_registry.py --check
-          git rev-parse HEAD
-          python3 --version
-          rustc --version
-      - name: Інструменти для інструкційного профілю
-        shell: bash
-        run: |
-          set -euo pipefail
-          sudo apt-get update -qq
-          sudo apt-get install -y valgrind
-          valgrind --version
-      - name: Виконати частину всіх bench.json
-        shell: bash
-        env:
-          SHARD: ${{ matrix.shard }}
-        run: |
-          set -euo pipefail
-          python3 scripts/benchmark_sweep.py \
-            --shard "$SHARD" --shards 8 --timeout 180 \
-            --out "$RUNNER_TEMP/benchmark-sweep-$SHARD"
-      - name: Зберегти сирі результати, навіть коли стенд червоний
-        if: always()
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f
-        with:
-          name: benchmark-sweep-${{ github.run_id }}-${{ matrix.shard }}
-          path: ${{ runner.temp }}/benchmark-sweep-${{ matrix.shard }}/
-          retention-days: 21
-          if-no-files-found: error
-
-  audit:
-    name: Підсумувати кожен стенд та виявити відсутні докази
-    needs: [sweep]
-    if: always()
-    runs-on: ubuntu-24.04
-    timeout-minutes: 10
-    steps:
-      - uses: actions/checkout@v5
-      - name: Зібрати всі часткові артефакти
-        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131
-        with:
-          pattern: benchmark-sweep-${{ github.run_id }}-*
-          path: ${{ runner.temp }}/benchmark-sweep-collected
-          merge-multiple: true
-      - name: Перевірити повноту реєстру й результати без приховування відмов
-        shell: bash
-        run: |
-          set -euo pipefail
-          python3 scripts/benchmark_sweep.py --summarize "$RUNNER_TEMP/benchmark-sweep-collected" \
-            | tee "$RUNNER_TEMP/benchmark-sweep-summary.txt"
-          cat "$RUNNER_TEMP/benchmark-sweep-summary.txt" >> "$GITHUB_STEP_SUMMARY"
-      - name: Зберегти аудит повноти
-        if: always()
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f
-        with:
-          name: benchmark-sweep-summary-${{ github.run_id }}
-          path: |
-            ${{ runner.temp }}/benchmark-sweep-collected/summary.json
-            ${{ runner.temp }}/benchmark-sweep-summary.txt
-          retention-days: 21
-          if-no-files-found: warn
