@@ -24,6 +24,7 @@ for source in \
   lib/list-foundation-compositions.lisp \
   lib/викликати-доменний-код.lisp \
   lib/list-domain-first-class-compose.lisp \
+  lib/list-zip-first-class-domain-code-general.lisp \
   lib/застосувати-ланцюг-доменних-функцій.lisp \
   lib/повторити-доменну-функцію.lisp \
   lib/d11-srfi1-alist-protocol.lisp; do
