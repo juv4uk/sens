@@ -78,7 +78,7 @@ def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description="додати функцію в D11 — один шлях")
     ap.add_argument("name", nargs="?", help="бажана укр-назва нової функції")
     ap.add_argument("--parent", help="10-бітна координата батька (селекторна похідна)")
-    ap.add_argument("--suffix", help="0 (перше) або 1 (решта)")
+    ap.add_argument("--suffix", help="0: селектор голови, 1: селектор хвоста")
     args = ap.parse_args(argv)
 
     print("═" * 62)
@@ -149,7 +149,7 @@ def main(argv: list[str] | None = None) -> int:
     print("     1. визнач функцію в lib/d11-<сімейство>.lisp, уживаючи наявні поверхні драбин;")
     print("     2. додай її до закону сімейства (knowledge/d11/закони-пропозиція-*.md);")
     print("     3. напиши SENS-свідка tests/semantic/d11-<сімейство>-{law,mutant}.lisp")
-    print("        з самовердиктом (перше (як-є ()));")
+    print("        з самовердиктом D1, обчисленим нативним SENS;")
     print("     4. додай --binding-source у scripts/execute_changed_lisp_t5m.sh.")
     print()
     print("  Координата: null (сімейний закон не дає opcode). Це ПРОПОЗИЦІЯ —"
