@@ -21,6 +21,43 @@ fn contains_predicate_bit(value: &Value) -> bool {
     }
 }
 
+// Відновлюємо тільки явно типізовані D7-слова канонічного WRITE.
+// Звичайний source-reader не змінює символи на Text7 за подібністю назв.
+fn quoted_canonical_wire(expression: &Expr, depth: u32) -> Result<Value, LanguageError> {
+    if depth > crate::syntax::MAX_STRUCTURE_DEPTH {
+        return Err(LanguageError::new(
+            ErrorKind::Parse,
+            "read: canonical wire exceeds structure depth",
+            expression.span,
+        ));
+    }
+    match &expression.kind {
+        crate::ExprKind::Symbol(token) if token.starts_with(crate::Text7::WIRE_TAG) => {
+            crate::Text7::from_canonical_wire_token(token)
+                .map(Value::Text7)
+                .map_err(|error| {
+                    LanguageError::new(
+                        ErrorKind::Parse,
+                        format!("read: invalid exact D7 wire token: {error:?}"),
+                        expression.span,
+                    )
+                })
+        }
+        crate::ExprKind::List(items) => {
+            let values = items
+                .iter()
+                .map(|item| quoted_canonical_wire(item, depth + 1))
+                .collect::<Result<Vec<_>, _>>()?;
+            Ok(Value::list(values))
+        }
+        crate::ExprKind::Pair(head, tail) => Ok(Value::Pair(Rc::new(crate::PairNode {
+            head: quoted_canonical_wire(head, depth + 1)?,
+            tail: quoted_canonical_wire(tail, depth + 1)?,
+        }))),
+        _ => quoted(expression),
+    }
+}
+
 pub(crate) fn write_to_string_values(
     arguments: &[Value],
     _environment: &Environment,
@@ -68,7 +105,7 @@ pub(crate) fn read_values(
         error
     })?;
     match <[Expr; 1]>::try_from(expressions) {
-        Ok([expression]) => quoted(&expression),
+        Ok([expression]) => quoted_canonical_wire(&expression, 0),
         Err(expressions) => Err(LanguageError::new(
             ErrorKind::InvalidForm,
             format!(
@@ -188,6 +225,44 @@ mod tests {
         )
         .expect("ordinary exact Number wire remains supported");
         assert_eq!(number, Value::String(Rc::from("#q2:1/1")));
+    }
+
+    #[test]
+    fn read_restores_nested_exact_d7_wire_values() {
+        let text = crate::Text7::from_cells(vec![0x41, 0x42])
+            .expect("exact D7 cells");
+        let original = Value::list([
+            Value::Text7(text.clone()),
+            Value::list([Value::Text7(text)]),
+        ]);
+        let wire = write_to_string_values(
+            &[original.clone()],
+            &Environment::root(),
+            Span::default(),
+        )
+        .expect("canonical WRITE");
+        let restored = read_values(&[wire], &Environment::root(), Span::default())
+            .expect("canonical READ");
+        assert_eq!(restored, original, "Text7 must not become a Symbol");
+    }
+
+    #[test]
+    fn read_rejects_malformed_d7_wire_and_keeps_quoted_string() {
+        let error = read_values(
+            &[Value::String(Rc::from("#t7:80"))],
+            &Environment::root(),
+            Span::default(),
+        )
+        .expect_err("a high-bit D7 cell must fail closed");
+        assert_eq!(error.kind, ErrorKind::Parse);
+
+        let literal = read_values(
+            &[Value::String(Rc::from("\"#t7:41\""))],
+            &Environment::root(),
+            Span::default(),
+        )
+        .expect("quoted source string remains a String");
+        assert_eq!(literal, Value::String(Rc::from("#t7:41")));
     }
 
     #[test]
