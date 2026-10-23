@@ -222,6 +222,7 @@ fn binary_bootstrap_words(root: &Path, output: &Path) {
         "lib/macro.sens",
         "lib/core3.sens",
         "lib/core4.sens",
+        "lib/compiler-nucleus.sens",
         "lib/time.sens",
         "lib/utf8.sens",
         "lib/process.sens",

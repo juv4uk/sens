@@ -1,7 +1,7 @@
-//! Contract 11.8 W1-W9 exact-width mechanical carrier benchmark.
+//! Bounded source-word fast-path benchmark; this is not the D1–24+ ladder.
 //!
 //! Measures source-word -> width-qualified DomainIdentity, not language execution.
-//! W9 uses u16; the top bit must survive. No registry, semantic callable projection,
+//! The widest adapter variant uses u16; its top bit must survive. No registry, semantic callable projection,
 //! spelling, historical 8-bit authority or benchmark-local domain-law table.
 
 use sens::{

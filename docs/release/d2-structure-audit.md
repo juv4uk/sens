@@ -1,7 +1,9 @@
-# D2 structure audit — release () #4160
+# Аудит D2-керування в читачі — реліз #4160
 
-**Current authority:** Contract 11.8 / D1–D9  
-**Invariant:** D2 alone owns canonical language structure.
+**Чинне джерело:** `language-contract.lisp` / D1–24+; точні закони перевіряються
+у відповідних ратифікованих джерелах.
+**Розмежування:** D2-керування позначає розділення, відкриття, закриття й крапку.
+Порожній список `()` — це примітив D3:000; його не можна ототожнювати з кодами D2.
 
 ```text
 00 separator
@@ -10,23 +12,26 @@
 11 dot
 ```
 
-Audit scope:
+Обсяг перевірки:
 
-| Path | Status | Result |
+| Шлях | Статус | Результат |
 | --- | --- | --- |
-| canonical_reader.rs | PASS | W2 only owns list structure; W1/W3–W9 remain payload identities |
-| source_words.rs | PASS | exact widths W1–W9 preserved; no competing structural meaning |
-| migrate-three-pass.py | PASS | emits D2 structure and rejects W2 as head/data |
-| translate-domain-program.py | PASS | display-only structural labels are never translated into source structure |
-| source_packing.rs | PASS | semantic payload packing is separate from framing/boundary metadata |
-| binary_framing.rs | DEBT-OWNED #4164 | private framing still uses stale CONTROL_* naming on current main |
+| `canonical_reader.rs` | PASS | читач розрізняє D2-керування, D3:000 (`()`) та інші точні доменні слова |
+| `source_words.rs` | PASS | обмежений source-word adapter зберігає точну ширину, але не є драбиною D1–24+ |
+| `migrate-three-pass.py` | PASS | виводить структуру D2 і відхиляє структурні слова як звичайні голови/дані |
+| `translate-domain-program.py` | PASS | мітки лише для відображення не перетворюються на вихідну структуру |
+| `source_packing.rs` | PASS | пакування payload відокремлене від framing і меж слів |
+| `binary_framing.rs` | DEBT-OWNED #4164 | внутрішнє framing ще має застарілі імена `CONTROL_*` у поточному main |
 
-The binary_framing debt is not a second semantic authority: the file already states that framing tags are metadata, not the canonical semantic payload. PR #4164 finishes the naming/claim separation by replacing private CONTROL_* with WIRE_* and explicitly protecting D2:11 DOT from wire escape.
+Борг у `binary_framing` не створює другого джерела семантичної влади: framing-теги
+є метаданими, а не канонічним payload мови. Задача #4164 завершує відокремлення
+імен і тверджень: замінює приватні `CONTROL_*` на `WIRE_*` та явно захищає D2:11
+DOT від використання як escape-послідовності дроту.
 
-The guard accepts exactly two states:
+Перевірка приймає рівно два стани:
 1. current owned debt exists and is still assigned to #4164;
 2. #4164 has landed and WIRE_* transport tags are present.
 
-It never accepts transport framing becoming D2 language semantics.
+Вона не приймає перетворення транспортного framing на семантику D2.
 
-Release rule: #4164 must resolve the owned debt before l0.42.0 freeze.
+Правило релізу: #4164 має закрити цей борг до заморожування l0.42.0.

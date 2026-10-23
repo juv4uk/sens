@@ -126,7 +126,7 @@ fn render_exact_t5m_words(bytes: &[u8], separator: &str) -> Result<String, Strin
 }
 
 /// Механічне обернення фізичного перегляду без семантичних припущень.
-/// W24+ не пропускаємо через застарілий читач точних слів W1–W9.
+/// Довільні T5M-ширини не пропускаємо через обмежений source fast path.
 #[cfg(feature = "zig-transport")]
 fn verify_exact_t5m_view(physical: &[u8], view: &[u8]) -> Result<(), String> {
     let canonical = format!("{}\n", render_exact_t5m_words(physical, " ")?);
@@ -463,9 +463,9 @@ fn explain_t5m_bytes(bytes: &[u8]) -> Result<String, String> {
     }
     #[cfg(feature = "zig-transport")]
     {
-        // Keep exact widths from Zig through SENS domain admission. The
-        // BinarySourceWord compatibility view is W1–W9 only and cannot
-        // represent ratified D24+ numbers without losing their identity.
+        // Keep exact widths from Zig through SENS domain admission. Do not
+        // project these words into the bounded source adapter; the exact route
+        // preserves every admitted D1–24+ identity or numeric value.
         let words = zig_transport::decode_t5m_exact_words(bytes)
             .map_err(|e| format!("physical T5M transport rejected: {e}"))?;
         let exact = words

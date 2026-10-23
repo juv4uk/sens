@@ -14,9 +14,8 @@
 use crate::{
     canonical_value_sha256_mechanism, domain_identity_shape_mechanism,
     domain_identity_shape_or_empty_mechanism, eval_parsed_expressions, load_core_library,
-    parse_mixed_exact_domain, sha256_source, CompilerExecutionRole, CompilerLoweringRole,
-    CoreDomainIdentity, DomainIdentity, ErrorKind, Exactness, Expr, ExprKind, LanguageError,
-    Session, Span, Value,
+    sha256_source, CompilerExecutionRole, CompilerLoweringRole, CoreDomainIdentity, DomainIdentity,
+    ErrorKind, Exactness, Expr, ExprKind, LanguageError, Session, Span, Value,
 };
 use std::rc::Rc;
 
@@ -239,12 +238,7 @@ fn compiler_artifact_field<'a>(
                 "compiler artifact fields must contain exactly name and value",
             ));
         }
-        let Value::Symbol(name) = parts[0] else {
-            return Err(invalid_projection(
-                "compiler artifact field name must be a symbol",
-            ));
-        };
-        if name.as_ref() == field {
+        if compiler_surface_text(parts[0]).as_deref() == Some(field) {
             if found.is_some() {
                 return Err(invalid_projection(format!(
                     "compiler artifact field {field} is duplicated"
@@ -259,9 +253,25 @@ fn compiler_artifact_field<'a>(
 fn compiler_artifact_string(value: &Value, field: &str) -> Result<String, LanguageError> {
     match value {
         Value::String(value) => Ok(value.to_string()),
+        Value::Text7(value) => crate::text7_projection::render_text7(value, crate::Text7Layout::En)
+            .map_err(|error| {
+                invalid_projection(format!(
+                    "compiler artifact field {field} contains unrenderable D7 text: {error}"
+                ))
+            }),
         other => Err(invalid_projection(format!(
             "compiler artifact field {field} must be a string, got {other}"
         ))),
+    }
+}
+
+fn compiler_surface_text(value: &Value) -> Option<String> {
+    match value {
+        Value::Symbol(value) => Some(value.to_string()),
+        Value::Text7(value) => {
+            crate::text7_projection::render_text7(value, crate::Text7Layout::En).ok()
+        }
+        _ => None,
     }
 }
 
@@ -572,8 +582,7 @@ fn compiler_program_call() -> Expr {
 }
 
 fn eval_compiler_nucleus(session: &mut Session) -> Result<(), LanguageError> {
-    let expressions = parse_mixed_exact_domain(COMPILER_NUCLEUS_SOURCE)?;
-    eval_parsed_expressions(&expressions, session)?;
+    crate::binary_bootstrap::compiler_nucleus_program()?.execute(session)?;
     Ok(())
 }
 
@@ -603,46 +612,47 @@ fn compiler_program_artifact_call() -> Expr {
 fn decode_language_lowering_role(
     value: &Value,
 ) -> Result<Option<CompilerLoweringRole>, LanguageError> {
-    match value {
-        Value::Nil => Ok(None),
-        Value::Symbol(name) if name.as_ref() == "quote-form" => {
-            Ok(Some(CompilerLoweringRole::QuoteForm))
+    // The source adapter historically surfaced role atoms as host Symbols;
+    // physical T5M returns their canonical D7 Text7 datum. Normalize only at
+    // this typed API boundary through D7's ratified ASCII projection.
+    let name = match value {
+        Value::Nil => return Ok(None),
+        Value::Symbol(name) => name.to_string(),
+        Value::Text7(text) => crate::text7_projection::render_text7(text, crate::Text7Layout::En)
+            .map_err(|error| {
+            LanguageError::new(
+                ErrorKind::InvalidForm,
+                format!("SENS compiler nucleus returned unrenderable D7 role text: {error}"),
+                Span::default(),
+            )
+        })?,
+        other => {
+            return Err(LanguageError::new(
+                ErrorKind::InvalidForm,
+                format!("SENS compiler nucleus returned non-role value: {other}"),
+                Span::default(),
+            ));
         }
-        Value::Symbol(name) if name.as_ref() == "atom-predicate" => {
-            Ok(Some(CompilerLoweringRole::AtomPredicate))
+    };
+    let role = match name.as_str() {
+        "quote-form" => CompilerLoweringRole::QuoteForm,
+        "atom-predicate" => CompilerLoweringRole::AtomPredicate,
+        "selector-tail" => CompilerLoweringRole::SelectorTail,
+        "selector-head" => CompilerLoweringRole::SelectorHead,
+        "atom-equality" => CompilerLoweringRole::AtomEquality,
+        "cond-form" => CompilerLoweringRole::CondForm,
+        "pair-construct" => CompilerLoweringRole::PairConstruct,
+        "lambda-form" => CompilerLoweringRole::LambdaForm,
+        "define-form" => CompilerLoweringRole::DefineForm,
+        _ => {
+            return Err(LanguageError::new(
+                ErrorKind::InvalidForm,
+                format!("SENS compiler nucleus returned unknown abstract role: {name}"),
+                Span::default(),
+            ));
         }
-        Value::Symbol(name) if name.as_ref() == "selector-tail" => {
-            Ok(Some(CompilerLoweringRole::SelectorTail))
-        }
-        Value::Symbol(name) if name.as_ref() == "selector-head" => {
-            Ok(Some(CompilerLoweringRole::SelectorHead))
-        }
-        Value::Symbol(name) if name.as_ref() == "atom-equality" => {
-            Ok(Some(CompilerLoweringRole::AtomEquality))
-        }
-        Value::Symbol(name) if name.as_ref() == "cond-form" => {
-            Ok(Some(CompilerLoweringRole::CondForm))
-        }
-        Value::Symbol(name) if name.as_ref() == "pair-construct" => {
-            Ok(Some(CompilerLoweringRole::PairConstruct))
-        }
-        Value::Symbol(name) if name.as_ref() == "lambda-form" => {
-            Ok(Some(CompilerLoweringRole::LambdaForm))
-        }
-        Value::Symbol(name) if name.as_ref() == "define-form" => {
-            Ok(Some(CompilerLoweringRole::DefineForm))
-        }
-        Value::Symbol(name) => Err(LanguageError::new(
-            ErrorKind::InvalidForm,
-            format!("SENS compiler nucleus returned unknown abstract role: {name}"),
-            Span::default(),
-        )),
-        other => Err(LanguageError::new(
-            ErrorKind::InvalidForm,
-            format!("SENS compiler nucleus returned non-role value: {other}"),
-            Span::default(),
-        )),
-    }
+    };
+    Ok(Some(role))
 }
 
 /// Derive the complete current compiler lowering role by executing the
@@ -798,17 +808,17 @@ pub fn verify_compiler_program_artifact_from_sens(
     }
 
     let rows = compiler_artifact_list(artifact, "compiler program artifact")?;
-    let Some(Value::Symbol(schema)) = rows.first().copied() else {
+    let Some(schema) = rows.first().and_then(|value| compiler_surface_text(value)) else {
         return Err(invalid_projection(
-            "compiler program artifact must start with a schema symbol",
+            "compiler program artifact must start with a D7 text schema name",
         ));
     };
-    if schema.as_ref() == "compiler-compilation-error-1" {
+    if schema == "compiler-compilation-error-1" {
         return Err(invalid_projection(
             "compiler-compilation-error-1 cannot enter executable lowering",
         ));
     }
-    if schema.as_ref() != "compiler-compilation-artifact-1" {
+    if schema != "compiler-compilation-artifact-1" {
         return Err(invalid_projection(format!(
             "unknown compiler program artifact schema: {schema}"
         )));
@@ -833,15 +843,9 @@ pub fn verify_compiler_program_artifact_from_sens(
                 "compiler artifact fields must contain exactly name and value",
             ));
         }
-        let Value::Symbol(name) = parts[0] else {
-            return Err(invalid_projection(
-                "compiler artifact field name must be a symbol",
-            ));
-        };
-        let Some(index) = ALLOWED_FIELDS
-            .iter()
-            .position(|&allowed| allowed == name.as_ref())
-        else {
+        let name = compiler_surface_text(parts[0])
+            .ok_or_else(|| invalid_projection("compiler artifact field name must be D7 text"))?;
+        let Some(index) = ALLOWED_FIELDS.iter().position(|&allowed| allowed == name) else {
             return Err(invalid_projection(format!(
                 "compiler artifact contains unsupported field {name}"
             )));
@@ -856,13 +860,13 @@ pub fn verify_compiler_program_artifact_from_sens(
     }
 
     let kind = compiler_artifact_field(&rows[1..], "artifact-kind")?;
-    if !matches!(kind, Value::Symbol(name) if name.as_ref() == "whole-program") {
+    if compiler_surface_text(kind).as_deref() != Some("whole-program") {
         return Err(invalid_projection(
             "compiler artifact kind must be whole-program",
         ));
     }
     let status = compiler_artifact_field(&rows[1..], "artifact-status")?;
-    if !matches!(status, Value::Symbol(name) if name.as_ref() == "canonical-backend-neutral") {
+    if compiler_surface_text(status).as_deref() != Some("canonical-backend-neutral") {
         return Err(invalid_projection(
             "compiler artifact status must be canonical-backend-neutral",
         ));
@@ -1060,8 +1064,8 @@ mod tests {
 
     #[test]
     fn compiler_nucleus_loads_each_definition_without_an_opaque_binding_failure() {
-        let expressions =
-            parse_mixed_exact_domain(COMPILER_NUCLEUS_SOURCE).expect("compiler nucleus parses");
+        let expressions = crate::parse_mixed_exact_domain(COMPILER_NUCLEUS_SOURCE)
+            .expect("compiler nucleus parses");
         let mut session = Session::bare();
         load_core_library(&mut session).expect("active core loads");
         for (index, expression) in expressions.iter().enumerate() {
@@ -1076,6 +1080,30 @@ mod tests {
     }
 
     #[test]
+    fn compiler_nucleus_t5m_bootstrap_loads_the_language_role_function() {
+        let form_count = crate::binary_bootstrap::compiler_nucleus_program()
+            .expect("Zig-restored compiler-nucleus T5M program")
+            .form_count();
+        assert!(form_count > 0);
+
+        let mut session = Session::bare();
+        load_core_library(&mut session).expect("active Core4 loads");
+        eval_compiler_nucleus(&mut session).expect("physical compiler nucleus executes");
+        let role_name = crate::encode_text7(
+            "роль-пониження-компілятора-за-законами",
+            crate::Text7Layout::Uk,
+        )
+        .expect("the compiler role name is representable in the ratified Ukrainian D7 layout")
+        .to_canonical_wire_token();
+        assert!(session.environment.get(&role_name).is_some());
+        assert_eq!(
+            compiler_lowering_role_from_sens(d3(0b010))
+                .expect("the role function executes after physical bootstrap"),
+            Some(CompilerLoweringRole::AtomPredicate)
+        );
+    }
+
+    #[test]
     fn compiled_driver_bootstrap_bundle_contains_verified_representation_only_inputs() {
         let bundle =
             compiler_program_bootstrap_bundle().expect("verified compiler bootstrap bundle");
@@ -1086,10 +1114,7 @@ mod tests {
         assert_eq!(bundle.d4_proof_ref, COMPILER_D4_PROOF_REF);
         assert_eq!(bundle.authority_path, COMPILER_AUTHORITY_PATH);
         assert_eq!(bundle.language_contract_version, COMPILER_CONTRACT_VERSION);
-        assert_eq!(
-            bundle.authority_sha256,
-            LANGUAGE_CONTRACT_SHA256
-        );
+        assert_eq!(bundle.authority_sha256, LANGUAGE_CONTRACT_SHA256);
         assert_eq!(
             bundle.compiler_nucleus_sha256,
             sha256_hex(COMPILER_NUCLEUS_SOURCE.as_bytes())
@@ -1217,8 +1242,7 @@ mod tests {
     fn field_value<'a>(artifact: &'a Value, field: &str) -> &'a Value {
         for entry in list_values(artifact).into_iter().skip(1) {
             let parts = list_values(entry);
-            if parts.len() == 2 && matches!(parts[0], Value::Symbol(name) if name.as_ref() == field)
-            {
+            if parts.len() == 2 && compiler_surface_text(parts[0]).as_deref() == Some(field) {
                 return parts[1];
             }
         }
@@ -1273,8 +1297,8 @@ mod tests {
 
     #[test]
     fn whole_program_artifact_verifier_binds_requests_to_current_sens_authority() {
-        let parsed =
-            parse_mixed_exact_domain(COMPILER_NUCLEUS_SOURCE).expect("compiler nucleus parses");
+        let parsed = crate::parse_mixed_exact_domain(COMPILER_NUCLEUS_SOURCE)
+            .expect("compiler nucleus parses");
         let lowered = crate::lower_program(&parsed);
         let wire = crate::wire_encode_program(&lowered);
         let decoded = crate::wire_decode_program(&wire).expect("canonical SW\\x01 program wire");
@@ -1355,8 +1379,8 @@ mod tests {
 
     #[test]
     fn whole_program_artifact_verifier_rejects_tampering_and_target_smuggling() {
-        let parsed =
-            parse_mixed_exact_domain(COMPILER_NUCLEUS_SOURCE).expect("compiler nucleus parses");
+        let parsed = crate::parse_mixed_exact_domain(COMPILER_NUCLEUS_SOURCE)
+            .expect("compiler nucleus parses");
         let lowered = crate::lower_program(&parsed);
         let wire = crate::wire_encode_program(&lowered);
         let decoded = crate::wire_decode_program(&wire).expect("canonical SW\\x01 program wire");
@@ -1391,7 +1415,7 @@ mod tests {
 
     #[test]
     fn whole_program_artifact_wraps_real_wire_traversal_inside_sens() {
-        let parsed = parse_mixed_exact_domain(COMPILER_NUCLEUS_SOURCE)
+        let parsed = crate::parse_mixed_exact_domain(COMPILER_NUCLEUS_SOURCE)
             .expect("compiler nucleus parses through exact-domain seam");
         let lowered = crate::lower_program(&parsed);
         let wire = crate::wire_encode_program(&lowered);
@@ -1409,16 +1433,16 @@ mod tests {
         let rows = list_values(&artifact);
         assert!(matches!(
             rows.first(),
-            Some(Value::Symbol(name)) if name.as_ref() == "compiler-compilation-artifact-1"
+            Some(schema) if compiler_surface_text(schema).as_deref() == Some("compiler-compilation-artifact-1")
         ));
         assert!(matches!(
             field_value(&artifact, "program-wire-sha256"),
             Value::String(found) if found.as_ref() == digest
         ));
-        assert!(matches!(
-            field_value(&artifact, "artifact-kind"),
-            Value::Symbol(found) if found.as_ref() == "whole-program"
-        ));
+        assert_eq!(
+            compiler_surface_text(field_value(&artifact, "artifact-kind")).as_deref(),
+            Some("whole-program")
+        );
         let provenance = list_values(field_value(&artifact, "authority-provenance"));
         assert_eq!(provenance.len(), 5);
         assert!(matches!(
@@ -1447,10 +1471,10 @@ mod tests {
             field_value(&artifact, "required-capabilities"),
             Value::Nil
         ));
-        assert!(matches!(
-            field_value(&artifact, "artifact-status"),
-            Value::Symbol(status) if status.as_ref() == "canonical-backend-neutral"
-        ));
+        assert_eq!(
+            compiler_surface_text(field_value(&artifact, "artifact-status")).as_deref(),
+            Some("canonical-backend-neutral")
+        );
 
         let request_value = field_value(&artifact, "semantic-requests");
         let requests = list_values(request_value);
@@ -1477,10 +1501,10 @@ mod tests {
             .iter()
             .map(|request| {
                 let request = list_values(request);
-                match request.get(1) {
-                    Some(Value::Symbol(role)) => role.to_string(),
-                    other => panic!("request has no symbolic role: {other:?}"),
-                }
+                request
+                    .get(1)
+                    .and_then(|value| compiler_surface_text(value))
+                    .unwrap_or_else(|| panic!("request has no D7 role text: {request:?}"))
             })
             .collect::<std::collections::HashSet<_>>();
         for role in [
@@ -1522,7 +1546,7 @@ mod tests {
         let rows = list_values(&artifact);
         assert!(matches!(
             rows.first(),
-            Some(Value::Symbol(name)) if name.as_ref() == "compiler-compilation-error-1"
+            Some(schema) if compiler_surface_text(schema).as_deref() == Some("compiler-compilation-error-1")
         ));
         assert!(matches!(
             field_value(&artifact, "program-wire-sha256"),
@@ -1583,10 +1607,8 @@ mod tests {
             .iter()
             .map(|request| {
                 let request = list_values(request);
-                match request[1] {
-                    Value::Symbol(role) => role.to_string(),
-                    other => panic!("request role must be symbolic, got {other}"),
-                }
+                compiler_surface_text(request[1])
+                    .unwrap_or_else(|| panic!("request role must be D7 text, got {}", request[1]))
             })
             .collect::<Vec<_>>();
         assert_eq!(

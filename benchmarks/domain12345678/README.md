@@ -1,4 +1,31 @@
-# W1-W8 exact-domain carrier benchmark under Contract 11.8 (#4129)
+# Обмежений benchmark носія source-слів
+
+> **Уточнення 2026-10-23:** цей benchmark вимірює історичний обмежений шлях
+> представлення source-слів і не описує драбину доменів SENS. Поточна рамка —
+> **D1–24+**; перевіряй identity, закони й допуск у чинному
+> [`language-contract.lisp`](../../language-contract.lisp) та ратифікованих
+> джерелах. D10 і D11 не можна оголошувати відсутніми на підставі цього
+> benchmark. T5M зберігає точні фізичні ширини, не визначаючи домен чи
+> викличність. Старий опис нижче збережено як provenance стану Contract 11.8.
+
+## Український опис benchmark
+
+`run.py` вимірює Cachegrind `Ir` для старого обмеженого шляху точних source-слів:
+окремі малі ширини, змішаний потік, перетворення ширини та порожній baseline.
+Приклад Rust проходить через production `Bits<N>`, `BinarySourceWord` і
+`DomainIdentity`. Це мікробенчмарк представлення й пакування, не час виконання
+програми SENS, не повна драбина доменів і не тест викличності. Його старі
+`BLOCKED-CARRIER` рядки — результат конкретного знімка реалізації Contract 11.8,
+а не чинний статус D9, D10, D11 чи D24+.
+
+Щоб повторити історичний вимір, збери приклад репозиторним Guix-профілем, потім
+запусти `python3 benchmarks/domain12345678/run.py` з потрібними `--binary`,
+`--out-dir`, `--iterations` та `--reps`. Зберігай сирі відліки, `results.tsv`,
+`environment.json`, SHA коміту, версії Rust/Valgrind й архітектуру. Результат не
+є performance-бюджетом без окремої ратифікації; не переносити його на сучасний
+повний runtime чи на інші фізичні шляхи.
+
+## Історичний опис виміру (стан Contract 11.8)
 
 This is the implemented exact-width carrier/runtime baseline across W1..W8.
 The directory name `domain12345678` is preserved as implementation provenance.

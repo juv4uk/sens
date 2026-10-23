@@ -13,6 +13,10 @@ pub(super) fn core3_program() -> Result<PhysicalT5Program, LanguageError> {
     program(CORE3_BOOTSTRAP_WORDS)
 }
 
+pub(super) fn compiler_nucleus_program() -> Result<PhysicalT5Program, LanguageError> {
+    program(COMPILER_NUCLEUS_BOOTSTRAP_WORDS)
+}
+
 pub(super) fn with_core4_program<T>(
     action: impl FnOnce(&PhysicalT5Program) -> T,
 ) -> Result<T, LanguageError> {

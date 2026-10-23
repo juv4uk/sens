@@ -226,6 +226,12 @@ pub(crate) fn quoted(expression: &Expr) -> Result<Value, LanguageError> {
                 Span { start: 0, end: 0 },
             ));
         }
+        // A D2-framed W7 run is a D7 text datum specifically in QUOTE's
+        // data position. Keep the canonical reader's AST structural; this
+        // contextual conversion preserves the exact cells as one text atom.
+        if let Some(text) = crate::canonical_reader::text7_atom(expression) {
+            return Ok(Value::Text7(text));
+        }
         Ok(match &expression.kind {
             ExprKind::Number(number, exactness) => Value::Number(*number, *exactness),
             ExprKind::Rational(rational) => Value::Rational(rational.clone()),
@@ -380,6 +386,22 @@ mod exact_d4_define_arity_tests {
             quoted(&expression).unwrap(),
             Value::DomainIdentity(crate::DomainIdentity::D3(value)) if value == quote
         ));
+    }
+
+    #[test]
+    fn quote_lifts_a_d2_framed_w7_run_to_exact_d7_text() {
+        let expression = crate::parse_canonical_binary("10 1100001 00 1110100 01")
+            .expect("canonical D2/W7 quote datum parses")
+            .remove(0);
+        let value = quoted(&expression).expect("quoted D7 text datum");
+        let Value::Text7(text) = &value else {
+            panic!("quoted W7 run must stay one D7 text atom");
+        };
+        assert_eq!(
+            crate::text7_projection::render_text7(&text, crate::Text7Layout::En)
+                .expect("ratified ASCII display"),
+            "at"
+        );
     }
 
     #[test]

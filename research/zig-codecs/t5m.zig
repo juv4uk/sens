@@ -2,7 +2,6 @@
 //! are ranked in base 3 and stored in one byte. T5M3 is the separate 15-trit/3-byte codec.
 //! This layer preserves exact word widths and bits; it assigns no semantics.
 const std = @import("std");
-const domain_ladder = @import("domain_ladder.zig");
 
 pub const MAX_PHYSICAL_BYTES: usize = 4 * 1024 * 1024;
 const TRITS_PER_BYTE: usize = 5;
@@ -167,9 +166,9 @@ pub fn decode(allocator: std.mem.Allocator, data: []const u8) Error!Decoded {
     return .{ .words = words, .bit_storage = bit_storage };
 }
 
-test "D24 exact word uses five T5M bytes without a numeric marker" {
-    const d24_one = "000000000000000000000001";
-    const words = [_]Word{.{ .width = 24, .bits = d24_one }};
+test "opaque 24-bit word uses five T5M bytes without domain interpretation" {
+    const exact_bits = "000000000000000000000001";
+    const words = [_]Word{.{ .width = 24, .bits = exact_bits }};
     const encoded = try encode(std.testing.allocator, &words);
     defer std.testing.allocator.free(encoded);
     try std.testing.expectEqual(@as(usize, 5), encoded.len);
@@ -178,8 +177,7 @@ test "D24 exact word uses five T5M bytes without a numeric marker" {
     defer decoded.deinit(std.testing.allocator);
     try std.testing.expectEqual(@as(usize, 1), decoded.words.len);
     try std.testing.expectEqual(@as(usize, 24), decoded.words[0].width);
-    try std.testing.expectEqualStrings(d24_one, decoded.words[0].bits);
-    try std.testing.expect(domain_ladder.supportsPhysicalWidth(decoded.words[0].width));
+    try std.testing.expectEqualStrings(exact_bits, decoded.words[0].bits);
 }
 
 test "T5M D1 word occupies one byte (five trits)" {

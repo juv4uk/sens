@@ -299,7 +299,35 @@ class SterileZigCorridorTests(unittest.TestCase):
         self.assertNotIn("ternary_transport", body)
         self.assertNotIn("TRITS_BY_BYTE", body)
         self.assertIn("packed_bits", body)
+        self.assertIn("decode_t5m_exact_words", body)
+        self.assertIn("encode_t5m_exact_words", body)
         self.assertNotIn("from_width_bits", body)
+
+    def test_t5m_codec_keeps_width_opaque_and_has_no_domain_authority(self) -> None:
+        module = runpy.run_path(str(SCRIPT))
+        check = module["check_zig_t5m_width_firewall"]
+        blocked = module["CorridorBlocked"]
+        path = ROOT / "research/zig-codecs/t5m.zig"
+        source = path.read_text(encoding="utf-8")
+        check(source)
+
+        with self.subTest(mutant="domain table import"):
+            mutant = source.replace(
+                'const std = @import("std");',
+                'const std = @import("std");\nconst domains = @import("domain_ladder.zig");',
+                1,
+            )
+            with self.assertRaisesRegex(blocked, "T5M_WIDTH_FIREWALL"):
+                check(mutant)
+
+        with self.subTest(mutant="artificial width ceiling"):
+            mutant = source.replace(
+                "return width != 0;",
+                "return width != 0 and width <= 24;",
+                1,
+            )
+            with self.assertRaisesRegex(blocked, "T5M_WIDTH_FIREWALL"):
+                check(mutant)
 
     def test_f3c_no_savings_rejects_t5m_validation_bypass_mutants(self) -> None:
         """encode_f3 must validate T5M via Zig before a no-savings result."""
@@ -309,7 +337,7 @@ class SterileZigCorridorTests(unittest.TestCase):
         body = (ROOT / "crates/sens-cli/src/zig_transport.rs").read_text(encoding="utf-8")
         check(body)
 
-        no_validate = body.replace("let logical_words = decode_t5_words(t5)?;",
+        no_validate = body.replace("let logical_words = decode_t5m_words(t5)?;",
                                    "let logical_words = vec![];", 1)
         with self.assertRaises(blocked):
             check(no_validate)
@@ -318,8 +346,8 @@ class SterileZigCorridorTests(unittest.TestCase):
         end = body.index("pub fn decode_f3(")
         route = body[start:end]
         swapped = route.replace(
-            "let logical_words = decode_t5_words(t5)?;\n    let legacy",
-            "if legacy.len() > 16 { return Ok(None); }\n    let logical_words = decode_t5_words(t5)?;\n    let legacy",
+            "let logical_words = decode_t5m_words(t5)?;\n    let legacy",
+            "if legacy.len() > 16 { return Ok(None); }\n    let logical_words = decode_t5m_words(t5)?;\n    let legacy",
             1,
         )
         self.assertNotEqual(swapped, route, "mutation must move live validation")
@@ -521,7 +549,7 @@ class SterileZigCorridorTests(unittest.TestCase):
         replacements = (
             (
                 "ingress",
-                "return zig_transport::decode_t5_exact_words(bytes)?",
+                "return zig_transport::decode_t5m_exact_words(bytes)?",
                 "return sens::decode_ternary_words(bytes).map_err(|e| format!(\"{e:?}\"));",
             ),
             (
@@ -531,7 +559,7 @@ class SterileZigCorridorTests(unittest.TestCase):
             ),
             (
                 "eval",
-                "let words = decode_physical_t5_words(bytes)?;",
+                "let words = decode_physical_t5m_words(bytes)?;",
                 "let words = sens::decode_ternary_words(bytes).unwrap();",
             ),
             (
@@ -549,7 +577,7 @@ class SterileZigCorridorTests(unittest.TestCase):
             with self.subTest(bypass=old):
                 self.assertIn(old, source)
                 if route_name == "ingress":
-                    start = source.index("fn decode_physical_t5_words(")
+                    start = source.index("fn decode_physical_t5m_words(")
                     end = source.index("\nfn eval_physical_t5(", start)
                 elif route_name == "eval":
                     start = source.index("fn eval_physical_t5(")
@@ -572,22 +600,21 @@ class SterileZigCorridorTests(unittest.TestCase):
             encoding="utf-8"
         )
         check(source)
-        start = source.index("fn explain_t5_bytes(")
+        start = source.index("fn explain_t5m_bytes(")
         end = source.index("\nfn require_zig_transport(", start)
         route = source[start:end]
         for old, fake in (
             (
-                "sens::parse_canonical_word_sequence(&words)",
+                "sens::ExactDomainWord::from_physical_width_bits(word.width, &word.bits)",
                 "sens::parse_canonical_binary(&sens::render_ternary_words_vertical(&words))",
             ),
             (
-                "zig_transport::decode_t5_words(bytes)",
+                "zig_transport::decode_t5m_exact_words(bytes)",
                 "sens::decode_ternary_words(bytes)",
             ),
             (
-                "sens::parse_canonical_word_sequence(&words)",
-                'sens::parse_canonical_word_sequence(&words) /* ignored */;\n'
-                'let _ = sens::render_ternary_words_vertical(&words);',
+                "sens::PhysicalT5Program::from_exact_domain_words_owned(exact)",
+                "exact",
             ),
         ):
             with self.subTest(mutation=old):
@@ -605,15 +632,15 @@ class SterileZigCorridorTests(unittest.TestCase):
 
         replacements = (
             (
-                "let bytes = zig_transport::encode_t5_direct(&admitted_source_words(&projection)?)?;",
+                "let bytes = zig_transport::encode_t5m_direct(&admitted_source_words(&projection)?)?;",
                 "let bytes = sens::encode_binary_projection_ternary(&projection).unwrap();",
             ),
             (
                 "let expected_words = admitted_source_words(source)?;",
-                "let expected_words = zig_transport::decode_t5_words(binary)?;",
+                "let expected_words = decode_canonical_t5m_words(binary)?;",
             ),
             (
-                "zig_transport::encode_t5(&expected_words, binary)",
+                "zig_transport::verify_t5m_encoding(&expected_words, binary)",
                 "sens::encode_binary_projection_ternary(source).map_err(|e| format!(\"{e:?}\"))",
             ),
             (
@@ -638,7 +665,7 @@ class SterileZigCorridorTests(unittest.TestCase):
         check(source)
         live = (
             "let bytes = "
-            "zig_transport::encode_t5_direct(&admitted_source_words(&projection)?)?;"
+            "zig_transport::encode_t5m_direct(&admitted_source_words(&projection)?)?;"
         )
         self.assertIn(live, source)
         for commented in ("// " + live, "/* " + live + " */"):
@@ -678,7 +705,7 @@ class SterileZigCorridorTests(unittest.TestCase):
                 "sens::envelope_e1::encode(&words).map_err(|e| format!(\"{e:?}\"))",
             ),
             (
-                "decode_canonical_t5_words(physical_t5)",
+                "decode_canonical_t5m_words(physical_t5)",
                 "sens::decode_ternary_words(physical_t5)",
             ),
             (
@@ -686,7 +713,7 @@ class SterileZigCorridorTests(unittest.TestCase):
                 'sens::envelope_e1::encode(&[]).map_err(|e| format!("{e:?}"))',
             ),
             (
-                "let e1 = encode_e1_from_t5(&bytes)?;",
+                "let e1 = encode_e1_from_t5m(&bytes)?;",
                 "let e1 = sens::envelope_e1::encode(&[]).unwrap();",
             ),
         )
@@ -743,12 +770,12 @@ class SterileZigCorridorTests(unittest.TestCase):
         blocked = module["CorridorBlocked"]
         source = (ROOT / "crates/sens-cli/src/bin/sens-trit.rs").read_text(encoding="utf-8")
         check(source)
-        start = source.index("fn eval_t5_bytes_core4(")
-        end = source.index("\n}\n", start) + len("\n}\n")
+        start = source.index("fn eval_t5m_bytes_core4(")
+        end = source.index("\n/// Diagnose a physical packed T5M file", start)
         actual_route = source[start:end]
         mutations = (
             (
-                "zig_transport::decode_t5_exact_words(bytes)?",
+                "zig_transport::decode_t5m_exact_words(bytes)?",
                 "sens::decode_ternary_words(bytes).unwrap()",
             ),
             (
@@ -756,7 +783,7 @@ class SterileZigCorridorTests(unittest.TestCase):
                 "sens::PhysicalT5Program::decode(bytes).unwrap()",
             ),
             (
-                'Err("physical T5 execution requires Zig; no Rust fallback".into())',
+            'Err("physical T5M execution requires Zig; no Rust fallback".into())',
                 "sens::eval_t5_program(bytes, &mut sens::Session::default()).map_err(|e| format!(\"{e:?}\"))",
             ),
         )
@@ -767,7 +794,7 @@ class SterileZigCorridorTests(unittest.TestCase):
                 with self.assertRaises(blocked):
                     check(changed)
 
-        entry = "eval_t5_bytes_core4(&bytes, true)?"
+        entry = "eval_t5m_bytes_core4(&bytes, true)?"
         self.assertIn(entry, source)
         with self.assertRaises(blocked):
             check(source.replace(entry, "sens::eval_t5_program(&bytes, &mut session)?", 1))
@@ -779,7 +806,7 @@ class SterileZigCorridorTests(unittest.TestCase):
         blocked = module["CorridorBlocked"]
         spoof = (
             'fn zig_ingress() {\n'
-            '    zig_transport::decode_t5_words(bytes);\n'
+            '    zig_transport::decode_t5m_exact_words(bytes);\n'
             '}\n'
             '#[cfg(test)]\n'
             'fn next_production_route() {\n'
@@ -802,7 +829,7 @@ class SterileZigCorridorTests(unittest.TestCase):
         blocked = module["CorridorBlocked"]
         source = (ROOT / "crates/sens-cli/src/main.rs").read_text(encoding="utf-8")
         check(source)  # Positive: the live production Zig return exists.
-        live = "return zig_transport::decode_t5_exact_words(bytes)?"
+        live = "return zig_transport::decode_t5m_exact_words(bytes)?"
         self.assertIn(live, source)
         mutant = source.replace(
             live,
@@ -823,7 +850,7 @@ class SterileZigCorridorTests(unittest.TestCase):
             source.replace('use sens_cli::zig_transport;', 'use untrusted_transport;'),
             source.replace('use sens_cli::zig_transport;', '// use sens_cli::zig_transport;'),
             source.replace('#[cfg(feature = "zig-transport")]\nuse sens_cli::zig_transport;', '#[cfg(test)]\nuse sens_cli::zig_transport;'),
-            source.replace('fn decode_physical_t5_words(', 'fn bypass_physical_t5_words('),
+            source.replace('fn decode_physical_t5m_words(', 'fn bypass_physical_t5m_words('),
             source.replace('fn eval_physical_t5(', 'fn bypass_eval_physical_t5('),
             source.replace('fn main() {', 'fn other_main() {'),
         ):

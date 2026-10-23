@@ -1,7 +1,9 @@
 //! Canonical visible-binary source boundary for SENS .lisp files.
 //!
-//! This module owns source token shape only. It deliberately does not assign
-//! D1-D9 meaning; semantic wrappers consume these exact-width words later.
+//! This module owns a bounded source-word fast path only. Its compact typed
+//! variants are an implementation adapter, not the SENS domain ladder and not
+//! a limit on exact-width words transported by T5M. Semantic wrappers consume
+//! the exact words later.
 
 use crate::{Bit1, Bit2, Bit3, Bit4, Bit5, Bit6, Bit7, Bit8, Bit9, ErrorKind, LanguageError, Span};
 use std::fmt;
@@ -145,10 +147,10 @@ impl BinarySourceWord {
         }
     }
 
-    /// Total exact-width qualified lift for the W1→W9 carrier ladder.
+    /// Exact-width lift for this bounded source-word adapter.
     ///
-    /// Contract 11.8: D1-D9 have current semantic authority.
-    /// D1-D9 identity is materialized exactly; callability remains separate.
+    /// This enum is not a domain ladder or a T5M width limit. Exact domain
+    /// identity and callability are resolved by their own typed paths.
     pub const fn domain_identity(self) -> crate::DomainIdentity {
         crate::DomainIdentity::from_source_word(self)
     }
@@ -263,7 +265,7 @@ pub fn parse_binary_source_words(source: &str) -> Result<Vec<BinarySourceToken>,
                     let message = if token.len() > 9
                         && token.bytes().all(|byte| matches!(byte, b'0' | b'1'))
                     {
-                        "canonical SENS source word exceeds current 9-bit carrier"
+                        "canonical SENS source word exceeds the bounded source fast path"
                     } else {
                         "canonical SENS source accepts only exact-width binary words"
                     };
@@ -561,10 +563,12 @@ mod tests {
     }
 
     #[test]
-    fn word_wider_than_current_w9_carrier_fails_named() {
+    fn legacy_bounded_source_fast_path_rejects_ten_bit_tokens() {
         let error = parse_binary_source_words("0000000000").expect_err("ten bits must fail");
         assert_eq!(error.kind, ErrorKind::Parse);
-        assert!(error.message.contains("exceeds current 9-bit carrier"));
+        assert!(error
+            .message
+            .contains("exceeds the bounded source fast path"));
         assert_eq!(error.span, Span { start: 0, end: 10 });
     }
 

@@ -634,14 +634,15 @@ test "ABI v2 D7 preserves every seven-bit coordinate without a semantic registry
     try std.testing.expectEqualSlices(u8, &.{ 0x6d, 0x6d }, &untouched);
 }
 
-// ── Ізоляція Rust: за неї відповідає ЛИШЕ Zig (власник, 23.10.2026) ──────────
-// Rust не має власного шляху до SENS: єдина фізична точка входу/виходу — цей
-// стерильний коридор. Перевірка тут, у Zig, а не в Python-чекері й не в Rust.
-test "Rust reaches SENS only through the sterile Zig corridor" {
-    // Єдиний фізичний ABI — версія 2; іншого шляху Rust не має.
-    std.debug.assert(sens_zig_codec_abi_version() == 2);
-    // Коридор відкидає порожній і завеликий фізичний буфер, без часткового запису.
+// Перевірка Zig ABI: версія та межі фізичного T5M-входу.
+// Архітектурну відсутність Rust-обходу перевіряють окремі source-route guards;
+// ці runtime-assertions самі по собі її не доводять.
+test "ABI v2 T5M validator rejects empty and oversized physical input" {
+    try std.testing.expectEqual(@as(u32, 2), sens_zig_codec_abi_version());
     var one: [1]u8 = .{0};
-    std.debug.assert(sens_zig_t5m_validate(&one, 0) == -1);
-    std.debug.assert(sens_zig_t5m_validate(&one, t5m.MAX_PHYSICAL_BYTES + 1) == -1);
+    try std.testing.expectEqual(@as(c_int, -1), sens_zig_t5m_validate(&one, 0));
+    try std.testing.expectEqual(
+        @as(c_int, -1),
+        sens_zig_t5m_validate(&one, t5m.MAX_PHYSICAL_BYTES + 1),
+    );
 }

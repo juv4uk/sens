@@ -1,14 +1,13 @@
-//! Exact width-qualified carrier for the ratified D1–D10 semantic ladder.
-//! Ratified numeric D24+ values travel as `BinaryNumber`/`ExactDomainWord::Number`.
+//! Typed representation for the exact domain identities currently modeled here.
+//! Numeric D24+ values travel as `BinaryNumber`/`ExactDomainWord::Number`.
 //!
 //! Semantic ratification and callable Core-operation identity are deliberately
 //! separate. Width never grants a semantic role by itself.
 //!
-//! - D1–D9 have Contract 11.8 authority; D10 is separately whole-domain ratified by Contract 11.9.
-//! - D1-D9 мають чинну семантичну authority згідно з Contract 11.8; D10 окремо ратифіковано Контрактом 11.9.
+//! - Domain identity, resident law, mechanism admission and physical encoding are independent.
 //! - Numeric D24/D48/D96/D192/... identity is explicit in the numeric value itself.
-//! - D11–D23 are not synthesized; width alone never creates a semantic identity.
-//! - W1–W8 keep the one-byte fast path; D9 and D10 use the exact non-truncating W9/W10 carriers (D11+ likewise).
+//! - The bounded small-word adapter below is not the D1–24+ domain ladder.
+//! - No width alone creates semantic identity or callability.
 //! - Semantic residency і callable/mechanism admission лишаються окремими фактами;
 //!   відсутній механізм може fail-closed навіть для ратифікованого resident.
 //! - D7 is keyboard/v2 W7 data identity and never enters callable routing by width.

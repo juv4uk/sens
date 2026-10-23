@@ -376,6 +376,8 @@ def check_trit_explain_typed_word_route(source: str) -> None:
         "sens::parse_canonical_word_sequence(&words)",
     )):
         raise CorridorBlocked("sens-trit explain does not admit exact SENS words")
+    if "sens::PhysicalT5Program::from_exact_domain_words_owned(exact)" not in active:
+        raise CorridorBlocked("sens-trit explain does not pass admitted exact words to the SENS D2 reader")
     for forbidden in (
         "sens::parse_canonical_binary(", "sens::render_ternary_words_vertical(",
         "sens::decode_ternary_words(", "sens::PhysicalT5Program::decode(",
@@ -662,6 +664,26 @@ def check_zig_f3c_semantic_firewall(source: str) -> None:
         raise CorridorBlocked("F3C_SEMANTIC_FIREWALL physical byte replay removed")
 
 
+def check_zig_t5m_width_firewall(source: str) -> None:
+    """T5M transports caller-formed exact words; it does not assign domains.
+
+    Width remains opaque and unbounded by a domain table (subject only to the
+    transport's global physical-byte limit). Domain identity/admission belongs
+    to SENS after Zig restores exact words.
+    """
+    production = source.split('\ntest "', 1)[0]
+    clean = re.sub(r"//[^\n]*", "", production)
+    if '@import("domain_ladder.zig")' in clean or "domain_ladder." in clean:
+        raise CorridorBlocked("T5M_WIDTH_FIREWALL codec must not consult domain identity")
+    if not re.search(
+        r"fn supportsWidth\(width: usize\) bool\s*\{\s*return width != 0;\s*\}",
+        clean,
+    ):
+        raise CorridorBlocked("T5M_WIDTH_FIREWALL accepts every positive exact width")
+    if re.search(r"\b(?:DomainIdentity|callable|admittedHead|semanticRegistry)\b", clean):
+        raise CorridorBlocked("T5M_WIDTH_FIREWALL codec contains semantic admission")
+
+
 def check_linter_zig_only(
     main_source: str, rust_corridor: str, zig_root: str, build: str,
 ) -> None:
@@ -938,7 +960,10 @@ def check() -> list[str]:
         raise CorridorBlocked(
             "zig_transport.rs must reconstruct BinarySourceWord via BitN::new"
         )
-    notes.append("typed-w1-w9-reconstruction")
+    notes.append("bounded-source-fast-path-view")
+    if "decode_t5m_exact_words" not in body or "encode_t5m_exact_words" not in body:
+        raise CorridorBlocked("zig_transport.rs missing unbounded exact-width T5M route")
+    notes.append("typed-exact-width-t5m-route")
 
     check_f3c_validate_before_no_savings(body)
     notes.append("f3c-validate-before-no-savings")
@@ -951,6 +976,12 @@ def check() -> list[str]:
         raise CorridorBlocked("F3C_SEMANTIC_FIREWALL missing regular f3c.zig")
     check_zig_f3c_semantic_firewall(F3C_ZIG.read_text(encoding="utf-8"))
     notes.append("f3c-physical-only-d2")
+
+    t5m_path = ROOT / "research/zig-codecs/t5m.zig"
+    if not t5m_path.is_file() or t5m_path.is_symlink():
+        raise CorridorBlocked("T5M_WIDTH_FIREWALL missing regular t5m.zig")
+    check_zig_t5m_width_firewall(t5m_path.read_text(encoding="utf-8"))
+    notes.append("t5m-width-opaque-no-domain-authority")
 
     abi = ABI.read_text(encoding="utf-8")
     check_zig_abi_v2_live_exports(abi)

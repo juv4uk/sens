@@ -121,6 +121,11 @@ fn encode_canonical_compiler_value(value: &Value, out: &mut Vec<u8>) -> Result<(
             put_canonical_compiler_len(out, text.len());
             out.extend_from_slice(text.as_bytes());
         }
+        Value::Text7(text) => {
+            out.push(0x05);
+            put_canonical_compiler_len(out, text.cells().len());
+            out.extend_from_slice(text.cells());
+        }
         Value::Pair(node) => {
             out.push(0x04);
             encode_canonical_compiler_value(&node.head, out)?;
@@ -138,8 +143,8 @@ fn encode_canonical_compiler_value(value: &Value, out: &mut Vec<u8>) -> Result<(
 /// Canonical binary representation for proof-carrying compiler evidence.
 ///
 /// This is the exact representation hashed by `canonical_value_sha256_mechanism`.
-/// It admits only NIL, exact DomainIdentity, Symbol, String and Pair, and owns
-/// no compiler meaning or backend policy.
+/// It admits NIL, exact DomainIdentity, Symbol, String, canonical D7 Text7 and
+/// Pair, and owns no compiler meaning or backend policy.
 pub fn compiler_evidence_canonical_bytes(value: &Value) -> Result<Vec<u8>, String> {
     let mut encoded = Vec::new();
     encode_canonical_compiler_value(value, &mut encoded)?;
@@ -195,6 +200,22 @@ impl<'a> CanonicalCompilerDecoder<'a> {
         let text = std::str::from_utf8(raw)
             .map_err(|_| format!("canonical compiler {label} is not valid UTF-8"))?;
         Ok(Rc::from(text))
+    }
+
+    fn take_text7(&mut self) -> Result<Value, String> {
+        let len = self.take_len()?;
+        let end = self
+            .offset
+            .checked_add(len)
+            .ok_or_else(|| "canonical compiler D7 text length overflow".to_string())?;
+        let cells = self
+            .bytes
+            .get(self.offset..end)
+            .ok_or_else(|| "truncated canonical compiler D7 text".to_string())?;
+        self.offset = end;
+        let text = crate::Text7::from_cells(cells.to_vec())
+            .map_err(|error| format!("invalid canonical compiler D7 text: {error}"))?;
+        Ok(Value::Text7(text))
     }
 
     fn decode_domain_identity(&mut self) -> Result<Value, String> {
@@ -254,6 +275,7 @@ impl<'a> CanonicalCompilerDecoder<'a> {
                 let tail = self.decode_value(depth + 1)?;
                 Ok(Value::Pair(Rc::new(PairNode { head, tail })))
             }
+            0x05 => self.take_text7(),
             tag => Err(format!(
                 "unknown canonical compiler evidence tag 0x{tag:02x}"
             )),
@@ -332,6 +354,7 @@ mod tests {
         let value = Value::list(identities.into_iter().map(Value::DomainIdentity).chain([
             Value::Symbol(Rc::from("compiler-compilation-artifact-1")),
             Value::String(Rc::from("точні-bytes")),
+            Value::Text7(crate::encode_text7("sens", crate::Text7Layout::En).unwrap()),
         ]));
         let encoded = compiler_evidence_canonical_bytes(&value).unwrap();
         let decoded = compiler_evidence_from_canonical_bytes(&encoded).unwrap();

@@ -137,7 +137,7 @@ impl PackedBitstream {
     ///
     /// D10 at a seven-bit offset spans 17 physical bits. This is a fixed
     /// MSB-first window, not a decimal conversion or width inference.
-    /// W1–W8 retain their dedicated existing fast path.
+    /// Small-width values retain their compact dedicated fast path.
     fn read_bounded_window(&self, bit_offset: usize, width: usize) -> Option<u16> {
         if !(1..=10).contains(&width) {
             return None;
@@ -167,9 +167,8 @@ impl PackedBitstream {
         Some(((window >> shift) & mask) as u16)
     }
 
-    /// Read one exact W9 word at a known bit offset, without a per-bit scan.
-    ///
-    /// W9 stays distinct from the W1–W8 `Bits<N>` fast path.
+    /// Read one exact nine-bit compatibility value at a known bit offset,
+    /// without a per-bit scan. This is an implementation path, not a domain rung.
     pub fn read_w9(&self, bit_offset: usize) -> Option<Bit9> {
         Bit9::new(self.read_bounded_window(bit_offset, 9)?)
     }

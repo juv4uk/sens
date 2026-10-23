@@ -116,7 +116,7 @@ pub fn append_binary_source_word(packer: &mut BitPacker, word: BinarySourceWord)
     // Width belongs to the already-validated source word, not the host u16.
     // Use the same bit-exact packer as D1–D10 without assigning any callability.
     let coordinate = DomainCoordinate::new(word.width() as u8, word.packed_bits())
-        .expect("a typed W1–W9 source word must fit its exact width");
+        .expect("a bounded source fast-path word must fit its exact width");
     packer.push_coordinate(coordinate)
 }
 
@@ -230,7 +230,7 @@ mod tests {
 
     /// Вичерпний бітовий свідок: 2+4+8+...+512 = 1022 слова.
     ///
-    /// Порівнює мігрований W1–W9 source шлях із єдиним D1–D10 packer,
+    /// Порівнює обмежений source fast-path із механічним D1–D10 packer,
     /// перевіряючи також нульові старші біти, offsets і фізичний roundtrip.
     #[test]
     fn all_1022_exact_d1_to_d9_words_use_one_lossless_dense_packer() {

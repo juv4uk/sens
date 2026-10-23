@@ -891,8 +891,8 @@ mod tests {
                 examined += 1;
                 significant_bits += usize::from(width);
 
-                // The W1–W9 carrier is exact and typed; there is
-                // deliberately NO lossy D10 → W8/W9 coercion.
+                // The bounded source fast-path is exact and typed; there is
+                // deliberately NO lossy D10 → narrower-carrier coercion.
                 let source = match width {
                     1 => Some(BinarySourceWord::W1(Bit1::new(bits as u8).unwrap())),
                     2 => Some(BinarySourceWord::W2(Bit2::new(bits as u8).unwrap())),
