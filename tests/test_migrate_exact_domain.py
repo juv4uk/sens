@@ -474,20 +474,20 @@ class ExactDomainMigrationTests(unittest.TestCase):
                 patch.object(migrate, "mapping", return_value=(mod, table, {})),
                 patch.object(mod, "reject_shadowed_surfaces", return_value=set()),
             ):
-                source.write_text("(SeNs8:00001100 2 3)\\n", encoding="utf-8")
+                source.write_text("(SeNs8:00001100 2 3)\n", encoding="utf-8")
                 with patch.object(sys, "argv", ["migrate-legacy-w8-ukr.py",
                                                str(source), "--write"]):
                     self.assertEqual(migrate.main(), 0)
                 self.assertEqual(source.read_text(encoding="utf-8"),
-                                 "(додати 2 3)\\n")
+                                 "(додати 2 3)\n")
                 # Без історичного SHA голий W8 залишається невизначеним:
                 # той самий байт міг бути сучасною Д8-функцією.
-                source.write_text("(00001100 2 3)\\n", encoding="utf-8")
+                source.write_text("(00001100 2 3)\n", encoding="utf-8")
                 with patch.object(sys, "argv", ["migrate-legacy-w8-ukr.py",
                                                str(source), "--write"]):
                     self.assertEqual(migrate.main(), 2)
                 self.assertEqual(source.read_text(encoding="utf-8"),
-                                 "(00001100 2 3)\\n")
+                                 "(00001100 2 3)\n")
 
 
 
