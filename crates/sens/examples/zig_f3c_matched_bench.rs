@@ -48,6 +48,12 @@ fn main() {
             256,
         ),
     ];
+    // Неканонічний F3C не допускається, а T5 fallback не припустимий.
+    // Перевірка поза таймінгом, жодного host-оракула SENS.
+    assert!(
+        decode_explicit_small_f3(&[0xf4, 0x40, 0x60]).is_err(),
+        "wrong F3C carrier tag must be rejected"
+    );
     for (name, input, expected, reps) in cases {
         let encoded = encode_explicit_small_f3(input)
             .expect("Rust encode")
@@ -68,9 +74,15 @@ fn main() {
         }
         let mut encode_ns = [0_u128; 11];
         let mut decode_ns = [0_u128; 11];
+        // AB/BA порядок для зменшення систематичного кеш-ефекту.
         for i in 0..11 {
-            encode_ns[i] = trial(name, "encode", input, expected, reps);
-            decode_ns[i] = trial(name, "decode", input, expected, reps);
+            if i % 2 == 0 {
+                encode_ns[i] = trial(name, "encode", input, expected, reps);
+                decode_ns[i] = trial(name, "decode", input, expected, reps);
+            } else {
+                decode_ns[i] = trial(name, "decode", input, expected, reps);
+                encode_ns[i] = trial(name, "encode", input, expected, reps);
+            }
         }
         for (op, mut samples) in [("encode", encode_ns), ("decode", decode_ns)] {
             samples.sort_unstable();

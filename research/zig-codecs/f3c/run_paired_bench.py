@@ -65,7 +65,7 @@ def main():
         raise RuntimeError(f"zig pin mismatch expected {args.zig_pin}, got {meta['zig_version']}")
     command(["zig", "test", "research/zig-codecs/tests.zig", "-lc"])
     command(["cargo", "build", "--locked", "--release", "-p", "sens",
-             "--example", RUST_EXE])
+             "--features", "rust-f3-reference", "--example", RUST_EXE])
     zb = out / "zig_f3c_bench"
     command(["zig", "build-exe", ZIG_EXE, "-O", "ReleaseFast", "-lc",
              f"-femit-bin={zb}"])
@@ -92,7 +92,7 @@ def main():
                     fixtures[row["case"]][impl] = (int(row["t5_bytes"]), int(row["f3c_bytes"]))
                     fixture_count[row["case"]].add(impl)
                 times = rows(output, "sample")
-                if len(times) != len(CASES) * 2 * 5:
+                if len(times) != len(CASES) * 2 * 11:
                     raise RuntimeError(f"UNINFORMATIVE-OUTPUT pair={pair} impl={impl} "
                                        f"samples={len(times)}")
                 for row in times:
@@ -127,7 +127,7 @@ def main():
         for op in ("encode", "decode"):
             zig = grouped[(case, op, "zig")]
             rust = grouped[(case, op, "rust")]
-            if len(zig) != 5 * args.pairs or len(rust) != len(zig):
+            if len(zig) != 11 * args.pairs or len(rust) != len(zig):
                 raise RuntimeError(f"BLOCKED_NO_TIMING missing samples {case}/{op}")
             z, r = statistics.median(zig), statistics.median(rust)
             report.append(f"| {case} | {op} | {z:.1f} | {r:.1f} | {r/z:.3f}× |")

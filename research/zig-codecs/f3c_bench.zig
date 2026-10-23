@@ -68,6 +68,13 @@ pub fn main() !void {
         .{ "quote", &[_]u8{ 0x63, 0x89, 0x06, 0xa1 }, &[_]u8{ 0xf3, 0x40, 0x60 }, @as(usize, 512) },
         .{ "car_cons", &[_]u8{ 0x66, 0x38, 0x67, 0x89, 0x89, 0x3b, 0x35 }, &[_]u8{ 0xf3, 0x36, 0x5f, 0x1b, 0xd0, 0xc9 }, @as(usize, 256) },
     };
+    // Перевірка негативної рамки перед таймінгом; жодного T5 fallback.
+    if (f3c.decode(allocator, &.{ 0xf4, 0x40, 0x60 })) |unexpected| {
+        allocator.free(unexpected);
+        return error.InvalidCarrierAccepted;
+    } else |err| {
+        if (err != error.WrongCarrier) return err;
+    }
     inline for (cases) |item| {
         const name = item[0];
         const source = item[1];
@@ -93,9 +100,15 @@ pub fn main() !void {
         }
         var encode_ns: [11]u64 = undefined;
         var decode_ns: [11]u64 = undefined;
+        // Порядок AB/BA симетричний до Rust. П'ять прогрівів і 11 проб.
         for (0..11) |i| {
-            encode_ns[i] = try trial(.encode, allocator, name, source, expected, reps);
-            decode_ns[i] = try trial(.decode, allocator, name, source, expected, reps);
+            if (i % 2 == 0) {
+                encode_ns[i] = try trial(.encode, allocator, name, source, expected, reps);
+                decode_ns[i] = try trial(.decode, allocator, name, source, expected, reps);
+            } else {
+                decode_ns[i] = try trial(.decode, allocator, name, source, expected, reps);
+                encode_ns[i] = try trial(.encode, allocator, name, source, expected, reps);
+            }
         }
         reportSamples(name, "encode", encode_ns, reps);
         reportSamples(name, "decode", decode_ns, reps);
