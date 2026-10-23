@@ -953,6 +953,7 @@ mod oracle_result_tests {
     #[test]
     fn oracle_help_loads_the_live_guard_reference_via_zig() {
         let mut session = Session::default();
+        sens::load_core_library(&mut session).expect("production oracle session loads Core4");
         let value = oracle_help(&mut session, None)
             .expect("Zig-carried Guard reference must load and answer the default query");
         assert!(
