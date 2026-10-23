@@ -41,9 +41,10 @@ DISCOVER = ROOT / "scripts" / "discover_domain_function_candidates.py"
 EXCLUDED_PREFIXES = (
     "lib/generated/", "lib/surface/", "lib/domains/", "lib/machine/",
     "vendor/", "benchmarks/",
-    # lib/core4-parts/** — ЦЕ СКЛАДОВІ lib/core4.lisp (розбиття заради видимості),
-    # а не самостійні файли. Їхні визначення неминуче збігаються з core4, тож
-    # охороняти їх як окремі файли — хибні дублі. Джерело істини — core4.lisp.
+    # lib/core4-parts/** — впорядковані фрагменти lib/core4.lisp; CLI завантажує
+    # їх через --t5m-files в одній сесії, але вони не є незалежними програмами.
+    # Їхні визначення збігаються з core4.lisp, тож окремий підрахунок дасть дублі.
+    # Джерело визначень — lib/core4.lisp.
     "lib/core4-parts/",
 )
 # tests/semantic/** — це МОВНІ ЗАКОНИ (Lisp), а не службові тести. Саме там рій

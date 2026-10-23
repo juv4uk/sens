@@ -18,9 +18,14 @@ from sens_t5_codec import (SensT5Error, decode_bytes, encode_words, parse_words,
                            decode_t5m_bytes, encode_t5m_projection, typed_sha256)
 
 SCHEMA = "sens-t5-file-pair-audit/v1"
-# core4-parts — СКЛАДОВІ lib/core4.lisp (розбиття заради видимості), не самостійні
-# файли: у них немає й не мусить бути власної фізичної пари .sens. Джерело — core4.lisp.
+# core4-parts — впорядковані фрагменти lib/core4.lisp. CLI завантажує їх через
+# --t5m-files в одній сесії; фрагменти не мають окремих сталих .sens-двійників.
+# Їх перевіряє груповий тест завантажувача, а цей аудит рахує сталі пари джерело/носій.
 SKIP_DIRS = {".git", ".worktrees", ".venv", "venv", "node_modules", "target", "__pycache__", "superseded", "core4-parts"}
+
+
+def _is_skipped_path(path: bytes) -> bool:
+    return any(part in SKIP_DIRS for part in Path(os.fsdecode(path)).parts)
 
 
 def candidates(root: Path, include_untracked: bool = False) -> list[Path]:
@@ -36,7 +41,7 @@ def candidates(root: Path, include_untracked: bool = False) -> list[Path]:
             paths = [
                 root / os.fsdecode(rel)
                 for rel in proc.stdout.split(b"\0")
-                if rel and b"/superseded/" not in rel
+                if rel and not _is_skipped_path(rel)
             ]
             return sorted(paths)
     result: list[Path] = []
@@ -49,7 +54,7 @@ def candidates(root: Path, include_untracked: bool = False) -> list[Path]:
 
 
 def source_candidates(root: Path, include_untracked: bool = False) -> list[Path]:
-    """Find all Lisp sources, INCLUDING those without a same-stem SENS carrier."""
+    """Find in-scope Lisp sources, including those without same-stem SENS carriers."""
     if not include_untracked:
         proc = subprocess.run(
             ["git", "-C", str(root), "ls-files", "-z", "--", "*.lisp"],
@@ -58,7 +63,7 @@ def source_candidates(root: Path, include_untracked: bool = False) -> list[Path]
         if proc.returncode == 0:
             return sorted(root / os.fsdecode(rel)
                           for rel in proc.stdout.split(b"\0")
-                          if rel and b"/superseded/" not in rel)
+                          if rel and not _is_skipped_path(rel))
     result: list[Path] = []
     for directory, names, files in os.walk(root, followlinks=False):
         names[:] = sorted(name for name in names if name not in SKIP_DIRS)
@@ -343,8 +348,9 @@ def inspect(root: Path, *, strict_semantic: bool = False,
             "Physical T5M/T5 and a source pair do not prove parser/oracle semantics. "
             "Missing extensionless views are NOT certified unless explicitly "
             "required for a scoped admitted cohort. Symbolic Lisp remains "
-            "PENDING_ORACLE; no automatic execution. Missing .sens twins "
-            "are separately counted across all .lisp files."
+            "PENDING_ORACLE; no automatic execution. Missing .sens twins are "
+            "counted for in-scope .lisp files; ordered core4-parts are checked "
+            "by the grouped T5M loader test."
         ),
     }
 
