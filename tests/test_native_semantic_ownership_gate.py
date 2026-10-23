@@ -42,6 +42,16 @@ class LanguageOwnershipRouting(unittest.TestCase):
         self.assertTrue(any("SENS_LAW_MUTANT_MISSING" in err
                             for err in self.audit([LAW], files=[LAW])))
 
+    def test_existing_but_unrouted_mutant_is_red(self):
+        changed = RUNNER.replace("tests/semantic/demo-mutant.lisp", "unrelated.lisp")
+        errors = self.audit([LAW], runner=changed)
+        self.assertTrue(any("SENS_LAW_MUTANT_NOT_ROUTED" in err for err in errors))
+
+    def test_existing_but_unrouted_positive_is_red(self):
+        changed = RUNNER.replace("tests/semantic/demo-law.lisp", "unrelated.lisp")
+        errors = self.audit([MUTANT], runner=changed)
+        self.assertTrue(any("SENS_LAW_POSITIVE_NOT_ROUTED" in err for err in errors))
+
     def test_missing_positive_is_red(self):
         self.assertTrue(any("SENS_LAW_POSITIVE_MISSING" in err
                             for err in self.audit([MUTANT], files=[MUTANT])))
