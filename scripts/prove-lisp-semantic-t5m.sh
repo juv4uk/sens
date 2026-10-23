@@ -268,6 +268,11 @@ run_case run_law d11-srfi1-span-break-physical "$d11_span_bundle" 1
 result_status_bundle="$evidence/result-status-bundle.lisp"
 cat lib/result-status.lisp tests/semantic/result-status-laws.lisp > "$result_status_bundle"
 run_case run_law result-status-source "$result_status_bundle" 1
+# Локалізуємо фізичну розбіжність: форма змінної → входження → повна уніфікація.
+# Визначення й закон належать тільки Lisp, Shell лише додає lib/unify.lisp.
+run_case run_bound_law unification-variable-shape tests/semantic/unification-variable-shape-law.lisp 1
+run_case run_bound_law unification-occurs-predicate-positive tests/semantic/unification-occurs-predicate-law.lisp 1
+run_case run_bound_law unification-occurs-predicate-mutant tests/semantic/unification-occurs-predicate-mutant.lisp 0
 run_case run_bound_law unification-occurs-check-positive tests/semantic/unification-occurs-check-law.lisp 1
 run_case run_bound_law unification-occurs-check-mutant tests/semantic/unification-occurs-check-mutant.lisp 0
 if (( failed > 0 )); then
