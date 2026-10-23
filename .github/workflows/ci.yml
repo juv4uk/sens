@@ -518,12 +518,22 @@ jobs:
           verified="$RUNNER_TEMP/benchmark-law-status.tsv"
           measurements="$RUNNER_TEMP/benchmark-times.tsv"
           : > "$measurements"
+          # Зберігаємо сирі виміри кожного запуску у вже наявному артефакті CI.
+          # Це wall-time цілого процесу, не ізольований бенчмарк eval.
+          raw_samples="$RUNNER_TEMP/changed-t5m-pairs/benchmark-wall-samples.tsv"
+          mkdir -p "$(dirname "$raw_samples")"
+          printf 'benchmark\trepetition\telapsed_ns\tstdout_sha256\tcommit\trunner\tarch\n' > "$raw_samples"
+          format_ns_ms() {
+            local ns="$1"
+            printf '%d.%03d' "$((ns / 1000000))" "$(((ns % 1000000) / 1000))"
+          }
           for spec in \
             'lists|benchmarks/lists.lisp' \
             'arithmetic|benchmarks/arithmetic.lisp' \
             'parser|benchmarks/parser.lisp'; do
             IFS='|' read -r id source <<< "$spec"
             if [[ ! -f "$verified" ]] || ! grep -Fxq "$(printf '%s\tPASS_DIRECT' "$id")" "$verified"; then
+              echo "::warning file=$source,title=SENS wall-time::NOT_MEASURED id=$id reason=language-law-not-verified"
               continue
             fi
             dir="$RUNNER_TEMP/bench-time/$id"
@@ -533,8 +543,9 @@ jobs:
               echo "::error file=$source,title=SENS wall-time::REGRESSION id=$id layer=warmup"
               exit 1
             fi
+            hash="$(sha256sum "$dir/reference.out" | cut -d' ' -f1)"
             : > "$dir/samples"
-            for repetition in 1 2 3; do
+            for repetition in 1 2 3 4 5; do
               start="$(date +%s%N)"
               if ! timeout 45s "$binary" "$source" > "$dir/$repetition.out" 2> "$dir/$repetition.err"; then
                 cat "$dir/$repetition.err" >&2
@@ -546,12 +557,26 @@ jobs:
                 echo "::error file=$source,title=SENS wall-time::REGRESSION id=$id layer=repeatability"
                 exit 1
               fi
-              printf '%s\n' "$(((end - start) / 1000000))" >> "$dir/samples"
+              elapsed_ns="$((end - start))"
+              if (( elapsed_ns <= 0 )); then
+                echo "::error file=$source,title=SENS wall-time::INVALID_CLOCK id=$id elapsed_ns=$elapsed_ns" >&2
+                exit 1
+              fi
+              printf '%s\n' "$elapsed_ns" >> "$dir/samples"
+              printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
+                "$id" "$repetition" "$elapsed_ns" "$hash" \
+                "${GITHUB_SHA:-unknown}" "${RUNNER_NAME:-unknown}" "$(uname -m)" >> "$raw_samples"
             done
-            median="$(sort -n "$dir/samples" | sed -n '2p')"
-            hash="$(sha256sum "$dir/reference.out" | cut -d' ' -f1)"
-            printf '%s\t%s\t%s\n' "$id" "$median" "$hash" >> "$measurements"
-            echo "::notice file=$source,title=SENS p50 $id::MEASURED wall_ms=$median repeats=3 warmup=1 includes=CLI_bootstrap_eval stdout_sha256=$hash"
+            mapfile -t sorted_samples < <(sort -n "$dir/samples")
+            if (( ${#sorted_samples[@]} != 5 )); then
+              echo "::error file=$source,title=SENS wall-time::INCOMPLETE id=$id samples=${#sorted_samples[@]}" >&2
+              exit 1
+            fi
+            min_ms="$(format_ns_ms "${sorted_samples[0]}")"
+            median_ms="$(format_ns_ms "${sorted_samples[2]}")"
+            max_ms="$(format_ns_ms "${sorted_samples[4]}")"
+            printf '%s\t%s\t%s\t%s\t%s\n' "$id" "$median_ms" "$min_ms" "$max_ms" "$hash" >> "$measurements"
+            echo "::notice file=$source,title=SENS p50 $id::MEASURED wall_p50_ms=$median_ms wall_min_ms=$min_ms wall_max_ms=$max_ms repeats=5 warmup=1 includes=CLI_bootstrap_eval stdout_sha256=$hash artifact=benchmark-wall-samples.tsv"
           done
 
       # Фінальні анотації будуються із фактично записаних SENS-вердиктів.
@@ -562,6 +587,7 @@ jobs:
         env:
           CLI_OUTCOME: ${{ steps.benchmark-cli.outcome }}
           LAWS_OUTCOME: ${{ steps.benchmark-laws.outcome }}
+          TIME_OUTCOME: ${{ steps.benchmark-time.outcome }}
         run: |
           set -euo pipefail
           verified="$RUNNER_TEMP/benchmark-law-status.tsv"
@@ -575,8 +601,8 @@ jobs:
             echo
             echo "Rust CLI (лише I/O): \`$CLI_OUTCOME\`; нативний крок SENS: \`$LAWS_OUTCOME\`."
             echo
-            echo '| Lisp-джерело | Семантика, прямий SENS | p50, мс (процес) | Фізичний Zig/T5M |'
-            echo '|---|---|---:|---|'
+            echo '| Lisp-джерело | Семантика, прямий SENS | p50, мс (процес) | Діапазон min–max, мс | Фізичний Zig/T5M |'
+            echo '|---|---|---:|---:|---|'
           } >> "$GITHUB_STEP_SUMMARY"
           for spec in \
             'lists|benchmarks/lists.lisp|d24-list-language' \
@@ -593,21 +619,30 @@ jobs:
               echo "::warning file=$source,title=SENS benchmark $id::NOT_VERIFIED law=$law laws_step=$LAWS_OUTCOME expected=completed-SENS-witness actual=missing"
             fi
             wall=NOT_MEASURED
+            wall_range=NOT_MEASURED
             if [[ -f "$measurements" ]]; then
               sample="$(grep -F "$id"$'\t' "$measurements" | head -n 1 || true)"
               if [[ -n "$sample" ]]; then
-                IFS=$'\t' read -r sample_id wall hash <<< "$sample"
-                if [[ "$sample_id" != "$id" || ! "$wall" =~ ^[0-9]+$ ]]; then
-                  echo "::error file=$source,title=SENS benchmark report::REGRESSION layer=p50 expected=integer actual=malformed"
+                IFS=$'\t' read -r sample_id wall floor ceiling hash <<< "$sample"
+                if [[ "$sample_id" != "$id" || ! "$wall" =~ ^[0-9]+[.][0-9]{3}$ ||
+                      ! "$floor" =~ ^[0-9]+[.][0-9]{3}$ || ! "$ceiling" =~ ^[0-9]+[.][0-9]{3}$ ||
+                      ! "$hash" =~ ^[0-9a-f]{64}$ ]]; then
+                  echo "::error file=$source,title=SENS benchmark report::REGRESSION layer=measurement expected=p50-min-max-hash actual=malformed"
                   exit 1
                 fi
+                wall_range="$floor–$ceiling"
                 measured=$((measured + 1))
               fi
             fi
-            printf '| %s | %s (%s) | %s | NOT_CERTIFIED |\n' "$source" "$status" "$law" "$wall" >> "$GITHUB_STEP_SUMMARY"
+            printf '| %s | %s (%s) | %s | %s | NOT_CERTIFIED |\n' "$source" "$status" "$law" "$wall" "$wall_range" >> "$GITHUB_STEP_SUMMARY"
           done
           printf 'прямі Lisp-закони=%s/3; p50=%s/3; Rust CLI=%s; T5M=NOT_CERTIFIED\n' "$passed" "$measured" "$CLI_OUTCOME" > "$summary"
+          echo 'p50 та min–max — wall-time цілого процесу (CLI+bootstrap+eval) на спільному runner; 1 прогрів, 5 вимірів. Сирі ns, SHA та runner: benchmark-wall-samples.tsv у CI-артефакті. Міжмашинне прискорення НЕ ДОВЕДЕНО.' >> "$GITHUB_STEP_SUMMARY"
           echo 'Значення PASS_DIRECT засвідчує лише нативну семантику SENS, не продуктивність і не фізичний T5M.' >> "$GITHUB_STEP_SUMMARY"
+          if [[ "$TIME_OUTCOME" == success && "$measured" -ne "$passed" ]]; then
+            echo "::error file=.github/workflows/ci.yml,title=SENS benchmark evidence::REGRESSION layer=measurement expected=$passed measured=$measured" >&2
+            exit 1
+          fi
           if (( missing > 0 )) && [[ "$LAWS_OUTCOME" == success ]]; then
             echo "::error file=.github/workflows/ci.yml,title=SENS benchmark evidence::REGRESSION layer=report expected=3-completed-witnesses actual=$passed"
             exit 1
