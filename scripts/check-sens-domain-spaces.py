@@ -12,10 +12,12 @@ from pathlib import Path
 import re
 import sys
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from domain_tables import number_domains  # noqa: E402
+
 
 def domain_widths(foundation: Path, number_policy: Path) -> set[int]:
     current = json.loads(foundation.read_text(encoding="utf-8"))
-    number = json.loads(number_policy.read_text(encoding="utf-8"))
     if current.get("status") != "owner-ratified":
         raise ValueError("D1–D11 foundation is not owner-ratified")
     found = current.get("domains", {})
@@ -26,11 +28,9 @@ def domain_widths(foundation: Path, number_policy: Path) -> set[int]:
             raise ValueError(f"missing/malformed ratified {domain}")
         if any(len(bits) != width or set(bits) - {"0", "1"} for bits in row["residents"]):
             raise ValueError(f"invalid ratified coordinate in {domain}")
-    if number.get("status") != "owner-ratified":
-        raise ValueError("Number width policy is not owner-ratified")
-    nums = number.get("ratified_prefix_bits", [])
-    if nums[:3] != [24, 48, 96] or any(b != 2 * a for a, b in zip(nums, nums[1:])):
-        raise ValueError("Number width ladder is invalid")
+    nums = [width for _, width in number_domains(number_policy)]
+    if nums[:5] != [12, 24, 48, 96, 192]:
+        raise ValueError("Number D12+ width ladder is invalid")
     return set(range(1, 12)) | set(nums)
 
 
@@ -77,7 +77,7 @@ def main() -> int:
     parser.add_argument("--foundation", type=Path,
                         default=Path("knowledge/d1-d11-foundation.json"))
     parser.add_argument("--number-widths", type=Path,
-                        default=Path("knowledge/number-width-ratified.json"))
+                        default=Path("contracts/numeric-domains-ratification.lisp"))
     args = parser.parse_args()
     try:
         result = analyze(args.source, domain_widths(args.foundation, args.number_widths))

@@ -24,7 +24,7 @@ SPEC.loader.exec_module(mod)
 from sens_source_resolver import build_resolver
 
 FOUNDATION = ROOT / "knowledge" / "d1-d7-foundation.json"
-NUMBER_WIDTHS = ROOT / "knowledge" / "number-width-ratified.json"
+NUMBER_WIDTHS = ROOT / "contracts" / "numeric-domains-ratification.lisp"
 TEXT7 = ROOT / "knowledge" / "d7-keyboard-v2-ratified.json"
 REGISTRY = ROOT / "lib" / "surface" / "semantic-registry.lisp"
 HISTORICAL = ROOT / "contracts" / "core1-historical-sid-map.lisp"
@@ -224,13 +224,12 @@ class SensCodeMigrationTests(unittest.TestCase):
         with self.assertRaisesRegex(mod.BinaryMigrationError, "unresolved executable head"):
             self.binary("(sqrt-iter x n)\n")
 
-    def test_number_width_ladder_is_owner_ratified_24_48_96(self):
-        import json
-        policy = json.loads(NUMBER_WIDTHS.read_text(encoding="utf-8"))
-        self.assertEqual(policy["status"], "owner-ratified")
-        self.assertEqual(policy["first_width_bits"], 24)
-        self.assertEqual(policy["growth_law"], "width(n) = 24 * 2^n")
-        self.assertEqual(policy["ratified_prefix_bits"][:3], [24, 48, 96])
+    def test_number_width_ladder_is_owner_ratified_12_24_48(self):
+        from domain_tables import number_domains
+        self.assertEqual(
+            number_domains(NUMBER_WIDTHS)[:3],
+            (("D12", 12), ("D24", 24), ("D48", 48)),
+        )
 
     def test_numeric_literal_is_number_empty_not_text7_digits(self):
         with self.assertRaisesRegex(

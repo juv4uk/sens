@@ -95,7 +95,9 @@ D24+ owner-ratified numeric ladder D24/D48/D96/D192/… — separate from functi
 
 Owner foundation ratification #4008 extends the current chain through D9: D1 #1699, D2 #1702, D3 #3202, D4 #3272, D5 #3305/#3330, D6 #3393, D7 historical v1 #3572 / current table v2 keyboard, D8 #3960, D9 #4008. Intermediate clean-room maps remain research provenance only. Any current implementation or fixture that still uses the superseded ordering `011=COND, 100=CONS, 101=CAR, 110=CDR, 111=EQ` is migration debt tracked by #3203/#2055/#3205/#3206, not an alternate language law.
 
-D10 ratification source: `knowledge/d10-owner-whole-domain-ratification-20261012.json`; current codebook pointer: `knowledge/d10-current-inventory.json`. Domain ratification does not fabricate resident-level proofs. Numeric acts: `contracts/numeric-domains-ratification.lisp` and `knowledge/number-width-ratified.json`.
+Чинна числова ратифікація від 24.10.2026: математичні домени починаються з D12, далі D24, D48, D96, D192 за законом подвоєння. Семантична ратифікація D12 не означає готовності фізичного Core/Zig/T5M-коду; поточний Zig профіль ще D24+. Єдине джерело — `contracts/numeric-domains-ratification.lisp`.
+
+D10 ratification source: `knowledge/d10-owner-whole-domain-ratification-20261012.json`; current codebook pointer: `knowledge/d10-current-inventory.json`. Domain ratification does not fabricate resident-level proofs. Numeric acts: `contracts/numeric-domains-ratification.lisp` (єдине чинне джерело; JSON числової драбини вилучено).
 
 Equal packed bits in two domains do not imply equal identity. In particular owner-ratified Core.D8 is not historical Sens8 merely because both occupy eight physical bits. Width alone does not mint meaning or callability. Ukrainian, English, Sanskrit, symbolic, and compatibility spellings remain source/UI projections only.
 

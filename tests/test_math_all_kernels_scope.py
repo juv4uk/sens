@@ -5,15 +5,17 @@ This guards semantic *scope*, not execution parity. Cross-kernel runtime
 conformance still needs independent per-substrate oracle/CI witnesses.
 """
 
-import json
 from pathlib import Path
 import re
 import unittest
+import sys
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT / "scripts"))
+from domain_tables import number_domains  # noqa: E402
 CONTRACT = ROOT / "language-contract.lisp"
 PROFILES = ROOT / "contracts/core-profile-contract.lisp"
-LADDER = ROOT / "knowledge/number-width-ratified.json"
+LADDER = ROOT / "contracts/numeric-domains-ratification.lisp"
 
 def law_body(source, name):
     pattern = r"\(" + re.escape(name) + r'\s*\.\s*"((?:[^"\\]|\\.)*)"\)'
@@ -41,19 +43,19 @@ class SharedMathematicsScope(unittest.TestCase):
         self.assertIn("(unsupported-mathematical-operation . explicit-failure-not-new-semantics)", text)
 
     def test_number_ladder_is_not_function_domain_or_text7(self):
-        ladder = json.loads(LADDER.read_text(encoding="utf-8"))
-        self.assertEqual(ladder["status"], "owner-ratified")
-        self.assertEqual(ladder["semantic_space"], "Number")
-        self.assertEqual(ladder["ratified_prefix_bits"], [24, 48, 96, 192])
-        self.assertEqual(ladder["growth_law"], "width(n) = 24 * 2^n")
-        self.assertIn("D1-D8", ladder["separate_from"])
-        self.assertIn("Text7", ladder["separate_from"])
-        self.assertIn("signedness", ladder["not_yet_ratified"])
-        self.assertIn("integer versus rational field layout", ladder["not_yet_ratified"])
-        self.assertIn("overflow versus automatic widening semantics", ladder["not_yet_ratified"])
-        self.assertIn("decimal literal lowering law", ladder["not_yet_ratified"])
-        number_law = law_body(CONTRACT.read_text(encoding="utf-8"), "number-ladder-all-kernels")
-        self.assertIn("24/48/96/192", number_law)
+        self.assertEqual(
+            number_domains(LADDER),
+            (("D12", 12), ("D24", 24), ("D48", 48), ("D96", 96), ("D192", 192)),
+        )
+        contract = LADDER.read_text(encoding="utf-8")
+        self.assertIn("(schema . numeric-d12-start-extension-1)", contract)
+        self.assertIn("(identity-law .", contract)
+        self.assertIn("D7 text", contract)
+        language = CONTRACT.read_text(encoding="utf-8")
+        number_law = law_body(language, "number-ladder-all-kernels")
+        self.assertIn("D12", number_law)
+        self.assertIn("D24", number_law)
+        self.assertIn("D(12 * 2^n)", number_law)
 
     def test_guard_rejects_removed_or_duplicate_law(self):
         sample = '(mathematics-all-kernels . "Core1 and Core2")'

@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import importlib.util
-import json
 import sys
 import tempfile
 import unittest
@@ -27,15 +26,23 @@ class NumericDomainTests(unittest.TestCase):
         self.tmp = tempfile.TemporaryDirectory()
         self.root = Path(self.tmp.name)
         (self.root / "contracts").mkdir(parents=True, exist_ok=True)
-        (self.root / "knowledge").mkdir(parents=True, exist_ok=True)
         (self.root / "crates/sens/src").mkdir(parents=True, exist_ok=True)
         (self.root / "research/zig-codecs/t5").mkdir(parents=True, exist_ok=True)
         (self.root / "contracts/numeric-domains-ratification.lisp").write_text(
-            "owner-ratified arithmetic-exclusivity D(24 * 2^n) D24 D48 D96 D192\n", encoding="utf-8")
-        (self.root / "knowledge/number-width-ratified.json").write_text(json.dumps({
-            "status": "owner-ratified", "growth_law": "width(n) = 24 * 2^n",
-            "ratified_prefix_bits": [24, 48, 96, 192], "first_width_bits": 24,
-        }), encoding="utf-8")
+            '(schema . numeric-d12-start-extension-1)\n'
+            '(status . owner-ratified)\n'
+            '(arithmetic-exclusivity . required)\n'
+            '(first-domain . D12)\n'
+            '(initial-width . #d12)\n'
+            '(next-width . double)\n'
+            '(canonical-domain-names . (D12 D24 D48 D96 D192))\n'
+            '(domain-rule . "D(12 * 2^n), n >= 0")\n'
+            '(integer-law . exact)\n'
+            '(fraction-law . exact)\n'
+            '(identity-law . exact)\n'
+            '(transport-law . exact)\n',
+            encoding="utf-8",
+        )
         (self.root / "crates/sens/src/binary_number.rs").write_text(
             "// None is the historic/unqualified pathway\nnumeric_domain_width: Option<usize>,\n",
             encoding="utf-8")
@@ -51,14 +58,15 @@ class NumericDomainTests(unittest.TestCase):
 
     def test_missing_exclusivity_law_is_blocked(self) -> None:
         p = self.root / "contracts/numeric-domains-ratification.lisp"
-        p.write_text("owner-ratified D(24 * 2^n) D24 D48 D96 D192\n", encoding="utf-8")
+        p.write_text(p.read_text(encoding="utf-8").replace("arithmetic-exclusivity", "removed-law"), encoding="utf-8")
         self.assertTrue(self.module.check(self.root))
 
     def test_width_drift_is_blocked(self) -> None:
-        p = self.root / "knowledge/number-width-ratified.json"
-        p.write_text(json.dumps({"status": "owner-ratified", "growth_law": "width(n) = 16 * 2^n",
-                                 "ratified_prefix_bits": [24, 48], "first_width_bits": 24}),
-                     encoding="utf-8")
+        p = self.root / "contracts/numeric-domains-ratification.lisp"
+        p.write_text(
+            p.read_text(encoding="utf-8").replace("D(12 * 2^n)", "D(16 * 2^n)"),
+            encoding="utf-8",
+        )
         self.assertTrue(self.module.check(self.root))
 
     def test_d11_leak_is_blocked(self) -> None:

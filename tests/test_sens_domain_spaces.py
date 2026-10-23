@@ -20,7 +20,7 @@ class DomainSpaceFileTests(unittest.TestCase):
     def setUpClass(cls):
         cls.widths = mod.domain_widths(
             ROOT / "knowledge" / "d1-d11-foundation.json",
-            ROOT / "knowledge" / "number-width-ratified.json",
+            ROOT / "contracts" / "numeric-domains-ratification.lisp",
         )
 
     def audit(self, text, *, suffix=".bits"):
@@ -54,6 +54,11 @@ class DomainSpaceFileTests(unittest.TestCase):
         self.assertEqual(b["domain_widths"], [2, 1])
         self.assertNotEqual(a["domain_widths"], b["domain_widths"])
 
+    def test_d12_number_word_is_visible(self):
+        report = self.audit("0" * 11 + "1")
+        self.assertEqual(report["domain_widths"], [12])
+        self.assertFalse(report["reader_oracle_validated"])
+
     def test_number_word_width_is_distinct_from_d7_digit_text(self):
         report = self.audit("0" * 23 + "1")
         self.assertEqual(report["domain_widths"], [24])
@@ -61,7 +66,7 @@ class DomainSpaceFileTests(unittest.TestCase):
 
     def test_invalid_no_separators_as_one_unratified_width(self):
         with self.assertRaisesRegex(ValueError, "unsupported word widths"):
-            self.audit("100010000001")
+            self.audit("1000100000010")
 
     def test_double_space_is_not_normalized(self):
         with self.assertRaisesRegex(ValueError, "single ASCII spaces"):

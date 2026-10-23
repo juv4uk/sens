@@ -13,7 +13,7 @@
   (next-width . double)
   (canonical-domain-names . (D24 D48 D96 D192))
   (domain-rule . "D(24 * 2^n), n >= 0")
-  (normative-map . "knowledge/number-width-ratified.json")
+  (historical-map-status . "Retired on 2026-10-24; this Lisp contract is the current authority.")
   (laws
     . ((identity . "exact binary bits + explicit numeric domain + domain law")
        (equal-rank . "D24/D48/... are semantic domains with equal ontology rank to D1-D9")
@@ -75,4 +75,5 @@
   (identity-law . "D12 is a numeric domain, not a D12 callable-function codebook, not D7 text, not a width-only inference and not a source literal. D12 and D24 identities remain distinct even at equal mathematical values.")
   (transport-law . "T5M/Zig carry already-admitted exact domain and payload bits; codec padding or byte framing never decides arithmetic identity, sign, ratio or float semantics.")
   (implementation-status . "Owner-ratified semantic law only; legacy D24-first generated constants, guards, Core admission and Zig physical prefix still require explicit migration and execution tests before D12 is reported operational.")
+  (current-normative-source . "contracts/numeric-domains-ratification.lisp")
 )

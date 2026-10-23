@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
-"""New-reality test (#5789): numeric domains are D24+ ONLY; D1-D10 are never operands.
+"""New-reality test (#5789): numeric domains are D12+ ONLY; D1-D10 are never operands.
 
 Authored to the CURRENT reality, not the past:
 - one source of domain widths: contracts/numeric-domains-ratification.lisp,
-  growth law D(24 * 2^n), arithmetic-exclusivity (D1-D10 are exact binary words,
+  growth law D(12 * 2^n), arithmetic-exclusivity (D1-D10 are exact binary words,
   never arithmetic operands or inferred numbers);
-- the normative map knowledge/number-width-ratified.json agrees;
+- the current D12 owner extension is parsed directly from Lisp;
 - crates/sens/src/binary_number.rs carries an explicit numeric domain, and the
   unqualified pathway is the *historic* one, not the default;
 - D11 is out: the transport caps at D10 (no 11-bit T5).
@@ -15,15 +15,16 @@ Fail-closed N1-N5. Exit 0 = NUMERIC_DOMAIN_EXCLUSIVE_OK; 1 = ..._BLOCKED.
 from __future__ import annotations
 
 import argparse
-import json
 import re
 import sys
 from pathlib import Path
 
 CONTRACT = "contracts/numeric-domains-ratification.lisp"
-MAP = "knowledge/number-width-ratified.json"
 BINNUM = "crates/sens/src/binary_number.rs"
 TRANSPORTS = ("research/zig-codecs/t5/t5.zig", "research/zig-codecs/transport_abi.zig")
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from domain_tables import number_domains  # noqa: E402
 
 
 def check(root: Path) -> list[str]:
@@ -38,25 +39,21 @@ def check(root: Path) -> list[str]:
         problems.append("N1: numeric-domain contract is not owner-ratified")
     if "arithmetic-exclusivity" not in c:
         problems.append("N1: contract does not state the arithmetic-exclusivity law")
-    if "D(24 * 2^n)" not in c and "24 * 2^n" not in c:
-        problems.append("N1: contract does not state the growth law D(24 * 2^n)")
-    if not all(name in c for name in ("D24", "D48", "D96", "D192")):
-        problems.append("N1: contract does not name the canonical domains D24/D48/D96/D192")
+    if "D(12 * 2^n)" not in c and "24 * 2^n" not in c:
+        problems.append("N1: contract does not state the growth law D(12 * 2^n)")
+    if not all(name in c for name in ("D12", "D24", "D48", "D96", "D192")):
+        problems.append("N1: contract does not name D12/D24/D48/D96/D192")
 
-    # N2 -- the normative map agrees with the contract.
-    mp = root / MAP
-    if not mp.is_file():
-        problems.append(f"N2: missing {MAP}")
-    else:
-        d = json.loads(mp.read_text(encoding="utf-8"))
-        if d.get("status") != "owner-ratified":
-            problems.append("N2: normative width map is not owner-ratified")
-        if d.get("growth_law") != "width(n) = 24 * 2^n":
-            problems.append(f"N2: growth law drift: {d.get('growth_law')!r}")
-        if d.get("ratified_prefix_bits") != [24, 48, 96, 192]:
-            problems.append(f"N2: prefix bits drift: {d.get('ratified_prefix_bits')!r}")
-        if d.get("first_width_bits") != 24:
-            problems.append(f"N2: first width is not 24: {d.get('first_width_bits')!r}")
+    # N2 -- the sole current owner form must parse and double from D12.
+    try:
+        domains = number_domains(cp)
+        if domains[:5] != (
+            ("D12", 12), ("D24", 24), ("D48", 48),
+            ("D96", 96), ("D192", 192),
+        ):
+            problems.append(f"N2: current D12 prefix drift: {domains!r}")
+    except (OSError, ValueError) as exc:
+        problems.append(f"N2: invalid current Lisp numeric law: {exc}")
 
     # N3 -- the numeric domain is explicit; the unqualified path is historic.
     bp = root / BINNUM
@@ -114,7 +111,7 @@ def main() -> int:
         for problem in problems:
             print(" -", problem, flush=True)
         return 1
-    print("NUMERIC_DOMAIN_EXCLUSIVE_OK numeric domains are D24+ only from one ratified "
+    print("NUMERIC_DOMAIN_EXCLUSIVE_OK numeric domains are D12+ only from one ratified "
           "source; D1-D10 are never operands; D11 stays out", flush=True)
     return 0
 

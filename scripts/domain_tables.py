@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from functools import lru_cache
 import json
 from pathlib import Path
 import re
@@ -15,7 +16,7 @@ D8_TABLE = ROOT / "lib" / "domains" / "d8.lisp"
 D9_TABLE = ROOT / "lib" / "domains" / "d9.lisp"
 D10_TABLE = ROOT / "lib" / "domains" / "d10.lisp"
 CURRENT_HUMAN_TABLES = DOMAIN_TABLES + (D7_TABLE, D8_TABLE, D9_TABLE, D10_TABLE,)
-NUMBER_RATIFICATION = ROOT / "knowledge" / "number-width-ratified.json"
+NUMBER_RATIFICATION = ROOT / "contracts" / "numeric-domains-ratification.lisp"
 
 TOKEN = r'(\(\)|"(?:\\.|[^"\\])*"|[^()\s]+)'
 ROW = re.compile(
@@ -95,36 +96,73 @@ def machine_word(number: int, width: int) -> str:
     return word.zfill(width)
 
 
-# projection-human: explicit D24+ numeric/UI boundary; never a D1-D10 identity.
+# projection-human: explicit D12+ numeric/UI boundary; never a D1-D10 identity.
 def human_number(word: str, *, domain_width: int) -> int:
-    """Decode an explicitly typed exact-width signed D24+ integer.
+    """Decode an explicitly typed exact-width signed D12+ integer.
 
     D1-D10 binary words and D7 text are not mathematical operands.
     This helper never constructs or infers a domain from bare bits.
     """
     if not is_number_width(domain_width):
-        raise ValueError(f"D{domain_width} is not a numeric D24+ domain")
+        raise ValueError(f"D{domain_width} is not a numeric D12+ domain")
     if len(word) != domain_width or any(bit not in "01" for bit in word):
         raise ValueError(f"expected exactly {domain_width} admitted numeric bits")
     unsigned = int(word, 2)
     return unsigned - (1 << domain_width) if word[0] == "1" else unsigned
 
 
-def number_domains() -> tuple[tuple[str, int], ...]:
-    """The owner-ratified D24+ numeric ladder: exact domain name and exact width."""
-    policy = json.loads(NUMBER_RATIFICATION.read_text(encoding="utf-8"))
-    return tuple(zip(policy["ratified_domains"], policy["ratified_prefix_bits"]))
+def number_domains(contract_path: Path = NUMBER_RATIFICATION) -> tuple[tuple[str, int], ...]:
+    """Read the current D12+ owner law from Lisp, rejecting drift."""
+    source = contract_path.read_text(encoding="utf-8")
+    marker = "(schema . numeric-d12-start-extension-1)"
+    if source.count(marker) != 1:
+        raise ValueError("exactly one current numeric D12 extension is required")
+    current = source.split(marker, 1)[1]
+    for required in (
+        "(status . owner-ratified)",
+        "(first-domain . D12)",
+        "(initial-width . #d12)",
+        "(next-width . double)",
+        '(domain-rule . "D(12 * 2^n), n >= 0")',
+        "(integer-law .",
+        "(fraction-law .",
+        "(identity-law .",
+        "(transport-law .",
+    ):
+        if required not in current:
+            raise ValueError(f"numeric D12 contract missing: {required}")
+    match = re.search(r"\(canonical-domain-names\s*\.\s*\(([^()]*)\)\)", current)
+    if not match:
+        raise ValueError("numeric D12 contract has no canonical domains")
+    names = match.group(1).split()
+    widths = []
+    for name in names:
+        if not re.fullmatch(r"D[1-9][0-9]*", name):
+            raise ValueError(f"invalid numeric domain name: {name!r}")
+        widths.append(int(name[1:]))
+    expected = [12 << shift for shift in range(len(names))]
+    if widths != expected or len(widths) < 5:
+        raise ValueError(f"numeric D12 doubling prefix drift: {widths!r}")
+    return tuple(zip(names, widths))
+
+
+@lru_cache(maxsize=1)
+def _numeric_first_width() -> int:
+    return number_domains()[0][1]
 
 
 def is_number_width(width: int) -> bool:
-    """The numeric domain law D(24 * 2^n), n >= 0 — the only widths a number may live in."""
-    return width >= 24 and width % 24 == 0 and (width // 24) & (width // 24 - 1) == 0
+    """An admitted mathematical width follows D(12 * 2^n), n >= 0."""
+    first = _numeric_first_width()
+    return (isinstance(width, int) and width >= first
+            and width % first == 0
+            and (width // first) & (width // first - 1) == 0)
 
 
 def number_word(number: int, width: int) -> str:
-    """Encode a signed integer as exact two's-complement D24+ bits."""
+    """Encode a signed integer as exact two's-complement D12+ bits."""
     if not is_number_width(width):
-        raise ValueError(f"{width} is not a D24+ numeric domain width")
+        raise ValueError(f"{width} is not a D12+ numeric domain width")
     if not -(1 << (width - 1)) <= number < (1 << (width - 1)):
         raise ValueError(f"{number} does not fit signed D{width}")
     return format(number % (1 << width), f"0{width}b")

@@ -1,10 +1,10 @@
-//! Mechanical width profile of the first four owner-ratified SENS numeric rungs.
-//! Source: knowledge/number-width-ratified.json (ratified_prefix_bits).
+//! Mechanical width profile of the four currently implemented D24+ SENS numeric carrier widths.
+//! Source: contracts/numeric-domains-ratification.lisp (historical D24 carrier profile).
 //!
 //! These are opaque *physical bit widths*, NOT a numeric-domain authority,
 //! decimal conversion, arithmetic engine, executable admission or registry.
-//! The full SENS law also admits D384, D768, ...; this Zig carrier currently
-//! implements only the explicitly listed D24/D48/D96/D192 prefix.
+//! The current mathematical law starts at D12; this Zig carrier still
+//! implements only D24/D48/D96/D192. D12 physical admission remains unproved.
 //! Keep this non-authoritative physical profile in sync with the SENS source.
 
 const std = @import("std");

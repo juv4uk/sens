@@ -1,4 +1,4 @@
-"""D1-D10 are machine words; only explicit D24+ math can display decimal."""
+"""D1-D10 are machine words; only explicit D12+ math can display decimal."""
 import pathlib
 import importlib.util
 import subprocess
@@ -28,11 +28,21 @@ class BinaryProjection(unittest.TestCase):
         self.assertEqual(machine_word(0, 4), "0000")
         self.assertEqual(machine_word(255, 8), "11111111")
 
-    def test_only_qualified_d24_plus_can_display_decimal(self):
-        for width in (24, 48, 96, 192):
+    def test_only_qualified_d12_plus_can_display_decimal(self):
+        for width in (12, 24, 48, 96, 192):
             for number in (0, 1, 2, 7, 31, 127, 255):
                 bits = number_word(number, width)
                 self.assertEqual(human_number(bits, domain_width=width), number)
+
+    def test_signed_d12_boundaries_use_twos_complement(self):
+        self.assertEqual(number_word(-1, 12), "1" * 12)
+        self.assertEqual(human_number("1" * 12, domain_width=12), -1)
+        self.assertEqual(human_number(number_word(-2048, 12), domain_width=12), -2048)
+        self.assertEqual(human_number(number_word(2047, 12), domain_width=12), 2047)
+        with self.assertRaises(ValueError):
+            number_word(2048, 12)
+        with self.assertRaises(ValueError):
+            number_word(-2049, 12)
 
     def test_signed_d24_boundaries_use_twos_complement(self):
         self.assertEqual(number_word(-1, 24), "1" * 24)
@@ -79,13 +89,13 @@ class NumericDomains(unittest.TestCase):
     def test_numbers_live_in_the_owner_ratified_ladder(self):
         self.assertEqual(
             number_domains(),
-            (("D24", 24), ("D48", 48), ("D96", 96), ("D192", 192)),
+            (("D12", 12), ("D24", 24), ("D48", 48), ("D96", 96), ("D192", 192)),
         )
 
-    def test_only_the_d24_ladder_widths_are_numeric(self):
-        for width in (24, 48, 96, 192, 384):
+    def test_only_the_d12_ladder_widths_are_numeric(self):
+        for width in (12, 24, 48, 96, 192, 384):
             self.assertTrue(is_number_width(width))
-        for width in (1, 7, 10, 23, 25, 100):
+        for width in (1, 7, 10, 13, 23, 25, 100):
             self.assertFalse(is_number_width(width))
 
     def test_number_word_requires_an_explicit_numeric_domain(self):
