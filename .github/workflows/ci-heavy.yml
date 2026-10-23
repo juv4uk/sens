@@ -671,7 +671,7 @@ jobs:
 
       - name: "LISP-TIER — зберегти T5M і звіти цих двох програм"
         if: ${{ always() && github.event_name == 'push' && startsWith(github.event.head_commit.message, 'LISP-TIER:') }}
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4 pinned
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2, Node 24, pinned
         with:
           name: sens-live-pairs-${{ github.sha }}
           path: ${{ runner.temp }}/sens-live-pairs/
@@ -989,7 +989,7 @@ jobs:
 
       - name: "BENCH-LISP→SENS — зберегти розмір і лічильники AST"
         if: ${{ always() && github.event_name == 'push' && steps.changed-t5m-lisp.outputs.has_files == 'true' }}
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4 pinned
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2, Node 24, pinned
         with:
           name: sens-lisp-ast-size-${{ github.sha }}
           path: ${{ runner.temp }}/lisp-ast-size/
@@ -1018,7 +1018,7 @@ jobs:
       # Парний PASS не видаємо за standalone/release admission.
       - name: "T5M — фізичні пари після справжнього виконання SENS"
         if: ${{ always() && steps.changed-t5m-lisp.outputs.has_files == 'true' && (steps.t5m_changed_execute.outcome == 'success' || steps.t5m_changed_execute.outcome == 'failure') }}
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4, pinned
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2, Node 24, pinned
         with:
           name: sens-t5m-refresh-${{ github.sha }}
           path: ${{ runner.temp }}/changed-t5m-pairs/
@@ -1085,7 +1085,7 @@ jobs:
 
       - name: "BENCH-AST — сирі серії та порівняння оптимізації"
         if: ${{ always() && (github.event_name == 'push' || github.event_name == 'workflow_dispatch') }}
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4 pinned
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2, Node 24, pinned
         with:
           name: sens-ast-optimization-${{ github.sha }}
           path: ${{ runner.temp }}/sens-ast-optimization/
@@ -1123,7 +1123,7 @@ jobs:
           } >> "$GITHUB_STEP_SUMMARY"
       - name: "BENCH-T5M — зберегти звіт"
         if: ${{ always() && github.event_name == 'push' && startsWith(github.event.head_commit.message, 'BENCH-T5M:') }}
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4 pinned
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2, Node 24, pinned
         with:
           name: t5m-zig-asm-rust-${{ github.sha }}
           path: ${{ runner.temp }}/t5m-bench/results.txt
@@ -1190,7 +1190,7 @@ jobs:
 
       - name: "ONE-SHOT — зберегти звіт та патч SID8/Sens8"
         if: ${{ always() && github.event_name == 'push' && startsWith(github.event.head_commit.message, 'MIGRATE-SID8-UKR:') }}
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4 pinned
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2, Node 24, pinned
         with:
           name: sens-sid8-ukr-${{ github.sha }}
           path: ${{ runner.temp }}/sid8-ukr-migration/
@@ -1794,7 +1794,7 @@ jobs:
 
       - name: "ONE-SHOT — artifact фізичних пар для точкового перенесення в main"
         if: ${{ always() && github.event_name == 'push' && startsWith(github.event.head_commit.message, 'MIGRATE-LIB-TRIPLETS:') }}
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4, pinned
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2, Node 24, pinned
         with:
           name: sens-lib-triplets-${{ github.sha }}
           path: ${{ runner.temp }}/sens-lib-triplets/
