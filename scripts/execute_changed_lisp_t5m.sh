@@ -161,7 +161,7 @@ run_native_t5m_program() {
     fi
     # Закон цитування/замикання сформульовано у Lisp, тут — лише точний D1.
     # Exit=0 та довільний друк НЕ засвідчують виконання мовного закону.
-    if [[ "$file" == "tests/semantic/власні-закони-цитування-замикання.lisp" ]]; then
+    if [[ "$file" == "tests/semantic/language-law-quote-closure-ukr.lisp" ]]; then
       printf '1\n' > "$dir/ukr-lisp-law.expected"
       if ! cmp -s "$dir/native-paired.stdout" "$dir/ukr-lisp-law.expected"; then
         echo "::error file=$file,title=SENS мовний закон::REGRESSION id=d3-d4-lisp layer=semantics expected=D1:1 actual=$(cat "$dir/native-paired.stdout")" >&2
