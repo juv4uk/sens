@@ -161,12 +161,15 @@ jobs:
                   continue
               if name not in selected:
                   selected.append(name)
-          # Мовний закон виконує нативний SENS за кожної зміни Lisp.
+          # Виконувані мовні закони: весь вердикт формулюється у Lisp/SENS.
           if has_lisp or workflow_changed:
-              witness = "tests/semantic/ukr-d3-structural-selftest.lisp"
-              if witness not in selected:
-                  selected.append(witness)
-              print(f"SENS_LISP_SEMANTIC_LAW source={witness} authority=SENS")
+              for witness in (
+                  "tests/semantic/ukr-d3-structural-selftest.lisp",
+                  "tests/semantic/language-law-d1-d4-ukr.lisp",
+              ):
+                  if witness not in selected:
+                      selected.append(witness)
+                  print(f"SENS_LISP_SEMANTIC_LAW source={witness} authority=SENS")
           manifest.write_text("".join(name + "\n" for name in selected), encoding="utf-8")
           with output.open("a", encoding="utf-8") as out:
               out.write(f"has_lisp={'true' if has_lisp or workflow_changed else 'false'}\n")
@@ -195,13 +198,15 @@ jobs:
       - uses: ./.github/actions/install-zig
         if: steps.changed-t5m-lisp.outputs.has_lisp == 'true' || steps.changed-t5m-lisp.outputs.has_files == 'true' || steps.changed-t5m-lisp.outputs.has_rust == 'true' || steps.changed-t5m-lisp.outputs.has_zig == 'true'
 
-      - name: Rust — перевірити лише механізм читача
+      - name: Rust — обрамлення й помилки вводу, без мовного оракула
         if: steps.changed-t5m-lisp.outputs.has_rust == 'true'
-        run: cargo test --locked -p wsm-guard-slice -- --nocapture
+        run: cargo test --locked -p wsm-guard-slice --bin wsm-guard-slice event_frame_rejects_overlong_duplicate_unknown_and_non_ascii_fields -- --exact --nocapture
 
-      - name: Zig — перевірити фізичні кодеки й ABI
+      - name: Zig — кодеки, ABI та безпечна межа копіювання
         if: steps.changed-t5m-lisp.outputs.has_zig == 'true'
-        run: zig test -lc research/zig-codecs/tests.zig
+        run: |
+          zig test -lc research/zig-codecs/tests.zig
+          zig test -lc zig_transport_root.zig --test-filter 'Zig REPL transport refuses one-byte-short destination without a partial write'
 
       - name: Три бенчмарки — lists, arithmetic, parser у справжньому SENS
         if: steps.changed-t5m-lisp.outputs.has_lisp == 'true'
