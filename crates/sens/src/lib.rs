@@ -299,7 +299,7 @@ pub use eval::{
 pub use parser::{parse, parse_exact_domain_source};
 pub use presentation::{
     present_system_message, render_error_for_presentation, render_value_for_presentation, AstLine,
-    render_ast, render_ast_node, PresentationLanguage,
+    render_ast, render_ast_node, AstNode, AstNodeKind, ast_nodes, PresentationLanguage,
 };
 pub use program_data::{expr_to_exact_program_data, lowered_program_to_exact_data};
 pub use syntax::fasl::{

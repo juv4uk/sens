@@ -850,22 +850,206 @@ pub struct AstLine {
     pub span: (usize, usize),
 }
 
-/// Дерево розбору для всієї форми-джерела (усі верхні форми).
+/// Класифікація вузла дерева розбору — семантика SENS. Підписи (uk/de/en/…)
+/// належать хосту: CLI рендерить канонічно, TUI — своєю UI-мовою.
+pub enum AstNodeKind {
+    List { items: usize, head: Option<String> },
+    Pair,
+    Call { identity: String, arguments: usize },
+    DomainCall { identity: String, arguments: usize },
+    Number,
+    Rational,
+    BinaryNumber,
+    NumericBuffer,
+    Sid { identity: String },
+    DomainIdentity { identity: String },
+    String,
+    Symbol,
+    Local { depth: String, index: String },
+}
+
+/// Один видимий рядок дерева: глибина, класифікація, спан і витяг джерела.
+pub struct AstNode {
+    pub depth: usize,
+    pub kind: AstNodeKind,
+    pub span: (usize, usize),
+    pub excerpt: String,
+}
+
+fn classify(expression: &Expr, source: &str) -> AstNodeKind {
+    match &expression.kind {
+        ExprKind::List(items) => AstNodeKind::List {
+            items: items.len(),
+            head: items
+                .first()
+                .and_then(|first| source.get(first.span.start..first.span.end))
+                .map(|raw| raw.trim().chars().take(48).collect()),
+        },
+        ExprKind::Pair(..) => AstNodeKind::Pair,
+        ExprKind::Call(identity, arguments) => AstNodeKind::Call {
+            identity: format!("{identity:?}"),
+            arguments: arguments.len(),
+        },
+        ExprKind::DomainCall(identity, arguments) => AstNodeKind::DomainCall {
+            identity: format!("{identity:?}"),
+            arguments: arguments.len(),
+        },
+        ExprKind::Number(..) => AstNodeKind::Number,
+        ExprKind::Rational(..) => AstNodeKind::Rational,
+        ExprKind::BinaryNumber(..) => AstNodeKind::BinaryNumber,
+        ExprKind::NumericBuffer(..) => AstNodeKind::NumericBuffer,
+        ExprKind::Sid(identity) => AstNodeKind::Sid {
+            identity: format!("{identity:?}"),
+        },
+        ExprKind::DomainIdentity(identity) => AstNodeKind::DomainIdentity {
+            identity: format!("{identity:?}"),
+        },
+        ExprKind::String(..) => AstNodeKind::String,
+        ExprKind::Symbol(..) => AstNodeKind::Symbol,
+        ExprKind::Local { depth, index } => AstNodeKind::Local {
+            depth: format!("{depth}"),
+            index: format!("{index}"),
+        },
+    }
+}
+
+fn collect_nodes(source: &str, expression: &Expr, depth: usize, out: &mut Vec<AstNode>) {
+    let span = (expression.span.start, expression.span.end);
+    let excerpt = source.get(span.0..span.1).unwrap_or("").to_string();
+    out.push(AstNode {
+        depth,
+        kind: classify(expression, source),
+        span,
+        excerpt,
+    });
+    match &expression.kind {
+        ExprKind::List(items) => {
+            for item in items.iter() {
+                collect_nodes(source, item, depth + 1, out);
+            }
+        }
+        ExprKind::Pair(head, tail) => {
+            collect_nodes(source, head, depth + 1, out);
+            collect_nodes(source, tail, depth + 1, out);
+        }
+        ExprKind::Call(_, arguments) | ExprKind::DomainCall(_, arguments) => {
+            for argument in arguments.iter() {
+                collect_nodes(source, argument, depth + 1, out);
+            }
+        }
+        _ => {}
+    }
+}
+
+/// Плоский обхід дерева розбору вже розібраних форм (та сама класифікація,
+/// що й у CLI-команді `:розбір`). Читач обирає хост; обхід і класифікація спільні.
+pub fn ast_nodes(source: &str, forms: &[Expr]) -> Vec<AstNode> {
+    let mut out = Vec::new();
+    for form in forms {
+        collect_nodes(source, form, 1, &mut out);
+    }
+    out
+}
+
+fn ast_label(language: PresentationLanguage, node: &AstNode) -> String {
+    let uk = matches!(language, PresentationLanguage::Ukrainian);
+    match &node.kind {
+        AstNodeKind::List { items, .. } => {
+            if uk {
+                format!("Список ({items} елементів)")
+            } else {
+                format!("List ({items} elements)")
+            }
+        }
+        AstNodeKind::Pair => {
+            if uk { "Пара".to_string() } else { "Pair".to_string() }
+        }
+        AstNodeKind::Call {
+            identity,
+            arguments,
+        } => {
+            if uk {
+                format!("Виклик резидента {identity} ({arguments} аргументів)")
+            } else {
+                format!("Resident call {identity} ({arguments} arguments)")
+            }
+        }
+        AstNodeKind::DomainCall {
+            identity,
+            arguments,
+        } => {
+            if uk {
+                format!("Доменний виклик {identity} ({arguments} аргументів)")
+            } else {
+                format!("Domain call {identity} ({arguments} arguments)")
+            }
+        }
+        AstNodeKind::Number => {
+            if uk { format!("Число: {}", node.excerpt) } else { format!("Number: {}", node.excerpt) }
+        }
+        AstNodeKind::Rational => {
+            if uk { format!("Дріб: {}", node.excerpt) } else { format!("Rational: {}", node.excerpt) }
+        }
+        AstNodeKind::BinaryNumber => {
+            if uk {
+                format!("Двійкове число: {}", node.excerpt)
+            } else {
+                format!("Binary number: {}", node.excerpt)
+            }
+        }
+        AstNodeKind::NumericBuffer => {
+            if uk {
+                format!("Числовий буфер: {}", node.excerpt)
+            } else {
+                format!("Numeric buffer: {}", node.excerpt)
+            }
+        }
+        AstNodeKind::Sid { identity } => {
+            if uk {
+                format!("Історична identity {identity}: {}", node.excerpt)
+            } else {
+                format!("Historical identity {identity}: {}", node.excerpt)
+            }
+        }
+        AstNodeKind::DomainIdentity { identity } => {
+            if uk {
+                format!("Доменна identity {identity}: {}", node.excerpt)
+            } else {
+                format!("Domain identity {identity}: {}", node.excerpt)
+            }
+        }
+        AstNodeKind::String => {
+            if uk { format!("Рядок: {}", node.excerpt) } else { format!("String: {}", node.excerpt) }
+        }
+        AstNodeKind::Symbol => {
+            if uk { format!("Символ: {}", node.excerpt) } else { format!("Symbol: {}", node.excerpt) }
+        }
+        AstNodeKind::Local { depth, index } => {
+            if uk {
+                format!("Локальний слот: depth={depth}, index={index}")
+            } else {
+                format!("Local slot: depth={depth}, index={index}")
+            }
+        }
+    }
+}
+
+/// Дерево розбору для всієї форми-джерела (канонічний рендер CLI).
 pub fn render_ast(
     source: &str,
     language: PresentationLanguage,
 ) -> Result<Vec<AstLine>, LanguageError> {
     let forms = crate::parse_mixed_exact_domain(source)?;
-    let mut lines = Vec::new();
-    for form in &forms {
-        render_ast_node(source, form, 1, language, &mut lines);
-    }
-    Ok(lines)
+    Ok(ast_nodes(source, &forms)
+        .into_iter()
+        .map(|node| AstLine {
+            text: format!("{}{}", "  ".repeat(node.depth), ast_label(language, &node)),
+            span: node.span,
+        })
+        .collect())
 }
 
-/// Рекурсивний вузол дерева розбору. Підписи належать SENS (uk/en), а не
-/// хосту: `uk` — точна поточна проєкція CLI, `en` — англійська, решта
-/// PresentationLanguage падає на англійську.
+/// Рендер одного вузла (для CLI, що друкує заголовок на кожну форму).
 pub fn render_ast_node(
     source: &str,
     expression: &Expr,
@@ -873,106 +1057,12 @@ pub fn render_ast_node(
     language: PresentationLanguage,
     lines: &mut Vec<AstLine>,
 ) {
-    let indent = "  ".repeat(depth);
-    let excerpt = source
-        .get(expression.span.start..expression.span.end)
-        .unwrap_or("");
-    let span = (expression.span.start, expression.span.end);
-    let uk = matches!(language, PresentationLanguage::Ukrainian);
-    let label = match &expression.kind {
-        ExprKind::List(items) => {
-            if uk {
-                format!("Список ({} елементів)", items.len())
-            } else {
-                format!("List ({} elements)", items.len())
-            }
-        }
-        ExprKind::Pair(..) => {
-            if uk { "Пара".to_string() } else { "Pair".to_string() }
-        }
-        ExprKind::Call(identity, arguments) => {
-            if uk {
-                format!("Виклик резидента {identity:?} ({} аргументів)", arguments.len())
-            } else {
-                format!("Resident call {identity:?} ({} arguments)", arguments.len())
-            }
-        }
-        ExprKind::DomainCall(identity, arguments) => {
-            if uk {
-                format!("Доменний виклик {identity:?} ({} аргументів)", arguments.len())
-            } else {
-                format!("Domain call {identity:?} ({} arguments)", arguments.len())
-            }
-        }
-        ExprKind::Number(..) => {
-            if uk { format!("Число: {excerpt}") } else { format!("Number: {excerpt}") }
-        }
-        ExprKind::Rational(..) => {
-            if uk { format!("Дріб: {excerpt}") } else { format!("Rational: {excerpt}") }
-        }
-        ExprKind::BinaryNumber(..) => {
-            if uk {
-                format!("Двійкове число: {excerpt}")
-            } else {
-                format!("Binary number: {excerpt}")
-            }
-        }
-        ExprKind::NumericBuffer(..) => {
-            if uk {
-                format!("Числовий буфер: {excerpt}")
-            } else {
-                format!("Numeric buffer: {excerpt}")
-            }
-        }
-        ExprKind::Sid(identity) => {
-            if uk {
-                format!("Історична identity {identity:?}: {excerpt}")
-            } else {
-                format!("Historical identity {identity:?}: {excerpt}")
-            }
-        }
-        ExprKind::DomainIdentity(identity) => {
-            if uk {
-                format!("Доменна identity {identity:?}: {excerpt}")
-            } else {
-                format!("Domain identity {identity:?}: {excerpt}")
-            }
-        }
-        ExprKind::String(..) => {
-            if uk { format!("Рядок: {excerpt}") } else { format!("String: {excerpt}") }
-        }
-        ExprKind::Symbol(..) => {
-            if uk { format!("Символ: {excerpt}") } else { format!("Symbol: {excerpt}") }
-        }
-        ExprKind::Local { depth, index } => {
-            if uk {
-                format!("Локальний слот: depth={depth}, index={index}")
-            } else {
-                format!("Local slot: depth={depth}, index={index}")
-            }
-        }
-    };
-    lines.push(AstLine {
-        text: format!("{indent}{label}"),
-        span,
-    });
-    match &expression.kind {
-        ExprKind::List(items) => {
-            for item in items.iter() {
-                render_ast_node(source, item, depth + 1, language, lines);
-            }
-        }
-        ExprKind::Pair(head, tail) => {
-            render_ast_node(source, head, depth + 1, language, lines);
-            render_ast_node(source, tail, depth + 1, language, lines);
-        }
-        ExprKind::Call(_, arguments) | ExprKind::DomainCall(_, arguments) => {
-            for argument in arguments.iter() {
-                render_ast_node(source, argument, depth + 1, language, lines);
-            }
-        }
-        _ => {}
-    }
+    let mut nodes = Vec::new();
+    collect_nodes(source, expression, depth, &mut nodes);
+    lines.extend(nodes.into_iter().map(|node| AstLine {
+        text: format!("{}{}", "  ".repeat(node.depth), ast_label(language, &node)),
+        span: node.span,
+    }));
 }
 
 #[cfg(test)]
@@ -990,5 +1080,21 @@ mod ast_render_tests {
 
         let en = render_ast(source, PresentationLanguage::English).expect("parses");
         assert!(en.iter().any(|line| line.text.contains("List (3 elements)")));
+    }
+
+    #[test]
+    fn structure_walk_reports_kinds_depth_and_head() {
+        let source = "(визначити площа (добуток 3 4))\n";
+        let forms = crate::parse_mixed_exact_domain(source).expect("parses");
+        let nodes = super::ast_nodes(source, &forms);
+        assert_eq!(nodes[0].depth, 1);
+        match &nodes[0].kind {
+            super::AstNodeKind::List { items, head } => {
+                assert_eq!(*items, 3);
+                assert_eq!(head.as_deref(), Some("визначити"));
+            }
+            _ => panic!("очікували список"),
+        }
+        assert!(nodes.iter().any(|node| node.depth == 2));
     }
 }
