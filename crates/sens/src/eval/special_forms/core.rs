@@ -226,12 +226,6 @@ pub(crate) fn quoted(expression: &Expr) -> Result<Value, LanguageError> {
                 Span { start: 0, end: 0 },
             ));
         }
-        // A D2-framed W7 run is a D7 text datum specifically in QUOTE's
-        // data position. Keep the canonical reader's AST structural; this
-        // contextual conversion preserves the exact cells as one text atom.
-        if let Some(text) = crate::canonical_reader::text7_atom(expression) {
-            return Ok(Value::Text7(text));
-        }
         Ok(match &expression.kind {
             ExprKind::Number(number, exactness) => Value::Number(*number, *exactness),
             ExprKind::Rational(rational) => Value::Rational(rational.clone()),
@@ -402,18 +396,22 @@ mod exact_d4_define_arity_tests {
     }
 
     #[test]
-    fn quote_lifts_a_d2_framed_w7_run_to_exact_d7_text() {
+    fn quote_keeps_a_d2_framed_w7_run_as_a_structural_list() {
         let expression = crate::parse_canonical_binary("10 1100001 00 1110100 01")
             .expect("canonical D2/W7 quote datum parses")
             .remove(0);
-        let value = quoted(&expression).expect("quoted D7 text datum");
-        let Value::Text7(text) = &value else {
-            panic!("quoted W7 run must stay one D7 text atom");
-        };
+        let value = quoted(&expression).expect("quoted D2/W7 structure");
         assert_eq!(
-            crate::text7_projection::render_text7(&text, crate::Text7Layout::En)
-                .expect("ratified ASCII display"),
-            "at"
+            value,
+            Value::list([
+                Value::DomainIdentity(crate::DomainIdentity::from_source_word(
+                    crate::BinarySourceWord::W7(crate::Bit7::new(0b1100001).unwrap()),
+                )),
+                Value::DomainIdentity(crate::DomainIdentity::from_source_word(
+                    crate::BinarySourceWord::W7(crate::Bit7::new(0b1110100).unwrap()),
+                )),
+            ]),
+            "D2 framing remains structure; W7 cells retain exact domain identity"
         );
     }
 

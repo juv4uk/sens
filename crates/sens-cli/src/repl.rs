@@ -3113,6 +3113,54 @@ mod tests {
         }
     }
 
+    #[cfg(feature = "zig-transport")]
+    #[test]
+    fn t5m_quoted_singleton_list_keeps_its_outer_d2_identity() {
+        let mut session = Session::default();
+        sens::load_core_library(&mut session).expect("Core4");
+
+        let parsed = sens::parse_mixed_exact_domain("(як-є (а))").expect("quoted list parses");
+        let words = prepare_t5m_repl_words("(як-є (а))", ReplSurface::UkrainianFull, &session)
+            .expect("quoted list lowers");
+        assert!(matches!(&parsed[0].kind, ExprKind::List(_)));
+        let identity = |width, bits| {
+            ExactDomainWord::Identity(t5m_domain_identity(width, bits).unwrap())
+        };
+        assert_eq!(
+            words,
+            vec![
+                identity(2, 0b10),
+                identity(3, 0b001),
+                identity(2, 0b00),
+                identity(2, 0b10),
+                identity(7, 0b1100110),
+                identity(2, 0b01),
+                identity(2, 0b01),
+            ],
+            "T5M must retain both D2 frames around the exact D7 cell"
+        );
+
+        let scalar = eval_t5m_repl_line("(як-є а)", &mut session, ReplSurface::UkrainianFull)
+            .expect("quoted D7 glyph survives T5M");
+        assert!(
+            matches!(&scalar.value, Value::DomainIdentity(value) if value.width() == 7),
+            "single D7 datum must remain atomic, got {}",
+            scalar.value
+        );
+
+        let singleton = eval_t5m_repl_line(
+            "(як-є (а))",
+            &mut session,
+            ReplSurface::UkrainianFull,
+        )
+        .expect("quoted one-element D2 list survives T5M");
+        assert!(
+            matches!(singleton.value, Value::Pair(_)),
+            "parenthesized singleton must remain a pair, got {}",
+            singleton.value
+        );
+    }
+
     #[test]
     fn t5m_uk_projection_separates_quoted_ascii_data_from_executable_names() {
         // Дані зовнішнього протоколу не є викличними іменами української
