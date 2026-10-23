@@ -106,6 +106,9 @@ run_bound_law() {
 }
 
 : >"$evidence/results.txt"
+# Повна пара власне мовного заперечення Д1: джерело тільки Lisp.
+run_law d1-not-positive tests/semantic/d1-not-law.lisp 1
+run_law d1-not-mutant tests/semantic/d1-not-mutant.lisp 0
 run_law d3-selection-positive tests/semantic/d3-d4-logic-selection-law.lisp 1
 run_law d3-selection-mutant tests/semantic/d3-d4-logic-selection-mutant.lisp 0
 run_law d3-demorgan-four-cases tests/semantic/d3-demorgan-truth-table-law.lisp 1
@@ -128,4 +131,4 @@ cat lib/result-status.lisp tests/semantic/result-status-laws.lisp > "$result_sta
 run_law result-status-source "$result_status_bundle" 1
 run_bound_law unification-occurs-check-positive tests/semantic/unification-occurs-check-law.lisp 1
 run_bound_law unification-occurs-check-mutant tests/semantic/unification-occurs-check-mutant.lisp 0
-echo "SENS_LISP_T5M_LAWS_PASS count=14 positive=8 mutants=6 physical=ZIG_T5M"
+echo "SENS_LISP_T5M_LAWS_PASS count=16 positive=9 mutants=7 physical=ZIG_T5M"
