@@ -224,8 +224,7 @@ def validate_documents(documents: dict[str, Any]) -> dict[str, Any]:
     derived_coordinates = set(deriveds)
     test_coordinates = set(test_map)
     coord_collisions = derived_coordinates & test_coordinates
-    coord_collisions: set[str] = set()
-    name_collisions: set[str] = set()
+    name_collisions = derived_names & test_names
     # Збіг із легасі-фікстурою більше не заборонено: ті 43 перенесено в архів
     # (lib/domains/archive/d11-rejected-43.lisp), і саме похідні за законом
     # тепер наповнюють lib/domains/d11.lisp. Звірку d11_map == deriveds зроблено вище.
@@ -270,7 +269,7 @@ def validate_documents(documents: dict[str, Any]) -> dict[str, Any]:
         "zig_t5_admitted": 0,
         "coordinates_outside_testing_vocabulary": 2048 - len(test_map),
         "coordinates_outside_testing_and_derived_selectors":
-            2048 - len(test_map) - len(derived_coordinates),
+            2048 - len(test_coordinates | derived_coordinates),
         "selector_derived_coordinates": len(deriveds),
         "derived_selectors_without_direct_opcode_admission": len(deriveds),
         "new_ratified_residents": 0,
@@ -325,7 +324,9 @@ def main(argv: list[str] | None = None) -> int:
             "PASS test_id=D11_SELECTOR_SEED_AUDIT layer=domain-ladder "
             f"derived={report['derived_count']} parents={report['selector_parents']} "
             f"width={report['width']} testing_only={report['testing_only_rows']} "
-            f"collisions=0 callability_added=0 ratified_residents_added=0 "
+            f"collisions={report['derived_testing_coordinate_collisions']} "
+            f"name_collisions={report['derived_testing_name_collisions']} "
+            f"callability_added=0 ratified_residents_added=0 "
             f"semantic_status={report['semantic_status']}"
         )
         if not report["historical_pin_matches_current"]:
