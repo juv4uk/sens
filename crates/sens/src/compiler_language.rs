@@ -81,10 +81,10 @@ pub struct VerifiedCompilerProgramArtifact {
 }
 const LAW_PROJECTION: &str =
     include_str!("../../../knowledge/bija3-l1-l5-structure-projection.json");
-const LAW_AUTHORITY: &str = include_str!("../../../contracts/bija3-l1-l5-ratification.lisp");
+const LAW_AUTHORITY_SHA256: &str = crate::binary_bootstrap::BIJA3_L1_L5_RATIFICATION_SHA256;
 const D4_LAW_PROJECTION: &str =
     include_str!("../../../knowledge/d4-bootstrap-compiler-structure-projection.json");
-const D4_LAW_AUTHORITY: &str = include_str!("../../../contracts/d4-bootstrap-ratification.lisp");
+const D4_LAW_AUTHORITY_SHA256: &str = crate::binary_bootstrap::D4_BOOTSTRAP_RATIFICATION_SHA256;
 
 const SHAPE_MECHANISM_NAME: &str = "__compiler_domain_shape_mechanism";
 const SHAPE_OR_EMPTY_MECHANISM_NAME: &str = "__compiler_domain_shape_or_empty_mechanism";
@@ -343,10 +343,12 @@ fn authority_sha256_from(projection: &str) -> Result<String, LanguageError> {
     quoted_json_string(&projection[authority..], "sha256")
 }
 
-fn verify_projection_authority(projection: &str, authority: &str) -> Result<(), LanguageError> {
+fn verify_projection_authority(
+    projection: &str,
+    authority_sha256: &str,
+) -> Result<(), LanguageError> {
     let expected_authority_sha = authority_sha256_from(projection)?;
-    let actual_authority_sha = sha256_hex(authority.as_bytes());
-    if expected_authority_sha != actual_authority_sha {
+    if expected_authority_sha != authority_sha256 {
         return Err(invalid_projection(
             "generated structural projection is stale against its ratified authority",
         ));
@@ -393,7 +395,7 @@ fn compiler_l1_l5_law_value() -> Result<Value, LanguageError> {
         }
     }
 
-    verify_projection_authority(LAW_PROJECTION, LAW_AUTHORITY)?;
+    verify_projection_authority(LAW_PROJECTION, LAW_AUTHORITY_SHA256)?;
 
     let width = projection_width()?;
     let empty = quoted_json_string(LAW_PROJECTION, "L1_empty")?;
@@ -451,7 +453,7 @@ fn compiler_d4_bootstrap_law_value() -> Result<Value, LanguageError> {
         }
     }
 
-    verify_projection_authority(D4_LAW_PROJECTION, D4_LAW_AUTHORITY)?;
+    verify_projection_authority(D4_LAW_PROJECTION, D4_LAW_AUTHORITY_SHA256)?;
 
     let width = projection_width_from(D4_LAW_PROJECTION)?;
     if width != 4 {
@@ -1043,6 +1045,20 @@ mod tests {
     }
 
     #[test]
+    fn zig_transport_digests_match_exact_ratification_bytes() {
+        assert_eq!(
+            crate::binary_bootstrap::BIJA3_L1_L5_RATIFICATION_SHA256,
+            sha256_hex(include_str!("../../../contracts/bija3-l1-l5-ratification.lisp").as_bytes())
+        );
+        assert_eq!(
+            crate::binary_bootstrap::D4_BOOTSTRAP_RATIFICATION_SHA256,
+            sha256_hex(
+                include_str!("../../../contracts/d4-bootstrap-ratification.lisp").as_bytes()
+            )
+        );
+    }
+
+    #[test]
     fn compiler_nucleus_loads_each_definition_without_an_opaque_binding_failure() {
         let expressions =
             parse_mixed_exact_domain(COMPILER_NUCLEUS_SOURCE).expect("compiler nucleus parses");
@@ -1116,8 +1132,8 @@ mod tests {
 
     #[test]
     fn stale_law_authority_is_a_bootstrap_failure_before_role_execution() {
-        let stale_authority = format!("{LAW_AUTHORITY}\n; parity-test-stale-authority");
-        let error = verify_projection_authority(LAW_PROJECTION, &stale_authority)
+        let stale_authority_sha256 = sha256_hex(b"parity-test-stale-authority");
+        let error = verify_projection_authority(LAW_PROJECTION, &stale_authority_sha256)
             .expect_err("stale authority must be rejected before SENS role execution");
 
         assert!(
@@ -1130,8 +1146,8 @@ mod tests {
 
     #[test]
     fn d4_projection_authority_is_verified_before_role_execution() {
-        let stale_authority = format!("{D4_LAW_AUTHORITY}\n; parity-test-stale-authority");
-        let error = verify_projection_authority(D4_LAW_PROJECTION, &stale_authority)
+        let stale_authority_sha256 = sha256_hex(b"parity-test-stale-authority");
+        let error = verify_projection_authority(D4_LAW_PROJECTION, &stale_authority_sha256)
             .expect_err("stale D4 authority must be rejected before SENS role execution");
 
         assert!(

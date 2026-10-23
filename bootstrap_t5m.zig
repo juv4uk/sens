@@ -20,15 +20,30 @@ pub fn main(init: std.process.Init) !void {
     for (libraries) |library| {
         try emitWords(allocator, output, library.name, library.physical);
     }
-    const contract = @embedFile("language-contract.lisp");
-    var contract_digest: [32]u8 = undefined;
-    std.crypto.hash.sha2.Sha256.hash(contract, &contract_digest, .{});
-    var contract_hex: [64]u8 = undefined;
-    _ = std.fmt.bufPrint(&contract_hex, "{x}", .{contract_digest}) catch unreachable;
-    try output.writeAll("pub(super) const LANGUAGE_CONTRACT_SHA256: &str = \"");
-    try output.writeAll(&contract_hex);
-    try output.writeAll("\";\n");
+    try emitSha256(output, "LANGUAGE_CONTRACT_SHA256", @embedFile("language-contract.lisp"));
+    try emitSha256(
+        output,
+        "BIJA3_L1_L5_RATIFICATION_SHA256",
+        @embedFile("contracts/bija3-l1-l5-ratification.lisp"),
+    );
+    try emitSha256(
+        output,
+        "D4_BOOTSTRAP_RATIFICATION_SHA256",
+        @embedFile("contracts/d4-bootstrap-ratification.lisp"),
+    );
     try output.flush();
+}
+
+fn emitSha256(output: *std.Io.Writer, name: []const u8, bytes: []const u8) !void {
+    var digest: [32]u8 = undefined;
+    std.crypto.hash.sha2.Sha256.hash(bytes, &digest, .{});
+    var hex: [64]u8 = undefined;
+    _ = std.fmt.bufPrint(&hex, "{x}", .{digest}) catch unreachable;
+    try output.writeAll("pub(super) const ");
+    try output.writeAll(name);
+    try output.writeAll(": &str = \"");
+    try output.writeAll(&hex);
+    try output.writeAll("\";\n");
 }
 
 fn emitWords(allocator: std.mem.Allocator, output: *std.Io.Writer, name: []const u8, physical: []const u8) !void {
