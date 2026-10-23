@@ -283,6 +283,11 @@ jobs:
           python3 scripts/guard_native_semantic_ownership.py \
             --base "$(cat "$RUNNER_TEMP/native-semantic-base.sha")" \
             --head "$GITHUB_SHA"
+          # Механічний ratchet: жодних нових Python/JSON мовних оракулів;
+          # попередні інструменти лишаються історичним боргом, не PASS.
+          bash scripts/test-test-ownership-ratchet.sh
+          bash scripts/guard-test-ownership-ratchet.sh \
+            "$(cat "$RUNNER_TEMP/native-semantic-base.sha")" "$GITHUB_SHA"
 
       - name: Звірити резидентність і повторне використання функцій D1–24+
         env:
