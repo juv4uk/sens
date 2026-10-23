@@ -661,6 +661,11 @@ class ResearchBatchUkrProjectionTests(unittest.TestCase):
             "tests/semantic/d8-floor-lognot-d24-laws.lisp",
             "tests/semantic/d8-logand-logior-logxor-d24-laws.lisp",
             "tests/semantic/d9-number-d24-text-invalid.lisp",
+            "tests/semantic/d8-logand-logior-logxor-laws.lisp",
+            "tests/semantic/d8-div-lognot-laws.lisp",
+            "tests/semantic/d8-floor-divide-rem-logbitp-laws.lisp",
+            "tests/semantic/d8-partial-lcm-mod-laws.lisp",
+            "tests/semantic/d8-list-index-surface-laws.lisp",
         ):
             with self.subTest(path=relative):
                 source_path = ROOT / relative
