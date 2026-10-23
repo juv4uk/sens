@@ -18,6 +18,10 @@ GUARD = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(GUARD)
 
 PROGRAMS = (
+    "benchmarks/contest-uk/акерман-малий.lisp",
+    "benchmarks/contest-uk/восьмикутне-добуток.lisp",
+    "benchmarks/contest-uk/відстань-пряма.lisp",
+    "benchmarks/contest-uk/збільшити-всі-компакт.lisp",
     "benchmarks/contest-uk/четвертий-степінь-квадрат-квадрата.lisp",
     "benchmarks/contest-uk/шестикутне-один-добуток.lisp",
     "benchmarks/contest-uk/різниця-квадратів-добуток.lisp",
