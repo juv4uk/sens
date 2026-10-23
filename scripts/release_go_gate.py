@@ -17,7 +17,7 @@ Gates (each is a script; missing scripts are reported UNVERIFIED, never PASS):
   axiom-coverage       scripts/check_axiom_coverage.py           (G1-G8,S1-S3)
   principle-force      scripts/check_principle_force.py          (P1-P5)
   numeric-domain       scripts/check_numeric_domain_exclusive.py (G1,G5)
-  rust-isolated        scripts/check_rust_isolated_only_zig.py   (G6,S2)
+  rust-isolated        scripts/check_rust_isolated_only_zig.sh   (G6,S2, Zig-owned)
   rust-lisp-sens-io    scripts/check_rust_lisp_sens_io.py        (G1,S2)
 
 Exit 0 when and ONLY when these ten structural checks pass.
@@ -40,7 +40,7 @@ GATES = [
     ("axiom-coverage", "scripts/check_axiom_coverage.py", "G1-G8,S1-S3"),
     ("principle-force", "scripts/check_principle_force.py", "P1-P5"),
     ("numeric-domain", "scripts/check_numeric_domain_exclusive.py", "G1,G5"),
-    ("rust-isolated", "scripts/check_rust_isolated_only_zig.py", "G6,S2"),
+    ("rust-isolated", "scripts/check_rust_isolated_only_zig.sh", "G6,S2"),
     ("rust-lisp-sens-io", "scripts/check_rust_lisp_sens_io.py", "G1,S2"),
 ]
 
@@ -58,7 +58,7 @@ SUCCESS_MARKERS = {
     "scripts/check_axiom_coverage.py": "AXIOM_COVERAGE_OK",
     "scripts/check_principle_force.py": "PRINCIPLE_FORCE_OK",
     "scripts/check_numeric_domain_exclusive.py": "NUMERIC_DOMAIN_EXCLUSIVE_OK",
-    "scripts/check_rust_isolated_only_zig.py": "RUST_ISOLATED_ONLY_ZIG_OK",
+    "scripts/check_rust_isolated_only_zig.sh": "RUST_ISOLATED_ONLY_ZIG_OK",
     "scripts/check_rust_lisp_sens_io.py": "RUST_LISP_SENS_IO_OK",
 }
 
