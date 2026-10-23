@@ -194,8 +194,8 @@ fn current_profile_records_only_exact_d6_width_safe_rows() {
         fs::read_to_string(repo_root().join("lib/machine/profile/current-domain-x86-64.lisp"))
             .expect("current exact-domain machine profile");
 
-    assert!(profile.contains("(6 14 fast-path \"ADD / exact u64 input <= u64-2, RHS=1\")"));
-    assert!(profile.contains("(6 15 fast-path \"SUB / exact u64 input >=1, RHS=1\")"));
+    assert!(profile.contains("(домен-шостий додати-1 fast-path \"ADD / exact u64 input <= u64-2, RHS=1\")"));
+    assert!(profile.contains("(домен-шостий відняти-1 fast-path \"SUB / exact u64 input >=1, RHS=1\")"));
     assert!(!profile.contains("(домен-п'ятий додати-1 fast-path"));
     assert!(!profile.contains("(домен-п'ятий відняти-1 fast-path"));
     assert!(!profile.contains("semantic-registry"));
