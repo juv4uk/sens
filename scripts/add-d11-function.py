@@ -48,7 +48,7 @@ def project_names() -> dict[str, str]:
             continue
         p = ROOT / rel
         if p.is_file():
-            for m in re.finditer(r"\(визначити\s+([^\s()]+)", p.read_text(encoding="utf-8", errors="ignore")):
+            for m in re.finditer(r"\(" + "визначити" + r"\s+([^\s()]+)", p.read_text(encoding="utf-8", errors="ignore")):
                 out.setdefault(m.group(1), rel)
     return out
 
