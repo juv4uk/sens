@@ -149,7 +149,7 @@ def inspect(root: Path, *, base: str) -> dict:
                 ),
                 "uk_oracle": "NOT_VERIFIED", "release_admitted": False,
             })
-    not_proven = sum(row["status"] == "NOT_PROVEN" for row in rows)
+    not_proven = sum(row["status"] == "BLOCKED" for row in rows)
     return {
         "schema": SCHEMA,
         "base_commit": base,
