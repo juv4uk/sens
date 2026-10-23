@@ -108,6 +108,9 @@ jobs:
           test "$(grep -c '^RUST_PHYSICAL_T5_SAMPLE[[:space:]]' "$out/physical-t5-process.tsv")" -eq 504
           test "$(grep -c '^RUST_PHYSICAL_T5_SUMMARY[[:space:]]' "$out/physical-t5-process.tsv")" -eq 24
           grep -E '^RUST_PHYSICAL_T5_(PREFLIGHT|SUMMARY)[[:space:]]' "$out/physical-t5-process.tsv"
+          test "$(grep -c '^RUST_PHYSICAL_SESSION_SAMPLE[[:space:]]' "$out/physical-t5-process.tsv")" -eq 21
+          test "$(grep -c '^RUST_PHYSICAL_SESSION_SUMMARY[[:space:]]' "$out/physical-t5-process.tsv")" -eq 1
+          grep -E '^RUST_PHYSICAL_SESSION_SUMMARY[[:space:]]' "$out/physical-t5-process.tsv"
       - name: Measure amortized Zig/T5M session cost against cold Rust CLI processes
         shell: bash
         run: |

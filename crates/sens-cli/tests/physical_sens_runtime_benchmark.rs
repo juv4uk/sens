@@ -317,7 +317,7 @@ fn physical_t5_persistent_session_benchmark() {
     let median = sorted[(sorted.len() - 1) / 2];
     let p95 = percentile_nearest_rank(&sorted, 95, 100);
     println!(
-        "RUST_PHYSICAL_SESSION_SUMMARY\tcommit={}\tfixture={relative}\tphysical_sha256={}\tsamples={}\tp50_execute_ns={median}\tp95_execute_ns={p95}\tmin_execute_ns={}\tmax_execute_ns={}\tscope=in-process-reused-session\tparity=exact",
+        "RUST_PHYSICAL_SESSION_SUMMARY\tcommit={}\tfixture={relative}\tphysical_sha256={}\tsamples={}\tp50_execute_ns={median}\tp95_execute_ns={p95}\tmin_execute_ns={}\tmax_execute_ns={}\tscope=in-process-reused-session-with-d2-lowering\tparity=exact",
         current_commit(&root).expect("current commit"),
         hex_sha256(&bytes),
         sorted.len(),
