@@ -107,6 +107,28 @@ paired_failure_layer() {
   fi
 }
 
+# Квитанція RED: індекс фізичної форми зіставляємо з рядком Lisp.
+# Це діагностика джерела, а не мовний оракул і не новий допуск.
+# Перелік форм із дужкою в першій колонці є лише candidate mapping.
+report_physical_red_source() {
+  local id="$1" source="$2" physical="$3" error_log="$4"
+  local index line excerpt
+  index="$(grep -o -m1 'physical_form_index=[0-9]*' "$error_log" | head -n1 | cut -d= -f2 || true)"
+  [[ "$index" =~ ^[0-9]+$ ]] || return 0
+  line="$(awk -v wanted="$index" '/^\(/ {if (number++ == wanted) {print NR; exit}}' "$source")"
+  if [[ -n "$line" ]]; then
+    excerpt="$(sed -n "${line}p" "$source" | cut -c1-180)"
+    printf 'SENS_RED_SOURCE id=%s source=%s physical_form_index=%s candidate_line=%s mapping=column-zero-form heuristic=NON_NORMATIVE\n' \
+      "$id" "$source" "$index" "$line" >&2
+    printf 'SENS_RED_FORM %s\n' "$excerpt" >&2
+    echo "::error file=$source,line=$line,title=SENS physical failure::RED id=$id physical_form_index=$index candidate-only" >&2
+  else
+    printf 'SENS_RED_SOURCE id=%s source=%s physical_form_index=%s candidate_line=UNRESOLVED mapping=column-zero-form\n' \
+      "$id" "$source" "$index" >&2
+  fi
+  sha256sum "$source" "$physical" >&2
+}
+
 run_law() {
   local id="$1" source="$2" expected="$3" dir physical actual
   dir="$evidence/$id"
@@ -137,6 +159,7 @@ run_law() {
   # Нативний SENS надає діагностику; shell не підміняє жоден Lisp-вердикт.
   if ! profile_stage "$id" sens-paired timeout 45s "$sens" --t5m-pair "$source" "$physical" >"$dir/paired.out" 2>"$dir/paired.err"; then
     cat "$dir/paired.err" >&2
+    report_physical_red_source "$id" "$source" "$physical" "$dir/paired.err"
     fail "$id" "$(paired_failure_layer "$dir/paired.err")" "source-matched-physical-execution" "rejected"
   fi
   if ! profile_stage "$id" sens-standalone timeout 45s "$sens" "$physical" >"$dir/physical.out" 2>"$dir/physical.err"; then
