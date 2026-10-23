@@ -185,6 +185,8 @@ jobs:
                   "tests/semantic/result-status-laws.lisp",
                   "tests/semantic/d11-srfi1-span-break-laws.lisp",
                   "tests/semantic/ukr-lists-d24-language-law.lisp",
+                  "tests/semantic/d24-polynomial-language-law.lisp",
+                  "tests/semantic/d24-polynomial-language-mutant.lisp",
                   "tests/semantic/d4-recursion-benchmark-law.lisp",
                   "tests/semantic/d4-recursion-benchmark-mutant.lisp",
                   # Ці фікстури потребують DEFINE обійти із benchmarks/recursion.lisp.
@@ -297,7 +299,6 @@ jobs:
         run: |
           set -euo pipefail
           export CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0
-          cargo test --locked -p sens --test ukr_unpaired_benchmark_runtime арифметика_та_бенчмарки_без_числових_токенів_виконуються_в_sens -- --exact --nocapture
           cargo test --locked -p sens-cli --test arithmetic_benchmark_cli -- --nocapture
           cargo test --locked -p sens --test ukr_unpaired_benchmark_runtime український_читач_виконує_цитовані_дані_й_точний_d24_дріб -- --exact --nocapture
           cargo test --locked -p sens --lib український_парсер_виконує_точний_дріб_та_відхиляє_ділення_на_нуль -- --nocapture
@@ -305,7 +306,7 @@ jobs:
           # Довжина списку вже не перевіряється числовим Rust-оракулом. Її D1-закон — нижче.
           # Поки Lisp-свідок не виконано, не оголошувати фіктивного PASS.
           echo "::notice file=benchmarks/lists.lisp,title=SENS Lisp benchmark::PENDING_LANGUAGE_LAW source=lists.lisp verifier=d24-list-language physical_T5M=NOT_CERTIFIED"
-          echo "::notice file=benchmarks/arithmetic.lisp,title=SENS Lisp benchmark::PASS source=arithmetic.lisp result=15505 native=SENS negative=CHECKED physical_T5M=NOT_TESTED"
+          echo "::notice file=benchmarks/arithmetic.lisp,title=SENS Lisp benchmark::PENDING_LANGUAGE_LAW source=arithmetic.lisp verifier=d24-polynomial-language physical_T5M=NOT_CERTIFIED"
           echo "::notice file=benchmarks/parser.lisp,title=SENS Lisp benchmark::PASS source=parser.lisp result=5/336 native=SENS negative=CHECKED physical_T5M=NOT_TESTED"
           {
             echo '## Три Lisp-бенчмарки — нативне виконання SENS'
@@ -313,10 +314,10 @@ jobs:
             echo '| Українська програма | Перевірений результат | Шлях |'
             echo '|---|---:|---|'
             echo '| `benchmarks/lists.lisp` | очікує окремого мовного кроку | tests/semantic/ukr-lists-d24-language-law.lisp |'
-            echo '| `benchmarks/arithmetic.lisp` | `15505` | SENS Lisp-eval, негатив перевірено |'
+            echo '| `benchmarks/arithmetic.lisp` | очікує окремого мовного кроку | tests/semantic/d24-polynomial-language-law.lisp |'
             echo '| `benchmarks/parser.lisp` | `5/336` | SENS Lisp-eval, негатив перевірено |'
             echo
-            echo 'Значення arithmetic/parser перевірені вище. Lists перевіряється лише пізнішим Lisp-законом; це не заміри часу. T5M для трьох джерел не атестовано.'
+            echo 'Parser перевірено вище. Lists і arithmetic перевіряються лише пізнішими Lisp-законами; це не заміри часу. T5M для трьох джерел не атестовано.'
           } >> "$GITHUB_STEP_SUMMARY"
 
       # Одного білда з AST вистачає для коридору, фізичних Lisp-законів та звіту.
@@ -412,6 +413,11 @@ jobs:
           # Фізичний D6 LENGTH ще не атестовано (#5854): direct=SENS, T5M=NOT_CERTIFIED.
           cat -- benchmarks/lists.lisp tests/semantic/ukr-lists-d24-language-law.lisp > "$RUNNER_TEMP/ukr-lists-d24-native.lisp"
           check_lisp_law d24-list-language "$RUNNER_TEMP/ukr-lists-d24-native.lisp" '1'
+          # Поліном Д24: Lisp-закон і контрприклад замість Rust-оракула.
+          cat -- benchmarks/arithmetic.lisp tests/semantic/d24-polynomial-language-law.lisp > "$RUNNER_TEMP/d24-polynomial-law.lisp"
+          check_lisp_law d24-polynomial-language-positive "$RUNNER_TEMP/d24-polynomial-law.lisp" '1'
+          cat -- benchmarks/arithmetic.lisp tests/semantic/d24-polynomial-language-mutant.lisp > "$RUNNER_TEMP/d24-polynomial-mutant.lisp"
+          check_lisp_law d24-polynomial-language-mutant "$RUNNER_TEMP/d24-polynomial-mutant.lisp" '0'
           check_lisp_law d3-ukr-self-verdict tests/semantic/d3-ukr-language-self-verdict.lisp '1'
           check_lisp_law d5-ukr-self-verdict tests/semantic/d5-ukr-arithmetic-self-verdict.lisp '1'
           check_lisp_law d5-physical-law tests/semantic/d5-arithmetic-native-t5m-law.lisp '1'
