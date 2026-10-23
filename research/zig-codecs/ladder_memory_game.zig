@@ -62,6 +62,67 @@ fn parseRow(width: u8, line: []const u8) ?Record {
     return .{ .width = width, .bits = bits, .lisp = value[0..end] };
 }
 
+
+pub const D11Guess = struct {
+    parent_bits: []const u8,
+    suffix: u8,
+    child_lisp: []const u8,
+};
+
+fn isD10Selector(name: []const u8) bool {
+    if (name.len != 10 or name[0] != 'C' or name[9] != 'R') return false;
+    for (name[1..9]) |letter| {
+        if (letter != 'A' and letter != 'D') return false;
+    }
+    return true;
+}
+
+/// Раунд D11: учасник пригадує похідний селектор за точним D10-батьком.
+/// Це перевірка таблиці та композиційної координати, не допуск до SENS.
+pub fn gradeD11(guesses: []const D11Guess) Score {
+    var result: Score = .{};
+    for (guesses, 0..) |guess, index| {
+        if (guess.parent_bits.len != 10 or (guess.suffix != '0' and guess.suffix != '1')) {
+            result.unknown += 1;
+            continue;
+        }
+        var repeated = false;
+        for (guesses[0..index]) |previous| {
+            if (previous.suffix == guess.suffix and
+                std.mem.eql(u8, previous.parent_bits, guess.parent_bits))
+            {
+                repeated = true;
+                break;
+            }
+        }
+        if (repeated) {
+            result.duplicate += 1;
+            continue;
+        }
+        const parent = lookup(10, guess.parent_bits) orelse {
+            result.unknown += 1;
+            continue;
+        };
+        if (!isD10Selector(parent.lisp)) {
+            result.unknown += 1;
+            continue;
+        }
+        var bits: [11]u8 = undefined;
+        @memcpy(bits[0..10], guess.parent_bits);
+        bits[10] = guess.suffix;
+        const child = lookup(11, &bits) orelse {
+            result.unknown += 1;
+            continue;
+        };
+        if (std.ascii.eqlIgnoreCase(child.lisp, guess.child_lisp)) {
+            result.correct += 1;
+        } else {
+            result.wrong += 1;
+        }
+    }
+    return result;
+}
+
 pub fn lookup(width: u8, bits: []const u8) ?Record {
     if (bits.len != @as(usize, width)) return null;
     const table = source(width) orelse return null;
@@ -179,4 +240,29 @@ test "Драбина: точні коди, хибні назви, повтори
     try std.testing.expectEqual(@as(usize, 1), result.duplicate);
     try std.testing.expectEqual(@as(usize, 1), result.unknown);
     try std.testing.expectEqual(@as(usize, 1), result.structural);
+}
+
+
+test "Драбина D11: 512 похідних мають селекторного D10-батька" {
+    try std.testing.expectEqual(@as(usize, 512), questionCount(11));
+    for (0..questionCount(11)) |i| {
+        const child = questionAt(11, i).?;
+        const parent = lookup(10, child.bits[0..10]).?;
+        try std.testing.expect(isD10Selector(parent.lisp));
+    }
+}
+
+test "Конкурс D11: вірна назва, хибна, повтор, не-селектор і зіпсований суфікс" {
+    const guesses = [_]D11Guess{
+        .{ .parent_bits = "0110000000", .suffix = '0', .child_lisp = "cdaaaaaaaar" },
+        .{ .parent_bits = "0110000000", .suffix = '0', .child_lisp = "WRONG" },
+        .{ .parent_bits = "0110000000", .suffix = '1', .child_lisp = "WRONG" },
+        .{ .parent_bits = "0110000000", .suffix = '2', .child_lisp = "CDAAAAAAAAR" },
+        .{ .parent_bits = "0000000000", .suffix = '0', .child_lisp = "CDAAAAAAAAR" },
+    };
+    const score = gradeD11(&guesses);
+    try std.testing.expectEqual(@as(usize, 1), score.correct);
+    try std.testing.expectEqual(@as(usize, 1), score.wrong);
+    try std.testing.expectEqual(@as(usize, 1), score.duplicate);
+    try std.testing.expectEqual(@as(usize, 2), score.unknown);
 }

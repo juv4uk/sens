@@ -415,6 +415,26 @@ jobs:
             echo "::error file=zig_transport_root.zig,title=Zig ABI::REGRESSION layer=abi expected=pass actual=nonzero"
             zig_failed=1
           fi
+          # Драбина D1–D11 — конкурс пам'яті точних координат, не SENS-семантики.
+          if zig test -O ReleaseFast -lc research/zig-codecs/ladder_memory_game.zig \
+              > "$RUNNER_TEMP/zig-ladder-contest-tests.log" 2>&1; then
+            cat "$RUNNER_TEMP/zig-ladder-contest-tests.log"
+            echo "::notice title=Zig Драбина D11::PASS layer=codebook-memory semantics=NOT_TESTED"
+          else
+            cat "$RUNNER_TEMP/zig-ladder-contest-tests.log" >&2
+            echo "::error file=research/zig-codecs/ladder_memory_game.zig,title=Драбина D11::REGRESSION layer=contest expected=selector-suffix-parity actual=failed"
+            zig_failed=1
+          fi
+          # Окрема фізична швидкість пошуку/оцінювання; без вигаданого PASS мови.
+          if zig run -O ReleaseFast -lc research/zig-codecs/ladder_memory_bench.zig \
+              > "$RUNNER_TEMP/zig-ladder-contest-bench.log" 2>&1; then
+            cat "$RUNNER_TEMP/zig-ladder-contest-bench.log"
+            echo "::notice title=Zig Драбина bench::MEASURED layer=codebook-memory provenance=$(git rev-parse HEAD) semantics=NOT_TESTED"
+          else
+            cat "$RUNNER_TEMP/zig-ladder-contest-bench.log" >&2
+            echo "::error file=research/zig-codecs/ladder_memory_bench.zig,title=Драбина bench::REGRESSION layer=contest-bench expected=timings actual=failed"
+            zig_failed=1
+          fi
           # Вимірюємо ТІЛЬКИ T5M transport Zig, без виконання мовних законів.
           # У Zig 0.16 — Io.Clock.awake, а не видалений std.time.Timer.
           # Фізичні позитивні/негативні контрприклади Zig не залежать від бенчмарка.
