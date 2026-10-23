@@ -101,6 +101,17 @@ class BatchSourceTests(unittest.TestCase):
             "(визначити f (функція (x) (тотожне? x x)))",
         )
 
+    def test_quoted_quote_head_does_not_quote_its_arguments(self):
+        # A QUOTE operator that is itself quoted does not extend
+        # quotation to its enclosing list's argument expressions.
+        source = "('00000001 (00001001 f (00001000 (x) x)))"
+        updated, count, problems = MOD.rewrite(source, self.mapping, self.blocked)
+        self.assertEqual((count, problems), (2, []))
+        self.assertEqual(
+            updated,
+            "('00000001 (визначити f (функція (x) x)))",
+        )
+
     def test_unproved_historical_head_blocks_ukr_rewrite(self):
         projected = self.mapping
         old = "(00001001 f (00001000 () (00110111 fun values)))"
