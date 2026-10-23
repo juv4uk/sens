@@ -1025,6 +1025,15 @@ fn prepare_t5m_repl_words(
     for expression in &parsed {
         collect_t5m_source_bindings(line, expression, &mut source_bindings);
     }
+    // A source-local name shadows a domain projection only if the selected
+    // domain slot is already occupied in this session. Otherwise the ratified
+    // D10 target and its call sites must remain exact DomainIdentity words.
+    source_bindings.retain(|name| {
+        selected_surface_callable(surface, name)
+            .ok()
+            .flatten()
+            .is_some_and(|_| session.environment.get(name).is_some())
+    });
     let expressions = parsed
         .iter()
         .map(|expression| {
@@ -1909,6 +1918,23 @@ pub(crate) fn run_repl(session: Session, initial_surface: ReplSurface, sens_loop
 #[cfg(test)]
 mod tests {
     use super::*;
+
+
+    #[cfg(feature = "zig-transport")]
+    #[test]
+    fn t5m_unoccupied_d10_definition_and_calls_keep_exact_identity() {
+        let name = "відібрати-визначення-іменованої-групи";
+        let source = format!("(визначити {name} (функція (локальне-значення) локальне-значення))\n({name} 40)");
+        let mut session = Session::bare();
+        assert!(session.environment.get(name).is_none());
+
+        let program = prepare_t5m_repl_program(&source, ReplSurface::UkrainianFull, &session)
+            .expect("unoccupied D10 target and calls use exact domain words");
+        let result = program
+            .execute(&mut session)
+            .expect("exact D10 definition and call execute through Zig T5M");
+        assert_eq!(result.value.to_string(), "40");
+    }
 
     #[cfg(feature = "zig-transport")]
     #[test]
