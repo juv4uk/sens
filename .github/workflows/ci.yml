@@ -513,6 +513,38 @@ jobs:
             echo "::error file=bench_d12_dense.zig,title=Zig D12 A/B::REGRESSION layer=codec-benchmark expected=preflight-and-measurement actual=failed"
             zig_failed=1
           fi
+          # D13 — лише дослідна фізична щільність. Чинна математична сім'я: D12,D24,D48…
+          # Сім неканонічних хвостів мають відмовляти без часткових вихідних слів.
+          if zig test -O ReleaseFast -lc research/zig-codecs/d13_dense_experiment.zig \
+              > "$RUNNER_TEMP/zig-d13-research-tests.log" 2>&1; then
+            cat "$RUNNER_TEMP/zig-d13-research-tests.log"
+            echo "::notice title=Zig D13 research::PASS layer=mechanism semantics=NOT_TESTED domain=NOT_RATIFIED"
+          else
+            cat "$RUNNER_TEMP/zig-d13-research-tests.log" >&2
+            echo "::error file=research/zig-codecs/d13_dense_experiment.zig,title=Zig D13 research::REGRESSION layer=codec-test expected=8192-roundtrips-and-seven-fail-closed-tails actual=failed"
+            zig_failed=1
+          fi
+          if zig run -O ReleaseFast -lc research/zig-codecs/d13_dense_experiment.zig \
+              > "$RUNNER_TEMP/zig-d13-research-bench.log" 2>&1; then
+            cat "$RUNNER_TEMP/zig-d13-research-bench.log"
+            if grep -Fq 'mode=dense13 words=64 bytes=104' "$RUNNER_TEMP/zig-d13-research-bench.log" &&
+               grep -Fq 'mode=raw16 words=64 bytes=128' "$RUNNER_TEMP/zig-d13-research-bench.log" &&
+               grep -Fq 'mode=dense13 words=512 bytes=832' "$RUNNER_TEMP/zig-d13-research-bench.log" &&
+               grep -Fq 'mode=raw16 words=512 bytes=1024' "$RUNNER_TEMP/zig-d13-research-bench.log" &&
+               [[ "$(grep -c '^D13_EXPERIMENT mode=' "$RUNNER_TEMP/zig-d13-research-bench.log")" -eq 4 ]] &&
+               [[ "$(grep -c 'roundtrip=EXACT frame=EXCLUDED semantics=NOT_TESTED' "$RUNNER_TEMP/zig-d13-research-bench.log")" -eq 4 ]] &&
+               grep -Fq 'D13_EXPERIMENT_METHOD width=13' "$RUNNER_TEMP/zig-d13-research-bench.log"; then
+              cat "$RUNNER_TEMP/zig-d13-research-bench.log" >> "$GITHUB_STEP_SUMMARY"
+              echo "::notice title=Zig D13 research benchmark::MEASURED provenance=$(git rev-parse HEAD) width=13 semantic_domain=NOT_RATIFIED"
+            else
+              echo "::error title=Zig D13 research benchmark::REGRESSION layer=benchmark-contract expected=4-exact-rows-and-method actual=missing-or-invalid"
+              zig_failed=1
+            fi
+          else
+            cat "$RUNNER_TEMP/zig-d13-research-bench.log" >&2
+            echo "::error title=Zig D13 research benchmark::REGRESSION layer=benchmark-run expected=success actual=nonzero"
+            zig_failed=1
+          fi
           # Дослідний кодек DWC1 — окремий від production Zig/T5M.
           # На кожному корпусі перевіряємо exact (width,bits) перед AB/BA замірами.
           if zig test -O ReleaseFast -lc research/zig-codecs/domain_codebook_experiment.zig \

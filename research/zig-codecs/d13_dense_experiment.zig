@@ -128,6 +128,28 @@ test "D13 research: malformed input fails without touching output" {
     try std.testing.expectError(error.TooLarge, packedLen(std.math.maxInt(usize)));
 }
 
+test "D13 research: all seven padding residues fail closed; aligned eight-word run succeeds" {
+    const source = [_]u16{0x1555} ** 8;
+    var payload: [13]u8 = undefined;
+    for (1..9) |count| {
+        const n = try encode(source[0..count], &payload);
+        const padding = n * 8 - count * width;
+        var restored = [_]u16{0xbeef} ** 8;
+        if (padding == 0) {
+            try std.testing.expectEqual(@as(usize, 8), count);
+            try decode(payload[0..n], count, restored[0..count]);
+            try std.testing.expectEqualSlices(u16, source[0..count], restored[0..count]);
+        } else {
+            try std.testing.expect(padding >= 1 and padding <= 7);
+            payload[n - 1] |= 1;
+            try std.testing.expectError(error.NonCanonicalTail, decode(payload[0..n], count, restored[0..count]));
+            for (restored[0..count]) |word| {
+                try std.testing.expectEqual(@as(u16, 0xbeef), word);
+            }
+        }
+    }
+}
+
 const CTimespec = extern struct { tv_sec: c_long, tv_nsec: c_long };
 extern "c" fn clock_gettime(clock_id: c_int, ts: *CTimespec) c_int;
 const clock_monotonic: c_int = 1;
