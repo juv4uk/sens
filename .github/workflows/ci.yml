@@ -316,8 +316,18 @@ jobs:
           set -euo pipefail
           manifest="$RUNNER_TEMP/changed-t5m-lisp.txt"
           if [[ ! -s "$manifest" ]]; then
-            echo "::error file=.github/workflows/ci.yml,title=SENS Lisp push::REGRESSION layer=selection expected=executable-Lisp-witness actual=empty-manifest"
-            exit 1
+            # Без змін Lisp порожній список програм — NOT_APPLICABLE, а не успіх мовного доказу.
+            # Помилковий відбір або порожній список після Lisp-змін залишаються RED.
+            if [[ "${{ steps.changed-t5m-lisp.outcome }}" != "success" ]]; then
+              echo "::error file=.github/workflows/ci.yml,title=SENS Lisp push::REGRESSION layer=selection expected=successful-manifest-selection actual=failed"
+              exit 1
+            fi
+            if [[ "${{ steps.changed-t5m-lisp.outputs.has_lisp }}" == "true" ]]; then
+              echo "::error file=.github/workflows/ci.yml,title=SENS Lisp push::REGRESSION layer=selection expected=executable-Lisp-witness actual=empty-manifest"
+              exit 1
+            fi
+            echo "::notice file=.github/workflows/ci.yml,title=SENS Lisp push::NOT_APPLICABLE changed_lisp=false physical_execution=NOT_TESTED"
+            exit 0
           fi
           export CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0
           binary="$PWD/target/debug/sens"
