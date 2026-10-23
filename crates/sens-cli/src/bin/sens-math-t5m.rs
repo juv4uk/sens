@@ -317,7 +317,7 @@ mod paired {
             for invalid in [
                 "(додати 0,5 2)",
                 "(додати 1e2 2)",
-                "(додати #d24:000000000000000000000001 2)",
+                "(додати 1 2 3)",
                 "(додати 170141183460469231731687303715884105728 1)",
                 "(як-є 1)",
             ] {
@@ -437,8 +437,34 @@ mod paired {
             }
         }
 
-        #[test]
-        fn unary_d5_zero_normalizes_and_zero_reciprocal_fails() {
+        // Чинне українське джерело: лише десяткові значення, без #d24.
+        // Одномісні D5:01011 та D5:10111 — справжні виконувані закони.
+        for (id, source, expected) in [
+            ("decimal-negation", "(відняти 2)", "-2"),
+            ("decimal-reciprocal", "(частка 2)", "1/2"),
+        ] {
+            let words = expected_words(&qualify(source).unwrap()).unwrap();
+            assert_eq!(
+                words.iter().map(|w| w.width).collect::<Vec<_>>(),
+                vec![2, 5, 24, 2],
+                "test_id={id} layer=domain"
+            );
+            let physical = zig_transport::encode_t5m_exact_words(&words).unwrap();
+            assert_eq!(
+                zig_transport::decode_t5m_exact_words(&physical).unwrap(),
+                words,
+                "test_id={id} layer=transport"
+            );
+            assert_eq!(
+                eval_verified(source, &physical).unwrap().to_string(),
+                expected,
+                "test_id={id} layer=SENS"
+            );
+        }
+    }
+
+    #[test]
+    fn unary_d5_zero_normalizes_and_zero_reciprocal_fails() {
             let neg_zero = format!("(відняти #d24:{})", bits(0));
             let words = expected_words(&qualify(&neg_zero).unwrap()).unwrap();
             let packed = zig_transport::encode_t5m_exact_words(&words).unwrap();
@@ -479,7 +505,7 @@ mod paired {
                     bits(2),
                     bits(3)
                 ),
-                "(частка 2)".to_string(),
+                "(частка)".to_string(),
             ] {
                 assert!(
                     qualify(&source).is_err(),
@@ -638,7 +664,7 @@ mod paired {
         fn physical_t5m_cannot_invent_numeric_admission_or_mutate_exact_bits() {
             for invalid in [
                 "(додати 0,5 2)",
-                "(додати #d24:000000000000000000000001 2)",
+                "(додати 1 2 3)",
                 "(додати #d24:000000000000000000000001 #d48:000000000000000000000000000000000000000000000010)",
                 "(quote #d24:000000000000000000000001)",
             ] {
