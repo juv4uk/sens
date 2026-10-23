@@ -274,15 +274,16 @@ run_native_t5m_program() {
         return
       fi
     fi
-    # Епістемічний закон повертає named Lisp verdict, не D1-біт.
+    # Обидва епістемічні свідки перевіряють named record самим Lisp/D8.
+    # Зовнішній вердикт позитиву й мутанта — точний D1:1, а не текстовий dump.
     if [[ "$file" == "tests/semantic/language-law-epistemic-records.lisp" ]]; then
-      printf '%s\n' "(epistemic-authority-witness (status pass))" > "$dir/epistemic-law.expected"
+      printf '1\n' > "$dir/epistemic-law.expected"
       if ! cmp -s "$dir/native-paired.stdout" "$dir/epistemic-law.expected"; then
-        echo "::error file=$file,title=SENS epistemic law::WRONG_VERDICT expected=epistemic-authority-witness/pass actual=$(cat "$dir/native-paired.stdout")" >&2
+        echo "::error file=$file,title=SENS epistemic law::WRONG_D1 expected=1 actual=$(cat "$dir/native-paired.stdout")" >&2
         mark_file_failed
         return
       fi
-      echo "::notice file=$file,title=SENS epistemic law::PASS native=SENS verdict=pass carrier=Zig/T5M"
+      echo "::notice file=$file,title=SENS epistemic law::PASS native=SENS result=D1:1 carrier=Zig/T5M"
     elif [[ "$file" == tests/semantic/language-law-*.lisp ||
             "$file" == "tests/semantic/lisp-d4-lexical-closure-laws.lisp" ]]; then
       printf '1\n' > "$dir/language-d1.expected"
@@ -293,15 +294,16 @@ run_native_t5m_program() {
       fi
       echo "::notice file=$file,title=SENS language law::PASS native=SENS result=D1:1 carrier=Zig/T5M"
     fi
-    # Епістемічний мутант отримує named fail від самого Lisp-перевіряльника.
+    # Мутант перевіряє named fail-record всередині Lisp та теж має D1:1,
+    # коли реалізація правильно виявляє хибне твердження.
     if [[ "$file" == "tests/semantic/language-mutant-epistemic-records.lisp" ]]; then
-      printf '%s\n' "(epistemic-authority-witness (status fail) (case source-ref-valid-mutant) (actual 1) (expected 0))" > "$dir/epistemic-mutant.expected"
+      printf '1\n' > "$dir/epistemic-mutant.expected"
       if ! cmp -s "$dir/native-paired.stdout" "$dir/epistemic-mutant.expected"; then
-        echo "::error file=$file,title=SENS epistemic mutant::WRONG_VERDICT expected=epistemic-authority-witness/fail actual=$(cat "$dir/native-paired.stdout")" >&2
+        echo "::error file=$file,title=SENS epistemic mutant::WRONG_D1 expected=1 actual=$(cat "$dir/native-paired.stdout")" >&2
         mark_file_failed
         return
       fi
-      echo "::notice file=$file,title=SENS epistemic mutant::PASS native=SENS verdict=fail-detected carrier=Zig/T5M"
+      echo "::notice file=$file,title=SENS epistemic mutant::PASS native=SENS result=D1:1 fail-record-verified=YES carrier=Zig/T5M"
     elif [[ "$file" == tests/semantic/language-mutant-*.lisp ]]; then
       printf '0\n' > "$dir/language-d1-mutant.expected"
       if ! cmp -s "$dir/native-paired.stdout" "$dir/language-d1-mutant.expected"; then
