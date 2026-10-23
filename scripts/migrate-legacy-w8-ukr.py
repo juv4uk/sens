@@ -173,7 +173,10 @@ def main():
     if args.historical_path and len(args.paths) != 1:
         ap.error("--historical-path — для одного файла")
     try:
-        scanner, table, withheld = mapping()
+        # Для вже мігрованих програм не потрібен історичний Git-об'єкт.
+        # Зчитувати bridge можна лише тоді, коли AST-сканер знайшов W8-голову.
+        scanner = shared("migrate-exact-domain.py")
+        table = withheld = None
         chosen = files(args.paths)
         if not chosen:
             raise ValueError("не знайдено активних lib/*.lisp")
@@ -197,14 +200,23 @@ def main():
                     })
                     print(f"{rel}: SKIP дані machine-profile-1, не викличний Lisp")
                     continue
+                # Пробний розбір не переписує Lisp і не виконує його.
+                # Коментарі, рядки, цитовані дані та не-викличні атоми
+                # залишаються поза пошуком W8-голів.
+                probe = []
+                scanner.plan(text, {}, legacy_heads={}, unresolved=probe)
                 unknown = []
-                edits = scanner.plan(text, {}, legacy_heads=table, unresolved=unknown)
+                edits = []
+                if probe:
+                    if not args.source_ref:
+                        raise ValueError(
+                            "для реальної заміни W8-голів потрібен --source-ref "
+                            "із перевіреним історичним SHA; без нього нічого не переписуємо"
+                        )
+                    if table is None:
+                        scanner, table, withheld = mapping()
+                    edits = scanner.plan(text, {}, legacy_heads=table, unresolved=unknown)
                 old_codes = {e.source for e in edits} | {code for _, code in unknown}
-                if old_codes and not args.source_ref:
-                    raise ValueError(
-                        "для реальної заміни W8-голів потрібен --source-ref "
-                        "із перевіреним історичним SHA; без нього нічого не переписуємо"
-                    )
                 proof = (prove(args.source_ref, args.historical_path or rel, old_codes, scanner, table)
                          if old_codes else None)
                 new = scanner.apply_edits(text, edits).encode("utf-8")
