@@ -313,7 +313,9 @@ fn write_new_t5m_pair(path: &str, bytes: &[u8], view: &str) -> Result<(), String
 /// Парне виконання дозволяє читати D24+ з реальних байтів Zig T5M,
 /// лише якщо український Lisp свідчить ТОЧНО ту саму доменну послідовність.
 /// Це не дозвіл трактувати довільний W24 за числову ідентичність.
-fn t5m_pair_request(args: &[String]) -> Option<Result<(&str, &str, Vec<&str>), &'static str>> {
+fn t5m_pair_request(
+    args: &[String],
+) -> Option<Result<(&str, &str, Vec<&str>, bool), &'static str>> {
     if !args.iter().skip(1).any(|item| item == "--t5m-pair") {
         return None;
     }
@@ -329,7 +331,36 @@ fn t5m_pair_request(args: &[String]) -> Option<Result<(&str, &str, Vec<&str>), &
             "--t5m-pair requires .lisp source and physical .sens bytes",
         ));
     }
-    Some(t5m_binding_paths(args).map(|bindings| (&args[2][..], &args[3][..], bindings)))
+    let mut bindings = Vec::new();
+    let mut load_core4 = false;
+    let mut index = 4;
+    while index < args.len() {
+        match args[index].as_str() {
+            "--core4-runtime" => {
+                if load_core4 {
+                    return Some(Err("--core4-runtime may be specified only once"));
+                }
+                load_core4 = true;
+                index += 1;
+            }
+            "--binding-source" => {
+                let Some(path) = args.get(index + 1) else {
+                    return Some(Err("--binding-source requires a .lisp path"));
+                };
+                if std::path::Path::new(path)
+                    .extension()
+                    .and_then(|part| part.to_str())
+                    != Some("lisp")
+                {
+                    return Some(Err("only --binding-source <source.lisp> is permitted"));
+                }
+                bindings.push(path.as_str());
+                index += 2;
+            }
+            _ => return Some(Err("unsupported --t5m-pair option")),
+        }
+    }
+    Some(Ok((&args[2][..], &args[3][..], bindings, load_core4)))
 }
 
 /// Фізичний вхід: байти -> стерильний Zig ABI v2 -> точні слова SENS.
@@ -535,7 +566,7 @@ fn main() {
     }
     if let Some(request) = t5m_pair_request(&raw_args) {
         let result = match request {
-            Ok((source_path, physical_path, binding_paths)) => fs::read_to_string(source_path)
+            Ok((source_path, physical_path, binding_paths, load_core4)) => fs::read_to_string(source_path)
                 .map_err(|error| format!("read Ukrainian Lisp source: {error}"))
                 .and_then(|source| {
                     let physical = fs::read(physical_path)
@@ -543,7 +574,11 @@ fn main() {
                     let bindings = read_t5m_binding_sources(&binding_paths)?;
                     #[cfg(feature = "zig-transport")]
                     {
-                        repl::eval_t5m_paired_file_with_bindings(&source, &physical, &bindings)
+                        if load_core4 {
+                            repl::eval_t5m_paired_file_with_core4(&source, &physical, &bindings)
+                        } else {
+                            repl::eval_t5m_paired_file_with_bindings(&source, &physical, &bindings)
+                        }
                     }
                     #[cfg(not(feature = "zig-transport"))]
                     {

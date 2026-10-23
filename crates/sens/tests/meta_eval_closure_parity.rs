@@ -4,6 +4,7 @@
 
 use sens::{
     eval_parsed_expressions, eval_program, load_core_library, parse_mixed_exact_domain, Session,
+    Value,
 };
 
 fn native(expr: &str) -> String {
@@ -37,6 +38,24 @@ fn closure_capture_has_native_parity() {
     let expected = "40";
     assert_eq!(native(expr), expected);
     assert_eq!(meta(expr), expected);
+}
+
+#[test]
+fn meta_numeric_roots_are_exact_d24_values() {
+    let mut session = Session::bare();
+    load_core_library(&mut session).expect("core should load");
+    sens::load_meta_evaluator_library(&mut session).expect("meta evaluator should load");
+
+    for (name, expected) in [("мета-число-нуль", "0"), ("мета-число-один", "1")] {
+        let value = eval_program(name, &mut session)
+            .unwrap_or_else(|error| panic!("{name} should evaluate: {error}"))
+            .value;
+        let Value::BinaryNumber(number) = &value else {
+            panic!("{name} must be an exact D24+ number, got {value:?}");
+        };
+        assert_eq!(number.numeric_domain_width(), Some(24), "{name}");
+        assert_eq!(number.to_decimal_string(), expected, "{name}");
+    }
 }
 
 #[test]

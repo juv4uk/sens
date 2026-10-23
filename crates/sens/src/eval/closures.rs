@@ -757,7 +757,7 @@ pub(super) fn apply_macro(
     let last = last_body_expression(body_for_call(&closure), &local_environment, span)?;
 
     let expanded_value = evaluate(last, &local_environment)?;
-    let expanded_expr = value_to_expr(expanded_value, span)?;
+    let expanded_expr = macro_expansion_to_expr(expanded_value, span)?;
 
     // Macro-produced source is lowered by the same ratified surface→domain
     // rule as ordinary source before it re-enters evaluation. This lets Lisp
@@ -790,18 +790,28 @@ pub(super) fn apply_macro(
 // Daten->Code-Umwandlung für `eval` wieder, statt den Cons-Zellen-Durchlauf
 // zu duplizieren, den die Makro-Expansion bereits brauchte.
 pub(super) fn value_to_expr(value: Value, span: Span) -> Result<Expr, LanguageError> {
-    fn go(value: &Value, span: Span, depth: u32) -> Result<Expr, LanguageError> {
-        if depth > crate::syntax::MAX_STRUCTURE_DEPTH {
-            return Err(LanguageError::new(
-                ErrorKind::Parse,
-                "structure exceeds reader limit · struktura perevyshchuie mezhu chytacha · Struktur überschreitet das Reader-Limit",
-                span,
-            ));
-        }
-        go_inner(value, span, depth)
-    }
+    value_to_expr_with_text7_policy(value, span, false)
+}
 
-    fn go_inner(value: &Value, span: Span, depth: u32) -> Result<Expr, LanguageError> {
+/// Макрос повертає не обчислене значення, а синтаксис. Тому D7-ім'я,
+/// яке макрос отримав через quote і повертає у формі, відновлюється як
+/// початковий список точних D7-кодів. Після цього звичайний lowerer
+/// застосовує до нього вибрану проєкцію та доменну identity.
+fn macro_expansion_to_expr(value: Value, span: Span) -> Result<Expr, LanguageError> {
+    value_to_expr_with_text7_policy(value, span, true)
+}
+
+fn value_to_expr_with_text7_policy(
+    value: Value,
+    span: Span,
+    allow_text7_syntax: bool,
+) -> Result<Expr, LanguageError> {
+    fn go_inner(
+        value: &Value,
+        span: Span,
+        depth: u32,
+        allow_text7_syntax: bool,
+    ) -> Result<Expr, LanguageError> {
         let kind = match &value {
         Value::Nil => ExprKind::List(Rc::new([])),
         Value::Bool(true) => ExprKind::Symbol("t".into()),
@@ -837,7 +847,12 @@ pub(super) fn value_to_expr(value: Value, span: Span) -> Result<Expr, LanguageEr
             loop {
                 match &current {
                     Value::Pair(node) => {
-                        items.push(go(&node.head, span, depth + 1)?);
+                        items.push(go_with_text7_policy(
+                            &node.head,
+                            span,
+                            depth + 1,
+                            allow_text7_syntax,
+                        )?);
                         current = node.tail.clone();
                     }
                     Value::Nil => break,
@@ -867,9 +882,19 @@ pub(super) fn value_to_expr(value: Value, span: Span) -> Result<Expr, LanguageEr
                 span,
             ))
         }
-        // Text7 is canonical data, not executable code: no source syntax
-        // re-reads it yet (reader admission is a separate slice), so a macro
-        // cannot return one as code. Named refusal, never silent bits.
+        // Text7 data remains non-executable for eval. A macro is different:
+        // its result is syntax, so reconstruct the exact D7 spelling and let
+        // the ordinary projection-aware lowerer decide its identity.
+        Value::Text7(text) if allow_text7_syntax => ExprKind::List(
+            text.to_source_words()
+                .into_iter()
+                .map(|word| Expr {
+                    kind: ExprKind::DomainIdentity(crate::DomainIdentity::from_source_word(word)),
+                    span,
+                })
+                .collect::<Vec<_>>()
+                .into(),
+        ),
         Value::Text7(_) => {
             return Err(LanguageError::new(
                 ErrorKind::Type,
@@ -881,7 +906,23 @@ pub(super) fn value_to_expr(value: Value, span: Span) -> Result<Expr, LanguageEr
         Ok(Expr { kind, span })
     }
 
-    go(&value, span, 0)
+    fn go_with_text7_policy(
+        value: &Value,
+        span: Span,
+        depth: u32,
+        allow_text7_syntax: bool,
+    ) -> Result<Expr, LanguageError> {
+        if depth > crate::syntax::MAX_STRUCTURE_DEPTH {
+            return Err(LanguageError::new(
+                ErrorKind::Parse,
+                "structure exceeds reader limit · struktura perevyshchuie mezhu chytacha · Struktur überschreitet das Reader-Limit",
+                span,
+            ));
+        }
+        go_inner(value, span, depth, allow_text7_syntax)
+    }
+
+    go_with_text7_policy(&value, span, 0, allow_text7_syntax)
 }
 
 #[cfg(test)]

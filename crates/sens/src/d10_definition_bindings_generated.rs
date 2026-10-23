@@ -1,6 +1,6 @@
 // GENERATED — DO NOT EDIT BY HAND.
-// Identity: lib/domains/d10.lisp; definitions: lib/core4.lisp.
-// Binding-only: concrete Core4 closures, never generic D10 callability.
+// Identity: lib/domains/d10.lisp; definitions: concrete SENS library closures.
+// Binding-only: concrete definitions, never generic D10 callability.
 // Checked by: scripts/check-d10-definition-bindings.py
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -24,6 +24,7 @@ pub(super) const D10_DEFINITION_BINDINGS: &[D10DefinitionBinding] = &[
     D10DefinitionBinding { bits: 0b0001110110, names: &["створити-твердження", "створити-структуроване-твердження", "nirmāṇa-pratijñā", "make-claim", "MAKE-CLAIM"] },
     D10DefinitionBinding { bits: 0b0001110111, names: &["джерело-спостереження", "отримати-джерело-спостереження", "nirīkṣaṇa-srotas", "observation-source", "OBSERVATION-SOURCE"] },
     D10DefinitionBinding { bits: 0b0001111011, names: &["вимоги-наміру", "отримати-необхідні-можливості-наміру", "saṅkalpa-āvaśyaka", "intent-requires", "INTENT-REQUIRES"] },
+    D10DefinitionBinding { bits: 0b0001111110, names: &["можливості-наміру-забезпечені?", "усі-необхідні-можливості-наміру-забезпечені?", "saṅkalpa-sāmarthyāni-saṃtuṣṭa", "intent-capabilities-satisfied?", "INTENT-CAPABILITIES-SATISFIED?"] },
     D10DefinitionBinding { bits: 0b0010000101, names: &["створити-намір", "nirmāṇa-saṅkalpa", "make-intent", "MAKE-INTENT"] },
     D10DefinitionBinding { bits: 0b0010000111, names: &["посилання-доказу-на-твердження", "отримати-посилання-доказу-на-твердження", "pramāṇa-pratijñā-saṃdarbha", "evidence-claim-ref", "EVIDENCE-CLAIM-REF"] },
     D10DefinitionBinding { bits: 0b0010001110, names: &["правильний-список-знань?", "правильно-структурований-список-знань?", "jñāna-samyak-sūcī", "knowledge-proper-list?", "KNOWLEDGE-PROPER-LIST?"] },
@@ -33,6 +34,7 @@ pub(super) const D10_DEFINITION_BINDINGS: &[D10DefinitionBinding] = &[
     D10DefinitionBinding { bits: 0b0010010011, names: &["створити-спостереження", "nirmāṇa-nirīkṣaṇa", "make-observation", "MAKE-OBSERVATION"] },
     D10DefinitionBinding { bits: 0b0010010100, names: &["голова-заперечена?", "голова-твердження-знань-заперечена?", "jñāna-na-śiras", "knowledge-not-head?", "KNOWLEDGE-NOT-HEAD?"] },
     D10DefinitionBinding { bits: 0b0010010110, names: &["правильний-список-результатів?", "результат-є-правильним-списком?", "phala-samyak-sūcī", "result-proper-list?", "RESULT-PROPER-LIST?"] },
+    D10DefinitionBinding { bits: 0b0010011001, names: &["посилання-на-джерело?", "це-належне-посилання-на-джерело?", "srotas-saṃdarbha", "source-ref?", "SOURCE-REF?"] },
     D10DefinitionBinding { bits: 0b0010011010, names: &["продукти-наміру", "отримати-очікувані-результати-наміру", "saṅkalpa-janana", "intent-produces", "INTENT-PRODUCES"] },
     D10DefinitionBinding { bits: 0b0010110000, names: &["статус-перекладу-коректний?", "статус-запису-перекладу-коректний?", "anuvāda-avasthā-yukta", "translation-status-valid?", "TRANSLATION-STATUS-VALID?"] },
     D10DefinitionBinding { bits: 0b0010111000, names: &["вид-перекладу-коректний?", "вид-кандидата-перекладу-коректний?", "anuvāda-jāti-yukta", "translation-kind-valid?", "TRANSLATION-KIND-VALID?"] },

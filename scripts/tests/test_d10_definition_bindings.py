@@ -20,7 +20,7 @@ def load_migration_module():
 
 
 class D10DefinitionBindingTests(unittest.TestCase):
-    def test_generated_bindings_are_only_concrete_core4_d10_definitions(self):
+    def test_generated_bindings_are_only_concrete_d10_library_definitions(self):
         migration = load_migration_module()
         expected = set(migration.core4_d10_defined_rows())
         source = (ROOT / "crates/sens/src/d10_definition_bindings_generated.rs").read_text()
@@ -29,7 +29,8 @@ class D10DefinitionBindingTests(unittest.TestCase):
         self.assertEqual(actual, expected)
         self.assertIn("0100001100", actual)  # LISTP
         self.assertIn("0011010111", actual)  # MKLIST
-        self.assertNotIn("0000000000", actual)  # codebook row, no Core4 definition
+        self.assertIn("0010011001", actual)  # SOURCE-REF? has a Lisp definition
+        self.assertNotIn("0000000000", actual)  # codebook row, no concrete definition
 
 
 if __name__ == "__main__":

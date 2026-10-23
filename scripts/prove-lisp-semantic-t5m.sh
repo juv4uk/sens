@@ -140,7 +140,7 @@ run_law() {
     fail "$id" "$(direct_failure_layer "$dir/direct.err")" "SENS-execution" "rejected"
   fi
   # Кодек створює байти T5M; Zig відкриває і перевіряє точне подання.
-  if ! profile_stage "$id" codec-mint timeout 45s "$sens" --t5m-mint "$source" "$physical" >"$dir/mint.out" 2>"$dir/mint.err"; then
+  if ! profile_stage "$id" codec-mint timeout 45s "$sens" --t5m-mint-pair "$source" "$physical" >"$dir/mint.out" 2>"$dir/mint.err"; then
     cat "$dir/mint.err" >&2
     fail "$id" codec "T5M-mint" "rejected"
   fi
@@ -193,7 +193,7 @@ run_bound_law() {
     cat "$dir/direct.err" >&2
     fail "$id" "$(direct_failure_layer "$dir/direct.err")" "SENS-execution" "rejected"
   fi
-  if ! profile_stage "$id" codec-mint timeout 45s "$sens" --t5m-mint "$combined" "$physical" >"$dir/mint.out" 2>"$dir/mint.err"; then
+  if ! profile_stage "$id" codec-mint timeout 45s "$sens" --t5m-mint-pair "$combined" "$physical" >"$dir/mint.out" 2>"$dir/mint.err"; then
     cat "$dir/mint.err" >&2
     fail "$id" codec "T5M-mint" "rejected"
   fi
@@ -248,7 +248,7 @@ run_type_rejection() {
     fail "$id" sens-direct "expected-Type-diagnostic" "unclassified-rejection"
   fi
 
-  if ! profile_stage "$id" codec-mint timeout 45s "$sens" --t5m-mint "$source" "$physical" >"$dir/mint.out" 2>"$dir/mint.err"; then
+  if ! profile_stage "$id" codec-mint timeout 45s "$sens" --t5m-mint-pair "$source" "$physical" >"$dir/mint.out" 2>"$dir/mint.err"; then
     cat "$dir/mint.err" >&2
     fail "$id" codec "T5M-mint" "rejected"
   fi

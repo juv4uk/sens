@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Перевірка binding-only проєкції D10-функцій, реально визначених у Core4."""
+"""Перевірка binding-only проєкції конкретних D10-визначень SENS."""
 from __future__ import annotations
 
 import argparse
@@ -22,11 +22,11 @@ def rust_string(value: str) -> str:
     return '"' + value.replace("\\", "\\\\").replace('"', '\\"') + '"'
 
 
-def concrete_core4_rows():
-    """Reuse the migrator's parsed Core4 definition/alias analysis verbatim."""
+def concrete_d10_rows():
+    """Reuse the migrator's parsed concrete library definition analysis."""
     spec = importlib.util.spec_from_file_location("sens_migrate_three_pass", MIGRATOR)
     if spec is None or spec.loader is None:
-        fail(f"не вдалося завантажити аналіз Core4: {MIGRATOR}")
+        fail(f"не вдалося завантажити аналіз конкретних D10-визначень: {MIGRATOR}")
     module = importlib.util.module_from_spec(spec)
     sys.modules[spec.name] = module
     spec.loader.exec_module(module)
@@ -42,9 +42,9 @@ def names(row) -> list[str]:
 
 
 def render() -> str:
-    rows = concrete_core4_rows()
+    rows = concrete_d10_rows()
     if not rows:
-        fail("Core4 не має конкретних D10-визначень для binding")
+        fail("бібліотеки SENS не мають конкретних D10-визначень для binding")
     seen: dict[str, str] = {}
     for bits, row in rows.items():
         if len(bits) != 10 or set(bits) - {"0", "1"}:
@@ -56,8 +56,8 @@ def render() -> str:
             seen[name] = bits
     lines = [
         "// GENERATED — DO NOT EDIT BY HAND.",
-        "// Identity: lib/domains/d10.lisp; definitions: lib/core4.lisp.",
-        "// Binding-only: concrete Core4 closures, never generic D10 callability.",
+        "// Identity: lib/domains/d10.lisp; definitions: concrete SENS library closures.",
+        "// Binding-only: concrete definitions, never generic D10 callability.",
         "// Checked by: scripts/check-d10-definition-bindings.py",
         "",
         "#[derive(Clone, Copy, Debug, Eq, PartialEq)]",

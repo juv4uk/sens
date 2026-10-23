@@ -960,13 +960,14 @@ def core4_d9_callable_rows():
 
 @lru_cache(maxsize=1)
 def core4_d10_defined_rows():
-    """Map concrete Core4-defined names to their exact D10 call identities."""
+    """Map concretely defined library names to exact D10 call identities."""
     from domain_tables import read_domain_table
 
-    source = strip_comments((REPO_ROOT / "lib" / "core4.lisp").read_text(
-        encoding="utf-8"
-    ))
-    forms = Parser(tokenize(source)).parse_program()
+    library_sources = (REPO_ROOT / "lib" / "core4.lisp", REPO_ROOT / "lib" / "epistemic.lisp")
+    forms = []
+    for path in library_sources:
+        source = strip_comments(path.read_text(encoding="utf-8"))
+        forms.extend(Parser(tokenize(source)).parse_program())
     defined_names = set()
     aliases = []
     define_heads = {"00001001", "0011", "define", "def", "визначити"}

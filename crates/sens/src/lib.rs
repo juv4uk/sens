@@ -561,11 +561,15 @@ fn bind_core_runtime_mechanisms(environment: &Environment) {
         crate::Bit8::new(D8_MODULO).expect("the D8 MOD resident has eight bits"),
     ));
     if environment.domain_code_slot(modulo_identity).is_none() {
-        if let Some(implementation) = environment
-            .get("модульна-остача")
-            .filter(|value| matches!(value, Value::Closure(_) | Value::Builtin(_)))
-        {
-            let _ = environment.bind_domain_code_slot_once(modulo_identity, implementation);
+        // Lisp DEFINE stores Ukrainian D7 names under their canonical Text7
+        // wire token, not their Unicode display spelling.
+        if let Ok(surface) = encode_text7("модульна-остача", Text7Layout::Uk) {
+            if let Some(implementation) = environment
+                .get(&surface.to_canonical_wire_token())
+                .filter(|value| matches!(value, Value::Closure(_) | Value::Builtin(_)))
+            {
+                let _ = environment.bind_domain_code_slot_once(modulo_identity, implementation);
+            }
         }
     }
 

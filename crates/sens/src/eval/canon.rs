@@ -318,9 +318,8 @@ fn d9_primitive_kind(identity: crate::DomainIdentity) -> Option<D9PrimitiveKind>
     }
 }
 
-/// True only for the seven ratified D9 value mechanisms required by the
-/// machine-admission wire checker. This is deliberately outside
-/// CoreDomainIdentity: D9 identity remains universal-domain identity, not Core.
+/// True only for exact D9 value mechanisms with an implemented route in the
+/// current evaluator. Domain residency alone never grants callability.
 pub(crate) fn has_d9_mechanism(identity: crate::DomainIdentity) -> bool {
     d9_primitive_kind(identity).is_some()
 }
@@ -663,6 +662,16 @@ pub(crate) fn bind_language_definition(name: &str, value: &Value, environment: &
         return;
     }
 
+    // T5M DEFINE stores a D7 binder under its canonical Text7 key. Domain
+    // binding tables are keyed by the ratified Ukrainian projection, so
+    // recover that spelling before looking up an exact resident. This adds
+    // no identity or callability: the generated table and concrete callable
+    // value are both still required below.
+    let projected_name = crate::Text7::from_canonical_wire_token(name)
+        .ok()
+        .and_then(|text| crate::render_text7(&text, crate::Text7Layout::Uk).ok());
+    let name = projected_name.as_deref().unwrap_or(name);
+
     if let Some(identity) = semantic_registry::d9_binding_identity_for_definition(name) {
         // Concrete Lisp implementation only; D9 itself remains non-Core.
         environment.bind_domain_code_slot_once(identity, value.clone());
@@ -921,7 +930,7 @@ mod exact_domain_primitive_tests {
     }
 
     #[test]
-    fn seven_ratified_d9_value_operations_have_explicit_exact_domain_mechanisms() {
+    fn ratified_d9_value_operations_have_explicit_exact_domain_mechanisms() {
         let environment = Environment::root();
         let span = Span { start: 0, end: 0 };
 

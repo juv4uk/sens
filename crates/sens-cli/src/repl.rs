@@ -773,6 +773,30 @@ fn project_repl_surface_expression_in_scope(
                         });
                     }
                 }
+                // A loaded language definition may occupy both its Text7 name
+                // and the exact domain call slot. In that case carry the
+                // ratified identity through T5M so the binary reader dispatches
+                // the same closure; otherwise a D7 text atom is mistaken for code.
+                if !bound
+                    .iter()
+                    .any(|candidate| candidate.as_ref() == head.as_ref())
+                {
+                    if let Some(identity) = selected_surface_callable(surface, head)? {
+                        if session.environment.has_domain_code_slot(identity) {
+                            let arguments = projected.drain(1..).collect::<Vec<_>>();
+                            let mut call = Vec::with_capacity(arguments.len() + 1);
+                            call.push(Expr {
+                                kind: ExprKind::DomainIdentity(identity),
+                                span: items[0].span,
+                            });
+                            call.extend(arguments);
+                            return Ok(Expr {
+                                kind: ExprKind::List(call.into()),
+                                span: expression.span,
+                            });
+                        }
+                    }
+                }
             }
             return Ok(Expr {
                 kind: ExprKind::List(projected.into()),
@@ -957,6 +981,33 @@ fn exact_t5m_result_expression(value: &Value, depth: usize) -> Result<Expr, Stri
             span: Default::default(),
         },
         Value::String(text) => string_value_expression(text)?,
+        Value::Text7(text) => {
+            if text.is_empty() {
+                return Err(
+                    "T5M_RESULT_UNSUPPORTED value=Text7: empty D7 text has no distinct canonical datum".into(),
+                );
+            }
+            let quoted_text = Expr {
+                kind: ExprKind::List(
+                    text.to_source_words()
+                        .into_iter()
+                        .map(|word| Expr {
+                            kind: ExprKind::DomainIdentity(DomainIdentity::from_source_word(word)),
+                            span: Default::default(),
+                        })
+                        .collect::<Vec<_>>()
+                        .into(),
+                ),
+                span: Default::default(),
+            };
+            Expr {
+                kind: ExprKind::DomainCall(
+                    exact_core_identity("як-є", 3)?,
+                    vec![quoted_text].into(),
+                ),
+                span: Default::default(),
+            }
+        }
         Value::Symbol(symbol) => Expr {
             kind: ExprKind::DomainCall(
                 exact_core_identity("текст-у-символ", 8)?,
@@ -1007,7 +1058,7 @@ fn result_t5m_words(value: &Value) -> Result<Vec<ExactDomainWord>, String> {
             append_t5m_expression(&expression, sens::Text7Layout::En, &mut words, 0)?;
             Ok(words)
         }
-        Value::Pair(..) => {
+        Value::Text7(_) | Value::Pair(..) => {
             let expression = exact_t5m_result_expression(value, 0)?;
             let mut words = Vec::new();
             append_t5m_expression(&expression, sens::Text7Layout::Uk, &mut words, 0)?;
@@ -1366,11 +1417,31 @@ pub(crate) fn eval_t5m_paired_file_with_bindings(
     physical: &[u8],
     bindings: &[String],
 ) -> Result<sens::EvalResult, String> {
-    // Mint і paired мають однакові Core4 зв'язування, інакше точні
-    // корені D24+ проектуються як невідомі викличні D7-гліфи.
-    let mut session = core4_t5m_source_session()?;
-    preload_t5m_binding_sources(&mut session, bindings)?;
-    let expected = prepare_t5m_repl_words(source, ReplSurface::UkrainianFull, &session)?;
+    eval_t5m_paired_file_with_runtime(source, physical, bindings, false)
+}
+
+#[cfg(feature = "zig-transport")]
+pub(crate) fn eval_t5m_paired_file_with_core4(
+    source: &str,
+    physical: &[u8],
+    bindings: &[String],
+) -> Result<sens::EvalResult, String> {
+    eval_t5m_paired_file_with_runtime(source, physical, bindings, true)
+}
+
+#[cfg(feature = "zig-transport")]
+fn eval_t5m_paired_file_with_runtime(
+    source: &str,
+    physical: &[u8],
+    bindings: &[String],
+    load_core4: bool,
+) -> Result<sens::EvalResult, String> {
+    // Mint always projects with Core4's exact D24+ roots available. Use the
+    // same projection environment here, but keep runtime Core4 opt-in and
+    // separate so source identity is established before runtime admission.
+    let mut projection_session = core4_t5m_source_session()?;
+    preload_t5m_binding_sources(&mut projection_session, bindings)?;
+    let expected = prepare_t5m_repl_words(source, ReplSurface::UkrainianFull, &projection_session)?;
     let actual = crate::zig_transport::decode_t5m_exact_words(physical)?;
     let restored = restore_t5m_words(&expected, &actual)
         .map_err(|error| format!("T5M_PHYSICAL_PAIR_MISMATCH: {error}"))?;
@@ -1382,6 +1453,15 @@ pub(crate) fn eval_t5m_paired_file_with_bindings(
     }
     let program = PhysicalT5Program::from_exact_domain_words_owned(restored)
         .map_err(|error| format!("SENS paired binary reader: {error:?}"))?;
+    let mut session = Session::default();
+    // Optional runtime profile is loaded only after the source has established
+    // its exact words. This keeps Core4 mechanisms available without allowing
+    // their surface bindings to erase D8 identities during projection.
+    if load_core4 {
+        sens::load_core_library(&mut session)
+            .map_err(|error| format!("SENS paired Core4 bootstrap: {}", error.render(source)))?;
+    }
+    preload_t5m_binding_sources(&mut session, bindings)?;
     // Фізичні вхідні слова вже пройшли точну перевірку Zig/SENS.
     // Не відхиляємо справжні результати SENS (списки, пари) лише
     // через те, що кодер зворотного представлення результатів їх не знає.
@@ -1390,12 +1470,10 @@ pub(crate) fn eval_t5m_paired_file_with_bindings(
     // bytes. Rendering those indices against the original Lisp falsely
     // highlights unrelated text (often the first comment) and misdirects
     // repair. SENS still owns the actual verdict; report exact word offsets.
-    program
-        .execute(&mut session)
-        .map_err(|error| format!(
-            "SENS paired evaluator: {} (kind={:?}, physical_word_span={}..{}; source_utf8_span=NOT_ASSERTED)",
-            error.message, error.kind, error.span.start, error.span.end,
-        ))
+    program.execute(&mut session).map_err(|error| format!(
+        "SENS paired evaluator: {} (kind={:?}, physical_word_span={}..{}; source_utf8_span=NOT_ASSERTED)",
+        error.message, error.kind, error.span.start, error.span.end,
+    ))
 }
 
 fn eval_t5m_repl_line(
@@ -2186,34 +2264,27 @@ mod tests {
     #[test]
     fn t5m_core4_defines_its_exact_numeric_roots() {
         let source = std::fs::read_to_string("../../lib/core4.lisp").unwrap();
+        let projection_session = Session::default();
         let mut binary_session = Session::default();
         let program =
-            prepare_t5m_repl_program(&source, ReplSurface::UkrainianFull, &binary_session)
+            prepare_t5m_repl_program(&source, ReplSurface::UkrainianFull, &projection_session)
                 .expect("full Core4 T5M projection with decimal D24+ roots in source");
         let binary_result = program
             .execute(&mut binary_session)
-            .expect("T5M Core4 defines its numeric roots without host seeding");
+            .expect("T5M Core4 defines its numeric roots from decimal source values");
 
         let mut source_session = Session::default();
         let source_result =
             sens::load_core_library(&mut source_session).expect("source Core4 bootstrap");
-        assert_eq!(
-            binary_result.value.to_string(),
-            source_result.value.to_string()
-        );
-        for probe in ["(додати-1 число-один)", "(змінити-знак число-один)"]
-        {
+        assert_eq!(binary_result.value.to_string(), source_result.value.to_string());
+        for probe in ["(додати-1 число-один)", "(змінити-знак число-один)"] {
             let source_value = eval_program(probe, &mut source_session)
                 .unwrap_or_else(|error| panic!("source Core4 probe {probe}: {error}"))
                 .value;
             let binary_value = eval_program(probe, &mut binary_session)
                 .unwrap_or_else(|error| panic!("T5M Core4 probe {probe}: {error}"))
                 .value;
-            assert_eq!(
-                binary_value.to_string(),
-                source_value.to_string(),
-                "{probe}"
-            );
+            assert_eq!(binary_value.to_string(), source_value.to_string(), "{probe}");
         }
     }
 
@@ -2261,7 +2332,7 @@ mod tests {
     fn t5m_local_d9_definition_shadows_an_occupied_exact_identity() {
         let name = "результат-ціль?";
         let source = format!(
-            "(визначити {name} (функція (локальне-значення) локальне-значення))\\n({name} 40)"
+            "(визначити {name} (функція (локальне-значення) локальне-значення))\n({name} 40)"
         );
         let mut session = Session::bare();
         sens::load_core_library(&mut session).expect("Core4 occupies the exact D9 slot");
@@ -3316,7 +3387,20 @@ mod tests {
         let mut session = Session::default();
         sens::load_core_library(&mut session).expect("Core4");
         sens::load_tcp_library(&mut session).expect("TCP and UTF-8 libraries through Zig T5M");
-
+        let tcp_identity = DomainIdentity::D9(sens::CoreD9::from_word(
+            sens::Bit9::new(0b001101001).expect("ratified TCP D9 word"),
+        ));
+        assert!(
+            session.environment.has_domain_code_slot(tcp_identity),
+            "loaded TCP Lisp definition must occupy its exact D9 call slot"
+        );
+        let reverse_identity = DomainIdentity::D5(sens::CoreD5::from_word(
+            sens::Bit5::new(0b10100).expect("ratified D5 reverse identity"),
+        ));
+        assert!(
+            session.environment.has_domain_code_slot(reverse_identity),
+            "loaded Core4 Lisp reverse definition must occupy its exact D5 slot"
+        );
         let code_char_program = prepare_t5m_repl_program(
             "(символ-за-кодом 104)",
             ReplSurface::UkrainianFull,
@@ -3365,13 +3449,7 @@ mod tests {
         let d7_text = |text: &str| {
             let projection = sens::encode_text7(text, sens::Text7Layout::En)
                 .expect("protocol marker uses ratified English D7 data");
-            Value::list(projection.cells().iter().map(|cell| {
-                Value::DomainIdentity(DomainIdentity::from_source_word(
-                    sens::BinarySourceWord::W7(
-                        sens::Bit7::new(*cell).expect("projection cells are exact W7"),
-                    ),
-                ))
-            }))
+            Value::Text7(projection)
         };
         for (source, expected) in [
             (

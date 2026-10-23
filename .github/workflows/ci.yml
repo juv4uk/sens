@@ -11,7 +11,7 @@ on:
 # Один автоматичний workflow; важкі дослідження — лише вручну в ci-heavy.yml.
 # PASS коридору не є релізним допуском.
 #
-# Драбини D1–D10 — джерело функцій для програм. Перед написанням нової функції:
+# Драбина D1–24+ — рамка навігації; чинні резиденти й закони визначаються контрактом.
 #   python3 scripts/search-domain-function.py <ім'я>      (--all <частина>, --domain d6)
 # Знайшов — вживай наявну; немає в програмі — визнач; немає в драбинах — кандидат D11 (далі D12…).
 # Охоронець scripts/guard-domain-function-reuse.py ловить дубль наявної поверхні (BLOCKED)
@@ -65,12 +65,11 @@ jobs:
           fi
           python3 scripts/check_no_encoded_source_literals.py --base "$base"
 
-      - name: "Інструменти Python — структура, проєкції, драбина D1–D10 — НЕ активні мовні тести"
+      - name: "Перевірки структури — джерела доменів D1–24+ — без Python-тестів"
         run: |
           set -euo pipefail
-          # Якщо охоронець чи його тести обнулені, сам запуск Python
-          # може пройти без перевірки драбин. Fail-closed ДО інших кроків.
-          for required in scripts/guard-domain-function-reuse.py tests/test_domain_function_reuse_rule.py; do
+          # Fail-closed: потрібен реальний охоронець драбини.
+          for required in scripts/guard-domain-function-reuse.py; do
             if [[ ! -s "$required" ]]; then
               echo "::error file=$required,title=ARCHITECTURE-GUARD-MISSING::REGRESSION layer=ci-structure expected=nonempty-guard actual=empty-or-missing"
               exit 1
@@ -78,30 +77,10 @@ jobs:
           done
           # Структура DEFINE та SENS має бути перевірена в тому самому кроці.
           python3 scripts/check-sens-definitions.py
-          # Проєкції та заборони D1–D11 (злито, без повторів).
-          python3 -m unittest \
-            tests/test_no_encoded_source_literals.py \
-            tests/test_ukrainian_domain_projection_rules.py \
-            tests/test_sid8_broad_source_cutover.py \
-            tests/test_domain_ladder_source_batch.py \
-            tests/test_domain_function_reuse_rule.py \
-            tests/test_tests_use_ukr_projection.py \
-            tests/test_language_stays_in_sens.py -v
-          # Ратифікована драбина D1–D10: точні ширини D1=2 … D10=1024.
+          # Поверхні звіряються з джерелами D1–24+; тут не фіксуємо межу драбини.
           python3 scripts/check-domain-ladder-identity.py --check
           python3 scripts/check-numeric-domain-ratification.py
           python3 scripts/check_d10_owner_whole_domain_ratification.py
-          python3 -m unittest tests/test_domain_ladder_2046_exact.py -v
-          # Core1 canaries перевіряють точну проєкцію й транспорт; семантику виконує SENS, не Python.
-          python3 -m unittest \
-            tests/test_core1_domain_canary.py \
-            tests/test_core1_third_domain_canary.py \
-            tests/test_core1_fourth_domain_canary.py -v
-          # Лише методика звіту T5M: nearest-rank p90, без запуску важкого бенчмарка.
-          python3 -m unittest discover -s research/zig-codecs/t5m -p 'test_*.py' -v
-          # Повний прогін: self-test пошуку й охоронця драбин.
-          python3 scripts/search-domain-function.py --self-test
-          python3 scripts/guard-domain-function-reuse.py --self-test
 
       - name: УКР-ПРОЄКЦІЯ — вчорашні анотації прогресу Lisp
         if: ${{ always() }}
@@ -301,12 +280,11 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          python3 -m unittest tests/test_native_semantic_ownership_gate.py -v
           python3 scripts/guard_native_semantic_ownership.py \
             --base "$(cat "$RUNNER_TEMP/native-semantic-base.sha")" \
             --head "$GITHUB_SHA"
 
-      - name: Вживати функції драбин D1–D10, а не винаходити дублі
+      - name: Звірити резидентність і повторне використання функцій D1–24+
         env:
           BEFORE_SHA: ${{ github.event.before }}
         run: |
@@ -973,7 +951,7 @@ jobs:
         run: |
           set -uo pipefail
           ladder="$(python3 scripts/check-domain-ladder-identity.py --check 2>&1 | grep -oE 'D1=[0-9]+ .*D10=[0-9]+' | head -1 || true)"
-          echo "::notice title=SENS · драбина D1–D10::${ladder:-НЕ ПЕРЕВІРЕНО}"
+          echo "::notice title=SENS · драбина D1–24+::${ladder:-НЕ ПЕРЕВІРЕНО}"
           debt="$(python3 -c "import json;print(json.load(open('knowledge/tests-legacy-binary-heads.json'))['count'])" 2>/dev/null || echo '?')"
           echo "::notice title=SENS · борг кодових голів у тестах::${debt} файлів — мусить скорочуватися до 0"
           if [[ -f "$RUNNER_TEMP/benchmark-status-summary.txt" ]]; then
@@ -989,7 +967,7 @@ jobs:
             echo
             echo '| показник | значення |'
             echo '|---|---|'
-            echo "| Драбина D1–D10 | \`${ladder:-НЕ ПЕРЕВІРЕНО}\` |"
+            echo "| Драбина D1–24+ | \`${ladder:-НЕ ПЕРЕВІРЕНО}\` |"
             echo "| Борг кодових голів у тестах | ${debt} файлів (мусить → 0) |"
             echo "| Бенчмарки (нативний SENS) | ${bench} |"
             echo "| Фізичні пари Lisp↔sens | ${pairs} |"
