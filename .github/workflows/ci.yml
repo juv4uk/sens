@@ -96,11 +96,15 @@ jobs:
         shell: bash
         env:
           BEFORE_SHA: ${{ github.event.before }}
+          PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
         run: |
           set -euo pipefail
           raw="$RUNNER_TEMP/changed-lisp-raw.txt"
           manifest="$RUNNER_TEMP/changed-t5m-lisp.txt"
           base="$BEFORE_SHA"
+          if [[ "$GITHUB_EVENT_NAME" == pull_request ]]; then
+            base="$PR_BASE_SHA"
+          fi
           if [[ -n "$base" && ! "$base" =~ ^0+$ ]]; then
             if ! git cat-file -e "$base^{commit}" 2>/dev/null; then
               timeout 60s git fetch --no-tags --depth=1 origin "$base"
