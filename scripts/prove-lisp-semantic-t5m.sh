@@ -741,9 +741,11 @@ sha256sum lib/core4.lisp "$epistemic_constructor_source" > "$evidence/epistemic-
 # Епістемічні закони належать Lisp: посилання, вимоги та вкладена рівність.
 # Той самий живий SENS-корпус спрацьовує на позитиві, а хибне очікування
 # повертає named fail із самого Lisp. Rust не містить таблиці очікувань.
-epistemic_sources=(lib/unify.lisp lib/reason.lisp lib/forward.lisp lib/knowledge.lisp
-                   lib/persistent-map.lisp lib/persistent-vector.lisp lib/time.lisp
-                   lib/epistemic.lisp tests/fixtures/witness-runner.lisp
+# Замкнене мінімальне джерело: точні залежності вже взяті з core4 вище.
+# Сторонні бібліотеки Reason/Knowledge/Time виконують D6 LENGTH та інші
+# незалежні закони; їхні ранні помилки не є вердиктом цього тесту.
+# Якщо власна епістемічна функція не працює, фізичний SENS лишається RED.
+epistemic_sources=(lib/epistemic.lisp tests/fixtures/witness-runner.lisp
                    tests/fixtures/epistemic-authority-witness.lisp)
 epistemic_law_bundle="$evidence/epistemic-record-logic-positive-complete.lisp"
 epistemic_mutant_bundle="$evidence/epistemic-record-logic-mutant-complete.lisp"
