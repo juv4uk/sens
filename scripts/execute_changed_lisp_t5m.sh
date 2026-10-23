@@ -279,6 +279,17 @@ run_native_t5m_program() {
         mark_file_failed
         return
       fi
+      # Lisp-свідок сам визначає кожен закон і завершує D1:1.
+      # Хост звіряє лише точний фізичний результат після Zig/T5M + SENS.
+      if [[ "$file" == "tests/semantic/lisp-d5-list-self-verdict.lisp" ]]; then
+        printf '1\n' > "$dir/lisp-d5-self-verdict.expected"
+        if ! cmp -s "$dir/native-standalone.stdout" "$dir/lisp-d5-self-verdict.expected"; then
+          echo "::error file=$file,title=SENS Lisp D5::REGRESSION id=d5-list-self-verdict layer=semantics expected=D1:1 actual=$(cat "$dir/native-standalone.stdout")" >&2
+          mark_file_failed
+          return
+        fi
+        echo "::notice file=$file,title=SENS Lisp D5::PASS id=d5-list-self-verdict physical=Zig/T5M semantic=SENS result=D1:1"
+      fi
       # Виконувані аксіоми: тільки D1:1, не структурне D3 () чи host truthiness.
       # Негативний змінений текст повинен дати саме D1:0 через SENS/Zig.
       if [[ "$file" == "lib/axioms-d1-principle-five.lisp" ]]; then
