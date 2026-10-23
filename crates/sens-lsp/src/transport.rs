@@ -38,3 +38,41 @@ pub fn write_message(output: &mut impl Write, json: &str) -> std::io::Result<()>
     output.write_all(json.as_bytes())?;
     output.flush()
 }
+
+#[cfg(test)]
+mod tests {
+    use super::{read_message, write_message};
+    use std::io::{Cursor, ErrorKind};
+
+    #[test]
+    fn рамка_зберігає_довжину_utf8_у_байтах() {
+        // Тестуємо Rust stdio-фреймування, а не семантику JSON чи SENS.
+        let повідомлення = r#"{"текст":"привіт"}"#;
+        let mut вихід = Vec::new();
+        write_message(&mut вихід, повідомлення).expect("запис фрейму");
+        let заголовок = format!("Content-Length: {}\r\n\r\n", повідомлення.len());
+        assert!(вихід.starts_with(заголовок.as_bytes()));
+        let mut вхід = Cursor::new(вихід);
+        assert_eq!(
+            read_message(&mut вхід).expect("читання фрейму").as_deref(),
+            Some(повідомлення)
+        );
+        assert_eq!(read_message(&mut вхід).expect("чистий EOF"), None);
+    }
+
+    #[test]
+    fn рамка_відхиляє_передчасний_eof() {
+        let mut вхід = Cursor::new(&b"Content-Length: 4\r\n\r\nab"[..]);
+        let помилка = read_message(&mut вхід).expect_err("неповне тіло");
+        assert_eq!(помилка.kind(), ErrorKind::UnexpectedEof);
+    }
+
+    #[test]
+    fn рамка_відхиляє_некоректний_utf8() {
+        let mut байти = b"Content-Length: 1\r\n\r\n".to_vec();
+        байти.push(0xff);
+        let mut вхід = Cursor::new(байти);
+        let помилка = read_message(&mut вхід).expect_err("некоректний UTF-8");
+        assert_eq!(помилка.kind(), ErrorKind::InvalidData);
+    }
+}
