@@ -161,10 +161,10 @@ jobs:
           PY
 
       - uses: dtolnay/rust-toolchain@1.99.0
-        if: steps.changed-t5m-lisp.outputs.has_lisp == 'true'
+        if: steps.changed-t5m-lisp.outputs.has_lisp == 'true' || steps.changed-t5m-lisp.outputs.has_files == 'true'
 
       - uses: ./.github/actions/install-zig
-        if: steps.changed-t5m-lisp.outputs.has_lisp == 'true'
+        if: steps.changed-t5m-lisp.outputs.has_lisp == 'true' || steps.changed-t5m-lisp.outputs.has_files == 'true'
 
       - name: Три бенчмарки — lists, arithmetic, parser у справжньому SENS
         if: steps.changed-t5m-lisp.outputs.has_lisp == 'true'
@@ -178,6 +178,21 @@ jobs:
           cargo test --locked -p sens-cli --test arithmetic_benchmark_cli -- --nocapture
           cargo test --locked -p sens --test ukr_unpaired_benchmark_runtime український_читач_виконує_цитовані_дані_й_точний_d24_дріб -- --exact --nocapture
           cargo test --locked -p sens --lib український_парсер_виконує_точний_дріб_та_відхиляє_ділення_на_нуль -- --nocapture
+          # Анотації GitHub Actions — лише результати реально виконаних тестів.
+          echo "::notice file=benchmarks/lists.lisp,title=SENS Lisp benchmark::PASS source=lists.lisp result=10 native=SENS physical_T5M=NOT_TESTED"
+          echo "::notice file=benchmarks/arithmetic.lisp,title=SENS Lisp benchmark::PASS source=arithmetic.lisp result=15505 native=SENS negative=CHECKED physical_T5M=NOT_TESTED"
+          echo "::notice file=benchmarks/parser.lisp,title=SENS Lisp benchmark::PASS source=parser.lisp result=5/336 native=SENS negative=CHECKED physical_T5M=NOT_TESTED"
+          {
+            echo '## Три Lisp-бенчмарки — нативне виконання SENS'
+            echo
+            echo '| Українська програма | Перевірений результат | Шлях |'
+            echo '|---|---:|---|'
+            echo '| `benchmarks/lists.lisp` | `10` | SENS Lisp-eval |'
+            echo '| `benchmarks/arithmetic.lisp` | `15505` | SENS Lisp-eval, негатив перевірено |'
+            echo '| `benchmarks/parser.lisp` | `5/336` | SENS Lisp-eval, негатив перевірено |'
+            echo
+            echo 'Це фактично перевірені значення, не заміри часу. Для цих трьох джерел T5M-пари окремо не заявлені.'
+          } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Виконати змінені Lisp через поточний Zig T5M і справжній SENS
         id: t5m_changed_execute
@@ -194,6 +209,99 @@ jobs:
               "$binary" "$RUNNER_TEMP/changed-t5m-lisp.txt" \
               "$RUNNER_TEMP/changed-t5m-pairs"
 
+
+      # Повернуто з ci.yml за 22.10.2026: реальні метрики AST і розміру.
+      # На відміну від старого лише Step Summary, тепер є й file-анотації.
+      - name: BENCH-LISP→SENS — анотації, AST і розмір фізичних програм
+        if: ${{ always() && steps.changed-t5m-lisp.outputs.has_files == 'true' }}
+        shell: bash
+        timeout-minutes: 5
+        run: |
+          set -euo pipefail
+          sources="$RUNNER_TEMP/changed-t5m-lisp.txt"
+          staged="$RUNNER_TEMP/changed-t5m-pairs"
+          report="$RUNNER_TEMP/lisp-ast-size"
+          mkdir -p "$report"
+          printf 'source\tsource_bytes\tt5m_bytes\tast_nodes\teval_visits\tresult\n' > "$report/measurements.tsv"
+          {
+            echo '## Змінений Lisp → фізичний Zig/T5M → SENS: розмір та AST'
+            echo
+            echo '| Джерело | Lisp, байт | T5M, байт | AST | Відвідування | Результат |'
+            echo '|---|---:|---:|---:|---:|---|'
+          } > "$report/report.md"
+
+          # RED іншого кроку не може створити в анотаціях удаваний PASS.
+          if [[ "${{ steps.t5m_changed_execute.outcome }}" != success ]]; then
+            echo "::warning title=SENS T5M corridor::physical=NOT_VERIFIED execution=${{ steps.t5m_changed_execute.outcome }}; release=NOT_CERTIFIED"
+            echo 'Нативний коридор не підтверджений, вимірювання відсутні.' >> "$report/report.md"
+            cat "$report/report.md" >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          echo "::notice title=SENS Zig/T5M corridor::PASS changed-Lisp physical roundtrip and paired execution; release=NOT_CERTIFIED"
+          sens="$PWD/target/debug/sens"
+          trit="$PWD/target/debug/sens-trit"
+          test -x "$sens"
+          test -x "$trit"
+          test -s "$sources"
+          measured=0
+          unmeasured=0
+          checked=0
+          while IFS= read -r source || [[ -n "$source" ]]; do
+            [[ -n "$source" ]] || continue
+            checked=$((checked + 1))
+            id="$(printf '%s' "$source" | sha256sum | cut -c1-16)"
+            dir="$staged/$id"
+            physical="$dir/$(basename "$source" .lisp).sens"
+            if [[ ! -f "$source" || -L "$source" || ! -s "$physical" || -L "$physical" ||
+                  ! -f "$dir/native-paired.stdout" || ! -f "$dir/native-standalone.stdout" ]] ||
+               ! cmp -s "$dir/native-paired.stdout" "$dir/native-standalone.stdout"; then
+              echo "::notice file=$source,title=SENS T5M AST::paired=CHECKED standalone=NOT_VERIFIED AST=NOT_MEASURED release=NOT_CERTIFIED"
+              printf '| `%s` | — | — | — | — | парність/самостійність не доведено для виміру |\n' "$source" >> "$report/report.md"
+              unmeasured=$((unmeasured + 1))
+              continue
+            fi
+            # Жодних Python-чисел: SENS видає AST_NODES/EVAL_VISITS і сам результат.
+            if ! timeout 45s "$trit" verify-view "$physical" >"$dir/size-verify.stdout" 2>"$dir/size-verify.stderr"; then
+              echo "::warning file=$source,title=SENS T5M AST::physical view inverse failed; AST=NOT_MEASURED"
+              unmeasured=$((unmeasured + 1))
+              continue
+            fi
+            if ! timeout 90s "$sens" --benchmark-physical "$physical" >"$dir/size-bench.stdout" 2>"$dir/size-bench.stderr"; then
+              echo "::warning file=$source,title=SENS T5M AST::native SENS physical benchmark rejected; AST=NOT_MEASURED"
+              unmeasured=$((unmeasured + 1))
+              continue
+            fi
+            entry="$(grep '^SENS_BINARY_BENCH ' "$dir/size-bench.stderr" || true)"
+            if [[ "$entry" =~ ^SENS_BINARY_BENCH[[:space:]]AST_NODES=([0-9]+)[[:space:]]EVAL_VISITS=([0-9]+)[[:space:]]RESULT=(.+)$ ]]; then
+              nodes="${BASH_REMATCH[1]}"
+              visits="${BASH_REMATCH[2]}"
+              result="${BASH_REMATCH[3]}"
+            else
+              echo "::warning file=$source,title=SENS T5M AST::native AST counters absent; AST=NOT_MEASURED"
+              unmeasured=$((unmeasured + 1))
+              continue
+            fi
+            if [[ "$result" != "$(tail -n 1 "$dir/size-bench.stdout")" ]] ||
+               ! cmp -s "$dir/native-standalone.stdout" "$dir/size-bench.stdout"; then
+              echo "::error file=$source,title=SENS T5M AST::physical measured result differs from executed SENS output"
+              exit 1
+            fi
+            source_bytes="$(wc -c < "$source" | tr -d '[:space:]')"
+            t5m_bytes="$(wc -c < "$physical" | tr -d '[:space:]')"
+            printf '%s\t%s\t%s\t%s\t%s\t%s\n' "$source" "$source_bytes" "$t5m_bytes" "$nodes" "$visits" "$result" >> "$report/measurements.tsv"
+            printf '| `%s` | %s | %s | %s | %s | `%s` |\n' "$source" "$source_bytes" "$t5m_bytes" "$nodes" "$visits" "$result" >> "$report/report.md"
+            echo "::notice file=$source,title=SENS Lisp→T5M AST::PASS lisp_bytes=$source_bytes t5m_bytes=$t5m_bytes ast_nodes=$nodes eval_visits=$visits result=$result native=SENS/Zig"
+            measured=$((measured + 1))
+          done < "$sources"
+          {
+            echo
+            echo "Файлів: **$checked**; виміряно: **$measured**; без AST-метрики: **$unmeasured**."
+            echo
+            echo 'Ці метрики не є p50/p95 та не надають релізного допуску.'
+          } >> "$report/report.md"
+          cat "$report/report.md" >> "$GITHUB_STEP_SUMMARY"
+          echo "::notice title=SENS Lisp physical summary::checked=$checked measured=$measured unmeasured=$unmeasured runtime=native-SENS/Zig release=NOT_CERTIFIED"
+
       - name: Зберегти фізичні T5M-свідки після SENS виконання
         if: always() && steps.changed-t5m-lisp.outputs.has_files == 'true'
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4, pinned
@@ -202,6 +310,15 @@ jobs:
           path: ${{ runner.temp }}/changed-t5m-pairs/
           if-no-files-found: ignore
           retention-days: 1
+
+      - name: BENCH-LISP→SENS — звіт AST та розміру
+        if: ${{ always() && steps.changed-t5m-lisp.outputs.has_files == 'true' }}
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4, pinned
+        with:
+          name: sens-lisp-ast-size-${{ github.sha }}
+          path: ${{ runner.temp }}/lisp-ast-size/
+          if-no-files-found: warn
+          retention-days: 14
 
   lisp-surface:
     name: Підсумковий гейт перевірок SENS
