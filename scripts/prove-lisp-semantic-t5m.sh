@@ -285,6 +285,10 @@ run_case run_law d3-d1-false-cons-head-mutant tests/semantic/language-mutant-d3-
 # Д3: два різні атоми в CONS мають зберігати позиції; негатив ловить їх підміну.
 run_case run_law d3-cons-ordered-atoms-positive tests/semantic/language-law-d3-cons-order-ukr.lisp 1
 run_case run_law d3-cons-ordered-atoms-mutant tests/semantic/language-mutant-d3-cons-order-ukr.lisp 0
+# Д3 CONS допускає атомний (крапковий) хвіст: CAR/CDR повертають точні атоми.
+# Мутант перевіряє хибну підміну хвоста головою; семантичні вердикти лише Lisp/SENS.
+run_case run_law d3-cons-dotted-tail-positive tests/semantic/d3-cons-dotted-tail-law.lisp 1
+run_case run_law d3-cons-dotted-tail-mutant tests/semantic/d3-cons-dotted-tail-mutant.lisp 0
 run_case run_law d3-eq-atom-boundary-positive tests/semantic/d3-eq-atom-boundary-law.lisp 1
 run_case run_law d3-eq-atom-boundary-mutant tests/semantic/d3-eq-atom-boundary-mutant.lisp 0
 run_case run_type_rejection d3-eq-nonatom-type-negative tests/semantic/d3-eq-nonatom-type-negative.lisp 'eq expects two atoms'
