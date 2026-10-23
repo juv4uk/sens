@@ -157,6 +157,8 @@ run_native_t5m_program() {
       negative_type_diagnostic='car expects a non-empty list' ;;
     tests/semantic/d3-cdr-empty-list-type-negative.lisp)
       negative_type_diagnostic='cdr expects a non-empty list' ;;
+    tests/semantic/d8-string-symbol-nontext-type-negative.lisp)
+      negative_type_diagnostic='string->symbol expects a string' ;;
   esac
   if [[ -n "$negative_type_diagnostic" ]]; then
     local rejection_status
