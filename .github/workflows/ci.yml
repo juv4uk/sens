@@ -347,6 +347,17 @@ jobs:
             echo "::error file=zig_transport_root.zig,title=Zig ABI::REGRESSION layer=abi expected=pass actual=nonzero"
             zig_failed=1
           fi
+          # Вимірюємо ТІЛЬКИ T5M transport Zig, без виконання мовних законів.
+          # У Zig 0.16 — Io.Clock.awake, а не видалений std.time.Timer.
+          if zig run -O ReleaseFast -lc research/zig-codecs/bench_t5m.zig \
+              > "$RUNNER_TEMP/zig-t5m-benchmark.log" 2>&1; then
+            cat "$RUNNER_TEMP/zig-t5m-benchmark.log"
+            echo "::notice title=Zig T5M benchmark::MEASURED provenance=$(git rev-parse HEAD) physical=benchmarks/lists.sens language_truth=NOT_ASSERTED"
+          else
+            cat "$RUNNER_TEMP/zig-t5m-benchmark.log" >&2
+            echo "::error file=research/zig-codecs/bench_t5m.zig,title=Zig benchmark::REGRESSION layer=codec-benchmark expected=canonical-roundtrip actual=failed"
+            zig_failed=1
+          fi
           exit "$zig_failed"
 
       # Rust тут перевіряє тільки механізм CLI. Жоден результат арифметики
@@ -360,6 +371,12 @@ jobs:
           set -euo pipefail
           export CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0
           cargo test --locked -p sens-cli --test arithmetic_benchmark_cli -- --nocapture
+          # Rust вимірює тільки власну фізичну рамку запису: не Lisp-істинність.
+          cargo test --locked -p sens --example rust_record_framing_bench -- --nocapture
+          cargo run --locked -p sens --example rust_record_framing_bench \
+            > "$RUNNER_TEMP/rust-framing-benchmark.log"
+          cat "$RUNNER_TEMP/rust-framing-benchmark.log"
+          echo "::notice title=Rust framing benchmark::MEASURED provenance=$(git rev-parse HEAD) layer=rust-framing language_truth=NOT_ASSERTED"
 
       # Одного білда з AST вистачає для коридору, фізичних Lisp-законів та звіту.
       - name: Зібрати нативний SENS і Zig/T5M лише один раз
