@@ -76,6 +76,21 @@ class EncodedSourceLiteralTests(unittest.TestCase):
             "закон ширини доменів не має числових голів або літералів",
         )
 
+    def test_domain_table_reader_and_logic_laws_have_no_numeric_literals(self):
+        # Розміри таблиць та математичні свідки називаються в самій SENS.
+        for relative in (
+            "scripts/check-domain-table-readable.lisp",
+            "scripts/check-domain-logic-laws.lisp",
+        ):
+            with self.subTest(path=relative):
+                path = ROOT / relative
+                source = path.read_text(encoding="utf-8")
+                self.assertEqual(
+                    CHECK.find_forbidden_literals(source, path=relative),
+                    [],
+                    f"проєкція {relative} не має числових голів або літералів",
+                )
+
     def test_machine_effect_live_source_uses_named_coordinates(self):
         # Лексична перевірка; обчислення маршруту перевіряють нативні тести SENS.
         path = ROOT / "lib/machine/lowering/semantic-effects.lisp"
