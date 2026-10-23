@@ -227,6 +227,21 @@ class D11SelectorSeedAuditTests(unittest.TestCase):
             with self.subTest(workflow_contract=contract):
                 self.assertIn(contract, workflow)
 
+    def test_guard_knowledge_records_d11_game_and_codec_limits(self):
+        knowledge = (ROOT / "knowledge/d11/охоронець-знання-драбина-d6.uk.md").read_text(encoding="utf-8")
+        for contract in (
+            "map / foreach unary",
+            "512 математично похідних селекторів",
+            "не нові примітиви",
+            "зовнішнього кадру",
+            "15 зразків",
+            "p50/p90",
+            "не оцінка семантики SENS",
+            "Не оголошувати переможця за одним заміром",
+        ):
+            with self.subTest(contract=contract):
+                self.assertIn(contract, knowledge)
+
 
 if __name__ == "__main__":
     unittest.main()
