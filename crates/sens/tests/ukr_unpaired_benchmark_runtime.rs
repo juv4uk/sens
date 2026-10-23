@@ -12,23 +12,9 @@ fn запустити_джерело(джерело: &str, сеанс: &mut Sess
 
 // Семантику рекурсивного обходу перенесено в українські Lisp-закони.
 // Rust не визначає очікувані результати функції «обійти».
-#[test]
-fn механізм_rust_повертає_помилку_на_неправильному_d1_типі() {
-    // Семантика NOT та істиннісні приклади тепер у
-    // tests/semantic/d1-not-law.lisp і d1-not-mutant.lisp.
-    // Rust перевіряє тільки межу виконавця: помилка не маскується успіхом.
-    let mut сеанс = Session::default();
-    load_core_library(&mut сеанс).expect("завантаження ядра SENS");
-    let помилка = match eval_program("(хибне? (як-є ()))", &mut сеанс) {
-        Ok(_) => panic!("структурне NIL не повинно приховувати помилку типу"),
-        Err(помилка) => помилка,
-    };
-    assert!(
-        !помилка.to_string().is_empty(),
-        "test_id=d1-not-type layer=rust-runtime expected=nonempty-error"
-    );
-}
-
+// Негативна семантика D4 NOT тепер у Lisp/SENS:
+// tests/semantic/d4-not-nonpredicate-type-negative.lisp.
+// Rust не видає самостійного мовного Type-вердикту.
 #[test]
 fn довжина_списку_відкидає_пошкоджений_хвіст_і_зберігає_d24_нуль() {
     let mut сеанс = Session::default();
