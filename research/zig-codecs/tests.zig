@@ -184,3 +184,17 @@ test "Zig ABI v2 F3C returns physical statuses without publishing error bytes" {
     try std.testing.expectEqual(@as(isize, quote_t5.len), abi.sens_zig_f3c_unpack(shared[0..].ptr, quote_f3c.len, shared[0..].ptr, shared.len));
     try std.testing.expectEqualSlices(u8, &quote_t5, shared[0..quote_t5.len]);
 }
+
+
+test "Zig T5M BE3 rejects incomplete source without touching the output" {
+    // Це виключно механізм ABI; жодного Lisp-значення тут не тлумачимо.
+    const incomplete = [_]u8{ 3, 0 };
+    var destination: [8]u8 = .{0xA5} ** 8;
+    try std.testing.expectEqual(
+        @as(isize, -1),
+        abi.sens_zig_t5m_encode_be3(&incomplete, incomplete.len, &destination, destination.len),
+    );
+    for (destination) |byte| {
+        try std.testing.expectEqual(@as(u8, 0xA5), byte);
+    }
+}
