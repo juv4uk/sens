@@ -221,6 +221,8 @@ run_case run_law d3-quote-inert-data-mutant tests/semantic/language-mutant-quote
 # Д4 EVAL: цитований Lisp повертає порожнечу, а мутант підміняє результат.
 run_case run_law d4-eval-quote-positive tests/semantic/d4-eval-value-call-laws.lisp 1
 run_case run_law d4-eval-quote-mutant tests/semantic/d4-eval-value-call-mutant.lisp 0
+run_case run_law d4-lambda-application-positive tests/semantic/d4-lambda-application-law.lisp 1
+run_case run_law d4-lambda-application-mutant tests/semantic/d4-lambda-application-mutant.lisp 0
 run_case run_law d4-late-binding-positive tests/semantic/d4-late-definition-binding-law.lisp 1
 # D4: параметр внутрішньої LAMBDA повинен затінити зовнішній.
 run_case run_law d4-parameter-shadow-positive tests/semantic/language-law-d4-parameter-shadowing.lisp 1
