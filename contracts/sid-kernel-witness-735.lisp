@@ -9,15 +9,8 @@
 
 (domain-kernel-witness-map-2
 
-  ; --- Canon 0 ---
-
-  (domain-witness
-    (identity . "D3:000")
-    (укр . ())
-    (en-name  . ())
-    (witnesses
-      (witness (kernel . sens)     (probe-id . 00000000) (status . historical)))
-    (note . "Canon 0 — первинний ground object. Жоден island поки не виконує ()."))
+  ; D3:000 — порожня структура, а не виклична функція.
+  ; Історичний байтовий probe зберігається у Git, не видається за live witness.
 
   ; --- Примітиви Д3 з українськими викличними іменами ---
 
