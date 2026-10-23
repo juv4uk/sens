@@ -15,6 +15,26 @@ fn run_sens(path: &str) -> Output {
         .expect("механізм запуску sens CLI повинен бути доступний")
 }
 
+
+// Механічний canary: SENS мусить завершити bootstrap та відкрити навіть
+// найменший Lisp-файл. Семантичний D1-вердикт перевіряє тільки SENS/T5M
+// у tests/semantic, Rust дивиться лише на успішний запуск та канали I/O.
+#[test]
+fn cli_bootstrap_reaches_minimal_lisp_execution_before_benchmarks() {
+    let source = "tests/semantic/d1-not-law.lisp";
+    assert!(repo_root().join(source).is_file(), "відсутній базовий Lisp-свідок");
+    let output = run_sens(source);
+    assert!(
+        output.status.success(),
+        "BOOTSTRAP_BLOCKED before any semantic verdict: {}",
+        String::from_utf8_lossy(&output.stderr)
+    );
+    assert!(!output.stdout.is_empty(), "CLI не повернув текст після bootstrap");
+    String::from_utf8(output.stdout)
+        .expect("CLI має видавати UTF-8 незалежно від семантичного результату");
+}
+
+
 #[test]
 fn cli_returns_observable_utf8_stdout_for_readable_lisp_source() {
     let output = run_sens("benchmarks/arithmetic.lisp");
