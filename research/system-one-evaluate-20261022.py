@@ -359,7 +359,7 @@ def main() -> int:
         if args.output:
             args.output.parent.mkdir(parents=True, exist_ok=True)
             handle = tempfile.NamedTemporaryFile(
-                mode="w", encoding="utf-8", newline="\\n",
+                mode="w", encoding="utf-8", newline="\n",
                 dir=args.output.parent, prefix=f".{args.output.name}.", suffix=".tmp",
                 delete=False,
             )
