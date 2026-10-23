@@ -772,6 +772,16 @@ class SystemOneResearchPipelineTests(unittest.TestCase):
             self.assertEqual(report["dataset_sha256"], seed_sha)
             self.assertEqual(report["teacher_observations_used_for_training"], ["train"])
             self.assertFalse(report["test_used_for_training_or_calibration"])
+            selected_policy = report["validation_selected_policy"]
+            self.assertEqual(selected_policy["selection_split"], "validation")
+            self.assertFalse(selected_policy["test_used_for_threshold_selection"])
+            self.assertFalse(selected_policy["challenge_used_for_threshold_selection"])
+            self.assertEqual(set(selected_policy["models"]), {"teacher", "student_gold", "student_soft"})
+            # П'яти validation-записів недостатньо, щоб підтвердити ризик <=10%.
+            for policy in selected_policy["models"].values():
+                self.assertEqual(policy["selection"]["status"], "no-safe-threshold")
+                self.assertIsNone(policy["selected_threshold"])
+                self.assertIsNone(policy["test_evaluation"])
             for split in ("train", "validation", "test"):
                 agreement = report["teacher_decoding_agreement"][split]
                 self.assertEqual(agreement["agreement_rate"], 1.0)
@@ -888,6 +898,13 @@ class SystemOneResearchPipelineTests(unittest.TestCase):
             self.assertEqual(challenge_report["record_count"], 60)
             self.assertFalse(challenge_report["test_used_for_training_or_calibration"])
             self.assertFalse(challenge_report["threshold_selected_on_challenge"])
+            self.assertFalse(challenge_report["validation_selected_policy"]["threshold_selected_on_challenge"])
+            self.assertTrue(
+                all(
+                    policy["selection_status"] == "no-safe-threshold" and policy["evaluation"] is None
+                    for policy in challenge_report["validation_selected_policy"]["models"].values()
+                )
+            )
             self.assertEqual(
                 challenge_report["teacher_decoding_agreement"]["agreement_rate"],
                 1.0,
