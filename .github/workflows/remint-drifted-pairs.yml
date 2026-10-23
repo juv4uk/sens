@@ -226,14 +226,15 @@ jobs:
             changed_sources=()
             pending_sources=()
             other_sources=()
-            changed_seen=0
             declare -A queued_sources=()
             while IFS= read -r source; do
               [[ -n "$source" ]] || continue
               if [[ -z "${queued_sources[$source]+seen}" ]]; then
                 queued_sources["$source"]=1
                 stem="${source%.lisp}"
-                if (( changed_seen < priority_count )); then
+                # Пріоритет визначає ТОЧНА множина push, а не позиція
+                # у черзі чи неоголошений лічильник priority_count.
+                if [[ -n "${push_changed_sources[$source]+seen}" ]]; then
                   changed_sources+=("$source")
                 elif [[ "$source" == *.lisp && -f "$source" && ! -L "$source" &&
                         ( ! -s "$stem.sens" || ! -f "$stem" ) ]]; then
@@ -242,9 +243,6 @@ jobs:
                   other_sources+=("$source")
                 fi
               fi
-              # Рахувати початкову пріоритетну ділянку, навіть коли
-              # запис дублювався в подальшому списку.
-              changed_seen=$((changed_seen + 1))
             done <<< "$list"
             list="$(printf '%s\n' "${changed_sources[@]}" "${pending_sources[@]}" "${other_sources[@]}")"
             echo "REMINT_PUSH_FIRST sources=${#changed_sources[@]} unpaired=${#pending_sources[@]} native=SENS_ZIG"
