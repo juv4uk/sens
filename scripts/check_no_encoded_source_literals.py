@@ -89,6 +89,53 @@ def _is_legacy_signature_key(source: str, path: str | Path | None, offset: int) 
     match = LEGACY_SIGNATURE_ROW.fullmatch(source[line_start:line_end].rstrip("\r"))
     return bool(match and line_start + match.start("bits") == offset)
 
+MACHINE_FACT_NUMERIC_PATHS = {
+    "lib/machine/encoding/x86-64.lisp",
+    "lib/machine/encoding/coverage.lisp",
+    "lib/machine/encoding/admitted-iclass-index.lisp",
+    "lib/machine/dispatch/native-first-coverage.lisp",
+}
+MACHINE_ISA_FACT_PATH = re.compile(r"^lib/machine/isa/[^/]+\\.lisp$")
+
+
+def _source_line_bounds(source: str, offset: int) -> tuple[int, int]:
+    start = source.rfind("\\n", 0, offset) + 1
+    end = source.find("\\n", offset)
+    return start, len(source) if end < 0 else end
+
+
+def _is_domain_table_data_row(source: str, path: str | Path | None, offset: int) -> bool:
+    if path is None:
+        return False
+    path_match = DOMAIN_TABLE_PATH.fullmatch(Path(path).as_posix())
+    if path_match is None:
+        return False
+    start, end = _source_line_bounds(source, offset)
+    row = DOMAIN_TABLE_ROW.fullmatch(source[start:end].rstrip("\\r"))
+    return bool(row and len(row.group("bits")) == int(path_match.group("width")))
+
+
+def _is_legacy_signature_metadata_row(
+    source: str, path: str | Path | None, offset: int,
+) -> bool:
+    if path is None or Path(path).as_posix() != LEGACY_SIGNATURE_PATH:
+        return False
+    start, end = _source_line_bounds(source, offset)
+    return LEGACY_SIGNATURE_ROW.fullmatch(source[start:end].rstrip("\\r")) is not None
+
+
+def _is_numeric_data_exemption(source: str, path: str | Path | None, offset: int) -> bool:
+    if path is None:
+        return False
+    relative = Path(path).as_posix()
+    return bool(
+        _is_domain_table_data_row(source, relative, offset)
+        or _is_legacy_signature_metadata_row(source, relative, offset)
+        or _is_frozen_source_snapshot(relative)
+        or relative in MACHINE_FACT_NUMERIC_PATHS
+        or MACHINE_ISA_FACT_PATH.fullmatch(relative)
+    )
+
 
 # Frozen donor snapshots: content is byte-pinned by the filename's Git blob
 # hash (knowledge/d10-source-snapshots/<sha>.lisp). They are immutable evidence,
@@ -185,11 +232,12 @@ def find_forbidden_literals(source: str, path: str | Path | None = None) -> list
         start = match.start()
         if not re.fullmatch(NUMBER, token):
             continue
-        if start in quoted_numeric_heads or start in numeric_heads:
+        # Numeric atoms anywhere in a human program are forbidden, including
+        # atoms inside QUOTE/як-є data. Only actual executable call heads below
+        # receive the more specific head diagnostic.
+        if start in numeric_heads and start not in quoted_numeric_heads:
             continue
-        if (_is_domain_table_key_head(source, path, start)
-                or _is_legacy_signature_key(source, path, start)
-                or _is_frozen_source_snapshot(path)):
+        if _is_numeric_data_exemption(source, path, start):
             continue
         line = code.count("\n", 0, start) + 1
         column = start - code.rfind("\n", 0, start)
