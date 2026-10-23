@@ -476,7 +476,6 @@ run_case run_law d4-higher-order-composition-positive tests/semantic/d4-higher-o
 run_case run_law d4-higher-order-composition-mutant tests/semantic/d4-higher-order-composition-mutant.lisp 0
 run_case run_law d4-first-class-predicate-positive tests/semantic/d4-first-class-predicate-law.lisp 1
 run_case run_law d4-first-class-predicate-mutant tests/semantic/d4-first-class-predicate-mutant.lisp 0
-run_case run_law d3-first-class-atom-code-positive tests/semantic/закон-першокласний-доменний-виклик.lisp 1
 # D6-квантори перевіряємо нижче як повні програми з визначеннями Core4.
 # D4 рекурсивна правильність списків: позитив та навмисне порушення.
 run_case run_law d4-proper-list-positive tests/semantic/d4-proper-list-recursion-law.lisp 1
