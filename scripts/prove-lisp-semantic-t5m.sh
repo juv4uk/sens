@@ -41,12 +41,12 @@ run_law() {
   test -s "$physical" || fail "$id" codec "nonempty-T5M" "empty"
   if ! timeout 45s "$trit" open "$physical" >"$dir/program" 2>"$dir/open.err" ||
      ! timeout 45s "$trit" verify-view "$physical" >"$dir/inverse.out" 2>"$dir/inverse.err"; then
-    cat "$dir/open.err" "$dir/inverse.err" >&2 2>/dev/null || true
+    cat "$dir/open.err" "$dir/inverse.err" >&2 || true
     fail "$id" zig-transport "canonical-roundtrip" "rejected"
   fi
   if ! timeout 45s "$sens" --t5m-pair "$source" "$physical" >"$dir/paired.out" 2>"$dir/paired.err" ||
      ! timeout 45s "$sens" "$physical" >"$dir/physical.out" 2>"$dir/physical.err"; then
-    cat "$dir/paired.err" "$dir/physical.err" >&2 2>/dev/null || true
+    cat "$dir/paired.err" "$dir/physical.err" >&2 || true
     fail "$id" sens-physical "paired-and-standalone-execution" "rejected"
   fi
   cmp -s "$dir/direct.out" "$dir/paired.out" ||
