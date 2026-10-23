@@ -1,0 +1,55 @@
+{
+  "schema": "sens-release-admission-ledger/v1",
+  "entries": [
+    {
+      "sens": "tests/semantic/meta-eval-graph-d1-law.sens",
+      "typed_word_sha256": "2b4edd731a71d1aefd44fb22300aef8ee0acabf0c203a13e98353d215350b459",
+      "f1_donor_provenance": "juv4uk/sens@20543d438e81c6937c35c8d5e1950d72bac42a33:lib/meta-eval.lisp:659",
+      "f2_positive_witness": "juv4uk/sens@20543d438e81c6937c35c8d5e1950d72bac42a33:tests/semantic/meta-eval-graph-d1-law.lisp:1",
+      "f2_negative_witness": "juv4uk/sens@20543d438e81c6937c35c8d5e1950d72bac42a33:tests/semantic/meta-eval-graph-d1-mutant.lisp:1",
+      "f3_dedup": "D1-D9@09d1d71c39d1484dfd005a5068dbb18b76f0f0d4=NO-MATCH;D10@73dd518469f972c55411e004b70b054ba8b3ec86=NO-MATCH",
+      "f4_t5_execution": "juv4uk/sens@20543d438e81c6937c35c8d5e1950d72bac42a33:scripts/prove-meta-eval-graph-d1.sh:65",
+      "ratified": 0
+    },
+    {
+      "sens": "tests/semantic/meta-eval-lexical-shadow-d1-law.sens",
+      "typed_word_sha256": "67df498b12518c24746c1765163e87f8e516e9746a3de5039b9001565d978178",
+      "f1_donor_provenance": "juv4uk/sens@20543d438e81c6937c35c8d5e1950d72bac42a33:lib/meta-eval.lisp:212",
+      "f2_positive_witness": "juv4uk/sens@20543d438e81c6937c35c8d5e1950d72bac42a33:tests/semantic/meta-eval-lexical-shadow-d1-law.lisp:1",
+      "f2_negative_witness": "juv4uk/sens@20543d438e81c6937c35c8d5e1950d72bac42a33:tests/semantic/meta-eval-lexical-shadow-d1-mutant.lisp:1",
+      "f3_dedup": "D1-D9@09d1d71c39d1484dfd005a5068dbb18b76f0f0d4=NO-MATCH;D10@73dd518469f972c55411e004b70b054ba8b3ec86=NO-MATCH",
+      "f4_t5_execution": "juv4uk/sens@20543d438e81c6937c35c8d5e1950d72bac42a33:scripts/prove-meta-eval-lexical-shadow-d1.sh:92",
+      "ratified": 0
+    },
+    {
+      "sens": "tests/semantic/meta-eval-predicates-d1-law.sens",
+      "typed_word_sha256": "861dc1be0fd36b3c0c28c1b3ce39863a3afb10c4d9a906822d456c349ed7b849",
+      "f1_donor_provenance": "juv4uk/sens@20543d438e81c6937c35c8d5e1950d72bac42a33:lib/meta-eval.lisp:1026",
+      "f2_positive_witness": "juv4uk/sens@20543d438e81c6937c35c8d5e1950d72bac42a33:tests/semantic/meta-eval-predicates-d1-law.lisp:1",
+      "f2_negative_witness": "juv4uk/sens@20543d438e81c6937c35c8d5e1950d72bac42a33:tests/semantic/meta-eval-predicates-d1-mutant.lisp:1",
+      "f3_dedup": "D1-D9@09d1d71c39d1484dfd005a5068dbb18b76f0f0d4=NO-MATCH;D10@73dd518469f972c55411e004b70b054ba8b3ec86=NO-MATCH",
+      "f4_t5_execution": "juv4uk/sens@20543d438e81c6937c35c8d5e1950d72bac42a33:scripts/prove-meta-eval-predicates-d1.sh:57",
+      "ratified": 0
+    },
+    {
+      "sens": "tests/semantic/meta-eval-mutual-d4-law.sens",
+      "typed_word_sha256": "e10c19a6438b533e195fdd53b06a11380a11791c52548e523d7e9f391f435153",
+      "f1_donor_provenance": "juv4uk/sens@20543d438e81c6937c35c8d5e1950d72bac42a33:lib/meta-eval.lisp:739",
+      "f2_positive_witness": "juv4uk/sens@20543d438e81c6937c35c8d5e1950d72bac42a33:tests/semantic/meta-eval-mutual-d4-law.bits:1",
+      "f2_negative_witness": "juv4uk/sens@20543d438e81c6937c35c8d5e1950d72bac42a33:tests/semantic/meta-eval-mutual-d4-mutant.bits:1",
+      "f3_dedup": "D1-D9@09d1d71c39d1484dfd005a5068dbb18b76f0f0d4=NO-MATCH;D10@73dd518469f972c55411e004b70b054ba8b3ec86=NO-MATCH",
+      "f4_t5_execution": "juv4uk/sens@20543d438e81c6937c35c8d5e1950d72bac42a33:scripts/prove-meta-eval-mutual-d4.sh:57",
+      "ratified": 0
+    },
+    {
+      "sens": "tests/semantic/d4-selector-width-law.sens",
+      "typed_word_sha256": "51e69ab45e6456b8b23f17d364b9e0f125e7bd793b3603c4854e41af7e615758",
+      "f1_donor_provenance": "juv4uk/sens@20543d438e81c6937c35c8d5e1950d72bac42a33:lib/domains/d4.lisp:18",
+      "f2_positive_witness": "juv4uk/sens@20543d438e81c6937c35c8d5e1950d72bac42a33:tests/semantic/d4-selector-width-law.bits:1",
+      "f2_negative_witness": "juv4uk/sens@20543d438e81c6937c35c8d5e1950d72bac42a33:tests/semantic/d4-selector-width-mutant.bits:1",
+      "f3_dedup": "D1-D9@09d1d71c39d1484dfd005a5068dbb18b76f0f0d4=NO-MATCH;D10@73dd518469f972c55411e004b70b054ba8b3ec86=NO-MATCH",
+      "f4_t5_execution": "juv4uk/sens@20543d438e81c6937c35c8d5e1950d72bac42a33:scripts/prove-d4-selector-width.sh:54",
+      "ratified": 0
+    }
+  ]
+}
