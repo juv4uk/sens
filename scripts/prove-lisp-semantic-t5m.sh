@@ -271,6 +271,38 @@ failed_ids=()
 # Одна проба на свідок: діагностичний wall-time, не p50 і не порівняння мов.
 printf 'id\tstatus\twall_ms\n' > "$evidence/law-timings.tsv"
 printf 'id\tstage\texit\telapsed_us\n' > "$evidence/law-stage-timings.tsv"
+# Відтворювані докази RED без додаткових запусків SENS або кодека.
+# source/input, фізичний носій, бітовий перегляд і точна позиція відмови.
+printf 'id\tlayer\tsource_sha256\tphysical_sha256\tview_sha256\tphysical_form_index\n' > "$evidence/law-red-receipts.tsv"
+red_receipt() {
+  local id="$1" source_path="$2" dir="$evidence/$1"
+  local source_hash=NOT_PRODUCED physical_hash=NOT_PRODUCED view_hash=NOT_PRODUCED
+  local form_index=NOT_REPORTED layer=NOT_CLASSIFIED line
+  if [[ -f "$source_path" && ! -L "$source_path" ]]; then
+    source_hash="$(sha256sum "$source_path" | cut -d' ' -f1)"
+  fi
+  if [[ -f "$dir/program.sens" && ! -L "$dir/program.sens" ]]; then
+    physical_hash="$(sha256sum "$dir/program.sens" | cut -d' ' -f1)"
+  fi
+  if [[ -f "$dir/program" && ! -L "$dir/program" ]]; then
+    view_hash="$(sha256sum "$dir/program" | cut -d' ' -f1)"
+  fi
+  if [[ -f "$dir/paired.err" ]]; then
+    layer="$(paired_failure_layer "$dir/paired.err")"
+    while IFS= read -r line; do
+      if [[ "$line" =~ physical_form_index=([0-9]+) ]]; then
+        form_index="${BASH_REMATCH[1]}"
+        break
+      fi
+    done < "$dir/paired.err"
+  elif [[ -f "$dir/direct.err" ]]; then
+    layer="$(direct_failure_layer "$dir/direct.err")"
+  fi
+  printf '%s\t%s\t%s\t%s\t%s\t%s\n' \
+    "$id" "$layer" "$source_hash" "$physical_hash" "$view_hash" "$form_index" \
+    >> "$evidence/law-red-receipts.tsv"
+  echo "SENS_RED_RECEIPT id=$id layer=$layer source_sha256=$source_hash physical_sha256=$physical_hash view_sha256=$view_hash physical_form_index=$form_index file=$evidence/law-red-receipts.tsv"
+}
 run_case() {
   local id="$2" start_ns end_ns wall_ms status
   start_ns="$(date +%s%N)"
@@ -282,6 +314,8 @@ run_case() {
     status=RED
     failed=$((failed + 1))
     failed_ids+=("$id")
+    # Цитата й фізичний індекс пояснюють один RED. Сама помилка лишається RED.
+    red_receipt "$id" "${3:-}"
   fi
   end_ns="$(date +%s%N)"
   wall_ms="$(((end_ns - start_ns) / 1000000))"
