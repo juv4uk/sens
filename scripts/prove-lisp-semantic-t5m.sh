@@ -244,6 +244,9 @@ cat -- benchmarks/recursion.lisp tests/semantic/d4-recursion-benchmark-mutant.li
 # Відокремити форму атома/списку в рекурсії від власне обчислення.
 run_case run_law d4-recursion-input-shapes-positive tests/semantic/d4-recursion-input-shapes-law.lisp 1
 run_case run_law d4-recursion-input-shapes-mutant tests/semantic/d4-recursion-input-shapes-mutant.lisp 0
+# D7 текст у D2-рамці поки не гарантує атомність джерельного символу.
+# Залишаємо окремий чесний RED, а не змінюємо значення D3 ATOM чи очікуємо SKIP.
+run_case run_law d4-recursion-d7-atom-parity tests/semantic/d4-recursion-d7-atom-parity-law.lisp 1
 run_case run_law d4-recursion-benchmark-positive "$recursion_law_bundle" 1
 run_case run_law d4-recursion-benchmark-mutant "$recursion_mutant_bundle" 0
 # Ізолюємо D3 атомну рівність від D8 структурної рівності в тому самому обході.
