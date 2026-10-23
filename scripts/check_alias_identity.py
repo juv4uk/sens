@@ -1,80 +1,90 @@
 #!/usr/bin/env python3
-"""Українські викличні назви повинні мати однозначну точнодоменну адресу.
+"""Перевірка однозначності чинної УКР-проєкції D1–D10, без старого SID8.
 
-Читаємо тільки ратифіковані D1–D10. D7 — текстова клавіатура, не функції.
-«en», «san» і «sym» — людські / історичні проєкції; їхні повтори
-не дають права вибирати першу відповідну функцію (fail closed у reader).
-Цей інструмент перевіряє таблиці, але не виконує програму SENS.
+Влада над (домен, точне слово, укр) — лише lib/domains/dN.lisp.
+D2 задає граматику; D7 є текстом, а D3:000 — структурним порожнім
+значенням: вони не потрапляють до простору викличних голів.
+
+Неповні en/sym проєкції можуть збігатися (наприклад MAP D6/D8):
+це не дозвіл вгадувати тотожність через ім'я. Цей guard перевіряє
+однозначність саме повної виконуваної «укр», а не право виконання
+кожної ратифікованої координати. Runtime і T5M перевіряються окремо.
 """
 from __future__ import annotations
 
 import argparse
-import importlib.util
 from collections import defaultdict
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[1]
-AUDIT = ROOT / "scripts/check_semantic_registry.py"
-NAMESPACES = ("ук", "укр")
+from domain_tables import read_domain_table
+
+REGISTRY = "lib/surface/semantic-registry.lisp"
+EXPECTED_READER = "(прочитати-семантичний-реєстр)"
 
 
-def load_audit():
-    spec = importlib.util.spec_from_file_location("sens_domain_registry_audit", AUDIT)
-    if spec is None or spec.loader is None:
-        raise ValueError("неможливо завантажити перевірку точних доменів")
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
-    return module
-
-
-def check(root: Path) -> list[str]:
-    audit = load_audit()
-    owners: dict[tuple[str, str], list[str]] = defaultdict(list)
-    problems = []
-    for width in range(1, 11):
-        path = root / f"lib/domains/d{width}.lisp"
-        try:
-            forms = audit.parse_all(audit.tokens(path.read_text(encoding="utf-8")))
-            if len(forms) != 1:
-                raise ValueError("рівно одна таблиця на домен")
-            table = forms[0]
-            audit.check(table, width)
-        except (OSError, ValueError) as error:
-            problems.append(f"D{width}: {error}")
+def check_rows(rows: list) -> list[str]:
+    """Повне УКР-ім'я не має означати дві різні викличні координати."""
+    owners: dict[str, set[str]] = defaultdict(set)
+    problems: list[str] = []
+    for row in rows:
+        identity = f"{row.domain}:{row.bits}"
+        if row.width in (2, 7) or (row.width == 3 and row.bits == "000"):
             continue
-        if width == 7:
-            continue  # Сім бітів — текст, а не функціональний код.
-        for record in table[1:]:
-            identity = f"D{width}:{record[0]}"
-            for namespace in NAMESPACES:
-                field = next((v for v in record[1:] if v[0] == namespace), None)
-                if field is None:
-                    problems.append(f"{identity}: відсутня {namespace}")
-                    continue
-                name = field[1]
-                if name != []:
-                    owners[(namespace, name)].append(identity)
-    for (namespace, name), identities in sorted(owners.items()):
+        if row.ukr is None or row.ukr == "()":
+            # D1 contains values, not function heads; other missing УКР
+            # projections must not be silently promoted via English/SID8.
+            if row.width not in (1,):
+                problems.append(f"{identity}: відсутня повна укр-проєкція")
+            continue
+        owners[row.ukr].add(identity)
+    for name, identities in sorted(owners.items()):
         if len(identities) > 1:
             problems.append(
-                f"АЛІАС-НЕОДНОЗНАЧНИЙ ({namespace} {name}): "
-                + ", ".join(identities)
+                f"неоднозначна укр-проєкція {name!r}: "
+                + ", ".join(sorted(identities))
             )
     return problems
 
 
+def check(root: Path) -> list[str]:
+    path = root / REGISTRY
+    if not path.is_file():
+        return [f"відсутній {REGISTRY}"]
+    # Comment-only metadata never counts as a legacy eight-bit registry.
+    live = "\n".join(line.split(";", 1)[0] for line in
+                     path.read_text(encoding="utf-8").splitlines()).strip()
+    if live != EXPECTED_READER:
+        return [f"{REGISTRY}: очікується єдине читання D1–D10 через SENS, не SID8"]
+
+    rows = []
+    for width in range(1, 11):
+        table = root / f"lib/domains/d{width}.lisp"
+        if not table.is_file():
+            return [f"відсутня ратифікована таблиця {table}"]
+        domain_rows = read_domain_table(table)
+        exact = [format(index, f"0{width}b") for index in range(1 << width)]
+        if [row.bits for row in domain_rows] != exact:
+            return [f"D{width}: координати пропущені, дубльовані або переставлені"]
+        rows.extend(domain_rows)
+    if len(rows) != 2046:
+        return [f"драбина D1–D10 неповна: {len(rows)}/2046"]
+    return check_rows(rows)
+
+
 def main() -> int:
-    parser = argparse.ArgumentParser()
-    parser.add_argument("root", nargs="?", default=str(ROOT))
-    args = parser.parse_args()
-    issues = check(Path(args.root).resolve())
-    if issues:
-        print(f"ALIAS_AMBIGUOUS count={len(issues)}")
-        for issue in issues:
-            print(" -", issue)
+    ap = argparse.ArgumentParser()
+    ap.add_argument("root", nargs="?", default=str(Path(__file__).resolve().parents[1]))
+    root = Path(ap.parse_args().root).resolve()
+    try:
+        problems = check(root)
+    except (OSError, ValueError) as exc:
+        problems = [str(exc)]
+    if problems:
+        print(f"УКР_НЕОДНОЗНАЧНІСТЬ: {len(problems)}", flush=True)
+        for problem in problems:
+            print(" -", problem, flush=True)
         return 1
-    print("ALIAS_IDENTITY_OK ук/укр → єдина точна (домен, біти) з D1–D10")
-    print("en/san/sym не використовуються як неявні викличні ідентичності")
+    print("УКР_ДОМЕНИ_OK: D1–D10; 2046 точних координат; повні викличні назви однозначні; виконання окремо")
     return 0
 
 
