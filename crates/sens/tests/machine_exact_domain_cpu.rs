@@ -151,10 +151,17 @@ fn current_machine_axis_and_profile_do_not_claim_sid8_as_authority() {
     let profile =
         fs::read_to_string(repo_root().join("lib/machine/profile/current-domain-x86-64.lisp"))
             .expect("current exact-domain x86 profile");
-    for (width, packed_bits) in [(5, 10), (3, 5), (3, 6), (3, 7), (3, 4), (3, 3)] {
+    for (domain, resident) in [
+        ("домен-п'ятий", "додати"),
+        ("домен-третій", "тотожне?"),
+        ("домен-третій", "за-умовою"),
+        ("домен-третій", "сполучити"),
+        ("домен-третій", "перше"),
+        ("домен-третій", "решта"),
+    ] {
         assert!(
-            profile.contains(&format!("({width} {packed_bits} ")),
-            "current profile missing width-safe key ({width},{packed_bits})"
+            profile.contains(&format!("({domain} {resident} ")),
+            "current profile missing exact named key ({domain},{resident})"
         );
     }
     assert!(!profile.contains("semantic-registry"));
