@@ -28,6 +28,16 @@ class EncodedSourceLiteralTests(unittest.TestCase):
             [],
         )
 
+    def test_function_index_generator_has_no_numeric_source_literals(self):
+        # Генератор довідника також є живою українською Lisp-програмою.
+        path = ROOT / "scripts/generate-functions-md.lisp"
+        source = path.read_text(encoding="utf-8")
+        self.assertEqual(
+            CHECK.find_forbidden_literals(source, path="scripts/generate-functions-md.lisp"),
+            [],
+            "проєкція генератора не має числових голів або літералів",
+        )
+
     def test_machine_effect_live_source_uses_named_coordinates(self):
         # Лексична перевірка; обчислення маршруту перевіряють нативні тести SENS.
         path = ROOT / "lib/machine/lowering/semantic-effects.lisp"
