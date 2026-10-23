@@ -20,8 +20,8 @@ class BatchSourceTests(unittest.TestCase):
 
     def test_ratified_map_exact_and_ambiguous_blocked(self):
         self.assertEqual(len(self.mapping), 171)
-        self.assertEqual(self.mapping["00001001"], "0011")
-        self.assertEqual(self.mapping["00000011"], "101")
+        self.assertEqual(self.mapping["00001001"], "визначити")
+        self.assertEqual(self.mapping["00000011"], "тотожне?")
         for code in ("00001010", "00110111", "01011010"):
             self.assertNotIn(code, self.mapping)
             self.assertIn(code, self.blocked)
@@ -69,11 +69,13 @@ class BatchSourceTests(unittest.TestCase):
         # Equal integer payload is NOT equal identity: W7 data vs W8.
         self.assertNotEqual((7, "0000001"), (8, "00000001"))
         self.assertNotEqual((3, "010"), (4, "0010"))
-        for old, word in self.mapping.items():
+        for old, українська in self.mapping.items():
             self.assertRegex(old, r"^[01]{8}$")
-            self.assertRegex(word, r"^[01]{3,9}$")
-            self.assertNotEqual(len(word), 2, "D2 structural words are not call-heads")
-            self.assertNotEqual(len(word), 10, "D10 has no admitted T5 mechanism")
+            self.assertTrue(українська)
+            self.assertNotRegex(українська, r"^[01]+$",
+                                "binary domain word is not a canonical .lisp head")
+            self.assertNotEqual(українська, "()",
+                                "D3 empty value is not an executable call head")
         for old in ("10101000", "01011010"):
             self.assertIn(old, self.blocked)
 
@@ -101,8 +103,20 @@ class BatchSourceTests(unittest.TestCase):
         new, n, empties = MOD.rewrite(old, self.mapping, self.blocked)
         self.assertEqual(n, 4)
         self.assertFalse(empties)
-        self.assertIn("(0011 f (0010 (x) (111 (001 00000011) x)))", new)
+        self.assertIn("(визначити f (функція (x) (сполучити (як-є 00000011) x)))", new)
         self.assertIn(";(00000100 ignored)", new)
+
+    def test_identical_old_and_d8_bytes_never_mean_the_same_function(self):
+        # Old SID8:00001001 is DEFINE, whereas current D8:00001001
+        # has another resident. Only the dated successor D4 is valid.
+        table = (ROOT / "lib/domains/d8.lisp").read_text(encoding="utf-8")
+        self.assertIn("(00001001 (ук підмножина?) (укр підмножина?)", table)
+        self.assertEqual(self.mapping["00001001"], "визначити")
+        self.assertNotEqual(self.mapping["00001001"], "підмножина?")
+        source = "(00001001 f (00001000 (x) x))"
+        updated, count, problems = MOD.rewrite(source, self.mapping, self.blocked)
+        self.assertEqual((count, problems), (2, []))
+        self.assertEqual(updated, "(визначити f (функція (x) x))")
 
     def test_ambiguous_head_blocks_entire_file(self):
         old = "(00001001 f (00001000 () (00110111 fun values)))"
