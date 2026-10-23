@@ -879,7 +879,7 @@ test -f "$epistemic_d1_source" && test ! -L "$epistemic_d1_source" || {
 cat -- "$epistemic_d1_source" "$epistemic_constructor_source" "${epistemic_sources[@]}" tests/semantic/language-law-epistemic-records.lisp > "$epistemic_law_bundle"
 cat -- "$epistemic_d1_source" "$epistemic_constructor_source" "${epistemic_sources[@]}" tests/semantic/language-mutant-epistemic-records.lisp > "$epistemic_mutant_bundle"
 sha256sum "$epistemic_d1_source" "$epistemic_constructor_source" "${epistemic_sources[@]}" tests/semantic/language-law-epistemic-records.lisp tests/semantic/language-mutant-epistemic-records.lisp > "$evidence/epistemic-record-logic-inputs.sha256"
-run_case run_law epistemic-record-logic-positive "$epistemic_law_bundle" "(epistemic-authority-witness (status pass))" core4
+run_case run_law epistemic-record-logic-positive "$epistemic_law_bundle" 1 core4
 # Назва, статус, фактичний та очікуваний D1 доведені D8 всередині Lisp.
 # Перевіряємо рівно один D1:1 від усіх фізичних виконавців без host-проєкції D7.
 run_case run_law epistemic-record-logic-mutant "$epistemic_mutant_bundle" 1 core4
