@@ -23,10 +23,27 @@ HOST_EXPECTED_VALUE = re.compile(r"\bassert_(?:eq|ne)!\s*\(|\bassert!\s*\(")
 
 
 def declared_sources(runner: str) -> set[str]:
-    # Коментар або документація НЕ є маршрутом нативного виконання.
+    # Сама згадка шляху, echo чи коментар не є виконанням.
     live = [line.split("#", 1)[0].strip()
             for line in runner.splitlines() if line.split("#", 1)[0].strip()]
-    return set(SEMANTIC_PATH.findall("\n".join(live)))
+    invocations = [line for line in live
+                   if re.match(r"^run_case\s+run_(?:law|bound_law|type_rejection)\s+", line)]
+    declared: set[str] = set()
+    for line in invocations:
+        declared.update(SEMANTIC_PATH.findall(line))
+    # Залежні DEFINE збираються cat у тимчасове джерело;
+    # цей bundle зараховується лише якщо run_case справді його викликає.
+    for line in live:
+        if not re.match(r"^cat\s+", line):
+            continue
+        sources = SEMANTIC_PATH.findall(line)
+        destination = re.search(r">\s*[\"']?\$([A-Za-z_][A-Za-z_0-9]*)", line)
+        if destination:
+            name = destination.group(1)
+            if any(re.search(r"\$" + re.escape(name) + r"\b", call)
+                   for call in invocations):
+                declared.update(sources)
+    return declared
 
 
 def companion_for_law(path: str) -> str | None:
