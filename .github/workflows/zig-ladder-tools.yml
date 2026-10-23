@@ -34,6 +34,20 @@ jobs:
           zig test research/zig-codecs/t5m3.zig
           zig test research/zig-codecs/tests.zig
           zig test research/zig-codecs/d2_ladder_game.zig
+      - name: Порівняти T5M T33 та D12 на точних спільних fixtures
+        shell: bash
+        run: |
+          set -euo pipefail
+          zig test -lc research/zig-codecs/codec_compare_bench.zig
+          zig build-exe -lc -O ReleaseFast research/zig-codecs/codec_compare_bench.zig -femit-bin="$RUNNER_TEMP/codec_compare"
+          {
+            git rev-parse HEAD
+            zig version
+            uname -a
+            lscpu
+            sha256sum research/zig-codecs/codec_compare_bench.zig research/zig-codecs/t5m.zig research/zig-codecs/t33_experiment.zig research/zig-codecs/d12_dense_experiment.zig "$RUNNER_TEMP/codec_compare"
+            "$RUNNER_TEMP/codec_compare"
+          } 2>&1 | tee "$RUNNER_TEMP/codec_compare.log"
       - name: Зібрати ladder_tool (ReleaseFast)
         run: zig build-exe -O ReleaseFast -lc research/zig-codecs/ladder_tool.zig -femit-bin="$RUNNER_TEMP/ladder_tool"
       - name: Драбина -> точні слова -> T5/F3C (round-trip + бенч)
@@ -54,5 +68,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: zig-ladder-tools-${{ github.sha }}
-          path: ${{ runner.temp }}/ladder.log
+          path: |
+            ${{ runner.temp }}/ladder.log
+            ${{ runner.temp }}/codec_compare.log
           if-no-files-found: warn
