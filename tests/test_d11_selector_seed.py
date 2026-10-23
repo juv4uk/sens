@@ -244,6 +244,28 @@ class D11SelectorSeedAuditTests(unittest.TestCase):
 
 
 
+    def test_d11_native_sens_benchmark_records_eleven_reproducible_samples(self):
+        runner = (ROOT / "scripts/prove-lisp-semantic-t5m.sh").read_text(encoding="utf-8")
+        required = (
+            "run_case run_law d11-families-benchmark-positive",
+            "run_case run_law d11-families-benchmark-mutant",
+            "for iteration in {1..11}",
+            'tail -n +2 "$d11_bench_samples" | cut -f2 | sort -n',
+            "${sorted_wall[5]}",
+            "${sorted_wall[9]}",
+            "p50_us",
+            "p90_us",
+            "source_sha256",
+            "physical_sha256",
+            "samples=11 native=SENS semantic=D1:1 verified=YES",
+            "scope=whole-process",
+            "HIGH_JITTER",
+        )
+        for token in required:
+            with self.subTest(token=token):
+                self.assertIn(token, runner)
+        self.assertNotIn("samples=5 native=SENS", runner)
+
     def test_d13_candidate_catalog_matches_current_d11_parents_exactly(self):
         import re
 
