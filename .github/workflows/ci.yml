@@ -266,7 +266,7 @@ jobs:
         if: ${{ always() }}
         run: |
           zig test -lc research/zig-codecs/tests.zig
-          zig test -lc zig_transport_root.zig --test-filter 'Zig byte carrier refuses one-byte-short destinations without partial writes'
+          zig test -lc zig_transport_root.zig
 
       - name: Три бенчмарки — lists, arithmetic, parser у справжньому SENS
         if: ${{ always() }}
