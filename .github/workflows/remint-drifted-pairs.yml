@@ -111,10 +111,13 @@ jobs:
             # ще не проходять точну D7-проєкцію. Не перезапускати її на
             # кожен сторонній push, але зміну самої yantra.lisp з push diff
             # завжди передавати в нативний remint і зберігати її RED.
-            # Зберігаємо кількість першочергових джерел з поточного push
-            # до додавання незмінних непарних пар. Інакше обмеження 24
-            # постійно вибирає початок алфавітної черги й морить хвіст.
-            priority_count="$(printf '%s\n' "$list" | sed '/^$/d' | wc -l)"
+            # Зберігати точні джерела push, а не тільки їхню кількість:
+            # подальше впорядкування непарних трійок змінює позиції.
+            declare -A push_changed_sources=()
+            while IFS= read -r changed; do
+              [[ -n "$changed" ]] || continue
+              push_changed_sources["$changed"]=1
+            done <<< "$list"
             # Не втрачати непарні програми після скасованого queued run.
             # Змінений конкурсний .lisp уже є у git diff вище, навіть якщо
             # стара .sens ще існує. Не перемайнювати незмінені повні трійки
@@ -250,26 +253,40 @@ jobs:
           list="$(printf '%s\n' "$list" | sed '/^$/d')"
           initial_total="$(printf '%s\n' "$list" | sed '/^$/d' | wc -l)"
           if [[ "$EVENT_NAME" == push ]] && (( initial_total > 24 )); then
-            # Змінені в поточному push джерела мають пріоритет.
-            # Непарний хвіст розкладаємо між наступними push по колу,
-            # а не перевіряємо ті самі перші 24 нескінченно.
-            mapfile -t pending_sources < <(printf '%s\n' "$list" | sed '/^$/d')
-            priority_slots=$(( priority_count < 24 ? priority_count : 24 ))
+            # Нові зміни не витісняються старою алфавітною чергою;
+            # далі — спершу непарні Lisp, потім дрейф фізичних трійок.
+            # Переповнені черги обходимо циклічно, без фальшивого PASS.
+            changed_batch=()
+            backlog_batch=()
+            while IFS= read -r candidate; do
+              [[ -n "$candidate" ]] || continue
+              if [[ -n "${push_changed_sources[$candidate]+seen}" ]]; then
+                changed_batch+=("$candidate")
+              else
+                backlog_batch+=("$candidate")
+              fi
+            done <<< "$list"
+            run_number=${GITHUB_RUN_NUMBER:-1}
+            priority_slots=$(( ${#changed_batch[@]} < 24 ? ${#changed_batch[@]} : 24 ))
             backlog_slots=$(( 24 - priority_slots ))
-            backlog_count=$(( initial_total - priority_slots ))
-            selected_sources=("${pending_sources[@]:0:priority_slots}")
-            batch_index=0
-            if (( backlog_slots > 0 && backlog_count > 0 )); then
-              batch_count=$(( (backlog_count + backlog_slots - 1) / backlog_slots ))
-              batch_index=$(( (${GITHUB_RUN_NUMBER:-1} - 1) % batch_count ))
+            selected_sources=()
+            if (( priority_slots > 0 )); then
+              priority_start=$(( ((run_number - 1) * priority_slots) % ${#changed_batch[@]} ))
+              for (( offset=0; offset<priority_slots; offset++ )); do
+                pick=$(( (priority_start + offset) % ${#changed_batch[@]} ))
+                selected_sources+=("${changed_batch[pick]}")
+              done
+            fi
+            if (( backlog_slots > 0 )); then
+              backlog_start=$(( ((run_number - 1) * backlog_slots) % ${#backlog_batch[@]} ))
               for (( offset=0; offset<backlog_slots; offset++ )); do
-                pick=$(( priority_slots + ((batch_index * backlog_slots + offset) % backlog_count) ))
-                selected_sources+=("${pending_sources[pick]}")
+                pick=$(( (backlog_start + offset) % ${#backlog_batch[@]} ))
+                selected_sources+=("${backlog_batch[pick]}")
               done
             fi
             printf -v list '%s\n' "${selected_sources[@]}"
             list="${list%$'\n'}"
-            echo "REMINT_INITIAL_BATCH selected=24 priority=$priority_slots backlog=$backlog_count batch=$batch_index native=SENS_ZIG"
+            echo "REMINT_INITIAL_BATCH selected=24 changed=$priority_slots backlog=$backlog_slots unprocessed=$((initial_total - 24)) native=SENS_ZIG"
           else
             echo "REMINT_INITIAL_BATCH selected=$initial_total pending=0 native=SENS_ZIG"
           fi
