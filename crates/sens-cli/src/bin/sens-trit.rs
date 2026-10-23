@@ -160,7 +160,10 @@ fn t5m_view_inverse_preserves_d24_and_rejects_noncanonical_view() {
         .collect::<Vec<_>>();
     let physical = zig_transport::encode_t5m_exact_words(&words).unwrap();
     let restored = zig_transport::decode_t5m_exact_words(&physical).unwrap();
-    assert_eq!(restored, words, "Zig T5M змінив точні біти або ширини D1–D10/D24+");
+    assert_eq!(
+        restored, words,
+        "Zig T5M змінив точні біти або ширини D1–D10/D24+"
+    );
 
     let canonical_view = format!(
         "{}\n",
@@ -460,17 +463,29 @@ fn explain_t5m_bytes(bytes: &[u8]) -> Result<String, String> {
     }
     #[cfg(feature = "zig-transport")]
     {
-        let words = zig_transport::decode_t5m_words(bytes)
+        // Keep exact widths from Zig through SENS domain admission. The
+        // BinarySourceWord compatibility view is W1–W9 only and cannot
+        // represent ratified D24+ numbers without losing their identity.
+        let words = zig_transport::decode_t5m_exact_words(bytes)
             .map_err(|e| format!("physical T5M transport rejected: {e}"))?;
-        sens::parse_canonical_word_sequence(&words).map_err(|e| {
-            format!(
-                "D2 grammar rejected (typed words; virtual payload byte span {}..{}): {e}",
+        let exact = words
+            .iter()
+            .map(|word| {
+                sens::ExactDomainWord::from_physical_width_bits(word.width, &word.bits)
+                    .map_err(|error| format!("SENS exact-domain admission rejected: {error}"))
+            })
+            .collect::<Result<Vec<_>, _>>()?;
+        let program =
+            sens::PhysicalT5Program::from_exact_domain_words_owned(exact).map_err(|e| {
+                format!(
+                "D2 grammar rejected (exact domain words; virtual payload byte span {}..{}): {e}",
                 e.span.start, e.span.end
             )
-        })?;
+            })?;
         Ok(format!(
-            "D2 syntax PASS; {} typed words; semantic oracle NOT_VERIFIED",
-            words.len()
+            "D2 syntax PASS; {} exact domain words; {} forms; semantic oracle NOT_VERIFIED",
+            words.len(),
+            program.form_count()
         ))
     }
 }
@@ -1136,7 +1151,7 @@ mod eval_tests {
         let err = explain_t5m_bytes(&trits).expect_err("unbalanced D2 syntax");
         assert!(err.contains("D2 grammar rejected"), "{err}");
         assert!(
-            err.contains("typed words; virtual payload byte span"),
+            err.contains("exact domain words; virtual payload byte span"),
             "{err}"
         );
         assert!(!err.contains("D2 syntax PASS"), "{err}");
@@ -1159,6 +1174,28 @@ mod eval_tests {
         assert!(explain_t5m_bytes(&bad_d2)
             .unwrap_err()
             .contains("D2 grammar rejected"));
+    }
+
+    #[cfg(feature = "zig-transport")]
+    #[test]
+    fn explain_accepts_ratified_numeric_widths_through_exact_zig_ingress() {
+        let exact = [24usize, 48, 96]
+            .into_iter()
+            .map(|width| {
+                let mut bits = vec![0; width];
+                bits[0] = 1;
+                zig_transport::ExactT5MWord::new(width, bits).unwrap()
+            })
+            .collect::<Vec<_>>();
+        let bytes = zig_transport::encode_t5m_exact_words(&exact).unwrap();
+
+        let receipt = explain_t5m_bytes(&bytes).expect("D24+ exact words are valid SENS forms");
+        assert!(receipt.contains("3 exact domain words"), "{receipt}");
+        assert!(receipt.contains("3 forms"), "{receipt}");
+        assert!(
+            receipt.contains("semantic oracle NOT_VERIFIED"),
+            "{receipt}"
+        );
     }
 
     #[cfg(feature = "zig-transport")]
@@ -1205,8 +1242,10 @@ mod eval_tests {
             .split("#[cfg(feature = \"zig-transport\")]")
             .nth(1)
             .expect("Zig-active explain route");
-        assert!(feature_branch.contains("zig_transport::decode_t5m_words(bytes)"));
-        assert!(feature_branch.contains("sens::parse_canonical_word_sequence(&words)"));
+        assert!(feature_branch.contains("zig_transport::decode_t5m_exact_words(bytes)"));
+        assert!(feature_branch.contains("sens::ExactDomainWord::from_physical_width_bits"));
+        assert!(feature_branch
+            .contains("sens::PhysicalT5Program::from_exact_domain_words_owned(exact)"));
         assert!(!feature_branch.contains("sens::decode_ternary_words(bytes)"));
         assert!(!feature_branch.contains("sens::parse_canonical_binary("));
         assert!(!feature_branch.contains("sens::render_ternary_words_vertical("));
