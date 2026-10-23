@@ -324,6 +324,14 @@ run_case run_law d11-srfi1-span-break-physical "$d11_span_bundle" 1
 result_status_bundle="$evidence/result-status-bundle.lisp"
 cat lib/result-status.lisp tests/semantic/result-status-laws.lisp > "$result_status_bundle"
 run_case run_law result-status-source "$result_status_bundle" 1
+# Незалежна Lisp-пара локалізує правильний UNKNOWN проти крапкового D7-хвоста.
+# Shell лише завантажує реальні визначення; D1:так/ні визначає сам SENS.
+result_status_dotted_law_bundle="$evidence/result-status-dotted-positive.lisp"
+result_status_dotted_mutant_bundle="$evidence/result-status-dotted-mutant.lisp"
+cat -- lib/result-status.lisp tests/semantic/result-status-dotted-law.lisp > "$result_status_dotted_law_bundle"
+cat -- lib/result-status.lisp tests/semantic/result-status-dotted-mutant.lisp > "$result_status_dotted_mutant_bundle"
+run_case run_law result-status-dotted-positive "$result_status_dotted_law_bundle" 1
+run_case run_law result-status-dotted-mutant "$result_status_dotted_mutant_bundle" 0
 # Локалізуємо фізичну розбіжність: форма змінної → входження → повна уніфікація.
 # Визначення й закон належать тільки Lisp, Shell лише додає lib/unify.lisp.
 # Незалежно локалізуємо D3/D4 форму змінної: позитив, негатив і мутант.

@@ -453,6 +453,11 @@ while IFS= read -r file || [[ -n "$file" ]]; do
   if [[ "$file" == "lib/reason.lisp" || "$file" == "lib/forward.lisp" ]]; then
     # Чинний D9 уніфікатор визначено в українському Lisp, не в самій таблиці.
     binding_sources=(--binding-source lib/unify.lisp)
+  elif [[ "$file" == "tests/semantic/result-status-dotted-law.lisp" ||
+          "$file" == "tests/semantic/result-status-dotted-mutant.lisp" ]]; then
+    # Мовний закон міток вимагає справжніх визначень Result Status.
+    # SENS визначає D1, Zig пакує фізичні слова, Rust тільки запускає.
+    binding_sources=(--binding-source lib/result-status.lisp)
   elif [[ "$file" == "tests/semantic/d11-srfi1-find-tail-laws.lisp" ]]; then
     # Лише визначення із справжньої бібліотеки SENS, без host-оракула.
     binding_sources=(--binding-source lib/d11-srfi1-find-tail.lisp)
