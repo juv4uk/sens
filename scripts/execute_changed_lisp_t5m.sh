@@ -459,6 +459,12 @@ while IFS= read -r file || [[ -n "$file" ]]; do
   elif [[ "$file" == "tests/semantic/meta-fc-predicates-d1-law.lisp" ||
           "$file" == "tests/semantic/meta-fc-predicates-d1-mutant.lisp" ]]; then
     binding_sources=(--binding-source lib/meta-eval-first-class.lisp)
+  elif [[ "$file" == "tests/semantic/domain-reuse-guard-law.lisp" ||
+          "$file" == "tests/semantic/domain-reuse-guard-mutant.lisp" ]]; then
+    # Ядро охоронця драбин (драбина-дублі/кандидати/вердикт) визначено
+    # лише в lib/domain-function-reuse.lisp. Без цього SENS правильно
+    # відхиляє невідомі D7 Text7-символи цих голів.
+    binding_sources=(--binding-source lib/domain-function-reuse.lisp)
   fi
   run_native_t5m_program
 done < "$manifest"
