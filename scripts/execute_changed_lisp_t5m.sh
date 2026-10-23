@@ -171,6 +171,17 @@ run_native_t5m_program() {
       fi
       echo "::notice file=$file,title=SENS language law::PASS native=SENS result=D1:1 carrier=Zig/T5M"
     fi
+    # Негативна мутація є коректною SENS-програмою з точним результатом Д1:ні.
+    # Вона теж проходить Zig/T5M, paired і standalone; логіку тут не моделюємо.
+    if [[ "$file" == tests/semantic/language-mutant-*.lisp ]]; then
+      printf '0\n' > "$dir/language-d1-mutant.expected"
+      if ! cmp -s "$dir/native-paired.stdout" "$dir/language-d1-mutant.expected"; then
+        echo "::error file=$file,title=SENS language mutant::WRONG_D1 expected=0 actual=$(cat "$dir/native-paired.stdout")" >&2
+        mark_file_failed
+        return
+      fi
+      echo "::notice file=$file,title=SENS language mutant::PASS native=SENS result=D1:0 carrier=Zig/T5M"
+    fi
     # Закони CAR/CDR/CONS/COND/NULL належать виконуваному Lisp.
     # Shell порівнює тільки кінцевий точний D1-біт нативного SENS.
     # Це не стороння модель EQ, COND або структурних правил.
