@@ -173,9 +173,9 @@
       (status current))
 
     (row
-      (concept sid-function-identity-space)
-      (identity "00000000..11111111")
-      (surface "bare 8-bit SID")
+      (concept historical-sid-function-identity-space)
+      (identity "історичний 8-бітний простір тотожностей; лише походження, без сучасної влади")
+      (surface "застарілий носій SID; не є викличною проєкцією Д1–Д10")
       (lineage my-lisp-native)
       (historical-reference "Немає: це експеримент із кодуванням тотожностей my-lisp.")
       (my-lisp-rationale "Єдиний восьмибітний простір тотожностей функцій у цьому історичному зрізі дозволяв різним механізмам переносити ту саму операцію без копіювання семантичних таблиць хоста.")
@@ -185,7 +185,7 @@
       (substrate-assumptions "Окремі виконавці могли пакувати байт по-різному, проте мусили зберігати тотожність")
       (portability-risk medium)
       (owner-issue 1167)
-      (status current))
+      (status historical-only))
 
     (row
       (concept canon-function-table-authority)
