@@ -235,6 +235,9 @@ recursion_law_bundle="$evidence/d4-recursion-benchmark-positive.lisp"
 recursion_mutant_bundle="$evidence/d4-recursion-benchmark-negative.lisp"
 cat -- benchmarks/recursion.lisp tests/semantic/d4-recursion-benchmark-law.lisp > "$recursion_law_bundle"
 cat -- benchmarks/recursion.lisp tests/semantic/d4-recursion-benchmark-mutant.lisp > "$recursion_mutant_bundle"
+# Відокремити форму атома/списку в рекурсії від власне обчислення.
+run_case run_law d4-recursion-input-shapes-positive tests/semantic/d4-recursion-input-shapes-law.lisp 1
+run_case run_law d4-recursion-input-shapes-mutant tests/semantic/d4-recursion-input-shapes-mutant.lisp 0
 run_case run_law d4-recursion-benchmark-positive "$recursion_law_bundle" 1
 run_case run_law d4-recursion-benchmark-mutant "$recursion_mutant_bundle" 0
 # Ізолюємо D3 атомну рівність від D8 структурної рівності в тому самому обході.
