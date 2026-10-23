@@ -10,8 +10,19 @@ fn migrated_core() -> Session {
 fn core4_named_numeric_values_are_exact_and_source_literal_free() {
     let mut session = migrated_core();
 
+    for (name, expected) in [("число-нуль", "0"), ("число-один", "1")] {
+        let value = session.environment.get(name).expect("named D24+ root value");
+        match value {
+            Value::BinaryNumber(number) => {
+                assert_eq!(number.numeric_domain_width(), Some(24));
+                assert_eq!(number.to_decimal_string(), expected);
+            }
+            other => panic!("{name} must be a typed D24+ binary value, got {other:?}"),
+        }
+    }
+
     let values = eval_program(
-        "(список число-нуль число-один число-два число-три число-чотири число-пять число-вісім число-десять число-п'ятнадцять число-сто число-тисяча число-двісті-п'ятдесят-шість число-шістдесят-п'ять-тисяч-п'ятсот-тридцять-шість число-мільйон)",
+        "(список число-нуль число-один число-два число-три число-чотири число-п'ять число-вісім число-десять число-п'ятнадцять число-сто число-тисяча число-двісті-п'ятдесят-шість число-шістдесят-п'ять-тисяч-п'ятсот-тридцять-шість число-мільйон)",
         &mut session,
     )
     .expect("named exact numeric values must evaluate")
