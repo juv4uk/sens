@@ -96,9 +96,28 @@ if (( ${#binding_sources[@]} != 0 )); then
   done
   cat -- "$source_file" >> "$direct_source"
 fi
-# Негативні мовні свідки теж потребують фізичної трійки.
-# У цьому режимі очікувану відмову перевіряємо окремо на Lisp і парному T5M;
-# лише після точного повідомлення публікуємо verified view + фізичний файл.
+# SENS власноруч створює слова, Zig єдиний пакує T5M.
+mint_flag=--t5m-mint
+if (( ${#binding_args[@]} != 0 )); then
+  mint_flag=--t5m-mint-pair
+fi
+if timeout "$native_timeout" "$binary" "$mint_flag" "$source_file" "$staged" "${binding_args[@]}"; then
+  :
+else
+  mint_status=$?
+  echo "T5M_REPAIR_MINT_FAILED source=$source_file status=$mint_status timeout=$native_timeout" >&2
+  exit 2
+fi
+test -s "$staged"
+timeout "$native_timeout" "$reader" view "$staged" > "$staged_view"
+test -s "$staged_view"
+# Відновити рівно ті самі слова та байти через справжній Zig/T5M.
+# Гарантія фізичного обернення не підміняє SENS-парне виконання нижче.
+if ! timeout "$native_timeout" "$reader" verify-view "$staged" > "$scratch/inverse.out" 2> "$scratch/inverse.err"; then
+  cat "$scratch/inverse.err" >&2
+  echo "T5M_REPAIR_VIEW_ROUNDTRIP_FAILED path=$source_file" >&2
+  exit 2
+fi
 if [[ -n "$expected_error" ]]; then
   if timeout "$native_timeout" "$binary" "$direct_source" > "$scratch/direct.out" 2> "$scratch/direct.err"; then
     echo "T5M_REPAIR_EXPECTED_ERROR_DIRECT_ACCEPTED source=$source_file expected=$expected_error" >&2
@@ -141,28 +160,6 @@ if [[ -n "$expected_error" ]]; then
     mode=expected-error-paired-and-standalone
   fi
 else
-# SENS власноруч створює слова, Zig єдиний пакує T5M.
-mint_flag=--t5m-mint
-if (( ${#binding_args[@]} != 0 )); then
-  mint_flag=--t5m-mint-pair
-fi
-if timeout "$native_timeout" "$binary" "$mint_flag" "$source_file" "$staged" "${binding_args[@]}"; then
-  :
-else
-  mint_status=$?
-  echo "T5M_REPAIR_MINT_FAILED source=$source_file status=$mint_status timeout=$native_timeout" >&2
-  exit 2
-fi
-test -s "$staged"
-timeout "$native_timeout" "$reader" view "$staged" > "$staged_view"
-test -s "$staged_view"
-# Відновити рівно ті самі слова та байти через справжній Zig/T5M.
-# Гарантія фізичного обернення не підміняє SENS-парне виконання нижче.
-if ! timeout "$native_timeout" "$reader" verify-view "$staged" > "$scratch/inverse.out" 2> "$scratch/inverse.err"; then
-  cat "$scratch/inverse.err" >&2
-  echo "T5M_REPAIR_VIEW_ROUNDTRIP_FAILED path=$source_file" >&2
-  exit 2
-fi
 if ! timeout "$native_timeout" "$binary" --t5m-pair "$source_file" "$staged" "${binding_args[@]}" > "$scratch/out" 2> "$scratch/err"; then
   cat "$scratch/err" >&2
   echo "T5M_REPAIR_REAL_EVAL_FAILED path=$source_file" >&2
