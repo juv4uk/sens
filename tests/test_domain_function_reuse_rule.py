@@ -53,6 +53,17 @@ class DomainFunctionReuseRule(unittest.TestCase):
         self.assertIn("НЕ ПЕРЕВІРЕНО", output.getvalue())
         self.assertIn(f"щонайменше {guard.MINIMUM_RATIFIED_SURFACES}", output.getvalue())
 
+    def test_d11_derived_selector_is_not_a_ratified_lower_domain_surface(self) -> None:
+        # D10-батько вже ратифікований; його D11-нащадок — лише похідна.
+        spec = importlib.util.spec_from_file_location("guard_d11_boundary_test", GUARD)
+        self.assertIsNotNone(spec)
+        self.assertIsNotNone(spec.loader)
+        guard = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(guard)
+        lower = guard.ladder_names(ROOT)
+        self.assertIn("CDAAAAAAAR", lower)  # D10
+        self.assertNotIn("CDAAAAAAAAR", lower)  # D11
+
     def test_search_self_test_is_green(self) -> None:
         result = run(SEARCH, "--self-test")
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)

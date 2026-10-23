@@ -69,7 +69,10 @@ def ladder_names(root: Path) -> set[str]:
     """Усі людські назви поверхонь драбин — через наявний механізм."""
     discover = _load_discover()
     names: set[str] = set()
-    for _domain, rows in discover.load_domain_tables(root).items():
+    for domain, rows in discover.load_domain_tables(root).items():
+        # D11 — робочий домен похідних, а не ратифікована драбина D1–D10.
+        if domain > 10:
+            continue
         for row in rows:
             names.update(discover.aliases(row))
     return names
