@@ -92,7 +92,7 @@ if (( ${#binding_sources[@]} != 0 )); then
   : > "$direct_source"
   for dependency in "${binding_sources[@]}"; do
     cat -- "$dependency" >> "$direct_source"
-    printf '\\n' >> "$direct_source"
+    printf '\n' >> "$direct_source"
   done
   cat -- "$source_file" >> "$direct_source"
 fi
