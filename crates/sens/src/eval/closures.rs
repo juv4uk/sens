@@ -107,30 +107,46 @@ fn parse_lambda_list_inner(expr: &Expr) -> LambdaListResult {
             let mut unique = HashSet::new();
             let mut current: &Expr = expr;
             let rest = loop {
+                // У хвості lambda-параметрів D2-рамка з W7-клітин є
+                // текстовим ім'ям лише тут, у явно вибраній binder-позиції.
+                // Сам canonical reader і довільні dotted-пари лишаються
+                // структурними; їхня інтерпретація не змінюється.
+                if let Some(name) = bindable_parameter_name(current)? {
+                    if !unique.insert(name.clone()) {
+                        return Err(LanguageError::new(
+                            ErrorKind::InvalidForm,
+                            format!("duplicate lambda parameter · povtornyi parametr lambda · doppelter lambda-Parameter: {name}"),
+                            current.span,
+                        ));
+                    }
+                    break name;
+                }
                 match &current.kind {
                     ExprKind::Pair(head, tail) => {
-                        let name = match &head.kind {
-                            ExprKind::Symbol(name) => {
-                                canon::ensure_bindable(name, head.span)?;
-                                name.clone()
-                            }
-                            ExprKind::Sid(sid) => {
-                                canon::ensure_bindable_sid(*sid, head.span)?;
-                                sid.to_string().into()
-                            }
-                            ExprKind::DomainIdentity(identity) => {
-                                return Err(canon::immutable_domain_binding_error(
-                                    *identity,
-                                    head.span,
-                                ));
-                            }
-                            _ => {
-                                return Err(LanguageError::new(
-                                    ErrorKind::InvalidForm,
-                                    "lambda parameter must be a symbol · parametr lambda maie buty symvolom · lambda-Parameter muss ein Symbol sein",
-                                    head.span,
-                                ));
-                            }
+                        let name = match bindable_parameter_name(head)? {
+                            Some(name) => name,
+                            None => match &head.kind {
+                                ExprKind::Symbol(name) => {
+                                    canon::ensure_bindable(name, head.span)?;
+                                    name.clone()
+                                }
+                                ExprKind::Sid(sid) => {
+                                    canon::ensure_bindable_sid(*sid, head.span)?;
+                                    sid.to_string().into()
+                                }
+                                ExprKind::DomainIdentity(identity) => {
+                                    return Err(canon::immutable_domain_binding_error(
+                                        *identity, head.span,
+                                    ));
+                                }
+                                _ => {
+                                    return Err(LanguageError::new(
+                                        ErrorKind::InvalidForm,
+                                        "lambda parameter must be a symbol · parametr lambda maie buty symvolom · lambda-Parameter muss ein Symbol sein",
+                                        head.span,
+                                    ));
+                                }
+                            },
                         };
                         if !unique.insert(name.clone()) {
                             return Err(LanguageError::new(

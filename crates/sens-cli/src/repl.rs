@@ -100,6 +100,38 @@ fn append_t5m_expression(
     append_t5m_expression_context(expression, layout, words, depth, false)
 }
 
+/// Закодувати список параметрів lambda в явному контексті зв'язування.
+/// Крапкове ім'я rest подається як послідовність W7 у рамці D2;
+/// `parse_lambda_list` відновлює його лише в позиції rest-зв'язувача.
+/// Та сама послідовність W7 в усіх інших місцях лишається звичайним списком D2.
+fn append_t5m_lambda_parameters(
+    expression: &Expr,
+    layout: sens::Text7Layout,
+    words: &mut Vec<ExactDomainWord>,
+    depth: usize,
+) -> Result<(), String> {
+    if depth > 128 {
+        return Err("T5M_SOURCE_DEPTH_NOT_ADMITTED: exact physical D2 reader limit=128".into());
+    }
+    let ExprKind::Pair(head, tail) = &expression.kind else {
+        return append_t5m_expression_context(expression, layout, words, depth, false);
+    };
+    let control = |bits| t5m_domain_identity(2, bits).map(ExactDomainWord::Identity);
+    words.push(control(0b10)?);
+    append_t5m_expression_context(head, layout, words, depth + 1, false)?;
+    words.push(control(0b11)?);
+    if matches!(tail.kind, ExprKind::Pair(..)) {
+        append_t5m_lambda_parameters(tail, layout, words, depth + 1)?;
+    } else {
+        // Символ саме в цій синтаксичній позиції є крапковим rest-зв'язувачем.
+        // Звичайне кодування символу дає послідовність гліфів W7 у D2-рамці;
+        // розбір замикань визнає її ім'ям лише в цьому слоті зв'язування.
+        append_t5m_expression_context(tail, layout, words, depth + 1, false)?;
+    }
+    words.push(control(0b01)?);
+    Ok(())
+}
+
 /// Цитовані протокольні символи — дані, не українські викличні імена.
 /// Їхні W7 glyph-и мають точний ASCII/en маршрут, а D2 списки мають
 /// канонічні 00-роздільники. Викличні імена надалі лишаються укр.
@@ -171,11 +203,16 @@ fn append_t5m_expression_context(
                     append_t5m_expression_context(item, layout, words, depth + 1, true)?;
                 }
             } else {
+                let lambda_head = matches!(items.first().map(|item| &item.kind), Some(ExprKind::DomainIdentity(DomainIdentity::D4(word))) if word.word().packed_bits() == 0b0010);
                 for (index, item) in items.iter().enumerate() {
                     if index > 0 {
                         words.push(control(0b00)?);
                     }
-                    append_t5m_expression_context(item, layout, words, depth + 1, quoted_data)?;
+                    if lambda_head && index == 1 {
+                        append_t5m_lambda_parameters(item, layout, words, depth + 1)?;
+                    } else {
+                        append_t5m_expression_context(item, layout, words, depth + 1, quoted_data)?;
+                    }
                 }
             }
             words.push(control(0b01)?);
@@ -2585,6 +2622,22 @@ mod tests {
                     if identity.width() == 2 && identity.packed_bits() == 0b11
             )));
         }
+    }
+
+    #[cfg(feature = "zig-transport")]
+    #[test]
+    fn t5m_dotted_lambda_rest_name_is_recovered_only_in_binder_context() {
+        let source = "((функція (а . хвостик) хвостик) 1 2)";
+        let (physical, view) = mint_t5m_source_pair(source)
+            .expect("lambda rest binder has an explicit reversible W7 route");
+        let result = eval_t5m_paired_file(source, &physical)
+            .expect("Zig-restored SENS words execute the dotted lambda");
+        assert_eq!(
+            result.value.to_string(),
+            "(2)",
+            "actual value: {:?}; words: {view}",
+            result.value
+        );
     }
 
     #[test]
