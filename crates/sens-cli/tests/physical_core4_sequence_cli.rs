@@ -525,6 +525,7 @@ fn verify_unpaired_ukrainian_libs_natively() {
         "list-penultimate-atomic-suffix-zero-copy-general",
         "суфікс-останнього-предиката-без-копії",
         "відобразити-першокласний-доменний-код-на-список",
+        "відібрати-за-першокласним-предикатом",
         "залишити-точні-числа",
     ] {
         let source = root.join("lib").join(format!("{stem}.lisp"));
