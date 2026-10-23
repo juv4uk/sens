@@ -23,7 +23,7 @@
   python3 scripts/guard-domain-function-reuse.py --file lib/x.lisp
   python3 scripts/guard-domain-function-reuse.py --self-test
 
-Код виходу: 0 — дублів немає; 1 — знайдено дубль (BLOCKED); 2 — помилка вживання.
+Код виходу: 0 — дублів немає; 1 — знайдено дубль (BLOCKED); 2 — помилка вживання або драбину не перевірено.
 """
 from __future__ import annotations
 
@@ -50,7 +50,7 @@ EXCLUDED_PREFIXES = (
 # визначає функції за принципом «мова тесту відповідає шару», тож охоронець
 # мусить їх бачити. Решта tests/** лишається поза увагою (фікстури, помічники).
 SEMANTIC_PREFIX = "tests/semantic/"
-MINIMUM_RATIFIED_SURFACES = 1000
+MINIMUM_RATIFIED_SURFACES = 1001
 DEF = re.compile(r"\(" + "визначити" + r"\s+([^\s()]+)")
 
 
