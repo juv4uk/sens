@@ -517,9 +517,8 @@ fn evaluate_list(
     span: Span,
 ) -> Result<EvalStep, LanguageError> {
     // Фізичний односимвольний D7 токен може бути ВЖЕ зв'язаним Text7 ім'ям.
-    // Тільки в позиції голови виклику, і тільки за точним наявним binding,
-    // розгортаємо його у той самий D2/W7 ключ, що й багатогліфове ім'я.
-    // Не робимо D7 викличним доменом і не торкаємося цитованих даних.
+    // Лише голова виклику та лише точне наявне зв'язування дають маршрут
+    // до джерельного символу; повторно виконувати D7-список тут не можна.
     if matches!(
         items[0].kind,
         ExprKind::DomainIdentity(crate::DomainIdentity::D7(_))
@@ -529,24 +528,31 @@ fn evaluate_list(
             span: items[0].span,
         };
         if let Some(key) = text7_binding_key(&framed) {
-            // Один D7-гліф має такий самий шлях до ВЖЕ наявного
-            // українського зв'язування, як багатогліфовий D2/W7.
-            // Без зв'язування D7 лишається даними, не викличним доменом.
-            let existing_source_binding = crate::Text7::from_canonical_wire_token(&key)
+            if environment.get(&key).is_some() {
+                let head = Expr {
+                    kind: ExprKind::Symbol(key.into()),
+                    span: items[0].span,
+                };
+                return dispatch_call(None, None, Some(&head), &items[1..], environment, span);
+            }
+            let source_name = crate::Text7::from_canonical_wire_token(&key)
                 .ok()
-                .and_then(|text| crate::render_text7(&text, crate::Text7Layout::Uk).ok())
-                .is_some_and(|name| environment.get(&name).is_some());
-            if environment.get(&key).is_some() || existing_source_binding {
-                return dispatch_call(None, None, Some(&framed), &items[1..], environment, span);
+                .and_then(|text| crate::render_text7(&text, crate::Text7Layout::Uk).ok());
+            if let Some(name) = source_name.filter(|name| environment.get(name).is_some()) {
+                let head = Expr {
+                    kind: ExprKind::Symbol(name.into()),
+                    span: items[0].span,
+                };
+                return dispatch_call(None, None, Some(&head), &items[1..], environment, span);
             }
         }
     }
     if let Some(identity) = binary_head_domain_identity(&items[0]) {
         return dispatch_domain_call(identity, &items[1..], environment, span);
     }
-    // A D2/W7 frame becomes a Text7 binding only in executable call-head
-    // position. Ordinary D2 lists, quoted data and dotted data remain governed
-    // solely by the canonical D2 reader.
+    // A D2/W7 frame is a lookup route only while it is the call head.
+    // Dispatch the already-resolved symbol, not the frame as a second program:
+    // evaluating the frame again would reinterpret its first D7 cell as code.
     if let Some(key) = text7_binding_key(&items[0]) {
         if environment.get(&key).is_none() {
             let text = crate::Text7::from_canonical_wire_token(&key).ok();
@@ -565,11 +571,12 @@ fn evaluate_list(
                     span,
                 );
             }
-            // Рівно той самий пошук наявного зв'язування, що й у
-            // позиції значення. D7-гліфи не створюють викличної
-            // координати; без вже визначеного імені — UnknownSymbol.
-            if surface.as_deref().is_some_and(|name| environment.get(name).is_some()) {
-                return dispatch_call(None, None, Some(&items[0]), &items[1..], environment, span);
+            if let Some(name) = surface.filter(|name| environment.get(name).is_some()) {
+                let head = Expr {
+                    kind: ExprKind::Symbol(name.into()),
+                    span: items[0].span,
+                };
+                return dispatch_call(None, None, Some(&head), &items[1..], environment, span);
             }
             return Err(LanguageError::new(
                 ErrorKind::UnknownSymbol,
@@ -577,7 +584,11 @@ fn evaluate_list(
                 items[0].span,
             ));
         }
-        return dispatch_call(None, None, Some(&items[0]), &items[1..], environment, span);
+        let head = Expr {
+            kind: ExprKind::Symbol(key.into()),
+            span: items[0].span,
+        };
+        return dispatch_call(None, None, Some(&head), &items[1..], environment, span);
     }
     dispatch_call(
         items[0].kind.as_symbol(),
