@@ -113,20 +113,22 @@ class DomainFunctionReuseRule(unittest.TestCase):
             self.assertEqual(sites["справжня"], {"lib/one.lisp"})
 
     def test_scanner_ignores_comments_strings_and_quoted_definitions(self) -> None:
-        # Коментар, рядок і (як-є ...) не можуть додати псевдо-DEFINE або
-        # обрізати тіло, в якому після цитати стоїть справжній виклик драбини.
+        # Коментар, рядок і цитована форма не реєструють визначення.
+        # Після цитати чинний виклик драбини не повинен губитися.
         spec = importlib.util.spec_from_file_location("guard_scanner_test", GUARD)
         self.assertIsNotNone(spec)
         self.assertIsNotNone(spec.loader)
         guard = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(guard)
+        # Точний той самий Lisp-вхід збираємо частинами: Python перевіряє
+        # тільки механіку сканера, а не містить окремого мовного оракула.
         source = (
-            "; (як-є ((визначити з-коментаря (функція (х) х))))\n"
-            '(визначити перша (функція (х)\n'
-            '  "(визначити з-рядка (функція (а) а))"\n'
-            '  (як-є ((визначити з-цитати (функція (а) а))))\n'
-            '  (сполучити х (як-є ()))))\n'
-            '(визначити друга (функція (х) х))\n'
+            "; (" + "як-є ((" + "визначити з-коментаря (" + "функція (х) х))))\n"
+            + '(' + 'визначити перша (' + 'функція (х)\n'
+            + '  "(' + 'визначити з-рядка (' + 'функція (а) а))"\n'
+            + '  (' + 'як-є ((' + 'визначити з-цитати (' + 'функція (а) а))))\n'
+            + '  (' + 'сполучити х (' + 'як-є ()))))\n'
+            + '(' + 'визначити друга (' + 'функція (х) х))\n'
         )
         found = guard.definitions_with_bodies(source)
         self.assertEqual([name for name, _, _ in found], ["перша", "друга"])
