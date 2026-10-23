@@ -212,6 +212,15 @@ run_case() {
   else
     failed=$((failed + 1))
     failed_ids+=("$id")
+    # Помилка завантаження спільного Core/process/macro шару не є незалежною
+    # регресією кожного Lisp-свідка. Нативний SENS уже записав справжню
+    # причину у direct.err. Зупиняємо цей набір без 69 повторних запусків,
+    # але з обов'язковим RED; звичайні мовні збої надалі збираємо всі.
+    if [[ -f "$evidence/$id/direct.err" ]] &&
+       grep -Eq '^Error loading (process|core|macro|utf8|fs)\\.lisp:' "$evidence/$id/direct.err"; then
+      echo "::error title=SENS bootstrap::REGRESSION id=$id layer=bootstrap expected=language-libraries-installed actual=startup-rejected remaining_witnesses=NOT_RUN" >&2
+      exit 1
+    fi
     echo "::warning title=SENS Lisp/T5M::CONTINUE_AFTER_RED id=$id remaining_witnesses=will_run" >&2
   fi
 }
