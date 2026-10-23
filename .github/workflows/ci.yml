@@ -92,6 +92,11 @@ jobs:
           python3 scripts/check-numeric-domain-ratification.py
           python3 scripts/check_d10_owner_whole_domain_ratification.py
           python3 -m unittest tests/test_domain_ladder_2046_exact.py -v
+          # Core1 canaries перевіряють точну проєкцію й транспорт; семантику виконує SENS, не Python.
+          python3 -m unittest \
+            tests/test_core1_domain_canary.py \
+            tests/test_core1_third_domain_canary.py \
+            tests/test_core1_fourth_domain_canary.py -v
           # Лише методика звіту T5M: nearest-rank p90, без запуску важкого бенчмарка.
           python3 -m unittest discover -s research/zig-codecs/t5m -p 'test_*.py' -v
           # Повний прогін: self-test пошуку й охоронця драбин.
