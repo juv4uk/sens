@@ -198,3 +198,65 @@ test "Zig T5M BE3 rejects incomplete source without touching the output" {
         try std.testing.expectEqual(@as(u8, 0xA5), byte);
     }
 }
+
+
+// Бенчмарк саме Zig ABI, не Lisp-законів. Той самий transport_abi.zig
+// виконує encode BE3 -> T5, що й фізичний коридор з Rust. Ні D1-вердиктів,
+// ні Python-підміни. Шум shared runner не перетворюємо на швидкісний gate.
+// Zig 0.16 вилучив std.time.Timer: для цього Linux CI потрібен CLOCK_MONOTONIC.
+const bench_clock = @cImport({
+    @cInclude("time.h");
+});
+
+fn benchMonotonicNs() !u64 {
+    var ts: bench_clock.struct_timespec = undefined;
+    if (bench_clock.clock_gettime(bench_clock.CLOCK_MONOTONIC, &ts) != 0)
+        return error.ClockUnavailable;
+    return @as(u64, @intCast(ts.tv_sec)) * 1_000_000_000 +
+        @as(u64, @intCast(ts.tv_nsec));
+}
+
+test "benchmark Zig T5 ABI exact-width throughput (diagnostic, no Lisp verdict)" {
+    const samples_count = 7;
+    const words_per_sample = 256 * 16;
+    var samples: [samples_count]u64 = undefined;
+    var checksum: u64 = 0;
+    var output: [2]u8 = undefined;
+
+    // Прогрів одного й того самого механізму без таймера.
+    for (0..256) |payload| {
+        const input: [3]u8 = .{ 8, 0, @intCast(payload) };
+        const n = abi.sens_zig_t5_encode_be3(&input, input.len, &output, output.len);
+        try std.testing.expectEqual(@as(isize, 2), n);
+        checksum +%= output[0];
+    }
+    for (0..samples_count) |sample| {
+        const start = try benchMonotonicNs();
+        for (0..16) |_| {
+            for (0..256) |payload| {
+                const input: [3]u8 = .{ 8, 0, @intCast(payload) };
+                const n = abi.sens_zig_t5_encode_be3(&input, input.len, &output, output.len);
+                if (n != 2) return error.TransportRegression;
+                checksum +%= output[0];
+            }
+        }
+        const finish = try benchMonotonicNs();
+        if (finish <= start) return error.NonMonotonicClock;
+        samples[sample] = finish - start;
+    }
+    // 7 фіксованих проб; медіана та 90-й порядковий елемент (6/7).
+    // Не вдаємо статистичної значущості та не вимірюємо Rust/SENS.
+    for (1..samples_count) |i| {
+        var j = i;
+        while (j > 0 and samples[j - 1] > samples[j]) : (j -= 1) {
+            const prior = samples[j - 1];
+            samples[j - 1] = samples[j];
+            samples[j] = prior;
+        }
+    }
+    std.mem.doNotOptimizeAway(checksum);
+    std.debug.print(
+        "ZIG_TRANSPORT_BENCH id=t5-abi-d8 samples={d} words_per_sample={d} p50_ns_per_word={d} p90_ns_per_word={d} checksum={d} semantics=NOT_TESTED status=MEASURED\\n",
+        .{ samples_count, words_per_sample, samples[3] / words_per_sample, samples[6] / words_per_sample, checksum },
+    );
+}
