@@ -641,9 +641,46 @@ while IFS= read -r file || [[ -n "$file" ]]; do
   elif [[ "$file" == "tests/semantic/d11-meta-sixth-laws.lisp" ||
           "$file" == "tests/semantic/d11-meta-sixth-mutant.lisp" ||
           "$file" == "tests/semantic/d11-meta-last-define-laws.lisp" ||
-          "$file" == "tests/semantic/d11-meta-last-define-mutant.lisp" ]]; then
-    # Мовне джерело не містить дубля D11: чинне DEFINE шостого — в MetaEval.
-    binding_sources=(--binding-source lib/meta-eval.lisp)
+          "$file" == "tests/semantic/d11-meta-last-define-mutant.lisp" ||
+          "$file" == "tests/semantic/d11-meta-compare-laws.lisp" ||
+          "$file" == "tests/semantic/d11-meta-compare-mutant.lisp" ]]; then
+    # MetaEval містить незалежні DEFINE, але при повному завантаженні
+    # першою виконується ще невиклична фізична D6 LENGTH (#5854).
+    # Витягаємо лише точний чинний Lisp DEFINE потрібного свідка.
+    # Shell не відтворює закон — він копіює справжній текст до SENS.
+    case "$file" in
+      tests/semantic/d11-meta-sixth-*)
+        target='(визначити шосте-значення-групи' ;;
+      tests/semantic/d11-meta-last-define-*)
+        target="(визначити останнє-ім'я-визначення-лямбди" ;;
+      tests/semantic/d11-meta-compare-*)
+        target='(визначити порівняти-два-значення-мета' ;;
+    esac
+    exact_meta_definition="$dir/meta-eval-exact-definition.lisp"
+    if ! awk -v target="$target" '
+      $0 == target {
+        if (found++) exit 2
+        copying = 1
+      }
+      copying && NF == 0 {
+        copying = 0
+        complete++
+        next
+      }
+      copying { print }
+      END { if (found != 1 || complete != 1 || copying) exit 2 }
+    ' lib/meta-eval.lisp > "$exact_meta_definition"; then
+      echo "::error::T5M_META_DEFINE_NOT_ISOLATABLE source=$file target=$target" >&2
+      mark_file_failed
+      continue
+    fi
+    if [[ ! -s "$exact_meta_definition" ]]; then
+      echo "::error::T5M_META_DEFINE_EMPTY source=$file target=$target" >&2
+      mark_file_failed
+      continue
+    fi
+    sha256sum lib/meta-eval.lisp "$exact_meta_definition" > "$dir/meta-eval-source.sha256"
+    binding_sources=(--binding-source "$exact_meta_definition")
   elif [[ "$file" == "benchmarks/d11-families.lisp" ]]; then
     # Чисті сімейства D11 використовують DEFINE зі справжніх Lisp-бібліотек.
     # Частоти залежать також від D11 групування, а не від Rust-імітації.
