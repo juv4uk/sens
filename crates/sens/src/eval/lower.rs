@@ -45,24 +45,29 @@ fn head_domain_identity(head: &Expr, mode: LowerMode) -> Option<CoreDomainIdenti
     match &head.kind {
         ExprKind::DomainIdentity(identity) => identity.core_operation(),
         ExprKind::Symbol(name) if mode == LowerMode::ExactDomain => {
-            immutable_surface_domain_identity(name)
+            source_head_domain_identity(name)
         }
-        ExprKind::Symbol(name) => immutable_surface_domain_identity(name),
+        ExprKind::Symbol(name) => source_head_domain_identity(name),
         _ => None,
     }
 }
 
-/// The source-surface → exact-domain projection boundary, shared by lowering
-/// and immutable-binding checks. Never reconstruct an historical eight-bit ID.
-pub(crate) fn immutable_surface_domain_identity(name: &str) -> Option<CoreDomainIdentity> {
+/// Resolve a *call head* through the exact Ukrainian source projection first.
+/// This is deliberately separate from immutable-binding checks: choosing the
+/// exact call route must not silently change which Lisp definitions are bindable.
+fn source_head_domain_identity(name: &str) -> Option<CoreDomainIdentity> {
     necessary_forms::domain_identity_for_symbol(name)
-        // Ukrainian source heads must follow the selected uk/ukr projection,
-        // not the cross-language compatibility index. In particular,
-        // D8 EQUAL (однакові?) must never fall through to historical D3 EQ.
         .or_else(|| {
             semantic_registry::exact_uk_callable_for_source_head(name)
                 .and_then(|identity| identity.core_operation())
         })
+        .or_else(|| semantic_registry::domain_identity_for_surface(name))
+}
+
+/// Binding identity is intentionally unchanged by the source-head routing fix.
+/// Never reconstruct an historical eight-bit ID.
+pub(crate) fn immutable_surface_domain_identity(name: &str) -> Option<CoreDomainIdentity> {
+    necessary_forms::domain_identity_for_symbol(name)
         .or_else(|| semantic_registry::domain_identity_for_surface(name))
 }
 
@@ -373,7 +378,7 @@ mod domain_ladder_lowering_migration_tests {
 
     #[test]
     fn ukr_equal_source_head_keeps_its_ratified_d8_identity() {
-        let identity = immutable_surface_domain_identity("однакові?")
+        let identity = source_head_domain_identity("однакові?")
             .expect("ratified Ukrainian D8 EQUAL source route");
         assert_eq!(identity.width(), 8, "D8 must not collapse to D3 EQ");
         assert_eq!(identity.packed_bits(), 0b11110111, "exact D8 EQUAL word");
