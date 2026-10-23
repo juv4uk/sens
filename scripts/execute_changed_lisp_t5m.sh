@@ -185,6 +185,23 @@ run_native_t5m_program() {
         echo "SENS_LISP_SEMANTIC_LAW_PASS source=$file result=D1:1 oracle=SENS carrier=ZIG_T5M"
         ;;
     esac
+    # Нативний Д5 закон та його мутант: вердикт формулює Lisp,
+    # Zig пакує, SENS виконує фізичний T5M, Shell лише звіряє D1.
+    case "$file" in
+      tests/semantic/d5-arithmetic-native-t5m-law.lisp|tests/semantic/d5-arithmetic-native-t5m-mutant.lisp)
+        local_expected=1
+        if [[ "$file" == "tests/semantic/d5-arithmetic-native-t5m-mutant.lisp" ]]; then
+          local_expected=0
+        fi
+        printf '%s\n' "$local_expected" > "$dir/d5-language.expected"
+        if ! cmp -s "$dir/native-paired.stdout" "$dir/d5-language.expected"; then
+          echo "::error file=$file,title=SENS D5 language::REGRESSION layer=semantics expected=D1:$local_expected actual=$(cat "$dir/native-paired.stdout")" >&2
+          mark_file_failed
+          return
+        fi
+        echo "::notice file=$file,title=SENS D5 language::PASS native=SENS carrier=Zig/T5M result=D1:$local_expected"
+        ;;
+    esac
     # Принцип 5: дві РІЗНІ фізичні форми того самого обчислення.
     # 1) живий український Lisp, без T5M; 2) точні байти Zig/T5M,
     # виконані SENS після контролю оборотності. Ніякого Python-оракула.

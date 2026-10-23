@@ -175,6 +175,8 @@ jobs:
                   "tests/semantic/lisp-d3-atom-cond-laws.lisp",
                   "tests/semantic/lisp-d3-cons-selectors-laws.lisp",
                   "tests/semantic/lisp-d3-eq-branches-laws.lisp",
+                  "tests/semantic/d5-arithmetic-native-t5m-law.lisp",
+                  "tests/semantic/d5-arithmetic-native-t5m-mutant.lisp",
               ):
                   if witness not in selected:
                       selected.append(witness)
@@ -295,6 +297,8 @@ jobs:
           check_lisp_law d3-d4-negative tests/semantic/d3-d4-ukr-native-mutant.lisp '0'
           check_lisp_law d3-ukr-self-verdict tests/semantic/d3-ukr-language-self-verdict.lisp '1'
           check_lisp_law d5-ukr-self-verdict tests/semantic/d5-ukr-arithmetic-self-verdict.lisp '1'
+          check_lisp_law d5-physical-law tests/semantic/d5-arithmetic-native-t5m-law.lisp '1'
+          check_lisp_law d5-physical-mutant tests/semantic/d5-arithmetic-native-t5m-mutant.lisp '0'
           check_lisp_law d4-late-binding tests/semantic/d4-late-definition-binding-law.lisp '1'
           check_lisp_law d4-escaped-closure tests/semantic/d4-escaped-lexical-closure-law.lisp '1'
           check_lisp_law d3-atom-cond tests/semantic/lisp-d3-atom-cond-laws.lisp '1'
