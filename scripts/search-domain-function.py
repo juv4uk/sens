@@ -26,6 +26,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 DISCOVER = ROOT / "scripts" / "discover_domain_function_candidates.py"
+GUARD = ROOT / "scripts" / "guard-domain-function-reuse.py"
 SINGLE = re.compile(r"^[^()\s]+$")
 
 
@@ -46,6 +47,13 @@ def _project_definitions() -> dict[str, list[str]]:
     import subprocess
     files = subprocess.run(["git", "-c", "core.quotepath=false", "ls-files", "lib"],
                            cwd=ROOT, capture_output=True, text=True).stdout.split()
+    # Механічне виявлення DEFINE вже реалізовано охоронцем драбини.
+    # Не заводимо другого regex-сканера Lisp у Python-пошуковику.
+    spec = importlib.util.spec_from_file_location("guard_domain_function_reuse", GUARD)
+    if spec is None or spec.loader is None:
+        raise SystemExit("SEARCH-DOMAIN-FUNCTION: guard-domain-function-reuse.py unavailable")
+    guard = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(guard)
     for rel in files:
         if not rel.endswith(".lisp"):
             continue
@@ -54,8 +62,8 @@ def _project_definitions() -> dict[str, list[str]]:
         path = ROOT / rel
         if not path.is_file():
             continue
-        for m in re.finditer(r"\(визначити\s+([^\s()]+)", path.read_text(encoding="utf-8", errors="ignore")):
-            out.setdefault(m.group(1), []).append(rel)
+        for name in guard.definitions(path.read_text(encoding="utf-8", errors="ignore")):
+            out.setdefault(name, []).append(rel)
     return out
 
 
