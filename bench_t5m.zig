@@ -34,12 +34,18 @@ pub fn main(init: std.process.Init) !void {
     if (!std.mem.eql(u8, physical, roundtrip)) return error.NonCanonicalPhysicalCorpus;
     if (original.words.len == 0) return error.EmptyCorpus;
 
-    var decode_ns: [11]u64 = undefined;
-    var encode_ns: [11]u64 = undefined;
+    const sample_count: usize = 11;
+    const min_sample_ns: u64 = 25_000_000;
+    const max_batches: usize = 100_000;
+    var decode_elapsed_ns: [sample_count]u64 = undefined;
+    var encode_elapsed_ns: [sample_count]u64 = undefined;
+    var decode_ops: [sample_count]u64 = undefined;
+    var encode_ops: [sample_count]u64 = undefined;
+    var decode_ns_per_op: [sample_count]u64 = undefined;
+    var encode_ns_per_op: [sample_count]u64 = undefined;
     var guard: usize = 0;
 
-    // Один повний прогрівальний пакет поза таймером: той самий codec і corpus,
-    // окремо decode та encode, без SENS-семантики в гарячому циклі.
+    // Прогрів поза таймером на тому самому корпусі і тому самому codec.
     for (0..iterations) |_| {
         var decoded = try codec.decode(allocator, physical);
         guard += decoded.words.len;
@@ -53,36 +59,65 @@ pub fn main(init: std.process.Init) !void {
         allocator.free(encoded);
     }
 
-    for (0..decode_ns.len) |sample| {
-        const started = std.Io.Clock.awake.now(io);
-        for (0..iterations) |_| {
-            var decoded = try codec.decode(allocator, physical);
-            guard += decoded.words.len;
-            std.mem.doNotOptimizeAway(decoded.words.len);
-            decoded.deinit(allocator);
+    // Калібруємо кожну пробу за мінімальною тривалістю, а не за фіксованими
+    // 128 операціями. Кількість пакетів зберігаємо, щоб отримати ns/operation.
+    for (0..sample_count) |sample| {
+        const decode_started = std.Io.Clock.awake.now(io);
+        var elapsed_decode: u64 = 0;
+        var decoded_ops: u64 = 0;
+        var decode_batches: usize = 0;
+        while (elapsed_decode < min_sample_ns) {
+            for (0..iterations) |_| {
+                var decoded = try codec.decode(allocator, physical);
+                guard += decoded.words.len;
+                std.mem.doNotOptimizeAway(decoded.words.len);
+                decoded.deinit(allocator);
+            }
+            decoded_ops += @intCast(iterations);
+            decode_batches += 1;
+            elapsed_decode = @intCast(decode_started.untilNow(io, .awake).toNanoseconds());
+            if (decode_batches >= max_batches and elapsed_decode < min_sample_ns)
+                return error.SampleBudgetExceeded;
         }
-        decode_ns[sample] = @intCast(started.untilNow(io, .awake).toNanoseconds());
+        if (elapsed_decode == 0 or decoded_ops == 0) return error.InsufficientClockResolution;
+        decode_elapsed_ns[sample] = elapsed_decode;
+        decode_ops[sample] = decoded_ops;
+        decode_ns_per_op[sample] = elapsed_decode / decoded_ops;
 
         const encode_started = std.Io.Clock.awake.now(io);
-        for (0..iterations) |_| {
-            const encoded = try codec.encode(allocator, words);
-            guard += encoded.len;
-            std.mem.doNotOptimizeAway(encoded.len);
-            allocator.free(encoded);
+        var elapsed_encode: u64 = 0;
+        var encoded_ops: u64 = 0;
+        var encode_batches: usize = 0;
+        while (elapsed_encode < min_sample_ns) {
+            for (0..iterations) |_| {
+                const encoded = try codec.encode(allocator, words);
+                guard += encoded.len;
+                std.mem.doNotOptimizeAway(encoded.len);
+                allocator.free(encoded);
+            }
+            encoded_ops += @intCast(iterations);
+            encode_batches += 1;
+            elapsed_encode = @intCast(encode_started.untilNow(io, .awake).toNanoseconds());
+            if (encode_batches >= max_batches and elapsed_encode < min_sample_ns)
+                return error.SampleBudgetExceeded;
         }
-        encode_ns[sample] = @intCast(encode_started.untilNow(io, .awake).toNanoseconds());
+        if (elapsed_encode == 0 or encoded_ops == 0) return error.InsufficientClockResolution;
+        encode_elapsed_ns[sample] = elapsed_encode;
+        encode_ops[sample] = encoded_ops;
+        encode_ns_per_op[sample] = elapsed_encode / encoded_ops;
+
+        std.debug.print(
+            "ZIG_T5M_SAMPLE sample={d} decode_elapsed_ns={d} decode_ops={d} decode_ns_per_op={d} encode_elapsed_ns={d} encode_ops={d} encode_ns_per_op={d} target_sample_ns={d}\n",
+            .{ sample + 1, elapsed_decode, decoded_ops, decode_ns_per_op[sample], elapsed_encode, encoded_ops, encode_ns_per_op[sample], min_sample_ns },
+        );
     }
-    const d = sortedCopy(decode_ns);
-    const e = sortedCopy(encode_ns);
+    const d = sortedCopy(decode_ns_per_op);
+    const e = sortedCopy(encode_ns_per_op);
     if (d[0] == 0 or e[0] == 0) return error.InsufficientClockResolution;
     std.debug.print(
-        "ZIG_T5M_BENCH physical_bytes={d} words={d} iterations={d} samples=11 warmup_batches=1 decode_p50_ns={d} decode_p90_ns={d} encode_p50_ns={d} encode_p90_ns={d} scope=zig-codec-only guard={d}\n",
-        .{ physical.len, words.len, iterations, d[5], d[9], e[5], e[9], guard },
+        "ZIG_T5M_BENCH physical_bytes={d} words={d} samples={d} min_sample_ns={d} decode_min_ns_per_op={d} decode_p50_ns_per_op={d} decode_p90_ns_per_op={d} decode_max_ns_per_op={d} encode_min_ns_per_op={d} encode_p50_ns_per_op={d} encode_p90_ns_per_op={d} encode_max_ns_per_op={d} scope=zig-codec-only guard={d}\n",
+        .{ physical.len, words.len, sample_count, min_sample_ns, d[0], d[5], d[9], d[sample_count - 1], e[0], e[5], e[9], e[sample_count - 1], guard },
     );
-    for (0..11) |i| {
-        std.debug.print("ZIG_T5M_SAMPLE sample={d} decode_ns={d} encode_ns={d}\n", .{ i + 1, decode_ns[i], encode_ns[i] });
-    }
-}
 
 test "physical T5M fixture is canonical and malformed bytes fail closed" {
     const allocator = std.testing.allocator;
