@@ -46,7 +46,7 @@ LC_ALL=C awk -F '\t' '
 
 printf '### Діагностика фаз Lisp → Zig/T5M → SENS\n\n'
 printf 'Реальні виміри окремих команд (разом зі стартом CLI). p50/p90 — **між різними свідками**, не повтори одного тесту; це не оцінка прискорення. Після відмови наступні фази не вимірюються.\n\n'
-printf '| Фаза | Вимірів | Невдалих команд | p50, мс | p90, мс | Макс., мс | Найповільніший свідок |\n'
+printf '| Фаза | Вимірів | Ненульових кодів | p50, мс | p90, мс | Макс., мс | Найповільніший свідок |\n'
 printf '|---|---:|---:|---:|---:|---:|---|\n'
 LC_ALL=C sort -t $'\t' -k2,2 -k4,4n "$clean" | LC_ALL=C awk -F '\t' '
   function flush(   i50,i90) {
@@ -54,15 +54,15 @@ LC_ALL=C sort -t $'\t' -k2,2 -k4,4n "$clean" | LC_ALL=C awk -F '\t' '
     i50 = int((n + 1) / 2)
     i90 = int((9 * n + 9) / 10)
     printf "| `%s` | %d | %d | %.1f | %.1f | %.1f | `%s` |\n", \
-      stage, n, errors, values[i50] / 1000, values[i90] / 1000, values[n] / 1000, slowest
+      stage, n, nonzero, values[i50] / 1000, values[i90] / 1000, values[n] / 1000, slowest
     delete values
     n = 0
-    errors = 0
+    nonzero = 0
   }
   $2 != stage { flush(); stage = $2 }
   {
     values[++n] = $4 + 0
-    if ($3 != "0") errors++
+    if ($3 != "0") nonzero++
     slowest = $1
   }
   END { flush() }
@@ -71,4 +71,4 @@ printf '\nНайповільніші окремі фази (для адресн�
 printf '| Свідок | Фаза | Код виходу | Час, мс |\n'
 printf '|---|---|---:|---:|\n'
 LC_ALL=C sort -t $'\t' -k4,4nr "$clean" | LC_ALL=C awk -F '\t' 'NR <= 5 {printf "| `%s` | `%s` | %s | %.1f |\n", $1, $2, $3, $4 / 1000}'
-printf '\nПомилки фази залишаються **RED**; таблиця не замінює Lisp/SENS-вердикти.\n'
+printf '\nНенульовий код може бути очікуваним для Type-негативу; це не вердикт RED. Остаточний PASS/RED визначає тільки Lisp/SENS-свідок та його окрема перевірка.\n'
