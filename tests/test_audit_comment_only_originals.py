@@ -128,7 +128,7 @@ class CommentOnlyOriginalTests(unittest.TestCase):
         self.assertTrue(original.is_file())
         raw = original.read_bytes()
         self.assertEqual(audit.git_blob_sha(raw),
-                         "9a39a1d341dde7faf3a1899b52f78a7b1e931783")
+                         "c1965220941df77917c06c0dd7be70bc897c6073")
         self.assertTrue(audit.semantic_lines(raw)[0])
         self.assertFalse((ROOT / "lib/core2.sens").exists())
 

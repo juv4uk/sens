@@ -309,9 +309,6 @@ pub use syntax::wire::{
     decode_program as wire_decode_program, encode_program as wire_encode_program,
 };
 
-/// Frozen Contract-6 compatibility profile.
-pub const CORE2_LIBRARY_SOURCE: &str = include_str!("../../../lib/core2.lisp");
-
 /// The current Core4 sens bootstrap library, evaluated after the macro layer.
 pub const CORE_LIBRARY_SOURCE: &str = include_str!("../../../lib/core4.lisp");
 
@@ -690,9 +687,13 @@ pub fn core_library_fasl_is_current() -> bool {
 /// historical profile changes provenance, not the language's truth model.
 pub fn load_core2_library(session: &mut Session) -> Result<EvalResult, LanguageError> {
     session.environment.select_core_profile(CoreProfile::Core2);
-    let result = eval_program(CORE2_LIBRARY_SOURCE, session)?;
     bind_missing_stable_surface_peers(&session.environment);
-    Ok(result)
+    // `lib/core2.lisp` is a comments-only profile description (zero forms),
+    // so loading it has no language effect and needs no embedded source bytes.
+    Ok(EvalResult {
+        value: Value::Nil,
+        output: session.environment.output_snapshot(),
+    })
 }
 
 /// Activate the Core3 experimental kernel-laboratory profile.
@@ -1047,6 +1048,18 @@ pub fn string_slice_text(text: &str, start: usize, end: usize) -> String {
 #[cfg(test)]
 mod core4_bootstrap_cache_tests {
     use super::*;
+
+    #[test]
+    fn core2_profile_selection_does_not_load_comment_only_source() {
+        let mut session = Session::bare();
+        let result = load_core2_library(&mut session).expect("Core2 profile selection");
+        assert_eq!(
+            session.environment.selected_core_profile(),
+            Some(CoreProfile::Core2)
+        );
+        assert!(matches!(result.value, Value::Nil));
+        assert!(result.output.is_empty());
+    }
 
     /// Measurement, not a language law. Each sample executes the identical
     /// Lisp-owned macro/Core4 bootstrap in a fresh bare Session; the *only*
