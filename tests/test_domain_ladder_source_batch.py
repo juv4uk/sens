@@ -47,6 +47,33 @@ class BatchSourceTests(unittest.TestCase):
         self.assertIn("(як-є 00000011)", new)
         self.assertEqual(MOD.guard_module(ROOT).scan_lisp(new, "lib/example.lisp"), [])
 
+    def test_explicit_sid8_sens8_heads_use_full_ukr_domain_projection(self):
+        # Міграція текстових голів, не удаване виконання СЕНС.
+        source = (
+            "(SeNs8:00001001 моя-функція "
+            "(SID8:00001000 (x) "
+            "(sens8:00000100 (sid8:00000001 00000011) x)))\n"
+            "; (sid8:00001001 коментар)\n"
+            "'(sens8:00001001 цитовані-дані)\n"
+        )
+        converted, count, reasons = MOD.rewrite(source, self.mapping, self.blocked)
+        self.assertEqual((count, reasons), (4, []))
+        self.assertIn(
+            "(визначити моя-функція (функція (x) "
+            "(сполучити (як-є 00000011) x)))", converted,
+        )
+        self.assertIn("; (sid8:00001001 коментар)", converted)
+        self.assertIn("'(sens8:00001001 цитовані-дані)", converted)
+        self.assertEqual(MOD.rewrite(converted, self.mapping, self.blocked),
+                         (converted, 0, []))
+
+    def test_unratified_explicit_sid8_remains_unchanged(self):
+        source = "(sid8:00001001 ф (SeNs8:00110111 результат))"
+        actual, count, reasons = MOD.rewrite(source, self.mapping, self.blocked)
+        self.assertEqual(actual, source)
+        self.assertEqual(count, 1)
+        self.assertTrue(any("SeNs8:00110111" in reason for reason in reasons))
+
     def test_ukrainian_apostrophe_does_not_hide_proven_old_heads(self):
         # Апостроф української клавіатури всередині назви не є QUOTE.
         source = "(00001001 ім'я (00001000 (об'єкт) (00000011 об'єкт об'єкт)))"
