@@ -161,7 +161,8 @@ run_native_t5m_program() {
     fi
     # Мовні самовердикти належать Lisp/SENS, а не Rust, Zig чи Python.
     # Shell перевіряє лише точний кінцевий D1:1 від фізичного виконавця.
-    if [[ "$file" == tests/semantic/language-law-*.lisp ]]; then
+    if [[ "$file" == tests/semantic/language-law-*.lisp ||
+          "$file" == "tests/semantic/lisp-d4-lexical-closure-laws.lisp" ]]; then
       printf '1\n' > "$dir/language-d1.expected"
       if ! cmp -s "$dir/native-paired.stdout" "$dir/language-d1.expected"; then
         echo "::error file=$file,title=SENS language law::WRONG_D1 expected=1 actual=$(cat "$dir/native-paired.stdout")" >&2
