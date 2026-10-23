@@ -16,13 +16,13 @@ mkdir -p "$OUT"
 } > "$OUT/environment.txt"
 
 CARGO_BUILD_JOBS=2 cargo run --locked --profile ci-meta -p sens \
-  --example packed_vs_visible_bench -- --samples 9 \
+  --example packed_vs_visible_bench -- --samples 15 \
   > "$OUT/raw.tsv" 2> "$OUT/run.stderr"
 
 samples="$(grep -c '^RUST_PACKED_VISIBLE_SAMPLE[[:space:]]' "$OUT/raw.tsv" || true)"
 summaries="$(grep -c '^RUST_PACKED_VISIBLE_SUMMARY[[:space:]]' "$OUT/raw.tsv" || true)"
-[[ "$samples" -eq 45 && "$summaries" -eq 5 ]] || {
-  echo "RUST_PACKED_VISIBLE_EVIDENCE_INVALID samples=$samples expected=45 summaries=$summaries expected_summaries=5" >&2
+[[ "$samples" -eq 75 && "$summaries" -eq 5 ]] || {
+  echo "RUST_PACKED_VISIBLE_EVIDENCE_INVALID samples=$samples expected=75 summaries=$summaries expected_summaries=5" >&2
   cat "$OUT/run.stderr" >&2
   exit 2
 }
