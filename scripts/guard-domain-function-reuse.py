@@ -193,6 +193,7 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--file", action="append")
     ap.add_argument("--self-test", action="store_true")
     ap.add_argument("--register", action="store_true", help="дописати виявлених кандидатів у реєстр D11")
+    ap.add_argument("--advise", action="store_true", help="замість BLOCKED — конкретні поради, що виправити")
     args = ap.parse_args(argv)
 
     ladder = ladder_names(ROOT)
@@ -267,6 +268,28 @@ def main(argv: list[str] | None = None) -> int:
         print(f"ЗАРЕЄСТРОВАНО в D11: {n} нових кандидатів → реєстр кандидатів D11 "
               f"(наявні не дублювались)")
 
+    if args.advise and blocked:
+        shadow = [(r, n) for r, n, w in blocked if "драбини" in w]
+        project = [(r, n) for r, n, w in blocked if "проєкту" in w]
+        fresh = [(r, n) for r, n, w in blocked if "драбини" not in w and "проєкту" not in w]
+        print(f"\nПОРАДИ (--advise): {len(blocked)} виправлень у {len({r for r, _, _ in blocked})} файлах")
+        if shadow:
+            print(f"\n  А) ЗАТІНЮЄ ДРАБИНУ ({len(shadow)}) — ужий наявну поверхню, не перевизначай:")
+            for r, n in shadow[:12]:
+                print(f"     {r}: «{n}» уже є поверхнею драбини — прибери своє визначення й клич драбину")
+            if len(shadow) > 12:
+                print(f"     … ще {len(shadow) - 12}")
+        if project:
+            print(f"\n  Б) ЗАТІНЮЄ ПРОЄКТ ({len(project)}) — ужий наявне визначення проєкту:")
+            for r, n in project[:8]:
+                print(f"     {r}: «{n}» уже визначено в проєкті")
+        if fresh:
+            print(f"\n  В) БЕЗ ДРАБИНИ ({len(fresh)}) — або вжий наявну поверхню, або познач причину:")
+            for r, n in fresh[:12]:
+                print(f"     {r}: «{n}» — додай вживання поверхні драбини, або `; D11-пропозиція: <причина>`")
+            if len(fresh) > 12:
+                print(f"     … ще {len(fresh) - 12}")
+        print()
     if blocked:
         for rel, name, why in blocked:
             print(f"BLOCKED: {rel}: «{name}» — {why}. Вжий наявну поверхню драбини, або познач "
