@@ -10,6 +10,12 @@ on:
 # Спрощений ci.yml за версією 22.10.2026.
 # Один автоматичний workflow; важкі дослідження — лише вручну в ci-heavy.yml.
 # PASS коридору не є релізним допуском.
+#
+# Драбини D1–D10 — джерело функцій для програм. Перед написанням нової функції:
+#   python3 scripts/search-domain-function.py <ім'я>      (--all <частина>, --domain d6)
+# Знайшов — вживай наявну; немає в програмі — визнач; немає в драбинах — кандидат D11 (далі D12…).
+# Охоронець scripts/guard-domain-function-reuse.py ловить дубль наявної поверхні (BLOCKED)
+# і друкує кандидатів D11. Драбина росте від потреби, а не від звички.
 permissions:
   contents: read
 
@@ -143,6 +149,17 @@ jobs:
           for name in selected:
               print(f"T5M_CHANGED_FILE {name}")
           PY
+
+      - name: Вживати функції драбин D1–D10, а не винаходити дублі
+        run: |
+          set -euo pipefail
+          manifest="$RUNNER_TEMP/changed-t5m-lisp.txt"
+          if [[ -s "$manifest" ]]; then
+            python3 scripts/guard-domain-function-reuse.py --paths-from "$manifest"
+          else
+            echo "немає змінених .lisp-програм — охоронець не має що перевіряти"
+          fi
+
 
       - uses: dtolnay/rust-toolchain@1.99.0
         if: steps.changed-t5m-lisp.outputs.has_lisp == 'true' || steps.changed-t5m-lisp.outputs.has_files == 'true'
