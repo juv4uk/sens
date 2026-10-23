@@ -1467,7 +1467,7 @@ NONPROGRAM_MANIFEST_BLOB_SHA = {
     "knowledge/migration-nonprogram-domain-tables-2026-10-08.json": "cc4e927f802e349b86ed55104e88560f399be14f",
     "knowledge/migration-nonprogram-comment-only-loaders-2026-10-08.json": "e258a854fb4abab0070c3f7585b96b6acdfcbfb7",
     "knowledge/migration-nonprogram-isa-manifest-2026-10-08.json": "d66fa8f636e47cd00744dc0ed5fa5f2f2c16ccd8",
-    "knowledge/migration-nonprogram-schema-manifest-2026-10-08.json": "ef7cf48cf53f48beaa49fdc3c9e130e6a7a69d7d",
+    "knowledge/migration-nonprogram-schema-manifest-2026-10-08.json": "53689013243182a3087f05781c6cc88be5814900",
     "knowledge/migration-nonprogram-evidence-manifest-2026-10-08.json": "413c9dee025bb56b9fd346701e46d7ae4fb9ea89",
     "knowledge/migration-nonprogram-expr-records-2026-10-08.json": "07c53b8dc76c2f35911f323966fdc2587d9224a9",
     "knowledge/migration-nonprogram-knowledge-records-2026-10-08.json": "f6ea570869558c91f4437f3b04c4300afced076f",
