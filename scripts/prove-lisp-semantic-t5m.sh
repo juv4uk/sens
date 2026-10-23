@@ -48,6 +48,22 @@ report_output_divergence() {
   fail "$id" carrier "$left_name-byte-exact-$right_name" divergent
 }
 
+# Прямий SENS уже прочитав файл, коли повідомляє невідоме зв'язування.
+# Це не помилка reader-а й не доказ хибності семантичного закону.
+# Класифікація стосується тільки діагностики; сам RED залишається RED.
+direct_failure_layer() {
+  local log="$1"
+  if grep -Fq 'unknown symbol' "$log"; then
+    printf '%s\n' 'sens-binding'
+  elif grep -Fq 'Parse error:' "$log"; then
+    printf '%s\n' 'lisp-reader'
+  elif grep -Eq 'kind=Type|expects a non-empty list|expects two atoms' "$log"; then
+    printf '%s\n' 'sens-direct-type'
+  else
+    printf '%s\n' 'sens-direct'
+  fi
+}
+
 run_law() {
   local id="$1" source="$2" expected="$3" dir physical actual
   dir="$evidence/$id"
@@ -59,7 +75,7 @@ run_law() {
   # Семантичний доказ не записує очікувану логіку іншою мовою.
   if ! timeout 45s "$sens" "$source" >"$dir/direct.out" 2>"$dir/direct.err"; then
     cat "$dir/direct.err" >&2
-    fail "$id" lisp-reader "SENS-execution" "rejected"
+    fail "$id" "$(direct_failure_layer "$dir/direct.err")" "SENS-execution" "rejected"
   fi
   # Кодек створює байти T5M; Zig відкриває і перевіряє точне подання.
   if ! timeout 45s "$sens" --t5m-mint "$source" "$physical" >"$dir/mint.out" 2>"$dir/mint.err"; then
@@ -110,7 +126,7 @@ run_bound_law() {
 
   if ! timeout 45s "$sens" "$combined" >"$dir/direct.out" 2>"$dir/direct.err"; then
     cat "$dir/direct.err" >&2
-    fail "$id" lisp-reader "SENS-execution" "rejected"
+    fail "$id" "$(direct_failure_layer "$dir/direct.err")" "SENS-execution" "rejected"
   fi
   if ! timeout 45s "$sens" --t5m-mint "$combined" "$physical" >"$dir/mint.out" 2>"$dir/mint.err"; then
     cat "$dir/mint.err" >&2
