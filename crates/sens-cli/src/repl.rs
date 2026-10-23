@@ -524,6 +524,32 @@ fn project_repl_surface_expression_in_scope(
     if depth > 768 {
         return Err("REPL projection lowering exceeds the SENS nesting limit".into());
     }
+    // The two ratified D24+ roots are immutable named values in the
+    // Core environment. Serialize those exact typed words into the carrier
+    // rather than leaving their Text7 spellings as apparent call heads in a
+    // detached physical session. This is a narrow projection rule: no other
+    // variables or computed expressions are substituted/folded.
+    if let Some(name) = source.get(expression.span.start..expression.span.end) {
+        if matches!(name, "число-нуль" | "число-один")
+            && !bound.iter().any(|candidate| candidate.as_ref() == name)
+            && matches!(
+                &expression.kind,
+                ExprKind::List(items)
+                    if !items.is_empty()
+                        && items.iter().all(|item| matches!(item.kind, ExprKind::DomainIdentity(DomainIdentity::D7(_))))
+            )
+        {
+            if let Some(Value::BinaryNumber(number)) = session.environment.get(name) {
+                if number.numeric_domain_width() == Some(24) {
+                    return Ok(Expr {
+                        kind: ExprKind::BinaryNumber(number.clone()),
+                        span: expression.span,
+                    });
+                }
+            }
+        }
+    }
+
     if let ExprKind::DomainIdentity(identity) = &expression.kind {
         if let Some(name) = source.get(expression.span.start..expression.span.end) {
             if bound.iter().any(|candidate| candidate.as_ref() == name)
@@ -2036,6 +2062,22 @@ pub(crate) fn run_repl(session: Session, initial_surface: ReplSurface, sens_loop
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[cfg(feature = "zig-transport")]
+    #[test]
+    fn named_d24_roots_lower_to_exact_numeric_words_not_text7_call_heads() {
+        let mut session = Session::default();
+        sens::load_core_library(&mut session).expect("Core4 roots");
+        for name in ["число-нуль", "число-один"] {
+            let words = prepare_t5m_repl_words(name, ReplSurface::UkrainianFull, &session)
+                .unwrap_or_else(|error| panic!("root={name} error={error}"));
+            assert_eq!(words.len(), 1, "root must be one typed D24+ word");
+            assert!(
+                matches!(&words[0], ExactDomainWord::Number(number) if number.numeric_domain_width() == Some(24)),
+                "root={name} must not remain as a D7/Text7 call head: {words:?}"
+            );
+        }
+    }
 
     #[cfg(feature = "zig-transport")]
     #[test]
