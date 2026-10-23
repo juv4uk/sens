@@ -633,6 +633,22 @@ jobs:
               echo "::warning file=$source,title=SENS wall-time $id::HIGH_JITTER p50_us=$p50 p90_us=$p90 ratio_gt_2=true shared_runner=true"
             fi
           done
+          # Однакові p50 чотирьох РІЗНИХ задач — привід шукати спільні накладні витрати.
+          # Це лише сигнал для профілювання bootstrap, не доказ eval-only чи регресії.
+          if [[ "$(wc -l < "$measurements")" -eq 4 ]]; then
+            min_p50="$(cut -f2 "$measurements" | sort -n | head -n 1)"
+            max_p50="$(cut -f2 "$measurements" | sort -n | tail -n 1)"
+            if [[ "$min_p50" =~ ^[0-9]+$ && "$max_p50" =~ ^[0-9]+$ ]] && (( min_p50 > 0 )); then
+              spread_pct=$(((max_p50 - min_p50) * 100 / min_p50))
+              echo "::notice title=SENS benchmark spread::MEASURED smallest_p50_us=$min_p50 largest_p50_us=$max_p50 spread_pct=$spread_pct samples_per_case=11 scope=CLI_bootstrap_eval"
+              if (( spread_pct <= 5 )); then
+                echo "::warning title=SENS benchmark spread::SIMILAR_P50_WATCH common_startup_or_shared_overhead_possible=true spread_pct=$spread_pct investigate=bootstrap_vs_eval not_a_semantic_or_release_verdict"
+              fi
+            else
+              echo "::error title=SENS benchmark spread::REGRESSION layer=timing expected=positive-numeric-p50 actual=invalid" >&2
+              exit 1
+            fi
+          fi
 
       # Фінальні анотації будуються лише із фактично записаних SENS-вердиктів.
       # RED законів не маскується часовими числами; без свідка лишається NOT_MEASURED.
