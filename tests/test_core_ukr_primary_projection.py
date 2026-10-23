@@ -50,6 +50,14 @@ class CoreUkrPrimaryProjectionTests(unittest.TestCase):
         self.assertNotIn("Відтворити:", document)
         self.assertNotIn("cargo run -p sens-cli --bin sens -- scripts/generate-function-table.lisp", document)
 
+    def test_flat_eight_bit_budget_inventory_is_retired(self):
+        # Стара таблиця не може зберігатися як активний список ідентичностей.
+        audit = source("contracts/primitive-budget-audit-734.lisp")
+        self.assertIn("ФАЙЛ ВИВЕДЕНО З УЖИТКУ", audit)
+        self.assertIn("повної колонки «укр»", audit)
+        self.assertNotRegex(audit, r"(?m)^\s*\(\(sid\s+\.")
+        self.assertNotRegex(audit, r"\b[01]{8}\b")
+
     def test_constitution_example_is_current_sens_not_host_racket(self):
         # Перевірка вихідних форм і незмінності цитованих даних.
         # Справжній SENS runtime/ T5M-зворотність — окремий доказ.
