@@ -14,7 +14,10 @@ import subprocess
 import sys
 import tempfile
 import unittest
+from contextlib import redirect_stdout
+from io import StringIO
 from pathlib import Path
+from unittest.mock import patch
 
 ROOT = Path(__file__).resolve().parents[1]
 GUARD = ROOT / "scripts" / "guard-domain-function-reuse.py"
@@ -35,6 +38,30 @@ class DomainFunctionReuseRule(unittest.TestCase):
     def test_guard_self_test_is_green(self) -> None:
         result = run(GUARD, "--self-test")
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+
+    def test_staged_guard_reads_git_index_not_dirty_worktree(self) -> None:
+        # Механіка pre-commit: staged дубль не можна приховати чистим worktree.
+        spec = importlib.util.spec_from_file_location("guard_staged_index_test", GUARD)
+        self.assertIsNotNone(spec)
+        self.assertIsNotNone(spec.loader)
+        guard = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(guard)
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            (root / "lib").mkdir()
+            subprocess.run(["git", "init", "-q"], cwd=root, check=True)
+            probe = root / "lib" / "staged.lisp"
+            probe.write_text("(визначити сполучити (функція (х у) х))\n", encoding="utf-8")
+            subprocess.run(["git", "add", "lib/staged.lisp"], cwd=root, check=True)
+            probe.write_text("(атом? (як-є ()))\n", encoding="utf-8")
+            output = StringIO()
+            with patch.object(guard, "ROOT", root):
+                with patch.object(guard, "ladder_names", return_value={"сполучити"}):
+                    with patch.object(guard, "project_definition_sites", return_value={}):
+                        with redirect_stdout(output):
+                            status = guard.main(["--staged"])
+            self.assertEqual(status, 1, output.getvalue())
+            self.assertIn("BLOCKED", output.getvalue())
 
     def test_search_self_test_is_green(self) -> None:
         result = run(SEARCH, "--self-test")
