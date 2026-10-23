@@ -366,14 +366,18 @@ red_receipt() {
     layer="$(head -n 1 "$dir/failure-layer.txt")"
   elif [[ -f "$dir/paired.err" ]]; then
     layer="$(paired_failure_layer "$dir/paired.err")"
+  elif [[ -f "$dir/direct.err" ]]; then
+    layer="$(direct_failure_layer "$dir/direct.err")"
+  fi
+  # Шар відмови та індекс фізичної форми — незалежні поля квитанції.
+  # fail() уже записав шар, але paired.err усе одно містить точну позицію.
+  if [[ -f "$dir/paired.err" ]]; then
     while IFS= read -r line; do
       if [[ "$line" =~ physical_form_index=([0-9]+) ]]; then
         form_index="${BASH_REMATCH[1]}"
         break
       fi
     done < "$dir/paired.err"
-  elif [[ -f "$dir/direct.err" ]]; then
-    layer="$(direct_failure_layer "$dir/direct.err")"
   fi
   printf '%s\t%s\t%s\t%s\t%s\t%s\n' \
     "$id" "$layer" "$source_hash" "$physical_hash" "$view_hash" "$form_index" \
