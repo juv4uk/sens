@@ -191,6 +191,40 @@ mod tests {
     }
 
     #[test]
+    fn канонічний_d7_read_write_зберігає_точні_вкладені_комірки() {
+        // Rust перевіряє лише механізм запису/читання D7-носія;
+        // семантичні закони залишаються в Lisp → SENS.
+        let original = Value::list([
+            Value::Text7(crate::Text7::from_cells(vec![0x00, 0x7f]).unwrap()),
+            Value::list([Value::Text7(
+                crate::Text7::from_cells(Vec::new()).unwrap(),
+            )]),
+        ]);
+        let wire = write_to_string_values(
+            &[original.clone()],
+            &Environment::root(),
+            Span::default(),
+        )
+        .expect("точний D7-носій повинен записуватися");
+        let restored = read_values(&[wire], &Environment::root(), Span::default())
+            .expect("READ повинен відновити D7, а не Symbol");
+        assert_eq!(restored, original);
+    }
+
+    #[test]
+    fn read_відхиляє_пошкоджений_d7_носій() {
+        for source in ["#t7:0", "#t7:80", "#t7:4A", "#t7:gg"] {
+            let error = read_values(
+                &[Value::String(Rc::from(source))],
+                &Environment::root(),
+                Span::default(),
+            )
+            .expect_err("пошкоджений D7 не може стати Symbol");
+            assert_eq!(error.kind, ErrorKind::Parse, "{source}");
+        }
+    }
+
+    #[test]
     fn read_all_returns_all_forms_as_data_with_exact_d24_numbers() {
         let result = read_all_values(
             &[Value::String(Rc::from("alpha 42"))],
