@@ -77,14 +77,37 @@ def definitions(text: str) -> list[str]:
 MARKER = re.compile(r";\s*D11-пропозиція\s*:", re.IGNORECASE)
 
 
-def introduced_at(rel: str, name: str) -> str:
-    """Коли й яким комітом уведено визначення — з історії комітів.
+_HISTORY_INDEX: dict | None = None
 
-    git log -S шукає коміт, де вперше з'явилася сигнатура іменованого визначення.
+
+def _history_index() -> dict:
+    """Кеш історії: індекс будує scripts/build-guard-history-index.py (один прохід)."""
+    global _HISTORY_INDEX
+    if _HISTORY_INDEX is None:
+        p = ROOT / "knowledge" / "guard-history-index.json"
+        try:
+            _HISTORY_INDEX = json.loads(p.read_text(encoding="utf-8"))
+        except Exception:
+            _HISTORY_INDEX = {}
+    return _HISTORY_INDEX
+
+
+def introduced_at(rel: str, name: str) -> str:
+    """Коли й яким комітом уведено — спершу з ІНДЕКСУ (миттєво), потім з git.
+
+    Індекс: knowledge/guard-history-index.json (будує build-guard-history-index.py).
+    Якщо чогось немає — запасний шлях git log -S, повільний, але точний.
     """
+    idx = _history_index()
+    d = (idx.get("defs") or {}).get(f"{rel}:{name}")
+    if d:
+        return f"{d['sha']} {d['date']}"
+    f = (idx.get("files") or {}).get(rel)
+    if f:
+        return f"{f['first_sha']} {f['first_date']} (створено файл)"
     try:
         out = subprocess.run(
-            ["git", "-c", "core.quotepath=false", "log", "-S", "(" + "визначити " + name,
+            ["git", "-c", "core.quotepath=false", "log", "-S", f"(визначити {name}",
              "--format=%h %ad", "--date=short", "-1", "--", rel],
             cwd=ROOT, capture_output=True, text=True, check=False).stdout.strip()
         return out or "?"
@@ -93,82 +116,31 @@ def introduced_at(rel: str, name: str) -> str:
 
 
 def _mask_quotes(text: str) -> str:
-    """Затерти коментарі, рядки та цитовані форми перед пошуком DEFINE.
+    """Затерти вміст (як-є …) — щоб не брати визначення з ДАНИХ.
 
-    Це лише структурний сканер джерела: вирази всередині цитати є
-    даними, не визначеннями коду. Довжина й позиції рядків зберігаються,
-    щоб діагностика та межі тіл лишалися прив'язаними до початкового тексту.
+    У законах часто є (як-є ((визначити а тіло-а) …)) — це тестові дані,
+    а не справжні визначення. Без цього охоронець скаржився б на «а», «б», «в».
     """
     out = list(text)
-    n = len(text)
-
-    def blank(start: int, stop: int) -> None:
-        for pos in range(start, stop):
-            if text[pos] != "\n":
-                out[pos] = " "
-
-    def string_end(start: int) -> int | None:
-        pos = start + 1
-        while pos < n:
-            if text[pos] == "\\":
-                pos += 2
-                continue
-            if text[pos] == '"':
-                return pos + 1
-            pos += 1
-        return None
-
-    def form_end(start: int) -> int | None:
-        """Кінець збалансованої форми з пропуском рядків і коментарів."""
+    i = 0
+    while True:
+        j = text.find("(як-є", i)
+        if j < 0:
+            break
         depth = 0
-        pos = start
-        while pos < n:
-            char = text[pos]
-            if char == ";":
-                newline = text.find("\n", pos)
-                pos = n if newline < 0 else newline + 1
-                continue
-            if char == '"':
-                after = string_end(pos)
-                if after is None:
-                    return None
-                pos = after
-                continue
-            if char == "(":
+        k = j
+        while k < len(text):
+            if text[k] == "(":
                 depth += 1
-            elif char == ")":
+            elif text[k] == ")":
                 depth -= 1
                 if depth == 0:
-                    return pos + 1
-            pos += 1
-        return None
-
-    pos = 0
-    while pos < n:
-        char = text[pos]
-        if char == ";":
-            newline = text.find("\n", pos)
-            stop = n if newline < 0 else newline
-            blank(pos, stop)
-            pos = stop
-            continue
-        if char == '"':
-            stop = string_end(pos)
-            if stop is None:
-                blank(pos, n)
-                break
-            blank(pos, stop)
-            pos = stop
-            continue
-        if text.startswith("(як-є", pos):
-            boundary = pos + len("(як-є")
-            if boundary == n or text[boundary].isspace() or text[boundary] in "()":
-                stop = form_end(pos)
-                if stop is not None:
-                    blank(pos, stop)
-                    pos = stop
-                    continue
-        pos += 1
+                    break
+            k += 1
+        for x in range(j, min(k + 1, len(text))):
+            if out[x] != "\n":
+                out[x] = " "
+        i = k + 1
     return "".join(out)
 
 
@@ -181,11 +153,9 @@ def definitions_with_bodies(text: str):
         # маркер у 200 символах перед визначенням
         before = text[max(0, m.start() - 200):m.start()]
         marked = bool(MARKER.search(before))
-        # Search boundaries in the same code-only view: DEFINE forms inside
-        # comments, strings or quoted data must not truncate executable bodies.
-        rest = masked[m.end():]
-        nxt_match = DEF.search(rest)
-        body = rest[:nxt_match.start()] if nxt_match else rest
+        rest = text[m.end():]
+        nxt = rest.find("(" + "визначити ")
+        body = rest[:nxt] if nxt > 0 else rest
         out.append((name, body, marked))
     return out
 
@@ -214,10 +184,7 @@ def project_definition_sites(root: Path) -> dict[str, set[str]]:
             continue
         path = root / rel
         if path.is_file():
-            source = path.read_text(encoding="utf-8", errors="ignore")
-            # Як і перевірка нового DEFINE, інвентар проєкту не трактує
-            # цитовану форму як реальне визначення в іншому файлі.
-            for m in DEF.finditer(_mask_quotes(source)):
+            for m in DEF.finditer(path.read_text(encoding="utf-8", errors="ignore")):
                 sites.setdefault(m.group(1), set()).add(rel)
     return sites
 
