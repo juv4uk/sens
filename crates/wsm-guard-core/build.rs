@@ -25,9 +25,9 @@ fn main() {
     for path in [
         "../../.zig-version",
         "../../guard_source_root.zig",
-        "../../lib/core.lisp",
-        "../../lib/unify.lisp",
-        "../../lib/guard.lisp",
+        "../../lib/core.sens",
+        "../../lib/unify.sens",
+        "../../lib/guard.sens",
     ] {
         println!("cargo:rerun-if-changed={path}");
     }

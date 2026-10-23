@@ -443,18 +443,14 @@ fn guard_reference_source() -> Result<String, String> {
 
 pub(crate) fn oracle_help(session: &mut Session, topic: Option<&str>) -> Result<Value, String> {
     let reference = guard_reference_source()?;
-    // The static Guard source crosses the Zig byte corridor, not Rust include.
-    // The mutable reference directory stays dynamically reloaded as before.
-    let guard = wsm_guard_core::guard_source()?;
-    for (name, source) in [
-        ("lib/guard.lisp", guard.as_str()),
-        ("knowledge/guard-reference.lisp", reference.as_str()),
-    ] {
-        let ast = parse(source)
-            .map_err(|error| format!("cannot parse {name}: {}", error.render(source)))?;
-        eval_parsed_expressions_incremental(&ast, session)
-            .map_err(|error| format!("cannot load {name}: {}", error.render(source)))?;
-    }
+    // Static Guard policy executes from its physical T5M asset. Only the
+    // deliberately live reference directory remains a source projection.
+    wsm_guard_core::load_guard_into(session)?;
+    let name = "knowledge/guard-reference.lisp";
+    let ast = parse(&reference)
+        .map_err(|error| format!("cannot parse {name}: {}", error.render(&reference)))?;
+    eval_parsed_expressions_incremental(&ast, session)
+        .map_err(|error| format!("cannot load {name}: {}", error.render(&reference)))?;
 
     let query = match topic {
         None => "(guard-scripts *guard-script-directory*)".to_string(),
