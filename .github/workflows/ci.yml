@@ -79,6 +79,16 @@ jobs:
                         "; ".join(row.get("reasons", [])))
           PY
 
+      # Точні вчорашні дві GitHub Annotations з чинного інвентарю .lisp.
+      # Прогрес не блокує незалежний коміт і не засвідчує SENS-семантику.
+      - name: УКР-ПРОЄКЦІЯ — вчорашні анотації прогресу Lisp
+        if: ${{ always() }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 scripts/report_ukr_projection_progress.py \
+            --json "$RUNNER_TEMP/ukr-projection-progress.json"
+
       - name: Знайти змінені Lisp-програми, а не історичні таблиці
         id: changed-t5m-lisp
         shell: bash
