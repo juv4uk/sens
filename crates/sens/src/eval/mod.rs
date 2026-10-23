@@ -47,6 +47,16 @@ pub(crate) fn d8_write_to_string_builtin() -> Value {
     }))
 }
 
+/// Д8:11101101 — уже існуючий точний механізм STRING->SYMBOL.
+/// Це лише першокласний адаптер для Lisp-виклику за українською назвою:
+/// правило значення й перевірка типу залишаються в тому самому SENS-примітиві,
+/// що обробляє точний D8 код; нової Rust-семантики тут немає.
+pub(crate) fn d8_string_to_symbol_builtin() -> Value {
+    Value::host_function(std::rc::Rc::new(|args, _environment, span| {
+        special_forms::string_to_symbol_values(args, span)
+    }))
+}
+
 /// Existing scalar-to-string representation bridge used by the pinned UTF-8
 /// Lisp layer. UTF-8 policy remains in Lisp; this only materializes a scalar.
 pub(crate) fn runtime_codepoint_to_string(
