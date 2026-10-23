@@ -44,6 +44,18 @@ fn український_поліном_обчислюється_в_sens_а_н�
                 фізичний.is_file() && фізичний.metadata().unwrap().len() > 0,
                 "відсутні фізичні Zig/T5M байти"
             );
+            let перегляд = фізичний.with_extension("");
+            let відкрито = Command::new(env!("CARGO_BIN_EXE_sens-trit"))
+                .args(["open", ф])
+                .output()
+                .expect("створити побітовий перегляд Zig/T5M");
+            assert!(
+                відкрито.status.success(),
+                "SENS фізичний reader: {}",
+                String::from_utf8_lossy(&відкрито.stderr)
+            );
+            std::fs::write(&перегляд, &відкрито.stdout)
+                .expect("запис канонічного T5M перегляду");
             let обернення = Command::new(env!("CARGO_BIN_EXE_sens-trit"))
                 .args(["verify-view", ф])
                 .output()
@@ -83,6 +95,7 @@ fn український_поліном_обчислюється_в_sens_а_н�
             );
         }
         let _ = std::fs::remove_file(&людський);
+        let _ = std::fs::remove_file(основа);
         let _ = std::fs::remove_file(&фізичний);
     }
 }
