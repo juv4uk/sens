@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Guard 14 immutable KNOWLEDGE DATA records against fake executable SENS migration."""
+"""Guard 13 immutable KNOWLEDGE DATA records against fake executable SENS migration."""
 from __future__ import annotations
 import hashlib
 import importlib.util
@@ -14,7 +14,6 @@ MANIFEST = ROOT / "knowledge/migration-nonprogram-knowledge-records-2026-10-08.j
 
 EXPECTED = {
     "knowledge/agent-discoveries.lisp": "agent-discoveries",
-    "knowledge/canon-authority-inventory.lisp": "schema",
     "knowledge/core4-predicate-record-inventory.lisp": "core4-predicate-record-inventory-3",
     "knowledge/function-table-sculpt-audit.lisp": "function-table-sculpt-audit-1",
     "knowledge/meta-eval-evidence.lisp": "schema",
@@ -76,7 +75,7 @@ class KnowledgeRecordSources(unittest.TestCase):
         ):
             self.assertNotIn(path, EXPECTED)
 
-    def test_canonical_census_imports_14_reviewed_data_rows(self):
+    def test_canonical_census_imports_13_reviewed_data_rows(self):
         script = ROOT / "scripts/report_original_migration_candidates.py"
         spec = importlib.util.spec_from_file_location("original_candidates_knowledge_test", script)
         assert spec and spec.loader
@@ -85,10 +84,31 @@ class KnowledgeRecordSources(unittest.TestCase):
         spec.loader.exec_module(mod)
         classifications = mod.load_nonprogram_classification(ROOT)
         knowledge = [x for x in classifications.values() if x["cohort"] == "knowledge-record"]
-        self.assertEqual(len(knowledge), 14)
+        self.assertEqual(len(knowledge), 13)
         self.assertEqual({x["path"] for x in knowledge}, set(EXPECTED))
         self.assertTrue(all(not x["automatic_sens_companion"] for x in knowledge))
         self.assertTrue(all(x["source_class"] == "NONPROGRAM_DATA_REVIEWED" for x in knowledge))
+
+    def test_retired_flat_sid_inventory_is_not_in_live_data_manifest(self):
+        manifest = json.loads(MANIFEST.read_text(encoding="utf-8"))
+        live_paths = {row["path"] for row in manifest["entries"]}
+        self.assertNotIn("knowledge/canon-authority-inventory.lisp", live_paths)
+        retired = [
+            row for row in manifest.get("retired_post_snapshot_sources", [])
+            if row.get("path") == "knowledge/canon-authority-inventory.lisp"
+        ]
+        self.assertEqual(len(retired), 1)
+        self.assertEqual(
+            retired[0]["previous_git_blob_sha1"],
+            "dd2804f937bc9b6178a8cb7c44d09dc28b225b4a",
+        )
+        self.assertEqual(
+            retired[0]["removed_by_commit"],
+            "acf2f3ab9c4785054e91a814cb5c93d2226f3355",
+        )
+        self.assertIn("SID8/Sens8", retired[0]["reason"])
+        self.assertFalse((ROOT / "knowledge/canon-authority-inventory.lisp").exists())
+
 
 if __name__ == "__main__":
     unittest.main()
