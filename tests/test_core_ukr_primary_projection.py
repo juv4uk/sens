@@ -45,7 +45,7 @@ class CoreUkrPrimaryProjectionTests(unittest.TestCase):
         self.assertIn("Чинна таблиця функцій — не окрема плоска восьмибітна нумерація.", machine)
         self.assertIn("lib/surface/semantic-registry-api.lisp", machine)
         self.assertIn("(прочитати-семантичний-реєстр)", machine)
-        self.assertNotRegex(machine, r"(?m)^\\s*\\([01]{8}\\s")
+        self.assertNotRegex(machine, r"(?m)^\s*\([01]{8}\s")
         self.assertIn("історична міграційна проєкція", document)
         self.assertNotIn("Відтворити:", document)
         self.assertNotIn("cargo run -p sens-cli --bin sens -- scripts/generate-function-table.lisp", document)
