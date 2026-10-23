@@ -162,23 +162,19 @@ class BatchSourceTests(unittest.TestCase):
         findings = self.guard.scan_lisp(new, "lib/f.lisp")
         self.assertIn("COND_NOT_TWO_FIELDS", {f.rule for f in findings})
 
-    def test_non_define_eight_bit_head_has_visible_unproved_evidence(self):
-        # Historical call-head 01001011 must never disappear simply because
-        # this file has no old DEFINE/DEF. Source-era remains unproved.
+    def test_migrated_native_executor_contains_no_w8_call_heads(self):
         path = "lib/machine/dispatch/native-first-execute.lisp"
+        source = (ROOT / path).read_text(encoding="utf-8")
+        heads = MOD.executable_call_heads(source, self.guard)
+        self.assertIn("визначити", heads)
+        self.assertIn("функція", heads)
+        self.assertFalse(any(MOD.BITS.fullmatch(head) for head in heads))
         report = MOD.run(ROOT, False, {path})
-        self.assertEqual(len(report["files"]), 1)
-        row = report["files"][0]
-        self.assertEqual(row["path"], path)
-        self.assertNotEqual(row["status"], "admitted")
-        self.assertTrue(
-            "01001011" in " ".join(row["reasons"])
-            or any("parser incomplete" in reason for reason in row["reasons"]),
-            row,
-        )
+        self.assertEqual(report["files"][0]["status"], "unchanged")
+        self.assertEqual(report["files"][0]["reasons"], [])
         self.assertFalse(report["semantic_admitted"])
 
-    def test_generated_and_current_domain_data_are_never_mass_rewritten(self):
+    def test_migrated_machine_and_data_sources_are_not_mass_rewritten(self):
         names = {
             "lib/machine/encoding/admitted-iclass-index.lisp",
             "lib/machine/cpu/intel-core-i5-6400-inventory.lisp",
@@ -191,7 +187,8 @@ class BatchSourceTests(unittest.TestCase):
         self.assertEqual(len(census["files"]), len(names))
         for row in census["files"]:
             with self.subTest(path=row["path"]):
-                self.assertEqual(row["status"], "source-era-unproved")
+                self.assertEqual(row["status"], "unchanged", row)
+                self.assertEqual(row["reasons"], [])
 
     def test_macro_and_machine_sources_are_assessed_not_name_blocked(self):
         paths = {"lib/macro.lisp", "lib/machine/block.lisp"}
@@ -256,8 +253,13 @@ class BatchSourceTests(unittest.TestCase):
         self.assertEqual(report["summary"]["scanned"], 2)
         self.assertEqual(
             {row["status"] for row in report["files"]},
-            {"source-era-unproved"},
+            {"unchanged"},
         )
+        for path in paths:
+            heads = MOD.executable_call_heads(
+                (ROOT / path).read_text(encoding="utf-8"), self.guard
+            )
+            self.assertFalse(any(MOD.BITS.fullmatch(head) for head in heads), path)
 
     def test_guard_sources_use_current_ukr_d3_d9_without_legacy_source_pin(self):
         cases = {
