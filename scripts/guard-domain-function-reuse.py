@@ -161,7 +161,10 @@ def project_definition_sites(root: Path) -> dict[str, set[str]]:
             continue
         path = root / rel
         if path.is_file():
-            for m in DEF.finditer(path.read_text(encoding="utf-8", errors="ignore")):
+            source = path.read_text(encoding="utf-8", errors="ignore")
+            # Як і перевірка нового DEFINE, інвентар проєкту не трактує
+            # цитовану форму як реальне визначення в іншому файлі.
+            for m in DEF.finditer(_mask_quotes(source)):
                 sites.setdefault(m.group(1), set()).add(rel)
     return sites
 
