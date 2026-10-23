@@ -396,6 +396,7 @@ run_case run_law d3-eq-atom-boundary-mutant tests/semantic/d3-eq-atom-boundary-m
 run_case run_type_rejection d3-eq-nonatom-type-negative tests/semantic/d3-eq-nonatom-type-negative.lisp 'eq expects two atoms'
 # Д3 селектори на порожньому D3 NIL повинні дати точний Type у всіх носіях.
 run_case run_type_rejection d3-car-empty-list-type-negative tests/semantic/d3-car-empty-list-type-negative.lisp 'car expects a non-empty list'
+run_case run_type_rejection d3-car-atomic-dotted-tail-type-negative tests/semantic/d3-car-atomic-dotted-tail-type-negative.lisp 'car expects a non-empty list'
 run_case run_type_rejection d3-cdr-empty-list-type-negative tests/semantic/d3-cdr-empty-list-type-negative.lisp 'cdr expects a non-empty list'
 run_case run_type_rejection d3-cond-nil-condition-type-negative tests/semantic/d3-cond-nil-condition-type-negative.lisp 'D3:110 COND expects exact D1:1 / D1:0'
 # D4 NOT — часткова функція тільки над D1 PredicateBit, ніколи над структурним NIL.
