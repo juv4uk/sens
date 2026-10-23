@@ -207,11 +207,135 @@ def score(rows: list[dict[str, Any]], threshold: float, bins: int, expected_spli
     }
 
 
+def select_threshold(
+    rows: list[dict[str, Any]],
+    max_selective_risk: float = 0.10,
+    min_accepted: int = 5,
+    expected_split: str = "validation",
+) -> dict[str, Any]:
+    """Вибрати поріг лише на validation; якщо безпечного немає — не вигадувати."""
+    if expected_split != "validation":
+        raise EvaluationError("поріг дозволено добирати лише на split=validation")
+    if not math.isfinite(max_selective_risk) or not 0 <= max_selective_risk <= 1:
+        raise EvaluationError("max selective risk має бути скінченним у [0,1]")
+    if isinstance(min_accepted, bool) or not isinstance(min_accepted, int) or min_accepted < 1:
+        raise EvaluationError("min accepted має бути додатним цілим числом")
+    if not rows:
+        raise EvaluationError("validation набір порожній")
+    if min_accepted > len(rows):
+        raise EvaluationError("min accepted більший за кількість validation-прикладів")
+
+    risk_limit = Fraction(str(max_selective_risk))
+    observed: list[tuple[Fraction, bool, str]] = []
+    seen_ids: set[str] = set()
+    dataset_hashes: set[str] = set()
+    model_hashes: set[str] = set()
+    for row in rows:
+        row_id = str(row.get("id", ""))
+        if not row_id or row_id in seen_ids:
+            raise EvaluationError(f"відсутній або повторений id: {row_id!r}")
+        seen_ids.add(row_id)
+        if row.get("split") != "validation":
+            raise EvaluationError(f"{row_id}: поріг добирається лише з validation, отримано {row.get('split')!r}")
+        gold = row.get("gold")
+        if gold not in LABELS:
+            raise EvaluationError(f"{row_id}: невідома еталонна мітка {gold!r}")
+        distribution = extract_distribution(row)
+        predicted = max(LABELS, key=lambda label: (distribution[label], -LABELS.index(label)))
+        confidence = distribution[predicted]
+        observed.append((confidence, predicted == gold, row_id))
+        if row.get("dataset_sha256"):
+            dataset_hashes.add(str(row["dataset_sha256"]))
+        elif row.get("input_dataset_sha256"):
+            dataset_hashes.add(str(row["input_dataset_sha256"]))
+        if row.get("student_model_sha256"):
+            model_hashes.add(str(row["student_model_sha256"]))
+        elif row.get("model_sha256"):
+            model_hashes.add(str(row["model_sha256"]))
+
+    if len(dataset_hashes) > 1:
+        raise EvaluationError("validation змішує кілька хешів корпусу")
+    if len(model_hashes) > 1:
+        raise EvaluationError("validation змішує прогнози кількох моделей")
+
+    candidates: list[dict[str, Any]] = []
+    thresholds = sorted({confidence for confidence, _correct, _row_id in observed})
+    for threshold in thresholds:
+        accepted = [(confidence, correct, row_id) for confidence, correct, row_id in observed if confidence >= threshold]
+        accepted_count = len(accepted)
+        if accepted_count < min_accepted:
+            continue
+        errors = sum(not correct for _confidence, correct, _row_id in accepted)
+        risk = Fraction(errors, accepted_count)
+        if risk <= risk_limit:
+            candidates.append(
+                {
+                    "threshold_fraction": threshold,
+                    "accepted": accepted_count,
+                    "errors": errors,
+                    "risk_fraction": risk,
+                }
+            )
+
+    common = {
+        "selected_for": "validation",
+        "validation_count": len(rows),
+        "maximum_allowed_selective_risk": {
+            "numerator": risk_limit.numerator,
+            "denominator": risk_limit.denominator,
+        },
+        "minimum_accepted": min_accepted,
+        "dataset_sha256_values": sorted(dataset_hashes),
+        "model_sha256_values": sorted(model_hashes),
+        "small_validation_warning": len(rows) < 30,
+        "threshold_rule": "maximize accepted validation rows subject to the risk bound; ties choose the higher threshold",
+        "challenge_used": False,
+        "test_used": False,
+    }
+    if not candidates:
+        return {
+            **common,
+            "status": "no-safe-threshold",
+            "threshold": None,
+            "accepted": 0,
+            "errors": 0,
+            "achieved_selective_risk": None,
+            "coverage": {"numerator": 0, "denominator": len(rows)},
+            "reason": "no candidate meets both max risk and minimum accepted count",
+        }
+
+    best = max(
+        candidates,
+        key=lambda candidate: (
+            candidate["accepted"],
+            candidate["threshold_fraction"],
+        ),
+    )
+    threshold = best["threshold_fraction"]
+    risk = best["risk_fraction"]
+    return {
+        **common,
+        "status": "selected",
+        "threshold": {"numerator": threshold.numerator, "denominator": threshold.denominator},
+        "accepted": best["accepted"],
+        "errors": best["errors"],
+        "achieved_selective_risk": {"numerator": risk.numerator, "denominator": risk.denominator},
+        "coverage": {
+            "numerator": best["accepted"],
+            "denominator": len(rows),
+        },
+        "reason": None,
+    }
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--input", type=Path, required=True, help="JSONL з teacher_distribution або distribution")
     parser.add_argument("--expected-split", choices=("validation", "test"), default="test")
+    parser.add_argument("--mode", choices=("score", "select-threshold"), default="score")
     parser.add_argument("--threshold", type=float, default=0.80, help="тільки для coverage/selective risk")
+    parser.add_argument("--max-selective-risk", type=float, default=0.10, help="максимальна частка помилок для mode=select-threshold")
+    parser.add_argument("--min-accepted", type=int, default=5, help="мінімум прийнятих validation-прикладів для mode=select-threshold")
     parser.add_argument("--bins", type=int, default=10)
     parser.add_argument("--output", type=Path, help="необов'язковий JSON-звіт; за замовчуванням stdout")
     args = parser.parse_args()
@@ -220,7 +344,15 @@ def main() -> int:
         if args.output and args.output.resolve() == args.input.resolve():
             raise EvaluationError("звіт не може перезаписати файл прогнозів")
         rows = read_rows(args.input)
-        report = score(rows, args.threshold, args.bins, args.expected_split)
+        if args.mode == "select-threshold":
+            report = select_threshold(
+                rows,
+                max_selective_risk=args.max_selective_risk,
+                min_accepted=args.min_accepted,
+                expected_split=args.expected_split,
+            )
+        else:
+            report = score(rows, args.threshold, args.bins, args.expected_split)
         report["input_path"] = str(args.input)
         report["input_sha256"] = hashlib.sha256(raw_bytes).hexdigest()
         rendered = json.dumps(report, ensure_ascii=False, indent=2, sort_keys=True) + "\n"
