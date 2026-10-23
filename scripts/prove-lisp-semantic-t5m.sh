@@ -264,9 +264,19 @@ run_error_rejection() {
   # Перевіряємо названий клас помилки на прямому, парному та фізичному шляху.
   # Bash лише класифікує справжню діагностику SENS, не створює семантичний вирок.
   local id="$1" source="$2" expected_kind="$3" diagnostic="$4" dir physical
+  local profile="${5:-clean}"
+  local -a paired_args=() physical_command=()
   dir="$evidence/$id"
   physical="$dir/program.sens"
   mkdir -p "$dir"
+  case "$profile" in
+    clean) physical_command=("$sens" "$physical") ;;
+    core4)
+      paired_args=(--core4-runtime)
+      physical_command=("$trit" eval-core4 "$physical")
+      ;;
+    *) fail "$id" harness "profile=clean-or-core4" "$profile" ;;
+  esac
   test -f "$source" && test ! -L "$source" ||
     fail "$id" source "regular-Lisp" "missing-or-symlink"
 
@@ -291,7 +301,7 @@ run_error_rejection() {
     fail "$id" zig-transport "canonical-roundtrip" "rejected"
   fi
 
-  if profile_stage "$id" sens-paired timeout 45s "$sens" --t5m-pair "$source" "$physical" >"$dir/paired.out" 2>"$dir/paired.err"; then
+  if profile_stage "$id" sens-paired timeout 45s "$sens" --t5m-pair "$source" "$physical" "${paired_args[@]}" >"$dir/paired.out" 2>"$dir/paired.err"; then
     fail "$id" sens-physical "$expected_kind-rejection" "paired-accepted"
   fi
   if ! grep -Fq "$diagnostic" "$dir/paired.err" ||
@@ -299,7 +309,7 @@ run_error_rejection() {
     cat "$dir/paired.err" >&2
     fail "$id" sens-physical "$expected_kind" "unexpected-paired-error"
   fi
-  if profile_stage "$id" sens-standalone timeout 45s "$sens" "$physical" >"$dir/physical.out" 2>"$dir/physical.err"; then
+  if profile_stage "$id" sens-standalone timeout 45s "${physical_command[@]}" >"$dir/physical.out" 2>"$dir/physical.err"; then
     fail "$id" sens-physical "$expected_kind-rejection" "standalone-accepted"
   fi
   if ! grep -Fq "$diagnostic" "$dir/physical.err"; then
@@ -317,7 +327,7 @@ run_type_rejection() {
 }
 
 run_division_by_zero_rejection() {
-  run_error_rejection "$1" "$2" DivisionByZero "$3"
+  run_error_rejection "$1" "$2" DivisionByZero "$3" core4
 }
 
 : >"$evidence/results.txt"
