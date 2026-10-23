@@ -180,6 +180,9 @@ run_case run_law d3-demorgan-four-cases tests/semantic/d3-demorgan-truth-table-l
 run_case run_law d3-demorgan-mutant tests/semantic/d3-demorgan-truth-table-mutant.lisp 0
 run_case run_law d3-quote-short-circuit-positive tests/semantic/d3-cond-quote-lazy-law.lisp 1
 run_case run_law d3-quote-short-circuit-mutant tests/semantic/d3-cond-quote-lazy-mutant.lisp 0
+# Д4 EVAL: цитований Lisp повертає порожнечу, а мутант підміняє результат.
+run_case run_law d4-eval-quote-positive tests/semantic/d4-eval-value-call-laws.lisp 1
+run_case run_law d4-eval-quote-mutant tests/semantic/d4-eval-value-call-mutant.lisp 0
 run_case run_law d4-late-binding-positive tests/semantic/d4-late-definition-binding-law.lisp 1
 # Передавання першокласного предиката — виключно Lisp-закон Д4.
 run_case run_law d4-first-class-predicate-positive tests/semantic/d4-first-class-predicate-law.lisp 1
