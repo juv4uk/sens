@@ -254,7 +254,6 @@ def validate_documents(documents: dict[str, Any]) -> dict[str, Any]:
         d11_map[bits] = name
         d11_names.add(name.casefold())
     # Звірку з похідними (deriveds) робимо нижче, після їх побудови.
-    validate_d11_table_projections(documents["d11_table"])
 
     derived_rows = seed.get("rows")
     require(isinstance(derived_rows, list) and len(derived_rows) == 512,
@@ -310,6 +309,8 @@ def validate_documents(documents: dict[str, Any]) -> dict[str, Any]:
         require(actual_name == expected_name, "D11_TABLE_DERIVATION",
                 f"input=D11:{bits} expected={expected_name!r} actual={actual_name!r} "
                 "reproduce=python3 scripts/check_d11_selector_seed.py --json")
+
+    validate_d11_table_projections(documents["d11_table"])
 
     actual_accounting = {
         "d10_selector_parents": len(parents),
