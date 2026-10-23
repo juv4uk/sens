@@ -62,11 +62,10 @@ jobs:
           python3 scripts/check_no_encoded_source_literals.py --base "$base"
 
       - name: Структура визначень Lisp та SENS
-        run: python3 scripts/check-sens-definitions.py
-
-      - name: Заборонити старі сирі коди і перевірити проєкції D1–D11
+      - name: Проєкції, ратифікована D1–D10 і повний прогін
         run: |
           set -euo pipefail
+          # Проєкції та заборони D1–D11 (злито, без повторів).
           python3 -m unittest \
             tests/test_no_encoded_source_literals.py \
             tests/test_ukrainian_domain_projection_rules.py \
@@ -74,34 +73,17 @@ jobs:
             tests/test_domain_ladder_source_batch.py \
             tests/test_domain_function_reuse_rule.py \
             tests/test_tests_use_ukr_projection.py -v
-
-      - name: Ратифікована D1–D10 — повна перевірка драбини
-        run: |
-          set -euo pipefail
-          # Уся ратифікована драбина: точні ширини D1=2 … D10=1024,
-          # числова ратифікація, володільна ратифікація D10 і ядрові канарки.
+          # Ратифікована драбина D1–D10: точні ширини D1=2 … D10=1024.
           python3 scripts/check-domain-ladder-identity.py --check
           python3 scripts/check-numeric-domain-ratification.py
           python3 scripts/check_d10_owner_whole_domain_ratification.py
-          python3 -m unittest \
-            tests/test_domain_ladder_2046_exact.py -v
+          python3 -m unittest tests/test_domain_ladder_2046_exact.py -v
+          # Повний прогін: self-test пошуку й охоронця драбин.
+          python3 scripts/search-domain-function.py --self-test
+          python3 scripts/guard-domain-function-reuse.py --self-test
 
-      - name: Звіт про залишкові кандидати SID8 у активних Lisp (лише читання)
-        run: |
-          set -euo pipefail
-          python3 scripts/migrate-domain-ladder-source-batch.py --report "$RUNNER_TEMP/sens-lisp-census.json"
-          python3 - "$RUNNER_TEMP/sens-lisp-census.json" <<'PY'
-          import json, sys
-          report = json.loads(open(sys.argv[1], encoding="utf-8").read())
-          print("SENS Lisp census:", json.dumps(report["summary"], ensure_ascii=False))
-          for row in report["files"]:
-              if row["status"] != "unchanged":
-                  print(f"{row['status']}: {row['path']}: " +
-                        "; ".join(row.get("reasons", [])))
-          PY
+        run: python3 scripts/check-sens-definitions.py
 
-      # Точні вчорашні дві GitHub Annotations з чинного інвентарю .lisp.
-      # Прогрес не блокує незалежний коміт і не засвідчує SENS-семантику.
       - name: УКР-ПРОЄКЦІЯ — вчорашні анотації прогресу Lisp
         if: ${{ always() }}
         shell: bash
@@ -333,19 +315,8 @@ jobs:
           set -euo pipefail
           manifest="$RUNNER_TEMP/changed-t5m-lisp.txt"
           if [[ ! -s "$manifest" ]]; then
-            # Відсутність змін виконуваних Lisp-програм при Rust/Zig-only push — не RED.
-            # Проте збій попереднього відбору або порожній список після Lisp-змін
-            # залишається справжньою помилкою і не може маскуватися як SKIP.
-            if [[ "${{ steps.changed-t5m-lisp.outcome }}" != "success" ]]; then
-              echo "::error file=.github/workflows/ci.yml,title=SENS Lisp push::REGRESSION layer=selection expected=successful-manifest-selection actual=failed"
-              exit 1
-            fi
-            if [[ "${{ steps.changed-t5m-lisp.outputs.has_lisp }}" == "true" ]]; then
-              echo "::error file=.github/workflows/ci.yml,title=SENS Lisp push::REGRESSION layer=selection expected=executable-Lisp-witness actual=empty-manifest"
-              exit 1
-            fi
-            echo "::notice file=.github/workflows/ci.yml,title=SENS Lisp push::NOT_APPLICABLE changed_lisp=false physical_execution=NOT_TESTED"
-            exit 0
+            echo "::error file=.github/workflows/ci.yml,title=SENS Lisp push::REGRESSION layer=selection expected=executable-Lisp-witness actual=empty-manifest"
+            exit 1
           fi
           export CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0
           binary="$PWD/target/debug/sens"
@@ -537,25 +508,6 @@ jobs:
 
       # Повний прогін — усе, що можливо перевірити незалежно від змінених файлів.
       # Нічого з попередніх кроків не замінює: лише додає.
-      - name: Повний прогін — усе, що можливо (не лише змінене)
-        if: ${{ always() }}
-        shell: bash
-        timeout-minutes: 12
-        run: |
-          set -uo pipefail
-          echo "::notice title=SENS · повний прогін::драбина, ратифікація, охоронці, пошук"
-          python3 scripts/check-domain-ladder-identity.py --check
-          python3 scripts/check-numeric-domain-ratification.py
-          python3 scripts/check_d10_owner_whole_domain_ratification.py
-          python3 -m unittest \
-            tests/test_domain_ladder_2046_exact.py \
-            tests/test_domain_function_reuse_rule.py \
-            tests/test_tests_use_ukr_projection.py -v
-          python3 scripts/search-domain-function.py --self-test
-          python3 scripts/guard-domain-function-reuse.py --self-test
-          echo "::notice title=SENS · повний прогін::PASS"
-
-      # Останній крок: короткі результати зведенням — в анотації Actions і підсумок джоби.
       - name: Короткі результати — зведення в анотації
         if: ${{ always() }}
         shell: bash
