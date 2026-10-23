@@ -24,24 +24,23 @@ EXPECTED_READER = "(прочитати-семантичний-реєстр)"
 
 def check_rows(rows: list) -> list[str]:
     """Повне УКР-ім'я не має означати дві різні викличні координати."""
-    owners: dict[str, set[str]] = defaultdict(set)
+    owners: dict[tuple[str, str], set[str]] = defaultdict(set)
     problems: list[str] = []
     for row in rows:
         identity = f"{row.domain}:{row.bits}"
         if row.width in (2, 7) or (row.width == 3 and row.bits == "000"):
             continue
-        if row.ukr is None or row.ukr == "()":
-            # D1 contains values, not function heads; other missing УКР
-            # projections must not be silently promoted via English/SID8.
-            if row.width not in (1,):
-                problems.append(f"{identity}: відсутня повна укр-проєкція")
-            continue
-        owners[row.ukr].add(identity)
-    for name, identities in sorted(owners.items()):
+        for column in ("ук", "укр"):
+            value = getattr(row, "uk" if column == "ук" else "ukr")
+            if value is None or value == "()":
+                if column == "укр" and row.width != 1:
+                    problems.append(f"{identity}: відсутня повна (укр ...) проєкція")
+                continue
+            owners[(column, value)].add(identity)
+    for (column, name), identities in sorted(owners.items()):
         if len(identities) > 1:
             problems.append(
-                f"неоднозначна укр-проєкція {name!r}: "
-                + ", ".join(sorted(identities))
+                f"неоднозначна ({column} {name}): " + ", ".join(sorted(identities))
             )
     return problems
 
@@ -60,8 +59,11 @@ def check(root: Path) -> list[str]:
     for width in range(1, 11):
         table = root / f"lib/domains/d{width}.lisp"
         if not table.is_file():
-            return [f"відсутня ратифікована таблиця {table}"]
-        domain_rows = read_domain_table(table)
+            return [f"D{width}: відсутня ратифікована таблиця {table}"]
+        try:
+            domain_rows = read_domain_table(table)
+        except (OSError, ValueError) as exc:
+            return [f"D{width}: неправильна ширина або структура: {exc}"]
         exact = [format(index, f"0{width}b") for index in range(1 << width)]
         if [row.bits for row in domain_rows] != exact:
             return [f"D{width}: координати пропущені, дубльовані або переставлені"]
@@ -71,12 +73,24 @@ def check(root: Path) -> list[str]:
     return check_rows(rows)
 
 
+def check_registry(root: Path) -> list[str]:
+    """Виконуваний реєстр читає домени, не дублює стару W8-таблицю."""
+    path = root / REGISTRY
+    if not path.is_file():
+        return [f"відсутній {REGISTRY}"]
+    live = "\\n".join(line.split(";", 1)[0] for line in
+                     path.read_text(encoding="utf-8").splitlines()).strip()
+    if live != EXPECTED_READER:
+        return [f"{REGISTRY}: потрібне читання D1–D10 через SENS, не SID8"]
+    return []
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("root", nargs="?", default=str(Path(__file__).resolve().parents[1]))
     root = Path(ap.parse_args().root).resolve()
     try:
-        problems = check(root)
+        problems = check_registry(root) + check(root)
     except (OSError, ValueError) as exc:
         problems = [str(exc)]
     if problems:
