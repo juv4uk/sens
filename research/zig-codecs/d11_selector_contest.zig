@@ -14,6 +14,7 @@ extern "c" fn fgets([*]u8, c_int, *CFile) ?[*]u8;
 pub const selector_first: u16 = 0b01100000000;
 pub const selector_last: u16 = 0b10011111111;
 pub const selector_count: usize = 512;
+const benchmark_byte_capacity: usize = selector_count * @sizeOf(u16); // raw16 is the widest contest mode
 
 pub const Error = error{
     EmptyRun,
@@ -157,6 +158,19 @@ test "D11 Драбина: 9, 11 і 16 біт — чесний облік бай�
     try std.testing.expectEqualSlices(u16, &source, &decoded);
 }
 
+test "D11 Драбина: повний raw16 раунд 512 селекторів у буфері конкурсу" {
+    var source: [selector_count]u16 = undefined;
+    for (&source, 0..) |*word, i| {
+        word.* = selector_first + @as(u16, @intCast(i));
+    }
+    var payload: [benchmark_byte_capacity]u8 = undefined;
+    var restored: [selector_count]u16 = undefined;
+    const bytes_written = try encodeRaw16(&source, &payload);
+    try std.testing.expectEqual(benchmark_byte_capacity, bytes_written);
+    try decodeRaw16(payload[0..bytes_written], source.len, &restored);
+    try std.testing.expectEqualSlices(u16, &source, &restored);
+}
+
 test "D11 Драбина: чужі координати, обрізання та хвіст не змінюють вихід" {
     const sentinel = [_]u8{0xa5} ** 9;
     var output = sentinel;
@@ -251,7 +265,7 @@ fn timedBatch(
     codec: Codec,
     words: []const u16,
     repetitions: usize,
-    bytes: *[704]u8,
+    bytes: *[benchmark_byte_capacity]u8,
     restored: *[selector_count]u16,
 ) Error!u64 {
     const start = nanoseconds();
@@ -267,7 +281,7 @@ fn timedBatch(
 fn measure(
     codec: Codec,
     words: []const u16,
-    bytes: *[704]u8,
+    bytes: *[benchmark_byte_capacity]u8,
     restored: *[selector_count]u16,
 ) Error!Measurement {
     var repetitions: usize = 1;
@@ -305,7 +319,7 @@ fn benchmarkCount(count: usize, offset: usize) !void {
     }
     const input = words[0..count];
 
-    var bytes: [704]u8 = undefined;
+    var bytes: [benchmark_byte_capacity]u8 = undefined;
     var restored: [selector_count]u16 = undefined;
     const codecs = [_]Codec{ .selector9, .dense11, .raw16 };
     var byte_sizes: [codecs.len]usize = undefined;
