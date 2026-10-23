@@ -186,7 +186,7 @@ fn current_profile_admits_only_the_witnessed_quotient_slice() {
         fs::read_to_string(repo_root().join("lib/machine/profile/current-domain-x86-64.lisp"))
             .expect("current exact-domain machine profile");
 
-    assert!(profile.contains("(5 23 fast-path \"CQO+IDIV / positive i64 equal operands\")"));
+    assert!(profile.contains("(домен-п'ятий частка fast-path \"CQO+IDIV / positive i64 equal operands\")"));
     assert!(
         !profile.contains("00010100 fast-path"),
         "historical byte SID QUOTIENT must not become current profile authority"
