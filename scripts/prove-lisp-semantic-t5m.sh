@@ -426,10 +426,7 @@ run_case run_law d4-higher-order-composition-positive tests/semantic/d4-higher-o
 run_case run_law d4-higher-order-composition-mutant tests/semantic/d4-higher-order-composition-mutant.lisp 0
 run_case run_law d4-first-class-predicate-positive tests/semantic/d4-first-class-predicate-law.lisp 1
 run_case run_law d4-first-class-predicate-mutant tests/semantic/d4-first-class-predicate-mutant.lisp 0
-# Два українські Lisp-свідки самі доводять позитивний і негативний випадки.
-# Rust/Bash лише звіряє фізичний вихід SENS із названим результатом.
-run_case run_law усі-за-предикатом tests/semantic/закон-усі-за-предикатом.lisp "(закон-усі (status pass))"
-run_case run_law існує-за-предикатом tests/semantic/закон-існує-за-предикатом.lisp "(закон-існує (status pass))"
+# D6-квантори перевіряємо нижче як повні програми з визначеннями Core4.
 # D4 рекурсивна правильність списків: позитив та навмисне порушення.
 run_case run_law d4-proper-list-positive tests/semantic/d4-proper-list-recursion-law.lisp 1
 run_case run_law d4-proper-list-mutant tests/semantic/d4-proper-list-recursion-mutant.lisp 0
