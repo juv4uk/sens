@@ -93,10 +93,15 @@ def verify(source: str) -> None:
     if re.search(r"\([01]{3,9}(?=\s|\))", executable):
         raise AssertionError("FS: старий двійковий викличний голов замість укр проєкції")
     forms = parse(source)
-    if [old_identity(form) for form in forms] != parse(EXACT_LAW):
+    # Після трьох українських DEFINE тепер існує справжній кінцевий
+    # виклик-свідок SENS. Структурний тест не виконує семантики замість SENS.
+    if len(forms) != 4 or forms[-1] != ["атом?", ["як-є", []]]:
+        raise AssertionError("FS: відсутній або змінений кінцевий D1-виклик-свідок")
+    definitions = forms[:-1]
+    if [old_identity(form) for form in definitions] != parse(EXACT_LAW):
         raise AssertionError("FS: порушено початковий D1/D3/D4 закон, арність або I/O")
-    if len(forms) != 3 or any(
-        form[0] != "визначити" or form[2][0] != "функція" for form in forms
+    if len(definitions) != 3 or any(
+        form[0] != "визначити" or form[2][0] != "функція" for form in definitions
     ):
         raise AssertionError("FS: не повна українська D4:0011/0010 проєкція")
     # Зовнішній тег не перейменовується: кодек зберігає стару семантику.
