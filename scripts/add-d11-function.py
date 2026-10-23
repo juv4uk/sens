@@ -14,7 +14,6 @@ from __future__ import annotations
 
 import argparse
 import json
-import re
 import subprocess
 import sys
 from pathlib import Path
@@ -42,14 +41,24 @@ def ladder_names() -> set[str]:
 
 
 def project_names() -> dict[str, str]:
+    # Усі інструменти використовують одну механічну граматику DEFINE,
+    # чинний охоронець драбини. Цей помічник не реалізує Lisp-семантику.
+    import importlib.util
+    guard_path = ROOT / "scripts" / "guard-domain-function-reuse.py"
+    spec = importlib.util.spec_from_file_location("guard_domain_function_reuse", guard_path)
+    if spec is None or spec.loader is None:
+        raise RuntimeError(f"немає механічного сканера визначень: {guard_path}")
+    guard = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(guard)
+
     out: dict[str, str] = {}
     for rel in _tracked("lib"):
         if not rel.endswith(".lisp") or rel.startswith(("lib/domains/", "lib/generated/", "lib/surface/")):
             continue
         p = ROOT / rel
         if p.is_file():
-            for m in re.finditer(r"\(визначити\s+([^\s()]+)", p.read_text(encoding="utf-8", errors="ignore")):
-                out.setdefault(m.group(1), rel)
+            for name in guard.definitions(p.read_text(encoding="utf-8", errors="ignore")):
+                out.setdefault(name, rel)
     return out
 
 
@@ -78,7 +87,7 @@ def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description="додати функцію в D11 — один шлях")
     ap.add_argument("name", nargs="?", help="бажана укр-назва нової функції")
     ap.add_argument("--parent", help="10-бітна координата батька (селекторна похідна)")
-    ap.add_argument("--suffix", help="0 (перше) або 1 (решта)")
+    ap.add_argument("--suffix", help="0: перше або 1: решта")
     args = ap.parse_args(argv)
 
     print("═" * 62)
