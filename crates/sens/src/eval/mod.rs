@@ -529,7 +529,14 @@ fn evaluate_list(
             span: items[0].span,
         };
         if let Some(key) = text7_binding_key(&framed) {
-            if environment.get(&key).is_some() {
+            // Один D7-гліф має такий самий шлях до ВЖЕ наявного
+            // українського зв'язування, як багатогліфовий D2/W7.
+            // Без зв'язування D7 лишається даними, не викличним доменом.
+            let existing_source_binding = crate::Text7::from_canonical_wire_token(&key)
+                .ok()
+                .and_then(|text| crate::render_text7(&text, crate::Text7Layout::Uk).ok())
+                .is_some_and(|name| environment.get(&name).is_some());
+            if environment.get(&key).is_some() || existing_source_binding {
                 return dispatch_call(None, None, Some(&framed), &items[1..], environment, span);
             }
         }
@@ -620,6 +627,42 @@ mod tests {
         let error = eval_parsed_expressions(&expressions, &mut unbound_session)
             .expect_err("unbound glyph call must remain noncallable");
         assert_eq!(error.kind, ErrorKind::UnknownSymbol);
+    }
+
+    #[test]
+    fn physical_single_glyph_d7_call_uses_existing_ukrainian_binding_only() {
+        // D7 1111000 — один гліф української клавіатури, не функція D7.
+        // Позитив перевіряє тільки механізм пошуку наявного зв'язування.
+        let name = "х";
+        let text7 = crate::encode_text7(name, crate::Text7Layout::Uk)
+            .expect("ratified D7 Ukrainian glyph");
+        assert_eq!(text7.cells().len(), 1);
+        let wire = text7.to_canonical_wire_token();
+        let glyph = format!("{:07b}", text7.cells()[0]);
+        let source = format!("10 10 {glyph} 01 1 01");
+        let expressions = crate::parse_canonical_binary(&source)
+            .expect("exact physical single-glyph call");
+        let mut session = Session::bare();
+        session.environment.define(
+            name,
+            Value::host_function(std::rc::Rc::new(|arguments, _, _| {
+                Ok(arguments.first().cloned().unwrap_or(Value::Nil))
+            })),
+        );
+        assert!(
+            session.environment.get(&wire).is_none(),
+            "the test must not invent a wire-token alias"
+        );
+        let result = eval_parsed_expressions(&expressions, &mut session)
+            .expect("one glyph calls the existing Ukrainian source binding");
+        assert_eq!(result.value.as_predicate_bit(), Some(true));
+
+        // Невідомий односимвольний ключ НЕ стає новою викличною координатою.
+        let mut unbound = Session::bare();
+        assert!(
+            eval_parsed_expressions(&expressions, &mut unbound).is_err(),
+            "an unbound D7 glyph is not an executable domain identity"
+        );
     }
 
     #[test]
