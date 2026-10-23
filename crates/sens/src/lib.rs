@@ -524,6 +524,10 @@ fn load_core_library_with_fasl_mode(
         load_macro_library(session)?;
     }
 
+    // Source Core4 has no numeric literal syntax. Seed only the two
+    // exact D24+ values needed to define the language-owned derived names.
+    bind_core_numeric_seed_values(&session.environment)?;
+
     // Cache only the exact embedded FASL. Arbitrary caller-supplied FASL
     // (including invalid/stale fixtures) retains the original decode/fallback
     // behavior and can never borrow this cached program by matching bytes.
@@ -611,6 +615,51 @@ fn bind_existing_d9_language_mechanisms(environment: &Environment) {
             let _ = environment.bind_domain_code_slot_once(identity, value);
         }
     }
+}
+
+/// Install the two named exact D24+ seed values required before the Lisp-owned
+/// arithmetic definitions can bootstrap their derived named constants. These
+/// are typed numeric-domain values, not source-number literals or D1-D10 codes.
+fn bind_core_numeric_seed_value(
+    environment: &Environment,
+    name: &str,
+    bits: &[u8],
+) -> Result<(), LanguageError> {
+    let matches = |value: &Value| match value {
+        Value::BinaryNumber(number) => {
+            number.numeric_domain_width() == Some(24)
+                && number.exact_numeric_domain_bits().as_deref() == Some(bits)
+        }
+        _ => false,
+    };
+    if let Some(existing) = environment.get(name) {
+        if matches(&existing) {
+            return Ok(());
+        }
+        return Err(LanguageError::new(
+            ErrorKind::InvalidForm,
+            format!("Core4 named D24+ seed conflicts with an existing binding: {name}"),
+            Span::default(),
+        ));
+    }
+    let number = BinaryNumber::from_numeric_domain_bits(24, bits).ok_or_else(|| {
+        LanguageError::new(
+            ErrorKind::InvalidForm,
+            format!("cannot construct canonical D24+ bootstrap value: {name}"),
+            Span::default(),
+        )
+    })?;
+    environment.define(name, Value::BinaryNumber(number));
+    Ok(())
+}
+
+fn bind_core_numeric_seed_values(environment: &Environment) -> Result<(), LanguageError> {
+    let zero = [0u8; 24];
+    let mut one = [0u8; 24];
+    one[23] = 1;
+    bind_core_numeric_seed_value(environment, "число-нуль", &zero)?;
+    bind_core_numeric_seed_value(environment, "число-один", &one)?;
+    Ok(())
 }
 
 /// Production always uses the owner-verified binary decode/lowering cache.
