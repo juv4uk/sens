@@ -63,13 +63,13 @@ fn current_d5_coordinate(resident: &str) -> (usize, u16) {
 #[test]
 fn current_foundation_runtime_identity_and_effect_router_agree() {
     let cases = [
-        ("PLUS", "(додати 2 3)"),
-        ("DIFFERENCE", "(відняти 5 3)"),
-        ("TIMES", "(помножити 4 6)"),
+        ("PLUS", "(додати 2 3)", "(bounded-u64-add 1 1)"),
+        ("DIFFERENCE", "(відняти 5 3)", "(bounded-u64-sub 1 1)"),
+        ("TIMES", "(помножити 4 6)", "(bounded-u64-mul 1 1)"),
     ];
 
-    let source = read("lib/machine/lowering/semantic-effects.lisp");
-    for (resident, program) in cases {
+    let mut session = lowering_session();
+    for (resident, program, expected_effect) in cases {
         let expected = current_d5_coordinate(resident);
 
         let parsed = parse(program).expect("current D5 source");
@@ -85,13 +85,18 @@ fn current_foundation_runtime_identity_and_effect_router_agree() {
         );
         assert_eq!(args.len(), 2);
 
-        let guarded_coordinate = format!(
-            "(машинний-ефект-збігається-поточний-домен? ширина біти {} {})",
-            expected.0, expected.1
+        // Виконуємо справжній маршрутизатор SENS: бітова координата
+        // з ратифікованої таблиці має обрати той самий машинний ефект.
+        let routed = eval_value(
+            &format!(
+                "(машинний-ефект-знизити-поточне-двійкове {} {} 1 1)",
+                expected.0, expected.1
+            ),
+            &mut session,
         );
-        assert!(
-            source.contains(&guarded_coordinate),
-            "semantic effect router drifted from owner foundation for {resident}: expected {guarded_coordinate}"
+        assert_eq!(
+            routed, expected_effect,
+            "semantic effect router drifted from owner foundation for {resident}"
         );
     }
 }

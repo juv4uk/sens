@@ -19,6 +19,18 @@ SPEC.loader.exec_module(CHECK)
 
 
 class EncodedSourceLiteralTests(unittest.TestCase):
+    def test_machine_effect_live_source_uses_named_coordinates(self):
+        # Лексична перевірка; обчислення маршруту перевіряють нативні тести SENS.
+        path = ROOT / "lib/machine/lowering/semantic-effects.lisp"
+        source = path.read_text(encoding="utf-8")
+        self.assertEqual(
+            CHECK.find_forbidden_literals(
+                source, path="lib/machine/lowering/semantic-effects.lisp"
+            ),
+            [],
+            "виконувана проєкція машинного зниження не має числових атомів",
+        )
+
     def test_unquoted_numeric_literals_are_rejected(self):
         found = CHECK.find_forbidden_literals("(сума 235 2.1564)\n")
         self.assertEqual(
