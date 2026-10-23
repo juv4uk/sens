@@ -413,6 +413,7 @@ pub fn sanskrit_surface_bytes() -> Result<Vec<u8>, String> {
 }
 
 /// Opaque full-Ukrainian REPL source; Zig is only a byte corridor.
+#[cfg(test)]
 pub fn ukr_surface_bytes() -> Result<Vec<u8>, String> {
     version()?;
     let required = unsafe {
@@ -434,6 +435,7 @@ pub fn ukr_surface_bytes() -> Result<Vec<u8>, String> {
 }
 
 /// Compact Ukrainian source goes through sterile Zig byte transport only.
+#[cfg(test)]
 pub fn uk_surface_bytes() -> Result<Vec<u8>, String> {
     version()?;
     let required = unsafe {

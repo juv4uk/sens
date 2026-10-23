@@ -815,123 +815,80 @@ def check_sanskrit_surface_zig_only(
 def check_ukr_surface_zig_only(
     repl_source: str, rust_corridor: str, zig_root: str, build: str,
 ) -> None:
-    """Full Ukrainian surface bytes come from Zig, meaning stays with SENS."""
+    """Ukrainian surface is registry-owned; comment-only sources stay out of runtime."""
+    source_path = ROOT / "lib/surface/ukr.lisp"
+    if not source_path.is_file() or any(
+        line.strip() and not line.lstrip().startswith(";")
+        for line in source_path.read_text(encoding="utf-8").splitlines()
+    ):
+        raise CorridorBlocked("UKR_ZIG_ONLY source is no longer documentation-only")
     def active(source: str) -> str:
         return re.sub(r"/\*.*?\*/|//[^\n]*", "", _production_source(source), flags=re.S)
     repl = active(repl_source)
     if re.search(r'include_(?:str|bytes)!\s*\(\s*"[^"]*lib/surface/ukr\.lisp"', repl):
         raise CorridorBlocked("UKR_ZIG_ONLY Rust source embeds Ukrainian peer surface")
-    helper = active(_route_between(
-        repl_source, "fn ukr_surface_source(", "\n// The original Sanskrit source"
-    ))
-    if (helper.count('#[cfg(feature = "zig-transport")]') != 1
-            or helper.count('#[cfg(not(feature = "zig-transport"))]') != 1
-            or "super::zig_transport::ukr_surface_bytes()?" not in helper
-            or "String::from_utf8(bytes)" not in helper
-            or "RUST_ZIG_ONLY: Ukrainian full surface requires Zig; no Rust source fallback" not in helper):
-        raise CorridorBlocked("UKR_ZIG_ONLY missing real Zig source / Zigless refusal")
+    if "ukr_surface_source" in repl or "ukr_surface_bytes()" in repl:
+        raise CorridorBlocked("UKR_ZIG_ONLY source carrier must not enter production REPL")
     loader = active(_route_between(repl_source, "fn build_surface_layer(", "\nstruct ReplState {"))
-    if ('Some(("ukr.lisp", ukr_surface_source()?))' not in loader
-            or "sens::parse_mixed_exact_domain(&source)" not in loader
-            or "sens::eval_parsed_expressions(&forms, &mut session)" not in loader):
-        raise CorridorBlocked("UKR_ZIG_ONLY REPL bypasses Zig ingress or SENS eval")
-    ffi = "sens_zig_ukr_bytes_copy"
+    if ("ukr.lisp" in loader or "parse_mixed_exact_domain" in loader
+            or "eval_parsed_expressions" in loader):
+        raise CorridorBlocked("UKR_ZIG_ONLY comment-only surface must not be parsed at runtime")
+    if "surface_catalog::identity_for_surface_name(surface.code(), &projected_name)?" not in repl:
+        raise CorridorBlocked("UKR_ZIG_ONLY exact names must resolve through current domain registry")
     asset_path = ROOT / "crates/sens-cli/src/zig_transport_assets.rs"
     if not asset_path.is_file() or asset_path.is_symlink():
-        raise CorridorBlocked("UKR_ZIG_ONLY missing separate asset C ABI")
-    declared = active(asset_path.read_text(encoding="utf-8"))
-    if "pub(super) fn sens_zig_ukr_bytes_copy(output: *mut u8, capacity: usize) -> isize;" not in declared:
-        raise CorridorBlocked("UKR_ZIG_ONLY missing exact Rust asset FFI declaration")
-    host = active(_route_between(
-        rust_corridor, "pub fn ukr_surface_bytes(", "\n/// Compact Ukrainian source goes through sterile Zig byte transport only."
-    ))
-    if (host.count(f"asset_ffi::{ffi}(") != 2
-            or "version()?;" not in host
-            or f"{ffi}(bytes.as_mut_ptr(), bytes.len())" not in host
-            or "if copied != required" not in host
-            or "Ok(bytes)" not in host):
-        raise CorridorBlocked("UKR_ZIG_ONLY missing two-call Zig ABI or copy verification")
-    root = active(zig_root)
-    if (root.count('const ukr_asset = @embedFile("lib/surface/ukr.lisp");') != 1
-            or f"pub export fn {ffi}(" not in root
-            or "if (capacity == 0) return @intCast(ukr_asset.len);" not in root
-            or "if (capacity < ukr_asset.len) return -2;" not in root
-            or "@memcpy(dst[0..ukr_asset.len], ukr_asset[0..ukr_asset.len]);" not in root):
-        raise CorridorBlocked("UKR_ZIG_ONLY wrong Zig byte copy or short-buffer refusal")
-    if ('.arg("zig_transport_root.zig")' not in active(build)
-            or "cargo:rerun-if-changed=../../lib/surface/ukr.lisp" not in build):
-        raise CorridorBlocked("UKR_ZIG_ONLY stale source or wrong Zig module root")
+        raise CorridorBlocked("UKR_ZIG_ONLY missing asset C ABI declarations")
+    declared = asset_path.read_text(encoding="utf-8")
+    ffi_decl = re.search(
+        r"#\s*\[\s*cfg\s*\(\s*test\s*\)\s*\]\s*pub\(super\)\s+fn\s+sens_zig_ukr_bytes_copy\b",
+        declared,
+    )
+    host = rust_corridor
+    host_decl = re.search(
+        r"#\s*\[\s*cfg\s*\(\s*test\s*\)\s*\]\s*pub\s+fn\s+ukr_surface_bytes\b",
+        host,
+    )
+    if not ffi_decl or not host_decl:
+        raise CorridorBlocked("UKR_ZIG_ONLY source byte carrier must be test-only")
 
 
 def check_uk_surface_zig_only(
     repl_source: str, rust_corridor: str, zig_root: str, build: str,
 ) -> None:
-    """Compact Ukrainian byte ingress is Zig-only; evaluator remains SENS."""
+    """Compact Ukrainian surface is registry-owned; comment-only sources stay out of runtime."""
+    source_path = ROOT / "lib/surface/uk.lisp"
+    if not source_path.is_file() or any(
+        line.strip() and not line.lstrip().startswith(";")
+        for line in source_path.read_text(encoding="utf-8").splitlines()
+    ):
+        raise CorridorBlocked("UK_ZIG_ONLY source is no longer documentation-only")
     def active(s: str) -> str:
         return re.sub(r"/\*.*?\*/|//[^\n]*", "", _production_source(s), flags=re.S)
     repl = active(repl_source)
     if re.search(r'include_(?:str|bytes)!\s*\(\s*"[^"]*lib/surface/uk\.lisp"', repl):
         raise CorridorBlocked("UK_ZIG_ONLY Rust embeds compact Ukrainian surface")
-    helper = active(_route_between(
-        repl_source, "fn uk_surface_source(", "\n// Full Ukrainian source bytes"
-    ))
-    if (helper.count('#[cfg(feature = "zig-transport")]') != 1
-            or helper.count('#[cfg(not(feature = "zig-transport"))]') != 1
-            or "super::zig_transport::uk_surface_bytes()?" not in helper
-            or "String::from_utf8(bytes)" not in helper
-            or "RUST_ZIG_ONLY: Ukrainian compact surface requires Zig; no Rust source fallback" not in helper):
-        raise CorridorBlocked("UK_ZIG_ONLY missing Zig ingress or Zigless refusal")
+    if "uk_surface_source" in repl or "uk_surface_bytes()" in repl:
+        raise CorridorBlocked("UK_ZIG_ONLY source carrier must not enter production REPL")
     loader = active(_route_between(repl_source, "fn build_surface_layer(", "\nstruct ReplState {"))
-    if ('Some(("uk.lisp", uk_surface_source()?))' not in loader
-            or "sens::parse_mixed_exact_domain(&source)" not in loader
-            or "sens::eval_parsed_expressions(&forms, &mut session)" not in loader):
-        raise CorridorBlocked("UK_ZIG_ONLY REPL bypasses Zig source or SENS evaluator")
-    ffi = "sens_zig_uk_bytes_copy"
+    if ("uk.lisp" in loader or "parse_mixed_exact_domain" in loader
+            or "eval_parsed_expressions" in loader):
+        raise CorridorBlocked("UK_ZIG_ONLY comment-only surface must not be parsed at runtime")
+    if "surface_catalog::identity_for_surface_name(surface.code(), &projected_name)?" not in repl:
+        raise CorridorBlocked("UK_ZIG_ONLY exact names must resolve through current domain registry")
     asset_path = ROOT / "crates/sens-cli/src/zig_transport_assets.rs"
     if not asset_path.is_file() or asset_path.is_symlink():
         raise CorridorBlocked("UK_ZIG_ONLY missing declared asset ABI file")
-    declared = active(asset_path.read_text(encoding="utf-8"))
-    if "pub(super) fn sens_zig_uk_bytes_copy(output: *mut u8, capacity: usize) -> isize;" not in declared:
-        raise CorridorBlocked("UK_ZIG_ONLY missing Zig ABI FFI signature")
-    # Inspect ONLY uk_surface_bytes, not adjacent Zig asset helpers.
-    # A later islands_manifest_bytes() also checks "if copied != required";
-    # that check must not hide a deleted UK-specific byte-count guard.
-    host = active(_route_between(
-        rust_corridor, "pub fn uk_surface_bytes(", "\n}\n"
-    ))
-    if (host.count(f"asset_ffi::{ffi}(") != 2
-            or "version()?;" not in host
-            or f"{ffi}(bytes.as_mut_ptr(), bytes.len())" not in host
-            or "if copied != required" not in host
-            or "Ok(bytes)" not in host):
-        raise CorridorBlocked("UK_ZIG_ONLY missing two-call Zig ABI checked copy")
-    # A string/condition appearing in the right function is insufficient:
-    # the live Zig byte-copy result must fail closed BEFORE Ok(bytes).
-    # Tie the checked comparison to the actual UK ABI call so another
-    # asset's validation (or an empty if-branch) cannot satisfy this gate.
-    copy_mismatch_must_return = (
-        r"let\s+copied\s*=\s*unsafe\s*\{\s*"
-        r"asset_ffi::sens_zig_uk_bytes_copy\(\s*bytes\.as_mut_ptr\(\)\s*,"
-        r"\s*bytes\.len\(\)\s*\)\s*\}\s*;\s*"
-        r"if\s+copied\s*!=\s*required\s*\{\s*"
-        r"return\s+Err\s*\(\s*format!\s*\(\s*"
-        r'"ZIG_UK_CARRIER mismatch: \{copied\}"\s*\)\s*\)\s*;\s*\}'
-        r"\s*Ok\s*\(\s*bytes\s*\)"
+    declared = asset_path.read_text(encoding="utf-8")
+    ffi_decl = re.search(
+        r"#\s*\[\s*cfg\s*\(\s*test\s*\)\s*\]\s*pub\(super\)\s+fn\s+sens_zig_uk_bytes_copy\b",
+        declared,
     )
-    if re.search(copy_mismatch_must_return, host) is None:
-        raise CorridorBlocked(
-            "UK_ZIG_ONLY unchecked or ignored UK asset byte-copy mismatch"
-        )
-    root = active(zig_root)
-    if (root.count('const uk_asset = @embedFile("lib/surface/uk.lisp");') != 1
-            or f"pub export fn {ffi}(" not in root
-            or "if (capacity == 0) return @intCast(uk_asset.len);" not in root
-            or "if (capacity < uk_asset.len) return -2;" not in root
-            or "@memcpy(dst[0..uk_asset.len], uk_asset[0..uk_asset.len]);" not in root):
-        raise CorridorBlocked("UK_ZIG_ONLY wrong opaque Zig asset or unsafe copy")
-    if ('.arg("zig_transport_root.zig")' not in active(build)
-            or "cargo:rerun-if-changed=../../lib/surface/uk.lisp" not in build):
-        raise CorridorBlocked("UK_ZIG_ONLY missing Cargo asset pin or Zig root")
+    host_decl = re.search(
+        r"#\s*\[\s*cfg\s*\(\s*test\s*\)\s*\]\s*pub\s+fn\s+uk_surface_bytes\b",
+        rust_corridor,
+    )
+    if not ffi_decl or not host_decl:
+        raise CorridorBlocked("UK_ZIG_ONLY source byte carrier must be test-only")
 
 
 def check() -> list[str]:
@@ -1039,11 +996,11 @@ def check() -> list[str]:
     check_ukr_surface_zig_only(
         REPL.read_text(encoding="utf-8"), body, ROOT_ZIG.read_text(encoding="utf-8"), build
     )
-    notes.append("ukr-zig-only-byte-carrier")
+    notes.append("ukr-domain-registry-no-source-runtime")
     check_uk_surface_zig_only(
         REPL.read_text(encoding="utf-8"), body, ROOT_ZIG.read_text(encoding="utf-8"), build
     )
-    notes.append("uk-zig-only-byte-carrier")
+    notes.append("uk-domain-registry-no-source-runtime")
     return notes
 
 

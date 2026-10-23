@@ -552,28 +552,16 @@ class ZigAbiV2DeclarationContractTest(unittest.TestCase):
         self.assertEqual(len(EXPECTED), 9)
         self.assertEqual(set(declarations(strip_c_comments(self.rust), "rust")), set(EXPECTED))
 
-    def test_unify_repl_is_exact_source_via_only_zig_and_keeps_load_order(self):
+    def test_unify_repl_uses_physical_t5m_asset_and_keeps_root_load_order(self):
         source = (ROOT / "crates/sens-cli/src/repl.rs").read_text(encoding="utf-8")
         self.assertNotIn('include_str!("../../../lib/unify.lisp")', source)
-        self.assertIn("super::zig_transport::unify_source_bytes()?", source)
-        self.assertIn("let unify_source = unify_surface_source()?;", source)
-        self.assertIn('std::iter::once(("unify.lisp", unify_source.as_str()))', source)
-        self.assertIn("let prerequisite_sources = surface_prerequisite_sources()?;", source)
-        self.assertIn(
-            ".chain(prerequisite_sources.iter().map(|(name, source)| (*name, source.as_str())))",
-            source,
-        )
-        # Every additional prerequisite must be copied by live Zig FFI,
-        # not implicitly embedded in the Rust REPL.
-        for name, carrier in (
-            ("persistent-vector.lisp", "sens_zig_repl_persistent_vector_bytes_copy"),
-            ("time.lisp", "sens_zig_repl_time_bytes_copy"),
-            ("epistemic.lisp", "sens_zig_repl_epistemic_bytes_copy"),
-        ):
-            self.assertIn(f'("{name}", repl_zig_source({carrier},', source)
-        self.assertIn("no Rust source fallback", source)
+        self.assertNotIn("unify_surface_source", source)
+        self.assertIn("repl_reasoning_t5m_assets()?", source)
+        self.assertIn('"unify",', (ROOT / "crates/sens-cli/src/zig_transport.rs").read_text())
+        self.assertIn('lib/unify.sens', (ROOT / "zig_transport_root.zig").read_text())
+        self.assertIn("D4 DEFINE reasoning programs must cross Zig as ordered root T5M pairs", source)
         build = (ROOT / "crates/sens-cli/build.rs").read_text(encoding="utf-8")
-        self.assertIn("cargo:rerun-if-changed=../../lib/unify.lisp", build)
+        self.assertIn("cargo:rerun-if-changed=../../lib/unify.sens", build)
 
     def test_unify_asset_cross_wiring_is_rejected_before_release(self):
         old = "@memcpy(dst[0..unify_asset.len], unify_asset[0..unify_asset.len]);"
@@ -593,17 +581,20 @@ class ZigAbiV2DeclarationContractTest(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "missing_copy_body=sens_zig_unify_bytes_copy"):
             check_root_asset_corridor(mutant, self.asset_rust, self.rust)
 
-    def test_reason_repl_uses_sterile_zig_only_and_keeps_unify_first(self):
+    def test_reason_repl_uses_ordered_physical_t5m_prerequisites(self):
         source = (ROOT / "crates/sens-cli/src/repl.rs").read_text(encoding="utf-8")
         self.assertNotIn('include_str!("../../../lib/reason.lisp")', source)
-        self.assertIn("super::zig_transport::reason_source_bytes()?", source)
-        self.assertIn("let reason_source = reason_surface_source()?;", source)
-        self.assertIn('.chain(std::iter::once(("reason.lisp", reason_source.as_str())))', source)
-        self.assertLess(source.index('std::iter::once(("unify.lisp"'),
-                        source.index('std::iter::once(("reason.lisp"'))
-        self.assertIn("no Rust source fallback", source)
+        self.assertNotIn("reason_surface_source", source)
+        self.assertIn("repl_reasoning_t5m_assets()?", source)
+        transport = (ROOT / "crates/sens-cli/src/zig_transport.rs").read_text(encoding="utf-8")
+        ordered_assets = transport[transport.index("pub fn repl_reasoning_t5m_assets"):
+                                   transport.index("/// Opaque D9 witness", transport.index("pub fn repl_reasoning_t5m_assets"))]
+        self.assertLess(ordered_assets.index('"unify"'), ordered_assets.index('"reason"'))
+        self.assertLess(ordered_assets.index('"reason"'), ordered_assets.index('"forward"'))
+        self.assertLess(ordered_assets.index('"forward"'), ordered_assets.index('"knowledge"'))
+        self.assertIn('lib/reason.sens', (ROOT / "zig_transport_root.zig").read_text())
         build = (ROOT / "crates/sens-cli/build.rs").read_text(encoding="utf-8")
-        self.assertIn("cargo:rerun-if-changed=../../lib/reason.lisp", build)
+        self.assertIn("cargo:rerun-if-changed=../../lib/reason.sens", build)
 
     def test_reason_asset_crosswired_to_different_bytes_rejected(self):
         old = "@memcpy(dst[0..reason_asset.len], reason_asset[0..reason_asset.len]);"
@@ -621,23 +612,18 @@ class ZigAbiV2DeclarationContractTest(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "missing_copy_body=sens_zig_reason_bytes_copy"):
             check_root_asset_corridor(mutant, self.asset_rust, self.rust)
 
-    def test_forward_repl_source_is_only_carried_by_zig_in_original_load_order(self):
+    def test_forward_repl_uses_physical_t5m_before_projection_layer(self):
         source = (ROOT / "crates/sens-cli/src/repl.rs").read_text(encoding="utf-8")
         self.assertNotIn('include_str!("../../../lib/forward.lisp")', source)
-        self.assertIn("super::zig_transport::forward_source_bytes()?", source)
-        self.assertIn("let forward_source = forward_surface_source()?;", source)
-        self.assertIn('.chain(std::iter::once(("forward.lisp", forward_source.as_str())))', source)
-        self.assertIn('.chain(std::iter::once(("knowledge.lisp", knowledge_source.as_str())))', source)
-        self.assertIn('.chain(std::iter::once(("persistent-map.lisp", persistent_map_source.as_str())))', source)
-        for lhs, rhs in (
-            ('std::iter::once(("unify.lisp"', 'std::iter::once(("reason.lisp"'),
-            ('std::iter::once(("reason.lisp"', 'std::iter::once(("forward.lisp"'),
-            ('std::iter::once(("forward.lisp"', 'prerequisite_sources.iter().map('),
-        ):
-            self.assertLess(source.index(lhs), source.index(rhs), "REPL SENS source order changed")
-        self.assertIn("RUST_ZIG_ONLY: forward.lisp requires Zig; no Rust source fallback", source)
+        self.assertNotIn("forward_surface_source", source)
+        self.assertIn("repl_reasoning_t5m_assets()?", source)
+        self.assertIn("execute_zig_t5m_asset(&physical, name, &mut root)?", source)
+        transport = (ROOT / "crates/sens-cli/src/zig_transport.rs").read_text(encoding="utf-8")
+        ordered_assets = transport[transport.index("pub fn repl_reasoning_t5m_assets"):
+                                   transport.index("/// Opaque D9 witness", transport.index("pub fn repl_reasoning_t5m_assets"))]
+        self.assertLess(ordered_assets.index('"reason"'), ordered_assets.index('"forward"'))
         build = (ROOT / "crates/sens-cli/build.rs").read_text(encoding="utf-8")
-        self.assertIn("cargo:rerun-if-changed=../../lib/forward.lisp", build)
+        self.assertIn("cargo:rerun-if-changed=../../lib/forward.sens", build)
 
     def test_forward_asset_crosswired_bytes_rejected_before_release(self):
         old = "@memcpy(dst[0..forward_asset.len], forward_asset[0..forward_asset.len]);"

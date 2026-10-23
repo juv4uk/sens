@@ -1581,30 +1581,6 @@ fn init_sens_loop(session: &mut Session) -> Result<(), String> {
     })
 }
 
-// The compact Ukrainian surface is original source bytes carried only by Zig.
-fn uk_surface_source() -> Result<String, String> {
-    #[cfg(feature = "zig-transport")]
-    {
-        let bytes = super::zig_transport::uk_surface_bytes()?;
-        String::from_utf8(bytes).map_err(|e| format!("ZIG_UK_CARRIER UTF-8: {e}"))
-    }
-    #[cfg(not(feature = "zig-transport"))]
-    {
-        Err("RUST_ZIG_ONLY: Ukrainian compact surface requires Zig; no Rust source fallback".into())
-    }
-}
-// Full Ukrainian source bytes are transported by Zig; SENS owns their meaning.
-fn ukr_surface_source() -> Result<String, String> {
-    #[cfg(feature = "zig-transport")]
-    {
-        let bytes = super::zig_transport::ukr_surface_bytes()?;
-        String::from_utf8(bytes).map_err(|e| format!("ZIG_UKR_CARRIER UTF-8 error: {e}"))
-    }
-    #[cfg(not(feature = "zig-transport"))]
-    {
-        Err("RUST_ZIG_ONLY: Ukrainian full surface requires Zig; no Rust source fallback".into())
-    }
-}
 // The original Sanskrit source is Zig-owned opaque bytes, never a Rust embed.
 #[cfg(test)]
 fn sanskrit_surface_source() -> Result<String, String> {
@@ -1691,9 +1667,9 @@ fn build_surface_layer(
     base: &Environment,
     surface: ReplSurface,
 ) -> Result<Environment, String> {
-    // D10 exact DEFINE installs code slots in the session root. Ensure the
-    // shared time mechanisms before creating a projection child frame; the
-    // loader is idempotent when the CLI/embedder already bootstrapped it.
+    // D4 DEFINE may install a mechanism at an exact D10 target identity, and
+    // that target slot is root-only. Ensure shared time mechanisms before
+    // creating a projection child; loading is idempotent after prior bootstrap.
     let mut base_session = Session {
         environment: base.clone(),
     };
@@ -1716,25 +1692,11 @@ fn build_surface_layer(
         for (name, physical) in prerequisite_assets {
             execute_zig_t5m_asset(&physical, name, &mut session)?;
         }
-        // REPL prerequisites enter as physical T5M domain words in dependency order.
-        let selected_source = match surface {
-            ReplSurface::Ukrainian => Some(("uk.lisp", uk_surface_source()?)),
-            ReplSurface::UkrainianFull => Some(("ukr.lisp", ukr_surface_source()?)),
-            // sa.lisp contains candidate/legacy aliases which are not the
-            // current domain-table projection. Resolve only current table
-            // names through selected_surface_callable instead.
-            ReplSurface::Sanskrit
-            | ReplSurface::Lisp
-            | ReplSurface::Core
-            | ReplSurface::English => None,
-        };
-        if let Some((name, source)) = selected_source {
-            sens::parse_mixed_exact_domain(&source)
-                .and_then(|forms| sens::eval_parsed_expressions(&forms, &mut session))
-                .map_err(|error| {
-                    format!("не вдалося завантажити {name}: {}", error.render(&source))
-                })?;
-        }
+        // Ukrainian surface files are documentation-only. Their names and
+        // exact identities already come from the live domain registry; do not
+        // parse empty comment-only Lisp sources in the Rust runtime.
+        // sa.lisp has candidate/legacy aliases, so Sanskrit also resolves only
+        // current table names through selected_surface_callable.
     }
     Ok(layer)
 }
@@ -3645,70 +3607,6 @@ mod tests {
             err,
             "RUST_ZIG_ONLY: REPL prerequisite T5M assets require Zig transport"
         );
-    }
-
-    #[cfg(feature = "zig-transport")]
-    #[test]
-    fn zig_uk_surface_preserves_original_bytes() {
-        let source = uk_surface_source().expect("root Zig C ABI original Ukrainian surface");
-        let bytes = crate::zig_transport::uk_surface_bytes().expect("second Zig ABI copy");
-        assert_eq!(
-            source.as_bytes(),
-            bytes.as_slice(),
-            "UK surface exact byte identity"
-        );
-        assert!(
-            source.starts_with("; Компактна українська проєкція"),
-            "not the current compact Ukrainian projection notice"
-        );
-        assert!(
-            source.contains("не дублює реєстр"),
-            "source must not duplicate domain identities"
-        );
-        println!(
-            "ZIG_UK_CARRIER_PASS bytes={} semantic_admission=NOT_TESTED",
-            bytes.len()
-        );
-    }
-
-    #[cfg(not(feature = "zig-transport"))]
-    #[test]
-    fn zig_uk_surface_rejects_rust_only_loading() {
-        let error = uk_surface_source().expect_err("Zigless Rust cannot read the surface");
-        assert!(error.contains("RUST_ZIG_ONLY"), "{error}");
-        assert!(error.contains("no Rust source fallback"), "{error}");
-    }
-
-    #[cfg(feature = "zig-transport")]
-    #[test]
-    fn zig_ukr_surface_preserves_actual_source_bytes() {
-        let source = ukr_surface_source().expect("real Zig full Ukrainian bytes");
-        let bytes = crate::zig_transport::ukr_surface_bytes().expect("second Zig ABI copy");
-        assert_eq!(
-            source.as_bytes(),
-            bytes.as_slice(),
-            "UKR original byte parity"
-        );
-        assert!(
-            source.starts_with("; Повна українська проєкція"),
-            "wrong source"
-        );
-        assert!(
-            source.contains("рівноправною мовною поверхнею"),
-            "truncated source"
-        );
-        println!(
-            "ZIG_UKR_CARRIER_PASS bytes={} semantic_admission=NOT_TESTED",
-            bytes.len()
-        );
-    }
-
-    #[cfg(not(feature = "zig-transport"))]
-    #[test]
-    fn zig_ukr_surface_denies_rust_only_loading() {
-        let err = ukr_surface_source().expect_err("no direct Rust Lisp source");
-        assert!(err.contains("RUST_ZIG_ONLY"), "{err}");
-        assert!(err.contains("no Rust source fallback"), "{err}");
     }
 
     #[cfg(feature = "zig-transport")]
