@@ -359,6 +359,11 @@ for suite in d11-clojure-partition-by d11-clojure-dedupe; do
   cat -- lib/d11-srfi1-span-break.lisp lib/d11-clojure-partition-by.lisp "tests/semantic/$suite-laws.lisp" > "$combined"
   run_case run_law "$suite-physical" "$combined" 1
 done
+# D7 не можна непомітно вважати атомом після фізичної D2-гліфової проєкції.
+# Незмінний оригінальний мовний закон лишається окремим чесним RED.
+d11_partition_d7_bundle="$evidence/d11-clojure-partition-by-d7-parity.lisp"
+cat -- lib/d11-srfi1-span-break.lisp lib/d11-clojure-partition-by.lisp tests/semantic/d11-clojure-partition-by-d7-parity.lisp > "$d11_partition_d7_bundle"
+run_case run_law d11-clojure-partition-by-d7-parity "$d11_partition_d7_bundle" 1
 
 # The result-status law stays in Ukrainian Lisp; only the runner bundles its admitted library.
 result_status_bundle="$evidence/result-status-bundle.lisp"

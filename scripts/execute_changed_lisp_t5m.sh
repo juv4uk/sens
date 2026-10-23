@@ -492,6 +492,7 @@ while IFS= read -r file || [[ -n "$file" ]]; do
     # SENS визначає мову; Zig лише переносить біти фізичного T5M.
     binding_sources=(--binding-source lib/d11-srfi1-span-break.lisp)
   elif [[ "$file" == "tests/semantic/d11-clojure-partition-by-laws.lisp" ||
+          "$file" == "tests/semantic/d11-clojure-partition-by-d7-parity.lisp" ||
           "$file" == "tests/semantic/d11-clojure-dedupe-laws.lisp" ]]; then
     # Порядок DEFINE суттєвий: спочатку SPAN, потім Clojure-композиції.
     # Жодної семантики у shell, Rust або Zig.
