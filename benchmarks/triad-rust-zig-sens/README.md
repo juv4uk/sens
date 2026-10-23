@@ -6,8 +6,8 @@
 
 | Шар | Реалізація | Фактична операція | Проби | Метрика |
 |---|---|---|---|---|
-| Rust / I/O | `crates/sens-cli/tests/mechanism_file_io_benchmark.rs` | `std::fs::read` байтів справжнього `benchmarks/lists.lisp` | 3 warmup + 11 | p50/p90 ns, bytes |
-| Zig / носій | `research/zig-codecs/tests.zig` | чинний `transport_abi.zig`: точний D8 BE3 → T5 | 256 warmup + 7 × 4096 слів | p50/p90 ns/word |
+| Rust / I/O | `crates/sens-cli/tests/mechanism_file_io_benchmark.rs` | `std::fs::read` байтів справжнього `benchmarks/lists.lisp` | 3 warmup + 11 timed samples; кожен ≥25 ms | raw sample + p50/p90/min/max ns/read, bytes |
+| Zig / носій | `research/zig-codecs/tests.zig` | чинний `transport_abi.zig`: точний D8 BE3 → T5 | 1 batch warmup + 7 timed samples; кожен ≥25 ms, batches адаптивні | raw elapsed/word counts + p50/p90/min/max ns/word |
 | Lisp → Zig/T5M → SENS | `benchmarks/{lists,arithmetic,parser,recursion}.lisp` і `tests/semantic/` | чотири нативні мовні навантаження, лише після успішного Lisp-закону | 11 + контрольний прогін | p50/p90 wall-time процесу, AST та розмір носія |
 
 Для D11 окремо діють `benchmarks/d11-families.lisp` та пара
@@ -56,8 +56,13 @@ bash scripts/prove-lisp-semantic-t5m.sh \
   нової залежності, щоб зберегти `Cargo.lock` та `cargo --locked`.
 - [hyperfine](https://github.com/sharkdp/hyperfine) — окремі прогріви,
   багатократні запуски CLI, експорт сирих даних.
+- [Zig Bench](https://github.com/zig-utils/zig-bench) — адаптивна кількість
+  ітерацій, час прогріву та p50/p75/p99; беремо ці ідеї, не нову залежність.
+- [Common Lisp cl-bench](https://cl-bench.common-lisp.dev/) — приклад
+  розділення I/O, числових, рядкових, бітових і пам'яттєвих навантажень.
+  Це набір для Common Lisp, не прямий performance ranking SENS.
 - [Zig 0.16 release notes](https://ziglang.org/download/0.16.0/release-notes.html)
   і [приклад проблеми std.time.Timer](https://github.com/mattrobenolt/zig-benchmark/issues/1)
-  — саме тому Linux Zig-бенчмарк використовує `CLOCK_MONOTONIC`.
+  — Linux Zig-бенчмарк використовує `CLOCK_MONOTONIC`.
 
 Жоден із цих інструментів не підміняє фізичний виконуваний SENS-коридор.
