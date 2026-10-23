@@ -331,6 +331,26 @@ def changed_files(args) -> list[str]:
     return []
 
 
+def hook_installed() -> tuple[bool, str]:
+    """Чи охоронець СПРАВДІ увімкнений у git — а не лише лежить у репо.
+
+    Гачок, який не виконуваний або не в hooksPath, git МОВЧКИ ігнорує
+    (це вже траплялось: режим 100644 замість 100755). Self-test мусить це бачити.
+    """
+    import subprocess as _sp
+    hp = _sp.run(["git", "config", "--get", "core.hooksPath"], cwd=ROOT,
+                 capture_output=True, text=True).stdout.strip()
+    if hp != "githooks":
+        return False, f"core.hooksPath={hp or '(порожньо)'} — увімкни: bash scripts/install-hooks.sh"
+    hook = ROOT / "githooks" / "pre-commit"
+    if not hook.is_file():
+        return False, "немає githooks/pre-commit"
+    import os as _os
+    if not _os.access(hook, _os.X_OK):
+        return False, "githooks/pre-commit не виконуваний — git його мовчки ігнорує"
+    return True, "увімкнено (githooks/pre-commit виконуваний)"
+
+
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description="guard: вживати функції драбин D1–D10")
     ap.add_argument("--staged", action="store_true")
@@ -361,7 +381,10 @@ def main(argv: list[str] | None = None) -> int:
     if args.self_test:
         ok = len(ladder) >= MINIMUM_RATIFIED_SURFACES
         print(f"GUARD-DOMAIN-REUSE self-test: {'OK' if ok else 'FAIL'} (поверхонь у драбинах: {len(ladder)}, джерело: discover_domain_function_candidates)")
-        return 0 if ok else 1
+        # Перевіряємо і ВЛАСНУ активацію: невиконуваний гачок = мертвий охоронець.
+        hok, hmsg = hook_installed()
+        print(f"GUARD-DOMAIN-REUSE self-test: гачок {'OK' if hok else 'НЕ УВІМКНЕНО'} — {hmsg}")
+        return 0 if (ok and hok) else 1
 
     if not (args.staged or args.paths_from or args.file):
         ap.error("потрібен --staged / --paths-from / --file")
