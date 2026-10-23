@@ -1484,6 +1484,44 @@ mod physical_d7_existing_binding_regressions {
     // Mechanism-only proof: a physical D2 frame of exact W7 words refers
     // to an already-installed Ukrainian binding, never grants the glyphs
     // a callable identity or a new semantic law.
+    // Одногліфове ім'я фізично є D7-словом, а не D2-списком.
+    // Викличність дає тільки вже наявне українське DEFINE-зв'язування.
+    #[test]
+    fn physical_single_glyph_ukrainian_call_needs_existing_binding() {
+        let spelling = "а";
+        let text = crate::encode_text7(spelling, crate::Text7Layout::Uk)
+            .expect("ратифікована українська D7 клавіатура");
+        assert_eq!(text.len(), 1, "справжнє однословне D7 ім'я");
+        let glyph = text.cells()[0];
+        let source = format!("10 {glyph:07b} 1 01");
+        let forms = crate::parse_canonical_binary(&source)
+            .expect("фізична форма D2(D7, D1)");
+
+        let mut bound = Session::bare();
+        bound.environment.define(
+            spelling,
+            Value::host_function(std::rc::Rc::new(|args, _, _| {
+                Ok(args.first().cloned().unwrap_or(Value::Nil))
+            })),
+        );
+        assert!(
+            bound.environment.get(&text.to_canonical_wire_token()).is_none(),
+            "допуск не створює прихованого D7 binding"
+        );
+        let result = eval_parsed_expressions(&forms, &mut bound)
+            .expect("наявне Lisp-зв'язування викликається точною D7 головою");
+        assert_eq!(result.value.as_predicate_bit(), Some(true));
+
+        let mut unknown = Session::bare();
+        let error = eval_parsed_expressions(&forms, &mut unknown)
+            .expect_err("невідомий D7 атом не отримує викличності");
+        assert!(
+            error.message.contains("domain identity is not callable"),
+            "невідоме ім'я не перетворюється на функцію: {}",
+            error.message
+        );
+    }
+
     #[test]
     fn physical_d7_frame_reads_existing_ukrainian_binding_without_host_oracle() {
         let spelling = "число-нуль";
