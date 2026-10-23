@@ -574,7 +574,8 @@ run_case run_law result-status-goal-tags-mutant "$result_status_goal_tags_mutant
 # повертає named fail із самого Lisp. Rust не містить таблиці очікувань.
 epistemic_sources=(lib/unify.lisp lib/reason.lisp lib/forward.lisp lib/knowledge.lisp
                    lib/persistent-map.lisp lib/persistent-vector.lisp lib/time.lisp
-                   lib/epistemic.lisp tests/fixtures/epistemic-authority-witness.lisp)
+                   lib/epistemic.lisp tests/fixtures/witness-runner.lisp
+                   tests/fixtures/epistemic-authority-witness.lisp)
 epistemic_law_bundle="$evidence/epistemic-record-logic-positive-complete.lisp"
 epistemic_mutant_bundle="$evidence/epistemic-record-logic-mutant-complete.lisp"
 cat -- "${epistemic_sources[@]}" tests/semantic/language-law-epistemic-records.lisp > "$epistemic_law_bundle"
