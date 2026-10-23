@@ -22,11 +22,11 @@ SPEC.loader.exec_module(mod)
 from sens_source_resolver import build_resolver
 
 HIST = ROOT / "contracts" / "core1-historical-sid-map.lisp"
-FOUNDATION = ROOT / "knowledge" / "d1-d7-foundation.json"
+FOUNDATION = ROOT / "knowledge" / "d1-d11-foundation.json"
 REGISTRY = ROOT / "lib" / "surface" / "semantic-registry.lisp"
 SURFACES = [
     ROOT / "lib" / "domains" / f"d{width}.lisp"
-    for width in range(1, 7)
+    for width in (3, 4, 5, 6, 8, 9, 10)
 ]
 
 
@@ -74,6 +74,25 @@ class ThreePassClassifierTests(unittest.TestCase):
         self.assertEqual(historical[0].current_domain, "D3")
         self.assertEqual(historical[0].current_bits, "001")
         self.assertIn("execution not certified", historical[0].evidence)
+
+    def test_wide_current_ukr_heads_resolve_without_promoting_sid8(self):
+        # Власницькі людські проєкції D8–D10, не доказ виконання.
+        src = (
+            "(символ-за-кодом 65)\\n"
+            "(пояснити-відповідь x)\\n"
+            "(відсутня-можливість-виконання x)\\n"
+        ).replace("\\\\n", "\\n")
+        historical, current, dynamic, empty = self.classify(src)
+        self.assertFalse(dynamic)
+        self.assertFalse(current)
+        self.assertFalse(empty)
+        self.assertEqual(
+            [(x.current_domain, x.current_bits) for x in historical],
+            [("D8", "00000000"), ("D9", "000000001"),
+             ("D10", "0000000000")],
+        )
+        with self.assertRaisesRegex(ValueError, "retired SID8-era head"):
+            self.classify("(00000000 x)\\n")
 
     def test_pass1_detects_legacy_sid8_and_resolves_current_car(self):
         historical, current, dynamic, empty = self.classify("(00000101 x)\n", source_era="legacy")
