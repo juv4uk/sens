@@ -352,3 +352,34 @@ test "T5M word separator crosses a five-trit boundary exactly" {
     // 02212 містить два сусідні роздільники, тобто порожнє слово.
     try std.testing.expectError(Error.EmptyDomainWord, decode(std.testing.allocator, &.{77}));
 }
+
+// Механічний стресовий корпус змішаних ширин: жодної семантики SENS.
+test "T5M mixed-width repeated physical roundtrip" {
+    const sample = [_]Word{
+        .{ .width = 1, .bits = "1" },
+        .{ .width = 7, .bits = "0000001" },
+        .{ .width = 10, .bits = "0000000001" },
+        .{ .width = 11, .bits = "00000000001" },
+        .{ .width = 24, .bits = "000000000000000000000001" },
+        .{ .width = 48, .bits = "000000000000000000000000000000000000000000000001" },
+    };
+    const allocator = std.testing.allocator;
+    for ([_]usize{ 1, 16, 128 }) |count| {
+        const words = try allocator.alloc(Word, count * sample.len);
+        defer allocator.free(words);
+        for (0..count) |i| {
+            @memcpy(words[i * sample.len ..][0..sample.len], &sample);
+        }
+        const bytes = try encode(allocator, words);
+        defer allocator.free(bytes);
+        const trits = count * (1 + 7 + 10 + 11 + 24 + 48) + words.len - 1;
+        try std.testing.expectEqual((trits + 4) / 5, bytes.len);
+        var decoded = try decode(allocator, bytes);
+        defer decoded.deinit(allocator);
+        try std.testing.expectEqual(words.len, decoded.words.len);
+        for (words, decoded.words) |before, after| {
+            try std.testing.expectEqual(before.width, after.width);
+            try std.testing.expectEqualSlices(u8, before.bits, after.bits);
+        }
+    }
+}
