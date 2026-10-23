@@ -28,6 +28,7 @@ failed_files=0
 # Показники виконання належать тільки реальному SENS CLI та Zig T5M;
 # це не дозвіл на семантичну або релізну атестацію.
 declare -A native_view_roundtrip_paths=()
+declare -A native_fragment_parity_paths=()
 declare -A native_paired_executed_paths=()
 declare -A native_standalone_parity_paths=()
 # Одне джерело може мати кілька реальних порушень (байти, перегляд,
@@ -120,6 +121,7 @@ run_native_t5m_program() {
     return
   fi
   native_view_roundtrip_paths["$file"]=1
+
   if [[ -e "$committed" || -L "$committed" ]]; then
     if [[ ! -f "$committed" || -L "$committed" ]]; then
       echo "::error::T5M_COMMITTED_PAIR_NOT_REGULAR source=$file companion=$committed" >&2
@@ -140,6 +142,20 @@ run_native_t5m_program() {
     mark_file_failed
   else
     echo "::notice::T5M_NATIVE_NOT_COMMITTED source=$file release=NOT_CERTIFIED"
+  fi
+
+  # Частини Core4 — складові одного послідовного Lisp-завантаження, а не
+  # незалежні програми. Для кожної окремо доведено T5M/бітову оберненість
+  # і перевірено committed пару (якщо вона є); спільне виконання перевіряє
+  # наявний Rust-тест t5m_core4_parts_load_sequentially_through_one_session.
+  # Не називати відсутнє самостійне виконання PASS.
+  if [[ "$file" == lib/core4-parts/*.lisp ]]; then
+    if [[ -n "${failed_file_paths[$file]+present}" ]]; then
+      return
+    fi
+    native_fragment_parity_paths["$file"]=1
+    echo "::notice file=$file,title=SENS Core4 fragment::T5M_PARITY_ONLY source=$file standalone=NOT_APPLICABLE integrated=Rust-sequential-SENS"
+    return
   fi
 
   # Типові негативні свідки: помилка Type є мовним результатом SENS,
@@ -768,9 +784,9 @@ while IFS= read -r file || [[ -n "$file" ]]; do
   fi
   run_native_t5m_program
 done < "$manifest"
-printf 'T5M_CHANGED_SUMMARY files_checked=%s files_failed=%s native_view_roundtrip=%s native_paired_executed=%s native_standalone_parity=%s scope=changed_manifest semantic=NOT_CERTIFIED release=NOT_CERTIFIED\n' \
+printf 'T5M_CHANGED_SUMMARY files_checked=%s files_failed=%s native_view_roundtrip=%s native_fragment_parity=%s native_paired_executed=%s native_standalone_parity=%s scope=changed_manifest semantic=NOT_CERTIFIED release=NOT_CERTIFIED\n' \
   "$checked_files" "$failed_files" \
-  "${#native_view_roundtrip_paths[@]}" "${#native_paired_executed_paths[@]}" "${#native_standalone_parity_paths[@]}"
+  "${#native_view_roundtrip_paths[@]}" "${#native_fragment_parity_paths[@]}" "${#native_paired_executed_paths[@]}" "${#native_standalone_parity_paths[@]}"
 if (( failed_files > 0 )); then
   exit 2
 fi
