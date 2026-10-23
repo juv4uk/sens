@@ -360,6 +360,17 @@ jobs:
           # Rust бенчмарк тільки реального I/O байтів Lisp. Він не обчислює D1.
           # 11 проб із прогрівом, p50/p90, явно запускаємо ignored benchmark.
           cargo test --locked -p sens-cli --test mechanism_file_io_benchmark -- --include-ignored --nocapture
+          # Smoke the self-contained Rust benchmark sample modes so CI compiles and checks
+          # the exact-width and packing implementations rather than only their runner.
+          cargo build --locked -p sens --example domain12345678_bench --example byte_pack_bench
+          target/debug/examples/domain12345678_bench series d3 10000 5 > "$RUNNER_TEMP/rust-domain-smoke.tsv"
+          test "$(grep -c '^RUST_DOMAIN_SAMPLE[[:space:]]' "$RUNNER_TEMP/rust-domain-smoke.tsv")" -eq 5
+          test "$(grep -c '^RUST_DOMAIN_SUMMARY[[:space:]]' "$RUNNER_TEMP/rust-domain-smoke.tsv")" -eq 1
+          target/debug/examples/byte_pack_bench series mixed 128 5 > "$RUNNER_TEMP/rust-pack-smoke.tsv"
+          test "$(grep -c '^PACK_BENCH_PREFLIGHT[[:space:]]' "$RUNNER_TEMP/rust-pack-smoke.tsv")" -eq 1
+          test "$(grep -c '^PACK_BENCH_SAMPLE[[:space:]]' "$RUNNER_TEMP/rust-pack-smoke.tsv")" -eq 15
+          test "$(grep -c '^PACK_BENCH_SUMMARY[[:space:]]' "$RUNNER_TEMP/rust-pack-smoke.tsv")" -eq 3
+          cat "$RUNNER_TEMP/rust-domain-smoke.tsv" "$RUNNER_TEMP/rust-pack-smoke.tsv"
           # Rust exact-width ingest benchmark: same D2/domain AST preflight, no JSON/Python corpus.
           # This measures only visible vs packed Rust readers; semantic verdicts stay in Lisp → Zig/T5M → SENS.
           bash benchmarks/rust-packed-visible/run.sh "$RUNNER_TEMP/rust-packed-visible"
