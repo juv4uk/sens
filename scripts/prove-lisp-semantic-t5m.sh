@@ -287,6 +287,11 @@ checked=0
 passed=0
 failed=0
 failed_ids=()
+# Спільні причини RED — діагностика, не мовний оракул і не карантин.
+red_d7_ids=()
+red_d3_car_ids=()
+red_d3_cdr_ids=()
+red_other_ids=()
 # Час кожного реального SENS→Zig/T5M→SENS виконання; не мовний оракул.
 # Одна проба на свідок: діагностичний wall-time, не p50 і не порівняння мов.
 printf 'id\tstatus\twall_ms\n' > "$evidence/law-timings.tsv"
@@ -347,6 +352,19 @@ run_case() {
     echo "SENS_LAW_STAGE id=$id stage=$stage exit=$phase_code elapsed_us=$elapsed_us scope=full-process"
   done < "$evidence/law-stage-timings.tsv"
   if [[ "$status" == RED ]]; then
+    # Класифікуємо фактичний paired.err, але не змінюємо failed чи статус.
+    if [[ -f "$evidence/$id/paired.err" ]] &&
+       grep -Fq 'domain identity is not callable under its ratified law: D7 ' "$evidence/$id/paired.err"; then
+      red_d7_ids+=("$id")
+    elif [[ -f "$evidence/$id/paired.err" ]] &&
+         grep -Fq 'car expects a non-empty list' "$evidence/$id/paired.err"; then
+      red_d3_car_ids+=("$id")
+    elif [[ -f "$evidence/$id/paired.err" ]] &&
+         grep -Fq 'cdr expects a non-empty list' "$evidence/$id/paired.err"; then
+      red_d3_cdr_ids+=("$id")
+    else
+      red_other_ids+=("$id")
+    fi
     # Вже документований борг D6 LENGTH: фізичне викликання ще не допущено.
     # TRANSITIONAL не змінює RED на PASS і не пропускає жодного свідка.
     if [[ -f "$evidence/$id/paired.err" ]] &&
@@ -875,6 +893,15 @@ sha256sum benchmarks/d3-structural-bench.lisp tests/semantic/d3-structural-bench
 run_case run_law d3-structural-bench-positive "$d3_hot_law" 1
 run_case run_law d3-structural-bench-mutant "$d3_hot_mutant" 0
 
+# Класифікуємо кореневі причини без повторного запуску SENS.
+printf 'SENS_RED_CAUSE root=d7-value-call count=%d ids=%s\n' "${#red_d7_ids[@]}" "${red_d7_ids[*]}"
+printf 'SENS_RED_CAUSE root=d3-car-type count=%d ids=%s\n' "${#red_d3_car_ids[@]}" "${red_d3_car_ids[*]}"
+printf 'SENS_RED_CAUSE root=d3-cdr-type count=%d ids=%s\n' "${#red_d3_cdr_ids[@]}" "${red_d3_cdr_ids[*]}"
+printf 'SENS_RED_CAUSE root=other-or-direct count=%d ids=%s\n' "${#red_other_ids[@]}" "${red_other_ids[*]}"
+if (( ${#red_d7_ids[@]} + ${#red_d3_car_ids[@]} + ${#red_d3_cdr_ids[@]} + ${#red_other_ids[@]} != failed )); then
+  echo "::error title=SENS RED grouping::REGRESSION expected=all-failures-classified actual=count-mismatch" >&2
+  exit 1
+fi
 # Звіт із фактично завершених програм: дорогі та червоні свідки поруч.
 # Семантику визначав Lisp/SENS; shell тільки заміряє тривалість і сортує.
 echo "SENS_LAW_BENCHMARK_SUMMARY measured=$checked failed=$failed file=$evidence/law-timings.tsv"
