@@ -587,7 +587,21 @@ while IFS= read -r file || [[ -n "$file" ]]; do
   # Механізм D9 «уніфікувати» справді визначено в lib/unify.lisp.
   # Це точне джерело завантажуваного DEFINE, не дозвіл викликати
   # кожного резидента D9 без реалізації.
-  if [[ "$file" == "lib/reason.lisp" || "$file" == "lib/forward.lisp" ]]; then
+  if [[ "$file" == "lib/persistent-vector.lisp" ]]; then
+    # Вектор використовує чинні мовні корені D24+, визначені в Core4.
+    # Витягаємо рівно ці два DEFINE з канонічного джерела, без копії закону.
+    vector_math_roots="$dir/core4-d24-roots.lisp"
+    if ! awk '
+      /^\(визначити число-нуль 0\)$/ { zero++; print; next }
+      /^\(визначити число-один 1\)$/ { one++; print; next }
+      END { if (zero != 1 || one != 1) exit 2 }
+    ' lib/core4-parts/core4-language.lisp > "$vector_math_roots"; then
+      echo "::error::VECTOR_D24_ROOTS_NOT_ISOLATABLE source=lib/core4-parts/core4-language.lisp expected=two-exact-definitions" >&2
+      mark_file_failed
+      continue
+    fi
+    binding_sources=(--binding-source "$vector_math_roots")
+  elif [[ "$file" == "lib/reason.lisp" || "$file" == "lib/forward.lisp" ]]; then
     # Чинний D9 уніфікатор визначено в українському Lisp, не в самій таблиці.
     binding_sources=(--binding-source lib/unify.lisp)
   elif [[ "$file" == "tests/semantic/result-status-d7-label-law.lisp" ||
