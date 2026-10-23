@@ -433,12 +433,37 @@ cat -- "$meta_sixth_definition" tests/semantic/d11-meta-sixth-laws.lisp > "$meta
 cat -- "$meta_sixth_definition" tests/semantic/d11-meta-sixth-mutant.lisp > "$meta_sixth_mutant_bundle"
 run_case run_law d11-meta-sixth-positive "$meta_sixth_law_bundle" 1
 run_case run_law d11-meta-sixth-mutant "$meta_sixth_mutant_bundle" 0
-# Порівняння Д11: десять самоперевірних мовних законів і негативний мутант.
-# Числа походять з Lisp LENGTH; фізична невикличність D6 лишається RED #5854.
+# Порівняння Д11: визначення беремо незмінним із чинного Lisp, без
+# завантаження всього MetaEval та його незалежних D6 LENGTH-ініціалізаторів.
+# Джерельні закони все ще використовують LENGTH для чисел: якщо фізична
+# викличність D6 #5854 відсутня, це справжній RED, а не привід змінити вердикт.
+# Якщо DEFINE зник, повторився або зламав межі — тестова підготовка падає.
+meta_compare_definition="$evidence/d11-meta-compare-source-definition.lisp"
+if ! awk -v target="(визначити порівняти-два-значення-мета" '
+  $0 == target {
+    if (found++) exit 2
+    copying = 1
+  }
+  copying && NF == 0 {
+    copying = 0
+    complete++
+    next
+  }
+  copying { print }
+  END { if (found != 1 || complete != 1 || copying) exit 2 }
+' lib/meta-eval.lisp > "$meta_compare_definition"; then
+  echo "::error::D11_META_COMPARE_SOURCE_NOT_ISOLATABLE source=lib/meta-eval.lisp" >&2
+  exit 2
+fi
+test -s "$meta_compare_definition" || {
+  echo "::error::D11_META_COMPARE_SOURCE_EMPTY" >&2
+  exit 2
+}
+sha256sum lib/meta-eval.lisp "$meta_compare_definition" > "$evidence/d11-meta-compare-source.sha256"
 meta_compare_law_bundle="$evidence/d11-meta-compare-positive-complete.lisp"
 meta_compare_mutant_bundle="$evidence/d11-meta-compare-mutant-complete.lisp"
-cat -- lib/meta-eval.lisp tests/semantic/d11-meta-compare-laws.lisp > "$meta_compare_law_bundle"
-cat -- lib/meta-eval.lisp tests/semantic/d11-meta-compare-mutant.lisp > "$meta_compare_mutant_bundle"
+cat -- "$meta_compare_definition" tests/semantic/d11-meta-compare-laws.lisp > "$meta_compare_law_bundle"
+cat -- "$meta_compare_definition" tests/semantic/d11-meta-compare-mutant.lisp > "$meta_compare_mutant_bundle"
 run_case run_law d11-meta-compare-positive "$meta_compare_law_bundle" 1
 run_case run_law d11-meta-compare-mutant "$meta_compare_mutant_bundle" 0
 # LAST-DEFINE: D7-текст має D8-рівність у нормативному Lisp, не D3 EQ Rust.
