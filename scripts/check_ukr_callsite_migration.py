@@ -203,9 +203,13 @@ def candidate_heads(forms: tuple):
             # Special reader/definition syntax is not a function invocation.
             syntax = {'quote', 'quasiquote', 'lambda', 'define', 'defmacro',
                       'let', 'let*', '001', '0010', '0011'}
-            if (head not in syntax and not BIT_WORD.fullmatch(head)
-                    and (ENCODED_HEAD.fullmatch(head) or LATIN.search(head)
-                         or UKRAINIAN.search(head))):
+            # Старі SID8/Sens8 та сучасні exact-bit голови не є
+            # українською людською проєкцією. Не відкидай їх з
+            # аудиту лише тому, що вони складаються з 0/1.
+            # Саму семантику старого W8 без provenance не вгадуємо.
+            if (head not in syntax
+                    and (BIT_WORD.fullmatch(head) or ENCODED_HEAD.fullmatch(head)
+                         or LATIN.search(head) or UKRAINIAN.search(head))):
                 yield node.values[0]
             # D3 COND clauses are (predicate result) pairs. A typed D1 value
             # such as #d1:1 in predicate position is a value, not a call head.
@@ -317,6 +321,10 @@ def excluded_metadata(path: Path) -> bool:
                 # not executable SENS call heads. Do not rewrite their ABI.
                 'lib/island-math-evidence.lisp',
                 'lib/machine/authority-boundary.lisp',
+                # Документ сумісності, де старі SID8 є ключами рядків
+                # машинного профілю, а не викликами SENS. Чинний
+                # точнодоменний профіль — machine/profile/current-domain-x86-64.
+                'lib/machine/intel-core-i5-6400.lisp',
             })
 
 
@@ -365,7 +373,7 @@ def measure(root: Path) -> dict:
             file_heads = file_full = file_nonfull = 0
             for head in candidate_heads(forms):
                 file_heads += 1
-                if ENCODED_HEAD.fullmatch(head.text):
+                if BIT_WORD.fullmatch(head.text) or ENCODED_HEAD.fullmatch(head.text):
                     file_nonfull += 1
                     encoded.append({'file': rel.as_posix(), 'line': head.line,
                                     'column': head.column, 'head': head.text,

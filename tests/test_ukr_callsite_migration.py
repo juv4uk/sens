@@ -375,6 +375,35 @@ class CallsiteAuditTests(unittest.TestCase):
         self.assertEqual(p.returncode, 1)
         self.assertIn('1 active encoded heads', p.stderr)
 
+    def test_raw_sid8_executable_head_is_reported_not_silently_skipped(self):
+        # Історична восьмибітна голова у живому Lisp має отримати
+        # окрему діагностику, а не зникнути з лічильника.
+        # Проєкцію «укр» дозволяє тільки точний доведений міст.
+        self.put('lib/старий-виклик.lisp',
+                 '(00000010 (як-є ()))\n'
+                 '(як-є (00000010 (як-є ())))\n'
+                 '; (00000100 (як-є ()))\n')
+        m = mod.measure(self.root)
+        self.assertEqual(m['active_encoded_head_sites'], 1)
+        self.assertEqual(m['active_latin_heads'], 0)
+        self.assertEqual(m['encoded_head_sites'][0]['head'], '00000010')
+        self.assertEqual(m['encoded_head_sites'][0]['file'],
+                         'lib/старий-виклик.lisp')
+        self.assertEqual(m['active_files_full_ukr'], 0)
+        p = subprocess.run([sys.executable, str(SCRIPT), '--root',
+                            str(self.root), '--require-full'],
+                           capture_output=True, text=True)
+        self.assertEqual(p.returncode, 1)
+        self.assertIn('1 active encoded heads', p.stderr)
+
+    def test_historical_sid8_machine_profile_keys_are_not_calls(self):
+        self.put('lib/machine/intel-core-i5-6400.lisp',
+                 '(machine-profile-1 (rows (00000010 sequence "CMP")))\n')
+        self.put('lib/чиста-програма.lisp', '(атом? (як-є ()))\n')
+        m = mod.measure(self.root)
+        self.assertEqual(m['active_encoded_head_sites'], 0)
+        self.assertEqual(m['metadata_files_excluded'], 1)
+
     def test_distinguishes_compact_only_full_and_local_cyrillic(self):
         self.row(3, '101', 'коротко', 'повна-назва', 'equal')
         self.put('lib/live.lisp', '(коротко а)\n(повна-назва а)\n(власна-функція а)\n')
