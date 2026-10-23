@@ -558,6 +558,12 @@ fn evaluate_list(
                     span,
                 );
             }
+            // Рівно той самий пошук наявного зв'язування, що й у
+            // позиції значення. D7-гліфи не створюють викличної
+            // координати; без вже визначеного імені — UnknownSymbol.
+            if surface.as_deref().is_some_and(|name| environment.get(name).is_some()) {
+                return dispatch_call(None, None, Some(&items[0]), &items[1..], environment, span);
+            }
             return Err(LanguageError::new(
                 ErrorKind::UnknownSymbol,
                 format!("unknown Text7 binding: {key}"),
@@ -579,6 +585,42 @@ fn evaluate_list(
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn physical_d7_call_head_uses_existing_ukrainian_source_binding_only() {
+        let name = "перевірка";
+        let text7 = crate::encode_text7(name, crate::Text7Layout::Uk)
+            .expect("ratified Ukrainian D7 glyphs");
+        let key = text7.to_canonical_wire_token();
+        let glyphs = text7
+            .cells()
+            .iter()
+            .map(|cell| format!("{cell:07b}"))
+            .collect::<Vec<_>>()
+            .join(" ");
+        let physical_source = format!("10 10 {glyphs} 01 1 01");
+        let expressions = crate::parse_canonical_binary(&physical_source)
+            .expect("physical D2/D7 call head");
+        let mut bound_session = Session::bare();
+        bound_session.environment.define(
+            name,
+            Value::host_function(std::rc::Rc::new(|arguments, _, _| {
+                Ok(arguments.first().cloned().unwrap_or(Value::Nil))
+            })),
+        );
+        assert!(
+            bound_session.environment.get(&key).is_none(),
+            "physical alias must not be fabricated for an existing source binding"
+        );
+        let result = eval_parsed_expressions(&expressions, &mut bound_session)
+            .expect("exact D7 call must reach the existing source closure");
+        assert_eq!(result.value.as_predicate_bit(), Some(true));
+
+        let mut unbound_session = Session::bare();
+        let error = eval_parsed_expressions(&expressions, &mut unbound_session)
+            .expect_err("unbound glyph call must remain noncallable");
+        assert_eq!(error.kind, ErrorKind::UnknownSymbol);
+    }
 
     #[test]
     fn text7_call_head_dispatches_an_already_bound_builtin() {
