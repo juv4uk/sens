@@ -64,6 +64,41 @@ class DomainFunctionReuseRule(unittest.TestCase):
         self.assertIn("CDAAAAAAAR", lower)  # D10
         self.assertNotIn("CDAAAAAAAAR", lower)  # D11
 
+    def test_staged_reads_index_not_unstaged_worktree(self) -> None:
+        # Коміт міститиме дубль D3, хоча робоче дерево вже виправлене.
+        # Охоронець мусить перевірити саме Git index.
+        spec = importlib.util.spec_from_file_location("guard_staged_index_test", GUARD)
+        self.assertIsNotNone(spec)
+        self.assertIsNotNone(spec.loader)
+        guard = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(guard)
+        with tempfile.TemporaryDirectory(prefix="sens-guard-staged-") as temp:
+            root = Path(temp)
+            staged_file = root / "lib" / "staged-guard-probe.lisp"
+            staged_file.parent.mkdir(parents=True)
+            staged_file.write_text(
+                "(визначити сполучити (функція (х у) х))\n", encoding="utf-8"
+            )
+            init = subprocess.run(
+                ["git", "init", "-q"], cwd=root, capture_output=True, text=True, check=False,
+            )
+            self.assertEqual(init.returncode, 0, init.stderr)
+            add = subprocess.run(
+                ["git", "add", "lib/staged-guard-probe.lisp"],
+                cwd=root, capture_output=True, text=True, check=False,
+            )
+            self.assertEqual(add.returncode, 0, add.stderr)
+            staged_file.write_text("; чисте робоче дерево\n", encoding="utf-8")
+            output = StringIO()
+            with mock.patch.object(guard, "ROOT", root), \
+                 mock.patch.object(guard, "ladder_names", return_value={"сполучити"}), \
+                 mock.patch.object(guard, "project_definition_sites", return_value={}), \
+                 mock.patch.object(guard, "MINIMUM_RATIFIED_SURFACES", 1), \
+                 redirect_stdout(output):
+                status = guard.main(["--staged"])
+        self.assertEqual(status, 1, output.getvalue())
+        self.assertIn("BLOCKED", output.getvalue())
+
     def test_search_self_test_is_green(self) -> None:
         result = run(SEARCH, "--self-test")
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)

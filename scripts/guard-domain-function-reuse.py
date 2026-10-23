@@ -327,7 +327,7 @@ def changed_files(args) -> list[str]:
         return [ln.strip() for ln in Path(args.paths_from).read_text(encoding="utf-8").splitlines() if ln.strip()]
     if args.staged:
         out = subprocess.run(
-            ["git", "-c", "core.quotepath=false", "diff", "--name-only", "--cached"],
+            ["git", "-c", "core.quotepath=false", "diff", "--name-only", "--cached", "--diff-filter=ACMR"],
             cwd=ROOT, capture_output=True, text=True, check=False,
         ).stdout
         return [ln.strip() for ln in out.splitlines() if ln.strip()]
@@ -405,10 +405,24 @@ def main(argv: list[str] | None = None) -> int:
         if rel.startswith("tests/") and not rel.startswith(SEMANTIC_PREFIX):
             continue
         path = ROOT / rel
-        if not path.is_file():
+        if not args.staged and not path.is_file():
             continue
+        if args.staged:
+            try:
+                staged = subprocess.run(
+                    ["git", "show", f":{rel}"], cwd=ROOT,
+                    capture_output=True, text=True, check=False,
+                )
+            except (OSError, UnicodeError) as exc:
+                print(f"GUARD-DOMAIN-REUSE: НЕ ПЕРЕВІРЕНО — Git index {rel}: {exc}", file=sys.stderr)
+                return 2
+            if staged.returncode != 0:
+                print(f"GUARD-DOMAIN-REUSE: НЕ ПЕРЕВІРЕНО — неможливо прочитати Git index {rel}: {staged.stderr.strip()}", file=sys.stderr)
+                return 2
+            text = staged.stdout
+        else:
+            text = path.read_text(encoding="utf-8")
         checked += 1
-        text = path.read_text(encoding="utf-8")
         known: set[str] = set()
         if args.base:
             try:
