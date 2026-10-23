@@ -52,12 +52,9 @@ words.
 Rust, Python and shell are allowed to transport bytes, invoke SENS, and retain
 evidence. They do not define the expected logic of this witness.
 
-`result-status-d1-law.bits` extends the same rule into the reasoning outcome
-layer. Its executable heads include exact D9 `RESULT-TAGGED?` and
-`MAKE-PROVED`, while D3 `COND/EQ/QUOTE` and D1 `0/1` carry the verdict.
-If either the true or false result law is wrong, SENS takes an intentionally
-non-callable D1 branch and rejects its own witness. The host runner therefore
-does not need an expected semantic value.
+`result-status-laws.lisp` is the authoritative source witness for reasoning outcomes. It exercises the existing `lib/result-status.lisp` constructors and validators through the Ukrainian projection; every failed case reaches a non-callable SENS branch. The native pipeline bundles the library with the witness only for execution, then runs source → T5M codec → Zig view/round-trip → physical SENS with matching verdicts.
+
+`result-status-d1-law.bits` is retained as a legacy carrier fixture for syntax/framing inspection only. It is no longer the semantic authority and must not be edited as source; semantic changes belong in `.lisp` and must be carried through the codec.
 
 ## Вузький двійковий свідок D4:1001 та бітності
 
