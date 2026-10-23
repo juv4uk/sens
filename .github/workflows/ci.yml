@@ -84,6 +84,8 @@ jobs:
           python3 scripts/check-numeric-domain-ratification.py
           python3 scripts/check_d10_owner_whole_domain_ratification.py
           python3 -m unittest tests/test_domain_ladder_2046_exact.py -v
+          # Лише методика звіту T5M: nearest-rank p90, без запуску важкого бенчмарка.
+          python3 -m unittest discover -s research/zig-codecs/t5m -p 'test_*.py' -v
           # Повний прогін: self-test пошуку й охоронця драбин.
           python3 scripts/search-domain-function.py --self-test
           python3 scripts/guard-domain-function-reuse.py --self-test
