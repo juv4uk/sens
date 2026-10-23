@@ -70,7 +70,7 @@ mod paired {
         // замінити SENS-кваліфікацію десяткового числа до точного D24+.
         if source.lines().any(|line| {
             let code = line.split(';').next().unwrap_or("");
-            ["#d", "#b", "#q2"].iter().any(|tag| code.contains(tag))
+            ["#d", "#b", "#q2"].iter().any(|tag| code.contains(*tag))
         }) {
             return Err("SENS admission: encoded literals forbidden in executable Lisp".into());
         }
