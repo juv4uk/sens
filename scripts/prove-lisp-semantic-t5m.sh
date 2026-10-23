@@ -73,4 +73,8 @@ run_law d4-escaped-closure-positive tests/semantic/d4-escaped-lexical-closure-la
 run_law d4-escaped-closure-mutant tests/semantic/d4-escaped-lexical-closure-mutant.lisp 0
 run_law d5-exact-arithmetic-positive tests/semantic/d5-arithmetic-native-t5m-law.lisp 1
 run_law d5-exact-arithmetic-mutant tests/semantic/d5-arithmetic-native-t5m-mutant.lisp 0
-echo "SENS_LISP_T5M_LAWS_PASS count=9 positive=5 mutants=4 physical=ZIG_T5M"
+# The result-status law stays in Ukrainian Lisp; only the runner bundles its admitted library.
+result_status_bundle="$evidence/result-status-bundle.lisp"
+cat lib/result-status.lisp tests/semantic/result-status-laws.lisp > "$result_status_bundle"
+run_law result-status-source tests/semantic/result-status-laws.lisp 1
+echo "SENS_LISP_T5M_LAWS_PASS count=10 positive=6 mutants=4 physical=ZIG_T5M"
