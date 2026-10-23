@@ -22,7 +22,7 @@
          (як-є explicit-owner-authority-required)
          (як-є authority-not-present) (як-є irreversible-impact)
          (як-є ask-owner) (список докази)))
-      (1 (захист-невідоме суб'єкт (як-є unclassified-event-kind)
+      (так (захист-невідоме суб'єкт (як-є unclassified-event-kind)
            (як-є choose-unknown-route))))))
 
 ; Сумісна історична назва для зовнішніх споживачів.

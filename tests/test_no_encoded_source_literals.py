@@ -19,6 +19,19 @@ SPEC.loader.exec_module(CHECK)
 
 
 class EncodedSourceLiteralTests(unittest.TestCase):
+    def test_guard_runtime_policy_uses_d1_truth_not_numeric_cond_head(self):
+        # Лексичний захист людської проєкції; не замінює SENS execution oracle.
+        path = ROOT / "knowledge/guard-runtime-policy.lisp"
+        source = path.read_text(encoding="utf-8")
+        self.assertEqual(
+            CHECK.find_forbidden_literals(
+                source, path="knowledge/guard-runtime-policy.lisp"
+            ),
+            [],
+            "гвардія не повинна містити числових голів або літералів",
+        )
+        self.assertIn("(так (захист-невідоме", source)
+
     def test_machine_encoder_has_no_numeric_source_literals(self):
         # Суто лексичний свідок; семантику кодувальника перевіряють SENS-тести.
         path = ROOT / "lib/machine/encoding/x86-64.lisp"
