@@ -1,45 +1,46 @@
-name: Contract 11.8 W1-W9 carrier benchmark
-
-# Exact-width carrier benchmark across the implemented W1..W9 ladder.
-# Contract 11.8 authority is D1-D9 current. W9 is measured mechanically
-# through the exact u16 carrier; domain-law execution remains separate.
-# Measuring a carrier never grants callability or replaces semantic authority.
+# Manual diagnostic only. Carrier timing belongs to Rust; language laws stay in Lisp/SENS.
+name: Contract 11.8 carrier — native Rust
 
 on:
   workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: domain12345678-bench-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
-  bench:
-    runs-on: ubuntu-latest
+  rust:
+    runs-on: ubuntu-24.04
     timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v5
-      - uses: dtolnay/rust-toolchain@stable
-      - uses: Swatinem/rust-cache@v2
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09
         with:
-          shared-key: domain12345678-bench
-
-      - name: Install Valgrind
+          persist-credentials: false
+      - uses: dtolnay/rust-toolchain@1.99.0
+      - name: Build the exact-width carrier benchmark
+        shell: bash
+        run: cargo build --locked --release -p sens --example domain12345678_bench
+      - name: Verify exact identities before adaptive timing
+        shell: bash
         run: |
-          sudo apt-get update
-          sudo apt-get install -y valgrind
-          valgrind --version
-          rustc --version
-
-      - name: Build W1-W9 carrier benchmark
-        run: cargo build --release -p sens --example domain12345678_bench
-
-      - name: Measure Contract 11.8 W1-W9 mechanical carrier cost
-        run: |
-          rm -rf /tmp/domain12345678
-          python3 benchmarks/domain12345678/run.py \
-            --binary target/release/examples/domain12345678_bench \
-            --out-dir /tmp/domain12345678 \
-            --iterations 200000 \
-            --reps 3
-
-      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f
+          set -euo pipefail
+          out="$RUNNER_TEMP/domain12345678"
+          mkdir -p "$out"
+          binary="$PWD/target/release/examples/domain12345678_bench"
+          for case in empty d1 d2 d3 d4 d5 d6 d7 d8 d9 mixed width-roundtrip; do
+            "$binary" series "$case" 100000 9 >> "$out/raw.tsv"
+          done
+          test "$(grep -c '^RUST_DOMAIN_SAMPLE[[:space:]]' "$out/raw.tsv")" -eq 108
+          test "$(grep -c '^RUST_DOMAIN_SUMMARY[[:space:]]' "$out/raw.tsv")" -eq 12
+          cat "$out/raw.tsv"
+      - name: Preserve measured Rust samples
         if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
-          name: domain12345678-cachegrind
-          path: /tmp/domain12345678
-          retention-days: 7
+          name: domain-carrier-rust-${{ github.sha }}
+          path: ${{ runner.temp }}/domain12345678/raw.tsv
+          if-no-files-found: warn
+          retention-days: 21

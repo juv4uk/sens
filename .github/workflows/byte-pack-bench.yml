@@ -1,59 +1,47 @@
-# Карантин автоматичного schedule 2026-10-13: тільки ci.yml виконується сам.
-# Бенчмарк залишається ручним дослідним інструментом.
-name: Byte-pack efficiency benchmark
+# Manual diagnostic only. All active bit-pack measurements are emitted by Rust.
+name: Byte-pack efficiency — native Rust
 
 on:
   workflow_dispatch:
+
+permissions:
+  contents: read
+
 concurrency:
-  group: byte-pack-bench-${{ github.event.pull_request.number || github.ref }}
+  group: byte-pack-bench-${{ github.ref }}
   cancel-in-progress: false
 
 jobs:
-  smoke:
-    runs-on: ubuntu-latest
+  rust:
+    runs-on: ubuntu-24.04
     timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v5
-      - uses: dtolnay/rust-toolchain@stable
-      - uses: Swatinem/rust-cache@v2
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09
         with:
-          shared-key: byte-pack-bench
-
-      - name: Install Cachegrind
+          persist-credentials: false
+      - uses: dtolnay/rust-toolchain@1.99.0
+      - name: Build the Rust packing mechanism
+        shell: bash
+        run: cargo build --locked --release -p sens --example byte_pack_bench
+      - name: Verify exact round-trip before adaptive timing
+        shell: bash
         run: |
-          sudo apt-get update
-          sudo apt-get install -y valgrind
-          valgrind --version
-
-      - name: Build production-API packing benchmark
-        run: cargo build --release -p sens --example byte_pack_bench
-
-      - name: Verify parity and measure density versus instruction cost
-        run: |
-          rm -rf /tmp/sens-byte-pack
-          python3 benchmarks/byte-pack/run.py \
-            --binary target/release/examples/byte_pack_bench \
-            --out /tmp/sens-byte-pack \
-            --sizes 64,1024 \
-            --reps 16
-
-      - name: Publish summary
+          set -euo pipefail
+          out="$RUNNER_TEMP/byte-pack"
+          mkdir -p "$out"
+          binary="$PWD/target/release/examples/byte_pack_bench"
+          for workload in d1 d3 w7 w8 w9 mixed; do
+            "$binary" series "$workload" 1024 9 >> "$out/raw.tsv"
+          done
+          test "$(grep -c '^PACK_BENCH_PREFLIGHT[[:space:]]' "$out/raw.tsv")" -eq 6
+          test "$(grep -c '^PACK_BENCH_SAMPLE[[:space:]]' "$out/raw.tsv")" -eq 162
+          test "$(grep -c '^PACK_BENCH_SUMMARY[[:space:]]' "$out/raw.tsv")" -eq 18
+          cat "$out/raw.tsv"
+      - name: Preserve measured Rust samples
         if: always()
-        run: |
-          {
-            echo "## Byte-pack efficiency #2190"
-            echo
-            echo "Exact parity is checked before Cachegrind. Packed bytes are mechanism evidence, not semantic identity."
-            if test -s /tmp/sens-byte-pack/results.tsv; then
-              echo '~~~text'
-              cat /tmp/sens-byte-pack/results.tsv
-              echo '~~~'
-            fi
-          } >> "$GITHUB_STEP_SUMMARY"
-
-      - uses: actions/upload-artifact@v4
-        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
-          name: byte-pack-efficiency
-          path: /tmp/sens-byte-pack/
-          retention-days: 7
+          name: byte-pack-rust-${{ github.sha }}
+          path: ${{ runner.temp }}/byte-pack/raw.tsv
+          if-no-files-found: warn
+          retention-days: 21

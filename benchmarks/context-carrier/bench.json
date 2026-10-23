@@ -7,13 +7,13 @@
     "FALSIFIER"
   ],
   "question": "Which context carrier preserves the order, multiplicity, witness identity, and provenance needed by the declared support/refutation workloads?",
-  "claim": "Capability matrix and bounded logical counters only; wall time is diagnostic, and carriers unable to preserve required information are non-comparable rather than winners.",
+  "claim": "The capability matrix and bounded logical counters are historical research only; the Python measurement workflow is retired. This record does not establish current wall time, language speed, or production runtime authority.",
   "witness": [
     "README.md",
     "run.py"
   ],
-  "status": "RESEARCH-ONLY; SMOKE PROFILE; METADATA BACKFILL",
-  "generation": "unknown",
+  "status": "HISTORICAL-RESEARCH-ONLY; PYTHON-MEASUREMENT-WORKFLOW-RETIRED",
+  "generation": "Prior bounded research; no current replay asserted",
   "axis": "capability preservation / logical reads-writes / invalidation fanout",
-  "reproduce": "python3 benchmarks/context-carrier/run.py --smoke --out /tmp/sens-context-carrier/results"
+  "reproduce": "No active measurement runner; retained sources are historical research and do not supply current performance evidence"
 }

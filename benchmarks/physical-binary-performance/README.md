@@ -1,86 +1,35 @@
-# SENS: вимірювання фізичної двійкової мови
+# Physical T5 execution — historical Python results, native Rust replacement
 
-Це **вимірювання фізичного T5-транспорту й CLI-шляхів**, а не тест з фіксованим числом інструкцій чи оголошений рейтинг мов.
+The earlier `run.py` and the records it generated are historical evidence only.
+They used a Python T5 decoder and must not be cited as a current replay or used
+to claim language speed. Existing historical artifacts are preserved for
+provenance; this commit does not re-label them as new measurements.
 
-Зафіксований `.sens` файл є фізичним еталоном. Незалежний Python-декодер
-розкладає його на точні D1–D9 двійкові слова; стенд записує цей потік як
-тимчасову ASCII-проєкцію з одним кінцевим LF, запускає `sens-trit encode` і
-вимагає, щоб отримані байти збіглися з committed `.sens` **побайтно**.
-Потім три реальні CLI-доріжки читають саме щойно повторно закодований файл.
-Так вимірюється проєкція слів → T5 плюс запуск/читання/декодування/виконання;
-це **не** компіляція історичного Lisp AST і не генерація нативних машинних інструкцій.
+The active replacement is a Rust integration benchmark in
+`crates/sens-cli/tests/physical_sens_runtime_benchmark.rs`, run from
+`.github/workflows/sens-performance.yml`. It uses eight committed physical
+`.sens` fixtures and their committed extensionless views. Before any timing,
+it requires all of these checks:
 
-Історичні сусідні `.lisp` файли під `tests/fixtures/migration-*` не є
-джерелом цього вимірювання: деякі містять AST-синтаксис попередньої генерації,
-який чинний exact-width reader правильно відхиляє. Вони залишаються незміненими.
+- The physical file and its committed visible view both exist and are nonempty.
+- `sens` and `sens-trit eval` emit identical stdout bytes.
+- `sens-trit open` emits exactly the committed extensionless view.
+- Warm-up and every timed repetition preserve the same stdout bytes.
 
-## Вісім фізичних взірців (не вигаданий навантажувальний корпус)
+The native benchmark records commit, fixture, executable SHA256, source/carrier
+SHA256 and emits plain-text TSV-style records:
+`RUST_PHYSICAL_T5_PREFLIGHT`, `RUST_PHYSICAL_T5_SAMPLE`, and
+`RUST_PHYSICAL_T5_SUMMARY`. Timing includes process startup, file reading,
+decoding/evaluation and stdout; it is not steady-state evaluator throughput
+and is not a semantic proof. Lisp laws remain in
+`scripts/prove-lisp-semantic-t5m.sh` and are evaluated through Zig/T5M into
+native SENS.
 
-- D3 `QUOTE`: `quote-legacy.sens`; дві форми: `two-forms.sens`.
-- D1 `COND` з точним PredicateBit: `branch.sens`.
-- D3 `CONS`, `CAR` і `CDR`: `pair-cons.sens`, `pair-car-cdr.sens`.
-- D4 `CAAR`: `caar.sens`.
-- D3 `EQ`/D1 `COND`: `eq-cond-select.sens`, `eq-cond-skip.sens`.
-
-Це всі **наявні зафіксовані фізичні файли**, не синтетичні дублікати.
-Кожен має окремий SHA256, exact-width words і незалежний T5 roundtrip.
-Якщо хоч одна доріжка завершиться помилкою, дасть інші stdout-байти або
-неканонічне декодування, **весь прогін зупиняється без зведеної оцінки**.
-Ці докази стосуються транспорту та виконавчих механізмів, не доводять
-семантику довільних Lisp-програм.
-
-## Що вимірюється
-
-- `source_bytes`: точний розмір тимчасової ASCII word-projection, декодованої з відповідного committed `.sens`; це не розмір чи семантичний доказ старого Lisp AST;
-- `encode_median_ms` / `encode_p95_ms`: окремий процес `sens-trit encode`, включно зі стартом процесу та перевіркою результату; один warm-up, п'ять вимірювань на джерело;
-- `physical_bytes`: реальні байти щойно згенерованого T5-файлу, а не теоретичний lower bound;
-- `visible_binary_bytes`: розмір **канонічної ASCII-проєкції** зі строго одним кінцевим LF, байт-у-байт як `sens-trit open`;
-- `first_process_ms`: перший **preflight-виклик** відповідного CLI, до бенчмарк-прогрівів; це не гарантує холодного OS page cache;
-- `median_wall_ms`, `p95_wall_ms`, `wall_cv`: медіана, p95 nearest-rank, коефіцієнт варіації;
-- `cachegrind_i_refs`: дійсні instruction references процесу (тільки з `--cachegrind`);
-- `executable_sha256`: SHA256 точних файлів `sens` і `sens-trit`, перевірених незмінними впродовж вимірювання;
-- `benchmark_sha256` та `t5_codec_sha256`: SHA256 реалізації вимірювача та незалежного Python T5-кодека;
-- `github_hosted_provenance`: назва й клас раннера, ID запуску та спроби (де ці змінні доступні).
-
-Кожен вимір запускає **окремий процес**. Це показник startup + читання +
-декодування + виконання + stdout (залежно від lane), **не** чистий hot evaluator
-і **не** число інструкцій мови SENS. Ланки `sens-exec` та `sens-trit-eval`
-виконують однаковий фізичний файл, але запускаються різними CLI.
-
-Бенчмарк допускається тільки якщо stdout двох виконавців збігається
-байт-у-байт, повтори детерміновані, а **незалежний Python-декодер** підтверджує
-`encode_words(decode_bytes(.sens)) == фізичні байти` та точний двійковий
-перегляд `sens-trit open` (із завершальним LF). У звіті є SHA256 типованих
-слів, який включає довжину кожного слова D1–D9. Це **лише паритет транспорту
-й механізмів**, не семантичний оракул чи нова ратифікація.
-
-## Відтворення
-
-Перед замірами перевірте проєкцію й негативні межі:
-
-`python3 -m unittest discover -s benchmarks/physical-binary-performance -p 'test_*.py' -v`.
-
+Manual replay:
 
 ```sh
-cargo build --locked --release -p sens-cli --bin sens --bin sens-trit
-python3 benchmarks/physical-binary-performance/run.py \
-  --sens target/release/sens \
-  --sens-trit target/release/sens-trit \
-  --reps 21 --warmup 4 --out /tmp/sens-physical-bench
-cat /tmp/sens-physical-bench/report.md
+gh workflow run sens-performance.yml --ref main
 ```
 
-Для вимірювання інструкцій CPU встановіть Valgrind і додайте `--cachegrind`.
-Файли `raw.tsv`, `results.json`, `report.md` містять коміт, CPU, фізичний
-розмір, час, за наявності instruction references; JSON додатково фіксує
-SHA256 обох реальних виконуваних файлів, benchmark-коду й T5-кодека. Для
-GitHub Actions workflow закріплює codec/fixture/source SHA та записує
-системне середовище. Тільки результати на порівнюваному обладнанні
-можна використовувати для числових зіставлень.
-
-**Порівнювати** результати на одному і тому ж процесорі, зі схожим
-навантаженням, тим самим корпусом і версією коду. GitHub-hosted runner може
-змінювати фізичний CPU; CI дає вимір, а не абсолютний об'єктивний рейтинг.
-
-Цей стенд не відключає Vertical Day / регресійні оракули: вимірювання
-непрацездатної програми не допускається.
+No new latency values are asserted until this workflow has completed on a known
+commit and its raw TSV evidence has been inspected.

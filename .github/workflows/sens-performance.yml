@@ -52,6 +52,7 @@ jobs:
             --example domain_occupancy_bench \
             --example byte_pack_bench \
             --example zig_t5_matched_bench
+          cargo build --locked --release -p sens-cli --bin sens --bin sens-trit
       - name: Measure exact-width domain construction in Rust
         shell: bash
         run: |
@@ -90,6 +91,23 @@ jobs:
           bash benchmarks/rust-packed-visible/run.sh "$RUNNER_TEMP/sens-mechanisms/packed-visible"
           test "$(grep -c '^RUST_PACKED_VISIBLE_SAMPLE[[:space:]]' "$RUNNER_TEMP/sens-mechanisms/packed-visible/raw.tsv")" -eq 45
           test "$(grep -c '^RUST_PACKED_VISIBLE_SUMMARY[[:space:]]' "$RUNNER_TEMP/sens-mechanisms/packed-visible/raw.tsv")" -eq 5
+      - name: Measure physical SENS process paths with Rust after byte/view parity
+        shell: bash
+        run: |
+          set -euo pipefail
+          out="$RUNNER_TEMP/sens-mechanisms"
+          SENS_PHYSICAL_T5_SENS="$PWD/target/release/sens" \
+          SENS_PHYSICAL_T5_TRIT="$PWD/target/release/sens-trit" \
+          SENS_PHYSICAL_T5_REPS=21 SENS_PHYSICAL_T5_WARMUPS=4 \
+            cargo test --locked --release -p sens-cli --test physical_sens_runtime_benchmark -- --ignored --nocapture \
+              > "$out/physical-t5-process.tsv" 2>&1 || {
+                cat "$out/physical-t5-process.tsv" >&2
+                exit 1
+              }
+          test "$(grep -c '^RUST_PHYSICAL_T5_PREFLIGHT[[:space:]]' "$out/physical-t5-process.tsv")" -eq 8
+          test "$(grep -c '^RUST_PHYSICAL_T5_SAMPLE[[:space:]]' "$out/physical-t5-process.tsv")" -eq 504
+          test "$(grep -c '^RUST_PHYSICAL_T5_SUMMARY[[:space:]]' "$out/physical-t5-process.tsv")" -eq 24
+          grep -E '^RUST_PHYSICAL_T5_(PREFLIGHT|SUMMARY)[[:space:]]' "$out/physical-t5-process.tsv"
       - name: Measure Rust and Zig T5 mechanics against identical bytes
         shell: bash
         run: |

@@ -1,20 +1,19 @@
 {
   "schema": "sens-benchmark-manifest/v1",
   "stand": "physical-binary-performance",
-  "wing": "Physical T5 runtime and transport",
+  "wing": "Native physical T5 process timing (Rust)",
   "roles": [
     "MEASUREMENT",
     "CONFORMANCE"
   ],
-  "question": "How large and fast is current physical .sens T5 transport, decode/open, and pure execution when committed T5 files are re-encoded from their canonical exact-width word projections?",
-  "claim": "Measures canonical word-projection-to-T5 re-encoding, physical file size, and per-process wall startup+execution, p95 and optional Cachegrind I refs across eight existing physical T5 fixtures. The reference Python decoder creates a temporary exact-width word projection from each committed .sens file; the Rust encoder must reproduce the committed bytes, and two CLI execution paths must emit identical output. This does not measure Lisp AST lowering or establish an independent semantic oracle, in-process warm throughput, or cross-machine superiority.",
+  "question": "What are the physical byte sizes and cold-process latencies for committed T5 SENS fixtures when native Rust verifies view/output parity first?",
+  "claim": "The Rust integration benchmark uses committed .sens files and their committed extensionless views, checks sens vs sens-trit eval stdout and sens-trit open byte parity, then emits first-process, p50, p95, min and max timings to TSV. It does not re-encode through a Python decoder, does not establish a semantic oracle, and does not rank languages. Prior Python outputs remain historical artifacts.",
   "witness": [
-    "README.md",
-    "run.py",
-    "test_word_projection.py"
+    "crates/sens-cli/tests/physical_sens_runtime_benchmark.rs",
+    ".github/workflows/sens-performance.yml"
   ],
-  "status": "ACTIVE-PHYSICAL-T5-ROUNDTRIP-MEASUREMENT",
-  "generation": "2026-10-12 canonical word projection from committed T5 artifacts",
-  "axis": "sens/t5-physical-runtime-density",
-  "reproduce": "cargo build --locked --release -p sens-cli --bin sens --bin sens-trit && python3 benchmarks/physical-binary-performance/run.py --sens target/release/sens --sens-trit target/release/sens-trit --reps 21 --warmup 4 --out /tmp/sens-physical-bench"
+  "status": "NATIVE-HARNESS-COMMITTED; MANUAL-REPLAY-NOT-YET-RECORDED",
+  "generation": "2026-10-23; no fresh measurement values asserted by this commit",
+  "axis": "sens/t5-cold-process-runtime-and-committed-view-parity",
+  "reproduce": "Manual: gh workflow run sens-performance.yml --ref main; outputs RUST_PHYSICAL_T5_* TSV records"
 }
