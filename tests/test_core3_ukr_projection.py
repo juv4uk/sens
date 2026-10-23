@@ -31,7 +31,7 @@ OLD_LAW = """
   (0010 ()
     (001
       (core3
-        (contract 7 0)
+        (contract "7" "0")
         (role experimental-kernel-laboratory)
         (selector shared-lisp-owned)
         (lowering partial)
@@ -133,6 +133,10 @@ class Core3UkrProjectionTests(unittest.TestCase):
             self.assertNotEqual(mutated, self.source)
             with self.assertRaisesRegex(AssertionError, "law or quoted data"):
                 verify(mutated)
+
+    def test_profile_contract_version_is_text_not_numeric_literal(self):
+        self.assertIn('(contract "7" "0")', self.source)
+        self.assertNotIn("(contract 7 0)", self.source)
 
     def test_current_d4_definition_and_lambda_peer_exactness(self):
         names = projection()
