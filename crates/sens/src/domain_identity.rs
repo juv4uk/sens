@@ -5,9 +5,10 @@
 //! separate. Width never grants a semantic role by itself.
 //!
 //! - D1–D9 have Contract 11.8 authority; D10 is separately whole-domain ratified by Contract 11.9.
+//! - D1-D9 мають чинну семантичну authority згідно з Contract 11.8; D10 окремо ратифіковано Контрактом 11.9.
 //! - Numeric D24/D48/D96/D192/... identity is explicit in the numeric value itself.
 //! - D11–D23 are not synthesized; width alone never creates a semantic identity.
-//! - W1–W8 keep the one-byte fast path; D9 uses the exact non-truncating W9 carrier.
+//! - W1–W8 keep the one-byte fast path; D9 and D10 use the exact non-truncating W9/W10 carriers (D11+ likewise).
 //! - Semantic residency і callable/mechanism admission лишаються окремими фактами;
 //!   відсутній механізм може fail-closed навіть для ратифікованого resident.
 //! - D7 is keyboard/v2 W7 data identity and never enters callable routing by width.

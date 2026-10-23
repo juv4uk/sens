@@ -56,10 +56,13 @@ assert "D9  full compact — exact 9-bit keys (512/512)" in current
 # Semantic authority, identity materialization and callability remain separate.
 # W9 now materializes exact D9 identity, while generic callability remains
 # explicitly fail-closed.
-assert "D1-D9 мають чинну семантичну authority згідно з Contract 11.8" in domain_identity
-assert "D9(CoreD9)" in domain_identity
-assert "Self::D9(_) => None" in domain_identity
-assert "W1-W8 keep the one-byte fast path; D9 uses the exact non-truncating W9 carrier." in domain_identity
+def _dash_norm(t):
+    return t.replace("\u2013","-").replace("\u2014","-")
+
+assert "D1-D9 мають чинну семантичну authority згідно з Contract 11.8" in _dash_norm(domain_identity)
+assert "D9(CoreD9)" in _dash_norm(domain_identity)
+assert "Self::D9(_) => None" in _dash_norm(domain_identity)
+assert "W1-W8 keep the one-byte fast path; D9 and D10 use the exact non-truncating W9/W10 carriers (D11+ likewise)." in _dash_norm(domain_identity)
 
 print("D9-CURRENT-AUTHORITY: PASS")
 print("occupancy=512/512 distinct=512 selector=128 s4-gauge=384")
