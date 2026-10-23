@@ -5,6 +5,8 @@
     python3 scripts/domain-game.py --brief
     python3 scripts/domain-game.py --track codec
     python3 scripts/domain-game.py --track codec --verify
+    python3 scripts/domain-game.py --track memory --domain D3 --list
+    python3 scripts/domain-game.py --track memory --domain ALL --count 20 --seed 42
 
 Мовні файли — не тотожні доведеним законам. Codec-щабель зараховується
 лише після успішного нативного Zig test; Python не перевіряє семантику SENS.
@@ -12,6 +14,7 @@
 from __future__ import annotations
 
 import argparse
+import random
 import re
 import subprocess
 import sys
@@ -200,15 +203,123 @@ def codec_game(brief: bool, verify: bool) -> int:
     return return_code
 
 
+# Конкурс пам'яті читає тільки канонічні людиночитані таблиці.
+# Це перевірка знання координат, не перевірка семантики або викличності SENS.
+MEMORY_DOMAINS = ("D3", "D4", "D5", "D6", "D8", "D9", "D10", "D11")
+MEMORY_SURFACES = ("укр", "ук", "LISP", "en", "san")
+
+
+def memory_rows(domain: str, surface: str) -> list[tuple[str, str]]:
+    """Точні біти та обрана людська проєкція, без домислювання порожніх назв."""
+    path = ROOT / "lib" / "domains" / f"{domain.lower()}.lisp"
+    try:
+        source = path.read_text(encoding="utf-8")
+    except OSError as exc:
+        raise ValueError(f"Не вдалося прочитати {path}: {exc}") from exc
+    width = int(domain[1:])
+    rows: list[tuple[str, str]] = []
+    seen: set[str] = set()
+    for line in source.splitlines():
+        match = re.match(r"^\s*\(([01]+)\s", line)
+        if not match:
+            continue
+        bits = match.group(1)
+        if len(bits) != width:
+            raise ValueError(f"{path}: неправильна ширина координати {bits}")
+        if bits in seen:
+            raise ValueError(f"{path}: повторена координата {bits}")
+        seen.add(bits)
+        label = re.search(r"\(" + re.escape(surface) + r"\s+([^()]*)\)", line)
+        if label is None or not label.group(1).strip():
+            continue
+        rows.append((bits, label.group(1).strip()))
+    if not seen:
+        raise ValueError(f"{path}: не знайдено точних доменних координат")
+    return sorted(rows)
+
+
+def memory_game(brief: bool, domain: str, surface: str,
+                mode: str, count: int, seed: int, list_only: bool) -> int:
+    if count < 0:
+        print("Кількість запитань має бути невід'ємною.", file=sys.stderr)
+        return 2
+    domains = MEMORY_DOMAINS if domain == "ALL" else (domain,)
+    entries: list[tuple[str, str, str]] = []
+    try:
+        for dom in domains:
+            entries.extend((dom, bits, label)
+                           for bits, label in memory_rows(dom, surface))
+    except ValueError as exc:
+        print(f"ДРАБИНА/ПАМ'ЯТЬ: {exc}", file=sys.stderr)
+        return 2
+    if brief:
+        print(f"ДРАБИНА/ПАМ'ЯТЬ: {domain} поверхня={surface} "
+              f"названих координат={len(entries)} режим={mode} "
+              "семантика=НЕ_ТЕСТУВАЛАСЬ")
+        return 0
+    if list_only:
+        print(f"═══ ДРАБИНА / ДОВІДНИК {domain} · {surface} ═══")
+        for dom, bits, label in entries:
+            print(f"{dom}:{bits}  {label}")
+        print(f"Усього названих координат: {len(entries)}")
+        return 0
+
+    rng = random.Random(seed)
+    rng.shuffle(entries)
+    selected = entries if count == 0 else entries[:count]
+    correct = 0
+    answered = 0
+    print(f"═══ ДРАБИНА / КОНКУРС ПАМ'ЯТІ {domain} ═══")
+    print("Тільки точні тотожності з таблиць; викличність не перевіряється.")
+    print("Команда :q завершує тур. Літери назв нечутливі до регістру.")
+    for index, (dom, bits, label) in enumerate(selected, 1):
+        ask_code = mode == "code" or (mode == "mixed" and index % 2 == 0)
+        question = label if ask_code else f"{dom}:{bits}"
+        expected = f"{dom}:{bits}" if ask_code else label
+        target = "домен:біти" if ask_code else f"назва ({surface})"
+        try:
+            answer = input(f"{index}/{len(selected)}  {question} → {target}: ").strip()
+        except EOFError:
+            print("\nВвід завершився.")
+            break
+        if answer == ":q":
+            break
+        answered += 1
+        good = answer == expected if ask_code else answer.casefold() == expected.casefold()
+        if good:
+            correct += 1
+            print("  ✓ Точно")
+        else:
+            print(f"  ✗ Очікувалось {dom}:{bits} = {label}; отримано {answer or '∅'}")
+    print(f"ПІДСУМОК ПАМ'ЯТІ: {correct}/{answered} правильних; "
+          f"запитань у турі {len(selected)}; домен={domain}; поверхня={surface}")
+    return 0 if correct == answered and answered == len(selected) else 1
+
+
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description="гра «Драбина»")
     ap.add_argument("--brief", action="store_true")
-    ap.add_argument("--track", choices=("semantic", "codec"), default="semantic")
+    ap.add_argument("--track", choices=("semantic", "codec", "memory"), default="semantic")
     ap.add_argument("--verify", action="store_true",
                     help="запустити нативний Zig test лише для --track codec")
+    ap.add_argument("--domain", choices=("ALL",) + MEMORY_DOMAINS, default="D3",
+                    help="домен для конкурсу пам'яті")
+    ap.add_argument("--surface", choices=MEMORY_SURFACES, default="укр",
+                    help="колонка людиночитаної назви")
+    ap.add_argument("--mode", choices=("name", "code", "mixed"), default="mixed",
+                    help="вгадати назву, біти або чергувати")
+    ap.add_argument("--count", type=int, default=8,
+                    help="кількість запитань; 0 = усі координати домену")
+    ap.add_argument("--seed", type=int, default=0,
+                    help="відтворюваний порядок запитань")
+    ap.add_argument("--list", action="store_true",
+                    help="показати довідник координат у режимі пам'яті")
     args = ap.parse_args(argv)
     if args.verify and args.track != "codec":
         ap.error("--verify дозволено лише з --track codec")
+    if args.track == "memory":
+        return memory_game(args.brief, args.domain, args.surface,
+                           args.mode, args.count, args.seed, args.list)
     if args.track == "codec":
         return codec_game(args.brief, args.verify)
     return semantic_game(args.brief)
