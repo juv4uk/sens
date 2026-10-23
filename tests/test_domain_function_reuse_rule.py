@@ -153,6 +153,19 @@ class DomainFunctionReuseRule(unittest.TestCase):
         self.assertIn("ВЖИВАННЯ ДРАБИН: lib/_rule_probe.lisp: 0 викликів", result.stdout)
         self.assertIn("BLOCKED", result.stdout)
 
+    def test_later_top_level_call_does_not_satisfy_definition_use(self) -> None:
+        # Визначення закінчується до наступного top-level виразу.
+        # Виклик сполучити після нього не повинен виправдовувати нову функцію.
+        source = (
+            "(" + "визначити незалежне-нове-імя "
+            + "(" + "функція (х) х))\n"
+            + "(" + "сполучити х (" + "як-є ()))\n"
+        )
+        PROBE.write_text(source, encoding="utf-8")
+        result = run(GUARD, "--file", str(PROBE.relative_to(ROOT)))
+        self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+        self.assertIn("BLOCKED", result.stdout)
+
     def test_tracked_new_definition_is_not_its_own_duplicate(self) -> None:
         # Механіка guard, не семантичний оракул Lisp: git ls-files включає
         # нове ім'я в поточний файл, але воно не може дублювати саме себе.

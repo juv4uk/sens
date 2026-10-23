@@ -201,20 +201,38 @@ def _mask_quotes(text: str) -> str:
     return "".join(out)
 
 
+def _form_end(masked: str, start: int) -> int | None:
+    """End offset of one balanced Lisp form in a code-only view.
+
+    Strings, comments and quoted data have already been blanked while keeping
+    offsets. This bounds a DEFINE's body to its own form, so a later top-level
+    call cannot accidentally satisfy the ladder-use rule for an earlier one.
+    """
+    depth = 0
+    for pos in range(start, len(masked)):
+        if masked[pos] == "(":
+            depth += 1
+        elif masked[pos] == ")":
+            depth -= 1
+            if depth == 0:
+                return pos + 1
+            if depth < 0:
+                return None
+    return None
+
+
 def definitions_with_bodies(text: str):
-    """Повертає (ім'я, тіло, чи позначено маркером D11-пропозиції) для кожного визначення Lisp."""
+    """Return each DEFINE's own body and whether its D11 marker is present."""
     out = []
     masked = _mask_quotes(text)
     for m in DEF.finditer(masked):
         name = m.group(1)
-        # маркер у 200 символах перед визначенням
         before = text[max(0, m.start() - 200):m.start()]
         marked = bool(MARKER.search(before))
-        # Use the same code-only view for body boundaries: quoted/commented
-        # DEFINE forms must not truncate a real function's executable body.
-        rest = masked[m.end():]
-        nxt_match = DEF.search(rest)
-        body = rest[:nxt_match.start()] if nxt_match else rest
+        end = _form_end(masked, m.start())
+        # A malformed form has no executable body for purposes of this guard;
+        # the caller must not treat unrelated later text as use of the ladder.
+        body = masked[m.end():end - 1] if end is not None else ""
         out.append((name, body, marked))
     return out
 
