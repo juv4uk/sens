@@ -500,6 +500,55 @@ jobs:
           cat -- lib/d11-srfi1-find-tail.lisp tests/semantic/d11-srfi1-find-tail-laws.lisp > "$RUNNER_TEMP/d11-srfi1-find-tail-native.lisp"
           check_lisp_law d11-srfi1-find-tail-language "$RUNNER_TEMP/d11-srfi1-find-tail-native.lisp" '1'
 
+      # p50 часу ЦІЛОГО процесу на shared runner: CLI+bootstrap+SENS eval.
+      # Це діагностика, не окремий eval benchmark та не сертифікат швидкодії.
+      - name: Три Lisp-бенчмарки — нативний p50 часу SENS
+        id: benchmark-time
+        if: ${{ always() && steps.native-build.outcome == 'success' }}
+        shell: bash
+        timeout-minutes: 3
+        run: |
+          set -euo pipefail
+          binary="$PWD/target/debug/sens"
+          verified="$RUNNER_TEMP/benchmark-law-status.tsv"
+          measurements="$RUNNER_TEMP/benchmark-times.tsv"
+          : > "$measurements"
+          for spec in \
+            'lists|benchmarks/lists.lisp' \
+            'arithmetic|benchmarks/arithmetic.lisp' \
+            'parser|benchmarks/parser.lisp'; do
+            IFS='|' read -r id source <<< "$spec"
+            if [[ ! -f "$verified" ]] || ! grep -Fxq "$(printf '%s\tPASS_DIRECT' "$id")" "$verified"; then
+              continue
+            fi
+            dir="$RUNNER_TEMP/bench-time/$id"
+            mkdir -p "$dir"
+            if ! timeout 45s "$binary" "$source" > "$dir/reference.out" 2> "$dir/warmup.err"; then
+              cat "$dir/warmup.err" >&2
+              echo "::error file=$source,title=SENS wall-time::REGRESSION id=$id layer=warmup"
+              exit 1
+            fi
+            : > "$dir/samples"
+            for repetition in 1 2 3; do
+              start="$(date +%s%N)"
+              if ! timeout 45s "$binary" "$source" > "$dir/$repetition.out" 2> "$dir/$repetition.err"; then
+                cat "$dir/$repetition.err" >&2
+                echo "::error file=$source,title=SENS wall-time::REGRESSION id=$id layer=execution"
+                exit 1
+              fi
+              end="$(date +%s%N)"
+              if ! cmp -s "$dir/reference.out" "$dir/$repetition.out"; then
+                echo "::error file=$source,title=SENS wall-time::REGRESSION id=$id layer=repeatability"
+                exit 1
+              fi
+              printf '%s\n' "$(((end - start) / 1000000))" >> "$dir/samples"
+            done
+            median="$(sort -n "$dir/samples" | sed -n '2p')"
+            hash="$(sha256sum "$dir/reference.out" | cut -d' ' -f1)"
+            printf '%s\t%s\t%s\n' "$id" "$median" "$hash" >> "$measurements"
+            echo "::notice file=$source,title=SENS p50 $id::MEASURED wall_ms=$median repeats=3 warmup=1 includes=CLI_bootstrap_eval stdout_sha256=$hash"
+          done
+
       # Фінальні анотації будуються із фактично записаних SENS-вердиктів.
       # Цей крок виконується й після RED: неперевірене не стає зеленим.
       - name: Три Lisp-бенчмарки — фактичні мовні анотації та підсумок
@@ -512,6 +561,8 @@ jobs:
           set -euo pipefail
           verified="$RUNNER_TEMP/benchmark-law-status.tsv"
           summary="$RUNNER_TEMP/benchmark-status-summary.txt"
+          measurements="$RUNNER_TEMP/benchmark-times.tsv"
+          measured=0
           passed=0
           missing=0
           {
@@ -519,8 +570,8 @@ jobs:
             echo
             echo "Rust CLI (лише I/O): \`$CLI_OUTCOME\`; нативний крок SENS: \`$LAWS_OUTCOME\`."
             echo
-            echo '| Lisp-джерело | Семантика, прямий SENS | Фізичний Zig/T5M |'
-            echo '|---|---|---|'
+            echo '| Lisp-джерело | Семантика, прямий SENS | p50, мс (процес) | Фізичний Zig/T5M |'
+            echo '|---|---|---:|---|'
           } >> "$GITHUB_STEP_SUMMARY"
           for spec in \
             'lists|benchmarks/lists.lisp|d24-list-language' \
@@ -536,9 +587,21 @@ jobs:
               missing=$((missing + 1))
               echo "::warning file=$source,title=SENS benchmark $id::NOT_VERIFIED law=$law laws_step=$LAWS_OUTCOME expected=completed-SENS-witness actual=missing"
             fi
-            echo "| \`$source\` | \`$status\` ($law) | NOT_CERTIFIED |" >> "$GITHUB_STEP_SUMMARY"
+            wall=NOT_MEASURED
+            if [[ -f "$measurements" ]]; then
+              sample="$(grep -F "$id"$'\t' "$measurements" | head -n 1 || true)"
+              if [[ -n "$sample" ]]; then
+                IFS=$'\t' read -r sample_id wall hash <<< "$sample"
+                if [[ "$sample_id" != "$id" || ! "$wall" =~ ^[0-9]+$ ]]; then
+                  echo "::error file=$source,title=SENS benchmark report::REGRESSION layer=p50 expected=integer actual=malformed"
+                  exit 1
+                fi
+                measured=$((measured + 1))
+              fi
+            fi
+            printf '| %s | %s (%s) | %s | NOT_CERTIFIED |\n' "$source" "$status" "$law" "$wall" >> "$GITHUB_STEP_SUMMARY"
           done
-          printf 'прямі Lisp-закони=%s/3; Rust CLI=%s; T5M=NOT_CERTIFIED; час=NOT_MEASURED\n' "$passed" "$CLI_OUTCOME" > "$summary"
+          printf 'прямі Lisp-закони=%s/3; p50=%s/3; Rust CLI=%s; T5M=NOT_CERTIFIED\n' "$passed" "$measured" "$CLI_OUTCOME" > "$summary"
           echo 'Значення PASS_DIRECT засвідчує лише нативну семантику SENS, не продуктивність і не фізичний T5M.' >> "$GITHUB_STEP_SUMMARY"
           if (( missing > 0 )) && [[ "$LAWS_OUTCOME" == success ]]; then
             echo "::error file=.github/workflows/ci.yml,title=SENS benchmark evidence::REGRESSION layer=report expected=3-completed-witnesses actual=$passed"
