@@ -412,10 +412,32 @@ cat -- "$meta_sixth_definition" tests/semantic/d11-meta-sixth-mutant.lisp > "$me
 run_case run_law d11-meta-sixth-positive "$meta_sixth_law_bundle" 1
 run_case run_law d11-meta-sixth-mutant "$meta_sixth_mutant_bundle" 0
 # LAST-DEFINE: D7-текст має D8-рівність у нормативному Lisp, не D3 EQ Rust.
+# Повний MetaEval починається з невикличного D6 LENGTH (#5854). Для цієї
+# незалежної функції беремо ТОЧНО її визначення з чинного Lisp-файлу.
+# Відсутність, дублювання або злам меж DEFINE — RED, не підміна закону.
+last_define_definition="$evidence/d11-meta-last-define-source-definition.lisp"
+if ! awk -v target="(визначити останнє-ім'я-визначення-лямбди" '
+  $0 == target {
+    if (found++) exit 2
+    copying = 1
+  }
+  copying && NF == 0 {
+    copying = 0
+    complete++
+    next
+  }
+  copying { print }
+  END { if (found != 1 || complete != 1 || copying) exit 2 }
+' lib/meta-eval.lisp > "$last_define_definition"; then
+  echo "::error::D11_META_LAST_DEFINE_SOURCE_NOT_ISOLATABLE source=lib/meta-eval.lisp" >&2
+  exit 2
+fi
+test -s "$last_define_definition" || { echo "::error::D11_META_LAST_DEFINE_SOURCE_EMPTY" >&2; exit 2; }
+sha256sum lib/meta-eval.lisp "$last_define_definition" > "$evidence/d11-meta-last-define-source.sha256"
 last_define_positive_bundle="$evidence/d11-meta-last-define-positive-complete.lisp"
 last_define_mutant_bundle="$evidence/d11-meta-last-define-mutant-complete.lisp"
-cat -- lib/meta-eval.lisp tests/semantic/d11-meta-last-define-laws.lisp > "$last_define_positive_bundle"
-cat -- lib/meta-eval.lisp tests/semantic/d11-meta-last-define-mutant.lisp > "$last_define_mutant_bundle"
+cat -- "$last_define_definition" tests/semantic/d11-meta-last-define-laws.lisp > "$last_define_positive_bundle"
+cat -- "$last_define_definition" tests/semantic/d11-meta-last-define-mutant.lisp > "$last_define_mutant_bundle"
 run_case run_law d11-meta-last-define-positive "$last_define_positive_bundle" 1
 run_case run_law d11-meta-last-define-mutant "$last_define_mutant_bundle" 0
 # Д11 Clojure: два комплекти законів перенесено з Rust у справжній Lisp.
