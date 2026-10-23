@@ -40,6 +40,23 @@ fn w8_binary_source(value: &Expr) -> String {
     }
 }
 
+fn exact_domain_source(value: &Expr) -> String {
+    // Лише механічна перевірка точного доменного слова, не його семантики.
+    let ExprKind::String(identity) = &value.kind else {
+        panic!("corpus identity must be a typed-domain string");
+    };
+    let (domain, bits) = identity.split_once(':').expect("domain and bits required");
+    let width: usize = domain
+        .strip_prefix('D')
+        .expect("domain prefix")
+        .parse()
+        .expect("domain width");
+    assert!((1..=10).contains(&width), "exact D1-D10 required");
+    assert_eq!(bits.len(), width, "bit width mismatch");
+    assert!(bits.bytes().all(|bit| bit == b'0' || bit == b'1'));
+    identity.to_string()
+}
+
 fn alist_str<'a>(entries: &'a [Expr], key: &str) -> Option<&'a str> {
     entries.iter().find_map(|entry| {
         let ExprKind::Pair(k, v) = &entry.kind else {
@@ -58,18 +75,12 @@ fn alist_str<'a>(entries: &'a [Expr], key: &str) -> Option<&'a str> {
     })
 }
 
-fn alist_w8_binary(entries: &[Expr], key: &str) -> Option<String> {
+fn alist_exact_domain(entries: &[Expr], key: &str) -> Option<String> {
     entries.iter().find_map(|entry| {
-        let ExprKind::Pair(k, v) = &entry.kind else {
-            return None;
-        };
-        let ExprKind::Symbol(name) = &k.kind else {
-            return None;
-        };
-        if &**name != key {
-            return None;
-        }
-        Some(w8_binary_source(v))
+        let ExprKind::Pair(k, v) = &entry.kind else { return None; };
+        let ExprKind::Symbol(name) = &k.kind else { return None; };
+        if &**name != key { return None; }
+        Some(exact_domain_source(v))
     })
 }
 
@@ -225,8 +236,8 @@ fn structure_core_rows() -> Vec<WitnessRow> {
             if !alist_flag(entries, "structure-core") {
                 return None;
             }
-            alist_w8_binary(entries, "semantic-id")
-                .expect("structure-core row must retain its exact binary provenance");
+            alist_exact_domain(entries, "semantic-id")
+                .expect("structure-core row must retain its exact D3 domain coordinate");
             Some(WitnessRow {
                 source: source[form.span.start..form.span.end].to_string(),
                 expr: alist_str(entries, "expr")?.to_string(),
