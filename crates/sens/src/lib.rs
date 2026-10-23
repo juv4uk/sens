@@ -891,10 +891,18 @@ fn bind_process_tcp_lisp_owned_macros(session: &mut Session) -> Result<(), Langu
 
         // Лише коли точного слота немає, переносимо вже існуюче
         // SENS-визначення, а не вигадуємо Rust-реалізацію або SID8.
-        let implementation = session
-            .environment
-            .get(full_ukr_surface)
-            .or_else(|| session.environment.get(uk_surface))
+        // З фізичного T5M Core4 український зв'язувач може бути збережений
+        // як канонічне D7-слово, а не як текстовий ключ середовища.
+        // Шукаємо тільки вже створений SENS-макрос; Rust не визначає закон LET.
+        let implementation = [full_ukr_surface, uk_surface]
+            .into_iter()
+            .find_map(|name| {
+                session.environment.get(name).or_else(|| {
+                    crate::encode_text7(name, crate::Text7Layout::Uk)
+                        .ok()
+                        .and_then(|word| session.environment.get(&word.to_canonical_wire_token()))
+                })
+            })
             .filter(|value| matches!(value, Value::Macro(_)))
             .ok_or_else(|| {
                 LanguageError::new(
