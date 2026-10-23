@@ -871,6 +871,24 @@ class ThreePassMigrationTests(unittest.TestCase):
             "10 001 00 10 1100110 00 10 0101100 01 00 1100100 01 01\n",
         )
 
+    def test_text7_datum_scalar_is_distinct_from_contextual_text7_binding(self):
+        # The same one W7 coordinate has different roles:
+        # D7 scalar data stays atomic; a lexical identifier remains a framed Text7 key.
+        glyph = mod.Tok("ATOM", "а", 0)
+        cells = mod.text7_encode("а", self.text7, glyph)
+        self.assertEqual(cells, ["1100110"])
+        self.assertEqual(mod.encode_text7_datum("а", self.text7, glyph), cells)
+        self.assertEqual(
+            mod.encode_text7_identifier("а", self.text7, glyph),
+            ["10", "1100110", "01"],
+        )
+
+        multi = mod.Tok("ATOM", "аб", 0)
+        self.assertEqual(
+            mod.encode_text7_datum("аб", self.text7, multi),
+            mod.frame_text7(mod.text7_encode("аб", self.text7, multi), multi),
+        )
+
     def test_quoted_symbol_datum_is_transported_as_ratified_d7_text(self):
         # One-cell D7 data is a scalar; the surrounding dotted pair remains
         # explicit D2 structure. Multi-cell names still use contextual Text7 frames.
