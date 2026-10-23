@@ -170,6 +170,7 @@ jobs:
               for witness in (
                   "tests/semantic/ukr-d3-structural-selftest.lisp",
                   "tests/semantic/language-law-d1-d4-ukr.lisp",
+                  "tests/semantic/language-law-d4-closure-shadow-ukr.lisp",
                   "tests/semantic/lisp-d4-lexical-closure-laws.lisp",
                   "tests/semantic/lisp-d3-atom-cond-laws.lisp",
                   "tests/semantic/lisp-d3-cons-selectors-laws.lisp",
