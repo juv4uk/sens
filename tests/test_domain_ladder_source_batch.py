@@ -27,7 +27,7 @@ class BatchSourceTests(unittest.TestCase):
             self.assertIn(code, self.blocked)
 
     def test_historical_sid8_writes_full_current_ukr_projection(self):
-        projected = MOD.ukrainian_projection(ROOT, self.mapping)
+        projected = self.mapping
         self.assertEqual(len(projected), 171)
         self.assertEqual(projected["00001001"], "визначити")
         self.assertEqual(projected["00001000"], "функція")
@@ -48,7 +48,7 @@ class BatchSourceTests(unittest.TestCase):
         self.assertEqual(MOD.guard_module(ROOT).scan_lisp(new, "lib/example.lisp"), [])
 
     def test_unproved_historical_head_blocks_ukr_rewrite(self):
-        projected = MOD.ukrainian_projection(ROOT, self.mapping)
+        projected = self.mapping
         old = "(00001001 f (00001000 () (00110111 fun values)))"
         changed, count, errors = MOD.rewrite(old, projected, self.blocked)
         self.assertEqual(changed, old)
