@@ -78,10 +78,10 @@ class ThreePassClassifierTests(unittest.TestCase):
     def test_wide_current_ukr_heads_resolve_without_promoting_sid8(self):
         # Власницькі людські проєкції D8–D10, не доказ виконання.
         src = (
-            "(символ-за-кодом 65)\\n"
-            "(пояснити-відповідь x)\\n"
-            "(відсутня-можливість-виконання x)\\n"
-        ).replace("\\\\n", "\\n")
+            "(символ-за-кодом 65)\n"
+            "(пояснити-відповідь x)\n"
+            "(відсутня-можливість-виконання x)\n"
+        )
         historical, current, dynamic, empty = self.classify(src)
         self.assertFalse(dynamic)
         self.assertFalse(current)
@@ -92,7 +92,7 @@ class ThreePassClassifierTests(unittest.TestCase):
              ("D10", "0000000000")],
         )
         with self.assertRaisesRegex(ValueError, "retired SID8-era head"):
-            self.classify("(00000000 x)\\n")
+            self.classify("(00000000 x)\n")
 
     def test_pass1_detects_legacy_sid8_and_resolves_current_car(self):
         historical, current, dynamic, empty = self.classify("(00000101 x)\n", source_era="legacy")
