@@ -4,9 +4,10 @@
 ; Автоматична перевірка звіряє рядки з відмовою за замовчуванням
 ; у scripts/machine-authority-guard.lisp.
 ;
-; Поле independent-semantic-witness містить точні значення DomainIdentity.
-; Ширина входить до тотожності; історичні байти сід8 і текстові
-; назви не використовуються як ключ для зіставлення.
+; Поле independent-semantic-witness містить повні українські назви
+; ратифікованих резидентів як людську проєкцію, а не машинний ключ.
+; Точні DomainIdentity й ширини визначають lib/domains/d3.lisp та d5.lisp;
+; історичні байти сід8 не використовуються для зіставлення.
 
 (capability-provenance
   (name add-u64)
@@ -15,7 +16,7 @@
   (lowering-owner lib/machine/lowering/semantic-x86-64.lisp)
   (machine-witness crates/my-lisp-host/tests/native_lisp_bytes.rs)
   (reverse-edge forbidden)
-  (independent-semantic-witness (exact-domain-expression 01010))
+  (independent-semantic-witness (exact-domain-expression додати))
   (representation-witness tests/fixtures/machine-representation-independence-witness.lisp))
 
 (capability-provenance
@@ -25,7 +26,7 @@
   (lowering-owner lib/machine/lowering/semantic-x86-64.lisp)
   (machine-witness crates/my-lisp-host/tests/native_cond_profile.rs)
   (reverse-edge forbidden)
-  (independent-semantic-witness (exact-domain-expression 101 110))
+  (independent-semantic-witness (exact-domain-expression тотожне? за-умовою))
   (representation-witness not-yet-required))
 
 (capability-provenance
@@ -35,5 +36,5 @@
   (lowering-owner lib/machine/lowering/semantic-x86-64.lisp)
   (machine-witness crates/my-lisp-host/tests/native_lisp_bytes.rs)
   (reverse-edge forbidden)
-  (independent-semantic-witness (exact-domain-expression 111 100))
+  (independent-semantic-witness (exact-domain-expression сполучити перше))
   (representation-witness crates/my-lisp-host/tests/native_guest_abi.rs))
