@@ -232,7 +232,27 @@ jobs:
           fi
           # Початковий native mint також має бути коротким: сотні повних
           # SENS/Zig перевірок раніше не встигали опублікуватись до нового push.
-          # Першими лишаються джерела, змінені у push, а тоді непарні.
+          # Непарні українські програми мають пріоритет у ліміті 24:
+          # інакше десятки старих drift-джерел витісняють кожну нову.
+          # Це тільки порядок native mint, НЕ мовний закон і НЕ PASS.
+          if [[ "$EVENT_NAME" == push ]]; then
+            pending_sources=()
+            other_sources=()
+            declare -A queued_sources=()
+            while IFS= read -r source; do
+              [[ -n "$source" && -z "${queued_sources[$source]+seen}" ]] || continue
+              queued_sources["$source"]=1
+              stem="${source%.lisp}"
+              if [[ "$source" == *.lisp && -f "$source" && ! -L "$source" &&
+                    ( ! -s "$stem.sens" || ! -f "$stem" ) ]]; then
+                pending_sources+=("$source")
+              else
+                other_sources+=("$source")
+              fi
+            done <<< "$list"
+            list="$(printf '%s\n' "${pending_sources[@]}" "${other_sources[@]}")"
+            echo "REMINT_PENDING_FIRST sources=${#pending_sources[@]} actual_execution=REQUIRES_SENS_ZIG"
+          fi
           # Незавершений хвіст — PENDING, не виданий за PASS чи реліз.
           list="$(printf '%s\n' "$list" | sed '/^$/d')"
           initial_total="$(printf '%s\n' "$list" | sed '/^$/d' | wc -l)"
