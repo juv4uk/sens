@@ -350,6 +350,9 @@ run_case run_law result-status-dotted-mutant "$result_status_dotted_mutant_bundl
 run_case run_bound_law unification-variable-shape-positive tests/semantic/unification-variable-shape-positive.lisp 1
 run_case run_bound_law unification-variable-shape-negative tests/semantic/unification-variable-shape-negative.lisp 1
 run_case run_bound_law unification-variable-shape-mutant tests/semantic/unification-variable-shape-mutant.lisp 0
+# Узгодженість конструктора і предиката перевіряє SENS після фізичного Zig/T5M.
+run_case run_bound_law unification-constructor-positive tests/semantic/unification-constructor-law.lisp 1
+run_case run_bound_law unification-constructor-mutant tests/semantic/unification-constructor-mutant.lisp 0
 run_case run_bound_law unification-variable-shape tests/semantic/unification-variable-shape-law.lisp 1
 run_case run_bound_law unification-occurs-predicate-positive tests/semantic/unification-occurs-predicate-law.lisp 1
 run_case run_bound_law unification-occurs-predicate-mutant tests/semantic/unification-occurs-predicate-mutant.lisp 0

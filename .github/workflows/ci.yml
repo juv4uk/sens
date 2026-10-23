@@ -176,6 +176,9 @@ jobs:
                   "tests/semantic/unification-variable-shape-positive.lisp",
                   "tests/semantic/unification-variable-shape-negative.lisp",
                   "tests/semantic/unification-variable-shape-mutant.lisp",
+                  # Конструктор і предикат потребують DEFINE lib/unify.lisp.
+                  "tests/semantic/unification-constructor-law.lisp",
+                  "tests/semantic/unification-constructor-mutant.lisp",
                   "tests/semantic/unification-occurs-predicate-law.lisp",
                   "tests/semantic/unification-occurs-predicate-mutant.lisp",
                   "tests/semantic/core-d3-car-cdr-cons-mutant.lisp",
