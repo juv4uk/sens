@@ -691,8 +691,19 @@ jobs:
             echo "Rust CLI (лише I/O): \`$CLI_OUTCOME\`; нативний крок SENS: \`$LAWS_OUTCOME\`."
             echo 'Вимірювання: 11 проб, один прогрів; p50 — шоста проба, p90 — десята у відсортованому ряді. Час цілого процесу, не eval-only.'
             baseline_file="$RUNNER_TEMP/benchmark-baseline.tsv"
-            if [[ -f "$baseline_file" ]]; then
-              IFS=
+            if [[ -s "$baseline_file" ]]; then
+              if ! IFS=$'\t' read -r baseline_p50 baseline_p90 baseline_sha baseline_source < "$baseline_file"; then
+                echo "::error file=.github/workflows/ci.yml,title=SENS startup baseline::REGRESSION layer=report expected=complete-baseline actual=unreadable" >&2
+                exit 1
+              fi
+              if [[ ! "$baseline_p50" =~ ^[0-9]+$ || ! "$baseline_p90" =~ ^[0-9]+$ || ! "$baseline_sha" =~ ^[0-9a-f]{40}$ || "$baseline_source" != "tests/semantic/d1-not-law.lisp" ]] || (( baseline_p50 <= 0 || baseline_p50 > baseline_p90 )); then
+                echo "::error file=.github/workflows/ci.yml,title=SENS startup baseline::REGRESSION layer=report expected=sorted-native-SENS-p50-p90 actual=malformed" >&2
+                exit 1
+              fi
+              printf 'Контрольний CLI startup+D1: p50=%d.%03d мс, p90=%d.%03d мс (11 проб, не чистий eval).\n' "$((baseline_p50 / 1000))" "$((baseline_p50 % 1000))" "$((baseline_p90 / 1000))" "$((baseline_p90 % 1000))"
+            else
+              echo 'Контрольний CLI startup+D1: NOT_MEASURED (немає нативного підтвердження).'
+            fi
             echo
             echo '| Lisp-джерело | Семантика, прямий SENS | p50, мс | p90, мс | Фізичний Zig/T5M |'
             echo '|---|---|---:|---:|---|'
