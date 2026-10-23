@@ -2,14 +2,16 @@
 //! Усі дев’ять законів селектора шостого елемента належать Lisp/SENS.
 //! Точний D1 позитиву й негативного мутанта доводить фізичний Zig/T5M → SENS.
 
-use sens::{eval_program, load_core_library, load_meta_evaluator_library, Session};
+mod common;
+
+use sens::{eval_program, load_core_library, Session};
 use std::path::PathBuf;
 
 #[test]
 fn rust_mechanism_loads_meta_sixth_lisp_witnesses() {
     let mut session = Session::bare();
     load_core_library(&mut session).expect("завантажити чинне ядро SENS");
-    load_meta_evaluator_library(&mut session)
+    common::load_meta_evaluator_library(&mut session)
         .expect("завантажити живі визначення MetaEval SENS");
 
     let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../..");

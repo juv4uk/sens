@@ -12,6 +12,8 @@
 //! `real_advice_taker_stack_has_exact_native_meta_parity`, which oversold
 //! what the substring checks below actually establish.
 
+mod common;
+
 use sens::{eval_program, Session};
 
 fn escaped(source: &str) -> String {
@@ -76,7 +78,7 @@ fn native_result(program: &str) -> String {
 fn meta_result(program: &str) -> String {
     let mut session = Session::default();
     eval_program(include_str!("../../../lib/core.lisp"), &mut session).expect("core bootstrap");
-    sens::load_meta_evaluator_library(&mut session).expect("meta-eval bootstrap");
+    common::load_meta_evaluator_library(&mut session).expect("meta-eval bootstrap");
 
     eval_program(
         &format!(

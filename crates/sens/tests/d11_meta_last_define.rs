@@ -1,14 +1,16 @@
 //! Rust відповідає тільки за механіку завантаження UTF-8 і запуск SENS.
 //! Вісім законів останнього DEFINE, D7/D8 і негативний мутант — у Lisp.
 
-use sens::{eval_program, load_core_library, load_meta_evaluator_library, Session};
+mod common;
+
+use sens::{eval_program, load_core_library, Session};
 use std::path::PathBuf;
 
 #[test]
 fn rust_mechanism_executes_last_define_lisp_witnesses() {
     let mut session = Session::bare();
     load_core_library(&mut session).expect("завантажити чинне ядро SENS");
-    load_meta_evaluator_library(&mut session).expect("завантажити MetaEval SENS");
+    common::load_meta_evaluator_library(&mut session).expect("завантажити MetaEval SENS");
 
     let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../..");
     for witness in [

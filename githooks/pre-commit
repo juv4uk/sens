@@ -7,11 +7,12 @@ set -euo pipefail
 
 repo_root="$(git rev-parse --show-toplevel)"
 python3 "$repo_root/scripts/guard_ukr_lisp_keyboard.py" --staged
-# Охоронець драбин D1–D10 — ПЕРЕШКОДА, а не звіт після пушу. Саме тут, у момент
-# коміту, він бачить лише ДОДАНІ визначення (--staged) і не дає закомітити дубль
-# наявної поверхні. Доти він біг тільки в CI (після роботи), тож агенти його
-# практично не бачили — і затінення драбини накопичувались.
-# Чисті нові функції реєструються як нератифіковані кандидати D11; охоронець
-# не додає файл у Git index і не призначає бітову координату.
-python3 "$repo_root/scripts/guard-domain-function-reuse.py" --staged --advise --register
+# Охоронець повторного визначення застосовується лише до змін Lisp-проекції.
+# Rust/Zig та інші зміни без staged .lisp не є його вхідними даними.
+mapfile -t staged_lisp < <(git diff --cached --name-only --diff-filter=ACMR -- '*.lisp')
+if ((${#staged_lisp[@]} > 0)); then
+    python3 "$repo_root/scripts/guard-domain-function-reuse.py" --staged --advise --register
+else
+    printf 'GUARD-DOMAIN-REUSE: SKIP (немає staged .lisp файлів)\n'
+fi
 "$repo_root/scripts/check-bilingual-docs"

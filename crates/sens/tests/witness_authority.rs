@@ -1,12 +1,14 @@
 //! WITNESS-CORPUS-1 (#113): the corpus owns expected truth; Rust only
 //! transports actual outcomes and asks SENS-owned witness logic for a verdict.
 
+mod common;
+
 use std::fs;
 use std::path::PathBuf;
 use std::rc::Rc;
 
 use sens::{
-    eval_program, load_core_library, load_meta_evaluator_library, parse, Expr, ExprKind, Session,
+    eval_program, load_core_library, parse, Expr, ExprKind, Session,
 };
 
 #[derive(Clone)]
@@ -422,7 +424,7 @@ fn assert_lisp_owned_verdict_passes(session: &mut Session, row: &WitnessRow, act
 fn init_meta_session() -> Session {
     let mut session = Session::default();
     load_core_library(&mut session).expect("core library");
-    load_meta_evaluator_library(&mut session).expect("meta evaluator");
+    common::load_meta_evaluator_library(&mut session).expect("meta evaluator");
     load_witness_library(&mut session);
     eval_program("(визначити свідок-мета-середовище (як-є ()))", &mut session)
         .expect("meta environment init");

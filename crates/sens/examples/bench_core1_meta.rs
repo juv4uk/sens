@@ -4,7 +4,7 @@
 use sens::{eval_lowered_expressions, eval_program, lower_program, parse, Session};
 use std::hint::black_box;
 use std::time::Instant;
-
+const META_EVAL_SOURCE: &str = include_str!("../../../lib/meta-eval.lisp");
 const CORE1_SOURCE: &str = include_str!("../../../lib/core1.lisp");
 #[derive(Clone, Copy)]
 struct Case {
@@ -93,7 +93,7 @@ fn main() {
     let mut meta_session = Session::default();
     let meta_boot_start = Instant::now();
     sens::load_core_library(&mut meta_session).expect("core library for Meta-Eval");
-    sens::load_meta_evaluator_library(&mut meta_session)
+    sens::load_meta_evaluator_library_from_source(&mut meta_session, META_EVAL_SOURCE)
         .expect("Meta-Eval bootstrap failed; report BLOCKED, not benchmark numbers");
     let meta_boot_us = meta_boot_start.elapsed().as_micros();
 

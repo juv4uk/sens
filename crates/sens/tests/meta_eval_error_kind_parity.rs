@@ -1,9 +1,11 @@
+mod common;
+
 use sens::{eval_program, load_core_library, ErrorKind, Session};
 
 fn meta_session() -> Session {
     let mut session = Session::bare();
     sens::load_core_library(&mut session).expect("core bootstrap");
-    sens::load_meta_evaluator_library(&mut session).expect("meta-eval bootstrap");
+    common::load_meta_evaluator_library(&mut session).expect("meta-eval bootstrap");
     session
 }
 

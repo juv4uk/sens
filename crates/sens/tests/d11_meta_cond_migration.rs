@@ -2,13 +2,15 @@
 //! Усі рішення ухвалює власний MetaEval, що виконується мовою SENS.
 //! Дослідна координата — не прямий машинний D11 opcode.
 
-use sens::{eval_program, load_core_library, load_meta_evaluator_library, Session};
+mod common;
+
+use sens::{eval_program, load_core_library, Session};
 
 #[test]
 fn d11_двопольова_умовна_гілка_досяжна_і_не_плутається_з_трипольовою() {
     let mut session = Session::bare();
     load_core_library(&mut session).expect("завантажити ядро SENS");
-    load_meta_evaluator_library(&mut session).expect("завантажити живий MetaEval");
+    common::load_meta_evaluator_library(&mut session).expect("завантажити живий MetaEval");
 
     for (case, source, expected) in [
         ("порожньо", "(має-перехідну-гілку-за-умовою? (як-є ()))", false),
