@@ -170,6 +170,26 @@ fi
 # Для D7/D24+ standalone може ще не мати контексту джерельних зв'язувань;
 # це НЕ забороняє реальний парний шлях і НЕ означає semantic GO.
 mode=paired-only
+# Source-only T5M із зовнішніми DEFINE перевіряємо через окремий повний носій.
+# Опублікована пара лишається source-only, самодостатній свідок — тимчасовий.
+if (( ${#binding_sources[@]} != 0 )); then
+  complete="$scratch/dependency-complete.sens"
+  if ! timeout "$native_timeout" "$binary" --t5m-mint "$direct_source" "$complete" > "$scratch/complete-mint.out" 2> "$scratch/complete-mint.err" ||
+     ! timeout "$native_timeout" "$reader" open "$complete" > "${complete%.sens}" 2> "$scratch/complete-open.err" ||
+     ! timeout "$native_timeout" "$reader" verify-view "$complete" > "$scratch/complete-verify.out" 2> "$scratch/complete-verify.err" ||
+     ! timeout "$native_timeout" "$binary" "$complete" > "$scratch/complete.out" 2> "$scratch/complete.err"; then
+    for diagnostic in "$scratch/complete-mint.err" "$scratch/complete-open.err" "$scratch/complete-verify.err" "$scratch/complete.err"; do
+      if [[ -f "$diagnostic" ]]; then sed "s/^/SENS dependency-complete: /" "$diagnostic" >&2; fi
+    done
+    echo "T5M_REPAIR_DEPENDENCY_COMPLETE_FAILED source=$source_file physical=NOT_CERTIFIED" >&2
+    exit 2
+  fi
+  if ! cmp -s "$scratch/out" "$scratch/complete.out"; then
+    echo "T5M_REPAIR_DEPENDENCY_COMPLETE_DIVERGENCE source=$source_file paired_sha256=$(sha256sum "$scratch/out" | cut -d' ' -f1) complete_sha256=$(sha256sum "$scratch/complete.out" | cut -d' ' -f1)" >&2
+    exit 2
+  fi
+  mode=paired-and-dependency-complete
+else
 if timeout "$native_timeout" "$binary" "$staged" > "$scratch/standalone.out" 2> "$scratch/standalone.err"; then
   if ! cmp -s "$scratch/out" "$scratch/standalone.out"; then
     echo "T5M_REPAIR_EXECUTION_DIVERGENCE source=$source_file paired_sha256=$(sha256sum "$scratch/out" | cut -d' ' -f1) standalone_sha256=$(sha256sum "$scratch/standalone.out" | cut -d' ' -f1)" >&2
@@ -192,6 +212,7 @@ else
     echo "T5M_REPAIR_STANDALONE_UNEXPECTED_FAIL source=$source_file status=$status physical=NOT_CERTIFIED" >&2
     exit 2
   fi
+fi
 fi
 fi
 # Негативна перевірка проводить іншу програму через той самий SENS.
