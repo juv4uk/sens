@@ -187,6 +187,6 @@ fn current_profile_only_admits_difference_and_times_after_witnesses_exist() {
 
     assert!(profile.contains("(домен-п'ятий відняти fast-path \"SUB / u64, left>=right\")"));
     assert!(profile.contains("(домен-п'ятий помножити fast-path \"IMUL / u32 inputs -> exact u64 result\")"));
-    assert!(!profile.contains("(домен-п'ятий встановити-ім'я fast-path"));
-    assert!(!profile.contains("(домен-п'ятий встановити-пари fast-path"));
+    assert!(!profile.contains("00001101 fast-path"));
+    assert!(!profile.contains("00001110 fast-path"));
 }
