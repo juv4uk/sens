@@ -749,7 +749,10 @@ run_case run_law epistemic-record-logic-positive "$epistemic_law_bundle" "(epist
 run_case run_law epistemic-record-logic-mutant "$epistemic_mutant_bundle" "(epistemic-authority-witness (status fail) (case source-ref-valid-mutant) (actual 1) (expected 0))"
 # Д7/D8: окремі малі закони про текстові теги без LET чи числових літералів.
 # Бібліотека та предикати — Lisp; Zig відповідає лише за фізичний носій.
-d7_tag_sources=(lib/unify.lisp lib/reason.lisp lib/forward.lisp lib/knowledge.lisp lib/epistemic.lisp)
+# Ці D7-правила використовують тільки власні D1/D8-визначення Epistemic.
+# Не завантажуємо сторонній Reason/Knowledge, де поки невиклична D6 LENGTH.
+# За будь-якої семантичної чи D7-помилки фізичний SENS все одно повертає RED.
+d7_tag_sources=(lib/epistemic.lisp)
 d7_tag_positive="$evidence/d7-epistemic-structural-tag-positive.lisp"
 d7_tag_mutant="$evidence/d7-epistemic-structural-tag-mutant.lisp"
 cat -- "${d7_tag_sources[@]}" tests/semantic/d7-epistemic-structural-tag-law.lisp > "$d7_tag_positive"
