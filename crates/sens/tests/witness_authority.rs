@@ -849,7 +849,7 @@ fn primitive_budget_audit_734_accounts_for_197_ids_under_256_constraint() {
 // deliberately separate evidence classes.  A matching u8 is provenance, not
 // proof that the kernel executed the registry identity's semantics.
 #[test]
-fn sid_kernel_witness_735_separates_semantic_execution_from_opaque_transport() {
+fn domain_kernel_witness_735_separates_semantic_execution_from_opaque_transport() {
     let src = std::fs::read_to_string(repo_file("contracts/sid-kernel-witness-735.lisp"))
         .expect("contracts/sid-kernel-witness-735.lisp must exist");
     let exprs = parse(&src).expect("contract must parse as valid Lisp");
@@ -864,10 +864,10 @@ fn sid_kernel_witness_735_separates_semantic_execution_from_opaque_transport() {
     };
     assert!(matches!(
         &map_items[0].kind,
-        ExprKind::Symbol(s) if &**s == "sid-kernel-witness-map-1"
+        ExprKind::Symbol(s) if &**s == "domain-kernel-witness-map-2"
     ));
 
-    let mut seen_sids = std::collections::HashSet::new();
+    let mut seen_identities = std::collections::HashSet::new();
     let mut semantic_kernels = std::collections::HashSet::new();
     let mut live_count = 0usize;
 
@@ -878,16 +878,28 @@ fn sid_kernel_witness_735_separates_semantic_execution_from_opaque_transport() {
         };
         assert!(matches!(
             &fields[0].kind,
-            ExprKind::Symbol(s) if &**s == "sid-witness"
+            ExprKind::Symbol(s) if &**s == "domain-witness"
         ));
 
-        let mut sid: Option<String> = None;
+        let mut identity: Option<String> = None;
+        let mut ukr: Option<String> = None;
         let mut witnesses: Vec<Expr> = Vec::new();
         for field in &fields[1..] {
             match &field.kind {
-                ExprKind::Pair(key, value) if matches!(&key.kind, ExprKind::Symbol(s) if &**s == "sid") =>
+                ExprKind::Pair(key, value) if matches!(&key.kind, ExprKind::Symbol(s) if &**s == "identity") =>
                 {
-                    sid = Some(w8_binary_source(value));
+                    let ExprKind::String(value) = &value.kind else {
+                        panic!("domain witness identity must be a domain-qualified string");
+                    };
+                    identity = Some(value.to_string());
+                }
+                ExprKind::Pair(key, value) if matches!(&key.kind, ExprKind::Symbol(s) if &**s == "укр") =>
+                {
+                    ukr = match &value.kind {
+                        ExprKind::Symbol(value) => Some(value.to_string()),
+                        ExprKind::List(items) if items.is_empty() => Some("()".to_string()),
+                        _ => panic!("domain witness needs an exact Ukrainian projection"),
+                    };
                 }
                 ExprKind::List(items)
                     if !items.is_empty()
@@ -899,10 +911,26 @@ fn sid_kernel_witness_735_separates_semantic_execution_from_opaque_transport() {
             }
         }
 
-        let sid = sid.expect("every semantic witness row needs a SID");
+        let identity = identity.expect("every semantic witness row needs an exact domain");
+        let ukr = ukr.expect("every exact-domain witness needs an укр projection");
+        let (domain, bits) = identity.split_once(':').expect("domain:bits required");
+        let width = domain.strip_prefix('D')
+            .and_then(|number| number.parse::<usize>().ok())
+            .expect("ratified domain prefix required");
+        assert!(matches!(width, 3 | 4 | 6), "unsupported witness domain: {identity}");
+        assert_eq!(bits.len(), width, "width must match exact domain: {identity}");
+        assert!(bits.bytes().all(|bit| bit == b'0' || bit == b'1'));
+        let table = fs::read_to_string(repo_file(&format!("lib/domains/d{width}.lisp")))
+            .expect("ratified table must exist");
+        let key = format!("({bits} ");
+        let row = table.lines()
+            .find(|line| line.trim_start().starts_with(&key))
+            .expect("identity must exist in ratified domain");
+        assert!(row.contains(&format!("(укр {ukr})")),
+            "witness projection must equal owner-ratified укр column: {identity}");
         assert!(
-            seen_sids.insert(sid.clone()),
-            "duplicate binary witness value {sid}"
+            seen_identities.insert(identity.clone()),
+            "duplicate domain witness identity {identity}"
         );
 
         for witness in witnesses {
@@ -971,11 +999,8 @@ fn sid_kernel_witness_735_separates_semantic_execution_from_opaque_transport() {
                     Some("semantic-execution"),
                     "external live semantic witness must explicitly prove semantic execution"
                 );
-                assert_eq!(
-                    probe_id,
-                    Some(sid.clone()),
-                    "semantic execution witness must intentionally receive the mapped SID"
-                );
+                assert!(probe_id.is_some(),
+                    "external semantic witness must retain its opaque provenance probe");
                 let evidence = evidence.expect("semantic execution witness needs evidence");
                 assert!(
                     repo_file(&evidence).is_file(),
@@ -988,7 +1013,7 @@ fn sid_kernel_witness_735_separates_semantic_execution_from_opaque_transport() {
     assert!(semantic_kernels.contains("sens"));
     assert!(semantic_kernels.contains("common-lisp"));
     assert!(live_count > 0);
-    assert!(seen_sids.len() >= 4);
+    assert!(seen_identities.len() >= 4);
 
     let probe_items = match &exprs[1].kind {
         ExprKind::List(items) => items.clone(),
