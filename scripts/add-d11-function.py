@@ -132,7 +132,7 @@ def main(argv: list[str] | None = None) -> int:
     print("     1. визнач функцію в lib/d11-<сімейство>.lisp, уживаючи наявні поверхні драбин;")
     print("     2. додай її до закону сімейства (knowledge/d11/закони-пропозиція-*.md);")
     print("     3. напиши SENS-свідка tests/semantic/d11-<сімейство>-{law,mutant}.lisp")
-    print("        з самовердиктом (перше (як-є ()));")
+    print("        з самовердиктом: хибний закон має відхилити сам SENS;")
     print("     4. додай --binding-source у scripts/execute_changed_lisp_t5m.sh.")
     print()
     print("  Координата: null (сімейний закон не дає opcode). Це ПРОПОЗИЦІЯ —"
