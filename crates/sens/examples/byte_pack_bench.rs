@@ -7,7 +7,7 @@ use sens::{
     append_binary_source_word, BinarySourceWord, Bit1, Bit2, Bit3, Bit4, Bit5, Bit6, Bit7, Bit8,
     Bit9, BitPacker, PackedBitstream,
 };
-use std::{env, hint::black_box, process::ExitCode};
+use std::{env, hint::black_box, process::ExitCode, time::Instant};
 
 fn word(workload: &str, i: usize) -> BinarySourceWord {
     match workload {
