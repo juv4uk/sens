@@ -630,6 +630,16 @@ class ResearchBatchUkrProjectionTests(unittest.TestCase):
         # є частиною їхнього контракту і не може бути виведена зі значення.
         for relative in (
             "tests/semantic/d9-numeric-cdr-derived-laws.lisp",
+            "tests/semantic/d5-arith-order-surface-laws.lisp",
+            "tests/semantic/d5-quotient-mod-gcd-laws.lisp",
+            "tests/semantic/d6-abs-laws.lisp",
+            "tests/semantic/d6-add1-sub1-laws.lisp",
+            "tests/semantic/d6-add1-sub1-uk-laws.lisp",
+            "tests/semantic/d6-order-derived-laws.lisp",
+            "tests/semantic/d6-min-max-list-laws.lisp",
+            "tests/semantic/d6-min-max-variadic-laws.lisp",
+            "tests/semantic/d8-ceiling-ash-rsh-d24-laws.lisp",
+            "tests/semantic/d8-ceiling-ash-rsh-laws.lisp",
             "tests/semantic/d9-d10-justified-numeric-laws.lisp",
             "tests/semantic/d5-arithmetic-surface-laws.lisp",
             "tests/semantic/d8-integer-length-signed-laws.lisp",
