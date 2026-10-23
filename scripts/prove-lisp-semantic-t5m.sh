@@ -105,6 +105,54 @@ run_bound_law() {
   printf '%s\n' "id=$id source=$source dependency=lib/unify.lisp expected=D1:$expected actual=D1:$actual" >>"$evidence/results.txt"
 }
 
+# Негатив типу: мовний текст застосовує EQ до пари й атома.
+# Не перетворюємо Type у false; транспорт лише зберігає фізичну форму.
+run_eq_type_rejection() {
+  local id="$1" source="$2" dir physical
+  dir="$evidence/$id"
+  physical="$dir/program.sens"
+  mkdir -p "$dir"
+  test -f "$source" && test ! -L "$source" ||
+    fail "$id" source "regular-Lisp" "missing-or-symlink"
+
+  if timeout 45s "$sens" "$source" >"$dir/direct.out" 2>"$dir/direct.err"; then
+    fail "$id" sens-direct "Type-rejection" "unexpected-success"
+  fi
+  grep -Fq 'eq expects two atoms' "$dir/direct.err" ||
+    fail "$id" sens-direct "EQ-atom-type-error" "unclassified-rejection"
+
+  if ! timeout 45s "$sens" --t5m-mint "$source" "$physical" >"$dir/mint.out" 2>"$dir/mint.err"; then
+    cat "$dir/mint.err" >&2
+    fail "$id" codec "T5M-mint" "rejected"
+  fi
+  test -s "$physical" || fail "$id" codec "nonempty-T5M" "empty"
+  if ! timeout 45s "$trit" open "$physical" >"$dir/program" 2>"$dir/open.err" ||
+     ! timeout 45s "$trit" verify-view "$physical" >"$dir/inverse.out" 2>"$dir/inverse.err"; then
+    cat "$dir/open.err" "$dir/inverse.err" >&2 || true
+    fail "$id" zig-transport "canonical-roundtrip" "rejected"
+  fi
+
+  if timeout 45s "$sens" --t5m-pair "$source" "$physical" >"$dir/paired.out" 2>"$dir/paired.err"; then
+    fail "$id" sens-physical "EQ-Type-rejection" "paired-accepted"
+  fi
+  if ! grep -Fq 'eq expects two atoms' "$dir/paired.err" ||
+     ! grep -Fq 'kind=Type' "$dir/paired.err"; then
+    cat "$dir/paired.err" >&2
+    fail "$id" sens-physical "EQ-Type" "unexpected-paired-error"
+  fi
+  if timeout 45s "$sens" "$physical" >"$dir/physical.out" 2>"$dir/physical.err"; then
+    fail "$id" sens-physical "EQ-Type-rejection" "standalone-accepted"
+  fi
+  if ! grep -Fq 'eq expects two atoms' "$dir/physical.err"; then
+    cat "$dir/physical.err" >&2
+    fail "$id" sens-physical "EQ-Type" "unexpected-standalone-error"
+  fi
+
+  sha256sum "$source" "$physical" >"$dir/sha256.txt"
+  echo "::notice file=$source,title=SENS Lisp→T5M→SENS::PASS id=$id expected=EQ-Type direct=REJECTED paired=REJECTED physical=REJECTED"
+  printf '%s\n' "id=$id source=$source expected=EQ-Type actual=EQ-Type" >>"$evidence/results.txt"
+}
+
 : >"$evidence/results.txt"
 # Не маскуємо збої: всі незалежні закони запускаються, але хоч один RED
 # робить загальний результат RED. Жодних substitute verdict з Rust/Python.
@@ -147,6 +195,9 @@ run_case run_law d4-escaped-closure-mutant tests/semantic/d4-escaped-lexical-clo
 # Фізичні закони Д3 не залежать від недопущеного виклику D6 LENGTH.
 run_case run_law d3-structural-positive tests/semantic/d3-structural-native-t5m-law.lisp 1
 run_case run_law d3-structural-mutant tests/semantic/d3-structural-native-t5m-mutant.lisp 0
+run_case run_law d3-eq-atom-boundary-positive tests/semantic/d3-eq-atom-boundary-law.lisp 1
+run_case run_law d3-eq-atom-boundary-mutant tests/semantic/d3-eq-atom-boundary-mutant.lisp 0
+run_case run_eq_type_rejection d3-eq-nonatom-type-negative tests/semantic/d3-eq-nonatom-type-negative.lisp
 # TRANSITIONAL #5854: арифметичні Lisp-свідки існують і перевіряються
 # прямим SENS у ci.yml, але фізичний T5M не атестовано до реалізації LENGTH.
 # Не оголошувати PASS і не замінювати семантику D6 хостовим оракулом.
@@ -161,4 +212,4 @@ if (( failed > 0 )); then
   echo "::error title=SENS Lisp/T5M::REGRESSION checked=$checked passed=$passed failed=$failed ids=${failed_ids[*]}" >&2
   exit 1
 fi
-echo "SENS_LISP_T5M_LAWS_PASS count=$checked positive=12 mutants=10 physical=ZIG_T5M"
+echo "SENS_LISP_T5M_LAWS_PASS count=$checked passed=$passed failed=$failed physical=ZIG_T5M"

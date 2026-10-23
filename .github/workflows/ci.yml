@@ -188,6 +188,7 @@ jobs:
                   "tests/semantic/unification-occurs-check-law.lisp",
                   "tests/semantic/unification-occurs-check-mutant.lisp",
                   "tests/semantic/core-d3-car-cdr-cons-mutant.lisp",
+                  "tests/semantic/d3-eq-nonatom-type-negative.lisp",
                   "tests/semantic/result-status-laws.lisp",
                   "tests/fixtures/conformance-transition-witness.lisp",
               }:
@@ -214,6 +215,8 @@ jobs:
                   "tests/semantic/lisp-d3-d4-list-self-verdict.lisp",
                   "tests/semantic/d3-structural-native-t5m-law.lisp",
                   "tests/semantic/d3-structural-native-t5m-mutant.lisp",
+                  "tests/semantic/d3-eq-atom-boundary-law.lisp",
+                  "tests/semantic/d3-eq-atom-boundary-mutant.lisp",
                   # TRANSITIONAL #5854: D6 LENGTH ратифікований, але невикличний у T5M.
               ):
                   if witness not in selected:
