@@ -404,6 +404,11 @@ fn append_t5m_expression_context(
                 // Порожній Text7 поки не має окремої фізичної тотожності:
                 // залишаємо його чинний носій до ратифікації закону.
                 if text7.cells().is_empty() {
+                    // D3 QUOTE is already emitted by the enclosing form.
+                // Another QUOTE would turn nonempty D7 text into a Lisp list.
+                // Preserve the historical empty carrier until a distinct
+                // zero-cell D7 datum is representable in the physical reader.
+                if text7.is_empty() {
                     words.push(control(0b10)?);
                     words.push(ExactDomainWord::identity(t5m_domain_identity(3, 0b001)?));
                     words.push(control(0b00)?);
@@ -419,7 +424,7 @@ fn append_t5m_expression_context(
                     )?));
                 }
                 words.push(control(0b01)?);
-                if text7.cells().is_empty() {
+                if text7.is_empty() {
                     words.push(control(0b01)?);
                 }
             } else {
@@ -3320,6 +3325,19 @@ mod tests {
         let result = eval_t5m_paired_file(source, &physical)
             .expect("a lexical binder keeps its source name through exact-domain lowering");
         assert_eq!(result.value.to_string(), "7");
+    }
+
+    #[cfg(feature = "zig-transport")]
+    #[test]
+    fn t5m_quoted_nonempty_d7_survives_native_physical_execution() {
+        let source = "(як-є \"sha256:abc\")";
+        let (physical, _) =
+            mint_t5m_source_pair(source).expect("quoted D7 source must mint exact Zig/T5M");
+        let result = eval_t5m_paired_file(source, &physical)
+            .expect("physical SENS must execute the same D3 quotation");
+        let expected = sens::encode_text7("sha256:abc", sens::Text7Layout::En)
+            .expect("ASCII protocol text is admitted by D7 v2");
+        assert_eq!(result.value, Value::Text7(expected));
     }
 
     #[test]
