@@ -702,6 +702,37 @@ cat -- lib/result-status.lisp tests/semantic/result-status-goal-tags-mutant.lisp
 run_case run_law result-status-goal-tags-positive "$result_status_goal_tags_bundle" 1
 run_case run_law result-status-goal-tags-mutant "$result_status_goal_tags_mutant_bundle" 0
 
+# Д10-конструктори існують у lib/core4.lisp, але мінімальний корпус
+# цього свідка не завантажує повний core4 (разом із незалежними макросами).
+# Витягаємо ТІЛЬКИ точні чинні Lisp DEFINE без копії реалізації чи host-оракула.
+# Відсутнє/дубльоване визначення — помилка, а не замовчуваний SKIP.
+epistemic_constructor_source="$evidence/epistemic-d10-constructors.lisp"
+: > "$epistemic_constructor_source"
+for constructor in створити-спостереження створити-твердження створити-доказ створити-намір; do
+  if ! awk -v target="(визначити $constructor" '
+    $0 == target {
+      if (found++) exit 2
+      copying = 1
+    }
+    copying && NF == 0 {
+      copying = 0
+      complete++
+      next
+    }
+    copying { print }
+    END { if (found != 1 || complete != 1 || copying) exit 2 }
+  ' lib/core4.lisp >> "$epistemic_constructor_source"; then
+    echo "::error::EPISTEMIC_D10_SOURCE_NOT_ISOLATABLE function=$constructor source=lib/core4.lisp" >&2
+    exit 2
+  fi
+  printf '\n' >> "$epistemic_constructor_source"
+done
+test -s "$epistemic_constructor_source" || {
+  echo "::error::EPISTEMIC_D10_SOURCE_EMPTY" >&2
+  exit 2
+}
+sha256sum lib/core4.lisp "$epistemic_constructor_source" > "$evidence/epistemic-d10-source.sha256"
+
 # Епістемічні закони належать Lisp: посилання, вимоги та вкладена рівність.
 # Той самий живий SENS-корпус спрацьовує на позитиві, а хибне очікування
 # повертає named fail із самого Lisp. Rust не містить таблиці очікувань.
@@ -711,9 +742,9 @@ epistemic_sources=(lib/unify.lisp lib/reason.lisp lib/forward.lisp lib/knowledge
                    tests/fixtures/epistemic-authority-witness.lisp)
 epistemic_law_bundle="$evidence/epistemic-record-logic-positive-complete.lisp"
 epistemic_mutant_bundle="$evidence/epistemic-record-logic-mutant-complete.lisp"
-cat -- "${epistemic_sources[@]}" tests/semantic/language-law-epistemic-records.lisp > "$epistemic_law_bundle"
-cat -- "${epistemic_sources[@]}" tests/semantic/language-mutant-epistemic-records.lisp > "$epistemic_mutant_bundle"
-sha256sum "${epistemic_sources[@]}" tests/semantic/language-law-epistemic-records.lisp tests/semantic/language-mutant-epistemic-records.lisp > "$evidence/epistemic-record-logic-inputs.sha256"
+cat -- "$epistemic_constructor_source" "${epistemic_sources[@]}" tests/semantic/language-law-epistemic-records.lisp > "$epistemic_law_bundle"
+cat -- "$epistemic_constructor_source" "${epistemic_sources[@]}" tests/semantic/language-mutant-epistemic-records.lisp > "$epistemic_mutant_bundle"
+sha256sum "$epistemic_constructor_source" "${epistemic_sources[@]}" tests/semantic/language-law-epistemic-records.lisp tests/semantic/language-mutant-epistemic-records.lisp > "$evidence/epistemic-record-logic-inputs.sha256"
 run_case run_law epistemic-record-logic-positive "$epistemic_law_bundle" "(epistemic-authority-witness (status pass))"
 run_case run_law epistemic-record-logic-mutant "$epistemic_mutant_bundle" "(epistemic-authority-witness (status fail) (case source-ref-valid-mutant) (actual 1) (expected 0))"
 # Д7/D8: окремі малі закони про текстові теги без LET чи числових літералів.
