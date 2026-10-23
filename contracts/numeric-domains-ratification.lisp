@@ -52,3 +52,27 @@
   (fraction-law . "Keep the existing exact reduced ratio composition: explicit sign plus unsigned numerator magnitude and positive unsigned denominator magnitude; gcd reduction, denominator zero rejected, zero and denominator one canonicalize as before. Integer two's-complement words do not replace the fraction composition.")
   (transport . "T5M transports already-formed exact-width words unchanged; it does not assign numeric meaning. Physical NEG/RATIO serialization remains separate.")
 )
+
+; Чинне рішення власника 2026-10-24: математична драбина починається з D12.
+; Цей закон переважає мінімальну ширину D24 у записах 2026-10-11/18.
+; Старі записи лишаються історією і свідченням чинного D24+ механізму.
+; Ратифікація семантики не є доказом реалізації D12 у Core/Zig/T5M.
+(
+  (schema . numeric-d12-start-extension-1)
+  (status . owner-ratified)
+  (date . "2026-10-24")
+  (owner-decision . "Математичні числові домени SENS починаються з D12+; D12 є найменшим повноцінним числовим доменом для малих точних значень і простих тестів.")
+  (authority . "This owner decision supersedes the D24-first width/name law in the 2026-10-11 ratification and its 2026-10-18 D24+ scope only as to the FIRST numeric rung; unchanged D24+ identities remain valid.")
+  (family . numeric)
+  (first-domain . D12)
+  (initial-width . #d12)
+  (next-width . double)
+  (canonical-domain-names . (D12 D24 D48 D96 D192))
+  (domain-rule . "D(12 * 2^n), n >= 0")
+  (integer-law . "D12 and every successor Dn use exact n-bit two's-complement words; D12 range is -2048..2047. Every word has one integer value, with no negative zero.")
+  (arithmetic . "For same-Dn admitted operands, exact mathematical + - * / and comparison preserve value; a signed integer result outside Dn widens to the smallest admitted successor D(2n), without wrapping or truncation. Mixed-Dn coercion is not implied.")
+  (fraction-law . "Exact reduced RATIO remains a semantic composition of admitted integer magnitudes with positive denominator, gcd reduction and no rounding; denominator zero is invalid, zero numerator and unit denominator canonicalize. Float is distinct and never an implicit replacement for exact RATIO.")
+  (identity-law . "D12 is a numeric domain, not a D12 callable-function codebook, not D7 text, not a width-only inference and not a source literal. D12 and D24 identities remain distinct even at equal mathematical values.")
+  (transport-law . "T5M/Zig carry already-admitted exact domain and payload bits; codec padding or byte framing never decides arithmetic identity, sign, ratio or float semantics.")
+  (implementation-status . "Owner-ratified semantic law only; legacy D24-first generated constants, guards, Core admission and Zig physical prefix still require explicit migration and execution tests before D12 is reported operational.")
+)
