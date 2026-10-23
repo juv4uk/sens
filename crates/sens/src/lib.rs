@@ -873,8 +873,24 @@ fn bind_process_tcp_lisp_owned_macros(session: &mut Session) -> Result<(), Langu
                 )
             })?;
 
-        // Core4 owns the macro through its *full Ukrainian* definition.
-        // Do not resurrect retired English bindings just to find this value.
+        // Точний D6-слот є владою виклику: Core4 міг уже встановити
+        // виконуваний Lisp-макрос без окремого lexical spelling. У такому
+        // разі додатковий lookup за текстовою назвою не є передумовою.
+        // Важливо: зайнятий НЕ-макросом слот — справжня помилка.
+        match session.environment.domain_code_slot(identity) {
+            Some(Value::Macro(_)) => continue,
+            Some(_) => {
+                return Err(LanguageError::new(
+                    ErrorKind::InvalidForm,
+                    format!("D6 {uk_surface} mechanism slot is occupied by a non-macro"),
+                    Span::default(),
+                ));
+            }
+            None => {}
+        }
+
+        // Лише коли точного слота немає, переносимо вже існуюче
+        // SENS-визначення, а не вигадуємо Rust-реалізацію або SID8.
         let implementation = session
             .environment
             .get(full_ukr_surface)
@@ -888,25 +904,12 @@ fn bind_process_tcp_lisp_owned_macros(session: &mut Session) -> Result<(), Langu
                 )
             })?;
 
-        match session.environment.domain_code_slot(identity) {
-            Some(Value::Macro(_)) => {}
-            Some(_) => {
-                return Err(LanguageError::new(
-                    ErrorKind::InvalidForm,
-                    format!("D6 {uk_surface} mechanism slot is occupied by a non-macro"),
-                    Span::default(),
-                ));
-            }
-            None if session
-                .environment
-                .bind_domain_code_slot_once(identity, implementation) => {}
-            None => {
-                return Err(LanguageError::new(
-                    ErrorKind::InvalidForm,
-                    format!("could not bind Lisp-owned {full_ukr_surface} to exact D6"),
-                    Span::default(),
-                ));
-            }
+        if !session.environment.bind_domain_code_slot_once(identity, implementation) {
+            return Err(LanguageError::new(
+                ErrorKind::InvalidForm,
+                format!("could not bind Lisp-owned {full_ukr_surface} to exact D6"),
+                Span::default(),
+            ));
         }
     }
     Ok(())
@@ -1017,6 +1020,29 @@ pub fn string_slice_text(text: &str, start: usize, end: usize) -> String {
 #[cfg(test)]
 mod core4_bootstrap_cache_tests {
     use super::*;
+
+    // Механічний тест завантажувача, а не оракул семантики LET/LET*.
+    // Core4 уже повинен надати виконувані D6 макроси; повторне
+    // зв'язування не має вимагати дубльованих текстових назв.
+    #[test]
+    fn d6_macro_mechanism_rebinding_is_idempotent_after_core4() {
+        let mut session = Session::bare();
+        load_core_library(&mut session).expect("живий Core4 через Zig T5M");
+        bind_process_tcp_lisp_owned_macros(&mut session)
+            .expect("вже встановлені мовні D6 механізми допускають повторний прохід");
+        bind_process_tcp_lisp_owned_macros(&mut session)
+            .expect("повторний прохід не вимагає другого DEFINE");
+        for (surface, bits) in [("нехай", 0b001000u16), ("нехай*", 0b001001u16)] {
+            let identity = semantic_registry::exact_uk_callable_for_source_head(surface)
+                .expect("збережено ратифіковану D6 тотожність");
+            assert_eq!(identity.width(), 6);
+            assert_eq!(identity.packed_bits(), bits);
+            assert!(
+                matches!(session.environment.domain_code_slot(identity), Some(Value::Macro(_))),
+                "D6 {surface} завантажено тільки як реальний Lisp-макрос"
+            );
+        }
+    }
 
     #[test]
     fn core4_t5m_bootstrap_contains_executable_forms() {
