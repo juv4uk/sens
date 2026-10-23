@@ -547,6 +547,45 @@ mod qualified_numeric_domain_value_tests {
     }
 
     #[test]
+    fn division_rejects_zero_created_by_exact_d24_subtraction() {
+        let env = Environment::root();
+        let d24 = |value: u32| {
+            let mut bits = vec![0u8; 24];
+            for offset in 0..24 {
+                bits[23 - offset] = ((value >> offset) & 1) as u8;
+            }
+            in_domain(24, bits)
+        };
+
+        let seven = d24(7);
+        let zero = arithmetic_on_values(
+            "-",
+            &[seven.clone(), seven],
+            &env,
+            Span::default(),
+        )
+        .expect("exact D24 subtraction produces an admitted zero");
+        assert!(
+            matches!(&zero, Value::BinaryNumber(number) if number.is_zero()),
+            "subtraction must retain the canonical exact D24 zero, got {zero:?}"
+        );
+
+        let error = division_on_values(
+            &[d24(5), zero],
+            2,
+            &env,
+            Span::default(),
+        )
+        .expect_err("a computed exact zero denominator must be rejected");
+        assert_eq!(error.kind, ErrorKind::DivisionByZero);
+        assert!(
+            error.message.contains("division by zero"),
+            "wrong zero-denominator diagnostic: {}",
+            error.message
+        );
+    }
+
+    #[test]
     fn core_runtime_d24_full_multiplication_produces_exact_d48() {
         let env = Environment::root();
         let mut max_word = vec![1; 24];
