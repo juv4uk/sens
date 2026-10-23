@@ -3,7 +3,7 @@
 ; Старі десяткові SID8 не визначають семантичну адресу.
 
 ((expect . expect-value)
- (expr . "(атом? 5)")
+ (expr . "(атом? число-один)")
  (expected . (value (1)))
  (active . t)
  (name . "ATOM цілого — YES")
