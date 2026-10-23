@@ -75,4 +75,32 @@ mod tests {
         let помилка = read_message(&mut вхід).expect_err("некоректний UTF-8");
         assert_eq!(помилка.kind(), ErrorKind::InvalidData);
     }
+    #[test]
+    fn послідовні_stdio_рамки_не_зливаються() {
+        // Механізм Rust: два фрейми зчитуються без втрати меж або байтів.
+        // Другий фрейм містить український UTF-8, але без парсингу семантики.
+        let перший = r#"{"id":"перший"}"#;
+        let другий = r#"{"id":"другий"}"#;
+        let mut потік = Vec::new();
+        write_message(&mut потік, перший).expect("перший запис");
+        write_message(&mut потік, другий).expect("другий запис");
+        let mut читач = Cursor::new(потік);
+        assert_eq!(
+            read_message(&mut читач).expect("перший фрейм").as_deref(),
+            Some(перший)
+        );
+        assert_eq!(
+            read_message(&mut читач).expect("другий фрейм").as_deref(),
+            Some(другий)
+        );
+        assert_eq!(read_message(&mut читач).expect("чистий EOF"), None);
+    }
+
+    #[test]
+    fn stdio_без_content_length_не_вигадує_повідомлення() {
+        // Помилка транспортного заголовка — не заперечний закон Lisp.
+        let mut читач = Cursor::new(b"Content-Type: application/json\r\n\r\n{}".as_slice());
+        assert_eq!(read_message(&mut читач).expect("відсутній розмір"), None);
+    }
+
 }
