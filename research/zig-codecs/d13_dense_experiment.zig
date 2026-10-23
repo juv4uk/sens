@@ -29,17 +29,29 @@ pub fn packedLen(count: usize) Error!usize {
 pub fn encode(words: []const u16, output: []u8) Error!usize {
     const n = try packedLen(words.len);
     for (words) |word| {
-        if (word > max_word) return error.InvalidWord;
+        if (word > 0x1fff) return error.InvalidWord;
     }
     if (output.len < n) return error.OutputTooSmall;
+
     @memset(output[0..n], 0);
-    for (words, 0..) |word, i| {
-        for (0..width) |j| {
-            const cursor = i * width + j;
-            const bit: u8 = @intCast((word >> @as(u4, @intCast(width - j - 1))) & 1);
-            output[cursor / 8] |= bit << @as(u3, @intCast(7 - cursor % 8));
+    var acc: u32 = 0;
+    var bits: u5 = 0;
+    var pos: usize = 0;
+    for (words) |word| {
+        acc = (acc << 13) | @as(u32, word);
+        bits += 13;
+        while (bits >= 8) {
+            bits -= 8;
+            output[pos] = @intCast((acc >> bits) & 0xff);
+            pos += 1;
+            acc &= (@as(u32, 1) << bits) - 1;
         }
     }
+    if (bits != 0) {
+        output[pos] = @intCast(acc << @as(u5, 8 - bits));
+        pos += 1;
+    }
+    std.debug.assert(pos == n);
     return n;
 }
 
@@ -51,16 +63,23 @@ pub fn decode(data: []const u8, count: usize, output: []u16) Error!void {
     if (output.len < count) return error.OutputTooSmall;
     const padding = n * 8 - count * width;
     if (padding != 0) {
-        const mask: u8 = (@as(u8, 1) << @as(u3, @intCast(padding))) - 1;
+        const shift: u3 = @intCast(padding);
+        const mask: u8 = (@as(u8, 1) << shift) - 1;
         if ((data[n - 1] & mask) != 0) return error.NonCanonicalTail;
     }
+
+    var acc: u32 = 0;
+    var bits: u5 = 0;
+    var pos: usize = 0;
     for (0..count) |i| {
-        var word: u16 = 0;
-        for (0..width) |j| {
-            const cursor = i * width + j;
-            word = (word << 1) | @as(u16, (data[cursor / 8] >> @as(u3, @intCast(7 - cursor % 8))) & 1);
+        while (bits < 13) {
+            acc = (acc << 8) | @as(u32, data[pos]);
+            bits += 8;
+            pos += 1;
         }
-        output[i] = word;
+        bits -= 13;
+        output[i] = @intCast((acc >> bits) & 0x1fff);
+        acc &= (@as(u32, 1) << bits) - 1;
     }
 }
 
