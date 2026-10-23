@@ -553,6 +553,10 @@ while IFS= read -r file || [[ -n "$file" ]]; do
   elif [[ "$file" == "tests/semantic/meta-fc-predicates-d1-law.lisp" ||
           "$file" == "tests/semantic/meta-fc-predicates-d1-mutant.lisp" ]]; then
     binding_sources=(--binding-source lib/meta-eval-first-class.lisp)
+  elif [[ "$file" == "tests/semantic/d11-meta-sixth-laws.lisp" ||
+          "$file" == "tests/semantic/d11-meta-sixth-mutant.lisp" ]]; then
+    # Мовне джерело не містить дубля D11: чинне DEFINE шостого — в MetaEval.
+    binding_sources=(--binding-source lib/meta-eval.lisp)
   elif [[ "$file" == "tests/semantic/d4-lambda-application-law.lisp" ||
           "$file" == "tests/semantic/d4-lambda-application-mutant.lisp" ]]; then
     binding_sources=()

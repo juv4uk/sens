@@ -352,6 +352,14 @@ d11_span_bundle="$evidence/d11-srfi1-span-break-complete.lisp"
 cat -- lib/d11-srfi1-span-break.lisp tests/semantic/d11-srfi1-span-break-laws.lisp > "$d11_span_bundle"
 sha256sum lib/d11-srfi1-span-break.lisp tests/semantic/d11-srfi1-span-break-laws.lisp > "$evidence/d11-srfi1-inputs.sha256"
 run_case run_law d11-srfi1-span-break-physical "$d11_span_bundle" 1
+# Дев’ять законів D11 шостого елемента перенесено з Rust у мову SENS.
+# Тільки чинна MetaEval бібліотека задає дію, shell не обчислює індекс.
+meta_sixth_law_bundle="$evidence/d11-meta-sixth-positive-complete.lisp"
+meta_sixth_mutant_bundle="$evidence/d11-meta-sixth-mutant-complete.lisp"
+cat -- lib/meta-eval.lisp tests/semantic/d11-meta-sixth-laws.lisp > "$meta_sixth_law_bundle"
+cat -- lib/meta-eval.lisp tests/semantic/d11-meta-sixth-mutant.lisp > "$meta_sixth_mutant_bundle"
+run_case run_law d11-meta-sixth-positive "$meta_sixth_law_bundle" 1
+run_case run_law d11-meta-sixth-mutant "$meta_sixth_mutant_bundle" 0
 # Д11 Clojure: два комплекти законів перенесено з Rust у справжній Lisp.
 # Їхня залежність SRFI-1 SPAN завантажується перед DEFINE групування.
 for suite in d11-clojure-partition-by d11-clojure-dedupe; do

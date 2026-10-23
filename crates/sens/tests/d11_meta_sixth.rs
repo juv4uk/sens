@@ -1,73 +1,27 @@
-//! Д11, дослідне місце 00000111100: шосте-значення-групи.
-//! Семантика належить чинній бібліотечній композиції SENS, не Rust.
-//! Це не новий примітив і не допуск прямого виклику D11-слова.
+//! Rust: механізм завантаження MetaEval і запуску українських Lisp-свідків.
+//! Усі дев’ять законів селектора шостого елемента належать Lisp/SENS.
+//! Точний D1 позитиву й негативного мутанта доводить фізичний Zig/T5M → SENS.
 
 use sens::{eval_program, load_core_library, load_meta_evaluator_library, Session};
+use std::path::PathBuf;
 
 #[test]
-fn d11_шосте_значення_не_плутає_позицію_і_структуру() {
+fn rust_mechanism_loads_meta_sixth_lisp_witnesses() {
     let mut session = Session::bare();
-    load_core_library(&mut session).expect("завантажити ратифіковане ядро SENS");
-    load_meta_evaluator_library(&mut session).expect("завантажити чинні SENS-визначення MetaEval");
-    
-    // Передумова: proper-list із щонайменше шести елементів.
-    // Усі рівності і D1-біти обчислює сама SENS.
-    for (case, source, expected) in [
-        (
-            "шість-правильно",
-            "(однакові? (шосте-значення-групи (як-є (а б в г д е))) (як-є е))",
-            true,
-        ),
-        (
-            "шість-не-перше",
-            "(однакові? (шосте-значення-групи (як-є (а б в г д е))) (як-є а))",
-            false,
-        ),
-        (
-            "шість-не-пяте",
-            "(однакові? (шосте-значення-групи (як-є (а б в г д е))) (як-є д))",
-            false,
-        ),
-        (
-            "сім-не-сьоме",
-            "(однакові? (шосте-значення-групи (як-є (а б в г д е є))) (як-є є))",
-            false,
-        ),
-        (
-            "сім-правильно",
-            "(однакові? (шосте-значення-групи (як-є (а б в г д е є))) (як-є е))",
-            true,
-        ),
-        (
-            "вкладена-пара",
-            "(однакові? (шосте-значення-групи (як-є (а б в г д (х у)))) (як-є (х у)))",
-            true,
-        ),
-        (
-            "вкладена-не-атом",
-            "(однакові? (шосте-значення-групи (як-є (а б в г д (х у)))) (як-є х))",
-            false,
-        ),
-        (
-            "порожнє-шосте",
-            "(однакові? (шосте-значення-групи (як-є (а б в г д ()))) (як-є ()))",
-            true,
-        ),
-        (
-            "повторені-атоми",
-            "(однакові? (шосте-значення-групи (як-є (а а а а а б б))) (як-є б))",
-            true,
-        ),
+    load_core_library(&mut session).expect("завантажити чинне ядро SENS");
+    load_meta_evaluator_library(&mut session)
+        .expect("завантажити живі визначення MetaEval SENS");
+
+    let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../..");
+    for witness in [
+        "tests/semantic/d11-meta-sixth-laws.lisp",
+        "tests/semantic/d11-meta-sixth-mutant.lisp",
     ] {
-        let observed = eval_program(source, &mut session)
-            .unwrap_or_else(|error| {
-                panic!("test_id=D11-META-SIXTH-{case} layer=SENS input={source} actual_error={error}")
-            })
-            .value;
-        assert_eq!(
-            observed.as_predicate_bit(),
-            Some(expected),
-            "test_id=D11-META-SIXTH-{case} layer=SENS input={source} expected=D1:{expected} actual={observed}"
-        );
+        let path = root.join(witness);
+        let source = std::fs::read_to_string(&path)
+            .unwrap_or_else(|error| panic!("Rust I/O path={} error={error}", path.display()));
+        // Rust тестує транспорт джерела до реального SENS, а не формулу закону.
+        eval_program(&source, &mut session)
+            .unwrap_or_else(|error| panic!("SENS eval path={witness} error={error}"));
     }
 }
