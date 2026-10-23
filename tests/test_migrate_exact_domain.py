@@ -491,5 +491,44 @@ class ExactDomainMigrationTests(unittest.TestCase):
 
 
 
+    def test_sid8_ukr_partial_file_is_never_written(self):
+        # Реальні непідтверджені викличні голови не можна залишити в
+        # частково зміненому *.lisp навіть якщо інші голови мають міст.
+        import json
+        entry = SCRIPTS / "migrate-legacy-w8-ukr.py"
+        spec = importlib.util.spec_from_file_location("sens_legacy_w8_atomic_test", entry)
+        self.assertIsNotNone(spec)
+        migrate = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(migrate)
+        with tempfile.TemporaryDirectory(prefix="sens-ukr-atomic-") as folder:
+            root = Path(folder)
+            source = root / "lib" / "перевірка.lisp"
+            source.parent.mkdir()
+            original = "(sid8:00001100 2 3)\\n(sens8:11111111 4 5)\\n"
+            source.write_text(original, encoding="utf-8")
+            report = root / "перевірка.json"
+            table = {"00001100": mod.Identity("D5", "01010", "PLUS", "додати")}
+            with (
+                patch.object(migrate, "ROOT", root),
+                patch.object(migrate, "shared", return_value=mod),
+                patch.object(migrate, "mapping", return_value=(
+                    mod, table, {"11111111": "недоведений виклик"}
+                )),
+                patch.object(sys, "argv", [
+                    "migrate-legacy-w8-ukr.py", str(source), "--write",
+                    "--report", str(report),
+                ]),
+            ):
+                self.assertEqual(migrate.main(), 2)
+            self.assertEqual(source.read_text(encoding="utf-8"), original)
+            result = json.loads(report.read_text(encoding="utf-8"))[0]
+            self.assertEqual(result["status"], "partial")
+            self.assertFalse(result["written"])
+            self.assertEqual(result["sha256_before"], result["sha256_after"])
+            self.assertEqual(len(result["replacements"]), 1)
+            self.assertEqual(len(result["unresolved"]), 1)
+
+
+
 if __name__ == "__main__":
     unittest.main()
