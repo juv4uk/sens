@@ -87,7 +87,7 @@ class IncrementalTripletGate(unittest.TestCase):
         self.assertEqual(result["summary"]["original_executable_migrations_certified"], 0)
         self.assertEqual(result["files"][0]["uk_oracle"], "NOT_VERIFIED")
         self.assertEqual(result["files"][0]["view_sha256"],
-                         result["files"][0]["view_sha256"])
+                         "7005a9baa508be0cba3367ae7321f53775361d2b0ced762ed60b761d488b4832")
 
     def test_existing_binary_modified_without_matching_view_is_rejected(self):
         old = self.root / "old"
