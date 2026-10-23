@@ -254,6 +254,10 @@ run_case run_law d3-cond-first-match-false-mutant tests/semantic/d3-cond-first-m
 # Д3: перша вибрана гілка зберігає D3 NIL як структуру, не як D1:NO.
 run_case run_law d3-cond-first-match-nil-positive tests/semantic/d3-cond-first-match-nil-law.lisp 1
 run_case run_law d3-cond-first-match-nil-mutant tests/semantic/d3-cond-first-match-nil-mutant.lisp 0
+# D3: після першого істинного guard наступний guard з CAR NIL не обчислюється.
+# Позитив і негатив обов'язково проходять direct → Zig/T5M → paired → standalone.
+run_case run_law d3-cond-guard-short-circuit-positive tests/semantic/d3-cond-guard-short-circuit-law.lisp 1
+run_case run_law d3-cond-guard-short-circuit-mutant tests/semantic/d3-cond-guard-short-circuit-mutant.lisp 0
 run_case run_law d3-quote-short-circuit-positive tests/semantic/d3-cond-quote-lazy-law.lisp 1
 run_case run_law d3-quote-short-circuit-mutant tests/semantic/d3-cond-quote-lazy-mutant.lisp 0
 # QUOTE не обчислює цитовану форму: структура лишається даними.
