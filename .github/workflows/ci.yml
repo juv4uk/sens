@@ -448,7 +448,7 @@ jobs:
           export CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0
           # Механічна проєкція цитованих ASCII D7: перевірити точні комірки
           # на справжньому Rust→Zig маршруті, без host-оракула семантики.
-          cargo test --locked -p sens-cli --bin sens t5m_quoted_string_remains_d7_data_while_executable_string_uses_domain_calls -- --nocapture
+          cargo test --locked -p sens-cli --bin sens t5m_quoted_ -- --nocapture
           cargo test --locked -p sens-cli --test arithmetic_benchmark_cli -- --nocapture
           # Rust вимірює тільки власну фізичну рамку запису: не Lisp-істинність.
           cargo test --locked -p sens --example rust_record_framing_bench -- --nocapture
