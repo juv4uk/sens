@@ -155,6 +155,8 @@ run_native_t5m_program() {
       negative_type_diagnostic='D3:110 COND expects exact D1:1 / D1:0' ;;
     tests/semantic/d3-car-empty-list-type-negative.lisp)
       negative_type_diagnostic='car expects a non-empty list' ;;
+    tests/semantic/d11-srfi1-find-tail-improper-tail-negative.lisp)
+      negative_type_diagnostic='car expects a non-empty list' ;;
     tests/semantic/d3-car-atomic-dotted-tail-type-negative.lisp)
       negative_type_diagnostic='car expects a non-empty list' ;;
     tests/semantic/d3-cdr-empty-list-type-negative.lisp)
@@ -168,7 +170,13 @@ run_native_t5m_program() {
     local rejection_status
     # Третій незалежний свідок: пряме українське Lisp-джерело.
     # Помилка Type має збігатися до і після фізичного Zig/T5M.
-    if timeout "$native_timeout" "$binary" "$file" \
+    # Залежний D11-свідок запускається з живим DEFINE, а не з host-оракулом.
+    local direct_source="$file"
+    if [[ "$file" == "tests/semantic/d11-srfi1-find-tail-improper-tail-negative.lisp" ]]; then
+      direct_source="$dir/d11-find-tail-bound-negative.lisp"
+      cat -- lib/d11-srfi1-find-tail.lisp "$file" > "$direct_source"
+    fi
+    if timeout "$native_timeout" "$binary" "$direct_source" \
         >"$dir/native-direct.stdout" 2>"$dir/native-direct.stderr"; then
       echo "::error::T5M_EXPECTED_TYPE_DIRECT_ACCEPTED source=$file" >&2
       mark_file_failed
@@ -591,7 +599,8 @@ while IFS= read -r file || [[ -n "$file" ]]; do
     # Mint і paired мусять завантажити його чинне DEFINE, інакше отримуємо
     # хибний UnknownSymbol замість мовного D1:1 / D1:0. Rust/Zig не оракули.
     binding_sources=(--binding-source benchmarks/d3-proper-tail-hot.lisp)
-  elif [[ "$file" == "tests/semantic/d11-srfi1-find-tail-laws.lisp" ]]; then
+  elif [[ "$file" == "tests/semantic/d11-srfi1-find-tail-laws.lisp" ||
+          "$file" == "tests/semantic/d11-srfi1-find-tail-improper-tail-negative.lisp" ]]; then
     # Лише визначення із справжньої бібліотеки SENS, без host-оракула.
     binding_sources=(--binding-source lib/d11-srfi1-find-tail.lisp)
   elif [[ "$file" == "tests/semantic/d11-srfi1-span-break-laws.lisp" ]]; then
