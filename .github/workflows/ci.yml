@@ -114,14 +114,20 @@ jobs:
             fi
             base="$(git rev-parse "$GITHUB_SHA^1")"
           fi
-          if [[ -n "$base" && ! "$base" =~ ^0+$ ]]; then
-            if ! git cat-file -e "$base^{commit}" 2>/dev/null; then
-              timeout 60s git fetch --no-tags --depth=1 origin "$base"
+          if [[ -z "$base" || "$base" =~ ^0+$ ]]; then
+            # Manual/atypical events may omit event.before. Never diff the whole
+            # repository root: historical paths are not changed test inputs.
+            if git cat-file -e "$GITHUB_SHA^1" 2>/dev/null; then
+              base="$(git rev-parse "$GITHUB_SHA^1")"
+            else
+              echo "::error::T5M_CHANGED_BASE_UNAVAILABLE event=$GITHUB_EVENT_NAME sha=$GITHUB_SHA" >&2
+              exit 2
             fi
-            git -c core.quotePath=false diff --name-only --diff-filter=ACMRT "$base" "$GITHUB_SHA" -- '*.lisp' '*.sens' '*.rs' '*.zig' '.github/workflows/ci.yml' 'scripts/prove-lisp-semantic-t5m.sh' 'scripts/prove-lisp-language-laws.sh' > "$raw"
-          else
-            git -c core.quotePath=false diff-tree --no-commit-id --root --name-only --diff-filter=ACMRT -r "$GITHUB_SHA" -- '*.lisp' '*.sens' '*.rs' '*.zig' '.github/workflows/ci.yml' 'scripts/prove-lisp-semantic-t5m.sh' 'scripts/prove-lisp-language-laws.sh' > "$raw"
           fi
+          if ! git cat-file -e "$base^{commit}" 2>/dev/null; then
+            timeout 60s git fetch --no-tags --depth=1 origin "$base"
+          fi
+          git -c core.quotePath=false diff --name-only --diff-filter=ACMRT "$base" "$GITHUB_SHA" -- '*.lisp' '*.sens' '*.rs' '*.zig' '.github/workflows/ci.yml' 'scripts/prove-lisp-semantic-t5m.sh' 'scripts/prove-lisp-language-laws.sh' > "$raw"
           python3 - "$raw" "$manifest" "$GITHUB_OUTPUT" <<'PY'
           from pathlib import Path
           import sys
