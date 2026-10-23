@@ -499,14 +499,14 @@ fn evaluate_list(
     // position. Ordinary D2 lists, quoted data and dotted data remain governed
     // solely by the canonical D2 reader.
     if let Some(key) = text7_binding_key(&items[0]) {
-        let function = environment.get(&key).ok_or_else(|| {
+        environment.get(&key).ok_or_else(|| {
             LanguageError::new(
                 ErrorKind::UnknownSymbol,
                 format!("unknown Text7 binding: {key}"),
                 items[0].span,
             )
         })?;
-        return closures::apply(function, &items[1..], environment, span);
+        return dispatch_call(None, None, Some(&items[0]), &items[1..], environment, span);
     }
     dispatch_call(
         items[0].kind.as_symbol(),
@@ -516,6 +516,43 @@ fn evaluate_list(
         environment,
         span,
     )
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn text7_call_head_dispatches_an_already_bound_builtin() {
+        let mut session = Session::bare();
+        let name = "функція";
+        let text7 = crate::encode_text7(name, crate::Text7Layout::Uk)
+            .expect("supported Ukrainian Text7 name");
+        let key = text7.to_canonical_wire_token();
+        session.environment.define(
+            key,
+            Value::host_function(std::rc::Rc::new(|arguments, _, _| {
+                if arguments.is_empty() {
+                    Ok(Value::Nil)
+                } else {
+                    Ok(arguments[0].clone())
+                }
+            })),
+        );
+
+        let glyphs = text7
+            .cells()
+            .iter()
+            .map(|cell| format!("{cell:07b}"))
+            .collect::<Vec<_>>()
+            .join(" ");
+        let source = format!("10 10 {glyphs} 01 1 01");
+        let expressions = crate::parse_canonical_binary(&source).expect("binary source parses");
+        let result = eval_parsed_expressions(&expressions, &mut session)
+            .expect("Text7-bound host function is callable");
+
+        assert_eq!(result.value.as_predicate_bit(), Some(true));
+    }
 }
 
 fn is_d3(identity: CoreDomainIdentity, bits: u8) -> bool {

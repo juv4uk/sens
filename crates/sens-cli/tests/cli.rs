@@ -530,6 +530,32 @@ fn t5m_physical_pair_minted_by_sens_reader_executes_and_rejects_mutant() {
     let _ = std::fs::remove_dir_all(dir);
 }
 
+/// Keep the committed physical T5M artifact in sync with its Lisp source and
+/// verify that the exact pair still executes through the public CLI path.
+#[cfg(feature = "zig-transport")]
+#[test]
+fn compiler_nucleus_committed_t5m_matches_current_lisp_and_executes() {
+    let output = sens()
+        .args([
+            "--t5m-pair",
+            "lib/compiler-nucleus.lisp",
+            "lib/compiler-nucleus.sens",
+        ])
+        .output()
+        .expect("compiler nucleus paired T5M execution");
+
+    assert!(
+        output.status.success(),
+        "compiler nucleus source/T5M pair failed: {}",
+        String::from_utf8_lossy(&output.stderr)
+    );
+    assert_eq!(
+        String::from_utf8_lossy(&output.stdout).trim(),
+        "1",
+        "the compiler nucleus load witness must evaluate true"
+    );
+}
+
 /// Справжня пара: .sens читається Zig, а домен D24 задано незмінним
 /// українським .lisp. Пошкоджені байти й підмінене джерело не виконуються.
 #[cfg(feature = "zig-transport")]
