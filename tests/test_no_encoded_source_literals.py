@@ -79,6 +79,15 @@ class EncodedSourceLiteralTests(unittest.TestCase):
             [],
         )
 
+    def test_foreign_tools_census_has_no_quoted_numeric_literal(self):
+        path = ROOT / "knowledge/foreign-tools-census.lisp"
+        source = path.read_text(encoding="utf-8")
+        self.assertEqual(
+            CHECK.find_forbidden_literals(source, path="knowledge/foreign-tools-census.lisp"),
+            [],
+        )
+        self.assertIn("(список (як-є count) число-нуль)", source)
+
     def test_guard_reference_ranks_are_named_not_numeric(self):
         # Порядок станів збережено; числові ранги мають іменовані D24+ значення.
         path = ROOT / "knowledge/guard-reference.lisp"
