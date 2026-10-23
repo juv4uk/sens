@@ -153,6 +153,10 @@ run_native_t5m_program() {
       negative_type_diagnostic='NOT requires an exact D1 PredicateBit' ;;
     tests/semantic/d3-cond-nil-condition-type-negative.lisp)
       negative_type_diagnostic='D3:110 COND expects exact D1:1 / D1:0' ;;
+    tests/semantic/d3-car-empty-list-type-negative.lisp)
+      negative_type_diagnostic='car expects a non-empty list' ;;
+    tests/semantic/d3-cdr-empty-list-type-negative.lisp)
+      negative_type_diagnostic='cdr expects a non-empty list' ;;
   esac
   if [[ -n "$negative_type_diagnostic" ]]; then
     local rejection_status
