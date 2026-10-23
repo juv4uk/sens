@@ -358,8 +358,8 @@ fn census_tracked_paths(
         let physical = format!("{stem}.sens");
         let has_physical = tracked.contains(&physical) && regular_file(&physical);
         let has_view = tracked.contains(stem) && regular_file(stem);
-        result.physical_present += usize::from(has_physical);
-        result.view_present += usize::from(has_view);
+        result.physical_present += if has_physical { 1 } else { 0 };
+        result.view_present += if has_view { 1 } else { 0 };
         let semantic = source.starts_with("tests/semantic/");
         if semantic {
             result.semantic_sources += 1;
@@ -371,7 +371,7 @@ fn census_tracked_paths(
             }
         } else {
             result.missing.push(TripletMissing {
-                source: source.clone(),
+                source: (*source).clone(),
                 has_physical,
                 has_view,
                 semantic,
