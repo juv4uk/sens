@@ -593,6 +593,10 @@ while IFS= read -r file || [[ -n "$file" ]]; do
           "$file" == "tests/semantic/d11-meta-last-define-mutant.lisp" ]]; then
     # Мовне джерело не містить дубля D11: чинне DEFINE шостого — в MetaEval.
     binding_sources=(--binding-source lib/meta-eval.lisp)
+  elif [[ "$file" == "tests/semantic/d11-family-selection-law.lisp" ||
+          "$file" == "tests/semantic/d11-family-selection-mutant.lisp" ]]; then
+    # Ядро сімейства відбору Д11 — у lib/d11-family-selection.lisp.
+    binding_sources=(--binding-source lib/d11-family-selection.lisp)
   elif [[ "$file" == "tests/semantic/d4-lambda-application-law.lisp" ||
           "$file" == "tests/semantic/d4-lambda-application-mutant.lisp" ]]; then
     binding_sources=()
