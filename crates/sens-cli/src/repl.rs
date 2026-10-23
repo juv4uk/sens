@@ -398,9 +398,16 @@ fn append_t5m_expression_context(
                 };
                 let text7 = sens::encode_text7(text, text_layout)
                     .map_err(|error| format!("T5M D7 text projection: {error}"))?;
-                words.push(control(0b10)?);
-                words.push(ExactDomainWord::identity(t5m_domain_identity(3, 0b001)?));
-                words.push(control(0b00)?);
+                // Зовнішній D3 QUOTE вже задає позицію даних.
+                // Повторний QUOTE тут перетворював Text7 на список з
+                // головою QUOTE, тому READ(WRITE(...)) розходився з джерелом.
+                // Порожній Text7 поки не має окремої фізичної тотожності:
+                // залишаємо його чинний носій до ратифікації закону.
+                if text7.cells().is_empty() {
+                    words.push(control(0b10)?);
+                    words.push(ExactDomainWord::identity(t5m_domain_identity(3, 0b001)?));
+                    words.push(control(0b00)?);
+                }
                 words.push(control(0b10)?);
                 for (index, cell) in text7.cells().iter().enumerate() {
                     if index > 0 {
@@ -412,7 +419,9 @@ fn append_t5m_expression_context(
                     )?));
                 }
                 words.push(control(0b01)?);
-                words.push(control(0b01)?);
+                if text7.cells().is_empty() {
+                    words.push(control(0b01)?);
+                }
             } else {
                 let lowered = string_value_expression(text)?;
                 append_t5m_expression_context(&lowered, layout, words, depth + 1, false)?;
@@ -3416,6 +3425,15 @@ mod tests {
             })
             .collect::<Vec<_>>();
         assert_eq!(restored_cells.as_slice(), expected.cells());
+        let quotes = actual.iter().filter(|word| matches!(
+            word,
+            ExactDomainWord::Identity(identity)
+                if identity.width() == 3 && identity.packed_bits() == 0b001
+        )).count();
+        assert_eq!(
+            quotes, 1,
+            "цитований непорожній D7-текст має один зовнішній QUOTE, без прихованої вкладеності"
+        );
 
         let unadmitted =
             sens::parse_mixed_exact_domain("(як-є \"🙂\")")
