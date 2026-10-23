@@ -630,6 +630,16 @@ run_case run_law d11-clojure-partition-by-d7-parity "$d11_partition_d7_bundle" 1
 result_status_bundle="$evidence/result-status-bundle.lisp"
 cat lib/result-status.lisp tests/semantic/result-status-laws.lisp > "$result_status_bundle"
 run_case run_law result-status-source "$result_status_bundle" 1
+# Вузька пара D7-мiток: саме правило зв'язування text7-гліфів з D8
+# та негативний чужий тег. Не замінюємо мовний вирок Bash-обчисленням.
+result_status_d7_law="$evidence/result-status-d7-label-positive.lisp"
+result_status_d7_mutant="$evidence/result-status-d7-label-mutant.lisp"
+cat -- lib/result-status.lisp tests/semantic/result-status-d7-label-law.lisp > "$result_status_d7_law"
+cat -- lib/result-status.lisp tests/semantic/result-status-d7-label-mutant.lisp > "$result_status_d7_mutant"
+sha256sum lib/result-status.lisp tests/semantic/result-status-d7-label-law.lisp \
+  tests/semantic/result-status-d7-label-mutant.lisp > "$evidence/result-status-d7-inputs.sha256"
+run_case run_law result-status-d7-label-positive "$result_status_d7_law" 1
+run_case run_law result-status-d7-label-mutant "$result_status_d7_mutant" 0
 # Незалежна Lisp-пара локалізує правильний UNKNOWN проти крапкового D7-хвоста.
 # Shell лише завантажує реальні визначення; D1:так/ні визначає сам SENS.
 result_status_dotted_law_bundle="$evidence/result-status-dotted-positive.lisp"
