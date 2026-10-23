@@ -453,5 +453,43 @@ class ExactDomainMigrationTests(unittest.TestCase):
 
 
 
+    def test_explicit_sid8_migrates_to_current_full_ukr_without_manual_sha(self):
+        # Тестує тільки безпечну source-проєкцію. Нативне виконання —
+        # виключно SENS/Zig, не цей тест Python.
+        entry = SCRIPTS / "migrate-legacy-w8-ukr.py"
+        spec = importlib.util.spec_from_file_location("sens_prefixed_sid8_ukr", entry)
+        self.assertIsNotNone(spec)
+        migrate = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(migrate)
+        with tempfile.TemporaryDirectory(prefix="sens-legacy-explicit-") as folder:
+            root = Path(folder)
+            source = root / "lib/перевірка.lisp"
+            source.parent.mkdir()
+            table = {
+                "00001100": mod.Identity("D5", "01010", "PLUS", "додати")
+            }
+            with (
+                patch.object(migrate, "ROOT", root),
+                patch.object(migrate, "shared", return_value=mod),
+                patch.object(migrate, "mapping", return_value=(mod, table, {})),
+                patch.object(mod, "reject_shadowed_surfaces", return_value=set()),
+            ):
+                source.write_text("(SeNs8:00001100 2 3)\\n", encoding="utf-8")
+                with patch.object(sys, "argv", ["migrate-legacy-w8-ukr.py",
+                                               str(source), "--write"]):
+                    self.assertEqual(migrate.main(), 0)
+                self.assertEqual(source.read_text(encoding="utf-8"),
+                                 "(додати 2 3)\\n")
+                # Без історичного SHA голий W8 залишається невизначеним:
+                # той самий байт міг бути сучасною Д8-функцією.
+                source.write_text("(00001100 2 3)\\n", encoding="utf-8")
+                with patch.object(sys, "argv", ["migrate-legacy-w8-ukr.py",
+                                               str(source), "--write"]):
+                    self.assertEqual(migrate.main(), 2)
+                self.assertEqual(source.read_text(encoding="utf-8"),
+                                 "(00001100 2 3)\\n")
+
+
+
 if __name__ == "__main__":
     unittest.main()
