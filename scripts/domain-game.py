@@ -23,6 +23,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 DENSE = Path("research/zig-codecs/d12_dense_experiment.zig")
+D13_DENSE = Path("research/zig-codecs/d13_dense_experiment.zig")
 
 LEVELS = [
     ("D1", "основа: тотожність, атом, хибне/істинне"),
@@ -58,6 +59,24 @@ CODEC_LEVELS = [
     ("C5", "Явний кадр: версія, домен, довжина, цілісність", None),
 ]
 
+# D13 тут лише дослідний 13-бітний carrier, а не числовий чи викличний домен.
+D13_CODEC_LEVELS = [
+    ("R1", "Повний перебір 8192 13-бітних слів", (
+        "D13 research: all 8192 possible raw words roundtrip",
+    )),
+    ("R2", "Точний порядок бітів і довжини", (
+        "D13 research: exact order, leading zeros and useful lengths",
+    )),
+    ("R3", "Довгі цикли та повторне кодування", (
+        "D13 research: long streams are bit- and byte-exact",
+    )),
+    ("R4", "Відмова без зміни буфера", (
+        "D13 research: malformed input fails without touching output",
+    )),
+    ("R5", "Сім неканонічних хвостів і повний байт", (
+        "D13 research: all seven padding residues fail closed; aligned eight-word run succeeds",
+    )),
+]
 
 def tracked(pattern: str) -> list[str]:
     out = subprocess.run(
@@ -147,20 +166,22 @@ def semantic_game(brief: bool) -> int:
     return 0
 
 
-def codec_game(brief: bool, verify: bool) -> int:
-    source_path = ROOT / DENSE
+def codec_game(brief: bool, verify: bool, experimental_d13: bool = False) -> int:
+    selected = D13_DENSE if experimental_d13 else DENSE
+    levels = D13_CODEC_LEVELS if experimental_d13 else CODEC_LEVELS
+    source_path = ROOT / selected
     source = source_path.read_text(encoding="utf-8") if source_path.is_file() else ""
     declared = set(re.findall(r'^test "([^"]+)"', source, flags=re.MULTILINE))
     present = {
         code: tests is not None and all(name in declared for name in tests)
-        for code, _, tests in CODEC_LEVELS
+        for code, _, tests in levels
     }
     tested = False
     return_code = 0
     zig_version = "NOT_RUN"
     if verify:
         if not source:
-            print(f"НЕМАЄ ФАЙЛУ: {DENSE}", file=sys.stderr)
+            print(f"НЕМАЄ ФАЙЛУ: {selected}", file=sys.stderr)
             return 2
         try:
             version = subprocess.run(
@@ -168,7 +189,7 @@ def codec_game(brief: bool, verify: bool) -> int:
             )
             zig_version = version.stdout.strip() or "UNKNOWN"
             result = subprocess.run(
-                ["zig", "test", "-lc", str(DENSE)],
+                ["zig", "test", "-lc", str(selected)],
                 cwd=ROOT, capture_output=True, text=True,
             )
         except FileNotFoundError:
@@ -182,36 +203,38 @@ def codec_game(brief: bool, verify: bool) -> int:
         if not tested:
             print(output, file=sys.stderr)
             print("Немає підтвердженого ненульового PASS Zig; очки не нараховано.", file=sys.stderr)
-    score = sum(1 for code, _, _ in CODEC_LEVELS if tested and present[code])
+    score = sum(1 for code, _, _ in levels if tested and present[code])
     proof = "PASS" if tested else ("FAIL" if verify else "NOT_RUN")
     if brief:
-        print(f"ДРАБИНА/CODEC: verified={score}/{len(CODEC_LEVELS)} "
+        print(f"ДРАБИНА/CODEC{'-D13' if experimental_d13 else '-D12'}: verified={score}/{len(levels)} "
               f"native={proof} semantics=NOT_TESTED")
         return return_code
 
-    print("═══ ГРА «ДРАБИНА» / DENSE-D12 ═══")
-    print("Фізичний 12-бітний payload; не самодостатній кадр.")
+    print("═══ ГРА «ДРАБИНА» / " + ("D13 RESEARCH" if experimental_d13 else "DENSE-D12") + " ═══")
+    print("Фізичний " + ("13" if experimental_d13 else "12") + "-бітний payload; не самодостатній кадр.")
+    if experimental_d13:
+        print("D13 НЕ ратифіковано як математичний чи викличний домен.")
     print("Семантика чисел і SENS: NOT_TESTED.\n")
-    for code, desc, tests in CODEC_LEVELS:
+    for code, desc, tests in levels:
         status = "ДОВЕДЕНО" if tested and present[code] else (
             "Є ТЕСТ / НЕ ЗАПУЩЕНО" if present[code] else "ЩЕ НЕМАЄ"
         )
         print(f"  {code}  [{status}] {desc}")
-    print(f"\nНагорода: {score}/{len(CODEC_LEVELS)} доведених щаблів; Zig={proof}")
+    print(f"\nНагорода: {score}/{len(levels)} доведених щаблів; Zig={proof}")
     if verify:
         sha = subprocess.run(
             ["git", "rev-parse", "HEAD"], cwd=ROOT, capture_output=True, text=True,
         ).stdout.strip()
         blob = subprocess.run(
-            ["git", "hash-object", str(DENSE)], cwd=ROOT, capture_output=True, text=True,
+            ["git", "hash-object", str(selected)], cwd=ROOT, capture_output=True, text=True,
         ).stdout.strip()
         print(f"Свідчення запуску: commit={sha or 'UNKNOWN'} blob={blob or 'UNKNOWN'} zig={zig_version}")
-        print(f"Команда: zig test -lc {DENSE}")
+        print(f"Команда: zig test -lc {selected}")
     if not tested:
         print("\nНАСТУПНИЙ ХІД: zig test -lc "
-              f"{DENSE}  (або --track codec --verify)")
+              f"{selected}  (або --track {'d13' if experimental_d13 else 'codec'} --verify)")
     else:
-        missing = next((code for code, _, _ in CODEC_LEVELS if not present[code]), None)
+        missing = next((code for code, _, _ in levels if not present[code]), None)
         if missing:
             print(f"\nНАСТУПНИЙ КВЕСТ: {missing} — реалізуй і перевір нативним Zig.")
         else:
@@ -221,7 +244,7 @@ def codec_game(brief: bool, verify: bool) -> int:
 
 # Конкурс пам'яті читає тільки канонічні людиночитані таблиці.
 # Це перевірка знання координат, не перевірка семантики або викличності SENS.
-MEMORY_DOMAINS = ("D3", "D4", "D5", "D6", "D8", "D9", "D10", "D11")
+MEMORY_DOMAINS = ("D1", "D2", "D3", "D4", "D5", "D6", "D8", "D9", "D10", "D11")
 MEMORY_SURFACES = ("укр", "ук", "LISP", "en", "san")
 
 
@@ -267,6 +290,9 @@ def memory_game(brief: bool, domain: str, surface: str,
                            for bits, label in memory_rows(dom, surface))
     except ValueError as exc:
         print(f"ДРАБИНА/ПАМ'ЯТЬ: {exc}", file=sys.stderr)
+        return 2
+    if not entries:
+        print("ДРАБИНА/ПАМ'ЯТЬ: обрана поверхня не має названих координат; тур не зараховано.", file=sys.stderr)
         return 2
     if brief:
         print(f"ДРАБИНА/ПАМ'ЯТЬ: {domain} поверхня={surface} "
@@ -315,9 +341,9 @@ def memory_game(brief: bool, domain: str, surface: str,
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description="гра «Драбина»")
     ap.add_argument("--brief", action="store_true")
-    ap.add_argument("--track", choices=("semantic", "codec", "memory"), default="semantic")
+    ap.add_argument("--track", choices=("semantic", "codec", "d13", "memory"), default="semantic")
     ap.add_argument("--verify", action="store_true",
-                    help="запустити нативний Zig test лише для --track codec")
+                    help="запустити нативний Zig test для --track codec або d13")
     ap.add_argument("--domain", choices=("ALL",) + MEMORY_DOMAINS, default="D3",
                     help="домен для конкурсу пам'яті")
     ap.add_argument("--surface", choices=MEMORY_SURFACES, default="укр",
@@ -331,13 +357,15 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--list", action="store_true",
                     help="показати довідник координат у режимі пам'яті")
     args = ap.parse_args(argv)
-    if args.verify and args.track != "codec":
-        ap.error("--verify дозволено лише з --track codec")
+    if args.verify and args.track not in ("codec", "d13"):
+        ap.error("--verify дозволено лише з --track codec або d13")
     if args.track == "memory":
         return memory_game(args.brief, args.domain, args.surface,
                            args.mode, args.count, args.seed, args.list)
     if args.track == "codec":
         return codec_game(args.brief, args.verify)
+    if args.track == "d13":
+        return codec_game(args.brief, args.verify, experimental_d13=True)
     return semantic_game(args.brief)
 
 
