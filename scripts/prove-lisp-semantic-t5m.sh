@@ -713,6 +713,25 @@ if [[ -n "${GITHUB_STEP_SUMMARY:-}" ]]; then
       done
   } >> "$GITHUB_STEP_SUMMARY"
 fi
+# Профіль видимий і при RED: не потрібен другий workflow або повторні прогони.
+# Форму та вердикт визначив Lisp/SENS, тут лише сортування часових проб.
+if [[ -n "${GITHUB_STEP_SUMMARY:-}" ]] && [[ -s "$evidence/law-stage-timings.tsv" ]]; then
+  {
+    echo
+    echo '## Найдорожчі механічні етапи Lisp → Zig/T5M → SENS'
+    echo 'Одна реальна проба на етап у мікросекундах, включно зі стартом процесу; це не p50.'
+    echo
+    echo '| Lisp-свідок | Етап | Exit | wall-time, мкс |'
+    echo '|---|---|---:|---:|'
+    tail -n +2 "$evidence/law-stage-timings.tsv" |
+      sort -t "$(printf '\t')" -k4,4nr |
+      sed -n '1,12p' |
+      while IFS="$(printf '\t')" read -r id stage stage_exit elapsed_us; do
+        printf '| `%s` | %s | %s | %s |\n' "$id" "$stage" "$stage_exit" "$elapsed_us"
+      done
+  } >> "$GITHUB_STEP_SUMMARY"
+fi
+
 if (( failed > 0 )); then
   echo "::error title=SENS Lisp/T5M::REGRESSION checked=$checked passed=$passed failed=$failed ids=${failed_ids[*]}" >&2
   exit 1
