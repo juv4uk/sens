@@ -53,7 +53,11 @@ report_output_divergence() {
 # Класифікація стосується тільки діагностики; сам RED залишається RED.
 direct_failure_layer() {
   local log="$1"
-  if grep -Fq 'unknown symbol' "$log"; then
+  if grep -Fq 'a lexical slot has no source datum' "$log"; then
+    printf '%s\n' 'sens-lexical-binding'
+  elif grep -Fq 'domain identity is not callable under its ratified law' "$log"; then
+    printf '%s\n' 'sens-admission'
+  elif grep -Fq 'unknown symbol' "$log"; then
     printf '%s\n' 'sens-binding'
   elif grep -Fq 'Parse error:' "$log"; then
     printf '%s\n' 'lisp-reader'
@@ -61,6 +65,21 @@ direct_failure_layer() {
     printf '%s\n' 'sens-direct-type'
   else
     printf '%s\n' 'sens-direct'
+  fi
+}
+
+# Не плутати відмову допуску D6 чи D7-структури з несправним кодеком.
+# Це лише точні шари діагностики: кожен випадок лишається RED.
+paired_failure_layer() {
+  local log="$1"
+  if grep -Fq 'domain identity is not callable under its ratified law' "$log"; then
+    printf '%s\n' 'sens-admission'
+  elif grep -Fq 'unknown Text7 binding' "$log"; then
+    printf '%s\n' 'sens-binding'
+  elif grep -Eq 'car expects a non-empty list|eq expects two atoms|kind=Type' "$log"; then
+    printf '%s\n' 'sens-paired-type'
+  else
+    printf '%s\n' 'sens-paired'
   fi
 }
 
@@ -94,7 +113,7 @@ run_law() {
   # Нативний SENS надає діагностику; shell не підміняє жоден Lisp-вердикт.
   if ! timeout 45s "$sens" --t5m-pair "$source" "$physical" >"$dir/paired.out" 2>"$dir/paired.err"; then
     cat "$dir/paired.err" >&2
-    fail "$id" sens-paired "source-matched-physical-execution" "rejected"
+    fail "$id" "$(paired_failure_layer "$dir/paired.err")" "source-matched-physical-execution" "rejected"
   fi
   if ! timeout 45s "$sens" "$physical" >"$dir/physical.out" 2>"$dir/physical.err"; then
     cat "$dir/physical.err" >&2
@@ -144,7 +163,7 @@ run_bound_law() {
   # Нативний SENS надає діагностику; shell не підміняє жоден Lisp-вердикт.
   if ! timeout 45s "$sens" --t5m-pair "$combined" "$physical" >"$dir/paired.out" 2>"$dir/paired.err"; then
     cat "$dir/paired.err" >&2
-    fail "$id" sens-paired "source-matched-physical-execution" "rejected"
+    fail "$id" "$(paired_failure_layer "$dir/paired.err")" "source-matched-physical-execution" "rejected"
   fi
   if ! timeout 45s "$sens" "$physical" >"$dir/physical.out" 2>"$dir/physical.err"; then
     cat "$dir/physical.err" >&2
