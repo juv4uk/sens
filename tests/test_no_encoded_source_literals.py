@@ -698,3 +698,51 @@ class ResearchBatchUkrProjectionTests(unittest.TestCase):
             source = (ROOT / "scripts" / name).read_text(encoding="utf-8")
             self.assertIn("(?:0011|визначити)", source)
             self.assertNotIn('body.find("(0011")', source)
+
+    def test_domain_ladder_language_laws_witness_has_no_numeric_source_literals(self):
+        # Машинно-лексичний захист не визначає семантику; самі закони
+        # виконуються окремим українським Lisp-свідком у semantic slice.
+        relative = "tests/fixtures/domain-ladder-language-laws-witness.lisp"
+        source = (ROOT / relative).read_text(encoding="utf-8")
+        self.assertEqual(
+            CHECK.find_forbidden_literals(source, path=relative),
+            [],
+            "свідок законів мови має бути без числових голів і літералів",
+        )
+
+    def test_semantic_fixture_program_strings_have_no_numeric_or_legacy_heads(self):
+        # У цих Lisp-фікстурах програми зберігаються як дані у полі expr.
+        # Перевіряємо саме програму всередині рядка, а не числові ключі
+        # очікувань/ідентифікатори записів, які є метаданими корпусу.
+        relative_paths = (
+            "tests/fixtures/semantic/atom-1bit-v1.lisp",
+            "tests/fixtures/semantic/predicate-1bit-v1.lisp",
+            "tests/fixtures/semantic/eq-1bit-v1.lisp",
+            "tests/fixtures/semantic/cond-2part-v1.lisp",
+            "tests/fixtures/semantic/core-universal-v1.lisp",
+        )
+        legacy_head = re.compile(
+            r"\\(\\s*(?:[01]{8}|(?:sid8|sens8):[01]{8})(?=[\\s)])",
+            re.IGNORECASE,
+        )
+        for relative in relative_paths:
+            with self.subTest(path=relative):
+                source = (ROOT / relative).read_text(encoding="utf-8")
+                expressions = re.findall(
+                    r'\\(expr\\s+\\.\\s+"((?:\\\\.|[^"\\\\])*)"\\)',
+                    source,
+                )
+                self.assertTrue(expressions, f"{relative}: немає жодного expr")
+                for index, raw_expr in enumerate(expressions):
+                    expr = raw_expr.replace(r'\\"', '"').replace(r"\\\\", "\\\\")
+                    where = f"{relative}:expr[{index}]"
+                    self.assertEqual(
+                        CHECK.find_forbidden_literals(expr, path=relative),
+                        [],
+                        f"{where}: вбудована програма має будувати числа засобами SENS",
+                    )
+                    self.assertIsNone(
+                        legacy_head.search(expr),
+                        f"{where}: заборонена цифрова/SID8 виклична голова",
+                    )
+
