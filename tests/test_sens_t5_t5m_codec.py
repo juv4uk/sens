@@ -9,7 +9,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 
-from sens_t5_codec import (
+from sens_t5_t5m_codec import (
     SensT5Error, decode_bytes, encode_projection, encode_words,
     decode_t5m_bytes, encode_t5m_projection, parse_words, typed_sha256,
     encode_typed_domain_words,

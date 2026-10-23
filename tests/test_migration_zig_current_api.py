@@ -15,7 +15,7 @@ import tempfile
 import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
-DRIVER = ROOT / "scripts/migrate-t5-batch.py"
+DRIVER = ROOT / "scripts/migrate-t5m-batch.py"
 INPUT = Path("tests/fixtures/migration-d1-cond-cohort/branch.lisp")
 
 

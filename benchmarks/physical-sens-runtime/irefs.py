@@ -21,7 +21,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "scripts"))
-from sens_t5_codec import decode_bytes, typed_sha256  # noqa: E402
+from sens_t5_t5m_codec import decode_bytes, typed_sha256  # noqa: E402
 
 FIXTURES = (
     "tests/fixtures/migration-quote-cohort-main/quote-legacy.sens",

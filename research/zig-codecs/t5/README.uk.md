@@ -53,7 +53,7 @@ cat /tmp/sens-zig-rust-t5/summary.md
 
 **Наслідок:** `lib/bridge/prolog-to-datalog.sens` містить D10-координати. Читати його треба **координатним** шляхом, інакше `UnsupportedDomainWidth`. (Саме на цьому спіткнувся `parity_t5.zig` до виправлення — файл при цьому валідний, round-trip OK.)
 
-- **D11 і T5M — різні межі.** Legacy-профілі `t5.encode/decode/validatePhysical` та `crates/sens/src/ternary_transport.rs` залишаються обмеженими D1–D9 або D1–D10 відповідно. Розширений `research/zig-codecs/t5m.zig` зберігає exact-width W1–W11; його чинний тест `T5M preserves an exact D11 word without admitting its semantics` перевіряє фізичний round-trip W11. `scripts/sens_t5_codec.py` також має окремий T5M-шлях. Для W11 уже існує точний фізичний маршрут — T5M; старий T5-профіль не треба непомітно розширювати.
+- **D11 і T5M — різні межі.** Legacy-профілі `t5.encode/decode/validatePhysical` та `crates/sens/src/ternary_transport.rs` залишаються обмеженими D1–D9 або D1–D10 відповідно. Розширений `research/zig-codecs/t5m.zig` зберігає exact-width W1–W11; його чинний тест `T5M preserves an exact D11 word without admitting its semantics` перевіряє фізичний round-trip W11. `scripts/sens_t5_t5m_codec.py` також має окремий T5M-шлях. Для W11 уже існує точний фізичний маршрут — T5M; старий T5-профіль не треба непомітно розширювати.
 
 - `lib/domains/d11.lisp` містить 43 ратифіковані записи тестового словника, а `knowledge/d11-selector-seed.json` — 512 кандидатів дослідження. Це не означає, що ці назви стали викличним Core. Точний транспорт не створює семантичний механізм або допуск до виклику.
 

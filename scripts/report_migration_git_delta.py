@@ -14,7 +14,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from sens_t5_codec import SensT5Error, decode_bytes, encode_words, typed_sha256
+from sens_t5_t5m_codec import SensT5Error, decode_bytes, encode_words, typed_sha256
 
 
 def git(root: Path, *args: str) -> bytes:

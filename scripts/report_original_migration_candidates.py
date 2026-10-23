@@ -24,7 +24,7 @@ SCRIPTS = str(ROOT / "scripts")
 if SCRIPTS not in sys.path:
     sys.path.insert(0, SCRIPTS)
 from migration_source_scope import scope
-from audit_t5_file_pairs import identify_physical
+from audit_t5_t5m_file_pairs import identify_physical
 ARGS = [
     "--foundation", "knowledge/d1-d11-foundation.json",
     "--domain-surfaces", "crates/sens/src/domain_surface_registry_generated.rs",

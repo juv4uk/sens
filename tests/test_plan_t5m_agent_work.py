@@ -10,7 +10,7 @@ import tempfile
 import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
-SCRIPT = ROOT / "scripts" / "plan_t5_agent_work.py"
+SCRIPT = ROOT / "scripts" / "plan_t5m_agent_work.py"
 spec = importlib.util.spec_from_file_location("t5_agent_plan", SCRIPT)
 assert spec and spec.loader
 mod = importlib.util.module_from_spec(spec)

@@ -42,7 +42,7 @@ wire = physical.read_bytes()
 from pathlib import Path
 repo = Path(%r)
 sys.path.insert(0,str(repo / "scripts"))
-from sens_t5_codec import decode_bytes, typed_sha256
+from sens_t5_t5m_codec import decode_bytes, typed_sha256
 words = decode_bytes(wire)
 d = {
  "schema":"sens-historical-current-oracle/v1", "status":"PASS",

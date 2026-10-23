@@ -113,14 +113,14 @@ jobs:
           python3 -m unittest tests/test_retired_t5_publisher.py -v
           python3 -m unittest tests/test_guarded_sens_mirror.py -v
           python3 -m unittest tests/test_audit_all_lisp_triplets.py -v
-          python3 -m unittest discover -s tests -p 'test_verify_uk_t5_triplet.py' -v
-          python3 -m unittest discover -s tests -p 'test_report_t5_triplet_inventory.py' -v
+          python3 -m unittest discover -s tests -p 'test_verify_uk_t5_t5m_triplet.py' -v
+          python3 -m unittest discover -s tests -p 'test_report_t5_t5m_triplet_inventory.py' -v
           python3 -m unittest discover -s tests -p 'test_check_release_triple_corpus.py' -v
-          python3 scripts/verify_uk_t5_triplet.py \
+          python3 scripts/verify_uk_t5_t5m_triplet.py \
             --lisp tests/fixtures/migration-d1-cond-cohort/branch.lisp \
             --sens tests/fixtures/migration-d1-cond-cohort/branch.sens \
             --view tests/fixtures/migration-d1-cond-cohort/branch
-          python3 scripts/report_t5_triplet_inventory.py . \
+          python3 scripts/report_t5_t5m_triplet_inventory.py . \
             --require-view tests/fixtures/migration-d1-cond-cohort/branch.sens \
             --report "$RUNNER_TEMP/t5-preflight-triple-ledger.json"
           python3 - "$RUNNER_TEMP/t5-preflight-triple-ledger.json" <<'PY'

@@ -11,10 +11,10 @@ import sys
 import tempfile
 import unittest
 
-from scripts.sens_t5_codec import encode_t5m_projection
+from scripts.sens_t5_t5m_codec import encode_t5m_projection
 
 ROOT = Path(__file__).resolve().parents[1]
-SOURCE = ROOT / "scripts/verify_uk_t5_triplet.py"
+SOURCE = ROOT / "scripts/verify_uk_t5_t5m_triplet.py"
 SPEC = importlib.util.spec_from_file_location("verify_uk_triplet", SOURCE)
 assert SPEC and SPEC.loader
 mod = importlib.util.module_from_spec(SPEC)

@@ -9,15 +9,15 @@ import tempfile
 import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
-SCRIPT = ROOT / "scripts/audit_t5_triplets.py"
-spec = importlib.util.spec_from_file_location("audit_t5_triplets_under_test", SCRIPT)
+SCRIPT = ROOT / "scripts/audit_t5_t5m_triplets.py"
+spec = importlib.util.spec_from_file_location("audit_t5_t5m_triplets_under_test", SCRIPT)
 assert spec and spec.loader
 import sys
 sys.path.insert(0, str(ROOT / "scripts"))
 mod = importlib.util.module_from_spec(spec)
 sys.modules[spec.name] = mod
 spec.loader.exec_module(mod)
-from sens_t5_codec import encode_words
+from sens_t5_t5m_codec import encode_words
 
 
 class T5TripletInventoryTests(unittest.TestCase):
@@ -144,9 +144,9 @@ class T5TripletInventoryTests(unittest.TestCase):
                                           stem.with_suffix(".sens"))):
             self.fail("real Ukrainian COND triple is missing from checked-in corpus")
         physical = stem.with_suffix(".sens").read_bytes()
-        words = mod.decode_bytes(physical)
+        words = mod.physical_words(physical, codec="t5m")
         self.assertEqual(stem.read_bytes(), mod.expected_ascii_view(words))
-        self.assertEqual(mod.encode_words(words), physical)
+        self.assertEqual(mod.physical_encode(words, codec="t5m"), physical)
         self.assertTrue(stem.with_suffix(".lisp").read_text(encoding="utf-8").startswith("("))
 
 

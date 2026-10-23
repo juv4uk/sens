@@ -7,7 +7,7 @@ SENS machine. So a physical .sens may be published ONLY after the pinned Zig
 transport has certified the bytes; there is no silent Python fallback.
 
 This is a STRUCTURAL, fail-closed checker (it does not run Zig):
-M1  scripts/migrate-t5-batch.py imports the corridor bridge `zig_codec_bridge`.
+M1  scripts/migrate-t5m-batch.py imports the corridor bridge `zig_codec_bridge`.
 M2  it builds the pinned transport (`zig_codec_bridge.build_transport`).
 M3  it certifies the candidate bytes through Zig (`zig_codec_bridge.verify_t5`).
 M4  publishing (`--write`) REQUIRES `--zig-codec` and fails closed without it --
@@ -34,7 +34,7 @@ import re
 import sys
 from pathlib import Path
 
-BATCH = "scripts/migrate-t5-batch.py"
+BATCH = "scripts/migrate-t5m-batch.py"
 BRIDGE = "scripts/zig_codec_bridge.py"
 
 
@@ -315,10 +315,10 @@ def check(root: Path) -> list[str]:
     runner_path = root / "scripts/migrate-parallel.sh"
     if runner_path.is_file():
         runner = runner_path.read_text(encoding="utf-8")
-        if "scripts/migrate-t5-batch.py" not in runner:
+        if "scripts/migrate-t5m-batch.py" not in runner:
             problems.append("M7: migrate-parallel.sh does not call the canonical driver "
-                            "scripts/migrate-t5-batch.py (a second migration path)")
-        if "zig_codec_bridge" in runner or "sens_t5_codec" in runner:
+                            "scripts/migrate-t5m-batch.py (a second migration path)")
+        if "zig_codec_bridge" in runner or "sens_t5_t5m_codec" in runner:
             problems.append("M7: migrate-parallel.sh touches the codec directly instead of "
                             "delegating to the canonical driver (a second path to .sens)")
 

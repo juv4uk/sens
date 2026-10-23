@@ -15,8 +15,8 @@ import subprocess
 import sys
 import tempfile
 
-from audit_t5_file_pairs import (inspect as inspect_pairs, physical_words, physical_encode, SKIP_DIRS)
-from sens_t5_codec import typed_sha256
+from audit_t5_t5m_file_pairs import (inspect as inspect_pairs, physical_words, physical_encode, SKIP_DIRS)
+from sens_t5_t5m_codec import typed_sha256
 from report_ukr_projection_progress import tokenize_lisp
 from audit_all_lisp_triplets import git_blob_sha, reviewed_nonprogram_pins
 

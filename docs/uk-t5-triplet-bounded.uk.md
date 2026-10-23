@@ -1,13 +1,13 @@
 # Канонічна українська проєкція ↔ фізичний T5 ↔ бітовий перегляд
 
-**Межа цього кроку:** перевіряємо тільки D1 `ні/так`, D3 з наявної ратифікованої таблиці (`QUOTE/ATOM/CDR/CAR/EQ/COND/CONS`) з обмеженням цитованих даних, D3 EMPTY `()` та **D4 `п-п` (CAAR) лише над вкладеною парою CONS із QUOTE(())**, і структурні D2 слова, а не довільний D1–D9 код. `ук` ідентичності читаються з чинних `lib/domains/d1.lisp`, `lib/domains/d3.lisp` і `lib/domains/d4.lisp`, кодування джерела робить існуючий `scripts/migrate-three-pass.py`, фізичні байти — `scripts/sens_t5_codec.py`. Нових таблиць семантики немає.
+**Межа цього кроку:** перевіряємо тільки D1 `ні/так`, D3 з наявної ратифікованої таблиці (`QUOTE/ATOM/CDR/CAR/EQ/COND/CONS`) з обмеженням цитованих даних, D3 EMPTY `()` та **D4 `п-п` (CAAR) лише над вкладеною парою CONS із QUOTE(())**, і структурні D2 слова, а не довільний D1–D9 код. `ук` ідентичності читаються з чинних `lib/domains/d1.lisp`, `lib/domains/d3.lisp` і `lib/domains/d4.lisp`, кодування джерела робить існуючий `scripts/migrate-three-pass.py`, фізичні байти — `scripts/sens_t5_t5m_codec.py`. Нових таблиць семантики немає.
 
 Три *однойменні*, але **різні** файли вже є в `tests/fixtures/migration-d1-cond-cohort/`: `branch.lisp` — `(за-умовою (ні (перше ())) (так так))` з фінальним LF, `branch.sens` — 12 фізичних T5-байтів, а `branch` — згенерований перегляд `0/1` із рівно одним ASCII-пробілом між точними словами та рівно одним LF наприкінці.
 
 Запуск перевірки:
 
 ```bash
-python3 scripts/verify_uk_t5_triplet.py \
+python3 scripts/verify_uk_t5_t5m_triplet.py \
   --lisp tests/fixtures/migration-d1-cond-cohort/branch.lisp \
   --sens tests/fixtures/migration-d1-cond-cohort/branch.sens \
   --view tests/fixtures/migration-d1-cond-cohort/branch

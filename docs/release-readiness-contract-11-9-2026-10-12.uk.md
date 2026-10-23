@@ -34,7 +34,7 @@
 - [ ] На початку кожної хвилі зафіксувати `git rev-parse HEAD`, commit/tag, domain contract, git blob SHA кожного вхідного файла, файл-маніфест і список усіх активних producer/consumer; не посилатися на тест іншого SHA.
 - [ ] Відрізнити `EXECUTABLE`, `DECLARATIVE`, `ARCHIVE`, `UNRESOLVED`; fail-closed для невідомих класів. Сканувати весь tracked корпус, не вибіркові 11 зручних прикладів.
 - [ ] Прогнати `python3 scripts/migrate.py candidates --report /tmp/sens-candidates.json`; пройти first-() cohorts: D2-as-data, nonbinary words, historical W8 collisions, LET, quotation/text/numbers, host effects.
-- [ ] Прогнати `python3 scripts/report_t5_triplet_inventory.py . --strict --report /tmp/sens-triplets.json` (очікуване блокування до допуску); синхронізувати живий inventory та `M0` manifest лише за доказом і протестувати негативний drift witness.
+- [ ] Прогнати `python3 scripts/report_t5_t5m_triplet_inventory.py . --strict --report /tmp/sens-triplets.json` (очікуване блокування до допуску); синхронізувати живий inventory та `M0` manifest лише за доказом і протестувати негативний drift witness.
 
 ### M1 — семантичний допуск кожного оригіналу
 - [ ] Для кожного виконуваного `.lisp` визначити source-era + точний Git blob + історичний незалежний oracle + сучасний oracle, successor за ратифікованим exact domain, typed/physical хеші.

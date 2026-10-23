@@ -31,7 +31,7 @@ STATUSES = {"T5_REQUIRED", "SENC_RESEARCH", "MIGRATION_CANDIDATE", "BLOCKED"}
 
 def load_generator():
     spec = importlib.util.spec_from_file_location(
-        "t5_inventory", HERE / "report_t5_migration_inventory.py")
+        "t5_inventory", HERE / "report_t5m_migration_inventory.py")
     mod = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(mod)
     return mod
@@ -77,7 +77,7 @@ class TestT5MigrationInventory(unittest.TestCase):
 
     def test_live_registry_matches_manifest(self):
         proc = subprocess.run(
-            [sys.executable, str(HERE / "report_t5_migration_inventory.py"),
+            [sys.executable, str(HERE / "report_t5m_migration_inventory.py"),
              "--check", str(MANIFEST)],
             cwd=str(ROOT), capture_output=True, text=True)
         self.assertEqual(proc.returncode, 0,
@@ -93,7 +93,7 @@ class TestT5MigrationInventory(unittest.TestCase):
             tmp = fh.name
         try:
             proc = subprocess.run(
-                [sys.executable, str(HERE / "report_t5_migration_inventory.py"),
+                [sys.executable, str(HERE / "report_t5m_migration_inventory.py"),
                  "--check", tmp],
                 cwd=str(ROOT), capture_output=True, text=True)
             self.assertNotEqual(proc.returncode, 0,
@@ -128,7 +128,7 @@ class TestT5MigrationInventory(unittest.TestCase):
             root = Path(d)
             newfile = root / "scripts" / "fresh_link.py"
             newfile.parent.mkdir(parents=True)
-            newfile.write_text("# читає canonical .sens через sens_t5_codec\n",
+            newfile.write_text("# читає canonical .sens через sens_t5_t5m_codec\n",
                                encoding="utf-8")
             self.assertTrue(GEN.is_candidate("scripts/fresh_link.py", root),
                             "new .sens-referencing link was not discovered")

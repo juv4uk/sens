@@ -10,8 +10,8 @@ import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
-from guard_t5_triplet_delta import inspect, main
-from sens_t5_codec import encode_words
+from guard_t5m_triplet_delta import inspect, main
+from sens_t5_t5m_codec import encode_words
 
 WORDS = ["10", "000", "01"]
 PHYSICAL = encode_words(WORDS)
@@ -242,8 +242,8 @@ class IncrementalTripletGate(unittest.TestCase):
         self.assertEqual((self.root / "new.sens").read_bytes(), before)
 
     def test_real_main_python_source_is_reused_not_reimplemented(self):
-        source = (ROOT / "scripts" / "guard_t5_triplet_delta.py").read_text(encoding="utf-8")
-        self.assertIn("from report_t5_triplet_inventory import inspect", source)
+        source = (ROOT / "scripts" / "guard_t5m_triplet_delta.py").read_text(encoding="utf-8")
+        self.assertIn("from report_t5_t5m_triplet_inventory import inspect", source)
         self.assertNotIn("def encode_words", source)
 
 

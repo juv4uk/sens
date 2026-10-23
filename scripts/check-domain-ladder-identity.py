@@ -117,7 +117,7 @@ IDENTITY_PATHS = (
     "crates/sens/src/binary_execution.rs",
     "crates/sens-cli/src/main.rs",
     "crates/sens-cli/src/bin/sens-trit.rs",
-    "scripts/sens_t5_codec.py",
+    "scripts/sens_t5_t5m_codec.py",
 )
 # Human-entered CLI transport configuration is not a domain identity. Such a
 # decimal boundary must be marked on the exact line, never whitelisted by file.
@@ -379,9 +379,9 @@ def self_test() -> None:
          'format!("{:0width$b}", bits, width = width);'),
         ("crates/sens/src/mixed_source.rs",
          "u16::from_str_radix(word, 2).unwrap();"),
-        ("scripts/sens_t5_codec.py",
+        ("scripts/sens_t5_t5m_codec.py",
          "int(word, 2); int(trits, 3)"),
-        ("scripts/sens_t5_codec.py",
+        ("scripts/sens_t5_t5m_codec.py",
          'projected = f"{bits:08b}"'),
         ("crates/sens-cli/src/main.rs",
          "port.parse::<u16>().ok() // projection-human: TCP port is human transport configuration"),
@@ -396,8 +396,8 @@ def self_test() -> None:
         ("crates/sens/src/domain_ladder.rs", "let source = self.bits.to_string();"),
         ("crates/sens/src/source_words.rs", "let payload = token.parse::<u16>()?;"),
         ("crates/sens/src/mixed_source.rs", "u16::from_str_radix(word, 10).unwrap();"),
-        ("scripts/sens_t5_codec.py", "payload = int(word)"),
-        ("scripts/sens_t5_codec.py", 'projected = f"{bits}"'),
+        ("scripts/sens_t5_t5m_codec.py", "payload = int(word)"),
+        ("scripts/sens_t5_t5m_codec.py", 'projected = f"{bits}"'),
         ("crates/sens/src/domain_identity.rs", 'format!("{bits}", bits = identity.packed_bits());'),
         ("crates/sens-cli/src/main.rs", "port.parse::<u16>().ok()"),
     )

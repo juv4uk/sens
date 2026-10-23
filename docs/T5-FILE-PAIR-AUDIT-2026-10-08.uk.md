@@ -8,13 +8,13 @@
 
 ## Інструмент
 
-`scripts/audit_t5_file_pairs.py` — **тільки читання**, працює з git-tracked `*.sens` за замовчуванням і не чіпає `.lisp` / `.sens` навіть у режимі помилки.
+`scripts/audit_t5_t5m_file_pairs.py` — **тільки читання**, працює з git-tracked `*.sens` за замовчуванням і не чіпає `.lisp` / `.sens` навіть у режимі помилки.
 
 ```sh
-python3 scripts/audit_t5_file_pairs.py . --output /tmp/t5-file-pairs.json
-python3 scripts/audit_t5_file_pairs.py . --strict-semantic --output /tmp/t5-file-pairs-strict.json
+python3 scripts/audit_t5_t5m_file_pairs.py . --output /tmp/t5-file-pairs.json
+python3 scripts/audit_t5_t5m_file_pairs.py . --strict-semantic --output /tmp/t5-file-pairs-strict.json
 # Для локального незакоміченого канаркового файла:
-python3 scripts/audit_t5_file_pairs.py /tmp/canary --include-untracked
+python3 scripts/audit_t5_t5m_file_pairs.py /tmp/canary --include-untracked
 ```
 
 Перевірки на кожну пару: відповідний той самий stem у `.lisp`, symlink/відсутні файли BLOCK; `T5_decode + reencode` byte-for-byte, фізичний SHA-256, typed-width digest, кількість semantic bits, кількість меж слів. Якщо `.lisp` уже є точними бітовими словами, потрібна тотожність exact typed words. Текстова Lisp-поверхня **не** стає перевіреною автоматично: отримує статус `PENDING_ORACLE`, а `--strict-semantic` повертає помилку. Автоматичне підтвердження її значення вимагатиме окремого незалежного ратифікованого перекладача й виконуваного оракула.

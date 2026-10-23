@@ -22,7 +22,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "scripts"))
 from domain_tables import D7_TABLE, read_domain_table  # noqa: E402
-from sens_t5_codec import decode_bytes, encode_words, typed_sha256  # noqa: E402
+from sens_t5_t5m_codec import decode_bytes, encode_words, typed_sha256  # noqa: E402
 
 D7 = tuple(row.bits for row in read_domain_table(D7_TABLE))
 # Власник 2026-10-20: D7 ратифікована як 128 координат (усі різні).

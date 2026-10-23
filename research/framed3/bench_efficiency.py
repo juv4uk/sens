@@ -22,7 +22,7 @@ sys.path.insert(0, str(ROOT / "scripts"))
 import adaptive_encoder as adaptive  # noqa: E402
 import research_codec as frame3  # noqa: E402
 import tb33_tail_research as tb33  # noqa: E402
-import sens_t5_codec as oracle_t5  # noqa: E402
+import sens_t5_t5m_codec as oracle_t5  # noqa: E402
 
 FIXTURES = (
     "tests/fixtures/migration-quote-cohort-main/quote-legacy.sens",

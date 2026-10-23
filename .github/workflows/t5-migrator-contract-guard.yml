@@ -11,4 +11,4 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - name: Canonical physical T5 migrator contract (non-text .sens, no-clobber)
-        run: python3 -m unittest tests/test_t5_migrator_contract_guard.py -v
+        run: python3 -m unittest tests/test_t5m_migrator_contract_guard.py -v

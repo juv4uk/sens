@@ -73,7 +73,7 @@ class ZigParallelWorkerReportTests(unittest.TestCase):
         (self.root / "src/a.lisp").write_text("(110 1 0)\n", encoding="utf-8")
         (self.root / "src/b.lisp").write_text("(110 0 1)\n", encoding="utf-8")
         shutil.copyfile(WRAPPER, self.root / "scripts/migrate-parallel.sh")
-        (self.root / "scripts/migrate-t5-batch.py").write_text(
+        (self.root / "scripts/migrate-t5m-batch.py").write_text(
             MOCK_DRIVER, encoding="utf-8"
         )
         self.report = self.root / "merged.json"

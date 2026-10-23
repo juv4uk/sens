@@ -13,7 +13,7 @@ import tempfile
 import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
-SCRIPT = ROOT / "scripts/migrate-approved-t5.py"
+SCRIPT = ROOT / "scripts/migrate-approved-t5m.py"
 SOURCE = ROOT / "tests/fixtures/migration-d1-cond-cohort/branch.lisp"
 BINARY = SOURCE.with_suffix(".sens")
 REL = SOURCE.relative_to(ROOT).as_posix()

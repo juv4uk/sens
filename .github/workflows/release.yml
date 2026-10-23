@@ -66,7 +66,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          python3 scripts/verify_uk_t5_triplet.py \
+          python3 scripts/verify_uk_t5_t5m_triplet.py \
             --lisp tests/fixtures/migration-d1-cond-cohort/branch.lisp \
             --sens tests/fixtures/migration-d1-cond-cohort/branch.sens \
             --view tests/fixtures/migration-d1-cond-cohort/branch
@@ -78,7 +78,7 @@ jobs:
           set -euo pipefail
           python3 -m unittest discover -s tests -p test_check_release_triple_corpus.py -v
           status=0
-          python3 scripts/report_t5_triplet_inventory.py . \
+          python3 scripts/report_t5_t5m_triplet_inventory.py . \
             --strict \
             --require-view tests/fixtures/migration-d1-cond-cohort/branch.sens \
             --report "$RUNNER_TEMP/release-triple-inventory.json" || status=$?

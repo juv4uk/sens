@@ -9,8 +9,8 @@ from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
-import run as physical_run  # noqa: E402
-from sens_t5_codec import decode_bytes, encode_words  # noqa: E402
+import t5_legacy as physical_run  # noqa: E402
+from sens_t5_t5m_codec import decode_bytes, encode_words  # noqa: E402
 
 
 class CanonicalWordProjectionTests(unittest.TestCase):

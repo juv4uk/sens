@@ -91,7 +91,7 @@ def scan(root: Path, *, verify_bounded: bool = False, validator=None, limit: int
     )
     reviewed_pins = reviewed_nonprogram_pins(root)
     if verify_bounded and validator is None:
-        from verify_uk_t5_triplet import verify
+        from verify_uk_t5_t5m_triplet import verify
         # Поточний фізичний носій T5M, старий T5 — лише явний аудит.
         validator = lambda source, physical, view: verify(
             source, physical, view, codec="t5m"

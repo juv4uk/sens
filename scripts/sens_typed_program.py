@@ -4,7 +4,7 @@
 Машина читає програму НЕ як текст і не як телеграфний wire-запис, а як
 послідовність ЯВНО типізованих доменних слів: кожне слово несе свій домен
 (D1..D9) і рівно свою ширину біт. Драбина тут явна в тезі, а не виведена з
-ширини. Кодує кодек репо (scripts/sens_t5_codec.encode_typed_domain_words).
+ширини. Кодує кодек репо (scripts/sens_t5_t5m_codec.encode_typed_domain_words).
 
 Формат вхідного файлу: по одному слову в рядку, "<Dn> <bits>", напр.:
     D2 10
@@ -26,7 +26,7 @@ import pathlib
 import sys
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
-import sens_t5_codec as C  # noqa: E402
+import sens_t5_t5m_codec as C  # noqa: E402
 
 TAG = __import__("re").compile(r"D[1-9]\Z")
 

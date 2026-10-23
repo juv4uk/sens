@@ -8,7 +8,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 SPEC = importlib.util.spec_from_file_location(
-    "t5_progress", ROOT / "scripts/report_t5_migration_progress.py"
+    "t5_progress", ROOT / "scripts/report_t5m_migration_progress.py"
 )
 assert SPEC and SPEC.loader
 mod = importlib.util.module_from_spec(SPEC)
@@ -297,8 +297,8 @@ class T5ProgressLedgerTests(unittest.TestCase):
         # auditor; a physical pass never asserts oracle approval.
         import sys
         sys.path.insert(0, str(ROOT / "scripts"))
-        import audit_t5_file_pairs
-        report = audit_t5_file_pairs.inspect(ROOT)
+        import audit_t5_t5m_file_pairs
+        report = audit_t5_t5m_file_pairs.inspect(ROOT)
         self.assertGreaterEqual(report["summary"]["sens_files"], 1)
         self.assertIsNone(report["summary"]["admitted_executable_semantics"])
         for row in report["files"]:

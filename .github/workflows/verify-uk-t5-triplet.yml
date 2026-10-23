@@ -35,7 +35,7 @@ jobs:
           import json
           import os
           from pathlib import Path
-          from scripts.sens_t5_codec import decode_bytes, decode_t5m_bytes, encode_t5m_projection
+          from scripts.sens_t5_t5m_codec import decode_bytes, decode_t5m_bytes, encode_t5m_projection
 
           mirror = Path(os.environ["RUNNER_TEMP"]) / "uk-triplet-export"
           paths = (
@@ -63,12 +63,12 @@ jobs:
           assert report["summary"]["original_executables_oracle_certified"] == 0
           PY
       - name: Current Ukrainian canonical-source and malicious triple negatives
-        run: python3 -m unittest discover -s tests -p 'test_verify_uk_t5_triplet.py' -v
+        run: python3 -m unittest discover -s tests -p 'test_verify_uk_t5_t5m_triplet.py' -v
       - name: Read-only exact real existing triple, emit source/physical/view SHA
         shell: bash
         run: |
           set -euo pipefail
-          python3 scripts/verify_uk_t5_triplet.py \
+          python3 scripts/verify_uk_t5_t5m_triplet.py \
             --lisp tests/fixtures/migration-d1-cond-cohort/branch.lisp \
             --sens tests/fixtures/migration-d1-cond-cohort/branch.sens \
             --view tests/fixtures/migration-d1-cond-cohort/branch \
@@ -97,7 +97,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          python3 scripts/verify_uk_t5_triplet.py \
+          python3 scripts/verify_uk_t5_t5m_triplet.py \
             --lisp tests/fixtures/migration-pair-cohort-main/pair-cons.lisp \
             --sens tests/fixtures/migration-pair-cohort-main/pair-cons.sens \
             --view tests/fixtures/migration-pair-cohort-main/pair-cons \
@@ -120,7 +120,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          python3 scripts/verify_uk_t5_triplet.py \
+          python3 scripts/verify_uk_t5_t5m_triplet.py \
             --lisp tests/fixtures/migration-d4-selector-cohort/caar.lisp \
             --sens tests/fixtures/migration-d4-selector-cohort/caar.sens \
             --view tests/fixtures/migration-d4-selector-cohort/caar \

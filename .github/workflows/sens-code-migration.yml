@@ -18,8 +18,8 @@ jobs:
             tests/test_sens_code_migration.py \
             tests/test_classify_lisp_source_forms.py \
             tests/test_three_pass_migration.py \
-            tests/test_migrate_approved_t5.py \
-            tests/test_sens_t5_codec.py > migration-test.log 2>&1
+            tests/test_migrate_approved_t5m.py \
+            tests/test_sens_t5_t5m_codec.py > migration-test.log 2>&1
           status=$?
           cat migration-test.log
           echo "$status" > migration-test.status

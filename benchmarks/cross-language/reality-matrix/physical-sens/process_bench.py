@@ -166,7 +166,7 @@ def run(args: argparse.Namespace) -> dict:
             "process_bench.py": sha256(Path(__file__)),
             "physical_cli.py": sha256(PYTHON_CLI),
             "slot_cpu.py": sha256(ROOT / "benchmarks/microcpu/slot_cpu.py"),
-            "sens_t5_codec.py": sha256(ROOT / "scripts/sens_t5_codec.py"),
+            "sens_t5_t5m_codec.py": sha256(ROOT / "scripts/sens_t5_t5m_codec.py"),
             "benchmark_helpers_run.py": sha256(Path(__file__).with_name("run.py")),
         },
         "cpu": cpu_model(), "platform": platform.platform(),

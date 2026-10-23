@@ -1366,8 +1366,8 @@ jobs:
           python3 -m unittest tests/test_audit_all_lisp_triplets.py -v
           python3 -m unittest tests/test_report_nonprogram_pin_drift.py -v
           # Легкі інтеграційні перевірки поточного D1–D11/T5M, без Zig build та SENS-eval.
-          python3 -m unittest tests/test_migrate_t5_batch.py -v
-          python3 -m unittest tests/test_migrate_approved_t5_current.py -v
+          python3 -m unittest tests/test_migrate_t5m_batch.py -v
+          python3 -m unittest tests/test_migrate_approved_t5m_current.py -v
           # Чинна інспекція D1–D11: жодного повернення до D1–D9/SID8.
           python3 -m unittest tests.test_migrate_selected_lisp.SelectedOriginalT5.test_one_file_resolver_uses_current_ukr_and_rejects_ambiguous_w8 -v
           # На кожному push: чинний D1–D11, точні слова та беззаписний dry-run.
@@ -1608,7 +1608,7 @@ jobs:
           python3 -m unittest tests.test_publish_verified_uk_triplets.SafeTripletPublisher.test_zig_unavailable_never_mints_python_reference_as_sens tests.test_publish_verified_uk_triplets.SafeTripletPublisher.test_zig_reference_divergence_cannot_publish tests.test_publish_verified_uk_triplets.SafeTripletPublisher.test_preview_is_reference_only_without_zig_mint -v
           # Це тести канонічної фізичної тотожності, НЕ незалежний SENS-eval.
           # Нові помилки у міграторі, інвентарі або свідках мають робити CI червоним.
-          python3 -m unittest tests/test_verify_uk_t5_triplet.py -v
+          python3 -m unittest tests/test_verify_uk_t5_t5m_triplet.py -v
           python3 -m unittest tests/test_migrated_two_projections.py -v
           # Охорона українських QUOTE/DEFINE/LAMBDA/LET від хибних замін.
           python3 -m unittest tests/test_audit_lisp_migration_edits.py -v
@@ -1634,15 +1634,15 @@ jobs:
           # Текстовий .bits — не фізичний T5M .sens; D10/D11 мають власні ширини.
           python3 -m unittest tests/test_sens_domain_spaces.py -v
           python3 -m unittest tests/test_binary_examples_source_boundary.py -v
-          python3 -m unittest tests/test_audit_t5_file_pairs.py -v
+          python3 -m unittest tests/test_audit_t5_t5m_file_pairs.py -v
           python3 -m unittest tests/test_check_release_triple_corpus.py -v
           # Тільки незмінні Lisp-токени дозволяють переприв'язувати SHA після українізації коментарів.
           python3 -m unittest tests/test_refresh_nonprogram_comment_pins.py -v
-          python3 -m unittest tests/test_report_t5_triplet_inventory.py -v
+          python3 -m unittest tests/test_report_t5_t5m_triplet_inventory.py -v
           # Інвентаризаційний борг — warning, а внутрішня помилка аудиту —
           # справжній RED. Не приховувати винятки за універсальним if !.
           # Навіть успішний інформативний звіт не є релізним допуском.
-          python3 scripts/report_t5_triplet_inventory.py . --informational
+          python3 scripts/report_t5_t5m_triplet_inventory.py . --informational
 
       - name: УКР-ПРОЄКЦІЯ — аудит поступової міграції .lisp (без глобального стопу)
         if: ${{ always() }}
@@ -1666,7 +1666,7 @@ jobs:
           python3 -m unittest tests/test_ukr_translation_result_prolog.py -v
           python3 -m unittest tests/test_translation_d1_bitness_current.py -v
           # Звіт включає .lisp без .sens і не є релізним допуском.
-          python3 scripts/audit_t5_file_pairs.py --inventory-only --output "$RUNNER_TEMP/t5-source-census.json"
+          python3 scripts/audit_t5_t5m_file_pairs.py --inventory-only --output "$RUNNER_TEMP/t5-source-census.json"
           # Прогрес поступової міграції — інформативна метрика, не глобальний стоп.
           # Компактне ук та повне укр — різні peer spellings; їхня рівність
           # не є вимогою semantic identity чи міграційним критерієм.

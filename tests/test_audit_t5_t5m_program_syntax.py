@@ -10,8 +10,8 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
-from audit_t5_program_syntax import audit, main
-from sens_t5_codec import encode_words
+from audit_t5_t5m_program_syntax import audit, main
+from sens_t5_t5m_codec import encode_words
 
 
 class AuditT5D2SyntaxTests(unittest.TestCase):

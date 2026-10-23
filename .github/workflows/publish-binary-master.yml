@@ -18,7 +18,7 @@ jobs:
       - name: Test strict T5 and three-pass migration
         run: |
           set -euo pipefail
-          python3 -m unittest tests/test_three_pass_migration.py tests/test_sens_t5_codec.py
+          python3 -m unittest tests/test_three_pass_migration.py tests/test_sens_t5_t5m_codec.py
       - name: Preview new same-name .sens binaries
         shell: bash
         run: |
@@ -41,7 +41,7 @@ jobs:
           PYTHONPATH=scripts python3 - "$RUNNER_TEMP/sens-migration-out" "$RUNNER_TEMP/sens-migration-report.json" <<'PY'
           import hashlib, json, sys
           from pathlib import Path
-          from sens_t5_codec import decode_bytes, typed_sha256
+          from sens_t5_t5m_codec import decode_bytes, typed_sha256
           root=Path(sys.argv[1])
           report=json.loads(Path(sys.argv[2]).read_text(encoding='utf-8'))
           assert report['schema']=='sens-three-pass-t5-migration/v3'

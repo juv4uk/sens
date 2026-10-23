@@ -11,7 +11,7 @@ import hashlib
 from pathlib import Path
 import sys
 
-from sens_t5_codec import parse_words
+from sens_t5_t5m_codec import parse_words
 from zig_codec_bridge import build_transport, carry_t5, verify_t5
 
 ROOT = Path(__file__).resolve().parents[1]

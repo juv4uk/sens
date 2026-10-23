@@ -18,7 +18,7 @@ import re
 import sys
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
-from sens_t5_codec import decode_t5m_bytes, encode_t5m_projection  # noqa: E402
+from sens_t5_t5m_codec import decode_t5m_bytes, encode_t5m_projection  # noqa: E402
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 

@@ -15,7 +15,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-from audit_t5_file_pairs import inspect as inspect_physical_pairs, physical_words
+from audit_t5_t5m_file_pairs import inspect as inspect_physical_pairs, physical_words
 
 SCHEMA = "sens-t5-d2-program-syntax-audit/v1"
 

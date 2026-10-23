@@ -1,12 +1,12 @@
 # Аудит синтаксису D2 для фізичних `.sens`
 
-**Стан:** дослідний перевірний release gate, без зміни ратифікованої мови. **Власник:** #4456 / координатор #4449. **Не підміняє** фізичний/джерельний аудитор `scripts/audit_t5_file_pairs.py` (#4497).
+**Стан:** дослідний перевірний release gate, без зміни ратифікованої мови. **Власник:** #4456 / координатор #4449. **Не підміняє** фізичний/джерельний аудитор `scripts/audit_t5_t5m_file_pairs.py` (#4497).
 
 ## Чому потрібен другий етап
 
 Фізично правильно упаковані слова ще не утворюють коректну програму. Наприклад, одиночне `01` — цілком коректне слово D2 CLOSE, а файл T5 може безвтратно зберегти його. Але закривальна дужка без відповідного D2 OPEN **порушує синтаксис програми**. Автоматична міграція не повинна називати такий файл прийнятним, лише тому що `decode(encode(words)) = words`.
 
-Інструмент `scripts/audit_t5_program_syntax.py` виконує два послідовні читання **без зміни файла**:
+Інструмент `scripts/audit_t5_t5m_program_syntax.py` виконує два послідовні читання **без зміни файла**:
 
 1. Чинний аудит #4497 перевіряє той самий шлях `name.lisp -> name.sens`, неприпустимість symlink, 5-trit T5 packing без `22`, канонічні 0–4 pad-трити `2`, точні ширини D1–D9, фізичний SHA і типізований SHA. Якщо source Lisp символічний, статус **PENDING_ORACLE** залишається.
 2. Потім інструмент передає вже перевірені `.sens` файли справжньому Rust рідеру `sens-trit open`, який застосовує чинний `parse_canonical_binary` (D2 structure). Він звіряє друковані двійкові слова з типізованими словами фізичного T5. Якщо граматика некоректна — **BLOCKED**, навіть коли пакування бездоганне.
@@ -17,21 +17,21 @@
 
 ```sh
 cargo build -q -p sens-cli --bin sens-trit
-python3 scripts/audit_t5_program_syntax.py . \
+python3 scripts/audit_t5_t5m_program_syntax.py . \
   --reader "$PWD/target/debug/sens-trit" \
   --output /tmp/t5-syntax-report.json
 
 # Відхилити символічні джерела без незалежного семантичного доказу
-python3 scripts/audit_t5_program_syntax.py . \
+python3 scripts/audit_t5_t5m_program_syntax.py . \
   --reader "$PWD/target/debug/sens-trit" --strict-source --require-files
 
 # Локальні, ще не включені в Git файли
-python3 scripts/audit_t5_program_syntax.py /tmp/my-corpus \
+python3 scripts/audit_t5_t5m_program_syntax.py /tmp/my-corpus \
   --reader "$PWD/target/debug/sens-trit" --include-untracked
 
 # Тести синтаксису й негативні кейси
 SENS_TRIT_BIN="$PWD/target/debug/sens-trit" \
-  python3 -m unittest discover -s tests -p 'test_audit_t5_program_syntax.py' -v
+  python3 -m unittest discover -s tests -p 'test_audit_t5_t5m_program_syntax.py' -v
 ```
 
 **Важливі результати:** `NO_FILES` = немає жодного `.sens`, тому **не сертифіковано**. `SYNTAX_ONLY` = усі знайдені фізичні файли мають правильний D2-синтаксис, але **семантика не доведена**. `BLOCKED` = помилка фізичного пакування, джерела, D2-граматики або ввімкненого суворого контролю source. `--require-files` примусово повертає ненульовий код, якщо корпус порожній.

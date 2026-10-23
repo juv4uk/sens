@@ -21,7 +21,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
-from sens_t5_codec import decode_bytes, encode_words, typed_sha256
+from sens_t5_t5m_codec import decode_bytes, encode_words, typed_sha256
 from sens_t5_spaced_view import canonical_view, parse_view
 
 DEFAULT_FIXTURES = (

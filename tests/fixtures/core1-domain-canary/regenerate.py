@@ -17,7 +17,7 @@ import json
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[2]
 sys.path.insert(0, str(ROOT / "scripts"))
-from sens_t5_codec import decode_bytes, encode_words, typed_sha256
+from sens_t5_t5m_codec import decode_bytes, encode_words, typed_sha256
 
 SOURCE = ROOT / "lib" / "core1.lisp"
 FOUNDATION = ROOT / "knowledge" / "d1-d9-foundation.json"

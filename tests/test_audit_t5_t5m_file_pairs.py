@@ -9,8 +9,8 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
-from audit_t5_file_pairs import inspect, main, require_changed_views, split_nul_delimited_paths
-from sens_t5_codec import encode_words, encode_t5m_projection
+from audit_t5_t5m_file_pairs import inspect, main, require_changed_views, split_nul_delimited_paths
+from sens_t5_t5m_codec import encode_words, encode_t5m_projection
 
 
 class AuditT5PairsTests(unittest.TestCase):

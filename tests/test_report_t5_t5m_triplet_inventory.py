@@ -16,9 +16,9 @@ from unittest.mock import patch
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 
-from report_t5_triplet_inventory import GOLDEN, inspect, main
+from report_t5_t5m_triplet_inventory import GOLDEN, inspect, main
 from audit_all_lisp_triplets import git_blob_sha
-from sens_t5_codec import encode_words
+from sens_t5_t5m_codec import encode_words
 
 # Під'єднання вже наявного релізного gate, без дублювання його законів.
 _GATE_PATH = ROOT / "scripts" / "check-release-triple-corpus.py"
@@ -113,7 +113,7 @@ class TripletInventoryTests(unittest.TestCase):
         original = approved.read_bytes()
         pin = {"затверджені-дані.lisp": (git_blob_sha(original), "перевірені-дані")}
 
-        with patch("report_t5_triplet_inventory.reviewed_nonprogram_pins",
+        with patch("report_t5_t5m_triplet_inventory.reviewed_nonprogram_pins",
                    return_value=pin):
             report = self.scan(strict=True, required=())
         self.assertEqual(report["status"], "PHYSICAL_VIEW_ONLY_UK_PENDING")
@@ -124,7 +124,7 @@ class TripletInventoryTests(unittest.TestCase):
 
         # Зміна бодай одного біта втрачає право на статус затверджених даних.
         approved.write_text("(таблиця (дані ні))\n", encoding="utf-8")
-        with patch("report_t5_triplet_inventory.reviewed_nonprogram_pins",
+        with patch("report_t5_t5m_triplet_inventory.reviewed_nonprogram_pins",
                    return_value=pin):
             drift = self.scan(strict=True, required=())
         self.assertEqual(drift["status"], "BLOCKED")

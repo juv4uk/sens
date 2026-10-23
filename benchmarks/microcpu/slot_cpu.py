@@ -20,7 +20,7 @@ from typing import TypeAlias
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "scripts"))
-from sens_t5_codec import decode_bytes, encode_words  # noqa: E402
+from sens_t5_t5m_codec import decode_bytes, encode_words  # noqa: E402
 
 MAX_DEPTH = 128
 MAX_SLOTS = 100_000

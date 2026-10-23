@@ -20,7 +20,7 @@ from time import perf_counter_ns
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "scripts"))
-from sens_t5_codec import encode_words  # noqa: E402
+from sens_t5_t5m_codec import encode_words  # noqa: E402
 from slot_cpu import compile_t5, run, visible  # noqa: E402
 
 

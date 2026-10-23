@@ -22,7 +22,7 @@ import tempfile
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
-from verify_uk_t5_triplet import (  # noqa: E402
+from verify_uk_t5_t5m_triplet import (  # noqa: E402
     ProjectionBlocked, canonical_uk_from_words, project_current_uk, three_pass,
 )
 

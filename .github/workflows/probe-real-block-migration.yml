@@ -32,7 +32,7 @@ jobs:
         if: success()
         run: |
           set -euo pipefail
-          python3 scripts/migrate-t5-batch.py \
+          python3 scripts/migrate-t5m-batch.py \
             lib/machine/block.lisp \
             --root . \
             --out "$RUNNER_TEMP/block-written" \
@@ -47,7 +47,7 @@ jobs:
           import hashlib
           import sys
           sys.path.insert(0, "scripts")
-          from sens_t5_codec import decode_bytes, typed_sha256
+          from sens_t5_t5m_codec import decode_bytes, typed_sha256
           p=Path(sys.argv[1])
           payload=p.read_bytes()
           words=decode_bytes(payload)

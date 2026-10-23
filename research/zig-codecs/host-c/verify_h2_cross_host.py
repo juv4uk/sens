@@ -50,7 +50,7 @@ H2_TRACKED_INPUTS = (
     "research/zig-codecs/transport/e1.zig",
     "research/zig-codecs/transport/e1_writer.zig",
     "research/zig-codecs/transport/fields.zig",
-    "scripts/sens_t5_codec.py", "scripts/zig_codec_bridge.py",
+    "scripts/sens_t5_t5m_codec.py", "scripts/zig_codec_bridge.py",
     "scripts/prepare_h2_zig_t5.py", ".zig-version", *RUST_DRIVERS,
     *(f"tests/semantic/{name}-{role}.bits"
       for name, _, _ in CASES for role in ("law", "mutant")),

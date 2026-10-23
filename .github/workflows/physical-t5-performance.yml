@@ -31,7 +31,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          python3 benchmarks/byte-pack/physical_t5.py \
+          python3 benchmarks/byte-pack/physical_t5_legacy.py \
             --sens target/release/sens \
             --trit target/release/sens-trit \
             --out "$RUNNER_TEMP/physical-t5-bench" \

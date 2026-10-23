@@ -13,7 +13,7 @@ This tool owns the .sens <-> view edge and proves the reversible identity:
     decode_T5M(.sens) -> exact-width words -> canonical view(name)
     parse_view(name) -> encode_T5M         -> byte-identical .sens
 
-It reuses the repository codec (sens_t5_codec.py); it is not a new codec,
+It reuses the repository codec (sens_t5_t5m_codec.py); it is not a new codec,
 parser, domain table or semantic oracle. Fail-closed.
 
 Usage:
@@ -29,7 +29,7 @@ import re
 import sys
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
-import sens_t5_codec as C  # noqa: E402
+import sens_t5_t5m_codec as C  # noqa: E402
 
 
 def view_from_words(words: list[str]) -> str:

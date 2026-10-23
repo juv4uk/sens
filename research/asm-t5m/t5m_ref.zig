@@ -1,5 +1,5 @@
 //! T5M (ДЕФОЛТНИЙ) Zig-реалізація з C-ABI. 5 трітів → 1 байт (3^5=243<256).
-//! Дзеркалить lib/core4.lisp (трітів-у-байті 5) і scripts/sens_t5_codec.py.
+//! Дзеркалить lib/core4.lisp (трітів-у-байті 5) і scripts/sens_t5_t5m_codec.py.
 export fn zig_t5m_pack(trits: [*]const u8, n: usize, out: [*]u8) usize {
     var o: usize = 0;
     var i: usize = 0;

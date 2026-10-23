@@ -9,7 +9,7 @@
       "first_seen_at": "2026-10-15T19:45:59Z",
       "reason": "Agent API drift in approved T5 migration: actual physical oracle remains red with two failed tests and one error; keep the failing test and exact Zig-only physical publishing, do not treat transport evidence as semantic admission.",
       "ticket": "#5821",
-      "investigation": "2026-10-15 GitHub Actions run 38799460135 step 26 checkout 0f7f47a90af4e4ae0f0da331bc8c4931507da09b: test_approved_t5_transaction.py fails; owner repair candidates #5821/#5830 require verified exact-head native green. Step 63 previously UNCLASSIFIED-RED despite an actual SENS_FAILURE_REPORT. Reproduce: python3 -m unittest discover -s tests -p test_approved_t5_transaction.py -v.",
+      "investigation": "2026-10-15 GitHub Actions run 38799460135 step 26 checkout 0f7f47a90af4e4ae0f0da331bc8c4931507da09b: test_approved_t5m_transaction.py fails; owner repair candidates #5821/#5830 require verified exact-head native green. Step 63 previously UNCLASSIFIED-RED despite an actual SENS_FAILURE_REPORT. Reproduce: python3 -m unittest discover -s tests -p test_approved_t5m_transaction.py -v.",
       "first_bad_sha": "UNRESOLVED"
     },
     {

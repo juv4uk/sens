@@ -91,7 +91,7 @@ jobs:
           import sys
           from pathlib import Path
           sys.path.insert(0, "scripts")
-          from sens_t5_codec import encode_projection
+          from sens_t5_t5m_codec import encode_projection
 
           # Transport only. The semantic law and failure branches are encoded
           # in the SENS program itself; Python supplies no expected truth table.
@@ -131,7 +131,7 @@ jobs:
               raise SystemExit("PHYSICAL-T5-WITNESS: BLOCKED — Python -O вимикає перевірки")
           from pathlib import Path
           sys.path.insert(0, "scripts")
-          from sens_t5_codec import decode_bytes
+          from sens_t5_t5m_codec import decode_bytes
           original = Path(sys.argv[1]).read_bytes()
           visible = Path(sys.argv[2]).read_text(encoding="ascii")
           assert visible == " ".join(decode_bytes(original)) + chr(10)
@@ -152,7 +152,7 @@ jobs:
               raise SystemExit("PHYSICAL-T5-WITNESS: BLOCKED — Python -O вимикає перевірки")
           from pathlib import Path
           sys.path.insert(0, "scripts")
-          from sens_t5_codec import encode_projection
+          from sens_t5_t5m_codec import encode_projection
 
           source_path = Path("examples/binary/d3-primitives-program.bits")
           source = " ".join(source_path.read_text(encoding="ascii").split())
@@ -193,7 +193,7 @@ jobs:
               raise SystemExit("PHYSICAL-T5-WITNESS: BLOCKED — Python -O вимикає перевірки")
           from pathlib import Path
           sys.path.insert(0, "scripts")
-          from sens_t5_codec import encode_projection
+          from sens_t5_t5m_codec import encode_projection
 
           source_path = Path("examples/binary/d5-label-recursion.bits")
           source = " ".join(source_path.read_text(encoding="ascii").split())
@@ -235,7 +235,7 @@ jobs:
               raise SystemExit("PHYSICAL-T5-WITNESS: BLOCKED — Python -O вимикає перевірки")
           from pathlib import Path
           sys.path.insert(0, "scripts")
-          from sens_t5_codec import encode_projection
+          from sens_t5_t5m_codec import encode_projection
 
           source_path = Path("examples/binary/d5-label-copy.bits")
           source = " ".join(source_path.read_text(encoding="ascii").split())
@@ -277,7 +277,7 @@ jobs:
               raise SystemExit("PHYSICAL-T5-WITNESS: BLOCKED — Python -O вимикає перевірки")
           from pathlib import Path
           sys.path.insert(0, "scripts")
-          from sens_t5_codec import encode_projection
+          from sens_t5_t5m_codec import encode_projection
 
           source_path = Path("examples/binary/d5-label-map.bits")
           source = " ".join(source_path.read_text(encoding="ascii").split())
@@ -319,7 +319,7 @@ jobs:
               raise SystemExit("PHYSICAL-T5-WITNESS: BLOCKED — Python -O вимикає перевірки")
           from pathlib import Path
           sys.path.insert(0, "scripts")
-          from sens_t5_codec import encode_projection
+          from sens_t5_t5m_codec import encode_projection
           root = Path(sys.argv[1])
           (root / "illegal-base3.sens").write_bytes(bytes([243]))
           (root / "stray-close.sens").write_bytes(encode_projection("01"))

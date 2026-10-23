@@ -12,8 +12,8 @@ import json
 from pathlib import Path
 import sys
 
-from audit_t5_file_pairs import (inspect as inspect_pairs, physical_words, physical_encode)
-from sens_t5_codec import SensT5Error, typed_sha256
+from audit_t5_t5m_file_pairs import (inspect as inspect_pairs, physical_words, physical_encode)
+from sens_t5_t5m_codec import SensT5Error, typed_sha256
 
 SCHEMA = "sens-t5-same-stem-triplet-inventory/v1"
 

@@ -14,7 +14,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-from sens_t5_codec import (SensT5Error, decode_bytes, encode_words, parse_words,
+from sens_t5_t5m_codec import (SensT5Error, decode_bytes, encode_words, parse_words,
                            decode_t5m_bytes, encode_t5m_projection, typed_sha256)
 
 SCHEMA = "sens-t5-file-pair-audit/v1"

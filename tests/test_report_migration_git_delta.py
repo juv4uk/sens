@@ -9,7 +9,7 @@ from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(ROOT/"scripts"))
 from report_migration_git_delta import difference, snapshot, main
-from sens_t5_codec import encode_words
+from sens_t5_t5m_codec import encode_words
 
 
 class TrackedMigrationDeltaTest(unittest.TestCase):

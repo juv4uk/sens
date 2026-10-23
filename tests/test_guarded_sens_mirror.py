@@ -22,7 +22,7 @@ FAKE_DRIVER = r"""
 import argparse, hashlib, json, os, sys
 from pathlib import Path
 sys.path.insert(0, os.environ["SENS_SCRIPTS"])
-from sens_t5_codec import encode_t5m_projection, typed_sha256, decode_t5m_bytes
+from sens_t5_t5m_codec import encode_t5m_projection, typed_sha256, decode_t5m_bytes
 p=argparse.ArgumentParser()
 p.add_argument("root", type=Path)
 p.add_argument("--foundation")

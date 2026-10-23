@@ -5,7 +5,7 @@
   "files": {
     "tests/test_audit_comment_only_originals.py": 3,
     "tests/test_audit_lisp_migration_edits.py": 30,
-    "tests/test_audit_t5_file_pairs.py": 1,
+    "tests/test_audit_t5_t5m_file_pairs.py": 1,
     "tests/test_build_inventory_ukr_projection.py": 1,
     "tests/test_check_alias_identity.py": 6,
     "tests/test_classify_lisp_source_forms.py": 19,
@@ -57,7 +57,7 @@
     "tests/test_migration_quote_cohort.py": 2,
     "tests/test_narrate_ukr_projection.py": 7,
     "tests/test_no_encoded_source_literals.py": 23,
-    "tests/test_plan_t5_agent_work.py": 5,
+    "tests/test_plan_t5m_agent_work.py": 5,
     "tests/test_prove_lexical_locals.py": 65,
     "tests/test_quantity_d1_direct_cutover.py": 11,
     "tests/test_readme_owner_contract.py": 1,

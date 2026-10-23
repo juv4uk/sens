@@ -24,7 +24,7 @@
 
 - `scripts/migration-readiness-census.py` робить один AUTO-прохід,
   без публікації фізичних файлів, і окремо повідомляє NO-GO.
-- `scripts/report_t5_migration_progress.py --require-executable-roundtrip`
+- `scripts/report_t5m_migration_progress.py --require-executable-roundtrip`
   відмовляє без повного незалежного SENS-доказу кожної виконуваної програми;
   архівні DATA не записуються як executable.
 - `scripts/release_go_gate.py --structural-only` дозволяє

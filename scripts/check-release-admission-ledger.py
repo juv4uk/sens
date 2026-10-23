@@ -8,7 +8,7 @@
    F1 donor provenance, F2 independent positive and negative witnesses,
    F3 behavioural dedup against D1-D9/D10, F4 physical T5 execution.
 2. КОНТЕНТ: заявлений `typed_word_sha256` мусить збігатися з реальними байтами
-   `.sens` (decode через sens_t5_codec → typed_sha256). Ledger, що посилається на
+   `.sens` (decode через sens_t5_t5m_codec → typed_sha256). Ledger, що посилається на
    неіснуючий файл, неканонічні байти чи чужий хеш, fail-closed.
 
 Fail-closed: відсутній ledger, невідома схема, зіпсований запис, дубль `sens`,
@@ -45,9 +45,9 @@ class LedgerBlocked(ValueError):
 
 
 def _load_codec():
-    spec = importlib.util.spec_from_file_location("sens_t5_codec_for_ledger", ROOT / "scripts" / "sens_t5_codec.py")
+    spec = importlib.util.spec_from_file_location("sens_t5_t5m_codec_for_ledger", ROOT / "scripts" / "sens_t5_t5m_codec.py")
     if spec is None or spec.loader is None:
-        raise LedgerBlocked("не вдалося завантажити sens_t5_codec")
+        raise LedgerBlocked("не вдалося завантажити sens_t5_t5m_codec")
     module = importlib.util.module_from_spec(spec)
     sys.modules[spec.name] = module
     spec.loader.exec_module(module)

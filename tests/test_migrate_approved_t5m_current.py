@@ -15,7 +15,7 @@ import tempfile
 import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
-SCRIPT = ROOT / "scripts/migrate-approved-t5.py"
+SCRIPT = ROOT / "scripts/migrate-approved-t5m.py"
 VIEW = ROOT / "tests/fixtures/migration-d4-selector-cohort/caar"
 SOURCE = VIEW.with_suffix(".lisp")
 SPEC = importlib.util.spec_from_file_location("sens_approved_t5m_test", SCRIPT)

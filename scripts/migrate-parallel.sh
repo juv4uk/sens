@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Run the canonical T5 migration across N workers (#1675 / #4455 / #5141).
 #
-# The single-file driver is scripts/migrate-t5-batch.py. This wrapper splits the
+# The single-file driver is scripts/migrate-t5m-batch.py. This wrapper splits the
 # explicit paths into N disjoint chunks, runs one worker per chunk concurrently,
 # then merges the per-worker JSON reports. Nothing new is decided here: the
 # canonical driver and the sterile Zig corridor stay the only path to a
@@ -156,7 +156,7 @@ for (( w = 0; w < JOBS; w++ )); do
   winputs="$WORK/inputs.$w.paths"
   printf '%s\0' "${chunk[@]}" >"$winputs"
   WORKER_ARGS+=("$wreport" "$winputs")
-  python3 scripts/migrate-t5-batch.py --out "$OUT" --report "$wreport" \
+  python3 scripts/migrate-t5m-batch.py --out "$OUT" --report "$wreport" \
     "${EXTRA[@]}" "${chunk[@]}" >"$WORK/worker.$w.log" 2>&1 &
   PIDS+=("$!")
 done

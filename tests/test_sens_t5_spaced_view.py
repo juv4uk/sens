@@ -11,7 +11,7 @@ import unittest
 ROOT = Path(__file__).resolve().parents[1]
 SCRIPTS = ROOT / "scripts"
 sys.path.insert(0, str(SCRIPTS))
-import sens_t5_codec as codec
+import sens_t5_t5m_codec as codec
 
 spec = importlib.util.spec_from_file_location("spaced_view", SCRIPTS / "sens_t5_spaced_view.py")
 assert spec and spec.loader

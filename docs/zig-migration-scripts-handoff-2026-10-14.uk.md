@@ -11,8 +11,8 @@
 `f3c/f3c.zig`, `transport/e1.zig`, `domain_ladder.zig`, `domain_e3_numeric.zig`).
 Ширина слова **є** ідентичністю (драбина доменів), а фізичні байти дає сам Zig-кодек.
 
-Але **скрипти міграції** (`scripts/migrate.py`, `scripts/migrate-t5-batch.py`,
-`scripts/migrate-three-pass.py`, `scripts/sens_t5_codec.py` та похідні) лишились на
+Але **скрипти міграції** (`scripts/migrate.py`, `scripts/migrate-t5m-batch.py`,
+`scripts/migrate-three-pass.py`, `scripts/sens_t5_t5m_codec.py` та похідні) лишились на
 **старій реалізації кодека** (Rust-ера, Python). Через це:
 
 - конвертер у SENS може давати **не ті байти**, що дає чинний Zig-кодек;

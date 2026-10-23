@@ -40,8 +40,8 @@ jobs:
           sha256sum \
             crates/sens-cli/src/main.rs \
             crates/sens-cli/src/bin/sens-trit.rs \
-            benchmarks/physical-binary-performance/run.py \
-            scripts/sens_t5_codec.py \
+            benchmarks/physical-binary-performance/t5_legacy.py \
+            scripts/sens_t5_t5m_codec.py \
             tests/fixtures/migration-quote-cohort-main/quote-legacy.sens \
             tests/fixtures/migration-multiform-cohort-main/two-forms.sens \
             tests/fixtures/migration-d1-cond-cohort/branch.sens \
@@ -70,7 +70,7 @@ jobs:
           if [[ "$RUN_CACHEGRIND" == "true" ]]; then
             options+=(--cachegrind)
           fi
-          python3 benchmarks/physical-binary-performance/run.py \
+          python3 benchmarks/physical-binary-performance/t5_legacy.py \
             --sens target/release/sens \
             --sens-trit target/release/sens-trit \
             --reps "$REPS" \

@@ -60,7 +60,7 @@ SENS: law + semantic verdict ◄── Zig: exact physical decode/validate ◄�
 
 - Канонічний пін інструмента: `.zig-version` = `0.16.0`.
 - `crates/sens-cli/build.rs` перевіряє точний `zig version` перед збіркою фізичного ABI; `ZIG=/path/to/zig` підтримується.
-- `scripts/migrate.py preview --zig-codec` і `scripts/migrate-t5-batch.py --zig-codec` додають незалежний Zig `t5-check` / `t5-roundtrip` та byte-exact SHA-свідок до кожного згенерованого T5 файлу. `scripts/migrate-one-to-sens.py --zig-codec` робить те саме до запису.
+- `scripts/migrate.py preview --zig-codec` і `scripts/migrate-t5m-batch.py --zig-codec` додають незалежний Zig `t5-check` / `t5-roundtrip` та byte-exact SHA-свідок до кожного згенерованого T5 файлу. `scripts/migrate-one-to-sens.py --zig-codec` робить те саме до запису.
 - Це **явне включення** перевірки, не прихований автоматичний fallback. Відсутність потрібного Zig або розбіжність байтів зупиняє відповідну Zig-перевірку, але не змінює SENS-законів. Наявні маршрути міграції зберігають попередню поведінку без цього прапорця.
 - Парні T5/F3C benchmark scripts приймають тільки `0.16.0` і перевіряють `.zig-version`. Старі історичні бенчмарки з `0.17.0` не підміняють нові результати.
 

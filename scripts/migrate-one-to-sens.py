@@ -21,12 +21,12 @@ import tempfile
 
 ROOT = Path(__file__).resolve().parents[1]
 MIGRATOR = ROOT / "scripts" / "migrate-three-pass.py"
-CODEC = ROOT / "scripts" / "sens_t5_codec.py"
+CODEC = ROOT / "scripts" / "sens_t5_t5m_codec.py"
 sys.path.insert(0, str(ROOT / "scripts"))
 import migration_publish_pair
 
 def load_codec():
-    spec = importlib.util.spec_from_file_location("sens_t5_codec", CODEC)
+    spec = importlib.util.spec_from_file_location("sens_t5_t5m_codec", CODEC)
     if spec is None or spec.loader is None:
         raise RuntimeError(f"cannot load codec: {CODEC}")
     module = importlib.util.module_from_spec(spec)

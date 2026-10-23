@@ -42,10 +42,10 @@
 Наша мова — двійкова; `path/name.lisp` стає `path/name.sens` у фізичному T5: 5 тритів на байт, транспортна `2` **лише між** точними доменними словами; EOF — довжина файла без `22`; 0–4 фінальних pad-трити. Вміст `.sens` не є текстом із нулів та одиниць.
 
 В історичному репозиторії були два незалежні механічні аудити (нині їхні звіти треба оцінювати з урахуванням T5M):
-- `scripts/audit_t5_file_pairs.py`: перевіряє **кожний відстежуваний файл .sens** і однойменний `.lisp`, фізичний T5, хеші й точні доменні ширини.
+- `scripts/audit_t5_t5m_file_pairs.py`: перевіряє **кожний відстежуваний файл .sens** і однойменний `.lisp`, фізичний T5, хеші й точні доменні ширини.
 - `scripts/migration-readiness-census.py`: у чинному режимі **AUTO** (історичні режими більше не дозволяють вибрати семантику) інвентаризує **оригінальні `.lisp` без .sens** і розрізняє історичні причини BLOCK та лише механічну готовність.
 
-Новий `scripts/report_t5_migration_progress.py` **не пише власного парсера, не конвертує і не створює .sens**. Він бере два результати та незалежний `git ls-files '*.lisp'`, перевіряє:
+Новий `scripts/report_t5m_migration_progress.py` **не пише власного парсера, не конвертує і не створює .sens**. Він бере два результати та незалежний `git ls-files '*.lisp'`, перевіряє:
 - усі відстежувані `.lisp` присутні **рівно один раз** або у файлі з парою, або в черзі;
 - усі фізичні файли отримали **однойменний** `.lisp` (не файл без розширення);
 - жодна пара не потрапила водночас у чергу «без пари»;
@@ -57,7 +57,7 @@
 
 ## Сувора перевірка оберненості, 21.10.2026
 
-**NO-GO до незалежного SENS-доказу.** Успіх `report_t5_migration_progress.py`
+**NO-GO до незалежного SENS-доказу.** Успіх `report_t5m_migration_progress.py`
 без суворого режиму означає виключно повноту **механічного обліку**.
 Він не означає, що кожний `.lisp` уже має `.sens`, що файл можна
 перетворити назад в українську проєкцію або що така програма правильно
@@ -78,7 +78,7 @@
 `/tmp/t5-pairs.json` та `/tmp/t5-readiness.json`:
 
 ```sh
-python3 scripts/report_t5_migration_progress.py \
+python3 scripts/report_t5m_migration_progress.py \
   --root . --pairs /tmp/t5-pairs.json --readiness /tmp/t5-readiness.json \
   --out /tmp/t5-executable-roundtrip.json --require-executable-roundtrip
 ```
@@ -92,12 +92,12 @@ python3 scripts/report_t5_migration_progress.py \
 ## Відтворення
 
 ```sh
-python3 scripts/audit_t5_file_pairs.py . --output /tmp/t5-pairs.json
+python3 scripts/audit_t5_t5m_file_pairs.py . --output /tmp/t5-pairs.json
 python3 scripts/migration-readiness-census.py --out /tmp/t5-readiness.json
-python3 scripts/report_t5_migration_progress.py \
+python3 scripts/report_t5m_migration_progress.py \
   --root . --pairs /tmp/t5-pairs.json --readiness /tmp/t5-readiness.json \
   --out /tmp/t5-progress.json
-python3 -m unittest discover -s tests -p 'test_report_t5_migration_progress.py' -v
+python3 -m unittest discover -s tests -p 'test_report_t5m_migration_progress.py' -v
 ```
 
 Підключений CI `report-t5-migration-progress` публікує JSON-артефакти й короткий підсумок. Відсутність жодної пари, зниклий файл у ledger, зайва публікація чи вигаданий статус — не можуть називатися `100% migrated`.

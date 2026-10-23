@@ -24,7 +24,7 @@ python3 - "$law" "$mutant" "$tmp" <<'PY'
 from pathlib import Path
 import sys
 sys.path.insert(0, "scripts")
-from sens_t5_codec import parse_words, encode_projection, decode_bytes
+from sens_t5_t5m_codec import parse_words, encode_projection, decode_bytes
 
 law_path, mutant_path, directory = map(Path, sys.argv[1:])
 lines = law_path.read_text(encoding="ascii").splitlines()

@@ -28,7 +28,7 @@ jobs:
           from pathlib import Path
           import sys
           sys.path.insert(0, "scripts")
-          from sens_t5_codec import encode_projection
+          from sens_t5_t5m_codec import encode_projection
           root = Path(sys.argv[1])
           for suite in ("fs-d4-binding", "bridge-d4-triple"):
               for name in ("law", "mutant"):

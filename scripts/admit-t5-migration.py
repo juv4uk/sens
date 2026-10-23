@@ -4,7 +4,7 @@
 Колишній видавець використовував застарілі D1–D9, --source-era=legacy та
 Python/T5. Ці докази не допускають програм у чинний SENS 11.9.
 Публікуйте нові .sens лише через Zig/T5M у migrate-one-to-sens.py або
-migrate-t5-batch.py; для семантичного допуску потрібен незалежний SENS-eval.
+migrate-t5m-batch.py; для семантичного допуску потрібен незалежний SENS-eval.
 Збережено перевірку старих маніфестів як історичного походження, не закону.
 """
 from __future__ import annotations
@@ -22,7 +22,7 @@ import tempfile
 REPO = Path(__file__).resolve().parents[1]
 MIGRATOR = REPO / "scripts/migrate-three-pass.py"
 sys.path.insert(0, str(REPO / "scripts"))
-from sens_t5_codec import decode_bytes, encode_projection, typed_sha256  # noqa: E402
+from sens_t5_t5m_codec import decode_bytes, encode_projection, typed_sha256  # noqa: E402
 
 SCHEMA = "sens-t5-proof-admission/v1"
 ARTIFACTS = {

@@ -8,7 +8,7 @@ import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
-from sens_t5_codec import encode_words, decode_bytes  # noqa: E402
+from sens_t5_t5m_codec import encode_words, decode_bytes  # noqa: E402
 
 OUT = ROOT / "examples" / "migrated" / "d7-core-identity"
 

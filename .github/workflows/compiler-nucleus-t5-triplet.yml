@@ -24,7 +24,7 @@ jobs:
 
       - name: Regression test compiler migration fails closed on unratified symbol data
         run: >-
-          python3 tests/test_migrate_t5_batch.py
+          python3 tests/test_migrate_t5m_batch.py
           RealBatchTest.test_compiler_migration_fails_closed_on_unratified_quoted_symbol_data
 
       - name: Migrate the compiler source with the canonical three-pass converter
@@ -72,7 +72,7 @@ jobs:
           from pathlib import Path
           import sys
           sys.path.insert(0, "scripts")
-          from sens_t5_codec import decode_bytes, encode_words
+          from sens_t5_t5m_codec import decode_bytes, encode_words
           physical = Path(sys.argv[1]).read_bytes()
           words = decode_bytes(physical)
           if encode_words(words) != physical:
@@ -122,7 +122,7 @@ jobs:
           python3 - <<'PY'
           import hashlib, json, pathlib, sys
           sys.path.insert(0, "scripts")
-          from sens_t5_codec import decode_bytes, encode_words
+          from sens_t5_t5m_codec import decode_bytes, encode_words
           source = pathlib.Path("lib/compiler-nucleus.lisp").read_bytes()
           physical = pathlib.Path("lib/compiler-nucleus.sens").read_bytes()
           view = pathlib.Path("lib/compiler-nucleus").read_bytes()

@@ -41,14 +41,14 @@ jobs:
           SENS_TRIT_BIN: ${{ github.workspace }}/target/debug/sens-trit
         run: |
           set -euo pipefail
-          python3 -m unittest discover -s tests -p 'test_audit_t5_program_syntax.py' -v
+          python3 -m unittest discover -s tests -p 'test_audit_t5_t5m_program_syntax.py' -v
       - name: Audit tracked .sens without claiming semantic oracle parity
         shell: bash
         run: |
           set -euo pipefail
           # Не сховати причину, навіть коли D2 reader повернув BLOCK.
           status=0
-          python3 scripts/audit_t5_program_syntax.py . \
+          python3 scripts/audit_t5_t5m_program_syntax.py . \
             --reader "$PWD/target/debug/sens-trit" \
             --output "$RUNNER_TEMP/t5-syntax-report.json" \
             --require-files || status=$?

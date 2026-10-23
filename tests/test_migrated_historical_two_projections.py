@@ -5,7 +5,7 @@ import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
-from verify_uk_t5_triplet import canonical_uk_from_words, project_current_uk, three_pass
+from verify_uk_t5_t5m_triplet import canonical_uk_from_words, project_current_uk, three_pass
 
 ROWS = (
     ("historic-atom", "tests/fixtures/migration-atom-cohort/atom-empty.lisp", True),

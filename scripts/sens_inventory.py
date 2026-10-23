@@ -21,8 +21,8 @@ import sys
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 from sens_spaced_view import ViewError, check_or_stage  # noqa: E402
-from sens_t5_codec import SensT5Error  # noqa: E402
-from verify_uk_t5_triplet import ProjectionBlocked, verify as prove_bounded_uk  # noqa: E402
+from sens_t5_t5m_codec import SensT5Error  # noqa: E402
+from verify_uk_t5_t5m_triplet import ProjectionBlocked, verify as prove_bounded_uk  # noqa: E402
 
 SCHEMA = "sens-triple-inventory-failclosed/v2"
 SCHEMA_HEAD = re.compile(r"^[A-Za-z][\w./-]*/\d+$")

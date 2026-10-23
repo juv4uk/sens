@@ -15,7 +15,7 @@ import tempfile
 from unittest.mock import patch
 
 import zig_codec_bridge as bridge
-import sens_t5_codec as t5m_reference
+import sens_t5_t5m_codec as t5m_reference
 
 from zig_codec_bridge import (
     ZigCodecError, build_transport, carry_t5 as _carry_t5,

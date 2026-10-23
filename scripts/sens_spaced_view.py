@@ -17,7 +17,7 @@ import subprocess
 import sys
 import tempfile
 
-from sens_t5_codec import (SensT5Error, decode_bytes, decode_t5m_bytes,
+from sens_t5_t5m_codec import (SensT5Error, decode_bytes, decode_t5m_bytes,
                            encode_words, encode_t5m_projection, typed_sha256)
 
 VIEW_PATTERN = re.compile(rb"[01]{1,9}(?: [01]{1,9})*\n")

@@ -125,7 +125,7 @@ class PhysicalT5IntegrityTests(unittest.TestCase):
             self.verify(data)
 
 
-import sens_t5_codec as physical_t5
+import sens_t5_t5m_codec as physical_t5
 
 
 class PhysicalT5CrossTransportTests(unittest.TestCase):

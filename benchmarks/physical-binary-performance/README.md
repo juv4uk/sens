@@ -1,6 +1,6 @@
 # Physical T5 execution — historical Python results, native Rust replacement
 
-The earlier `run.py` and the records it generated are historical evidence only.
+The legacy T5 source `t5_legacy.py` and the records it generated are historical evidence only.
 They used a Python T5 decoder and must not be cited as a current replay or used
 to claim language speed. Existing historical artifacts are preserved for
 provenance; this commit does not re-label them as new measurements.

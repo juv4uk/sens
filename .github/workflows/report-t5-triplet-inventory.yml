@@ -13,12 +13,12 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - name: Negative source/T5/view parity regressions
-        run: python3 -m unittest discover -s tests -p 'test_report_t5_triplet_inventory.py' -v
+        run: python3 -m unittest discover -s tests -p 'test_report_t5_t5m_triplet_inventory.py' -v
       - name: Census all tracked physical pairs and REQUIRE existing Ukrainian COND view
         env:
           RECEIPT: ${{ runner.temp }}/sens-triple-view-inventory.json
         run: |
-          python3 scripts/report_t5_triplet_inventory.py . \
+          python3 scripts/report_t5_t5m_triplet_inventory.py . \
             --require-view tests/fixtures/migration-d1-cond-cohort/branch.sens \
             --report "$RECEIPT"
           python3 - "$RECEIPT" <<'PY'

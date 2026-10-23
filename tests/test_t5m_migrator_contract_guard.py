@@ -17,7 +17,7 @@ import unittest
 ROOT = Path(__file__).resolve().parents[1]
 SCRIPT = ROOT / "scripts" / "migrate-to-sens-codes.py"
 sys.path.insert(0, str(ROOT / "scripts"))
-from sens_t5_codec import decode_t5m_bytes, encode_t5m_projection
+from sens_t5_t5m_codec import decode_t5m_bytes, encode_t5m_projection
 
 FOUNDATION = ROOT / "knowledge" / "d1-d7-foundation.json"
 TEXT7 = ROOT / "knowledge" / "d7-keyboard-v2-ratified.json"

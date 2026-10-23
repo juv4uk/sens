@@ -16,15 +16,15 @@ jobs:
         with:
           python-version: "3.12"
       - name: Reject source omissions, duplicate physical names and fake oracle credit
-        run: python3 -m unittest discover -s tests -p "test_report_t5_migration_progress.py" -v
+        run: python3 -m unittest discover -s tests -p "test_report_t5m_migration_progress.py" -v
       - name: Existing physical T5 same-stem pair audit
-        run: python3 scripts/audit_t5_file_pairs.py . --output "$RUNNER_TEMP/t5-pairs.json"
+        run: python3 scripts/audit_t5_t5m_file_pairs.py . --output "$RUNNER_TEMP/t5-pairs.json"
       - name: Existing source-era migration readiness census (no output files)
         run: python3 scripts/migration-readiness-census.py --out "$RUNNER_TEMP/t5-readiness.json"
       - name: Combine audited physical pairs and blocked original sources
         run: |
           set -euo pipefail
-          python3 scripts/report_t5_migration_progress.py \
+          python3 scripts/report_t5m_migration_progress.py \
             --root . \
             --pairs "$RUNNER_TEMP/t5-pairs.json" \
             --readiness "$RUNNER_TEMP/t5-readiness.json" \

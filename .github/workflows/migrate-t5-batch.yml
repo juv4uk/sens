@@ -13,12 +13,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Test real Core1 physical T5 conversion and fail-closed batch
-        run: python3 -m unittest discover -s tests -p test_migrate_t5_batch.py -v
+        run: python3 -m unittest discover -s tests -p test_migrate_t5m_batch.py -v
 
       - name: Dry-run REAL lib corpus and preserve blocked ledger (never mint false .sens)
         run: |
           set +e
-          python3 scripts/migrate-t5-batch.py lib \
+          python3 scripts/migrate-t5m-batch.py lib \
             --out /tmp/sens-library-batch-mirror \
             --report /tmp/sens-library-batch.json
           rc=$?

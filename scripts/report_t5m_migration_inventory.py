@@ -32,7 +32,7 @@ EXCLUDE_PREFIXES = (
 
 # Терміни, за якими ланка вважається такою, що торкається фізичного SENS.
 DISCOVERY = re.compile(
-    r"\.sens\b|\.senc\b|sens-trit|sens_t5_codec|PhysicalT5|"
+    r"\.sens\b|\.senc\b|sens-trit|sens_t5_t5m_codec|PhysicalT5|"
     r"\btriplet\b|triple-projection|source_packing|canonical_reader|"
     r"binary_execution|\bT5\b|sens_triplet|physical_t5|physical-t5",
     re.IGNORECASE,
@@ -44,10 +44,10 @@ T5_AUTHORITY = {
     "crates/sens/src/binary_execution.rs": "crates/sens/src/canonical_reader.rs",
     "crates/sens/src/source_packing.rs": "crates/sens/src/source_packing.rs",
     "crates/sens-cli/src/bin/sens-trit.rs": "crates/sens/src/binary_execution.rs",
-    "scripts/sens_t5_codec.py": "scripts/sens_t5_codec.py",
-    "scripts/audit_t5_file_pairs.py": "scripts/sens_t5_codec.py",
-    "scripts/report_t5_triplet_inventory.py": "scripts/audit_t5_file_pairs.py",
-    "scripts/check-triple-projection.sh": "scripts/sens_t5_codec.py",
+    "scripts/sens_t5_t5m_codec.py": "scripts/sens_t5_t5m_codec.py",
+    "scripts/audit_t5_t5m_file_pairs.py": "scripts/sens_t5_t5m_codec.py",
+    "scripts/report_t5_t5m_triplet_inventory.py": "scripts/audit_t5_t5m_file_pairs.py",
+    "scripts/check-triple-projection.sh": "scripts/sens_t5_t5m_codec.py",
 }
 
 ROLE_RULES = [
@@ -57,7 +57,7 @@ ROLE_RULES = [
      "назва вказує на проєкцію/читабельний view"),
     (re.compile(r"migrate|encode|publish|mirror|admit|guarded_sens|"
                 r"canonical_reader|source_packing|binary_execution|ternary_transport|"
-                r"sens-trit|sens_t5_codec"), "producer",
+                r"sens-trit|sens_t5_t5m_codec"), "producer",
      "назва вказує на видавця/читача фізичних байтів T5"),
     (re.compile(r"bench|performance|latency|throughput"), "benchmark",
      "назва вказує на вимірювання"),

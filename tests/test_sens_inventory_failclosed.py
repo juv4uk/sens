@@ -11,7 +11,7 @@ import unittest
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 import sens_inventory as inventory
-from sens_t5_codec import encode_words
+from sens_t5_t5m_codec import encode_words
 
 GOLDEN = ROOT / "tests/fixtures/migration-d1-cond-cohort"
 

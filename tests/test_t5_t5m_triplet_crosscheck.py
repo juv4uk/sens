@@ -15,9 +15,9 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 
 import sens_spaced_view as physical
-import verify_uk_t5_triplet as ukrainian
-import report_t5_triplet_inventory as inventory
-from sens_t5_codec import SensT5Error
+import verify_uk_t5_t5m_triplet as ukrainian
+import report_t5_t5m_triplet_inventory as inventory
+from sens_t5_t5m_codec import SensT5Error
 
 GOLDEN = ROOT / "tests/fixtures/migration-d1-cond-cohort"
 

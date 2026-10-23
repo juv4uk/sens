@@ -160,7 +160,7 @@ class SensCodeMigrationTests(unittest.TestCase):
     def test_admitted_contextual_text7_binder_is_physical_t5_roundtrip(self):
         # A named DEFINE and LAMBDA parameter use contextual D2/W7 keys;
         # the standalone W7 payload remains data, never an implicit symbol.
-        from sens_t5_codec import decode_bytes, encode_projection, parse_words
+        from sens_t5_t5m_codec import decode_bytes, encode_projection, parse_words
         original = "(00001001 machine-block (00001000 (forms) forms))\n"
         projected, hits, shadowed = self.binary(original)
         self.assertTrue(projected.startswith("10 0011 00 10 "), projected)
@@ -326,7 +326,7 @@ class SensCodeMigrationTests(unittest.TestCase):
             ]
             first = subprocess.run(args, cwd=ROOT, capture_output=True, text=True)
             self.assertEqual(first.returncode, 0, first.stderr)
-            from sens_t5_codec import decode_t5m_bytes, encode_t5m_projection
+            from sens_t5_t5m_codec import decode_t5m_bytes, encode_t5m_projection
             target = out / 'hello.sens'
             self.assertTrue(target.is_file())
             self.assertFalse((out / 'hello').exists())

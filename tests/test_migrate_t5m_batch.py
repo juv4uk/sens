@@ -20,7 +20,7 @@ REPO = Path(__file__).resolve().parents[1]
 SCRIPTS = REPO / "scripts"
 if str(SCRIPTS) not in sys.path:
     sys.path.insert(0, str(SCRIPTS))
-DRIVER = SCRIPTS / "migrate-t5-batch.py"
+DRIVER = SCRIPTS / "migrate-t5m-batch.py"
 FIXTURE = REPO / "tests/fixtures/migration-d1-cond-cohort/branch"
 SPEC = importlib.util.spec_from_file_location("sens_t5m_current_batch", DRIVER)
 assert SPEC is not None and SPEC.loader is not None
@@ -28,7 +28,7 @@ batch = importlib.util.module_from_spec(SPEC)
 sys.modules[SPEC.name] = batch
 SPEC.loader.exec_module(batch)
 
-from sens_t5_codec import decode_t5m_bytes, encode_t5m_projection, typed_sha256
+from sens_t5_t5m_codec import decode_t5m_bytes, encode_t5m_projection, typed_sha256
 
 
 class CurrentBatchTransportTests(unittest.TestCase):

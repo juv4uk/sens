@@ -17,7 +17,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(ROOT / "scripts"))
-from sens_t5_codec import decode_bytes, encode_words, parse_words  # noqa: E402
+from sens_t5_t5m_codec import decode_bytes, encode_words, parse_words  # noqa: E402
 
 CASE = "d5-label-copy"
 SOURCE_WORDS = ROOT / "examples/binary/d5-label-copy.bits"

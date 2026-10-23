@@ -64,7 +64,7 @@ for relative in "${FIXTURES[@]}"; do
   view="${source%.lisp}"
   n=$((n+1))
   # Open these ACTUAL committed files: no temporary generated stand-ins.
-  if proof="$(python3 "$SCRIPT_ROOT/scripts/verify_uk_t5_triplet.py" \
+  if proof="$(python3 "$SCRIPT_ROOT/scripts/verify_uk_t5_t5m_triplet.py" \
       --lisp "$source" --sens "$physical" --view "$view" 2>&1)"; then
     printf 'PASS %-64s укр=T5=view (bounded); release=NOT_ADMITTED\n' "$relative"
   else

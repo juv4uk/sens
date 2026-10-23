@@ -6,7 +6,7 @@ to stdout by default. An explicitly requested --out path must be OUTSIDE
 the repository and is created atomically, never overwritten. In particular,
 running 'render lib/foo.sens' MUST NEVER write or clobber lib/foo.lisp.
 
-Release-facing triple proof: scripts/verify_uk_t5_triplet.py (bounded grammar).
+Release-facing triple proof: scripts/verify_uk_t5_t5m_triplet.py (bounded grammar).
 """
 from __future__ import annotations
 
@@ -18,7 +18,7 @@ import sys
 import tempfile
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-import sens_t5_codec as C  # noqa: E402
+import sens_t5_t5m_codec as C  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[1]
 ROW = re.compile(r"^\s*\(([01]{1,9})\s+\(ук\s+[^)]+\)\s+\(укр\s+([^)]+)\)", re.MULTILINE)

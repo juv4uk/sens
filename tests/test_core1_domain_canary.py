@@ -11,7 +11,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
-from sens_t5_codec import SensT5Error, decode_bytes, encode_projection, encode_words
+from sens_t5_t5m_codec import SensT5Error, decode_bytes, encode_projection, encode_words
 
 SCRIPT = ROOT / "tests" / "fixtures" / "core1-domain-canary" / "regenerate.py"
 spec = importlib.util.spec_from_file_location("sens_core1_domain_canary", SCRIPT)

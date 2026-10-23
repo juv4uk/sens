@@ -16,13 +16,13 @@ jobs:
         with:
           python-version: "3.12"
       - name: Test exhaustive disjoint family shards and all fail-closed blockers
-        run: python3 -m unittest discover -s tests -p "test_plan_t5_agent_work.py" -v
+        run: python3 -m unittest discover -s tests -p "test_plan_t5m_agent_work.py" -v
       - name: Transform real current source blocker census into exclusive SHA-pinned queues
         shell: bash
         run: |
           set -euo pipefail
           python3 scripts/migrate.py candidates --report "$RUNNER_TEMP/t5-candidates.json"
-          python3 scripts/plan_t5_agent_work.py \
+          python3 scripts/plan_t5m_agent_work.py \
             --candidates "$RUNNER_TEMP/t5-candidates.json" \
             --out "$RUNNER_TEMP/t5-agent-shards.json" \
             --max-files 20

@@ -11,7 +11,7 @@ import tempfile
 import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
-SCRIPT = ROOT / "scripts/migrate-approved-t5.py"
+SCRIPT = ROOT / "scripts/migrate-approved-t5m.py"
 CAAR = "tests/fixtures/migration-d4-selector-cohort/caar.lisp"
 EXPECTED_PHYSICAL = bytes.fromhex(
     "6612c47ec47ec32da42dc32da42ea937a813b1a1"

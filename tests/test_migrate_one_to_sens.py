@@ -10,7 +10,7 @@ import sys
 import tempfile
 import unittest
 
-from scripts.sens_t5_codec import decode_t5m_bytes, encode_t5m_projection
+from scripts.sens_t5_t5m_codec import decode_t5m_bytes, encode_t5m_projection
 
 ROOT = Path(__file__).resolve().parents[1]
 SCRIPT = ROOT / "scripts" / "migrate-one-to-sens.py"

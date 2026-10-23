@@ -72,7 +72,7 @@ def main() -> None:
         raise FileNotFoundError("build release sens and sens-trit first")
 
     sys.path.insert(0, str(ROOT / "scripts"))
-    from sens_t5_codec import decode_bytes, encode_words
+    from sens_t5_t5m_codec import decode_bytes, encode_words
 
     args.out.mkdir(parents=True, exist_ok=True)
     git = os.environ.get("GITHUB_SHA")

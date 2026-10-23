@@ -16,7 +16,7 @@ import tempfile
 import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
-SCRIPT = ROOT / "scripts" / "migrate-t5-batch.py"
+SCRIPT = ROOT / "scripts" / "migrate-t5m-batch.py"
 
 
 @unittest.skipIf(os.name == "nt", "символічні посилання тестуються на POSIX")

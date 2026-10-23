@@ -60,7 +60,7 @@ Git-дерева каталогів `src`, `scripts`, `host`, `fpga`, `futhark`,
 
 ## Відтворюваний доказ меж чужих транспортів (М3, перенесена реалізація)
 
-Після приймання М0 GitHub-hosted гвардія знайшла новий файл поза закоміченим inventory. Щоб не обходити М0, **не створюємо нового test path**: шість позитивних/негативних контролів додаємо до чинного, уже tracked `tests/test_physical_t5_evidence_integrity.py` як клас `PhysicalT5CrossTransportTests`. Вони імпортують лише наявний `scripts/sens_t5_codec.py`; production encoder чи parser не змінюється.
+Після приймання М0 GitHub-hosted гвардія знайшла новий файл поза закоміченим inventory. Щоб не обходити М0, **не створюємо нового test path**: шість позитивних/негативних контролів додаємо до чинного, уже tracked `tests/test_physical_t5_evidence_integrity.py` як клас `PhysicalT5CrossTransportTests`. Вони імпортують лише наявний `scripts/sens_t5_t5m_codec.py`; production encoder чи parser не змінюється.
 
 Позитивний фіксований свідок: `0x11` ↔ `001` (точна ширина D3). Негативи: `CMLJ` UART magic, GPU CSV header, текстове `(binary 8)`, зарезервовані фізичні байти 243/244, неканонічна порожня упаковка 242.
 

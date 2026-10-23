@@ -19,12 +19,12 @@ import tempfile
 
 ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(ROOT / "scripts"))
-from sens_t5_codec import decode_bytes, encode_projection, parse_words  # noqa: E402
+from sens_t5_t5m_codec import decode_bytes, encode_projection, parse_words  # noqa: E402
 from verify_h2_cross_host import AuditFailure, CASES, preflight  # noqa: E402
 
 C_SOURCE = "research/zig-codecs/host-c/h2_t5_dump.c"
 ABI_SOURCE = "research/zig-codecs/transport_abi.zig"
-REF_SOURCE = "scripts/sens_t5_codec.py"
+REF_SOURCE = "scripts/sens_t5_t5m_codec.py"
 REPRODUCE = "python3 research/zig-codecs/host-c/verify_h2_physical_parity.py --run"
 
 

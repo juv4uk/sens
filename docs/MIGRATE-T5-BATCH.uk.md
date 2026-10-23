@@ -3,7 +3,7 @@
 Це **транзакційний пакетний драйвер фізичної T5-підготовки**, а не новий парсер, альтернативна мова чи незалежний семантичний оракул.
 Використовує єдиний історичний трипрохідний конвертер
 `scripts/migrate-three-pass.py` та фізичний T5-кодек
-`scripts/sens_t5_codec.py`. D2 єдиний власник структури.
+`scripts/sens_t5_t5m_codec.py`. D2 єдиний власник структури.
 Текстові файли з ASCII `0/1/2` не вважаються фізичним `.sens`.
 
 **Безпечний стандарт — `--source-era auto`.** Якщо вихідний виклик має рівно 8 біт,
@@ -16,19 +16,19 @@
 
 ```bash
 # 1. Аудит конкретних файлів без жодного запису .sens (за замовчуванням)
-python3 scripts/migrate-t5-batch.py \
+python3 scripts/migrate-t5m-batch.py \
     tests/fixtures/core1-third-domain-canary/third.lisp \
     --out /tmp/sens-staged --report /tmp/sens-batch-report.json \
     --source-era legacy
 
 # 2. ЛИШЕ механічне дзеркало T5: усі джерела проходять, або ЖОДЕН .sens не записано
-python3 scripts/migrate-t5-batch.py \
+python3 scripts/migrate-t5m-batch.py \
     tests/fixtures/core1-third-domain-canary/third.lisp \
     --out /tmp/sens-staged --report /tmp/sens-batch-report.json \
     --source-era legacy --write
 
 # 3. Можна задати декілька файлів і каталогів, зокрема lib/
-python3 scripts/migrate-t5-batch.py lib/ \
+python3 scripts/migrate-t5m-batch.py lib/ \
     --out /tmp/sens-lib-staged --report /tmp/sens-lib-report.json
 ```
 
@@ -85,7 +85,7 @@ push до `main`, що змінює початкові `lib/**/*.lisp` або `s
 відповідних таблиць. Його також можна запустити вручну через
 **GitHub Actions → safe-batch-t5-migration → Run workflow**.
 
-Кожен такий запуск **дійсно виконує** наявний `scripts/migrate-t5-batch.py lib scripts`
+Кожен такий запуск **дійсно виконує** наявний `scripts/migrate-t5m-batch.py lib scripts`
 у режимі dry-run, додає до GitHub Actions Summary лічильники допущених/заблокованих
 джерел і перші 12 причин, а повний JSON реальних шляхів публікує у
 `active-lib-scripts-t5-migration-ledger` (артефакт прогону).
@@ -101,7 +101,7 @@ push до `main`, що змінює початкові `lib/**/*.lisp` або `s
 3. Після встановлення законної D1–D9 тотожності доведіть у поточному SENS
    незалежне семантичне виконання, D2 структуру, коректний T5 roundtrip
    і точний SHA у звіті.
-4. Виконайте `scripts/migrate-t5-batch.py` у `dry-run`: якщо хоча б один
+4. Виконайте `scripts/migrate-t5m-batch.py` у `dry-run`: якщо хоча б один
    учасник групи `BLOCKED`, виправляйте семантичну причину, а не публікуйте
    частковий пакет. Режим `--write` тут лише готує **усе фізичне дзеркало**.
    Для справжнього доказового допуску до `main` використовуйте вже наявний
@@ -115,4 +115,4 @@ push до `main`, що змінює початкові `lib/**/*.lisp` або `s
 
 ## D7 v2 для нового перенесення історичного SID8 (13.10.2026)
 
-`scripts/migrate-three-pass.py` і `scripts/migrate-t5-batch.py` тепер за замовчуванням використовують ратифікований `knowledge/d7-keyboard-v2-ratified.json`. Латинські імена читаються як ASCII-7, українські — як позиційна клавіатурна `uk`, деванагарі — `san`. Непідтримувані або змішані системи письма блокуються. Старий generated Rust Text7 можна передати **явно** через `--text7` лише для історичного provenance/відтворення; він не є нормативною системою нових .sens. Наявні `.sens` ніколи не переписуються без explicit proof.
+`scripts/migrate-three-pass.py` і `scripts/migrate-t5m-batch.py` тепер за замовчуванням використовують ратифікований `knowledge/d7-keyboard-v2-ratified.json`. Латинські імена читаються як ASCII-7, українські — як позиційна клавіатурна `uk`, деванагарі — `san`. Непідтримувані або змішані системи письма блокуються. Старий generated Rust Text7 можна передати **явно** через `--text7` лише для історичного provenance/відтворення; він не є нормативною системою нових .sens. Наявні `.sens` ніколи не переписуються без explicit proof.

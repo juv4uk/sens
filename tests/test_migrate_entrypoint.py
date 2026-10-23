@@ -33,7 +33,7 @@ class CanonicalMigrateEntrypointTests(unittest.TestCase):
             ["preview", "benchmarks/lists.lisp", "--mirror", "/tmp/mirror",
              "--report", "/tmp/preview.json"])
         cmd = migrate.command(args)
-        self.assertEqual(Path(cmd[1]).name, "migrate-t5-batch.py")
+        self.assertEqual(Path(cmd[1]).name, "migrate-t5m-batch.py")
         self.assertIn("benchmarks/lists.lisp", cmd)
         self.assertNotIn("--write", cmd)
         self.assertEqual(cmd[-4:], ["--report", "/tmp/preview.json", "--source-era", "auto"])
@@ -95,7 +95,7 @@ class CanonicalMigrateEntrypointTests(unittest.TestCase):
 
     def test_current_t5m_view_keeps_d24_width_and_rejects_stale_bits(self):
         # Лише фізична оберненість T5M, не SENS-eval і не релізний oracle.
-        from scripts.sens_t5_codec import encode_t5m_projection
+        from scripts.sens_t5_t5m_codec import encode_t5m_projection
 
         words = "101010101010101010101010 10 0111"
         canonical = words + "\n"

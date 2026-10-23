@@ -15,7 +15,7 @@ from unittest.mock import patch
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 import sens_spaced_view as view
-from sens_t5_codec import (SensT5Error, decode_bytes, encode_words,
+from sens_t5_t5m_codec import (SensT5Error, decode_bytes, encode_words,
                            decode_t5m_bytes, encode_t5m_projection)
 
 FIXTURE = ROOT / "tests/fixtures/migration-d1-cond-cohort"

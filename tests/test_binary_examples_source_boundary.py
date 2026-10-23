@@ -11,7 +11,7 @@ import unittest
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 
-from sens_t5_codec import decode_t5m_bytes, encode_t5m_projection
+from sens_t5_t5m_codec import decode_t5m_bytes, encode_t5m_projection
 
 CASES = {
     "examples/binary/d7-first-program.bits":

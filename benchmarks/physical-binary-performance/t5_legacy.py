@@ -28,7 +28,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "scripts"))
-from sens_t5_codec import decode_bytes, encode_words, typed_sha256
+from sens_t5_t5m_codec import decode_bytes, encode_words, typed_sha256
 
 # Фізичні, вже зафіксовані T5-взірці різних доменних операцій.
 # Паритет stdout є умовою заміру, а НЕ незалежним семантичним законом.
@@ -150,7 +150,7 @@ def main() -> None:
         "sens": sha256(Path(sens).read_bytes()),
         "sens-trit": sha256(Path(trit).read_bytes()),
     }
-    codec_sha256 = sha256((ROOT / "scripts" / "sens_t5_codec.py").read_bytes())
+    codec_sha256 = sha256((ROOT / "scripts" / "sens_t5_t5m_codec.py").read_bytes())
     benchmark_sha256 = sha256(Path(__file__).read_bytes())
 
     args.out.mkdir(parents=True, exist_ok=True)

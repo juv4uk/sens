@@ -31,7 +31,7 @@ import re
 import sys
 import os
 import tempfile
-from sens_t5_codec import (
+from sens_t5_t5m_codec import (
     SensT5Error, encode_t5m_projection, decode_t5m_bytes,
     parse_t5m_words, typed_sha256,
 )

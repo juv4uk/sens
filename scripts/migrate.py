@@ -22,7 +22,7 @@ def command(args: argparse.Namespace) -> list[str]:
         return [sys.executable, str(SCRIPTS / "report_original_migration_candidates.py"),
                 "--out", str(args.report)]
     if args.action == "preview":
-        cmd = [sys.executable, str(SCRIPTS / "migrate-t5-batch.py"),
+        cmd = [sys.executable, str(SCRIPTS / "migrate-t5m-batch.py"),
                *args.paths, "--root", str(ROOT), "--out", str(args.mirror),
                "--report", str(args.report), "--source-era", args.source_era]
         if args.zig_codec:

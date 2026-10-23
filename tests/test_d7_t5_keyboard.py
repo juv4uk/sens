@@ -7,7 +7,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 
 from d7_symbol_codec import current_codec
-from sens_t5_codec import (
+from sens_t5_t5m_codec import (
     SensT5Error, decode_bytes, decode_d7_t5, encode_d7_uk_t5, encode_words,
 )
 

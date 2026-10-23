@@ -17,7 +17,7 @@ from slot_cpu import (  # noqa: E402
     Blocked, EMPTY, Pair, Predicate, SKIP_ZERO, JUMP,
     compile_t5, run, visible,
 )
-from sens_t5_codec import decode_bytes, encode_words  # noqa: E402
+from sens_t5_t5m_codec import decode_bytes, encode_words  # noqa: E402
 
 
 def call(*values):

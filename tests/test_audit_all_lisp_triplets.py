@@ -32,7 +32,7 @@ class AllLispTripletCensusTests(unittest.TestCase):
     @staticmethod
     def make_current_t5m(target: Path) -> None:
         """Перекодувати лише тимчасову копію, не історичне джерело."""
-        from sens_t5_codec import encode_t5m_projection
+        from sens_t5_t5m_codec import encode_t5m_projection
         target.with_suffix(".sens").write_bytes(encode_t5m_projection(
             target.read_text(encoding="ascii")
         ))
@@ -72,7 +72,7 @@ class AllLispTripletCensusTests(unittest.TestCase):
             shutil.copyfile(fixture / ("cond-short-circuit" + suffix),
                             source.with_suffix(suffix))
         self.make_current_t5m(source.with_suffix(""))
-        from sens_t5_codec import encode_t5m_projection
+        from sens_t5_t5m_codec import encode_t5m_projection
         source.with_suffix(".sens").write_bytes(
             encode_t5m_projection(source.with_suffix("").read_text(encoding="ascii"))
         )
@@ -225,7 +225,7 @@ class AllLispTripletCensusTests(unittest.TestCase):
             target.parent.mkdir(parents=True, exist_ok=True)
             shutil.copyfile(fixture / ("cond-short-circuit" + suffix), target)
         self.make_current_t5m(self.root / "lib/branch")
-        from sens_t5_codec import encode_t5m_projection
+        from sens_t5_t5m_codec import encode_t5m_projection
         target = self.root / "lib" / "branch"
         target.with_suffix(".sens").write_bytes(
             encode_t5m_projection(target.read_text(encoding="ascii"))
@@ -249,7 +249,7 @@ class AllLispTripletCensusTests(unittest.TestCase):
         source = target.with_suffix(".lisp")
         source.write_text("; inert historical comment ٢\n" +
                           source.read_text(encoding="utf-8"), encoding="utf-8")
-        from sens_t5_codec import encode_t5m_projection
+        from sens_t5_t5m_codec import encode_t5m_projection
         target.with_suffix(".sens").write_bytes(
             encode_t5m_projection(target.read_text(encoding="ascii"))
         )
@@ -271,7 +271,7 @@ class AllLispTripletCensusTests(unittest.TestCase):
         self.assertEqual(report["potential_program_missing_sens"], 1)
 
     def test_current_t5m_triplet_is_counted_only_after_real_reverse_proof(self):
-        from sens_t5_codec import encode_t5m_projection
+        from sens_t5_t5m_codec import encode_t5m_projection
         fixture = ROOT / "tests/semantic/native-t5"
         target = self.root / "lib" / "branch"
         target.parent.mkdir(parents=True, exist_ok=True)
@@ -292,14 +292,14 @@ class AllLispTripletCensusTests(unittest.TestCase):
 
     def test_legacy_t5_cannot_certify_the_current_corpus(self):
         # Старі фізичні T5-байти не означають сучасний T5M-доказ.
-        from verify_uk_t5_triplet import verify
+        from verify_uk_t5_t5m_triplet import verify
         fixture = ROOT / "tests/semantic/native-t5"
         target = self.root / "lib/branch"
         target.parent.mkdir(parents=True, exist_ok=True)
         for suffix in (".lisp", ".sens", ""):
             shutil.copyfile(fixture / ("cond-short-circuit" + suffix), target.with_suffix(suffix))
         # Чинний T5-кодек, не невизначена історична послідовність байтів.
-        from sens_t5_codec import encode_words
+        from sens_t5_t5m_codec import encode_words
         target.with_suffix(".sens").write_bytes(
             encode_words(target.read_text(encoding="ascii").split())
         )
@@ -320,8 +320,8 @@ class AllLispTripletCensusTests(unittest.TestCase):
         self.assertFalse(current["semantic_runtime_proven"])
 
     def test_t5m_receipt_cannot_claim_legacy_t5_roundtrip_as_well(self):
-        from sens_t5_codec import encode_t5m_projection
-        from verify_uk_t5_triplet import verify
+        from sens_t5_t5m_codec import encode_t5m_projection
+        from verify_uk_t5_t5m_triplet import verify
         fixture = ROOT / "tests/semantic/native-t5"
         target = self.root / "lib" / "branch"
         target.parent.mkdir(parents=True, exist_ok=True)
@@ -358,7 +358,7 @@ class AllLispTripletCensusTests(unittest.TestCase):
             target = self.root / "lib" / ("branch" + suffix)
             target.parent.mkdir(parents=True, exist_ok=True)
             shutil.copyfile(fixture / ("cond-short-circuit" + suffix), target)
-        from verify_uk_t5_triplet import verify
+        from verify_uk_t5_t5m_triplet import verify
         source = self.root / "lib/branch.lisp"
         original_receipt = verify(
             source, source.with_suffix(".sens"), source.with_suffix("")

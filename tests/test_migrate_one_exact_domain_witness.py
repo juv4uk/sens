@@ -11,7 +11,7 @@ import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
-from sens_t5_codec import SensT5Error, decode_bytes, encode_words, typed_sha256
+from sens_t5_t5m_codec import SensT5Error, decode_bytes, encode_words, typed_sha256
 
 spec = importlib.util.spec_from_file_location(
     "one_file_t5_witness", ROOT / "scripts/migrate-one-to-sens.py")

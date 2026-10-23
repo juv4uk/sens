@@ -15,8 +15,8 @@ import re
 import subprocess
 import sys
 
-from report_t5_triplet_inventory import inspect as inspect_triplets
-from verify_uk_t5_triplet import ProjectionBlocked, verify as verify_bounded_uk
+from report_t5_t5m_triplet_inventory import inspect as inspect_triplets
+from verify_uk_t5_t5m_triplet import ProjectionBlocked, verify as verify_bounded_uk
 
 SCHEMA = "sens-t5-triplet-delta-ratchet/v1"
 COMMIT = re.compile(r"[0-9a-f]{40}\Z")

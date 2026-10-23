@@ -1,7 +1,7 @@
 /* T5M (ДЕФОЛТНИЙ) pack/unpack — x86-64 SysV, без libc.
    5 трітів (0/1, роздільник 2) → 1 байт; 3^5 = 243 < 256.
    value = value*3 + trit, перший тріт — старший. Дзеркалить lib/core4.lisp
-   (трітів-у-байті 5) і scripts/sens_t5_codec.py (encode_words/decode_bytes).
+   (трітів-у-байті 5) і scripts/sens_t5_t5m_codec.py (encode_words/decode_bytes).
    pack і unpack розгорнуто на 5 кроків; ділення на 3 — магічним множенням.
    Це механізм транспорту, не семантика SENS. */
 

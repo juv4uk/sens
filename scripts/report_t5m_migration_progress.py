@@ -2,7 +2,7 @@
 """Read-only cross-check of two *independent* existing SENS migration audits.
 
 Inputs are reports from:
-  scripts/audit_t5_file_pairs.py
+  scripts/audit_t5_t5m_file_pairs.py
   scripts/migration-readiness-census.py
 
 Do NOT encode Lisp, publish .sens, reinterpret DATA as programs, or award
@@ -264,7 +264,7 @@ def combine(pairs: dict, readiness: dict, tracked_sources: set[str]) -> dict:
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--pairs", type=Path, required=True,
-                        help="existing audit_t5_file_pairs.py --output JSON")
+                        help="existing audit_t5_t5m_file_pairs.py --output JSON")
     parser.add_argument("--readiness", type=Path, required=True,
                         help="existing migration-readiness-census.py --out JSON")
     parser.add_argument("--root", type=Path, default=Path("."))

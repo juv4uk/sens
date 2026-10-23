@@ -15,7 +15,7 @@ sys.path.insert(0, str(ROOT / "scripts"))
 from publish_verified_uk_triplets import (
     ProjectionBlocked, attest_source, export, no_symlink_destination,
 )
-from sens_t5_codec import decode_t5m_bytes, encode_t5m_projection
+from sens_t5_t5m_codec import decode_t5m_bytes, encode_t5m_projection
 
 
 class SafeTripletPublisher(unittest.TestCase):

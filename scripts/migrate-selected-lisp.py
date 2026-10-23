@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Fail-closed, one-existing-file SENS migration admission.
 
-This is an adapter over migrate-three-pass.py and sens_t5_codec.py,
+This is an adapter over migrate-three-pass.py and sens_t5_t5m_codec.py,
 NOT a new parser, codec, domain table, or semantic oracle.
 
 Proof before publication: immutable Git source blob, ONE current AUTO source
@@ -26,7 +26,7 @@ ROOT = Path(__file__).resolve().parents[1]
 SCRIPTS = ROOT / "scripts"
 if str(SCRIPTS) not in sys.path:
     sys.path.insert(0, str(SCRIPTS))
-from sens_t5_codec import decode_bytes, encode_projection, typed_sha256
+from sens_t5_t5m_codec import decode_bytes, encode_projection, typed_sha256
 
 SCHEMA = "sens-selected-original-t5/v1"
 ORACLE_SCHEMA = "sens-historical-current-oracle/v1"

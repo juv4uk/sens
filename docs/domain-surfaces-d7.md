@@ -67,7 +67,7 @@
 Виконувані модулі:
 
 - `scripts/d7_symbol_codec.py` — проєкції Sound7 і оборотний кодек;
-- `scripts/sens_t5_codec.py`: `encode_d7_uk_t5` / `decode_d7_t5`;
+- `scripts/sens_t5_t5m_codec.py`: `encode_d7_uk_t5` / `decode_d7_t5`;
 - `crates/sens/src/ternary_transport.rs`: `encode_d7_uk_t5` /
   `decode_d7_uk_t5` — той самий Rust T5 transport;
 - `crates/sens/src/text7_projection.rs` — правильні українські

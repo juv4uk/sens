@@ -15,12 +15,12 @@ jobs:
         with:
           fetch-depth: 0
       - name: Test T5 physical file-pair guard
-        run: python3 -m unittest discover -s tests -p 'test_audit_t5_file_pairs.py' -v
+        run: python3 -m unittest discover -s tests -p 'test_audit_t5_t5m_file_pairs.py' -v
       - name: Inspect tracked .sens file pairs
         shell: bash
         run: |
           set -euo pipefail
-          python3 scripts/audit_t5_file_pairs.py . \
+          python3 scripts/audit_t5_t5m_file_pairs.py . \
             --output "$RUNNER_TEMP/t5-pairs-report.json"
           python3 - "$RUNNER_TEMP/t5-pairs-report.json" <<'PY'
           import json,sys
@@ -48,7 +48,7 @@ jobs:
           import json,os,subprocess,sys
           from pathlib import Path
           sys.path.insert(0,"scripts")
-          from audit_t5_file_pairs import require_changed_views
+          from audit_t5_t5m_file_pairs import require_changed_views
           report=json.loads(Path(sys.argv[1]).read_text(encoding="utf-8"))
           if os.environ["EVENT_NAME"] == "workflow_dispatch":
               print("Manual audit: whole corpus plus scoped D1 trio, no commit-diff selection")
@@ -62,7 +62,7 @@ jobs:
                    base,head,"--",":(glob)**/*.sens"],
                   stdout=subprocess.PIPE,stderr=subprocess.PIPE,check=True,
               )
-              from audit_t5_file_pairs import split_nul_delimited_paths
+              from audit_t5_t5m_file_pairs import split_nul_delimited_paths
               changed=split_nul_delimited_paths(diff.stdout)
               require_changed_views(report,changed)
               print(f"NEW_OR_MODIFIED_T5_TRIPLES_PASS: {len(changed)}")
@@ -71,7 +71,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          python3 scripts/audit_t5_file_pairs.py tests/fixtures/migration-d1-cond-cohort \
+          python3 scripts/audit_t5_t5m_file_pairs.py tests/fixtures/migration-d1-cond-cohort \
             --include-untracked --require-spaced-view \
             --output "$RUNNER_TEMP/t5-admitted-triple-report.json"
           python3 - "$RUNNER_TEMP/t5-admitted-triple-report.json" <<'PY'

@@ -28,7 +28,7 @@ SCRIPTS = REPO / "scripts"
 if str(SCRIPTS) not in sys.path:
     sys.path.insert(0, str(SCRIPTS))
 
-from sens_t5_codec import decode_t5m_bytes, typed_sha256, SensT5Error
+from sens_t5_t5m_codec import decode_t5m_bytes, typed_sha256, SensT5Error
 
 DEFAULT_DRIVER = SCRIPTS / "migrate-to-sens-codes.py"
 DEFAULT_FOUNDATION = REPO / "knowledge/d1-d11-foundation.json"

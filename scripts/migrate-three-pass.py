@@ -60,7 +60,7 @@ SCRIPTS = str(Path(__file__).resolve().parent)
 if SCRIPTS not in sys.path:
     sys.path.insert(0, SCRIPTS)
 
-from sens_t5_codec import (
+from sens_t5_t5m_codec import (
     SensT5Error, decode_bytes, decode_t5m_bytes, encode_projection,
     encode_t5m_projection, parse_words, parse_t5m_words, typed_sha256,
 )

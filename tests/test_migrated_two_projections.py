@@ -5,8 +5,8 @@ import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
-from verify_uk_t5_triplet import canonical_uk_from_words, project_current_uk
-from sens_t5_codec import decode_t5m_bytes, encode_t5m_projection
+from verify_uk_t5_t5m_triplet import canonical_uk_from_words, project_current_uk
+from sens_t5_t5m_codec import decode_t5m_bytes, encode_t5m_projection
 
 NAMES = ("smoke-quote", "smoke-atom", "smoke-cond", "smoke-nested")
 

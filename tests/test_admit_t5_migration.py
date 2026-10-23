@@ -63,7 +63,7 @@ class T5ProofPublisherTests(unittest.TestCase):
             (ROOT / "knowledge/d1-d11-foundation.json").read_text(encoding="utf-8")
         )
         self.assertEqual(current["current_domains"], [f"D{i}" for i in range(1, 12)])
-        batch = (ROOT / "scripts/migrate-t5-batch.py").read_text(encoding="utf-8")
+        batch = (ROOT / "scripts/migrate-t5m-batch.py").read_text(encoding="utf-8")
         self.assertIn('"foundation": ROOT / "knowledge/d1-d11-foundation.json"', batch)
         publisher = SCRIPT.read_text(encoding="utf-8")
         self.assertIn("LEGACY_T5_PUBLICATION_DISABLED", publisher)

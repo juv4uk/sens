@@ -19,9 +19,9 @@ import tempfile
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
-from sens_t5_codec import encode_t5m_projection, decode_t5m_bytes, typed_sha256
+from sens_t5_t5m_codec import encode_t5m_projection, decode_t5m_bytes, typed_sha256
 import zig_codec_bridge
-from verify_uk_t5_triplet import (
+from verify_uk_t5_t5m_triplet import (
     ProjectionBlocked, canonical_uk_from_words, project_current_uk, verify,
 )
 

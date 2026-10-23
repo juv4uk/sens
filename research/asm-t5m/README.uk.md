@@ -7,7 +7,7 @@ x86-64 і порівняння швидкості з референсними р
 
 **5 трітів (0/1, роздільник 2) → 1 байт.** `3^5 = 243 < 256`, тож 5 трітів точно
 вміщаються в байт; `value = value*3 + trit`, перший тріт — старший. Це
-дзеркалить `lib/core4.lisp` (`трітів-у-байті 5`) і `scripts/sens_t5_codec.py`
+дзеркалить `lib/core4.lisp` (`трітів-у-байті 5`) і `scripts/sens_t5_t5m_codec.py`
 (`encode_words`/`decode_bytes`).
 
 Це **механізм транспорту**, а не джерело семантики SENS.
@@ -24,7 +24,7 @@ x86-64 і порівняння швидкості з референсними р
 | `t5m_ref.zig` | Zig-реалізація з C-ABI |
 | `t5m_ref.rs` | Rust-реалізація з C-ABI (`#![no_std]`) |
 | `bench.c` | спільний харнес: міряє asm, Zig, C (і Rust за `-DHAVE_RUST`) |
-| `check_asm.py` | локальна перевірка: mmap `.text`, звірка з `scripts/sens_t5_codec.py` |
+| `check_asm.py` | локальна перевірка: mmap `.text`, звірка з `scripts/sens_t5_t5m_codec.py` |
 
 ## Збірка й запуск
 

@@ -40,7 +40,7 @@ jobs:
       - name: Verify strict view codec and fail-closed negative cases
         run: python3 -m unittest discover -s tests -p 'test_sens_spaced_view.py' -v
       - name: Prove three independent triplet checkers agree on SHA and semantic boundaries
-        run: python3 -m unittest discover -s tests -p 'test_t5_triplet_crosscheck.py' -v
+        run: python3 -m unittest discover -s tests -p 'test_t5_t5m_triplet_crosscheck.py' -v
       - name: Verify committed fixture is exact T5 view, without release claims
         run: |
           python3 scripts/sens_spaced_view.py \

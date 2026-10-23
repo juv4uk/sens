@@ -10,15 +10,15 @@
 
 Цей скрипт — **інвентар**, а не генератор, перекладач або семантичний
 сертифікатор. Він читає **лише Git-tracked `.sens`** за замовчуванням,
-викликає чинний `scripts/audit_t5_file_pairs.py` для фізичної
+викликає чинний `scripts/audit_t5_t5m_file_pairs.py` для фізичної
 `.lisp`/`.sens` пари, незалежно декодує/пакує T5 через
-`scripts/sens_t5_codec.py` і порівнює *точні байти* існуючого
+`scripts/sens_t5_t5m_codec.py` і порівнює *точні байти* існуючого
 безрозширеневого `name` із `' '.join(typed_words) + '\n'`.
 
 ## Виконання
 
 ```bash
-python3 scripts/audit_t5_triplets.py . --output /tmp/t5-triplets.json
+python3 scripts/audit_t5_t5m_triplets.py . --output /tmp/t5-triplets.json
 ```
 
 Сканер друкує підсумок: число фізичних пар, число перевірених,
@@ -38,7 +38,7 @@ python3 scripts/audit_t5_triplets.py . --output /tmp/t5-triplets.json
 Для **окремої контрольованої вибірки, де всі views повинні існувати**:
 
 ```bash
-python3 scripts/audit_t5_triplets.py . --require-all-views \
+python3 scripts/audit_t5_t5m_triplets.py . --require-all-views \
   --output /tmp/triplets-strict.json
 ```
 

@@ -25,7 +25,7 @@ python3 - "$law_bits" "$mutant_bits" "$law" "$mutant" <<'PY'
 from pathlib import Path
 import sys
 sys.path.insert(0, "scripts")
-from sens_t5_codec import parse_words, encode_projection, decode_bytes
+from sens_t5_t5m_codec import parse_words, encode_projection, decode_bytes
 
 law_bits, mutant_bits, law_path, mutant_path = map(Path, sys.argv[1:])
 good = parse_words(law_bits.read_text(encoding="ascii"))

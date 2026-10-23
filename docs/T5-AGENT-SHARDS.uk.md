@@ -2,7 +2,7 @@
 
 Власник прямо скасував усі несанкціоновані заборони на міграцію файлів. **Кожен початковий `.lisp` доступний для робочої міграції**, незалежно від старих статусів `BLOCKED`, `NONPROGRAM`, кількості невдалих спроб чи порядку агента. Старі числа `490 blocked` нижче — історичні результати конвертера, **не нормативний чорний список**. Кожен shard, включно з data/ISA/архівними, відкритий для дослідження і ремонту; потрібний формат представлення визначається доказами, а не автоматичною забороною.
 
-Поточний `scripts/plan_t5_agent_work.py` видає `UNCLAIMED__MIGRATION_WORK_OPEN` або `UNCLAIMED__DATA_MIGRATION_OPEN`, із `administrative_file_holds=0`. Це не означає нуль невирішених технічних помилок. Незворотний перезапис старих доказів заборонений; семантичний PASS тільки від нативного SENS. Робочі зміни — без нових гілок, у чинному `main`, із перевіркою фактичного SHA. Координація: [#4449](https://github.com/juv4uk/sens/issues/4449#issuecomment-6156896619).
+Поточний `scripts/plan_t5m_agent_work.py` видає `UNCLAIMED__MIGRATION_WORK_OPEN` або `UNCLAIMED__DATA_MIGRATION_OPEN`, із `administrative_file_holds=0`. Це не означає нуль невирішених технічних помилок. Незворотний перезапис старих доказів заборонений; семантичний PASS тільки від нативного SENS. Робочі зміни — без нових гілок, у чинному `main`, із перевіркою фактичного SHA. Координація: [#4449](https://github.com/juv4uk/sens/issues/4449#issuecomment-6156896619).
 
 ---
 
@@ -18,7 +18,7 @@
 python3 scripts/migrate.py candidates --report /tmp/sens-candidates.json
 
 # Планувальник НЕ виконує перекладу/запису .sens і нічого не призначає сам:
-python3 scripts/plan_t5_agent_work.py \
+python3 scripts/plan_t5m_agent_work.py \
   --candidates /tmp/sens-candidates.json \
   --out /tmp/sens-agent-shards.json \
   --max-files 20

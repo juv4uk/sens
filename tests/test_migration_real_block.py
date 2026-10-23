@@ -16,7 +16,7 @@ import tempfile
 import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
-BATCH = ROOT / "scripts/migrate-t5-batch.py"
+BATCH = ROOT / "scripts/migrate-t5m-batch.py"
 SOURCE = ROOT / "lib/machine/block.lisp"
 HISTORICAL = ROOT / "docs/archive/historical/machine-block-original-200201b7.source.txt"
 NOT_ADMITTED = ROOT / "lib/machine/block.sens"

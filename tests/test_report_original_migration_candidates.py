@@ -18,7 +18,7 @@ assert spec is not None and spec.loader is not None
 mod = importlib.util.module_from_spec(spec)
 sys.modules[spec.name] = mod
 spec.loader.exec_module(mod)
-from sens_t5_codec import encode_t5m_projection
+from sens_t5_t5m_codec import encode_t5m_projection
 
 
 class OriginalCandidateTests(unittest.TestCase):

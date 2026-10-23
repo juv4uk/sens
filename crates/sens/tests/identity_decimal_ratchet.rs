@@ -80,9 +80,9 @@ const SOURCES: &[Source<'static>] = &[
         contents: include_str!("../../../scripts/generate-domain-width-certificate.py"),
     },
     Source {
-        path: "scripts/sens_t5_codec.py",
+        path: "scripts/sens_t5_t5m_codec.py",
         language: Language::Python,
-        contents: include_str!("../../../scripts/sens_t5_codec.py"),
+        contents: include_str!("../../../scripts/sens_t5_t5m_codec.py"),
     },
     Source {
         path: "scripts/d7_symbol_codec.py",
@@ -110,14 +110,14 @@ const SOURCES: &[Source<'static>] = &[
         contents: include_str!("../../../scripts/admit-t5-migration.py"),
     },
     Source {
-        path: "scripts/migrate-t5-batch.py",
+        path: "scripts/migrate-t5m-batch.py",
         language: Language::Python,
-        contents: include_str!("../../../scripts/migrate-t5-batch.py"),
+        contents: include_str!("../../../scripts/migrate-t5m-batch.py"),
     },
     Source {
-        path: "scripts/migrate-approved-t5.py",
+        path: "scripts/migrate-approved-t5m.py",
         language: Language::Python,
-        contents: include_str!("../../../scripts/migrate-approved-t5.py"),
+        contents: include_str!("../../../scripts/migrate-approved-t5m.py"),
     },
     Source {
         path: "scripts/migrate-three-pass.py",

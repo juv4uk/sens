@@ -3,7 +3,7 @@
 
 This command does not redefine language semantics. It delegates conversion,
 three-pass legacy resolution and atomic publication to the canonical
-scripts/migrate-approved-t5.py. It only creates an SHA-pinned source manifest,
+scripts/migrate-approved-t5m.py. It only creates an SHA-pinned source manifest,
 runs that existing transaction, and *independently verifies* every published
 T5 byte stream before reporting success.
 
@@ -35,9 +35,9 @@ SCRIPT_DIR = Path(__file__).resolve().parent
 if str(SCRIPT_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPT_DIR))
 
-from sens_t5_codec import decode_bytes, encode_words, typed_sha256
+from sens_t5_t5m_codec import decode_bytes, encode_words, typed_sha256
 
-TRANSACTION = SCRIPT_DIR / "migrate-approved-t5.py"
+TRANSACTION = SCRIPT_DIR / "migrate-approved-t5m.py"
 
 
 class MigrationBlocked(ValueError):

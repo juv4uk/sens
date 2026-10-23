@@ -15,8 +15,8 @@ import unittest
 ROOT = Path(__file__).resolve().parents[1]
 FIXTURES = ROOT / "tests/fixtures/migration-d1-cond-cohort"
 sys.path.insert(0, str(ROOT / "scripts"))
-from audit_t5_file_pairs import inspect
-from sens_t5_codec import decode_bytes, typed_sha256
+from audit_t5_t5m_file_pairs import inspect
+from sens_t5_t5m_codec import decode_bytes, typed_sha256
 
 
 class ExecutableD1CondPairAudit(unittest.TestCase):

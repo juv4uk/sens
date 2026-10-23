@@ -8,7 +8,7 @@
      чи argparse, чого не бачать in-process тести.
   2. Наш власний читач (`scripts/migrate-three-pass.py`) токенізує й розбирає
      реальні мовні джерела: `lib/core4.lisp` і всі `lib/domains/d*.lisp`.
-  3. Наш власний кодек (`scripts/sens_t5_codec.py`) виконується на реальних
+  3. Наш власний кодек (`scripts/sens_t5_t5m_codec.py`) виконується на реальних
      мовних файлах: `.sens` має пережити decode → encode байт-у-байт, а
      extensionless-програма (нулі й одиниці через пропуск) — encode → decode.
   4. Кожне Python-джерело має компілюватися (`py_compile`).
@@ -41,8 +41,8 @@ def _load(name: str, path: Path):
 
 
 three_pass = _load("sens_three_pass_for_code_runs", SCRIPTS / "migrate-three-pass.py")
-codec = _load("sens_t5_codec_for_code_runs", SCRIPTS / "sens_t5_codec.py")
-physical_audit = _load("sens_physical_audit_for_code_runs", SCRIPTS / "audit_t5_file_pairs.py")
+codec = _load("sens_t5_t5m_codec_for_code_runs", SCRIPTS / "sens_t5_t5m_codec.py")
+physical_audit = _load("sens_physical_audit_for_code_runs", SCRIPTS / "audit_t5_t5m_file_pairs.py")
 
 
 def run_entrypoint(*args: str, timeout: int = 120):

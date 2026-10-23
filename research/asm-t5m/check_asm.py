@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Локальна перевірка асемблерного T5M: mmap .text, виклик через ctypes,
-звірка з scripts/sens_t5_codec.py на реальних словах .sens."""
+звірка з scripts/sens_t5_t5m_codec.py на реальних словах .sens."""
 import ctypes
 import mmap
 import pathlib
@@ -11,7 +11,7 @@ import tempfile
 HERE = pathlib.Path(__file__).resolve().parent
 ROOT = HERE.parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
-import sens_t5_codec as codec
+import sens_t5_t5m_codec as codec
 
 with tempfile.TemporaryDirectory(prefix="sens-t5m-asm-") as temp_name:
     temp = pathlib.Path(temp_name)

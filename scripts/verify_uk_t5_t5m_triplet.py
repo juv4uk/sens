@@ -23,7 +23,7 @@ if str(SCRIPTS) not in sys.path:
     sys.path.insert(0, str(SCRIPTS))
 
 from domain_tables import read_domain_table
-from sens_t5_codec import (SensT5Error, decode_bytes, encode_words,
+from sens_t5_t5m_codec import (SensT5Error, decode_bytes, encode_words,
                            decode_t5m_bytes, encode_t5m_projection, typed_sha256)
 
 CONVERTER = SCRIPTS / "migrate-three-pass.py"
