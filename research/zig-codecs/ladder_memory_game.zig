@@ -204,12 +204,24 @@ pub fn gradeDomain(width: u8, guesses: []const Guess) Score {
         }
         if (repeated) continue;
         const actual = lookup(guess.width, guess.bits) orelse continue;
-        if (!std.mem.eql(u8, actual.lisp, "()")) answered += 1;
+        if (!std.mem.eql(u8, actual.lisp, "()") and std.ascii.eqlIgnoreCase(actual.lisp, guess.lisp)) answered += 1;
     }
     result.answered = answered;
     const total = questionCount(width);
     result.missing = if (total > answered) total - answered else 0;
     return result;
+}
+
+test "Драбина D11: правильний код з хибною назвою не означає пригадану функцію" {
+    const first = questionAt(11, 0) orelse return error.MissingQuestion;
+    const guesses = [_]Guess{
+        .{ .width = 11, .bits = first.bits, .lisp = "WRONGSELECTOR" },
+    };
+    const result = gradeDomain(11, &guesses);
+    try std.testing.expectEqual(@as(usize, 0), result.correct);
+    try std.testing.expectEqual(@as(usize, 1), result.wrong);
+    try std.testing.expectEqual(@as(usize, 0), result.answered);
+    try std.testing.expectEqual(@as(usize, 512), result.missing);
 }
 
 test "Драбина D11: раунд має 512 унікальних відтворюваних запитань і повний підрахунок" {
