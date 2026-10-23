@@ -536,13 +536,13 @@ fn project_repl_surface_expression_in_scope(
                 &expression.kind,
                 ExprKind::List(items)
                     if !items.is_empty()
-                        && items.iter().all(|item| matches!(item.kind, ExprKind::DomainIdentity(DomainIdentity::D7(_))))
+                        && items.iter().all(|item| matches!(&item.kind, ExprKind::DomainIdentity(DomainIdentity::D7(_))))
             )
         {
             if let Some(Value::BinaryNumber(number)) = session.environment.get(name) {
                 if number.numeric_domain_width() == Some(24) {
                     return Ok(Expr {
-                        kind: ExprKind::BinaryNumber(number.clone()),
+                        kind: ExprKind::BinaryNumber((*number).clone()),
                         span: expression.span,
                     });
                 }
