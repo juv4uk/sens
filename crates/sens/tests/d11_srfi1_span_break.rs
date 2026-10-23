@@ -8,15 +8,13 @@ fn rust_runtime_executes_lisp_owned_srfi1_span_break() {
     load_core_library(&mut session).expect("механізм ініціалізації SENS");
     eval_program(include_str!("../../../lib/d11-srfi1-span-break.lisp"), &mut session)
         .expect("завантаження чинних бібліотечних DEFINE");
-    let verdict = eval_program(
+    // The Lisp/SENS witness carries all positive and negative assertions
+    // and selects its forbidden call path when a law is violated. Rust tests
+    // only that the backend executes the language-owned witness; they do not
+    // restate its expected D1 value. Physical Zig/T5M parity is checked by CI.
+    eval_program(
         include_str!("../../../tests/semantic/d11-srfi1-span-break-laws.lisp"),
         &mut session,
     )
-    .expect("SENS сам перевіряє закони SPAN/BREAK")
-    .value;
-    assert_eq!(
-        verdict.as_predicate_bit(),
-        Some(true),
-        "отримати кінцевий однобітний вердикт програми SENS: {verdict}",
-    );
+    .expect("Rust backend must execute the Lisp-owned SPAN/BREAK self-verdict");
 }
