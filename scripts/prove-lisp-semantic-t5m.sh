@@ -240,6 +240,12 @@ run_case() {
   printf '%s\t%s\t%s\n' "$id" "$status" "$wall_ms" >> "$evidence/law-timings.tsv"
   echo "SENS_LAW_WALL_TIME id=$id status=$status wall_ms=$wall_ms scope=full-execution"
   if [[ "$status" == RED ]]; then
+    # Вже документований борг D6 LENGTH: фізичне викликання ще не допущено.
+    # TRANSITIONAL не змінює RED на PASS і не пропускає жодного свідка.
+    if [[ -f "$evidence/$id/paired.err" ]] &&
+       grep -Fq 'domain identity is not callable under its ratified law: D6 000000' "$evidence/$id/paired.err"; then
+      echo "::warning title=TRANSITIONAL #5854::id=$id layer=sens-paired gate=D6_LENGTH physical=NOT_CERTIFIED status=RED" >&2
+    fi
     # Спільне падіння bootstrap — не 69 незалежних семантичних регресій.
     if [[ -f "$evidence/$id/direct.err" ]] &&
        grep -Eq '^Error loading (process|core|macro|utf8|fs)[.]lisp:' "$evidence/$id/direct.err"; then
