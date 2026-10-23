@@ -108,6 +108,8 @@ run_bound_law() {
 : >"$evidence/results.txt"
 run_law d3-selection-positive tests/semantic/d3-d4-logic-selection-law.lisp 1
 run_law d3-selection-mutant tests/semantic/d3-d4-logic-selection-mutant.lisp 0
+run_law d3-demorgan-four-cases tests/semantic/d3-demorgan-truth-table-law.lisp 1
+run_law d3-demorgan-mutant tests/semantic/d3-demorgan-truth-table-mutant.lisp 0
 run_law d3-quote-short-circuit-positive tests/semantic/d3-cond-quote-lazy-law.lisp 1
 run_law d3-quote-short-circuit-mutant tests/semantic/d3-cond-quote-lazy-mutant.lisp 0
 run_law d4-late-binding-positive tests/semantic/d4-late-definition-binding-law.lisp 1
@@ -126,4 +128,4 @@ cat lib/result-status.lisp tests/semantic/result-status-laws.lisp > "$result_sta
 run_law result-status-source "$result_status_bundle" 1
 run_bound_law unification-occurs-check-positive tests/semantic/unification-occurs-check-law.lisp 1
 run_bound_law unification-occurs-check-mutant tests/semantic/unification-occurs-check-mutant.lisp 0
-echo "SENS_LISP_T5M_LAWS_PASS count=12 positive=7 mutants=5 physical=ZIG_T5M"
+echo "SENS_LISP_T5M_LAWS_PASS count=14 positive=8 mutants=6 physical=ZIG_T5M"
