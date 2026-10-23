@@ -777,7 +777,9 @@ cat -- "$epistemic_d1_source" "$epistemic_constructor_source" "${epistemic_sourc
 cat -- "$epistemic_d1_source" "$epistemic_constructor_source" "${epistemic_sources[@]}" tests/semantic/language-mutant-epistemic-records.lisp > "$epistemic_mutant_bundle"
 sha256sum "$epistemic_d1_source" "$epistemic_constructor_source" "${epistemic_sources[@]}" tests/semantic/language-law-epistemic-records.lisp tests/semantic/language-mutant-epistemic-records.lisp > "$evidence/epistemic-record-logic-inputs.sha256"
 run_case run_law epistemic-record-logic-positive "$epistemic_law_bundle" "(epistemic-authority-witness (status pass))"
-run_case run_law epistemic-record-logic-mutant "$epistemic_mutant_bundle" "(epistemic-authority-witness (status fail) (case source-ref-valid-mutant) (actual 1) (expected 0))"
+# Назва, статус, фактичний та очікуваний D1 доведені D8 всередині Lisp.
+# Перевіряємо рівно один D1:1 від усіх фізичних виконавців без host-проєкції D7.
+run_case run_law epistemic-record-logic-mutant "$epistemic_mutant_bundle" 1
 # Д7/D8: окремі малі закони про текстові теги без LET чи числових літералів.
 # Бібліотека та предикати — Lisp; Zig відповідає лише за фізичний носій.
 # Сам модуль Epistemic при завантаженні зв'язує чинне ім'я
