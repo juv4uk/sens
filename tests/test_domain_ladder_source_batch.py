@@ -82,6 +82,31 @@ class BatchSourceTests(unittest.TestCase):
         self.assertEqual(count, 2)
         self.assertTrue(any("00110111" in problem for problem in errors))
 
+    def test_function_genealogy_data_uses_current_ukr_not_legacy_w8_numbers(self):
+        # Це перевірка джерела, а НЕ підміна реального запуску SENS.
+        # У графі функції — цитовані чинні ідентичності; раніше старі
+        # восьмибітні коди без лапок ставали числами D24+.
+        import re
+        path = "experiments/function-genealogy.lisp"
+        source = (ROOT / path).read_text(encoding="utf-8")
+        code = "\\n".join(line for line in source.splitlines()
+                          if not line.lstrip().startswith(";"))
+        self.assertIsNone(re.search(r"(?<![01])[01]{8}(?![01])", code))
+        heads = MOD.executable_call_heads(source, self.guard)
+        self.assertIn("визначити", heads)
+        self.assertNotIn("00001001", heads)
+        for resident in ("(як-є як-є)", "(як-є сполучити)",
+                         "(як-є друге)", "(як-є четверте)",
+                         "(як-є уніфікувати)", "(як-є застосувати-підстановка)"):
+            with self.subTest(resident=resident):
+                self.assertIn(resident, code)
+        # Раніше два різні SID8 значення вважалися різними функціями.
+        # Поточна ратифікація дає одну ідентичність D4:1001 і D6:100111.
+        self.assertIn("друге дослід-друге", code)
+        self.assertIn("четверте дослід-четверте", code)
+        self.assertNotIn("second cadr перший-зразок", code)
+        self.assertIn("(однакові? (перше (перше граф)) джерело)", code)
+
     def test_d7_schema_sha_pin_tracks_owner_ratified_keyboard_v2(self):
         import hashlib
         import json
