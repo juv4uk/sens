@@ -11,6 +11,33 @@
 (визначити *довідник-гвардії*
   (як-є
     ((reference
+       (topic d11-family-candidates-evidence)
+       (summary "У конкурсі Драбина пам'ять 512 чинних селекторів D11 не дорівнює появі 512 нових примітивів. Бібліотечні композиції filter-map, alist presence/update-first, lset-equal/adjoin, group-by, unary frequencies, partition-by та adjacent dedupe мають реальні вихідні Lisp-файли, але не мають автоматично виданих 11-бітних opcode. Дублікати FILTER, UNION, INTERSECTION, ASSOC, SET-DIFFERENCE, SUBSETP, PARTITION-IF уже присутні в D1-D10. Новий рядок потребує точного сімейного закону, позитивного і негативного SENS-свідка та власникового рішення.")
+       (authority (AGENTS.md lib/domains/d11.lisp knowledge/d11/гра-драбина-конкурс-20261024.uk.md knowledge/d11/закони-пропозиція-20261023.uk.md lib/d11-srfi1-filter-map.lisp lib/d11-srfi1-alist-protocol.lisp lib/d11-srfi1-set-relations.lisp lib/d11-clojure-group-by.lisp lib/d11-clojure-frequencies-unary.lisp lib/d11-clojure-partition-by.lisp))
+       (how-to (search-d1-through-d11-before-definition distinguish-library-function-from-opcode record-family-law-and-signature preserve-d1-no-versus-empty-list prove-order-and-multiplicity write-native-sens-positive-and-negative-witness keep-unratified-coordinate-empty))
+       (verify (exact-d11-selector-map-and-width no-duplicate-existing-domain-function filter-map-no-versus-empty-witness alist-presence-versus-false-value-witness group-by-versus-partition-by-a-b-a-witness native-sens-execution))
+       (lifecycle candidate-evidence-not-ratification)
+       (provenance "Конкурс Драбина і аудит наявних бібліотечних D11-кандидатів, 2026-10-24")
+       (unknown-route ask-owner))
+      (reference
+       (topic d12-mathematics-versus-transport)
+       (summary "Чинне рішення власника починає математичні домени з D12. Для D12 двійковий додатковий код задає знаковий діапазон -2048..2047 без окремого мінус-нуля; D24+ залишаються ширшими математичними доменами. Передача T5M непрозорого слова довільної додатної ширини є механікою і не доводить виконуваної D12-семантики в SENS. D1-D10 не стають числовими операндами через випадковий збіг бітів.")
+       (authority (contracts/numeric-domains-ratification.lisp AGENTS.md research/zig-codecs/t5m.zig research/zig-codecs/d12_dense_experiment.zig))
+       (how-to (apply-latest-owner-d12-extension preserve-exact-twos-complement-bits separate-typed-word-transfer-from-semantic-admission avoid-implicit-decimal-bridge require-sens-law-witness-and-zig-mechanism-witness))
+       (verify (d12-minus-one-is-all-one-bits d12-minimum-is-leading-one-rest-zero d12-maximum-is-leading-zero-rest-one reject-overflow-without-explicit-wider-domain no-mathematics-from-d1-through-d10))
+       (lifecycle owner-ratified-mathematics-with-separate-physical-proof)
+       (provenance "Числове доповнення рішення власника 24.10.2026; аудит D12 і T5M")
+       (unknown-route ask-owner))
+      (reference
+       (topic esc13-experimental-physical-boundary)
+       (summary "ESC13 досліджує escape-байти 243..255 для D12+ серій, але не ратифікований і не є активним транспортом. Чинний T5M не може мовчки перейти в ESC13: потрібні явний профіль, версія та однозначні границі кадру. У дослідній граматиці bit-tight і RLE інколи дають однаково короткі байти для тих самих слів; без правила нічиєї зворотне канонічне кодування неоднозначне. RLE D192 x32 розгортає 27 байтів у 768, тому довжину виходу обмежують до алокації. Zig відповідає за фізичний roundtrip; математичну семантику дає лише SENS.")
+       (authority (research/zig-codecs/esc13_ladder_game.md research/zig-codecs/t5m.zig research/zig-codecs/d12_dense_experiment.zig contracts/numeric-domains-ratification.lisp))
+       (how-to (keep-esc13-research-only require-explicit-versioned-profile forbid-implicit-t5m-escape-fallback define-canonical-tie-break enforce-decoded-size-budget-before-allocation compare-with-t5m-on-identical-typed-words report-analytic-bytes-separately-from-native-time))
+       (verify (current-t5m-rejects-invalid-physical-trit-byte esc13-signed-d12-positive-vector esc13-rle-versus-bit-tight-tie-mutant esc13-rle-32-versus-33-boundary esc13-decompression-budget-negative-vector exact-leading-zeros-and-float-bits no-claimed-zig-benchmark-without-native-run))
+       (lifecycle unratified-transport-research)
+       (provenance "ESC13 Драбина: аналітичні розміри, негативні випадки та A/B аудит, 2026-10-24; нативний ESC13 Zig ще не виміряно")
+       (unknown-route ask-owner))
+      (reference
        (topic language-policy)
        (summary "Українська — первинна мова в усіх авторських репозиторіях власника; кодові коментарі — українською кирилицею в UTF-8; англійська й німецька — допоміжні. CORE-RULE tier (CRITICAL, ALL_AGENTS) з 2026-09-08: знання політики саме по собі не гарантує дотримання — перевіряти мову свідомо до першого речення нової прози, не покладатися на звичку (реальний зрив і виправлення задокументовані в ecosystem/memory/CORE-RULE-ukrainian-first.md). Ecosystem-wide audit 2026-09-08 знайшов борг у 12 з 19 перевірених репозиторіїв (ecosystem/memory/LANGUAGE-DEBT-REGISTRY-2026-09-08.md); за прямою настановою власника кожен із них тепер має задачу BILINGUAL-DOCUMENTATION-AUDIT (priority 9.0) у своєму tasks.lisp, з конкретним context, не generic-описом -- claim-able через звичайний swarm цикл, не масове автоматичне виправлення. СТРУКТУРНА ЗАГОРОЖА (2026-09-08, після другого зриву цього самого правила в тій самій сесії): scripts/check-bilingual-docs тепер підключений -- pre-commit hook (git config core.hooksPath githooks, живо перевірено -- блокує реальний англомовний коміт) і CI (.github/workflows/bilingual-docs-check.yml), не лише перевірка присутності кирилиці, а порядок/обсяг української прози відносно секції English. Пілот на ecosystem+my-lisp; не покриває код-коментарі -- відомий, названий пробіл")
        (authority (knowledge/language-policy.lisp AGENTS.md ../ecosystem/docs/policy/BILINGUAL-DOCUMENTATION-POLICY.md ../ecosystem/docs/policy/REPOSITORIES-LICENSE-AUDIT.md ../ecosystem/memory/CORE-RULE-ukrainian-first.md ../ecosystem/memory/LANGUAGE-DEBT-REGISTRY-2026-09-08.md scripts/check-bilingual-docs scripts/install-hooks.sh .github/workflows/bilingual-docs-check.yml scripts/uk-latynka.py))
