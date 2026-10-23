@@ -243,5 +243,61 @@ class D11SelectorSeedAuditTests(unittest.TestCase):
                 self.assertIn(contract, knowledge)
 
 
+
+    def test_d13_candidate_catalog_matches_current_d11_parents_exactly(self):
+        import re
+
+        d11_source = (ROOT / "lib/domains/d11.lisp").read_text(encoding="utf-8")
+        catalog_path = ROOT / "knowledge/d13/селекторні-кандидати-2048-20261024.lisp"
+        catalog = catalog_path.read_text(encoding="utf-8")
+        parent_pattern = re.compile(
+            r"^\\s+\\(([01]{11})\\s+.*?\\(LISP ([^()\\s]+)\\)", re.MULTILINE
+        )
+        parents = [
+            (bits, name)
+            for bits, name in parent_pattern.findall(d11_source)
+            if re.fullmatch(r"C[AD]{9}R", name)
+        ]
+        self.assertEqual(512, len(parents))
+        self.assertEqual(list(range(768, 1280)), [int(bits, 2) for bits, _ in parents])
+        self.assertEqual(512, len({bits for bits, _ in parents}))
+        self.assertEqual(512, len({name for _, name in parents}))
+
+        source_pin = re.search(r'\\(parent-source-blob-sha "([0-9a-f]{40})"\\)', catalog)
+        self.assertIsNotNone(source_pin)
+        self.assertEqual(MOD.git_blob_sha1(d11_source.encode("utf-8")), source_pin.group(1))
+        self.assertIn("(status research-candidate-not-ratified)", catalog)
+        self.assertIn("(runtime-admission NO)", catalog)
+        self.assertIn("(opcode-admission NO)", catalog)
+
+        row_pattern = re.compile(
+            r"^\\s+\\(([01]{13}) \\(LISP ([^()\\s]+)\\) \\(parent ([01]{11})\\) \\(suffix ([01]{2})\\)\\)$",
+            re.MULTILINE,
+        )
+        actual = row_pattern.findall(catalog)
+        suffix_letters = {"00": "AA", "01": "AD", "10": "DA", "11": "DD"}
+        expected = []
+        for parent_bits, parent_name in parents:
+            for suffix in ("00", "01", "10", "11"):
+                candidate_bits = parent_bits + suffix
+                candidate_name = parent_name[:-1] + suffix_letters[suffix] + "R"
+                expected.append((candidate_bits, candidate_name, parent_bits, suffix))
+        self.assertEqual(expected, actual)
+
+        candidate_bits = [row[0] for row in actual]
+        candidate_names = [row[1] for row in actual]
+        self.assertEqual(2048, len(actual))
+        self.assertEqual(2048, len(set(candidate_bits)))
+        self.assertEqual(2048, len(set(candidate_names)))
+        self.assertEqual(list(range(3072, 5120)), [int(bits, 2) for bits in candidate_bits])
+        self.assertTrue(all(re.fullmatch(r"[01]{13}", bits) for bits in candidate_bits))
+        self.assertTrue(all(re.fullmatch(r"C[AD]{11}R", name) for name in candidate_names))
+        self.assertFalse((ROOT / "lib/domains/d13.lisp").exists())
+
+        guard_ref = (ROOT / "knowledge/guard-reference.lisp").read_text(encoding="utf-8")
+        self.assertIn("research-catalog-exactly-matches-parent-plus-two-bits", guard_ref)
+        self.assertIn("research-candidate-not-ratified", guard_ref)
+
+
 if __name__ == "__main__":
     unittest.main()
