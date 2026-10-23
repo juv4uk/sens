@@ -40,11 +40,14 @@ fn rust_mechanism_read_real_lisp_bytes() {
     for sample in 0..REPEATS {
         let began = Instant::now();
         let mut reads = 0_u64;
+        let mut last_bytes = Vec::new();
         loop {
             for _ in 0..READS_PER_BATCH {
-                let bytes = std::fs::read(black_box(&path)).expect("Rust IO read");
-                assert_eq!(bytes, reference, "байти файлу зобов'язані збігатися");
-                black_box(bytes);
+                // Рівність байтів перевіряється після таймера: у вимірі лишається
+                // реальний fs::read + виділення/звільнення буфера, не assert_eq.
+                last_bytes = black_box(
+                    std::fs::read(black_box(&path)).expect("Rust IO read"),
+                );
                 reads += 1;
             }
             if began.elapsed() >= MIN_SAMPLE_TIME {
@@ -54,6 +57,10 @@ fn rust_mechanism_read_real_lisp_bytes() {
 
         let elapsed = began.elapsed().as_nanos();
         assert!(elapsed > 0 && reads > 0, "sample must have positive duration");
+        assert_eq!(
+            last_bytes, reference,
+            "байти останнього прочитання зобов'язані збігатися"
+        );
         ns_per_read[sample] = elapsed / u128::from(reads);
         eprintln!(
             "RUST_MECHANISM_SAMPLE id=fs-read-lisp sample={} elapsed_ns={} operations={} ns_per_read={} bytes={} scope=warm-cache-file-io",
