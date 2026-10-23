@@ -295,6 +295,7 @@ run_case run_law d3-cons-dotted-tail-mutant tests/semantic/d3-cons-dotted-tail-m
 run_case run_law d3-eq-atom-boundary-positive tests/semantic/d3-eq-atom-boundary-law.lisp 1
 run_case run_law d3-eq-atom-boundary-mutant tests/semantic/d3-eq-atom-boundary-mutant.lisp 0
 run_case run_type_rejection d3-eq-nonatom-type-negative tests/semantic/d3-eq-nonatom-type-negative.lisp 'eq expects two atoms'
+run_case run_type_rejection d3-cond-nil-condition-type-negative tests/semantic/d3-cond-nil-condition-type-negative.lisp 'D3:110 COND expects exact D1:1 / D1:0'
 # D4 NOT — часткова функція тільки над D1 PredicateBit, ніколи над структурним NIL.
 run_case run_type_rejection d4-not-nonpredicate-type-negative tests/semantic/d4-not-nonpredicate-type-negative.lisp 'NOT requires an exact D1 PredicateBit'
 # TRANSITIONAL #5854: арифметичні Lisp-свідки існують і перевіряються
