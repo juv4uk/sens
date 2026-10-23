@@ -454,6 +454,40 @@ pub(crate) fn surface_for_domain_identity(
         };
     }
 
+    // Драбина Д8–Д10 має окремі ратифіковані таблиці. Не повертатися
+    // до 256 комірок історичного SID8, коли просять повну «укр».
+    // Це тільки проєкція значення: запис у binding не допускає виклик.
+    if namespace == "ukr" {
+        match identity {
+            DomainIdentity::D8(_) => {
+                // Лише 64 доведені селектори: їхні повні імена вже
+                // побудовано за шляхом CAR/CDR, і вони точно відповідають Д8.
+                return d8_selector_uk_index().iter().find_map(|(name, current)| {
+                    (*current == identity && name.contains("-від-")).then_some(name.as_str())
+                });
+            }
+            DomainIdentity::D9(word) => {
+                return D9_DEFINITION_BINDINGS
+                    .iter()
+                    .find(|row| row.bits == word.word().packed_bits())
+                    .and_then(|row| {
+                        // Генератор згортає лише однакові ук/укр:
+                        // 5 імен => окреме повне укр, інакше перше вже повне.
+                        row.names.get(if row.names.len() == 5 { 1 } else { 0 }).copied()
+                    });
+            }
+            DomainIdentity::D10(word) => {
+                return D10_DEFINITION_BINDINGS
+                    .iter()
+                    .find(|row| row.bits == word.packed_bits())
+                    .and_then(|row| {
+                        row.names.get(if row.names.len() == 5 { 1 } else { 0 }).copied()
+                    });
+            }
+            _ => {}
+        }
+    }
+
     DOMAIN_SURFACE_ROWS
         .iter()
         .find(|row| {
@@ -595,6 +629,37 @@ pub(crate) fn admitted_surfaces_with_namespace_for_semantic_id(
 mod exact_registry_vs_historical_slot_tests {
     use super::*;
     use crate::{Bit8, CoreD8};
+
+    #[test]
+    fn full_ukr_high_domains_use_current_ladder_not_historical_sid8() {
+        let d8 = DomainIdentity::D8(CoreD8::from_word(crate::Bit8::new(0b01100000).unwrap()));
+        assert_eq!(
+            surface_for_domain_identity(d8, "ukr"),
+            Some("решта-від-перше-від-перше-від-перше-від-перше-від-перше")
+        );
+        let d9 = DomainIdentity::D9(CoreD9::from_word(Bit9::new(0b011000000).unwrap()));
+        assert_eq!(
+            surface_for_domain_identity(d9, "ukr"),
+            Some("решта-від-перше-від-перше-від-перше-від-перше-від-перше-від-перше")
+        );
+        let d9_same = DomainIdentity::D9(CoreD9::from_word(Bit9::new(0).unwrap()));
+        assert_eq!(
+            surface_for_domain_identity(d9_same, "ukr"),
+            Some("захист-доказ-стан?")
+        );
+        let d10 = DomainIdentity::D10(crate::DomainD10::new(0b0000000001).unwrap());
+        assert_eq!(
+            surface_for_domain_identity(d10, "ukr"),
+            Some("кількість-результатів-спостереження")
+        );
+        // Ратифіковане, але не присутнє в механізмах/проєкції
+        // значення не отримує вигаданого текстового відповідника.
+        let unbound_d10 = DomainIdentity::D10(crate::DomainD10::new(0).unwrap());
+        assert_eq!(surface_for_domain_identity(unbound_d10, "ukr"), None);
+        // Д8 поза сім'єю доведених селекторів не одержує імені з W8.
+        let unrelated_d8 = DomainIdentity::D8(CoreD8::from_word(crate::Bit8::new(0).unwrap()));
+        assert_eq!(surface_for_domain_identity(unrelated_d8, "ukr"), None);
+    }
 
     #[test]
     fn historical_w8_slot_cannot_become_current_d8_round() {
