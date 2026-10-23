@@ -70,23 +70,10 @@ pub fn parse_mixed_exact_domain_machine_source(
     }
 }
 
-/// Already-admitted D8 callable names and exact words from the owner domain ladder.
-/// Shared by ordinary Ukrainian source and path-pinned readers. Neither bare
-/// historical W8 bytes nor quoted/bound words obtain callable authority.
+/// Shared exact D8 source-route allowlist. Residency alone never grants
+/// callability; the central registry list is also used by direct evaluation.
 fn admitted_d8_uk_callable_bits(spelling: &str) -> Option<&'static str> {
-    match spelling {
-        "символ-за-кодом" => Some("00000000"),
-        // D8 MOD has a concrete Core4 implementation. This source spelling
-        // selects only the exact resident; invocation still fails closed if
-        // Core4 has not populated that identity's mechanism slot.
-        "модульна-остача" => Some("00101100"),
-        "код-символу" => Some("11100000"),
-        "текст-у-символ" => Some("11101101"),
-        "символ-у-текст" => Some("11101110"),
-        "значення-у-текст" => Some("11110100"),
-        "однакові?" => Some("11110111"),
-        _ => None,
-    }
+    crate::semantic_registry::admitted_d8_uk_callable_bits(spelling)
 }
 
 fn lift_pinned_d8_io(source: &str, expression: Expr, depth: u32) -> Result<Expr, LanguageError> {
