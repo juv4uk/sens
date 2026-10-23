@@ -926,11 +926,14 @@ mod tests {
     #[test]
     fn legacy_function8_frames_are_rejected_and_w8_admission_is_exact() {
         let admitted = [
+            0b0000_0000,
+            0b0010_1100,
             0b1110_0000,
             0b1110_1010,
             0b1110_1101,
             0b1110_1110,
             0b1111_0100,
+            0b1111_0111,
         ];
 
         for packed in 0u16..=255 {

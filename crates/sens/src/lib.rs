@@ -326,17 +326,14 @@ pub const META_EVAL_LIBRARY_SOURCE: &str = include_str!("../../../lib/meta-eval.
 /// Process-result interpretation owned by Lisp. The host contributes only the
 /// `process-run-raw` capability; this layer decides how captured bytes become
 /// text and how decoding failures are represented.
+#[cfg(test)]
 pub const PROCESS_LIBRARY_SOURCE: &str = include_str!("../../../lib/process.lisp");
 
 /// TCP text interpretation owned by Lisp. The host contributes only the raw
 /// socket-read bytes through `tcp-read-raw`; this layer defines public
 /// `tcp-read` by applying the shared UTF-8 semantics.
+#[cfg(test)]
 pub const TCP_LIBRARY_SOURCE: &str = include_str!("../../../lib/tcp.lisp");
-
-/// File text interpretation owned by Lisp. The host contributes only raw
-/// bytes through `read-file-bytes`/`записати-байти-файла`; this layer defines
-/// public `read-file`/`write-file` by applying the shared UTF-8 semantics.
-pub const FS_LIBRARY_SOURCE: &str = include_str!("../../../lib/fs.lisp");
 
 /// Install the one primitive macro-construction mechanism required by the
 /// language-owned macro layer, evaluate the Lisp derivation exactly once, and
@@ -553,6 +550,23 @@ fn load_core_library_with_fasl_mode(
 /// Джерело identity: `lib/domains/d10.lisp`, точне слово `0011110110`.
 /// Це один іменований механізм, а не загальна викличність D10 за резидентністю.
 fn bind_core_runtime_mechanisms(environment: &Environment) {
+    // The D8 ladder identifies MOD at exactly 00101100. Core4 supplies its
+    // executable Lisp closure; Rust only places that existing closure in the
+    // exact domain slot. If Core4 did not define it, there is no fallback or
+    // host implementation and invocation remains unavailable.
+    const D8_MODULO: u8 = 0b00101100;
+    let modulo_identity = DomainIdentity::D8(crate::CoreD8::from_word(
+        crate::Bit8::new(D8_MODULO).expect("the D8 MOD resident has eight bits"),
+    ));
+    if environment.domain_code_slot(modulo_identity).is_none() {
+        if let Some(implementation) = environment
+            .get("модульна-остача")
+            .filter(|value| matches!(value, Value::Closure(_) | Value::Builtin(_)))
+        {
+            let _ = environment.bind_domain_code_slot_once(modulo_identity, implementation);
+        }
+    }
+
     const MONOTONIC_NANOSECONDS_D10: u16 = 0b0011110110;
     const SURFACE: &str = "монотонний-наносекунди";
     let identity = DomainIdentity::D10(
@@ -673,6 +687,25 @@ pub fn load_meta_evaluator_library_from_source(
 /// preserves the closed language core while giving embedders one canonical
 /// time-layer loader instead of ad-hoc `include_str!` calls.
 pub fn load_time_library(session: &mut Session) -> Result<EvalResult, LanguageError> {
+    let time_sentinel = domain_projection_catalog::exact_uk_domain_identity("дата-із-днів")
+        .filter(|identity| identity.width() == 10)
+        .ok_or_else(|| {
+            LanguageError::new(
+                ErrorKind::InvalidForm,
+                "time bootstrap sentinel is missing from the exact ratified D10 Ukrainian projection",
+                Span::default(),
+            )
+        })?;
+    if session
+        .environment
+        .domain_code_slot(time_sentinel)
+        .is_some()
+    {
+        return Ok(EvalResult {
+            value: Value::Nil,
+            output: Vec::new(),
+        });
+    }
     binary_bootstrap::time_program()?.execute(session)
 }
 
@@ -720,6 +753,37 @@ pub fn load_utf8_library(session: &mut Session) -> Result<EvalResult, LanguageEr
     let result = binary_bootstrap::utf8_program()?.execute(session)?;
     bind_missing_stable_surface_peers(&session.environment);
     Ok(result)
+}
+
+/// Check the exact ratified D10 resident that the UTF-8 bootstrap defines.
+/// This is only an installation sentinel; the D10 identity does not gain a
+/// call route from this check. Reusing the already-loaded dependency prevents
+/// a second DEFINE from conflicting when process/TCP and FS are composed.
+fn utf8_library_is_loaded(session: &Session) -> bool {
+    let sentinel = (0..(1u16 << 10)).find_map(|bits| {
+        let exact_bits = format!("{bits:010b}");
+        match domain_projection_catalog::lookup(
+            domain_projection_catalog::ProjectionSource::DomainTable,
+            10,
+            &exact_bits,
+            "укр",
+        ) {
+            Some(domain_projection_catalog::ProjectionValue::Symbol(name))
+                if name == "кодова-одиниця-кодування-юнікод-8-у-допустимому-діапазоні?" =>
+            {
+                Some(DomainIdentity::D10(DomainD10::new(bits)?))
+            }
+            _ => None,
+        }
+    });
+    sentinel.is_some_and(|identity| session.environment.domain_code_slot(identity).is_some())
+}
+
+fn load_utf8_dependency(session: &mut Session) -> Result<(), LanguageError> {
+    if !utf8_library_is_loaded(session) {
+        load_utf8_library(session)?;
+    }
+    Ok(())
 }
 
 /// Load caller-supplied time source through the SAME owner-pinned exact-width
@@ -834,12 +898,9 @@ fn bind_process_tcp_lisp_owned_macros(session: &mut Session) -> Result<(), Langu
 /// public `process-run` over `process-run-raw`, and public `tcp-read` over
 /// `tcp-read-raw`. Neither raw capability is required merely to define them.
 pub fn load_process_library(session: &mut Session) -> Result<EvalResult, LanguageError> {
-    load_utf8_library(session)?;
-    let process =
-        parse_mixed_exact_domain_process_tcp_source("lib/process.lisp", PROCESS_LIBRARY_SOURCE)?;
-    eval_parsed_expressions(&process, session)?;
-    let tcp = parse_mixed_exact_domain_process_tcp_source("lib/tcp.lisp", TCP_LIBRARY_SOURCE)?;
-    let result = eval_parsed_expressions(&tcp, session)?;
+    load_utf8_dependency(session)?;
+    binary_bootstrap::process_program()?.execute(session)?;
+    let result = binary_bootstrap::tcp_program()?.execute(session)?;
     bind_missing_stable_surface_peers(&session.environment);
     Ok(result)
 }
@@ -847,9 +908,8 @@ pub fn load_process_library(session: &mut Session) -> Result<EvalResult, Languag
 /// Load language-owned TCP text semantics explicitly when an embedder does
 /// not otherwise need the process adapter.
 pub fn load_tcp_library(session: &mut Session) -> Result<EvalResult, LanguageError> {
-    load_utf8_library(session)?;
-    let tcp = parse_mixed_exact_domain_process_tcp_source("lib/tcp.lisp", TCP_LIBRARY_SOURCE)?;
-    let result = eval_parsed_expressions(&tcp, session)?;
+    load_utf8_dependency(session)?;
+    let result = binary_bootstrap::tcp_program()?.execute(session)?;
     bind_missing_stable_surface_peers(&session.environment);
     Ok(result)
 }
@@ -859,9 +919,8 @@ pub fn load_tcp_library(session: &mut Session) -> Result<EvalResult, LanguageErr
 /// host capabilities plus the shared UTF-8 layer. No new host capability is
 /// introduced for this migration.
 pub fn load_fs_library(session: &mut Session) -> Result<EvalResult, LanguageError> {
-    load_utf8_library(session)?;
-    let fs = parse_mixed_exact_domain_fs_source("lib/fs.lisp", FS_LIBRARY_SOURCE)?;
-    let result = eval_parsed_expressions(&fs, session)?;
+    load_utf8_dependency(session)?;
+    let result = binary_bootstrap::fs_program()?.execute(session)?;
     bind_missing_stable_surface_peers(&session.environment);
     Ok(result)
 }
@@ -1094,6 +1153,19 @@ mod core4_bootstrap_cache_tests {
     }
 
     #[test]
+    fn time_library_loader_is_idempotent_across_child_surface_frames() {
+        let mut root = Session::default();
+        load_core_library(&mut root).expect("Core4 bootstrap");
+        load_time_library(&mut root).expect("install exact D10 mechanisms in root");
+
+        let mut child = Session {
+            environment: root.environment.child(),
+        };
+        load_time_library(&mut child)
+            .expect("inherited time mechanisms are not redefined in a child frame");
+    }
+
+    #[test]
     fn same_hash_ordinary_reader_fasl_cannot_reinterpret_d3_heads_as_numbers() {
         // A matching source hash does NOT prove that callable D3-D6 heads
         // survived reading; the generic parser reads bare 100 as a Number.
@@ -1166,5 +1238,13 @@ mod exact_surface_domain_query_migration_tests {
         assert!(surface_has_domain_identity("як-є", quote));
         assert!(!surface_has_domain_identity("як-є", cons));
         assert!(!surface_has_domain_identity("неіснуюча-функція", quote));
+    }
+
+    #[test]
+    fn filesystem_library_loads_from_zig_restored_t5m_words() {
+        let mut session = Session::default();
+        load_core_library(&mut session).expect("Core4 bootstrap");
+        load_process_library(&mut session).expect("process and TCP T5M bootstrap");
+        load_fs_library(&mut session).expect("filesystem T5M bootstrap executes");
     }
 }

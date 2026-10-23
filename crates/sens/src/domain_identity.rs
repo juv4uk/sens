@@ -1,11 +1,13 @@
-//! Exact width-qualified identity carrier for the W1→W9 ladder.
+//! Exact width-qualified carrier for the ratified D1–D10 semantic ladder.
+//! Ratified numeric D24+ values travel as `BinaryNumber`/`ExactDomainWord::Number`.
 //!
 //! Semantic ratification and callable Core-operation identity are deliberately
 //! separate. Width never grants a semantic role by itself.
 //!
-//! - D1-D9 мають чинну семантичну authority згідно з Contract 11.8.
-//! - D5 #3305, D6 #3393, D7 #3572, D8 #3960, D9 #4008.
-//! - W1-W8 keep the one-byte fast path; D9 uses the exact non-truncating W9 carrier.
+//! - D1–D9 have Contract 11.8 authority; D10 is separately whole-domain ratified by Contract 11.9.
+//! - Numeric D24/D48/D96/D192/... identity is explicit in the numeric value itself.
+//! - D11–D23 are not synthesized; width alone never creates a semantic identity.
+//! - W1–W8 keep the one-byte fast path; D9 uses the exact non-truncating W9 carrier.
 //! - Semantic residency і callable/mechanism admission лишаються окремими фактами;
 //!   відсутній механізм може fail-closed навіть для ратифікованого resident.
 //! - D7 is keyboard/v2 W7 data identity and never enters callable routing by width.
@@ -126,18 +128,28 @@ impl DomainIdentity {
             Self::D4(value) => Some(CoreDomainIdentity::D4(value)),
             Self::D5(value) => Some(CoreDomainIdentity::D5(value)),
             Self::D6(value)
-                if matches!(value.word().packed_bits(), 0b001110 | 0b001111 | 0b010010 | 0b111110) =>
+                if matches!(
+                    value.word().packed_bits(),
+                    0b001110 | 0b001111 | 0b010010 | 0b111110
+                ) =>
             {
                 Some(CoreDomainIdentity::D6(value))
             }
             Self::D8(value)
                 if matches!(
                     value.word().packed_bits(),
-                    0b11100000 | 0b11101010 | 0b11101101 | 0b11101110 | 0b11110100
+                    0b00000000
+                        | 0b00101100
+                        | 0b11100000
+                        | 0b11101010
+                        | 0b11101101
+                        | 0b11101110
+                        | 0b11110100
+                        | 0b11110111
                 ) =>
             {
-                // Only the exact admitted D8 CHAR-CODE, READ, STRING-TO-SYMBOL,
-                // SYMBOL-TO-STRING and WRITE-TO-STRING can project here. Residency alone
+                // Exact D8 CODE-CHAR and MOD use their concrete mechanisms;
+                // only listed D8 identities project here. Residency alone
                 // never grants callability to any other D8 coordinate.
                 Some(CoreDomainIdentity::D8(value))
             }
@@ -150,6 +162,7 @@ impl DomainIdentity {
                         | 0b110101010
                         | 0b110101011
                         | 0b110100110
+                        | 0b110101001
                 ) =>
             {
                 Some(CoreDomainIdentity::D9(value))
@@ -452,6 +465,23 @@ mod tests {
     }
 
     #[test]
+    fn exact_d8_modulo_and_equal_operations_exclude_adjacent_residents() {
+        for bits in [0b00000000, 0b00101100, 0b11110111] {
+            let admitted =
+                DomainIdentity::from_source_word(BinarySourceWord::W8(Bit8::new(bits).unwrap()));
+            assert!(matches!(
+                admitted.core_operation(),
+                Some(CoreDomainIdentity::D8(word)) if word.word().packed_bits() == bits
+            ));
+        }
+        for bits in [0b00000001, 0b00101101, 0b11110110] {
+            let neighbor =
+                DomainIdentity::from_source_word(BinarySourceWord::W8(Bit8::new(bits).unwrap()));
+            assert!(neighbor.core_operation().is_none());
+        }
+    }
+
+    #[test]
     fn d9_string_append_is_a_core_operation_without_admitting_neighbors() {
         for raw in [
             0b110011110, // STRING-APPEND
@@ -460,6 +490,7 @@ mod tests {
             0b110101010, // STRING-PREFIX?
             0b110101011, // STRING-FIRST
             0b110100110, // STRINGP
+            0b110101001, // READ-ALL
         ] {
             let operation =
                 DomainIdentity::from_source_word(BinarySourceWord::W9(Bit9::new(raw).unwrap()))
@@ -468,7 +499,7 @@ mod tests {
                 if word.word().packed_bits() == raw));
         }
 
-        for raw in [0b110011111, 0b110101001, 0b111011110] {
+        for raw in [0b110011111, 0b110101000, 0b111011110] {
             let other =
                 DomainIdentity::from_source_word(BinarySourceWord::W9(Bit9::new(raw).unwrap()));
             assert!(
@@ -502,7 +533,6 @@ mod tests {
         assert_eq!(high.packed_bits(), 0x101);
         assert_ne!(high, d9);
     }
-
 
     #[test]
     fn d10_width_comes_from_exact_coordinate_without_d9_narrowing() {

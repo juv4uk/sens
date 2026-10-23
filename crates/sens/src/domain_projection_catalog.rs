@@ -1,6 +1,9 @@
 //! Read-only, source-derived projection lookup. A projection row does not grant
 //! residency, callability, meaning, or physical encoding behavior.
 
+use std::collections::HashMap;
+use std::sync::OnceLock;
+
 /// Незалежний простір джерела: однакові назви колонок не зливають різні таблиці.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum ProjectionSource {
@@ -79,7 +82,81 @@ pub fn lookup(
         .map(|entry| entry.value)
 }
 
+/// Unique Ukrainian D1–D10 projection identity for executable source heads.
+///
+/// This resolves identity only: evaluator dispatch separately requires an
+/// admitted primitive or an explicitly installed code slot. D7 is excluded
+/// because its Ukrainian cells are text glyph data, not function names. D24+
+/// numeric operands are handled by the numeric source projection instead.
+pub(crate) fn exact_uk_domain_identity(name: &str) -> Option<crate::DomainIdentity> {
+    static INDEX: OnceLock<HashMap<&'static str, Option<crate::DomainIdentity>>> = OnceLock::new();
+    let index = INDEX.get_or_init(|| {
+        let mut names = HashMap::new();
+        for entry in ENTRIES.iter().filter(|entry| {
+            entry.source == ProjectionSource::DomainTable
+                && entry.column == "ук"
+                && entry.domain != 7
+        }) {
+            let ProjectionValue::Symbol(surface) = entry.value else {
+                continue;
+            };
+            let Ok(bits) = u16::from_str_radix(entry.bits, 2) else {
+                continue;
+            };
+            let Some(coordinate) =
+                crate::domain_ladder::DomainCoordinate::new(entry.domain as u8, bits)
+            else {
+                continue;
+            };
+            let identity = crate::DomainIdentity::from_coordinate(coordinate);
+            use std::collections::hash_map::Entry;
+            match names.entry(surface) {
+                Entry::Vacant(slot) => {
+                    slot.insert(Some(identity));
+                }
+                Entry::Occupied(mut slot) if slot.get().is_some_and(|old| old != identity) => {
+                    slot.insert(None);
+                }
+                Entry::Occupied(_) => {}
+            }
+        }
+        names
+    });
+    index.get(name).copied().flatten()
+}
+
 /// Кількість клітинок згенерованих Lisp-таблиць D1–D10.
 pub fn entry_count() -> usize {
     ENTRIES.len()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::exact_uk_domain_identity;
+
+    #[test]
+    fn exact_uk_projection_resolves_ratified_domains_without_promoting_d7_text() {
+        for (surface, width, bits) in [
+            ("так", 1, 1),
+            ("відкрити", 2, 0b10),
+            ("сполучити", 3, 0b111),
+            ("визначити", 4, 0b0011),
+            ("нехай*", 6, 0b001001),
+            ("символ-за-кодом", 8, 0),
+            ("читати-файл", 9, 0b110110111),
+            ("умови-зупинки-наміру", 10, 0b0010010000),
+        ] {
+            assert!(
+                matches!(
+                    exact_uk_domain_identity(surface),
+                    Some(identity) if identity.width() == width && identity.packed_bits() == bits
+                ),
+                "{surface} must retain D{width}:{bits:0width$b}"
+            );
+        }
+        assert!(
+            exact_uk_domain_identity("а").is_none(),
+            "D7 Ukrainian glyphs remain text data, not callable source heads"
+        );
+    }
 }

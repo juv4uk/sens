@@ -13,6 +13,9 @@ pub fn main(init: std.process.Init) !void {
         .{ .name = "CORE3_BOOTSTRAP_WORDS", .physical = @embedFile("lib/core3.sens") },
         .{ .name = "TIME_BOOTSTRAP_WORDS", .physical = @embedFile("lib/time.sens") },
         .{ .name = "UTF8_BOOTSTRAP_WORDS", .physical = @embedFile("lib/utf8.sens") },
+        .{ .name = "PROCESS_BOOTSTRAP_WORDS", .physical = @embedFile("lib/process.sens") },
+        .{ .name = "TCP_BOOTSTRAP_WORDS", .physical = @embedFile("lib/tcp.sens") },
+        .{ .name = "FS_BOOTSTRAP_WORDS", .physical = @embedFile("lib/fs.sens") },
     };
     for (libraries) |library| {
         try emitWords(allocator, output, library.name, library.physical);

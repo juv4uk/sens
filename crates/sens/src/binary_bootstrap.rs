@@ -21,6 +21,18 @@ pub(super) fn utf8_program() -> Result<PhysicalT5Program, LanguageError> {
     program(UTF8_BOOTSTRAP_WORDS)
 }
 
+pub(super) fn process_program() -> Result<PhysicalT5Program, LanguageError> {
+    program(PROCESS_BOOTSTRAP_WORDS)
+}
+
+pub(super) fn tcp_program() -> Result<PhysicalT5Program, LanguageError> {
+    program(TCP_BOOTSTRAP_WORDS)
+}
+
+pub(super) fn fs_program() -> Result<PhysicalT5Program, LanguageError> {
+    program(FS_BOOTSTRAP_WORDS)
+}
+
 fn program(restored: &[(usize, &[u8])]) -> Result<PhysicalT5Program, LanguageError> {
     let words = restored
         .iter()

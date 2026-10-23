@@ -70,15 +70,21 @@ pub fn parse_mixed_exact_domain_machine_source(
     }
 }
 
-/// Already-admitted D8 I/O names and exact words from the owner domain ladder.
+/// Already-admitted D8 callable names and exact words from the owner domain ladder.
 /// Shared by ordinary Ukrainian source and path-pinned readers. Neither bare
 /// historical W8 bytes nor quoted/bound words obtain callable authority.
-fn admitted_d8_io_uk_bits(spelling: &str) -> Option<&'static str> {
+fn admitted_d8_uk_callable_bits(spelling: &str) -> Option<&'static str> {
     match spelling {
+        "символ-за-кодом" => Some("00000000"),
+        // D8 MOD has a concrete Core4 implementation. This source spelling
+        // selects only the exact resident; invocation still fails closed if
+        // Core4 has not populated that identity's mechanism slot.
+        "модульна-остача" => Some("00101100"),
         "код-символу" => Some("11100000"),
         "текст-у-символ" => Some("11101101"),
         "символ-у-текст" => Some("11101110"),
         "значення-у-текст" => Some("11110100"),
+        "однакові?" => Some("11110111"),
         _ => None,
     }
 }
@@ -113,19 +119,10 @@ fn lift_pinned_d8_io(source: &str, expression: Expr, depth: u32) -> Result<Expr,
         });
     }
 
-    if let Some(bits) = head_spelling.and_then(admitted_d8_io_uk_bits) {
+    if let Some(bits) = head_spelling.and_then(admitted_d8_uk_callable_bits) {
         let word = parse_binary_source_words(bits)?[0].word;
         lifted[0] = Expr {
             kind: ExprKind::DomainIdentity(DomainIdentity::from_source_word(word)),
-            span: lifted[0].span,
-        };
-    } else if head_spelling == Some("символ-за-кодом") {
-        // CODE-CHAR is not currently an admitted D8 execution mechanism.
-        // Use the existing minimal runtime representation bridge by its
-        // compatibility symbol; it materializes a scalar only and does not
-        // implement UTF-8 policy.
-        lifted[0] = Expr {
-            kind: ExprKind::Symbol(Rc::from("codepoint->string")),
             span: lifted[0].span,
         };
     } else if matches!(
@@ -253,7 +250,7 @@ fn lift_pinned_d9_language_calls(
     expression: Expr,
     depth: u32,
 ) -> Result<Expr, LanguageError> {
-    const UKRAINIAN_D9_MECHANISMS: [&str; 7] = [
+    const UKRAINIAN_D9_MECHANISMS: [&str; 9] = [
         "рядок-додати",
         "рядок-порожній?",
         "рядок-решта",
@@ -261,6 +258,8 @@ fn lift_pinned_d9_language_calls(
         "рядок-перший",
         "рядок?",
         "читати-всі",
+        "читати-файл",
+        "записати-файл",
     ];
     if depth > MAX_STRUCTURE_DEPTH {
         return Err(LanguageError::new(
@@ -705,7 +704,71 @@ pub fn parse_mixed_exact_domain_process_tcp_source(
             Span::default(),
         ));
     }
-    parse_mixed_source(source, true)
+    parse_mixed_source(source, true)?
+        .into_iter()
+        .map(|expression| lift_pinned_process_tcp_d9_closure(source, expression, 0))
+        .collect()
+}
+
+/// The TCP byte-to-text resident is a D9 identity in the Ukrainian ladder.
+/// This pinned source path lowers only that named head; runtime invocation
+/// still requires the concrete closure installed into that exact D9 slot.
+/// D9 residency alone therefore does not grant a callable implementation.
+fn lift_pinned_process_tcp_d9_closure(
+    source: &str,
+    expression: Expr,
+    depth: u32,
+) -> Result<Expr, LanguageError> {
+    const ADMITTED_UKRAINIAN_HEADS: [&str; 1] = ["протокол-передавання-читати-байти-текст"];
+    if depth > MAX_STRUCTURE_DEPTH {
+        return Err(LanguageError::new(
+            ErrorKind::Parse,
+            "pinned process/TCP D9 source exceeds structure depth",
+            expression.span,
+        ));
+    }
+    let Expr { kind, span } = expression;
+    let ExprKind::List(items) = kind else {
+        return Ok(Expr { kind, span });
+    };
+    if items.is_empty()
+        || is_exact_quote(&items[0])
+        || source_spelling(source, &items[0]) == Some("'")
+    {
+        return Ok(Expr {
+            kind: ExprKind::List(items),
+            span,
+        });
+    }
+
+    let mut lifted = items.to_vec();
+    if source_spelling(source, &items[0])
+        .is_some_and(|name| ADMITTED_UKRAINIAN_HEADS.contains(&name))
+    {
+        if let Some(identity) = source_spelling(source, &items[0])
+            .and_then(crate::semantic_registry::d9_uk_source_identity)
+        {
+            lifted[0] = Expr {
+                kind: ExprKind::DomainIdentity(identity),
+                span: items[0].span,
+            };
+        }
+    }
+
+    let skip_binding = is_legacy_w8_define_head(source, &items[0])
+        || is_legacy_w8_lambda_head(source, &items[0])
+        || is_exact_d4_binding_head(&items[0]);
+    for index in 1..lifted.len() {
+        if skip_binding && index == 1 {
+            continue;
+        }
+        lifted[index] =
+            lift_pinned_process_tcp_d9_closure(source, lifted[index].clone(), depth + 1)?;
+    }
+    Ok(Expr {
+        kind: ExprKind::List(Rc::from(lifted.into_boxed_slice())),
+        span,
+    })
 }
 
 /// Parse only the language-owned time module with exact-width D3 call heads.
@@ -844,6 +907,36 @@ fn collect_source_bindings(
     {
         return;
     }
+
+    // These ratified D6 Lisp macros introduce lexical names even though the
+    // reader sees their ordinary macro-call surface before expansion. Collect
+    // those names before projecting call heads, so a D8 resident such as
+    // `значення` remains usable as a local binding inside the macro body.
+    if matches!(
+        source_spelling(source, head),
+        Some("нехай" | "нехай-послідовно")
+    ) {
+        if let Some(Expr {
+            kind: ExprKind::List(bindings),
+            ..
+        }) = items.get(1)
+        {
+            for binding in bindings.iter() {
+                if let ExprKind::List(parts) = &binding.kind {
+                    if let Some(Expr {
+                        kind: ExprKind::Symbol(_),
+                        ..
+                    }) = parts.first()
+                    {
+                        if let Some(name) = source_spelling(source, &parts[0]) {
+                            names.insert(name.to_owned());
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     if descend_legacy_machine_wrappers && is_legacy_w8_define_head(source, head) {
         if let Some(target) = items.get(1) {
             if matches!(&target.kind, ExprKind::Symbol(_)) {
@@ -1115,12 +1208,20 @@ fn lift_head(
             // conservative whole-source refusal into precise scopes.
             return Ok(head);
         }
-        // Human-facing .lisp stays Ukrainian. Lift ONLY a ratified callable
-        // list HEAD into the same exact DomainIdentity as its binary spelling.
-        // This is reader-time projection, not runtime dispatch by names.
-        // The source registry deliberately has NO legacy SID/English fallback.
+        // Human-facing .lisp stays Ukrainian. First resolve the existing
+        // callable source subset, then fall back to the unique exact identity
+        // in the ratified D1–D10 projection table. This does not grant a call
+        // mechanism: evaluator dispatch still requires a primitive or an
+        // installed code slot. No legacy SID/English fallback is consulted.
         if let Some(identity) =
             crate::semantic_registry::exact_uk_callable_for_source_head(spelling)
+        {
+            return Ok(Expr {
+                kind: ExprKind::DomainIdentity(identity),
+                span: head.span,
+            });
+        }
+        if let Some(identity) = crate::domain_projection_catalog::exact_uk_domain_identity(spelling)
         {
             return Ok(Expr {
                 kind: ExprKind::DomainIdentity(identity),
@@ -1130,7 +1231,7 @@ fn lift_head(
         // D8 I/O was already admitted by the same reader in pinned modules.
         // Apply its exact Ukrainian address in ordinary source as well:
         // binder names above win; quoted data never reaches lift_head.
-        if let Some(bits) = admitted_d8_io_uk_bits(spelling) {
+        if let Some(bits) = admitted_d8_uk_callable_bits(spelling) {
             let word = parse_binary_source_words(bits)?[0].word;
             return Ok(Expr {
                 kind: ExprKind::DomainIdentity(DomainIdentity::from_source_word(word)),
@@ -1268,9 +1369,13 @@ mod tests {
             .expect("ратифікована українська поверхня Д10");
         let source = format!("(визначити вибраний-селектор-для-свідка {name})");
         let expression = only(parse_mixed_exact_domain(&source).expect("чинний D10 reader"));
-        let ExprKind::List(parts) = expression.kind else { panic!("форма DEFINE") };
-        assert!(matches!(&parts[2].kind, ExprKind::DomainIdentity(code) if *code == identity),
-            "Д10 код у позиції значення має бути десятирозрядним, а не Д7 текстом");
+        let ExprKind::List(parts) = expression.kind else {
+            panic!("форма DEFINE")
+        };
+        assert!(
+            matches!(&parts[2].kind, ExprKind::DomainIdentity(code) if *code == identity),
+            "Д10 код у позиції значення має бути десятирозрядним, а не Д7 текстом"
+        );
 
         let mut input = "(як-є атом?)".to_owned();
         for _ in 0..8 {
@@ -1307,12 +1412,15 @@ mod tests {
     }
 
     #[test]
-    fn ordinary_ukrainian_source_lifts_only_admitted_d8_io_heads() {
+    fn ordinary_ukrainian_source_lifts_only_exact_admitted_d8_heads() {
         for (surface, bits) in [
+            ("символ-за-кодом", 0b00000000),
+            ("модульна-остача", 0b00101100),
             ("код-символу", 0b11100000),
             ("текст-у-символ", 0b11101101),
             ("символ-у-текст", 0b11101110),
             ("значення-у-текст", 0b11110100),
+            ("однакові?", 0b11110111),
         ] {
             let input = format!("({surface} (як-є а))");
             let expression = only(
@@ -1355,15 +1463,64 @@ mod tests {
         assert!(matches!(&call[0].kind, ExprKind::Symbol(name)
             if name.as_ref() == "текст-у-символ"));
 
-        let unadmitted = only(
+        let code_char = only(
             parse_mixed_exact_domain("(символ-за-кодом 65)")
-                .expect("нератифікований D8 не змінюється від читання"),
+                .expect("ратифікований D8 CODE-CHAR отримує точну адресу"),
         );
-        let ExprKind::List(parts) = unadmitted.kind else {
+        let ExprKind::List(parts) = code_char.kind else {
             panic!("call");
         };
-        assert!(matches!(&parts[0].kind, ExprKind::Symbol(name)
-            if name.as_ref() == "символ-за-кодом"));
+        assert!(matches!(
+            &parts[0].kind,
+            ExprKind::DomainIdentity(identity)
+                if identity.width() == 8 && identity.packed_bits() == 0
+        ));
+
+        let neighbor = only(
+            parse_mixed_exact_domain("(додати-якщо-нема список елемент)")
+                .expect("сусідній D8-резидент має точну identity без механізму"),
+        );
+        let ExprKind::List(parts) = neighbor.kind else {
+            panic!("call");
+        };
+        assert!(matches!(
+            &parts[0].kind,
+            ExprKind::DomainIdentity(identity)
+                if identity.width() == 8 && identity.packed_bits() == 0b00101101
+        ));
+    }
+
+    #[test]
+    fn ukrainian_projection_preserves_ratified_d9_and_d10_identity_without_granting_callability() {
+        let d9 = only(
+            parse_mixed_exact_domain("(читати-файл шлях)")
+                .expect("ratified D9 projection resolves to its exact identity"),
+        );
+        let ExprKind::List(d9_parts) = d9.kind else {
+            panic!("D9 call form");
+        };
+        assert!(matches!(
+            &d9_parts[0].kind,
+            ExprKind::DomainIdentity(identity)
+                if identity.width() == 9 && identity.packed_bits() == 0b110110111
+        ));
+        assert!(matches!(
+            d9_parts[0].kind,
+            ExprKind::DomainIdentity(identity) if identity.core_operation().is_none()
+        ));
+
+        let d10 = only(
+            parse_mixed_exact_domain("(умови-зупинки-наміру x)")
+                .expect("ratified D10 projection resolves to its exact identity"),
+        );
+        let ExprKind::List(d10_parts) = d10.kind else {
+            panic!("D10 call form");
+        };
+        assert!(matches!(
+            &d10_parts[0].kind,
+            ExprKind::DomainIdentity(identity)
+                if identity.width() == 10 && identity.packed_bits() == 0b0010010000
+        ));
     }
 
     #[test]
@@ -1405,22 +1562,28 @@ mod tests {
             "the explicitly admitted D9 mechanism head must bypass its same-spelled wrapper"
         );
 
-        for (head, source) in [
-            ("string-empty?", "(string-empty? text)"),
-            ("рядок-довжина", "(рядок-довжина text)"),
-        ] {
-            let parsed = only(
-                parse_mixed_exact_domain_core_source("lib/core4.lisp", source)
-                    .expect("non-admitted heads remain ordinary source"),
-            );
-            let ExprKind::List(call) = parsed.kind else {
-                panic!("call");
-            };
-            assert!(
-                matches!(&call[0].kind, ExprKind::Symbol(name) if name.as_ref() == head),
-                "{head} must not be promoted by D9 residency or an English projection"
-            );
-        }
+        let english = only(
+            parse_mixed_exact_domain_core_source("lib/core4.lisp", "(string-empty? text)")
+                .expect("English aliases do not acquire source authority"),
+        );
+        let ExprKind::List(english_call) = english.kind else {
+            panic!("English call");
+        };
+        assert!(matches!(&english_call[0].kind, ExprKind::Symbol(name)
+            if name.as_ref() == "string-empty?"));
+
+        let projected = only(
+            parse_mixed_exact_domain_core_source("lib/core4.lisp", "(рядок-довжина текст)")
+                .expect("unique Ukrainian D9 name resolves to exact identity"),
+        );
+        let ExprKind::List(projected_call) = projected.kind else {
+            panic!("D9 call");
+        };
+        assert!(matches!(
+            &projected_call[0].kind,
+            ExprKind::DomainIdentity(identity)
+                if identity.width() == 9 && identity.packed_bits() == 0b110100010
+        ));
     }
 
     #[test]
@@ -1779,7 +1942,9 @@ mod tests {
         // passed through a lexical parameter in a physical SENS expression.
         let source = "((функція (дія) (дія 20 22)) додати)";
         let expression = only(parse_mixed_exact_domain(source).expect("D5 as value"));
-        let ExprKind::List(items) = &expression.kind else { panic!("application") };
+        let ExprKind::List(items) = &expression.kind else {
+            panic!("application")
+        };
         assert!(matches!(
             &items[1].kind,
             ExprKind::DomainIdentity(identity)
@@ -1793,10 +1958,12 @@ mod tests {
         };
         assert_eq!(number.to_decimal_string(), "42");
 
-        let d6 = only(parse_mixed_exact_domain(
-            "((функція (дія) (дія 42)) відняти-1)"
-        ).expect("D6 as value"));
-        let ExprKind::List(items) = &d6.kind else { panic!("D6 application") };
+        let d6 = only(
+            parse_mixed_exact_domain("((функція (дія) (дія 42)) відняти-1)").expect("D6 as value"),
+        );
+        let ExprKind::List(items) = &d6.kind else {
+            panic!("D6 application")
+        };
         assert!(matches!(
             &items[1].kind,
             ExprKind::DomainIdentity(identity)
@@ -1811,18 +1978,19 @@ mod tests {
 
         // No promotion of syntax, quoted data or a locally bound spelling.
         let quote = only(parse_mixed_exact_domain("(як-є додати)").unwrap());
-        let ExprKind::List(quoted) = &quote.kind else { panic!("quoted data") };
+        let ExprKind::List(quoted) = &quote.kind else {
+            panic!("quoted data")
+        };
         assert!(matches!(&quoted[1].kind, ExprKind::Symbol(_)));
-        let shadow = only(parse_mixed_exact_domain(
-            "(функція (додати) додати)"
-        ).unwrap());
-        let ExprKind::List(lambda) = &shadow.kind else { panic!("lambda") };
+        let shadow = only(parse_mixed_exact_domain("(функція (додати) додати)").unwrap());
+        let ExprKind::List(lambda) = &shadow.kind else {
+            panic!("lambda")
+        };
         assert!(matches!(&lambda[2].kind, ExprKind::Symbol(_)));
         let syntax = only(parse_mixed_exact_domain("за-умовою").unwrap());
         assert!(matches!(syntax.kind, ExprKind::Symbol(_)));
-        let invalid = parse_mixed_exact_domain(
-            "((функція (дія) (дія (як-є ()))) відняти-1)"
-        ).expect("D6 negative source is parseable");
+        let invalid = parse_mixed_exact_domain("((функція (дія) (дія (як-є ()))) відняти-1)")
+            .expect("D6 negative source is parseable");
         assert!(
             crate::eval::eval_parsed_expressions(&invalid, &mut session).is_err(),
             "first-class D6 must reject nonnumeric input"
@@ -3076,11 +3244,14 @@ mod tests {
 
     #[test]
     fn process_tcp_language_loaders_use_path_bound_reader() {
-        let process_ast =
-            parse_mixed_exact_domain_process_tcp_source("lib/process.lisp", crate::PROCESS_LIBRARY_SOURCE)
-                .expect("actual process.lisp parses through its path-bound reader");
-        let tcp_ast = parse_mixed_exact_domain_process_tcp_source("lib/tcp.lisp", crate::TCP_LIBRARY_SOURCE)
-            .expect("actual tcp.lisp parses through its path-bound reader");
+        let process_ast = parse_mixed_exact_domain_process_tcp_source(
+            "lib/process.lisp",
+            crate::PROCESS_LIBRARY_SOURCE,
+        )
+        .expect("actual process.lisp parses through its path-bound reader");
+        let tcp_ast =
+            parse_mixed_exact_domain_process_tcp_source("lib/tcp.lisp", crate::TCP_LIBRARY_SOURCE)
+                .expect("actual tcp.lisp parses through its path-bound reader");
         assert!(!process_ast.is_empty() && !tcp_ast.is_empty());
 
         let mut session = crate::Session::default();

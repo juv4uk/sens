@@ -722,7 +722,7 @@ fn main() {
     if let Err(e) = sens::load_process_library(&mut session) {
         eprintln!(
             "Error loading process.lisp: {}",
-            e.render(sens::PROCESS_LIBRARY_SOURCE)
+            e.render("<T5M process bootstrap>")
         );
         process::exit(1);
     }
@@ -732,8 +732,8 @@ fn main() {
     // 2026-09-12 (FS-CAPABILITY-UTF8-POLICY-MIGRATION).
     if let Err(e) = sens::load_fs_library(&mut session) {
         eprintln!(
-            "Error loading fs.lisp: {}",
-            e.render(sens::FS_LIBRARY_SOURCE)
+            "Error loading filesystem T5M bootstrap: {}",
+            e.render("<T5M filesystem bootstrap>")
         );
         process::exit(1);
     }
@@ -1506,4 +1506,3 @@ fn repl_core_source_zig_only() -> Result<String, String> {
         Err("RUST_ZIG_ONLY: SENS REPL core requires Zig; no Rust source fallback".into())
     }
 }
-

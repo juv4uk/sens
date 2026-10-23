@@ -141,6 +141,7 @@ fn exact_args(
 pub(crate) enum DomainPrimitiveKind {
     StringToSymbol,
     SymbolToString,
+    CodeChar,
     CharCode,
     Read,
     WriteToString,
@@ -166,6 +167,7 @@ pub(crate) fn domain_primitive_kind(identity: CoreDomainIdentity) -> Option<Doma
             _ => None, // QUOTE/COND are syntax routes, 000 is structural empty
         },
         CoreDomainIdentity::D8(word) => match word.word().packed_bits() {
+            0b00000000 => Some(DomainPrimitiveKind::CodeChar),
             0b11100000 => Some(DomainPrimitiveKind::CharCode),
             0b11101101 => Some(DomainPrimitiveKind::StringToSymbol),
             0b11101110 => Some(DomainPrimitiveKind::SymbolToString),
@@ -190,8 +192,10 @@ fn invoke_domain_primitive(
     let kind = domain_primitive_kind(identity)?;
     Some((|| {
         let expected = match kind {
-            DomainPrimitiveKind::StringToSymbol | DomainPrimitiveKind::SymbolToString => 1,
-            DomainPrimitiveKind::CharCode => 1,
+            DomainPrimitiveKind::StringToSymbol
+            | DomainPrimitiveKind::SymbolToString
+            | DomainPrimitiveKind::CodeChar
+            | DomainPrimitiveKind::CharCode => 1,
             DomainPrimitiveKind::Read => args.len(),
             DomainPrimitiveKind::WriteToString => 1,
             DomainPrimitiveKind::AtomPredicate => 1,
@@ -238,6 +242,11 @@ fn invoke_domain_primitive(
                 // D8:11101110, exact inverse carrier with the existing string
                 // mechanism. No historical byte/alias is ever consulted.
                 special_forms::symbol_to_string_values(args, span)
+            }
+            DomainPrimitiveKind::CodeChar => {
+                // D8:00000000 materializes one Unicode scalar from an
+                // explicitly qualified D24+ value. UTF-8 policy stays Lisp-owned.
+                special_forms::codepoint_to_string_values(args, span)
             }
             DomainPrimitiveKind::CharCode => {
                 // D8:11100000 is the explicit Unicode scalar -> D24 boundary.
@@ -748,6 +757,32 @@ mod exact_domain_primitive_tests {
         CoreDomainIdentity::D4(crate::CoreD4::from_word(
             crate::Bit4::new(bits).expect("D4 word"),
         ))
+    }
+
+    #[test]
+    fn d8_code_char_uses_exact_d24_scalar_and_rejects_neighbor() {
+        let environment = Environment::root();
+        let scalar = (0u32..24)
+            .rev()
+            .map(|shift| ((65u32 >> shift) & 1) as u8)
+            .collect::<Vec<_>>();
+        let value = Value::BinaryNumber(
+            crate::BinaryNumber::from_numeric_domain_bits(24, &scalar).expect("exact D24 scalar"),
+        );
+        let code_char = CoreDomainIdentity::D8(crate::CoreD8::from_word(
+            crate::Bit8::new(0).expect("D8 CODE-CHAR"),
+        ));
+        let result = invoke_domain_identity(code_char, &[value], &environment, Span::default())
+            .expect("ratified D8 CODE-CHAR has a concrete scalar bridge");
+        assert!(matches!(result, Value::String(ref text) if text.as_ref() == "A"));
+
+        let neighbor = CoreDomainIdentity::D8(crate::CoreD8::from_word(
+            crate::Bit8::new(1).expect("adjacent D8 resident"),
+        ));
+        assert!(
+            invoke_domain_identity(neighbor, &[], &environment, Span::default()).is_err(),
+            "admitting CODE-CHAR must not admit its adjacent D8 resident"
+        );
     }
 
     #[test]

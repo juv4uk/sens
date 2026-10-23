@@ -416,6 +416,42 @@ mod exact_t5m_cutover_tests {
         PhysicalT5Program::from_exact_words(&words).map_err(|error| format!("{error:?}"))
     }
 
+    #[test]
+    fn physical_admission_covers_every_ratified_domain_family_only() {
+        for width in 1..=10 {
+            let mut bits = vec![0; width];
+            bits[width - 1] = 1;
+            let admitted = ExactDomainWord::from_physical_width_bits(width, &bits)
+                .unwrap_or_else(|error| panic!("ratified D{width} must be admitted: {error}"));
+            assert!(
+                matches!(admitted, ExactDomainWord::Identity(identity) if identity.width() == width)
+            );
+        }
+
+        // D24, D48, ... are the ratified numeric family D(24 * 2^n).
+        // Keep exact width and leading zeros; do not cap admission at D192.
+        for width in [24, 48, 96, 192, 384, 768] {
+            let mut bits = vec![0; width];
+            bits[0] = 1;
+            let admitted =
+                ExactDomainWord::from_physical_width_bits(width, &bits).unwrap_or_else(|error| {
+                    panic!("ratified numeric D{width} must be admitted: {error}")
+                });
+            assert!(matches!(admitted, ExactDomainWord::Number(number)
+                if number.numeric_domain_width() == Some(width)
+                    && number.exact_numeric_domain_bits().as_deref() == Some(bits.as_slice())));
+        }
+
+        // D11–D23 have no ratified identity, and numeric widths must follow
+        // the exact D24 * 2^n family rather than an arbitrary multiple.
+        for width in (11..=23).chain([25, 36, 72, 120]) {
+            assert!(
+                ExactDomainWord::from_physical_width_bits(width, &vec![0; width]).is_err(),
+                "unratified D{width} must remain rejected"
+            );
+        }
+    }
+
     // Д2 має один закон вкладеності у текстовому та відновленому
     // з Zig/T5M exact-domain readers. Жодного другого parser-ліміту.
     #[test]

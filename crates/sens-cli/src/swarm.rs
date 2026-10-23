@@ -604,14 +604,14 @@ fn handle_sexpr_connection(
     if let Err(error) = sens::load_process_library(&mut session) {
         eprintln!(
             "TCP REPL: process library bootstrap failed: {}",
-            error.render(sens::PROCESS_LIBRARY_SOURCE)
+            error.render("<T5M process bootstrap>")
         );
         return;
     }
     if let Err(error) = sens::load_fs_library(&mut session) {
         eprintln!(
-            "TCP REPL: filesystem library bootstrap failed: {}",
-            error.render(sens::FS_LIBRARY_SOURCE)
+            "TCP REPL: filesystem T5M bootstrap failed: {}",
+            error.render("<T5M filesystem bootstrap>")
         );
         return;
     }
