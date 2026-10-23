@@ -65,9 +65,7 @@
     (четверте sequence "3xLOAD-tail+LOAD-head")
     (п'ятий sequence "4xLOAD-tail+LOAD-head")
     (перше-першого sequence "LOAD-head+LOAD-head")
-    (друге sequence "LOAD-tail+LOAD-head")
     (решта-решти sequence "LOAD-tail+LOAD-tail")
-    (четверте sequence "3xLOAD-tail+LOAD-head")
 
     (вектор runtime "allocate+STORE-vector")
     (створити-вектор runtime "allocate+fill-vector")
