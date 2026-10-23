@@ -50,7 +50,10 @@ def _human(row: dict) -> dict[str, str]:
 
 
 def main(argv: list[str] | None = None) -> int:
-    ap = argparse.ArgumentParser(description="пошук функцій у драбинах D1–D10")
+    ap = argparse.ArgumentParser(
+        description="пошук функцій у драбинах D1–D10 (перед написанням — шукай, не вигадуй)",
+        epilog="Приклади:  search-domain-function.py сполучити   |   search-domain-function.py --all спол   |   "
+               "search-domain-function.py --domain d6 список   |   search-domain-function.py --list-domains")
     ap.add_argument("query", nargs="?")
     ap.add_argument("--domain", help="обмежити доменом, напр. d6")
     ap.add_argument("--all", action="store_true", help="шукати підрядок, а не точний збіг")
@@ -84,21 +87,42 @@ def main(argv: list[str] | None = None) -> int:
             ap.error("--domain має вигляд d6")
         want_domain = int(m.group(1))
 
-    hits = []
-    for d in sorted(tables):
-        if want_domain is not None and d != want_domain:
-            continue
-        for row in tables[d]:
-            names = _human(row)
-            for col, value in names.items():
-                if not SINGLE.match(value):
-                    continue
-                if (q in value.lower()) if args.all else (q == value.lower()):
-                    hits.append((d, row, names))
-                    break
+    def collect(pred) -> list:
+        out = []
+        for d in sorted(tables):
+            if want_domain is not None and d != want_domain:
+                continue
+            for row in tables[d]:
+                names = _human(row)
+                for col, value in names.items():
+                    if not SINGLE.match(value):
+                        continue
+                    if pred(value.lower()):
+                        out.append((d, row, names))
+                        break
+        return out
+
+    hits = collect(lambda v: q == v)
+    auto_substring = False
+    if not hits and not args.all:
+        # Комфорт: частковий запит не мусить провалюватися — пробуємо підрядок.
+        hits = collect(lambda v: q in v)
+        auto_substring = bool(hits)
 
     if not hits:
+        import difflib
+        pool = []
+        for d in sorted(tables):
+            if want_domain is not None and d != want_domain:
+                continue
+            for row in tables[d]:
+                for value in _human(row).values():
+                    if SINGLE.match(value):
+                        pool.append(value)
+        close = difflib.get_close_matches(args.query, pool, n=8, cutoff=0.55)
         print(f"НЕ ЗНАЙДЕНО у D1–D10: {args.query}")
+        if close:
+            print("Можливо, ви мали на увазі: " + ", ".join(close))
         print("Якщо операції справді немає — це кандидат у пропозиції D11, а не привід писати дубль.")
         return 1
 
