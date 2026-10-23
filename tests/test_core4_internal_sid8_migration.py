@@ -87,6 +87,20 @@ def domain_rows(width: int) -> dict[str, str]:
     return rows
 
 
+def domain_ukr_names(width: int) -> set[str]:
+    text = (DOMAIN_DIR / f"d{width}.lisp").read_text(encoding="utf-8")
+    names: set[str] = set()
+    for line in text.splitlines():
+        if not re.match(rf"^\\s*\\([01]{{{width}}}\\s+", line):
+            continue
+        projection = re.search(r'\\(укр\\s+(\\(\\)|"[^"]*"|[^()\\s]+)\\)', line)
+        if projection is None:
+            raise ValueError(f"D{width} missing укр projection")
+        value = projection.group(1)
+        names.add(value[1:-1] if value.startswith('"') else value)
+    return names
+
+
 def verify(source: str) -> None:
     heads = active_heads(source)
     if "t" in active_atoms(source):
@@ -115,14 +129,18 @@ def verify(source: str) -> None:
     start = source.index("(визначити сталі-відповідники-за-ідентичностями")
     end = source.index("(визначити знайти-групу-відповідників-за-ідентичністю", start)
     projection_block = source[start:end]
-    if re.search(r"\\(д9\\s+[01]{9}(?=[\\s)])", projection_block):
+    if re.search(r"\(д9\s+[01]{9}(?=[\s)])", projection_block):
         raise ValueError("stable D9 identity map still contains a binary coordinate literal")
-    named_rows = re.findall(r"^\\s*\\(д9\\s+([^\\s()]+)\\s+\\(([^\\s()]+)\\)\\)\\s*$",
+    named_rows = re.findall(r"^\s*\(д9\s+([^\s()]+)\s+\(([^\s()]+)\)\)\s*$",
                             projection_block, flags=re.MULTILINE)
     if len(named_rows) != 20:
         raise ValueError(f"expected 20 named D9 projections, found {len(named_rows)}")
     if any(key != alias for key, alias in named_rows):
         raise ValueError("stable D9 identity key differs from its Ukrainian alias projection")
+    authoritative_ukr = domain_ukr_names(9)
+    unknown_names = sorted(key for key, _alias in named_rows if key not in authoritative_ukr)
+    if unknown_names:
+        raise ValueError("stable D9 keys are not full-column укр projections: " + ", ".join(unknown_names))
 
     if heads["mono-ns"] != 1:
         raise ValueError("Core4 must retain exactly one honest MONO-NS mechanism boundary")
