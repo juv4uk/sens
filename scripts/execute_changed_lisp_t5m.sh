@@ -560,7 +560,7 @@ while IFS= read -r file || [[ -n "$file" ]]; do
     binding_sources=(--binding-source lib/result-status.lisp)
   elif [[ "$file" == "tests/semantic/language-law-epistemic-records.lisp" ||
           "$file" == "tests/semantic/language-mutant-epistemic-records.lisp" ]]; then
-    # Lisp owns the epistemic contracts; preload their exact DEFINE dependencies in order.
+    # Епістемічні закони належать Lisp; спершу завантажуються їхні реальні DEFINE-залежності.
     binding_sources=(--binding-source lib/unify.lisp
                      --binding-source lib/reason.lisp
                      --binding-source lib/forward.lisp
