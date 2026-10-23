@@ -16,7 +16,7 @@ use std::path::PathBuf;
 use std::process;
 
 #[cfg(feature = "zig-transport")]
-fn execute_zig_t5m_asset(
+pub(crate) fn execute_zig_t5m_asset(
     physical: &[u8],
     label: &str,
     session: &mut Session,
@@ -1551,6 +1551,20 @@ pub(crate) fn eval_t5m_source_in_session(
     surface: ReplSurface,
 ) -> Result<sens::EvalResult, String> {
     eval_t5m_repl_line(source, session, surface)
+}
+
+/// Виконати джерело через T5M у вже завантаженій сесії, зберігши непрозорий
+/// результат синтаксичного дерева для мовних інструментів на кшталт лінтера.
+#[cfg(feature = "zig-transport")]
+pub(crate) fn eval_t5m_source_in_session_preserving_result(
+    source: &str,
+    session: &mut Session,
+    surface: ReplSurface,
+) -> Result<sens::EvalResult, String> {
+    let program = prepare_t5m_repl_program(source, surface, session)?;
+    program
+        .execute(session)
+        .map_err(|error| format!("SENS binary evaluator: {}", error.render(source)))
 }
 
 /// Виконати впорядковані Lisp-частини через Zig/T5M в одній SENS-сесії.

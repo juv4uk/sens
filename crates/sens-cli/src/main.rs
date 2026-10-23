@@ -452,17 +452,15 @@ fn eval_physical_t5_with_benchmark_metrics(
     Ok((result, ast_nodes, eval_visits))
 }
 
-/// Isolated byte carrier. SENS decides how the contents are parsed and executed.
-fn linter_source_zig_only() -> Result<String, String> {
+/// CLI receives only the committed physical linter T5M carrier from Zig.
+fn linter_t5m_asset_zig_only() -> Result<Vec<u8>, String> {
     #[cfg(feature = "zig-transport")]
     {
-        let bytes = zig_transport::linter_source_bytes()?;
-        String::from_utf8(bytes)
-            .map_err(|e| format!("ZIG_LINTER_CARRIER invalid UTF-8 surface: {e}"))
+        zig_transport::linter_t5m_bytes()
     }
     #[cfg(not(feature = "zig-transport"))]
     {
-        Err("RUST_ZIG_ONLY: linter library requires Zig; no Rust project-source fallback".into())
+        Err("RUST_ZIG_ONLY: linter T5M asset requires Zig; no Rust fallback".into())
     }
 }
 
@@ -971,78 +969,43 @@ fn main() {
             }
             let filename = &args[2];
 
-            // Load unchanged bytes only through Zig; SENS retains Lisp semantics.
-            let linter_lib = match linter_source_zig_only() {
-                Ok(source) => source,
+            // Load only the committed physical T5M library through Zig;
+            // SENS decodes and executes it in the existing Core4 session.
+            let linter_asset = match linter_t5m_asset_zig_only() {
+                Ok(physical) => physical,
                 Err(error) => {
-                    eprintln!("Error loading linter through Zig: {error}");
+                    eprintln!("Error loading linter T5M through Zig: {error}");
                     process::exit(2);
                 }
             };
-            if let Ok(linter_ast) = parse(&linter_lib) {
-                if let Err(e) = eval_parsed_expressions(&linter_ast, &mut session) {
-                    eprintln!("Error loading linter: {}", e.render(&linter_lib));
-                    process::exit(1);
-                }
-            } else {
-                eprintln!("Failed to parse linter.lisp");
+            if let Err(error) =
+                repl::execute_zig_t5m_asset(&linter_asset, "SENS linter", &mut session)
+            {
+                eprintln!("Error executing linter T5M: {error}");
                 process::exit(1);
             }
 
             match fs::read_to_string(filename) {
                 Ok(source) => {
-                    let quoted_src = format!("(quote (begin {}\n))", source);
-                    match parse(&quoted_src) {
-                        Ok(q_ast) => {
-                            let target_ast = match eval_parsed_expressions(&q_ast, &mut session) {
-                                Ok(r) => r.value,
-                                Err(e) => {
-                                    eprintln!(
-                                        "Error evaluating quoted source: {}",
-                                        e.render(&quoted_src)
-                                    );
-                                    process::exit(1);
-                                }
-                            };
-                            session.environment.define("*lint-target*", target_ast);
-
-                            let lint_call_src = "(аналіз-перевірити *lint-target* (quote ((max-size . 5000) (max-nesting . 50) (max-complexity . 100) (max-globals . 500) (max-effects . 10))))";
-                            match parse(lint_call_src) {
-                                Ok(lint_ast) => {
-                                    match eval_parsed_expressions(&lint_ast, &mut session) {
-                                        Ok(result) => {
-                                            if let Value::Nil = result.value {
-                                                println!("Linter passed: {}", filename);
-                                                return;
-                                            } else {
-                                                eprintln!(
-                                                    "Linter violations found in {}:",
-                                                    filename
-                                                );
-                                                eprintln!("{}", result.value);
-                                                process::exit(1);
-                                            }
-                                        }
-                                        Err(e) => {
-                                            eprintln!(
-                                                "Error running linter: {}",
-                                                e.render(lint_call_src)
-                                            );
-                                            process::exit(1);
-                                        }
-                                    }
-                                }
-                                Err(e) => {
-                                    eprintln!(
-                                        "Parse error creating lint call: {}",
-                                        e.render(lint_call_src)
-                                    );
-                                    process::exit(1);
-                                }
+                    let lint_call_src = format!(
+                        "(аналіз-перевірити (як-є (begin {source}\n)) (як-є ((max-size . 5000) (max-nesting . 50) (max-complexity . 100) (max-globals . 500) (max-effects . 10))))"
+                    );
+                    match repl::eval_t5m_source_in_session_preserving_result(
+                        &lint_call_src,
+                        &mut session,
+                        repl::ReplSurface::UkrainianFull,
+                    ) {
+                        Ok(result) => {
+                            if let Value::Nil = result.value {
+                                println!("Linter passed: {}", filename);
+                                return;
                             }
+                            eprintln!("Linter violations found in {}:", filename);
+                            eprintln!("{}", result.value);
+                            process::exit(1);
                         }
-                        Err(e) => {
-                            eprintln!("Parse error in {}: {}", filename, e.render(&source));
+                        Err(error) => {
+                            eprintln!("Error running linter through T5M for {filename}: {error}");
                             process::exit(1);
                         }
                     }
@@ -1489,35 +1452,28 @@ mod core_profile_bootstrap_tests {
 
     #[cfg(feature = "zig-transport")]
     #[test]
-    fn zig_linter_carrier_transports_real_source_without_rust_embed() {
-        let src = linter_source_zig_only().expect("live Zig C ABI must carry linter bytes");
-        let raw = zig_transport::linter_source_bytes().expect("repeat exact Zig ABI byte copy");
-        assert!(!src.is_empty());
-        assert_eq!(
-            src.as_bytes(),
-            raw.as_slice(),
-            "Zig ABI must preserve every source byte"
-        );
-        assert!(
-            src.contains("(визначити аналіз-форма-голова"),
-            "current Ukrainian linter source, not a stub"
-        );
-        // Parsing and execution are distinct SENS-owned admission tests.
-        // Do not turn this transport witness red for an unrelated legacy
-        // mixed-source parser rejection, nor falsely claim semantic PASS.
+    fn zig_linter_carrier_transports_only_physical_t5m() {
+        let raw = linter_t5m_asset_zig_only().expect("live Zig C ABI must carry linter T5M");
+        let words = zig_transport::decode_t5m_exact_words(&raw)
+            .expect("physical T5M decodes to exact SENS words");
+        assert!(!raw.is_empty());
+        assert!(!words.is_empty());
         println!(
-            "ZIG_LINTER_CARRIER_PASS bytes={} semantic_admission=NOT_TESTED",
-            raw.len()
+            "ZIG_LINTER_T5M_CARRIER_PASS bytes={} words={} semantic_admission=CLI_TESTED",
+            raw.len(),
+            words.len()
         );
-        assert!(!include_str!("main.rs").contains("include_str!(\\\"../../../lib/linter.lisp\\\")"));
+        let rust_main = include_str!("main.rs");
+        assert!(!rust_main.contains("include_str!(\"../../../lib/linter.lisp\")"));
+        assert!(!rust_main.contains("include_bytes!(\"../../../lib/linter.sens\")"));
     }
 
     #[cfg(not(feature = "zig-transport"))]
     #[test]
-    fn zig_linter_carrier_refuses_absent_transport_before_lisp_load() {
-        let error = linter_source_zig_only().expect_err("Zig-less Rust must not load SENS linter");
+    fn zig_linter_carrier_refuses_absent_transport() {
+        let error = linter_t5m_asset_zig_only().expect_err("Zig-less Rust must not load linter T5M");
         assert!(error.contains("RUST_ZIG_ONLY"));
-        assert!(error.contains("no Rust project-source fallback"));
+        assert!(error.contains("no Rust fallback"));
     }
 
     #[cfg(feature = "zig-transport")]

@@ -124,13 +124,13 @@ test "SENS meta-evaluator T5M bytes cross Zig exactly, short buffer is untouched
 
 // A single opaque asset, not a symbol registry. The caller owns memory;
 // capacity=0 queries exact byte length. -2 is fail-closed, no partial write.
-const linter_asset = @embedFile("lib/linter.lisp");
-pub export fn sens_zig_linter_bytes_copy(dst: [*]u8, capacity: usize) isize {
-    if (linter_asset.len == 0) return -1;
-    if (capacity == 0) return @intCast(linter_asset.len);
-    if (capacity < linter_asset.len) return -2;
-    @memcpy(dst[0..linter_asset.len], linter_asset[0..linter_asset.len]);
-    return @intCast(linter_asset.len);
+const linter_t5m_asset = @embedFile("lib/linter.sens");
+pub export fn sens_zig_linter_t5m_bytes_copy(dst: [*]u8, capacity: usize) isize {
+    if (linter_t5m_asset.len == 0) return -1;
+    if (capacity == 0) return @intCast(linter_t5m_asset.len);
+    if (capacity < linter_t5m_asset.len) return -2;
+    @memcpy(dst[0..linter_t5m_asset.len], linter_t5m_asset[0..linter_t5m_asset.len]);
+    return @intCast(linter_t5m_asset.len);
 }
 
 // Contract source is an opaque byte asset, never a semantic registry.
@@ -213,15 +213,15 @@ test "contract exact-byte copy and no partial output on a short buffer" {
     try std.testing.expectEqualSlices(u8, contract_asset[0..contract_asset.len], &destination);
 }
 
-test "opaque linter bytes cross Zig without partial writes or semantic registry" {
-    const required = sens_zig_linter_bytes_copy(undefined, 0);
-    try std.testing.expectEqual(@as(isize, @intCast(linter_asset.len)), required);
+test "physical linter T5M crosses Zig without partial writes or semantic registry" {
+    const required = sens_zig_linter_t5m_bytes_copy(undefined, 0);
+    try std.testing.expectEqual(@as(isize, @intCast(linter_t5m_asset.len)), required);
     var short: [1]u8 = .{0xA5};
-    try std.testing.expectEqual(@as(isize, -2), sens_zig_linter_bytes_copy(&short, short.len));
+    try std.testing.expectEqual(@as(isize, -2), sens_zig_linter_t5m_bytes_copy(&short, short.len));
     try std.testing.expectEqual(@as(u8, 0xA5), short[0]);
-    var output: [linter_asset.len]u8 = undefined;
-    try std.testing.expectEqual(required, sens_zig_linter_bytes_copy(&output, output.len));
-    try std.testing.expectEqualSlices(u8, linter_asset[0..linter_asset.len], &output);
+    var output: [linter_t5m_asset.len]u8 = undefined;
+    try std.testing.expectEqual(required, sens_zig_linter_t5m_bytes_copy(&output, output.len));
+    try std.testing.expectEqualSlices(u8, linter_t5m_asset[0..linter_t5m_asset.len], &output);
 }
 
 // Ukrainian API documentation is a SENS-owned source. Zig only copies bytes.

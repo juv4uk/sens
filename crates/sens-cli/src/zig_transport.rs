@@ -343,26 +343,31 @@ pub fn guard_reference_source_bytes() -> Result<Vec<u8>, String> {
 
 /// Механічний інваріант SENS ↔ Zig: кількість, ширина, біти.
 /// Не визначає значення функцій і не замінює SENS-семантичний оракул.
-/// Retrieves opaque source bytes through the sterile Zig C ABI.
-/// No direct Rust include/open of lib/linter.lisp and no semantic work in Zig.
-pub fn linter_source_bytes() -> Result<Vec<u8>, String> {
+/// Retrieves opaque physical linter T5M through the sterile Zig C ABI.
+/// Rust never opens the Lisp source and Zig performs no semantic work.
+pub fn linter_t5m_bytes() -> Result<Vec<u8>, String> {
     version()?;
     let required = unsafe {
-        asset_ffi::sens_zig_linter_bytes_copy(std::ptr::NonNull::<u8>::dangling().as_ptr(), 0)
+        asset_ffi::sens_zig_linter_t5m_bytes_copy(
+            std::ptr::NonNull::<u8>::dangling().as_ptr(),
+            0,
+        )
     };
     if required <= 0 {
-        return Err("ZIG_LINTER_CARRIER invalid source length".into());
+        return Err("ZIG_LINTER_T5M_CARRIER invalid physical length".into());
     }
-    let len = usize::try_from(required).map_err(|_| "ZIG_LINTER_CARRIER length overflow")?;
+    let len = usize::try_from(required).map_err(|_| "ZIG_LINTER_T5M_CARRIER length overflow")?;
     // Host memory bound. This is not a SENS domain/semantic admission threshold.
     if len > 8 * 1024 * 1024 {
-        return Err("ZIG_LINTER_CARRIER source exceeds host byte limit".into());
+        return Err("ZIG_LINTER_T5M_CARRIER exceeds host byte limit".into());
     }
     let mut bytes = vec![0u8; len];
-    let copied = unsafe { asset_ffi::sens_zig_linter_bytes_copy(bytes.as_mut_ptr(), bytes.len()) };
+    let copied = unsafe {
+        asset_ffi::sens_zig_linter_t5m_bytes_copy(bytes.as_mut_ptr(), bytes.len())
+    };
     if copied != required {
         return Err(format!(
-            "ZIG_LINTER_CARRIER byte copy rejected: code={copied}"
+            "ZIG_LINTER_T5M_CARRIER byte copy rejected: code={copied}"
         ));
     }
     Ok(bytes)

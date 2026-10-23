@@ -33,8 +33,8 @@ fn main() {
     // not only today's hand-listed leaf files. Source bits stay Zig-owned.
     println!("cargo:rerun-if-changed=../../research/zig-codecs");
     println!("cargo:rerun-if-changed=../../zig_transport_root.zig");
-    // Zig @embedFile holds the linter source: never serve a stale asset in Cargo.
-    println!("cargo:rerun-if-changed=../../lib/linter.lisp");
+    // Zig @embedFile holds the linter's physical T5M pair: never serve a stale asset.
+    println!("cargo:rerun-if-changed=../../lib/linter.sens");
     println!("cargo:rerun-if-changed=../../lib/unify.lisp");
     println!("cargo:rerun-if-changed=../../lib/unify.sens");
     println!("cargo:rerun-if-changed=../../lib/reason.lisp");
