@@ -659,17 +659,17 @@ mod tests {
         let mut session = Session::bare();
         let result = eval_program(r#"(прочитати "(alpha beta)")"#, &mut session)
             .expect("the exact Ukrainian D8 READ projection is executable");
-        let Value::Pair(pair) = result.value else {
+        let Value::Pair(pair) = &result.value else {
             panic!("READ of a two-item list must return a structural pair");
         };
         // Rust перевіряє лише механічну форму результату READ;
         // рівність вмісту й семантику символів засвідчує Lisp/SENS.
-        assert!(matches!(pair.head, Value::Symbol(_)));
-        let Value::Pair(rest) = pair.tail else {
+        assert!(matches!(&pair.head, Value::Symbol(_)));
+        let Value::Pair(rest) = &pair.tail else {
             panic!("READ must preserve the second list cell");
         };
-        assert!(matches!(rest.head, Value::Symbol(_)));
-        assert!(matches!(rest.tail, Value::Nil));
+        assert!(matches!(&rest.head, Value::Symbol(_)));
+        assert!(matches!(&rest.tail, Value::Nil));
     }
 }
 
