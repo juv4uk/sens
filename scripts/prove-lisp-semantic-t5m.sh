@@ -20,6 +20,18 @@ fail() {
   exit 1
 }
 
+# Доказовий розбір червоного маршруту: жодних підмін вердикту чи допуску.
+# Показуємо обидва реальні потоки й першу різницю, не лише "divergent".
+report_output_divergence() {
+  local id="$1" left_name="$2" left="$3" right_name="$4" right="$5"
+  printf 'T5M_OUTPUT_DIVERGENCE id=%s layer=carrier left=%s right=%s\\n' \
+    "$id" "$left_name" "$right_name" >&2
+  wc -c "$left" "$right" >&2
+  sha256sum "$left" "$right" >&2
+  diff -u --label "$left_name" --label "$right_name" "$left" "$right" | head -n 40 >&2 || true
+  fail "$id" carrier "$left_name-byte-exact-$right_name" divergent
+}
+
 run_law() {
   local id="$1" source="$2" expected="$3" dir physical actual
   dir="$evidence/$id"
@@ -54,9 +66,9 @@ run_law() {
     fail "$id" sens-physical "paired-and-standalone-execution" "rejected"
   fi
   cmp -s "$dir/direct.out" "$dir/paired.out" ||
-    fail "$id" carrier "direct-equals-paired" "divergent"
+    report_output_divergence "$id" direct "$dir/direct.out" paired "$dir/paired.out"
   cmp -s "$dir/paired.out" "$dir/physical.out" ||
-    fail "$id" carrier "paired-equals-physical" "divergent"
+    report_output_divergence "$id" paired "$dir/paired.out" physical "$dir/physical.out"
 
   actual="$(cat "$dir/physical.out")"
   if [[ "$actual" != "$expected" ]]; then
@@ -101,9 +113,9 @@ run_bound_law() {
     fail "$id" sens-physical "paired-and-standalone-execution" "rejected"
   fi
   cmp -s "$dir/direct.out" "$dir/paired.out" ||
-    fail "$id" carrier "direct-equals-paired" "divergent"
+    report_output_divergence "$id" direct "$dir/direct.out" paired "$dir/paired.out"
   cmp -s "$dir/paired.out" "$dir/physical.out" ||
-    fail "$id" carrier "paired-equals-physical" "divergent"
+    report_output_divergence "$id" paired "$dir/paired.out" physical "$dir/physical.out"
 
   actual="$(cat "$dir/physical.out")"
   [[ "$actual" == "$expected" ]] ||
