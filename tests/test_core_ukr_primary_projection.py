@@ -100,6 +100,14 @@ class CoreUkrPrimaryProjectionTests(unittest.TestCase):
                 self.assertNotRegex(core, rf"\(визначити\s+{retired}\b")
 
         with self.subTest(file="lib/core4.lisp"):
+            # Старий описувач восьмибітних літералів не є резидентом драбини.
+            # Він не має ані визначення, ані активного тега binary, ані сирих
+            # восьмибітних голів у виконуваному джерелі Core4.
+            self.assertNotRegex(
+                core4, r"(?m)^\(визначити\s+двійковий(?=\s|\))"
+            )
+            self.assertNotIn("(як-є binary)", core4)
+            self.assertNotRegex(core4, r"(?m)^\s*\([01]{8}\s")
             # Допоміжний двоелементний список і D8 «пара» — різні закони.
             self.assertIn(
                 "(визначити створити-список-із-двох-значень\n  (функція (лівий-аргумент правий-аргумент)",
