@@ -338,35 +338,8 @@ fn utf8_library_loads_from_zig_t5m_words_without_process_host_capabilities() {
     }
 }
 
-#[test]
-fn utf8_helper_returns_exact_d1_predicate_on_boundaries() {
-    let mut session = utf8_session();
-    for (source, expected) in [
-        ("(кодова-одиниця-кодування-юнікод-8-у-допустимому-діапазоні? 0 0 255)", true),
-        ("(кодова-одиниця-кодування-юнікод-8-у-допустимому-діапазоні? 255 0 255)", true),
-        ("(кодова-одиниця-кодування-юнікод-8-у-допустимому-діапазоні? 256 0 255)", false),
-        ("(кодова-одиниця-кодування-юнікод-8-у-допустимому-діапазоні? -1 0 255)", false),
-        ("(це-байт-продовження-кодування-юнікод-8? 127)", false),
-        ("(це-байт-продовження-кодування-юнікод-8? 128)", true),
-        ("(це-байт-продовження-кодування-юнікод-8? 191)", true),
-        ("(це-байт-продовження-кодування-юнікод-8? 192)", false),
-        ("(це-допустимий-байт-кодування-юнікод-8? 0)", true),
-        ("(це-допустимий-байт-кодування-юнікод-8? 255)", true),
-        ("(це-допустимий-байт-кодування-юнікод-8? 256)", false),
-        ("(усі-елементи-є-байтами-кодування-юнікод-8? (як-є ()))", true),
-        ("(усі-елементи-є-байтами-кодування-юнікод-8? (як-є (0 127 255)))", true),
-        ("(усі-елементи-є-байтами-кодування-юнікод-8? (як-є (0 256)))", false),
-        ("(наявні-два-байти-продовження-кодування-юнікод-8? 128 191)", true),
-        ("(наявні-два-байти-продовження-кодування-юнікод-8? 128 192)", false),
-    ] {
-        let actual = eval_in_utf8_context(source, &mut session);
-        assert_eq!(
-            actual.as_predicate_bit(),
-            Some(expected),
-            "{source}: expected an exact D1 bit, never ordinary Number 0/1"
-        );
-    }
-}
+// Boundary results now belong to tests/semantic/utf8-boundary-laws.lisp.
+// This file keeps UTF-8 reader/loader/codec mechanics and SENS self-verdict transport.
 
 const UTF8_D1_LAW: &str = include_str!("../../../tests/semantic/utf8-direct-d1-law.lisp");
 
