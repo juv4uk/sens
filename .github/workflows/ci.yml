@@ -203,6 +203,11 @@ jobs:
                   "tests/semantic/d7-epistemic-structural-tag-mutant.lisp",
                   "tests/semantic/language-law-epistemic-records.lisp",
                   "tests/semantic/language-mutant-epistemic-records.lisp",
+                  # D6 quantifier files must be evaluated only inside the exact-Core4 bundle.
+                  "tests/semantic/усі-за-предикатом-law.lisp",
+                  "tests/semantic/усі-за-предикатом-mutant.lisp",
+                  "tests/semantic/існує-за-предикатом-law.lisp",
+                  "tests/semantic/існує-за-предикатом-mutant.lisp",
                   "tests/semantic/ukr-lists-d24-language-law.lisp",
                   "tests/semantic/d24-polynomial-language-law.lisp",
                   "tests/semantic/d24-polynomial-language-mutant.lisp",

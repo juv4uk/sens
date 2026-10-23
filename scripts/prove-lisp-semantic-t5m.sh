@@ -936,13 +936,19 @@ for quantifier in будь-яке? усі?; do
   fi
   printf '\n' >> "$d6_quantifier_source"
 done
-all_quantifier_bundle="$evidence/all-predicate-quantifier.lisp"
-any_quantifier_bundle="$evidence/any-predicate-quantifier.lisp"
-cat -- tests/fixtures/epistemic-d1-names.lisp "$d6_quantifier_source" tests/semantic/закон-усі-за-предикатом.lisp > "$all_quantifier_bundle"
-cat -- tests/fixtures/epistemic-d1-names.lisp "$d6_quantifier_source" tests/semantic/закон-існує-за-предикатом.lisp > "$any_quantifier_bundle"
-sha256sum lib/core4-parts/core4-d6b.lisp tests/fixtures/epistemic-d1-names.lisp tests/semantic/закон-усі-за-предикатом.lisp tests/semantic/закон-існує-за-предикатом.lisp > "$evidence/d6-quantifier-inputs.sha256"
-run_case run_law all-predicate-quantifier-law "$all_quantifier_bundle" 1
-run_case run_law exists-predicate-quantifier-law "$any_quantifier_bundle" 1
+all_quantifier_law_bundle="$evidence/all-predicate-quantifier.lisp"
+all_quantifier_mutant_bundle="$evidence/all-predicate-quantifier-mutant.lisp"
+any_quantifier_law_bundle="$evidence/any-predicate-quantifier.lisp"
+any_quantifier_mutant_bundle="$evidence/any-predicate-quantifier-mutant.lisp"
+cat -- tests/fixtures/epistemic-d1-names.lisp "$d6_quantifier_source" tests/semantic/усі-за-предикатом-law.lisp > "$all_quantifier_law_bundle"
+cat -- tests/fixtures/epistemic-d1-names.lisp "$d6_quantifier_source" tests/semantic/усі-за-предикатом-mutant.lisp > "$all_quantifier_mutant_bundle"
+cat -- tests/fixtures/epistemic-d1-names.lisp "$d6_quantifier_source" tests/semantic/існує-за-предикатом-law.lisp > "$any_quantifier_law_bundle"
+cat -- tests/fixtures/epistemic-d1-names.lisp "$d6_quantifier_source" tests/semantic/існує-за-предикатом-mutant.lisp > "$any_quantifier_mutant_bundle"
+sha256sum lib/core4-parts/core4-d6b.lisp tests/fixtures/epistemic-d1-names.lisp tests/semantic/усі-за-предикатом-law.lisp tests/semantic/усі-за-предикатом-mutant.lisp tests/semantic/існує-за-предикатом-law.lisp tests/semantic/існує-за-предикатом-mutant.lisp > "$evidence/d6-quantifier-inputs.sha256"
+run_case run_law all-predicate-quantifier-law "$all_quantifier_law_bundle" 1
+run_case run_law all-predicate-quantifier-mutant "$all_quantifier_mutant_bundle" 0
+run_case run_law exists-predicate-quantifier-law "$any_quantifier_law_bundle" 1
+run_case run_law exists-predicate-quantifier-mutant "$any_quantifier_mutant_bundle" 0
 
 # Класифікуємо кореневі причини без повторного запуску SENS.
 printf 'SENS_RED_CAUSE root=d7-value-call count=%d ids=%s\n' "${#red_d7_ids[@]}" "${red_d7_ids[*]}"
