@@ -1,6 +1,7 @@
-"""Exhaustive 2046-cell D1–D10 witness for historical SID8 migration.
+"""Перевірка актуальної драбини D1–D10 та історичного SID8 crosswalk.
 
-A ratified coordinate is NOT automatically a callable runtime mechanism.
+Це тест джерельної цілісності координат і української проєкції;
+він НЕ підміняє виконання СЕНС або фізичне T5M roundtrip.
 """
 from dataclasses import replace
 import importlib.util
@@ -13,76 +14,70 @@ ROOT = Path(__file__).resolve().parents[1]
 SOURCE = ROOT / "scripts/migrate-domain-ladder-source-batch.py"
 spec = importlib.util.spec_from_file_location("sens_exact_2046", SOURCE)
 if spec is None or spec.loader is None:
-    raise RuntimeError("SID8 source migrator missing")
+    raise RuntimeError("мігратор доменної драбини відсутній")
 mod = importlib.util.module_from_spec(spec)
 sys.modules[spec.name] = mod
 spec.loader.exec_module(mod)
 
 
 class ExactWidth2046(unittest.TestCase):
-    @classmethod
-    def setUpClass(cls):
-        cls.c = mod.exact_domain_catalog(ROOT)
+    def test_all_ratified_coordinates_without_invented_callability(self):
+        actual = mod.verify_full_domain_bitspace(ROOT)
+        self.assertEqual(actual["typed_coordinates"], 2046)
+        self.assertEqual(actual["meaningful_bits"], 18434)
+        self.assertEqual(actual["counts_by_domain"], {
+            f"D{width}": 1 << width for width in range(1, 11)
+        })
+        self.assertEqual(actual["runtime_admission_claims_added"], 0)
 
-    def test_full_2046_codes_and_exact_bit_mass(self):
-        self.assertEqual(self.c["count"], 2046)
-        self.assertEqual(self.c["widths"], {f"D{w}": 1 << w for w in range(1, 11)})
-        self.assertEqual(self.c["address_bits"], 18434)
-        self.assertEqual(self.c["min_packed_bytes"], 2305)
-        self.assertFalse(self.c["callable_inferred"])
-        for width in range(1, 11):
-            for value in range(1 << width):
-                self.assertIn((width, format(value, f"0{width}b")), self.c["identities"])
-        for width, bits in ((7, "0100001"), (7, "0101010")):
-            self.assertIn((width, bits), self.c["identities"])
+    def test_legacy_to_ukr_requires_current_domain_identity(self):
+        mapping, blocked = mod.authority(ROOT)
+        self.assertEqual((len(mapping), len(blocked)), (171, 85))
+        self.assertEqual(mapping["00001001"], "визначити")
+        self.assertEqual(mapping["00000011"], "тотожне?")
+        self.assertEqual(mapping["00000100"], "сполучити")
+        for old in ("10101000", "01011010", "00110111"):
+            self.assertNotIn(old, mapping)
+            self.assertIn(old, blocked)
+        self.assertEqual(len(set(mapping) | set(blocked)), 256)
+        self.assertFalse(set(mapping) & set(blocked))
+        for old, spelling in mapping.items():
+            self.assertRegex(old, r"^[01]{8}$")
+            self.assertTrue(spelling)
+            self.assertNotRegex(spelling, r"^[01]+$")
+        # Колізія бітового payload не перетворює старий DEFINE на D8.
+        d8 = (ROOT / "lib/domains/d8.lisp").read_text(encoding="utf-8")
+        self.assertIn("(00001001 (ук підмножина?) (укр підмножина?)", d8)
+        self.assertNotEqual(mapping["00001001"], "підмножина?")
 
-    def test_different_width_means_different_function_identity(self):
+    def test_different_widths_never_form_the_same_identity(self):
         pairs = (((3, "010"), (4, "0010")),
                  ((7, "1000001"), (8, "01000001")),
                  ((9, "000000001"), (10, "0000000001")))
         for left, right in pairs:
-            self.assertIn(left, self.c["identities"])
-            self.assertIn(right, self.c["identities"])
             self.assertNotEqual(left, right)
 
-    def test_legacy_256_cells_only_171_admitted(self):
-        mapping, blocked = mod.authority(ROOT)
-        self.assertEqual((len(mapping), len(blocked)), (171, 85))
-        self.assertEqual(mapping["00001001"], "0011")
-        self.assertEqual(mapping["00000011"], "101")
-        for old in ("10101000", "01011010", "00110111"):
-            self.assertNotIn(old, mapping)
-            self.assertIn(old, blocked)
-        for bits in mapping.values():
-            self.assertIn((len(bits), bits), self.c["identities"])
+    def test_d7_text_is_never_callable_by_table_mutation(self):
+        self.corrupt("d7", 65, {"lisp": "CAR"}, "D7 v2 text coordinate drift")
 
-    def test_d7_cannot_mint_lisp_callable(self):
-        self.corrupt("d7", 65, {"lisp": "CAR"}, "data/callability drift")
+    def test_d7_word_cannot_silently_widen_to_8_bits(self):
+        self.corrupt("d7", 65, {"bits": "01000001"}, "wrong-width coordinate")
 
-    def test_d7_cannot_be_widened_to_w8(self):
-        self.corrupt("d7", 65, {"bits": "01000001"}, "changed coordinate")
-
-    def test_d10_cannot_be_reordered_even_when_full(self):
-        original = mod.read_domain_table
-        def swapped(path):
-            rows = original(path)
-            if path.stem == "d10":
-                rows[0], rows[1] = rows[1], rows[0]
-            return rows
-        with patch.object(mod, "read_domain_table", side_effect=swapped):
-            with self.assertRaisesRegex(ValueError, "changed coordinate"):
-                mod.exact_domain_catalog(ROOT)
+    def test_d10_duplicate_address_is_rejected(self):
+        self.corrupt("d10", 0, {"bits": "0000000001"}, "duplicate or wrong-width")
 
     def corrupt(self, domain, index, changes, reason):
         original = mod.read_domain_table
-        def invalid(path):
+
+        def altered(path):
             rows = original(path)
             if path.stem == domain:
                 rows[index] = replace(rows[index], **changes)
             return rows
-        with patch.object(mod, "read_domain_table", side_effect=invalid):
+
+        with patch.object(mod, "read_domain_table", side_effect=altered):
             with self.assertRaisesRegex(ValueError, reason):
-                mod.exact_domain_catalog(ROOT)
+                mod.verify_full_domain_bitspace(ROOT)
 
 
 if __name__ == "__main__":
