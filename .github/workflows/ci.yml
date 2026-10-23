@@ -1854,8 +1854,8 @@ jobs:
 
       - name: Побудувати SENS/T5M виконавець
         env:
-          CARGO_BUILD_JOBS: 2
-          CARGO_INCREMENTAL: 0
+          CARGO_BUILD_JOBS: '2'
+          CARGO_INCREMENTAL: '0'
         run: |
           cargo build --locked -p sens-cli --bin sens-trit
           cargo build --locked -p sens --example sens_numeric_memory_bench
