@@ -293,7 +293,7 @@ run_native_t5m_program() {
     # Нативні Д3/Д5 закони та мутанти: вердикт формулює Lisp,
     # Zig пакує, SENS виконує фізичний T5M, Shell лише звіряє D1.
     case "$file" in
-      tests/semantic/d5-arithmetic-native-t5m-law.lisp|tests/semantic/d5-arithmetic-native-t5m-mutant.lisp|tests/semantic/d3-structural-native-t5m-law.lisp|tests/semantic/d3-structural-native-t5m-mutant.lisp|tests/semantic/d3-proper-tail-hot-law.lisp|tests/semantic/d3-proper-tail-hot-mutant.lisp)
+      tests/semantic/d5-arithmetic-native-t5m-law.lisp|tests/semantic/d5-arithmetic-native-t5m-mutant.lisp|tests/semantic/d3-structural-native-t5m-law.lisp|tests/semantic/d3-structural-native-t5m-mutant.lisp|tests/semantic/d3-proper-tail-hot-law.lisp|tests/semantic/d3-proper-tail-hot-mutant.lisp|tests/semantic/d3-structural-bench-law.lisp|tests/semantic/d3-structural-bench-mutant.lisp)
         local_expected=1
         if [[ "$file" == *-mutant.lisp ]]; then
           local_expected=0
@@ -580,6 +580,11 @@ while IFS= read -r file || [[ -n "$file" ]]; do
     # Джерелом D24+ числових тотожностей є чинна Lisp-бібліотека UTF-8.
     # Zig не вигадує значення, а фізичний SENS перевіряє їх після T5M.
     binding_sources=(--binding-source lib/utf8.lisp)
+  elif [[ "$file" == "tests/semantic/d3-structural-bench-law.lisp" ||
+          "$file" == "tests/semantic/d3-structural-bench-mutant.lisp" ]]; then
+    # D3 закон і мутант потребують точних Lisp DEFINE з відповідного бенчмарку.
+    # Не дублюємо їх у Zig або Rust: фізичне виконання має бути SENS.
+    binding_sources=(--binding-source benchmarks/d3-structural-bench.lisp)
   elif [[ "$file" == "tests/semantic/d3-proper-tail-hot-law.lisp" ||
           "$file" == "tests/semantic/d3-proper-tail-hot-mutant.lisp" ]]; then
     # Нові D3-свідки викликають ОБІЙТИ-ПОВНИЙ-СПИСОК з реального Lisp-бенчмарку.
