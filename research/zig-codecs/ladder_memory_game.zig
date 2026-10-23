@@ -22,6 +22,8 @@ pub const Score = struct {
     duplicate: usize = 0,
     unknown: usize = 0,
     structural: usize = 0,
+    answered: usize = 0,
+    missing: usize = 0,
 };
 
 // Не дублюємо реєстр у Zig: кожна відповідь читається з канонічного Lisp.
@@ -136,6 +138,99 @@ pub fn grade(guesses: []const Guess) Score {
         }
     }
     return result;
+}
+
+/// Відтворювана перестановка запитань для чесного раунду.
+/// Один seed дає той самий порядок; усі індекси з'являються рівно один раз.
+/// Це механіка гри: назви й координати як і раніше читаються з Lisp-таблиць.
+pub fn questionOrder(allocator: std.mem.Allocator, width: u8, seed: u64) ![]usize {
+    const count = questionCount(width);
+    const order = try allocator.alloc(usize, count);
+    for (order, 0..) |*index, i| index.* = i;
+
+    var state = if (seed == 0) @as(u64, 0x9e3779b97f4a7c15) else seed;
+    var i = count;
+    while (i > 1) {
+        i -= 1;
+        state ^= state << 13;
+        state ^= state >> 7;
+        state ^= state << 17;
+        const j: usize = @intCast(state % @as(u64, @intCast(i + 1)));
+        std.mem.swap(usize, &order[i], &order[j]);
+    }
+    return order;
+}
+
+/// Оцінює повноту одного доменного раунду, окрім точності кожної відповіді.
+/// Невідомі координати й структурні записи не зараховуються як пригадані функції.
+pub fn gradeDomain(width: u8, guesses: []const Guess) Score {
+    var result = grade(guesses);
+    var answered: usize = 0;
+    for (guesses, 0..) |guess, index| {
+        if (guess.width != width) continue;
+        var repeated = false;
+        for (guesses[0..index]) |previous| {
+            if (previous.width == guess.width and std.mem.eql(u8, previous.bits, guess.bits)) {
+                repeated = true;
+                break;
+            }
+        }
+        if (repeated) continue;
+        const actual = lookup(guess.width, guess.bits) orelse continue;
+        if (!std.mem.eql(u8, actual.lisp, "()")) answered += 1;
+    }
+    result.answered = answered;
+    const total = questionCount(width);
+    result.missing = if (total > answered) total - answered else 0;
+    return result;
+}
+
+test "Драбина D11: раунд має 512 унікальних відтворюваних запитань і повний підрахунок" {
+    const allocator = std.testing.allocator;
+    try std.testing.expectEqual(@as(usize, 512), questionCount(11));
+    try std.testing.expectEqual(@as(usize, 512), coordinateCount(11));
+
+    const order = try questionOrder(allocator, 11, 0x53454e534c414444);
+    defer allocator.free(order);
+    const replay = try questionOrder(allocator, 11, 0x53454e534c414444);
+    defer allocator.free(replay);
+    try std.testing.expectEqualSlices(usize, order, replay);
+    try std.testing.expectEqual(@as(usize, 512), order.len);
+
+    var seen = [_]bool{false} ** 512;
+    var guesses = try allocator.alloc(Guess, order.len);
+    defer allocator.free(guesses);
+    for (order, 0..) |question_index, i| {
+        try std.testing.expect(question_index < seen.len);
+        try std.testing.expect(!seen[question_index]);
+        seen[question_index] = true;
+        const record = questionAt(11, question_index) orelse return error.MissingQuestion;
+        guesses[i] = .{ .width = record.width, .bits = record.bits, .lisp = record.lisp };
+    }
+    for (seen) |found| try std.testing.expect(found);
+
+    const result = gradeDomain(11, guesses);
+    try std.testing.expectEqual(@as(usize, 512), result.correct);
+    try std.testing.expectEqual(@as(usize, 512), result.answered);
+    try std.testing.expectEqual(@as(usize, 0), result.missing);
+    try std.testing.expectEqual(@as(usize, 0), result.wrong);
+    try std.testing.expectEqual(@as(usize, 0), result.duplicate);
+    try std.testing.expectEqual(@as(usize, 0), result.unknown);
+}
+
+test "Драбина D11: прогалина, хибна відповідь і повтор не зараховуються як нові функції" {
+    const first = questionAt(11, 0) orelse return error.MissingQuestion;
+    const guesses = [_]Guess{
+        .{ .width = 11, .bits = first.bits, .lisp = first.lisp },
+        .{ .width = 11, .bits = first.bits, .lisp = "НЕПРАВИЛЬНА-НАЗВА" },
+        .{ .width = 11, .bits = "00000000000", .lisp = "UNKNOWN" },
+    };
+    const result = gradeDomain(11, &guesses);
+    try std.testing.expectEqual(@as(usize, 1), result.correct);
+    try std.testing.expectEqual(@as(usize, 1), result.duplicate);
+    try std.testing.expectEqual(@as(usize, 1), result.unknown);
+    try std.testing.expectEqual(@as(usize, 1), result.answered);
+    try std.testing.expectEqual(@as(usize, 511), result.missing);
 }
 
 test "Драбина: усі D1–D10 мають точні двійкові координати" {
