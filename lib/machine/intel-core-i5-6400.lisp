@@ -1,10 +1,14 @@
-; Історична сумісна проєкція сід8 для Intel Core i5-6400 / Skylake.
+; Українська проєкція машинного профілю Intel Core i5-6400 / Skylake.
 ;
 ; Цей файл НЕ є чинним джерелом семантичних повноважень.
-; Він зберігає стару побайтову проєкцію SID лише для сумісності
-; та відстеження походження. Сучасні рядки точних доменів розміщено
-; в lib/machine/profile/current-domain-x86-64.lisp; їхні ключі —
-; точні значення DomainIdentity, а не історичні байти сід8.
+; Історичні SID8-позиції рядків перетворено на повні ратифіковані
+; українські назви «укр». Джерелом зіставлення були датований
+; історичний міст і чинні lib/domains/d3..d9.lisp, не збіг байтів
+; із новим D8. Старі координати збережені лише в історії Git.
+; Дійсні точнодоменні механізми з (ширина, біти) — у
+; lib/machine/profile/current-domain-x86-64.lisp.
+; Ці рядки описують можливі машинні маршрути, а не
+; доводять виконуваність кожної названої функції.
 ;
 ; Проєкція розрізняє швидкий шлях з однієї або кількох інструкцій
 ; та повнішу реалізацію Lisp/виконавця. Наприклад, дія `+` зберігає
@@ -24,12 +28,12 @@
   (microarchitecture skylake)
   (isa x86-64)
   (rows
-    (00000010 sequence "tag-test: TEST/AND/CMP")
-    (00000011 direct "CMP/SETE")
-    (00000100 runtime "allocate+STORE-pair")
-    (00000101 direct "LOAD-pair-head")
-    (00000110 direct "LOAD-pair-tail")
-    (00000111 control "TEST/CMP+Jcc")
+    (атом? sequence "tag-test: TEST/AND/CMP")
+    (тотожне? direct "CMP/SETE")
+    (сполучити runtime "allocate+STORE-pair")
+    (перше direct "LOAD-pair-head")
+    (решта direct "LOAD-pair-tail")
+    (за-умовою control "TEST/CMP+Jcc")
 
     (додати fast-path "ADD / ADDSD")
     (відняти fast-path "SUB/NEG / SUBSD")
@@ -39,25 +43,25 @@
     (найменше sequence "CMP/CMOV-min")
     (найбільше sequence "CMP/CMOV-max")
     (модульна-остача fast-path "IDIV-remainder")
-    (00010100 fast-path "IDIV-quotient")
+    (частка fast-path "IDIV-quotient")
     (корінь fast-path "SQRTSD")
     (цілий-корінь runtime "integer-sqrt routine")
     (найменше-у-списку runtime "loop+CMP/CMOV-min")
     (найбільше-у-списку runtime "loop+CMP/CMOV-max")
     (менше? direct "CMP/SETL")
     (більше? direct "CMP/SETG")
-    (00011100 direct "CMP/SETE")
-    (00011101 direct "CMP/SETLE")
-    (00011110 direct "CMP/SETGE")
+    (однакові? direct "CMP/SETE")
+    (не-більше? direct "CMP/SETLE")
+    (не-менше? direct "CMP/SETGE")
     (хибне? direct "TEST/SETE")
 
     (символ? sequence "tag-test: symbol")
-    (00100100 sequence "tag-test: string")
-    (00100110 sequence "tag-test: numeric-buffer")
+    (рядок? sequence "tag-test: string")
+    (числовий-буфер? sequence "tag-test: numeric-buffer")
     (довжина runtime "list-walk+LOAD-pair-tail")
     (елемент-списку-за-індексом runtime "indexed-list-walk+LOAD")
-    (00101111 sequence "LOAD-tail+LOAD-head")
-    (00110000 sequence "2xLOAD-tail+LOAD-head")
+    (друге sequence "LOAD-tail+LOAD-head")
+    (третє sequence "2xLOAD-tail+LOAD-head")
     (четверте sequence "3xLOAD-tail+LOAD-head")
     (п'ятий sequence "4xLOAD-tail+LOAD-head")
     (перше-першого sequence "LOAD-head+LOAD-head")

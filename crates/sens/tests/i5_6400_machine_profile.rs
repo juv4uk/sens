@@ -5,18 +5,49 @@ fn repo_root() -> std::path::PathBuf {
 }
 
 #[test]
-fn legacy_i5_6400_profile_is_provenance_not_current_authority() {
+fn i5_6400_human_profile_uses_full_ukr_peers_not_legacy_sid8_slots() {
     let root = repo_root();
     let profile_path = root.join("lib/machine/intel-core-i5-6400.lisp");
     let profile = std::fs::read_to_string(&profile_path).unwrap_or_else(|error| {
-        panic!("missing i5-6400 compatibility profile at {profile_path:?}: {error}")
+        panic!("missing i5-6400 Ukrainian profile at {profile_path:?}: {error}")
     });
-
-    sens::parse(&profile).expect("legacy i5-6400 profile must remain valid sens data");
-
-    assert!(profile.contains("Історична сумісна проєкція сід8 для Intel Core i5-6400 / Skylake."));
+    sens::parse(&profile).expect("i5-6400 profile must remain valid SENS data");
+    assert!(profile.contains("Українська проєкція машинного профілю"));
     assert!(profile.contains("Цей файл НЕ є чинним джерелом семантичних повноважень."));
     assert!(profile.contains("lib/machine/profile/current-domain-x86-64.lisp"));
+
+    // Ці 14 пар звірені за старою семантикою та поточною колонкою «укр»
+    // відповідного D3/D4/D5/D6/D8/D9. Самі маршрути не є законами SENS.
+    for (ukr, machine_path) in [
+        ("атом?", "tag-test: TEST/AND/CMP"),
+        ("тотожне?", "CMP/SETE"),
+        ("сполучити", "allocate+STORE-pair"),
+        ("перше", "LOAD-pair-head"),
+        ("решта", "LOAD-pair-tail"),
+        ("за-умовою", "TEST/CMP+Jcc"),
+        ("частка", "IDIV-quotient"),
+        ("однакові?", "CMP/SETE"),
+        ("не-більше?", "CMP/SETLE"),
+        ("не-менше?", "CMP/SETGE"),
+        ("рядок?", "tag-test: string"),
+        ("числовий-буфер?", "tag-test: numeric-buffer"),
+        ("друге", "LOAD-tail+LOAD-head"),
+        ("третє", "2xLOAD-tail+LOAD-head"),
+    ] {
+        let prefix = format!("({ukr} ");
+        let row = profile.lines().map(str::trim_start)
+            .find(|line| line.starts_with(&prefix))
+            .unwrap_or_else(|| panic!("missing migrated «укр» machine row: {ukr}"));
+        assert!(row.contains(machine_path),
+            "unexpected mechanism for migrated {ukr}: {row}");
+    }
+    assert!(!profile.lines().any(|line| {
+        let trimmed = line.trim_start();
+        trimmed.starts_with('(')
+            && trimmed.as_bytes().get(1..9)
+                .is_some_and(|word| word.iter().all(|b| *b == b'0' || *b == b'1'))
+            && trimmed.as_bytes().get(9).is_some_and(u8::is_ascii_whitespace)
+    }), "historical SID8 machine row must not survive as a live profile key");
 }
 
 #[test]
