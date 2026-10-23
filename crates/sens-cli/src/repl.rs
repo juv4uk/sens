@@ -582,7 +582,7 @@ fn project_repl_surface_expression_in_scope(
     // it does not fold arbitrary variables or computed expressions.
     if let Some(name) = t5m_text7_surface_name(expression, t5m_surface_layout(surface)) {
         if matches!(name.as_str(), "число-нуль" | "число-один")
-            && !bound.iter().any(|candidate| candidate.as_ref() == name)
+            && !bound.iter().any(|candidate| candidate.as_ref() == name.as_str())
         {
             if let Some(value) = session.environment.get(&name) {
                 if let Value::BinaryNumber(number) = &value {
