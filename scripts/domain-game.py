@@ -67,6 +67,17 @@ def tracked(pattern: str) -> list[str]:
     return [ln.strip() for ln in out.splitlines() if ln.strip()]
 
 
+def codec_coverage() -> tuple[int, int, int]:
+    """Стан кодеку: скільки lib/*.lisp мають фізичну пару .sens (T5M).
+
+    Це «гра для кодеку»: кожна нова пара — це ще один файл, який кодек
+    справді переносить. Три числа: з парою, без пари, усього.
+    """
+    lisp = [p for p in tracked("lib/*.lisp")]
+    with_pair = [p for p in lisp if (ROOT / (p[:-5] + ".sens")).is_file()]
+    return len(with_pair), len(lisp) - len(with_pair), len(lisp)
+
+
 def progress() -> Counter:
     """Кількість ФАЙЛІВ за префіксом домену, не число доведених законів."""
     c: Counter = Counter()
@@ -111,6 +122,11 @@ def semantic_game(brief: bool) -> int:
         bar = "█" * min(n // 5, 20)
         print(f"{dom:<6} {n:>7}  {bar} {desc}")
     print(f"\nУсього файлів Lisp із доменним префіксом: {total}")
+    wp, wo, tot = codec_coverage()
+    pct = (100 * wp // tot) if tot else 0
+    bar = "█" * (pct // 5) + "·" * (20 - pct // 5)
+    print(f"\nКОДЕК (фізичні пари .lisp↔.sens): {wp}/{tot} ({pct}%)")
+    print(f"  [{bar}]  без пари: {wo}")
     ranked = sorted(levels, key=lambda kv: prog.get(kv[0], 0))
     gaps = ranked[:3]
     print("\nНАСТУПНИЙ КВЕСТ (найменше файлів):")
