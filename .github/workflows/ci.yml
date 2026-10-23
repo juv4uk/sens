@@ -567,7 +567,7 @@ jobs:
             exit 1
           fi
           : > "$baseline_dir/samples.us"
-          printf 'sample\\telapsed_us\\tsha\\n' > "$baseline_dir/samples.tsv"
+          printf 'sample\telapsed_us\tsha\n' > "$baseline_dir/samples.tsv"
           for repetition in {1..11}; do
             start_ns="$(date +%s%N)"
             if ! timeout 45s "$binary" "$baseline_source" > "$baseline_dir/$repetition.out" 2> "$baseline_dir/$repetition.err"; then
@@ -585,13 +585,13 @@ jobs:
               echo "::error file=$baseline_source,title=SENS benchmark baseline::REGRESSION layer=clock"
               exit 1
             fi
-            printf '%s\\n' "$elapsed_us" >> "$baseline_dir/samples.us"
-            printf '%s\\t%s\\t%s\\n' "$repetition" "$elapsed_us" "$bench_sha" >> "$baseline_dir/samples.tsv"
+            printf '%s\n' "$elapsed_us" >> "$baseline_dir/samples.us"
+            printf '%s\t%s\t%s\n' "$repetition" "$elapsed_us" "$bench_sha" >> "$baseline_dir/samples.tsv"
           done
           sort -n "$baseline_dir/samples.us" > "$baseline_dir/sorted.us"
           baseline_p50="$(sed -n '6p' "$baseline_dir/sorted.us")"
           baseline_p90="$(sed -n '10p' "$baseline_dir/sorted.us")"
-          printf '%s\\t%s\\t%s\\t%s\\n' "$baseline_p50" "$baseline_p90" "$bench_sha" "$baseline_source" > "$RUNNER_TEMP/benchmark-baseline.tsv"
+          printf '%s\t%s\t%s\t%s\n' "$baseline_p50" "$baseline_p90" "$bench_sha" "$baseline_source" > "$RUNNER_TEMP/benchmark-baseline.tsv"
           echo "::notice file=$baseline_source,title=SENS startup baseline::MEASURED p50_us=$baseline_p50 p90_us=$baseline_p90 repeats=11 scope=CLI_bootstrap_plus_minimal_D1"
           for spec in \
             'lists|benchmarks/lists.lisp' \
