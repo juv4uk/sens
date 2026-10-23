@@ -1,104 +1,80 @@
 #!/usr/bin/env python3
-"""Guard: every human alias resolves to EXACTLY ONE identity (#5609, migration-empty-to-solution step 1).
+"""Українські викличні назви повинні мати однозначну точнодоменну адресу.
 
-Design note `migration-empty-to-solution.md` localized the non-identity-preserving
-migration to the **alias -> admitted-surface resolution**: a Ukrainian alias can
-resolve to an SID that is not the intended operation. This guard makes that class
-of bug impossible to land:
-
-A1  each spelling in the human slots (ук / укр / sa / sym) belongs to at most ONE
-    identity -- two identities claiming the same alias is ambiguity and fails closed;
-A2  an alias shared between identities must not silently pick one;
-A3  the `en` slot of every identity is itself unique (no two identities share an
-    English name) -- otherwise `en` is not a usable key either.
-
-This is a structural check on the single surface registry; it decides no semantics.
-Exit 0 = ALIAS_IDENTITY_OK; exit 1 = ALIAS_AMBIGUOUS.
+Читаємо тільки ратифіковані D1–D10. D7 — текстова клавіатура, не функції.
+«en», «san» і «sym» — людські / історичні проєкції; їхні повтори
+не дають права вибирати першу відповідну функцію (fail closed у reader).
+Цей інструмент перевіряє таблиці, але не виконує програму SENS.
 """
 from __future__ import annotations
 
 import argparse
-import re
-import sys
+import importlib.util
 from collections import defaultdict
 from pathlib import Path
 
-REGISTRY = "lib/surface/semantic-registry.lisp"
-ENTRY = re.compile(r"^\s*\(([01]{8})\s+(.*)\)\s*$")
-SLOT = re.compile(r'\((en|ук|укр|sa|sym)\s+(\(\)|"(?:\\.|[^"])*"|[^\s()]+)\)')
-HUMAN = ("ук", "укр", "sa", "sym")
+ROOT = Path(__file__).resolve().parents[1]
+AUDIT = ROOT / "scripts/check_semantic_registry.py"
+NAMESPACES = ("ук", "укр")
 
 
-def decode(raw: str) -> str | None:
-    if raw == "()":
-        return None
-    if raw.startswith('"') and raw.endswith('"'):
-        return raw[1:-1]
-    return raw
-
-
-def parse(text: str) -> list[tuple[str, dict[str, str | None]]]:
-    out = []
-    for line in text.splitlines():
-        m = ENTRY.match(line)
-        if not m:
-            continue
-        bits = m.group(1)
-        slots = {k: decode(v) for k, v in SLOT.findall(m.group(2))}
-        out.append((bits, slots))
-    return out
+def load_audit():
+    spec = importlib.util.spec_from_file_location("sens_domain_registry_audit", AUDIT)
+    if spec is None or spec.loader is None:
+        raise ValueError("неможливо завантажити перевірку точних доменів")
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
 
 
 def check(root: Path) -> list[str]:
-    path = root / REGISTRY
-    if not path.is_file():
-        return [f"missing {REGISTRY}"]
-    entries = parse(path.read_text(encoding="utf-8"))
-    if not entries:
-        return [f"no entries parsed from {REGISTRY}"]
-    problems: list[str] = []
-
-    # A1/A2 -- an alias must belong to at most one identity.
+    audit = load_audit()
     owners: dict[tuple[str, str], list[str]] = defaultdict(list)
-    for bits, slots in entries:
-        for slot in HUMAN:
-            v = slots.get(slot)
-            if v:
-                owners[(slot, v)].append(bits)
-    for (slot, name), bits in sorted(owners.items()):
-        if len(bits) > 1:
-            problems.append(f"A1/A2: alias ({slot} {name}) claimed by {len(bits)} identities: "
-                            f"{', '.join(sorted(bits))}")
-
-    # A3 -- en names unique.
-    en: dict[str, list[str]] = defaultdict(list)
-    for bits, slots in entries:
-        v = slots.get("en")
-        if v:
-            en[v].append(bits)
-    for name, bits in sorted(en.items()):
-        if len(bits) > 1:
-            problems.append(f"A3: en name {name!r} shared by {len(bits)} identities: "
-                            f"{', '.join(sorted(bits))}")
-
+    problems = []
+    for width in range(1, 11):
+        path = root / f"lib/domains/d{width}.lisp"
+        try:
+            forms = audit.parse_all(audit.tokens(path.read_text(encoding="utf-8")))
+            if len(forms) != 1:
+                raise ValueError("рівно одна таблиця на домен")
+            table = forms[0]
+            audit.check(table, width)
+        except (OSError, ValueError) as error:
+            problems.append(f"D{width}: {error}")
+            continue
+        if width == 7:
+            continue  # Сім бітів — текст, а не функціональний код.
+        for record in table[1:]:
+            identity = f"D{width}:{record[0]}"
+            for namespace in NAMESPACES:
+                field = next((v for v in record[1:] if v[0] == namespace), None)
+                if field is None:
+                    problems.append(f"{identity}: відсутня {namespace}")
+                    continue
+                name = field[1]
+                if name != []:
+                    owners[(namespace, name)].append(identity)
+    for (namespace, name), identities in sorted(owners.items()):
+        if len(identities) > 1:
+            problems.append(
+                f"АЛІАС-НЕОДНОЗНАЧНИЙ ({namespace} {name}): "
+                + ", ".join(identities)
+            )
     return problems
 
 
 def main() -> int:
-    ap = argparse.ArgumentParser()
-    ap.add_argument("root", nargs="?", default=str(Path(__file__).resolve().parents[1]))
-    ns = ap.parse_args()
-    root = Path(ns.root).resolve()
-    try:
-        problems = check(root)
-    except OSError as exc:
-        print(f"ALIAS_AMBIGUOUS: {exc}"); return 1
-    if problems:
-        print(f"ALIAS_AMBIGUOUS {len(problems)} problem(s):", flush=True)
-        for p in problems:
-            print(" -", p, flush=True)
+    parser = argparse.ArgumentParser()
+    parser.add_argument("root", nargs="?", default=str(ROOT))
+    args = parser.parse_args()
+    issues = check(Path(args.root).resolve())
+    if issues:
+        print(f"ALIAS_AMBIGUOUS count={len(issues)}")
+        for issue in issues:
+            print(" -", issue)
         return 1
-    print("ALIAS_IDENTITY_OK every human alias resolves to exactly one identity", flush=True)
+    print("ALIAS_IDENTITY_OK ук/укр → єдина точна (домен, біти) з D1–D10")
+    print("en/san/sym не використовуються як неявні викличні ідентичності")
     return 0
 
 
