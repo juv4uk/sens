@@ -588,7 +588,7 @@ fn handle_sexpr_connection(
     if let Err(error) = sens::load_core_library(&mut session) {
         eprintln!(
             "TCP REPL: Core4 bootstrap failed: {}",
-            error.render(sens::CORE_LIBRARY_SOURCE)
+            error.render("<T5M Core4 bootstrap>")
         );
         return;
     }
