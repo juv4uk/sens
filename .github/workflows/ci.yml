@@ -224,6 +224,31 @@ jobs:
 
 
 
+      # Логіка перевірки всередині Lisp. Bash лише звіряє фактичний D1-вивід.
+      # Rust відповідає за механізми Rust, Zig — за власний T5M/ABI.
+      - name: Lisp-семантика Д1/Д3/Д4 — позитив і негатив у справжньому SENS
+        if: steps.changed-t5m-lisp.outputs.has_lisp == 'true'
+        shell: bash
+        timeout-minutes: 3
+        run: |
+          set -euo pipefail
+          binary="$PWD/target/debug/sens"
+          test -x "$binary"
+          перевірити_закон() {
+            local id="$1" джерело="$2" очікуване="$3" фактичне
+            if ! фактичне="$(timeout 45s "$binary" "$джерело")"; then
+              echo "::error file=$джерело,title=SENS Lisp law::REGRESSION id=$id layer=eval expected=$очікуване actual=execution-failure"
+              return 1
+            fi
+            if [[ "$фактичне" != "$очікуване" ]]; then
+              echo "::error file=$джерело,title=SENS Lisp law::REGRESSION id=$id layer=semantics expected=$очікуване actual=$фактичне"
+              return 1
+            fi
+            echo "::notice file=$джерело,title=SENS Lisp law::PASS id=$id native=SENS result=$фактичне"
+          }
+          перевірити_закон d3-d4-positive tests/semantic/d3-d4-ukr-native-laws.lisp '(1 1 1 1 1 1 1 1 1 1)'
+          перевірити_закон d3-d4-negative tests/semantic/d3-d4-ukr-native-mutant.lisp '0'
+
       # Учорашній BENCH-LISP→SENS: анотації лише зі справжніх нативних метрик.
       - name: Lisp → T5M → SENS — анотації розміру й AST
         if: ${{ always() && steps.changed-t5m-lisp.outputs.has_files == 'true' }}
