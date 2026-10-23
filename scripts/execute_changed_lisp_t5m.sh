@@ -580,6 +580,12 @@ while IFS= read -r file || [[ -n "$file" ]]; do
     # Джерелом D24+ числових тотожностей є чинна Lisp-бібліотека UTF-8.
     # Zig не вигадує значення, а фізичний SENS перевіряє їх після T5M.
     binding_sources=(--binding-source lib/utf8.lisp)
+  elif [[ "$file" == "tests/semantic/d3-proper-tail-hot-law.lisp" ||
+          "$file" == "tests/semantic/d3-proper-tail-hot-mutant.lisp" ]]; then
+    # Нові D3-свідки викликають ОБІЙТИ-ПОВНИЙ-СПИСОК з реального Lisp-бенчмарку.
+    # Mint і paired мусять завантажити його чинне DEFINE, інакше отримуємо
+    # хибний UnknownSymbol замість мовного D1:1 / D1:0. Rust/Zig не оракули.
+    binding_sources=(--binding-source benchmarks/d3-proper-tail-hot.lisp)
   elif [[ "$file" == "tests/semantic/d11-srfi1-find-tail-laws.lisp" ]]; then
     # Лише визначення із справжньої бібліотеки SENS, без host-оракула.
     binding_sources=(--binding-source lib/d11-srfi1-find-tail.lisp)
