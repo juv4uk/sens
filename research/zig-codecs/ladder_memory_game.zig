@@ -26,22 +26,49 @@ pub const Score = struct {
     missing: usize = 0,
 };
 
-// Не дублюємо реєстр у Zig: кожна відповідь читається з канонічного Lisp.
+// Не дублюємо реєстр у Zig: читаємо чинні Lisp-файли з кореня checkout.
+// Zig 0.16 не дозволяє вбудовувати файл поза коренем пакета.
+// Таблиці тримаємо в пам'яті до завершення процесу: Record повертає їхні зрізи.
+const CFile = opaque {};
+extern "c" fn fopen([*:0]const u8, [*:0]const u8) ?*CFile;
+extern "c" fn fclose(*CFile) c_int;
+extern "c" fn fseek(*CFile, c_long, c_int) c_int;
+extern "c" fn ftell(*CFile) c_long;
+extern "c" fn fread([*]u8, usize, usize, *CFile) usize;
+
+var table_cache = [_]?[]u8{null} ** 11;
+
 fn source(width: u8) ?[]const u8 {
-    return switch (width) {
-        1 => @embedFile("../../lib/domains/d1.lisp"),
-        2 => @embedFile("../../lib/domains/d2.lisp"),
-        3 => @embedFile("../../lib/domains/d3.lisp"),
-        4 => @embedFile("../../lib/domains/d4.lisp"),
-        5 => @embedFile("../../lib/domains/d5.lisp"),
-        6 => @embedFile("../../lib/domains/d6.lisp"),
-        7 => @embedFile("../../lib/domains/d7.lisp"),
-        8 => @embedFile("../../lib/domains/d8.lisp"),
-        9 => @embedFile("../../lib/domains/d9.lisp"),
-        10 => @embedFile("../../lib/domains/d10.lisp"),
-        11 => @embedFile("../../lib/domains/d11.lisp"),
-        else => null,
+    const path: [*:0]const u8 = switch (width) {
+        1 => "lib/domains/d1.lisp",
+        2 => "lib/domains/d2.lisp",
+        3 => "lib/domains/d3.lisp",
+        4 => "lib/domains/d4.lisp",
+        5 => "lib/domains/d5.lisp",
+        6 => "lib/domains/d6.lisp",
+        7 => "lib/domains/d7.lisp",
+        8 => "lib/domains/d8.lisp",
+        9 => "lib/domains/d9.lisp",
+        10 => "lib/domains/d10.lisp",
+        11 => "lib/domains/d11.lisp",
+        else => return null,
     };
+    const index = @as(usize, width) - 1;
+    if (table_cache[index]) |bytes| return bytes;
+
+    const file = fopen(path, "rb") orelse return null;
+    defer _ = fclose(file);
+    if (fseek(file, 0, 2) != 0) return null;
+    const raw_len = ftell(file);
+    if (raw_len <= 0 or fseek(file, 0, 0) != 0) return null;
+    const len: usize = @intCast(raw_len);
+    const bytes = std.heap.page_allocator.alloc(u8, len) catch return null;
+    if (fread(bytes.ptr, 1, len, file) != len) {
+        std.heap.page_allocator.free(bytes);
+        return null;
+    }
+    table_cache[index] = bytes;
+    return bytes;
 }
 
 // Читаємо лише точну координату та колонку LISP, без інтерпретації семантики.
