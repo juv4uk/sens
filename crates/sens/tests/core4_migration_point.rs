@@ -7,6 +7,27 @@ fn migrated_core() -> Session {
 }
 
 #[test]
+fn core4_named_numeric_values_are_exact_and_source_literal_free() {
+    let mut session = migrated_core();
+
+    let values = eval_program(
+        "(список число-нуль число-один число-два число-три число-чотири число-пять число-вісім число-десять число-п'ятнадцять число-сто число-тисяча число-двісті-п'ятдесят-шість число-шістдесят-п'ять-тисяч-п'ятсот-тридцять-шість число-мільйон)",
+        &mut session,
+    )
+    .expect("named exact numeric values must evaluate")
+    .value;
+    assert_eq!(
+        values.to_string(),
+        "(0 1 2 3 4 5 8 10 15 100 1000 256 65536 1000000)"
+    );
+
+    let bytes = eval_program("(т5м3-три-байти число-мільйон)", &mut session)
+        .expect("named million must enter the existing T5M3 projection")
+        .value;
+    assert_eq!(bytes.to_string(), "(64 66 15)");
+}
+
+#[test]
 fn core4_point_witness_crosses_predicates_strings_macros_and_fresh_symbols() {
     let mut session = migrated_core();
 
