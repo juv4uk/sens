@@ -18,6 +18,12 @@ GUARD = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(GUARD)
 
 PROGRAMS = (
+    "benchmarks/contest-uk/пентагональне-формула.lisp",
+    "benchmarks/contest-uk/подвійний-факторіал-рекурсивний.lisp",
+    "benchmarks/contest-uk/поліном-кубічний-горнер.lisp",
+    "benchmarks/contest-uk/різниця-кубів-пряма.lisp",
+    "benchmarks/contest-uk/семикутне-формула.lisp",
+    "benchmarks/contest-uk/степінь-двійки-одинарний.lisp",
     "benchmarks/contest-uk/сума-до-n-одинарна.lisp",
     "benchmarks/contest-uk/сума-квадратів-без-одиниць.lisp",
     "benchmarks/contest-uk/сума-кубів-без-замикання.lisp",
