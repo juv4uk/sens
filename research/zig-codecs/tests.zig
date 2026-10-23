@@ -256,7 +256,7 @@ test "benchmark Zig T5 ABI exact-width throughput (diagnostic, no Lisp verdict)"
     }
     std.mem.doNotOptimizeAway(checksum);
     std.debug.print(
-        "ZIG_TRANSPORT_BENCH id=t5-abi-d8 samples={d} words_per_sample={d} p50_ns_per_word={d} p90_ns_per_word={d} checksum={d} semantics=NOT_TESTED status=MEASURED\\n",
+        "ZIG_TRANSPORT_BENCH id=t5-abi-d8 samples={d} words_per_sample={d} p50_ns_per_word={d} p90_ns_per_word={d} checksum={d} semantics=NOT_TESTED status=MEASURED\n",
         .{ samples_count, words_per_sample, samples[3] / words_per_sample, samples[6] / words_per_sample, checksum },
     );
 }
