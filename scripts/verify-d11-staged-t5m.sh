@@ -30,7 +30,10 @@ for source in \
   lib/list-zip-first-class-domain-code-general.lisp \
   lib/застосувати-ланцюг-доменних-функцій.lisp \
   lib/повторити-доменну-функцію.lisp \
-  lib/d11-srfi1-alist-protocol.lisp; do
+  lib/d11-srfi1-alist-protocol.lisp \
+  lib/mechanism-selector.lisp \
+  tests/fixtures/mechanism-selector-1047-witness.lisp \
+  tests/fixtures/function-table-mechanisms-sid8-witness.lisp; do
   stem="${source##*/}"
   physical="$scratch/${stem%.lisp}.sens"
   bitview="${physical%.sens}"
@@ -39,6 +42,11 @@ for source in \
   if [[ "$source" == "lib/d11-clojure-frequencies-unary.lisp" ]]; then
     mint_flag=--t5m-mint-pair
     bindings=(--binding-source lib/d11-clojure-group-by.lisp)
+  fi
+
+  if [[ "$source" == "tests/fixtures/mechanism-selector-1047-witness.lisp" ]]; then
+    mint_flag=--t5m-mint-pair
+    bindings=(--binding-source lib/mechanism-selector.lisp)
   fi
 
   if ! timeout 90s "$sens" "$mint_flag" "$source" "$physical" "${bindings[@]}"; then
