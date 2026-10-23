@@ -86,6 +86,26 @@ def verify():
     # Preserve the independent truth-in-label contract: any step that DOES
     # claim a binary SENS executor must actually invoke that executor.
     ci_text = (WORKFLOWS / "ci.yml").read_text(encoding="utf-8")
+    # Механічна перевірка YAML-метаданих, а не оракул семантики Lisp.
+    # Виявляємо повтори кроків та id при помилковому злитті ci.yml.
+    for field, pattern in (
+        ("name", r"^      - name: (.+?)\s*$"),
+        ("id", r"^        id:\s*([a-zA-Z][a-zA-Z0-9_-]*)\s*$"),
+    ):
+        matches = re.findall(pattern, ci_text, flags=re.MULTILINE)
+        if field == "name" and not matches:
+            errors.append("CI_STEPS_MISSING: немає іменованих кроків")
+        seen = set()
+        duplicates = set()
+        for item in matches:
+            if item in seen:
+                duplicates.add(item)
+            seen.add(item)
+        if duplicates:
+            errors.append(
+                "CI_STEPS_DUPLICATED field=" + field
+                + " entries=" + ", ".join(sorted(duplicates))
+            )
     for step in ci_text.split("      - name: ")[1:]:
         if "--layer eval" in step and "target/debug/sens" not in step:
             errors.append("UNINFORMATIVE-EXECUTOR: eval label without native SENS invocation")
