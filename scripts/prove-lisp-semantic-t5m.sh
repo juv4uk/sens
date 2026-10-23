@@ -337,6 +337,10 @@ run_case run_law d3-structural-mutant tests/semantic/d3-structural-native-t5m-mu
 # Обидва свідки проходять direct, Zig/T5M, paired та standalone SENS.
 run_case run_law d8-d7-equal-physical-positive tests/semantic/d8-d7-equal-physical-law.lisp 1
 run_case run_law d8-d7-equal-physical-mutant tests/semantic/d8-d7-equal-physical-mutant.lisp 0
+# D8 STRING->SYMBOL уже визначений точним механізмом D8.
+# Точні результати пари формує сам Lisp; Zig лише переносить T5M.
+run_case run_law d8-string-symbol-roundtrip-positive tests/semantic/d8-string-symbol-roundtrip-law.lisp 1
+run_case run_law d8-string-symbol-roundtrip-mutant tests/semantic/d8-string-symbol-roundtrip-mutant.lisp 0
 # D1 хибне значення як голова CONS ≠ порожній D3-список.
 # Обидва результати вираховує Lisp/SENS; Zig лише фізично переносить слова.
 run_case run_law d3-d1-false-cons-head-positive tests/semantic/language-law-d3-d1-false-head-ukr.lisp 1
