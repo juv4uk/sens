@@ -436,6 +436,26 @@ jobs:
             echo "::error file=bench_t5m.zig,title=Zig benchmark::REGRESSION layer=codec-benchmark expected=canonical-roundtrip actual=failed"
             zig_failed=1
           fi
+          # Дослідний кодек DWC1 — окремий від production Zig/T5M.
+          # На кожному корпусі перевіряємо exact (width,bits) перед AB/BA замірами.
+          if zig test -O ReleaseFast -lc research/zig-codecs/domain_codebook_experiment.zig \
+              > "$RUNNER_TEMP/zig-dwc1-tests.log" 2>&1; then
+            cat "$RUNNER_TEMP/zig-dwc1-tests.log"
+            echo "::notice title=Zig DWC1 experiment::PASS layer=mechanism semantics=NOT_TESTED"
+          else
+            cat "$RUNNER_TEMP/zig-dwc1-tests.log" >&2
+            echo "::error file=research/zig-codecs/domain_codebook_experiment.zig,title=Zig DWC1 tests::REGRESSION layer=codec-experiment expected=roundtrip-and-fail-closed actual=failed"
+            zig_failed=1
+          fi
+          if zig run -O ReleaseFast -lc research/zig-codecs/domain_codebook_bench.zig \
+              > "$RUNNER_TEMP/zig-dwc1-benchmark.log" 2>&1; then
+            cat "$RUNNER_TEMP/zig-dwc1-benchmark.log"
+            echo "::notice title=Zig DWC1 A/B::MEASURED corpora=4 provenance=$(git rev-parse HEAD) semantics=NOT_TESTED"
+          else
+            cat "$RUNNER_TEMP/zig-dwc1-benchmark.log" >&2
+            echo "::error file=research/zig-codecs/domain_codebook_bench.zig,title=Zig DWC1 A/B::REGRESSION layer=codec-experiment expected=paired-measurements actual=failed"
+            zig_failed=1
+          fi
           exit "$zig_failed"
 
       # Окремі бенчмарки MECHANISM_COPY_BENCH: не змішувати з Lisp-законами.
