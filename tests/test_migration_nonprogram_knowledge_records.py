@@ -15,7 +15,7 @@ MANIFEST = ROOT / "knowledge/migration-nonprogram-knowledge-records-2026-10-08.j
 EXPECTED = {
     "knowledge/agent-discoveries.lisp": "agent-discoveries",
     "knowledge/canon-authority-inventory.lisp": "schema",
-    "knowledge/core4-predicate-record-inventory.lisp": "core4-predicate-record-inventory-2",
+    "knowledge/core4-predicate-record-inventory.lisp": "core4-predicate-record-inventory-3",
     "knowledge/function-table-sculpt-audit.lisp": "function-table-sculpt-audit-1",
     "knowledge/meta-eval-evidence.lisp": "schema",
     "knowledge/repo-tooling-inventory.lisp": "about",
