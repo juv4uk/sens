@@ -91,7 +91,7 @@ def row_line(d: dict[str, str]) -> str:
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description="вивести D11-координату за законом")
     ap.add_argument("parent", nargs="?", help="10-бітна координата батька з D10")
-    ap.add_argument("suffix", nargs="?", help="0 (перше) або 1 (решта)")
+    ap.add_argument("suffix", nargs="?", help="0: селектор голови, 1: селектор хвоста")
     ap.add_argument("--name", help="укр-назва батька (шукається в D10)")
     ap.add_argument("--from-lisp", help="LISP-ім'я батька (напр. CDAAAAAAAAR)")
     ap.add_argument("--check", action="store_true", help="звірити з сідом, якщо координата вже є")
@@ -118,8 +118,6 @@ def main(argv: list[str] | None = None) -> int:
         if parent_bits is None:
             raise SystemExit(f"батька {parent_lisp!r} немає серед D10")
     if args.name and parent_bits is None:
-        for bits, line in ((b, l) for b, l in by_lisp.items()):
-            pass
         # шукаємо укр-назву серед D10
         path = ROOT / "lib" / "domains" / "d10.lisp"
         for line in path.read_text(encoding="utf-8").splitlines():
