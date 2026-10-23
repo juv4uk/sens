@@ -363,8 +363,8 @@ def select_threshold(
         raise EvaluationError("validation змішує прогнози кількох моделей")
 
     # Одна сортування і накопичення: один кандидат на кожен різний рівень впевненості.
-    # Порогові рішення перевіряються не за самою часткою помилок, а за її точною
-    # однобічною 95%-ю межею Clopper–Pearson, щоб не довіряти малій вибірці надмірно.
+    # Кожен поріг отримує точну однобічну межу Clopper–Pearson; поправка Бонферроні
+    # враховує, що найкращий поріг обирається після перевірки кількох кандидатів.
     if not math.isfinite(confidence_level) or not 0.0 < confidence_level < 1.0:
         raise EvaluationError("confidence level має бути скінченним і строго між 0 та 1")
     eligible_candidates: list[dict[str, Any]] = []
