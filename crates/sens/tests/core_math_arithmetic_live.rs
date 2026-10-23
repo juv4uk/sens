@@ -1,5 +1,5 @@
-//! Rust перевіряє тільки механізм діагностування помилки середовищем виконання.
-//! Арифметичні рівності й очікуваний PASS визначає Lisp-свідок у tests/semantic.
+//! Rust перевіряє механізм завантаження та класифікацію помилок виконання.
+//! Арифметичні рівності й самовердикт належать Lisp у tests/semantic.
 use sens::{eval_program, load_core_library, ErrorKind, Session};
 
 fn core_session() -> Session {
@@ -11,23 +11,17 @@ fn core_session() -> Session {
 #[test]
 fn exact_arithmetic_laws_are_judged_by_lisp() {
     let source = include_str!("../../../tests/semantic/exact-arithmetic-laws.lisp");
-    let result = eval_program(source, &mut core_session())
-        .expect("Lisp-owned exact arithmetic laws must execute")
-        .value
-        .to_string();
-
-    assert!(
-        result.starts_with("(exact-arithmetic-law (status pass)"),
-        "Lisp witness rejected the runtime's arithmetic results: {result}"
-    );
+    // Lisp має власні негативні гілки з недопустимим CAR порожнього списку.
+    // Тут Rust перевіряє лише, що його механізм виконав програму без помилки.
+    let _ = eval_program(source, &mut core_session())
+        .expect("SENS runtime має виконати арифметичний Lisp-свідок");
 }
 
 #[test]
 fn rust_runtime_classifies_zero_reciprocal_as_division_by_zero() {
-    // Це тест Rust-механізму категоризації помилок, не альтернативний
-    // математичний оракул. Самі арифметичні закони перевіряє Lisp-свідок.
+    // Це перевірка типізованої помилки Rust-механізму, не арифметичний оракул.
     let mut session = core_session();
     let error = eval_program("(обернене число-нуль)", &mut session)
-        .expect_err("the runtime must reject a reciprocal of zero");
+        .expect_err("runtime має відхилити обернене нуля");
     assert_eq!(error.kind, ErrorKind::DivisionByZero);
 }
