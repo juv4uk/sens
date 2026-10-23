@@ -666,6 +666,11 @@ class ResearchBatchUkrProjectionTests(unittest.TestCase):
             "tests/semantic/d8-floor-divide-rem-logbitp-laws.lisp",
             "tests/semantic/d8-partial-lcm-mod-laws.lisp",
             "tests/semantic/d8-list-index-surface-laws.lisp",
+            "tests/semantic/d8-reciprocal-alias-laws.lisp",
+            "tests/semantic/d8-repeat-elt-surface-laws.lisp",
+            "tests/semantic/d8-repeat-take-drop-subseq-laws.lisp",
+            "tests/semantic/d8-take-drop-right-laws.lisp",
+            "tests/semantic/d8-take-drop-right-negative.lisp",
         ):
             with self.subTest(path=relative):
                 source_path = ROOT / relative
