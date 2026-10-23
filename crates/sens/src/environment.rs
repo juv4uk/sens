@@ -111,6 +111,12 @@ pub enum CoreProfile {
     Core4,
 }
 
+/// Підлога порогу високої позначки для `arena_handles`. Карта обслуговується
+/// (прибираються мертві записи), щойно її довжина сягає поточного порогу;
+/// після прибирання поріг вертається до цієї підлоги, доки живий набір її не
+/// переросте.
+const ARENA_HANDLES_HWM_FLOOR: usize = 2048;
+
 /// Shared session state: the opt-in resource/capability limits plus the print
 /// transcript, allocated once per session and shared by every lexical child.
 #[derive(Debug)]
@@ -172,7 +178,7 @@ impl Default for SessionState {
             arena_enabled: true,
             arena: Arena::default(),
             arena_handles: ArenaHandles::new(),
-            arena_handles_hwm: 2048,
+            arena_handles_hwm: ARENA_HANDLES_HWM_FLOOR,
             numeric_bit_limit: None,
             process_allowlist: None,
             fs_read_roots: None,
@@ -183,6 +189,37 @@ impl Default for SessionState {
             legacy_code_slots: HashMap::new(),
             transcript: Transcript::default(),
         }
+    }
+}
+
+impl SessionState {
+    /// Обмежити зростання `arena_handles` періодичним прибиранням за порогом
+    /// високої позначки [`SessionState::arena_handles_hwm`].
+    ///
+    /// Слабкий власник у кожному записі тримає алокацію `Rc<PairNode>`
+    /// живучою, тож записи мертвих пар треба прибирати явно — інакше карта
+    /// росла б упродовж усієї довгої сесії. Політика:
+    ///
+    /// * доки довжина менша за поріг — нічого не робимо (амортизовано дешево);
+    /// * щойно довжина сягає порогу — викидаємо записи з мертвим власником;
+    /// * поріг піднімаємо лише тоді, коли ЖИВИЙ набір сам його переріс;
+    ///   інакше вертаємо до [`ARENA_HANDLES_HWM_FLOOR`].
+    ///
+    /// Живі записи не викидаються ніколи: викинути живий запис означало б
+    /// втратити комірку-опору для ще живої пари, тобто змінити семантику
+    /// `cons`. Тому межа — це саме поріг, за яким прибираються мертві, а не
+    /// жорстка стеля кількості.
+    fn prune_dead_arena_handles(&mut self) {
+        if self.arena_handles.len() < self.arena_handles_hwm {
+            return;
+        }
+        self.arena_handles
+            .retain(|_, (owner, _)| owner.strong_count() > 0);
+        self.arena_handles_hwm = self
+            .arena_handles
+            .len()
+            .saturating_mul(2)
+            .max(ARENA_HANDLES_HWM_FLOOR);
     }
 }
 
@@ -317,14 +354,8 @@ impl Environment {
     pub(crate) fn arena_cons(&self, head: Value, tail: Value) -> Value {
         let mut guard = self.2.borrow_mut();
         let state: &mut SessionState = &mut guard;
-        // Періодичне прибирання мертвих записів: слабкий власник тримає
-        // алокацію живою, тож без прибирання карта росла б назавжди.
-        if state.arena_handles.len() >= state.arena_handles_hwm {
-            state
-                .arena_handles
-                .retain(|_, (owner, _)| owner.strong_count() > 0);
-            state.arena_handles_hwm = state.arena_handles.len().saturating_mul(2).max(2048);
-        }
+        // Обмеження зростання карти за порогом високої позначки.
+        state.prune_dead_arena_handles();
         let head_edge = arena_edge_for(&state.arena, &state.arena_handles, &head);
         let tail_edge = arena_edge_for(&state.arena, &state.arena_handles, &tail);
         let cell = state.arena.alloc_with(head_edge, tail_edge);
@@ -336,6 +367,11 @@ impl Environment {
     /// Кількість слотів арени (свідок).
     pub fn arena_len(&self) -> usize {
         self.2.borrow().arena.len()
+    }
+
+    /// Скільки записів зараз у `arena_handles` (свідок межі зростання).
+    pub fn arena_handles_len(&self) -> usize {
+        self.2.borrow().arena_handles.len()
     }
 
     /// Чи має це значення живу комірку-опору в арені.
@@ -1186,5 +1222,97 @@ mod tests {
         assert!(!child.is_tcp_connect_allowed("example.org", 8080));
         assert!(child.is_tcp_listen_allowed("127.0.0.1", 9999));
         assert!(!child.is_tcp_listen_allowed("0.0.0.0", 9999));
+    }
+
+    /// РЕГРЕСІЯ НА ПЕРШОПРИЧИНУ (#5950): `arena_handles` ключується не
+    /// голим `Rc::as_ptr`, а парою `(Weak<PairNode>, CellRef)`.
+    ///
+    /// Дефект, який це ловить: коли карта ключувалася голою адресою
+    /// `Rc<PairNode>`, звільнений `Rc` віддавав свою адресу новій, нічим не
+    /// пов'язаній парі — і наступний `cons` знаходив у карті застарілий запис
+    /// та зшивав ребро на чужу комірку арени (`Edge::Cell`), замість того щоб
+    /// лишити ту пару листовим `Edge::Atom`. Слабкий власник тримає саму
+    /// алокацію `Rc<PairNode>` живучою, тож її адреса фізично не може бути
+    /// перевикористана, доки запис існує.
+    ///
+    /// Тест **падає** на голому ключі: там `Rc::new` одразу віддає щойно
+    /// звільнену адресу, `assert_ne!` про перевикористання не проходить, а
+    /// `cons` зшиває хвіст на застарілу комірку (друге твердження).
+    #[test]
+    fn arena_cons_does_not_adopt_a_foreign_pair_that_reuses_a_freed_address() {
+        let environment = Environment::root();
+        assert!(environment.arena_cons_enabled(), "арена — типове подання cons");
+
+        // (1) Пара, народжена крізь шов арени: її адреса зареєстрована в
+        //     `arena_handles`.
+        let first = environment.arena_cons(Value::Symbol(Rc::from("a")), Value::Nil);
+        let freed = match &first {
+            Value::Pair(node) => Rc::as_ptr(node) as usize,
+            other => panic!("cons мусив дати пару, а дав {other:?}"),
+        };
+        // (2) Прибрати всі сильні власники. За нового ключа слабкий запис
+        //     лишається й закріплює адресу; за голого — адреса звільняється.
+        drop(first);
+
+        // Нічого не алокуємо між звільненням і новою парою, щоб на голому
+        // ключі алокатор гарантовано повернув ту саму адресу.
+        let foreign_head = Value::Symbol(Rc::from("b"));
+        let foreign = Rc::new(crate::PairNode {
+            head: foreign_head,
+            tail: Value::Nil,
+        });
+        let reused = Rc::as_ptr(&foreign) as usize;
+
+        // (3) `cons` із цією чужою парою як хвостом. За нового ключа вона не
+        //     має жодного запису в карті, тож лишається листовим `Atom`.
+        let second = environment.arena_cons(
+            Value::Symbol(Rc::from("c")),
+            Value::Pair(Rc::clone(&foreign)),
+        );
+        let Value::Pair(second_node) = &second else {
+            panic!("cons мусив дати пару");
+        };
+        let Value::Pair(tail_node) = &second_node.tail else {
+            panic!("хвіст мусив бути парою");
+        };
+        assert!(
+            Rc::ptr_eq(tail_node, &foreign),
+            "cons зшив ребро на чужий (застарілий) підграф замість листового Atom"
+        );
+        assert_eq!(second.to_string(), "(c b)");
+
+        // (4) Корінь причини: адресу не перевикористано, бо слабкий власник
+        //     тримає стару алокацію живучою.
+        assert_ne!(
+            reused, freed,
+            "слабкий власник мусив закріпити адресу Rc<PairNode>"
+        );
+    }
+
+    /// ОБМЕЖЕНІСТЬ ЗРОСТАННЯ (пункт 2): за довгої сесії `arena_handles` не
+    /// росте безмежно.
+    ///
+    /// Кожен `cons` реєструє одну пару в карті; тут кожну пару одразу
+    /// відпускають, тож записи стають мертвими. Без прибирання за порогом
+    /// високої позначки карта переросла б `4 × підлога`; з прибиранням пік
+    /// не перевищує підлоги. Живі записи (окремо перевірено) не чіпаються.
+    #[test]
+    fn arena_handles_stays_bounded_across_a_long_session() {
+        let environment = Environment::root();
+        let floor = ARENA_HANDLES_HWM_FLOOR;
+        let mut peak = 0;
+        for _ in 0..(floor * 4) {
+            let value = environment.arena_cons(Value::Symbol(Rc::from("x")), Value::Nil);
+            drop(value); // запис у карті стає мертвим одразу
+            peak = peak.max(environment.arena_handles_len());
+        }
+        assert!(
+            peak <= floor,
+            "карта переросла поріг високої позначки: пік {peak} > {floor}"
+        );
+        assert!(
+            environment.arena_handles_len() <= floor,
+            "наприкінці сесії карта мусить лишатися обмеженою"
+        );
     }
 }

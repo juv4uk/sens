@@ -379,9 +379,21 @@ impl Arena {
         }
     }
 
-    /// Відновити `Value` з комірки. Для ациклічного підграфа дає точний
-    /// `Value::Pair`-еквівалент; на зворотному ребрі (цикл) спиняється й
-    /// повертає `Value::Nil`, бо `Rc<PairNode>` цикл подати не може.
+    /// Відновити `Value` з комірки.
+    ///
+    /// Для ациклічного підграфа дає точний `Value::Pair`-еквівалент. На
+    /// зворотному ребрі (цикл) спиняється й повертає [`Value::Nil`].
+    ///
+    /// Це **СВІДОМИЙ, задокументований компроміс, а не дефект** (закріплено
+    /// тестом `cycle_is_cut_to_nil_by_design`). Причина в чинному поданні
+    /// пари: `Rc<PairNode>` з незмінними полями `head`/`tail` — у ньому
+    /// фізично немає куди записати зворотне ребро, а коректне подання циклу
+    /// вимагало б змінити сам `Value` (позикове подання або слабке ребро).
+    /// Доти цикл розрізається саме на зворотному ребрі: решта ациклічного
+    /// підграфа відновлюється точно, а місце зворотного ребра стає `Nil`.
+    ///
+    /// Не приймати це за помилку відновлення: `Nil` тут означає «зворотне
+    /// ребро», а не «відсутня комірка».
     pub(crate) fn to_value(&self, root: CellRef) -> Value {
         self.to_value_guarded(root, &mut Vec::new())
     }
@@ -404,7 +416,10 @@ impl Arena {
         handles: &mut ArenaHandles,
     ) -> Value {
         if seen.contains(&root) {
-            return Value::Nil; // цикл: `Rc<PairNode>` його не подає
+            // Зворотне ребро циклу. `Rc<PairNode>` цикл подати не може
+            // (незмінні `head`/`tail`), тож це свідомий компроміс — див.
+            // доку [`Arena::to_value`].
+            return Value::Nil;
         }
         let Some(slot) = self.cell(root) else {
             return Value::Nil;
@@ -436,7 +451,8 @@ impl Arena {
 
     fn to_value_guarded(&self, root: CellRef, seen: &mut Vec<CellRef>) -> Value {
         if seen.contains(&root) {
-            return Value::Nil; // цикл: `Rc<PairNode>` його не подає
+            // Зворотне ребро циклу — свідомий компроміс, див. [`Arena::to_value`].
+            return Value::Nil;
         }
         let Some(slot) = self.cell(root) else {
             return Value::Nil;
@@ -667,5 +683,42 @@ mod tests {
         arena.collect(&[]);
         assert_eq!(value, before, "перенесення не мусить чіпати джерело");
         assert!(matches!(value, Value::Pair(_)));
+    }
+
+    /// ЦИКЛІЧНИЙ ПІДГРАФ (пункт 3): `to_value` **свідомо** розрізає цикл до
+    /// [`Value::Nil`] на зворотному ребрі — це задокументований компроміс
+    /// (див. доку [`Arena::to_value`]), а не дефект.
+    ///
+    /// `Rc<PairNode>` має незмінні `head`/`tail`, тож фізично не подає цикл;
+    /// коректне подання циклу вимагало б змінити сам `Value`. Тест закріплює
+    /// поведінку, щоб її не прийняли за помилку: розрізається рівно зворотне
+    /// ребро, а решта ациклічного підграфа відновлюється точно.
+    #[test]
+    fn cycle_is_cut_to_nil_by_design() {
+        let mut arena = Arena::new();
+        // Ациклічний лист: (t . ()) — має відновитися точно.
+        let leaf = arena.alloc_with(Edge::Atom(Value::Bool(true)), Edge::None); // 0
+        // Цикл a -> b -> a.
+        let a = arena.alloc(); // 1
+        let b = arena.alloc(); // 2
+        assert!(arena.write(a, Edge::Cell(b), Edge::None));
+        assert!(arena.write(b, Edge::Cell(a), Edge::None));
+
+        // Ациклічне відновлюється точно, без жодного зайвого `Nil`.
+        assert_eq!(arena.to_value(leaf).to_string(), "(t)");
+
+        // З кореня циклу зворотне ребро ріжеться до `Nil`, решта — точна.
+        // a = (b . ()); b = (a . ()) -> b стає (Nil . ()) = (()); a = ((()) . ()).
+        assert_eq!(arena.to_value(a).to_string(), "((()))");
+        // Той самий результат із другого боку циклу: ріжеться саме зворотне
+        // ребро, а не «весь цикл цілком».
+        assert_eq!(arena.to_value(b).to_string(), "((()))");
+
+        // Зареєстрований шлях (`cons`) поводиться ідентично.
+        let mut handles = ArenaHandles::new();
+        assert_eq!(
+            arena.to_value_registered(a, &mut handles).to_string(),
+            "((()))"
+        );
     }
 }
