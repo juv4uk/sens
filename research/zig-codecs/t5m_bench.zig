@@ -65,7 +65,8 @@ fn trialRejected(
 ) !void {
     const begin = nanoseconds();
     for (0..repetitions) |_| {
-        if (t5m.decode(allocator, std.mem.doNotOptimizeAway(malformed))) |decoded| {
+        std.mem.doNotOptimizeAway(malformed);
+        if (t5m.decode(allocator, malformed)) |decoded| {
             var unexpected = decoded;
             unexpected.deinit(allocator);
             return error.InvalidCarrierUnexpectedlyAccepted;
@@ -76,7 +77,7 @@ fn trialRejected(
     const elapsed = nanoseconds() - begin;
     if (elapsed == 0) return error.InvalidMeasurement;
     std.debug.print(
-        "negative impl=zig case={s} op=decode-reject error={s} elapsed_ns={d} reps={d}\\n",
+        "negative impl=zig case={s} op=decode-reject error={s} elapsed_ns={d} reps={d}\n",
         .{ name, @errorName(expected), elapsed, repetitions },
     );
 }
