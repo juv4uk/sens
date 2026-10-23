@@ -1,5 +1,7 @@
-# Owner 2026-10-13: manual only; the D4 binary gate is the sole automatic test.
-name: SENS performance scoreboard
+# Manual diagnostic only: CI remains the single automatic workflow.
+# All benchmark measurements are implemented by Rust, Zig, or native SENS.
+# Records are TSV/plain text; no JSON/Python benchmark or reporting lane.
+name: SENS performance — Rust, Zig, фізичний SENS
 
 on:
   workflow_dispatch:
@@ -7,328 +9,173 @@ on:
 permissions:
   contents: read
 
-# Не перериваємо вже запущений pinned-SHA вимір під час шторму push.
-# GitHub concurrency лишає один running та найновіший pending workflow.
 concurrency:
-  group: sens-performance-${{ github.event.pull_request.number || github.ref }}
+  group: sens-performance-${{ github.ref }}
   cancel-in-progress: false
 
 jobs:
-  t5-reference:
-    name: T5 physical size and reference codec throughput
+  mechanisms:
+    name: Rust + Zig mechanism benchmarks (semantic oracle excluded)
     runs-on: ubuntu-24.04
-    timeout-minutes: 12
+    timeout-minutes: 40
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5 pinned
+        with:
+          persist-credentials: false
+      - uses: dtolnay/rust-toolchain@1.99.0
       - uses: ./.github/actions/install-zig
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-      - name: Measure physical T5 versus exact ASCII bit view
-        run: |
-          python3 benchmarks/sens-performance/t5_reference.py \
-            --out "$RUNNER_TEMP/sens-t5-performance" \
-            --sizes 128,2048 --samples 9 --loops 3
-      - name: Keep measured data and environment
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: sens-t5-reference-${{ github.sha }}
-          path: ${{ runner.temp }}/sens-t5-performance/
-          if-no-files-found: warn
-          retention-days: 14
-
-  domain-carrier:
-    name: Exact W1-W9 carrier cost (Cachegrind I refs)
-    runs-on: ubuntu-24.04
-    timeout-minutes: 30
-    steps:
-      - uses: actions/checkout@v5
-      - uses: dtolnay/rust-toolchain@stable
-      - uses: Swatinem/rust-cache@v2
-      - name: Install deterministic instruction-counter tool
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y valgrind
-      - name: Build production API benchmark in release mode
-        run: cargo build --locked --release -p sens --example domain12345678_bench --example domain_occupancy_bench
-      - name: Measure domain-coordinate carrier with paired empty-loop baseline
-        run: |
-          python3 benchmarks/domain12345678/run.py \
-            --binary "$(pwd)/target/release/examples/domain12345678_bench" \
-            --out-dir "$RUNNER_TEMP/sens-domain-carrier" \
-            --iterations 100000 --reps 3
-      - name: Benchmark D3/D7/D8/D9 occupancy projection without language semantics
+      - name: Record exact runner and toolchain provenance
         shell: bash
         run: |
           set -euo pipefail
-          mkdir -p "$RUNNER_TEMP/sens-domain-carrier"
+          out="$RUNNER_TEMP/sens-mechanisms"
+          mkdir -p "$out"
           {
-            echo "SHA=$GITHUB_SHA"
-            rustc --version
-            grep -m1 'model name' /proc/cpuinfo || true
-          } > "$RUNNER_TEMP/sens-domain-carrier/occupancy-environment.txt"
+            echo "commit=$GITHUB_SHA"
+            echo "runner=${RUNNER_NAME:-unknown}"
+            echo "architecture=$(uname -m)"
+            echo "system=$(uname -s)"
+            cargo --version
+            rustc -Vv
+            zig version
+            sha256sum crates/sens/examples/byte_pack_bench.rs
+            sha256sum crates/sens/examples/domain12345678_bench.rs
+            sha256sum crates/sens/examples/packed_vs_visible_bench.rs
+            sha256sum research/zig-codecs/t5/bench.zig
+          } > "$out/environment.txt"
+      - name: Build native Rust mechanism benchmarks
+        shell: bash
+        run: |
+          set -euo pipefail
+          cargo build --locked --release -p sens \
+            --example domain12345678_bench \
+            --example domain_occupancy_bench \
+            --example byte_pack_bench \
+            --example zig_t5_matched_bench
+      - name: Measure exact-width domain construction in Rust
+        shell: bash
+        run: |
+          set -euo pipefail
+          out="$RUNNER_TEMP/sens-mechanisms"
+          binary="$PWD/target/release/examples/domain12345678_bench"
+          for case in empty d1 d2 d3 d4 d5 d6 d7 d8 d9 mixed width-roundtrip; do
+            "$binary" series "$case" 100000 9 >> "$out/domain-series.tsv"
+          done
+          test "$(grep -c '^RUST_DOMAIN_SAMPLE[[:space:]]' "$out/domain-series.tsv")" -eq 108
+          test "$(grep -c '^RUST_DOMAIN_SUMMARY[[:space:]]' "$out/domain-series.tsv")" -eq 12
+      - name: Measure bit packing and decoding in Rust after exact round-trip
+        shell: bash
+        run: |
+          set -euo pipefail
+          out="$RUNNER_TEMP/sens-mechanisms"
+          binary="$PWD/target/release/examples/byte_pack_bench"
+          for workload in d1 d3 w7 w8 w9 mixed; do
+            "$binary" series "$workload" 1024 9 >> "$out/bit-pack.tsv"
+          done
+          test "$(grep -c '^PACK_BENCH_PREFLIGHT[[:space:]]' "$out/bit-pack.tsv")" -eq 6
+          test "$(grep -c '^PACK_BENCH_SAMPLE[[:space:]]' "$out/bit-pack.tsv")" -eq 162
+          test "$(grep -c '^PACK_BENCH_SUMMARY[[:space:]]' "$out/bit-pack.tsv")" -eq 18
+      - name: Measure native Rust owner-coordinate lookup
+        shell: bash
+        run: |
+          set -euo pipefail
+          out="$RUNNER_TEMP/sens-mechanisms"
           SENS_OCCUPANCY_ITERATIONS=100000 SENS_OCCUPANCY_SAMPLES=9 \
-            target/release/examples/domain_occupancy_bench \
-            | tee "$RUNNER_TEMP/sens-domain-carrier/occupancy.tsv"
-          {
-            echo "## Exact-domain occupancy lookup latency"
-            echo
-            echo "Measured p50/p95 include coordinate construction and owner lookup, not evaluation or dispatch."
-            echo
-            echo '~~~text'
-            cat "$RUNNER_TEMP/sens-domain-carrier/occupancy.tsv"
-            echo '~~~'
-            echo
-            echo "Source SHA: $GITHUB_SHA"
-          } >> "$GITHUB_STEP_SUMMARY"
-      - name: Keep raw I refs, report and toolchain provenance
+            target/release/examples/domain_occupancy_bench > "$out/domain-occupancy.tsv"
+          test "$(wc -l < "$out/domain-occupancy.tsv")" -eq 11
+      - name: Measure exact-width visible versus packed Rust ingestion
+        shell: bash
+        run: |
+          set -euo pipefail
+          bash benchmarks/rust-packed-visible/run.sh "$RUNNER_TEMP/sens-mechanisms/packed-visible"
+          test "$(grep -c '^RUST_PACKED_VISIBLE_SAMPLE[[:space:]]' "$RUNNER_TEMP/sens-mechanisms/packed-visible/raw.tsv")" -eq 45
+          test "$(grep -c '^RUST_PACKED_VISIBLE_SUMMARY[[:space:]]' "$RUNNER_TEMP/sens-mechanisms/packed-visible/raw.tsv")" -eq 5
+      - name: Measure Rust and Zig T5 mechanics against identical bytes
+        shell: bash
+        run: |
+          set -euo pipefail
+          out="$RUNNER_TEMP/sens-mechanisms"
+          target/release/examples/zig_t5_matched_bench > "$out/rust-t5.tsv"
+          zig build-exe -O ReleaseFast -lc research/zig-codecs/t5/bench.zig \
+            -femit-bin="$out/zig-t5-bench" > "$out/zig-build.log" 2>&1
+          "$out/zig-t5-bench" > "$out/zig-t5.tsv" 2>&1
+          grep -E '^(fixture|physical) impl=rust ' "$out/rust-t5.tsv" \
+            | sed 's/ impl=rust//' > "$out/rust-t5-fixtures.txt"
+          grep -E '^(fixture|physical) impl=zig ' "$out/zig-t5.tsv" \
+            | sed 's/ impl=zig//' > "$out/zig-t5-fixtures.txt"
+          test "$(wc -l < "$out/rust-t5-fixtures.txt")" -eq 8
+          test "$(wc -l < "$out/zig-t5-fixtures.txt")" -eq 8
+          diff -u "$out/rust-t5-fixtures.txt" "$out/zig-t5-fixtures.txt"
+          grep '^sample impl=rust ' "$out/rust-t5.tsv" > "$out/rust-t5-samples.txt"
+          grep '^sample impl=zig ' "$out/zig-t5.tsv" > "$out/zig-t5-samples.txt"
+          test "$(wc -l < "$out/rust-t5-samples.txt")" -eq 40
+          test "$(wc -l < "$out/zig-t5-samples.txt")" -eq 40
+      - name: Run Rust mechanism and Zig codec/ABI tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          cargo test --locked -p sens-cli --test mechanism_file_io_benchmark -- --include-ignored --nocapture \
+            > "$RUNNER_TEMP/sens-mechanisms/rust-file-io.log" 2>&1
+          zig test -lc research/zig-codecs/tests.zig \
+            > "$RUNNER_TEMP/sens-mechanisms/zig-codecs-tests.log" 2>&1
+          zig test -lc zig_transport_root.zig \
+            > "$RUNNER_TEMP/sens-mechanisms/zig-abi-tests.log" 2>&1
+          zig test -O ReleaseFast -lc bench_t5m_test.zig \
+            > "$RUNNER_TEMP/sens-mechanisms/zig-t5m-tests.log" 2>&1
+          zig run -O ReleaseFast -lc bench_t5m.zig \
+            > "$RUNNER_TEMP/sens-mechanisms/zig-t5m-benchmark.tsv" 2>&1
+          cat "$RUNNER_TEMP/sens-mechanisms/zig-t5m-benchmark.tsv"
+      - name: Publish native mechanism samples
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4 pinned
         with:
-          name: sens-domain-carrier-${{ github.sha }}
-          path: ${{ runner.temp }}/sens-domain-carrier/
+          name: sens-native-mechanisms-${{ github.sha }}
+          path: ${{ runner.temp }}/sens-mechanisms/
           if-no-files-found: warn
-          retention-days: 14
-
-  bit-pack:
-    name: Bit packing cost versus byte density (Cachegrind)
-    runs-on: ubuntu-24.04
-    timeout-minutes: 30
-    steps:
-      - uses: actions/checkout@v5
-      - uses: dtolnay/rust-toolchain@stable
-      - uses: Swatinem/rust-cache@v2
-      - name: Install instruction-counter tool
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y valgrind
-      - name: Build exact-width packing benchmark
-        run: cargo build --locked --release -p sens --example byte_pack_bench
-      - name: Measure real packed bytes and pack/decode instruction costs
-        run: |
-          python3 benchmarks/byte-pack/run.py \
-            --binary "$(pwd)/target/release/examples/byte_pack_bench" \
-            --out "$RUNNER_TEMP/sens-bitpack" \
-            --sizes 1024 --reps 16 --workloads d1,d3,w7,w8,w9,mixed
-      - name: Publish measured packed bytes and I refs per word
-        if: always()
-        shell: bash
-        run: |
-          if test -s "$RUNNER_TEMP/sens-bitpack/results.tsv"; then
-            python3 benchmarks/current-en-vs-d1d8/performance_scoreboard.py \
-              --pack-tsv "$RUNNER_TEMP/sens-bitpack/results.tsv" \
-              --out "$RUNNER_TEMP/sens-bitpack/scoreboard.md"
-            cat "$RUNNER_TEMP/sens-bitpack/scoreboard.md" >> "$GITHUB_STEP_SUMMARY"
-          else
-            echo 'D1/D3/D7/D8/D9 Cachegrind measurement BLOCKED; no invented result.' >> "$GITHUB_STEP_SUMMARY"
-          fi
-      - uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: sens-bitpack-${{ github.sha }}
-          path: ${{ runner.temp }}/sens-bitpack/
-          if-no-files-found: warn
-          retention-days: 14
-
-  paired-d3:
-    name: D3 paired English vs binary CPU phases (parity-gated)
-    runs-on: ubuntu-24.04
-    timeout-minutes: 25
-    steps:
-      - uses: actions/checkout@v5
-      - uses: dtolnay/rust-toolchain@stable
-      - uses: Swatinem/rust-cache@v2
-      - name: Build single shared CPU benchmark helper
-        run: cargo build --locked --release -p sens --example current_en_vs_d1d8_cpu
-      - name: Measure admitted D3 pairs or publish explicit historical-lane block
-        shell: bash
-        run: |
-          set -euo pipefail
-          root="$RUNNER_TEMP/sens-d3-cpu"
-          mkdir -p "$root"
-          set +e
-          python3 benchmarks/current-en-vs-d1d8/cpu_runner.py \
-            --manifest benchmarks/current-en-vs-d1d8/fixtures/d3-smoke.json \
-            --helper "$(pwd)/target/release/examples/current_en_vs_d1d8_cpu" \
-            --out "$root/phases.jsonl" \
-            --reps 7 --repeat-n 64 --phases session,ingest,lower,execute,full,repeated \
-            > "$root/preflight.log" 2>&1
-          status=$?
-          set -e
-          if [ "$status" -ne 0 ]; then
-            if grep -qF 'legacy byte identity entered current D1-D8 CPU preflight' \
-                "$root/preflight.log"; then
-              python3 - "$root" "$GITHUB_SHA" <<'PY'
-          import json, sys
-          from pathlib import Path
-          root, sha = Path(sys.argv[1]), sys.argv[2]
-          record = {
-              "schema": "sens-performance-blocked/v1",
-              "status": "BLOCKED_NO_TIMING",
-              "git_sha": sha,
-              "reason": "historical English surface produces retired SID identity",
-              "semantic_oracle_parity": "NOT_PROVED",
-              "speed_ratio": None,
-          }
-          (root / "blocked.json").write_text(json.dumps(record, indent=2) + "\n")
-          (root / "blocked.md").write_text(
-              "## English/Binary D3 historical pair: BLOCKED_NO_TIMING\n\n"
-              f"SHA: \x60{sha}\x60\n\n"
-              "English candidate constructs retired SID identity. "
-              "No paired result or speed ratio is admitted.\n"
-          )
-          PY
-              cat "$root/blocked.md"
-              exit 0
-            fi
-            cat "$root/preflight.log" >&2
-            exit "$status"
-          fi
-          cat "$root/preflight.log"
-          python3 benchmarks/current-en-vs-d1d8/validate.py "$root/phases.jsonl"
-      - name: Publish paired phase medians, speed ratios and measurement limits
-        if: always()
-        shell: bash
-        run: |
-          if test -s "$RUNNER_TEMP/sens-d3-cpu/phases.jsonl"; then
-            python3 benchmarks/current-en-vs-d1d8/performance_scoreboard.py \
-              --cpu-jsonl "$RUNNER_TEMP/sens-d3-cpu/phases.jsonl" \
-              --out "$RUNNER_TEMP/sens-d3-cpu/scoreboard.md"
-            cat "$RUNNER_TEMP/sens-d3-cpu/scoreboard.md" >> "$GITHUB_STEP_SUMMARY"
-          elif test -s "$RUNNER_TEMP/sens-d3-cpu/blocked.md"; then
-            cat "$RUNNER_TEMP/sens-d3-cpu/blocked.md" >> "$GITHUB_STEP_SUMMARY"
-          else
-            echo 'Paired phase benchmark failed before parity admission; inspect preflight.log.' >> "$GITHUB_STEP_SUMMARY"
-          fi
-      - uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: sens-paired-d3-${{ github.sha }}
-          path: ${{ runner.temp }}/sens-d3-cpu/
-          if-no-files-found: warn
-          retention-days: 14
-
-  adaptive-carriers:
-    name: "Адаптивні T5/F3/F4 та T21/T22/T33: байти й Python wall-time"
-    runs-on: ubuntu-24.04
-    timeout-minutes: 25
-    steps:
-      - uses: actions/checkout@v5
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-      - uses: dtolnay/rust-toolchain@stable
-      - name: Довести Rust↔Python і відмови експериментальних носіїв
-        shell: bash
-        run: |
-          set -euo pipefail
-          mkdir -p "$RUNNER_TEMP/sens-adaptive"
-          git rev-parse HEAD > "$RUNNER_TEMP/sens-adaptive/source.sha"
-          python3 --version > "$RUNNER_TEMP/sens-adaptive/environment.txt"
-          rustc -Vv >> "$RUNNER_TEMP/sens-adaptive/environment.txt"
-          python3 -m unittest discover -s research/framed3 -p 'test_*.py' -v \
-            > "$RUNNER_TEMP/sens-adaptive/python-parity.log" 2>&1 || {
-              cat "$RUNNER_TEMP/sens-adaptive/python-parity.log" >&2
-              exit 1
-            }
-          bash research/framed3/rust_codec/run_parity.sh \
-            > "$RUNNER_TEMP/sens-adaptive/rust-parity.log" 2>&1 || {
-              cat "$RUNNER_TEMP/sens-adaptive/rust-parity.log" >&2
-              exit 1
-            }
-          cat "$RUNNER_TEMP/sens-adaptive/rust-parity.log"
-      - name: Поміряти мінімальний повний носій, включно з F3/F4-маркером
-        shell: bash
-        run: |
-          set -euo pipefail
-          python3 benchmarks/sens-performance/adaptive_carrier_bench.py \
-            --reps 11 --out "$RUNNER_TEMP/sens-adaptive/adaptive.json"
-          python3 -O benchmarks/sens-performance/adaptive_carrier_bench.py \
-            --reps 5 --out "$RUNNER_TEMP/sens-adaptive/adaptive-optimized.json"
-          test -s "$RUNNER_TEMP/sens-adaptive/adaptive.json"
-      - name: Перевірити й заміряти фіксовані T21/T22/T33
-        shell: bash
-        run: |
-          set -euo pipefail
-          python3 benchmarks/byte-pack/носій22.py --verify \
-            > "$RUNNER_TEMP/sens-adaptive/t21-t22-t33-checks.log"
-          python3 benchmarks/byte-pack/носій22.py \
-            --bench --ntrits 4620 --reps 15 \
-            --out "$RUNNER_TEMP/sens-adaptive/t21-t22-t33.json"
-          test -s "$RUNNER_TEMP/sens-adaptive/t21-t22-t33.json"
-      - name: Зберегти сирі результати та іменовані блокери
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: sens-adaptive-carriers-${{ github.sha }}
-          path: ${{ runner.temp }}/sens-adaptive/
-          if-no-files-found: error
           retention-days: 21
 
-  physical-binary-paired:
-    name: "Фізичний T5: 8 програм, p50/p95 і парний A/A-контроль"
+  language:
+    name: Lisp laws → Zig/T5M → native SENS (semantics and full-process timing)
     runs-on: ubuntu-24.04
-    timeout-minutes: 35
+    timeout-minutes: 45
     steps:
-      - uses: actions/checkout@v5
-      - uses: dtolnay/rust-toolchain@stable
-      - uses: Swatinem/rust-cache@v2
-      - name: Побудувати лише чинні фізичні CLI
-        shell: bash
-        run: |
-          set -euo pipefail
-          cargo build --locked --release -p sens-cli --bin sens --bin sens-trit
-      - name: Виміряти фізичне виконання після незалежного byte parity
-        shell: bash
-        run: |
-          set -euo pipefail
-          mkdir -p "$RUNNER_TEMP/sens-physical-paired"
-          python3 benchmarks/physical-binary-performance/run.py \
-            --sens target/release/sens --sens-trit target/release/sens-trit \
-            --reps 11 --warmup 4 --out "$RUNNER_TEMP/sens-physical-paired/physical"
-      - name: Негативний A/A-контроль шуму парних вимірювань
-        shell: bash
-        run: |
-          set -euo pipefail
-          python3 -m unittest discover \
-            -s benchmarks/methodology/tests -p 'test_*.py' -v
-          python3 benchmarks/methodology/paired_wall.py \
-            --a-json '["target/release/sens","tests/fixtures/migration-quote-cohort-main/quote-legacy.sens"]' \
-            --b-json '["target/release/sens","tests/fixtures/migration-quote-cohort-main/quote-legacy.sens"]' \
-            --payload tests/fixtures/migration-quote-cohort-main/quote-legacy.sens \
-            --sessions 5 --pairs-per-session 7 --warmups 2 \
-            --seed 20261010 --bootstrap 2000 \
-            --out "$RUNNER_TEMP/sens-physical-paired/aa-control"
-      - name: Зберегти raw wall-time і паритет
-        if: always()
-        uses: actions/upload-artifact@v4
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5 pinned
         with:
-          name: sens-physical-paired-${{ github.sha }}
-          path: ${{ runner.temp }}/sens-physical-paired/
-          if-no-files-found: error
-          retention-days: 21
-
-  rust-packed-visible:
-    name: "Rust exact-width: visible vs packed ingestion"
-    runs-on: ubuntu-24.04
-    timeout-minutes: 20
-    steps:
-      - uses: actions/checkout@v5
-      - uses: dtolnay/rust-toolchain@stable
-      - uses: Swatinem/rust-cache@v2
-      - name: Measure visible/packed readers after exact D2 AST parity preflight
+          persist-credentials: false
+      - uses: dtolnay/rust-toolchain@1.99.0
+      - uses: ./.github/actions/install-zig
+      - name: Build the native SENS executors once
         shell: bash
         run: |
           set -euo pipefail
-          bash benchmarks/rust-packed-visible/run.sh "$RUNNER_TEMP/sens-rust-packed-visible"
-          test -s "$RUNNER_TEMP/sens-rust-packed-visible/raw.tsv"
-          cat "$RUNNER_TEMP/sens-rust-packed-visible/summary.md" >> "$GITHUB_STEP_SUMMARY"
-      - name: Keep raw exact-width samples and provenance
+          CARGO_BUILD_JOBS=2 cargo build --locked -p sens-cli \
+            --bin sens --bin sens-trit --features benchmark-ast-visits \
+            > "$RUNNER_TEMP/sens-language-build.log" 2>&1
+          test -x target/debug/sens
+          test -x target/debug/sens-trit
+      - name: Execute Lisp-owned positive/negative laws through the physical T5M route
+        shell: bash
+        timeout-minutes: 38
+        run: |
+          set -euo pipefail
+          out="$RUNNER_TEMP/sens-language"
+          mkdir -p "$out"
+          bash scripts/prove-lisp-semantic-t5m.sh \
+            "$PWD/target/debug/sens" "$PWD/target/debug/sens-trit" "$out/evidence" \
+            > "$out/native-law-run.log" 2>&1 || {
+              cat "$out/native-law-run.log" >&2
+              exit 1
+            }
+          test -s "$out/evidence/results.txt"
+          test -s "$out/evidence/law-timings.tsv"
+          test -s "$out/evidence/law-stage-timings.tsv"
+          grep -E 'SENS_LISP_T5M_LAWS_PASS|SENS_LAW_BENCHMARK_SUMMARY|SENS_PHASE_BENCHMARK_SUMMARY' \
+            "$out/native-law-run.log" | tee "$out/summary.tsv"
+      - name: Preserve Lisp law and timing evidence
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4 pinned
         with:
-          name: sens-rust-packed-visible-${{ github.sha }}
-          path: ${{ runner.temp }}/sens-rust-packed-visible/
+          name: sens-native-language-${{ github.sha }}
+          path: ${{ runner.temp }}/sens-language/
           if-no-files-found: warn
           retention-days: 21
