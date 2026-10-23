@@ -1,20 +1,19 @@
 {
   "schema": "sens-benchmark-manifest/v1",
   "stand": "byte-pack",
-  "wing": "Constrained physical carriers — research only",
+  "wing": "Historical T21/T22/T33 carrier research — provenance only",
   "roles": [
     "RESEARCH",
-    "FALSIFIER",
-    "MEASUREMENT"
+    "FALSIFIER"
   ],
-  "question": "Can bounded T21/T22/T33 rank-unrank reduce physical bytes while preserving canonical round-trip and rejecting malformed carriers?",
-  "claim": "Python carrier experiment only; fixed blocks require external metadata; no .sens replacement, language-speed claim, or production codec authority.",
+  "question": "What historical rank-unrank byte-size observations were made for experimental T21/T22/T33 carriers, and what would still need independent physical evidence?",
+  "claim": "The old Python carrier prototype is retained as historical research only and is not invoked by the active performance workflow. Its prior local checks do not establish a current hosted replay, production codec authority, or language speed. The active exact-width bit-packing mechanism is a different Rust benchmark and does not validate T21/T22/T33.",
   "witness": [
     "носій22.py",
     "T22-EXPERIMENT.uk.md"
   ],
-  "status": "RESEARCH-ONLY; hosted replay pending",
-  "generation": "2026-10-10; CPython 3.13.5 Linux x86_64; seed 20261010; 9036 locally reported checks, hosted replay pending",
-  "axis": "physical bytes / rank-unrank correctness / Python wall time",
-  "reproduce": "python3 benchmarks/byte-pack/носій22.py --verify && python3 benchmarks/byte-pack/носій22.py --bench --ntrits 4620 --reps 15 --out /tmp/t22-results.json"
+  "status": "HISTORICAL-RESEARCH-ONLY; NOT IN ACTIVE PERFORMANCE WORKFLOW",
+  "generation": "Historical record 2026-10-10; current hosted replay not asserted",
+  "axis": "historical physical bytes and rank-unrank correctness; no current wall-time claim",
+  "reproduce": "Historical runner is not replayed by current CI. Separate active Rust bit-pack mechanism: cargo run --locked --release -p sens --example byte_pack_bench -- series mixed 1024 9"
 }
