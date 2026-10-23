@@ -468,7 +468,7 @@ class BatchSourceTests(unittest.TestCase):
         self.assertEqual(set(projections), expected)
         self.assertIn("(function-field . ukr-projection-only)", source)
         self.assertIn("(legacy-addresses . omitted)", source)
-        self.assertNotRegex(source, r"\\b[01]{8}\\b")
+        self.assertNotRegex(source, r"\b[01]{8}\b")
         domains = [
             (ROOT / f"lib/domains/d{width}.lisp").read_text(encoding="utf-8")
             for width in (3, 8, 9)
