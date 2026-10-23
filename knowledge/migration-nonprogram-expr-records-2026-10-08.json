@@ -54,7 +54,7 @@
     },
     {
       "path": "tests/fixtures/structure-core-v1.lisp",
-      "git_blob_sha1": "6cdaa86f69b99c1f51ec018a1c11002fdf2dd085"
+      "git_blob_sha1": "1e11f35e7907256934e7717f00aadcb37b875998"
     },
     {
       "path": "tests/fixtures/unification-outcome-v1.lisp",
@@ -103,6 +103,13 @@
       "current_git_blob_sha1": "fbaeb9623beea5a47b58865111a38f50dd53ff50",
       "reviewed_commit": "0220c4428878187db82de5f017700b217d6500ff",
       "reason": "Пофайлово перевірено 33 верхньорівневі Lisp-записи (expr/expected), включно з трьома новими цитованими тестами складності. Це дані лінтера, не виконувана SENS-програма. Вкладені вирази залишаються separate-unproven; .sens чи runtime admission не створено."
+    },
+    {
+      "path": "tests/fixtures/structure-core-v1.lisp",
+      "previous_git_blob_sha1": "6cdaa86f69b99c1f51ec018a1c11002fdf2dd085",
+      "current_git_blob_sha1": "1e11f35e7907256934e7717f00aadcb37b875998",
+      "reviewed_commit": "e86019a5ff12291612ebd0d246d1f99272044dff",
+      "reason": "Структурні очікування й вирази лишилися тими самими; лише semantic-id у декларативних expr-records переведено зі старих плоских SID8 на точні рядкові тотожності D3:001/D3:111/D3:100/D3:011. Верхній файл залишається записами даних, не виконуваною програмою; вкладені source strings лишаються separate-unproven, без автоматичного .sens чи runtime admission."
     }
   ]
 }
