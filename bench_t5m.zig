@@ -37,10 +37,6 @@ pub fn main(init: std.process.Init) !void {
     const sample_count: usize = 11;
     const min_sample_ns: u64 = 25_000_000;
     const max_batches: usize = 100_000;
-    var decode_elapsed_ns: [sample_count]u64 = undefined;
-    var encode_elapsed_ns: [sample_count]u64 = undefined;
-    var decode_ops: [sample_count]u64 = undefined;
-    var encode_ops: [sample_count]u64 = undefined;
     var decode_ns_per_op: [sample_count]u64 = undefined;
     var encode_ns_per_op: [sample_count]u64 = undefined;
     var guard: usize = 0;
@@ -80,8 +76,6 @@ pub fn main(init: std.process.Init) !void {
                 return error.SampleBudgetExceeded;
         }
         if (elapsed_decode == 0 or decoded_ops == 0) return error.InsufficientClockResolution;
-        decode_elapsed_ns[sample] = elapsed_decode;
-        decode_ops[sample] = decoded_ops;
         decode_ns_per_op[sample] = elapsed_decode / decoded_ops;
 
         const encode_started = std.Io.Clock.awake.now(io);
@@ -102,8 +96,6 @@ pub fn main(init: std.process.Init) !void {
                 return error.SampleBudgetExceeded;
         }
         if (elapsed_encode == 0 or encoded_ops == 0) return error.InsufficientClockResolution;
-        encode_elapsed_ns[sample] = elapsed_encode;
-        encode_ops[sample] = encoded_ops;
         encode_ns_per_op[sample] = elapsed_encode / encoded_ops;
 
         std.debug.print(
