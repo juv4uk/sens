@@ -75,6 +75,17 @@ jobs:
             tests/test_domain_function_reuse_rule.py \
             tests/test_tests_use_ukr_projection.py -v
 
+      - name: Ратифікована D1–D10 — повна перевірка драбини
+        run: |
+          set -euo pipefail
+          # Уся ратифікована драбина: точні ширини D1=2 … D10=1024,
+          # числова ратифікація, володільна ратифікація D10 і ядрові канарки.
+          python3 scripts/check-domain-ladder-identity.py --check
+          python3 scripts/check-numeric-domain-ratification.py
+          python3 scripts/check_d10_owner_whole_domain_ratification.py
+          python3 -m unittest \
+            tests/test_domain_ladder_2046_exact.py -v
+
       - name: Звіт про залишкові кандидати SID8 у активних Lisp (лише читання)
         run: |
           set -euo pipefail

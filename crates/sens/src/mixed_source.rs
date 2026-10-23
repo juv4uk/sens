@@ -1956,7 +1956,7 @@ mod tests {
         let crate::Value::BinaryNumber(number) = &result.value else {
             panic!("D5 result must be exact D24+");
         };
-        assert_eq!(number.to_decimal_string(), "42");
+        assert_eq!(number.bits(), "101010");
 
         let d6 = only(
             parse_mixed_exact_domain("((функція (дія) (дія 42)) відняти-1)").expect("D6 as value"),
@@ -1974,7 +1974,7 @@ mod tests {
         let crate::Value::BinaryNumber(number) = &result.value else {
             panic!("D6 result must be exact D24+");
         };
-        assert_eq!(number.to_decimal_string(), "41");
+        assert_eq!(number.bits(), "101001");
 
         // No promotion of syntax, quoted data or a locally bound spelling.
         let quote = only(parse_mixed_exact_domain("(як-є додати)").unwrap());
