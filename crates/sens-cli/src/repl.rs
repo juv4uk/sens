@@ -543,6 +543,26 @@ fn collect_t5m_source_bindings(
     }
 }
 
+fn t5m_text7_surface_name(expression: &Expr, layout: sens::Text7Layout) -> Option<String> {
+    let ExprKind::List(items) = &expression.kind else {
+        return None;
+    };
+    if items.is_empty() {
+        return None;
+    }
+    let cells = items
+        .iter()
+        .map(|item| match &item.kind {
+            ExprKind::DomainIdentity(DomainIdentity::D7(word)) => {
+                Some(word.word().packed_bits() as u8)
+            }
+            _ => None,
+        })
+        .collect::<Option<Vec<_>>>()?;
+    let text = sens::Text7::from_cells(cells).ok()?;
+    sens::text7_projection::render_text7(&text, layout).ok()
+}
+
 fn project_repl_surface_expression_in_scope(
     expression: &Expr,
     session: &Session,
@@ -555,28 +575,21 @@ fn project_repl_surface_expression_in_scope(
         return Err("REPL projection lowering exceeds the SENS nesting limit".into());
     }
     // The two ratified D24+ roots are immutable named values in the
-    // Core environment. Serialize those exact typed words into the carrier
-    // rather than leaving their Text7 spellings as apparent call heads in a
-    // detached physical session. This is a narrow projection rule: no other
-    // variables or computed expressions are substituted/folded.
-    if let Some(name) = source.get(expression.span.start..expression.span.end) {
-        if matches!(name, "число-нуль" | "число-один")
+    // Core environment. Identify them from their exact W7 cells, not source
+    // byte spans: mixed-source projection can create a D2/W7 atom whose AST
+    // span is not a trustworthy way to rediscover the original spelling.
+    // This narrow rule substitutes only these two existing Core bindings;
+    // it does not fold arbitrary variables or computed expressions.
+    if let Some(name) = t5m_text7_surface_name(expression, t5m_surface_layout(surface)) {
+        if matches!(name.as_str(), "число-нуль" | "число-один")
             && !bound.iter().any(|candidate| candidate.as_ref() == name)
-            && matches!(
-                &expression.kind,
-                ExprKind::List(items)
-                    if !items.is_empty()
-                        && items.iter().all(|item| matches!(&item.kind, ExprKind::DomainIdentity(DomainIdentity::D7(_))))
-            )
         {
-            if let Some(value) = session.environment.get(name) {
-                if let Value::BinaryNumber(number) = &value {
-                    if number.numeric_domain_width() == Some(24) {
-                        return Ok(Expr {
-                            kind: ExprKind::BinaryNumber(number.clone()),
-                            span: expression.span,
-                        });
-                    }
+            if let Some(Value::BinaryNumber(number)) = session.environment.get(&name) {
+                if number.numeric_domain_width() == Some(24) {
+                    return Ok(Expr {
+                        kind: ExprKind::BinaryNumber(number),
+                        span: expression.span,
+                    });
                 }
             }
         }
@@ -2124,6 +2137,31 @@ mod tests {
                 "root={name} must not remain as a D7/Text7 call head: {words:?}"
             );
         }
+    }
+
+    #[cfg(feature = "zig-transport")]
+    #[test]
+    fn nested_d24_root_reference_projects_to_an_exact_numeric_word() {
+        let mut session = Session::default();
+        sens::load_core_library(&mut session).expect("Core4 roots");
+        let source = "(визначити пробний-корінь число-нуль)";
+        let words = prepare_t5m_repl_words(source, ReplSurface::UkrainianFull, &session)
+            .expect("nested root reference must project through the exact D24+ route");
+        assert!(
+            words.iter().any(|word| matches!(
+                word,
+                ExactDomainWord::Number(number) if number.numeric_domain_width() == Some(24)
+            )),
+            "nested число-нуль must stay a typed D24+ value, not a callable D7 glyph sequence"
+        );
+        let program = PhysicalT5Program::from_exact_domain_words(&words)
+            .expect("exact D24+ root-reference program");
+        let result = program.execute(&mut session)
+            .expect("nested root lookup through physical SENS");
+        assert_eq!(
+            result.value,
+            session.environment.get("число-нуль").expect("Core4 zero root")
+        );
     }
 
     #[cfg(feature = "zig-transport")]
