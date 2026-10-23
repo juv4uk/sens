@@ -1,4 +1,4 @@
-"""Exact Ukrainian D3/D4 projection for the semantic-registry read benchmark."""
+"""Exact Ukrainian D3/D4 call heads and current D8 table read benchmark."""
 from __future__ import annotations
 
 import hashlib
@@ -22,6 +22,17 @@ REWRITES = (
 )
 
 # Лише локальні Lisp-змінні; цитовані поля результату й рядки — незмінні.
+# Зміна даних навантаження: тепер читаємо чинну таблицю Д8, не старий SID8.
+# Для перевірки історичного джерела кожне редагування обертається побайтово.
+SOURCE_REWRITES = (
+    ("; #74 — реальне навантаження зі старої міграції Python → SENS.",
+     "; #74 — реальне навантаження читання чинної ратифікованої проєкції Д8.", 1),
+    ("для реєстру такий обхід", "для таблиці домену такий обхід", 1),
+    ('"lib/surface/semantic-registry.lisp"', '"lib/domains/d8.lisp"', 1),
+    ("eco-lisp-script-perf/read-semantic-registry",
+     "eco-lisp-script-perf/read-ratified-d8-table", 1),
+)
+
 LOCAL_REWRITES = (
     ("started", "початок", 3),  # локальне ім'я, не домен
     ("registry-text", "текст-реєстру", 2),  # локальне ім'я, не домен
@@ -83,7 +94,7 @@ class UkrainianRegistryReadBenchmarkTests(unittest.TestCase):
     def test_full_ukr_heads_have_exact_ratified_counts(self):
         source = SOURCE.read_text(encoding="utf-8")
         visible = mask_comments_and_strings(source)
-        for old, new, count in (*REWRITES, *LOCAL_REWRITES):
+        for old, new, count in (*REWRITES, *LOCAL_REWRITES, *SOURCE_REWRITES):
             with self.subTest(old=old):
                 self.assertEqual(source.count(old), 0,
                                  "retired binary head remains in the projected source")
@@ -97,7 +108,7 @@ class UkrainianRegistryReadBenchmarkTests(unittest.TestCase):
     def test_inverse_restores_the_original_git_blob_byte_exactly(self):
         source = SOURCE.read_text(encoding="utf-8")
         restored = source
-        for old, new, count in reversed((*REWRITES, *LOCAL_REWRITES)):
+        for old, new, count in reversed((*REWRITES, *LOCAL_REWRITES, *SOURCE_REWRITES)):
             self.assertEqual(restored.count(new), count)
             restored = restored.replace(new, old)
         payload = restored.encode("utf-8")
@@ -107,7 +118,7 @@ class UkrainianRegistryReadBenchmarkTests(unittest.TestCase):
     def test_historical_d8_d9_and_measurement_fields_restore_unchanged(self):
         source = SOURCE.read_text(encoding="utf-8")
         restored = source
-        for old, new, _ in reversed((*REWRITES, *LOCAL_REWRITES)):
+        for old, new, _ in reversed((*REWRITES, *LOCAL_REWRITES, *SOURCE_REWRITES)):
             restored = restored.replace(new, old)
         for token in ("01011010", "110110111", "110101001", "11011011",
                       "01011 after-read started", "01011 after-parse after-read",
