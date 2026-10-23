@@ -326,10 +326,10 @@ sha256sum lib/d11-srfi1-span-break.lisp tests/semantic/d11-srfi1-span-break-laws
 run_case run_law d11-srfi1-span-break-physical "$d11_span_bundle" 1
 # Д11 Clojure: два комплекти законів перенесено з Rust у справжній Lisp.
 # Їхня залежність SRFI-1 SPAN завантажується перед DEFINE групування.
-for набір in d11-clojure-partition-by d11-clojure-dedupe; do
-  спільний="$evidence/$набір-complete.lisp"
-  cat -- lib/d11-srfi1-span-break.lisp lib/d11-clojure-partition-by.lisp "tests/semantic/$набір-laws.lisp" > "$спільний"
-  run_case run_law "$набір-physical" "$спільний" 1
+for suite in d11-clojure-partition-by d11-clojure-dedupe; do
+  combined="$evidence/$suite-complete.lisp"
+  cat -- lib/d11-srfi1-span-break.lisp lib/d11-clojure-partition-by.lisp "tests/semantic/$suite-laws.lisp" > "$combined"
+  run_case run_law "$suite-physical" "$combined" 1
 done
 
 # The result-status law stays in Ukrainian Lisp; only the runner bundles its admitted library.
