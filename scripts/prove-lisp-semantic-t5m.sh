@@ -46,7 +46,9 @@ run_law() {
   fi
   if ! timeout 45s "$sens" --t5m-pair "$source" "$physical" >"$dir/paired.out" 2>"$dir/paired.err" ||
      ! timeout 45s "$sens" "$physical" >"$dir/physical.out" 2>"$dir/physical.err"; then
-    cat "$dir/paired.err" "$dir/physical.err" >&2 || true
+    for error_log in "$dir/paired.err" "$dir/physical.err"; do
+      if [[ -f "$error_log" ]]; then cat "$error_log" >&2; fi
+    done
     fail "$id" sens-physical "paired-and-standalone-execution" "rejected"
   fi
   cmp -s "$dir/direct.out" "$dir/paired.out" ||
@@ -89,7 +91,9 @@ run_bound_law() {
   fi
   if ! timeout 45s "$sens" --t5m-pair "$combined" "$physical" >"$dir/paired.out" 2>"$dir/paired.err" ||
      ! timeout 45s "$sens" "$physical" >"$dir/physical.out" 2>"$dir/physical.err"; then
-    cat "$dir/paired.err" "$dir/physical.err" >&2 || true
+    for error_log in "$dir/paired.err" "$dir/physical.err"; do
+      if [[ -f "$error_log" ]]; then cat "$error_log" >&2; fi
+    done
     fail "$id" sens-physical "paired-and-standalone-execution" "rejected"
   fi
   cmp -s "$dir/direct.out" "$dir/paired.out" ||
@@ -237,6 +241,14 @@ run_case run_eq_type_rejection d3-eq-nonatom-type-negative tests/semantic/d3-eq-
 # прямим SENS у ci.yml, але фізичний T5M не атестовано до реалізації LENGTH.
 # Не оголошувати PASS і не замінювати семантику D6 хостовим оракулом.
 echo "::warning file=tests/semantic/d5-arithmetic-native-t5m-law.lisp,title=TRANSITIONAL #5854::D6 LENGTH (D6 000000) поки невикличний у фізичному SENS; D5 T5M=NOT_CERTIFIED"
+# Залежні закони Д11 SPAN/BREAK: мова задає і функції, і твердження.
+# Цей повний Lisp-пакет кодується Zig/T5M і виконується фізичним SENS.
+# Відокремлений .lisp-свідок не є автономною програмою — без lib/ він не викличний.
+d11_span_bundle="$evidence/d11-srfi1-span-break-complete.lisp"
+cat -- lib/d11-srfi1-span-break.lisp tests/semantic/d11-srfi1-span-break-laws.lisp > "$d11_span_bundle"
+sha256sum lib/d11-srfi1-span-break.lisp tests/semantic/d11-srfi1-span-break-laws.lisp > "$evidence/d11-srfi1-inputs.sha256"
+run_case run_law d11-srfi1-span-break-physical "$d11_span_bundle" 1
+
 # The result-status law stays in Ukrainian Lisp; only the runner bundles its admitted library.
 result_status_bundle="$evidence/result-status-bundle.lisp"
 cat lib/result-status.lisp tests/semantic/result-status-laws.lisp > "$result_status_bundle"
