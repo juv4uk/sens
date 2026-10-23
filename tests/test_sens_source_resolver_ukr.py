@@ -50,6 +50,33 @@ class CurrentUkrainianResolverTests(unittest.TestCase):
         self.assertEqual(actual.current, self.words[(6, "101000")])
         self.assertEqual(actual.current.domain, "D6")
 
+    def test_current_wide_ukr_surfaces_preserve_domain_and_never_promote_sid8(self):
+        # Діагностика, не runtime-допуск: кожне ім'я береться з колонки укр.
+        labels, words = load_current_foundation(
+            ROOT / "knowledge" / "d1-d11-foundation.json"
+        )
+        surfaces = load_domain_surfaces(
+            [ROOT / "lib" / "domains" / f"d{width}.lisp"
+             for width in (3, 4, 5, 6, 8, 9, 10)],
+            words,
+        )
+        resolver = SourceResolver([], labels, words, surfaces, {}, {})
+        for name, width, bits in (
+            ("символ-за-кодом", 8, "00000000"),
+            ("пояснити-відповідь", 9, "000000001"),
+            ("відсутня-можливість-виконання", 10, "0000000000"),
+        ):
+            with self.subTest(name=name):
+                result = resolver.resolve_head(name)
+                self.assertEqual(result.current, words[(width, bits)])
+                self.assertTrue(result.resolved)
+        # D6:MAP і D8:MAP не повинні зливатися за історичною міткою.
+        self.assertNotIn("MAP", labels)
+        self.assertEqual(words[(6, "101000")].domain, "D6")
+        with self.assertRaisesRegex(ValueError, "retired SID8-era head"):
+            resolver.resolve_head("00000000")
+        self.assertNotIn((7, "0000000"), words)
+
     def test_exact_current_d3_word_is_not_a_legacy_byte(self):
         actual = self.resolver.resolve_head("100")
         self.assertEqual(actual.current, self.words[(3, "100")])
