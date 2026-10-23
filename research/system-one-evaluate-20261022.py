@@ -207,11 +207,115 @@ def score(rows: list[dict[str, Any]], threshold: float, bins: int, expected_spli
     }
 
 
+def _beta_continued_fraction(a: float, b: float, x: float) -> float:
+    """Обчислити ланцюговий дріб для регуляризованої неповної beta-функції."""
+    max_iterations = 300
+    epsilon = 3.0e-14
+    minimum = 1.0e-300
+    qab = a + b
+    qap = a + 1.0
+    qam = a - 1.0
+    c = 1.0
+    d = 1.0 - qab * x / qap
+    if abs(d) < minimum:
+        d = minimum
+    d = 1.0 / d
+    result = d
+
+    for iteration in range(1, max_iterations + 1):
+        m2 = 2 * iteration
+        aa = iteration * (b - iteration) * x / ((qam + m2) * (a + m2))
+        d = 1.0 + aa * d
+        if abs(d) < minimum:
+            d = minimum
+        c = 1.0 + aa / c
+        if abs(c) < minimum:
+            c = minimum
+        d = 1.0 / d
+        result *= d * c
+
+        aa = -(a + iteration) * (qab + iteration) * x / (
+            (a + m2) * (qap + m2)
+        )
+        d = 1.0 + aa * d
+        if abs(d) < minimum:
+            d = minimum
+        c = 1.0 + aa / c
+        if abs(c) < minimum:
+            c = minimum
+        d = 1.0 / d
+        delta = d * c
+        result *= delta
+        if abs(delta - 1.0) < epsilon:
+            return result
+    raise EvaluationError("не збігся числовий ланцюговий дріб для довірчої межі")
+
+
+def _regularized_incomplete_beta(x: float, a: float, b: float) -> float:
+    if not 0.0 <= x <= 1.0 or a <= 0.0 or b <= 0.0:
+        raise EvaluationError("некоректні параметри beta-функції")
+    if x == 0.0:
+        return 0.0
+    if x == 1.0:
+        return 1.0
+    log_front = (
+        math.lgamma(a + b)
+        - math.lgamma(a)
+        - math.lgamma(b)
+        + a * math.log(x)
+        + b * math.log1p(-x)
+    )
+    front = math.exp(log_front)
+    if x < (a + 1.0) / (a + b + 2.0):
+        return front * _beta_continued_fraction(a, b, x) / a
+    return 1.0 - front * _beta_continued_fraction(b, a, 1.0 - x) / b
+
+
+def clopper_pearson_upper_bound(
+    errors: int,
+    accepted: int,
+    confidence_level: float = 0.95,
+) -> float:
+    """Однобічна точна верхня межа ризику за розподілом біноміальних помилок."""
+    if (
+        isinstance(errors, bool)
+        or not isinstance(errors, int)
+        or isinstance(accepted, bool)
+        or not isinstance(accepted, int)
+        or accepted < 1
+        or errors < 0
+        or errors > accepted
+    ):
+        raise EvaluationError("для довірчої межі потрібні 0 <= errors <= accepted і accepted > 0")
+    if not math.isfinite(confidence_level) or not 0.0 < confidence_level < 1.0:
+        raise EvaluationError("confidence level має бути скінченним і строго між 0 та 1")
+    if errors == accepted:
+        return 1.0
+    if errors == 0:
+        # Точний крайовий випадок: (1 - upper)^accepted = 1 - confidence.
+        return 1.0 - (1.0 - confidence_level) ** (1.0 / accepted)
+
+    # Clopper–Pearson: upper = Beta^{-1}(confidence; errors+1, accepted-errors).
+    # Бісекція стабільна, не потребує SciPy та не виводить ймовірність із test-набору.
+    a = float(errors + 1)
+    b = float(accepted - errors)
+    low, high = 0.0, 1.0
+    for _ in range(80):
+        middle = (low + high) / 2.0
+        cdf = _regularized_incomplete_beta(middle, a, b)
+        if cdf < confidence_level:
+            low = middle
+        else:
+            high = middle
+    return (low + high) / 2.0
+
+
 def select_threshold(
     rows: list[dict[str, Any]],
     max_selective_risk: float = 0.10,
     min_accepted: int = 5,
     expected_split: str = "validation",
+    confidence_level: float = 0.95,
 ) -> dict[str, Any]:
     """Вибрати поріг лише на validation; якщо безпечного немає — не вигадувати."""
     if expected_split != "validation":
@@ -258,22 +362,37 @@ def select_threshold(
     if len(model_hashes) > 1:
         raise EvaluationError("validation змішує прогнози кількох моделей")
 
+    # Одна сортування і накопичення: один кандидат на кожен різний рівень впевненості.
+    # Порогові рішення перевіряються не за самою часткою помилок, а за її точною
+    # однобічною 95%-ю межею Clopper–Pearson, щоб не довіряти малій вибірці надмірно.
+    if not math.isfinite(confidence_level) or not 0.0 < confidence_level < 1.0:
+        raise EvaluationError("confidence level має бути скінченним і строго між 0 та 1")
     candidates: list[dict[str, Any]] = []
-    thresholds = sorted({confidence for confidence, _correct, _row_id in observed})
-    for threshold in thresholds:
-        accepted = [(confidence, correct, row_id) for confidence, correct, row_id in observed if confidence >= threshold]
-        accepted_count = len(accepted)
+    ordered = sorted(observed, key=lambda item: item[0], reverse=True)
+    accepted_count = 0
+    errors = 0
+    index = 0
+    while index < len(ordered):
+        threshold = ordered[index][0]
+        # Додаємо всі записи з рівно таким рівнем впевненості; нічия не розщеплюється.
+        while index < len(ordered) and ordered[index][0] == threshold:
+            _confidence, is_correct, _row_id = ordered[index]
+            accepted_count += 1
+            errors += int(not is_correct)
+            index += 1
         if accepted_count < min_accepted:
             continue
-        errors = sum(not correct for _confidence, correct, _row_id in accepted)
         risk = Fraction(errors, accepted_count)
-        if risk <= risk_limit:
+        risk_upper = clopper_pearson_upper_bound(errors, accepted_count, confidence_level)
+        if risk_upper <= float(risk_limit):
             candidates.append(
                 {
                     "threshold_fraction": threshold,
                     "accepted": accepted_count,
                     "errors": errors,
                     "risk_fraction": risk,
+                    "risk_upper_bound": risk_upper,
+                    "confidence_level": confidence_level,
                 }
             )
 
@@ -288,7 +407,9 @@ def select_threshold(
         "dataset_sha256_values": sorted(dataset_hashes),
         "model_sha256_values": sorted(model_hashes),
         "small_validation_warning": len(rows) < 30,
-        "threshold_rule": "maximize accepted validation rows subject to the risk bound; ties choose the higher threshold",
+        "risk_bound_method": "one-sided exact Clopper-Pearson binomial upper confidence limit",
+        "confidence_level": confidence_level,
+        "threshold_rule": "maximize accepted validation rows subject to the one-sided exact upper confidence bound; ties choose the higher threshold",
         "challenge_used": False,
         "test_used": False,
     }
@@ -336,6 +457,7 @@ def main() -> int:
     parser.add_argument("--threshold", type=float, default=0.80, help="тільки для coverage/selective risk")
     parser.add_argument("--max-selective-risk", type=float, default=0.10, help="максимальна частка помилок для mode=select-threshold")
     parser.add_argument("--min-accepted", type=int, default=5, help="мінімум прийнятих validation-прикладів для mode=select-threshold")
+    parser.add_argument("--confidence-level", type=float, default=0.95, help="однобічний рівень довірчої межі ризику")
     parser.add_argument("--bins", type=int, default=10)
     parser.add_argument("--output", type=Path, help="необов'язковий JSON-звіт; за замовчуванням stdout")
     args = parser.parse_args()
@@ -350,6 +472,7 @@ def main() -> int:
                 max_selective_risk=args.max_selective_risk,
                 min_accepted=args.min_accepted,
                 expected_split=args.expected_split,
+                confidence_level=args.confidence_level,
             )
         else:
             report = score(rows, args.threshold, args.bins, args.expected_split)
