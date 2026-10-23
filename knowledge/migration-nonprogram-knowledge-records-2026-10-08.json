@@ -20,8 +20,8 @@
     },
     {
       "path": "knowledge/core4-predicate-record-inventory.lisp",
-      "git_blob_sha1": "1e7ad79dabd15fa8322a583919530ae98be91816",
-      "record_head": "core4-predicate-record-inventory-2"
+      "git_blob_sha1": "9527fdccf182c894484e1519c739886a379dff7f",
+      "record_head": "core4-predicate-record-inventory-3"
     },
     {
       "path": "knowledge/function-table-sculpt-audit.lisp",
