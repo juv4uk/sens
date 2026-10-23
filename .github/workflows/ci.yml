@@ -28,6 +28,9 @@ jobs:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5, pinned
         with:
           persist-credentials: false
+          # Для порівняння змінених Lisp-файлів потрібен батьківський SHA.
+          # Без цього fetch окремого попереднього SHA вичерпував 60 с.
+          fetch-depth: 2
 
       - name: Один автоматичний CI — тільки поточний main
         run: python3 scripts/ci_one_focused_workflow.py
