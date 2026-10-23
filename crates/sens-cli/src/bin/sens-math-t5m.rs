@@ -2,7 +2,7 @@
 //!
 //! `name.lisp` містить українську D5-голову та десяткові цілі операнди.
 //! Адаптер формує exact D24+ до фізичного Zig T5M без host-float.
-//! Історичні tagged D24+ свідки тимчасово залишаються тільки для сумісності.
+//! Машинні #d/#b/#q2 літерали не є людською виконуваною поверхнею.
 //! Фізичний `name.sens` перевозить лише слова через Zig T5M.
 //! ПРИМІТКА: сама ширина фізичного слова не надає D24-identity.
 //! Домен береться тільки з перевіреного SENS AST парного джерела;
@@ -66,6 +66,14 @@ mod paired {
     }
 
     fn qualify(source: &str) -> Result<Expr, String> {
+        // Входом є людський Lisp; кодові та бітові літерали не можуть
+        // замінити SENS-кваліфікацію десяткового числа до точного D24+.
+        if source.lines().any(|line| {
+            let code = line.split(';').next().unwrap_or("");
+            ["#d", "#b", "#q2"].iter().any(|tag| code.contains(tag))
+        }) {
+            return Err("SENS admission: encoded literals forbidden in executable Lisp".into());
+        }
         let parsed = sens::parse(source).map_err(|error| format!("SENS reader: {error}"))?;
         // Share the owner-ratified source projection with WASM and the IDE:
         // decimal source text is converted before domain lowering, never by
@@ -257,12 +265,8 @@ mod paired {
     mod tests {
         use super::*;
 
-        fn bits(value: i64) -> String {
-            format!("{:024b}", (value as i128 & ((1i128 << 24) - 1)))
-        }
-
         fn source(op: &str, left: i64, right: i64) -> String {
-            format!("({op} #d24:{} #d24:{})", bits(left), bits(right))
+            format!("({op} {left} {right})")
         }
 
         #[test]
@@ -400,7 +404,7 @@ mod paired {
                 ("reciprocal-minus-two", "частка", -2, "-1/2", 24, true),
                 ("reciprocal-one", "частка", 1, "1", 24, false),
             ] {
-                let source = format!("({head} #d24:{})", bits(input));
+                let source = format!("({head} {input})");
                 let admitted = qualify(&source)
                     .unwrap_or_else(|error| panic!("test_id={id} layer=admission {error}"));
                 let words = expected_words(&admitted).unwrap();
@@ -464,7 +468,7 @@ mod paired {
 
         #[test]
         fn unary_d5_zero_normalizes_and_zero_reciprocal_fails() {
-            let neg_zero = format!("(відняти #d24:{})", bits(0));
+            let neg_zero = "(відняти 0)".to_string();
             let words = expected_words(&qualify(&neg_zero).unwrap()).unwrap();
             let packed = zig_transport::encode_t5m_exact_words(&words).unwrap();
             let result = eval_verified(&neg_zero, &packed).unwrap();
@@ -474,7 +478,7 @@ mod paired {
             assert_eq!(number.numeric_domain_width(), Some(24));
             assert_eq!(number.exact_numeric_domain_bits(), Some(vec![0; 24]));
 
-            let zero_reciprocal = format!("(частка #d24:{})", bits(0));
+            let zero_reciprocal = "(частка 0)".to_string();
             let words = expected_words(&qualify(&zero_reciprocal).unwrap()).unwrap();
             let packed = zig_transport::encode_t5m_exact_words(&words).unwrap();
             let error =
@@ -488,22 +492,12 @@ mod paired {
         #[test]
         fn unsupported_unary_math_or_wrong_arity_cannot_be_physically_admitted() {
             for source in [
-                format!("(додати #d24:{})", bits(1)),
-                format!("(помножити #d24:{})", bits(1)),
-                format!("(менше? #d24:{})", bits(1)),
-                format!("(більше? #d24:{})", bits(1)),
-                format!(
-                    "(частка #d24:{} #d24:{} #d24:{})",
-                    bits(1),
-                    bits(2),
-                    bits(3)
-                ),
-                format!(
-                    "(відняти #d24:{} #d24:{} #d24:{})",
-                    bits(1),
-                    bits(2),
-                    bits(3)
-                ),
+                "(додати 1)".to_string(),
+                "(помножити 1)".to_string(),
+                "(менше? 1)".to_string(),
+                "(більше? 1)".to_string(),
+                "(частка 1 2 3)".to_string(),
+                "(відняти 1 2 3)".to_string(),
                 "(частка)".to_string(),
             ] {
                 assert!(
@@ -541,9 +535,8 @@ mod paired {
             // Input leaves themselves are qualified. The inner ADD widens
             // to D48, so outer D24 + D48 has no admitted mixed-domain law.
             let source = format!(
-                "(додати {} #d24:{})",
+                "(додати {} 1)",
                 source("додати", 8_388_607, 1),
-                bits(1),
             );
             let root = qualify(&source).expect("source words each qualified");
             let words = expected_words(&root).expect("physical structure is valid");
@@ -602,9 +595,9 @@ mod paired {
         fn existing_d48_operands_survive_real_t5m_and_stay_domain_qualified() {
             // The exact D48 word is transported by Zig, never converted to a
             // W8/W9 code, a host integer, or a new D24 identity.
-            let minus_three = format!("{:048b}", (-3_i128) & ((1_i128 << 48) - 1));
-            let two = format!("{:048b}", 2_u8);
-            let source = format!("(помножити #d48:{minus_three} #d48:{two})");
+            // Обидва операнди вже D48 за Д24+ числовим законом,
+            // без нав'язаного текстом #d48 і без примусової ширини.
+            let source = "(помножити -8388609 8388608)";
             let expected = expected_words(&qualify(&source).unwrap()).unwrap();
             assert_eq!(
                 expected.iter().map(|w| w.width).collect::<Vec<_>>(),
@@ -620,7 +613,7 @@ mod paired {
                 panic!("test_id=d48-negative layer=eval expected=integer D48");
             };
             assert_eq!(number.numeric_domain_width(), Some(48));
-            assert_eq!(number.to_decimal_string(), "-6");
+            assert_eq!(number.to_decimal_string(), "-70368752566272");
             assert_eq!(number.exact_numeric_domain_bits().unwrap().len(), 48);
         }
 
@@ -664,7 +657,10 @@ mod paired {
             for invalid in [
                 "(додати 0,5 2)",
                 "(додати 1 2 3)",
-                "(додати #d24:000000000000000000000001 #d48:000000000000000000000000000000000000000000000010)",
+                "(додати 1 8388608)",
+                "(додати #d24:000000000000000000000001 2)",
+                "(додати #b101 2)",
+                "(додати #q2:10 2)",
                 "(quote #d24:000000000000000000000001)",
             ] {
                 assert!(qualify(invalid).is_err(), "unadmitted source={invalid}");
