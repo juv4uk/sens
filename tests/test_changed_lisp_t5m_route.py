@@ -12,7 +12,7 @@ import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
 RUNNER = ROOT / "scripts/execute_changed_lisp_t5m.sh"
-CI = ROOT / ".github/workflows/ci.yml"
+CI = ROOT / ".github/workflows/ci-heavy.yml"
 
 # Лише фальшивий CLI для перевірки shell exit-code/output parity.
 # Жоден результат цього тесту не зараховується як виконання SENS.
