@@ -68,6 +68,52 @@ class DomainFunctionReuseRule(unittest.TestCase):
         self.assertEqual(result.returncode, 0, "кличе драбину — припустимо")
         self.assertIn("КАНДИДАТ D11", result.stdout)
 
+    def test_project_helper_does_not_substitute_for_a_ladder_call(self) -> None:
+        # Старий внутрішній helper не є поверхнею D1–D10. Його виклик
+        # не повинен обходити правило «драбина або явна пропозиція D11».
+        spec = importlib.util.spec_from_file_location("guard_project_helper_test", GUARD)
+        self.assertIsNotNone(spec)
+        self.assertIsNotNone(spec.loader)
+        guard = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(guard)
+        helper = "знайти-хвіст-за-умовою"
+        self.assertIn(helper, guard.project_names(ROOT))
+        self.assertNotIn(helper, guard.ladder_names(ROOT))
+        body = "(" + helper + " х)"
+        PROBE.write_text(
+            "(" + "визначити " + "нове-імя-з-тесту "
+            + "(" + "функція (х) " + body + "))\n",
+            encoding="utf-8",
+        )
+        result = run(GUARD, "--file", str(PROBE.relative_to(ROOT)))
+        self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+        self.assertIn("BLOCKED", result.stdout)
+
+    def test_usage_counts_active_call_sites_not_unique_names(self) -> None:
+        # Механічний лічильник має рахувати два виклики, а не одну унікальну назву.
+        twice = "(" + "сполучити х (" + "сполучити х (" + "як-є ())))"
+        PROBE.write_text(
+            "(" + "визначити " + "двічі-вжити-поверхню "
+            + "(" + "функція (х) " + twice + "))\n",
+            encoding="utf-8",
+        )
+        result = run(GUARD, "--file", str(PROBE.relative_to(ROOT)))
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertIn("ВЖИВАННЯ ДРАБИН: lib/_rule_probe.lisp: 2 викликів", result.stdout)
+
+    def test_usage_ignores_comment_only_calls(self) -> None:
+        # Коментар не є викликом; він не має створити хибну згоду охоронця.
+        source = (
+            "; (" + "сполучити" + " вигаданий-приклад)\n"
+            + "(" + "визначити " + "без-реального-виклику "
+            + "(" + "функція (х) х))\n"
+        )
+        PROBE.write_text(source, encoding="utf-8")
+        result = run(GUARD, "--file", str(PROBE.relative_to(ROOT)))
+        self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+        self.assertIn("ВЖИВАННЯ ДРАБИН: lib/_rule_probe.lisp: 0 викликів", result.stdout)
+        self.assertIn("BLOCKED", result.stdout)
+
     def test_tracked_new_definition_is_not_its_own_duplicate(self) -> None:
         # Механіка guard, не семантичний оракул Lisp: git ls-files включає
         # нове ім'я в поточний файл, але воно не може дублювати саме себе.
