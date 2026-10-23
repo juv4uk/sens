@@ -450,7 +450,7 @@ mod exact_lowering_isolation_tests {
         assert!(!glyphs.is_empty());
         assert!(
             glyphs.iter().all(|glyph| matches!(
-                glyph.kind,
+                &glyph.kind,
                 ExprKind::DomainIdentity(crate::DomainIdentity::D7(_))
             )),
             "the symbol's characters must remain D7 data, not a D7 DomainCall"
@@ -466,7 +466,7 @@ mod exact_lowering_isolation_tests {
                 Some(ExprKind::List(glyphs))
                     if !glyphs.is_empty()
                         && glyphs.iter().all(|glyph| matches!(
-                            glyph.kind,
+                &glyph.kind,
                             ExprKind::DomainIdentity(crate::DomainIdentity::D7(_))
                         ))
             ),
