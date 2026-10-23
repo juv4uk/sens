@@ -50,6 +50,7 @@ EXCLUDED_PREFIXES = (
 # визначає функції за принципом «мова тесту відповідає шару», тож охоронець
 # мусить їх бачити. Решта tests/** лишається поза увагою (фікстури, помічники).
 SEMANTIC_PREFIX = "tests/semantic/"
+MINIMUM_RATIFIED_SURFACES = 1000
 DEF = re.compile(r"\(" + "визначити" + r"\s+([^\s()]+)")
 
 
@@ -325,10 +326,22 @@ def main(argv: list[str] | None = None) -> int:
     args = ap.parse_args(argv)
 
     ladder = ladder_names(ROOT)
+    # Неповне виявлення драбини небезпечніше за звичайний RED: охоронець
+    # може не впізнати чинну поверхню або хибно оголосити нову. Відмовляємося
+    # працювати, якщо завантажено менше за мінімум, який уже вимагає self-test.
+    if len(ladder) < MINIMUM_RATIFIED_SURFACES:
+        print(
+            "GUARD-DOMAIN-REUSE: НЕ ПЕРЕВІРЕНО — "
+            f"виявлено лише {len(ladder)} поверхонь; "
+            f"потрібно щонайменше {MINIMUM_RATIFIED_SURFACES}; "
+            "джерело: discover_domain_function_candidates",
+            file=sys.stderr,
+        )
+        return 2
     project_sites = project_definition_sites(ROOT)
 
     if args.self_test:
-        ok = len(ladder) > 1000
+        ok = len(ladder) >= MINIMUM_RATIFIED_SURFACES
         print(f"GUARD-DOMAIN-REUSE self-test: {'OK' if ok else 'FAIL'} (поверхонь у драбинах: {len(ladder)}, джерело: discover_domain_function_candidates)")
         return 0 if ok else 1
 
