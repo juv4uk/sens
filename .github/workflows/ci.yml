@@ -224,6 +224,8 @@ jobs:
           cargo test --locked -p wsm-guard-slice --bin wsm-guard-slice event_frame_rejects_overlong_duplicate_unknown_and_non_ascii_fields -- --exact --nocapture
           cargo test --locked -p sens-lsp --lib transport::tests:: -- --nocapture
           cargo test --locked -p sens --test d5_list_search_laws parser_rejects_an_unclosed_form_before_evaluation -- --exact --nocapture
+          # Rust виконує SENS; самі 24 закони визначені тільки в .lisp.
+          cargo test --locked -p sens --test d11_clojure_juxt -- --nocapture
 
       - name: Zig — кодеки, ABI та безпечна межа копіювання
         if: steps.changed-t5m-lisp.outputs.has_zig == 'true'
