@@ -9,8 +9,10 @@
 """
 from __future__ import annotations
 
+import importlib.util
 import subprocess
 import sys
+import tempfile
 import unittest
 from pathlib import Path
 
@@ -65,6 +67,30 @@ class DomainFunctionReuseRule(unittest.TestCase):
         result = run(GUARD, "--file", str(PROBE.relative_to(ROOT)))
         self.assertEqual(result.returncode, 0, "кличе драбину — припустимо")
         self.assertIn("КАНДИДАТ D11", result.stdout)
+
+    def test_tracked_new_definition_is_not_its_own_duplicate(self) -> None:
+        # Механіка guard, не семантичний оракул Lisp: git ls-files включає
+        # нове ім'я в поточний файл, але воно не може дублювати саме себе.
+        spec = importlib.util.spec_from_file_location("guard_reuse_test", GUARD)
+        self.assertIsNotNone(spec)
+        self.assertIsNotNone(spec.loader)
+        guard = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(guard)
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            lib = root / "lib"
+            lib.mkdir()
+            (lib / "one.lisp").write_text("(визначити проба (функція (х) х))\\n", encoding="utf-8")
+            subprocess.run(["git", "init", "-q"], cwd=root, check=True)
+            subprocess.run(["git", "add", "lib/one.lisp"], cwd=root, check=True)
+            sites = guard.project_definition_sites(root)
+            self.assertEqual(sites["проба"], {"lib/one.lisp"})
+            self.assertFalse(guard.duplicates_project_definition(sites, "проба", "lib/one.lisp"))
+            self.assertTrue(guard.duplicates_project_definition(sites, "проба", "lib/two.lisp"))
+            (lib / "two.lisp").write_text("(визначити проба (функція (х) х))\\n", encoding="utf-8")
+            subprocess.run(["git", "add", "lib/two.lisp"], cwd=root, check=True)
+            sites = guard.project_definition_sites(root)
+            self.assertTrue(guard.duplicates_project_definition(sites, "проба", "lib/one.lisp"))
 
     def test_search_finds_an_existing_surface_by_name(self) -> None:
         result = run(SEARCH, "сполучити")

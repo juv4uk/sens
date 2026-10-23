@@ -102,10 +102,9 @@ def _calls_ladder(body: str, ladder: set[str]) -> bool:
 
 
 
-def project_names(root) -> set[str]:
-    """Імена, які ПРОЄКТ уже визначив у lib/** (не ратифіковані поверхні, а власні).
-    Вживання власної функції проєкту — теж вживання наявного, а не вигадування."""
-    out: set[str] = set()
+def project_definition_sites(root: Path) -> dict[str, set[str]]:
+    """Позиції чинних DEFINE: власне визначення не є власним дублем."""
+    sites: dict[str, set[str]] = {}
     files = subprocess.run(["git", "-c", "core.quotepath=false", "ls-files", "lib"],
                            cwd=root, capture_output=True, text=True).stdout.split()
     for rel in files:
@@ -113,8 +112,19 @@ def project_names(root) -> set[str]:
             continue
         path = root / rel
         if path.is_file():
-            out |= {m.group(1) for m in DEF.finditer(path.read_text(encoding="utf-8", errors="ignore"))}
-    return out
+            for m in DEF.finditer(path.read_text(encoding="utf-8", errors="ignore")):
+                sites.setdefault(m.group(1), set()).add(rel)
+    return sites
+
+
+def project_names(root: Path) -> set[str]:
+    """Зберігаємо інтерфейс пошуку вже визначених функцій проєкту."""
+    return set(project_definition_sites(root))
+
+
+def duplicates_project_definition(sites: dict[str, set[str]], name: str, rel: str) -> bool:
+    """Дубль означає наявність визначення в іншому файлі, не в самому rel."""
+    return bool(sites.get(name, set()) - {rel})
 
 
 def changed_files(args) -> list[str]:
@@ -141,7 +151,8 @@ def main(argv: list[str] | None = None) -> int:
     args = ap.parse_args(argv)
 
     ladder = ladder_names(ROOT)
-    project = project_names(ROOT)
+    project_sites = project_definition_sites(ROOT)
+    project = set(project_sites)
     known_any = ladder | project
 
     if args.self_test:
@@ -184,7 +195,7 @@ def main(argv: list[str] | None = None) -> int:
             if name in ladder:
                 blocked.append((rel, name, "дубль наявної поверхні драбини"))
                 continue
-            if name in project:
+            if duplicates_project_definition(project_sites, name, rel):
                 blocked.append((rel, name, "дубль наявного визначення проєкту"))
                 continue
             if not marked and not _calls_ladder(body, known_any):
