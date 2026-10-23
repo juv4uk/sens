@@ -18,6 +18,20 @@ GUARD = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(GUARD)
 
 PROGRAMS = (
+    "benchmarks/contest-uk/сума-до-n-одинарна.lisp",
+    "benchmarks/contest-uk/сума-квадратів-без-одиниць.lisp",
+    "benchmarks/contest-uk/сума-кубів-без-замикання.lisp",
+    "benchmarks/contest-uk/сума-непарних-квадрат.lisp",
+    "benchmarks/contest-uk/сума-непарних-квадратів-різниця-квадратів.lisp",
+    "benchmarks/contest-uk/сума-парних-формула.lisp",
+    "benchmarks/contest-uk/сума-трикутних-два-прирости.lisp",
+    "benchmarks/contest-uk/сума-четвертих-степенів-без-лямбди.lisp",
+    "benchmarks/contest-uk/трикутне-добуток.lisp",
+    "benchmarks/contest-uk/факторіал-д6-стислий.lisp",
+    "benchmarks/contest-uk/фібоначчі-компакт.lisp",
+    "benchmarks/contest-uk/центроване-квадратне-д6.lisp",
+    "benchmarks/contest-uk/центроване-трикутне-д6.lisp",
+    "benchmarks/contest-uk/центроване-шестикутне-д6.lisp",
     "benchmarks/contest-uk/кількість-пар-формула.lisp",
     "benchmarks/contest-uk/кількість-трійок-формула.lisp",
     "benchmarks/contest-uk/максимум-дзеркальний.lisp",
