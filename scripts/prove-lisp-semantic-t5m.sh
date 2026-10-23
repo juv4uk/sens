@@ -412,6 +412,25 @@ d11_span_bundle="$evidence/d11-srfi1-span-break-complete.lisp"
 cat -- lib/d11-srfi1-span-break.lisp tests/semantic/d11-srfi1-span-break-laws.lisp > "$d11_span_bundle"
 sha256sum lib/d11-srfi1-span-break.lisp tests/semantic/d11-srfi1-span-break-laws.lisp > "$evidence/d11-srfi1-inputs.sha256"
 run_case run_law d11-srfi1-span-break-physical "$d11_span_bundle" 1
+# Д11: НЕ втрачати бенчмарк сімейств, навіть коли він не змінювався в commit.
+# Композиції й позитив/мутант — виключно справжній Lisp/SENS; Bash тільки
+# складає допущені джерела й перевіряє D1/точні фізичні байти.
+d11_families_source="$evidence/d11-families-source.lisp"
+cat -- lib/d11-family-selection.lisp \
+       lib/d11-srfi1-alist-protocol.lisp \
+       lib/d11-clojure-group-by.lisp \
+       lib/d11-clojure-frequencies-unary.lisp \
+       benchmarks/d11-families.lisp > "$d11_families_source"
+d11_families_law="$evidence/d11-families-positive.lisp"
+d11_families_mutant="$evidence/d11-families-mutant.lisp"
+cat -- "$d11_families_source" tests/semantic/d11-families-benchmark-law.lisp > "$d11_families_law"
+cat -- "$d11_families_source" tests/semantic/d11-families-benchmark-mutant.lisp > "$d11_families_mutant"
+sha256sum lib/d11-family-selection.lisp lib/d11-srfi1-alist-protocol.lisp \
+  lib/d11-clojure-group-by.lisp lib/d11-clojure-frequencies-unary.lisp \
+  benchmarks/d11-families.lisp tests/semantic/d11-families-benchmark-law.lisp \
+  tests/semantic/d11-families-benchmark-mutant.lisp > "$evidence/d11-families-inputs.sha256"
+run_case run_law d11-families-benchmark-positive "$d11_families_law" 1
+run_case run_law d11-families-benchmark-mutant "$d11_families_mutant" 0
 # Дев'ять D11 законів шостого елемента належать самому Lisp/SENS.
 # Повний MetaEval починає з D6 LENGTH, ще невикличного у фізичному T5M:
 # він не є передумовою цієї незалежної композиції п'яти CDR і одного CAR.
