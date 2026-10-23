@@ -11,6 +11,7 @@ on:
           - lisp
           - shards
           - memory
+          - session
         default: lisp
 
 # Жодної примусової черги чи автоматичного скасування SHA.
@@ -1826,6 +1827,34 @@ jobs:
             exit 1
           fi
           echo "SENS HEAVY PASS suite=$SUITE release=NOT_CERTIFIED"
+
+  t5m-session-benchmark:
+    name: Сесія Zig/T5M/SENS — 11 пар холодний/теплий запуск
+    if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main' && inputs.suite == 'session'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5, pinned
+        with:
+          persist-credentials: false
+      - uses: dtolnay/rust-toolchain@1.99.0
+      - uses: ./.github/actions/install-zig
+      - name: Виміряти реальні CLI-процеси через Zig/T5M і SENS
+        shell: bash
+        env:
+          CARGO_BUILD_JOBS: '2'
+          CARGO_INCREMENTAL: '0'
+        run: |
+          set -euo pipefail
+          cargo test --locked --release -p sens-cli --test t5m_session_benchmark -- --nocapture
+          cargo test --locked --release -p sens-cli --test t5m_session_benchmark -- --ignored --nocapture 2>&1 | tee "$RUNNER_TEMP/t5m-session.log"
+          grep -Fq 'T5M_SESSION_BENCH cold_p50_amortized_ns=' "$RUNNER_TEMP/t5m-session.log"
+          samples="$(grep -c '^T5M_SESSION_SAMPLE ' "$RUNNER_TEMP/t5m-session.log")"
+          if [[ "$samples" != 22 ]]; then
+            echo "::error::T5M_SESSION_BENCH_INCOMPLETE expected_samples=22 actual_samples=$samples"
+            exit 1
+          fi
+          echo 'T5M_SESSION_BENCH_PASS samples=22 rounds=11 parity=final-result-42 scope=cli-process-wall claim=measurement-only'
 
   interpreter-memory-smoke:
     name: Пікова RSS інтерпретаторів — smoke
