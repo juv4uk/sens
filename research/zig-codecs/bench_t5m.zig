@@ -37,11 +37,27 @@ pub fn main(init: std.process.Init) !void {
     var decode_ns: [11]u64 = undefined;
     var encode_ns: [11]u64 = undefined;
     var guard: usize = 0;
+
+    // Один повний прогрівальний пакет поза таймером: той самий codec і corpus,
+    // окремо decode та encode, без SENS-семантики в гарячому циклі.
+    for (0..iterations) |_| {
+        var decoded = try codec.decode(allocator, physical);
+        guard += decoded.words.len;
+        std.mem.doNotOptimizeAway(decoded.words.len);
+        decoded.deinit(allocator);
+    }
+    for (0..iterations) |_| {
+        const encoded = try codec.encode(allocator, words);
+        guard += encoded.len;
+        std.mem.doNotOptimizeAway(encoded.len);
+        allocator.free(encoded);
+    }
+
     for (0..decode_ns.len) |sample| {
         const started = std.Io.Clock.awake.now(io);
         for (0..iterations) |_| {
             var decoded = try codec.decode(allocator, physical);
-            guard ^= decoded.words.len;
+            guard += decoded.words.len;
             std.mem.doNotOptimizeAway(decoded.words.len);
             decoded.deinit(allocator);
         }
@@ -50,7 +66,7 @@ pub fn main(init: std.process.Init) !void {
         const encode_started = std.Io.Clock.awake.now(io);
         for (0..iterations) |_| {
             const encoded = try codec.encode(allocator, words);
-            guard ^= encoded.len;
+            guard += encoded.len;
             std.mem.doNotOptimizeAway(encoded.len);
             allocator.free(encoded);
         }
@@ -60,7 +76,7 @@ pub fn main(init: std.process.Init) !void {
     const e = sortedCopy(encode_ns);
     if (d[0] == 0 or e[0] == 0) return error.InsufficientClockResolution;
     std.debug.print(
-        "ZIG_T5M_BENCH physical_bytes={d} words={d} iterations={d} samples=11 decode_p50_ns={d} decode_p90_ns={d} encode_p50_ns={d} encode_p90_ns={d} scope=zig-codec-only guard={d}\n",
+        "ZIG_T5M_BENCH physical_bytes={d} words={d} iterations={d} samples=11 warmup_batches=1 decode_p50_ns={d} decode_p90_ns={d} encode_p50_ns={d} encode_p90_ns={d} scope=zig-codec-only guard={d}\n",
         .{ physical.len, words.len, iterations, d[5], d[9], e[5], e[9], guard },
     );
     for (0..11) |i| {
