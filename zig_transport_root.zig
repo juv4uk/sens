@@ -550,7 +550,7 @@ test "compiler export assets cross Zig byte-exact without partial writes" {
         compiler_nucleus_asset,
         compiler_identity_corpus_asset,
     };
-    for (assets, 0..) |asset, index| {
+    inline for (assets, 0..) |asset, index| {
         const copy = if (index == 0)
             sens_zig_compiler_nucleus_bytes_copy
         else
