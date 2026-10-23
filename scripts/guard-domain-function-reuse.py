@@ -326,8 +326,6 @@ def main(argv: list[str] | None = None) -> int:
 
     ladder = ladder_names(ROOT)
     project_sites = project_definition_sites(ROOT)
-    project = set(project_sites)
-    known_any = ladder | project
 
     if args.self_test:
         ok = len(ladder) > 1000
@@ -363,7 +361,11 @@ def main(argv: list[str] | None = None) -> int:
             except Exception:
                 old_text = ""
             known = {n for n, _, _ in definitions_with_bodies(old_text)}
-        usage[rel] = len((set(re.findall(r"\(\s*([^\s()]{2,})", text)) & ladder) - STRUCTURAL)
+        active_text = _mask_quotes(text)
+        usage[rel] = sum(
+            1 for head in re.findall(r"\\(\\s*([^\\s()]{2,})", active_text)
+            if head in ladder and head not in STRUCTURAL
+        )
         for name, body, marked in definitions_with_bodies(text):
             if args.base and name in known:
                 continue  # не чіпаємо те, що вже було до зміни
@@ -374,7 +376,7 @@ def main(argv: list[str] | None = None) -> int:
             if duplicates_project_definition(project_sites, name, rel):
                 blocked.append((rel, name, "дубль наявного визначення проєкту"))
                 continue
-            if not marked and not _calls_ladder(body, known_any):
+            if not marked and not _calls_ladder(body, ladder):
                 # Нове ім'я без жодного виклику поверхні драбини і без маркера —
                 # це або перевинахід наявної операції, або неусвідомлена нова.
                 blocked.append((rel, name, "нове ім'я без виклику драбини і без маркера D11-пропозиції"))
