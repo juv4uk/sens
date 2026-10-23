@@ -408,6 +408,11 @@ sha256sum lib/d11-srfi1-list-equality.lisp tests/semantic/d11-srfi1-list-equalit
 d11_find_tail_bundle="$evidence/d11-srfi1-find-tail-complete.lisp"
 cat -- lib/d11-srfi1-find-tail.lisp tests/semantic/d11-srfi1-find-tail-laws.lisp > "$d11_find_tail_bundle"
 run_case run_law d11-srfi1-find-tail-physical "$d11_find_tail_bundle" 1
+# Сувора границя SRFI-1: неправильний D1-хвіст не можна приймати за NIL.
+# Прямий SENS, Zig T5M і фізичний SENS мусять відхилити тим самим Type.
+d11_find_tail_bad="$evidence/d11-srfi1-find-tail-improper-complete.lisp"
+cat -- lib/d11-srfi1-find-tail.lisp tests/semantic/d11-srfi1-find-tail-improper-tail-negative.lisp > "$d11_find_tail_bad"
+run_case run_type_rejection d11-find-tail-improper-d1-type-negative "$d11_find_tail_bad" 'car expects a non-empty list'
 sha256sum lib/d11-srfi1-find-tail.lisp tests/semantic/d11-srfi1-find-tail-laws.lisp > "$evidence/d11-find-tail-inputs.sha256"
 # Фізичні закони Д3 не залежать від недопущеного виклику D6 LENGTH.
 run_case run_law d3-structural-positive tests/semantic/d3-structural-native-t5m-law.lisp 1
