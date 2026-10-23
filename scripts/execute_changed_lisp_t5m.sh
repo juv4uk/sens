@@ -186,7 +186,7 @@ run_native_t5m_program() {
     # Shell порівнює тільки кінцевий точний D1-біт нативного SENS.
     # Це не стороння модель EQ, COND або структурних правил.
     case "$file" in
-      tests/semantic/ukr-d3-pair-identity-law.lisp|tests/semantic/ukr-d3-cond-control-law.lisp|tests/semantic/ukr-d3-structural-selftest.lisp|tests/semantic/d11-clojure-juxt-laws.lisp|tests/semantic/d11-srfi1-span-break-laws.lisp)
+      tests/semantic/ukr-d3-pair-identity-law.lisp|tests/semantic/ukr-d3-cond-control-law.lisp|tests/semantic/ukr-d3-structural-selftest.lisp|tests/semantic/d11-clojure-juxt-laws.lisp|tests/semantic/d11-srfi1-span-break-laws.lisp|tests/semantic/d11-srfi1-find-tail-laws.lisp)
         echo 1 > "$dir/ukr-d3-law.expected"
         if ! cmp -s "$dir/native-paired.stdout" "$dir/ukr-d3-law.expected"; then
           echo "::error::SENS_LISP_SEMANTIC_LAW_WRONG_D1 source=$file expected=D1:1 actual=$(cat "$dir/native-paired.stdout")" >&2
@@ -404,6 +404,9 @@ while IFS= read -r file || [[ -n "$file" ]]; do
   if [[ "$file" == "lib/reason.lisp" || "$file" == "lib/forward.lisp" ]]; then
     # Чинний D9 уніфікатор визначено в українському Lisp, не в самій таблиці.
     binding_sources=(--binding-source lib/unify.lisp)
+  elif [[ "$file" == "tests/semantic/d11-srfi1-find-tail-laws.lisp" ]]; then
+    # Лише визначення із справжньої бібліотеки SENS, без host-оракула.
+    binding_sources=(--binding-source lib/d11-srfi1-find-tail.lisp)
   elif [[ "$file" == "tests/semantic/d11-srfi1-span-break-laws.lisp" ]]; then
     # SENS визначає мову; Zig лише переносить біти фізичного T5M.
     binding_sources=(--binding-source lib/d11-srfi1-span-break.lisp)
