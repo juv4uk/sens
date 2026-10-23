@@ -91,6 +91,16 @@ class EncodedSourceLiteralTests(unittest.TestCase):
                     f"проєкція {relative} не має числових голів або літералів",
                 )
 
+    def test_program_symbol_table_has_no_numeric_source_literals(self):
+        # Живий український витягувач не містить числових атомів.
+        path = ROOT / "scripts/program-symbol-table.lisp"
+        source = path.read_text(encoding="utf-8")
+        self.assertEqual(
+            CHECK.find_forbidden_literals(source, path="scripts/program-symbol-table.lisp"),
+            [],
+            "проєкція витягувача символів не має цифрових голів або літералів",
+        )
+
     def test_machine_effect_live_source_uses_named_coordinates(self):
         # Лексична перевірка; обчислення маршруту перевіряють нативні тести SENS.
         path = ROOT / "lib/machine/lowering/semantic-effects.lisp"
