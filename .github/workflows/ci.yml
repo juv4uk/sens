@@ -426,7 +426,13 @@ jobs:
           check_lisp_law() {
             local id="$1" source="$2" expected="$3" actual
             if ! actual="$(timeout 45s "$binary" "$source")"; then
-              echo "::error file=$source,title=SENS Lisp law::REGRESSION id=$id layer=eval expected=$expected actual=execution-failure"
+              # У довгих Lisp-бандлах останні успішні форми вже обчислено
+              # справжнім SENS. Не губимо їх при ненульовому exit-коді.
+              if [[ -n "$actual" ]]; then
+                echo "SENS_LAW_PARTIAL_STDOUT id=$id source=$source (останні 16 рядків)" >&2
+                printf '%s\n' "$actual" | tail -n 16 >&2
+              fi
+              echo "::error file=$source,title=SENS Lisp law::REGRESSION id=$id layer=eval expected=$expected actual=execution-failure partial_stdout=see-log"
               return 1
             fi
             if [[ "$actual" != "$expected" ]]; then
