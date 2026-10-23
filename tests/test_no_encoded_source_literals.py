@@ -722,19 +722,19 @@ class ResearchBatchUkrProjectionTests(unittest.TestCase):
             "tests/fixtures/semantic/core-universal-v1.lisp",
         )
         legacy_head = re.compile(
-            r"\\(\\s*(?:[01]{8}|(?:sid8|sens8):[01]{8})(?=[\\s)])",
+            r"\(\s*(?:[01]{8}|(?:sid8|sens8):[01]{8})(?=[\s)])",
             re.IGNORECASE,
         )
         for relative in relative_paths:
             with self.subTest(path=relative):
                 source = (ROOT / relative).read_text(encoding="utf-8")
                 expressions = re.findall(
-                    r'\\(expr\\s+\\.\\s+"((?:\\\\.|[^"\\\\])*)"\\)',
+                    r'\(expr\s+\.\s+"((?:\\.|[^"\\])*)"\)',
                     source,
                 )
                 self.assertTrue(expressions, f"{relative}: немає жодного expr")
                 for index, raw_expr in enumerate(expressions):
-                    expr = raw_expr.replace(r'\\"', '"').replace(r"\\\\", "\\\\")
+                    expr = re.sub(r'\\(["\\])', r'\1', raw_expr)
                     where = f"{relative}:expr[{index}]"
                     self.assertEqual(
                         CHECK.find_forbidden_literals(expr, path=relative),
