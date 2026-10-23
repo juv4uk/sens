@@ -105,6 +105,54 @@ run_bound_law() {
   printf '%s\n' "id=$id source=$source dependency=lib/unify.lisp expected=D1:$expected actual=D1:$actual" >>"$evidence/results.txt"
 }
 
+# Негатив типу: мовний текст застосовує EQ до пари й атома.
+# Не перетворюємо Type у false; транспорт лише зберігає фізичну форму.
+run_eq_type_rejection() {
+  local id="$1" source="$2" dir physical
+  dir="$evidence/$id"
+  physical="$dir/program.sens"
+  mkdir -p "$dir"
+  test -f "$source" && test ! -L "$source" ||
+    fail "$id" source "regular-Lisp" "missing-or-symlink"
+
+  if timeout 45s "$sens" "$source" >"$dir/direct.out" 2>"$dir/direct.err"; then
+    fail "$id" sens-direct "Type-rejection" "unexpected-success"
+  fi
+  grep -Fq 'eq expects two atoms' "$dir/direct.err" ||
+    fail "$id" sens-direct "EQ-atom-type-error" "unclassified-rejection"
+
+  if ! timeout 45s "$sens" --t5m-mint "$source" "$physical" >"$dir/mint.out" 2>"$dir/mint.err"; then
+    cat "$dir/mint.err" >&2
+    fail "$id" codec "T5M-mint" "rejected"
+  fi
+  test -s "$physical" || fail "$id" codec "nonempty-T5M" "empty"
+  if ! timeout 45s "$trit" open "$physical" >"$dir/program" 2>"$dir/open.err" ||
+     ! timeout 45s "$trit" verify-view "$physical" >"$dir/inverse.out" 2>"$dir/inverse.err"; then
+    cat "$dir/open.err" "$dir/inverse.err" >&2 || true
+    fail "$id" zig-transport "canonical-roundtrip" "rejected"
+  fi
+
+  if timeout 45s "$sens" --t5m-pair "$source" "$physical" >"$dir/paired.out" 2>"$dir/paired.err"; then
+    fail "$id" sens-physical "EQ-Type-rejection" "paired-accepted"
+  fi
+  if ! grep -Fq 'eq expects two atoms' "$dir/paired.err" ||
+     ! grep -Fq 'kind=Type' "$dir/paired.err"; then
+    cat "$dir/paired.err" >&2
+    fail "$id" sens-physical "EQ-Type" "unexpected-paired-error"
+  fi
+  if timeout 45s "$sens" "$physical" >"$dir/physical.out" 2>"$dir/physical.err"; then
+    fail "$id" sens-physical "EQ-Type-rejection" "standalone-accepted"
+  fi
+  if ! grep -Fq 'eq expects two atoms' "$dir/physical.err"; then
+    cat "$dir/physical.err" >&2
+    fail "$id" sens-physical "EQ-Type" "unexpected-standalone-error"
+  fi
+
+  sha256sum "$source" "$physical" >"$dir/sha256.txt"
+  echo "::notice file=$source,title=SENS Lisp→T5M→SENS::PASS id=$id expected=EQ-Type direct=REJECTED paired=REJECTED physical=REJECTED"
+  printf '%s\n' "id=$id source=$source expected=EQ-Type actual=EQ-Type" >>"$evidence/results.txt"
+}
+
 : >"$evidence/results.txt"
 # Не маскуємо збої: всі незалежні закони запускаються, але хоч один RED
 # робить загальний результат RED. Жодних substitute verdict з Rust/Python.
@@ -130,14 +178,37 @@ run_case run_law d3-selection-positive tests/semantic/d3-d4-logic-selection-law.
 run_case run_law d3-selection-mutant tests/semantic/d3-d4-logic-selection-mutant.lisp 0
 run_case run_law d3-demorgan-four-cases tests/semantic/d3-demorgan-truth-table-law.lisp 1
 run_case run_law d3-demorgan-mutant tests/semantic/d3-demorgan-truth-table-mutant.lisp 0
+# Д3: перша істинна гілка COND має пріоритет навіть коли повертає Д1:ні.
+# Позитив і мутант проходять однаковий фізичний SENS/Zig/T5M коридор.
+run_case run_law d3-cond-first-match-false-positive tests/semantic/d3-cond-first-match-false-law.lisp 1
+run_case run_law d3-cond-first-match-false-mutant tests/semantic/d3-cond-first-match-false-mutant.lisp 0
 run_case run_law d3-quote-short-circuit-positive tests/semantic/d3-cond-quote-lazy-law.lisp 1
 run_case run_law d3-quote-short-circuit-mutant tests/semantic/d3-cond-quote-lazy-mutant.lisp 0
+# Д4 EVAL: цитований Lisp повертає порожнечу, а мутант підміняє результат.
+run_case run_law d4-eval-quote-positive tests/semantic/d4-eval-value-call-laws.lisp 1
+run_case run_law d4-eval-quote-mutant tests/semantic/d4-eval-value-call-mutant.lisp 0
 run_case run_law d4-late-binding-positive tests/semantic/d4-late-definition-binding-law.lisp 1
+# Передавання першокласного предиката — виключно Lisp-закон Д4.
+run_case run_law d4-first-class-predicate-positive tests/semantic/d4-first-class-predicate-law.lisp 1
+run_case run_law d4-first-class-predicate-mutant tests/semantic/d4-first-class-predicate-mutant.lisp 0
+# D4 рекурсивна правильність списків: позитив та навмисне порушення.
+run_case run_law d4-proper-list-positive tests/semantic/d4-proper-list-recursion-law.lisp 1
+run_case run_law d4-proper-list-mutant tests/semantic/d4-proper-list-recursion-mutant.lisp 0
+# Складені селектори Д4: шість тверджень у Lisp та точний D1-негатив.
+run_case run_law d4-selector-composition-positive tests/semantic/d4-selector-composition-law.lisp 1
+run_case run_law d4-selector-composition-mutant tests/semantic/d4-selector-composition-mutant.lisp 0
 run_case run_law d4-escaped-closure-positive tests/semantic/d4-escaped-lexical-closure-law.lisp 1
 run_case run_law d4-escaped-closure-mutant tests/semantic/d4-escaped-lexical-closure-mutant.lisp 0
+# D4 lexical capture/shadowing: SENS Lisp — єдиний семантичний оракул.
+# Замінює колишню Rust-перевірку арифметичного результату замикання.
+run_case run_law d4-lexical-scope-positive tests/semantic/d4-lexical-scope-law.lisp 1
+run_case run_law d4-lexical-scope-mutant tests/semantic/d4-lexical-scope-mutant.lisp 0
 # Фізичні закони Д3 не залежать від недопущеного виклику D6 LENGTH.
 run_case run_law d3-structural-positive tests/semantic/d3-structural-native-t5m-law.lisp 1
 run_case run_law d3-structural-mutant tests/semantic/d3-structural-native-t5m-mutant.lisp 0
+run_case run_law d3-eq-atom-boundary-positive tests/semantic/d3-eq-atom-boundary-law.lisp 1
+run_case run_law d3-eq-atom-boundary-mutant tests/semantic/d3-eq-atom-boundary-mutant.lisp 0
+run_case run_eq_type_rejection d3-eq-nonatom-type-negative tests/semantic/d3-eq-nonatom-type-negative.lisp
 # TRANSITIONAL #5854: арифметичні Lisp-свідки існують і перевіряються
 # прямим SENS у ci.yml, але фізичний T5M не атестовано до реалізації LENGTH.
 # Не оголошувати PASS і не замінювати семантику D6 хостовим оракулом.
@@ -152,4 +223,4 @@ if (( failed > 0 )); then
   echo "::error title=SENS Lisp/T5M::REGRESSION checked=$checked passed=$passed failed=$failed ids=${failed_ids[*]}" >&2
   exit 1
 fi
-echo "SENS_LISP_T5M_LAWS_PASS count=$checked positive=9 mutants=7 physical=ZIG_T5M"
+echo "SENS_LISP_T5M_LAWS_PASS count=$checked passed=$passed failed=$failed physical=ZIG_T5M"

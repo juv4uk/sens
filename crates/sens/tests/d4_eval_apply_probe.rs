@@ -62,9 +62,7 @@ fn print_exact_d4_apply_eval_matrix() {
     }
 }
 
-#[test]
-fn exact_d4_lambda_capture_control() {
-    let result = run_surface("((lambda (x) ((lambda (y) (+ x y)) 3)) 4)")
-        .expect("current closure capture control");
-    assert_eq!(result, "7");
-}
+// Мовний закон D4 лексичного захоплення й затінення тепер визначений
+// тільки в tests/semantic/d4-lexical-scope-{law,mutant}.lisp;
+// scripts/prove-lisp-semantic-t5m.sh запускає обидва через Zig/T5M → SENS.
+// Rust лишається дослідницьким механічним адаптером exact D4 APPLY/EVAL.

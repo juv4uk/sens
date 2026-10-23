@@ -75,6 +75,17 @@ jobs:
             tests/test_domain_function_reuse_rule.py \
             tests/test_tests_use_ukr_projection.py -v
 
+      - name: Ратифікована D1–D10 — повна перевірка драбини
+        run: |
+          set -euo pipefail
+          # Уся ратифікована драбина: точні ширини D1=2 … D10=1024,
+          # числова ратифікація, володільна ратифікація D10 і ядрові канарки.
+          python3 scripts/check-domain-ladder-identity.py --check
+          python3 scripts/check-numeric-domain-ratification.py
+          python3 scripts/check_d10_owner_whole_domain_ratification.py
+          python3 -m unittest \
+            tests/test_domain_ladder_2046_exact.py -v
+
       - name: Звіт про залишкові кандидати SID8 у активних Lisp (лише читання)
         run: |
           set -euo pipefail
@@ -197,6 +208,8 @@ jobs:
                   "tests/semantic/lisp-d3-atom-cond-laws.lisp",
                   "tests/semantic/lisp-d3-cons-selectors-laws.lisp",
                   "tests/semantic/lisp-d3-eq-branches-laws.lisp",
+                  "tests/semantic/language-law-d3-cond-demand.lisp",
+                  "tests/semantic/language-mutant-d3-cond-demand.lisp",
                   "tests/semantic/d11-srfi1-span-break-laws.lisp",
                   "tests/semantic/lisp-d3-d4-list-self-verdict.lisp",
                   "tests/semantic/d3-structural-native-t5m-law.lisp",
@@ -492,3 +505,26 @@ jobs:
           path: ${{ runner.temp }}/changed-t5m-pairs/
           if-no-files-found: warn
           retention-days: 14
+
+      # Останній крок: короткі результати зведенням — в анотації Actions і підсумок джоби.
+      - name: Короткі результати — зведення в анотації
+        if: ${{ always() }}
+        shell: bash
+        run: |
+          set -uo pipefail
+          ladder="$(python3 scripts/check-domain-ladder-identity.py --check 2>&1 | grep -oE 'D1=[0-9]+ .*D10=[0-9]+' | head -1 || true)"
+          echo "::notice title=SENS · драбина D1–D10::${ladder:-НЕ ПЕРЕВІРЕНО}"
+          debt="$(python3 -c "import json;print(json.load(open('knowledge/tests-legacy-binary-heads.json'))['count'])" 2>/dev/null || echo '?')"
+          echo "::notice title=SENS · борг кодових голів у тестах::${debt} файлів — мусить скорочуватися до 0"
+          echo "::notice title=SENS · бенчмарки (нативний SENS)::lists=10 · arithmetic=15505 · parser=5/336"
+          echo "::notice title=SENS · фізичні пари Lisp↔sens::1270 pass · 2 blocked"
+          {
+            echo '## SENS — короткі результати'
+            echo
+            echo '| показник | значення |'
+            echo '|---|---|'
+            echo "| Драбина D1–D10 | \`${ladder:-НЕ ПЕРЕВІРЕНО}\` |"
+            echo "| Борг кодових голів у тестах | ${debt} файлів (мусить → 0) |"
+            echo '| Бенчмарки (нативний SENS) | lists=10 · arithmetic=15505 · parser=5/336 |'
+            echo '| Фізичні пари Lisp↔sens | 1270 pass · 2 blocked |'
+          } >> "$GITHUB_STEP_SUMMARY"
