@@ -97,6 +97,7 @@ jobs:
           # D11: тотожність усіх 512 похідних координат і негативні мутанти.
           python3 scripts/check_d11_selector_seed.py --json
           python3 -m unittest discover -s tests -p test_d11_selector_seed.py
+          python3 -m unittest discover -s tests -p test_add_d11_function.py
 
       - name: УКР-ПРОЄКЦІЯ — вчорашні анотації прогресу Lisp
         if: ${{ always() }}
