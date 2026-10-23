@@ -23,7 +23,9 @@ SOURCE = ROOT / "lib" / "core1.lisp"
 FOUNDATION = ROOT / "knowledge" / "d1-d9-foundation.json"
 PROJECTION = HERE / "second"
 HUMAN = HERE / "second.lisp"
-CURRENT_HUMAN_LISP = "(перше\n  (решта\n    (сполучити\n      (як-є ())\n      (сполучити (як-є ()) (як-є ())))))\n"
+# Pin the checked-in Lisp source as a Git blob, rather than copying its
+# semantic forms into Python. The .lisp file remains the source of truth.
+CURRENT_HUMAN_BLOB_SHA = "33e382c7d752b99713f146a4da963bcd3f38209e"
 PHYSICAL = HERE / "second.sens"
 
 # Pin the CURRENT Ukrainian Core1 binding. The retired C1-SECOND/SID8
@@ -105,7 +107,9 @@ def verify_checked_in() -> tuple[int, str]:
     projection, physical, digest = expected_artifacts()
     if PROJECTION.read_text(encoding="utf-8") != projection:
         raise ValueError("BLOCK: Core1 exact-bit view drift")
-    if HUMAN.read_text(encoding="utf-8") != CURRENT_HUMAN_LISP:
+    human_bytes = HUMAN.read_bytes()
+    git_blob = b"blob " + str(len(human_bytes)).encode("ascii") + b"\0" + human_bytes
+    if hashlib.sha1(git_blob).hexdigest() != CURRENT_HUMAN_BLOB_SHA:
         raise ValueError("BLOCK: Core1 Ukrainian Lisp source drift")
     if PHYSICAL.read_bytes() != physical:
         raise ValueError("BLOCK: Core1 physical .sens mismatch or noncanonical bytes")
