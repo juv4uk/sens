@@ -217,6 +217,7 @@ jobs:
                   "tests/semantic/lisp-d3-cons-selectors-laws.lisp",
                   "tests/semantic/lisp-d3-eq-branches-laws.lisp",
                   "tests/semantic/d11-srfi1-span-break-laws.lisp",
+                  "tests/semantic/d11-srfi1-find-tail-laws.lisp",
                   "tests/semantic/lisp-d3-d4-list-self-verdict.lisp",
                   "tests/semantic/d3-structural-native-t5m-law.lisp",
                   "tests/semantic/d3-structural-native-t5m-mutant.lisp",
@@ -400,6 +401,8 @@ jobs:
           # Лише конкатенація джерел: весь вердикт виконує Lisp/SENS.
           cat -- lib/d11-srfi1-span-break.lisp tests/semantic/d11-srfi1-span-break-laws.lisp > "$RUNNER_TEMP/d11-srfi1-span-break-native.lisp"
           check_lisp_law d11-srfi1-span-break-language "$RUNNER_TEMP/d11-srfi1-span-break-native.lisp" '1'
+          cat -- lib/d11-srfi1-find-tail.lisp tests/semantic/d11-srfi1-find-tail-laws.lisp > "$RUNNER_TEMP/d11-srfi1-find-tail-native.lisp"
+          check_lisp_law d11-srfi1-find-tail-language "$RUNNER_TEMP/d11-srfi1-find-tail-native.lisp" '1'
 
       # Негативний свідок не є позитивним входом загального T5M-коридору.
       - name: Lisp D3 — CAR/CDR/CONS закон і негативний мутант
