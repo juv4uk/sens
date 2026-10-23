@@ -165,7 +165,7 @@ def replace_atomic(path, original, updated):
 def main():
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("paths", type=Path, nargs="+")
-    ap.add_argument("--source-ref", required=True, help="історичний commit до D8")
+    ap.add_argument("--source-ref", help="історичний commit до D8; потрібен лише для наявних W8-голів")
     ap.add_argument("--historical-path", type=Path, help="стара адреса одного перейменованого файла")
     ap.add_argument("--write", action="store_true")
     ap.add_argument("--report", type=Path, help="JSON діагностика")
@@ -200,6 +200,11 @@ def main():
                 unknown = []
                 edits = scanner.plan(text, {}, legacy_heads=table, unresolved=unknown)
                 old_codes = {e.source for e in edits} | {code for _, code in unknown}
+                if old_codes and not args.source_ref:
+                    raise ValueError(
+                        "для реальної заміни W8-голів потрібен --source-ref "
+                        "із перевіреним історичним SHA; без нього нічого не переписуємо"
+                    )
                 proof = (prove(args.source_ref, args.historical_path or rel, old_codes, scanner, table)
                          if old_codes else None)
                 new = scanner.apply_edits(text, edits).encode("utf-8")
