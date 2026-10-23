@@ -94,8 +94,11 @@ jobs:
           python3 scripts/report_ukr_projection_progress.py \
             --json "$RUNNER_TEMP/ukr-projection-progress.json"
 
+      # Незалежний механічний/мовний доказ не зникає після RED аудиту:
+      # збій залишається RED, але маніфест і SENS-коридор все одно працюють.
       - name: Знайти змінені Lisp-програми, а не історичні таблиці
         id: changed-t5m-lisp
+        if: ${{ always() }}
         shell: bash
         env:
           BEFORE_SHA: ${{ github.event.before }}
@@ -218,13 +221,13 @@ jobs:
 
 
       - uses: dtolnay/rust-toolchain@1.99.0
-        if: steps.changed-t5m-lisp.outputs.has_lisp == 'true' || steps.changed-t5m-lisp.outputs.has_files == 'true' || steps.changed-t5m-lisp.outputs.has_rust == 'true'
+        if: ${{ always() && (steps.changed-t5m-lisp.outputs.has_lisp == 'true' || steps.changed-t5m-lisp.outputs.has_files == 'true' || steps.changed-t5m-lisp.outputs.has_rust == 'true') }}
 
       - uses: ./.github/actions/install-zig
-        if: steps.changed-t5m-lisp.outputs.has_lisp == 'true' || steps.changed-t5m-lisp.outputs.has_files == 'true' || steps.changed-t5m-lisp.outputs.has_rust == 'true' || steps.changed-t5m-lisp.outputs.has_zig == 'true'
+        if: ${{ always() && (steps.changed-t5m-lisp.outputs.has_lisp == 'true' || steps.changed-t5m-lisp.outputs.has_files == 'true' || steps.changed-t5m-lisp.outputs.has_rust == 'true' || steps.changed-t5m-lisp.outputs.has_zig == 'true') }}
 
       - name: Rust — обрамлення й помилки вводу, без мовного оракула
-        if: steps.changed-t5m-lisp.outputs.has_rust == 'true'
+        if: ${{ always() && steps.changed-t5m-lisp.outputs.has_rust == 'true' }}
         run: |
           set -euo pipefail
           cargo test --locked -p wsm-guard-slice --bin wsm-guard-slice event_frame_rejects_overlong_duplicate_unknown_and_non_ascii_fields -- --exact --nocapture
@@ -234,13 +237,13 @@ jobs:
           # Не дублюємо мовний оракул у механічному Rust-шарі.
 
       - name: Zig — кодеки, ABI та безпечна межа копіювання
-        if: steps.changed-t5m-lisp.outputs.has_zig == 'true'
+        if: ${{ always() && steps.changed-t5m-lisp.outputs.has_zig == 'true' }}
         run: |
           zig test -lc research/zig-codecs/tests.zig
           zig test -lc zig_transport_root.zig --test-filter 'Zig REPL transport refuses one-byte-short destination without a partial write'
 
       - name: Три бенчмарки — lists, arithmetic, parser у справжньому SENS
-        if: steps.changed-t5m-lisp.outputs.has_lisp == 'true'
+        if: ${{ always() && steps.changed-t5m-lisp.outputs.has_lisp == 'true' }}
         shell: bash
         timeout-minutes: 15
         run: |
