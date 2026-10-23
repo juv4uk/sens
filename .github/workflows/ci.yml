@@ -360,6 +360,19 @@ jobs:
           fi
           exit "$zig_failed"
 
+      # Окремі бенчмарки MECHANISM_COPY_BENCH: не змішувати з Lisp-законами.
+      # По одному прогону Rust/Zig на коміт, p50/p90 без автоматичного gate швидкості.
+      - name: Rust/Zig — мікробенчмарки механізму байтового транспорту
+        if: ${{ always() }}
+        shell: bash
+        timeout-minutes: 6
+        run: |
+          set -euo pipefail
+          rustc -O --edition=2021 benchmarks/mechanism/rust-byte-copy-bench.rs -o "$RUNNER_TEMP/sens-rust-copy-bench"
+          "$RUNNER_TEMP/sens-rust-copy-bench"
+          zig test -O ReleaseFast -lc benchmarks/mechanism/zig-byte-copy-bench.zig
+          echo "::notice title=Rust Zig mechanism benchmarks::MEASURED samples=11 batch=512 source=lib/core4.lisp semantic=NOT_ASSERTED"
+
       # Rust тут перевіряє тільки механізм CLI. Жоден результат арифметики
       # або Lisp-закон не визначається Rust-тестами.
       - name: Rust CLI — механізм запуску бенчмарків, без мовного оракула
