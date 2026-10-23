@@ -4,6 +4,7 @@ use std::{collections::BTreeSet, env, fs, path::Path, process::{self, Command}};
 const PREFIX: &str = "tests/semantic/";
 const RUNNER: &str = "scripts/prove-lisp-semantic-t5m.sh";
 const CI: &str = ".github/workflows/ci.yml";
+const REMINT: &str = ".github/workflows/remint-drifted-pairs.yml";
 
 fn commands(source: &str) -> Vec<String> {
     let mut result = Vec::new();
@@ -227,7 +228,81 @@ fn test_git_change_filter() -> Result<(),String> {
     Ok(())
 }
 
+// Обидва проходи remint мають однаково передавати залежності та очікувані помилки.
+fn audit_remint_dispatch(workflow: &str) -> Result<(), String> {
+    let lines: Vec<&str> = workflow.lines()
+        .map(str::trim)
+        .filter(|line| !line.is_empty() && !line.starts_with('#'))
+        .collect();
+    let mut blocks: Vec<Vec<&str>> = Vec::new();
+    for (index, line) in lines.iter().enumerate() {
+        if *line != "expect_args=()" {
+            continue;
+        }
+        let start = index + 1;
+        if lines.get(start).copied() != Some("case \"$f\" in") {
+            return Err(format!("REMINT_DISPATCH_MALFORMED layer=CI start={index}"));
+        }
+        let end = (start + 1..lines.len())
+            .find(|&i| lines[i] == "esac")
+            .ok_or_else(|| "REMINT_DISPATCH_UNTERMINATED layer=CI".to_string())?;
+        let arms = &lines[start + 1..end];
+        if arms.is_empty() || arms.iter().any(|arm| !arm.ends_with(";;")) {
+            return Err("REMINT_DISPATCH_INVALID_ARMS layer=CI".into());
+        }
+        blocks.push(arms.to_vec());
+    }
+    if blocks.len() != 2 {
+        return Err(format!(
+            "REMINT_DISPATCH_COUNT layer=CI expected=2 actual={}", blocks.len()
+        ));
+    }
+    if blocks[0] != blocks[1] {
+        let index = blocks[0].iter().zip(&blocks[1])
+            .position(|(a, b)| a != b)
+            .unwrap_or_else(|| blocks[0].len().min(blocks[1].len()));
+        return Err(format!(
+            "REMINT_DISPATCH_DRIFT layer=CI arm={index} expected={:?} actual={:?}",
+            blocks[0].get(index), blocks[1].get(index)
+        ));
+    }
+    Ok(())
+}
+
+fn test_remint_dispatch() -> Result<(), String> {
+    let fixture = r#"
+        expect_args=()
+        case "$f" in
+          test-positive.lisp) bs=(--binding-source lib/a.lisp);;
+          test-negative.lisp) expect_args=(--expect-error "car expects a non-empty list");;
+          *) : ;;
+        esac
+        # other remint work
+          expect_args=()
+          case "$f" in
+            test-positive.lisp) bs=(--binding-source lib/a.lisp);;
+            test-negative.lisp) expect_args=(--expect-error "car expects a non-empty list");;
+            *) : ;;
+          esac
+    "#;
+    audit_remint_dispatch(fixture)?;
+    let mutations = [
+        fixture.replacen("--binding-source lib/a.lisp", "--binding-source lib/b.lisp", 1),
+        fixture.replacen("car expects a non-empty list", "wrong error", 1),
+        fixture.replacen("test-positive.lisp) bs=(--binding-source lib/a.lisp);;", "", 1),
+        fixture.replacen("expect_args=()", "expect_args=(lost)", 1),
+        fixture.replacen("esac", "", 1),
+    ];
+    for (index, mutant) in mutations.iter().enumerate() {
+        if audit_remint_dispatch(mutant).is_ok() {
+            return Err(format!("REMINT_DISPATCH_MUTANT_SURVIVED index={index}"));
+        }
+    }
+    Ok(())
+}
+
 fn self_test() -> Result<(),String> {
+    test_remint_dispatch()?;
     test_git_change_filter()?;
     test_triplet_census()?;
     let runner = "cat -- tests/semantic/sample-law.lisp > \"$bundle\"\n\
@@ -472,6 +547,8 @@ fn main() {
         let changed = changed_since(base,head)?;
         let script = fs::read_to_string(RUNNER).map_err(|e| e.to_string())?;
         let ci = fs::read_to_string(CI).map_err(|e| e.to_string())?;
+        let remint = fs::read_to_string(REMINT).map_err(|e| e.to_string())?;
+        audit_remint_dispatch(&remint)?;
         let errs = audit(&changed,&script,&ci,file_exists,
             |path| fs::read_to_string(path).map_err(|e| e.to_string()));
         Ok((changed.len(),errs))
