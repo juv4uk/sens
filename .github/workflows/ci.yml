@@ -62,9 +62,7 @@ jobs:
           fi
           python3 scripts/check_no_encoded_source_literals.py --base "$base"
 
-      - name: Структура визначень Lisp та SENS
-
-      - name: Проєкції, ратифікована D1–D10 і повний прогін
+      - name: Структура Lisp, проєкції, драбина D1–D10 та повний прогін
         run: |
           set -euo pipefail
           # Структура DEFINE та SENS має бути перевірена в тому самому кроці.
