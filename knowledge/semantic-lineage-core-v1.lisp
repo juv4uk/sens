@@ -4,7 +4,7 @@
 ; непомітно видавати себе за мовний проєкт.
 ;
 ; Джерелом повноважень залишається канонічна таблиця функцій / реєстр:
-;   lib/surface/semantic-registry.lisp
+;   lib/domains/d1.lisp ... lib/domains/d10.lisp
 ;
 ; Класифікаційні категорії визначено в #1113:
 ;   mccarthy-inspired | my-lisp-native | deliberate-departure
@@ -12,11 +12,13 @@
 ;
 ; Кожен рядок прив'язано до свідчень. «unresolved» означає, що проєкт
 ; не має права вважати поточний вигляд реалізації остаточним мовним законом.
+; Поле identity нижче — чинна точнодоменна українська проєкція концепту,
+; а не історичний 8-бітний SID: дата as-of стосується доказів походження.
 
 (semantic-lineage-1
   (issue 1113)
   (as-of "2026-09-23")
-  (authority "lib/surface/semantic-registry.lisp")
+  (authority "lib/domains/d1.lisp ... lib/domains/d10.lisp")
   (status "bounded-first-mandatory-core-row-set")
   (rows
 
@@ -37,7 +39,7 @@
 
     (row
       (concept atom/pair-model)
-      (identity 00000010)
+      (identity (д3 010 атом?))
       (surface atom)
       (lineage mccarthy-inspired)
       (historical-reference "Розрізнення атома й структури в Маккарті")
@@ -52,7 +54,7 @@
 
     (row
       (concept quote)
-      (identity 00000001)
+      (identity (д3 001 як-є))
       (surface quote)
       (lineage mccarthy-inspired)
       (historical-reference "Цитування Маккарті")
@@ -67,7 +69,7 @@
 
     (row
       (concept cons)
-      (identity 00000100)
+      (identity (д3 111 сполучити))
       (surface cons)
       (lineage mccarthy-inspired)
       (historical-reference "Побудова пари за Маккарті")
@@ -82,7 +84,7 @@
 
     (row
       (concept car)
-      (identity 00000101)
+      (identity (д3 100 перше))
       (surface car)
       (lineage mccarthy-inspired)
       (historical-reference "Вибір першого елемента за Маккарті")
@@ -97,7 +99,7 @@
 
     (row
       (concept cdr)
-      (identity 00000110)
+      (identity (д3 011 решта))
       (surface cdr)
       (lineage mccarthy-inspired)
       (historical-reference "Вибір хвоста пари за Маккарті")
@@ -112,7 +114,7 @@
 
     (row
       (concept cond)
-      (identity 00000111)
+      (identity (д3 110 за-умовою))
       (surface cond)
       (lineage deliberate-departure)
       (historical-reference "Умовне керування за Маккарті")
@@ -127,7 +129,7 @@
 
     (row
       (concept lambda/application/recursion)
-      (identity 00001000)
+      (identity (д4 0010 функція))
       (surface lambda)
       (lineage mccarthy-inspired)
       (historical-reference "Модель функції та застосування Маккарті")
@@ -142,7 +144,7 @@
 
     (row
       (concept define)
-      (identity 00001001)
+      (identity (д4 0011 визначити))
       (surface define)
       (lineage my-lisp-native)
       (historical-reference "Історичний приклад зв'язування верхнього рівня в родині Ліспу")
@@ -157,7 +159,7 @@
 
     (row
       (concept empty-list)
-      (identity 00000000)
+      (identity ())
       (surface "()")
       (lineage mccarthy-inspired)
       (historical-reference "Порожній список Ліспу / структурне значення NIL")
