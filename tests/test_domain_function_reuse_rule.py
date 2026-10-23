@@ -108,6 +108,44 @@ class DomainFunctionReuseRule(unittest.TestCase):
         self.assertEqual(status, 1, output.getvalue())
         self.assertIn("BLOCKED", output.getvalue())
 
+    def test_staged_base_detects_second_definition_in_same_file(self) -> None:
+        # --base мусить порівнювати кількість DEFINE, а не лише множину імен.
+        # База має одне визначення; у Git index додається друге з тим самим ім'ям.
+        spec = importlib.util.spec_from_file_location("guard_same_file_delta_test", GUARD)
+        self.assertIsNotNone(spec)
+        self.assertIsNotNone(spec.loader)
+        guard = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(guard)
+        definition = (
+            "(визначити подвійний-локальний "
+            "(функція (х) (сполучити х (як-є ()))))\n"
+        )
+        with tempfile.TemporaryDirectory(prefix="sens-guard-double-") as temp:
+            root = Path(temp)
+            path = root / "lib" / "double.lisp"
+            path.parent.mkdir(parents=True)
+            path.write_text(definition, encoding="utf-8")
+            subprocess.run(["git", "init", "-q"], cwd=root, check=True)
+            subprocess.run(["git", "add", "lib/double.lisp"], cwd=root, check=True)
+            subprocess.run(
+                ["git", "-c", "user.name=SENS Guard", "-c",
+                 "user.email=guard@example.invalid", "commit", "-qm", "base"],
+                cwd=root, check=True,
+            )
+            path.write_text(definition + definition, encoding="utf-8")
+            subprocess.run(["git", "add", "lib/double.lisp"], cwd=root, check=True)
+            with mock.patch.object(guard, "ROOT", root), \
+                 mock.patch.object(guard, "ladder_names", return_value={"сполучити"}), \
+                 mock.patch.object(guard, "project_definition_sites", return_value={}), \
+                 mock.patch.object(guard, "MINIMUM_RATIFIED_SURFACES", 1):
+                for mode in (("--staged", "--base", "HEAD"), ("--staged",)):
+                    with self.subTest(mode=mode):
+                        output = StringIO()
+                        with redirect_stdout(output):
+                            status = guard.main(list(mode))
+                        self.assertEqual(status, 1, output.getvalue())
+                        self.assertIn("повторне визначення в одному файлі", output.getvalue())
+
     def test_search_self_test_is_green(self) -> None:
         result = run(SEARCH, "--self-test")
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)

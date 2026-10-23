@@ -28,6 +28,7 @@
 from __future__ import annotations
 
 import argparse
+from collections import Counter
 import importlib.util
 import json
 import re
@@ -423,7 +424,9 @@ def main(argv: list[str] | None = None) -> int:
         else:
             text = path.read_text(encoding="utf-8")
         checked += 1
-        known: set[str] = set()
+        # Рахуємо входження, а не лише імена: у --base друге DEFINE
+        # з тією самою назвою є новим, навіть якщо перше вже існувало.
+        known_counts: Counter[str] = Counter()
         if args.base:
             try:
                 old_text = subprocess.run(
@@ -431,16 +434,21 @@ def main(argv: list[str] | None = None) -> int:
                     capture_output=True, text=True, check=False).stdout
             except Exception:
                 old_text = ""
-            known = {n for n, _, _ in definitions_with_bodies(old_text)}
+            known_counts.update(n for n, _, _ in definitions_with_bodies(old_text))
+        seen_counts: Counter[str] = Counter()
         active_text = _mask_quotes(text)
         usage[rel] = sum(
             1 for head in re.findall(r"\(\s*([^\s()]{2,})", active_text)
             if head in ladder and head not in STRUCTURAL
         )
         for name, body, marked in definitions_with_bodies(text):
-            if args.base and name in known:
-                continue  # не чіпаємо те, що вже було до зміни
+            seen_counts[name] += 1
+            if args.base and seen_counts[name] <= known_counts[name]:
+                continue  # наявне входження; перевіряємо лише приріст
             new_defs[rel] = new_defs.get(rel, 0) + 1
+            if seen_counts[name] > 1:
+                blocked.append((rel, name, "повторне визначення в одному файлі"))
+                continue
             if name in ladder:
                 blocked.append((rel, name, "дубль наявної поверхні драбини"))
                 continue
