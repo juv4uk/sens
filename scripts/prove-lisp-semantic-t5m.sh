@@ -878,6 +878,10 @@ for constructor in значення-у-списку? знайти-за-ключ�
   fi
   printf '\n' >> "$epistemic_constructor_source"
 done
+# D10:0001110110 має дві ратифіковані українські поверхні.
+# Мінімальний Lisp-корпус зв’язує повну назву з уже визначеною функцією.
+# Це зв’язування виконує SENS, без хостового дублювання закону.
+printf '(визначити створити-структуроване-твердження створити-твердження)\n' >> "$epistemic_constructor_source"
 test -s "$epistemic_constructor_source" || {
   echo "::error::EPISTEMIC_D10_SOURCE_EMPTY" >&2
   exit 2
