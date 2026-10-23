@@ -245,8 +245,91 @@ fn run_benchmark() -> Result<(), String> {
     Ok(())
 }
 
+
+#[cfg(feature = "zig-transport")]
+fn physical_t5_persistent_session_benchmark() {
+    const TEST_ID: &str = "physical-t5-persistent-session";
+    let root = repository_root().expect("repository root");
+    let relative = FIXTURES[0]; // Pure quoted data: replay must not mutate bindings.
+    let physical = root.join(relative);
+    let bytes = fs::read(&physical).expect("tracked physical .sens fixture");
+    let sens = required_executable("SENS_PHYSICAL_T5_SENS").expect("physical SENS binary");
+    let sens_trit = required_executable("SENS_PHYSICAL_T5_TRIT").expect("physical transport binary");
+    let (_, baseline_stdout) =
+        invoke(Lane::SensExec, &sens, &sens_trit, &physical, &root)
+            .expect("cold physical SENS baseline");
+
+    // Production Zig ingress restores only transport words. SENS owns the
+    // domain identities, D2 admission, and execution semantics.
+    let restored = sens_cli::zig_transport::decode_t5m_exact_words(&bytes)
+        .expect("real Zig T5M decode");
+    let words = restored
+        .into_iter()
+        .map(|word| sens::ExactDomainWord::from_physical_width_bits(word.width, &word.bits))
+        .collect::<Result<Vec<_>, _>>()
+        .expect("exact SENS domain identities");
+    let program = sens::PhysicalT5Program::from_exact_domain_words_owned(words)
+        .expect("real SENS D2 admission");
+    let mut session = sens::Session::bare();
+    sens::install_ratified_d5_macro_mechanism(&session);
+
+    let repetitions = env::var("SENS_PHYSICAL_T5_REPS")
+        .ok()
+        .and_then(|value| value.parse::<usize>().ok())
+        .unwrap_or(21);
+    let warmups = env::var("SENS_PHYSICAL_T5_WARMUPS")
+        .ok()
+        .and_then(|value| value.parse::<usize>().ok())
+        .unwrap_or(4);
+    assert!(repetitions >= 5 && warmups >= 1, "{TEST_ID}: insufficient samples");
+    let mut samples = Vec::with_capacity(repetitions);
+    for call in 0..(warmups + repetitions) {
+        let started = Instant::now();
+        let result = program.execute(&mut session).unwrap_or_else(|error| {
+            panic!("{TEST_ID}: physical SENS execution call={call} error={error}")
+        });
+        let elapsed_ns = started.elapsed().as_nanos();
+
+        // execute() exposes the session's cumulative transcript; take only
+        // the output produced since the preceding call for CLI parity.
+        let mut visible = Vec::new();
+        for line in session.environment.output_take_new() {
+            visible.extend_from_slice(line.as_bytes());
+            visible.push(b'\n');
+        }
+        visible.extend_from_slice(result.value.to_string().as_bytes());
+        visible.push(b'\n');
+        assert_eq!(
+            visible, baseline_stdout,
+            "{TEST_ID}: observable drift call={call} fixture={relative}"
+        );
+        std::hint::black_box(result);
+        if call >= warmups {
+            samples.push(elapsed_ns);
+            println!(
+                "RUST_PHYSICAL_SESSION_SAMPLE\tfixture={relative}\tcall={}\texecute_ns={elapsed_ns}\tparity=exact",
+                call - warmups + 1
+            );
+        }
+    }
+    let mut sorted = samples;
+    sorted.sort_unstable();
+    let median = sorted[(sorted.len() - 1) / 2];
+    let p95 = percentile_nearest_rank(&sorted, 95, 100);
+    println!(
+        "RUST_PHYSICAL_SESSION_SUMMARY\tcommit={}\tfixture={relative}\tphysical_sha256={}\tsamples={}\tp50_execute_ns={median}\tp95_execute_ns={p95}\tmin_execute_ns={}\tmax_execute_ns={}\tscope=in-process-reused-session\tparity=exact",
+        current_commit(&root).expect("current commit"),
+        hex_sha256(&bytes),
+        sorted.len(),
+        sorted[0],
+        sorted[sorted.len() - 1]
+    );
+}
+
 #[test]
 #[ignore = "explicit native physical T5 benchmark; run from sens-performance.yml"]
 fn physical_sens_runtime_benchmark() {
     run_benchmark().unwrap_or_else(|error| panic!("RUST_PHYSICAL_T5_BENCHMARK_FAILED: {error}"));
+    #[cfg(feature = "zig-transport")]
+    physical_t5_persistent_session_benchmark();
 }
