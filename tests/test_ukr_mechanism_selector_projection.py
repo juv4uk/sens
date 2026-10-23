@@ -142,7 +142,7 @@ class MechanismSelectorFullUkrProjectionTests(unittest.TestCase):
         for token in ("(rows", "(як-є mechanism-selected)",
                       "(як-є доменного-коду-немає-в-таблиці)"):
             self.assertIn(token, self.source)
-        self.assertNotIn("(як-є sid-not-in-function-table)", normalized)
+        self.assertNotIn("(як-є identity-not-in-function-table)", normalized)
         for legacy, current in LOCAL_RENAMES:
             self.assertIn(f"(визначити {current}", self.source)
             self.assertNotIn(f"(визначити {legacy} ", self.source)
