@@ -59,7 +59,7 @@ class Core1ThirdCurrentMigration(unittest.TestCase):
         # Третій елемент реалізується через ратифікований селектор.
         self.assertIn("(визначити ядро1-третій-елемент",
                       (ROOT / "lib/core1.lisp").read_text(encoding="utf-8"))
-        self.assertIn("(третє значення)",
+        self.assertIn("(третє передане-значення)",
                       (ROOT / "lib/core1.lisp").read_text(encoding="utf-8"))
         self.assertEqual(self.bridge, {})
 

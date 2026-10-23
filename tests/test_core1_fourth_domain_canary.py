@@ -58,7 +58,7 @@ class Core1FourthCurrentMigration(unittest.TestCase):
         # Чинний четвертий елемент компонується з D5/D3, не із SID8.
         self.assertIn("(визначити ядро1-четвертий-елемент",
                       (ROOT / "lib/core1.lisp").read_text(encoding="utf-8"))
-        self.assertIn("(третє (решта значення))",
+        self.assertIn("(третє (решта передане-значення))",
                       (ROOT / "lib/core1.lisp").read_text(encoding="utf-8"))
         self.assertEqual(self.bridge, {})
 
