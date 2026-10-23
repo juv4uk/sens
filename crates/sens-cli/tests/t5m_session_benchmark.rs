@@ -31,7 +31,7 @@ impl TempLisp {
             .create_new(true)
             .open(&path)
             .expect("create unique temporary Lisp source");
-        file.write_all(b"(\xd0\xb4\xd0\xbe\xd0\xb4\xd0\xb0\xd1\x82\xd0\xb8 20 22)\n")
+        file.write_all("(додати 20 22)\n".as_bytes())
             .expect("write real SENS source");
         Self(path)
     }
