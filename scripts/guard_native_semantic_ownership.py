@@ -83,14 +83,24 @@ def audit_added_paths(added: list[str], runner: str, ci: str, exists, read_file)
                     f"SENS_LAW_NOT_REGISTERED source={path} runner={RUNNER} "
                     "expected=run_case/native-T5M")
             counterpart = companion_for_law(path)
-            if counterpart and not exists(counterpart):
-                errors.append(
-                    f"SENS_LAW_MUTANT_MISSING source={path} expected={counterpart}")
+            if counterpart:
+                if not exists(counterpart):
+                    errors.append(
+                        f"SENS_LAW_MUTANT_MISSING source={path} expected={counterpart}")
+                elif counterpart not in routed:
+                    errors.append(
+                        f"SENS_LAW_MUTANT_NOT_ROUTED source={path} expected={counterpart}")
             alternatives = companions_for_mutant(path)
-            if alternatives and not any(exists(candidate) for candidate in alternatives):
-                errors.append(
-                    f"SENS_LAW_POSITIVE_MISSING source={path} "
-                    f"expected=one-of:{','.join(alternatives)}")
+            if alternatives:
+                existing_positive = [candidate for candidate in alternatives if exists(candidate)]
+                if not existing_positive:
+                    errors.append(
+                        f"SENS_LAW_POSITIVE_MISSING source={path} "
+                        f"expected=one-of:{','.join(alternatives)}")
+                elif not any(candidate in routed for candidate in existing_positive):
+                    errors.append(
+                        f"SENS_LAW_POSITIVE_NOT_ROUTED source={path} "
+                        f"expected=one-of:{','.join(existing_positive)}")
         # Вузька, перевірювана ознака НОВОГО Rust-оракула: eval + assert(Value).
         # Тести Rust I/O, парсера, аварій та байтового механізму не блокуємо.
         if (path.startswith("crates/") and "/tests/" in path
