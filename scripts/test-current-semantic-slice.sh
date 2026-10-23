@@ -158,28 +158,30 @@ cargo test -p sens --test witness_authority exact_d3_predicate_boundaries_are_ju
 # #5408: насамперед випробувати саму послідовну лексичну область D6.
 # Повний закон величин перевіряється лише після проходження цього SENS-свідка.
 lambda_witness="witnesses/quantity-lambda-binding.lisp"
+lambda_expected="(quantity-lambda-binding (status pass) (authority lisp))"
 if lambda_status="$(cargo run --quiet -p sens-cli --bin sens -- "$lambda_witness" 2>&1)"; then
-  if [[ "$lambda_status" != "7" ]]; then
-    printf 'QUANTITY-LAMBDA-BLOCKED: очікувано точне SENS 7, одержано: %s\n' "$lambda_status" >&2
+  if [[ "$lambda_status" != "$lambda_expected" ]]; then
+    printf 'QUANTITY-LAMBDA-BLOCKED: Lisp-вердикт не підтверджено, очікувано %s, одержано: %s\n' "$lambda_expected" "$lambda_status" >&2
     exit 1
   fi
-  printf 'QUANTITY-LAMBDA-PASS: D5 LAMBDA => 7\n'
+  printf 'QUANTITY-LAMBDA-PASS: D5 LAMBDA; authority=Lisp self-verdict\n'
 else
   lambda_rc=$?
-  printf 'QUANTITY-LAMBDA-BLOCKED: виконання D5 LAMBDA завершилося %s: %s\n' "$lambda_rc" "$lambda_status" >&2
+  printf 'QUANTITY-LAMBDA-BLOCKED: виконання Lisp-свідка завершилося %s: %s\n' "$lambda_rc" "$lambda_status" >&2
   exit 1
 fi
 
 binding_witness="witnesses/quantity-sequential-binding.lisp"
+binding_expected="(quantity-sequential-binding (status pass) (authority lisp))"
 if binding_status="$(cargo run --quiet -p sens-cli --bin sens -- "$binding_witness" 2>&1)"; then
-  if [[ "$binding_status" != "7" ]]; then
-    printf 'QUANTITY-BINDING-BLOCKED: очікувано SENS 7, одержано: %s\n' "$binding_status" >&2
+  if [[ "$binding_status" != "$binding_expected" ]]; then
+    printf 'QUANTITY-BINDING-BLOCKED: Lisp-вердикт не підтверджено, очікувано %s, одержано: %s\n' "$binding_expected" "$binding_status" >&2
     exit 1
   fi
-  printf 'QUANTITY-BINDING-PASS: D6 нехай* => 7\n'
+  printf 'QUANTITY-BINDING-PASS: D6 нехай-послідовно; authority=Lisp self-verdict\n'
 else
   binding_rc=$?
-  printf 'QUANTITY-BINDING-BLOCKED: SENS-свідок завершився %s: %s\n' "$binding_rc" "$binding_status" >&2
+  printf 'QUANTITY-BINDING-BLOCKED: виконання Lisp-свідка завершилося %s: %s\n' "$binding_rc" "$binding_status" >&2
   exit 1
 fi
 
