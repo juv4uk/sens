@@ -23,18 +23,29 @@ jobs:
           tar -xJf "$RUNNER_TEMP/zig-0.16.0.tar.xz" -C "$RUNNER_TEMP"
           echo "$RUNNER_TEMP/zig-x86_64-linux-0.16.0" >> "$GITHUB_PATH"
           "$RUNNER_TEMP/zig-x86_64-linux-0.16.0/zig" version
-      - name: Тести 512 функцій, roundtrip і негативних випадків
+      - name: Гра пам'яті — відтворюваний раунд усіх 512 функцій D11
+        run: zig test -lc research/zig-codecs/ladder_memory_game.zig
+      - name: Тести кодеку — 512 координат, roundtrip і негативні випадки
         run: zig test -lc research/zig-codecs/d11_selector_contest.zig
       - name: Зібрати змагання оптимізовано
         run: zig build-exe -lc -O ReleaseFast research/zig-codecs/d11_selector_contest.zig -femit-bin="$RUNNER_TEMP/d11_contest"
-      - name: Виміряти 9-бітний проти 11-бітного на 64 словах
+      - name: Виміряти 9/11/16-бітні кодеки на однакових потоках 64 і 512 слів
         shell: bash
         run: |
           set -euo pipefail
           "$RUNNER_TEMP/d11_contest" 2>&1 | tee "$RUNNER_TEMP/d11_contest.log"
           grep -Fq 'mode=selector9 words=64 bytes=72' "$RUNNER_TEMP/d11_contest.log"
           grep -Fq 'mode=dense11 words=64 bytes=88' "$RUNNER_TEMP/d11_contest.log"
-          grep -Fq 'roundtrip=EXACT' "$RUNNER_TEMP/d11_contest.log"
+          grep -Fq 'mode=raw16 words=64 bytes=128' "$RUNNER_TEMP/d11_contest.log"
+          grep -Fq 'mode=selector9 words=512 bytes=576' "$RUNNER_TEMP/d11_contest.log"
+          grep -Fq 'mode=dense11 words=512 bytes=704' "$RUNNER_TEMP/d11_contest.log"
+          grep -Fq 'mode=raw16 words=512 bytes=1024' "$RUNNER_TEMP/d11_contest.log"
+          test "$(grep -c '^D11_CONTEST mode=' "$RUNNER_TEMP/d11_contest.log")" -eq 6
+          grep -Fq 'samples=15' "$RUNNER_TEMP/d11_contest.log"
+          grep -Fq 'p50_ns_per_roundtrip=' "$RUNNER_TEMP/d11_contest.log"
+          grep -Fq 'p90_ns_per_roundtrip=' "$RUNNER_TEMP/d11_contest.log"
+          grep -Fq 'D11_CONTEST_METHOD paired=YES alternating=YES samples=15' "$RUNNER_TEMP/d11_contest.log"
+          test "$(grep -c 'roundtrip=EXACT paired=YES' "$RUNNER_TEMP/d11_contest.log")" -eq 6
       - name: Зберегти сирі результати
         if: always()
         uses: actions/upload-artifact@v4
