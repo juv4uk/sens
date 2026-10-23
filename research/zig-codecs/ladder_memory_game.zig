@@ -138,9 +138,12 @@ pub fn coordinateCount(width: u8) usize {
     return count;
 }
 
-pub fn grade(guesses: []const Guess) Score {
+fn gradeFiltered(guesses: []const Guess, domain: ?u8) Score {
     var result: Score = .{};
     for (guesses, 0..) |guess, index| {
+        if (domain) |width| {
+            if (guess.width != width) continue;
+        }
         var repeated = false;
         for (guesses[0..index]) |previous| {
             if (previous.width == guess.width and std.mem.eql(u8, previous.bits, guess.bits)) {
@@ -167,6 +170,10 @@ pub fn grade(guesses: []const Guess) Score {
     return result;
 }
 
+pub fn grade(guesses: []const Guess) Score {
+    return gradeFiltered(guesses, null);
+}
+
 /// Відтворювана перестановка запитань для чесного раунду.
 /// Один seed дає той самий порядок; усі індекси з'являються рівно один раз.
 /// Це механіка гри: назви й координати як і раніше читаються з Lisp-таблиць.
@@ -191,7 +198,7 @@ pub fn questionOrder(allocator: std.mem.Allocator, width: u8, seed: u64) ![]usiz
 /// Оцінює повноту одного доменного раунду, окрім точності кожної відповіді.
 /// Невідомі координати й структурні записи не зараховуються як пригадані функції.
 pub fn gradeDomain(width: u8, guesses: []const Guess) Score {
-    var result = grade(guesses);
+    var result = gradeFiltered(guesses, width);
     var answered: usize = 0;
     for (guesses, 0..) |guess, index| {
         if (guess.width != width) continue;
@@ -222,6 +229,25 @@ test "Драбина D11: правильний код з хибною назво
     try std.testing.expectEqual(@as(usize, 1), result.wrong);
     try std.testing.expectEqual(@as(usize, 0), result.answered);
     try std.testing.expectEqual(@as(usize, 512), result.missing);
+}
+
+test "Драбина D11: чужі домени не впливають на оцінку раунду" {
+    const first = questionAt(11, 0) orelse return error.MissingQuestion;
+    const guesses = [_]Guess{
+        .{ .width = 11, .bits = first.bits, .lisp = first.lisp },
+        .{ .width = 3, .bits = "100", .lisp = "CDR" },
+        .{ .width = 3, .bits = "100", .lisp = "CDR" },
+        .{ .width = 3, .bits = "1110", .lisp = "CONS" },
+        .{ .width = 2, .bits = "11", .lisp = "()" },
+    };
+    const result = gradeDomain(11, &guesses);
+    try std.testing.expectEqual(@as(usize, 1), result.correct);
+    try std.testing.expectEqual(@as(usize, 0), result.wrong);
+    try std.testing.expectEqual(@as(usize, 0), result.duplicate);
+    try std.testing.expectEqual(@as(usize, 0), result.unknown);
+    try std.testing.expectEqual(@as(usize, 0), result.structural);
+    try std.testing.expectEqual(@as(usize, 1), result.answered);
+    try std.testing.expectEqual(@as(usize, 511), result.missing);
 }
 
 test "Драбина D11: раунд має 512 унікальних відтворюваних запитань і повний підрахунок" {
