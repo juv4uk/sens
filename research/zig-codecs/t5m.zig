@@ -321,3 +321,12 @@ test "decoder rejects invalid T5M bytes, tails, and empty words" {
     // Five trailing separator trits are not canonical padding for a nonempty word.
     try std.testing.expectError(Error.InvalidTail, decode(std.testing.allocator, &.{242}));
 }
+
+// The physical codec rejects malformed carriers; this is not a semantic oracle.
+test "T5M encoder rejects nonbinary payload and incorrect declared width" {
+    const bad_digit = [_]Word{.{ .width = 3, .bits = "10x" }};
+    try std.testing.expectError(Error.InvalidBinaryDigit, encode(std.testing.allocator, &bad_digit));
+
+    const wrong_width = [_]Word{.{ .width = 3, .bits = "10" }};
+    try std.testing.expectError(Error.UnsupportedDomainWidth, encode(std.testing.allocator, &wrong_width));
+}

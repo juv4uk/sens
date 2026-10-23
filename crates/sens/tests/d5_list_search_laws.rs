@@ -10,3 +10,9 @@ fn compatibility_parser_does_not_mint_short_domain_words() {
         ExprKind::Number(value, _) if value == 10_000.0
     ));
 }
+
+#[test]
+fn parser_rejects_an_unclosed_form_before_evaluation() {
+    // Rust owns reader failures; this test does not decide Lisp truth or EQ.
+    assert!(parse("(як-є (радіо антена)").is_err());
+}
