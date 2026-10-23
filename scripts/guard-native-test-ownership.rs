@@ -143,9 +143,13 @@ fn file_exists(path: &str) -> bool {
     Path::new(path).symlink_metadata().is_ok_and(|m| m.is_file() && !m.file_type().is_symlink())
 }
 
-fn added_since(base: &str, head: &str) -> Result<Vec<String>,String> {
-    let out = Command::new("git").args(["diff", "--no-ext-diff", "--name-only", "-z",
-        "--diff-filter=A", base, head, "--", "tests/semantic/", "crates/"])
+// Той самий набір змін, що й у native-semantic кроці CI.
+// M важливий: перероблений існуючий Rust-тест теж може стати host-оракулом.
+// R важливий: перейменування не скасовує вимоги реального SENS-маршруту.
+fn changed_since_in(repo: &Path, base: &str, head: &str) -> Result<Vec<String>,String> {
+    let out = Command::new("git").current_dir(repo)
+        .args(["diff", "--no-ext-diff", "--name-only", "-z",
+            "--diff-filter=ACMRT", base, head, "--", "tests/semantic/", "crates/"])
         .output().map_err(|e| e.to_string())?;
     if !out.status.success() { return Err(format!("git diff {}: {}",
         out.status, String::from_utf8_lossy(&out.stderr))); }
@@ -153,7 +157,71 @@ fn added_since(base: &str, head: &str) -> Result<Vec<String>,String> {
         .map(|part| String::from_utf8(part.to_vec()).map_err(|e| e.to_string())).collect()
 }
 
+fn changed_since(base: &str, head: &str) -> Result<Vec<String>,String> {
+    changed_since_in(Path::new("."), base, head)
+}
+
+// Механічний Rust-свідок: старий diff-filter=A пропускав ОБИДВА змінені файли.
+// Тест створює тимчасовий Git-репозиторій; мовних значень не обчислює.
+fn test_git_change_filter() -> Result<(),String> {
+    let nanos = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH).map_err(|e| e.to_string())?.as_nanos();
+    let dir = env::temp_dir().join(format!("sens-native-guard-{}-{nanos}", process::id()));
+    fs::create_dir(&dir).map_err(|e| e.to_string())?;
+    let tested = (|| -> Result<(),String> {
+        let git = |args: &[&str]| -> Result<String,String> {
+            let out = Command::new("git").current_dir(&dir).args(args)
+                .output().map_err(|e| e.to_string())?;
+            if !out.status.success() {
+                return Err(format!("тест git {:?}: {}", args,
+                    String::from_utf8_lossy(&out.stderr)));
+            }
+            String::from_utf8(out.stdout).map(|s| s.trim().to_string())
+                .map_err(|e| e.to_string())
+        };
+        git(&["init", "-q"])?;
+        fs::create_dir_all(dir.join("tests/semantic")).map_err(|e| e.to_string())?;
+        fs::create_dir_all(dir.join("crates/sens/tests")).map_err(|e| e.to_string())?;
+        fs::write(dir.join("tests/semantic/old-law.lisp"), "(первинний-закон)\n")
+            .map_err(|e| e.to_string())?;
+        fs::write(dir.join("crates/sens/tests/carrier.rs"), "// механізм\n")
+            .map_err(|e| e.to_string())?;
+        git(&["add", "."])?;
+        git(&["-c", "user.name=SensGuard", "-c",
+            "user.email=sens-guard@example.invalid", "commit", "-qm", "base"])?;
+        let base = git(&["rev-parse", "HEAD"])?;
+        fs::write(dir.join("tests/semantic/old-law.lisp"), "(змінений-закон)\n")
+            .map_err(|e| e.to_string())?;
+        fs::write(dir.join("crates/sens/tests/carrier.rs"), "// змінений механізм\n")
+            .map_err(|e| e.to_string())?;
+        fs::write(dir.join("tests/semantic/новий-law.lisp"), "(новий-закон)\n")
+            .map_err(|e| e.to_string())?;
+        git(&["add", "."])?;
+        git(&["-c", "user.name=SensGuard", "-c",
+            "user.email=sens-guard@example.invalid", "commit", "-qm", "change"])?;
+        let changed = changed_since_in(&dir, &base, "HEAD")?;
+        for path in [
+            "tests/semantic/old-law.lisp",
+            "crates/sens/tests/carrier.rs",
+            "tests/semantic/новий-law.lisp",
+        ] {
+            if !changed.iter().any(|item| item == path) {
+                return Err(format!("Не побачено Git-зміну: {path}; знайдено={changed:?}"));
+            }
+        }
+        if changed.len() != 3 {
+            return Err(format!("Неочікуваний набір Git-змін: {changed:?}"));
+        }
+        Ok(())
+    })();
+    let cleaned = fs::remove_dir_all(&dir).map_err(|e| e.to_string());
+    tested?;
+    cleaned?;
+    Ok(())
+}
+
 fn self_test() -> Result<(),String> {
+    test_git_change_filter()?;
     let runner = "cat -- tests/semantic/sample-law.lisp > \"$bundle\"\n\
 run_case run_law sample \"$bundle\" 1\n\
 run_case run_law sample-mut tests/semantic/sample-mutant.lisp 0\n\
@@ -231,17 +299,17 @@ fn main() {
     let head = args.windows(2).find(|a| a[0]=="--head")
         .map(|a| a[1].as_str()).unwrap_or("HEAD");
     let result = (|| -> Result<_,String> {
-        let added = added_since(base,head)?;
+        let changed = changed_since(base,head)?;
         let script = fs::read_to_string(RUNNER).map_err(|e| e.to_string())?;
         let ci = fs::read_to_string(CI).map_err(|e| e.to_string())?;
-        let errs = audit(&added,&script,&ci,file_exists,
+        let errs = audit(&changed,&script,&ci,file_exists,
             |path| fs::read_to_string(path).map_err(|e| e.to_string()));
-        Ok((added.len(),errs))
+        Ok((changed.len(),errs))
     })();
     match result {
-        Ok((added,errs)) => {
+        Ok((changed,errs)) => {
             for err in &errs { eprintln!("::error::REGRESSION layer=test-authority {err}"); }
-            println!("SENS_LANGUAGE_OWNERSHIP_AUDIT added={added} rejected={} semantic=NOT_ASSERTED native_runner=REQUIRED owner=Rust",errs.len());
+            println!("SENS_LANGUAGE_OWNERSHIP_AUDIT changed={changed} rejected={} semantic=NOT_ASSERTED native_runner=REQUIRED owner=Rust",errs.len());
             if !errs.is_empty() { process::exit(1); }
         }
         Err(e) => { eprintln!("::error::SENS_LANGUAGE_OWNERSHIP_GATE_FAILURE actual={e}"); process::exit(2) }
