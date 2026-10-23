@@ -191,7 +191,7 @@ NONPROGRAM_MANIFESTS = (
     ("schema", "knowledge/migration-nonprogram-schema-manifest-2026-10-08.json", 19),
     ("evidence", "knowledge/migration-nonprogram-evidence-manifest-2026-10-08.json", 8),
     ("expr-record", "knowledge/migration-nonprogram-expr-records-2026-10-08.json", 13),
-    ("knowledge-record", "knowledge/migration-nonprogram-knowledge-records-2026-10-08.json", 13),
+    ("knowledge-record", "knowledge/migration-nonprogram-knowledge-records-2026-10-08.json", 12),
 )
 
 
