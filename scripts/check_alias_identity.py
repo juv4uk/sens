@@ -15,7 +15,13 @@ from __future__ import annotations
 import argparse
 from collections import defaultdict
 from pathlib import Path
+import sys
 
+# Уніт-тест підключає файл напряму через spec_from_file_location,
+# тому scripts/ не гарантовано міститься у sys.path.
+SCRIPT_DIR = Path(__file__).resolve().parent
+if str(SCRIPT_DIR) not in sys.path:
+    sys.path.insert(0, str(SCRIPT_DIR))
 from domain_tables import read_domain_table
 
 REGISTRY = "lib/surface/semantic-registry.lisp"
