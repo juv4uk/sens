@@ -270,9 +270,25 @@ jobs:
 
       - name: Zig — кодеки, ABI та безпечна межа копіювання
         if: ${{ always() }}
+        shell: bash
         run: |
-          zig test -lc research/zig-codecs/tests.zig
-          zig test -lc zig_transport_root.zig
+          set -euo pipefail
+          # Незалежні механічні перевірки виконуються рівно один раз кожна.
+          # Не маскувати RED першого набору успішним завершенням другого.
+          zig_failed=0
+          if zig test -lc research/zig-codecs/tests.zig; then
+            echo "::notice title=Zig codecs::PASS layer=codec"
+          else
+            echo "::error file=research/zig-codecs/tests.zig,title=Zig codecs::REGRESSION layer=codec expected=pass actual=nonzero"
+            zig_failed=1
+          fi
+          if zig test -lc zig_transport_root.zig; then
+            echo "::notice title=Zig ABI::PASS layer=abi"
+          else
+            echo "::error file=zig_transport_root.zig,title=Zig ABI::REGRESSION layer=abi expected=pass actual=nonzero"
+            zig_failed=1
+          fi
+          exit "$zig_failed"
 
       - name: Три бенчмарки — lists, arithmetic, parser у справжньому SENS
         if: ${{ always() }}
