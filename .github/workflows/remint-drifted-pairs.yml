@@ -384,7 +384,9 @@ jobs:
             fi
             # Пари може ще не бути — refresh створює її канонічно (mint + view).
             bs=()
+            expect_args=()
             case "$f" in
+              tests/semantic/core-d3-car-cdr-cons-mutant.lisp) expect_args=(--expect-error "car expects a non-empty list");;
               lib/persistent-vector.lisp|lib/knowledge.lisp) bs=(--binding-source "$RUNNER_TEMP/sens-core4-d24-roots.lisp");;
               lib/reason.lisp) bs=(--binding-source "$RUNNER_TEMP/sens-core4-d24-roots.lisp" --binding-source lib/unify.lisp);;
               lib/forward.lisp) bs=(--binding-source lib/unify.lisp);;
@@ -408,7 +410,7 @@ jobs:
               tests/semantic/core1-gc-reachability-laws.lisp) bs=(--binding-source lib/core1.lisp);;
               tests/semantic/meta-fc-predicates-d1-law.lisp) bs=(--binding-source lib/meta-eval-first-class.lisp);;
             esac
-            if bash scripts/refresh-verified-t5m-pair.sh "$f" target/debug/sens target/debug/sens-trit "${bs[@]}"; then
+            if bash scripts/refresh-verified-t5m-pair.sh "$f" target/debug/sens target/debug/sens-trit "${bs[@]}" "${expect_args[@]}"; then
               ok=$((ok+1))
               printf '%s\n' "$f" >> "$RUNNER_TEMP/sens-remint-success.txt"
             else
@@ -676,7 +678,9 @@ jobs:
                 continue
               fi
               bs=()
+              expect_args=()
               case "$f" in
+                tests/semantic/core-d3-car-cdr-cons-mutant.lisp) expect_args=(--expect-error "car expects a non-empty list");;
                 lib/persistent-vector.lisp|lib/knowledge.lisp) bs=(--binding-source "$RUNNER_TEMP/sens-core4-d24-roots.lisp");;
                 lib/reason.lisp) bs=(--binding-source "$RUNNER_TEMP/sens-core4-d24-roots.lisp" --binding-source lib/unify.lisp);;
               lib/forward.lisp) bs=(--binding-source lib/unify.lisp);;
@@ -687,11 +691,13 @@ jobs:
                 lib/translation.lisp) bs=(--binding-source lib/unify.lisp --binding-source lib/knowledge.lisp --binding-source lib/reason.lisp --binding-source lib/world.lisp --binding-source lib/yantra.lisp --binding-source lib/result-status.lisp);;
                 tests/fixtures/mechanism-selector-1047-witness.lisp) bs=(--binding-source lib/mechanism-selector.lisp);;
               tests/fixtures/island-lowering-1048-witness.lisp) bs=(--binding-source lib/mechanism-selector.lisp --binding-source lib/island-lowering.lisp);;
+                tests/semantic/d11-clojure-juxt-laws.lisp) bs=(--binding-source lib/d11-clojure-juxt.lisp);;
+                tests/semantic/d11-clojure-dedupe-laws.lisp) bs=(--binding-source lib/d11-srfi1-span-break.lisp --binding-source lib/d11-clojure-partition-by.lisp);;
                 tests/semantic/d9-world-shape-module-events-laws.lisp|tests/semantic/world-exact-arity-witness.lisp) bs=(--binding-source lib/world.lisp);;
               tests/semantic/core1-gc-reachability-laws.lisp) bs=(--binding-source lib/core1.lisp);;
               tests/semantic/meta-fc-predicates-d1-law.lisp) bs=(--binding-source lib/meta-eval-first-class.lisp);;
               esac
-              if ! bash scripts/refresh-verified-t5m-pair.sh "$f" target/debug/sens target/debug/sens-trit "${bs[@]}"; then
+              if ! bash scripts/refresh-verified-t5m-pair.sh "$f" target/debug/sens target/debug/sens-trit "${bs[@]}" "${expect_args[@]}"; then
                 echo "::error::REMINT_CURRENT_MAIN_NATIVE_FAILED $f" >&2
                 regenerated_failed=1
               fi
