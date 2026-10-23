@@ -1,6 +1,8 @@
 ; #801 — свідок планувальника LIFE-1, семантика належить СЕНС.
 ; Виконувані назви взято з lib/life-1-scheduler.lisp.
 ; Позначки повідомлень Прологу й Даталогу залишаються даними протоколу.
+; Значення semantic-id у прикладах — повна укр-проєкція D5:01010 (додати),
+; не десятковий історичний SID8-слот 12.
 
 (визначити свідок-планувальника-життя-1
   (функція ()
@@ -11,7 +13,7 @@
                  (trigger (projection-ready prolog-substitutions-to-datalog-facts))
                  (provenance-ref observation-42)
                  (priority ordinary)
-                 (semantic-id 12))))
+                 (semantic-id додати))))
            (дубль-першого-виклику
              (як-є
                (pending-invocation
@@ -19,7 +21,7 @@
                  (trigger (projection-ready prolog-substitutions-to-datalog-facts))
                  (provenance-ref observation-42)
                  (priority ordinary)
-                 (semantic-id 12))))
+                 (semantic-id додати))))
            (виклик-з-іншим-джерелом
              (як-є
                (pending-invocation
@@ -27,7 +29,7 @@
                  (trigger (projection-ready prolog-substitutions-to-datalog-facts))
                  (provenance-ref observation-99)
                  (priority ordinary)
-                 (semantic-id 12))))
+                 (semantic-id додати))))
            (очікування
              (життя-очікування
                (список перший-виклик дубль-першого-виклику виклик-з-іншим-джерелом)))
