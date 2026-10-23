@@ -2163,14 +2163,14 @@ mod tests {
             .expect("exact D24+ root-reference program");
         let result = program.execute(&mut session)
             .expect("nested root lookup through physical SENS");
-        let Value::BinaryNumber(expected) = session
+        let expected_root = session
             .environment
             .get("число-нуль")
-            .expect("Core4 zero root")
-        else {
+            .expect("Core4 zero root");
+        let Value::BinaryNumber(expected) = &expected_root else {
             panic!("Core4 zero root must retain exact D24+ number identity");
         };
-        let Value::BinaryNumber(actual) = result.value else {
+        let Value::BinaryNumber(actual) = &result.value else {
             panic!("physical definition must return an exact D24+ number");
         };
         assert_eq!(actual.numeric_domain_width(), Some(24));
