@@ -221,8 +221,6 @@ test "benchmark Zig T5 ABI exact-width throughput (diagnostic, no Lisp verdict)"
     const batch_words = 256 * 16;
     const target_sample_ns: u64 = 25_000_000;
     const max_batches: usize = 100_000;
-    var elapsed_samples: [samples_count]u64 = undefined;
-    var word_samples: [samples_count]u64 = undefined;
     var ns_per_word_samples: [samples_count]u64 = undefined;
     var checksum: u64 = 0;
     var output: [2]u8 = undefined;
@@ -263,8 +261,6 @@ test "benchmark Zig T5 ABI exact-width throughput (diagnostic, no Lisp verdict)"
                 return error.SampleBudgetExceeded;
         }
 
-        elapsed_samples[sample] = elapsed_ns;
-        word_samples[sample] = word_count;
         ns_per_word_samples[sample] = elapsed_ns / word_count;
         std.debug.print(
             "ZIG_TRANSPORT_SAMPLE id=t5-abi-d8 sample={d} elapsed_ns={d} words={d} ns_per_word={d} batches={d} target_sample_ns={d}\n",
@@ -283,7 +279,7 @@ test "benchmark Zig T5 ABI exact-width throughput (diagnostic, no Lisp verdict)"
     }
     std.mem.doNotOptimizeAway(checksum);
     std.debug.print(
-        "ZIG_TRANSPORT_BENCH id=t5-abi-d8 samples={d} target_sample_ns={d} min_ns_per_word={d} p50_ns_per_word={d} p90_ns_per_word={d} max_ns_per_word={d} checksum={d} semantics=NOT_TESTED status=MEASURED\\n",
+        "ZIG_TRANSPORT_BENCH id=t5-abi-d8 samples={d} target_sample_ns={d} min_ns_per_word={d} p50_ns_per_word={d} p90_ns_per_word={d} max_ns_per_word={d} checksum={d} semantics=NOT_TESTED status=MEASURED\n",
         .{ samples_count, target_sample_ns, ordered[0], ordered[3], ordered[6], ordered[samples_count - 1], checksum },
     );
 }
