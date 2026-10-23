@@ -26,6 +26,27 @@ jobs:
       - name: Один автоматичний CI — тільки поточний main
         run: python3 scripts/ci_one_focused_workflow.py
 
+      - name: Заборона нових сирих кодів у змінених Lisp-файлах
+        shell: bash
+        env:
+          BEFORE_SHA: ${{ github.event.before }}
+          PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          set -euo pipefail
+          base="$BEFORE_SHA"
+          if [[ "$GITHUB_EVENT_NAME" == pull_request ]]; then
+            base="$PR_BASE_SHA"
+          fi
+          if [[ -z "$base" || "$base" =~ ^0+$ ]]; then
+            # Для ручного запуску або першого push потрібен попередній коміт.
+            git fetch --no-tags --deepen=2 origin main
+            base="$(git rev-parse HEAD^)"
+          fi
+          if ! git cat-file -e "$base^{commit}" 2>/dev/null; then
+            timeout 60s git fetch --no-tags --depth=1 origin "$base"
+          fi
+          python3 scripts/check_no_encoded_source_literals.py --base "$base"
+
       - name: Структура визначень Lisp та SENS
         run: python3 scripts/check-sens-definitions.py
 
