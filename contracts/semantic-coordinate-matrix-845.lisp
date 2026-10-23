@@ -9,14 +9,15 @@
 ; явно, а не заповнювати здогадом.
 
 (semantic-coordinate-matrix-2
-  (identity-source . "lib/surface/semantic-registry.lisp")
+  (identity-source . "knowledge/d1-d11-foundation.json")
+  (ukr-projection-source . "lib/domains/d3.lisp;lib/domains/d5.lisp")
   (math-axis-source . "tests/fixtures/semantic-coordinate-law-axis-v1.lisp")
   (kernel-axis-source . "contracts/sid-kernel-witness-735.lisp")
   (machine-axis-source . "lib/machine/capability-axis.lisp")
   (missing-axis-policy . explicit)
   (scope
-    00001100 ; +
-    00000011 ; eq
-    00000100 ; cons
-    00000101 ; car
-    00000111)) ; cond
+    (Д5 01010 додати)
+    (Д3 101 тотожне?)
+    (Д3 111 сполучити)
+    (Д3 100 перше)
+    (Д3 110 за-умовою)))
