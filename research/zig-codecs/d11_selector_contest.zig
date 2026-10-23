@@ -319,8 +319,12 @@ fn benchmarkCount(count: usize, offset: usize) !void {
     }
 
     var samples: [codecs.len][sample_count]u64 = undefined;
-    var minimum_reps: [codecs.len]usize = .{maximum_repetitions} ** codecs.len;
-    var maximum_reps: [codecs.len]usize = .{0} ** codecs.len;
+    var minimum_reps: [codecs.len]usize = undefined;
+    var maximum_reps: [codecs.len]usize = undefined;
+    for (0..codecs.len) |i| {
+        minimum_reps[i] = maximum_repetitions;
+        maximum_reps[i] = 0;
+    }
 
     // Identical unmeasured warmups; then alternate codec order by sample.
     for (codecs) |codec| {
