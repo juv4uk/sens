@@ -23,7 +23,7 @@ struct WitnessRow {
 struct D3PredicateBoundaryRow {
     case: String,
     expr: String,
-    expected_bit: bool,
+    expected: String,
 }
 
 fn exact_domain_source(value: &Expr) -> String {
@@ -167,17 +167,17 @@ fn d3_predicate_boundary_rows() -> Vec<D3PredicateBoundaryRow> {
             let expr = alist_str(entries, "вираз")
                 .expect("predicate boundary row needs вираз")
                 .to_string();
-            let expected_bit = match alist_str(entries, "очікуваний-біт")
+            let expected = alist_str(entries, "очікуваний-біт")
                 .expect("predicate boundary row needs очікуваний-біт")
-            {
-                "1" => true,
-                "0" => false,
-                other => panic!("predicate boundary bit must be 0/1, got {other:?}"),
-            };
+                .to_string();
+            assert!(
+                matches!(expected.as_str(), "1" | "0"),
+                "predicate boundary fixture must carry an exact D1 display value, got {expected:?}"
+            );
             D3PredicateBoundaryRow {
                 case,
                 expr,
-                expected_bit,
+                expected,
             }
         })
         .collect()
@@ -496,26 +496,39 @@ fn compiler_corpus_native_actuals_are_judged_only_by_lisp_owned_witness_logic() 
 }
 
 #[test]
-fn exact_d3_predicate_boundaries_follow_lisp_owned_bit_cases() {
+fn exact_d3_predicate_boundaries_are_judged_by_lisp_owned_witness_logic() {
     let rows = d3_predicate_boundary_rows();
     assert!(
         rows.len() >= 8,
         "typed D3 predicate boundary corpus must keep both polarities and peer surfaces"
     );
 
+    let mut session = Session::default();
+    load_core_library(&mut session).expect("core library");
+    load_witness_library(&mut session);
+
     for row in rows {
-        let mut session = Session::default();
-        load_core_library(&mut session).expect("core library");
+        // Rust is only the execution observer. The expected D1 result and the
+        // pass/fail comparison are both handed to the Lisp-owned comparator;
+        // Rust does not decode PredicateBit or decide this language law.
         let value = eval_program(&row.expr, &mut session)
             .unwrap_or_else(|error| panic!("{} failed to evaluate: {error}", row.case))
             .value;
-
-        assert_eq!(
-            value.as_predicate_bit(),
-            Some(row.expected_bit),
-            "Lisp-owned case {} must cross the exact D3 -> D1 boundary without Number/list/T/NIL coercion; value={value}",
-            row.case
+        let source = format!(
+            "((expr . \"{}\") (expected . \"{}\"))",
+            escape_lisp_string(&row.expr),
+            row.expected,
         );
+        let witness_row = WitnessRow {
+            source,
+            expr: row.expr.clone(),
+            expected: Some(row.expected),
+            error: None,
+            meta_eval: false,
+            compiler_corpus: false,
+        };
+        let actual = format!("(value \"{}\")", escape_lisp_string(&value.to_string()));
+        assert_lisp_owned_verdict_passes(&mut session, &witness_row, &actual);
     }
 }
 
