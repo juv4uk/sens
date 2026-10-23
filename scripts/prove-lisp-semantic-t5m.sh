@@ -58,12 +58,15 @@ run_law() {
     done
     fail "$id" zig-transport "canonical-roundtrip" "rejected"
   fi
-  if ! timeout 45s "$sens" --t5m-pair "$source" "$physical" >"$dir/paired.out" 2>"$dir/paired.err" ||
-     ! timeout 45s "$sens" "$physical" >"$dir/physical.out" 2>"$dir/physical.err"; then
-    for error_log in "$dir/paired.err" "$dir/physical.err"; do
-      if [[ -f "$error_log" ]]; then cat "$error_log" >&2; fi
-    done
-    fail "$id" sens-physical "paired-and-standalone-execution" "rejected"
+  # Розрізняємо помилку парного виконання та standalone: це різні шари.
+  # Нативний SENS надає діагностику; shell не підміняє жоден Lisp-вердикт.
+  if ! timeout 45s "$sens" --t5m-pair "$source" "$physical" >"$dir/paired.out" 2>"$dir/paired.err"; then
+    cat "$dir/paired.err" >&2
+    fail "$id" sens-paired "source-matched-physical-execution" "rejected"
+  fi
+  if ! timeout 45s "$sens" "$physical" >"$dir/physical.out" 2>"$dir/physical.err"; then
+    cat "$dir/physical.err" >&2
+    fail "$id" sens-standalone "standalone-physical-execution" "rejected"
   fi
   cmp -s "$dir/direct.out" "$dir/paired.out" ||
     report_output_divergence "$id" direct "$dir/direct.out" paired "$dir/paired.out"
@@ -105,12 +108,15 @@ run_bound_law() {
     done
     fail "$id" zig-transport "canonical-roundtrip" "rejected"
   fi
-  if ! timeout 45s "$sens" --t5m-pair "$combined" "$physical" >"$dir/paired.out" 2>"$dir/paired.err" ||
-     ! timeout 45s "$sens" "$physical" >"$dir/physical.out" 2>"$dir/physical.err"; then
-    for error_log in "$dir/paired.err" "$dir/physical.err"; do
-      if [[ -f "$error_log" ]]; then cat "$error_log" >&2; fi
-    done
-    fail "$id" sens-physical "paired-and-standalone-execution" "rejected"
+  # Розрізняємо помилку парного виконання та standalone: це різні шари.
+  # Нативний SENS надає діагностику; shell не підміняє жоден Lisp-вердикт.
+  if ! timeout 45s "$sens" --t5m-pair "$combined" "$physical" >"$dir/paired.out" 2>"$dir/paired.err"; then
+    cat "$dir/paired.err" >&2
+    fail "$id" sens-paired "source-matched-physical-execution" "rejected"
+  fi
+  if ! timeout 45s "$sens" "$physical" >"$dir/physical.out" 2>"$dir/physical.err"; then
+    cat "$dir/physical.err" >&2
+    fail "$id" sens-standalone "standalone-physical-execution" "rejected"
   fi
   cmp -s "$dir/direct.out" "$dir/paired.out" ||
     report_output_divergence "$id" direct "$dir/direct.out" paired "$dir/paired.out"
