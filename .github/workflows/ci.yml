@@ -19,6 +19,11 @@ on:
 permissions:
   contents: read
 
+# Нові push тієї самої гілки скасовують застарілий CI і заощаджують ресурси.
+concurrency:
+  group: sens-ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name != 'workflow_dispatch' }}
+
 jobs:
   sens:
     name: Українська проєкція, 3 бенчмарки та SENS/Zig/T5M
@@ -245,7 +250,7 @@ jobs:
           zig test -lc zig_transport_root.zig --test-filter 'Zig REPL transport refuses one-byte-short destination without a partial write'
 
       - name: Три бенчмарки — lists, arithmetic, parser у справжньому SENS
-        if: ${{ always() && steps.changed-t5m-lisp.outputs.has_lisp == 'true' }}
+        if: ${{ always() && steps.native-build.outcome == 'success' && steps.changed-t5m-lisp.outputs.has_lisp == 'true' }}
         shell: bash
         timeout-minutes: 15
         run: |
@@ -272,13 +277,25 @@ jobs:
             echo 'Це фактично перевірені значення, не заміри часу. Для цих трьох джерел T5M-пари окремо не заявлені.'
           } >> "$GITHUB_STEP_SUMMARY"
 
+      # Одного білда з AST вистачає для коридору, фізичних Lisp-законів та звіту.
+      - name: Зібрати нативний SENS і Zig/T5M лише один раз
+        id: native-build
+        if: ${{ always() && (steps.changed-t5m-lisp.outputs.has_lisp == 'true' || steps.changed-t5m-lisp.outputs.has_files == 'true') }}
+        shell: bash
+        timeout-minutes: 12
+        run: |
+          set -euo pipefail
+          export CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0
+          test -x "$PWD/target/debug/sens"
+          test -x "$PWD/target/debug/sens-trit"
+
       # Маршрут 22.10: кожен push із .lisp МУСИТЬ дійти до реального
       # SENS → Zig/T5M mint/verify-view → парного й фізичного SENS-виконання.
       # Для таблиць/залежних фікстур маніфест містить виконувані Lisp-закони;
       # порожній маніфест після push .lisp — помилка, не тихий SKIP.
       - name: PUSH Lisp → кодек Zig/T5M → виконання SENS
         id: t5m_changed_execute
-        if: ${{ always() && (steps.changed-t5m-lisp.outputs.has_files == 'true' || (github.event_name == 'push' && steps.changed-t5m-lisp.outputs.has_lisp == 'true')) }}
+        if: ${{ always() && steps.native-build.outcome == 'success' && (steps.changed-t5m-lisp.outputs.has_files == 'true' || (github.event_name == 'push' && steps.changed-t5m-lisp.outputs.has_lisp == 'true')) }}
         shell: bash
         timeout-minutes: 15
         run: |
@@ -302,13 +319,12 @@ jobs:
       # Незалежний від загального corpus: сторонній RED не приховує доказ
       # мовних законів. Кодек і Zig перевіряють лише носій.
       - name: Lisp → Zig/T5M → SENS — нативні позитивні й негативні мовні закони
-        if: ${{ always() && steps.changed-t5m-lisp.outputs.has_files == 'true' }}
+        if: ${{ always() && steps.native-build.outcome == 'success' && steps.changed-t5m-lisp.outputs.has_files == 'true' }}
         shell: bash
         timeout-minutes: 8
         run: |
           set -euo pipefail
           export CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0
-          cargo build --locked -p sens-cli --bin sens --bin sens-trit
           bash scripts/prove-lisp-semantic-t5m.sh \
             "$PWD/target/debug/sens" "$PWD/target/debug/sens-trit" \
             "$RUNNER_TEMP/changed-t5m-pairs/lisp-laws"
@@ -324,7 +340,6 @@ jobs:
           binary="$PWD/target/debug/sens"
           # Коміт лише з ci.yml теж запускає цей закон: збираємо CLI явно.
           export CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0
-          cargo build --locked -p sens-cli --bin sens
           test -x "$binary"
           check_lisp_law() {
             local id="$1" source="$2" expected="$3" actual
@@ -368,7 +383,7 @@ jobs:
 
       # Негативний свідок не є позитивним входом загального T5M-коридору.
       - name: Lisp D3 — CAR/CDR/CONS закон і негативний мутант
-        if: steps.changed-t5m-lisp.outputs.has_lisp == 'true'
+        if: ${{ always() && steps.native-build.outcome == 'success' && steps.changed-t5m-lisp.outputs.has_lisp == 'true' }}
         shell: bash
         timeout-minutes: 3
         run: |
