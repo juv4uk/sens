@@ -13,7 +13,7 @@
 ; Це дані, а не логічна хиба предиката.
 
 (control-dispatch-contract-2
-  ((identity . (Д3 110))
+  ((identity . (D3 "110"))
    (укр . за-умовою)
    (domain-owner . control)
    (canonical-clause-shape . (test expression))
