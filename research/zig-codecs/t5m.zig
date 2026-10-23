@@ -330,3 +330,27 @@ test "T5M encoder rejects nonbinary payload and incorrect declared width" {
     const wrong_width = [_]Word{.{ .width = 3, .bits = "10" }};
     try std.testing.expectError(Error.UnsupportedDomainWidth, encode(std.testing.allocator, &wrong_width));
 }
+
+test "T5M word separator crosses a five-trit boundary exactly" {
+    // Тільки фізична механіка: жодного виконавця або значення SENS.
+    // 0 | 01 | 001 -> трити 02012 00122 -> байти 59, 17.
+    const source = [_]Word{
+        .{ .width = 1, .bits = "0" },
+        .{ .width = 2, .bits = "01" },
+        .{ .width = 3, .bits = "001" },
+    };
+    const physical = try encode(std.testing.allocator, &source);
+    defer std.testing.allocator.free(physical);
+    try std.testing.expectEqualSlices(u8, &.{ 59, 17 }, physical);
+
+    var restored = try decode(std.testing.allocator, physical);
+    defer restored.deinit(std.testing.allocator);
+    try std.testing.expectEqual(source.len, restored.words.len);
+    for (source, restored.words) |expected, actual| {
+        try std.testing.expectEqual(expected.width, actual.width);
+        try std.testing.expectEqualStrings(expected.bits, actual.bits);
+    }
+
+    // 02212 містить два сусідні роздільники, тобто порожнє слово.
+    try std.testing.expectError(Error.EmptyDomainWord, decode(std.testing.allocator, &.{77}));
+}
