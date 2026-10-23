@@ -40,13 +40,14 @@ fn main() {
     println!("cargo:rerun-if-changed=../../lib/forward.lisp");
     println!("cargo:rerun-if-changed=../../lib/knowledge.lisp");
     println!("cargo:rerun-if-changed=../../lib/persistent-map.lisp");
+    println!("cargo:rerun-if-changed=../../lib/persistent-map.sens");
     println!("cargo:rerun-if-changed=../../lib/world.lisp");
     println!("cargo:rerun-if-changed=../../lib/content-store.lisp");
     println!("cargo:rerun-if-changed=../../lib/lisp-fs.lisp");
-    println!("cargo:rerun-if-changed=../../lib/persistent-vector.lisp");
+    println!("cargo:rerun-if-changed=../../lib/persistent-vector.sens");
     println!("cargo:rerun-if-changed=../../lib/time.lisp");
     println!("cargo:rerun-if-changed=../../tests/semantic/d9-four-uk-projections-laws.lisp");
-    println!("cargo:rerun-if-changed=../../lib/epistemic.lisp");
+    println!("cargo:rerun-if-changed=../../lib/epistemic.sens");
     println!("cargo:rerun-if-changed=../../lib/meta-eval.sens");
     println!("cargo:rerun-if-changed=../../lib/repl-core.sens");
     println!("cargo:rerun-if-changed=../../language-contract.lisp");

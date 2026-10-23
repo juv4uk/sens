@@ -15,37 +15,6 @@ use std::env;
 use std::path::PathBuf;
 use std::process;
 
-// REPL-local FFI: other CLI binaries acquire no extra dead_code warnings.
-#[cfg(feature = "zig-transport")]
-unsafe extern "C" {
-    fn sens_zig_codec_abi_version() -> u32;
-    fn sens_zig_repl_persistent_vector_bytes_copy(dst: *mut u8, cap: usize) -> isize;
-    fn sens_zig_repl_epistemic_bytes_copy(dst: *mut u8, cap: usize) -> isize;
-}
-#[cfg(feature = "zig-transport")]
-fn repl_zig_source(
-    copy: unsafe extern "C" fn(*mut u8, usize) -> isize,
-    label: &str,
-) -> Result<String, String> {
-    if unsafe { sens_zig_codec_abi_version() } != 2 {
-        return Err(format!("{label}: Zig ABI version mismatch"));
-    }
-    let n = unsafe { copy(std::ptr::NonNull::<u8>::dangling().as_ptr(), 0) };
-    if n <= 0 {
-        return Err(format!("{label}: invalid Zig byte length {n}"));
-    }
-    let len = usize::try_from(n).map_err(|_| format!("{label}: Zig length overflow"))?;
-    if len > 8 * 1024 * 1024 {
-        return Err(format!("{label}: host byte bound exceeded"));
-    }
-    let mut bytes = vec![0u8; len];
-    let got = unsafe { copy(bytes.as_mut_ptr(), len) };
-    if got != n {
-        return Err(format!("{label}: Zig exact copy rejected {got}"));
-    }
-    String::from_utf8(bytes).map_err(|err| format!("{label}: UTF-8 source error {err}"))
-}
-
 #[cfg(feature = "zig-transport")]
 fn execute_zig_t5m_asset(
     physical: &[u8],
@@ -81,16 +50,24 @@ fn surface_uses_sens_repl(surface: ReplSurface, sens_loop: bool) -> bool {
 fn load_sens_repl_bootstraps(environment: &Environment) -> Result<(), String> {
     #[cfg(feature = "zig-transport")]
     {
-        // Exact D10 mechanism definitions are root-only. Install them before
-        // constructing the projection child frame; the T5M reader must not
-        // weaken that admission rule to make a nested load succeed.
+        // D4 define installs a mechanism in the exact identity of its target
+        // resident. Core4 keeps the applicable D9/D10 installation slots
+        // root-only, so load those T5M programs before making a projection
+        // child; do not confuse the D4 operator with its target's domain.
         let mut root = Session {
             environment: environment.clone(),
         };
+        sens::load_time_library(&mut root).map_err(|error| {
+            format!("REPL T5M time bootstrap: {}", error.render("<T5M time bootstrap>"))
+        })?;
         let meta_eval = crate::zig_transport::meta_eval_t5m_bytes()?;
         execute_zig_t5m_asset(&meta_eval, "MetaEval", &mut root)?;
         let repl_core = crate::zig_transport::repl_core_t5m_bytes()?;
         execute_zig_t5m_asset(&repl_core, "repl-core", &mut root)?;
+        let persistent_map = crate::zig_transport::persistent_map_t5m_bytes()?;
+        execute_zig_t5m_asset(&persistent_map, "persistent-map", &mut root)?;
+        let epistemic = crate::zig_transport::repl_epistemic_t5m_bytes()?;
+        execute_zig_t5m_asset(&epistemic, "epistemic", &mut root)?;
         Ok(())
     }
     #[cfg(not(feature = "zig-transport"))]
@@ -100,27 +77,20 @@ fn load_sens_repl_bootstraps(environment: &Environment) -> Result<(), String> {
     }
 }
 
-// No Rust include_str! of SENS project source. Zig owns byte transport.
-fn surface_prerequisite_sources() -> Result<Vec<(&'static str, String)>, String> {
+// REPL prerequisites cross into Rust only as physical T5M bytes.
+fn surface_prerequisite_t5m_assets() -> Result<Vec<(&'static str, Vec<u8>)>, String> {
     #[cfg(feature = "zig-transport")]
     {
         Ok(vec![
             (
-                "persistent-vector.lisp",
-                repl_zig_source(
-                    sens_zig_repl_persistent_vector_bytes_copy,
-                    "ZIG_REPL_PERSISTENT_VECTOR",
-                )?,
-            ),
-            (
-                "epistemic.lisp",
-                repl_zig_source(sens_zig_repl_epistemic_bytes_copy, "ZIG_REPL_EPISTEMIC")?,
+                "persistent-vector",
+                crate::zig_transport::repl_persistent_vector_t5m_bytes()?,
             ),
         ])
     }
     #[cfg(not(feature = "zig-transport"))]
     {
-        Err("RUST_ZIG_ONLY: REPL prerequisites require Zig transport".into())
+        Err("RUST_ZIG_ONLY: REPL prerequisite T5M assets require Zig transport".into())
     }
 }
 
@@ -1610,19 +1580,6 @@ fn init_sens_loop(session: &mut Session) -> Result<(), String> {
     })
 }
 
-// The persistent map is a separate host-neutral root Zig byte asset.
-fn persistent_map_surface_source() -> Result<String, String> {
-    #[cfg(feature = "zig-transport")]
-    {
-        let bytes = super::zig_transport::persistent_map_source_bytes()?;
-        String::from_utf8(bytes).map_err(|error| format!("ZIG_PERSISTENT_MAP_REPL UTF-8: {error}"))
-    }
-    #[cfg(not(feature = "zig-transport"))]
-    {
-        Err("RUST_ZIG_ONLY: persistent-map.lisp requires Zig; no Rust source fallback".into())
-    }
-}
-
 // lib/knowledge.lisp is a host-neutral Zig-owned byte asset, never a Rust embed.
 fn knowledge_surface_source() -> Result<String, String> {
     #[cfg(feature = "zig-transport")]
@@ -1810,43 +1767,23 @@ fn build_surface_layer(
         let reason_source = reason_surface_source()?;
         let forward_source = forward_surface_source()?;
         let knowledge_source = knowledge_surface_source()?;
-        let persistent_map_source = persistent_map_surface_source()?;
-        let prerequisite_sources = surface_prerequisite_sources()?;
-        let prerequisites = std::iter::once(("unify.lisp", unify_source.as_str()))
-            .chain(std::iter::once(("reason.lisp", reason_source.as_str())))
-            .chain(std::iter::once(("forward.lisp", forward_source.as_str())))
-            .chain(std::iter::once((
-                "knowledge.lisp",
-                knowledge_source.as_str(),
-            )))
-            .chain(std::iter::once((
-                "persistent-map.lisp",
-                persistent_map_source.as_str(),
-            )))
-            .chain(
-                prerequisite_sources
-                    .iter()
-                    .map(|(name, source)| (*name, source.as_str())),
-            );
+        let prerequisite_assets = surface_prerequisite_t5m_assets()?;
+        let prerequisites = [
+            ("unify.lisp", unify_source.as_str()),
+            ("reason.lisp", reason_source.as_str()),
+            ("forward.lisp", forward_source.as_str()),
+            ("knowledge.lisp", knowledge_source.as_str()),
+        ];
         for (name, source) in prerequisites {
-            (if matches!(
-                name,
-                "unify.lisp"
-                    | "reason.lisp"
-                    | "forward.lisp"
-                    | "knowledge.lisp"
-                    | "persistent-map.lisp"
-            ) {
-                sens::eval_pinned_reasoning_source(&format!("lib/{name}"), source, &mut session)
-            } else if matches!(name, "persistent-vector.lisp" | "epistemic.lisp") {
-                sens::parse_mixed_exact_domain(source)
-                    .and_then(|forms| sens::eval_parsed_expressions(&forms, &mut session))
-            } else {
-                eval_program(source, &mut session)
-            })
-            .map_err(|error| format!("не вдалося завантажити {name}: {}", error.render(source)))?;
+            sens::eval_pinned_reasoning_source(&format!("lib/{name}"), source, &mut session)
+                .map_err(|error| {
+                    format!("не вдалося завантажити {name}: {}", error.render(source))
+                })?;
         }
-        // Keep the same SENS evaluation order; only source transport changes.
+        for (name, physical) in prerequisite_assets {
+            execute_zig_t5m_asset(&physical, name, &mut session)?;
+        }
+        // Після залежних Lisp-модулів виконати фізичні T5M-пари без текстового імпорту.
         let selected_source = match surface {
             ReplSurface::Ukrainian => Some(("uk.lisp", uk_surface_source()?)),
             ReplSurface::UkrainianFull => Some(("ukr.lisp", ukr_surface_source()?)),
@@ -2283,6 +2220,34 @@ mod tests {
         let repl_forms = execute_zig_t5m_asset(&repl_core, "repl-core", &mut session)
             .expect("REPL core executes from exact T5M domain words");
         assert!(repl_forms > 0);
+    }
+
+    #[cfg(feature = "zig-transport")]
+    #[test]
+    fn repl_prerequisite_pairs_execute_as_t5m_domain_words() {
+        let mut session = Session::default();
+        sens::load_core_library(&mut session).expect("Core4 bootstrap");
+        sens::load_time_library(&mut session).expect("time bootstrap");
+
+        let physical = include_bytes!("../../../lib/persistent-vector.sens");
+        let forms = execute_zig_t5m_asset(physical, "persistent-vector", &mut session)
+            .expect("persistent-vector executes from exact T5M domain words");
+        assert!(forms > 0, "persistent-vector must contain executable domain forms");
+
+        for (name, physical) in [
+            (
+                "persistent-map",
+                include_bytes!("../../../lib/persistent-map.sens").as_slice(),
+            ),
+            (
+                "epistemic",
+                include_bytes!("../../../lib/epistemic.sens").as_slice(),
+            ),
+        ] {
+            let forms = execute_zig_t5m_asset(physical, name, &mut session)
+                .unwrap_or_else(|error| panic!("{name} root T5M bootstrap: {error}"));
+            assert!(forms > 0, "{name} must contain executable domain forms");
+        }
     }
 
     #[cfg(feature = "zig-transport")]
@@ -3705,18 +3670,17 @@ mod tests {
 
     #[cfg(feature = "zig-transport")]
     #[test]
-    fn zig_linter_carrier_persistent_map_repl_exact_bytes() {
-        let source = persistent_map_surface_source().expect("persistent map via Zig root");
-        let bytes =
-            crate::zig_transport::persistent_map_source_bytes().expect("second Zig byte copy");
-        assert!(!source.is_empty());
+    fn zig_t5m_asset_persistent_map_repl_exact_bytes() {
+        let bytes = crate::zig_transport::persistent_map_t5m_bytes()
+            .expect("persistent map T5M via Zig root");
+        let checked_in = include_bytes!("../../../lib/persistent-map.sens");
         assert_eq!(
-            source.as_bytes(),
             bytes.as_slice(),
-            "ZIG_PERSISTENT_MAP_REPL byte parity"
+            checked_in,
+            "ZIG_PERSISTENT_MAP_REPL T5M byte parity"
         );
         println!(
-            "ZIG_PERSISTENT_MAP_REPL_PASS test_id=zig-repl-persistent-map layer=transport bytes={} semantic_admission=NOT_TESTED",
+            "ZIG_PERSISTENT_MAP_REPL_PASS test_id=zig-repl-persistent-map-t5m layer=transport bytes={} semantic_admission=NOT_TESTED",
             bytes.len()
         );
     }
@@ -3724,10 +3688,10 @@ mod tests {
     #[cfg(not(feature = "zig-transport"))]
     #[test]
     fn zig_linter_carrier_persistent_map_no_rust_fallback() {
-        let err = persistent_map_surface_source().expect_err("must not bypass Zig");
+        let err = surface_prerequisite_t5m_assets().expect_err("must not bypass Zig");
         assert_eq!(
             err,
-            "RUST_ZIG_ONLY: persistent-map.lisp requires Zig; no Rust source fallback"
+            "RUST_ZIG_ONLY: REPL prerequisite T5M assets require Zig transport"
         );
     }
 

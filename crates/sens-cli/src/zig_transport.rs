@@ -268,6 +268,30 @@ pub fn meta_eval_t5m_bytes() -> Result<Vec<u8>, String> {
     )
 }
 
+/// Physical T5M bytes for the REPL persistent-vector library.
+pub fn repl_persistent_vector_t5m_bytes() -> Result<Vec<u8>, String> {
+    opaque_zig_asset(
+        asset_ffi::sens_zig_repl_persistent_vector_t5m_bytes_copy,
+        "ZIG_REPL_PERSISTENT_VECTOR_T5M",
+    )
+}
+
+/// Physical T5M bytes for the REPL epistemic library.
+pub fn repl_epistemic_t5m_bytes() -> Result<Vec<u8>, String> {
+    opaque_zig_asset(
+        asset_ffi::sens_zig_repl_epistemic_t5m_bytes_copy,
+        "ZIG_REPL_EPISTEMIC_T5M",
+    )
+}
+
+/// Physical T5M bytes for the REPL persistent-map library.
+pub fn persistent_map_t5m_bytes() -> Result<Vec<u8>, String> {
+    opaque_zig_asset(
+        asset_ffi::sens_zig_repl_persistent_map_t5m_bytes_copy,
+        "ZIG_REPL_PERSISTENT_MAP_T5M",
+    )
+}
+
 /// Opaque D9 witness source bytes carried through the Zig root ABI.
 pub fn d9_witness_source_bytes() -> Result<Vec<u8>, String> {
     opaque_zig_asset(asset_ffi::sens_zig_d9_witness_bytes_copy, "ZIG_D9_WITNESS")

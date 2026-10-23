@@ -11,7 +11,9 @@ python3 "$repo_root/scripts/guard_ukr_lisp_keyboard.py" --staged
 # Rust/Zig та інші зміни без staged .lisp не є його вхідними даними.
 mapfile -t staged_lisp < <(git diff --cached --name-only --diff-filter=ACMR -- '*.lisp')
 if ((${#staged_lisp[@]} > 0)); then
-    python3 "$repo_root/scripts/guard-domain-function-reuse.py" --staged --advise --register
+    # Перевіряти лише нові DEFINE відносно HEAD: наявні визначення в
+    # зміненому файлі не є новою роботою й не мають повторно блокувати коміт.
+    python3 "$repo_root/scripts/guard-domain-function-reuse.py" --staged --base HEAD --advise --register
 else
     printf 'GUARD-DOMAIN-REUSE: SKIP (немає staged .lisp файлів)\n'
 fi
