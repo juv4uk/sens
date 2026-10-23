@@ -97,15 +97,16 @@ class УкраїнськийДобірМеханізмів(unittest.TestCase):
         self.assertIn("(механізм-зіставити-маршрут", self.код)
         self.assertIn("(механізм-оформити-вибір", self.код)
 
-    def test_протокольні_дані_не_перекладені(self) -> None:
+    def test_чинний_протокол_не_містить_sid8_статусу(self) -> None:
         for фрагмент in (
             "(як-є rows)",
             "(як-є mechanism-selected)",
             "(як-є mechanism-unavailable)",
             "(як-є mechanism-selection-failure)",
-            "(як-є sid-not-in-function-table)",
+            "(як-є доменного-коду-немає-в-таблиці)",
         ):
             self.assertIn(фрагмент, self.джерело)
+        self.assertNotIn("(як-є sid-not-in-function-table)", self.код)
 
     def test_внутрішній_предикат_повертає_точний_d1(self) -> None:
         істина = "(атом? (як-є ()))"
