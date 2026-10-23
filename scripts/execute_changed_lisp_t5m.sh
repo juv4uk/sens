@@ -237,10 +237,17 @@ run_native_t5m_program() {
         return
       fi
     fi
-    # Мовні самовердикти належать Lisp/SENS, а не Rust, Zig чи Python.
-    # Shell перевіряє лише точний кінцевий D1:1 від фізичного виконавця.
-    if [[ "$file" == tests/semantic/language-law-*.lisp ||
-          "$file" == "tests/semantic/lisp-d4-lexical-closure-laws.lisp" ]]; then
+    # Епістемічний закон повертає named Lisp verdict, не D1-біт.
+    if [[ "$file" == "tests/semantic/language-law-epistemic-records.lisp" ]]; then
+      printf '%s\n' "(epistemic-authority-witness (status pass))" > "$dir/epistemic-law.expected"
+      if ! cmp -s "$dir/native-paired.stdout" "$dir/epistemic-law.expected"; then
+        echo "::error file=$file,title=SENS epistemic law::WRONG_VERDICT expected=epistemic-authority-witness/pass actual=$(cat "$dir/native-paired.stdout")" >&2
+        mark_file_failed
+        return
+      fi
+      echo "::notice file=$file,title=SENS epistemic law::PASS native=SENS verdict=pass carrier=Zig/T5M"
+    elif [[ "$file" == tests/semantic/language-law-*.lisp ||
+            "$file" == "tests/semantic/lisp-d4-lexical-closure-laws.lisp" ]]; then
       printf '1\n' > "$dir/language-d1.expected"
       if ! cmp -s "$dir/native-paired.stdout" "$dir/language-d1.expected"; then
         echo "::error file=$file,title=SENS language law::WRONG_D1 expected=1 actual=$(cat "$dir/native-paired.stdout")" >&2
@@ -249,9 +256,16 @@ run_native_t5m_program() {
       fi
       echo "::notice file=$file,title=SENS language law::PASS native=SENS result=D1:1 carrier=Zig/T5M"
     fi
-    # Негативна мутація є коректною SENS-програмою з точним результатом Д1:ні.
-    # Вона теж проходить Zig/T5M, paired і standalone; логіку тут не моделюємо.
-    if [[ "$file" == tests/semantic/language-mutant-*.lisp ]]; then
+    # Епістемічний мутант отримує named fail від самого Lisp-перевіряльника.
+    if [[ "$file" == "tests/semantic/language-mutant-epistemic-records.lisp" ]]; then
+      printf '%s\n' "(epistemic-authority-witness (status fail) (case source-ref-valid-mutant) (actual 1) (expected 0))" > "$dir/epistemic-mutant.expected"
+      if ! cmp -s "$dir/native-paired.stdout" "$dir/epistemic-mutant.expected"; then
+        echo "::error file=$file,title=SENS epistemic mutant::WRONG_VERDICT expected=epistemic-authority-witness/fail actual=$(cat "$dir/native-paired.stdout")" >&2
+        mark_file_failed
+        return
+      fi
+      echo "::notice file=$file,title=SENS epistemic mutant::PASS native=SENS verdict=fail-detected carrier=Zig/T5M"
+    elif [[ "$file" == tests/semantic/language-mutant-*.lisp ]]; then
       printf '0\n' > "$dir/language-d1-mutant.expected"
       if ! cmp -s "$dir/native-paired.stdout" "$dir/language-d1-mutant.expected"; then
         echo "::error file=$file,title=SENS language mutant::WRONG_D1 expected=0 actual=$(cat "$dir/native-paired.stdout")" >&2
@@ -356,6 +370,27 @@ run_native_t5m_program() {
     # Для двох D3-законів виконуємо окремий САМОДОСТАТНІЙ фізичний
     # носій із тим самим чинним джерелом визначень. Жодного mock/host oracle.
     local standalone_physical="$physical"
+    if [[ "$file" == "tests/semantic/language-law-epistemic-records.lisp" ||
+          "$file" == "tests/semantic/language-mutant-epistemic-records.lisp" ]]; then
+      local epistemic_complete_source="$dir/epistemic-dependency-complete.lisp"
+      standalone_physical="$dir/epistemic-dependency-complete.sens"
+      cat -- lib/unify.lisp lib/reason.lisp lib/forward.lisp lib/knowledge.lisp \
+        lib/persistent-map.lisp lib/persistent-vector.lisp lib/time.lisp lib/epistemic.lisp \
+        tests/fixtures/epistemic-authority-witness.lisp "$file" > "$epistemic_complete_source"
+      if ! timeout "$native_timeout" "$binary" --t5m-mint "$epistemic_complete_source" "$standalone_physical" \
+          >"$dir/epistemic-mint.stdout" 2>"$dir/epistemic-mint.stderr" ||
+         ! timeout "$native_timeout" "$native_open" open "$standalone_physical" \
+          >"$dir/epistemic-complete.view" 2>"$dir/epistemic-open.stderr" ||
+         ! timeout "$native_timeout" "$native_open" verify-view "$standalone_physical" \
+          >"$dir/epistemic-verify.stdout" 2>"$dir/epistemic-verify.stderr"; then
+        for diagnostic in "$dir/epistemic-mint.stderr" "$dir/epistemic-open.stderr" "$dir/epistemic-verify.stderr"; do
+          [[ ! -f "$diagnostic" ]] || sed 's/^/SENS epistemic dependency bundle: /' "$diagnostic" >&2
+        done
+        echo "::error::T5M_EPISTEMIC_DEPENDENCY_BUNDLE_FAILED source=$file" >&2
+        mark_file_failed
+        return
+      fi
+    fi
     if [[ "$file" == "tests/semantic/result-status-proper-list-d3-law.lisp" ||
           "$file" == "tests/semantic/result-status-proper-list-d3-mutant.lisp" ]]; then
       local complete_source="$dir/dependency-complete.lisp"
@@ -523,6 +558,18 @@ while IFS= read -r file || [[ -n "$file" ]]; do
     # Мовний закон міток вимагає справжніх визначень Result Status.
     # SENS визначає D1, Zig пакує фізичні слова, Rust тільки запускає.
     binding_sources=(--binding-source lib/result-status.lisp)
+  elif [[ "$file" == "tests/semantic/language-law-epistemic-records.lisp" ||
+          "$file" == "tests/semantic/language-mutant-epistemic-records.lisp" ]]; then
+    # Lisp owns the epistemic contracts; preload their exact DEFINE dependencies in order.
+    binding_sources=(--binding-source lib/unify.lisp
+                     --binding-source lib/reason.lisp
+                     --binding-source lib/forward.lisp
+                     --binding-source lib/knowledge.lisp
+                     --binding-source lib/persistent-map.lisp
+                     --binding-source lib/persistent-vector.lisp
+                     --binding-source lib/time.lisp
+                     --binding-source lib/epistemic.lisp
+                     --binding-source tests/fixtures/epistemic-authority-witness.lisp)
   elif [[ "$file" == "tests/semantic/d11-srfi1-find-tail-laws.lisp" ]]; then
     # Лише визначення із справжньої бібліотеки SENS, без host-оракула.
     binding_sources=(--binding-source lib/d11-srfi1-find-tail.lisp)
