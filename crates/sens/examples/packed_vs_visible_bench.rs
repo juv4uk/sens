@@ -192,7 +192,7 @@ fn main() {
     ];
     for (name, source, count) in cases {
         if let Err(error) = benchmark(name, source, count, samples) {
-            eprintln!("BLOCKED: {error}");
+            eprintln!("RUST_PACKED_VISIBLE_INVALID_INPUT_OR_PARITY: {error}");
             std::process::exit(2);
         }
     }
