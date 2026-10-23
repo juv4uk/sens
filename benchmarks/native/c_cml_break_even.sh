@@ -1,22 +1,23 @@
 #!/usr/bin/env bash
-# C_cml — третє число тези про найменшу плату: ціна РАЗОВОЇ спеціалізації.
-#
-# Два числа вже виміряні: C_запуск ≈ 2.2 мс, C_виконання ≈ 0.1 мс.
-# Третє (це) показує, за якого N разова плата окупається:
-#     N* = C_cml / C_виконання
-# Тобто: для програм, коротших за N* виконань, разова плата — збиток;
-# довших — виграш. Це і є «мінімум» у вимірюваному вигляді.
+# Вартість одного Lisp → FASL експорту в окремому процесі.
+# --program-fasl лише читає джерело, викликає parse та fasl_encode і записує файл.
+# Це НЕ компіляція/спеціалізація CML і не свідчення прискорення виконання.
+# Реальна точка окупності потребує C_спеціалізація та різниці часу виконання
+# до й після спеціалізації: N* = C_спеціалізація / (C_до - C_після).
 #
 # Запуск (потрібен зібраний sens-cli з біном cml-export):
-#     bash benchmarks/native/c_cml_break_even.sh <source.lisp> [repeats] [c_exec_us]
+#     bash benchmarks/native/c_cml_break_even.sh <source.lisp> [repeats]
 #
-# Якщо sens/cml-export не зібрано — скрипт чесно каже, що вимір не відбувся
-# (не вигадує число).
+# Третій аргумент старого інтерфейсу приймаємо, але не використовуємо.
+# Якщо cml-export не зібрано, число не вигадується.
 set -euo pipefail
 
 src="${1:?вкажи source.lisp}"
 repeats="${2:-11}"
-c_exec_us="${3:-100}"   # C_виконання, мкс (типово 0.1 мс із наявних бенчмарків)
+legacy_exec_us="${3:-}"
+if [ -n "$legacy_exec_us" ]; then
+  echo "УВАГА: старий аргумент c_exec_us ігнорується: FASL-експорт не вимірює спеціалізацію" >&2
+fi
 
 repo_root="$(git rev-parse --show-toplevel)"
 bin="$repo_root/target/release/cml-export"
@@ -30,13 +31,8 @@ out="$(mktemp -d)/out.fasl"
 t0=$(date +%s%N)
 for _ in $(seq 1 "$repeats"); do "$bin" --program-fasl "$src" "$out"; done
 t1=$(date +%s%N)
-c_cml_us=$(( (t1 - t0) / repeats / 1000 ))
+c_fasl_export_us=$(( (t1 - t0) / repeats / 1000 ))
 
-echo "C_cml (разова спеціалізація): ${c_cml_us} мкс  (з ${repeats} прогонів)"
-echo "C_виконання (питома):         ${c_exec_us} мкс"
-if [ "$c_exec_us" -le 0 ]; then
-  echo "N*: невизначено (C_виконання ≤ 0)"
-else
-  echo "N* (точка окупності):          $(( c_cml_us / c_exec_us )) виконань"
-  echo "  коротші за N* — разова плата збиткова; довші — вигідна."
-fi
+echo "C_fasl_export_process_mean: ${c_fasl_export_us} мкс (один процес на експорт, середнє з ${repeats} прогонів)"
+echo "C_cml_specialization: НЕ ВИМІРЯНО (експорт FASL не є спеціалізацією)"
+echo "N* (окупність спеціалізації): НЕ ВИМІРЯНО (немає C_спеціалізація та C_до - C_після)"
