@@ -135,9 +135,9 @@ jobs:
             if ! git cat-file -e "$base^{commit}" 2>/dev/null; then
               timeout 60s git fetch --no-tags --depth=1 origin "$base"
             fi
-            git -c core.quotePath=false diff --name-only --diff-filter=ACMRT "$base" "$GITHUB_SHA" -- '*.lisp' '*.sens' '*.rs' '*.zig' '.github/workflows/ci.yml' 'scripts/prove-lisp-semantic-t5m.sh' > "$raw"
+            git -c core.quotePath=false diff --name-only --diff-filter=ACMRT "$base" "$GITHUB_SHA" -- '*.lisp' '*.sens' '*.rs' '*.zig' '.github/workflows/ci.yml' 'scripts/prove-lisp-semantic-t5m.sh' 'scripts/prove-lisp-language-laws.sh' > "$raw"
           else
-            git -c core.quotePath=false diff-tree --no-commit-id --root --name-only --diff-filter=ACMRT -r "$GITHUB_SHA" -- '*.lisp' '*.sens' '*.rs' '*.zig' '.github/workflows/ci.yml' 'scripts/prove-lisp-semantic-t5m.sh' > "$raw"
+            git -c core.quotePath=false diff-tree --no-commit-id --root --name-only --diff-filter=ACMRT -r "$GITHUB_SHA" -- '*.lisp' '*.sens' '*.rs' '*.zig' '.github/workflows/ci.yml' 'scripts/prove-lisp-semantic-t5m.sh' 'scripts/prove-lisp-language-laws.sh' > "$raw"
           fi
           python3 - "$raw" "$manifest" "$GITHUB_OUTPUT" <<'PY'
           from pathlib import Path
@@ -155,7 +155,7 @@ jobs:
           has_zig = False
           workflow_changed = False
           for original in raw.read_text(encoding="utf-8").splitlines():
-              if original in {".github/workflows/ci.yml", "scripts/prove-lisp-semantic-t5m.sh"}:
+              if original in {".github/workflows/ci.yml", "scripts/prove-lisp-semantic-t5m.sh", "scripts/prove-lisp-language-laws.sh"}:
                   workflow_changed = True
                   continue
               if original.endswith(".lisp"):
@@ -204,6 +204,12 @@ jobs:
                   "tests/semantic/language-law-d1-d4-ukr.lisp",
                   "tests/semantic/language-law-d4-closure-shadow-ukr.lisp",
                   "tests/semantic/language-mutant-d4-closure-shadow-ukr.lisp",
+                  "tests/semantic/language-law-d3-cond-demand.lisp",
+                  "tests/semantic/language-mutant-d3-cond-demand.lisp",
+                  "tests/semantic/language-law-d4-parameter-shadowing.lisp",
+                  "tests/semantic/language-mutant-d4-parameter-shadowing.lisp",
+                  "tests/semantic/language-law-quote-inertness.lisp",
+                  "tests/semantic/language-mutant-quote-inertness.lisp",
                   "tests/semantic/lisp-d4-lexical-closure-laws.lisp",
                   "tests/semantic/lisp-d4-recursive-list-laws.lisp",
                   "tests/semantic/lisp-d4-recursive-list-mutant.lisp",
