@@ -141,7 +141,7 @@ def _quoted_data_numeric_head_offsets(code: str) -> set[int]:
     """
     quoted: set[int] = set()
     stack: list[list] = []
-    for match in re.finditer(r"\\(|\\)|[^\\s()]+", code):
+    for match in re.finditer(r"\(|\)|[^\s()]+", code):
         token = match.group()
         if token == "(":
             parent = stack[-1] if stack else None
@@ -180,7 +180,7 @@ def find_forbidden_literals(source: str, path: str | Path | None = None) -> list
     numeric_heads = {match.start(1): match for match in NUMERIC_CALL_HEAD.finditer(code)}
     # Ban numeric atoms in live source, not merely numeric function heads.
     # A numeric call head gets the more specific diagnostic below.
-    for match in re.finditer(r"[^\\s()]+", code):
+    for match in re.finditer(r"[^\s()]+", code):
         token = match.group()
         start = match.start()
         if not re.fullmatch(NUMBER, token):
@@ -191,8 +191,8 @@ def find_forbidden_literals(source: str, path: str | Path | None = None) -> list
                 or _is_legacy_signature_key(source, path, start)
                 or _is_frozen_source_snapshot(path)):
             continue
-        line = code.count("\\n", 0, start) + 1
-        column = start - code.rfind("\\n", 0, start)
+        line = code.count("\n", 0, start) + 1
+        column = start - code.rfind("\n", 0, start)
         findings.append(Finding(line, column, token, "numeric source literal"))
     for start, match in numeric_heads.items():
         if start in quoted_numeric_heads:
@@ -201,8 +201,8 @@ def find_forbidden_literals(source: str, path: str | Path | None = None) -> list
                 or _is_legacy_signature_key(source, path, start)
                 or _is_frozen_source_snapshot(path)):
             continue
-        line = code.count("\\n", 0, start) + 1
-        column = start - code.rfind("\\n", 0, start)
+        line = code.count("\n", 0, start) + 1
+        column = start - code.rfind("\n", 0, start)
         findings.append(Finding(line, column, match.group(1), "numeric function/opcode head"))
     return sorted(findings, key=lambda item: (item.line, item.column))
 
