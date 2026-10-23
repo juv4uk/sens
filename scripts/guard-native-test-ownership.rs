@@ -54,7 +54,15 @@ fn routed(script: &str) -> BTreeSet<String> {
             ch.is_ascii_alphanumeric() || ch == '_') { continue }
         let plain = "$".to_string() + name;
         let braced = "$".to_string() + "{" + name + "}";
-        if calls.iter().any(|s| s.contains(&plain) || s.contains(&braced)) {
+        // $bundle_extra — інша змінна Bash, а не живий маршрут $bundle.
+        // Приймаємо $bundle і ${bundle}, звіряючи точну межу ідентифікатора.
+        if calls.iter().any(|call| {
+            let call = call.as_str();
+            call.contains(&braced) || call.match_indices(plain.as_str()).any(|(at, _)| {
+                !call[at + plain.len()..].chars().next().is_some_and(|ch|
+                    ch.is_ascii_alphanumeric() || ch == '_')
+            })
+        }) {
             result.extend(paths_in(line));
         }
     }
@@ -178,6 +186,23 @@ run_case run_law sample-mut tests/semantic/sample-mutant.lisp 0\n\
     );
     if !unicode.is_empty() {
         return Err(format!("Unicode paired witnesses: {unicode:?}"));
+    }
+    // Схоже ім'я змінної не доводить, що новий Lisp-закон справді виконується.
+    let collision_runner = runner.replace(
+        "sample \"$bundle\" 1", "sample \"$bundle_extra\" 1");
+    let collision = audit(&["tests/semantic/sample-law.lisp".into()],
+        &collision_runner, ci, |_| true, |_| Ok(String::new()));
+    if !collision.iter().any(|e| e.contains("SENS_LAW_NOT_REGISTERED")) {
+        return Err("lookalike Bash bundle falsely registered a Lisp law".into());
+    }
+    // Bash-форма ${bundle} залишається чинним посиланням на той самий bundle.
+    let braced_runner = runner.replace(
+        "sample \"$bundle\" 1", "sample \"${bundle}\" 1");
+    let braced = audit(&["tests/semantic/sample-law.lisp".into(),
+        "tests/semantic/sample-mutant.lisp".into()],
+        &braced_runner, ci, |_| true, |_| Ok(String::new()));
+    if !braced.is_empty() {
+        return Err(format!("braced native Lisp bundle was rejected: {braced:?}"));
     }
     let invalid = audit(&["tests/semantic/not-a-law.py".into()], runner, ci,
         |_| true, |_| Ok(String::new()));
