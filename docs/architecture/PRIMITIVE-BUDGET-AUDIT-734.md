@@ -1,12 +1,14 @@
 # Primitive Budget Audit: 197 Experimental IDs under the 256-ID Constraint (#734)
 
-**Status:** Proposed / Complete under #734
+**Status:** Historical report; superseded by the domain ladder on 2026-10-23
+
+> Historical report of the former flat eight-bit SID model, not current SENS semantic authority. The live Lisp inventory formerly linked below has been retired; its prior contents remain in Git history. Current identities and Ukrainian projections come from the language contract and active domain sources; no legacy slot is implicitly mapped to a current domain.
 **Date:** 2026-09-19
 **Parents:** #730, #726
 **Related:** #728, #733, #746, #748, COMMON-LISP-KERNEL-1
 
 Ukrainian counterpart: [PRIMITIVE-BUDGET-AUDIT-734.uk.md](PRIMITIVE-BUDGET-AUDIT-734.uk.md)
-Machine-readable Lisp inventory: [`contracts/primitive-budget-audit-734.lisp`](../../contracts/primitive-budget-audit-734.lisp)
+Retired Lisp inventory path (notice only): [`contracts/primitive-budget-audit-734.lisp`](../../contracts/primitive-budget-audit-734.lisp)
 Executable genealogy experiments: [`experiments/function-genealogy.lisp`](../../experiments/function-genealogy.lisp)
 
 ---
