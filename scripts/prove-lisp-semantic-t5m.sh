@@ -194,6 +194,16 @@ run_case run_law d4-first-class-predicate-mutant tests/semantic/d4-first-class-p
 # D4 рекурсивна правильність списків: позитив та навмисне порушення.
 run_case run_law d4-proper-list-positive tests/semantic/d4-proper-list-recursion-law.lisp 1
 run_case run_law d4-proper-list-mutant tests/semantic/d4-proper-list-recursion-mutant.lisp 0
+
+# Закон і мутант працюють із точно тим самим Lisp-кодом бенчмарку.
+# Shell тільки з'єднує джерела; SENS визначає результат через Zig/T5M.
+recursion_law_bundle="$evidence/d4-recursion-benchmark-positive.lisp"
+recursion_mutant_bundle="$evidence/d4-recursion-benchmark-negative.lisp"
+cat -- benchmarks/recursion.lisp tests/semantic/d4-recursion-benchmark-law.lisp > "$recursion_law_bundle"
+cat -- benchmarks/recursion.lisp tests/semantic/d4-recursion-benchmark-mutant.lisp > "$recursion_mutant_bundle"
+run_case run_law d4-recursion-benchmark-positive "$recursion_law_bundle" 1
+run_case run_law d4-recursion-benchmark-mutant "$recursion_mutant_bundle" 0
+sha256sum benchmarks/recursion.lisp tests/semantic/d4-recursion-benchmark-law.lisp tests/semantic/d4-recursion-benchmark-mutant.lisp > "$evidence/d4-recursion-inputs.sha256"
 # Складені селектори Д4: шість тверджень у Lisp та точний D1-негатив.
 run_case run_law d4-selector-composition-positive tests/semantic/d4-selector-composition-law.lisp 1
 run_case run_law d4-selector-composition-mutant tests/semantic/d4-selector-composition-mutant.lisp 0
