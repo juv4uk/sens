@@ -698,6 +698,19 @@ if [[ -n "${GITHUB_STEP_SUMMARY:-}" ]]; then
       while IFS="$(printf '\t')" read -r id status ms; do
         printf '| `%s` | %s | %s |\n' "$id" "$status" "$ms"
       done
+    echo
+    echo '### Повільні етапи Lisp → Zig/T5M → SENS'
+    echo
+    echo 'Одна процесна проба на етап, мікросекунди. Порівнювати як p50 або заявляти speedup заборонено.'
+    echo
+    echo '| Свідок | Фаза | Код виходу | мкс |'
+    echo '|---|---|---:|---:|'
+    tail -n +2 "$evidence/law-stage-timings.tsv" |
+      sort -t "$(printf '\t')" -k4,4nr |
+      sed -n '1,10p' |
+      while IFS="$(printf '\t')" read -r id stage exit_code duration_us; do
+        printf '| %s | %s | %s | %s |\n' "$id" "$stage" "$exit_code" "$duration_us"
+      done
   } >> "$GITHUB_STEP_SUMMARY"
 fi
 if (( failed > 0 )); then
