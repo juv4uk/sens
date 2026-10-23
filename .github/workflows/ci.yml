@@ -181,6 +181,11 @@ jobs:
                   "tests/semantic/ukr-lists-d24-language-law.lisp",
                   "tests/semantic/d4-recursion-benchmark-law.lisp",
                   "tests/semantic/d4-recursion-benchmark-mutant.lisp",
+                  # Ці фікстури потребують DEFINE обійти із benchmarks/recursion.lisp.
+                  # Повний бандл law/mutant запускається через SENS/Zig/T5M нижче;
+                  # окремий змінений-файл без бібліотеки помилково дає UnknownSymbol.
+                  "tests/semantic/d4-recursion-atom-result-law.lisp",
+                  "tests/semantic/d4-recursion-atom-result-mutant.lisp",
                   "tests/fixtures/conformance-transition-witness.lisp",
               }:
                   print(f"T5M_DEPENDENT_FIXTURE path={name} status=NOT_STANDALONE")
