@@ -144,6 +144,10 @@ cargo test -p sens \
   --test domain_ast_value_identity \
   --test d7_w7_pack
 
+# Rust is the observer/harness; Lisp's witness-runner owns the semantic verdict.
+cargo test -p sens --test witness_authority exact_d3_predicate_boundaries_are_judged_by_lisp_owned_witness_logic
+
+
 
 # Historical #1096 bare-SID witness remains preserved as compatibility evidence,
 # but it is intentionally not executed by the current semantic slice. Contract
