@@ -323,7 +323,10 @@ jobs:
           fi
           exit "$zig_failed"
 
-      - name: Три бенчмарки — lists, arithmetic, parser у справжньому SENS
+      # Rust тут перевіряє тільки механізм CLI. Жоден результат арифметики
+      # або Lisp-закон не визначається Rust-тестами.
+      - name: Rust CLI — механізм запуску бенчмарків, без мовного оракула
+        id: benchmark-cli
         if: ${{ always() }}
         shell: bash
         timeout-minutes: 15
@@ -331,23 +334,6 @@ jobs:
           set -euo pipefail
           export CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0
           cargo test --locked -p sens-cli --test arithmetic_benchmark_cli -- --nocapture
-          # Анотації GitHub Actions — лише результати реально виконаних тестів.
-          # Довжина списку вже не перевіряється числовим Rust-оракулом. Її D1-закон — нижче.
-          # Поки Lisp-свідок не виконано, не оголошувати фіктивного PASS.
-          echo "::notice file=benchmarks/lists.lisp,title=SENS Lisp benchmark::PENDING_LANGUAGE_LAW source=lists.lisp verifier=d24-list-language physical_T5M=NOT_CERTIFIED"
-          echo "::notice file=benchmarks/arithmetic.lisp,title=SENS Lisp benchmark::PENDING_LANGUAGE_LAW source=arithmetic.lisp verifier=d24-polynomial-language physical_T5M=NOT_CERTIFIED"
-          echo "::notice file=benchmarks/parser.lisp,title=SENS Lisp benchmark::PENDING_LANGUAGE_LAW source=parser.lisp verifier=d24-reader-fraction-language physical_T5M=NOT_CERTIFIED"
-          {
-            echo '## Три Lisp-бенчмарки — нативне виконання SENS'
-            echo
-            echo '| Українська програма | Перевірений результат | Шлях |'
-            echo '|---|---:|---|'
-            echo '| `benchmarks/lists.lisp` | очікує окремого мовного кроку | tests/semantic/ukr-lists-d24-language-law.lisp |'
-            echo '| `benchmarks/arithmetic.lisp` | очікує окремого мовного кроку | tests/semantic/d24-polynomial-language-law.lisp |'
-            echo '| `benchmarks/parser.lisp` | очікує окремого мовного кроку | tests/semantic/d24-reader-fraction-language-law.lisp |'
-            echo
-            echo 'Усі три програми перевіряються окремими Lisp-законами нижче; це не заміри часу. T5M для трьох джерел не атестовано.'
-          } >> "$GITHUB_STEP_SUMMARY"
 
       # Одного білда з AST вистачає для коридору, фізичних Lisp-законів та звіту.
       - name: Зібрати нативний SENS і Zig/T5M лише один раз
@@ -414,6 +400,7 @@ jobs:
       # Логіка перевірки всередині Lisp. Bash лише звіряє фактичний D1-вивід.
       # Rust відповідає за механізми Rust, Zig — за власний T5M/ABI.
       - name: Lisp-семантика Д1/Д3/Д4 — позитив і негатив у справжньому SENS
+        id: benchmark-laws
         if: ${{ always() && steps.native-build.outcome == 'success' }}
         shell: bash
         timeout-minutes: 10
@@ -423,6 +410,8 @@ jobs:
           # Бінарники зібрано один раз вище, тут перевіряється лише SENS-семантика.
           export CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0
           test -x "$binary"
+          # Зберігаємо тільки завершені перевірки, а не заздалегідь оголошений PASS.
+          : > "$RUNNER_TEMP/benchmark-law-status.tsv"
           check_lisp_law() {
             local id="$1" source="$2" expected="$3" actual
             if ! actual="$(timeout 45s "$binary" "$source")"; then
@@ -442,11 +431,13 @@ jobs:
           # Фізичний D6 LENGTH ще не атестовано (#5854): direct=SENS, T5M=NOT_CERTIFIED.
           cat -- benchmarks/lists.lisp tests/semantic/ukr-lists-d24-language-law.lisp > "$RUNNER_TEMP/ukr-lists-d24-native.lisp"
           check_lisp_law d24-list-language "$RUNNER_TEMP/ukr-lists-d24-native.lisp" '1'
+          printf 'lists\tPASS_DIRECT\n' >> "$RUNNER_TEMP/benchmark-law-status.tsv"
           # Поліном Д24: Lisp-закон і контрприклад замість Rust-оракула.
           cat -- benchmarks/arithmetic.lisp tests/semantic/d24-polynomial-language-law.lisp > "$RUNNER_TEMP/d24-polynomial-law.lisp"
           check_lisp_law d24-polynomial-language-positive "$RUNNER_TEMP/d24-polynomial-law.lisp" '1'
           cat -- benchmarks/arithmetic.lisp tests/semantic/d24-polynomial-language-mutant.lisp > "$RUNNER_TEMP/d24-polynomial-mutant.lisp"
           check_lisp_law d24-polynomial-language-mutant "$RUNNER_TEMP/d24-polynomial-mutant.lisp" '0'
+          printf 'arithmetic\tPASS_DIRECT\n' >> "$RUNNER_TEMP/benchmark-law-status.tsv"
           # Читач Д24/D7: самовердикти в Lisp, Rust не є мовним оракулом.
           cat -- benchmarks/parser.lisp tests/semantic/d24-reader-fraction-language-law.lisp > "$RUNNER_TEMP/d24-reader-positive.lisp"
           check_lisp_law d24-reader-fraction-language-positive "$RUNNER_TEMP/d24-reader-positive.lisp" '1'
@@ -475,6 +466,7 @@ jobs:
             exit 1
           fi
           echo "::notice file=tests/semantic/d24-reader-zero-denominator-negative.lisp,title=SENS Lisp law::PASS id=d24-reader-zero-denominator native=SENS rejection=division-by-zero"
+          printf 'parser\tPASS_DIRECT\n' >> "$RUNNER_TEMP/benchmark-law-status.tsv"
           check_lisp_law d3-ukr-self-verdict tests/semantic/d3-ukr-language-self-verdict.lisp '1'
           check_lisp_law d5-ukr-self-verdict tests/semantic/d5-ukr-arithmetic-self-verdict.lisp '1'
           check_lisp_law d5-physical-law tests/semantic/d5-arithmetic-native-t5m-law.lisp '1'
@@ -501,6 +493,51 @@ jobs:
           check_lisp_law d11-srfi1-span-break-language "$RUNNER_TEMP/d11-srfi1-span-break-native.lisp" '1'
           cat -- lib/d11-srfi1-find-tail.lisp tests/semantic/d11-srfi1-find-tail-laws.lisp > "$RUNNER_TEMP/d11-srfi1-find-tail-native.lisp"
           check_lisp_law d11-srfi1-find-tail-language "$RUNNER_TEMP/d11-srfi1-find-tail-native.lisp" '1'
+
+      # Фінальні анотації будуються із фактично записаних SENS-вердиктів.
+      # Цей крок виконується й після RED: неперевірене не стає зеленим.
+      - name: Три Lisp-бенчмарки — фактичні мовні анотації та підсумок
+        if: ${{ always() }}
+        shell: bash
+        env:
+          CLI_OUTCOME: ${{ steps.benchmark-cli.outcome }}
+          LAWS_OUTCOME: ${{ steps.benchmark-laws.outcome }}
+        run: |
+          set -euo pipefail
+          verified="$RUNNER_TEMP/benchmark-law-status.tsv"
+          summary="$RUNNER_TEMP/benchmark-status-summary.txt"
+          passed=0
+          missing=0
+          {
+            echo '## Бенчмарки Lisp — перевірені факти'
+            echo
+            echo "Rust CLI (лише I/O): \`$CLI_OUTCOME\`; нативний крок SENS: \`$LAWS_OUTCOME\`."
+            echo
+            echo '| Lisp-джерело | Семантика, прямий SENS | Фізичний Zig/T5M |'
+            echo '|---|---|---|'
+          } >> "$GITHUB_STEP_SUMMARY"
+          for spec in \
+            'lists|benchmarks/lists.lisp|d24-list-language' \
+            'arithmetic|benchmarks/arithmetic.lisp|d24-polynomial-language' \
+            'parser|benchmarks/parser.lisp|d24-reader-fraction-language'; do
+            IFS='|' read -r id source law <<< "$spec"
+            if [[ -f "$verified" ]] && grep -Fxq "$(printf '%s\tPASS_DIRECT' "$id")" "$verified"; then
+              status=PASS_DIRECT
+              passed=$((passed + 1))
+              echo "::notice file=$source,title=SENS benchmark $id::PASS_DIRECT law=$law executor=SENS metric=SEMANTIC_ONLY t5m=NOT_CERTIFIED"
+            else
+              status=NOT_VERIFIED
+              missing=$((missing + 1))
+              echo "::warning file=$source,title=SENS benchmark $id::NOT_VERIFIED law=$law laws_step=$LAWS_OUTCOME expected=completed-SENS-witness actual=missing"
+            fi
+            echo "| \`$source\` | \`$status\` ($law) | NOT_CERTIFIED |" >> "$GITHUB_STEP_SUMMARY"
+          done
+          printf 'прямі Lisp-закони=%s/3; Rust CLI=%s; T5M=NOT_CERTIFIED; час=NOT_MEASURED\n' "$passed" "$CLI_OUTCOME" > "$summary"
+          echo 'Значення PASS_DIRECT засвідчує лише нативну семантику SENS, не продуктивність і не фізичний T5M.' >> "$GITHUB_STEP_SUMMARY"
+          if (( missing > 0 )) && [[ "$LAWS_OUTCOME" == success ]]; then
+            echo "::error file=.github/workflows/ci.yml,title=SENS benchmark evidence::REGRESSION layer=report expected=3-completed-witnesses actual=$passed"
+            exit 1
+          fi
 
       # Негативний свідок не є позитивним входом загального T5M-коридору.
       - name: Lisp D3 — CAR/CDR/CONS закон і негативний мутант
@@ -624,7 +661,12 @@ jobs:
           echo "::notice title=SENS · драбина D1–D10::${ladder:-НЕ ПЕРЕВІРЕНО}"
           debt="$(python3 -c "import json;print(json.load(open('knowledge/tests-legacy-binary-heads.json'))['count'])" 2>/dev/null || echo '?')"
           echo "::notice title=SENS · борг кодових голів у тестах::${debt} файлів — мусить скорочуватися до 0"
-          echo "::notice title=SENS · бенчмарки::результати — у кроці «Три бенчмарки» вище (щоб не показувати старе зашитим)"
+          if [[ -f "$RUNNER_TEMP/benchmark-status-summary.txt" ]]; then
+            bench="$(cat "$RUNNER_TEMP/benchmark-status-summary.txt")"
+          else
+            bench='НЕ ПЕРЕВІРЕНО'
+          fi
+          echo "::notice title=SENS · бенчмарки::$bench"
           pairs="$(python3 scripts/audit_t5_file_pairs.py 2>/dev/null | python3 -c "import sys,json;d=json.load(sys.stdin);print(f\"pass={d.get('physical_pass','?')} blocked={d.get('physical_blocked','?')} без_пари={d.get('lisp_without_sens','?')}\")" 2>/dev/null || echo 'НЕ ВИМІРЯНО')"
           echo "::notice title=SENS · фізичні пари Lisp↔sens::${pairs}"
           {
@@ -634,6 +676,6 @@ jobs:
             echo '|---|---|'
             echo "| Драбина D1–D10 | \`${ladder:-НЕ ПЕРЕВІРЕНО}\` |"
             echo "| Борг кодових голів у тестах | ${debt} файлів (мусить → 0) |"
-            echo '| Бенчмарки (нативний SENS) | див. крок «Три бенчмарки» вище |'
+            echo "| Бенчмарки (нативний SENS) | ${bench} |"
             echo "| Фізичні пари Lisp↔sens | ${pairs} |"
           } >> "$GITHUB_STEP_SUMMARY"
