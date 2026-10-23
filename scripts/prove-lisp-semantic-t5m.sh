@@ -136,6 +136,9 @@ run_case run_law d4-late-binding-positive tests/semantic/d4-late-definition-bind
 # D4 рекурсивна правильність списків: позитив та навмисне порушення.
 run_case run_law d4-proper-list-positive tests/semantic/d4-proper-list-recursion-law.lisp 1
 run_case run_law d4-proper-list-mutant tests/semantic/d4-proper-list-recursion-mutant.lisp 0
+# Складені селектори Д4: шість тверджень у Lisp та точний D1-негатив.
+run_case run_law d4-selector-composition-positive tests/semantic/d4-selector-composition-law.lisp 1
+run_case run_law d4-selector-composition-mutant tests/semantic/d4-selector-composition-mutant.lisp 0
 run_case run_law d4-escaped-closure-positive tests/semantic/d4-escaped-lexical-closure-law.lisp 1
 run_case run_law d4-escaped-closure-mutant tests/semantic/d4-escaped-lexical-closure-mutant.lisp 0
 # Фізичні закони Д3 не залежать від недопущеного виклику D6 LENGTH.
@@ -155,4 +158,4 @@ if (( failed > 0 )); then
   echo "::error title=SENS Lisp/T5M::REGRESSION checked=$checked passed=$passed failed=$failed ids=${failed_ids[*]}" >&2
   exit 1
 fi
-echo "SENS_LISP_T5M_LAWS_PASS count=$checked positive=10 mutants=8 physical=ZIG_T5M"
+echo "SENS_LISP_T5M_LAWS_PASS count=$checked positive=11 mutants=9 physical=ZIG_T5M"
