@@ -35,6 +35,15 @@ class DomainFunctionReuseRule(unittest.TestCase):
         if PROBE.exists():
             PROBE.unlink()
 
+    def test_explicit_missing_lisp_file_fails_closed(self) -> None:
+        # Tool admission, not Lisp semantics: no inspected input cannot be PASS.
+        with tempfile.TemporaryDirectory() as temporary:
+            missing = Path(temporary) / "missing-guard-input.lisp"
+            self.assertFalse(missing.exists())
+            result = run(GUARD, "--file", str(missing))
+        self.assertEqual(result.returncode, 2, result.stdout + result.stderr)
+        self.assertIn("НЕ ПЕРЕВІРЕНО", result.stdout + result.stderr)
+
     def test_guard_self_test_is_green(self) -> None:
         result = run(GUARD, "--self-test")
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)

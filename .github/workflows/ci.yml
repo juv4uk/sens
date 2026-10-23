@@ -328,6 +328,9 @@ jobs:
           BEFORE_SHA: ${{ github.event.before }}
         run: |
           set -euo pipefail
+          # Guard/tool-only edits must exercise the real scanner even without Lisp changes.
+          bash scripts/install-hooks.sh
+          python3 -m unittest tests/test_domain_function_reuse_rule.py -v
           manifest="$RUNNER_TEMP/changed-t5m-lisp.txt"
           if [[ -s "$manifest" ]]; then
             # Guard має перевіряти НОВІ DEFINE, а не повторно оголошувати
@@ -343,7 +346,6 @@ jobs:
               timeout 60s git fetch --no-tags --depth=1 origin "$base"
             fi
             git cat-file -e "$base^{commit}"
-            python3 -m unittest tests/test_domain_function_reuse_rule.py -v
             python3 scripts/guard-domain-function-reuse.py --paths-from "$manifest" --base "$base"
           else
             echo "немає змінених .lisp-програм — охоронець не має що перевіряти"
