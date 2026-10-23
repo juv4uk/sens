@@ -91,7 +91,7 @@ def production_rust_files(root: Path, tracked: set[str]) -> list[Path]:
 # Production scope is a Rust cfg condition, not merely a filesystem path.
 # Preserve offsets so the line in a failed receipt still points to real source.
 _CFG_TEST_ITEM = re.compile(
-    r"#\s*\[\s*cfg\s*\(\s*test\s*\)\s*\]\s*(?:pub\s+)?(?:mod|fn)\s+\w+\b"
+    r"#\s*\[\s*cfg\s*\(\s*test\s*\)\s*\]\s*(?:pub\s+)?(?:mod|fn|const|static)\s+\w+\b"
 )
 _RAW_STRING = re.compile(r'(?:br|r)(?P<hashes>#{0,16})"')
 _CHAR_LITERAL = re.compile(r"'(?:\\.|[^'\\\n])'")

@@ -121,6 +121,7 @@ class RustIsolationTests(unittest.TestCase):
             '   fn project_read() { let _ = std::fs::read("lib/core.lisp"); }\n'
             '}\n'
             '#[cfg(test)] fn test_only() { let _ = include_bytes!("lib/core.sens"); }\n'
+            '#[cfg(test)] const TEST_ONLY: &str = include_str!("lib/core.lisp");\n'
             '#[cfg(any(test, feature = "production"))] mod uncertain {\n'
             '  const X: &str = include_str!("lib/core.lisp");\n'
             '}\n'

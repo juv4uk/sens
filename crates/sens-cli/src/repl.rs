@@ -448,22 +448,27 @@ fn project_repl_surface_expression_in_scope(
             // A projection spelling is only a lookup route. In value position
             // it lowers to the same exact identity as in call-head position.
             // Lexical binders and persistent REPL bindings keep their Text7 name.
-            let mut lambda_identity = None;
-            if let ExprKind::Symbol(head) = &items[0].kind {
-                if session.environment.get(head).is_none() {
-                    lambda_identity =
-                        selected_surface_callable(surface, head)?.filter(|identity| {
-                            matches!(
-                                identity,
-                                DomainIdentity::D4(word)
-                                    if word.word().packed_bits() == 0b0010
-                            )
-                        });
+            let lambda_identity = match &items[0].kind {
+                ExprKind::DomainIdentity(identity) if matches!(identity, DomainIdentity::D4(word) if word.word().packed_bits() == 0b0010) => {
+                    Some(*identity)
                 }
-            }
+                ExprKind::Symbol(head) if session.environment.get(head).is_none() => {
+                    selected_surface_callable(surface, head)?.filter(|identity| {
+                        matches!(
+                            identity,
+                            DomainIdentity::D4(word) if word.word().packed_bits() == 0b0010
+                        )
+                    })
+                }
+                _ => None,
+            };
             if let Some(identity) = lambda_identity {
                 let mut lambda_bound = bound.to_vec();
-                if let Some(parameters) = items.get(1) {
+                let parameters = items
+                    .get(1)
+                    .map(|parameters| project_lambda_binder_names(parameters, source))
+                    .transpose()?;
+                if let Some(parameters) = &parameters {
                     collect_repl_binders(parameters, &mut lambda_bound);
                 }
                 let mut projected = Vec::with_capacity(items.len());
@@ -471,7 +476,7 @@ fn project_repl_surface_expression_in_scope(
                     kind: ExprKind::DomainIdentity(DomainIdentity::from(identity)),
                     span: items[0].span,
                 });
-                if let Some(parameters) = items.get(1) {
+                if let Some(parameters) = parameters {
                     projected.push(parameters.clone());
                 }
                 projected.extend(
@@ -597,6 +602,34 @@ fn collect_repl_binders(expression: &Expr, names: &mut Vec<std::rc::Rc<str>>) {
         }
         _ => {}
     }
+}
+
+/// Lambda parameter names are lexical text even when their spelling is also
+/// a ratified domain projection. Keep the source spelling in this binder-only
+/// position; the SENS binary reader still rejects names reserved by its laws.
+fn project_lambda_binder_names(expression: &Expr, source: &str) -> Result<Expr, String> {
+    let mut projected = expression.clone();
+    projected.kind = match &expression.kind {
+        ExprKind::List(items) => ExprKind::List(
+            items
+                .iter()
+                .map(|item| project_lambda_binder_names(item, source))
+                .collect::<Result<Vec<_>, _>>()?
+                .into(),
+        ),
+        ExprKind::Pair(head, tail) => ExprKind::Pair(
+            std::rc::Rc::new(project_lambda_binder_names(head, source)?),
+            std::rc::Rc::new(project_lambda_binder_names(tail, source)?),
+        ),
+        ExprKind::Symbol(_) | ExprKind::DomainIdentity(_) => {
+            let spelling = source
+                .get(expression.span.start..expression.span.end)
+                .ok_or("T5M_LAMBDA_BINDER_SOURCE_SPAN_INVALID")?;
+            ExprKind::Symbol(spelling.into())
+        }
+        _ => expression.kind.clone(),
+    };
+    Ok(projected)
 }
 
 fn exact_t5m_carrier_words(
@@ -2638,6 +2671,17 @@ mod tests {
             "actual value: {:?}; words: {view}",
             result.value
         );
+    }
+
+    #[cfg(feature = "zig-transport")]
+    #[test]
+    fn t5m_lambda_parameter_can_share_a_noncallable_domain_projection() {
+        let source = "((функція (аргументи) аргументи) 7)";
+        let (physical, _) =
+            mint_t5m_source_pair(source).expect("lexical parameter text must survive T5M lowering");
+        let result = eval_t5m_paired_file(source, &physical)
+            .expect("a lexical binder keeps its source name through exact-domain lowering");
+        assert_eq!(result.value.to_string(), "7");
     }
 
     #[test]
