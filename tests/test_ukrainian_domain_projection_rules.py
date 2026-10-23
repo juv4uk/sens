@@ -126,7 +126,10 @@ class UkrainianDomainProjectionRulesTests(unittest.TestCase):
 
     def test_current_domain_uk_and_ukr_are_real_keyboard_glyphs(self):
         """Перевірити фактичні D1-D11, а не лише тестові підставні рядки."""
-        expected = {width: (1 << width if width <= 10 else 43)
+        # D11 більше не є відхиленим словником із 43 записів:
+        # 256 підтверджених D10-селекторів × два суфікси = 512 D11 координат.
+        # Перевірка лишається fail-closed: повнота, точна ширина, унікальність.
+        expected = {width: (1 << width if width <= 10 else 512)
                     for width in range(1, 12)}
         total = 0
         for width, count in expected.items():
@@ -158,7 +161,7 @@ class UkrainianDomainProjectionRulesTests(unittest.TestCase):
             self.assertEqual(len(rows), count, f"{path}: неповна таблиця")
             self.assertEqual(len(set(rows)), count, f"{path}: повтор координати")
             total += count
-        self.assertEqual(total, 2089)
+        self.assertEqual(total, 2558)
 
     def test_live_interlisp_library_has_only_ukrainian_keyboard_symbols(self):
         """Жодної латиниці навіть у коментарях або іменах функцій."""
