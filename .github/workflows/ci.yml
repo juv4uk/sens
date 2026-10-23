@@ -46,6 +46,17 @@ jobs:
           python3 scripts/ci_one_focused_workflow.py
           python3 scripts/check_ci_bash_blocks.py
 
+      # Перевіряємо синтаксис CLI перед довгими тестами й бенчмарками.
+      # rustfmt тут лише парсить Rust; стилістичних змін не вимагаємо.
+      - name: Rust CLI — рання перевірка синтаксису REPL
+        shell: bash
+        run: |
+          set -euo pipefail
+          if ! rustfmt --edition 2021 --emit stdout crates/sens-cli/src/repl.rs > /dev/null; then
+            echo "::error file=crates/sens-cli/src/repl.rs,title=RUST_REPL_SYNTAX::REGRESSION id=rust-repl-syntax layer=rust-cli expected=parsable actual=syntax-error"
+            exit 1
+          fi
+
       - name: Заборона нових сирих кодів у змінених Lisp-файлах
         shell: bash
         env:
