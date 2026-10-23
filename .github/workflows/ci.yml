@@ -27,6 +27,8 @@ concurrency:
 
 jobs:
   sens:
+    outputs:
+      changed_lisp_files: ${{ steps.changed-t5m-lisp.outputs.lisp_files }}
     name: Українська проєкція, 3 бенчмарки та SENS/Zig/T5M
     runs-on: ubuntu-24.04
     timeout-minutes: 60
@@ -273,6 +275,14 @@ jobs:
               out.write(f"has_files={'true' if selected else 'false'}\n")
               out.write(f"has_rust={'true' if has_rust else 'false'}\n")
               out.write(f"has_zig={'true' if has_zig else 'false'}\n")
+              # Передати точні шляхи цього запуску в нативний remint-job;
+              # це інвентар вхідних джерел, не мовний вердикт.
+              out.write("lisp_files<<SENS_LISP_FILES\n")
+              lisp_files = manifest.read_text(encoding="utf-8")
+              out.write(lisp_files)
+              if lisp_files and not lisp_files.endswith("\n"):
+                  out.write("\n")
+              out.write("SENS_LISP_FILES\n")
           print(f"T5M_CHANGED_EXECUTABLE_LISP count={len(selected)}")
           for name in selected:
               print(f"T5M_CHANGED_FILE {name}")
@@ -1004,3 +1014,13 @@ jobs:
             echo "| Бенчмарки (нативний SENS) | ${bench} |"
             echo "| Фізичні пари Lisp↔sens | ${pairs} |"
           } >> "$GITHUB_STEP_SUMMARY"
+
+  remint-pairs:
+    name: Нативні трійки Lisp / Zig T5M
+    needs: [sens]
+    if: ${{ always() && github.ref == 'refs/heads/main' && github.event_name != 'pull_request' }}
+    permissions:
+      contents: write
+    uses: ./.github/workflows/remint-drifted-pairs.yml
+    with:
+      files: ${{ needs.sens.outputs.changed_lisp_files }}
