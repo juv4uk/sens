@@ -11,6 +11,15 @@
 (визначити *довідник-гвардії*
   (як-є
     ((reference
+       (topic selector-quarter-generative-law)
+       (summary "Селекторна родина функціональних доменів D3,D4,D5,D6,D8,D9,D10,D11 має точні коди {011,100}||{0,1}^(n-3), кількість 2^(n-2), рівно одну чверть місткості Dn. Корені D3: 011=CDR, 100=CAR; кожний суфіксний 0 відповідає A/CAR, 1 відповідає D/CDR. D6→D8 додає два біти, не привласнюючи текстовий D7. D11→D13 додає два біти, не привласнюючи числовий D12; 2048 D13 слів є лише дослідними кандидатами. Сама ширина не надає доменного допуску або викличності.")
+       (authority (contracts/bija3-l1-l5-ratification.lisp contracts/d5-ratification.lisp contracts/d6-ratification.lisp contracts/d8-ratification.lisp docs/research/D10-SELECTOR-SEMANTICS-PROOF-20261012.uk.md lib/domains/d11.lisp research/zig-codecs/d13_selector_game.zig))
+       (how-to (check-exact-root-011-or-100 check-every-bit-letter-0-A-1-D reject-bit-name-mismatch derive-through-reserved-widths-without-domain-admission require-native-sens-semantics-proof-for-callability))
+       (verify (d3-two-selector-roots d4-four d5-eight d6-sixteen d8-sixty-four d9-one-hundred-twenty-eight d10-two-hundred-fifty-six d11-five-hundred-twelve d13-two-thousand-forty-eight-research-candidates malformed-d11-parent-rejected))
+       (lifecycle exact-catalog-geometry-verified-native-zig-and-sens-execution-pending)
+       (provenance "Драбина: селекторна чверть та точний закон код-назва, 2026-10-24")
+       (unknown-route ask-owner))
+      (reference
        (topic ladder-width-three-rhythms-research)
        (summary "Дослідна метааксіома Драбини відрізняє три дії: ENUM розширює місткість таблиць функцій, WIDEN подвоює ширину ЛИШЕ ратифікованої родини даних, DERIVE породжує композиції за доведеним законом. Чинна числова драбина D12→D24→D48 ратифікована; D7→D14→D28 є лише текстовою гіпотезою; D17 не випливає з двох інтервалів +5. D14 не має місткості для одного атома на кожен символ Unicode 17.0. Ширина не є доменним допуском.")
        (authority (language-contract.lisp contracts/d7-ratification.lisp contracts/numeric-domains-ratification.lisp lib/domains/d11.lisp knowledge/ladder/закон-ширин-пропозиція-20261024.uk.md))
