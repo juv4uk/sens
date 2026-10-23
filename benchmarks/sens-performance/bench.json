@@ -1,18 +1,23 @@
 {
   "schema": "sens-benchmark-manifest/v1",
   "stand": "sens-performance",
-  "wing": "Implementation and physical-cost research",
+  "wing": "Native Rust, Zig and physical SENS performance diagnostics",
   "roles": [
-    "RESEARCH",
+    "MEASUREMENT",
+    "CONFORMANCE",
     "FALSIFIER"
   ],
-  "question": "What bounded observation does the existing benchmarks/sens-performance/adaptive_carrier_bench.py witness provide for Sens Performance, and what counterexample limits the conclusion?",
-  "claim": "Metadata-only backfill. Adding this record does not replay the runner, create a benchmark result, raise evidence strength, ratify a semantic identity, or grant production authority. Interpret any prior result only with its own exact SHA, raw witness and declared limits.",
+  "question": "What do native Rust domain/packing measurements, Zig transport measurements and physical Lisp/SENS timings show after their own parity checks?",
+  "claim": "Rust measures exact-width identity construction, bit packing and reader paths; Zig measures physical codec and ABI mechanics; Lisp/SENS owns semantic verdicts and full-process timings. Samples are diagnostic and do not alone certify a speedup or release. The active workflow emits TSV/plain text without Python or JSON measurement runners.",
   "witness": [
-    "benchmarks/sens-performance/adaptive_carrier_bench.py"
+    ".github/workflows/sens-performance.yml",
+    "crates/sens/examples/domain12345678_bench.rs",
+    "crates/sens/examples/byte_pack_bench.rs",
+    "research/zig-codecs/t5/bench.zig",
+    "scripts/prove-lisp-semantic-t5m.sh"
   ],
-  "status": "METADATA-BACKFILL; NOT REPLAYED BY THIS CHANGE",
-  "generation": "unknown",
-  "axis": "research/backfill/sens-performance",
-  "reproduce": "python3 benchmarks/sens-performance/adaptive_carrier_bench.py"
+  "status": "NATIVE-HARNESS-COMMITTED; MANUAL-REPLAY-NOT-YET-RECORDED",
+  "generation": "2026-10-23; native workflow and adaptive Rust samples added; awaiting manual runner evidence",
+  "axis": "exact-width mechanism time / packed byte density / Zig transport / physical SENS full-process wall time",
+  "reproduce": "gh workflow run sens-performance.yml --ref main"
 }
