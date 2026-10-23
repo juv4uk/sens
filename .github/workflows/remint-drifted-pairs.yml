@@ -209,6 +209,33 @@ jobs:
               fi
             done
           fi
+          # Розширюємо чергу на відсутні семантичні свідки.
+          # Очікувані Type/ділення-на-нуль проходять окремий негативний маршрут,
+          # тому не можна віддавати їх звичайному успішному remint.
+          if [[ "$EVENT_NAME" == push ]]; then
+            for source in tests/semantic/*.lisp; do
+              [[ -f "$source" && ! -L "$source" ]] || continue
+              case "$source" in
+                tests/semantic/*-type-negative.lisp|\
+                tests/semantic/*-improper-*-negative.lisp|\
+                tests/semantic/*-improper-tail-negative.lisp|\
+                tests/semantic/d24-reader-zero-denominator-negative.lisp|\
+                tests/semantic/meta-fc-predicates-d1-mutant.lisp)
+                  continue ;;
+              esac
+              pair="${source%.lisp}.sens"
+              view="${source%.lisp}"
+              # Лише реально відсутня фізична трійка; готові пари не перемайнюємо
+              # тут навмання — зміна джерела вже входить у Git-diff вище.
+              if [[ -s "$pair" && -f "$view" && ! -L "$pair" && ! -L "$view" ]]; then
+                continue
+              fi
+              if ! printf '%s\n' "$list" | grep -Fxq -- "$source"; then
+                list="$(printf '%s\n%s' "$list" "$source")"
+                echo "REMINT_SEMANTIC_TRIPLET_PENDING source=$source"
+              fi
+            done
+          fi
           if [ -z "$list" ] && [[ "$EVENT_NAME" != push ]]; then
             if [ -f scripts/remint-drifted-pairs.txt ]; then
               list="$(grep -vE '^[[:space:]]*(#|$)' scripts/remint-drifted-pairs.txt)"
@@ -358,6 +385,13 @@ jobs:
               lib/translation.lisp) bs=(--binding-source lib/unify.lisp --binding-source lib/knowledge.lisp --binding-source lib/reason.lisp --binding-source lib/world.lisp --binding-source lib/yantra.lisp --binding-source lib/result-status.lisp);;
               tests/fixtures/mechanism-selector-1047-witness.lisp) bs=(--binding-source lib/mechanism-selector.lisp);;
               tests/fixtures/island-lowering-1048-witness.lisp) bs=(--binding-source lib/mechanism-selector.lisp --binding-source lib/island-lowering.lisp);;
+              tests/semantic/d11-clojure-juxt-laws.lisp) bs=(--binding-source lib/d11-clojure-juxt.lisp);;
+              tests/semantic/d11-clojure-partition-by-laws.lisp|tests/semantic/d11-clojure-partition-by-d7-parity.lisp) bs=(--binding-source lib/d11-srfi1-span-break.lisp --binding-source lib/d11-clojure-partition-by.lisp);;
+              tests/semantic/d11-srfi1-find-tail-laws.lisp) bs=(--binding-source lib/d11-srfi1-find-tail.lisp);;
+              tests/semantic/d11-srfi1-list-equality-law.lisp|tests/semantic/d11-srfi1-list-equality-mutant.lisp) bs=(--binding-source lib/d11-srfi1-list-equality.lisp);;
+              tests/semantic/d11-family-selection-law.lisp|tests/semantic/d11-family-selection-mutant.lisp) bs=(--binding-source lib/d11-family-selection.lisp);;
+              tests/semantic/d11-families-benchmark-law.lisp|tests/semantic/d11-families-benchmark-mutant.lisp) bs=(--binding-source lib/d11-family-selection.lisp --binding-source lib/d11-srfi1-alist-protocol.lisp --binding-source lib/d11-clojure-group-by.lisp --binding-source lib/d11-clojure-frequencies-unary.lisp);;
+              tests/semantic/unification-variable-shape-negative.lisp) bs=(--binding-source lib/unify.lisp);;
               tests/semantic/d11-srfi1-span-break-laws.lisp) bs=(--binding-source lib/d11-srfi1-span-break.lisp);;
               tests/semantic/d9-world-shape-module-events-laws.lisp|tests/semantic/world-exact-arity-witness.lisp) bs=(--binding-source lib/world.lisp);;
               tests/semantic/core1-gc-reachability-laws.lisp) bs=(--binding-source lib/core1.lisp);;
