@@ -1093,8 +1093,6 @@ class SystemOneResearchPipelineTests(unittest.TestCase):
             validation_row("v6", "невизначено", "доставка", 700_000_000),
         ]
 
-        # Відомі контрольні значення однобічної точної 95%-ї межі:
-        # 0 помилок із 2 прикладів усе одно не доводять ризик нижче 10%.
         self.assertAlmostEqual(
             evaluator.clopper_pearson_upper_bound(0, 2, 0.95),
             0.776393202250021,
@@ -1104,29 +1102,37 @@ class SystemOneResearchPipelineTests(unittest.TestCase):
 
         selected = evaluator.select_threshold(
             rows,
-            max_selective_risk=0.75,
+            max_selective_risk=0.95,
             min_accepted=4,
         )
         self.assertEqual(selected["status"], "selected")
         self.assertEqual(selected["selected_for"], "validation")
-        self.assertEqual(selected["threshold"], {"numerator": 17, "denominator": 20})
-        self.assertEqual(selected["accepted"], 5)
-        self.assertEqual(selected["errors"], 1)
-        self.assertEqual(selected["achieved_selective_risk"], {"numerator": 1, "denominator": 5})
-        self.assertLessEqual(selected["selective_risk_upper_confidence_bound"], 0.75)
-        self.assertAlmostEqual(selected["selective_risk_upper_confidence_bound"], 0.716417936118, places=8)
+        self.assertEqual(selected["threshold"], {"numerator": 7, "denominator": 10})
+        self.assertEqual(selected["accepted"], 6)
+        self.assertEqual(selected["errors"], 2)
+        self.assertEqual(selected["achieved_selective_risk"], {"numerator": 1, "denominator": 3})
+        self.assertLessEqual(selected["selective_risk_upper_confidence_bound"], 0.95)
         self.assertEqual(selected["familywise_confidence_level"], 0.95)
-        self.assertEqual(selected["candidate_threshold_count"], 2)
-        self.assertAlmostEqual(selected["per_candidate_confidence_level"], 0.975, places=12)
+        self.assertEqual(selected["candidate_threshold_count"], 101)
+        self.assertEqual(selected["eligible_candidate_threshold_count"], 86)
+        self.assertAlmostEqual(
+            selected["per_candidate_confidence_level"],
+            1.0 - 0.05 / 101,
+            places=12,
+        )
+        self.assertEqual(
+            selected["threshold_grid"],
+            "predeclared exact fractions k/100 for k=0..100",
+        )
         self.assertEqual(
             selected["risk_bound_method"],
             "Bonferroni-corrected one-sided exact Clopper-Pearson binomial upper confidence limit",
         )
-        self.assertEqual(selected["coverage"], {"numerator": 5, "denominator": 6})
+        self.assertEqual(selected["coverage"], {"numerator": 6, "denominator": 6})
         self.assertFalse(selected["test_used"])
         self.assertFalse(selected["challenge_used"])
 
-        # За суворішої межі empirical risk уже не достатній: безпечного порога немає.
+        # Навіть empirical risk нижче 0.50 не проходить сімейну верхню межу.
         no_safe_threshold = evaluator.select_threshold(
             rows,
             max_selective_risk=0.50,
@@ -1143,8 +1149,9 @@ class SystemOneResearchPipelineTests(unittest.TestCase):
         )
         self.assertEqual(too_few_validation["status"], "no-safe-threshold")
         self.assertIsNone(too_few_validation["threshold"])
-        self.assertEqual(too_few_validation["candidate_threshold_count"], 0)
-        self.assertIsNone(too_few_validation["per_candidate_confidence_level"])
+        self.assertEqual(too_few_validation["candidate_threshold_count"], 101)
+        self.assertEqual(too_few_validation["eligible_candidate_threshold_count"], 0)
+        self.assertIsNotNone(too_few_validation["per_candidate_confidence_level"])
         self.assertEqual(
             too_few_validation["reason"],
             "validation count is below minimum accepted count",
@@ -1153,9 +1160,8 @@ class SystemOneResearchPipelineTests(unittest.TestCase):
         wrong_split = [dict(row) for row in rows]
         wrong_split[0]["split"] = "test"
         with self.assertRaises(evaluator.EvaluationError):
-            evaluator.select_threshold(wrong_split, max_selective_risk=0.75, min_accepted=4)
+            evaluator.select_threshold(wrong_split, max_selective_risk=0.95, min_accepted=4)
 
-        # CLI перевіряє запис JSON: атомарний файл, точний поріг і правильний newline.
         from unittest.mock import patch
 
         with tempfile.TemporaryDirectory() as directory:
@@ -1173,7 +1179,7 @@ class SystemOneResearchPipelineTests(unittest.TestCase):
                     "--mode",
                     "select-threshold",
                     "--max-selective-risk",
-                    "0.75",
+                    "0.95",
                     "--min-accepted",
                     "4",
                     "--output",
@@ -1183,9 +1189,12 @@ class SystemOneResearchPipelineTests(unittest.TestCase):
                 self.assertEqual(evaluator.main(), 0)
             report = json.loads(output_path.read_text(encoding="utf-8"))
             self.assertEqual(report["status"], "selected")
-            self.assertEqual(report["threshold"], {"numerator": 17, "denominator": 20})
-            self.assertLessEqual(report["selective_risk_upper_confidence_bound"], 0.75)
-            self.assertEqual(report["risk_bound_method"], "Bonferroni-corrected one-sided exact Clopper-Pearson binomial upper confidence limit")
+            self.assertEqual(report["threshold"], {"numerator": 7, "denominator": 10})
+            self.assertLessEqual(report["selective_risk_upper_confidence_bound"], 0.95)
+            self.assertEqual(
+                report["threshold_grid"],
+                "predeclared exact fractions k/100 for k=0..100",
+            )
             self.assertEqual(
                 report["input_sha256"],
                 hashlib.sha256(input_bytes).hexdigest(),
