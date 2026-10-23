@@ -514,7 +514,7 @@ mod tests {
     }
 
     #[test]
-    fn d9_without_runtime_surface_renders_exact_canonical_bits() {
+    fn d9_without_executable_mechanism_still_projects_ratified_full_ukr() {
         let d9 = Value::DomainIdentity(crate::DomainIdentity::D9(crate::CoreD9::from_word(
             crate::Bit9::new(0b1_00000001).unwrap(),
         )));
@@ -524,12 +524,11 @@ mod tests {
             render_value_for_presentation(&d9, PresentationLanguage::Canonical),
             "100000001"
         );
-        // Human presentation never mints runtime routing. The established
-        // Ukrainian fallback keeps the value visibly typed as a domain
-        // identity, while Sanskrit falls back to the exact canonical bits.
+        // Відображення ратифікованої Д9-колонки «укр» не означає
+        // допуску механізму виконання. Канонічний носій не змінюємо.
         assert_eq!(
             render_value_for_presentation(&d9, PresentationLanguage::Ukrainian),
-            "#<домен D9:100000001>"
+            "перше-від-перше-від-перше-від-перше-від-перше-від-перше-від-решта"
         );
         assert_eq!(
             render_value_for_presentation(&d9, PresentationLanguage::Sanskrit),
@@ -601,6 +600,38 @@ mod tests {
         // Машинний точнодоменний код залишився тим самим.
         assert_eq!(value.to_string(), "01100");
         assert_eq!(uk_operation_name("невідомий-символ"), "невідомий-символ");
+    }
+
+    #[test]
+    fn вища_драбина_укр_не_підмінюється_старим_сід8() {
+        let d8_selector = Value::DomainIdentity(crate::DomainIdentity::D8(
+            crate::CoreD8::from_word(crate::Bit8::new(0b01100000).unwrap()),
+        ));
+        assert_eq!(
+            render_value_for_presentation(&d8_selector, PresentationLanguage::Ukrainian),
+            "решта-від-перше-від-перше-від-перше-від-перше-від-перше"
+        );
+
+        let d10 = Value::DomainIdentity(crate::DomainIdentity::D10(
+            crate::DomainD10::new(0b0000000001).unwrap(),
+        ));
+        assert_eq!(
+            render_value_for_presentation(&d10, PresentationLanguage::Ukrainian),
+            "кількість-результатів-спостереження"
+        );
+        assert_eq!(d10.to_string(), "0000000001");
+
+        // Відсутність конкретної проєкції не створює вигаданий
+        // викличний символ або тотожність зі старим W8.
+        let d10_without_projection = Value::DomainIdentity(crate::DomainIdentity::D10(
+            crate::DomainD10::new(0).unwrap(),
+        ));
+        assert_eq!(
+            render_value_for_presentation(
+                &d10_without_projection, PresentationLanguage::Ukrainian
+            ),
+            "#<домен D10:0000000000>"
+        );
     }
 
     #[test]
