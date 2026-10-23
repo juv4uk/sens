@@ -159,6 +159,24 @@ run_law() {
   if ! profile_stage "$id" sens-paired timeout 45s "$sens" --t5m-pair "$source" "$physical" >"$dir/paired.out" 2>"$dir/paired.err"; then
     cat "$dir/paired.err" >&2
     report_physical_red_source "$id" "$source" "$physical" "$dir/paired.err"
+    # Діагностика відмінності середовищ: прямий файл має Core4,
+    # а парний фізичний маршрут запускається в чистому SENS.
+    # Додатковий запуск ніколи не змінює RED на PASS.
+    if grep -Fq 'domain identity is not callable under its ratified law: D7 ' "$dir/paired.err"; then
+      if profile_stage "$id" sens-paired-core4-diagnostic timeout 45s "$sens" \
+        --t5m-pair "$source" "$physical" --core4-runtime \
+        >"$dir/paired-core4.out" 2>"$dir/paired-core4.err"; then
+        if cmp -s "$dir/direct.out" "$dir/paired-core4.out"; then
+          echo "SENS_D7_PROFILE_DIAGNOSTIC id=$id clean=RED core4=PASS output=BYTE_PARITY verdict=RED" >&2
+        else
+          echo "SENS_D7_PROFILE_DIAGNOSTIC id=$id clean=RED core4=PASS output=DIVERGENT verdict=RED" >&2
+          sha256sum "$dir/direct.out" "$dir/paired-core4.out" >&2
+        fi
+      else
+        echo "SENS_D7_PROFILE_DIAGNOSTIC id=$id clean=RED core4=RED verdict=RED" >&2
+        sed -n '1,8p' "$dir/paired-core4.err" >&2
+      fi
+    fi
     fail "$id" "$(paired_failure_layer "$dir/paired.err")" "source-matched-physical-execution" "rejected"
   fi
   if ! profile_stage "$id" sens-standalone timeout 45s "$trit" eval-core4 "$physical" >"$dir/physical.out" 2>"$dir/physical.err"; then
