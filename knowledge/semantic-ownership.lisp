@@ -27,7 +27,7 @@
 (ownership gensym - lisp-owned stdlib confirmed no "Політика свіжого символу складена в Lisp зі string-операцій і monotonic observation" "lib/core4.lisp" "tests/fixtures/conformance.lisp;crates/sens/tests/mccarthy.rs" - -)
 (ownership meta-evaluator - lisp-owned self-hosting confirmed no "Lisp-owned metacircular evaluator witness; усі 34 required parity rows підтверджені machine evidence matrix" "lib/meta-eval.lisp;knowledge/meta-eval-evidence.lisp" "scripts/verify-repo.lisp;crates/sens/tests/witness_authority.rs;tests/fixtures/meta-semantic-registry-witness.lisp;crates/sens/tests/meta_eval_error_kind_parity.rs;crates/sens/tests/meta_eval_error_detail_boundary.rs" - -)
 
-(ownership unification - lisp-owned reasoning confirmed no "Уніфікація логічних змінних з occurs-check" "lib/unify.lisp" "tests/fixtures/conformance.lisp" - -)
+(ownership unification - lisp-owned reasoning confirmed no "Уніфікація логічних змінних з occurs-check" "lib/unify.lisp" "tests/semantic/unification-occurs-check-law.lisp;tests/semantic/unification-occurs-check-mutant.lisp" - -)
 (ownership backward-reasoning - lisp-owned reasoning confirmed no "Backward-chaining пошук доказу й побудова provenance" "lib/reason.lisp" "crates/sens/tests/reason_stack.rs;crates/sens/tests/reason_index.rs" - -)
 (ownership reason-index - lisp-owned reasoning confirmed no "Скінченний immutable predicate index із точним linear fallback" "lib/reason.lisp" "crates/sens/tests/reason_index.rs;crates/sens/tests/reason_advice_scale.rs" - -)
 (ownership reasoning-outcomes - lisp-owned reasoning confirmed no "Data-only outcome algebra: proved/unknown/partial/blocked/disputed/invalid" "lib/result-status.lisp" "crates/sens/tests/result_status.rs" - -)
