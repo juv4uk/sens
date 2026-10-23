@@ -182,40 +182,6 @@ def authority(root):
     # exact addresses with full current call projections are considered.
     return mapping, blocked
 
-def ukrainian_projection(root, mapping):
-    """Recheck historical successor spellings against exact current domain rows.
-
-    authority() has already matched the dated SID8 donor to its ratified
-    (domain, bits) identity and returned the canonical full «укр» head.
-    Its values are *spellings*, not bit strings: looking up row.bits here
-    lost every successor and stopped the source migration.
-    """
-    required = set(mapping.values())
-    coordinates = {}
-    for width in (3, 4, 5, 6, 8, 9):
-        for row in read_domain_table(root / f"lib/domains/d{width}.lisp"):
-            name = row.ukr
-            if name not in required:
-                continue
-            # D3 NIL and display-only/text residents cannot become call heads.
-            # An apostrophe is a valid Ukrainian keyboard glyph (п'ятий).
-            if (row.role == "display" or not isinstance(name, str)
-                    or not name or name == "()"
-                    or any(c.isspace() or c in ("(", ")", chr(92), chr(34), ";")
-                           for c in name)):
-                raise ValueError(f"D{width}:{row.bits}: invalid executable укр projection")
-            identity = (f"D{width}", row.bits)
-            previous = coordinates.get(name)
-            if previous is not None and previous != identity:
-                raise ValueError(f"ambiguous exact-domain укр projection: {name}")
-            coordinates[name] = identity
-    if set(coordinates) != required:
-        raise ValueError("historical successor without a ratified укр domain row: "
-                         + ", ".join(sorted(required - set(coordinates))))
-    # No second raw-byte -> D8 conversion: the historical crosswalk already
-    # resolved exact semantic identity. Human source receives only its «укр».
-    return dict(mapping)
-
 def rewrite(src, mapping, blocked):
     stack, edits, problems = [], [], []
     quote = False
@@ -346,9 +312,7 @@ def guard_module(root):
 
 def run(root, write=False, selected=None):
     mapping, blocked = authority(root)
-    # Executable human Lisp uses the full ратифікована «укр» column.
-    # Keep rewrite(..., mapping, ...) available only for historical bit-delta witnesses.
-    surface_mapping = ukrainian_projection(root, mapping)
+    # authority() has already resolved each historical code to its current укр spelling.
     guard = guard_module(root)
     # Повторно використовуємо канонічні Git-blob pins із #4460.
     # Будь-яка зміна навіть одного байта в джерелі залишається BLOCK, а не skip.
@@ -407,7 +371,7 @@ def run(root, write=False, selected=None):
                            "potential_heads": 0,
                            "reasons": ["generated carrier needs generator migration"]})
             continue
-        updated, n, problems = rewrite(original, surface_mapping, blocked)
+        updated, n, problems = rewrite(original, mapping, blocked)
         if n:
             try:
                 problems.extend(x.rule + " at line " + str(x.line)
