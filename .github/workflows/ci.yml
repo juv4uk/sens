@@ -258,20 +258,20 @@ jobs:
           set -euo pipefail
           binary="$PWD/target/debug/sens"
           test -x "$binary"
-          перевірити_закон() {
-            local id="$1" джерело="$2" очікуване="$3" фактичне
-            if ! фактичне="$(timeout 45s "$binary" "$джерело")"; then
-              echo "::error file=$джерело,title=SENS Lisp law::REGRESSION id=$id layer=eval expected=$очікуване actual=execution-failure"
+          check_lisp_law() {
+            local id="$1" source="$2" expected="$3" actual
+            if ! actual="$(timeout 45s "$binary" "$source")"; then
+              echo "::error file=$source,title=SENS Lisp law::REGRESSION id=$id layer=eval expected=$expected actual=execution-failure"
               return 1
             fi
-            if [[ "$фактичне" != "$очікуване" ]]; then
-              echo "::error file=$джерело,title=SENS Lisp law::REGRESSION id=$id layer=semantics expected=$очікуване actual=$фактичне"
+            if [[ "$actual" != "$expected" ]]; then
+              echo "::error file=$source,title=SENS Lisp law::REGRESSION id=$id layer=semantics expected=$expected actual=$actual"
               return 1
             fi
-            echo "::notice file=$джерело,title=SENS Lisp law::PASS id=$id native=SENS result=$фактичне"
+            echo "::notice file=$source,title=SENS Lisp law::PASS id=$id native=SENS result=$actual"
           }
-          перевірити_закон d3-d4-positive tests/semantic/d3-d4-ukr-native-laws.lisp '(1 1 1 1 1 1 1 1 1 1)'
-          перевірити_закон d3-d4-negative tests/semantic/d3-d4-ukr-native-mutant.lisp '0'
+          check_lisp_law d3-d4-positive tests/semantic/d3-d4-ukr-native-laws.lisp '(1 1 1 1 1 1 1 1 1 1)'
+          check_lisp_law d3-d4-negative tests/semantic/d3-d4-ukr-native-mutant.lisp '0'
 
       # Учорашній BENCH-LISP→SENS: анотації лише зі справжніх нативних метрик.
       - name: Lisp → T5M → SENS — анотації розміру й AST
