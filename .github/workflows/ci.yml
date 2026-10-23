@@ -467,6 +467,28 @@ jobs:
           cargo build --locked -p sens-cli --bin sens --bin sens-trit --features benchmark-ast-visits
           test -x "$PWD/target/debug/sens"
           test -x "$PWD/target/debug/sens-trit"
+      - name: Rust — smoke фізичного T5 бенчмарка після перевірки паритету
+        id: physical_t5_benchmark_smoke
+        if: ${{ always() && steps.native-build.outcome == 'success' }}
+        shell: bash
+        timeout-minutes: 8
+        run: |
+          set -euo pipefail
+          out="$RUNNER_TEMP/physical-t5-mechanism-smoke.tsv"
+          SENS_PHYSICAL_T5_SENS="$PWD/target/debug/sens" \
+          SENS_PHYSICAL_T5_TRIT="$PWD/target/debug/sens-trit" \
+          SENS_PHYSICAL_T5_REPS=5 SENS_PHYSICAL_T5_WARMUPS=1 \
+            cargo test --locked -p sens-cli --features benchmark-ast-visits \
+              --test physical_sens_runtime_benchmark -- --ignored --nocapture \
+              > "$out" 2>&1 || {
+                cat "$out" >&2
+                exit 1
+              }
+          test "$(grep -c '^RUST_PHYSICAL_T5_PREFLIGHT[[:space:]]' "$out")" -eq 8
+          test "$(grep -c '^RUST_PHYSICAL_T5_SAMPLE[[:space:]]' "$out")" -eq 120
+          test "$(grep -c '^RUST_PHYSICAL_T5_SUMMARY[[:space:]]' "$out")" -eq 24
+          grep -E '^RUST_PHYSICAL_T5_(PREFLIGHT|SUMMARY)[[:space:]]' "$out"
+
 
       # Маршрут 22.10: кожен push із .lisp МУСИТЬ дійти до реального
       # SENS → Zig/T5M mint/verify-view → парного й фізичного SENS-виконання.
