@@ -19,9 +19,10 @@ on:
 permissions:
   contents: read
 
-# Нові push тієї самої гілки скасовують застарілий CI і заощаджують ресурси.
+# Окремий SHA має незалежний прогін: не скасовуємо попередні й не ставимо їх у чергу за гілкою.
+# Семантичні RED залишаються видимими на кожному перевіреному коміті.
 concurrency:
-  group: sens-ci-${{ github.workflow }}-${{ github.ref }}
+  group: sens-ci-${{ github.workflow }}-${{ github.sha }}-${{ github.event_name }}
   cancel-in-progress: false
 
 jobs:
