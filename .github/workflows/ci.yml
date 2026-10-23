@@ -547,6 +547,39 @@ jobs:
             echo "::error title=Zig D13 research benchmark::REGRESSION layer=benchmark-run expected=success actual=nonzero"
             zig_failed=1
           fi
+          # Д13-гра: лише похідні D11-селектори, без семантичної ратифікації.
+          # Негативні кадри і всі 2048 точних координат перевіряє сам Zig.
+          if zig test -O ReleaseFast -lc research/zig-codecs/d13_selector_contest.zig \
+              > "$RUNNER_TEMP/zig-d13-selector-tests.log" 2>&1; then
+            cat "$RUNNER_TEMP/zig-d13-selector-tests.log"
+            echo "::notice title=Zig D13 selector research::PASS layer=mechanism parents=512 derived=2048 semantics=NOT_TESTED"
+          else
+            cat "$RUNNER_TEMP/zig-d13-selector-tests.log" >&2
+            echo "::error file=research/zig-codecs/d13_selector_contest.zig,title=Zig D13 selectors::REGRESSION layer=codec-test input=D11-parent-table expected=2048-exact-derived-coordinates-and-negative-tests actual=failed"
+            zig_failed=1
+          fi
+          if zig run -O ReleaseFast -lc research/zig-codecs/d13_selector_contest.zig \
+              > "$RUNNER_TEMP/zig-d13-selector-bench.log" 2>&1; then
+            cat "$RUNNER_TEMP/zig-d13-selector-bench.log"
+            if grep -Fq 'mode=selector11 words=64 bytes=88' "$RUNNER_TEMP/zig-d13-selector-bench.log" &&
+               grep -Fq 'mode=dense13 words=64 bytes=104' "$RUNNER_TEMP/zig-d13-selector-bench.log" &&
+               grep -Fq 'mode=raw16 words=64 bytes=128' "$RUNNER_TEMP/zig-d13-selector-bench.log" &&
+               grep -Fq 'mode=selector11 words=2048 bytes=2816' "$RUNNER_TEMP/zig-d13-selector-bench.log" &&
+               grep -Fq 'mode=dense13 words=2048 bytes=3328' "$RUNNER_TEMP/zig-d13-selector-bench.log" &&
+               grep -Fq 'mode=raw16 words=2048 bytes=4096' "$RUNNER_TEMP/zig-d13-selector-bench.log" &&
+               [[ "$(grep -c '^D13_CONTEST mode=' "$RUNNER_TEMP/zig-d13-selector-bench.log")" -eq 6 ]] &&
+               grep -Fq 'D13_CONTEST_METHOD paired=YES alternating=YES samples=15' "$RUNNER_TEMP/zig-d13-selector-bench.log"; then
+              cat "$RUNNER_TEMP/zig-d13-selector-bench.log" >> "$GITHUB_STEP_SUMMARY"
+              echo "::notice title=Zig D13 selector benchmark::MEASURED provenance=$(git rev-parse HEAD) frame=EXCLUDED semantics=NOT_TESTED"
+            else
+              echo "::error title=Zig D13 selector benchmark::REGRESSION layer=benchmark-contract expected=six-exact-rows-and-method actual=missing-or-invalid"
+              zig_failed=1
+            fi
+          else
+            cat "$RUNNER_TEMP/zig-d13-selector-bench.log" >&2
+            echo "::error title=Zig D13 selector benchmark::REGRESSION layer=benchmark-run expected=success actual=nonzero"
+            zig_failed=1
+          fi
           # Дослідний кодек DWC1 — окремий від production Zig/T5M.
           # На кожному корпусі перевіряємо exact (width,bits) перед AB/BA замірами.
           if zig test -O ReleaseFast -lc research/zig-codecs/domain_codebook_experiment.zig \
