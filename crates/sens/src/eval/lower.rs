@@ -56,6 +56,13 @@ fn head_domain_identity(head: &Expr, mode: LowerMode) -> Option<CoreDomainIdenti
 /// and immutable-binding checks. Never reconstruct an historical eight-bit ID.
 pub(crate) fn immutable_surface_domain_identity(name: &str) -> Option<CoreDomainIdentity> {
     necessary_forms::domain_identity_for_symbol(name)
+        // Ukrainian source heads must follow the selected uk/ukr projection,
+        // not the cross-language compatibility index. In particular,
+        // D8 EQUAL (однакові?) must never fall through to historical D3 EQ.
+        .or_else(|| {
+            semantic_registry::exact_uk_callable_for_source_head(name)
+                .and_then(|identity| identity.core_operation())
+        })
         .or_else(|| semantic_registry::domain_identity_for_surface(name))
 }
 
@@ -362,6 +369,14 @@ mod domain_ladder_lowering_migration_tests {
             .into_iter()
             .next()
             .expect("одна форма")
+    }
+
+    #[test]
+    fn ukr_equal_source_head_keeps_its_ratified_d8_identity() {
+        let identity = immutable_surface_domain_identity("однакові?")
+            .expect("ratified Ukrainian D8 EQUAL source route");
+        assert_eq!(identity.width(), 8, "D8 must not collapse to D3 EQ");
+        assert_eq!(identity.packed_bits(), 0b11110111, "exact D8 EQUAL word");
     }
 
     #[test]
