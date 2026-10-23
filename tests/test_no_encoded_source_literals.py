@@ -38,6 +38,16 @@ class EncodedSourceLiteralTests(unittest.TestCase):
             "проєкція генератора не має числових голів або літералів",
         )
 
+    def test_racket_boot_core_has_no_numeric_source_literals(self):
+        # Bootstrap є живою проєкцією; корені чисел названі, приріст — D5-додавання.
+        path = ROOT / "racket/boot/core.lisp"
+        source = path.read_text(encoding="utf-8")
+        self.assertEqual(
+            CHECK.find_forbidden_literals(source, path="racket/boot/core.lisp"),
+            [],
+            "проєкція Racket bootstrap не має числових голів або літералів",
+        )
+
     def test_machine_effect_live_source_uses_named_coordinates(self):
         # Лексична перевірка; обчислення маршруту перевіряють нативні тести SENS.
         path = ROOT / "lib/machine/lowering/semantic-effects.lisp"
