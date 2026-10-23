@@ -403,6 +403,7 @@ fn verify_unpaired_ukrainian_libs_natively() {
         "list-unique-last-stable",
         "list-replace-last-occurrence-general",
         "list-drop-while-atom-general",
+        "list-first-class-drop-while-zero-copy-general",
         "list-take-while-atom-general",
         "list-interpose-general",
         "list-last-occurrence-suffix",
