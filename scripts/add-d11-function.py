@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import subprocess
 import sys
 from pathlib import Path
@@ -41,24 +42,14 @@ def ladder_names() -> set[str]:
 
 
 def project_names() -> dict[str, str]:
-    # Усі інструменти використовують одну механічну граматику DEFINE,
-    # чинний охоронець драбини. Цей помічник не реалізує Lisp-семантику.
-    import importlib.util
-    guard_path = ROOT / "scripts" / "guard-domain-function-reuse.py"
-    spec = importlib.util.spec_from_file_location("guard_domain_function_reuse", guard_path)
-    if spec is None or spec.loader is None:
-        raise RuntimeError(f"немає механічного сканера визначень: {guard_path}")
-    guard = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(guard)
-
     out: dict[str, str] = {}
     for rel in _tracked("lib"):
         if not rel.endswith(".lisp") or rel.startswith(("lib/domains/", "lib/generated/", "lib/surface/")):
             continue
         p = ROOT / rel
         if p.is_file():
-            for name in guard.definitions(p.read_text(encoding="utf-8", errors="ignore")):
-                out.setdefault(name, rel)
+            for m in re.finditer(r"\(визначити\s+([^\s()]+)", p.read_text(encoding="utf-8", errors="ignore")):
+                out.setdefault(m.group(1), rel)
     return out
 
 
@@ -87,7 +78,7 @@ def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description="додати функцію в D11 — один шлях")
     ap.add_argument("name", nargs="?", help="бажана укр-назва нової функції")
     ap.add_argument("--parent", help="10-бітна координата батька (селекторна похідна)")
-    ap.add_argument("--suffix", help="0: перше або 1: решта")
+    ap.add_argument("--suffix", help="0 (перше) або 1 (решта)")
     args = ap.parse_args(argv)
 
     print("═" * 62)
@@ -120,6 +111,23 @@ def main(argv: list[str] | None = None) -> int:
     print(f"2) Проєкт (lib)    : {'Є у ' + project[name] + ' — ВЖИЙ' if in_project else 'немає'}")
     print(f"3) D11-кандидати   : {'Є в реєстрі кандидатів' if in_cands else 'немає'}")
 
+    # СХОЖІ (не точні) назви — щоб агент не створив дубль під іншим ім'ям.
+    import difflib
+    pool = ladder | set(project) | cands
+    substr = {n for n in pool if n != name and name.lower() in n.lower()}
+    # Складені імена: порівнюємо ще й за головою (перший складник до «-»),
+    # бо «частота» і «частоти-елементів-унарно» різняться лише закінченням голови.
+    heads = {n: n.split("-")[0].split(":")[-1] for n in pool if n != name}
+    fuzzy = set(difflib.get_close_matches(name, list(heads.values()), n=12, cutoff=0.75))
+    by_head = {n for n, h in heads.items() if h in fuzzy}
+    fuzzy_full = set(difflib.get_close_matches(name, [n for n in pool if n != name], n=12, cutoff=0.6))
+    near = sorted(substr | fuzzy_full | by_head)
+    if near:
+        print(f"\nСХОЖІ назви ({len(near)}) — перевір, чи це та сама операція:")
+        for n in near[:12]:
+            where = "драбина" if n in ladder else (project.get(n, "D11-кандидат"))
+            print(f"   {n}   ← {where}")
+
     print("\n" + "─" * 62)
     if on_ladder:
         print("ВЕРДИКТ: наявна поверхня драбини. Вжий її. Нічого не додавай.")
@@ -141,7 +149,7 @@ def main(argv: list[str] | None = None) -> int:
     print("     1. визнач функцію в lib/d11-<сімейство>.lisp, уживаючи наявні поверхні драбин;")
     print("     2. додай її до закону сімейства (knowledge/d11/закони-пропозиція-*.md);")
     print("     3. напиши SENS-свідка tests/semantic/d11-<сімейство>-{law,mutant}.lisp")
-    print("        з самовердиктом: хибний закон має відхилити сам SENS;")
+    print("        з самовердиктом (перше (як-є ()));")
     print("     4. додай --binding-source у scripts/execute_changed_lisp_t5m.sh.")
     print()
     print("  Координата: null (сімейний закон не дає opcode). Це ПРОПОЗИЦІЯ —"
