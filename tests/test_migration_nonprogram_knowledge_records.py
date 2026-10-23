@@ -125,5 +125,11 @@ class KnowledgeRecordSources(unittest.TestCase):
         self.assertFalse((ROOT / "knowledge/function-table-sculpt-audit.lisp").exists())
 
 
+    def test_silent_regeneration_inventory_does_not_keep_retired_binary_templates(self):
+        source = (ROOT / "knowledge/silent-fallback-inventory.lisp").read_text(encoding="utf-8")
+        self.assertNotIn('(site (class "silent-regeneration")', source)
+        self.assertNotRegex(source, r"\b[01]{8}\b")
+        self.assertIn("активних W8/трьохпольових COND-шаблонів", source)
+
 if __name__ == "__main__":
     unittest.main()
