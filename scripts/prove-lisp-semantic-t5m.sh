@@ -899,6 +899,36 @@ sha256sum benchmarks/d3-structural-bench.lisp tests/semantic/d3-structural-bench
 run_case run_law d3-structural-bench-positive "$d3_hot_law" 1
 run_case run_law d3-structural-bench-mutant "$d3_hot_mutant" 0
 
+# Семантика D6 ALL — виконувані мовні закони з чинним визначенням Core4.
+d6_quantifier_source="$evidence/d6-first-class-predicate-quantifiers.lisp"
+: > "$d6_quantifier_source"
+for quantifier in будь-яке? усі?; do
+  if ! awk -v target="(визначити $quantifier" '
+    $0 == target {
+      if (found++) exit 2
+      copying = 1
+    }
+    copying && NF == 0 {
+      copying = 0
+      complete++
+      next
+    }
+    copying { print }
+    END { if (found != 1 || complete != 1 || copying) exit 2 }
+  ' lib/core4-parts/core4-d6b.lisp >> "$d6_quantifier_source"; then
+    echo "::error::SENS_D6_QUANTIFIER_SOURCE_NOT_ISOLATABLE function=$quantifier source=lib/core4-parts/core4-d6b.lisp" >&2
+    exit 2
+  fi
+  printf '\n' >> "$d6_quantifier_source"
+done
+all_quantifier_bundle="$evidence/all-predicate-quantifier.lisp"
+any_quantifier_bundle="$evidence/any-predicate-quantifier.lisp"
+cat -- tests/fixtures/epistemic-d1-names.lisp "$d6_quantifier_source" tests/semantic/закон-усі-за-предикатом.lisp > "$all_quantifier_bundle"
+cat -- tests/fixtures/epistemic-d1-names.lisp "$d6_quantifier_source" tests/semantic/закон-існує-за-предикатом.lisp > "$any_quantifier_bundle"
+sha256sum lib/core4-parts/core4-d6b.lisp tests/fixtures/epistemic-d1-names.lisp tests/semantic/закон-усі-за-предикатом.lisp tests/semantic/закон-існує-за-предикатом.lisp > "$evidence/d6-quantifier-inputs.sha256"
+run_case run_law all-predicate-quantifier-law "$all_quantifier_bundle" 1
+run_case run_law exists-predicate-quantifier-law "$any_quantifier_bundle" 1
+
 # Класифікуємо кореневі причини без повторного запуску SENS.
 printf 'SENS_RED_CAUSE root=d7-value-call count=%d ids=%s\n' "${#red_d7_ids[@]}" "${red_d7_ids[*]}"
 printf 'SENS_RED_CAUSE root=d3-car-type count=%d ids=%s\n' "${#red_d3_car_ids[@]}" "${red_d3_car_ids[*]}"
