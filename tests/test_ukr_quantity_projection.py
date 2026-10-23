@@ -47,28 +47,29 @@ def parse_forms(source: str) -> tuple:
     return tuple(forms)
 
 
+# Точний кінцевий виклик виконує SENS, а не цей структурний тест.
+# Його не слід плутати з DEFINE чи з доказом семантики в Python.
+EXECUTION_WITNESS = ("науковий-список-правильний?", ("як-є", ("а", "б")))
+
+
 def definitions(forms: tuple) -> dict[str, tuple]:
     result = {}
-    # Живий файл завершується виконуваним SENS-свідком, а не ще одним
-    # DEFINE. Структурна перевірка не має відкидати справжнє виконання.
-    executable_witness = ("науковий-список-правильний?", ("як-є", ("а", "б")))
-    witnessed = False
-    for form in forms:
-        if form == executable_witness and not witnessed:
-            witnessed = True
+    witnesses = []
+    for index, form in enumerate(forms):
+        if form == EXECUTION_WITNESS:
+            witnesses.append(index)
             continue
         if not isinstance(form, tuple) or len(form) != 3 or form[0] != "визначити":
-            raise AssertionError("очікувався український DEFINE або справжній SENS-свідок")
+            raise AssertionError("чинні верхньорівневі форми мають бути українськими DEFINE або точним кінцевим SENS-свідком")
         name = form[1]
         if not isinstance(name, str):
             raise AssertionError("некоректне ім'я визначення")
         if name in result:
             raise AssertionError(f"дубльоване визначення: {name}")
         result[name] = form[2]
-    if not witnessed:
-        raise AssertionError("зник виконуваний SENS-свідок перевірки списку")
+    if witnesses != [len(forms) - 1]:
+        raise AssertionError("відсутній або переміщений кінцевий виклик-свідок SENS")
     return result
-
 
 def verify(source: str) -> dict[str, tuple]:
     forms = parse_forms(source)
