@@ -265,6 +265,8 @@ run_case run_law d4-eval-quote-mutant tests/semantic/d4-eval-value-call-mutant.l
 run_case run_law d4-lambda-application-positive tests/semantic/d4-lambda-application-law.lisp 1
 run_case run_law d4-lambda-application-mutant tests/semantic/d4-lambda-application-mutant.lisp 0
 run_case run_law d4-late-binding-positive tests/semantic/d4-late-definition-binding-law.lisp 1
+# Д4: негативний самовердикт повторного визначення, тільки Lisp/SENS.
+run_case run_law d4-late-binding-redefinition-mutant tests/semantic/d4-late-definition-binding-mutant.lisp 0
 # D4: параметр внутрішньої LAMBDA повинен затінити зовнішній.
 run_case run_law d4-parameter-shadow-positive tests/semantic/language-law-d4-parameter-shadowing.lisp 1
 run_case run_law d4-parameter-shadow-mutant tests/semantic/language-mutant-d4-parameter-shadowing.lisp 0
