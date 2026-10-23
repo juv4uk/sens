@@ -411,6 +411,14 @@ cat -- "$meta_sixth_definition" tests/semantic/d11-meta-sixth-laws.lisp > "$meta
 cat -- "$meta_sixth_definition" tests/semantic/d11-meta-sixth-mutant.lisp > "$meta_sixth_mutant_bundle"
 run_case run_law d11-meta-sixth-positive "$meta_sixth_law_bundle" 1
 run_case run_law d11-meta-sixth-mutant "$meta_sixth_mutant_bundle" 0
+# Порівняння Д11: десять самоперевірних мовних законів і негативний мутант.
+# Числа походять з Lisp LENGTH; фізична невикличність D6 лишається RED #5854.
+meta_compare_law_bundle="$evidence/d11-meta-compare-positive-complete.lisp"
+meta_compare_mutant_bundle="$evidence/d11-meta-compare-mutant-complete.lisp"
+cat -- lib/meta-eval.lisp tests/semantic/d11-meta-compare-laws.lisp > "$meta_compare_law_bundle"
+cat -- lib/meta-eval.lisp tests/semantic/d11-meta-compare-mutant.lisp > "$meta_compare_mutant_bundle"
+run_case run_law d11-meta-compare-positive "$meta_compare_law_bundle" 1
+run_case run_law d11-meta-compare-mutant "$meta_compare_mutant_bundle" 0
 # LAST-DEFINE: D7-текст має D8-рівність у нормативному Lisp, не D3 EQ Rust.
 # Повний MetaEval починається з невикличного D6 LENGTH (#5854). Для цієї
 # незалежної функції беремо ТОЧНО її визначення з чинного Lisp-файлу.

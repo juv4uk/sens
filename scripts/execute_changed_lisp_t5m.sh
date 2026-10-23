@@ -589,7 +589,9 @@ while IFS= read -r file || [[ -n "$file" ]]; do
   elif [[ "$file" == "tests/semantic/meta-fc-predicates-d1-law.lisp" ||
           "$file" == "tests/semantic/meta-fc-predicates-d1-mutant.lisp" ]]; then
     binding_sources=(--binding-source lib/meta-eval-first-class.lisp)
-  elif [[ "$file" == "tests/semantic/d11-meta-sixth-laws.lisp" ||
+  elif [[ "$file" == "tests/semantic/d11-meta-compare-laws.lisp" ||
+          "$file" == "tests/semantic/d11-meta-compare-mutant.lisp" ||
+          "$file" == "tests/semantic/d11-meta-sixth-laws.lisp" ||
           "$file" == "tests/semantic/d11-meta-sixth-mutant.lisp" ||
           "$file" == "tests/semantic/d11-meta-last-define-laws.lisp" ||
           "$file" == "tests/semantic/d11-meta-last-define-mutant.lisp" ]]; then
