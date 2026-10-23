@@ -44,6 +44,14 @@ jobs:
       - name: Build SENS binaries (sens + sens-trit)
         run: cargo build --locked -p sens-cli --bin sens --bin sens-trit --features benchmark-ast-visits
 
+      - name: Канонічні D24 корені для фізичного вектора
+        run: |
+          awk '
+            /^\(визначити число-нуль 0\)$/ { zero++; print; next }
+            /^\(визначити число-один 1\)$/ { one++; print; next }
+            END { if (zero != 1 || one != 1) exit 2 }
+          ' lib/core4-parts/core4-language.lisp > "$RUNNER_TEMP/sens-core4-d24-roots.lisp"
+
       - name: Remint pairs via canonical Zig T5M
         id: remint
         env:
@@ -377,6 +385,7 @@ jobs:
             # Пари може ще не бути — refresh створює її канонічно (mint + view).
             bs=()
             case "$f" in
+              lib/persistent-vector.lisp) bs=(--binding-source "$RUNNER_TEMP/sens-core4-d24-roots.lisp");;
               lib/reason.lisp|lib/forward.lisp) bs=(--binding-source lib/unify.lisp);;
               lib/d11-clojure-partition-by.lisp) bs=(--binding-source lib/d11-srfi1-span-break.lisp);;
                 lib/d11-clojure-frequencies-unary.lisp) bs=(--binding-source lib/d11-clojure-group-by.lisp);;
@@ -667,6 +676,7 @@ jobs:
               fi
               bs=()
               case "$f" in
+                lib/persistent-vector.lisp) bs=(--binding-source "$RUNNER_TEMP/sens-core4-d24-roots.lisp");;
                 lib/reason.lisp|lib/forward.lisp) bs=(--binding-source lib/unify.lisp);;
               lib/d11-clojure-partition-by.lisp) bs=(--binding-source lib/d11-srfi1-span-break.lisp);;
                 lib/d11-clojure-frequencies-unary.lisp) bs=(--binding-source lib/d11-clojure-group-by.lisp);;
