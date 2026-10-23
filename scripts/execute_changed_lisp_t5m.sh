@@ -514,6 +514,9 @@ while IFS= read -r file || [[ -n "$file" ]]; do
   elif [[ "$file" == "tests/semantic/meta-fc-predicates-d1-law.lisp" ||
           "$file" == "tests/semantic/meta-fc-predicates-d1-mutant.lisp" ]]; then
     binding_sources=(--binding-source lib/meta-eval-first-class.lisp)
+  elif [[ "$file" == "tests/semantic/d4-lambda-application-law.lisp" ||
+          "$file" == "tests/semantic/d4-lambda-application-mutant.lisp" ]]; then
+    binding_sources=()
   elif [[ "$file" == "tests/semantic/unify-logic-law.lisp" ||
           "$file" == "tests/semantic/unify-logic-mutant.lisp" ]]; then
     # Ядро логіки (уніфікація, occurs-check, підстановка) — у lib/unify.lisp.
