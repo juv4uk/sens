@@ -96,14 +96,18 @@ jobs:
         shell: bash
         env:
           BEFORE_SHA: ${{ github.event.before }}
-          PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
         run: |
           set -euo pipefail
           raw="$RUNNER_TEMP/changed-lisp-raw.txt"
           manifest="$RUNNER_TEMP/changed-t5m-lisp.txt"
           base="$BEFORE_SHA"
           if [[ "$GITHUB_EVENT_NAME" == pull_request ]]; then
-            base="$PR_BASE_SHA"
+            # Для PR GitHub перевіряє синтетичний merge-коміт.
+            # Перший батько цього merge — точна база його файлів, без сусідніх push.
+            if ! git cat-file -e "$GITHUB_SHA^1" 2>/dev/null; then
+              timeout 60s git fetch --no-tags --deepen=2 origin "$GITHUB_REF"
+            fi
+            base="$(git rev-parse "$GITHUB_SHA^1")"
           fi
           if [[ -n "$base" && ! "$base" =~ ^0+$ ]]; then
             if ! git cat-file -e "$base^{commit}" 2>/dev/null; then
