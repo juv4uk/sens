@@ -101,6 +101,17 @@ class EncodedSourceLiteralTests(unittest.TestCase):
             "проєкція витягувача символів не має цифрових голів або літералів",
         )
 
+    def test_kernel_abi_lisp_guard_has_no_numeric_source_literals(self):
+        path = ROOT / "scripts/check-kernel-abi-transport-boundary.lisp"
+        source = path.read_text(encoding="utf-8")
+        self.assertEqual(
+            CHECK.find_forbidden_literals(
+                source, path="scripts/check-kernel-abi-transport-boundary.lisp"
+            ),
+            [],
+            "проєкція перевірки ABI не має числових голів або літералів",
+        )
+
     def test_machine_effect_live_source_uses_named_coordinates(self):
         # Лексична перевірка; обчислення маршруту перевіряють нативні тести SENS.
         path = ROOT / "lib/machine/lowering/semantic-effects.lisp"
