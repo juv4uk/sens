@@ -181,7 +181,7 @@ jobs:
 
       - name: Виконати змінені Lisp через поточний Zig T5M і справжній SENS
         id: t5m_changed_execute
-        if: steps.changed-t5m-lisp.outputs.has_files == 'true'
+        if: always() && steps.changed-t5m-lisp.outputs.has_files == 'true'
         shell: bash
         timeout-minutes: 15
         run: |
