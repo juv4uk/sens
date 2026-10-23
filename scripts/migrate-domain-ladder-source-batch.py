@@ -340,12 +340,12 @@ def run(root, write=False, selected=None):
                      path.startswith("benchmarks/") and path.count("/") == 1)):
             continue
         file = root / path
+        if file.is_symlink():
+            report.append({"path": path, "status": "blocked", "reasons": ["symlink"]})
+            continue
         if path.startswith("lib/surface/") and not _contains_source_definitions(file):
             # Проєкційні таблиці — дані. Але дійсні DEFINE-програми у
             # surface/ не можна приховувати від міграції лише через каталог.
-            continue
-        if file.is_symlink():
-            report.append({"path": path, "status": "blocked", "reasons": ["symlink"]})
             continue
         original = file.read_text(encoding="utf-8")
         # Raw regexes incorrectly attribute generated strings to historical
