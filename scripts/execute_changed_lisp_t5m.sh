@@ -199,9 +199,9 @@ run_native_t5m_program() {
     # Нативний Д5 закон та його мутант: вердикт формулює Lisp,
     # Zig пакує, SENS виконує фізичний T5M, Shell лише звіряє D1.
     case "$file" in
-      tests/semantic/d5-arithmetic-native-t5m-law.lisp|tests/semantic/d5-arithmetic-native-t5m-mutant.lisp)
+      tests/semantic/d5-arithmetic-native-t5m-law.lisp|tests/semantic/d5-arithmetic-native-t5m-mutant.lisp|tests/semantic/d3-structural-native-t5m-law.lisp|tests/semantic/d3-structural-native-t5m-mutant.lisp)
         local_expected=1
-        if [[ "$file" == "tests/semantic/d5-arithmetic-native-t5m-mutant.lisp" ]]; then
+        if [[ "$file" == *-mutant.lisp ]]; then
           local_expected=0
         fi
         printf '%s\n' "$local_expected" > "$dir/d5-language.expected"
