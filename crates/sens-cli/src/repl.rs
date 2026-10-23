@@ -321,6 +321,18 @@ fn append_t5m_expression_context(
             append_t5m_expression_context(&ratio, layout, words, depth + 1, quoted_data)?;
         }
         ExprKind::String(text) => {
+            // Людський Unicode існує лише на вході REPL. Перш ніж
+            // знижувати літерал у фізичні слова, обов'язково встановлюємо
+            // його точне D7-кодування. Неприпустимий символ НЕ повинен
+            // обходити драбину через D24 Unicode scalar / D8 CODE-CHAR.
+            let text_layout = if text.is_ascii() {
+                sens::Text7Layout::En
+            } else {
+                layout
+            };
+            let _admitted_d7 = sens::encode_text7(text, text_layout).map_err(|error| {
+                format!("T5M_D7_TEXT_NOT_ADMITTED: REPL glyph cannot enter binary SENS as Unicode: {error}")
+            })?;
             if quoted_data {
                 // Як і цитовані символи, ASCII-рядки є D7-даними EN,
                 // навіть коли виклична поверхня вибрана українською.
