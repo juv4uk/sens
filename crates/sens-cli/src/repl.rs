@@ -539,7 +539,7 @@ fn project_repl_surface_expression_in_scope(
                         && items.iter().all(|item| matches!(&item.kind, ExprKind::DomainIdentity(DomainIdentity::D7(_))))
             )
         {
-            if let Some(Value::BinaryNumber(number)) = session.environment.get(name) {
+            if let Some(Value::BinaryNumber(ref number)) = session.environment.get(name) {
                 if number.numeric_domain_width() == Some(24) {
                     return Ok(Expr {
                         kind: ExprKind::BinaryNumber((*number).clone()),
