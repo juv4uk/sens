@@ -105,9 +105,9 @@ jobs:
             if ! git cat-file -e "$base^{commit}" 2>/dev/null; then
               timeout 60s git fetch --no-tags --depth=1 origin "$base"
             fi
-            git -c core.quotePath=false diff --name-only --diff-filter=ACMRT "$base" "$GITHUB_SHA" -- '*.lisp' '*.sens' '.github/workflows/ci.yml' > "$raw"
+            git -c core.quotePath=false diff --name-only --diff-filter=ACMRT "$base" "$GITHUB_SHA" -- '*.lisp' '*.sens' '*.rs' '*.zig' '.github/workflows/ci.yml' > "$raw"
           else
-            git -c core.quotePath=false diff-tree --no-commit-id --root --name-only --diff-filter=ACMRT -r "$GITHUB_SHA" -- '*.lisp' '*.sens' '.github/workflows/ci.yml' > "$raw"
+            git -c core.quotePath=false diff-tree --no-commit-id --root --name-only --diff-filter=ACMRT -r "$GITHUB_SHA" -- '*.lisp' '*.sens' '*.rs' '*.zig' '.github/workflows/ci.yml' > "$raw"
           fi
           python3 - "$raw" "$manifest" "$GITHUB_OUTPUT" <<'PY'
           from pathlib import Path
@@ -121,6 +121,8 @@ jobs:
           data_paths = {"language-contract.lisp"}
           selected = []
           has_lisp = False
+          has_rust = False
+          has_zig = False
           workflow_changed = False
           for original in raw.read_text(encoding="utf-8").splitlines():
               if original == ".github/workflows/ci.yml":
@@ -128,6 +130,12 @@ jobs:
                   continue
               if original.endswith(".lisp"):
                   has_lisp = True
+              if original.endswith(".rs"):
+                  has_rust = True
+                  continue
+              if original.endswith(".zig"):
+                  has_zig = True
+                  continue
               name = original[:-5] + ".lisp" if original.endswith(".sens") else original
               if not name.endswith(".lisp") or name.startswith(data_prefixes) or name in data_paths:
                   continue
@@ -153,10 +161,18 @@ jobs:
                   continue
               if name not in selected:
                   selected.append(name)
+          # Мовний закон виконує нативний SENS за кожної зміни Lisp.
+          if has_lisp or workflow_changed:
+              witness = "tests/semantic/ukr-d3-structural-selftest.lisp"
+              if witness not in selected:
+                  selected.append(witness)
+              print(f"SENS_LISP_SEMANTIC_LAW source={witness} authority=SENS")
           manifest.write_text("".join(name + "\n" for name in selected), encoding="utf-8")
           with output.open("a", encoding="utf-8") as out:
               out.write(f"has_lisp={'true' if has_lisp or workflow_changed else 'false'}\n")
               out.write(f"has_files={'true' if selected else 'false'}\n")
+              out.write(f"has_rust={'true' if has_rust else 'false'}\n")
+              out.write(f"has_zig={'true' if has_zig else 'false'}\n")
           print(f"T5M_CHANGED_EXECUTABLE_LISP count={len(selected)}")
           for name in selected:
               print(f"T5M_CHANGED_FILE {name}")
@@ -174,10 +190,18 @@ jobs:
 
 
       - uses: dtolnay/rust-toolchain@1.99.0
-        if: steps.changed-t5m-lisp.outputs.has_lisp == 'true' || steps.changed-t5m-lisp.outputs.has_files == 'true'
+        if: steps.changed-t5m-lisp.outputs.has_lisp == 'true' || steps.changed-t5m-lisp.outputs.has_files == 'true' || steps.changed-t5m-lisp.outputs.has_rust == 'true'
 
       - uses: ./.github/actions/install-zig
-        if: steps.changed-t5m-lisp.outputs.has_lisp == 'true' || steps.changed-t5m-lisp.outputs.has_files == 'true'
+        if: steps.changed-t5m-lisp.outputs.has_lisp == 'true' || steps.changed-t5m-lisp.outputs.has_files == 'true' || steps.changed-t5m-lisp.outputs.has_rust == 'true' || steps.changed-t5m-lisp.outputs.has_zig == 'true'
+
+      - name: Rust — перевірити лише механізм читача
+        if: steps.changed-t5m-lisp.outputs.has_rust == 'true'
+        run: cargo test --locked -p sens --test d5_list_search_laws -- --nocapture
+
+      - name: Zig — перевірити фізичні кодеки й ABI
+        if: steps.changed-t5m-lisp.outputs.has_zig == 'true'
+        run: zig test research/zig-codecs/tests.zig
 
       - name: Три бенчмарки — lists, arithmetic, parser у справжньому SENS
         if: steps.changed-t5m-lisp.outputs.has_lisp == 'true'
