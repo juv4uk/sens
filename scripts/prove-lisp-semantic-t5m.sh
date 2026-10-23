@@ -246,6 +246,12 @@ cat -- lib/d11-srfi1-list-equality.lisp tests/semantic/d11-srfi1-list-equality-m
 run_case run_law d11-srfi1-list-equality-positive "$d11_list_equal_law_bundle" 1
 run_case run_law d11-srfi1-list-equality-mutant "$d11_list_equal_mutant_bundle" 0
 sha256sum lib/d11-srfi1-list-equality.lisp tests/semantic/d11-srfi1-list-equality-law.lisp tests/semantic/d11-srfi1-list-equality-mutant.lisp > "$evidence/d11-list-equality-inputs.sha256"
+# Залежний свідок Д11 FIND-TAIL має виконуватись із бібліотекою, а не окремо.
+# Прямий Lisp, Zig/T5M, парне та фізичне SENS виконують тотожний пакет.
+d11_find_tail_bundle="$evidence/d11-srfi1-find-tail-complete.lisp"
+cat -- lib/d11-srfi1-find-tail.lisp tests/semantic/d11-srfi1-find-tail-laws.lisp > "$d11_find_tail_bundle"
+run_case run_law d11-srfi1-find-tail-physical "$d11_find_tail_bundle" 1
+sha256sum lib/d11-srfi1-find-tail.lisp tests/semantic/d11-srfi1-find-tail-laws.lisp > "$evidence/d11-find-tail-inputs.sha256"
 # Фізичні закони Д3 не залежать від недопущеного виклику D6 LENGTH.
 run_case run_law d3-structural-positive tests/semantic/d3-structural-native-t5m-law.lisp 1
 run_case run_law d3-structural-mutant tests/semantic/d3-structural-native-t5m-mutant.lisp 0
