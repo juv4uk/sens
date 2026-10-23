@@ -203,7 +203,10 @@ jobs:
 
       - name: Rust — обрамлення й помилки вводу, без мовного оракула
         if: steps.changed-t5m-lisp.outputs.has_rust == 'true'
-        run: cargo test --locked -p wsm-guard-slice --bin wsm-guard-slice event_frame_rejects_overlong_duplicate_unknown_and_non_ascii_fields -- --exact --nocapture
+        run: |
+          set -euo pipefail
+          cargo test --locked -p wsm-guard-slice --bin wsm-guard-slice event_frame_rejects_overlong_duplicate_unknown_and_non_ascii_fields -- --exact --nocapture
+          cargo test --locked -p sens-lsp --lib transport::tests:: -- --nocapture
 
       - name: Zig — кодеки, ABI та безпечна межа копіювання
         if: steps.changed-t5m-lisp.outputs.has_zig == 'true'
