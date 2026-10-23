@@ -19,8 +19,14 @@ SPEC.loader.exec_module(CHECK)
 
 
 class EncodedSourceLiteralTests(unittest.TestCase):
-    def test_decimal_human_projection_values_are_allowed(self):
-        self.assertEqual(CHECK.find_forbidden_literals("(сума 235 2.1564)\n"), [])
+    def test_unquoted_numeric_literals_are_rejected(self):
+        found = CHECK.find_forbidden_literals("(сума 235 2.1564)\n")
+        self.assertEqual(
+            [(item.token, item.reason) for item in found],
+            [("235", "numeric source literal"), ("2.1564", "numeric source literal")],
+        )
+        # Explicitly quoted numbers are inert data, not evaluated operands.
+        self.assertEqual(CHECK.find_forbidden_literals("(сума (як-є (235 2.1564)))\n"), [])
 
     def test_d24_human_projection_fixture_contains_no_encoded_domain_words(self):
         fixture = ROOT / "tests" / "semantic" / "ukr-d24-existing-functions.lisp"
@@ -187,10 +193,10 @@ diff --git a/tests/b.lisp b/tests/b.lisp
             committed_result = run_guard("--base", base_sha)
             self.assertEqual(committed_result.returncode, 1, committed_result.stderr)
 
-            elsewhere.write_text("(сума 235 2.1564)\n", encoding="utf-8")
-            decimal_result = run_guard()
-            self.assertEqual(decimal_result.returncode, 0, decimal_result.stderr)
-            self.assertIn("SOURCE_ENCODED_LITERAL_GUARD_PASS", decimal_result.stdout)
+            elsewhere.write_text("(сума сума)\n", encoding="utf-8")
+            valid_result = run_guard()
+            self.assertEqual(valid_result.returncode, 0, valid_result.stderr)
+            self.assertIn("SOURCE_ENCODED_LITERAL_GUARD_PASS", valid_result.stdout)
 
 
     def test_projected_head_preserves_existing_d24_but_not_new_wire_words(self):
