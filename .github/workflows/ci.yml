@@ -261,20 +261,30 @@ jobs:
             echo 'Це фактично перевірені значення, не заміри часу. Для цих трьох джерел T5M-пари окремо не заявлені.'
           } >> "$GITHUB_STEP_SUMMARY"
 
-      - name: Виконати змінені Lisp через поточний Zig T5M і справжній SENS
+      # Маршрут 22.10: кожен push із .lisp МУСИТЬ дійти до реального
+      # SENS → Zig/T5M mint/verify-view → парного й фізичного SENS-виконання.
+      # Для таблиць/залежних фікстур маніфест містить виконувані Lisp-закони;
+      # порожній маніфест після push .lisp — помилка, не тихий SKIP.
+      - name: PUSH Lisp → кодек Zig/T5M → виконання SENS
         id: t5m_changed_execute
-        if: always() && steps.changed-t5m-lisp.outputs.has_files == 'true'
+        if: ${{ always() && (steps.changed-t5m-lisp.outputs.has_files == 'true' || (github.event_name == 'push' && steps.changed-t5m-lisp.outputs.has_lisp == 'true')) }}
         shell: bash
         timeout-minutes: 15
         run: |
           set -euo pipefail
+          manifest="$RUNNER_TEMP/changed-t5m-lisp.txt"
+          if [[ ! -s "$manifest" ]]; then
+            echo "::error file=.github/workflows/ci.yml,title=SENS Lisp push::REGRESSION layer=selection expected=executable-Lisp-witness actual=empty-manifest"
+            exit 1
+          fi
           export CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0
           cargo build --locked -p sens-cli --bin sens --bin sens-trit --features benchmark-ast-visits
           binary="$PWD/target/debug/sens"
           SENS_NATIVE_T5M=1 SENS_T5M_OPEN="$PWD/target/debug/sens-trit" \
             bash scripts/execute_changed_lisp_t5m.sh \
-              "$binary" "$RUNNER_TEMP/changed-t5m-lisp.txt" \
+              "$binary" "$manifest" \
               "$RUNNER_TEMP/changed-t5m-pairs"
+          echo "::notice file=.github/workflows/ci.yml,title=SENS Lisp→Zig/T5M→SENS::PASS physical_codec=Zig/T5M execution=SENS release=NOT_CERTIFIED"
           # Чотири мовні D1-вердикти через кодек, Zig і фізичний SENS.
           # Жоден хост не обчислює тут семантику Lisp.
           bash scripts/prove-lisp-semantic-t5m.sh \
