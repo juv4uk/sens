@@ -16,7 +16,7 @@ REGISTRY = ROOT / "lib/surface/semantic-registry.lisp"
 LEGACY_DOCS = ROOT / "lib/surface/uk-docs.lisp"
 PUBLIC = ROOT / "docs/ukrainian-api.md"
 REGISTRY_ROW = re.compile(r"^\s*\(([01]{8})\s+[^\n]*?\(ук ([^\s()]+)\)", re.MULTILINE)
-DOC_ENTRY = re.compile(r"^\s*\(doc\s+\S+\s+([01]{8})\s+", re.MULTILINE)
+DOC_ENTRY = re.compile(r"^\s*\(doc\s+\S+\s+(D(?:[1-9]|10):[01]+)\s+", re.MULTILINE)
 MD_ROW = re.compile(r"^\| `([^|`]+)` \| `([01]{8})` \| [^\n]*\|$", re.MULTILINE)
 
 
@@ -31,11 +31,12 @@ def verify_reference(registry: str, old_docs: str, markdown: str) -> dict:
     if len(set(uk for _, uk in pairs)) != len(pairs):
         raise ValueError("ambiguous historical Ukrainian spelling")
     documented = DOC_ENTRY.findall(old_docs)
-    if not documented or len(documented) != len(set(documented)):
-        raise ValueError("missing or repeated historical documentation IDs")
-    ids = {id_ for id_, _ in pairs}
-    if not set(documented).issubset(ids):
-        raise ValueError("legacy function docs no longer correspond to stable registry")
+    if len(documented) != 140 or len(documented) != len(set(documented)):
+        raise ValueError("missing or repeated current domain documentation identities")
+    for identity in documented:
+        domain, bits = identity.split(":", 1)
+        if len(bits) != int(domain[1:]):
+            raise ValueError(f"incorrect exact domain width: {identity}")
     rows = [(id_, uk) for uk, id_ in MD_ROW.findall(markdown)]
     if len(rows) != len(set(rows)):
         raise ValueError("duplicate public compatibility Markdown entry")

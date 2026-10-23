@@ -21,7 +21,7 @@ fn ukrainian_api_distinguishes_surface_names_from_function_meaning() {
     for required in [
         "`ук` — коротке ім'я",
         "`укр` — повне ім'я",
-        "byte SID",
+        "точних доменних",
         "generated/function-table.md",
     ] {
         assert!(
@@ -34,10 +34,9 @@ fn ukrainian_api_distinguishes_surface_names_from_function_meaning() {
 #[test]
 fn machine_docs_index_states_that_registry_owns_surface_spellings() {
     for required in [
-        "byte SID",
-        "ук/укр",
-        "semantic-registry.lisp",
-        "опис функції не дублюється",
+        "«укр»",
+        "lib/domains/d1..d10.lisp",
+        "опис",
     ] {
         assert!(
             DOCS_INDEX.contains(required),
@@ -50,15 +49,16 @@ fn documented_ids() -> Vec<String> {
     DOCS_INDEX
         .lines()
         .filter_map(|line| {
-            let line = line.trim_start();
-            let rest = line.strip_prefix("(doc ")?;
-            let mut fields = rest.split_whitespace();
-            fields.next()?;
-            let id = fields.next()?;
-            // A bare 8-bit SENS token; a quoted "00001100" is text, not SENS.
-            let bits = id;
-            (bits.len() == 8 && bits.bytes().all(|byte| matches!(byte, b'0' | b'1')))
-                .then(|| bits.to_string())
+            let mut fields = line.trim_start().strip_prefix("(doc ")?.split_whitespace();
+            fields.next()?; // category
+            let identity = fields.next()?;
+            let (domain, bits) = identity.split_once(':')?;
+            let width = domain.strip_prefix('D')?.parse::<usize>().ok()?;
+            (width >= 1
+                && width <= 10
+                && bits.len() == width
+                && bits.bytes().all(|bit| matches!(bit, b'0' | b'1')))
+                .then(|| identity.to_string())
         })
         .collect()
 }
@@ -73,7 +73,7 @@ fn every_documented_identity_shows_uk_ukr_and_one_behavior_description() {
         .expect("Ukrainian API detailed reference must end before the boundary section");
 
     assert!(
-        reference.contains("| byte SID | `ук` | `укр` | Виклик | Тип | Що робить | Основа |"),
+        reference.contains("| Домен | `ук` | `укр` | Виклик | Тип | Що робить | Основа |"),
         "detailed Ukrainian API must expose ук and укр side by side"
     );
 
@@ -93,7 +93,7 @@ fn every_documented_identity_shows_uk_ukr_and_one_behavior_description() {
     assert_eq!(
         rows.len(),
         ids.len(),
-        "detailed reference must contain exactly one row per documented byte SID"
+        "detailed reference must contain exactly one row per exact domain identity"
     );
 
     for id in ids {
@@ -101,13 +101,13 @@ fn every_documented_identity_shows_uk_ukr_and_one_behavior_description() {
         let count = rows.iter().filter(|row| row.starts_with(&marker)).count();
         assert_eq!(
             count, 1,
-            "byte SID {id} must appear exactly once in the detailed ук/укр reference"
+            "exact {id} must appear exactly once in the detailed ук/укр reference"
         );
     }
 
     for required_row_fragment in [
-        "| `00111100` | `текст-порожній?` | `порожній-текст?` |",
-        "| `01011010` | `монотонний-нс` | `монотонний-час-у-наносекундах` |",
+        "| `D9:110011100` | `рядок-порожній?` | `рядок-порожній?` |",
+        "| `D10:0011110110` | `монотонний-наносекунди` | `монотонний-наносекунди` |",
     ] {
         assert!(
             reference.contains(required_row_fragment),

@@ -16,11 +16,11 @@ fn documented_kind(name: &str) -> Option<String> {
             return None;
         }
         assert!(
-            fields.len() >= 5,
-            "рядок документації має містити category numeric-ID kind signature: {line}"
+            fields.len() >= 6,
+            "рядок документації має містити category Dn:bits укр kind signature: {line}"
         );
         line.contains(&signature_prefix)
-            .then(|| fields[3].to_string())
+            .then(|| fields[4].to_string())
     })
 }
 
@@ -43,7 +43,7 @@ fn stari_nazvy_dvokh_predykativ_lyshaiutsia_aliasamy_symisnosti() {
 
 #[test]
 fn dovidnyk_poiasniuie_ne_predykaty_shcho_mozhut_povernuty_pustyi_spysok() {
-    for name in ["отримати-з-карти", "підтримувальний-доказ", "та", "або"]
+    for name in ["мапа-отримати", "підтверджувальний-доказ", "та", "або"]
     {
         let kind = documented_kind(name)
             .unwrap_or_else(|| panic!("немає документаційного запису для {name}"));

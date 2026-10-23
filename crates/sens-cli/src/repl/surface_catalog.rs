@@ -283,17 +283,19 @@ fn expr_string(expr: &Expr) -> Option<&str> {
     }
 }
 
-/// Historical documentation key, not a modern function identity.
-/// The compatibility reader keeps its exact eight glyphs as inert data.
+/// Documentation key is an exact D1..D10 domain coordinate, not legacy SID8.
 #[cfg(test)]
 fn expr_documentation_key(expr: &Expr) -> Option<String> {
-    match &expr.kind {
-        ExprKind::Symbol(bits)
-            if bits.len() == 8 && bits.bytes().all(|bit| bit == b'0' || bit == b'1') =>
-        {
-            Some(bits.to_string())
-        }
-        _ => None,
+    let symbol = expr_symbol(expr)?;
+    let (domain, bits) = symbol.split_once(':')?;
+    let width = domain.strip_prefix('D')?.parse::<usize>().ok()?;
+    if (1..=10).contains(&width)
+        && bits.len() == width
+        && bits.bytes().all(|bit| matches!(bit, b'0' | b'1'))
+    {
+        Some(symbol.to_string())
+    } else {
+        None
     }
 }
 
@@ -338,23 +340,26 @@ fn ukrainian_docs() -> Result<Vec<SurfaceDoc>, String> {
         .map(|entry| {
             let fields =
                 expr_list(entry).ok_or_else(|| "uk-docs.wsm: doc має бути списком".to_string())?;
-            if fields.len() != 6 || fields.first().and_then(expr_symbol) != Some("doc") {
+            if fields.len() != 7 || fields.first().and_then(expr_symbol) != Some("doc") {
                 return Err("uk-docs.wsm: некоректний doc-запис".to_string());
+            }
+            if expr_symbol(&fields[3]).is_none() {
+                return Err("uk-docs.wsm: немає повної української проєкції".to_string());
             }
             Ok(SurfaceDoc {
                 category: expr_symbol(&fields[1])
                     .ok_or_else(|| "uk-docs.wsm: category має бути символом".to_string())?
                     .to_string(),
                 identity: expr_documentation_key(&fields[2]).ok_or_else(|| {
-                    "uk-docs.wsm: історичний документальний ключ повинен мати 8 біт".to_string()
+                    "uk-docs.wsm: потрібен точний домен D1–D10 з власною шириною".to_string()
                 })?,
-                kind: expr_symbol(&fields[3])
+                kind: expr_symbol(&fields[4])
                     .ok_or_else(|| "uk-docs.wsm: kind має бути символом".to_string())?
                     .to_string(),
-                call: expr_string(&fields[4])
+                call: expr_string(&fields[5])
                     .ok_or_else(|| "uk-docs.wsm: call має бути рядком".to_string())?
                     .to_string(),
-                description: expr_string(&fields[5])
+                description: expr_string(&fields[6])
                     .ok_or_else(|| "uk-docs.wsm: description має бути рядком".to_string())?
                     .to_string(),
             })
@@ -568,8 +573,8 @@ mod tests {
         // SENS owns the parser/identities; this is not semantic admission by Zig.
         let docs = ukrainian_docs().expect("SENS parses Zig-delivered documentation");
         assert!(
-            docs.iter().any(|doc| doc.identity == "00000001"),
-            "expected exact eight-bit documentation identity"
+            docs.iter().any(|doc| doc.identity == "D3:001"),
+            "expected exact D3 domain documentation identity"
         );
         println!(
             "ZIG_UK_DOCS_CARRIER_PASS test_id=zig-uk-docs-exact-carry \
