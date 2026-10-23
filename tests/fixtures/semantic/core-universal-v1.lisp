@@ -11,7 +11,7 @@
 ; Історичні SID8/Sens8 залишаються лише в історії Git, не у викликах.
 
 ((expect . expect-value)
- (expr . "(однакові? 1 1)")
+ (expr . "(однакові? число-один число-один)")
  (expected . (value (1)))
  (active . t)
  (name . "universal: однакові? 1 1 -> 1 біт")
@@ -20,7 +20,7 @@
  (note . "Однакова відповідь у кожному профілі."))
 
 ((expect . expect-value)
- (expr . "(однакові? 1 2)")
+ (expr . "(однакові? число-один (додати число-один число-один))")
  (expected . (value (0)))
  (active . t)
  (name . "universal: однакові? 1 2 -> 1 біт")
@@ -29,7 +29,7 @@
  (note . "Відсутність збігу теж має бути 0, а не ()."))
 
 ((expect . expect-value)
- (expr . "(атом? 5)")
+ (expr . "(атом? число-один)")
  (expected . (value (1)))
  (active . t)
  (name . "universal: ATOM не-пара -> 1")
@@ -65,7 +65,7 @@
  (note . "Спільна істина для всіх профілів."))
 
  ((expect . expect-rejected)
-  (expr . "(тотожне? 1")
+  (expr . "(тотожне? число-один")
   (expected . (rejected "(тотожне? 1"))
   (active . t)
   (name . "universal: незакрита форма відхиляється, а не ремонтується")
