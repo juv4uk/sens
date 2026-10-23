@@ -3,6 +3,7 @@
 const std = @import("std");
 const t5 = @import("t5/t5.zig");
 const t5m = @import("t5m.zig");
+const d12_dense_experiment = @import("d12_dense_experiment.zig");
 const t5m3 = @import("t5m3.zig");
 const physical_cycle = @import("physical_cycle.zig");
 const ladder = @import("domain_ladder.zig");
@@ -25,6 +26,7 @@ test "import exact-width transport suites" {
     std.debug.assert(freestanding.F3C_SUFFIX_ROM_BYTES == 4000);
     _ = t5;
     _ = t5m;
+    _ = d12_dense_experiment;
     _ = t5m3;
     _ = physical_cycle;
     _ = ladder;
