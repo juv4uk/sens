@@ -574,6 +574,14 @@ cat -- "$meta_compare_definition" tests/semantic/d11-meta-compare-laws.lisp > "$
 cat -- "$meta_compare_definition" tests/semantic/d11-meta-compare-mutant.lisp > "$meta_compare_mutant_bundle"
 run_case run_law d11-meta-compare-positive "$meta_compare_law_bundle" 1
 run_case run_law d11-meta-compare-mutant "$meta_compare_mutant_bundle" 0
+# Незалежні Д1-операнди не потребують D6 LENGTH: точний Lisp-закон
+# і негативний мутант виконуються через той самий фізичний Zig/T5M.
+meta_compare_d1_law_bundle="$evidence/d11-meta-compare-d1-positive-complete.lisp"
+meta_compare_d1_mutant_bundle="$evidence/d11-meta-compare-d1-mutant-complete.lisp"
+cat -- "$meta_compare_definition" tests/semantic/d11-meta-compare-d1-law.lisp > "$meta_compare_d1_law_bundle"
+cat -- "$meta_compare_definition" tests/semantic/d11-meta-compare-d1-mutant.lisp > "$meta_compare_d1_mutant_bundle"
+run_case run_law d11-meta-compare-d1-positive "$meta_compare_d1_law_bundle" 1
+run_case run_law d11-meta-compare-d1-mutant "$meta_compare_d1_mutant_bundle" 0
 # Interlisp DWIM / Masterscope — 22 мовні закони і два контрприклади.
 # Ці DEFINE фізично пакуються Zig/T5M, D1 вирішує лише SENS.
 for suite in dwim masterscope; do
