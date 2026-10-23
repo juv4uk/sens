@@ -234,6 +234,14 @@ cat -- benchmarks/recursion.lisp tests/semantic/d4-recursion-benchmark-law.lisp 
 cat -- benchmarks/recursion.lisp tests/semantic/d4-recursion-benchmark-mutant.lisp > "$recursion_mutant_bundle"
 run_case run_law d4-recursion-benchmark-positive "$recursion_law_bundle" 1
 run_case run_law d4-recursion-benchmark-mutant "$recursion_mutant_bundle" 0
+# Ізолюємо D3 атомну рівність від D8 структурної рівності в тому самому обході.
+# Це окрема позитивна/негативна пара SENS, не підміна червоного D8-тесту.
+recursion_atom_law_bundle="$evidence/d4-recursion-atom-positive.lisp"
+recursion_atom_mutant_bundle="$evidence/d4-recursion-atom-negative.lisp"
+cat -- benchmarks/recursion.lisp tests/semantic/d4-recursion-atom-result-law.lisp > "$recursion_atom_law_bundle"
+cat -- benchmarks/recursion.lisp tests/semantic/d4-recursion-atom-result-mutant.lisp > "$recursion_atom_mutant_bundle"
+run_case run_law d4-recursion-atom-positive "$recursion_atom_law_bundle" 1
+run_case run_law d4-recursion-atom-mutant "$recursion_atom_mutant_bundle" 0
 sha256sum benchmarks/recursion.lisp tests/semantic/d4-recursion-benchmark-law.lisp tests/semantic/d4-recursion-benchmark-mutant.lisp > "$evidence/d4-recursion-inputs.sha256"
 # Складені селектори Д4: шість тверджень у Lisp та точний D1-негатив.
 run_case run_law d4-selector-composition-positive tests/semantic/d4-selector-composition-law.lisp 1
