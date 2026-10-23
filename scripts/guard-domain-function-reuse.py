@@ -393,10 +393,15 @@ def main(argv: list[str] | None = None) -> int:
 
     for rel, name in candidates:
         print(f"КАНДИДАТ D11: {rel}: {name} — немає в драбинах; пропозиція D11 (далі D12…)")
-    if args.register and candidates:
+    # Не змінюємо реєстр під час невдалого коміту: спочатку власник
+    # має усунути всі дублікати/порушення, і лише чистий зріз реєструється.
+    # Реєстрація — лише кандидат, не ратифікація й не видача координати.
+    if args.register and candidates and not blocked:
         n = register_candidates(candidates)
         print(f"ЗАРЕЄСТРОВАНО в D11: {n} нових кандидатів → реєстр кандидатів D11 "
-              f"(наявні не дублювались)")
+              f"(наявні не дублювались; статус кандидат, не ратифіковано)")
+    elif args.register and candidates and blocked:
+        print("НЕ ЗАРЕЄСТРОВАНО в D11: коміт заблоковано; спершу виправ усі порушення.")
 
     if args.advise and blocked:
         shadow = [(r, n) for r, n, w in blocked if "драбини" in w]
