@@ -344,6 +344,10 @@ jobs:
           # Rust бенчмарк тільки реального I/O байтів Lisp. Він не обчислює D1.
           # 11 проб із прогрівом, p50/p90, явно запускаємо ignored benchmark.
           cargo test --locked -p sens-cli --test mechanism_file_io_benchmark -- --include-ignored --nocapture
+          # Rust exact-width ingest benchmark: same D2/domain AST preflight, no JSON/Python corpus.
+          # This measures only visible vs packed Rust readers; semantic verdicts stay in Lisp → Zig/T5M → SENS.
+          bash benchmarks/rust-packed-visible/run.sh "$RUNNER_TEMP/rust-packed-visible"
+          cat "$RUNNER_TEMP/rust-packed-visible/summary.md" >> "$GITHUB_STEP_SUMMARY"
           # Семантика D11 перевіряється в окремому Lisp-кроці через SENS/T5M.
           # Не дублюємо мовний оракул у механічному Rust-шарі.
 
