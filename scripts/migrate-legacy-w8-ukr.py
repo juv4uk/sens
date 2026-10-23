@@ -2,6 +2,7 @@
 """Перенести доведені SID8/Sens8 викличні голови у повну проєкцію «укр».
 
     python3 scripts/migrate-legacy-w8-ukr.py lib/core1.lisp --source-ref <старий-40-символьний-SHA>
+    python3 scripts/migrate-legacy-w8-ukr.py lib/модуль.lisp --write  # явні sid8:/sens8:
     python3 scripts/migrate-legacy-w8-ukr.py lib scripts tests/fixtures benchmarks/contest-uk --source-ref <SHA> --write
 
 За замовчуванням dry-run. Немає виведення D8 з байта, запису .sens
@@ -203,7 +204,7 @@ def main():
         table = withheld = None
         chosen = files(args.paths)
         if not chosen:
-            raise ValueError("не знайдено активних lib/*.lisp")
+            raise ValueError("не знайдено активних виконуваних *.lisp у дозволених каталогах")
         report = []
         for file in chosen:
             rel = file.relative_to(ROOT)
@@ -232,10 +233,16 @@ def main():
                 unknown = []
                 edits = []
                 if probe:
-                    if not args.source_ref:
+                    # Явна голова sid8:/sens8: сама вказує історичну епоху;
+                    # її значення все одно перевіряємо за pinned bridge і
+                    # чинною ратифікованою таблицею. Голі 8 біт двозначні:
+                    # сучасний D8 не можна оголошити старим SID8.
+                    bare = [token for _, token in probe
+                            if re.fullmatch(r"[01]{8}", token)]
+                    if bare and not args.source_ref:
                         raise ValueError(
-                            "для реальної заміни W8-голів потрібен --source-ref "
-                            "із перевіреним історичним SHA; без нього нічого не переписуємо"
+                            "голий W8 виклик неоднозначний: потрібен --source-ref "
+                            "до-D8 історичного SHA; sid8:/sens8: має явне походження"
                         )
                     if table is None:
                         scanner, table, withheld = mapping()
@@ -245,8 +252,19 @@ def main():
                 old_tokens = {e.source for e in edits} | {code for _, code in unknown}
                 old_codes = {scanner.LEGACY_W8_HEAD.fullmatch(token).group(1)
                              for token in old_tokens}
-                proof = (prove(args.source_ref, args.historical_path or rel, old_codes, scanner, table)
-                         if old_codes else None)
+                if old_codes and args.source_ref:
+                    proof = prove(args.source_ref, args.historical_path or rel,
+                                  old_codes, scanner, table)
+                elif old_codes:
+                    # Тут усі знайдені executable голови мають явний
+                    # sid8:/sens8: префікс; mapping() окремо перевіряє
+                    # історичний blob та сучасний допуск механізму.
+                    proof = {"kind": "explicit-legacy-prefix",
+                             "bridge_commit": HISTORICAL_BRIDGE_COMMIT,
+                             "bridge_blob": HISTORICAL_BRIDGE_BLOB,
+                             "codes": sorted(old_codes)}
+                else:
+                    proof = None
                 new = scanner.apply_edits(text, edits).encode("utf-8")
                 if args.write and new != original:
                     replace_atomic(file, original, new)
