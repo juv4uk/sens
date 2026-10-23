@@ -1055,5 +1055,91 @@ class SystemOneResearchPipelineTests(unittest.TestCase):
             evaluator.score([row], threshold=0.8, bins=10, expected_split="test")
 
 
+    def test_validation_threshold_selection_is_risk_bounded_and_cli_writes_exact_fraction(self):
+        def validation_row(row_id, gold, probability_winner, numerator):
+            return {
+                "id": row_id,
+                "split": "validation",
+                "text": row_id,
+                "gold": gold,
+                "dataset_sha256": "seed-sha-for-threshold-fixture",
+                "student_model_sha256": "student-sha-for-threshold-fixture",
+                "distribution": exact_distribution(probability_winner, numerator),
+            }
+
+        rows = [
+            validation_row("v1", "оплата", "оплата", 900_000_000),
+            validation_row("v2", "доставка", "доставка", 900_000_000),
+            validation_row("v3", "технічне", "технічне", 850_000_000),
+            validation_row("v4", "обліковий-запис", "обліковий-запис", 850_000_000),
+            validation_row("v5", "оплата", "доставка", 950_000_000),
+            validation_row("v6", "невизначено", "доставка", 700_000_000),
+        ]
+
+        selected = evaluator.select_threshold(
+            rows,
+            max_selective_risk=0.25,
+            min_accepted=4,
+        )
+        self.assertEqual(selected["status"], "selected")
+        self.assertEqual(selected["selected_for"], "validation")
+        self.assertEqual(selected["threshold"], {"numerator": 17, "denominator": 20})
+        self.assertEqual(selected["accepted"], 5)
+        self.assertEqual(selected["errors"], 1)
+        self.assertEqual(selected["achieved_selective_risk"], {"numerator": 1, "denominator": 5})
+        self.assertEqual(selected["coverage"], {"numerator": 5, "denominator": 6})
+        self.assertFalse(selected["test_used"])
+        self.assertFalse(selected["challenge_used"])
+
+        no_safe_threshold = evaluator.select_threshold(
+            rows,
+            max_selective_risk=0.10,
+            min_accepted=4,
+        )
+        self.assertEqual(no_safe_threshold["status"], "no-safe-threshold")
+        self.assertIsNone(no_safe_threshold["threshold"])
+        self.assertEqual(no_safe_threshold["accepted"], 0)
+
+        wrong_split = [dict(row) for row in rows]
+        wrong_split[0]["split"] = "test"
+        with self.assertRaises(evaluator.EvaluationError):
+            evaluator.select_threshold(wrong_split, max_selective_risk=0.25, min_accepted=4)
+
+        # CLI перевіряє фактичний запис JSON, зокрема атомарний файл і правильний newline.
+        from unittest.mock import patch
+
+        with tempfile.TemporaryDirectory() as directory:
+            input_path = Path(directory) / "validation.jsonl"
+            output_path = Path(directory) / "threshold-report.json"
+            input_bytes = write_jsonl(input_path, rows)
+            with patch(
+                "sys.argv",
+                [
+                    "system-one-evaluate",
+                    "--input",
+                    str(input_path),
+                    "--expected-split",
+                    "validation",
+                    "--mode",
+                    "select-threshold",
+                    "--max-selective-risk",
+                    "0.25",
+                    "--min-accepted",
+                    "4",
+                    "--output",
+                    str(output_path),
+                ],
+            ):
+                self.assertEqual(evaluator.main(), 0)
+            report = json.loads(output_path.read_text(encoding="utf-8"))
+            self.assertEqual(report["status"], "selected")
+            self.assertEqual(report["threshold"], {"numerator": 17, "denominator": 20})
+            self.assertEqual(
+                report["input_sha256"],
+                hashlib.sha256(input_bytes).hexdigest(),
+            )
+            self.assertTrue(output_path.read_bytes().endswith(b"\n"))
+
+
 if __name__ == "__main__":
     unittest.main()
