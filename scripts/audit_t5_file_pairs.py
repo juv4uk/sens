@@ -18,10 +18,10 @@ from sens_t5_codec import (SensT5Error, decode_bytes, encode_words, parse_words,
                            decode_t5m_bytes, encode_t5m_projection, typed_sha256)
 
 SCHEMA = "sens-t5-file-pair-audit/v1"
-# core4-parts — впорядковані фрагменти lib/core4.lisp. CLI завантажує їх через
-# --t5m-files в одній сесії; фрагменти не мають окремих сталих .sens-двійників.
-# Їх перевіряє груповий тест завантажувача, а цей аудит рахує сталі пари джерело/носій.
-SKIP_DIRS = {".git", ".worktrees", ".venv", "venv", "node_modules", "target", "__pycache__", "superseded", "core4-parts"}
+# core4-parts — впорядковані фрагменти lib/core4.lisp. Кожен може мати власну
+# сталу пару, створену sens --t5m-mint-pair; аудит перевіряє ці пари окремо.
+# Груповий тест завантажувача додатково перевіряє порядок і спільну сесію.
+SKIP_DIRS = {".git", ".worktrees", ".venv", "venv", "node_modules", "target", "__pycache__", "superseded"}
 
 
 def _is_skipped_path(path: bytes) -> bool:

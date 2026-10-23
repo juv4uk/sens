@@ -41,10 +41,9 @@ DISCOVER = ROOT / "scripts" / "discover_domain_function_candidates.py"
 EXCLUDED_PREFIXES = (
     "lib/generated/", "lib/surface/", "lib/domains/", "lib/machine/",
     "vendor/", "benchmarks/",
-    # lib/core4-parts/** — впорядковані фрагменти lib/core4.lisp; CLI завантажує
-    # їх через --t5m-files в одній сесії, але вони не є незалежними програмами.
-    # Їхні визначення збігаються з core4.lisp, тож окремий підрахунок дасть дублі.
-    # Джерело визначень — lib/core4.lisp.
+    # lib/core4-parts/** — копії визначень із lib/core4.lisp для контрольованого
+    # розбиття. Пари T5M перевіряються окремо; тут фрагменти пропускаємо лише
+    # щоб не рахувати їхні дубльовані визначення як нові доменні функції.
     "lib/core4-parts/",
 )
 # tests/semantic/** — це МОВНІ ЗАКОНИ (Lisp), а не службові тести. Саме там рій
