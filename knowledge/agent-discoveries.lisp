@@ -30,8 +30,8 @@
     (m8-local-binding-shadow
       . ((status . confirmed)
          (claim . "Локальне зв'язування допущеної назви → помилка незмінної тотожності SID")
-         (examples . (("provenance" "10000100" "#1596")
-                      ("identity" "10011000" "#1603")))
+         (examples . (("походження" "D9:101101111" "#1596")
+                      ("тотожність" "D9:110101110" "#1603")))
          (action . "Перейменувати локальне ім'я на …-ref / …-value / sens-ref; не послаблювати ensure_bindable")))
 
     (binary-transport-ci
