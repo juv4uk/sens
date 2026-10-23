@@ -287,7 +287,7 @@ run_case run_law sample-mut tests/semantic/sample-mutant.lisp 0\n\
         "run_case run_division_by_zero_rejection d24-computed-zero-denominator \\\n",
     );
     error_runner.push_str(
-        "  tests/semantic/d24-reader-zero-denominator-negative.lisp 'division by zero'\\\n",
+        "  tests/semantic/d24-reader-zero-denominator-negative.lisp 'division by zero'\n",
     );
     let error_route = audit(
         &["tests/semantic/d24-reader-zero-denominator-negative.lisp".into()],
