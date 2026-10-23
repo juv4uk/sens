@@ -21,7 +21,7 @@ use crate::{
 use std::rc::Rc;
 
 const COMPILER_NUCLEUS_SOURCE: &str = include_str!("../../../lib/compiler-nucleus.lisp");
-const LANGUAGE_CONTRACT: &str = include_str!("../../../language-contract.lisp");
+const LANGUAGE_CONTRACT_SHA256: &str = crate::binary_bootstrap::LANGUAGE_CONTRACT_SHA256;
 
 pub const COMPILER_ROLE_LAW_REF: &str =
     "lib/compiler-nucleus.lisp:роль-пониження-компілятора-за-законами";
@@ -321,7 +321,7 @@ fn verify_compiler_program_request(
     let contract_version =
         compiler_artifact_string(provenance[2], "semantic-request contract version")?;
     if path != COMPILER_AUTHORITY_PATH
-        || authority_sha != sha256_hex(LANGUAGE_CONTRACT.as_bytes())
+        || authority_sha != LANGUAGE_CONTRACT_SHA256
         || contract_version != COMPILER_CONTRACT_VERSION
     {
         return Err(invalid_projection(
@@ -504,7 +504,7 @@ fn compiler_d4_bootstrap_law_value() -> Result<Value, LanguageError> {
 /// in another substrate.
 pub fn compiler_program_bootstrap_bundle() -> Result<CompilerProgramBootstrapBundle, LanguageError>
 {
-    let authority_sha256 = sha256_hex(LANGUAGE_CONTRACT.as_bytes());
+    let authority_sha256 = LANGUAGE_CONTRACT_SHA256.to_owned();
     Ok(CompilerProgramBootstrapBundle {
         d3_law: compiler_l1_l5_law_value()?,
         d4_law: compiler_d4_bootstrap_law_value()?,
@@ -697,7 +697,7 @@ fn install_compiler_program_bindings(
         PROVENANCE_VALUE_NAME,
         Value::list([
             Value::String(Rc::from(COMPILER_AUTHORITY_PATH)),
-            Value::String(Rc::from(sha256_hex(LANGUAGE_CONTRACT.as_bytes()))),
+            Value::String(Rc::from(LANGUAGE_CONTRACT_SHA256)),
             Value::String(Rc::from(COMPILER_CONTRACT_VERSION)),
         ]),
     );
@@ -764,7 +764,7 @@ pub fn compiler_program_artifact_from_sens(
         Value::list([
             Value::String(Rc::from(sens_revision)),
             Value::String(Rc::from(COMPILER_AUTHORITY_PATH)),
-            Value::String(Rc::from(sha256_hex(LANGUAGE_CONTRACT.as_bytes()))),
+            Value::String(Rc::from(LANGUAGE_CONTRACT_SHA256)),
             Value::String(Rc::from(COMPILER_CONTRACT_VERSION)),
             Value::String(Rc::from(sha256_hex(COMPILER_NUCLEUS_SOURCE.as_bytes()))),
         ]),
@@ -903,7 +903,7 @@ pub fn verify_compiler_program_artifact_from_sens(
 
     if sens_revision != expected_sens_revision
         || authority_path != COMPILER_AUTHORITY_PATH
-        || authority_sha256 != sha256_hex(LANGUAGE_CONTRACT.as_bytes())
+        || authority_sha256 != LANGUAGE_CONTRACT_SHA256
         || language_contract_version != COMPILER_CONTRACT_VERSION
         || compiler_nucleus_sha256 != sha256_hex(COMPILER_NUCLEUS_SOURCE.as_bytes())
     {
@@ -1002,7 +1002,7 @@ pub fn compiler_semantic_input_from_sens(
         proof_ref,
         semantic_status: "current",
         authority_path: COMPILER_AUTHORITY_PATH,
-        authority_sha256: sha256_hex(LANGUAGE_CONTRACT.as_bytes()),
+        authority_sha256: LANGUAGE_CONTRACT_SHA256.to_owned(),
         language_contract_version: COMPILER_CONTRACT_VERSION,
     }))
 }
@@ -1035,6 +1035,14 @@ mod tests {
     }
 
     #[test]
+    fn zig_transport_digest_matches_exact_language_contract_bytes() {
+        assert_eq!(
+            LANGUAGE_CONTRACT_SHA256,
+            sha256_hex(include_str!("../../../language-contract.lisp").as_bytes())
+        );
+    }
+
+    #[test]
     fn compiler_nucleus_loads_each_definition_without_an_opaque_binding_failure() {
         let expressions =
             parse_mixed_exact_domain(COMPILER_NUCLEUS_SOURCE).expect("compiler nucleus parses");
@@ -1064,7 +1072,7 @@ mod tests {
         assert_eq!(bundle.language_contract_version, COMPILER_CONTRACT_VERSION);
         assert_eq!(
             bundle.authority_sha256,
-            sha256_hex(LANGUAGE_CONTRACT.as_bytes())
+            LANGUAGE_CONTRACT_SHA256
         );
         assert_eq!(
             bundle.compiler_nucleus_sha256,
@@ -1408,7 +1416,7 @@ mod tests {
         assert!(matches!(
             provenance[2],
             Value::String(found)
-                if found.as_ref() == sha256_hex(LANGUAGE_CONTRACT.as_bytes())
+                if found.as_ref() == LANGUAGE_CONTRACT_SHA256
         ));
         assert!(matches!(
             provenance[3],

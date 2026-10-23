@@ -20,6 +20,14 @@ pub fn main(init: std.process.Init) !void {
     for (libraries) |library| {
         try emitWords(allocator, output, library.name, library.physical);
     }
+    const contract = @embedFile("language-contract.lisp");
+    var contract_digest: [32]u8 = undefined;
+    std.crypto.hash.sha2.Sha256.hash(contract, &contract_digest, .{});
+    var contract_hex: [64]u8 = undefined;
+    _ = std.fmt.bufPrint(&contract_hex, "{x}", .{contract_digest}) catch unreachable;
+    try output.writeAll("pub(super) const LANGUAGE_CONTRACT_SHA256: &str = \"");
+    try output.writeAll(&contract_hex);
+    try output.writeAll("\";\n");
     try output.flush();
 }
 

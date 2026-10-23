@@ -226,6 +226,7 @@ fn binary_bootstrap_words(root: &Path, output: &Path) {
         "lib/process.sens",
         "lib/tcp.sens",
         "lib/fs.sens",
+        "language-contract.lisp",
         "research/zig-codecs/t5m.zig",
         "research/zig-codecs/domain_ladder.zig",
         "research/zig-codecs/numeric_domains.zig",
