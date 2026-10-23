@@ -1,4 +1,4 @@
-//! Виконуваний SENS-свідок української Lisp-проєкції епістемічних законів.
+//! Rust перевіряє reader/lowering та запускає Lisp-свідок; не дублює таблицю істинності.
 
 use sens::{
     eval_parsed_expressions, load_core_library, lower_program, parse, parse_mixed_exact_domain,
@@ -20,8 +20,7 @@ fn evaluate_ukr(
     source: &str,
     session: &mut Session,
 ) -> Result<sens::EvalResult, sens::LanguageError> {
-    // D1 «так»/«ні» — ратифіковані однобітні слова, а не глобальні
-    // незв'язані Lisp-символи. Чинний mixed reader зберігає quoted data.
+    // Змішаний читач і lowering — механізм Rust; вердикт мовних законів лишається Lisp.
     let parsed = parse_mixed_exact_domain(source)?;
     let projected = lower_program(&parsed);
     eval_parsed_expressions(&projected, session)
@@ -37,7 +36,7 @@ fn epistemic_session() -> Session {
 }
 
 #[test]
-fn бібліотечні_голови_не_повертаються_до_історичних_англійських_імен() {
+fn бібліотечні_голови_лишаються_українською_проєкцією() {
     let source = include_str!("../../../lib/epistemic.lisp");
     for obsolete in [
         "(визначити source-ref?",
@@ -49,161 +48,35 @@ fn бібліотечні_голови_не_повертаються_до_іст
         assert!(!source.contains(obsolete), "застаріла голова: {obsolete}");
     }
 
+    // Лише reader/lowering contract. Жодної Rust-таблиці очікувань для D1.
     let parsed = parse("(тотожне? (атом? (як-є ())) (хибне? (атом? (як-є ()))))")
         .expect("українська проєкція D1–D4 читається");
-    let projected = lower_program(&parsed);
-    let result = eval_parsed_expressions(&projected, &mut epistemic_session())
-        .expect("предикатні операції повертають точний D1");
-    assert_eq!(result.value.as_predicate_bit(), Some(false));
+    assert_eq!(parsed.len(), 1);
+    assert_eq!(lower_program(&parsed).len(), parsed.len());
 }
 
 #[test]
-fn український_свідок_епістеміки_розбирається_як_lisp() {
+fn український_епістемічний_свідок_сам_виносить_вердикт() {
     let source = include_str!("../../../tests/fixtures/epistemic-authority-witness.lisp");
     let parsed = parse(source).expect("український Lisp-свідок розбирається");
-    assert_eq!(parsed.len(), 3, "свідок зберігає три визначення");
+    assert_eq!(parsed.len(), 3, "свідок має три визначення");
+
+    let mut session = epistemic_session();
+    evaluate_ukr(source, &mut session).expect("визначення Lisp-свідка завантажуються");
+    let verdict = evaluate_ukr("(свідок-епістеміки)", &mut session)
+        .expect("Lisp-свідок сам перевіряє епістемічні закони");
+    assert_eq!(
+        verdict.value.to_string(),
+        "(epistemic-authority-witness (status pass))",
+        "тестовий Rust-адаптер лише спостерігає іменований Lisp-вердикт",
+    );
 }
 
 #[test]
-fn посилання_на_джерело_повертає_точні_значення_d1() {
-    let mut session = epistemic_session();
-    for (source, expected) in [
-        (
-            "(це-належне-посилання-на-джерело? (як-є (digest packet)))",
-            true,
-        ),
-        (
-            "(це-належне-посилання-на-джерело? (як-є (proof packet)))",
-            true,
-        ),
-        (
-            "(це-належне-посилання-на-джерело? (як-є (unknown packet)))",
-            false,
-        ),
-        (
-            "(це-належне-посилання-на-джерело? (як-є ((digest) packet)))",
-            false,
-        ),
-        ("(це-належне-посилання-на-джерело? (як-є ()))", false),
-        (
-            "(це-належне-посилання-на-джерело? (як-є (digest packet extra)))",
-            false,
-        ),
-        (
-            "(це-належне-посилання-на-джерело? (як-є (digest packet . пошкоджений-хвіст)))",
-            false,
-        ),
-        (
-            "(це-належне-посилання-на-джерело? (як-є (proof packet . пошкоджений-хвіст)))",
-            false,
-        ),
-    ] {
-        let result =
-            evaluate_ukr(source, &mut session).unwrap_or_else(|error| panic!("{source}: {error}"));
-        assert_eq!(result.value.as_predicate_bit(), Some(expected), "{source}");
-    }
-
-    for (source, expected) in [
-        (
-            "(епістеміка--посилання-на-твердження? (як-є (claim-ref packet)))",
-            true,
-        ),
-        (
-            "(епістеміка--посилання-на-твердження? (як-є (other-ref packet)))",
-            false,
-        ),
-        (
-            "(епістеміка--посилання-на-твердження? (як-є (claim-ref packet extra)))",
-            false,
-        ),
-        (
-            "(епістеміка--посилання-на-твердження? (як-є (claim-ref packet . пошкоджений-хвіст)))",
-            false,
-        ),
-        (
-            "(епістеміка--посилання-на-твердження? (як-є (claim-ref)))",
-            false,
-        ),
-    ] {
-        let result =
-            evaluate_ukr(source, &mut session).unwrap_or_else(|error| panic!("{source}: {error}"));
-        assert_eq!(result.value.as_predicate_bit(), Some(expected), "{source}");
-    }
-}
-
-#[test]
-fn український_файл_законів_посилання_повертає_точний_d1() {
-    let mut session = epistemic_session();
+fn файл_законів_посилань_читається_й_понижується() {
     let source = include_str!("../../../tests/semantic/epistemic-source-ref-d1-law.lisp");
     let parsed = parse(source).expect("українські закони розбираються");
-    assert_eq!(
-        parsed.len(),
-        6,
-        "файл містить п'ять законів і відмовний випадок"
-    );
-
-    for (index, form) in parsed.iter().enumerate() {
-        let projected = lower_program(std::slice::from_ref(form));
-        let result = eval_parsed_expressions(&projected, &mut session)
-            .unwrap_or_else(|error| panic!("закон посилання {index}: {error}"));
-        assert_eq!(result.value.as_predicate_bit(), Some(true), "закон {index}");
-    }
-}
-
-#[test]
-fn неправильний_хвіст_вимог_не_створює_хибної_істини() {
-    // Справжній SENS обчислює D1, не Python-симуляція.
-    // Пошкоджені атомні та крапкові хвости не дорівнюють порожньому списку.
-    let mut session = epistemic_session();
-    for (source, expected) in [
-        ("(епістеміка--усі-вимоги-наявні? (як-є ()) (як-є ()))", true),
-        (
-            "(епістеміка--усі-вимоги-наявні? (як-є (читання)) (як-є (читання)))",
-            true,
-        ),
-        (
-            "(епістеміка--усі-вимоги-наявні? (як-є (читання)) (як-є (запис)))",
-            false,
-        ),
-        (
-            "(епістеміка--усі-вимоги-наявні? (як-є хибний-хвіст) (як-є (читання)))",
-            false,
-        ),
-        (
-            "(епістеміка--усі-вимоги-наявні? (як-є (читання . хибний-хвіст)) (як-є (читання)))",
-            false,
-        ),
-    ] {
-        let result =
-            evaluate_ukr(source, &mut session).unwrap_or_else(|error| panic!("{source}: {error}"));
-        assert_eq!(
-            result.value.as_predicate_bit(),
-            Some(expected),
-            "повинно бути точне D1, джерело: {source}",
-        );
-    }
-}
-
-#[test]
-fn рівність_вкладених_посилань_розрізняє_форму_та_значення() {
-    let mut session = epistemic_session();
-    for (source, expected) in [
-        (
-            "(епістеміка--рівні-посилання? (як-є (а (б в))) (як-є (а (б в))))",
-            true,
-        ),
-        (
-            "(епістеміка--рівні-посилання? (як-є (а (б в))) (як-є (а (б г))))",
-            false,
-        ),
-        (
-            "(епістеміка--рівні-посилання? (як-є (а (б))) (як-є (а б)))",
-            false,
-        ),
-        ("(епістеміка--рівні-посилання? (як-є ()) (як-є ()))", true),
-    ] {
-        let result =
-            evaluate_ukr(source, &mut session).unwrap_or_else(|error| panic!("{source}: {error}"));
-        assert_eq!(result.value.as_predicate_bit(), Some(expected), "{source}");
-    }
+    assert_eq!(parsed.len(), 6, "файл містить шість Lisp-форм");
+    let lowered = lower_program(&parsed);
+    assert_eq!(lowered.len(), parsed.len(), "кожна форма має механічне lowering-подання");
 }
