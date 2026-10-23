@@ -62,9 +62,24 @@ class LanguageOwnershipRouting(unittest.TestCase):
     def test_language_prefix_pair_is_supported(self):
         positive = "tests/semantic/language-law-new-idea.lisp"
         negative = "tests/semantic/language-mutant-new-idea.lisp"
-        runner = RUNNER + f"cat {positive} {negative} > /tmp/new-idea.lisp\n"
+        runner = RUNNER + (
+            f'cat {positive} > "$law_bundle"\n'
+            f'cat {negative} > "$mutant_bundle"\n'
+            'run_case run_law new-idea-positive "$law_bundle" 1\n'
+            'run_case run_law new-idea-mutant "$mutant_bundle" 0\n'
+        )
         self.assertEqual(self.audit([positive, negative], runner=runner,
                                     files=[positive, negative]), [])
+
+    def test_echo_and_unused_cat_do_not_forge_native_execution(self):
+        runner = RUNNER + (
+            f"echo {'tests/semantic/hidden-law.lisp'}\n"
+            'cat tests/semantic/hidden-law.lisp > "$unused_bundle"\n'
+        )
+        hidden = "tests/semantic/hidden-law.lisp"
+        mutant = "tests/semantic/hidden-mutant.lisp"
+        errors = self.audit([hidden], runner=runner, files=[hidden, mutant])
+        self.assertTrue(any("SENS_LAW_NOT_REGISTERED" in err for err in errors))
 
 
 if __name__ == "__main__":
