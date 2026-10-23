@@ -422,7 +422,7 @@ run_native_t5m_program() {
          ! timeout "$native_timeout" "$binary" --t5m-mint "$vector_complete_source" "$standalone_physical" \
            >"$dir/vector-complete-mint.stdout" 2>"$dir/vector-complete-mint.stderr" ||
          ! timeout "$native_timeout" "$native_open" open "$standalone_physical" \
-           >"$dir/vector-complete.view" 2>"$dir/vector-complete-open.stderr" ||
+           >"${standalone_physical%.sens}" 2>"$dir/vector-complete-open.stderr" ||
          ! timeout "$native_timeout" "$native_open" verify-view "$standalone_physical" \
            >"$dir/vector-complete-verify.stdout" 2>"$dir/vector-complete-verify.stderr"; then
         for diagnostic in "$dir/vector-complete-mint.stderr" "$dir/vector-complete-open.stderr" "$dir/vector-complete-verify.stderr"; do
@@ -546,11 +546,17 @@ SENS_D1_NEGATIVE
         fi
         echo "SENS_D1_AXIOMS_P5_EXECUTED_PASS source=$file positive=D1:1 mutant=D1:0 physical=ZIG_T5M native=SENS"
       fi
-      native_standalone_parity_paths["$file"]=1
-      if [[ -f "$committed" && ! -L "$committed" ]] && cmp -s "$physical" "$committed"; then
-        printf '%s\n' "$committed" >> "$benchmark_manifest"
+      if [[ "$standalone_physical" == "$physical" ]]; then
+        native_standalone_parity_paths["$file"]=1
+        if [[ -f "$committed" && ! -L "$committed" ]] && cmp -s "$physical" "$committed"; then
+          printf '%s\n' "$committed" >> "$benchmark_manifest"
+        fi
+        echo "T5M_NATIVE_STANDALONE_AND_PAIRED_PASS source=$file physical=ZIG_VERIFIED semantic=NOT_CERTIFIED release=NOT_CERTIFIED"
+      else
+        # Самодостатній носій містить Lisp-залежності, committed source-only — ні.
+        # Не віддавати неперевірений source-only файл фізичному бенчмарку.
+        echo "T5M_NATIVE_DEPENDENCY_COMPLETE_AND_PAIRED_PASS source=$file physical=ZIG_VERIFIED semantic=NOT_CERTIFIED release=NOT_CERTIFIED"
       fi
-      echo "T5M_NATIVE_STANDALONE_AND_PAIRED_PASS source=$file physical=ZIG_VERIFIED semantic=NOT_CERTIFIED release=NOT_CERTIFIED"
     else
       status=$?
       # Лише названі відмови фізичного reader D24+/D7 допускають
