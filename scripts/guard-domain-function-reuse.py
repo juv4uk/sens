@@ -304,12 +304,30 @@ def changed_files(args) -> list[str]:
     if args.paths_from:
         return [ln.strip() for ln in Path(args.paths_from).read_text(encoding="utf-8").splitlines() if ln.strip()]
     if args.staged:
-        out = subprocess.run(
-            ["git", "-c", "core.quotepath=false", "diff", "--name-only", "--cached"],
+        result = subprocess.run(
+            ["git", "-c", "core.quotepath=false", "diff", "--name-only",
+             "--cached", "--diff-filter=ACMRT"],
             cwd=ROOT, capture_output=True, text=True, check=False,
-        ).stdout
-        return [ln.strip() for ln in out.splitlines() if ln.strip()]
+        )
+        if result.returncode != 0:
+            raise RuntimeError("GUARD-DOMAIN-REUSE: не вдалося прочитати staged-шляхи: "
+                               + result.stderr.strip())
+        return [ln.strip() for ln in result.stdout.splitlines() if ln.strip()]
     return []
+
+
+def read_source_text(root: Path, rel: str, staged: bool) -> str:
+    """Для pre-commit перевіряємо саме blob індексу, а не мінливий worktree."""
+    if not staged:
+        return (root / rel).read_text(encoding="utf-8")
+    result = subprocess.run(
+        ["git", "show", f":{rel}"], cwd=root,
+        capture_output=True, text=True, check=False,
+    )
+    if result.returncode != 0:
+        raise RuntimeError("GUARD-DOMAIN-REUSE: staged-вміст недоступний: "
+                           + rel + ": " + result.stderr.strip())
+    return result.stdout
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -348,10 +366,10 @@ def main(argv: list[str] | None = None) -> int:
         if rel.startswith("tests/") and not rel.startswith(SEMANTIC_PREFIX):
             continue
         path = ROOT / rel
-        if not path.is_file():
+        if not args.staged and not path.is_file():
             continue
         checked += 1
-        text = path.read_text(encoding="utf-8")
+        text = read_source_text(ROOT, rel, args.staged)
         known: set[str] = set()
         if args.base:
             try:
