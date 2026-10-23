@@ -183,6 +183,10 @@ jobs:
                   "tests/semantic/unification-occurs-check-mutant.lisp",
                   "tests/semantic/d11-srfi1-list-equality-law.lisp",
                   "tests/semantic/d11-srfi1-list-equality-mutant.lisp",
+                  # D11 FIND-TAIL requires its canonical Lisp DEFINE from lib/.
+                  # It is executed in the native bundled law step and in the
+                  # physical law runner; never misclassify it as standalone.
+                  "tests/semantic/d11-srfi1-find-tail-laws.lisp",
                   "tests/semantic/unification-variable-shape-law.lisp",
                   "tests/semantic/unification-variable-shape-positive.lisp",
                   "tests/semantic/unification-variable-shape-negative.lisp",
@@ -257,7 +261,6 @@ jobs:
                   "tests/semantic/lisp-d3-eq-branches-laws.lisp",
                   "tests/semantic/language-law-d3-eq-symmetry-ukr.lisp",
                   "tests/semantic/language-mutant-d3-eq-symmetry-ukr.lisp",
-                  "tests/semantic/d11-srfi1-find-tail-laws.lisp",
                   "tests/semantic/lisp-d3-d4-list-self-verdict.lisp",
                   "tests/semantic/d3-structural-native-t5m-law.lisp",
                   "tests/semantic/d3-structural-native-t5m-mutant.lisp",
