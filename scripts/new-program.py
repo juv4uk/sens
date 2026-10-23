@@ -48,6 +48,16 @@ def main(argv: list[str] | None = None) -> int:
     if not name or any(c in name for c in " \t/\\"):
         print("ім'я мусить бути одним словом укр-проєкції, без пробілів і слешів", file=sys.stderr)
         return 2
+    # ПОШУК ЗАПУСКАЄТЬСЯ САМ — до створення. Агент не мусить пам'ятати
+    # про окрему команду: скафолд одразу показує, чи є схоже наявне.
+    print("пошук наявного (щоб не вигадувати):")
+    sr = subprocess.run([sys.executable, str(ROOT / "scripts" / "search-domain-function.py"), name],
+                        cwd=ROOT, capture_output=True, text=True)
+    out = (sr.stdout + sr.stderr).strip().splitlines()
+    for line in out[:8]:
+        print("  " + line)
+    print()
+
     target = ROOT / "lib" / f"{name}.lisp"
     if target.exists():
         print(f"уже існує: lib/{name}.lisp — не перезаписую", file=sys.stderr)
