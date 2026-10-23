@@ -31,7 +31,7 @@ ENCODED_WORD = re.compile(
     r"(?<![\w#])#(?:d\d+:[01]+|b[01]+|q2:[01]+(?:/[01]+)?)",
     re.IGNORECASE,
 )
-NUMBER = r"[+-]?(?:\d+(?:[.,]\d+)?(?:[eE][+-]?\d+)?)"
+NUMBER = r"[+-]?(?:\d+(?:/[+-]?\d+)?(?:[.,]\d+)?(?:[eE][+-]?\d+)?)"
 NUMERIC_CALL_HEAD = re.compile(rf"\(\s*({NUMBER})(?=\s|\)|$)")
 
 # Domain-table coordinates are declarative keys, not Lisp call heads.
@@ -95,12 +95,12 @@ MACHINE_FACT_NUMERIC_PATHS = {
     "lib/machine/encoding/admitted-iclass-index.lisp",
     "lib/machine/dispatch/native-first-coverage.lisp",
 }
-MACHINE_ISA_FACT_PATH = re.compile(r"^lib/machine/isa/[^/]+\\.lisp$")
+MACHINE_ISA_FACT_PATH = re.compile(r"^lib/machine/isa/[^/]+\.lisp$")
 
 
 def _source_line_bounds(source: str, offset: int) -> tuple[int, int]:
-    start = source.rfind("\\n", 0, offset) + 1
-    end = source.find("\\n", offset)
+    start = source.rfind("\n", 0, offset) + 1
+    end = source.find("\n", offset)
     return start, len(source) if end < 0 else end
 
 
@@ -111,7 +111,7 @@ def _is_domain_table_data_row(source: str, path: str | Path | None, offset: int)
     if path_match is None:
         return False
     start, end = _source_line_bounds(source, offset)
-    row = DOMAIN_TABLE_ROW.fullmatch(source[start:end].rstrip("\\r"))
+    row = DOMAIN_TABLE_ROW.fullmatch(source[start:end].rstrip("\r"))
     return bool(row and len(row.group("bits")) == int(path_match.group("width")))
 
 
