@@ -362,9 +362,19 @@ def check_trit_explain_typed_word_route(source: str) -> None:
     if live.count(zig_marker) != 1:
         raise CorridorBlocked("sens-trit explain missing sole Zig physical branch")
     active = live.split(zig_marker, 1)[1]
-    if "zig_transport::decode_t5m_words(bytes)" not in active:
+    # Чинний шлях зберігає ТОЧНІ ширини (D24+), тож Zig-вхід — decode_t5m_exact_words,
+    # а допуск SENS — ExactDomainWord::from_physical_width_bits. Давніші назви
+    # лишаємо прийнятними, щоб чекер не ламався від перейменування; суть — та сама:
+    # explain мусить іти фізичним Zig-входом і допускати точні SENS-слова.
+    if not any(name in active for name in (
+        "zig_transport::decode_t5m_exact_words(bytes)",
+        "zig_transport::decode_t5m_words(bytes)",
+    )):
         raise CorridorBlocked("sens-trit explain bypasses physical Zig T5 ingress")
-    if "sens::parse_canonical_word_sequence(&words)" not in active:
+    if not any(name in active for name in (
+        "sens::ExactDomainWord::from_physical_width_bits",
+        "sens::parse_canonical_word_sequence(&words)",
+    )):
         raise CorridorBlocked("sens-trit explain does not admit exact SENS words")
     for forbidden in (
         "sens::parse_canonical_binary(", "sens::render_ternary_words_vertical(",
@@ -768,7 +778,7 @@ def check_sanskrit_surface_zig_only(
     if re.search(r'include_(?:str|bytes)!\s*\(\s*"[^"]*lib/surface/sa\.lisp"', repl):
         raise CorridorBlocked("SANSKRIT_ZIG_ONLY direct Rust source embed")
     resolver = active(_route_between(
-        repl_source, "fn selected_surface_callable(", "\nfn project_repl_surface_expression("
+        repl_source, "fn selected_surface_callable(", "\nfn project_repl_surface_expression_in_scope("
     ))
     if ("surface_catalog::identity_for_surface_name(surface.code(), &projected_name)?" not in resolver
             or "exact_uk_callable_for_source_head(&ukr_name)" not in resolver
