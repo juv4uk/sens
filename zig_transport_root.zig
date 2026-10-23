@@ -551,10 +551,12 @@ test "compiler export assets cross Zig byte-exact without partial writes" {
         compiler_identity_corpus_asset,
     };
     inline for (assets, 0..) |asset, index| {
-        const copy = if (index == 0)
-            sens_zig_compiler_nucleus_bytes_copy
+        // Експортовані функції мають C ABI: при виборі з двох адрес
+        // використовуємо явний покажчик, а не comptime-only fn.
+        const copy: *const fn ([*]u8, usize) callconv(.c) isize = if (index == 0)
+            &sens_zig_compiler_nucleus_bytes_copy
         else
-            sens_zig_compiler_identity_corpus_bytes_copy;
+            &sens_zig_compiler_identity_corpus_bytes_copy;
         const required = copy(undefined, 0);
         try std.testing.expectEqual(@as(isize, @intCast(asset.len)), required);
         var short: [1]u8 = .{0xA5};
