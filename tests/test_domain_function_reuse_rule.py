@@ -10,7 +10,7 @@
 from __future__ import annotations
 
 import importlib.util
-from contextlib import redirect_stdout
+from contextlib import redirect_stdout, redirect_stderr
 from io import StringIO
 import subprocess
 import sys
