@@ -59,6 +59,20 @@ jobs:
             tests/test_sid8_broad_source_cutover.py \
             tests/test_domain_ladder_source_batch.py -v
 
+      - name: Звіт про залишкові кандидати SID8 у активних Lisp (лише читання)
+        run: |
+          set -euo pipefail
+          python3 scripts/migrate-domain-ladder-source-batch.py --report "$RUNNER_TEMP/sens-lisp-census.json"
+          python3 - "$RUNNER_TEMP/sens-lisp-census.json" <<'PY'
+          import json, sys
+          report = json.loads(open(sys.argv[1], encoding="utf-8").read())
+          print("SENS Lisp census:", json.dumps(report["summary"], ensure_ascii=False))
+          for row in report["files"]:
+              if row["status"] != "unchanged":
+                  print(f"{row['status']}: {row['path']}: " +
+                        "; ".join(row.get("reasons", [])))
+          PY
+
   lisp-surface:
     name: Підсумковий гейт перевірок SENS
     if: ${{ always() }}
