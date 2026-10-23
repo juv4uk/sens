@@ -251,7 +251,13 @@ class SourceResolver:
                 candidates: set[CurrentIdentity] = set()
                 for row in rows:
                     for spelling in (row.my_lisp, row.historical):
-                        candidates.update(self.current_surface.get(spelling, set()))
+                        # A historic SID8 role is only a D3–D6 candidate here.
+                        # Modern D8–D10 spelling alone is no provenance bridge.
+                        candidates.update(
+                            candidate
+                            for candidate in self.current_surface.get(spelling, set())
+                            if candidate.domain in {"D3", "D4", "D5", "D6"}
+                        )
                 return self._choose(
                     "sid8-sens8", 1, token, candidates,
                     legacy_sid8=token, rows=rows,
