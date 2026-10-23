@@ -707,13 +707,13 @@ cat -- lib/result-status.lisp tests/semantic/result-status-goal-tags-mutant.lisp
 run_case run_law result-status-goal-tags-positive "$result_status_goal_tags_bundle" 1
 run_case run_law result-status-goal-tags-mutant "$result_status_goal_tags_mutant_bundle" 0
 
-# Д10-конструктори існують у lib/core4.lisp, але мінімальний корпус
-# цього свідка не завантажує повний core4 (разом із незалежними макросами).
+# Д5-помічники, D9-предикати та D10-конструктори існують у lib/core4.lisp,
+# але мінімальний корпус свідка не завантажує весь core4 з макросами.
 # Витягаємо ТІЛЬКИ точні чинні Lisp DEFINE без копії реалізації чи host-оракула.
 # Відсутнє/дубльоване визначення — помилка, а не замовчуваний SKIP.
-epistemic_constructor_source="$evidence/epistemic-d10-constructors.lisp"
+epistemic_constructor_source="$evidence/epistemic-canonical-core4-dependencies.lisp"
 : > "$epistemic_constructor_source"
-for constructor in створити-спостереження створити-твердження створити-доказ створити-намір; do
+for constructor in значення-у-списку? знайти-за-ключем створити-спостереження створити-твердження створити-доказ створити-намір спостереження? твердження? доказ? намір?; do
   if ! awk -v target="(визначити $constructor" '
     $0 == target {
       if (found++) exit 2
@@ -736,7 +736,7 @@ test -s "$epistemic_constructor_source" || {
   echo "::error::EPISTEMIC_D10_SOURCE_EMPTY" >&2
   exit 2
 }
-sha256sum lib/core4.lisp "$epistemic_constructor_source" > "$evidence/epistemic-d10-source.sha256"
+sha256sum lib/core4.lisp "$epistemic_constructor_source" > "$evidence/epistemic-core4-dependencies.sha256"
 
 # Епістемічні закони належать Lisp: посилання, вимоги та вкладена рівність.
 # Той самий живий SENS-корпус спрацьовує на позитиві, а хибне очікування
