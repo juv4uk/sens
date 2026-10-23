@@ -370,7 +370,7 @@ def main() -> int:
     parser.add_argument(
         "--foundation",
         type=Path,
-        default=Path("knowledge/d1-d7-foundation.json"),
+        default=Path("knowledge/d1-d11-foundation.json"),
     )
     parser.add_argument(
         "--registry",
@@ -381,7 +381,7 @@ def main() -> int:
         "--domain-surfaces",
         type=Path,
         nargs="*",
-        default=[Path(f"lib/domains/d{width}.lisp") for width in range(1, 7)],
+        default=[Path(f"lib/domains/d{width}.lisp") for width in (3, 4, 5, 6, 8, 9, 10)],
     )
     parser.add_argument("--json", type=Path)
     parser.add_argument("--tsv", type=Path)
