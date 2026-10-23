@@ -64,7 +64,8 @@ jobs:
             tests/test_ukrainian_domain_projection_rules.py \
             tests/test_sid8_broad_source_cutover.py \
             tests/test_domain_ladder_source_batch.py \
-            tests/test_domain_function_reuse_rule.py -v
+            tests/test_domain_function_reuse_rule.py \
+            tests/test_tests_use_ukr_projection.py -v
 
       - name: Звіт про залишкові кандидати SID8 у активних Lisp (лише читання)
         run: |
