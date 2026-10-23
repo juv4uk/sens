@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Guard 13 immutable KNOWLEDGE DATA records against fake executable SENS migration."""
+"""Guard 12 current KNOWLEDGE DATA records against fake executable SENS migration."""
 from __future__ import annotations
 import hashlib
 import importlib.util
@@ -15,7 +15,6 @@ MANIFEST = ROOT / "knowledge/migration-nonprogram-knowledge-records-2026-10-08.j
 EXPECTED = {
     "knowledge/agent-discoveries.lisp": "agent-discoveries",
     "knowledge/core4-predicate-record-inventory.lisp": "core4-predicate-record-inventory-3",
-    "knowledge/function-table-sculpt-audit.lisp": "function-table-sculpt-audit-1",
     "knowledge/meta-eval-evidence.lisp": "schema",
     "knowledge/repo-tooling-inventory.lisp": "about",
     "knowledge/sanskrit-cyrillic-audit.lisp": "sanskrit-cyrillic-audit",
@@ -75,7 +74,7 @@ class KnowledgeRecordSources(unittest.TestCase):
         ):
             self.assertNotIn(path, EXPECTED)
 
-    def test_canonical_census_imports_13_reviewed_data_rows(self):
+    def test_canonical_census_imports_12_reviewed_data_rows(self):
         script = ROOT / "scripts/report_original_migration_candidates.py"
         spec = importlib.util.spec_from_file_location("original_candidates_knowledge_test", script)
         assert spec and spec.loader
@@ -84,7 +83,7 @@ class KnowledgeRecordSources(unittest.TestCase):
         spec.loader.exec_module(mod)
         classifications = mod.load_nonprogram_classification(ROOT)
         knowledge = [x for x in classifications.values() if x["cohort"] == "knowledge-record"]
-        self.assertEqual(len(knowledge), 13)
+        self.assertEqual(len(knowledge), 12)
         self.assertEqual({x["path"] for x in knowledge}, set(EXPECTED))
         self.assertTrue(all(not x["automatic_sens_companion"] for x in knowledge))
         self.assertTrue(all(x["source_class"] == "NONPROGRAM_DATA_REVIEWED" for x in knowledge))
@@ -108,6 +107,22 @@ class KnowledgeRecordSources(unittest.TestCase):
         )
         self.assertIn("SID8/Sens8", retired[0]["reason"])
         self.assertFalse((ROOT / "knowledge/canon-authority-inventory.lisp").exists())
+        self.assertNotIn("knowledge/function-table-sculpt-audit.lisp", live_paths)
+        retired_function_table = [
+            row for row in manifest.get("retired_post_snapshot_sources", [])
+            if row.get("path") == "knowledge/function-table-sculpt-audit.lisp"
+        ]
+        self.assertEqual(len(retired_function_table), 1)
+        self.assertEqual(
+            retired_function_table[0]["previous_git_blob_sha1"],
+            "02c6879a33241b1126c43f3c902d31b6eb94287a",
+        )
+        self.assertEqual(
+            retired_function_table[0]["removed_by_commit"],
+            "fb8bce900a33e1d5bdf95f34a0fbf3b6c359a293",
+        )
+        self.assertIn("SID8", retired_function_table[0]["reason"])
+        self.assertFalse((ROOT / "knowledge/function-table-sculpt-audit.lisp").exists())
 
 
 if __name__ == "__main__":
