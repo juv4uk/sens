@@ -195,6 +195,6 @@ fn zerop_machine_proof_does_not_publish_numeric_boolean_language_semantics() {
         fs::read_to_string(repo_root().join("lib/machine/profile/current-domain-x86-64.lisp"))
             .expect("current profile");
     assert!(profile
-        .contains("(5 8 proof \"CMP+SETE+MOVZX / exact integer internal bit; D1 boundary\")"));
+        .contains("(домен-п'ятий нуль? proof \"CMP+SETE+MOVZX / exact integer internal bit; D1 boundary\")"));
     assert!(!profile.contains("00001000 direct"));
 }
