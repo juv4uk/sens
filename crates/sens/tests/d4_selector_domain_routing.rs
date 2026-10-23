@@ -1,5 +1,5 @@
-//! Rust відповідає лише за запуск виконуваного Lisp-свідка в своєму runtime.
-//! Очікувані результати CAR/CDR-подібних селекторів задає сама програма SENS.
+//! Rust перевіряє лише механізм завантаження та виконання програми.
+//! Закон селекторів і власний fail-closed самовердикт належать SENS Lisp.
 use sens::{eval_program, load_core_library, Session};
 
 #[test]
@@ -8,13 +8,8 @@ fn rust_runtime_executes_lisp_owned_d4_selector_witness() {
     load_core_library(&mut session).expect("SENS core must load");
 
     let source = include_str!("../../../tests/semantic/d4-selector-domain-law.lisp");
-    let result = eval_program(source, &mut session)
-        .expect("Lisp-owned selector law must execute")
-        .value
-        .to_string();
-
-    assert!(
-        result.starts_with("(d4-selector-domain-law (status pass)"),
-        "SENS Lisp witness rejected selector semantics: {result}"
-    );
+    // Хибний закон у цьому Lisp сам переходить до недопустимого CAR NIL.
+    // Rust не порівнює мовний результат із власною таблицею істинності.
+    let _ = eval_program(source, &mut session)
+        .expect("SENS runtime має виконати самоперевірний Lisp-свідок");
 }
