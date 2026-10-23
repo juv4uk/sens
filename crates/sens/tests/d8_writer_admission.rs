@@ -49,18 +49,10 @@ fn d8_writer_survives_d4_lambdas_and_user_defined_calls() {
     }
 }
 
-#[test]
-fn d8_string_to_symbol_is_exact_and_rejects_non_strings() {
-    let mut session = session();
-    assert_eq!(
-        run("(текст-у-символ \"zoo\")", &mut session)
-            .expect("ratified Ukrainian D8 text-to-symbol")
-            .to_string(),
-        "zoo"
-    );
-    let error = run("(текст-у-символ 7)", &mut session).expect_err("number is not text");
-    assert_eq!(error.kind, sens::ErrorKind::Type);
-}
+// Закон D8 TEXT→SYMBOL та його мутант виконуються тільки SENS із Lisp:
+// tests/semantic/d8-string-symbol-roundtrip-{law,mutant}.lisp.
+// Негатив Type також живе у tests/semantic/d8-string-symbol-nontext-type-negative.lisp.
+// Rust не дублює цей вердикт: CI перевіряє його через Zig/T5M та реальний SENS.
 
 #[test]
 fn d8_writer_rejects_incorrect_arity() {
