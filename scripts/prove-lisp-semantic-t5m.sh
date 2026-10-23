@@ -41,11 +41,7 @@ run_law() {
   test -s "$physical" || fail "$id" codec "nonempty-T5M" "empty"
   if ! timeout 45s "$trit" open "$physical" >"$dir/program" 2>"$dir/open.err" ||
      ! timeout 45s "$trit" verify-view "$physical" >"$dir/inverse.out" 2>"$dir/inverse.err"; then
-    for error_log in "$dir/open.err" "$dir/inverse.err"; do
-      if [[ -f "$error_log" ]]; then
-        cat "$error_log" >&2
-      fi
-    done
+    cat "$dir/open.err" "$dir/inverse.err" >&2 || true
     fail "$id" zig-transport "canonical-roundtrip" "rejected"
   fi
   if ! timeout 45s "$sens" --t5m-pair "$source" "$physical" >"$dir/paired.out" 2>"$dir/paired.err" ||
@@ -90,11 +86,7 @@ run_bound_law() {
   test -s "$physical" || fail "$id" codec "nonempty-T5M" "empty"
   if ! timeout 45s "$trit" open "$physical" >"$dir/program" 2>"$dir/open.err" ||
      ! timeout 45s "$trit" verify-view "$physical" >"$dir/inverse.out" 2>"$dir/inverse.err"; then
-    for error_log in "$dir/open.err" "$dir/inverse.err"; do
-      if [[ -f "$error_log" ]]; then
-        cat "$error_log" >&2
-      fi
-    done
+    cat "$dir/open.err" "$dir/inverse.err" >&2 || true
     fail "$id" zig-transport "canonical-roundtrip" "rejected"
   fi
   if ! timeout 45s "$sens" --t5m-pair "$combined" "$physical" >"$dir/paired.out" 2>"$dir/paired.err" ||
@@ -140,11 +132,7 @@ run_eq_type_rejection() {
   test -s "$physical" || fail "$id" codec "nonempty-T5M" "empty"
   if ! timeout 45s "$trit" open "$physical" >"$dir/program" 2>"$dir/open.err" ||
      ! timeout 45s "$trit" verify-view "$physical" >"$dir/inverse.out" 2>"$dir/inverse.err"; then
-    for error_log in "$dir/open.err" "$dir/inverse.err"; do
-      if [[ -f "$error_log" ]]; then
-        cat "$error_log" >&2
-      fi
-    done
+    cat "$dir/open.err" "$dir/inverse.err" >&2 || true
     fail "$id" zig-transport "canonical-roundtrip" "rejected"
   fi
 
@@ -243,6 +231,15 @@ run_case run_law d4-lexical-scope-mutant tests/semantic/d4-lexical-scope-mutant.
 # Лише Lisp формулює закон, shell звіряє кінцевий D1; Rust не є оракулом.
 run_case run_law d4-d5-ordered-arguments-positive tests/semantic/language-law-d5-ordered-arguments-ukr.lisp 1
 run_case run_law d4-d5-ordered-arguments-mutant tests/semantic/language-mutant-d5-ordered-arguments-ukr.lisp 0
+# SRFI-1 list=: алгоритм з чинної lib/D11, очікувані предикати тільки в Lisp.
+# Не тестуємо D11-операцію Rust-оракулом; Zig тільки кодує фізичні байти.
+d11_list_equal_law_bundle="$evidence/d11-list-equality-positive.lisp"
+d11_list_equal_mutant_bundle="$evidence/d11-list-equality-negative.lisp"
+cat -- lib/d11-srfi1-list-equality.lisp tests/semantic/d11-srfi1-list-equality-law.lisp > "$d11_list_equal_law_bundle"
+cat -- lib/d11-srfi1-list-equality.lisp tests/semantic/d11-srfi1-list-equality-mutant.lisp > "$d11_list_equal_mutant_bundle"
+run_case run_law d11-srfi1-list-equality-positive "$d11_list_equal_law_bundle" 1
+run_case run_law d11-srfi1-list-equality-mutant "$d11_list_equal_mutant_bundle" 0
+sha256sum lib/d11-srfi1-list-equality.lisp tests/semantic/d11-srfi1-list-equality-law.lisp tests/semantic/d11-srfi1-list-equality-mutant.lisp > "$evidence/d11-list-equality-inputs.sha256"
 # Фізичні закони Д3 не залежать від недопущеного виклику D6 LENGTH.
 run_case run_law d3-structural-positive tests/semantic/d3-structural-native-t5m-law.lisp 1
 run_case run_law d3-structural-mutant tests/semantic/d3-structural-native-t5m-mutant.lisp 0
