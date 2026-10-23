@@ -963,16 +963,10 @@ fn core_lib_is_preloaded_before_running_a_file() {
 }
 
 #[test]
-fn argv_carries_everything_after_the_filename() {
-    // *argv* (PLAN.md item 21's follow-up, for scripts/release.my taking a
-    // version on the command line) is whatever follows the filename, as a
-    // SENS list of strings — not parsed as code, just passed through.
-    // *argv* (prodovzhennia PLAN.md, punktu 21, dlia scripts/release.my, yaka
-    // bere versiiu z komandnoho riadka) — use, shcho yde pislia imeni failu, yak
-    // SENS-spysok riadkiv — ne parsytsia yak kod, lyshe peredaietsia yak ye.
+fn ukrainian_arguments_binding_carries_everything_after_the_filename() {
     let dir = std::env::temp_dir();
     let path = dir.join("sens-cli-test-argv.lisp");
-    std::fs::write(&path, "*argv*").expect("should write temp file");
+    std::fs::write(&path, "параметри-командного-рядка").expect("should write temp file");
 
     let output = sens()
         .arg(&path)
@@ -988,10 +982,10 @@ fn argv_carries_everything_after_the_filename() {
 }
 
 #[test]
-fn argv_is_empty_when_nothing_follows_the_filename() {
+fn ukrainian_arguments_binding_is_empty_when_nothing_follows_the_filename() {
     let dir = std::env::temp_dir();
     let path = dir.join("sens-cli-test-argv-empty.lisp");
-    std::fs::write(&path, "*argv*").expect("should write temp file");
+    std::fs::write(&path, "параметри-командного-рядка").expect("should write temp file");
 
     let output = sens().arg(&path).output().expect("binary should run");
     let _ = std::fs::remove_file(&path);

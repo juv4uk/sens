@@ -130,6 +130,7 @@ fn extract_cli_core(args: Vec<String>) -> Result<(Vec<String>, CliCore), String>
 /// Людська українська .lisp-проєкція належить SENS, а не GUI/TUI.
 /// Звичайні десяткові операнди набувають точного домену D24+ перед
 /// обчисленням. Фізичний .sens іде окремим T5M шляхом, без цього reader.
+#[cfg(test)]
 fn parse_human_lisp_file(source: &str) -> Result<Vec<sens::Expr>, sens::LanguageError> {
     let parsed = parse(source)?;
     sens::source_projection::project_ukr_decimal_integer_literals(&parsed, source)
@@ -1063,51 +1064,48 @@ fn main() {
         // Run file
         let filename = arg;
 
-        // `*argv*` (PLAN.md item 21's follow-up, for scripts/release.lisp
-        // taking a version on the command line) — everything after the
-        // filename, as a sens list of strings, defined before the
-        // script runs. Empty when nothing follows the filename, not an
-        // error — a script that wants an argument checks for that itself
-        // (`(atom *argv*)`), the same way any other missing-input case in
-        // this language is handled, not a special CLI-only mechanism.
-        // `*argv*` (продовження PLAN.md, пункту 21, для scripts/release.lisp,
-        // яка бере версію з командного рядка) — усе після імені файлу, як
-        // sens-список рядків, визначений до запуску скрипта. Порожній,
-        // якщо нічого не йде після імені файлу, не помилка — скрипт, якому
-        // потрібен аргумент, сам перевіряє це (`(atom *argv*)`), так само
-        // як будь-який інший випадок відсутнього вводу в цій мові, не
-        // окремий CLI-специфічний механізм.
-        let argv = Value::list(
+        // Аргументи після шляху передаються як список рядків у змінну
+        // української поверхні `параметри-командного-рядка`, до виконання.
+        let arguments = Value::list(
             args[2..]
                 .iter()
                 .map(|arg| Value::String(Rc::from(arg.as_str()))),
         );
-        session.environment.define("*argv*", argv);
+        session.environment.define("*argv*", arguments.clone());
+        session
+            .environment
+            .define("параметри-командного-рядка", arguments);
 
         match fs::read_to_string(filename) {
-            Ok(source) => match parse_human_lisp_file(&source) {
-                Ok(ast) => match eval_parsed_expressions(&ast, &mut session) {
+            Ok(source) => {
+                #[cfg(feature = "zig-transport")]
+                let result = repl::eval_t5m_source_in_session(
+                    &source,
+                    &mut session,
+                    repl::ReplSurface::UkrainianFull,
+                );
+                #[cfg(not(feature = "zig-transport"))]
+                let result: Result<sens::EvalResult, String> = Err(
+                    "RUST_ZIG_ONLY: Lisp file execution requires the Zig T5M corridor; no Rust fallback".into(),
+                );
+
+                match result {
                     Ok(result) => {
                         for out in result.output {
                             println!("{}", out);
                         }
                         println!("{}", result.value);
                     }
-                    Err(e) => {
-                        // Вивід, накопичений до помилки (наприклад, «FAIL: ...» від
-                        // скрипта перевірок), не губиться: друкуємо його перед помилкою.
+                    Err(error) => {
+                        // Вивід до SENS-помилки не губиться.
                         for out in session.environment.output_take_new() {
                             println!("{}", out);
                         }
-                        eprintln!("Error: {}", e.render(&source));
+                        eprintln!("sens: T5M source execution failed: {error}");
                         process::exit(1);
                     }
-                },
-                Err(e) => {
-                    eprintln!("Parse error: {}", e.render(&source));
-                    process::exit(1);
                 }
-            },
+            }
             Err(e) => {
                 eprintln!("Error reading file {}: {}", filename, e);
                 process::exit(1);

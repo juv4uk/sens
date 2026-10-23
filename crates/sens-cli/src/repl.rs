@@ -1537,7 +1537,20 @@ fn eval_t5m_repl_line(
 #[cfg(feature = "zig-transport")]
 pub(crate) fn eval_t5m_source_file(source: &str) -> Result<sens::EvalResult, String> {
     let mut session = Session::default();
-    eval_t5m_repl_line(source, &mut session, ReplSurface::UkrainianFull)
+    eval_t5m_source_in_session(source, &mut session, ReplSurface::UkrainianFull)
+}
+
+/// Execute a human source form in an existing host session through the same
+/// exact-word → Zig T5M → SENS path used by the REPL. The session supplies
+/// already admitted language definitions, command-line arguments, and host
+/// capabilities; it does not provide a textual evaluator fallback.
+#[cfg(feature = "zig-transport")]
+pub(crate) fn eval_t5m_source_in_session(
+    source: &str,
+    session: &mut Session,
+    surface: ReplSurface,
+) -> Result<sens::EvalResult, String> {
+    eval_t5m_repl_line(source, session, surface)
 }
 
 /// Виконати впорядковані Lisp-частини через Zig/T5M в одній SENS-сесії.
@@ -2115,6 +2128,21 @@ mod tests {
         let repl_forms = execute_zig_t5m_asset(&repl_core, "repl-core", &mut session)
             .expect("REPL core executes from exact T5M domain words");
         assert!(repl_forms > 0);
+    }
+
+    #[cfg(feature = "zig-transport")]
+    #[test]
+    fn cli_source_file_executes_via_t5m_in_the_existing_sens_session() {
+        let mut session = Session::default();
+        sens::load_core_library(&mut session).expect("Core4 bootstrap");
+        let result = eval_t5m_source_in_session(
+            "(додати-1 число-один)",
+            &mut session,
+            ReplSurface::UkrainianFull,
+        )
+        .expect("source is encoded by Zig T5M and executed by SENS");
+
+        assert_eq!(result.value.to_string(), "2");
     }
 
     #[cfg(feature = "zig-transport")]
