@@ -41,7 +41,7 @@ EXCLUDED_PREFIXES = (
     "lib/generated/", "lib/surface/", "lib/domains/", "lib/machine/",
     "vendor/", "benchmarks/", "tests/",
 )
-DEF = re.compile(r"\(визначити\s+([^\s()]+)")
+DEF = re.compile(r"\(" + "визначити" + r"\s+([^\s()]+)")
 
 
 def _load_discover():

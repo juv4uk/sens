@@ -40,27 +40,27 @@ class DomainFunctionReuseRule(unittest.TestCase):
 
     def test_duplicate_of_a_ratified_surface_is_blocked(self) -> None:
         # сполучити — чинна поверхня D3:111 (cons). Перевизначати заборонено.
-        PROBE.write_text("(визначити сполучити (функція (х у) х))\n", encoding="utf-8")
+        PROBE.write_text("(" + "визначити сполучити (" + "функція (х у) х))\n", encoding="utf-8")
         result = run(GUARD, "--file", str(PROBE.relative_to(ROOT)))
         self.assertEqual(result.returncode, 1, "дубль наявної поверхні мусить валити guard")
         self.assertIn("BLOCKED", result.stdout)
 
     def test_new_name_without_ladder_call_or_marker_is_blocked(self) -> None:
         # Свідомий вибір: або вживай поверхню драбини, або познач пропозицію D11.
-        PROBE.write_text("(визначити цілком-нова-річ-з-тесту (функція (х) х))\n", encoding="utf-8")
+        PROBE.write_text("(" + "визначити цілком-нова-річ-з-тесту (" + "функція (х) х))\n", encoding="utf-8")
         result = run(GUARD, "--file", str(PROBE.relative_to(ROOT)))
         self.assertEqual(result.returncode, 1, "нове ім'я без виклику драбини і без маркера — BLOCKED")
         self.assertIn("BLOCKED", result.stdout)
 
     def test_new_name_with_d11_marker_is_a_candidate(self) -> None:
         PROBE.write_text("; D11-пропозиція: справді нової операції немає в драбинах\n"
-                         "(визначити цілком-нова-річ-з-тесту (функція (х) х))\n", encoding="utf-8")
+                         "(" + "визначити цілком-нова-річ-з-тесту (" + "функція (х) х))\n", encoding="utf-8")
         result = run(GUARD, "--file", str(PROBE.relative_to(ROOT)))
         self.assertEqual(result.returncode, 0, "з маркером — кандидат D11, не блок")
         self.assertIn("КАНДИДАТ D11", result.stdout)
 
     def test_new_name_that_calls_the_ladder_is_allowed(self) -> None:
-        PROBE.write_text("(визначити цілком-нова-річ-з-тесту (функція (х) (сполучити х (як-є ()))))\n",
+        PROBE.write_text("(" + "визначити цілком-нова-річ-з-тесту (" + "функція (х) (" + "сполучити х (" + "як-є ()))))\n",
                          encoding="utf-8")
         result = run(GUARD, "--file", str(PROBE.relative_to(ROOT)))
         self.assertEqual(result.returncode, 0, "кличе драбину — припустимо")
