@@ -346,7 +346,39 @@ run_native_t5m_program() {
       echo "CORE1_GC_TWO_CARRIERS_PASS source=$file direct=LISP physical=T5M native=SENS positive=D1:1 negative=D1:0 GC=SYMBOLIC_REACHABILITY_ONLY"
     fi
     native_paired_executed_paths["$file"]=1
-    if timeout "$native_timeout" "$binary" "$physical" \
+    # Модульний Lisp-свідок має право звертатися до DEFINE лише після
+    # їх завантаження. Source-only T5M є точним кодом свідка, але НЕ
+    # самодостатньою програмою: у standalone немає його D10-зв'язувань.
+    # Для двох D3-законів виконуємо окремий САМОДОСТАТНІЙ фізичний
+    # носій із тим самим чинним джерелом визначень. Жодного mock/host oracle.
+    local standalone_physical="$physical"
+    if [[ "$file" == "tests/semantic/result-status-proper-list-d3-law.lisp" ||
+          "$file" == "tests/semantic/result-status-proper-list-d3-mutant.lisp" ]]; then
+      local complete_source="$dir/dependency-complete.lisp"
+      standalone_physical="$dir/dependency-complete.sens"
+      cat -- lib/result-status.lisp "$file" > "$complete_source"
+      if ! timeout "$native_timeout" "$binary" --t5m-mint "$complete_source" "$standalone_physical" \
+          >"$dir/dependency-mint.stdout" 2>"$dir/dependency-mint.stderr" ||
+         ! timeout "$native_timeout" "$native_open" open "$standalone_physical" \
+          >"$dir/dependency-complete" 2>"$dir/dependency-open.stderr" ||
+         ! timeout "$native_timeout" "$native_open" verify-view "$standalone_physical" \
+          >"$dir/dependency-verify.stdout" 2>"$dir/dependency-verify.stderr"; then
+        for diagnostic in "$dir/dependency-mint.stderr" "$dir/dependency-open.stderr" "$dir/dependency-verify.stderr"; do
+          [[ ! -f "$diagnostic" ]] || sed 's/^/SENS dependency-complete: /' "$diagnostic" >&2
+        done
+        echo "::error::T5M_DEPENDENCY_COMPLETE_MINT_OR_ROUNDTRIP_FAIL source=$file" >&2
+        mark_file_failed
+        return
+      fi
+      local expected_d1=1
+      [[ "$file" != *-mutant.lisp ]] || expected_d1=0
+      if [[ "$(cat "$dir/native-paired.stdout")" != "$expected_d1" ]]; then
+        echo "::error::T5M_DEPENDENCY_PAIRED_WRONG_D1 source=$file expected=$expected_d1" >&2
+        mark_file_failed
+        return
+      fi
+    fi
+    if timeout "$native_timeout" "$binary" "$standalone_physical" \
         >"$dir/native-standalone.stdout" 2>"$dir/native-standalone.stderr"; then
       if ! cmp -s "$dir/native-standalone.stdout" "$dir/native-paired.stdout"; then
         echo "::error::T5M_NATIVE_EXECUTION_OUTPUT_DRIFT source=$file" >&2
