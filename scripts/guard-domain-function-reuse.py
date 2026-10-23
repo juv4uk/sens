@@ -80,11 +80,11 @@ MARKER = re.compile(r";\s*D11-пропозиція\s*:", re.IGNORECASE)
 def introduced_at(rel: str, name: str) -> str:
     """Коли й яким комітом уведено визначення — з історії комітів.
 
-    git log -S шукає коміт, де рядок «(визначити <ім'я>» вперше з'явився.
+    git log -S шукає коміт, де вперше з'явилася сигнатура іменованого визначення.
     """
     try:
         out = subprocess.run(
-            ["git", "-c", "core.quotepath=false", "log", "-S", f"(визначити {name}",
+            ["git", "-c", "core.quotepath=false", "log", "-S", "(" + "визначити " + name,
              "--format=%h %ad", "--date=short", "-1", "--", rel],
             cwd=ROOT, capture_output=True, text=True, check=False).stdout.strip()
         return out or "?"
