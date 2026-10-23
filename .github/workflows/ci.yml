@@ -348,6 +348,8 @@ jobs:
           # Rust перевіряє тільки носій D7: чинне українське зв'язування
           # після Zig/T5M доступне, а незв'язаний гліф не стає функцією.
           cargo test --locked -p sens --lib physical_d7_existing_binding_regressions -- --nocapture
+          # Rust перевіряє механіку канонічного D7 READ/WRITE, включно з пошкодженими носіями.
+          cargo test --locked -p sens --lib io::tests:: -- --nocapture
           cargo test --locked -p sens --test ukr_unpaired_benchmark_runtime два_українські_рекурсивні_джерела_завантажуються_як_lisp -- --exact --nocapture
           # Rust перевіряє тільки ідемпотентність точного D6 зв'язування Lisp-макроса.
           # Сам закон LET/LET* лишається мовним SENS-свідком.
