@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
-"""Dry-run active Lisp sources for safe historical-word -> exact-domain substitutions.
+"""Dry-run historical W8 call heads -> canonical full Ukrainian projections.
 
 --write updates original Lisp only. Never creates .sens or a branch.
 No guessing for dual successor MAP, DEFMACRO, D10 or internal mechanisms.
+The exact domain/word is verified first; human .lisp heads use the `укр` column,
+not a raw binary opcode. No Python evaluator or runtime semantics are added.
 D3 guard rejects old three-field COND and host truth after rewriting.
 """
 import argparse
@@ -137,7 +139,17 @@ def authority(root):
         raise ValueError("unverified historical source crosswalk")
     if f.get("status") != "owner-ratified":
         raise ValueError("missing ratified current foundation")
-    mapping, blocked = {}, {}
+    # One normative Ukrainian spelling per exact (domain, word) address.
+    # Never index these tables by bare payload: D8:00001001 is NOT
+    # historical SID8:00001001 (DEFINE -> D4:0011).
+    projected = {}
+    for width in (3, 4, 5, 6, 8, 9):
+        domain = f"D{width}"
+        for row in read_domain_table(root / "lib/domains" / f"d{width}.lisp"):
+            if not row.ukr or row.ukr == "()":
+                raise ValueError(f"missing executable Ukrainian projection: {domain}:{row.bits}")
+            projected[(domain, row.bits)] = row.ukr
+    mapping, blocked, spellings = {}, {}, {}
     for x in a["rows"]:
         old = x["legacy_code"]
         if not BITS.fullmatch(old) or old in mapping or old in blocked:
@@ -148,15 +160,23 @@ def authority(root):
             owner = f["domains"].get(domain, {})
             if owner.get("width") != len(word) or word not in owner.get("residents", {}):
                 raise ValueError("not a ratified current resident: " + old)
-            mapping[old] = word
+            spelling = projected.get((domain, word))
+            if spelling is None:
+                # D7 is text data, D10 is not automatically callable, and
+                # an unproved/non-projected target must never become a call.
+                blocked[old] = f"no admitted Ukrainian call projection: {domain}:{word}"
+                continue
+            previous = spellings.get(spelling)
+            if previous is not None and previous != (domain, word):
+                raise ValueError(f"ambiguous canonical Ukrainian call head: {spelling}")
+            spellings[spelling] = (domain, word)
+            mapping[old] = spelling
         else:
             blocked[old] = x["classification"]
     if len(mapping) + len(blocked) != 256:
         raise ValueError("all 256 SID8 donor cells must receive an explicit disposition")
-    # Owner ratification of the complete D10 catalogue is not T5 permission.
-    # A D10 candidate stays unresolved until a separately proved runtime law.
-    if any(len(word) == 10 for word in mapping.values()):
-        raise ValueError("D10 whole-domain ratification is not executable SID8 admission")
+    # D10 whole-domain ratification is not executable admission. Only
+    # exact addresses with full current call projections are considered.
     return mapping, blocked
 
 def ukrainian_projection(root, mapping):
@@ -281,8 +301,8 @@ def rewrite(src, mapping, blocked):
         problems.append("unclosed list")
     output = src
     if not problems:
-        for start, stop, word in reversed(edits):
-            output = output[:start] + word + output[stop:]
+        for start, stop, українська in reversed(edits):
+            output = output[:start] + українська + output[stop:]
     return output, len(edits), sorted(set(problems))
 
 def executable_call_heads(source, guard):
