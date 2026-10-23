@@ -188,6 +188,11 @@ jobs:
                   "tests/semantic/unification-occurs-predicate-law.lisp",
                   "tests/semantic/unification-occurs-predicate-mutant.lisp",
                   "tests/semantic/core-d3-car-cdr-cons-mutant.lisp",
+                  # UTF-8 laws require the admitted library and are bundled by the native SENS witness runner.
+                  "tests/semantic/utf8-boundary-laws.lisp",
+                  "tests/semantic/utf8-boundary-mutant.lisp",
+                  "tests/semantic/utf8-quotient-laws.lisp",
+                  "tests/semantic/utf8-quotient-mutant.lisp",
                   "tests/semantic/result-status-laws.lisp",
                   "tests/semantic/d11-srfi1-span-break-laws.lisp",
                   "tests/semantic/ukr-lists-d24-language-law.lisp",
