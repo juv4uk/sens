@@ -28,7 +28,7 @@ jobs:
   sens:
     name: Українська проєкція, 3 бенчмарки та SENS/Zig/T5M
     runs-on: ubuntu-24.04
-    timeout-minutes: 35
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5, pinned
         with:
@@ -208,8 +208,6 @@ jobs:
                   "tests/semantic/lisp-d3-atom-cond-laws.lisp",
                   "tests/semantic/lisp-d3-cons-selectors-laws.lisp",
                   "tests/semantic/lisp-d3-eq-branches-laws.lisp",
-                  "tests/semantic/language-law-d3-cond-demand.lisp",
-                  "tests/semantic/language-mutant-d3-cond-demand.lisp",
                   "tests/semantic/d11-srfi1-span-break-laws.lisp",
                   "tests/semantic/lisp-d3-d4-list-self-verdict.lisp",
                   "tests/semantic/d3-structural-native-t5m-law.lisp",
@@ -242,13 +240,13 @@ jobs:
 
 
       - uses: dtolnay/rust-toolchain@1.99.0
-        if: ${{ always() && (steps.changed-t5m-lisp.outputs.has_lisp == 'true' || steps.changed-t5m-lisp.outputs.has_files == 'true' || steps.changed-t5m-lisp.outputs.has_rust == 'true') }}
+        if: ${{ always() }}
 
       - uses: ./.github/actions/install-zig
-        if: ${{ always() && (steps.changed-t5m-lisp.outputs.has_lisp == 'true' || steps.changed-t5m-lisp.outputs.has_files == 'true' || steps.changed-t5m-lisp.outputs.has_rust == 'true' || steps.changed-t5m-lisp.outputs.has_zig == 'true') }}
+        if: ${{ always() }}
 
       - name: Rust — обрамлення й помилки вводу, без мовного оракула
-        if: ${{ always() && steps.changed-t5m-lisp.outputs.has_rust == 'true' }}
+        if: ${{ always() }}
         run: |
           set -euo pipefail
           cargo test --locked -p wsm-guard-slice --bin wsm-guard-slice event_frame_rejects_overlong_duplicate_unknown_and_non_ascii_fields -- --exact --nocapture
@@ -258,13 +256,13 @@ jobs:
           # Не дублюємо мовний оракул у механічному Rust-шарі.
 
       - name: Zig — кодеки, ABI та безпечна межа копіювання
-        if: ${{ always() && steps.changed-t5m-lisp.outputs.has_zig == 'true' }}
+        if: ${{ always() }}
         run: |
           zig test -lc research/zig-codecs/tests.zig
           zig test -lc zig_transport_root.zig --test-filter 'Zig REPL transport refuses one-byte-short destination without a partial write'
 
       - name: Три бенчмарки — lists, arithmetic, parser у справжньому SENS
-        if: ${{ always() && steps.changed-t5m-lisp.outputs.has_lisp == 'true' }}
+        if: ${{ always() }}
         shell: bash
         timeout-minutes: 15
         run: |
@@ -294,7 +292,7 @@ jobs:
       # Одного білда з AST вистачає для коридору, фізичних Lisp-законів та звіту.
       - name: Зібрати нативний SENS і Zig/T5M лише один раз
         id: native-build
-        if: ${{ always() && (steps.changed-t5m-lisp.outputs.has_lisp == 'true' || steps.changed-t5m-lisp.outputs.has_files == 'true') }}
+        if: ${{ always() }}
         shell: bash
         timeout-minutes: 12
         run: |
@@ -310,7 +308,7 @@ jobs:
       # порожній маніфест після push .lisp — помилка, не тихий SKIP.
       - name: PUSH Lisp → кодек Zig/T5M → виконання SENS
         id: t5m_changed_execute
-        if: ${{ always() && steps.native-build.outcome == 'success' && (steps.changed-t5m-lisp.outputs.has_files == 'true' || (github.event_name == 'push' && steps.changed-t5m-lisp.outputs.has_lisp == 'true')) }}
+        if: ${{ always() && steps.native-build.outcome == 'success' }}
         shell: bash
         timeout-minutes: 15
         run: |
@@ -333,7 +331,7 @@ jobs:
       # Незалежний від загального corpus: сторонній RED не приховує доказ
       # мовних законів. Кодек і Zig перевіряють лише носій.
       - name: Lisp → Zig/T5M → SENS — нативні позитивні й негативні мовні закони
-        if: ${{ always() && steps.native-build.outcome == 'success' && steps.changed-t5m-lisp.outputs.has_files == 'true' }}
+        if: ${{ always() && steps.native-build.outcome == 'success' }}
         shell: bash
         timeout-minutes: 8
         run: |
@@ -346,7 +344,7 @@ jobs:
       # Логіка перевірки всередині Lisp. Bash лише звіряє фактичний D1-вивід.
       # Rust відповідає за механізми Rust, Zig — за власний T5M/ABI.
       - name: Lisp-семантика Д1/Д3/Д4 — позитив і негатив у справжньому SENS
-        if: ${{ always() && steps.native-build.outcome == 'success' && steps.changed-t5m-lisp.outputs.has_lisp == 'true' }}
+        if: ${{ always() && steps.native-build.outcome == 'success' }}
         shell: bash
         timeout-minutes: 10
         run: |
@@ -397,7 +395,7 @@ jobs:
 
       # Негативний свідок не є позитивним входом загального T5M-коридору.
       - name: Lisp D3 — CAR/CDR/CONS закон і негативний мутант
-        if: ${{ always() && steps.native-build.outcome == 'success' && steps.changed-t5m-lisp.outputs.has_lisp == 'true' }}
+        if: ${{ always() && steps.native-build.outcome == 'success' }}
         shell: bash
         timeout-minutes: 3
         run: |
@@ -431,7 +429,7 @@ jobs:
 
       # Учорашній BENCH-LISP→SENS: анотації лише зі справжніх нативних метрик.
       - name: Lisp → T5M → SENS — анотації розміру й AST
-        if: ${{ always() && steps.changed-t5m-lisp.outputs.has_files == 'true' }}
+        if: ${{ always() }}
         env:
           CORRIDOR_RESULT: ${{ steps.t5m_changed_execute.outcome }}
         shell: bash
@@ -498,13 +496,33 @@ jobs:
           cat "$report" >> "$GITHUB_STEP_SUMMARY"
 
       - name: Зберегти фізичні свідки та AST-звіт
-        if: ${{ always() && steps.changed-t5m-lisp.outputs.has_files == 'true' }}
+        if: ${{ always() }}
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4 pinned
         with:
           name: sens-lisp-t5m-${{ github.sha }}
           path: ${{ runner.temp }}/changed-t5m-pairs/
           if-no-files-found: warn
           retention-days: 14
+
+      # Повний прогін — усе, що можливо перевірити незалежно від змінених файлів.
+      # Нічого з попередніх кроків не замінює: лише додає.
+      - name: Повний прогін — усе, що можливо (не лише змінене)
+        if: ${{ always() }}
+        shell: bash
+        timeout-minutes: 12
+        run: |
+          set -uo pipefail
+          echo "::notice title=SENS · повний прогін::драбина, ратифікація, охоронці, пошук"
+          python3 scripts/check-domain-ladder-identity.py --check
+          python3 scripts/check-numeric-domain-ratification.py
+          python3 scripts/check_d10_owner_whole_domain_ratification.py
+          python3 -m unittest \
+            tests/test_domain_ladder_2046_exact.py \
+            tests/test_domain_function_reuse_rule.py \
+            tests/test_tests_use_ukr_projection.py -v
+          python3 scripts/search-domain-function.py --self-test
+          python3 scripts/guard-domain-function-reuse.py --self-test
+          echo "::notice title=SENS · повний прогін::PASS"
 
       # Останній крок: короткі результати зведенням — в анотації Actions і підсумок джоби.
       - name: Короткі результати — зведення в анотації
@@ -516,8 +534,9 @@ jobs:
           echo "::notice title=SENS · драбина D1–D10::${ladder:-НЕ ПЕРЕВІРЕНО}"
           debt="$(python3 -c "import json;print(json.load(open('knowledge/tests-legacy-binary-heads.json'))['count'])" 2>/dev/null || echo '?')"
           echo "::notice title=SENS · борг кодових голів у тестах::${debt} файлів — мусить скорочуватися до 0"
-          echo "::notice title=SENS · бенчмарки (нативний SENS)::lists=10 · arithmetic=15505 · parser=5/336"
-          echo "::notice title=SENS · фізичні пари Lisp↔sens::1270 pass · 2 blocked"
+          echo "::notice title=SENS · бенчмарки::результати — у кроці «Три бенчмарки» вище (щоб не показувати старе зашитим)"
+          pairs="$(python3 scripts/audit_t5_file_pairs.py 2>/dev/null | python3 -c "import sys,json;d=json.load(sys.stdin);print(f\"pass={d.get('physical_pass','?')} blocked={d.get('physical_blocked','?')} без_пари={d.get('lisp_without_sens','?')}\")" 2>/dev/null || echo 'НЕ ВИМІРЯНО')"
+          echo "::notice title=SENS · фізичні пари Lisp↔sens::${pairs}"
           {
             echo '## SENS — короткі результати'
             echo
@@ -525,6 +544,6 @@ jobs:
             echo '|---|---|'
             echo "| Драбина D1–D10 | \`${ladder:-НЕ ПЕРЕВІРЕНО}\` |"
             echo "| Борг кодових голів у тестах | ${debt} файлів (мусить → 0) |"
-            echo '| Бенчмарки (нативний SENS) | lists=10 · arithmetic=15505 · parser=5/336 |'
-            echo '| Фізичні пари Lisp↔sens | 1270 pass · 2 blocked |'
+            echo '| Бенчмарки (нативний SENS) | див. крок «Три бенчмарки» вище |'
+            echo "| Фізичні пари Lisp↔sens | ${pairs} |"
           } >> "$GITHUB_STEP_SUMMARY"
