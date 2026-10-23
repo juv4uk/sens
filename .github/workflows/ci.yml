@@ -285,13 +285,22 @@ jobs:
               "$binary" "$manifest" \
               "$RUNNER_TEMP/changed-t5m-pairs"
           echo "::notice file=.github/workflows/ci.yml,title=SENS Lisp→Zig/T5M→SENS::PASS physical_codec=Zig/T5M execution=SENS release=NOT_CERTIFIED"
-          # Чотири мовні D1-вердикти через кодек, Zig і фізичний SENS.
-          # Жоден хост не обчислює тут семантику Lisp.
+
+
+
+      # Незалежний від загального corpus: сторонній RED не приховує доказ
+      # цих чотирьох мовних законів. Кодек і Zig перевіряють лише носій.
+      - name: Lisp → Zig/T5M → SENS — чотири нативні мовні вердикти
+        if: ${{ always() && steps.changed-t5m-lisp.outputs.has_files == 'true' }}
+        shell: bash
+        timeout-minutes: 8
+        run: |
+          set -euo pipefail
+          export CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0
+          cargo build --locked -p sens-cli --bin sens --bin sens-trit
           bash scripts/prove-lisp-semantic-t5m.sh \
-            "$binary" "$PWD/target/debug/sens-trit" \
+            "$PWD/target/debug/sens" "$PWD/target/debug/sens-trit" \
             "$RUNNER_TEMP/changed-t5m-pairs/lisp-laws"
-
-
 
       # Логіка перевірки всередині Lisp. Bash лише звіряє фактичний D1-вивід.
       # Rust відповідає за механізми Rust, Zig — за власний T5M/ABI.
