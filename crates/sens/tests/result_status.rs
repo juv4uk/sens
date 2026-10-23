@@ -109,25 +109,16 @@ fn make_invalid_keeps_reason_and_payload() {
 
 #[test]
 fn result_status_extracts_every_canonical_tag() {
-    for (source, expected) in [
-        (
-            "(результат-стан (створити-доведений (quote x) (quote ())))",
-            "proved",
-        ),
-        ("(результат-стан (створити-невідоме (quote x)))", "unknown"),
-        ("(результат-стан (створити-частковий 1 2))", "partial"),
-        (
-            "(результат-стан (створити-заблокований (quote x)))",
-            "blocked",
-        ),
-        ("(результат-стан (створити-спірний (quote ())))", "disputed"),
-        (
-            "(результат-стан (створити-некоректний (quote x) 1))",
-            "invalid",
-        ),
-    ] {
-        assert_eq!(eval_result_status(source), expected);
-    }
+    // Rust відповідає за механізм завантаження та виконання, не за
+    // таблицю очікуваних тегів. Шість канонічних статусів і негативні
+    // випадки вже перевіряє мовний самовердикт у Lisp.
+    // За порушення хоч одного закону він викликає недопущений CAR.
+    let mut session = result_status_session();
+    eval_program(
+        include_str!("../../../tests/semantic/result-status-laws.lisp"),
+        &mut session,
+    )
+    .expect("SENS має виконати Lisp-закони шести статусів результату");
 }
 
 #[test]
