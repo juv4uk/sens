@@ -17,9 +17,10 @@
 Ніяких хостових `assert_eq!(eval(...), ...)` як окремої семантичної влади;
 існуючі тести переносити адресно, не масово видаляти.
 
-**Перший зріз:** `tests/semantic/власні-закони-цитування-замикання.lisp`
+**Перший зріз:** `tests/semantic/language-law-quote-closure-ukr.lisp`
 перевіряє D3 QUOTE/CONS/CAR/CDR/EQ/COND і D4 лексичне замикання.
-Статична збалансованість дужок **не є** доказом виконання; потрібні реальні
+У чинному native runner префікс `language-law-` вимагає точного результату D1:1;
+Zig/T5M перетворює `.lisp` на фізичну `.sens`. Статична збалансованість дужок **не є** доказом виконання; потрібні реальні
 SENS positive/negative witnesses, exact SHA та Zig T5M transport receipts.
 Це не дозвіл вважати Rust-free або portable runtime доведеним.
 
