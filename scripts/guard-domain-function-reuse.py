@@ -101,6 +101,22 @@ def _calls_ladder(body: str, ladder: set[str]) -> bool:
     return bool((calls & ladder) - STRUCTURAL)
 
 
+
+def project_names(root) -> set[str]:
+    """Імена, які ПРОЄКТ уже визначив у lib/** (не ратифіковані поверхні, а власні).
+    Вживання власної функції проєкту — теж вживання наявного, а не вигадування."""
+    out: set[str] = set()
+    files = subprocess.run(["git", "-c", "core.quotepath=false", "ls-files", "lib"],
+                           cwd=root, capture_output=True, text=True).stdout.split()
+    for rel in files:
+        if not rel.endswith(".lisp") or rel.startswith(("lib/domains/", "lib/generated/", "lib/surface/")):
+            continue
+        path = root / rel
+        if path.is_file():
+            out |= {m.group(1) for m in DEF.finditer(path.read_text(encoding="utf-8", errors="ignore"))}
+    return out
+
+
 def changed_files(args) -> list[str]:
     if args.file:
         return list(args.file)
@@ -125,6 +141,8 @@ def main(argv: list[str] | None = None) -> int:
     args = ap.parse_args(argv)
 
     ladder = ladder_names(ROOT)
+    project = project_names(ROOT)
+    known_any = ladder | project
 
     if args.self_test:
         ok = len(ladder) > 1000
@@ -164,9 +182,12 @@ def main(argv: list[str] | None = None) -> int:
                 continue  # не чіпаємо те, що вже було до зміни
             new_defs[rel] = new_defs.get(rel, 0) + 1
             if name in ladder:
-                blocked.append((rel, name, "дубль наявної поверхні"))
+                blocked.append((rel, name, "дубль наявної поверхні драбини"))
                 continue
-            if not marked and not _calls_ladder(body, ladder):
+            if name in project:
+                blocked.append((rel, name, "дубль наявного визначення проєкту"))
+                continue
+            if not marked and not _calls_ladder(body, known_any):
                 # Нове ім'я без жодного виклику поверхні драбини і без маркера —
                 # це або перевинахід наявної операції, або неусвідомлена нова.
                 blocked.append((rel, name, "нове ім'я без виклику драбини і без маркера D11-пропозиції"))

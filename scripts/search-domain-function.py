@@ -155,18 +155,25 @@ def main(argv: list[str] | None = None) -> int:
 
     # Власні визначення проєкту — щоб не винаходити те, що вже написано.
     own = _project_definitions()
-    own_hits = {name: where for name, where in own.items() if q == name.lower() or (not args.all and q in name.lower())}
+    own_exact = {n: w for n, w in own.items() if q == n.lower()}
+    own_near = {n: w for n, w in own.items() if q != n.lower() and q in n.lower()}
+    own_hits = dict(own_exact)
+    own_hits.update(own_near)
     if own_hits:
         print("\nУЖЕ ВИЗНАЧЕНО у проєкті (вжий, не перевизначай):")
         for name, where in sorted(own_hits.items()):
             print(f"  {name}  ←  {', '.join(sorted(set(where)))}")
 
     # Простий вердикт — агент швидко вирішує сам.
-    if hits:
-        print("\nВЕРДИКТ: уживай наявну поверхню драбини. Не визначай наново.")
+    if hits and not auto_substring:
+        print("\nВЕРДИКТ: точний збіг — уживай наявну поверхню драбини. Не визначай наново.")
         return 0
-    if own_hits:
-        print("\nВЕРДИКТ: уживай наявне визначення проєкту. Не визначай наново.")
+    if own_exact:
+        print("\nВЕРДИКТ: точний збіг — уживай наявне визначення проєкту. Не визначай наново.")
+        return 0
+    if hits or own_hits:
+        print("\nВЕРДИКТ: точного імені немає; нижче — лише СХОЖІ за підрядком. "
+              "Перевір, чи це та сама операція. Якщо НІ — визнач своє і познач `; D11-пропозиція: <причина>`.")
         return 0
     print("\nВЕРДИКТ: у драбинах і проєкті немає. Визнач — і познач `; D11-пропозиція: <причина>`.")
     return 0
