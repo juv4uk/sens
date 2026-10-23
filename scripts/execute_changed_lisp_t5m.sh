@@ -174,7 +174,7 @@ run_native_t5m_program() {
     # Shell порівнює тільки кінцевий точний D1-біт нативного SENS.
     # Це не стороння модель EQ, COND або структурних правил.
     case "$file" in
-      tests/semantic/ukr-d3-pair-identity-law.lisp|tests/semantic/ukr-d3-cond-control-law.lisp|tests/semantic/ukr-d3-structural-selftest.lisp)
+      tests/semantic/ukr-d3-pair-identity-law.lisp|tests/semantic/ukr-d3-cond-control-law.lisp|tests/semantic/ukr-d3-structural-selftest.lisp|tests/semantic/d11-clojure-juxt-laws.lisp)
         echo 1 > "$dir/ukr-d3-law.expected"
         if ! cmp -s "$dir/native-paired.stdout" "$dir/ukr-d3-law.expected"; then
           echo "::error::SENS_LISP_SEMANTIC_LAW_WRONG_D1 source=$file expected=D1:1 actual=$(cat "$dir/native-paired.stdout")" >&2
@@ -413,6 +413,9 @@ while IFS= read -r file || [[ -n "$file" ]]; do
   elif [[ "$file" == "tests/semantic/core1-gc-reachability-laws.lisp" ]]; then
     # Обхід коренів і циклів виконує лише наявний Core1 Lisp.
     binding_sources=(--binding-source lib/core1.lisp)
+  elif [[ "$file" == "tests/semantic/d11-clojure-juxt-laws.lisp" ]]; then
+    # Реальні DEFINE мови, не дубль Rust-реалізації закону.
+    binding_sources=(--binding-source lib/d11-clojure-juxt.lisp)
   elif [[ "$file" == "tests/semantic/meta-fc-predicates-d1-law.lisp" ||
           "$file" == "tests/semantic/meta-fc-predicates-d1-mutant.lisp" ]]; then
     binding_sources=(--binding-source lib/meta-eval-first-class.lisp)
