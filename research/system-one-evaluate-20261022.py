@@ -364,51 +364,40 @@ def select_threshold(
     # враховує, що найкращий поріг обирається після перевірки кількох кандидатів.
     if not math.isfinite(confidence_level) or not 0.0 < confidence_level < 1.0:
         raise EvaluationError("confidence level має бути скінченним і строго між 0 та 1")
+    # Наперед визначена сітка не підбирає сам перелік порогів за спостереженими оцінками.
+    # Сімейна поправка застосовується до ВСІХ 101 кандидатів, зокрема тих,
+    # що відхиляються через замалу кількість прийнятих прикладів.
+    threshold_grid = [Fraction(index, 100) for index in range(101)]
+    per_candidate_confidence_level = 1.0 - (
+        (1.0 - confidence_level) / len(threshold_grid)
+    )
     eligible_candidates: list[dict[str, Any]] = []
     candidates: list[dict[str, Any]] = []
-    # Один прохід після сортування: по одному кандидату на кожен рівень впевненості.
-    ordered = sorted(observed, key=lambda item: item[0], reverse=True)
-    accepted_count = 0
-    errors = 0
-    index = 0
-    while index < len(ordered):
-        threshold = ordered[index][0]
-        # Додаємо всі записи з рівно таким рівнем впевненості; нічия не розщеплюється.
-        while index < len(ordered) and ordered[index][0] == threshold:
-            _confidence, is_correct, _row_id = ordered[index]
-            accepted_count += 1
-            errors += int(not is_correct)
-            index += 1
+    for threshold in threshold_grid:
+        accepted = [
+            (confidence, correct, row_id)
+            for confidence, correct, row_id in observed
+            if confidence >= threshold
+        ]
+        accepted_count = len(accepted)
         if accepted_count < min_accepted:
             continue
-        eligible_candidates.append(
-            {
-                "threshold_fraction": threshold,
-                "accepted": accepted_count,
-                "errors": errors,
-                "risk_fraction": Fraction(errors, accepted_count),
-            }
+        errors = sum(not correct for _confidence, correct, _row_id in accepted)
+        risk = Fraction(errors, accepted_count)
+        risk_upper = clopper_pearson_upper_bound(
+            errors, accepted_count, per_candidate_confidence_level
         )
-
-    # Якщо мінімум прийнятих більший за вибірку, жоден поріг не підходить:
-    # це безпечне відкладення, а не помилка, яка зриває решту звіту.
-    per_candidate_confidence_level = None
-    if eligible_candidates:
-        # Поправка Бонферроні: пошук кращого з кількох порогів не має підвищувати
-        # сімейний ризик хибної гарантії понад заданий confidence_level.
-        per_candidate_confidence_level = 1.0 - (
-            (1.0 - confidence_level) / len(eligible_candidates)
-        )
-        for candidate in eligible_candidates:
-            risk_upper = clopper_pearson_upper_bound(
-                candidate["errors"],
-                candidate["accepted"],
-                per_candidate_confidence_level,
-            )
-            candidate["risk_upper_bound"] = risk_upper
-            candidate["per_candidate_confidence_level"] = per_candidate_confidence_level
-            if risk_upper <= float(risk_limit):
-                candidates.append(candidate)
+        candidate = {
+            "threshold_fraction": threshold,
+            "accepted": accepted_count,
+            "errors": errors,
+            "risk_fraction": risk,
+            "risk_upper_bound": risk_upper,
+            "per_candidate_confidence_level": per_candidate_confidence_level,
+        }
+        eligible_candidates.append(candidate)
+        if risk_upper <= float(risk_limit):
+            candidates.append(candidate)
 
     common = {
         "selected_for": "validation",
@@ -423,9 +412,11 @@ def select_threshold(
         "small_validation_warning": len(rows) < 30,
         "risk_bound_method": "Bonferroni-corrected one-sided exact Clopper-Pearson binomial upper confidence limit",
         "familywise_confidence_level": confidence_level,
-        "candidate_threshold_count": len(eligible_candidates),
+        "candidate_threshold_count": len(threshold_grid),
+        "eligible_candidate_threshold_count": len(eligible_candidates),
+        "threshold_grid": "predeclared exact fractions k/100 for k=0..100",
         "per_candidate_confidence_level": per_candidate_confidence_level,
-        "threshold_rule": "maximize accepted validation rows subject to the Bonferroni-corrected one-sided exact upper confidence bound; ties choose the higher threshold",
+        "threshold_rule": "maximize accepted validation rows over the predeclared 101-point grid subject to the Bonferroni-corrected one-sided exact upper confidence bound; ties choose the higher threshold",
         "challenge_used": False,
         "test_used": False,
     }
