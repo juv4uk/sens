@@ -41,7 +41,9 @@ run_law() {
   test -s "$physical" || fail "$id" codec "nonempty-T5M" "empty"
   if ! timeout 45s "$trit" open "$physical" >"$dir/program" 2>"$dir/open.err" ||
      ! timeout 45s "$trit" verify-view "$physical" >"$dir/inverse.out" 2>"$dir/inverse.err"; then
-    cat "$dir/open.err" "$dir/inverse.err" >&2 || true
+    for error_log in "$dir/open.err" "$dir/inverse.err"; do
+      if [[ -f "$error_log" ]]; then cat "$error_log" >&2; fi
+    done
     fail "$id" zig-transport "canonical-roundtrip" "rejected"
   fi
   if ! timeout 45s "$sens" --t5m-pair "$source" "$physical" >"$dir/paired.out" 2>"$dir/paired.err" ||
@@ -86,7 +88,9 @@ run_bound_law() {
   test -s "$physical" || fail "$id" codec "nonempty-T5M" "empty"
   if ! timeout 45s "$trit" open "$physical" >"$dir/program" 2>"$dir/open.err" ||
      ! timeout 45s "$trit" verify-view "$physical" >"$dir/inverse.out" 2>"$dir/inverse.err"; then
-    cat "$dir/open.err" "$dir/inverse.err" >&2 || true
+    for error_log in "$dir/open.err" "$dir/inverse.err"; do
+      if [[ -f "$error_log" ]]; then cat "$error_log" >&2; fi
+    done
     fail "$id" zig-transport "canonical-roundtrip" "rejected"
   fi
   if ! timeout 45s "$sens" --t5m-pair "$combined" "$physical" >"$dir/paired.out" 2>"$dir/paired.err" ||
@@ -132,7 +136,9 @@ run_eq_type_rejection() {
   test -s "$physical" || fail "$id" codec "nonempty-T5M" "empty"
   if ! timeout 45s "$trit" open "$physical" >"$dir/program" 2>"$dir/open.err" ||
      ! timeout 45s "$trit" verify-view "$physical" >"$dir/inverse.out" 2>"$dir/inverse.err"; then
-    cat "$dir/open.err" "$dir/inverse.err" >&2 || true
+    for error_log in "$dir/open.err" "$dir/inverse.err"; do
+      if [[ -f "$error_log" ]]; then cat "$error_log" >&2; fi
+    done
     fail "$id" zig-transport "canonical-roundtrip" "rejected"
   fi
 
