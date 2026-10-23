@@ -145,6 +145,18 @@ class BatchSourceTests(unittest.TestCase):
         self.assertNotIn("second cadr перший-зразок", code)
         self.assertIn("(однакові? (перше (перше граф)) джерело)", code)
 
+    def test_core4_historical_sid_is_text_not_modern_number_or_d8_function(self):
+        # Справжній SENS-виконавець перевіряється окремо: тут лише
+        # охорона від повернення виконуваного голого SID8-числа.
+        source = (ROOT / "experiments/core4-predicate-answer-carrier-matrix.lisp").read_text(
+            encoding="utf-8")
+        self.assertIn('(визначити матриця-історичний-запис "00000011")', source)
+        self.assertIn("(визначити матриця-чинна-тотожність (як-є тотожне?))", source)
+        self.assertIn('(список (як-є sid-read) "00000011")', source)
+        self.assertNotIn("(визначити матриця-історичний-сід 00000011)", source)
+        self.assertNotIn("(список (як-є sid-read) 00000011)", source)
+        self.assertEqual(self.guard.scan_lisp(source, "experiments/core4-predicate-answer-carrier-matrix.lisp"), [])
+
     def test_d7_schema_sha_pin_tracks_owner_ratified_keyboard_v2(self):
         import hashlib
         import json
