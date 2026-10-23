@@ -6,8 +6,9 @@
 ; додавання має координату D5:01010 та українську назву «додати».
 ; Збіг машинних бітів між епохами не утворює семантичної тотожності.
 ;
-; Відомості про чинні функції та маршрути зберігаються у
-; lib/surface/semantic-registry.lisp і lib/function-table-mechanisms.lisp.
+; Чинна тотожність додавання — тільки D5:01010 з lib/domains/d5.lisp.
+; Шляхи механізмів — lib/function-table-mechanisms.lisp.
+; Історичний lib/surface/semantic-registry.lisp не визначає ідентичності.
 ; Добір механізму та зниження для автономного виконавця лише споживають
 ; ці відомості; вони не можуть привласнювати функції нову координату.
 ;
@@ -20,7 +21,7 @@
 
 (
   (schema island-math-evidence/1)
-  (authority "lib/surface/semantic-registry.lisp")
+  (authority "lib/domains/d5.lisp")
   (role mechanism-evidence-only)
   (parent-issue 990)
   (canon-convergence-issue 1046)
