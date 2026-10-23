@@ -46,15 +46,7 @@ def check_rows(rows: list) -> list[str]:
 
 
 def check(root: Path) -> list[str]:
-    path = root / REGISTRY
-    if not path.is_file():
-        return [f"відсутній {REGISTRY}"]
-    # Comment-only metadata never counts as a legacy eight-bit registry.
-    live = "\n".join(line.split(";", 1)[0] for line in
-                     path.read_text(encoding="utf-8").splitlines()).strip()
-    if live != EXPECTED_READER:
-        return [f"{REGISTRY}: очікується єдине читання D1–D10 через SENS, не SID8"]
-
+    """Аудит точних D1–D10, придатний і для тимчасових тестових таблиць."""
     rows = []
     for width in range(1, 11):
         table = root / f"lib/domains/d{width}.lisp"
@@ -78,7 +70,7 @@ def check_registry(root: Path) -> list[str]:
     path = root / REGISTRY
     if not path.is_file():
         return [f"відсутній {REGISTRY}"]
-    live = "\\n".join(line.split(";", 1)[0] for line in
+    live = "\n".join(line.split(";", 1)[0] for line in
                      path.read_text(encoding="utf-8").splitlines()).strip()
     if live != EXPECTED_READER:
         return [f"{REGISTRY}: потрібне читання D1–D10 через SENS, не SID8"]
