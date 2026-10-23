@@ -247,7 +247,7 @@ jobs:
         if: ${{ always() }}
         run: |
           set -euo pipefail
-          cargo test --locked -p wsm-guard-slice --bin wsm-guard-slice event_frame_rejects_overlong_duplicate_unknown_and_non_ascii_fields -- --exact --nocapture
+          cargo test --locked -p wsm-guard-slice --bin wsm-guard-slice tests::event_frame_rejects_overlong_duplicate_unknown_and_non_ascii_fields -- --exact --nocapture
           cargo test --locked -p sens-lsp --lib transport::tests:: -- --nocapture
           cargo test --locked -p sens --test d5_list_search_laws -- --nocapture
           # Rust перевіряє механізм завантаження/виконання Lisp, без власних семантичних очікувань.
@@ -259,7 +259,7 @@ jobs:
         if: ${{ always() }}
         run: |
           zig test -lc research/zig-codecs/tests.zig
-          zig test -lc zig_transport_root.zig --test-filter 'Zig REPL transport refuses one-byte-short destination without a partial write'
+          zig test -lc zig_transport_root.zig --test-filter 'Zig byte carrier refuses one-byte-short destinations without partial writes'
 
       - name: Три бенчмарки — lists, arithmetic, parser у справжньому SENS
         if: ${{ always() }}
