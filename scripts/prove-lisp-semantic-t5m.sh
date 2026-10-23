@@ -329,6 +329,10 @@ run_case run_law d3-quote-short-circuit-mutant tests/semantic/d3-cond-quote-lazy
 # QUOTE не обчислює цитовану форму: структура лишається даними.
 run_case run_law d3-quote-inert-data-positive tests/semantic/language-law-quote-inertness.lisp 1
 run_case run_law d3-quote-inert-data-mutant tests/semantic/language-mutant-quote-inertness.lisp 0
+# Одногліфовий D7 у викличній голові: лише вже зв'язаний параметр D4.
+# Повний фізичний маршрут і негативний свідок зберігають точні D1 вердикти.
+run_case run_law d7-single-glyph-bound-head-positive tests/semantic/d7-single-glyph-bound-head-law.lisp 1
+run_case run_law d7-single-glyph-bound-head-mutant tests/semantic/d7-single-glyph-bound-head-mutant.lisp 0
 # Д4 EVAL: цитований Lisp повертає порожнечу, а мутант підміняє результат.
 run_case run_law d4-eval-quote-positive tests/semantic/d4-eval-value-call-laws.lisp 1
 run_case run_law d4-eval-quote-mutant tests/semantic/d4-eval-value-call-mutant.lisp 0
