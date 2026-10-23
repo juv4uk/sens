@@ -27,7 +27,7 @@ fn result_status_legacy_binary_carrier_is_parseable() {
     assert!(
         RESULT_STATUS_D1_WITNESS
             .bytes()
-            .all(|byte| matches!(byte, b'0' | b'1' | b' ' | b'\\n' | b'\\r' | b'\\t')),
+            .all(|byte| matches!(byte, b'0' | b'1' | b' ' | b'\n' | b'\r' | b'\t')),
         "legacy carrier fixture must contain only binary words and separators"
     );
 
