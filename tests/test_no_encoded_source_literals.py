@@ -61,6 +61,16 @@ class EncodedSourceLiteralTests(unittest.TestCase):
             "проєкція Racket bootstrap не має числових голів або літералів",
         )
 
+    def test_file_authority_guard_uses_named_exact_numbers(self):
+        # У живій файловій гвардії жоден лічильник не є сирим літералом.
+        relative = "knowledge/file-authority-guard.lisp"
+        source = (ROOT / relative).read_text(encoding="utf-8")
+        self.assertEqual(
+            CHECK.find_forbidden_literals(source, path=relative),
+            [],
+            "числа файлової гвардії мають бути іменованими значеннями СЕНС",
+        )
+
     def test_guard_reference_ranks_are_named_not_numeric(self):
         # Порядок станів збережено; числові ранги мають іменовані D24+ значення.
         path = ROOT / "knowledge/guard-reference.lisp"
