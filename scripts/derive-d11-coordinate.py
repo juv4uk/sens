@@ -60,17 +60,26 @@ def _san(lisp: str) -> str:
     return "-".join("ādi" if c == "A" else "śeṣa" for c in steps)
 
 
-def derive(parent_bits: str, suffix: str, parent_lisp: str | None) -> dict[str, str]:
+def derive(parent_bits: str, suffix: str, parent_lisp: str | None,
+           seed_rows: dict[str, str] | None = None) -> dict[str, str]:
+    """Тільки вже математично виведені селекторні координати D11."""
     if not re.fullmatch(r"[01]{10}", parent_bits):
         raise SystemExit(f"батько мусить бути 10 біт (D10), отримано {parent_bits!r}")
     if suffix not in ("0", "1"):
         raise SystemExit("суфікс мусить бути 0 або 1")
     coord = parent_bits + suffix
-    letter = "A" if suffix == "0" else "D"  # 0 → перше(CAR), 1 → решта(CDR)
-    if parent_lisp and parent_lisp.startswith("C") and parent_lisp.endswith("R"):
-        lisp = "C" + letter + parent_lisp[1:]  # батько застосований до перше/решта
-    else:
-        lisp = (parent_lisp or "?") + ("-ПЕРШЕ" if suffix == "0" else "-РЕШТА")
+    rows = _rows() if seed_rows is None else seed_rows
+    if coord not in rows:
+        raise SystemExit(f"NO_EXTENSION: D10:{parent_bits} не є селекторним батьком D11")
+    if not parent_lisp or not re.fullmatch(r"C[AD]{8}R", parent_lisp):
+        raise SystemExit(f"INVALID_PARENT_SELECTOR: {parent_lisp!r}")
+    letter = "A" if suffix == "0" else "D"
+    lisp = parent_lisp[:-1] + letter + "R"
+    if rows[coord] != lisp:
+        raise SystemExit(
+            f"SEED_MISMATCH: D11:{coord} очікується {rows[coord]!r}, "
+            f"із батька виведено {lisp!r}"
+        )
     return {
         "coordinate": coord,
         "parent": parent_bits,
@@ -114,6 +123,7 @@ def main(argv: list[str] | None = None) -> int:
                         parent_bits, sfx = bits[:-1], bits[-1]
                         print(f"УВАГА: {parent_lisp} — уже похідна; батько {parent_bits}, суфікс {sfx}")
                         args.suffix = args.suffix or sfx
+                        parent_lisp = lisp_by_bits.get(parent_bits)
                         break
         if parent_bits is None:
             raise SystemExit(f"батька {parent_lisp!r} немає серед D10")
@@ -133,21 +143,14 @@ def main(argv: list[str] | None = None) -> int:
     if not parent_bits or not args.suffix:
         ap.error("потрібні батько (координата/--name/--from-lisp) і суфікс 0|1")
 
-    d = derive(parent_bits, args.suffix, parent_lisp)
-    # Сід — авторитет назв: якщо координата вже там, беремо його LISP і перекладаємо.
-    if d["coordinate"] in rows:
-        d["lisp"] = rows[d["coordinate"]]
-        d["ukr"] = _ukr(d["lisp"]); d["san"] = _san(d["lisp"]); d["en"] = d["lisp"].lower()
+    d = derive(parent_bits, args.suffix, parent_lisp, rows)
     print("D11-КООРДИНАТА:", d["coordinate"])
     print("  батько:", d["parent"], " суфікс:", d["suffix"])
     print("  назви:  ук/укр =", d["ukr"], "| san =", d["san"], "| en =", d["en"], "| LISP =", d["lisp"])
     print("  готовий рядок для lib/domains/d11.lisp:")
     print(row_line(d))
     if args.check:
-        if d["coordinate"] in rows:
-            print("ЗВІРКА: координата вже в сіді →", rows[d["coordinate"]], "(очікувано", d["lisp"] + ")")
-        else:
-            print("ЗВІРКА: координати ще немає в сіді — це новий рядок за законом")
+        print("ЗВІРКА: точний збіг із сідом →", rows[d["coordinate"]])
     return 0
 
 

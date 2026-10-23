@@ -1,0 +1,48 @@
+name: D11 ladder contest · Zig (targeted)
+# Один вузький запуск на зміну експерименту; не оцінює семантику SENS.
+on:
+  push:
+    paths:
+      - research/zig-codecs/d11_selector_contest.zig
+      - .github/workflows/d11-ladder-contest.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  d11-contest:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - name: Встановити зафіксований Zig 0.16.0
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --fail --location --retry 3 --silent --show-error \
+            https://ziglang.org/download/0.16.0/zig-x86_64-linux-0.16.0.tar.xz \
+            --output "$RUNNER_TEMP/zig-0.16.0.tar.xz"
+          echo '70e49664a74374b48b51e6f3fdfbf437f6395d42509050588bd49abe52ba3d00  '"$RUNNER_TEMP/zig-0.16.0.tar.xz" | sha256sum --check --status
+          tar -xJf "$RUNNER_TEMP/zig-0.16.0.tar.xz" -C "$RUNNER_TEMP"
+          echo "$RUNNER_TEMP/zig-x86_64-linux-0.16.0" >> "$GITHUB_PATH"
+          "$RUNNER_TEMP/zig-x86_64-linux-0.16.0/zig" version
+      - name: Тести 512 функцій, roundtrip і негативних випадків
+        run: zig test -lc research/zig-codecs/d11_selector_contest.zig
+      - name: Зібрати змагання оптимізовано
+        run: zig build-exe -lc -O ReleaseFast research/zig-codecs/d11_selector_contest.zig -femit-bin="$RUNNER_TEMP/d11_contest"
+      - name: Виміряти 9-бітний проти 11-бітного на 64 словах
+        shell: bash
+        run: |
+          set -euo pipefail
+          "$RUNNER_TEMP/d11_contest" 2>&1 | tee "$RUNNER_TEMP/d11_contest.log"
+          grep -Fq 'mode=selector9 words=64 bytes=72' "$RUNNER_TEMP/d11_contest.log"
+          grep -Fq 'mode=dense11 words=64 bytes=88' "$RUNNER_TEMP/d11_contest.log"
+          grep -Fq 'roundtrip=EXACT' "$RUNNER_TEMP/d11_contest.log"
+      - name: Зберегти сирі результати
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: d11-contest-${{ github.sha }}
+          path: ${{ runner.temp }}/d11_contest.log
+          if-no-files-found: warn

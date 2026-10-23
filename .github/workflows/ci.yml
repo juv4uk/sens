@@ -94,6 +94,9 @@ jobs:
           python3 scripts/check-domain-ladder-identity.py --check
           python3 scripts/check-numeric-domain-ratification.py
           python3 scripts/check_d10_owner_whole_domain_ratification.py
+          # D11: тотожність усіх 512 похідних координат і негативні мутанти.
+          python3 scripts/check_d11_selector_seed.py --json
+          python3 -m unittest discover -s tests -p test_d11_selector_seed.py
 
       - name: УКР-ПРОЄКЦІЯ — вчорашні анотації прогресу Lisp
         if: ${{ always() }}
@@ -435,6 +438,16 @@ jobs:
             echo "::error file=research/zig-codecs/ladder_memory_bench.zig,title=Драбина bench::REGRESSION layer=contest-bench expected=timings actual=failed"
             zig_failed=1
           fi
+          # Дослід D2: лише тритовий payload, не змішаний T5M-кадр.
+          if zig run -O ReleaseFast -lc research/zig-codecs/d2_ladder_bench.zig \
+              > "$RUNNER_TEMP/zig-d2-payload-bench.log" 2>&1; then
+            cat "$RUNNER_TEMP/zig-d2-payload-bench.log"
+            echo "::notice title=Zig D2 bench::MEASURED layer=payload-only position_map=ABSENT full_codec=NO provenance=$(git rev-parse HEAD)"
+          else
+            cat "$RUNNER_TEMP/zig-d2-payload-bench.log" >&2
+            echo "::error file=research/zig-codecs/d2_ladder_bench.zig,title=D2 payload bench::REGRESSION layer=codec-bench expected=roundtrip-and-timing actual=failed"
+            zig_failed=1
+          fi
           # Вимірюємо ТІЛЬКИ T5M transport Zig, без виконання мовних законів.
           # У Zig 0.16 — Io.Clock.awake, а не видалений std.time.Timer.
           # Фізичні позитивні/негативні контрприклади Zig не залежать від бенчмарка.
@@ -454,6 +467,26 @@ jobs:
           else
             cat "$RUNNER_TEMP/zig-t5m-benchmark.log" >&2
             echo "::error file=bench_t5m.zig,title=Zig benchmark::REGRESSION layer=codec-benchmark expected=canonical-roundtrip actual=failed"
+            zig_failed=1
+          fi
+          # Драбина кодеків: D12 dense проти BE16 на тих самих 4096 словах.
+          # Це тільки payload-механіка Zig; SENS-значення і D12-допуск не заявляємо.
+          if zig test -O ReleaseFast -lc research/zig-codecs/d12_dense_experiment.zig \
+              > "$RUNNER_TEMP/zig-d12-dense-tests.log" 2>&1; then
+            cat "$RUNNER_TEMP/zig-d12-dense-tests.log"
+            echo "::notice title=Zig D12 dense::PASS layer=mechanism semantics=NOT_TESTED"
+          else
+            cat "$RUNNER_TEMP/zig-d12-dense-tests.log" >&2
+            echo "::error file=research/zig-codecs/d12_dense_experiment.zig,title=Zig D12 dense::REGRESSION layer=codec-test expected=roundtrip actual=failed"
+            zig_failed=1
+          fi
+          if zig run -O ReleaseFast -lc bench_d12_dense.zig \
+              > "$RUNNER_TEMP/zig-d12-dense-bench.log" 2>&1; then
+            cat "$RUNNER_TEMP/zig-d12-dense-bench.log"
+            echo "::notice title=Zig D12 A/B::MEASURED provenance=$(git rev-parse HEAD) scope=raw-payload-only"
+          else
+            cat "$RUNNER_TEMP/zig-d12-dense-bench.log" >&2
+            echo "::error file=bench_d12_dense.zig,title=Zig D12 A/B::REGRESSION layer=codec-benchmark expected=preflight-and-measurement actual=failed"
             zig_failed=1
           fi
           # Дослідний кодек DWC1 — окремий від production Zig/T5M.

@@ -22,6 +22,8 @@ pub const Score = struct {
     duplicate: usize = 0,
     unknown: usize = 0,
     structural: usize = 0,
+    invalid_suffix: usize = 0,
+    non_selector: usize = 0,
 };
 
 // Не дублюємо реєстр у Zig: кожна відповідь читається з канонічного Lisp.
@@ -82,10 +84,6 @@ fn isD10Selector(name: []const u8) bool {
 pub fn gradeD11(guesses: []const D11Guess) Score {
     var result: Score = .{};
     for (guesses, 0..) |guess, index| {
-        if (guess.parent_bits.len != 10 or (guess.suffix != '0' and guess.suffix != '1')) {
-            result.unknown += 1;
-            continue;
-        }
         var repeated = false;
         for (guesses[0..index]) |previous| {
             if (previous.suffix == guess.suffix and
@@ -99,12 +97,20 @@ pub fn gradeD11(guesses: []const D11Guess) Score {
             result.duplicate += 1;
             continue;
         }
+        if (guess.parent_bits.len != 10) {
+            result.unknown += 1;
+            continue;
+        }
+        if (guess.suffix != '0' and guess.suffix != '1') {
+            result.invalid_suffix += 1;
+            continue;
+        }
         const parent = lookup(10, guess.parent_bits) orelse {
             result.unknown += 1;
             continue;
         };
         if (!isD10Selector(parent.lisp)) {
-            result.unknown += 1;
+            result.non_selector += 1;
             continue;
         }
         var bits: [11]u8 = undefined;
@@ -243,12 +249,27 @@ test "Драбина: точні коди, хибні назви, повтори
 }
 
 
-test "Драбина D11: 512 похідних мають селекторного D10-батька" {
+test "Драбина D11: 512 унікальних похідних точно виконують закон суфікса" {
     try std.testing.expectEqual(@as(usize, 512), questionCount(11));
+    var seen = [_]bool{false} ** 2048;
     for (0..questionCount(11)) |i| {
         const child = questionAt(11, i).?;
         const parent = lookup(10, child.bits[0..10]).?;
         try std.testing.expect(isD10Selector(parent.lisp));
+        try std.testing.expect(child.bits[10] == '0' or child.bits[10] == '1');
+        var coordinate: usize = 0;
+        for (child.bits) |digit| coordinate = (coordinate << 1) | @as(usize, digit - '0');
+        try std.testing.expect(!seen[coordinate]);
+        seen[coordinate] = true;
+        var expected: [11]u8 = undefined;
+        @memcpy(expected[0..9], parent.lisp[0..9]);
+        expected[9] = if (child.bits[10] == '0') 'A' else 'D';
+        expected[10] = 'R';
+        try std.testing.expectEqualStrings(&expected, child.lisp);
+        var sibling_bits: [11]u8 = undefined;
+        @memcpy(sibling_bits[0..], child.bits);
+        sibling_bits[10] = if (child.bits[10] == '0') '1' else '0';
+        try std.testing.expect(lookup(11, &sibling_bits) != null);
     }
 }
 
@@ -264,5 +285,20 @@ test "Конкурс D11: вірна назва, хибна, повтор, не-
     try std.testing.expectEqual(@as(usize, 1), score.correct);
     try std.testing.expectEqual(@as(usize, 1), score.wrong);
     try std.testing.expectEqual(@as(usize, 1), score.duplicate);
-    try std.testing.expectEqual(@as(usize, 2), score.unknown);
+    try std.testing.expectEqual(@as(usize, 0), score.unknown);
+    try std.testing.expectEqual(@as(usize, 1), score.invalid_suffix);
+    try std.testing.expectEqual(@as(usize, 1), score.non_selector);
+}
+
+test "Конкурс D11: обидва суфікси та повтор зіпсованої відповіді" {
+    const guesses = [_]D11Guess{
+        .{ .parent_bits = "0110000000", .suffix = '0', .child_lisp = "CDAAAAAAAAR" },
+        .{ .parent_bits = "0110000000", .suffix = '1', .child_lisp = "CDAAAAAAADR" },
+        .{ .parent_bits = "0110000000", .suffix = '2', .child_lisp = "WRONG" },
+        .{ .parent_bits = "0110000000", .suffix = '2', .child_lisp = "WRONG" },
+    };
+    const score = gradeD11(&guesses);
+    try std.testing.expectEqual(@as(usize, 2), score.correct);
+    try std.testing.expectEqual(@as(usize, 1), score.duplicate);
+    try std.testing.expectEqual(@as(usize, 1), score.invalid_suffix);
 }

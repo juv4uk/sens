@@ -43,28 +43,42 @@ fn lookupTrial(width: u8, repetitions: usize) void {
     }
 }
 
-fn d11Trial(repetitions: usize) void {
+fn d11Trial(batch: usize, repetitions: usize) void {
     const questions = game.questionCount(11);
-    if (questions != 512) @panic("D11 inventory mismatch");
-    const first = game.questionAt(11, 0).?;
-    const guess = [_]game.D11Guess{.{
-        .parent_bits = first.bits[0..10],
-        .suffix = first.bits[10],
-        .child_lisp = first.lisp,
-    }};
-    if (game.gradeD11(&guess).correct != 1) @panic("D11 derivation parity");
-    for (0..16) |_| std.mem.doNotOptimizeAway(game.gradeD11(&guess));
+    if (questions != 512 or batch == 0 or batch > questions) @panic("D11 inventory mismatch");
+    // Крок 73 взаємно простий із 512: зразки покривають увесь D11.
+    // Подвійний масив дозволяє зсувати вікно без пропусків координат.
+    var guesses: [1024]game.D11Guess = undefined;
+    for (0..512) |i| {
+        const child = game.questionAt(11, (i * 73) % 512).?;
+        const answer: game.D11Guess = .{
+            .parent_bits = child.bits[0..10],
+            .suffix = child.bits[10],
+            .child_lisp = child.lisp,
+        };
+        guesses[i] = answer;
+        guesses[512 + i] = answer;
+    }
+    const seed: usize = @intCast(nanoseconds() & 511);
+    for (0..16) |i| {
+        const offset = (seed + i * 73) & 511;
+        const result = game.gradeD11(guesses[offset .. offset + batch]);
+        if (result.correct != batch) @panic("D11 derivation parity");
+        std.mem.doNotOptimizeAway(result);
+    }
     for (0..5) |round| {
-        const start = nanoseconds();
-        for (0..repetitions) |_| {
-            const result = game.gradeD11(&guess);
+        const start_ns = nanoseconds();
+        for (0..repetitions) |i| {
+            // Вхід залежить від реального годинника та змінюється в кожній ітерації.
+            const offset = (seed + round + i * 73) & 511;
+            const result = game.gradeD11(guesses[offset .. offset + batch]);
             std.mem.doNotOptimizeAway(result);
         }
-        const elapsed = nanoseconds() - start;
+        const elapsed = nanoseconds() - start_ns;
         if (elapsed == 0) @panic("zero duration");
         std.debug.print(
-            "sample impl=zig mode=d11-derivation round={d} elapsed_ns={d} reps={d} questions={d}\n",
-            .{ round, elapsed, repetitions, questions },
+            "sample impl=zig mode=d11-derivation round={d} elapsed_ns={d} reps={d} guesses_per_round={d} questions={d}\n",
+            .{ round, elapsed, repetitions, batch, questions },
         );
     }
 }
@@ -74,5 +88,8 @@ pub fn main() void {
     lookupTrial(5, 12000);
     lookupTrial(10, 2000);
     lookupTrial(11, 2000);
-    d11Trial(2000);
+    d11Trial(1, 2000);
+    d11Trial(16, 500);
+    d11Trial(128, 100);
+    d11Trial(512, 20);
 }
