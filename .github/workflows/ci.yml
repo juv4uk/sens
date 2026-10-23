@@ -324,6 +324,7 @@ jobs:
               timeout 60s git fetch --no-tags --depth=1 origin "$base"
             fi
             git cat-file -e "$base^{commit}"
+            python3 -m unittest tests/test_domain_function_reuse_rule.py -v
             python3 scripts/guard-domain-function-reuse.py --paths-from "$manifest" --base "$base"
           else
             echo "немає змінених .lisp-програм — охоронець не має що перевіряти"
