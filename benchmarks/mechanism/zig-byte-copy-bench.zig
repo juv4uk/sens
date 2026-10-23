@@ -1,7 +1,27 @@
 //! Бенчмарк механізму копіювання байтів Zig 0.16, без SENS-семантики.
 //! zig test -O ReleaseFast -lc benchmarks/mechanism/zig-byte-copy-bench.zig
 const std = @import("std");
-const source = @embedFile("../../lib/core4.lisp");
+// Zig 0.16 forbids @embedFile outside a package root. Load before timing.
+const CFile = opaque {};
+extern "c" fn fopen([*:0]const u8, [*:0]const u8) ?*CFile;
+extern "c" fn fclose(*CFile) c_int;
+extern "c" fn fseek(*CFile, c_long, c_int) c_int;
+extern "c" fn ftell(*CFile) c_long;
+extern "c" fn fread([*]u8, usize, usize, *CFile) usize;
+
+fn readCorpus(allocator: std.mem.Allocator) ![]u8 {
+    const file = fopen("lib/core4.lisp", "rb") orelse return error.CorpusUnavailable;
+    defer _ = fclose(file);
+    if (fseek(file, 0, 2) != 0) return error.SeekFailure;
+    const end = ftell(file);
+    if (end <= 0 or end > 64 * 1024 * 1024) return error.BadCorpusSize;
+    if (fseek(file, 0, 0) != 0) return error.SeekFailure;
+    const data = try allocator.alloc(u8, @intCast(end));
+    errdefer allocator.free(data);
+    if (fread(data.ptr, 1, data.len, file) != data.len) return error.IncompleteCorpus;
+    return data;
+}
+
 const samples_count = 11;
 const batch_count = 512;
 
@@ -21,6 +41,8 @@ fn nowNs() !u64 {
 }
 
 test "Zig byte carrier benchmark, no language oracle" {
+    const source = try readCorpus(std.testing.allocator);
+    defer std.testing.allocator.free(source);
     try std.testing.expect(source.len > 0);
     const destination = try std.testing.allocator.alloc(u8, source.len);
     defer std.testing.allocator.free(destination);
