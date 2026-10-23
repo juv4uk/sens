@@ -135,11 +135,11 @@
                       "crates/wsm-datalog-kernel/Cargo.toml")))))))
       (за-умовою
         ((атом? невдача)
-         (як-є
-           (kernel-abi-transport-boundary-ok
-             (kernels 4)
-             (language-type CoreDomainIdentity)
-             (abi-wrapper LegacyAbiSemanticId))))
+         (список
+           (як-є kernel-abi-transport-boundary-ok)
+           (список (як-є kernels) (довжина (як-є (а б в г))))
+           (список (як-є language-type) (як-є CoreDomainIdentity))
+           (список (як-є abi-wrapper) (як-є LegacyAbiSemanticId))))
         ((атом? (як-є ())) (список (як-є kernel-abi-transport-boundary-violation) невдача))))))
 
 (каб-вердикт)
