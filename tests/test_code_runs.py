@@ -1610,5 +1610,46 @@ class QuantityUkrLocalHelpersTests(unittest.TestCase):
         with self.assertRaisesRegex(AssertionError, "порушена точна"):
             self.restore_original(bad)
 
+class UkrainianD4ForwardBindingMigrationTests(unittest.TestCase):
+    """Українські взаємні посилання — справжній D4 DEFINE, не старий SID8."""
+
+    def test_full_ukr_define_is_seeded_by_ratified_d4_projection(self):
+        migrator = _load(
+            "sens_codes_forward_binding_migrator",
+            SCRIPTS / "migrate-to-sens-codes.py",
+        )
+        rows = migrator.read_domain_table(ROOT / "lib/domains/d4.lisp")
+        resident = [row for row in rows if row.bits == "0011"]
+        self.assertEqual(len(resident), 1)
+        row = resident[0]
+        self.assertEqual(row.ukr, "визначити")
+        entry = migrator.Entry("D4", 4, row.bits, "DEFINE", "lib/domains/d4.lisp")
+        code_map = {
+            name.upper(): entry
+            for name in (row.uk, row.ukr, row.en, row.lisp)
+            if name and name != "()"
+        }
+        source = (
+            "(визначити перша (функція (х) (друга х)))\n"
+            "(визначити друга (функція (х) х))\n"
+            "(define old-name (lambda (x) x))\n"
+            "(невідома голова)\n"
+        )
+        bindings = migrator.seed_forward_definitions(source, code_map)
+        self.assertEqual(bindings, {"перша", "друга", "old-name"})
+        self.assertNotIn("голова", bindings)
+
+    def test_unratified_pseudo_definition_does_not_seed_executable_binding(self):
+        migrator = _load(
+            "sens_codes_forward_binding_negative",
+            SCRIPTS / "migrate-to-sens-codes.py",
+        )
+        impostor = {
+            "ВИЗНАЧИТИ": migrator.Entry("D8", 8, "00000000", "DEFINE", "legacy")
+        }
+        with self.assertRaisesRegex(migrator.BinaryMigrationError, "D4:0011"):
+            migrator.seed_forward_definitions("(визначити фальш (як-є ()))", impostor)
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)
