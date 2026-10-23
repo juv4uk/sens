@@ -467,8 +467,17 @@ def plan(source: str, surfaces, *, legacy_heads=None, unresolved=None):
             i += 1
             continue
         start = i
-        while operator.lt(i, len(source)) and not source[i].isspace() and source[i] not in ("(", ")", "'", '"', ";"):
+        # Апостроф усередині українського ідентифікатора (ім'я,
+        # пам'ять) є символом атома. Лише окремий початковий апостроф
+        # позначає QUOTE; не підміняємо ці два різні випадки.
+        while operator.lt(i, len(source)) and not source[i].isspace() and source[i] not in ("(", ")", '"', ";", chr(96)):
             if source.startswith("#|", i):
+                break
+            if source[i] == "'" and not (
+                i > start and i + 1 < len(source)
+                and source[i - 1].isalpha()
+                and source[i + 1].isalpha()
+            ):
                 break
             if source[i] == ",":
                 # Українська десяткова кома належить числу, не quasiquote.
