@@ -17,82 +17,79 @@ comptime {
     _ = abi.sens_zig_f3c_unpack;
 }
 
-// Український REPL належить SENS. Zig — лише точний носій його джерела;
-// жодного тлумачення назв, семантики чи дозвільних таблиць у Zig.
-const repl_core_asset = @embedFile("lib/repl-core.lisp");
+// REPL receives the already encoded T5M pair; Zig only serves physical bytes.
+const repl_core_t5m_asset = @embedFile("lib/repl-core.sens");
 
-pub export fn sens_zig_repl_core_bytes_copy(dst: [*]u8, capacity: usize) isize {
-    if (repl_core_asset.len == 0) return -1;
-    if (capacity == 0) return @intCast(repl_core_asset.len);
-    if (capacity < repl_core_asset.len) return -2;
-    @memcpy(dst[0..repl_core_asset.len], repl_core_asset[0..repl_core_asset.len]);
-    return @intCast(repl_core_asset.len);
+pub export fn sens_zig_repl_core_t5m_bytes_copy(dst: [*]u8, capacity: usize) isize {
+    if (repl_core_t5m_asset.len == 0) return -1;
+    if (capacity == 0) return @intCast(repl_core_t5m_asset.len);
+    if (capacity < repl_core_t5m_asset.len) return -2;
+    @memcpy(dst[0..repl_core_t5m_asset.len], repl_core_t5m_asset[0..repl_core_t5m_asset.len]);
+    return @intCast(repl_core_t5m_asset.len);
 }
 
-test "ukrainian SENS REPL source crosses Zig byte-exact, short buffer is untouched" {
-    const expected: isize = @intCast(repl_core_asset.len);
-    try std.testing.expectEqual(expected, sens_zig_repl_core_bytes_copy(undefined, 0));
+test "ukrainian SENS REPL T5M bytes cross Zig exactly, short buffer is untouched" {
+    const expected: isize = @intCast(repl_core_t5m_asset.len);
+    try std.testing.expectEqual(expected, sens_zig_repl_core_t5m_bytes_copy(undefined, 0));
     var small: [1]u8 = .{0xA5};
-    try std.testing.expectEqual(@as(isize, -2), sens_zig_repl_core_bytes_copy(&small, small.len));
+    try std.testing.expectEqual(@as(isize, -2), sens_zig_repl_core_t5m_bytes_copy(&small, small.len));
     try std.testing.expectEqual(@as(u8, 0xA5), small[0]);
-    var exact: [repl_core_asset.len]u8 = undefined;
-    try std.testing.expectEqual(expected, sens_zig_repl_core_bytes_copy(&exact, exact.len));
-    try std.testing.expectEqualSlices(u8, repl_core_asset[0..repl_core_asset.len], &exact);
+    var exact: [repl_core_t5m_asset.len]u8 = undefined;
+    try std.testing.expectEqual(expected, sens_zig_repl_core_t5m_bytes_copy(&exact, exact.len));
+    try std.testing.expectEqualSlices(u8, repl_core_t5m_asset[0..repl_core_t5m_asset.len], &exact);
 }
 
 test "Zig byte carrier refuses one-byte-short destinations without partial writes" {
     // Перевіряємо виключно байтову межу, не семантику Lisp чи коди доменів.
-    var output: [repl_core_asset.len]u8 = undefined;
+    var output: [repl_core_t5m_asset.len]u8 = undefined;
     @memset(output[0..], 0xA5);
     try std.testing.expectEqual(
         @as(isize, -2),
-        sens_zig_repl_core_bytes_copy(&output, output.len - 1),
+        sens_zig_repl_core_t5m_bytes_copy(&output, output.len - 1),
     );
     for (output) |byte| {
         try std.testing.expectEqual(@as(u8, 0xA5), byte);
     }
-    const expected: isize = @intCast(repl_core_asset.len);
-    try std.testing.expectEqual(expected, sens_zig_repl_core_bytes_copy(&output, output.len));
-    try std.testing.expectEqualSlices(u8, repl_core_asset, &output);
+    const expected: isize = @intCast(repl_core_t5m_asset.len);
+    try std.testing.expectEqual(expected, sens_zig_repl_core_t5m_bytes_copy(&output, output.len));
+    try std.testing.expectEqualSlices(u8, repl_core_t5m_asset, &output);
 
-    // Meta-eval так само є лише непрозорим джерелом байтів.
+    // Meta-eval так само передає лише фізичні T5M-байти.
     // Буфер із нестачею одного байта не може бути змінено навіть частково.
-    var meta_out: [meta_eval_asset.len]u8 = undefined;
+    var meta_out: [meta_eval_t5m_asset.len]u8 = undefined;
     @memset(meta_out[0..], 0xA5);
     try std.testing.expectEqual(
         @as(isize, -2),
-        sens_zig_meta_eval_bytes_copy(&meta_out, meta_out.len - 1),
+        sens_zig_meta_eval_t5m_bytes_copy(&meta_out, meta_out.len - 1),
     );
     for (meta_out) |byte| {
         try std.testing.expectEqual(@as(u8, 0xA5), byte);
     }
-    const meta_expected: isize = @intCast(meta_eval_asset.len);
-    try std.testing.expectEqual(meta_expected, sens_zig_meta_eval_bytes_copy(&meta_out, meta_out.len));
-    try std.testing.expectEqualSlices(u8, meta_eval_asset, &meta_out);
+    const meta_expected: isize = @intCast(meta_eval_t5m_asset.len);
+    try std.testing.expectEqual(meta_expected, sens_zig_meta_eval_t5m_bytes_copy(&meta_out, meta_out.len));
+    try std.testing.expectEqualSlices(u8, meta_eval_t5m_asset, &meta_out);
 }
 
-// SENS owns the metacircular evaluator and its generated semantic registry.
-// Zig is only the exact byte carrier; no name interpretation, semantics or
-// admission tables live here.
-const meta_eval_asset = @embedFile("lib/meta-eval.lisp");
+// SENS owns the metacircular evaluator; the REPL receives its physical T5M pair.
+const meta_eval_t5m_asset = @embedFile("lib/meta-eval.sens");
 
-pub export fn sens_zig_meta_eval_bytes_copy(dst: [*]u8, capacity: usize) isize {
-    if (meta_eval_asset.len == 0) return -1;
-    if (capacity == 0) return @intCast(meta_eval_asset.len);
-    if (capacity < meta_eval_asset.len) return -2;
-    @memcpy(dst[0..meta_eval_asset.len], meta_eval_asset[0..meta_eval_asset.len]);
-    return @intCast(meta_eval_asset.len);
+pub export fn sens_zig_meta_eval_t5m_bytes_copy(dst: [*]u8, capacity: usize) isize {
+    if (meta_eval_t5m_asset.len == 0) return -1;
+    if (capacity == 0) return @intCast(meta_eval_t5m_asset.len);
+    if (capacity < meta_eval_t5m_asset.len) return -2;
+    @memcpy(dst[0..meta_eval_t5m_asset.len], meta_eval_t5m_asset[0..meta_eval_t5m_asset.len]);
+    return @intCast(meta_eval_t5m_asset.len);
 }
 
-test "SENS meta-evaluator source crosses Zig byte-exact, short buffer is untouched" {
-    const expected: isize = @intCast(meta_eval_asset.len);
-    try std.testing.expectEqual(expected, sens_zig_meta_eval_bytes_copy(undefined, 0));
+test "SENS meta-evaluator T5M bytes cross Zig exactly, short buffer is untouched" {
+    const expected: isize = @intCast(meta_eval_t5m_asset.len);
+    try std.testing.expectEqual(expected, sens_zig_meta_eval_t5m_bytes_copy(undefined, 0));
     var small: [1]u8 = .{0xA5};
-    try std.testing.expectEqual(@as(isize, -2), sens_zig_meta_eval_bytes_copy(&small, small.len));
+    try std.testing.expectEqual(@as(isize, -2), sens_zig_meta_eval_t5m_bytes_copy(&small, small.len));
     try std.testing.expectEqual(@as(u8, 0xA5), small[0]);
-    var exact: [meta_eval_asset.len]u8 = undefined;
-    try std.testing.expectEqual(expected, sens_zig_meta_eval_bytes_copy(&exact, exact.len));
-    try std.testing.expectEqualSlices(u8, meta_eval_asset[0..meta_eval_asset.len], &exact);
+    var exact: [meta_eval_t5m_asset.len]u8 = undefined;
+    try std.testing.expectEqual(expected, sens_zig_meta_eval_t5m_bytes_copy(&exact, exact.len));
+    try std.testing.expectEqualSlices(u8, meta_eval_t5m_asset[0..meta_eval_t5m_asset.len], &exact);
 }
 
 // A single opaque asset, not a symbol registry. The caller owns memory;

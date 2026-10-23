@@ -252,9 +252,20 @@ fn opaque_zig_asset(
     Ok(bytes)
 }
 
-/// Pure physical handoff of the SENS-owned REPL source, not a Rust REPL.
-pub fn repl_core_source_bytes() -> Result<Vec<u8>, String> {
-    opaque_zig_asset(asset_ffi::sens_zig_repl_core_bytes_copy, "ZIG_SENS_REPL")
+/// Physical T5M bytes for the SENS-owned REPL core; no source text crosses to Rust.
+pub fn repl_core_t5m_bytes() -> Result<Vec<u8>, String> {
+    opaque_zig_asset(
+        asset_ffi::sens_zig_repl_core_t5m_bytes_copy,
+        "ZIG_SENS_REPL_T5M",
+    )
+}
+
+/// Physical T5M bytes for the SENS-owned metacircular evaluator.
+pub fn meta_eval_t5m_bytes() -> Result<Vec<u8>, String> {
+    opaque_zig_asset(
+        asset_ffi::sens_zig_meta_eval_t5m_bytes_copy,
+        "ZIG_META_EVAL_T5M",
+    )
 }
 
 /// Opaque D9 witness source bytes carried through the Zig root ABI.

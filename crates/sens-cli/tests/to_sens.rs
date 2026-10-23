@@ -1,5 +1,8 @@
-use sens::{eval_program, load_core_library, Session, CORE_LIBRARY_SOURCE};
+use sens::{eval_program, load_core_library, Session};
 use std::process::Command;
+
+// Лише тестова основа: production Rust не залежить від текстового API Core4.
+const CORE_LIBRARY_SOURCE: &str = include_str!("../../../lib/core4.lisp");
 
 fn tool() -> Command {
     Command::new(env!("CARGO_BIN_EXE_sens-to-sens"))

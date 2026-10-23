@@ -21,7 +21,6 @@ unsafe extern "C" {
     fn sens_zig_codec_abi_version() -> u32;
     fn sens_zig_repl_persistent_vector_bytes_copy(dst: *mut u8, cap: usize) -> isize;
     fn sens_zig_repl_epistemic_bytes_copy(dst: *mut u8, cap: usize) -> isize;
-    fn sens_zig_meta_eval_bytes_copy(dst: *mut u8, cap: usize) -> isize;
 }
 #[cfg(feature = "zig-transport")]
 fn repl_zig_source(
@@ -46,6 +45,61 @@ fn repl_zig_source(
     }
     String::from_utf8(bytes).map_err(|err| format!("{label}: UTF-8 source error {err}"))
 }
+
+#[cfg(feature = "zig-transport")]
+fn execute_zig_t5m_asset(
+    physical: &[u8],
+    label: &str,
+    session: &mut Session,
+) -> Result<usize, String> {
+    let restored = crate::zig_transport::decode_t5m_exact_words(physical)
+        .map_err(|error| format!("{label} Zig T5M decode: {error}"))?;
+    let words = restored
+        .iter()
+        .map(|word| {
+            ExactDomainWord::from_physical_width_bits(word.width(), word.bits())
+                .map_err(|error| format!("{label} exact SENS word: {error}"))
+        })
+        .collect::<Result<Vec<_>, _>>()?;
+    let program = PhysicalT5Program::from_exact_domain_words_owned(words)
+        .map_err(|error| format!("{label} SENS binary reader: {}", error.message))?;
+    let form_count = program.form_count();
+    program
+        .execute(session)
+        .map(|_| form_count)
+        .map_err(|error| format!("{label} SENS binary evaluator: {}", error.message))
+}
+
+fn surface_uses_sens_repl(surface: ReplSurface, sens_loop: bool) -> bool {
+    sens_loop
+        || matches!(
+            surface,
+            ReplSurface::Ukrainian | ReplSurface::UkrainianFull | ReplSurface::Sanskrit
+        )
+}
+
+fn load_sens_repl_bootstraps(environment: &Environment) -> Result<(), String> {
+    #[cfg(feature = "zig-transport")]
+    {
+        // Exact D10 mechanism definitions are root-only. Install them before
+        // constructing the projection child frame; the T5M reader must not
+        // weaken that admission rule to make a nested load succeed.
+        let mut root = Session {
+            environment: environment.clone(),
+        };
+        let meta_eval = crate::zig_transport::meta_eval_t5m_bytes()?;
+        execute_zig_t5m_asset(&meta_eval, "MetaEval", &mut root)?;
+        let repl_core = crate::zig_transport::repl_core_t5m_bytes()?;
+        execute_zig_t5m_asset(&repl_core, "repl-core", &mut root)?;
+        Ok(())
+    }
+    #[cfg(not(feature = "zig-transport"))]
+    {
+        let _ = environment;
+        Err("RUST_ZIG_ONLY: SENS REPL bootstrap requires physical T5M through Zig".into())
+    }
+}
+
 // No Rust include_str! of SENS project source. Zig owns byte transport.
 fn surface_prerequisite_sources() -> Result<Vec<(&'static str, String)>, String> {
     #[cfg(feature = "zig-transport")]
@@ -1721,7 +1775,6 @@ fn render_surface_status() -> Result<String, String> {
 fn build_surface_layer(
     base: &Environment,
     surface: ReplSurface,
-    sens_loop: bool,
 ) -> Result<Environment, String> {
     // D10 exact DEFINE installs code slots in the session root. Ensure the
     // shared time mechanisms before creating a projection child frame; the
@@ -1740,41 +1793,6 @@ fn build_surface_layer(
         surface,
         ReplSurface::Ukrainian | ReplSurface::UkrainianFull | ReplSurface::Sanskrit
     );
-    // Meta-eval + repl-core are needed both for surface projection
-    // and for the SENS-owned `--sens-loop` mode. They load here once. The
-    // active human aliases come from selected D1–D11 table columns and are
-    // admitted only when they pair with a full-ukr callable identity.
-    if sens_loop || needs_surface {
-        // Used only inside the zig-transport block below; without that feature
-        // this binding is unused and need not be mutable.
-        #[cfg_attr(not(feature = "zig-transport"), allow(unused_mut, unused_variables))]
-        let mut session = Session {
-            environment: layer.clone(),
-        };
-        #[cfg(feature = "zig-transport")]
-        {
-            let meta_eval = repl_zig_source(sens_zig_meta_eval_bytes_copy, "ZIG_SENS_META_EVAL")?;
-            sens::load_meta_evaluator_library_from_source(&mut session, &meta_eval).map_err(
-                |error| {
-                    format!(
-                        "не вдалося завантажити MetaEval: {}",
-                        error.render(&meta_eval)
-                    )
-                },
-            )?;
-            let repl_core = crate::zig_transport::repl_core_source_bytes().and_then(|bytes| {
-                String::from_utf8(bytes).map_err(|err| format!("ZIG_SENS_REPL UTF-8: {err}"))
-            })?;
-            sens::parse_mixed_exact_domain(&repl_core)
-                .and_then(|forms| sens::eval_parsed_expressions(&forms, &mut session))
-                .map_err(|error| {
-                    format!(
-                        "не вдалося завантажити repl-core: {}",
-                        error.render(&repl_core)
-                    )
-                })?;
-        }
-    }
     if needs_surface {
         let mut session = Session {
             environment: layer.clone(),
@@ -1848,12 +1866,17 @@ struct ReplState {
     user_environment: Environment,
     surface: ReplSurface,
     sens_loop: bool,
+    sens_repl_bootstrapped: bool,
 }
 
 impl ReplState {
     fn new(mut session: Session, surface: ReplSurface, sens_loop: bool) -> Result<Self, String> {
         let base_environment = session.environment.clone();
-        let surface_environment = build_surface_layer(&base_environment, surface, sens_loop)?;
+        let sens_repl_bootstrapped = surface_uses_sens_repl(surface, sens_loop);
+        if sens_repl_bootstrapped {
+            load_sens_repl_bootstraps(&base_environment)?;
+        }
+        let surface_environment = build_surface_layer(&base_environment, surface)?;
         let user_environment = surface_environment.child();
         session.environment = user_environment.clone();
         if sens_loop {
@@ -1865,6 +1888,7 @@ impl ReplState {
             user_environment,
             surface,
             sens_loop,
+            sens_repl_bootstrapped,
         })
     }
 
@@ -1872,8 +1896,11 @@ impl ReplState {
         if self.surface == surface {
             return Ok(());
         }
-        let surface_environment =
-            build_surface_layer(&self.base_environment, surface, self.sens_loop)?;
+        if !self.sens_repl_bootstrapped && surface_uses_sens_repl(surface, self.sens_loop) {
+            load_sens_repl_bootstraps(&self.base_environment)?;
+            self.sens_repl_bootstrapped = true;
+        }
+        let surface_environment = build_surface_layer(&self.base_environment, surface)?;
         self.user_environment
             .reparent(surface_environment)
             .map_err(str::to_string)?;
@@ -2231,6 +2258,26 @@ mod tests {
 
     #[cfg(feature = "zig-transport")]
     #[test]
+    fn repl_bootstrap_evaluator_and_loop_execute_from_t5m_domain_words() {
+        let mut session = Session::default();
+        sens::load_core_library(&mut session).expect("Core4 bootstrap");
+        sens::load_time_library(&mut session).expect("time bootstrap");
+
+        let meta_eval = crate::zig_transport::meta_eval_t5m_bytes()
+            .expect("Zig carries physical MetaEval T5M bytes");
+        let meta_forms = execute_zig_t5m_asset(&meta_eval, "MetaEval", &mut session)
+            .expect("MetaEval executes from exact T5M domain words");
+        assert!(meta_forms > 0);
+
+        let repl_core = crate::zig_transport::repl_core_t5m_bytes()
+            .expect("Zig carries physical REPL-core T5M bytes");
+        let repl_forms = execute_zig_t5m_asset(&repl_core, "repl-core", &mut session)
+            .expect("REPL core executes from exact T5M domain words");
+        assert!(repl_forms > 0);
+    }
+
+    #[cfg(feature = "zig-transport")]
+    #[test]
     fn named_d24_roots_lower_to_exact_numeric_words_not_text7_call_heads() {
         let mut session = Session::default();
         sens::load_core_library(&mut session).expect("Core4 roots");
@@ -2502,6 +2549,7 @@ mod tests {
             user_environment,
             surface: ReplSurface::UkrainianFull,
             sens_loop: false,
+            sens_repl_bootstrapped: false,
         };
         let (preview, result) = render_repl_ast_and_eval("(визначити відповідь 40)", &mut state)
             .expect("команда має показати дерево й виконати форму");
@@ -3066,6 +3114,7 @@ mod tests {
             user_environment,
             surface: ReplSurface::UkrainianFull,
             sens_loop: true,
+            sens_repl_bootstrapped: true,
         };
         let result = eval_repl_step_t5m(&mut state, "(додати 1 2)")
             .expect("--sens-loop must use the same Zig T5M interactive step");

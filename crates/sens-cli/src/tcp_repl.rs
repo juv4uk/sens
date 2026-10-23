@@ -3,8 +3,7 @@
 //! swarm.rs. Moved verbatim from main.rs (2026-08-22 mechanical split).
 
 use sens::{
-    eval_parsed_expressions, eval_parsed_expressions_incremental, load_macro_library,
-    load_process_library, parse, Environment, Session,
+    eval_parsed_expressions_incremental, load_process_library, parse, Environment, Session,
 };
 use std::io::{BufRead, BufReader, Write};
 use std::net::{Ipv4Addr, TcpListener};
@@ -31,7 +30,7 @@ use std::process;
 /// session), but two different connections never see each other's `def`s.
 /// Every expression is still logged to stderr with its peer address, for
 /// the same accountability reason the isolation itself was added for.
-pub(crate) fn run_tcp_repl(port: u16, core_lib: &str, allowed: &[String]) {
+pub(crate) fn run_tcp_repl(port: u16, allowed: &[String]) {
     let listener = match TcpListener::bind((Ipv4Addr::LOCALHOST, port)) {
         Ok(listener) => listener,
         Err(err) => {
@@ -61,25 +60,23 @@ pub(crate) fn run_tcp_repl(port: u16, core_lib: &str, allowed: &[String]) {
         let environment = Environment::root().with_process_allowlist(allowed.to_vec());
         let mut session = Session { environment };
 
-        // Keep the same language bootstrap invariant as the local CLI:
-        // use the exact D5 «макрос» slot, then let SENS
-        // define «визначити-макрос» before Core4 defines its derived forms. No evaluator
-        // head-name fallback is allowed to rescue a bare custom Environment.
-        if load_macro_library(&mut session).is_ok() {
-            if let Ok(core_ast) = parse(core_lib) {
-                if eval_parsed_expressions(&core_ast, &mut session).is_ok() {
-                    match sens::load_time_library(&mut session) {
-                        Ok(_) => {
-                            let _ = load_process_library(&mut session);
-                        }
-                        Err(error) => eprintln!(
-                            "TCP REPL: T5M time bootstrap failed: {}",
-                            error.render("<T5M time bootstrap>")
-                        ),
-                    }
-                }
-            }
+        // The TCP REPL uses the same canonical physical bootstrap as the
+        // local CLI. No Rust-held Core4 Lisp source is passed into this runtime.
+        if let Err(error) = sens::load_core_library(&mut session) {
+            eprintln!(
+                "TCP REPL: Core4 T5M bootstrap failed: {}",
+                error.render("<Core4 T5M bootstrap>")
+            );
+            continue;
         }
+        if let Err(error) = sens::load_time_library(&mut session) {
+            eprintln!(
+                "TCP REPL: T5M time bootstrap failed: {}",
+                error.render("<T5M time bootstrap>")
+            );
+            continue;
+        }
+        let _ = load_process_library(&mut session);
 
         let mut reader = BufReader::new(stream.try_clone().expect("clone TCP stream"));
         let mut line = String::new();

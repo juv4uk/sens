@@ -478,8 +478,6 @@ fn contract_source_zig_only() -> Result<String, String> {
     }
 }
 
-/// Byte-only carrier for SENS REPL core (lib/repl-core.lisp). Zig owns transport.
-
 /// Explicit REPL-only switches must not be confused with the implicit
 /// Ukrainian REPL default: file execution never requested a surface.
 fn explicit_repl_surface_flag(args: &[String]) -> bool {
@@ -789,7 +787,10 @@ fn main() {
             CliCore::Core3 => "Core3",
             CliCore::Core4 => "Core4",
         };
-        eprintln!("Error loading bootstrap {label}: {}", e.render("<SENS core bootstrap>"));
+        eprintln!(
+            "Error loading bootstrap {label}: {}",
+            e.render("<SENS core bootstrap>")
+        );
         process::exit(1);
     }
 
@@ -826,11 +827,6 @@ fn main() {
         );
         process::exit(1);
     }
-
-    // Text form stays in scope for downstream consumers (tcp repl seed,
-    // --lint path) without re-reading the file.
-    #[allow(unused_variables)]
-    let core_lib = CORE_SRC;
 
     if args.len() > 1 {
         let arg = &args[1];
@@ -908,7 +904,7 @@ fn main() {
             if sexpr_protocol {
                 run_tcp_repl_sexpr(port, allowed_for_tcp, contract_major, contract_minor);
             } else {
-                run_tcp_repl(port, core_lib, &allowed_for_tcp);
+                run_tcp_repl(port, &allowed_for_tcp);
             }
             return;
         }
@@ -1603,18 +1599,5 @@ mod core_profile_bootstrap_tests {
 
         sens::load_time_library(&mut session)
             .expect("SENS restores and loads the exact T5M time words");
-    }
-}
-
-#[allow(dead_code)] // wired by the REPL path once the Zig-only core is admitted
-fn repl_core_source_zig_only() -> Result<String, String> {
-    #[cfg(feature = "zig-transport")]
-    {
-        let bytes = zig_transport::repl_core_source_bytes()?;
-        String::from_utf8(bytes).map_err(|e| format!("ZIG_SENS_REPL_CORE UTF-8: {e}"))
-    }
-    #[cfg(not(feature = "zig-transport"))]
-    {
-        Err("RUST_ZIG_ONLY: SENS REPL core requires Zig; no Rust source fallback".into())
     }
 }
