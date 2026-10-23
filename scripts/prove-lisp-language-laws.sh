@@ -12,10 +12,16 @@ if [[ ! -x "$cli" ]]; then
   printf 'REGRESSION test_id=lisp-language-laws layer=executor expected=native-sens actual=missing path=%s\n' "$cli" >&2
   exit 1
 fi
+# Той самий Zig-кодек відкриває і перевіряє фізичні слова.
+reader="$(dirname "$cli")/sens-trit"
+if [[ ! -x "$reader" ]]; then
+  printf 'REGRESSION test_id=lisp-language-laws layer=Zig-T5M expected=sens-trit actual=missing path=%s\n' "$reader" >&2
+  exit 1
+fi
 tmp="$(mktemp -d)"
 trap 'rm -rf "$tmp"' EXIT
 printf 'NATIVE_SENS_EXECUTOR test_id=lisp-language-laws path=%s version=%s\n' "$cli" "$("$cli" --version)"
-for id in d1-not d2-cond-laziness d3-structure; do
+for id in d1-not d2-cond-laziness d3-structure d4-lexical-scope; do
   law="tests/semantic/$id-law.lisp"
   mutant="tests/semantic/$id-mutant.lisp"
   if [[ ! -f "$law" || ! -f "$mutant" ]] || cmp -s "$law" "$mutant"; then
@@ -29,8 +35,25 @@ for id in d1-not d2-cond-laziness d3-structure; do
     printf '%s\n' "$expected" > "$tmp/expected"
     printf 'NATIVE_SENS_CASE test_id=%s kind=%s fixture=%s expected=D1:%s\n' "$id" "$kind" "$file" "$expected"
     sha256sum "$file"
-    if ! "$cli" "$file" > "$tmp/actual" 2> "$tmp/stderr"; then
-      printf 'REGRESSION test_id=%s layer=eval input=%s expected=D1:%s actual=execution-error\n' "$id" "$file" "$expected" >&2
+    # Автором закону є .lisp; SENS створює точні слова, Zig — T5M-байти.
+    physical="$tmp/$id-$kind.sens"
+    view="$tmp/$id-$kind"
+    if ! timeout 45s "$cli" --t5m-mint "$file" "$physical" > "$tmp/mint.out" 2> "$tmp/stderr"; then
+      printf 'REGRESSION test_id=%s layer=codec input=%s expected=Zig-T5M actual=mint-failure\n' "$id" "$file" >&2
+      cat "$tmp/stderr" >&2
+      exit 1
+    fi
+    if [[ ! -s "$physical" ]] ||
+       ! timeout 45s "$reader" open "$physical" > "$view" 2> "$tmp/stderr" ||
+       ! timeout 45s "$reader" verify-view "$physical" > "$tmp/verify.out" 2> "$tmp/stderr"; then
+      printf 'REGRESSION test_id=%s layer=Zig-T5M input=%s expected=canonical-roundtrip actual=invalid-carrier\n' "$id" "$file" >&2
+      cat "$tmp/stderr" >&2
+      exit 1
+    fi
+    # Парне виконання SENS порівнює фізичні слова з вихідною програмою.
+    # Shell не обчислює семантику й не оголошує standalone фізичного входу.
+    if ! timeout 45s "$cli" --t5m-pair "$file" "$physical" > "$tmp/actual" 2> "$tmp/stderr"; then
+      printf 'REGRESSION test_id=%s layer=physical-eval input=%s expected=D1:%s actual=execution-error\n' "$id" "$file" "$expected" >&2
       cat "$tmp/stderr" >&2
       exit 1
     fi
@@ -38,7 +61,7 @@ for id in d1-not d2-cond-laziness d3-structure; do
       printf 'REGRESSION test_id=%s layer=eval input=%s expected=D1:%s actual=%q\n' "$id" "$file" "$expected" "$(cat "$tmp/actual")" >&2
       exit 1
     fi
-    printf 'NATIVE_SENS_PASS test_id=%s kind=%s expected=D1:%s executor=SENS\n' "$id" "$kind" "$expected"
+    printf 'NATIVE_SENS_PASS test_id=%s kind=%s expected=D1:%s executor=SENS carrier=Zig/T5M standalone=NOT_CLAIMED\n' "$id" "$kind" "$expected"
   done
 done
-printf 'NATIVE_SENS_SUITE_PASS suite=lisp-language-laws laws=3 mutants=3 authority=SENS\n'
+printf 'NATIVE_SENS_SUITE_PASS suite=lisp-language-laws laws=4 mutants=4 authority=SENS\n'
