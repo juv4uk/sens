@@ -244,3 +244,19 @@ test "exact-width field envelope refuses truncated and trailing bytes" {
         unpack(&appended, 10, &.{10}, &restored));
     try std.testing.expectEqual(@as(u64, 0xdeadbeef), restored[0]);
 }
+
+// Zig owns wire integrity, never the meaning of a SENS function.
+test "packed envelope CRC detects one changed physical bit" {
+    const fields = [_]Field{
+        .{ .width = 3, .bits = 0b001 },
+        .{ .width = 5, .bits = 0b10101 },
+        .{ .width = 4, .bits = 0b0010 },
+    };
+    var packed: [2]u8 = undefined;
+    try std.testing.expectEqual(@as(usize, 12), try pack(&packed, &fields));
+    const checksum = crc32(&packed);
+    try verifyCrc32(&packed, checksum);
+    var corrupted = packed;
+    corrupted[0] ^= 0b10000000;
+    try std.testing.expectError(error.IntegrityMismatch, verifyCrc32(&corrupted, checksum));
+}
