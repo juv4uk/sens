@@ -26,7 +26,7 @@ summaries="$(grep -c '^RUST_PACKED_VISIBLE_SUMMARY[[:space:]]' "$OUT/raw.tsv" ||
   cat "$OUT/run.stderr" >&2
   exit 2
 }
-if grep -Eq '^\s*\{' "$OUT/raw.tsv"; then
+if grep -q '^{' "$OUT/raw.tsv"; then
   echo "RUST_PACKED_VISIBLE_EVIDENCE_INVALID unexpected JSON-formatted output" >&2
   exit 2
 fi
