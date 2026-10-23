@@ -229,6 +229,7 @@ fn test_git_change_filter() -> Result<(),String> {
 
 fn self_test() -> Result<(),String> {
     test_git_change_filter()?;
+    test_triplet_census()?;
     let runner = "cat -- tests/semantic/sample-law.lisp > \"$bundle\"\n\
 run_case run_law sample \"$bundle\" 1\n\
 run_case run_law sample-mut tests/semantic/sample-mutant.lisp 0\n\
@@ -317,6 +318,136 @@ run_case run_law sample-mut tests/semantic/sample-mutant.lisp 0\n\
     Ok(())
 }
 
+#[derive(Debug, PartialEq, Eq)]
+struct TripletMissing {
+    source: String,
+    has_physical: bool,
+    has_view: bool,
+    semantic: bool,
+}
+
+#[derive(Debug, PartialEq, Eq)]
+struct TripletCensus {
+    lisp_sources: usize,
+    physical_present: usize,
+    view_present: usize,
+    complete: usize,
+    semantic_sources: usize,
+    semantic_complete: usize,
+    missing: Vec<TripletMissing>,
+}
+
+// Raw filesystem census only: it never declares a Lisp file a program,
+// validates encoded semantics, or grants release admission.
+fn census_tracked_paths(
+    tracked: &BTreeSet<String>,
+    regular_file: impl Fn(&str) -> bool,
+) -> TripletCensus {
+    let mut result = TripletCensus {
+        lisp_sources: 0,
+        physical_present: 0,
+        view_present: 0,
+        complete: 0,
+        semantic_sources: 0,
+        semantic_complete: 0,
+        missing: Vec::new(),
+    };
+    for source in tracked.iter().filter(|path| path.ends_with(".lisp")) {
+        result.lisp_sources += 1;
+        let stem = source.strip_suffix(".lisp").expect("suffix checked");
+        let physical = format!("{stem}.sens");
+        let has_physical = tracked.contains(&physical) && regular_file(&physical);
+        let has_view = tracked.contains(stem) && regular_file(stem);
+        result.physical_present += usize::from(has_physical);
+        result.view_present += usize::from(has_view);
+        let semantic = source.starts_with("tests/semantic/");
+        if semantic {
+            result.semantic_sources += 1;
+        }
+        if has_physical && has_view {
+            result.complete += 1;
+            if semantic {
+                result.semantic_complete += 1;
+            }
+        } else {
+            result.missing.push(TripletMissing {
+                source: source.clone(),
+                has_physical,
+                has_view,
+                semantic,
+            });
+        }
+    }
+    result
+}
+
+fn tracked_triplet_census(repo: &Path) -> Result<TripletCensus, String> {
+    let out = Command::new("git").current_dir(repo)
+        .args(["ls-files", "-z"])
+        .output().map_err(|e| e.to_string())?;
+    if !out.status.success() {
+        return Err(format!("git ls-files: {}", String::from_utf8_lossy(&out.stderr)));
+    }
+    let tracked: BTreeSet<String> = out.stdout.split(|byte| *byte == 0)
+        .filter(|item| !item.is_empty())
+        .map(|item| String::from_utf8(item.to_vec()).map_err(|e| e.to_string()))
+        .collect::<Result<_, _>>()?;
+    Ok(census_tracked_paths(&tracked, |relative| {
+        let path = repo.join(relative);
+        path.symlink_metadata().is_ok_and(|metadata|
+            metadata.is_file() && !metadata.file_type().is_symlink())
+    }))
+}
+
+fn print_triplet_census(census: &TripletCensus) {
+    println!(
+        "SENS_TRIPLET_LAYOUT_CENSUS lisp_sources={} physical_present={} view_present={} complete={} raw_missing={} semantic_sources={} semantic_complete={} semantic_missing={}",
+        census.lisp_sources,
+        census.physical_present,
+        census.view_present,
+        census.complete,
+        census.missing.len(),
+        census.semantic_sources,
+        census.semantic_complete,
+        census.semantic_sources - census.semantic_complete,
+    );
+    for row in &census.missing {
+        println!(
+            "SENS_TRIPLET_LAYOUT_MISSING source={} physical={} view={} scope={}",
+            row.source,
+            if row.has_physical { "present" } else { "missing" },
+            if row.has_view { "present" } else { "missing" },
+            if row.semantic { "semantic-law" } else { "needs-classification" },
+        );
+    }
+}
+
+fn test_triplet_census() -> Result<(), String> {
+    let tracked = BTreeSet::from([
+        "lib/paired.lisp".to_string(),
+        "lib/paired.sens".to_string(),
+        "lib/paired".to_string(),
+        "tests/semantic/unpaired.lisp".to_string(),
+    ]);
+    let census = census_tracked_paths(&tracked, |path| tracked.contains(path));
+    if census.lisp_sources != 2
+        || census.physical_present != 1
+        || census.view_present != 1
+        || census.complete != 1
+        || census.semantic_sources != 1
+        || census.semantic_complete != 0
+        || census.missing != vec![TripletMissing {
+            source: "tests/semantic/unpaired.lisp".into(),
+            has_physical: false,
+            has_view: false,
+            semantic: true,
+        }]
+    {
+        return Err(format!("triplet layout census misclassified fixture: {census:?}"));
+    }
+    Ok(())
+}
+
 fn main() {
     let args: Vec<_> = env::args().collect();
     if args.iter().any(|s| s == "--self-test") {
@@ -331,6 +462,8 @@ fn main() {
     let head = args.windows(2).find(|a| a[0]=="--head")
         .map(|a| a[1].as_str()).unwrap_or("HEAD");
     let result = (|| -> Result<_,String> {
+        let census = tracked_triplet_census(Path::new("."))?;
+        print_triplet_census(&census);
         let changed = changed_since(base,head)?;
         let script = fs::read_to_string(RUNNER).map_err(|e| e.to_string())?;
         let ci = fs::read_to_string(CI).map_err(|e| e.to_string())?;
