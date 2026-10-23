@@ -16,3 +16,10 @@ fn parser_rejects_an_unclosed_form_before_evaluation() {
     // Rust owns reader failures; this test does not decide Lisp truth or EQ.
     assert!(parse("(як-є (радіо антена)").is_err());
 }
+
+
+#[test]
+fn parser_rejects_an_extra_closing_form_before_evaluation() {
+    // Тест механізму читача Rust, не істинності чи семантики Lisp.
+    assert!(parse("(як-є радіо))").is_err());
+}

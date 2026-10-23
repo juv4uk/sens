@@ -36,24 +36,19 @@ fn рекурсія_не_приймає_непорожній_атом_за_за�
 }
 
 #[test]
-fn заперечення_повертає_точний_d1_без_невизначених_так_ні() {
+fn механізм_rust_повертає_помилку_на_неправильному_d1_типі() {
+    // Семантика NOT та істиннісні приклади тепер у
+    // tests/semantic/d1-not-law.lisp і d1-not-mutant.lisp.
+    // Rust перевіряє тільки межу виконавця: помилка не маскується успіхом.
     let mut сеанс = Session::default();
-    load_core_library(&mut сеанс).expect("ядро повинно завантажитися");
-    for (вираз, очікуване) in [
-        ("(хибне? (атом? (як-є ())))", false),
-        ("(хибне? (атом? (сполучити (як-є ()) (як-є ()))))", true),
-    ] {
-        let результат = eval_program(вираз, &mut сеанс)
-            .unwrap_or_else(|помилка| panic!("test_id=d1-not source={вираз} actual={помилка}"));
-        assert_eq!(
-            результат.value.as_predicate_bit(),
-            Some(очікуване),
-            "test_id=d1-not source={вираз} expected={очікуване}"
-        );
-    }
+    load_core_library(&mut сеанс).expect("завантаження ядра SENS");
+    let помилка = match eval_program("(хибне? (як-є ()))", &mut сеанс) {
+        Ok(_) => panic!("структурне NIL не повинно приховувати помилку типу"),
+        Err(помилка) => помилка,
+    };
     assert!(
-        eval_program("(хибне? (як-є ()))", &mut сеанс).is_err(),
-        "test_id=d1-not-type expected=fail-closed for structural nil"
+        !помилка.to_string().is_empty(),
+        "test_id=d1-not-type layer=rust-runtime expected=nonempty-error"
     );
 }
 
