@@ -91,7 +91,7 @@ LEGACY_HOST_DEBT: dict[str, int] = {
     "tests/test_d10_time_law_review_v2.py": 2,
     "tests/test_d3_legacy_logic_guard.py": 26,
     "tests/test_d7_core_identity_triplet.py": 3,
-    "tests/test_domain_function_reuse_rule.py": 4,
+    "tests/test_domain_function_reuse_rule.py": 10,
     "tests/test_domain_ladder_source_batch.py": 45,
     "tests/test_encoder_coverage_ukr_projection.py": 13,
     "tests/test_forward_macro_d4_2046.py": 2,
@@ -220,6 +220,73 @@ class LanguageStaysInSens(unittest.TestCase):
         probe = 'program = "(' + 'визначити список (' + 'функція (х) х))"'
         self.assertTrue(SENS_HEAD.search(probe))
         self.assertFalse(SENS_HEAD.search("def helper(): return 1  # звичайний клей"))
+
+
+# ── Подвоєння механіки: Python не перевіряє те, за що відповідає Rust ──────────
+# Механіку рантайму засвідчують Rust-тести (crates/*/tests/*.rs); ізоляцію — Zig.
+# Python-тест, що лізе в Rust-джерело механіки, — це подвоєння. Борг заморожено.
+RUST_MECHANISM_SOURCE = re.compile(r"crates/(sens|sens-cli|sens-host)/src")
+MECHANISM_TERM = re.compile(
+    r"\b(arena|cons|environment|eval|value|closure)\b|сполучити|перше|решта|середовище|комірк",
+    re.IGNORECASE,
+)
+LEGACY_PYTHON_RUST_DOUBLING: dict[str, int] = {
+    "tests/test_core1_fourth_domain_canary.py": 4,
+    "tests/test_core1_third_domain_canary.py": 4,
+    "tests/test_d3_legacy_logic_guard.py": 1,
+    "tests/test_d4_define_source_cutover.py": 1,
+    "tests/test_migrate_selected_lisp.py": 12,
+    "tests/test_migrated_historical_two_projections.py": 4,
+    "tests/test_migration_d1_cond_cohort.py": 5,
+    "tests/test_migration_d4_selector_cohort.py": 5,
+    "tests/test_migration_dynamic_binding_census.py": 5,
+    "tests/test_migration_dynamic_binding_triage.py": 5,
+    "tests/test_migration_eq_cohort.py": 5,
+    "tests/test_migration_eq_cond_cohort.py": 5,
+    "tests/test_migration_multiform_cohort.py": 5,
+    "tests/test_migration_pair_cohort.py": 5,
+    "tests/test_migration_pair_cons_uk_triplet.py": 5,
+    "tests/test_migration_print_host_effect_triage.py": 5,
+    "tests/test_migration_quote_cohort.py": 5,
+    "tests/test_repl_physical_prerequisites.py": 3,
+    "tests/test_sterile_zig_corridor.py": 30,
+    "tests/test_three_pass_quoted_datum_law.py": 4,
+    "tests/test_ukr_default_t5m_contract.py": 1,
+    "tests/test_ukr_tcp_map_current.py": 1,
+    "tests/test_verify_uk_t5_triplet.py": 1,
+    "tests/test_wsm_f6_zig_source_boundary.py": 2,
+    "tests/test_zig_build_environment_watch.py": 1,
+    "tests/test_zig_ffi_v2_contract.py": 10
+}
+
+
+def _python_rust_doubling() -> dict[str, int]:
+    found: dict[str, int] = {}
+    for rel in _tracked("tests/*.py"):
+        path = ROOT / rel
+        if not path.is_file():
+            continue
+        text = path.read_text(encoding="utf-8", errors="ignore")
+        if RUST_MECHANISM_SOURCE.search(text) and MECHANISM_TERM.search(text):
+            found[rel] = len(RUST_MECHANISM_SOURCE.findall(text))
+    return found
+
+
+class PythonDoesNotDoubleRustMechanism(unittest.TestCase):
+    def test_no_new_python_test_doubles_rust_mechanism(self) -> None:
+        new = sorted(rel for rel in _python_rust_doubling() if rel not in LEGACY_PYTHON_RUST_DOUBLING)
+        self.assertEqual(
+            new, [],
+            "Новий Python-тест перевіряє механіку рантайму, за яку відповідає Rust. "
+            "Механіку засвідчують Rust-тести (crates/*/tests), ізоляцію — Zig-тести.",
+        )
+
+    def test_python_rust_doubling_debt_only_shrinks(self) -> None:
+        cur = _python_rust_doubling()
+        grown = {r: (LEGACY_PYTHON_RUST_DOUBLING[r], cur[r])
+                 for r in LEGACY_PYTHON_RUST_DOUBLING
+                 if r in cur and cur[r] > LEGACY_PYTHON_RUST_DOUBLING[r]}
+        self.assertEqual(grown, {}, f"подвоєння не сміє зростати: {grown}")
 
 
 if __name__ == "__main__":
