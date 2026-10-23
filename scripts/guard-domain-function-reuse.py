@@ -77,10 +77,40 @@ def definitions(text: str) -> list[str]:
 MARKER = re.compile(r";\s*D11-пропозиція\s*:", re.IGNORECASE)
 
 
+def _mask_quotes(text: str) -> str:
+    """Затерти вміст (як-є …) — щоб не брати визначення з ДАНИХ.
+
+    У законах часто є (як-є ((визначити а тіло-а) …)) — це тестові дані,
+    а не справжні визначення. Без цього охоронець скаржився б на «а», «б», «в».
+    """
+    out = list(text)
+    i = 0
+    while True:
+        j = text.find("(як-є", i)
+        if j < 0:
+            break
+        depth = 0
+        k = j
+        while k < len(text):
+            if text[k] == "(":
+                depth += 1
+            elif text[k] == ")":
+                depth -= 1
+                if depth == 0:
+                    break
+            k += 1
+        for x in range(j, min(k + 1, len(text))):
+            if out[x] != "\n":
+                out[x] = " "
+        i = k + 1
+    return "".join(out)
+
+
 def definitions_with_bodies(text: str):
     """Повертає (ім'я, тіло, чи позначено маркером D11-пропозиції) для кожного визначення Lisp."""
     out = []
-    for m in DEF.finditer(text):
+    masked = _mask_quotes(text)
+    for m in DEF.finditer(masked):
         name = m.group(1)
         # маркер у 200 символах перед визначенням
         before = text[max(0, m.start() - 200):m.start()]
