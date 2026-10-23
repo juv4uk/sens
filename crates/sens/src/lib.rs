@@ -1069,10 +1069,17 @@ mod core4_bootstrap_cache_tests {
     fn d8_string_to_symbol_projection_is_installed_after_core4() {
         let mut session = Session::bare();
         load_core_library(&mut session).expect("чинний Core4 завантажується фізично");
-        let identity = semantic_registry::domain_identity_for_surface("текст-у-символ")
-            .expect("українська D8 проєкція має точну координату");
-        assert_eq!(identity.width(), 8);
-        assert_eq!(identity.packed_bits(), 0b11101101);
+        // Таблиця драбини є джерелом координати; реєстр викличності
+        // навмисно не містить автоматично кожну ратифіковану поверхню.
+        assert_eq!(
+            domain_projection_catalog::lookup(
+                domain_projection_catalog::ProjectionSource::DomainTable,
+                8,
+                "11101101",
+                "ук",
+            ),
+            Some(domain_projection_catalog::ProjectionValue::Symbol("текст-у-символ"))
+        );
         assert!(
             matches!(session.environment.get("текст-у-символ"), Some(Value::Builtin(_))),
             "вже реалізований D8 механізм має бути доступним звичайному Lisp"
