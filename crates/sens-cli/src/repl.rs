@@ -3069,7 +3069,7 @@ mod tests {
                 _ => None,
             })
             .collect::<Vec<_>>();
-        assert_eq!(restored_cells, expected.cells());
+        assert_eq!(restored_cells.as_slice(), expected.cells());
 
         let executable =
             sens::parse_mixed_exact_domain("\"аб\"").expect("executable Ukrainian string source");
