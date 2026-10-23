@@ -32,7 +32,33 @@ done
 test "$(grep -c '^D11_FAMILIES_SAMPLE ' "$raw")" -eq 30
 test "$(grep -c '^D11_FAMILIES_SAMPLE impl=rust ' "$raw")" -eq 15
 test "$(grep -c '^D11_FAMILIES_SAMPLE impl=zig ' "$raw")" -eq 15
-grep -Fq 'checksum=9 allocations=0' "$raw"
+# Every sample must have the same checksum, a unique index, and the expected AB/BA process order.
+awk '
+  /^D11_FAMILIES_SAMPLE / {
+    impl_value=""; sample_value=""; checksum_value=""; allocations_value="";
+    for (i=1; i<=NF; i++) {
+      split($i, pair, "=");
+      if (pair[1] == "impl") impl_value=pair[2];
+      if (pair[1] == "sample") sample_value=pair[2];
+      if (pair[1] == "checksum") checksum_value=pair[2];
+      if (pair[1] == "allocations") allocations_value=pair[2];
+    }
+    sample_index=int(rows/2);
+    if (sample_value != sample_index || checksum_value != "9" || allocations_value != "0") exit 1;
+    if (sample_index % 2 == 0) expected_impl=(rows % 2 == 0 ? "rust" : "zig");
+    else expected_impl=(rows % 2 == 0 ? "zig" : "rust");
+    if (impl_value != expected_impl) exit 1;
+    key=impl_value SUBSEP sample_value;
+    if (seen[key]++) exit 1;
+    rows++;
+  }
+  END {
+    if (rows != 30) exit 1;
+    for (i=0; i<15; i++) {
+      if (!seen["rust" SUBSEP i] || !seen["zig" SUBSEP i]) exit 1;
+    }
+  }
+' "$raw"
 
 for impl in rust zig; do
   values="$(awk -v impl="$impl" '
