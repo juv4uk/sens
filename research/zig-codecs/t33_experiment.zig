@@ -41,7 +41,7 @@ fn buildCounts() [BLOCK_TRITS + 1][2]u64 {
     return c;
 }
 
-const counts = comptime buildCounts();
+const counts = buildCounts();
 
 fn lebLen(value: usize) usize {
     var n = value;
