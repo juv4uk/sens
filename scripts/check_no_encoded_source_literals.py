@@ -90,7 +90,6 @@ def _is_legacy_signature_key(source: str, path: str | Path | None, offset: int) 
     return bool(match and line_start + match.start("bits") == offset)
 
 MACHINE_FACT_NUMERIC_PATHS = {
-    "lib/machine/encoding/x86-64.lisp",
     "lib/machine/encoding/coverage.lisp",
     "lib/machine/encoding/admitted-iclass-index.lisp",
     "lib/machine/dispatch/native-first-coverage.lisp",
