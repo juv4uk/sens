@@ -99,10 +99,10 @@ test "CAAR: злиті D2 стискаються, перемежовані се�
     };
     var total_bytes: usize = 0;
     for (runs) |run| {
-        const packed = try pack(allocator, run);
-        defer allocator.free(packed);
-        total_bytes += packed.len;
-        const back = try unpack(allocator, packed, run.len);
+        const encoded = try pack(allocator, run);
+        defer allocator.free(encoded);
+        total_bytes += encoded.len;
+        const back = try unpack(allocator, encoded, run.len);
         defer allocator.free(back);
         try std.testing.expectEqualSlices(u8, run, back);
     }

@@ -118,6 +118,9 @@ def number_domains(contract_path: Path = NUMBER_RATIFICATION) -> tuple[tuple[str
     if source.count(marker) != 1:
         raise ValueError("exactly one current numeric D12 extension is required")
     current = source.split(marker, 1)[1]
+    first_domains = re.findall(r"\(first-domain\s*\.\s*([^()\s]+)\)", current)
+    if first_domains != ["D12"]:
+        raise ValueError(f"numeric D12 contract requires exactly one first-domain D12: {first_domains!r}")
     for required in (
         "(status . owner-ratified)",
         "(first-domain . D12)",

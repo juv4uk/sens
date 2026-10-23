@@ -24,24 +24,53 @@ pub const Score = struct {
     structural: usize = 0,
     invalid_suffix: usize = 0,
     non_selector: usize = 0,
+    answered: usize = 0,
+    missing: usize = 0,
 };
 
-// Не дублюємо реєстр у Zig: кожна відповідь читається з канонічного Lisp.
+// Не дублюємо реєстр у Zig: читаємо чинні Lisp-файли з кореня checkout.
+// Zig 0.16 не дозволяє вбудовувати файл поза коренем пакета.
+// Таблиці тримаємо в пам'яті до завершення процесу: Record повертає їхні зрізи.
+const CFile = opaque {};
+extern "c" fn fopen([*:0]const u8, [*:0]const u8) ?*CFile;
+extern "c" fn fclose(*CFile) c_int;
+extern "c" fn fseek(*CFile, c_long, c_int) c_int;
+extern "c" fn ftell(*CFile) c_long;
+extern "c" fn fread([*]u8, usize, usize, *CFile) usize;
+
+var table_cache = [_]?[]u8{null} ** 11;
+
 fn source(width: u8) ?[]const u8 {
-    return switch (width) {
-        1 => @embedFile("../../lib/domains/d1.lisp"),
-        2 => @embedFile("../../lib/domains/d2.lisp"),
-        3 => @embedFile("../../lib/domains/d3.lisp"),
-        4 => @embedFile("../../lib/domains/d4.lisp"),
-        5 => @embedFile("../../lib/domains/d5.lisp"),
-        6 => @embedFile("../../lib/domains/d6.lisp"),
-        7 => @embedFile("../../lib/domains/d7.lisp"),
-        8 => @embedFile("../../lib/domains/d8.lisp"),
-        9 => @embedFile("../../lib/domains/d9.lisp"),
-        10 => @embedFile("../../lib/domains/d10.lisp"),
-        11 => @embedFile("../../lib/domains/d11.lisp"),
-        else => null,
+    const path: [*:0]const u8 = switch (width) {
+        1 => "lib/domains/d1.lisp",
+        2 => "lib/domains/d2.lisp",
+        3 => "lib/domains/d3.lisp",
+        4 => "lib/domains/d4.lisp",
+        5 => "lib/domains/d5.lisp",
+        6 => "lib/domains/d6.lisp",
+        7 => "lib/domains/d7.lisp",
+        8 => "lib/domains/d8.lisp",
+        9 => "lib/domains/d9.lisp",
+        10 => "lib/domains/d10.lisp",
+        11 => "lib/domains/d11.lisp",
+        else => return null,
     };
+    const index = @as(usize, width) - 1;
+    if (table_cache[index]) |bytes| return bytes;
+
+    const file = fopen(path, "rb") orelse return null;
+    defer _ = fclose(file);
+    if (fseek(file, 0, 2) != 0) return null;
+    const raw_len = ftell(file);
+    if (raw_len <= 0 or fseek(file, 0, 0) != 0) return null;
+    const len: usize = @intCast(raw_len);
+    const bytes = std.heap.page_allocator.alloc(u8, len) catch return null;
+    if (fread(bytes.ptr, 1, len, file) != len) {
+        std.heap.page_allocator.free(bytes);
+        return null;
+    }
+    table_cache[index] = bytes;
+    return bytes;
 }
 
 // Читаємо лише точну координату та колонку LISP, без інтерпретації семантики.
@@ -63,7 +92,6 @@ fn parseRow(width: u8, line: []const u8) ?Record {
     if (end == 0) return null;
     return .{ .width = width, .bits = bits, .lisp = value[0..end] };
 }
-
 
 pub const D11Guess = struct {
     parent_bits: []const u8,
@@ -126,6 +154,9 @@ pub fn gradeD11(guesses: []const D11Guess) Score {
             result.wrong += 1;
         }
     }
+    result.answered = result.correct;
+    const total = questionCount(11);
+    result.missing = if (total > result.correct) total - result.correct else 0;
     return result;
 }
 
@@ -176,9 +207,12 @@ pub fn coordinateCount(width: u8) usize {
     return count;
 }
 
-pub fn grade(guesses: []const Guess) Score {
+fn gradeFiltered(guesses: []const Guess, domain: ?u8) Score {
     var result: Score = .{};
     for (guesses, 0..) |guess, index| {
+        if (domain) |width| {
+            if (guess.width != width) continue;
+        }
         var repeated = false;
         for (guesses[0..index]) |previous| {
             if (previous.width == guess.width and std.mem.eql(u8, previous.bits, guess.bits)) {
@@ -203,6 +237,134 @@ pub fn grade(guesses: []const Guess) Score {
         }
     }
     return result;
+}
+
+pub fn grade(guesses: []const Guess) Score {
+    return gradeFiltered(guesses, null);
+}
+
+/// Відтворювана перестановка запитань для чесного раунду.
+/// Один seed дає той самий порядок; усі індекси з'являються рівно один раз.
+/// Це механіка гри: назви й координати як і раніше читаються з Lisp-таблиць.
+pub fn questionOrder(allocator: std.mem.Allocator, width: u8, seed: u64) ![]usize {
+    const count = questionCount(width);
+    const order = try allocator.alloc(usize, count);
+    for (order, 0..) |*index, i| index.* = i;
+
+    var state = if (seed == 0) @as(u64, 0x9e3779b97f4a7c15) else seed;
+    var i = count;
+    while (i > 1) {
+        i -= 1;
+        state ^= state << 13;
+        state ^= state >> 7;
+        state ^= state << 17;
+        const j: usize = @intCast(state % @as(u64, @intCast(i + 1)));
+        std.mem.swap(usize, &order[i], &order[j]);
+    }
+    return order;
+}
+
+/// Оцінює повноту одного доменного раунду, окрім точності кожної відповіді.
+/// Невідомі координати й структурні записи не зараховуються як пригадані функції.
+pub fn gradeDomain(width: u8, guesses: []const Guess) Score {
+    var result = gradeFiltered(guesses, width);
+    var answered: usize = 0;
+    for (guesses, 0..) |guess, index| {
+        if (guess.width != width) continue;
+        var repeated = false;
+        for (guesses[0..index]) |previous| {
+            if (previous.width == guess.width and std.mem.eql(u8, previous.bits, guess.bits)) {
+                repeated = true;
+                break;
+            }
+        }
+        if (repeated) continue;
+        const actual = lookup(guess.width, guess.bits) orelse continue;
+        if (!std.mem.eql(u8, actual.lisp, "()") and std.ascii.eqlIgnoreCase(actual.lisp, guess.lisp)) answered += 1;
+    }
+    result.answered = answered;
+    const total = questionCount(width);
+    result.missing = if (total > answered) total - answered else 0;
+    return result;
+}
+
+test "Драбина D11: правильний код з хибною назвою не означає пригадану функцію" {
+    const first = questionAt(11, 0) orelse return error.MissingQuestion;
+    const guesses = [_]Guess{
+        .{ .width = 11, .bits = first.bits, .lisp = "WRONGSELECTOR" },
+    };
+    const result = gradeDomain(11, &guesses);
+    try std.testing.expectEqual(@as(usize, 0), result.correct);
+    try std.testing.expectEqual(@as(usize, 1), result.wrong);
+    try std.testing.expectEqual(@as(usize, 0), result.answered);
+    try std.testing.expectEqual(@as(usize, 512), result.missing);
+}
+
+test "Драбина D11: чужі домени не впливають на оцінку раунду" {
+    const first = questionAt(11, 0) orelse return error.MissingQuestion;
+    const guesses = [_]Guess{
+        .{ .width = 11, .bits = first.bits, .lisp = first.lisp },
+        .{ .width = 3, .bits = "100", .lisp = "CDR" },
+        .{ .width = 3, .bits = "100", .lisp = "CDR" },
+        .{ .width = 3, .bits = "1110", .lisp = "CONS" },
+        .{ .width = 2, .bits = "11", .lisp = "()" },
+    };
+    const result = gradeDomain(11, &guesses);
+    try std.testing.expectEqual(@as(usize, 1), result.correct);
+    try std.testing.expectEqual(@as(usize, 0), result.wrong);
+    try std.testing.expectEqual(@as(usize, 0), result.duplicate);
+    try std.testing.expectEqual(@as(usize, 0), result.unknown);
+    try std.testing.expectEqual(@as(usize, 0), result.structural);
+    try std.testing.expectEqual(@as(usize, 1), result.answered);
+    try std.testing.expectEqual(@as(usize, 511), result.missing);
+}
+
+test "Драбина D11: раунд має 512 унікальних відтворюваних запитань і повний підрахунок" {
+    const allocator = std.testing.allocator;
+    try std.testing.expectEqual(@as(usize, 512), questionCount(11));
+    try std.testing.expectEqual(@as(usize, 512), coordinateCount(11));
+
+    const order = try questionOrder(allocator, 11, 0x53454e534c414444);
+    defer allocator.free(order);
+    const replay = try questionOrder(allocator, 11, 0x53454e534c414444);
+    defer allocator.free(replay);
+    try std.testing.expectEqualSlices(usize, order, replay);
+    try std.testing.expectEqual(@as(usize, 512), order.len);
+
+    var seen = [_]bool{false} ** 512;
+    var guesses = try allocator.alloc(Guess, order.len);
+    defer allocator.free(guesses);
+    for (order, 0..) |question_index, i| {
+        try std.testing.expect(question_index < seen.len);
+        try std.testing.expect(!seen[question_index]);
+        seen[question_index] = true;
+        const record = questionAt(11, question_index) orelse return error.MissingQuestion;
+        guesses[i] = .{ .width = record.width, .bits = record.bits, .lisp = record.lisp };
+    }
+    for (seen) |found| try std.testing.expect(found);
+
+    const result = gradeDomain(11, guesses);
+    try std.testing.expectEqual(@as(usize, 512), result.correct);
+    try std.testing.expectEqual(@as(usize, 512), result.answered);
+    try std.testing.expectEqual(@as(usize, 0), result.missing);
+    try std.testing.expectEqual(@as(usize, 0), result.wrong);
+    try std.testing.expectEqual(@as(usize, 0), result.duplicate);
+    try std.testing.expectEqual(@as(usize, 0), result.unknown);
+}
+
+test "Драбина D11: прогалина, хибна відповідь і повтор не зараховуються як нові функції" {
+    const first = questionAt(11, 0) orelse return error.MissingQuestion;
+    const guesses = [_]Guess{
+        .{ .width = 11, .bits = first.bits, .lisp = first.lisp },
+        .{ .width = 11, .bits = first.bits, .lisp = "НЕПРАВИЛЬНА-НАЗВА" },
+        .{ .width = 11, .bits = "00000000000", .lisp = "UNKNOWN" },
+    };
+    const result = gradeDomain(11, &guesses);
+    try std.testing.expectEqual(@as(usize, 1), result.correct);
+    try std.testing.expectEqual(@as(usize, 1), result.duplicate);
+    try std.testing.expectEqual(@as(usize, 1), result.unknown);
+    try std.testing.expectEqual(@as(usize, 1), result.answered);
+    try std.testing.expectEqual(@as(usize, 511), result.missing);
 }
 
 test "Драбина: усі D1–D10 мають точні двійкові координати" {
@@ -248,7 +410,6 @@ test "Драбина: точні коди, хибні назви, повтори
     try std.testing.expectEqual(@as(usize, 1), result.structural);
 }
 
-
 test "Драбина D11: 512 унікальних похідних точно виконують закон суфікса" {
     try std.testing.expectEqual(@as(usize, 512), questionCount(11));
     var seen = [_]bool{false} ** 2048;
@@ -288,6 +449,8 @@ test "Конкурс D11: вірна назва, хибна, повтор, не-
     try std.testing.expectEqual(@as(usize, 0), score.unknown);
     try std.testing.expectEqual(@as(usize, 1), score.invalid_suffix);
     try std.testing.expectEqual(@as(usize, 1), score.non_selector);
+    try std.testing.expectEqual(@as(usize, 1), score.answered);
+    try std.testing.expectEqual(@as(usize, 511), score.missing);
 }
 
 test "Конкурс D11: обидва суфікси та повтор зіпсованої відповіді" {
@@ -301,4 +464,6 @@ test "Конкурс D11: обидва суфікси та повтор зіпс
     try std.testing.expectEqual(@as(usize, 2), score.correct);
     try std.testing.expectEqual(@as(usize, 1), score.duplicate);
     try std.testing.expectEqual(@as(usize, 1), score.invalid_suffix);
+    try std.testing.expectEqual(@as(usize, 2), score.answered);
+    try std.testing.expectEqual(@as(usize, 510), score.missing);
 }

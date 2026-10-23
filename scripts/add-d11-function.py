@@ -102,9 +102,20 @@ def main(argv: list[str] | None = None) -> int:
 
     # Крок 0: селекторна похідна — якщо агент уже знає батька й суфікс
     if args.parent and args.suffix:
+        if not re.fullmatch(r"[01]{10}", args.parent) or args.suffix not in ("0", "1"):
+            raise SystemExit(
+                f"D11_PARENT_SUFFIX_INVALID input=parent:{args.parent!r} suffix:{args.suffix!r} "
+                "expected=10-bit-D10-selector-and-0-or-1"
+            )
         coord = args.parent + args.suffix
         lisp = is_selector_derived(coord)
-        print(f"0) Селекторна похідна: координата {coord} → {lisp or 'нових рядок за законом'}")
+        if lisp is None:
+            raise SystemExit(
+                f"D11_NON_SELECTOR_PARENT layer=d11-coordinate input=D10:{args.parent} "
+                f"suffix={args.suffix} expected=derived-selector-in-seed actual=absent "
+                f"reproduce='python3 scripts/add-d11-function.py --parent {args.parent} --suffix {args.suffix}'"
+            )
+        print(f"0) Селекторна похідна: координата {coord} → {lisp}")
         print("   Далі:  python3 scripts/derive-d11-coordinate.py "
               f"{args.parent} {args.suffix}  → готовий рядок у lib/domains/d11.lisp")
         return 0

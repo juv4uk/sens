@@ -31,9 +31,9 @@ fn operation(
 ) !void {
     for (runs, physical) |run, bytes| {
         if (op == .encode) {
-            const packed = try codec.pack(allocator, run);
-            std.mem.doNotOptimizeAway(packed);
-            allocator.free(packed);
+            const encoded = try codec.pack(allocator, run);
+            std.mem.doNotOptimizeAway(encoded);
+            allocator.free(encoded);
         } else {
             const decoded = try codec.unpack(allocator, bytes, run.len);
             std.mem.doNotOptimizeAway(decoded);

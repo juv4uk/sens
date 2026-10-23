@@ -52,7 +52,7 @@ fn measure(
     comptime operation: Operation,
     io: std.Io,
     words: []const u16,
-    packed: []u8,
+    dense_buf: []u8,
     bytes16: []u8,
     restored: []u16,
 ) !u64 {
@@ -64,15 +64,15 @@ fn measure(
         for (0..batch) |_| {
             switch (operation) {
                 .dense_encode => {
-                    const size = try dense.encode(words, packed);
-                    std.mem.doNotOptimizeAway(packed[size - 1]);
+                    const size = try dense.encode(words, dense_buf);
+                    std.mem.doNotOptimizeAway(dense_buf[size - 1]);
                 },
                 .be16_encode => {
                     try encodeBe16(words, bytes16);
                     std.mem.doNotOptimizeAway(bytes16[bytes16.len - 1]);
                 },
                 .dense_decode => {
-                    try dense.decode(packed, words.len, restored);
+                    try dense.decode(dense_buf, words.len, restored);
                     std.mem.doNotOptimizeAway(restored[restored.len - 1]);
                 },
                 .be16_decode => {
@@ -97,18 +97,18 @@ pub fn main(init: std.process.Init) !void {
     for (0..word_count) |i| {
         words[i] = @intCast((i * 73 + (i >> 1) * 137) & 0x0fff);
     }
-    var packed: [dense_bytes]u8 = undefined;
+    var dense_buf: [dense_bytes]u8 = undefined;
     var bytes16: [be16_bytes]u8 = undefined;
     var restored: [word_count]u16 = undefined;
     var replay: [dense_bytes]u8 = undefined;
     var replay16: [be16_bytes]u8 = undefined;
 
     // Приймання в конкурс: однакові слова і побайтова канонічна оберненість.
-    if (try dense.encode(&words, &packed) != dense_bytes) return error.DenseLength;
-    try dense.decode(&packed, word_count, &restored);
+    if (try dense.encode(&words, &dense_buf) != dense_bytes) return error.DenseLength;
+    try dense.decode(&dense_buf, word_count, &restored);
     if (!std.mem.eql(u16, &words, &restored)) return error.DenseRoundtrip;
     if (try dense.encode(&restored, &replay) != dense_bytes) return error.DenseReplayLength;
-    if (!std.mem.eql(u8, &packed, &replay)) return error.DenseReplay;
+    if (!std.mem.eql(u8, &dense_buf, &replay)) return error.DenseReplay;
     try encodeBe16(&words, &bytes16);
     try decodeBe16(&bytes16, &restored);
     if (!std.mem.eql(u16, &words, &restored)) return error.Be16Roundtrip;
@@ -116,9 +116,9 @@ pub fn main(init: std.process.Init) !void {
     if (!std.mem.eql(u8, &bytes16, &replay16)) return error.Be16Replay;
 
     // Один прогрів кожного шляху, поза таймером.
-    _ = try dense.encode(&words, &packed);
+    _ = try dense.encode(&words, &dense_buf);
     try encodeBe16(&words, &bytes16);
-    try dense.decode(&packed, word_count, &restored);
+    try dense.decode(&dense_buf, word_count, &restored);
     try decodeBe16(&bytes16, &restored);
 
     var de: [samples]u64 = undefined;
@@ -127,15 +127,15 @@ pub fn main(init: std.process.Init) !void {
     var bd: [samples]u64 = undefined;
     for (0..samples) |i| {
         if (i % 2 == 0) {
-            de[i] = try measure(.dense_encode, io, &words, &packed, &bytes16, &restored);
-            be[i] = try measure(.be16_encode, io, &words, &packed, &bytes16, &restored);
-            dd[i] = try measure(.dense_decode, io, &words, &packed, &bytes16, &restored);
-            bd[i] = try measure(.be16_decode, io, &words, &packed, &bytes16, &restored);
+            de[i] = try measure(.dense_encode, io, &words, &dense_buf, &bytes16, &restored);
+            be[i] = try measure(.be16_encode, io, &words, &dense_buf, &bytes16, &restored);
+            dd[i] = try measure(.dense_decode, io, &words, &dense_buf, &bytes16, &restored);
+            bd[i] = try measure(.be16_decode, io, &words, &dense_buf, &bytes16, &restored);
         } else {
-            be[i] = try measure(.be16_encode, io, &words, &packed, &bytes16, &restored);
-            de[i] = try measure(.dense_encode, io, &words, &packed, &bytes16, &restored);
-            bd[i] = try measure(.be16_decode, io, &words, &packed, &bytes16, &restored);
-            dd[i] = try measure(.dense_decode, io, &words, &packed, &bytes16, &restored);
+            be[i] = try measure(.be16_encode, io, &words, &dense_buf, &bytes16, &restored);
+            de[i] = try measure(.dense_encode, io, &words, &dense_buf, &bytes16, &restored);
+            bd[i] = try measure(.be16_decode, io, &words, &dense_buf, &bytes16, &restored);
+            dd[i] = try measure(.dense_decode, io, &words, &dense_buf, &bytes16, &restored);
         }
         std.debug.print(
             "D12_AB_SAMPLE index={d} dense_encode_ns={d} be16_encode_ns={d} dense_decode_ns={d} be16_decode_ns={d}\n",

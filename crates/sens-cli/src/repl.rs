@@ -3299,9 +3299,25 @@ mod tests {
             mint_t5m_source_pair(source).expect("quoted D7 source must mint exact Zig/T5M");
         let result = eval_t5m_paired_file(source, &physical)
             .expect("physical SENS must execute the same D3 quotation");
-        let expected = sens::encode_text7("sha256:abc", sens::Text7Layout::En)
-            .expect("ASCII protocol text is admitted by D7 v2");
-        assert_eq!(result.value, Value::Text7(expected));
+        // Фізичний D2 читач повертає структуру, D7 — точні бітові гліфи.
+        // Тут не існує окремого host Text7-тега: це було старе очікування тесту.
+        // Еталонні біти виведені незалежно з ASCII "sha256:abc".
+        let expected = Value::list(
+            [
+                0b1110011_u16, 0b1101000, 0b1100001, 0b0110010, 0b0110101,
+                0b0110110, 0b0111010, 0b1100001, 0b1100010, 0b1100011,
+            ]
+            .into_iter()
+            .map(|bits| {
+                Value::DomainIdentity(
+                    t5m_domain_identity(7, bits).expect("literal must be an exact D7 coordinate"),
+                )
+            }),
+        );
+        assert_eq!(
+            result.value, expected,
+            "quoted D7 glyph order and D2 structure must survive Zig/T5M"
+        );
     }
 
     #[test]

@@ -35,6 +35,15 @@ class DomainFunctionReuseRule(unittest.TestCase):
         if PROBE.exists():
             PROBE.unlink()
 
+    def test_explicit_missing_lisp_file_fails_closed(self) -> None:
+        # Tool admission, not Lisp semantics: no inspected input cannot be PASS.
+        with tempfile.TemporaryDirectory() as temporary:
+            missing = Path(temporary) / "missing-guard-input.lisp"
+            self.assertFalse(missing.exists())
+            result = run(GUARD, "--file", str(missing))
+        self.assertEqual(result.returncode, 2, result.stdout + result.stderr)
+        self.assertIn("НЕ ПЕРЕВІРЕНО", result.stdout + result.stderr)
+
     def test_guard_self_test_is_green(self) -> None:
         result = run(GUARD, "--self-test")
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
@@ -52,6 +61,90 @@ class DomainFunctionReuseRule(unittest.TestCase):
         self.assertEqual(status, 2, output.getvalue())
         self.assertIn("НЕ ПЕРЕВІРЕНО", output.getvalue())
         self.assertIn(f"щонайменше {guard.MINIMUM_RATIFIED_SURFACES}", output.getvalue())
+
+    def test_d11_derived_selector_is_not_a_ratified_lower_domain_surface(self) -> None:
+        # D10-батько вже ратифікований; його D11-нащадок — лише похідна.
+        spec = importlib.util.spec_from_file_location("guard_d11_boundary_test", GUARD)
+        self.assertIsNotNone(spec)
+        self.assertIsNotNone(spec.loader)
+        guard = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(guard)
+        lower = guard.ladder_names(ROOT)
+        self.assertIn("CDAAAAAAAR", lower)  # D10
+        self.assertNotIn("CDAAAAAAAAR", lower)  # D11
+
+    def test_staged_reads_index_not_unstaged_worktree(self) -> None:
+        # Коміт міститиме дубль D3, хоча робоче дерево вже виправлене.
+        # Охоронець мусить перевірити саме Git index.
+        spec = importlib.util.spec_from_file_location("guard_staged_index_test", GUARD)
+        self.assertIsNotNone(spec)
+        self.assertIsNotNone(spec.loader)
+        guard = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(guard)
+        with tempfile.TemporaryDirectory(prefix="sens-guard-staged-") as temp:
+            root = Path(temp)
+            staged_file = root / "lib" / "staged-guard-probe.lisp"
+            staged_file.parent.mkdir(parents=True)
+            staged_file.write_text(
+                "(визначити сполучити (функція (х у) х))\n", encoding="utf-8"
+            )
+            init = subprocess.run(
+                ["git", "init", "-q"], cwd=root, capture_output=True, text=True, check=False,
+            )
+            self.assertEqual(init.returncode, 0, init.stderr)
+            add = subprocess.run(
+                ["git", "add", "lib/staged-guard-probe.lisp"],
+                cwd=root, capture_output=True, text=True, check=False,
+            )
+            self.assertEqual(add.returncode, 0, add.stderr)
+            staged_file.write_text("; чисте робоче дерево\n", encoding="utf-8")
+            output = StringIO()
+            with mock.patch.object(guard, "ROOT", root), \
+                 mock.patch.object(guard, "ladder_names", return_value={"сполучити"}), \
+                 mock.patch.object(guard, "project_definition_sites", return_value={}), \
+                 mock.patch.object(guard, "MINIMUM_RATIFIED_SURFACES", 1), \
+                 redirect_stdout(output):
+                status = guard.main(["--staged"])
+        self.assertEqual(status, 1, output.getvalue())
+        self.assertIn("BLOCKED", output.getvalue())
+
+    def test_staged_base_detects_second_definition_in_same_file(self) -> None:
+        # --base мусить порівнювати кількість DEFINE, а не лише множину імен.
+        # База має одне визначення; у Git index додається друге з тим самим ім'ям.
+        spec = importlib.util.spec_from_file_location("guard_same_file_delta_test", GUARD)
+        self.assertIsNotNone(spec)
+        self.assertIsNotNone(spec.loader)
+        guard = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(guard)
+        definition = (
+            "(визначити подвійний-локальний "
+            "(функція (х) (сполучити х (як-є ()))))\n"
+        )
+        with tempfile.TemporaryDirectory(prefix="sens-guard-double-") as temp:
+            root = Path(temp)
+            path = root / "lib" / "double.lisp"
+            path.parent.mkdir(parents=True)
+            path.write_text(definition, encoding="utf-8")
+            subprocess.run(["git", "init", "-q"], cwd=root, check=True)
+            subprocess.run(["git", "add", "lib/double.lisp"], cwd=root, check=True)
+            subprocess.run(
+                ["git", "-c", "user.name=SENS Guard", "-c",
+                 "user.email=guard@example.invalid", "commit", "-qm", "base"],
+                cwd=root, check=True,
+            )
+            path.write_text(definition + definition, encoding="utf-8")
+            subprocess.run(["git", "add", "lib/double.lisp"], cwd=root, check=True)
+            with mock.patch.object(guard, "ROOT", root), \
+                 mock.patch.object(guard, "ladder_names", return_value={"сполучити"}), \
+                 mock.patch.object(guard, "project_definition_sites", return_value={}), \
+                 mock.patch.object(guard, "MINIMUM_RATIFIED_SURFACES", 1):
+                for mode in (("--staged", "--base", "HEAD"), ("--staged",)):
+                    with self.subTest(mode=mode):
+                        output = StringIO()
+                        with redirect_stdout(output):
+                            status = guard.main(list(mode))
+                        self.assertEqual(status, 1, output.getvalue())
+                        self.assertIn("повторне визначення в одному файлі", output.getvalue())
 
     def test_search_self_test_is_green(self) -> None:
         result = run(SEARCH, "--self-test")

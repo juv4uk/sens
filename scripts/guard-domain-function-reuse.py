@@ -28,6 +28,7 @@
 from __future__ import annotations
 
 import argparse
+from collections import Counter
 import importlib.util
 import json
 import re
@@ -69,7 +70,10 @@ def ladder_names(root: Path) -> set[str]:
     """Усі людські назви поверхонь драбин — через наявний механізм."""
     discover = _load_discover()
     names: set[str] = set()
-    for _domain, rows in discover.load_domain_tables(root).items():
+    for domain, rows in discover.load_domain_tables(root).items():
+        # D11 — робочий домен похідних, а не ратифікована драбина D1–D10.
+        if domain > 10:
+            continue
         for row in rows:
             names.update(discover.aliases(row))
     return names
@@ -324,7 +328,7 @@ def changed_files(args) -> list[str]:
         return [ln.strip() for ln in Path(args.paths_from).read_text(encoding="utf-8").splitlines() if ln.strip()]
     if args.staged:
         out = subprocess.run(
-            ["git", "-c", "core.quotepath=false", "diff", "--name-only", "--cached"],
+            ["git", "-c", "core.quotepath=false", "diff", "--name-only", "--cached", "--diff-filter=ACMR"],
             cwd=ROOT, capture_output=True, text=True, check=False,
         ).stdout
         return [ln.strip() for ln in out.splitlines() if ln.strip()]
@@ -402,11 +406,27 @@ def main(argv: list[str] | None = None) -> int:
         if rel.startswith("tests/") and not rel.startswith(SEMANTIC_PREFIX):
             continue
         path = ROOT / rel
-        if not path.is_file():
+        if not args.staged and not path.is_file():
             continue
+        if args.staged:
+            try:
+                staged = subprocess.run(
+                    ["git", "show", f":{rel}"], cwd=ROOT,
+                    capture_output=True, text=True, check=False,
+                )
+            except (OSError, UnicodeError) as exc:
+                print(f"GUARD-DOMAIN-REUSE: НЕ ПЕРЕВІРЕНО — Git index {rel}: {exc}", file=sys.stderr)
+                return 2
+            if staged.returncode != 0:
+                print(f"GUARD-DOMAIN-REUSE: НЕ ПЕРЕВІРЕНО — неможливо прочитати Git index {rel}: {staged.stderr.strip()}", file=sys.stderr)
+                return 2
+            text = staged.stdout
+        else:
+            text = path.read_text(encoding="utf-8")
         checked += 1
-        text = path.read_text(encoding="utf-8")
-        known: set[str] = set()
+        # Рахуємо входження, а не лише імена: у --base друге DEFINE
+        # з тією самою назвою є новим, навіть якщо перше вже існувало.
+        known_counts: Counter[str] = Counter()
         if args.base:
             try:
                 old_text = subprocess.run(
@@ -414,16 +434,21 @@ def main(argv: list[str] | None = None) -> int:
                     capture_output=True, text=True, check=False).stdout
             except Exception:
                 old_text = ""
-            known = {n for n, _, _ in definitions_with_bodies(old_text)}
+            known_counts.update(n for n, _, _ in definitions_with_bodies(old_text))
+        seen_counts: Counter[str] = Counter()
         active_text = _mask_quotes(text)
         usage[rel] = sum(
             1 for head in re.findall(r"\(\s*([^\s()]{2,})", active_text)
             if head in ladder and head not in STRUCTURAL
         )
         for name, body, marked in definitions_with_bodies(text):
-            if args.base and name in known:
-                continue  # не чіпаємо те, що вже було до зміни
+            seen_counts[name] += 1
+            if args.base and seen_counts[name] <= known_counts[name]:
+                continue  # наявне входження; перевіряємо лише приріст
             new_defs[rel] = new_defs.get(rel, 0) + 1
+            if seen_counts[name] > 1:
+                blocked.append((rel, name, "повторне визначення в одному файлі"))
+                continue
             if name in ladder:
                 blocked.append((rel, name, "дубль наявної поверхні драбини"))
                 continue

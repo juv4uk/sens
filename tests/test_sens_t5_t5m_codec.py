@@ -58,6 +58,21 @@ class PhysicalT5CodecTests(unittest.TestCase):
                     self.assertEqual(decode_bytes(packed), [word])
                     self.assertEqual(encode_words(decode_bytes(packed)), packed)
 
+    def test_legacy_t5_encoder_rejects_w12_before_emitting_unreadable_bytes(self):
+        word = "0" * 12
+        with self.assertRaisesRegex(SensT5Error, "W1..W11"):
+            parse_words(word)
+        with self.assertRaisesRegex(SensT5Error, "W1..W11"):
+            encode_words([word])
+        with self.assertRaisesRegex(SensT5Error, "W1..W11"):
+            encode_projection(word)
+
+    def test_t5m_still_roundtrips_w12_w24_exactly(self):
+        for word in ("0" * 12, "101010101010", "1" + "0" * 22 + "1"):
+            with self.subTest(width=len(word), word=word):
+                physical = encode_t5m_projection(word)
+                self.assertEqual(decode_t5m_bytes(physical), [word])
+
     def test_malformed_separators_and_overwidth_word_have_exact_reason(self):
         def physical(trits: str) -> bytes:
             self.assertEqual(len(trits) % 5, 0)

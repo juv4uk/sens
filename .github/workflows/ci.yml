@@ -92,11 +92,12 @@ jobs:
           python3 scripts/check-sens-definitions.py
           # Поверхні звіряються з джерелами D1–24+; тут не фіксуємо межу драбини.
           python3 scripts/check-domain-ladder-identity.py --check
-          python3 scripts/check-numeric-domain-ratification.py
+          python3 scripts/check-numeric-domain-ratification.py --self-test
           python3 scripts/check_d10_owner_whole_domain_ratification.py
           # D11: тотожність усіх 512 похідних координат і негативні мутанти.
           python3 scripts/check_d11_selector_seed.py --json
           python3 -m unittest discover -s tests -p test_d11_selector_seed.py
+          python3 -m unittest discover -s tests -p test_add_d11_function.py
 
       - name: УКР-ПРОЄКЦІЯ — вчорашні анотації прогресу Lisp
         if: ${{ always() }}
@@ -327,6 +328,9 @@ jobs:
           BEFORE_SHA: ${{ github.event.before }}
         run: |
           set -euo pipefail
+          # Guard/tool-only edits must exercise the real scanner even without Lisp changes.
+          bash scripts/install-hooks.sh
+          python3 -m unittest tests/test_domain_function_reuse_rule.py -v
           manifest="$RUNNER_TEMP/changed-t5m-lisp.txt"
           if [[ -s "$manifest" ]]; then
             # Guard має перевіряти НОВІ DEFINE, а не повторно оголошувати
@@ -342,7 +346,6 @@ jobs:
               timeout 60s git fetch --no-tags --depth=1 origin "$base"
             fi
             git cat-file -e "$base^{commit}"
-            python3 -m unittest tests/test_domain_function_reuse_rule.py -v
             python3 scripts/guard-domain-function-reuse.py --paths-from "$manifest" --base "$base"
           else
             echo "немає змінених .lisp-програм — охоронець не має що перевіряти"
@@ -418,36 +421,6 @@ jobs:
             echo "::error file=zig_transport_root.zig,title=Zig ABI::REGRESSION layer=abi expected=pass actual=nonzero"
             zig_failed=1
           fi
-          # Драбина D1–D11 — конкурс пам'яті точних координат, не SENS-семантики.
-          if zig test -O ReleaseFast -lc research/zig-codecs/ladder_memory_game.zig \
-              > "$RUNNER_TEMP/zig-ladder-contest-tests.log" 2>&1; then
-            cat "$RUNNER_TEMP/zig-ladder-contest-tests.log"
-            echo "::notice title=Zig Драбина D11::PASS layer=codebook-memory semantics=NOT_TESTED"
-          else
-            cat "$RUNNER_TEMP/zig-ladder-contest-tests.log" >&2
-            echo "::error file=research/zig-codecs/ladder_memory_game.zig,title=Драбина D11::REGRESSION layer=contest expected=selector-suffix-parity actual=failed"
-            zig_failed=1
-          fi
-          # Окрема фізична швидкість пошуку/оцінювання; без вигаданого PASS мови.
-          if zig run -O ReleaseFast -lc research/zig-codecs/ladder_memory_bench.zig \
-              > "$RUNNER_TEMP/zig-ladder-contest-bench.log" 2>&1; then
-            cat "$RUNNER_TEMP/zig-ladder-contest-bench.log"
-            echo "::notice title=Zig Драбина bench::MEASURED layer=codebook-memory provenance=$(git rev-parse HEAD) semantics=NOT_TESTED"
-          else
-            cat "$RUNNER_TEMP/zig-ladder-contest-bench.log" >&2
-            echo "::error file=research/zig-codecs/ladder_memory_bench.zig,title=Драбина bench::REGRESSION layer=contest-bench expected=timings actual=failed"
-            zig_failed=1
-          fi
-          # Дослід D2: лише тритовий payload, не змішаний T5M-кадр.
-          if zig run -O ReleaseFast -lc research/zig-codecs/d2_ladder_bench.zig \
-              > "$RUNNER_TEMP/zig-d2-payload-bench.log" 2>&1; then
-            cat "$RUNNER_TEMP/zig-d2-payload-bench.log"
-            echo "::notice title=Zig D2 bench::MEASURED layer=payload-only position_map=ABSENT full_codec=NO provenance=$(git rev-parse HEAD)"
-          else
-            cat "$RUNNER_TEMP/zig-d2-payload-bench.log" >&2
-            echo "::error file=research/zig-codecs/d2_ladder_bench.zig,title=D2 payload bench::REGRESSION layer=codec-bench expected=roundtrip-and-timing actual=failed"
-            zig_failed=1
-          fi
           # Вимірюємо ТІЛЬКИ T5M transport Zig, без виконання мовних законів.
           # У Zig 0.16 — Io.Clock.awake, а не видалений std.time.Timer.
           # Фізичні позитивні/негативні контрприклади Zig не залежать від бенчмарка.
@@ -469,6 +442,95 @@ jobs:
             echo "::error file=bench_t5m.zig,title=Zig benchmark::REGRESSION layer=codec-benchmark expected=canonical-roundtrip actual=failed"
             zig_failed=1
           fi
+          # Гра пам'яті використовує чинні Lisp-таблиці та доводить повне покриття D11.
+          # Тут перевіряється тільки механіка гри; мовні закони виконуються SENS.
+          if zig test -lc research/zig-codecs/ladder_memory_game.zig \
+              > "$RUNNER_TEMP/zig-ladder-memory-game.log" 2>&1; then
+            cat "$RUNNER_TEMP/zig-ladder-memory-game.log"
+            echo "::notice title=Zig ladder memory game::PASS D11 questions=512 reproducible=YES semantics=NOT_TESTED"
+          else
+            cat "$RUNNER_TEMP/zig-ladder-memory-game.log" >&2
+            echo "::error file=research/zig-codecs/ladder_memory_game.zig,title=Zig ladder memory game::REGRESSION layer=game expected=512-question-complete-round actual=failed"
+            zig_failed=1
+          fi
+          if zig test -lc research/zig-codecs/d2_ladder_game.zig \
+              > "$RUNNER_TEMP/zig-d2-ladder-game.log" 2>&1; then
+            cat "$RUNNER_TEMP/zig-d2-ladder-game.log"
+            echo "::notice title=Zig D2 payload game::PASS scope=payload-only semantics=NOT_TESTED"
+          else
+            cat "$RUNNER_TEMP/zig-d2-ladder-game.log" >&2
+            echo "::error file=research/zig-codecs/d2_ladder_game.zig,title=Zig D2 payload game::REGRESSION layer=codec-test expected=exact-roundtrip actual=failed"
+            zig_failed=1
+          fi
+          if zig run -O ReleaseFast -lc research/zig-codecs/d2_ladder_bench.zig \
+              > "$RUNNER_TEMP/zig-d2-ladder-bench.log" 2>&1; then
+            cat "$RUNNER_TEMP/zig-d2-ladder-bench.log"
+            echo "::notice title=Zig D2 ladder A/B::MEASURED scope=payload-only position-map=ABSENT"
+          else
+            cat "$RUNNER_TEMP/zig-d2-ladder-bench.log" >&2
+            echo "::error file=research/zig-codecs/d2_ladder_bench.zig,title=Zig D2 ladder benchmark::REGRESSION layer=codec-benchmark expected=measured-parity actual=failed"
+            zig_failed=1
+          fi
+          if zig run -O ReleaseFast -lc research/zig-codecs/ladder_memory_bench.zig \
+              > "$RUNNER_TEMP/zig-ladder-memory-bench.log" 2>&1; then
+            cat "$RUNNER_TEMP/zig-ladder-memory-bench.log"
+            echo "::notice title=Zig D11 memory benchmark::MEASURED scope=inventory-lookup-and-game semantics=NOT_TESTED"
+          else
+            cat "$RUNNER_TEMP/zig-ladder-memory-bench.log" >&2
+            echo "::error file=research/zig-codecs/ladder_memory_bench.zig,title=Zig D11 memory benchmark::REGRESSION layer=game-benchmark expected=measured-parity actual=failed"
+            zig_failed=1
+          fi
+          if zig test -lc research/zig-codecs/d13_selector_game.zig \
+              > "$RUNNER_TEMP/zig-d13-selector-game.log" 2>&1; then
+            cat "$RUNNER_TEMP/zig-d13-selector-game.log"
+            echo "::notice title=Zig D13 selector research::PASS proposals=2048 opcode=UNRATIFIED semantics=NOT_TESTED"
+          else
+            cat "$RUNNER_TEMP/zig-d13-selector-game.log" >&2
+            echo "::error file=research/zig-codecs/d13_selector_game.zig,title=Zig D13 selector research::REGRESSION layer=selector-research expected=2048-unique-candidates actual=failed"
+            zig_failed=1
+          fi
+          if zig test -lc research/zig-codecs/d11_selector_contest.zig \
+              > "$RUNNER_TEMP/zig-d11-selector-tests.log" 2>&1; then
+            cat "$RUNNER_TEMP/zig-d11-selector-tests.log"
+            echo "::notice title=Zig D11 selector codec::PASS selectors=512 modes=9-bit,11-bit,raw16 semantics=NOT_TESTED"
+          else
+            cat "$RUNNER_TEMP/zig-d11-selector-tests.log" >&2
+            echo "::error file=research/zig-codecs/d11_selector_contest.zig,title=Zig D11 selector codec::REGRESSION layer=codec-test expected=exact-roundtrip actual=failed"
+            zig_failed=1
+          fi
+          # Той самий потік D11 міряється трьома поданнями; preflight перевіряє точний roundtrip.
+          # 15 чергованих зразків, p50/p90; цифри — payload+encode/decode, не SENS semantics.
+          if zig build-exe -lc -O ReleaseFast research/zig-codecs/d11_selector_contest.zig \
+              -femit-bin="$RUNNER_TEMP/sens-d11-selector-contest"; then
+            if "$RUNNER_TEMP/sens-d11-selector-contest" > "$RUNNER_TEMP/zig-d11-selector-benchmark.log" 2>&1; then
+              cat "$RUNNER_TEMP/zig-d11-selector-benchmark.log"
+              if grep -Fq 'mode=selector9 words=64 bytes=72' "$RUNNER_TEMP/zig-d11-selector-benchmark.log" &&
+                 grep -Fq 'mode=dense11 words=64 bytes=88' "$RUNNER_TEMP/zig-d11-selector-benchmark.log" &&
+                 grep -Fq 'mode=raw16 words=64 bytes=128' "$RUNNER_TEMP/zig-d11-selector-benchmark.log" &&
+                 grep -Fq 'mode=selector9 words=512 bytes=576' "$RUNNER_TEMP/zig-d11-selector-benchmark.log" &&
+                 grep -Fq 'mode=dense11 words=512 bytes=704' "$RUNNER_TEMP/zig-d11-selector-benchmark.log" &&
+                 grep -Fq 'mode=raw16 words=512 bytes=1024' "$RUNNER_TEMP/zig-d11-selector-benchmark.log" &&
+                 [[ "$(grep -c '^D11_CONTEST mode=' "$RUNNER_TEMP/zig-d11-selector-benchmark.log")" -eq 6 ]] &&
+                 grep -Fq 'samples=15' "$RUNNER_TEMP/zig-d11-selector-benchmark.log" &&
+                 grep -Fq 'p50_ns_per_roundtrip=' "$RUNNER_TEMP/zig-d11-selector-benchmark.log" &&
+                 grep -Fq 'p90_ns_per_roundtrip=' "$RUNNER_TEMP/zig-d11-selector-benchmark.log" &&
+                 grep -Fq 'D11_CONTEST_METHOD paired=YES alternating=YES samples=15' "$RUNNER_TEMP/zig-d11-selector-benchmark.log" &&
+                 [[ "$(grep -c 'roundtrip=EXACT paired=YES' "$RUNNER_TEMP/zig-d11-selector-benchmark.log")" -eq 6 ]]; then
+                cat "$RUNNER_TEMP/zig-d11-selector-benchmark.log" >> "$GITHUB_STEP_SUMMARY"
+                echo "::notice title=Zig D11 codec benchmark::MEASURED sizes=64,512 modes=selector9,dense11,raw16 samples=15 exact_parity=YES"
+              else
+                echo "::error title=Zig D11 codec benchmark::REGRESSION layer=benchmark-contract expected=6-exact-paired-p50-p90-rows actual=missing-or-invalid"
+                zig_failed=1
+              fi
+            else
+              cat "$RUNNER_TEMP/zig-d11-selector-benchmark.log" >&2
+              echo "::error title=Zig D11 codec benchmark::REGRESSION layer=benchmark-run expected=success actual=nonzero"
+              zig_failed=1
+            fi
+          else
+            echo "::error title=Zig D11 codec benchmark::REGRESSION layer=benchmark-build expected=success actual=nonzero"
+            zig_failed=1
+          fi
           # Драбина кодеків: D12 dense проти BE16 на тих самих 4096 словах.
           # Це тільки payload-механіка Zig; SENS-значення і D12-допуск не заявляємо.
           if zig test -O ReleaseFast -lc research/zig-codecs/d12_dense_experiment.zig \
@@ -487,6 +549,71 @@ jobs:
           else
             cat "$RUNNER_TEMP/zig-d12-dense-bench.log" >&2
             echo "::error file=bench_d12_dense.zig,title=Zig D12 A/B::REGRESSION layer=codec-benchmark expected=preflight-and-measurement actual=failed"
+            zig_failed=1
+          fi
+          # D13 — лише дослідна фізична щільність. Чинна математична сім'я: D12,D24,D48…
+          # Сім неканонічних хвостів мають відмовляти без часткових вихідних слів.
+          if zig test -O ReleaseFast -lc research/zig-codecs/d13_dense_experiment.zig \
+              > "$RUNNER_TEMP/zig-d13-research-tests.log" 2>&1; then
+            cat "$RUNNER_TEMP/zig-d13-research-tests.log"
+            echo "::notice title=Zig D13 research::PASS layer=mechanism semantics=NOT_TESTED domain=NOT_RATIFIED"
+          else
+            cat "$RUNNER_TEMP/zig-d13-research-tests.log" >&2
+            echo "::error file=research/zig-codecs/d13_dense_experiment.zig,title=Zig D13 research::REGRESSION layer=codec-test expected=8192-roundtrips-and-seven-fail-closed-tails actual=failed"
+            zig_failed=1
+          fi
+          if zig run -O ReleaseFast -lc research/zig-codecs/d13_dense_experiment.zig \
+              > "$RUNNER_TEMP/zig-d13-research-bench.log" 2>&1; then
+            cat "$RUNNER_TEMP/zig-d13-research-bench.log"
+            if grep -Fq 'mode=dense13 words=64 bytes=104' "$RUNNER_TEMP/zig-d13-research-bench.log" &&
+               grep -Fq 'mode=raw16 words=64 bytes=128' "$RUNNER_TEMP/zig-d13-research-bench.log" &&
+               grep -Fq 'mode=dense13 words=512 bytes=832' "$RUNNER_TEMP/zig-d13-research-bench.log" &&
+               grep -Fq 'mode=raw16 words=512 bytes=1024' "$RUNNER_TEMP/zig-d13-research-bench.log" &&
+               [[ "$(grep -c '^D13_EXPERIMENT mode=' "$RUNNER_TEMP/zig-d13-research-bench.log")" -eq 4 ]] &&
+               [[ "$(grep -c 'roundtrip=EXACT frame=EXCLUDED semantics=NOT_TESTED' "$RUNNER_TEMP/zig-d13-research-bench.log")" -eq 4 ]] &&
+               grep -Fq 'D13_EXPERIMENT_METHOD width=13' "$RUNNER_TEMP/zig-d13-research-bench.log"; then
+              cat "$RUNNER_TEMP/zig-d13-research-bench.log" >> "$GITHUB_STEP_SUMMARY"
+              echo "::notice title=Zig D13 research benchmark::MEASURED provenance=$(git rev-parse HEAD) width=13 semantic_domain=NOT_RATIFIED"
+            else
+              echo "::error title=Zig D13 research benchmark::REGRESSION layer=benchmark-contract expected=4-exact-rows-and-method actual=missing-or-invalid"
+              zig_failed=1
+            fi
+          else
+            cat "$RUNNER_TEMP/zig-d13-research-bench.log" >&2
+            echo "::error title=Zig D13 research benchmark::REGRESSION layer=benchmark-run expected=success actual=nonzero"
+            zig_failed=1
+          fi
+          # Д13-гра: лише похідні D11-селектори, без семантичної ратифікації.
+          # Негативні кадри і всі 2048 точних координат перевіряє сам Zig.
+          if zig test -O ReleaseFast -lc research/zig-codecs/d13_selector_contest.zig \
+              > "$RUNNER_TEMP/zig-d13-selector-tests.log" 2>&1; then
+            cat "$RUNNER_TEMP/zig-d13-selector-tests.log"
+            echo "::notice title=Zig D13 selector research::PASS layer=mechanism parents=512 derived=2048 semantics=NOT_TESTED"
+          else
+            cat "$RUNNER_TEMP/zig-d13-selector-tests.log" >&2
+            echo "::error file=research/zig-codecs/d13_selector_contest.zig,title=Zig D13 selectors::REGRESSION layer=codec-test input=D11-parent-table expected=2048-exact-derived-coordinates-and-negative-tests actual=failed"
+            zig_failed=1
+          fi
+          if zig run -O ReleaseFast -lc research/zig-codecs/d13_selector_contest.zig \
+              > "$RUNNER_TEMP/zig-d13-selector-bench.log" 2>&1; then
+            cat "$RUNNER_TEMP/zig-d13-selector-bench.log"
+            if grep -Fq 'mode=selector11 words=64 bytes=88' "$RUNNER_TEMP/zig-d13-selector-bench.log" &&
+               grep -Fq 'mode=dense13 words=64 bytes=104' "$RUNNER_TEMP/zig-d13-selector-bench.log" &&
+               grep -Fq 'mode=raw16 words=64 bytes=128' "$RUNNER_TEMP/zig-d13-selector-bench.log" &&
+               grep -Fq 'mode=selector11 words=2048 bytes=2816' "$RUNNER_TEMP/zig-d13-selector-bench.log" &&
+               grep -Fq 'mode=dense13 words=2048 bytes=3328' "$RUNNER_TEMP/zig-d13-selector-bench.log" &&
+               grep -Fq 'mode=raw16 words=2048 bytes=4096' "$RUNNER_TEMP/zig-d13-selector-bench.log" &&
+               [[ "$(grep -c '^D13_CONTEST mode=' "$RUNNER_TEMP/zig-d13-selector-bench.log")" -eq 6 ]] &&
+               grep -Fq 'D13_CONTEST_METHOD paired=YES alternating=YES samples=15' "$RUNNER_TEMP/zig-d13-selector-bench.log"; then
+              cat "$RUNNER_TEMP/zig-d13-selector-bench.log" >> "$GITHUB_STEP_SUMMARY"
+              echo "::notice title=Zig D13 selector benchmark::MEASURED provenance=$(git rev-parse HEAD) frame=EXCLUDED semantics=NOT_TESTED"
+            else
+              echo "::error title=Zig D13 selector benchmark::REGRESSION layer=benchmark-contract expected=six-exact-rows-and-method actual=missing-or-invalid"
+              zig_failed=1
+            fi
+          else
+            cat "$RUNNER_TEMP/zig-d13-selector-bench.log" >&2
+            echo "::error title=Zig D13 selector benchmark::REGRESSION layer=benchmark-run expected=success actual=nonzero"
             zig_failed=1
           fi
           # Дослідний кодек DWC1 — окремий від production Zig/T5M.

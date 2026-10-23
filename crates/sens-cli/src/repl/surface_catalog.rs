@@ -516,13 +516,13 @@ mod tests {
                 "missing D{width} rows"
             );
         }
-        assert_eq!(
-            entries
-                .iter()
-                .filter(|entry| entry.identity.starts_with("D11:"))
-                .count(),
-            43,
-            "D11 remains the ratified sparse 43-row test vocabulary"
+        let d11_count = entries
+            .iter()
+            .filter(|entry| entry.identity.starts_with("D11:"))
+            .count();
+        assert!(
+            d11_count >= 512,
+            "test_id=D11_REPL_TABLE_COUNT layer=projection input=D11 expected=at-least-512-derived actual={d11_count}"
         );
         assert_eq!(find_entries(entries, "D3:010")[0].identity, "D3:010");
         assert!(
@@ -610,7 +610,7 @@ mod tests {
     fn core_catalog_lists_domain_qualified_identities() {
         let output = render_names("core").expect("core catalog");
         assert!(output.contains("D1:0"));
-        assert!(output.contains("D11:00000000000"));
+        assert!(output.contains("D11:01100000000"));
         assert!(!output.contains("byte semantic"));
     }
 
@@ -626,14 +626,14 @@ mod tests {
 
     #[cfg(feature = "zig-transport")]
     #[test]
-    fn repl_surface_catalog_projects_the_ratified_d11_table_row() {
-        let output = render_name("укр", "прочитати-вміст-файла").expect("D11 projection");
+    fn repl_surface_catalog_projects_the_current_derived_d11_table_row() {
+        let output = render_name("укр", "D11:01100000000").expect("D11 projection");
         assert!(
-            output.starts_with("identity: D11:00000000000\n"),
-            "{output}"
+            output.starts_with("identity: D11:01100000000\n"),
+            "test_id=D11_REPL_DERIVED_PROJECTION layer=projection input=D11:01100000000 expected=current-derived-selector actual={output}"
         );
-        assert!(output.contains("UKR: прочитати-вміст-файла"), "{output}");
-        assert!(output.contains("EN: read-file"), "{output}");
+        assert!(output.contains("LISP: CDAAAAAAAAR"), "{output}");
+        assert!(output.contains("EN: cdaaaaaaaar"), "{output}");
     }
 
     #[cfg(feature = "zig-transport")]
