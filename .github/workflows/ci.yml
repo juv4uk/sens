@@ -299,8 +299,8 @@ jobs:
 
 
       # Незалежний від загального corpus: сторонній RED не приховує доказ
-      # цих чотирьох мовних законів. Кодек і Zig перевіряють лише носій.
-      - name: Lisp → Zig/T5M → SENS — чотири нативні мовні вердикти
+      # мовних законів. Кодек і Zig перевіряють лише носій.
+      - name: Lisp → Zig/T5M → SENS — нативні позитивні й негативні мовні закони
         if: ${{ always() && steps.changed-t5m-lisp.outputs.has_files == 'true' }}
         shell: bash
         timeout-minutes: 8
