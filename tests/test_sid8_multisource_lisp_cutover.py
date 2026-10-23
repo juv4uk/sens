@@ -167,7 +167,7 @@ class MultisourceDomainCutover(unittest.TestCase):
             if {"domains", "generated", "staged-out"} & set(rel.parts):
                 continue  # Таблиці й архіви — дані, а не виконавчі голови.
             source = path.read_text(encoding="utf-8")
-            if not re.search(r"(?m)^\\s*\\(визначити\\s+", source):
+            if not re.search(r"(?m)^\s*\(визначити\s+", source):
                 continue  # Декларативна таблиця, без виконуваних DEFINE.
             scanned += 1
             with self.subTest(path=str(rel)):
