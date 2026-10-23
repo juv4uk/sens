@@ -53,6 +53,58 @@ class DomainFunctionReuseRule(unittest.TestCase):
         self.assertIn("НЕ ПЕРЕВІРЕНО", output.getvalue())
         self.assertIn(f"щонайменше {guard.MINIMUM_RATIFIED_SURFACES}", output.getvalue())
 
+    def test_staged_guard_reads_git_index_not_dirty_worktree(self) -> None:
+        # Механіка pre-commit: staged дубль не можна приховати чистим worktree.
+        spec = importlib.util.spec_from_file_location("guard_staged_index_test", GUARD)
+        self.assertIsNotNone(spec)
+        self.assertIsNotNone(spec.loader)
+        guard = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(guard)
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            (root / "lib").mkdir()
+            subprocess.run(["git", "init", "-q"], cwd=root, check=True)
+            probe = root / "lib" / "staged.lisp"
+            probe.write_text("(визначити сполучити (функція (х у) х))\n", encoding="utf-8")
+            subprocess.run(["git", "add", "lib/staged.lisp"], cwd=root, check=True)
+            probe.write_text("(атом? (як-є ()))\n", encoding="utf-8")
+            output = StringIO()
+            with mock.patch.object(guard, "ROOT", root):
+                with mock.patch.object(guard, "MINIMUM_RATIFIED_SURFACES", 1):
+                    with mock.patch.object(guard, "ladder_names", return_value={"сполучити"}):
+                        with mock.patch.object(guard, "project_definition_sites", return_value={}):
+                            with redirect_stdout(output):
+                                status = guard.main(["--staged"])
+            self.assertEqual(status, 1, output.getvalue())
+            self.assertIn("BLOCKED", output.getvalue())
+
+    def test_staged_guard_handles_control_characters_in_git_paths(self) -> None:
+        # Git -z має зберігати справжнє ім'я з TAB, а не quoted-path.
+        spec = importlib.util.spec_from_file_location("guard_git_nul_paths_test", GUARD)
+        self.assertIsNotNone(spec)
+        self.assertIsNotNone(spec.loader)
+        guard = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(guard)
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            (root / "lib").mkdir()
+            subprocess.run(["git", "init", "-q"], cwd=root, check=True)
+            rel = "lib/staged\tname.lisp"
+            (root / rel).write_text(
+                "(визначити сполучити (функція (х у) х))\n", encoding="utf-8"
+            )
+            subprocess.run(["git", "add", "--", rel], cwd=root, check=True)
+            output = StringIO()
+            with mock.patch.object(guard, "ROOT", root):
+                with mock.patch.object(guard, "MINIMUM_RATIFIED_SURFACES", 1):
+                    with mock.patch.object(guard, "ladder_names", return_value={"сполучити"}):
+                        with mock.patch.object(guard, "project_definition_sites", return_value={}):
+                            with redirect_stdout(output):
+                                self.assertEqual(guard.changed_files(mock.Mock(file=None, paths_from=None, staged=True)), [rel])
+                                status = guard.main(["--staged"])
+            self.assertEqual(status, 1, output.getvalue())
+            self.assertIn("BLOCKED", output.getvalue())
+
     def test_search_self_test_is_green(self) -> None:
         result = run(SEARCH, "--self-test")
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)

@@ -45,6 +45,7 @@ jobs:
           set -euo pipefail
           python3 scripts/ci_one_focused_workflow.py
           python3 scripts/check_ci_bash_blocks.py
+          python3 -m unittest discover -s tests -p test_domain_function_reuse_rule.py -k staged_guard -v
 
       - name: Заборона нових сирих кодів у змінених Lisp-файлах
         shell: bash
