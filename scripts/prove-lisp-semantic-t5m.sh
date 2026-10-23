@@ -133,6 +133,9 @@ run_case run_law d3-demorgan-mutant tests/semantic/d3-demorgan-truth-table-mutan
 run_case run_law d3-quote-short-circuit-positive tests/semantic/d3-cond-quote-lazy-law.lisp 1
 run_case run_law d3-quote-short-circuit-mutant tests/semantic/d3-cond-quote-lazy-mutant.lisp 0
 run_case run_law d4-late-binding-positive tests/semantic/d4-late-definition-binding-law.lisp 1
+# D4 рекурсивна правильність списків: позитив та навмисне порушення.
+run_case run_law d4-proper-list-positive tests/semantic/d4-proper-list-recursion-law.lisp 1
+run_case run_law d4-proper-list-mutant tests/semantic/d4-proper-list-recursion-mutant.lisp 0
 run_case run_law d4-escaped-closure-positive tests/semantic/d4-escaped-lexical-closure-law.lisp 1
 run_case run_law d4-escaped-closure-mutant tests/semantic/d4-escaped-lexical-closure-mutant.lisp 0
 # Фізичні закони Д3 не залежать від недопущеного виклику D6 LENGTH.
@@ -152,4 +155,4 @@ if (( failed > 0 )); then
   echo "::error title=SENS Lisp/T5M::REGRESSION checked=$checked passed=$passed failed=$failed ids=${failed_ids[*]}" >&2
   exit 1
 fi
-echo "SENS_LISP_T5M_LAWS_PASS count=$checked positive=9 mutants=7 physical=ZIG_T5M"
+echo "SENS_LISP_T5M_LAWS_PASS count=$checked positive=10 mutants=8 physical=ZIG_T5M"
