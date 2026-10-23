@@ -177,7 +177,7 @@ class BatchSourceTests(unittest.TestCase):
         self.assertEqual(owner["occupancy"], 128)
         self.assertEqual(entry["git_blob_sha1"], digest)
         self.assertEqual(entry["previous_pinned_git_blob_sha1"],
-                         "c51ec57ca40ddf585a22ca8cbddab5efb4f11028")
+                         "9c8e3861208384250724688f688d1daba90e2c82")
         self.assertIn(b"(status . owner-ratified)", payload)
         self.assertIn(b"knowledge/d7-keyboard-v2-ratified.json", payload)
 
