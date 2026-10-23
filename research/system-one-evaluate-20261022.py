@@ -326,9 +326,6 @@ def select_threshold(
         raise EvaluationError("min accepted має бути додатним цілим числом")
     if not rows:
         raise EvaluationError("validation набір порожній")
-    if min_accepted > len(rows):
-        raise EvaluationError("min accepted більший за кількість validation-прикладів")
-
     risk_limit = Fraction(str(max_selective_risk))
     observed: list[tuple[Fraction, bool, str]] = []
     seen_ids: set[str] = set()
@@ -393,23 +390,25 @@ def select_threshold(
             }
         )
 
-    if not eligible_candidates:
-        raise EvaluationError("внутрішня помилка: немає кандидатів після мінімуму прийнятих")
-    # Поправка Бонферроні: пошук кращого з кількох порогів не має підвищувати
-    # сімейний ризик хибної гарантії понад заданий confidence_level.
-    per_candidate_confidence_level = 1.0 - (
-        (1.0 - confidence_level) / len(eligible_candidates)
-    )
-    for candidate in eligible_candidates:
-        risk_upper = clopper_pearson_upper_bound(
-            candidate["errors"],
-            candidate["accepted"],
-            per_candidate_confidence_level,
+    # Якщо мінімум прийнятих більший за вибірку, жоден поріг не підходить:
+    # це безпечне відкладення, а не помилка, яка зриває решту звіту.
+    per_candidate_confidence_level = None
+    if eligible_candidates:
+        # Поправка Бонферроні: пошук кращого з кількох порогів не має підвищувати
+        # сімейний ризик хибної гарантії понад заданий confidence_level.
+        per_candidate_confidence_level = 1.0 - (
+            (1.0 - confidence_level) / len(eligible_candidates)
         )
-        candidate["risk_upper_bound"] = risk_upper
-        candidate["per_candidate_confidence_level"] = per_candidate_confidence_level
-        if risk_upper <= float(risk_limit):
-            candidates.append(candidate)
+        for candidate in eligible_candidates:
+            risk_upper = clopper_pearson_upper_bound(
+                candidate["errors"],
+                candidate["accepted"],
+                per_candidate_confidence_level,
+            )
+            candidate["risk_upper_bound"] = risk_upper
+            candidate["per_candidate_confidence_level"] = per_candidate_confidence_level
+            if risk_upper <= float(risk_limit):
+                candidates.append(candidate)
 
     common = {
         "selected_for": "validation",
@@ -431,6 +430,11 @@ def select_threshold(
         "test_used": False,
     }
     if not candidates:
+        reason = (
+            "validation count is below minimum accepted count"
+            if not eligible_candidates
+            else "no candidate meets both max risk and minimum accepted count"
+        )
         return {
             **common,
             "status": "no-safe-threshold",
@@ -438,8 +442,9 @@ def select_threshold(
             "accepted": 0,
             "errors": 0,
             "achieved_selective_risk": None,
+            "selective_risk_upper_confidence_bound": None,
             "coverage": {"numerator": 0, "denominator": len(rows)},
-            "reason": "no candidate meets both max risk and minimum accepted count",
+            "reason": reason,
         }
 
     best = max(
