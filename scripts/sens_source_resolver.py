@@ -89,15 +89,32 @@ def load_current_foundation(path: Path) -> tuple[
 
     by_label: dict[str, CurrentIdentity] = {}
     by_word: dict[tuple[int, str], CurrentIdentity] = {}
-    for domain in ("D3", "D4", "D5", "D6"):
+    ambiguous_labels: set[str] = set()
+    # D7 carries keyboard/text DATA, never callable heads. D1/D2 are
+    # predicate/structure, not interchangeable with function identities.
+    # Older pinned foundations may lack D8–D10; the current full foundation
+    # includes them and is selected by the command-line inventory.
+    for domain in ("D3", "D4", "D5", "D6", "D8", "D9", "D10"):
+        if domain not in data["domains"]:
+            continue
         desc = data["domains"][domain]
         width = int(desc["width"])
+        if width != int(domain[1:]):
+            raise ValueError(f"invalid exact domain width: {domain}")
         for bits, label in desc["residents"].items():
+            if len(bits) != width or set(bits) - {"0", "1"}:
+                raise ValueError(f"invalid exact domain word: {domain}:{bits}")
             identity = CurrentIdentity(domain, width, bits, str(label))
             key = str(label).upper()
-            if key in by_label and by_label[key] != identity:
-                raise ValueError(f"duplicate current label: {key}")
-            by_label[key] = identity
+            # Same historical spelling can occur in distinct domains
+            # (e.g. D6 MAP != D8 MAP). Never pick one by insertion order.
+            if key not in ambiguous_labels:
+                previous = by_label.get(key)
+                if previous is not None and previous != identity:
+                    by_label.pop(key)
+                    ambiguous_labels.add(key)
+                else:
+                    by_label[key] = identity
             by_word[(width, bits)] = identity
     return by_label, by_word
 
