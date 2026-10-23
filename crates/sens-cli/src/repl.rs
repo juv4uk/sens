@@ -322,7 +322,15 @@ fn append_t5m_expression_context(
         }
         ExprKind::String(text) => {
             if quoted_data {
-                let text7 = sens::encode_text7(text, layout)
+                // Як і цитовані символи, ASCII-рядки є D7-даними EN,
+                // навіть коли виклична поверхня вибрана українською.
+                // Інакше "sha256:abc" хибно шукатиме латинське 's' у Uk.
+                let text_layout = if text.is_ascii() {
+                    sens::Text7Layout::En
+                } else {
+                    layout
+                };
+                let text7 = sens::encode_text7(text, text_layout)
                     .map_err(|error| format!("T5M D7 text projection: {error}"))?;
                 words.push(control(0b10)?);
                 words.push(ExactDomainWord::identity(t5m_domain_identity(3, 0b001)?));
@@ -3042,6 +3050,26 @@ mod tests {
             ExactDomainWord::Identity(identity) if identity.width() == 3 && identity.packed_bits() == 0b001)));
         assert!(actual.iter().any(|word| matches!(word,
             ExactDomainWord::Identity(identity) if identity.width() == 7)));
+
+        // Протокольні ASCII-рядки цитуються як дані EN, а не
+        // примусово декодуються українським D7 keyboard/v2.
+        let ascii_source = sens::parse_mixed_exact_domain("(як-є \"sha256:abc\")")
+            .expect("quoted ASCII string source");
+        actual.clear();
+        append_t5m_expression(&ascii_source[0], sens::Text7Layout::Uk, &mut actual, 0)
+            .expect("ASCII quoted string has a valid EN Text7 path");
+        let expected = sens::encode_text7("sha256:abc", sens::Text7Layout::En)
+            .expect("ASCII protocol glyphs are ratified in EN Text7");
+        let restored_cells = actual
+            .iter()
+            .filter_map(|word| match word {
+                ExactDomainWord::Identity(identity) if identity.width() == 7 => {
+                    Some(identity.packed_bits() as u8)
+                }
+                _ => None,
+            })
+            .collect::<Vec<_>>();
+        assert_eq!(restored_cells, expected.cells());
 
         let executable =
             sens::parse_mixed_exact_domain("\"аб\"").expect("executable Ukrainian string source");
