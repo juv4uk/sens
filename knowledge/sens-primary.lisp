@@ -44,20 +44,20 @@
     (D10 owner-ratified-whole-domain))
 
   (axioms
-    (1 (sens-is-not text string quoted-literal decimal-semantic-id
+    (аксіома 1 (sens-is-not text string quoted-literal decimal-semantic-id
                     english-name ukrainian-name sanskrit-name host-opcode))
-    (2 (sens-is-not compiled-executable object-file fasl bytecode-artifact))
-    (3 (semantic-width not-equal host-container-width))
-    (4 (carrier may-widen-storage without-changing-identity))
-    (5 (human-names are projections generated-from-binary-authority))
-    (6 (backends rust c common-lisp prolog datalog clips fpga wasm
+    (аксіома 2 (sens-is-not compiled-executable object-file fasl bytecode-artifact))
+    (аксіома 3 (semantic-width not-equal host-container-width))
+    (аксіома 4 (carrier may-widen-storage without-changing-identity))
+    (аксіома 5 (human-names are projections generated-from-binary-authority))
+    (аксіома 6 (backends rust c common-lisp prolog datalog clips fpga wasm
          are witnesses not meaning-sources))
-    (7 (legacy eight-bit-flat-ontology
+    (аксіома 7 (legacy eight-bit-flat-ontology
          compatibility-provenance-only not-universal-identity))
-    (8 (packed-transport preserves exact-width-sequence
+    (аксіома 8 (packed-transport preserves exact-width-sequence
          without byte-padding-as-semantics))
-    (9 (no parallel canonical ідентичність beside exact-domain-bits))
-    (10 (conflict historical-lisp-vs-sens-clarity -> sens-wins
+    (аксіома 9 (no parallel canonical ідентичність beside exact-domain-bits))
+    (аксіома 10 (conflict historical-lisp-vs-sens-clarity -> sens-wins
           compatibility-built-on-top)))
 
   (source
