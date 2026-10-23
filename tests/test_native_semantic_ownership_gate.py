@@ -103,6 +103,29 @@ class LanguageOwnershipRouting(unittest.TestCase):
         self.assertTrue(any("SENS_LAW_NOT_REGISTERED" in error for error in failures))
         self.assertTrue(any("SENS_LAW_MUTANT_NOT_ROUTED" in error for error in failures))
 
+    def test_braced_bash_bundle_names_require_live_native_invocation(self):
+        positive = "tests/semantic/language-law-braced.lisp"
+        mutant = "tests/semantic/language-mutant-braced.lisp"
+        runner = RUNNER + (
+            f'cat -- "{positive}" > "${{positive_bundle}}"\n'
+            f'cat -- "{mutant}" > "${{mutant_bundle}}"\n'
+            'run_case run_law braced-positive "${positive_bundle}" 1\n'
+            'run_case run_law braced-mutant "${mutant_bundle}" 0\n'
+        )
+        self.assertEqual(
+            self.audit([positive, mutant], runner=runner,
+                       files=[positive, mutant]),
+            [],
+        )
+        unused = runner.replace(
+            'run_case run_law braced-mutant "${mutant_bundle}" 0',
+            'echo "${mutant_bundle}"',
+        )
+        errors = self.audit([mutant], runner=unused,
+                            files=[positive, mutant])
+        self.assertTrue(any("SENS_LAW_NOT_REGISTERED" in error
+                            for error in errors))
+
     def test_echo_and_unused_cat_do_not_forge_native_execution(self):
         runner = RUNNER + (
             f"echo {'tests/semantic/hidden-law.lisp'}\n"

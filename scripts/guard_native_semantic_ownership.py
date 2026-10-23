@@ -48,11 +48,15 @@ def declared_sources(runner: str) -> set[str]:
         if not re.match(r"^cat(?:\s+--)?\s+", line):
             continue
         sources = SEMANTIC_PATH.findall(line)
-        destination = re.search(r">\s*[\"']?\$([A-Za-z_][A-Za-z_0-9]*)", line)
+        destination = re.search(
+            r">\s*[\"\']?\$(?:\{([A-Za-z_][A-Za-z_0-9]*)\}|([A-Za-z_][A-Za-z_0-9]*))",
+            line,
+        )
         if destination:
-            name = destination.group(1)
-            if any(re.search(r"\$" + re.escape(name) + r"\b", call)
-                   for call in invocations):
+            name = destination.group(1) or destination.group(2)
+            reference = (r"\$(?:\{" + re.escape(name) + r"\}|"
+                         + re.escape(name) + r"\b)")
+            if any(re.search(reference, call) for call in invocations):
                 declared.update(sources)
     return declared
 
