@@ -43,10 +43,10 @@ class УкраїнськийАпострофПриМіграції(unittest.Test
 
         migrated = scanner.apply_edits(source, edits)
         self.assertIn("(додати ім'я 1)", migrated)
-        self.assertIn("\"(00001100 ім'я)\"", migrated)
+        self.assertIn("(як-є (00001100 ім'я))", migrated)
         self.assertIn("'(00001100 2 3)", migrated)
         self.assertIn("; (00001100 7 8)", migrated)
-        self.assertIn('"(00001100 ім\\'я)"', migrated)
+        self.assertIn("\"(00001100 ім'я)\"", migrated)
         self.assertEqual(migrated.count("(додати"), 1)
 
     def test_окремий_апостроф_залишається_цитуванням(self):
