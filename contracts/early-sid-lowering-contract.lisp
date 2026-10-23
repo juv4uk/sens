@@ -1,30 +1,33 @@
-; #1115 — історичний контракт раннього зниження SID засобами Lisp.
-;
-; Людське написання розв'язується до межі зовнішнього виконавця.
-; Виконавець отримує тотожність, аргументи та переносимий контракт,
-; але не людську назву мовної проєкції.
-;
-; Це запис контракту, а не нова семантична тотожність.
+; #1115 — чинний контракт раннього зведення українського коду СЕНС.
+; Історичне ім'я файла лишається provenance і сумісною адресою.
+; Вісім бітів старого SID8/Sens8 не визначають домен і не дають виклику.
+; Ратифіковані `lib/domains/d1.lisp` ... `d10.lisp` володіють
+; (домен, точне бітове слово), а колонка «укр» є людською проєкцією.
+; Нижній механізм отримує код і аргументи, не вибирає семантику.
+; Це контракт на дані; не додаткова таблиця тотожностей та не evaluator.
 
 (early-sid-lowering-contract-1
   ((resolution
      (owner sens)
-     (source canonical-semantic-registry)
-     (input surface-name)
-     (output exact-eight-bit-sid)
-     (peer-surfaces-same-sid yes))
+     (source ratified-domain-tables)
+     (input full-ukr-projection)
+     (output exact-domain-and-bits)
+     (peer-surfaces-same-identity only-when-unambiguous))
    (backend-entry
-     (required-fields (sid arguments contract))
+     (required-fields (доменний-код аргументи договір))
      (surface-name forbidden)
+     (historical-sid8-or-sens8 forbidden)
      (native-operator-name forbidden)
-     (sid-reinterpretation forbidden))
+     (domain-reinterpretation forbidden))
    (data-separation
      (quoted-symbol-remains-data yes)
      (string-remains-data yes))
    (failure
      (unadmitted-surface rejected)
-     (unadmitted-sid rejected)
+     (ambiguous-projection rejected)
+     (unadmitted-domain-mechanism rejected)
      (backend-surface-routing rejected))
    (round-trip
-     (sid-preserved yes)
+     (domain-preserved yes)
+     (exact-bits-preserved yes)
      (leading-zeroes-preserved yes))))
