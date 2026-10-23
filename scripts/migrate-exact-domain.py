@@ -15,6 +15,9 @@ import operator
 
 ROOT = Path(__file__).resolve().parents[1]
 WORD8 = re.compile(r"[01]{8}\Z")
+# Явні історичні SID8/Sens8-голови не є іменами сучасного D8.
+# Лише доведений legacy_heads надає їм чинну укр-проєкцію.
+LEGACY_W8_HEAD = re.compile(r"(?:(?:sid8|sens8):)?([01]{8})\Z", re.IGNORECASE)
 FIELD = re.compile(r'\((ук|укр|san|en|LISP|sym)\s+("(?:\\.|[^"\\])*"|\(\)|[^()\s]+)\)')
 SAFE_OLD = {
     ("D3", "QUOTE"), ("D3", "ATOM"), ("D3", "EQ"),
@@ -496,13 +499,16 @@ def plan(source: str, surfaces, *, legacy_heads=None, unresolved=None):
         if frame and frame["first"]:
             frame["first"] = False
             if not frame["quoted"] and not pending_quote:
-                if WORD8.fullmatch(token):
+                legacy_match = LEGACY_W8_HEAD.fullmatch(token)
+                if legacy_match:
+                    # sid8:/sens8: — саме історичні слова, не сучасний D8.
+                    historical_bits = legacy_match.group(1)
                     if legacy_heads is None:
                         raise ValueError(
-                            "UNQUALIFIED_W8_HEAD: 8 біт — не автоматично D8; "
+                            "UNQUALIFIED_W8_HEAD: SID8/Sens8 — не сучасний D8; "
                             "потрібне історичне походження"
                         )
-                    identity = legacy_heads.get(token)
+                    identity = legacy_heads.get(historical_bits)
                     if identity is not None:
                         edits.append(Edit(start, i, token, identity))
                         if identity.domain == "D3" and identity.bits == "001":
