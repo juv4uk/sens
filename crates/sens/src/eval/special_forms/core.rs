@@ -324,6 +324,12 @@ pub(crate) fn cons_values(
             span,
         ));
     }
+    // Єдина точка алокації cons. За увімкненого перемикача арени комірка
+    // народжується в арені, а значення читається назад крізь арену; інакше —
+    // незмінне подання `Value::Pair(Rc<PairNode>)`.
+    if environment.arena_cons_enabled() {
+        return Ok(environment.arena_cons(head, tail));
+    }
     Ok(Value::Pair(std::rc::Rc::new(PairNode { head, tail })))
 }
 

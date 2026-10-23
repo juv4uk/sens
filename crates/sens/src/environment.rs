@@ -1,3 +1,4 @@
+use crate::arena::{Arena, CellRef, Edge};
 use crate::{DomainIdentity, Value};
 use std::{
     cell::RefCell,
@@ -117,6 +118,18 @@ struct SessionState {
     selected_core_profile: Option<CoreProfile>,
     cons_limit: Option<usize>,
     cons_count: usize,
+    /// Опт-ін перемикач арени для `cons`. Коли ввімкнено, єдина точка
+    /// алокації `cons_values` виділяє комірку в `arena` і читає значення
+    /// назад крізь арену. Вимкнено — подання `Value::Pair(Rc<PairNode>)`
+    /// незмінне, як і вся решта виконавця.
+    arena_enabled: bool,
+    /// Арена комірок, що обслуговує шов `cons_values` за увімкненого
+    /// перемикача. Порожня, доки перемикач вимкнено.
+    arena: Arena,
+    /// Відповідність «адреса `Rc<PairNode>` → дескриптор комірки» для
+    /// значень, відновлених із арени. Дає змогу зшивати ребра-`Cell` між
+    /// комірками, не заводячи окремого подання арени в самому `Value`.
+    arena_handles: HashMap<usize, CellRef>,
     numeric_bit_limit: Option<usize>,
     /// Exact program-name policy. `None` = unrestricted, `Some([])` = deny all.
     process_allowlist: Option<Vec<String>>,
@@ -245,6 +258,77 @@ impl Environment {
         }
         limits.cons_count += 1;
         Ok(())
+    }
+
+    // ── Арена як BACKING-STORE для `cons` (єдина точка — `cons_values`) ────
+
+    /// Опт-ін: зробити арену BACKING-STORE для `cons`. Без цього виклику
+    /// єдина точка алокації `cons_values` лишається на `Rc::new(PairNode)`.
+    /// Перемикач живе в спільному стані сесії, тож сигнатури виконавця
+    /// не змінюються.
+    pub fn with_arena_cons(self) -> Self {
+        self.2.borrow_mut().arena_enabled = true;
+        self
+    }
+
+    /// Чи ввімкнено арену для `cons` у цій сесії.
+    pub(crate) fn arena_cons_enabled(&self) -> bool {
+        self.2.borrow().arena_enabled
+    }
+
+    /// Шов алокації `cons`: виділити комірку в арені й **прочитати значення
+    /// назад крізь арену**. Ребро на дитину стає `Edge::Cell`, якщо дитина вже
+    /// має комірку в арені (за `arena_handles`), інакше — листове `Edge::Atom`.
+    /// Це та сама семантика, що й `Value::Pair(Rc::new(PairNode { .. }))`,
+    /// лише матеріалізована з комірки арени.
+    pub(crate) fn arena_cons(&self, head: Value, tail: Value) -> Value {
+        let mut guard = self.2.borrow_mut();
+        let state: &mut SessionState = &mut guard;
+        let head_edge = arena_edge_for(&state.arena_handles, &head);
+        let tail_edge = arena_edge_for(&state.arena_handles, &tail);
+        let cell = state.arena.alloc_with(head_edge, tail_edge);
+        state
+            .arena
+            .to_value_registered(cell, &mut state.arena_handles)
+    }
+
+    /// Кількість слотів арени (свідок).
+    pub fn arena_len(&self) -> usize {
+        self.2.borrow().arena.len()
+    }
+
+    /// Чи має це значення живу комірку-опору в арені.
+    pub fn arena_backs(&self, value: &Value) -> bool {
+        let state = self.2.borrow();
+        match value {
+            Value::Pair(node) => match state.arena_handles.get(&(Rc::as_ptr(node) as usize)) {
+                Some(&cell) => state.arena.cell(cell).is_some(),
+                None => false,
+            },
+            _ => false,
+        }
+    }
+
+    /// Скільки комірок арени досяжні з цих значень-коренів (свідок).
+    pub fn arena_reachable_count(&self, roots: &[Value]) -> usize {
+        let state = self.2.borrow();
+        let cells = arena_root_cells(&state.arena_handles, roots);
+        state.arena.reachable(&cells).len()
+    }
+
+    /// Скільки комірок арени недосяжні з цих значень-коренів (сміття).
+    pub fn arena_garbage_count(&self, roots: &[Value]) -> usize {
+        let state = self.2.borrow();
+        let cells = arena_root_cells(&state.arena_handles, roots);
+        state.arena.garbage(&cells).len()
+    }
+
+    /// Зібрати недосяжне з цих значень-коренів; повертає кількість
+    /// вигрібених комірок. Досяжні комірки лишаються живими.
+    pub fn arena_collect(&self, roots: &[Value]) -> usize {
+        let mut state = self.2.borrow_mut();
+        let cells = arena_root_cells(&state.arena_handles, roots);
+        state.arena.collect(&cells).len()
     }
 
     pub(crate) fn numeric_bit_limit(&self) -> Option<usize> {
@@ -538,6 +622,28 @@ impl Drop for Environment {
             drop(environment);
         }
     }
+}
+
+/// Ребро арени для значення-дитини: `Edge::Cell`, якщо дитина вже має комірку
+/// в арені, інакше листове `Edge::Atom` (вузол без комірки не чорніє).
+fn arena_edge_for(handles: &HashMap<usize, CellRef>, value: &Value) -> Edge {
+    if let Value::Pair(node) = value {
+        if let Some(&cell) = handles.get(&(Rc::as_ptr(node) as usize)) {
+            return Edge::Cell(cell);
+        }
+    }
+    Edge::Atom(value.clone())
+}
+
+/// Дескриптори-корені для значень: беруться лише ті, що мають комірку в арені.
+fn arena_root_cells(handles: &HashMap<usize, CellRef>, roots: &[Value]) -> Vec<CellRef> {
+    roots
+        .iter()
+        .filter_map(|value| match value {
+            Value::Pair(node) => handles.get(&(Rc::as_ptr(node) as usize)).copied(),
+            _ => None,
+        })
+        .collect()
 }
 
 #[derive(Clone, Debug)]

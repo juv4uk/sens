@@ -377,6 +377,55 @@ impl Arena {
         self.to_value_guarded(root, &mut Vec::new())
     }
 
+    /// Те саме, що [`Arena::to_value`], але кожну відновлену пару ще й
+    /// **реєструє** в `handles` (адреса `Rc<PairNode>` → дескриптор комірки).
+    ///
+    /// Це потрібно зворотному шляху: `cons` віддає значення, відновлене з
+    /// арени, а наступний `cons` мусить знати, у якій комірці воно живе, щоб
+    /// зшити ребро-`Cell`, а не розсипати весь підграф у листові `Atom`.
+    /// Окремого подання арени в самому `Value` для цього не заводимо.
+    pub(crate) fn to_value_registered(
+        &self,
+        root: CellRef,
+        handles: &mut std::collections::HashMap<usize, CellRef>,
+    ) -> Value {
+        self.to_value_registered_guarded(root, &mut Vec::new(), handles)
+    }
+
+    fn to_value_registered_guarded(
+        &self,
+        root: CellRef,
+        seen: &mut Vec<CellRef>,
+        handles: &mut std::collections::HashMap<usize, CellRef>,
+    ) -> Value {
+        if seen.contains(&root) {
+            return Value::Nil; // цикл: `Rc<PairNode>` його не подає
+        }
+        let Some(slot) = self.cell(root) else {
+            return Value::Nil;
+        };
+        seen.push(root);
+        let head = self.edge_to_value_registered(&slot.head, seen, handles);
+        let tail = self.edge_to_value_registered(&slot.tail, seen, handles);
+        seen.pop();
+        let node = Rc::new(PairNode { head, tail });
+        handles.insert(Rc::as_ptr(&node) as usize, root);
+        Value::Pair(node)
+    }
+
+    fn edge_to_value_registered(
+        &self,
+        edge: &Edge,
+        seen: &mut Vec<CellRef>,
+        handles: &mut std::collections::HashMap<usize, CellRef>,
+    ) -> Value {
+        match edge {
+            Edge::None => Value::Nil,
+            Edge::Atom(value) => value.clone(),
+            Edge::Cell(cell) => self.to_value_registered_guarded(*cell, seen, handles),
+        }
+    }
+
     fn to_value_guarded(&self, root: CellRef, seen: &mut Vec<CellRef>) -> Value {
         if seen.contains(&root) {
             return Value::Nil; // цикл: `Rc<PairNode>` його не подає
