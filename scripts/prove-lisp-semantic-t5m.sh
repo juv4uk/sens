@@ -421,6 +421,13 @@ cat -- lib/utf8.lisp tests/semantic/utf8-quotient-laws.lisp > "$utf8_quotient_la
 cat -- lib/utf8.lisp tests/semantic/utf8-quotient-mutant.lisp > "$utf8_quotient_mutant_bundle"
 run_case run_law utf8-quotient-positive "$utf8_quotient_law_bundle" 1
 run_case run_law utf8-quotient-mutant "$utf8_quotient_mutant_bundle" 0
+# Кореневі числові тотожності UTF-8 перевіряє сам Lisp/SENS, включно з мутантом.
+utf8_roots_positive="$evidence/utf8-numeric-foundations-positive-complete.lisp"
+utf8_roots_mutant="$evidence/utf8-numeric-foundations-mutant-complete.lisp"
+cat -- lib/utf8.lisp tests/semantic/utf8-numeric-foundations-law.lisp > "$utf8_roots_positive"
+cat -- lib/utf8.lisp tests/semantic/utf8-numeric-foundations-mutant.lisp > "$utf8_roots_mutant"
+run_case run_law utf8-numeric-foundations-positive "$utf8_roots_positive" 1
+run_case run_law utf8-numeric-foundations-mutant "$utf8_roots_mutant" 0
 # Негативний тип перевіряє сама мова; Rust/Zig не є семантичним оракулом.
 run_case run_type_rejection d8-string-symbol-nontext-type-negative tests/semantic/d8-string-symbol-nontext-type-negative.lisp 'string->symbol expects a string'
 # D1 хибне значення як голова CONS ≠ порожній D3-список.
