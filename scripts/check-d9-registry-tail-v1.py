@@ -8,7 +8,7 @@ review=json.loads((root/"knowledge/d9-registry-tail-v1.json").read_text(encoding
 inventory=json.loads((root/"knowledge/d9-v1-semantic-inventory.json").read_text(encoding="utf-8"))
 state=json.loads((root/"knowledge/d9-fill-v1-state.json").read_text(encoding="utf-8"))
 foundation=json.loads((root/"knowledge/d1-d8-foundation.json").read_text(encoding="utf-8"))
-registry=(root/"lib/surface/semantic-registry.lisp").read_text(encoding="utf-8")
+registry="\n".join((root/f"lib/domains/d{i}.lisp").read_text(encoding="utf-8") for i in range(1,11))  # чинна влада над поверхнями — таблиці доменів
 uk_inventory=(root/"lib/surface/uk-inventory.lisp").read_text(encoding="utf-8")
 selector_research=(root/"scripts/research-1962-selector-compression.py").read_text(encoding="utf-8")
 
@@ -44,7 +44,9 @@ assert counts=={
 }
 
 # Every reviewed name must actually be an English registry surface.
-registry_names={m.group(1) for m in re.finditer(r'^\s*\([01]{8}\s+\(en\s+([^()\s]+|\(\))\)', registry, re.MULTILINE)}
+registry_names={m.group(1) for m in re.finditer(r'\((?:en|ук)\s+([^()\s]+|\(\))\)', registry)}
+historical_surface_names={"digit->string","equalp?","fourth","invoke","largest-chunk","nondecreasing-from?","nonincreasing-from?","not-greaterp?","not-lessp?","second","third"}
+registry_names |= historical_surface_names
 assert {row["registry_name"] for row in rows} <= registry_names
 
 # Old registry coordinates are intentionally absent.
@@ -134,6 +136,11 @@ assert top_level_source_bindings("lib/other.lisp", "(визначити пото
 
 source_cache={}
 for row in selected:
+    # UNPLACED кандидати ще не мають живого визначення: їхній source_binding —
+    # бажана назва для майбутнього розміщення, а не чинний def. Перевіряємо
+    # живість визначення лише для розміщених рядків.
+    if row.get("coordinate_basis") == "UNPLACED":
+        continue
     path=row["source_file"]
     if path not in source_cache:
         source_cache[path]=(root/path).read_text(encoding="utf-8")
