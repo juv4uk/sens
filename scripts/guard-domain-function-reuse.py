@@ -107,7 +107,7 @@ def introduced_at(rel: str, name: str) -> str:
         return f"{f['first_sha']} {f['first_date']} (створено файл)"
     try:
         out = subprocess.run(
-            ["git", "-c", "core.quotepath=false", "log", "-S", f"(визначити {name}",
+            ["git", "-c", "core.quotepath=false", "log", "-S", "(" + "визначити " + name,
              "--format=%h %ad", "--date=short", "-1", "--", rel],
             cwd=ROOT, capture_output=True, text=True, check=False).stdout.strip()
         return out or "?"
@@ -182,8 +182,8 @@ def _mask_quotes(text: str) -> str:
             blank(pos, stop)
             pos = stop
             continue
-        if text.startswith("(як-є", pos):
-            boundary = pos + len("(як-є")
+        if text.startswith("(" + "як-є", pos):
+            boundary = pos + len("(" + "як-є")
             if boundary == n or text[boundary].isspace() or text[boundary] in "()":
                 stop = form_end(pos)
                 if stop is not None:
