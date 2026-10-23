@@ -113,7 +113,7 @@ jobs:
         run: |
           set -euo pipefail
           out="$RUNNER_TEMP/sens-mechanisms"
-          cargo test --locked --release -p sens-cli --test t5m_session_benchmark -- --ignored --nocapture \
+          cargo test --locked --release -p sens-cli --test t5m_session_benchmark -- --include-ignored --nocapture \
             > "$out/t5m-session.tsv" 2>&1 || {
               cat "$out/t5m-session.tsv" >&2
               exit 1
