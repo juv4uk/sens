@@ -309,37 +309,26 @@ jobs:
           if-no-files-found: error
           retention-days: 21
 
-  rust-wire-vs-json:
-    name: "Rust: SENS wire проти serde_json, Cachegrind Ir та парний час"
+  rust-packed-visible:
+    name: "Rust exact-width: visible vs packed ingestion"
     runs-on: ubuntu-24.04
-    timeout-minutes: 40
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v5
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
-      - name: Встановити незалежний лічильник інструкцій CPU
+      - name: Measure visible/packed readers after exact D2 AST parity preflight
         shell: bash
         run: |
           set -euo pipefail
-          sudo apt-get update
-          sudo apt-get install -y valgrind
-          valgrind --version
-      - name: Виконати на тому самому корпусі й одному CPU
-        shell: bash
-        env:
-          N_MESSAGES: "1000"
-          WALL_CLOCK_REPS: "7"
-        run: |
-          set -euo pipefail
-          bash benchmarks/rust-json-vs-sens-wire/run.sh \
-            "$RUNNER_TEMP/sens-rust-wire-json"
-          test -s "$RUNNER_TEMP/sens-rust-wire-json/summary.md"
-          cat "$RUNNER_TEMP/sens-rust-wire-json/summary.md" >> "$GITHUB_STEP_SUMMARY"
-      - name: Зберегти сирий Cachegrind та ns окремо
+          bash benchmarks/rust-packed-visible/run.sh "$RUNNER_TEMP/sens-rust-packed-visible"
+          test -s "$RUNNER_TEMP/sens-rust-packed-visible/raw.tsv"
+          cat "$RUNNER_TEMP/sens-rust-packed-visible/summary.md" >> "$GITHUB_STEP_SUMMARY"
+      - name: Keep raw exact-width samples and provenance
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: sens-rust-wire-json-${{ github.sha }}
-          path: ${{ runner.temp }}/sens-rust-wire-json/
-          if-no-files-found: error
+          name: sens-rust-packed-visible-${{ github.sha }}
+          path: ${{ runner.temp }}/sens-rust-packed-visible/
+          if-no-files-found: warn
           retention-days: 21

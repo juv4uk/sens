@@ -154,6 +154,31 @@ run_case run_law sample-mut tests/semantic/sample-mutant.lisp 0\n\
     let valid = audit(&["tests/semantic/sample-law.lisp".into(),
         "tests/semantic/sample-mutant.lisp".into()], runner, ci, |_| true, |_| Ok(String::new()));
     if !valid.is_empty() { return Err(format!("valid native witnesses: {valid:?}")); }
+
+    // Verify Unicode Lisp paths, source-bundle registration, and law/mutant matching.
+    let mut unicode_runner = runner.to_string();
+    unicode_runner.push_str(concat!(
+        "\ncat -- tests/semantic/усі-за-предикатом-law.lisp > \"$all_law_bundle\"\n",
+        "run_case run_law all-predicate-law \"$all_law_bundle\" 1\n",
+        "cat -- tests/semantic/усі-за-предикатом-mutant.lisp > \"$all_mutant_bundle\"\n",
+        "run_case run_law all-predicate-mutant \"$all_mutant_bundle\" 0\n",
+        "cat -- tests/semantic/існує-за-предикатом-law.lisp > \"$any_law_bundle\"\n",
+        "run_case run_law exists-predicate-law \"$any_law_bundle\" 1\n",
+        "cat -- tests/semantic/існує-за-предикатом-mutant.lisp > \"$any_mutant_bundle\"\n",
+        "run_case run_law exists-predicate-mutant \"$any_mutant_bundle\" 0\n",
+    ));
+    let unicode = audit(
+        &[
+            "tests/semantic/усі-за-предикатом-law.lisp".into(),
+            "tests/semantic/усі-за-предикатом-mutant.lisp".into(),
+            "tests/semantic/існує-за-предикатом-law.lisp".into(),
+            "tests/semantic/існує-за-предикатом-mutant.lisp".into(),
+        ],
+        &unicode_runner, ci, |_| true, |_| Ok(String::new()),
+    );
+    if !unicode.is_empty() {
+        return Err(format!("Unicode paired witnesses: {unicode:?}"));
+    }
     let invalid = audit(&["tests/semantic/not-a-law.py".into()], runner, ci,
         |_| true, |_| Ok(String::new()));
     if !invalid.iter().any(|e| e.contains("HOST_SEMANTIC_TEST_ADDED")) {

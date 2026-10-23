@@ -4,6 +4,12 @@
 
 This file exists per [`DOC-AUTHORITY-ARCHIVE`](https://github.com/juv4uk/ecosystem/issues/5): **one active truth, many preserved histories**. Read this first. Historical material may explain how SENS arrived here, but it cannot override current contract and executable evidence.
 
+## Фізичні трійки Lisp → T5M → біти · облік 23.10.2026
+
+На Git-знімку `main@799d0c7f0b7eefe912bb409277a432c328bb938c` є **1776** файлів `.lisp`, **1255** однойменних пар `.lisp`/`.sens` і **1254** трійки з файлом без розширення. Це лише наявність Git-шляхів: **521** Lisp-джерело не має однойменного `.sens`, а `lib/core4.lisp` має `.sens` без бітового перегляду. Найбільша черга — `tests/semantic/` (**235** файлів без фізичної пари). Наявність трьох файлів не доводить ні побайтової оберненості, ні семантичного виконання.
+
+**Причини потрібно називати точно:** відсутній фізичний файл, відсутній або неточний бітовий перегляд, невідповідність D7/D24+, помилка коду, некоректний тест, нестача незалежного семантичного доказу. Таблиці доменів, архівні матеріали та перевірені схеми даних залишаються в повному обліку `.lisp`, але не отримують вигаданого статусу виконуваної програми. Для чинної програми потрібні SENS mint/paired execution, Zig T5M byte roundtrip і позитивний/негативний Lisp-свідок. Статус релізу з цього обліку не випливає.
+
 ## Перевірений стан реалізації · 19.10.2026
 
 Цей розділ описує **виявлений код**, а не змінює Contract 11.9 чи власницьку ратифікацію. Відділяти нормативну владу нижче від фактичного стану конкретних entrypoints.
@@ -95,7 +101,7 @@ Equal packed bits in two domains do not imply equal identity. In particular owne
 
 Owner direction (2026-10-12): remove active Sens8/SID8/Function8 runtime semantics across Rust, Lisp, scripts, tests, CLI and workflows; replace each call/data position with a width-qualified domain identity and explicit admitted mechanism. No new consumer may be added to the legacy carrier. Historical manifests and archived experiments remain provenance-only and must never be loaded as executable input.
 
-**Виконаний полімовний зріз і залишкові блокери:** [`docs/migration/domain-ladder-cutover-2026-10-12.uk.md`](docs/migration/domain-ladder-cutover-2026-10-12.uk.md) фіксує видалений старий guard, новий Rust/Python/C/Lisp CI, явні D1–D10 координати в Python і ще не перенесені AST/evaluator/capability та Lisp-шляхи. На одному candidate SHA повний green ще **не доведений**; автоматично ототожнювати історичний W8:10101000 INVOKE із чинним D8:10101000 ROUND заборонено.
+**Виконаний полімовний зріз і конкретні невирішені причини:** [`docs/migration/domain-ladder-cutover-2026-10-12.uk.md`](docs/migration/domain-ladder-cutover-2026-10-12.uk.md) фіксує видалений старий guard, новий Rust/Python/C/Lisp CI, явні D1–D10 координати в Python і ще не перенесені AST/evaluator/capability та Lisp-шляхи. На одному candidate SHA повний green ще **не доведений**; автоматично ототожнювати історичний W8:10101000 INVOKE із чинним D8:10101000 ROUND заборонено.
 
 Structural `()` is the admitted Core.D3 `000` object. It is not historical exact-eight-bit `00000000`, PredicateBit `0`, or Number zero; those equal-looking numeric payloads remain distinct across domains.
 

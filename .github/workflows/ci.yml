@@ -204,6 +204,11 @@ jobs:
                   "tests/semantic/d7-epistemic-structural-tag-mutant.lisp",
                   "tests/semantic/language-law-epistemic-records.lisp",
                   "tests/semantic/language-mutant-epistemic-records.lisp",
+                  # D6 quantifier files must be evaluated only inside the exact-Core4 bundle.
+                  "tests/semantic/усі-за-предикатом-law.lisp",
+                  "tests/semantic/усі-за-предикатом-mutant.lisp",
+                  "tests/semantic/існує-за-предикатом-law.lisp",
+                  "tests/semantic/існує-за-предикатом-mutant.lisp",
                   "tests/semantic/ukr-lists-d24-language-law.lisp",
                   "tests/semantic/d24-polynomial-language-law.lisp",
                   "tests/semantic/d24-polynomial-language-mutant.lisp",
@@ -345,6 +350,10 @@ jobs:
           # Rust бенчмарк тільки реального I/O байтів Lisp. Він не обчислює D1.
           # 11 проб із прогрівом, p50/p90, явно запускаємо ignored benchmark.
           cargo test --locked -p sens-cli --test mechanism_file_io_benchmark -- --include-ignored --nocapture
+          # Rust exact-width ingest benchmark: same D2/domain AST preflight, no JSON/Python corpus.
+          # This measures only visible vs packed Rust readers; semantic verdicts stay in Lisp → Zig/T5M → SENS.
+          bash benchmarks/rust-packed-visible/run.sh "$RUNNER_TEMP/rust-packed-visible"
+          cat "$RUNNER_TEMP/rust-packed-visible/summary.md" >> "$GITHUB_STEP_SUMMARY"
           # Семантика D11 перевіряється в окремому Lisp-кроці через SENS/T5M.
           # Не дублюємо мовний оракул у механічному Rust-шарі.
 
@@ -963,7 +972,28 @@ jobs:
             bench='НЕ ПЕРЕВІРЕНО'
           fi
           echo "::notice title=SENS · бенчмарки::$bench"
-          pairs="$(python3 scripts/audit_t5_file_pairs.py 2>/dev/null | python3 -c "import sys,json;d=json.load(sys.stdin);print(f\"pass={d.get('physical_pass','?')} blocked={d.get('physical_blocked','?')} без_пари={d.get('lisp_without_sens','?')}\")" 2>/dev/null || echo 'НЕ ВИМІРЯНО')"
+          physical_nonempty=0
+          physical_empty=0
+          lisp_without_sens=0
+          triplets=0
+          missing_views=0
+          while IFS= read -r -d '' source; do
+            carrier="${source%.lisp}.sens"
+            view="${source%.lisp}"
+            if [[ ! -f "$carrier" ]]; then
+              ((lisp_without_sens += 1))
+            elif [[ ! -s "$carrier" ]]; then
+              ((physical_empty += 1))
+            else
+              ((physical_nonempty += 1))
+              if [[ -s "$view" ]]; then
+                ((triplets += 1))
+              else
+                ((missing_views += 1))
+              fi
+            fi
+          done < <(git ls-files -z -- '*.lisp')
+          pairs="непорожні=$physical_nonempty порожні=$physical_empty без_пари=$lisp_without_sens трійки=$triplets без_вигляду=$missing_views"
           echo "::notice title=SENS · фізичні пари Lisp↔sens::${pairs}"
           {
             echo '## SENS — короткі результати'

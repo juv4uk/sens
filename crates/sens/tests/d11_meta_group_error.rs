@@ -2,13 +2,15 @@
 //! Виконання та розрізнення помилок належить виключно живому SENS MetaEval;
 //! ці бібліотечні свідки не надають прямої машинної D11-викличності.
 
-use sens::{eval_program, load_core_library, load_meta_evaluator_library, Session};
+mod common;
+
+use sens::{eval_program, load_core_library, Session};
 
 #[test]
 fn d11_перевірка_групи_визначень_розрізняє_повтор_і_канонічні_параметри() {
     let mut session = Session::bare();
     load_core_library(&mut session).expect("ядро SENS");
-    load_meta_evaluator_library(&mut session).expect("живий MetaEval");
+    common::load_meta_evaluator_library(&mut session).expect("живий MetaEval");
 
     for (case, source, expected) in [
         (

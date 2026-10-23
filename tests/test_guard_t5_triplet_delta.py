@@ -73,9 +73,9 @@ class IncrementalTripletGate(unittest.TestCase):
     def test_new_physical_without_view_is_rejected(self):
         self.new_pair(with_view=False)
         row = self.scan()["files"][0]
-        self.assertEqual(row["status"], "BLOCKED")
+        self.assertEqual(row["status"], "NOT_PROVEN")
         self.assertEqual(row["view_status"], "MISSING_VIEW")
-        self.assertEqual(self.scan()["summary"]["changed_blocked"], 1)
+        self.assertEqual(self.scan()["summary"]["changed_not_proven"], 1)
 
     def test_new_complete_triplet_passes_transport_but_not_uk_oracle(self):
         self.new_pair(with_view=True)
@@ -87,7 +87,7 @@ class IncrementalTripletGate(unittest.TestCase):
         self.assertEqual(result["summary"]["original_executable_migrations_certified"], 0)
         self.assertEqual(result["files"][0]["uk_oracle"], "NOT_VERIFIED")
         self.assertEqual(result["files"][0]["view_sha256"],
-                         result["files"][0]["view_sha256"])
+                         "7005a9baa508be0cba3367ae7321f53775361d2b0ced762ed60b761d488b4832")
 
     def test_existing_binary_modified_without_matching_view_is_rejected(self):
         old = self.root / "old"
@@ -97,7 +97,7 @@ class IncrementalTripletGate(unittest.TestCase):
         (self.root / "old.sens").write_bytes(encode_words(["10", "001", "01"]))
         self.commit("binary changes only")
         result = self.scan()
-        self.assertEqual(result["status"], "BLOCKED")
+        self.assertEqual(result["status"], "DELTA_NOT_VERIFIED")
         self.assertEqual(result["files"][0]["view_status"], "VIEW_MISMATCH")
 
     def test_view_modified_without_binary_change_is_rejected(self):
@@ -108,7 +108,7 @@ class IncrementalTripletGate(unittest.TestCase):
         old.write_bytes(b"10 000 01 \n")
         self.commit("stale view")
         result = self.scan()
-        self.assertEqual(result["status"], "BLOCKED")
+        self.assertEqual(result["status"], "DELTA_NOT_VERIFIED")
         self.assertEqual(result["changed_paths"][0]["kind"], "view")
 
     def test_deleted_view_is_detected_without_changes_to_binary(self):
@@ -119,17 +119,17 @@ class IncrementalTripletGate(unittest.TestCase):
         old.unlink()
         self.commit("remove view")
         result = self.scan()
-        self.assertEqual(result["status"], "BLOCKED")
+        self.assertEqual(result["status"], "DELTA_NOT_VERIFIED")
         self.assertEqual(result["files"][0]["view_status"], "MISSING_VIEW")
 
     def test_deleted_physical_program_not_mistaken_for_no_change(self):
         (self.root / "old.sens").unlink()
         self.commit("delete physical")
         result = self.scan()
-        self.assertEqual(result["status"], "BLOCKED")
+        self.assertEqual(result["status"], "DELTA_NOT_VERIFIED")
         self.assertIn("deleted", result["files"][0]["reason"])
 
-    def test_changed_physical_symlink_view_is_blocked(self):
+    def test_changed_physical_symlink_view_is_rejected(self):
         self.new_pair(with_view=True)
         view = self.root / "new"
         target = self.root / "view-target"
@@ -137,7 +137,7 @@ class IncrementalTripletGate(unittest.TestCase):
         view.unlink()
         view.symlink_to(target)
         self.commit("replace view with symlink")
-        self.assertEqual(self.scan()["status"], "BLOCKED")
+        self.assertEqual(self.scan()["status"], "DELTA_NOT_VERIFIED")
 
     def test_existing_view_typechange_to_symlink_never_bypasses_delta(self):
         old = self.root / "old"
@@ -150,7 +150,7 @@ class IncrementalTripletGate(unittest.TestCase):
         old.symlink_to(original)
         self.commit("T status replaces tracked regular view by a symlink")
         result = self.scan()
-        self.assertEqual(result["status"], "BLOCKED")
+        self.assertEqual(result["status"], "DELTA_NOT_VERIFIED")
         self.assertEqual(result["files"][0]["view_status"], "UNSAFE_LINK")
         self.assertTrue(any(row["change"] == "T" for row in result["changed_paths"]))
 
@@ -169,14 +169,14 @@ class IncrementalTripletGate(unittest.TestCase):
         self.base = self.cmd("rev-parse", "HEAD").strip()
         return stem
 
-    def test_uk_source_only_semantic_drift_blocks_with_unchanged_t5_and_view(self):
+    def test_uk_source_only_semantic_drift_is_rejected_with_unchanged_t5_and_view(self):
         stem = self.baseline_uk_triplet()
         binary_before = stem.with_suffix(".sens").read_bytes()
         view_before = stem.read_bytes()
         stem.with_suffix(".lisp").write_text("(перше (так))\n", encoding="utf-8")
         self.commit("change uk source semantics but keep physical and view")
         report = self.scan()
-        self.assertEqual(report["status"], "BLOCKED")
+        self.assertEqual(report["status"], "DELTA_NOT_VERIFIED")
         self.assertEqual(report["summary"]["changed_pairs"], 1)
         self.assertEqual(report["changed_paths"][0]["kind"], "uk_source")
         self.assertIn("UK_SOURCE_DELTA:", report["files"][0]["reason"])
@@ -199,22 +199,22 @@ class IncrementalTripletGate(unittest.TestCase):
         stem = self.baseline_uk_triplet()
         stem.with_suffix(".lisp").write_text("(перше ( ))\n", encoding="utf-8")
         self.commit("noncanonical whitespace variant source")
-        self.assertEqual(self.scan()["status"], "BLOCKED")
+        self.assertEqual(self.scan()["status"], "DELTA_NOT_VERIFIED")
 
-    def test_bounded_uk_source_does_not_guess_d4_projection(self):
+    def test_bounded_uk_source_requires_known_d4_projection(self):
         stem = self.baseline_uk_triplet()
         stem.with_suffix(".lisp").write_text("(підміна ())\n", encoding="utf-8")
         self.commit("unsupported source")
         report = self.scan()
-        self.assertEqual(report["status"], "BLOCKED")
+        self.assertEqual(report["status"], "DELTA_NOT_VERIFIED")
         self.assertEqual(report["files"][0]["view_status"], "PHYSICAL_VIEW_PASS")
 
-    def test_deleted_uk_source_of_unchanged_t5_blocks(self):
+    def test_deleted_uk_source_of_unchanged_t5_is_rejected(self):
         stem = self.baseline_uk_triplet()
         stem.with_suffix(".lisp").unlink()
         self.commit("delete source only")
         report = self.scan()
-        self.assertEqual(report["status"], "BLOCKED")
+        self.assertEqual(report["status"], "DELTA_NOT_VERIFIED")
         self.assertIn("uk_source", [x["kind"] for x in report["changed_paths"]])
 
     def test_unpaired_lisp_change_keeps_historical_debt_visible_without_false_fail(self):

@@ -23,7 +23,7 @@
   python3 scripts/guard-domain-function-reuse.py --file lib/x.lisp
   python3 scripts/guard-domain-function-reuse.py --self-test
 
-Код виходу: 0 — дублів немає; 1 — знайдено дубль (BLOCKED); 2 — помилка вживання.
+Код виходу: 0 — дублів немає; 1 — знайдено дубль (BLOCKED); 2 — помилка вживання або драбину не перевірено.
 """
 from __future__ import annotations
 
@@ -50,6 +50,7 @@ EXCLUDED_PREFIXES = (
 # визначає функції за принципом «мова тесту відповідає шару», тож охоронець
 # мусить їх бачити. Решта tests/** лишається поза увагою (фікстури, помічники).
 SEMANTIC_PREFIX = "tests/semantic/"
+MINIMUM_RATIFIED_SURFACES = 1001
 DEF = re.compile(r"\(" + "визначити" + r"\s+([^\s()]+)")
 
 
@@ -343,10 +344,22 @@ def main(argv: list[str] | None = None) -> int:
     args = ap.parse_args(argv)
 
     ladder = ladder_names(ROOT)
+    # Неповне виявлення драбини небезпечніше за звичайний RED: охоронець
+    # може не впізнати чинну поверхню або хибно оголосити нову. Відмовляємося
+    # працювати, якщо завантажено менше за мінімум, який уже вимагає self-test.
+    if len(ladder) < MINIMUM_RATIFIED_SURFACES:
+        print(
+            "GUARD-DOMAIN-REUSE: НЕ ПЕРЕВІРЕНО — "
+            f"виявлено лише {len(ladder)} поверхонь; "
+            f"потрібно щонайменше {MINIMUM_RATIFIED_SURFACES}; "
+            "джерело: discover_domain_function_candidates",
+            file=sys.stderr,
+        )
+        return 2
     project_sites = project_definition_sites(ROOT)
 
     if args.self_test:
-        ok = len(ladder) > 1000
+        ok = len(ladder) >= MINIMUM_RATIFIED_SURFACES
         print(f"GUARD-DOMAIN-REUSE self-test: {'OK' if ok else 'FAIL'} (поверхонь у драбинах: {len(ladder)}, джерело: discover_domain_function_candidates)")
         return 0 if ok else 1
 
@@ -411,15 +424,13 @@ def main(argv: list[str] | None = None) -> int:
 
     for rel, name in candidates:
         print(f"КАНДИДАТ D11: {rel}: {name} — немає в драбинах; пропозиція D11 (далі D12…)")
-    # Не змінюємо реєстр під час невдалого коміту: спочатку власник
-    # має усунути всі дублікати/порушення, і лише чистий зріз реєструється.
-    # Реєстрація — лише кандидат, не ратифікація й не видача координати.
+    # Заблокований зріз не має змінювати реєстр кандидатів D11.
     if args.register and candidates and not blocked:
         n = register_candidates(candidates)
         print(f"ЗАРЕЄСТРОВАНО в D11: {n} нових кандидатів → реєстр кандидатів D11 "
               f"(наявні не дублювались; статус кандидат, не ратифіковано)")
     elif args.register and candidates and blocked:
-        print("НЕ ЗАРЕЄСТРОВАНО в D11: коміт заблоковано; спершу виправ усі порушення.")
+        print("НЕ ЗАРЕЄСТРОВАНО в D11: є BLOCKED; спершу виправ усі порушення.")
 
     if args.advise and blocked:
         shadow = [(r, n) for r, n, w in blocked if "драбини" in w]
@@ -452,6 +463,16 @@ def main(argv: list[str] | None = None) -> int:
         print(f"GUARD-DOMAIN-REUSE: BLOCKED ({len(blocked)} порушень серед {checked} файлів)")
         return 1
 
+    # Мертвий охоронець не має права казати OK. Якщо він не побачив ЖОДНОГО
+    # файлу — це не «все чисто», а «перевірка не відбулась» (буває, коли шлях
+    # виключено, гачок не активний, або список порожній). Мовчазне OK тут
+    # небезпечніше за хибний RED: воно створює враження, що перевірку зроблено.
+    if checked == 0:
+        print("УВАГА: охоронець не перевірив ЖОДНОГО файлу — це не «все чисто», "
+              "а «перевірка не відбулась». Переконайся, що шлях не виключено "
+              "й гачок активний (bash scripts/install-hooks.sh).", file=sys.stderr)
+        print(f"GUARD-DOMAIN-REUSE: НЕ ПЕРЕВІРЕНО (0 файлів)")
+        return 2
     print(f"GUARD-DOMAIN-REUSE: OK ({checked} файлів, {len(candidates)} кандидатів D11)")
     return 0
 

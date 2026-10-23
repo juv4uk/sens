@@ -159,6 +159,24 @@ run_law() {
   if ! profile_stage "$id" sens-paired timeout 45s "$sens" --t5m-pair "$source" "$physical" >"$dir/paired.out" 2>"$dir/paired.err"; then
     cat "$dir/paired.err" >&2
     report_physical_red_source "$id" "$source" "$physical" "$dir/paired.err"
+    # Діагностика відмінності середовищ: прямий файл має Core4,
+    # а парний фізичний маршрут запускається в чистому SENS.
+    # Додатковий запуск ніколи не змінює RED на PASS.
+    if grep -Fq 'domain identity is not callable under its ratified law: D7 ' "$dir/paired.err"; then
+      if profile_stage "$id" sens-paired-core4-diagnostic timeout 45s "$sens" \
+        --t5m-pair "$source" "$physical" --core4-runtime \
+        >"$dir/paired-core4.out" 2>"$dir/paired-core4.err"; then
+        if cmp -s "$dir/direct.out" "$dir/paired-core4.out"; then
+          echo "SENS_D7_PROFILE_DIAGNOSTIC id=$id clean=RED core4=PASS output=BYTE_PARITY verdict=RED" >&2
+        else
+          echo "SENS_D7_PROFILE_DIAGNOSTIC id=$id clean=RED core4=PASS output=DIVERGENT verdict=RED" >&2
+          sha256sum "$dir/direct.out" "$dir/paired-core4.out" >&2
+        fi
+      else
+        echo "SENS_D7_PROFILE_DIAGNOSTIC id=$id clean=RED core4=RED verdict=RED" >&2
+        sed -n '1,8p' "$dir/paired-core4.err" >&2
+      fi
+    fi
     fail "$id" "$(paired_failure_layer "$dir/paired.err")" "source-matched-physical-execution" "rejected"
   fi
   if ! profile_stage "$id" sens-standalone timeout 45s "$trit" eval-core4 "$physical" >"$dir/physical.out" 2>"$dir/physical.err"; then
@@ -426,6 +444,7 @@ run_case run_law d4-higher-order-composition-positive tests/semantic/d4-higher-o
 run_case run_law d4-higher-order-composition-mutant tests/semantic/d4-higher-order-composition-mutant.lisp 0
 run_case run_law d4-first-class-predicate-positive tests/semantic/d4-first-class-predicate-law.lisp 1
 run_case run_law d4-first-class-predicate-mutant tests/semantic/d4-first-class-predicate-mutant.lisp 0
+# D6-квантори перевіряємо нижче як повні програми з визначеннями Core4.
 # D4 рекурсивна правильність списків: позитив та навмисне порушення.
 run_case run_law d4-proper-list-positive tests/semantic/d4-proper-list-recursion-law.lisp 1
 run_case run_law d4-proper-list-mutant tests/semantic/d4-proper-list-recursion-mutant.lisp 0
@@ -894,6 +913,42 @@ cat -- benchmarks/d3-structural-bench.lisp tests/semantic/d3-structural-bench-mu
 sha256sum benchmarks/d3-structural-bench.lisp tests/semantic/d3-structural-bench-law.lisp tests/semantic/d3-structural-bench-mutant.lisp > "$evidence/d3-structural-bench-inputs.sha256"
 run_case run_law d3-structural-bench-positive "$d3_hot_law" 1
 run_case run_law d3-structural-bench-mutant "$d3_hot_mutant" 0
+
+# Семантика D6 ALL — виконувані мовні закони з чинним визначенням Core4.
+d6_quantifier_source="$evidence/d6-first-class-predicate-quantifiers.lisp"
+: > "$d6_quantifier_source"
+for quantifier in будь-яке? усі?; do
+  if ! awk -v target="(визначити $quantifier" '
+    $0 == target {
+      if (found++) exit 2
+      copying = 1
+    }
+    copying && NF == 0 {
+      copying = 0
+      complete++
+      next
+    }
+    copying { print }
+    END { if (found != 1 || complete != 1 || copying) exit 2 }
+  ' lib/core4-parts/core4-d6b.lisp >> "$d6_quantifier_source"; then
+    echo "::error::SENS_D6_QUANTIFIER_SOURCE_NOT_ISOLATABLE function=$quantifier source=lib/core4-parts/core4-d6b.lisp" >&2
+    exit 2
+  fi
+  printf '\n' >> "$d6_quantifier_source"
+done
+all_quantifier_law_bundle="$evidence/all-predicate-quantifier.lisp"
+all_quantifier_mutant_bundle="$evidence/all-predicate-quantifier-mutant.lisp"
+any_quantifier_law_bundle="$evidence/any-predicate-quantifier.lisp"
+any_quantifier_mutant_bundle="$evidence/any-predicate-quantifier-mutant.lisp"
+cat -- tests/fixtures/epistemic-d1-names.lisp "$d6_quantifier_source" tests/semantic/усі-за-предикатом-law.lisp > "$all_quantifier_law_bundle"
+cat -- tests/fixtures/epistemic-d1-names.lisp "$d6_quantifier_source" tests/semantic/усі-за-предикатом-mutant.lisp > "$all_quantifier_mutant_bundle"
+cat -- tests/fixtures/epistemic-d1-names.lisp "$d6_quantifier_source" tests/semantic/існує-за-предикатом-law.lisp > "$any_quantifier_law_bundle"
+cat -- tests/fixtures/epistemic-d1-names.lisp "$d6_quantifier_source" tests/semantic/існує-за-предикатом-mutant.lisp > "$any_quantifier_mutant_bundle"
+sha256sum lib/core4-parts/core4-d6b.lisp tests/fixtures/epistemic-d1-names.lisp tests/semantic/усі-за-предикатом-law.lisp tests/semantic/усі-за-предикатом-mutant.lisp tests/semantic/існує-за-предикатом-law.lisp tests/semantic/існує-за-предикатом-mutant.lisp > "$evidence/d6-quantifier-inputs.sha256"
+run_case run_law all-predicate-quantifier-law "$all_quantifier_law_bundle" 1
+run_case run_law all-predicate-quantifier-mutant "$all_quantifier_mutant_bundle" 0
+run_case run_law exists-predicate-quantifier-law "$any_quantifier_law_bundle" 1
+run_case run_law exists-predicate-quantifier-mutant "$any_quantifier_mutant_bundle" 0
 
 # Класифікуємо кореневі причини без повторного запуску SENS.
 printf 'SENS_RED_CAUSE root=d7-value-call count=%d ids=%s\n' "${#red_d7_ids[@]}" "${red_d7_ids[*]}"

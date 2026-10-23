@@ -2,6 +2,8 @@
 //! Keep the native evaluator as oracle and verify that the metacircular
 //! evaluator preserves closure semantics.
 
+mod common;
+
 use sens::{
     eval_parsed_expressions, eval_program, load_core_library, parse_mixed_exact_domain, Session,
     Value,
@@ -20,7 +22,7 @@ fn native(expr: &str) -> String {
 fn meta(expr: &str) -> String {
     let mut session = Session::bare();
     sens::load_core_library(&mut session).expect("core should load");
-    sens::load_meta_evaluator_library(&mut session).expect("meta evaluator should load");
+    common::load_meta_evaluator_library(&mut session).expect("meta evaluator should load");
 
     let source = format!("(обчислити-мета-вираз (quote {}) (quote ()))", expr);
     eval_program(&source, &mut session)
@@ -44,7 +46,7 @@ fn closure_capture_has_native_parity() {
 fn meta_numeric_roots_are_exact_d24_values() {
     let mut session = Session::bare();
     load_core_library(&mut session).expect("core should load");
-    sens::load_meta_evaluator_library(&mut session).expect("meta evaluator should load");
+    common::load_meta_evaluator_library(&mut session).expect("meta evaluator should load");
 
     for (name, expected) in [("мета-число-нуль", "0"), ("мета-число-один", "1")] {
         let value = eval_program(name, &mut session)
@@ -62,7 +64,7 @@ fn meta_numeric_roots_are_exact_d24_values() {
 fn mutual_group_closure_d1_is_computed_by_sens_not_bare_truth_names() {
     let mut session = Session::bare();
     load_core_library(&mut session).expect("ядро SENS");
-    sens::load_meta_evaluator_library(&mut session).expect("живий метаобчислювач");
+    common::load_meta_evaluator_library(&mut session).expect("живий метаобчислювач");
     let program = include_str!("../../../lib/meta-eval-mutual.lisp");
     let forms = parse_mixed_exact_domain(program).expect("поточна укр проєкція");
     eval_parsed_expressions(&forms, &mut session)

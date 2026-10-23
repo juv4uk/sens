@@ -9,7 +9,8 @@ use std::fmt::Write as _;
 use std::hint::black_box;
 use std::time::Instant;
 
-const SCHEMA: &str = "sens-packed-visible-ingest/v1";
+const MIN_SAMPLE: std::time::Duration = std::time::Duration::from_millis(25);
+const MAX_BATCHES_PER_SAMPLE: usize = 100_000;
 
 fn shape(expr: &Expr, output: &mut String) {
     match &expr.kind {
@@ -45,21 +46,49 @@ fn fingerprint(forms: &[Expr]) -> String {
     output
 }
 
-fn elapsed_per_program<F, T>(iterations: usize, f: &mut F) -> f64
+fn elapsed_per_program<F, T>(
+    iterations: usize,
+    f: &mut F,
+) -> Result<(f64, u128, u64, usize), String>
 where
     F: FnMut() -> T,
 {
     let start = Instant::now();
-    for _ in 0..iterations {
-        black_box(f());
+    let mut operations = 0u64;
+    let mut batches = 0usize;
+    while start.elapsed() < MIN_SAMPLE {
+        for _ in 0..iterations {
+            black_box(f());
+            operations += 1;
+        }
+        batches += 1;
+        if batches >= MAX_BATCHES_PER_SAMPLE && start.elapsed() < MIN_SAMPLE {
+            return Err("adaptive sample exceeded its batch budget".into());
+        }
     }
-    (start.elapsed().as_nanos() as f64) / iterations as f64
+    let elapsed_ns = start.elapsed().as_nanos();
+    if elapsed_ns == 0 || operations == 0 {
+        return Err("insufficient timer resolution".into());
+    }
+    Ok((
+        elapsed_ns as f64 / operations as f64,
+        elapsed_ns,
+        operations,
+        batches,
+    ))
 }
 
 fn median(values: &[f64]) -> f64 {
     let mut sorted = values.to_vec();
     sorted.sort_by(|a, b| a.total_cmp(b));
     sorted[sorted.len() / 2]
+}
+
+fn percentile(values: &[f64], percent: usize) -> f64 {
+    let mut sorted = values.to_vec();
+    sorted.sort_by(|a, b| a.total_cmp(b));
+    let index = (sorted.len() * percent).div_ceil(100).saturating_sub(1);
+    sorted[index.min(sorted.len() - 1)]
 }
 
 fn benchmark(case: &str, form: &str, forms: usize, samples: usize) -> Result<(), String> {
@@ -75,17 +104,15 @@ fn benchmark(case: &str, form: &str, forms: usize, samples: usize) -> Result<(),
     let physical_ast = parse_canonical_packed_words(&packed, &widths)
         .map_err(|e| format!("{case}: packed D2: {e:?}"))?;
     if fingerprint(&visual_ast) != fingerprint(&physical_ast) {
-        return Err(format!(
-            "{case}: D2/domain AST parity failed: no performance claim"
-        ));
+        return Err(format!("{case}: D2/domain AST parity failed: no performance claim"));
     }
     if visual_ast.len() != forms || physical_ast.len() != forms {
         return Err(format!("{case}: expected {forms} complete D2 forms"));
     }
 
-    // Same AST grammar and compiled binary. Packed-width boundaries are already
-    // known and *not* included in the timed ingest; report their count instead.
-    // Both closures allocate their parsed AST on each measured invocation.
+    // Same grammar and exact domain AST. Width boundaries are supplied out of
+    // band and intentionally excluded from the packed payload and timed loop.
+    // Each closure allocates its parsed AST on every invocation.
     let mut visible_read =
         || parse_canonical_binary(black_box(&visible)).expect("preflighted visible input");
     let mut packed_read = || {
@@ -101,29 +128,44 @@ fn benchmark(case: &str, form: &str, forms: usize, samples: usize) -> Result<(),
     let mut visible_ns = Vec::with_capacity(samples);
     let mut packed_ns = Vec::with_capacity(samples);
     for sample in 0..samples {
-        if sample.is_multiple_of(2) {
-            visible_ns.push(elapsed_per_program(iterations, &mut visible_read));
-            packed_ns.push(elapsed_per_program(iterations, &mut packed_read));
+        let (v, p) = if sample.is_multiple_of(2) {
+            let v = elapsed_per_program(iterations, &mut visible_read)?;
+            let p = elapsed_per_program(iterations, &mut packed_read)?;
+            (v, p)
         } else {
-            packed_ns.push(elapsed_per_program(iterations, &mut packed_read));
-            visible_ns.push(elapsed_per_program(iterations, &mut visible_read));
-        }
+            let p = elapsed_per_program(iterations, &mut packed_read)?;
+            let v = elapsed_per_program(iterations, &mut visible_read)?;
+            (v, p)
+        };
+        visible_ns.push(v.0);
+        packed_ns.push(p.0);
+        println!(
+            "RUST_PACKED_VISIBLE_SAMPLE\tcase={case}\tforms={forms}\tsample={}\tvisible_elapsed_ns={}\tvisible_programs={}\tvisible_ns_per_program={:.2}\tvisible_batches={}\tpacked_elapsed_ns={}\tpacked_programs={}\tpacked_ns_per_program={:.2}\tpacked_batches={}\titerations_per_batch={}\ttarget_sample_ns={}",
+            sample + 1,
+            v.1,
+            v.2,
+            v.0,
+            v.3,
+            p.1,
+            p.2,
+            p.0,
+            p.3,
+            iterations,
+            MIN_SAMPLE.as_nanos(),
+        );
     }
 
-    let v = median(&visible_ns);
-    let p = median(&packed_ns);
-    if !(v.is_finite() && p.is_finite() && v > 0.0 && p > 0.0) {
-        return Err(format!("{case}: invalid timing, refuse a speed claim"));
-    }
     println!(
-        "{{\"schema\":\"{SCHEMA}\",\"case\":\"{case}\",\"forms\":{forms},\"iterations_per_sample\":{iterations},\"samples\":{samples},\"visible_median_ns\":{v:.2},\"packed_median_ns\":{p:.2},\"ratio_visible_over_packed\":{:.5},\"visible_source_bytes\":{},\"packed_payload_bytes\":{},\"semantic_payload_bits\":{},\"width_schedule_entries\":{},\"visible_samples_ns\":{:?},\"packed_samples_ns\":{:?},\"preflight\":\"same-D2-domain-AST\",\"boundary_policy\":\"caller-supplied-excluded-from-payload\"}}",
-        v / p,
+        "RUST_PACKED_VISIBLE_SUMMARY\tcase={case}\tforms={forms}\tsamples={samples}\tvisible_p50_ns_per_program={:.2}\tvisible_p90_ns_per_program={:.2}\tpacked_p50_ns_per_program={:.2}\tpacked_p90_ns_per_program={:.2}\tratio_visible_over_packed_p50={:.5}\tvisible_source_bytes={}\tpacked_payload_bytes={}\tsemantic_payload_bits={}\twidth_schedule_entries={}\tpreflight=same-D2-domain-AST\tboundary_policy=caller-supplied-excluded-from-payload",
+        median(&visible_ns),
+        percentile(&visible_ns, 90),
+        median(&packed_ns),
+        percentile(&packed_ns, 90),
+        median(&visible_ns) / median(&packed_ns),
         visible.len(),
         packed.byte_len(),
         packed.bit_len(),
         widths.len(),
-        visible_ns,
-        packed_ns,
     );
     Ok(())
 }
@@ -150,7 +192,7 @@ fn main() {
     ];
     for (name, source, count) in cases {
         if let Err(error) = benchmark(name, source, count, samples) {
-            eprintln!("BLOCKED: {error}");
+            eprintln!("RUST_PACKED_VISIBLE_INVALID_INPUT_OR_PARITY: {error}");
             std::process::exit(2);
         }
     }

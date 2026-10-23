@@ -45,8 +45,8 @@ jobs:
           path: ${{ runner.temp }}/t22-results.json
           if-no-files-found: error
 
-      - name: Decide whether Rust wire-vs-JSON evidence is relevant
-        id: rust_wire_json
+      - name: Decide whether Rust exact-width ingest evidence is relevant
+        id: rust_packed_visible
         shell: bash
         env:
           EVENT_NAME: ${{ github.event_name }}
@@ -57,37 +57,29 @@ jobs:
           run_bench=false
           if [[ "$EVENT_NAME" == "workflow_dispatch" ]]; then
             run_bench=true
-          elif [[ -n "$BASE_SHA" && -n "$HEAD_SHA" ]] && git diff --name-only "$BASE_SHA" "$HEAD_SHA" | grep -Eq '^(benchmarks/rust-json-vs-sens-wire/|crates/sens/examples/transport_decode_bench\.rs$|crates/sens/Cargo\.toml$|Cargo\.lock$|benchmarks/agent-messages/run\.py$)'; then
+          elif [[ -n "$BASE_SHA" && -n "$HEAD_SHA" ]] && git diff --name-only "$BASE_SHA" "$HEAD_SHA" | grep -Eq '^(benchmarks/rust-packed-visible/|crates/sens/examples/packed_vs_visible_bench\.rs$|crates/sens/Cargo\.toml$|Cargo\.lock$)'; then
             run_bench=true
           fi
           echo "run=$run_bench" >> "$GITHUB_OUTPUT"
 
-      - name: Install stable Rust for decode-only comparison
-        if: steps.rust_wire_json.outputs.run == 'true'
+      - name: Install Rust for exact-width source-ingestion benchmark
+        if: steps.rust_packed_visible.outputs.run == 'true'
         uses: dtolnay/rust-toolchain@stable
 
-      - name: Install Cachegrind
-        if: steps.rust_wire_json.outputs.run == 'true'
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y valgrind
-          rustc --version
-          valgrind --version
-
-      - name: Benchmark Rust serde_json against SENS wire
-        if: steps.rust_wire_json.outputs.run == 'true'
+      - name: Benchmark Rust visible/packed exact-width ingestion
+        if: steps.rust_packed_visible.outputs.run == 'true'
         shell: bash
         run: |
           set -euo pipefail
-          bash benchmarks/rust-json-vs-sens-wire/run.sh "$RUNNER_TEMP/rust-json-vs-sens-wire"
-          cat "$RUNNER_TEMP/rust-json-vs-sens-wire/summary.md" >> "$GITHUB_STEP_SUMMARY"
+          bash benchmarks/rust-packed-visible/run.sh "$RUNNER_TEMP/rust-packed-visible"
+          cat "$RUNNER_TEMP/rust-packed-visible/summary.md" >> "$GITHUB_STEP_SUMMARY"
 
-      - name: Publish raw Rust wire-vs-JSON evidence
-        if: always() && steps.rust_wire_json.outputs.run == 'true'
+      - name: Publish raw Rust visible/packed ingest evidence
+        if: always() && steps.rust_packed_visible.outputs.run == 'true'
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f
         with:
-          name: rust-json-vs-sens-wire-${{ github.sha }}
-          path: ${{ runner.temp }}/rust-json-vs-sens-wire/
+          name: rust-packed-visible-${{ github.sha }}
+          path: ${{ runner.temp }}/rust-packed-visible/
           if-no-files-found: warn
           retention-days: 14
 

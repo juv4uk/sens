@@ -1,9 +1,11 @@
+mod common;
+
 use sens::{eval_program, load_core_library, ErrorKind, Session};
 
 fn eval_meta(source: &str) -> String {
     let mut session = Session::bare();
     load_core_library(&mut session).expect("core bootstrap");
-    sens::load_meta_evaluator_library(&mut session).unwrap();
+    common::load_meta_evaluator_library(&mut session).unwrap();
 
     let wrapper = format!("(обчислити-мета-вираз (quote {source}) (quote ()))");
 

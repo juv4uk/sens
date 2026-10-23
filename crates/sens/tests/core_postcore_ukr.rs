@@ -1,5 +1,7 @@
 //! Живе виконання виправлених post-core функцій через справжній SENS evaluator.
 //! Не підмінює семантику Rust або Python; Rust лише викликає SENS та звіряє результат.
+mod common;
+
 use sens::{eval_program, Session};
 
 fn core_session() -> Session {
@@ -164,7 +166,7 @@ fn core_sublis_and_maplist_execute_in_sens_without_host_oracle() {
 #[test]
 fn meta_eval_predicates_are_actual_d1_bits() {
     let mut session = core_session();
-    sens::load_meta_evaluator_library(&mut session)
+    common::load_meta_evaluator_library(&mut session)
         .expect("чинний український MetaEval має виконуватися в SENS");
     let cases = [
         ("(ім'я-форми-як-є? (як-є як-є))", true),
@@ -490,7 +492,7 @@ fn meta_eval_graph_exact_d1_law_and_negative_mutant_execute_in_sens() {
         ),
     ] {
         let mut session = core_session();
-        sens::load_meta_evaluator_library(&mut session)
+        common::load_meta_evaluator_library(&mut session)
             .expect("MetaEval має завантажитися у справжній SENS");
         let result = eval_program(source, &mut session).unwrap_or_else(|err| {
             panic!("test_id=meta-eval-graph-d1 case={name} actual=execution-error: {err}")
@@ -507,7 +509,7 @@ fn meta_eval_graph_exact_d1_law_and_negative_mutant_execute_in_sens() {
     // залежності-графа та досяжність-залежностей-графа?.
     // Rust лише порівнює дві відповіді справжнього SENS і читає D1.
     let mut session = core_session();
-    sens::load_meta_evaluator_library(&mut session).expect("дійсний метаобчислювач SENS");
+    common::load_meta_evaluator_library(&mut session).expect("дійсний метаобчислювач SENS");
     for (case, actual_source, expected_source) in [
         (
             "перший-запис",
@@ -730,7 +732,7 @@ fn meta_eval_lexical_eight_laws_and_eight_mutants_execute_in_sens() {
     assert_eq!(first[0], mutants[0]);
     assert_eq!(&first[1..], &laws[1..]);
     let mut session = core_session();
-    sens::load_meta_evaluator_library(&mut session).expect("живе українське визначення MetaEval");
+    common::load_meta_evaluator_library(&mut session).expect("живе українське визначення MetaEval");
     for (index, (law, mutant)) in laws.iter().zip(mutants.iter()).enumerate() {
         for (case, source, expected) in [("закон", *law, true), ("мутант", *mutant, false)]
         {
@@ -755,7 +757,7 @@ fn meta_eval_lexical_eight_laws_and_eight_mutants_execute_in_sens() {
 #[test]
 fn meta_eval_body_result_observes_last_form_and_early_failure() {
     let mut session = core_session();
-    sens::load_meta_evaluator_library(&mut session).expect("дійсний SENS MetaEval");
+    common::load_meta_evaluator_library(&mut session).expect("дійсний SENS MetaEval");
 
     // До виправлення перша форма помилково ставала остаточним результатом.
     assert_eq!(

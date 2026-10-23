@@ -10,14 +10,14 @@
 from __future__ import annotations
 
 import importlib.util
+from contextlib import redirect_stdout, redirect_stderr
+from io import StringIO
 import subprocess
 import sys
 import tempfile
 import unittest
-from contextlib import redirect_stdout
-from io import StringIO
+from unittest import mock
 from pathlib import Path
-from unittest.mock import patch
 
 ROOT = Path(__file__).resolve().parents[1]
 GUARD = ROOT / "scripts" / "guard-domain-function-reuse.py"
@@ -39,6 +39,20 @@ class DomainFunctionReuseRule(unittest.TestCase):
         result = run(GUARD, "--self-test")
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
 
+    def test_guard_fails_closed_when_ladder_discovery_is_incomplete(self) -> None:
+        spec = importlib.util.spec_from_file_location("guard_empty_ladder_test", GUARD)
+        self.assertIsNotNone(spec)
+        self.assertIsNotNone(spec.loader)
+        guard = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(guard)
+        output = StringIO()
+        with mock.patch.object(guard, "ladder_names", return_value=set()):
+            with redirect_stderr(output):
+                status = guard.main(["--file", "lib/core4.lisp"])
+        self.assertEqual(status, 2, output.getvalue())
+        self.assertIn("НЕ ПЕРЕВІРЕНО", output.getvalue())
+        self.assertIn(f"щонайменше {guard.MINIMUM_RATIFIED_SURFACES}", output.getvalue())
+
     def test_staged_guard_reads_git_index_not_dirty_worktree(self) -> None:
         # Механіка pre-commit: staged дубль не можна приховати чистим worktree.
         spec = importlib.util.spec_from_file_location("guard_staged_index_test", GUARD)
@@ -55,11 +69,12 @@ class DomainFunctionReuseRule(unittest.TestCase):
             subprocess.run(["git", "add", "lib/staged.lisp"], cwd=root, check=True)
             probe.write_text("(атом? (як-є ()))\n", encoding="utf-8")
             output = StringIO()
-            with patch.object(guard, "ROOT", root):
-                with patch.object(guard, "ladder_names", return_value={"сполучити"}):
-                    with patch.object(guard, "project_definition_sites", return_value={}):
-                        with redirect_stdout(output):
-                            status = guard.main(["--staged"])
+            with mock.patch.object(guard, "ROOT", root):
+                with mock.patch.object(guard, "MINIMUM_RATIFIED_SURFACES", 1):
+                    with mock.patch.object(guard, "ladder_names", return_value={"сполучити"}):
+                        with mock.patch.object(guard, "project_definition_sites", return_value={}):
+                            with redirect_stdout(output):
+                                status = guard.main(["--staged"])
             self.assertEqual(status, 1, output.getvalue())
             self.assertIn("BLOCKED", output.getvalue())
 
@@ -73,6 +88,28 @@ class DomainFunctionReuseRule(unittest.TestCase):
         result = run(GUARD, "--file", str(PROBE.relative_to(ROOT)))
         self.assertEqual(result.returncode, 1, "дубль наявної поверхні мусить валити guard")
         self.assertIn("BLOCKED", result.stdout)
+
+    def test_blocked_batch_cannot_register_d11_candidates(self) -> None:
+        # Якщо поряд із кандидатом є дубль D3, відмова має бути без побічного запису.
+        PROBE.write_text(
+            "(визначити сполучити (функція (х у) х))\n"
+            "(визначити нова-проба-реєстру-охоронця "
+            "(функція (х) (сполучити х (як-є ()))))\n",
+            encoding="utf-8",
+        )
+        spec = importlib.util.spec_from_file_location("guard_registration_test", GUARD)
+        self.assertIsNotNone(spec)
+        self.assertIsNotNone(spec.loader)
+        guard = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(guard)
+        output = StringIO()
+        with mock.patch.object(guard, "register_candidates", return_value=1) as register:
+            with redirect_stdout(output):
+                status = guard.main(["--file", str(PROBE.relative_to(ROOT)), "--register"])
+        self.assertEqual(status, 1, output.getvalue())
+        self.assertIn("КАНДИДАТ D11", output.getvalue())
+        self.assertIn("НЕ ЗАРЕЄСТРОВАНО", output.getvalue())
+        register.assert_not_called()
 
     def test_new_name_without_ladder_call_or_marker_is_blocked(self) -> None:
         # Свідомий вибір: або вживай поверхню драбини, або познач пропозицію D11.

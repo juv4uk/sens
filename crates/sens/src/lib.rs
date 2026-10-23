@@ -318,10 +318,6 @@ pub const CORE_LIBRARY_SOURCE: &str = include_str!("../../../lib/core4.lisp");
 /// bytes переходять на parsing CORE_LIBRARY_SOURCE.
 const CORE_LIBRARY_FASL: &[u8] = include_bytes!("../../../lib/core4.lisp.fasl");
 
-/// Metacircular evaluator source. Primitive identity values are canonical
-/// Ukrainian domain projections, not decimalized bit strings or a generated SID registry.
-pub const META_EVAL_LIBRARY_SOURCE: &str = include_str!("../../../lib/meta-eval.lisp");
-
 /// Process-result interpretation owned by Lisp. The host contributes only the
 /// `process-run-raw` capability; this layer decides how captured bytes become
 /// text and how decoding failures are represented.
@@ -698,13 +694,6 @@ pub fn load_core3_library(session: &mut Session) -> Result<EvalResult, LanguageE
     let result = binary_bootstrap::core3_program()?.execute(session)?;
     session.environment.select_core_profile(CoreProfile::Core3);
     Ok(result)
-}
-
-/// Завантажити явний метакруговий свідок SENS після звичайного ядра.
-/// Реєстр SID/Sens8 не завантажується: поверхні й семантичні ідентичності
-/// належать чинним доменним таблицям, а MetaEval використовує українські імена.
-pub fn load_meta_evaluator_library(session: &mut Session) -> Result<EvalResult, LanguageError> {
-    load_meta_evaluator_library_from_source(session, META_EVAL_LIBRARY_SOURCE)
 }
 
 /// Завантажити caller-supplied MetaEval source через той самий загальний

@@ -1,0 +1,21 @@
+{
+  "schema": "sens-benchmark-manifest/v1",
+  "stand": "rust-packed-visible",
+  "wing": "Exact-width Rust source-ingestion mechanism",
+  "roles": [
+    "MEASUREMENT",
+    "CONFORMANCE",
+    "FALSIFIER"
+  ],
+  "question": "What is the relative ingest cost of visible exact-width source words and packed payloads when both routes produce the same D2/domain AST?",
+  "claim": "The benchmark preflights exact AST parity and caller-supplied width boundaries, then measures only visible and packed readers. Width schedules remain out of the packed payload. This is not a self-describing file format, a language semantic proof, or a release speedup claim.",
+  "witness": [
+    "run.sh",
+    "README.md",
+    "crates/sens/examples/packed_vs_visible_bench.rs"
+  ],
+  "status": "RESEARCH-ONLY; EXACT AST PARITY PREFLIGHT",
+  "generation": "inline exact-width corpus; 5 workloads; 32 paired warmups; 9 alternating samples with adaptive minimum 25 ms timing; caller-supplied widths excluded from packed payload",
+  "axis": "visible vs packed p50/p90 ns/program; payload bytes and semantic bits",
+  "reproduce": "bash benchmarks/rust-packed-visible/run.sh /tmp/rust-packed-visible"
+}

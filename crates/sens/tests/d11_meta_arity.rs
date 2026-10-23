@@ -2,13 +2,15 @@
 //! Лише чинний MetaEval SENS визначає відповідь; Rust звіряє точний D1.
 //! Дослідна координата не є ратифікованим машинним викликом.
 
-use sens::{eval_program, load_core_library, load_meta_evaluator_library, Session};
+mod common;
+
+use sens::{eval_program, load_core_library, Session};
 
 #[test]
 fn d11_помилка_арності_мета_зберігає_очікувану_й_одержану_арність() {
     let mut session = Session::bare();
     load_core_library(&mut session).expect("ядро SENS");
-    load_meta_evaluator_library(&mut session).expect("живий MetaEval SENS");
+    common::load_meta_evaluator_library(&mut session).expect("живий MetaEval SENS");
 
     // Очікуване дерево складається засобами SENS: математичні лічильники
     // лишаються D24+, а не цитованими текстовими мітками.
