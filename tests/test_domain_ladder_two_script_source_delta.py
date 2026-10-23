@@ -4,6 +4,8 @@ Replay the owner-audited mapping against the original Git blobs. Unknown
 historical code words are explicitly pinned to themselves in this witness:
 they are NOT admitted successors and are never silently mapped.
 """
+import json
+import re
 import runpy
 import subprocess
 import unittest
@@ -36,6 +38,41 @@ def old_blob(sha):
     return cp.stdout
 
 
+
+def pinned_historical_words(ukr_mapping):
+    """Reconstruct the *archived* bit-stage witness, never current Lisp output.
+
+    Current migration writes full укр. The old source-delta proof intentionally
+    replays an intermediate bit-stage Git blob, so it needs the exact historical
+    domain successor rather than a human source spelling.
+    """
+    corpus = json.loads(
+        (ROOT / "knowledge/sens8-current-coverage-v1.json").read_text(encoding="utf-8")
+    )
+    surfaces = {
+        f"D{width}": {
+            row.bits: row.ukr
+            for row in MIGRATION["read_domain_table"](ROOT / f"lib/domains/d{width}.lisp")
+        }
+        for width in (3, 4, 5, 6, 8, 9)
+    }
+    words = {}
+    for record in corpus["rows"]:
+        legacy = record["legacy_code"]
+        if legacy not in ukr_mapping:
+            continue
+        exact = set(re.findall(r"D(10|[1-9]):([01]+)", record.get("current_target") or ""))
+        if len(exact) != 1:
+            raise AssertionError(f"{legacy}: historical successor is not unique")
+        width, bits = next(iter(exact))
+        if surfaces.get(f"D{width}", {}).get(bits) != ukr_mapping[legacy]:
+            raise AssertionError(f"{legacy}: archived successor differs from current укр")
+        words[legacy] = bits
+    if set(words) != set(ukr_mapping):
+        raise AssertionError("historical crosswalk no longer covers admitted callers")
+    return words
+
+
 class HistoricalScriptSourceDelta(unittest.TestCase):
     def test_ratifed_current_authority_and_unresolved_holds(self):
         mapping, blocked = MIGRATION["authority"](ROOT)
@@ -48,13 +85,14 @@ class HistoricalScriptSourceDelta(unittest.TestCase):
 
     def test_exact_source_change_only_admitted_call_heads(self):
         mapping, blocked = MIGRATION["authority"](ROOT)
+        archived_bits = pinned_historical_words(mapping)
         for path, blob_sha, number_replaced, holds in CASES:
             with self.subTest(path=path):
                 original = old_blob(blob_sha)
                 current = (ROOT / path).read_text(encoding="utf-8")
                 # This overlay is test-only: unresolved code words must retain
                 # identical bytes, NOT gain current language identities.
-                test_mapping = dict(mapping)
+                test_mapping = dict(archived_bits)
                 for word in holds:
                     test_mapping[word] = word
                 projection, candidate_count, problems = MIGRATION["rewrite"](
