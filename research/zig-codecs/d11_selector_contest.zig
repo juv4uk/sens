@@ -103,10 +103,10 @@ fn selectorName(word: u16) [11]u8 {
 test "D11 Драбина: усі 512 селекторів мають точний roundtrip" {
     for (0..selector_count) |i| {
         const source = [_]u16{selector_first + @as(u16, @intCast(i))};
-        var packed: [2]u8 = undefined;
-        try std.testing.expectEqual(@as(usize, 2), try encodeSelectors(&source, &packed));
+        var payload: [2]u8 = undefined;
+        try std.testing.expectEqual(@as(usize, 2), try encodeSelectors(&source, &payload));
         var decoded: [1]u16 = undefined;
-        try decodeSelectors(&packed, 1, &decoded);
+        try decodeSelectors(&payload, 1, &decoded);
         try std.testing.expectEqualSlices(u16, &source, &decoded);
     }
 }
