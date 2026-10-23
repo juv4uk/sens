@@ -26,6 +26,8 @@ for source in "$dir"/*.lisp; do
     failed=$((failed+1))
     continue
   fi
+  # Конкурс не має допускати байти, якщо Lisp змінено під час суду.
+  source_sha="$(sha256sum "$source" | cut -d\x27 \x27 -f1)"
   name="${stem##*/}"
   stage="$tmp/$name.sens"
   rm -f -- "$stage" "$tmp/$name"
@@ -60,6 +62,13 @@ for source in "$dir"/*.lisp; do
     unverified=""
     echo "CONTEST_NATIVE_RED source=$source stage=judge" >&2
     cat "$tmp/judge.err" >&2
+    failed=$((failed+1))
+    continue
+  fi
+  if [[ "$source_sha" != "$(sha256sum "$source" | cut -d\x27 \x27 -f1)" ]]; then
+    rm -f -- "$stem.sens" "$stem"
+    unverified=""
+    echo "CONTEST_SOURCE_CHANGED source=$source action=reject_stale_proof" >&2
     failed=$((failed+1))
     continue
   fi
