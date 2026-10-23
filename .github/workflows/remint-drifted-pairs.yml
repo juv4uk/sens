@@ -205,6 +205,31 @@ jobs:
               list="$(git log --diff-filter=A --name-only -n 600 -- '*.sens' | grep '\.sens$' | sed 's/\.sens$/.lisp/' | sort -u)"
             fi
           fi
+          # У черзі перші — реальні нові непарні програми, а не старі
+          # source/pair дрейфи, які можуть зайняти всі 24 місця.
+          # Вибір не дає PASS: далі кожну програму судять тільки SENS + Zig.
+          if [[ "$EVENT_NAME" == push ]]; then
+            priority="$RUNNER_TEMP/sens-remint-first-unpaired.list"
+            deferred="$RUNNER_TEMP/sens-remint-first-existing.list"
+            : > "$priority"
+            : > "$deferred"
+            while IFS= read -r source; do
+              [[ -n "$source" ]] || continue
+              if [[ "$source" == benchmarks/contest-uk/*.lisp ||
+                    "$source" == lib/*.lisp ]] &&
+                 [[ -f "$source" && ! -L "$source" ]] &&
+                 { [[ ! -s "${source%.lisp}.sens" ||
+                       ! -f "${source%.lisp}" ||
+                       -L "${source%.lisp}.sens" ||
+                       -L "${source%.lisp}" ]]; }; then
+                printf '%s\n' "$source" >> "$priority"
+              else
+                printf '%s\n' "$source" >> "$deferred"
+              fi
+            done <<< "$list"
+            list="$(cat "$priority" "$deferred")"
+            rm -- "$priority" "$deferred"
+          fi
           # Початковий native mint також має бути коротким: сотні повних
           # SENS/Zig перевірок раніше не встигали опублікуватись до нового push.
           # Першими лишаються джерела, змінені у push, а тоді непарні.
