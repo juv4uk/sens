@@ -91,9 +91,9 @@ def domain_ukr_names(width: int) -> set[str]:
     text = (DOMAIN_DIR / f"d{width}.lisp").read_text(encoding="utf-8")
     names: set[str] = set()
     for line in text.splitlines():
-        if not re.match(rf"^\\s*\\([01]{{{width}}}\\s+", line):
+        if not re.match(rf"^\s*\([01]{{{width}}}\s+", line):
             continue
-        projection = re.search(r'\\(укр\\s+(\\(\\)|"[^"]*"|[^()\\s]+)\\)', line)
+        projection = re.search(r'\(укр\s+(\(\)|"[^"]*"|[^()\s]+)\)', line)
         if projection is None:
             raise ValueError(f"D{width} missing укр projection")
         value = projection.group(1)
