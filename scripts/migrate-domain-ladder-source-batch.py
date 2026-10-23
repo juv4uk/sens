@@ -24,11 +24,12 @@ if str(SCRIPT_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPT_DIR))
 from report_original_migration_candidates import load_nonprogram_classification
 from domain_tables import read_domain_table
+from report_ukr_projection_progress import _contains_source_definitions
 BITS = re.compile(r"[01]{8}\Z")
 TARGET = re.compile(r"D(10|[1-9]):([01]+)")
 ALLOW = {"DIRECT-CURRENT-IDENTITY", "CURRENT-PROJECTION-DERIVED"}
 SCOPES = ("lib/", "knowledge/", "scripts/", "experiments/", "racket/boot/")
-SKIP = ("lib/domains/", "lib/generated/", "lib/surface/", "knowledge/archive/",
+SKIP = ("lib/domains/", "lib/generated/", "knowledge/archive/",
         "knowledge/d10-source-snapshots/", "research/", "docs/", "tests/")
 # Do not impose a file-name-based migration veto. Every tracked source in
 # the active scopes reaches the source-era/parser/evidence classification below;
@@ -339,6 +340,10 @@ def run(root, write=False, selected=None):
                      path.startswith("benchmarks/") and path.count("/") == 1)):
             continue
         file = root / path
+        if path.startswith("lib/surface/") and not _contains_source_definitions(file):
+            # Проєкційні таблиці — дані. Але дійсні DEFINE-програми у
+            # surface/ не можна приховувати від міграції лише через каталог.
+            continue
         if file.is_symlink():
             report.append({"path": path, "status": "blocked", "reasons": ["symlink"]})
             continue
