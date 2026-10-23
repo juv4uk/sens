@@ -75,23 +75,40 @@ def progress() -> Counter:
     return c
 
 
+def visible_levels(counts: Counter) -> list[tuple[str, str]]:
+    """Показати всі домени з файлами, не надаючи їм нової ратифікації."""
+    known = {domain for domain, _ in LEVELS}
+    extra = sorted(
+        (domain for domain in counts if domain not in known),
+        key=lambda domain: int(domain[1:]),
+    )
+    descriptions = {
+        "D24": "точна математика: числові закони та негативні свідки",
+    }
+    return LEVELS + [
+        (domain, descriptions.get(domain, "виявлені файли; звірити доменний контракт"))
+        for domain in extra
+    ]
+
+
 def semantic_game(brief: bool) -> int:
     prog = progress()
     total = sum(prog.values())
+    levels = visible_levels(prog)
     if brief:
-        print(f"ДРАБИНА: рівнів {len(LEVELS)}, файлів Lisp {total}, "
+        print(f"ДРАБИНА: рівнів {len(levels)}, файлів Lisp {total}, "
               f"найбільше {max(prog, key=prog.get) if prog else '—'}")
         return 0
 
     print("═══ ГРА «ДРАБИНА» / МОВА ═══")
     print("Лічильник показує файли, не результат виконання законів.\n")
     print(f"{'рівень':<6} {'файлів':>7}  опис")
-    for dom, desc in LEVELS:
+    for dom, desc in levels:
         n = prog.get(dom, 0)
         bar = "█" * min(n // 5, 20)
         print(f"{dom:<6} {n:>7}  {bar} {desc}")
     print(f"\nУсього файлів Lisp із доменним префіксом: {total}")
-    ranked = sorted(LEVELS, key=lambda kv: prog.get(kv[0], 0))
+    ranked = sorted(levels, key=lambda kv: prog.get(kv[0], 0))
     gaps = ranked[:3]
     print("\nНАСТУПНИЙ КВЕСТ (найменше файлів):")
     for dom, desc in gaps:
