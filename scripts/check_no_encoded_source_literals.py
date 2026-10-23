@@ -134,21 +134,19 @@ def _mask_comments_and_strings(source: str) -> str:
 
 
 def _quoted_data_numeric_head_offsets(code: str) -> set[int]:
-    """The operand of ratified D3 QUOTE is data, not executable call heads.
+    """Return every numeric atom inside an explicit D3 QUOTE operand.
 
-    Iterate masked source as S-expressions. Each frame tracks whether the
-    current list is quoted, its head and the number of parsed expressions.
-    Only the first operand of QUOTE is data; extra operands do not acquire
-    an exemption. The outer numeric 001 head remains forbidden itself.
+    A numeric atom in quoted data is inert. Only the first operand of the
+    Ukrainian QUOTE form is data; extra operands remain executable.
     """
     quoted: set[int] = set()
     stack: list[list] = []
-    for match in re.finditer(r"\(|\)|[^\s()]+", code):
+    for match in re.finditer(r"\\(|\\)|[^\\s()]+", code):
         token = match.group()
         if token == "(":
             parent = stack[-1] if stack else None
             inside_data = bool(parent and (
-                parent[0] or (parent[1] in ("як-є", "001") and parent[2] == 1)
+                parent[0] or (parent[1] in ("як-є", "001", "quote", "QUOTE") and parent[2] == 1)
             ))
             if parent:
                 parent[2] += 1
@@ -156,15 +154,19 @@ def _quoted_data_numeric_head_offsets(code: str) -> set[int]:
         elif token == ")":
             if stack:
                 stack.pop()
-        elif stack:
-            frame = stack[-1]
+        else:
+            frame = stack[-1] if stack else None
+            if frame is None:
+                continue
+            in_data = frame[0] or (
+                frame[1] in ("як-є", "001", "quote", "QUOTE") and frame[2] == 1
+            )
+            if in_data and re.fullmatch(NUMBER, token):
+                quoted.add(match.start())
             if frame[2] == 0:
                 frame[1] = token
-                if frame[0] and re.fullmatch(NUMBER, token):
-                    quoted.add(match.start())
             frame[2] += 1
     return quoted
-
 
 def find_forbidden_literals(source: str, path: str | Path | None = None) -> list[Finding]:
     """Find raw typed-wire spellings, numeric call heads and scalar literals."""
@@ -176,9 +178,9 @@ def find_forbidden_literals(source: str, path: str | Path | None = None) -> list
         findings.append(Finding(line, column, match.group(), "encoded domain/wire word"))
     quoted_numeric_heads = _quoted_data_numeric_head_offsets(code)
     numeric_heads = {match.start(1): match for match in NUMERIC_CALL_HEAD.finditer(code)}
-    # Ban every numeric atom in live source, not merely numeric function heads.
-    # Keep the head diagnostic as the more specific error for a numeric opcode.
-    for match in re.finditer(r"[^\s()]+", code):
+    # Ban numeric atoms in live source, not merely numeric function heads.
+    # A numeric call head gets the more specific diagnostic below.
+    for match in re.finditer(r"[^\\s()]+", code):
         token = match.group()
         start = match.start()
         if not re.fullmatch(NUMBER, token):
@@ -202,8 +204,7 @@ def find_forbidden_literals(source: str, path: str | Path | None = None) -> list
         line = code.count("\\n", 0, start) + 1
         column = start - code.rfind("\\n", 0, start)
         findings.append(Finding(line, column, match.group(1), "numeric function/opcode head"))
-        return sorted(findings, key=lambda item: (item.line, item.column))
-
+    return sorted(findings, key=lambda item: (item.line, item.column))
 
 def added_lisp_lines_from_diff(diff: str) -> list[tuple[str, int, str]]:
     """Return added lines and new-file line numbers from a unified Git diff."""
