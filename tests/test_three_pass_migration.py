@@ -862,13 +862,21 @@ class ThreePassMigrationTests(unittest.TestCase):
         out,_=self.migrate("'(() . ())\n")
         self.assertEqual(out,"10 001 00 10 000 11 000 01 01\n")
 
-    def test_quoted_symbol_datum_is_transported_as_ratified_d7_text(self):
-        # Ratified quoted-datum law: a quoted free symbol with no place in the
-        # callable D3-D10 ladder is transported as D7 Text/Data (D7 never
-        # creates a callable), framed exactly and never silently dropped.
-        out,_=self.migrate("'(a . b)\n")
+    def test_quoted_single_glyphs_are_d7_atoms_not_one_cell_lists(self):
+        # A quoted free glyph is one exact D7 datum. D2 wraps the actual
+        # surrounding pair/list, not the scalar glyph inside it.
+        out, _ = self.migrate("'(а (б) в)\n")
         self.assertEqual(
-            out,"10 001 00 10 10 1100001 01 11 10 1100010 01 01 01\n"
+            out,
+            "10 001 00 10 1100110 00 10 0101100 01 00 1100100 01 01\n",
+        )
+
+    def test_quoted_symbol_datum_is_transported_as_ratified_d7_text(self):
+        # One-cell D7 data is a scalar; the surrounding dotted pair remains
+        # explicit D2 structure. Multi-cell names still use contextual Text7 frames.
+        out, _ = self.migrate("'(a . b)\n")
+        self.assertEqual(
+            out, "10 001 00 10 1100001 11 1100010 01 01\n"
         )
 
     def test_known_structure_and_function_convert_while_unknown_data_stays_visible(self):
