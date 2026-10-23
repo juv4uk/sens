@@ -15,7 +15,7 @@
     "crates/sens/examples/packed_vs_visible_bench.rs"
   ],
   "status": "RESEARCH-ONLY; EXACT AST PARITY PREFLIGHT",
-  "generation": "inline exact-width corpus; 5 workloads; 32 paired warmups; 9 alternating samples with adaptive minimum 25 ms timing; caller-supplied widths excluded from packed payload",
+  "generation": "inline exact-width corpus; 5 workloads; 32 paired warmups; 15 alternating samples with adaptive minimum 25 ms timing; caller-supplied widths excluded from packed payload",
   "axis": "visible vs packed p50/p90 ns/program; payload bytes and semantic bits",
   "reproduce": "bash benchmarks/rust-packed-visible/run.sh /tmp/rust-packed-visible"
 }
