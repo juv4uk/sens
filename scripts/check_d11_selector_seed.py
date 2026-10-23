@@ -155,8 +155,8 @@ def validate_documents(documents: dict[str, Any]) -> dict[str, Any]:
     current_d10_blob = git_blob_sha1(documents["d10_table"].encode("utf-8"))
     parent_pin_matches = current_d10_blob == parent_pin
 
-    # Verify that the canonical D11 table still consists only of the 43
-    # unratified legacy test fixtures, not the 512 derived selectors.
+    # The 43 historical test fixtures remain unratified and archived;
+    # the current D11 table is checked against all 512 derived selectors below.
     require(vocabulary.get("schema") == "sens.d11.testing/v1" and
             vocabulary.get("status") == "UNRATIFIED_REVIEW" and
             vocabulary.get("ratified") is False and
@@ -220,6 +220,14 @@ def validate_documents(documents: dict[str, Any]) -> dict[str, Any]:
                 f"duplicate derived name {name}")
         deriveds[bits] = name
         derived_names.add(name.casefold())
+
+    # The current D11 table must match the mathematically derived seed, not
+    # merely contain 512 distinct well-formed coordinates.
+    for bits, expected_name in deriveds.items():
+        actual_name = d11_map.get(bits)
+        require(actual_name == expected_name, "D11_TABLE_DERIVATION",
+                f"input=D11:{bits} expected={expected_name!r} actual={actual_name!r} "
+                "reproduce=python3 scripts/check_d11_selector_seed.py --json")
 
     derived_coordinates = set(deriveds)
     test_coordinates = set(test_map)
