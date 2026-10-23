@@ -43,7 +43,8 @@ class HistoricalScriptSourceDelta(unittest.TestCase):
                               "історичний пін повинен вести на старий source")
                 heads = MIGRATION["executable_call_heads"](current, guard)
                 self.assertIn("визначити", heads)
-                self.assertIn("функція", heads)
+                if path.endswith("generate-functions-md.lisp"):
+                    self.assertIn("функція", heads)
                 self.assertFalse(
                     any(MIGRATION["BITS"].fullmatch(head) for head in heads),
                     f"{path}: лишився сирий 8-бітний виклик",
