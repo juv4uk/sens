@@ -51,12 +51,23 @@ def build() -> dict:
         if not rel or not rel.endswith(".lisp") or not rel.startswith(TRACKED):
             continue
         if rel not in files:  # перше створення файлу
-            files[rel] = {"first_sha": sha[:9], "first_date": date, "first_subject": subject[:80]}
+            files[rel] = {"first_sha": sha[:9], "first_date": date, "first_subject": subject[:80],
+                          "commits": 0, "last_sha": "", "last_date": "", "active_days": []}
             text = git("show", f"{sha}:{rel}")
             for m in DEF.finditer(text):
                 key = f"{rel}:{m.group(1)}"
                 defs.setdefault(key, {"sha": sha[:9], "date": date, "subject": subject[:80]})
-    return {"schema": "sens.guard-history-index/v1", "files": files, "defs": defs,
+        # активність: скільки разів файл змінювали, коли востаннє, у які дні
+        e = files[rel]
+        e["commits"] += 1
+        e["last_sha"] = sha[:9]
+        e["last_date"] = date
+        if date not in e["active_days"]:
+            e["active_days"].append(date)
+    hot = sorted(files.items(), key=lambda kv: -kv[1]["commits"])[:15]
+    return {"schema": "sens.guard-history-index/v2", "files": files, "defs": defs,
+            "hot_files": [{"path": k, **{x: v[x] for x in ("commits", "first_date", "last_date",
+                                                           "active_days")}} for k, v in hot],
             "counts": {"files": len(files), "defs": len(defs)}}
 
 
