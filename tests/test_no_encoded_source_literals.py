@@ -19,6 +19,15 @@ SPEC.loader.exec_module(CHECK)
 
 
 class EncodedSourceLiteralTests(unittest.TestCase):
+    def test_machine_encoder_has_no_numeric_source_literals(self):
+        # Суто лексичний свідок; семантику кодувальника перевіряють SENS-тести.
+        path = ROOT / "lib/machine/encoding/x86-64.lisp"
+        source = path.read_text(encoding="utf-8")
+        self.assertEqual(
+            CHECK.find_forbidden_literals(source, path="lib/machine/encoding/x86-64.lisp"),
+            [],
+        )
+
     def test_machine_effect_live_source_uses_named_coordinates(self):
         # Лексична перевірка; обчислення маршруту перевіряють нативні тести SENS.
         path = ROOT / "lib/machine/lowering/semantic-effects.lisp"
