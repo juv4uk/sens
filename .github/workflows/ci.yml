@@ -166,6 +166,9 @@ jobs:
               for witness in (
                   "tests/semantic/ukr-d3-structural-selftest.lisp",
                   "tests/semantic/language-law-d1-d4-ukr.lisp",
+                  "tests/semantic/lisp-d3-atom-cond-laws.lisp",
+                  "tests/semantic/lisp-d3-cons-selectors-laws.lisp",
+                  "tests/semantic/lisp-d3-eq-branches-laws.lisp",
               ):
                   if witness not in selected:
                       selected.append(witness)
@@ -280,6 +283,9 @@ jobs:
           }
           check_lisp_law d3-d4-positive tests/semantic/d3-d4-ukr-native-laws.lisp '(1 1 1 1 1 1 1 1 1 1 1 1)'
           check_lisp_law d3-d4-negative tests/semantic/d3-d4-ukr-native-mutant.lisp '0'
+          check_lisp_law d3-atom-cond tests/semantic/lisp-d3-atom-cond-laws.lisp '1'
+          check_lisp_law d3-cons-selectors tests/semantic/lisp-d3-cons-selectors-laws.lisp '1'
+          check_lisp_law d3-eq-branches tests/semantic/lisp-d3-eq-branches-laws.lisp '1'
           check_lisp_law d3-d4-selection-positive tests/semantic/d3-d4-logic-selection-law.lisp '1'
           check_lisp_law d3-d4-selection-mutant tests/semantic/d3-d4-logic-selection-mutant.lisp '0'
 
