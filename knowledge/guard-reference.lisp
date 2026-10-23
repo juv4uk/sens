@@ -11,6 +11,15 @@
 (визначити *довідник-гвардії*
   (як-є
     ((reference
+       (topic ladder-width-three-rhythms-research)
+       (summary "Дослідна метааксіома Драбини відрізняє три дії: ENUM розширює місткість таблиць функцій, WIDEN подвоює ширину ЛИШЕ ратифікованої родини даних, DERIVE породжує композиції за доведеним законом. Чинна числова драбина D12→D24→D48 ратифікована; D7→D14→D28 є лише текстовою гіпотезою; D17 не випливає з двох інтервалів +5. D14 не має місткості для одного атома на кожен символ Unicode 17.0. Ширина не є доменним допуском.")
+       (authority (language-contract.lisp contracts/d7-ratification.lisp contracts/numeric-domains-ratification.lisp lib/domains/d11.lisp knowledge/ladder/закон-ширин-пропозиція-20261024.uk.md))
+       (how-to (separate-capacity-from-domain-identity classify-enum-widen-derive check-current-owner-ratification test-generator-with-positive-and-negative-sens-witness do-not-admit-d14-or-d17-by-pattern do-not-confuse-unicode-character-with-glyph))
+       (verify (numeric-d12-doubling-is-ratified d7-v2-is-only-w7-ratified d14-and-d17-remain-unratified width-alone-does-not-mint-semantics d13-derivation-is-research-only))
+       (lifecycle research-proposal-not-ratified)
+       (provenance "Закон ширин SENS: три ритми Драбини, дослід 2026-10-24")
+       (unknown-route ask-owner))
+      (reference
        (topic d13-selector-double-suffix-research)
        (summary "D13 наразі не має ратифікованої доменної таблиці. Дослідний закон: із 512 селекторів D11 вивести по чотири двокрокові композиції p(s_a(s_b(x))), де s_0=CAR, s_1=CDR; кандидат координати дорівнює 11 біт батька та суфіксу ab. Це 2048 унікальних 13-бітних пропозицій із 8192 можливих місць, але НЕ прямі opcode, НЕ нативно доведена семантика і НЕ рішення власника. Математична драбина D12→D24→D48 не включає D13; дослідний транспорт ESC13 теж не є доменом D13.")
        (authority (AGENTS.md lib/domains/d11.lisp scripts/check_d11_selector_seed.py contracts/numeric-domains-ratification.lisp research/zig-codecs/esc13_ladder_game.md research/zig-codecs/d13_selector_game.zig knowledge/d13/селекторні-кандидати-2048-20261024.lisp .github/workflows/d11-ladder-contest.yml))
