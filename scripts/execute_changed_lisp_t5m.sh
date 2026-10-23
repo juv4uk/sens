@@ -186,7 +186,7 @@ run_native_t5m_program() {
     # Shell порівнює тільки кінцевий точний D1-біт нативного SENS.
     # Це не стороння модель EQ, COND або структурних правил.
     case "$file" in
-      tests/semantic/ukr-d3-pair-identity-law.lisp|tests/semantic/ukr-d3-cond-control-law.lisp|tests/semantic/ukr-d3-structural-selftest.lisp|tests/semantic/d11-clojure-juxt-laws.lisp)
+      tests/semantic/ukr-d3-pair-identity-law.lisp|tests/semantic/ukr-d3-cond-control-law.lisp|tests/semantic/ukr-d3-structural-selftest.lisp|tests/semantic/d11-clojure-juxt-laws.lisp|tests/semantic/d11-srfi1-span-break-laws.lisp)
         echo 1 > "$dir/ukr-d3-law.expected"
         if ! cmp -s "$dir/native-paired.stdout" "$dir/ukr-d3-law.expected"; then
           echo "::error::SENS_LISP_SEMANTIC_LAW_WRONG_D1 source=$file expected=D1:1 actual=$(cat "$dir/native-paired.stdout")" >&2
@@ -199,9 +199,9 @@ run_native_t5m_program() {
     # Нативний Д5 закон та його мутант: вердикт формулює Lisp,
     # Zig пакує, SENS виконує фізичний T5M, Shell лише звіряє D1.
     case "$file" in
-      tests/semantic/d5-arithmetic-native-t5m-law.lisp|tests/semantic/d5-arithmetic-native-t5m-mutant.lisp)
+      tests/semantic/d5-arithmetic-native-t5m-law.lisp|tests/semantic/d5-arithmetic-native-t5m-mutant.lisp|tests/semantic/d3-structural-native-t5m-law.lisp|tests/semantic/d3-structural-native-t5m-mutant.lisp)
         local_expected=1
-        if [[ "$file" == "tests/semantic/d5-arithmetic-native-t5m-mutant.lisp" ]]; then
+        if [[ "$file" == *-mutant.lisp ]]; then
           local_expected=0
         fi
         printf '%s\n' "$local_expected" > "$dir/d5-language.expected"
@@ -281,14 +281,14 @@ run_native_t5m_program() {
       fi
       # Lisp-свідок сам визначає кожен закон і завершує D1:1.
       # Хост звіряє лише точний фізичний результат після Zig/T5M + SENS.
-      if [[ "$file" == "tests/semantic/lisp-d5-list-self-verdict.lisp" ]]; then
-        printf '1\n' > "$dir/lisp-d5-self-verdict.expected"
-        if ! cmp -s "$dir/native-standalone.stdout" "$dir/lisp-d5-self-verdict.expected"; then
-          echo "::error file=$file,title=SENS Lisp D5::REGRESSION id=d5-list-self-verdict layer=semantics expected=D1:1 actual=$(cat "$dir/native-standalone.stdout")" >&2
+      if [[ "$file" == "tests/semantic/lisp-d3-d4-list-self-verdict.lisp" ]]; then
+        printf '1\n' > "$dir/lisp-d3-d4-self-verdict.expected"
+        if ! cmp -s "$dir/native-standalone.stdout" "$dir/lisp-d3-d4-self-verdict.expected"; then
+          echo "::error file=$file,title=SENS Lisp D3/D4::REGRESSION id=d3-d4-list-self-verdict layer=semantics expected=D1:1 actual=$(cat "$dir/native-standalone.stdout")" >&2
           mark_file_failed
           return
         fi
-        echo "::notice file=$file,title=SENS Lisp D5::PASS id=d5-list-self-verdict physical=Zig/T5M semantic=SENS result=D1:1"
+        echo "::notice file=$file,title=SENS Lisp D3/D4::PASS id=d3-d4-list-self-verdict physical=Zig/T5M semantic=SENS result=D1:1"
       fi
       # Виконувані аксіоми: тільки D1:1, не структурне D3 () чи host truthiness.
       # Негативний змінений текст повинен дати саме D1:0 через SENS/Zig.
@@ -404,6 +404,9 @@ while IFS= read -r file || [[ -n "$file" ]]; do
   if [[ "$file" == "lib/reason.lisp" || "$file" == "lib/forward.lisp" ]]; then
     # Чинний D9 уніфікатор визначено в українському Lisp, не в самій таблиці.
     binding_sources=(--binding-source lib/unify.lisp)
+  elif [[ "$file" == "tests/semantic/d11-srfi1-span-break-laws.lisp" ]]; then
+    # SENS визначає мову; Zig лише переносить біти фізичного T5M.
+    binding_sources=(--binding-source lib/d11-srfi1-span-break.lisp)
   elif [[ "$file" == "lib/d11-clojure-partition-by.lisp" ]]; then
     # Partition-by викликає чинні DEFINE із SRFI-1 span/break.
     # Ті самі SENS-зв'язування вже використовують remint і нативний census.
@@ -459,6 +462,14 @@ while IFS= read -r file || [[ -n "$file" ]]; do
   elif [[ "$file" == "tests/semantic/meta-fc-predicates-d1-law.lisp" ||
           "$file" == "tests/semantic/meta-fc-predicates-d1-mutant.lisp" ]]; then
     binding_sources=(--binding-source lib/meta-eval-first-class.lisp)
+  elif [[ "$file" == "tests/semantic/domain-reuse-guard-law.lisp" ||
+          "$file" == "tests/semantic/domain-reuse-guard-mutant.lisp" ||
+          "$file" == "tests/semantic/domain-reuse-debt-law.lisp" ||
+          "$file" == "tests/semantic/domain-reuse-debt-mutant.lisp" ]]; then
+    # Ядро охоронця драбин (драбина-дублі/кандидати/вердикт) визначено
+    # лише в lib/domain-function-reuse.lisp. Без цього SENS правильно
+    # відхиляє невідомі D7 Text7-символи цих голів.
+    binding_sources=(--binding-source lib/domain-function-reuse.lisp)
   fi
   run_native_t5m_program
 done < "$manifest"

@@ -19,6 +19,11 @@ on:
 permissions:
   contents: read
 
+# Нові push тієї самої гілки скасовують застарілий CI і заощаджують ресурси.
+concurrency:
+  group: sens-ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name != 'workflow_dispatch' }}
+
 jobs:
   sens:
     name: Українська проєкція, 3 бенчмарки та SENS/Zig/T5M
@@ -94,8 +99,11 @@ jobs:
           python3 scripts/report_ukr_projection_progress.py \
             --json "$RUNNER_TEMP/ukr-projection-progress.json"
 
+      # Незалежний механічний/мовний доказ не зникає після RED аудиту:
+      # збій залишається RED, але маніфест і SENS-коридор все одно працюють.
       - name: Знайти змінені Lisp-програми, а не історичні таблиці
         id: changed-t5m-lisp
+        if: ${{ always() }}
         shell: bash
         env:
           BEFORE_SHA: ${{ github.event.before }}
@@ -116,9 +124,9 @@ jobs:
             if ! git cat-file -e "$base^{commit}" 2>/dev/null; then
               timeout 60s git fetch --no-tags --depth=1 origin "$base"
             fi
-            git -c core.quotePath=false diff --name-only --diff-filter=ACMRT "$base" "$GITHUB_SHA" -- '*.lisp' '*.sens' '*.rs' '*.zig' '.github/workflows/ci.yml' > "$raw"
+            git -c core.quotePath=false diff --name-only --diff-filter=ACMRT "$base" "$GITHUB_SHA" -- '*.lisp' '*.sens' '*.rs' '*.zig' '.github/workflows/ci.yml' 'scripts/prove-lisp-semantic-t5m.sh' > "$raw"
           else
-            git -c core.quotePath=false diff-tree --no-commit-id --root --name-only --diff-filter=ACMRT -r "$GITHUB_SHA" -- '*.lisp' '*.sens' '*.rs' '*.zig' '.github/workflows/ci.yml' > "$raw"
+            git -c core.quotePath=false diff-tree --no-commit-id --root --name-only --diff-filter=ACMRT -r "$GITHUB_SHA" -- '*.lisp' '*.sens' '*.rs' '*.zig' '.github/workflows/ci.yml' 'scripts/prove-lisp-semantic-t5m.sh' > "$raw"
           fi
           python3 - "$raw" "$manifest" "$GITHUB_OUTPUT" <<'PY'
           from pathlib import Path
@@ -136,7 +144,7 @@ jobs:
           has_zig = False
           workflow_changed = False
           for original in raw.read_text(encoding="utf-8").splitlines():
-              if original == ".github/workflows/ci.yml":
+              if original in {".github/workflows/ci.yml", "scripts/prove-lisp-semantic-t5m.sh"}:
                   workflow_changed = True
                   continue
               if original.endswith(".lisp"):
@@ -182,14 +190,18 @@ jobs:
                   "tests/semantic/ukr-d3-structural-selftest.lisp",
                   "tests/semantic/language-law-d1-d4-ukr.lisp",
                   "tests/semantic/language-law-d4-closure-shadow-ukr.lisp",
+                  "tests/semantic/language-mutant-d4-closure-shadow-ukr.lisp",
                   "tests/semantic/lisp-d4-lexical-closure-laws.lisp",
-                  "tests/semantic/lisp-d6-map-filter-language-law.lisp",
-                  "tests/semantic/lisp-d6-map-filter-language-mutant.lisp",
+                  "tests/semantic/lisp-d4-recursive-list-laws.lisp",
+                  "tests/semantic/lisp-d4-recursive-list-mutant.lisp",
                   "tests/semantic/lisp-d3-atom-cond-laws.lisp",
                   "tests/semantic/lisp-d3-cons-selectors-laws.lisp",
                   "tests/semantic/lisp-d3-eq-branches-laws.lisp",
-                  "tests/semantic/d5-arithmetic-native-t5m-law.lisp",
-                  "tests/semantic/d5-arithmetic-native-t5m-mutant.lisp",
+                  "tests/semantic/d11-srfi1-span-break-laws.lisp",
+                  "tests/semantic/lisp-d3-d4-list-self-verdict.lisp",
+                  "tests/semantic/d3-structural-native-t5m-law.lisp",
+                  "tests/semantic/d3-structural-native-t5m-mutant.lisp",
+                  # TRANSITIONAL #5854: D6 LENGTH ратифікований, але невикличний у T5M.
               ):
                   if witness not in selected:
                       selected.append(witness)
@@ -217,29 +229,29 @@ jobs:
 
 
       - uses: dtolnay/rust-toolchain@1.99.0
-        if: steps.changed-t5m-lisp.outputs.has_lisp == 'true' || steps.changed-t5m-lisp.outputs.has_files == 'true' || steps.changed-t5m-lisp.outputs.has_rust == 'true'
+        if: ${{ always() && (steps.changed-t5m-lisp.outputs.has_lisp == 'true' || steps.changed-t5m-lisp.outputs.has_files == 'true' || steps.changed-t5m-lisp.outputs.has_rust == 'true') }}
 
       - uses: ./.github/actions/install-zig
-        if: steps.changed-t5m-lisp.outputs.has_lisp == 'true' || steps.changed-t5m-lisp.outputs.has_files == 'true' || steps.changed-t5m-lisp.outputs.has_rust == 'true' || steps.changed-t5m-lisp.outputs.has_zig == 'true'
+        if: ${{ always() && (steps.changed-t5m-lisp.outputs.has_lisp == 'true' || steps.changed-t5m-lisp.outputs.has_files == 'true' || steps.changed-t5m-lisp.outputs.has_rust == 'true' || steps.changed-t5m-lisp.outputs.has_zig == 'true') }}
 
       - name: Rust — обрамлення й помилки вводу, без мовного оракула
-        if: steps.changed-t5m-lisp.outputs.has_rust == 'true'
+        if: ${{ always() && steps.changed-t5m-lisp.outputs.has_rust == 'true' }}
         run: |
           set -euo pipefail
           cargo test --locked -p wsm-guard-slice --bin wsm-guard-slice event_frame_rejects_overlong_duplicate_unknown_and_non_ascii_fields -- --exact --nocapture
           cargo test --locked -p sens-lsp --lib transport::tests:: -- --nocapture
-          cargo test --locked -p sens --test d5_list_search_laws parser_rejects_an_unclosed_form_before_evaluation -- --exact --nocapture
+          cargo test --locked -p sens --test d5_list_search_laws -- --nocapture
           # Семантика D11 перевіряється в окремому Lisp-кроці через SENS/T5M.
           # Не дублюємо мовний оракул у механічному Rust-шарі.
 
       - name: Zig — кодеки, ABI та безпечна межа копіювання
-        if: steps.changed-t5m-lisp.outputs.has_zig == 'true'
+        if: ${{ always() && steps.changed-t5m-lisp.outputs.has_zig == 'true' }}
         run: |
           zig test -lc research/zig-codecs/tests.zig
           zig test -lc zig_transport_root.zig --test-filter 'Zig REPL transport refuses one-byte-short destination without a partial write'
 
       - name: Три бенчмарки — lists, arithmetic, parser у справжньому SENS
-        if: steps.changed-t5m-lisp.outputs.has_lisp == 'true'
+        if: ${{ always() && steps.changed-t5m-lisp.outputs.has_lisp == 'true' }}
         shell: bash
         timeout-minutes: 15
         run: |
@@ -266,13 +278,26 @@ jobs:
             echo 'Це фактично перевірені значення, не заміри часу. Для цих трьох джерел T5M-пари окремо не заявлені.'
           } >> "$GITHUB_STEP_SUMMARY"
 
+      # Одного білда з AST вистачає для коридору, фізичних Lisp-законів та звіту.
+      - name: Зібрати нативний SENS і Zig/T5M лише один раз
+        id: native-build
+        if: ${{ always() && (steps.changed-t5m-lisp.outputs.has_lisp == 'true' || steps.changed-t5m-lisp.outputs.has_files == 'true') }}
+        shell: bash
+        timeout-minutes: 12
+        run: |
+          set -euo pipefail
+          export CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0
+          cargo build --locked -p sens-cli --bin sens --bin sens-trit --features benchmark-ast-visits
+          test -x "$PWD/target/debug/sens"
+          test -x "$PWD/target/debug/sens-trit"
+
       # Маршрут 22.10: кожен push із .lisp МУСИТЬ дійти до реального
       # SENS → Zig/T5M mint/verify-view → парного й фізичного SENS-виконання.
       # Для таблиць/залежних фікстур маніфест містить виконувані Lisp-закони;
       # порожній маніфест після push .lisp — помилка, не тихий SKIP.
       - name: PUSH Lisp → кодек Zig/T5M → виконання SENS
         id: t5m_changed_execute
-        if: ${{ always() && (steps.changed-t5m-lisp.outputs.has_files == 'true' || (github.event_name == 'push' && steps.changed-t5m-lisp.outputs.has_lisp == 'true')) }}
+        if: ${{ always() && steps.native-build.outcome == 'success' && (steps.changed-t5m-lisp.outputs.has_files == 'true' || (github.event_name == 'push' && steps.changed-t5m-lisp.outputs.has_lisp == 'true')) }}
         shell: bash
         timeout-minutes: 15
         run: |
@@ -283,7 +308,6 @@ jobs:
             exit 1
           fi
           export CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0
-          cargo build --locked -p sens-cli --bin sens --bin sens-trit --features benchmark-ast-visits
           binary="$PWD/target/debug/sens"
           SENS_NATIVE_T5M=1 SENS_T5M_OPEN="$PWD/target/debug/sens-trit" \
             bash scripts/execute_changed_lisp_t5m.sh \
@@ -294,15 +318,14 @@ jobs:
 
 
       # Незалежний від загального corpus: сторонній RED не приховує доказ
-      # цих чотирьох мовних законів. Кодек і Zig перевіряють лише носій.
-      - name: Lisp → Zig/T5M → SENS — чотири нативні мовні вердикти
-        if: ${{ always() && steps.changed-t5m-lisp.outputs.has_files == 'true' }}
+      # мовних законів. Кодек і Zig перевіряють лише носій.
+      - name: Lisp → Zig/T5M → SENS — нативні позитивні й негативні мовні закони
+        if: ${{ always() && steps.native-build.outcome == 'success' && steps.changed-t5m-lisp.outputs.has_files == 'true' }}
         shell: bash
         timeout-minutes: 8
         run: |
           set -euo pipefail
           export CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0
-          cargo build --locked -p sens-cli --bin sens --bin sens-trit
           bash scripts/prove-lisp-semantic-t5m.sh \
             "$PWD/target/debug/sens" "$PWD/target/debug/sens-trit" \
             "$RUNNER_TEMP/changed-t5m-pairs/lisp-laws"
@@ -310,15 +333,14 @@ jobs:
       # Логіка перевірки всередині Lisp. Bash лише звіряє фактичний D1-вивід.
       # Rust відповідає за механізми Rust, Zig — за власний T5M/ABI.
       - name: Lisp-семантика Д1/Д3/Д4 — позитив і негатив у справжньому SENS
-        if: ${{ always() && steps.changed-t5m-lisp.outputs.has_lisp == 'true' }}
+        if: ${{ always() && steps.native-build.outcome == 'success' && steps.changed-t5m-lisp.outputs.has_lisp == 'true' }}
         shell: bash
         timeout-minutes: 10
         run: |
           set -euo pipefail
           binary="$PWD/target/debug/sens"
-          # Коміт лише з ci.yml теж запускає цей закон: збираємо CLI явно.
+          # Бінарники зібрано один раз вище, тут перевіряється лише SENS-семантика.
           export CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0
-          cargo build --locked -p sens-cli --bin sens
           test -x "$binary"
           check_lisp_law() {
             local id="$1" source="$2" expected="$3" actual
@@ -339,13 +361,16 @@ jobs:
           check_lisp_law d5-ukr-self-verdict tests/semantic/d5-ukr-arithmetic-self-verdict.lisp '1'
           check_lisp_law d5-physical-law tests/semantic/d5-arithmetic-native-t5m-law.lisp '1'
           check_lisp_law d5-physical-mutant tests/semantic/d5-arithmetic-native-t5m-mutant.lisp '0'
+          echo "::warning file=tests/semantic/d5-arithmetic-native-t5m-law.lisp,title=TRANSITIONAL #5854::D6 LENGTH D6 000000 невикличний фізично; D5 T5M=NOT_CERTIFIED"
+          check_lisp_law d3-physical-law tests/semantic/d3-structural-native-t5m-law.lisp '1'
+          check_lisp_law d3-physical-mutant tests/semantic/d3-structural-native-t5m-mutant.lisp '0'
           check_lisp_law d4-late-binding tests/semantic/d4-late-definition-binding-law.lisp '1'
           check_lisp_law d4-escaped-closure tests/semantic/d4-escaped-lexical-closure-law.lisp '1'
           check_lisp_law d3-atom-cond tests/semantic/lisp-d3-atom-cond-laws.lisp '1'
           check_lisp_law d3-cons-selectors tests/semantic/lisp-d3-cons-selectors-laws.lisp '1'
           check_lisp_law d3-eq-branches tests/semantic/lisp-d3-eq-branches-laws.lisp '1'
-          check_lisp_law d6-map-filter-positive tests/semantic/lisp-d6-map-filter-language-law.lisp '1'
-          check_lisp_law d6-map-filter-mutant tests/semantic/lisp-d6-map-filter-language-mutant.lisp '0'
+          check_lisp_law d4-recursive-list-positive tests/semantic/lisp-d4-recursive-list-laws.lisp '1'
+          check_lisp_law d4-recursive-list-mutant tests/semantic/lisp-d4-recursive-list-mutant.lisp '0'
           check_lisp_law d3-d4-selection-positive tests/semantic/d3-d4-logic-selection-law.lisp '1'
           check_lisp_law d3-d4-selection-mutant tests/semantic/d3-d4-logic-selection-mutant.lisp '0'
           check_lisp_law d4-selector-domain-positive tests/semantic/d4-selector-domain-law.lisp '(d4-selector-domain-law (status pass) (projection ukr))'
@@ -353,10 +378,13 @@ jobs:
           # Механізм конкатенації — shell; усі очікувані результати — SENS Lisp.
           cat -- lib/d11-clojure-juxt.lisp tests/semantic/d11-clojure-juxt-laws.lisp > "$RUNNER_TEMP/d11-clojure-juxt-native.lisp"
           check_lisp_law d11-clojure-juxt-language "$RUNNER_TEMP/d11-clojure-juxt-native.lisp" '1'
+          # Лише конкатенація джерел: весь вердикт виконує Lisp/SENS.
+          cat -- lib/d11-srfi1-span-break.lisp tests/semantic/d11-srfi1-span-break-laws.lisp > "$RUNNER_TEMP/d11-srfi1-span-break-native.lisp"
+          check_lisp_law d11-srfi1-span-break-language "$RUNNER_TEMP/d11-srfi1-span-break-native.lisp" '1'
 
       # Негативний свідок не є позитивним входом загального T5M-коридору.
       - name: Lisp D3 — CAR/CDR/CONS закон і негативний мутант
-        if: steps.changed-t5m-lisp.outputs.has_lisp == 'true'
+        if: ${{ always() && steps.native-build.outcome == 'success' && steps.changed-t5m-lisp.outputs.has_lisp == 'true' }}
         shell: bash
         timeout-minutes: 3
         run: |

@@ -14,4 +14,4 @@ bash scripts/prove-lisp-language-laws.sh target/debug/sens
 
 ## Додаткова сім'я: рекурсія над списком
 
-`d5-recursive-list-law.lisp` перевіряє створення функції через `визначити`/`функція`, базовий випадок порожнього списку, рекурсивний перехід через `решта`, атомність `перше` та відхилення вкладеної пари. `d5-recursive-list-mutant.lisp` змінює саме рекурсивну умову — очікується D1:0. Задумано як мовні самовердикти без хостового оракула. Обидві програми проходять `--t5m-mint`, `sens-trit open`, `verify-view` та `--t5m-pair` у `scripts/prove-lisp-language-laws.sh`.
+`d5-recursive-list-law.lisp` перевіряє функцію `визначити`/`функція`, базовий випадок порожнього списку, рекурсію через `решта`, атомність `перше` та відхилення вкладеної пари. `d5-recursive-list-mutant.lisp` змінює саме рекурсивну умову; очікується D1:0. Обидва тести проходять `--t5m-mint`, `sens-trit open`, `verify-view` та `--t5m-pair` у `scripts/prove-lisp-language-laws.sh`. Семантичний вердикт належить SENS, не Rust або Zig.

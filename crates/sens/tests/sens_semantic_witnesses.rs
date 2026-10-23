@@ -12,6 +12,8 @@ use sens::{
 const RESULT_STATUS: &str = include_str!("../../../lib/result-status.lisp");
 const RESULT_STATUS_D1_WITNESS: &str =
     include_str!("../../../tests/semantic/result-status-d1-law.bits");
+const RESULT_STATUS_LISP_WITNESS: &str =
+    include_str!("../../../tests/semantic/result-status-laws.lisp");
 
 fn load_reasoning(session: &mut Session, path: &str, source: &str) {
     let parsed = parse_mixed_exact_domain_reasoning_source(path, source)
@@ -21,23 +23,36 @@ fn load_reasoning(session: &mut Session, path: &str, source: &str) {
 }
 
 #[test]
-fn result_status_exact_d1_binary_self_verdict() {
+fn result_status_legacy_binary_carrier_is_parseable() {
     assert!(
         RESULT_STATUS_D1_WITNESS
             .bytes()
             .all(|byte| matches!(byte, b'0' | b'1' | b' ' | b'\n' | b'\r' | b'\t')),
-        "semantic witness must be exact binary SENS source"
+        "legacy carrier fixture must contain only binary words and separators"
     );
 
+    let witness = parse_canonical_binary(RESULT_STATUS_D1_WITNESS)
+        .expect("legacy binary carrier must retain canonical D2 framing");
+    assert!(
+        !witness.is_empty(),
+        "legacy carrier fixture must contain framed forms"
+    );
+}
+
+#[test]
+fn result_status_semantic_authority_is_ukrainian_lisp() {
     let mut session = Session::default();
     eval_core_library_source(include_str!("../../../lib/core.lisp"), &mut session)
         .expect("mechanical Core loader must admit current source");
     load_reasoning(&mut session, "lib/result-status.lisp", RESULT_STATUS);
 
-    let witness = parse_canonical_binary(RESULT_STATUS_D1_WITNESS)
-        .expect("binary SENS witness must have canonical D2 framing");
+    let witness = parse_mixed_exact_domain_reasoning_source(
+        "tests/semantic/result-status-laws.lisp",
+        RESULT_STATUS_LISP_WITNESS,
+    )
+    .expect("Ukrainian Lisp semantic witness must parse");
     eval_parsed_expressions(&witness, &mut session)
-        .expect("SENS-owned result-status self-verdict rejected");
+        .expect("SENS-owned Lisp result-status law rejected");
 }
 
 const X86_ENCODING_DIRECT_D4_LAW: &str =
