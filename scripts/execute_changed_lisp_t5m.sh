@@ -594,10 +594,15 @@ while IFS= read -r file || [[ -n "$file" ]]; do
                      --binding-source lib/epistemic.lisp
                      --binding-source tests/fixtures/witness-runner.lisp
                      --binding-source tests/fixtures/epistemic-authority-witness.lisp)
-  elif [[ "$file" == "tests/semantic/utf8-numeric-foundations-law.lisp" ||
+  elif [[ "$file" == "tests/semantic/utf8-boundary-laws.lisp" ||
+          "$file" == "tests/semantic/utf8-boundary-mutant.lisp" ||
+          "$file" == "tests/semantic/utf8-quotient-laws.lisp" ||
+          "$file" == "tests/semantic/utf8-quotient-mutant.lisp" ||
+          "$file" == "tests/semantic/utf8-numeric-foundations-law.lisp" ||
           "$file" == "tests/semantic/utf8-numeric-foundations-mutant.lisp" ]]; then
-    # Джерелом D24+ числових тотожностей є чинна Lisp-бібліотека UTF-8.
-    # Zig не вигадує значення, а фізичний SENS перевіряє їх після T5M.
+    # Усі UTF-8 закони/мутанти викликають DEFINE зі справжньої Lisp-бібліотеки.
+    # Без неї фізичний SENS бачить невизначену D7-голову, а не мовний закон.
+    # Числові тотожності залишаються точними D24+ значеннями.
     binding_sources=(--binding-source lib/utf8.lisp)
   elif [[ "$file" == "tests/semantic/d3-structural-bench-law.lisp" ||
           "$file" == "tests/semantic/d3-structural-bench-mutant.lisp" ]]; then
