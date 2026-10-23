@@ -39,6 +39,26 @@ def _load_discover():
     return module
 
 
+
+def _project_definitions() -> dict[str, list[str]]:
+    """Ім'я → місця в проєкті (lib/**.lisp), де воно ВЖЕ визначено (не ратифікована поверхня, а власне)."""
+    out: dict[str, list[str]] = {}
+    import subprocess
+    files = subprocess.run(["git", "-c", "core.quotepath=false", "ls-files", "lib"],
+                           cwd=ROOT, capture_output=True, text=True).stdout.split()
+    for rel in files:
+        if not rel.endswith(".lisp"):
+            continue
+        if rel.startswith(("lib/domains/", "lib/generated/", "lib/surface/")):
+            continue
+        path = ROOT / rel
+        if not path.is_file():
+            continue
+        for m in re.finditer(r"\(визначити\s+([^\s()]+)", path.read_text(encoding="utf-8", errors="ignore")):
+            out.setdefault(m.group(1), []).append(rel)
+    return out
+
+
 def _human(row: dict) -> dict[str, str]:
     out = {}
     for col in ("ук", "укр", "san", "en", "LISP"):
@@ -124,15 +144,31 @@ def main(argv: list[str] | None = None) -> int:
         if close:
             print("Можливо, ви мали на увазі: " + ", ".join(close))
         print("Якщо операції справді немає — це кандидат у пропозиції D11, а не привід писати дубль.")
-        return 1
 
-    print(f"знайдено {len(hits)} (показано до {args.limit}):")
-    for d, row, names in hits[: args.limit]:
-        uk = names.get("ук", names.get("укр", ""))
-        bits = row.get("bits", "")
-        width = len(bits)
-        print(f"  {uk}  [укр-проєкція]  (координата D{d}:{bits}, W{width})  en={names.get('en','')}  LISP={names.get('LISP','')}")
-    print("\nДжерело влади: lib/domains/*.lisp (через discover_domain_function_candidates). Вживай наявне, а не винаходь наново.")
+    if hits:
+        print(f"знайдено {len(hits)} (показано до {args.limit}):")
+        for d, row, names in hits[: args.limit]:
+            uk = names.get("ук", names.get("укр", ""))
+            bits = row.get("bits", "")
+            width = len(bits)
+            print(f"  {uk}  [поверхня драбини]  (координата D{d}:{bits}, W{width})  en={names.get('en','')}  LISP={names.get('LISP','')}")
+
+    # Власні визначення проєкту — щоб не винаходити те, що вже написано.
+    own = _project_definitions()
+    own_hits = {name: where for name, where in own.items() if q == name.lower() or (not args.all and q in name.lower())}
+    if own_hits:
+        print("\nУЖЕ ВИЗНАЧЕНО у проєкті (вжий, не перевизначай):")
+        for name, where in sorted(own_hits.items()):
+            print(f"  {name}  ←  {', '.join(sorted(set(where)))}")
+
+    # Простий вердикт — агент швидко вирішує сам.
+    if hits:
+        print("\nВЕРДИКТ: уживай наявну поверхню драбини. Не визначай наново.")
+        return 0
+    if own_hits:
+        print("\nВЕРДИКТ: уживай наявне визначення проєкту. Не визначай наново.")
+        return 0
+    print("\nВЕРДИКТ: у драбинах і проєкті немає. Визнач — і познач `; D11-пропозиція: <причина>`.")
     return 0
 
 
