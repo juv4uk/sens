@@ -47,6 +47,25 @@ cargo run --locked -p sens-cli --bin sens-trit -- open path/to/program.sens
 
 Для нової міграції потрібні **`name.lisp` → `name.sens` (байти T5M) + `name` (похідний видимий бітовий перегляд без розширення)**. Файл `name` — не ще один канонічний виконавчий формат. Старі SID8/Sens8 голови зіставляються з чинними доменами **за доведеною історичною роллю**, а не за рівністю байта з D8. [Правила міграції](docs/SENS-LISP-TO-T5-MIGRATION-2026-10-08.uk.md) · [навігація документацією](docs/README.md).
 
+## Завантаження частин Core4
+
+У SENS немає мовної форми `include`. Це не забороняє CLI завантажувати кілька файлів як частини однієї програми: `sens --t5m-files` читає `.lisp` шляхи в заданому порядку, проводить кожну частину через Zig/T5M і виконує всі частини в одній SENS-сесії. Визначення з попередніх файлів доступні наступним. Окремий файл-частина не обов'язково самодостатній.
+
+Для Core4 застосовуй такий порядок; додай останнім власний файл-пробу, щоб перевірити визначення з бібліотеки:
+
+```sh
+cargo run --locked -p sens-cli --bin sens -- \
+  --t5m-files \
+  lib/core4-parts/core4-language.lisp \
+  lib/core4-parts/core4-d6.lisp \
+  lib/core4-parts/core4-codec.lisp \
+  lib/core4-parts/core4-d6b.lisp \
+  lib/core4-parts/core4-d8-d9.lisp \
+  path/to/probe.lisp
+```
+
+Це зовнішнє завантаження файлів CLI, а не `include` у мові. Перевірка послідовного завантаження є в `crates/sens-cli/src/repl.rs::t5m_core4_parts_load_sequentially_through_one_session`; реальний CLI-прогін повернув `2` для проби `(додати-1 число-один)` після п'яти частин.
+
 
 
 > **Історичний зріз 12.10.2026:** [проєктна картина на цю дату](docs/project-reality-2026-10-12.uk.md) і [raw evidence](evidence/benchmark-sweep-2026-10-12.json) залишаються відтворюваними свідченнями, але не описують весь поточний `main` і не засвідчують глобальний PASS.
