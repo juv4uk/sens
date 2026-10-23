@@ -69,6 +69,38 @@ def definitions(text: str) -> list[str]:
     return [m.group(1) for m in DEF.finditer(text)]
 
 
+
+MARKER = re.compile(r";\s*D11-пропозиція\s*:", re.IGNORECASE)
+
+
+def definitions_with_bodies(text: str):
+    """Повертає (ім'я, тіло, чи позначено маркером D11-пропозиції) для кожного (визначити …)."""
+    out = []
+    for m in DEF.finditer(text):
+        name = m.group(1)
+        # маркер у 200 символах перед визначенням
+        before = text[max(0, m.start() - 200):m.start()]
+        marked = bool(MARKER.search(before))
+        rest = text[m.end():]
+        nxt = rest.find("(визначити ")
+        body = rest[:nxt] if nxt > 0 else rest
+        out.append((name, body, marked))
+    return out
+
+
+# Структурні/синтаксичні голови — це не «вживання операції», а будова форми.
+# Їх не рахуємо як виклик драбини, інакше кожне (визначити … (функція …)) «кликало б» драбину.
+STRUCTURAL = {
+    "визначити", "функція", "за-умовою", "як-є", "нехай", "нехай-послідовно",
+    "нехай*", "пропустити", "так", "ні",
+}
+
+
+def _calls_ladder(body: str, ladder: set[str]) -> bool:
+    calls = set(re.findall(r"\(\s*([^\s()]{2,})", body))
+    return bool((calls & ladder) - STRUCTURAL)
+
+
 def changed_files(args) -> list[str]:
     if args.file:
         return list(args.file)
@@ -87,6 +119,7 @@ def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description="guard: вживати функції драбин D1–D10")
     ap.add_argument("--staged", action="store_true")
     ap.add_argument("--paths-from")
+    ap.add_argument("--base", help="базовий SHA; перевіряти лише ДОДАНІ визначення")
     ap.add_argument("--file", action="append")
     ap.add_argument("--self-test", action="store_true")
     args = ap.parse_args(argv)
@@ -101,7 +134,7 @@ def main(argv: list[str] | None = None) -> int:
     if not (args.staged or args.paths_from or args.file):
         ap.error("потрібен --staged / --paths-from / --file")
 
-    blocked: list[tuple[str, str]] = []
+    blocked: list[tuple[str, str, str]] = []
     candidates: list[tuple[str, str]] = []
     checked = 0
     for rel in changed_files(args):
@@ -113,19 +146,40 @@ def main(argv: list[str] | None = None) -> int:
         if not path.is_file():
             continue
         checked += 1
-        for name in definitions(path.read_text(encoding="utf-8")):
-            (blocked if name in ladder else candidates).append((rel, name))
+        text = path.read_text(encoding="utf-8")
+        known: set[str] = set()
+        if args.base:
+            try:
+                old_text = subprocess.run(
+                    ["git", "show", f"{args.base}:{rel}"], cwd=ROOT,
+                    capture_output=True, text=True, check=False).stdout
+            except Exception:
+                old_text = ""
+            known = {n for n, _, _ in definitions_with_bodies(old_text)}
+        for name, body, marked in definitions_with_bodies(text):
+            if args.base and name in known:
+                continue  # не чіпаємо те, що вже було до зміни
+            if name in ladder:
+                blocked.append((rel, name, "дубль наявної поверхні"))
+                continue
+            if not marked and not _calls_ladder(body, ladder):
+                # Нове ім'я без жодного виклику поверхні драбини і без маркера —
+                # це або перевинахід наявної операції, або неусвідомлена нова.
+                blocked.append((rel, name, "нове ім'я без виклику драбини і без маркера D11-пропозиції"))
+                continue
+            candidates.append((rel, name))
 
     for rel, name in candidates:
-        print(f"КАНДИДАТ D11: {rel}: {name} — немає в драбинах; внеси в пропозиції D11 (далі D12…), не лишай локальним дублем")
+        print(f"КАНДИДАТ D11: {rel}: {name} — немає в драбинах; зареєстровано як пропозицію D11 (далі D12…)")
 
     if blocked:
-        for rel, name in blocked:
-            print(f"BLOCKED: {rel}: «{name}» вже є ратифікованою поверхнею D1–D10 — вжий наявну, не перевизначай")
-        print(f"GUARD-DOMAIN-REUSE: BLOCKED ({len(blocked)} дублів серед {checked} файлів)")
+        for rel, name, why in blocked:
+            print(f"BLOCKED: {rel}: «{name}» — {why}. Вжий наявну поверхню драбини, або познач "
+                  f"`; D11-пропозиція: <причина>` перед визначенням, якщо операції справді немає.")
+        print(f"GUARD-DOMAIN-REUSE: BLOCKED ({len(blocked)} порушень серед {checked} файлів)")
         return 1
 
-    print(f"GUARD-DOMAIN-REUSE: OK ({checked} файлів перевірено, {len(candidates)} кандидатів D11)")
+    print(f"GUARD-DOMAIN-REUSE: OK ({checked} файлів, {len(candidates)} кандидатів D11)")
     return 0
 
 

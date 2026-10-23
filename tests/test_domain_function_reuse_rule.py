@@ -45,10 +45,25 @@ class DomainFunctionReuseRule(unittest.TestCase):
         self.assertEqual(result.returncode, 1, "дубль наявної поверхні мусить валити guard")
         self.assertIn("BLOCKED", result.stdout)
 
-    def test_genuinely_new_name_is_a_candidate_not_a_block(self) -> None:
+    def test_new_name_without_ladder_call_or_marker_is_blocked(self) -> None:
+        # Свідомий вибір: або вживай поверхню драбини, або познач пропозицію D11.
         PROBE.write_text("(визначити цілком-нова-річ-з-тесту (функція (х) х))\n", encoding="utf-8")
         result = run(GUARD, "--file", str(PROBE.relative_to(ROOT)))
-        self.assertEqual(result.returncode, 0, "нове ім'я — не дубль, а кандидат D11")
+        self.assertEqual(result.returncode, 1, "нове ім'я без виклику драбини і без маркера — BLOCKED")
+        self.assertIn("BLOCKED", result.stdout)
+
+    def test_new_name_with_d11_marker_is_a_candidate(self) -> None:
+        PROBE.write_text("; D11-пропозиція: справді нової операції немає в драбинах\n"
+                         "(визначити цілком-нова-річ-з-тесту (функція (х) х))\n", encoding="utf-8")
+        result = run(GUARD, "--file", str(PROBE.relative_to(ROOT)))
+        self.assertEqual(result.returncode, 0, "з маркером — кандидат D11, не блок")
+        self.assertIn("КАНДИДАТ D11", result.stdout)
+
+    def test_new_name_that_calls_the_ladder_is_allowed(self) -> None:
+        PROBE.write_text("(визначити цілком-нова-річ-з-тесту (функція (х) (сполучити х (як-є ()))))\n",
+                         encoding="utf-8")
+        result = run(GUARD, "--file", str(PROBE.relative_to(ROOT)))
+        self.assertEqual(result.returncode, 0, "кличе драбину — припустимо")
         self.assertIn("КАНДИДАТ D11", result.stdout)
 
     def test_search_finds_an_existing_surface_by_name(self) -> None:
