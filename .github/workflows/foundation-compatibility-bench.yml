@@ -6,7 +6,6 @@ on:
 concurrency:
   group: sens-foundation-compatibility-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: false
-  queue: max
 
 jobs:
   foundation-compatibility:

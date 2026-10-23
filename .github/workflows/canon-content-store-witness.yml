@@ -8,7 +8,6 @@ permissions:
 concurrency:
   group: canon-content-store-witness-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: false
-  queue: max
 
 jobs:
   canon-and-content-store:

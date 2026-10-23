@@ -6,7 +6,6 @@ on:
 concurrency:
   group: nonlocal-exit-domain-${{ github.ref }}
   cancel-in-progress: false
-  queue: max
 
 jobs:
   falsifier:

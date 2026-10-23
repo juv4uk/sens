@@ -9,7 +9,6 @@ permissions:
 concurrency:
   group: sens-packed-bench-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: false
-  queue: max
 
 jobs:
   performance:

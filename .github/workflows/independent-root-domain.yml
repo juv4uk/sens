@@ -6,7 +6,6 @@ on:
 concurrency:
   group: independent-root-domain-${{ github.ref }}
   cancel-in-progress: false
-  queue: max
 
 jobs:
   attack:

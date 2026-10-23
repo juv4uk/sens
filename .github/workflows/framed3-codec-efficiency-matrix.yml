@@ -9,7 +9,6 @@ permissions:
 concurrency:
   group: sens-codec-efficiency-${{ github.sha }}-${{ github.event_name }}
   cancel-in-progress: false
-  queue: max
 
 jobs:
   paired-physical-profiles:

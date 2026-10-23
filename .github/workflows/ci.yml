@@ -19,11 +19,9 @@ on:
 permissions:
   contents: read
 
-# Кожен SHA отримує незалежний результат; новий push не скасовує і не
-# ставить у concurrency-чергу виконання попереднього коміту.
-# Один автоматичний workflow лишається в ci.yml, без дубльованих запусків.
+# Нові push тієї самої гілки скасовують застарілий CI і заощаджують ресурси.
 concurrency:
-  group: sens-ci-${{ github.workflow }}-${{ github.event_name }}-${{ github.sha }}
+  group: sens-ci-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: false
 
 jobs:

@@ -8,7 +8,6 @@ permissions:
 concurrency:
   group: d10-unified-sieve-main-single-writer
   cancel-in-progress: false
-  queue: max
 
 jobs:
   verify-and-publish:

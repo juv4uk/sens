@@ -10,7 +10,6 @@ permissions:
 concurrency:
   group: physical-t5-irefs-${{ github.sha }}
   cancel-in-progress: false
-  queue: max
 
 jobs:
   cpu-irefs:

@@ -6,7 +6,6 @@ on:
 concurrency:
   group: exact-width-admitted-corpus-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: false
-  queue: max
 
 jobs:
   historical-projection:

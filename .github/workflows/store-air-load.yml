@@ -6,7 +6,6 @@ on:
 concurrency:
   group: store-air-load-${{ github.ref }}
   cancel-in-progress: false
-  queue: max
 
 jobs:
   evidence:

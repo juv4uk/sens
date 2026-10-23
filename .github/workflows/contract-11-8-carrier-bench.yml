@@ -9,7 +9,6 @@ on:
 concurrency:
   group: contract-11-8-carrier-${{ github.ref }}
   cancel-in-progress: false
-  queue: max
 
 jobs:
   bench:

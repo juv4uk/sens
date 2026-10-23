@@ -10,7 +10,6 @@ on:
 concurrency:
   group: research-bench-smoke-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: false
-  queue: max
 
 jobs:
   structural-smoke:

@@ -6,7 +6,6 @@ on:
 concurrency:
   group: sens-domain-mechanism-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: false
-  queue: max
 
 jobs:
   semantic-path-locality:

@@ -6,7 +6,6 @@ on:
 concurrency:
   group: release-preflight-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: false
-  queue: max
 
 jobs:
   release-preflight:

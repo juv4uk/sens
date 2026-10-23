@@ -9,7 +9,6 @@ permissions:
 concurrency:
   group: gpu-exact-domain-2046-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: false
-  queue: max
 
 jobs:
   gpu-coordinate-proof:
