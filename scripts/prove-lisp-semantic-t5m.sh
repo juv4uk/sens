@@ -63,6 +63,48 @@ run_law() {
   printf '%s\n' "id=$id source=$source expected=D1:$expected actual=D1:$actual" >>"$evidence/results.txt"
 }
 
+# Логічний шар уніфікації — окремий Lisp-свідок із чинною бібліотекою.
+# Повний вихідний текст виконується й кодується разом; хост не обчислює occurs-check.
+run_bound_law() {
+  local id="$1" source="$2" expected="$3" dir combined physical actual
+  dir="$evidence/$id"
+  combined="$dir/combined.lisp"
+  physical="$dir/program.sens"
+  mkdir -p "$dir"
+  cat -- lib/unify.lisp "$source" > "$combined"
+
+  if ! timeout 45s "$sens" "$combined" >"$dir/direct.out" 2>"$dir/direct.err"; then
+    cat "$dir/direct.err" >&2
+    fail "$id" lisp-reader "SENS-execution" "rejected"
+  fi
+  if ! timeout 45s "$sens" --t5m-mint "$combined" "$physical" >"$dir/mint.out" 2>"$dir/mint.err"; then
+    cat "$dir/mint.err" >&2
+    fail "$id" codec "T5M-mint" "rejected"
+  fi
+  test -s "$physical" || fail "$id" codec "nonempty-T5M" "empty"
+  if ! timeout 45s "$trit" open "$physical" >"$dir/program" 2>"$dir/open.err" ||
+     ! timeout 45s "$trit" verify-view "$physical" >"$dir/inverse.out" 2>"$dir/inverse.err"; then
+    cat "$dir/open.err" "$dir/inverse.err" >&2 || true
+    fail "$id" zig-transport "canonical-roundtrip" "rejected"
+  fi
+  if ! timeout 45s "$sens" --t5m-pair "$combined" "$physical" >"$dir/paired.out" 2>"$dir/paired.err" ||
+     ! timeout 45s "$sens" "$physical" >"$dir/physical.out" 2>"$dir/physical.err"; then
+    cat "$dir/paired.err" "$dir/physical.err" >&2 || true
+    fail "$id" sens-physical "paired-and-standalone-execution" "rejected"
+  fi
+  cmp -s "$dir/direct.out" "$dir/paired.out" ||
+    fail "$id" carrier "direct-equals-paired" "divergent"
+  cmp -s "$dir/paired.out" "$dir/physical.out" ||
+    fail "$id" carrier "paired-equals-physical" "divergent"
+
+  actual="$(cat "$dir/physical.out")"
+  [[ "$actual" == "$expected" ]] ||
+    fail "$id" sens-logic "D1:$expected" "$actual"
+  echo "::notice file=$source,title=SENS unification law::PASS id=$id D1=$actual native=SENS carrier=Zig/T5M"
+  sha256sum "$source" lib/unify.lisp "$physical" >"$dir/sha256.txt"
+  printf '%s\n' "id=$id source=$source dependency=lib/unify.lisp expected=D1:$expected actual=D1:$actual" >>"$evidence/results.txt"
+}
+
 : >"$evidence/results.txt"
 run_law d3-selection-positive tests/semantic/d3-d4-logic-selection-law.lisp 1
 run_law d3-selection-mutant tests/semantic/d3-d4-logic-selection-mutant.lisp 0
@@ -77,4 +119,6 @@ run_law d5-exact-arithmetic-mutant tests/semantic/d5-arithmetic-native-t5m-mutan
 result_status_bundle="$evidence/result-status-bundle.lisp"
 cat lib/result-status.lisp tests/semantic/result-status-laws.lisp > "$result_status_bundle"
 run_law result-status-source "$result_status_bundle" 1
-echo "SENS_LISP_T5M_LAWS_PASS count=10 positive=6 mutants=4 physical=ZIG_T5M"
+run_bound_law unification-occurs-check-positive tests/semantic/unification-occurs-check-law.lisp 1
+run_bound_law unification-occurs-check-mutant tests/semantic/unification-occurs-check-mutant.lisp 0
+echo "SENS_LISP_T5M_LAWS_PASS count=12 positive=7 mutants=5 physical=ZIG_T5M"
