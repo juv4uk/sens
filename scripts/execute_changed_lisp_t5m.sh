@@ -159,6 +159,17 @@ run_native_t5m_program() {
         return
       fi
     fi
+    # Мовні самовердикти належать Lisp/SENS, а не Rust, Zig чи Python.
+    # Shell перевіряє лише точний кінцевий D1:1 від фізичного виконавця.
+    if [[ "$file" == tests/semantic/language-law-*.lisp ]]; then
+      printf '1\n' > "$dir/language-d1.expected"
+      if ! cmp -s "$dir/native-paired.stdout" "$dir/language-d1.expected"; then
+        echo "::error file=$file,title=SENS language law::WRONG_D1 expected=1 actual=$(cat "$dir/native-paired.stdout")" >&2
+        mark_file_failed
+        return
+      fi
+      echo "::notice file=$file,title=SENS language law::PASS native=SENS result=D1:1 carrier=Zig/T5M"
+    fi
     # Принцип 5: дві РІЗНІ фізичні форми того самого обчислення.
     # 1) живий український Lisp, без T5M; 2) точні байти Zig/T5M,
     # виконані SENS після контролю оборотності. Ніякого Python-оракула.
