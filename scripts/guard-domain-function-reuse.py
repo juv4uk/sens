@@ -30,6 +30,7 @@ from __future__ import annotations
 import argparse
 import importlib.util
 import json
+import os
 import re
 import subprocess
 import sys
@@ -305,15 +306,16 @@ def changed_files(args) -> list[str]:
     if args.paths_from:
         return [ln.strip() for ln in Path(args.paths_from).read_text(encoding="utf-8").splitlines() if ln.strip()]
     if args.staged:
+        # -z зберігає Git-шляхи побайтово, включно з TAB та LF в імені.
         result = subprocess.run(
-            ["git", "-c", "core.quotepath=false", "diff", "--name-only",
-             "--cached", "--diff-filter=ACMRT"],
-            cwd=ROOT, capture_output=True, text=True, check=False,
+            ["git", "diff", "--name-only", "-z", "--cached",
+             "--diff-filter=ACMRT"],
+            cwd=ROOT, capture_output=True, check=False,
         )
         if result.returncode != 0:
             raise RuntimeError("GUARD-DOMAIN-REUSE: не вдалося прочитати staged-шляхи: "
-                               + result.stderr.strip())
-        return [ln.strip() for ln in result.stdout.splitlines() if ln.strip()]
+                               + result.stderr.decode("utf-8", errors="replace").strip())
+        return [os.fsdecode(path) for path in result.stdout.split(b"\0") if path]
     return []
 
 

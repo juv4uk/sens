@@ -78,6 +78,33 @@ class DomainFunctionReuseRule(unittest.TestCase):
             self.assertEqual(status, 1, output.getvalue())
             self.assertIn("BLOCKED", output.getvalue())
 
+    def test_staged_guard_handles_control_characters_in_git_paths(self) -> None:
+        # Git -z має зберігати справжнє ім'я з TAB, а не quoted-path.
+        spec = importlib.util.spec_from_file_location("guard_git_nul_paths_test", GUARD)
+        self.assertIsNotNone(spec)
+        self.assertIsNotNone(spec.loader)
+        guard = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(guard)
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            (root / "lib").mkdir()
+            subprocess.run(["git", "init", "-q"], cwd=root, check=True)
+            rel = "lib/staged\tname.lisp"
+            (root / rel).write_text(
+                "(визначити сполучити (функція (х у) х))\n", encoding="utf-8"
+            )
+            subprocess.run(["git", "add", "--", rel], cwd=root, check=True)
+            output = StringIO()
+            with mock.patch.object(guard, "ROOT", root):
+                with mock.patch.object(guard, "MINIMUM_RATIFIED_SURFACES", 1):
+                    with mock.patch.object(guard, "ladder_names", return_value={"сполучити"}):
+                        with mock.patch.object(guard, "project_definition_sites", return_value={}):
+                            with redirect_stdout(output):
+                                self.assertEqual(guard.changed_files(mock.Mock(file=None, paths_from=None, staged=True)), [rel])
+                                status = guard.main(["--staged"])
+            self.assertEqual(status, 1, output.getvalue())
+            self.assertIn("BLOCKED", output.getvalue())
+
     def test_search_self_test_is_green(self) -> None:
         result = run(SEARCH, "--self-test")
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
