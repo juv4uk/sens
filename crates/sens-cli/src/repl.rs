@@ -1272,11 +1272,24 @@ pub(crate) fn mint_t5m_source_pair(source: &str) -> Result<(Vec<u8>, String), St
 }
 
 #[cfg(feature = "zig-transport")]
+fn core4_t5m_source_session() -> Result<Session, String> {
+    let mut session = Session::default();
+    sens::load_core_library(&mut session).map_err(|error| {
+        format!("T5M_CORE4_BOOTSTRAP: {}", error.message)
+    })?;
+    Ok(session)
+}
+
+#[cfg(feature = "zig-transport")]
 pub(crate) fn mint_t5m_source_pair_with_bindings(
     source: &str,
     bindings: &[String],
 ) -> Result<(Vec<u8>, String), String> {
-    let mut session = Session::default();
+    // Пряме виконання .lisp працює з Core4, а не лише з D4 MACRO.
+    // Без того самого SENS bootstrap корені D24+ (число-нуль/один)
+    // лишаються непов'язаними D7 гліфами і помилково викликаються як Lisp.
+    // Визначення і числа надає тільки SENS Core4, не Rust-підстановка.
+    let mut session = core4_t5m_source_session()?;
     preload_t5m_binding_sources(&mut session, bindings)?;
     mint_t5m_source_pair_in_session(source, &session)
 }
@@ -1335,7 +1348,9 @@ pub(crate) fn eval_t5m_paired_file_with_bindings(
     physical: &[u8],
     bindings: &[String],
 ) -> Result<sens::EvalResult, String> {
-    let mut session = Session::default();
+    // Mint і paired мають однакові Core4 зв'язування, інакше точні
+    // корені D24+ проектуються як невідомі викличні D7-гліфи.
+    let mut session = core4_t5m_source_session()?;
     preload_t5m_binding_sources(&mut session, bindings)?;
     let expected = prepare_t5m_repl_words(source, ReplSurface::UkrainianFull, &session)?;
     let actual = crate::zig_transport::decode_t5m_exact_words(physical)?;
