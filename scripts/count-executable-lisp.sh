@@ -106,7 +106,7 @@ while IFS= read -r -d '' source; do
     lib/generated/uk-surface-audit.lisp) data_schema="uk-surface-audit-2" ;;
     lib/surface/uk-sa-coverage.lisp) data_schema="uk-sa-coverage" ;;
     lib/machine/intel-core-i5-6400.lisp) data_schema="machine-profile-1" ;;
-    lib/machine/profile/current-domain-x86-64.lisp) data_schema="machine-domain-profile-2" ;;
+    lib/machine/profile/current-domain-x86-64.lisp) data_schema="machine-domain-profile-3" ;;
   esac
   if [[ -n "$data_schema" && -f "$source" && ! -L "$source" ]] &&
      LC_ALL=C grep -Eq "^[[:space:]]*\\($data_schema([[:space:]]|$)" -- "$source"; then
