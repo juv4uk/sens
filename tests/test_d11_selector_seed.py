@@ -100,6 +100,24 @@ class D11SelectorSeedAuditTests(unittest.TestCase):
             "(LISP CDAAAAAAAAR)", "(LISP WRONGSELECTOR)", 1)
         self.assert_rejected(docs, "D11_TABLE_DERIVATION")
 
+
+    def test_archived_coordinate_overlap_is_accounted_not_forbidden(self):
+        docs = self.changed()
+        docs["d11_vocabulary"]["table"][0]["bits"] = docs["seed"]["rows"][0][0]
+        self.assert_rejected(docs, "ACCOUNTING")
+        docs["seed"]["accounting"]["test_coordinate_collisions"] = 1
+        docs["seed"]["accounting"]["coordinates_outside_testing_and_derived_selectors"] += 1
+        report = MOD.validate_documents(docs)
+        self.assertEqual(report["derived_testing_coordinate_collisions"], 1)
+
+    def test_archived_name_overlap_is_accounted_not_forbidden(self):
+        docs = self.changed()
+        docs["d11_vocabulary"]["table"][0]["lisp"] = docs["seed"]["rows"][0][1]
+        self.assert_rejected(docs, "ACCOUNTING")
+        docs["seed"]["accounting"]["test_name_collisions"] = 1
+        report = MOD.validate_documents(docs)
+        self.assertEqual(report["derived_testing_name_collisions"], 1)
+
     def test_rejects_wrong_selector_suffix_name(self):
         docs = self.changed()
         bits, name = docs["seed"]["rows"][0]
