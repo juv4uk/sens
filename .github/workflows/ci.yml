@@ -484,6 +484,13 @@ jobs:
           fi
           echo "::notice file=tests/semantic/d24-reader-zero-denominator-negative.lisp,title=SENS Lisp law::PASS id=d24-reader-zero-denominator native=SENS rejection=division-by-zero"
           printf 'parser\tPASS_DIRECT\n' >> "$RUNNER_TEMP/benchmark-law-status.tsv"
+          # Д4: рекурсивний обхід — прямий Lisp позитив/мутант D1.
+          # Фізична розбіжність D7 перевіряється окремо і не стає PASS.
+          cat -- benchmarks/recursion.lisp tests/semantic/d4-recursion-atom-result-law.lisp > "$RUNNER_TEMP/recursion-benchmark-positive.lisp"
+          check_lisp_law d4-recursion-benchmark-language-positive "$RUNNER_TEMP/recursion-benchmark-positive.lisp" '1'
+          cat -- benchmarks/recursion.lisp tests/semantic/d4-recursion-atom-result-mutant.lisp > "$RUNNER_TEMP/recursion-benchmark-mutant.lisp"
+          check_lisp_law d4-recursion-benchmark-language-mutant "$RUNNER_TEMP/recursion-benchmark-mutant.lisp" '0'
+          printf 'recursion\tPASS_DIRECT\n' >> "$RUNNER_TEMP/benchmark-law-status.tsv"
           check_lisp_law d3-ukr-self-verdict tests/semantic/d3-ukr-language-self-verdict.lisp '1'
           check_lisp_law d5-ukr-self-verdict tests/semantic/d5-ukr-arithmetic-self-verdict.lisp '1'
           check_lisp_law d5-physical-law tests/semantic/d5-arithmetic-native-t5m-law.lisp '1'
@@ -514,7 +521,7 @@ jobs:
       # Час ЦІЛОГО процесу: CLI + bootstrap + SENS eval на shared runner.
       # Це діагностика затримок, а не ізольований eval чи міжмашинний speedup.
       # 11 проб, p50/p90, межі та сирі дані зі SHA джерела і stdout.
-      - name: Три Lisp-бенчмарки — p50/p90 та розкид нативного SENS
+      - name: Чотири Lisp-бенчмарки — p50/p90 та розкид нативного SENS
         id: benchmark-time
         if: ${{ always() && steps.native-build.outcome == 'success' }}
         shell: bash
@@ -529,7 +536,8 @@ jobs:
           for spec in \
             'lists|benchmarks/lists.lisp' \
             'arithmetic|benchmarks/arithmetic.lisp' \
-            'parser|benchmarks/parser.lisp'; do
+            'parser|benchmarks/parser.lisp' \
+            'recursion|benchmarks/recursion.lisp'; do
             IFS='|' read -r id source <<< "$spec"
             if [[ ! -f "$verified" ]] || ! grep -Fxq "$(printf '%s\tPASS_DIRECT' "$id")" "$verified"; then
               echo "::warning file=$source,title=SENS benchmark::NOT_MEASURED id=$id cause=unverified-Lisp-law"
@@ -581,7 +589,7 @@ jobs:
 
       # Фінальні анотації будуються лише із фактично записаних SENS-вердиктів.
       # RED законів не маскується часовими числами; без свідка лишається NOT_MEASURED.
-      - name: Три Lisp-бенчмарки — фактичні мовні анотації та підсумок
+      - name: Чотири Lisp-бенчмарки — фактичні мовні анотації та підсумок
         if: ${{ always() }}
         shell: bash
         env:
@@ -607,7 +615,8 @@ jobs:
           for spec in \
             'lists|benchmarks/lists.lisp|d24-list-language' \
             'arithmetic|benchmarks/arithmetic.lisp|d24-polynomial-language' \
-            'parser|benchmarks/parser.lisp|d24-reader-fraction-language'; do
+            'parser|benchmarks/parser.lisp|d24-reader-fraction-language' \
+            'recursion|benchmarks/recursion.lisp|d4-recursion-atom-language'; do
             IFS='|' read -r id source law <<< "$spec"
             if [[ -f "$verified" ]] && grep -Fxq "$(printf '%s\tPASS_DIRECT' "$id")" "$verified"; then
               status=PASS_DIRECT
@@ -639,10 +648,10 @@ jobs:
             fi
             printf '| %s | %s (%s) | %s | %s | NOT_CERTIFIED |\n' "$source" "$status" "$law" "$wall" "$tail" >> "$GITHUB_STEP_SUMMARY"
           done
-          printf 'прямі Lisp-закони=%s/3; p50/p90=%s/3; Rust CLI=%s; T5M=NOT_CERTIFIED\n' "$passed" "$measured" "$CLI_OUTCOME" > "$summary"
+          printf 'прямі Lisp-закони=%s/4; p50/p90=%s/4; Rust CLI=%s; T5M=NOT_CERTIFIED\n' "$passed" "$measured" "$CLI_OUTCOME" > "$summary"
           echo 'PASS_DIRECT означає лише перевірену мовну семантику, а не продуктивність чи фізичну T5M-атестацію. Сирі проби та SHA збережені в артефакті.' >> "$GITHUB_STEP_SUMMARY"
           if (( missing > 0 )) && [[ "$LAWS_OUTCOME" == success ]]; then
-            echo "::error file=.github/workflows/ci.yml,title=SENS benchmark evidence::REGRESSION layer=report expected=3-completed-witnesses actual=$passed"
+            echo "::error file=.github/workflows/ci.yml,title=SENS benchmark evidence::REGRESSION layer=report expected=4-completed-witnesses actual=$passed"
             exit 1
           fi
 
