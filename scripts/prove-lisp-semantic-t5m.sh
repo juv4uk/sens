@@ -442,7 +442,8 @@ run_case run_law d11-families-benchmark-mutant "$d11_families_mutant" 0
 # Сирі зразки + SHA залишаються в артефакті CI; червоне не маскуємо.
 d11_bench_evidence="$evidence/d11-families-benchmark-positive"
 if [[ -s "$d11_bench_evidence/program.sens" &&
-      -f "$d11_bench_evidence/physical.out" ]]; then
+      -f "$d11_bench_evidence/physical.out" ]] &&
+   grep -Fq 'id=d11-families-benchmark-positive source=' "$evidence/results.txt"; then
   d11_bench_samples="$evidence/d11-families-physical-wall-us.tsv"
   : > "$d11_bench_samples"
   for iteration in 1 2 3 4 5; do
