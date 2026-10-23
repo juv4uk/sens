@@ -118,7 +118,7 @@ jobs:
               cat "$out/t5m-session.tsv" >&2
               exit 1
             }
-          test "$(grep -c 'T5M_SESSION_SAMPLE lane=' "$out/t5m-session.tsv")" -eq 10
+          test "$(grep -c 'T5M_SESSION_SAMPLE lane=' "$out/t5m-session.tsv")" -eq 22
           test "$(grep -c 'T5M_SESSION_BENCH cold_p50_amortized_ns=' "$out/t5m-session.tsv")" -eq 1
           grep 'T5M_SESSION_BENCH cold_p50_amortized_ns=' "$out/t5m-session.tsv"
       - name: Measure Rust and Zig T5 mechanics against identical bytes

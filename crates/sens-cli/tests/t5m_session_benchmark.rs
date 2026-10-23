@@ -11,7 +11,7 @@ use std::{
 };
 
 const CALLS: usize = 16;
-const ROUNDS: usize = 5;
+const ROUNDS: usize = 11;
 const EXPECTED: &[u8] = b"42\n";
 
 struct TempLisp(PathBuf);
@@ -92,9 +92,17 @@ fn warm_batch(source: &Path) -> u128 {
     wall_ns
 }
 
-fn median(mut values: [u128; ROUNDS]) -> u128 {
+fn p50_p90(mut values: [u128; ROUNDS]) -> (u128, u128) {
     values.sort_unstable();
-    values[ROUNDS / 2]
+    (values[ROUNDS / 2], values[(ROUNDS * 9).div_ceil(10) - 1])
+}
+
+#[test]
+fn p50_p90_uses_nearest_rank_for_eleven_samples() {
+    assert_eq!(
+        p50_p90([11, 1, 10, 2, 9, 3, 8, 4, 7, 5, 6]),
+        (6, 10)
+    );
 }
 
 #[test]
@@ -123,6 +131,10 @@ fn zig_t5m_one_session_vs_process_per_form() {
         "warm-preflight",
     );
 
+    // Повний прогрів кожної смуги не входить у 11 виміряних пар.
+    let _ = cold_batch(source.path());
+    let _ = warm_batch(source.path());
+
     let mut cold_ns = [0_u128; ROUNDS];
     let mut warm_ns = [0_u128; ROUNDS];
     for round in 0..ROUNDS {
@@ -142,9 +154,13 @@ fn zig_t5m_one_session_vs_process_per_form() {
             );
         }
     }
-    let cold_p50 = median(cold_ns) / CALLS as u128;
-    let warm_p50 = median(warm_ns) / CALLS as u128;
+    let (cold_p50_batch, cold_p90_batch) = p50_p90(cold_ns);
+    let (warm_p50_batch, warm_p90_batch) = p50_p90(warm_ns);
+    let cold_p50 = cold_p50_batch / CALLS as u128;
+    let cold_p90 = cold_p90_batch / CALLS as u128;
+    let warm_p50 = warm_p50_batch / CALLS as u128;
+    let warm_p90 = warm_p90_batch / CALLS as u128;
     eprintln!(
-        "T5M_SESSION_BENCH cold_p50_amortized_ns={cold_p50} warm_p50_amortized_ns={warm_p50} forms={CALLS} rounds={ROUNDS} path=Zig-T5M-SENS parity=42 scope=process-wall claim=measurement-only"
+        "T5M_SESSION_BENCH cold_p50_amortized_ns={cold_p50} cold_p90_amortized_ns={cold_p90} warm_p50_amortized_ns={warm_p50} warm_p90_amortized_ns={warm_p90} cold_p50_batch_ns={cold_p50_batch} cold_p90_batch_ns={cold_p90_batch} warm_p50_batch_ns={warm_p50_batch} warm_p90_batch_ns={warm_p90_batch} forms={CALLS} rounds={ROUNDS} warmup_batches=1 path=Zig-T5M-SENS parity=42 scope=process-wall claim=measurement-only"
     );
 }
