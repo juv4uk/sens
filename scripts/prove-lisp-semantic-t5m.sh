@@ -339,6 +339,10 @@ sha256sum lib/d11-srfi1-find-tail.lisp tests/semantic/d11-srfi1-find-tail-laws.l
 # Фізичні закони Д3 не залежать від недопущеного виклику D6 LENGTH.
 run_case run_law d3-structural-positive tests/semantic/d3-structural-native-t5m-law.lisp 1
 run_case run_law d3-structural-mutant tests/semantic/d3-structural-native-t5m-mutant.lisp 0
+# Д3 COND: SENS сам доводить лінивий вибір гілки; негатив лишається D1:ні.
+# Невибраний CAR над порожнечею є пасткою Type, але не повинен виконуватись.
+run_case run_law d3-cond-lazy-positive tests/semantic/language-law-d3-cond-lazy-ukr.lisp 1
+run_case run_law d3-cond-lazy-mutant tests/semantic/language-mutant-d3-cond-lazy-ukr.lisp 0
 # Ізолювати D8 структурну рівність D7-даних від рекурсії/уніфікації.
 # Обидва свідки проходять direct, Zig/T5M, paired та standalone SENS.
 run_case run_law d8-d7-equal-physical-positive tests/semantic/d8-d7-equal-physical-law.lisp 1
