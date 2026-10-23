@@ -2338,8 +2338,9 @@ mod tests {
         );
     }
 
-    /// D7 quote payload is a sequence of glyphs, not a secretly
-    /// interned atom; EQ must not accept the derived pair as an atom.
+    /// Multi-glyph D7 quote payload stays a sequence, not a secretly
+    /// interned atom; EQ must not accept its derived D2 list as an atom.
+    /// The one-glyph scalar case has a separate exact-W7 regression test.
     #[cfg(feature = "zig-transport")]
     #[test]
     fn bija3_eq_d7_text_does_not_gain_atomic_identity_on_physical_route() {
