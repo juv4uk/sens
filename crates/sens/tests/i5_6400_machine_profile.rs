@@ -14,8 +14,8 @@ fn legacy_i5_6400_profile_is_provenance_not_current_authority() {
 
     sens::parse(&profile).expect("legacy i5-6400 profile must remain valid sens data");
 
-    assert!(profile.contains("Legacy Intel Core i5-6400 / Skylake SID8 compatibility projection."));
-    assert!(profile.contains("NOT current semantic authority"));
+    assert!(profile.contains("Історична сумісна проєкція сід8 для Intel Core i5-6400 / Skylake."));
+    assert!(profile.contains("Цей файл НЕ є чинним джерелом семантичних повноважень."));
     assert!(profile.contains("lib/machine/profile/current-domain-x86-64.lisp"));
 }
 
