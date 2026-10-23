@@ -1,12 +1,14 @@
 ; #4057 навмисний негативний свідок.
-; Влада контракту чинна, але незалежний семантичний свідок використовує
-; відкликану онтологію свідка сід8. Вартовий мусить його відкинути.
-(capability-provenance
-  (name legacy-sid8-answer-key)
-  (semantic-authority language-contract.lisp+ratified-domain-laws)
-  (admitted-form add-r64-r64)
-  (lowering-owner lib/machine/lowering/semantic-x86-64.lisp)
-  (machine-witness native-result)
-  (reverse-edge forbidden)
-  (independent-semantic-witness (lisp-owned-expression 00001100))
-  (representation-witness not-yet-required))
+; Вартовий мусить відкинути свідка, що посилається на відкликану
+; восьмибітну онтологію замість точних бітів + ширини + домену.
+; Не виконувана програма СЕНС; дані вартового.
+
+(походження-можливості
+  (назва відкликаний-восьмибітний-ключ)
+  (семантична-влада language-contract.lisp+ратифіковані-закони-доменів)
+  (допущена-форма додати-р64-р64)
+  (власник-зниження lib/machine/lowering/semantic-x86-64.lisp)
+  (машинний-свідок нативний-результат)
+  (зворотне-ребро заборонено)
+  (незалежний-семантичний-свідок (вираз-власності-лісп 00001100))
+  (свідок-представлення ще-не-потрібен))
