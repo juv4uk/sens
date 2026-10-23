@@ -3057,12 +3057,19 @@ mod tests {
         let mut session = Session::default();
         sens::load_core_library(&mut session).expect("Core4");
         let program =
-            prepare_t5m_repl_program("\"Привіт🙂\"", ReplSurface::UkrainianFull, &session)
-                .expect("string literal lowers into exact domain operations");
+            prepare_t5m_repl_program("\"Привіт\"", ReplSurface::UkrainianFull, &session)
+                .expect("D7-admitted Ukrainian text lowers into physical transport");
         let actual = program
             .execute(&mut session)
-            .expect("string literal executes after Zig/T5M transport");
-        assert_eq!(actual.value, Value::String("Привіт🙂".into()));
+            .expect("D7-admitted text executes after Zig/T5M transport");
+        assert_eq!(actual.value, Value::String("Привіт".into()));
+
+        // Emoji may appear in Unicode REPL UI, but have NO D7 identity.
+        // They must not silently become D24 Unicode scalars in a program.
+        let rejected = prepare_t5m_repl_program(
+            "\"Привіт🙂\"", ReplSurface::UkrainianFull, &session,
+        ).err().expect("unsupported REPL glyph must not bypass D7");
+        assert!(rejected.contains("T5M_D7_TEXT_NOT_ADMITTED"), "{rejected}");
     }
 
     #[test]
@@ -3126,6 +3133,15 @@ mod tests {
             })
             .collect::<Vec<_>>();
         assert_eq!(restored_cells.as_slice(), expected.cells());
+
+        let unadmitted =
+            sens::parse_mixed_exact_domain("(як-є \"🙂\")")
+                .expect("REPL Unicode syntax can be parsed before D7 admission");
+        actual.clear();
+        let rejection = append_t5m_expression(
+            &unadmitted[0], sens::Text7Layout::Uk, &mut actual, 0
+        ).expect_err("quoted Unicode outside D7 must not enter physical words");
+        assert!(rejection.contains("T5M_D7_TEXT_NOT_ADMITTED"), "{rejection}");
 
         let executable =
             sens::parse_mixed_exact_domain("\"аб\"").expect("executable Ukrainian string source");
