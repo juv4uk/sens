@@ -178,5 +178,55 @@ class D11SelectorSeedAuditTests(unittest.TestCase):
         self.assert_rejected(docs, "DERIVED_COUNT")
 
 
+    def test_memory_game_covers_all_512_d11_selectors_and_reports_omissions(self):
+        game = (ROOT / "research/zig-codecs/ladder_memory_game.zig").read_text(encoding="utf-8")
+        for contract in (
+            "pub fn questionOrder",
+            "pub fn gradeDomain",
+            "questionCount(11)",
+            "coordinateCount(11)",
+            "result.missing",
+            "order.len",
+            "0x53454e534c414444",
+            "512 унікальних відтворюваних запитань",
+            " прогалина, хибна відповідь і повтор",
+        ):
+            with self.subTest(contract=contract):
+                self.assertIn(contract, game)
+
+    def test_selector_codec_benchmark_is_paired_and_uses_identical_words(self):
+        codec = (ROOT / "research/zig-codecs/d11_selector_contest.zig").read_text(encoding="utf-8")
+        workflow = (ROOT / ".github/workflows/d11-ladder-contest.yml").read_text(encoding="utf-8")
+        for contract in (
+            "const sample_count: usize = 15",
+            "const minimum_sample_ns: u64 = 2_000_000",
+            "selector9",
+            "dense11",
+            "raw16",
+            "fn encodeRaw16",
+            "fn decodeRaw16",
+            "RoundtripMismatch",
+            "samples={d}",
+            "p50_ns_per_roundtrip={d}",
+            "p90_ns_per_roundtrip={d}",
+            "alternating=YES",
+        ):
+            with self.subTest(contract=contract):
+                self.assertIn(contract, codec)
+        for contract in (
+            "zig test -lc research/zig-codecs/ladder_memory_game.zig",
+            "zig test -lc research/zig-codecs/d11_selector_contest.zig",
+            "mode=raw16 words=64 bytes=128",
+            "mode=selector9 words=512 bytes=576",
+            "mode=dense11 words=512 bytes=704",
+            "mode=raw16 words=512 bytes=1024",
+            "p50_ns_per_roundtrip=",
+            "p90_ns_per_roundtrip=",
+            "samples=15",
+        ):
+            with self.subTest(workflow_contract=contract):
+                self.assertIn(contract, workflow)
+
+
 if __name__ == "__main__":
     unittest.main()
