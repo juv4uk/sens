@@ -260,3 +260,35 @@ test "packed_bytes envelope CRC detects one changed physical bit" {
     corrupted[0] ^= 0b10000000;
     try std.testing.expectError(error.IntegrityMismatch, verifyCrc32(&corrupted, checksum));
 }
+
+
+test "invalid Zig transport schemas preserve caller-owned outputs" {
+    const valid = [_]Field{
+        .{ .width = 3, .bits = 5 },
+        .{ .width = 5, .bits = 17 },
+    };
+    var bytes: [2]u8 = .{ 0xa5, 0x5a };
+    const before = bytes;
+    // Eight meaningful bits need exactly one byte; never partially fill two.
+    try std.testing.expectError(error.LengthMismatch, pack(&bytes, &valid));
+    try std.testing.expectEqualSlices(u8, &before, &bytes);
+    const overflow = [_]Field{.{ .width = 2, .bits = 4 }};
+    try std.testing.expectError(error.FieldOverflow, pack(bytes[0..1], &overflow));
+    try std.testing.expectEqualSlices(u8, &before, &bytes);
+
+    var result: [2]u64 = .{ 0xdeadbeef, 0xfeedface };
+    const prior = result;
+    // Bad metadata must not modify decoded words, whatever the physical bits.
+    try std.testing.expectError(error.InvalidWidth,
+        unpack(&.{0}, 8, &.{ 0, 8 }, &result));
+    try std.testing.expectEqualSlices(u64, &prior, &result);
+    try std.testing.expectError(error.LengthMismatch,
+        unpack(&.{0}, 8, &.{3}, &result));
+    try std.testing.expectEqualSlices(u64, &prior, &result);
+    // A three-bit frame carries five padding bits, which must stay zero.
+    var single: [1]u64 = .{0xdeadbeef};
+    try std.testing.expectError(error.NonCanonicalTail,
+        unpack(&.{0b10000001}, 3, &.{3}, &single));
+    try std.testing.expectEqual(@as(u64, 0xdeadbeef), single[0]);
+    try std.testing.expectEqualSlices(u64, &prior, &result);
+}

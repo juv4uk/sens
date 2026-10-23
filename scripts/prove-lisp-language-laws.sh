@@ -21,15 +21,24 @@ fi
 tmp="$(mktemp -d)"
 trap 'rm -rf "$tmp"' EXIT
 printf 'NATIVE_SENS_EXECUTOR test_id=lisp-language-laws path=%s version=%s\n' "$cli" "$("$cli" --version)"
-for id in d1-not d2-cond-laziness d3-structure d4-lexical-scope d4-second-selector d4-closure-pair d4-nested-pair-selectors d5-recursive-list; do
-  law="tests/semantic/$id-law.lisp"
-  mutant="tests/semantic/$id-mutant.lisp"
+for id in d1-not d2-cond-laziness d3-structure d4-lexical-scope d4-second-selector d4-closure-pair d4-nested-pair-selectors d3-dotted-pair d3-cond-demand d4-parameter-shadowing quote-inertness d5-recursive-list; do
+  case "$id" in
+    d3-cond-demand|d4-parameter-shadowing|quote-inertness)
+      law="tests/semantic/language-law-$id.lisp"
+      mutant="tests/semantic/language-mutant-$id.lisp"
+      ;;
+    *)
+      law="tests/semantic/$id-law.lisp"
+      mutant="tests/semantic/$id-mutant.lisp"
+      ;;
+  esac
   if [[ ! -f "$law" || ! -f "$mutant" ]] || cmp -s "$law" "$mutant"; then
     printf 'REGRESSION test_id=%s layer=fixture expected=distinct-pair actual=missing-or-identical\n' "$id" >&2
     exit 1
   fi
   for kind in law mutant; do
-    file="tests/semantic/$id-$kind.lisp"
+    file="$law"
+    [[ "$kind" == mutant ]] && file="$mutant"
     expected=1
     [[ "$kind" == mutant ]] && expected=0
     printf '%s\n' "$expected" > "$tmp/expected"
@@ -64,4 +73,4 @@ for id in d1-not d2-cond-laziness d3-structure d4-lexical-scope d4-second-select
     printf 'NATIVE_SENS_PASS test_id=%s kind=%s expected=D1:%s executor=SENS carrier=Zig/T5M standalone=NOT_CLAIMED\n' "$id" "$kind" "$expected"
   done
 done
-printf 'NATIVE_SENS_SUITE_PASS suite=lisp-language-laws laws=8 mutants=8 authority=SENS\n'
+printf 'NATIVE_SENS_SUITE_PASS suite=lisp-language-laws laws=12 mutants=12 authority=SENS\n'
