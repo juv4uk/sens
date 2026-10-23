@@ -848,6 +848,19 @@ def encode_text7_identifier(spelling: str,text7,tok: Tok):
     return frame_text7(text7_encode(spelling,text7,tok), tok)
 
 
+def encode_text7_datum(spelling: str, text7, tok: Tok):
+    """Encode one D7 glyph as its scalar; frame only multi-cell Text7 data.
+
+    A one-cell quoted datum is a D7 atom, not a one-element D2 list. Its
+    surrounding source list already owns D2 framing. Contextual identifiers
+    still use encode_text7_identifier so binder/call-head lookup remains framed.
+    """
+    cells = text7_encode(spelling, text7, tok)
+    if len(cells) == 1:
+        return cells
+    return frame_text7(cells, tok)
+
+
 def collect_global_bindings(forms,resolver=None):
     # Do not maintain a second spelling authority for DEFINE. The canonical
     # Ukrainian surface "визначити" (and any future alias) must be recognized
@@ -1181,7 +1194,7 @@ def encode_atom_data(node: Atom,text7,lexical_env=(),quoted=False,resolver=None)
         if targets:
             _domain, bits = next(iter(targets))
             return [bits]
-        return encode_text7_identifier(t, text7, node.tok)
+        return encode_text7_datum(t, text7, node.tok)
     # Нецитовані дані: ім'я, яке джерело саме зв'язує глобально (DEFINE),
     # є Text7-посиланням, а не сирим текстом. Решта лишається точно як
     # написано і пізніше fail-closed перевіркою фізичного 0/1-слова.
@@ -1189,7 +1202,7 @@ def encode_atom_data(node: Atom,text7,lexical_env=(),quoted=False,resolver=None)
         return list(resolver.global_binding_words[t])
     # Owner rule: unresolved names are DATA -> D7 text (all their glyphs, e.g. "/",
     # live in the ratified D7 keyboard). Never leave raw text as a physical word.
-    return encode_text7_identifier(t, text7, node.tok)
+    return encode_text7_datum(t, text7, node.tok)
 
 
 def encode_string(node: String, text7):
