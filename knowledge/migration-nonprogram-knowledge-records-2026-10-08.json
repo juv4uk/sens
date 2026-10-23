@@ -50,7 +50,7 @@
     },
     {
       "path": "knowledge/semantic-ownership.lisp",
-      "git_blob_sha1": "bc2eee9409cb4ad44f9c3cb03b31f86ce1e3fade",
+      "git_blob_sha1": "62732b73df74e2a768e407bcabdf1ac4e56f14aa",
       "record_head": "schema"
     },
     {
@@ -125,6 +125,13 @@
       "current_git_blob_sha1": "4f93ff14b51be11d595b2b40164553ce2adc39dc",
       "reviewed_commit": "fb8bce900a33e1d5bdf95f34a0fbf3b6c359a293",
       "reason": "Після виведення з ужитку плоских SID8-аудитів перевірено всі scripts/generate*.lisp та lib/generated/*.lisp: жодного активного старого шаблону COND не залишилося. Видалено лише застарілі рядки quoted-key класу silent-regeneration; актуальні fallback-сайти збережено."
+    },
+    {
+      "path": "knowledge/semantic-ownership.lisp",
+      "previous_git_blob_sha1": "bc2eee9409cb4ad44f9c3cb03b31f86ce1e3fade",
+      "current_git_blob_sha1": "62732b73df74e2a768e407bcabdf1ac4e56f14aa",
+      "reviewed_commit": "9b9b06e96b5a0b927027ff5747a80fffeb708ac3",
+      "reason": "В інвентарі власності уніфікації замість застарілого загального свідка вказані конкретні Lisp-закон і негативний мутант tests/semantic/unification-occurs-check-*.lisp. Зміна лише декларативного шляху доказів, не виконуваний код і не новий семантичний авторитет."
     }
   ],
   "retired_post_snapshot_sources": [
