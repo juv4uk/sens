@@ -1554,6 +1554,13 @@ fn t5m_physical_pair_repair_uses_sens_mint_and_executes_real_pair() {
         String::from_utf8_lossy(&repaired_binding.stdout)
     );
     assert!(String::from_utf8_lossy(&repaired_binding.stdout).contains("T5M_REPAIR_OK"));
+    assert!(
+        String::from_utf8_lossy(&repaired_binding.stdout)
+            .contains("mode=paired-and-dependency-complete"),
+        "test_id=t5m-repair-dependency-complete layer=SENS/Zig expected=paired-and-dependency-complete stdout={} stderr={}",
+        String::from_utf8_lossy(&repaired_binding.stdout),
+        String::from_utf8_lossy(&repaired_binding.stderr)
+    );
     let paired_with_binding = sens()
         .arg("--t5m-pair")
         .arg(&src)
