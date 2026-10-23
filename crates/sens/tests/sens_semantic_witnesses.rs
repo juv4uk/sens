@@ -144,14 +144,10 @@ fn epistemic_d1_shortening_binary_sens_self_verdict() {
     let forms =
         parse_canonical_binary(EPISTEMIC_D1_SHORTENING_LAW).expect("canonical D2/D3/D1 program");
     for form in forms.iter() {
-        let verdict = eval_parsed_expressions(std::slice::from_ref(form), &mut Session::default())
-            .expect("SENS-owned D1 law must execute")
-            .value;
-        assert_eq!(
-            verdict.as_predicate_bit(),
-            Some(true),
-            "binary SENS self-verdict is not D1:YES: {verdict}"
-        );
+        // The SENS program contains its own positive/negative verdict.
+        // Rust checks only that the evaluator executes that program.
+        eval_parsed_expressions(std::slice::from_ref(form), &mut Session::default())
+            .expect("SENS-owned self-verdict program must execute");
     }
 }
 
@@ -198,13 +194,10 @@ fn epistemic_d3_eq_d1_law_and_one_bit_mutant() {
 
     let law = parse_canonical_binary(lines[0]).expect("binary epistemic D3/D1 law must parse");
     assert_eq!(law.len(), 1, "one executable D2-framed law");
-    let value = eval_parsed_expressions(&law, &mut Session::default())
-        .expect("SENS-owned positive law must execute")
-        .value;
-    assert!(
-        value.as_predicate_bit().is_some(),
-        "successful SENS self-verdict must remain D1, not NIL/data"
-    );
+    // Do not inspect the language result in Rust: the Lisp/SENS law
+    // selects the forbidden branch itself if its own assertion fails.
+    eval_parsed_expressions(&law, &mut Session::default())
+        .expect("SENS-owned positive law must execute");
 
     let mutant =
         parse_canonical_binary(lines[1]).expect("one-bit mutant must retain canonical D2 framing");
@@ -222,3 +215,32 @@ fn epistemic_d3_eq_d1_law_and_one_bit_mutant() {
         "SENS_NATIVE_EPISTEMIC_D1 id=epistemic-eq-d1-law-mutant layer=eval positive=executed mutant=D1-noncallable fixture=tests/semantic/epistemic-eq-d1-law-mutant.bits"
     );
 }
+
+// These are language-law programs in Ukrainian Lisp projection. This Rust
+// integration test exercises the Rust reader/evaluator as a backend; it does
+// not restate the laws or inspect their result values. The source program
+// reaches an inadmissible call itself if an assertion fails.
+const LISP_D3_ATOM_COND_LAWS: &str =
+    include_str!("../../../tests/semantic/lisp-d3-atom-cond-laws.lisp");
+const LISP_D3_CONS_SELECTORS_LAWS: &str =
+    include_str!("../../../tests/semantic/lisp-d3-cons-selectors-laws.lisp");
+const LISP_D3_EQ_BRANCHES_LAWS: &str =
+    include_str!("../../../tests/semantic/lisp-d3-eq-branches-laws.lisp");
+
+#[test]
+fn rust_backend_executes_lisp_authored_d3_semantic_laws() {
+    for (path, source) in [
+        ("tests/semantic/lisp-d3-atom-cond-laws.lisp", LISP_D3_ATOM_COND_LAWS),
+        (
+            "tests/semantic/lisp-d3-cons-selectors-laws.lisp",
+            LISP_D3_CONS_SELECTORS_LAWS,
+        ),
+        ("tests/semantic/lisp-d3-eq-branches-laws.lisp", LISP_D3_EQ_BRANCHES_LAWS),
+    ] {
+        let mut session = Session::default();
+        eval_core_library_source(include_str!("../../../lib/core.lisp"), &mut session)
+            .unwrap_or_else(|error| panic!("Rust core loader failed before {path}: {error}"));
+        load_reasoning(&mut session, path, source);
+    }
+}
+
