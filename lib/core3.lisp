@@ -40,7 +40,7 @@
   (функція ()
     (як-є
       (core3
-        (contract 7 0)
+        (contract "7" "0")
         (role experimental-kernel-laboratory)
         (selector shared-lisp-owned)
         (lowering partial)
