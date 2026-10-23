@@ -1621,11 +1621,13 @@ jobs:
           python3 -m unittest tests/test_encoder_coverage_ukr_projection.py -v
           # Справжній SENS-виконавець перевіряє D24+ довжину та D1.
           if grep -Eq '^(lib/quantity\.lisp|crates/sens/tests/quantity_length_d24_current\.rs|crates/sens/tests/quantity_d1_direct_cutover\.rs|tests/test_ukr_quantity_projection\.py|\.github/workflows/ci\.yml)$' "$RUNNER_TEMP/changed-core-dependencies.txt"; then
-            python3 -m unittest tests/test_ukr_quantity_projection.py -v
+            # Спершу сам SENS виконує закони: Python не є воротарем виконання.
             CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 cargo test --locked -p sens --test quantity_length_d24_current -- --nocapture
             CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 cargo test --locked -p sens --test quantity_d1_direct_cutover -- --nocapture
-            # Наукові константи: сім справжніх клауз SENS, Advice Taker та негативний запис.
+            # Сім справжніх клауз SENS, Advice Taker і негативний запис.
             CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 cargo test --locked -p sens --test scientific_constants -- --nocapture
+            # Лише структурна перевірка проєкції; не семантичний оракул.
+            python3 -m unittest tests/test_ukr_quantity_projection.py -v
           fi
           # Чинний D24+ закон з самого Lisp перевіряє реальний виконавець SENS.
           # Одна адресна перевірка лише після зміни джерела/свідка або цього CI.
