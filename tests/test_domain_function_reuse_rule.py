@@ -92,6 +92,26 @@ class DomainFunctionReuseRule(unittest.TestCase):
             sites = guard.project_definition_sites(root)
             self.assertTrue(guard.duplicates_project_definition(sites, "проба", "lib/one.lisp"))
 
+    def test_quoted_definitions_are_data_not_project_duplicates(self) -> None:
+        # Механічний аудит Lisp-джерела: цитата не реєструє функцію.
+        spec = importlib.util.spec_from_file_location("guard_quote_probe", GUARD)
+        self.assertIsNotNone(spec)
+        self.assertIsNotNone(spec.loader)
+        guard = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(guard)
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            lib = root / "lib"
+            lib.mkdir()
+            quote = "(" + "як-є" + " ((" + "визначити" + " уявна (" + "функція" + " (х) х))))"
+            real = "(" + "визначити" + " справжня (" + "функція" + " (х) х))"
+            (lib / "one.lisp").write_text(quote + "\\n" + real + "\\n", encoding="utf-8")
+            subprocess.run(["git", "init", "-q"], cwd=root, check=True)
+            subprocess.run(["git", "add", "lib/one.lisp"], cwd=root, check=True)
+            sites = guard.project_definition_sites(root)
+            self.assertNotIn("уявна", sites)
+            self.assertEqual(sites["справжня"], {"lib/one.lisp"})
+
     def test_search_finds_an_existing_surface_by_name(self) -> None:
         result = run(SEARCH, "сполучити")
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
