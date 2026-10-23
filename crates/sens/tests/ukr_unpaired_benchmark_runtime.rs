@@ -98,6 +98,47 @@ fn довжина_списку_відкидає_пошкоджений_хвіс�
 }
 
 #[test]
+fn арифметика_та_бенчмарки_без_числових_токенів_виконуються_в_sens() {
+    // Цей контракт стосується лише живої вихідної проєкції, не коментарів.
+    let програми = [
+        ("списки", include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/../../benchmarks/lists.lisp"))),
+        ("арифметика", include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/../../benchmarks/arithmetic.lisp"))),
+        ("читач", include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/../../benchmarks/parser.lisp"))),
+    ];
+    for (назва, джерело) in програми {
+        for (індекс, рядок) in джерело.lines().enumerate() {
+            let код = рядок.split(';').next().unwrap_or("");
+            for токен in код.split(|знак: char| знак.is_whitespace() || знак == '(' || знак == ')') {
+                if токен.is_empty() {
+                    continue;
+                }
+                assert!(
+                    !токен.chars().all(|знак| знак.is_ascii_digit())
+                        && !токен.starts_with("#d")
+                        && !токен.starts_with("#b")
+                        && !токен.starts_with("#q2"),
+                    "test_id=ukr-no-numeric-token файл={назва} рядок={} токен={токен}",
+                    індекс + 1
+                );
+            }
+        }
+    }
+
+    let mut сеанс = Session::default();
+    load_core_library(&mut сеанс).expect("завантаження ядра SENS");
+    let арифметика = include_str!(concat!(
+        env!("CARGO_MANIFEST_DIR"),
+        "/../../benchmarks/arithmetic.lisp"
+    ));
+    assert_eq!(запустити_джерело(арифметика, &mut сеанс), "15505");
+    assert_eq!(
+        запустити_джерело("(поліном (довжина (як-є ())))", &mut сеанс),
+        "7",
+        "нульовий аргумент не потребує цифрового літерала"
+    );
+}
+
+#[test]
 fn замикання_зберігає_обидва_лексичні_зв_язування() {
     let mut сеанс = Session::default();
     load_core_library(&mut сеанс).expect("завантаження ядра SENS");
