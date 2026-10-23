@@ -123,6 +123,25 @@ class MigrationNonProgramExprRecords(unittest.TestCase):
         entries = data["entries"]
         self.assertEqual(len(entries), 13)
         self.assertEqual({row["path"] for row in entries}, EXPECTED_PATHS)
+
+        # The structural fixture's old SID8 labels were reviewed as D3 data
+        # identities; the fixture wrapper remains non-executable data.
+        reviewed = [
+            row for row in data.get("reviewed_post_snapshot_changes", [])
+            if row.get("path") == "tests/fixtures/structure-core-v1.lisp"
+            and row.get("current_git_blob_sha1") == "1e11f35e7907256934e7717f00aadcb37b875998"
+        ]
+        self.assertEqual(len(reviewed), 1)
+        self.assertEqual(
+            reviewed[0]["previous_git_blob_sha1"],
+            "6cdaa86f69b99c1f51ec018a1c11002fdf2dd085",
+        )
+        self.assertEqual(
+            reviewed[0]["reviewed_commit"],
+            "e86019a5ff12291612ebd0d246d1f99272044dff",
+        )
+        self.assertIn("D3:001/D3:111/D3:100/D3:011", reviewed[0]["reason"])
+
         for row in entries:
             rel = Path(row["path"])
             self.assertEqual(rel.parts[:2], ("tests", "fixtures"))
