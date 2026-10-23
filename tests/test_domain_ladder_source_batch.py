@@ -57,6 +57,23 @@ class BatchSourceTests(unittest.TestCase):
             "(визначити ім'я (функція (об'єкт) (тотожне? об'єкт об'єкт)))",
         )
 
+    def test_quoted_w8_head_does_not_block_valid_ukr_rewrite(self):
+        # Standalone QUOTE/FUNCTION-QUOTE before a historical bit atom marks
+        # DATA, not an executable W8 call or an ambiguous successor.
+        source = (
+            "('00110111 datum) "
+            "(#'00001001 name) "
+            "(00001001 f (00001000 (x) (00000011 x x)))"
+        )
+        updated, count, problems = MOD.rewrite(source, self.mapping, self.blocked)
+        self.assertEqual((count, problems), (3, []))
+        self.assertEqual(
+            updated,
+            "('00110111 datum) "
+            "(#'00001001 name) "
+            "(визначити f (функція (x) (тотожне? x x)))",
+        )
+
     def test_unproved_historical_head_blocks_ukr_rewrite(self):
         projected = self.mapping
         old = "(00001001 f (00001000 () (00110111 fun values)))"
