@@ -48,15 +48,15 @@
     (список (як-є binary-descriptor) (список (як-є binary) 2))
     (список (як-є symbol-written) "00")
     (список (як-є symbol-read) 0)
-    (список (як-є symbol-roundtrip) (як-є (0)))
+    (список (як-є symbol-roundtrip) ні)
     (список (як-є string-written) "\"00\"")
     (список (як-є string-read) "00")
-    (список (як-є string-roundtrip) (як-є (1)))
+    (список (як-є string-roundtrip) так)
     (список (як-є sid-written) "\"00000011\"")
     (список (як-є sid-read) "00000011")
     (список (як-є sid-current-ukr) (як-є тотожне?))
     (список (як-є current-d3-eq-result) (атом? (як-є ())))
-    (список (як-є sid-roundtrip) (як-є (1)))))
+    (список (як-є sid-roundtrip) так)))
 
 (за-умовою
   ((однакові? матриця-спостережене матриця-очікуване)
