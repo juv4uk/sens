@@ -25,6 +25,7 @@ red="$(awk -F '\t' 'NR>1 && $2=="RED" {n++} END{print n+0}' "$laws")"
  echo '## Фази Lisp → Zig/T5M → SENS — вимірювання RED і PASS'
  printf '\nСвідків: %s, PASS: %s, RED: %s.\n\n' "$checked" "$passed" "$red"
  echo 'Одна проба на етап для кожного різного свідка, з вартістю запуску CLI. p50/p90 нижче — розподіл між свідками одного runner, не оцінка чистого EVAL або прискорення.'
+  echo 'Ненульовий exit — діагностичний факт: Type-negative свідки навмисно відхиляються. Це не кількість регресій; остаточний RED визначається окремим Lisp-вердиктом у law-timings.tsv.'
  echo
  echo '| Етап | Проб | Ненульових виходів | p50 мкс | p90 мкс | max мкс |'
  echo '|---|---:|---:|---:|---:|---:|'
@@ -36,9 +37,9 @@ for stage in direct codec-mint zig-open zig-verify sens-paired sens-standalone; 
  p50="$(sed -n "$(((count+1)/2))p" "$tmp/sorted")"
  p90="$(sed -n "$(((9*count+9)/10))p" "$tmp/sorted")"
  high="$(tail -n 1 "$tmp/sorted")"
- failed="$(awk -F '\t' -v st="$stage" 'NR>1 && $2==st && $3!="0"{n++}END{print n+0}' "$phases")"
- printf '| %s | %s | %s | %s | %s | %s |\n' "$stage" "$count" "$failed" "$p50" "$p90" "$high" >> "$report"
- echo "SENS_PHASE_BENCHMARK stage=$stage count=$count failed=$failed p50_us=$p50 p90_us=$p90 max_us=$high scope=mixed-witnesses"
+ nonzero_exit="$(awk -F '\t' -v st="$stage" 'NR>1 && $2==st && $3!="0"{n++}END{print n+0}' "$phases")"
+ printf '| %s | %s | %s | %s | %s | %s |\n' "$stage" "$count" "$nonzero_exit" "$p50" "$p90" "$high" >> "$report"
+ echo "SENS_PHASE_BENCHMARK stage=$stage count=$count nonzero_exit=$nonzero_exit p50_us=$p50 p90_us=$p90 max_us=$high scope=mixed-witnesses"
 done
 {
  echo
