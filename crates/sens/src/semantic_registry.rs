@@ -217,15 +217,37 @@ pub(crate) fn compatibility_d3_route_from_ratified_domains(
     admitted
 }
 
+/// Exact Ukrainian spellings for the explicitly implemented D8 mechanisms.
+/// Residency alone is not enough: this small owner-pinned list names only
+/// routes with a concrete mechanism in eval/canon.rs. Keep it shared with the
+/// mixed-source lift so direct and Lisp→T5M source do not disagree.
+pub(crate) fn admitted_d8_uk_callable_bits(spelling: &str) -> Option<&'static str> {
+    match spelling {
+        "символ-за-кодом" => Some("00000000"),
+        "модульна-остача" => Some("00101100"),
+        "код-символу" => Some("11100000"),
+        "прочитати" => Some("11101010"),
+        "текст-у-символ" => Some("11101101"),
+        "символ-у-текст" => Some("11101110"),
+        "значення-у-текст" => Some("11110100"),
+        "однакові?" => Some("11110111"),
+        _ => None,
+    }
+}
+
 /// Canonical Ukrainian *source-head* projection, before evaluation.
 ///
-/// Only owner-ratified source-routable uk/ukr peer rows are eligible. This is NOT the
-/// legacy SID compatibility index: no en alias, old W8, D2 structure, or
-/// unratified D7 binder can become a callable head via this API.
-/// The mixed reader applies it only to executable HEAD positions.
+/// Only owner-ratified source-routable uk/ukr peer rows are eligible, together
+/// with the small explicit D8 mechanism list above. This is NOT the legacy SID
+/// compatibility index: no en alias, old W8, D2 structure, or unratified D7
+/// binder can become a callable head via this API.
 pub(crate) fn exact_uk_callable_for_source_head(name: &str) -> Option<crate::DomainIdentity> {
     if let Some(identity) = exact_source_index().uk.get(name).copied().flatten() {
         return Some(identity);
+    }
+    if let Some(bits) = admitted_d8_uk_callable_bits(name) {
+        let word = crate::parse_binary_source_words(bits).ok()?.into_iter().next()?.word;
+        return Some(DomainIdentity::from_source_word(word));
     }
     higher_selector_uk_index()
         .get(name)
@@ -1002,6 +1024,19 @@ mod domain_source_projection_anti_collision_tests {
         assert_eq!(
             direct_domain_identity_for_surface("як-є").map(|d| d.packed_bits()),
             Some(0b001)
+        );
+    }
+
+    #[test]
+    fn read_surface_selects_its_exact_admitted_d8_word_only() {
+        let read = exact_uk_callable_for_source_head("прочитати")
+            .expect("D8 READ has an implemented, explicitly admitted mechanism");
+        assert_eq!(read.width(), 8);
+        assert_eq!(read.packed_bits(), 0b11101010);
+        assert_eq!(
+            exact_uk_callable_for_source_head("закрити"),
+            None,
+            "neighboring D8 residency must not become callable by proximity"
         );
     }
 }
