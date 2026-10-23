@@ -278,6 +278,45 @@ class ExactDomainMigrationTests(unittest.TestCase):
         expected = source.replace("(00000101 аргумент)", "(перше аргумент)")
         self.assertEqual(mod.apply_edits(source, edits), expected)
 
+    def test_explicit_sid8_sens8_heads_use_historical_bridge_not_d8(self):
+        # Лише механічна міграція ратифікованої укр-проєкції,
+        # а не удаване Python-виконання SENS.
+        original = (
+            "; (sid8:00001100 коментар)\n"
+            "(sid8:00001100 2 3)\n"
+            "(SeNs8:00001100 4 5)\n"
+            "(як-є (sens8:00001100 дані))\n"
+            "'(sid8:00001100 теж-дані)\n"
+            '"(sid8:00001100 рядок)"\n'
+        )
+        replacement = mod.Identity("D5", "01010", "PLUS", "додати")
+        pending = []
+        edits = mod.plan(
+            original, {}, legacy_heads={"00001100": replacement},
+            unresolved=pending
+        )
+        self.assertEqual(pending, [])
+        self.assertEqual(len(edits), 2)
+        converted = mod.apply_edits(original, edits)
+        self.assertEqual(converted.count("(додати "), 2)
+        self.assertIn("(як-є (sens8:00001100 дані))", converted)
+        self.assertIn("'(sid8:00001100 теж-дані)", converted)
+        self.assertIn("; (sid8:00001100 коментар)", converted)
+        self.assertIn('"(sid8:00001100 рядок)"', converted)
+        self.assertEqual(mod.plan(converted, {}, legacy_heads={
+            "00001100": replacement}), [])
+
+    def test_prefixed_old_word_without_proof_fails_closed(self):
+        for old in ("sid8:00001100", "sens8:00001100"):
+            with self.subTest(old=old):
+                with self.assertRaisesRegex(ValueError, "UNQUALIFIED_W8_HEAD"):
+                    mod.plan(f"({old} 1)", {})
+                missing = []
+                edits = mod.plan(f"({old} 1)", {}, legacy_heads={},
+                                 unresolved=missing)
+                self.assertEqual(edits, [])
+                self.assertEqual(missing, [(1, old)])
+
     def test_legacy_audit_checks_real_ukr_si_source_without_invented_w8(self):
         # #5872 не має позначати будь-який файл із namespaced-symbol
         # або довільною формою LAMBDA як невдалу міграцію старого байта.
