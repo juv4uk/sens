@@ -559,6 +559,7 @@ class SystemOneResearchPipelineTests(unittest.TestCase):
             self.assertEqual(model["training_dataset_sha256"], hashlib.sha256(raw).hexdigest())
 
             measured: dict[str, dict] = {}
+            predictions_by_split: dict[str, list[dict]] = {}
             for split in ("validation", "test"):
                 prediction_path = root / f"seed-{split}-predictions.jsonl"
                 self.assertEqual(
@@ -580,6 +581,7 @@ class SystemOneResearchPipelineTests(unittest.TestCase):
                 expected_count = 10
                 self.assertEqual(len(predictions), expected_count)
                 self.assertTrue(all(row["split"] == split for row in predictions))
+                predictions_by_split[split] = predictions
                 report = evaluator.score(
                     predictions, threshold=0.8, bins=10, expected_split=split
                 )
@@ -590,6 +592,44 @@ class SystemOneResearchPipelineTests(unittest.TestCase):
                     "metrics": report["metrics"],
                     "per_class": report["per_class"],
                 }
+
+            # Безпечний поріг добирається тільки на validation, з поправкою на всі 101 кандидати.
+            selected_policy = evaluator.select_threshold(
+                predictions_by_split["validation"],
+                max_selective_risk=0.10,
+                min_accepted=5,
+                expected_split="validation",
+                confidence_level=0.95,
+            )
+            policy_test_report = None
+            if selected_policy["threshold"] is not None:
+                exact_threshold = (
+                    selected_policy["threshold"]["numerator"]
+                    / selected_policy["threshold"]["denominator"]
+                )
+                policy_test_report = evaluator.score(
+                    predictions_by_split["test"],
+                    threshold=exact_threshold,
+                    bins=10,
+                    expected_split="test",
+                )
+            self.assertEqual(selected_policy["status"], "no-safe-threshold")
+            self.assertIsNone(selected_policy["threshold"])
+            self.assertFalse(selected_policy["test_used"])
+            self.assertFalse(selected_policy["challenge_used"])
+            measured["validation_selected_policy"] = {
+                "status": selected_policy["status"],
+                "threshold": selected_policy["threshold"],
+                "reason": selected_policy["reason"],
+                "risk_bound_method": selected_policy["risk_bound_method"],
+                "candidate_threshold_count": selected_policy["candidate_threshold_count"],
+                "eligible_candidate_threshold_count": selected_policy["eligible_candidate_threshold_count"],
+                "familywise_confidence_level": selected_policy["familywise_confidence_level"],
+                "test_used_for_selection": False,
+                "test_metrics": (
+                    policy_test_report["metrics"] if policy_test_report is not None else None
+                ),
+            }
 
             # Окремий challenge: тільки прогнози після навчання; ніколи не передається train.
             challenge_path = ROOT / "research" / "system-one-support-challenge-20261022.jsonl"
