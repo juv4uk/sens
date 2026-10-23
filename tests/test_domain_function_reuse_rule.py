@@ -132,7 +132,7 @@ class DomainFunctionReuseRule(unittest.TestCase):
         )
         found = guard.definitions_with_bodies(source)
         self.assertEqual([name for name, _, _ in found], ["перша", "друга"])
-        self.assertTrue(guard._calls_ladder(found[0][1], {"сполучити"}))
+        self.assertTrue(guard._calls_ladder(found[0][1], guard.ladder_names(ROOT)))
 
     def test_search_finds_an_existing_surface_by_name(self) -> None:
         result = run(SEARCH, "сполучити")
