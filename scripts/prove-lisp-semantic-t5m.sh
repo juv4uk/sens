@@ -106,21 +106,38 @@ run_bound_law() {
 }
 
 : >"$evidence/results.txt"
+# Не маскуємо збої: всі незалежні закони запускаються, але хоч один RED
+# робить загальний результат RED. Жодних substitute verdict з Rust/Python.
+checked=0
+passed=0
+failed=0
+failed_ids=()
+run_case() {
+  local id="$2"
+  checked=$((checked + 1))
+  if ( "$@" ); then
+    passed=$((passed + 1))
+  else
+    failed=$((failed + 1))
+    failed_ids+=("$id")
+    echo "::warning title=SENS Lisp/T5M::CONTINUE_AFTER_RED id=$id remaining_witnesses=will_run" >&2
+  fi
+}
 # Повна пара власне мовного заперечення Д1: джерело тільки Lisp.
-run_law d1-not-positive tests/semantic/d1-not-law.lisp 1
-run_law d1-not-mutant tests/semantic/d1-not-mutant.lisp 0
-run_law d3-selection-positive tests/semantic/d3-d4-logic-selection-law.lisp 1
-run_law d3-selection-mutant tests/semantic/d3-d4-logic-selection-mutant.lisp 0
-run_law d3-demorgan-four-cases tests/semantic/d3-demorgan-truth-table-law.lisp 1
-run_law d3-demorgan-mutant tests/semantic/d3-demorgan-truth-table-mutant.lisp 0
-run_law d3-quote-short-circuit-positive tests/semantic/d3-cond-quote-lazy-law.lisp 1
-run_law d3-quote-short-circuit-mutant tests/semantic/d3-cond-quote-lazy-mutant.lisp 0
-run_law d4-late-binding-positive tests/semantic/d4-late-definition-binding-law.lisp 1
-run_law d4-escaped-closure-positive tests/semantic/d4-escaped-lexical-closure-law.lisp 1
-run_law d4-escaped-closure-mutant tests/semantic/d4-escaped-lexical-closure-mutant.lisp 0
+run_case run_law d1-not-positive tests/semantic/d1-not-law.lisp 1
+run_case run_law d1-not-mutant tests/semantic/d1-not-mutant.lisp 0
+run_case run_law d3-selection-positive tests/semantic/d3-d4-logic-selection-law.lisp 1
+run_case run_law d3-selection-mutant tests/semantic/d3-d4-logic-selection-mutant.lisp 0
+run_case run_law d3-demorgan-four-cases tests/semantic/d3-demorgan-truth-table-law.lisp 1
+run_case run_law d3-demorgan-mutant tests/semantic/d3-demorgan-truth-table-mutant.lisp 0
+run_case run_law d3-quote-short-circuit-positive tests/semantic/d3-cond-quote-lazy-law.lisp 1
+run_case run_law d3-quote-short-circuit-mutant tests/semantic/d3-cond-quote-lazy-mutant.lisp 0
+run_case run_law d4-late-binding-positive tests/semantic/d4-late-definition-binding-law.lisp 1
+run_case run_law d4-escaped-closure-positive tests/semantic/d4-escaped-lexical-closure-law.lisp 1
+run_case run_law d4-escaped-closure-mutant tests/semantic/d4-escaped-lexical-closure-mutant.lisp 0
 # Фізичні закони Д3 не залежать від недопущеного виклику D6 LENGTH.
-run_law d3-structural-positive tests/semantic/d3-structural-native-t5m-law.lisp 1
-run_law d3-structural-mutant tests/semantic/d3-structural-native-t5m-mutant.lisp 0
+run_case run_law d3-structural-positive tests/semantic/d3-structural-native-t5m-law.lisp 1
+run_case run_law d3-structural-mutant tests/semantic/d3-structural-native-t5m-mutant.lisp 0
 # TRANSITIONAL #5854: арифметичні Lisp-свідки існують і перевіряються
 # прямим SENS у ci.yml, але фізичний T5M не атестовано до реалізації LENGTH.
 # Не оголошувати PASS і не замінювати семантику D6 хостовим оракулом.
@@ -128,7 +145,11 @@ echo "::warning file=tests/semantic/d5-arithmetic-native-t5m-law.lisp,title=TRAN
 # The result-status law stays in Ukrainian Lisp; only the runner bundles its admitted library.
 result_status_bundle="$evidence/result-status-bundle.lisp"
 cat lib/result-status.lisp tests/semantic/result-status-laws.lisp > "$result_status_bundle"
-run_law result-status-source "$result_status_bundle" 1
-run_bound_law unification-occurs-check-positive tests/semantic/unification-occurs-check-law.lisp 1
-run_bound_law unification-occurs-check-mutant tests/semantic/unification-occurs-check-mutant.lisp 0
-echo "SENS_LISP_T5M_LAWS_PASS count=16 positive=9 mutants=7 physical=ZIG_T5M"
+run_case run_law result-status-source "$result_status_bundle" 1
+run_case run_bound_law unification-occurs-check-positive tests/semantic/unification-occurs-check-law.lisp 1
+run_case run_bound_law unification-occurs-check-mutant tests/semantic/unification-occurs-check-mutant.lisp 0
+if (( failed > 0 )); then
+  echo "::error title=SENS Lisp/T5M::REGRESSION checked=$checked passed=$passed failed=$failed ids=${failed_ids[*]}" >&2
+  exit 1
+fi
+echo "SENS_LISP_T5M_LAWS_PASS count=$checked positive=9 mutants=7 physical=ZIG_T5M"
