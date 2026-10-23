@@ -9,7 +9,7 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - uses: dtolnay/rust-toolchain@stable
-      - name: D1 точковий AST свідок
+      - name: Статичний аудит української UTF-8 проєкції
         run: python3 -m unittest discover -s tests -p test_utf8_d1_predicate_migration.py -v
       - name: UTF-8 semantic regression
         run: cargo test --locked -p sens --test utf8 --test utf8_stack --no-fail-fast -- --nocapture
