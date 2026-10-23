@@ -51,7 +51,7 @@ class DomainFunctionReuseRule(unittest.TestCase):
                 status = guard.main(["--file", "lib/core4.lisp"])
         self.assertEqual(status, 2, output.getvalue())
         self.assertIn("НЕ ПЕРЕВІРЕНО", output.getvalue())
-        self.assertIn("щонайменше 1000", output.getvalue())
+        self.assertIn(f"щонайменше {guard.MINIMUM_RATIFIED_SURFACES}", output.getvalue())
 
     def test_search_self_test_is_green(self) -> None:
         result = run(SEARCH, "--self-test")
