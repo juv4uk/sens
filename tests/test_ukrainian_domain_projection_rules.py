@@ -129,8 +129,27 @@ class UkrainianDomainProjectionRulesTests(unittest.TestCase):
         # D11 більше не є відхиленим словником із 43 записів:
         # 256 підтверджених D10-селекторів × два суфікси = 512 D11 координат.
         # Перевірка лишається fail-closed: повнота, точна ширина, унікальність.
-        expected = {width: (1 << width if width <= 10 else 512)
-                    for width in range(1, 12)}
+        # Виводимо повноту D11 з незалежно перевірюваного закону D10→D11.
+        # 43 історичні слова не входять до робочої таблиці похідних селекторів.
+        seed = json.loads(
+            (ROOT / "knowledge/d11-selector-seed.json").read_text(encoding="utf-8")
+        )
+        self.assertEqual(seed["status"], "MATHEMATICALLY_DERIVED_SELECTOR_FUNCTIONS")
+        self.assertEqual(seed["source"]["parent_domain"], "D10")
+        self.assertEqual(seed["law"]["name"], "selector-suffix-extension")
+        self.assertTrue(seed["law"]["derived_by_law"])
+        parent_count = seed["accounting"]["d10_selector_parents"]
+        self.assertEqual(parent_count, 256)
+        derived_rows = seed["rows"]
+        self.assertEqual(len(derived_rows), parent_count * 2)
+        self.assertEqual(seed["accounting"]["selector_derived_coordinates"], len(derived_rows))
+        self.assertEqual(seed["accounting"]["zig_t5_admitted"], 0)
+        self.assertEqual(seed["accounting"]["new_ratified_residents"], 0)
+        derived_names = dict(derived_rows)
+        self.assertEqual(len(derived_names), len(derived_rows),
+                         "D11: повтор координати математично похідного селектора")
+        expected = {width: (1 << width) for width in range(1, 11)}
+        expected[11] = len(derived_rows)
         total = 0
         for width, count in expected.items():
             path = ROOT / "lib" / "domains" / f"d{width}.lisp"
@@ -146,6 +165,12 @@ class UkrainianDomainProjectionRulesTests(unittest.TestCase):
                 bits, uk, ukr, san, en, lisp, sym = match.groups()
                 self.assertEqual(len(bits), width)
                 rows.append(bits)
+                if width == 11:
+                    self.assertEqual(
+                        lisp, derived_names.get(bits),
+                        f"{path}:{number}: координата і LISP-поверхня D11 "
+                        "мають відповідати закону D10 selector-suffix-extension",
+                    )
                 for column, token in (("ук", uk), ("укр", ukr)):
                     value = projection_value(token, f"D{width}")
                     disallowed = set(char for char in value
@@ -161,7 +186,7 @@ class UkrainianDomainProjectionRulesTests(unittest.TestCase):
             self.assertEqual(len(rows), count, f"{path}: неповна таблиця")
             self.assertEqual(len(set(rows)), count, f"{path}: повтор координати")
             total += count
-        self.assertEqual(total, 2558)
+        self.assertEqual(total, sum(expected.values()))
 
     def test_live_interlisp_library_has_only_ukrainian_keyboard_symbols(self):
         """Жодної латиниці навіть у коментарях або іменах функцій."""
