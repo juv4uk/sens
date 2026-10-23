@@ -367,7 +367,9 @@ def select_threshold(
     # однобічною 95%-ю межею Clopper–Pearson, щоб не довіряти малій вибірці надмірно.
     if not math.isfinite(confidence_level) or not 0.0 < confidence_level < 1.0:
         raise EvaluationError("confidence level має бути скінченним і строго між 0 та 1")
+    eligible_candidates: list[dict[str, Any]] = []
     candidates: list[dict[str, Any]] = []
+    # Один прохід після сортування: по одному кандидату на кожен рівень впевненості.
     ordered = sorted(observed, key=lambda item: item[0], reverse=True)
     accepted_count = 0
     errors = 0
@@ -382,19 +384,32 @@ def select_threshold(
             index += 1
         if accepted_count < min_accepted:
             continue
-        risk = Fraction(errors, accepted_count)
-        risk_upper = clopper_pearson_upper_bound(errors, accepted_count, confidence_level)
+        eligible_candidates.append(
+            {
+                "threshold_fraction": threshold,
+                "accepted": accepted_count,
+                "errors": errors,
+                "risk_fraction": Fraction(errors, accepted_count),
+            }
+        )
+
+    if not eligible_candidates:
+        raise EvaluationError("внутрішня помилка: немає кандидатів після мінімуму прийнятих")
+    # Поправка Бонферроні: пошук кращого з кількох порогів не має підвищувати
+    # сімейний ризик хибної гарантії понад заданий confidence_level.
+    per_candidate_confidence_level = 1.0 - (
+        (1.0 - confidence_level) / len(eligible_candidates)
+    )
+    for candidate in eligible_candidates:
+        risk_upper = clopper_pearson_upper_bound(
+            candidate["errors"],
+            candidate["accepted"],
+            per_candidate_confidence_level,
+        )
+        candidate["risk_upper_bound"] = risk_upper
+        candidate["per_candidate_confidence_level"] = per_candidate_confidence_level
         if risk_upper <= float(risk_limit):
-            candidates.append(
-                {
-                    "threshold_fraction": threshold,
-                    "accepted": accepted_count,
-                    "errors": errors,
-                    "risk_fraction": risk,
-                    "risk_upper_bound": risk_upper,
-                    "confidence_level": confidence_level,
-                }
-            )
+            candidates.append(candidate)
 
     common = {
         "selected_for": "validation",
@@ -407,9 +422,11 @@ def select_threshold(
         "dataset_sha256_values": sorted(dataset_hashes),
         "model_sha256_values": sorted(model_hashes),
         "small_validation_warning": len(rows) < 30,
-        "risk_bound_method": "one-sided exact Clopper-Pearson binomial upper confidence limit",
-        "confidence_level": confidence_level,
-        "threshold_rule": "maximize accepted validation rows subject to the one-sided exact upper confidence bound; ties choose the higher threshold",
+        "risk_bound_method": "Bonferroni-corrected one-sided exact Clopper-Pearson binomial upper confidence limit",
+        "familywise_confidence_level": confidence_level,
+        "candidate_threshold_count": len(eligible_candidates),
+        "per_candidate_confidence_level": per_candidate_confidence_level,
+        "threshold_rule": "maximize accepted validation rows subject to the Bonferroni-corrected one-sided exact upper confidence bound; ties choose the higher threshold",
         "challenge_used": False,
         "test_used": False,
     }
