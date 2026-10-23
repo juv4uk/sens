@@ -32,6 +32,10 @@ echo "SENS_BOOTSTRAP_EXECUTABLE source=$bootstrap_source semantic=NOT_CERTIFIED"
 
 fail() {
   local id="$1" layer="$2" expected="$3" actual="$4"
+  # Передаємо точний шар відмови до квитанції, без повторної евристики stderr.
+  if [[ -d "$evidence/$id" ]]; then
+    printf '%s\n' "$layer" > "$evidence/$id/failure-layer.txt"
+  fi
   echo "::error title=SENS Lisp/T5M::REGRESSION id=$id layer=$layer expected=$expected actual=$actual" >&2
   exit 1
 }
@@ -348,7 +352,9 @@ red_receipt() {
   if [[ -f "$dir/program" && ! -L "$dir/program" ]]; then
     view_hash="$(sha256sum "$dir/program" | cut -d' ' -f1)"
   fi
-  if [[ -f "$dir/paired.err" ]]; then
+  if [[ -s "$dir/failure-layer.txt" ]]; then
+    layer="$(head -n 1 "$dir/failure-layer.txt")"
+  elif [[ -f "$dir/paired.err" ]]; then
     layer="$(paired_failure_layer "$dir/paired.err")"
     while IFS= read -r line; do
       if [[ "$line" =~ physical_form_index=([0-9]+) ]]; then
