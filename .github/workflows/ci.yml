@@ -72,7 +72,8 @@ jobs:
             tests/test_sid8_broad_source_cutover.py \
             tests/test_domain_ladder_source_batch.py \
             tests/test_domain_function_reuse_rule.py \
-            tests/test_tests_use_ukr_projection.py -v
+            tests/test_tests_use_ukr_projection.py \
+            tests/test_language_stays_in_sens.py -v
           # Ратифікована драбина D1–D10: точні ширини D1=2 … D10=1024.
           python3 scripts/check-domain-ladder-identity.py --check
           python3 scripts/check-numeric-domain-ratification.py
@@ -177,7 +178,6 @@ jobs:
                   "tests/semantic/core-d3-car-cdr-cons-mutant.lisp",
                   "tests/semantic/result-status-laws.lisp",
                   "tests/semantic/d11-srfi1-span-break-laws.lisp",
-                  "tests/semantic/d11-srfi1-find-tail-laws.lisp",
                   "tests/semantic/d4-recursion-benchmark-law.lisp",
                   "tests/semantic/d4-recursion-benchmark-mutant.lisp",
                   "tests/fixtures/conformance-transition-witness.lisp",
@@ -207,6 +207,7 @@ jobs:
                   "tests/semantic/lisp-d3-eq-branches-laws.lisp",
                   "tests/semantic/language-law-d3-eq-symmetry-ukr.lisp",
                   "tests/semantic/language-mutant-d3-eq-symmetry-ukr.lisp",
+                  "tests/semantic/d11-srfi1-find-tail-laws.lisp",
                   "tests/semantic/lisp-d3-d4-list-self-verdict.lisp",
                   "tests/semantic/d3-structural-native-t5m-law.lisp",
                   "tests/semantic/d3-structural-native-t5m-mutant.lisp",
