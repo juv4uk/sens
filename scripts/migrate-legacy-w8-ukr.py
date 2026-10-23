@@ -116,7 +116,12 @@ def prove(commit, historical_path, requested, scanner, table):
     historic = git("show", f"{commit}:{historical_path.as_posix()}")
     unknown = []
     edits = scanner.plan(historic, {}, legacy_heads=table, unresolved=unknown)
-    found = {e.source for e in edits} | {word for _, word in unknown}
+    # Явні історичні sid8:/sens8:-голови мають ті самі вісім
+    # provenance-бітів, але НЕ перетворюються на D8.
+    found = {
+        scanner.LEGACY_W8_HEAD.fullmatch(token).group(1)
+        for token in ({e.source for e in edits} | {word for _, word in unknown})
+    }
     if requested - found:
         raise ValueError(f"{historical_path}@{commit[:12]} не містить цих старих call-head: {sorted(requested - found)}")
     return {"commit": commit, "date": date, "path": str(historical_path)}
