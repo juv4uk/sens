@@ -46,9 +46,8 @@ profile_stage() {
   "$@" || code=$?
   ended_ns="$(date +%s%N)"
   elapsed_us="$(((ended_ns - started_ns) / 1000))"
-  printf '%s\\t%s\\t%s\\t%s\\n' "$id" "$stage" "$code" "$elapsed_us" >> "$evidence/law-stage-timings.tsv"
-  printf 'SENS_LAW_STAGE id=%s stage=%s exit=%s elapsed_us=%s scope=full-process\\n' \\
-    "$id" "$stage" "$code" "$elapsed_us"
+  printf '%s\t%s\t%s\t%s\n' "$id" "$stage" "$code" "$elapsed_us" >> "$evidence/law-stage-timings.tsv"
+  printf 'SENS_LAW_STAGE id=%s stage=%s exit=%s elapsed_us=%s scope=full-process\n' "$id" "$stage" "$code" "$elapsed_us"
   return "$code"
 }
 
@@ -258,7 +257,7 @@ failed_ids=()
 # Час кожного реального SENS→Zig/T5M→SENS виконання; не мовний оракул.
 # Одна проба на свідок: діагностичний wall-time, не p50 і не порівняння мов.
 printf 'id\tstatus\twall_ms\n' > "$evidence/law-timings.tsv"
-printf 'id\\tstage\\texit\\telapsed_us\\n' > "$evidence/law-stage-timings.tsv"
+printf 'id\tstage\texit\telapsed_us\n' > "$evidence/law-stage-timings.tsv"
 run_case() {
   local id="$2" start_ns end_ns wall_ms status
   start_ns="$(date +%s%N)"
