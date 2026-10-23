@@ -4,7 +4,7 @@
 //! користуються conformance-перевірки, машинні протоколи й точне відтворення
 //! джерела. Цей модуль змінює лише те, що інтерактивна поверхня показує людині.
 
-use crate::{semantic_registry, ErrorKind, Exactness, LanguageError, NumericBuffer, Value};
+use crate::{semantic_registry, ErrorKind, Exactness, Expr, ExprKind, LanguageError, NumericBuffer, Value};
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum PresentationLanguage {
     Canonical,
@@ -838,5 +838,157 @@ mod tests {
         let error = LanguageError::new(ErrorKind::Type, "boom", Span { start: 0, end: 1 });
         let rendered = render_error_for_presentation(&error, "x", PresentationLanguage::Canonical);
         assert!(rendered.starts_with("boom"));
+    }
+}
+
+/// Один рядок подання вузла дерева розбору: текст і байтовий спан вузла.
+///
+/// Спільне подання для CLI-команди `:розбір` і хостів (TUI) — щоб дерево
+/// розбору рендерилося ОДНІЄЮ реалізацією, а не дублем у кожному хості.
+pub struct AstLine {
+    pub text: String,
+    pub span: (usize, usize),
+}
+
+/// Дерево розбору для всієї форми-джерела (усі верхні форми).
+pub fn render_ast(
+    source: &str,
+    language: PresentationLanguage,
+) -> Result<Vec<AstLine>, LanguageError> {
+    let forms = crate::parse_mixed_exact_domain(source)?;
+    let mut lines = Vec::new();
+    for form in &forms {
+        render_ast_node(source, form, 1, language, &mut lines);
+    }
+    Ok(lines)
+}
+
+/// Рекурсивний вузол дерева розбору. Підписи належать SENS (uk/en), а не
+/// хосту: `uk` — точна поточна проєкція CLI, `en` — англійська, решта
+/// PresentationLanguage падає на англійську.
+pub fn render_ast_node(
+    source: &str,
+    expression: &Expr,
+    depth: usize,
+    language: PresentationLanguage,
+    lines: &mut Vec<AstLine>,
+) {
+    let indent = "  ".repeat(depth);
+    let excerpt = source
+        .get(expression.span.start..expression.span.end)
+        .unwrap_or("");
+    let span = (expression.span.start, expression.span.end);
+    let uk = matches!(language, PresentationLanguage::Ukrainian);
+    let label = match &expression.kind {
+        ExprKind::List(items) => {
+            if uk {
+                format!("Список ({} елементів)", items.len())
+            } else {
+                format!("List ({} elements)", items.len())
+            }
+        }
+        ExprKind::Pair(..) => {
+            if uk { "Пара".to_string() } else { "Pair".to_string() }
+        }
+        ExprKind::Call(identity, arguments) => {
+            if uk {
+                format!("Виклик резидента {identity:?} ({} аргументів)", arguments.len())
+            } else {
+                format!("Resident call {identity:?} ({} arguments)", arguments.len())
+            }
+        }
+        ExprKind::DomainCall(identity, arguments) => {
+            if uk {
+                format!("Доменний виклик {identity:?} ({} аргументів)", arguments.len())
+            } else {
+                format!("Domain call {identity:?} ({} arguments)", arguments.len())
+            }
+        }
+        ExprKind::Number(..) => {
+            if uk { format!("Число: {excerpt}") } else { format!("Number: {excerpt}") }
+        }
+        ExprKind::Rational(..) => {
+            if uk { format!("Дріб: {excerpt}") } else { format!("Rational: {excerpt}") }
+        }
+        ExprKind::BinaryNumber(..) => {
+            if uk {
+                format!("Двійкове число: {excerpt}")
+            } else {
+                format!("Binary number: {excerpt}")
+            }
+        }
+        ExprKind::NumericBuffer(..) => {
+            if uk {
+                format!("Числовий буфер: {excerpt}")
+            } else {
+                format!("Numeric buffer: {excerpt}")
+            }
+        }
+        ExprKind::Sid(identity) => {
+            if uk {
+                format!("Історична identity {identity:?}: {excerpt}")
+            } else {
+                format!("Historical identity {identity:?}: {excerpt}")
+            }
+        }
+        ExprKind::DomainIdentity(identity) => {
+            if uk {
+                format!("Доменна identity {identity:?}: {excerpt}")
+            } else {
+                format!("Domain identity {identity:?}: {excerpt}")
+            }
+        }
+        ExprKind::String(..) => {
+            if uk { format!("Рядок: {excerpt}") } else { format!("String: {excerpt}") }
+        }
+        ExprKind::Symbol(..) => {
+            if uk { format!("Символ: {excerpt}") } else { format!("Symbol: {excerpt}") }
+        }
+        ExprKind::Local { depth, index } => {
+            if uk {
+                format!("Локальний слот: depth={depth}, index={index}")
+            } else {
+                format!("Local slot: depth={depth}, index={index}")
+            }
+        }
+    };
+    lines.push(AstLine {
+        text: format!("{indent}{label}"),
+        span,
+    });
+    match &expression.kind {
+        ExprKind::List(items) => {
+            for item in items.iter() {
+                render_ast_node(source, item, depth + 1, language, lines);
+            }
+        }
+        ExprKind::Pair(head, tail) => {
+            render_ast_node(source, head, depth + 1, language, lines);
+            render_ast_node(source, tail, depth + 1, language, lines);
+        }
+        ExprKind::Call(_, arguments) | ExprKind::DomainCall(_, arguments) => {
+            for argument in arguments.iter() {
+                render_ast_node(source, argument, depth + 1, language, lines);
+            }
+        }
+        _ => {}
+    }
+}
+
+#[cfg(test)]
+mod ast_render_tests {
+    use super::{render_ast, PresentationLanguage};
+
+    #[test]
+    fn shared_ast_renderer_reports_nested_forms_languages_and_spans() {
+        let source = "(визначити площа (добуток 3 4))\n";
+        let uk = render_ast(source, PresentationLanguage::Ukrainian).expect("parses");
+        assert!(uk[0].text.contains("Список (3 елементів)"), "{:?}", uk[0].text);
+        assert!(uk.iter().any(|line| line.text.contains("Список (3 елементів)")));
+        // Спан зовнішньої форми починається з нуля — хостам є що підсвітити.
+        assert_eq!(uk[0].span.0, 0);
+
+        let en = render_ast(source, PresentationLanguage::English).expect("parses");
+        assert!(en.iter().any(|line| line.text.contains("List (3 elements)")));
     }
 }

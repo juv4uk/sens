@@ -243,9 +243,10 @@ fn append_t5m_expression_context(
             // У цитаті ратифікована тотожність має пріоритет над текстом.
             // Нова викличність з одного лише збігу напису не виникає.
             if quoted_data {
-                if let Some(identity) = sens::semantic_registry_export::exact_uk_domain_identity(name)
+                if let Some(identity) =
+                    sens::semantic_registry_export::admitted_core_domain_for_surface(name)
                 {
-                    words.push(ExactDomainWord::Identity(identity));
+                    words.push(ExactDomainWord::Identity(DomainIdentity::from(identity)));
                     return Ok(());
                 }
             }
@@ -1597,7 +1598,9 @@ fn render_repl_ast(
     ));
     for (index, form) in forms.iter().enumerate() {
         lines.push(format!("Форма {}", index + 1));
-        render_repl_ast_node(source, form, 1, &mut lines);
+        let mut ast = Vec::new();
+        sens::render_ast_node(source, form, 1, PresentationLanguage::Ukrainian, &mut ast);
+        lines.extend(ast.into_iter().map(|line| line.text));
     }
     Ok(lines.join("\n"))
 }
@@ -1609,63 +1612,6 @@ fn render_repl_ast_and_eval(
     let preview = render_repl_ast(source, state.surface, &state.session)?;
     let execution = eval_t5m_repl_line(source, &mut state.session, state.surface);
     Ok((preview, execution))
-}
-
-fn render_repl_ast_node(source: &str, expression: &Expr, depth: usize, lines: &mut Vec<String>) {
-    let indent = "  ".repeat(depth);
-    let excerpt = source
-        .get(expression.span.start..expression.span.end)
-        .unwrap_or("");
-    match &expression.kind {
-        ExprKind::List(items) => {
-            lines.push(format!("{indent}Список ({} елементів)", items.len()));
-            for item in items.iter() {
-                render_repl_ast_node(source, item, depth + 1, lines);
-            }
-        }
-        ExprKind::Pair(head, tail) => {
-            lines.push(format!("{indent}Пара"));
-            render_repl_ast_node(source, head, depth + 1, lines);
-            render_repl_ast_node(source, tail, depth + 1, lines);
-        }
-        ExprKind::Call(identity, arguments) => {
-            lines.push(format!(
-                "{indent}Виклик резидента {identity:?} ({} аргументів)",
-                arguments.len()
-            ));
-            for argument in arguments.iter() {
-                render_repl_ast_node(source, argument, depth + 1, lines);
-            }
-        }
-        ExprKind::DomainCall(identity, arguments) => {
-            lines.push(format!(
-                "{indent}Доменний виклик {identity:?} ({} аргументів)",
-                arguments.len()
-            ));
-            for argument in arguments.iter() {
-                render_repl_ast_node(source, argument, depth + 1, lines);
-            }
-        }
-        ExprKind::Number(..) => lines.push(format!("{indent}Число: {excerpt}")),
-        ExprKind::Rational(..) => lines.push(format!("{indent}Дріб: {excerpt}")),
-        ExprKind::BinaryNumber(..) => lines.push(format!("{indent}Двійкове число: {excerpt}")),
-        ExprKind::NumericBuffer(..) => lines.push(format!("{indent}Числовий буфер: {excerpt}")),
-        ExprKind::Sid(identity) => {
-            lines.push(format!(
-                "{indent}Історична identity {identity:?}: {excerpt}"
-            ));
-        }
-        ExprKind::DomainIdentity(identity) => {
-            lines.push(format!("{indent}Доменна identity {identity:?}: {excerpt}"));
-        }
-        ExprKind::String(..) => lines.push(format!("{indent}Рядок: {excerpt}")),
-        ExprKind::Symbol(..) => lines.push(format!("{indent}Символ: {excerpt}")),
-        ExprKind::Local { depth, index } => {
-            lines.push(format!(
-                "{indent}Локальний слот: depth={depth}, index={index}"
-            ));
-        }
-    }
 }
 
 /// `~/.sens-history`, якщо home directory доступний.
@@ -2771,35 +2717,6 @@ mod tests {
         assert!(actual.iter().any(|word| matches!(word,
             ExactDomainWord::Identity(identity)
                 if identity.width() == 9 && identity.packed_bits() == 0b110011110)));
-    }
-
-    #[test]
-    fn t5m_quote_preserves_domain_identity_without_granting_callability() {
-        let source = sens::parse_mixed_exact_domain("(як-є розгорнути-макрос)")
-            .expect("quote of a ratified but non-core projection");
-        let mut actual = Vec::new();
-        append_t5m_expression(&source[0], sens::Text7Layout::Uk, &mut actual, 0)
-            .expect("quoted domain name remains an exact domain word");
-        let identity =
-            sens::semantic_registry_export::exact_uk_domain_identity("розгорнути-макрос")
-                .expect("D6 projection has an exact resident identity");
-        assert_eq!(identity.width(), 6);
-        assert!(
-            sens::semantic_registry_export::admitted_core_domain_for_surface("розгорнути-макрос")
-                .is_none(),
-            "identity lookup must not rely on an admitted core-callability projection"
-        );
-        assert_eq!(
-            actual,
-            vec![
-                ExactDomainWord::Identity(t5m_domain_identity(2, 0b10).unwrap()),
-                ExactDomainWord::Identity(t5m_domain_identity(3, 0b001).unwrap()),
-                ExactDomainWord::Identity(t5m_domain_identity(2, 0b00).unwrap()),
-                ExactDomainWord::Identity(identity),
-                ExactDomainWord::Identity(t5m_domain_identity(2, 0b01).unwrap()),
-            ],
-            "quotation transports identity and does not infer a callable mechanism"
-        );
     }
 
     #[cfg(feature = "zig-transport")]

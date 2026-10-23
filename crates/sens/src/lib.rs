@@ -156,12 +156,6 @@ pub mod semantic_registry_export {
         super::semantic_registry::exact_uk_callable_for_source_head(name)
     }
 
-    /// Розв'язати точну тотожність з української проєкції без висновку про
-    /// викличність. Цитовані дані можуть нести резидентів, які не є головами.
-    pub fn exact_uk_domain_identity(name: &str) -> Option<super::DomainIdentity> {
-        super::domain_projection_catalog::exact_uk_domain_identity(name)
-    }
-
     /// Whether an exact current D9/D10 identity may be an explicit D4 DEFINE
     /// target. This is admission only, not evidence that a definition exists;
     /// evaluation still requires a concrete callable and an empty root slot.
@@ -304,8 +298,8 @@ pub use eval::{
 };
 pub use parser::{parse, parse_exact_domain_source};
 pub use presentation::{
-    present_system_message, render_error_for_presentation, render_value_for_presentation,
-    PresentationLanguage,
+    present_system_message, render_error_for_presentation, render_value_for_presentation, AstLine,
+    render_ast, render_ast_node, PresentationLanguage,
 };
 pub use program_data::{expr_to_exact_program_data, lowered_program_to_exact_data};
 pub use syntax::fasl::{
