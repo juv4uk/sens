@@ -341,6 +341,8 @@ run_case run_law d8-d7-equal-physical-mutant tests/semantic/d8-d7-equal-physical
 # Точні результати пари формує сам Lisp; Zig лише переносить T5M.
 run_case run_law d8-string-symbol-roundtrip-positive tests/semantic/d8-string-symbol-roundtrip-law.lisp 1
 run_case run_law d8-string-symbol-roundtrip-mutant tests/semantic/d8-string-symbol-roundtrip-mutant.lisp 0
+# Негативний тип перевіряє сама мова; Rust/Zig не є семантичним оракулом.
+run_case run_type_rejection d8-string-symbol-nontext-type-negative tests/semantic/d8-string-symbol-nontext-type-negative.lisp 'string->symbol expects a string'
 # D1 хибне значення як голова CONS ≠ порожній D3-список.
 # Обидва результати вираховує Lisp/SENS; Zig лише фізично переносить слова.
 run_case run_law d3-d1-false-cons-head-positive tests/semantic/language-law-d3-d1-false-head-ukr.lisp 1
