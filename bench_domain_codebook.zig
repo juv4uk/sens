@@ -1,18 +1,18 @@
 //! Парний механічний A/B: чинний T5M проти дослідного DWC1.
 //! Один і той самий exact-width corpus, без SENS-семантики й host-оракулів.
 const std = @import("std");
-const t5m = @import("t5m.zig");
-const dwc = @import("domain_codebook_experiment.zig");
+const t5m = @import("research/zig-codecs/t5m.zig");
+const dwc = @import("research/zig-codecs/domain_codebook_experiment.zig");
 
 const Corpus = struct {
     name: []const u8,
     physical: []const u8,
 };
 const corpora = [_]Corpus{
-    .{ .name = "train-core", .physical = @embedFile("../../lib/core.sens") },
-    .{ .name = "holdout-lists", .physical = @embedFile("../../benchmarks/lists.sens") },
-    .{ .name = "holdout-arithmetic", .physical = @embedFile("../../benchmarks/arithmetic.sens") },
-    .{ .name = "holdout-persistent-vector", .physical = @embedFile("../../lib/persistent-vector.sens") },
+    .{ .name = "train-core", .physical = @embedFile("lib/core.sens") },
+    .{ .name = "holdout-lists", .physical = @embedFile("benchmarks/lists.sens") },
+    .{ .name = "holdout-arithmetic", .physical = @embedFile("benchmarks/arithmetic.sens") },
+    .{ .name = "holdout-persistent-vector", .physical = @embedFile("lib/persistent-vector.sens") },
 };
 const Lane = enum { t5m_encode, dwc_encode, t5m_decode, dwc_decode };
 const samples: usize = 11;

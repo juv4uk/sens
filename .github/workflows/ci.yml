@@ -447,13 +447,13 @@ jobs:
             echo "::error file=research/zig-codecs/domain_codebook_experiment.zig,title=Zig DWC1 tests::REGRESSION layer=codec-experiment expected=roundtrip-and-fail-closed actual=failed"
             zig_failed=1
           fi
-          if zig run -O ReleaseFast -lc research/zig-codecs/domain_codebook_bench.zig \
+          if zig run -O ReleaseFast -lc bench_domain_codebook.zig \
               > "$RUNNER_TEMP/zig-dwc1-benchmark.log" 2>&1; then
             cat "$RUNNER_TEMP/zig-dwc1-benchmark.log"
             echo "::notice title=Zig DWC1 A/B::MEASURED corpora=4 provenance=$(git rev-parse HEAD) semantics=NOT_TESTED"
           else
             cat "$RUNNER_TEMP/zig-dwc1-benchmark.log" >&2
-            echo "::error file=research/zig-codecs/domain_codebook_bench.zig,title=Zig DWC1 A/B::REGRESSION layer=codec-experiment expected=paired-measurements actual=failed"
+            echo "::error file=bench_domain_codebook.zig,title=Zig DWC1 A/B::REGRESSION layer=codec-experiment expected=paired-measurements actual=failed"
             zig_failed=1
           fi
           exit "$zig_failed"
