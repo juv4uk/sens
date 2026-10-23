@@ -29,7 +29,20 @@ fn cli_returns_observable_utf8_stdout_for_readable_lisp_source() {
 
 #[test]
 fn cli_returns_error_status_and_stderr_for_missing_input_file() {
-    let output = run_sens("tests/semantic/__missing_cli_io_input__.lisp");
+    // Перевіряємо саме механізм файлового вводу, а не будь-яку відмову
+    // попереднього Core4/process bootstrap. Інакше цей тест був би
+    // хибно-зеленим навіть тоді, коли CLI ще не дійшов до читання шляху.
+    let requested = "tests/semantic/__missing_cli_io_input__.lisp";
+    assert!(
+        !repo_root().join(requested).exists(),
+        "фікстура відсутнього файлу не повинна існувати"
+    );
+    let output = run_sens(requested);
     assert!(!output.status.success(), "відсутній файл має дати ненульовий статус");
-    assert!(!output.stderr.is_empty(), "помилка читання має бути видима у stderr");
+    let stderr = String::from_utf8(output.stderr)
+        .expect("механічна діагностика CLI повинна бути UTF-8");
+    assert!(
+        stderr.contains(&format!("Error reading file {requested}:")),
+        "CLI завершився не на читанні відсутнього файла, а раніше: {stderr}"
+    );
 }
