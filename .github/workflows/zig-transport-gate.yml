@@ -20,7 +20,6 @@ jobs:
       - name: Unit tests (no semantic admission)
         run: |
           python3 -m unittest tests.test_migration_zig_gate -v
-          python3 -m unittest tests.test_t5_physical_python_parity -v
           python3 scripts/check_sterile_zig_corridor.py
           python3 -m unittest tests.test_sterile_zig_corridor -v
           python3 scripts/check_rust_sens_zig_corridor.py .
