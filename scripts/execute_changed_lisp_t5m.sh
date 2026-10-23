@@ -142,6 +142,55 @@ run_native_t5m_program() {
     echo "::notice::T5M_NATIVE_NOT_COMMITTED source=$file release=NOT_CERTIFIED"
   fi
 
+  # Типові негативні свідки: помилка Type є мовним результатом SENS,
+  # а не провалом кодека. Zig спершу зберіг точні байти й перевірив roundtrip.
+  # Названі випадки проходять і paired, і standalone; інша причина відмови — RED.
+  local negative_type_diagnostic=""
+  case "$file" in
+    tests/semantic/d3-eq-nonatom-type-negative.lisp)
+      negative_type_diagnostic='eq expects two atoms' ;;
+    tests/semantic/d4-not-nonpredicate-type-negative.lisp)
+      negative_type_diagnostic='NOT requires an exact D1 PredicateBit' ;;
+    tests/semantic/d3-cond-nil-condition-type-negative.lisp)
+      negative_type_diagnostic='D3:110 COND expects exact D1:1 / D1:0' ;;
+  esac
+  if [[ -n "$negative_type_diagnostic" ]]; then
+    local rejection_status
+    if timeout "$native_timeout" "$binary" --t5m-pair "$file" "$physical" "${binding_sources[@]}" \
+        >"$dir/native-paired.stdout" 2>"$dir/native-paired.stderr"; then
+      echo "::error::T5M_EXPECTED_TYPE_PAIRED_ACCEPTED source=$file" >&2
+      mark_file_failed
+      return
+    else
+      rejection_status=$?
+    fi
+    if (( rejection_status == 124 || rejection_status == 137 )) ||
+       ! grep -Fq "$negative_type_diagnostic" "$dir/native-paired.stderr" ||
+       ! grep -Fq 'kind=Type' "$dir/native-paired.stderr"; then
+      sed 's/^/SENS negative paired: /' "$dir/native-paired.stderr" >&2
+      echo "::error::T5M_EXPECTED_TYPE_PAIRED_MISMATCH source=$file status=$rejection_status" >&2
+      mark_file_failed
+      return
+    fi
+    if timeout "$native_timeout" "$binary" "$physical" \
+        >"$dir/native-standalone.stdout" 2>"$dir/native-standalone.stderr"; then
+      echo "::error::T5M_EXPECTED_TYPE_STANDALONE_ACCEPTED source=$file" >&2
+      mark_file_failed
+      return
+    else
+      rejection_status=$?
+    fi
+    if (( rejection_status == 124 || rejection_status == 137 )) ||
+       ! grep -Fq "$negative_type_diagnostic" "$dir/native-standalone.stderr"; then
+      sed 's/^/SENS negative standalone: /' "$dir/native-standalone.stderr" >&2
+      echo "::error::T5M_EXPECTED_TYPE_STANDALONE_MISMATCH source=$file status=$rejection_status" >&2
+      mark_file_failed
+      return
+    fi
+    echo "::notice file=$file,title=SENS negative Type::PASS physical=Zig/T5M paired=REJECTED standalone=REJECTED diagnostic=$negative_type_diagnostic"
+    return
+  fi
+
   # Критичний доказ — реальне парне виконання фізичних Zig-байтів.
   if timeout "$native_timeout" "$binary" --t5m-pair "$file" "$physical" "${binding_sources[@]}" \
       >"$dir/native-paired.stdout" 2>"$dir/native-paired.stderr"; then
