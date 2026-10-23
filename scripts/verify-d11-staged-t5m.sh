@@ -17,6 +17,8 @@ trap 'rm -rf -- "$scratch"' EXIT
 
 for source in \
   lib/d11-clojure-frequencies-unary.lisp \
+  lib/d11-clojure-juxt.lisp \
+  lib/d11-srfi1-filter-map.lisp \
   lib/d11-srfi1-find-tail.lisp \
   lib/d11-srfi1-list-equality.lisp \
   lib/d11-srfi1-unary-count.lisp \
