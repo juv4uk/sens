@@ -19,7 +19,10 @@ from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
 COLUMNS = ("ук", "укр", "san", "en", "LISP", "sym")
-EXPECTED = {n: 1 << n for n in range(1, 11)}
+EXPECTED = {n: 1 << n for n in range(1, 12)}
+# D11 — робочий домен розширення: наповнюється похідними за законом, тож
+# повна зайнятість 2048 ще не вимагається (на відміну від ратифікованих D1–D10).
+PARTIAL_DOMAINS = {11}
 TEXT_SUFFIXES = {".lisp", ".lsp", ".scm", ".ss", ".sld", ".json", ".jsonl",
                  ".md", ".rst", ".txt", ".tsv", ".csv", ".py", ".rs", ".c", ".h", ".bits"}
 TOKEN = re.compile(r"[A-Za-z][A-Za-z0-9_?!*+/<>=:-]*")
@@ -133,7 +136,7 @@ def parse_domain_row(line: str, domain: int, line_no: int) -> dict[str, Any] | N
 def load_domain_tables(root: Path) -> dict[int, list[dict[str, Any]]]:
     """Verify exact-width keys, complete occupancy and uniqueness."""
     result = {}
-    for domain in range(1, 11):
+    for domain in range(1, 12):
         path = root / "lib" / "domains" / f"d{domain}.lisp"
         if not path.is_file() or path.is_symlink():
             raise AuditError(f"missing or symlinked table: {path.relative_to(root)}")
@@ -147,7 +150,8 @@ def load_domain_tables(root: Path) -> dict[int, list[dict[str, Any]]]:
         duplicates = sorted({word for word in words if words.count(word) > 1})
         missing = sorted(expected - set(words))
         unexpected = sorted(set(words) - expected)
-        if duplicates or missing or unexpected or len(rows) != EXPECTED[domain]:
+        partial = domain in PARTIAL_DOMAINS
+        if duplicates or unexpected or (not partial and (missing or len(rows) != EXPECTED[domain])):
             raise AuditError(f"D{domain} shape: rows={len(rows)}/{EXPECTED[domain]}, "
                              f"duplicates={duplicates[:4]}, missing={missing[:4]}, unexpected={unexpected[:4]}")
         result[domain] = rows
@@ -328,7 +332,7 @@ def witness_references(root: Path, tokens_needed: set[str]) -> dict[str, list[st
 def discover(root: Path, scan_research: bool = True) -> list[dict[str, Any]]:
     maps = load_domain_tables(root)
     definitions = find_active_sens_definitions(root)
-    all_rows = [row for d in range(1, 11) for row in maps[d]]
+    all_rows = [row for d in range(1, 12) for row in maps[d]]
     needed = {alias.casefold() for row in all_rows for alias in aliases(row)}
     hits = research_mentions(root, needed) if scan_research else {}
     witnesses = witness_references(root, needed)
@@ -379,7 +383,7 @@ def render_tsv(rows: list[dict[str, Any]]) -> str:
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--root", type=Path, default=ROOT)
-    parser.add_argument("--domain", choices=[f"D{n}" for n in range(1, 11)])
+    parser.add_argument("--domain", choices=[f"D{n}" for n in range(1, 12)])
     parser.add_argument("--limit", type=int, default=0)
     parser.add_argument("--format", choices=("json", "tsv"), default="json")
     parser.add_argument("--no-research-scan", action="store_true")
