@@ -444,6 +444,15 @@ impl Environment {
         self.2.borrow().domain_code_slots.get(&identity).cloned()
     }
 
+    /// Чи має точна доменна identity зв'язування в цьому середовищі.
+    /// Зайнятість не доводить, що прив'язане значення можна викликати.
+    /// Whether an exact domain identity has a runtime binding in this environment.
+    /// Occupancy alone does not establish that the bound value is callable.
+    pub fn has_domain_code_slot(&self, identity: impl Into<DomainIdentity>) -> bool {
+        let identity = identity.into();
+        self.2.borrow().domain_code_slots.contains_key(&identity)
+    }
+
     /// Binds one concrete mechanism to one already-known exact-domain identity.
     /// Width/residency alone never grants callability.
     pub(crate) fn bind_domain_code_slot_once(

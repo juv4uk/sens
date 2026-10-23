@@ -12,6 +12,48 @@ use std::{
 static UNIQUE: AtomicU64 = AtomicU64::new(0);
 
 #[test]
+fn t5m_core4_d6_macro_executes_with_ukrainian_lexical_names() {
+    let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../..");
+    let mut source_text = fs::read_to_string(root.join("lib/core4.lisp"))
+        .expect("current Ukrainian Core4 source");
+    source_text.push_str("\n(нехай* ((основа 7) (наслідок основа)) наслідок)\n");
+
+    let id = UNIQUE.fetch_add(1, Ordering::Relaxed);
+    let stem = format!("sens-core4-d6-t5m-{}-{id}", std::process::id());
+    let source = std::env::temp_dir().join(format!("{stem}.lisp"));
+    let physical = std::env::temp_dir().join(format!("{stem}.sens"));
+    let view = physical.with_extension("");
+    let mut source_file = fs::OpenOptions::new()
+        .write(true)
+        .create_new(true)
+        .open(&source)
+        .expect("create a unique temporary Ukrainian source");
+    source_file
+        .write_all(source_text.as_bytes())
+        .expect("write temporary source");
+
+    let minted = Command::new(env!("CARGO_BIN_EXE_sens"))
+        .args(["--t5m-mint-pair"])
+        .arg(&source)
+        .arg(&physical)
+        .output()
+        .expect("mint T5M through SENS and Zig");
+    assert!(minted.status.success(), "{}", error(&minted));
+
+    let executed = Command::new(env!("CARGO_BIN_EXE_sens-trit"))
+        .arg("eval")
+        .arg(&physical)
+        .output()
+        .expect("execute physical T5M through Zig and SENS");
+    assert!(executed.status.success(), "{}", error(&executed));
+    assert_eq!(observed(&executed).trim(), "7");
+
+    fs::remove_file(&source).expect("remove temporary source");
+    fs::remove_file(&physical).expect("remove temporary T5M");
+    fs::remove_file(&view).expect("remove temporary exact-bit view");
+}
+
+#[test]
 fn sens_trit_eval_executes_physical_t5m_d24_without_the_source_file() {
     let path = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../tests/fixtures/приклад.sens");
     let output = Command::new(env!("CARGO_BIN_EXE_sens-trit"))

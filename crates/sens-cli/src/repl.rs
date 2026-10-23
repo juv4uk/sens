@@ -410,11 +410,45 @@ fn selected_surface_callable(
     )
 }
 
-/// Collect source-local DEFINE names before projection. A local definition
-/// shadows a same-spelled domain projection throughout the source unit, just
-/// as the mixed-source reader already does; only an unoccupied exact target
-/// can install a new language-owned domain mechanism.
-fn collect_t5m_source_bindings(source: &str, expression: &Expr, names: &mut Vec<std::rc::Rc<str>>) {
+fn is_t5m_callable_definition_form(expression: &Expr) -> bool {
+    let lambda = |identity: DomainIdentity| matches!(identity, DomainIdentity::D4(word) if word.word().packed_bits() == 0b0010);
+    match &expression.kind {
+        ExprKind::DomainCall(identity, _) => lambda(DomainIdentity::from(*identity)),
+        ExprKind::List(items) => {
+            let head_is_lambda = items.first().is_some_and(|head| match &head.kind {
+                ExprKind::DomainIdentity(identity) => lambda(*identity),
+                ExprKind::Symbol(name) => name.as_ref() == "функція",
+                _ => false,
+            });
+            if head_is_lambda {
+                return true;
+            }
+
+            let macro_identity =
+                sens::semantic_registry_export::admitted_core_domain_for_surface("макрос")
+                    .map(DomainIdentity::from);
+            let head_is_macro = items.first().is_some_and(|head| match &head.kind {
+                ExprKind::DomainIdentity(identity) => Some(*identity) == macro_identity,
+                ExprKind::Symbol(name) => name.as_ref() == "макрос",
+                _ => false,
+            });
+            head_is_macro && items.get(1).is_some_and(is_t5m_callable_definition_form)
+        }
+        _ => false,
+    }
+}
+
+/// Збирає локальні імена DEFINE та позначає визначення, що створюють замикання.
+/// Ім'я лишається текстовим зв'язувачем, якщо воно не встановлюється у вільну
+/// допущену identity D6/D9/D10.
+/// Collect source-local DEFINE names and whether the definition constructs a
+/// closure. A binder shadows a domain projection unless it is an unoccupied,
+/// admitted D6/D9/D10 target whose value is explicitly a lambda.
+fn collect_t5m_source_bindings(
+    source: &str,
+    expression: &Expr,
+    names: &mut Vec<(std::rc::Rc<str>, bool)>,
+) {
     let ExprKind::List(items) = &expression.kind else {
         match &expression.kind {
             ExprKind::Pair(head, tail) => {
@@ -436,7 +470,10 @@ fn collect_t5m_source_bindings(source: &str, expression: &Expr, names: &mut Vec<
     {
         if let Some(target) = items.get(1) {
             if let Some(name) = source.get(target.span.start..target.span.end) {
-                names.push(name.into());
+                names.push((
+                    name.into(),
+                    items.get(2).is_some_and(is_t5m_callable_definition_form),
+                ));
             }
         }
     }
@@ -455,6 +492,22 @@ fn project_repl_surface_expression_in_scope(
 ) -> Result<Expr, String> {
     if depth > 768 {
         return Err("REPL projection lowering exceeds the SENS nesting limit".into());
+    }
+    if let ExprKind::DomainIdentity(identity) = &expression.kind {
+        if let Some(name) = source.get(expression.span.start..expression.span.end) {
+            if bound.iter().any(|candidate| candidate.as_ref() == name)
+                && session.environment.get(name).is_none()
+            {
+                return Ok(Expr {
+                    kind: ExprKind::Symbol(name.into()),
+                    span: expression.span,
+                });
+            }
+        }
+        return Ok(Expr {
+            kind: ExprKind::DomainIdentity(*identity),
+            span: expression.span,
+        });
     }
     let ExprKind::Symbol(name) = &expression.kind else {
         if let ExprKind::List(items) = &expression.kind {
@@ -556,10 +609,16 @@ fn project_repl_surface_expression_in_scope(
                         if let Some(identity) = selected_surface_callable(surface, target_name)? {
                             if sens::semantic_registry_export::is_admitted_exact_definition_target(
                                 identity,
-                            ) && session.environment.get(target_name).is_none()
+                            ) && items.get(2).is_some_and(is_t5m_callable_definition_form)
                             {
                                 projected[1] = Expr {
-                                    kind: ExprKind::DomainIdentity(identity),
+                                    kind: if session.environment.has_domain_code_slot(identity)
+                                        || session.environment.get(target_name).is_some()
+                                    {
+                                        ExprKind::Symbol(target_name.into())
+                                    } else {
+                                        ExprKind::DomainIdentity(identity)
+                                    },
                                     span: target.span,
                                 };
                             }
@@ -570,7 +629,11 @@ fn project_repl_surface_expression_in_scope(
             if let ExprKind::Symbol(head) = &items[0].kind {
                 // A user binding in the persistent REPL frame shadows a projection
                 // alias, preserving ordinary interactive rebinding behavior.
-                if session.environment.get(head).is_none() {
+                if !bound
+                    .iter()
+                    .any(|candidate| candidate.as_ref() == head.as_ref())
+                    && session.environment.get(head).is_none()
+                {
                     if let Some(identity) = selected_surface_callable(surface, head)? {
                         let arguments = projected.drain(1..).collect::<Vec<_>>();
                         if let Some(core_identity) = identity.core_operation() {
@@ -1028,12 +1091,24 @@ fn prepare_t5m_repl_words(
     // A source-local name shadows a domain projection only if the selected
     // domain slot is already occupied in this session. Otherwise the ratified
     // D10 target and its call sites must remain exact DomainIdentity words.
-    source_bindings.retain(|name| {
-        selected_surface_callable(surface, name)
+    source_bindings.retain(|(name, is_lambda)| {
+        let exact_target = selected_surface_callable(surface, name)
             .ok()
             .flatten()
-            .is_some_and(|_| session.environment.get(name).is_some())
+            .filter(|identity| {
+                sens::semantic_registry_export::is_admitted_exact_definition_target(*identity)
+            });
+        let will_be_exact = *is_lambda
+            && exact_target.is_some_and(|identity| {
+                !session.environment.has_domain_code_slot(identity)
+                    && session.environment.get(name).is_none()
+            });
+        !will_be_exact
     });
+    let bound_names = source_bindings
+        .iter()
+        .map(|(name, _)| name.clone())
+        .collect::<Vec<_>>();
     let expressions = parsed
         .iter()
         .map(|expression| {
@@ -1043,7 +1118,7 @@ fn prepare_t5m_repl_words(
                 surface,
                 line,
                 0,
-                &source_bindings,
+                &bound_names,
             )
         })
         .collect::<Result<Vec<_>, _>>()?;
@@ -1919,12 +1994,48 @@ pub(crate) fn run_repl(session: Session, initial_surface: ReplSurface, sens_loop
 mod tests {
     use super::*;
 
+    #[cfg(feature = "zig-transport")]
+    #[test]
+    fn t5m_core4_defines_its_exact_numeric_roots() {
+        let source = std::fs::read_to_string("../../lib/core4.lisp").unwrap();
+        let mut binary_session = Session::default();
+        let program =
+            prepare_t5m_repl_program(&source, ReplSurface::UkrainianFull, &binary_session)
+                .expect("full Core4 T5M projection with decimal D24+ roots in source");
+        let binary_result = program
+            .execute(&mut binary_session)
+            .expect("T5M Core4 defines its numeric roots without host seeding");
+
+        let mut source_session = Session::default();
+        let source_result =
+            sens::load_core_library(&mut source_session).expect("source Core4 bootstrap");
+        assert_eq!(
+            binary_result.value.to_string(),
+            source_result.value.to_string()
+        );
+        for probe in ["(додати-1 число-один)", "(змінити-знак число-один)"]
+        {
+            let source_value = eval_program(probe, &mut source_session)
+                .unwrap_or_else(|error| panic!("source Core4 probe {probe}: {error}"))
+                .value;
+            let binary_value = eval_program(probe, &mut binary_session)
+                .unwrap_or_else(|error| panic!("T5M Core4 probe {probe}: {error}"))
+                .value;
+            assert_eq!(
+                binary_value.to_string(),
+                source_value.to_string(),
+                "{probe}"
+            );
+        }
+    }
 
     #[cfg(feature = "zig-transport")]
     #[test]
     fn t5m_unoccupied_d10_definition_and_calls_keep_exact_identity() {
         let name = "відібрати-визначення-іменованої-групи";
-        let source = format!("(визначити {name} (функція (локальне-значення) локальне-значення))\n({name} 40)");
+        let source = format!(
+            "(визначити {name} (функція (локальне-значення) локальне-значення))\n({name} 40)"
+        );
         let mut session = Session::bare();
         assert!(session.environment.get(name).is_none());
 
@@ -1942,22 +2053,37 @@ mod tests {
         let name = "відібрати-визначення-іменованої-групи";
         let source = format!("(визначити {name} (функція (значення) значення))\n({name} 40)");
         let mut session = Session::bare();
-        sens::load_core_library(&mut session).expect("Core4 installs the D10 mechanism");
+        sens::load_core_library(&mut session).expect("Core4 occupies the exact D10 slot");
         let identity = selected_surface_callable(ReplSurface::UkrainianFull, name)
             .unwrap()
             .expect("exact D10 projection");
         assert_eq!(identity.width(), 10);
-        assert!(
-            session.environment.get(name).is_some(),
-            "fixture must exercise an already occupied language-owned D10 slot"
-        );
+        assert!(session.environment.has_domain_code_slot(identity));
 
         let program = prepare_t5m_repl_program(&source, ReplSurface::UkrainianFull, &session)
-            .expect("source-local D10 name stays a Text7 binding through Zig T5M");
+            .expect("source-local definition shadows an occupied exact D10 identity");
         let result = program
             .execute(&mut session)
             .expect("local Text7 binding shadows the existing D10 mechanism");
         assert_eq!(result.value.to_string(), "40");
+    }
+
+    #[cfg(feature = "zig-transport")]
+    #[test]
+    fn t5m_noncallable_d10_spelling_remains_a_text7_binding() {
+        let name = "канон-порожній-список";
+        let identity = selected_surface_callable(ReplSurface::UkrainianFull, name)
+            .unwrap()
+            .expect("the spelling has a ratified D10 projection");
+        assert!(sens::semantic_registry_export::is_admitted_exact_definition_target(identity));
+        let source = format!("(визначити {name} (як-є ()))");
+        let mut session = Session::bare();
+        let program = prepare_t5m_repl_program(&source, ReplSurface::UkrainianFull, &session)
+            .expect("non-callable local value stays in its Text7 namespace");
+        let result = program
+            .execute(&mut session)
+            .expect("D10 spelling does not force a non-callable exact target");
+        assert!(matches!(result.value, Value::Nil));
     }
 
     #[test]

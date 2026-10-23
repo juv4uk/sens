@@ -34,39 +34,6 @@ fn committed_core_fasl_matches_current_core_source() {
     );
 }
 
-/// #5408: порожня, одна й дві послідовні прив'язки мають працювати з
-/// поточного Lisp-макросу, незалежно від людської поверхні імен.
-#[test]
-fn poslidovni_pryviazky_d6_vykonuiutsia_i_ne_prykhovuiut_nevidome_imia() {
-    for source in [
-        "(нехай* () 7)",
-        "(нехай* ((x 7)) x)",
-        "(нехай* ((x 7) (y x)) y)",
-        "(нехай* ((основа 7) (наслідок основа)) наслідок)",
-        "(нехай* ((x 7) (y x)) y)",
-    ] {
-        let mut session = sens::Session::default();
-        sens::load_core_library(&mut session).expect("чинний Core4 мусить завантажитися");
-        let expressions = sens::parse(source).expect("допущена форма D6");
-        let outcome = sens::eval_parsed_expressions(&expressions, &mut session)
-            .unwrap_or_else(|err| panic!("нехай* не створило лексичну рамку для {source}: {err}"));
-        assert_eq!(
-            outcome.value.to_string(),
-            "7",
-            "неправильне значення для {source}"
-        );
-    }
-
-    let mut session = sens::Session::default();
-    sens::load_core_library(&mut session).expect("поточний Core4");
-    let unknown =
-        sens::parse("(нехай* ((основа 7)) наслідок)").expect("допущений негативний свідок");
-    assert!(
-        sens::eval_parsed_expressions(&unknown, &mut session).is_err(),
-        "невідомий символ повинен завершуватися помилкою, а не прихованим допуском"
-    );
-}
-
 #[test]
 fn core4_length_terminates_on_exact_d4_null_not_on_nonempty_atom_negation() {
     // #5408: Observe the Lisp-owned source law through the real Core4
@@ -79,7 +46,8 @@ fn core4_length_terminates_on_exact_d4_null_not_on_nonempty_atom_negation() {
         ("(довжина (як-є (7)))", "1"),
         ("(довжина (як-є (7 6 5 4 3 2 1)))", "7"),
     ] {
-        let expressions = sens::parse(source).expect("admitted exact D3 QUOTE fixture");
+        let expressions =
+            sens::parse_mixed_exact_domain(source).expect("admitted exact D3 QUOTE fixture");
         let outcome = sens::eval_parsed_expressions(&expressions, &mut session)
             .unwrap_or_else(|err| panic!("Lisp-owned length failed for {source}: {err}"));
         assert_eq!(

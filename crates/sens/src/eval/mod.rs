@@ -499,13 +499,29 @@ fn evaluate_list(
     // position. Ordinary D2 lists, quoted data and dotted data remain governed
     // solely by the canonical D2 reader.
     if let Some(key) = text7_binding_key(&items[0]) {
-        environment.get(&key).ok_or_else(|| {
-            LanguageError::new(
+        if environment.get(&key).is_none() {
+            let text = crate::Text7::from_canonical_wire_token(&key).ok();
+            let surface = text.as_ref().and_then(|text| {
+                crate::text7_projection::render_text7(text, crate::Text7Layout::Uk).ok()
+            });
+            let exact_d6 = surface
+                .as_deref()
+                .and_then(crate::semantic_registry::d6_binding_identity_for_definition)
+                .filter(|identity| environment.domain_code_slot(*identity).is_some());
+            if let Some(crate::DomainIdentity::D6(word)) = exact_d6 {
+                return dispatch_domain_call(
+                    CoreDomainIdentity::D6(word),
+                    &items[1..],
+                    environment,
+                    span,
+                );
+            }
+            return Err(LanguageError::new(
                 ErrorKind::UnknownSymbol,
                 format!("unknown Text7 binding: {key}"),
                 items[0].span,
-            )
-        })?;
+            ));
+        }
         return dispatch_call(None, None, Some(&items[0]), &items[1..], environment, span);
     }
     dispatch_call(
@@ -876,6 +892,25 @@ fn dispatch_call(
         return selector_law::invoke(identity, &values, span)
             .expect("unique ratified D6-D10 selector head")
             .map(EvalStep::Value);
+    }
+
+    // D6-визначення беруть точний рядок згенерованої таблиці «ім'я → домен».
+    // Текстовий зв'язувач джерела не стає identity сам собою: викликаємо її,
+    // лише якщо точний D6-слот уже містить механізм.
+    // D6 library definitions use an exact generated name-to-domain row, but
+    // their Text7 source binder is intentionally projection-neutral inside
+    // the runtime. Route a Ukrainian source head only when that exact D6 slot
+    // already contains a concrete mechanism; residency alone is insufficient.
+    if let Some(identity) = head_name
+        .and_then(crate::semantic_registry::d6_binding_identity_for_definition)
+        .filter(|identity| environment.domain_code_slot(*identity).is_some())
+    {
+        return apply_exact_domain_value(
+            &identity,
+            arguments,
+            environment,
+            span,
+        );
     }
 
     if let Some(name) = head_name {

@@ -11,6 +11,7 @@ pub fn main(init: std.process.Init) !void {
     const libraries = [_]struct { name: []const u8, physical: []const u8 }{
         .{ .name = "MACRO_BOOTSTRAP_WORDS", .physical = @embedFile("lib/macro.sens") },
         .{ .name = "CORE3_BOOTSTRAP_WORDS", .physical = @embedFile("lib/core3.sens") },
+        .{ .name = "CORE4_BOOTSTRAP_WORDS", .physical = @embedFile("lib/core4.sens") },
         .{ .name = "TIME_BOOTSTRAP_WORDS", .physical = @embedFile("lib/time.sens") },
         .{ .name = "UTF8_BOOTSTRAP_WORDS", .physical = @embedFile("lib/utf8.sens") },
         .{ .name = "PROCESS_BOOTSTRAP_WORDS", .physical = @embedFile("lib/process.sens") },

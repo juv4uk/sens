@@ -156,9 +156,10 @@ pub mod semantic_registry_export {
         super::semantic_registry::exact_uk_callable_for_source_head(name)
     }
 
-    /// Whether an exact current D9/D10 identity may be an explicit D4 DEFINE
-    /// target. This is admission only, not evidence that a definition exists;
-    /// evaluation still requires a concrete callable and an empty root slot.
+    /// Whether an exact current D6/D9/D10 identity may be an explicit D4
+    /// DEFINE target. D6 targets must appear in the generated definition map
+    /// and must not already be a Core operation. Evaluation still requires a
+    /// concrete callable and an empty root slot.
     pub fn is_admitted_exact_definition_target(identity: super::DomainIdentity) -> bool {
         super::semantic_registry::is_admitted_exact_definition_target(identity)
     }
@@ -479,6 +480,7 @@ fn decode_verified_core4_fasl(fasl: &[u8]) -> Option<Vec<Expr>> {
     fasl_decode_program(fasl).map(|(expressions, _)| expressions)
 }
 
+#[cfg(test)]
 fn current_core_verified_lowered() -> Option<std::rc::Rc<[Expr]>> {
     thread_local! {
         static LOWERED: std::cell::OnceCell<Option<std::rc::Rc<[Expr]>>> =
@@ -499,17 +501,18 @@ fn current_core_verified_lowered() -> Option<std::rc::Rc<[Expr]>> {
 /// bit spellings such as `100` numeric outside this exact source context;
 /// parsing Core4 that way leaves executable CAR heads as Numbers whenever the
 /// checked-in FASL is stale. Other libraries retain their ordinary reader.
+#[cfg(test)]
 fn eval_core4_source_fallback(session: &mut Session) -> Result<EvalResult, LanguageError> {
     let expressions = parse_mixed_exact_domain_core_source("lib/core4.lisp", CORE_LIBRARY_SOURCE)?;
     eval_parsed_expressions(&expressions, session)
 }
 
+#[cfg(test)]
 fn load_core_library_with_fasl_mode(
     session: &mut Session,
     core_fasl: &[u8],
     use_verified_cache: bool,
 ) -> Result<EvalResult, LanguageError> {
-    session.environment.select_core_profile(CoreProfile::Core4);
     // `Session::default()` already installs the same language-owned macro
     // layer. Its exact D5 mechanism slot is bind-once, so bootstrapping Core4
     // must not install the identical layer a second time.
@@ -520,10 +523,6 @@ fn load_core_library_with_fasl_mode(
     {
         load_macro_library(session)?;
     }
-
-    // Source Core4 has no numeric literal syntax. Seed only the two
-    // exact D24+ values needed to define the language-owned derived names.
-    bind_core_numeric_seed_values(&session.environment)?;
 
     // Cache only the exact embedded FASL. Arbitrary caller-supplied FASL
     // (including invalid/stale fixtures) retains the original decode/fallback
@@ -545,6 +544,7 @@ fn load_core_library_with_fasl_mode(
     bind_core_runtime_mechanisms(&session.environment);
     bind_missing_stable_surface_peers(&session.environment);
     bind_existing_d9_language_mechanisms(&session.environment);
+    session.environment.select_core_profile(CoreProfile::Core4);
     Ok(result)
 }
 
@@ -614,54 +614,10 @@ fn bind_existing_d9_language_mechanisms(environment: &Environment) {
     }
 }
 
-/// Install the two named exact D24+ seed values required before the Lisp-owned
-/// arithmetic definitions can bootstrap their derived named constants. These
-/// are typed numeric-domain values, not source-number literals or D1-D10 codes.
-fn bind_core_numeric_seed_value(
-    environment: &Environment,
-    name: &str,
-    bits: &[u8],
-) -> Result<(), LanguageError> {
-    let matches = |value: &Value| match value {
-        Value::BinaryNumber(number) => {
-            number.numeric_domain_width() == Some(24)
-                && number.exact_numeric_domain_bits().as_deref() == Some(bits)
-        }
-        _ => false,
-    };
-    if let Some(existing) = environment.get(name) {
-        if matches(&existing) {
-            return Ok(());
-        }
-        return Err(LanguageError::new(
-            ErrorKind::InvalidForm,
-            format!("Core4 named D24+ seed conflicts with an existing binding: {name}"),
-            Span::default(),
-        ));
-    }
-    let number = BinaryNumber::from_numeric_domain_bits(24, bits).ok_or_else(|| {
-        LanguageError::new(
-            ErrorKind::InvalidForm,
-            format!("cannot construct canonical D24+ bootstrap value: {name}"),
-            Span::default(),
-        )
-    })?;
-    environment.define(name, Value::BinaryNumber(number));
-    Ok(())
-}
-
-fn bind_core_numeric_seed_values(environment: &Environment) -> Result<(), LanguageError> {
-    let zero = [0u8; 24];
-    let mut one = [0u8; 24];
-    one[23] = 1;
-    bind_core_numeric_seed_value(environment, "число-нуль", &zero)?;
-    bind_core_numeric_seed_value(environment, "число-один", &one)?;
-    Ok(())
-}
-
 /// Production always uses the owner-verified binary decode/lowering cache.
 /// An internal-only switch exists solely to compare identical full Core4
 /// bootstrap paths with and without cached transport on the *same* CPU.
+#[cfg(test)]
 fn load_core_library_with_fasl(
     session: &mut Session,
     core_fasl: &[u8],
@@ -670,7 +626,20 @@ fn load_core_library_with_fasl(
 }
 
 pub fn load_core_library(session: &mut Session) -> Result<EvalResult, LanguageError> {
-    load_core_library_with_fasl(session, CORE_LIBRARY_FASL)
+    let macro_identity = semantic_registry::domain_identity_for_surface("макрос");
+    if macro_identity
+        .and_then(|identity| session.environment.domain_code_slot(identity))
+        .is_none()
+    {
+        load_macro_library(session)?;
+    }
+
+    let result = binary_bootstrap::with_core4_program(|program| program.execute(session))??;
+    bind_core_runtime_mechanisms(&session.environment);
+    bind_missing_stable_surface_peers(&session.environment);
+    bind_existing_d9_language_mechanisms(&session.environment);
+    session.environment.select_core_profile(CoreProfile::Core4);
+    Ok(result)
 }
 
 /// Read-only діагностика для embedder-а: чи відповідає Core4 FASL точному
@@ -1050,6 +1019,36 @@ mod core4_bootstrap_cache_tests {
     use super::*;
 
     #[test]
+    fn core4_t5m_bootstrap_contains_executable_forms() {
+        let form_count = binary_bootstrap::with_core4_program(PhysicalT5Program::form_count)
+            .expect("Zig-restored Core4 T5M program");
+        assert!(form_count > 0);
+
+        let mut binary_session = Session::bare();
+        let binary_result = load_core_library(&mut binary_session)
+            .expect("production Core4 bootstrap executes Zig-restored T5M");
+        assert_eq!(
+            binary_session.environment.selected_core_profile(),
+            Some(CoreProfile::Core4)
+        );
+
+        let mut source_session = Session::bare();
+        let source_result =
+            load_core_library_with_fasl_mode(&mut source_session, b"source-oracle", false)
+                .expect("source Core4 oracle remains available to tests");
+        assert_eq!(
+            binary_result.value.to_string(),
+            source_result.value.to_string()
+        );
+
+        for session in [&mut binary_session, &mut source_session] {
+            let result = eval_program("(додати-1 число-один)", session)
+                .expect("Core4 D6 operation is callable after bootstrap");
+            assert_eq!(result.value.to_string(), "2");
+        }
+    }
+
+    #[test]
     fn core2_profile_selection_does_not_load_comment_only_source() {
         let mut session = Session::bare();
         let result = load_core2_library(&mut session).expect("Core2 profile selection");
@@ -1192,13 +1191,26 @@ mod core4_bootstrap_cache_tests {
             .expect("monotonic clock result is an exact integer");
         assert!(nanoseconds >= 0);
 
-        let first = eval_program("(створити-символ \"probe-\")", &mut session)
-            .expect("створити-символ викликає D10-годинник і D8-проєкцію тексту");
-        let second = eval_program("(створити-символ \"probe-\")", &mut session)
-            .expect("створити-символ повертає інший свіжий символ");
-        assert!(matches!(first.value, Value::Symbol(_)));
-        assert!(matches!(second.value, Value::Symbol(_)));
-        assert_ne!(first.value, second.value);
+        let identity = semantic_registry::d9_binding_identity_for_definition("створити-символ")
+            .expect("ratified D9 identity for fresh-symbol operation");
+        let argument = Value::String(std::rc::Rc::from("probe-"));
+        let first = eval::invoke_value(
+            &Value::DomainIdentity(identity),
+            std::slice::from_ref(&argument),
+            &session.environment,
+            Span::default(),
+        )
+        .expect("exact D9 mechanism calls the Lisp-owned symbol constructor");
+        let second = eval::invoke_value(
+            &Value::DomainIdentity(identity),
+            &[argument],
+            &session.environment,
+            Span::default(),
+        )
+        .expect("exact D9 mechanism returns another fresh symbol");
+        assert!(matches!(first, Value::Symbol(_)));
+        assert!(matches!(second, Value::Symbol(_)));
+        assert_ne!(first, second);
 
         let unrelated = DomainIdentity::D10(
             DomainD10::new(0b0000000010).expect("valid unrelated D10 resident"),

@@ -385,13 +385,19 @@ pub(crate) fn d10_binding_identity_for_definition(name: &str) -> Option<DomainId
         })
 }
 
-/// Exact current D9/D10 identity domains support explicit D4 DEFINE binding.
-/// The target identity alone does not grant callability: DEFINE still requires
-/// a concrete closure/builtin, a root frame, and an empty exact runtime slot.
-/// This keeps domain identity, explicit definition, and subsequent invocation
-/// as three separate steps.
+/// Exact D6 definitions recorded by the generated binding table, plus current
+/// D9/D10 identities, may be explicit D4 DEFINE targets. The target identity
+/// alone does not grant callability: DEFINE still requires a concrete
+/// closure/builtin, a root frame, and an empty exact runtime slot. D6 Core
+/// operations are excluded from redefinition.
 pub(crate) fn is_admitted_exact_definition_target(identity: DomainIdentity) -> bool {
-    matches!(identity, DomainIdentity::D9(_) | DomainIdentity::D10(_))
+    match identity {
+        DomainIdentity::D6(_) if identity.core_operation().is_none() => D6_DEFINITION_BINDINGS
+            .iter()
+            .any(|binding| u16::from(binding.bits) == identity.packed_bits()),
+        DomainIdentity::D9(_) | DomainIdentity::D10(_) => true,
+        _ => false,
+    }
 }
 
 /// Канонічний surface → domain маршрут читає тільки ратифіковану

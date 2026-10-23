@@ -13,6 +13,21 @@ pub(super) fn core3_program() -> Result<PhysicalT5Program, LanguageError> {
     program(CORE3_BOOTSTRAP_WORDS)
 }
 
+pub(super) fn with_core4_program<T>(
+    action: impl FnOnce(&PhysicalT5Program) -> T,
+) -> Result<T, LanguageError> {
+    thread_local! {
+        static PROGRAM: std::cell::OnceCell<Result<PhysicalT5Program, LanguageError>> =
+            const { std::cell::OnceCell::new() };
+    }
+    PROGRAM.with(
+        |slot| match slot.get_or_init(|| program(CORE4_BOOTSTRAP_WORDS)) {
+            Ok(program) => Ok(action(program)),
+            Err(error) => Err(error.clone()),
+        },
+    )
+}
+
 pub(super) fn time_program() -> Result<PhysicalT5Program, LanguageError> {
     program(TIME_BOOTSTRAP_WORDS)
 }
