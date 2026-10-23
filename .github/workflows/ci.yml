@@ -193,6 +193,10 @@ jobs:
                   # It is executed in the native bundled law step and in the
                   # physical law runner; never misclassify it as standalone.
                   "tests/semantic/d11-srfi1-find-tail-laws.lisp",
+                  # Обидва juxt-свідки потребують реального DEFINE з lib/d11-clojure-juxt.lisp.
+                  # Їх виконує повний нативний закон Lisp → Zig/T5M → SENS нижче.
+                  "tests/semantic/d11-clojure-juxt-laws.lisp",
+                  "tests/semantic/d11-clojure-juxt-mutant.lisp",
                   "tests/semantic/unification-variable-shape-law.lisp",
                   "tests/semantic/unification-variable-shape-positive.lisp",
                   "tests/semantic/unification-variable-shape-negative.lisp",
