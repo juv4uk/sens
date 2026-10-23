@@ -48,6 +48,24 @@ class EncodedSourceLiteralTests(unittest.TestCase):
             "проєкція Racket bootstrap не має числових голів або літералів",
         )
 
+    def test_guard_reference_ranks_are_named_not_numeric(self):
+        # Порядок станів збережено; числові ранги мають іменовані D24+ значення.
+        path = ROOT / "knowledge/guard-reference.lisp"
+        source = path.read_text(encoding="utf-8")
+        self.assertEqual(
+            CHECK.find_forbidden_literals(source, path="knowledge/guard-reference.lisp"),
+            [],
+            "проєкція довідника гвардії не має числових голів або літералів",
+        )
+        for fragment in (
+            "((тотожне? стан (як-є confirmed)) гвардія-число-чотири)",
+            "((тотожне? стан (як-є partial)) гвардія-число-три)",
+            "((тотожне? стан (як-є unresolved)) гвардія-число-два)",
+            "((тотожне? стан (як-є broken)) гвардія-число-один)",
+            "(так гвардія-число-нуль)",
+        ):
+            self.assertIn(fragment, source)
+
     def test_machine_effect_live_source_uses_named_coordinates(self):
         # Лексична перевірка; обчислення маршруту перевіряють нативні тести SENS.
         path = ROOT / "lib/machine/lowering/semantic-effects.lisp"
