@@ -28,7 +28,7 @@ class УкраїнськийАпострофПриМіграції(unittest.Test
             "  (функція (ім'я) (00001100 ім'я 1)))\n"
             "(як-є (00001100 ім'я))\n"
             "'(00001100 2 3)\n"
-            '"(00001100 ім\\'я)"\n'
+            "\"(00001100 ім'я)\"\n"
         )
         identity = scanner.Identity("D5", "01010", "PLUS", "додати")
         unresolved = []
@@ -43,7 +43,7 @@ class УкраїнськийАпострофПриМіграції(unittest.Test
 
         migrated = scanner.apply_edits(source, edits)
         self.assertIn("(додати ім'я 1)", migrated)
-        self.assertIn("(як-є (00001100 ім'я))", migrated)
+        self.assertIn("\"(00001100 ім'я)\"", migrated)
         self.assertIn("'(00001100 2 3)", migrated)
         self.assertIn("; (00001100 7 8)", migrated)
         self.assertIn('"(00001100 ім\\'я)"', migrated)
