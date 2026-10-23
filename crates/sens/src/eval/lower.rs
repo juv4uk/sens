@@ -207,6 +207,16 @@ fn lower(expression: &Expr, depth: u32, mode: LowerMode) -> Expr {
             *identity,
             lower_domain_arguments(*identity, arguments, depth, mode),
         ),
+        // In exact-domain source a D2/W7 Text7 identifier is an atomic name,
+        // not a call whose first D7 glyph becomes executable. Preserve the
+        // framed token for the evaluator's contextual binding lookup.
+        ExprKind::List(items)
+            if !items.is_empty()
+                && mode == LowerMode::ExactDomain
+                && crate::canonical_reader::text7_binding_key(expression).is_some() =>
+        {
+            expression.kind.clone()
+        }
         ExprKind::List(items) if !items.is_empty() => {
             let arguments = &items[1..];
 
@@ -425,6 +435,43 @@ mod exact_lowering_isolation_tests {
             &arguments[1].kind,
             ExprKind::DomainCall(CoreDomainIdentity::D3(_), _)
         ));
+    }
+
+    #[test]
+    fn exact_lowering_preserves_text7_references_instead_of_calling_the_first_glyph() {
+        let current = lower_current("(визначити кодування-число-нуль число-нуль)");
+        let ExprKind::DomainCall(CoreDomainIdentity::D4(word), arguments) = current.kind else {
+            panic!("the exact Ukrainian DEFINE head must remain D4");
+        };
+        assert_eq!(word.word().packed_bits(), 0b0011);
+        let ExprKind::List(glyphs) = &arguments[1].kind else {
+            panic!("a Text7 name reference must remain a framed D2 list");
+        };
+        assert!(!glyphs.is_empty());
+        assert!(
+            glyphs.iter().all(|glyph| matches!(
+                glyph.kind,
+                ExprKind::DomainIdentity(crate::DomainIdentity::D7(_))
+            )),
+            "the symbol's characters must remain D7 data, not a D7 DomainCall"
+        );
+
+        let call = lower_current("(число-нуль)");
+        let ExprKind::List(items) = call.kind else {
+            panic!("a D2 Text7 call head must remain a contextual list");
+        };
+        assert!(
+            matches!(
+                items.first().map(|head| &head.kind),
+                Some(ExprKind::List(glyphs))
+                    if !glyphs.is_empty()
+                        && glyphs.iter().all(|glyph| matches!(
+                            glyph.kind,
+                            ExprKind::DomainIdentity(crate::DomainIdentity::D7(_))
+                        ))
+            ),
+            "the full identifier, not its first D7 glyph, selects the binding"
+        );
     }
 
     #[test]
