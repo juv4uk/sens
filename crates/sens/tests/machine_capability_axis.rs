@@ -79,13 +79,13 @@ fn current_exact_domain_identities_project_to_target_neutral_capabilities() {
     .to_string();
     assert_eq!(car, "((pair-field-load head bounded-u64))");
 
-    // Текст «01010» не можна маскувати під D24+ число. Чинний SENS
+    // Текст «01010» не можна маскувати під D12+ число. Чинний SENS
     // відхиляє несумісний тип; ERROR не тотожне семантичному NO/().
     let quoted_shadow = eval_axis_program(r#"(спроможності-для-домену 5 "01010")"#, &mut s)
-        .expect_err("text data cannot impersonate a D24+ numerical domain coordinate");
+        .expect_err("text data cannot impersonate a D12+ numerical domain coordinate");
     assert_eq!(quoted_shadow.kind, sens::ErrorKind::Type);
     assert!(
-        quoted_shadow.message.contains("D24+"),
+        quoted_shadow.message.contains("D12+"),
         "SENS must report the exact numeric domain boundary: {quoted_shadow}"
     );
 }
