@@ -673,6 +673,8 @@ jobs:
           cargo test --locked -p sens-cli --test arithmetic_benchmark_cli -- --nocapture
           # Rust вимірює тільки власну фізичну рамку запису: не Lisp-істинність.
           cargo test --locked -p sens --example rust_record_framing_bench -- --nocapture
+          # Окремі Session для калібрування та замірів; це тест механізму бенчмарка.
+          cargo test --locked -p sens --example fn_table_bench -- --nocapture
           cargo run --locked -p sens --example rust_record_framing_bench \
             > "$RUNNER_TEMP/rust-framing-benchmark.log"
           cat "$RUNNER_TEMP/rust-framing-benchmark.log"
