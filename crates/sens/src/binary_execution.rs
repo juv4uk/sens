@@ -12,7 +12,7 @@ use crate::{
 use std::sync::OnceLock;
 
 /// SENS-owned word after physical T5M restoration. Identity is explicit:
-/// exact domain words are not inferred from payload width, and D24+ numbers
+/// exact domain words are not inferred from payload width, and D12+ numbers
 /// retain their numeric-domain qualification.
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum ExactDomainWord {
@@ -27,13 +27,13 @@ impl ExactDomainWord {
 
     pub fn number(number: BinaryNumber) -> Result<Self, &'static str> {
         if number.numeric_domain_width().is_none() || number.exact_numeric_domain_bits().is_none() {
-            return Err("T5M number must retain an exact D24+ identity and exact-width bits");
+            return Err("T5M number must retain an exact D12+ identity and exact-width bits");
         }
         Ok(Self::Number(number))
     }
 
     /// Допускає відновлене фізичне слово до чинних ідентичностей SENS.
-    /// D1–D10 — точні координати драбини; числа D24+ належать до окремо
+    /// D1–D10 — точні координати драбини; числа D12+ належать до окремо
     /// ратифікованої родини ширин. Інші ширини не відображаються: сама
     /// ширина не вигадує резидента.
     pub fn from_physical_width_bits(width: usize, bits: &[u8]) -> Result<Self, String> {
@@ -50,7 +50,7 @@ impl ExactDomainWord {
         }
         if BinaryNumber::is_numeric_domain_width(width) {
             let number = BinaryNumber::from_numeric_domain_bits(width, bits)
-                .ok_or_else(|| "invalid exact D24+ numeric word".to_string())?;
+                .ok_or_else(|| "invalid exact D12+ numeric word".to_string())?;
             return Self::number(number).map_err(str::to_owned);
         }
         Err(format!(
@@ -86,7 +86,7 @@ impl PhysicalT5Program {
 
     /// Build an executable SENS program from words already restored by a
     /// physical carrier such as Zig T5M. This reader accepts only explicit
-    /// domain identities plus explicitly qualified D24+ numbers.
+    /// domain identities plus explicitly qualified D12+ numbers.
     pub fn from_exact_domain_words(words: &[ExactDomainWord]) -> Result<Self, LanguageError> {
         Self::from_exact_domain_words_owned(words.to_vec())
     }
