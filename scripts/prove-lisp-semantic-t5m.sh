@@ -568,7 +568,7 @@ run_case run_law d6-filter-independent-mutant tests/semantic/d6-filter-independe
 # Д6:101010 MAP-ONTO · закон, мутант, неправильний D3-хвіст.
 run_case run_law d6-map-onto-accumulator-positive tests/semantic/d6-map-onto-accumulator-law.lisp 1 core4
 run_case run_law d6-map-onto-order-mutant tests/semantic/d6-map-onto-order-mutant.lisp 0 core4
-run_case run_error_rejection d6-map-onto-improper-tail tests/semantic/d6-map-onto-improper-tail-negative.lisp Type 'cdr expects a non-empty list' core4
+run_case run_error_rejection d6-map-onto-improper-tail tests/semantic/d6-map-onto-improper-tail-negative.lisp Type 'car expects a non-empty list' core4
 # Д6:101110 REDUCE · порядок, порожня база й Type для неправильного хвоста.
 run_case run_law d6-reduce-left-positive tests/semantic/d6-reduce-left-law.lisp 1 core4
 run_case run_law d6-reduce-left-mutant tests/semantic/d6-reduce-left-mutant.lisp 0 core4
