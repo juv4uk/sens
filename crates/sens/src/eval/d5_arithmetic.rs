@@ -43,7 +43,7 @@ pub(super) fn invoke(
             } else if !crate::domain_numeric::is_domain_value(&args[0]) {
                 Err(LanguageError::new(
                     ErrorKind::Type,
-                    "D5 ZEROP requires one exact D24+ numeric argument",
+                    "D5 ZEROP requires one exact D12+ numeric argument",
                     span,
                 ))
             } else {
@@ -53,7 +53,7 @@ pub(super) fn invoke(
                 )))
             }
         }
-        // Ратифікований D5 NUMBERP — властивість точного D24+ об'єкта,
+        // Ратифікований D5 NUMBERP — властивість точного D12+ об'єкта,
         // а не розпізнавання хостового Number, тексту D7 чи JSON.
         0b01001 => {
             if args.len() != 1 {
@@ -95,16 +95,30 @@ mod exact_d5_numberp {
         Value::BinaryNumber(BinaryNumber::from_numeric_domain_bits(24, &bits).unwrap())
     }
 
+    fn d12(n: i16) -> Value {
+        let word = (n as u16) & 0x0fff;
+        let bits = (0..12)
+            .rev()
+            .map(|offset| ((word >> offset) & 1) as u8)
+            .collect::<Vec<_>>();
+        Value::BinaryNumber(BinaryNumber::from_numeric_domain_bits(12, &bits).unwrap())
+    }
+
     #[test]
-    fn zerop_is_exact_d24_law_and_never_coerces_text_or_host_number() {
+    fn zerop_is_exact_d12_plus_law_and_never_coerces_text_or_host_number() {
         let identity = CoreDomainIdentity::D5(CoreD5::from_word(Bit5::new(0b01000).unwrap()));
         let environment = Environment::root();
         let fraction = crate::domain_numeric::compute("/", &d24(7), &d24(2)).unwrap();
+        let fraction_d12 = crate::domain_numeric::compute("/", &d12(7), &d12(2)).unwrap();
         for (argument, expected) in [
             (d24(0), true),
             (d24(7), false),
             (d24(-7), false),
             (fraction, false),
+            (d12(0), true),
+            (d12(7), false),
+            (d12(-7), false),
+            (fraction_d12, false),
         ] {
             let actual = invoke(identity, &[argument], &environment, Span::default())
                 .expect("D5 ZEROP resident")
@@ -119,7 +133,7 @@ mod exact_d5_numberp {
         ] {
             let error = invoke(identity, &[input], &environment, Span::default())
                 .expect("D5 ZEROP resident")
-                .expect_err("non-D24 must not be coerced into numeric zero");
+                .expect_err("non-domain value must not be coerced into numeric zero");
             assert_eq!(error.kind, ErrorKind::Type);
         }
         for args in [Vec::<Value>::new(), vec![d24(0), d24(0)]] {
@@ -147,14 +161,18 @@ mod exact_d5_numberp {
     }
 
     #[test]
-    fn numberp_is_exact_d24_predicate_and_rejects_host_lookalikes() {
+    fn numberp_is_exact_d12_plus_predicate_and_rejects_host_lookalikes() {
         let identity = CoreDomainIdentity::D5(CoreD5::from_word(Bit5::new(0b01001).unwrap()));
         let environment = Environment::root();
         let fraction = crate::domain_numeric::compute("/", &d24(7), &d24(2)).unwrap();
+        let fraction_d12 = crate::domain_numeric::compute("/", &d12(7), &d12(2)).unwrap();
         for (argument, expected) in [
             (d24(7), true),
             (d24(-7), true),
             (fraction, true),
+            (d12(7), true),
+            (d12(-7), true),
+            (fraction_d12, true),
             (Value::Nil, false),
             (Value::String("7".into()), false),
             (Value::Number(7.0, Exactness::Exact), false),
