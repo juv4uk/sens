@@ -2,8 +2,10 @@
 # Автор: агент Vicāra, 2026-10-24. Це СУДЖЕННЯ, а не автозаповнення ledger'а:
 # покажчики в ledger не змінювались (див. PR #6034).
 # Вердикти: CONFIRMED | WEAK | UNJUDGEABLE | REJECTED
+# ПЕРЕГЛЯД 2026-10-24: жодного CONFIRMED не лишилось — усі три перевірені
+# випадки виявились або хибними, або завищеними. Див. рядки нижче.
 retired_test_id	hint_artifact	verdict	reason
-crates/sens/tests/meta_eval.rs::lambda_application_binds_parameters_and_evaluates	d4-lambda-application	CONFIRMED	Закон: «застосування, захоплення та затінення параметрів функції»; рядок: «binds formal parameters in the call environment». Те саме твердження.
+crates/sens/tests/meta_eval.rs::lambda_application_binds_parameters_and_evaluates	d4-lambda-application	WEAK	ПЕРЕГЛЯНУТО 2026-10-24: я поставив CONFIRMED, але прочитавши закон ПОВНІСТЮ бачу — він ШИРШИЙ. Закон: застосування тотожної функції + замикання зберігає зовнішню істину + затінення параметра. Рядок: лише «binds formal parameters and evaluates its body». Покриття є, але не тотожність.
 crates/sens/tests/meta_eval.rs::higher_order_functions_pass_a_closure_as_an_argument	d4-higher-order-composition	WEAK	Закон: «композиція ДВОХ функцій першого класу»; рядок: «передає замикання ЯК АРГУМЕНТ». Споріднене, не тотожне.
 crates/sens/tests/meta_eval.rs::self_evaluates_numbers_without_environment	meta-eval-first-class-d1	UNJUDGEABLE	Артефакт НЕ має читаного .lisp-джерела — твердження невідоме. Підказку відкинуто як надто широку (той самий артефакт підказано 6 рядкам).
 crates/sens/tests/meta_eval.rs::stage2_list_body_and_parameter_binding_helpers	meta-eval-first-class-d1	UNJUDGEABLE	Те саме: немає .lisp-джерела.
