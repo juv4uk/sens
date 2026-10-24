@@ -232,7 +232,12 @@ if timeout "$native_timeout" "${standalone_runtime[@]}" "$staged" > "$scratch/st
     echo "T5M_REPAIR_EXECUTION_DIVERGENCE source=$source_file paired_sha256=$(sha256sum "$scratch/out" | cut -d' ' -f1) standalone_sha256=$(sha256sum "$scratch/standalone.out" | cut -d' ' -f1)" >&2
     exit 2
   fi
-  mode=paired-and-standalone
+  if (( core4_runtime )); then
+    # Це успішний фізичний Core4, але не запуск через голий `sens FILE.sens`.
+    mode=paired-and-explicit-core4
+  else
+    mode=paired-and-standalone
+  fi
 else
   status=$?
   # Явний Core4 повинен виконуватися фізично самостійно; paired-only не доказ.

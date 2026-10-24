@@ -571,11 +571,18 @@ SENS_D1_NEGATIVE
         echo "SENS_D1_AXIOMS_P5_EXECUTED_PASS source=$file positive=D1:1 mutant=D1:0 physical=ZIG_T5M native=SENS"
       fi
       if [[ "$standalone_physical" == "$physical" ]]; then
-        native_standalone_parity_paths["$file"]=1
-        if [[ -f "$committed" && ! -L "$committed" ]] && cmp -s "$physical" "$committed"; then
-          printf '%s\n' "$committed" >> "$benchmark_manifest"
+        # eval-core4 виконує фізичні байти, але це НЕ голий CLI `sens FILE.sens`.
+        # Зараховувати bare-паритет і передавати до бенчмарка можна лише
+        # тоді, коли той самий committed носій запускав безпосередньо sens.
+        if [[ "${standalone_runtime[0]}" == "$binary" ]]; then
+          native_standalone_parity_paths["$file"]=1
+          if [[ -f "$committed" && ! -L "$committed" ]] && cmp -s "$physical" "$committed"; then
+            printf '%s\n' "$committed" >> "$benchmark_manifest"
+          fi
+          echo "T5M_NATIVE_STANDALONE_AND_PAIRED_PASS source=$file physical=ZIG_VERIFIED semantic=NOT_CERTIFIED release=NOT_CERTIFIED"
+        else
+          echo "T5M_NATIVE_EXPLICIT_CORE4_PAIRED_PASS source=$file runner=sens-trit/eval-core4 bare=NOT_TESTED physical=ZIG_VERIFIED semantic=NOT_CERTIFIED release=NOT_CERTIFIED"
         fi
-        echo "T5M_NATIVE_STANDALONE_AND_PAIRED_PASS source=$file physical=ZIG_VERIFIED semantic=NOT_CERTIFIED release=NOT_CERTIFIED"
       else
         # Самодостатній носій містить Lisp-залежності, committed source-only — ні.
         # Не віддавати неперевірений source-only файл фізичному бенчмарку.
