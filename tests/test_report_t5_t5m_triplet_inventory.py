@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import hashlib
 from pathlib import Path
 import contextlib
 import importlib.util
@@ -63,6 +64,21 @@ class TripletInventoryTests(unittest.TestCase):
         self.assertEqual(before, (
             self.source.read_bytes(), self.sens.read_bytes(), self.view.read_bytes(),
         ))
+
+    def test_bits_source_provenance_matches_real_sha_and_physical_view(self):
+        # The lower pair auditor accepts same-stem .bits without a .lisp.
+        # The release inventory must never report an imaginary .lisp source.
+        self.source.unlink()
+        bits = self.root / "case.bits"
+        bits.write_bytes(self.expected)
+        self.view.write_bytes(self.expected)
+        result = self.scan(strict=True)
+        row = result["files"][0]
+        self.assertEqual(row["source"], "case.bits")
+        self.assertEqual(row["source_sha256"], hashlib.sha256(self.expected).hexdigest())
+        self.assertEqual(row["view_status"], "PHYSICAL_VIEW_PASS")
+        self.assertEqual(result["summary"]["uk_oracle_verified"], 0)
+        self.assertEqual(result["summary"]["release_admitted"], 0)
 
     def test_missing_view_reports_real_debt_but_required_gate_blocks(self):
         report = self.scan(required=())

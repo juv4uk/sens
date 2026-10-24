@@ -115,7 +115,11 @@ def inspect(root: Path, *, include_untracked: bool = False,
     for pair in pairs["files"]:
         name = pair["sens"]
         path = safe_relative(name)
-        source_rel = path.with_suffix(".lisp")
+        # Джерело підтвердив фізичний аудитор: це може бути .lisp або .bits.
+        source_rel = Path(pair["source"])
+        if (source_rel.as_posix() != pair["source"] or
+                source_rel not in (path.with_suffix(".lisp"), path.with_suffix(".bits"))):
+            raise ValueError(f"invalid same-stem audited source for {name}: {pair['source']}")
         view_rel = path.with_suffix("")
         view_name = view_rel.as_posix()
         row = {
