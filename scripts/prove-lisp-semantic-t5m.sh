@@ -767,6 +767,23 @@ run_case run_law d5-arithmetic-native-t5m-mutant tests/semantic/d5-arithmetic-na
 # Залежні закони Д11 SPAN/BREAK: мова задає і функції, і твердження.
 # Цей повний Lisp-пакет кодується Zig/T5M і виконується фізичним SENS.
 # Відокремлений .lisp-свідок не є автономною програмою — без lib/ він не викличний.
+
+# Д11 SRFI-1 lset-adjoin: перевірка лише SENS через фізичний Zig/T5M.
+# Негативні свідки мусять дати D3 ПЕРШЕ Type, а не мовчазний результат.
+d11_adjoin_law_bundle="$evidence/d11-srfi1-adjoin-law-complete.lisp"
+d11_adjoin_mutant_bundle="$evidence/d11-srfi1-adjoin-mutant-complete.lisp"
+d11_adjoin_bad_empty_bundle="$evidence/d11-srfi1-adjoin-bad-empty-complete.lisp"
+d11_adjoin_bad_duplicate_bundle="$evidence/d11-srfi1-adjoin-bad-duplicate-complete.lisp"
+cat -- lib/d11-srfi1-set-relations.lisp tests/semantic/d11-srfi1-adjoin-proper-law.lisp > "$d11_adjoin_law_bundle"
+cat -- lib/d11-srfi1-set-relations.lisp tests/semantic/d11-srfi1-adjoin-proper-mutant.lisp > "$d11_adjoin_mutant_bundle"
+cat -- lib/d11-srfi1-set-relations.lisp tests/semantic/d11-srfi1-adjoin-improper-empty-negative.lisp > "$d11_adjoin_bad_empty_bundle"
+cat -- lib/d11-srfi1-set-relations.lisp tests/semantic/d11-srfi1-adjoin-improper-duplicate-negative.lisp > "$d11_adjoin_bad_duplicate_bundle"
+run_case run_law d11-srfi1-adjoin-proper-positive "$d11_adjoin_law_bundle" 1
+run_case run_law d11-srfi1-adjoin-proper-mutant "$d11_adjoin_mutant_bundle" 0
+run_case run_type_rejection d11-srfi1-adjoin-improper-empty "$d11_adjoin_bad_empty_bundle" 'car expects a non-empty list'
+run_case run_type_rejection d11-srfi1-adjoin-improper-duplicate "$d11_adjoin_bad_duplicate_bundle" 'car expects a non-empty list'
+sha256sum lib/d11-srfi1-set-relations.lisp tests/semantic/d11-srfi1-adjoin-*.lisp > "$evidence/d11-srfi1-adjoin-inputs.sha256"
+
 d11_span_bundle="$evidence/d11-srfi1-span-break-complete.lisp"
 cat -- lib/d11-srfi1-span-break.lisp tests/semantic/d11-srfi1-span-break-laws.lisp > "$d11_span_bundle"
 sha256sum lib/d11-srfi1-span-break.lisp tests/semantic/d11-srfi1-span-break-laws.lisp > "$evidence/d11-srfi1-inputs.sha256"
