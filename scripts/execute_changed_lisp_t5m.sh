@@ -520,6 +520,27 @@ run_native_t5m_program() {
         return
       fi
     fi
+    if [[ "$file" == "tests/semantic/d11-list-terminator-law.lisp" ||
+          "$file" == "tests/semantic/d11-list-terminator-mutant.lisp" ]]; then
+      # Native самодостатній SENS-носій з тієї самої бібліотеки.
+      local terminator_source="$dir/d11-terminator-full.lisp"
+      standalone_physical="$dir/d11-terminator-full.sens"
+      if ! cat -- lib/d11-list-terminator-evidence.lisp "$file" >"$terminator_source" ||
+         ! timeout "$native_timeout" "$binary" --t5m-mint "$terminator_source" "$standalone_physical" >"$dir/d11-terminator-mint.out" 2>"$dir/d11-terminator-mint.err" ||
+         ! timeout "$native_timeout" "$native_open" open "$standalone_physical" >"$dir/d11-terminator-open.out" 2>"$dir/d11-terminator-open.err" ||
+         ! timeout "$native_timeout" "$native_open" verify-view "$standalone_physical" >"$dir/d11-terminator-verify.out" 2>"$dir/d11-terminator-verify.err"; then
+        echo "::error::D11_TERMINATOR_MINT_RED source=$file" >&2
+        mark_file_failed
+        return
+      fi
+      local expected_terminator=1
+      [[ "$file" != *-mutant.lisp ]] || expected_terminator=0
+      if [[ "$(cat "$dir/native-paired.stdout")" != "$expected_terminator" ]]; then
+        echo "::error::D11_TERMINATOR_PAIRED_RED source=$file expected=D1:$expected_terminator" >&2
+        mark_file_failed
+        return
+      fi
+    fi
     if [[ "$file" == "tests/semantic/d11-tree-equal-by-test-law.lisp" ||
           "$file" == "tests/semantic/d11-tree-equal-by-test-mutant.lisp" ]]; then
       # Фізична самодостатність: одна й та сама SENS-бібліотека + SENS-свідок.
@@ -768,6 +789,9 @@ while IFS= read -r file || [[ -n "$file" ]]; do
     # SENS визначає UNFOLD/UNFOLD-RIGHT у бібліотеці, яку фізично
     # додаємо до mint/paired, замість допуску невідомого Text7 імені.
     binding_sources=(--binding-source lib/d11-srfi1-unfold.lisp)
+  elif [[ "$file" == "tests/semantic/d11-list-terminator-law.lisp" ||
+          "$file" == "tests/semantic/d11-list-terminator-mutant.lisp" ]]; then
+    binding_sources=(--binding-source lib/d11-list-terminator-evidence.lisp)
   elif [[ "$file" == "tests/semantic/d11-srfi1-find-tail-laws.lisp" ||
           "$file" == "tests/semantic/d11-srfi1-find-tail-improper-tail-negative.lisp" ]]; then
     # Лише визначення із справжньої бібліотеки SENS, без host-оракула.
