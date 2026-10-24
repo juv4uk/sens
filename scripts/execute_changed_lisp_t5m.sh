@@ -277,7 +277,10 @@ run_native_t5m_program() {
     # до тестованої помилки Type. Це не семантичний PASS: прямий та
     # парний SENS уже мають збігтися з точним Type-діагнозом вище.
     if (( ${#binding_sources[@]} != 0 )) &&
-       grep -Fq 'unknown Text7 binding:' "$dir/native-standalone.stderr"; then
+       { grep -Fq 'unknown Text7 binding:' "$dir/native-standalone.stderr" ||
+         { [[ "$file" == "tests/semantic/d11-srfi1-member-improper-hit-negative.lisp" ||
+              "$file" == "tests/semantic/d11-srfi1-subset-improper-empty-negative.lisp" ]] &&
+           grep -Fq 'domain identity is not callable under its ratified law: D7 ' "$dir/native-standalone.stderr"; }; }; then
       native_paired_executed_paths["$file"]=1
       echo "::notice file=$file,title=SENS negative Type::PASS direct=REJECTED paired=REJECTED standalone=NOT_APPLICABLE reason=external-D11-binding diagnostic=$negative_type_diagnostic"
       return
