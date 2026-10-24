@@ -143,10 +143,25 @@ fn carryTrits(allocator: std.mem.Allocator, source: []const u8) ![]u8 {
 fn carryT5M(allocator: std.mem.Allocator, source: []const u8) ![]u8 {
     if (source.len == 0 or source.len > t5m.MAX_PHYSICAL_BYTES * 5)
         return Error.InvalidTritBoundary;
+    // First pass: validate every character and all word boundaries before
+    // allocating a word array. A malformed frame must report its grammar
+    // error even when the allocator has no free memory.
+    // Invalid characters retain precedence over malformed boundaries.
     var count: usize = 1;
-    for (source) |ch| {
-        if (ch == '2') count += 1 else if (ch != '0' and ch != '1') return Error.InvalidTrit;
+    var start_of_word: usize = 0;
+    var malformed_boundary = false;
+    for (source, 0..) |ch, i| {
+        if (ch == '2') {
+            if (i == start_of_word) malformed_boundary = true;
+            start_of_word = i + 1;
+            count += 1;
+        } else if (ch != '0' and ch != '1') {
+            return Error.InvalidTrit;
+        }
     }
+    if (malformed_boundary or start_of_word == source.len)
+        return Error.InvalidTritBoundary;
+
     const words = try allocator.alloc(t5m.Word, count);
     defer allocator.free(words);
     var start: usize = 0;
