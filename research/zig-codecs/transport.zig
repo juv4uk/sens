@@ -3,6 +3,7 @@
 //! Commands never execute a program and never guess the physical profile.
 //! The filesystem adapter is libc-hosted; the codec itself does not do I/O.
 const std = @import("std");
+const builtin = @import("builtin");
 const t5 = @import("t5/t5.zig");
 const t5m = @import("t5m.zig");
 const f3c = @import("f3c/f3c.zig");
@@ -20,6 +21,9 @@ extern "c" fn mkstemp([*:0]u8) c_int;
 extern "c" fn fdopen(c_int, [*:0]const u8) ?*CFile;
 extern "c" fn close(c_int) c_int;
 extern "c" fn link([*:0]const u8, [*:0]const u8) c_int;
+// Linux-only anonymous staging: fall back to mkstemp on other systems.
+extern "c" fn open([*:0]const u8, c_int, c_uint) c_int;
+extern "c" fn linkat(c_int, [*:0]const u8, c_int, [*:0]const u8, c_int) c_int;
 extern "c" fn fsync(c_int) c_int;
 extern "c" fn fileno(*CFile) c_int;
 const CDir = opaque {};
@@ -133,11 +137,73 @@ fn syncParentDirectory(allocator: std.mem.Allocator, path: []const u8) !void {
     if (fd < 0 or fsync(fd) != 0) return Error.OutputSyncFailed;
 }
 
+/// On Linux, prefer an unnamed inode: a crash before linkat then leaves NO
+/// *.tmp.* entry to collect. This backend is an optimization of the existing
+/// portable mkstemp + link path, never a second semantic codec.
+/// Returns false when the filesystem cannot publish O_TMPFILE; caller then
+/// uses the existing exclusive, verified named-stage fallback.
+fn tryWriteAnonymous(
+    allocator: std.mem.Allocator,
+    dest_path: []const u8,
+    body: []const u8,
+) !bool {
+    if (builtin.os.tag != .linux) return false;
+    const parent = std.fs.path.dirname(dest_path) orelse ".";
+    const parent_z = try allocator.dupeZ(u8, parent);
+    defer allocator.free(parent_z);
+    // Linux asm-generic: O_TMPFILE = __O_TMPFILE | O_DIRECTORY.
+    // Opening an unnamed inode in the destination directory guarantees
+    // same-filesystem publication without a crash-leaked temporary name.
+    const fd = open(parent_z.ptr, 0o20200002, 0o600);
+    if (fd < 0) return false;
+
+    const file = fdopen(fd, "w+b") orelse {
+        _ = close(fd);
+        return Error.OutputWriteFailed;
+    };
+    var stream_open = true;
+    defer {
+        if (stream_open) _ = fclose(file);
+    }
+    if (body.len != 0 and fwrite(body.ptr, 1, body.len, file) != body.len)
+        return Error.OutputWriteFailed;
+    if (fflush(file) != 0) return Error.OutputWriteFailed;
+    if (fsync(fileno(file)) != 0) return Error.OutputSyncFailed;
+
+    // Validate the actual persisted inode in bounded chunks without a second
+    // allocation proportional to user input, preserving large .trits fixtures.
+    if (fseek(file, 0, 0) != 0) return Error.OutputWriteFailed;
+    var scratch: [4096]u8 = undefined;
+    var offset: usize = 0;
+    while (offset < body.len) {
+        const count = @min(scratch.len, body.len - offset);
+        if (fread(scratch[0..].ptr, 1, count, file) != count)
+            return Error.CanonicalRoundtripMismatch;
+        if (!std.mem.eql(u8, scratch[0..count], body[offset .. offset + count]))
+            return Error.CanonicalRoundtripMismatch;
+        offset += count;
+    }
+
+    const dest_z = try allocator.dupeZ(u8, dest_path);
+    defer allocator.free(dest_z);
+    // AT_FDCWD = -100, AT_EMPTY_PATH = 0x1000 on Linux. Neither this
+    // operation nor the portable fallback overwrites an existing target.
+    if (linkat(fileno(file), "", -100, dest_z.ptr, 0x1000) != 0)
+        return false;
+
+    const close_result = fclose(file);
+    stream_open = false;
+    if (close_result != 0) return Error.OutputWriteFailed;
+    try syncParentDirectory(allocator, dest_path);
+    return true;
+}
+
 fn writeVerifiedNew(
     allocator: std.mem.Allocator,
     dest_path: []const u8,
     body: []const u8,
 ) !void {
+    if (try tryWriteAnonymous(allocator, dest_path, body)) return;
     const stage = try createVerifiedStage(allocator, dest_path, body, body);
     defer allocator.free(stage);
     var stage_exists = true;
@@ -430,6 +496,31 @@ test "Zig stages bytes before publishing and preserves a concurrent winner" {
     const winner = try readFile(allocator, collided, t5.MAX_PHYSICAL_BYTES + 1);
     defer allocator.free(winner);
     try std.testing.expectEqualSlices(u8, &.{0x22}, winner);
+}
+
+test "Linux anonymous stage publishes only verified bytes without a staging name" {
+    if (builtin.os.tag != .linux) return;
+    var tmp = std.testing.tmpDir(.{});
+    defer tmp.cleanup();
+    const allocator = std.testing.allocator;
+    const parent = try tmp.dir.realPathFileAlloc(std.testing.io, ".", allocator);
+    defer allocator.free(parent);
+    const dest = try std.fs.path.join(allocator, &.{ parent, "anonymous.sens" });
+    defer allocator.free(dest);
+
+    // A filesystem lacking O_TMPFILE is covered by the portable fallback
+    // tests above; on supported filesystems this tests real linkat().
+    const available = try tryWriteAnonymous(allocator, dest, &.{ 0x63, 0x89, 0x06, 0xa1 });
+    if (!available) return;
+    const original = try readFile(allocator, dest, t5.MAX_PHYSICAL_BYTES + 1);
+    defer allocator.free(original);
+    try std.testing.expectEqualSlices(u8, &.{ 0x63, 0x89, 0x06, 0xa1 }, original);
+
+    // An anonymous candidate cannot replace a concurrent/public winner.
+    try std.testing.expect(!(try tryWriteAnonymous(allocator, dest, &.{0xff})));
+    const preserved = try readFile(allocator, dest, t5.MAX_PHYSICAL_BYTES + 1);
+    defer allocator.free(preserved);
+    try std.testing.expectEqualSlices(u8, original, preserved);
 }
 
 test "Zig durable publication detects missing parent directory" {
