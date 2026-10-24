@@ -836,6 +836,25 @@ run_case run_type_rejection d11-srfi1-adjoin-improper-empty "$d11_adjoin_bad_emp
 run_case run_type_rejection d11-srfi1-adjoin-improper-duplicate "$d11_adjoin_bad_duplicate_bundle" 'car expects a non-empty list'
 sha256sum lib/d11-srfi1-set-relations.lisp tests/semantic/d11-srfi1-adjoin-*.lisp > "$evidence/d11-srfi1-adjoin-inputs.sha256"
 
+# Д11 reductions / pair-fold: реальний SENS позитив, мутант і Type-відмови.
+# Файли залежать від бібліотечних DEFINE; окремий запуск не є атестацією.
+d11_scan_fold_law_bundle="$evidence/d11-scan-fold-d3-positive.lisp"
+d11_scan_fold_mutant_bundle="$evidence/d11-scan-fold-d3-mutant.lisp"
+d11_scan_fold_bad_scan="$evidence/d11-scan-fold-d3-scan-bad.lisp"
+d11_scan_fold_bad_left="$evidence/d11-scan-fold-d3-left-bad.lisp"
+d11_scan_fold_bad_right="$evidence/d11-scan-fold-d3-right-bad.lisp"
+cat -- lib/d11-historical-scan-fold.lisp tests/semantic/d11-scan-fold-d3-tail-law.lisp > "$d11_scan_fold_law_bundle"
+cat -- lib/d11-historical-scan-fold.lisp tests/semantic/d11-scan-fold-d3-tail-mutant.lisp > "$d11_scan_fold_mutant_bundle"
+cat -- lib/d11-historical-scan-fold.lisp tests/semantic/d11-scan-fold-d3-tail-scan-improper-negative.lisp > "$d11_scan_fold_bad_scan"
+cat -- lib/d11-historical-scan-fold.lisp tests/semantic/d11-scan-fold-d3-tail-left-improper-negative.lisp > "$d11_scan_fold_bad_left"
+cat -- lib/d11-historical-scan-fold.lisp tests/semantic/d11-scan-fold-d3-tail-right-improper-negative.lisp > "$d11_scan_fold_bad_right"
+run_case run_law d11-scan-fold-d3-positive "$d11_scan_fold_law_bundle" 1
+run_case run_law d11-scan-fold-d3-mutant "$d11_scan_fold_mutant_bundle" 0
+run_case run_type_rejection d11-scan-fold-d3-scan-bad "$d11_scan_fold_bad_scan" 'car expects a non-empty list'
+run_case run_type_rejection d11-scan-fold-d3-left-bad "$d11_scan_fold_bad_left" 'car expects a non-empty list'
+run_case run_type_rejection d11-scan-fold-d3-right-bad "$d11_scan_fold_bad_right" 'car expects a non-empty list'
+sha256sum lib/d11-historical-scan-fold.lisp tests/semantic/d11-scan-fold-d3-tail-*.lisp > "$evidence/d11-scan-fold-d3-inputs.sha256"
+
 d11_span_bundle="$evidence/d11-srfi1-span-break-complete.lisp"
 cat -- lib/d11-srfi1-span-break.lisp tests/semantic/d11-srfi1-span-break-laws.lisp > "$d11_span_bundle"
 sha256sum lib/d11-srfi1-span-break.lisp tests/semantic/d11-srfi1-span-break-laws.lisp > "$evidence/d11-srfi1-inputs.sha256"
