@@ -148,7 +148,7 @@ mod paired {
     }
 
     // Each numeric leaf is reconstructed FROM the actual Zig-restored bits.
-    // The separately-validated source AST grants D5/D24 identity and structure.
+    // The separately-validated source AST grants D5/D12+ identity and structure.
     fn reconstruct(
         source: &Expr,
         physical: &[ExactT5MWord],
@@ -329,7 +329,7 @@ mod paired {
                 let got = eval_verified(text, &packed).unwrap();
                 assert_eq!(got.to_string(), expected, "test_id={id} layer=SENS");
             }
-            // Нова реальність: точна драбина D24+ тримає ширини, ширші за D24,
+            // Нова реальність: D12-first source profile widens exactly through D24+,
             // тож 2^127 — законне точне ціле, а не «завеликий» літерал. Невалідними
             // лишаються десяткові дроби, експоненти, хибна арність і не-число.
             for invalid in [
