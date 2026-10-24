@@ -85,9 +85,29 @@ def require_pinned_artifact_download(job: str) -> None:
         )
 
 
+def require_supported_macos_intel_runner(source: str) -> None:
+    """GitHub retired macos-13: keep Intel label paired with x86_64 Darwin."""
+    match = re.search(
+        r"(?m)^          - os: (\S+)\n            target: x86_64-apple-darwin$",
+        source,
+    )
+    if match is None or match.group(1) != "macos-15-intel":
+        raise AssertionError("Intel macOS release runner must be macos-15-intel")
+
+
 class ReleasePublicationGateTest(unittest.TestCase):
     def setUp(self):
         self.source = WORKFLOW.read_text(encoding="utf-8")
+
+    def test_macos_intel_release_runner_is_supported(self):
+        require_supported_macos_intel_runner(self.source)
+        for stale in ("macos-13", "macos-14", "macos-15"):
+            with self.subTest(stale=stale), self.assertRaisesRegex(
+                AssertionError, "must be macos-15-intel"
+            ):
+                require_supported_macos_intel_runner(
+                    self.source.replace("os: macos-15-intel", f"os: {stale}", 1)
+                )
 
     def test_workflow_rechecks_main_after_replay_and_before_publish(self):
         require_final_publication_guard(self.source)
