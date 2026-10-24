@@ -520,7 +520,12 @@ jobs:
           # Only real SENS emits words; pinned Zig packages the binary.
           timeout 180s "$PWD/target/debug/sens" --t5m-mint-pair        lib/core4.lisp "$physical_dir/core4.sens"
           timeout 45s "$PWD/target/debug/sens-trit" verify-view             "$physical_dir/core4.sens" >"$physical_dir/core4-verified.txt"
-          sha256sum lib/core4.lisp lib/core4.sens             "$physical_dir/core4.sens" >"$physical_dir/sha256.txt"
+          # SHA of the exact source checkout; never apply this artifact to a
+          # different main tree even if its filename still matches.
+          git rev-parse --verify HEAD > "$physical_dir/source-commit.sha"
+          sha256sum lib/core4.lisp > "$physical_dir/source-core4.sha256"
+          sha256sum lib/core4.lisp lib/core4.sens \
+            "$physical_dir/core4.sens" > "$physical_dir/sha256.txt"
           if ! cmp -s lib/core4.sens "$physical_dir/core4.sens"; then
             echo "::error file=lib/core4.sens,title=SENS_CORE4_PHYSICAL_DRIFT::REGRESSION layer=bootstrap expected=exact-current-SENS-source actual=outdated-physical bytes=Zig/T5M release=NO-GO" >&2
             exit 1
@@ -576,7 +581,9 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: sens-pair-regen-${{ github.sha }}
-          path: ${{ runner.temp }}/changed-t5m-pairs/**
-          if-no-files-found: warn
+          # Artifact contains only the physical Core4 minted by this exact
+          # commit, plus its SHA receipts and Zig verify-view output.
+          path: ${{ runner.temp }}/changed-t5m-pairs/core4-parity/**
+          if-no-files-found: error
           retention-days: 1
           compression-level: 0
