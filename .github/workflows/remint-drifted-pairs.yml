@@ -365,7 +365,7 @@ jobs:
             # Перевіряємо і точний шлях, і форму даних: зміна на програму
             # не може бути непомітно пропущена.
             if [[ "$f" == knowledge/silent-fallback-inventory.lisp && ! -L "$f" ]] &&
-               LC_ALL=C grep -Eq '^[[:space:]]*\(silent-fallback-inventory([[:space:]]|$)' -- "$f"; then
+               python3 scripts/check-single-data-schema.py silent-fallback-inventory "$f"; then
               echo "REMINT_DATA_ONLY source=$f classification=SCHEMA_INVENTORY"
               continue
             fi
@@ -378,7 +378,7 @@ jobs:
               lib/machine/profile/current-domain-x86-64.lisp) machine_schema="machine-domain-profile-3" ;;
             esac
             if [[ -n "$machine_schema" && ! -L "$f" ]] &&
-               LC_ALL=C grep -Eq "^[[:space:]]*\\($machine_schema([[:space:]]|$)" -- "$f"; then
+               python3 scripts/check-single-data-schema.py "$machine_schema" "$f"; then
               echo "REMINT_DATA_ONLY source=$f classification=EXACT_SCHEMA:$machine_schema"
               continue
             fi
@@ -683,8 +683,20 @@ jobs:
               # Перевіряємо і точний шлях, і форму даних: зміна на програму
               # не може бути непомітно пропущена.
               if [[ "$f" == knowledge/silent-fallback-inventory.lisp && ! -L "$f" ]] &&
-                 LC_ALL=C grep -Eq '^[[:space:]]*\(silent-fallback-inventory([[:space:]]|$)' -- "$f"; then
+                 python3 scripts/check-single-data-schema.py silent-fallback-inventory "$f"; then
                 echo "REMINT_CURRENT_MAIN_DATA_ONLY source=$f classification=SCHEMA_INVENTORY"
+                continue
+              fi
+              # Другий прохід після конкурентного push мусить мати ті самі
+              # правила відокремлення схемних даних від виконуваних форм.
+              machine_schema=""
+              case "$f" in
+                lib/machine/intel-core-i5-6400.lisp) machine_schema="machine-profile-1" ;;
+                lib/machine/profile/current-domain-x86-64.lisp) machine_schema="machine-domain-profile-3" ;;
+              esac
+              if [[ -n "$machine_schema" && ! -L "$f" ]] &&
+                 python3 scripts/check-single-data-schema.py "$machine_schema" "$f"; then
+                echo "REMINT_CURRENT_MAIN_DATA_ONLY source=$f classification=EXACT_SCHEMA:$machine_schema"
                 continue
               fi
               if [[ ! -L "$f" ]] &&

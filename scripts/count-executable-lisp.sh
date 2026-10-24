@@ -73,7 +73,7 @@ while IFS= read -r -d '' source; do
   # автоматичного виключення не буде: його перевірить SENS/Zig.
   if [[ "$source" == knowledge/silent-fallback-inventory.lisp &&
         -f "$source" && ! -L "$source" ]] &&
-     LC_ALL=C grep -Eq '^[[:space:]]*\(silent-fallback-inventory([[:space:]]|$)' -- "$source"; then
+     python3 scripts/check-single-data-schema.py silent-fallback-inventory "$source"; then
     (( nonprogram_data += 1 ))
     printf 'NATIVE_DATA_ONLY\t%s\tclassification=SCHEMA_INVENTORY\n' "$source" >&2
     continue
@@ -118,7 +118,7 @@ while IFS= read -r -d '' source; do
     lib/machine/profile/current-domain-x86-64.lisp) data_schema="machine-domain-profile-3" ;;
   esac
   if [[ -n "$data_schema" && -f "$source" && ! -L "$source" ]] &&
-     LC_ALL=C grep -Eq "^[[:space:]]*\\($data_schema([[:space:]]|$)" -- "$source"; then
+     python3 scripts/check-single-data-schema.py "$data_schema" "$source"; then
     (( nonprogram_data += 1 ))
     printf 'NATIVE_DATA_ONLY\t%s\tclassification=EXACT_SCHEMA:%s\n' "$source" "$data_schema" >&2
     continue
