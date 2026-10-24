@@ -1357,6 +1357,15 @@ run_case run_type_rejection d11-srfi1-span-improper-suffix-type "$d11_span_impro
 d11_break_improper="$evidence/d11-srfi1-break-improper-suffix.lisp"
 cat -- lib/d11-srfi1-span-break.lisp tests/semantic/d11-srfi1-break-improper-suffix-negative.lisp > "$d11_break_improper"
 run_case run_type_rejection d11-srfi1-break-improper-suffix-type "$d11_break_improper" 'car expects a non-empty list'
+# D11 SPAN/BREAK: CAR неправильного D3-хвоста мусить передувати
+# іншій CDR Type усередині першокласного SENS-предиката.
+d11_span_precedence_bad="$evidence/d11-span-structure-before-predicate-complete.lisp"
+d11_break_precedence_bad="$evidence/d11-break-structure-before-predicate-complete.lisp"
+cat -- lib/d11-srfi1-span-break.lisp tests/fixtures/d11-span-improper-before-predicate-negative.lisp > "$d11_span_precedence_bad"
+cat -- lib/d11-srfi1-span-break.lisp tests/fixtures/d11-break-improper-before-predicate-negative.lisp > "$d11_break_precedence_bad"
+run_case run_type_rejection d11-span-structure-before-predicate-type "$d11_span_precedence_bad" 'car expects a non-empty list'
+run_case run_type_rejection d11-break-structure-before-predicate-type "$d11_break_precedence_bad" 'car expects a non-empty list'
+sha256sum lib/d11-srfi1-span-break.lisp tests/fixtures/d11-span-improper-before-predicate-negative.lisp tests/fixtures/d11-break-improper-before-predicate-negative.lisp > "$evidence/d11-span-break-precedence-inputs.sha256"
 sha256sum lib/d11-srfi1-span-break.lisp tests/semantic/d11-srfi1-span-improper-suffix-negative.lisp tests/semantic/d11-srfi1-break-improper-suffix-negative.lisp > "$evidence/d11-span-break-improper-inputs.sha256"
 
 # Д11: НЕ втрачати бенчмарк сімейств, навіть коли він не змінювався в commit.
