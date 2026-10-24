@@ -89,7 +89,7 @@ jobs:
         run: |
           set -euo pipefail
           bash benchmarks/rust-packed-visible/run.sh "$RUNNER_TEMP/sens-mechanisms/packed-visible"
-          test "$(grep -c '^RUST_PACKED_VISIBLE_SAMPLE[[:space:]]' "$RUNNER_TEMP/sens-mechanisms/packed-visible/raw.tsv")" -eq 45
+          test "$(grep -c '^RUST_PACKED_VISIBLE_SAMPLE[[:space:]]' "$RUNNER_TEMP/sens-mechanisms/packed-visible/raw.tsv")" -eq 75
           test "$(grep -c '^RUST_PACKED_VISIBLE_SUMMARY[[:space:]]' "$RUNNER_TEMP/sens-mechanisms/packed-visible/raw.tsv")" -eq 5
       - name: Measure physical SENS process paths with Rust after byte/view parity
         shell: bash
