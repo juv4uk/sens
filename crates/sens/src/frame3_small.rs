@@ -26,14 +26,14 @@ pub enum SmallF3Error {
 /// complete physical carrier (including 0xf3) saves bytes. Other canonical
 /// T5 programs remain T5. This never mutates the input or falls back at decode.
 pub fn encode_explicit_small_f3(t5_input: &[u8]) -> Result<Option<Vec<u8>>, SmallF3Error> {
-    let parsed = PhysicalT5Program::from_exact_words(
-        &decode_ternary_words(t5_input).map_err(|_| SmallF3Error::InvalidProgram)?,
-    )
-    .map_err(|_| SmallF3Error::InvalidProgram)?;
+    // Один точний T5 decode служить і перевірці форми, і canonical re-encode.
+    // Повторний decode у цьому гарячому маршруті не додавав жодної перевірки.
+    let typed = decode_ternary_words(t5_input).map_err(|_| SmallF3Error::InvalidProgram)?;
+    let parsed = PhysicalT5Program::from_exact_words(&typed)
+        .map_err(|_| SmallF3Error::InvalidProgram)?;
     if parsed.form_count() != 1 || t5_input.len() > MAX_TINY_T5_BYTES {
         return Ok(None);
     }
-    let typed = decode_ternary_words(t5_input).map_err(|_| SmallF3Error::InvalidProgram)?;
     let current = encode_ternary_words(&typed).map_err(|_| SmallF3Error::InvalidProgram)?;
     if current != t5_input {
         return Err(SmallF3Error::InvalidProgram);
