@@ -597,7 +597,9 @@ sha256sum lib/d11-srfi1-unfold.lisp tests/semantic/d11-srfi1-unfold-positive.lis
 # Усі визначення — в Lisp/SENS, Zig лише транспортує T5M.
 d11_freq_bad_count="$evidence/d11-frequencies-bad-count.lisp"
 cat -- lib/d11-clojure-frequencies-unary.lisp tests/semantic/d11-clojure-frequencies-improper-count-negative.lisp > "$d11_freq_bad_count"
-run_case run_type_rejection d11-frequencies-improper-count-type "$d11_freq_bad_count" 'car expects a non-empty list'
+# Рекурсивний виклик одержує (решта елементи) ще до входу до нового COND:
+# неправильний D1 хвіст відхиляє саме D3 РЕШТА (CDR), не ПЕРШЕ (CAR).
+run_case run_type_rejection d11-frequencies-improper-count-type "$d11_freq_bad_count" 'cdr expects a non-empty list'
 d11_freq_bad_groups="$evidence/d11-frequencies-bad-groups.lisp"
 cat -- lib/d11-clojure-frequencies-unary.lisp tests/semantic/d11-clojure-frequencies-improper-groups-negative.lisp > "$d11_freq_bad_groups"
 run_case run_type_rejection d11-frequencies-improper-groups-type "$d11_freq_bad_groups" 'car expects a non-empty list'
