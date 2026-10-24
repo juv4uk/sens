@@ -1030,6 +1030,27 @@ sha256sum benchmarks/d3-structural-bench.lisp tests/semantic/d3-structural-bench
 run_case run_law d3-structural-bench-positive "$d3_hot_law" 1
 run_case run_law d3-structural-bench-mutant "$d3_hot_mutant" 0
 
+# D6 ZIP: витягаємо лише канонічний SENS DEFINE із core4-d6b.
+d6_zip_source="$evidence/d6-zip-define.lisp"
+if ! awk -v target="(визначити спарувати-послідовності" '
+  $0 == target { if (found++) exit 2; copying = 1 }
+  copying && NF == 0 { copying = 0; complete++; next }
+  copying { print }
+  END { if (found != 1 || complete != 1 || copying) exit 2 }
+' lib/core4-parts/core4-d6b.lisp > "$d6_zip_source"; then
+  echo "::error::D6_ZIP_SOURCE_NOT_ISOLATABLE" >&2
+  exit 2
+fi
+for kind in proper-law improper-tail-negative improper-root-negative; do
+  cat -- "$d6_zip_source" "tests/semantic/d6-zip-$kind.lisp" > "$evidence/d6-zip-$kind-complete.lisp"
+done
+sha256sum lib/core4.lisp lib/core4-parts/core4-d6b.lisp \
+ tests/semantic/d6-zip-proper-law.lisp tests/semantic/d6-zip-improper-tail-negative.lisp \
+ tests/semantic/d6-zip-improper-root-negative.lisp > "$evidence/d6-zip-inputs.sha256"
+run_case run_law d6-zip-proper "$evidence/d6-zip-proper-law-complete.lisp" 1
+run_case run_type_rejection d6-zip-improper-tail "$evidence/d6-zip-improper-tail-negative-complete.lisp" 'car expects a non-empty list'
+run_case run_type_rejection d6-zip-improper-root "$evidence/d6-zip-improper-root-negative-complete.lisp" 'car expects a non-empty list'
+
 # Семантика D6 ALL — виконувані мовні закони з чинним визначенням Core4.
 d6_quantifier_source="$evidence/d6-first-class-predicate-quantifiers.lisp"
 : > "$d6_quantifier_source"
