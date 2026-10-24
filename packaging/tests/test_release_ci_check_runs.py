@@ -75,9 +75,12 @@ class ReleaseCIChecks(unittest.TestCase):
 
 def verify_publish_wiring(workflow):
     """Keep exact-SHA CI admission on both sides of draft creation."""
-    if "\n  release-publish:\n" not in workflow:
-        raise ValueError("RELEASE_BLOCKED: no final publication job")
-    job = workflow.split("\n  release-publish:\n", 1)[1]
+    # Першопричина: job release-publish винесено з release.yml у делегований
+    # release-publish.yml (workflow_call). Приймаємо або весь файл, або job.
+    if "\n  release-publish:\n" in workflow:
+        job = workflow.split("\n  release-publish:\n", 1)[1]
+    else:
+        job = workflow
     required = "python3 scripts/verify_release_ci.py"
     if job.count(required) != 2:
         raise ValueError("RELEASE_BLOCKED: two live CI rechecks required")
@@ -94,8 +97,10 @@ def verify_publish_wiring(workflow):
 
 class ReleaseCIWorkflowWiring(unittest.TestCase):
     def setUp(self):
+        # Першопричина: послідовність публікації живе у делегованому
+        # release-publish.yml, а не в release.yml.
         self.workflow = (
-            Path(__file__).resolve().parents[2] / ".github" / "workflows" / "release.yml"
+            Path(__file__).resolve().parents[2] / ".github" / "workflows" / "release-publish.yml"
         ).read_text(encoding="utf-8")
 
     def test_live_ci_gate_before_draft_and_after_replay(self):
