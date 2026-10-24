@@ -112,6 +112,16 @@
       let historyIndex = -1;
       let currentSurface = "укр";
       const promptEl = document.getElementById("prompt");
+      const inputEl = document.getElementById("input");
+      const logEl = document.getElementById("log");
+
+      function printLine(value, className = "line-value") {
+        const line = document.createElement("div");
+        line.className = className;
+        line.textContent = String(value);
+        logEl.appendChild(line);
+        logEl.scrollTop = logEl.scrollHeight;
+      }
 
       function updatePrompt() {
         promptEl.textContent = `my-lisp[${currentSurface}]>`;
