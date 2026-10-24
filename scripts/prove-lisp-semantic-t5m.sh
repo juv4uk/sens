@@ -575,6 +575,15 @@ cat -- lib/d11-tree-equal-by-test.lisp tests/semantic/d11-tree-equal-by-test-mut
 run_case run_law d11-tree-test-positive "$d11_tree_test_law_bundle" 1
 run_case run_law d11-tree-test-mutant "$d11_tree_test_mutant_bundle" 0
 sha256sum lib/d11-tree-equal-by-test.lisp tests/semantic/d11-tree-equal-by-test-law.lisp tests/semantic/d11-tree-equal-by-test-mutant.lisp > "$evidence/d11-tree-test-inputs.sha256"
+# D11 SRFI-1 lset: позитив і мутант виконують справжні DEFINE мови SENS.
+# Немає нових opcode; Zig/T5M лише фізично переносить код і значення.
+d11_set_law_bundle="$evidence/d11-srfi1-set-relations-law-complete.lisp"
+d11_set_mutant_bundle="$evidence/d11-srfi1-set-relations-mutant-complete.lisp"
+cat -- lib/d11-srfi1-set-relations.lisp tests/semantic/d11-srfi1-set-relations-law.lisp > "$d11_set_law_bundle"
+cat -- lib/d11-srfi1-set-relations.lisp tests/semantic/d11-srfi1-set-relations-mutant.lisp > "$d11_set_mutant_bundle"
+run_case run_law d11-srfi1-set-relations-positive "$d11_set_law_bundle" 1
+run_case run_law d11-srfi1-set-relations-mutant "$d11_set_mutant_bundle" 0
+sha256sum lib/d11-srfi1-set-relations.lisp tests/semantic/d11-srfi1-set-relations-law.lisp tests/semantic/d11-srfi1-set-relations-mutant.lisp > "$evidence/d11-set-relations-inputs.sha256"
 # SRFI-1 list=: алгоритм з чинної lib/D11, очікувані предикати тільки в Lisp.
 # Не тестуємо D11-операцію Rust-оракулом; Zig тільки кодує фізичні байти.
 d11_list_equal_law_bundle="$evidence/d11-list-equality-positive.lisp"

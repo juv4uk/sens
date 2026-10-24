@@ -849,6 +849,10 @@ while IFS= read -r file || [[ -n "$file" ]]; do
       printf '\n' >> "$d6_union_binding"
     done
     binding_sources=(--binding-source "$d6_union_binding")
+  elif [[ "$file" == "tests/semantic/d11-srfi1-set-relations-law.lisp" ||
+          "$file" == "tests/semantic/d11-srfi1-set-relations-mutant.lisp" ]]; then
+    # D11-множини: SENS-функції бере лише з чинного бібліотечного джерела.
+    binding_sources=(--binding-source lib/d11-srfi1-set-relations.lisp)
   elif [[ "$file" == "tests/semantic/d11-srfi1-find-tail-laws.lisp" ||
           "$file" == "tests/semantic/d11-srfi1-find-tail-improper-tail-negative.lisp" ]]; then
     # Лише визначення із справжньої бібліотеки SENS, без host-оракула.
