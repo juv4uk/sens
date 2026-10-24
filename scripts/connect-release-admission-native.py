@@ -92,6 +92,32 @@ def check_proof_ref(root: Path, sha: str, rel: str, script: Path) -> tuple[bool,
     return True, f"F4_PROVENANCE_OK sha={sha} path={rel}"
 
 
+def has_exact_native_verdict(stdout: str, script: Path) -> bool:
+    """Require this proof's terminal PASS and its preceding mutant receipt.
+
+    The pinned script is responsible for executing SENS. This helper validates
+    only receipt structure, never computes the semantic answer in Python.
+    """
+    if not script.stem.startswith("prove-"):
+        return False
+    proof_id = re.escape(script.stem.removeprefix("prove-"))
+    lines = [line.strip() for line in stdout.splitlines() if line.strip()]
+    if not lines:
+        return False
+    final = lines[-1]
+    if re.fullmatch(
+        rf"{PASS_MARKER} (?:test_)?id={proof_id} [^\r\n]*"
+        rf"(?:semantic_authority=(?:binary-)?SENS|authority=SENS)",
+        final,
+    ) is None:
+        return False
+    mutant = re.compile(
+        rf"NATIVE_SENS_NEGATIVE (?:test_)?id={proof_id}-mutant"
+        rf"(?:-[0-9]+)?(?:\s|$)"
+    )
+    return any(mutant.match(line) for line in lines[:-1])
+
+
 def run_proof(script: Path, cli: Path, root: Path, timeout: float) -> tuple[bool, str]:
     """Run one native proof. Verified only on exit 0 AND the terminal marker."""
     try:
@@ -109,8 +135,11 @@ def run_proof(script: Path, cli: Path, root: Path, timeout: float) -> tuple[bool
     stdout = proc.stdout or ""
     if proc.returncode != 0:
         return False, f"proof exit={proc.returncode} (без {PASS_MARKER})"
-    if PASS_MARKER not in stdout:
-        return False, f"у виводі немає {PASS_MARKER}"
+    if not has_exact_native_verdict(stdout, script):
+        return False, (
+            f"у виводі немає завершальної квитанції {PASS_MARKER} "
+            f"для {script.stem} разом із негативним SENS-свідком"
+        )
     return True, PASS_MARKER
 
 
