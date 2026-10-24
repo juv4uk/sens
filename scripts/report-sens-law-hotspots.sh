@@ -80,4 +80,30 @@ for stage in direct codec-mint zig-open zig-verify sens-paired sens-paired-core4
   echo "SENS_PHASE_EXIT_CLASS stage=$stage exit_class=$exit_class count=$count p50_us=$p50 p90_us=$p90 max_us=$high scope=mixed-witnesses"
  done
 done
+# Exit=0 ще не є успіхом закону: Lisp може повернути RED при нормальному
+# завершенні процесу. Профіль для порівняння швидкодії мусить мати обидва докази.
+{
+ echo
+ echo '### Семантично правильні успішні маршрути'
+ echo 'До цієї вибірки входять лише Lisp PASS разом з exit=0. Інші проби залишаються у діагностичних таблицях вище.'
+ echo 'Це розподіл різних свідків із запуском CLI, а не чистий EVAL і не доказ прискорення.'
+ echo
+ echo '| Етап | Закон + вихід | Проб | p50 мкс | p90 мкс | max мкс |'
+ echo '|---|---|---:|---:|---:|---:|'
+} >> "$report"
+for stage in direct codec-mint zig-open zig-verify sens-paired sens-paired-core4-diagnostic sens-standalone; do
+ awk -F '\t' -v st="$stage" \
+   'NR==FNR {if(FNR>1) verdict[$1]=$2; next} FNR>1 && $2==st && $3=="0" && verdict[$1]=="PASS" {print $4}' \
+   "$laws" "$phases" | sort -n > "$tmp/sorted"
+ count="$(wc -l < "$tmp/sorted" | tr -d '[:space:]')"
+ if (( count==0 )); then
+  printf '| %s | PASS + exit=0 | 0 | — | — | — |\n' "$stage" >> "$report"
+  continue
+ fi
+ p50="$(sed -n "$(((count+1)/2))p" "$tmp/sorted")"
+ p90="$(sed -n "$(((9*count+9)/10))p" "$tmp/sorted")"
+ high="$(tail -n 1 "$tmp/sorted")"
+ printf '| %s | PASS + exit=0 | %s | %s | %s | %s |\n' "$stage" "$count" "$p50" "$p90" "$high" >> "$report"
+ echo "SENS_PHASE_VERIFIED_SUCCESS stage=$stage count=$count p50_us=$p50 p90_us=$p90 max_us=$high scope=mixed-witnesses"
+done
 printf 'SENS_PHASE_BENCHMARK_SUMMARY checked=%s passed=%s red=%s report=%s\n' "$checked" "$passed" "$red" "$report"
