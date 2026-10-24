@@ -189,6 +189,30 @@ def verify_derivation() -> None:
                 "диспетчер змінився, передеривуй число")
 
 
+def verify_declared_authority() -> None:
+    """Рукописний зріз D5 мусить називати власника, і власник мусить бути
+    в ратифікованому контракті. Проза «#3331/#3305» стає перевіреним фактом:
+    рукописне джерело без власника — це вибір без права."""
+    path = ROOT / "lib/surface/d5-definition-bindings.lisp"
+    if not path.is_file():
+        raise SystemExit("FAIL: відсутнє рукописне джерело D5-зрізу")
+    text = path.read_text(encoding="utf-8")
+    if "(status projection-only)" not in text:
+        raise SystemExit("FAIL: D5-зріз втратив status projection-only")
+    match = re.search(r'\(authority\s+"([^"]+)"\)', text)
+    if not match:
+        raise SystemExit("FAIL: D5-зріз не називає власника (authority)")
+    tokens = re.findall(r"#(\d+)", match.group(1))
+    if not tokens:
+        raise SystemExit("FAIL: authority без токенів завдання")
+    contracts = "\n".join(
+        p.read_text(encoding="utf-8") for p in sorted((ROOT / "contracts").glob("*.lisp")))
+    for token in tokens:
+        if f"#{token}" not in contracts:
+            raise SystemExit(
+                f"FAIL: власник D5 #{token} не згаданий у жодному ратифікованому контракті")
+
+
 def declared_source(n: int) -> dict[str, object] | None:
     """Щаблі, чиє джерело допуску ЯВНО каже, скільки виконуваних.
 
@@ -263,6 +287,7 @@ def main() -> int:
     ap.add_argument("--check", action="store_true", help="fail-closed перевірка вкладеності")
     args = ap.parse_args()
     verify_derivation()
+    verify_declared_authority()
     rows = survey()
     bad = False
     print(f"{'щабель':>6} {'каталог':>8} {'bindings':>9} {'carrier-only':>13}  стан")
