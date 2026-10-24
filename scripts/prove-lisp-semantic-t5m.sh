@@ -658,6 +658,16 @@ cat -- lib/d11-srfi1-set-relations.lisp tests/semantic/d11-srfi1-set-relations-l
 cat -- lib/d11-srfi1-set-relations.lisp tests/semantic/d11-srfi1-set-relations-mutant.lisp > "$d11_set_mutant_bundle"
 run_case run_law d11-srfi1-set-relations-positive "$d11_set_law_bundle" 1
 run_case run_law d11-srfi1-set-relations-mutant "$d11_set_mutant_bundle" 0
+# Д11 lset<=/lset=: структурно хибний єдиний елемент не є множиною.
+# Обидві точні D3 Type-відмови перевіряє direct + Zig/T5M + physical SENS.
+d11_lset_subset_chain_bad="$evidence/d11-lset-subset-malformed-chain.lisp"
+cat -- lib/d11-srfi1-set-relations.lisp tests/fixtures/d11-lset-subset-malformed-chain-negative.lisp > "$d11_lset_subset_chain_bad"
+run_case run_type_rejection d11-lset-subset-malformed-chain "$d11_lset_subset_chain_bad" 'car expects a non-empty list'
+d11_lset_equality_chain_bad="$evidence/d11-lset-equality-malformed-chain.lisp"
+cat -- lib/d11-srfi1-set-relations.lisp tests/fixtures/d11-lset-equality-malformed-chain-negative.lisp > "$d11_lset_equality_chain_bad"
+run_case run_type_rejection d11-lset-equality-malformed-chain "$d11_lset_equality_chain_bad" 'car expects a non-empty list'
+sha256sum lib/d11-srfi1-set-relations.lisp tests/fixtures/d11-lset-{subset,equality}-malformed-chain-negative.lisp > "$evidence/d11-lset-chain-inputs.sha256"
+
 sha256sum lib/d11-srfi1-set-relations.lisp tests/semantic/d11-srfi1-set-relations-law.lisp tests/semantic/d11-srfi1-set-relations-mutant.lisp > "$evidence/d11-set-relations-inputs.sha256"
 # D11 SRFI-1: навіть короткий шлях повернення ТАК не маскує пошкоджений хвіст.
 # Обидва негативні свідки запускають справжню бібліотеку SENS через Zig/T5M.
