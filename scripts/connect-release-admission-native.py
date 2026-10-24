@@ -65,6 +65,33 @@ def cli_is_ready(cli: Path) -> bool:
     return cli.is_file() and os.access(cli, os.X_OK)
 
 
+def check_proof_ref(root: Path, sha: str, rel: str, script: Path) -> tuple[bool, str]:
+    """Confirm that the executed proof is byte-identical to its F4 Git citation.
+
+    This checks provenance only. It does not infer Lisp/SENS semantic truth.
+    A shallow checkout without the cited commit must fail closed.
+    """
+    try:
+        pinned = subprocess.run(
+            ["git", "-C", str(root), "show", f"{sha}:{rel}"],
+            capture_output=True,
+            timeout=10,
+            check=False,
+        )
+    except (OSError, subprocess.TimeoutExpired) as exc:
+        return False, f"F4_REF_UNAVAILABLE sha={sha} path={rel}: {exc}"
+    if pinned.returncode != 0:
+        detail = pinned.stderr.decode("utf-8", errors="replace").strip()
+        return False, f"F4_REF_UNAVAILABLE sha={sha} path={rel}: {detail[:160]}"
+    try:
+        current = script.read_bytes()
+    except OSError as exc:
+        return False, f"F4_SCRIPT_UNREADABLE path={rel}: {exc}"
+    if pinned.stdout != current:
+        return False, f"F4_PROVENANCE_MISMATCH sha={sha} path={rel}: bytes differ"
+    return True, f"F4_PROVENANCE_OK sha={sha} path={rel}"
+
+
 def run_proof(script: Path, cli: Path, root: Path, timeout: float) -> tuple[bool, str]:
     """Run one native proof. Verified only on exit 0 AND the terminal marker."""
     try:
@@ -165,6 +192,14 @@ def main(argv: list[str] | None = None) -> int:
             continue
         if not resolved.is_relative_to(scripts_dir):
             blocked.append((label, f"proof script поза scripts/: {rel}"))
+            continue
+
+        provenance_ok, provenance_detail = check_proof_ref(
+            root, match.group("sha"), rel, script
+        )
+        if not provenance_ok:
+            blocked.append((label, provenance_detail))
+            print(f"NATIVE-BLOCKED {label} script={rel} reason={provenance_detail}")
             continue
 
         ok, detail = run_proof(script, cli, root, args.timeout)
