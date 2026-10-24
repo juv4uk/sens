@@ -159,7 +159,10 @@ class ReleaseWorkflowOrderingTest(unittest.TestCase):
 
     def test_main_sha_and_owner_go_are_rechecked_after_replay_before_publish(self):
         root = Path(__file__).resolve().parents[1]
-        workflow = (root / ".github" / "workflows" / "release.yml").read_text(encoding="utf-8")
+        # Першопричина: послідовність публікації винесено з release.yml у
+        # делегований release-publish.yml; тест мусить читати САМЕ той файл.
+        workflow = (root / ".github" / "workflows" /
+                    "release-publish.yml").read_text(encoding="utf-8")
 
         replay = workflow.rfind("python3 scripts/verify_release_assets.py replay")
         publish = workflow.rfind('gh release edit "$GITHUB_REF_NAME" --draft=false')
@@ -256,9 +259,11 @@ class ReleaseVersionParityTest(unittest.TestCase):
                 self.assertIn(f"sens-cli_{version}_{suffix}", installer)
         self.assertIn(f"releases/download/l{version}/", installer)
 
+        # Першопричина: scripts/release.lisp виведено з ужитку (стаб зберігає
+        # лише потрібну версію як provenance). Стара вимога до вмісту драйвера
+        # більше не існує — перевіряємо версію, яку стаб справді фіксує.
         release_script = (root / "scripts" / "release.lisp").read_text(encoding="utf-8")
-        self.assertIn(f"scripts/release.lisp {version}", release_script)
-        self.assertIn(f"Потрібна одна версія: {version}", release_script)
+        self.assertIn(f"Потрібна версія релізу: {version}", release_script)
 
 class ReleaseWebDemoLinkTests(unittest.TestCase):
     """CI_GLUE_NO_SEMANTICS: stable README link across asset renames."""
