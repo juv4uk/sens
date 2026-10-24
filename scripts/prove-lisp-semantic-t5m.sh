@@ -1505,6 +1505,21 @@ for suite in d11-clojure-partition-by d11-clojure-dedupe; do
   cat -- lib/d11-srfi1-span-break.lisp lib/d11-clojure-partition-by.lisp "tests/semantic/$suite-laws.lisp" > "$combined"
   run_case run_law "$suite-physical" "$combined" 1
 done
+# Д11 PARTITION-BY: singleton також зобов'язаний виконати функцію ключа.
+d11_partition_singleton_law="$evidence/d11-clojure-partition-singleton-key-law-complete.lisp"
+d11_partition_singleton_mutant="$evidence/d11-clojure-partition-singleton-key-mutant-complete.lisp"
+d11_partition_singleton_bad="$evidence/d11-clojure-partition-singleton-key-error-complete.lisp"
+cat -- lib/d11-srfi1-span-break.lisp lib/d11-clojure-partition-by.lisp tests/semantic/d11-clojure-partition-singleton-key-law.lisp > "$d11_partition_singleton_law"
+cat -- lib/d11-srfi1-span-break.lisp lib/d11-clojure-partition-by.lisp tests/semantic/d11-clojure-partition-singleton-key-mutant.lisp > "$d11_partition_singleton_mutant"
+cat -- lib/d11-srfi1-span-break.lisp lib/d11-clojure-partition-by.lisp tests/semantic/d11-clojure-partition-singleton-key-error-negative.lisp > "$d11_partition_singleton_bad"
+run_case run_law d11-clojure-partition-singleton-key-law "$d11_partition_singleton_law" 1
+run_case run_law d11-clojure-partition-singleton-key-mutant "$d11_partition_singleton_mutant" 0
+run_case run_error_rejection d11-clojure-partition-singleton-key-error "$d11_partition_singleton_bad" Type 'car expects a non-empty list'
+sha256sum lib/d11-clojure-partition-by.lisp \
+  tests/semantic/d11-clojure-partition-singleton-key-law.lisp \
+  tests/semantic/d11-clojure-partition-singleton-key-mutant.lisp \
+  tests/semantic/d11-clojure-partition-singleton-key-error-negative.lisp > "$evidence/d11-clojure-partition-singleton-key-inputs.sha256"
+
 # Д11: атом Д1 не є завершенням правильного списку. Потрібен SENS Type,
 # а не фальшивий PASS порожнього результату від ATOM? замість ПОРОЖНІЙ?.
 for kind in partition dedupe; do
