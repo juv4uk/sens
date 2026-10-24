@@ -473,11 +473,12 @@ impl BinaryNumber {
         a
     }
 
-    /// Owner-ratified numeric domain family D24, D48, D96, D192, ...
-    /// A width is legitimate only when it is 24 * 2^k, k >= 0.
-    /// This helper checks the *domain family*, not resident admissibility.
+    /// Owner-ratified numeric family D12, D24, D48, D96, ...
+    /// The current Lisp law is D(12 * 2^k), k >= 0; D12 is a number,
+    /// never a D12 callable-function identity. This checks the *semantic*
+    /// domain family, not the narrower Zig/T5M physical support profile.
     pub fn is_numeric_domain_width(width: usize) -> bool {
-        width >= 24 && width.is_multiple_of(24) && (width / 24).is_power_of_two()
+        width >= 12 && width.is_multiple_of(12) && (width / 12).is_power_of_two()
     }
 
     /// Exact magnitude capacity of one admitted numeric domain.
@@ -584,6 +585,108 @@ impl fmt::Display for BinaryNumber {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn d12_exact_signed_core_arithmetic_obeys_current_owner_law() {
+        // D12 has 12 exact bits, two's complement signed range -2048..=2047.
+        // It is not inferred from decimal source or an unqualified Number.
+        let admitted = |number: i32| {
+            assert!((-2048..=2047).contains(&number));
+            let word = (0..12)
+                .rev()
+                .map(|shift| (((number as u32) >> shift) & 1) as u8)
+                .collect::<Vec<_>>();
+            BinaryNumber::from_numeric_domain_bits(12, &word).expect("exact D12 word")
+        };
+
+        for number in [-2048, -1, 0, 1, 2047] {
+            let value = admitted(number);
+            assert_eq!(value.numeric_domain_width(), Some(12));
+            assert_eq!(value.exact_numeric_domain_bits().unwrap().len(), 12);
+            assert_eq!(value.to_decimal_string(), number.to_string());
+        }
+
+        let one = admitted(1);
+        let zero = admitted(0);
+        assert_eq!(
+            admitted(-1).add_admitted_numeric(&one).unwrap(),
+            zero,
+            "minus one plus one must retain exact D12 zero"
+        );
+
+        let carry = admitted(2047).add_admitted_numeric(&one).unwrap();
+        assert_eq!(carry.numeric_domain_width(), Some(24));
+        assert_eq!(carry.to_decimal_string(), "2048");
+
+        let borrow = admitted(-2048).checked_sub_admitted_numeric(&one).unwrap();
+        assert_eq!(borrow.numeric_domain_width(), Some(24));
+        assert_eq!(borrow.to_decimal_string(), "-2049");
+
+        let product = admitted(64).mul_admitted_numeric(&admitted(64)).unwrap();
+        assert_eq!(product.numeric_domain_width(), Some(24));
+        assert_eq!(product.to_decimal_string(), "4096");
+
+        let left = crate::Value::BinaryNumber(one.clone());
+        let right = crate::Value::BinaryNumber(admitted(3));
+        let ratio = crate::domain_numeric::compute("/", &left, &right)
+            .expect("non-integral D12 quotient must retain exact ratio");
+        assert_eq!(ratio.to_string(), "1/3");
+        assert!(crate::domain_numeric::compute(
+            "/", &left, &crate::Value::BinaryNumber(zero)
+        ).is_none(), "zero denominator must fail closed");
+
+        let d24_one = BinaryNumber::from_numeric_domain_bits(24, &{
+            let mut bits = vec![0; 24];
+            bits[23] = 1;
+            bits
+        }).unwrap();
+        assert!(
+            crate::domain_numeric::compute(
+                "+", &left, &crate::Value::BinaryNumber(d24_one)
+            ).is_none(),
+            "equal values with unequal exact domains must not be coerced"
+        );
+        assert!(BinaryNumber::from_numeric_domain_bits(11, &[0; 11]).is_none());
+        assert!(BinaryNumber::from_numeric_domain_bits(13, &[0; 13]).is_none());
+        assert!(BinaryNumber::from_numeric_domain_bits(36, &[0; 36]).is_none());
+        assert_ne!(one, BinaryNumber::one(), "D12 is not an unqualified Number");
+    }
+
+    #[test]
+    fn d12_core_evaluator_executes_exact_math_without_host_numeric_fallback() {
+        let value = |n: u16| {
+            let bits = (0..12)
+                .rev()
+                .map(|shift| ((n >> shift) & 1) as u8)
+                .collect::<Vec<_>>();
+            crate::Value::BinaryNumber(
+                BinaryNumber::from_numeric_domain_bits(12, &bits).unwrap()
+            )
+        };
+        let mut session = crate::Session::default();
+        session.environment.define("ліва", value(2047));
+        session.environment.define("права", value(1));
+        let sum = crate::eval_program("(додати ліва права)", &mut session)
+            .expect("SENS D5 addition must accept explicitly admitted D12")
+            .value;
+        let crate::Value::BinaryNumber(result) = sum else {
+            panic!("D12 addition must return exact numeric D24");
+        };
+        assert_eq!(result.numeric_domain_width(), Some(24));
+        assert_eq!(result.to_decimal_string(), "2048");
+
+        session.environment.define("ліва", value(1));
+        session.environment.define("права", value(3));
+        let fraction = crate::eval_program("(частка ліва права)", &mut session)
+            .expect("SENS D5 quotient must keep a reduced exact D12 ratio")
+            .value;
+        assert_eq!(fraction.to_string(), "1/3");
+
+        session.environment.define("права", value(0));
+        let error = crate::eval_program("(частка ліва права)", &mut session)
+            .expect_err("SENS D5 division by D12 zero must fail");
+        assert_eq!(error.kind, crate::ErrorKind::DivisionByZero);
+    }
 
     #[test]
     fn d24_twos_complement_words_have_signed_decimal_projection() {
