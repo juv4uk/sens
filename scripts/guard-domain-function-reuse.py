@@ -103,6 +103,59 @@ def _history_index() -> dict:
     return _HISTORY_INDEX
 
 
+def _norm_path(rel: str) -> str:
+    """Один формат шляху: без провідного `./`, з прямими слешами."""
+    rel = str(rel).replace("\\", "/").strip()
+    while rel.startswith("./"):
+        rel = rel[2:]
+    return rel.lstrip("/")
+
+
+def hot_paths() -> dict[str, dict]:
+    """Гарячі файли з індексу історії: шлях → запис {commits, last_date, …}.
+
+    Індекс будує scripts/build-guard-history-index.py. Ключ `hot_files` —
+    список словників із полем `path`, але приймаємо й словник {шлях: дані}.
+    Порожній результат означає «індексу немає» — тоді попередження мовчить.
+    """
+    raw = _history_index().get("hot_files")
+    out: dict[str, dict] = {}
+    if isinstance(raw, list):
+        for h in raw:
+            if isinstance(h, dict) and h.get("path"):
+                out[_norm_path(h["path"])] = h
+    elif isinstance(raw, dict):
+        for key, val in raw.items():
+            entry = dict(val) if isinstance(val, dict) else {}
+            entry.setdefault("path", key)
+            out[_norm_path(key)] = entry
+    return out
+
+
+def hot_warning(paths) -> None:
+    """Попередження (НЕ змінює код виходу): гарячі файли правлять МАЛЕНЬКИМИ кроками.
+
+    Урок №1 з docs/guard-history-reference.uk.md, тепер дією: щойно охоронець
+    бере на перевірку гарячий файл, він попереджає — і для OK, і для BLOCKED.
+    """
+    hot = hot_paths()
+    if not hot:
+        return  # індексу немає — тихо, це не помилка перевірки
+    seen: set[str] = set()
+    for rel in paths:
+        key = _norm_path(rel)
+        if key in seen or key not in hot:
+            continue
+        seen.add(key)
+        entry = hot[key]
+        print(
+            f"ГАРЯЧИЙ ФАЙЛ: {key} — {entry.get('commits')} змін, "
+            f"остання {entry.get('last_date')}. "
+            "Прав МАЛЕНЬКИМИ кроками (одне визначення), не переписуй файл.",
+            file=sys.stderr,
+        )
+
+
 def introduced_at(rel: str, name: str) -> str:
     """Коли й яким комітом уведено — спершу з ІНДЕКСУ (миттєво), потім з git.
 
@@ -405,6 +458,11 @@ def main(argv: list[str] | None = None) -> int:
 
     if not (args.staged or args.paths_from or args.file):
         ap.error("потрібен --staged / --paths-from / --file")
+
+    # Урок №1 з docs/guard-history-reference.uk.md стає перевіркою: гарячі файли
+    # (напр. lib/core4.lisp) правлять МАЛЕНЬКИМИ кроками. Це ПОПЕРЕДЖЕННЯ —
+    # воно не змінює код виходу й друкується і для OK, і для BLOCKED.
+    hot_warning(changed_files(args))
 
     blocked: list[tuple[str, str, str]] = []
     usage: dict[str, int] = {}
