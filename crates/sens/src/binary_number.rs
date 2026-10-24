@@ -683,10 +683,9 @@ mod tests {
         assert_eq!(borrowed.numeric_domain_width(), Some(24));
         assert_eq!(borrowed.to_decimal_string(), "-2049");
 
-        let d24_two = BinaryNumber::from_numeric_domain_bits(
-            24,
-            &[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0],
-        ).unwrap();
+        let mut d24_two_bits = [0u8; 24];
+        d24_two_bits[22] = 1;
+        let d24_two = BinaryNumber::from_numeric_domain_bits(24, &d24_two_bits).unwrap();
         assert_eq!(two.to_decimal_string(), d24_two.to_decimal_string());
         assert_ne!(two, d24_two, "equal magnitudes in D12 and D24 keep distinct identities");
         assert_eq!(two.add_admitted_numeric(&d24_two), None);
