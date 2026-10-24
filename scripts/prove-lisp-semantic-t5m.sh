@@ -603,6 +603,15 @@ cat -- lib/d11-srfi1-set-relations.lisp tests/semantic/d11-srfi1-set-relations-m
 run_case run_law d11-srfi1-set-relations-positive "$d11_set_law_bundle" 1
 run_case run_law d11-srfi1-set-relations-mutant "$d11_set_mutant_bundle" 0
 sha256sum lib/d11-srfi1-set-relations.lisp tests/semantic/d11-srfi1-set-relations-law.lisp tests/semantic/d11-srfi1-set-relations-mutant.lisp > "$evidence/d11-set-relations-inputs.sha256"
+# D11 SRFI-1: навіть короткий шлях повернення ТАК не маскує пошкоджений хвіст.
+# Обидва негативні свідки запускають справжню бібліотеку SENS через Zig/T5M.
+d11_set_member_bad="$evidence/d11-srfi1-member-improper-hit-complete.lisp"
+d11_set_subset_bad="$evidence/d11-srfi1-subset-improper-empty-complete.lisp"
+cat -- lib/d11-srfi1-set-relations.lisp tests/semantic/d11-srfi1-member-improper-hit-negative.lisp > "$d11_set_member_bad"
+cat -- lib/d11-srfi1-set-relations.lisp tests/semantic/d11-srfi1-subset-improper-empty-negative.lisp > "$d11_set_subset_bad"
+run_case run_type_rejection d11-srfi1-member-improper-hit "$d11_set_member_bad" 'car expects a non-empty list'
+run_case run_type_rejection d11-srfi1-subset-improper-empty "$d11_set_subset_bad" 'car expects a non-empty list'
+sha256sum lib/d11-srfi1-set-relations.lisp tests/semantic/d11-srfi1-member-improper-hit-negative.lisp tests/semantic/d11-srfi1-subset-improper-empty-negative.lisp > "$evidence/d11-set-improper-inputs.sha256"
 # SRFI-1 list=: алгоритм з чинної lib/D11, очікувані предикати тільки в Lisp.
 # Не тестуємо D11-операцію Rust-оракулом; Zig тільки кодує фізичні байти.
 d11_list_equal_law_bundle="$evidence/d11-list-equality-positive.lisp"
