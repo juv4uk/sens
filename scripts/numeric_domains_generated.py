@@ -1,8 +1,11 @@
 # GENERATED from contracts/numeric-domains-ratification.lisp — DO NOT EDIT BY HAND.
-# Authority: contracts/numeric-domains-ratification.lisp (D(24 * 2^n), n >= 0).
+# Чинний D12+ закон: D(12 * 2^n), n >= 0.
+# Механічний опис ширин; не виконання семантики SENS.
 
-WIDE_WIDTHS = [24, 48, 96, 192]
-FIRST_WIDTH = 24
+WIDE_WIDTHS = [12, 24, 48, 96, 192]
+FIRST_WIDTH = 12
+PHYSICAL_WIDE_WIDTHS = [24, 48, 96, 192]
+FIRST_PHYSICAL_WIDTH = 24
 
 
 def next_width(w):
@@ -11,3 +14,7 @@ def next_width(w):
 
 def is_wide(w):
     return w in WIDE_WIDTHS
+
+
+def is_physically_supported(w):
+    return w in PHYSICAL_WIDE_WIDTHS

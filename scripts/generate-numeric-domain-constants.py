@@ -1,25 +1,21 @@
 #!/usr/bin/env python3
-"""Generate per-language numeric-domain constants from the owner-ratified contract.
+"""Перевіряти математичну драбину D12+ окремо від фізичного профілю D24+.
 
-SINGLE SOURCE (authority): contracts/numeric-domains-ratification.lisp
-  (canonical-domain-names . (D24 D48 D96 D192))
-  (initial-width . #d24)  (next-width . double)
-  (domain-rule . "D(24 * 2^n), n >= 0")
+Чинна семантична влада: contracts/numeric-domains-ratification.lisp,
+форма numeric-d12-start-extension-1, закон D(12 * 2^n).
+Історичний D24-профіль у тому самому файлі лишається джерелом
+реально підтримуваних фізичних ширин Zig.
 
-CONSUMERS (generated, never hand-edited):
-  research/zig-codecs/numeric_domains.zig          (Zig = sterile turnstile)
-  crates/sens/src/numeric_domains_generated.rs     (Rust = holds bytes)
-  scripts/numeric_domains_generated.py             (Python tooling/benches)
+Цей генератор створює тільки механічні дзеркала для Rust/Python.
+Zig numeric_domains.zig перевіряється на відповідність фізичному
+профілю, але його нативні тести та код не перезаписуються.
 
-Zig is a TURNSTILE, not a REGISTRY: it carries codes, it does not decide them.
-Assignment lives here, sourced from the ratified contract.
-
-Usage:  python3 scripts/generate-numeric-domain-constants.py [--check]
-        --check  exit 1 if any consumer diverges from the contract (fail-closed).
+Використання: python3 scripts/generate-numeric-domain-constants.py [--check]
 """
 from __future__ import annotations
 import argparse, re, sys
 from pathlib import Path
+from domain_tables import number_domains
 
 ROOT = Path(__file__).resolve().parents[1]
 CONTRACT = ROOT / "contracts" / "numeric-domains-ratification.lisp"
@@ -31,82 +27,79 @@ HEADER = "GENERATED from contracts/numeric-domains-ratification.lisp — DO NOT 
 
 
 def read_contract() -> dict:
-    text = CONTRACT.read_text(encoding="utf-8")
-    names = re.search(r"canonical-domain-names\s*\.\s*\(([^)]*)\)", text)
-    if not names:
-        raise SystemExit("contract: canonical-domain-names not found")
-    widths = [int(m.group(1)) for m in re.finditer(r"D(\d+)", names.group(1))]
-    rule = re.search(r'domain-rule\s*\.\s*"([^"]*)"', text)
-    first = re.search(r"first-domain\s*\.\s*D(\d+)", text)
-    if not widths or not rule or not first:
-        raise SystemExit("contract: widths/rule/first-domain incomplete")
-    # D(24 * 2^n): every rung must match the rule, else the contract is self-inconsistent.
-    first_w = int(first.group(1))
-    for i, w in enumerate(widths):
-        if w != first_w * (2 ** i):
-            raise SystemExit(f"contract: D{w} violates rule {rule.group(1)!r}")
-    return {"widths": widths, "rule": rule.group(1), "first": first_w}
+    """Повернути чинні D12+ домени та окремий історичний фізичний профіль."""
+    source = CONTRACT.read_text(encoding="utf-8")
+    domains = number_domains(CONTRACT)
+    widths = [width for _name, width in domains]
+    marker = "(schema . numeric-domains-ratification-1)"
+    end_marker = "(schema . numeric-d24-signed-extension-1)"
+    if source.count(marker) != 1 or source.count(end_marker) != 1:
+        raise ValueError("Очікували одну історичну форму D24 і одну її межу")
+    historical = source.split(marker, 1)[1].split(end_marker, 1)[0]
+    match = re.search(r"\(canonical-domain-names\s*\.\s*\(([^()]*)\)\)", historical)
+    if match is None:
+        raise ValueError("Історичний фізичний профіль D24 відсутній")
+    names = match.group(1).split()
+    if not names or any(re.fullmatch(r"D[1-9][0-9]*", name) is None for name in names):
+        raise ValueError(f"Некоректні фізичні домени: {names!r}")
+    physical = [int(name[1:]) for name in names]
+    if physical != widths[1:1 + len(physical)]:
+        raise ValueError(f"Фізичний D24-профіль не є префіксом наступників D12: {physical!r}")
+    return {
+        "widths": widths,
+        "first": widths[0],
+        "rule": "D(12 * 2^n), n >= 0",
+        "physical_widths": physical,
+    }
 
 
-def zig(c: dict) -> str:
-    ws = ", ".join(str(w) for w in c["widths"])
-    return f"""//! {HEADER}
-//! Authority: contracts/numeric-domains-ratification.lisp ({c['rule']}).
-//! Zig is a turnstile: it carries these codes, it does not decide them.
-
-const std = @import("std");
-
-/// Canonical wide numeric-domain widths, in contract order.
-pub const WIDE_WIDTHS = [_]u16{{ {ws} }};
-
-/// The first (narrowest) ratified numeric domain width.
-pub const FIRST_WIDTH: u16 = {c['first']};
-
-/// Next rung from any ratified width (contract: next-width = double).
-pub fn nextWidth(w: u16) u16 {{
-    return w * 2;
-}}
-
-/// True iff `w` is a ratified wide numeric-domain width.
-pub fn isWide(comptime w: u16) bool {{
-    inline for (WIDE_WIDTHS) |x| {{
-        if (w == x) return true;
-    }}
-    return false;
-}}
-
-test "generated widths obey the ratified rule" {{
-    inline for (WIDE_WIDTHS, 0..) |w, i| {{
-        try std.testing.expectEqual(FIRST_WIDTH * (@as(u16, 1) << @intCast(i)), w);
-    }}
-}}
-"""
+def validate_zig_profile(source: str, physical_widths: list[int]) -> None:
+    """Zig зберігає лише фізичні ширини; не домислюємо ратифікацію з байтів."""
+    matches = re.findall(
+        r"(?m)^\s*pub\s+const\s+WIDE_WIDTHS\s*=\s*\[_\]u16\s*\{([^{}]*)\}\s*;",
+        source,
+    )
+    if len(matches) != 1:
+        raise ValueError("Очікували рівно одне фізичне визначення Zig WIDE_WIDTHS")
+    parts = [part.strip() for part in matches[0].split(",") if part.strip()]
+    if any(re.fullmatch(r"(?:0|[1-9][0-9]*)", part) is None for part in parts):
+        raise ValueError("Zig WIDE_WIDTHS містить неканонічне слово")
+    actual = [int(part) for part in parts]
+    if actual != physical_widths:
+        raise ValueError(f"Zig physical widths: expected={physical_widths!r} actual={actual!r}")
 
 
 def rust(c: dict) -> str:
-    ws = ", ".join(str(w) for w in c["widths"])
+    semantic = ", ".join(str(w) for w in c["widths"])
+    physical = ", ".join(str(w) for w in c["physical_widths"])
     return f"""// {HEADER}
-// Authority: contracts/numeric-domains-ratification.lisp ({c['rule']}).
-// Rust holds bytes; it does not decide codes.
+// Чинний D12+ закон: {c['rule']}.
+// Rust переносить точні ширини, а не визначає семантику або виконання.
 
-/// Canonical wide numeric-domain widths, in contract order.
-pub const NUMERIC_DOMAIN_WIDTHS: [u16; {len(c['widths'])}] = [ {ws} ];
-
-/// The first (narrowest) ratified numeric domain width.
+/// Початковий префікс ратифікованих математичних ширин.
+pub const NUMERIC_DOMAIN_WIDTHS: [u16; {len(c['widths'])}] = [ {semantic} ];
 pub const FIRST_NUMERIC_DOMAIN_WIDTH: u16 = {c['first']};
 
-/// Next rung from any ratified width (contract: next-width = double).
+/// Реально підтримуваний фізичний профіль, без D12.
+pub const PHYSICAL_NUMERIC_WIDTHS: [u16; {len(c['physical_widths'])}] = [ {physical} ];
+pub const FIRST_PHYSICAL_NUMERIC_WIDTH: u16 = {c['physical_widths'][0]};
+
+/// Подвоєння ширини не надає права виклику чи фізичної підтримки.
 pub const fn next_width(w: u16) -> u16 {{ w * 2 }}
 """
 
 
 def python(c: dict) -> str:
-    ws = ", ".join(str(w) for w in c["widths"])
+    semantic = ", ".join(str(w) for w in c["widths"])
+    physical = ", ".join(str(w) for w in c["physical_widths"])
     return f'''# {HEADER}
-# Authority: contracts/numeric-domains-ratification.lisp ({c['rule']}).
+# Чинний D12+ закон: {c["rule"]}.
+# Механічний опис ширин; не виконання семантики SENS.
 
-WIDE_WIDTHS = [{ws}]
-FIRST_WIDTH = {c['first']}
+WIDE_WIDTHS = [{semantic}]
+FIRST_WIDTH = {c["first"]}
+PHYSICAL_WIDE_WIDTHS = [{physical}]
+FIRST_PHYSICAL_WIDTH = {c["physical_widths"][0]}
 
 
 def next_width(w):
@@ -115,6 +108,10 @@ def next_width(w):
 
 def is_wide(w):
     return w in WIDE_WIDTHS
+
+
+def is_physically_supported(w):
+    return w in PHYSICAL_WIDE_WIDTHS
 '''
 
 
@@ -123,7 +120,9 @@ def main() -> int:
     ap.add_argument("--check", action="store_true")
     args = ap.parse_args()
     c = read_contract()
-    outs = {ZIG_OUT: zig(c), RS_OUT: rust(c), PY_OUT: python(c)}
+    zig_source = ZIG_OUT.read_text(encoding="utf-8")
+    validate_zig_profile(zig_source, c["physical_widths"])
+    outs = {RS_OUT: rust(c), PY_OUT: python(c)}
     if args.check:
         bad = []
         for path, want in outs.items():
@@ -135,7 +134,7 @@ def main() -> int:
             for b in bad:
                 print("  -", b)
             return 1
-        print(f"numeric-domain constants match the contract ({len(c['widths'])} widths: {c['widths']})")
+        print(f"ЧИННІ D12+ {c['widths']}; ФІЗИЧНІ Zig {c['physical_widths']}; Rust/Python узгоджено")
         return 0
     for path, text in outs.items():
         path.parent.mkdir(parents=True, exist_ok=True)
