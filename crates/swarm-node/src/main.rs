@@ -3733,9 +3733,15 @@ mod peer_connection_generation_tests {
             done_tx.send(result).unwrap();
         });
 
-        // A writer waiting on the per-peer mutex must not own the global
-        // peer table. No TCP reader traffic is needed for this lock test.
-        assert!(done_rx.recv_timeout(Duration::from_millis(30)).is_err());
+        // Wait until the worker has cloned the per-peer writer Arc:
+        // that proves it has left the snapshot stage and reached the
+        // independently synchronized write stage. Avoid timing guesses.
+        let deadline = Instant::now() + Duration::from_secs(2);
+        while Arc::strong_count(&writer) < 3 {
+            assert!(Instant::now() < deadline, "writer never reached its lock");
+            thread::yield_now();
+        }
+        assert!(done_rx.try_recv().is_err(), "worker must wait for writer");
         assert!(
             table.try_lock().is_ok(),
             "socket writer must release global peer table before waiting"
