@@ -772,6 +772,21 @@ run_case run_type_rejection d11-list-equality-improper-right-type "$d11_list_equ
 run_case run_type_rejection d11-list-equality-invalid-singleton-type "$d11_list_equal_bad_singleton" "$d11_list_equal_type_error"
 run_case run_type_rejection d11-list-equality-invalid-third-type "$d11_list_equal_bad_third" "$d11_list_equal_type_error"
 sha256sum lib/d11-srfi1-list-equality.lisp tests/semantic/d11-srfi1-list-equality-law.lisp tests/semantic/d11-srfi1-list-equality-mutant.lisp tests/fixtures/d11-list-equality-improper-left-must-error.lisp tests/fixtures/d11-list-equality-improper-right-must-error.lisp tests/fixtures/d11-list-equality-invalid-singleton-must-error.lisp tests/fixtures/d11-list-equality-invalid-third-must-error.lisp > "$evidence/d11-list-equality-inputs.sha256"
+# Д11 SRFI-1 COUNT: без D24 та host-арифметики; результат — D1 унарний список.
+# Незалежні SENS law/mutant і дві строгі помилки неправильного хвоста.
+d11_unary_count_positive="$evidence/d11-unary-count-positive-complete.lisp"
+d11_unary_count_mutant="$evidence/d11-unary-count-mutant-complete.lisp"
+d11_unary_count_bad_tail="$evidence/d11-unary-count-bad-tail-complete.lisp"
+d11_unary_count_bad_right="$evidence/d11-unary-count-bad-right-complete.lisp"
+cat -- lib/d11-srfi1-unary-count.lisp tests/semantic/d11-srfi1-unary-count-law.lisp > "$d11_unary_count_positive"
+cat -- lib/d11-srfi1-unary-count.lisp tests/semantic/d11-srfi1-unary-count-mutant.lisp > "$d11_unary_count_mutant"
+cat -- lib/d11-srfi1-unary-count.lisp tests/semantic/d11-srfi1-unary-count-improper-tail-negative.lisp > "$d11_unary_count_bad_tail"
+cat -- lib/d11-srfi1-unary-count.lisp tests/semantic/d11-srfi1-unary-count-improper-right-negative.lisp > "$d11_unary_count_bad_right"
+run_case run_law d11-unary-count-positive "$d11_unary_count_positive" 1
+run_case run_law d11-unary-count-mutant "$d11_unary_count_mutant" 0
+run_case run_type_rejection d11-unary-count-improper-tail-type "$d11_unary_count_bad_tail" 'car expects a non-empty list'
+run_case run_type_rejection d11-unary-count-improper-right-type "$d11_unary_count_bad_right" 'car expects a non-empty list'
+sha256sum lib/d11-srfi1-unary-count.lisp tests/semantic/d11-srfi1-unary-count-law.lisp tests/semantic/d11-srfi1-unary-count-mutant.lisp tests/semantic/d11-srfi1-unary-count-improper-tail-negative.lisp tests/semantic/d11-srfi1-unary-count-improper-right-negative.lisp > "$evidence/d11-unary-count-inputs.sha256"
 # Д11 FIND-PRESENCE: прапорець наявності незалежний від знайденого значення.
 # Чинний SENS DEFINE, точний D1 позитив/мутант та неправильний D1-хвіст.
 d11_presence_positive="$evidence/d11-srfi1-find-presence-positive-complete.lisp"

@@ -176,6 +176,8 @@ run_native_t5m_program() {
   case "$file" in
     tests/semantic/d11-srfi1-filter-map-improper-root-negative.lisp|tests/semantic/d11-srfi1-filter-map-improper-tail-negative.lisp)
       negative_type_diagnostic='domain identity is not callable under its ratified law: D1 ' ;;
+    tests/semantic/d11-srfi1-unary-count-improper-tail-negative.lisp|tests/semantic/d11-srfi1-unary-count-improper-right-negative.lisp)
+      negative_type_diagnostic='car expects a non-empty list' ;;
     tests/semantic/d11-srfi1-find-presence-improper-tail-negative.lisp)
       negative_type_diagnostic='car expects a non-empty list' ;;
     tests/semantic/d3-eq-nonatom-type-negative.lisp)
@@ -224,6 +226,10 @@ run_native_t5m_program() {
     elif [[ "$file" == "tests/semantic/d11-tree-equal-by-test-nonpredicate-negative.lisp" ]]; then
       direct_source="$dir/d11-tree-test-bound-negative.lisp"
       cat -- lib/d11-tree-equal-by-test.lisp "$file" > "$direct_source"
+    elif [[ "$file" == "tests/semantic/d11-srfi1-unary-count-improper-tail-negative.lisp" ||
+            "$file" == "tests/semantic/d11-srfi1-unary-count-improper-right-negative.lisp" ]]; then
+      direct_source="$dir/d11-unary-count-bound-negative.lisp"
+      cat -- lib/d11-srfi1-unary-count.lisp "$file" > "$direct_source"
     elif [[ "$file" == "tests/semantic/d11-srfi1-find-presence-improper-tail-negative.lisp" ]]; then
       direct_source="$dir/d11-find-presence-bound-negative.lisp"
       cat -- lib/d11-srfi1-find-presence.lisp "$file" > "$direct_source"
@@ -607,6 +613,33 @@ run_native_t5m_program() {
         return
       fi
     fi
+    if [[ "$file" == "tests/semantic/d11-srfi1-unary-count-law.lisp" ||
+          "$file" == "tests/semantic/d11-srfi1-unary-count-mutant.lisp" ]]; then
+      # Повний SENS-носій використовує визначення з живої бібліотеки.
+      local unary_count_full_source="$dir/d11-unary-count-full.lisp"
+      standalone_physical="$dir/d11-unary-count-full.sens"
+      if ! cat -- lib/d11-srfi1-unary-count.lisp "$file" > "$unary_count_full_source" ||
+         ! timeout "$native_timeout" "$binary" --t5m-mint "$unary_count_full_source" "$standalone_physical" \
+              >"$dir/d11-unary-count-mint.stdout" 2>"$dir/d11-unary-count-mint.stderr" ||
+         ! timeout "$native_timeout" "$native_open" open "$standalone_physical" \
+              >"${standalone_physical%.sens}" 2>"$dir/d11-unary-count-open.stderr" ||
+         ! timeout "$native_timeout" "$native_open" verify-view "$standalone_physical" \
+              >"$dir/d11-unary-count-verify.stdout" 2>"$dir/d11-unary-count-verify.stderr"; then
+        echo "::error::D11_UNARY_COUNT_STANDALONE_MINT_FAILED source=$file layer=zig-t5m" >&2
+        for diagnostic in "$dir"/d11-unary-count-*.stderr; do
+          [[ ! -f "$diagnostic" ]] || sed 's/^/D11 UNARY COUNT: /' "$diagnostic" >&2
+        done
+        mark_file_failed
+        return
+      fi
+      local expected_unary_count_d1=1
+      [[ "$file" != *-mutant.lisp ]] || expected_unary_count_d1=0
+      if [[ "$(cat "$dir/native-paired.stdout")" != "$expected_unary_count_d1" ]]; then
+        echo "::error::D11_UNARY_COUNT_WRONG_PAIRED_VERDICT source=$file expected=D1:$expected_unary_count_d1 actual=$(cat "$dir/native-paired.stdout")" >&2
+        mark_file_failed
+        return
+      fi
+    fi
     if [[ "$file" == "tests/semantic/d11-srfi1-find-presence-law.lisp" ||
           "$file" == "tests/semantic/d11-srfi1-find-presence-mutant.lisp" ]]; then
       # Самодостатній SENS-носій: ті самі DEFINE та той самий мовний свідок,
@@ -917,6 +950,12 @@ while IFS= read -r file || [[ -n "$file" ]]; do
           "$file" == "tests/semantic/d11-srfi1-filter-map-improper-tail-negative.lisp" ]]; then
     # Джерело чинної D11-композиції: Zig транспортує, SENS виконує Type.
     binding_sources=(--binding-source lib/d11-srfi1-filter-map.lisp)
+  elif [[ "$file" == "tests/semantic/d11-srfi1-unary-count-law.lisp" ||
+          "$file" == "tests/semantic/d11-srfi1-unary-count-mutant.lisp" ||
+          "$file" == "tests/semantic/d11-srfi1-unary-count-improper-tail-negative.lisp" ||
+          "$file" == "tests/semantic/d11-srfi1-unary-count-improper-right-negative.lisp" ]]; then
+    # Усі чотири носії викликають ті самі чинні SENS DEFINE.
+    binding_sources=(--binding-source lib/d11-srfi1-unary-count.lisp)
   elif [[ "$file" == "tests/semantic/d11-srfi1-find-presence-law.lisp" ||
           "$file" == "tests/semantic/d11-srfi1-find-presence-mutant.lisp" ||
           "$file" == "tests/semantic/d11-srfi1-find-presence-improper-tail-negative.lisp" ]]; then
