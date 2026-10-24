@@ -39,6 +39,18 @@ extern "c" fn ftell(*CFile) c_long;
 extern "c" fn fread([*]u8, usize, usize, *CFile) usize;
 
 var table_cache = [_]?[]u8{null} ** 11;
+// Індекс — лише механіка пошуку у вже прочитаних Lisp-таблицях.
+// Record зберігає зрізи тих самих джерельних байтів: нової семантики немає.
+var coordinate_index_cache = [_]?[]?Record{null} ** 11;
+
+fn bitCoordinate(bits: []const u8) ?usize {
+    var coordinate: usize = 0;
+    for (bits) |digit| {
+        if (digit != '0' and digit != '1') return null;
+        coordinate = (coordinate << 1) | @as(usize, digit - '0');
+    }
+    return coordinate;
+}
 
 fn source(width: u8) ?[]const u8 {
     const path: [*:0]const u8 = switch (width) {
@@ -160,15 +172,32 @@ pub fn gradeD11(guesses: []const D11Guess) Score {
     return result;
 }
 
-pub fn lookup(width: u8, bits: []const u8) ?Record {
-    if (bits.len != @as(usize, width)) return null;
+fn coordinateIndex(width: u8) ?[]?Record {
+    if (width == 0 or width > 11) return null;
+    const domain_index = @as(usize, width) - 1;
+    if (coordinate_index_cache[domain_index]) |records| return records;
+
     const table = source(width) orelse return null;
+    const shift: u6 = @intCast(width);
+    const capacity = @as(usize, 1) << shift;
+    const records = std.heap.page_allocator.alloc(?Record, capacity) catch return null;
+    @memset(records, null);
     var lines = std.mem.splitScalar(u8, table, '\n');
     while (lines.next()) |line| {
         const row = parseRow(width, line) orelse continue;
-        if (std.mem.eql(u8, row.bits, bits)) return row;
+        const coordinate = bitCoordinate(row.bits) orelse continue;
+        // Як і послідовний пошук, повертаємо перший запис координати.
+        if (records[coordinate] == null) records[coordinate] = row;
     }
-    return null;
+    coordinate_index_cache[domain_index] = records;
+    return records;
+}
+
+pub fn lookup(width: u8, bits: []const u8) ?Record {
+    if (bits.len != @as(usize, width)) return null;
+    const coordinate = bitCoordinate(bits) orelse return null;
+    const records = coordinateIndex(width) orelse return null;
+    return records[coordinate];
 }
 
 // Завданням конкурсу є пригадати назву та код. Порожня LISP-поверхня
@@ -286,6 +315,23 @@ pub fn gradeDomain(width: u8, guesses: []const Guess) Score {
     const total = questionCount(width);
     result.missing = if (total > answered) total - answered else 0;
     return result;
+}
+
+test "Драбина: індекс зберігає кожен запис і відкидає не-двійковий код" {
+    var width: u8 = 1;
+    while (width <= 11) : (width += 1) {
+        const table = source(width) orelse return error.MissingDomainTable;
+        var lines = std.mem.splitScalar(u8, table, '\n');
+        while (lines.next()) |line| {
+            const row = parseRow(width, line) orelse continue;
+            const indexed = lookup(width, row.bits) orelse return error.MissingIndexedRecord;
+            try std.testing.expectEqualStrings(row.lisp, indexed.lisp);
+            try std.testing.expectEqualStrings(row.bits, indexed.bits);
+        }
+    }
+    try std.testing.expect(lookup(11, "0110000000x") == null);
+    try std.testing.expect(lookup(11, "0110000000") == null);
+    try std.testing.expect(lookup(12, "011000000000") == null);
 }
 
 test "Драбина D11: правильний код з хибною назвою не означає пригадану функцію" {
