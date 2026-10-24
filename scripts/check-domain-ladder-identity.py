@@ -286,6 +286,48 @@ AUTO_GATE = ".github/workflows/ci.yml"
 AUTO_GUARD = "scripts/ci_one_focused_workflow.py"
 
 
+D11_EXPECTED_ROWS = 512
+D11_EXPECTED_PARENTS = 256
+
+
+def inspect_d11_selector_extension(root: Path) -> int:
+    """Закон D11 — selector-suffix-extension (knowledge/d11-selector-seed.json).
+
+    Для кожного ратифікованого селектора-батька D10 існують рівно дві похідні
+    Д11: p0(x)=p(перше(x)) і p1(x)=p(решта(x)). Тобто 256 батьків × 2 = 512
+    рядків, кожен — 11-бітна координата = 10-бітний батько ‖ один біт.
+
+    inspect_domains покриває D1..D10; D11 має ВЛАСНИЙ закон, і саме його тут
+    зафіксовано закрито — раніше D11 не перевірявся взагалі, тож таблицю можна
+    було зламати (загубити похідну, додати чужий батько) без жодного сигналу.
+    """
+    path = root / "lib/domains/d11.lisp"
+    if not path.is_file() or path.is_symlink():
+        raise ValueError("missing domain table: lib/domains/d11.lisp")
+    rows = ROW.findall(path.read_text(encoding="utf-8"))
+    if len(rows) != D11_EXPECTED_ROWS:
+        raise ValueError(f"D11: expected {D11_EXPECTED_ROWS} exact rows; got {len(rows)}")
+    invalid = [word for word in rows if len(word) != 11]
+    if invalid:
+        raise ValueError(f"D11: non-exact-width row {invalid[0]}")
+    if len(set(rows)) != len(rows):
+        raise ValueError("D11: duplicate domain coordinate")
+    parents: dict[str, list[str]] = {}
+    for row in rows:
+        parents.setdefault(row[:10], []).append(row[10])
+    if len(parents) != D11_EXPECTED_PARENTS:
+        raise ValueError(
+            f"D11: expected {D11_EXPECTED_PARENTS} selector parents; got {len(parents)}"
+        )
+    for parent, suffixes in parents.items():
+        if sorted(suffixes) != ["0", "1"]:
+            raise ValueError(
+                f"D11: parent {parent} must carry exactly the suffixes 0 and 1; "
+                f"got {sorted(suffixes)}"
+            )
+    return len(rows)
+
+
 def inspect_active_gates(root: Path) -> None:
     for rel in ACTIVE_GATES:
         path = root / rel
@@ -355,6 +397,7 @@ def inspect_files(root: Path) -> dict[int, int]:
             raise ValueError(f"missing domain table: {rel}")
         domain_texts[domain] = path.read_text(encoding="utf-8")
     counts = inspect_domains(domain_texts)
+    counts[11] = inspect_d11_selector_extension(root)
     inspect_active_gates(root)
     # The same sole automatic CI invokes this --check. Reuse the existing
     # generated certificate and canonical D7 keyboard/v2 projection check
