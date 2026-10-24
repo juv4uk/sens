@@ -448,6 +448,192 @@ def knowledge_facts(text: str) -> list[tuple[str, str, str, str]]:
     return out
 
 
+# --- Міні-(run): застосувати правила (defrule …) до фактів і ВИВЕСТИ поради. ---
+# Це не повний рушій CLIPS (Rust не тягнемо): беремо перший патерн
+# (guard-fact (kind K) …) як УМОВУ й (assert (guard-advice …)) як ДІЮ. Цього
+# досить, щоб доданий факт або правило справді ДІЯЛО, а не лежало декларацією.
+
+
+def _clips_atoms(text: str) -> list:
+    """Токенізувати CLIPS: дужки, символи й рядки (з урахуванням ;-коментарів).
+
+    Рядки беремо ЦІЛКОМ — лапки всередині дужок не плутають розбір
+    (напр. порада "перевіряй Zig-тестами (ізоляція), не Rust").
+    """
+    tokens: list = []
+    i, n = 0, len(text)
+    while i < n:
+        ch = text[i]
+        if ch == ";":
+            while i < n and text[i] != "\n":
+                i += 1
+        elif ch in " \t\r\n":
+            i += 1
+        elif ch in "()":
+            tokens.append(ch)
+            i += 1
+        elif ch == '"':
+            j = i + 1
+            buf: list[str] = []
+            while j < n:
+                if text[j] == "\\" and j + 1 < n:
+                    buf.append(text[j + 1])
+                    j += 2
+                    continue
+                if text[j] == '"':
+                    break
+                buf.append(text[j])
+                j += 1
+            tokens.append(("str", "".join(buf)))
+            i = j + 1
+        else:
+            j = i
+            while j < n and text[j] not in " \t\r\n()\"":
+                j += 1
+            tokens.append(("sym", text[i:j]))
+            i = j
+    return tokens
+
+
+def _clips_forms(text: str) -> list:
+    """Розібрати токени у вкладені списки (S-вирази). Стійко до обірваних форм."""
+    tokens = _clips_atoms(text)
+    pos = 0
+
+    def parse_one():
+        nonlocal pos
+        tok = tokens[pos]
+        if tok == "(":
+            pos += 1
+            items: list = []
+            while pos < len(tokens) and tokens[pos] != ")":
+                items.append(parse_one())
+            pos += 1  # закриваюча дужка
+            return items
+        pos += 1
+        return tok
+
+    forms: list = []
+    while pos < len(tokens):
+        forms.append(parse_one())
+    return forms
+
+
+def _sym(node) -> str | None:
+    return node[1] if isinstance(node, tuple) and node[0] == "sym" else None
+
+
+def _atom_text(node) -> str | None:
+    return node[1] if isinstance(node, tuple) and node[0] in ("sym", "str") else None
+
+
+def _slot(node, name: str):
+    """Значення слота (name …) у формі; None, якщо слота немає."""
+    if not isinstance(node, list):
+        return None
+    for child in node[1:]:
+        if isinstance(child, list) and _sym(child[0]) == name and len(child) >= 2:
+            return child[1]
+    return None
+
+
+def _find_guard_advice(nodes) -> list | None:
+    """Знайти (guard-advice …) у піддереві дії (assert …)."""
+    for node in nodes:
+        if isinstance(node, list):
+            if _sym(node[0]) == "guard-advice":
+                return node
+            found = _find_guard_advice(node[1:])
+            if found is not None:
+                return found
+    return None
+
+
+def knowledge_rules(text: str) -> list[dict]:
+    """Витягти (defrule …) із CLIPS-тексту простим розбором (без рушія).
+
+    Для кожного правила беремо:
+      • УМОВУ — перший патерн (guard-fact (kind K) …): kind (обов'язково) і,
+        якщо value — ЛІТЕРАЛ (не ?змінна), то його значення (решта слотів —
+        зв'язування, не умова);
+      • ДІЮ — (assert (guard-advice (file …) (advice "…") (why …))).
+    Нерозібране правило ПРОПУСКАЄМО (попередження в stderr), не падаємо.
+    """
+    rules: list[dict] = []
+    for form in _clips_forms(text):
+        if not (isinstance(form, list) and _sym(form[0]) == "defrule"):
+            continue
+        name = _sym(form[1]) or "?"
+        arrow = next(
+            (k for k, node in enumerate(form) if _sym(node) == "=>"), None)
+        if arrow is None:
+            print(f"GUARD-DOMAIN-REUSE --knowledge: правило «{name}» без => — пропущено",
+                  file=sys.stderr)
+            continue
+        pattern = next(
+            (node for node in form[2:arrow]
+             if isinstance(node, list) and _sym(node[0]) == "guard-fact"), None)
+        if pattern is None:
+            print(f"GUARD-DOMAIN-REUSE --knowledge: правило «{name}» без патерна guard-fact — пропущено",
+                  file=sys.stderr)
+            continue
+        kind = _atom_text(_slot(pattern, "kind"))
+        if not kind or kind.startswith("?"):
+            print(f"GUARD-DOMAIN-REUSE --knowledge: правило «{name}» без літерального kind — пропущено",
+                  file=sys.stderr)
+            continue
+        value_node = _slot(pattern, "value")
+        value_literal = _atom_text(value_node)
+        if value_literal is not None and value_literal.startswith("?"):
+            value_literal = None  # ?змінна — це зв'язування, не умова
+        advice_node = _find_guard_advice(form[arrow + 1:])
+        advice = _atom_text(_slot(advice_node, "advice")) if advice_node else None
+        if not advice:
+            print(f"GUARD-DOMAIN-REUSE --knowledge: правило «{name}» без поради advice — пропущено",
+                  file=sys.stderr)
+            continue
+        rules.append({
+            "name": name,
+            "kind": kind,
+            "value": value_literal,
+            "file": _slot(advice_node, "file") if advice_node else None,
+            "why": _slot(advice_node, "why") if advice_node else None,
+            "advice": advice,
+        })
+    return rules
+
+
+def _resolve_binding(node, name: str, value: str) -> str:
+    """Зв'язати ?f/?n → name, ?v → value; літерал лишаємо як є."""
+    text = _atom_text(node)
+    if text is None:
+        return name
+    if text.startswith("?"):
+        if text in ("?f", "?n"):
+            return name
+        if text == "?v":
+            return value
+        return text
+    return text
+
+
+def knowledge_inference(text: str, facts: list[tuple[str, str, str, str]]):
+    """Застосувати правила до КОЖНОГО факту, чий kind (і літеральний value)
+    збігається; повернути (правила, [(файл/ім'я, порада, чому), …])."""
+    rules = knowledge_rules(text)
+    inferred: list[tuple[str, str, str]] = []
+    for rule in rules:
+        for kind, name, value, _source in facts:
+            if kind != rule["kind"]:
+                continue
+            if rule["value"] is not None and value != rule["value"]:
+                continue
+            target = _resolve_binding(rule["file"], name, value)
+            why = _resolve_binding(rule["why"], name, value)
+            inferred.append((target, rule["advice"], why))
+    return rules, inferred
+
+
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description="guard: вживати функції драбин D1–D10")
     ap.add_argument("--staged", action="store_true")
@@ -517,7 +703,18 @@ def main(argv: list[str] | None = None) -> int:
             print("УВАГА: не вдалося розібрати факти — сирий вміст knowledge/guard-knowledge.clp:")
             print(ktext)
         rules = len(re.findall(r"\(defrule\b", ktext))
-        print(f"БАЗА ЗНАНЬ: {len(facts)} фактів, {rules} правил")
+        # Міні-(run): застосовуємо правила (defrule …) до фактів і ВИВОДИМО поради.
+        # Досі --knowledge лише ПОКАЗУВАВ факти; тепер охоронець справді ВИВОДИТЬ
+        # guard-advice, тож доданий факт або правило ДІЄ, а не лежить декларацією.
+        _rules, inferred = knowledge_inference(ktext, facts)
+        print()
+        print("ВИВЕДЕНІ ПОРАДИ (run):")
+        if inferred:
+            for target, advice, why in inferred:
+                print(f"  {target} → {advice}  (чому: {why})")
+        else:
+            print("  (жодне правило не вивело поради)")
+        print(f"БАЗА ЗНАНЬ: {len(facts)} фактів, {rules} правил, {len(inferred)} виведених порад")
         return 0
 
     if not (args.staged or args.paths_from or args.file):
