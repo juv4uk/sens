@@ -25,9 +25,32 @@ pub fn project_ukr_decimal_integer_literals(
     expressions: &[Expr],
     source: &str,
 ) -> Result<Vec<Expr>, LanguageError> {
+    project_ukr_decimal_integer_literals_with_minimum_width(expressions, source, 24)
+}
+
+/// Project source integers using an explicit numeric-domain floor.
+///
+/// D12-first execution passes 12; callers which deliberately operate inside an
+/// established D24+ Core4 profile pass 24. This is a source-profile choice, not
+/// inference from a bit carrier or silent mixed-domain coercion.
+pub fn project_ukr_decimal_integer_literals_with_minimum_width(
+    expressions: &[Expr],
+    source: &str,
+    minimum_width: usize,
+) -> Result<Vec<Expr>, LanguageError> {
+    if !BinaryNumber::is_numeric_domain_width(minimum_width) {
+        return Err(LanguageError::new(
+            ErrorKind::InvalidForm,
+            format!("unsupported numeric projection floor D{minimum_width}"),
+            expressions.first().map_or(
+                Span { start: 0, end: source.len() },
+                |expr| expr.span,
+            ),
+        ));
+    }
     expressions
         .iter()
-        .map(|expr| project_expr(expr, source, None))
+        .map(|expr| project_expr(expr, source, None, minimum_width))
         .collect()
 }
 
@@ -118,9 +141,14 @@ fn integer_width(token: &str, span: Span) -> Result<usize, LanguageError> {
         })
 }
 
-fn project_integer(token: &str, span: Span, inherited_width: usize) -> Result<Expr, LanguageError> {
+fn project_integer(
+    token: &str,
+    span: Span,
+    inherited_width: usize,
+    minimum_width: usize,
+) -> Result<Expr, LanguageError> {
     let (negative, magnitude) = decimal_magnitude_bits(token, span)?;
-    let required_width = integer_width(token, span)?;
+    let required_width = integer_width(token, span, minimum_width)?;
     let width = inherited_width.max(required_width);
     let mut bits = vec![0u8; width];
     for (index, bit) in magnitude.iter().rev().enumerate() {
@@ -180,6 +208,7 @@ fn required_width_in_math_tree(
     expr: &Expr,
     source: &str,
     depth: usize,
+    minimum_width: usize,
 ) -> Result<Option<usize>, LanguageError> {
     if depth > 768 {
         return Err(LanguageError::new(
@@ -189,7 +218,7 @@ fn required_width_in_math_tree(
         ));
     }
     if let Some(token) = integer_lexeme(expr, source) {
-        return integer_width(token, expr.span).map(Some);
+        return integer_width(token, expr.span, minimum_width).map(Some);
     }
     if !is_d5_call(expr) {
         return Ok(None);
@@ -199,7 +228,9 @@ fn required_width_in_math_tree(
     };
     let mut width = None;
     for argument in items.iter().skip(1) {
-        if let Some(required) = required_width_in_math_tree(argument, source, depth + 1)? {
+        if let Some(required) =
+            required_width_in_math_tree(argument, source, depth + 1, minimum_width)?
+        {
             width = Some(width.map_or(required, |current: usize| current.max(required)));
         }
     }
@@ -234,6 +265,7 @@ fn project_expr(
     expr: &Expr,
     source: &str,
     inherited_math_width: Option<usize>,
+    minimum_width: usize,
 ) -> Result<Expr, LanguageError> {
     // Quoted forms are syntax/data. Their contents may include decimal digits,
     // domain-shaped atoms, or source code; projection must preserve every one.
@@ -242,10 +274,10 @@ fn project_expr(
     }
     if let Some(token) = integer_lexeme(expr, source) {
         let width = match inherited_math_width {
-            Some(width) => width.max(integer_width(token, expr.span)?),
-            None => integer_width(token, expr.span)?,
+            Some(width) => width.max(integer_width(token, expr.span, minimum_width)?),
+            None => integer_width(token, expr.span, minimum_width)?,
         };
-        return project_integer(token, expr.span, width);
+        return project_integer(token, expr.span, width, minimum_width);
     }
 
     let kind = match &expr.kind {
@@ -260,7 +292,7 @@ fn project_expr(
                         if index == 0 {
                             Ok(item.clone())
                         } else {
-                            project_expr(item, source, Some(width))
+                            project_expr(item, source, Some(width), minimum_width)
                         }
                     })
                     .collect::<Result<Vec<_>, LanguageError>>()?
@@ -272,13 +304,13 @@ fn project_expr(
                 .iter()
                 // A data/syntax form starts a fresh numeric context. An actual
                 // D5 call discovers its own required domain when visited.
-                .map(|item| project_expr(item, source, None))
+                .map(|item| project_expr(item, source, None, minimum_width))
                 .collect::<Result<Vec<_>, _>>()?
                 .into(),
         ),
         ExprKind::Pair(car, cdr) => ExprKind::Pair(
-            Rc::new(project_expr(car, source, None)?),
-            Rc::new(project_expr(cdr, source, None)?),
+            Rc::new(project_expr(car, source, None, minimum_width)?),
+            Rc::new(project_expr(cdr, source, None, minimum_width)?),
         ),
         _ => expr.kind.clone(),
     };
