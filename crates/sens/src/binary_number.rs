@@ -1,4 +1,4 @@
-//! Exact binary Number carrier for #3022 and signed D24+ numeric values.
+//! Exact binary Number carrier for #3022 and signed D12+ numeric values.
 //!
 //! Language identity is the normalized binary bitstring. This type deliberately
 //! carries no decimal spelling, Rational fields, fixed machine width, or host
@@ -141,7 +141,7 @@ impl BinaryNumber {
         Some(out)
     }
 
-    /// Decode a D24+ exact-width word as (negative, unsigned magnitude).
+    /// Decode an admitted D12+ exact-width word as (negative, unsigned magnitude).
     /// The returned magnitude is an unqualified mechanism value, not a Dn.
     pub(crate) fn signed_magnitude(&self) -> Option<(bool, Self)> {
         let mut word = self.exact_numeric_domain_bits()?;
@@ -297,7 +297,7 @@ impl BinaryNumber {
     }
 
     /// Normalize positive *magnitude components* for exact RATIO(p,q).
-    /// Inputs must be same-domain nonnegative D24+ values; q=0 is rejected.
+    /// Inputs must be same-domain nonnegative D12+ values; q=0 is rejected.
     /// gcd(p,q)=1 is enforced by exact binary div_rem.
     ///
     /// This returns mechanism-level existing BinaryNumber constituents, NOT
@@ -488,7 +488,7 @@ impl BinaryNumber {
 
     /// Mechanical realization of same-domain signed D24+ addition.
     /// Both operands must carry the same explicit Dn identity. The result
-    /// remains Dn when representable or widens to the next D24+ rung.
+    /// remains Dn when representable or widens to the next D12+ rung.
     /// Returned bits retain the selected domain's FULL width.
     /// The (width, bits) pair is a mechanism boundary, not itself a SENS
     /// language value; generic mixed-domain coercion remains unratified.
@@ -641,6 +641,55 @@ mod tests {
                 .to_decimal_string(),
             "0"
         );
+    }
+
+
+    #[test]
+    fn d12_is_the_first_signed_numeric_domain_and_preserves_exact_boundaries() {
+        assert!(BinaryNumber::is_numeric_domain_width(12));
+        assert!(BinaryNumber::is_numeric_domain_width(24));
+        assert!(BinaryNumber::is_numeric_domain_width(48));
+        for width in [0usize, 1, 11, 13, 23, 25, 36, 60] {
+            assert!(!BinaryNumber::is_numeric_domain_width(width), "D{width}");
+        }
+
+        let minimum = BinaryNumber::from_numeric_domain_bits(
+            12,
+            &[1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        ).unwrap();
+        let maximum = BinaryNumber::from_numeric_domain_bits(
+            12,
+            &[0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        ).unwrap();
+        let minus_one = BinaryNumber::from_numeric_domain_bits(12, &[1; 12]).unwrap();
+        assert_eq!(minimum.numeric_domain_width(), Some(12));
+        assert_eq!(maximum.numeric_domain_width(), Some(12));
+        assert_eq!(minimum.to_decimal_string(), "-2048");
+        assert_eq!(maximum.to_decimal_string(), "2047");
+        assert_eq!(minus_one.to_decimal_string(), "-1");
+
+        let one = BinaryNumber::from_numeric_domain_bits(
+            12,
+            &[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+        ).unwrap();
+        let two = one.add_admitted_numeric(&one).unwrap();
+        assert_eq!(two.numeric_domain_width(), Some(12));
+        assert_eq!(two.to_decimal_string(), "2");
+
+        let carried = maximum.add_admitted_numeric(&one).unwrap();
+        assert_eq!(carried.numeric_domain_width(), Some(24));
+        assert_eq!(carried.to_decimal_string(), "2048");
+        let borrowed = minimum.checked_sub_admitted_numeric(&one).unwrap();
+        assert_eq!(borrowed.numeric_domain_width(), Some(24));
+        assert_eq!(borrowed.to_decimal_string(), "-2049");
+
+        let d24_two = BinaryNumber::from_numeric_domain_bits(
+            24,
+            &[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0],
+        ).unwrap();
+        assert_eq!(two.to_decimal_string(), d24_two.to_decimal_string());
+        assert_ne!(two, d24_two, "equal magnitudes in D12 and D24 keep distinct identities");
+        assert_eq!(two.add_admitted_numeric(&d24_two), None);
     }
 
     #[test]
