@@ -805,7 +805,15 @@ cat -- lib/d11-srfi1-list-equality.lisp tests/semantic/d11-srfi1-list-equality-m
 run_case run_law d11-srfi1-list-equality-positive "$d11_list_equal_law_bundle" 1
 # Три незалежні SENS-виконання ізолюють структуру, попарні закони та n=0.
 # Будь-який D1:ні залишається RED; тут немає хостової семантики.
-for family in structure pairs nullary; do
+# Точна SENS-маршрутизація структури й мутанта потрібна також guard'у:
+# динамічне ім'я $family саме по собі не є доказом конкретного SOURCE.
+d11_list_equal_structure="$evidence/d11-list-equality-structure-isolated.lisp"
+d11_list_equal_structure_mutant="$evidence/d11-list-equality-structure-mutant-isolated.lisp"
+cat -- lib/d11-srfi1-list-equality.lisp tests/semantic/d11-srfi1-list-equality-structure-law.lisp > "$d11_list_equal_structure"
+cat -- lib/d11-srfi1-list-equality.lisp tests/semantic/d11-srfi1-list-equality-structure-mutant.lisp > "$d11_list_equal_structure_mutant"
+run_case run_law d11-srfi1-list-equality-structure-positive "$d11_list_equal_structure" 1
+run_case run_law d11-srfi1-list-equality-structure-mutant "$d11_list_equal_structure_mutant" 0
+for family in pairs nullary; do
   witness="$evidence/d11-list-equality-$family-isolated.lisp"
   cat -- lib/d11-srfi1-list-equality.lisp "tests/semantic/d11-srfi1-list-equality-$family-law.lisp" > "$witness"
   run_case run_law "d11-srfi1-list-equality-$family-positive" "$witness" 1
