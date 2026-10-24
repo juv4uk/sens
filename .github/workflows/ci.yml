@@ -307,6 +307,17 @@ jobs:
           for name in selected:
               print(f"T5M_CHANGED_FILE {name}")
           PY
+          # Негативний контроль changed-source: зміна фізичного диспетчера має
+          # повторно виконати обидва Core4-свідки, а не лише law runner.
+          # Перевіряємо manifest; істинність арифметики визначає лише Lisp/SENS.
+          if grep -Eq '^(\.github/workflows/ci\.yml|scripts/(prove-lisp-semantic-t5m|execute_changed_lisp_t5m)\.sh)$' "$raw"; then
+            for source in tests/semantic/exact-arithmetic-laws.lisp tests/semantic/exact-arithmetic-mutant.lisp; do
+              if ! grep -Fxq "$source" "$manifest"; then
+                echo "::error::T5M_CHANGED_CORE4_REPLAY_MISSING source=$source route=changed-source expected=scheduled actual=absent" >&2
+                exit 1
+              fi
+            done
+          fi
 
       # Інженерний бар'єр: новий мовний закон не рахується перевіреним
       # від одного успішного mint чи Rust assert. Вимагаємо явний нативний маршрут.
