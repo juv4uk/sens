@@ -121,5 +121,35 @@ fn semantic_oracle_surface_survives_coordination_removal() {
     assert!(isolated.contains("(status error)"), "{isolated}");
     assert!(isolated.contains("unknown-symbol"), "{isolated}");
 
+    // An unauthenticated TCP session must reject raw host mechanisms before
+    // checking their arity or evaluating arguments. No machine bytes run.
+    #[cfg(all(
+        any(target_os = "linux", target_os = "windows"),
+        target_arch = "x86_64"
+    ))]
+    {
+        let denied = request(
+            port,
+            r#"(request (id 7) (op eval) (source "(native-call-u64-raw)"))"#,
+        );
+        assert!(denied.contains("(status error)"), "{denied}");
+        assert!(
+            denied.contains("host capability forbidden by session policy: native-call-u64-raw"),
+            "{denied}"
+        );
+    }
+
+    for (id, operation) in [(8, "read-file-bytes"), (9, "tcp-connect")] {
+        let denied = request(
+            port,
+            &format!(r#"(request (id {id}) (op eval) (source "({operation})"))"#),
+        );
+        assert!(denied.contains("(status error)"), "{denied}");
+        assert!(
+            denied.contains(&format!("host capability forbidden by session policy: {operation}")),
+            "{denied}"
+        );
+    }
+
     child.kill().expect("semantic oracle should stop");
 }
