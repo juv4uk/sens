@@ -2114,6 +2114,7 @@ run_case run_law d6-any-vacuous-mutant tests/semantic/d6-any-vacuous-mutant.lisp
 run_case run_error_rejection d6-any-invalid-root tests/semantic/d6-any-invalid-root-law.lisp Type 'car expects a non-empty list' core4
 run_case run_error_rejection d6-all-invalid-root tests/semantic/d6-all-invalid-root-law.lisp Type 'car expects a non-empty list' core4
 run_case run_law d8-quantifier-composition tests/semantic/d8-quantifier-composition-law.lisp 1 core4
+run_case run_law d8-quantifier-composition-mutant tests/semantic/d8-quantifier-composition-mutant.lisp 0 core4
 run_case run_error_rejection d8-notany-invalid-root tests/semantic/d8-notany-invalid-root-law.lisp Type 'car expects a non-empty list' core4
 run_case run_error_rejection d8-notevery-invalid-root tests/semantic/d8-notevery-invalid-root-law.lisp Type 'car expects a non-empty list' core4
 run_case run_error_rejection d8-all-not-invalid-root tests/semantic/d8-all-not-invalid-root-law.lisp Type 'car expects a non-empty list' core4
