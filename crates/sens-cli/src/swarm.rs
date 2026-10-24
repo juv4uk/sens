@@ -211,6 +211,21 @@ fn error_response_classified(
     ])
 }
 
+/// Parse-operation requests use only the SENS D3 QUOTE datum reader.
+/// This operation is deliberately independent of Session and Environment.
+fn parse_operation_response(id: &Value, input: &str, contract_version: &Value) -> Value {
+    match sens::read_single_quoted_datum(input) {
+        Ok(value) => ok_response(id, value, &[], contract_version),
+        Err(error) => error_response_classified(
+            id,
+            error_kind_symbol(&error.kind),
+            error.kind.classification(),
+            &error.message,
+            contract_version,
+        ),
+    }
+}
+
 fn protocol_error(kind: &str, message: &str, contract_version: &Value) -> Value {
     Value::list([
         Value::Symbol("protocol-error".into()),
@@ -786,12 +801,8 @@ fn handle_sexpr_connection(
                 Some("contract-version") => {
                     ok_response(&id, contract_version.clone(), &[], &contract_version)
                 }
-                // `parse` renders the canonical structure via the same
-                // `quote`-and-print path the request envelope itself
-                // uses, not Rust's `{:?}` — the caller gets sens
-                // syntax back, not this CLI's internal AST debug
-                // format. Limited to a single top-level form, the
-                // same arity `quote` itself has.
+                // Parsing a SENS datum must not run the evaluator.
+                // The shared D3 QUOTE reader preserves domain identity.
                 Some("parse") => match &source {
                     None => error_response(
                         &id,
@@ -799,39 +810,7 @@ fn handle_sexpr_connection(
                         "op `parse` requires a `source` field",
                         &contract_version,
                     ),
-                    Some(src) => match parse(src) {
-                        Ok(ast) if ast.len() == 1 => {
-                            let quoted_src = format!("(quote {src})");
-                            match parse(&quoted_src).ok().and_then(|q| {
-                                eval_parsed_expressions_incremental(&q, &mut session)
-                                    .ok()
-                                    .map(|r| r.value)
-                            }) {
-                                Some(structure) => {
-                                    ok_response(&id, structure, &[], &contract_version)
-                                }
-                                None => error_response(
-                                    &id,
-                                    "parse-error",
-                                    "source parsed but could not be rendered as data",
-                                    &contract_version,
-                                ),
-                            }
-                        }
-                        Ok(_) => error_response(
-                            &id,
-                            "invalid-form",
-                            "op `parse` accepts exactly one top-level form",
-                            &contract_version,
-                        ),
-                        Err(e) => error_response_classified(
-                            &id,
-                            error_kind_symbol(&e.kind),
-                            e.kind.classification(),
-                            &e.message,
-                            &contract_version,
-                        ),
-                    },
+                    Some(src) => parse_operation_response(&id, src, &contract_version),
                 },
                 // Agent-facing syntax preflight. Unlike `oracle-eval`,
                 // this never evaluates the submitted program or invokes
@@ -1051,6 +1030,28 @@ mod oracle_result_tests {
             matches!(value, Value::Pair(_) | Value::Nil),
             "Guard default query returned an unexpected value: {value}"
         );
+    }
+
+    #[test]
+    fn oracle_parse_returns_exact_sens_data() {
+        let id = Value::Symbol("probe".into());
+        let source = r#"(a "вітаю" (b c))"#;
+        let expected = sens::read_single_quoted_datum(source).expect("valid datum");
+        let response = parse_operation_response(&id, source, &contract()).to_string();
+        assert!(response.contains("(status ok)"));
+        assert!(response.contains(&format!("(value {expected})")));
+    }
+
+    #[test]
+    fn oracle_parse_rejects_multiple_and_malformed_data() {
+        let id = Value::Symbol("probe".into());
+        for source in ["", "(a) (b)", "(a"] {
+            let response = parse_operation_response(&id, source, &contract()).to_string();
+            assert!(response.contains("(status error)"), "input: {source:?}");
+        }
+        assert!(parse_operation_response(&id, "()", &contract())
+            .to_string()
+            .contains("(status ok)"));
     }
 
     #[test]
