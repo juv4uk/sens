@@ -428,9 +428,9 @@ mod exact_t5m_cutover_tests {
             );
         }
 
-        // D24, D48, ... are the ratified numeric family D(24 * 2^n).
-        // Keep exact width and leading zeros; do not cap admission at D192.
-        for width in [24, 48, 96, 192, 384, 768] {
+        // Чинна числова родина — D(12 * 2^n), починаючи з D12.
+        // Зберігаємо точну ширину й біти, не обмежуючи її D192.
+        for width in [12, 24, 48, 96, 192, 384, 768] {
             let mut bits = vec![0; width];
             bits[0] = 1;
             let admitted =
@@ -442,12 +442,12 @@ mod exact_t5m_cutover_tests {
                     && number.exact_numeric_domain_bits().as_deref() == Some(bits.as_slice())));
         }
 
-        // D11–D23 have no ratified identity, and numeric widths must follow
-        // the exact D24 * 2^n family rather than an arbitrary multiple.
-        for width in (11..=23).chain([25, 36, 72, 120]) {
+        // Це межа поточного фізичного adapter, не акт ратифікації доменів.
+        // Числова ширина має належати D(12 * 2^n), а не довільній кратності.
+        for width in (11..=23).filter(|width| *width != 12).chain([25, 36, 72, 120]) {
             assert!(
                 ExactDomainWord::from_physical_width_bits(width, &vec![0; width]).is_err(),
-                "unratified D{width} must remain rejected"
+                "D{width} поза поточними підтриманими родинами фізичного adapter"
             );
         }
     }
