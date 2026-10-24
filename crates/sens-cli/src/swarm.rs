@@ -35,17 +35,18 @@ enum RequestFrame {
     TooLarge,
 }
 
-/// Read one newline-delimited frame without ever allocating more than `limit`
-/// bytes for it. Oversized frames are drained through the newline and then
-/// reported, so the connection cannot be desynchronised by the rejected data.
-fn read_request_frame(reader: &mut BufReader<TcpStream>, limit: usize, deadline: Instant) -> io::Result<RequestFrame> {
+/// Read one LF-terminated frame. The caller closes on TooLarge, so waiting
+/// for LF after crossing the limit unnecessarily exhausts worker capacity.
+fn read_request_frame(
+    reader: &mut BufReader<TcpStream>,
+    limit: usize,
+    deadline: Instant,
+) -> io::Result<RequestFrame> {
     let mut bytes = Vec::with_capacity(limit.min(4096));
-    let mut too_large = false;
     loop {
-        // Absolute deadline: trickling bytes cannot keep a worker indefinitely.
         let remaining = deadline
             .checked_duration_since(Instant::now())
-            .filter(|duration| !duration.is_zero())
+            .filter(|time| !time.is_zero())
             .ok_or_else(|| io::Error::new(io::ErrorKind::TimedOut, "TCP frame deadline exceeded"))?;
         reader.get_ref().set_read_timeout(Some(remaining))?;
         let chunk = reader.fill_buf().map_err(|error| {
@@ -56,34 +57,27 @@ fn read_request_frame(reader: &mut BufReader<TcpStream>, limit: usize, deadline:
             }
         })?;
         if chunk.is_empty() {
-            return Ok(if too_large {
-                RequestFrame::TooLarge
-            } else if bytes.is_empty() {
-                RequestFrame::Eof
+            return if bytes.is_empty() {
+                Ok(RequestFrame::Eof)
             } else {
-                RequestFrame::Line(bytes)
-            });
+                Err(io::Error::new(io::ErrorKind::UnexpectedEof, "TCP request ended before LF"))
+            };
         }
         if let Some(newline) = chunk.iter().position(|byte| *byte == b'\n') {
-            let frame_len = newline + 1;
-            if too_large || bytes.len() + frame_len > limit {
-                reader.consume(frame_len);
+            let size = newline + 1;
+            if size > limit.saturating_sub(bytes.len()) {
                 return Ok(RequestFrame::TooLarge);
             }
-            bytes.extend_from_slice(&chunk[..frame_len]);
-            reader.consume(frame_len);
+            bytes.extend_from_slice(&chunk[..size]);
+            reader.consume(size);
             return Ok(RequestFrame::Line(bytes));
         }
-        if too_large || bytes.len() + chunk.len() > limit {
-            too_large = true;
-            let consume_len = chunk.len();
-            reader.consume(consume_len);
-        } else {
-            let copied = chunk.to_vec();
-            let consume_len = copied.len();
-            bytes.extend_from_slice(&copied);
-            reader.consume(consume_len);
+        if chunk.len() > limit.saturating_sub(bytes.len()) {
+            return Ok(RequestFrame::TooLarge);
         }
+        let size = chunk.len();
+        bytes.extend_from_slice(chunk);
+        reader.consume(size);
     }
 }
 
@@ -691,6 +685,8 @@ fn handle_sexpr_connection(
             Err(error) => {
                 let (kind, message) = if error.kind() == io::ErrorKind::TimedOut {
                     ("request-timeout", "request frame deadline exceeded".to_string())
+                } else if error.kind() == io::ErrorKind::UnexpectedEof {
+                    ("incomplete-frame", "request frame ended before LF".to_string())
                 } else {
                     ("input-read-error", format!("could not read TCP frame: {error}"))
                 };
@@ -993,6 +989,53 @@ mod oracle_result_tests {
         });
         assert!(outcome.is_err());
         assert_eq!(active.load(Ordering::Acquire), 0);
+    }
+
+    fn connected_oracle_streams() -> (TcpStream, TcpStream) {
+        let listener = TcpListener::bind((Ipv4Addr::LOCALHOST, 0)).unwrap();
+        let client = TcpStream::connect(listener.local_addr().unwrap()).unwrap();
+        let (server, _) = listener.accept().unwrap();
+        (client, server)
+    }
+
+    #[test]
+    fn oracle_frame_rejects_oversize_without_lf_or_eof() {
+        let (mut sender, server) = connected_oracle_streams();
+        sender.write_all(&[b'x'; 129]).unwrap();
+        let mut reader = BufReader::new(server);
+        let deadline = Instant::now() + Duration::from_millis(500);
+        assert!(matches!(
+            read_request_frame(&mut reader, 128, deadline).unwrap(),
+            RequestFrame::TooLarge
+        ));
+    }
+
+    #[test]
+    fn oracle_frame_rejects_unterminated_eof() {
+        let (mut sender, server) = connected_oracle_streams();
+        sender.write_all(b"(request (id partial))").unwrap();
+        sender.shutdown(std::net::Shutdown::Write).unwrap();
+        let mut reader = BufReader::new(server);
+        let deadline = Instant::now() + Duration::from_secs(1);
+        let error = match read_request_frame(&mut reader, 128, deadline) {
+            Ok(_) => panic!("missing LF must be rejected"),
+            Err(error) => error,
+        };
+        assert_eq!(error.kind(), io::ErrorKind::UnexpectedEof);
+    }
+
+    #[test]
+    fn oracle_frame_exact_limit_preserves_following_frame() {
+        let (mut sender, server) = connected_oracle_streams();
+        sender.write_all(b"(a)\n(b)\n").unwrap();
+        let mut reader = BufReader::new(server);
+        for expected in [b"(a)\n".as_slice(), b"(b)\n".as_slice()] {
+            let deadline = Instant::now() + Duration::from_secs(1);
+            match read_request_frame(&mut reader, 4, deadline).unwrap() {
+                RequestFrame::Line(bytes) => assert_eq!(bytes, expected),
+                _ => panic!("exact-sized frame rejected"),
+            }
+        }
     }
 
     #[test]
