@@ -599,6 +599,15 @@ d11_list_equal_mutant_bundle="$evidence/d11-list-equality-negative.lisp"
 cat -- lib/d11-srfi1-list-equality.lisp tests/semantic/d11-srfi1-list-equality-law.lisp > "$d11_list_equal_law_bundle"
 cat -- lib/d11-srfi1-list-equality.lisp tests/semantic/d11-srfi1-list-equality-mutant.lisp > "$d11_list_equal_mutant_bundle"
 run_case run_law d11-srfi1-list-equality-positive "$d11_list_equal_law_bundle" 1
+# Три незалежні SENS-виконання ізолюють структуру, попарні закони та n=0.
+# Будь-який D1:ні залишається RED; тут немає хостової семантики.
+for family in structure pairs nullary; do
+  witness="$evidence/d11-list-equality-$family-isolated.lisp"
+  cat -- lib/d11-srfi1-list-equality.lisp "tests/semantic/d11-srfi1-list-equality-$family-law.lisp" > "$witness"
+  run_case run_law "d11-srfi1-list-equality-$family-positive" "$witness" 1
+done
+sha256sum tests/semantic/d11-srfi1-list-equality-{structure,pairs,nullary}-law.lisp > "$evidence/d11-list-equality-isolated-inputs.sha256"
+
 run_case run_law d11-srfi1-list-equality-mutant "$d11_list_equal_mutant_bundle" 0
 
 # SRFI-1 list= rejects malformed input even when early length/value cases could

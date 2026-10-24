@@ -205,6 +205,10 @@ jobs:
                   "tests/semantic/unification-occurs-check-law.lisp",
                   "tests/semantic/unification-occurs-check-mutant.lisp",
                   "tests/semantic/d11-srfi1-list-equality-law.lisp",
+                  # D11 list=: залежні позитиви, справжні визначення lib/ перед ними.
+                  "tests/semantic/d11-srfi1-list-equality-structure-law.lisp",
+                  "tests/semantic/d11-srfi1-list-equality-pairs-law.lisp",
+                  "tests/semantic/d11-srfi1-list-equality-nullary-law.lisp",
                   "tests/semantic/d11-srfi1-list-equality-mutant.lisp",
                   # D11 FIND-TAIL requires its canonical Lisp DEFINE from lib/.
                   # It is executed in the native bundled law step and in the
