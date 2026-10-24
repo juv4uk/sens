@@ -35,6 +35,14 @@ missing=0
 nonprogram_data=0
 expected_negative=0
 
+# Завершення git ls-files перевіряється ДО обходу: process substitution
+# приховує ненульовий код і може представити частковий список як повний.
+tracked_lisp_list="$scratch/tracked-lisp.nul"
+if ! git ls-files -z -- '*.lisp' > "$tracked_lisp_list"; then
+  echo "NATIVE_COUNT_GIT_FILES_FAILED layer=inventory expected=complete-tracked-lisp-list actual=git-ls-files-error" >&2
+  exit 2
+fi
+
 while IFS= read -r -d '' source; do
   if [[ -n "$scope" && "$source" != "$scope"* ]]; then
     continue
@@ -273,7 +281,7 @@ while IFS= read -r -d '' source; do
   fi
   (( executable += 1 ))
   printf 'NATIVE_EXECUTED\t%s\n' "$source"
-done < <(git ls-files -z -- '*.lisp')
+done < "$tracked_lisp_list"
 
 # Цифра самостійно виконаних файлів є достовірною лише для тих,
 # які пройшли нативне pair/standalone SENS і побайтовий Zig inverse.
