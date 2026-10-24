@@ -616,6 +616,24 @@ impl Parser<'_> {
                 ExprKind::Symbol(token.into())
             }
         } else if token.contains(['.', ',', 'e', 'E']) {
+            // У канонічному READ точні числа мають окремий #q2-носій.
+            // Отже десятковий текст WRITE — саме скінченний inexact f64.
+            // Звичайний Lisp-reader лишає десятковий синтаксис точним.
+            if self.mode == ReaderMode::CanonicalValueWire {
+                if let Ok(number) = decimal_text.parse::<f64>() {
+                    if !number.is_finite() {
+                        return Err(LanguageError::new(
+                            ErrorKind::NumericOverflow,
+                            "canonical inexact wire number must be finite",
+                            Span { start, end: self.cursor },
+                        ));
+                    }
+                    return Ok(Expr {
+                        kind: ExprKind::Number(number, Exactness::Inexact),
+                        span: Span { start, end: self.cursor },
+                    });
+                }
+            }
             let kind = match crate::value::Rational::from_decimal_literal(decimal_text) {
                 Ok(r) => match r.as_precise_i64() {
                     Some(value) => ExprKind::Number(value as f64, Exactness::Exact),
@@ -714,6 +732,39 @@ mod tests {
         let expressions = parse(source).expect("parsing should succeed");
         assert_eq!(expressions.len(), 1, "expected exactly one top-level form");
         expressions.into_iter().next().unwrap()
+    }
+
+    #[test]
+    fn canonical_wire_reader_recovers_inexact_finite_decimals_not_exact_rationals() {
+        // Конкретний закон WRITE→READ: 3.0 — неточне значення;
+        // звичайний людський parser і далі читає його як точне.
+        for (token, expected) in [
+            ("3.0", 3.0_f64),
+            ("0.5", 0.5_f64),
+            ("-0.0", -0.0_f64),
+            ("1e-9", 1e-9_f64),
+        ] {
+            let forms = parse_canonical_value_wire(token).expect("канонічний READ");
+            assert_eq!(forms.len(), 1, "source: {token}");
+            assert!(
+                matches!(&forms[0].kind, ExprKind::Number(value, Exactness::Inexact)
+                    if value.to_bits() == expected.to_bits()),
+                "втрачено неточність або біти: source={token} actual={:?}",
+                forms[0].kind
+            );
+            let ordinary = parse(token).expect("Lisp source parser");
+            assert!(
+                !matches!(&ordinary[0].kind, ExprKind::Number(_, Exactness::Inexact)),
+                "канонічний режим не повинен змінити читання звичайного Lisp"
+            );
+        }
+        let words = parse_canonical_value_wire("delta").expect("нечислова назва");
+        assert!(matches!(&words[0].kind, ExprKind::Symbol(value) if value.as_ref() == "delta"));
+
+        // За числовим контрактом канонічне неточне значення є скінченним.
+        let error = parse_canonical_value_wire("1e309")
+            .expect_err("нескінченність не є допустимими машинними даними");
+        assert_eq!(error.kind, ErrorKind::NumericOverflow);
     }
 
     #[test]
