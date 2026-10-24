@@ -13,6 +13,7 @@
 //! Number D24+ ще не допускається до цього механічного носія.
 
 use crate::{
+    d7_projection::{decode_d7_uk_words, encode_d7_uk_words, D7ProjectionError},
     parse_binary_source_words, BinarySourceWord, Bit1, Bit2, Bit3, Bit4, Bit5, Bit6, Bit7, Bit8,
     Bit9,
 };
@@ -393,67 +394,29 @@ impl From<TernaryTransportError> for D7T5Error {
     }
 }
 
-fn keyboard_d7_words(source: &str) -> Result<Vec<BinarySourceWord>, D7T5Error> {
-    if source.is_empty() {
-        return Err(D7T5Error::EmptyText);
+impl From<D7ProjectionError> for D7T5Error {
+    fn from(source: D7ProjectionError) -> Self {
+        match source {
+            D7ProjectionError::EmptyText => Self::EmptyText,
+            D7ProjectionError::UnassignedKeyboardGlyph { byte_offset } => {
+                Self::UnassignedKeyboardGlyph { byte_offset }
+            }
+            D7ProjectionError::NonD7Word => Self::NonD7Word,
+            D7ProjectionError::UnrenderableD7Cell => Self::UnrenderableD7Cell,
+            D7ProjectionError::AmbiguousText => Self::AmbiguousText,
+        }
     }
-    // D7 v2 assigns each Ukrainian keyboard character one exact W7 cell.
-    // The old D7 uppercase modifier must not add a phantom word.
-    source
-        .char_indices()
-        .map(|(offset, ch)| {
-            // Four stack bytes fit every Unicode scalar: no heap String per D7 glyph.
-            // The existing canonical D7 table still determines the exact W7 cell.
-            let mut utf8 = [0u8; 4];
-            let glyph = ch.encode_utf8(&mut utf8);
-            let cell = crate::semantic_registry::d7_uk_keyboard_cell(glyph).ok_or(
-                D7T5Error::UnassignedKeyboardGlyph {
-                    byte_offset: offset,
-                },
-            )?;
-            Ok(BinarySourceWord::W7(
-                Bit7::new(cell).expect("D7 table is exactly W7"),
-            ))
-        })
-        .collect()
 }
-
-/// Map owner-ratified Ukrainian keyboard glyphs to exact W7 data words.
-/// No physical T5 encoding takes place here; external transports (including
-/// Zig ABI v2) may consume this checked, width-qualified SENS projection.
-pub fn encode_d7_uk_words(source: &str) -> Result<Vec<BinarySourceWord>, D7T5Error> {
-    // Українські glyph-и перетворюються в D7 лише на межі читання.
-    // keyboard_d7_words уже відхиляє невідомі знаки й повертає точні W7.
-    // Не виконуємо вдруге Unicode-проєкцію перед машинним передаванням.
-    keyboard_d7_words(source)
-}
-
 /// Physical Rust T5 reference remains supported independently of Zig.
 pub fn encode_d7_uk_t5(source: &str) -> Result<Vec<u8>, D7T5Error> {
-    Ok(encode_ternary_words(&encode_d7_uk_words(source)?)?)
-}
-
-/// Render only ratified W7 Ukrainian keyboard words, without touching T5.
-/// D2 words (00/01/10/11) never become D7 text or punctuation.
-pub fn decode_d7_uk_words(words: &[BinarySourceWord]) -> Result<String, D7T5Error> {
-    let mut text = String::new();
-    for word in words {
-        let BinarySourceWord::W7(cell) = word else {
-            return Err(D7T5Error::NonD7Word);
-        };
-        let glyph = crate::semantic_registry::d7_uk_keyboard_glyph(cell.packed_bits())
-            .ok_or(D7T5Error::UnrenderableD7Cell)?;
-        text.push_str(glyph);
-    }
-    if keyboard_d7_words(&text)?.as_slice() != words {
-        return Err(D7T5Error::AmbiguousText);
-    }
-    Ok(text)
+    let words = encode_d7_uk_words(source).map_err(D7T5Error::from)?;
+    Ok(encode_ternary_words(&words)?)
 }
 
 /// Physical Rust T5 reference remains supported independently of Zig.
 pub fn decode_d7_uk_t5(packed: &[u8]) -> Result<String, D7T5Error> {
-    decode_d7_uk_words(&decode_ternary_words(packed)?)
+    let words = decode_ternary_words(packed)?;
+    decode_d7_uk_words(&words).map_err(D7T5Error::from)
 }
 
 #[cfg(test)]
@@ -675,12 +638,12 @@ mod tests {
         }
         assert!(matches!(
             encode_d7_uk_words("🙂"),
-            Err(D7T5Error::UnassignedKeyboardGlyph { .. })
+            Err(D7ProjectionError::UnassignedKeyboardGlyph { .. })
         ));
-        assert_eq!(encode_d7_uk_words(""), Err(D7T5Error::EmptyText));
+        assert_eq!(encode_d7_uk_words(""), Err(D7ProjectionError::EmptyText));
         assert_eq!(
             decode_d7_uk_words(&words("10 01")),
-            Err(D7T5Error::NonD7Word)
+            Err(D7ProjectionError::NonD7Word)
         );
     }
 

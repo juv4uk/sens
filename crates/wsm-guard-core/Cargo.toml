@@ -12,4 +12,4 @@ default = ["zig-source"]
 zig-source = []
 
 [dependencies]
-sens = { path = "../sens" }
+sens = { path = "../sens", default-features = false }

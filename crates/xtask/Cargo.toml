@@ -11,7 +11,7 @@ name = "xtask"
 path = "src/main.rs"
 
 [dependencies]
-sens = { path = "../sens" }
+sens = { path = "../sens", default-features = false }
 sens-cli = { path = "../sens-cli", features = ["zig-transport"] }
 
 [dev-dependencies]

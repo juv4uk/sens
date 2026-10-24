@@ -18,4 +18,4 @@ wsm-datalog-kernel = { path = "../wsm-datalog-kernel" }
 wsm-kernel-c-abi = { path = "../wsm-kernel-c-abi" }
 
 [dev-dependencies]
-sens = { path = "../sens" }
+sens = { path = "../sens", default-features = false }

@@ -14,6 +14,7 @@ mod bit9;
 mod bits;
 mod canonical_reader;
 pub mod d7_keyboard;
+mod d7_projection;
 mod domain_numeric;
 pub mod frame3_domain;
 pub mod frame3_grammar;
@@ -88,6 +89,9 @@ mod semantic_registry;
 pub mod sens;
 mod source_packing;
 mod source_words;
+// Rust T5 is reference/compatibility code. Production frontends can compile
+// SENS without it and route physical bytes through the sterile Zig corridor.
+#[cfg(any(test, feature = "rust-t5-reference"))]
 mod ternary_transport;
 /// Deliberately thin, crate-external view onto `semantic_registry` — exposes
 /// exactly the (namespace, spelling) pairs a consumer like the CML semantic
@@ -249,6 +253,7 @@ pub use compiler_language::{
     CompilerSemanticInput, VerifiedCompilerProgramArtifact, VerifiedCompilerProgramRequest,
 };
 pub use compiler_role::{compiler_execution_role, CompilerExecutionRole, CompilerLoweringRole};
+pub use d7_projection::{decode_d7_uk_words, encode_d7_uk_words, D7ProjectionError};
 pub use domain_identity::{CoreDomainIdentity, DomainIdentity};
 pub use domain_words::{
     Bija3, CoreD4, CoreD5, CoreD6, CoreD8, CoreD9, D7DataWord, PredicateBit, Racana2,
@@ -274,11 +279,12 @@ pub use source_words::{
     parse_binary_source_words, parse_domain_ladder_source_words, BinarySourceToken,
     BinarySourceWord, DomainLadderSourceToken, CANONICAL_SOURCE_EXTENSION,
 };
+#[cfg(any(test, feature = "rust-t5-reference"))]
 pub use ternary_transport::{
-    decode_d7_uk_t5, decode_d7_uk_words, decode_ternary_program, decode_ternary_words,
-    encode_binary_projection_ternary, encode_d7_uk_t5, encode_d7_uk_words, encode_ternary_words,
-    open_ternary_program, render_ternary_words_spaced, render_ternary_words_vertical,
-    ternary_transport_accounting, D7T5Error, TernaryTransportAccounting, TernaryTransportError,
+    decode_d7_uk_t5, decode_ternary_program, decode_ternary_words,
+    encode_binary_projection_ternary, encode_d7_uk_t5, encode_ternary_words, open_ternary_program,
+    render_ternary_words_spaced, render_ternary_words_vertical, ternary_transport_accounting,
+    D7T5Error, TernaryTransportAccounting, TernaryTransportError,
 };
 pub use text7::{Text7, Text7CellError, Text7W7Error, Text7WireError, Text7WordError};
 pub use text7_projection::{encode_text7, render_text7, Text7Layout, Text7ProjectionError};

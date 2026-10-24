@@ -9,7 +9,7 @@ description = "WebAssembly bindings for the sens engine · WASM-прив'язк�
 crate-type = ["cdylib"]
 
 [dependencies]
-sens = { path = "../sens" }
+sens = { path = "../sens", default-features = false }
 sens-literate = { path = "../sens-literate" }
 sens-lsp = { path = "../sens-lsp" }
 wasm-bindgen = "0.2"

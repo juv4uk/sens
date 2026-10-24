@@ -8,4 +8,4 @@ description = "Mechanical lifecycle and opaque-byte transport substrate for auto
 [dependencies]
 
 [dev-dependencies]
-sens = { path = "../sens" }
+sens = { path = "../sens", default-features = false }

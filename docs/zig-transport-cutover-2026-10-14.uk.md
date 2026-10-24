@@ -1,5 +1,32 @@
 # Перехід фізичного транспорту SENS на Zig · 14.10.2026
 
+## Актуалізація межі Rust T5 · 24.10.2026
+
+Попередні абзаци про `--no-default-features` як робочий Rust physical backend
+застаріли й не описують поточний CLI: команда без `zig-transport` відмовляє
+фізичним командам (`RUST_ZIG_ONLY`), а `backend` повідомляє
+`transport=unavailable`. Ознайомлюйся з кодом `sens-trit`, а не з історичним
+прикладом нижче.
+
+- `sens-cli` залежить від `sens` із `default-features = false`; те саме
+  виставлено всім прямим production-залежностям SENS у workspace. Типова
+  production-збірка не вмикає `sens/rust-t5-reference`.
+- Фізичні Rust T5 API в `sens` тепер feature-gated. CLI не має runtime feature
+  для ввімкнення Rust fallback; без `zig-transport` фізичні команди відмовляють.
+  Dev-залежність підключає reference API тільки під час сумісних тестів.
+- D7↔W7 українська проєкція SENS винесена в `d7_projection.rs`, отже
+  семантичне зіставлення символу з точним доменним словом не залежить від
+  Rust T5-пакувальника.
+- `sens` зберігає `rust-t5-reference` у власних default features як перехідну
+  сумісність для чинних інтеграційних тестів та споживачів. Тому наступний
+  зріз ізоляції — перенести ці тести на Zig-свідків і лише тоді прибрати
+  compatibility default ядра. Це свідомо не приховано як завершена міграція.
+
+Перевірка цього зрізу: `cargo check --locked -p sens-cli --bin sens-trit`
+успішний; граф звичайних залежностей не містить feature
+`sens/rust-t5-reference`; D7/Zig boundary, bare-session CLI та reference T5
+roundtrip integration tests також успішні.
+
 ## Нове рішення власника: Zig — єдиний турнікет, але НЕ реєстр кодів
 
 > **«Zig — турнікет, не реєстр. Реєстр — контракт, ратифікований власником. SENS вирішує значення, Zig дає коди обом, Rust тримає байти. Той, хто дає, не вирішує; той, хто вирішує, — закон».**

@@ -85,6 +85,7 @@ fn exact_bit_view_maps_to_its_existing_sens_physical_companion() {
 /// Physical T5M is decoded in Zig for normal CLI builds. Structural D2
 /// admission remains the SAME SENS canonical word reader, with no visible
 /// source reconstruction or implicit execution in read-only commands.
+#[cfg_attr(not(feature = "zig-transport"), allow(dead_code))]
 fn decode_canonical_t5m_words(bytes: &[u8]) -> Result<Vec<sens::BinarySourceWord>, String> {
     #[cfg(not(feature = "zig-transport"))]
     {
@@ -110,19 +111,28 @@ fn eval_t5m_fixture(bytes: &[u8]) -> Result<sens::EvalResult, String> {
         .map_err(|e| format!("current SENS evaluator rejected: {e}"))
 }
 
-#[cfg(feature = "zig-transport")]
 fn render_exact_t5m_words(bytes: &[u8], separator: &str) -> Result<String, String> {
-    let words = zig_transport::decode_t5m_exact_words(bytes)?;
-    Ok(words
-        .into_iter()
-        .map(|word| {
-            word.bits
-                .into_iter()
-                .map(|bit| if bit == 0 { '0' } else { '1' })
-                .collect::<String>()
-        })
-        .collect::<Vec<_>>()
-        .join(separator))
+    #[cfg(not(feature = "zig-transport"))]
+    {
+        let _ = (bytes, separator);
+        return Err(
+            "RUST_ZIG_ONLY: T5M rendering requires the Zig corridor; no Rust fallback".into(),
+        );
+    }
+    #[cfg(feature = "zig-transport")]
+    {
+        let words = zig_transport::decode_t5m_exact_words(bytes)?;
+        Ok(words
+            .into_iter()
+            .map(|word| {
+                word.bits
+                    .into_iter()
+                    .map(|bit| if bit == 0 { '0' } else { '1' })
+                    .collect::<String>()
+            })
+            .collect::<Vec<_>>()
+            .join(separator))
+    }
 }
 
 /// Механічне обернення фізичного перегляду без семантичних припущень.
@@ -606,14 +616,7 @@ fn execute() -> Result<(), String> {
             // Physical inspection retains every T5M word's exact width and
             // bits; neither width nor this projection grants D1–24+ identity
             // or callability.
-            #[cfg(feature = "zig-transport")]
             let human = render_exact_t5m_words(&bytes, " ")?;
-            #[cfg(not(feature = "zig-transport"))]
-            let human = {
-                let words =
-                    decode_canonical_t5m_words(&bytes).map_err(|e| format!("open .sens: {e}"))?;
-                sens::render_ternary_words_spaced(&words)
-            };
             println!("{human}");
             Ok(())
         }
@@ -639,14 +642,7 @@ fn execute() -> Result<(), String> {
         }
         "decode" => {
             let bytes = read_sens(path)?;
-            #[cfg(feature = "zig-transport")]
             let human = render_exact_t5m_words(&bytes, "\n")?;
-            #[cfg(not(feature = "zig-transport"))]
-            let human = {
-                let words =
-                    decode_canonical_t5m_words(&bytes).map_err(|e| format!("decode .sens: {e}"))?;
-                sens::render_ternary_words_vertical(&words)
-            };
             print!("{human}");
             Ok(())
         }
@@ -724,16 +720,12 @@ fn execute() -> Result<(), String> {
 
         "open-f3" => {
             let canonical_t5 = read_explicit_f3(path)?;
-            let words = decode_canonical_t5m_words(&canonical_t5)
-                .map_err(|e| format!("SENS canonical reader after F3: {e}"))?;
-            println!("{}", sens::render_ternary_words_spaced(&words));
+            println!("{}", render_exact_t5m_words(&canonical_t5, " ")?);
             Ok(())
         }
         "decode-f3" => {
             let canonical_t5 = read_explicit_f3(path)?;
-            let words = decode_canonical_t5m_words(&canonical_t5)
-                .map_err(|e| format!("canonical words after F3: {e}"))?;
-            print!("{}", sens::render_ternary_words_vertical(&words));
+            print!("{}", render_exact_t5m_words(&canonical_t5, "\n")?);
             Ok(())
         }
         "eval-f3" => {
@@ -1491,7 +1483,7 @@ mod d7_zig_cli_boundary_tests {
         let error = sens::encode_d7_uk_words("Кі🙂").unwrap_err();
         assert_eq!(
             error,
-            sens::D7T5Error::UnassignedKeyboardGlyph { byte_offset: 4 }
+            sens::D7ProjectionError::UnassignedKeyboardGlyph { byte_offset: 4 }
         );
         let d2_word = sens::parse_binary_source_words("01").unwrap()[0].word;
         let d2_carrier = zig_transport::encode_t5m_direct(&[d2_word]).unwrap();
@@ -1499,7 +1491,7 @@ mod d7_zig_cli_boundary_tests {
             .expect("valid D2:01 T5M physical word, not D7");
         assert_eq!(
             sens::decode_d7_uk_words(&d2),
-            Err(sens::D7T5Error::NonD7Word)
+            Err(sens::D7ProjectionError::NonD7Word)
         );
         for invalid in [&[0xf3][..], &[0xf2][..], &[0x00, 0x00][..]] {
             assert!(zig_transport::decode_t5m_words(invalid).is_err());
