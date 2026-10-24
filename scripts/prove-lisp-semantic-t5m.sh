@@ -609,14 +609,18 @@ sha256sum lib/d11-tree-equal-by-test.lisp tests/semantic/d11-tree-equal-by-test-
 # SENS виконує 2 D1 закони й 2 очікувані Type-помилки через Zig/T5M.
 reason_trace_common="$evidence/d11-reason-proof-trace-definitions.lisp"
 cat -- lib/unify.lisp lib/reason.lisp > "$reason_trace_common"
-cat -- "$reason_trace_common" tests/semantic/d11-reason-proof-trace-law.lisp > "$evidence/d11-reason-proof-trace-law-complete.lisp"
-cat -- "$reason_trace_common" tests/semantic/d11-reason-proof-trace-mutant.lisp > "$evidence/d11-reason-proof-trace-mutant-complete.lisp"
-cat -- "$reason_trace_common" tests/semantic/d11-reason-proof-trace-improper-provenance-negative.lisp > "$evidence/d11-reason-proof-trace-improper-provenance-negative-complete.lisp"
-cat -- "$reason_trace_common" tests/semantic/d11-reason-proof-trace-improper-count-negative.lisp > "$evidence/d11-reason-proof-trace-improper-count-negative-complete.lisp"
-run_case run_law d11-reason-proof-trace-law "$evidence/d11-reason-proof-trace-law-complete.lisp" 1 core4
-run_case run_law d11-reason-proof-trace-mutant "$evidence/d11-reason-proof-trace-mutant-complete.lisp" 0 core4
-run_case run_error_rejection d11-reason-proof-trace-improper-provenance "$evidence/d11-reason-proof-trace-improper-provenance-negative-complete.lisp" Type 'car expects a non-empty list' core4
-run_case run_error_rejection d11-reason-proof-trace-improper-count "$evidence/d11-reason-proof-trace-improper-count-negative-complete.lisp" Type 'car expects a non-empty list' core4
+reason_trace_law_bundle="$evidence/d11-reason-proof-trace-law-complete.lisp"
+reason_trace_mutant_bundle="$evidence/d11-reason-proof-trace-mutant-complete.lisp"
+reason_trace_bad_provenance_bundle="$evidence/d11-reason-proof-trace-improper-provenance-negative-complete.lisp"
+reason_trace_bad_count_bundle="$evidence/d11-reason-proof-trace-improper-count-negative-complete.lisp"
+cat -- "$reason_trace_common" tests/semantic/d11-reason-proof-trace-law.lisp > "$reason_trace_law_bundle"
+cat -- "$reason_trace_common" tests/semantic/d11-reason-proof-trace-mutant.lisp > "$reason_trace_mutant_bundle"
+cat -- "$reason_trace_common" tests/semantic/d11-reason-proof-trace-improper-provenance-negative.lisp > "$reason_trace_bad_provenance_bundle"
+cat -- "$reason_trace_common" tests/semantic/d11-reason-proof-trace-improper-count-negative.lisp > "$reason_trace_bad_count_bundle"
+run_case run_law d11-reason-proof-trace-law "$reason_trace_law_bundle" 1 core4
+run_case run_law d11-reason-proof-trace-mutant "$reason_trace_mutant_bundle" 0 core4
+run_case run_error_rejection d11-reason-proof-trace-improper-provenance "$reason_trace_bad_provenance_bundle" Type 'car expects a non-empty list' core4
+run_case run_error_rejection d11-reason-proof-trace-improper-count "$reason_trace_bad_count_bundle" Type 'car expects a non-empty list' core4
 sha256sum lib/unify.lisp lib/reason.lisp tests/semantic/d11-reason-proof-trace-*.lisp > "$evidence/d11-reason-proof-trace-inputs.sha256"
 
 # D11 SRFI-1 lset: позитив і мутант виконують справжні DEFINE мови SENS.
