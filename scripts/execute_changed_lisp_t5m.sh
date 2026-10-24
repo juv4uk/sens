@@ -506,6 +506,34 @@ run_native_t5m_program() {
         return
       fi
     fi
+    if [[ "$file" == "tests/semantic/d11-tree-equal-by-test-law.lisp" ||
+          "$file" == "tests/semantic/d11-tree-equal-by-test-mutant.lisp" ]]; then
+      # Фізична самодостатність: одна й та сама SENS-бібліотека + SENS-свідок.
+      # Host тільки збирає джерело та звіряє точний D1; ніякого host-оракула.
+      local tree_complete_source="$dir/d11-tree-test-full.lisp"
+      standalone_physical="$dir/d11-tree-test-full.sens"
+      if ! cat -- lib/d11-tree-equal-by-test.lisp "$file" >"$tree_complete_source" ||
+         ! timeout "$native_timeout" "$binary" --t5m-mint "$tree_complete_source" "$standalone_physical" \
+              >"$dir/d11-tree-test-mint.stdout" 2>"$dir/d11-tree-test-mint.stderr" ||
+         ! timeout "$native_timeout" "$native_open" open "$standalone_physical" \
+              >"$dir/d11-tree-test-full.view" 2>"$dir/d11-tree-test-open.stderr" ||
+         ! timeout "$native_timeout" "$native_open" verify-view "$standalone_physical" \
+              >"$dir/d11-tree-test-verify.stdout" 2>"$dir/d11-tree-test-verify.stderr"; then
+        echo "::error::D11_TREE_TEST_PHYSICAL_STANDALONE_MINT_FAILED source=$file layer=zig-t5m" >&2
+        for diagnostic in "$dir"/d11-tree-test-*.stderr; do
+          [[ ! -f "$diagnostic" ]] || sed 's/^/D11 TREE-TEST: /' "$diagnostic" >&2
+        done
+        mark_file_failed
+        return
+      fi
+      local expected_tree_d1=1
+      [[ "$file" != *-mutant.lisp ]] || expected_tree_d1=0
+      if [[ "$(cat "$dir/native-paired.stdout")" != "$expected_tree_d1" ]]; then
+        echo "::error::D11_TREE_TEST_WRONG_VERDICT source=$file layer=sens-paired expected=D1:$expected_tree_d1 actual=$(cat "$dir/native-paired.stdout")" >&2
+        mark_file_failed
+        return
+      fi
+    fi
     if timeout "$native_timeout" "${standalone_runtime[@]}" "$standalone_physical" \
         >"$dir/native-standalone.stdout" 2>"$dir/native-standalone.stderr"; then
       if ! cmp -s "$dir/native-standalone.stdout" "$dir/native-paired.stdout"; then

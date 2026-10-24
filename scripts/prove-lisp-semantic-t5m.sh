@@ -562,6 +562,15 @@ run_case run_law d4-lexical-scope-mutant tests/semantic/d4-lexical-scope-mutant.
 # Лише Lisp формулює закон, shell звіряє кінцевий D1; Rust не є оракулом.
 run_case run_law d4-d5-ordered-arguments-positive tests/semantic/language-law-d5-ordered-arguments-ukr.lisp 1
 run_case run_law d4-d5-ordered-arguments-mutant tests/semantic/language-mutant-d5-ordered-arguments-ukr.lisp 0
+# F11-TREE-TEST: двоаргументне SENS-замикання порівнює лише атомні листки.
+# Д3 CAR/CDR перевіряє структуру, Zig — лише точний T5M-носій.
+d11_tree_test_law_bundle="$evidence/d11-tree-test-law-complete.lisp"
+d11_tree_test_mutant_bundle="$evidence/d11-tree-test-mutant-complete.lisp"
+cat -- lib/d11-tree-equal-by-test.lisp tests/semantic/d11-tree-equal-by-test-law.lisp > "$d11_tree_test_law_bundle"
+cat -- lib/d11-tree-equal-by-test.lisp tests/semantic/d11-tree-equal-by-test-mutant.lisp > "$d11_tree_test_mutant_bundle"
+run_case run_law d11-tree-test-positive "$d11_tree_test_law_bundle" 1
+run_case run_law d11-tree-test-mutant "$d11_tree_test_mutant_bundle" 0
+sha256sum lib/d11-tree-equal-by-test.lisp tests/semantic/d11-tree-equal-by-test-law.lisp tests/semantic/d11-tree-equal-by-test-mutant.lisp > "$evidence/d11-tree-test-inputs.sha256"
 # SRFI-1 list=: алгоритм з чинної lib/D11, очікувані предикати тільки в Lisp.
 # Не тестуємо D11-операцію Rust-оракулом; Zig тільки кодує фізичні байти.
 d11_list_equal_law_bundle="$evidence/d11-list-equality-positive.lisp"
