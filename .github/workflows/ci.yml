@@ -211,6 +211,12 @@ jobs:
                   "tests/semantic/d11-scan-fold-d3-tail-left-improper-negative.lisp",
                   "tests/semantic/d11-scan-fold-d3-tail-right-improper-negative.lisp",
                   "tests/semantic/d11-srfi1-list-equality-law.lisp",
+                  # Д11: залежні свідки вилучення асоціацій з SENS-бібліотекою.
+                  # Без DEFINE standalone відхиляється; виконує лише law runner.
+                  "tests/semantic/d11-assoc-delete-proper-law.lisp",
+                  "tests/semantic/d11-assoc-delete-order-mutant.lisp",
+                  "tests/semantic/d11-assoc-delete-improper-tail-negative.lisp",
+                  "tests/semantic/d11-assoc-delete-invalid-record-negative.lisp",
                   # D11 list=: залежні позитиви, справжні визначення lib/ перед ними.
                   "tests/semantic/d11-srfi1-list-equality-structure-law.lisp",
                   "tests/semantic/d11-srfi1-list-equality-pairs-law.lisp",

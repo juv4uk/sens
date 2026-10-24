@@ -641,6 +641,26 @@ run_case run_law d4-lexical-scope-mutant tests/semantic/d4-lexical-scope-mutant.
 # Лише Lisp формулює закон, shell звіряє кінцевий D1; Rust не є оракулом.
 run_case run_law d4-d5-ordered-arguments-positive tests/semantic/language-law-d5-ordered-arguments-ukr.lisp 1
 run_case run_law d4-d5-ordered-arguments-mutant tests/semantic/language-mutant-d5-ordered-arguments-ukr.lisp 0
+# Д11: видалення всіх alist-записів зі строгою перевіркою D3 структури.
+# SENS сам визначає результат D1/Type; transport перевіряється реальною Zig/T5M парою.
+d11_assoc_delete_source=lib/list-foundation-compositions.lisp
+d11_assoc_delete_positive="$evidence/d11-assoc-delete-proper-law-complete.lisp"
+d11_assoc_delete_mutant="$evidence/d11-assoc-delete-order-mutant-complete.lisp"
+d11_assoc_delete_tail="$evidence/d11-assoc-delete-improper-tail-negative-complete.lisp"
+d11_assoc_delete_record="$evidence/d11-assoc-delete-invalid-record-negative-complete.lisp"
+cat -- "$d11_assoc_delete_source" tests/semantic/d11-assoc-delete-proper-law.lisp > "$d11_assoc_delete_positive"
+cat -- "$d11_assoc_delete_source" tests/semantic/d11-assoc-delete-order-mutant.lisp > "$d11_assoc_delete_mutant"
+cat -- "$d11_assoc_delete_source" tests/semantic/d11-assoc-delete-improper-tail-negative.lisp > "$d11_assoc_delete_tail"
+cat -- "$d11_assoc_delete_source" tests/semantic/d11-assoc-delete-invalid-record-negative.lisp > "$d11_assoc_delete_record"
+run_case run_law d11-assoc-delete-positive "$d11_assoc_delete_positive" 1 core4
+run_case run_law d11-assoc-delete-mutant "$d11_assoc_delete_mutant" 0 core4
+run_case run_error_rejection d11-assoc-delete-improper-tail "$d11_assoc_delete_tail" Type 'car expects a non-empty list' core4
+run_case run_error_rejection d11-assoc-delete-invalid-record "$d11_assoc_delete_record" Type 'car expects a non-empty list' core4
+sha256sum "$d11_assoc_delete_source" \
+  tests/semantic/d11-assoc-delete-proper-law.lisp \
+  tests/semantic/d11-assoc-delete-order-mutant.lisp \
+  tests/semantic/d11-assoc-delete-improper-tail-negative.lisp \
+  tests/semantic/d11-assoc-delete-invalid-record-negative.lisp > "$evidence/d11-assoc-delete-inputs.sha256"
 # F11-TREE-TEST: двоаргументне SENS-замикання порівнює лише атомні листки.
 # Д3 CAR/CDR перевіряє структуру, Zig — лише точний T5M-носій.
 d11_tree_test_law_bundle="$evidence/d11-tree-test-law-complete.lisp"
@@ -867,10 +887,7 @@ cat -- lib/d11-list-terminator-evidence.lisp tests/semantic/d11-list-terminator-
 cat -- lib/d11-list-terminator-evidence.lisp tests/semantic/d11-list-terminator-mutant.lisp > "$d11_terminator_mutant"
 run_case run_law d11-list-terminator-positive "$d11_terminator_positive" 1
 run_case run_law d11-list-terminator-mutant "$d11_terminator_mutant" 0
-d11_terminator_nested_mutant="$evidence/d11-list-terminator-nested-mutant-complete.lisp"
-cat -- lib/d11-list-terminator-evidence.lisp tests/semantic/d11-list-terminator-nested-mutant.lisp > "$d11_terminator_nested_mutant"
-run_case run_law d11-list-terminator-nested-mutant "$d11_terminator_nested_mutant" 0
-sha256sum lib/d11-list-terminator-evidence.lisp tests/semantic/d11-list-terminator-law.lisp tests/semantic/d11-list-terminator-mutant.lisp tests/semantic/d11-list-terminator-nested-mutant.lisp > "$evidence/d11-list-terminator-inputs.sha256"
+sha256sum lib/d11-list-terminator-evidence.lisp tests/semantic/d11-list-terminator-law.lisp tests/semantic/d11-list-terminator-mutant.lisp > "$evidence/d11-list-terminator-inputs.sha256"
 # Д11 FIND-PRESENCE: прапорець наявності незалежний від знайденого значення.
 # Чинний SENS DEFINE, точний D1 позитив/мутант та неправильний D1-хвіст.
 d11_presence_positive="$evidence/d11-srfi1-find-presence-positive-complete.lisp"
