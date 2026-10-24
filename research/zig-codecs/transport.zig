@@ -20,6 +20,12 @@ extern "c" fn mkstemp([*:0]u8) c_int;
 extern "c" fn fdopen(c_int, [*:0]const u8) ?*CFile;
 extern "c" fn close(c_int) c_int;
 extern "c" fn link([*:0]const u8, [*:0]const u8) c_int;
+extern "c" fn fsync(c_int) c_int;
+extern "c" fn fileno(*CFile) c_int;
+const CDir = opaque {};
+extern "c" fn opendir([*:0]const u8) ?*CDir;
+extern "c" fn dirfd(*CDir) c_int;
+extern "c" fn closedir(*CDir) c_int;
 
 const Error = error{
     Usage,
@@ -28,6 +34,7 @@ const Error = error{
     InputTooLarge,
     OutputExistsOrUnavailable,
     OutputWriteFailed,
+    OutputSyncFailed,
     InputEqualsOutput,
     NotSmallerThanT5,
     CanonicalRoundtripMismatch,
@@ -87,6 +94,9 @@ fn createVerifiedStage(
     if (body.len != 0 and fwrite(body.ptr, 1, body.len, file) != body.len)
         return Error.OutputWriteFailed;
     if (fflush(file) != 0) return Error.OutputWriteFailed;
+    // fflush flushes the C buffer, NOT the filesystem's dirty pages.
+    // An fsync failure must prevent this stage from becoming public.
+    if (fsync(fileno(file)) != 0) return Error.OutputSyncFailed;
     const close_result = fclose(file);
     open = false;
     if (close_result != 0) return Error.OutputWriteFailed;
@@ -111,6 +121,18 @@ fn publishVerifiedStage(
     if (link(stage.ptr, dest.ptr) != 0) return Error.OutputExistsOrUnavailable;
 }
 
+/// Make the directory-entry change durable, not merely visible.
+/// File data is already fsync'd before the hard link is published.
+fn syncParentDirectory(allocator: std.mem.Allocator, path: []const u8) !void {
+    const parent = std.fs.path.dirname(path) orelse ".";
+    const zparent = try allocator.dupeZ(u8, parent);
+    defer allocator.free(zparent);
+    const dir = opendir(zparent.ptr) orelse return Error.OutputSyncFailed;
+    defer _ = closedir(dir);
+    const fd = dirfd(dir);
+    if (fd < 0 or fsync(fd) != 0) return Error.OutputSyncFailed;
+}
+
 fn writeVerifiedNew(
     allocator: std.mem.Allocator,
     dest_path: []const u8,
@@ -118,8 +140,17 @@ fn writeVerifiedNew(
 ) !void {
     const stage = try createVerifiedStage(allocator, dest_path, body, body);
     defer allocator.free(stage);
-    defer _ = remove(stage.ptr);
+    var stage_exists = true;
+    defer {
+        // The stage is ours, the destination is shared; never unlink dest.
+        if (stage_exists) _ = remove(stage.ptr);
+    }
     try publishVerifiedStage(allocator, stage, dest_path);
+    // On a failed unlink, report failure instead of claiming durability.
+    if (remove(stage.ptr) != 0) return Error.OutputWriteFailed;
+    stage_exists = false;
+    // Persist the published name AND the stage-name removal.
+    try syncParentDirectory(allocator, dest_path);
 }
 
 /// Physical T5 emission from PRE-SEGMENTED, opaque trits.
@@ -399,6 +430,18 @@ test "Zig stages bytes before publishing and preserves a concurrent winner" {
     const winner = try readFile(allocator, collided, t5.MAX_PHYSICAL_BYTES + 1);
     defer allocator.free(winner);
     try std.testing.expectEqualSlices(u8, &.{0x22}, winner);
+}
+
+test "Zig durable publication detects missing parent directory" {
+    var tmp = std.testing.tmpDir(.{});
+    defer tmp.cleanup();
+    const allocator = std.testing.allocator;
+    const parent = try tmp.dir.realPathFileAlloc(std.testing.io, ".", allocator);
+    defer allocator.free(parent);
+    const missing = try std.fs.path.join(allocator, &.{ parent, "no-such-directory", "file.sens" });
+    defer allocator.free(missing);
+    // Directory sync cannot be quietly skipped when its descriptor is absent.
+    try std.testing.expectError(Error.OutputSyncFailed, syncParentDirectory(allocator, missing));
 }
 
 test "Zig opaque trit carry preserves widths and rejects malformed boundaries" {
