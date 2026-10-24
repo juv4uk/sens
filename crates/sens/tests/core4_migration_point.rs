@@ -12,7 +12,7 @@ fn core4_named_numeric_values_are_exact_and_source_literal_free() {
 
     for (name, expected) in [("число-нуль", "0"), ("число-один", "1")] {
         let value = session.environment.get(name).expect("named D24+ root value");
-        match value {
+        match &value {
             Value::BinaryNumber(number) => {
                 assert_eq!(number.numeric_domain_width(), Some(24));
                 assert_eq!(number.to_decimal_string(), expected);
