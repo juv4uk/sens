@@ -1036,6 +1036,19 @@ run_case run_law d11-find-last-tail-mutant "$last_tail_mutant" 0
 run_case run_type_rejection d11-find-last-tail-improper "$last_tail_bad" 'car expects a non-empty list'
 sha256sum lib/d11-srfi1-find-presence.lisp lib/d11-srfi1-find-last-tail-presence.lisp tests/semantic/d11-find-last-tail-*.lisp > "$evidence/d11-last-tail-inputs.sha256"
 
+# Д11: розділити перед останнім збігом, явний D1 прапорець.
+# Значення, порядок, хибна перша позиція й Type — SENS, не shell.
+split_last_positive="$evidence/d11-split-last-positive.lisp"
+split_last_mutant="$evidence/d11-split-last-mutant.lisp"
+split_last_invalid="$evidence/d11-split-last-improper.lisp"
+cat -- lib/d11-srfi1-find-presence.lisp lib/d11-split-before-last-presence.lisp tests/semantic/d11-split-before-last-law.lisp > "$split_last_positive"
+cat -- lib/d11-srfi1-find-presence.lisp lib/d11-split-before-last-presence.lisp tests/semantic/d11-split-before-last-mutant.lisp > "$split_last_mutant"
+cat -- lib/d11-srfi1-find-presence.lisp lib/d11-split-before-last-presence.lisp tests/semantic/d11-split-before-last-improper-negative.lisp > "$split_last_invalid"
+run_case run_law d11-split-last-positive "$split_last_positive" 1
+run_case run_law d11-split-last-mutant "$split_last_mutant" 0
+run_case run_type_rejection d11-split-last-improper "$split_last_invalid" 'car expects a non-empty list'
+sha256sum lib/d11-srfi1-find-presence.lisp lib/d11-split-before-last-presence.lisp tests/semantic/d11-split-before-last-*.lisp > "$evidence/d11-split-last-inputs.sha256"
+
 # Д11 SRFI-1 FILTER-MAP: D1:ні відкидається, структурне () зберігається.
 # Справжній SENS source → Zig/T5M → парний і самостійний SENS.
 d11_filter_map_positive="$evidence/d11-srfi1-filter-map-positive.lisp"

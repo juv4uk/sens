@@ -180,6 +180,8 @@ run_native_t5m_program() {
       negative_type_diagnostic='car expects a non-empty list' ;;
     tests/semantic/d11-find-last-presence-improper-negative.lisp)
       negative_type_diagnostic='car expects a non-empty list' ;;
+    tests/semantic/d11-split-before-last-improper-negative.lisp)
+      negative_type_diagnostic='car expects a non-empty list' ;;
     tests/semantic/d11-find-last-tail-improper-negative.lisp)
       negative_type_diagnostic='car expects a non-empty list' ;;
     tests/semantic/d11-find-first-tail-presence-improper-negative.lisp)
@@ -253,6 +255,9 @@ run_native_t5m_program() {
     elif [[ "$file" == "tests/semantic/d11-find-first-tail-presence-improper-negative.lisp" ]]; then
       direct_source="$dir/d11-first-tail-presence-negative-bound.lisp"
       cat -- lib/d11-srfi1-find-tail.lisp lib/d11-srfi1-find-tail-presence.lisp "$file" > "$direct_source"
+    elif [[ "$file" == "tests/semantic/d11-split-before-last-improper-negative.lisp" ]]; then
+      direct_source="$dir/d11-split-last-negative-bound.lisp"
+      cat -- lib/d11-srfi1-find-presence.lisp lib/d11-split-before-last-presence.lisp "$file" > "$direct_source"
     elif [[ "$file" == "tests/semantic/d11-srfi1-find-presence-improper-tail-negative.lisp" ]]; then
       direct_source="$dir/d11-find-presence-bound-negative.lisp"
       cat -- lib/d11-srfi1-find-presence.lisp "$file" > "$direct_source"
@@ -316,6 +321,19 @@ run_native_t5m_program() {
     # Для окремого D11-негативу самодостатній фізичний носій містить
     # точні SENS DEFINE. Перевіряємо Type, не списуємо відмову на D7 ім'я.
     local negative_standalone_physical="$physical"
+    if [[ "$file" == "tests/semantic/d11-split-before-last-improper-negative.lisp" ]]; then
+      local split_bad_source="$dir/d11-split-last-bad-complete.lisp"
+      negative_standalone_physical="$dir/d11-split-last-bad-complete.sens"
+      if ! cat -- lib/d11-srfi1-find-presence.lisp lib/d11-split-before-last-presence.lisp "$file" > "$split_bad_source" ||
+         ! timeout "$native_timeout" "$binary" --t5m-mint "$split_bad_source" "$negative_standalone_physical" >"$dir/d11-split-bad-mint.stdout" 2>"$dir/d11-split-bad-mint.stderr" ||
+         ! timeout "$native_timeout" "$native_open" open "$negative_standalone_physical" >"${negative_standalone_physical%.sens}" 2>"$dir/d11-split-bad-open.stderr" ||
+         ! timeout "$native_timeout" "$native_open" verify-view "$negative_standalone_physical" >"$dir/d11-split-bad-verify.stdout" 2>"$dir/d11-split-bad-verify.stderr"; then
+        echo "::error::D11_SPLIT_LAST_NEGATIVE_PHYSICAL_INVALID source=$file" >&2
+        mark_file_failed
+        return
+      fi
+    fi
+
     if [[ "$file" == "tests/semantic/d11-find-last-presence-improper-negative.lisp" ]]; then
       local complete_last_source="$dir/d11-last-complete-negative.lisp"
       negative_standalone_physical="$dir/d11-last-complete-negative.sens"
@@ -606,6 +624,28 @@ run_native_t5m_program() {
     # Для двох D3-законів виконуємо окремий САМОДОСТАТНІЙ фізичний
     # носій із тим самим чинним джерелом визначень. Жодного mock/host oracle.
     local standalone_physical="$physical"
+    if [[ "$file" == "tests/semantic/d11-split-before-last-law.lisp" ||
+          "$file" == "tests/semantic/d11-split-before-last-mutant.lisp" ]]; then
+      # Повна SENS-програма, а не самостійний D7 виклик без DEFINE.
+      local split_source="$dir/d11-split-last-complete.lisp"
+      standalone_physical="$dir/d11-split-last-complete.sens"
+      if ! cat -- lib/d11-srfi1-find-presence.lisp lib/d11-split-before-last-presence.lisp "$file" > "$split_source" ||
+         ! timeout "$native_timeout" "$binary" --t5m-mint "$split_source" "$standalone_physical" >"$dir/d11-split-mint.stdout" 2>"$dir/d11-split-mint.stderr" ||
+         ! timeout "$native_timeout" "$native_open" open "$standalone_physical" >"${standalone_physical%.sens}" 2>"$dir/d11-split-open.stderr" ||
+         ! timeout "$native_timeout" "$native_open" verify-view "$standalone_physical" >"$dir/d11-split-verify.stdout" 2>"$dir/d11-split-verify.stderr"; then
+        echo "::error::D11_SPLIT_LAST_PHYSICAL_INVALID source=$file" >&2
+        mark_file_failed
+        return
+      fi
+      local split_expected=1
+      [[ "$file" != *-mutant.lisp ]] || split_expected=0
+      if [[ "$(cat "$dir/native-paired.stdout")" != "$split_expected" ]]; then
+        echo "::error::D11_SPLIT_LAST_PAIRED_MISMATCH source=$file expected=$split_expected" >&2
+        mark_file_failed
+        return
+      fi
+    fi
+
     if [[ "$file" == "tests/semantic/d6-any-all-first-class-law.lisp" ||
           "$file" == "tests/semantic/d6-any-all-first-class-mutant.lisp" ]]; then
       # Автономний фізичний носій повинен містити ДВА реальні DEFINE
@@ -1161,6 +1201,11 @@ while IFS= read -r file || [[ -n "$file" ]]; do
           "$file" == "tests/semantic/d11-find-first-tail-presence-improper-negative.lisp" ]]; then
     binding_sources=(--binding-source lib/d11-srfi1-find-tail.lisp
                      --binding-source lib/d11-srfi1-find-tail-presence.lisp)
+  elif [[ "$file" == "tests/semantic/d11-split-before-last-law.lisp" ||
+          "$file" == "tests/semantic/d11-split-before-last-mutant.lisp" ||
+          "$file" == "tests/semantic/d11-split-before-last-improper-negative.lisp" ]]; then
+    binding_sources=(--binding-source lib/d11-srfi1-find-presence.lisp
+                     --binding-source lib/d11-split-before-last-presence.lisp)
   elif [[ "$file" == "tests/semantic/d11-srfi1-find-presence-law.lisp" ||
           "$file" == "tests/semantic/d11-srfi1-find-presence-mutant.lisp" ||
           "$file" == "tests/semantic/d11-srfi1-find-presence-improper-tail-negative.lisp" ||
