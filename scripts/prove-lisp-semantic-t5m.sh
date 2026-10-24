@@ -2050,6 +2050,7 @@ run_case run_error_rejection d6-all-invalid-root tests/semantic/d6-all-invalid-r
 run_case run_law d8-quantifier-composition tests/semantic/d8-quantifier-composition-law.lisp 1 core4
 run_case run_error_rejection d8-notany-invalid-root tests/semantic/d8-notany-invalid-root-law.lisp Type 'car expects a non-empty list' core4
 run_case run_error_rejection d8-notevery-invalid-root tests/semantic/d8-notevery-invalid-root-law.lisp Type 'car expects a non-empty list' core4
+run_case run_error_rejection d8-all-not-invalid-root tests/semantic/d8-all-not-invalid-root-law.lisp Type 'car expects a non-empty list' core4
 sha256sum lib/core4-parts/core4-d6b.lisp tests/semantic/d6-any-all-native-call-law.lisp tests/semantic/d6-any-all-native-call-mutant.lisp > "$evidence/d6-any-all-native-call-inputs.sha256"
 sha256sum lib/core4.lisp lib/core4-parts/core4-d6b.lisp \
   tests/semantic/d6-any-all-exact-empty-law.lisp \
