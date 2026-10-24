@@ -35,17 +35,18 @@ mod paired {
             ExprKind::BinaryNumber(value) if value.numeric_domain_width().is_some() => Ok(()),
             ExprKind::DomainCall(identity, args)
                 if identity.width() == 5
-                    && matches!(identity.packed_bits(),
-                        0b01000 | 0b01001 | 0b01010 | 0b01011
-                            | 0b10110 | 0b10111 | 0b11010 | 0b11011)
-                    // ZEROP and NUMBERP are unary D5 laws; DIFFERENCE and
-                    // QUOTIENT also retain their existing unary forms.
-                    && (args.len() == 2
-                        || (args.len() == 1
-                            && matches!(
-                                identity.packed_bits(),
-                                0b01000 | 0b01001 | 0b01011 | 0b10111
-                            ))) =>
+                    // Arity is part of the physical admission law: a head is
+                    // admitted only for the exact argument counts its D5 law
+                    // defines. ZEROP and NUMBERP are strictly unary D5 laws;
+                    // DIFFERENCE and QUOTIENT retain their existing unary
+                    // forms alongside the binary form; ADD, MULTIPLY, LESS
+                    // and GREATER are strictly binary.
+                    && match identity.packed_bits() {
+                        0b01000 | 0b01001 => args.len() == 1,
+                        0b01011 | 0b10111 => args.len() == 1 || args.len() == 2,
+                        0b01010 | 0b10110 | 0b11010 | 0b11011 => args.len() == 2,
+                        _ => false,
+                    } =>
             {
                 // Atomic binary operands must carry the SAME admitted Dn.
                 // Nested results (possibly widened by an earlier operation)
