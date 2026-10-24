@@ -29,7 +29,9 @@ window.loadMyLispWasm = function () {
   // new Function уникає конфлікту Closure Compiler з ключовим словом `import`.
   // new Function vermeidet den Schlüsselwortkonflikt des Closure Compilers mit `import`.
   var dynamicImport = new Function('u', 'return import(u)');
-  return dynamicImport('./wasm/my_lisp_wasm.js').then(function (mod) {
+  // Першопричина: wasm-pack для crate `sens-wasm` видає sens_wasm.js;
+  // старе ім'я my_lisp_wasm.js давало 404 для НЕзібраного REPL.
+  return dynamicImport('./wasm/sens_wasm.js').then(function (mod) {
     return mod.default().then(function () {
       return mod;
     });
