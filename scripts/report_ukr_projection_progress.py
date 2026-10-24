@@ -154,6 +154,19 @@ NONPROGRAM_LIB_PATHS = (
 NONPROGRAM_LIB_FILES = frozenset({
     "lib/machine/encoding/coverage.lisp",
 })
+# Каталоги, чиї `.lisp` — ДАНІ, а не виконувані програми (таблиці, реєстри,
+# машинні дані, контракти, знання, документація, свідки, фізичні/до-міграційні
+# приклади, Rust-крейти). Див. також NONPROGRAM_LIB_PATHS/FILES вище.
+NONPROGRAM_TREE_PATHS = (
+    "contracts/",
+    "knowledge/",
+    "docs/",
+    "tests/",
+    "fixtures/",
+    "examples/binary",
+    "examples/migrated/",
+    "crates/",
+)
 
 
 def _advance_position(fragment: str, line: int, column: int) -> tuple[int, int]:
@@ -361,13 +374,26 @@ def _contains_source_definitions(path: Path) -> bool:
 
 def iter_projectable_source_files(root: Path) -> tuple[list[Path], int]:
     """Active authored library programs; semantic tables and generated inventory are reported separately."""
-    lib = root / "lib"
-    if not lib.is_dir():
-        return [], 0
+    # Першопричина: раніше перелік брався лише з `lib/`, тож виконувані
+    # `scripts/*.lisp` і кореневі `.lisp` не входили у знаменник узагалі —
+    # їхню міграцію метрика не бачила. Тепер набір виводиться з ДЕРЕВА,
+    # а дані/таблиці/фізичні свідки виключені явними коренями.
     all_files = sorted(
-        (path for path in lib.rglob("*.lisp") if path.is_file() and not path.is_symlink()),
+        (
+            path
+            for path in root.rglob("*.lisp")
+            if path.is_file()
+            and not path.is_symlink()
+            and ".git" not in path.parts
+            and not any(
+                path.relative_to(root).as_posix().startswith(prefix)
+                for prefix in NONPROGRAM_TREE_PATHS
+            )
+        ),
         key=lambda path: path.relative_to(root).as_posix(),
     )
+    if not all_files:
+        return [], 0
     selected: list[Path] = []
     excluded = 0
     for path in all_files:
@@ -451,7 +477,7 @@ def measure_source_projection(root: Path) -> SourceProjection:
 
 def render_source_projection(progress: SourceProjection) -> str:
     return (
-        "УКР-ПРОЄКЦІЯ: виконувані назви, голови та параметри в активних lib-файлах — "
+        "УКР-ПРОЄКЦІЯ: виконувані назви, голови та параметри в активних .lisp-програмах (дерево, не лише lib) — "
         f"{progress.fully_projected_source_files}/{progress.total_source_files} "
         f"({progress.percent:.1f}%)"
     )
