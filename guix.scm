@@ -2,7 +2,12 @@
              (guix gexp)
              (guix build-system gnu)
              ((guix licenses) #:prefix license:)
-             (gnu packages rust))
+             (gnu packages))
+
+(define sens-rust-toolchain
+  (primitive-load
+   (string-append (dirname (current-filename))
+                  "/packaging/guix/rust-toolchain.scm")))
 
 (define (source-filter file stat)
   ;; Package identity depends only on compilable sources/resources, not docs,
@@ -42,8 +47,7 @@
              (install-file "target/release/sens" bin)
              (install-file "target/release/swarm-node" bin)))))))
   (native-inputs
-   `(("rust" ,rust)
-     ("cargo" ,rust "cargo")))
+   `(("rust-toolchain" ,sens-rust-toolchain)))
   (synopsis "SENS runtime, CLI and swarm coordination node")
   (description
    "Hermetic Guix build of the SENS CLI and swarm-node coordination executable.

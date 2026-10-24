@@ -1,9 +1,18 @@
 ;; Базове dev-середовище SENS. Evidence-grade запуск: ./guix/run dev -- <команда>
 ;; gcc-toolchain оголошений явно, щоб --pure не успадковував linker з host PATH.
-(specifications->manifest
- (quote ("rust"
-         "rust:cargo"
-         "zig"
+;; Rust-пакет оголошує LD_LIBRARY_PATH для запуску Cargo build-script у --pure.
+(use-modules (guix profiles) (gnu packages))
+
+(define sens-rust-toolchain
+  (primitive-load
+   (string-append (dirname (current-filename))
+                  "/packaging/guix/rust-toolchain.scm")))
+
+(concatenate-manifests
+ (list
+  (packages->manifest (list sens-rust-toolchain))
+  (specifications->manifest
+   (quote ("zig@0.16.0"
          "gcc-toolchain"
          "bash"
          "coreutils"
@@ -11,4 +20,4 @@
          "grep"
          "nss-certs"
          "git"
-         "racket")))
+         "racket")))))

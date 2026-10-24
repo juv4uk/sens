@@ -15,6 +15,28 @@
 Shared profile та звичайний `$PATH` — лише інтерактивна зручність. Результат,
 який називається evidence-grade, не повинен залежати від них.
 
+Rust/Cargo закріплено на **1.99.0**, Zig — на **0.16.0**. Rust постачається
+як пакет Guix із готових офіційних компонентів через pinned `guix-rustup`
+і Nonguix; окрема команда `rustup install` не потрібна. Визначення пакета
+живе в `packaging/guix/rust-toolchain.scm`. Воно явно підтримує нові назви
+метаданих офіційного manifest 1.99, яких ще немає в закріпленому каналі.
+Базова ревізія Guix узгоджена з Nonguix, усі три канали фіксує `channels.scm`.
+Пакет також оголошує пошук динамічних бібліотек у `lib` цього Guix-профілю:
+це потрібно для створених Cargo build-script, які потребують `libgcc_s.so.1`.
+Після локальної зміни завантажуваного Scheme-визначення пакета оновіть кеш:
+`guix time-machine -C channels.scm -- shell --rebuild-cache --pure -m manifest.scm -- rustc --version`.
+
+```sh
+./guix/run dev -- rustc --version
+./guix/run dev -- cargo --version
+./guix/run dev -- zig version
+```
+
+Перевірка ядра без мережі та без зовнішнього кеш-сервера компіляції:
+`./guix/run dev -- env RUSTC_WRAPPER= cargo check --offline --locked -p sens --lib --jobs 2`.
+Порожній `RUSTC_WRAPPER` вимикає лише wrapper із користувацького Cargo config;
+версію компілятора й залежності визначає цей Guix-профіль.
+
 ## Ролі
 
 - `dev` — Rust/Cargo + GCC + certs + git + Racket.
