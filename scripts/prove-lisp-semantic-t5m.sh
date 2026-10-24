@@ -486,6 +486,8 @@ run_case run_law d3-quote-inert-data-mutant tests/semantic/language-mutant-quote
 # Повний фізичний маршрут і негативний свідок зберігають точні D1 вердикти.
 run_case run_law d7-single-glyph-bound-head-positive tests/semantic/d7-single-glyph-bound-head-law.lisp 1
 run_case run_law d7-single-glyph-bound-head-mutant tests/semantic/d7-single-glyph-bound-head-mutant.lisp 0
+# Д7 не отримує callability лише від коду; нев'язаний «х» — Type, не D1:0.
+run_case run_type_rejection d7-unbound-head-type-negative tests/semantic/d7-unbound-head-type-negative.lisp 'domain identity is not callable under its ratified law: D7 '
 # Д4 EVAL: цитований Lisp повертає порожнечу, а мутант підміняє результат.
 run_case run_law d4-eval-quote-positive tests/semantic/d4-eval-value-call-laws.lisp 1
 run_case run_law d4-eval-quote-mutant tests/semantic/d4-eval-value-call-mutant.lisp 0
