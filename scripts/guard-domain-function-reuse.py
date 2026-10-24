@@ -101,8 +101,8 @@ MARKER = re.compile(r";\s*D11-пропозиція\s*:", re.IGNORECASE)
 # причиною після `—`/`:` — порожній маркер не приймається, інакше це діра
 # для вимкнення охоронця.
 MARKER_INTENT = re.compile(
-    r";\s*НАВМИСНО\s*:\s*інший закон\s*[—–:\-]\s*\S",
-    re.IGNORECASE,
+    r"^[ \t]*;+[ \t]*НАВМИСНО[ \t]*:[ \t]*інший закон[ \t]*[—–:\-][ \t]*\S[^\r\n]*$",
+    re.IGNORECASE | re.MULTILINE,
 )
 
 
@@ -296,6 +296,18 @@ def _form_end(masked: str, start: int) -> int | None:
     return None
 
 
+def _preceding_comment_block(text: str, start: int) -> str:
+    """Коментарі безпосередньо перед DEFINE, без сусідніх визначень."""
+    line_start = text.rfind("\n", 0, start) + 1
+    if text[line_start:start].strip():
+        return ""
+    lines = text[:line_start].splitlines()
+    comments = []
+    while lines and lines[-1].lstrip().startswith(";"):
+        comments.append(lines.pop())
+    return "\n".join(reversed(comments))
+
+
 def definitions_with_bodies(text: str):
     """Return each DEFINE's own body, D11 marker and intent-marker presence."""
     out = []
@@ -304,7 +316,7 @@ def definitions_with_bodies(text: str):
         name = m.group(1)
         before = text[max(0, m.start() - 200):m.start()]
         marked = bool(MARKER.search(before))
-        intent = bool(MARKER_INTENT.search(before))
+        intent = bool(MARKER_INTENT.search(_preceding_comment_block(text, m.start())))
         end = _form_end(masked, m.start())
         # A malformed form has no executable body for purposes of this guard;
         # the caller must not treat unrelated later text as use of the ladder.
@@ -685,12 +697,28 @@ def main(argv: list[str] | None = None) -> int:
     if args.self_test:
         ok = len(ladder) >= MINIMUM_RATIFIED_SURFACES
         print(f"GUARD-DOMAIN-REUSE self-test: {'OK' if ok else 'FAIL'} (поверхонь у драбинах: {len(ladder)}, джерело: discover_domain_function_candidates)")
+        # Дозвіл на інший закон стосується рівно одного наступного DEFINE.
+        marked = definitions_with_bodies(
+            "; НАВМИСНО: інший закон — окрема семантика\n"
+            "(визначити перша (функція (х) х))\n"
+            "(визначити друга (функція (х) х))\n"
+        )
+        empty = definitions_with_bodies(
+            "; НАВМИСНО: інший закон —\n"
+            "(визначити перша (функція (х) х))\n"
+            "(визначити друга (функція (х) х))\n"
+        )
+        intent_ok = (
+            [row[3] for row in marked] == [True, False]
+            and [row[3] for row in empty] == [False, False]
+        )
+        print(f"GUARD-DOMAIN-REUSE self-test: маркер іншого закону {'OK' if intent_ok else 'FAIL'}")
         # Перевіряємо і ВЛАСНУ активацію: невиконуваний гачок = мертвий охоронець.
         hok, hmsg = hook_installed()
         print(f"GUARD-DOMAIN-REUSE self-test: гачок {'OK' if hok else 'НЕ УВІМКНЕНО (попередження)'} — {hmsg}")
         # Стан гачка — ПОПЕРЕДЖЕННЯ, не падіння: свіжий клон законно не має
         # ввімкненого гачка, доки не виконано scripts/install-hooks.sh.
-        return 0 if ok else 1
+        return 0 if ok and intent_ok else 1
 
     if args.lessons:
         # Знання живуть у САМОМУ охоронці: агент, який ним користується,
