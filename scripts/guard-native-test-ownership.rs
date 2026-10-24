@@ -170,12 +170,15 @@ fn file_exists(path: &str) -> bool {
 fn changed_since_in(repo: &Path, base: &str, head: &str) -> Result<Vec<String>,String> {
     let out = Command::new("git").current_dir(repo)
         .args(["diff", "--no-ext-diff", "--name-only", "-z",
-            "--diff-filter=ACDMRT", base, head, "--", "tests/semantic/", "crates/"])
+            "--diff-filter=ACDMRT", base, head])
         .output().map_err(|e| e.to_string())?;
     if !out.status.success() { return Err(format!("git diff {}: {}",
         out.status, String::from_utf8_lossy(&out.stderr))); }
     out.stdout.split(|b| *b==0).filter(|part| !part.is_empty())
-        .map(|part| String::from_utf8(part.to_vec()).map_err(|e| e.to_string())).collect()
+        .map(|part| String::from_utf8(part.to_vec()).map_err(|e| e.to_string()))
+        .filter(|path| path.as_ref().is_ok_and(|path|
+            path.starts_with(PREFIX) || path.starts_with("crates/")))
+        .collect()
 }
 
 fn changed_since(base: &str, head: &str) -> Result<Vec<String>,String> {
@@ -202,8 +205,11 @@ fn test_git_change_filter() -> Result<(),String> {
         };
         git(&["init", "-q"])?;
         fs::create_dir_all(dir.join("tests/semantic")).map_err(|e| e.to_string())?;
+        fs::create_dir_all(dir.join("tests/fixtures")).map_err(|e| e.to_string())?;
         fs::create_dir_all(dir.join("crates/sens/tests")).map_err(|e| e.to_string())?;
         fs::write(dir.join("tests/semantic/old-law.lisp"), "(первинний-закон)\n")
+            .map_err(|e| e.to_string())?;
+        fs::write(dir.join("tests/semantic/moved-fixture.lisp"), "(вхідна-фікстура)\n")
             .map_err(|e| e.to_string())?;
         fs::write(dir.join("tests/semantic/deleted-law.lisp"), "; deleted-sentinel-only-234567890abcdef\n")
             .map_err(|e| e.to_string())?;
@@ -221,6 +227,10 @@ fn test_git_change_filter() -> Result<(),String> {
             .map_err(|e| e.to_string())?;
         fs::remove_file(dir.join("tests/semantic/deleted-law.lisp"))
             .map_err(|e| e.to_string())?;
+        fs::rename(
+            dir.join("tests/semantic/moved-fixture.lisp"),
+            dir.join("tests/fixtures/moved-fixture.lisp"),
+        ).map_err(|e| e.to_string())?;
         git(&["add", "-A"])?;
         git(&["-c", "user.name=SensGuard", "-c",
             "user.email=sens-guard@example.invalid", "commit", "-qm", "change"])?;
@@ -237,6 +247,9 @@ fn test_git_change_filter() -> Result<(),String> {
         }
         if changed.len() != 4 {
             return Err(format!("Неочікуваний набір Git-змін: {changed:?}"));
+        }
+        if changed.iter().any(|item| item == "tests/semantic/moved-fixture.lisp") {
+            return Err(format!("Перейменування назовні помилково лишило старий semantic шлях: {changed:?}"));
         }
         Ok(())
     })();
