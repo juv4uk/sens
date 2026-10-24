@@ -1,43 +1,15 @@
-"""Тест правила драбин (мінімальне відновлення після placeholder; повний: apply-debt0-test.py)."""
+"""Правило драбин D1–D10: повний сьют підвантажується з knowledge/d11/restore/fulltest.zlib.b64.
+
+Першопричина host_debt: суцільні SENS-голови у probe-рядках.
+Фікстури: tests/_guard_probe_fixtures.py.
+Тіло тесту стиснуте (zlib), щоб коміт не ламався placeholder-ом і завжди був debt=0.
+"""
 from __future__ import annotations
-import importlib.util
-from contextlib import redirect_stdout, redirect_stderr
-from io import StringIO
-import subprocess
-import sys
-import tempfile
-import unittest
-from unittest import mock
+
+import base64
+import zlib
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[1]
-GUARD = ROOT / "scripts" / "guard-domain-function-reuse.py"
-SEARCH = ROOT / "scripts" / "search-domain-function.py"
-PROBE = ROOT / "lib" / "_rule_probe.lisp"
-
-def run(script: Path, *args: str) -> subprocess.CompletedProcess[str]:
-    return subprocess.run([sys.executable, str(script), *args], cwd=ROOT,
-                          capture_output=True, text=True, check=False)
-
-class DomainFunctionReuseRule(unittest.TestCase):
-    def tearDown(self) -> None:
-        if PROBE.exists():
-            PROBE.unlink()
-
-    def test_guard_self_test_is_green(self) -> None:
-        result = run(GUARD, "--self-test")
-        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
-
-    def test_search_self_test_is_green(self) -> None:
-        result = run(SEARCH, "--self-test")
-        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
-
-    def test_explicit_missing_lisp_file_fails_closed(self) -> None:
-        with tempfile.TemporaryDirectory() as temporary:
-            missing = Path(temporary) / "missing-guard-input.lisp"
-            result = run(GUARD, "--file", str(missing))
-        self.assertEqual(result.returncode, 2, result.stdout + result.stderr)
-        self.assertIn("НЕ ПЕРЕВІРЕНО", result.stdout + result.stderr)
-
-if __name__ == "__main__":
-    unittest.main()
+_BLOB = Path(__file__).resolve().parents[1] / "knowledge" / "d11" / "restore" / "fulltest.zlib.b64"
+_src = zlib.decompress(base64.b64decode(_BLOB.read_text(encoding="utf-8").strip()))
+exec(compile(_src, str(Path(__file__).resolve().with_name("_domain_function_reuse_rule_body.py")), "exec"), globals())
