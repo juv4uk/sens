@@ -379,6 +379,8 @@ jobs:
           cargo test --locked -p sens-host --test capability_scoping local_model_ -- --nocapture
           cargo test --locked -p sens-lsp --lib transport::tests:: -- --nocapture
           cargo test --locked -p sens-cli --bin sens t5m_quoted_ -- --nocapture
+          # Лише host I/O: фізична помилка SENS ніколи не стає stdout echo.
+          cargo test --locked -p sens-cli --bin sens repl::tests::host_reports_native_sens_rejection_without_echo_fallback -- --exact --nocapture
           # Реальна межа TCP-кадру: UTF-8, EOF, overflow і абсолютний дедлайн.
           cargo test --locked -p sens-cli --bin sens tcp_repl_frame_ -- --nocapture
           # F6 — тільки механізм двозаписового Rust-транспорту.
