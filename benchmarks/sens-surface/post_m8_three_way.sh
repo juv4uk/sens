@@ -49,15 +49,20 @@ paramsof() {
 }
 
 measure() {
-  value=$(
-    valgrind --tool=cachegrind --cache-sim=no --cachegrind-out-file=/dev/null \
-      "$BIN" "$PROGRAMS" "$@" 2>&1 >/dev/null |
-      sed -n 's/.*I *refs: *//p' | tr -d ','
-  )
+  # A failed benchmark must not become a valid instruction count.
+  if diagnostic=$(valgrind --tool=cachegrind --cache-sim=no --cachegrind-out-file=/dev/null \
+      "$BIN" "$PROGRAMS" "$@" 2>&1 >/dev/null); then
+    :
+  else
+    echo "Cachegrind or benchmark failed for: $*" >&2
+    return 3
+  fi
+  value=$(printf '%s\n' "$diagnostic" |
+    sed -n 's/.*I *refs: *//p' | tr -d ',')
   case "$value" in
     ''|*[!0-9]*)
       echo "failed to read Cachegrind I refs for: $*" >&2
-      exit 3
+      return 3
       ;;
   esac
   printf '%s' "$value"
@@ -106,7 +111,8 @@ printf 'workload\tparams\ttransport\tmode\trep\trepeat_n\tinstructions\n' > "$RA
 
 rep=1
 while [ "$rep" -le "$REPS" ]; do
-  printf 'empty\t-\t-\tempty\t%s\t-\t%s\n' "$rep" "$(measure empty -)" >> "$RAW"
+  instructions=$(measure empty -)
+  printf 'empty\t-\t-\tempty\t%s\t-\t%s\n' "$rep" "$instructions" >> "$RAW"
   rep=$((rep + 1))
 done
 
@@ -124,13 +130,15 @@ for expected in "$PROGRAMS"/*.expected; do
     rep=1
     while [ "$rep" -le "$REPS" ]; do
       for mode in load ready full; do
+        instructions=$(measure "$name" "$form" "$mode")
         printf '%s\t%s\t%s\t%s\t%s\t-\t%s\n' \
           "$name" "$params" "$transport" "$mode" "$rep" \
-          "$(measure "$name" "$form" "$mode")" >> "$RAW"
+          "$instructions" >> "$RAW"
       done
+      instructions=$(measure "$name" "$form" repeat "$REPEAT_N")
       printf '%s\t%s\t%s\trepeat\t%s\t%s\t%s\n' \
         "$name" "$params" "$transport" "$rep" "$REPEAT_N" \
-        "$(measure "$name" "$form" repeat "$REPEAT_N")" >> "$RAW"
+        "$instructions" >> "$RAW"
       rep=$((rep + 1))
     done
   done
