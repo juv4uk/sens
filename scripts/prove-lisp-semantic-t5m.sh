@@ -1887,6 +1887,20 @@ run_case run_law d6-zip-structural-order "$d6_zip_order" 1
 run_case run_type_rejection d6-zip-right-root "$d6_zip_right_root" 'car expects a non-empty list'
 run_case run_type_rejection d6-zip-right-tail "$d6_zip_right_tail" 'car expects a non-empty list'
 run_case run_law d6-d8-zip-swap-interoperability tests/semantic/d6-d8-zip-swap-interoperability-law.lisp 1 core4
+# Д6:111001 UNZIP · один SENS-обхід, проєкції та всі D3 Type-негативи.
+run_case run_law d6-unzip-single-pass-positive tests/semantic/d6-unzip-single-pass-law.lisp 1 core4
+run_case run_law d6-unzip-single-pass-mutant tests/semantic/d6-unzip-single-pass-mutant.lisp 0 core4
+run_case run_error_rejection d6-unzip-atom-root tests/semantic/d6-unzip-atom-root-negative.lisp Type 'car expects a non-empty list' core4
+run_case run_error_rejection d6-unzip-atom-tail tests/semantic/d6-unzip-atom-tail-negative.lisp Type 'car expects a non-empty list' core4
+run_case run_error_rejection d6-unzip-atom-element tests/semantic/d6-unzip-atom-element-negative.lisp Type 'car expects a non-empty list' core4
+run_case run_error_rejection d6-unzip-empty-pair tests/semantic/d6-unzip-empty-pair-negative.lisp Type 'car expects a non-empty list' core4
+sha256sum lib/core4.lisp lib/core4-parts/core4-d6b.lisp \
+  tests/semantic/d6-unzip-single-pass-law.lisp \
+  tests/semantic/d6-unzip-single-pass-mutant.lisp \
+  tests/semantic/d6-unzip-atom-root-negative.lisp \
+  tests/semantic/d6-unzip-atom-tail-negative.lisp \
+  tests/semantic/d6-unzip-atom-element-negative.lisp \
+  tests/semantic/d6-unzip-empty-pair-negative.lisp > "$evidence/d6-unzip-inputs.sha256"
 
 # D6 UNION: одна точна SENS-бібліотека, лише витяг чинних DEFINE.
 # Неправильний D1-хвіст має відхилятися Type, а не повертати обрізаний результат.
