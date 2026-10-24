@@ -362,7 +362,13 @@ def project_definition_sites(root: Path) -> dict[str, set[str]]:
         raise SystemExit(2)
     files = result.stdout.split("\0")
     for rel in files:
-        if not rel.endswith(".lisp") or rel.startswith(("lib/domains/", "lib/generated/", "lib/surface/")):
+        # core4-parts — проєкційні дзеркала lib/core4.lisp. Вони не є
+        # незалежними визначеннями проєкту; інакше будь-який новий
+        # SENS-помічник Core4 стає хибним «дублем іншого файла».
+        # Мовні DEFINE частин перевіряє окремий парний SENS/T5M guard.
+        if not rel.endswith(".lisp") or rel.startswith(
+            ("lib/domains/", "lib/generated/", "lib/surface/", "lib/core4-parts/")
+        ):
             continue
         path = root / rel
         if path.is_file():
