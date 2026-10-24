@@ -1,0 +1,51 @@
+result=PASS
+measurement_date=2026-10-24
+timing_source_base_commit=dd9c0d75340328409a6a88737c3c1a6ea03d121a
+timing_source_delta=baseline used bit-at-a-time packing plus 1024-byte capacity; optimized version uses a streaming bit accumulator
+timing_capacity_fix_commit=05561ee2d
+timing_optimized_source=worktree optimization based on main 34c2ecd40
+zig=0.16.0
+target=WSL2 Linux 6.18.33.2-microsoft-standard-WSL2
+cpu=Intel(R) Core(TM) i5-6400 CPU @ 2.70GHz; 4 cores; 4 logical CPUs
+optimization=ReleaseFast
+scope=encode+decode roundtrip; caller-owned buffers; no allocation
+semantics=NOT_TESTED; T5M=NOT_COMPARED; frame=NOT_INCLUDED; RSS=NOT_MEASURED
+corpus=64: first 64 entries of (i*73) mod 512; corpus=512: all selector coordinates
+method=4 warmups per mode; 15 alternating paired samples; target_sample_ns=2000000; p50 and nearest-rank p90; timings are ns per encode+decode roundtrip
+roundtrip_preflight=PASS for all codecs and both corpora
+
+run=1; preceding wsm-agent bench-ready=READY load1=1.37; build and benchmark ran sequentially in one command
+D11_CONTEST mode=selector9 words=64 bytes=72 bytes_per_word_milli=1125 p50_ns_per_roundtrip=1337 p90_ns_per_roundtrip=1978 ratio_vs_raw16_milli=23456 samples=15 reps_min=1024 reps_max=2048 roundtrip=EXACT paired=YES
+D11_CONTEST mode=dense11 words=64 bytes=88 bytes_per_word_milli=1375 p50_ns_per_roundtrip=1558 p90_ns_per_roundtrip=1881 ratio_vs_raw16_milli=27333 samples=15 reps_min=2048 reps_max=2048 roundtrip=EXACT paired=YES
+D11_CONTEST mode=raw16 words=64 bytes=128 bytes_per_word_milli=2000 p50_ns_per_roundtrip=57 p90_ns_per_roundtrip=76 ratio_vs_raw16_milli=1000 samples=15 reps_min=32768 reps_max=65536 roundtrip=EXACT paired=YES
+D11_CONTEST mode=selector9 words=512 bytes=576 bytes_per_word_milli=1125 p50_ns_per_roundtrip=11076 p90_ns_per_roundtrip=15224 ratio_vs_raw16_milli=28919 samples=15 reps_min=256 reps_max=256 roundtrip=EXACT paired=YES
+D11_CONTEST mode=dense11 words=512 bytes=704 bytes_per_word_milli=1375 p50_ns_per_roundtrip=12444 p90_ns_per_roundtrip=13560 ratio_vs_raw16_milli=32490 samples=15 reps_min=256 reps_max=256 roundtrip=EXACT paired=YES
+D11_CONTEST mode=raw16 words=512 bytes=1024 bytes_per_word_milli=2000 p50_ns_per_roundtrip=383 p90_ns_per_roundtrip=511 ratio_vs_raw16_milli=1000 samples=15 reps_min=4096 reps_max=8192 roundtrip=EXACT paired=YES
+D11_CONTEST_METHOD paired=YES alternating=YES samples=15 target_sample_ns=2000000 semantic_oracle=NOT_USED modes=selector9,dense11,raw16
+
+optimized_run=1; preceding wsm-agent bench-ready=READY load1=1.45; cached ReleaseFast executable after separately observing READY post-build
+D11_CONTEST mode=selector9 words=64 bytes=72 bytes_per_word_milli=1125 p50_ns_per_roundtrip=491 p90_ns_per_roundtrip=1062 ratio_vs_raw16_milli=8322 samples=15 reps_min=512 reps_max=8192 roundtrip=EXACT paired=YES
+D11_CONTEST mode=dense11 words=64 bytes=88 bytes_per_word_milli=1375 p50_ns_per_roundtrip=437 p90_ns_per_roundtrip=855 ratio_vs_raw16_milli=7406 samples=15 reps_min=4096 reps_max=8192 roundtrip=EXACT paired=YES
+D11_CONTEST mode=raw16 words=64 bytes=128 bytes_per_word_milli=2000 p50_ns_per_roundtrip=59 p90_ns_per_roundtrip=131 ratio_vs_raw16_milli=1000 samples=15 reps_min=8192 reps_max=65536 roundtrip=EXACT paired=YES
+D11_CONTEST mode=selector9 words=512 bytes=576 bytes_per_word_milli=1125 p50_ns_per_roundtrip=3978 p90_ns_per_roundtrip=7210 ratio_vs_raw16_milli=10722 samples=15 reps_min=256 reps_max=1024 roundtrip=EXACT paired=YES
+D11_CONTEST mode=dense11 words=512 bytes=704 bytes_per_word_milli=1375 p50_ns_per_roundtrip=3896 p90_ns_per_roundtrip=12433 ratio_vs_raw16_milli=10501 samples=15 reps_min=128 reps_max=1024 roundtrip=EXACT paired=YES
+D11_CONTEST mode=raw16 words=512 bytes=1024 bytes_per_word_milli=2000 p50_ns_per_roundtrip=371 p90_ns_per_roundtrip=2580 ratio_vs_raw16_milli=1000 samples=15 reps_min=128 reps_max=8192 roundtrip=EXACT paired=YES
+D11_CONTEST_METHOD paired=YES alternating=YES samples=15 target_sample_ns=2000000 semantic_oracle=NOT_USED modes=selector9,dense11,raw16
+
+optimized_run=2; preceding wsm-agent bench-ready=READY load1=1.30; cached ReleaseFast executable
+D11_CONTEST mode=selector9 words=64 bytes=72 bytes_per_word_milli=1125 p50_ns_per_roundtrip=494 p90_ns_per_roundtrip=591 ratio_vs_raw16_milli=9148 samples=15 reps_min=4096 reps_max=8192 roundtrip=EXACT paired=YES
+D11_CONTEST mode=dense11 words=64 bytes=88 bytes_per_word_milli=1375 p50_ns_per_roundtrip=439 p90_ns_per_roundtrip=680 ratio_vs_raw16_milli=8129 samples=15 reps_min=4096 reps_max=8192 roundtrip=EXACT paired=YES
+D11_CONTEST mode=raw16 words=64 bytes=128 bytes_per_word_milli=2000 p50_ns_per_roundtrip=54 p90_ns_per_roundtrip=76 ratio_vs_raw16_milli=1000 samples=15 reps_min=32768 reps_max=65536 roundtrip=EXACT paired=YES
+D11_CONTEST mode=selector9 words=512 bytes=576 bytes_per_word_milli=1125 p50_ns_per_roundtrip=3805 p90_ns_per_roundtrip=6040 ratio_vs_raw16_milli=10569 samples=15 reps_min=512 reps_max=1024 roundtrip=EXACT paired=YES
+D11_CONTEST mode=dense11 words=512 bytes=704 bytes_per_word_milli=1375 p50_ns_per_roundtrip=3803 p90_ns_per_roundtrip=8132 ratio_vs_raw16_milli=10563 samples=15 reps_min=256 reps_max=1024 roundtrip=EXACT paired=YES
+D11_CONTEST mode=raw16 words=512 bytes=1024 bytes_per_word_milli=2000 p50_ns_per_roundtrip=360 p90_ns_per_roundtrip=381 ratio_vs_raw16_milli=1000 samples=15 reps_min=8192 reps_max=8192 roundtrip=EXACT paired=YES
+D11_CONTEST_METHOD paired=YES alternating=YES samples=15 target_sample_ns=2000000 semantic_oracle=NOT_USED modes=selector9,dense11,raw16
+
+run=2; preceding wsm-agent bench-ready=READY load1=0.91; cached ReleaseFast executable
+D11_CONTEST mode=selector9 words=64 bytes=72 bytes_per_word_milli=1125 p50_ns_per_roundtrip=1387 p90_ns_per_roundtrip=18872 ratio_vs_raw16_milli=24767 samples=15 reps_min=256 reps_max=2048 roundtrip=EXACT paired=YES
+D11_CONTEST mode=dense11 words=64 bytes=88 bytes_per_word_milli=1375 p50_ns_per_roundtrip=1556 p90_ns_per_roundtrip=2527 ratio_vs_raw16_milli=27785 samples=15 reps_min=1024 reps_max=2048 roundtrip=EXACT paired=YES
+D11_CONTEST mode=raw16 words=64 bytes=128 bytes_per_word_milli=2000 p50_ns_per_roundtrip=56 p90_ns_per_roundtrip=113 ratio_vs_raw16_milli=1000 samples=15 reps_min=32768 reps_max=65536 roundtrip=EXACT paired=YES
+D11_CONTEST mode=selector9 words=512 bytes=576 bytes_per_word_milli=1125 p50_ns_per_roundtrip=10799 p90_ns_per_roundtrip=18649 ratio_vs_raw16_milli=28951 samples=15 reps_min=64 reps_max=256 roundtrip=EXACT paired=YES
+D11_CONTEST mode=dense11 words=512 bytes=704 bytes_per_word_milli=1375 p50_ns_per_roundtrip=13728 p90_ns_per_roundtrip=31528 ratio_vs_raw16_milli=36804 samples=15 reps_min=32 reps_max=256 roundtrip=EXACT paired=YES
+D11_CONTEST mode=raw16 words=512 bytes=1024 bytes_per_word_milli=2000 p50_ns_per_roundtrip=373 p90_ns_per_roundtrip=2812 ratio_vs_raw16_milli=1000 samples=15 reps_min=128 reps_max=8192 roundtrip=EXACT paired=YES
+D11_CONTEST_METHOD paired=YES alternating=YES samples=15 target_sample_ns=2000000 semantic_oracle=NOT_USED modes=selector9,dense11,raw16

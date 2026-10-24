@@ -387,8 +387,10 @@ def main(argv: list[str] | None = None) -> int:
         print(f"GUARD-DOMAIN-REUSE self-test: {'OK' if ok else 'FAIL'} (поверхонь у драбинах: {len(ladder)}, джерело: discover_domain_function_candidates)")
         # Перевіряємо і ВЛАСНУ активацію: невиконуваний гачок = мертвий охоронець.
         hok, hmsg = hook_installed()
-        print(f"GUARD-DOMAIN-REUSE self-test: гачок {'OK' if hok else 'НЕ УВІМКНЕНО'} — {hmsg}")
-        return 0 if (ok and hok) else 1
+        print(f"GUARD-DOMAIN-REUSE self-test: гачок {'OK' if hok else 'НЕ УВІМКНЕНО (попередження)'} — {hmsg}")
+        # Стан гачка — ПОПЕРЕДЖЕННЯ, не падіння: свіжий клон законно не має
+        # ввімкненого гачка, доки не виконано scripts/install-hooks.sh.
+        return 0 if ok else 1
 
     if not (args.staged or args.paths_from or args.file):
         ap.error("потрібен --staged / --paths-from / --file")

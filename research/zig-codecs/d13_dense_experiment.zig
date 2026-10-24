@@ -95,13 +95,13 @@ test "D13 research: all 8192 possible raw words roundtrip" {
 }
 
 test "D13 research: exact order, leading zeros and useful lengths" {
-    const sample = [_]u16{ 0x0000, 0x1fff };
+    const example_words = [_]u16{ 0x0000, 0x1fff };
     var bytes: [4]u8 = undefined;
-    try std.testing.expectEqual(@as(usize, 4), try encode(&sample, &bytes));
+    try std.testing.expectEqual(@as(usize, 4), try encode(&example_words, &bytes));
     try std.testing.expectEqualSlices(u8, &.{ 0x00, 0x07, 0xff, 0xc0 }, &bytes);
     var restored: [2]u16 = undefined;
     try decode(&bytes, 2, &restored);
-    try std.testing.expectEqualSlices(u16, &sample, &restored);
+    try std.testing.expectEqualSlices(u16, &example_words, &restored);
 
     const counts = [_]usize{ 1, 2, 3, 4, 5, 64, 512 };
     const lengths = [_]usize{ 2, 4, 5, 7, 9, 104, 832 };

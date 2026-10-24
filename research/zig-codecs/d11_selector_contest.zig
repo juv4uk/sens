@@ -43,14 +43,21 @@ fn encodeWords(comptime width: usize, comptime base: u16, words: []const u16, ou
         if (word < base or word >= limit) return error.InvalidWord;
     }
     if (output.len < n) return error.OutputTooSmall;
-    @memset(output[0..n], 0);
-    for (words, 0..) |word, i| {
-        const value: u16 = word - base;
-        for (0..width) |j| {
-            const cursor = i * width + j;
-            const bit: u8 = @intCast((value >> @as(u4, @intCast(width - j - 1))) & 1);
-            output[cursor / 8] |= bit << @as(u3, @intCast(7 - cursor % 8));
+    var accumulator: u64 = 0;
+    var pending: u7 = 0;
+    var output_index: usize = 0;
+    for (words) |word| {
+        accumulator = (accumulator << width) | @as(u64, word - base);
+        pending += width;
+        while (pending >= 8) {
+            pending -= 8;
+            output[output_index] = @truncate(accumulator >> @as(u6, @intCast(pending)));
+            output_index += 1;
         }
+        accumulator &= (@as(u64, 1) << @as(u6, @intCast(pending))) - 1;
+    }
+    if (pending != 0) {
+        output[output_index] = @truncate(accumulator << @as(u6, @intCast(8 - pending)));
     }
     return n;
 }
@@ -64,13 +71,19 @@ fn decodeWords(comptime width: usize, comptime base: u16, data: []const u8, coun
         const mask: u8 = (@as(u8, 1) << @as(u3, @intCast(padding))) - 1;
         if ((data[n - 1] & mask) != 0) return error.NonCanonicalTail;
     }
-    for (0..count) |i| {
-        var value: u16 = 0;
-        for (0..width) |j| {
-            const cursor = i * width + j;
-            value = (value << 1) | @as(u16, (data[cursor / 8] >> @as(u3, @intCast(7 - cursor % 8))) & 1);
+    var accumulator: u64 = 0;
+    var pending: u7 = 0;
+    var input_index: usize = 0;
+    const value_mask = (@as(u64, 1) << width) - 1;
+    for (output[0..count]) |*word| {
+        while (pending < width) {
+            accumulator = (accumulator << 8) | data[input_index];
+            input_index += 1;
+            pending += 8;
         }
-        output[i] = base + value;
+        pending -= width;
+        word.* = base + @as(u16, @intCast((accumulator >> @as(u6, @intCast(pending))) & value_mask));
+        accumulator &= (@as(u64, 1) << @as(u6, @intCast(pending))) - 1;
     }
 }
 
@@ -115,6 +128,29 @@ test "D11 Драбина: усі 512 селекторів мають точни�
         try decodeSelectors(&payload, 1, &decoded);
         try std.testing.expectEqualSlices(u16, &source, &decoded);
     }
+}
+
+test "D11 Драбина: selector9 зберігає порядок бітів на межі байта" {
+    const source = [_]u16{ selector_first, selector_first + 1, selector_last };
+    const expected = [_]u8{ 0x00, 0x00, 0x7f, 0xe0 };
+    var payload: [expected.len]u8 = undefined;
+    try std.testing.expectEqual(expected.len, try encodeSelectors(&source, &payload));
+    try std.testing.expectEqualSlices(u8, &expected, &payload);
+
+    var restored: [source.len]u16 = undefined;
+    try decodeSelectors(&payload, source.len, &restored);
+    try std.testing.expectEqualSlices(u16, &source, &restored);
+}
+
+test "D11 Драбина: один потік selector9 переносить усі 512 слів" {
+    var source: [selector_count]u16 = undefined;
+    for (&source, 0..) |*word, i| word.* = selector_first + @as(u16, @intCast(i));
+    var payload: [576]u8 = undefined;
+    try std.testing.expectEqual(@as(usize, 576), try encodeSelectors(&source, &payload));
+
+    var restored: [selector_count]u16 = undefined;
+    try decodeSelectors(&payload, source.len, &restored);
+    try std.testing.expectEqualSlices(u16, &source, &restored);
 }
 
 test "D11 Драбина: запам'ятати всі 512 координат і Lisp-імен таблиці" {
@@ -363,8 +399,8 @@ fn benchmarkCount(count: usize, offset: usize) !void {
         std.debug.print(
             "D11_CONTEST mode={s} words={d} bytes={d} bytes_per_word_milli={d} p50_ns_per_roundtrip={d} p90_ns_per_roundtrip={d} ratio_vs_raw16_milli={d} samples={d} reps_min={d} reps_max={d} roundtrip=EXACT paired=YES\n",
             .{
-                codecName(codec), count, byte_sizes[index], bytes_per_word_milli,
-                p50, p90, ratio_vs_raw16_milli, sample_count,
+                codecName(codec),    count,               byte_sizes[index],    bytes_per_word_milli,
+                p50,                 p90,                 ratio_vs_raw16_milli, sample_count,
                 minimum_reps[index], maximum_reps[index],
             },
         );

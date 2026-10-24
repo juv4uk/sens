@@ -21,12 +21,22 @@ pub const Candidate = struct {
 /// Ім'я має 11 літер A/D між C і R; код складається з 11+2 бітів.
 pub fn derive(parent: ladder.Record, suffix: u2) ?Candidate {
     if (parent.width != 11 or parent.bits.len != 11 or parent.lisp.len != 11) return null;
-    if (parent.lisp[0] != 'C' or parent.lisp[10] != 'R') return null;
-    for (parent.bits) |bit| {
-        if (bit != '0' and bit != '1') return null;
-    }
-    for (parent.lisp[1..10]) |letter| {
-        if (letter != 'A' and letter != 'D') return null;
+    // Доведена селекторна чверть: лише корені D3 CDR=011 та CAR=100.
+    // Біти суфікса не просто синтаксис: 0=A/CAR, 1=D/CDR.
+    const root_letter: u8 = if (std.mem.eql(u8, parent.bits[0..3], "011"))
+        'D'
+    else if (std.mem.eql(u8, parent.bits[0..3], "100"))
+        'A'
+    else
+        return null;
+    if (parent.lisp[0] != 'C' or parent.lisp[1] != root_letter or parent.lisp[10] != 'R') return null;
+    for (parent.bits[3..], 0..) |bit, index| {
+        const expected_letter: u8 = switch (bit) {
+            '0' => 'A',
+            '1' => 'D',
+            else => return null,
+        };
+        if (parent.lisp[index + 2] != expected_letter) return null;
     }
 
     var result: Candidate = undefined;
@@ -87,6 +97,37 @@ test "Драбина D13: чотири різні суфікси зберіга�
         try std.testing.expectEqualSlices(u8, names[i], child.lisp[10..12]);
         try std.testing.expectEqual(@as(u8, 'R'), child.lisp[12]);
     }
+}
+
+test "Драбина D13: батько має дотримуватися точного закону бітів і літер" {
+    const parent = ladder.questionAt(11, 0) orelse return error.MissingParent;
+
+    var wrong_name: [11]u8 = undefined;
+    std.mem.copyForwards(u8, &wrong_name, parent.lisp);
+    wrong_name[2] = if (wrong_name[2] == 'A') 'D' else 'A';
+    const name_mismatch = ladder.Record{
+        .width = 11,
+        .bits = parent.bits,
+        .lisp = &wrong_name,
+    };
+    try std.testing.expect(derive(name_mismatch, 0) == null);
+
+    var wrong_bits: [11]u8 = undefined;
+    std.mem.copyForwards(u8, &wrong_bits, parent.bits);
+    wrong_bits[3] = if (wrong_bits[3] == '0') '1' else '0';
+    const bit_mismatch = ladder.Record{
+        .width = 11,
+        .bits = &wrong_bits,
+        .lisp = parent.lisp,
+    };
+    try std.testing.expect(derive(bit_mismatch, 0) == null);
+
+    const foreign_root = ladder.Record{
+        .width = 11,
+        .bits = "00000000000",
+        .lisp = parent.lisp,
+    };
+    try std.testing.expect(derive(foreign_root, 0) == null);
 }
 
 test "Драбина D13: чужі та некоректні координати відхиляються" {

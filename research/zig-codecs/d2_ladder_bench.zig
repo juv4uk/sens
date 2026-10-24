@@ -16,6 +16,8 @@ fn nanoseconds() u64 {
         @as(u64, @intCast(ts.tv_nsec));
 }
 
+const Direction = enum { encode, decode };
+
 const merged = [_]u8{ 2, 0, 2, 0, 2, 0, 2, 0, 1, 0, 2, 0, 1, 1, 0, 2, 0, 1, 1, 1 };
 const merged_runs = [_][]const u8{&merged};
 const interrupted = [_][]const u8{
@@ -24,7 +26,7 @@ const interrupted = [_][]const u8{
 };
 
 fn operation(
-    comptime op: enum { encode, decode },
+    comptime op: Direction,
     allocator: std.mem.Allocator,
     runs: []const []const u8,
     physical: []const []const u8,
@@ -43,7 +45,7 @@ fn operation(
 }
 
 fn trial(
-    comptime op: enum { encode, decode },
+    comptime op: Direction,
     allocator: std.mem.Allocator,
     name: []const u8,
     runs: []const []const u8,

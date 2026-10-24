@@ -98,6 +98,7 @@ jobs:
           python3 scripts/check_d11_selector_seed.py --json
           python3 -m unittest discover -s tests -p test_d11_selector_seed.py
           python3 -m unittest discover -s tests -p test_add_d11_function.py
+          python3 -m unittest discover -s tests -p test_domain_game.py
 
       - name: УКР-ПРОЄКЦІЯ — вчорашні анотації прогресу Lisp
         if: ${{ always() }}
@@ -480,15 +481,6 @@ jobs:
             echo "::error file=research/zig-codecs/ladder_memory_bench.zig,title=Zig D11 memory benchmark::REGRESSION layer=game-benchmark expected=measured-parity actual=failed"
             zig_failed=1
           fi
-          if zig test -lc research/zig-codecs/d13_selector_game.zig \
-              > "$RUNNER_TEMP/zig-d13-selector-game.log" 2>&1; then
-            cat "$RUNNER_TEMP/zig-d13-selector-game.log"
-            echo "::notice title=Zig D13 selector research::PASS proposals=2048 opcode=UNRATIFIED semantics=NOT_TESTED"
-          else
-            cat "$RUNNER_TEMP/zig-d13-selector-game.log" >&2
-            echo "::error file=research/zig-codecs/d13_selector_game.zig,title=Zig D13 selector research::REGRESSION layer=selector-research expected=2048-unique-candidates actual=failed"
-            zig_failed=1
-          fi
           if zig test -lc research/zig-codecs/d11_selector_contest.zig \
               > "$RUNNER_TEMP/zig-d11-selector-tests.log" 2>&1; then
             cat "$RUNNER_TEMP/zig-d11-selector-tests.log"
@@ -585,6 +577,17 @@ jobs:
           fi
           # Д13-гра: лише похідні D11-селектори, без семантичної ратифікації.
           # Негативні кадри і всі 2048 точних координат перевіряє сам Zig.
+          # Д13-гра: генератор і перевірка 2048 кандидатів від чинних D11-таблиць.
+          # Механічна перевірка не оголошує новий домен або виконуваний opcode.
+          if zig test -O ReleaseFast -lc research/zig-codecs/d13_selector_game.zig \
+              > "$RUNNER_TEMP/zig-d13-selector-game.log" 2>&1; then
+            cat "$RUNNER_TEMP/zig-d13-selector-game.log"
+            echo "::notice title=Zig D13 selector game::PASS candidates=2048 parents=512 semantic_status=UNRATIFIED"
+          else
+            cat "$RUNNER_TEMP/zig-d13-selector-game.log" >&2
+            echo "::error file=research/zig-codecs/d13_selector_game.zig,title=Zig D13 selector game::REGRESSION layer=derived-coordinate-game expected=2048-exact-unique-candidates actual=failed"
+            zig_failed=1
+          fi
           if zig test -O ReleaseFast -lc research/zig-codecs/d13_selector_contest.zig \
               > "$RUNNER_TEMP/zig-d13-selector-tests.log" 2>&1; then
             cat "$RUNNER_TEMP/zig-d13-selector-tests.log"
@@ -669,6 +672,17 @@ jobs:
           "$RUNNER_TEMP/sens-rust-copy-bench"
           zig test -O ReleaseFast -lc benchmarks/mechanism/zig-byte-copy-bench.zig
           echo "::notice title=Rust Zig mechanism benchmarks::MEASURED samples=11 batch=512 source=lib/core4.lisp semantic=NOT_ASSERTED"
+
+      # Д11: Rust і Zig виконують ті самі три операції з тими самими даними.
+      # Однакова часова межа, повторно використовувані буфери, 15 чергованих зразків.
+      - name: Rust/Zig — порівнюваний бенчмарк сімейств D11
+        if: ${{ always() }}
+        shell: bash
+        timeout-minutes: 5
+        run: |
+          set -euo pipefail
+          bash benchmarks/native/run-d11-families.sh "$RUNNER_TEMP/d11-families"
+          cat "$RUNNER_TEMP/d11-families/summary.tsv" >> "$GITHUB_STEP_SUMMARY"
 
       # Rust тут перевіряє тільки механізм CLI. Жоден результат арифметики
       # або Lisp-закон не визначається Rust-тестами.

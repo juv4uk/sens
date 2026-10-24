@@ -1,12 +1,14 @@
 // GENERATED from contracts/numeric-domains-ratification.lisp — DO NOT EDIT BY HAND.
-// Authority: contracts/numeric-domains-ratification.lisp (D(24 * 2^n), n >= 0).
-// Rust holds bytes; it does not decide codes.
+// Чинний D12+ закон: D(12 * 2^n), n >= 0.
+// Rust переносить точні ширини, а не визначає семантику або виконання.
 
-/// Canonical wide numeric-domain widths, in contract order.
-pub const NUMERIC_DOMAIN_WIDTHS: [u16; 4] = [ 24, 48, 96, 192 ];
+/// Початковий префікс ратифікованих математичних ширин.
+pub const NUMERIC_DOMAIN_WIDTHS: [u16; 5] = [ 12, 24, 48, 96, 192 ];
+pub const FIRST_NUMERIC_DOMAIN_WIDTH: u16 = 12;
 
-/// The first (narrowest) ratified numeric domain width.
-pub const FIRST_NUMERIC_DOMAIN_WIDTH: u16 = 24;
+/// Реально підтримуваний фізичний профіль, без D12.
+pub const PHYSICAL_NUMERIC_WIDTHS: [u16; 4] = [ 24, 48, 96, 192 ];
+pub const FIRST_PHYSICAL_NUMERIC_WIDTH: u16 = 24;
 
-/// Next rung from any ratified width (contract: next-width = double).
+/// Подвоєння ширини не надає права виклику чи фізичної підтримки.
 pub const fn next_width(w: u16) -> u16 { w * 2 }
