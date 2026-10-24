@@ -11,6 +11,15 @@
 (визначити *довідник-гвардії*
   (як-є
     ((reference
+       (topic sens-lisp-t5m-stage-profile-interpretation)
+       (summary "Фазові бенчмарки CI не можна ототожнювати з гарячим EVAL чи release CLI. На run 40040241581, SHA 95b521cc, 141 різний Lisp-свідок давав по одній повнопроцесній пробі на етап: p50 direct 571153 мкс, codec-mint 402612 мкс, sens-paired 400594 мкс, sens-standalone 272950 мкс, Zig open 7973 мкс, Zig verify 8238 мкс. Ці p50 отримані між РІЗНИМИ свідками, не є однією сумовною трасою. CI використовує target/debug/sens та target/debug/sens-trit із benchmark-ast-visits, тому порівняння з release CLI p50 близько 1.3 мс для простої D3-форми на іншому SHA не доводить регресію чи прискорення. Нативні фази включають старт процесу, завантаження Core та виконання; відносну ціну цих складників ще треба виміряти. Час не визначає семантичну істину.")
+       (authority (.github/workflows/ci.yml scripts/prove-lisp-semantic-t5m.sh scripts/report-sens-law-hotspots.sh benchmarks/physical-sens-runtime/first-hot-baseline-2026-10-09.md docs/research/2026-10-09-benchmark-first-reality-baseline.uk.md))
+       (how-to (record-exact-sha-and-build-profile compare-identical-corpus-and-runner separate-cold-start-core-load-parse-lower-eval-and-transport keep-stdout-and-negative-law-parity measure-p50-and-p95-before-optimization never-sum-cross-witness-medians-as-one-trace do-not-convert-benchmark-pass-into-semantic-pass))
+       (verify (ci-binary-profile-is-debug recorded-phase-samples-have-one-sample-per-witness old-release-baseline-is-not-directly-comparable native-sens-verdict-remains-authoritative))
+       (lifecycle benchmark-diagnostic-not-language-law)
+       (provenance "SENS CI run 40040241581, 2026-10-24; debug/release attribution audit")
+       (unknown-route ask-owner))
+      (reference
        (topic selector-quarter-generative-law)
        (summary "Селекторна родина функціональних доменів D3,D4,D5,D6,D8,D9,D10,D11 має точні коди {011,100}||{0,1}^(n-3), кількість 2^(n-2), рівно одну чверть місткості Dn. Корені D3: 011=CDR, 100=CAR; кожний суфіксний 0 відповідає A/CAR, 1 відповідає D/CDR. D6→D8 додає два біти, не привласнюючи текстовий D7. D11→D13 додає два біти, не привласнюючи числовий D12; 2048 D13 слів є лише дослідними кандидатами. Сама ширина не надає доменного допуску або викличності.")
        (authority (contracts/bija3-l1-l5-ratification.lisp contracts/d5-ratification.lisp contracts/d6-ratification.lisp contracts/d8-ratification.lisp docs/research/D10-SELECTOR-SEMANTICS-PROOF-20261012.uk.md lib/domains/d11.lisp research/zig-codecs/d13_selector_game.zig))
