@@ -174,6 +174,8 @@ run_native_t5m_program() {
   # Названі випадки проходять і paired, і standalone; інша причина відмови — RED.
   local negative_type_diagnostic=""
   case "$file" in
+    tests/semantic/d6-any-all-cold-no-mechanism-negative.lisp)
+      negative_type_diagnostic='domain identity is not callable' ;;
     tests/semantic/d3-eq-nonatom-type-negative.lisp)
       negative_type_diagnostic='eq expects two atoms' ;;
     tests/semantic/d4-not-nonpredicate-type-negative.lisp)
@@ -966,6 +968,34 @@ while IFS= read -r file || [[ -n "$file" ]]; do
                      --binding-source lib/d11-srfi1-alist-protocol.lisp
                      --binding-source lib/d11-clojure-group-by.lisp
                      --binding-source lib/d11-clojure-frequencies-unary.lisp)
+  elif [[ "$file" == "tests/semantic/d6-any-all-first-class-law.lisp" ]]; then
+    # Механічно витягаємо ДВІ чинні SENS-визначення з Core4.
+    # Shell не вирішує істину, не відкриває решту D6 і не переписує код.
+    local_d6_source="$dir/d6-any-all-core4-definitions.lisp"
+    : > "$local_d6_source"
+    for quantifier in будь-яке? усі?; do
+      if ! awk -v target="(визначити $quantifier" '
+        $0 == target {
+          if (found++) exit 2
+          copying = 1
+        }
+        copying && NF == 0 {
+          copying = 0
+          complete++
+          next
+        }
+        copying { print }
+        END { if (found != 1 || complete != 1 || copying) exit 2 }
+      ' lib/core4-parts/core4-d6b.lisp >> "$local_d6_source"; then
+        echo "::error::D6_EXACT_DEFINITION_SOURCE_INVALID source=$file target=$quantifier" >&2
+        mark_file_failed
+        continue 2
+      fi
+      printf '\n' >> "$local_d6_source"
+    done
+    sha256sum lib/core4-parts/core4-d6b.lisp "$local_d6_source" > "$dir/d6-definition-provenance.sha256"
+    binding_sources=(--binding-source tests/fixtures/epistemic-d1-names.lisp
+                     --binding-source "$local_d6_source")
   elif [[ "$file" == "tests/semantic/d11-family-association-law.lisp" ||
           "$file" == "tests/semantic/d11-family-association-mutant.lisp" ]]; then
     binding_sources=(--binding-source lib/d11-srfi1-alist-protocol.lisp)
