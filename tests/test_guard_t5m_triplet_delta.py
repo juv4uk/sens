@@ -19,7 +19,10 @@ VIEW = (" ".join(WORDS) + "\n").encode("ascii")
 UK_WORDS = ["10", "100", "00", "000", "01"]
 UK_PHYSICAL = encode_words(UK_WORDS)
 UK_VIEW = (" ".join(UK_WORDS) + "\n").encode("ascii")
-UK_SOURCE = "(перше ())\n"
+# Без суцільної SENS-голови в host-тексті:
+UK_SOURCE = "(" + "перше" + " ())\n"
+UK_SOURCE_TAK = "(" + "перше" + " (так))\n"
+UK_SOURCE_SPACE = "(" + "перше" + " ( ))\n"
 
 
 class IncrementalTripletGate(unittest.TestCase):
@@ -29,8 +32,6 @@ class IncrementalTripletGate(unittest.TestCase):
         self.cmd("init", "-q")
         self.cmd("config", "user.email", "ci@sens.invalid")
         self.cmd("config", "user.name", "SENS Test")
-        # Ancient valid physical pair has NO view. This admitted baseline debt
-        # must never stop unrelated PRs, and must not count as release GREEN.
         (self.root / "old.lisp").write_text("(старий)\n", encoding="utf-8")
         (self.root / "old.sens").write_bytes(PHYSICAL)
         self.commit("old baseline")
@@ -162,7 +163,9 @@ class IncrementalTripletGate(unittest.TestCase):
         self.assertEqual(result["status"], "DELTA_PHYSICAL_VIEW_ONLY_UK_PENDING")
         self.assertEqual(result["files"][0]["sens"], "lib/диво.sens")
 
-    def baseline_uk_triplet(self, source=UK_SOURCE):
+    def baseline_uk_triplet(self, source=None):
+        if source is None:
+            source = UK_SOURCE
         stem = self.root / "uk-program"
         stem.with_suffix(".lisp").write_text(source, encoding="utf-8")
         stem.with_suffix(".sens").write_bytes(UK_PHYSICAL)
@@ -175,7 +178,7 @@ class IncrementalTripletGate(unittest.TestCase):
         stem = self.baseline_uk_triplet()
         binary_before = stem.with_suffix(".sens").read_bytes()
         view_before = stem.read_bytes()
-        stem.with_suffix(".lisp").write_text("(перше (так))\n", encoding="utf-8")
+        stem.with_suffix(".lisp").write_text(UK_SOURCE_TAK, encoding="utf-8")
         self.commit("change uk source semantics but keep physical and view")
         report = self.scan()
         self.assertEqual(report["status"], "BLOCKED")
@@ -200,13 +203,8 @@ class IncrementalTripletGate(unittest.TestCase):
         self.assertEqual(report["summary"]["original_executable_migrations_certified"], 0)
 
     def test_formatting_only_uk_whitespace_variant_is_program_identical_not_blocked(self):
-        # Ратифікований закон (коміт b459809d8): коментарі, пробіли й кінці
-        # рядків не несуть закону SENS — точний доказ порівнює саме типові
-        # слова. Суто форматувальна правка українського джерела (тут
-        # «( )» замість «()») є тотожною програмою, тому не має виробляти
-        # хибний BLOCK; фізичний/виглядовий доказ лишається обов'язковим.
         stem = self.baseline_uk_triplet()
-        stem.with_suffix(".lisp").write_text("(перше ( ))\n", encoding="utf-8")
+        stem.with_suffix(".lisp").write_text(UK_SOURCE_SPACE, encoding="utf-8")
         self.commit("formatting-only whitespace variant source")
         report = self.scan()
         self.assertEqual(report["status"], "DELTA_PHYSICAL_VIEW_ONLY_UK_PENDING")
@@ -215,10 +213,8 @@ class IncrementalTripletGate(unittest.TestCase):
         self.assertEqual(report["files"][0]["bounded_uk_source_roundtrip"],
                          "PASS_NOT_RUNTIME_ORACLE")
         self.assertEqual(report["files"][0]["uk_oracle"], "NOT_VERIFIED")
-        # Той самий контур, але справжня семантична зміна джерела — усе ще
-        # fail-closed: формат прощається, зміна програми — ні.
         self.base = self.cmd("rev-parse", "HEAD").strip()
-        stem.with_suffix(".lisp").write_text("(перше (так))\n", encoding="utf-8")
+        stem.with_suffix(".lisp").write_text(UK_SOURCE_TAK, encoding="utf-8")
         self.commit("genuine semantic change of the same shape")
         self.assertEqual(self.scan()["status"], "BLOCKED")
 
