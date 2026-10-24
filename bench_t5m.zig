@@ -118,7 +118,7 @@ pub fn main(init: std.process.Init) !void {
         }
 
         std.debug.print(
-            "ZIG_T5M_SAMPLE sample={d} decode_elapsed_ns={d} decode_ops={d} decode_ns_per_op={d} encode_elapsed_ns={d} encode_ops={d} encode_ns_per_op={d} target_sample_ns={d}\\n",
+            "ZIG_T5M_SAMPLE sample={d} decode_elapsed_ns={d} decode_ops={d} decode_ns_per_op={d} encode_elapsed_ns={d} encode_ops={d} encode_ns_per_op={d} target_sample_ns={d}\n",
             .{ sample + 1, elapsed_decode, decoded_ops, decode_ns_per_op[sample], elapsed_encode, encoded_ops, encode_ns_per_op[sample], min_sample_ns },
         );
     }
