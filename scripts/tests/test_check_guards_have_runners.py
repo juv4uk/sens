@@ -25,6 +25,14 @@ class GuardRunnerTests(unittest.TestCase):
             self.assertIn(name, r.stdout)
             self.assertIn(f"{name}: НІХТО не запускає", r.stdout)
 
+    def test_release_gate_is_not_an_orphan(self):
+        # Реліз-гейт виглядав сиротою, але його ЗАПУСКАЮТЬ тести
+        # (tests/test_check_release_admission_ledger.py:18 будує шлях як
+        # ROOT / "scripts" / "..."). Матч мусить бачити цю форму.
+        r = self.run_script()
+        for name in ("check-release-admission-ledger.py", "check-required-checks.py"):
+            self.assertNotIn(f"{name}: НІХТО не запускає", r.stdout)
+
     def test_wired_guards_are_not_reported(self):
         # D5/D9 мають запускача (workflow) — не можуть бути в боргу.
         r = self.run_script()
