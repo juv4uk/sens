@@ -85,7 +85,10 @@ def content_sha256(root: Path, sens: str) -> str:
                 raise LedgerBlocked(
                     f"{sens}: hardlink або неунікальний regular-file inode не є доказом .sens"
                 )
-            words = CODEC.decode_bytes(stream.read())
+            # `.sens` is T5M by default. The legacy T5 decoder rejects valid
+            # D24+ words before their typed physical hash can be inspected.
+            # This remains byte integrity only, never semantic F2/F4 admission.
+            words = CODEC.decode_t5m_bytes(stream.read())
     except (OSError, RuntimeError) as exc:
         raise LedgerBlocked(f"{sens}: немає доступного канонічного файла .sens ({exc})") from exc
     except CODEC.SensT5Error as exc:

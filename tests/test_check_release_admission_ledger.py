@@ -142,6 +142,25 @@ class ContentTests(unittest.TestCase):
             self.assertNotIn("RELEASE_ADMISSION_PASS", stdout.getvalue())
             self.assertIn("RELEASE_ADMISSION_BLOCKED", stderr.getvalue())
 
+    def test_current_t5m_d24_word_verifies_bytes_without_granting_release_admission(self):
+        # Physical T5M carries D24-width words; legacy T5 stops at W11.
+        # This proves transport integrity only, not a semantic D24 law.
+        wide = "1" + "0" * 23
+        physical = MODULE.CODEC.encode_t5m_projection(wide)
+        expected_hash = MODULE.CODEC.typed_sha256([wide])
+        with tempfile.TemporaryDirectory() as tmp:
+            repo = Path(tmp)
+            (repo / "operand.sens").write_bytes(physical)
+            self.assertEqual(MODULE.content_sha256(repo, "operand.sens"), expected_hash)
+            receipt = MODULE.validate_ledger(
+                ledger([entry(sens="operand.sens", typed_word_sha256=expected_hash,
+                              ratified=1)]),
+                root=repo,
+            )
+            self.assertEqual(receipt["content_verified"], 1)
+            self.assertEqual(receipt["uk_oracle_verified"], 0)
+            self.assertEqual(receipt["release_admitted"], 0)
+
     def test_wrong_content_hash_blocks(self):
         with self.assertRaises(MODULE.LedgerBlocked):
             MODULE.validate_ledger(ledger([entry(sens=REAL_SENS, typed_word_sha256="b" * 64)]))
