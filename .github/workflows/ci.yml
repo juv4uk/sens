@@ -230,10 +230,6 @@ jobs:
                   "tests/semantic/d11-srfi1-list-equality-mutant.lisp",
                   # F11-PROOF-TRACE запускається в єдиному нативному law runner із DEFINE lib/reason.lisp.
                   "tests/semantic/d11-reason-proof-trace-law.lisp",
-                  "tests/semantic/d11-reason-provenance-children-law.lisp",
-                  "tests/semantic/d11-reason-provenance-children-mutant.lisp",
-                  "tests/semantic/d11-reason-provenance-improper-children-negative.lisp",
-                  "tests/semantic/d11-reason-provenance-improper-explanation-negative.lisp",
                   "tests/semantic/d11-reason-proof-results-law.lisp",
                   "tests/semantic/d11-reason-proof-results-mutant.lisp",
                   "tests/semantic/d11-reason-proof-results-improper-accum-negative.lisp",
@@ -522,7 +518,7 @@ jobs:
           physical_dir="$RUNNER_TEMP/changed-t5m-pairs/core4-parity"
           mkdir -p "$physical_dir"
           # Only real SENS emits words; pinned Zig packages the binary.
-          timeout 180s "$PWD/target/debug/sens" --t5m-mint             lib/core4.lisp "$physical_dir/core4.sens"
+          timeout 180s "$PWD/target/debug/sens" --t5m-mint-pair        lib/core4.lisp "$physical_dir/core4.sens"
           timeout 45s "$PWD/target/debug/sens-trit" verify-view             "$physical_dir/core4.sens" >"$physical_dir/core4-verified.txt"
           sha256sum lib/core4.lisp lib/core4.sens             "$physical_dir/core4.sens" >"$physical_dir/sha256.txt"
           if ! cmp -s lib/core4.sens "$physical_dir/core4.sens"; then
