@@ -7,4 +7,5 @@ set -euo pipefail
 zig test -lc research/zig-codecs/tests.zig
 # Окремий source-route доказ для колишнього прямого stdin у ядрі READ.
 zig test -lc zig_transport_root.zig --test-filter 'Rust core READ'
+zig test -lc zig_transport_root.zig --test-filter 'Rust build domain projections'
 printf '%s\n' RUST_ISOLATED_ONLY_ZIG_OK

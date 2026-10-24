@@ -8,6 +8,10 @@ description = "Independent sens core · Незалежне ядро sens · Unab
 [lib]
 path = "src/lib.rs"
 
+[[test]]
+name = "build_projection_transfer"
+path = "build_support/projection_transfer.rs"
+
 # This is a manually invoked comparison against the isolated Rust reference
 # codec, not a production example or default Cargo test target.
 [[example]]

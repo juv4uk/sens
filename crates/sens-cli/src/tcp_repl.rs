@@ -101,7 +101,7 @@ pub(crate) fn run_tcp_repl(port: u16, allowed: &[String]) {
     );
 
     for stream in listener.incoming() {
-        let mut stream = match stream {
+        let stream = match stream {
             Ok(stream) => stream,
             Err(_) => continue,
         };

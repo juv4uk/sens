@@ -12,6 +12,11 @@ test "Rust core READ has no direct OS input route" {
     try std.testing.expect(std.mem.indexOf(u8, source, "read_stdin_line") == null);
 }
 
+test "Rust build domain projections arrive through Zig" {
+    const source = @embedFile("crates/sens/build.rs");
+    try std.testing.expect(std.mem.indexOf(u8, source, "fs::read") == null);
+}
+
 // Keep all existing public C exports reachable without re-implementing them.
 comptime {
     _ = abi.sens_zig_codec_abi_version;
@@ -543,28 +548,11 @@ test "F6 lisp_fs exact bytes and unchanged short buffer" {
 
 // Domain projection tables cross the corridor as opaque bytes. SENS parses
 // and interprets them; the index selects only which checked-in asset to copy.
-const domain_table_assets = [_][]const u8{
-    @embedFile("lib/domains/d1.lisp"),
-    @embedFile("lib/domains/d2.lisp"),
-    @embedFile("lib/domains/d3.lisp"),
-    @embedFile("lib/domains/d4.lisp"),
-    @embedFile("lib/domains/d5.lisp"),
-    @embedFile("lib/domains/d6.lisp"),
-    @embedFile("lib/domains/d7.lisp"),
-    @embedFile("lib/domains/d8.lisp"),
-    @embedFile("lib/domains/d9.lisp"),
-    @embedFile("lib/domains/d10.lisp"),
-    @embedFile("lib/domains/d11.lisp"),
-};
+const domain_projection_assets = @import("domain_projection_assets.zig");
+const domain_table_assets = domain_projection_assets.tables;
 
 pub export fn sens_zig_domain_table_bytes_copy(domain: u8, dst: [*]u8, capacity: usize) isize {
-    if (domain == 0 or domain > domain_table_assets.len) return -1;
-    const asset = domain_table_assets[@as(usize, domain) - 1];
-    if (asset.len == 0) return -1;
-    if (capacity == 0) return @intCast(asset.len);
-    if (capacity < asset.len) return -2;
-    @memcpy(dst[0..asset.len], asset);
-    return @intCast(asset.len);
+    return domain_projection_assets.copy(domain, dst, capacity);
 }
 
 test "domain projection tables cross Zig byte-exact and refuse short writes" {

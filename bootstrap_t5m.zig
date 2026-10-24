@@ -1,13 +1,22 @@
-//! Фізичний bootstrap: Zig читає тільки готовий Т5М, відновлює точні
-//! ширини/біти й видає дані для Rust. Семантику допускає сам SENS.
+//! Типовий bootstrap: Zig відновлює точні ширини/біти готового Т5М.
+//! Окремий --projection-tables передає незмінені джерела людських проєкцій
+//! build-каталогу; це не машинні значення. Семантику допускає сам SENS.
 const std = @import("std");
 const t5m = @import("research/zig-codecs/t5m.zig");
+const projections = @import("domain_projection_assets.zig");
 
 pub fn main(init: std.process.Init) !void {
     const allocator = init.arena.allocator();
     var buffer: [4096]u8 = undefined;
     var stdout = std.Io.File.stdout().writer(init.io, &buffer);
     const output = &stdout.interface;
+    const args = try init.minimal.args.toSlice(allocator);
+    if (args.len == 2 and std.mem.eql(u8, args[1], "--projection-tables")) {
+        try projections.writeBuildTables(output);
+        try output.flush();
+        return;
+    }
+    if (args.len != 1) return error.UnknownBootstrapMode;
     const libraries = [_]struct { name: []const u8, physical: []const u8 }{
         .{ .name = "MACRO_BOOTSTRAP_WORDS", .physical = @embedFile("lib/macro.sens") },
         .{ .name = "CORE3_BOOTSTRAP_WORDS", .physical = @embedFile("lib/core3.sens") },

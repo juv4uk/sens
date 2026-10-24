@@ -5,6 +5,10 @@ use std::{
     process::Command,
 };
 
+#[path = "build_support/projection_transfer.rs"]
+mod projection_transfer;
+use projection_transfer::projection_sources;
+
 #[derive(Debug, Clone)]
 enum Expr {
     Symbol(String),
@@ -133,14 +137,31 @@ fn add_entry(
     out.push_str(&format!("    Entry {{ source: ProjectionSource::{source}, domain: {domain}, bits: {}, column: {}, value: ProjectionValue::{kind}({}) }},\n", rust_str(bits), rust_str(column), rust_str(text)));
 }
 
-fn domain_tables(root: &Path, out: &mut String) {
+fn domain_tables(root: &Path, compiler: &std::ffi::OsStr, out: &mut String) {
+    let transferred = Command::new(compiler)
+        .current_dir(root)
+        .args([
+            "run",
+            "bootstrap_t5m.zig",
+            "-O",
+            "ReleaseSafe",
+            "--",
+            "--projection-tables",
+        ])
+        .output()
+        .expect("receive domain projection bytes through pinned Zig");
+    assert!(
+        transferred.status.success(),
+        "Zig projection transfer rejected: {}",
+        String::from_utf8_lossy(&transferred.stderr)
+    );
+    let sources = projection_sources(&transferred.stdout)
+        .expect("Zig returned invalid domain projection frames");
     for domain in 1..=10u16 {
         let relative = format!("lib/domains/d{domain}.lisp");
         let path = root.join(&relative);
         println!("cargo:rerun-if-changed={}", path.display());
-        let source =
-            fs::read_to_string(&path).unwrap_or_else(|error| panic!("{relative}: {error}"));
-        let forms = parse_all(&source, &relative);
+        let forms = parse_all(sources[usize::from(domain) - 1], &relative);
         assert_eq!(forms.len(), 1, "{relative}: expected one root form");
         let Expr::List(root_form) = &forms[0] else {
             panic!("{relative}: expected root list")
@@ -215,10 +236,12 @@ fn domain_tables(root: &Path, out: &mut String) {
     }
 }
 
-fn binary_bootstrap_words(root: &Path, output: &Path) {
+fn binary_bootstrap_words(root: &Path, output: &Path, compiler: &std::ffi::OsStr) {
     for path in [
         ".zig-version",
         "bootstrap_t5m.zig",
+        "domain_projection_assets.zig",
+        "lib/domains/d11.lisp",
         "lib/macro.sens",
         "lib/core3.sens",
         "lib/core4.sens",
@@ -239,6 +262,27 @@ fn binary_bootstrap_words(root: &Path, output: &Path) {
     ] {
         println!("cargo:rerun-if-changed={}", root.join(path).display());
     }
+    // Генератор Zig отримує фізичний носій, а Rust — лише точні слова.
+    // Жодного читання Lisp або запасного Rust-декодера.
+    let restored = Command::new(compiler)
+        .current_dir(root)
+        .args(["run", "bootstrap_t5m.zig", "-O", "ReleaseSafe"])
+        .output()
+        .expect("run pinned Zig T5M bootstrap decoder");
+    assert!(
+        restored.status.success(),
+        "Zig T5M binary bootstrap rejected: {}",
+        String::from_utf8_lossy(&restored.stderr)
+    );
+    assert!(
+        !restored.stdout.is_empty(),
+        "Zig returned no binary bootstrap words"
+    );
+    fs::write(output.join("binary_bootstrap_words.rs"), restored.stdout)
+        .expect("write Zig-restored exact binary bootstrap words");
+}
+
+fn pinned_zig() -> std::ffi::OsString {
     println!("cargo:rerun-if-env-changed=ZIG");
     println!("cargo:rerun-if-env-changed=PATH");
     println!("cargo:rerun-if-env-changed=LOCALAPPDATA");
@@ -271,33 +315,17 @@ fn binary_bootstrap_words(root: &Path, output: &Path) {
         pinned,
         "binary bootstrap requires the repository Zig pin"
     );
-    // Генератор Zig отримує фізичний носій, а Rust — лише точні слова.
-    // Жодного читання Lisp або запасного Rust-декодера.
-    let restored = Command::new(&compiler)
-        .current_dir(root)
-        .args(["run", "bootstrap_t5m.zig", "-O", "ReleaseSafe"])
-        .output()
-        .expect("run pinned Zig T5M bootstrap decoder");
-    assert!(
-        restored.status.success(),
-        "Zig T5M binary bootstrap rejected: {}",
-        String::from_utf8_lossy(&restored.stderr)
-    );
-    assert!(
-        !restored.stdout.is_empty(),
-        "Zig returned no binary bootstrap words"
-    );
-    fs::write(output.join("binary_bootstrap_words.rs"), restored.stdout)
-        .expect("write Zig-restored exact binary bootstrap words");
+    compiler
 }
 
 fn main() {
     let root =
         PathBuf::from(env::var_os("CARGO_MANIFEST_DIR").expect("manifest dir")).join("../..");
     let output = PathBuf::from(env::var_os("OUT_DIR").expect("OUT_DIR"));
-    binary_bootstrap_words(&root, &output);
+    let compiler = pinned_zig();
+    binary_bootstrap_words(&root, &output, &compiler);
     let mut generated = String::from("pub(super) static ENTRIES: &[Entry] = &[\n");
-    domain_tables(&root, &mut generated);
+    domain_tables(&root, &compiler, &mut generated);
     generated.push_str("];\n");
     let destination = output.join("domain_projection_catalog.rs");
     fs::write(destination, generated).expect("write generated projection catalog");
