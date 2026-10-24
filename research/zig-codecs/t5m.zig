@@ -98,44 +98,67 @@ fn validateWordWidth(width: usize) Error!void {
     if (!supportsWidth(width)) return Error.UnsupportedDomainWidth;
 }
 
+fn unpackGroup(raw: u8) [TRITS_PER_BYTE]u8 {
+    var digits: [TRITS_PER_BYTE]u8 = undefined;
+    var value = raw;
+    var place: usize = TRITS_PER_BYTE;
+    while (place > 0) {
+        place -= 1;
+        digits[place] = value % 3;
+        value /= 3;
+    }
+    return digits;
+}
+
 /// Decode the mechanical T5M stream, retaining exact leading zeros and widths.
+/// Read each physical group twice; no heap allocation for intermediate trits.
 pub fn decode(allocator: std.mem.Allocator, data: []const u8) Error!Decoded {
     if (data.len == 0) return Error.EmptyProgram;
     if (data.len > MAX_PHYSICAL_BYTES) return Error.TransportTooLarge;
     const trit_count = std.math.mul(usize, data.len, TRITS_PER_BYTE) catch
         return Error.TransportTooLarge;
-    const trits = allocator.alloc(u8, trit_count) catch return Error.OutOfMemory;
-    defer allocator.free(trits);
-    for (data, 0..) |raw, byte_index| {
+
+    // Validate every physical byte first: malformed bytes take precedence over
+    // malformed tails or empty words, as in the original transport contract.
+    for (data) |raw| {
         if (raw >= MAX_BYTE_VALUE) return Error.InvalidPhysicalByte;
-        var value = raw;
-        var place: usize = TRITS_PER_BYTE;
-        while (place > 0) {
-            place -= 1;
-            trits[byte_index * TRITS_PER_BYTE + place] = value % 3;
-            value /= 3;
-        }
     }
 
     var padding: usize = 0;
-    while (padding < trits.len and trits[trits.len - padding - 1] == 2) : (padding += 1) {}
+    var byte_index = data.len;
+    tail: while (byte_index > 0) {
+        byte_index -= 1;
+        const group = unpackGroup(data[byte_index]);
+        var place: usize = TRITS_PER_BYTE;
+        while (place > 0) {
+            place -= 1;
+            if (group[place] != 2) break :tail;
+            padding += 1;
+        }
+    }
     if (padding >= TRITS_PER_BYTE) return Error.InvalidTail;
-    const body_len = trits.len - padding;
+    const body_len = trit_count - padding;
     if (body_len == 0) return Error.EmptyDomainWord;
 
     var word_count: usize = 1;
     var total_bits: usize = 0;
     var current_width: usize = 0;
-    for (trits[0..body_len]) |trit| {
-        if (trit == 2) {
-            if (current_width == 0) return Error.EmptyDomainWord;
-            try validateWordWidth(current_width);
-            word_count += 1;
-            total_bits = std.math.add(usize, total_bits, current_width) catch
-                return Error.TransportTooLarge;
-            current_width = 0;
-        } else {
-            current_width += 1;
+    var processed: usize = 0;
+    count_words: for (data) |raw| {
+        const group = unpackGroup(raw);
+        for (group) |trit| {
+            if (processed == body_len) break :count_words;
+            processed += 1;
+            if (trit == 2) {
+                if (current_width == 0) return Error.EmptyDomainWord;
+                try validateWordWidth(current_width);
+                word_count += 1;
+                total_bits = std.math.add(usize, total_bits, current_width) catch
+                    return Error.TransportTooLarge;
+                current_width = 0;
+            } else {
+                current_width += 1;
+            }
         }
     }
     if (current_width == 0) return Error.EmptyDomainWord;
@@ -151,15 +174,21 @@ pub fn decode(allocator: std.mem.Allocator, data: []const u8) Error!Decoded {
     var word_index: usize = 0;
     var bit_offset: usize = 0;
     var word_start: usize = 0;
-    for (trits[0..body_len]) |trit| {
-        if (trit == 2) {
-            const width = bit_offset - word_start;
-            words[word_index] = .{ .width = width, .bits = bit_storage[word_start..bit_offset] };
-            word_index += 1;
-            word_start = bit_offset;
-        } else {
-            bit_storage[bit_offset] = if (trit == 0) '0' else '1';
-            bit_offset += 1;
+    processed = 0;
+    fill_words: for (data) |raw| {
+        const group = unpackGroup(raw);
+        for (group) |trit| {
+            if (processed == body_len) break :fill_words;
+            processed += 1;
+            if (trit == 2) {
+                const width = bit_offset - word_start;
+                words[word_index] = .{ .width = width, .bits = bit_storage[word_start..bit_offset] };
+                word_index += 1;
+                word_start = bit_offset;
+            } else {
+                bit_storage[bit_offset] = trit + '0';
+                bit_offset += 1;
+            }
         }
     }
     words[word_index] = .{ .width = bit_offset - word_start, .bits = bit_storage[word_start..bit_offset] };
