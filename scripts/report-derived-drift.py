@@ -22,13 +22,27 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 try:
-    from sens_t5_t5m_codec import decode_bytes
+    from sens_t5_t5m_codec import decode_bytes, decode_t5m_bytes
 except Exception as exc:  # pragma: no cover
     print(f"кодек недоступний: {exc}", file=sys.stderr)
     raise SystemExit(2)
 
 # Архівні/заміщені гілки — окремий кошик: це історія, не поточне виконання.
 ARCHIVE_MARKERS = ("superseded", "archive", "/history/", "staged-out")
+
+
+def decode_any(data: bytes) -> tuple[list[str], str]:
+    """ДВА декодери, а не один. decode_bytes — ЛЕГАСІ T5; decode_t5m_bytes — T5M.
+    Виклик лише decode_bytes дав ХИБНУ ТРИВОГУ «439 не декодується», хоча всі
+    1530 файлів декодуються як T5M. Це виправлено тут."""
+    last: Exception | None = None
+    for fn, decoder in (("decode_t5m_bytes", decode_t5m_bytes),
+                        ("decode_bytes", decode_bytes)):
+        try:
+            return decoder(data), fn
+        except Exception as exc:  # noqa: BLE001
+            last = exc
+    raise last if last else RuntimeError("жоден декодер")
 
 
 def tracked_sens() -> list[str]:
@@ -49,7 +63,7 @@ def main() -> int:
         path = ROOT / rel
         view = path.with_suffix("")
         try:
-            words = decode_bytes(path.read_bytes())
+            words, _decoder = decode_any(path.read_bytes())
         except Exception:
             undecodable.append(rel)
             continue
