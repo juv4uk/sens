@@ -716,6 +716,11 @@ while IFS= read -r file || [[ -n "$file" ]]; do
     # Mint і paired мусять завантажити його чинне DEFINE, інакше отримуємо
     # хибний UnknownSymbol замість мовного D1:1 / D1:0. Rust/Zig не оракули.
     binding_sources=(--binding-source benchmarks/d3-proper-tail-hot.lisp)
+  elif [[ "$file" == "tests/semantic/d11-tree-equal-by-test-law.lisp" ||
+          "$file" == "tests/semantic/d11-tree-equal-by-test-mutant.lisp" ]]; then
+    # F11-TREE-TEST: точний D11-кандидат — викличне Lisp-визначення,
+    # Zig транспортує слова, а SENS сам обчислює D1 позитив/мутант.
+    binding_sources=(--binding-source lib/d11-tree-equal-by-test.lisp)
   elif [[ "$file" == "tests/semantic/d11-srfi1-find-tail-laws.lisp" ||
           "$file" == "tests/semantic/d11-srfi1-find-tail-improper-tail-negative.lisp" ]]; then
     # Лише визначення із справжньої бібліотеки SENS, без host-оракула.
