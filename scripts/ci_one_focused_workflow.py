@@ -85,6 +85,24 @@ def verify():
     # but absence of --require or scan-executors must not freeze migration.
     # Preserve the independent truth-in-label contract: any step that DOES
     # claim a binary SENS executor must actually invoke that executor.
+    # Ручна зміна main: перевіряємо job-level умову ДО checkout,
+    # build та використання write-token. Це CI-механізм, не SENS-оракул.
+    promote_path = WORKFLOWS / "contest-promote.yml"
+    try:
+        promote_text = promote_path.read_text(encoding="utf-8")
+        must_guard = (
+            "  promote:\n"
+            "    if: ${{ github.event_name == 'workflow_dispatch' "
+            "&& github.ref == 'refs/heads/main' }}\n"
+        )
+        if must_guard not in promote_text:
+            errors.append(
+                "CONTEST_PROMOTE_UNSAFE_REF id=contest-promote layer=actions "
+                "expected=main-only-job actual=unguarded-or-different-guard "
+                "reproduce='python3 scripts/ci_one_focused_workflow.py'"
+            )
+    except OSError as exc:
+        errors.append(f"CONTEST_PROMOTE_MISSING_CONFIG path={promote_path}: {exc}")
     ci_text = (WORKFLOWS / "ci.yml").read_text(encoding="utf-8")
     # Механічна перевірка YAML-метаданих, а не оракул семантики Lisp.
     # Виявляємо повтори кроків та id при помилковому злитті ci.yml.

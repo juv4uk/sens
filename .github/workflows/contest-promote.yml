@@ -15,11 +15,14 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  # Ручний dispatch може вибрати гілку/тег; writer до main виконується
+  # тільки з HEAD main. Інакше rebase переніс би чужу історію у main.
   promote:
+    if: ${{ github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main' }}
     runs-on: ubuntu-latest
     timeout-minutes: 40
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5, pinned
       - uses: ./.github/actions/install-zig
       - uses: dtolnay/rust-toolchain@1.99.0
 
