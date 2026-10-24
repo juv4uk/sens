@@ -414,11 +414,22 @@ def changed_files(args) -> list[str]:
     if args.paths_from:
         return [ln.strip() for ln in Path(args.paths_from).read_text(encoding="utf-8").splitlines() if ln.strip()]
     if args.staged:
-        out = subprocess.run(
-            ["git", "-c", "core.quotepath=false", "diff", "--name-only", "--cached", "--diff-filter=ACMR"],
-            cwd=ROOT, capture_output=True, text=True, check=False,
-        ).stdout
-        return [ln.strip() for ln in out.splitlines() if ln.strip()]
+        command = ["git", "-c", "core.quotepath=false", "diff", "--name-only", "--cached", "--diff-filter=ACMR"]
+        try:
+            result = subprocess.run(
+                command, cwd=ROOT, capture_output=True, text=True, check=False,
+            )
+        except (OSError, UnicodeError) as exc:
+            print(f"GUARD-DOMAIN-REUSE: НЕ ПЕРЕВІРЕНО — git diff --cached: {exc}", file=sys.stderr)
+            raise SystemExit(2) from exc
+        if result.returncode != 0:
+            print(
+                f"GUARD-DOMAIN-REUSE: НЕ ПЕРЕВІРЕНО — git diff --cached code={result.returncode} "
+                f"detail={result.stderr.strip()}",
+                file=sys.stderr,
+            )
+            raise SystemExit(2)
+        return [ln.strip() for ln in result.stdout.splitlines() if ln.strip()]
     return []
 
 
@@ -732,12 +743,29 @@ def main(argv: list[str] | None = None) -> int:
             and [row[2] for row in d11_empty] == [False, False]
         )
         print(f"GUARD-DOMAIN-REUSE self-test: маркер D11 {'OK' if d11_ok else 'FAIL'}")
+        # Недоступний Git index не може означати «немає змінених файлів».
+        from contextlib import redirect_stderr
+        from io import StringIO
+        from unittest.mock import patch
+        with patch.object(
+            subprocess, "run",
+            return_value=subprocess.CompletedProcess(
+                ["git", "diff"], 128, "", "fatal: simulated index failure"
+            ),
+        ), redirect_stderr(StringIO()):
+            try:
+                changed_files(argparse.Namespace(file=None, paths_from=None, staged=True))
+            except SystemExit as exc:
+                staged_ok = exc.code == 2
+            else:
+                staged_ok = False
+        print(f"GUARD-DOMAIN-REUSE self-test: git staged fail-closed {'OK' if staged_ok else 'FAIL'}")
         # Перевіряємо і ВЛАСНУ активацію: невиконуваний гачок = мертвий охоронець.
         hok, hmsg = hook_installed()
         print(f"GUARD-DOMAIN-REUSE self-test: гачок {'OK' if hok else 'НЕ УВІМКНЕНО (попередження)'} — {hmsg}")
         # Стан гачка — ПОПЕРЕДЖЕННЯ, не падіння: свіжий клон законно не має
         # ввімкненого гачка, доки не виконано scripts/install-hooks.sh.
-        return 0 if ok and intent_ok and d11_ok else 1
+        return 0 if ok and intent_ok and d11_ok and staged_ok else 1
 
     if args.lessons:
         # Знання живуть у САМОМУ охоронці: агент, який ним користується,
