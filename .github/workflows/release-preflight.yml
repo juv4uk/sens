@@ -116,6 +116,8 @@ jobs:
           python3 -m unittest discover -s tests -p 'test_verify_uk_t5_t5m_triplet.py' -v
           python3 -m unittest discover -s tests -p 'test_report_t5_t5m_triplet_inventory.py' -v
           python3 -m unittest discover -s tests -p 'test_check_release_triple_corpus.py' -v
+          # F1–F4 receipt: T5M physical hash, negative fraud cases, never semantic GO.
+          python3 -m unittest discover -s tests -p 'test_check_release_admission_ledger.py' -v
           python3 scripts/verify_uk_t5_t5m_triplet.py \
             --lisp tests/fixtures/migration-d1-cond-cohort/branch.lisp \
             --sens tests/fixtures/migration-d1-cond-cohort/branch.sens \
