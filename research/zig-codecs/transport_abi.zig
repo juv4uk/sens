@@ -83,11 +83,11 @@ pub export fn sens_zig_t5m_decode_be3(
     var decoded = t5m.decode(std.heap.page_allocator, src[0..byte_len]) catch return -1;
     defer decoded.deinit(std.heap.page_allocator);
     const need = decoded.words.len * 3;
-    if (need > capacity) return -2;
-    // Відхилити весь потік до першого запису в буфер викликача.
+    // Спершу валідність всього BE3: -1 має перевагу над браком місткості.
     for (decoded.words) |word| {
         if (word.width > 9) return -1;
     }
+    if (need > capacity) return -2;
     for (decoded.words, 0..) |word, i| {
         var value: u16 = 0;
         for (word.bits) |bit| value = (value << 1) | @as(u16, bit - '0');
@@ -520,6 +520,19 @@ test "T5M BE3 rejects a late unsupported width without modifying output" {
     try std.testing.expectEqual(
         @as(isize, -1),
         sens_zig_t5m_decode_be3(&physical, physical.len, &output, output.len),
+    );
+    try std.testing.expectEqualSlices(u8, &unchanged, &output);
+}
+
+test "T5M BE3 unsupported width takes priority over short output capacity" {
+    // Канонічний фізичний W10: 00000 00001, але BE3 допускає тільки W1..W9.
+    const physical = [_]u8{ 0x00, 0x01 };
+    const unchanged = [_]u8{0x5a} ** 3;
+    var output = unchanged;
+    // Було -2 (ємність 0) попри недопустиме для BE3 слово W10.
+    try std.testing.expectEqual(
+        @as(isize, -1),
+        sens_zig_t5m_decode_be3(&physical, physical.len, &output, 0),
     );
     try std.testing.expectEqualSlices(u8, &unchanged, &output);
 }
