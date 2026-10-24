@@ -284,6 +284,46 @@ mod paired {
         }
 
         #[test]
+        fn canonical_d5_d12_predicate_laws_execute_via_zig_t5m_and_sens() {
+            // The Lisp fixtures own the semantic claim. This test only routes
+            // their exact source through the D12-first SENS projection, Zig/T5M
+            // round-trip, and the existing SENS evaluator; it is not a host oracle.
+            for (id, fixture) in [
+                ("d5-d12-zerop", "d5-d12-zerop-law.lisp"),
+                ("d5-d12-numberp-ratio", "d5-d12-numberp-law.lisp"),
+            ] {
+                let source_path = Path::new(env!("CARGO_MANIFEST_DIR"))
+                    .join("../../tests/semantic")
+                    .join(fixture);
+                let text = std::fs::read_to_string(&source_path)
+                    .unwrap_or_else(|error| panic!("id={id} fixture={} error={error}", source_path.display()));
+                let admitted = qualify(&text)
+                    .unwrap_or_else(|error| panic!("id={id} layer=SENS-source {error}"));
+                let words = expected_words(&admitted)
+                    .unwrap_or_else(|error| panic!("id={id} layer=SENS-admission {error}"));
+                let d12_operands = words.iter().filter(|word| word.width == 12).count();
+                assert!(
+                    d12_operands >= 2,
+                    "id={id} layer=projection expected=D12-operands actual={d12_operands}"
+                );
+
+                let physical = zig_transport::encode_t5m_exact_words(&words)
+                    .unwrap_or_else(|error| panic!("id={id} layer=Zig-T5M encode {error}"));
+                let restored = zig_transport::decode_t5m_exact_words(&physical)
+                    .unwrap_or_else(|error| panic!("id={id} layer=Zig-T5M decode {error}"));
+                assert_eq!(restored, words, "id={id} layer=physical-roundtrip");
+
+                let actual = eval_verified(&text, &physical)
+                    .unwrap_or_else(|error| panic!("id={id} layer=SENS-eval {error}"));
+                assert_eq!(
+                    actual.as_predicate_bit(),
+                    Some(true),
+                    "id={id} layer=SENS-law expected=D1:так actual={actual}"
+                );
+            }
+        }
+
+        #[test]
         fn physical_t5m_restores_exact_d12plus_words_with_explicit_sens_admission() {
             for (id, source, expected_width, expected_human) in [
                 ("sum", source("додати", 1, 2), 12, "3"),
