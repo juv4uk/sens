@@ -54,6 +54,8 @@ profile_stage() {
   if [[ "$stage" == sens-standalone ]]; then
     if [[ "${1:-}" == timeout && "${3:-}" == "$sens" ]]; then
       stage=sens-standalone-sens
+    elif [[ "${1:-}" == timeout && "${3:-}" == "$trit" && "${4:-}" == eval ]]; then
+      stage=sens-standalone-trit-clean
     elif [[ "${1:-}" == timeout && "${3:-}" == "$trit" && "${4:-}" == eval-core4 ]]; then
       stage=sens-standalone-trit-core4
     else
@@ -150,9 +152,10 @@ run_law() {
   local id="$1" source="$2" expected="$3" dir physical actual
   local profile="${4:-clean}"
   local -a paired_args=()
+  local standalone_verb=eval
   case "$profile" in
     clean) ;;
-    core4) paired_args=(--core4-runtime) ;;
+    core4) paired_args=(--core4-runtime); standalone_verb=eval-core4 ;;
     *) fail "$id" harness "profile=clean-or-core4" "$profile" ;;
   esac
   dir="$evidence/$id"
@@ -207,9 +210,10 @@ run_law() {
     fi
     fail "$id" "$(paired_failure_layer "$dir/paired.err")" "source-matched-physical-execution" "rejected"
   fi
-  if ! profile_stage "$id" sens-standalone timeout 45s "$trit" eval-core4 "$physical" >"$dir/physical.out" 2>"$dir/physical.err"; then
+  # Парний і автономний SENS мають виконувати той самий мовний профіль.
+  if ! profile_stage "$id" sens-standalone timeout 45s "$trit" "$standalone_verb" "$physical" >"$dir/physical.out" 2>"$dir/physical.err"; then
     cat "$dir/physical.err" >&2
-    fail "$id" sens-standalone "standalone-physical-execution-core4" "rejected"
+    fail "$id" sens-standalone "standalone-physical-execution-$profile" "rejected"
   fi
   cmp -s "$dir/direct.out" "$dir/paired.out" ||
     report_output_divergence "$id" direct "$dir/direct.out" paired "$dir/paired.out"

@@ -10,7 +10,7 @@ if [[ ! -s "$phases" || ! -s "$laws" ]]; then
   printf '## Профіль етапів SENS/Zig\n\nNOT_MEASURED: даних немає.\n' > "$report"
   exit 0
 fi
-if ! awk -F '\t' 'NR==1 {if (NF!=4||$1!="id"||$2!="stage"||$3!="exit"||$4!="elapsed_us") exit 2; next} NF!=4||$1==""||$2 !~ /^(direct|codec-mint|zig-open|zig-verify|sens-paired|sens-paired-core4-diagnostic|sens-standalone|sens-standalone-sens|sens-standalone-trit-core4)$/||$3 !~ /^[0-9]+$/||$4 !~ /^[0-9]+$/ {exit 2}' "$phases"; then
+if ! awk -F '\t' 'NR==1 {if (NF!=4||$1!="id"||$2!="stage"||$3!="exit"||$4!="elapsed_us") exit 2; next} NF!=4||$1==""||$2 !~ /^(direct|codec-mint|zig-open|zig-verify|sens-paired|sens-paired-core4-diagnostic|sens-standalone|sens-standalone-sens|sens-standalone-trit-clean|sens-standalone-trit-core4)$/||$3 !~ /^[0-9]+$/||$4 !~ /^[0-9]+$/ {exit 2}' "$phases"; then
  echo '::error::SENS_PHASE_TSV_MALFORMED' >&2; exit 2
 fi
 if ! awk -F '\t' 'NR==1 {if (NF!=3||$1!="id"||$2!="status"||$3!="wall_ms") exit 2; next} NF!=3||$1==""||($2!="PASS"&&$2!="RED")||$3 !~ /^[0-9]+$/ {exit 2}' "$laws"; then
@@ -27,12 +27,12 @@ red="$(awk -F '\t' 'NR>1 && $2=="RED" {n++} END{print n+0}' "$laws")"
  echo 'Одна проба на етап для кожного різного свідка, з вартістю запуску CLI. p50/p90 нижче — розподіл між свідками одного runner, не оцінка чистого EVAL або прискорення.'
   echo 'Ненульовий exit — діагностичний факт: Type-negative свідки навмисно відхиляються. Це не кількість регресій; остаточний RED визначається окремим Lisp-вердиктом у law-timings.tsv.'
  echo 'sens-paired-core4-diagnostic — умовний діагностичний запуск після RED чистого SENS; його час не входить до основних фаз.'
- echo 'sens-standalone-sens і sens-standalone-trit-core4 — різні CLI; історичний sens-standalone не має точного маркера маршруту.'
+ echo 'sens-standalone-sens, sens-standalone-trit-clean і sens-standalone-trit-core4 — окремі маршрути; історичний sens-standalone не має точного маркера.'
  echo
  echo '| Етап | Проб | Ненульових виходів | p50 мкс | p90 мкс | max мкс |'
  echo '|---|---:|---:|---:|---:|---:|'
 } > "$report"
-for stage in direct codec-mint zig-open zig-verify sens-paired sens-paired-core4-diagnostic sens-standalone sens-standalone-sens sens-standalone-trit-core4; do
+for stage in direct codec-mint zig-open zig-verify sens-paired sens-paired-core4-diagnostic sens-standalone sens-standalone-sens sens-standalone-trit-clean sens-standalone-trit-core4; do
  awk -F '\t' -v st="$stage" 'NR>1 && $2==st {print $4}' "$phases" | sort -n > "$tmp/sorted"
  count="$(wc -l < "$tmp/sorted" | tr -d '[:space:]')"
  if (( count==0 )); then printf '| %s | 0 | 0 | — | — | — |\n' "$stage" >> "$report"; continue; fi
@@ -64,7 +64,7 @@ done
  echo '| Етап | Exit-клас | Проб | p50 мкс | p90 мкс | max мкс |'
  echo '|---|---|---:|---:|---:|---:|'
 } >> "$report"
-for stage in direct codec-mint zig-open zig-verify sens-paired sens-paired-core4-diagnostic sens-standalone sens-standalone-sens sens-standalone-trit-core4; do
+for stage in direct codec-mint zig-open zig-verify sens-paired sens-paired-core4-diagnostic sens-standalone sens-standalone-sens sens-standalone-trit-clean sens-standalone-trit-core4; do
  for exit_class in zero nonzero; do
   awk -F '\t' -v st="$stage" -v cls="$exit_class" \
     'NR>1 && $2==st && (($3=="0") == (cls=="zero")) {print $4}' "$phases" | sort -n > "$tmp/sorted"
