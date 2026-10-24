@@ -220,7 +220,7 @@ def typed_sha256(words: list[str]) -> str:
     for word in words:
         if re.fullmatch(r"[01]+", word) is None:
             raise SensT5Error("invalid typed word for digest")
-        if len(word) <= 255:
+        if len(word) < 255:
             digest.update(bytes([len(word)]))
         else:
             digest.update(b"\xff" + len(word).to_bytes(4, "big"))

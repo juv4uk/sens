@@ -143,6 +143,16 @@ class PhysicalT5CodecTests(unittest.TestCase):
         with self.assertRaises(SensT5Error):
             encode_typed_domain_words([])
 
+    def test_typed_digest_disambiguates_w255_w24_from_w256(self):
+        # Обидва різні потоки давали ті самі байти перед SHA-256:
+        # W255: 0xff + 32 байти; W24: 0x18 + 3 байти.
+        # W256: 0xff + 4-байтна ширина + 32 байти.
+        w255 = "0" * 22 + "1" + "0" * 232
+        w24 = "0" * 24
+        w256 = "0" * 227 + "11" + "0" * 27
+        self.assertEqual((len(w255), len(w24), len(w256)), (255, 24, 256))
+        self.assertNotEqual(typed_sha256([w255, w24]), typed_sha256([w256]))
+
     def test_naked_collision_has_distinct_typed_digest(self):
         lhs = ["0", "00"]
         rhs = ["000"]
