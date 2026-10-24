@@ -4,6 +4,14 @@
 const std = @import("std");
 const abi = @import("research/zig-codecs/transport_abi.zig");
 
+test "Rust core READ has no direct OS input route" {
+    // Перевіряємо саме місце колишнього обходу: успішний T5M roundtrip
+    // сам собою не доводить відсутність читання ОС у Rust READ.
+    const source = @embedFile("crates/sens/src/eval/special_forms/io.rs");
+    try std.testing.expect(std.mem.indexOf(u8, source, "std::io") == null);
+    try std.testing.expect(std.mem.indexOf(u8, source, "read_stdin_line") == null);
+}
+
 // Keep all existing public C exports reachable without re-implementing them.
 comptime {
     _ = abi.sens_zig_codec_abi_version;
