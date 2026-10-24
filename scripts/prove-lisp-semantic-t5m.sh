@@ -961,6 +961,17 @@ cat -- lib/d11-srfi1-unfold.lisp tests/semantic/d11-srfi1-unfold-mutant.lisp > "
 run_case run_law d11-srfi1-unfold-positive "$d11_unfold_positive" 1
 run_case run_law d11-srfi1-unfold-mutant "$d11_unfold_mutant" 0
 sha256sum lib/d11-srfi1-unfold.lisp tests/semantic/d11-srfi1-unfold-positive.lisp tests/semantic/d11-srfi1-unfold-mutant.lisp > "$evidence/d11-srfi1-unfold-inputs.sha256"
+# Д11 UNFOLD обох напрямків: структурний D3:() не є D1-предикатом.
+# Два незалежні строгі SENS Type-свідки, Zig/T5M і повне фізичне виконання.
+d11_unfold_bad_predicate="$evidence/d11-unfold-nonpredicate-stop-complete.lisp"
+d11_unfold_right_bad_predicate="$evidence/d11-unfold-right-nonpredicate-stop-complete.lisp"
+cat -- lib/d11-srfi1-unfold.lisp tests/fixtures/d11-unfold-nonpredicate-stop-must-error.lisp > "$d11_unfold_bad_predicate"
+cat -- lib/d11-srfi1-unfold.lisp tests/fixtures/d11-unfold-right-nonpredicate-stop-must-error.lisp > "$d11_unfold_right_bad_predicate"
+run_case run_error_rejection d11-unfold-nonpredicate-stop "$d11_unfold_bad_predicate" Type 'D3:110 COND expects exact D1:1 / D1:0'
+run_case run_error_rejection d11-unfold-right-nonpredicate-stop "$d11_unfold_right_bad_predicate" Type 'D3:110 COND expects exact D1:1 / D1:0'
+sha256sum lib/d11-srfi1-unfold.lisp tests/fixtures/d11-unfold-nonpredicate-stop-must-error.lisp \
+  tests/fixtures/d11-unfold-right-nonpredicate-stop-must-error.lisp > "$evidence/d11-unfold-type-inputs.sha256"
+
 # Д11: повна композиція GROUP-BY → FREQUENCIES, з несуміжними ключами.
 # Міняємо тільки SENS law/mutant, а не координати або хостову семантику.
 d11_freq_key_positive="$evidence/d11-frequencies-key-order-positive-complete.lisp"
