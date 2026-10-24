@@ -208,3 +208,47 @@ fn connect_and_listen_policies_are_independent() {
         .expect_err("port below connect allow-range must be policy-denied");
     assert_scope_denied(error, "tcp-connect");
 }
+
+#[test]
+fn local_model_respects_tcp_connect_deny_all() {
+    let env = Environment::root().with_tcp_connect_allowlist(vec![]);
+    let mut session = session(env);
+    let error = eval_program(
+        r#"(модельний-розподіл-вибору-сире
+             "http://127.0.0.1:1/v1/chat/completions"
+             "fixture-model"
+             "Контекст"
+             "Оберіть критерій"
+             (як-є ((оплата "Платіж") (технічне "Помилка"))))"#,
+        &mut session,
+    )
+    .expect_err("model adapter must respect deny-all before opening TCP");
+    assert!(
+        error.message.contains("модельний-розподіл-вибору-сире: 127.0.0.1:1"),
+        "expected model adapter denial on the requested port, got: {}",
+        error.message
+    );
+    assert_scope_denied(error, "модельний-розподіл-вибору-сире");
+}
+
+#[test]
+fn local_model_rejects_port_outside_tcp_connect_allowlist() {
+    let env = Environment::root().with_tcp_connect_allowlist(vec![("127.0.0.1".into(), 2, 2)]);
+    let mut session = session(env);
+    let error = eval_program(
+        r#"(модельний-розподіл-вибору-сире
+             "http://127.0.0.1:1/v1/chat/completions"
+             "fixture-model"
+             "Контекст"
+             "Оберіть критерій"
+             (як-є ((оплата "Платіж") (технічне "Помилка"))))"#,
+        &mut session,
+    )
+    .expect_err("model adapter must reject a port outside the connect allowlist");
+    assert!(
+        error.message.contains("модельний-розподіл-вибору-сире: 127.0.0.1:1"),
+        "expected exact denied port, got: {}",
+        error.message
+    );
+    assert_scope_denied(error, "модельний-розподіл-вибору-сире");
+}

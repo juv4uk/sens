@@ -199,8 +199,21 @@ fn chunked_body(mut body: &[u8]) -> Result<Vec<u8>, String> {
     }
 }
 
-fn post_json(endpoint: &str, payload: &Json, span: Span) -> Result<Json, LanguageError> {
+fn post_json(
+    endpoint: &str,
+    payload: &Json,
+    environment: &Environment,
+    span: Span,
+) -> Result<Json, LanguageError> {
     let endpoint = parse_loopback_endpoint(endpoint, span)?;
+    // Мережева capability сесії поширюється також на модельний адаптер.
+    if !environment.is_tcp_connect_allowed("127.0.0.1", endpoint.port) {
+        return Err(super::denied(
+            "модельний-розподіл-вибору-сире",
+            format!("127.0.0.1:{}", endpoint.port),
+            span,
+        ));
+    }
     let body = serde_json::to_vec(payload).map_err(|error| {
         fail(
             ErrorKind::InvalidForm,
@@ -534,7 +547,7 @@ fn exact_distribution(
 /// It returns (model-distribution/1 distribution provenance), not accept/defer/invalid.
 pub(crate) fn evaluate_choice_distribution(
     arguments: &[(Value, Span)],
-    _environment: &Environment,
+    environment: &Environment,
     span: Span,
 ) -> Result<Value, LanguageError> {
     let endpoint = text(&arguments[0].0, "model endpoint", arguments[0].1)?;
@@ -581,7 +594,7 @@ pub(crate) fn evaluate_choice_distribution(
         "structured_outputs": {"choice": letters},
         "chat_template_kwargs": {"enable_thinking": false}
     });
-    let response = post_json(&endpoint, &payload, span)?;
+    let response = post_json(&endpoint, &payload, environment, span)?;
     let logs = log_probabilities(&response, &criteria, span)?;
     let distribution = exact_distribution(&logs, &criteria, span)?;
 
