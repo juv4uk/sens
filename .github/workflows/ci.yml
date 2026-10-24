@@ -377,6 +377,8 @@ jobs:
           cargo test --locked -p sens-host --test capability_scoping local_model_ -- --nocapture
           cargo test --locked -p sens-lsp --lib transport::tests:: -- --nocapture
           cargo test --locked -p sens-cli --bin sens t5m_quoted_ -- --nocapture
+          # Механіка peer-table, generation fencing та TCP-повідомлень swarm-node.
+          cargo test --locked -p swarm-node --bin swarm-node -- --nocapture
           # Реальна межа TCP-кадру: UTF-8, EOF, overflow і абсолютний дедлайн.
           cargo test --locked -p sens-cli --bin sens tcp_repl_frame_ -- --nocapture
           # F6 — тільки механізм двозаписового Rust-транспорту.
