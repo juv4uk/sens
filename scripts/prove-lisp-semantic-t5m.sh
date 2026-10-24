@@ -849,6 +849,15 @@ cat -- lib/d11-clojure-juxt.lisp tests/semantic/d11-clojure-juxt-mutant.lisp > "
 sha256sum lib/d11-clojure-juxt.lisp tests/semantic/d11-clojure-juxt-laws.lisp tests/semantic/d11-clojure-juxt-mutant.lisp > "$evidence/d11-clojure-juxt-inputs.sha256"
 run_case run_law d11-clojure-juxt-positive "$d11_juxt_law_bundle" 1
 run_case run_law d11-clojure-juxt-mutant "$d11_juxt_mutant_bundle" 0
+# Д11 JUХT: атом Д1:ні не є завершенням списку функцій.
+# Фізичний і прямий SENS мусять дати Type при D3 ПЕРШЕ, а не
+# сховати крапковий хвіст під пустим результатом через АТОМ?.
+d11_juxt_improper_bundle="$evidence/d11-clojure-juxt-improper-d1-complete.lisp"
+cat -- lib/d11-clojure-juxt.lisp \
+  tests/semantic/d11-clojure-juxt-improper-d1-tail-negative.lisp > "$d11_juxt_improper_bundle"
+run_case run_type_rejection d11-clojure-juxt-improper-d1-type-negative \
+  "$d11_juxt_improper_bundle" 'car expects a non-empty list'
+
 # Д11 Clojure: два комплекти законів перенесено з Rust у справжній Lisp.
 # Їхня залежність SRFI-1 SPAN завантажується перед DEFINE групування.
 for suite in d11-clojure-partition-by d11-clojure-dedupe; do

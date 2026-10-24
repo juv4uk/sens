@@ -209,6 +209,9 @@ jobs:
                   # Їх виконує повний нативний закон Lisp → Zig/T5M → SENS нижче.
                   "tests/semantic/d11-clojure-juxt-laws.lisp",
                   "tests/semantic/d11-clojure-juxt-mutant.lisp",
+                  # Негативний D11 juxt залежить від DEFINE і очікує Type.
+                  # Його запускає run_type_rejection у фізичному law bundle.
+                  "tests/semantic/d11-clojure-juxt-improper-d1-tail-negative.lisp",
                   "tests/semantic/unification-variable-shape-law.lisp",
                   "tests/semantic/unification-variable-shape-positive.lisp",
                   "tests/semantic/unification-variable-shape-negative.lisp",
