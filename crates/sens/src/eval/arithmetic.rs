@@ -316,7 +316,7 @@ mod qualified_numeric_domain_value_tests {
         let retained = arithmetic_on_values(
             "+", &[maximum.clone(), zero.clone()], &env, Span::default()
         ).expect("D12 non-overflow result stays in D12");
-        let Value::BinaryNumber(retained) = retained else {
+        let Value::BinaryNumber(ref retained) = retained else {
             panic!("D12 integer result remains a qualified binary word");
         };
         assert_eq!(retained.numeric_domain_width(), Some(12));
@@ -326,7 +326,7 @@ mod qualified_numeric_domain_value_tests {
         let positive_overflow = arithmetic_on_values(
             "+", &[maximum.clone(), one.clone()], &env, Span::default()
         ).expect("2047 + 1 widens exactly");
-        let Value::BinaryNumber(positive_overflow) = positive_overflow else {
+        let Value::BinaryNumber(ref positive_overflow) = positive_overflow else {
             panic!("positive overflow is an exact integer");
         };
         assert_eq!(positive_overflow.numeric_domain_width(), Some(24));
@@ -335,7 +335,7 @@ mod qualified_numeric_domain_value_tests {
         let negative_overflow = arithmetic_on_values(
             "-", &[minimum, one.clone()], &env, Span::default()
         ).expect("-2048 - 1 widens exactly");
-        let Value::BinaryNumber(negative_overflow) = negative_overflow else {
+        let Value::BinaryNumber(ref negative_overflow) = negative_overflow else {
             panic!("negative overflow is an exact integer");
         };
         assert_eq!(negative_overflow.numeric_domain_width(), Some(24));
