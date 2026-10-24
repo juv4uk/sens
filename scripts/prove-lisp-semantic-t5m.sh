@@ -46,6 +46,18 @@ fail() {
 profile_stage() {
   local id="$1" stage="$2" started_ns ended_ns elapsed_us code=0
   shift 2
+  # Одна назва sens-standalone раніше змішувала різні виконувані CLI.
+  # Маршрут — частина виміру; заміна runner не може виглядати як speedup.
+  if [[ "$stage" == sens-standalone ]]; then
+    if [[ "${1:-}" == timeout && "${3:-}" == "$sens" ]]; then
+      stage=sens-standalone-sens
+    elif [[ "${1:-}" == timeout && "${3:-}" == "$trit" && "${4:-}" == eval-core4 ]]; then
+      stage=sens-standalone-trit-core4
+    else
+      echo "::error::SENS_STAGE_EXECUTOR_UNKNOWN id=$id stage=$stage" >&2
+      return 2
+    fi
+  fi
   started_ns="$(date +%s%N)"
   "$@" || code=$?
   ended_ns="$(date +%s%N)"
@@ -520,6 +532,9 @@ sha256sum benchmarks/recursion.lisp tests/semantic/d4-recursion-benchmark-law.li
 # Складені селектори Д4: шість тверджень у Lisp та точний D1-негатив.
 run_case run_law d4-selector-composition-positive tests/semantic/d4-selector-composition-law.lisp 1
 run_case run_law d4-selector-composition-mutant tests/semantic/d4-selector-composition-mutant.lisp 0
+# Д4: вибірка трьома селекторами; самовердикт D1 і хибний вибір цілі.
+run_case run_law d4-selector-domain-positive tests/semantic/d4-selector-domain-law.lisp 1
+run_case run_law d4-selector-domain-mutant tests/semantic/d4-selector-domain-mutant.lisp 0
 run_case run_law d4-escaped-closure-positive tests/semantic/d4-escaped-lexical-closure-law.lisp 1
 run_case run_law d4-escaped-closure-mutant tests/semantic/d4-escaped-lexical-closure-mutant.lisp 0
 # D4 lexical capture/shadowing: SENS Lisp — єдиний семантичний оракул.
@@ -597,6 +612,10 @@ run_case run_type_rejection d8-string-symbol-nontext-type-negative tests/semanti
 run_case run_type_rejection d8-contextual-d1-serialize-type-negative tests/semantic/d8-contextual-d1-serialize-type-negative.lisp 'write-to-string cannot serialize contextual predicate results'
 # Ділення на обчислений нуль є мовним DivisionByZero, не довільною помилкою reader-а.
 run_case run_division_by_zero_rejection d24-computed-zero-denominator tests/semantic/d24-reader-zero-denominator-negative.lisp 'division by zero'
+# D24+ арифметика використовує ті самі справжні визначення Core4 на всіх
+# трьох маршрутах; позитив і мутант доводять точні D1:1 / D1:0.
+run_case run_law exact-arithmetic-positive tests/semantic/exact-arithmetic-laws.lisp 1 core4
+run_case run_law exact-arithmetic-mutant tests/semantic/exact-arithmetic-mutant.lisp 0 core4
 # D1 хибне значення як голова CONS ≠ порожній D3-список.
 # Обидва результати вираховує Lisp/SENS; Zig лише фізично переносить слова.
 run_case run_law d3-d1-false-cons-head-positive tests/semantic/language-law-d3-d1-false-head-ukr.lisp 1

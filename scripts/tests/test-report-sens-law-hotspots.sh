@@ -5,7 +5,7 @@ tool="$repo/scripts/report-sens-law-hotspots.sh"
 tmp="$(mktemp -d)"; trap 'rm -rf "$tmp"' EXIT
 mkdir -p "$tmp/ev"
 printf 'id\tstatus\twall_ms\nalpha\tPASS\t20\nbeta\tRED\t30\nexpected-type-negative\tPASS\t10\n' > "$tmp/ev/law-timings.tsv"
-printf 'id\tstage\texit\telapsed_us\nalpha\tdirect\t0\t100\nbeta\tdirect\t2\t300\nbeta\tsens-paired-core4-diagnostic\t0\t250\nexpected-type-negative\tdirect\t1\t200\nalpha\tzig-open\t0\t15\nbeta\tzig-open\t0\t25\nexpected-type-negative\tsens-paired\t1\t210\nexpected-type-negative\tsens-standalone\t1\t220\n' > "$tmp/ev/law-stage-timings.tsv"
+printf 'id\tstage\texit\telapsed_us\nalpha\tdirect\t0\t100\nbeta\tdirect\t2\t300\nbeta\tsens-paired-core4-diagnostic\t0\t250\nexpected-type-negative\tdirect\t1\t200\nalpha\tzig-open\t0\t15\nbeta\tzig-open\t0\t25\nexpected-type-negative\tsens-paired\t1\t210\nexpected-type-negative\tsens-standalone-sens\t1\t220\nalpha\tsens-standalone-trit-core4\t0\t310\nbeta\tsens-standalone\t1\t190\n' > "$tmp/ev/law-stage-timings.tsv"
 bash "$tool" "$tmp/ev" "$tmp/report.md" > "$tmp/log"
 grep -Fq '| direct | 3 | 2 | 200 | 300 | 300 |' "$tmp/report.md"
 grep -Fq '| zig-open | 2 | 0 | 15 | 25 | 25 |' "$tmp/report.md"
@@ -19,17 +19,22 @@ grep -Fq 'SENS_PHASE_BENCHMARK_SUMMARY checked=3 passed=2 red=1' "$tmp/log"
 grep -Fq '| direct | exit=0 | 1 | 100 | 100 | 100 |' "$tmp/report.md"
 grep -Fq '| direct | exit!=0 | 2 | 200 | 300 | 300 |' "$tmp/report.md"
 grep -Fq '| zig-open | exit=0 | 2 | 15 | 25 | 25 |' "$tmp/report.md"
-grep -Fq '| sens-standalone | exit!=0 | 1 | 220 | 220 | 220 |' "$tmp/report.md"
+grep -Fq '| sens-standalone-sens | exit!=0 | 1 | 220 | 220 | 220 |' "$tmp/report.md"
+grep -Fq '| sens-standalone-trit-core4 | exit=0 | 1 | 310 | 310 | 310 |' "$tmp/report.md"
+grep -Fq '| sens-standalone | exit!=0 | 1 | 190 | 190 | 190 |' "$tmp/report.md"
+grep -Fq 'SENS_PHASE_EXIT_CLASS stage=sens-standalone-trit-core4 exit_class=zero count=1 p50_us=310' "$tmp/log"
 grep -Fq 'SENS_PHASE_EXIT_CLASS stage=direct exit_class=zero count=1 p50_us=100' "$tmp/log"
 grep -Fq 'SENS_PHASE_EXIT_CLASS stage=direct exit_class=nonzero count=2 p50_us=200' "$tmp/log"
-# Семантичний RED з exit=0 не має прискорювати вибірку правильних законів.
+# Семантичний RED з exit=0 не входить до розподілу успішних вимірів.
 printf 'semantic-red\tRED\t5\n' >> "$tmp/ev/law-timings.tsv"
 printf 'semantic-red\tdirect\t0\t1\n' >> "$tmp/ev/law-stage-timings.tsv"
 bash "$tool" "$tmp/ev" "$tmp/report-semantic-red.md" > "$tmp/log-semantic-red"
 grep -Fq '| direct | PASS + exit=0 | 1 | 100 | 100 | 100 |' "$tmp/report-semantic-red.md"
+grep -Fq '| zig-open | PASS + exit=0 | 1 | 15 | 15 | 15 |' "$tmp/report-semantic-red.md"
 grep -Fq 'SENS_PHASE_VERIFIED_SUCCESS stage=direct count=1 p50_us=100' "$tmp/log-semantic-red"
+grep -Fq '| sens-standalone-trit-core4 | PASS + exit=0 | 1 | 310 | 310 | 310 |' "$tmp/report-semantic-red.md"
 printf 'bad\trow\n' >> "$tmp/ev/law-stage-timings.tsv"
 if bash "$tool" "$tmp/ev" "$tmp/invalid.md" > "$tmp/invalid.out" 2>&1; then
  echo 'REPORTER_TEST_FAILED: malformed evidence was accepted' >&2; exit 1
 fi
-echo 'REPORTER_TEST_PASS checks=15 evidence=synthetic reporting_only=true'
+echo 'REPORTER_TEST_PASS checks=22 evidence=synthetic reporting_only=true'

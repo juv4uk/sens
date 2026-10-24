@@ -12,4 +12,4 @@ path = "src/main.rs"
 [dependencies]
 # The only dependency: the canonical sens core. The parser, Expr spans
 # and LanguageError are reused unchanged — the LSP never re-parses .my.
-sens = { path = "../sens" }
+sens = { path = "../sens", default-features = false }

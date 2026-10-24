@@ -6,4 +6,4 @@ license-file = "../../LICENSE"
 description = "EXPERIMENTAL Sanskrit/Paninian semantic layer for sens (not wired into the evaluator)"
 
 [dependencies]
-sens = { path = "../sens" }
+sens = { path = "../sens", default-features = false }

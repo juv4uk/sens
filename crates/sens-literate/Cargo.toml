@@ -6,5 +6,5 @@ license-file = "../../LICENSE"
 description = "Literate markdown extraction wrapper for the sens engine"
 
 [dependencies]
-sens = { path = "../sens" }
+sens = { path = "../sens", default-features = false }
 pulldown-cmark = "0.12"

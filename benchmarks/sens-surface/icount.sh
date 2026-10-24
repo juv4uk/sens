@@ -32,11 +32,33 @@ for f in "$OUT"/programs/*.lisp; do
   base=$(basename "$f" .lisp)
   name=${base%-*}
   form=${base##*-}
-  answer=$(valgrind --tool=cachegrind --cache-sim=no --cachegrind-out-file=/dev/null \
-            --log-file="$OUT/$base.vg" "$SENS" "$f" | grep -v '^$' | tail -1)
+  # Падіння SENS або Cachegrind не може ставати успішним результатом через tail.
+  if output=$(valgrind --tool=cachegrind --cache-sim=no --cachegrind-out-file=/dev/null \
+              --log-file="$OUT/$base.vg" "$SENS" "$f"); then
+    :
+  else
+    rc=$?
+    printf 'ICOUNT_ERROR id=%s layer=cachegrind input=%s expected=exit:0 actual=exit:%s\n' \
+      "$base" "$f" "$rc" >&2
+    exit "$rc"
+  fi
+  answer=$(printf '%s\n' "$output" | sed '/^$/d' | tail -1)
   ir=$(sed -n 's/.*I *refs: *//p' "$OUT/$base.vg" | tr -d ',')
+  case "$ir" in
+    ''|*[!0123456789]*)
+      printf 'ICOUNT_ERROR id=%s layer=cachegrind input=%s expected=integer-I-refs actual=%s\n' \
+        "$base" "$f" "$ir" >&2
+      exit 3
+      ;;
+  esac
+  expected=$(cat "$OUT/programs/$name.expected")
   ok=no
-  [ "$answer" = "$(cat "$OUT/programs/$name.expected")" ] && ok=yes
+  [ "$answer" = "$expected" ] && ok=yes
   printf '%s\t%s\t%s\t%s\n' "$name" "$form" "$ir" "$ok" >> "$OUT/icount.tsv"
   echo "$name $form $ir $ok"
+  if [ "$ok" = no ]; then
+    printf 'ICOUNT_ERROR id=%s layer=sens input=%s expected=%s actual=%s\n' \
+      "$base" "$f" "$expected" "$answer" >&2
+    exit 3
+  fi
 done

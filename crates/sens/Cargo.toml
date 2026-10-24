@@ -16,9 +16,12 @@ test = false
 required-features = ["rust-f3-reference"]
 
 [features]
-default = []
+default = ["rust-t5-reference"]
 benchmark-ast-visits = []
-rust-f3-reference = []
+# Historical Rust T5 codec, retained as a reference/compatibility capability.
+# Production frontends can disable defaults and opt in only for comparisons.
+rust-t5-reference = []
+rust-f3-reference = ["rust-t5-reference"]
 
 [dev-dependencies]
 # Tests may opt into the explicit host capability crate, while the shipped

@@ -72,6 +72,15 @@ fn routed(script: &str) -> BTreeSet<String> {
     result
 }
 
+// Незалежні check_lisp_law у CI виконують справжній SENS, але їхній
+// прямий PASS не видаємо за фізичну T5M-атестацію.
+fn direct_ci_routed(ci: &str) -> BTreeSet<String> {
+    commands(ci).into_iter()
+        .filter(|line| line.starts_with("check_lisp_law "))
+        .flat_map(|line| paths_in(&line))
+        .collect()
+}
+
 fn counterpart(path: &str) -> Option<String> {
     if let Some(stem) = path.strip_prefix("tests/semantic/language-law-") {
         return Some(format!("tests/semantic/language-mutant-{stem}"));
@@ -101,6 +110,8 @@ fn host_oracle(s: &str) -> bool {
 fn audit(added: &[String], runner: &str, ci: &str,
          exists: impl Fn(&str) -> bool, read: impl Fn(&str) -> Result<String,String>) -> Vec<String> {
     let routes = routed(runner);
+    let direct_routes = direct_ci_routed(ci);
+    let registered = |path: &str| routes.contains(path) || direct_routes.contains(path);
     let mut errs = Vec::new();
     if !ci.contains("bash scripts/prove-lisp-semantic-t5m.sh") {
         errs.push("NATIVE_LANGUAGE_RUNNER_NOT_IN_CI".into());
@@ -114,18 +125,18 @@ fn audit(added: &[String], runner: &str, ci: &str,
         }
         if path.starts_with(PREFIX) && path.ends_with(".lisp") {
             if !exists(path) { errs.push(format!("SENS_LAW_SOURCE_MISSING source={path}")); continue; }
-            if !routes.contains(path.as_str()) {
-                errs.push(format!("SENS_LAW_NOT_REGISTERED id=semantic-law-route layer=test-authority input={path} source={path} expected=registered-Lisp-T5M-SENS-route actual=absent"));
+            if !registered(path) {
+                errs.push(format!("SENS_LAW_NOT_REGISTERED id=semantic-law-route layer=test-authority input={path} source={path} expected=registered-native-SENS-route actual=absent"));
             }
             if let Some(other) = counterpart(path) {
                 if !exists(&other) { errs.push(format!("SENS_LAW_MUTANT_MISSING source={path} expected={other}")); }
-                else if !routes.contains(&other) { errs.push(format!("SENS_LAW_MUTANT_NOT_ROUTED source={path} expected={other}")); }
+                else if !registered(&other) { errs.push(format!("SENS_LAW_MUTANT_NOT_ROUTED source={path} expected={other}")); }
             }
             let ps = positives(path);
             if !ps.is_empty() {
                 let installed: Vec<_> = ps.iter().filter(|name| exists(name)).collect();
                 if installed.is_empty() { errs.push(format!("SENS_LAW_POSITIVE_MISSING source={path}")); }
-                else if !installed.iter().any(|name| routes.contains(name.as_str())) {
+                else if !installed.iter().any(|name| registered(name)) {
                     errs.push(format!("SENS_LAW_POSITIVE_NOT_ROUTED source={path}"));
                 }
             }
@@ -337,6 +348,25 @@ run_case run_law sample-mut tests/semantic/sample-mutant.lisp 0\n\
     );
     if !unicode.is_empty() {
         return Err(format!("Unicode paired witnesses: {unicode:?}"));
+    }
+    // Прямий check_lisp_law — реальний SENS-шлях, хоча не T5M-сертифікація.
+    // Зламана реєстрація повинна відхилити обидва змінені Lisp-свідки.
+    let direct_ci = format!("{ci}\ncheck_lisp_law exact-arithmetic-positive tests/semantic/exact-arithmetic-laws.lisp '1'\ncheck_lisp_law exact-arithmetic-mutant tests/semantic/exact-arithmetic-mutant.lisp '0'\n");
+    let direct = audit(
+        &["tests/semantic/exact-arithmetic-laws.lisp".into(),
+          "tests/semantic/exact-arithmetic-mutant.lisp".into()],
+        runner, &direct_ci, |_| true, |_| Ok(String::new()),
+    );
+    if !direct.is_empty() {
+        return Err(format!("registered direct SENS witnesses were rejected: {direct:?}"));
+    }
+    let commented_ci = format!("{ci}\n# check_lisp_law fake tests/semantic/exact-arithmetic-laws.lisp '1'\n");
+    let commented = audit(
+        &["tests/semantic/exact-arithmetic-laws.lisp".into()],
+        runner, &commented_ci, |_| true, |_| Ok(String::new()),
+    );
+    if !commented.iter().any(|e| e.contains("SENS_LAW_NOT_REGISTERED")) {
+        return Err("commented direct SENS route falsely registered a witness".into());
     }
     // Схоже ім'я змінної не доводить, що новий Lisp-закон справді виконується.
     let collision_runner = runner.replace(
