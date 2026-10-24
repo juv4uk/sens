@@ -125,14 +125,31 @@ fn isD10Selector(name: []const u8) bool {
 /// Це перевірка таблиці та композиційної координати, не допуск до SENS.
 pub fn gradeD11(guesses: []const D11Guess) Score {
     var result: Score = .{};
+    // 10 біт батька + 1 біт суфікса дають точні 2048 координат.
+    // Пошкоджені відповіді звіряємо старим способом, щоб зберегти вердикти.
+    var seen = [_]bool{false} ** 2048;
     for (guesses, 0..) |guess, index| {
         var repeated = false;
-        for (guesses[0..index]) |previous| {
-            if (previous.suffix == guess.suffix and
-                std.mem.eql(u8, previous.parent_bits, guess.parent_bits))
-            {
-                repeated = true;
-                break;
+        var indexed = false;
+        if (guess.parent_bits.len == 10 and
+            (guess.suffix == '0' or guess.suffix == '1'))
+        {
+            if (bitCoordinate(guess.parent_bits)) |parent_coordinate| {
+                const child_coordinate = (parent_coordinate << 1) |
+                    @as(usize, guess.suffix - '0');
+                repeated = seen[child_coordinate];
+                seen[child_coordinate] = true;
+                indexed = true;
+            }
+        }
+        if (!indexed) {
+            for (guesses[0..index]) |previous| {
+                if (previous.suffix == guess.suffix and
+                    std.mem.eql(u8, previous.parent_bits, guess.parent_bits))
+                {
+                    repeated = true;
+                    break;
+                }
             }
         }
         if (repeated) {
@@ -578,6 +595,29 @@ test "Конкурс D11: вірна назва, хибна, повтор, не-
     try std.testing.expectEqual(@as(usize, 1), score.wrong);
     try std.testing.expectEqual(@as(usize, 1), score.duplicate);
     try std.testing.expectEqual(@as(usize, 0), score.unknown);
+    try std.testing.expectEqual(@as(usize, 1), score.invalid_suffix);
+    try std.testing.expectEqual(@as(usize, 1), score.non_selector);
+    try std.testing.expectEqual(@as(usize, 1), score.answered);
+    try std.testing.expectEqual(@as(usize, 511), score.missing);
+}
+
+test "Конкурс D11: прямий індекс зберігає повтори правильних і пошкоджених координат" {
+    const guesses = [_]D11Guess{
+        .{ .parent_bits = "0110000000", .suffix = '0', .child_lisp = "CDAAAAAAAAR" },
+        .{ .parent_bits = "0110000000", .suffix = '0', .child_lisp = "WRONG" },
+        .{ .parent_bits = "011000000x", .suffix = '0', .child_lisp = "WRONG" },
+        .{ .parent_bits = "011000000x", .suffix = '0', .child_lisp = "WRONG" },
+        .{ .parent_bits = "0110000000", .suffix = '2', .child_lisp = "WRONG" },
+        .{ .parent_bits = "0110000000", .suffix = '2', .child_lisp = "WRONG" },
+        .{ .parent_bits = "011000000", .suffix = '1', .child_lisp = "WRONG" },
+        .{ .parent_bits = "011000000", .suffix = '1', .child_lisp = "WRONG" },
+        .{ .parent_bits = "0000000000", .suffix = '0', .child_lisp = "WRONG" },
+        .{ .parent_bits = "0000000000", .suffix = '0', .child_lisp = "WRONG" },
+    };
+    const score = gradeD11(&guesses);
+    try std.testing.expectEqual(@as(usize, 1), score.correct);
+    try std.testing.expectEqual(@as(usize, 5), score.duplicate);
+    try std.testing.expectEqual(@as(usize, 2), score.unknown);
     try std.testing.expectEqual(@as(usize, 1), score.invalid_suffix);
     try std.testing.expectEqual(@as(usize, 1), score.non_selector);
     try std.testing.expectEqual(@as(usize, 1), score.answered);
