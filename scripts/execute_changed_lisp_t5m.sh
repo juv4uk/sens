@@ -527,7 +527,7 @@ run_native_t5m_program() {
       standalone_physical="$dir/d11-terminator-full.sens"
       if ! cat -- lib/d11-list-terminator-evidence.lisp "$file" >"$terminator_source" ||
          ! timeout "$native_timeout" "$binary" --t5m-mint "$terminator_source" "$standalone_physical" >"$dir/d11-terminator-mint.out" 2>"$dir/d11-terminator-mint.err" ||
-         ! timeout "$native_timeout" "$native_open" open "$standalone_physical" >"$dir/d11-terminator-open.out" 2>"$dir/d11-terminator-open.err" ||
+         ! timeout "$native_timeout" "$native_open" open "$standalone_physical" >"${standalone_physical%.sens}" 2>"$dir/d11-terminator-open.err" ||
          ! timeout "$native_timeout" "$native_open" verify-view "$standalone_physical" >"$dir/d11-terminator-verify.out" 2>"$dir/d11-terminator-verify.err"; then
         echo "::error::D11_TERMINATOR_MINT_RED source=$file" >&2
         mark_file_failed
