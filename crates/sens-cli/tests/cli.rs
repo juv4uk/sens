@@ -1151,7 +1151,7 @@ fn sexpr_protocol_rejects_extra_top_level_form_before_evaluation() {
     // Повторюємо повний обмін лише після помилки I/O: перший connect
     // на деяких CI-хостах може скинутися відразу після запуску сервера.
     let exchange = (0..20).find_map(|_| {
-        let attempt = (|| -> io::Result<(String, String, String)> {
+        let attempt = (|| -> io::Result<(String, String, String, String)> {
             let mut stream = TcpStream::connect(("127.0.0.1", port))?;
             stream.set_read_timeout(Some(Duration::from_secs(3)))?;
             stream.set_write_timeout(Some(Duration::from_secs(3)))?;
@@ -1180,7 +1180,18 @@ fn sexpr_protocol_rejects_extra_top_level_form_before_evaluation() {
             if reader.read_line(&mut followup)? == 0 {
                 return Err(io::ErrorKind::UnexpectedEof.into());
             }
-            Ok((rejected, rejected_definition, followup))
+
+            // Після двох відхилених конвертів нормальний SENS-запит
+            // усе ще повинен виконуватися на тому самому сокеті.
+            writeln!(
+                stream,
+                r#"(request (id 3) (op eval) (source "(як-є сенс)"))"#
+            )?;
+            let mut allowed = String::new();
+            if reader.read_line(&mut allowed)? == 0 {
+                return Err(io::ErrorKind::UnexpectedEof.into());
+            }
+            Ok((rejected, rejected_definition, followup, allowed))
         })();
         match attempt {
             Ok(responses) => Some(responses),
@@ -1194,7 +1205,7 @@ fn sexpr_protocol_rejects_extra_top_level_form_before_evaluation() {
     let _ = child.kill();
     let _ = child.wait();
 
-    let (rejected, rejected_definition, followup) = exchange
+    let (rejected, rejected_definition, followup, allowed) = exchange
         .unwrap_or_else(|| panic!("не вдалося виконати TCP-обмін: {last_error:?}"));
     assert!(
         rejected.contains("(kind parse-error)"),
@@ -1207,6 +1218,10 @@ fn sexpr_protocol_rejects_extra_top_level_form_before_evaluation() {
     assert!(
         followup.contains("(status error)") && followup.contains("unknown-symbol"),
         "відхилений конверт змінив стан SENS-сесії: {followup}"
+    );
+    assert!(
+        allowed.contains("(status ok)") && allowed.contains("(value сенс)"),
+        "коректний запит після відмови не виконується: {allowed}"
     );
 }
 
