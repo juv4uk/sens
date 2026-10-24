@@ -1078,6 +1078,9 @@ cat -- lib/list-append-general.lisp tests/semantic/d4-append-general-proper-law.
 cat -- lib/list-append-general.lisp tests/semantic/d4-append-general-atomic-left-negative.lisp > "$d4_append_atom"
 cat -- lib/list-append-general.lisp tests/semantic/d4-append-general-improper-tail-negative.lisp > "$d4_append_tail"
 run_case run_law d4-append-general-proper "$d4_append_positive" 1 core4
+d4_append_mutant="$evidence/d4-append-general-proper-mutant-complete.lisp"
+cat -- lib/list-append-general.lisp tests/semantic/d4-append-general-proper-mutant.lisp > "$d4_append_mutant"
+run_case run_law d4-append-general-proper-mutant "$d4_append_mutant" 0 core4
 run_case run_error_rejection d4-append-general-atomic-left "$d4_append_atom" Type 'car expects a non-empty list' core4
 run_case run_error_rejection d4-append-general-improper-tail "$d4_append_tail" Type 'car expects a non-empty list' core4
 d4_append_right_atom="$evidence/d4-append-general-atomic-right-complete.lisp"
@@ -1087,6 +1090,7 @@ cat -- lib/list-append-general.lisp tests/semantic/d4-append-general-improper-ri
 run_case run_error_rejection d4-append-general-atomic-right "$d4_append_right_atom" Type 'car expects a non-empty list' core4
 run_case run_error_rejection d4-append-general-improper-right "$d4_append_right_tail" Type 'car expects a non-empty list' core4
 sha256sum lib/list-append-general.lisp tests/semantic/d4-append-general-proper-law.lisp \
+  tests/semantic/d4-append-general-proper-mutant.lisp \
   tests/semantic/d4-append-general-atomic-left-negative.lisp \
   tests/semantic/d4-append-general-improper-tail-negative.lisp \
   tests/semantic/d4-append-general-atomic-right-negative.lisp tests/semantic/d4-append-general-improper-right-negative.lisp > "$evidence/d4-append-general-inputs.sha256"
