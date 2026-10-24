@@ -21,6 +21,7 @@ REQUIRED_CHECKS = (
     "physical-binary-cli",
     "d2-grammar-audit",
     "focused release preflight",
+    "Охоронець · Rust · Zig · SENS",
     # The real ci.yml/lisp-guards job runs native Zig T5M + SENS checks on main.
     # Use its exact published check-run name; never require a retired label.
     "Українська проєкція та заборона сирих літералів",

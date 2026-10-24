@@ -80,6 +80,36 @@ class ExactReleaseChecksTest(unittest.TestCase):
                 with self.assertRaisesRegex(ValueError, expected):
                     MODULE.verify_check_runs(mutant, SHA, "juv4uk/sens")
 
+    def test_main_ci_is_mandatory_on_the_exact_sha(self):
+        # The real automatic job in .github/workflows/ci.yml must never
+        # disappear from the exact-SHA release admission contract.
+        central = "Охоронець · Rust · Zig · SENS"
+        self.assertIn(central, MODULE.REQUIRED_CHECKS)
+        baseline = complete_payload()
+        self.assertEqual(
+            len(MODULE.verify_check_runs(baseline, SHA, "juv4uk/sens")),
+            len(MODULE.REQUIRED_CHECKS),
+        )
+
+        missing = copy.deepcopy(baseline)
+        missing["check_runs"] = [
+            row for row in missing["check_runs"] if row["name"] != central
+        ]
+        with self.assertRaisesRegex(ValueError, "missing exact-SHA check"):
+            MODULE.verify_check_runs(missing, SHA, "juv4uk/sens")
+
+        for change, expected in (
+            ({"status": "completed", "conclusion": "failure"}, "not green"),
+            ({"status": "in_progress", "conclusion": None}, "not green"),
+            ({"head_sha": "b" * 40}, "wrong check-run SHA"),
+        ):
+            with self.subTest(change=change):
+                mutant = copy.deepcopy(baseline)
+                row = next(r for r in mutant["check_runs"] if r["name"] == central)
+                row.update(change)
+                with self.assertRaisesRegex(ValueError, expected):
+                    MODULE.verify_check_runs(mutant, SHA, "juv4uk/sens")
+
     def test_missing_required_check_is_rejected(self):
         payload = complete_payload()
         missing = MODULE.REQUIRED_CHECKS[0]
@@ -172,11 +202,25 @@ class ExactReleaseChecksTest(unittest.TestCase):
                     MODULE.verify_check_runs(payload, SHA)
 
     def test_tag_workflow_requires_release_ci_before_staging_and_publication(self):
-        workflow = (ROOT / ".github/workflows/release.yml").read_text(encoding="utf-8")
-        self.assertGreaterEqual(
-            workflow.count('python3 scripts/verify_release_ci.py "$GITHUB_SHA" "$GITHUB_REPOSITORY"'),
-            2,
-            "exact-SHA verifier must run before staging and again before publication",
+        caller = (ROOT / ".github/workflows/release.yml").read_text(encoding="utf-8")
+        publisher = (ROOT / ".github/workflows/release-publish.yml").read_text(encoding="utf-8")
+        self.assertIn("uses: ./.github/workflows/release-publish.yml", caller)
+        command = 'python3 scripts/verify_release_ci.py "$GITHUB_SHA" "$GITHUB_REPOSITORY"'
+        self.assertEqual(
+            publisher.count(command), 2,
+            "exact-SHA verifier must run once before draft and again before publication",
+        )
+        self.assertLess(
+            publisher.index(command),
+            publisher.index("Download all staged release artifacts"),
+        )
+        self.assertGreater(
+            publisher.rindex(command),
+            publisher.index('gh release create "$GITHUB_REF_NAME"'),
+        )
+        self.assertLess(
+            publisher.rindex(command),
+            publisher.index('gh release edit "$GITHUB_REF_NAME"'),
         )
 
 
