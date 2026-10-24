@@ -454,6 +454,18 @@ jobs:
           echo "::notice file=.github/workflows/ci.yml,title=SENS Lisp→Zig/T5M→SENS::PASS physical_codec=Zig/T5M execution=SENS release=NOT_CERTIFIED"
 
 
+      # Окремий MetaEval F4-свідок: усі вісім лексичних законів,
+      # вісім мутантів і точні закомічені .sens-пари перевіряються
+      # на КОЖНОМУ SHA, навіть якщо цей push не змінював Lisp.
+      # Фізичний RED не може перетворюватися на зелений changed-only SKIP.
+      - name: MetaEval F4 — чинний Lisp і фізичні Zig/T5M позитив та мутант
+        if: ${{ always() && steps.native-build.outcome == 'success' }}
+        timeout-minutes: 8
+        shell: bash
+        run: |
+          set -euo pipefail
+          bash scripts/prove-meta-eval-lexical-shadow-d1.sh "$PWD/target/debug/sens"
+
       - name: Lisp → Zig/T5M → SENS — позитивні та негативні закони
         if: ${{ always() && steps.native-build.outcome == 'success' }}
         timeout-minutes: 15

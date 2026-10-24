@@ -3,6 +3,7 @@
 use std::{collections::BTreeSet, env, fs, path::Path, process::{self, Command}};
 const PREFIX: &str = "tests/semantic/";
 const RUNNER: &str = "scripts/prove-lisp-semantic-t5m.sh";
+const META_F4_RUNNER: &str = "scripts/prove-meta-eval-lexical-shadow-d1.sh";
 const CI: &str = ".github/workflows/ci.yml";
 const REMINT: &str = ".github/workflows/remint-drifted-pairs.yml";
 
@@ -75,6 +76,47 @@ fn routed(script: &str) -> BTreeSet<String> {
     result
 }
 
+// Додатковий маршрут F4 — окремий справжній SENS-виконавець.
+// Згадка шляху в коментарі чи echo не реєструє тест. Так само
+// назва файлу сама по собі не є доказом фізичного виконання.
+fn meta_f4_routed(ci: &str, script: &str) -> BTreeSet<String> {
+    let active = commands(ci).iter().any(|line|
+        line.starts_with("bash scripts/prove-meta-eval-lexical-shadow-d1.sh ")
+    );
+    // Лише живі shell-команди: закоментований, echo або згаданий
+    // у повідомленні F4-виклик не стає фізичною атестацією.
+    let lines = commands(script);
+    let executes = |prefix: &str| lines.iter().any(|line| line.starts_with(prefix));
+    if !active
+        || !executes("mapfile -t forms ")
+        || !executes("mapfile -t mutant_forms ")
+        || !executes("if ! \"$cli\" --t5m-pair \"$physical_aggregate\" \"$physical_aggregate_carrier\" ")
+        || !executes("if ! \"$cli\" --t5m-pair \"$physical_aggregate_mutant\" \"$physical_aggregate_mutant_carrier\" ")
+        || !executes("if \"$cli\" --t5m-pair \"$physical_aggregate_mutant\" \"$physical_aggregate_carrier\" ")
+        || !executes("if ! grep -Fq 'T5M_PHYSICAL_PAIR_MISMATCH' ")
+    {
+        return BTreeSet::new();
+    }
+    let mut sources = BTreeSet::new();
+    for variable in ["law", "mutant", "mutants", "physical_aggregate",
+                     "physical_aggregate_mutant"] {
+        let prefix = format!("{variable}=");
+        let matches: Vec<_> = lines.iter()
+            .filter_map(|line| line.strip_prefix(&prefix)).collect();
+        if matches.len() != 1 { return BTreeSet::new(); }
+        let path = matches[0].trim_matches('"');
+        if !path.starts_with(PREFIX) || !path.ends_with(".lisp")
+            || !path.chars().all(|ch|
+                ch.is_alphanumeric() || matches!(ch, '/' | '-' | '_' | '.'))
+        {
+            return BTreeSet::new();
+        }
+        sources.insert(path.to_string());
+    }
+    if sources.len() != 5 { return BTreeSet::new(); }
+    sources
+}
+
 // Незалежні check_lisp_law у CI виконують справжній SENS, але їхній
 // прямий PASS не видаємо за фізичну T5M-атестацію.
 fn direct_ci_routed(ci: &str) -> BTreeSet<String> {
@@ -114,7 +156,11 @@ fn audit(added: &[String], runner: &str, ci: &str,
          exists: impl Fn(&str) -> bool, read: impl Fn(&str) -> Result<String,String>) -> Vec<String> {
     let routes = routed(runner);
     let direct_routes = direct_ci_routed(ci);
-    let registered = |path: &str| routes.contains(path) || direct_routes.contains(path);
+    // Без наявного виконуваного F4 CI-маршруту список не реєструється.
+    let meta_source = fs::read_to_string(META_F4_RUNNER).unwrap_or_default();
+    let meta_routes = meta_f4_routed(ci, &meta_source);
+    let registered = |path: &str| routes.contains(path)
+        || direct_routes.contains(path) || meta_routes.contains(path);
     let mut errs = Vec::new();
     let runner_call = "bash scripts/prove-lisp-semantic-t5m.sh";
     let call_with_args = format!("{runner_call} ");
@@ -332,7 +378,51 @@ fn test_remint_dispatch() -> Result<(), String> {
     Ok(())
 }
 
+fn test_meta_f4_routing() -> Result<(), String> {
+    let script = fs::read_to_string(META_F4_RUNNER).map_err(|e| e.to_string())?;
+    let ci = "bash scripts/prove-meta-eval-lexical-shadow-d1.sh \"$PWD/target/debug/sens\"";
+    let paths = meta_f4_routed(ci, &script);
+    let expected = BTreeSet::from([
+        "tests/semantic/meta-eval-lexical-shadow-d1-law.lisp".to_string(),
+        "tests/semantic/meta-eval-lexical-shadow-d1-mutant.lisp".to_string(),
+        "tests/semantic/meta-eval-lexical-shadow-d1-mutants.lisp".to_string(),
+        "tests/semantic/meta-eval-lexical-shadow-d1-physical-law.lisp".to_string(),
+        "tests/semantic/meta-eval-lexical-shadow-d1-physical-mutant.lisp".to_string(),
+    ]);
+    if paths != expected {
+        return Err(format!("META_F4_ROUTE_INVALID actual={paths:?} expected={expected:?}"));
+    }
+    let commented = "# bash scripts/prove-meta-eval-lexical-shadow-d1.sh\n\
+echo bash scripts/prove-meta-eval-lexical-shadow-d1.sh";
+    if !meta_f4_routed(commented, &script).is_empty() {
+        return Err("commented or echoed MetaEval route was falsely registered".into());
+    }
+    for broken in [
+        script.replacen(
+            "\"$cli\" --t5m-pair \"$physical_aggregate\" \"$physical_aggregate_carrier\"",
+            "echo no-physical-positive", 1),
+        script.replacen(
+            "\"$cli\" --t5m-pair \"$physical_aggregate_mutant\" \"$physical_aggregate_mutant_carrier\"",
+            "echo no-physical-negative", 1),
+        script.replacen(
+            "physical_aggregate_mutant=tests/semantic/",
+            "physical_aggregate_mutant=tests/fixtures/", 1),
+        script.replacen(
+            "if ! \"$cli\" --t5m-pair \"$physical_aggregate\"",
+            "# if ! \"$cli\" --t5m-pair \"$physical_aggregate\"", 1),
+        script.replacen(
+            "if ! grep -Fq 'T5M_PHYSICAL_PAIR_MISMATCH'",
+            "echo T5M_PHYSICAL_PAIR_MISMATCH", 1),
+    ] {
+        if !meta_f4_routed(ci, &broken).is_empty() {
+            return Err("broken MetaEval physical witness was falsely registered".into());
+        }
+    }
+    Ok(())
+}
+
 fn self_test() -> Result<(),String> {
+    test_meta_f4_routing()?;
     test_remint_dispatch()?;
     test_git_change_filter()?;
     test_triplet_census()?;
