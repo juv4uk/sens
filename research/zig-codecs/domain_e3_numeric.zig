@@ -89,6 +89,53 @@ test "E3 single numeric-run D24 and D48 independently pinned Rust wire vectors" 
     try std.testing.expectError(error.WrongLength, decodeOne(24, &gold48));
 }
 
+
+test "E3 v3 D96 і D192 зберігають незалежні golden байти та відкидають чужий ordinal" {
+    // Кадри й CRC обчислено незалежно від WIDE_WIDTHS; D24/D48 pinned вище.
+    // Зсув ordinal через вставлення D12 не може змінити ці очікувані байти.
+    const gold96 = [_]u8{
+        0x53, 0x33, 0x03, 0x01, 0x02, 0x01, 0x02, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x61,
+        0x57, 0xbe, 0x81 
+    };
+    const gold192 = [_]u8{
+        0x53, 0x33, 0x03, 0x01, 0x02, 0x01, 0x03, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0x01, 0x92, 0x80, 0xc1, 0xae 
+    };
+    var buffer: [64]u8 = undefined;
+    const d96 = ladder.WideDomainWord(96).init(1);
+    const d192 = ladder.WideDomainWord(192).init(1);
+
+    const len96 = try encodeOne(96, d96, &buffer);
+    try std.testing.expectEqualSlices(u8, &gold96, buffer[0..len96]);
+    try std.testing.expectEqual(d96.bits, (try decodeOne(96, &gold96)).bits);
+    const len192 = try encodeOne(192, d192, &buffer);
+    try std.testing.expectEqualSlices(u8, &gold192, buffer[0..len192]);
+    try std.testing.expectEqual(d192.bits, (try decodeOne(192, &gold192)).bits);
+
+    // Негативний мутант має коректний CRC, але чужий ordinal.
+    // Контроль цілісності сам по собі не встановлює доменну ідентичність.
+    var wrong96 = gold96;
+    wrong96[prefix.len] = 3;
+    const crc96 = fields.crc32(wrong96[0 .. wrong96.len - 4]);
+    wrong96[wrong96.len - 4] = @intCast(crc96 >> 24);
+    wrong96[wrong96.len - 3] = @intCast((crc96 >> 16) & 0xff);
+    wrong96[wrong96.len - 2] = @intCast((crc96 >> 8) & 0xff);
+    wrong96[wrong96.len - 1] = @intCast(crc96 & 0xff);
+    try std.testing.expectError(error.WrongProfile, decodeOne(96, &wrong96));
+
+    var wrong192 = gold192;
+    wrong192[prefix.len] = 2;
+    const crc192 = fields.crc32(wrong192[0 .. wrong192.len - 4]);
+    wrong192[wrong192.len - 4] = @intCast(crc192 >> 24);
+    wrong192[wrong192.len - 3] = @intCast((crc192 >> 16) & 0xff);
+    wrong192[wrong192.len - 2] = @intCast((crc192 >> 8) & 0xff);
+    wrong192[wrong192.len - 1] = @intCast(crc192 & 0xff);
+    try std.testing.expectError(error.WrongProfile, decodeOne(192, &wrong192));
+}
+
 test "E3 single-source numeric width order and CRC-correct profile mutant" {
     // Numeric rung order is imported from the shared physical profile, not
     // independently declared by the E3 codec. CRC integrity alone never
