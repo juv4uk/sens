@@ -1,0 +1,35 @@
+"""Стек семантичного боргу: вимір мусить бути точним і чесним."""
+import subprocess
+import sys
+import unittest
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[2]
+SCRIPT = ROOT / "scripts" / "report-semantic-coverage-backlog.py"
+
+
+class SemanticBacklogTests(unittest.TestCase):
+    def run_script(self, *args):
+        return subprocess.run([sys.executable, str(SCRIPT), *args],
+                              capture_output=True, text=True, timeout=60, check=False)
+
+    def test_backlog_is_measured_and_honest(self):
+        r = self.run_script("--check")
+        self.assertEqual(r.returncode, 0, r.stderr)
+        self.assertIn("рядків=221", r.stdout)
+        # Закон чесноти: жодного COVERED без нативної квитанції.
+        self.assertIn("COVERED=0", r.stdout)
+        self.assertIn("PASS", r.stdout)
+
+    def test_no_false_receipts(self):
+        r = self.run_script()
+        self.assertIn("з квитанцією=0", r.stdout)
+
+    def test_the_three_scopes_are_named(self):
+        r = self.run_script()
+        for scope in ("BULK_20261009", "EVAL_20261009", "TARGETED_20261009"):
+            self.assertIn(scope, r.stdout)
+
+
+if __name__ == "__main__":
+    unittest.main()
