@@ -28,7 +28,7 @@ struct LineConnectionSlot {
 impl LineConnectionSlot {
     fn acquire(active: &Arc<AtomicUsize>, limit: usize) -> Option<Self> {
         active
-            .try_update(Ordering::AcqRel, Ordering::Acquire, |count| {
+            .fetch_update(Ordering::AcqRel, Ordering::Acquire, |count| {
                 (count < limit).then_some(count + 1)
             })
             .ok()
