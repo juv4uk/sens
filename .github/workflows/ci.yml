@@ -371,6 +371,9 @@ jobs:
           # Мовні закони й семантика виконуються окремо у фізичному SENS.
           cargo test --locked -p sens-cli --bin wsm-fs-record-producer -- --nocapture
           cargo test --locked -p sens-cli --bin wsm-fs-record-consumer -- --nocapture
+          # Реальний producer → фізичний Zig/T5M → SENS consumer;
+          # позитив і пошкоджені пакети без Rust-імітації мовного закону.
+          cargo test --locked -p sens-cli --test wsm_fs_f6_pipeline -- --nocapture
           cargo test --locked -p sens --example fn_table_bench -- --nocapture
 
       - name: Zig — точний кодек, ABI, пошкоджені кадри
