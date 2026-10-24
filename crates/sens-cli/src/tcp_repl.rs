@@ -190,7 +190,13 @@ fn handle_tcp_line_connection(stream: TcpStream, allowed: &[String]) {
         );
         return;
     }
-    let _ = load_process_library(&mut session);
+    if let Err(error) = sens::load_process_library(&mut session) {
+        eprintln!(
+            "TCP REPL: process library bootstrap failed: {}",
+            error.render("<T5M process bootstrap>")
+        );
+        return;
+    }
 
     // Обмежуємо і запис: клієнт, що перестав читати відповіді,
     // не повинен тримати сервер у нескінченному write.
