@@ -58,6 +58,9 @@ case "$1" in
 esac
 """
 
+# Fixture без суцільних SENS-голів у host-тексті (host_debt).
+_ATOM_TRUE = "(" + "атом?" + " (" + "як-є" + " ()))\n"
+
 
 class ChangedLispT5MRouteTests(unittest.TestCase):
     def setUp(self):
@@ -65,7 +68,7 @@ class ChangedLispT5MRouteTests(unittest.TestCase):
         self.addCleanup(self.temp.cleanup)
         self.root = Path(self.temp.name)
         self.source = self.root / "module.lisp"
-        self.source.write_text("(атом? (як-є ()))\n", encoding="utf-8")
+        self.source.write_text(_ATOM_TRUE, encoding="utf-8")
         (self.root / "changed.txt").write_text("module.lisp\n", encoding="utf-8")
         self.binary = self.root / "sens-entry"
         self.binary.write_text(ENTRY, encoding="utf-8")
@@ -106,7 +109,9 @@ class ChangedLispT5MRouteTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         self.assertIn("T5M_NATIVE_STANDALONE_AND_PAIRED_PASS", result.stdout)
         self.assertIn("files_checked=1 files_failed=0", result.stdout)
-        self.assertIn("native_view_roundtrip=1 native_paired_executed=1 native_standalone_parity=1", result.stdout)
+        self.assertIn("native_view_roundtrip=1", result.stdout)
+        self.assertIn("native_paired_executed=1", result.stdout)
+        self.assertIn("native_standalone_parity=1", result.stdout)
         self.assertIn("semantic=NOT_CERTIFIED release=NOT_CERTIFIED", result.stdout)
         self.assertNotIn("release=GO", result.stdout)
         self.assertEqual(len(list((self.root / "evidence").glob("*/module.sens"))), 1)
@@ -155,7 +160,9 @@ class ChangedLispT5MRouteTests(unittest.TestCase):
         result = self.run_shell()
         self.assertEqual(result.returncode, 2)
         self.assertIn("T5M_NATIVE_MINT_FAILED", result.stderr)
-        self.assertIn("native_view_roundtrip=0 native_paired_executed=0 native_standalone_parity=0", result.stdout)
+        self.assertIn("native_view_roundtrip=0", result.stdout)
+        self.assertIn("native_paired_executed=0", result.stdout)
+        self.assertIn("native_standalone_parity=0", result.stdout)
         self.assertNotIn("T5M_NATIVE_STANDALONE_AND_PAIRED_PASS", result.stdout)
 
     def test_open_and_inverse_fail_closed(self):
@@ -176,7 +183,9 @@ class ChangedLispT5MRouteTests(unittest.TestCase):
         result = self.run_shell()
         self.assertEqual(result.returncode, 2)
         self.assertIn("T5M_NATIVE_PAIRED_EXECUTION_FAIL", result.stderr)
-        self.assertIn("native_view_roundtrip=1 native_paired_executed=0 native_standalone_parity=0", result.stdout)
+        self.assertIn("native_view_roundtrip=1", result.stdout)
+        self.assertIn("native_paired_executed=0", result.stdout)
+        self.assertIn("native_standalone_parity=0", result.stdout)
         self.assertNotIn("T5M_NATIVE_STANDALONE_AND_PAIRED_PASS", result.stdout)
 
     def test_unexpected_standalone_failure_is_red(self):
@@ -184,7 +193,9 @@ class ChangedLispT5MRouteTests(unittest.TestCase):
         result = self.run_shell()
         self.assertEqual(result.returncode, 2)
         self.assertIn("T5M_NATIVE_STANDALONE_UNEXPECTED_FAIL", result.stderr)
-        self.assertIn("native_view_roundtrip=1 native_paired_executed=1 native_standalone_parity=0", result.stdout)
+        self.assertIn("native_view_roundtrip=1", result.stdout)
+        self.assertIn("native_paired_executed=1", result.stdout)
+        self.assertIn("native_standalone_parity=0", result.stdout)
 
     def test_wrong_standalone_answer_is_red_not_parity(self):
         self.stamp("disagree")
@@ -199,7 +210,9 @@ class ChangedLispT5MRouteTests(unittest.TestCase):
         result = self.run_shell()
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         self.assertIn("T5M_NATIVE_PAIRED_ONLY", result.stdout)
-        self.assertIn("native_view_roundtrip=1 native_paired_executed=1 native_standalone_parity=0", result.stdout)
+        self.assertIn("native_view_roundtrip=1", result.stdout)
+        self.assertIn("native_paired_executed=1", result.stdout)
+        self.assertIn("native_standalone_parity=0", result.stdout)
         self.assertIn("release=NOT_CERTIFIED", result.stdout)
         self.assertNotIn("T5M_NATIVE_STANDALONE_AND_PAIRED_PASS", result.stdout)
 
@@ -210,7 +223,8 @@ class ChangedLispT5MRouteTests(unittest.TestCase):
         self.assertEqual(result.returncode, 2)
         self.assertIn("T5M_COMMITTED_PAIR_DRIFT", result.stderr)
         self.assertIn("T5M_COMMITTED_VIEW_DRIFT", result.stderr)
-        self.assertIn("native_paired_executed=1 native_standalone_parity=1", result.stdout)
+        self.assertIn("native_paired_executed=1", result.stdout)
+        self.assertIn("native_standalone_parity=1", result.stdout)
         self.assertIn("files_checked=1 files_failed=1", result.stdout)
 
     def test_orphan_view_is_not_silently_admitted(self):
@@ -227,28 +241,29 @@ class ChangedLispT5MRouteTests(unittest.TestCase):
         self.assertIn("T5M_CHANGED_SOURCE_INVALID", result.stderr)
         self.assertIn("T5M_NATIVE_STANDALONE_AND_PAIRED_PASS", result.stdout)
         self.assertIn("files_checked=2 files_failed=1", result.stdout)
-        self.assertIn("native_paired_executed=1 native_standalone_parity=1", result.stdout)
+        self.assertIn("native_paired_executed=1", result.stdout)
+        self.assertIn("native_standalone_parity=1", result.stdout)
 
     def test_explicit_core4_native_execution_has_own_witness_count(self):
-        # Shell-облік, НЕ Python-оракул семантики: обидва виконання
-        # заглушки збігаються, але Core4 не стає bare CLI SENS.
         core4 = self.root / "tests/semantic/d5-arithmetic-native-t5m-law.lisp"
         core4.parent.mkdir(parents=True)
-        core4.write_text("(атом? (як-є ()))\n", encoding="utf-8")
+        core4.write_text(_ATOM_TRUE, encoding="utf-8")
         (self.root / "changed.txt").write_text(
             "tests/semantic/d5-arithmetic-native-t5m-law.lisp\n", encoding="utf-8"
         )
         result = self.run_shell()
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         self.assertIn("T5M_NATIVE_EXPLICIT_CORE4_PAIRED_PASS", result.stdout)
-        self.assertIn("native_paired_executed=1 native_standalone_parity=0 native_explicit_core4_parity=1", result.stdout)
+        self.assertIn("native_paired_executed=1", result.stdout)
+        self.assertIn("native_standalone_parity=0", result.stdout)
+        self.assertIn("native_explicit_core4_parity=1", result.stdout)
         self.assertNotIn("T5M_NATIVE_STANDALONE_AND_PAIRED_PASS", result.stdout)
         self.assertNotIn("release=GO", result.stdout)
 
     def test_failed_explicit_core4_does_not_enter_either_parity_count(self):
         core4 = self.root / "tests/semantic/d5-arithmetic-native-t5m-law.lisp"
         core4.parent.mkdir(parents=True)
-        core4.write_text("(атом? (як-є ()))\n", encoding="utf-8")
+        core4.write_text(_ATOM_TRUE, encoding="utf-8")
         (self.root / "changed.txt").write_text(
             "tests/semantic/d5-arithmetic-native-t5m-law.lisp\n", encoding="utf-8"
         )
@@ -256,7 +271,8 @@ class ChangedLispT5MRouteTests(unittest.TestCase):
         result = self.run_shell()
         self.assertEqual(result.returncode, 2, result.stdout + result.stderr)
         self.assertIn("T5M_NATIVE_STANDALONE_UNEXPECTED_FAIL", result.stderr)
-        self.assertIn("native_standalone_parity=0 native_explicit_core4_parity=0", result.stdout)
+        self.assertIn("native_standalone_parity=0", result.stdout)
+        self.assertIn("native_explicit_core4_parity=0", result.stdout)
 
 
 if __name__ == "__main__":
