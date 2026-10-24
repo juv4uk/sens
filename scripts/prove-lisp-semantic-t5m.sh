@@ -1028,6 +1028,21 @@ sha256sum lib/d11-srfi1-lset-diff-intersection.lisp \
   tests/semantic/d11-srfi1-lset-diff-intersection-mutant.lisp \
   tests/semantic/d11-srfi1-lset-diff-intersection-improper-left-negative.lisp \
   tests/semantic/d11-srfi1-lset-diff-intersection-improper-right-negative.lisp > "$evidence/d11-lset-diff-intersection-inputs.sha256"
+# Д11 LSET-XOR: три справжні негативні виклики SENS із тим самим DEFINE.
+# Лівий/правий атом D1 замість D3 () → CAR Type, компаратор D3 → COND Type.
+d11_xor_bad_left="$evidence/d11-lset-xor-improper-left-complete.lisp"
+d11_xor_bad_right="$evidence/d11-lset-xor-improper-right-complete.lisp"
+d11_xor_bad_comparator="$evidence/d11-lset-xor-nonpredicate-complete.lisp"
+cat -- lib/d11-srfi1-lset-diff-intersection.lisp tests/semantic/d11-srfi1-lset-xor-improper-left-negative.lisp > "$d11_xor_bad_left"
+cat -- lib/d11-srfi1-lset-diff-intersection.lisp tests/semantic/d11-srfi1-lset-xor-improper-right-negative.lisp > "$d11_xor_bad_right"
+cat -- lib/d11-srfi1-lset-diff-intersection.lisp tests/semantic/d11-srfi1-lset-xor-nonpredicate-negative.lisp > "$d11_xor_bad_comparator"
+run_case run_error_rejection d11-lset-xor-improper-left "$d11_xor_bad_left" Type 'car expects a non-empty list' core4
+run_case run_error_rejection d11-lset-xor-improper-right "$d11_xor_bad_right" Type 'car expects a non-empty list' core4
+run_case run_error_rejection d11-lset-xor-nonpredicate "$d11_xor_bad_comparator" Type 'D3:110 COND expects exact D1:1 / D1:0' core4
+sha256sum lib/d11-srfi1-lset-diff-intersection.lisp tests/semantic/d11-srfi1-lset-xor-improper-left-negative.lisp tests/semantic/d11-srfi1-lset-xor-improper-right-negative.lisp tests/semantic/d11-srfi1-lset-xor-nonpredicate-negative.lisp > "$evidence/d11-lset-xor-negative-inputs.sha256"
+
+
+
 # Д11 FREQUENCIES: окремий позитивний закон і мутант у SENS.
 # Нормативна проєкція: не числа D24, а правильний список унарних "о".
 # Всі DEFINE — канонічна Lisp-бібліотека, а фізичний шлях лише Zig/T5M.
