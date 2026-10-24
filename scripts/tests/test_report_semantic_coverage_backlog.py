@@ -44,6 +44,9 @@ class SemanticBacklogTests(unittest.TestCase):
         self.assertIn("ПІДКАЗКИ, не зіставлення", r.stdout)
         self.assertIn("d3-dotted-pair", r.stdout)   # конкретна підказка
         self.assertIn("~", r.stdout)
+        # І контрприклад: підказка для mccarthy-рядка ХИБНА — це перевірено
+        # читанням джерела, і мусить бути закарбовано, щоб їй не вірили.
+        self.assertIn("ХИБНА", r.stdout)
 
     def test_the_three_scopes_are_named(self):
         r = self.run_script()
