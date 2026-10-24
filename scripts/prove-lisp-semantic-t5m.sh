@@ -640,6 +640,24 @@ run_case run_error_rejection d11-tree-test-nonpredicate-negative "$d11_tree_test
 sha256sum lib/d11-tree-equal-by-test.lisp tests/semantic/d11-tree-equal-by-test-law.lisp \
   tests/semantic/d11-tree-equal-by-test-mutant.lisp \
   tests/semantic/d11-tree-equal-by-test-nonpredicate-negative.lisp > "$evidence/d11-tree-test-inputs.sha256"
+# Д11: реальний SENS індекс — закон, мутант і три точні D3 Type-відмови.
+reason_index_law_bundle="$evidence/d11-reason-index-law-complete.lisp"
+reason_index_mutant_bundle="$evidence/d11-reason-index-mutant-complete.lisp"
+reason_index_bad_reverse_bundle="$evidence/d11-reason-index-improper-reverse-complete.lisp"
+reason_index_bad_buckets_bundle="$evidence/d11-reason-index-improper-buckets-complete.lisp"
+reason_index_bad_rules_bundle="$evidence/d11-reason-index-improper-rules-complete.lisp"
+cat -- lib/unify.lisp lib/reason.lisp tests/semantic/d11-reason-index-law.lisp > "$reason_index_law_bundle"
+cat -- lib/unify.lisp lib/reason.lisp tests/semantic/d11-reason-index-mutant.lisp > "$reason_index_mutant_bundle"
+cat -- lib/unify.lisp lib/reason.lisp tests/semantic/d11-reason-index-improper-reverse-negative.lisp > "$reason_index_bad_reverse_bundle"
+cat -- lib/unify.lisp lib/reason.lisp tests/semantic/d11-reason-index-improper-buckets-negative.lisp > "$reason_index_bad_buckets_bundle"
+cat -- lib/unify.lisp lib/reason.lisp tests/semantic/d11-reason-index-improper-rules-negative.lisp > "$reason_index_bad_rules_bundle"
+run_case run_law d11-reason-index-law "$reason_index_law_bundle" 1 core4
+run_case run_law d11-reason-index-mutant "$reason_index_mutant_bundle" 0 core4
+run_case run_error_rejection d11-reason-index-improper-reverse "$reason_index_bad_reverse_bundle" Type 'car expects a non-empty list' core4
+run_case run_error_rejection d11-reason-index-improper-buckets "$reason_index_bad_buckets_bundle" Type 'car expects a non-empty list' core4
+run_case run_error_rejection d11-reason-index-improper-rules "$reason_index_bad_rules_bundle" Type 'car expects a non-empty list' core4
+sha256sum lib/reason.lisp lib/unify.lisp tests/semantic/d11-reason-index-*.lisp > "$evidence/d11-reason-index-inputs.sha256"
+
 # F11-PROOF-TRACE: нативний закон SENS, жодної додаткової D11-координати.
 # Фактичні визначення беруться лише з lib/reason.lisp (та D9 уніфікатора).
 # SENS виконує 2 D1 закони й 2 очікувані Type-помилки через Zig/T5M.
@@ -766,15 +784,6 @@ run_case run_law d11-srfi1-find-presence-positive "$d11_presence_positive" 1
 run_case run_law d11-srfi1-find-presence-mutant "$d11_presence_mutant" 0
 run_case run_type_rejection d11-srfi1-find-presence-improper-tail-type "$d11_presence_bad_tail" 'car expects a non-empty list'
 sha256sum lib/d11-srfi1-find-presence.lisp tests/semantic/d11-srfi1-find-presence-law.lisp tests/semantic/d11-srfi1-find-presence-mutant.lisp tests/semantic/d11-srfi1-find-presence-improper-tail-negative.lisp > "$evidence/d11-find-presence-inputs.sha256"
-# Д11 асоціації: лише Lisp-визначення, точні D1 позитив і мутант.
-d11_assoc_positive="$evidence/d11-family-association-positive-complete.lisp"
-d11_assoc_mutant="$evidence/d11-family-association-mutant-complete.lisp"
-cat -- lib/d11-srfi1-alist-protocol.lisp tests/semantic/d11-family-association-law.lisp > "$d11_assoc_positive"
-cat -- lib/d11-srfi1-alist-protocol.lisp tests/semantic/d11-family-association-mutant.lisp > "$d11_assoc_mutant"
-run_case run_law d11-family-association-positive "$d11_assoc_positive" 1
-run_case run_law d11-family-association-mutant "$d11_assoc_mutant" 0
-sha256sum lib/d11-srfi1-alist-protocol.lisp tests/semantic/d11-family-association-law.lisp \
-  tests/semantic/d11-family-association-mutant.lisp > "$evidence/d11-family-association-inputs.sha256"
 # Д11 SRFI-1 FILTER-MAP: D1:ні відкидається, структурне () зберігається.
 # Справжній SENS source → Zig/T5M → парний і самостійний SENS.
 d11_filter_map_positive="$evidence/d11-srfi1-filter-map-positive.lisp"
