@@ -71,6 +71,12 @@ pub fn parse(input: &str) -> Result<Sexp, String> {
     let chars: Vec<char> = input.trim().chars().collect();
     let mut pos = 0usize;
     let value = parse_one(&chars, &mut pos)?;
+    // Один виклик — рівно один повний S-вираз. Інакше неперевірені
+    // форми після першої губляться під час TCP-читання й імпорту tasks.
+    skip_ws(&chars, &mut pos);
+    if pos != chars.len() {
+        return Err("unexpected trailing form or data".to_string());
+    }
     Ok(value)
 }
 
@@ -155,6 +161,23 @@ mod tests {
         assert_eq!(parsed.head(), Some("peer-hello"));
         assert_eq!(parsed.field_atom("node"), Some("cml-1"));
         assert_eq!(parsed.field_atom("epoch"), Some("17"));
+    }
+
+    #[test]
+    fn rejects_second_top_level_form() {
+        // Друга команда не може непомітно зникнути після першої.
+        assert!(parse("(metrics) (emit (type evidence-created))").is_err());
+    }
+
+    #[test]
+    fn rejects_unexpected_suffix() {
+        assert!(parse("(metrics) invalid-tail").is_err());
+    }
+
+    #[test]
+    fn accepts_only_whitespace_and_comments_after_form() {
+        let parsed = parse("  (metrics) ; перший коментар\n ; другий коментар").unwrap();
+        assert_eq!(parsed.head(), Some("metrics"));
     }
 
     #[test]
