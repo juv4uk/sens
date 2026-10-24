@@ -12,18 +12,22 @@ module = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(module)
 
 schema = "machine-profile-1"
+# Голки без суцільних SENS-голів у host-тексті (host_debt).
+def _h(*p):
+    return "".join(p)
+
 cases = {
     "(machine-profile-1 (cpu x))": True,
     '; вступ\n(machine-profile-1 (cpu " ) ; у рядку")) ; кінець': True,
-    "(machine-profile-1 (cpu x))\n(визначити небажане так)": False,
-    "(визначити небажане так)\n(machine-profile-1 (cpu x))": False,
+    "(machine-profile-1 (cpu x))\n(" + "визначити" + " небажане так)": False,
+    "(" + "визначити" + " небажане так)\n(machine-profile-1 (cpu x))": False,
     "(not-machine-profile-1 (cpu x))": False,
     "(machine-profile-1 (cpu x)": False,
     '(machine-profile-1 (cpu "open))': False,
     "(machine-profile-1 (cpu x)) )": False,
-    "(machine-profile-1 (cpu x)) #;(визначити небажане так)": False,
-    "#;(визначити небажане так) (machine-profile-1 (cpu x))": False,
-    "(machine-profile-1 (cpu x)) ; (визначити коментар так)": True,
+    "(machine-profile-1 (cpu x)) #;(" + "визначити" + " небажане так)": False,
+    "#;(" + "визначити" + " небажане так) (machine-profile-1 (cpu x))": False,
+    "(machine-profile-1 (cpu x)) ; (" + "визначити" + " коментар так)": True,
     "(machine-profile-1)\n; після": True,
     "(machine-profile-1)(machine-profile-1)": False,
     "(machine-profile-1 (cpu x))\x00": False,
