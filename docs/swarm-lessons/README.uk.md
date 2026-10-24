@@ -49,3 +49,4 @@
 | 2026-10-14 | D24 у джерелі є, але лічильник арності в meta-eval некваліфікований | [`2026-10-14-d24-meta-eval-arity.uk.md`](2026-10-14-d24-meta-eval-arity.uk.md) |
 | 2026-10-14 | Мій пропущений D7.authority: сертифікат зелений за SHA, але не за законом | [`2026-10-14-d7-generated-authority-drift.uk.md`](2026-10-14-d7-generated-authority-drift.uk.md) |
 | 2026-10-14 | Моя помилка: передчасний M2 DONE, непомічений Rust-декодер у F3C | [`2026-10-14-zig-m2-ingress-audit.uk.md`](2026-10-14-zig-m2-ingress-audit.uk.md) |
+| 2026-10-14 | T5: точна назва файла є частиною SHA-квитанції корпусу | [`2026-10-14-t5-manifest-path-fidelity.uk.md`](2026-10-14-t5-manifest-path-fidelity.uk.md) |
