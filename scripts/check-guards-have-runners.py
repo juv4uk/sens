@@ -36,7 +36,6 @@ KNOWN_ORPHANS = {
     "check-lisp15-arithmetic-provenance.py",
     "check-meta-eval-evidence.py",
     "check-od005-d5-baseline.py",
-    "check-semantic-coverage-ledger.py",
     "check-world-knowledge-authority.py",
 }
 
