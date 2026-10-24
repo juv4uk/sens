@@ -38,10 +38,8 @@ KNOWN_ORPHANS = {
     "check-domain-bitness-witness.py",
     "check-lisp15-arithmetic-provenance.py",
     "check-meta-eval-evidence.py",
-    "check-migration-debt.py",
     "check-od005-d5-baseline.py",
     "check-semantic-coverage-ledger.py",
-    "check-workflow-yaml.py",
     "check-world-knowledge-authority.py",
 }
 
