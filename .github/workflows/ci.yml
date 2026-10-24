@@ -484,6 +484,27 @@ jobs:
           test -x "$PWD/target/debug/sens"
           test -x "$PWD/target/debug/sens-trit"
 
+      # Core4 is executed from lib/core4.sens (Zig-restored at build),
+      # not from the textual file changed in Git. Detect stale bootstrap
+      # BEFORE calling old bytecode a successful implementation of a new law.
+      - name: Core4 — точна фізична пара SENS/Zig T5M
+        if: ${{ always() && steps.native-build.outcome == 'success' }}
+        shell: bash
+        timeout-minutes: 5
+        run: |
+          set -euo pipefail
+          physical_dir="$RUNNER_TEMP/changed-t5m-pairs/core4-parity"
+          mkdir -p "$physical_dir"
+          # Only real SENS emits words; pinned Zig packages the binary.
+          timeout 180s "$PWD/target/debug/sens" --t5m-mint             lib/core4.lisp "$physical_dir/core4.sens"
+          timeout 45s "$PWD/target/debug/sens-trit" verify-view             "$physical_dir/core4.sens" >"$physical_dir/core4-verified.txt"
+          sha256sum lib/core4.lisp lib/core4.sens             "$physical_dir/core4.sens" >"$physical_dir/sha256.txt"
+          if ! cmp -s lib/core4.sens "$physical_dir/core4.sens"; then
+            echo "::error file=lib/core4.sens,title=SENS_CORE4_PHYSICAL_DRIFT::REGRESSION layer=bootstrap expected=exact-current-SENS-source actual=outdated-physical bytes=Zig/T5M release=NO-GO" >&2
+            exit 1
+          fi
+          echo "SENS_CORE4_PHYSICAL_PARITY_PASS source=lib/core4.lisp physical=lib/core4.sens codec=Zig/T5M"
+
       - name: PUSH Lisp → кодек Zig/T5M → виконання SENS
         id: t5m_changed_execute
         if: ${{ always() && steps.native-build.outcome == 'success' }}
