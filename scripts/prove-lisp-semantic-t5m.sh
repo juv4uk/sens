@@ -1304,6 +1304,21 @@ sha256sum lib/d11-family-selection.lisp \
   tests/semantic/d11-family-selection-d1-structural-law.lisp \
   tests/semantic/d11-family-selection-d1-structural-mutant.lisp > "$evidence/d11-family-selection-d1-inputs.sha256"
 
+# D11 DROP-WHILE — суфікс чинного SPAN із повною перевіркою D3 до предиката.
+d11_drop_while_law="$evidence/d11-drop-while-first-class-law-complete.lisp"
+d11_drop_while_mutant="$evidence/d11-drop-while-first-class-mutant-complete.lisp"
+d11_drop_while_root="$evidence/d11-drop-while-first-class-root-complete.lisp"
+d11_drop_while_precedence="$evidence/d11-drop-while-first-class-precedence-complete.lisp"
+cat -- lib/d11-srfi1-find-presence.lisp lib/d11-srfi1-span-break.lisp lib/d11-srfi1-drop-while.lisp tests/semantic/d11-drop-while-first-class-law.lisp > "$d11_drop_while_law"
+cat -- lib/d11-srfi1-find-presence.lisp lib/d11-srfi1-span-break.lisp lib/d11-srfi1-drop-while.lisp tests/semantic/d11-drop-while-first-class-mutant.lisp > "$d11_drop_while_mutant"
+cat -- lib/d11-srfi1-find-presence.lisp lib/d11-srfi1-span-break.lisp lib/d11-srfi1-drop-while.lisp tests/semantic/d11-drop-while-first-class-atomic-root-negative.lisp > "$d11_drop_while_root"
+cat -- lib/d11-srfi1-find-presence.lisp lib/d11-srfi1-span-break.lisp lib/d11-srfi1-drop-while.lisp tests/semantic/d11-drop-while-first-class-predicate-precedence-negative.lisp > "$d11_drop_while_precedence"
+run_case run_law d11-drop-while-first-class-positive "$d11_drop_while_law" 1
+run_case run_law d11-drop-while-first-class-mutant "$d11_drop_while_mutant" 0
+run_case run_type_rejection d11-drop-while-first-class-atomic-root "$d11_drop_while_root" 'car expects a non-empty list'
+run_case run_type_rejection d11-drop-while-first-class-predicate-precedence "$d11_drop_while_precedence" 'car expects a non-empty list'
+sha256sum lib/d11-srfi1-find-presence.lisp lib/d11-srfi1-span-break.lisp lib/d11-srfi1-drop-while.lisp tests/semantic/d11-drop-while-first-class-*.lisp > "$evidence/d11-drop-while-first-class-inputs.sha256"
+
 # D11 TAKE-WHILE: композиція єдиного чинного SENS SPAN, без нового opcode.
 # Прямий і обидва фізичні шляхи обчислюють позитив, мутант та D3 Type.
 d11_take_while_positive="$evidence/d11-take-while-first-class-positive-complete.lisp"

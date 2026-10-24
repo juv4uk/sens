@@ -202,6 +202,8 @@ run_native_t5m_program() {
       negative_type_diagnostic='car expects a non-empty list' ;;
     tests/semantic/d11-srfi1-find-tail-improper-tail-negative.lisp|tests/semantic/d11-family-aggregation-mutant.lisp)
       negative_type_diagnostic='car expects a non-empty list' ;;
+    tests/semantic/d11-drop-while-first-class-atomic-root-negative.lisp|tests/semantic/d11-drop-while-first-class-predicate-precedence-negative.lisp)
+      negative_type_diagnostic='car expects a non-empty list' ;;
     tests/semantic/d11-take-while-first-class-improper-tail-negative.lisp|tests/semantic/d11-take-while-first-class-atomic-root-negative.lisp|tests/semantic/d11-take-while-first-class-late-improper-negative.lisp|tests/semantic/d11-take-while-first-class-predicate-precedence-negative.lisp)
       negative_type_diagnostic='car expects a non-empty list' ;;
     tests/semantic/d11-family-association-late-record-negative.lisp|tests/semantic/d11-family-association-invalid-update-negative.lisp)
@@ -254,6 +256,10 @@ run_native_t5m_program() {
     elif [[ "$file" == "tests/semantic/d11-srfi1-find-presence-improper-tail-negative.lisp" ]]; then
       direct_source="$dir/d11-find-presence-bound-negative.lisp"
       cat -- lib/d11-srfi1-find-presence.lisp "$file" > "$direct_source"
+    elif [[ "$file" == "tests/semantic/d11-drop-while-first-class-atomic-root-negative.lisp" ||
+            "$file" == "tests/semantic/d11-drop-while-first-class-predicate-precedence-negative.lisp" ]]; then
+      direct_source="$dir/d11-drop-while-bound-negative.lisp"
+      cat -- lib/d11-srfi1-find-presence.lisp lib/d11-srfi1-span-break.lisp lib/d11-srfi1-drop-while.lisp "$file" > "$direct_source"
     elif [[ "$file" == "tests/semantic/d11-take-while-first-class-improper-tail-negative.lisp" ||
             "$file" == "tests/semantic/d11-take-while-first-class-atomic-root-negative.lisp" ||
             "$file" == "tests/semantic/d11-take-while-first-class-late-improper-negative.lisp" ||
@@ -330,6 +336,19 @@ run_native_t5m_program() {
          ! timeout "$native_timeout" "$native_open" open "$negative_standalone_physical" >"${negative_standalone_physical%.sens}" 2>"$dir/d11-first-tail-bad-open.stderr" ||
          ! timeout "$native_timeout" "$native_open" verify-view "$negative_standalone_physical" >"$dir/d11-first-tail-bad-verify.stdout" 2>"$dir/d11-first-tail-bad-verify.stderr"; then
         echo "::error::D11_FIRST_TAIL_BAD_STANDALONE_MINT_FAILED source=$file" >&2
+        mark_file_failed
+        return
+      fi
+    fi
+    if [[ "$file" == "tests/semantic/d11-drop-while-first-class-atomic-root-negative.lisp" ||
+            "$file" == "tests/semantic/d11-drop-while-first-class-predicate-precedence-negative.lisp" ]]; then
+      local full_bad_source="$dir/d11-drop-while-full-negative.lisp"
+      negative_standalone_physical="$dir/d11-drop-while-$(basename "$file" .lisp)-full-negative.sens"
+      if ! cat -- lib/d11-srfi1-find-presence.lisp lib/d11-srfi1-span-break.lisp lib/d11-srfi1-drop-while.lisp "$file" > "$full_bad_source" ||
+         ! timeout "$native_timeout" "$binary" --t5m-mint "$full_bad_source" "$negative_standalone_physical" >"$dir/d11-drop-while-mint.stdout" 2>"$dir/d11-drop-while-mint.stderr" ||
+         ! timeout "$native_timeout" "$native_open" open "$negative_standalone_physical" >"${negative_standalone_physical%.sens}" 2>"$dir/d11-drop-while-open.stderr" ||
+         ! timeout "$native_timeout" "$native_open" verify-view "$negative_standalone_physical" >"$dir/d11-drop-while-verify.stdout" 2>"$dir/d11-drop-while-verify.stderr"; then
+        echo "::error::D11_DROP_WHILE_STANDALONE_MINT_FAILED source=$file" >&2
         mark_file_failed
         return
       fi
@@ -1353,6 +1372,13 @@ while IFS= read -r file || [[ -n "$file" ]]; do
     # Частоти викликають чинне DEFINE групування: обидва кроки виконуються SENS.
     binding_sources=(--binding-source lib/d11-clojure-group-by.lisp
                      --binding-source lib/d11-clojure-frequencies-unary.lisp)
+  elif [[ "$file" == "tests/semantic/d11-drop-while-first-class-law.lisp" ||
+          "$file" == "tests/semantic/d11-drop-while-first-class-mutant.lisp" ||
+          "$file" == "tests/semantic/d11-drop-while-first-class-atomic-root-negative.lisp" ||
+          "$file" == "tests/semantic/d11-drop-while-first-class-predicate-precedence-negative.lisp" ]]; then
+    binding_sources=(--binding-source lib/d11-srfi1-find-presence.lisp
+                     --binding-source lib/d11-srfi1-span-break.lisp
+                     --binding-source lib/d11-srfi1-drop-while.lisp)
   elif [[ "$file" == "tests/semantic/d11-take-while-first-class-law.lisp" ||
           "$file" == "tests/semantic/d11-take-while-first-class-mutant.lisp" ||
           "$file" == "tests/semantic/d11-take-while-first-class-improper-tail-negative.lisp" ||
