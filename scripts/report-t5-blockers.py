@@ -41,6 +41,10 @@ def blockers() -> dict[str, list[str]]:
         "view_missing": [f["sens"] for f in files
                          if f.get("view_status") == "MISSING_NOT_CERTIFIED"],
         "status": [report.get("status", "?")],
+        # Справжня причина: аудит ставить physical_status=BLOCKED навіть коли
+        # T5M канонічний, якщо бракує same-stem .lisp. Поле error це показує.
+        "errors": {f["sens"]: f.get("error", "")
+                   for f in files if f.get("error")},
     }
 
 
@@ -53,15 +57,21 @@ def decode_diagnosis(sens_path: str) -> str:
     import sys as _sys
     _sys.path.insert(0, str(ROOT / "scripts"))
     try:
-        from sens_t5_t5m_codec import decode_bytes
+        from sens_t5_t5m_codec import decode_bytes, decode_t5m_bytes
     except Exception as exc:  # pragma: no cover
         return f"кодек недоступний: {exc}"
     data = (ROOT / sens_path).read_bytes()
-    try:
-        words = decode_bytes(data)
-    except Exception as exc:
-        return f"{type(exc).__name__}: {exc} (НЕ канонічний T5M → треба пере-карбування)"
-    return f"декодується ({len(words)} слів) → вигляд можна регенерувати"
+    # ДВА декодери: decode_bytes — легасі T5, decode_t5m_bytes — T5M. Кликати
+    # лише перший дає ХИБНИЙ діагноз «не канонічний T5M» — цю помилку я вже
+    # зробив двічі, тож тут вона виправлена явно.
+    for name, decoder in (("T5M", decode_t5m_bytes), ("легасі T5", decode_bytes)):
+        try:
+            words = decoder(data)
+        except Exception:
+            continue
+        return (f"декодується як {name} ({len(words)} слів) — канонічний; "
+                "фізичний блок НЕ тут, див. СПРАВЖНЮ ПРИЧИНУ")
+    return "не декодується ЖОДНИМ кодеком (T5M і легасі T5) → треба пере-карбування"
 
 
 def main() -> int:
@@ -79,6 +89,8 @@ def main() -> int:
         print(f"  ВИГЛЯД БЛОК:   {path}")
     for path in b["view_missing"]:
         print(f"  ВИГЛЯД ВІДСУТНІЙ: {path}")
+    for path, err in b.get("errors", {}).items():
+        print(f"  СПРАВЖНЯ ПРИЧИНА: {path} → {err}")
     print("  ДІАГНОЗ (чому не виправляється одним регенеруванням):")
     for path in (b["physical_blocked"] + b["view_missing"]):
         print(f"    {path}: {decode_diagnosis(path)}")
