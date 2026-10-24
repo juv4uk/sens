@@ -70,12 +70,13 @@ def active_ukrainian_definitions(source: str):
 
     if any(name not in definitions for name in NAMES):
         raise ValueError("втрачене українське визначення")
-    # Старі локальні клієнти ще використовують три явні посилання.
-    # Вони не можуть перевизначати семантику: це тільки прозорі
-    # сумісні зв'язування на первинні українські визначення.
-    for old_name, primary in zip(LEGACY_HEADS, NAMES):
-        if definitions.get(old_name) != ["визначити", old_name, primary]:
-            raise ValueError("англійський сумісний запис не є українським посиланням")
+    # Історичні англійські виконувані псевдоніми прибрано з укр-модуля
+    # (owner, коміт 3d9c0aecc «прибрати 20 старих англійських виконуваних
+    # псевдонімів»). Вони більше не є прозорим сумісним зв'язуванням, тож
+    # будь-яке їхнє повторне визначення тут є дрейфом укр-поверхні.
+    for old_name in LEGACY_HEADS:
+        if old_name in definitions:
+            raise ValueError("відновлено історичний англійський виконуваний псевдонім")
     if re.search(r"(?<![\w])#(?:d\d+:|b[01]|q2:)", source):
         # Коментарі та рядки не є виконуваним кодом — скануємо лише
         # токени програми. Історичні пояснення залишаються дозволені.
@@ -200,10 +201,7 @@ class RecoverKnowledge(unittest.TestCase):
                 "((тотожне? голова (як-є not)) (атом? (як-є ())))",
                 "((тотожне? голова (як-є not)) (атом? (як-є (стан))))", 1
             ),
-            source.replace(
-                "(визначити knowledge-not-head? голова-твердження-знань-заперечена?)",
-                "(визначити knowledge-not-head? вигаданий-старий-механізм)", 1
-            ),
+            source + "\n(визначити knowledge-not-head? голова-твердження-знань-заперечена?)\n",
         ]
         for changed in mutations:
             self.assertNotEqual(changed, source)

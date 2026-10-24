@@ -101,7 +101,7 @@
     },
     {
       "path": "lib/domains/d11.lisp",
-      "git_blob_sha1": "2cc87c897ad07ebf540cfe369de2c4a69a657c98",
+      "git_blob_sha1": "f625a4f3d9bd4702736de64ddb701fa11dcb361e",
       "domain": "D11",
       "bit_width": 11,
       "expected_rows": 43,

@@ -27,9 +27,12 @@ class D7CoreIdentityTriplet(unittest.TestCase):
         # з D7-кодованим іменем, а не історична двійкова форма
         # (0011 identity (0010 (value) value)). Канонічна тотожність
         # тотожність/значення живе в lib/core.lisp окремо.
+        # Параметр звуть передане-значення, а не значення: «значення» —
+        # першокласна назва D8 (ук значення = en values, 00110100), тож
+        # локальне зв'язування з ним затіняло ратифіковану функцію.
         source = (OUT / "source.lisp").read_text(encoding="utf-8")
         self.assertTrue(source.startswith("(визначити "), source)
-        self.assertIn("(визначити тотожність (функція (значення) значення))",
+        self.assertIn("(визначити тотожність (функція (передане-значення) передане-значення))",
                       (ROOT / "lib/core.lisp").read_text(encoding="utf-8"))
         d7 = json.loads((ROOT / "knowledge/d7-keyboard-v2-ratified.json").read_text(encoding="utf-8"))
         self.assertEqual((d7["schema"], d7["width"], d7["occupancy"]),

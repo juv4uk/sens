@@ -27,8 +27,9 @@ AUTHORITY = {
     "semantic_generated": ROOT / "crates/sens/src/semantic_registry_generated.rs",
     "semantic_registry": ROOT / "crates/sens/src/semantic_registry.rs",
     "necessary_forms": ROOT / "crates/sens/src/eval/necessary_forms_generated.rs",
-    "historical_map": ROOT / "contracts/core1-historical-sid-map.lisp",
-    "text7": ROOT / "crates/sens/src/text7_projection_generated.rs",
+    # Єдиний допущений D7-маршрут — ратифікована клавіатура v2 (JSON).
+    # Історичну .rs-проєкцію та SID8 crosswalk прибрано з живого шляху (#5817).
+    "text7": ROOT / "knowledge/d7-keyboard-v2-ratified.json",
 }
 
 
@@ -37,10 +38,9 @@ class UkrainianPairConsTriple(unittest.TestCase):
     def setUpClass(cls):
         foundation = mod.load_foundation(AUTHORITY["foundation"])
         cls.assert_residents = foundation["domains"]["D3"]["residents"]
-        cls.legacy, cls.my, cls.upper = mod.build_three_pass_maps(
+        cls.my, cls.upper, _bs = mod.build_three_pass_maps(
             foundation, AUTHORITY["domain_surfaces"], AUTHORITY["semantic_generated"],
             AUTHORITY["semantic_registry"], AUTHORITY["necessary_forms"],
-            AUTHORITY["historical_map"],
         )
         cls.text7 = mod.build_text7(foundation, AUTHORITY["text7"])
 
@@ -49,7 +49,7 @@ class UkrainianPairConsTriple(unittest.TestCase):
         self.assertEqual(self.assert_residents["001"], "QUOTE")
         self.assertEqual(self.assert_residents["000"], "EMPTY")
         self.assertEqual((HERE / "pair-cons.lisp").read_text(encoding="utf-8"), SOURCE)
-        resolver = mod.Resolver(self.legacy, self.my, self.upper, source_era="auto")
+        resolver = mod.Resolver(self.my, self.upper)
         projection = mod.migrate_file(SOURCE, resolver, self.text7)
         self.assertEqual(projection, VISIBLE)
         self.assertEqual(resolver.counts["pass2-my-lisp"], 3)
@@ -60,14 +60,13 @@ class UkrainianPairConsTriple(unittest.TestCase):
         self.assertNotEqual(physical, SOURCE.encode("utf-8"))
         self.assertEqual(VISIBLE.count("\n"), 1)
 
-    def test_legacy_eight_bit_requires_explicit_source_era(self):
+    def test_retired_eight_bit_head_fails_closed(self):
+        # SID8/Sens8 (восьмибітну історичну голову) прибрано з живого шляху
+        # (owner 2026-10-15, #5817): 00000100 більше не є чинною D8-координатою
+        # і мусить закритися без явної «ери джерела», а не мігрувати у T5.
+        resolver = mod.Resolver(self.my, self.upper)
         with self.assertRaises((mod.MigrationError, mod.SensT5Error)):
-            auto = mod.Resolver(self.legacy, self.my, self.upper, source_era="auto")
-            mod.encode_projection(mod.migrate_file(HISTORICAL, auto, self.text7))
-        legacy = mod.Resolver(self.legacy, self.my, self.upper, source_era="legacy")
-        projection = mod.migrate_file(HISTORICAL, legacy, self.text7)
-        self.assertEqual(projection, VISIBLE)
-        self.assertEqual(mod.encode_projection(projection), (HERE / "pair-cons.sens").read_bytes())
+            mod.encode_projection(mod.migrate_file(HISTORICAL, resolver, self.text7))
 
     def test_existing_view_verification_and_external_no_clobber(self):
         command = [sys.executable, str(VIEWER), "--root", str(ROOT),

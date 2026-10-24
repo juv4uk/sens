@@ -19,7 +19,9 @@ RATIFIED = {
     "атом?": ("D3", "010"),
     "решта": ("D3", "011"),
     "перше": ("D3", "100"),
-    "тотожне?": ("D3", "101"),
+    # Ключі сталої мапи порівнює ратифікований структурний закон D8
+    # «однакові?» (en equal?, 11110111), а не атомний D3 EQ «тотожне?».
+    "однакові?": ("D8", "11110111"),
     "за-умовою": ("D3", "110"),
     "сполучити": ("D3", "111"),
     "функція": ("D4", "0010"),
@@ -69,7 +71,7 @@ class PersistentMapUkrProjectionTests(unittest.TestCase):
     def test_all_surface_mappings_are_current_ratified(self):
         tables = {
             (row.domain, row.bits): row.ukr
-            for width in (3, 4)
+            for width in (3, 4, 8)
             for row in read_domain_table(ROOT / f"lib/domains/d{width}.lisp")
         }
         for name, coordinate in RATIFIED.items():
@@ -82,9 +84,9 @@ class PersistentMapUkrProjectionTests(unittest.TestCase):
         verify_current_peers(self.source)
 
     def test_mutated_peer_fails_current_projection(self):
-        mutated = self.source.replace("(тотожне?", "(хибна-назва")
+        mutated = self.source.replace("(однакові?", "(хибна-назва")
         self.assertNotEqual(mutated, self.source)
-        mutated += "\n; (тотожне? x y)\n"
+        mutated += "\n; (однакові? x y)\n"
         with self.assertRaisesRegex(ValueError, "peer drift"):
             verify_current_peers(mutated)
 
