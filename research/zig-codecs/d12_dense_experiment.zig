@@ -32,17 +32,22 @@ pub fn encode(words: []const u16, output: []u8) Error!usize {
         if (word > 0x0fff) return Error.InvalidWord;
     }
     if (output.len < n) return Error.OutputTooSmall;
-    @memset(output[0..n], 0);
-
-    for (words, 0..) |word, i| {
-        const base = (i / 2) * 3;
-        if (i % 2 == 0) {
-            output[base] = @intCast(word >> 4);
-            output[base + 1] = @intCast((word & 0x000f) << 4);
-        } else {
-            output[base + 1] |= @intCast(word >> 8);
-            output[base + 2] = @intCast(word & 0x00ff);
-        }
+    // Кожний байт записується рівно один раз: додаткове занулення зайве.
+    var i: usize = 0;
+    var offset: usize = 0;
+    while (i + 1 < words.len) {
+        const first = words[i];
+        const second = words[i + 1];
+        output[offset] = @intCast(first >> 4);
+        output[offset + 1] = @intCast(((first & 0x000f) << 4) | (second >> 8));
+        output[offset + 2] = @intCast(second & 0x00ff);
+        i += 2;
+        offset += 3;
+    }
+    if (i < words.len) {
+        const last = words[i];
+        output[offset] = @intCast(last >> 4);
+        output[offset + 1] = @intCast((last & 0x000f) << 4);
     }
     return n;
 }
@@ -86,6 +91,22 @@ test "D12 dense exhaustive 4096 raw words with complementary partner" {
         try decode(&bytes, source.len, &decoded);
         try std.testing.expectEqualSlices(u16, &source, &decoded);
     }
+}
+
+test "D12 dense overwrites reused nonzero buffers canonically" {
+    var output = [_]u8{0xa5} ** 8;
+
+    const first_len = try encode(&.{0xabc}, &output);
+    try std.testing.expectEqual(@as(usize, 2), first_len);
+    try std.testing.expectEqualSlices(u8, &.{ 0xab, 0xc0 }, output[0..first_len]);
+
+    const second_len = try encode(&.{ 0x123, 0x456, 0x789 }, &output);
+    try std.testing.expectEqual(@as(usize, 5), second_len);
+    try std.testing.expectEqualSlices(u8, &.{ 0x12, 0x34, 0x56, 0x78, 0x90 }, output[0..second_len]);
+
+    const third_len = try encode(&.{ 0xfff, 0x000 }, &output);
+    try std.testing.expectEqual(@as(usize, 3), third_len);
+    try std.testing.expectEqualSlices(u8, &.{ 0xff, 0xf0, 0x00 }, output[0..third_len]);
 }
 
 test "D12 dense exact byte ordering and run lengths" {
