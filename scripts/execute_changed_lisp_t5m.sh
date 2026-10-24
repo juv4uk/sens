@@ -192,6 +192,8 @@ run_native_t5m_program() {
       negative_type_diagnostic='car expects a non-empty list' ;;
     tests/semantic/core-d3-car-cdr-cons-mutant.lisp)
       negative_type_diagnostic='car expects a non-empty list' ;;
+    tests/semantic/d11-srfi1-member-improper-hit-negative.lisp|tests/semantic/d11-srfi1-subset-improper-empty-negative.lisp)
+      negative_type_diagnostic='car expects a non-empty list' ;;
     tests/semantic/d11-srfi1-find-tail-improper-tail-negative.lisp|tests/semantic/d11-family-aggregation-mutant.lisp)
       negative_type_diagnostic='car expects a non-empty list' ;;
     tests/semantic/d11-srfi1-span-improper-suffix-negative.lisp|tests/semantic/d11-srfi1-break-improper-suffix-negative.lisp)
@@ -215,7 +217,11 @@ run_native_t5m_program() {
     # Помилка Type має збігатися до і після фізичного Zig/T5M.
     # Залежний D11-свідок запускається з живим DEFINE, а не з host-оракулом.
     local direct_source="$file"
-    if [[ "$file" == "tests/semantic/d11-srfi1-find-tail-improper-tail-negative.lisp" ]]; then
+    if [[ "$file" == "tests/semantic/d11-srfi1-member-improper-hit-negative.lisp" ||
+          "$file" == "tests/semantic/d11-srfi1-subset-improper-empty-negative.lisp" ]]; then
+      direct_source="$dir/d11-set-relations-bound-negative.lisp"
+      cat -- lib/d11-srfi1-set-relations.lisp "$file" > "$direct_source"
+    elif [[ "$file" == "tests/semantic/d11-srfi1-find-tail-improper-tail-negative.lisp" ]]; then
       direct_source="$dir/d11-find-tail-bound-negative.lisp"
       cat -- lib/d11-srfi1-find-tail.lisp "$file" > "$direct_source"
     elif [[ "$file" == "tests/semantic/d11-family-aggregation-mutant.lisp" ]]; then
