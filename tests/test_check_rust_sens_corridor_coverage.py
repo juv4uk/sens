@@ -116,6 +116,50 @@ class CorridorCoverageTests(unittest.TestCase):
             f"test_id=zig-cfg-test-ghost layer=transport expected=BLOCKED actual={errors!r}",
         )
 
+    def test_cfg_test_module_before_production_cannot_hide_bypass(self) -> None:
+        # The guard must inspect real Rust items after a test-only module.
+        write_crate(
+            self.root, "testfirst",
+            "#[cfg(test)]\n"
+            "mod tests { fn fake() { zig_transport::decode_t5_words(&[]); } }\n"
+            "fn live() { sens::decode_binary_frame(&[]); }\n",
+        )
+        write_registry(self.root, [])
+        errors = self.module.check(self.root)
+        self.assertTrue(
+            any("crates/testfirst/src/lib.rs" in error for error in errors),
+            f"test_id=zig-test-before-production layer=transport "
+            f"expected=COVERAGE_BLOCKED actual={errors!r}",
+        )
+
+    def test_production_zig_after_cfg_test_module_remains_covered(self) -> None:
+        write_crate(
+            self.root, "zigafter",
+            "#[cfg(test)]\n"
+            "mod tests { fn fake() { zig_transport::decode_t5_words(&[]); } }\n"
+            "fn live() { zig_transport::decode_t5_words(&[]); "
+            "sens::decode_binary_frame(&[]); }\n",
+        )
+        write_registry(self.root, [])
+        self.assertEqual(
+            self.module.check(self.root), [],
+            "test_id=zig-real-ingress-after-tests layer=transport expected=COVERAGE_OK",
+        )
+
+    def test_unterminated_cfg_test_item_fails_closed(self) -> None:
+        write_crate(
+            self.root, "badtest",
+            "#[cfg(test)]\n"
+            "mod tests { fn fake() { zig_transport::decode_t5_words(&[]); }\n"
+            "fn live() { sens::decode_binary_frame(&[]); }\n",
+        )
+        write_registry(self.root, [])
+        errors = self.module.check(self.root)
+        self.assertTrue(
+            any("cfg(test) boundary is ambiguous" in error for error in errors),
+            f"test_id=zig-invalid-test-boundary expected=COVERAGE_BLOCKED actual={errors!r}",
+        )
+
     def test_production_zig_call_still_proves_source_ingress_with_tests(self) -> None:
         write_crate(
             self.root, "realzig",

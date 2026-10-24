@@ -99,6 +99,61 @@ def _live_rust(source: str) -> str:
     return "".join(active)
 
 
+CFG_TEST_ATTR = re.compile(r"#\s*\[\s*cfg\s*\(\s*test\s*\)\s*\]")
+
+
+def _production_rust(active: str) -> str:
+    """Erase only cfg(test) items, retaining production Rust after them.
+
+    _live_rust erased comments and literals. Ambiguous test-only item
+    boundaries fail closed instead of legitimizing a codec bypass.
+    """
+    output = list(active)
+    position = 0
+    while (match := CFG_TEST_ATTR.search(active, position)) is not None:
+        start = match.start()
+        item = match.end()
+        # Additional attributes may decorate the same test-only item.
+        while True:
+            while item < len(active) and active[item].isspace():
+                item += 1
+            attribute = re.match(r"#\s*\[", active[item:])
+            if attribute is None:
+                break
+            depth = 1
+            item += attribute.end()
+            while item < len(active) and depth:
+                if active[item] == "[":
+                    depth += 1
+                elif active[item] == "]":
+                    depth -= 1
+                item += 1
+            if depth:
+                raise ValueError("unterminated test-only attribute")
+        if item >= len(active):
+            raise ValueError("cfg(test) has no Rust item")
+        brace = active.find("{", item)
+        semicolon = active.find(";", item)
+        if semicolon >= 0 and (brace < 0 or semicolon < brace):
+            end = semicolon + 1
+        elif brace >= 0:
+            depth = 1
+            end = brace + 1
+            while end < len(active) and depth:
+                if active[end] == "{":
+                    depth += 1
+                elif active[end] == "}":
+                    depth -= 1
+                end += 1
+            if depth:
+                raise ValueError("unterminated cfg(test) Rust item")
+        else:
+            raise ValueError("cfg(test) Rust item has no terminator")
+        output[start:end] = " " * (end - start)
+        position = end
+    return "".join(output)
+
+
 def _crate_sources(crate: Path) -> list[Path]:
     src = crate / "src"
     return sorted(p for p in src.rglob("*.rs") if p.is_file()) if src.is_dir() else []
@@ -185,16 +240,20 @@ def check(root: Path) -> list[str]:
         unbridged = []
         for source in sources:
             active = _live_rust(source.read_text(encoding="utf-8", errors="replace"))
-            # A Zig invocation compiled only under cfg(test) cannot
-            # authorize direct production Rust access to physical SENS bytes.
-            # Fail closed when production touches a codec before the first
-            # test-only section but Zig ingress exists only inside that section.
-            test_section = re.search(r"(?m)^\s*#\s*\[\s*cfg\s*\(\s*test\s*\)\s*\]", active)
-            production_prefix = active[:test_section.start()] if test_section else active
+            # Test-only Zig calls cannot attest a production SENS codec edge,
+            # regardless of whether cfg(test) appears before or after it.
+            try:
+                production = _production_rust(active)
+            except ValueError as exc:
+                problems.append(
+                    f"host `{rel}` source `{source.relative_to(root).as_posix()}` "
+                    f"cfg(test) boundary is ambiguous: {exc}"
+                )
+                continue
             physical = CODEC_API.search(active) is not None
             zig_anywhere = CORRIDOR_API.search(active) is not None
-            production_codec = CODEC_API.search(production_prefix) is not None
-            production_zig = CORRIDOR_API.search(production_prefix) is not None
+            production_codec = CODEC_API.search(production) is not None
+            production_zig = CORRIDOR_API.search(production) is not None
             if (physical and not zig_anywhere) or (production_codec and not production_zig):
                 unbridged.append(source.relative_to(root).as_posix())
         if not unbridged:
