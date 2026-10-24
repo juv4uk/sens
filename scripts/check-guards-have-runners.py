@@ -32,23 +32,16 @@ KNOWN_ORPHANS = {
     "audit-foundation-d7-version.py",
     "audit-test-languages.py",
     "audit-three-pass-d11-resident-shadow.py",
-    "audit-workflow-pins.py",
     "check-core-universal-contract.py",
-    "check-d10-catalogue-vs-executable.py",
     "check-d10-definition-bindings.py",
     "check-d10-island-bridge-v1.py",
     "check-d10-lisp-machine-evaluator-harvest-v1.py",
     "check-d6-definition-bindings.py",
     "check-domain-bitness-witness.py",
-    "check-generated-layers-have-consumers.py",
-    "check-guards-have-runners.py",
-    "check-ladder-catalogue-vs-executable.py",
     "check-lisp15-arithmetic-provenance.py",
     "check-meta-eval-evidence.py",
     "check-migration-debt.py",
     "check-od005-d5-baseline.py",
-    "check-release-admission-ledger.py",
-    "check-required-checks.py",
     "check-semantic-coverage-ledger.py",
     "check-workflow-yaml.py",
     "check-world-knowledge-authority.py",
@@ -91,8 +84,15 @@ def main() -> int:
         # workflow (`python3 scripts/check-d9-…`) чи тесті (subprocess).
         # Інакше тест, який лише називає guard у перевірці, «підключив» би
         # його — самореферентна помилка, яку цей чекер виявив на собі.
-        needle = f"scripts/{name}"
-        who = [rel for rel, text in runners if needle in text and Path(rel).name != name]
+        # Запуск буває у ДВОХ формах:
+        #   • рядковий шлях:  `python3 scripts/check-x.py` (workflow);
+        #   • конструювання:  ROOT / "scripts" / "check-x.py" (тест).
+        # Лише перша форма пропускала тести — і хибно оголошувала
+        # check-release-admission-ledger.py та check-required-checks.py
+        # сиротами, хоча їх запускають tests/test_check_*.py.
+        needles = (f"scripts/{name}", f'"scripts" / "{name}"')
+        who = [rel for rel, text in runners
+               if any(n in text for n in needles) and Path(rel).name != name]
         (wired if who else orphan).append((name, who))
     print(f"GUARDS-RUNNERS: guard-скриптів={len(all_guards)} "
           f"мають запуск={len(wired)} борг={len(orphan)}")
