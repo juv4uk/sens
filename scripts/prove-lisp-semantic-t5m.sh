@@ -656,6 +656,16 @@ run_case run_error_rejection d11-tree-test-nonpredicate-negative "$d11_tree_test
 sha256sum lib/d11-tree-equal-by-test.lisp tests/semantic/d11-tree-equal-by-test-law.lisp \
   tests/semantic/d11-tree-equal-by-test-mutant.lisp \
   tests/semantic/d11-tree-equal-by-test-nonpredicate-negative.lisp > "$evidence/d11-tree-test-inputs.sha256"
+# Д11 REASON INDEX: D8 порівнює складені ключі, без D3-atom gate.
+reason_index_pair_law="$evidence/d11-reason-index-pair-key-law-complete.lisp"
+reason_index_pair_mutant="$evidence/d11-reason-index-pair-key-mutant-complete.lisp"
+cat -- lib/unify.lisp lib/reason.lisp tests/semantic/d11-reason-index-pair-key-law.lisp > "$reason_index_pair_law"
+cat -- lib/unify.lisp lib/reason.lisp tests/semantic/d11-reason-index-pair-key-mutant.lisp > "$reason_index_pair_mutant"
+run_case run_law d11-reason-index-pair-key-law "$reason_index_pair_law" 1
+run_case run_law d11-reason-index-pair-key-mutant "$reason_index_pair_mutant" 0
+sha256sum lib/reason.lisp \
+  tests/semantic/d11-reason-index-pair-key-law.lisp \
+  tests/semantic/d11-reason-index-pair-key-mutant.lisp > "$evidence/d11-reason-index-pair-key-inputs.sha256"
 # Д11: реальний SENS індекс — закон, мутант і три точні D3 Type-відмови.
 reason_index_law_bundle="$evidence/d11-reason-index-law-complete.lisp"
 reason_index_mutant_bundle="$evidence/d11-reason-index-mutant-complete.lisp"
