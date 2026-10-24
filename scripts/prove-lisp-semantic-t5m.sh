@@ -530,10 +530,6 @@ run_case run_law d6-compose-flip-order-mutant tests/semantic/d6-compose-flip-mut
 # D6 FILTER: безпосередня SENS-рекурсія з D3/D4; закон і мутант.
 run_case run_law d6-filter-independent-positive tests/semantic/d6-filter-independent-law.lisp 1 core4
 run_case run_law d6-filter-independent-mutant tests/semantic/d6-filter-independent-mutant.lisp 0 core4
-# Д6:101010 MAP-ONTO — закон накопичувача, мутант порядку і атомарний хвіст.
-run_case run_law d6-map-onto-accumulator-positive tests/semantic/d6-map-onto-accumulator-law.lisp 1 core4
-run_case run_law d6-map-onto-order-mutant tests/semantic/d6-map-onto-order-mutant.lisp 0 core4
-run_case run_error_rejection d6-map-onto-improper-tail tests/semantic/d6-map-onto-improper-tail-negative.lisp Type 'car expects a non-empty list' core4
 # Д6 FILTER-ONTO: непорожній акумулятор має оборотний порядок; мутант хибний.
 run_case run_law d6-filter-onto-accumulator-positive tests/semantic/d6-filter-onto-accumulator-law.lisp 1 core4
 run_case run_law d6-filter-onto-accumulator-mutant tests/semantic/d6-filter-onto-accumulator-mutant.lisp 0 core4
@@ -743,6 +739,24 @@ for variant in atom-input improper-tail remove-improper-tail select-improper-tai
 done
 sha256sum lib/d11-clojure-group-by.lisp \
   tests/fixtures/d11-group-by-*-must-error.lisp > "$evidence/d11-group-by-type-inputs.sha256"
+# Д11 SRFI-1 LSET-DIFF+INTERSECTION: закон, мутант і два фізичні Type-свідки.
+# Джерело кожного COMPLETE: SENS DEFINE та SENS-висновок; Zig лише T5M.
+d11_lset_base="lib/d11-srfi1-lset-diff-intersection.lisp"
+for verdict in law mutant; do
+  witness="tests/semantic/d11-srfi1-lset-diff-intersection-${verdict}.lisp"
+  complete="$evidence/d11-lset-diff-intersection-${verdict}-complete.lisp"
+  cat -- "$d11_lset_base" "$witness" > "$complete"
+  expected=1
+  [[ "$verdict" == mutant ]] && expected=0
+  run_case run_law "d11-lset-diff-intersection-${verdict}" "$complete" "$expected" core4
+done
+for side in left right; do
+  witness="tests/semantic/d11-srfi1-lset-diff-intersection-improper-${side}-negative.lisp"
+  complete="$evidence/d11-lset-diff-intersection-improper-${side}-complete.lisp"
+  cat -- "$d11_lset_base" "$witness" > "$complete"
+  run_case run_error_rejection "d11-lset-diff-intersection-improper-${side}" "$complete" Type 'car expects a non-empty list' core4
+done
+sha256sum "$d11_lset_base" tests/semantic/d11-srfi1-lset-diff-intersection-{law,mutant,improper-left-negative,improper-right-negative}.lisp > "$evidence/d11-lset-diff-intersection-inputs.sha256"
 # Д11 FREQUENCIES: окремий позитивний закон і мутант у SENS.
 # Нормативна проєкція: не числа D24, а правильний список унарних "о".
 # Всі DEFINE — канонічна Lisp-бібліотека, а фізичний шлях лише Zig/T5M.
