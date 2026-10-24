@@ -1782,14 +1782,24 @@ fn broadcast_to_peers(
     msg: &Sexp,
     skip_origin: Option<&str>,
 ) -> (Vec<String>, Vec<String>) {
+    broadcast_to_peer_table(&node.peers, &node.peer_write_locks, msg, skip_origin)
+}
+
+/// The actual network mechanism depends only on the socket table and writer
+/// locks. This separation permits deterministic concurrency regression tests.
+fn broadcast_to_peer_table(
+    peer_table: &Mutex<HashMap<String, PeerLink>>,
+    peer_write_locks: &Mutex<HashMap<String, Arc<Mutex<()>>>>,
+    msg: &Sexp,
+    skip_origin: Option<&str>,
+) -> (Vec<String>, Vec<String>) {
     const PEER_WRITE_TIMEOUT: Duration = Duration::from_secs(5);
     let line = format!("{}\n", msg.to_text());
     // Clone handles under the table lock, then do all socket I/O outside it.
     // The generation is carried alongside each clone so a failed old write
     // cannot retire a freshly reconnected peer with the same logical id.
     let targets: Vec<(String, u64, std::io::Result<TcpStream>)> = {
-        let peers = node
-            .peers
+        let peers = peer_table
             .lock()
             .unwrap_or_else(|poisoned| poisoned.into_inner());
         peers
@@ -1810,7 +1820,7 @@ fn broadcast_to_peers(
             }
         };
         let lock = Arc::clone(
-            node.peer_write_locks
+            peer_write_locks
                 .lock()
                 .unwrap_or_else(|poisoned| poisoned.into_inner())
                 .entry(id.clone())
@@ -1819,8 +1829,7 @@ fn broadcast_to_peers(
         let _guard = lock.lock().unwrap_or_else(|poisoned| poisoned.into_inner());
         // Do not even attempt to write an obsolete snapshot if reconnect
         // already replaced that peer while waiting for its write lock.
-        let still_current = node
-            .peers
+        let still_current = peer_table
             .lock()
             .unwrap_or_else(|poisoned| poisoned.into_inner())
             .get(&id)
@@ -1841,8 +1850,7 @@ fn broadcast_to_peers(
         }
     }
     if !dead.is_empty() {
-        let mut peers = node
-            .peers
+        let mut peers = peer_table
             .lock()
             .unwrap_or_else(|poisoned| poisoned.into_inner());
         for (id, generation) in &dead {
@@ -3696,6 +3704,47 @@ mod peer_connection_generation_tests {
         assert_eq!(peers["same-node"].generation, 2);
         assert!(retire_peer_if_current(&mut peers, "same-node", 2));
         assert!(!peers.contains_key("same-node"));
+    }
+
+    #[test]
+    fn peer_table_remains_unlocked_during_wait_for_peer_writer() {
+        use std::sync::mpsc;
+        let (socket, _remote) = local_pair();
+        let table = Arc::new(Mutex::new(HashMap::new()));
+        table.lock().unwrap().insert("peer".into(), PeerLink {
+            stream: socket,
+            generation: 1,
+        });
+        let writer = Arc::new(Mutex::new(()));
+        let mut locks = HashMap::new();
+        locks.insert("peer".into(), Arc::clone(&writer));
+        let write_locks = Arc::new(Mutex::new(locks));
+        let held_writer_guard = writer.lock().unwrap();
+        let (done_tx, done_rx) = mpsc::channel();
+        let test_table = Arc::clone(&table);
+        let test_locks = Arc::clone(&write_locks);
+        let handle = thread::spawn(move || {
+            let result = broadcast_to_peer_table(
+                &test_table,
+                &test_locks,
+                &Sexp::list(vec![Sexp::atom("peer-list")]),
+                None,
+            );
+            done_tx.send(result).unwrap();
+        });
+
+        // A writer waiting on the per-peer mutex must not own the global
+        // peer table. No TCP reader traffic is needed for this lock test.
+        assert!(done_rx.recv_timeout(Duration::from_millis(30)).is_err());
+        assert!(
+            table.try_lock().is_ok(),
+            "socket writer must release global peer table before waiting"
+        );
+        drop(held_writer_guard);
+        let (written, failed) = done_rx.recv_timeout(Duration::from_secs(2)).unwrap();
+        handle.join().unwrap();
+        assert_eq!(written, vec!["peer"]);
+        assert!(failed.is_empty());
     }
 
     #[test]
