@@ -1755,7 +1755,10 @@ run_case run_type_rejection d11-clojure-partition-improper-d1-type-negative "$d1
 # DEDUPE має власний шлях, чинна точна D3 CDR Type-відмова незмінна.
 d11_dedupe_bad_root="$evidence/d11-clojure-dedupe-improper-d1-tail-complete.lisp"
 cat -- lib/d11-srfi1-span-break.lisp lib/d11-clojure-partition-by.lisp tests/semantic/d11-clojure-dedupe-improper-d1-tail-negative.lisp > "$d11_dedupe_bad_root"
-run_case run_type_rejection d11-clojure-dedupe-improper-d1-type-negative "$d11_dedupe_bad_root" 'cdr expects a non-empty list'
+run_case run_type_rejection d11-clojure-dedupe-improper-d1-type-negative "$d11_dedupe_bad_root" 'car expects a non-empty list'
+d11_dedupe_bad_late="$evidence/d11-clojure-dedupe-late-complete.lisp"
+cat -- lib/d11-srfi1-span-break.lisp lib/d11-clojure-partition-by.lisp tests/fixtures/d11-clojure-dedupe-late-improper-tail-negative.lisp > "$d11_dedupe_bad_late"
+run_case run_type_rejection d11-clojure-dedupe-late-improper-tail-type-negative "$d11_dedupe_bad_late" 'car expects a non-empty list'
 # Суворий пріоритет D3-структури над першокласною функцією-ключем.
 d11_partition_bad_early="$evidence/d11-clojure-partition-early-bad-tail-complete.lisp"
 d11_partition_bad_late="$evidence/d11-clojure-partition-late-bad-tail-complete.lisp"
