@@ -374,6 +374,20 @@ run_native_t5m_program() {
         echo "::notice file=$file,title=SENS D3/D5 language::PASS native=SENS carrier=Zig/T5M result=D1:$local_expected"
         ;;
     esac
+    # Свідки D11: кінцева мовна істина належить тільки виконанню SENS.
+    case "$file" in
+      tests/semantic/d11-srfi1-unfold-positive.lisp|tests/semantic/d11-srfi1-unfold-mutant.lisp)
+        d11_unfold_expected=1
+        [[ "$file" != *-mutant.lisp ]] || d11_unfold_expected=0
+        printf '%s\n' "$d11_unfold_expected" > "$dir/d11-unfold.expected"
+        if ! cmp -s "$dir/native-paired.stdout" "$dir/d11-unfold.expected"; then
+          echo "::error::SENS_D11_UNFOLD_WRONG_D1 source=$file expected=D1:$d11_unfold_expected actual=$(cat "$dir/native-paired.stdout")" >&2
+          mark_file_failed
+          return
+        fi
+        echo "SENS_D11_UNFOLD_EXECUTED_PASS source=$file result=D1:$d11_unfold_expected carrier=Zig/T5M"
+        ;;
+    esac
     # Принцип 5: дві РІЗНІ фізичні форми того самого обчислення.
     # 1) живий український Lisp, без T5M; 2) точні байти Zig/T5M,
     # виконані SENS після контролю оборотності. Ніякого Python-оракула.
@@ -749,6 +763,11 @@ while IFS= read -r file || [[ -n "$file" ]]; do
     # F11-TREE-TEST: точний D11-кандидат — викличне Lisp-визначення,
     # Zig транспортує слова, а SENS сам обчислює D1 позитив/мутант.
     binding_sources=(--binding-source lib/d11-tree-equal-by-test.lisp)
+  elif [[ "$file" == "tests/semantic/d11-srfi1-unfold-positive.lisp" ||
+          "$file" == "tests/semantic/d11-srfi1-unfold-mutant.lisp" ]]; then
+    # SENS визначає UNFOLD/UNFOLD-RIGHT у бібліотеці, яку фізично
+    # додаємо до mint/paired, замість допуску невідомого Text7 імені.
+    binding_sources=(--binding-source lib/d11-srfi1-unfold.lisp)
   elif [[ "$file" == "tests/semantic/d11-srfi1-find-tail-laws.lisp" ||
           "$file" == "tests/semantic/d11-srfi1-find-tail-improper-tail-negative.lisp" ]]; then
     # Лише визначення із справжньої бібліотеки SENS, без host-оракула.
