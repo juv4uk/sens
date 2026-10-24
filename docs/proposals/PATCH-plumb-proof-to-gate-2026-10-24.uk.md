@@ -92,3 +92,37 @@ Patch: das Ausführungs-Ergebnis an das Release-Gate anschließen.
 ## English
 
 Patch: plumb the execution result into the release gate.
+
+
+---
+
+## ОНОВЛЕННЯ (Grathana, 2026-10-24): безпечну половину ЗРОБЛЕНО й ПЕРЕВІРЕНО
+
+`scripts/prove-lisp-language-laws.sh` **уже друкує звіт** (другий аргумент):
+
+```sh
+bash scripts/prove-lisp-language-laws.sh target/debug/sens /tmp/proof.json
+```
+
+Формат: `{"schema":"sens-language-law-proof/v1","cases":[{"test_id","kind",
+"expected","actual"}…],"cases_recorded":N,"authority":"SENS"}`.
+
+**Перевірено наскрізним прогоном** (підроблений `sens`, що повертає D1 за іменем
+фікстури):
+
+```
+NATIVE_SENS_SUITE_PASS suite=lisp-language-laws laws=14 mutants=14 authority=SENS
+звіт: випадків=28 (14 law + 14 mutant), пар law&mutant=14
+```
+
+Тобто `_proof_counts()` із кроку 2 патчу **читає саме те, що є**.
+
+**ВАЖЛИВО (виявлено тестом):** при **провалі** скрипт виходить із `exit 1`
+**до** закриття JSON — звіт лишається **обрізаним і невалідним**. Це **безпечно**
+(обрізаний звіт = відсутність доказу ✓), але **читач мусить** трактувати
+невалідний JSON як `(0, 0)`, а не падати. У патчі крок 2 це враховано:
+`try: json.loads(...) except (OSError, ValueError): return 0, 0`.
+
+**Тобто безпечна половина патчу вже в дереві** — і вона **не змінює вердикт
+гейта** (лише дає йому що читати). Залишається крок 2 (заміна літералів) і
+крок 3 (крок у release.yml) — це **рішення власника**.
