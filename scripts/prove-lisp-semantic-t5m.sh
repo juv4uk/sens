@@ -563,6 +563,13 @@ sha256sum "$d5_exact_number_source" \
 run_case run_law d6-compose-flip-positive tests/semantic/d6-compose-flip-law.lisp 1 core4
 run_case run_law d6-compose-flip-order-mutant tests/semantic/d6-compose-flip-mutant.lisp 0 core4
 # D6 FILTER: безпосередня SENS-рекурсія з D3/D4; закон і мутант.
+# Д6:000000/000001 LENGTH та LENGTH-ONTO. Перевірка D3:() проти D1:ні.
+# Фізичний D6 LENGTH наразі може залишатися TRANSITIONAL #5854.
+# Усі нові позитиви/негативи зберігають RED, якщо допуску ще немає.
+run_case run_law d6-length-onto-boundary-positive tests/semantic/d6-length-onto-d3-boundary-law.lisp 1 core4
+run_case run_law d6-length-onto-boundary-mutant tests/semantic/d6-length-onto-d3-boundary-mutant.lisp 0 core4
+run_case run_error_rejection d6-length-onto-d1-root-type tests/semantic/d6-length-onto-d1-root-negative.lisp Type 'car expects a non-empty list' core4
+run_case run_error_rejection d6-length-onto-late-d1-tail-type tests/semantic/d6-length-onto-late-d1-tail-negative.lisp Type 'car expects a non-empty list' core4
 run_case run_law d6-filter-independent-positive tests/semantic/d6-filter-independent-law.lisp 1 core4
 run_case run_law d6-filter-independent-mutant tests/semantic/d6-filter-independent-mutant.lisp 0 core4
 # Д6:101010 MAP-ONTO · закон, мутант, неправильний D3-хвіст.
