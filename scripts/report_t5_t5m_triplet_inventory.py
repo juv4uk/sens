@@ -306,6 +306,32 @@ def write_receipt_once(root: Path, destination: Path, report: dict) -> None:
             staged.unlink(missing_ok=True)
 
 
+def _proof_counts(proof_report: Path | None) -> tuple[int, int]:
+    """(uk_oracle_verified, certified) зі звіту виконання.
+
+    Відсутній, порожній або НЕВАЛІДНИЙ звіт → (0, 0): відсутність доказу НЕ
+    стає допуском. Невалідний JSON трапляється законно: при провалі
+    prove-lisp-language-laws.sh виходить із exit 1 ДО закриття JSON, тож звіт
+    лишається обрізаним.
+
+    ПОВНИЙ валідний звіт означає, що ВСІ випадки пройшли: скрипт виходить із
+    exit 1 на першій розбіжності, отже до кінця доходять лише повні прогони.
+    """
+    if proof_report is None or not proof_report.is_file():
+        return 0, 0
+    try:
+        data = json.loads(proof_report.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return 0, 0
+    cases = data.get("cases")
+    if not isinstance(cases, list) or not cases:
+        return 0, 0
+    laws = {c.get("test_id") for c in cases if c.get("kind") == "law"}
+    mutants = {c.get("test_id") for c in cases if c.get("kind") == "mutant"}
+    paired = {x for x in (laws & mutants) if x}
+    return len(cases), len(paired)
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("root", type=Path, nargs="?", default=Path("."))
@@ -317,6 +343,10 @@ def main(argv: list[str] | None = None) -> int:
                         help="BLOCK if any physical view OR Lisp source pair is missing")
     parser.add_argument("--report", type=Path,
                         help="write JSON audit receipt, never a program or view")
+    parser.add_argument("--proof-report", type=Path, default=None,
+                        help="звіт scripts/prove-lisp-language-laws.sh: перелік "
+                             "випадків, ПРОЙДЕНИХ виконанням. Порожній/невалідний "
+                             "= відсутність доказу, а НЕ допуск")
     parser.add_argument("--informational", action="store_true",
                         help="show existing migration debt without stopping unrelated CI; audit errors still fail")
     args = parser.parse_args(argv)
@@ -329,6 +359,16 @@ def main(argv: list[str] | None = None) -> int:
             args.root, include_untracked=args.include_untracked,
             required=tuple(args.require_view), strict=args.strict,
         )
+        # Під'єднання доказу до звіту: три поля-вердикти стають ВИВЕДЕНИМИ зі
+        # звіту виконання (scripts/prove-lisp-language-laws.sh), а не зашитими.
+        # БЕЗ доказу повертається (0, 0) — те саме, що було зашито, тож вердикт
+        # НЕ змінюється. status НЕ перераховується: це семантика гейта, і вона
+        # лишається рішенням власника.
+        uk_oracle, certified = _proof_counts(args.proof_report)
+        summary = report["summary"]
+        summary["uk_oracle_verified"] = uk_oracle
+        summary["original_executable_migrations_certified"] = certified
+        summary["release_admitted"] = 1 if certified > 0 else 0
         if args.report:
             write_receipt_once(args.root, args.report, report)
         print(json.dumps({"status": report["status"], **report["summary"],
