@@ -363,7 +363,7 @@ mod paired {
                 );
                 let result = eval_verified(text, &physical)
                     .unwrap_or_else(|error| panic!("id={id} layer=SENS {error}"));
-                let Value::BinaryNumber(number) = result else {
+                let Value::BinaryNumber(ref number) = result else {
                     panic!("id={id} layer=SENS expected exact D{output_width} integer");
                 };
                 assert_eq!(number.numeric_domain_width(), Some(output_width), "id={id}");
