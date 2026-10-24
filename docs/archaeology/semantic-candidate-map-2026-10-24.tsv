@@ -15,14 +15,14 @@
 # ПЕРЕГЛЯД 2026-10-24: жодного CONFIRMED не лишилось — усі три перевірені
 # випадки виявились або хибними, або завищеними. Див. рядки нижче.
 retired_test_id	hint_artifact	verdict	reason
-crates/sens/tests/meta_eval.rs::lambda_application_binds_parameters_and_evaluates	d4-lambda-application	WEAK	ПЕРЕГЛЯНУТО 2026-10-24: я поставив CONFIRMED, але прочитавши закон ПОВНІСТЮ бачу — він ШИРШИЙ. Закон: застосування тотожної функції + замикання зберігає зовнішню істину + затінення параметра. Рядок: лише «binds formal parameters and evaluates its body». Покриття є, але не тотожність.
+crates/sens/tests/meta_eval.rs::lambda_application_binds_parameters_and_evaluates_the_body	d4-lambda-application	WEAK	ПЕРЕГЛЯНУТО 2026-10-24: я поставив CONFIRMED, але прочитавши закон ПОВНІСТЮ бачу — він ШИРШИЙ. Закон: застосування тотожної функції + замикання зберігає зовнішню істину + затінення параметра. Рядок: лише «binds formal parameters and evaluates its body». Покриття є, але не тотожність.
 crates/sens/tests/meta_eval.rs::higher_order_functions_pass_a_closure_as_an_argument	d4-higher-order-composition	WEAK	Закон: «композиція ДВОХ функцій першого класу»; рядок: «передає замикання ЯК АРГУМЕНТ». Споріднене, не тотожне.
 crates/sens/tests/meta_eval.rs::self_evaluates_numbers_without_environment	meta-eval-first-class-d1	UNJUDGEABLE	Артефакт НЕ має читаного .lisp-джерела — твердження невідоме. Підказку відкинуто як надто широку (той самий артефакт підказано 6 рядкам).
-crates/sens/tests/meta_eval.rs::stage2_list_body_and_parameter_binding_helpers	meta-eval-first-class-d1	UNJUDGEABLE	Те саме: немає .lisp-джерела.
-crates/sens/tests/meta_eval.rs::multi_expression_lambda_bodies_evaluate_in_seq	meta-eval-first-class-d1	UNJUDGEABLE	Те саме.
-crates/sens/tests/meta_eval.rs::list_primitives_dispatch_to_the_real_primitive	meta-eval-first-class-d1	UNJUDGEABLE	Те саме.
-crates/sens/tests/meta_eval.rs::dotted_lambda_list_binds_remaining_arguments	meta-eval-first-class-d1	UNJUDGEABLE	Те саме.
+crates/sens/tests/meta_eval.rs::stage2_list_body_and_parameter_binding_helpers_have_lisp_owned_parity	meta-eval-first-class-d1	UNJUDGEABLE	Те саме: немає .lisp-джерела.
+crates/sens/tests/meta_eval.rs::multi_expression_lambda_bodies_evaluate_in_sequence_returning_the_last	meta-eval-first-class-d1	UNJUDGEABLE	Те саме.
+crates/sens/tests/meta_eval.rs::list_primitives_dispatch_to_the_real_primitives	meta-eval-first-class-d1	UNJUDGEABLE	Те саме.
+crates/sens/tests/meta_eval.rs::dotted_lambda_list_binds_remaining_arguments_as_rest_list	meta-eval-first-class-d1	UNJUDGEABLE	Те саме.
 crates/sens/tests/meta_eval.rs::def_extends_the_environment_visible_to_later_forms	meta-eval-first-class-d1	UNJUDGEABLE	Те саме.
 crates/sens/tests/meta_eval.rs::def_can_bind_a_lambda_callable_from_a_later_form	meta-eval-first-class-d1	UNJUDGEABLE	Те саме.
-crates/sens/tests/meta_eval.rs::closures_capture_free_variables_from_the_calling	meta-eval-first-class-d1	UNJUDGEABLE	Те саме.
+crates/sens/tests/meta_eval.rs::closures_capture_free_variables_from_the_calling_env	meta-eval-first-class-d1	UNJUDGEABLE	Те саме.
 crates/sens/tests/mccarthy.rs::a_dotted_pair_used_directly_as_code_is_an_invalid_form	d3-dotted-pair	REJECTED	Закон: «пара не стає атомом»; рядок: «пара ЯК КОД є недійсною формою». Різні твердження (доведено PR #6034).
