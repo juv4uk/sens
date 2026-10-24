@@ -51,7 +51,6 @@ fn main() {
     println!("cargo:rerun-if-changed=../../lib/content-store.sens");
     println!("cargo:rerun-if-changed=../../lib/lisp-fs.lisp");
     println!("cargo:rerun-if-changed=../../lib/lisp-fs.sens");
-    println!("cargo:rerun-if-changed=../../tests/fixtures/wsm-fs-record-producer.lisp");
     println!("cargo:rerun-if-changed=../../tests/fixtures/wsm-fs-record-producer.sens");
     println!("cargo:rerun-if-changed=../../lib/persistent-vector.sens");
     println!("cargo:rerun-if-changed=../../lib/time.lisp");
