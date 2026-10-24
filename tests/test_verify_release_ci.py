@@ -172,9 +172,14 @@ class ExactReleaseChecksTest(unittest.TestCase):
                     MODULE.verify_check_runs(payload, SHA)
 
     def test_tag_workflow_requires_release_ci_before_staging_and_publication(self):
-        workflow = (ROOT / ".github/workflows/release.yml").read_text(encoding="utf-8")
+        # Першопричина: job release-publish винесено з release.yml у делегований
+        # release-publish.yml (workflow_call). Тест мусить читати САМЕ той файл,
+        # який публікує, інакше він згниває й блокує релізний preflight.
+        tag = (ROOT / ".github/workflows/release.yml").read_text(encoding="utf-8")
+        publish = (ROOT / ".github/workflows/release-publish.yml").read_text(encoding="utf-8")
+        self.assertIn("uses: ./.github/workflows/release-publish.yml", tag)
         self.assertGreaterEqual(
-            workflow.count('python3 scripts/verify_release_ci.py "$GITHUB_SHA" "$GITHUB_REPOSITORY"'),
+            publish.count('python3 scripts/verify_release_ci.py "$GITHUB_SHA" "$GITHUB_REPOSITORY"'),
             2,
             "exact-SHA verifier must run before staging and again before publication",
         )
