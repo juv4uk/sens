@@ -2038,6 +2038,14 @@ run_case run_law d8-quantifier-composition tests/semantic/d8-quantifier-composit
 run_case run_error_rejection d8-notany-invalid-root tests/semantic/d8-notany-invalid-root-law.lisp Type 'car expects a non-empty list' core4
 run_case run_error_rejection d8-notevery-invalid-root tests/semantic/d8-notevery-invalid-root-law.lisp Type 'car expects a non-empty list' core4
 sha256sum lib/core4-parts/core4-d6b.lisp tests/semantic/d6-any-all-native-call-law.lisp tests/semantic/d6-any-all-native-call-mutant.lisp > "$evidence/d6-any-all-native-call-inputs.sha256"
+sha256sum lib/core4.lisp lib/core4-parts/core4-d6b.lisp \
+  tests/semantic/d6-any-all-exact-empty-law.lisp \
+  tests/semantic/d6-any-vacuous-mutant.lisp \
+  tests/semantic/d6-any-invalid-root-law.lisp \
+  tests/semantic/d6-all-invalid-root-law.lisp \
+  tests/semantic/d8-quantifier-composition-law.lisp \
+  tests/semantic/d8-notany-invalid-root-law.lisp \
+  tests/semantic/d8-notevery-invalid-root-law.lisp > "$evidence/d6-d8-quantifier-inputs.sha256"
 
 # Класифікуємо кореневі причини без повторного запуску SENS.
 printf 'SENS_RED_CAUSE root=d7-value-call count=%d ids=%s\n' "${#red_d7_ids[@]}" "${red_d7_ids[*]}"
