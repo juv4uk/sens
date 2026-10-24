@@ -284,6 +284,9 @@ jobs:
                   "tests/semantic/lisp-d3-d4-list-self-verdict.lisp",
                   "tests/semantic/d3-structural-native-t5m-law.lisp",
                   "tests/semantic/d3-structural-native-t5m-mutant.lisp",
+                  # Явний Core4: replay фізичного dispatcher, не окремий law runner.
+                  "tests/semantic/exact-arithmetic-laws.lisp",
+                  "tests/semantic/exact-arithmetic-mutant.lisp",
                   # TRANSITIONAL #5854: D6 LENGTH ратифікований, але невикличний у T5M.
               ):
                   if witness not in selected:
