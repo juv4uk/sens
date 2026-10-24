@@ -118,7 +118,7 @@ jobs:
           if ! git cat-file -e "$base^{commit}" 2>/dev/null; then
             timeout 60s git fetch --no-tags --depth=1 origin "$base"
           fi
-          git -c core.quotePath=false diff --name-only --diff-filter=ACMRT "$base" "$GITHUB_SHA" -- '*.lisp' '*.sens' '*.rs' '*.zig' '.github/workflows/ci.yml' 'scripts/prove-lisp-semantic-t5m.sh' 'scripts/prove-lisp-language-laws.sh' 'scripts/execute_changed_lisp_t5m.sh' > "$raw"
+          git -c core.quotePath=false diff --name-only -z --diff-filter=ACMRT "$base" "$GITHUB_SHA" -- '*.lisp' '*.sens' '*.rs' '*.zig' '.github/workflows/ci.yml' 'scripts/prove-lisp-semantic-t5m.sh' 'scripts/prove-lisp-language-laws.sh' 'scripts/execute_changed_lisp_t5m.sh' > "$raw"
           printf '%s\n' "$base" > "$RUNNER_TEMP/native-semantic-base.sha"
           python3 - "$raw" "$manifest" "$GITHUB_OUTPUT" <<'PY'
           from pathlib import Path
@@ -135,7 +135,34 @@ jobs:
           has_rust = False
           has_zig = False
           workflow_changed = False
-          for original in raw.read_text(encoding="utf-8").splitlines():
+          # Git -z зберігає справжні назви файлів. Далі маємо legacy
+          # рядковий manifest і GitHub Output: непридатні шляхи не пропускаємо.
+          def git_paths(blob: bytes) -> list[str]:
+              if blob and not blob.endswith(bytes([0])):
+                  raise ValueError("Git path list must be NUL-terminated")
+              paths = []
+              for name in blob.decode("utf-8").split(chr(0)):
+                  if not name:
+                      continue
+                  if any(ch in name for ch in ("\n", "\r", "\t")) or name != name.strip():
+                      raise ValueError(f"line-manifest cannot represent path {name!r}")
+                  paths.append(name)
+              return paths
+
+          # Негативний свідок самої механіки CI: раніше такий .lisp мовчки губився.
+          assert git_paths("lib/назва із пробілом.lisp".encode() + bytes([0])) == ["lib/назва із пробілом.lisp"]
+          for malformed in (b"lib/multiline\nsource.lisp\0", b"lib/tab\tname.lisp\0", b"lib/bad.lisp\n"):
+              try:
+                  git_paths(malformed)
+              except ValueError:
+                  pass
+              else:
+                  raise AssertionError(f"T5M_CHANGED_GIT_PATH_SELFTEST_FAILED input={malformed!r}")
+          try:
+              changed_paths = git_paths(raw.read_bytes())
+          except (ValueError, UnicodeError) as exc:
+              raise SystemExit(f"::error::T5M_CHANGED_UNREPRESENTABLE_PATH {exc}") from exc
+          for original in changed_paths:
               if original in {".github/workflows/ci.yml", "scripts/prove-lisp-semantic-t5m.sh", "scripts/prove-lisp-language-laws.sh", "scripts/execute_changed_lisp_t5m.sh"}:
                   workflow_changed = True
                   continue
