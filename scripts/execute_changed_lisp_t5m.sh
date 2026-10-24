@@ -60,6 +60,13 @@ run_native_t5m_program() {
       standalone_runtime=("$native_open" eval-core4)
       ;;
   esac
+  # Ці фізичні Type-свідки використовують ту саму чинну Core4-сесію,
+  # що і прямі D8 закони; не змішувати профілі clean і Core4.
+  if [[ "$file" == "tests/fixtures/d8-right-fold-improper-before-action-negative.lisp" ||
+        "$file" == "tests/fixtures/d8-right-scan-improper-before-action-negative.lisp" ]]; then
+    paired_runtime_args=(--core4-runtime)
+    standalone_runtime=("$native_open" eval-core4)
+  fi
   source_bytes=$(wc -c < "$file")
   native_timeout=45s
   # Мінімальний свідок може підвантажувати 300+ KiB визначень.
@@ -174,6 +181,8 @@ run_native_t5m_program() {
   # Названі випадки проходять і paired, і standalone; інша причина відмови — RED.
   local negative_type_diagnostic=""
   case "$file" in
+    tests/fixtures/d8-right-fold-improper-before-action-negative.lisp|tests/fixtures/d8-right-scan-improper-before-action-negative.lisp)
+      negative_type_diagnostic='car expects a non-empty list' ;;
     tests/semantic/d11-srfi1-filter-map-improper-root-negative.lisp|tests/semantic/d11-srfi1-filter-map-improper-tail-negative.lisp)
       negative_type_diagnostic='domain identity is not callable under its ratified law: D1 ' ;;
     tests/semantic/d11-srfi1-unary-count-improper-tail-negative.lisp|tests/semantic/d11-srfi1-unary-count-improper-right-negative.lisp)
@@ -302,7 +311,7 @@ run_native_t5m_program() {
       mark_file_failed
       return
     fi
-    if timeout "$native_timeout" "$binary" --t5m-pair "$file" "$physical" "${binding_sources[@]}" \
+    if timeout "$native_timeout" "$binary" --t5m-pair "$file" "$physical" "${paired_runtime_args[@]}" "${binding_sources[@]}" \
         >"$dir/native-paired.stdout" 2>"$dir/native-paired.stderr"; then
       echo "::error::T5M_EXPECTED_TYPE_PAIRED_ACCEPTED source=$file" >&2
       mark_file_failed
@@ -396,7 +405,7 @@ run_native_t5m_program() {
         return
       fi
     fi
-    if timeout "$native_timeout" "$binary" "$negative_standalone_physical" \
+    if timeout "$native_timeout" "${standalone_runtime[@]}" "$negative_standalone_physical" \
         >"$dir/native-standalone.stdout" 2>"$dir/native-standalone.stderr"; then
       echo "::error::T5M_EXPECTED_TYPE_STANDALONE_ACCEPTED source=$file" >&2
       mark_file_failed
