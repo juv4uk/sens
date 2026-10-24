@@ -251,7 +251,7 @@ class WholeFileMetricTests(FileTree):
         self.assertEqual(code, 0)
         self.assertIn("повністю українські файли .lisp — 0/3 (0.0%)", stdout)
         self.assertIn(
-            "виконувані назви, голови та параметри в активних lib-файлах — "
+            "виконувані назви, голови та параметри в активних .lisp-програмах (дерево, не лише lib) — "
             "0/3 (0.0%)",
             stdout,
         )
@@ -325,7 +325,7 @@ class ReportCliTests(FileTree):
             stdout.splitlines(),
             [
                 "УКР-ПРОЄКЦІЯ: повністю українські файли .lisp — 1/2 (50.0%)",
-                "УКР-ПРОЄКЦІЯ: виконувані назви, голови та параметри в активних lib-файлах — 1/2 (50.0%)",
+                "УКР-ПРОЄКЦІЯ: виконувані назви, голови та параметри в активних .lisp-програмах (дерево, не лише lib) — 1/2 (50.0%)",
             ],
         )
         self.assertNotIn("ук==укр", stdout)
@@ -362,7 +362,8 @@ class ReportCliTests(FileTree):
             "percent": 50.0,
         })
         self.assertIn("source_projection", payload)
-        self.assertEqual(payload["source_projection"]["total_source_files"], 0)
+        # Першопричина: кореневі .lisp тепер у знаменнику (дерево, не лише lib).
+        self.assertEqual(payload["source_projection"]["total_source_files"], 1)
 
     def test_errors_on_absent_root(self):
         stderr = io.StringIO()
