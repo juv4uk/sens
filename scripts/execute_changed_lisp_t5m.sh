@@ -586,6 +586,34 @@ run_native_t5m_program() {
         return
       fi
     fi
+    if [[ "$file" == "tests/semantic/d11-srfi1-filter-map-law.lisp" ||
+          "$file" == "tests/semantic/d11-srfi1-filter-map-mutant.lisp" ]]; then
+      # Повний фізичний носій має містити ті самі чинні SENS DEFINE,
+      # що пройшли парний T5M. Інакше голий .sens виклик дає UnknownSymbol.
+      local filter_map_complete_source="$dir/d11-filter-map-full.lisp"
+      standalone_physical="$dir/d11-filter-map-full.sens"
+      if ! cat -- lib/d11-srfi1-filter-map.lisp "$file" >"$filter_map_complete_source" ||
+         ! timeout "$native_timeout" "$binary" --t5m-mint "$filter_map_complete_source" "$standalone_physical" \
+              >"$dir/d11-filter-map-mint.stdout" 2>"$dir/d11-filter-map-mint.stderr" ||
+         ! timeout "$native_timeout" "$native_open" open "$standalone_physical" \
+              >"$dir/d11-filter-map-full.view" 2>"$dir/d11-filter-map-open.stderr" ||
+         ! timeout "$native_timeout" "$native_open" verify-view "$standalone_physical" \
+              >"$dir/d11-filter-map-verify.stdout" 2>"$dir/d11-filter-map-verify.stderr"; then
+        echo "::error::D11_FILTER_MAP_STANDALONE_MINT_FAILED source=$file layer=zig-t5m" >&2
+        for diagnostic in "$dir"/d11-filter-map-*.stderr; do
+          [[ ! -f "$diagnostic" ]] || sed 's/^/D11 FILTER-MAP: /' "$diagnostic" >&2
+        done
+        mark_file_failed
+        return
+      fi
+      local expected_filter_map_d1=1
+      [[ "$file" != *-mutant.lisp ]] || expected_filter_map_d1=0
+      if [[ "$(cat "$dir/native-paired.stdout")" != "$expected_filter_map_d1" ]]; then
+        echo "::error::D11_FILTER_MAP_WRONG_PAIRED_VERDICT source=$file expected=D1:$expected_filter_map_d1 actual=$(cat "$dir/native-paired.stdout")" >&2
+        mark_file_failed
+        return
+      fi
+    fi
     if [[ "$file" == "tests/semantic/d11-tree-equal-by-test-law.lisp" ||
           "$file" == "tests/semantic/d11-tree-equal-by-test-mutant.lisp" ]]; then
       # Фізична самодостатність: одна й та сама SENS-бібліотека + SENS-свідок.
