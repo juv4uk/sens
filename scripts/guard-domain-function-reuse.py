@@ -408,6 +408,46 @@ def hook_installed() -> tuple[bool, str]:
     return True, "увімкнено (githooks/pre-commit виконуваний)"
 
 
+# --- База знань охоронця у формі CLIPS: проста ВИБІРКА фактів (не рушій правил). ---
+# Факт відрізняється від взірця в правилі наявністю слота (source ...).
+GUARD_FACT = re.compile(r"\(guard-fact\s+(?:\([^()]*\)\s*)+\)")
+
+KNOWLEDGE_ADVICE = {
+    "hot-file": "правити МАЛЕНЬКИМИ кроками",
+    "layer": "перевіряй Zig-тестами",
+    "error-class": "ужий наявну поверхню драбини",
+}
+
+
+def _knowledge_slot(chunk: str, slot: str) -> str | None:
+    m = re.search(r"\(" + slot + r"\s+\"?([^\")]*)\"?\)", chunk)
+    return m.group(1).strip() if m else None
+
+
+def knowledge_advice(kind: str) -> str:
+    """Порада за класом факта (kind) — те саме, що виводять правила CLIPS."""
+    return KNOWLEDGE_ADVICE.get(kind, "дій за правилами бази знань")
+
+
+def knowledge_facts(text: str) -> list[tuple[str, str, str, str]]:
+    """Витягти guard-fact із CLIPS-тексту ПРОСТИМ розбором (regex), без рушія.
+
+    Беремо лише ті форми, де є всі чотири слоти (kind, name, value, source):
+    взірці всередині (defrule …) слота source не мають, тож не рахуються як
+    факти. Якщо чогось не збіглось — не падаємо, а повертаємо те, що знайшли.
+    """
+    out: list[tuple[str, str, str, str]] = []
+    for m in GUARD_FACT.finditer(text):
+        chunk = m.group(0)
+        kind = _knowledge_slot(chunk, "kind")
+        name = _knowledge_slot(chunk, "name")
+        value = _knowledge_slot(chunk, "value")
+        source = _knowledge_slot(chunk, "source")
+        if kind and name and value and source:
+            out.append((kind, name, value, source))
+    return out
+
+
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description="guard: вживати функції драбин D1–D10")
     ap.add_argument("--staged", action="store_true")
@@ -419,6 +459,7 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--advise", action="store_true", help="замість BLOCKED — конкретні поради, що виправити")
     ap.add_argument("--when", action="store_true", help="додати, коли й яким комітом уведено кожне визначення")
     ap.add_argument("--lessons", action="store_true", help="показати ЦІННІ ЗНАННЯ: уроки історії з довідника")
+    ap.add_argument("--knowledge", action="store_true", help="показати БАЗУ ЗНАНЬ охоронця (CLIPS-факти й поради)")
     args = ap.parse_args(argv)
 
     ladder = ladder_names(ROOT)
@@ -454,6 +495,29 @@ def main(argv: list[str] | None = None) -> int:
             print("GUARD-DOMAIN-REUSE --lessons: немає docs/guard-history-reference.uk.md", file=sys.stderr)
             return 2
         print(doc.read_text(encoding="utf-8"))
+        return 0
+
+    if args.knowledge:
+        # ЗНАННЯ охоронця тепер у ФОРМІ CLIPS (knowledge/guard-knowledge.clp):
+        # факти — ЩО Є (гарячий файл, шар, клас помилки), правила — ЩО РОБИТИ.
+        # Це ЧИТАННЯ (проста вибірка фактів), а не повний рушій правил: Rust не тягнемо.
+        kpath = ROOT / "knowledge" / "guard-knowledge.clp"
+        if not kpath.is_file():
+            print("GUARD-DOMAIN-REUSE --knowledge: немає knowledge/guard-knowledge.clp", file=sys.stderr)
+            return 2
+        ktext = kpath.read_text(encoding="utf-8", errors="replace")
+        facts = knowledge_facts(ktext)
+        if facts:
+            print("БАЗА ЗНАНЬ ОХОРОНЦЯ (knowledge/guard-knowledge.clp)")
+            print("ФАКТ → ПОРАДА:")
+            for kind, name, value, source in facts:
+                print(f"  [{kind}] {name} ({value}) → {knowledge_advice(kind)}  (джерело: {source})")
+        else:
+            # Стійкість: щось не збіглось — не падаємо, показуємо сирий вміст.
+            print("УВАГА: не вдалося розібрати факти — сирий вміст knowledge/guard-knowledge.clp:")
+            print(ktext)
+        rules = len(re.findall(r"\(defrule\b", ktext))
+        print(f"БАЗА ЗНАНЬ: {len(facts)} фактів, {rules} правил")
         return 0
 
     if not (args.staged or args.paths_from or args.file):
