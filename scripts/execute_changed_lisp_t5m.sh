@@ -204,6 +204,8 @@ run_native_t5m_program() {
       negative_type_diagnostic='car expects a non-empty list' ;;
     tests/semantic/d11-take-while-first-class-improper-tail-negative.lisp|tests/semantic/d11-take-while-first-class-atomic-root-negative.lisp|tests/semantic/d11-take-while-first-class-late-improper-negative.lisp|tests/semantic/d11-take-while-first-class-predicate-precedence-negative.lisp)
       negative_type_diagnostic='car expects a non-empty list' ;;
+    tests/semantic/d11-family-association-late-record-negative.lisp|tests/semantic/d11-family-association-invalid-update-negative.lisp)
+      negative_type_diagnostic='car expects a non-empty list' ;;
     tests/semantic/d11-srfi1-span-improper-suffix-negative.lisp|tests/semantic/d11-srfi1-break-improper-suffix-negative.lisp)
       negative_type_diagnostic='car expects a non-empty list' ;;
     tests/semantic/d6-union-improper-tail-negative.lisp|tests/semantic/d6-union-improper-root-negative.lisp)
@@ -258,6 +260,11 @@ run_native_t5m_program() {
             "$file" == "tests/semantic/d11-take-while-first-class-predicate-precedence-negative.lisp" ]]; then
       direct_source="$dir/d11-take-while-bound-negative.lisp"
       cat -- lib/d11-srfi1-find-presence.lisp lib/d11-srfi1-span-break.lisp lib/d11-srfi1-take-while.lisp "$file" > "$direct_source"
+    elif [[ "$file" == "tests/semantic/d11-family-association-late-record-negative.lisp" ||
+            "$file" == "tests/semantic/d11-family-association-invalid-update-negative.lisp" ]]; then
+      # Прямий SENS Type-свідок має ту ж саму чинну alist-бібліотеку.
+      direct_source="$dir/d11-family-association-bound-negative.lisp"
+      cat -- lib/d11-srfi1-alist-protocol.lisp "$file" > "$direct_source"
     elif [[ "$file" == "tests/semantic/d11-srfi1-find-tail-improper-tail-negative.lisp" ]]; then
       direct_source="$dir/d11-find-tail-bound-negative.lisp"
       cat -- lib/d11-srfi1-find-tail.lisp "$file" > "$direct_source"
@@ -1337,7 +1344,9 @@ while IFS= read -r file || [[ -n "$file" ]]; do
     binding_sources=(--binding-source tests/fixtures/epistemic-d1-names.lisp
                      --binding-source "$local_d6_source")
   elif [[ "$file" == "tests/semantic/d11-family-association-law.lisp" ||
-          "$file" == "tests/semantic/d11-family-association-mutant.lisp" ]]; then
+          "$file" == "tests/semantic/d11-family-association-mutant.lisp" ||
+          "$file" == "tests/semantic/d11-family-association-late-record-negative.lisp" ||
+          "$file" == "tests/semantic/d11-family-association-invalid-update-negative.lisp" ]]; then
     binding_sources=(--binding-source lib/d11-srfi1-alist-protocol.lisp)
   elif [[ "$file" == "tests/semantic/d11-family-aggregation-law.lisp" ||
           "$file" == "tests/semantic/d11-family-aggregation-mutant.lisp" ]]; then

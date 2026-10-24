@@ -668,6 +668,25 @@ run_case run_law d4-lexical-scope-mutant tests/semantic/d4-lexical-scope-mutant.
 # Лише Lisp формулює закон, shell звіряє кінцевий D1; Rust не є оракулом.
 run_case run_law d4-d5-ordered-arguments-positive tests/semantic/language-law-d5-ordered-arguments-ukr.lisp 1
 run_case run_law d4-d5-ordered-arguments-mutant tests/semantic/language-mutant-d5-ordered-arguments-ukr.lisp 0
+# Д11 ALIST: окремий SENS-закон пошуку/першого оновлення/збору,
+# незалежний D1-мутант та строгі Type-свідки до виклику компаратора.
+d11_association_positive="$evidence/d11-family-association-positive-complete.lisp"
+d11_association_mutant="$evidence/d11-family-association-mutant-complete.lisp"
+d11_association_late_record="$evidence/d11-family-association-late-record-negative-complete.lisp"
+d11_association_invalid_update="$evidence/d11-family-association-invalid-update-negative-complete.lisp"
+cat -- lib/d11-srfi1-alist-protocol.lisp tests/semantic/d11-family-association-law.lisp > "$d11_association_positive"
+cat -- lib/d11-srfi1-alist-protocol.lisp tests/semantic/d11-family-association-mutant.lisp > "$d11_association_mutant"
+cat -- lib/d11-srfi1-alist-protocol.lisp tests/semantic/d11-family-association-late-record-negative.lisp > "$d11_association_late_record"
+cat -- lib/d11-srfi1-alist-protocol.lisp tests/semantic/d11-family-association-invalid-update-negative.lisp > "$d11_association_invalid_update"
+run_case run_law d11-family-association-positive "$d11_association_positive" 1
+run_case run_law d11-family-association-mutant "$d11_association_mutant" 0
+run_case run_type_rejection d11-family-association-late-record-type "$d11_association_late_record" 'car expects a non-empty list'
+run_case run_type_rejection d11-family-association-invalid-update-type "$d11_association_invalid_update" 'car expects a non-empty list'
+sha256sum lib/d11-srfi1-alist-protocol.lisp \
+  tests/semantic/d11-family-association-law.lisp \
+  tests/semantic/d11-family-association-mutant.lisp \
+  tests/semantic/d11-family-association-late-record-negative.lisp \
+  tests/semantic/d11-family-association-invalid-update-negative.lisp > "$evidence/d11-family-association-inputs.sha256"
 # Д11: видалення всіх alist-записів зі строгою перевіркою D3 структури.
 # SENS сам визначає результат D1/Type; transport перевіряється реальною Zig/T5M парою.
 d11_assoc_delete_source=lib/list-foundation-compositions.lisp
