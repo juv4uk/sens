@@ -64,6 +64,41 @@ def map_entries() -> list[tuple[str, str]]:
     return out
 
 
+# МАПА ПОНЯТЬ: закон писано українською, ledger — англійською. Без неї
+# перевіряч дає REJECTED через порожній перетин токенів — хибний сигнал.
+CONCEPTS = {
+    "застосування": ("application", "apply", "applies"),
+    "захоплення": ("capture", "captures", "closure", "captured"),
+    "затінення": ("shadow", "shadowing", "shadows"),
+    "тотожне": ("identity", "identical", "same", "equal"),
+    "хибне": ("false", "negative", "falsy"),
+    "істина": ("true", "positive"),
+    "атом": ("atom", "atomic"),
+    "сполучити": ("cons", "pair", "pairs"),
+    "перше": ("car", "head", "first"),
+    "решта": ("cdr", "tail", "rest", "remaining"),
+    "порожній": ("empty", "null", "nil"),
+    "за-умовою": ("cond", "selective", "branch", "conditional"),
+    "функція": ("lambda", "function", "closure", "callable"),
+    "список": ("list", "proper", "sequence"),
+    "селектор": ("selector", "selectors"),
+    "параметр": ("parameter", "parameters", "argument", "arguments", "binds"),
+    "обчислює": ("evaluates", "evaluation", "evaluate"),
+    "середовище": ("environment", "lexical", "scope"),
+}
+
+
+def concepts(text: str) -> set[str]:
+    """Поняття з тексту — українські терміни ЗАРАХОВУЮТЬСЯ за англійськими
+    відповідниками, тож порівняння стає двомовним."""
+    low = text.lower()
+    found: set[str] = set()
+    for uk, en in CONCEPTS.items():
+        if uk in low or any(word in low for word in en):
+            found.add(uk)
+    return found
+
+
 def independent(row_id: str, artifact: str) -> str:
     """Механічний вердикт: перетин токенів закону й claim_slice."""
     header = law_header(artifact)
@@ -74,7 +109,7 @@ def independent(row_id: str, artifact: str) -> str:
     claim = claims.get(row_id, "")
     if not claim:
         return "UNJUDGEABLE"
-    shared = toks(header) & toks(claim)
+    shared = concepts(header) & concepts(claim)  # ДВОМОВНО, не латинські токени
     if len(shared) >= 3:
         return "CONFIRMED"
     if len(shared) == 2:
