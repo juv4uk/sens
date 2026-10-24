@@ -538,7 +538,7 @@ struct OracleConnectionSlot {
 }
 impl OracleConnectionSlot {
     fn acquire(active: &Arc<AtomicUsize>, limit: usize) -> Option<Self> {
-        active.fetch_update(Ordering::AcqRel, Ordering::Acquire, |count| {
+        active.try_update(Ordering::AcqRel, Ordering::Acquire, |count| {
             if count < limit { Some(count + 1) } else { None }
         }).ok().map(|_| Self { active: Arc::clone(active) })
     }
