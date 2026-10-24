@@ -530,6 +530,10 @@ run_case run_law d6-compose-flip-order-mutant tests/semantic/d6-compose-flip-mut
 # D6 FILTER: безпосередня SENS-рекурсія з D3/D4; закон і мутант.
 run_case run_law d6-filter-independent-positive tests/semantic/d6-filter-independent-law.lisp 1 core4
 run_case run_law d6-filter-independent-mutant tests/semantic/d6-filter-independent-mutant.lisp 0 core4
+# Д6:101010 MAP-ONTO · закон, мутант, неправильний D3-хвіст.
+run_case run_law d6-map-onto-accumulator-positive tests/semantic/d6-map-onto-accumulator-law.lisp 1 core4
+run_case run_law d6-map-onto-order-mutant tests/semantic/d6-map-onto-order-mutant.lisp 0 core4
+run_case run_error_rejection d6-map-onto-improper-tail tests/semantic/d6-map-onto-improper-tail-negative.lisp Type 'car expects a non-empty list' core4
 # Д6 FILTER-ONTO: непорожній акумулятор має оборотний порядок; мутант хибний.
 run_case run_law d6-filter-onto-accumulator-positive tests/semantic/d6-filter-onto-accumulator-law.lisp 1 core4
 run_case run_law d6-filter-onto-accumulator-mutant tests/semantic/d6-filter-onto-accumulator-mutant.lisp 0 core4
