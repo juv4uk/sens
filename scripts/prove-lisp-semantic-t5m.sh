@@ -804,6 +804,16 @@ d11_span_bundle="$evidence/d11-srfi1-span-break-complete.lisp"
 cat -- lib/d11-srfi1-span-break.lisp tests/semantic/d11-srfi1-span-break-laws.lisp > "$d11_span_bundle"
 sha256sum lib/d11-srfi1-span-break.lisp tests/semantic/d11-srfi1-span-break-laws.lisp > "$evidence/d11-srfi1-inputs.sha256"
 run_case run_law d11-srfi1-span-break-physical "$d11_span_bundle" 1
+# Д11: успішний nil-термінатор і відмова для крапкового хвоста.
+# Усі визначення беруться з точних SENS-бібліотек, не з host-моделі.
+d11_suffix_bundles=(lib/list-common-suffix-general.lisp lib/d11-list-terminator-evidence.lisp lib/d11-common-suffix-checked.lisp)
+d11_suffix_law="$evidence/d11-checked-suffix-law-complete.lisp"
+d11_suffix_mutant="$evidence/d11-checked-suffix-mutant-complete.lisp"
+cat -- "${d11_suffix_bundles[@]}" tests/semantic/d11-common-suffix-checked-law.lisp > "$d11_suffix_law"
+cat -- "${d11_suffix_bundles[@]}" tests/semantic/d11-common-suffix-checked-mutant.lisp > "$d11_suffix_mutant"
+run_case run_law d11-checked-suffix-positive "$d11_suffix_law" 1
+run_case run_law d11-checked-suffix-mutant "$d11_suffix_mutant" 0
+sha256sum "${d11_suffix_bundles[@]}" tests/semantic/d11-common-suffix-checked-law.lisp tests/semantic/d11-common-suffix-checked-mutant.lisp > "$evidence/d11-checked-suffix-inputs.sha256"
 # Д11: SPAN/BREAK не повинні пропускати атомний D1-хвіст суфікса.
 d11_span_improper="$evidence/d11-srfi1-span-improper-suffix.lisp"
 cat -- lib/d11-srfi1-span-break.lisp tests/semantic/d11-srfi1-span-improper-suffix-negative.lisp > "$d11_span_improper"
