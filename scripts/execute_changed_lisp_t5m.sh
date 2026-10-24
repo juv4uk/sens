@@ -200,6 +200,8 @@ run_native_t5m_program() {
       negative_type_diagnostic='car expects a non-empty list' ;;
     tests/semantic/d11-srfi1-find-tail-improper-tail-negative.lisp|tests/semantic/d11-family-aggregation-mutant.lisp)
       negative_type_diagnostic='car expects a non-empty list' ;;
+    tests/semantic/d11-take-while-first-class-improper-tail-negative.lisp|tests/semantic/d11-take-while-first-class-atomic-root-negative.lisp|tests/semantic/d11-take-while-first-class-late-improper-negative.lisp)
+      negative_type_diagnostic='car expects a non-empty list' ;;
     tests/semantic/d11-srfi1-span-improper-suffix-negative.lisp|tests/semantic/d11-srfi1-break-improper-suffix-negative.lisp)
       negative_type_diagnostic='car expects a non-empty list' ;;
     tests/semantic/d6-union-improper-tail-negative.lisp|tests/semantic/d6-union-improper-root-negative.lisp)
@@ -245,6 +247,11 @@ run_native_t5m_program() {
     elif [[ "$file" == "tests/semantic/d11-srfi1-find-presence-improper-tail-negative.lisp" ]]; then
       direct_source="$dir/d11-find-presence-bound-negative.lisp"
       cat -- lib/d11-srfi1-find-presence.lisp "$file" > "$direct_source"
+    elif [[ "$file" == "tests/semantic/d11-take-while-first-class-improper-tail-negative.lisp" ||
+            "$file" == "tests/semantic/d11-take-while-first-class-atomic-root-negative.lisp" ||
+            "$file" == "tests/semantic/d11-take-while-first-class-late-improper-negative.lisp" ]]; then
+      direct_source="$dir/d11-take-while-bound-negative.lisp"
+      cat -- lib/d11-srfi1-span-break.lisp lib/d11-srfi1-take-while.lisp "$file" > "$direct_source"
     elif [[ "$file" == "tests/semantic/d11-srfi1-find-tail-improper-tail-negative.lisp" ]]; then
       direct_source="$dir/d11-find-tail-bound-negative.lisp"
       cat -- lib/d11-srfi1-find-tail.lisp "$file" > "$direct_source"
@@ -1303,7 +1310,9 @@ while IFS= read -r file || [[ -n "$file" ]]; do
                      --binding-source lib/d11-clojure-frequencies-unary.lisp)
   elif [[ "$file" == "tests/semantic/d11-take-while-first-class-law.lisp" ||
           "$file" == "tests/semantic/d11-take-while-first-class-mutant.lisp" ||
-          "$file" == "tests/semantic/d11-take-while-first-class-improper-tail-negative.lisp" ]]; then
+          "$file" == "tests/semantic/d11-take-while-first-class-improper-tail-negative.lisp" ||
+          "$file" == "tests/semantic/d11-take-while-first-class-atomic-root-negative.lisp" ||
+          "$file" == "tests/semantic/d11-take-while-first-class-late-improper-negative.lisp" ]]; then
     # Бібліотечна D11-композиція: SPAN і TAKE-WHILE виконує тільки SENS.
     binding_sources=(--binding-source lib/d11-srfi1-span-break.lisp
                      --binding-source lib/d11-srfi1-take-while.lisp)

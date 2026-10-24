@@ -1262,6 +1262,16 @@ cat -- lib/d11-srfi1-span-break.lisp lib/d11-srfi1-take-while.lisp \
 run_case run_law d11-take-while-first-class-positive "$d11_take_while_positive" 1
 run_case run_law d11-take-while-first-class-mutant "$d11_take_while_mutant" 0
 run_case run_type_rejection d11-take-while-first-class-improper-tail "$d11_take_while_bad" 'car expects a non-empty list'
+d11_take_while_root="$evidence/d11-take-while-first-class-atomic-root-complete.lisp"
+d11_take_while_late="$evidence/d11-take-while-first-class-late-improper-complete.lisp"
+cat -- lib/d11-srfi1-span-break.lisp lib/d11-srfi1-take-while.lisp \
+  tests/semantic/d11-take-while-first-class-atomic-root-negative.lisp > "$d11_take_while_root"
+cat -- lib/d11-srfi1-span-break.lisp lib/d11-srfi1-take-while.lisp \
+  tests/semantic/d11-take-while-first-class-late-improper-negative.lisp > "$d11_take_while_late"
+run_case run_type_rejection d11-take-while-first-class-atomic-root "$d11_take_while_root" 'car expects a non-empty list'
+run_case run_type_rejection d11-take-while-first-class-late-improper "$d11_take_while_late" 'car expects a non-empty list'
+
+
 sha256sum lib/d11-srfi1-span-break.lisp lib/d11-srfi1-take-while.lisp \
   tests/semantic/d11-take-while-first-class-*.lisp > "$evidence/d11-take-while-first-class-inputs.sha256"
 
