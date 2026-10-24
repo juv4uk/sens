@@ -1,5 +1,5 @@
-//! Поточні механізми `write-to-string`, `read`/`eval` та єдине місце ядра,
-//! що читає stdin (`read_stdin_line`, лише для `(read)` без аргументів).
+//! Механізми `write-to-string`, `read`/`eval` без доступу ядра до ОС.
+//! Інтерактивний ввід належить зовнішньому хосту, а не READ ядра.
 //!
 //! These operations are value-level mechanisms. Their callable identities are
 //! ordinary root `Value::Builtin` bindings; the evaluator does not dispatch on
@@ -61,7 +61,11 @@ pub(crate) fn read_values(
             )),
         }
     } else {
-        read_stdin_line(span)?
+        return Err(LanguageError::new(
+            ErrorKind::MechanismUnavailable,
+            "READ_HOST_INPUT_UNAVAILABLE: ядро SENS не має неявного вводу ОС; передайте значення для READ через зовнішній ввід",
+            span,
+        ));
     };
     let expressions = crate::parse(&source).map_err(|mut error| {
         error.span = span;
@@ -106,28 +110,6 @@ pub(crate) fn read_all_values(
         .map(Value::list)
 }
 
-#[cfg(not(target_arch = "wasm32"))]
-fn read_stdin_line(span: Span) -> Result<String, LanguageError> {
-    use std::io::BufRead;
-    let mut line = String::new();
-    std::io::stdin().lock().read_line(&mut line).map_err(|error| {
-        LanguageError::new(
-            ErrorKind::InvalidForm,
-            format!("read: failed to read from stdin · read: ne vdalos prochytaty stdin · read: Lesen von stdin fehlgeschlagen: {error}"),
-            span,
-        )
-    })?;
-    Ok(line.trim_end_matches(['\n', '\r']).to_string())
-}
-
-#[cfg(target_arch = "wasm32")]
-fn read_stdin_line(span: Span) -> Result<String, LanguageError> {
-    Err(LanguageError::new(
-        ErrorKind::InvalidForm,
-        "read: interactive stdin is not available in this build · read: interaktyvnyi stdin nedostupnyi u tsii zbirtsi · read: interaktives stdin ist in diesem Build nicht verfügbar",
-        span,
-    ))
-}
 
 pub(crate) fn eval_values(
     arguments: &[Value],
@@ -162,6 +144,16 @@ fn exact_values(
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn read_without_host_input_has_no_implicit_os_capability() {
+        let span = Span::default();
+        let error = read_values(&[], &Environment::root(), span)
+            .expect_err("ядро без хостового вводу не повинно читати stdin");
+        assert_eq!(error.kind, ErrorKind::MechanismUnavailable);
+        assert!(error.message.contains("READ_HOST_INPUT_UNAVAILABLE"));
+        assert_eq!(error.span, span);
+    }
 
     fn assert_predicate_wire_rejected(value: Value) {
         let error = write_to_string_values(&[value], &Environment::root(), Span::default())
