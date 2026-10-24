@@ -383,3 +383,21 @@ test "T5M mixed-width repeated physical roundtrip" {
         }
     }
 }
+
+test "T5M decodes one D24 word within output-buffer budget" {
+    // 24 bits require one output word (24 bytes) and 24 bit bytes.
+    // 64 bytes fit the outputs but not an extra 25-trit scratch allocation.
+    const source = [_]Word{.{ .width = 24, .bits = "000000000000000000000001" }};
+    const physical = try encode(std.testing.allocator, &source);
+    defer std.testing.allocator.free(physical);
+
+    var storage: [64]u8 align(@alignOf(DecodedWord)) = undefined;
+    var fixed = std.heap.FixedBufferAllocator.init(&storage);
+    const allocator = fixed.allocator();
+    var result = try decode(allocator, physical);
+    defer result.deinit(allocator);
+
+    try std.testing.expectEqual(@as(usize, 1), result.words.len);
+    try std.testing.expectEqual(@as(usize, 24), result.words[0].width);
+    try std.testing.expectEqualStrings(source[0].bits, result.words[0].bits);
+}
