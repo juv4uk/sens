@@ -1915,7 +1915,9 @@ sha256sum lib/core4.lisp lib/core4-parts/core4-d6b.lisp \
 # Неправильний D1-хвіст має відхилятися Type, а не повертати обрізаний результат.
 d6_union_source="$evidence/d6-union-exact-definitions.lisp"
 : > "$d6_union_source"
-for spec in 'lib/core4-parts/core4-language.lisp|значення-у-списку?' 'lib/core4-parts/core4-codec.lisp|об'"'"'єднання'; do
+for spec in 'lib/core4-parts/core4-language.lisp|значення-у-списку?' \
+  'lib/core4-parts/core4-codec.lisp|об'"'"'єднання-перевірити-правий' \
+  'lib/core4-parts/core4-codec.lisp|об'"'"'єднання'; do
   d6_union_file="${spec%%|*}"
   d6_union_name="${spec#*|}"
   if ! awk -v target="(визначити $d6_union_name" '
