@@ -1101,6 +1101,25 @@ sha256sum lib/d11-family-selection.lisp \
   tests/semantic/d11-family-selection-d1-structural-law.lisp \
   tests/semantic/d11-family-selection-d1-structural-mutant.lisp > "$evidence/d11-family-selection-d1-inputs.sha256"
 
+# Д11 DROP-WHILE: перевірка всього D3-ланцюга, суфікс без копіювання.
+d11_drop_positive="$evidence/d11-drop-while-zero-copy-positive-complete.lisp"
+d11_drop_mutant="$evidence/d11-drop-while-zero-copy-mutant-complete.lisp"
+d11_drop_bad_early="$evidence/d11-drop-while-early-improper-complete.lisp"
+d11_drop_bad_scanned="$evidence/d11-drop-while-scanned-improper-complete.lisp"
+cat -- lib/list-first-class-drop-while-zero-copy-general.lisp tests/semantic/d11-drop-while-zero-copy-law.lisp > "$d11_drop_positive"
+cat -- lib/list-first-class-drop-while-zero-copy-general.lisp tests/semantic/d11-drop-while-zero-copy-mutant.lisp > "$d11_drop_mutant"
+cat -- lib/list-first-class-drop-while-zero-copy-general.lisp tests/semantic/d11-drop-while-early-improper-tail-negative.lisp > "$d11_drop_bad_early"
+cat -- lib/list-first-class-drop-while-zero-copy-general.lisp tests/semantic/d11-drop-while-scanned-improper-tail-negative.lisp > "$d11_drop_bad_scanned"
+run_case run_law d11-drop-while-zero-copy-positive "$d11_drop_positive" 1 core4
+run_case run_law d11-drop-while-zero-copy-mutant "$d11_drop_mutant" 0 core4
+run_case run_error_rejection d11-drop-while-early-improper "$d11_drop_bad_early" Type 'car expects a non-empty list' core4
+run_case run_error_rejection d11-drop-while-scanned-improper "$d11_drop_bad_scanned" Type 'car expects a non-empty list' core4
+sha256sum lib/list-first-class-drop-while-zero-copy-general.lisp \
+  tests/semantic/d11-drop-while-zero-copy-law.lisp \
+  tests/semantic/d11-drop-while-zero-copy-mutant.lisp \
+  tests/semantic/d11-drop-while-early-improper-tail-negative.lisp \
+  tests/semantic/d11-drop-while-scanned-improper-tail-negative.lisp > "$evidence/d11-drop-while-zero-copy-inputs.sha256"
+
 # D11 TAKE-WHILE: композиція єдиного чинного SENS SPAN, без нового opcode.
 # Прямий і обидва фізичні шляхи обчислюють позитив, мутант та D3 Type.
 d11_take_while_positive="$evidence/d11-take-while-first-class-positive-complete.lisp"
