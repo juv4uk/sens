@@ -653,6 +653,17 @@ done
 sha256sum tests/semantic/d11-srfi1-list-equality-{structure,pairs,nullary}-law.lisp > "$evidence/d11-list-equality-isolated-inputs.sha256"
 
 run_case run_law d11-srfi1-list-equality-mutant "$d11_list_equal_mutant_bundle" 0
+# D11 LIST=: окремі нативні закони спрямованої рівності.
+for part in directed-pairs directed-adjacent; do
+  witness="$evidence/d11-list-equality-$part.lisp"
+  cat -- lib/d11-srfi1-list-equality.lisp "tests/semantic/d11-srfi1-list-equality-$part-law.lisp" > "$witness"
+  run_case run_law "d11-list-equality-$part-positive" "$witness" 1
+done
+witness="$evidence/d11-list-equality-directed-mutant.lisp"
+cat -- lib/d11-srfi1-list-equality.lisp tests/semantic/d11-srfi1-list-equality-directed-mutant.lisp > "$witness"
+run_case run_law d11-list-equality-directed-mutant "$witness" 0
+sha256sum tests/semantic/d11-srfi1-list-equality-directed-{pairs-law,adjacent-law,mutant}.lisp > "$evidence/d11-directed-inputs.sha256"
+
 
 # SRFI-1 list= rejects malformed input even when early length/value cases could
 # otherwise short-circuit. Each negative is checked as a real Type error through
