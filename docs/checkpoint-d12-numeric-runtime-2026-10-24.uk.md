@@ -4,7 +4,7 @@
 
 **Зріз:** 2026-10-24  
 **Гілка:** `main` (без нових гілок)  
-**Кодовий коміт:** [d36d90ae2abd82cb4dd9d58860c335ad6250370e](https://github.com/juv4uk/sens/commit/d36d90ae2abd82cb4dd9d58860c335ad6250370e)  
+**Поточний кодовий зріз:** [9c38e0430a945965070f97ba46860ca889519ca7](https://github.com/juv4uk/sens/commit/9c38e0430a945965070f97ba46860ca889519ca7) (прямі коміти до `main`; latest observed by the checkpoint update)  
 **Нормативне джерело:** `contracts/numeric-domains-ratification.lisp`, схема `numeric-d12-start-extension-1`  
 **Робочий корінь:** [#6016](https://github.com/juv4uk/sens/issues/6016)
 
@@ -12,15 +12,15 @@
 
 У `crates/sens/src/binary_number.rs` правило допустимої ширини змінено на ратифіковану родину D(12 × 2ⁿ). Точні 12-бітні слова тепер несуть власну ідентичність; однакові payload у D12 і D24 залишаються різними значеннями домену. Перехід та обмеження змішаних доменів перевіряє unit-test `d12_is_the_first_signed_numeric_domain_and_preserves_exact_boundaries`.
 
-У `crates/sens/src/source_projection.rs` додано явний API `project_ukr_decimal_integer_literals_with_minimum_width(..., 12)`. Звичайний спільний wrapper поки зберігає мінімум D24 для сумісності з наявним Core4, тому це **opt-in D12-профіль**, а не глобальне перемикання усіх CLI/REPL джерел. Тести `explicit_d12_projection_keeps_signed_boundaries_and_widens_exactly` і `explicit_d12_projection_runs_same_domain_arithmetic_and_carries_without_wrap` покривають межі та точне зростання.
+У `crates/sens/src/source_projection.rs` додано явний API `project_ukr_decimal_integer_literals_with_minimum_width(..., 12)`. Загальний wrapper і звичайний REPL/source шлях зберігають мінімум D24 для сумісності з Core4. Водночас спеціальна парна поверхня `crates/sens-cli/src/bin/sens-math-t5m.rs` тепер явно викликає цей API з мінімумом D12; вона не виводить домен із carrier ширини. Тести `explicit_d12_projection_keeps_signed_boundaries_and_widens_exactly` і `explicit_d12_projection_runs_same_domain_arithmetic_and_carries_without_wrap` покривають межі та точне зростання.
 
 У `crates/sens/src/eval/arithmetic.rs` тест `core_runtime_d12_signed_arithmetic_and_ratio_are_exact` перевіряє Core-runtime: 2047 + 0 лишається D12; 2047 + 1 і −2048 − 1 розширюються до D24 без обгортання; 1/3 лишається точною D12-композицією; D12/D24 не змішуються; ділення на нуль відхиляється.
 
-Наскрізну тестову ланку додано до `crates/sens-cli/src/bin/sens-math-t5m.rs`: `d12_edges_roundtrip_and_grow_through_zig_t5m_and_sens_math` передає значення джерела через справжній Zig/T5M round-trip та SENS evaluator; сусідні тести перевіряють D12 суму, віднімання, множення, точні дроби та негативний ділення-на-нуль. У `research/zig-codecs/t5m.zig` додано round-trip D12 меж і D12/D24 з однаковою величиною; загальний тест точних фізичних ширин включає 12.
+Наскрізну тестову ланку додано до `crates/sens-cli/src/bin/sens-math-t5m.rs`: `d12_edges_roundtrip_and_grow_through_zig_t5m_and_sens_math` перевіряє exact D12 → Zig/T5M round-trip → SENS evaluator; окремо є D12 sum/subtract/multiply, signed comparisons, exact ratios, divide-by-zero negative witness, змішана ширина й payload-mutant. У `research/zig-codecs/t5m.zig` є round-trip D12 меж і D12/D24 з однаковою величиною. Це стосується bit-granular T5M transport; `research/zig-codecs/numeric_domains.zig` лишається byte-aligned D24/D48/D96/D192 carrier і навмисно не є доказом D12 byte-carrier підтримки.
 
 Для цього існуючого CI додано команду `cargo test --locked -p sens-cli --bin sens-math-t5m -- --nocapture` у `.github/workflows/ci.yml` (коміт [e85e002](https://github.com/juv4uk/sens/commit/e85e00242df5fc8a80f0893a390f730eec2c07ac)). Це доповнення чинного workflow, не новий workflow.
 
-**Статус доказу:** усі перераховані свідки закомічені, а їхній запуск зареєстрований у CI, але на момент цього чекпоінту немає підтвердженого локального або hosted результату виконання. Порожній список статусів GitHub не є PASS.
+**Статус доказу:** свідки закомічені, а їхній запуск зареєстрований у наявному CI; GitHub connector повернув порожні `statuses`/`workflow_runs` і не дав логу тестового виконання. Це **NOT_VERIFIED**, не PASS. Локальний clone/build не вдалося запустити в цій сесії через недоступний DNS до `github.com`.
 
 ## Картка доменів: не змішувати значення, резидентність і виконання
 
@@ -40,6 +40,6 @@
 
 ## Пріоритет наступного агента
 
-Продовжити #6016 від source projection і Core evaluator. Спочатку виконати нативні D12 закони та оновити їхні регресії; потім визначити й реалізувати фізичний формат D12 у Zig/T5M із точними бітами та явною шириною. Не додавати нових функціональних opcode, не змінювати D11, не вводити decimal/host-number як семантичного посередника і не послаблювати чинні D24+ негативні свідки.
+Пріоритет 1 — отримати реальний результат поточного CI для `9c38e043…` (включає `cargo test --locked -p sens-cli --bin sens-math-t5m -- --nocapture`) і, якщо RED, виправити точний корінь. Локальні відтворення: `cargo test --locked -p sens --lib d12_signed_domain_preserves_identity_and_widens_without_wrap -- --nocapture`; `cargo test --locked -p sens --lib core_runtime_d12_signed_arithmetic_and_ratio_are_exact -- --nocapture`; `cargo test --locked -p sens-cli --bin sens-math-t5m -- --nocapture`; Zig-перевірка через чинну `zig test -lc research/zig-codecs/tests.zig` CI-команду. Пріоритет 2 — вирішити окрему міграцію звичайного CLI/REPL з D24 floor на D12, оновивши Core4/numeric roots і свідків без неявної коерції. Пріоритет 3 — продовжити окремий аудит D1–D11 resident-level callable laws, включно з позитивними й негативними SENS-свідками; D12 як число не є D12 функціональним кодбуком. Не додавати нових opcode, не змінювати D11 без його власного закону, не вводити decimal/host-number як семантичного посередника й не послаблювати чинні негативні свідки.
 
-**Поточний статус:** D12 Core numeric semantics та opt-in source→Zig/T5M→SENS свідки закомічені; відповідний тест доданий до наявного CI, але виконання саме цих змін **NOT_VERIFIED** до отримання hosted result. Звичайний source/REPL шлях досі не мігрований глобально з D24 на D12; загальний release GO не оголошується.
+**Поточний статус:** exact D12 Core/source-profile/bit-granular Zig-T5M paired path і негативні свідки закомічені до `main`; test command додана в чинний CI. Runtime test result — **NOT_VERIFIED**. Звичайний shared source projection/REPL лишається D24-first; загальна мета «всі функції D1–D12+ доведені та придатні до release» НЕ виконана цим checkpoint, і release GO не оголошується.
