@@ -51,17 +51,30 @@ pub fn derive(parent: ladder.Record, suffix: u2) ?Candidate {
     return result;
 }
 
+/// Точна координата D11-батька визначається старшими 11 бітами D13.
+/// Порядок рядків таблиці не є частиною тотожності функції.
+fn parentBitsFromWord(word: u16) ?[11]u8 {
+    if (word < first_word or word > last_word) return null;
+    const parent_word = word >> 2;
+    var bits: [11]u8 = undefined;
+    for (0..bits.len) |i| {
+        const shift: u4 = @intCast(10 - i);
+        bits[i] = if (((parent_word >> shift) & 1) == 0) '0' else '1';
+    }
+    return bits;
+}
+
 /// Індекс 0..2047 відображається на безперервну ділянку D13.
 /// Це НЕ дозвіл на використання слова як виконуваного коду SENS.
 pub fn candidateAt(index: usize) ?Candidate {
     if (index >= candidate_count) return null;
-    const parent = ladder.questionAt(11, index / 4) orelse return null;
-    return derive(parent, @intCast(index % 4));
+    return candidateFromWord(first_word + @as(u16, @intCast(index)));
 }
 
 pub fn candidateFromWord(word: u16) ?Candidate {
-    if (word < first_word or word > last_word) return null;
-    return candidateAt(@as(usize, word - first_word));
+    const parent_bits = parentBitsFromWord(word) orelse return null;
+    const parent = ladder.lookup(11, &parent_bits) orelse return null;
+    return derive(parent, @intCast(word & 0b11));
 }
 
 test "Драбина D13: 512 батьків породжують рівно 2048 точних різних координат" {
@@ -83,6 +96,25 @@ test "Драбина D13: 512 батьків породжують рівно 204
     for (first_word..last_word + 1) |word| {
         try std.testing.expect(seen[word]);
     }
+}
+
+test "Драбина D13: код батька визначають 11 старших бітів, не номер рядка" {
+    const probes = [_]struct { word: u16, parent: []const u8 }{
+        .{ .word = first_word, .parent = "01100000000" },
+        .{ .word = first_word + 3, .parent = "01100000000" },
+        .{ .word = first_word + 4, .parent = "01100000001" },
+        .{ .word = 0b1000000000000, .parent = "10000000000" },
+        .{ .word = last_word, .parent = "10011111111" },
+    };
+    for (probes) |probe| {
+        const parent_bits = parentBitsFromWord(probe.word) orelse return error.MissingParentCode;
+        try std.testing.expectEqualSlices(u8, probe.parent, &parent_bits);
+        const child = candidateFromWord(probe.word) orelse return error.MissingCandidate;
+        try std.testing.expectEqualSlices(u8, probe.parent, child.bits[0..11]);
+        try std.testing.expectEqual(probe.word, try std.fmt.parseInt(u16, &child.bits, 2));
+    }
+    try std.testing.expect(parentBitsFromWord(first_word - 1) == null);
+    try std.testing.expect(parentBitsFromWord(last_word + 1) == null);
 }
 
 test "Драбина D13: чотири різні суфікси зберігають порядок CAR/CDR" {
