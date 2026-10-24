@@ -25,7 +25,6 @@ fn is_explicit_non_implementation(rel: &str) -> bool {
     rel.starts_with("lib/generated/")
         || rel.starts_with("lib/surface/")
         || rel == "lib/machine/encoding/coverage.lisp"
-        || rel == "lib/machine/encoding/admitted-iclass-index.lisp"
         // Core4 — декларативна таблиця з колонками san/en/LISP/sym.
         // lib/yantra.lisp має справжні (визначити ...) і тому належить
         // до активного виконуваного корпусу, навіть якщо фізична T5M
@@ -312,6 +311,17 @@ fn generated_iclass_snapshot_is_data_only_when_full_record_contract_holds() {
     assert!(is_generated_iclass_catalogue(rel, &source));
     assert!(is_explicit_non_implementation_file(rel, &source_path));
 
+    // Пільга належить перевіреному вмісту, а не назві файлу.
+    // Старе безумовне виключення пропускало виконувані форми та порожній файл.
+    assert!(!is_explicit_non_implementation_file(
+        rel,
+        &repo_root().join("lib/yantra.lisp")
+    ));
+    assert!(!is_explicit_non_implementation_file(
+        rel,
+        &repo_root().join("lib/machine/encoding/nonexistent-catalogue.lisp")
+    ));
+
     // A similar file, executable code, forged owner header or new root form
     // must remain in the active-language scan, NOT inherit an exemption.
     assert!(!is_generated_iclass_catalogue(
@@ -377,7 +387,8 @@ fn completion_gate_exclusions_are_narrow_and_explicit() {
     assert!(is_explicit_non_implementation(
         "lib/machine/encoding/coverage.lisp"
     ));
-    assert!(is_explicit_non_implementation(
+    // Для спеціального каталогу тільки повний запис доводить статус даних.
+    assert!(!is_explicit_non_implementation(
         "lib/machine/encoding/admitted-iclass-index.lisp"
     ));
     assert!(is_explicit_non_implementation(
