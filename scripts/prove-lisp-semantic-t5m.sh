@@ -653,10 +653,12 @@ run_case run_type_rejection d3-cdr-atom-type-negative tests/semantic/d3-cdr-atom
 run_case run_type_rejection d3-cond-nil-condition-type-negative tests/semantic/d3-cond-nil-condition-type-negative.lisp 'D3:110 COND expects exact D1:1 / D1:0'
 # D4 NOT — часткова функція тільки над D1 PredicateBit, ніколи над структурним NIL.
 run_case run_type_rejection d4-not-nonpredicate-type-negative tests/semantic/d4-not-nonpredicate-type-negative.lisp 'NOT requires an exact D1 PredicateBit'
-# TRANSITIONAL #5854: арифметичні Lisp-свідки існують і перевіряються
-# прямим SENS у ci.yml, але фізичний T5M не атестовано до реалізації LENGTH.
-# Не оголошувати PASS і не замінювати семантику D6 хостовим оракулом.
-echo "::warning file=tests/semantic/d5-arithmetic-native-t5m-law.lisp,title=TRANSITIONAL #5854::D6 LENGTH (D6 000000) поки невикличний у фізичному SENS; D5 T5M=NOT_CERTIFIED"
+# D5/D24+ потребує D6 LENGTH, яку Core4 визначає мовою SENS.
+# Прямий Lisp має цей Core4-профіль. Відтворюємо ТОЙ САМИЙ профіль
+# для фізичного Zig/T5M (парного та автономного), без host-арифметики.
+# Якщо exact D6:000000 не отримає реального замикання, це чесний RED.
+run_case run_law d5-arithmetic-native-t5m-law tests/semantic/d5-arithmetic-native-t5m-law.lisp 1 core4
+run_case run_law d5-arithmetic-native-t5m-mutant tests/semantic/d5-arithmetic-native-t5m-mutant.lisp 0 core4
 # Залежні закони Д11 SPAN/BREAK: мова задає і функції, і твердження.
 # Цей повний Lisp-пакет кодується Zig/T5M і виконується фізичним SENS.
 # Відокремлений .lisp-свідок не є автономною програмою — без lib/ він не викличний.
