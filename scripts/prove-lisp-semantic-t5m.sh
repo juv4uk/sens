@@ -593,6 +593,18 @@ cat -- lib/d11-srfi1-unfold.lisp tests/semantic/d11-srfi1-unfold-mutant.lisp > "
 run_case run_law d11-srfi1-unfold-positive "$d11_unfold_positive" 1
 run_case run_law d11-srfi1-unfold-mutant "$d11_unfold_mutant" 0
 sha256sum lib/d11-srfi1-unfold.lisp tests/semantic/d11-srfi1-unfold-positive.lisp tests/semantic/d11-srfi1-unfold-mutant.lisp > "$evidence/d11-srfi1-unfold-inputs.sha256"
+# Д11 FREQUENCIES: окремий позитивний закон і мутант у SENS.
+# Нормативна проєкція: не числа D24, а правильний список унарних "о".
+# Всі DEFINE — канонічна Lisp-бібліотека, а фізичний шлях лише Zig/T5M.
+d11_freq_positive="$evidence/d11-frequencies-unary-positive-complete.lisp"
+d11_freq_mutant="$evidence/d11-frequencies-unary-mutant-complete.lisp"
+cat -- lib/d11-clojure-frequencies-unary.lisp tests/semantic/d11-clojure-frequencies-unary-law.lisp > "$d11_freq_positive"
+cat -- lib/d11-clojure-frequencies-unary.lisp tests/semantic/d11-clojure-frequencies-unary-mutant.lisp > "$d11_freq_mutant"
+run_case run_law d11-frequencies-unary-positive "$d11_freq_positive" 1
+run_case run_law d11-frequencies-unary-mutant "$d11_freq_mutant" 0
+sha256sum lib/d11-clojure-frequencies-unary.lisp \
+  tests/semantic/d11-clojure-frequencies-unary-law.lisp \
+  tests/semantic/d11-clojure-frequencies-unary-mutant.lisp > "$evidence/d11-frequencies-unary-inputs.sha256"
 # Д11 унарні частоти: негативні SENS-свідки завершення правильних списків.
 # Усі визначення — в Lisp/SENS, Zig лише транспортує T5M.
 d11_freq_bad_count="$evidence/d11-frequencies-bad-count.lisp"
