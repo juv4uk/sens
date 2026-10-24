@@ -3,18 +3,18 @@
 # Не є семантичним сертифікатом усієї бібліотеки або релізним GO.
 set -euo pipefail
 if (( $# < 1 )); then
-  echo "usage: bash $0 SOURCE.lisp [SENS_BINARY] [SENS_TRIT_BINARY] [--binding-source SOURCE.lisp ...]" >&2
+  echo "usage: bash $0 SOURCE.lisp [SENS_BINARY] [SENS_TRIT_BINARY] [--binding-source SOURCE.lisp ...] [--core4-runtime]" >&2
   exit 2
 fi
 source_file="$1"
 shift
 binary="target/debug/sens"
 reader="target/debug/sens-trit"
-if (( $# > 0 )) && [[ "$1" != --binding-source && "$1" != --expect-error ]]; then
+if (( $# > 0 )) && [[ "$1" != --binding-source && "$1" != --expect-error && "$1" != --core4-runtime ]]; then
   binary="$1"
   shift
 fi
-if (( $# > 0 )) && [[ "$1" != --binding-source && "$1" != --expect-error ]]; then
+if (( $# > 0 )) && [[ "$1" != --binding-source && "$1" != --expect-error && "$1" != --core4-runtime ]]; then
   reader="$1"
   shift
 fi
@@ -23,8 +23,17 @@ fi
 binding_args=()
 binding_sources=()
 expected_error=""
+core4_runtime=0
 while (( $# > 0 )); do
   case "${1:-}" in
+    --core4-runtime)
+      if (( core4_runtime )); then
+        echo "T5M_REPAIR_CORE4_PROFILE_DUPLICATE source=$source_file" >&2
+        exit 2
+      fi
+      core4_runtime=1
+      shift
+      ;;
     --binding-source)
       if (( $# < 2 )) || [[ "$2" != *.lisp || ! -f "$2" || -L "$2" ]]; then
         echo "T5M_REPAIR_BINDING_SOURCE_INVALID argument=${2:-missing}" >&2
@@ -48,6 +57,18 @@ while (( $# > 0 )); do
       ;;
   esac
 done
+# Core4 потрібний лише під час SENS eval, а не mint чи фізичного Zig-перегляду.
+# Не допускати тихої зміни профілю решти джерел або неперевірених комбінацій.
+if (( core4_runtime )); then
+  case "$source_file" in
+    tests/semantic/exact-arithmetic-laws.lisp|tests/semantic/exact-arithmetic-mutant.lisp) ;;
+    *) echo "T5M_REPAIR_CORE4_PROFILE_UNREGISTERED source=$source_file" >&2; exit 2 ;;
+  esac
+  if (( ${#binding_args[@]} != 0 )) || [[ -n "$expected_error" ]]; then
+    echo "T5M_REPAIR_CORE4_PROFILE_INCOMPATIBLE source=$source_file" >&2
+    exit 2
+  fi
+fi
 if [[ "$source_file" != *.lisp || ! -f "$source_file" || -L "$source_file" ]]; then
   echo "T5M_REPAIR_SOURCE_INVALID path=$source_file" >&2
   exit 2
@@ -118,6 +139,12 @@ if ! timeout "$native_timeout" "$reader" verify-view "$staged" > "$scratch/inver
   echo "T5M_REPAIR_VIEW_ROUNDTRIP_FAILED path=$source_file" >&2
   exit 2
 fi
+paired_runtime_args=()
+standalone_runtime=("$binary")
+if (( core4_runtime )); then
+  paired_runtime_args=(--core4-runtime)
+  standalone_runtime=("$reader" eval-core4)
+fi
 if [[ -n "$expected_error" ]]; then
   if timeout "$native_timeout" "$binary" "$direct_source" > "$scratch/direct.out" 2> "$scratch/direct.err"; then
     echo "T5M_REPAIR_EXPECTED_ERROR_DIRECT_ACCEPTED source=$source_file expected=$expected_error" >&2
@@ -160,10 +187,19 @@ if [[ -n "$expected_error" ]]; then
     mode=expected-error-paired-and-standalone
   fi
 else
-if ! timeout "$native_timeout" "$binary" --t5m-pair "$source_file" "$staged" "${binding_args[@]}" > "$scratch/out" 2> "$scratch/err"; then
+if ! timeout "$native_timeout" "$binary" --t5m-pair "$source_file" "$staged" "${binding_args[@]}" "${paired_runtime_args[@]}" > "$scratch/out" 2> "$scratch/err"; then
   cat "$scratch/err" >&2
   echo "T5M_REPAIR_REAL_EVAL_FAILED path=$source_file" >&2
   exit 2
+fi
+# За явного Core4-профілю закон повертає тільки точний D1-свідок.
+if (( core4_runtime )); then
+  expected_d1=1
+  [[ "$source_file" != *-mutant.lisp ]] || expected_d1=0
+  if [[ "$(cat "$scratch/out")" != "$expected_d1" ]]; then
+    echo "T5M_REPAIR_CORE4_WRONG_D1 source=$source_file expected=$expected_d1 actual=$(cat "$scratch/out")" >&2
+    exit 2
+  fi
 fi
 # Якщо голий фізичний носій також виконується, звіряємо справжні
 # результати SENS, а не тільки код виходу та правильність пакування.
@@ -190,7 +226,7 @@ if (( ${#binding_sources[@]} != 0 )); then
   fi
   mode=paired-and-dependency-complete
 else
-if timeout "$native_timeout" "$binary" "$staged" > "$scratch/standalone.out" 2> "$scratch/standalone.err"; then
+if timeout "$native_timeout" "${standalone_runtime[@]}" "$staged" > "$scratch/standalone.out" 2> "$scratch/standalone.err"; then
   if ! cmp -s "$scratch/out" "$scratch/standalone.out"; then
     echo "T5M_REPAIR_EXECUTION_DIVERGENCE source=$source_file paired_sha256=$(sha256sum "$scratch/out" | cut -d' ' -f1) standalone_sha256=$(sha256sum "$scratch/standalone.out" | cut -d' ' -f1)" >&2
     exit 2
@@ -198,6 +234,12 @@ if timeout "$native_timeout" "$binary" "$staged" > "$scratch/standalone.out" 2> 
   mode=paired-and-standalone
 else
   status=$?
+  # Явний Core4 повинен виконуватися фізично самостійно; paired-only не доказ.
+  if (( core4_runtime )); then
+    cat "$scratch/standalone.err" >&2
+    echo "T5M_REPAIR_CORE4_STANDALONE_FAILED source=$source_file status=$status" >&2
+    exit 2
+  fi
   # Парне виконання не виправдовує довільну аварію незалежного
   # фізичного виконавця. Відомі межі D7/D24+ допускають лише paired,
   # а panic, timeout і невідома помилка зупиняють ремонт без запису пари.
@@ -217,7 +259,7 @@ fi
 fi
 # Негативна перевірка проводить іншу програму через той самий SENS.
 { cat "$source_file"; printf '\n(як-є ())\n'; } > "$scratch/mutant.lisp"
-if timeout "$native_timeout" "$binary" --t5m-pair "$scratch/mutant.lisp" "$staged" "${binding_args[@]}" > "$scratch/no" 2> "$scratch/no.err"; then
+if timeout "$native_timeout" "$binary" --t5m-pair "$scratch/mutant.lisp" "$staged" "${binding_args[@]}" "${paired_runtime_args[@]}" > "$scratch/no" 2> "$scratch/no.err"; then
   echo "T5M_REPAIR_MUTANT_WAS_ACCEPTED path=$source_file" >&2
   exit 2
 fi

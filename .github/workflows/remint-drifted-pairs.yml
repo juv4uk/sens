@@ -385,7 +385,9 @@ jobs:
             # Пари може ще не бути — refresh створює її канонічно (mint + view).
             bs=()
             expect_args=()
+            profile_args=()
             case "$f" in
+              tests/semantic/exact-arithmetic-laws.lisp|tests/semantic/exact-arithmetic-mutant.lisp) profile_args=(--core4-runtime);;
               tests/semantic/core-d3-car-cdr-cons-mutant.lisp) expect_args=(--expect-error "car expects a non-empty list");;
               lib/persistent-vector.lisp|lib/knowledge.lisp) bs=(--binding-source "$RUNNER_TEMP/sens-core4-d24-roots.lisp");;
               lib/reason.lisp) bs=(--binding-source "$RUNNER_TEMP/sens-core4-d24-roots.lisp" --binding-source lib/unify.lisp);;
@@ -411,7 +413,7 @@ jobs:
               tests/semantic/core1-gc-reachability-laws.lisp) bs=(--binding-source lib/core1.lisp);;
               tests/semantic/meta-fc-predicates-d1-law.lisp) bs=(--binding-source lib/meta-eval-first-class.lisp);;
             esac
-            if bash scripts/refresh-verified-t5m-pair.sh "$f" target/debug/sens target/debug/sens-trit "${bs[@]}" "${expect_args[@]}"; then
+            if bash scripts/refresh-verified-t5m-pair.sh "$f" target/debug/sens target/debug/sens-trit "${bs[@]}" "${expect_args[@]}" "${profile_args[@]}"; then
               ok=$((ok+1))
               printf '%s\n' "$f" >> "$RUNNER_TEMP/sens-remint-success.txt"
             else
@@ -680,8 +682,10 @@ jobs:
               fi
               bs=()
               expect_args=()
+              profile_args=()
               case "$f" in
-                tests/semantic/core-d3-car-cdr-cons-mutant.lisp) expect_args=(--expect-error "car expects a non-empty list");;
+                tests/semantic/exact-arithmetic-laws.lisp|tests/semantic/exact-arithmetic-mutant.lisp) profile_args=(--core4-runtime);;
+              tests/semantic/core-d3-car-cdr-cons-mutant.lisp) expect_args=(--expect-error "car expects a non-empty list");;
                 lib/persistent-vector.lisp|lib/knowledge.lisp) bs=(--binding-source "$RUNNER_TEMP/sens-core4-d24-roots.lisp");;
                 lib/reason.lisp) bs=(--binding-source "$RUNNER_TEMP/sens-core4-d24-roots.lisp" --binding-source lib/unify.lisp);;
               lib/forward.lisp) bs=(--binding-source lib/unify.lisp);;
@@ -706,7 +710,7 @@ jobs:
               tests/semantic/core1-gc-reachability-laws.lisp) bs=(--binding-source lib/core1.lisp);;
               tests/semantic/meta-fc-predicates-d1-law.lisp) bs=(--binding-source lib/meta-eval-first-class.lisp);;
               esac
-              if ! bash scripts/refresh-verified-t5m-pair.sh "$f" target/debug/sens target/debug/sens-trit "${bs[@]}" "${expect_args[@]}"; then
+              if ! bash scripts/refresh-verified-t5m-pair.sh "$f" target/debug/sens target/debug/sens-trit "${bs[@]}" "${expect_args[@]}" "${profile_args[@]}"; then
                 echo "::error::REMINT_CURRENT_MAIN_NATIVE_FAILED $f" >&2
                 regenerated_failed=1
               fi
