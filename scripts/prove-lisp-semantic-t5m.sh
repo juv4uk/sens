@@ -530,6 +530,22 @@ sha256sum lib/core4.lisp \
   tests/semantic/d5-reverse-onto-order-mutant.lisp \
   tests/semantic/d5-reverse-onto-improper-tail-negative.lisp \
   tests/semantic/d5-reverse-improper-tail-negative.lisp > "$evidence/d5-reverse-inputs.sha256"
+# D5/D24+: точні числові величини, мутант, неправильний D1-хвіст.
+# Усі вердикти формулює SENS. Shell тільки з'єднує бібліотеку та свідки.
+d5_exact_number_source=lib/залишити-точні-числа.lisp
+d5_exact_number_law_bundle="$evidence/d5-exact-numbers-filter-law-complete.lisp"
+d5_exact_number_mutant_bundle="$evidence/d5-exact-numbers-filter-mutant-complete.lisp"
+d5_exact_number_negative_bundle="$evidence/d5-exact-numbers-filter-improper-tail-negative-complete.lisp"
+cat -- "$d5_exact_number_source" tests/semantic/d5-exact-numbers-filter-law.lisp > "$d5_exact_number_law_bundle"
+cat -- "$d5_exact_number_source" tests/semantic/d5-exact-numbers-filter-mutant.lisp > "$d5_exact_number_mutant_bundle"
+cat -- "$d5_exact_number_source" tests/semantic/d5-exact-numbers-filter-improper-tail-negative.lisp > "$d5_exact_number_negative_bundle"
+run_case run_law d5-exact-numbers-filter-positive "$d5_exact_number_law_bundle" 1 core4
+run_case run_law d5-exact-numbers-filter-mutant "$d5_exact_number_mutant_bundle" 0 core4
+run_case run_error_rejection d5-exact-numbers-filter-improper-tail "$d5_exact_number_negative_bundle" Type 'car expects a non-empty list' core4
+sha256sum "$d5_exact_number_source" \
+  tests/semantic/d5-exact-numbers-filter-law.lisp \
+  tests/semantic/d5-exact-numbers-filter-mutant.lisp \
+  tests/semantic/d5-exact-numbers-filter-improper-tail-negative.lisp > "$evidence/d5-exact-numbers-inputs.sha256"
 # D6 COMPOSE/FLIP/CURRY are derived SENS functions, so their law and
 # counterexample must pass the same physical Zig/T5M -> SENS route.
 run_case run_law d6-compose-flip-positive tests/semantic/d6-compose-flip-law.lisp 1 core4
