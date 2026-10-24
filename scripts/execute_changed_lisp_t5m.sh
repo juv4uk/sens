@@ -972,7 +972,8 @@ while IFS= read -r file || [[ -n "$file" ]]; do
                      --binding-source lib/d11-srfi1-alist-protocol.lisp
                      --binding-source lib/d11-clojure-group-by.lisp
                      --binding-source lib/d11-clojure-frequencies-unary.lisp)
-  elif [[ "$file" == "tests/semantic/d6-any-all-first-class-law.lisp" ]]; then
+  elif [[ "$file" == "tests/semantic/d6-any-all-first-class-law.lisp" ||
+          "$file" == "tests/semantic/d6-any-all-first-class-mutant.lisp" ]]; then
     # Механічно витягаємо ДВІ чинні SENS-визначення з Core4.
     # Shell не вирішує істину, не відкриває решту D6 і не переписує код.
     local_d6_source="$dir/d6-any-all-core4-definitions.lisp"

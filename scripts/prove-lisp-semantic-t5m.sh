@@ -1236,6 +1236,15 @@ run_case run_law all-predicate-quantifier-law "$all_quantifier_law_bundle" 1
 run_case run_law all-predicate-quantifier-mutant "$all_quantifier_mutant_bundle" 0
 run_case run_law exists-predicate-quantifier-law "$any_quantifier_law_bundle" 1
 run_case run_law exists-predicate-quantifier-mutant "$any_quantifier_mutant_bundle" 0
+# Д6: перший клас функцій — СЕНС одержує справжні DEFINE з Core4.
+# Мутант має Д1:0, а холодний виклик — точне мовне відхилення до DEFINE.
+d6_first_class_law_bundle="$evidence/d6-any-all-first-class-law.lisp"
+d6_first_class_mutant_bundle="$evidence/d6-any-all-first-class-mutant.lisp"
+cat -- tests/fixtures/epistemic-d1-names.lisp "$d6_quantifier_source" tests/semantic/d6-any-all-first-class-law.lisp > "$d6_first_class_law_bundle"
+cat -- tests/fixtures/epistemic-d1-names.lisp "$d6_quantifier_source" tests/semantic/d6-any-all-first-class-mutant.lisp > "$d6_first_class_mutant_bundle"
+run_case run_law d6-any-all-first-class-law "$d6_first_class_law_bundle" 1
+run_case run_law d6-any-all-first-class-mutant "$d6_first_class_mutant_bundle" 0
+run_case run_type_rejection d6-any-all-cold-no-mechanism tests/semantic/d6-any-all-cold-no-mechanism-negative.lisp 'domain identity is not callable'
 
 # Класифікуємо кореневі причини без повторного запуску SENS.
 printf 'SENS_RED_CAUSE root=d7-value-call count=%d ids=%s\n' "${#red_d7_ids[@]}" "${red_d7_ids[*]}"
