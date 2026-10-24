@@ -319,8 +319,33 @@ fn test_remint_dispatch() -> Result<(), String> {
     Ok(())
 }
 
+fn test_d3_benchmark_remint_bindings() -> Result<(), String> {
+    // Обидві копії native-remint диспетчера мають бачити ті самі
+    // визначення D3-свідків, що вже передає changed-Lisp executor.
+    let workflow = fs::read_to_string(REMINT).map_err(|e| e.to_string())?;
+    for (id, arm) in [
+        (
+            "d3-proper-tail-hot",
+            "tests/semantic/d3-proper-tail-hot-law.lisp|tests/semantic/d3-proper-tail-hot-mutant.lisp) bs=(--binding-source benchmarks/d3-proper-tail-hot.lisp);;",
+        ),
+        (
+            "d3-structural-bench",
+            "tests/semantic/d3-structural-bench-law.lisp|tests/semantic/d3-structural-bench-mutant.lisp) bs=(--binding-source benchmarks/d3-structural-bench.lisp);;",
+        ),
+    ] {
+        let count = workflow.lines().map(str::trim).filter(|line| *line == arm).count();
+        if count != 2 {
+            return Err(format!(
+                "REMINT_D3_BINDING_ROUTE id={id} expected=2-identical-dispatch-arms actual={count}"
+            ));
+        }
+    }
+    Ok(())
+}
+
 fn self_test() -> Result<(),String> {
     test_remint_dispatch()?;
+    test_d3_benchmark_remint_bindings()?;
     test_git_change_filter()?;
     test_triplet_census()?;
     let runner = "cat -- tests/semantic/sample-law.lisp > \"$bundle\"\n\
