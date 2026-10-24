@@ -18,12 +18,12 @@ class GuardRunnerTests(unittest.TestCase):
         self.assertEqual(r.returncode, 0, r.stderr)
         self.assertIn("PASS", r.stdout)
 
-    def test_the_d6_and_d10_generators_are_named_as_debt(self):
-        # D5/D9 у CI Є; D6/D10 — ні, і це мусить бути названо.
+    def test_the_d6_and_d10_generators_are_now_wired(self):
+        # Було: D5/D9 у CI, а D6/D10 — борг. Тепер D6/D10 підключено
+        # (ci-hosted.yml:70-71), тож сиротами вони бути НЕ можуть.
         r = self.run_script()
         for name in ("check-d6-definition-bindings.py", "check-d10-definition-bindings.py"):
-            self.assertIn(name, r.stdout)
-            self.assertIn(f"{name}: НІХТО не запускає", r.stdout)
+            self.assertNotIn(f"{name}: НІХТО не запускає", r.stdout)
 
     def test_release_gate_is_not_an_orphan(self):
         # Реліз-гейт виглядав сиротою, але його ЗАПУСКАЮТЬ тести
