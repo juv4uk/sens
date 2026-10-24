@@ -1,0 +1,12 @@
+(let* ((value (quote (hello world)))
+       (written (фс-записати (фс-порожній) "code" value))
+       (fs (car written))
+       (root (фс-корінь-пакет fs))
+       (object (фс-об'єкт-пакет value))
+       (rebuilt (фс-відновити-корінь root (list object))))
+  (cond
+    ((not? (eq? (car rebuilt) (quote accepted)))
+     (quote reconstruction-rejected))
+    ((not? (equal? (second (фс-читати (second rebuilt) "code")) value))
+     (quote reconstruction-mismatch))
+    (t (list (фс-серіалізувати-корінь fs) (фс-серіалізувати-об'єкт value)))))
