@@ -1138,6 +1138,65 @@ fn sexpr_protocol_parse_returns_canonical_structure_not_debug_format() {
     );
 }
 
+/// Транспорт: некоректний конверт не може виконати іншу SENS-форму.
+/// Після відхилення перевіряємо стан тієї самої TCP-сесії.
+#[test]
+fn sexpr_protocol_rejects_extra_top_level_form_before_evaluation() {
+    use std::io::{self, BufRead, Write};
+    use std::net::TcpStream;
+    use std::time::Duration;
+
+    let (mut child, port) = spawn_sexpr_server();
+    let mut last_error = None;
+    // Повторюємо повний обмін лише після помилки I/O: перший connect
+    // на деяких CI-хостах може скинутися відразу після запуску сервера.
+    let exchange = (0..20).find_map(|_| {
+        let attempt = (|| -> io::Result<(String, String)> {
+            let mut stream = TcpStream::connect(("127.0.0.1", port))?;
+            stream.set_read_timeout(Some(Duration::from_secs(3)))?;
+            stream.set_write_timeout(Some(Duration::from_secs(3)))?;
+            let mut reader = io::BufReader::new(stream.try_clone()?);
+
+            writeln!(stream, "()) (def envelope_probe 42")?;
+            let mut rejected = String::new();
+            if reader.read_line(&mut rejected)? == 0 {
+                return Err(io::ErrorKind::UnexpectedEof.into());
+            }
+
+            writeln!(
+                stream,
+                r#"(request (id 2) (op eval) (source "envelope_probe"))"#
+            )?;
+            let mut followup = String::new();
+            if reader.read_line(&mut followup)? == 0 {
+                return Err(io::ErrorKind::UnexpectedEof.into());
+            }
+            Ok((rejected, followup))
+        })();
+        match attempt {
+            Ok(responses) => Some(responses),
+            Err(error) => {
+                last_error = Some(error);
+                std::thread::sleep(Duration::from_millis(100));
+                None
+            }
+        }
+    });
+    let _ = child.kill();
+    let _ = child.wait();
+
+    let (rejected, followup) = exchange
+        .unwrap_or_else(|| panic!("не вдалося виконати TCP-обмін: {last_error:?}"));
+    assert!(
+        rejected.contains("(kind parse-error)"),
+        "некоректний конверт виконав форму або повернув не ту помилку: {rejected}"
+    );
+    assert!(
+        followup.contains("(status error)") && followup.contains("unknown-symbol"),
+        "відхилений конверт змінив стан SENS-сесії: {followup}"
+    );
+}
+
 #[test]
 fn sexpr_protocol_connections_do_not_share_state() {
     let (mut child, port) = spawn_sexpr_server();
