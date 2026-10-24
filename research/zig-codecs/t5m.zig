@@ -231,6 +231,27 @@ test "ordinary SENS difference and quotient words compose with D24 operands" {
     }
 }
 
+test "T5M preserves exact D12 boundary words and does not merge equal-value domains" {
+    const words = [_]Word{
+        .{ .width = 12, .bits = "100000000000" }, // D12 minimum: -2048
+        .{ .width = 12, .bits = "011111111111" }, // D12 maximum: 2047
+        .{ .width = 12, .bits = "000000000010" }, // D12 value 2
+        .{ .width = 24, .bits = "000000000000000000000010" }, // D24 value 2
+    };
+    const encoded = try encode(std.testing.allocator, &words);
+    defer std.testing.allocator.free(encoded);
+    var decoded = try decode(std.testing.allocator, encoded);
+    defer decoded.deinit(std.testing.allocator);
+    try std.testing.expectEqual(words.len, decoded.words.len);
+    for (words, decoded.words) |expected, actual| {
+        try std.testing.expectEqual(expected.width, actual.width);
+        try std.testing.expectEqualStrings(expected.bits, actual.bits);
+    }
+    try std.testing.expect(decoded.words[2].width != decoded.words[3].width);
+    try std.testing.expectEqualStrings("000000000010", decoded.words[2].bits);
+    try std.testing.expectEqualStrings("000000000000000000000010", decoded.words[3].bits);
+}
+
 test "T5M transports a caller-formed negative D24 two's-complement word unchanged" {
     // -5 is already represented as an exact-width D24 two's-complement word.
     // T5M must preserve those 24 bits, not reinterpret them as sign-magnitude.
