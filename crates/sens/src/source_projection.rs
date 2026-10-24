@@ -18,7 +18,8 @@ use std::rc::Rc;
 /// Project integer literals in Ukrainian source before evaluation.
 ///
 /// Numeric literals in one connected D5 call tree share the widest required
-/// numeric domain; independent values retain their smallest exact domain.
+/// numeric domain; independent values retain the smallest exact domain no
+/// narrower than the caller's explicit projection floor.
 /// Source spans are preserved for diagnostics. The owning surface chooses when
 /// this conversion is applicable.
 pub fn project_ukr_decimal_integer_literals(
@@ -351,37 +352,6 @@ mod tests {
     }
 
     #[test]
-    fn decimal_integer_source_uses_exact_signed_d12_edges() {
-        for (source, expected) in [
-            ("0", "0"),
-            ("1", "1"),
-            ("-1", "-1"),
-            ("2047", "2047"),
-            ("-2048", "-2048"),
-        ] {
-            let parsed = crate::parse(source).expect("D12 boundary parses");
-            let projected = project_ukr_decimal_integer_literals(&parsed, source)
-                .expect("D12 boundary projects exactly");
-            let ExprKind::BinaryNumber(value) = &projected[0].kind else {
-                panic!("decimal source must become an exact numeric-domain word");
-            };
-            assert_eq!(value.numeric_domain_width(), Some(12), "{source}");
-            assert_eq!(value.to_decimal_string(), expected, "{source}");
-        }
-
-        let source = "2048";
-        let parsed = crate::parse(source).expect("first positive overflow parses");
-        let projected = project_ukr_decimal_integer_literals(&parsed, source)
-            .expect("positive overflow widens without wrapping");
-        let ExprKind::BinaryNumber(value) = &projected[0].kind else {
-            panic!("overflow result must remain an exact numeric-domain word");
-        };
-        assert_eq!(value.numeric_domain_width(), Some(24));
-        assert_eq!(value.to_decimal_string(), "2048");
-    }
-
- 
-    #[test]
     fn explicit_d12_projection_keeps_signed_boundaries_and_widens_exactly() {
         let source = "(приклад 0 1 -1 2047 -2048 2048 -2049)";
         let parsed = crate::parse(source).expect("source parses");
@@ -464,7 +434,7 @@ mod tests {
     fn decimal_integer_literals_keep_exact_domain_width_and_signed_value() {
         let values = projected_numbers("(приклад 1 -8388608 8388607 8388608)");
         assert_eq!(values.len(), 4);
-        assert_eq!(values[0].numeric_domain_width(), Some(12));
+        assert_eq!(values[0].numeric_domain_width(), Some(24));
         assert_eq!(values[1].numeric_domain_width(), Some(24));
         assert_eq!(values[2].numeric_domain_width(), Some(24));
         assert_eq!(values[3].numeric_domain_width(), Some(48));
