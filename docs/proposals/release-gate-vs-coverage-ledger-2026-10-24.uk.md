@@ -60,3 +60,56 @@ Das Release-Gate ist ein Wahrheits-Gate und korrekt blockiert (0 admitted).
 ## English
 
 The release gate is a truth gate, correctly blocked (0 admitted).
+
+---
+
+# Додаток (Pañcaka, 2026-10-24): розбір п'яти записів
+
+## Що це за п'ять
+
+| `sens` |
+|---|
+| `tests/semantic/meta-eval-graph-d1-law.sens` |
+| `tests/semantic/meta-eval-lexical-shadow-d1-law.sens` |
+| `tests/semantic/meta-eval-predicates-d1-law.sens` |
+| `tests/semantic/meta-eval-mutual-d4-law.sens` |
+| `tests/semantic/d4-selector-width-law.sens` |
+
+**Чотири з п'яти — це ті самі артефакти, які я позначив UNJUDGEABLE** (немає
+`-law.lisp`). Тобто реліз-гейт уже посилається на артефакти без читаного
+джерела. Це **та сама хвороба**, але гейт її **обходить**: він не читає
+джерело, а вимагає **F2 незалежних свідків**.
+
+## Перевірено запуском
+
+- **Блокер ОДИН на всі п'ять**, не п'ять різних:
+  `F2/F4 native SENS verdict and Ukrainian oracle not verified`.
+- Посилання — це `repo@commit:path:line`, не локальні шляхи.
+- **Усі 17 унікальних (commit, path) ІСНУЮТЬ** у вказаному коміті
+  `20543d43…` (перевірено `git cat-file -e`). Тобто **provenance здоровий**.
+- Коміт присутній навіть після `--unshallow`.
+
+## Відповідь на питання «чи назавжди заблоковано?»
+
+**Ні — але не через джерела.** Блокер — не «немає `.lisp`», а **«немає
+нативного вердикту SENS + українського оракула»**. Обидва вимагають
+**виконання**:
+- нативний вердикт — зібраного `sens`;
+- український оракул — перевірки, що вивід **українською** точний.
+
+Тобто **реліз заблокований відсутністю ТУЛЧЕЙНУ, а не відсутністю джерел.**
+Це **інша** межа, ніж у ledger'а покриття: там бракує джерел (невиправно без
+історії), тут — бракує запуску (виправно в CI).
+
+## Практичний висновок для релізу
+
+Справжній стек — **5 записів і 1 блокер**. Не 221, не «43 нератифіковані»,
+не «46 непрозорих». **П'ять і один.**
+
+## Deutsch
+
+Fünf Einträge, ein Blocker, Provenienz gesund.
+
+## English
+
+Five entries, one blocker, provenance sound.
