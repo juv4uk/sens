@@ -973,6 +973,23 @@ run_case run_type_rejection d11-find-last-presence-improper "$d11_last_invalid" 
 sha256sum lib/d11-srfi1-find-presence.lisp lib/d11-srfi1-find-last-presence.lisp \
   tests/semantic/d11-find-last-presence-*.lisp > "$evidence/d11-find-last-presence-inputs.sha256"
 
+# Д11 FIRST-TAIL-PRESENCE: D1 наявність окремо від D3 суфікса.
+# Нативний SENS → Zig/T5M → paired/standalone SENS, без host-оцінювання.
+first_tail_presence_positive="$evidence/d11-find-first-tail-presence-positive.lisp"
+first_tail_presence_mutant="$evidence/d11-find-first-tail-presence-mutant.lisp"
+first_tail_presence_bad="$evidence/d11-find-first-tail-presence-improper.lisp"
+cat -- lib/d11-srfi1-find-tail.lisp lib/d11-srfi1-find-tail-presence.lisp \
+  tests/semantic/d11-find-first-tail-presence-law.lisp > "$first_tail_presence_positive"
+cat -- lib/d11-srfi1-find-tail.lisp lib/d11-srfi1-find-tail-presence.lisp \
+  tests/semantic/d11-find-first-tail-presence-mutant.lisp > "$first_tail_presence_mutant"
+cat -- lib/d11-srfi1-find-tail.lisp lib/d11-srfi1-find-tail-presence.lisp \
+  tests/semantic/d11-find-first-tail-presence-improper-negative.lisp > "$first_tail_presence_bad"
+run_case run_law d11-find-first-tail-presence-positive "$first_tail_presence_positive" 1
+run_case run_law d11-find-first-tail-presence-mutant "$first_tail_presence_mutant" 0
+run_case run_type_rejection d11-find-first-tail-presence-improper "$first_tail_presence_bad" 'car expects a non-empty list'
+sha256sum lib/d11-srfi1-find-tail.lisp lib/d11-srfi1-find-tail-presence.lisp \
+  tests/semantic/d11-find-first-tail-presence-*.lisp > "$evidence/d11-find-first-tail-presence-inputs.sha256"
+
 # Д11 LAST-TAIL: підтвердити суфікс останнього збігу лише мовою SENS.
 last_tail_positive="$evidence/d11-last-tail-positive.lisp"
 last_tail_mutant="$evidence/d11-last-tail-mutant.lisp"
