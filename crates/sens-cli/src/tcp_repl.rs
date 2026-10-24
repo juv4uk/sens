@@ -257,7 +257,7 @@ mod tests {
     }
 
     #[test]
-    fn tcp_repl_worker_slots_are_bounded_and_released_on_panic() {
+    fn tcp_repl_frame_worker_slots_are_bounded_and_released_on_panic() {
         let active = Arc::new(AtomicUsize::new(0));
         let first = LineConnectionSlot::acquire(&active, 2).expect("first session");
         let second = LineConnectionSlot::acquire(&active, 2).expect("second session");
@@ -280,7 +280,7 @@ mod tests {
     }
 
     #[test]
-    fn tcp_repl_worker_slots_are_atomic_under_contention() {
+    fn tcp_repl_frame_worker_slots_are_atomic_under_contention() {
         let active = Arc::new(AtomicUsize::new(0));
         let begin = Arc::new(std::sync::Barrier::new(17));
         let release = Arc::new(std::sync::Barrier::new(17));
