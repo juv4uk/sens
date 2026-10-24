@@ -130,9 +130,8 @@ for i in "${!forms[@]}"; do
   printf 'NATIVE_SENS_NEGATIVE test_id=%s-mutant-%s expected=D1:0 actual_sha256=' "$id" "$case_no"
   sha256sum "$tmp/mutant.out"
 done
-# F4: фактичні закомічені T5M-носії мають довести ті ж вісім законів.
-# Окремий mutants.lisp вище перевіряє вісім змін; committed mutant.sens
-# відповідає тільки першій зміні в mutant.lisp.
+# F4: агрегатор робить усі вісім D1-висновків спостережуваними одним
+# результатом парного фізичного запуску. Його мутант змінює перший закон.
 physical_law="${law%.lisp}.sens"
 physical_mutant="${mutant%.lisp}.sens"
 for physical in "$physical_law" "$physical_mutant"; do
@@ -142,41 +141,41 @@ for physical in "$physical_law" "$physical_mutant"; do
   fi
 done
 sha256sum "$physical_law" "$physical_mutant"
-# Кожна з восьми позитивних форм друкує D1:1. Тільки перший
-# агрегований мутант друкує D1:0; решта сім законів лишаються D1:1.
-for ((i=0; i<${#forms[@]}; i++)); do
-  printf '1\n'
-done > "$tmp/expected-physical-law"
-{
-  printf '0\n'
-  for ((i=1; i<${#forms[@]}; i++)); do
-    printf '1\n'
-  done
-} > "$tmp/expected-physical-mutant"
-if ! "$cli" --t5m-pair "$law" "$physical_law" --binding-source "$lib" \
+physical_aggregate=tests/semantic/meta-eval-lexical-shadow-d1-physical-law.lisp
+physical_aggregate_carrier="${physical_aggregate%.lisp}.sens"
+physical_aggregate_mutant=tests/semantic/meta-eval-lexical-shadow-d1-physical-mutant.lisp
+physical_aggregate_mutant_carrier="${physical_aggregate_mutant%.lisp}.sens"
+for physical in "$physical_aggregate" "$physical_aggregate_carrier" "$physical_aggregate_mutant" "$physical_aggregate_mutant_carrier"; do
+  if [[ ! -s "$physical" || -L "$physical" ]]; then
+    printf 'REGRESSION test_id=%s layer=physical-f4 fixture=%s expected=committed-aggregate-source-pair actual=missing-or-invalid reproduce=%q\n' "$id" "$physical" "$reproduce" >&2
+    exit 1
+  fi
+done
+sha256sum "$physical_aggregate" "$physical_aggregate_carrier" "$physical_aggregate_mutant" "$physical_aggregate_mutant_carrier"
+if ! "$cli" --t5m-pair "$physical_aggregate" "$physical_aggregate_carrier" --core4-runtime --binding-source "$lib" \
     > "$tmp/paired-positive.out" 2> "$tmp/paired-positive.err"; then
-  printf 'REGRESSION test_id=%s layer=physical-f4 fixture=%s expected=eight-D1:1 actual=execution-error reproduce=%q\n' "$id" "$physical_law" "$reproduce" >&2
+  printf 'REGRESSION test_id=%s layer=physical-f4 fixture=%s expected=aggregate-D1:1 actual=execution-error reproduce=%q\n' "$id" "$physical_aggregate_carrier" "$reproduce" >&2
   cat "$tmp/paired-positive.err" >&2
   exit 1
 fi
-if ! cmp -s "$tmp/expected-physical-law" "$tmp/paired-positive.out"; then
-  printf 'REGRESSION test_id=%s layer=physical-f4 fixture=%s expected=eight-D1:1 actual=wrong-verdict reproduce=%q\n' "$id" "$physical_law" "$reproduce" >&2
-  sha256sum "$tmp/expected-physical-law" "$tmp/paired-positive.out" >&2
+if ! cmp -s "$tmp/expected" "$tmp/paired-positive.out"; then
+  printf 'REGRESSION test_id=%s layer=physical-f4 fixture=%s expected=aggregate-D1:1 actual=wrong-verdict reproduce=%q\n' "$id" "$physical_aggregate_carrier" "$reproduce" >&2
+  sha256sum "$tmp/expected" "$tmp/paired-positive.out" >&2
   exit 1
 fi
-if ! "$cli" --t5m-pair "$mutant" "$physical_mutant" --binding-source "$lib" \
+if ! "$cli" --t5m-pair "$physical_aggregate_mutant" "$physical_aggregate_mutant_carrier" --core4-runtime --binding-source "$lib" \
     > "$tmp/paired-mutant.out" 2> "$tmp/paired-mutant.err"; then
-  printf 'REGRESSION test_id=%s-mutant layer=physical-f4 fixture=%s expected=first-D1:0-then-seven-D1:1 actual=execution-error reproduce=%q\n' "$id" "$physical_mutant" "$reproduce" >&2
+  printf 'REGRESSION test_id=%s-mutant layer=physical-f4 fixture=%s expected=aggregate-D1:0 actual=execution-error reproduce=%q\n' "$id" "$physical_aggregate_mutant_carrier" "$reproduce" >&2
   cat "$tmp/paired-mutant.err" >&2
   exit 1
 fi
-if ! cmp -s "$tmp/expected-physical-mutant" "$tmp/paired-mutant.out"; then
-  printf 'REGRESSION test_id=%s-mutant layer=physical-f4 fixture=%s expected=first-D1:0-then-seven-D1:1 actual=wrong-verdict reproduce=%q\n' "$id" "$physical_mutant" "$reproduce" >&2
-  sha256sum "$tmp/expected-physical-mutant" "$tmp/paired-mutant.out" >&2
+if ! cmp -s "$tmp/expected-mutant" "$tmp/paired-mutant.out"; then
+  printf 'REGRESSION test_id=%s-mutant layer=physical-f4 fixture=%s expected=aggregate-D1:0 actual=wrong-verdict reproduce=%q\n' "$id" "$physical_aggregate_mutant_carrier" "$reproduce" >&2
+  sha256sum "$tmp/expected-mutant" "$tmp/paired-mutant.out" >&2
   exit 1
 fi
 # Носій першого мутанта не може бути підмінений під чинне джерело.
-if "$cli" --t5m-pair "$law" "$physical_mutant" --binding-source "$lib" \
+if "$cli" --t5m-pair "$physical_aggregate_mutant" "$physical_aggregate_carrier" --core4-runtime --binding-source "$lib" \
     > "$tmp/paired-foreign.out" 2> "$tmp/paired-foreign.err"; then
   printf 'REGRESSION test_id=%s-mutant layer=physical-f4 expected=pair-rejection actual=accepted reproduce=%q\n' "$id" "$reproduce" >&2
   exit 1
@@ -186,5 +185,5 @@ if ! grep -Fq 'T5M_PHYSICAL_PAIR_MISMATCH' "$tmp/paired-foreign.err"; then
   cat "$tmp/paired-foreign.err" >&2
   exit 1
 fi
-printf 'NATIVE_SENS_PHYSICAL_F4_PASS test_id=%s positive_forms=8 first_mutant=D1:0 paired_source=EXACT physical=Zig/T5M\n' "$id"
+printf 'NATIVE_SENS_PHYSICAL_F4_PASS test_id=%s positive_forms=8 aggregate=D1:1 mutant=aggregate-D1:0 paired_source=EXACT physical=Zig/T5M\n' "$id"
 printf 'NATIVE_SENS_PASS test_id=%s positive_forms=8 negative_forms=8 mutant=D1:0 authority=SENS\n' "$id"

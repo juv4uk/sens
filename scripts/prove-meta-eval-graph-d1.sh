@@ -22,8 +22,8 @@ fi
 # обидва вироки нижче виконує виключно нативний SENS.
 positive="$(sed '/^[[:space:]]*;/d' "$law")"
 negative="$(sed '/^[[:space:]]*;/d' "$mutant")"
-before="(ім'я-зв'язане-формальними-параметрами? (як-є requested) (як-є requested))"
-after="(ім'я-зв'язане-формальними-параметрами? (як-є requested) (як-є other))"
+before="(ім'я-зв'язане-формальними-параметрами? (як-є requested) (як-є (requested)))"
+after="(ім'я-зв'язане-формальними-параметрами? (як-є requested) (як-є (other)))"
 
 # Підрахунок буквальних викличних голів: лапки і '?' — дані, не glob.
 count_fixed() {
@@ -103,7 +103,7 @@ for physical in "$physical_law" "$physical_mutant"; do
   fi
 done
 sha256sum "$physical_law" "$physical_mutant"
-if ! "$cli" --t5m-pair "$law" "$physical_law" --binding-source "$lib" \
+if ! "$cli" --t5m-pair "$law" "$physical_law" --core4-runtime --binding-source "$lib" \
     > "$tmp/paired-positive.out" 2> "$tmp/paired-positive.err"; then
   printf 'REGRESSION id=%s layer=physical-f4 fixture=%s expected=D1:1 actual=execution-error\n' "$id" "$physical_law" >&2
   cat "$tmp/paired-positive.err" >&2
@@ -114,7 +114,7 @@ if ! cmp -s "$tmp/expected" "$tmp/paired-positive.out"; then
   sha256sum "$tmp/expected" "$tmp/paired-positive.out" >&2
   exit 1
 fi
-if ! "$cli" --t5m-pair "$mutant" "$physical_mutant" --binding-source "$lib" \
+if ! "$cli" --t5m-pair "$mutant" "$physical_mutant" --core4-runtime --binding-source "$lib" \
     > "$tmp/paired-mutant.out" 2> "$tmp/paired-mutant.err"; then
   printf 'REGRESSION id=%s-mutant layer=physical-f4 fixture=%s expected=D1:0 actual=execution-error\n' "$id" "$physical_mutant" >&2
   cat "$tmp/paired-mutant.err" >&2
@@ -126,7 +126,7 @@ if ! cmp -s "$tmp/expected-mutant" "$tmp/paired-mutant.out"; then
   exit 1
 fi
 # Same bytes with different Lisp must fail at the exact domain-word identity gate.
-if "$cli" --t5m-pair "$mutant" "$physical_law" --binding-source "$lib" \
+if "$cli" --t5m-pair "$mutant" "$physical_law" --core4-runtime --binding-source "$lib" \
     > "$tmp/paired-foreign.out" 2> "$tmp/paired-foreign.err"; then
   printf 'REGRESSION id=%s-mutant layer=physical-f4 expected=pair-rejection actual=accepted\n' "$id" >&2
   exit 1

@@ -192,6 +192,10 @@ jobs:
               if name in {
                   "tests/semantic/meta-eval-graph-d1-law.lisp",
                   "tests/semantic/meta-eval-graph-d1-mutant.lisp",
+                  "tests/semantic/meta-eval-predicates-d1-law.lisp",
+                  "tests/semantic/meta-eval-predicates-d1-mutant.lisp",
+                  "tests/semantic/meta-eval-lexical-shadow-d1-physical-law.lisp",
+                  "tests/semantic/meta-eval-lexical-shadow-d1-physical-mutant.lisp",
                   "tests/semantic/meta-fc-predicates-d1-mutant.lisp",
                   "tests/semantic/unification-occurs-check-law.lisp",
                   "tests/semantic/unification-occurs-check-mutant.lisp",
