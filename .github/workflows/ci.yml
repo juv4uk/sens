@@ -336,6 +336,7 @@ jobs:
               exit "$status"
             fi
             cargo test --locked -p swarm-node --test integration generic_emit_rejects_reserved_task_events_without_mutating_journal -- --nocapture
+            cargo test --locked -p swarm-node --test integration unregistered_clients_cannot_inject_peer_events_but_real_peers_replicate -- --nocapture
           fi
       - name: Власність тестів — Rust охоронець фізичних Lisp-законів
         if: ${{ always() && steps.changed-t5m-lisp.outcome == 'success' }}
