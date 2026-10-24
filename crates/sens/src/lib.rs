@@ -550,6 +550,7 @@ fn load_core_library_with_fasl_mode(
     bind_core_runtime_mechanisms(&session.environment);
     bind_missing_stable_surface_peers(&session.environment);
     bind_existing_d5_language_mechanisms(&session.environment);
+    bind_existing_d6_language_mechanisms(&session.environment);
     bind_existing_d9_language_mechanisms(&session.environment);
     session.environment.select_core_profile(CoreProfile::Core4);
     Ok(result)
@@ -641,6 +642,39 @@ fn bind_existing_d5_language_mechanisms(environment: &Environment) {
     }
 }
 
+/// Механічне зв'язування вже обчислених замикань SENS з точними D6.
+/// Дзеркало D5-нету. Фізичний Core4 (`lib/core4.sens`) відновлює український
+/// зв'язувач DEFINE як канонічне D7-слово, а не як Unicode-текст, тому шлях
+/// `bind_language_definition` не бачить Unicode-імені таблиці; тут шукаємо
+/// вже створене замикання за обома формами. Сам перелік не надає нового
+/// допуску: похідні D6 без власного Rust-механізму отримують слот лише тоді,
+/// коли справжнє Lisp-визначення вже існує. Відсутній closure не створюється.
+fn bind_existing_d6_language_mechanisms(environment: &Environment) {
+    for name in semantic_registry::d6_lisp_definition_names() {
+        let Some(identity) = semantic_registry::d6_binding_identity_for_definition(name) else {
+            continue;
+        };
+        // ADD1/SUB1/NEG/INTEGERP мають ратифікований Rust-механізм; їхній
+        // точний слот не замінюємо Lisp-замиканням.
+        if identity.core_operation().is_some() {
+            continue;
+        }
+        if environment.domain_code_slot(identity).is_some() {
+            continue;
+        }
+        let Some(value) = encode_text7(name, Text7Layout::Uk)
+            .ok()
+            .and_then(|surface| environment.get(&surface.to_canonical_wire_token()))
+            .or_else(|| environment.get(name))
+        else {
+            continue;
+        };
+        if matches!(value, Value::Closure(_) | Value::Builtin(_)) {
+            let _ = environment.bind_domain_code_slot_once(identity, value);
+        }
+    }
+}
+
 /// Attach only already-existing callable values to their ratified D9 identities.
 /// This is a mechanism migration bridge, never a width-based callability grant.
 fn bind_existing_d9_language_mechanisms(environment: &Environment) {
@@ -685,6 +719,7 @@ pub fn load_core_library(session: &mut Session) -> Result<EvalResult, LanguageEr
     bind_core_runtime_mechanisms(&session.environment);
     bind_missing_stable_surface_peers(&session.environment);
     bind_existing_d5_language_mechanisms(&session.environment);
+    bind_existing_d6_language_mechanisms(&session.environment);
     bind_existing_d9_language_mechanisms(&session.environment);
     session.environment.select_core_profile(CoreProfile::Core4);
     Ok(result)

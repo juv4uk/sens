@@ -349,6 +349,15 @@ pub(crate) fn d5_lisp_definition_names() -> impl Iterator<Item = &'static str> {
     D5_DEFINITION_BINDINGS.iter().map(|row| row.name)
 }
 
+/// Перелік уже ратифікованих власником похідних SENS-визначень D6.
+/// Дзеркало D5: сам перелік не надає нового допуску, лише наявні імена
+/// проєкції для механічного зв'язування вже обчислених замикань.
+pub(crate) fn d6_lisp_definition_names() -> impl Iterator<Item = &'static str> {
+    D6_DEFINITION_BINDINGS
+        .iter()
+        .flat_map(|row| row.names.iter().copied())
+}
+
 pub(crate) fn d5_binding_identity_for_definition(name: &str) -> Option<CoreDomainIdentity> {
     D5_DEFINITION_BINDINGS
         .iter()
