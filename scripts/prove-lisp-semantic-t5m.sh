@@ -958,6 +958,18 @@ run_case run_type_rejection d11-find-last-presence-improper "$d11_last_invalid" 
 sha256sum lib/d11-srfi1-find-presence.lisp lib/d11-srfi1-find-last-presence.lisp \
   tests/semantic/d11-find-last-presence-*.lisp > "$evidence/d11-find-last-presence-inputs.sha256"
 
+# Д11 LAST-TAIL: підтвердити суфікс останнього збігу лише мовою SENS.
+last_tail_positive="$evidence/d11-last-tail-positive.lisp"
+last_tail_mutant="$evidence/d11-last-tail-mutant.lisp"
+last_tail_bad="$evidence/d11-last-tail-improper.lisp"
+cat -- lib/d11-srfi1-find-presence.lisp lib/d11-srfi1-find-last-tail-presence.lisp tests/semantic/d11-find-last-tail-law.lisp > "$last_tail_positive"
+cat -- lib/d11-srfi1-find-presence.lisp lib/d11-srfi1-find-last-tail-presence.lisp tests/semantic/d11-find-last-tail-mutant.lisp > "$last_tail_mutant"
+cat -- lib/d11-srfi1-find-presence.lisp lib/d11-srfi1-find-last-tail-presence.lisp tests/semantic/d11-find-last-tail-improper-negative.lisp > "$last_tail_bad"
+run_case run_law d11-find-last-tail-positive "$last_tail_positive" 1
+run_case run_law d11-find-last-tail-mutant "$last_tail_mutant" 0
+run_case run_type_rejection d11-find-last-tail-improper "$last_tail_bad" 'car expects a non-empty list'
+sha256sum lib/d11-srfi1-find-presence.lisp lib/d11-srfi1-find-last-tail-presence.lisp tests/semantic/d11-find-last-tail-*.lisp > "$evidence/d11-last-tail-inputs.sha256"
+
 # Д11 SRFI-1 FILTER-MAP: D1:ні відкидається, структурне () зберігається.
 # Справжній SENS source → Zig/T5M → парний і самостійний SENS.
 d11_filter_map_positive="$evidence/d11-srfi1-filter-map-positive.lisp"

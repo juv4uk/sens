@@ -180,6 +180,8 @@ run_native_t5m_program() {
       negative_type_diagnostic='car expects a non-empty list' ;;
     tests/semantic/d11-find-last-presence-improper-negative.lisp)
       negative_type_diagnostic='car expects a non-empty list' ;;
+    tests/semantic/d11-find-last-tail-improper-negative.lisp)
+      negative_type_diagnostic='car expects a non-empty list' ;;
     tests/semantic/d11-srfi1-find-presence-improper-tail-negative.lisp)
       negative_type_diagnostic='car expects a non-empty list' ;;
     tests/semantic/d3-eq-nonatom-type-negative.lisp)
@@ -237,6 +239,9 @@ run_native_t5m_program() {
     elif [[ "$file" == "tests/semantic/d11-find-last-presence-improper-negative.lisp" ]]; then
       direct_source="$dir/d11-find-last-presence-complete-negative.lisp"
       cat -- lib/d11-srfi1-find-presence.lisp lib/d11-srfi1-find-last-presence.lisp "$file" > "$direct_source"
+    elif [[ "$file" == "tests/semantic/d11-find-last-tail-improper-negative.lisp" ]]; then
+      direct_source="$dir/d11-last-tail-negative-bound.lisp"
+      cat -- lib/d11-srfi1-find-presence.lisp lib/d11-srfi1-find-last-tail-presence.lisp "$file" > "$direct_source"
     elif [[ "$file" == "tests/semantic/d11-srfi1-find-presence-improper-tail-negative.lisp" ]]; then
       direct_source="$dir/d11-find-presence-bound-negative.lisp"
       cat -- lib/d11-srfi1-find-presence.lisp "$file" > "$direct_source"
@@ -293,6 +298,18 @@ run_native_t5m_program() {
          ! timeout "$native_timeout" "$native_open" open "$negative_standalone_physical" >"$dir/d11-last-complete-negative" 2>"$dir/d11-last-open.stderr" ||
          ! timeout "$native_timeout" "$native_open" verify-view "$negative_standalone_physical" >"$dir/d11-last-verify.stdout" 2>"$dir/d11-last-verify.stderr"; then
         echo "::error::T5M_D11_LAST_COMPLETE_NEGATIVE_MINT_FAILED source=$file" >&2
+        mark_file_failed
+        return
+      fi
+    fi
+    if [[ "$file" == "tests/semantic/d11-find-last-tail-improper-negative.lisp" ]]; then
+      local full_bad_source="$dir/d11-last-tail-complete-negative.lisp"
+      negative_standalone_physical="$dir/d11-last-tail-complete-negative.sens"
+      if ! cat -- lib/d11-srfi1-find-presence.lisp lib/d11-srfi1-find-last-tail-presence.lisp "$file" > "$full_bad_source" ||
+         ! timeout "$native_timeout" "$binary" --t5m-mint "$full_bad_source" "$negative_standalone_physical" >"$dir/d11-tail-bad-mint.stdout" 2>"$dir/d11-tail-bad-mint.stderr" ||
+         ! timeout "$native_timeout" "$native_open" open "$negative_standalone_physical" >"${negative_standalone_physical%.sens}" 2>"$dir/d11-tail-bad-open.stderr" ||
+         ! timeout "$native_timeout" "$native_open" verify-view "$negative_standalone_physical" >"$dir/d11-tail-bad-verify.stdout" 2>"$dir/d11-tail-bad-verify.stderr"; then
+        echo "::error::D11_LAST_TAIL_BAD_STANDALONE_MINT_FAILED source=$file" >&2
         mark_file_failed
         return
       fi
@@ -751,6 +768,27 @@ run_native_t5m_program() {
         return
       fi
     fi
+    if [[ "$file" == "tests/semantic/d11-find-last-tail-law.lisp" ||
+          "$file" == "tests/semantic/d11-find-last-tail-mutant.lisp" ]]; then
+      # Повне SENS-джерело: той самий валідатор і останній суфікс.
+      local full_tail_source="$dir/d11-last-tail-complete.lisp"
+      standalone_physical="$dir/d11-last-tail-complete.sens"
+      if ! cat -- lib/d11-srfi1-find-presence.lisp lib/d11-srfi1-find-last-tail-presence.lisp "$file" > "$full_tail_source" ||
+         ! timeout "$native_timeout" "$binary" --t5m-mint "$full_tail_source" "$standalone_physical" >"$dir/d11-tail-mint.stdout" 2>"$dir/d11-tail-mint.stderr" ||
+         ! timeout "$native_timeout" "$native_open" open "$standalone_physical" >"${standalone_physical%.sens}" 2>"$dir/d11-tail-open.stderr" ||
+         ! timeout "$native_timeout" "$native_open" verify-view "$standalone_physical" >"$dir/d11-tail-verify.stdout" 2>"$dir/d11-tail-verify.stderr"; then
+        echo "::error::D11_LAST_TAIL_STANDALONE_MINT_FAILED source=$file" >&2
+        mark_file_failed
+        return
+      fi
+      local expected_tail_result=1
+      [[ "$file" != *-mutant.lisp ]] || expected_tail_result=0
+      if [[ "$(cat "$dir/native-paired.stdout")" != "$expected_tail_result" ]]; then
+        echo "::error::D11_LAST_TAIL_PAIRED_MISMATCH source=$file expected=$expected_tail_result actual=$(cat "$dir/native-paired.stdout")" >&2
+        mark_file_failed
+        return
+      fi
+    fi
     if [[ "$file" == "tests/semantic/d11-srfi1-filter-map-law.lisp" ||
           "$file" == "tests/semantic/d11-srfi1-filter-map-mutant.lisp" ]]; then
       # Повний фізичний носій має містити ті самі чинні SENS DEFINE,
@@ -1049,6 +1087,11 @@ while IFS= read -r file || [[ -n "$file" ]]; do
           "$file" == "tests/semantic/d11-find-last-presence-improper-negative.lisp" ]]; then
     binding_sources=(--binding-source lib/d11-srfi1-find-presence.lisp
                      --binding-source lib/d11-srfi1-find-last-presence.lisp)
+  elif [[ "$file" == "tests/semantic/d11-find-last-tail-law.lisp" ||
+          "$file" == "tests/semantic/d11-find-last-tail-mutant.lisp" ||
+          "$file" == "tests/semantic/d11-find-last-tail-improper-negative.lisp" ]]; then
+    binding_sources=(--binding-source lib/d11-srfi1-find-presence.lisp
+                     --binding-source lib/d11-srfi1-find-last-tail-presence.lisp)
   elif [[ "$file" == "tests/semantic/d11-srfi1-find-presence-law.lisp" ||
           "$file" == "tests/semantic/d11-srfi1-find-presence-mutant.lisp" ||
           "$file" == "tests/semantic/d11-srfi1-find-presence-improper-tail-negative.lisp" ||
