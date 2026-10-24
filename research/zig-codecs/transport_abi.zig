@@ -84,8 +84,11 @@ pub export fn sens_zig_t5m_decode_be3(
     defer decoded.deinit(std.heap.page_allocator);
     const need = decoded.words.len * 3;
     if (need > capacity) return -2;
-    for (decoded.words, 0..) |word, i| {
+    // Відхилити весь потік до першого запису в буфер викликача.
+    for (decoded.words) |word| {
         if (word.width > 9) return -1;
+    }
+    for (decoded.words, 0..) |word, i| {
         var value: u16 = 0;
         for (word.bits) |bit| value = (value << 1) | @as(u16, bit - '0');
         const at = i * 3;
@@ -506,6 +509,19 @@ test "ABI v2 additive T5M BE3 exact W1 roundtrip uses one byte" {
     const restored = sens_zig_t5m_decode_be3(&physical, 1, &decoded, decoded.len);
     try std.testing.expectEqual(@as(isize, 3), restored);
     try std.testing.expectEqualSlices(u8, &input, &decoded);
+}
+
+test "T5M BE3 rejects a late unsupported width without modifying output" {
+    // 12000 00000 01222: спершу D1:1, потім D10:0000000001.
+    // Фізичний T5M приймає обидва; BE3 дозволяє лише ширини W1..W9.
+    const physical = [_]u8{ 0x87, 0x00, 0x35 };
+    const unchanged = [_]u8{0x5a} ** 6;
+    var output = unchanged;
+    try std.testing.expectEqual(
+        @as(isize, -1),
+        sens_zig_t5m_decode_be3(&physical, physical.len, &output, output.len),
+    );
+    try std.testing.expectEqualSlices(u8, &unchanged, &output);
 }
 
 test "ABI v2 big endian triplets reject Rust layout and preserve exact word widths" {
