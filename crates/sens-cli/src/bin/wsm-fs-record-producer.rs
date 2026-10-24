@@ -8,6 +8,41 @@ use sens::{load_core_library, Environment, Session, Value};
 
 const MAX_RECORD_BYTES: usize = 64 * 1024;
 
+fn bounded_two_line_records(value: &Value) -> Result<[String; 2], &'static str> {
+    let mut records = Vec::with_capacity(2);
+    let mut next = value;
+    loop {
+        match next {
+            Value::Pair(node) => {
+                // SENS визначає дані, Rust лише передає рівно два фізичні записи.
+                // Перевірка ДО копіювання запобігає необмеженому накопиченню.
+                if records.len() == 2 {
+                    return Err("F6_RECORD_COUNT expected=2 actual=more-than-2");
+                }
+                let Value::String(record) = &node.head else {
+                    return Err("F6_RECORD_TYPE expected=String actual=non-string");
+                };
+                let bytes = record.as_bytes();
+                if bytes.is_empty() || bytes.len() > MAX_RECORD_BYTES {
+                    return Err("F6_RECORD_SIZE expected=1..65536");
+                }
+                // Зовнішній протокол — один запис на рядок. Дані SENS
+                // не повинні додавати третій фізичний рядок чи NUL.
+                if bytes.iter().any(|byte| matches!(*byte, b'\n' | b'\r' | b'\0')) {
+                    return Err("F6_RECORD_DELIMITER expected=single-line");
+                }
+                records.push(record.to_string());
+                next = &node.tail;
+            }
+            Value::Nil => break,
+            _ => return Err("F6_RECORD_LIST expected=proper-list"),
+        }
+    }
+    records
+        .try_into()
+        .map_err(|_| "F6_RECORD_COUNT expected=2 actual=fewer-than-2")
+}
+
 fn main() {
     let mut session = Session {
         environment: Environment::root(),
@@ -27,30 +62,67 @@ fn main() {
             std::process::exit(1);
         }
     };
-    let mut records = Vec::new();
-    let mut value = result.value;
-    loop {
-        match &value {
-            Value::Pair(node) => {
-                let Value::String(record) = &node.head else {
-                    eprintln!("wsm-fs-record-producer: record is not a string: {}", node.head);
-                    std::process::exit(1);
-                };
-                records.push(record.to_string());
-                value = node.tail.clone();
-            }
-            Value::Nil => break,
-            _ => {
-                eprintln!("wsm-fs-record-producer: result is not a proper list: {value}");
-                std::process::exit(1);
-            }
+    let records = match bounded_two_line_records(&result.value) {
+        Ok(records) => records,
+        Err(error) => {
+            eprintln!("wsm-fs-record-producer: {error}");
+            std::process::exit(1);
         }
-    }
-    if records.len() != 2 || records.iter().any(|record| record.len() > MAX_RECORD_BYTES) {
-        eprintln!("wsm-fs-record-producer: invalid bounded record stream");
-        std::process::exit(1);
-    }
+    };
     for record in records {
         println!("{record}");
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn records(lines: &[&str]) -> Value {
+        Value::list(lines.iter().map(|line| Value::String((*line).into())))
+    }
+
+    #[test]
+    fn f6_accepts_exactly_two_bounded_single_line_records() {
+        assert_eq!(
+            bounded_two_line_records(&records(&["root", "object"])).unwrap(),
+            ["root".to_owned(), "object".to_owned()]
+        );
+        let maximum = "x".repeat(MAX_RECORD_BYTES);
+        let exact = Value::list([
+            Value::String(maximum.into()),
+            Value::String("object".into()),
+        ]);
+        assert!(bounded_two_line_records(&exact).is_ok());
+    }
+
+    #[test]
+    fn f6_rejects_unbounded_list_before_cloning_a_third_record() {
+        let too_many = records(&["root", "object", "third"]);
+        assert_eq!(
+            bounded_two_line_records(&too_many).unwrap_err(),
+            "F6_RECORD_COUNT expected=2 actual=more-than-2"
+        );
+        assert!(bounded_two_line_records(&records(&["root"])).is_err());
+        assert!(bounded_two_line_records(&Value::Bool(true)).is_err());
+    }
+
+    #[test]
+    fn f6_rejects_oversize_and_injected_line_delimiters() {
+        let too_long = Value::list([
+            Value::String("x".repeat(MAX_RECORD_BYTES + 1).into()),
+            Value::String("object".into()),
+        ]);
+        assert_eq!(
+            bounded_two_line_records(&too_long).unwrap_err(),
+            "F6_RECORD_SIZE expected=1..65536"
+        );
+        for injected in ["root\nextra", "root\rextra", "root\0extra"] {
+            assert_eq!(
+                bounded_two_line_records(&records(&[injected, "object"])).unwrap_err(),
+                "F6_RECORD_DELIMITER expected=single-line"
+            );
+        }
+        assert!(bounded_two_line_records(&records(&["", "object"])).is_err());
     }
 }
