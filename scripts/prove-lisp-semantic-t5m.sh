@@ -593,6 +593,15 @@ cat -- lib/d11-srfi1-unfold.lisp tests/semantic/d11-srfi1-unfold-mutant.lisp > "
 run_case run_law d11-srfi1-unfold-positive "$d11_unfold_positive" 1
 run_case run_law d11-srfi1-unfold-mutant "$d11_unfold_mutant" 0
 sha256sum lib/d11-srfi1-unfold.lisp tests/semantic/d11-srfi1-unfold-positive.lisp tests/semantic/d11-srfi1-unfold-mutant.lisp > "$evidence/d11-srfi1-unfold-inputs.sha256"
+# Д11 унарні частоти: негативні SENS-свідки завершення правильних списків.
+# Усі визначення — в Lisp/SENS, Zig лише транспортує T5M.
+d11_freq_bad_count="$evidence/d11-frequencies-bad-count.lisp"
+cat -- lib/d11-clojure-frequencies-unary.lisp tests/semantic/d11-clojure-frequencies-improper-count-negative.lisp > "$d11_freq_bad_count"
+run_case run_type_rejection d11-frequencies-improper-count-type "$d11_freq_bad_count" 'car expects a non-empty list'
+d11_freq_bad_groups="$evidence/d11-frequencies-bad-groups.lisp"
+cat -- lib/d11-clojure-frequencies-unary.lisp tests/semantic/d11-clojure-frequencies-improper-groups-negative.lisp > "$d11_freq_bad_groups"
+run_case run_type_rejection d11-frequencies-improper-groups-type "$d11_freq_bad_groups" 'car expects a non-empty list'
+sha256sum lib/d11-clojure-frequencies-unary.lisp tests/semantic/d11-clojure-frequencies-improper-count-negative.lisp tests/semantic/d11-clojure-frequencies-improper-groups-negative.lisp > "$evidence/d11-frequencies-improper-inputs.sha256"
 # Залежний свідок Д11 FIND-TAIL має виконуватись із бібліотекою, а не окремо.
 # Прямий Lisp, Zig/T5M, парне та фізичне SENS виконують тотожний пакет.
 d11_find_tail_bundle="$evidence/d11-srfi1-find-tail-complete.lisp"

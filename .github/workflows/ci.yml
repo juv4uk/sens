@@ -217,6 +217,9 @@ jobs:
                   # Негативний D11 juxt залежить від DEFINE і очікує Type.
                   # Його запускає run_type_rejection у фізичному law bundle.
                   "tests/semantic/d11-clojure-juxt-improper-d1-tail-negative.lisp",
+                  # D11 частоти: обидва негативні свідки потребують бібліотечного DEFINE.
+                  "tests/semantic/d11-clojure-frequencies-improper-count-negative.lisp",
+                  "tests/semantic/d11-clojure-frequencies-improper-groups-negative.lisp",
                   "tests/semantic/unification-variable-shape-law.lisp",
                   "tests/semantic/unification-variable-shape-positive.lisp",
                   "tests/semantic/unification-variable-shape-negative.lisp",
