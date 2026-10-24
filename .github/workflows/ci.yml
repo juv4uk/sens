@@ -893,6 +893,7 @@ jobs:
           check_lisp_law d3-d4-selection-mutant tests/semantic/d3-d4-logic-selection-mutant.lisp '0'
           check_lisp_law d4-selector-domain-positive tests/semantic/d4-selector-domain-law.lisp '1'
           check_lisp_law exact-arithmetic-positive tests/semantic/exact-arithmetic-laws.lisp '1'
+          check_lisp_law exact-arithmetic-mutant tests/semantic/exact-arithmetic-mutant.lisp '0'
           # Механізм конкатенації — shell; усі очікувані результати — SENS Lisp.
           cat -- lib/d11-clojure-juxt.lisp tests/semantic/d11-clojure-juxt-laws.lisp > "$RUNNER_TEMP/d11-clojure-juxt-native.lisp"
           check_lisp_law d11-clojure-juxt-language "$RUNNER_TEMP/d11-clojure-juxt-native.lisp" '1'
