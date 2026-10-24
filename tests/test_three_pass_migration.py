@@ -1178,7 +1178,7 @@ class ThreePassMigrationTests(unittest.TestCase):
         # CI packaging may use Python tests, but executable .sens MUST be
         # produced by native SENS -> Zig/T5M and executed by SENS itself.
         # A renamed historical Python/JSON exporter is no longer authority.
-        workflow = (ROOT / ".github/workflows/ci.yml").read_text(encoding="utf-8")
+        workflow = (ROOT / ".github/workflows/ci-heavy.yml").read_text(encoding="utf-8")
         guards = workflow.split("  lisp-guards:", 1)[1]
         # Поточний native AST/T5M smoke завжди збирає SENS з pinned Zig.
         # Навіть якщо визначення змінених файлів упаде, не маскувати

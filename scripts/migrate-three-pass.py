@@ -443,6 +443,16 @@ def build_three_pass_maps(data, domain_surface_generated: Path, semantic_generat
                 if not name or unique_surfaces.get(name) != frozenset({(f"D{width}", row.bits)}):
                     continue
                 my[name] = ident
+            # Owner-admitted native D8 operations keep their en/san surfaces.
+            # Commit 260118115 legitimately removed the self-recursive D8
+            # wrappers from core4.lisp, but build_three_pass_maps was not
+            # updated with it, so those five surfaces silently dropped out.
+            if width == 8 and row.bits in CORE_OPERATION_D8:
+                for name in (row.san, row.en):
+                    if not name or unique_surfaces.get(name) != frozenset({("D8", row.bits)}):
+                        continue
+                    if my.get(name) is None:
+                        my[name] = ident
 
     # Additional D9 spellings may be retained from Core4 source only when
     # they resolve uniquely to the same ratified identity. This is projection
@@ -1484,7 +1494,7 @@ NONPROGRAM_MANIFEST_BLOB_SHA = {
     "knowledge/migration-nonprogram-schema-manifest-2026-10-08.json": "53689013243182a3087f05781c6cc88be5814900",
     "knowledge/migration-nonprogram-evidence-manifest-2026-10-08.json": "413c9dee025bb56b9fd346701e46d7ae4fb9ea89",
     "knowledge/migration-nonprogram-expr-records-2026-10-08.json": "07c53b8dc76c2f35911f323966fdc2587d9224a9",
-    "knowledge/migration-nonprogram-knowledge-records-2026-10-08.json": "b9fd8cae5d24679892c53a8b84a76fa669db4055",
+    "knowledge/migration-nonprogram-knowledge-records-2026-10-08.json": "d1665b3459b8c1871bb5b729f83557101cfa2cd8",
 }
 
 
