@@ -1836,9 +1836,15 @@ cat -- lib/d11-srfi1-span-break.lisp lib/d11-clojure-partition-by.lisp tests/sem
 cat -- lib/d11-srfi1-span-break.lisp lib/d11-clojure-partition-by.lisp tests/semantic/d11-clojure-partition-late-bad-tail-negative.lisp > "$d11_partition_bad_late"
 run_case run_error_rejection d11-clojure-partition-early-bad-tail "$d11_partition_bad_early" Type 'car expects a non-empty list'
 run_case run_error_rejection d11-clojure-partition-late-bad-tail "$d11_partition_bad_late" Type 'car expects a non-empty list'
+# Прямий helper: до першого callback пріоритет D3 CAR Type над D3 CDR Type.
+d11_partition_direct_helper_bad="$evidence/d11-clojure-partition-direct-helper-bad-tail-complete.lisp"
+cat -- lib/d11-srfi1-span-break.lisp lib/d11-clojure-partition-by.lisp \
+  tests/semantic/d11-clojure-partition-direct-helper-bad-tail-negative.lisp > "$d11_partition_direct_helper_bad"
+run_case run_error_rejection d11-clojure-partition-direct-helper-bad-tail "$d11_partition_direct_helper_bad" Type 'car expects a non-empty list'
 sha256sum lib/d11-srfi1-span-break.lisp lib/d11-clojure-partition-by.lisp \
   tests/semantic/d11-clojure-partition-early-bad-tail-negative.lisp \
-  tests/semantic/d11-clojure-partition-late-bad-tail-negative.lisp > "$evidence/d11-clojure-partition-spine-inputs.sha256"
+  tests/semantic/d11-clojure-partition-late-bad-tail-negative.lisp \
+  tests/semantic/d11-clojure-partition-direct-helper-bad-tail-negative.lisp > "$evidence/d11-clojure-partition-spine-inputs.sha256"
 # Один quoted D7-гліф має бути точним W7-атомом; вкладений список лишається D2.
 # Багатогліфовий Text7 далі є послідовністю, а не таємно interned-атомом.
 d11_partition_d7_bundle="$evidence/d11-clojure-partition-by-d7-parity.lisp"
