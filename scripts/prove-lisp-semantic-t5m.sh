@@ -766,6 +766,15 @@ run_case run_law d11-srfi1-find-presence-positive "$d11_presence_positive" 1
 run_case run_law d11-srfi1-find-presence-mutant "$d11_presence_mutant" 0
 run_case run_type_rejection d11-srfi1-find-presence-improper-tail-type "$d11_presence_bad_tail" 'car expects a non-empty list'
 sha256sum lib/d11-srfi1-find-presence.lisp tests/semantic/d11-srfi1-find-presence-law.lisp tests/semantic/d11-srfi1-find-presence-mutant.lisp tests/semantic/d11-srfi1-find-presence-improper-tail-negative.lisp > "$evidence/d11-find-presence-inputs.sha256"
+# Д11 асоціації: лише Lisp-визначення, точні D1 позитив і мутант.
+d11_assoc_positive="$evidence/d11-family-association-positive-complete.lisp"
+d11_assoc_mutant="$evidence/d11-family-association-mutant-complete.lisp"
+cat -- lib/d11-srfi1-alist-protocol.lisp tests/semantic/d11-family-association-law.lisp > "$d11_assoc_positive"
+cat -- lib/d11-srfi1-alist-protocol.lisp tests/semantic/d11-family-association-mutant.lisp > "$d11_assoc_mutant"
+run_case run_law d11-family-association-positive "$d11_assoc_positive" 1
+run_case run_law d11-family-association-mutant "$d11_assoc_mutant" 0
+sha256sum lib/d11-srfi1-alist-protocol.lisp tests/semantic/d11-family-association-law.lisp \
+  tests/semantic/d11-family-association-mutant.lisp > "$evidence/d11-family-association-inputs.sha256"
 # Д11 SRFI-1 FILTER-MAP: D1:ні відкидається, структурне () зберігається.
 # Справжній SENS source → Zig/T5M → парний і самостійний SENS.
 d11_filter_map_positive="$evidence/d11-srfi1-filter-map-positive.lisp"
