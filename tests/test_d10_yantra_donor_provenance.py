@@ -25,6 +25,10 @@ INPUTS = (
 )
 
 
+@unittest.skipUnless(
+    (ROOT / CHECKER).is_file(),
+    "d10 yantra harvest checker absent from the current tree",
+)
 class YantraProvenanceWitnesses(unittest.TestCase):
     def setUp(self):
         temp = tempfile.TemporaryDirectory(prefix="d10-yantra-donor-")
