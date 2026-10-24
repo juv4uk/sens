@@ -715,6 +715,39 @@ run_native_t5m_program() {
         return
       fi
     fi
+    if [[ "$file" == "tests/semantic/d11-find-last-presence-law.lisp" ||
+          "$file" == "tests/semantic/d11-find-last-presence-mutant.lisp" ]]; then
+      # Повний фізичний носій виконує ті самі чинні SENS DEFINE, що
+      # парне виконання. Залежності не підмінюються Zig чи Rust.
+      local last_full_source="$dir/d11-find-last-presence-full.lisp"
+      standalone_physical="$dir/d11-find-last-presence-full.sens"
+      if ! cat -- lib/d11-srfi1-find-presence.lisp \
+          lib/d11-srfi1-find-last-presence.lisp "$file" > "$last_full_source" ||
+         ! timeout "$native_timeout" "$binary" --t5m-mint \
+          "$last_full_source" "$standalone_physical" \
+          >"$dir/d11-last-mint.stdout" 2>"$dir/d11-last-mint.stderr" ||
+         ! timeout "$native_timeout" "$native_open" open \
+          "$standalone_physical" >"${standalone_physical%.sens}" \
+          2>"$dir/d11-last-open.stderr" ||
+         ! timeout "$native_timeout" "$native_open" verify-view \
+          "$standalone_physical" >"$dir/d11-last-verify.stdout" \
+          2>"$dir/d11-last-verify.stderr"; then
+        echo "::error::D11_FIND_LAST_STANDALONE_MINT_FAILED source=$file" >&2
+        for diagnostic in "$dir"/d11-last-*.stderr; do
+          [[ ! -f "$diagnostic" ]] ||
+            sed 's/^/SENS FIND-LAST-PRESENCE: /' "$diagnostic" >&2
+        done
+        mark_file_failed
+        return
+      fi
+      local expected_last_d1=1
+      [[ "$file" != *-mutant.lisp ]] || expected_last_d1=0
+      if [[ "$(cat "$dir/native-paired.stdout")" != "$expected_last_d1" ]]; then
+        echo "::error::D11_FIND_LAST_WRONG_PAIRED_D1 source=$file expected=$expected_last_d1 actual=$(cat "$dir/native-paired.stdout")" >&2
+        mark_file_failed
+        return
+      fi
+    fi
     if [[ "$file" == "tests/semantic/d11-srfi1-filter-map-law.lisp" ||
           "$file" == "tests/semantic/d11-srfi1-filter-map-mutant.lisp" ]]; then
       # Повний фізичний носій має містити ті самі чинні SENS DEFINE,
