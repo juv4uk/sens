@@ -16,7 +16,7 @@ WORKFLOW = ROOT / ".github" / "workflows" / "release-preflight.yml"
 # executes them. Comments, echoes, disabled snippets and wrong steps cannot
 # certify a complete release after the Zig transport gate.
 REQUIRED_WORKSPACE_STEPS = (
-    ("Full workspace tests (pre-tag, exact SHA)", "cargo test --locked --workspace"),
+    ("Full workspace tests (pre-tag, exact SHA)", "cargo test --locked --workspace --no-fail-fast"),
     ("Full workspace Clippy (pre-tag, exact SHA)",
      "cargo clippy --locked --workspace --all-targets -- -D warnings"),
 )
@@ -169,7 +169,6 @@ def require_manual_preflight(source: str) -> None:
     receipt_body = source.split(receipt_step, 1)[1].split("\n      - name:", 1)[0]
     required_upload_lines = (
         "        if: always()",
-        "        uses: actions/upload-artifact@v4",
         "        with:",
         "          name: release-go-gate",
         "          path: ${{ runner.temp }}/release-go-gate.json",
@@ -181,6 +180,16 @@ def require_manual_preflight(source: str) -> None:
                 "RELEASE_BLOCKED: missing fail-closed GO-gate artifact evidence: "
                 + expected_line.strip()
             )
+    # GitHub Actions v4 must be pinned to its immutable 40-hex commit.
+    # A floating @v4 label is not a valid release receipt.
+    if re.search(
+        r"(?m)^        uses: actions/upload-artifact@[0-9a-f]{40} # v4$",
+        receipt_body,
+    ) is None:
+        raise AssertionError(
+            "RELEASE_BLOCKED: missing fail-closed GO-gate artifact evidence: "
+            "immutable actions/upload-artifact v4 SHA"
+        )
 
 
 class ReleasePreflightScopeTest(unittest.TestCase):
@@ -197,6 +206,11 @@ class ReleasePreflightScopeTest(unittest.TestCase):
         self.assertIn(expected, self.workflow)
         live = "      - name: Upload release GO-gate report\n"
         self.assertIn(live, self.workflow)
+        pin = re.search(
+            r"(?m)^        uses: actions/upload-artifact@[0-9a-f]{40} # v4\n",
+            self.workflow,
+        )
+        self.assertIsNotNone(pin)
         mutations = (
             (expected, "          if-no-files-found: warn\n"),
             (expected, "          if-no-files-found: ignore\n"),
@@ -205,8 +219,10 @@ class ReleasePreflightScopeTest(unittest.TestCase):
              "          path: ${{ runner.temp }}/unrelated.json\n"),
             ("          name: release-go-gate\n",
              "          name: unrelated-artifact\n"),
-            ("        uses: actions/upload-artifact@v4\n",
-             "        uses: actions/upload-artifact@v5\n"),
+            (pin.group(), "        uses: actions/upload-artifact@v4\n"),
+            (pin.group(), "        uses: actions/upload-artifact@v5\n"),
+            (pin.group(), "        uses: actions/upload-artifact@1234567 # v4\n"),
+            (pin.group(), "        uses: actions/upload-artifact@" + "1" * 40 + " # v3\n"),
             (live, "      - name: Unrelated upload step\n"),
         )
         for before, after in mutations:
