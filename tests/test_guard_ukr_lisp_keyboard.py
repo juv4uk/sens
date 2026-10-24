@@ -45,7 +45,7 @@ class UkrainianLispGitGuard(unittest.TestCase):
             input=stdin, text=True, capture_output=True,
         )
 
-    def test_comments_are_exempt_but_strings_and_code_are_not(self):
+    def test_comments_and_d7_string_data_are_exempt_but_code_is_not(self):
         # Коментарі НЕ кодуються у фізичний носій (strip_comments у мінтері),
         # тож у Д7-перевірці їх не чіпаємо.
         for source in (
@@ -57,11 +57,22 @@ class UkrainianLispGitGuard(unittest.TestCase):
                 self.write("lib/діюче.lisp", source)
                 self.git("add", "lib/діюче.lisp")
                 self.assertEqual(self.check("--staged").returncode, 0)
-        # Рядки та код кодуються у носій — перевіряються далі.
+        # Рядковий вміст ASCII є D7-даними; executable surface поза ним
+        # усе ще мусить відповідати українській клавіатурі.
+        for source in (
+            '(визначити рядок "hello")\n',
+            '(визначити рядок "code")\n',
+            '(визначити рядок "hello\\nworld")\n',
+        ):
+            with self.subTest(d7_string=source.strip()):
+                self.write("lib/діюче.lisp", source)
+                self.git("add", "lib/діюче.lisp")
+                self.assertEqual(self.check("--staged").returncode, 0)
+
         for source, codepoint in (
-            ('(визначити рядок "hello")\n', "U+0068"),
             ("(визначити імʼя 1)\n", "U+02BC"),
             ("(визначити ім'я #d1:1)\n", "U+0023"),
+            ('(визначити рядок "क")\n', "U+0915"),
         ):
             with self.subTest(codepoint=codepoint):
                 self.write("lib/діюче.lisp", source)

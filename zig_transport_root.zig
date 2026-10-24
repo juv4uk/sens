@@ -89,7 +89,7 @@ const repl_knowledge_t5m_asset = @embedFile("lib/knowledge.sens");
 const f6_world_t5m_asset = @embedFile("lib/world.sens");
 const f6_content_store_t5m_asset = @embedFile("lib/content-store.sens");
 const f6_lisp_fs_t5m_asset = @embedFile("lib/lisp-fs.sens");
-const f6_producer_witness_t5m_asset = @embedFile("tests/fixtures/wsm-fs-record-producer.sens");
+const f6_producer_witness_t5m_asset = @embedFile("tests/semantic/wsm-fs-record-producer.sens");
 
 fn copy_repl_t5m_asset(asset: []const u8, dst: [*]u8, capacity: usize) isize {
     if (asset.len == 0) return -1;

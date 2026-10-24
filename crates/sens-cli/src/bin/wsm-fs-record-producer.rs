@@ -33,7 +33,7 @@ fn main() {
         match &value {
             Value::Pair(node) => {
                 let Value::String(record) = &node.head else {
-                    eprintln!("wsm-fs-record-producer: record is not a string");
+                    eprintln!("wsm-fs-record-producer: record is not a string: {}", node.head);
                     std::process::exit(1);
                 };
                 records.push(record.to_string());

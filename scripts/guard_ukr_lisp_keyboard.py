@@ -102,7 +102,8 @@ def _mask_exempt(source: str) -> str:
     """Маскувати те, що не є кодом укр-проєкції, зберігаючи довжину:
     - коментарі `;` і вкладені `#| |#` (коментарі НЕ кодуються у носій — див.
       strip_comments у scripts/migrate-three-pass.py, тож у Д7 їх не перевіряємо);
-    - дані D7 у цитатах `(як-є …)` (вміст фактів може бути латиницею);
+    - дані D7 у рядкових літералах і цитатах `(як-є …)` (вміст фактів
+      може бути латиницею; поза рядком це вже має бути укр-проєкція);
     - зовнішні URL (історичні джерела).
     """
     chars = list(source)
@@ -174,7 +175,32 @@ def _mask_exempt(source: str) -> str:
 
     masked = "".join(chars)
 
-    # 2) (як-є …) з балансуванням дужок
+    # 2) ASCII-вміст рядкових літералів — це значення D7, а не назви
+    # виконуваних форм. Не маскуємо самі лапки та не-ASCII символи:
+    # останні мають пройти українську клавіатурну перевірку окремо.
+    in_string = False
+    i = 0
+    while i < n:
+        ch = masked[i]
+        if not in_string:
+            if ch == '"':
+                in_string = True
+            i += 1
+            continue
+        if ch == "\\" and i + 1 < n:
+            if ord(masked[i + 1]) < 128:
+                blank(i, i + 2)
+            i += 2
+            continue
+        if ch == '"':
+            in_string = False
+            i += 1
+            continue
+        if ord(ch) < 128:
+            blank(i, i + 1)
+        i += 1
+
+    # 3) (як-є …) з балансуванням дужок
     i = 0
     while True:
         j = masked.find("(як-є", i)
@@ -194,7 +220,7 @@ def _mask_exempt(source: str) -> str:
         blank(j, k)
         i = k
 
-    # 3) URL
+    # 4) URL
     for m in re.finditer(r"https?://\S+", masked):
         blank(m.start(), m.end())
     return "".join(chars)
