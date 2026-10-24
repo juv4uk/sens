@@ -1,9 +1,5 @@
 #!/usr/bin/env python3
-"""Focused F6 host source isolation: Zig carries exact bytes; SENS keeps semantics.
-
-Source guard only, with negative mutants; the same central CI compiles both Rust
-binaries against the real linked Zig ABI. Never calls this semantic admission.
-"""
+"""F6 executables use the aggregate Core4 T5M bootstrap, without module includes."""
 from __future__ import annotations
 
 import re
@@ -11,187 +7,68 @@ import unittest
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-FILES = (
+BINS = (
     "crates/sens-cli/src/bin/wsm-fs-record-producer.rs",
     "crates/sens-cli/src/bin/wsm-fs-record-consumer.rs",
 )
-DIRECT = re.compile(r'include_(?:str|bytes)!\s*\(\s*"[^"]*/lib/(?:unify|reason|forward|knowledge|persistent-map|world|content-store|lisp-fs)\.lisp"')
-
-def check_f6_route(source: str, label: str) -> None:
-    # Commented-out code cannot impersonate a live Zig route.
-    live = re.sub(r"(?m)^\s*//[^\n]*$", "", source)
-    if DIRECT.search(live):
-        raise ValueError(f"F6_DIRECT_RUST_SOURCE layer=transport binary={label}")
-    # Compile each F6 bin against the one feature-gated Zig adapter in sens-cli lib.
-    # Reject a private source module, comment ghost or missing real import.
-    if ('#[cfg(feature = "zig-transport")]\nuse sens_cli::zig_transport;' not in live
-            or '#[path = "../zig_transport.rs"]' in live):
-        raise ValueError(f"F6_NO_ZIG_MODULE layer=transport binary={label}")
-    for asset in ("unify", "reason", "forward", "knowledge", "persistent_map", "world", "content_store", "lisp_fs"):
-        call = f"zig_transport::{asset}_source_bytes()?"
-        if live.count(call) != 1:
-            raise ValueError(f"F6_MISSING_ZIG_CARRIER layer=transport binary={label} asset={asset}")
-    if '#[cfg(not(feature = "zig-transport"))]' not in live or "no Rust fallback" not in live:
-        raise ValueError(f"F6_FALLBACK_UNSAFE layer=transport binary={label}")
-    if "let sources = zig_bootstrap_sources()" not in live:
-        raise ValueError(f"F6_MISSING_BOOTSTRAP layer=transport binary={label}")
-    a = live.find('("lib/unify.lisp", sources[0].as_str())')
-    b = live.find('("lib/reason.lisp", sources[1].as_str())')
-    c = live.find('("lib/forward.lisp", sources[2].as_str())')
-    d = live.find('("lib/knowledge.lisp", sources[3].as_str())')
-    e = live.find('("lib/persistent-map.lisp", sources[4].as_str())')
-    f = live.find('("lib/world.lisp", sources[5].as_str())')
-    g = live.find('("lib/content-store.lisp", sources[6].as_str())')
-    h = live.find('("lib/lisp-fs.lisp", sources[7].as_str())')
-    if min(a, b, c, d, e, f, g, h) < 0 or not (a < b < c < d < e < f < g < h):
-        raise ValueError(f"F6_ORDER_CHANGED layer=transport binary={label}")
-    if "sens::eval_pinned_reasoning_source(path, source, &mut session)" not in live:
-        raise ValueError(f"F6_NO_SENS_EVALUATOR layer=eval binary={label}")
-
-class F6ZigBoundaryTests(unittest.TestCase):
-    def test_both_real_bins_use_only_existing_zig_source_carriers(self) -> None:
-        for file in FILES:
-            with self.subTest(file=file):
-                check_f6_route((ROOT / file).read_text(encoding="utf-8"), file)
-
-    def test_commented_shared_zig_import_cannot_pass(self) -> None:
-        for file in FILES:
-            source = (ROOT / file).read_text(encoding="utf-8")
-            mutant = source.replace(
-                "use sens_cli::zig_transport;",
-                "// use sens_cli::zig_transport;", 1,
-            )
-            self.assertNotEqual(mutant, source)
-            with self.subTest(file=file), self.assertRaisesRegex(ValueError, "F6_NO_ZIG_MODULE"):
-                check_f6_route(mutant, file)
-
-    def test_world_direct_source_embed_mutant_rejected(self) -> None:
-        for file in FILES:
-            source = (ROOT / file).read_text(encoding="utf-8")
-            mutant = source.replace(
-                '("lib/world.lisp", sources[5].as_str())',
-                '("lib/world.lisp", include_str!("../../../../lib/world.lisp"))', 1,
-            )
-            self.assertNotEqual(mutant, source)
-            with self.subTest(file=file), self.assertRaisesRegex(ValueError, "F6_DIRECT_RUST_SOURCE"):
-                check_f6_route(mutant, file)
-
-    def test_direct_rust_embed_mutant_is_rejected(self) -> None:
-        for file in FILES:
-            source = (ROOT / file).read_text(encoding="utf-8")
-            mutation = source + '\nconst SHADOW: &str = include_str!("../../../../lib/knowledge.lisp");\n'
-            with self.subTest(file=file), self.assertRaisesRegex(ValueError, "F6_DIRECT_RUST_SOURCE"):
-                check_f6_route(mutation, file)
-
-    def test_persistent_map_direct_rust_embed_cannot_bypass_zig(self) -> None:
-        # A fresh direct Rust source edge remains forbidden even if the
-        # legitimate Zig persistent-map carrier is already present.
-        for file in FILES:
-            source = (ROOT / file).read_text(encoding="utf-8")
-            mutant = source + '\nconst LEAK: &str = include_str!("../../../../lib/persistent-map.lisp");\n'
-            with self.subTest(file=file), self.assertRaisesRegex(
-                ValueError, "F6_DIRECT_RUST_SOURCE"
-            ):
-                check_f6_route(mutant, file)
-
-    def test_zig_token_in_comment_cannot_replace_live_source_call(self) -> None:
-        for file in FILES:
-            source = (ROOT / file).read_text(encoding="utf-8")
-            mutant = source.replace(
-                "zig_transport::knowledge_source_bytes()?",
-                "/* disabled */ missing_knowledge_source()?", 1,
-            ) + "\n// zig_transport::knowledge_source_bytes()?\n"
-            with self.subTest(file=file), self.assertRaisesRegex(ValueError, "F6_MISSING_ZIG_CARRIER"):
-                check_f6_route(mutant, file)
-
-    def test_swap_reason_and_forward_load_order_is_rejected(self) -> None:
-        for file in FILES:
-            source = (ROOT / file).read_text(encoding="utf-8")
-            # Use a temporary sentinel to exchange two source positions.
-            changed = source.replace(
-                '("lib/reason.lisp", sources[1].as_str()),',
-                '("__TEMP_ORDER_SENTINEL__", sources[1].as_str()),', 1,
-            ).replace(
-                '("lib/forward.lisp", sources[2].as_str()),',
-                '("lib/reason.lisp", sources[1].as_str()),', 1,
-            ).replace(
-                '("__TEMP_ORDER_SENTINEL__", sources[1].as_str()),',
-                '("lib/forward.lisp", sources[2].as_str()),', 1,
-            )
-            self.assertNotEqual(changed, source)
-            with self.subTest(file=file), self.assertRaisesRegex(ValueError, "F6_ORDER_CHANGED"):
-                check_f6_route(changed, file)
-
-    def test_swap_forward_and_knowledge_order_is_rejected(self) -> None:
-        for file in FILES:
-            source = (ROOT / file).read_text(encoding="utf-8")
-            changed = source.replace(
-                '("lib/forward.lisp", sources[2].as_str()),',
-                '("__ORDER_SENTINEL__", sources[2].as_str()),', 1,
-            ).replace(
-                '("lib/knowledge.lisp", sources[3].as_str()),',
-                '("lib/forward.lisp", sources[2].as_str()),', 1,
-            ).replace(
-                '("__ORDER_SENTINEL__", sources[2].as_str()),',
-                '("lib/knowledge.lisp", sources[3].as_str()),', 1,
-            )
-            self.assertNotEqual(changed, source)
-            with self.subTest(file=file), self.assertRaisesRegex(ValueError, "F6_ORDER_CHANGED"):
-                check_f6_route(changed, file)
-
-    def test_persistent_map_comment_ghost_does_not_replace_zig_call(self) -> None:
-        for file in FILES:
-            source = (ROOT / file).read_text(encoding="utf-8")
-            mutant = source.replace(
-                "zig_transport::persistent_map_source_bytes()?",
-                "missing_persistent_map_source()?", 1
-            ) + "\n// zig_transport::persistent_map_source_bytes()?\n"
-            self.assertNotEqual(source, mutant)
-            with self.subTest(file=file), self.assertRaisesRegex(ValueError, "F6_MISSING_ZIG_CARRIER"):
-                check_f6_route(mutant, file)
-
-    def test_no_zig_feature_must_refuse_instead_of_rust_fallback(self) -> None:
-        for file in FILES:
-            source = (ROOT / file).read_text(encoding="utf-8")
-            mutant = source.replace("no Rust fallback\".into()", "host-side fallback\".into()", 1)
-            with self.subTest(file=file), self.assertRaisesRegex(ValueError, "F6_FALLBACK_UNSAFE"):
-                check_f6_route(mutant, file)
+def live_source(source: str) -> str:
+    return re.sub(r"(?m)^\s*//[^\n]*$", "", source)
 
 
-    def test_content_store_direct_embed_and_comment_ghost_are_rejected(self) -> None:
-        for file in FILES:
-            source = (ROOT / file).read_text(encoding="utf-8")
-            mutant = source.replace(
-                '("lib/content-store.lisp", sources[6].as_str())',
-                '("lib/content-store.lisp", include_str!("../../../../lib/content-store.lisp"))', 1
-            )
-            self.assertNotEqual(mutant, source)
-            with self.subTest(file=file, case="direct"), self.assertRaisesRegex(ValueError, "F6_DIRECT_RUST_SOURCE"):
-                check_f6_route(mutant, file)
-            ghost = source.replace(
-                "zig_transport::content_store_source_bytes()?",
-                "unavailable_content_store_source()?", 1
-            ) + "\\n// zig_transport::content_store_source_bytes()?\\n"
-            self.assertNotEqual(ghost, source)
-            with self.subTest(file=file, case="ghost"), self.assertRaisesRegex(ValueError, "F6_MISSING_ZIG_CARRIER"):
-                check_f6_route(ghost, file)
+def check_bin(source: str, label: str) -> None:
+    live = live_source(source)
+    if "load_core_library(&mut session)" not in live:
+        raise ValueError(f"F6_MISSING_CORE4_BOOTSTRAP binary={label}")
+    for forbidden in (
+        "bootstrap_f6_libraries",
+        "zig_bootstrap_sources",
+        "String::from_utf8",
+        "eval_pinned_reasoning_source",
+        "include_str!(\"../../../../lib/",
+    ):
+        if forbidden in live:
+            raise ValueError(f"F6_SEPARATE_SOURCE_INGRESS binary={label} symbol={forbidden}")
 
-    def test_content_store_original_load_order_remains_protected(self) -> None:
-        for file in FILES:
-            source = (ROOT / file).read_text(encoding="utf-8")
-            changed = source.replace(
-                '("lib/world.lisp", sources[5].as_str()),',
-                '("__F6_SENTINEL__", sources[5].as_str()),', 1
-            ).replace(
-                '("lib/content-store.lisp", sources[6].as_str()),',
-                '("lib/world.lisp", sources[5].as_str()),', 1
-            ).replace(
-                '("__F6_SENTINEL__", sources[5].as_str()),',
-                '("lib/content-store.lisp", sources[6].as_str()),', 1
-            )
-            self.assertNotEqual(changed, source)
-            with self.subTest(file=file), self.assertRaisesRegex(ValueError, "F6_ORDER_CHANGED"):
-                check_f6_route(changed, file)
+
+def check_core4_bootstrap(build: str, zig: str, rust: str) -> None:
+    watch = '"lib/core4.sens"'
+    if watch not in build or watch not in zig:
+        raise ValueError("F6_CORE4_T5M_NOT_THE_WATCHED_PHYSICAL_BOOTSTRAP")
+    if "t5m.decode" not in zig or "CORE4_BOOTSTRAP_WORDS" not in zig:
+        raise ValueError("F6_CORE4_NOT_DECODED_BY_PINNED_ZIG_T5M")
+    if "PhysicalT5Program::from_exact_domain_words_owned" not in rust:
+        raise ValueError("F6_CORE4_WORDS_NOT_GIVEN_TO_SENS_BINARY_READER")
+
+
+class F6Core4BoundaryTests(unittest.TestCase):
+    def test_both_bins_use_the_shared_physical_bootstrap(self) -> None:
+        for path in BINS:
+            with self.subTest(path=path):
+                check_bin((ROOT / path).read_text(encoding="utf-8"), path)
+
+    def test_f6_uses_the_physical_aggregate_core4_bootstrap(self) -> None:
+        check_core4_bootstrap(
+            (ROOT / "crates/sens/build.rs").read_text(encoding="utf-8"),
+            (ROOT / "bootstrap_t5m.zig").read_text(encoding="utf-8"),
+            (ROOT / "crates/sens/src/binary_bootstrap.rs").read_text(encoding="utf-8"),
+        )
+
+    def test_text_ingress_mutant_is_rejected(self) -> None:
+        source = (ROOT / BINS[0]).read_text(encoding="utf-8")
+        mutant = source.replace(
+            "load_core_library(&mut session)",
+            "load_core_library(&mut session);\n    let _ = String::from_utf8(vec![])",
+            1,
+        )
+        with self.assertRaisesRegex(ValueError, "F6_SEPARATE_SOURCE_INGRESS"):
+            check_bin(mutant, BINS[0])
+
+    def test_missing_bootstrap_call_is_rejected(self) -> None:
+        source = (ROOT / BINS[1]).read_text(encoding="utf-8")
+        mutant = source.replace("load_core_library(&mut session)", "Ok(())", 1)
+        with self.assertRaisesRegex(ValueError, "F6_MISSING_CORE4_BOOTSTRAP"):
+            check_bin(mutant, BINS[1])
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

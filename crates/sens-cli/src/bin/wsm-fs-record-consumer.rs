@@ -1,52 +1,61 @@
 //! Consume the bounded F6 record stream and reconstruct its WSM root.
 //! Stored envelopes are quoted data; this binary never evaluates their payload.
 
-use sens::{eval_program, load_core_library, Environment, Session, Value};
+use sens::{
+    eval_parsed_expressions, load_core_library, Bija3, Bit3, Bit4, Bit7, Bit9, CoreD4, CoreD9,
+    D7DataWord, DomainIdentity, Environment, Expr, ExprKind, Session, Span, Value,
+};
 use std::io::{self, Read};
+use std::rc::Rc;
 
-#[cfg(feature = "zig-transport")]
-use sens_cli::zig_transport;
+fn exact_d4(bits: u8) -> DomainIdentity {
+    DomainIdentity::D4(CoreD4::from_word(Bit4::new(bits).expect("D4 coordinate")))
+}
 
-// A host may request exact SENS source bytes only from the compiled Zig ABI.
-// Zig never decides what these sources mean and no Rust fallback is permitted.
-fn zig_bootstrap_sources() -> Result<[String; 8], String> {
-    #[cfg(feature = "zig-transport")]
-    {
-        let unify = String::from_utf8(zig_transport::unify_source_bytes()?)
-            .map_err(|error| format!("ZIG_F6_UNIFY_CARRIER invalid UTF-8: {error}"))?;
-        let reason = String::from_utf8(zig_transport::reason_source_bytes()?)
-            .map_err(|error| format!("ZIG_F6_REASON_CARRIER invalid UTF-8: {error}"))?;
-        let forward = String::from_utf8(zig_transport::forward_source_bytes()?)
-            .map_err(|error| format!("ZIG_F6_FORWARD_CARRIER invalid UTF-8: {error}"))?;
-        let knowledge = String::from_utf8(zig_transport::knowledge_source_bytes()?)
-            .map_err(|error| format!("ZIG_F6_KNOWLEDGE_CARRIER invalid UTF-8: {error}"))?;
-        let persistent_map = String::from_utf8(zig_transport::persistent_map_source_bytes()?)
-            .map_err(|error| format!("ZIG_F6_PERSISTENT_MAP_CARRIER invalid UTF-8: {error}"))?;
-        let world = String::from_utf8(zig_transport::world_source_bytes()?)
-            .map_err(|error| format!("ZIG_F6_WORLD_CARRIER invalid UTF-8: {error}"))?;
-        let content_store = String::from_utf8(zig_transport::content_store_source_bytes()?)
-            .map_err(|error| format!("ZIG_F6_CONTENT_STORE_CARRIER invalid UTF-8: {error}"))?;
-        let lisp_fs = String::from_utf8(zig_transport::lisp_fs_source_bytes()?)
-            .map_err(|error| format!("ZIG_F6_LISP_FS_CARRIER invalid UTF-8: {error}"))?;
-        Ok([
-            unify,
-            reason,
-            forward,
-            knowledge,
-            persistent_map,
-            world,
-            content_store,
-            lisp_fs,
-        ])
-    }
-    #[cfg(not(feature = "zig-transport"))]
-    {
-        Err("RUST_ZIG_ONLY: F6 source bootstrap requires the sterile Zig corridor; no Rust fallback".into())
+fn exact_d9(bits: u16) -> DomainIdentity {
+    DomainIdentity::D9(CoreD9::from_word(Bit9::new(bits).expect("D9 coordinate")))
+}
+
+fn exact_d3(bits: u8) -> DomainIdentity {
+    DomainIdentity::D3(Bija3::from_word(Bit3::new(bits).expect("D3 coordinate")))
+}
+
+fn call(identity: DomainIdentity, arguments: Vec<Expr>) -> Expr {
+    let mut items = Vec::with_capacity(arguments.len() + 1);
+    items.push(Expr {
+        kind: ExprKind::DomainIdentity(identity),
+        span: Span::default(),
+    });
+    items.extend(arguments);
+    Expr {
+        kind: ExprKind::List(items.into()),
+        span: Span::default(),
     }
 }
 
-fn string_literal(value: &str) -> String {
-    format!("\"{}\"", value.replace('\\', "\\\\").replace('"', "\\\""))
+fn string_value(value: &str) -> Expr {
+    Expr {
+        kind: ExprKind::String(Rc::from(value)),
+        span: Span::default(),
+    }
+}
+
+fn d7_text(value: &str) -> Expr {
+    Expr {
+        kind: ExprKind::List(
+            value
+                .bytes()
+                .map(|byte| Expr {
+                    kind: ExprKind::DomainIdentity(DomainIdentity::D7(D7DataWord::from_word(
+                        Bit7::new(byte).expect("D7 protocol glyph"),
+                    ))),
+                    span: Span::default(),
+                })
+                .collect::<Vec<_>>()
+                .into(),
+        ),
+        span: Span::default(),
+    }
 }
 
 fn main() {
@@ -64,72 +73,45 @@ fn main() {
         environment: Environment::root(),
     };
     load_core_library(&mut session).unwrap();
-    let sources = zig_bootstrap_sources().unwrap_or_else(|error| {
-        eprintln!("wsm-fs-record-consumer: {error}");
-        std::process::exit(1);
-    });
-    for (path, source) in [
-        ("lib/unify.lisp", sources[0].as_str()),
-        ("lib/reason.lisp", sources[1].as_str()),
-        ("lib/forward.lisp", sources[2].as_str()),
-        ("lib/knowledge.lisp", sources[3].as_str()),
-    ] {
-        sens::eval_pinned_reasoning_source(path, source, &mut session)
-            .expect("Zig-owned F6 bootstrap source must load in SENS");
-    }
-    for (path, source) in [
-        ("lib/persistent-map.lisp", sources[4].as_str()),
-        ("lib/world.lisp", sources[5].as_str()),
-        ("lib/content-store.lisp", sources[6].as_str()),
-        ("lib/lisp-fs.lisp", sources[7].as_str()),
-    ] {
-        if matches!(
-            path,
-            "lib/unify.lisp"
-                | "lib/reason.lisp"
-                | "lib/forward.lisp"
-                | "lib/knowledge.lisp"
-                | "lib/world.lisp"
-                | "lib/persistent-map.lisp"
-                | "lib/content-store.lisp"
-                | "lib/lisp-fs.lisp"
-        ) {
-            sens::eval_pinned_reasoning_source(path, source, &mut session).unwrap();
-        } else {
-            eval_program(source, &mut session).unwrap();
-        }
-    }
-    let root = eval_program(
-        &format!("(фс-десеріалізувати-корінь {})", string_literal(records[0])),
-        &mut session,
-    )
-    .unwrap()
-    .value;
-    let _object = eval_program(
-        &format!("(фс-десеріалізувати-об'єкт {})", string_literal(records[1])),
-        &mut session,
-    )
-    .unwrap()
-    .value;
-    let Value::Pair(root_node) = &root else {
-        std::process::exit(1)
-    };
-    let Value::Symbol(tag) = &root_node.head else {
-        std::process::exit(1)
-    };
-    if &**tag != "accepted" {
+    if let Err(error) = sens_cli::bootstrap_f6_t5m_libraries(&mut session) {
+        eprintln!("wsm-fs-record-consumer: physical F6 bootstrap failed: {error}");
         std::process::exit(1);
     }
-    let expr = format!(
-        "(фс-відновити-корінь (quote {}) (list (quote {})))",
-        records[0], records[1]
+    // These exact identities are the ratified D9/D4 entries in
+    // lib/domains/d9.lisp and lib/domains/d4.lisp. Rust builds only an exact
+    // SENS call tree; all record parsing and validation executes in SENS.
+    let root_package = call(
+        exact_d4(0b1001),
+        vec![call(exact_d9(0b001110011), vec![string_value(records[0])])],
     );
-    let rebuilt = eval_program(&expr, &mut session).unwrap().value;
-    let Value::Pair(ref node) = rebuilt else {
-        std::process::exit(1)
-    };
-    if !matches!(&node.head, Value::Symbol(name) if &**name == "accepted") {
+    let object_value = call(
+        exact_d4(0b1001),
+        vec![call(exact_d9(0b101000110), vec![string_value(records[1])])],
+    );
+    let object_package = call(exact_d9(0b010100010), vec![object_value]);
+    let object_packages = call(exact_d4(0b1110), vec![object_package]);
+    let reconstruction = call(exact_d9(0b010101000), vec![root_package, object_packages]);
+    // SENS performs the D3 selection and D8 structural comparison. Rust
+    // checks only the resulting exact D1 answer.
+    let status = call(exact_d3(0b100), vec![reconstruction]);
+    let expected = call(exact_d3(0b001), vec![d7_text("accepted")]);
+    let accepted = call(exact_d8_equal(), vec![status, expected]);
+    let verdict = eval_parsed_expressions(&[accepted], &mut session)
+        .unwrap_or_else(|error| {
+            eprintln!("root reconstruction failed: {error}");
+            std::process::exit(1)
+        })
+        .value;
+    let accepted_bit = sens::PredicateBit::from_word(sens::Bit1::new(1).unwrap());
+    if verdict != Value::DomainIdentity(DomainIdentity::D1(accepted_bit)) {
+        eprintln!("root reconstruction rejected: {verdict}");
         std::process::exit(1);
     }
     println!("f6-semantic-consumer-ok records=2");
+}
+
+fn exact_d8_equal() -> DomainIdentity {
+    DomainIdentity::D8(sens::CoreD8::from_word(
+        sens::Bit8::new(0b11110111).expect("D8 equal identity"),
+    ))
 }

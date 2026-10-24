@@ -912,10 +912,20 @@ fn render_canonical_wire(value: &Value) -> String {
             composite.domain_width()
         ),
         Value::BinaryNumber(number) => match number.numeric_domain_width() {
-            // Explicitly non-reader token. This string API cannot return a
-            // typed error, so make the unsupported Dn transport unmistakable
-            // rather than silently losing the numeric domain with #b bits.
-            Some(width) => format!("#<D{width}-NUMERIC-WIRE-UNSUPPORTED>"),
+            // Keep the admitted numeric identity and its exact-width word in
+            // the reader-safe D24+ carrier already recognized by the
+            // canonical value reader. Never normalize this to an unqualified
+            // #b value: that would discard the numeric domain.
+            Some(width) => {
+                let bits = number
+                    .exact_numeric_domain_bits()
+                    .expect("qualified numeric values retain their exact domain width");
+                let payload: String = bits
+                    .into_iter()
+                    .map(|bit| if bit == 0 { '0' } else { '1' })
+                    .collect();
+                format!("#d{width}:{payload}")
+            }
             None => format!("#b{}", number.bits()),
         },
         Value::Pair(_) => render_pair_canonical_wire(value),

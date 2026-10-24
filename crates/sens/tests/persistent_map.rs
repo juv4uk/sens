@@ -2,12 +2,11 @@
 //! Імена, D1-предикати та D3-пари належать lib/persistent-map.lisp.
 //! Історичні AVL/англійські def/cond/t не є чинною семантикою мапи.
 
-use sens::{eval_core_library_source, eval_pinned_reasoning_source, eval_program, Session, Value};
+use sens::{eval_pinned_reasoning_source, eval_program, load_core_library, Session, Value};
 
 fn map_session() -> Session {
     let mut session = Session::default();
-    eval_core_library_source(include_str!("../../../lib/core.lisp"), &mut session)
-        .expect("українське ядро SENS");
+    load_core_library(&mut session).expect("фізичний Core4 SENS із Zig T5M");
     eval_pinned_reasoning_source(
         "lib/persistent-map.lisp",
         include_str!("../../../lib/persistent-map.lisp"),

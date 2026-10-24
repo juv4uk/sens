@@ -204,7 +204,7 @@ fn object_package_and_nonempty_map_addresses_are_structurally_consistent() {
 fn content_store_membership_is_an_exact_d1_bit_not_structural_one() {
     let mut session = session();
     for (source, expected) in [
-        ("(вміст-сховище-містить? (вміст-сховище-покласти (порожній-вміст-сховище) (quote star)) (знання-вміст-адреса (quote star)))", true),
+        ("(вміст-сховище-містить? (вміст-сховище-покласти (порожній-вміст-сховище) (знання-вміст-адреса (quote star)) (quote star)) (знання-вміст-адреса (quote star)))", true),
         ("(вміст-сховище-містить? (порожній-вміст-сховище) (знання-вміст-адреса (quote star)))", false),
         ("(фс-містить? (car (фс-записати (фс-порожній) \"x\" (quote star))) \"x\")", true),
         ("(фс-містить? (фс-порожній) \"x\")", false),

@@ -12,18 +12,27 @@ unsafe extern "C" {
         output: *mut u8,
         capacity: usize,
     ) -> isize;
-    pub(super) fn sens_zig_repl_epistemic_t5m_bytes_copy(output: *mut u8, capacity: usize) -> isize;
+    pub(super) fn sens_zig_repl_epistemic_t5m_bytes_copy(output: *mut u8, capacity: usize)
+        -> isize;
     pub(super) fn sens_zig_repl_persistent_map_t5m_bytes_copy(
+        output: *mut u8,
+        capacity: usize,
+    ) -> isize;
+    pub(super) fn sens_zig_f6_world_t5m_bytes_copy(output: *mut u8, capacity: usize) -> isize;
+    pub(super) fn sens_zig_f6_content_store_t5m_bytes_copy(
+        output: *mut u8,
+        capacity: usize,
+    ) -> isize;
+    pub(super) fn sens_zig_f6_lisp_fs_t5m_bytes_copy(output: *mut u8, capacity: usize) -> isize;
+    pub(super) fn sens_zig_f6_producer_witness_t5m_bytes_copy(
         output: *mut u8,
         capacity: usize,
     ) -> isize;
     pub(super) fn sens_zig_repl_unify_t5m_bytes_copy(output: *mut u8, capacity: usize) -> isize;
     pub(super) fn sens_zig_repl_reason_t5m_bytes_copy(output: *mut u8, capacity: usize) -> isize;
     pub(super) fn sens_zig_repl_forward_t5m_bytes_copy(output: *mut u8, capacity: usize) -> isize;
-    pub(super) fn sens_zig_repl_knowledge_t5m_bytes_copy(
-        output: *mut u8,
-        capacity: usize,
-    ) -> isize;
+    pub(super) fn sens_zig_repl_knowledge_t5m_bytes_copy(output: *mut u8, capacity: usize)
+        -> isize;
     pub(super) fn sens_zig_d9_witness_bytes_copy(output: *mut u8, capacity: usize) -> isize;
     pub(super) fn sens_zig_sanskrit_bytes_copy(output: *mut u8, capacity: usize) -> isize;
     #[cfg(test)]

@@ -52,9 +52,18 @@ def check_embedded_asset_watches(build_source: str, zig_root_source: str) -> Non
     if not assets:
         raise ValueError("ZIG_CORRIDOR_STALE_ASSET layer=build missing=zig_root_assets")
     setup_lines = build_source[:marker].splitlines()
+    watched_paths = {
+        line.split("../../", 1)[1].split('"', 1)[0]
+        for line in setup_lines
+        if 'println!("cargo:rerun-if-changed=../../' in line
+    }
     for asset in sorted(assets):
         watch = f'    println!("cargo:rerun-if-changed=../../{asset}");'
-        if setup_lines.count(watch) != 1:
+        parent_watch_covers_asset = any(
+            asset.startswith(path.rstrip("/") + "/") and (ROOT / path).is_dir()
+            for path in watched_paths
+        )
+        if setup_lines.count(watch) != 1 and not parent_watch_covers_asset:
             raise ValueError(
                 f"ZIG_CORRIDOR_STALE_ASSET layer=build file={asset} "
                 "reason=missing_or_late_rebuild_watch"
@@ -250,28 +259,15 @@ class ZigBuildEnvironmentWatchTest(unittest.TestCase):
 
 
 
-    def test_f6_fs_source_assets_use_zig_and_live_cargo_watches(self) -> None:
-        root = ZIG_ROOT.read_text(encoding="utf-8")
-        build = BUILD.read_text(encoding="utf-8")
-        check_embedded_asset_watches(build, root)
-        for filename, symbol, adapter in (
-            ("world", "sens_zig_world_bytes_copy", "world_source_bytes"),
-            ("content-store", "sens_zig_content_store_bytes_copy", "content_store_source_bytes"),
-            ("lisp-fs", "sens_zig_lisp_fs_bytes_copy", "lisp_fs_source_bytes"),
-        ):
-            asset = f"lib/{filename}.lisp"
-            watch = f'    println!("cargo:rerun-if-changed=../../{asset}");'
-            with self.subTest(asset=asset):
-                self.assertIn(f'@embedFile("{asset}")', root)
-                self.assertIn(f"pub export fn {symbol}(", root)
-                self.assertEqual(build.count(watch), 1)
-                with self.assertRaisesRegex(ValueError, "ZIG_CORRIDOR_STALE_ASSET"):
-                    check_embedded_asset_watches(build.replace(watch, "", 1), root)
-                for host in ("producer", "consumer"):
-                    src = (ROOT / f"crates/sens-cli/src/bin/wsm-fs-record-{host}.rs").read_text(encoding="utf-8")
-                    self.assertNotIn(f'include_str!("../../../../{asset}")', src)
-                    self.assertIn(f"zig_transport::{adapter}()", src)
-                    self.assertIn(f'("lib/{filename}.lisp", sources[', src)
+    def test_f6_uses_watched_aggregate_core4_t5m(self) -> None:
+        sens_build = (ROOT / "crates/sens/build.rs").read_text(encoding="utf-8")
+        bootstrap = (ROOT / "bootstrap_t5m.zig").read_text(encoding="utf-8")
+        self.assertIn('"lib/core4.sens"', sens_build)
+        self.assertIn('.physical = @embedFile("lib/core4.sens")', bootstrap)
+        for host in ("producer", "consumer"):
+            source = (ROOT / f"crates/sens-cli/src/bin/wsm-fs-record-{host}.rs").read_text(encoding="utf-8")
+            self.assertIn("load_core_library(&mut session)", source)
+            self.assertNotIn("bootstrap_f6_libraries", source)
 
 
 if __name__ == "__main__":

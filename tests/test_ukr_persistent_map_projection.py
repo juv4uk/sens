@@ -30,7 +30,8 @@ EXACT_HEADS = {
     "визначити": (4, "0011"), "функція": (4, "0010"),
     "як-є": (3, "001"), "атом?": (3, "010"),
     "решта": (3, "011"), "перше": (3, "100"),
-    "тотожне?": (3, "101"), "за-умовою": (3, "110"),
+    "тотожне?": (3, "101"), "однакові?": (8, "11110111"),
+    "за-умовою": (3, "110"),
     "сполучити": (3, "111"),
 }
 LIVE_TRUE = "((атом? (як-є ()))"
@@ -61,6 +62,7 @@ def check_current(source: str) -> None:
         "(функція (ключ значення записи)",
         "(функція (ключ записи)",
         "(сполучити ключ значення)",
+        "(сполучити (сполучити ключ значення) (решта записи))",
         "(внутрішня-мапа-вставити ключ значення (решта записи))",
         "(список (решта (перше записи)))",
         "(мапа-отримати ключ (решта записи))",
@@ -88,6 +90,11 @@ class CurrentPersistentMapUkrProjection(unittest.TestCase):
 
     def test_current_lisp_source_is_ukrainian_and_computed_d1(self):
         check_current(self.source)
+        self.assertEqual(
+            code_only(self.source).count("(однакові? "),
+            2,
+            "D7 map keys compare through the ratified structural D8 law",
+        )
 
     def test_exact_domain_heads_roundtrip_without_old_alias(self):
         code = code_only(self.source)
@@ -115,7 +122,8 @@ class CurrentPersistentMapUkrProjection(unittest.TestCase):
         source = self.source
         for old, new in (
             (LIVE_TRUE, "(так"),
-            ("(сполучити ключ значення)", "(сполучити значення ключ)"),
+            ("(сполучити (сполучити ключ значення) (решта записи))",
+             "(сполучити (сполучити значення ключ) (решта записи))"),
             ("(визначити мапа-вставити", "(визначити map-insert"),
             ("(мапа-отримати ключ (решта записи))",
              "(мапа-містить? ключ (решта записи))"),

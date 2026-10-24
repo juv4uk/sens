@@ -238,6 +238,25 @@ mod tests {
     }
 
     #[test]
+    fn read_write_зберігає_точну_ширину_числових_d24_plus_слів() {
+        for width in [24, 48] {
+            let mut bits = vec![0; width];
+            bits[width - 1] = 1;
+            let original = Value::BinaryNumber(
+                crate::BinaryNumber::from_numeric_domain_bits(width, &bits)
+                    .expect("exact admitted D24+ word"),
+            );
+            let wire = write_to_string_values(&[original.clone()], &Environment::root(), Span::default())
+                .expect("D24+ exact words must have a reader-safe wire form");
+            let expected = format!("#d{width}:{}", "0".repeat(width - 1) + "1");
+            assert_eq!(wire, Value::String(Rc::from(expected)));
+            let restored = read_values(&[wire], &Environment::root(), Span::default())
+                .expect("canonical READ must restore the admitted D24+ word");
+            assert_eq!(restored, original);
+        }
+    }
+
+    #[test]
     fn read_відхиляє_пошкоджений_d7_носій() {
         for source in ["#t7:0", "#t7:80", "#t7:4A", "#t7:gg"] {
             let error = read_values(

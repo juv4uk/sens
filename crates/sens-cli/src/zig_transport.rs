@@ -292,6 +292,38 @@ pub fn persistent_map_t5m_bytes() -> Result<Vec<u8>, String> {
     )
 }
 
+/// F6 world library as an opaque physical T5M asset owned by Zig.
+pub fn f6_world_t5m_bytes() -> Result<Vec<u8>, String> {
+    opaque_zig_asset(
+        asset_ffi::sens_zig_f6_world_t5m_bytes_copy,
+        "ZIG_F6_WORLD_T5M",
+    )
+}
+
+/// F6 content-store library as an opaque physical T5M asset owned by Zig.
+pub fn f6_content_store_t5m_bytes() -> Result<Vec<u8>, String> {
+    opaque_zig_asset(
+        asset_ffi::sens_zig_f6_content_store_t5m_bytes_copy,
+        "ZIG_F6_CONTENT_STORE_T5M",
+    )
+}
+
+/// F6 filesystem library as an opaque physical T5M asset owned by Zig.
+pub fn f6_lisp_fs_t5m_bytes() -> Result<Vec<u8>, String> {
+    opaque_zig_asset(
+        asset_ffi::sens_zig_f6_lisp_fs_t5m_bytes_copy,
+        "ZIG_F6_LISP_FS_T5M",
+    )
+}
+
+/// F6 producer witness as an opaque physical T5M asset owned by Zig.
+pub fn f6_producer_witness_t5m_bytes() -> Result<Vec<u8>, String> {
+    opaque_zig_asset(
+        asset_ffi::sens_zig_f6_producer_witness_t5m_bytes_copy,
+        "ZIG_F6_PRODUCER_WITNESS_T5M",
+    )
+}
+
 /// Ordered physical T5M assets for the REPL's reasoning prerequisites.
 /// Rust receives exact bytes; the SENS binary reader/evaluator owns meaning.
 pub fn repl_reasoning_t5m_assets() -> Result<Vec<(&'static str, Vec<u8>)>, String> {
@@ -348,10 +380,7 @@ pub fn guard_reference_source_bytes() -> Result<Vec<u8>, String> {
 pub fn linter_t5m_bytes() -> Result<Vec<u8>, String> {
     version()?;
     let required = unsafe {
-        asset_ffi::sens_zig_linter_t5m_bytes_copy(
-            std::ptr::NonNull::<u8>::dangling().as_ptr(),
-            0,
-        )
+        asset_ffi::sens_zig_linter_t5m_bytes_copy(std::ptr::NonNull::<u8>::dangling().as_ptr(), 0)
     };
     if required <= 0 {
         return Err("ZIG_LINTER_T5M_CARRIER invalid physical length".into());
@@ -362,9 +391,8 @@ pub fn linter_t5m_bytes() -> Result<Vec<u8>, String> {
         return Err("ZIG_LINTER_T5M_CARRIER exceeds host byte limit".into());
     }
     let mut bytes = vec![0u8; len];
-    let copied = unsafe {
-        asset_ffi::sens_zig_linter_t5m_bytes_copy(bytes.as_mut_ptr(), bytes.len())
-    };
+    let copied =
+        unsafe { asset_ffi::sens_zig_linter_t5m_bytes_copy(bytes.as_mut_ptr(), bytes.len()) };
     if copied != required {
         return Err(format!(
             "ZIG_LINTER_T5M_CARRIER byte copy rejected: code={copied}"

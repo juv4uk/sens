@@ -642,16 +642,21 @@ class ZigAbiV2DeclarationContractTest(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "missing_copy_body=sens_zig_forward_bytes_copy"):
             check_root_asset_corridor(mutant, self.asset_rust, self.rust)
 
-    def test_knowledge_ffi_exact_source_binding_and_f6_no_direct_rust(self):
+    def test_f6_binaries_use_aggregate_core4_t5m_not_separate_sources(self):
         for binary in (
             "crates/sens-cli/src/bin/wsm-fs-record-producer.rs",
             "crates/sens-cli/src/bin/wsm-fs-record-consumer.rs",
         ):
             source = (ROOT / binary).read_text(encoding="utf-8")
-            self.assertNotIn('include_str!("../../../../lib/knowledge.lisp")', source)
-            self.assertIn("zig_transport::knowledge_source_bytes()?", source)
-        build = (ROOT / "crates/sens-cli/build.rs").read_text(encoding="utf-8")
-        self.assertIn("cargo:rerun-if-changed=../../lib/knowledge.lisp", build)
+            self.assertIn("load_core_library(&mut session)", source)
+            self.assertNotIn("bootstrap_f6_libraries", source)
+            self.assertNotIn("zig_bootstrap_sources", source)
+            self.assertNotIn("String::from_utf8", source)
+            self.assertNotIn("eval_pinned_reasoning_source", source)
+        bootstrap = (ROOT / "bootstrap_t5m.zig").read_text(encoding="utf-8")
+        self.assertIn('.physical = @embedFile("lib/core4.sens")', bootstrap)
+        build = (ROOT / "crates/sens/build.rs").read_text(encoding="utf-8")
+        self.assertIn('"lib/core4.sens"', build)
 
     def test_world_byte_source_rejects_crosswire_mutant(self):
         check_root_asset_corridor(self.asset_zig, self.asset_rust, self.rust)

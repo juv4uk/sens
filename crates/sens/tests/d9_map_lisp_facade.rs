@@ -1,14 +1,13 @@
 //! D9 map coordinates without admitted mechanisms must remain fail-closed.
 //! These tests exercise separately named Lisp-owned AVL closures only.
 use sens::{
-    eval_core_library_source, eval_parsed_expressions, eval_pinned_reasoning_source, eval_program,
-    Bit9, CoreD9, DomainIdentity, Expr, ExprKind, Session, Span,
+    eval_parsed_expressions, eval_pinned_reasoning_source, eval_program, load_core_library, Bit9,
+    CoreD9, DomainIdentity, Expr, ExprKind, Session, Span,
 };
 
 fn session() -> Session {
     let mut session = Session::default();
-    eval_core_library_source(include_str!("../../../lib/core.lisp"), &mut session)
-        .expect("derived core bootstrap");
+    load_core_library(&mut session).expect("physical Core4 SENS bootstrap via Zig T5M");
     eval_pinned_reasoning_source(
         "lib/persistent-map.lisp",
         include_str!("../../../lib/persistent-map.lisp"),
@@ -107,7 +106,7 @@ fn collect_exact_head_identities(expr: &Expr, out: &mut Vec<(usize, u16)>) {
 }
 
 #[test]
-fn persistent_map_core_uses_only_exact_d3_d4_heads_and_no_numeric_ordering() {
+fn persistent_map_uses_exact_d3_d4_heads_and_ratified_d8_structural_equality() {
     let source = include_str!("../../../lib/persistent-map.lisp");
 
     for forbidden in [
@@ -138,8 +137,16 @@ fn persistent_map_core_uses_only_exact_d3_d4_heads_and_no_numeric_ordering() {
         "proof must inspect executable exact-domain heads"
     );
     assert!(
-        heads.iter().all(|(width, _)| matches!(width, 3 | 4)),
-        "persistent map execution must be D3/D4-only; got {heads:?}"
+        heads.iter().all(|(width, bits)| match width {
+            3 | 4 => true,
+            8 => *bits == 0b1111_0111,
+            _ => false,
+        }),
+        "persistent map may use D3/D4 mechanisms and only D8 structural equality; got {heads:?}"
+    );
+    assert!(
+        heads.contains(&(8, 0b1111_0111)),
+        "composite map keys must use ratified D8 identical?"
     );
 }
 
