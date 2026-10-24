@@ -50,10 +50,10 @@ run_native_t5m_program() {
   local status=0
   local source_bytes native_timeout
   local -a paired_runtime_args=() standalone_runtime=("$binary")
-  # D24+ корені «число-*» створюються з Core4; той самий профіль
-  # обов'язковий під час парного та самостійного фізичного виконання.
+  # D24+ корені «число-*» та мовна Д6 «довжина» створюються Core4;
+  # профіль однаковий для парного й автономного фізичного виконання.
   case "$file" in
-    tests/semantic/exact-arithmetic-laws.lisp|tests/semantic/exact-arithmetic-mutant.lisp)
+    tests/semantic/exact-arithmetic-laws.lisp|tests/semantic/exact-arithmetic-mutant.lisp|lib/lisp-fs.lisp)
       paired_runtime_args=(--core4-runtime)
       standalone_runtime=("$native_open" eval-core4)
       ;;

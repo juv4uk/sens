@@ -61,7 +61,7 @@ done
 # Не допускати тихої зміни профілю решти джерел або неперевірених комбінацій.
 if (( core4_runtime )); then
   case "$source_file" in
-    tests/semantic/exact-arithmetic-laws.lisp|tests/semantic/exact-arithmetic-mutant.lisp) ;;
+    tests/semantic/exact-arithmetic-laws.lisp|tests/semantic/exact-arithmetic-mutant.lisp|lib/lisp-fs.lisp) ;;
     *) echo "T5M_REPAIR_CORE4_PROFILE_UNREGISTERED source=$source_file" >&2; exit 2 ;;
   esac
   if (( ${#binding_args[@]} != 0 )) || [[ -n "$expected_error" ]]; then
@@ -192,8 +192,9 @@ if ! timeout "$native_timeout" "$binary" --t5m-pair "$source_file" "$staged" "${
   echo "T5M_REPAIR_REAL_EVAL_FAILED path=$source_file" >&2
   exit 2
 fi
-# За явного Core4-профілю закон повертає тільки точний D1-свідок.
-if (( core4_runtime )); then
+# Тільки арифметичні SENS-свідки повертають точний D1;
+# файлові DEFINE можуть повертати замикання або структуру.
+if (( core4_runtime )) && [[ "$source_file" == tests/semantic/exact-arithmetic-*.lisp ]]; then
   expected_d1=1
   [[ "$source_file" != *-mutant.lisp ]] || expected_d1=0
   if [[ "$(cat "$scratch/out")" != "$expected_d1" ]]; then
