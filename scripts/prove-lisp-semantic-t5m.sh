@@ -874,6 +874,26 @@ cat -- "$last_define_definition" tests/semantic/d11-meta-last-define-laws.lisp >
 cat -- "$last_define_definition" tests/semantic/d11-meta-last-define-mutant.lisp > "$last_define_mutant_bundle"
 run_case run_law d11-meta-last-define-positive "$last_define_positive_bundle" 1
 run_case run_law d11-meta-last-define-mutant "$last_define_mutant_bundle" 0
+# Д6 RASSOC: єдине чинне DEFINE вилучаємо з core4 без семантичної копії.
+# Складене значення не можна подавати D3 EQ; істинність перевіряє SENS.
+d6_rassoc_definition="$evidence/d6-rassoc-authoritative-definition.lisp"
+if ! awk '
+  $0 == "(визначити знайти-за-значенням" { started++; inside=1 }
+  inside && $0 == "; intersection (перетин)" { inside=0; ended++; next }
+  inside { print }
+  END { if (started != 1 || ended != 1 || inside) exit 2 }
+' lib/core4.lisp > "$d6_rassoc_definition"; then
+  echo "::error::D6_RASSOC_DEFINITION_NOT_ISOLATABLE" >&2
+  exit 2
+fi
+test -s "$d6_rassoc_definition"
+d6_rassoc_positive="$evidence/d6-rassoc-atomic-positive-complete.lisp"
+d6_rassoc_negative="$evidence/d6-rassoc-atomic-mutant-complete.lisp"
+cat -- "$d6_rassoc_definition" tests/semantic/d6-rassoc-atomic-law.lisp > "$d6_rassoc_positive"
+cat -- "$d6_rassoc_definition" tests/semantic/d6-rassoc-atomic-mutant.lisp > "$d6_rassoc_negative"
+sha256sum lib/core4.lisp "$d6_rassoc_definition" tests/semantic/d6-rassoc-atomic-law.lisp tests/semantic/d6-rassoc-atomic-mutant.lisp > "$evidence/d6-rassoc-inputs.sha256"
+run_case run_law d6-rassoc-atomic-positive "$d6_rassoc_positive" 1
+run_case run_law d6-rassoc-atomic-mutant "$d6_rassoc_negative" 0
 # Д11 juxt: першокласні одномісні функції та контрприклад перевіряє SENS.
 # Bash лише додає чинні DEFINE та проводить обидва свідки через Zig/T5M.
 d11_juxt_law_bundle="$evidence/d11-clojure-juxt-positive-complete.lisp"
