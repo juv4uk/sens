@@ -674,12 +674,12 @@ fn handle_sexpr_connection(
         let frame = match read_request_frame(&mut reader, MAX_REQUEST_LINE_BYTES, deadline) {
             Ok(frame) => frame,
             Err(error) => {
-                let resp = error_response(
-                    &Value::Nil,
-                    "invalid-encoding",
-                    &format!("request is not valid UTF-8: {error}"),
-                    &contract_version,
-                );
+                let (kind, message) = if error.kind() == io::ErrorKind::TimedOut {
+                    ("request-timeout", "request frame deadline exceeded".to_string())
+                } else {
+                    ("input-read-error", format!("could not read TCP frame: {error}"))
+                };
+                let resp = error_response(&Value::Nil, kind, &message, &contract_version);
                 let _ = writeln!(stream, "{resp}");
                 break;
             }
