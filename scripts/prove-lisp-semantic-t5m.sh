@@ -1046,6 +1046,13 @@ run_case run_law d11-srfi1-adjoin-proper-positive "$d11_adjoin_law_bundle" 1
 run_case run_law d11-srfi1-adjoin-proper-mutant "$d11_adjoin_mutant_bundle" 0
 run_case run_type_rejection d11-srfi1-adjoin-improper-empty "$d11_adjoin_bad_empty_bundle" 'car expects a non-empty list'
 run_case run_type_rejection d11-srfi1-adjoin-improper-duplicate "$d11_adjoin_bad_duplicate_bundle" 'car expects a non-empty list'
+# Д11 ADDJOIN: кандидатний D1:ні не є структурним завершенням D3:().
+d11_adjoin_atomic_candidates="$evidence/d11-srfi1-adjoin-atomic-candidates.lisp"
+d11_adjoin_improper_candidates_tail="$evidence/d11-srfi1-adjoin-improper-candidates-tail.lisp"
+cat -- lib/d11-srfi1-set-relations.lisp tests/fixtures/d11-srfi1-adjoin-atomic-candidates-negative.lisp > "$d11_adjoin_atomic_candidates"
+cat -- lib/d11-srfi1-set-relations.lisp tests/fixtures/d11-srfi1-adjoin-improper-candidates-tail-negative.lisp > "$d11_adjoin_improper_candidates_tail"
+run_case run_type_rejection d11-srfi1-adjoin-atomic-candidates "$d11_adjoin_atomic_candidates" 'car expects a non-empty list'
+run_case run_type_rejection d11-srfi1-adjoin-improper-candidates-tail "$d11_adjoin_improper_candidates_tail" 'car expects a non-empty list'
 sha256sum lib/d11-srfi1-set-relations.lisp tests/semantic/d11-srfi1-adjoin-*.lisp > "$evidence/d11-srfi1-adjoin-inputs.sha256"
 
 # Д11 reductions / pair-fold: реальний SENS позитив, мутант і Type-відмови.
