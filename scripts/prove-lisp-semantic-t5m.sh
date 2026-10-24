@@ -583,7 +583,24 @@ cat -- lib/d11-srfi1-list-equality.lisp tests/semantic/d11-srfi1-list-equality-l
 cat -- lib/d11-srfi1-list-equality.lisp tests/semantic/d11-srfi1-list-equality-mutant.lisp > "$d11_list_equal_mutant_bundle"
 run_case run_law d11-srfi1-list-equality-positive "$d11_list_equal_law_bundle" 1
 run_case run_law d11-srfi1-list-equality-mutant "$d11_list_equal_mutant_bundle" 0
-sha256sum lib/d11-srfi1-list-equality.lisp tests/semantic/d11-srfi1-list-equality-law.lisp tests/semantic/d11-srfi1-list-equality-mutant.lisp > "$evidence/d11-list-equality-inputs.sha256"
+
+# SRFI-1 list= rejects malformed input even when early length/value cases could
+# otherwise short-circuit. Each negative is checked as a real Type error through
+# direct SENS, Zig/T5M paired execution, and standalone physical SENS.
+d11_list_equal_bad_left="$evidence/d11-list-equality-improper-left-complete.lisp"
+d11_list_equal_bad_right="$evidence/d11-list-equality-improper-right-complete.lisp"
+d11_list_equal_bad_singleton="$evidence/d11-list-equality-invalid-singleton-complete.lisp"
+d11_list_equal_bad_third="$evidence/d11-list-equality-invalid-third-complete.lisp"
+cat -- lib/d11-srfi1-list-equality.lisp tests/fixtures/d11-list-equality-improper-left-must-error.lisp > "$d11_list_equal_bad_left"
+cat -- lib/d11-srfi1-list-equality.lisp tests/fixtures/d11-list-equality-improper-right-must-error.lisp > "$d11_list_equal_bad_right"
+cat -- lib/d11-srfi1-list-equality.lisp tests/fixtures/d11-list-equality-invalid-singleton-must-error.lisp > "$d11_list_equal_bad_singleton"
+cat -- lib/d11-srfi1-list-equality.lisp tests/fixtures/d11-list-equality-invalid-third-must-error.lisp > "$d11_list_equal_bad_third"
+d11_list_equal_type_error='domain identity is not callable under its ratified law: D1 '
+run_case run_type_rejection d11-list-equality-improper-left-type "$d11_list_equal_bad_left" "$d11_list_equal_type_error"
+run_case run_type_rejection d11-list-equality-improper-right-type "$d11_list_equal_bad_right" "$d11_list_equal_type_error"
+run_case run_type_rejection d11-list-equality-invalid-singleton-type "$d11_list_equal_bad_singleton" "$d11_list_equal_type_error"
+run_case run_type_rejection d11-list-equality-invalid-third-type "$d11_list_equal_bad_third" "$d11_list_equal_type_error"
+sha256sum lib/d11-srfi1-list-equality.lisp tests/semantic/d11-srfi1-list-equality-law.lisp tests/semantic/d11-srfi1-list-equality-mutant.lisp tests/fixtures/d11-list-equality-improper-left-must-error.lisp tests/fixtures/d11-list-equality-improper-right-must-error.lisp tests/fixtures/d11-list-equality-invalid-singleton-must-error.lisp tests/fixtures/d11-list-equality-invalid-third-must-error.lisp > "$evidence/d11-list-equality-inputs.sha256"
 # Д11 SRFI-1: UNFOLD/UNFOLD-RIGHT є чистими композиціями SENS.
 # Джерело тестів — Lisp, Zig лише несе T5M; помилковий порядок = D1:ні.
 d11_unfold_positive="$evidence/d11-srfi1-unfold-positive-complete.lisp"
