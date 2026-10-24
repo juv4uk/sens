@@ -329,6 +329,11 @@ jobs:
                   "tests/fixtures/d11-list-equality-improper-right-must-error.lisp",
                   "tests/fixtures/d11-list-equality-invalid-singleton-must-error.lisp",
                   "tests/fixtures/d11-list-equality-invalid-third-must-error.lisp",
+                  # D11 UNFOLD terminal tail: виконувати тільки з canonical DEFINE через фізичний law-runner.
+                  "tests/fixtures/d11-unfold-terminal-left-atom-must-error.lisp",
+                  "tests/fixtures/d11-unfold-terminal-left-dotted-must-error.lisp",
+                  "tests/fixtures/d11-unfold-terminal-right-atom-must-error.lisp",
+                  "tests/fixtures/d11-unfold-terminal-right-dotted-must-error.lisp",
                   # Д5/D24+: залежні SENS-свідки із DEFINE чинної числової бібліотеки.
                   # Працюють тільки як зібрані SENS-програми law-runner.
                   "tests/semantic/d5-exact-numbers-filter-law.lisp",
