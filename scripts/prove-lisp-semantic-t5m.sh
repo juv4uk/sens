@@ -573,6 +573,10 @@ run_case run_error_rejection d6-map-onto-improper-tail tests/semantic/d6-map-ont
 run_case run_law d6-reduce-left-positive tests/semantic/d6-reduce-left-law.lisp 1 core4
 run_case run_law d6-reduce-left-mutant tests/semantic/d6-reduce-left-mutant.lisp 0 core4
 run_case run_error_rejection d6-reduce-improper-tail tests/semantic/d6-reduce-improper-tail-negative.lisp Type 'car expects a non-empty list' core4
+# Д6 SCAN: хвостове накопичення станів, мутант та точний Type.
+run_case run_law d6-scan-tail-state-positive tests/semantic/d6-scan-tail-state-law.lisp 1 core4
+run_case run_law d6-scan-tail-state-mutant tests/semantic/d6-scan-tail-state-mutant.lisp 0 core4
+run_case run_error_rejection d6-scan-tail-improper tests/semantic/d6-scan-tail-improper-negative.lisp Type 'car expects a non-empty list' core4
 # Д6:101111 SCAN: послідовність станів, зв'язок із REDUCE та структурні відмови.
 run_case run_law d6-scan-reduce-terminal-positive tests/semantic/d6-scan-reduce-terminal-law.lisp 1 core4
 run_case run_law d6-scan-missing-initial-mutant tests/semantic/d6-scan-missing-initial-mutant.lisp 0 core4
