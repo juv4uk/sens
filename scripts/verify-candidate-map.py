@@ -155,6 +155,17 @@ KNOWN_CASES = (
 )
 
 
+# ВІДОМІ НЕВИРІШУВАНІ: правило НЕ дає правильного вердикту, і це зафіксовано,
+# а не замовчано. Для них перевіряється лише те, що правило СТАБІЛЬНЕ
+# (не CONFIRMED), а не те, що воно праве.
+KNOWN_UNRESOLVABLE = (
+    ("d4-higher-order-composition",
+     "шапка каже «композиція функцій», застосування — у ТІЛІ. Ні шапка, ні весь "
+     "файл не дають правильного вердикту; моє судження WEAK, правило REJECTED. "
+     "НЕ вирішено — лишається видимим."),
+)
+
+
 def self_test() -> int:
     bad = 0
     for artifact, want, why in KNOWN_CASES:
@@ -163,6 +174,12 @@ def self_test() -> int:
         bad += not ok
         print(f"MAP-VERIFY-SELFTEST: {'OK  ' if ok else 'ЗЛАМАНО'} {artifact}: "
               f"очікувано={want} отримано={got} ({why})")
+    for artifact, why in KNOWN_UNRESOLVABLE:
+        got = independent(_artifact_row(artifact), artifact)
+        ok = got != "CONFIRMED"
+        bad += not ok
+        print(f"MAP-VERIFY-SELFTEST: {'OK  ' if ok else 'ЗЛАМАНО'} {artifact}: "
+              f"правило={got} (НЕВИРІШУВАНИЙ — правило не сміє казати CONFIRMED; {why})")
     if bad:
         raise SystemExit(f"FAIL: правило перевіряча зламано на {bad} відомих випадках")
     print("MAP-VERIFY-SELFTEST: PASS правило стабільне на відомих випадках")
