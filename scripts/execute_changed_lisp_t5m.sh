@@ -661,7 +661,8 @@ run_native_t5m_program() {
       fi
     fi
     if [[ "$file" == "tests/semantic/d11-list-terminator-law.lisp" ||
-          "$file" == "tests/semantic/d11-list-terminator-mutant.lisp" ]]; then
+          "$file" == "tests/semantic/d11-list-terminator-mutant.lisp" ||
+          "$file" == "tests/semantic/d11-list-terminator-nested-mutant.lisp" ]]; then
       # Самодостатній T5M-носій без підміни функції зовнішнім хостом.
       local terminator_full_source="$dir/d11-list-terminator-full.lisp"
       standalone_physical="$dir/d11-list-terminator-full.sens"
@@ -1037,7 +1038,8 @@ while IFS= read -r file || [[ -n "$file" ]]; do
     # Усі чотири носії викликають ті самі чинні SENS DEFINE.
     binding_sources=(--binding-source lib/d11-srfi1-unary-count.lisp)
   elif [[ "$file" == "tests/semantic/d11-list-terminator-law.lisp" ||
-          "$file" == "tests/semantic/d11-list-terminator-mutant.lisp" ]]; then
+          "$file" == "tests/semantic/d11-list-terminator-mutant.lisp" ||
+          "$file" == "tests/semantic/d11-list-terminator-nested-mutant.lisp" ]]; then
     # Повторно використовуємо лише справжній SENS DEFINE, Zig переносить форму.
     binding_sources=(--binding-source lib/d11-list-terminator-evidence.lisp)
   elif [[ "$file" == "tests/semantic/d11-find-last-presence-law.lisp" ||
