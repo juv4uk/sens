@@ -304,15 +304,23 @@ def inspect(root: Path, *, strict_semantic: bool = False,
                 row["view_status"] = "MISSING_NOT_CERTIFIED"
         except (OSError, SensT5Error, ValueError) as exc:
             row["error"] = str(exc)
-            row["physical_status"] = "BLOCKED"
-            if row["source_status"] == "NOT_CHECKED":
-                row["source_status"] = "BLOCKED"
+            if "missing same-stem" in str(exc):
+                # Брак ДЖЕРЕЛА — не фізичний дефект. Файл міг бути цілком
+                # канонічним T5M; фізичну перевірку просто не було виконано.
+                # Мітку виправлено; блокування збережено окремим лічильником.
+                row["physical_status"] = "NOT_CHECKED"
+                row["source_status"] = "MISSING_SOURCE"
+            else:
+                row["physical_status"] = "BLOCKED"
+                if row["source_status"] == "NOT_CHECKED":
+                    row["source_status"] = "BLOCKED"
     physical_empties = sum(row["physical_status"] == "BLOCKED" for row in entries)
     pending_oracle = sum(row["source_status"] == "PENDING_ORACLE" for row in entries)
     exact_binary = sum(row["source_status"] == "EXACT_BINARY_SOURCE" for row in entries)
     view_pass = sum(row["view_status"] == "PASS" for row in entries)
     view_missing = sum(row["view_status"] == "MISSING_NOT_CERTIFIED" for row in entries)
     view_blocked = sum(row["view_status"] == "BLOCKED" for row in entries)
+    source_missing = sum(row["source_status"] == "MISSING_SOURCE" for row in entries)
     return {
         "schema": SCHEMA,
         "mode": "tracked-only" if not include_untracked else "all-files",
@@ -332,10 +340,11 @@ def inspect(root: Path, *, strict_semantic: bool = False,
             "spaced_view_pass": view_pass,
             "spaced_view_missing": view_missing,
             "spaced_view_blocked": view_blocked,
+            "source_missing": source_missing,
             "admitted_executable_semantics": None,
         },
         "status": (
-            "BLOCKED" if (physical_empties or view_blocked
+            "BLOCKED" if (physical_empties or view_blocked or source_missing
                           or (require_spaced_view and view_missing)
                           or (strict_semantic and pending_oracle)
                           or (require_complete_sources and missing_sens))
