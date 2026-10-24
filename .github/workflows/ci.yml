@@ -494,3 +494,15 @@ jobs:
             "$PWD/target/debug/sens" "$PWD/target/debug/sens-trit" \
             "$RUNNER_TEMP/sens-language-laws"
           bash scripts/prove-lisp-language-laws.sh "$PWD/target/debug/sens"
+
+      # Narrow, one-run evidence export: capture outputs minted by the actual
+      # SENS CLI + Zig/T5M route when explicitly requested for pair regeneration.
+      - name: Export canonical SENS/Zig T5M pair regeneration evidence
+        if: ${{ always() && contains(github.event.head_commit.message, 'SENS_PAIR_REGEN') }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: sens-pair-regen-${{ github.sha }}
+          path: ${{ runner.temp }}/changed-t5m-pairs/**
+          if-no-files-found: warn
+          retention-days: 1
+          compression-level: 0
