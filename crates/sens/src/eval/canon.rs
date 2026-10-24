@@ -142,6 +142,7 @@ pub(crate) enum DomainPrimitiveKind {
     StringToSymbol,
     SymbolToString,
     CharCode,
+    CodeChar,
     Read,
     WriteToString,
     Equal,
@@ -166,6 +167,12 @@ pub(crate) fn domain_primitive_kind(identity: CoreDomainIdentity) -> Option<Doma
             _ => None, // QUOTE/COND are syntax routes, 000 is structural empty
         },
         CoreDomainIdentity::D8(word) => match word.word().packed_bits() {
+            // D8:00000000 CODE-CHAR (укр `символ-за-кодом`) is the exact
+            // inverse of D8:11100000 CHAR-CODE. It is the identity the domain
+            // table (lib/domains/d8.lisp), the projection catalog and the
+            // semantic registry already ratify for that surface, and the one
+            // the CLI string projection lowers every string literal into.
+            0b00000000 => Some(DomainPrimitiveKind::CodeChar),
             0b11100000 => Some(DomainPrimitiveKind::CharCode),
             0b11101101 => Some(DomainPrimitiveKind::StringToSymbol),
             0b11101110 => Some(DomainPrimitiveKind::SymbolToString),
@@ -192,6 +199,7 @@ fn invoke_domain_primitive(
         let expected = match kind {
             DomainPrimitiveKind::StringToSymbol | DomainPrimitiveKind::SymbolToString => 1,
             DomainPrimitiveKind::CharCode => 1,
+            DomainPrimitiveKind::CodeChar => 1,
             DomainPrimitiveKind::Read => args.len(),
             DomainPrimitiveKind::WriteToString => 1,
             DomainPrimitiveKind::AtomPredicate => 1,
@@ -268,6 +276,14 @@ fn invoke_domain_primitive(
                         span,
                     )),
                 }
+            }
+            DomainPrimitiveKind::CodeChar => {
+                // D8:00000000 CODE-CHAR: one already-interpreted Unicode scalar
+                // becomes the language's immutable one-character string.
+                // Unicode/UTF-8 policy stays in Lisp; this only materializes a
+                // scalar, exactly like the admitted D8:11100000 CHAR-CODE does
+                // in the opposite direction. No historical byte is consulted.
+                special_forms::codepoint_to_string_values(args, span)
             }
             DomainPrimitiveKind::Read => {
                 // D8:11101010 owns canonical READ, not the historical SID.
