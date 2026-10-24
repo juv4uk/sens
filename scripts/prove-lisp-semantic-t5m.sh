@@ -666,6 +666,17 @@ run_case run_law d11-reason-index-pair-key-mutant "$reason_index_pair_mutant" 0
 sha256sum lib/reason.lisp \
   tests/semantic/d11-reason-index-pair-key-law.lisp \
   tests/semantic/d11-reason-index-pair-key-mutant.lisp > "$evidence/d11-reason-index-pair-key-inputs.sha256"
+# Д11 REASON: точний хвіст перевіряється ще до першого збігу.
+reason_early_hit_positive="$evidence/d11-reason-early-hit-proper-positive-complete.lisp"
+reason_early_hit_bad_tail="$evidence/d11-reason-early-hit-bad-tail-complete.lisp"
+cat -- lib/unify.lisp lib/reason.lisp tests/semantic/d11-reason-early-hit-proper-law.lisp > "$reason_early_hit_positive"
+cat -- lib/unify.lisp lib/reason.lisp tests/semantic/d11-reason-early-hit-improper-tail-negative.lisp > "$reason_early_hit_bad_tail"
+run_case run_law d11-reason-early-hit-proper-positive "$reason_early_hit_positive" 1 core4
+run_case run_error_rejection d11-reason-early-hit-improper-tail-type "$reason_early_hit_bad_tail" Type 'car expects a non-empty list' core4
+sha256sum lib/unify.lisp lib/reason.lisp \
+  tests/semantic/d11-reason-early-hit-proper-law.lisp \
+  tests/semantic/d11-reason-early-hit-improper-tail-negative.lisp > "$evidence/d11-reason-early-hit-inputs.sha256"
+
 # Д11: реальний SENS індекс — закон, мутант і три точні D3 Type-відмови.
 reason_index_law_bundle="$evidence/d11-reason-index-law-complete.lisp"
 reason_index_mutant_bundle="$evidence/d11-reason-index-mutant-complete.lisp"
