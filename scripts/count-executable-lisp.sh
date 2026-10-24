@@ -30,6 +30,7 @@ inverse=0
 paired_executable=0
 executable=0
 paired_only=0
+explicit_core4=0
 bad=0
 missing=0
 nonprogram_data=0
@@ -180,6 +181,17 @@ while IFS= read -r -d '' source; do
       # Облік виконує той самий native binding-source, що й парний CLI.
       binding_sources=(--binding-source lib/meta-eval-first-class.lisp) ;;
   esac
+  # Core4 потрібний лише для реального eval: mint і Zig-перегляд
+  # залишаються без додаткового мовного оракула. Явний Core4-ранер
+  # не можна зараховувати до «голого» sens FILE.sens.
+  paired_runtime_args=()
+  standalone_runtime=("$sens")
+  case "$source" in
+    tests/semantic/exact-arithmetic-laws.lisp|tests/semantic/exact-arithmetic-mutant.lisp|tests/semantic/d5-arithmetic-native-t5m-law.lisp|tests/semantic/d5-arithmetic-native-t5m-mutant.lisp|lib/lisp-fs.lisp)
+      paired_runtime_args=(--core4-runtime)
+      standalone_runtime=("$trit" eval-core4)
+      ;;
+  esac
   # Часовий бюджет визначає повний SENS-вхід, а не тільки файл-
   # споживач: --binding-source може завантажувати великий Core4.
   # Така сама межа, як у refresh-verified-t5m-pair.sh; семантика
@@ -241,7 +253,7 @@ while IFS= read -r -d '' source; do
     continue
   fi
   (( inverse += 1 ))
-  if timeout "${mint_seconds}s" "$sens" --t5m-pair "$source" "$physical" "${binding_sources[@]}" >"$scratch/paired.out" 2>"$scratch/paired.err"; then
+  if timeout "${mint_seconds}s" "$sens" --t5m-pair "$source" "$physical" "${binding_sources[@]}" "${paired_runtime_args[@]}" >"$scratch/paired.out" 2>"$scratch/paired.err"; then
     :
   else
     status=$?
@@ -250,17 +262,35 @@ while IFS= read -r -d '' source; do
     sed 's/^/SENS paired: /' "$scratch/paired.err" >&2
     continue
   fi
+  # Арифметичні свідки самі повертають точний D1; успішний
+  # код процесу не є доказом законів чи відхилення мутанта.
+  case "$source" in
+    tests/semantic/exact-arithmetic-laws.lisp|tests/semantic/exact-arithmetic-mutant.lisp|tests/semantic/d5-arithmetic-native-t5m-law.lisp|tests/semantic/d5-arithmetic-native-t5m-mutant.lisp)
+      expected_d1=1
+      [[ "$source" != *-mutant.lisp ]] || expected_d1=0
+      if [[ "$(cat "$scratch/paired.out")" != "$expected_d1" ]]; then
+        (( bad += 1 ))
+        printf 'NATIVE_CORE4_WRONG_D1\t%s\texpected=%s actual=%s\n' "$source" "$expected_d1" "$(cat "$scratch/paired.out")" >&2
+        continue
+      fi
+      ;;
+  esac
   # Цей фізичний файл вже успішно виконав SENS-парний шлях.
   # Не плутати парне виконання з незалежним standalone admission.
   (( paired_executable += 1 ))
-  if timeout "${mint_seconds}s" "$sens" "$physical" >"$scratch/standalone.out" 2>"$scratch/standalone.err"; then
+  if timeout "${mint_seconds}s" "${standalone_runtime[@]}" "$physical" >"$scratch/standalone.out" 2>"$scratch/standalone.err"; then
     :
   else
     status=$?
     # Парний шлях доведений, але standalone має лише вузькі відомі
     # обмеження D7/D24+. Panic, timeout і довільний RED не є paired-only.
     # Та сама перевірювана межа, що у refresh-verified-t5m-pair.sh.
-    if (( status != 124 && status != 137 )) &&
+    if [[ "${standalone_runtime[0]}" != "$sens" ]]; then
+      # Явний Core4 не має права деградувати у paired-only.
+      (( bad += 1 ))
+      printf 'NATIVE_CORE4_STANDALONE_FAILED\t%s\tstatus=%s\n' "$source" "$status" >&2
+      sed 's/^/SENS Core4: /' "$scratch/standalone.err" >&2
+    elif (( status != 124 && status != 137 )) &&
        { grep -Fq 'T5M requires exact source projection to D24+ before transport' "$scratch/standalone.err" ||
          grep -Fq 'unknown Text7 binding:' "$scratch/standalone.err" ||
          { grep -Fq 'Фізичне T5M-декодування зберегло точні ширини слів' "$scratch/standalone.err" &&
@@ -279,6 +309,13 @@ while IFS= read -r -d '' source; do
     printf 'NATIVE_OUTPUT_DIVERGENCE\t%s\n' "$source" >&2
     continue
   fi
+  if [[ "${standalone_runtime[0]}" != "$sens" ]]; then
+    # Байти доведено в парному та явному Core4, але автономний CLI
+    # без Core4 не запускався — це окрема, чесна категорія обліку.
+    (( explicit_core4 += 1 ))
+    printf 'NATIVE_EXPLICIT_CORE4\t%s\tbare=NOT_TESTED\n' "$source"
+    continue
+  fi
   (( executable += 1 ))
   printf 'NATIVE_EXECUTED\t%s\n' "$source"
 done < "$tracked_lisp_list"
@@ -291,11 +328,11 @@ status=COMPLETE
 if (( sources == 0 )); then
   # Порожня вибірка НЕ може засвідчувати виконання SENS.
   status=EMPTY
-elif (( bad != 0 || missing != 0 || paired_only != 0 )); then
+elif (( bad != 0 || missing != 0 || paired_only != 0 || explicit_core4 != 0 )); then
   status=PARTIAL
 fi
-printf 'NATIVE_LISP_RESULT scope=%s sources=%s complete_triplets=%s exact_inverse=%s paired_executed=%s paired_and_standalone=%s paired_only=%s failed=%s missing_triplet=%s nonprogram_data=%s intentional_negative=%s status=%s\n' \
-  "${scope:-all}" "$sources" "$complete" "$inverse" "$paired_executable" "$executable" "$paired_only" "$bad" "$missing" "$nonprogram_data" "$expected_negative" "$status"
+printf 'NATIVE_LISP_RESULT scope=%s sources=%s complete_triplets=%s exact_inverse=%s paired_executed=%s paired_and_standalone=%s paired_only=%s explicit_core4=%s failed=%s missing_triplet=%s nonprogram_data=%s intentional_negative=%s status=%s\n' \
+  "${scope:-all}" "$sources" "$complete" "$inverse" "$paired_executable" "$executable" "$paired_only" "$explicit_core4" "$bad" "$missing" "$nonprogram_data" "$expected_negative" "$status"
 if (( bad != 0 )); then
   echo "NATIVE_LISP_EXECUTION_RED failed=$bad: справжню помилку не приховує статус обліку" >&2
   exit 1
@@ -304,7 +341,7 @@ fi
 # неповного корпусу, але оболонка не має права трактувати пропущені
 # фізичні трійки або paired-only як повне нативне виконання.
 if [[ "$status" != COMPLETE ]]; then
-  printf 'NATIVE_LISP_NOT_COMPLETE status=%s missing=%s paired_only=%s sources=%s\n' \
-    "$status" "$missing" "$paired_only" "$sources" >&2
+  printf 'NATIVE_LISP_NOT_COMPLETE status=%s missing=%s paired_only=%s explicit_core4=%s sources=%s\n' \
+    "$status" "$missing" "$paired_only" "$explicit_core4" "$sources" >&2
   exit 1
 fi
