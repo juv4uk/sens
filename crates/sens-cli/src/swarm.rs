@@ -10,8 +10,10 @@ use sens::{
 use std::io::{self, BufRead, BufReader, Write};
 use std::net::{Ipv4Addr, TcpListener, TcpStream};
 use std::process;
+use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::Arc;
 use std::thread;
+use std::time::{Duration, Instant};
 
 /// Walks a `Value` list (the `Pair`-chain shape `Value::list` builds) into
 /// a `Vec`, stopping at the first non-`Pair` tail. Used only for reading
@@ -36,11 +38,23 @@ enum RequestFrame {
 /// Read one newline-delimited frame without ever allocating more than `limit`
 /// bytes for it. Oversized frames are drained through the newline and then
 /// reported, so the connection cannot be desynchronised by the rejected data.
-fn read_request_frame(reader: &mut BufReader<TcpStream>, limit: usize) -> io::Result<RequestFrame> {
+fn read_request_frame(reader: &mut BufReader<TcpStream>, limit: usize, deadline: Instant) -> io::Result<RequestFrame> {
     let mut bytes = Vec::with_capacity(limit.min(4096));
     let mut too_large = false;
     loop {
-        let chunk = reader.fill_buf()?;
+        // Absolute deadline: trickling bytes cannot keep a worker indefinitely.
+        let remaining = deadline
+            .checked_duration_since(Instant::now())
+            .filter(|duration| !duration.is_zero())
+            .ok_or_else(|| io::Error::new(io::ErrorKind::TimedOut, "TCP frame deadline exceeded"))?;
+        reader.get_ref().set_read_timeout(Some(remaining))?;
+        let chunk = reader.fill_buf().map_err(|error| {
+            if matches!(error.kind(), io::ErrorKind::WouldBlock | io::ErrorKind::TimedOut) {
+                io::Error::new(io::ErrorKind::TimedOut, "TCP frame deadline exceeded")
+            } else {
+                error
+            }
+        })?;
         if chunk.is_empty() {
             return Ok(if too_large {
                 RequestFrame::TooLarge
@@ -513,6 +527,26 @@ fn error_kind_symbol(kind: &ErrorKind) -> &'static str {
 /// a live `Value`. The isolation guarantee (`eval`/`parse`/`diagnose`
 /// state invisible across connections) is now also physical (separate
 /// threads), not just logical (separate `Environment`s in one thread).
+/// Bounded number of workers that each reserve a large native stack.
+const MAX_ORACLE_CONNECTIONS: usize = 8;
+const ORACLE_REQUEST_DEADLINE: Duration = Duration::from_secs(60);
+const ORACLE_WRITE_TIMEOUT: Duration = Duration::from_secs(10);
+
+/// Session admission token automatically released at worker exit or panic.
+struct OracleConnectionSlot {
+    active: Arc<AtomicUsize>,
+}
+impl OracleConnectionSlot {
+    fn acquire(active: &Arc<AtomicUsize>, limit: usize) -> Option<Self> {
+        active.fetch_update(Ordering::AcqRel, Ordering::Acquire, |count| {
+            if count < limit { Some(count + 1) } else { None }
+        }).ok().map(|_| Self { active: Arc::clone(active) })
+    }
+}
+impl Drop for OracleConnectionSlot {
+    fn drop(&mut self) { self.active.fetch_sub(1, Ordering::AcqRel); }
+}
+
 pub(crate) fn run_tcp_repl_sexpr(
     port: u16,
     allowed: Vec<String>,
@@ -533,11 +567,18 @@ pub(crate) fn run_tcp_repl_sexpr(
     );
 
     let allowed = Arc::new(allowed);
+    let active = Arc::new(AtomicUsize::new(0));
 
     for stream in listener.incoming() {
         let stream = match stream {
             Ok(stream) => stream,
             Err(_) => continue,
+        };
+        // Reject before allocating a worker or its 256 MiB stack.
+        let Some(slot) = OracleConnectionSlot::acquire(&active, MAX_ORACLE_CONNECTIONS) else {
+            eprintln!("SENS oracle: {MAX_ORACLE_CONNECTIONS} concurrent sessions; refusing peer");
+            let _ = stream.shutdown(std::net::Shutdown::Both);
+            continue;
         };
         let allowed = Arc::clone(&allowed);
         // Deep sens recursion (e.g. (fact 1000)) consumes native stack
@@ -545,12 +586,16 @@ pub(crate) fn run_tcp_repl_sexpr(
         // stack overflowed and ABORTED the whole shared oracle process
         // (found 2026-08-25 by wsl-nidana-1/wsl-ganaka-1). Give every
         // connection its own generous stack instead.
-        thread::Builder::new()
+        if let Err(error) = thread::Builder::new()
             .stack_size(256 * 1024 * 1024)
             .spawn(move || {
+                let _slot = slot;
                 handle_sexpr_connection(stream, &allowed, contract_major, contract_minor);
             })
-            .expect("failed to spawn TCP connection thread");
+        {
+            // Failed spawn drops the closure and its admission token.
+            eprintln!("SENS oracle: cannot spawn connection worker: {error}");
+        }
     }
 }
 
@@ -612,9 +657,21 @@ fn handle_sexpr_connection(
         return;
     }
 
-    let mut reader = BufReader::new(stream.try_clone().expect("clone TCP stream"));
+    if let Err(error) = stream.set_write_timeout(Some(ORACLE_WRITE_TIMEOUT)) {
+        eprintln!("TCP REPL: {peer} cannot set write timeout: {error}");
+        return;
+    }
+    let reader_stream = match stream.try_clone() {
+        Ok(clone) => clone,
+        Err(error) => {
+            eprintln!("TCP REPL: {peer} cannot clone stream: {error}");
+            return;
+        }
+    };
+    let mut reader = BufReader::new(reader_stream);
     loop {
-        let frame = match read_request_frame(&mut reader, MAX_REQUEST_LINE_BYTES) {
+        let deadline = Instant::now() + ORACLE_REQUEST_DEADLINE;
+        let frame = match read_request_frame(&mut reader, MAX_REQUEST_LINE_BYTES, deadline) {
             Ok(frame) => frame,
             Err(error) => {
                 let resp = error_response(
@@ -936,6 +993,45 @@ pub(crate) fn run_client(address: &str) {
 #[cfg(test)]
 mod oracle_result_tests {
     use super::*;
+
+    #[test]
+    fn oracle_session_slots_are_bounded_and_released_after_panic() {
+        let active = Arc::new(AtomicUsize::new(0));
+        let first = OracleConnectionSlot::acquire(&active, 2).expect("first session");
+        let second = OracleConnectionSlot::acquire(&active, 2).expect("second session");
+        assert!(OracleConnectionSlot::acquire(&active, 2).is_none());
+        drop(first);
+        let third = OracleConnectionSlot::acquire(&active, 2).expect("released slot");
+        drop(second);
+        drop(third);
+        assert_eq!(active.load(Ordering::Acquire), 0);
+        let outcome = std::panic::catch_unwind({
+            let active = Arc::clone(&active);
+            move || {
+                let _slot = OracleConnectionSlot::acquire(&active, 2).expect("worker slot");
+                panic!("simulated worker failure");
+            }
+        });
+        assert!(outcome.is_err());
+        assert_eq!(active.load(Ordering::Acquire), 0);
+    }
+
+    #[test]
+    fn oracle_partial_frame_expires_without_newline() {
+        let listener = TcpListener::bind((Ipv4Addr::LOCALHOST, 0))
+            .expect("loopback listener");
+        let mut client = TcpStream::connect(listener.local_addr().expect("listener addr"))
+            .expect("client");
+        let (server, _) = listener.accept().expect("accept client");
+        client.write_all(b"(request (id slow)").expect("partial request");
+        let mut reader = BufReader::new(server);
+        let deadline = Instant::now() + Duration::from_millis(100);
+        let error = match read_request_frame(&mut reader, 128, deadline) {
+            Err(error) => error,
+            Ok(_) => panic!("incomplete frame must be rejected"),
+        };
+        assert_eq!(error.kind(), io::ErrorKind::TimedOut);
+    }
 
     fn contract() -> Value {
         Value::list([
