@@ -25,6 +25,16 @@ class SemanticBacklogTests(unittest.TestCase):
         r = self.run_script()
         self.assertIn("з квитанцією=0", r.stdout)
 
+    def test_readiness_names_the_unmet_requirements(self):
+        # 4 рядки з кандидатом; 2 мають .bits (треба .sens), 2 мають .sens але
+        # без негатива. Звіт мусить назвати саме це, а не «готово».
+        r = self.run_script("--ready")
+        self.assertEqual(r.returncode, 0, r.stderr)
+        self.assertIn("UNVERIFIED_NATIVE_PHYSICAL", r.stdout)   # .bits-кандидати
+        self.assertIn("MISSING_NEGATIVE_SENS", r.stdout)        # немає негатива
+        self.assertIn("NEEDS_NATIVE_RUN", r.stdout)             # потрібен запуск
+        self.assertNotIn("готово ✓", r.stdout)
+
     def test_the_three_scopes_are_named(self):
         r = self.run_script()
         for scope in ("BULK_20261009", "EVAL_20261009", "TARGETED_20261009"):
