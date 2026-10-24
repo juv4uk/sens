@@ -1474,6 +1474,19 @@ run_case run_type_rejection d11-srfi1-span-improper-suffix-type "$d11_span_impro
 d11_break_improper="$evidence/d11-srfi1-break-improper-suffix.lisp"
 cat -- lib/d11-srfi1-span-break.lisp tests/semantic/d11-srfi1-break-improper-suffix-negative.lisp > "$d11_break_improper"
 run_case run_type_rejection d11-srfi1-break-improper-suffix-type "$d11_break_improper" 'car expects a non-empty list'
+# Д11 TAKE/DROP-UNTIL: повний D3-хвіст перевіряється ДО раннього D1-збігу
+# та ДО помилкового першокласного предиката. Тільки справжня SENS Type.
+d11_until_early_bad="$evidence/d11-take-until-early-hit-improper-complete.lisp"
+d11_until_priority_bad="$evidence/d11-drop-until-structure-before-predicate-complete.lisp"
+cat -- lib/d11-srfi1-span-break.lisp tests/fixtures/d11-take-until-early-hit-improper-negative.lisp > "$d11_until_early_bad"
+cat -- lib/d11-srfi1-span-break.lisp tests/fixtures/d11-drop-until-structure-before-predicate-negative.lisp > "$d11_until_priority_bad"
+run_case run_type_rejection d11-take-until-early-hit-spine "$d11_until_early_bad" 'car expects a non-empty list'
+run_case run_type_rejection d11-drop-until-before-predicate "$d11_until_priority_bad" 'car expects a non-empty list'
+sha256sum lib/d11-srfi1-span-break.lisp \
+  tests/fixtures/d11-take-until-early-hit-improper-negative.lisp \
+  tests/fixtures/d11-drop-until-structure-before-predicate-negative.lisp \
+  > "$evidence/d11-until-type-priority-inputs.sha256"
+
 # D11 SPAN/BREAK: CAR неправильного D3-хвоста мусить передувати
 # іншій CDR Type усередині першокласного SENS-предиката.
 d11_span_precedence_bad="$evidence/d11-span-structure-before-predicate-complete.lisp"
