@@ -42,6 +42,8 @@ var table_cache = [_]?[]u8{null} ** 11;
 // Індекс — лише механіка пошуку у вже прочитаних Lisp-таблицях.
 // Record зберігає зрізи тих самих джерельних байтів: нової семантики немає.
 var coordinate_index_cache = [_]?[]?Record{null} ** 11;
+// Підрахунок походить із тих самих незмінних таблиць, один раз за процес.
+var question_count_cache = [_]?usize{null} ** 11;
 
 fn bitCoordinate(bits: []const u8) ?usize {
     var coordinate: usize = 0;
@@ -216,6 +218,9 @@ pub fn questionAt(width: u8, index: usize) ?Record {
 }
 
 pub fn questionCount(width: u8) usize {
+    if (width == 0 or width > 11) return 0;
+    const index = @as(usize, width) - 1;
+    if (question_count_cache[index]) |cached| return cached;
     const table = source(width) orelse return 0;
     var lines = std.mem.splitScalar(u8, table, '\n');
     var count: usize = 0;
@@ -223,6 +228,7 @@ pub fn questionCount(width: u8) usize {
         const row = parseRow(width, line) orelse continue;
         if (!std.mem.eql(u8, row.lisp, "()")) count += 1;
     }
+    question_count_cache[index] = count;
     return count;
 }
 
@@ -315,6 +321,23 @@ pub fn gradeDomain(width: u8, guesses: []const Guess) Score {
     const total = questionCount(width);
     result.missing = if (total > answered) total - answered else 0;
     return result;
+}
+
+test "Драбина: кеш кількості питань зберігає відповідність Lisp-таблицям" {
+    var width: u8 = 1;
+    while (width <= 11) : (width += 1) {
+        const table = source(width) orelse return error.MissingDomainTable;
+        var lines = std.mem.splitScalar(u8, table, '\n');
+        var expected: usize = 0;
+        while (lines.next()) |line| {
+            const row = parseRow(width, line) orelse continue;
+            if (!std.mem.eql(u8, row.lisp, "()")) expected += 1;
+        }
+        try std.testing.expectEqual(expected, questionCount(width));
+        try std.testing.expectEqual(expected, questionCount(width));
+    }
+    try std.testing.expectEqual(@as(usize, 0), questionCount(0));
+    try std.testing.expectEqual(@as(usize, 0), questionCount(12));
 }
 
 test "Драбина: індекс зберігає кожен запис і відкидає не-двійковий код" {
