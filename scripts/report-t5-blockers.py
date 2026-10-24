@@ -1,0 +1,65 @@
+#!/usr/bin/env python3
+"""Точний перелік блокерів T5/T5M-аудиту — названий, а не похований у JSON.
+
+Першопричина: audit_t5_t5m_file_pairs.py каже status=BLOCKED, але його повний
+звіт (з файлами) пише лише --output і він іде ~90 с. Тому 5 конкретних блокерів
+ніхто не бачив — бачили лише «BLOCKED».
+
+Знайдено (2026-10-24, власними руками):
+  physical_status=BLOCKED (2): docs/research/1556-sens-runtime-lookup-inventory.sens
+                               knowledge/function-table-sculpt-audit.sens
+  view_status=BLOCKED     (2): lib/core.sens, lib/guard.sens
+  spaced_view_missing     (1)
+
+Це НЕ борг і НЕ межа — це п'ять конкретних файлів. Їх треба назвати.
+
+Цей звіт лише читає аудит і друкує перелік; нічого не змінює.
+"""
+from __future__ import annotations
+
+import argparse
+import json
+import subprocess
+import sys
+import tempfile
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[1]
+AUDIT = ROOT / "scripts" / "audit_t5_t5m_file_pairs.py"
+
+
+def blockers() -> dict[str, list[str]]:
+    with tempfile.TemporaryDirectory() as tmp:
+        out = Path(tmp) / "audit.json"
+        subprocess.run([sys.executable, str(AUDIT), str(ROOT), "--output", str(out)],
+                       capture_output=True, text=True, timeout=280, check=False)
+        report = json.loads(out.read_text(encoding="utf-8"))
+    files = report.get("files", [])
+    return {
+        "physical_blocked": [f["sens"] for f in files if f.get("physical_status") == "BLOCKED"],
+        "view_blocked": [f["sens"] for f in files if f.get("view_status") == "BLOCKED"],
+        "status": [report.get("status", "?")],
+    }
+
+
+def main() -> int:
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--check", action="store_true", help="fail-closed: набір блокерів не сміє змінитись")
+    args = ap.parse_args()
+    b = blockers()
+    total = len(b["physical_blocked"]) + len(b["view_blocked"])
+    print(f"T5-BLOCKERS: status={b['status'][0]} фізичних={len(b['physical_blocked'])} "
+          f"виглядів={len(b['view_blocked'])} усього={total}")
+    for path in b["physical_blocked"]:
+        print(f"  ФІЗИЧНИЙ БЛОК: {path}")
+    for path in b["view_blocked"]:
+        print(f"  ВИГЛЯД БЛОК:   {path}")
+    if args.check:
+        print(f"T5-BLOCKERS: названо {total} файлів за іменем; п'ятий блокер "
+              "(spaced_view_missing=1) звіт рахує окремим ключем, не як файл "
+              "у files[] — його ім'я цим звітом НЕ встановлено.")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
