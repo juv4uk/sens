@@ -408,6 +408,7 @@ jobs:
               tests/semantic/d11-family-selection-law.lisp|tests/semantic/d11-family-selection-mutant.lisp) bs=(--binding-source lib/d11-family-selection.lisp);;
               tests/semantic/d11-families-benchmark-law.lisp|tests/semantic/d11-families-benchmark-mutant.lisp) bs=(--binding-source lib/d11-family-selection.lisp --binding-source lib/d11-srfi1-alist-protocol.lisp --binding-source lib/d11-clojure-group-by.lisp --binding-source lib/d11-clojure-frequencies-unary.lisp);;
               tests/semantic/unification-variable-shape-negative.lisp|tests/semantic/unification-variable-shape-positive.lisp) bs=(--binding-source lib/unify.lisp);;
+              tests/semantic/unification-occurs-predicate-law.lisp|tests/semantic/unification-occurs-predicate-mutant.lisp) bs=(--binding-source lib/unify.lisp);;
               tests/semantic/d11-srfi1-span-break-laws.lisp) bs=(--binding-source lib/d11-srfi1-span-break.lisp);;
               tests/semantic/d9-world-shape-module-events-laws.lisp|tests/semantic/world-exact-arity-witness.lisp) bs=(--binding-source lib/world.lisp);;
               tests/semantic/core1-gc-reachability-laws.lisp) bs=(--binding-source lib/core1.lisp);;
@@ -705,6 +706,7 @@ jobs:
                 tests/semantic/d11-family-selection-law.lisp|tests/semantic/d11-family-selection-mutant.lisp) bs=(--binding-source lib/d11-family-selection.lisp);;
                 tests/semantic/d11-families-benchmark-law.lisp|tests/semantic/d11-families-benchmark-mutant.lisp) bs=(--binding-source lib/d11-family-selection.lisp --binding-source lib/d11-srfi1-alist-protocol.lisp --binding-source lib/d11-clojure-group-by.lisp --binding-source lib/d11-clojure-frequencies-unary.lisp);;
                 tests/semantic/unification-variable-shape-negative.lisp|tests/semantic/unification-variable-shape-positive.lisp) bs=(--binding-source lib/unify.lisp);;
+                tests/semantic/unification-occurs-predicate-law.lisp|tests/semantic/unification-occurs-predicate-mutant.lisp) bs=(--binding-source lib/unify.lisp);;
                 tests/semantic/d11-srfi1-span-break-laws.lisp) bs=(--binding-source lib/d11-srfi1-span-break.lisp);;
                 tests/semantic/d9-world-shape-module-events-laws.lisp|tests/semantic/world-exact-arity-witness.lisp) bs=(--binding-source lib/world.lisp);;
               tests/semantic/core1-gc-reachability-laws.lisp) bs=(--binding-source lib/core1.lisp);;
