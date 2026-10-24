@@ -133,11 +133,11 @@ fn bench(
             t.elapsed().as_nanos() as f64 / iters as f64
         };
         let (a, b) = if s % 2 == 0 {
-            let a = run(&fa, sa);
-            (a, run(&fb, sb))
+            let a = run(&fa, &mut sa);
+            (a, run(&fb, &mut sb))
         } else {
-            let b = run(&fb, sb);
-            (run(&fa, sa), b)
+            let b = run(&fb, &mut sb);
+            (run(&fa, &mut sa), b)
         };
         xa.push(a);
         xb.push(b);
