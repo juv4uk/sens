@@ -1,11 +1,11 @@
-//! Projection of human-facing Ukrainian decimal integers into exact SENS D24+ values.
+//! Projection of human-facing Ukrainian decimal integers into exact SENS D12+ values.
 //!
 //! The source spelling supplies the digits; it is not itself a domain identity.
 //! This boundary is shared by embedders. It never promotes D1-D10 words or
 //! host numbers into arithmetic. Fractions remain expressible with the admitted
 //! Ukrainian `частка` operation.
 //!
-//! Integers are source-qualified to the smallest signed D24/D48/D96/D192 word
+//! Integers are source-qualified to the smallest signed D12/D24/D48/D96/D192 word
 //! that contains their value. Within one connected D5 numeric expression tree,
 //! all source integer leaves receive the same widest required domain. This
 //! prevents an expression such as `(додати 8388608 1)` from mixing D48 and D24.
@@ -106,7 +106,7 @@ fn magnitude_fits_signed_width(negative: bool, magnitude: &[u8], width: usize) -
 
 fn integer_width(token: &str, span: Span) -> Result<usize, LanguageError> {
     let (negative, magnitude) = decimal_magnitude_bits(token, span)?;
-    [24usize, 48, 96, 192]
+    [12usize, 24, 48, 96, 192]
         .into_iter()
         .find(|width| magnitude_fits_signed_width(negative, &magnitude, *width))
         .ok_or_else(|| {
@@ -250,7 +250,7 @@ fn project_expr(
 
     let kind = match &expr.kind {
         ExprKind::List(items) if is_d5_call(expr) => {
-            let required = required_width_in_math_tree(expr, source, 0)?.unwrap_or(24);
+            let required = required_width_in_math_tree(expr, source, 0)?.unwrap_or(12);
             let width = inherited_math_width.map_or(required, |outer| outer.max(required));
             ExprKind::List(
                 items
@@ -313,10 +313,40 @@ mod tests {
     }
 
     #[test]
+    fn decimal_integer_source_uses_exact_signed_d12_edges() {
+        for (source, expected) in [
+            ("0", "0"),
+            ("1", "1"),
+            ("-1", "-1"),
+            ("2047", "2047"),
+            ("-2048", "-2048"),
+        ] {
+            let parsed = crate::parse(source).expect("D12 boundary parses");
+            let projected = project_ukr_decimal_integer_literals(&parsed, source)
+                .expect("D12 boundary projects exactly");
+            let ExprKind::BinaryNumber(value) = &projected[0].kind else {
+                panic!("decimal source must become an exact numeric-domain word");
+            };
+            assert_eq!(value.numeric_domain_width(), Some(12), "{source}");
+            assert_eq!(value.to_decimal_string(), expected, "{source}");
+        }
+
+        let source = "2048";
+        let parsed = crate::parse(source).expect("first positive overflow parses");
+        let projected = project_ukr_decimal_integer_literals(&parsed, source)
+            .expect("positive overflow widens without wrapping");
+        let ExprKind::BinaryNumber(value) = &projected[0].kind else {
+            panic!("overflow result must remain an exact numeric-domain word");
+        };
+        assert_eq!(value.numeric_domain_width(), Some(24));
+        assert_eq!(value.to_decimal_string(), "2048");
+    }
+
+    #[test]
     fn decimal_integer_literals_keep_exact_domain_width_and_signed_value() {
         let values = projected_numbers("(приклад 1 -8388608 8388607 8388608)");
         assert_eq!(values.len(), 4);
-        assert_eq!(values[0].numeric_domain_width(), Some(24));
+        assert_eq!(values[0].numeric_domain_width(), Some(12));
         assert_eq!(values[1].numeric_domain_width(), Some(24));
         assert_eq!(values[2].numeric_domain_width(), Some(24));
         assert_eq!(values[3].numeric_domain_width(), Some(48));
@@ -480,7 +510,7 @@ mod tests {
         let source = "(частка 1 3)";
         let parsed = crate::parse(source).expect("source parses");
         let projected = project_ukr_decimal_integer_literals(&parsed, source)
-            .expect("source decimal integers become D24 words");
+            .expect("source decimal integers become exact D12+ words");
         let lowered = crate::lower_program(&projected);
         assert!(
             matches!(
@@ -551,7 +581,7 @@ mod tests {
         let source = include_str!("../../../benchmarks/parser.lisp");
         let parsed = crate::parse(source).expect("читач розуміє весь український Lisp");
         let projected = project_ukr_decimal_integer_literals(&parsed, source)
-            .expect("кожне десяткове ціле отримує власну D24+ ідентичність");
+            .expect("кожне десяткове ціле отримує власну D12+ ідентичність");
         let mut session = crate::Session::default();
         crate::load_core_library(&mut session).expect("чинне ядро SENS");
         let result = crate::eval_parsed_expressions(&projected, &mut session)
@@ -572,7 +602,7 @@ mod tests {
         let invalid = "(частка 5 0)";
         let parsed = crate::parse(invalid).expect("читач не підміняє семантику");
         let projected = project_ukr_decimal_integer_literals(&parsed, invalid)
-            .expect("нуль також є допустимим цілим операндом D24+");
+            .expect("нуль також є допустимим цілим операндом D12+");
         let error = crate::eval_parsed_expressions(&projected, &mut session)
             .err()
             .expect("SENS сам забороняє ділення на нуль");
