@@ -78,7 +78,9 @@ jobs:
             mkdir -p "$dir"
             physical="$dir/program.sens"
             timeout 45s "$sens" "$source" > "$dir/direct.out" 2> "$dir/direct.err"
-            timeout 45s "$sens" --t5m-mint "$source" "$physical" > "$dir/mint.out" 2> "$dir/mint.err"
+            # verify-view читає парний безрозширений sibling ($dir/program),
+            # не view.txt; --t5m-mint-pair публікує його разом із носієм.
+            timeout 45s "$sens" --t5m-mint-pair "$source" "$physical" > "$dir/mint.out" 2> "$dir/mint.err"
             test -s "$physical"
             timeout 45s "$trit" open "$physical" > "$dir/view.txt"
             timeout 45s "$trit" verify-view "$physical" > "$dir/verify.txt"
