@@ -181,6 +181,22 @@ fn changed_since_in(repo: &Path, base: &str, head: &str) -> Result<Vec<String>,S
         .collect()
 }
 
+// Видалений тест є окремим Git-станом, а не «джерелом, що загубилося».
+// Не послаблюємо перевірку наявності для доданих або змінених файлів.
+fn deleted_since_in(repo: &Path, base: &str, head: &str) -> Result<BTreeSet<String>,String> {
+    let out = Command::new("git").current_dir(repo)
+        .args(["diff", "--no-ext-diff", "--name-only", "-z",
+            "--diff-filter=D", base, head])
+        .output().map_err(|e| e.to_string())?;
+    if !out.status.success() {
+        return Err(format!("git diff deleted {}: {}",
+            out.status, String::from_utf8_lossy(&out.stderr)));
+    }
+    out.stdout.split(|b| *b == 0).filter(|part| !part.is_empty())
+        .map(|part| String::from_utf8(part.to_vec()).map_err(|e| e.to_string()))
+        .collect()
+}
+
 fn changed_since(base: &str, head: &str) -> Result<Vec<String>,String> {
     changed_since_in(Path::new("."), base, head)
 }
@@ -247,6 +263,11 @@ fn test_git_change_filter() -> Result<(),String> {
         }
         if changed.len() != 4 {
             return Err(format!("Неочікуваний набір Git-змін: {changed:?}"));
+        }
+        let deleted = deleted_since_in(&dir, &base, "HEAD")?;
+        if deleted.len() != 1 ||
+           !deleted.contains("tests/semantic/deleted-law.lisp") {
+            return Err(format!("Помилкова класифікація Git-видалень: {deleted:?}"));
         }
         if changed.iter().any(|item| item == "tests/semantic/moved-fixture.lisp") {
             return Err(format!("Перейменування назовні помилково лишило старий semantic шлях: {changed:?}"));
@@ -623,11 +644,17 @@ fn main() {
         let census = tracked_triplet_census(Path::new("."))?;
         print_triplet_census(&census);
         let changed = changed_since(base,head)?;
+        let deleted = deleted_since_in(Path::new("."), base, head)?;
+        // Git-видалення зберігаємо в загальному changed-обліку, але не
+        // вимагаємо існування його джерела в поточному дереві.
+        let active: Vec<String> = changed.iter()
+            .filter(|path| !deleted.contains(path.as_str()))
+            .cloned().collect();
         let script = fs::read_to_string(RUNNER).map_err(|e| e.to_string())?;
         let ci = fs::read_to_string(CI).map_err(|e| e.to_string())?;
         let remint = fs::read_to_string(REMINT).map_err(|e| e.to_string())?;
         audit_remint_dispatch(&remint)?;
-        let errs = audit(&changed,&script,&ci,file_exists,
+        let errs = audit(&active,&script,&ci,file_exists,
             |path| fs::read_to_string(path).map_err(|e| e.to_string()));
         Ok((changed.len(),errs))
     })();
