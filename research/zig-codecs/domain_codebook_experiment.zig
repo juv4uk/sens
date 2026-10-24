@@ -235,6 +235,28 @@ fn readWord(reader: *Reader, out: ?[]u8) Error!usize {
     if (width > reader.remaining()) return Error.Truncated;
     if (out) |target| {
         if (target.len != width) return Error.InvalidWidth;
+    }
+
+    // Літеральний escape не може дублювати короткий канонічний код.
+    // Перша проходка з out=null теж має відхилити неканонічний кадр.
+    if (width == 2 or width == 7) {
+        var small_value: u8 = 0;
+        for (0..width) |i| {
+            const bit = try reader.bit();
+            small_value = (small_value << 1) | bit;
+            if (out) |target| target[i] = bit + '0';
+        }
+        if (width == 2 and small_value != 0b11) return Error.NonCanonical;
+        if (width == 7) {
+            for (DICTIONARY) |bits| {
+                var dictionary_value: u8 = 0;
+                for (bits) |digit| {
+                    dictionary_value = (dictionary_value << 1) | (digit - '0');
+                }
+                if (small_value == dictionary_value) return Error.NonCanonical;
+            }
+        }
+    } else if (out) |target| {
         for (target) |*digit| digit.* = (try reader.bit()) + '0';
     } else {
         for (0..width) |_| _ = try reader.bit();
@@ -302,6 +324,22 @@ test "DWC1 preserves exact widths, leading zeros and D24" {
         try std.testing.expectEqual(original.width, actual.width);
         try std.testing.expectEqualSlices(u8, original.bits, actual.bits);
     }
+}
+
+test "DWC1 відхиляє довгі літеральні дублікати канонічних слів" {
+    const allocator = std.testing.allocator;
+    // 111 | gamma(2)=010 | 00/10/01: ті самі слова вже мають короткі коди.
+    try std.testing.expectError(Error.NonCanonical, decode(allocator, &.{ 0xf3, 0x01, 0x01, 0xe8 }));
+    try std.testing.expectError(Error.NonCanonical, decode(allocator, &.{ 0xf3, 0x01, 0x01, 0xea }));
+    try std.testing.expectError(Error.NonCanonical, decode(allocator, &.{ 0xf3, 0x01, 0x01, 0xe9 }));
+    // 111 | gamma(7)=00111 | 1111001: перше слово словника DWC1.
+    try std.testing.expectError(Error.NonCanonical, decode(allocator, &.{ 0xf3, 0x01, 0x01, 0xe7, 0xf2 }));
+
+    // 11 не має окремого короткого коду і залишається допустимим літералом.
+    var allowed = try decode(allocator, &.{ 0xf3, 0x01, 0x01, 0xeb });
+    defer allowed.deinit(allocator);
+    try std.testing.expectEqual(@as(usize, 1), allowed.words.len);
+    try std.testing.expectEqualSlices(u8, "11", allowed.words[0].bits);
 }
 
 test "DWC1 rejects malformed physical records" {
