@@ -64,7 +64,7 @@ impl Sexp {
                 if s.is_empty()
                     || s.starts_with(';')
                     || s.chars().any(|ch| {
-                        ch.is_whitespace() || matches!(ch, '(' | ')' | '"')
+                        ch.is_whitespace() || ch.is_control() || matches!(ch, '(' | ')' | '"')
                     }) =>
             {
                 Sexp::Str(s.clone()).to_text()
@@ -296,6 +296,14 @@ mod tests {
                 Sexp::string("bad\n(evict (node victim))"),
             ])
         );
+    }
+
+    #[test]
+    fn control_character_in_atom_is_not_sent_raw() {
+        let value = Sexp::atom("peer\u{001B}name");
+        let encoded = value.to_text();
+        assert!(!encoded.contains('\u{001B}'));
+        assert_eq!(parse(&encoded).unwrap(), Sexp::string("peer\u{001B}name"));
     }
 
     #[test]
