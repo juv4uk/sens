@@ -861,6 +861,14 @@ cat -- "$last_define_definition" tests/semantic/d11-meta-last-define-laws.lisp >
 cat -- "$last_define_definition" tests/semantic/d11-meta-last-define-mutant.lisp > "$last_define_mutant_bundle"
 run_case run_law d11-meta-last-define-positive "$last_define_positive_bundle" 1
 run_case run_law d11-meta-last-define-mutant "$last_define_mutant_bundle" 0
+# Д11 похідні селектори: SENS виконує шлях Д1(ні/так) -> Д3 CAR/CDR.
+# Shell тільки збирає справжнє визначення з позитивом і мутантом.
+d11_selector_law="$evidence/d11-selector-path-positive-complete.lisp"
+d11_selector_mutant="$evidence/d11-selector-path-mutant-complete.lisp"
+cat -- lib/d11-selector-path.lisp tests/semantic/d11-selector-path-laws.lisp > "$d11_selector_law"
+cat -- lib/d11-selector-path.lisp tests/semantic/d11-selector-path-mutant.lisp > "$d11_selector_mutant"
+run_case run_law d11-selector-path-positive "$d11_selector_law" 1
+run_case run_law d11-selector-path-mutant "$d11_selector_mutant" 0
 # Д11 juxt: першокласні одномісні функції та контрприклад перевіряє SENS.
 # Bash лише додає чинні DEFINE та проводить обидва свідки через Zig/T5M.
 d11_juxt_law_bundle="$evidence/d11-clojure-juxt-positive-complete.lisp"
