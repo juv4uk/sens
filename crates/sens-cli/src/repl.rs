@@ -1,4 +1,4 @@
-//! Інтерактивний stdio REPL: історія, interaction-only echo fallback і
+//! Інтерактивний stdio REPL: історія, прозорі помилки SENS і
 //! перемикання програмних поверхонь. `:мова` / `:surface` не є Lisp syntax:
 //! це команди оболонки над одним і тим самим семантичним ядром.
 
@@ -2018,19 +2018,10 @@ fn handle_meta_command(line: &str, state: &mut ReplState) -> bool {
     }
 }
 
-fn is_interaction_only_unresolved_name(line: &str, error: &str) -> bool {
-    let standalone_name = sens::parse_mixed_exact_domain(line)
-        .ok()
-        .is_some_and(|forms| {
-            forms.len() == 1
-                && matches!(
-                    forms[0].kind,
-                    ExprKind::Symbol(_) | ExprKind::DomainIdentity(DomainIdentity::D7(_))
-                )
-        });
-    let unresolved_name =
-        error.contains("unknown symbol") || error.contains("domain identity is not callable");
-    standalone_name && unresolved_name
+// Хост лише передає діагностику фізичного SENS; не перетворює Type/Name
+// помилку на успішну відповідь "echo ..." у stdout.
+fn repl_transport_error_message(error: &str) -> String {
+    format!("REPL/T5M: {error}")
 }
 
 pub(crate) fn run_repl(session: Session, initial_surface: ReplSurface, sens_loop: bool) {
@@ -2101,13 +2092,9 @@ pub(crate) fn run_repl(session: Session, initial_surface: ReplSurface, sens_loop
                         );
                     }
                     Err(error) => {
-                        // Зберігаємо interaction policy для окремого невідомого імені;
-                        // усі форми оцінюються тільки після Zig T5M roundtrip.
-                        if is_interaction_only_unresolved_name(line, &error) {
-                            println!("echo {line}");
-                        } else {
-                            eprintln!("REPL/T5M: {error}");
-                        }
+                        // Відмова фізичного SENS залишається відмовою у stderr.
+                        // Жодного Rust reader/eval чи interaction-only echo fallback.
+                        eprintln!("{}", repl_transport_error_message(&error));
                     }
                 }
             }
@@ -2415,15 +2402,18 @@ mod tests {
     }
 
     #[test]
-    fn standalone_d7_text_identity_uses_repl_echo_without_granting_callability() {
-        let error =
-            "SENS binary evaluator: domain identity is not callable under its ratified law: D7";
-        assert!(is_interaction_only_unresolved_name("мама", error));
-        assert!(!is_interaction_only_unresolved_name("(мама)", error));
-        assert!(!is_interaction_only_unresolved_name(
-            "мама",
-            "unrelated error"
-        ));
+    fn host_reports_native_sens_rejection_without_echo_fallback() {
+        // Це тест лише механізму повідомлень хоста; значення D7
+        // і викличність визначає виключно фізичний SENS.
+        for error in [
+            "SENS binary evaluator: domain identity is not callable under its ratified law: D7",
+            "SENS binary reader: unclosed list",
+            "unknown symbol",
+        ] {
+            let message = repl_transport_error_message(error);
+            assert_eq!(message, format!("REPL/T5M: {error}"));
+            assert!(!message.starts_with("echo "));
+        }
     }
 
     #[test]
