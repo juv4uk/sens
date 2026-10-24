@@ -5,7 +5,7 @@
 //!
 //! ADD1/SUB1/NEG do not mint another numeric authority. They compose the
 //! admitted D5 PLUS/DIFFERENCE laws with exact 0 or 1 in the operand's
-//! already admitted D24+ domain. D6 identity and its law remain SENS-owned.
+//! already admitted D12+ domain. D6 identity and its law remain SENS-owned.
 
 use crate::{
     BinaryNumber, Bit5, CoreD5, CoreDomainIdentity, Environment, ErrorKind, LanguageError, Span,
@@ -33,7 +33,7 @@ pub(super) fn invoke(
         return None;
     }
 
-    // D6:111110 INTEGERP читає тільки явний D24+ числовий тип.
+    // D6:111110 INTEGERP читає тільки явний D12+ числовий тип.
     // RATIO(p,1) канонічно стає BinaryNumber, а дріб — NumericComposition.
     // Ні #q2, ні D8 wire, ні Unicode не визначають математичну істину.
     if bits == 0b111110 {
@@ -66,7 +66,7 @@ pub(super) fn invoke(
 
     // The old implementation inserted an unqualified Rational(1), silently
     // crossing the D24+ admission boundary. ADD1/SUB1 are operators in D6,
-    // but their numeric *operands* must be explicitly qualified D24+ values.
+    // but their numeric *operands* must be explicitly qualified D12+ values.
     let width = match &args[0] {
         Value::BinaryNumber(number) => number.numeric_domain_width(),
         Value::NumericComposition(composition) => Some(composition.domain_width()),
@@ -75,7 +75,7 @@ pub(super) fn invoke(
     let Some(width) = width else {
         return Some(Err(LanguageError::new(
             ErrorKind::Type,
-            "D6 ADD1/SUB1/NEG requires a D24+ numeric operand",
+            "D6 ADD1/SUB1/NEG requires a D12+ numeric operand",
             span,
         )));
     };
@@ -87,7 +87,7 @@ pub(super) fn invoke(
         constant_bits[width - 1] = 1;
     }
     let constant = BinaryNumber::from_numeric_domain_bits(width, &constant_bits)
-        .expect("D24+ domain width from qualified operand");
+        .expect("D12+ domain width from qualified operand");
     let composed_args = if bits == 0b010010 {
         [Value::BinaryNumber(constant), args[0].clone()]
     } else {
@@ -117,6 +117,78 @@ mod tests {
             bits[23 - i] = ((encoded >> i) & 1) as u8;
         }
         Value::BinaryNumber(BinaryNumber::from_numeric_domain_bits(24, &bits).unwrap())
+    }
+
+    fn d12(n: i32) -> Value {
+        assert!((-2048..=2047).contains(&n));
+        let encoded = if n < 0 { (1_i32 << 12) + n } else { n };
+        let bits = (0..12)
+            .rev()
+            .map(|shift| ((encoded >> shift) & 1) as u8)
+            .collect::<Vec<_>>();
+        Value::BinaryNumber(BinaryNumber::from_numeric_domain_bits(12, &bits).unwrap())
+    }
+
+    #[test]
+    fn d6_unit_arithmetic_admits_d12_and_promotes_signed_boundaries() {
+        let env = Environment::root();
+        let add1 = CoreDomainIdentity::D6(crate::CoreD6::from_word(
+            crate::Bit6::new(0b001110).unwrap(),
+        ));
+        let sub1 = CoreDomainIdentity::D6(crate::CoreD6::from_word(
+            crate::Bit6::new(0b001111).unwrap(),
+        ));
+        let neg = CoreDomainIdentity::D6(crate::CoreD6::from_word(
+            crate::Bit6::new(0b010010).unwrap(),
+        ));
+        let integerp = CoreDomainIdentity::D6(crate::CoreD6::from_word(
+            crate::Bit6::new(0b111110).unwrap(),
+        ));
+
+        let assert_integer = |value: Value, width: usize, expected: &str| {
+            let Value::BinaryNumber(ref number) = value else {
+                panic!("D6 arithmetic must return an exact numeric-domain value");
+            };
+            assert_eq!(number.numeric_domain_width(), Some(width));
+            assert_eq!(number.to_decimal_string(), expected);
+            assert_eq!(number.exact_numeric_domain_bits().unwrap().len(), width);
+        };
+
+        assert_integer(invoke(add1, &[d12(7)], &env, Span::default()).unwrap().unwrap(), 12, "8");
+        assert_integer(invoke(sub1, &[d12(7)], &env, Span::default()).unwrap().unwrap(), 12, "6");
+        assert_integer(
+            invoke(add1, &[d12(2047)], &env, Span::default()).unwrap().unwrap(),
+            24,
+            "2048",
+        );
+        assert_integer(
+            invoke(sub1, &[d12(-2048)], &env, Span::default()).unwrap().unwrap(),
+            24,
+            "-2049",
+        );
+        assert_integer(
+            invoke(neg, &[d12(-2048)], &env, Span::default()).unwrap().unwrap(),
+            24,
+            "2048",
+        );
+
+        assert_eq!(
+            invoke(integerp, &[d12(7)], &env, Span::default())
+                .unwrap()
+                .unwrap()
+                .as_predicate_bit(),
+            Some(true),
+        );
+        let fraction = crate::domain_numeric::compute("/", &d12(1), &d12(2))
+            .expect("D12 division produces exact ratio");
+        assert!(matches!(fraction, Value::NumericComposition(_)));
+        assert_eq!(
+            invoke(integerp, &[fraction], &env, Span::default())
+                .unwrap()
+                .unwrap()
+                .as_predicate_bit(),
+            Some(false),
+        );
     }
 
     #[test]

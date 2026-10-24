@@ -163,7 +163,7 @@ def selftest_zig_numeric_prefix(policy, zig_source):
         raise ValueError(f"NUMERIC-DOMAIN-RATIFICATION: Zig mutant {index} was admitted")
 
 def validate_runtime_boundary(arithmetic, d6):
-    """Assert that every Core math entry point checks explicit D24+ admission.
+    """Assert that every Core math entry point checks explicit D12+ admission.
 
     This is a static CI backstop; behavioral Rust integration witnesses are
     crates/sens/tests/math_domain_exclusivity.rs. Never count a text check as
@@ -179,7 +179,7 @@ def validate_runtime_boundary(arithmetic, d6):
         tail = arithmetic.split(start, 1)[1]
         need(end in tail, name + " next boundary missing")
         body = tail.split(end, 1)[0]
-        need(body.count("require_math_domain(values, span)?;") == 1, name + " must enforce D24+ admission")
+        need(body.count("require_math_domain(values, span)?;") == 1, name + " must enforce D12+ admission")
     need("!domain_numeric::is_domain_value(value)" in arithmetic, "unqualified/functional values must be refused")
     # Historical Number/Rational/floating point branches were removed from the
     # mathematical evaluator. Reader and JSON presentation may still retain
@@ -194,14 +194,16 @@ def validate_runtime_boundary(arithmetic, d6):
         need(legacy not in arithmetic, "legacy literal math path returned: " + legacy)
     need("values.is_empty()" in arithmetic, "no zero-arity generic Number operations")
     need("Value::NumericComposition(composition) => Some(composition.domain_width())" in d6,
-         "D6 must accept canonical D24+ composite width")
+         "D6 must accept canonical D12+ composite width")
     need("Value::BinaryNumber(number) => number.numeric_domain_width()" in d6,
-         "D6 must require an exact D24+ numeric natural")
+         "D6 must require an exact D12+ numeric natural")
     need("BinaryNumber::from_numeric_domain_bits(width, &constant_bits)" in d6,
          "D6 unit must preserve the exact operand domain")
     need("Value::BinaryNumber(constant)" in d6, "D6 must not insert unqualified Rational(1)")
     need("Value::Rational(Rational::integer(1))" not in d6,
          "D6 historical unqualified one was reintroduced")
+    need("D6 ADD1/SUB1/NEG requires a D12+ numeric operand" in d6,
+         "D6 unary arithmetic must admit explicit D12+ numeric values")
 
 
 def selftest_runtime(arithmetic, d6):
@@ -272,7 +274,7 @@ def main():
     except (ValueError, KeyError, OSError) as exc:
         print(str(exc), file=sys.stderr)
         return 1
-    print("NUMERIC-DOMAIN-RATIFICATION: PASS Lisp D12 law + legacy Zig D24 physical prefix + static D24+-only Core entry guards (Rust/Zig runtime execution requires separate tests); composite physical codec deferred")
+    print("NUMERIC-DOMAIN-RATIFICATION: PASS Lisp D12 law + legacy Zig D24 wide-word profile + static D12+ Core admission guards (runtime claims require executed witnesses); standalone E3 composite physical codec deferred")
     return 0
 
 if __name__ == "__main__":
