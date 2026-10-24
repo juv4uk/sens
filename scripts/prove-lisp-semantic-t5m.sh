@@ -1158,6 +1158,17 @@ for suite in dwim masterscope; do
   run_case run_law "d11-interlisp-$suite-positive" "$interlisp_positive" 1
   run_case run_law "d11-interlisp-$suite-mutant" "$interlisp_mutant" 0
 done
+# Д11 DWIM: незалежний канонічний D3 закон і мутант.
+# Явні шляхи дають Rust guard змогу підтвердити справжнє SENS-джерело.
+d11_dwim_d3_proper="$evidence/d11-dwim-d3-proper-complete.lisp"
+d11_dwim_d3_mutant="$evidence/d11-dwim-d3-mutant-complete.lisp"
+cat -- lib/d11-interlisp-safe-analysis.lisp tests/semantic/d11-interlisp-dwim-d3-proper-law.lisp > "$d11_dwim_d3_proper"
+cat -- lib/d11-interlisp-safe-analysis.lisp tests/semantic/d11-interlisp-dwim-d3-proper-mutant.lisp > "$d11_dwim_d3_mutant"
+run_case run_law d11-interlisp-dwim-d3-proper "$d11_dwim_d3_proper" 1 core4
+run_case run_law d11-interlisp-dwim-d3-mutant "$d11_dwim_d3_mutant" 0 core4
+sha256sum lib/d11-interlisp-safe-analysis.lisp \
+  tests/semantic/d11-interlisp-dwim-d3-proper-law.lisp \
+  tests/semantic/d11-interlisp-dwim-d3-proper-mutant.lisp > "$evidence/d11-interlisp-dwim-d3-inputs.sha256"
 # LAST-DEFINE: D7-текст має D8-рівність у нормативному Lisp, не D3 EQ Rust.
 # Повний MetaEval починається з невикличного D6 LENGTH (#5854). Для цієї
 # незалежної функції беремо ТОЧНО її визначення з чинного Lisp-файлу.
