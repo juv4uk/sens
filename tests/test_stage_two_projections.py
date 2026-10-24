@@ -27,16 +27,16 @@ class StageTwoProjectionsTests(unittest.TestCase):
 
     def test_current_exact_word_widths_exclude_d11_proposals(self):
         # D1–D10 are eligible word widths; D11 is catalogue-only.
-        # D24+ can carry exact mathematical words, but these bytes alone
+        # D12+ can carry exact mathematical words, but these bytes alone
         # cannot prove a callable identity or authorize semantic execution.
         for width in range(1, 11):
             with self.subTest(width=width):
                 self.assertIsNotNone(pair.BITS.fullmatch("0" * width))
-        # 25, 32 і 49 біт не утворюють нового числового домену.
-        for width in (11, 12, 16, 23, 25, 32, 47, 49, 95, 97, 191, 193):
+        # D12 — перший числовий домен за чинною ратифікацією; D11 не числовий.
+        for width in (11, 16, 23, 25, 32, 47, 49, 95, 97, 191, 193):
             with self.subTest(rejected_width=width):
                 self.assertIsNone(pair.BITS.fullmatch("0" * width))
-        for width in (24, 48, 96, 192):
+        for width in (12, 24, 48, 96, 192):
             with self.subTest(math_width=width):
                 self.assertIsNotNone(pair.BITS.fullmatch("0" * width))
         self.assertIsNone(pair.BITS.fullmatch("0" * 24 + "2"))
