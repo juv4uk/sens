@@ -224,6 +224,12 @@ jobs:
                   "tests/semantic/d11-srfi1-list-equality-mutant.lisp",
                   # F11-PROOF-TRACE запускається в єдиному нативному law runner із DEFINE lib/reason.lisp.
                   "tests/semantic/d11-reason-proof-trace-law.lisp",
+                  "tests/semantic/d11-reason-proof-results-law.lisp",
+                  "tests/semantic/d11-reason-proof-results-mutant.lisp",
+                  "tests/semantic/d11-reason-proof-results-improper-accum-negative.lisp",
+                  "tests/semantic/d11-reason-proof-results-improper-scan-negative.lisp",
+                  "tests/semantic/d11-reason-proof-results-improper-map-negative.lisp",
+                  "tests/semantic/d11-reason-proof-results-improper-attach-negative.lisp",
                   "tests/semantic/d11-reason-index-law.lisp",
                   "tests/semantic/d11-reason-index-mutant.lisp",
                   "tests/semantic/d11-reason-index-improper-reverse-negative.lisp",

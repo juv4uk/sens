@@ -699,6 +699,27 @@ run_case run_error_rejection d11-reason-index-improper-buckets "$reason_index_ba
 run_case run_error_rejection d11-reason-index-improper-rules "$reason_index_bad_rules_bundle" Type 'car expects a non-empty list' core4
 sha256sum lib/reason.lisp lib/unify.lisp tests/semantic/d11-reason-index-*.lisp > "$evidence/d11-reason-index-inputs.sha256"
 
+# D11 proof-results: лише SENS визначає D1, Zig/T5M переносить реальний код.
+reason_results_law_bundle="$evidence/d11-reason-proof-results-law-complete.lisp"
+reason_results_mutant_bundle="$evidence/d11-reason-proof-results-mutant-complete.lisp"
+reason_results_accum_bundle="$evidence/d11-reason-proof-results-improper-accum-complete.lisp"
+reason_results_scan_bundle="$evidence/d11-reason-proof-results-improper-scan-complete.lisp"
+reason_results_map_bundle="$evidence/d11-reason-proof-results-improper-map-complete.lisp"
+reason_results_attach_bundle="$evidence/d11-reason-proof-results-improper-attach-complete.lisp"
+cat -- lib/unify.lisp lib/reason.lisp tests/semantic/d11-reason-proof-results-law.lisp > "$reason_results_law_bundle"
+cat -- lib/unify.lisp lib/reason.lisp tests/semantic/d11-reason-proof-results-mutant.lisp > "$reason_results_mutant_bundle"
+cat -- lib/unify.lisp lib/reason.lisp tests/semantic/d11-reason-proof-results-improper-accum-negative.lisp > "$reason_results_accum_bundle"
+cat -- lib/unify.lisp lib/reason.lisp tests/semantic/d11-reason-proof-results-improper-scan-negative.lisp > "$reason_results_scan_bundle"
+cat -- lib/unify.lisp lib/reason.lisp tests/semantic/d11-reason-proof-results-improper-map-negative.lisp > "$reason_results_map_bundle"
+cat -- lib/unify.lisp lib/reason.lisp tests/semantic/d11-reason-proof-results-improper-attach-negative.lisp > "$reason_results_attach_bundle"
+run_case run_law d11-reason-proof-results-law "$reason_results_law_bundle" 1 core4
+run_case run_law d11-reason-proof-results-mutant "$reason_results_mutant_bundle" 0 core4
+run_case run_error_rejection d11-reason-proof-results-improper-accum "$reason_results_accum_bundle" Type 'car expects a non-empty list' core4
+run_case run_error_rejection d11-reason-proof-results-improper-scan "$reason_results_scan_bundle" Type 'car expects a non-empty list' core4
+run_case run_error_rejection d11-reason-proof-results-improper-map "$reason_results_map_bundle" Type 'car expects a non-empty list' core4
+run_case run_error_rejection d11-reason-proof-results-improper-attach "$reason_results_attach_bundle" Type 'car expects a non-empty list' core4
+sha256sum lib/unify.lisp lib/reason.lisp tests/semantic/d11-reason-proof-results-*.lisp > "$evidence/d11-reason-proof-results-inputs.sha256"
+
 # F11-PROOF-TRACE: нативний закон SENS, жодної додаткової D11-координати.
 # Фактичні визначення беруться лише з lib/reason.lisp (та D9 уніфікатора).
 # SENS виконує 2 D1 закони й 2 очікувані Type-помилки через Zig/T5M.
@@ -1100,25 +1121,6 @@ run_case run_law d11-family-selection-d1-structural-mutant "$d11_selection_d1_mu
 sha256sum lib/d11-family-selection.lisp \
   tests/semantic/d11-family-selection-d1-structural-law.lisp \
   tests/semantic/d11-family-selection-d1-structural-mutant.lisp > "$evidence/d11-family-selection-d1-inputs.sha256"
-
-# Д11 DROP-WHILE: перевірка всього D3-ланцюга, суфікс без копіювання.
-d11_drop_positive="$evidence/d11-drop-while-zero-copy-positive-complete.lisp"
-d11_drop_mutant="$evidence/d11-drop-while-zero-copy-mutant-complete.lisp"
-d11_drop_bad_early="$evidence/d11-drop-while-early-improper-complete.lisp"
-d11_drop_bad_scanned="$evidence/d11-drop-while-scanned-improper-complete.lisp"
-cat -- lib/list-first-class-drop-while-zero-copy-general.lisp tests/semantic/d11-drop-while-zero-copy-law.lisp > "$d11_drop_positive"
-cat -- lib/list-first-class-drop-while-zero-copy-general.lisp tests/semantic/d11-drop-while-zero-copy-mutant.lisp > "$d11_drop_mutant"
-cat -- lib/list-first-class-drop-while-zero-copy-general.lisp tests/semantic/d11-drop-while-early-improper-tail-negative.lisp > "$d11_drop_bad_early"
-cat -- lib/list-first-class-drop-while-zero-copy-general.lisp tests/semantic/d11-drop-while-scanned-improper-tail-negative.lisp > "$d11_drop_bad_scanned"
-run_case run_law d11-drop-while-zero-copy-positive "$d11_drop_positive" 1 core4
-run_case run_law d11-drop-while-zero-copy-mutant "$d11_drop_mutant" 0 core4
-run_case run_error_rejection d11-drop-while-early-improper "$d11_drop_bad_early" Type 'car expects a non-empty list' core4
-run_case run_error_rejection d11-drop-while-scanned-improper "$d11_drop_bad_scanned" Type 'car expects a non-empty list' core4
-sha256sum lib/list-first-class-drop-while-zero-copy-general.lisp \
-  tests/semantic/d11-drop-while-zero-copy-law.lisp \
-  tests/semantic/d11-drop-while-zero-copy-mutant.lisp \
-  tests/semantic/d11-drop-while-early-improper-tail-negative.lisp \
-  tests/semantic/d11-drop-while-scanned-improper-tail-negative.lisp > "$evidence/d11-drop-while-zero-copy-inputs.sha256"
 
 # D11 TAKE-WHILE: композиція єдиного чинного SENS SPAN, без нового opcode.
 # Прямий і обидва фізичні шляхи обчислюють позитив, мутант та D3 Type.
