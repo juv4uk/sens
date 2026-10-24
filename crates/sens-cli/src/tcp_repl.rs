@@ -163,82 +163,82 @@ pub(crate) fn run_tcp_repl(port: u16, allowed: &[String]) {
 }
 
 fn handle_tcp_line_connection(stream: TcpStream, allowed: &[String]) {
-        let peer = stream
-            .peer_addr()
-            .map(|a| a.to_string())
-            .unwrap_or_else(|_| "?".into());
-        eprintln!("TCP REPL: connection from {peer}");
+    let peer = stream
+        .peer_addr()
+        .map(|a| a.to_string())
+        .unwrap_or_else(|_| "?".into());
+    eprintln!("TCP REPL: connection from {peer}");
 
-        // TCP is an unauthenticated entry point, not the trusted local
-        // Lisp-machine profile. Empty means deny all; a supplied list is exact.
-        let environment = Environment::untrusted_tcp(allowed.to_vec());
-        let mut session = Session { environment };
+    // TCP is an unauthenticated entry point, not the trusted local
+    // Lisp-machine profile. Empty means deny all; a supplied list is exact.
+    let environment = Environment::untrusted_tcp(allowed.to_vec());
+    let mut session = Session { environment };
 
-        // The TCP REPL uses the same canonical physical bootstrap as the
-        // local CLI. No Rust-held Core4 Lisp source is passed into this runtime.
-        if let Err(error) = sens::load_core_library(&mut session) {
-            eprintln!(
-                "TCP REPL: Core4 T5M bootstrap failed: {}",
-                error.render("<Core4 T5M bootstrap>")
-            );
-            continue;
-        }
-        if let Err(error) = sens::load_time_library(&mut session) {
-            eprintln!(
-                "TCP REPL: T5M time bootstrap failed: {}",
-                error.render("<T5M time bootstrap>")
-            );
-            continue;
-        }
-        let _ = load_process_library(&mut session);
+    // The TCP REPL uses the same canonical physical bootstrap as the
+    // local CLI. No Rust-held Core4 Lisp source is passed into this runtime.
+    if let Err(error) = sens::load_core_library(&mut session) {
+        eprintln!(
+            "TCP REPL: Core4 T5M bootstrap failed: {}",
+            error.render("<Core4 T5M bootstrap>")
+        );
+        return;
+    }
+    if let Err(error) = sens::load_time_library(&mut session) {
+        eprintln!(
+            "TCP REPL: T5M time bootstrap failed: {}",
+            error.render("<T5M time bootstrap>")
+        );
+        return;
+    }
+    let _ = load_process_library(&mut session);
 
-        // Обмежуємо і запис: клієнт, що перестав читати відповіді,
-        // не повинен тримати сервер у нескінченному write.
-        if let Err(error) = stream.set_write_timeout(Some(Duration::from_secs(5))) {
-            eprintln!("TCP REPL: {peer} cannot set write timeout: {error}");
-            continue;
-        }
-        // BufReader володіє socket; зайвого дублювання handle не потрібно.
-        let mut reader = BufReader::new(stream);
-        loop {
-            match read_bounded_tcp_line(
-                &mut reader,
-                MAX_TCP_REPL_LINE_BYTES,
-                TCP_REPL_FRAME_DEADLINE,
-            ) {
-                Ok(None) => break,
-                Ok(Some(line)) => {
-                    let trimmed = line.trim();
-                    if trimmed.is_empty() {
-                        continue;
-                    }
-                    eprintln!("TCP REPL: {peer} > {trimmed}");
-                    let response = match parse(trimmed) {
-                        Ok(ast) => match eval_parsed_expressions_incremental(&ast, &mut session) {
-                            Ok(result) => {
-                                let mut out = String::new();
-                                for line in result.output {
-                                    out.push_str(&line);
-                                    out.push('\n');
-                                }
-                                out.push_str(&result.value.to_string());
-                                out
-                            }
-                            Err(e) => format!("Error: {}", e.render(trimmed)),
-                        },
-                        Err(e) => format!("Parse error: {}", e.render(trimmed)),
-                    };
-                    if writeln!(reader.get_mut(), "{response}").is_err() {
-                        break;
-                    }
+    // Обмежуємо і запис: клієнт, що перестав читати відповіді,
+    // не повинен тримати сервер у нескінченному write.
+    if let Err(error) = stream.set_write_timeout(Some(Duration::from_secs(5))) {
+        eprintln!("TCP REPL: {peer} cannot set write timeout: {error}");
+        return;
+    }
+    // BufReader володіє socket; зайвого дублювання handle не потрібно.
+    let mut reader = BufReader::new(stream);
+    loop {
+        match read_bounded_tcp_line(
+            &mut reader,
+            MAX_TCP_REPL_LINE_BYTES,
+            TCP_REPL_FRAME_DEADLINE,
+        ) {
+            Ok(None) => break,
+            Ok(Some(line)) => {
+                let trimmed = line.trim();
+                if trimmed.is_empty() {
+                    continue;
                 }
-                Err(error) => {
-                    eprintln!("TCP REPL: {peer} rejected input: {error}");
+                eprintln!("TCP REPL: {peer} > {trimmed}");
+                let response = match parse(trimmed) {
+                    Ok(ast) => match eval_parsed_expressions_incremental(&ast, &mut session) {
+                        Ok(result) => {
+                            let mut out = String::new();
+                            for line in result.output {
+                                out.push_str(&line);
+                                out.push('\n');
+                            }
+                            out.push_str(&result.value.to_string());
+                            out
+                        }
+                        Err(e) => format!("Error: {}", e.render(trimmed)),
+                    },
+                    Err(e) => format!("Parse error: {}", e.render(trimmed)),
+                };
+                if writeln!(reader.get_mut(), "{response}").is_err() {
                     break;
                 }
             }
+            Err(error) => {
+                eprintln!("TCP REPL: {peer} rejected input: {error}");
+                break;
+            }
         }
-        eprintln!("TCP REPL: {peer} disconnected");
+    }
+    eprintln!("TCP REPL: {peer} disconnected");
 }
 
 
