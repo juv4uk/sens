@@ -5,9 +5,65 @@
 use sens::{
     eval_parsed_expressions_incremental, load_process_library, parse, Environment, Session,
 };
-use std::io::{BufRead, BufReader, Write};
-use std::net::{Ipv4Addr, TcpListener};
+use std::io::{self, BufRead, BufReader, Write};
+use std::net::{Ipv4Addr, TcpListener, TcpStream};
 use std::process;
+use std::time::{Duration, Instant};
+
+
+const MAX_TCP_REPL_LINE_BYTES: usize = 256 * 1024;
+const TCP_REPL_FRAME_DEADLINE: Duration = Duration::from_secs(5);
+
+/// Обмежене читання одного кадру. Ліміт у байтах включає LF.
+/// Прострочення, перевищення ліміту або некоректний UTF-8 закривають
+/// саме з'єднання, а не вимагають дочитувати решту ворожого кадру.
+/// EOF із непорожнім фрагментом зберігає попередній контракт read_line.
+fn read_bounded_tcp_line(
+    reader: &mut BufReader<TcpStream>,
+    max_bytes: usize,
+    budget: Duration,
+) -> io::Result<Option<String>> {
+    let deadline = Instant::now() + budget;
+    let mut bytes = Vec::with_capacity(max_bytes.min(4096));
+
+    loop {
+        // Тайм-аут окремого read не може продовжувати загальний дедлайн:
+        // клієнт, що передає по байту, не отримує нових п'яти секунд.
+        let remaining = deadline
+            .checked_duration_since(Instant::now())
+            .filter(|duration| !duration.is_zero())
+            .ok_or_else(|| io::Error::new(io::ErrorKind::TimedOut, "TCP frame deadline exceeded"))?;
+        reader.get_ref().set_read_timeout(Some(remaining))?;
+
+        let chunk = reader.fill_buf()?;
+        if chunk.is_empty() {
+            return if bytes.is_empty() {
+                Ok(None)
+            } else {
+                String::from_utf8(bytes)
+                    .map(Some)
+                    .map_err(|_| io::Error::new(io::ErrorKind::InvalidData, "TCP frame is not UTF-8"))
+            };
+        }
+
+        let newline = chunk.iter().position(|byte| *byte == b'\n');
+        let take = newline.map_or(chunk.len(), |index| index + 1);
+        if take > max_bytes.saturating_sub(bytes.len()) {
+            return Err(io::Error::new(
+                io::ErrorKind::InvalidData,
+                "TCP frame exceeds byte limit",
+            ));
+        }
+        bytes.extend_from_slice(&chunk[..take]);
+        reader.consume(take);
+
+        if newline.is_some() {
+            return String::from_utf8(bytes)
+                .map(Some)
+                .map_err(|_| io::Error::new(io::ErrorKind::InvalidData, "TCP frame is not UTF-8"));
+        }
+    }
+}
 
 /// `--tcp` / `--tcp=PORT` — a REPL reachable over TCP instead of stdio, for
 /// other local processes (e.g. a cross-session tool) to eval expressions
@@ -78,13 +134,22 @@ pub(crate) fn run_tcp_repl(port: u16, allowed: &[String]) {
         }
         let _ = load_process_library(&mut session);
 
-        let mut reader = BufReader::new(stream.try_clone().expect("clone TCP stream"));
-        let mut line = String::new();
+        // Обмежуємо і запис: клієнт, що перестав читати відповіді,
+        // не повинен тримати сервер у нескінченному write.
+        if let Err(error) = stream.set_write_timeout(Some(Duration::from_secs(5))) {
+            eprintln!("TCP REPL: {peer} cannot set write timeout: {error}");
+            continue;
+        }
+        // BufReader володіє socket; зайвого дублювання handle не потрібно.
+        let mut reader = BufReader::new(stream);
         loop {
-            line.clear();
-            match reader.read_line(&mut line) {
-                Ok(0) => break, // connection closed
-                Ok(_) => {
+            match read_bounded_tcp_line(
+                &mut reader,
+                MAX_TCP_REPL_LINE_BYTES,
+                TCP_REPL_FRAME_DEADLINE,
+            ) {
+                Ok(None) => break,
+                Ok(Some(line)) => {
                     let trimmed = line.trim();
                     if trimmed.is_empty() {
                         continue;
@@ -105,13 +170,106 @@ pub(crate) fn run_tcp_repl(port: u16, allowed: &[String]) {
                         },
                         Err(e) => format!("Parse error: {}", e.render(trimmed)),
                     };
-                    if writeln!(stream, "{response}").is_err() {
+                    if writeln!(reader.get_mut(), "{response}").is_err() {
                         break;
                     }
                 }
-                Err(_) => break,
+                Err(error) => {
+                    eprintln!("TCP REPL: {peer} rejected input: {error}");
+                    break;
+                }
             }
         }
         eprintln!("TCP REPL: {peer} disconnected");
+    }
+}
+
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::net::Shutdown;
+    use std::io::Write;
+
+    fn connected_streams() -> (TcpStream, TcpStream) {
+        let listener = TcpListener::bind((Ipv4Addr::LOCALHOST, 0)).unwrap();
+        let sender = TcpStream::connect(listener.local_addr().unwrap()).unwrap();
+        let (receiver, _) = listener.accept().unwrap();
+        (sender, receiver)
+    }
+
+    #[test]
+    fn tcp_repl_frame_preserves_crlf_and_following_frame() {
+        let (mut sender, receiver) = connected_streams();
+        sender.write_all(b"(a)\r\n(b)\n").unwrap();
+        let mut reader = BufReader::new(receiver);
+        assert_eq!(
+            read_bounded_tcp_line(&mut reader, 5, Duration::from_secs(1)).unwrap(),
+            Some("(a)\r\n".into())
+        );
+        assert_eq!(
+            read_bounded_tcp_line(&mut reader, 5, Duration::from_secs(1)).unwrap(),
+            Some("(b)\n".into())
+        );
+    }
+
+    #[test]
+    fn tcp_repl_frame_rejects_oversize_without_waiting_for_lf() {
+        let (mut sender, receiver) = connected_streams();
+        sender.write_all(b"12345").unwrap();
+        // Keep the socket open: the fifth byte must fail without LF or EOF.
+        let mut reader = BufReader::new(receiver);
+        let error = read_bounded_tcp_line(&mut reader, 4, Duration::from_secs(1))
+            .unwrap_err();
+        assert_eq!(error.kind(), io::ErrorKind::InvalidData);
+    }
+
+    #[test]
+    fn tcp_repl_frame_exact_boundary_and_multibyte_utf8() {
+        let (mut sender, receiver) = connected_streams();
+        sender.write_all("é\n".as_bytes()).unwrap(); // two UTF-8 bytes plus LF
+        let mut reader = BufReader::new(receiver);
+        assert_eq!(
+            read_bounded_tcp_line(&mut reader, 3, Duration::from_secs(1)).unwrap(),
+            Some("é\n".into())
+        );
+    }
+
+    #[test]
+    fn tcp_repl_frame_rejects_invalid_utf8() {
+        let (mut sender, receiver) = connected_streams();
+        sender.write_all(b"\xff\n").unwrap();
+        let mut reader = BufReader::new(receiver);
+        let error = read_bounded_tcp_line(&mut reader, 3, Duration::from_secs(1))
+            .unwrap_err();
+        assert_eq!(error.kind(), io::ErrorKind::InvalidData);
+    }
+
+    #[test]
+    fn tcp_repl_frame_retains_partial_eof_compatibility() {
+        let (mut sender, receiver) = connected_streams();
+        sender.write_all(b"abc").unwrap();
+        sender.shutdown(Shutdown::Write).unwrap();
+        let mut reader = BufReader::new(receiver);
+        assert_eq!(
+            read_bounded_tcp_line(&mut reader, 3, Duration::from_secs(1)).unwrap(),
+            Some("abc".into())
+        );
+        assert_eq!(
+            read_bounded_tcp_line(&mut reader, 3, Duration::from_secs(1)).unwrap(),
+            None
+        );
+    }
+
+    #[test]
+    fn tcp_repl_frame_idle_peer_has_bounded_deadline() {
+        let (_sender, receiver) = connected_streams();
+        let mut reader = BufReader::new(receiver);
+        let error = read_bounded_tcp_line(&mut reader, 16, Duration::from_millis(100))
+            .unwrap_err();
+        assert!(matches!(
+            error.kind(),
+            io::ErrorKind::TimedOut | io::ErrorKind::WouldBlock
+        ));
     }
 }
