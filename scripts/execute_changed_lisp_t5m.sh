@@ -52,12 +52,6 @@ run_native_t5m_program() {
   local status=0
   local source_bytes native_timeout
   local -a paired_runtime_args=() standalone_runtime=("$binary") direct_runtime=("$binary")
-  if [[ "$file" == "tests/semantic/d6-any-all-cold-no-mechanism-negative.lisp" ]]; then
-    # CLI за замовчуванням запускає Core4: для холодного негативу
-    # необхідний явний Core3 без D6 ANY/ALL визначень.
-    direct_runtime=("$binary" --core=3)
-    standalone_runtime=("$binary" --core=3)
-  fi
   # D24+ корені «число-*» та мовна Д6 «довжина» створюються Core4;
   # профіль однаковий для парного й автономного фізичного виконання.
   case "$file" in
@@ -180,8 +174,6 @@ run_native_t5m_program() {
   # Названі випадки проходять і paired, і standalone; інша причина відмови — RED.
   local negative_type_diagnostic=""
   case "$file" in
-    tests/semantic/d6-any-all-cold-no-mechanism-negative.lisp)
-      negative_type_diagnostic='domain identity is not callable' ;;
     tests/semantic/d11-srfi1-filter-map-improper-root-negative.lisp|tests/semantic/d11-srfi1-filter-map-improper-tail-negative.lisp)
       negative_type_diagnostic='domain identity is not callable under its ratified law: D1 ' ;;
     tests/semantic/d3-eq-nonatom-type-negative.lisp)
