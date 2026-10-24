@@ -575,6 +575,14 @@ cat -- lib/d11-tree-equal-by-test.lisp tests/semantic/d11-tree-equal-by-test-mut
 run_case run_law d11-tree-test-positive "$d11_tree_test_law_bundle" 1
 run_case run_law d11-tree-test-mutant "$d11_tree_test_mutant_bundle" 0
 sha256sum lib/d11-tree-equal-by-test.lisp tests/semantic/d11-tree-equal-by-test-law.lisp tests/semantic/d11-tree-equal-by-test-mutant.lisp > "$evidence/d11-tree-test-inputs.sha256"
+# Д11: точний D1 позитив/мутант для завершення proper/dotted списків.
+d11_end_law="$evidence/d11-terminator-law-full.lisp"
+d11_end_mutant="$evidence/d11-terminator-mutant-full.lisp"
+cat -- lib/d11-list-terminator-evidence.lisp tests/semantic/d11-list-terminator-law.lisp > "$d11_end_law"
+cat -- lib/d11-list-terminator-evidence.lisp tests/semantic/d11-list-terminator-mutant.lisp > "$d11_end_mutant"
+run_case run_law d11-terminator-positive "$d11_end_law" 1
+run_case run_law d11-terminator-mutant "$d11_end_mutant" 0
+sha256sum lib/d11-list-terminator-evidence.lisp tests/semantic/d11-list-terminator-law.lisp tests/semantic/d11-list-terminator-mutant.lisp > "$evidence/d11-terminator-inputs.sha256"
 # SRFI-1 list=: алгоритм з чинної lib/D11, очікувані предикати тільки в Lisp.
 # Не тестуємо D11-операцію Rust-оракулом; Zig тільки кодує фізичні байти.
 d11_list_equal_law_bundle="$evidence/d11-list-equality-positive.lisp"
