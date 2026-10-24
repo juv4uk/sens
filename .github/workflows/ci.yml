@@ -376,6 +376,8 @@ jobs:
           cargo test --locked -p sens-host --test capability_scoping local_model_ -- --nocapture
           cargo test --locked -p sens-lsp --lib transport::tests:: -- --nocapture
           cargo test --locked -p sens-cli --bin sens t5m_quoted_ -- --nocapture
+          # Координаційна площина: нативні Rust-тести мережевого reader/журналу.
+          cargo test --locked -p swarm-node --bin swarm-node -- --nocapture
           # F6 — тільки механізм двозаписового Rust-транспорту.
           # Мовні закони й семантика виконуються окремо у фізичному SENS.
           cargo test --locked -p sens-cli --bin wsm-fs-record-producer -- --nocapture
