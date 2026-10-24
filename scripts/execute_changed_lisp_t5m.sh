@@ -186,6 +186,8 @@ run_native_t5m_program() {
       negative_type_diagnostic='car expects a non-empty list' ;;
     tests/semantic/d11-srfi1-find-tail-improper-tail-negative.lisp|tests/semantic/d11-family-aggregation-mutant.lisp)
       negative_type_diagnostic='car expects a non-empty list' ;;
+    tests/semantic/d6-union-improper-tail-negative.lisp|tests/semantic/d6-union-improper-root-negative.lisp)
+      negative_type_diagnostic='car expects a non-empty list' ;;
     tests/semantic/d3-car-atomic-dotted-tail-type-negative.lisp)
       negative_type_diagnostic='car expects a non-empty list' ;;
     tests/semantic/d3-cdr-empty-list-type-negative.lisp)
@@ -209,6 +211,10 @@ run_native_t5m_program() {
     elif [[ "$file" == "tests/semantic/d11-family-aggregation-mutant.lisp" ]]; then
       direct_source="$dir/d11-aggregation-bound-negative.lisp"
       cat -- lib/d11-clojure-group-by.lisp lib/d11-clojure-frequencies-unary.lisp "$file" > "$direct_source"
+    elif [[ "$file" == "tests/semantic/d6-union-improper-tail-negative.lisp" ||
+            "$file" == "tests/semantic/d6-union-improper-root-negative.lisp" ]]; then
+      direct_source="$dir/d6-union-bound-negative.lisp"
+      cat -- "$dir/d6-union-exact-binding.lisp" "$file" > "$direct_source"
     fi
     if timeout "$native_timeout" "$binary" "$direct_source" \
         >"$dir/native-direct.stdout" 2>"$dir/native-direct.stderr"; then
@@ -388,6 +394,19 @@ run_native_t5m_program() {
         echo "SENS_D11_UNFOLD_EXECUTED_PASS source=$file result=D1:$d11_unfold_expected carrier=Zig/T5M"
         ;;
     esac
+    # D6 UNION: підтвердження точних D1 свідків, не host-оракул.
+    if [[ "$file" == "tests/semantic/d6-union-proper-law.lisp" ||
+          "$file" == "tests/semantic/d6-union-proper-mutant.lisp" ]]; then
+      d6_union_expected=1
+      [[ "$file" != *-mutant.lisp ]] || d6_union_expected=0
+      printf '%s\n' "$d6_union_expected" > "$dir/d6-union.expected"
+      if ! cmp -s "$dir/native-paired.stdout" "$dir/d6-union.expected"; then
+        echo "::error::SENS_D6_UNION_WRONG_D1 source=$file expected=D1:$d6_union_expected actual=$(cat "$dir/native-paired.stdout")" >&2
+        mark_file_failed
+        return
+      fi
+      echo "SENS_D6_UNION_EXECUTED_PASS source=$file result=D1:$d6_union_expected carrier=Zig/T5M"
+    fi
     # Принцип 5: дві РІЗНІ фізичні форми того самого обчислення.
     # 1) живий український Lisp, без T5M; 2) точні байти Zig/T5M,
     # виконані SENS після контролю оборотності. Ніякого Python-оракула.
