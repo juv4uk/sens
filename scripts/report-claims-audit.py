@@ -29,6 +29,34 @@ def filled(row: dict[str, str], col: str) -> bool:
     return row.get(col, "-") not in ("-", "")
 
 
+MAP = ROOT / "docs/archaeology/semantic-candidate-map-2026-10-24.tsv"
+VERDICTS = ("CONFIRMED", "WEAK", "UNJUDGEABLE", "REJECTED")
+
+
+def verdicts() -> list[tuple[str, str]]:
+    """(артефакт, вердикт) з моєї судженої мапи — читається, не вгадується."""
+    if not MAP.is_file():
+        return []
+    out = []
+    for line in MAP.read_text(encoding="utf-8").splitlines():
+        if line.startswith("#") or not line.strip():
+            continue
+        cells = line.split("\t")
+        if len(cells) >= 3 and cells[2] in VERDICTS:
+            out.append((cells[1], cells[2]))
+    return out
+
+
+def count_verdict(name: str) -> int:
+    return sum(1 for _, v in verdicts() if v == name)
+
+
+def unjudgeable_without_source() -> int:
+    return sum(1 for art, v in verdicts()
+               if v == "UNJUDGEABLE"
+               and not (SEMANTIC / f"{art}-law.lisp").is_file())
+
+
 def claims() -> list[tuple[str, int, int]]:
     """(опис, виміряно, очікувано)"""
     rows = ledger_rows()
@@ -45,6 +73,11 @@ def claims() -> list[tuple[str, int, int]]:
         ("*-law.sens", len(laws), 119),
         ("*-law.sens без .lisp", len(opaque), 46),
         (".sens у tests/semantic", len(arts), 549),
+        # Семантичні судження — теж перевірні: жодного CONFIRMED у моїй мапі
+        # (усі три перевірені випадки виявились хибними або завищеними), і 8
+        # UNJUDGEABLE справді без .lisp-джерела.
+        ("CONFIRMED у моїй мапі", count_verdict("CONFIRMED"), 0),
+        ("UNJUDGEABLE без .lisp", unjudgeable_without_source(), 8),
         # Твердження «N незгаданих артефактів» ПРИБРАНО: хибне за формою.
         # Ledger посилається і на .bits-кандидата (не .sens), тож перетин
         # залежить від способу порівняння — будь-яке одне число вводить в
