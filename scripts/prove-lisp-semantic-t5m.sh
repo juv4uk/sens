@@ -813,6 +813,15 @@ d11_form_bad_miss="$evidence/d11-form-presence-improper-miss.lisp"
 cat -- lib/d11-form-presence.lisp tests/fixtures/d11-form-presence-improper-miss-negative.lisp > "$d11_form_bad_miss"
 run_case run_type_rejection d11-form-presence-improper-miss "$d11_form_bad_miss" 'car expects a non-empty list'
 sha256sum lib/d11-form-presence.lisp tests/fixtures/d11-form-presence-improper-{match,miss}-negative.lisp > "$evidence/d11-form-presence-inputs.sha256"
+# Д11 LIST-TERMINATOR: D1:ні є даними неправильного хвоста, D3:() — кінець.
+# Фізична SENS-бібліотека та незалежний позитив/мутант використовують одні DEFINE.
+d11_terminator_positive="$evidence/d11-list-terminator-positive-complete.lisp"
+d11_terminator_mutant="$evidence/d11-list-terminator-mutant-complete.lisp"
+cat -- lib/d11-list-terminator-evidence.lisp tests/semantic/d11-list-terminator-law.lisp > "$d11_terminator_positive"
+cat -- lib/d11-list-terminator-evidence.lisp tests/semantic/d11-list-terminator-mutant.lisp > "$d11_terminator_mutant"
+run_case run_law d11-list-terminator-positive "$d11_terminator_positive" 1
+run_case run_law d11-list-terminator-mutant "$d11_terminator_mutant" 0
+sha256sum lib/d11-list-terminator-evidence.lisp tests/semantic/d11-list-terminator-law.lisp tests/semantic/d11-list-terminator-mutant.lisp > "$evidence/d11-list-terminator-inputs.sha256"
 # Д11 FIND-PRESENCE: прапорець наявності незалежний від знайденого значення.
 # Чинний SENS DEFINE, точний D1 позитив/мутант та неправильний D1-хвіст.
 d11_presence_positive="$evidence/d11-srfi1-find-presence-positive-complete.lisp"

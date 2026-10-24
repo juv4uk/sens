@@ -640,6 +640,33 @@ run_native_t5m_program() {
         return
       fi
     fi
+    if [[ "$file" == "tests/semantic/d11-list-terminator-law.lisp" ||
+          "$file" == "tests/semantic/d11-list-terminator-mutant.lisp" ]]; then
+      # Самодостатній T5M-носій без підміни функції зовнішнім хостом.
+      local terminator_full_source="$dir/d11-list-terminator-full.lisp"
+      standalone_physical="$dir/d11-list-terminator-full.sens"
+      if ! cat -- lib/d11-list-terminator-evidence.lisp "$file" > "$terminator_full_source" ||
+         ! timeout "$native_timeout" "$binary" --t5m-mint "$terminator_full_source" "$standalone_physical" \
+              >"$dir/d11-list-terminator-mint.stdout" 2>"$dir/d11-list-terminator-mint.stderr" ||
+         ! timeout "$native_timeout" "$native_open" open "$standalone_physical" \
+              >"${standalone_physical%.sens}" 2>"$dir/d11-list-terminator-open.stderr" ||
+         ! timeout "$native_timeout" "$native_open" verify-view "$standalone_physical" \
+              >"$dir/d11-list-terminator-verify.stdout" 2>"$dir/d11-list-terminator-verify.stderr"; then
+        echo "::error::D11_LIST_TERMINATOR_STANDALONE_MINT_FAILED source=$file layer=zig-t5m" >&2
+        for diagnostic in "$dir"/d11-list-terminator-*.stderr; do
+          [[ ! -f "$diagnostic" ]] || sed 's/^/D11 LIST-TERMINATOR: /' "$diagnostic" >&2
+        done
+        mark_file_failed
+        return
+      fi
+      local expected_terminator_d1=1
+      [[ "$file" != *-mutant.lisp ]] || expected_terminator_d1=0
+      if [[ "$(cat "$dir/native-paired.stdout")" != "$expected_terminator_d1" ]]; then
+        echo "::error::D11_LIST_TERMINATOR_WRONG_PAIRED_VERDICT source=$file expected=D1:$expected_terminator_d1 actual=$(cat "$dir/native-paired.stdout")" >&2
+        mark_file_failed
+        return
+      fi
+    fi
     if [[ "$file" == "tests/semantic/d11-srfi1-find-presence-law.lisp" ||
           "$file" == "tests/semantic/d11-srfi1-find-presence-mutant.lisp" ]]; then
       # Самодостатній SENS-носій: ті самі DEFINE та той самий мовний свідок,
@@ -956,6 +983,10 @@ while IFS= read -r file || [[ -n "$file" ]]; do
           "$file" == "tests/semantic/d11-srfi1-unary-count-improper-right-negative.lisp" ]]; then
     # Усі чотири носії викликають ті самі чинні SENS DEFINE.
     binding_sources=(--binding-source lib/d11-srfi1-unary-count.lisp)
+  elif [[ "$file" == "tests/semantic/d11-list-terminator-law.lisp" ||
+          "$file" == "tests/semantic/d11-list-terminator-mutant.lisp" ]]; then
+    # Повторно використовуємо лише справжній SENS DEFINE, Zig переносить форму.
+    binding_sources=(--binding-source lib/d11-list-terminator-evidence.lisp)
   elif [[ "$file" == "tests/semantic/d11-srfi1-find-presence-law.lisp" ||
           "$file" == "tests/semantic/d11-srfi1-find-presence-mutant.lisp" ||
           "$file" == "tests/semantic/d11-srfi1-find-presence-improper-tail-negative.lisp" ||
