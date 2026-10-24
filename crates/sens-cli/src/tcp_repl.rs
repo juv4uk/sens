@@ -198,6 +198,9 @@ fn handle_tcp_line_connection(stream: TcpStream, allowed: &[String]) {
         return;
     }
 
+    // Apply finite resource budgets after Core4/time/process bootstrap.
+    session.environment.activate_untrusted_runtime_limits();
+
     // Обмежуємо і запис: клієнт, що перестав читати відповіді,
     // не повинен тримати сервер у нескінченному write.
     if let Err(error) = stream.set_write_timeout(Some(Duration::from_secs(5))) {

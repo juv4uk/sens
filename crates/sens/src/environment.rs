@@ -124,6 +124,8 @@ struct SessionState {
     selected_core_profile: Option<CoreProfile>,
     cons_limit: Option<usize>,
     cons_count: usize,
+    /// Remaining evaluator dispatches; None is the trusted local profile.
+    eval_steps_remaining: Option<usize>,
     /// Опт-ін перемикач арени для `cons`. Коли ввімкнено, єдина точка
     /// алокації `cons_values` виділяє комірку в `arena` і читає значення
     /// назад крізь арену. Вимкнено — подання `Value::Pair(Rc<PairNode>)`
@@ -174,6 +176,7 @@ impl Default for SessionState {
             selected_core_profile: None,
             cons_limit: None,
             cons_count: 0,
+            eval_steps_remaining: None,
             // Арена — ТИПОВЕ подання `cons`: кожна сесія народжується з
             // увімкненим швом арени. `Rc`-подання `Value` лишається
             // незмінним; арена стоїть поверх нього.
@@ -256,6 +259,42 @@ impl Environment {
     pub fn with_numeric_bit_limit(self, limit: usize) -> Self {
         self.2.borrow_mut().numeric_bit_limit = Some(limit);
         self
+    }
+
+    /// Mechanical resource budget for untrusted network sessions.
+    /// Activate only AFTER Core4 and other trusted bootstrap libraries load.
+    /// Counts include nested and tail-position evaluator dispatches.
+    pub fn activate_untrusted_runtime_limits(&self) {
+        const CONS_ADDITIONAL: usize = 100_000;
+        const EVAL_DISPATCHES: usize = 500_000;
+        const NUMERIC_BITS: usize = 4096;
+        const PRINT_LINES: usize = 256;
+
+        let mut state = self.2.borrow_mut();
+        // Preserve the already-accounted bootstrap allocations: never reset
+        // cons_count, or the arena could have unaccounted surviving values.
+        state.cons_limit = Some(state.cons_count.saturating_add(CONS_ADDITIONAL));
+        state.eval_steps_remaining = Some(EVAL_DISPATCHES);
+        state.numeric_bit_limit = Some(NUMERIC_BITS);
+        state.transcript.cap = Some(PRINT_LINES);
+    }
+
+    /// Mechanism test/embedding hook; no additional SENS function is defined.
+    pub fn with_eval_step_budget(self, steps: usize) -> Self {
+        self.2.borrow_mut().eval_steps_remaining = Some(steps);
+        self
+    }
+
+    /// A zero budget is a named failure, not successful SENS evaluation.
+    pub(crate) fn consume_eval_step(&self) -> Result<(), ()> {
+        let mut state = self.2.borrow_mut();
+        if let Some(remaining) = state.eval_steps_remaining.as_mut() {
+            if *remaining == 0 {
+                return Err(());
+            }
+            *remaining -= 1;
+        }
+        Ok(())
     }
 
     /// Restricts process execution to exact program names.
@@ -816,6 +855,23 @@ impl Default for Session {
 
 #[cfg(test)]
 mod tests {
+    #[test]
+    fn untrusted_resource_limits_count_only_post_bootstrap_cons_allocations() {
+        let env = Environment::root();
+        for _ in 0..3 {
+            env.try_alloc_cons().expect("bootstrap setup consumes cons");
+        }
+        env.activate_untrusted_runtime_limits();
+        for _ in 0..100_000 {
+            env.try_alloc_cons().expect("post-bootstrap budget admitted");
+        }
+        assert!(env.try_alloc_cons().is_err(), "network cons allocation must stop");
+        let limited = env.2.borrow();
+        assert_eq!(limited.numeric_bit_limit, Some(4096));
+        assert_eq!(limited.transcript.cap, Some(256));
+        assert_eq!(limited.eval_steps_remaining, Some(500_000));
+    }
+
     use super::*;
     use crate::{CoreDomainIdentity, Exactness};
 

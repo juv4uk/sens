@@ -672,6 +672,11 @@ fn handle_sexpr_connection(
         return;
     }
 
+    // Bootstrap belongs to the trusted loader. Only client expressions
+    // consume the network session's finite cons, evaluator, numeric and
+    // transcript budgets.
+    session.environment.activate_untrusted_runtime_limits();
+
     if let Err(error) = stream.set_write_timeout(Some(ORACLE_WRITE_TIMEOUT)) {
         eprintln!("TCP REPL: {peer} cannot set write timeout: {error}");
         return;

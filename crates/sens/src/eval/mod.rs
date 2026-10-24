@@ -386,6 +386,13 @@ pub(crate) fn evaluate_step(
     expression: &Expr,
     environment: &Environment,
 ) -> Result<EvalStep, LanguageError> {
+    if environment.consume_eval_step().is_err() {
+        return Err(LanguageError::new(
+            ErrorKind::OutOfMemory,
+            "network SENS evaluator step budget exhausted",
+            expression.span,
+        ));
+    }
     #[cfg(feature = "benchmark-ast-visits")]
     record_eval_ast_visit();
 
@@ -621,6 +628,18 @@ fn evaluate_list(
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn evaluator_budget_counts_real_dispatches_and_fails_named() {
+        let expr = crate::parse("(quote ())").expect("quote is syntactically valid");
+        let environment = Environment::root().with_eval_step_budget(1);
+        let first = evaluate(&expr[0], &environment).expect("first dispatch admitted");
+        assert_eq!(first, Value::Nil);
+        let second = evaluate(&expr[0], &environment)
+            .expect_err("exhausted budget must not be treated as SENS success");
+        assert_eq!(second.kind, ErrorKind::OutOfMemory);
+        assert!(second.message.contains("evaluator step budget exhausted"));
+    }
 
     #[test]
     fn physical_d7_call_head_uses_existing_ukrainian_source_binding_only() {
