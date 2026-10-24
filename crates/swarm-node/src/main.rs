@@ -1803,7 +1803,17 @@ fn broadcast_to_peers(
     (written_to, dead)
 }
 
-/// Local client injects a fact: `(emit (type evidence-created) (payload (...)))`.
+/// Зарезервовані факти змінюють авторитетний стан задачі. Тільки
+/// спеціалізовані команди можуть створювати їх після перевірок.
+/// Звичайний emit залишається відкритим для evidence/work/help подій.
+fn is_reserved_task_event_type(typ: &str) -> bool {
+    matches!(
+        typ,
+        "task-defined" | "claim-committed" | "claim-released" | "task-completed"
+    )
+}
+
+/// Local client injects a non-authoritative fact: `(emit (type evidence-created) (payload (...)))`.
 fn handle_emit(node: &Arc<Node>, msg: &Sexp, stream: &mut TcpStream) {
     let Some(typ) = msg.field_atom("type") else {
         send(
@@ -1815,6 +1825,18 @@ fn handle_emit(node: &Arc<Node>, msg: &Sexp, stream: &mut TcpStream) {
         );
         return;
     };
+    if is_reserved_task_event_type(typ) {
+        send(
+            stream,
+            &Sexp::list(vec![
+                Sexp::atom("error"),
+                Sexp::string(format!(
+                    "emit forbids reserved task event `{typ}`; use a task-specific operation"
+                )),
+            ]),
+        );
+        return;
+    }
     let payload = msg
         .field("payload")
         .and_then(|f| f.first())
