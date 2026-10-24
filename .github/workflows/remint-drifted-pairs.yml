@@ -389,6 +389,8 @@ jobs:
             case "$f" in
               tests/semantic/exact-arithmetic-laws.lisp|tests/semantic/exact-arithmetic-mutant.lisp) profile_args=(--core4-runtime);;
               tests/semantic/core-d3-car-cdr-cons-mutant.lisp) expect_args=(--expect-error "car expects a non-empty list");;
+              tests/semantic/d3-proper-tail-hot-law.lisp|tests/semantic/d3-proper-tail-hot-mutant.lisp) bs=(--binding-source benchmarks/d3-proper-tail-hot.lisp);;
+              tests/semantic/d3-structural-bench-law.lisp|tests/semantic/d3-structural-bench-mutant.lisp) bs=(--binding-source benchmarks/d3-structural-bench.lisp);;
               tests/semantic/d4-recursion-atom-result-law.lisp|tests/semantic/d4-recursion-atom-result-mutant.lisp|tests/semantic/d4-recursion-benchmark-law.lisp|tests/semantic/d4-recursion-benchmark-mutant.lisp) bs=(--binding-source benchmarks/recursion.lisp);;
               lib/persistent-vector.lisp|lib/knowledge.lisp) bs=(--binding-source "$RUNNER_TEMP/sens-core4-d24-roots.lisp");;
               lib/reason.lisp) bs=(--binding-source "$RUNNER_TEMP/sens-core4-d24-roots.lisp" --binding-source lib/unify.lisp);;
@@ -689,6 +691,8 @@ jobs:
               case "$f" in
                 tests/semantic/exact-arithmetic-laws.lisp|tests/semantic/exact-arithmetic-mutant.lisp) profile_args=(--core4-runtime);;
               tests/semantic/core-d3-car-cdr-cons-mutant.lisp) expect_args=(--expect-error "car expects a non-empty list");;
+              tests/semantic/d3-proper-tail-hot-law.lisp|tests/semantic/d3-proper-tail-hot-mutant.lisp) bs=(--binding-source benchmarks/d3-proper-tail-hot.lisp);;
+              tests/semantic/d3-structural-bench-law.lisp|tests/semantic/d3-structural-bench-mutant.lisp) bs=(--binding-source benchmarks/d3-structural-bench.lisp);;
               tests/semantic/d4-recursion-atom-result-law.lisp|tests/semantic/d4-recursion-atom-result-mutant.lisp|tests/semantic/d4-recursion-benchmark-law.lisp|tests/semantic/d4-recursion-benchmark-mutant.lisp) bs=(--binding-source benchmarks/recursion.lisp);;
                 lib/persistent-vector.lisp|lib/knowledge.lisp) bs=(--binding-source "$RUNNER_TEMP/sens-core4-d24-roots.lisp");;
                 lib/reason.lisp) bs=(--binding-source "$RUNNER_TEMP/sens-core4-d24-roots.lisp" --binding-source lib/unify.lisp);;
