@@ -35,6 +35,8 @@ jobs:
           set -euo pipefail
           python3 scripts/ci_one_focused_workflow.py
           python3 scripts/check_ci_bash_blocks.py
+          # Негативний контроль повноти обліку файлів — один швидкий Bash-тест.
+          bash tests/test-count-executable-lisp-git-inventory.sh
 
       - name: Rust CLI — рання перевірка синтаксису REPL
         shell: bash
