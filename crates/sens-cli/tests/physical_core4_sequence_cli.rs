@@ -394,6 +394,12 @@ fn verify_unpaired_ukrainian_libs_natively() {
         "list-reverse-tail-general",
         "list-last-adjacent-equal-atom-suffix-general",
         "list-first-adjacent-equal-atom-suffix-general",
+        "list-first-adjacent-atomic-triple-zero-copy-general",
+        "list-domain-first-class-compose",
+        "list-first-class-predicate-suffix-zero-copy-general",
+        "list-foundation-compositions",
+        "list-last-atomic-run-first-class-zero-copy-general",
+        "викликати-доменний-код",
         "list-every-fifth-linear-general",
         "list-every-fourth-linear-general",
         "list-every-second-general",
@@ -728,6 +734,7 @@ fn verify_unpaired_ukrainian_libs_natively() {
                 | "list-reverse-tail-general"
                 | "list-last-adjacent-equal-atom-suffix-general"
                 | "list-first-adjacent-equal-atom-suffix-general"
+                | "list-first-adjacent-atomic-triple-zero-copy-general"
                 | "list-every-fifth-linear-general"
                 | "list-every-fourth-linear-general"
                 | "list-every-second-general"
@@ -1048,6 +1055,7 @@ fn ukrainian_d3_d4_existing_files_mint_verify_and_execute() {
         "lib/list-interleave-two-general",
         "lib/list-reverse-tail-general",
         "lib/list-last-adjacent-equal-atom-suffix-general",
+        "lib/list-first-adjacent-atomic-triple-zero-copy-general",
         "lib/list-append-general",
         "lib/list-collapse-adjacent",
         "lib/list-collapse-adjacent-atoms",
