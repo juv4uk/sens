@@ -372,6 +372,8 @@ jobs:
           set -euo pipefail
           cargo test --locked -p sens --test build_projection_transfer -- --nocapture
           cargo test --locked -p sens --lib io::tests:: -- --nocapture
+          # Негативний TCP-свідок: звичайний emit не створює fenced task-/claim- факти.
+          cargo test --locked -p swarm-node --test integration generic_emit_cannot_forge_fenced_task_facts -- --nocapture
           cargo test --locked -p sens --test d5_list_search_laws -- --nocapture
           # Host-механізм: SENS-виклик перевіряє дозволи мережевого з’єднання.
           cargo test --locked -p sens-host --test capability_scoping local_model_ -- --nocapture

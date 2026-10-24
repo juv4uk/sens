@@ -1803,7 +1803,13 @@ fn broadcast_to_peers(
     (written_to, dead)
 }
 
-/// Local client injects a fact: `(emit (type evidence-created) (payload (...)))`.
+/// Control-plane task and claim events require a dedicated fenced transition.
+/// Reserve the namespace so newly added event kinds cannot bypass ownership checks.
+fn is_fenced_event_type(typ: &str) -> bool {
+    typ.starts_with("task-") || typ.starts_with("claim-")
+}
+
+/// Local clients may emit non-authoritative observations only.
 fn handle_emit(node: &Arc<Node>, msg: &Sexp, stream: &mut TcpStream) {
     let Some(typ) = msg.field_atom("type") else {
         send(
@@ -1815,6 +1821,18 @@ fn handle_emit(node: &Arc<Node>, msg: &Sexp, stream: &mut TcpStream) {
         );
         return;
     };
+    if is_fenced_event_type(typ) {
+        send(
+            stream,
+            &Sexp::list(vec![
+                Sexp::atom("error"),
+                Sexp::string(
+                    "UNAUTHORIZED_EVENT_TYPE: use fenced task/claim transitions",
+                ),
+            ]),
+        );
+        return;
+    }
     let payload = msg
         .field("payload")
         .and_then(|f| f.first())

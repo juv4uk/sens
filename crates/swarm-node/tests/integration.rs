@@ -309,6 +309,56 @@ fn anti_entropy_sync_and_live_push_event() {
 }
 
 #[test]
+fn generic_emit_cannot_forge_fenced_task_facts() {
+    let port = alloc_ports(1);
+    let _node = spawn(port, "emit-fence", &data_dir("emit-fence"), None);
+    let defined = request(
+        port,
+        "(define-task (task FENCED) (priority 1) (capabilities ()) (depends-on ()) (description \"fence\"))",
+    );
+    assert!(defined.starts_with("(ok"), "task setup failed: {defined}");
+    let baseline = request(port, "(task-state (task FENCED))");
+    assert!(
+        baseline.contains("(completed nil)") && baseline.contains("(generation 0)"),
+        "unexpected initial state: {baseline}"
+    );
+
+    for typ in [
+        "claim-committed",
+        "claim-released",
+        "task-completed",
+        "task-defined",
+        "claim-future-control",
+        "task-future-control",
+    ] {
+        let attempted = request(
+            port,
+            &format!(
+                "(emit (type {typ}) (payload ((task FENCED) (generation 777) (agent attacker))))"
+            ),
+        );
+        assert!(
+            attempted.starts_with("(error") && attempted.contains("UNAUTHORIZED_EVENT_TYPE"),
+            "generic emit must reject {typ}: {attempted}"
+        );
+        let after = request(port, "(task-state (task FENCED))");
+        assert_eq!(after, baseline, "forged {typ} changed task ownership");
+    }
+
+    let evidence = request(
+        port,
+        "(emit (type evidence-created) (payload (artifact \"allowed\")))",
+    );
+    assert!(evidence.starts_with("(ok"), "ordinary emit regressed: {evidence}");
+    assert_eq!(request(port, "(task-state (task FENCED))"), baseline);
+    let metrics = request(port, "(metrics)");
+    assert!(
+        metrics.contains("(event-count 2)"),
+        "rejected control events must not enter the journal: {metrics}"
+    );
+}
+
+#[test]
 fn quorum_claim_fencing_and_stale_rejection() {
     let base = alloc_ports(3);
     let (port_a, port_b, port_c) = (base, base + 1, base + 2);
