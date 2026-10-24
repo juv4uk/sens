@@ -1088,7 +1088,8 @@ while IFS= read -r file || [[ -n "$file" ]]; do
     binding_sources=(--binding-source lib/d11-clojure-group-by.lisp
                      --binding-source lib/d11-clojure-frequencies-unary.lisp)
   elif [[ "$file" == "tests/semantic/d11-family-selection-law.lisp" ||
-          "$file" == "tests/semantic/d11-family-selection-mutant.lisp" ]]; then
+          "$file" == "tests/semantic/d11-family-selection-mutant.lisp" ||
+          "$file" == "tests/semantic/d11-family-selection-d1-structural-law.lisp" ]]; then
     # Ядро сімейства відбору Д11 — у lib/d11-family-selection.lisp.
     binding_sources=(--binding-source lib/d11-family-selection.lisp)
   elif [[ "$file" == "tests/semantic/d11-interlisp-dwim-laws.lisp" ||
