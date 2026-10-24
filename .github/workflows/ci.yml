@@ -370,6 +370,8 @@ jobs:
           cargo test --locked -p sens --test d5_list_search_laws -- --nocapture
           cargo test --locked -p sens-lsp --lib transport::tests:: -- --nocapture
           cargo test --locked -p sens-cli --bin sens t5m_quoted_ -- --nocapture
+          # TCP-конверт має бути єдиною формою, без побічного виконання.
+          cargo test --locked -p sens-cli --test cli sexpr_protocol_rejects_extra_top_level_form_before_evaluation -- --nocapture
           # F6 — тільки механізм двозаписового Rust-транспорту.
           # Мовні закони й семантика виконуються окремо у фізичному SENS.
           cargo test --locked -p sens-cli --bin wsm-fs-record-producer -- --nocapture
