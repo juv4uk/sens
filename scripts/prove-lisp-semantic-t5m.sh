@@ -726,6 +726,18 @@ run_case run_type_rejection d11-list-equality-improper-right-type "$d11_list_equ
 run_case run_type_rejection d11-list-equality-invalid-singleton-type "$d11_list_equal_bad_singleton" "$d11_list_equal_type_error"
 run_case run_type_rejection d11-list-equality-invalid-third-type "$d11_list_equal_bad_third" "$d11_list_equal_type_error"
 sha256sum lib/d11-srfi1-list-equality.lisp tests/semantic/d11-srfi1-list-equality-law.lisp tests/semantic/d11-srfi1-list-equality-mutant.lisp tests/fixtures/d11-list-equality-improper-left-must-error.lisp tests/fixtures/d11-list-equality-improper-right-must-error.lisp tests/fixtures/d11-list-equality-invalid-singleton-must-error.lisp tests/fixtures/d11-list-equality-invalid-third-must-error.lisp > "$evidence/d11-list-equality-inputs.sha256"
+# Д11 FIND-PRESENCE: прапорець наявності незалежний від знайденого значення.
+# Чинний SENS DEFINE, точний D1 позитив/мутант та неправильний D1-хвіст.
+d11_presence_positive="$evidence/d11-srfi1-find-presence-positive-complete.lisp"
+d11_presence_mutant="$evidence/d11-srfi1-find-presence-mutant-complete.lisp"
+d11_presence_bad_tail="$evidence/d11-srfi1-find-presence-improper-tail-complete.lisp"
+cat -- lib/d11-srfi1-find-presence.lisp tests/semantic/d11-srfi1-find-presence-law.lisp > "$d11_presence_positive"
+cat -- lib/d11-srfi1-find-presence.lisp tests/semantic/d11-srfi1-find-presence-mutant.lisp > "$d11_presence_mutant"
+cat -- lib/d11-srfi1-find-presence.lisp tests/semantic/d11-srfi1-find-presence-improper-tail-negative.lisp > "$d11_presence_bad_tail"
+run_case run_law d11-srfi1-find-presence-positive "$d11_presence_positive" 1
+run_case run_law d11-srfi1-find-presence-mutant "$d11_presence_mutant" 0
+run_case run_type_rejection d11-srfi1-find-presence-improper-tail-type "$d11_presence_bad_tail" 'car expects a non-empty list'
+sha256sum lib/d11-srfi1-find-presence.lisp tests/semantic/d11-srfi1-find-presence-law.lisp tests/semantic/d11-srfi1-find-presence-mutant.lisp tests/semantic/d11-srfi1-find-presence-improper-tail-negative.lisp > "$evidence/d11-find-presence-inputs.sha256"
 # Д11 SRFI-1 FILTER-MAP: D1:ні відкидається, структурне () зберігається.
 # Справжній SENS source → Zig/T5M → парний і самостійний SENS.
 d11_filter_map_positive="$evidence/d11-srfi1-filter-map-positive.lisp"
