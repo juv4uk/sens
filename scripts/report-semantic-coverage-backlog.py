@@ -27,6 +27,7 @@ from __future__ import annotations
 
 import argparse
 import csv
+import re
 import sys
 from collections import Counter
 from pathlib import Path
@@ -68,8 +69,31 @@ def blockers(row: dict[str, str], root: Path) -> list[str]:
     return out
 
 
+def tokens(text: str) -> set[str]:
+    """Розпізнавальні токени: латинські слова довші за 3, з розділювачами.
+    Числа й короткі слова відкидаємо — вони дають хибні збіги."""
+    return {w for w in re.split(r"[^a-z0-9]+", text.lower())
+            if len(w) > 3 and not w.isdigit()}
+
+
+def suggest(row_id: str, laws: list[str], threshold: int = 2) -> list[str]:
+    """Артефакти, які ТЕМАТИЧНО перетинаються з рядком. Це ПІДКАЗКА, не
+    зіставлення: дослівних збігів немає (перевірено), тож автозаповнення
+    покажчиків неможливе — потрібне судження."""
+    row_tokens = tokens(row_id)
+    scored = []
+    for law in laws:
+        shared = row_tokens & tokens(law)
+        if len(shared) >= threshold:
+            scored.append((len(shared), law, sorted(shared)))
+    scored.sort(reverse=True)
+    return [f"{law} (спільні: {', '.join(shared)})" for _, law, shared in scored[:3]]
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
+    ap.add_argument("--suggest", action="store_true",
+                    help="тематичні підказки для рядків без кандидата (не зіставлення!)")
     ap.add_argument("--ready", action="store_true",
                     help="показати, які вимоги COVERED не виконано для рядків із кандидатом")
     ap.add_argument("--check", action="store_true",
@@ -102,6 +126,24 @@ def main() -> int:
             print(f"    кандидат: {row['candidate_sens_witness']}")
             for blocker in blockers(row, ROOT):
                 print(f"    ✗ {blocker}")
+    if args.suggest:
+        laws = sorted(p.stem[:-4] for p in (ROOT / "tests/semantic").glob("*-law.sens"))
+        print(f"SEMANTIC-BACKLOG: підказки (артефактів {len(laws)}, рядків без кандидата "
+              f"{len(data) - len(with_candidate)})")
+        shown = 0
+        for row in data:
+            if filled(row, "candidate_sens_witness"):
+                continue
+            hints = suggest(row["retired_test_id"], laws)
+            if hints:
+                print(f"  {row['retired_test_id'][:66]}")
+                for hint in hints:
+                    print(f"    ~ {hint}")
+                shown += 1
+            if shown >= 12:
+                break
+        print(f"SEMANTIC-BACKLOG: рядків із підказками показано={shown} "
+              "(це ПІДКАЗКИ, не зіставлення)")
     if args.check:
         print("SEMANTIC-BACKLOG: PASS квитанцій на не-COVERED немає (закон чесноти тримається)")
     return 0
