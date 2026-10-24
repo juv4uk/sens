@@ -345,8 +345,22 @@ def _calls_ladder(body: str, ladder: set[str]) -> bool:
 def project_definition_sites(root: Path) -> dict[str, set[str]]:
     """Позиції чинних DEFINE: власне визначення не є власним дублем."""
     sites: dict[str, set[str]] = {}
-    files = subprocess.run(["git", "-c", "core.quotepath=false", "ls-files", "lib"],
-                           cwd=root, capture_output=True, text=True).stdout.split()
+    # Порожній stdout від помилки Git не є доказом відсутності дублів.
+    # -z зберігає пробіли/переноси у назвах файлів без розділення за whitespace.
+    command = ["git", "-c", "core.quotepath=false", "ls-files", "-z", "--", "lib"]
+    try:
+        result = subprocess.run(command, cwd=root, capture_output=True, text=True, check=False)
+    except (OSError, UnicodeError) as exc:
+        print(f"GUARD-DOMAIN-REUSE: НЕ ПЕРЕВІРЕНО — git ls-files lib: {exc}", file=sys.stderr)
+        raise SystemExit(2) from exc
+    if result.returncode != 0:
+        print(
+            f"GUARD-DOMAIN-REUSE: НЕ ПЕРЕВІРЕНО — git ls-files lib code={result.returncode} "
+            f"stderr={result.stderr.strip()}",
+            file=sys.stderr,
+        )
+        raise SystemExit(2)
+    files = result.stdout.split("\0")
     for rel in files:
         if not rel.endswith(".lisp") or rel.startswith(("lib/domains/", "lib/generated/", "lib/surface/")):
             continue
@@ -760,12 +774,42 @@ def main(argv: list[str] | None = None) -> int:
             else:
                 staged_ok = False
         print(f"GUARD-DOMAIN-REUSE self-test: git staged fail-closed {'OK' if staged_ok else 'FAIL'}")
+        # Недоступний індекс проєкту не повинен приховувати дубль DEFINE.
+        with patch.object(
+            subprocess, "run",
+            return_value=subprocess.CompletedProcess(
+                ["git", "ls-files"], 128, "", "fatal: simulated repository failure"
+            ),
+        ), redirect_stderr(StringIO()):
+            try:
+                project_definition_sites(ROOT)
+            except SystemExit as exc:
+                project_sites_ok = exc.code == 2
+            else:
+                project_sites_ok = False
+        print(f"GUARD-DOMAIN-REUSE self-test: git ls-files fail-closed {'OK' if project_sites_ok else 'FAIL'}")
+        # Git -z лишає шлях із пробілами єдиним іменем, без втрати визначення.
+        sample_file = ROOT / "lib" / "назва із пробілами.lisp"
+        with patch.object(
+            subprocess, "run",
+            return_value=subprocess.CompletedProcess(
+                ["git", "ls-files"], 0, "lib/назва із пробілами.lisp\0", ""
+            ),
+        ), patch.object(
+            Path, "is_file", lambda path: path == sample_file
+        ), patch.object(
+            Path, "read_text", return_value="(визначити перевірка (функція (х) х))"
+        ):
+            paths_ok = project_definition_sites(ROOT).get("перевірка") == {
+                "lib/назва із пробілами.lisp"
+            }
+        print(f"GUARD-DOMAIN-REUSE self-test: шлях з пробілами {'OK' if paths_ok else 'FAIL'}")
         # Перевіряємо і ВЛАСНУ активацію: невиконуваний гачок = мертвий охоронець.
         hok, hmsg = hook_installed()
         print(f"GUARD-DOMAIN-REUSE self-test: гачок {'OK' if hok else 'НЕ УВІМКНЕНО (попередження)'} — {hmsg}")
         # Стан гачка — ПОПЕРЕДЖЕННЯ, не падіння: свіжий клон законно не має
         # ввімкненого гачка, доки не виконано scripts/install-hooks.sh.
-        return 0 if ok and intent_ok and d11_ok and staged_ok else 1
+        return 0 if ok and intent_ok and d11_ok and staged_ok and project_sites_ok and paths_ok else 1
 
     if args.lessons:
         # Знання живуть у САМОМУ охоронці: агент, який ним користується,
