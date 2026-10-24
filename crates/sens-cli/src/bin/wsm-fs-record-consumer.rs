@@ -58,17 +58,55 @@ fn d7_text(value: &str) -> Expr {
     }
 }
 
-fn main() {
-    let mut input = String::new();
-    io::stdin().read_to_string(&mut input).unwrap();
-    let records: Vec<_> = input
-        .lines()
-        .filter(|line| !line.trim().is_empty())
-        .collect();
-    if records.len() != 2 {
-        eprintln!("expected exactly two records");
-        std::process::exit(2);
+// Узгоджено з фізичним F6 producer: два UTF-8 записи, кожен 1..65536
+// байтів, кожен завершується LF. Rust обмежує лише транспорт;
+// оцінювання та перевірка вмісту залишаються в SENS.
+const MAX_RECORD_BYTES: usize = 64 * 1024;
+const MAX_WIRE_BYTES: usize = 2 * (MAX_RECORD_BYTES + 1);
+
+fn read_two_records<R: Read>(input: R) -> Result<[String; 2], &'static str> {
+    // +1 — свідок переповнення. Навіть ворожий stdin не може
+    // змусити нас прочитати чи накопичити більше цього ліміту.
+    let mut bounded = input.take((MAX_WIRE_BYTES + 1) as u64);
+    let mut wire = Vec::new();
+    bounded
+        .read_to_end(&mut wire)
+        .map_err(|_| "F6_INPUT_IO expected=readable-stream")?;
+    if wire.len() > MAX_WIRE_BYTES {
+        return Err("F6_RECORD_STREAM_SIZE expected<=131074");
     }
+    if !wire.ends_with(b"\n") {
+        return Err("F6_RECORD_TERMINATOR expected=final-LF");
+    }
+    if wire.contains(&b'\r') || wire.contains(&b'\0') {
+        return Err("F6_RECORD_DELIMITER expected=LF-only");
+    }
+
+    // Знімаємо рівно один кінцевий LF: додатковий порожній кадр не
+    // губиться, на відміну від lines().filter(trim-empty).
+    let mut frames = wire[..wire.len() - 1].split(|byte| *byte == b'\n');
+    let first = frames.next().ok_or("F6_RECORD_COUNT expected=2")?;
+    let second = frames.next().ok_or("F6_RECORD_COUNT expected=2")?;
+    if frames.next().is_some() {
+        return Err("F6_RECORD_COUNT expected=2 actual=more-than-2");
+    }
+    if first.is_empty()
+        || second.is_empty()
+        || first.len() > MAX_RECORD_BYTES
+        || second.len() > MAX_RECORD_BYTES
+    {
+        return Err("F6_RECORD_SIZE expected=1..65536");
+    }
+    let root = std::str::from_utf8(first).map_err(|_| "F6_RECORD_UTF8 expected=valid")?;
+    let object = std::str::from_utf8(second).map_err(|_| "F6_RECORD_UTF8 expected=valid")?;
+    Ok([root.to_owned(), object.to_owned()])
+}
+
+fn main() {
+    let records = read_two_records(io::stdin()).unwrap_or_else(|error| {
+        eprintln!("wsm-fs-record-consumer: {error}");
+        std::process::exit(2)
+    });
     let mut session = Session {
         environment: Environment::root(),
     };
@@ -82,11 +120,11 @@ fn main() {
     // SENS call tree; all record parsing and validation executes in SENS.
     let root_package = call(
         exact_d4(0b1001),
-        vec![call(exact_d9(0b001110011), vec![string_value(records[0])])],
+        vec![call(exact_d9(0b001110011), vec![string_value(&records[0])])],
     );
     let object_value = call(
         exact_d4(0b1001),
-        vec![call(exact_d9(0b101000110), vec![string_value(records[1])])],
+        vec![call(exact_d9(0b101000110), vec![string_value(&records[1])])],
     );
     let object_package = call(exact_d9(0b010100010), vec![object_value]);
     let object_packages = call(exact_d4(0b1110), vec![object_package]);
@@ -114,4 +152,63 @@ fn exact_d8_equal() -> DomainIdentity {
     DomainIdentity::D8(sens::CoreD8::from_word(
         sens::Bit8::new(0b11110111).expect("D8 equal identity"),
     ))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::io::Cursor;
+
+    #[test]
+    fn f6_reader_accepts_exactly_two_records_and_preserves_whitespace() {
+        let decoded = read_two_records(" root \nobject \n".as_bytes()).unwrap();
+        assert_eq!(decoded, [" root ".to_owned(), "object ".to_owned()]);
+        let maximum = "x".repeat(MAX_RECORD_BYTES);
+        let stream = format!("{maximum}\n{maximum}\n");
+        assert_eq!(
+            read_two_records(stream.as_bytes()).unwrap(),
+            [maximum.clone(), maximum]
+        );
+    }
+
+    #[test]
+    fn f6_reader_rejects_hidden_empty_and_extra_frames() {
+        for stream in [
+            "",
+            "root\n",
+            "root\n\n",
+            "root\n\nobject\n",
+            "root\nobject\n\n",
+            "root\nobject\nthird\n",
+            "root\nobject",
+            "\nobject\n",
+        ] {
+            assert!(
+                read_two_records(stream.as_bytes()).is_err(),
+                "додатковий чи порожній кадр прийнято: {stream:?}"
+            );
+        }
+    }
+
+    #[test]
+    fn f6_reader_rejects_control_bytes_non_utf8_and_oversize_record() {
+        for stream in [
+            &b"root\r\nobject\n"[..],
+            &b"root\0\nobject\n"[..],
+            &b"root\nob\0ject\n"[..],
+            &b"\xff\nobject\n"[..],
+        ] {
+            assert!(read_two_records(stream).is_err(), "пошкоджені байти прийнято");
+        }
+        let oversized = format!("{}\nobject\n", "x".repeat(MAX_RECORD_BYTES + 1));
+        assert!(read_two_records(oversized.as_bytes()).is_err());
+    }
+
+    #[test]
+    fn f6_reader_stops_reading_after_bounded_overflow_witness() {
+        let bytes = vec![b'x'; MAX_WIRE_BYTES + 4096];
+        let mut reader = Cursor::new(bytes);
+        assert!(read_two_records(&mut reader).is_err());
+        assert_eq!(reader.position(), (MAX_WIRE_BYTES + 1) as u64);
+    }
 }
