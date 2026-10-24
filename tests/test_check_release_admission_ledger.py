@@ -13,6 +13,7 @@ import sys
 import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
 
 ROOT = Path(__file__).resolve().parents[1]
 PATH = ROOT / "scripts" / "check-release-admission-ledger.py"
@@ -299,6 +300,117 @@ class HostedCiAdmissionWiringTests(unittest.TestCase):
             "python3 -m unittest discover -s tests -p 'test_check_release_admission_ledger.py' -v",
             block,
         )
+
+
+class NativeConnectorWiringTests(unittest.TestCase):
+    """Full verification must take its native verdict FROM the connector.
+
+    The connector is the only component that runs the F4 proofs; the checker must
+    call it (with a timeout) and report what it said -- never a hardcoded value.
+    """
+
+    def _real_ledger(self, tmp: str) -> Path:
+        good = MODULE.content_sha256(ROOT, REAL_SENS)
+        path = Path(tmp) / "ledger.json"
+        path.write_text(
+            json.dumps(ledger([entry(sens=REAL_SENS, typed_word_sha256=good, ratified=1)])),
+            encoding="utf-8",
+        )
+        return path
+
+    @staticmethod
+    def _receipt(stdout: str) -> dict:
+        for line in stdout.splitlines():
+            if line.startswith("{"):
+                return json.loads(line)
+        raise AssertionError(f"no receipt JSON in stdout: {stdout!r}")
+
+    def test_no_verify_content_never_calls_the_connector(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "ledger.json"
+            path.write_text(json.dumps(ledger([entry(ratified=1)])), encoding="utf-8")
+            with mock.patch.object(MODULE, "run_native_connector") as connector:
+                exit_code = MODULE.main(["--ledger", str(path), "--no-verify-content"])
+            self.assertEqual(exit_code, 0)
+            connector.assert_not_called()
+
+    def test_connector_blocked_stays_blocked_with_visible_reason(self):
+        import io
+        from contextlib import redirect_stderr, redirect_stdout
+
+        with tempfile.TemporaryDirectory() as tmp:
+            path = self._real_ledger(tmp)
+            summary = (
+                "NATIVE-CONNECTOR-SUMMARY verified=0 blocked=1 entries=1 "
+                "missing=target/debug/sens\n"
+            )
+            blocked = (
+                "NATIVE-CONNECTOR-BLOCKED: потрібен cargo build --locked "
+                "-p sens-cli --bin sens\n"
+            )
+            with mock.patch.object(
+                MODULE, "run_native_connector", return_value=(3, summary, blocked)
+            ):
+                stdout, stderr = io.StringIO(), io.StringIO()
+                with redirect_stdout(stdout), redirect_stderr(stderr):
+                    exit_code = MODULE.main(["--ledger", str(path)])
+            self.assertEqual(exit_code, 2)
+            self.assertNotIn("RELEASE_ADMISSION_PASS", stdout.getvalue())
+            self.assertIn("RELEASE_ADMISSION_BLOCKED", stderr.getvalue())
+            # The connector's own words must be visible, not an unexplained 0.
+            self.assertIn("NATIVE-CONNECTOR-SUMMARY", stdout.getvalue())
+            self.assertIn("NATIVE-CONNECTOR-BLOCKED", stderr.getvalue())
+            self.assertEqual(self._receipt(stdout.getvalue())["release_admitted"], 0)
+            self.assertEqual(self._receipt(stdout.getvalue())["uk_oracle_verified"], 0)
+
+    def test_connector_verified_all_entries_yields_real_count(self):
+        import io
+        from contextlib import redirect_stdout
+
+        with tempfile.TemporaryDirectory() as tmp:
+            path = self._real_ledger(tmp)
+            out = (
+                f"NATIVE-VERIFIED {REAL_SENS} script=scripts/prove-x.sh line=1\n"
+                "NATIVE-CONNECTOR-SUMMARY verified=1 blocked=0 entries=1\n"
+                "NATIVE-CONNECTOR-OK all 1 entries NATIVE-VERIFIED "
+                "(per-entry native proof; NOT release admission)\n"
+            )
+            with mock.patch.object(MODULE, "run_native_connector", return_value=(0, out, "")):
+                stdout = io.StringIO()
+                with redirect_stdout(stdout):
+                    exit_code = MODULE.main(["--ledger", str(path)])
+            self.assertEqual(exit_code, 0)
+            self.assertIn("RELEASE_ADMISSION_PASS", stdout.getvalue())
+            receipt = self._receipt(stdout.getvalue())
+            self.assertEqual(receipt["uk_oracle_verified"], 1)
+            self.assertEqual(receipt["release_admitted"], 1)
+            self.assertEqual(receipt["admitted_sens"], [REAL_SENS])
+
+    def test_partial_connector_verdict_is_not_admission(self):
+        import io
+        from contextlib import redirect_stderr, redirect_stdout
+
+        # The real ledger has several content-verified entries; a connector that
+        # verifies only some of them must not admit any.
+        path = ROOT / "knowledge" / "release-admission-ledger.json"
+        out = f"NATIVE-VERIFIED {REAL_SENS} script=scripts/prove-x.sh line=1\n"
+        with mock.patch.object(MODULE, "run_native_connector", return_value=(1, out, "")):
+            stdout, stderr = io.StringIO(), io.StringIO()
+            with redirect_stdout(stdout), redirect_stderr(stderr):
+                exit_code = MODULE.main(["--ledger", str(path)])
+        self.assertEqual(exit_code, 2)
+        receipt = self._receipt(stdout.getvalue())
+        self.assertGreater(receipt["entries"], 1)
+        self.assertEqual(receipt["release_admitted"], 0)
+        self.assertEqual(receipt["uk_oracle_verified"], 0)
+
+    def test_missing_connector_is_fail_closed(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            rc, out, _ = MODULE.run_native_connector(
+                Path(tmp) / "ledger.json", Path(tmp), 5
+            )
+            self.assertNotEqual(rc, 0)
+            self.assertEqual(MODULE._native_verified_sens(out), [])
 
 
 if __name__ == "__main__":

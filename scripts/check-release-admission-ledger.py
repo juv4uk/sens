@@ -3,16 +3,23 @@
 
 Це МЕХАНІЗМ, не ратифікація. Він не доводить семантику й не вигадує допуск.
 
-Дві незалежні перевірки:
+Три незалежні перевірки:
 1. ФОРМА запису: усі чотири рівні, названі Contract 11.9, плюс явний `ratified=1`.
    F1 donor provenance, F2 independent positive and negative witnesses,
    F3 behavioural dedup against D1-D9/D10, F4 physical T5 execution.
 2. КОНТЕНТ: заявлений `typed_word_sha256` мусить збігатися з реальними байтами
    `.sens` (decode через sens_t5_t5m_codec → typed_sha256). Ledger, що посилається на
    неіснуючий файл, неканонічні байти чи чужий хеш, fail-closed.
+3. НАТИВНИЙ ВЕРДИКТ (лише за повної перевірки, без `--no-verify-content`): чекер
+   ВИКЛИКАЄ `scripts/connect-release-admission-native.py` і бере вердикт ЗВІДТИ.
+   `uk_oracle_verified` / `release_admitted` стають >0 ЛИШЕ якщо конектор повернув 0
+   і всі записи NATIVE-VERIFIED (реальні F4-докази відтворено). Інакше — 0 і BLOCKED,
+   із явним зазначенням того, ЩО САМЕ сказав конектор (щоб причина була видима).
+   Чекер ніколи не вигадує й не хардкодить вердикт.
 
 Fail-closed: відсутній ledger, невідома схема, зіпсований запис, дубль `sens`,
-відсутнє будь-яке з F1–F4, або розбіжність typed_word_sha256 → НЕ admitted.
+відсутнє будь-яке з F1–F4, розбіжність typed_word_sha256, ВІДСУТНІЙ/провалений
+конектор або не всі записи NATIVE-VERIFIED → НЕ admitted.
 Порожній ledger → 0/0.
 """
 from __future__ import annotations
@@ -23,12 +30,19 @@ import json
 import os
 import re
 import stat
+import subprocess
 import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_LEDGER = ROOT / "knowledge" / "release-admission-ledger.json"
 SCHEMA = "sens-release-admission-ledger/v1"
+
+# The native connector is the only component that actually runs the F4 proofs and
+# reproduces the SENS verdict. The checker consults it instead of asserting a
+# verdict of its own. Missing/unreadable/failed connector stays fail-closed.
+CONNECTOR_NAME = "connect-release-admission-native.py"
+CONNECTOR_TIMEOUT = 900.0
 
 REF = re.compile(r"[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+@[0-9a-f]{7,40}:[^:\t\n]+:[1-9][0-9]*(?:-[1-9][0-9]*)?\Z")
 SHA256 = re.compile(r"[0-9a-f]{64}\Z")
@@ -141,6 +155,7 @@ def validate_ledger(document: object, *, root: Path = ROOT, verify_content: bool
     # F1-F4 references above are only format-checked; they are NOT independent
     # native SENS positive/negative results or an executable Ukrainian oracle.
     # Never derive release admission from byte integrity or owner ratification.
+    # The native verdict is supplied separately, by the connector (see main()).
     content_verified = sorted(form_candidates) if verify_content else []
     return {
         "schema": SCHEMA,
@@ -155,12 +170,54 @@ def validate_ledger(document: object, *, root: Path = ROOT, verify_content: bool
     }
 
 
+def _native_verified_sens(stdout: str) -> list[str]:
+    """Collect the ledger entries the connector reported NATIVE-VERIFIED.
+
+    The connector prints one ``NATIVE-VERIFIED <sens> script=<rel> line=<n>`` line
+    per entry whose native proof actually ran. Only that explicit token counts;
+    BLOCKED lines, echoes and summaries are ignored here. This function never
+    infers a verdict -- it reads what the connector said.
+    """
+    verified: list[str] = []
+    for line in stdout.splitlines():
+        parts = line.split()
+        if len(parts) >= 2 and parts[0] == "NATIVE-VERIFIED":
+            verified.append(parts[1])
+    return verified
+
+
+def run_native_connector(ledger: Path, root: Path, timeout: float) -> tuple[int, str, str]:
+    """Run scripts/connect-release-admission-native.py and return (rc, stdout, stderr).
+
+    Fail-closed: a missing connector, a spawn failure or a timeout is reported as a
+    non-zero result with no verdict -- never as verification.
+    """
+    connector = root / "scripts" / CONNECTOR_NAME
+    if not connector.is_file():
+        return 127, "", f"connector відсутній: {connector}"
+    command = [
+        sys.executable, str(connector),
+        "--ledger", str(ledger), "--root", str(root),
+    ]
+    try:
+        proc = subprocess.run(
+            command, cwd=str(root), capture_output=True, text=True, timeout=timeout,
+        )
+    except subprocess.TimeoutExpired:
+        return 124, "", f"connector timeout після {timeout:g}s"
+    except OSError as exc:
+        return 126, "", f"connector не запускається: {exc}"
+    return proc.returncode, proc.stdout or "", proc.stderr or ""
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="fail-closed release admission-ledger check")
     parser.add_argument("--ledger", type=Path, default=DEFAULT_LEDGER)
     parser.add_argument("--root", type=Path, default=ROOT)
     parser.add_argument("--no-verify-content", action="store_true",
                         help="перевіряти лише форму (для тестів/чернеток)")
+    parser.add_argument("--connector-timeout", type=float, default=CONNECTOR_TIMEOUT,
+                        help="таймаут виклику native-конектора, секунди")
     args = parser.parse_args(argv)
     if not args.ledger.is_file():
         print(f"RELEASE_ADMISSION_BLOCKED: ledger відсутній: {args.ledger}", file=sys.stderr)
@@ -171,14 +228,45 @@ def main(argv: list[str] | None = None) -> int:
     except (LedgerBlocked, json.JSONDecodeError, OSError) as exc:
         print(f"RELEASE_ADMISSION_BLOCKED: {exc}", file=sys.stderr)
         return 1
-    print(json.dumps(receipt, ensure_ascii=False, sort_keys=True))
+
     if args.no_verify_content:
+        print(json.dumps(receipt, ensure_ascii=False, sort_keys=True))
         print(f"RELEASE_ADMISSION_FORM_ONLY entries={receipt['entries']} candidates={receipt['form_candidates']} admitted=0")
-    else:
-        # Physical integrity does not verify F2/F4 or the native Ukrainian oracle.
-        # An independently executed semantic witness is a separate release gate.
-        print("RELEASE_ADMISSION_BLOCKED: F2/F4 native SENS verdict and Ukrainian oracle not verified", file=sys.stderr)
+        return 0
+
+    # Full verification: take the native verdict from the connector. The checker
+    # runs no proof itself and never hardcodes an admission.
+    rc, out, err = run_native_connector(args.ledger, args.root, args.connector_timeout)
+    verified = _native_verified_sens(out)
+    print(f"NATIVE-CONNECTOR-CALL ledger={args.ledger} root={args.root} rc={rc} verified={len(verified)}")
+    # Surface exactly what the connector said, so a blocked verdict shows a real
+    # reason instead of an unexplained constant 0. Its own lines already carry the
+    # NATIVE-CONNECTOR-* provenance, so they are forwarded verbatim.
+    for line in out.splitlines():
+        if line.strip():
+            print(line)
+    for line in err.splitlines():
+        if line.strip():
+            print(line, file=sys.stderr)
+
+    native_ok = rc == 0 and bool(verified) and len(verified) == receipt["entries"]
+    if native_ok:
+        # Real count, taken from the connector: it returned 0 only because every
+        # entry's native F4 proof reproduced. Never a hardcoded 1.
+        receipt["uk_oracle_verified"] = len(verified)
+        receipt["release_admitted"] = len(verified)
+        receipt["admitted_sens"] = sorted(verified)
+    print(json.dumps(receipt, ensure_ascii=False, sort_keys=True))
+
+    if not native_ok:
+        print(
+            "RELEASE_ADMISSION_BLOCKED: native connector did not reproduce every entry "
+            f"(rc={rc}, verified={len(verified)}/{receipt['entries']}); "
+            f"verdict taken from scripts/{CONNECTOR_NAME}",
+            file=sys.stderr,
+        )
         return 2
+    print(f"RELEASE_ADMISSION_PASS native connector rc=0 verified={len(verified)}/{receipt['entries']}")
     return 0
 
 
