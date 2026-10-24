@@ -476,6 +476,21 @@ run_native_t5m_program() {
     # Для двох D3-законів виконуємо окремий САМОДОСТАТНІЙ фізичний
     # носій із тим самим чинним джерелом визначень. Жодного mock/host oracle.
     local standalone_physical="$physical"
+    if [[ "$file" == "tests/semantic/d6-any-all-first-class-law.lisp" ||
+          "$file" == "tests/semantic/d6-any-all-first-class-mutant.lisp" ]]; then
+      # Автономний фізичний носій повинен містити ДВА реальні DEFINE
+      # з Core4 та власний SENS-свідок. Source-only D6 не є викличним.
+      local d6_complete_source="$dir/d6-any-all-full.lisp"
+      standalone_physical="$dir/d6-any-all-full.sens"
+      if ! cat -- tests/fixtures/epistemic-d1-names.lisp "$local_d6_source" "$file" > "$d6_complete_source" ||
+         ! timeout "$native_timeout" "$binary" --t5m-mint "$d6_complete_source" "$standalone_physical" >"$dir/d6-complete-mint.stdout" 2>"$dir/d6-complete-mint.stderr" ||
+         ! timeout "$native_timeout" "$native_open" open "$standalone_physical" >"$dir/d6-complete.view" 2>"$dir/d6-complete-open.stderr" ||
+         ! timeout "$native_timeout" "$native_open" verify-view "$standalone_physical" >"$dir/d6-complete-inverse.stdout" 2>"$dir/d6-complete-inverse.stderr"; then
+        echo "::error::T5M_D6_DEPENDENCY_COMPLETE_INVALID source=$file" >&2
+        mark_file_failed
+        return
+      fi
+    fi
     if [[ "$file" == "lib/persistent-vector.lisp" ]]; then
       # Автономний SENS повинен одержати ті самі чинні Lisp-корені D24+,
       # що й парне виконання; source-only носій лишається для byte-parity.
