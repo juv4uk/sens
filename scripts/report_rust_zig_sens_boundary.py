@@ -34,6 +34,21 @@ FS_RE = re.compile(r'\.(sens|lisp)')
 GLOBS = ("crates/*/src/**/*.rs", "crates/*/build.rs")
 
 
+def is_production_source(path: Path, root: Path) -> bool:
+    """Відсікти архівні копії, які широка glob-маска помилково бачить як Rust."""
+    rel = path.relative_to(root).as_posix()
+    parts = path.relative_to(root).parts
+    if "/tests/" in f"/{rel}/" or "/examples/" in f"/{rel}/":
+        return False
+    # Історичні копії в src/staged-out і crates/*.bak — це архіви доказів,
+    # а не production-модулі Cargo.
+    if "/staged-out/" in f"/{rel}/":
+        return False
+    if any(part.endswith(".bak") for part in parts):
+        return False
+    return True
+
+
 def _rust_live_tokens(source: str) -> str:
     """Mask Rust comments and string literals before accepting a Zig route.
 
@@ -113,9 +128,9 @@ def build_map(root: Path) -> dict:
     contacts = []
     for pattern in GLOBS:
         for path in sorted(root.glob(pattern)):
-            rel = path.relative_to(root).as_posix()
-            if "/tests/" in f"/{rel}" or "/examples/" in f"/{rel}":
+            if not path.is_file() or not is_production_source(path, root):
                 continue
+            rel = path.relative_to(root).as_posix()
             src = path.read_text(encoding="utf-8", errors="replace")
             corridor = bool(CORRIDOR_RE.search(_rust_live_tokens(src)))
             direct = bool(DIRECT_RE.search(src))
