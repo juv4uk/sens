@@ -26,6 +26,9 @@ fn contains_predicate_bit(value: &Value) -> bool {
 // Точні числа D24+ мають окремий BinaryNumber-носій і сюди не входять.
 fn contains_noncanonical_exact_number(value: &Value) -> bool {
     match value {
+        // Жодної канонічної граматики для D24+ RATIO/NEG ще немає:
+        // текст WIRE-UNSUPPORTED не може вважатися успішним записом.
+        Value::NumericComposition(_) => true,
         Value::Number(number, crate::Exactness::Exact) => {
             !number.is_finite()
                 || number.fract() != 0.0
@@ -258,6 +261,32 @@ mod tests {
             Span::default(),
         )
         .is_ok());
+    }
+
+    #[test]
+    fn wire_rejects_d24_exact_ratio_instead_of_returning_unsupported_marker() {
+        // Дробова композиція — точні SENS-дані, але поточний
+        // canonical reader не має для неї фізичного носія.
+        let word = |last_two: [u8; 2]| {
+            let mut bits = vec![0; 24];
+            bits[22..].copy_from_slice(&last_two);
+            Value::BinaryNumber(
+                crate::BinaryNumber::from_numeric_domain_bits(24, &bits)
+                    .expect("допущене точне слово D24"),
+            )
+        };
+        let ratio = crate::domain_numeric::compute("/", &word([0, 1]), &word([1, 0]))
+            .expect("точне відношення одиниці до двійки");
+        assert!(matches!(ratio, Value::NumericComposition(_)));
+        for value in [ratio.clone(), Value::list([ratio])] {
+            let error = write_to_string_values(
+                &[value],
+                &Environment::root(),
+                Span::default(),
+            )
+            .expect_err("WIRE-UNSUPPORTED не є успішним записом");
+            assert_eq!(error.kind, ErrorKind::Type);
+        }
     }
 
     #[test]
