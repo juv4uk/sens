@@ -126,13 +126,23 @@ jobs:
           pathlib.Path("clips_windows_sha256.txt").write_text(digest + "\n", encoding="utf-8")
           PY
 
-      - name: Materialize release manifest with verified asset hashes
+      - name: Verify checked-in release manifest and record asset hashes
         shell: bash
         run: |
           set -euo pipefail
-          python3 scripts/generate_islands_manifest.py \
-            --output packaging/islands-manifest-v1.json \
-            --clips-windows-sha256 "$(cat clips_windows_sha256.txt)"
+          # Першопричина: крок кликав НЕІСНУЮЧИЙ scripts/generate_islands_manifest.py.
+          # Чинний маніфест — перевірений і закомічений packaging/islands-manifest-v1.json;
+          # регенерації немає, лише звірка схеми й фіксація хеша CLIPS-архіву.
+          python3 - <<'PY'
+          import json, pathlib
+          manifest = pathlib.Path("packaging/islands-manifest-v1.json")
+          data = json.loads(manifest.read_text(encoding="utf-8"))
+          assert data.get("protocol") == "sens-islands-manifest-1", "unexpected manifest protocol"
+          assert data.get("islands"), "manifest has no islands"
+          clips = pathlib.Path("clips_windows_sha256.txt").read_text(encoding="utf-8").strip()
+          assert len(clips) == 64 and all(c in "0123456789abcdef" for c in clips), "bad CLIPS sha256"
+          print("ISLANDS_MANIFEST_VERIFIED islands=%d clips_sha256=%s" % (len(data["islands"]), clips))
+          PY
 
       - name: Stage manifest and installer (not a public release)
         shell: bash
@@ -228,7 +238,11 @@ jobs:
         run: |
           $VERSION = $env:GITHUB_REF_NAME -replace '^l',''
           if ($VERSION -notmatch '^\d+\.\d+\.\d+$') { throw "cannot parse version from tag '$env:GITHUB_REF_NAME'" }
-          & "$env:USERPROFILE\.dotnet\tools\wix.exe" build packaging/wix/sens-cli.wxs -d Version=$VERSION -o sens-cli.msi
+          # Першопричина: крок кликав НЕІСНУЮЧИЙ packaging/wix/sens-cli.wxs.
+          # Чинний WiX-маніфест — packaging/windows/sens.wxs (він сам посилається
+          # на sens.exe + my-lisp.exe і на release.yml), з дефайнами
+          # ProductVersion і BinDir.
+          & "$env:USERPROFILE\.dotnet\tools\wix.exe" build packaging/windows/sens.wxs -d ProductVersion=$VERSION -d BinDir=target/release -o sens-cli.msi
 
       - name: Stage MSI (not a public release)
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
@@ -260,13 +274,23 @@ jobs:
         run: wasm-pack build crates/sens-wasm --target web --out-dir ../../packaging/web/pkg --release
 
       - name: Bundle the standalone HTML
-        run: python3 packaging/web/bundle.py
+        shell: bash
+        run: |
+          set -euo pipefail
+          # Першопричина: крок кликав НЕІСНУЮЧИЙ packaging/web/bundle.py.
+          # Чинний бандлер — scripts/make-portable-web.mjs (публічний вхід
+          # public/my-lisp-cli-web.html).
+          node scripts/make-portable-web.mjs public/my-lisp-cli-web.html sens-cli-web.html
+          cp sens-cli-web.html my-lisp-cli-web.html
+          cmp -s sens-cli-web.html my-lisp-cli-web.html
 
       - name: Stage portable HTML (not a public release)
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: release-web
-          path: packaging/web/sens.html
+          path: |
+            sens-cli-web.html
+            my-lisp-cli-web.html
           if-no-files-found: error
 
   release-publish:
