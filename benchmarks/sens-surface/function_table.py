@@ -29,6 +29,12 @@ for line in src.splitlines():
     english = en if en != "()" else (sym if sym not in ("()", "") else "()")
     out.append((code, english, uk))
 
+if not out:
+    print("FN_TABLE_EMPTY reason=legacy_eight_bit_rows_absent "
+          "source=lib/generated/function-table.lisp actual_rows=0 "
+          "expected=canonical_domain_registry_D1_D10", file=sys.stderr)
+    sys.exit(1)
+
 target = sys.argv[1] if len(sys.argv) > 1 else "-"
 text = "".join(f"{c}\t{e}\t{u}\n" for c, e, u in out)
 if target == "-":
