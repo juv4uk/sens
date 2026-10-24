@@ -32,11 +32,17 @@ class StageTwoProjectionsTests(unittest.TestCase):
         for width in range(1, 11):
             with self.subTest(width=width):
                 self.assertIsNotNone(pair.BITS.fullmatch("0" * width))
-        # 25, 32 і 49 біт не утворюють нового числового домену.
-        for width in (11, 12, 16, 23, 25, 32, 47, 49, 95, 97, 191, 193):
+        # Першопричина: 12 стояло серед ВІДХИЛЕНИХ ширин, хоча
+        # contracts/numeric-domains-ratification.lisp (owner-ratified
+        # 2026-10-24) робить D12 ПЕРШИМ числовим доменом: D(12 * 2^n).
+        # Сам _current_word_pattern (scripts/stage-two-projections.py:38)
+        # вимагає початок [12, 24, 48, 96, 192] — тобто код був правий, а тест
+        # пінив застарілий D24-first закон. 11 лишається виключеним: D11 —
+        # каталог, не числовий домен.
+        for width in (11, 16, 23, 25, 32, 47, 49, 95, 97, 191, 193):
             with self.subTest(rejected_width=width):
                 self.assertIsNone(pair.BITS.fullmatch("0" * width))
-        for width in (24, 48, 96, 192):
+        for width in (12, 24, 48, 96, 192):
             with self.subTest(math_width=width):
                 self.assertIsNotNone(pair.BITS.fullmatch("0" * width))
         self.assertIsNone(pair.BITS.fullmatch("0" * 24 + "2"))
