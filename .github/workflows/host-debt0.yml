@@ -1,0 +1,27 @@
+name: host-debt0 + language-stays
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  host-debt0:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: host_debt → 0
+        run: bash scripts/ensure-host-debt0.sh
+      - name: language stays in SENS (frozen host debt)
+        run: |
+          python3 -m unittest \
+            tests.test_language_stays_in_sens.LanguageStaysInSens.test_frozen_host_debt_only_shrinks \
+            tests.test_language_stays_in_sens.LanguageStaysInSens.test_no_new_host_file_carries_sens_semantics \
+            -v
+      - name: domain function reuse rule
+        run: python3 -m unittest tests.test_domain_function_reuse_rule -v
