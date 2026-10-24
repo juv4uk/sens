@@ -407,6 +407,7 @@ jobs:
                 tests/semantic/d11-srfi1-find-tail-improper-tail-negative.lisp) bs=(--binding-source lib/d11-srfi1-find-tail.lisp); expect_args=(--expect-error "car expects a non-empty list");;
               tests/semantic/d11-srfi1-list-equality-law.lisp|tests/semantic/d11-srfi1-list-equality-mutant.lisp) bs=(--binding-source lib/d11-srfi1-list-equality.lisp);;
               tests/semantic/d11-family-selection-law.lisp|tests/semantic/d11-family-selection-mutant.lisp) bs=(--binding-source lib/d11-family-selection.lisp);;
+              tests/semantic/d11-family-association-law.lisp|tests/semantic/d11-family-association-mutant.lisp) bs=(--binding-source lib/d11-srfi1-alist-protocol.lisp);;
               tests/semantic/d11-families-benchmark-law.lisp|tests/semantic/d11-families-benchmark-mutant.lisp) bs=(--binding-source lib/d11-family-selection.lisp --binding-source lib/d11-srfi1-alist-protocol.lisp --binding-source lib/d11-clojure-group-by.lisp --binding-source lib/d11-clojure-frequencies-unary.lisp);;
               tests/semantic/unification-variable-shape-negative.lisp|tests/semantic/unification-variable-shape-positive.lisp) bs=(--binding-source lib/unify.lisp);;
               tests/semantic/unification-occurs-predicate-law.lisp|tests/semantic/unification-occurs-predicate-mutant.lisp) bs=(--binding-source lib/unify.lisp);;
@@ -706,6 +707,7 @@ jobs:
                 tests/semantic/d11-srfi1-find-tail-improper-tail-negative.lisp) bs=(--binding-source lib/d11-srfi1-find-tail.lisp); expect_args=(--expect-error "car expects a non-empty list");;
                 tests/semantic/d11-srfi1-list-equality-law.lisp|tests/semantic/d11-srfi1-list-equality-mutant.lisp) bs=(--binding-source lib/d11-srfi1-list-equality.lisp);;
                 tests/semantic/d11-family-selection-law.lisp|tests/semantic/d11-family-selection-mutant.lisp) bs=(--binding-source lib/d11-family-selection.lisp);;
+                tests/semantic/d11-family-association-law.lisp|tests/semantic/d11-family-association-mutant.lisp) bs=(--binding-source lib/d11-srfi1-alist-protocol.lisp);;
                 tests/semantic/d11-families-benchmark-law.lisp|tests/semantic/d11-families-benchmark-mutant.lisp) bs=(--binding-source lib/d11-family-selection.lisp --binding-source lib/d11-srfi1-alist-protocol.lisp --binding-source lib/d11-clojure-group-by.lisp --binding-source lib/d11-clojure-frequencies-unary.lisp);;
                 tests/semantic/unification-variable-shape-negative.lisp|tests/semantic/unification-variable-shape-positive.lisp) bs=(--binding-source lib/unify.lisp);;
                 tests/semantic/unification-occurs-predicate-law.lisp|tests/semantic/unification-occurs-predicate-mutant.lisp) bs=(--binding-source lib/unify.lisp);;
