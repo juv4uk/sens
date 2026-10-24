@@ -74,14 +74,17 @@ class DomainTableNotExecutableTest(unittest.TestCase):
                 total += len(codes)
         self.assertEqual(total, 2046)
 
-        # D11 is a 43-row testing vocabulary, NOT a 2048-row callable domain.
+        # D11 is the working extension domain (512 selectors derived by
+        # selector-suffix-extension of a 2048-capacity domain), NOT a
+        # callable Core domain. The retired 43-word testing vocabulary was
+        # owner-rejected and archived (lib/domains/archive/d11-rejected-43.lisp).
         entry = rows[10]
         path = ROOT / entry["path"]
         with self.subTest(path=entry["path"]):
             self.assertEqual(entry["domain"], "D11")
             self.assertEqual(entry["bit_width"], 11)
-            self.assertEqual(entry["expected_rows"], 43)
-            self.assertEqual(entry["role"], "testing-only-vocabulary")
+            self.assertEqual(entry["expected_rows"], 512)
+            self.assertEqual(entry["role"], "working-extension-domain")
             self.assertFalse(path.is_symlink())
             self.assertFalse(path.with_suffix(".sens").exists())
             self.assertFalse(path.with_suffix("").exists())
@@ -95,12 +98,12 @@ class DomainTableNotExecutableTest(unittest.TestCase):
             self.assertEqual(body[0], "(domain-table-1")
             self.assertEqual(body[-1], ")")
             codes = resident_codes(source, 11)
-            self.assertEqual(len(codes), 43)
-            self.assertEqual(len(set(codes)), 43)
+            self.assertEqual(len(codes), 512)
+            self.assertEqual(len(set(codes)), 512)
             self.assertTrue(all(len(code) == 11 for code in codes))
         total += len(codes)
         self.assertEqual(total, m["total_rows"])
-        self.assertEqual(total, 2089)
+        self.assertEqual(total, 2558)
 
     def test_no_executable_or_research_paths_are_exempted(self):
         paths = {r["path"] for r in json.loads(MANIFEST.read_text())["entries"]}

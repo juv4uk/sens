@@ -199,10 +199,27 @@ class IncrementalTripletGate(unittest.TestCase):
         self.assertEqual(report["files"][0]["uk_oracle"], "NOT_VERIFIED")
         self.assertEqual(report["summary"]["original_executable_migrations_certified"], 0)
 
-    def test_noncanonical_uk_whitespace_source_only_is_rejected(self):
+    def test_formatting_only_uk_whitespace_variant_is_program_identical_not_blocked(self):
+        # Ратифікований закон (коміт b459809d8): коментарі, пробіли й кінці
+        # рядків не несуть закону SENS — точний доказ порівнює саме типові
+        # слова. Суто форматувальна правка українського джерела (тут
+        # «( )» замість «()») є тотожною програмою, тому не має виробляти
+        # хибний BLOCK; фізичний/виглядовий доказ лишається обов'язковим.
         stem = self.baseline_uk_triplet()
         stem.with_suffix(".lisp").write_text("(перше ( ))\n", encoding="utf-8")
-        self.commit("noncanonical whitespace variant source")
+        self.commit("formatting-only whitespace variant source")
+        report = self.scan()
+        self.assertEqual(report["status"], "DELTA_PHYSICAL_VIEW_ONLY_UK_PENDING")
+        self.assertEqual(report["summary"]["changed_pairs"], 1)
+        self.assertEqual(report["summary"]["changed_blocked"], 0)
+        self.assertEqual(report["files"][0]["bounded_uk_source_roundtrip"],
+                         "PASS_NOT_RUNTIME_ORACLE")
+        self.assertEqual(report["files"][0]["uk_oracle"], "NOT_VERIFIED")
+        # Той самий контур, але справжня семантична зміна джерела — усе ще
+        # fail-closed: формат прощається, зміна програми — ні.
+        self.base = self.cmd("rev-parse", "HEAD").strip()
+        stem.with_suffix(".lisp").write_text("(перше (так))\n", encoding="utf-8")
+        self.commit("genuine semantic change of the same shape")
         self.assertEqual(self.scan()["status"], "BLOCKED")
 
     def test_bounded_uk_source_requires_known_d4_projection(self):

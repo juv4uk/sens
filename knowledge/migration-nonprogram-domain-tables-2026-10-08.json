@@ -3,12 +3,12 @@
   "generated_from_main": "9490b8897dac4863ebf1a6d927c42c8d53e1e00e",
   "issue": 4460,
   "classification": "lisp-data-nonprogram",
-  "cohort": "ratified D1-D10 human-readable domain definition tables plus the unratified D11 testing-only vocabulary table",
-  "reason": "domain-table-1 rows declare authoritative exact-width identities and surfaces; D1-D10 are domain tables and D11 is an unratified testing vocabulary. These are DATA, not executable SENS programs.",
+  "cohort": "ratified D1-D10 human-readable domain definition tables plus the working D11 extension domain table (law selector-suffix-extension)",
+  "reason": "domain-table-1 rows declare authoritative exact-width identities and surfaces; D1-D10 are domain tables and D11 is the working extension domain derived by selector-suffix-extension. These are DATA, not executable SENS programs.",
   "automatic_sens_companion": false,
   "not_executable_programs": true,
   "not_physical_migration_credit": true,
-  "total_rows": 2089,
+  "total_rows": 2558,
   "entries": [
     {
       "path": "lib/domains/d1.lisp",
@@ -104,8 +104,8 @@
       "git_blob_sha1": "f625a4f3d9bd4702736de64ddb701fa11dcb361e",
       "domain": "D11",
       "bit_width": 11,
-      "expected_rows": 43,
-      "role": "testing-only-vocabulary"
+      "expected_rows": 512,
+      "role": "working-extension-domain"
     }
   ],
   "updated_current_d7": "2026-10-13 keyboard/v2 owner-ratified; historical v1 source pinned separately",
