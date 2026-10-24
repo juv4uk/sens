@@ -1000,6 +1000,11 @@ cat -- lib/d11-srfi1-filter-map.lisp tests/semantic/d11-srfi1-filter-map-imprope
 d11_filter_map_type_error='car expects a non-empty list'
 run_case run_type_rejection d11-srfi1-filter-map-improper-root-type "$d11_filter_bad_root" "$d11_filter_map_type_error"
 run_case run_type_rejection d11-srfi1-filter-map-improper-tail-type "$d11_filter_bad_tail" "$d11_filter_map_type_error"
+# Д11 FILTER-MAP: перевірка структури має передувати mapper з іншою Type.
+d11_filter_prevalidate_bad="$evidence/d11-filter-map-prevalidate-bad-complete.lisp"
+cat -- lib/d11-srfi1-filter-map.lisp tests/fixtures/d11-filter-map-improper-precedes-transform-negative.lisp > "$d11_filter_prevalidate_bad"
+run_case run_type_rejection d11-filter-map-prevalidate-before-transform-type "$d11_filter_prevalidate_bad" 'car expects a non-empty list'
+sha256sum lib/d11-srfi1-filter-map.lisp tests/fixtures/d11-filter-map-improper-precedes-transform-negative.lisp > "$evidence/d11-filter-map-prevalidate-inputs.sha256"
 sha256sum lib/d11-srfi1-filter-map.lisp tests/semantic/d11-srfi1-filter-map-improper-root-negative.lisp tests/semantic/d11-srfi1-filter-map-improper-tail-negative.lisp > "$evidence/d11-filter-map-improper-inputs.sha256"
 
 # Д11 SRFI-1: UNFOLD/UNFOLD-RIGHT є чистими композиціями SENS.
