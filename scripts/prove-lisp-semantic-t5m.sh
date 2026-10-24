@@ -439,6 +439,8 @@ run_case() {
 # Повна пара власне мовного заперечення Д1: джерело тільки Lisp.
 run_case run_law d1-not-positive tests/semantic/d1-not-law.lisp 1
 run_case run_law d1-not-mutant tests/semantic/d1-not-mutant.lisp 0
+# Самоперевірка українського D3: EQ приймає тільки точні атоми.
+run_case run_law d3-ukr-self-verdict tests/semantic/d3-ukr-language-self-verdict.lisp 1
 run_case run_law d3-selection-positive tests/semantic/d3-d4-logic-selection-law.lisp 1
 run_case run_law d3-selection-mutant tests/semantic/d3-d4-logic-selection-mutant.lisp 0
 run_case run_law d3-demorgan-four-cases tests/semantic/d3-demorgan-truth-table-law.lisp 1
