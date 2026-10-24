@@ -539,6 +539,27 @@ run_native_t5m_program() {
         return
       fi
     fi
+    if [[ "$file" == "tests/semantic/d6-curry-binding-law.lisp" ||
+          "$file" == "tests/semantic/d6-curry-binding-mutant.lisp" ]]; then
+      # Автономний носій включає те саме SENS DEFINE, що й paired.
+      local d6_curry_complete="$dir/d6-curry-complete.lisp"
+      standalone_physical="$dir/d6-curry-complete.sens"
+      if ! cat -- "$d6_curry_binding" "$file" >"$d6_curry_complete" ||
+         ! timeout "$native_timeout" "$binary" --t5m-mint "$d6_curry_complete" "$standalone_physical" >"$dir/d6-curry-mint.stdout" 2>"$dir/d6-curry-mint.stderr" ||
+         ! timeout "$native_timeout" "$native_open" open "$standalone_physical" >"${standalone_physical%.sens}" 2>"$dir/d6-curry-open.stderr" ||
+         ! timeout "$native_timeout" "$native_open" verify-view "$standalone_physical" >"$dir/d6-curry-verify.stdout" 2>"$dir/d6-curry-verify.stderr"; then
+        echo "::error::D6_CURRY_COMPLETE_MINT_RED source=$file" >&2
+        mark_file_failed
+        return
+      fi
+      local expected_d6_curry=1
+      [[ "$file" != *-mutant.lisp ]] || expected_d6_curry=0
+      if [[ "$(cat "$dir/native-paired.stdout")" != "$expected_d6_curry" ]]; then
+        echo "::error::D6_CURRY_WRONG_D1 source=$file expected=D1:$expected_d6_curry actual=$(cat "$dir/native-paired.stdout")" >&2
+        mark_file_failed
+        return
+      fi
+    fi
     if [[ "$file" == "tests/semantic/d11-tree-equal-by-test-law.lisp" ||
           "$file" == "tests/semantic/d11-tree-equal-by-test-mutant.lisp" ]]; then
       # Фізична самодостатність: одна й та сама SENS-бібліотека + SENS-свідок.
@@ -811,6 +832,21 @@ while IFS= read -r file || [[ -n "$file" ]]; do
       printf '\n' >> "$d6_union_binding"
     done
     binding_sources=(--binding-source "$d6_union_binding")
+  elif [[ "$file" == "tests/semantic/d6-curry-binding-law.lisp" ||
+          "$file" == "tests/semantic/d6-curry-binding-mutant.lisp" ]]; then
+    # Витягнути єдине чинне SENS DEFINE з lib/core.lisp без другої реалізації.
+    d6_curry_binding="$dir/d6-curry-existing-definition.lisp"
+    if ! awk '
+  $0 == "(визначити частково-застосувати" { if (found++) exit 2; copying = 1 }
+  copying && NF == 0 { copying = 0; complete++; next }
+  copying { print }
+  END { if (found != 1 || complete != 1 || copying) exit 2 }
+' lib/core.lisp >"$d6_curry_binding"; then
+      echo "::error::D6_CURRY_DEFINE_NOT_ISOLATABLE source=lib/core.lisp" >&2
+      mark_file_failed
+      continue
+    fi
+    binding_sources=(--binding-source "$d6_curry_binding")
   elif [[ "$file" == "tests/semantic/d11-srfi1-find-tail-laws.lisp" ||
           "$file" == "tests/semantic/d11-srfi1-find-tail-improper-tail-negative.lisp" ]]; then
     # Лише визначення із справжньої бібліотеки SENS, без host-оракула.
