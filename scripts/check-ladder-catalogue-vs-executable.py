@@ -50,6 +50,23 @@ def host_mechanisms() -> dict[int, set[str]]:
     return found
 
 
+# Статично виведено з диспетчера (не виконано — немає Rust). Кожен запис
+# прив'язаний до ЯКОРЯ: якщо якір зникне (рефактор), чекер упаде голосно,
+# а не тихо віддасть застаріле число.
+DISPATCH_ANCHORS = {
+    1: (0, "crates/sens/src/domain_identity.rs",
+        "pub enum CoreDomainIdentity {\n    D3(", "D1 не має викличної ідентичності"),
+    2: (0, "crates/sens/src/domain_identity.rs",
+        "pub enum CoreDomainIdentity {\n    D3(", "D2 не має викличної ідентичності"),
+    3: (7, "crates/sens/src/eval/canon.rs",
+        "DomainPrimitiveKind::PairConstruct", "3 примітиви + 2 селектори + QUOTE/COND"),
+    4: (11, "crates/sens/src/eval/necessary_forms.rs",
+        "LAMBDA", "EVAL+LAMBDA+DEFINE+NOT/NULL/LIST/APPEND+4 селектори"),
+    8: (72, "crates/sens/src/eval/canon.rs",
+        "DomainPrimitiveKind::WriteToString", "7 примітивів + MOD + 64 селектори"),
+}
+
+
 def declared_source(n: int) -> dict[str, object] | None:
     """Щаблі, чиє джерело допуску ЯВНО каже, скільки виконуваних.
 
@@ -65,6 +82,14 @@ def declared_source(n: int) -> dict[str, object] | None:
         if "never authorizes a callable" not in text:
             raise SystemExit("FAIL: D7 registry втратив застереження про виклик")
         return {"executable": 0, "note": "клавіатурні дані; виклик не дозволено (шапка реєстру)"}
+    if n in DISPATCH_ANCHORS:
+        count, rel, anchor, note = DISPATCH_ANCHORS[n]
+        path = ROOT / rel
+        if not path.is_file():
+            raise SystemExit(f"FAIL: D{n} якір відсутній: {rel}")
+        if anchor not in path.read_text(encoding="utf-8"):
+            raise SystemExit(f"FAIL: D{n} якір зник у {rel}: {anchor!r}")
+        return {"executable": count, "note": f"з диспетчера: {note}"}
     if n == 11:
         path = ROOT / "knowledge/d11-selector-seed.json"
         if not path.is_file():
@@ -134,8 +159,12 @@ def main() -> int:
             print(f"{'D'+str(n):>6} {r['catalogue']:>8} {r['executable']:>9} {r['carrier_only']:>13}  {full}")
     mapped = [r for r in rows if r["mapped"]]
     unmapped = [r["rung"] for r in rows if not r["mapped"]]
-    print(f"\nLADDER-SEPARATION: замаплено {len(mapped)}/{len(list(RUNGS))} щаблів; "
-          f"не замаплено: D{', D'.join(map(str, unmapped))}")
+    if unmapped:
+        print(f"\nLADDER-SEPARATION: замаплено {len(mapped)}/{len(list(RUNGS))} щаблів; "
+              f"не замаплено: D{', D'.join(map(str, unmapped))}")
+    else:
+        print(f"\nLADDER-SEPARATION: замаплено {len(mapped)}/{len(list(RUNGS))} щаблів; "
+              "усі щаблі мають межу")
     if args.check and bad:
         raise SystemExit("FAIL: bindings поза каталогом або хибної ширини")
     print("LADDER-SEPARATION: PASS вкладеність bindings ⊆ каталог тримається")
