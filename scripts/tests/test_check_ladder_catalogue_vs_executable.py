@@ -20,11 +20,18 @@ class LadderSeparationTests(unittest.TestCase):
 
     def test_unmapped_rungs_are_named_not_silently_skipped(self):
         r = self.run_script()
-        # D1-D4, D7, D8, D11 не мають джерела допуску — чекер мусить це сказати.
-        for rung in ("D1", "D4", "D7", "D8", "D11"):
-            self.assertIn(rung, r.stdout)
+        # Лишаються без джерела допуску: D1-D4, D8 — чекер мусить це сказати.
         self.assertIn("не замаплено", r.stdout)
-        self.assertIn("замаплено 4/11", r.stdout)
+        self.assertIn("замаплено 6/11", r.stdout)
+        self.assertIn("не замаплено: D1, D2, D3, D4, D8", r.stdout)
+
+    def test_declared_zero_executable_rungs_read_their_source(self):
+        # D7 (клавіатурні дані) і D11 (selector-похідні) — джерело ЯВНО каже 0.
+        r = self.run_script()
+        for rung in ("D7", "D11"):
+            line = next(l for l in r.stdout.splitlines() if l.strip().startswith(rung))
+            self.assertIn("задекларовано", line)
+            self.assertIn(" 0 ", line + " ")
 
     def test_fully_bound_rungs_report_zero_carrier_only(self):
         r = self.run_script()
