@@ -41,13 +41,22 @@ for id in d1-not d2-cond-laziness d3-structure d4-lexical-scope d4-second-select
     [[ "$kind" == mutant ]] && file="$mutant"
     expected=1
     [[ "$kind" == mutant ]] && expected=0
+    # D6 COMPOSE/FLIP/CURRY are real SENS Core4 closures, not direct opcodes.
+    # Pairing without Core4 incorrectly rejects ratified D6:001011 as noncallable.
+    # The full native law runner already uses this exact same profile.
+    mint_verb=--t5m-mint
+    paired_profile=()
+    if [[ "$id" == d6-compose-flip ]]; then
+      mint_verb=--t5m-mint-pair
+      paired_profile=(--core4-runtime)
+    fi
     printf '%s\n' "$expected" > "$tmp/expected"
     printf 'NATIVE_SENS_CASE test_id=%s kind=%s fixture=%s expected=D1:%s\n' "$id" "$kind" "$file" "$expected"
     sha256sum "$file"
     # Автором закону є .lisp; SENS створює точні слова, Zig — T5M-байти.
     physical="$tmp/$id-$kind.sens"
     view="$tmp/$id-$kind"
-    if ! timeout 45s "$cli" --t5m-mint "$file" "$physical" > "$tmp/mint.out" 2> "$tmp/stderr"; then
+    if ! timeout 45s "$cli" "$mint_verb" "$file" "$physical" > "$tmp/mint.out" 2> "$tmp/stderr"; then
       printf 'REGRESSION test_id=%s layer=codec input=%s expected=Zig-T5M actual=mint-failure\n' "$id" "$file" >&2
       cat "$tmp/stderr" >&2
       exit 1
@@ -61,7 +70,7 @@ for id in d1-not d2-cond-laziness d3-structure d4-lexical-scope d4-second-select
     fi
     # Парне виконання SENS порівнює фізичні слова з вихідною програмою.
     # Shell не обчислює семантику й не оголошує standalone фізичного входу.
-    if ! timeout 45s "$cli" --t5m-pair "$file" "$physical" > "$tmp/actual" 2> "$tmp/stderr"; then
+    if ! timeout 45s "$cli" --t5m-pair "$file" "$physical" "${paired_profile[@]}" > "$tmp/actual" 2> "$tmp/stderr"; then
       printf 'REGRESSION test_id=%s layer=physical-eval input=%s expected=D1:%s actual=execution-error\n' "$id" "$file" "$expected" >&2
       cat "$tmp/stderr" >&2
       exit 1
