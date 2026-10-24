@@ -612,6 +612,10 @@ run_case run_type_rejection d8-string-symbol-nontext-type-negative tests/semanti
 run_case run_type_rejection d8-contextual-d1-serialize-type-negative tests/semantic/d8-contextual-d1-serialize-type-negative.lisp 'write-to-string cannot serialize contextual predicate results'
 # Ділення на обчислений нуль є мовним DivisionByZero, не довільною помилкою reader-а.
 run_case run_division_by_zero_rejection d24-computed-zero-denominator tests/semantic/d24-reader-zero-denominator-negative.lisp 'division by zero'
+# Точна D24+ арифметика потребує профілю Core4 для викличних D7 поверхонь.
+# Прямий, парний та автономний SENS мають дати ті самі D1-вердикти.
+run_case run_law exact-arithmetic-positive tests/semantic/exact-arithmetic-laws.lisp 1 core4
+run_case run_law exact-arithmetic-mutant tests/semantic/exact-arithmetic-mutant.lisp 0 core4
 # D1 хибне значення як голова CONS ≠ порожній D3-список.
 # Обидва результати вираховує Lisp/SENS; Zig лише фізично переносить слова.
 run_case run_law d3-d1-false-cons-head-positive tests/semantic/language-law-d3-d1-false-head-ukr.lisp 1
