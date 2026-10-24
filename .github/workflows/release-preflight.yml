@@ -167,5 +167,18 @@ jobs:
       - name: Full workspace tests (pre-tag, exact SHA)
         run: cargo test --locked --workspace --no-fail-fast
 
+      - name: "Native SENS F2/F4: позитивні та негативні докази на цьому SHA"
+        shell: bash
+        run: |
+          set -euo pipefail
+          # Семантичний вирок належить реальному SENS-процесу; оболонка й Python
+          # перевіряють лише фізичні байти, форму свідків та їхні результати.
+          cargo build --locked -p sens-cli --bin sens
+          bash scripts/prove-meta-eval-graph-d1.sh target/debug/sens
+          bash scripts/prove-meta-eval-lexical-shadow-d1.sh target/debug/sens
+          bash scripts/prove-meta-eval-predicates-d1.sh target/debug/sens
+          bash scripts/prove-meta-eval-mutual-d4.sh target/debug/sens
+          bash scripts/prove-d4-selector-width.sh target/debug/sens
+
       - name: Full workspace Clippy (pre-tag, exact SHA)
         run: cargo clippy --locked --workspace --all-targets -- -D warnings
