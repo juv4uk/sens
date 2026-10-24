@@ -155,8 +155,20 @@ fn benchmark(case: &str, form: &str, forms: usize, samples: usize) -> Result<(),
         );
     }
 
+    // Чесна мінімальна ціна поточного нативного носія меж ширин:
+    // Vec<usize> передається читачеві окремо від упакованих байтів.
+    // Не враховано запас ємності Vec та витрати алокатора; це не wire-size.
+    let width_schedule_native_bytes = widths
+        .len()
+        .checked_mul(std::mem::size_of::<usize>())
+        .ok_or_else(|| format!("{case}: width schedule size overflow"))?;
+    let packed_reader_native_min_bytes = packed
+        .byte_len()
+        .checked_add(width_schedule_native_bytes)
+        .ok_or_else(|| format!("{case}: packed reader input size overflow"))?;
+
     println!(
-        "RUST_PACKED_VISIBLE_SUMMARY\tcase={case}\tforms={forms}\tsamples={samples}\tvisible_p50_ns_per_program={:.2}\tvisible_p90_ns_per_program={:.2}\tpacked_p50_ns_per_program={:.2}\tpacked_p90_ns_per_program={:.2}\tratio_visible_over_packed_p50={:.5}\tvisible_source_bytes={}\tpacked_payload_bytes={}\tsemantic_payload_bits={}\twidth_schedule_entries={}\tpreflight=same-D2-domain-AST\tboundary_policy=caller-supplied-excluded-from-payload",
+        "RUST_PACKED_VISIBLE_SUMMARY\tcase={case}\tforms={forms}\tsamples={samples}\tvisible_p50_ns_per_program={:.2}\tvisible_p90_ns_per_program={:.2}\tpacked_p50_ns_per_program={:.2}\tpacked_p90_ns_per_program={:.2}\tratio_visible_over_packed_p50={:.5}\tvisible_source_bytes={}\tpacked_payload_bytes={}\tsemantic_payload_bits={}\twidth_schedule_entries={}\twidth_schedule_native_bytes={}\tpacked_reader_native_min_bytes={}\tpreflight=same-D2-domain-AST\tboundary_policy=caller-supplied-excluded-from-payload",
         median(&visible_ns),
         percentile(&visible_ns, 90),
         median(&packed_ns),
@@ -166,6 +178,8 @@ fn benchmark(case: &str, form: &str, forms: usize, samples: usize) -> Result<(),
         packed.byte_len(),
         packed.bit_len(),
         widths.len(),
+        width_schedule_native_bytes,
+        packed_reader_native_min_bytes,
     );
     Ok(())
 }
