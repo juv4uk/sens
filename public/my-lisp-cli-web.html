@@ -112,16 +112,6 @@
       let historyIndex = -1;
       let currentSurface = "укр";
       const promptEl = document.getElementById("prompt");
-      const inputEl = document.getElementById("input");
-      const logEl = document.getElementById("log");
-
-      function printLine(value, className = "line-value") {
-        const line = document.createElement("div");
-        line.className = className;
-        line.textContent = String(value);
-        logEl.appendChild(line);
-        logEl.scrollTop = logEl.scrollHeight;
-      }
 
       function updatePrompt() {
         promptEl.textContent = `my-lisp[${currentSurface}]>`;
@@ -154,11 +144,32 @@
         return true;
       }
 
+      // Першопричина: ініціалізація без дедлайну. Якщо проміс завантаження
+      // WASM зависне (обрив мережі, 404 на модулі, блокований запит), catch
+      // НІКОЛИ не спрацює — і сторінка назавжди лишиться на
+      // placeholder="Loading my-lisp WASM…". Це тиха деградація: REPL виглядає
+      // живим, але не виконує жодного рядка Сенсу.
+      // Дедлайн перетворює зависання на ВИДИМУ помилку.
+      const WASM_INIT_DEADLINE_MS = 15000;
+      function withDeadline(promise, ms) {
+        let timer;
+        const deadline = new Promise((_, reject) => {
+          timer = setTimeout(
+            () => reject(new Error(
+              "WASM init did not settle within " + ms + "ms (load hung; not a silent Loading…)")),
+            ms,
+          );
+        });
+        return Promise.race([promise, deadline]).finally(() => clearTimeout(timer));
+      }
+
       async function main() {
         let wasmModule;
         try {
-          wasmModule = await window.loadMyLispWasm();
+          wasmModule = await withDeadline(window.loadMyLispWasm(), WASM_INIT_DEADLINE_MS);
         } catch (error) {
+          // Видима відмова + гарантований вихід зі стану «Loading…».
+          inputEl.placeholder = "WASM не завантажився — див. повідомлення вище";
           printLine("Error: could not load the my-lisp WASM module: " + error, "line-error");
           return;
         }
@@ -167,6 +178,14 @@
           currentSurface = wasmModule.set_surface("укр");
         } catch (error) {
           printLine("Помилка запуску повної української поверхні: " + String(error), "line-error");
+          // Не вдавати: показати ФАКТИЧНУ поверхню рушія (current_surface),
+          // а не бажане значення. UI має відображати відповідь, не запит.
+          try {
+            currentSurface = wasmModule.current_surface();
+            printLine("Фактична поверхня рушія: " + currentSurface, "line-system");
+          } catch (probeError) {
+            printLine("Не вдалося визначити поверхню рушія: " + String(probeError), "line-error");
+          }
         }
         updatePrompt();
         printLine("my-lisp-cli · Web — українська поверхня над тим самим семантичним ядром.", "line-system");
@@ -223,7 +242,10 @@
           // no JS-side bookkeeping to stay out of a replayed history.
         } catch (error) {
           const message = error && error.message ? error.message : String(error);
-          printLine(currentSurface === "ук" ? message : "Error: " + message, "line-error");
+          // Першопричина: перевірялося лише "ук", але рушій віддає код "укр"
+          // (UkrainianFull, lib.rs:82; дефолт lib.rs:171). Тож гілка була
+          // МЕРТВОЮ: українські помилки завжди отримували англійський префікс.
+          printLine(["ук", "укр"].includes(currentSurface) ? message : "Error: " + message, "line-error");
         }
       }
 
