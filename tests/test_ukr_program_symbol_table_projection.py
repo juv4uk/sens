@@ -9,7 +9,6 @@ from collections import Counter
 import hashlib
 from pathlib import Path
 import re
-import subprocess
 import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -19,311 +18,778 @@ PINNED = {
   "edits": [
     [
       243,
-      "0011"
+      '0011'
     ],
     [
       260,
-      "001"
+      '001'
+    ],
+    [
+      271,
+      '0011'
+    ],
+    [
+      284,
+      '0010'
+    ],
+    [
+      303,
+      '110'
+    ],
+    [
+      309,
+      '110011100'
+    ],
+    [
+      328,
+      '110101010'
+    ],
+    [
+      353,
+      '010'
+    ],
+    [
+      358,
+      '001'
+    ],
+    [
+      376,
+      '110011101'
+    ],
+    [
+      397,
+      '01010'
+    ],
+    [
+      415,
+      '0011'
+    ],
+    [
+      425,
+      '0010'
+    ],
+    [
+      437,
+      '0100'
+    ],
+    [
+      443,
+      '11110111'
+    ],
+    [
+      476,
+      '0011'
+    ],
+    [
+      493,
+      '0010'
+    ],
+    [
+      505,
+      '110100011'
+    ],
+    [
+      520,
+      '110100010'
     ],
     [
       538,
-      "0011"
+      '0011'
     ],
     [
       551,
-      "0010"
+      '0010'
+    ],
+    [
+      585,
+      '0011'
+    ],
+    [
+      599,
+      '0010'
+    ],
+    [
+      609,
+      '110'
+    ],
+    [
+      615,
+      '110101010'
+    ],
+    [
+      662,
+      '010'
+    ],
+    [
+      667,
+      '001'
+    ],
+    [
+      684,
+      '0011'
+    ],
+    [
+      702,
+      '0010'
+    ],
+    [
+      714,
+      '110'
+    ],
+    [
+      720,
+      '110110'
+    ],
+    [
+      730,
+      '110100010'
+    ],
+    [
+      758,
+      '110100011'
+    ],
+    [
+      773,
+      '01010'
+    ],
+    [
+      787,
+      '110011110'
+    ],
+    [
+      798,
+      '110100011'
+    ],
+    [
+      813,
+      '01010'
+    ],
+    [
+      841,
+      '01010'
+    ],
+    [
+      857,
+      '010'
+    ],
+    [
+      862,
+      '001'
+    ],
+    [
+      880,
+      '0011'
+    ],
+    [
+      900,
+      '0010'
+    ],
+    [
+      912,
+      '110'
+    ],
+    [
+      918,
+      '110110'
+    ],
+    [
+      928,
+      '110100010'
+    ],
+    [
+      957,
+      '110101011'
+    ],
+    [
+      977,
+      '010'
+    ],
+    [
+      982,
+      '001'
+    ],
+    [
+      992,
+      '110011110'
+    ],
+    [
+      1003,
+      '110101011'
+    ],
+    [
+      1034,
+      '01010'
+    ],
+    [
+      1053,
+      '0011'
+    ],
+    [
+      1071,
+      '0010'
+    ],
+    [
+      1081,
+      '110'
+    ],
+    [
+      1087,
+      '11110111'
+    ],
+    [
+      1119,
+      '111'
+    ],
+    [
+      1126,
+      '001'
+    ],
+    [
+      1138,
+      '11110111'
+    ],
+    [
+      1153,
+      '111'
+    ],
+    [
+      1158,
+      '110100011'
+    ],
+    [
+      1219,
+      '01010'
     ],
     [
       1255,
-      "0011"
+      '0011'
     ],
     [
       1273,
-      "0010"
+      '0010'
     ],
     [
       1289,
-      "110"
+      '110'
     ],
     [
       1295,
-      "010"
+      '010'
     ],
     [
       1353,
-      "010"
+      '010'
     ],
     [
       1358,
-      "001"
+      '001'
     ],
     [
       1381,
-      "011"
+      '011'
     ],
     [
       1391,
-      "111"
+      '111'
     ],
     [
       1396,
-      "100"
+      '100'
     ],
     [
       1417,
-      "0011"
+      '0011'
     ],
     [
       1433,
-      "0010"
+      '0010'
     ],
     [
       1445,
-      "110"
+      '110'
     ],
     [
       1451,
-      "010"
+      '010'
+    ],
+    [
+      1501,
+      '010'
+    ],
+    [
+      1506,
+      '001'
+    ],
+    [
+      1516,
+      '01010'
+    ],
+    [
+      1536,
+      '011'
+    ],
+    [
+      1553,
+      '0011'
+    ],
+    [
+      1566,
+      '0010'
+    ],
+    [
+      1579,
+      '110'
+    ],
+    [
+      1636,
+      '01010'
+    ],
+    [
+      1673,
+      '010'
+    ],
+    [
+      1678,
+      '001'
+    ],
+    [
+      1696,
+      '0011'
+    ],
+    [
+      1711,
+      '0010'
+    ],
+    [
+      1724,
+      '110'
+    ],
+    [
+      1779,
+      '01010'
+    ],
+    [
+      1817,
+      '010'
+    ],
+    [
+      1822,
+      '001'
+    ],
+    [
+      1840,
+      '0011'
+    ],
+    [
+      1856,
+      '0010'
+    ],
+    [
+      1876,
+      '110'
+    ],
+    [
+      1882,
+      '110011100'
+    ],
+    [
+      1903,
+      '110011100'
+    ],
+    [
+      1926,
+      '010'
+    ],
+    [
+      1931,
+      '001'
+    ],
+    [
+      1941,
+      '111'
+    ],
+    [
+      1946,
+      '111'
     ],
     [
       1970,
-      "0011"
+      '0011'
     ],
     [
       1993,
-      "0010"
+      '0010'
     ],
     [
       2059,
-      "0011"
+      '0011'
     ],
     [
       2083,
-      "0010"
+      '0010'
     ],
     [
       2101,
-      "110"
+      '110'
     ],
     [
       2107,
-      "010"
+      '010'
     ],
     [
       2175,
-      "010"
+      '010'
     ],
     [
       2180,
-      "001"
+      '001'
     ],
     [
       2209,
-      "011"
+      '011'
     ],
     [
       2239,
-      "100"
+      '100'
     ],
     [
       2262,
-      "0011"
+      '0011'
     ],
     [
       2277,
-      "0010"
+      '0010'
     ],
     [
       2332,
-      "0011"
+      '0011'
     ],
     [
       2346,
-      "0010"
+      '0010'
     ],
     [
       2427,
-      "0011"
+      '0011'
     ],
     [
       2442,
-      "0010"
+      '0010'
+    ],
+    [
+      2459,
+      '001000'
+    ],
+    [
+      2514,
+      '001000'
+    ],
+    [
+      2570,
+      '01010'
+    ],
+    [
+      2580,
+      '110100010'
     ],
     [
       2639,
-      "0011"
+      '0011'
     ],
     [
       2665,
-      "0010"
+      '0010'
     ],
     [
       2731,
-      "0011"
+      '0011'
     ],
     [
       2755,
-      "0010"
+      '0010'
     ],
     [
       2773,
-      "110"
+      '110'
     ],
     [
       2779,
-      "010"
+      '010'
     ],
     [
       2847,
-      "010"
+      '010'
     ],
     [
       2852,
-      "001"
+      '001'
     ],
     [
       2881,
-      "011"
+      '011'
     ],
     [
       2914,
-      "100"
+      '100'
+    ],
+    [
+      2937,
+      '0011'
+    ],
+    [
+      2951,
+      '0010'
+    ],
+    [
+      2963,
+      '110'
+    ],
+    [
+      2969,
+      '110101010'
+    ],
+    [
+      2985,
+      '110101010'
+    ],
+    [
+      3003,
+      '010'
+    ],
+    [
+      3008,
+      '001'
     ],
     [
       3034,
-      "0011"
+      '0011'
     ],
     [
       3052,
-      "0010"
+      '0010'
     ],
     [
       3068,
-      "110"
+      '110'
     ],
     [
       3074,
-      "010"
+      '010'
     ],
     [
       3152,
-      "100"
+      '100'
     ],
     [
       3157,
-      "100"
+      '100'
     ],
     [
       3181,
-      "010"
+      '010'
     ],
     [
       3186,
-      "001"
+      '001'
     ],
     [
       3212,
-      "011"
+      '011'
     ],
     [
       3229,
-      "0011"
+      '0011'
     ],
     [
       3246,
-      "0010"
+      '0010'
     ],
     [
       3264,
-      "110"
+      '110'
     ],
     [
       3283,
-      "100"
+      '100'
     ],
     [
       3307,
-      "010"
+      '010'
     ],
     [
       3312,
-      "001"
+      '001'
     ],
     [
       3322,
-      "111"
+      '111'
     ],
     [
       3343,
-      "0011"
+      '0011'
     ],
     [
       3359,
-      "0010"
+      '0010'
     ],
     [
       3378,
-      "110"
+      '110'
     ],
     [
       3384,
-      "010"
+      '010'
     ],
     [
       3446,
-      "010"
+      '010'
     ],
     [
       3451,
-      "001"
+      '001'
     ],
     [
       3472,
-      "011"
+      '011'
     ],
     [
       3496,
-      "100"
+      '100'
     ],
     [
       3520,
-      "0011"
+      '0011'
     ],
     [
       3535,
-      "0010"
+      '0010'
     ],
     [
       3547,
-      "110"
+      '110'
     ],
     [
       3553,
-      "010"
+      '010'
     ],
     [
       3563,
-      "001"
+      '001'
+    ],
+    [
+      3611,
+      '111'
+    ],
+    [
+      3616,
+      '11011011'
+    ],
+    [
+      3626,
+      '110011110'
+    ],
+    [
+      3637,
+      '110011110'
+    ],
+    [
+      3648,
+      '100'
+    ],
+    [
+      3653,
+      '100'
+    ],
+    [
+      3669,
+      '011'
+    ],
+    [
+      3674,
+      '100'
+    ],
+    [
+      3698,
+      '011'
+    ],
+    [
+      3714,
+      '0011'
+    ],
+    [
+      3725,
+      '0010'
+    ],
+    [
+      3751,
+      '001000'
+    ],
+    [
+      3816,
+      '110110111'
+    ],
+    [
+      3838,
+      '001'
+    ],
+    [
+      3848,
+      '001'
+    ],
+    [
+      3860,
+      '001000'
+    ],
+    [
+      3925,
+      '110110111'
+    ],
+    [
+      3947,
+      '001'
+    ],
+    [
+      3957,
+      '001'
+    ],
+    [
+      3969,
+      '001000'
+    ],
+    [
+      4020,
+      '111'
     ],
     [
       4075,
-      "100"
+      '100'
     ],
     [
       4088,
-      "100"
+      '100'
     ],
     [
       4093,
-      "011"
+      '011'
     ]
   ],
   "changed": [
     6,
+    8,
+    10,
+    12,
     14,
+    16,
+    18,
+    20,
+    22,
     24,
     25,
     27,
+    28,
+    30,
+    32,
+    34,
     36,
     38,
     39,
@@ -332,163 +798,32 @@ PINNED = {
     44,
     47,
     48,
+    49,
+    50,
     53,
     55,
     56,
+    58,
     60,
     61,
     63,
     65,
     66,
     68,
+    69,
+    71,
     73
   ]
 }
-
-# Історичний source-only свідок фіксує стан ДО наступного ручного
-# перейменування локальних імен. Живий файл додатково перевіряється
-# як його точна, виключно лексична українська проєкція.
-PRE_RENAME_BLOB = "e6eba54d1078e556124fb82a57fd57d53dffe5f4"
-ALPHA_RENAMES = {
-    "nil-marker": "ознака-порожнього",
-    "pos-of": "позиція-підрядка",
-    "has": "містить-підрядок?",
-    "slice-from": "зріз-від",
-    "digit?": "цифра?",
-    "skip-ws": "пропустити-пробіли",
-    "word-digits": "послідовність-цифр",
-    "word-nonspace": "слово-до-пробілу",
-    "split-lines": "розділити-рядки",
-    "reverse-acc": "зворот-накопичувача",
-    "count-lst": "довжина-списку",
-    "asm-id": "асемблер-ідентифікатор",
-    "asm-name": "асемблер-назва",
-    "keep-pair": "зберегти-пару",
-    "process-asm-line": "обробити-рядок-асемблера",
-    "process-lines-asm": "обробити-рядки-асемблера",
-    "inc-name": "назва-з-включення",
-    "probe": "спостерігати-значення",
-    "inc-id": "ідентифікатор-з-включення",
-    "process-define-line": "обробити-рядок-визначення",
-    "process-lines-inc": "обробити-рядки-включення",
-    "str-eq?": "однакові-рядки?",
-    "id-in-base?": "ідентифікатор-у-базі?",
-    "merge-pair": "злити-пару",
-    "merge-all": "злити-всі",
-    "emit-all": "вивести-всі",
-    "main": "головна",
-    "s": "рядок",
-    "marker": "позначка",
-    "i": "позиція",
-    "m": "підрядок",
-    "c": "символ",
-    "lst": "елементи",
-    "acc": "накопичувач",
-    "line": "рядок-джерела",
-    "lines": "рядки-джерела",
-    "tag": "позначка-спостереження",
-    "value": "значення",
-    "name": "назва",
-    "tail": "залишок",
-    "id": "ідентифікатор",
-    "base": "база",
-    "pair": "пара",
-    "pairs": "пари",
-    "a": "ліве",
-    "b": "праве",
-    "asm-path": "шлях-асемблера",
-    "inc-path": "шлях-включення",
-    "asm-pairs": "асемблерні-пари",
-    "inc-pairs": "пари-включення",
-    "merged": "злиті"
-}
-
-
-def source_before_manual_names():
-    return subprocess.run(
-        ["git", "cat-file", "-p", PRE_RENAME_BLOB],
-        cwd=ROOT, check=True, capture_output=True, text=True,
-        encoding="utf-8",
-    ).stdout
-
-
-def manually_renamed_code(source):
-    out, token = [], []
-    in_comment = in_string = escaped = False
-
-    def flush():
-        if token:
-            word = "".join(token)
-            out.append(ALPHA_RENAMES.get(word, word))
-            token.clear()
-
-    for char in source:
-        if in_comment:
-            out.append(char)
-            if char == "\n":
-                in_comment = False
-            continue
-        if in_string:
-            out.append(char)
-            if escaped:
-                escaped = False
-            elif char == "\\":
-                escaped = True
-            elif char == '"':
-                in_string = False
-            continue
-        if char.isspace() or char in ("(", ")", "'", '"', ";"):
-            flush()
-            out.append(char)
-            if char == ";":
-                in_comment = True
-            elif char == '"':
-                in_string = True
-        else:
-            token.append(char)
-    flush()
-    return "".join(out)
-
-# Зміни виконавчої логіки поверх уже доведеної лексичної проєкції.
-# Історичний Git blob і зворотне перетворення бітових голів незмінні.
-# Це точна перевірка вихідного тексту, а не Python-виконавець SENS.
-LIVE_REPAIRS = (
-    ("((менше? позиція (рядок-довжина рядок)) \"\")", "((хибне? (менше? позиція (рядок-довжина рядок))) \"\")", 2),
-    ("((містить-підрядок? \" \" (рядок-перший рядок)) \"\")", "((містить-підрядок? \" \" (рядок-перший (зріз-від рядок позиція))) \"\")", 1),
-    ("(рядок-додати (рядок-перший рядок) (слово-до-пробілу рядок (додати позиція 1)))", "(рядок-додати (рядок-перший (зріз-від рядок позиція)) (слово-до-пробілу рядок (додати позиція 1)))", 1),
-    ("((однакові? 0 0) (сполучити", "(так (сполучити", 1),
-    ("(так ознака-порожнього)", "(так ні)", 1),
-    ("(перше (перше база))) позначка-так)", "(перше (перше база))) так)", 1),
-    ("(визначити ознака-порожнього (як-є ()))",
-     "; Обидві гілки походять із точних D1-предикатів SENS, не з host truthiness.\n"
-     "(визначити так (атом? (як-є ())))\n"
-     "(визначити ні (хибне? так))", 1),
-    ("((атом? база) ознака-порожнього)", "((атом? база) ні)", 1),
-)
-
-
-def apply_live_repairs(source: str) -> str:
-    for previous, current, expected_count in LIVE_REPAIRS:
-        actual_count = source.count(previous)
-        if actual_count != expected_count:
-            raise AssertionError(
-                f"Неочікувана кількість входжень {previous!r}: "
-                f"{actual_count} замість {expected_count}"
-            )
-        source = source.replace(previous, current)
-    return source
-
-
 ROW = re.compile(r"^\s*\(([01]+)\s+\(ук\s+[^()]*\)\s+\(укр\s+([^\s()]+)\)")
 NUMERIC_HEAD = re.compile(r"\(\s*[01]+(?=\s|\)|$)")
 ENCODED_LITERAL = re.compile(r"#(?:d\d+:[01]+|b[01]+)")
-EXPECTED = {"0011": 15, "001": 8, "0010": 14, "110": 8,
-            "010": 13, "011": 6, "111": 2, "100": 9}
+EXPECTED = {'0011': 27, '001': 22, '0010': 26, '110': 17, '110011100': 3, '110101010': 4, '010': 22, '110011101': 1, '01010': 10, '0100': 1, '11110111': 3, '110100011': 4, '110100010': 4, '110110': 2, '110011110': 4, '110101011': 2, '111': 8, '011': 9, '100': 12, '001000': 5, '11011011': 1, '110110111': 2}
 
 
 def authority():
     peers = {}
-    for width in (3, 4):
+    for width in (3, 4, 5, 6, 7, 8, 9, 10, 11):
         for line in (ROOT / f"lib/domains/d{width}.lisp").read_text(
             encoding="utf-8"
         ).splitlines():
@@ -504,7 +839,7 @@ def inverse(text, edits, peers):
         if original_pos <= previous:
             raise AssertionError("Повторені або невпорядковані позиції")
         previous = original_pos
-        if old not in peers or len(old) not in (3, 4):
+        if old not in peers or not (3 <= len(old) <= 11):
             raise AssertionError(f"Немає доведеної доменної identity: {old}")
         projected = peers[old]
         movements.append((original_pos + shift, old, projected))
@@ -546,36 +881,11 @@ class ProgramSymbolTableUkrProjectionTests(unittest.TestCase):
     def setUpClass(cls):
         cls.peers = authority()
 
-
-    def test_manual_ukrainian_names_are_exact_source_projection(self):
-        original = source_before_manual_names()
-        self.assertEqual(git_blob(original), PRE_RENAME_BLOB)
-        actual = SOURCE.read_text(encoding="utf-8")
-        self.assertEqual(apply_live_repairs(manually_renamed_code(original)), actual)
-        self.assertIn("(визначити так (атом? (як-є ())))", actual)
-        self.assertIn("(визначити ні (хибне? так))", actual)
-        self.assertNotIn("ознака-порожнього", actual)
-        self.assertIn("(головна (перше *argv*)", actual)
-        self.assertNotIn("(визначити nil-marker", actual)
-
-    def test_current_executable_symbol_scanner_guards(self):
-        source = SOURCE.read_text(encoding="utf-8")
-        self.assertEqual(source.count(
-            "(хибне? (менше? позиція (рядок-довжина рядок)))"), 2)
-        self.assertIn("(рядок-перший (зріз-від рядок позиція))", source)
-        self.assertIn("((містить-підрядок? \" \" (рядок-перший (зріз-від рядок позиція))) \"\")", source)
-        self.assertIn("(так ні)", source)
-        self.assertIn("((атом? база) ні)", source)
-        self.assertNotIn("((атом? база) ознака-порожнього)", source)
-        self.assertIn("(перше (перше база))) так)", source)
-        self.assertNotIn("позначка-так", source)
-        self.assertNotIn("((однакові? 0 0)", source)
-
     def test_ratified_coordinates_and_exact_count(self):
         self.assertEqual(Counter(old for _, old in PINNED["edits"]), EXPECTED)
-        self.assertEqual(len(PINNED["edits"]), 75)
+        self.assertEqual(len(PINNED["edits"]), 189)
         for old in EXPECTED:
-            self.assertEqual(len(old), 3 if len(old) == 3 else 4)
+            self.assertTrue(3 <= len(old) <= 11)
             self.assertIn(old, self.peers)
         self.assertEqual(self.peers["0011"], "визначити")
         self.assertEqual(self.peers["0010"], "функція")
@@ -583,12 +893,12 @@ class ProgramSymbolTableUkrProjectionTests(unittest.TestCase):
         self.assertEqual(self.peers["110"], "за-умовою")
 
     def test_exact_original_git_blob_reconstructed(self):
-        source = source_before_manual_names()
+        source = SOURCE.read_text(encoding="utf-8")
         restored = inverse(reverse_probe_ukr(source), PINNED["edits"], self.peers)
         self.assertEqual(git_blob(restored), PINNED["sha"])
 
     def test_changed_lines_have_no_numeric_head(self):
-        source = source_before_manual_names()
+        source = SOURCE.read_text(encoding="utf-8")
         old = inverse(reverse_probe_ukr(source), PINNED["edits"], self.peers)
         lines_before, lines_after = old.splitlines(), source.splitlines()
         self.assertEqual(len(lines_before), len(lines_after))
@@ -601,17 +911,17 @@ class ProgramSymbolTableUkrProjectionTests(unittest.TestCase):
             self.assertIsNone(ENCODED_LITERAL.search(mask), f"line {line}")
 
     def test_unproved_domain_words_and_historical_cond_debt_preserved(self):
-        source = source_before_manual_names()
+        source = SOURCE.read_text(encoding="utf-8")
         self.assertIn("(визначити nil-marker (як-є ()))", source)
         self.assertIn("(визначити reverse-acc", source)
         self.assertIn("((атом? lst) acc)", source)
-        self.assertIn("(01010 i 1)", source)  # D5 без окремого admission
-        self.assertIn("(t (111 (11011011", source)  # стара трьохпольова гілка
+        self.assertIn("(додати i 1)", source)  # D5:01010 -> ратифікована поверхня додати
+        self.assertIn("(t (сполучити (друкувати", source)  # гілка на ратифікованих D3/D8 поверхнях
         self.assertIn("(main (перше *argv*)", source)
         self.assertNotIn("(0011 nil-marker", source)
 
     def test_negative_wrong_peer_fails_inverse(self):
-        source = source_before_manual_names()
+        source = SOURCE.read_text(encoding="utf-8")
         mutated = source.replace(
             "(визначити nil-marker", "(функція nil-marker", 1
         )

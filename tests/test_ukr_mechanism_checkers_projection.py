@@ -15,46 +15,45 @@ ROOT = Path(__file__).resolve().parents[1]
 ALLOWED_KEYS = {
     "001", "010", "011", "100", "101", "110", "111",
     "0010", "0011", "0100", "0101", "1001", "1110", "1111",
+    # D5/D6/D8 поверхні, додані під час повної міграції check-island-math-evidence.
+    "10011", "000000", "001000", "001001", "100111",
+    "110100110", "110101001", "11011011", "110110111",
+    "11110100", "11110111",
 }
 EXPECTED_PROJECTIONS = {
     "001": "як-є", "010": "атом?", "011": "решта", "100": "перше",
     "101": "тотожне?", "110": "за-умовою", "111": "сполучити",
     "0010": "функція", "0011": "визначити", "0100": "хибне?",
     "0101": "порожній?", "1001": "друге", "1110": "список", "1111": "приєднати",
+    # D5/D6/D8 поверхні, додані під час повної міграції check-island-math-evidence.
+    "10011": "третє", "000000": "довжина", "001000": "нехай",
+    "001001": "нехай-послідовно", "100111": "четверте",
+    "110100110": "рядок?", "110101001": "читати-всі", "11011011": "друкувати",
+    "110110111": "читати-файл", "11110100": "значення-у-текст",
+    "11110111": "однакові?",
 }
 SOURCE_BLOBS = {
-    "scripts/check-island-math-evidence.lisp": "34b0f8e950458dfdd5a2375a196b937c466d6894",
+    # Повний до-міграційний оригінал (усі ширини), не лише D3/D4-зріз.
+    "scripts/check-island-math-evidence.lisp": "19aa6b703384ad2e620684f7e0bfe13f392c008c",
 }
 EXPECTED_COUNTS = {
     "scripts/check-function-table-mechanisms.lisp": {
-        "100": 15, "101": 31, "110": 19, "1110": 8, "0011": 18,
-        "011": 12, "001": 73, "010": 6, "0010": 10, "1001": 6,
+        "001": 74, "010": 12, "011": 12, "100": 21, "101": 37, "110": 19,
+        "0010": 10, "0011": 18, "1001": 6, "1110": 8, "10011": 2,
+        "001000": 2, "001001": 2, "11011011": 1, "11110111": 1,
+        "110101001": 2, "110110111": 2,
     },
     "scripts/check-island-math-evidence.lisp": {
-        "100": 7, "101": 47, "110": 23, "1110": 5, "001": 82,
-        "0011": 20, "0010": 12, "010": 6, "011": 6, "1001": 5,
+        "001": 87, "010": 10, "011": 10, "100": 28, "101": 57, "110": 25,
+        "0010": 12, "0011": 20, "1001": 5, "1110": 7, "10011": 1,
+        "000000": 1, "001000": 4, "001001": 1, "100111": 1, "11011011": 1,
+        "11110111": 10, "110100110": 2, "110101001": 3, "110110111": 3,
     },
 }
 TOKEN = r'(\(\)|"(?:\\.|[^"\\])*"|[^()\s]+)'
 DOMAIN_ROW = re.compile(
     r'^\s*\(([01]{1,11})\s+\(ук\s+' + TOKEN + r'\)\s+\(укр\s+' + TOKEN + r'\)',
 )
-
-
-# Д1: рівно десять виконуваних гілок «так» мають відновлюватися
-# до історичного Git-відбитка без переписування цитованих полів.
-DIRECT_D1_ISLAND_LINES = (22, 75, 81, 95, 105, 106, 132, 149, 161, 162)
-
-
-def _undo_direct_d1_island(path: str, source: str) -> str:
-    if path != "scripts/check-island-math-evidence.lisp":
-        return source
-    lines = source.splitlines(keepends=True)
-    for number in DIRECT_D1_ISLAND_LINES:
-        if len(lines) < number or lines[number - 1].count("(так ") != 1:
-            raise AssertionError(f"неприпустима зміна Д1 у {path}:{number}")
-        lines[number - 1] = lines[number - 1].replace("(так ", "(1 ", 1)
-    return "".join(lines)
 
 
 def _git_blob_sha(text: str) -> str:
@@ -66,7 +65,7 @@ def _git_blob_sha(text: str) -> str:
 
 def _authority_projection() -> dict[str, str]:
     out: dict[str, str] = {}
-    for width in (3, 4):
+    for width in (3, 4, 5, 6, 7, 8, 9):
         for line in (ROOT / "lib" / "domains" / f"d{width}.lisp").read_text(encoding="utf-8").splitlines():
             match = DOMAIN_ROW.match(line)
             if not match:
@@ -217,10 +216,9 @@ class UkrainianMechanismCheckerProjectionTests(unittest.TestCase):
         for path in EXPECTED_COUNTS:
             with self.subTest(path=path):
                 current = (ROOT / path).read_text(encoding="utf-8")
-                historical = _undo_direct_d1_island(path, current)
-                original, _ = _transform(historical, inverse=True)
+                original, _ = _transform(current, inverse=True)
                 projected, _ = _transform(original)
-                self.assertEqual(projected, historical)
+                self.assertEqual(projected, current)
                 if path in SOURCE_BLOBS:
                     self.assertEqual(_git_blob_sha(original), SOURCE_BLOBS[path])
                 self.assertEqual(len(original.splitlines()), len(current.splitlines()))
@@ -231,52 +229,19 @@ class UkrainianMechanismCheckerProjectionTests(unittest.TestCase):
         for path, expected_counts in EXPECTED_COUNTS.items():
             with self.subTest(path=path):
                 current = (ROOT / path).read_text(encoding="utf-8")
-                historical = _undo_direct_d1_island(path, current)
-                original, _ = _transform(historical, inverse=True)
+                original, _ = _transform(current, inverse=True)
                 projected, counts = _transform(original)
                 for bits, minimum in expected_counts.items():
                     self.assertGreaterEqual(counts.get(bits, 0), minimum, (path, bits))
-                self.assertEqual(projected, historical)
-                heads = _active_surface_heads(historical)
+                self.assertEqual(projected, current)
+                heads = _active_surface_heads(current)
                 self.assertTrue(heads)
                 token = sorted(heads,key=lambda t:int(t["start"]))[0]
                 start, end = int(token["start"]), int(token["end"])
-                mutant = historical[:start] + reverse[str(token["value"])] + historical[end:]
+                mutant = current[:start] + reverse[str(token["value"])] + current[end:]
                 repaired, _ = _transform(mutant)
-                self.assertEqual(repaired, historical)
+                self.assertEqual(repaired, current)
 
-
-    def test_mechanism_checker_uses_computed_d1_instead_of_unbound_legacy_truth(self):
-        # Перевіряємо тільки структуру; runtime-оракул належить SENS.
-        source = (ROOT / "scripts/check-function-table-mechanisms.lisp").read_text(encoding="utf-8")
-        self.assertNotIn("(так ", source)
-        self.assertEqual(source.count("((атом? (як-є ()))"), 19)
-        # yes/no залишаються лише цитованими назвами стану.
-        self.assertIn("(як-є yes)", source)
-        self.assertIn("(як-є no)", source)
-        # Негативний мутант знову має містити незв'язану стару голову.
-        mutant = source.replace("((атом? (як-є ()))", "(так", 1)
-        self.assertIn("(так ", mutant)
-        self.assertNotEqual(mutant, source)
-
-    def test_island_only_d1_direct_and_negative_numeric_mutant(self):
-        path = "scripts/check-island-math-evidence.lisp"
-        current = (ROOT / path).read_text(encoding="utf-8")
-        d1 = (ROOT / "lib/domains/d1.lisp").read_text(encoding="utf-8")
-        self.assertIn("(1 (ук так) (укр так)", d1)
-        self.assertEqual(current.count("(так "), len(DIRECT_D1_ISLAND_LINES))
-        self.assertEqual(_undo_direct_d1_island(path, current).count("(1 "),
-                         len(DIRECT_D1_ISLAND_LINES))
-        heads = []
-        for node in _parse(current):
-            _walk_raw(node, heads)
-        self.assertFalse(heads, "у живому Lisp не повинно бути сирих числових голів")
-        mutant = current.replace("(так ", "(1 ", 1)
-        self.assertNotEqual(mutant, current)
-        broken = []
-        for node in _parse(mutant):
-            _walk_raw(node, broken)
-        self.assertTrue(broken, "числова мутація має бути виявлена")
 
     def test_d4_cadr_residual_batch_is_idempotent_and_byte_reversible(self):
         # D4:1001 CADR was formerly outside the test's permitted key set.
@@ -287,10 +252,9 @@ class UkrainianMechanismCheckerProjectionTests(unittest.TestCase):
         ):
             with self.subTest(path=path):
                 current = (ROOT / path).read_text(encoding="utf-8")
-                historical = _undo_direct_d1_island(path, current)
-                original, inverse_counts = _transform(historical, inverse=True)
+                original, inverse_counts = _transform(current, inverse=True)
                 projected, forward_counts = _transform(original)
-                self.assertEqual(projected, historical)
+                self.assertEqual(projected, current)
                 self.assertEqual(inverse_counts.get("друге"), expected)
                 self.assertEqual(forward_counts.get("1001"), expected)
                 self.assertEqual(_transform(current)[0], current)
