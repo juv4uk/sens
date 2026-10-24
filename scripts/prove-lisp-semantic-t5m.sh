@@ -1977,6 +1977,9 @@ sha256sum lib/core4.lisp lib/core4-parts/core4-codec.lisp lib/core4-parts/core4-
 run_case run_law d6-intersection-order-positive tests/semantic/d6-intersection-order-law.lisp 1 core4
 run_case run_law d6-intersection-duplicates-mutant tests/semantic/d6-intersection-duplicates-mutant.lisp 0 core4
 run_case run_error_rejection d6-intersection-left-tail tests/semantic/d6-intersection-left-tail-negative.lisp Type 'car expects a non-empty list' core4
+sha256sum lib/core4.lisp tests/semantic/d6-intersection-order-law.lisp \
+  tests/semantic/d6-intersection-duplicates-mutant.lisp \
+  tests/semantic/d6-intersection-left-tail-negative.lisp > "$evidence/d6-intersection-inputs.sha256"
 # Семантика D6 ALL — виконувані мовні закони з чинним визначенням Core4.
 d6_quantifier_source="$evidence/d6-first-class-predicate-quantifiers.lisp"
 : > "$d6_quantifier_source"
