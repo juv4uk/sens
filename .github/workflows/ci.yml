@@ -241,6 +241,9 @@ jobs:
                   "tests/semantic/utf8-quotient-mutant.lisp",
                   "tests/semantic/result-status-laws.lisp",
                   "tests/semantic/d11-srfi1-span-break-laws.lisp",
+                  # Залежні SPAN/BREAK негативні SENS-свідки запускаються з lib/ в Zig/T5M.
+                  "tests/semantic/d11-srfi1-span-improper-suffix-negative.lisp",
+                  "tests/semantic/d11-srfi1-break-improper-suffix-negative.lisp",
                   # D7/D8 епістемічні закони залежать від Lisp-бібліотеки.
                   # Вони завжди запускаються через реальний T5M law bundle нижче.
                   "tests/semantic/d7-epistemic-structural-tag-law.lisp",

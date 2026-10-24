@@ -728,6 +728,15 @@ d11_span_bundle="$evidence/d11-srfi1-span-break-complete.lisp"
 cat -- lib/d11-srfi1-span-break.lisp tests/semantic/d11-srfi1-span-break-laws.lisp > "$d11_span_bundle"
 sha256sum lib/d11-srfi1-span-break.lisp tests/semantic/d11-srfi1-span-break-laws.lisp > "$evidence/d11-srfi1-inputs.sha256"
 run_case run_law d11-srfi1-span-break-physical "$d11_span_bundle" 1
+# Д11: SPAN/BREAK не повинні пропускати атомний D1-хвіст суфікса.
+d11_span_improper="$evidence/d11-srfi1-span-improper-suffix.lisp"
+cat -- lib/d11-srfi1-span-break.lisp tests/semantic/d11-srfi1-span-improper-suffix-negative.lisp > "$d11_span_improper"
+run_case run_type_rejection d11-srfi1-span-improper-suffix-type "$d11_span_improper" 'car expects a non-empty list'
+d11_break_improper="$evidence/d11-srfi1-break-improper-suffix.lisp"
+cat -- lib/d11-srfi1-span-break.lisp tests/semantic/d11-srfi1-break-improper-suffix-negative.lisp > "$d11_break_improper"
+run_case run_type_rejection d11-srfi1-break-improper-suffix-type "$d11_break_improper" 'car expects a non-empty list'
+sha256sum lib/d11-srfi1-span-break.lisp tests/semantic/d11-srfi1-span-improper-suffix-negative.lisp tests/semantic/d11-srfi1-break-improper-suffix-negative.lisp > "$evidence/d11-span-break-improper-inputs.sha256"
+
 # Д11: НЕ втрачати бенчмарк сімейств, навіть коли він не змінювався в commit.
 # Композиції й позитив/мутант — виключно справжній Lisp/SENS; Bash тільки
 # складає допущені джерела й перевіряє D1/точні фізичні байти.
