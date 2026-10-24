@@ -2029,6 +2029,14 @@ run_case run_law d6-any-all-native-call-mutant tests/semantic/d6-any-all-native-
 # D6 improper tails: real D1 NO is not D3 NIL.
 run_case run_error_rejection d6-any-improper-tail-type tests/semantic/d6-any-improper-tail-negative.lisp Type 'car expects a non-empty list' core4
 run_case run_error_rejection d6-all-improper-tail-type tests/semantic/d6-all-improper-tail-negative.lisp Type 'car expects a non-empty list' core4
+# Д6 ANY/ALL і похідні Д8: точний D3:(), коротке замикання та Type.
+run_case run_law d6-any-all-exact-empty tests/semantic/d6-any-all-exact-empty-law.lisp 1 core4
+run_case run_law d6-any-vacuous-mutant tests/semantic/d6-any-vacuous-mutant.lisp 0 core4
+run_case run_error_rejection d6-any-invalid-root tests/semantic/d6-any-invalid-root-law.lisp Type 'car expects a non-empty list' core4
+run_case run_error_rejection d6-all-invalid-root tests/semantic/d6-all-invalid-root-law.lisp Type 'car expects a non-empty list' core4
+run_case run_law d8-quantifier-composition tests/semantic/d8-quantifier-composition-law.lisp 1 core4
+run_case run_error_rejection d8-notany-invalid-root tests/semantic/d8-notany-invalid-root-law.lisp Type 'car expects a non-empty list' core4
+run_case run_error_rejection d8-notevery-invalid-root tests/semantic/d8-notevery-invalid-root-law.lisp Type 'car expects a non-empty list' core4
 sha256sum lib/core4-parts/core4-d6b.lisp tests/semantic/d6-any-all-native-call-law.lisp tests/semantic/d6-any-all-native-call-mutant.lisp > "$evidence/d6-any-all-native-call-inputs.sha256"
 
 # Класифікуємо кореневі причини без повторного запуску SENS.
