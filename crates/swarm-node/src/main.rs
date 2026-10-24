@@ -3754,6 +3754,54 @@ mod peer_connection_generation_tests {
     }
 
     #[test]
+    fn reconnect_while_old_writer_waits_does_not_send_or_remove_new_socket() {
+        use std::sync::mpsc;
+        let (old_stream, _old_remote) = local_pair();
+        let (new_stream, _new_remote) = local_pair();
+        let table = Arc::new(Mutex::new(HashMap::new()));
+        table.lock().unwrap().insert("peer".into(), PeerLink {
+            stream: old_stream,
+            generation: 1,
+        });
+        let writer = Arc::new(Mutex::new(()));
+        let mut locks = HashMap::new();
+        locks.insert("peer".into(), Arc::clone(&writer));
+        let write_locks = Arc::new(Mutex::new(locks));
+        let held_writer_guard = writer.lock().unwrap();
+
+        let test_table = Arc::clone(&table);
+        let test_locks = Arc::clone(&write_locks);
+        let (tx, rx) = mpsc::channel();
+        let handle = thread::spawn(move || {
+            let result = broadcast_to_peer_table(
+                &test_table,
+                &test_locks,
+                &Sexp::list(vec![Sexp::atom("heartbeat")]),
+                None,
+            );
+            tx.send(result).unwrap();
+        });
+
+        // A third Arc owner means the worker already snapshotted generation
+        // 1 and is waiting on the writer lock. Replace it with generation 2.
+        let deadline = Instant::now() + Duration::from_secs(2);
+        while Arc::strong_count(&writer) < 3 {
+            assert!(Instant::now() < deadline, "worker never reached writer");
+            thread::yield_now();
+        }
+        table.lock().unwrap().insert("peer".into(), PeerLink {
+            stream: new_stream,
+            generation: 2,
+        });
+        drop(held_writer_guard);
+        let (written, dead) = rx.recv_timeout(Duration::from_secs(2)).unwrap();
+        handle.join().unwrap();
+        assert!(written.is_empty(), "old snapshot must not count as delivered");
+        assert!(dead.is_empty(), "old snapshot must not retire replacement");
+        assert_eq!(table.lock().unwrap()["peer"].generation, 2);
+    }
+
+    #[test]
     fn socket_generation_can_be_retired_at_most_once() {
         let (stream, _remote) = local_pair();
         let mut peers = HashMap::new();
