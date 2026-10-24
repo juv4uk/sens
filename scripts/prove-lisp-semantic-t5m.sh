@@ -32,6 +32,7 @@ echo "SENS_BOOTSTRAP_EXECUTABLE source=$bootstrap_source semantic=NOT_CERTIFIED"
 
 # Невід'ємність вимірів і справжні коди виходу перевіряє сам Bash-механізм.
 bash scripts/test_law_stage_clock.sh
+bash scripts/test_sens_law_hotspots_empty.sh
 
 fail() {
   local id="$1" layer="$2" expected="$3" actual="$4"
