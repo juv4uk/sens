@@ -516,8 +516,8 @@ run_case run_law d10-empty-queue-mutant tests/semantic/d10-empty-queue-mutant.li
 # Д5 REVERSE/REVERSE-ONTO: SENS-закон, порядок і дві точні Type-відмови.
 run_case run_law d5-reverse-onto-proper-positive tests/semantic/d5-reverse-onto-proper-law.lisp 1 core4
 run_case run_law d5-reverse-onto-order-mutant tests/semantic/d5-reverse-onto-order-mutant.lisp 0 core4
-run_error_rejection d5-reverse-onto-improper-tail tests/semantic/d5-reverse-onto-improper-tail-negative.lisp Type 'car expects a non-empty list' core4
-run_error_rejection d5-reverse-improper-tail tests/semantic/d5-reverse-improper-tail-negative.lisp Type 'car expects a non-empty list' core4
+run_case run_error_rejection d5-reverse-onto-improper-tail tests/semantic/d5-reverse-onto-improper-tail-negative.lisp Type 'car expects a non-empty list' core4
+run_case run_error_rejection d5-reverse-improper-tail tests/semantic/d5-reverse-improper-tail-negative.lisp Type 'car expects a non-empty list' core4
 sha256sum lib/core4.lisp \
   tests/semantic/d5-reverse-onto-proper-law.lisp \
   tests/semantic/d5-reverse-onto-order-mutant.lisp \
