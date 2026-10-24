@@ -49,7 +49,13 @@ def toks(text: str) -> set[str]:
 
 
 def law_header(artifact: str) -> str:
-    """Твердження закону — перший коментар .lisp. Порожньо, якщо джерела немає."""
+    """Твердження закону — ПЕРШИЙ КОМЕНТАР .lisp.
+
+    ВІДКОЧЕНО 2026-10-24: я спробував читати ВЕСЬ закон (щоб уловити
+    застосування в ТІЛІ d4-higher-order-composition) — і це ЗЛАМАЛО відомий
+    випадок d3-dotted-pair (REJECTED → WEAK), бо цілий файл містить безліч
+    понять і дає хибні перекриття. Самотест це впіймав. Отже: шапка.
+    Порожньо, якщо джерела немає."""
     for cand in (f"{artifact}-law.lisp", f"{artifact}.lisp"):
         path = SEMANTIC / cand
         if path.is_file():
@@ -120,10 +126,16 @@ def independent(row_id: str, artifact: str) -> str:
     claim = claims.get(row_id, "")
     if not claim:
         return "UNJUDGEABLE"
-    shared = concepts(header) & concepts(claim)  # ДВОМОВНО, не латинські токени
-    if len(shared) >= 3:
+    law_c, claim_c = concepts(header), concepts(claim)
+    shared = law_c & claim_c          # ДВОМОВНО, не латинські токени
+    law_extra = law_c - claim_c       # те, що закон покриває, а рядок — ні
+    # ПОЛІПШЕННЯ, знайдене на відомому випадку d4-lambda-application: спільних
+    # понять 3, але закон має ще 2 ЗАЙВІ (затінення, захоплення). Закон ШИРШИЙ
+    # за рядок — отже це WEAK, а не CONFIRMED. Правило, яке рахує лише спільне,
+    # дає CONFIRMED там, де покриття нерівне.
+    if len(shared) >= 3 and len(law_extra) <= 1:
         return "CONFIRMED"
-    if len(shared) == 2:
+    if len(shared) >= 2:
         return "WEAK"
     return "REJECTED"
 
@@ -135,6 +147,11 @@ KNOWN_CASES = (
     # (артефакт, очікуваний механічний вердикт, чому відомий)
     ("meta-eval-first-class-d1", "UNJUDGEABLE", "немає .lisp-джерела — перевірено"),
     ("d3-dotted-pair", "REJECTED", "закон і рядок про РІЗНЕ — доведено PR #6034"),
+    # РЕГРЕСІЯ, впіймана самотестом 2026-10-24: читання ВСЬОГО закону
+    # зламало цей випадок (REJECTED → WEAK). Лишається як сторож.
+    ("d3-dotted-pair", "REJECTED", "закон і рядок про РІЗНЕ; читання всього файлу ламає"),
+    ("d4-lambda-application", "WEAK",
+     "закон ШИРШИЙ за рядок (затінення/захоплення відсутні в claim) — прочитано"),
 )
 
 
