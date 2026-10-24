@@ -13,9 +13,10 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[2]
-WORKFLOW = ROOT / ".github" / "workflows" / "release.yml"
-PUBLISH_JOB = "  release-publish:"
-FINAL_GUARD = "# Revalidate authorization and main immediately before publication:"
+ENTRY_WORKFLOW = ROOT / ".github" / "workflows" / "release.yml"
+PUBLISH_WORKFLOW = ROOT / ".github" / "workflows" / "release-publish.yml"
+PUBLISH_JOB = "  publish:"
+FINAL_GUARD = "git fetch --no-tags --depth=1 origin main"
 PUBLISH_COMMAND = 'gh release edit "$GITHUB_REF_NAME" --draft=false'
 CI_COMMAND = 'python3 scripts/verify_release_ci.py "$GITHUB_SHA" "$GITHUB_REPOSITORY"'
 DRAFT_COMMAND = 'gh release create "$GITHUB_REF_NAME" dist/*'
@@ -36,12 +37,11 @@ def require_final_publication_guard(source: str) -> None:
     final_go_at = job.rfind(
         'if [[ -z "$RELEASE_GO_SHA" || -z "$RELEASE_GO_TAG"', 0, publish_at
     )
-    final_guard_at = job.rfind(FINAL_GUARD, 0, publish_at)
 
     if replay_at < 0 or checksum_at < 0:
         raise AssertionError("draft replay and SHA256 verification must precede publication")
     if not (
-        replay_at < checksum_at < final_guard_at < final_fetch_at
+        replay_at < checksum_at < final_fetch_at
         < final_compare_at < final_go_at < publish_at
     ):
         raise AssertionError(
@@ -63,7 +63,7 @@ def require_final_publication_guard(source: str) -> None:
         or final_ci_at == first_ci_at
         or not (
             first_ci_at < draft_at < replay_at < checksum_at
-            < final_guard_at < final_fetch_at < final_compare_at
+            < final_fetch_at < final_compare_at
             < final_go_at < final_ci_at < publish_at
         )
     ):
@@ -76,12 +76,12 @@ def require_final_publication_guard(source: str) -> None:
 def require_pinned_artifact_download(job: str) -> None:
     """Reject floating action tags and truncated hashes before publication."""
     pinned = re.search(
-        r"(?m)^\s+uses:\s+actions/download-artifact@[0-9a-f]{40}\s+# v4\s*$",
+        r"(?m)^\s+uses:\s+actions/download-artifact@[0-9a-f]{40}\s+# v5\s*$",
         job,
     )
     if pinned is None:
         raise AssertionError(
-            "release-publish must use full immutable SHA for actions/download-artifact v4"
+            "release-publish must use full immutable SHA for actions/download-artifact v5"
         )
 
 
@@ -97,16 +97,17 @@ def require_supported_macos_intel_runner(source: str) -> None:
 
 class ReleasePublicationGateTest(unittest.TestCase):
     def setUp(self):
-        self.source = WORKFLOW.read_text(encoding="utf-8")
+        self.source = PUBLISH_WORKFLOW.read_text(encoding="utf-8")
+        self.entry_source = ENTRY_WORKFLOW.read_text(encoding="utf-8")
 
     def test_macos_intel_release_runner_is_supported(self):
-        require_supported_macos_intel_runner(self.source)
+        require_supported_macos_intel_runner(self.entry_source)
         for stale in ("macos-13", "macos-14", "macos-15"):
             with self.subTest(stale=stale), self.assertRaisesRegex(
                 AssertionError, "must be macos-15-intel"
             ):
                 require_supported_macos_intel_runner(
-                    self.source.replace("os: macos-15-intel", f"os: {stale}", 1)
+                    self.entry_source.replace("os: macos-15-intel", f"os: {stale}", 1)
                 )
 
     def test_workflow_rechecks_main_after_replay_and_before_publish(self):
@@ -115,7 +116,7 @@ class ReleasePublicationGateTest(unittest.TestCase):
     def test_workflow_without_final_guard_is_rejected(self):
         job_start = self.source.index(PUBLISH_JOB)
         job = self.source[job_start:]
-        guard_at = job.index(FINAL_GUARD)
+        guard_at = job.rfind(FINAL_GUARD)
         publish_at = job.index(PUBLISH_COMMAND, guard_at)
         mutated = self.source[:job_start] + job[:guard_at] + job[publish_at:]
         with self.assertRaisesRegex(AssertionError, "fresh main-SHA"):
@@ -149,30 +150,34 @@ class ReleasePublicationGateTest(unittest.TestCase):
         with self.assertRaisesRegex(AssertionError, "final exact-SHA release CI recheck"):
             require_final_publication_guard(self.source[:job_start] + broken_job)
 
-    def test_local_tag_driver_requires_every_exact_sha_workflow_and_owner_go(self):
-        driver = (ROOT / "scripts" / "release.lisp").read_text(encoding="utf-8")
-        for workflow in ('"ci-hosted.yml"', '"release-preflight.yml"'):
-            with self.subTest(workflow=workflow):
-                self.assertIn(workflow, driver)
-                self.assertIn('"--limit" "1"', driver)
-        self.assertIn('"SENS_RELEASE_GO_SHA"', driver)
-        self.assertIn('"SENS_RELEASE_GO_TAG"', driver)
-        self.assertIn('"variable" "get"', driver)
-
-    def test_local_tag_driver_is_not_satisfied_by_any_old_green_run(self):
-        driver = (ROOT / "scripts" / "release.lisp").read_text(encoding="utf-8")
-        self.assertNotIn('"--workflow" "CI"', driver)
-        self.assertNotIn('"--workflow" "ci.yml"', driver)
-        self.assertNotIn('"--limit" "20"', driver)
-
-    def test_publisher_waits_for_all_assets_and_replays_exact_bytes(self):
-        workflow = WORKFLOW.read_text(encoding="utf-8")
-        publish_at = workflow.index("  release-publish:")
-        job = workflow[publish_at:]
+    def test_manual_release_delegates_to_sha_pinned_publisher(self):
+        """Tagged entry delegates publication only after all asset jobs finish."""
+        self.assertIn("on:\n  workflow_dispatch:\n", self.entry_source)
+        entry = self.entry_source[self.entry_source.index("  release-publish:"):]
         self.assertIn(
             "needs: [test, publish-island-manifest, build-cli, build-msi, build-web]",
-            job,
+            entry,
         )
+        self.assertIn("uses: ./.github/workflows/release-publish.yml", entry)
+        self.assertIn("secrets: inherit", entry)
+        self.assertIn("RELEASE_GO_SHA: ${{ vars.SENS_RELEASE_GO_SHA }}", self.source)
+        self.assertIn("RELEASE_GO_TAG: ${{ vars.SENS_RELEASE_GO_TAG }}", self.source)
+
+    def test_retired_local_driver_cannot_publish(self):
+        """Retired Lisp shim is no longer a source of tag authority."""
+        driver = (ROOT / "scripts" / "release.lisp").read_text(encoding="utf-8")
+        self.assertIn("ФАЙЛ ВИВЕДЕНО З УЖИТКУ", driver)
+        self.assertNotIn("gh release", driver)
+        self.assertNotIn("SENS_RELEASE_GO_SHA", driver)
+
+    def test_publisher_waits_for_all_assets_and_replays_exact_bytes(self):
+        entry = self.entry_source[self.entry_source.index("  release-publish:"):]
+        self.assertIn(
+            "needs: [test, publish-island-manifest, build-cli, build-msi, build-web]",
+            entry,
+        )
+        self.assertIn("uses: ./.github/workflows/release-publish.yml", entry)
+        job = self.source[self.source.index(PUBLISH_JOB):]
         require_pinned_artifact_download(job)
         self.assertIn("python3 scripts/verify_release_assets.py replay", job)
         self.assertIn("sha256sum --check SHA256SUMS", job)
@@ -185,15 +190,15 @@ class ReleasePublicationGateTest(unittest.TestCase):
         job = self.source[self.source.index(PUBLISH_JOB):]
         require_pinned_artifact_download(job)
         pin = re.search(
-            r"actions/download-artifact@[0-9a-f]{40} # v4",
+            r"actions/download-artifact@[0-9a-f]{40} # v5",
             job,
         )
         self.assertIsNotNone(pin)
         for broken in (
-            "actions/download-artifact@v4",
-            "actions/download-artifact@1234567 # v4",
-            "actions/download-artifact@1234567890123456789012345678901234567890 # v3",
-            "actions/upload-artifact@1234567890123456789012345678901234567890 # v4",
+            "actions/download-artifact@v5",
+            "actions/download-artifact@1234567 # v5",
+            "actions/download-artifact@1234567890123456789012345678901234567890 # v4",
+            "actions/upload-artifact@1234567890123456789012345678901234567890 # v5",
         ):
             with self.subTest(broken=broken), self.assertRaisesRegex(
                 AssertionError, "full immutable SHA"
