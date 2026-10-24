@@ -89,6 +89,16 @@ fn try_eval(src: &str, session: &mut Session) -> Result<String, String> {
         .map_err(|e| e.to_string().lines().next().unwrap_or("").to_owned())
 }
 
+// Проби спільного середовища можуть створити зв'язування, яких немає
+// на початку реального вимірювання. Перевіряємо ОБИДВІ форми поза таймером.
+fn verify_clean_pair(src_a: &str, src_b: &str) -> Result<(String, String), String> {
+    let mut en = fresh();
+    let a = try_eval(src_a, &mut en).map_err(|error| format!("clean EN: {error}"))?;
+    let mut sens = fresh();
+    let b = try_eval(src_b, &mut sens).map_err(|error| format!("clean SENS: {error}"))?;
+    Ok((a, b))
+}
+
 fn bench(
     src_a: &str,
     src_b: &str,
@@ -183,26 +193,40 @@ fn main() {
         // запам'ятати першу помилку SENS для набору, що працює англійською.
         let mut en_ok_any = false;
         let mut first_sens_err: Option<(&str, String)> = None;
+        let mut first_dirty_probe: Option<(&str, String)> = None;
         let mut found: Option<(&str, String, String)> = None;
         for a in CANDIDATES {
-            let Ok(ev) = try_eval(&format!("({en} {a})"), &mut sa) else {
+            let en_src = format!("({en} {a})");
+            let sens_src = format!("({code} {a})");
+            if try_eval(&en_src, &mut sa).is_err() {
                 continue;
-            };
+            }
             en_ok_any = true;
-            match try_eval(&format!("({code} {a})"), &mut sb) {
-                Ok(sv) => {
-                    found = Some((a, ev, sv));
-                    break;
-                }
-                Err(e) => {
+            match try_eval(&sens_src, &mut sb) {
+                Ok(_) => match verify_clean_pair(&en_src, &sens_src) {
+                    Ok((ev, sv)) => {
+                        found = Some((a, ev, sv));
+                        break;
+                    }
+                    Err(error) => {
+                        // Dirty probe succeeded; fresh execution did not.
+                        // Never turn this into a benchmark sample or a false PASS.
+                        if first_dirty_probe.is_none() {
+                            first_dirty_probe = Some((a, error));
+                        }
+                    }
+                },
+                Err(error) => {
                     if first_sens_err.is_none() {
-                        first_sens_err = Some((a, e));
+                        first_sens_err = Some((a, error));
                     }
                 }
             }
         }
         let Some((a, en_value, sens_value)) = found else {
-            if !en_ok_any {
+            if let Some((args, error)) = first_dirty_probe {
+                row("probe-state-dependent", args, &error.replace('\t', " "));
+            } else if !en_ok_any {
                 row(
                     "no-working-args",
                     "",
@@ -248,7 +272,21 @@ fn main() {
 
 #[cfg(test)]
 mod tests {
-    use super::bench;
+    use super::{bench, verify_clean_pair};
+
+    #[test]
+    fn чиста_перевірка_перед_таймером_використовує_дві_сесії() {
+        let (en, sens) = verify_clean_pair("(quote a)", "(quote a)")
+            .expect("identical pure calls must run in fresh sessions");
+        assert_eq!(en, sens);
+    }
+
+    #[test]
+    fn чиста_перевірка_не_пропускає_помилковий_виклик_у_таймер() {
+        let error = verify_clean_pair("(car (quote ()))", "(quote a)")
+            .expect_err("invalid English call must not be benchmarked");
+        assert!(error.starts_with("clean EN: "), "unexpected error: {error}");
+    }
 
     #[test]
     fn окремі_сесії_бенчмарка_вимірюють_обидві_чисті_форми() {
