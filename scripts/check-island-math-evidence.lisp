@@ -1,169 +1,163 @@
-; #990 — перевірка fail-closed для свідчень механізмів.
-; Свідчення прив'язуються до чинних повних «укр»-назв Д3–Д5
-; та маршрутів виконавців, допущених паспортом механізмів #1046.
-; Ця перевірка не визначає назв операцій, значення, закону, домену чи
-; семантичної рівнозначності.
+; #990 — fail-closed validation for mechanism evidence.
+; Evidence may only attach to an existing Canon/function-table SID and to an
+; executor route already admitted by #1046 mechanism metadata. This checker does
+; not define operation names, meaning, law, domain, or semantic equivalence.
 
-; Читання канонічної колонки «укр», а не історичної байтової адреси.
-(визначити рядки-д3
-  (решта (перше (читати-всі (читати-файл "lib/domains/d3.lisp")))))
-(визначити рядки-д4
-  (решта (перше (читати-всі (читати-файл "lib/domains/d4.lisp")))))
-(визначити рядки-д5
-  (решта (перше (читати-всі (читати-файл "lib/domains/d5.lisp")))))
-(визначити рядки-реєстру
-  (приєднати рядки-д3 (приєднати рядки-д4 рядки-д5)))
+(визначити registry
+  (перше (читати-всі (читати-файл "lib/surface/semantic-registry.lisp"))))
 
-; Паспорт — (визначити назва (як-є ДАНІ)), дані читаємо без eval.
-(визначити механізми
-  (друге (третє
-    (перше (читати-всі (читати-файл "lib/function-table-mechanisms.lisp"))))))
+(визначити mechanisms
+  (перше (читати-всі (читати-файл "lib/function-table-mechanisms.lisp"))))
 
-(визначити докази
+(визначити evidence
   (перше (читати-всі (читати-файл "lib/island-math-evidence.lisp"))))
 
-(визначити знайти-розділ
-  (функція (назва розділи)
+(визначити registry-rows registry)
+
+(визначити evidence-sid-bits
+  (функція (sid)
     (за-умовою
-      ((тотожне? розділи (як-є ())) (як-є ()))
-      ((хибне? (атом? розділи)) (за-умовою
-         ((тотожне? (перше (перше розділи)) назва) (перше розділи))
-         ((хибне? (тотожне? (перше (перше розділи)) назва)) (знайти-розділ назва (решта розділи))))))))
+      ((рядок? sid) sid)
+      (1 (значення-у-текст sid)))))
 
-(визначити рядки-механізмів
-  (решта (знайти-розділ (як-є rows) механізми)))
-
-(визначити рядки-доказів
-  (решта (знайти-розділ (як-є rows) докази)))
-
-(визначити реєстр-має-ід?
-  (функція (ід рядки)
+(визначити find-section
+  (функція (name sections)
     (за-умовою
-      ((тотожне? рядки (як-є ())) (як-є no))
-      ((хибне? (атом? рядки)) (за-умовою
-         ((тотожне? ід (друге (третє (перше рядки)))) (як-є yes))
-         ((хибне? (тотожне? ід (друге (третє (перше рядки))))) (реєстр-має-ід? ід (решта рядки))))))))
+      ((тотожне? sections (як-є ())) (як-є ()))
+      ((тотожне? (атом? sections) 0) (за-умовою
+         ((тотожне? (перше (перше sections)) name) (перше sections))
+         ((тотожне? (тотожне? (перше (перше sections)) name) 0) (find-section name (решта sections))))))))
 
-(визначити механізм-має-маршрут?
-  (функція (ід виконавець рядки)
+(визначити mechanism-rows
+  (решта (find-section (як-є rows) mechanisms)))
+
+(визначити evidence-rows
+  (решта (find-section (як-є rows) evidence)))
+
+(визначити registry-has-sid?
+  (функція (sid rows)
     (за-умовою
-      ((тотожне? рядки (як-є ())) (як-є no))
-      ((хибне? (атом? рядки)) (нехай ((рядок (перше рядки)))
+      ((тотожне? rows (як-є ())) (як-є no))
+      ((тотожне? (атом? rows) 0) (за-умовою
+         ((однакові? sid (перше (перше rows))) (як-є yes))
+         ((тотожне? (однакові? sid (перше (перше rows))) 0) (registry-has-sid? sid (решта rows))))))))
+
+(визначити mechanism-has-route?
+  (функція (sid executor rows)
+    (за-умовою
+      ((тотожне? rows (як-є ())) (як-є no))
+      ((тотожне? (атом? rows) 0) (нехай ((row (перше rows)))
          (за-умовою
-           ((тотожне? ід (перше рядок)) (за-умовою
-              ((тотожне? виконавець (друге рядок)) (як-є yes))
-              ((хибне? (тотожне? виконавець (друге рядок))) (механізм-має-маршрут? ід виконавець (решта рядки)))))
-           ((хибне? (тотожне? ід (перше рядок))) (механізм-має-маршрут? ід виконавець (решта рядки)))))))))
+           ((однакові? (evidence-sid-bits sid) (evidence-sid-bits (перше row))) (за-умовою
+              ((тотожне? executor (друге row)) (як-є yes))
+              ((тотожне? (тотожне? executor (друге row)) 0) (mechanism-has-route? sid executor (решта rows)))))
+           ((тотожне? (однакові? (evidence-sid-bits sid) (evidence-sid-bits (перше row))) 0) (mechanism-has-route? sid executor (решта rows)))))))))
 
-(визначити доказ-має-маршрут?
-  (функція (ід виконавець рядки)
+(визначити evidence-has-route?
+  (функція (sid executor rows)
     (за-умовою
-      ((тотожне? рядки (як-є ())) (як-є no))
-      ((хибне? (атом? рядки)) (нехай ((рядок (перше рядки)))
+      ((тотожне? rows (як-є ())) (як-є no))
+      ((тотожне? (атом? rows) 0) (нехай ((row (перше rows)))
          (за-умовою
-           ((однакові? ід (перше рядок)) (за-умовою
-              ((тотожне? виконавець (друге рядок)) (як-є yes))
-              ((хибне? (тотожне? виконавець (друге рядок))) (доказ-має-маршрут? ід виконавець (решта рядки)))))
-           ((хибне? (однакові? ід (перше рядок))) (доказ-має-маршрут? ід виконавець (решта рядки)))))))))
+           ((однакові? sid (перше row)) (за-умовою
+              ((тотожне? executor (друге row)) (як-є yes))
+              ((тотожне? (тотожне? executor (друге row)) 0) (evidence-has-route? sid executor (решта rows)))))
+           ((тотожне? (однакові? sid (перше row)) 0) (evidence-has-route? sid executor (решта rows)))))))))
 
-(визначити допущений-виконавець?
-  (функція (виконавець)
+(визначити admitted-executor?
+  (функція (executor)
     (за-умовою
-      ((тотожне? виконавець (як-є common-lisp)) (як-є yes))
-      ((тотожне? виконавець (як-є prolog)) (як-є yes))
-      ((тотожне? виконавець (як-є clips)) (як-є yes))
-      ((тотожне? виконавець (як-є datalog)) (як-є yes))
-      ((атом? (як-є ())) (як-є no)))))
+      ((тотожне? executor (як-є common-lisp)) (як-є yes))
+      ((тотожне? executor (як-є prolog)) (як-є yes))
+      ((тотожне? executor (як-є clips)) (як-є yes))
+      ((тотожне? executor (як-є datalog)) (як-є yes))
+      (1 (як-є no)))))
 
-(визначити допущений-статус?
-  (функція (статус)
+(визначити admitted-status?
+  (функція (status)
     (за-умовою
-      ((тотожне? статус (як-є execution-witness)) (як-є yes))
-      ((атом? (як-є ())) (як-є no)))))
+      ((тотожне? status (як-є execution-witness)) (як-є yes))
+      (1 (як-є no)))))
 
-(визначити заборонений-семантичний-символ?
-  (функція (значення)
+(визначити forbidden-semantic-symbol?
+  (функція (value)
     (за-умовою
-      ((тотожне? значення (як-є ())) (як-є no))
-      ((хибне? (атом? значення)) (як-є no))
-      ((атом? значення) (за-умовою
-         ((тотожне? значення (як-є operation)) (як-є yes))
-         ((тотожне? значення (як-є meaning)) (як-є yes))
-         ((тотожне? значення (як-є law)) (як-є yes))
-         ((тотожне? значення (як-є domain)) (як-є yes))
-         ((тотожне? значення (як-є operand-domain)) (як-є yes))
-         ((тотожне? значення (як-є result-domain)) (як-є yes))
-         ((атом? (як-є ())) (як-є no)))))))
+      ((тотожне? value (як-є ())) (як-є no))
+      ((тотожне? (атом? value) 0) (як-є no))
+      ((атом? value) (за-умовою
+         ((тотожне? value (як-є operation)) (як-є yes))
+         ((тотожне? value (як-є meaning)) (як-є yes))
+         ((тотожне? value (як-є law)) (як-є yes))
+         ((тотожне? value (як-є domain)) (як-є yes))
+         ((тотожне? value (як-є operand-domain)) (як-є yes))
+         ((тотожне? value (як-є result-domain)) (як-є yes))
+         (1 (як-є no)))))))
 
-(визначити містить-заборонений-семантичний-розділ?
-  (функція (розділи)
+(визначити contains-forbidden-semantic-section?
+  (функція (sections)
     (за-умовою
-      ((тотожне? розділи (як-є ())) (як-є no))
-      ((хибне? (атом? розділи)) (нехай ((розділ (перше розділи)))
+      ((тотожне? sections (як-є ())) (як-є no))
+      ((тотожне? (атом? sections) 0) (нехай ((section (перше sections)))
          (за-умовою
-           ((хибне? (атом? розділ)) (за-умовою
-              ((тотожне? (заборонений-семантичний-символ? (перше розділ)) (як-є yes)) (як-є yes))
-              ((атом? (як-є ())) (містить-заборонений-семантичний-розділ? (решта розділи)))))
-           ((атом? (як-є ())) (містить-заборонений-семантичний-розділ? (решта розділи)))))))))
+           ((тотожне? (атом? section) 0) (за-умовою
+              ((тотожне? (forbidden-semantic-symbol? (перше section)) (як-є yes)) (як-є yes))
+              (1 (contains-forbidden-semantic-section? (решта sections)))))
+           (1 (contains-forbidden-semantic-section? (решта sections)))))))))
 
-; Кількість полів породжує SENS через точну довжину списку, без числового літерала.
-(визначити кількість-полів-доказу
-  (довжина (як-є (ід виконавець статус походження))))
-
-(визначити перевірити-рядки
-  (функція (рядки)
+(визначити validate-rows
+  (функція (rows)
     (за-умовою
-      ((тотожне? рядки (як-є ())) (як-є (island-math-evidence-ok)))
-      ((хибне? (атом? рядки)) (нехай-послідовно ((рядок (перше рядки))
-              (ід (перше рядок))
-              (виконавець (друге рядок))
-              (статус (третє рядок))
-              (посилання-на-походження (четверте рядок)))
+      ((тотожне? rows (як-є ())) (як-є (island-math-evidence-ok)))
+      ((тотожне? (атом? rows) 0) (нехай-послідовно ((row (перше rows))
+              (sid (перше row))
+              (executor (друге row))
+              (status (третє row))
+              (provenance-ref (четверте row)))
          (за-умовою
-           ((хибне? (однакові? (довжина рядок) кількість-полів-доказу)) (список (як-є island-math-evidence-violation)
-                  (як-є invalid-evidence-row-shape) ід))
-           ((хибне? (рядок? посилання-на-походження)) (список (як-є island-math-evidence-violation)
-                  (як-є provenance-must-be-string) ід виконавець))
-           ((тотожне? (реєстр-має-ід? ід рядки-реєстру) (як-є no)) (список (як-є island-math-evidence-violation)
-                  (як-є function-not-in-ratified-domain-table) ід))
-           ((тотожне? (допущений-виконавець? виконавець) (як-є no)) (список (як-є island-math-evidence-violation)
-                  (як-є unsupported-executor) ід виконавець))
-           ((тотожне? (механізм-має-маршрут? ід виконавець рядки-механізмів) (як-є no)) (список (як-є island-math-evidence-violation)
-                  (як-є executor-route-not-admitted-by-canon-projection) ід виконавець))
-           ((тотожне? (допущений-статус? статус) (як-є no)) (список (як-є island-math-evidence-violation)
-                  (як-є unsupported-status) ід статус))
-           ((тотожне? (доказ-має-маршрут? ід виконавець (решта рядки)) (як-є yes)) (список (як-є island-math-evidence-violation)
-                  (як-є duplicate-executor-evidence) ід виконавець))
-           ((атом? (як-є ())) (перевірити-рядки (решта рядки)))))))))
+           ((тотожне? (однакові? (довжина row) 4) 0) (список (як-є island-math-evidence-violation)
+                  (як-є invalid-evidence-row-shape) sid))
+           ((тотожне? (рядок? provenance-ref) 0) (список (як-є island-math-evidence-violation)
+                  (як-є provenance-must-be-string) sid executor))
+           ((тотожне? (registry-has-sid? sid registry-rows) (як-є no)) (список (як-є island-math-evidence-violation)
+                  (як-є sid-not-in-canon-function-table) sid))
+           ((тотожне? (admitted-executor? executor) (як-є no)) (список (як-є island-math-evidence-violation)
+                  (як-є unsupported-executor) sid executor))
+           ((тотожне? (mechanism-has-route? sid executor mechanism-rows) (як-є no)) (список (як-є island-math-evidence-violation)
+                  (як-є executor-route-not-admitted-by-canon-projection) sid executor))
+           ((тотожне? (admitted-status? status) (як-є no)) (список (як-є island-math-evidence-violation)
+                  (як-є unsupported-status) sid status))
+           ((тотожне? (evidence-has-route? sid executor (решта rows)) (як-є yes)) (список (як-є island-math-evidence-violation)
+                  (як-є duplicate-executor-evidence) sid executor))
+           (1 (validate-rows (решта rows)))))))))
 
-(визначити той-самий-ід?
-  (функція (ід рядки)
+(визначити same-sid?
+  (функція (sid rows)
     (за-умовою
-      ((тотожне? рядки (як-є ())) (як-є yes))
-      ((хибне? (атом? рядки)) (за-умовою
-         ((тотожне? ід (друге (третє (перше рядки)))) (той-самий-ід? ід (решта рядки)))
-         ((хибне? (тотожне? ід (друге (третє (перше рядки))))) (як-є no)))))))
+      ((тотожне? rows (як-є ())) (як-є yes))
+      ((тотожне? (атом? rows) 0) (за-умовою
+         ((однакові? sid (перше (перше rows))) (same-sid? sid (решта rows)))
+         ((тотожне? (однакові? sid (перше (перше rows))) 0) (як-є no)))))))
 
-(визначити зріз-чотирьох-островів?
-  (функція (ід)
+(визначити four-island-slice?
+  (функція (sid)
     (за-умовою
-      ((тотожне? (доказ-має-маршрут? ід (як-є common-lisp) рядки-доказів) (як-є no)) (як-є no))
-      ((тотожне? (доказ-має-маршрут? ід (як-є prolog) рядки-доказів) (як-є no)) (як-є no))
-      ((тотожне? (доказ-має-маршрут? ід (як-є clips) рядки-доказів) (як-є no)) (як-є no))
-      ((тотожне? (доказ-має-маршрут? ід (як-є datalog) рядки-доказів) (як-є no)) (як-є no))
-      ((атом? (як-є ())) (як-є yes)))))
+      ((тотожне? (evidence-has-route? sid (як-є common-lisp) evidence-rows) (як-є no)) (як-є no))
+      ((тотожне? (evidence-has-route? sid (як-є prolog) evidence-rows) (як-є no)) (як-є no))
+      ((тотожне? (evidence-has-route? sid (як-є clips) evidence-rows) (як-є no)) (як-є no))
+      ((тотожне? (evidence-has-route? sid (як-є datalog) evidence-rows) (як-є no)) (як-є no))
+      (1 (як-є yes)))))
 
-(визначити вердикт-рядка (перевірити-рядки рядки-доказів))
+(визначити row-verdict (validate-rows evidence-rows))
 
-(визначити вердикт
+(визначити verdict
   (за-умовою
-    ((тотожне? (містить-заборонений-семантичний-розділ? докази) (як-є yes)) (як-є (island-math-evidence-violation semantic-field-forbidden)))
-    ((тотожне? рядки-доказів (як-є ())) (як-є (island-math-evidence-violation empty-evidence)))
-    ((однакові? вердикт-рядка (як-є (island-math-evidence-ok))) (нехай ((цільовий-ід (перше (перше рядки-доказів))))
+    ((тотожне? (contains-forbidden-semantic-section? evidence) (як-є yes)) (як-є (island-math-evidence-violation semantic-field-forbidden)))
+    ((тотожне? evidence-rows (як-є ())) (як-є (island-math-evidence-violation empty-evidence)))
+    ((однакові? row-verdict (як-є (island-math-evidence-ok))) (нехай ((target-sid (перше (перше evidence-rows))))
        (за-умовою
-         ((тотожне? (той-самий-ід? цільовий-ід рядки-доказів) (як-є no)) (як-є (island-math-evidence-violation first-slice-must-have-one-sid)))
-         ((тотожне? (зріз-чотирьох-островів? цільовий-ід) (як-є no)) (як-є (island-math-evidence-violation missing-required-four-island-slice)))
-         ((атом? (як-є ())) (як-є (island-math-evidence-ok))))))
-    ((атом? (як-є ())) вердикт-рядка)))
+         ((тотожне? (same-sid? target-sid evidence-rows) (як-є no)) (як-є (island-math-evidence-violation first-slice-must-have-one-sid)))
+         ((тотожне? (four-island-slice? target-sid) (як-є no)) (як-є (island-math-evidence-violation missing-required-four-island-slice)))
+         (1 (як-є (island-math-evidence-ok))))))
+    (1 row-verdict)))
 
-(друкувати вердикт)
+(друкувати verdict)
