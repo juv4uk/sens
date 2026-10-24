@@ -1151,15 +1151,24 @@ fn sexpr_protocol_rejects_extra_top_level_form_before_evaluation() {
     // Повторюємо повний обмін лише після помилки I/O: перший connect
     // на деяких CI-хостах може скинутися відразу після запуску сервера.
     let exchange = (0..20).find_map(|_| {
-        let attempt = (|| -> io::Result<(String, String)> {
+        let attempt = (|| -> io::Result<(String, String, String)> {
             let mut stream = TcpStream::connect(("127.0.0.1", port))?;
             stream.set_read_timeout(Some(Duration::from_secs(3)))?;
             stream.set_write_timeout(Some(Duration::from_secs(3)))?;
             let mut reader = io::BufReader::new(stream.try_clone()?);
 
-            writeln!(stream, "()) (def envelope_probe 42")?;
+            // Незалежний свідок: виконувана D3 QUOTE-сумісна форма,
+            // на відміну від історичного alias DEF, не залежить від DEFINE.
+            writeln!(stream, "()) (як-є сенс")?;
             let mut rejected = String::new();
             if reader.read_line(&mut rejected)? == 0 {
+                return Err(io::ErrorKind::UnexpectedEof.into());
+            }
+
+            // Окремо перевіряємо можливий побічний ефект D4 DEFINE.
+            writeln!(stream, "()) (визначити envelope_probe (як-є ()))")?;
+            let mut rejected_definition = String::new();
+            if reader.read_line(&mut rejected_definition)? == 0 {
                 return Err(io::ErrorKind::UnexpectedEof.into());
             }
 
@@ -1171,7 +1180,7 @@ fn sexpr_protocol_rejects_extra_top_level_form_before_evaluation() {
             if reader.read_line(&mut followup)? == 0 {
                 return Err(io::ErrorKind::UnexpectedEof.into());
             }
-            Ok((rejected, followup))
+            Ok((rejected, rejected_definition, followup))
         })();
         match attempt {
             Ok(responses) => Some(responses),
@@ -1185,11 +1194,15 @@ fn sexpr_protocol_rejects_extra_top_level_form_before_evaluation() {
     let _ = child.kill();
     let _ = child.wait();
 
-    let (rejected, followup) = exchange
+    let (rejected, rejected_definition, followup) = exchange
         .unwrap_or_else(|| panic!("не вдалося виконати TCP-обмін: {last_error:?}"));
     assert!(
         rejected.contains("(kind parse-error)"),
         "некоректний конверт виконав форму або повернув не ту помилку: {rejected}"
+    );
+    assert!(
+        rejected_definition.contains("(kind parse-error)"),
+        "DEFINE у невалідному конверті не було відхилено: {rejected_definition}"
     );
     assert!(
         followup.contains("(status error)") && followup.contains("unknown-symbol"),
