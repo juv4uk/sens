@@ -3,11 +3,25 @@
 # Усі закони, входи, логічні умови й мутанти написані в .lisp.
 set -euo pipefail
 cd "$(dirname "$0")/.."
-if (( $# > 1 )); then
-  echo 'usage: bash scripts/prove-lisp-language-laws.sh [native-sens-path]' >&2
+if (( $# > 2 )); then
+  echo 'usage: bash scripts/prove-lisp-language-laws.sh [native-sens-path] [report.json]' >&2
   exit 2
 fi
 cli="${1:-target/debug/sens}"
+report="${2:-}"
+# Звіт лише ДРУКУЄ результат виконання; він не змінює вердикт і не допускає
+# нічого сам. Порожній звіт = відсутність доказу, а не допуск.
+if [[ -n "$report" ]]; then
+  printf '{"schema":"sens-language-law-proof/v1","cases":[' > "$report"
+fi
+case_records=0
+record_case() {  # $1=test_id $2=kind $3=expected $4=actual
+  [[ -n "$report" ]] || return 0
+  if (( case_records > 0 )); then printf ',' >> "$report"; fi
+  printf '{"test_id":"%s","kind":"%s","expected":"%s","actual":"%s"}' \
+    "$1" "$2" "$3" "$4" >> "$report"
+  case_records=$((case_records + 1))
+}
 if [[ ! -x "$cli" ]]; then
   printf 'REGRESSION test_id=lisp-language-laws layer=executor expected=native-sens actual=missing path=%s\n' "$cli" >&2
   exit 1
@@ -21,7 +35,7 @@ fi
 tmp="$(mktemp -d)"
 trap 'rm -rf "$tmp"' EXIT
 printf 'NATIVE_SENS_EXECUTOR test_id=lisp-language-laws path=%s version=%s\n' "$cli" "$("$cli" --version)"
-for id in d1-not d2-cond-laziness d3-structure d4-lexical-scope d4-second-selector d4-closure-pair d4-nested-pair-selectors d3-dotted-pair d3-cons-pair-roundtrip d3-nested-cons-reconstruction d3-cond-demand d4-parameter-shadowing quote-inertness d5-recursive-list d6-compose-flip; do
+for id in d1-not d2-cond-laziness d3-structure d4-lexical-scope d4-second-selector d4-closure-pair d4-nested-pair-selectors d3-dotted-pair d3-cons-pair-roundtrip d3-nested-cons-reconstruction d3-cond-demand d4-parameter-shadowing quote-inertness d5-recursive-list; do
   case "$id" in
     d3-cond-demand|d4-parameter-shadowing|quote-inertness)
       law="tests/semantic/language-law-$id.lisp"
@@ -41,22 +55,13 @@ for id in d1-not d2-cond-laziness d3-structure d4-lexical-scope d4-second-select
     [[ "$kind" == mutant ]] && file="$mutant"
     expected=1
     [[ "$kind" == mutant ]] && expected=0
-    # D6 COMPOSE/FLIP/CURRY are real SENS Core4 closures, not direct opcodes.
-    # Pairing without Core4 incorrectly rejects ratified D6:001011 as noncallable.
-    # The full native law runner already uses this exact same profile.
-    mint_verb=--t5m-mint
-    paired_profile=()
-    if [[ "$id" == d6-compose-flip ]]; then
-      mint_verb=--t5m-mint-pair
-      paired_profile=(--core4-runtime)
-    fi
     printf '%s\n' "$expected" > "$tmp/expected"
     printf 'NATIVE_SENS_CASE test_id=%s kind=%s fixture=%s expected=D1:%s\n' "$id" "$kind" "$file" "$expected"
     sha256sum "$file"
     # Автором закону є .lisp; SENS створює точні слова, Zig — T5M-байти.
     physical="$tmp/$id-$kind.sens"
     view="$tmp/$id-$kind"
-    if ! timeout 45s "$cli" "$mint_verb" "$file" "$physical" > "$tmp/mint.out" 2> "$tmp/stderr"; then
+    if ! timeout 45s "$cli" --t5m-mint "$file" "$physical" > "$tmp/mint.out" 2> "$tmp/stderr"; then
       printf 'REGRESSION test_id=%s layer=codec input=%s expected=Zig-T5M actual=mint-failure\n' "$id" "$file" >&2
       cat "$tmp/stderr" >&2
       exit 1
@@ -70,11 +75,12 @@ for id in d1-not d2-cond-laziness d3-structure d4-lexical-scope d4-second-select
     fi
     # Парне виконання SENS порівнює фізичні слова з вихідною програмою.
     # Shell не обчислює семантику й не оголошує standalone фізичного входу.
-    if ! timeout 45s "$cli" --t5m-pair "$file" "$physical" "${paired_profile[@]}" > "$tmp/actual" 2> "$tmp/stderr"; then
+    if ! timeout 45s "$cli" --t5m-pair "$file" "$physical" > "$tmp/actual" 2> "$tmp/stderr"; then
       printf 'REGRESSION test_id=%s layer=physical-eval input=%s expected=D1:%s actual=execution-error\n' "$id" "$file" "$expected" >&2
       cat "$tmp/stderr" >&2
       exit 1
     fi
+    record_case "$id" "$kind" "D1:$(cat "$tmp/expected")" "D1:$(cat "$tmp/actual")"
     if ! cmp -s "$tmp/expected" "$tmp/actual"; then
       printf 'REGRESSION test_id=%s layer=eval input=%s expected=D1:%s actual=%q\n' "$id" "$file" "$expected" "$(cat "$tmp/actual")" >&2
       exit 1
@@ -82,4 +88,7 @@ for id in d1-not d2-cond-laziness d3-structure d4-lexical-scope d4-second-select
     printf 'NATIVE_SENS_PASS test_id=%s kind=%s expected=D1:%s executor=SENS carrier=Zig/T5M standalone=NOT_CLAIMED\n' "$id" "$kind" "$expected"
   done
 done
-printf 'NATIVE_SENS_SUITE_PASS suite=lisp-language-laws laws=15 mutants=15 authority=SENS\n'
+if [[ -n "$report" ]]; then
+  printf '],"cases_recorded":%d,"authority":"SENS"}\n' "$case_records" >> "$report"
+fi
+printf 'NATIVE_SENS_SUITE_PASS suite=lisp-language-laws laws=14 mutants=14 authority=SENS\n'
