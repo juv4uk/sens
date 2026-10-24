@@ -698,6 +698,17 @@ run_case run_law d11-frequencies-key-order-positive "$d11_freq_key_positive" 1 c
 run_case run_law d11-frequencies-key-order-mutant "$d11_freq_key_mutant" 0 core4
 sha256sum lib/d11-clojure-group-by.lisp lib/d11-clojure-frequencies-unary.lisp \
   tests/semantic/d11-frequencies-key-order-law.lisp tests/semantic/d11-frequencies-key-order-mutant.lisp > "$evidence/d11-frequencies-key-order-inputs.sha256"
+# Д11 GROUP-BY: чотири незалежні фізичні негативні свідки D3 Type.
+# Кожен джерельний SENS-файл отримує ті ж DEFINE, що й позитивний закон.
+# Жодне D7 текстове ім'я не підміняє неправильний D1-хвіст списку.
+for variant in atom-input improper-tail remove-improper-tail select-improper-tail; do
+  fixture="tests/fixtures/d11-group-by-${variant}-must-error.lisp"
+  complete="$evidence/d11-group-by-${variant}-complete.lisp"
+  cat -- lib/d11-clojure-group-by.lisp "$fixture" > "$complete"
+  run_case run_error_rejection "d11-group-by-${variant}" "$complete" Type 'car expects a non-empty list' core4
+done
+sha256sum lib/d11-clojure-group-by.lisp \
+  tests/fixtures/d11-group-by-*-must-error.lisp > "$evidence/d11-group-by-type-inputs.sha256"
 # Д11 FREQUENCIES: окремий позитивний закон і мутант у SENS.
 # Нормативна проєкція: не числа D24, а правильний список унарних "о".
 # Всі DEFINE — канонічна Lisp-бібліотека, а фізичний шлях лише Zig/T5M.
