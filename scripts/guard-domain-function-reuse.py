@@ -94,7 +94,10 @@ def definitions(text: str) -> list[str]:
 
 
 
-MARKER = re.compile(r";\s*D11-пропозиція\s*:", re.IGNORECASE)
+MARKER = re.compile(
+    r"^[ \t]*;+[ \t]*D11-пропозиція[ \t]*:[ \t]*\S[^\r\n]*$",
+    re.IGNORECASE | re.MULTILINE,
+)
 
 # Клас А («дубль наявної поверхні драбини»): закон може НАВМИСНЕ визначити
 # однойменну функцію з ІНШИМ тілом (не дубль). Маркер діє ЛИШЕ з непорожньою
@@ -314,9 +317,9 @@ def definitions_with_bodies(text: str):
     masked = _mask_quotes(text)
     for m in DEF.finditer(masked):
         name = m.group(1)
-        before = text[max(0, m.start() - 200):m.start()]
-        marked = bool(MARKER.search(before))
-        intent = bool(MARKER_INTENT.search(_preceding_comment_block(text, m.start())))
+        comments = _preceding_comment_block(text, m.start())
+        marked = bool(MARKER.search(comments))
+        intent = bool(MARKER_INTENT.search(comments))
         end = _form_end(masked, m.start())
         # A malformed form has no executable body for purposes of this guard;
         # the caller must not treat unrelated later text as use of the ladder.
@@ -713,12 +716,28 @@ def main(argv: list[str] | None = None) -> int:
             and [row[3] for row in empty] == [False, False]
         )
         print(f"GUARD-DOMAIN-REUSE self-test: маркер іншого закону {'OK' if intent_ok else 'FAIL'}")
+        # Пропозиція D11 мусить мати причину і стосуватися одного DEFINE.
+        d11_marked = definitions_with_bodies(
+            "; D11-пропозиція: нова операція\n"
+            "(визначити перша (функція (х) х))\n"
+            "(визначити друга (функція (х) х))\n"
+        )
+        d11_empty = definitions_with_bodies(
+            "; D11-пропозиція:\n"
+            "(визначити перша (функція (х) х))\n"
+            "(визначити друга (функція (х) х))\n"
+        )
+        d11_ok = (
+            [row[2] for row in d11_marked] == [True, False]
+            and [row[2] for row in d11_empty] == [False, False]
+        )
+        print(f"GUARD-DOMAIN-REUSE self-test: маркер D11 {'OK' if d11_ok else 'FAIL'}")
         # Перевіряємо і ВЛАСНУ активацію: невиконуваний гачок = мертвий охоронець.
         hok, hmsg = hook_installed()
         print(f"GUARD-DOMAIN-REUSE self-test: гачок {'OK' if hok else 'НЕ УВІМКНЕНО (попередження)'} — {hmsg}")
         # Стан гачка — ПОПЕРЕДЖЕННЯ, не падіння: свіжий клон законно не має
         # ввімкненого гачка, доки не виконано scripts/install-hooks.sh.
-        return 0 if ok and intent_ok else 1
+        return 0 if ok and intent_ok and d11_ok else 1
 
     if args.lessons:
         # Знання живуть у САМОМУ охоронці: агент, який ним користується,
