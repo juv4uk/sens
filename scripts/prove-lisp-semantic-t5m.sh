@@ -814,7 +814,8 @@ d11_filter_bad_root="$evidence/d11-filter-map-improper-root-complete.lisp"
 d11_filter_bad_tail="$evidence/d11-filter-map-improper-tail-complete.lisp"
 cat -- lib/d11-srfi1-filter-map.lisp tests/semantic/d11-srfi1-filter-map-improper-root-negative.lisp > "$d11_filter_bad_root"
 cat -- lib/d11-srfi1-filter-map.lisp tests/semantic/d11-srfi1-filter-map-improper-tail-negative.lisp > "$d11_filter_bad_tail"
-d11_filter_map_type_error='domain identity is not callable under its ratified law: D1 '
+# Неправильні корінь та хвіст відхиляє точний нативний D3 CAR Type.
+d11_filter_map_type_error='car expects a non-empty list'
 run_case run_type_rejection d11-srfi1-filter-map-improper-root-type "$d11_filter_bad_root" "$d11_filter_map_type_error"
 run_case run_type_rejection d11-srfi1-filter-map-improper-tail-type "$d11_filter_bad_tail" "$d11_filter_map_type_error"
 sha256sum lib/d11-srfi1-filter-map.lisp tests/semantic/d11-srfi1-filter-map-improper-root-negative.lisp tests/semantic/d11-srfi1-filter-map-improper-tail-negative.lisp > "$evidence/d11-filter-map-improper-inputs.sha256"
