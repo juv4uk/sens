@@ -1601,17 +1601,25 @@ sha256sum lib/d11-clojure-partition-by.lisp \
   tests/semantic/d11-clojure-partition-singleton-key-mutant.lisp \
   tests/semantic/d11-clojure-partition-singleton-key-error-negative.lisp > "$evidence/d11-clojure-partition-singleton-key-inputs.sha256"
 
-# Д11: атом Д1 не є завершенням правильного списку. Потрібен SENS Type,
-# а не фальшивий PASS порожнього результату від ATOM? замість ПОРОЖНІЙ?.
-for kind in partition dedupe; do
-  invalid="$evidence/d11-clojure-${kind}-improper-d1-tail-complete.lisp"
-  cat -- lib/d11-srfi1-span-break.lisp lib/d11-clojure-partition-by.lisp \
-    "tests/semantic/d11-clojure-${kind}-improper-d1-tail-negative.lisp" > "$invalid"
-  # D1-атом не є NIL; спочатку оцінюється CDR у перевірці singleton,
-  # тому нормативний Type тут належить D3 CDR, а не D3 CAR.
-  run_case run_type_rejection "d11-clojure-${kind}-improper-d1-type-negative" \
-    "$invalid" 'cdr expects a non-empty list'
-done
+# Д11: атом D1:ні не є кінцем D3-списку. PARTITION використовує
+# канонічний SPAN-валідатор перед викликом ключа, тому це D3 CAR Type.
+d11_partition_bad_root="$evidence/d11-clojure-partition-improper-d1-tail-complete.lisp"
+cat -- lib/d11-srfi1-span-break.lisp lib/d11-clojure-partition-by.lisp tests/semantic/d11-clojure-partition-improper-d1-tail-negative.lisp > "$d11_partition_bad_root"
+run_case run_type_rejection d11-clojure-partition-improper-d1-type-negative "$d11_partition_bad_root" 'car expects a non-empty list'
+# DEDUPE має власний шлях, чинна точна D3 CDR Type-відмова незмінна.
+d11_dedupe_bad_root="$evidence/d11-clojure-dedupe-improper-d1-tail-complete.lisp"
+cat -- lib/d11-srfi1-span-break.lisp lib/d11-clojure-partition-by.lisp tests/semantic/d11-clojure-dedupe-improper-d1-tail-negative.lisp > "$d11_dedupe_bad_root"
+run_case run_type_rejection d11-clojure-dedupe-improper-d1-type-negative "$d11_dedupe_bad_root" 'cdr expects a non-empty list'
+# Суворий пріоритет D3-структури над першокласною функцією-ключем.
+d11_partition_bad_early="$evidence/d11-clojure-partition-early-bad-tail-complete.lisp"
+d11_partition_bad_late="$evidence/d11-clojure-partition-late-bad-tail-complete.lisp"
+cat -- lib/d11-srfi1-span-break.lisp lib/d11-clojure-partition-by.lisp tests/semantic/d11-clojure-partition-early-bad-tail-negative.lisp > "$d11_partition_bad_early"
+cat -- lib/d11-srfi1-span-break.lisp lib/d11-clojure-partition-by.lisp tests/semantic/d11-clojure-partition-late-bad-tail-negative.lisp > "$d11_partition_bad_late"
+run_case run_error_rejection d11-clojure-partition-early-bad-tail "$d11_partition_bad_early" Type 'car expects a non-empty list'
+run_case run_error_rejection d11-clojure-partition-late-bad-tail "$d11_partition_bad_late" Type 'car expects a non-empty list'
+sha256sum lib/d11-srfi1-span-break.lisp lib/d11-clojure-partition-by.lisp \
+  tests/semantic/d11-clojure-partition-early-bad-tail-negative.lisp \
+  tests/semantic/d11-clojure-partition-late-bad-tail-negative.lisp > "$evidence/d11-clojure-partition-spine-inputs.sha256"
 # Один quoted D7-гліф має бути точним W7-атомом; вкладений список лишається D2.
 # Багатогліфовий Text7 далі є послідовністю, а не таємно interned-атомом.
 d11_partition_d7_bundle="$evidence/d11-clojure-partition-by-d7-parity.lisp"
