@@ -8,7 +8,8 @@ laws="$input/law-timings.tsv"
 mkdir -p "$(dirname "$report")"
 if [[ ! -s "$phases" || ! -s "$laws" ]]; then
   printf '## Профіль етапів SENS/Zig\n\nNOT_MEASURED: даних немає.\n' > "$report"
-  exit 0
+  echo "::error::SENS_PHASE_EVIDENCE_MISSING layer=benchmark expected=law-and-stage-samples actual=missing-or-empty phases=$phases laws=$laws" >&2
+  exit 2
 fi
 if ! awk -F '\t' 'NR==1 {if (NF!=4||$1!="id"||$2!="stage"||$3!="exit"||$4!="elapsed_us") exit 2; next} NF!=4||$1==""||$2 !~ /^(direct|codec-mint|zig-open|zig-verify|sens-paired|sens-paired-core4-diagnostic|sens-standalone|sens-standalone-sens|sens-standalone-trit-clean|sens-standalone-trit-core4)$/||$3 !~ /^[0-9]+$/||$4 !~ /^[0-9]+$/ {exit 2} END { if (NR < 2) { print "SENS_PHASE_TSV_EMPTY" > "/dev/stderr"; exit 2 } }' "$phases"; then
  echo '::error::SENS_PHASE_TSV_MALFORMED' >&2; exit 2

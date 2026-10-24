@@ -29,4 +29,24 @@ printf 'bad\trow\n' >> "$tmp/ev/law-stage-timings.tsv"
 if bash "$tool" "$tmp/ev" "$tmp/invalid.md" > "$tmp/invalid.out" 2>&1; then
  echo 'REPORTER_TEST_FAILED: malformed evidence was accepted' >&2; exit 1
 fi
-echo 'REPORTER_TEST_PASS checks=18 evidence=synthetic reporting_only=true'
+# Реальний збій виробника свідчень не може стати зеленим профілем.
+# Заголовок є схемою, а не виміром; кожен файл перевіряється окремо.
+printf 'id\tstage\texit\telapsed_us\n' > "$tmp/ev/law-stage-timings.tsv"
+printf 'id\tstatus\twall_ms\n' > "$tmp/ev/law-timings.tsv"
+if bash "$tool" "$tmp/ev" "$tmp/empty-phases.md" > "$tmp/empty-phases.out" 2>&1; then
+ echo 'REPORTER_TEST_FAILED: header-only stages accepted' >&2; exit 1
+fi
+grep -Fq 'SENS_PHASE_TSV_EMPTY' "$tmp/empty-phases.out"
+printf 'alpha\tdirect\t0\t100\n' >> "$tmp/ev/law-stage-timings.tsv"
+if bash "$tool" "$tmp/ev" "$tmp/empty-laws.md" > "$tmp/empty-laws.out" 2>&1; then
+ echo 'REPORTER_TEST_FAILED: header-only laws accepted' >&2; exit 1
+fi
+grep -Fq 'SENS_LAW_TIMING_TSV_EMPTY' "$tmp/empty-laws.out"
+
+rm "$tmp/ev/law-timings.tsv"
+if bash "$tool" "$tmp/ev" "$tmp/missing.md" > "$tmp/missing.out" 2>&1; then
+ echo 'REPORTER_TEST_FAILED: missing law samples accepted as success' >&2; exit 1
+fi
+grep -Fq 'SENS_PHASE_EVIDENCE_MISSING' "$tmp/missing.out"
+grep -Fq 'NOT_MEASURED' "$tmp/missing.md"
+echo 'REPORTER_TEST_PASS checks=21 evidence=synthetic reporting_only=true'
