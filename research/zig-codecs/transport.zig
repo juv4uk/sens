@@ -91,9 +91,9 @@ fn createVerifiedStage(
         _ = close(fd);
         return Error.OutputWriteFailed;
     };
-    var open = true;
+    var file_stream_open = true;
     defer {
-        if (open) _ = fclose(file);
+        if (file_stream_open) _ = fclose(file);
     }
     if (body.len != 0 and fwrite(body.ptr, 1, body.len, file) != body.len)
         return Error.OutputWriteFailed;
@@ -102,7 +102,7 @@ fn createVerifiedStage(
     // An fsync failure must prevent this stage from becoming public.
     if (fsync(fileno(file)) != 0) return Error.OutputSyncFailed;
     const close_result = fclose(file);
-    open = false;
+    file_stream_open = false;
     if (close_result != 0) return Error.OutputWriteFailed;
 
     // Exact known size, including large presegmented trit fixtures.
