@@ -113,7 +113,7 @@ pub(crate) fn run_tcp_repl(port: u16, allowed: &[String]) {
 
         // TCP is an unauthenticated entry point, not the trusted local
         // Lisp-machine profile. Empty means deny all; a supplied list is exact.
-        let environment = Environment::root().with_process_allowlist(allowed.to_vec());
+        let environment = Environment::untrusted_tcp(allowed.to_vec());
         let mut session = Session { environment };
 
         // The TCP REPL uses the same canonical physical bootstrap as the

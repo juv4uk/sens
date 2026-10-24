@@ -144,6 +144,13 @@ fn dispatch_capability_from(
     span: Span,
 ) -> Option<Result<EvalStep, LanguageError>> {
     match lookup_capability(source, name) {
+        CapabilityLookup::Present(_) if !environment.is_host_capability_allowed(name) => {
+            Some(Err(LanguageError::new(
+                ErrorKind::MechanismUnavailable,
+                format!("host capability forbidden by session policy: {name}"),
+                span,
+            )))
+        }
         CapabilityLookup::Present(HostHandler::Raw(handler)) => {
             Some(handler(arguments, environment, span).map(EvalStep::Value))
         }
@@ -201,10 +208,17 @@ pub(crate) fn dispatch_sens_capability(
     span: Span,
 ) -> Option<Result<Value, LanguageError>> {
     match sens_registry().read() {
-        Ok(map) => map
-            .get(&sens)
-            .copied()
-            .map(|handler| handler(sens, arguments, environment, span)),
+        Ok(map) => map.get(&sens).copied().map(|handler| {
+            if !environment.are_exact_host_capabilities_allowed() {
+                Err(LanguageError::new(
+                    ErrorKind::MechanismUnavailable,
+                    format!("exact host capability forbidden by session policy: {sens}"),
+                    span,
+                ))
+            } else {
+                handler(sens, arguments, environment, span)
+            }
+        }),
         Err(_) => Some(Err(LanguageError::new(
             ErrorKind::MechanismUnavailable,
             format!("SENS capability registry unavailable while resolving: {sens}"),
@@ -317,10 +331,54 @@ mod honesty_tests {
             .expect("mechanism succeeds");
         assert_eq!(result.to_string(), "0011");
 
+        let denied = dispatch_sens_capability(
+            sens, &[], &Environment::untrusted_tcp(Vec::new()), Span::default(),
+        ).expect("registered exact host mechanism");
+        let error = match denied {
+            Err(error) => error,
+            Ok(_) => panic!("TCP must reject exact host mechanism"),
+        };
+        assert_eq!(error.kind, ErrorKind::MechanismUnavailable);
+
         unregister_sens_capability(sens);
         assert!(
             dispatch_sens_capability(sens, &[], &Environment::root(), Span::default(),).is_none()
         );
+    }
+
+    #[test]
+    fn tcp_denies_named_host_before_argument_eval_but_retains_explicit_process_grants() {
+        let lock = RwLock::new(BTreeMap::new());
+        lock.write().expect("new registry").insert(
+            "demo".to_owned(),
+            HostHandler::Evaluated { arity: 1, handler: evaluated_handler },
+        );
+        let program = crate::parse("(demo missing)").expect("parse source");
+        let crate::ExprKind::List(items) = &program[0].kind else {
+            panic!("expected list");
+        };
+        let span = program[0].span;
+        let blocked = dispatch_capability_from(
+            &lock, "demo", &items[1..], &Environment::untrusted_tcp(Vec::new()), span,
+        ).expect("registered name");
+        let error = match blocked {
+            Err(error) => error,
+            Ok(_) => panic!("host invocation must be denied"),
+        };
+        assert_eq!(error.kind, ErrorKind::MechanismUnavailable);
+        assert_eq!(error.span, span);
+        let guest = Environment::untrusted_tcp(vec!["git".to_owned()]);
+        assert!(guest.is_host_capability_allowed("process-run-raw"));
+        assert!(guest.is_host_capability_allowed("процес-запустити-сирий"));
+        for forbidden in ["read-file-bytes", "tcp-connect", "native-call-u64-raw",
+            "модельний-розподіл-вибору-сире"] {
+            assert!(!guest.is_host_capability_allowed(forbidden), "{forbidden}");
+        }
+        assert!(!guest.are_exact_host_capabilities_allowed());
+        assert!(Environment::root().are_exact_host_capabilities_allowed());
+        assert_eq!(guest.fs_read_roots(), Some(Vec::new()));
+        assert_eq!(guest.fs_write_roots(), Some(Vec::new()));
+        assert!(!guest.is_tcp_connect_allowed("127.0.0.1", 9999));
     }
 
     #[test]

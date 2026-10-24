@@ -575,7 +575,7 @@ fn handle_sexpr_connection(
     // The oracle protocol is an unauthenticated network boundary. Keep its
     // process policy explicit even though trusted native root sessions are
     // unrestricted by default.
-    let environment = Environment::root().with_process_allowlist(allowed.to_vec());
+    let environment = Environment::untrusted_tcp(allowed.to_vec());
     let mut session = Session { environment };
     // Keep the oracle bootstrap on the same exact-domain/FASL-aware loader path
     // as the CLI. Environment::root() is deliberately bare: evaluating the

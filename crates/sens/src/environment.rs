@@ -146,6 +146,8 @@ struct SessionState {
     numeric_bit_limit: Option<usize>,
     /// Exact program-name policy. `None` = unrestricted, `Some([])` = deny all.
     process_allowlist: Option<Vec<String>>,
+    /// None for trusted CLI; Some([]) denies every host mechanism.
+    host_capability_allowlist: Option<Vec<String>>,
     /// Filesystem roots are stored as caller-supplied paths. The host layer,
     /// not the language core, owns canonicalization/symlink enforcement.
     fs_read_roots: Option<Vec<PathBuf>>,
@@ -181,6 +183,7 @@ impl Default for SessionState {
             arena_handles_hwm: ARENA_HANDLES_HWM_FLOOR,
             numeric_bit_limit: None,
             process_allowlist: None,
+            host_capability_allowlist: None,
             fs_read_roots: None,
             fs_write_roots: None,
             tcp_connect_allowlist: None,
@@ -259,6 +262,41 @@ impl Environment {
     pub fn with_process_allowlist(self, programs: Vec<String>) -> Self {
         self.2.borrow_mut().process_allowlist = Some(programs);
         self
+    }
+
+    /// Недовірений TCP-сеанс: лише явно названі процеси можуть отримати
+    /// host-виклик; файли, сокети, модель і точні island-механізми заборонені.
+    pub fn untrusted_tcp(allowed_processes: Vec<String>) -> Self {
+        let allowed_host = if allowed_processes.is_empty() {
+            Vec::new()
+        } else {
+            vec!["process-run-raw".to_owned(), "процес-запустити-сирий".to_owned()]
+        };
+        Self::root()
+            .with_process_allowlist(allowed_processes)
+            .with_host_capability_allowlist(allowed_host)
+            .with_fs_read_roots(Vec::new())
+            .with_fs_write_roots(Vec::new())
+            .with_tcp_connect_allowlist(Vec::new())
+            .with_tcp_listen_allowlist(Vec::new())
+    }
+
+    /// Host-механізм — не значення та не семантика SENS.
+    pub fn with_host_capability_allowlist(self, names: Vec<String>) -> Self {
+        self.2.borrow_mut().host_capability_allowlist = Some(names);
+        self
+    }
+
+    pub(crate) fn is_host_capability_allowed(&self, name: &str) -> bool {
+        match &self.2.borrow().host_capability_allowlist {
+            None => true,
+            Some(names) => names.iter().any(|allowed| allowed == name),
+        }
+    }
+
+    /// У недовіреному сеансі host-механізми із точними identity не допускаються.
+    pub(crate) fn are_exact_host_capabilities_allowed(&self) -> bool {
+        self.2.borrow().host_capability_allowlist.is_none()
     }
 
     /// Restricts host filesystem reads (`read-file`, `read-file-bytes`,
