@@ -726,6 +726,25 @@ sha256sum lib/d11-srfi1-alist-protocol.lisp \
   tests/semantic/d11-family-association-mutant.lisp \
   tests/semantic/d11-family-association-late-record-negative.lisp \
   tests/semantic/d11-family-association-invalid-update-negative.lisp > "$evidence/d11-family-association-inputs.sha256"
+# Д11 ALIST: явна присутність ЗНАЧЕННЯ запису, а не лише запису.
+# Справжній SENS відрізняє знайдені D1:ні/D3:() від відсутнього ключа.
+d11_alist_value_positive="$evidence/d11-alist-value-presence-positive-complete.lisp"
+d11_alist_value_mutant="$evidence/d11-alist-value-presence-mutant-complete.lisp"
+d11_alist_value_late="$evidence/d11-alist-value-presence-late-invalid-complete.lisp"
+d11_alist_value_priority="$evidence/d11-alist-value-presence-priority-complete.lisp"
+cat -- lib/d11-srfi1-alist-protocol.lisp tests/semantic/d11-alist-value-presence-law.lisp > "$d11_alist_value_positive"
+cat -- lib/d11-srfi1-alist-protocol.lisp tests/semantic/d11-alist-value-presence-mutant.lisp > "$d11_alist_value_mutant"
+cat -- lib/d11-srfi1-alist-protocol.lisp tests/fixtures/d11-alist-value-presence-late-invalid-negative.lisp > "$d11_alist_value_late"
+cat -- lib/d11-srfi1-alist-protocol.lisp tests/fixtures/d11-alist-value-presence-priority-negative.lisp > "$d11_alist_value_priority"
+run_case run_law d11-alist-value-presence-positive "$d11_alist_value_positive" 1
+run_case run_law d11-alist-value-presence-mutant "$d11_alist_value_mutant" 0
+run_case run_type_rejection d11-alist-value-presence-late-invalid "$d11_alist_value_late" 'car expects a non-empty list'
+run_case run_type_rejection d11-alist-value-presence-priority "$d11_alist_value_priority" 'car expects a non-empty list'
+sha256sum lib/d11-srfi1-alist-protocol.lisp \
+  tests/semantic/d11-alist-value-presence-*.lisp \
+  tests/fixtures/d11-alist-value-presence-*.lisp \
+  > "$evidence/d11-alist-value-presence-inputs.sha256"
+
 # Д11: видалення всіх alist-записів зі строгою перевіркою D3 структури.
 # SENS сам визначає результат D1/Type; transport перевіряється реальною Zig/T5M парою.
 d11_assoc_delete_source=lib/list-foundation-compositions.lisp

@@ -541,6 +541,19 @@ run_native_t5m_program() {
         echo "::notice file=$file,title=SENS D3/D5 language::PASS native=SENS carrier=Zig/T5M result=D1:$local_expected"
         ;;
     esac
+    # ALIST-VALUE-PRESENCE: точна відповідь D1, закон не підміняється хостом.
+    if [[ "$file" == "tests/semantic/d11-alist-value-presence-law.lisp" ||
+          "$file" == "tests/semantic/d11-alist-value-presence-mutant.lisp" ]]; then
+      local d11_value_expected=1
+      [[ "$file" != *-mutant.lisp ]] || d11_value_expected=0
+      printf '%s\n' "$d11_value_expected" > "$dir/d11-alist-value.expected"
+      if ! cmp -s "$dir/native-paired.stdout" "$dir/d11-alist-value.expected"; then
+        echo "::error::D11_ALIST_VALUE_D1_MISMATCH source=$file expected=$d11_value_expected actual=$(cat "$dir/native-paired.stdout")" >&2
+        mark_file_failed
+        return
+      fi
+      echo "D11_ALIST_VALUE_PHYSICAL_PASS source=$file native=SENS result=D1:$d11_value_expected"
+    fi
     # Окремий мутант TAKE-UNTIL — хибний закон повертає саме D1:ні.
     # Shell перевіряє тільки фізичний результат SENS, не обчислює списки.
     if [[ "$file" == "tests/semantic/d11-srfi1-span-break-mutant.lisp" ]]; then
@@ -1504,6 +1517,10 @@ while IFS= read -r file || [[ -n "$file" ]]; do
           "$file" == "tests/semantic/d11-family-association-mutant.lisp" ||
           "$file" == "tests/semantic/d11-family-association-late-record-negative.lisp" ||
           "$file" == "tests/semantic/d11-family-association-invalid-update-negative.lisp" ]]; then
+    binding_sources=(--binding-source lib/d11-srfi1-alist-protocol.lisp)
+  elif [[ "$file" == "tests/semantic/d11-alist-value-presence-law.lisp" ||
+          "$file" == "tests/semantic/d11-alist-value-presence-mutant.lisp" ]]; then
+    # Мовний результат формує SENS, транспорт бере тільки точні байти T5M.
     binding_sources=(--binding-source lib/d11-srfi1-alist-protocol.lisp)
   elif [[ "$file" == "tests/semantic/d11-family-aggregation-law.lisp" ||
           "$file" == "tests/semantic/d11-family-aggregation-mutant.lisp" ]]; then
