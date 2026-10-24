@@ -2059,7 +2059,8 @@ sha256sum lib/core4.lisp lib/core4-parts/core4-d6b.lisp \
   tests/semantic/d6-all-invalid-root-law.lisp \
   tests/semantic/d8-quantifier-composition-law.lisp \
   tests/semantic/d8-notany-invalid-root-law.lisp \
-  tests/semantic/d8-notevery-invalid-root-law.lisp > "$evidence/d6-d8-quantifier-inputs.sha256"
+  tests/semantic/d8-notevery-invalid-root-law.lisp \
+  tests/semantic/d8-all-not-invalid-root-law.lisp > "$evidence/d6-d8-quantifier-inputs.sha256"
 
 # Класифікуємо кореневі причини без повторного запуску SENS.
 printf 'SENS_RED_CAUSE root=d7-value-call count=%d ids=%s\n' "${#red_d7_ids[@]}" "${red_d7_ids[*]}"
