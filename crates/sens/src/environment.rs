@@ -161,6 +161,9 @@ struct SessionState {
     /// Equal payloads in different D1-D9 domains remain distinct HashMap keys.
     /// Residency alone never inserts a mechanism slot.
     domain_code_slots: HashMap<DomainIdentity, Value>,
+    /// Результати завершених bootstrap-запусків за точним доменним ключем.
+    /// Це стан завантажувача, не реєстр значень чи допуску функцій SENS.
+    bootstrap_results: HashMap<DomainIdentity, Value>,
     /// Historical exact-eight compatibility slots. These are intentionally
     /// separate storage so a legacy byte can never collide with a canonical
     /// domain identity merely from its packed payload.
@@ -192,6 +195,7 @@ impl Default for SessionState {
             tcp_connect_allowlist: None,
             tcp_listen_allowlist: None,
             domain_code_slots: HashMap::new(),
+            bootstrap_results: HashMap::new(),
             legacy_code_slots: HashMap::new(),
             transcript: Transcript::default(),
         }
@@ -513,6 +517,15 @@ impl Environment {
     /// Чи це кадр верхнього рівня сесії (без lexical parent).
     pub(crate) fn is_root(&self) -> bool {
         self.0.borrow().parent.is_none()
+    }
+
+    /// Результат фактично завершеного bootstrap, спільний для кадрів сесії.
+    pub(crate) fn completed_bootstrap_result(&self, identity: DomainIdentity) -> Option<Value> {
+        self.2.borrow().bootstrap_results.get(&identity).cloned()
+    }
+
+    pub(crate) fn complete_bootstrap(&self, identity: DomainIdentity, value: Value) {
+        self.2.borrow_mut().bootstrap_results.insert(identity, value);
     }
 
     /// Canonical exact-domain language slot.

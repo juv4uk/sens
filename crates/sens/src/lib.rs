@@ -722,19 +722,9 @@ pub fn load_meta_evaluator_library_from_source(
 /// preserves the closed language core while giving embedders one canonical
 /// time-layer loader instead of ad-hoc `include_str!` calls.
 pub fn load_time_library(session: &mut Session) -> Result<EvalResult, LanguageError> {
-    let time_sentinel = domain_projection_catalog::exact_uk_domain_identity("дата-із-днів")
-        .filter(|identity| identity.width() == 10)
-        .ok_or_else(|| {
-            LanguageError::new(
-                ErrorKind::InvalidForm,
-                "time bootstrap sentinel is missing from the exact ratified D10 Ukrainian projection",
-                Span::default(),
-            )
-        })?;
     if session
         .environment
-        .domain_code_slot(time_sentinel)
-        .is_some()
+        .has_domain_code_slot(binary_bootstrap::TIME_DEFINITION)
     {
         return Ok(EvalResult {
             value: Value::Nil,
@@ -765,20 +755,17 @@ pub fn load_utf8_library(session: &mut Session) -> Result<EvalResult, LanguageEr
     // and must not be guessed from that narrower table (or from SID8/W8).
     // This identity locates an existing SENS-defined closure, not a host
     // implementation or blanket admission of a D10 resident.
-    let first = DomainIdentity::D10(
-        DomainD10::new(0b0010111011).expect("ратифікована Д10 координата UTF-8"),
-    );
-    if session.environment.domain_code_slot(first).is_some() {
-        let terminal = crate::encode_text7("успішно-декодовано?", crate::Text7Layout::Uk)
-            .expect("кінцеве ім'я UTF-8 визначене українською клавіатурою")
-            .to_canonical_wire_token();
-        let value = session.environment.get(&terminal).ok_or_else(|| {
-            LanguageError::new(
-                ErrorKind::InvalidForm,
-                "неповне завантаження UTF-8: Д10 функція вже існує, але кінцеве SENS-визначення відсутнє",
-                Span::default(),
-            )
-        })?;
+    if utf8_library_is_loaded(session) {
+        let value = session
+            .environment
+            .completed_bootstrap_result(binary_bootstrap::UTF8_DEFINITION)
+            .ok_or_else(|| {
+                LanguageError::new(
+                    ErrorKind::InvalidForm,
+                    "UTF8_BOOTSTRAP_INCOMPLETE: Д10 функція вже існує, але завершений запуск бібліотеки не зареєстрований",
+                    Span::default(),
+                )
+            })?;
         bind_missing_stable_surface_peers(&session.environment);
         return Ok(EvalResult {
             value,
@@ -786,6 +773,9 @@ pub fn load_utf8_library(session: &mut Session) -> Result<EvalResult, LanguageEr
         });
     }
     let result = binary_bootstrap::utf8_program()?.execute(session)?;
+    session.environment.complete_bootstrap(
+        binary_bootstrap::UTF8_DEFINITION, result.value.clone(),
+    );
     bind_missing_stable_surface_peers(&session.environment);
     Ok(result)
 }
@@ -795,27 +785,18 @@ pub fn load_utf8_library(session: &mut Session) -> Result<EvalResult, LanguageEr
 /// call route from this check. Reusing the already-loaded dependency prevents
 /// a second DEFINE from conflicting when process/TCP and FS are composed.
 fn utf8_library_is_loaded(session: &Session) -> bool {
-    let sentinel = (0..(1u16 << 10)).find_map(|bits| {
-        let exact_bits = format!("{bits:010b}");
-        match domain_projection_catalog::lookup(
-            domain_projection_catalog::ProjectionSource::DomainTable,
-            10,
-            &exact_bits,
-            "укр",
-        ) {
-            Some(domain_projection_catalog::ProjectionValue::Symbol(name))
-                if name == "кодова-одиниця-кодування-юнікод-8-у-допустимому-діапазоні?" =>
-            {
-                Some(DomainIdentity::D10(DomainD10::new(bits)?))
-            }
-            _ => None,
-        }
-    });
-    sentinel.is_some_and(|identity| session.environment.domain_code_slot(identity).is_some())
+    session
+        .environment
+        .has_domain_code_slot(binary_bootstrap::UTF8_DEFINITION)
 }
 
 fn load_utf8_dependency(session: &mut Session) -> Result<(), LanguageError> {
-    if !utf8_library_is_loaded(session) {
+    if !utf8_library_is_loaded(session)
+        || session
+            .environment
+            .completed_bootstrap_result(binary_bootstrap::UTF8_DEFINITION)
+            .is_none()
+    {
         load_utf8_library(session)?;
     }
     Ok(())
@@ -1310,6 +1291,20 @@ mod core4_bootstrap_cache_tests {
         };
         load_time_library(&mut child)
             .expect("inherited time mechanisms are not redefined in a child frame");
+    }
+
+    #[test]
+    fn utf8_partial_bootstrap_is_not_reported_as_complete() {
+        let mut session = Session::default();
+        load_core_library(&mut session).expect("Core4 bootstrap");
+        assert!(session.environment.bind_domain_code_slot_once(
+            binary_bootstrap::UTF8_DEFINITION,
+            Value::Nil,
+        ));
+        let error = load_utf8_dependency(&mut session)
+            .expect_err("наявність одного слота не доводить завершення бібліотеки");
+        assert_eq!(error.kind, ErrorKind::InvalidForm);
+        assert!(error.message.starts_with("UTF8_BOOTSTRAP_INCOMPLETE:"));
     }
 
     #[test]

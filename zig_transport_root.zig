@@ -17,6 +17,13 @@ test "Rust build domain projections arrive through Zig" {
     try std.testing.expect(std.mem.indexOf(u8, source, "fs::read") == null);
 }
 
+test "Rust bootstrap slot checks do not resolve projections" {
+    const source = @embedFile("crates/sens/src/lib.rs");
+    const start = std.mem.indexOf(u8, source, "pub fn load_time_library(") orelse return error.MissingBootstrap;
+    const end = std.mem.indexOfPos(u8, source, start, "fn load_utf8_dependency(") orelse return error.MissingBootstrap;
+    try std.testing.expect(std.mem.indexOf(u8, source[start..end], "domain_projection_catalog") == null);
+}
+
 // Keep all existing public C exports reachable without re-implementing them.
 comptime {
     _ = abi.sens_zig_codec_abi_version;

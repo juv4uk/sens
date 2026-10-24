@@ -1,7 +1,18 @@
 //! Bootstrap-бібліотеки надходять у бекенд тільки точними доменними словами.
 //! Фізичний Т5М відновлює pinned Zig під час збірки; Lisp-джерела тут немає.
 
-use crate::{ErrorKind, ExactDomainWord, LanguageError, PhysicalT5Program, Span};
+use crate::{
+    DomainD10, DomainIdentity, ErrorKind, ExactDomainWord, LanguageError, PhysicalT5Program, Span,
+};
+
+// Точні коди вже визначених функцій lib/domains/d10.lisp. Це лише ключі
+// перевірки встановлення бібліотек: вони не визначають значення чи викличність.
+pub(super) const TIME_DEFINITION: DomainIdentity = DomainIdentity::D10(
+    DomainD10::new(0b1010111110).expect("точна Д10 координата часової бібліотеки"),
+);
+pub(super) const UTF8_DEFINITION: DomainIdentity = DomainIdentity::D10(
+    DomainD10::new(0b0010111011).expect("точна Д10 координата бібліотеки кодування"),
+);
 
 include!(concat!(env!("OUT_DIR"), "/binary_bootstrap_words.rs"));
 

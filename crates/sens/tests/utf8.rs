@@ -14,18 +14,42 @@ fn utf8_session() -> Session {
 
 #[test]
 fn utf8_domain_functions_survive_repeated_loader_and_fs_without_redefinition() {
-    let mut session = utf8_session();
-    let law = "(кодова-одиниця-кодування-юнікод-8-у-допустимому-діапазоні? 128 128 191)";
-    let original = eval_in_utf8_context(law, &mut session);
+    let mut session = Session::default();
+    load_core_library(&mut session).expect("core library");
+    let installed = load_utf8_library(&mut session).expect("перший фізичний bootstrap UTF-8");
+    // Перевірка механізму викликає точний код D10, без людського reader
+    // або текстового псевдоніма. Числові аргументи мають власні D24 слова.
+    let words = [
+        (2, 0b10u32), (10, 0b0010111011),
+        (24, 128), (24, 128), (24, 191), (2, 0b01),
+    ].into_iter().map(|(width, payload)| {
+        let bits = (0..width).rev()
+            .map(|shift| ((payload >> shift) & 1) as u8).collect::<Vec<_>>();
+        sens::ExactDomainWord::from_physical_width_bits(width, &bits)
+            .expect("точні Д2/Д10/Д24 слова виклику")
+    }).collect();
+    let program = sens::PhysicalT5Program::from_exact_domain_words_owned(words)
+        .expect("двійковий виклик чинної функції Д10");
+    let original = program.execute(&mut session)
+        .expect("перший двійковий виклик").value;
     assert_eq!(original.as_predicate_bit(), Some(true), "test_id=UTF8-D10-FIRST-LOAD");
 
-    load_utf8_library(&mut session)
+    let repeated = load_utf8_library(&mut session)
         .expect("повторний запит не може перевизначати мовний D10 код");
+    assert_eq!(repeated.value, installed.value,
+        "збережений результат саме завершеного bootstrap");
     load_fs_library(&mut session)
         .expect("FS має використовувати ту саму UTF-8 бібліотеку без другого DEFINE");
 
-    let after = eval_in_utf8_context(law, &mut session);
+    let after = program.execute(&mut session)
+        .expect("повторний двійковий виклик").value;
     assert_eq!(after, original, "test_id=UTF8-D10-SHARED-SENS-CALL");
+    let mut child = Session {
+        environment: session.environment.child(),
+    };
+    let inherited = load_utf8_library(&mut child)
+        .expect("дочірній кадр використовує завершений bootstrap");
+    assert_eq!(inherited.value, installed.value);
 }
 
 fn eval(source: &str) -> String {
@@ -338,55 +362,5 @@ fn utf8_library_loads_from_zig_t5m_words_without_process_host_capabilities() {
     }
 }
 
-// Boundary results now belong to tests/semantic/utf8-boundary-laws.lisp.
-// This file keeps UTF-8 reader/loader/codec mechanics and SENS self-verdict transport.
-
-const UTF8_D1_LAW: &str = include_str!("../../../tests/semantic/utf8-direct-d1-law.lisp");
-
-/// The executable SENS program compares actual/expected D1 itself.
-/// Rust only transports the fixture, executes it, and observes the final bit.
-/// No Python or Rust function duplicates the UTF-8 predicate oracle.
-#[test]
-fn utf8_direct_d1_self_verdict_and_one_bit_mutant() {
-    let program = sens::parse_mixed_exact_domain_utf8_source("lib/utf8.lisp", UTF8_D1_LAW)
-        .expect("the current pinned UTF-8 reader must parse binary SENS law");
-    assert_eq!(
-        program.len(),
-        2,
-        "two structural SENS-owned UTF-8 verdicts; numeric D24 boundaries remain transitional"
-    );
-
-    let mut session = utf8_session();
-    for (index, form) in program.iter().enumerate() {
-        let result = sens::eval_parsed_expressions(std::slice::from_ref(form), &mut session)
-            .unwrap_or_else(|error| {
-                panic!("test_id=utf8-d1-direct layer=eval fixture=tests/semantic/utf8-direct-d1-law.lisp form={index} error={error}")
-            });
-        assert_eq!(
-            result.value.as_predicate_bit(),
-            Some(true),
-            "test_id=utf8-d1-direct form={index} SENS self-verdict was not D1:YES: {}",
-            result.value
-        );
-    }
-
-    // Чинне укр-джерело не містить історичних #d1: літералів.
-    // Міняємо один семантичний D1:YES/NO у справжній програмі SENS,
-    // не порівнюємо довжину UTF-8 проєкцій із різними літерами.
-    let original = "(як-є не-список)) ні) так)";
-    let flipped = "(як-є не-список)) так) так)";
-    assert_eq!(
-        UTF8_D1_LAW.matches(original).count(),
-        1,
-        "має існувати рівно один чинний D1-свідок для мутації"
-    );
-    let mutant_source = UTF8_D1_LAW.replacen(original, flipped, 1);
-    let mutant = sens::parse_mixed_exact_domain_utf8_source("lib/utf8.lisp", &mutant_source)
-        .expect("one-bit mutant remains valid SENS source");
-    let mut mutant_session = utf8_session();
-    assert!(
-        sens::eval_parsed_expressions(std::slice::from_ref(&mutant[0]), &mut mutant_session)
-            .is_err(),
-        "SENS itself must fail closed on the one-bit false verdict"
-    );
-}
+// Фізичний SENS D1-свідок і його однобітний мутант виконуються через Zig
+// у crates/sens-cli/tests/utf8_physical_d1.rs.

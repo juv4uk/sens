@@ -399,7 +399,7 @@ jobs:
             echo 'needs_zig=true' >> "$GITHUB_OUTPUT"
           fi
           # Чинна українська UTF-8 програма запускає справжній SENS D1, не Python/JSON oracle.
-          if grep -Eq '^(lib/utf8\.lisp|crates/sens/src/lib\.rs|crates/sens/tests/utf8\.rs|\.github/workflows/ci\.yml)$' "$changed_all"; then
+          if grep -Eq '^(lib/utf8\.lisp|crates/sens/src/(lib|binary_bootstrap|environment)\.rs|crates/sens/tests/utf8\.rs|\.github/workflows/ci\.yml)$' "$changed_all"; then
             echo 'utf8_runtime_tests=true' >> "$GITHUB_OUTPUT"
             echo 'needs_zig=true' >> "$GITHUB_OUTPUT"
           fi
@@ -832,7 +832,6 @@ jobs:
           set -euo pipefail
           # UTF-8 predicate and D24+ quotient laws now run as Lisp/SENS witnesses in the standard native T5M proof.
           # This step retains only runtime loader/reuse and the independent D1 self-verdict transport test.
-          cargo test --locked -p sens --test utf8 utf8_direct_d1_self_verdict_and_one_bit_mutant -- --exact --nocapture
           cargo test --locked -p sens --test utf8 utf8_domain_functions_survive_repeated_loader_and_fs_without_redefinition -- --exact --nocapture
 
       - name: "Непарний Lisp-бенчмарк — Zig/T5M → справжній SENS"

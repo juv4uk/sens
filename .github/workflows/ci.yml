@@ -190,6 +190,10 @@ jobs:
                   pass  # malformed Lisp must reach the real SENS reader and fail closed
               # Ці law/mutant є залежними фікстурами, не автономними програмами.
               if name in {
+                  # Ці свідки потребують фізичного UTF-8 bootstrap; їх виконує
+                  # обов'язковий utf8_physical_d1 нижче разом із точністю пар.
+                  "tests/semantic/utf8-direct-d1-law.lisp",
+                  "tests/semantic/utf8-direct-d1-mutant.lisp",
                   "tests/semantic/meta-eval-graph-d1-law.lisp",
                   "tests/semantic/meta-eval-graph-d1-mutant.lisp",
                   "tests/semantic/meta-eval-predicates-d1-law.lisp",
@@ -374,6 +378,8 @@ jobs:
         run: |
           set -euo pipefail
           cargo test --locked -p sens --test build_projection_transfer -- --nocapture
+          cargo test --locked -p sens-cli --test utf8_physical_d1 -- --nocapture
+          cargo test --locked -p sens --lib utf8_partial_bootstrap_is_not_reported_as_complete -- --nocapture
           cargo test --locked -p sens --lib io::tests:: -- --nocapture
           # Негативний TCP-свідок: звичайний emit не створює fenced task-/claim- факти.
           cargo test --locked -p swarm-node --test integration generic_emit_cannot_forge_fenced_task_facts -- --nocapture
