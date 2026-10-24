@@ -686,11 +686,13 @@ def check_zig_t5m_width_firewall(source: str) -> None:
 
 def check_linter_zig_only(
     main_source: str, rust_corridor: str, zig_root: str, build: str,
+    asset_module_source: str | None = None,
 ) -> None:
-    """Release regression: historical Lisp asset bytes ONLY cross Zig C ABI.
+    """The physical linter T5M asset crosses the Rust boundary only through Zig.
 
-    This is a byte/provenance boundary, NOT SENS parsing, execution or domain
-    admission. Inspect active code rather than comments or test-only witnesses.
+    Rust does not load or parse the Lisp projection. Zig transports the
+    checked-in physical .sens bytes; SENS owns interpreting and executing it.
+    Inspect active code rather than comments or test-only witnesses.
     """
     def live(source: str) -> str:
         return re.sub(r"/\*.*?\*/|//[^\n]*", "", _production_source(source), flags=re.S)
@@ -701,48 +703,55 @@ def check_linter_zig_only(
     asset_module = ROOT / "crates/sens-cli/src/zig_transport_assets.rs"
     if not asset_module.is_file() or asset_module.is_symlink():
         raise CorridorBlocked("LINTER_ZIG_ONLY missing reviewed asset ABI module")
-    asset_source = live(asset_module.read_text(encoding="utf-8"))
+    asset_source = live(
+        asset_module.read_text(encoding="utf-8")
+        if asset_module_source is None else asset_module_source
+    )
     if ('unsafe extern "C" {' not in asset_source or
-            "pub(super) fn sens_zig_linter_bytes_copy(output: *mut u8, capacity: usize) -> isize;" not in asset_source):
+            "pub(super) fn sens_zig_linter_t5m_bytes_copy(output: *mut u8, capacity: usize) -> isize;" not in asset_source):
         raise CorridorBlocked("LINTER_ZIG_ONLY missing declared Zig asset ABI")
-    if (re.search(r'include_(?:str|bytes)!\s*\(\s*"[^"]*linter\.lisp"', main)
-            or re.search(r'(?:fs|std::fs)::read(?:_to_string)?\s*\(\s*"[^"]*linter\.lisp"', main)):
-        raise CorridorBlocked("LINTER_ZIG_ONLY Rust directly embeds or reads project Lisp")
+    if (re.search(r'include_(?:str|bytes)!\s*\(\s*"[^"]*lib/linter\.(?:lisp|sens)"', main)
+            or re.search(r'(?:fs|std::fs)::read(?:_to_string)?\s*\(\s*"[^"]*lib/linter\.(?:lisp|sens)"', main)):
+        raise CorridorBlocked("LINTER_ZIG_ONLY Rust directly embeds or reads the project linter asset")
 
-    helper = _route_between(main_source, "fn linter_source_zig_only(", "\nfn contract_source_zig_only(")
+    helper = _route_between(main_source, "fn linter_t5m_asset_zig_only(", "\nfn contract_source_zig_only(")
     helper = live(helper)
     if (helper.count('#[cfg(feature = "zig-transport")]') != 1
             or helper.count('#[cfg(not(feature = "zig-transport"))]') != 1
-            or "zig_transport::linter_source_bytes()?" not in helper
-            or "String::from_utf8(bytes)" not in helper
-            or "RUST_ZIG_ONLY: linter library requires Zig; no Rust project-source fallback" not in helper
-            or "fs::read" in helper or "include_str!" in helper):
-        raise CorridorBlocked("LINTER_ZIG_ONLY no live Zig-only source byte helper / fail-closed denial")
-    if ('let linter_lib = match linter_source_zig_only()' not in main
-            or "parse(&linter_lib)" not in main):
-        raise CorridorBlocked("LINTER_ZIG_ONLY CLI bypassed Zig asset ingress or SENS parser")
+            or "zig_transport::linter_t5m_bytes()" not in helper
+            or "RUST_ZIG_ONLY: linter T5M asset requires Zig; no Rust fallback" not in helper
+            or "fs::read" in helper or "include_str!" in helper or "include_bytes!" in helper):
+        raise CorridorBlocked("LINTER_ZIG_ONLY no live Zig T5M asset helper / fail-closed denial")
+    if ('let linter_asset = match linter_t5m_asset_zig_only()' not in main
+            or 'repl::execute_zig_t5m_asset(&linter_asset, "SENS linter", &mut session)' not in main
+            or "parse(&linter_asset)" in main):
+        raise CorridorBlocked("LINTER_ZIG_ONLY CLI must execute the Zig-carried asset through SENS")
 
-    ffi = "sens_zig_linter_bytes_copy"
+    ffi = "sens_zig_linter_t5m_bytes_copy"
     linter_host = live(_route_between(
-        rust_corridor, "pub fn linter_source_bytes(", "\n/// Exact opaque project contract"
+        rust_corridor, "pub fn linter_t5m_bytes(", "\n/// Exact opaque project contract"
     ))
+    linter_host_compact = re.sub(r"\s+", " ", linter_host)
     if (host.count(f"asset_ffi::{ffi}(") != 2
             or '#[path = "zig_transport_assets.rs"]' not in host
-            or "version()?;" not in linter_host
-            or "let copied = unsafe" not in linter_host
-            or "if copied != required" not in linter_host
-            or "Ok(bytes)" not in linter_host):
-        raise CorridorBlocked("LINTER_ZIG_ONLY Rust lacks verified Zig ABI byte copy")
+            or "version()?;" not in linter_host_compact
+            or "let required = unsafe" not in linter_host_compact
+            or "if required <= 0" not in linter_host_compact
+            or "8 * 1024 * 1024" not in linter_host_compact
+            or "let copied = unsafe" not in linter_host_compact
+            or "if copied != required" not in linter_host_compact
+            or "Ok(bytes)" not in linter_host_compact):
+        raise CorridorBlocked("LINTER_ZIG_ONLY Rust lacks bounded and verified Zig ABI T5M copy")
 
-    if (root.count('const linter_asset = @embedFile("lib/linter.lisp");') != 1
+    if (root.count('const linter_t5m_asset = @embedFile("lib/linter.sens");') != 1
             or f"pub export fn {ffi}(" not in root
-            or "if (capacity == 0) return @intCast(linter_asset.len);" not in root
-            or "if (capacity < linter_asset.len) return -2;" not in root
-            or "@memcpy(dst[0..linter_asset.len], linter_asset[0..linter_asset.len]);" not in root):
-        raise CorridorBlocked("LINTER_ZIG_ONLY Zig ABI must copy exact original bytes or reject before writing")
+            or "if (capacity == 0) return @intCast(linter_t5m_asset.len);" not in root
+            or "if (capacity < linter_t5m_asset.len) return -2;" not in root
+            or "@memcpy(dst[0..linter_t5m_asset.len], linter_t5m_asset[0..linter_t5m_asset.len]);" not in root):
+        raise CorridorBlocked("LINTER_ZIG_ONLY Zig ABI must copy exact physical T5M bytes or reject before writing")
     if ('.arg("zig_transport_root.zig")' not in live(build)
-            or "cargo:rerun-if-changed=../../lib/linter.lisp" not in build):
-        raise CorridorBlocked("LINTER_ZIG_ONLY Cargo must build root Zig module and rebuild on source change")
+            or "cargo:rerun-if-changed=../../lib/linter.sens" not in build):
+        raise CorridorBlocked("LINTER_ZIG_ONLY Cargo must build root Zig module and watch the physical asset")
 
 
 def check_contract_zig_only(main_source: str, rust_corridor: str, zig_root: str, build: str) -> None:
