@@ -4,7 +4,7 @@
 
 **Зріз:** 2026-10-24  
 **Гілка:** `main` (без нових гілок)  
-**Поточний кодовий зріз перед цим checkpoint-оновленням:** [b632395bafbd66e3c92f6d71481026830ebbabbd](https://github.com/juv4uk/sens/commit/b632395bafbd66e3c92f6d71481026830ebbabbd) (точний main HEAD, перевірений перед checkpoint commit).  
+**Поточний кодовий зріз перед цим checkpoint-оновленням:** [0035f273ecc5f933c1f17906206da7c540feedf2](https://github.com/juv4uk/sens/commit/0035f273ecc5f933c1f17906206da7c540feedf2) (точний `main` HEAD перед checkpoint-комітом; повторно звірити SHA перед тестами).
 **Нормативне джерело:** `contracts/numeric-domains-ratification.lisp`, схема `numeric-d12-start-extension-1`  
 **Робочий корінь:** [#6016](https://github.com/juv4uk/sens/issues/6016)
 
@@ -24,7 +24,7 @@
 
 Для цього існуючого CI додано команду `cargo test --locked -p sens-cli --bin sens-math-t5m -- --nocapture` у `.github/workflows/ci.yml` (коміт [e85e002](https://github.com/juv4uk/sens/commit/e85e00242df5fc8a80f0893a390f730eec2c07ac)). Це доповнення чинного workflow, не новий workflow.
 
-**Статус доказу на момент checkpoint:** [run 40094605513](https://github.com/juv4uk/sens/actions/runs/40094605513) для SHA `e95a8e1611dbde8b98496d89bdbd15888a91a78b` і [run 40094953967](https://github.com/juv4uk/sens/actions/runs/40094953967) для поточного SHA `b632395bafbd66e3c92f6d71481026830ebbabbd` залишаються `in_progress`. Цільовий [run 40094934801](https://github.com/juv4uk/sens/actions/runs/40094934801) для точкового Type-класифікатора також `in_progress`; жоден з них ще не є PASS. У попередньому [run 40093997962](https://github.com/juv4uk/sens/actions/runs/40093997962) журнали показали рівно 1 RED із 172 — `d11-srfi1-list-equality-positive`: тестові дані, створені через QUOTE над W7-послідовністю, не гарантували D3-парної структури. Коміт [e95a8e1](https://github.com/juv4uk/sens/commit/e95a8e1611dbde8b98496d89bdbd15888a91a78b) виправив свідок, будуючи вкладені списки через SENS `СПИСОК` і подаючи неправильний хвіст як точний D1 `ні`; його фізичний повторний результат залишається непідтвердженим. Локальний clone/build у цій сесії недоступний через DNS до `github.com`.
+**Статус доказу на момент checkpoint:** [Actions run 40095010070](https://github.com/juv4uk/sens/actions/runs/40095010070) для SHA `0035f273ecc5f933c1f17906206da7c540feedf2` має стан `queued`; це **NOT_VERIFIED**, не PASS. Rust `E0509` із D12 assertions виправлено у [a33b3dd](https://github.com/juv4uk/sens/commit/a33b3dd160bbd43caa4fcdf3713ea3640a763631) та [554336a](https://github.com/juv4uk/sens/commit/554336adc507d7cfc359ead6197c789f7462e17c); для SHA `e95a8e…` hosted Rust-крок уже пройшов, але повний CI не завершився. У старому run [40093997962](https://github.com/juv4uk/sens/actions/runs/40093997962) зміни D11 частот падали в парному шляху через невідомі `Text7` bindings: не передавалися `lib/d11-clojure-group-by.lisp` і `lib/d11-clojure-frequencies-unary.lisp`. Коміт [9663918](https://github.com/juv4uk/sens/commit/9663918ddcf52592a536977ab9bdcbc481e17589) передав залежності й Core4-профіль; [dc2ced7](https://github.com/juv4uk/sens/commit/dc2ced7af0cb93ebf238f1fe1e914a64af08c766) додав self-contained standalone T5M bundle з позитивним/мутантним очікуванням D1. Ці два зміни ще чекають повного CI на точному SHA. Окремий D11 list-equality позитив виправлено у [e95a8e1](https://github.com/juv4uk/sens/commit/e95a8e1611dbde8b98496d89bdbd15888a91a78b), але його фізичний повторний запуск також має бути підтверджено.
 
 ## Конкретні RED, які вже мають вузьку правку
 
@@ -41,6 +41,10 @@
 Коміт [e95a8e1](https://github.com/juv4uk/sens/commit/e95a8e1611dbde8b98496d89bdbd15888a91a78b) усунув RED `d11-srfi1-list-equality-positive`: test data тепер формуються D4 `СПИСОК`, а improper tail — точним D1 `ні`, без припущення, що QUOTE над W7-текстом створює D3 пари. Mutant-свідок і алгоритм бібліотеки не змінювалися. Повний фізичний результат для цього коміту ще не підтверджений.
 
 Новий D11 `знайти-перший-із-наявністю` і D11 SRFI-1 list-equality — окремі SENS-бібліотечні композиції. Вони не призначають жодних нових доменних координат і не доводять callability усіх D11-селекторів.
+
+## Фізична інтеграція D11 частот у зміненому Lisp-раннері
+
+Попередній CI повідомив `unknown Text7 binding` для `tests/semantic/d11-frequencies-key-order-law.lisp` і його мутанта, бо змінений-файловий раннер не завантажував справжні SENS залежності. Тепер `scripts/execute_changed_lisp_t5m.sh` явно передає `lib/d11-clojure-group-by.lisp` та `lib/d11-clojure-frequencies-unary.lisp` у paired mint/evaluator, використовує профіль `--core4-runtime` для парного й автономного маршруту та будує self-contained standalone `.sens` із тих самих визначень + закон/мутант. Позитив очікує D1 `1`; мутант — D1 `0`. Змінено тільки orchestration/фізичну комплектацію — бізнес-логіка залишається в SENS. Hosted PASS для цього точного HEAD ще не відомий.
 
 ## Картка доменів: не змішувати значення, резидентність і виконання
 
@@ -70,4 +74,4 @@
 
 Пріоритет 1 — довести до завершення [run 40094934801](https://github.com/juv4uk/sens/actions/runs/40094934801) для коміту `20665aba` і перевірити, що обидва нові improper-suffix свідки проходять як очікувана Type-відмова direct/paired/standalone, а не маскуються. Пріоритет 2 — перевірити [run 40094953967](https://github.com/juv4uk/sens/actions/runs/40094953967) на HEAD `b632395b`, включно з новими D11 list= та F11 presence свідками. Якщо будь-який крок RED — отримати журнал, зафіксувати ID/expected/actual і виправити першопричину. Лише потім переходити до D12 shared source/REPL floor та D1–D11 resident audit; успішний Rust-крок не є загальним PASS.
 
-**Поточний статус:** D12 signed exact-domain path, D6 boundary arithmetic, явний D10/D6 Core4 paired profile і нові D11 SENS-композиції/свідки закомічені до `main`. Виявлену розбіжність Type-класифікатора для D11 SPAN/BREAK виправлено окремим комітом `20665aba`; результати CI для цього та актуального HEAD ще **NOT_VERIFIED**. Shared CLI/REPL лишається D24-first; D6 ledger усе ще має 60/64 механізмів без доказу; повна мета виконуваності D1–D12+ не закрита, release GO не оголошується.
+**Поточний статус:** D12 exact-domain/source-profile/bit-granular Zig-T5M path, D6 boundary tests, D10/D6 explicit Core4 paired profile і D11 SENS-композиції/свідки закомічені до `main`. Відомі root-cause fixes для Rust E0509, D11 list-equality test data та D11 frequencies dependencies/standalone carrier додані; їхній повний hosted статус для SHA `0035f273ecc5f933c1f17906206da7c540feedf2` — **NOT_VERIFIED**. CLI/REPL лишається D24-first; D6 ledger має 60/64 резиденти без механічного доказу; глобальна мета виконуваності всього D1–D12+ не закрита, release GO не оголошується.
