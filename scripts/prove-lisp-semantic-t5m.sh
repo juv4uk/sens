@@ -833,6 +833,9 @@ cat -- lib/d11-srfi1-find-presence.lisp tests/semantic/d11-srfi1-find-presence-i
 run_case run_law d11-srfi1-find-presence-positive "$d11_presence_positive" 1
 run_case run_law d11-srfi1-find-presence-mutant "$d11_presence_mutant" 0
 run_case run_type_rejection d11-srfi1-find-presence-improper-tail-type "$d11_presence_bad_tail" 'car expects a non-empty list'
+d11_presence_atomic_root="$evidence/d11-find-presence-atomic-root-complete.lisp"
+cat -- lib/d11-srfi1-find-presence.lisp tests/fixtures/d11-find-presence-atomic-root-negative.lisp > "$d11_presence_atomic_root"
+run_case run_type_rejection d11-find-presence-atomic-root-type "$d11_presence_atomic_root" 'car expects a non-empty list'
 d11_presence_early="$evidence/d11-find-presence-early-improper.lisp"
 cat -- lib/d11-srfi1-find-presence.lisp tests/semantic/d11-srfi1-find-presence-early-hit-improper-negative.lisp > "$d11_presence_early"
 run_case run_type_rejection d11-find-presence-early-hit-improper "$d11_presence_early" "car expects a non-empty list"
@@ -946,6 +949,9 @@ run_case run_law d11-srfi1-find-tail-mutant "$d11_find_tail_mutant" 0
 d11_find_tail_bad="$evidence/d11-srfi1-find-tail-improper-complete.lisp"
 cat -- lib/d11-srfi1-find-tail.lisp tests/semantic/d11-srfi1-find-tail-improper-tail-negative.lisp > "$d11_find_tail_bad"
 run_case run_type_rejection d11-find-tail-improper-d1-type-negative "$d11_find_tail_bad" 'car expects a non-empty list'
+d11_find_tail_atomic_root="$evidence/d11-find-tail-atomic-root-complete.lisp"
+cat -- lib/d11-srfi1-find-tail.lisp tests/fixtures/d11-find-tail-atomic-root-negative.lisp > "$d11_find_tail_atomic_root"
+run_case run_type_rejection d11-find-tail-atomic-root-type "$d11_find_tail_atomic_root" 'car expects a non-empty list'
 sha256sum lib/d11-srfi1-find-tail.lisp tests/semantic/d11-srfi1-find-tail-laws.lisp > "$evidence/d11-find-tail-inputs.sha256"
 # Фізичні закони Д3 не залежать від недопущеного виклику D6 LENGTH.
 run_case run_law d3-structural-positive tests/semantic/d3-structural-native-t5m-law.lisp 1
