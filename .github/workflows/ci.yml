@@ -217,6 +217,9 @@ jobs:
                   "tests/semantic/d11-srfi1-list-equality-directed-pairs-law.lisp",
                   "tests/semantic/d11-srfi1-list-equality-directed-adjacent-law.lisp",
                   "tests/semantic/d11-srfi1-list-equality-directed-mutant.lisp",
+                  "tests/semantic/d11-srfi1-list-equality-directed-law.lisp",
+                  "tests/semantic/d11-srfi1-list-equality-directed-pairs-mutant.lisp",
+                  "tests/semantic/d11-srfi1-list-equality-directed-adjacent-mutant.lisp",
                   "tests/semantic/d11-srfi1-list-equality-nullary-law.lisp",
                   "tests/semantic/d11-srfi1-list-equality-mutant.lisp",
                   # F11-PROOF-TRACE запускається в єдиному нативному law runner із DEFINE lib/reason.lisp.

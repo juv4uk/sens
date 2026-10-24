@@ -665,16 +665,26 @@ done
 sha256sum tests/semantic/d11-srfi1-list-equality-{structure,pairs,nullary}-law.lisp > "$evidence/d11-list-equality-isolated-inputs.sha256"
 
 run_case run_law d11-srfi1-list-equality-mutant "$d11_list_equal_mutant_bundle" 0
-# D11 LIST=: окремі нативні закони спрямованої рівності.
-for part in directed-pairs directed-adjacent; do
-  witness="$evidence/d11-list-equality-$part.lisp"
-  cat -- lib/d11-srfi1-list-equality.lisp "tests/semantic/d11-srfi1-list-equality-$part-law.lisp" > "$witness"
-  run_case run_law "d11-list-equality-$part-positive" "$witness" 1
-done
-witness="$evidence/d11-list-equality-directed-mutant.lisp"
-cat -- lib/d11-srfi1-list-equality.lisp tests/semantic/d11-srfi1-list-equality-directed-mutant.lisp > "$witness"
-run_case run_law d11-list-equality-directed-mutant "$witness" 0
-sha256sum tests/semantic/d11-srfi1-list-equality-directed-{pairs-law,adjacent-law,mutant}.lisp > "$evidence/d11-directed-inputs.sha256"
+# Д11 LIST=: один точний шлях для кожного закону й мутанта.
+d11_direction_0="$evidence/directed-law-witness.lisp"
+cat -- lib/d11-srfi1-list-equality.lisp tests/semantic/d11-srfi1-list-equality-directed-law.lisp > "$d11_direction_0"
+run_case run_law d11-direction-directed-law "$d11_direction_0" 1
+d11_direction_1="$evidence/directed-mutant-witness.lisp"
+cat -- lib/d11-srfi1-list-equality.lisp tests/semantic/d11-srfi1-list-equality-directed-mutant.lisp > "$d11_direction_1"
+run_case run_law d11-direction-directed-mutant "$d11_direction_1" 0
+d11_direction_2="$evidence/directed-pairs-law-witness.lisp"
+cat -- lib/d11-srfi1-list-equality.lisp tests/semantic/d11-srfi1-list-equality-directed-pairs-law.lisp > "$d11_direction_2"
+run_case run_law d11-direction-directed-pairs-law "$d11_direction_2" 1
+d11_direction_3="$evidence/directed-pairs-mutant-witness.lisp"
+cat -- lib/d11-srfi1-list-equality.lisp tests/semantic/d11-srfi1-list-equality-directed-pairs-mutant.lisp > "$d11_direction_3"
+run_case run_law d11-direction-directed-pairs-mutant "$d11_direction_3" 0
+d11_direction_4="$evidence/directed-adjacent-law-witness.lisp"
+cat -- lib/d11-srfi1-list-equality.lisp tests/semantic/d11-srfi1-list-equality-directed-adjacent-law.lisp > "$d11_direction_4"
+run_case run_law d11-direction-directed-adjacent-law "$d11_direction_4" 1
+d11_direction_5="$evidence/directed-adjacent-mutant-witness.lisp"
+cat -- lib/d11-srfi1-list-equality.lisp tests/semantic/d11-srfi1-list-equality-directed-adjacent-mutant.lisp > "$d11_direction_5"
+run_case run_law d11-direction-directed-adjacent-mutant "$d11_direction_5" 0
+sha256sum tests/semantic/d11-srfi1-list-equality-directed-law.lisp tests/semantic/d11-srfi1-list-equality-directed-mutant.lisp tests/semantic/d11-srfi1-list-equality-directed-pairs-law.lisp tests/semantic/d11-srfi1-list-equality-directed-pairs-mutant.lisp tests/semantic/d11-srfi1-list-equality-directed-adjacent-law.lisp tests/semantic/d11-srfi1-list-equality-directed-adjacent-mutant.lisp > "$evidence/d11-directed-inputs.sha256"
 
 
 # SRFI-1 list= rejects malformed input even when early length/value cases could
