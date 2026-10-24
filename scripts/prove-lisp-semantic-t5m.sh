@@ -601,6 +601,15 @@ run_case run_type_rejection d11-list-equality-improper-right-type "$d11_list_equ
 run_case run_type_rejection d11-list-equality-invalid-singleton-type "$d11_list_equal_bad_singleton" "$d11_list_equal_type_error"
 run_case run_type_rejection d11-list-equality-invalid-third-type "$d11_list_equal_bad_third" "$d11_list_equal_type_error"
 sha256sum lib/d11-srfi1-list-equality.lisp tests/semantic/d11-srfi1-list-equality-law.lisp tests/semantic/d11-srfi1-list-equality-mutant.lisp tests/fixtures/d11-list-equality-improper-left-must-error.lisp tests/fixtures/d11-list-equality-improper-right-must-error.lisp tests/fixtures/d11-list-equality-invalid-singleton-must-error.lisp tests/fixtures/d11-list-equality-invalid-third-must-error.lisp > "$evidence/d11-list-equality-inputs.sha256"
+# Д11 SRFI-1 FILTER-MAP: D1:ні відкидається, структурне () зберігається.
+# Справжній SENS source → Zig/T5M → парний і самостійний SENS.
+d11_filter_map_positive="$evidence/d11-srfi1-filter-map-positive.lisp"
+d11_filter_map_mutant="$evidence/d11-srfi1-filter-map-mutant.lisp"
+cat -- lib/d11-srfi1-filter-map.lisp tests/semantic/d11-srfi1-filter-map-law.lisp > "$d11_filter_map_positive"
+cat -- lib/d11-srfi1-filter-map.lisp tests/semantic/d11-srfi1-filter-map-mutant.lisp > "$d11_filter_map_mutant"
+run_case run_law d11-srfi1-filter-map-positive "$d11_filter_map_positive" 1
+run_case run_law d11-srfi1-filter-map-mutant "$d11_filter_map_mutant" 0
+sha256sum lib/d11-srfi1-filter-map.lisp tests/semantic/d11-srfi1-filter-map-law.lisp tests/semantic/d11-srfi1-filter-map-mutant.lisp > "$evidence/d11-srfi1-filter-map-inputs.sha256"
 # Д11 SRFI-1: UNFOLD/UNFOLD-RIGHT є чистими композиціями SENS.
 # Джерело тестів — Lisp, Zig лише несе T5M; помилковий порядок = D1:ні.
 d11_unfold_positive="$evidence/d11-srfi1-unfold-positive-complete.lisp"
