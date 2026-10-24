@@ -298,7 +298,7 @@ mod tests {
         }
         begin.wait();
         release.wait();
-        let admitted = joins.into_iter().filter(|join| join.join().unwrap()).count();
+        let admitted = joins.into_iter().map(|join| join.join().unwrap()).filter(|ok| *ok).count();
         assert!(admitted <= 4);
         assert_eq!(active.load(Ordering::Acquire), 0);
     }
