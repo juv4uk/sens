@@ -15,7 +15,48 @@ def check_ok(value,reason):
 def blob(b):
     return hashlib.sha1(b"blob "+str(len(b)).encode()+b"\0"+b).hexdigest()
 
-def verify(m,ptr,inventory):
+# Список зв'язаних із джерелом визначень — не список фізичних PASS.
+# Генератор окремо звіряє цей Rust-покажчик з конкретними SENS DEFINE.
+BINDINGS = "crates/sens/src/d10_definition_bindings_generated.rs"
+BINDING_ENTRY = re.compile(
+    r"^\s*D10DefinitionBinding \{ bits: 0b([01]{10}), names: &\[",
+    re.MULTILINE,
+)
+
+def source_definition_codes(root):
+    source = (root / BINDINGS).read_text(encoding="utf-8")
+    codes = BINDING_ENTRY.findall(source)
+    check_ok(bool(codes) and len(codes) == len(set(codes)),
+             "missing or duplicate D10 concrete SENS bindings")
+    return codes
+
+def write_coverage(path, inventory, definitions):
+    """1024 exact coordinates; UNKNOWN is not a verdict of non-executability."""
+    header = (
+        "coordinate\tstable_id\tsemantic_name\towner_ratified\t"
+        "core4_epistemic_sens_definition\tmath_selector_shape\t"
+        "native_positive\tnative_negative\tphysical_execution"
+    )
+    lines = [header]
+    for row in sorted(inventory["rows"], key=lambda r: r["coordinate"]):
+        name = row["semantic_name"]
+        sid = row["stable_id"]
+        check_ok(all("\t" not in str(x) and "\n" not in str(x)
+                     for x in (name, sid)), "unsafe evidence TSV field")
+        lines.append("\t".join((
+            row["coordinate"], sid, name, "OWNER_RATIFIED",
+            "SOURCE_FOUND" if row["coordinate"] in definitions
+            else "NOT_IN_SCANNED_CORE4_EPISTEMIC",
+            "SELECTOR_MODEL_FAMILY" if re.fullmatch(r"C[AD]{8}R", name)
+            else "OTHER_DOMAIN_LAW",
+            "NOT_RECORDED_IN_PINNED_INVENTORY",
+            "NOT_RECORDED_IN_PINNED_INVENTORY",
+            "NOT_ATTESTED_HERE_NOT_A_NONCALLABLE_VERDICT",
+        )))
+    check_ok(len(lines) == 1025, "coverage rows must be 1024")
+    path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+
+def verify(m,ptr,inventory,definitions):
     check_ok(m["schema"]=="sens-d10-whole-domain-owner-ratification/v1","schema")
     check_ok(m["decision"]=="RATIFY_D10_AS_ONE_COMPLETE_DOMAIN" and
              m["ratification_mode"]=="ATOMIC_WHOLE_DOMAIN_NOT_PER_RESIDENT" and
@@ -53,8 +94,20 @@ def verify(m,ptr,inventory):
                      r.get("physical_t5_authorized") is True for r in inventory["rows"])
              and ptr["canonical_current"]["ratified"]==0,
              "unreviewed per-row/runtime admission")
+    definition_codes=set(definitions)
+    check_ok(len(definitions)==len(definition_codes)
+             and definition_codes.issubset(set(bits)),
+             "duplicate or non-D10 SENS definition binding")
+    # Ніякого global physical_executable=false: ця функція не запускає SENS.
+    # Відсутність квитанції у pinned metadata не встановлює невикличність.
     return {"domain_owner_ratified":True,"semantics":1024,"codewords":1024,
-            "physical_executable":False,"fully_oracle_attested":False}
+            "execution_target_positions":1024,
+            "known_concrete_SENS_source_definitions":len(definition_codes),
+            "not_in_scanned_SENS_libraries":1024-len(definition_codes),
+            "pinned_manifest_native_attestations":0,
+            "physical_execution_tested_by_this_checker":False,
+            "physical_status":"NOT_MEASURED_BY_RATIFICATION_CHECK",
+            "fully_oracle_attested":False}
 
 def run(root=ROOT,self_test=False):
     root=root.resolve()
@@ -66,7 +119,8 @@ def run(root=ROOT,self_test=False):
     raw=path.read_bytes()
     check_ok(blob(raw)==pin["git_blob"],"git blob mismatch")
     inv=json.loads(raw)
-    result=verify(m,ptr,inv)
+    definitions=source_definition_codes(root)
+    result=verify(m,ptr,inv,definitions)
     if self_test:
         from copy import deepcopy
         for name,mutation in [
@@ -76,13 +130,24 @@ def run(root=ROOT,self_test=False):
         ]:
             mutant=deepcopy(inv)
             mutation(mutant)
-            try:verify(m,ptr,mutant)
+            try:verify(m,ptr,mutant,definitions)
             except ValueError: pass
             else:raise ValueError("D10_OWNER_RATIFICATION_BLOCK:mutant admitted "+name)
-    return result
+        for label,bad in (("duplicate-binding",definitions+[definitions[0]]),
+                          ("unknown-binding",definitions+["11111111111"])):
+            try:verify(m,ptr,inv,bad)
+            except ValueError: pass
+            else:raise ValueError("D10_OWNER_RATIFICATION_BLOCK:mutant admitted "+label)
+    return result,inv,set(definitions)
 
 if __name__=="__main__":
     p=argparse.ArgumentParser()
     p.add_argument("--self-test",action="store_true")
+    p.add_argument("--coverage-tsv",type=Path,
+                   help="emit one line per D10 position, not a native PASS verdict")
     args=p.parse_args()
-    print(json.dumps(run(self_test=args.self_test),sort_keys=True))
+    summary,inventory,definitions=run(self_test=args.self_test)
+    if args.coverage_tsv:
+        write_coverage(args.coverage_tsv,inventory,definitions)
+        summary["coverage_tsv"]=str(args.coverage_tsv)
+    print(json.dumps(summary,sort_keys=True))

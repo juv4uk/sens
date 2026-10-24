@@ -503,6 +503,10 @@ run_case run_law d4-higher-order-composition-positive tests/semantic/d4-higher-o
 run_case run_law d4-higher-order-composition-mutant tests/semantic/d4-higher-order-composition-mutant.lisp 0
 run_case run_law d4-first-class-predicate-positive tests/semantic/d4-first-class-predicate-law.lisp 1
 run_case run_law d4-first-class-predicate-mutant tests/semantic/d4-first-class-predicate-mutant.lisp 0
+# Д10:0011000010 — конкретне визначення SENS: черга-порожня?.
+# Ратифікація 1024/1024 не підміняє фізичного позитиву й мутанта.
+run_case run_law d10-empty-queue-positive tests/semantic/d10-empty-queue-law.lisp 1
+run_case run_law d10-empty-queue-mutant tests/semantic/d10-empty-queue-mutant.lisp 0
 # D6 COMPOSE/FLIP/CURRY are derived SENS functions, so their law and
 # counterexample must pass the same physical Zig/T5M -> SENS route.
 run_case run_law d6-compose-flip-positive tests/semantic/d6-compose-flip-law.lisp 1
