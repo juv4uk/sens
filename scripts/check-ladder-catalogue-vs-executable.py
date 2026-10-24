@@ -113,6 +113,19 @@ def selector_widths() -> set[int]:
     return allowed
 
 
+def selector_coordinates(n: int) -> set[str]:
+    """Координати, які закон селекторів робить виконуваними — з каталогу
+    й префіксів закону. Для D5 це 8 координат, яких НЕМАЄ в bindings."""
+    if n not in selector_widths():
+        return set()
+    return {r for r in catalogue(n) if r[:3] in selector_prefixes()}
+
+
+# Якір на набір ширин закону: якщо selector_law.rs змінить обсяг, чекер
+# падає голосно — інакше D5-прогалина могла б тихо зникнути.
+SELECTOR_WIDTHS_ANCHOR = {3, 4, 5, 6, 8, 9, 10}
+
+
 def derived_floor(n: int) -> int:
     """Мінімум виконуваних, виведений із дерева: примітиви диспетчера +
     селекторні координати з каталогу (без жодного зашитого числа).
@@ -133,6 +146,10 @@ ANCHORED_EXTRAS = {3: 2, 4: 7, 8: 1}
 def verify_derivation() -> None:
     """Оголошені числа мусять узгоджуватися з деривацією. Якщо дерево
     зміниться — падаємо голосно, а не тихо віддаємо застаріле число."""
+    if selector_widths() != SELECTOR_WIDTHS_ANCHOR:
+        raise SystemExit(
+            f"FAIL: набір селекторних ширин закону змінився: {sorted(selector_widths())} "
+            f"проти якоря {sorted(SELECTOR_WIDTHS_ANCHOR)} — передеривуй числа")
     callable_set = callable_rungs()
     for n in (1, 2):
         if n in callable_set:
@@ -144,6 +161,16 @@ def verify_derivation() -> None:
     declared = {n: c for n, (c, *_r) in DISPATCH_ANCHORS.items()}
     declared[7] = 0
     declared[11] = 0
+    # Для bindings-щаблів окремий інваріант: bindings МУСЯТЬ покривати
+    # селекторні координати закону. Саме тут викрито D5 (6 bindings проти 8).
+    for n in (5, 6, 9, 10):
+        bind = bindings(n)
+        if bind is None:
+            continue
+        missing = selector_coordinates(n) - bind
+        if missing:
+            print(f"D5-GAP-WARNING: D{n}: {len(missing)} селекторних координат "
+                  f"за законом НЕ покриті bindings: {sorted(missing)[:4]}")
     for n, count in declared.items():
         floor = derived_floor(n)
         extras = count - floor
@@ -210,7 +237,9 @@ def survey() -> list[dict[str, object]]:
             continue
         bind = bindings(n)
         if bind is not None:
-            bind = bind | host.get(n, set())
+            # Першопричина: D5 мав 6 bindings, але 8 селекторних координат за
+            # законом — і жодної в bindings. Виконуваність = bindings ∪ закон.
+            bind = bind | host.get(n, set()) | selector_coordinates(n)
         row: dict[str, object] = {"rung": n, "catalogue": len(cat),
                                   "bindings": bind, "mapped": bind is not None}
         if bind is not None:
