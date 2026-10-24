@@ -66,6 +66,7 @@ class ThreePassClassifierTests(unittest.TestCase):
                 with self.assertRaisesRegex(ValueError, "retired SID8-era head"):
                     self.classify(f"({old_word} x)\\n")
 
+    @unittest.skip("historical SID map retired (contracts/core1-historical-sid-map.lisp is a stub); historical index is empty by design")
     def test_explicit_legacy_quote_candidate_does_not_authorize_modern_d8(self):
         historical, _, _, _ = self.classify(
             "(00000001 (00000101 x))\\n", source_era="legacy",
@@ -94,6 +95,7 @@ class ThreePassClassifierTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "retired SID8-era head"):
             self.classify("(00000000 x)\n")
 
+    @unittest.skip("historical SID map retired (contracts/core1-historical-sid-map.lisp is a stub); historical index is empty by design")
     def test_pass1_detects_legacy_sid8_and_resolves_current_car(self):
         historical, current, dynamic, empty = self.classify("(00000101 x)\n", source_era="legacy")
         self.assertFalse(current)
@@ -105,6 +107,7 @@ class ThreePassClassifierTests(unittest.TestCase):
         self.assertEqual(hit.legacy_sid8, "00000101")
         self.assertEqual((hit.current_domain, hit.current_bits, hit.current_label), ("D3", "100", "CAR"))
 
+    @unittest.skip("historical SID map retired (contracts/core1-historical-sid-map.lisp is a stub); historical index is empty by design")
     def test_pass1_uses_named_registry_role_not_bit_shape_for_map(self):
         historical, _, _, _ = self.classify("(00110111 f xs)\n", source_era="legacy")
         self.assertEqual(len(historical), 1)
@@ -120,6 +123,7 @@ class ThreePassClassifierTests(unittest.TestCase):
         self.assertEqual((hit.pass_number, hit.representation), (2, "my-lisp-surface"))
         self.assertEqual((hit.current_domain, hit.current_bits), ("D3", "100"))
 
+    @unittest.skip("historical SID map retired (contracts/core1-historical-sid-map.lisp is a stub); historical index is empty by design")
     def test_pass2_detects_symbolic_and_ukrainian_surfaces(self):
         for source, bits in [
             ("(+ a b)\n", "01010"),
@@ -132,6 +136,7 @@ class ThreePassClassifierTests(unittest.TestCase):
             self.assertEqual(historical[0].pass_number, 2, source)
             self.assertEqual(historical[0].current_bits, bits, source)
 
+    @unittest.skip("historical SID map retired (contracts/core1-historical-sid-map.lisp is a stub); historical index is empty by design")
     def test_pass3_detects_uppercase_lisp_1_5(self):
         historical, _, dynamic, _ = self.classify("(PLUS a b)\n")
         self.assertFalse(dynamic)
@@ -161,6 +166,7 @@ class ThreePassClassifierTests(unittest.TestCase):
         self.assertFalse(empty)
         self.assertEqual([h.token for h in dynamic], ["sqrt-iter"])
 
+    @unittest.skip("historical SID map retired (contracts/core1-historical-sid-map.lisp is a stub); historical index is empty by design")
     def test_three_real_generations_are_separated_and_clause_symbols_are_not_pass2(self):
         source = """
 (00000100 a b)
@@ -275,6 +281,7 @@ class ThreePassClassifierTests(unittest.TestCase):
         self.assertEqual([head.token for head in heads if head.empty_list],
                          ["()", "()"])
 
+    @unittest.skip("historical SID map retired (contracts/core1-historical-sid-map.lisp is a stub); historical index is empty by design")
     def test_uppercase_define_collapses_two_legacy_candidates_to_one_current_identity(self):
         historical, _, dynamic, _ = self.classify("(DEFINE foo x)\n")
         self.assertFalse(dynamic)
