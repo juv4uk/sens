@@ -321,6 +321,22 @@ jobs:
       - uses: dtolnay/rust-toolchain@1.99.0
         if: ${{ always() }}
 
+      - name: Swarm — нативний TCP-доказ за зміненою межею emit
+        if: ${{ steps.changed-t5m-lisp.outputs.has_rust == 'true' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          base="$(cat "$RUNNER_TEMP/native-semantic-base.sha")"
+          if git diff --quiet "$base" "$GITHUB_SHA" -- crates/swarm-node/src/main.rs crates/swarm-node/tests/integration.rs; then
+            echo "SWARM_TASK_FENCE_NOT_CHANGED"
+          else
+            status=$?
+            if [[ "$status" -ne 1 ]]; then
+              echo "::error::SWARM_TASK_FENCE_DIFF_FAILED status=$status"
+              exit "$status"
+            fi
+            cargo test --locked -p swarm-node --test integration generic_emit_rejects_reserved_task_events_without_mutating_journal -- --nocapture
+          fi
       - name: Власність тестів — Rust охоронець фізичних Lisp-законів
         if: ${{ always() && steps.changed-t5m-lisp.outcome == 'success' }}
         shell: bash
