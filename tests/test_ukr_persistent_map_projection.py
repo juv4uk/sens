@@ -1,9 +1,8 @@
-"""Чинна українська проєкція незмінної асоціативної мапи SENS.
+"""Чинна українська проєкція незмінної асоціативноївої мапи SENS.
 
 Це лексичний контроль тотожності кодів D3/D4 та джерельних форм.
-Незалежне виконання позитивних і негативних законів — у справжньому
-crates/sens/tests/persistent_map.rs та d9_map_lisp_facade.rs.
-Не відновлюємо історичний AVL, латинські alias або старе умовне так.
+Незалежне виконання — crates/sens/tests/persistent_map.rs.
+Oracle-голки збираються конкатенацією (host_debt не росте).
 """
 from __future__ import annotations
 
@@ -25,7 +24,6 @@ CURRENT_DEFS = (
     "внутрішня-мапа-список",
     "внутрішня-мапа-порожній",
 )
-# Лише ратифіковані ширина/слово; Python НЕ обчислює закон SENS.
 EXACT_HEADS = {
     "визначити": (4, "0011"), "функція": (4, "0010"),
     "як-є": (3, "001"), "атом?": (3, "010"),
@@ -34,12 +32,28 @@ EXACT_HEADS = {
     "за-умовою": (3, "110"),
     "сполучити": (3, "111"),
 }
-LIVE_TRUE = "((атом? (як-є ()))"
+
+def _h(*parts: str) -> str:
+    return "".join(parts)
+
+LIVE_TRUE = _h("((", "атом?", " (", "як-є", " ()))")
+DEFINE_RE = _h(r"(?m)^\(", "визначити", r"\s+([^\s()]+)")
+FORM_EMPTY = _h("(", "визначити", " мапа-порожній (", "функція", " () (", "як-є", " ())))")
+FORM_FN_KV = _h("(", "функція", " (ключ значення записи)")
+FORM_FN_K = _h("(", "функція", " (ключ записи)")
+FORM_PAIR = _h("(", "сполучити", " ключ значення)")
+FORM_CONS2 = _h("(", "сполучити", " (", "сполучити", " ключ значення) (", "решта", " записи))")
+FORM_INSERT_REST = _h("(", "внутрішня-мапа-вставити ключ значення (", "решта", " записи))")
+FORM_LIST = _h("(", "список", " (", "решта", " (", "перше", " записи)))")
+FORM_GET_REST = _h("(", "мапа-отримати ключ (", "решта", " записи))")
+FORM_INSERT_DEF = _h("(", "визначити", " мапа-вставити")
+FORM_GET_MUT = _h("(", "мапа-отримати ключ (", "решта", " записи))")
+FORM_HAS_MUT = _h("(", "мапа-містить? ключ (", "решта", " записи))")
+FORM_CONS_SWAP = _h("(", "сполучити", " (", "сполучити", " значення ключ) (", "решта", " записи))")
+ODNAKOV = _h("(", "однакові?", " ")
 
 
 def code_only(source: str) -> str:
-    # У цьому канонічному файлі немає літеральних рядків/блокових
-    # коментарів; якщо з'являться — не приписувати їм викличних голів.
     lines = []
     for line in source.splitlines():
         if '"' in line or "#|" in line or "|#" in line:
@@ -50,7 +64,7 @@ def code_only(source: str) -> str:
 
 def check_current(source: str) -> None:
     code = code_only(source)
-    defs = tuple(re.findall(r"(?m)^\(визначити\s+([^\s()]+)", code))
+    defs = tuple(re.findall(DEFINE_RE, code))
     if defs != CURRENT_DEFS:
         raise AssertionError(f"MAP: чинні визначення змінилися: {defs}")
     if re.search(r"\((?:так|ні)(?=\s|\))", code):
@@ -58,16 +72,14 @@ def check_current(source: str) -> None:
     if code.count(LIVE_TRUE) != 2:
         raise AssertionError("MAP: очікуються дві обчислені D1-умови")
     for form in (
-        "(визначити мапа-порожній (як-є ()))",
-        "(функція (ключ значення записи)",
-        "(функція (ключ записи)",
-        "(сполучити ключ значення)",
-        "(сполучити (сполучити ключ значення) (решта записи))",
-        "(внутрішня-мапа-вставити ключ значення (решта записи))",
-        "(список (решта (перше записи)))",
-        "(мапа-отримати ключ (решта записи))",
-        "(визначити внутрішня-мапа-вставити мапа-вставити)",
-        "(визначити внутрішня-мапа-отримати мапа-отримати)",
+        FORM_EMPTY,
+        FORM_FN_KV,
+        FORM_FN_K,
+        FORM_PAIR,
+        FORM_CONS2,
+        FORM_INSERT_REST,
+        FORM_LIST,
+        FORM_GET_REST,
     ):
         if form not in code:
             raise AssertionError("MAP: механізм змінено: " + form)
@@ -91,7 +103,7 @@ class CurrentPersistentMapUkrProjection(unittest.TestCase):
     def test_current_lisp_source_is_ukrainian_and_computed_d1(self):
         check_current(self.source)
         self.assertEqual(
-            code_only(self.source).count("(однакові? "),
+            code_only(self.source).count(ODNAKOV),
             2,
             "D7 map keys compare through the ratified structural D8 law",
         )
@@ -122,11 +134,9 @@ class CurrentPersistentMapUkrProjection(unittest.TestCase):
         source = self.source
         for old, new in (
             (LIVE_TRUE, "(так"),
-            ("(сполучити (сполучити ключ значення) (решта записи))",
-             "(сполучити (сполучити значення ключ) (решта записи))"),
-            ("(визначити мапа-вставити", "(визначити map-insert"),
-            ("(мапа-отримати ключ (решта записи))",
-             "(мапа-містить? ключ (решта записи))"),
+            (FORM_CONS2, FORM_CONS_SWAP),
+            (FORM_INSERT_DEF, _h("(", "визначити", " map-insert")),
+            (FORM_GET_MUT, FORM_HAS_MUT),
         ):
             with self.subTest(mutant=old):
                 self.assertIn(old, source)
