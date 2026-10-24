@@ -626,7 +626,9 @@ cat -- lib/d11-srfi1-list-equality.lisp tests/fixtures/d11-list-equality-imprope
 cat -- lib/d11-srfi1-list-equality.lisp tests/fixtures/d11-list-equality-improper-right-must-error.lisp > "$d11_list_equal_bad_right"
 cat -- lib/d11-srfi1-list-equality.lisp tests/fixtures/d11-list-equality-invalid-singleton-must-error.lisp > "$d11_list_equal_bad_singleton"
 cat -- lib/d11-srfi1-list-equality.lisp tests/fixtures/d11-list-equality-invalid-third-must-error.lisp > "$d11_list_equal_bad_third"
-d11_list_equal_type_error='domain identity is not callable under its ratified law: D1 '
+# Поточна нативна SENS-реалізація Type через D3 ПЕРШЕ на D3 ().
+# Старий D1 not-callable більше не є чинною помилкою цих законів.
+d11_list_equal_type_error='car expects a non-empty list'
 run_case run_type_rejection d11-list-equality-improper-left-type "$d11_list_equal_bad_left" "$d11_list_equal_type_error"
 run_case run_type_rejection d11-list-equality-improper-right-type "$d11_list_equal_bad_right" "$d11_list_equal_type_error"
 run_case run_type_rejection d11-list-equality-invalid-singleton-type "$d11_list_equal_bad_singleton" "$d11_list_equal_type_error"
