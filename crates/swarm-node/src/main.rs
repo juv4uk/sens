@@ -137,6 +137,29 @@ fn retire_peer_if_current(
     }
 }
 
+/// A heartbeat must recheck both the socket generation and its latest
+/// activity after taking the snapshot; stale name alone is not identity.
+fn retire_stale_peer_if_current(
+    peers: &mut HashMap<String, PeerLink>,
+    last_seen: &HashMap<String, Instant>,
+    sync_in_flight: &HashSet<String>,
+    id: &str,
+    generation: u64,
+    now: Instant,
+) -> Option<PeerLink> {
+    let stale = last_seen.get(id).is_some_and(|seen| {
+        now.saturating_duration_since(*seen) > STALE_PEER_TIMEOUT
+    });
+    if !stale || sync_in_flight.contains(id) {
+        return None;
+    }
+    if peers.get(id).is_some_and(|peer| peer.generation == generation) {
+        peers.remove(id)
+    } else {
+        None
+    }
+}
+
 struct Node {
     identity: Identity,
     project: String,
@@ -748,16 +771,25 @@ fn spawn_heartbeat(node: &Arc<Node>) {
             .sync_in_flight
             .lock()
             .unwrap_or_else(|poisoned| poisoned.into_inner());
-        let stale: Vec<String> = node
-            .last_seen
-            .lock()
-            .unwrap()
-            .iter()
-            .filter(|(id, seen)| {
-                now.duration_since(**seen) > STALE_PEER_TIMEOUT && !in_flight.contains(*id)
-            })
-            .map(|(id, _)| id.clone())
-            .collect();
+        let stale: Vec<(String, u64)> = {
+            let peers = node
+                .peers
+                .lock()
+                .unwrap_or_else(|poisoned| poisoned.into_inner());
+            let seen = node
+                .last_seen
+                .lock()
+                .unwrap_or_else(|poisoned| poisoned.into_inner());
+            seen.iter()
+                .filter(|(id, at)| {
+                    now.saturating_duration_since(**at) > STALE_PEER_TIMEOUT
+                        && !in_flight.contains(*id)
+                })
+                .filter_map(|(id, _)| {
+                    peers.get(id).map(|peer| (id.clone(), peer.generation))
+                })
+                .collect()
+        };
         drop(in_flight);
 
         // M1.1c legacy fallback: a peer whose batched train went silent
@@ -787,15 +819,41 @@ fn spawn_heartbeat(node: &Arc<Node>) {
         if stale.is_empty() {
             continue;
         }
-        let mut peers = node
-            .peers
-            .lock()
-            .unwrap_or_else(|poisoned| poisoned.into_inner());
-        for id in &stale {
-            if let Some(stream) = peers.remove(id) {
-                warn!("swarm-node: peer {id} silent for over {STALE_PEER_TIMEOUT:?}, closing connection");
-                let _ = stream.stream.shutdown(std::net::Shutdown::Both);
-            }
+        // Recheck all three conditions under the same lock order used
+        // for registration: in-flight grace, peer table, then liveness.
+        // The network shutdown itself occurs after releasing all locks.
+        let retired: Vec<(String, PeerLink)> = {
+            let in_flight = node
+                .sync_in_flight
+                .lock()
+                .unwrap_or_else(|poisoned| poisoned.into_inner());
+            let mut peers = node
+                .peers
+                .lock()
+                .unwrap_or_else(|poisoned| poisoned.into_inner());
+            let seen = node
+                .last_seen
+                .lock()
+                .unwrap_or_else(|poisoned| poisoned.into_inner());
+            let now = Instant::now();
+            stale
+                .iter()
+                .filter_map(|(id, generation)| {
+                    retire_stale_peer_if_current(
+                        &mut peers,
+                        &seen,
+                        &in_flight,
+                        id,
+                        *generation,
+                        now,
+                    )
+                    .map(|peer| (id.clone(), peer))
+                })
+                .collect()
+        };
+        for (id, peer) in retired {
+            warn!("swarm-node: peer {id} silent for over {STALE_PEER_TIMEOUT:?}, closing connection");
+            let _ = peer.stream.shutdown(std::net::Shutdown::Both);
         }
     });
 }
@@ -3817,6 +3875,53 @@ mod peer_connection_generation_tests {
         assert!(written.is_empty(), "old snapshot must not count as delivered");
         assert!(dead.is_empty(), "old snapshot must not retire replacement");
         assert_eq!(table.lock().unwrap()["peer"].generation, 2);
+    }
+
+    #[test]
+    fn stale_heartbeat_snapshot_must_respect_new_activity_and_generation() {
+        let (old, _old_remote) = local_pair();
+        let (new, _new_remote) = local_pair();
+        let mut peers = HashMap::new();
+        peers.insert("peer".into(), PeerLink {
+            stream: old,
+            generation: 1,
+        });
+        let mut seen = HashMap::new();
+        seen.insert(
+            "peer".into(),
+            Instant::now() - STALE_PEER_TIMEOUT - Duration::from_secs(1),
+        );
+        let clear = HashSet::new();
+        let now = Instant::now();
+
+        // A heartbeat arriving after an earlier stale snapshot rescues
+        // the same live connection without changing its generation.
+        seen.insert("peer".into(), Instant::now());
+        assert!(retire_stale_peer_if_current(
+            &mut peers, &seen, &clear, "peer", 1, now
+        ).is_none());
+        assert!(peers.contains_key("peer"));
+
+        // The same logical id reconnects before the old close commits.
+        peers.insert("peer".into(), PeerLink {
+            stream: new,
+            generation: 2,
+        });
+        seen.insert(
+            "peer".into(),
+            Instant::now() - STALE_PEER_TIMEOUT - Duration::from_secs(1),
+        );
+        assert!(retire_stale_peer_if_current(
+            &mut peers, &seen, &clear, "peer", 1, Instant::now()
+        ).is_none());
+        assert_eq!(peers["peer"].generation, 2);
+
+        let mut syncing = HashSet::new();
+        syncing.insert("peer".into());
+        assert!(retire_stale_peer_if_current(
+            &mut peers, &seen, &syncing, "peer", 2, Instant::now()
+        ).is_none());
+        assert_eq!(peers["peer"].generation, 2);
     }
 
     #[test]
