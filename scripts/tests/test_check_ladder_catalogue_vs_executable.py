@@ -41,11 +41,13 @@ class LadderSeparationTests(unittest.TestCase):
             self.assertIn("задекларовано", line)
             self.assertIn(" 0 ", line + " ")
 
-    def test_d5_gap_is_named_not_silently_swallowed(self):
-        # D5 має 8 селекторних координат за законом, але 0 у bindings —
-        # виконуваність мусить бути 6 ∪ 8 = 14, а прогалину — названо.
+    def test_d5_law_only_coordinates_are_named_as_by_design(self):
+        # D5 має 8 селекторних координат, яких немає в bindings — але вони
+        # виконуються ЗАКОНОМ (mod.rs:927 перевіряє селектор першим). Це задум,
+        # не прогалина: виконуваність = 6 ∪ 8 = 14, і це названо.
         r = self.run_script()
-        self.assertIn("D5-GAP-WARNING", r.stdout)
+        self.assertIn("D5-LAW-NOTE", r.stdout)
+        self.assertNotIn("GAP-WARNING", r.stdout)  # хибне формулювання прибрано
         import re as _re
         d5 = next(l for l in r.stdout.splitlines()
                   if _re.match(r"D5\s+\d+", l.strip()))
