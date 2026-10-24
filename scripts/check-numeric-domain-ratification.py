@@ -66,8 +66,13 @@ def validate(ratification, lang):
                 "not a D12 callable-function codebook", "codec padding",
                 "not reported operational"):
         if law == "not reported operational":
-            # The status explicitly says D12 is not yet operational.
-            need("before D12 is reported operational" in current, "D12 runtime status")
+            # Gate the operational claim on the real native execution path,
+            # not on one frozen wording of the status sentence.
+            need(
+                "Do not report D12 operational before" in current
+                and "positive/negative execution witnesses pass" in current,
+                "D12 runtime status",
+            )
         else:
             need(law in current, "D12 law: " + law)
     need(ratification.count("(schema . numeric-d24-signed-extension-1)") == 1,
