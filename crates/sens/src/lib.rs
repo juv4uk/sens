@@ -579,6 +579,30 @@ fn bind_core_runtime_mechanisms(environment: &Environment) {
         }
     }
 
+    // D8:11110101 AND and D8:11111100 OR are *language-defined*
+    // short-circuit macros in Core4. A code coordinate is never enough:
+    // bind only if Core4 has produced a real Value::Macro under the exact
+    // canonical Ukrainian D7 surface key. Raw operands stay unevaluated
+    // until the SENS macro itself expands to its D3 COND definition.
+    for (bits, surface) in [
+        (0b11110101u8, "та"),
+        (0b11111100u8, "або"),
+    ] {
+        let identity = DomainIdentity::D8(crate::CoreD8::from_word(
+            crate::Bit8::new(bits).expect("owner-ratified exact D8 macro coordinate"),
+        ));
+        if environment.domain_code_slot(identity).is_some() {
+            continue;
+        }
+        if let Ok(surface_word) = encode_text7(surface, Text7Layout::Uk) {
+            if let Some(value @ Value::Macro(_)) =
+                environment.get(&surface_word.to_canonical_wire_token())
+            {
+                let _ = environment.bind_domain_code_slot_once(identity, value);
+            }
+        }
+    }
+
     const MONOTONIC_NANOSECONDS_D10: u16 = 0b0011110110;
     const SURFACE: &str = "монотонний-наносекунди";
     let identity = DomainIdentity::D10(
