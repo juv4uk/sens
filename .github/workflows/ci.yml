@@ -312,6 +312,10 @@ jobs:
                   "tests/fixtures/d11-list-equality-improper-right-must-error.lisp",
                   "tests/fixtures/d11-list-equality-invalid-singleton-must-error.lisp",
                   "tests/fixtures/d11-list-equality-invalid-third-must-error.lisp",
+                  # Д6 ANY/ALL: негативні Type-свідки навмисне відхиляються;
+                  # виконуються тільки повним SENS law-runner із Core4.
+                  "tests/semantic/d6-any-improper-tail-negative.lisp",
+                  "tests/semantic/d6-all-improper-tail-negative.lisp",
                   # Вхід F6 producer для Rust producer→consumer інтеграційного тесту,
                   # не окремий мовний закон для самостійного виконання.
                   "tests/fixtures/wsm-fs-record-producer.lisp",

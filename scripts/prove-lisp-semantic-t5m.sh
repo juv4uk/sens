@@ -1411,6 +1411,9 @@ run_case run_law d6-any-all-first-class-law "$d6_first_class_law_bundle" 1
 run_case run_law d6-any-all-first-class-mutant "$d6_first_class_mutant_bundle" 0
 run_case run_law d6-any-all-native-call-law tests/semantic/d6-any-all-native-call-law.lisp 1 core4
 run_case run_law d6-any-all-native-call-mutant tests/semantic/d6-any-all-native-call-mutant.lisp 0 core4
+# D6 improper tails: real D1 NO is not D3 NIL.
+run_case run_error_rejection d6-any-improper-tail-type tests/semantic/d6-any-improper-tail-negative.lisp Type 'car expects a non-empty list' core4
+run_case run_error_rejection d6-all-improper-tail-type tests/semantic/d6-all-improper-tail-negative.lisp Type 'car expects a non-empty list' core4
 sha256sum lib/core4-parts/core4-d6b.lisp tests/semantic/d6-any-all-native-call-law.lisp tests/semantic/d6-any-all-native-call-mutant.lisp > "$evidence/d6-any-all-native-call-inputs.sha256"
 
 # Класифікуємо кореневі причини без повторного запуску SENS.
