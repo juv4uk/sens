@@ -8,11 +8,41 @@ use sens::{
 use std::io::{self, BufRead, BufReader, Write};
 use std::net::{Ipv4Addr, TcpListener, TcpStream};
 use std::process;
+use std::sync::atomic::{AtomicUsize, Ordering};
+use std::sync::Arc;
+use std::thread;
 use std::time::{Duration, Instant};
 
 
 const MAX_TCP_REPL_LINE_BYTES: usize = 256 * 1024;
 const TCP_REPL_FRAME_DEADLINE: Duration = Duration::from_secs(5);
+const MAX_TCP_REPL_CONNECTIONS: usize = 4;
+// A separate worker must accommodate the same deep SENS recursion as Oracle.
+const TCP_REPL_WORKER_STACK_BYTES: usize = 256 * 1024 * 1024;
+
+/// A bounded, RAII-owned TCP worker slot: always released on exit or panic.
+struct LineConnectionSlot {
+    active: Arc<AtomicUsize>,
+}
+
+impl LineConnectionSlot {
+    fn acquire(active: &Arc<AtomicUsize>, limit: usize) -> Option<Self> {
+        active
+            .fetch_update(Ordering::AcqRel, Ordering::Acquire, |count| {
+                (count < limit).then_some(count + 1)
+            })
+            .ok()
+            .map(|_| Self {
+                active: Arc::clone(active),
+            })
+    }
+}
+
+impl Drop for LineConnectionSlot {
+    fn drop(&mut self) {
+        self.active.fetch_sub(1, Ordering::AcqRel);
+    }
+}
 
 /// Обмежене читання одного кадру. Ліміт у байтах включає LF.
 /// Прострочення, перевищення ліміту або некоректний UTF-8 закривають
@@ -100,11 +130,39 @@ pub(crate) fn run_tcp_repl(port: u16, allowed: &[String]) {
         env!("CARGO_PKG_VERSION")
     );
 
+    // Sessions are independent and concurrent. One client that keeps
+    // submitting valid lines must not monopolize the entire accept loop.
+    // Allocate a bounded worker slot BEFORE reserving its large stack.
+    let active = Arc::new(AtomicUsize::new(0));
+    let allowed = Arc::new(allowed.to_vec());
     for stream in listener.incoming() {
         let stream = match stream {
             Ok(stream) => stream,
-            Err(_) => continue,
+            Err(error) => {
+                eprintln!("TCP REPL: accept failed: {error}");
+                continue;
+            }
         };
+        let Some(slot) = LineConnectionSlot::acquire(&active, MAX_TCP_REPL_CONNECTIONS) else {
+            eprintln!("TCP REPL: maximum {MAX_TCP_REPL_CONNECTIONS} sessions reached");
+            let _ = stream.shutdown(std::net::Shutdown::Both);
+            continue;
+        };
+        let allowed = Arc::clone(&allowed);
+        if let Err(error) = thread::Builder::new()
+            .stack_size(TCP_REPL_WORKER_STACK_BYTES)
+            .spawn(move || {
+                let _slot = slot;
+                handle_tcp_line_connection(stream, allowed.as_slice());
+            })
+        {
+            // Failed spawning drops the closure and releases the slot.
+            eprintln!("TCP REPL: cannot spawn session worker: {error}");
+        }
+    }
+}
+
+fn handle_tcp_line_connection(stream: TcpStream, allowed: &[String]) {
         let peer = stream
             .peer_addr()
             .map(|a| a.to_string())
@@ -181,8 +239,8 @@ pub(crate) fn run_tcp_repl(port: u16, allowed: &[String]) {
             }
         }
         eprintln!("TCP REPL: {peer} disconnected");
-    }
 }
+
 
 
 #[cfg(test)]
@@ -196,6 +254,53 @@ mod tests {
         let sender = TcpStream::connect(listener.local_addr().unwrap()).unwrap();
         let (receiver, _) = listener.accept().unwrap();
         (sender, receiver)
+    }
+
+    #[test]
+    fn tcp_repl_worker_slots_are_bounded_and_released_on_panic() {
+        let active = Arc::new(AtomicUsize::new(0));
+        let first = LineConnectionSlot::acquire(&active, 2).expect("first session");
+        let second = LineConnectionSlot::acquire(&active, 2).expect("second session");
+        assert!(LineConnectionSlot::acquire(&active, 2).is_none());
+        drop(first);
+        let third = LineConnectionSlot::acquire(&active, 2).expect("released slot");
+        drop(second);
+        drop(third);
+        assert_eq!(active.load(Ordering::Acquire), 0);
+
+        let outcome = std::panic::catch_unwind({
+            let active = Arc::clone(&active);
+            move || {
+                let _slot = LineConnectionSlot::acquire(&active, 2).expect("worker slot");
+                panic!("simulated session failure");
+            }
+        });
+        assert!(outcome.is_err());
+        assert_eq!(active.load(Ordering::Acquire), 0);
+    }
+
+    #[test]
+    fn tcp_repl_worker_slots_are_atomic_under_contention() {
+        let active = Arc::new(AtomicUsize::new(0));
+        let begin = Arc::new(std::sync::Barrier::new(17));
+        let release = Arc::new(std::sync::Barrier::new(17));
+        let mut joins = Vec::new();
+        for _ in 0..16 {
+            let active = Arc::clone(&active);
+            let begin = Arc::clone(&begin);
+            let release = Arc::clone(&release);
+            joins.push(thread::spawn(move || {
+                begin.wait();
+                let slot = LineConnectionSlot::acquire(&active, 4);
+                release.wait();
+                slot.is_some()
+            }));
+        }
+        begin.wait();
+        release.wait();
+        let admitted = joins.into_iter().filter(|join| join.join().unwrap()).count();
+        assert!(admitted <= 4);
+        assert_eq!(active.load(Ordering::Acquire), 0);
     }
 
     #[test]
