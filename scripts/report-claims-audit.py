@@ -57,6 +57,21 @@ def unjudgeable_without_source() -> int:
                and not (SEMANTIC / f"{art}-law.lisp").is_file())
 
 
+def _opaque_without_family_lisp() -> int:
+    """Скільки *-law.sens без -law.lisp не мають ЖОДНОГО .lisp у родині (2 токени).
+    Грубий евристик: родич у родині — не обов'язково джерело того ж твердження."""
+    import re as _re
+    laws = sorted(p.stem[:-4] for p in SEMANTIC.glob("*-law.sens"))
+    opaque = [x for x in laws if not (SEMANTIC / f"{x}-law.lisp").is_file()]
+    stems = {p.name[:-5] for p in SEMANTIC.glob("*.lisp")}
+
+    def family(name: str) -> str:
+        parts = _re.split(r"[-_]", name)
+        return "-".join(parts[:2]) if len(parts) >= 2 else name
+
+    return sum(1 for x in opaque if not any(family(s) == family(x) for s in stems))
+
+
 def claims() -> list[tuple[str, int, int]]:
     """(опис, виміряно, очікувано)"""
     rows = ledger_rows()
@@ -78,6 +93,15 @@ def claims() -> list[tuple[str, int, int]]:
         # UNJUDGEABLE справді без .lisp-джерела.
         ("CONFIRMED у моїй мапі", count_verdict("CONFIRMED"), 0),
         ("UNJUDGEABLE без .lisp", unjudgeable_without_source(), 8),
+        # НЮАНС, перевірений 2026-10-24: конвенція імен у tests/semantic НЕ
+        # строго -law/-mutant (є d10-*-laws.lisp, -invalid-arity.lisp тощо).
+        # Тому «46 без -law.lisp» вужче за «46 без джерела». Родинний тест
+        # дає 7 «з родичем» і 39 «без родича» — але родич у родині
+        # (meta-eval-first-class-d1 ← meta-eval-lexical-shadow-d1) — ЦЕ ІНШЕ
+        # ТВЕРДЖЕННЯ, не джерело. Отже наявність джерела під іншим іменем
+        # НЕ вирішується механічно; це судження.
+        ("без -law.lisp (вужче за «без джерела»)", len(opaque), 46),
+        ("з них без жодного .lisp у родині", _opaque_without_family_lisp(), 39),
         # Твердження «N незгаданих артефактів» ПРИБРАНО: хибне за формою.
         # Ledger посилається і на .bits-кандидата (не .sens), тож перетин
         # залежить від способу порівняння — будь-яке одне число вводить в
