@@ -593,6 +593,16 @@ cat -- lib/d11-srfi1-unfold.lisp tests/semantic/d11-srfi1-unfold-mutant.lisp > "
 run_case run_law d11-srfi1-unfold-positive "$d11_unfold_positive" 1
 run_case run_law d11-srfi1-unfold-mutant "$d11_unfold_mutant" 0
 sha256sum lib/d11-srfi1-unfold.lisp tests/semantic/d11-srfi1-unfold-positive.lisp tests/semantic/d11-srfi1-unfold-mutant.lisp > "$evidence/d11-srfi1-unfold-inputs.sha256"
+# Д11: повна композиція GROUP-BY → FREQUENCIES, з несуміжними ключами.
+# Міняємо тільки SENS law/mutant, а не координати або хостову семантику.
+d11_freq_key_positive="$evidence/d11-frequencies-key-order-positive-complete.lisp"
+d11_freq_key_mutant="$evidence/d11-frequencies-key-order-mutant-complete.lisp"
+cat -- lib/d11-clojure-group-by.lisp lib/d11-clojure-frequencies-unary.lisp tests/semantic/d11-frequencies-key-order-law.lisp > "$d11_freq_key_positive"
+cat -- lib/d11-clojure-group-by.lisp lib/d11-clojure-frequencies-unary.lisp tests/semantic/d11-frequencies-key-order-mutant.lisp > "$d11_freq_key_mutant"
+run_case run_law d11-frequencies-key-order-positive "$d11_freq_key_positive" 1 core4
+run_case run_law d11-frequencies-key-order-mutant "$d11_freq_key_mutant" 0 core4
+sha256sum lib/d11-clojure-group-by.lisp lib/d11-clojure-frequencies-unary.lisp \
+  tests/semantic/d11-frequencies-key-order-law.lisp tests/semantic/d11-frequencies-key-order-mutant.lisp > "$evidence/d11-frequencies-key-order-inputs.sha256"
 # Д11 FREQUENCIES: окремий позитивний закон і мутант у SENS.
 # Нормативна проєкція: не числа D24, а правильний список унарних "о".
 # Всі DEFINE — канонічна Lisp-бібліотека, а фізичний шлях лише Zig/T5M.
