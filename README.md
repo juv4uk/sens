@@ -19,7 +19,7 @@
 
 ---
 
-**Чинне джерело:** [CURRENT.md](CURRENT.md) · Contract 11.9 · D1–D10 · D11 (окремий тестовий словник) · числові D24+.
+**Чинне джерело:** [CURRENT.md](CURRENT.md) · Contract 11.9 · D1–D10 · D11 (окремий тестовий словник) · числова драбина D12+.
 Ратифікація координат ≠ допуск до виклику ≠ доказ фізичного виконання.
 
 ## Стан на 19.10.2026: українське джерело та точні домени
@@ -30,7 +30,7 @@
 |---|---|---|
 | Домени | D1–D10 з ратифікованими координатами; D10 1024/1024. [D11](lib/domains/d11.lisp) містить **43 нератифіковані тестові позначення** (це не зарезервовані адреси функцій); окремо [512 похідних селекторів D11](knowledge/d11-selector-seed.json) математично визначено, але їхнє автономне виконання ще не доведено. [D7 v2](docs/d7-keyboard-v2.uk.md) — клавіатурний текст 128/128. | D11 — ще не новий callable Core; D10 **не оголошено невиконуваним**: поелементне виконання необхідно реалізувати й перевірити, не виводячи статус із кількості координат. |
 | Людський `.lisp` | Виклики використовують **повні імена `укр`** із доменних таблиць; синтаксис/імена — символи української розкладки. Цифрові викличні голови й числові літерали заборонені; числові значення будуються зі спискових даних і явної арифметики. Сирі бітові голови, закодовані літерали та історичні SID8/Sens8 не є людською програмою. | Назва сама по собі не встановлює семантичної ідентичності чи викличності. |
-| Математика | Реалізовано opt-in проєкцію **знакових десяткових цілих** у точні D24/D48/D96/D192 перед виконанням `*.lisp` у CLI та спеціальних українських точках входу ([код](crates/sens/src/source_projection.rs)); пов'язані D5-вирази узгоджують ширину. Дроби можливі через допущені математичні операції, зокрема `частка`. | Це **не** загальна підтримка всіх десяткових дробових літералів чи чисел довільної величини: поточний reader має межу `i128` і повертає явну помилку при переповненні. |
+| Математика | Реалізовано opt-in проєкцію **знакових десяткових цілих** у точні D12/D24/D48/D96/D192 перед виконанням `*.lisp` у CLI та спеціальних українських точках входу ([код](crates/sens/src/source_projection.rs)); профіль `project_ukr_decimal_integer_literals_with_minimum_width(..., 12)` явно вибирає D12, а сумісний wrapper зберігає підлогу D24. Пов'язані D5-вирази узгоджують ширину. Дроби можливі через допущені математичні операції, зокрема `частка`. | Це **не** загальна підтримка всіх десяткових дробових літералів чи чисел довільної величини: поточний reader має межу `i128` і повертає явну помилку при переповненні. |
 | Фізичне представлення | `.sens` — фізичні байти **T5M** (чинний default); **T5** лишився явним legacy-маршрутом. Zig-коридор переносить точні слова до/від байтів. `.lisp` та `.sens` — різні шари. | Сам транспортний roundtrip не є доказом SENS-евалюації; повне усунення Rust-обходів не слід вважати доведеним. |
 | CI | Центральний [`ci.yml`](.github/workflows/ci.yml) запускає перевірки на **GitHub-hosted Ubuntu 24.04**; чинний YAML **не містить** `concurrency`, `cancel-in-progress` чи `queue: max`, тому не гарантує ані несхлопування запусків, ані місткості черги на 100 jobs. Статуси перевіряти в GitHub Actions за точним SHA. | Колір одного workflow не встановлює статус усього проєкту; історичні бенчмарки не є поточним зеленим CI. |
 
@@ -500,7 +500,7 @@ semantic width  ≠  physical carrier width
 
 Історія назви: проєкт починався під робочою назвою `my-lisp`, поточне ім'я — SENS. Ратифікація D9: **owner-ratified #4008**. Чинні таблиці людських поверхонь: [D1](lib/domains/d1.lisp), [D8](lib/domains/d8.lisp), [D9](lib/domains/d9.lisp). Для D10 нормативні координати й декларації законів наведено в [канонічному інвентарі](knowledge/d10-v18-semantic-inventory.json), а статус рішення — в [акті власника](knowledge/d10-owner-whole-domain-ratification-20261012.json). Жоден транспорт, зокрема T5M, сам по собі не надає автоматичного допуску до виклику.
 
-## D1–D10, тестовий D11 та числові D24+
+## D1–D10, тестовий D11 та числові D12+
 
 SENS будує не одну плоску таблицю opcode, а **драбину доменів**.
 
@@ -516,7 +516,7 @@ SENS будує не одну плоску таблицю opcode, а **драб�
 | D8 | 8 | повний owner-ratified domain |
 | D9 | 9 | повний owner-ratified domain |
 | D10 | 10 | весь каталог 1024/1024 ратифіковано; окремі докази механізмів і виклику залишаються відкритими |
-| D24+ | 24·2^n | ратифіковані числові домени D24/D48/D96/D192/… |
+| D12+ | 12·2^n | ратифіковані числові домени D12/D24/D48/D96/D192/… |
 
 Поточна owner-ratified картина:
 
@@ -525,7 +525,7 @@ D7 = 128/128 ratified keyboard/text v2; historical sound v1 was 126/128
 D8 = 256/256
 D9 = 512/512
 D10 = 1024/1024, whole-domain owner-ratified; residency alone grants no callability
-D24+ = owner-ratified numeric ladder
+D12+ = owner-ratified numeric ladder
 ~~~
 
 **Чинна D7:** [ратифікована клавіатурна таблиця v2](knowledge/d7-keyboard-v2-ratified.json) від 13.10.2026 з усіма 128 точними семибітовими координатами. Два історично резервні місця `0100001` і `0101010` належали лише звуковій v1. **За D7 v1 нічого не було мігровано**, тому для нинішньої міграції немає старих v1-даних, які потрібно декодувати чи перекодовувати: одразу застосовується чинна D7 v2. D7 — текстові дані, не арифметика чи право виклику функції. [Опис чинного профілю](docs/d7-keyboard-v2.uk.md).
@@ -911,7 +911,7 @@ exact bits + exact domain + proved/ratified law
 
 Width is part of identity. A byte or u8 carrier is only storage.
 
-Current Contract 11.9 preserves D1–D9, owner-ratifies D10 as a single 1024-code domain and keeps separately ratified D24+ numeric domains. D10 residency alone does not grant a callable mechanism; T5M transports exact words but does not grant execution. D2 owns source structure; D3 and higher domains own semantic residents according to their own laws.
+Current Contract 11.9 preserves D1–D9, owner-ratifies D10 as a single 1024-code domain and keeps separately ratified D12+ numeric domains. D10 residency alone does not grant a callable mechanism; T5M transports exact words but does not grant execution. D2 owns source structure; D3 and higher domains own semantic residents according to their own laws.
 
 Canonical binary source is visible binary, not decimal IDs, #b..., quoted binary strings, or host opcode wrappers.
 

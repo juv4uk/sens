@@ -5,7 +5,7 @@
 //! integer identity. Host vectors are private storage only.
 //!
 //! Unqualified legacy values retain their canonical unsigned magnitude
-//! projection. Explicit D24+ values interpret their exact-width words as
+//! projection. Explicit D12+ values interpret their exact-width words as
 //! two's-complement integers; ratio components use private unsigned magnitudes.
 
 use std::{cmp::Ordering, fmt, sync::Arc};
@@ -21,7 +21,7 @@ pub enum BinaryNumberError {
 pub struct BinaryNumber {
     bits: Arc<Vec<u8>>,
     // None is the historic/unqualified normalized Number pathway.
-    // Some(n) is an explicitly admitted numeric domain Dn (n=24*2^k).
+    // Some(n) is an explicitly admitted numeric domain Dn (n=12*2^k).
     // The field is authority-bearing and therefore participates in Eq/Hash.
     numeric_domain_width: Option<usize>,
 }
@@ -486,7 +486,7 @@ impl BinaryNumber {
         Self::is_numeric_domain_width(width) && self.width() <= width
     }
 
-    /// Mechanical realization of same-domain signed D24+ addition.
+    /// Mechanical realization of same-domain signed D12+ addition.
     /// Both operands must carry the same explicit Dn identity. The result
     /// remains Dn when representable or widens to the next D12+ rung.
     /// Returned bits retain the selected domain's FULL width.
@@ -866,7 +866,7 @@ mod tests {
 
     #[test]
     fn numeric_domain_addition_widens_unbounded_rungs_and_rejects_bad_domains() {
-        for width in [24, 48, 96, 192, 384, 768] {
+        for width in [12, 24, 48, 96, 192, 384, 768] {
             let mut max_word = vec![1; width];
             max_word[0] = 0;
             let max = BinaryNumber::from_numeric_domain_bits(width, &max_word).unwrap();
@@ -1027,7 +1027,7 @@ mod tests {
     }
 
     #[test]
-    fn d24_plus_same_domain_mul_sub_div_are_exact_and_closed() {
+    fn d12_plus_same_domain_mul_sub_div_are_exact_and_closed() {
         let admitted = |width: usize, value: u64| {
             let mut word = vec![0; width];
             for i in 0..width.min(64) {
@@ -1035,7 +1035,7 @@ mod tests {
             }
             BinaryNumber::from_numeric_domain_bits(width, &word).unwrap()
         };
-        for width in [24, 48, 96, 192, 384] {
+        for width in [12, 24, 48, 96, 192, 384] {
             let z = admitted(width, 0);
             let one = admitted(width, 1);
             let six = admitted(width, 6);
@@ -1084,8 +1084,8 @@ mod tests {
     }
 
     #[test]
-    fn full_d24_plus_multiplication_promotes_to_exact_double_width() {
-        for width in [24, 48, 96, 192, 384] {
+    fn full_d12_plus_multiplication_promotes_to_exact_double_width() {
+        for width in [12, 24, 48, 96, 192, 384] {
             let mut max_word = vec![1; width];
             max_word[0] = 0;
             let max = BinaryNumber::from_numeric_domain_bits(width, &max_word).unwrap();

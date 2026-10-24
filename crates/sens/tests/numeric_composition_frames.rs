@@ -1,4 +1,4 @@
-//! Exact D24+ NEG/RATIO mechanical frame roundtrip (not a T5 grammar change).
+//! Exact D12+ NEG/RATIO value-frame roundtrip (not a T5 grammar change).
 //! Independent witness: semantic identity, canonicality, bit length, and
 //! refusal to interpret legacy/unqualified numbers as admitted Dn values.
 use sens::{
@@ -35,7 +35,7 @@ fn gamma0(n: usize) -> Vec<u8> {
 
 #[test]
 fn signed_and_rational_values_roundtrip_without_domain_loss() {
-    for width in [24usize, 48, 96, 192, 384] {
+    for width in [12usize, 24, 48, 96, 192, 384] {
         let one = Value::BinaryNumber(d(width, 1));
         let two = Value::BinaryNumber(d(width, 2));
         let three = Value::BinaryNumber(d(width, 3));

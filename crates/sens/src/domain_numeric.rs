@@ -1,4 +1,4 @@
-//! Exact arithmetic for signed D24+ integers and exact NEG/RATIO compositions.
+//! Exact arithmetic for signed D12+ integers and exact NEG/RATIO compositions.
 //! This is a Core VALUE mechanism, NOT a new SENS domain. Integer words use
 //! two's complement; fraction components keep private unsigned magnitudes.
 //! Domain identities remain explicit, with no host floats, mixed-domain
@@ -6,7 +6,7 @@
 use crate::{BinaryNumber, Value};
 use std::cmp::Ordering;
 
-/// Executable canonical fractions over admitted D24/D48/... numeric domains.
+/// Executable canonical fractions over admitted D12/D24/... numeric domains.
 ///
 /// Both unsigned-magnitude constituents retain the exact SAME admitted Dn.
 /// Their sign and reduced rational shape are fraction-composition fields;
@@ -452,8 +452,8 @@ fn signed_wide_div_exact_fast(lhs: &BinaryNumber, rhs: &BinaryNumber) -> Option<
 /// Exactly two operands in the SAME Dn; arithmetic creates no unqualified
 /// identity. The specific result-domain growth is explicit and validated.
 pub fn compute(operator: &str, lhs: &Value, rhs: &Value) -> Option<Value> {
-    // Reject D24/D48 (or non-Dn) BEFORE cloning potentially wide rational
-    // constituents into the private calculation.
+    // Reject mixed-domain or unqualified operands BEFORE cloning potentially
+    // wide rational constituents into the private calculation.
     let width = shared_numeric_domain_width(lhs, rhs)?;
     // Для широких Dn машинний DIVQ повертає лише точні цілі частки.
     // Остача або великий дільник переходять до існуючого RATIO.
