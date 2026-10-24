@@ -180,7 +180,7 @@ run_native_t5m_program() {
       negative_type_diagnostic='eq expects two atoms' ;;
     tests/semantic/d4-not-nonpredicate-type-negative.lisp)
       negative_type_diagnostic='NOT requires an exact D1 PredicateBit' ;;
-    tests/semantic/d3-cond-nil-condition-type-negative.lisp)
+    tests/semantic/d3-cond-nil-condition-type-negative.lisp|tests/semantic/d11-tree-equal-by-test-nonpredicate-negative.lisp)
       negative_type_diagnostic='D3:110 COND expects exact D1:1 / D1:0' ;;
     tests/semantic/d3-car-empty-list-type-negative.lisp)
       negative_type_diagnostic='car expects a non-empty list' ;;
@@ -219,6 +219,9 @@ run_native_t5m_program() {
             "$file" == "tests/semantic/d11-srfi1-filter-map-improper-tail-negative.lisp" ]]; then
       direct_source="$dir/d11-filter-map-bound-negative.lisp"
       cat -- lib/d11-srfi1-filter-map.lisp "$file" > "$direct_source"
+    elif [[ "$file" == "tests/semantic/d11-tree-equal-by-test-nonpredicate-negative.lisp" ]]; then
+      direct_source="$dir/d11-tree-test-bound-negative.lisp"
+      cat -- lib/d11-tree-equal-by-test.lisp "$file" > "$direct_source"
     elif [[ "$file" == "tests/semantic/d11-srfi1-find-tail-improper-tail-negative.lisp" ]]; then
       direct_source="$dir/d11-find-tail-bound-negative.lisp"
       cat -- lib/d11-srfi1-find-tail.lisp "$file" > "$direct_source"
@@ -872,7 +875,8 @@ while IFS= read -r file || [[ -n "$file" ]]; do
     binding_sources=(--binding-source lib/d11-clojure-group-by.lisp
                      --binding-source lib/d11-clojure-frequencies-unary.lisp)
   elif [[ "$file" == "tests/semantic/d11-tree-equal-by-test-law.lisp" ||
-          "$file" == "tests/semantic/d11-tree-equal-by-test-mutant.lisp" ]]; then
+          "$file" == "tests/semantic/d11-tree-equal-by-test-mutant.lisp" ||
+          "$file" == "tests/semantic/d11-tree-equal-by-test-nonpredicate-negative.lisp" ]]; then
     # F11-TREE-TEST: точний D11-кандидат — викличне Lisp-визначення,
     # Zig транспортує слова, а SENS сам обчислює D1 позитив/мутант.
     binding_sources=(--binding-source lib/d11-tree-equal-by-test.lisp)

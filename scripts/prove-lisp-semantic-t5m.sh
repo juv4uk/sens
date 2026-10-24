@@ -624,7 +624,13 @@ cat -- lib/d11-tree-equal-by-test.lisp tests/semantic/d11-tree-equal-by-test-law
 cat -- lib/d11-tree-equal-by-test.lisp tests/semantic/d11-tree-equal-by-test-mutant.lisp > "$d11_tree_test_mutant_bundle"
 run_case run_law d11-tree-test-positive "$d11_tree_test_law_bundle" 1
 run_case run_law d11-tree-test-mutant "$d11_tree_test_mutant_bundle" 0
-sha256sum lib/d11-tree-equal-by-test.lisp tests/semantic/d11-tree-equal-by-test-law.lisp tests/semantic/d11-tree-equal-by-test-mutant.lisp > "$evidence/d11-tree-test-inputs.sha256"
+# Справжній негатив: не-D1 результат листкового компаратора викликає Type.
+d11_tree_test_invalid_bundle="$evidence/d11-tree-test-nonpredicate-negative-complete.lisp"
+cat -- lib/d11-tree-equal-by-test.lisp tests/semantic/d11-tree-equal-by-test-nonpredicate-negative.lisp > "$d11_tree_test_invalid_bundle"
+run_case run_error_rejection d11-tree-test-nonpredicate-negative "$d11_tree_test_invalid_bundle" Type 'D3:110 COND expects exact D1:1 / D1:0'
+sha256sum lib/d11-tree-equal-by-test.lisp tests/semantic/d11-tree-equal-by-test-law.lisp \
+  tests/semantic/d11-tree-equal-by-test-mutant.lisp \
+  tests/semantic/d11-tree-equal-by-test-nonpredicate-negative.lisp > "$evidence/d11-tree-test-inputs.sha256"
 # F11-PROOF-TRACE: нативний закон SENS, жодної додаткової D11-координати.
 # Фактичні визначення беруться лише з lib/reason.lisp (та D9 уніфікатора).
 # SENS виконує 2 D1 закони й 2 очікувані Type-помилки через Zig/T5M.
