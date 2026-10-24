@@ -382,6 +382,19 @@ test "default T5M CLI carry packs exact opaque words five trits per byte" {
     try std.testing.expectError(Error.InvalidTrit, carryT5M(allocator, "10x"));
 }
 
+test "T5M malformed separators are rejected before word allocation" {
+    // A zero-capacity allocator proves the parser rejects malformed grammar
+    // before requesting storage proportional to attacker-controlled separators.
+    var empty_storage: [0]u8 = .{};
+    var fixed = std.heap.FixedBufferAllocator.init(&empty_storage);
+    const allocator = fixed.allocator();
+
+    try std.testing.expectError(Error.InvalidTritBoundary, carryT5M(allocator, "2"));
+    try std.testing.expectError(Error.InvalidTritBoundary, carryT5M(allocator, "02"));
+    try std.testing.expectError(Error.InvalidTritBoundary, carryT5M(allocator, "0221"));
+    try std.testing.expectError(Error.InvalidTrit, carryT5M(allocator, "0x"));
+}
+
 test "Zig migration accepts presegmented trits longer than packed T5 bound" {
     // A presegmented source is allowed to exceed the size of the physical
     // carrier it produces. The Zig corridor must not truncate it or call a
