@@ -22,6 +22,12 @@ grep -Fq '| zig-open | exit=0 | 2 | 15 | 25 | 25 |' "$tmp/report.md"
 grep -Fq '| sens-standalone | exit!=0 | 1 | 220 | 220 | 220 |' "$tmp/report.md"
 grep -Fq 'SENS_PHASE_EXIT_CLASS stage=direct exit_class=zero count=1 p50_us=100' "$tmp/log"
 grep -Fq 'SENS_PHASE_EXIT_CLASS stage=direct exit_class=nonzero count=2 p50_us=200' "$tmp/log"
+# Семантичний RED з exit=0 не має прискорювати вибірку правильних законів.
+printf 'semantic-red\tRED\t5\n' >> "$tmp/ev/law-timings.tsv"
+printf 'semantic-red\tdirect\t0\t1\n' >> "$tmp/ev/law-stage-timings.tsv"
+bash "$tool" "$tmp/ev" "$tmp/report-semantic-red.md" > "$tmp/log-semantic-red"
+grep -Fq '| direct | PASS + exit=0 | 1 | 100 | 100 | 100 |' "$tmp/report-semantic-red.md"
+grep -Fq 'SENS_PHASE_VERIFIED_SUCCESS stage=direct count=1 p50_us=100' "$tmp/log-semantic-red"
 printf 'bad\trow\n' >> "$tmp/ev/law-stage-timings.tsv"
 if bash "$tool" "$tmp/ev" "$tmp/invalid.md" > "$tmp/invalid.out" 2>&1; then
  echo 'REPORTER_TEST_FAILED: malformed evidence was accepted' >&2; exit 1
