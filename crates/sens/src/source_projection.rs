@@ -403,7 +403,7 @@ mod tests {
         crate::load_core_library(&mut session).expect("SENS Core loads");
         let result = crate::eval_parsed_expressions(&projected, &mut session)
             .expect("SENS computes the exact result without modulo-4096 wrapping");
-        let crate::Value::BinaryNumber(sum) = result.value else {
+        let crate::Value::BinaryNumber(ref sum) = result.value else {
             panic!("D12 addition must return an exact numeric word")
         };
         assert_eq!(sum.numeric_domain_width(), Some(24));
