@@ -47,6 +47,23 @@ fn contains_noncanonical_exact_number(value: &Value) -> bool {
     }
 }
 
+// Живі об'єкти та виконувані значення мають лише діагностичне
+// відображення. READ не може відновити їхню тотожність із тексту.
+fn contains_unserializable_capability(value: &Value) -> bool {
+    match value {
+        Value::Closure(_) | Value::Macro(_) | Value::Builtin(_) | Value::HostHandle { .. } => true,
+        Value::Pair(node) => {
+            contains_unserializable_capability(&node.head)
+                || contains_unserializable_capability(&node.tail)
+        }
+        Value::Vector(values) => values
+            .borrow()
+            .iter()
+            .any(contains_unserializable_capability),
+        _ => false,
+    }
+}
+
 pub(crate) fn write_to_string_values(
     arguments: &[Value],
     _environment: &Environment,
@@ -64,6 +81,13 @@ pub(crate) fn write_to_string_values(
         return Err(LanguageError::new(
             ErrorKind::Type,
             "write-to-string cannot serialize a legacy exact Number without loss",
+            span,
+        ));
+    }
+    if contains_unserializable_capability(&arguments[0]) {
+        return Err(LanguageError::new(
+            ErrorKind::Type,
+            "write-to-string cannot serialize an executable or opaque host capability",
             span,
         ));
     }
@@ -200,6 +224,27 @@ mod tests {
         let error = write_to_string_values(&[value], &Environment::root(), Span::default())
             .expect_err("PredicateBit must not enter canonical wire");
         assert_eq!(error.kind, ErrorKind::Type);
+    }
+
+    #[test]
+    fn canonical_wire_rejects_live_host_handles_even_when_nested() {
+        // Діагностичний <tcp-connection> не має зворотного READ,
+        // навіть якщо об'єкт захований усередині D2-списку чи вектора.
+        let handle = Value::host_handle("tcp-connection", 7);
+        let list = Value::list([Value::Number(1.0, crate::Exactness::Exact), handle.clone()]);
+        let vector = Value::Vector(Rc::new(std::cell::RefCell::new(vec![handle.clone()])));
+        for value in [handle, list, vector] {
+            let error = write_to_string_values(&[value], &Environment::root(), Span::default())
+                .expect_err("opaque resource cannot have canonical read-back-safe wire");
+            assert_eq!(error.kind, ErrorKind::Type);
+        }
+        let ordinary = write_to_string_values(
+            &[Value::String(Rc::from("звичайні-дані"))],
+            &Environment::root(),
+            Span::default(),
+        )
+        .expect("ordinary data remains writable");
+        assert_eq!(ordinary, Value::String(Rc::from("\"звичайні-дані\"")));
     }
 
     #[test]
