@@ -740,6 +740,21 @@ run_case run_error_rejection d11-reason-proof-results-improper-map "$reason_resu
 run_case run_error_rejection d11-reason-proof-results-improper-attach "$reason_results_attach_bundle" Type 'car expects a non-empty list' core4
 sha256sum lib/unify.lisp lib/reason.lisp tests/semantic/d11-reason-proof-results-*.lisp > "$evidence/d11-reason-proof-results-inputs.sha256"
 
+# D11 REASON PROVENANCE: точний SENS D3 NIL та D1-невідповідність.
+provenance_leaf_law_bundle="$evidence/d11-reason-provenance-children-law-complete.lisp"
+provenance_leaf_mutant_bundle="$evidence/d11-reason-provenance-children-mutant-complete.lisp"
+provenance_bad_children_bundle="$evidence/d11-reason-provenance-improper-children-complete.lisp"
+provenance_bad_explanation_bundle="$evidence/d11-reason-provenance-improper-explanation-complete.lisp"
+cat -- lib/unify.lisp lib/reason.lisp tests/semantic/d11-reason-provenance-children-law.lisp > "$provenance_leaf_law_bundle"
+cat -- lib/unify.lisp lib/reason.lisp tests/semantic/d11-reason-provenance-children-mutant.lisp > "$provenance_leaf_mutant_bundle"
+cat -- lib/unify.lisp lib/reason.lisp tests/semantic/d11-reason-provenance-improper-children-negative.lisp > "$provenance_bad_children_bundle"
+cat -- lib/unify.lisp lib/reason.lisp tests/semantic/d11-reason-provenance-improper-explanation-negative.lisp > "$provenance_bad_explanation_bundle"
+run_case run_law d11-reason-provenance-children-law "$provenance_leaf_law_bundle" 1 core4
+run_case run_law d11-reason-provenance-children-mutant "$provenance_leaf_mutant_bundle" 0 core4
+run_case run_error_rejection d11-reason-provenance-improper-children "$provenance_bad_children_bundle" Type 'car expects a non-empty list' core4
+run_case run_error_rejection d11-reason-provenance-improper-explanation "$provenance_bad_explanation_bundle" Type 'car expects a non-empty list' core4
+sha256sum lib/unify.lisp lib/reason.lisp tests/semantic/d11-reason-provenance-*.lisp > "$evidence/d11-reason-provenance-inputs.sha256"
+
 # F11-PROOF-TRACE: нативний закон SENS, жодної додаткової D11-координати.
 # Фактичні визначення беруться лише з lib/reason.lisp (та D9 уніфікатора).
 # SENS виконує 2 D1 закони й 2 очікувані Type-помилки через Zig/T5M.
@@ -1013,20 +1028,6 @@ sha256sum lib/d11-srfi1-lset-diff-intersection.lisp \
   tests/semantic/d11-srfi1-lset-diff-intersection-mutant.lisp \
   tests/semantic/d11-srfi1-lset-diff-intersection-improper-left-negative.lisp \
   tests/semantic/d11-srfi1-lset-diff-intersection-improper-right-negative.lisp > "$evidence/d11-lset-diff-intersection-inputs.sha256"
-# Д11 LSET-XOR: три справжні негативні виклики SENS із тим самим DEFINE.
-# Лівий/правий атом D1 замість D3 () → CAR Type, компаратор D3 → COND Type.
-d11_xor_bad_left="$evidence/d11-lset-xor-improper-left-complete.lisp"
-d11_xor_bad_right="$evidence/d11-lset-xor-improper-right-complete.lisp"
-d11_xor_bad_comparator="$evidence/d11-lset-xor-nonpredicate-complete.lisp"
-cat -- lib/d11-srfi1-lset-diff-intersection.lisp tests/semantic/d11-srfi1-lset-xor-improper-left-negative.lisp > "$d11_xor_bad_left"
-cat -- lib/d11-srfi1-lset-diff-intersection.lisp tests/semantic/d11-srfi1-lset-xor-improper-right-negative.lisp > "$d11_xor_bad_right"
-cat -- lib/d11-srfi1-lset-diff-intersection.lisp tests/semantic/d11-srfi1-lset-xor-nonpredicate-negative.lisp > "$d11_xor_bad_comparator"
-run_case run_error_rejection d11-lset-xor-improper-left "$d11_xor_bad_left" Type 'car expects a non-empty list' core4
-run_case run_error_rejection d11-lset-xor-improper-right "$d11_xor_bad_right" Type 'car expects a non-empty list' core4
-run_case run_error_rejection d11-lset-xor-nonpredicate "$d11_xor_bad_comparator" Type 'D3:110 COND expects exact D1:1 / D1:0' core4
-sha256sum lib/d11-srfi1-lset-diff-intersection.lisp tests/semantic/d11-srfi1-lset-xor-improper-left-negative.lisp tests/semantic/d11-srfi1-lset-xor-improper-right-negative.lisp tests/semantic/d11-srfi1-lset-xor-nonpredicate-negative.lisp > "$evidence/d11-lset-xor-negative-inputs.sha256"
-
-
 # Д11 FREQUENCIES: окремий позитивний закон і мутант у SENS.
 # Нормативна проєкція: не числа D24, а правильний список унарних "о".
 # Всі DEFINE — канонічна Lisp-бібліотека, а фізичний шлях лише Zig/T5M.
