@@ -61,7 +61,13 @@ for id in d1-not d2-cond-laziness d3-structure d4-lexical-scope d4-second-select
     fi
     # Парне виконання SENS порівнює фізичні слова з вихідною програмою.
     # Shell не обчислює семантику й не оголошує standalone фізичного входу.
-    if ! timeout 45s "$cli" --t5m-pair "$file" "$physical" > "$tmp/actual" 2> "$tmp/stderr"; then
+    # Похідні D6 COMPOSE/FLIP/CURRY визначені самою мовою в Core4.
+    # Передавати лише наявний профіль завантаження, не імітувати семантику.
+    runtime_args=()
+    if [[ "$id" == d6-compose-flip ]]; then
+      runtime_args=(--core4-runtime)
+    fi
+    if ! timeout 45s "$cli" --t5m-pair "$file" "$physical" "${runtime_args[@]}" > "$tmp/actual" 2> "$tmp/stderr"; then
       printf 'REGRESSION test_id=%s layer=physical-eval input=%s expected=D1:%s actual=execution-error\n' "$id" "$file" "$expected" >&2
       cat "$tmp/stderr" >&2
       exit 1
