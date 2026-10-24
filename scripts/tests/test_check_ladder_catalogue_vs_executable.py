@@ -41,6 +41,16 @@ class LadderSeparationTests(unittest.TestCase):
             self.assertIn("задекларовано", line)
             self.assertIn(" 0 ", line + " ")
 
+    def test_d5_gap_is_named_not_silently_swallowed(self):
+        # D5 має 8 селекторних координат за законом, але 0 у bindings —
+        # виконуваність мусить бути 6 ∪ 8 = 14, а прогалину — названо.
+        r = self.run_script()
+        self.assertIn("D5-GAP-WARNING", r.stdout)
+        import re as _re
+        d5 = next(l for l in r.stdout.splitlines()
+                  if _re.match(r"D5\s+\d+", l.strip()))
+        self.assertIn(" 14 ", d5 + " ")
+
     def test_fully_bound_rungs_report_zero_carrier_only(self):
         r = self.run_script()
         # D6 (64/64) і D9 (512/512) — повністю зв'язані.
