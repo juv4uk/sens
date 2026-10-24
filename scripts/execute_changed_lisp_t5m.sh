@@ -182,6 +182,8 @@ run_native_t5m_program() {
   case "$file" in
     tests/semantic/d6-any-all-cold-no-mechanism-negative.lisp)
       negative_type_diagnostic='domain identity is not callable' ;;
+    tests/semantic/d11-srfi1-filter-map-improper-root-negative.lisp|tests/semantic/d11-srfi1-filter-map-improper-tail-negative.lisp)
+      negative_type_diagnostic='domain identity is not callable under its ratified law: D1 ' ;;
     tests/semantic/d3-eq-nonatom-type-negative.lisp)
       negative_type_diagnostic='eq expects two atoms' ;;
     tests/semantic/d4-not-nonpredicate-type-negative.lisp)
@@ -221,6 +223,10 @@ run_native_t5m_program() {
           "$file" == "tests/semantic/d11-srfi1-subset-improper-empty-negative.lisp" ]]; then
       direct_source="$dir/d11-set-relations-bound-negative.lisp"
       cat -- lib/d11-srfi1-set-relations.lisp "$file" > "$direct_source"
+    elif [[ "$file" == "tests/semantic/d11-srfi1-filter-map-improper-root-negative.lisp" ||
+            "$file" == "tests/semantic/d11-srfi1-filter-map-improper-tail-negative.lisp" ]]; then
+      direct_source="$dir/d11-filter-map-bound-negative.lisp"
+      cat -- lib/d11-srfi1-filter-map.lisp "$file" > "$direct_source"
     elif [[ "$file" == "tests/semantic/d11-srfi1-find-tail-improper-tail-negative.lisp" ]]; then
       direct_source="$dir/d11-find-tail-bound-negative.lisp"
       cat -- lib/d11-srfi1-find-tail.lisp "$file" > "$direct_source"
@@ -878,6 +884,10 @@ while IFS= read -r file || [[ -n "$file" ]]; do
     # F11-TREE-TEST: точний D11-кандидат — викличне Lisp-визначення,
     # Zig транспортує слова, а SENS сам обчислює D1 позитив/мутант.
     binding_sources=(--binding-source lib/d11-tree-equal-by-test.lisp)
+  elif [[ "$file" == "tests/semantic/d11-srfi1-filter-map-improper-root-negative.lisp" ||
+          "$file" == "tests/semantic/d11-srfi1-filter-map-improper-tail-negative.lisp" ]]; then
+    # Джерело чинної D11-композиції: Zig транспортує, SENS виконує Type.
+    binding_sources=(--binding-source lib/d11-srfi1-filter-map.lisp)
   elif [[ "$file" == "tests/semantic/d11-srfi1-filter-map-law.lisp" ||
           "$file" == "tests/semantic/d11-srfi1-filter-map-mutant.lisp" ]]; then
     # Д11 FILTER-MAP: після зміни окремого свідка Mint/Pair мають

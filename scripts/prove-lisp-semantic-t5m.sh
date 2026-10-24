@@ -668,6 +668,17 @@ cat -- lib/d11-srfi1-filter-map.lisp tests/semantic/d11-srfi1-filter-map-mutant.
 run_case run_law d11-srfi1-filter-map-positive "$d11_filter_map_positive" 1
 run_case run_law d11-srfi1-filter-map-mutant "$d11_filter_map_mutant" 0
 sha256sum lib/d11-srfi1-filter-map.lisp tests/semantic/d11-srfi1-filter-map-law.lisp tests/semantic/d11-srfi1-filter-map-mutant.lisp > "$evidence/d11-srfi1-filter-map-inputs.sha256"
+# Д11 FILTER-MAP: атомарний корінь та D1-хвіст мають давати SENS Type,
+# а не помилковий успіх, тихе усікання чи D7 UnknownSymbol.
+d11_filter_bad_root="$evidence/d11-filter-map-improper-root-complete.lisp"
+d11_filter_bad_tail="$evidence/d11-filter-map-improper-tail-complete.lisp"
+cat -- lib/d11-srfi1-filter-map.lisp tests/semantic/d11-srfi1-filter-map-improper-root-negative.lisp > "$d11_filter_bad_root"
+cat -- lib/d11-srfi1-filter-map.lisp tests/semantic/d11-srfi1-filter-map-improper-tail-negative.lisp > "$d11_filter_bad_tail"
+d11_filter_map_type_error='domain identity is not callable under its ratified law: D1 '
+run_case run_type_rejection d11-srfi1-filter-map-improper-root-type "$d11_filter_bad_root" "$d11_filter_map_type_error"
+run_case run_type_rejection d11-srfi1-filter-map-improper-tail-type "$d11_filter_bad_tail" "$d11_filter_map_type_error"
+sha256sum lib/d11-srfi1-filter-map.lisp tests/semantic/d11-srfi1-filter-map-improper-root-negative.lisp tests/semantic/d11-srfi1-filter-map-improper-tail-negative.lisp > "$evidence/d11-filter-map-improper-inputs.sha256"
+
 # Д11 SRFI-1: UNFOLD/UNFOLD-RIGHT є чистими композиціями SENS.
 # Джерело тестів — Lisp, Zig лише несе T5M; помилковий порядок = D1:ні.
 d11_unfold_positive="$evidence/d11-srfi1-unfold-positive-complete.lisp"
