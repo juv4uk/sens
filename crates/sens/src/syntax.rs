@@ -1340,7 +1340,7 @@ mod fasl_tests {
 
     fn fasl_with_one_raw_expression(raw: &[u8]) -> Vec<u8> {
         let mut payload = Vec::new();
-        payload.extend_from_slice(&fasl::FASL_FORMAT_VERSION.to_le_bytes());
+        payload.extend_from_slice(&super::fasl::FASL_FORMAT_VERSION.to_le_bytes());
         payload.extend_from_slice(&[0x3du8; 32]);
         payload.extend_from_slice(&1u32.to_le_bytes());
         payload.extend_from_slice(raw);
