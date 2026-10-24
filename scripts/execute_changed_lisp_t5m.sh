@@ -958,7 +958,8 @@ while IFS= read -r file || [[ -n "$file" ]]; do
     binding_sources=(--binding-source lib/d11-srfi1-unary-count.lisp)
   elif [[ "$file" == "tests/semantic/d11-srfi1-find-presence-law.lisp" ||
           "$file" == "tests/semantic/d11-srfi1-find-presence-mutant.lisp" ||
-          "$file" == "tests/semantic/d11-srfi1-find-presence-improper-tail-negative.lisp" ]]; then
+          "$file" == "tests/semantic/d11-srfi1-find-presence-improper-tail-negative.lisp" ||
+          "$file" == "tests/semantic/d11-srfi1-find-presence-early-hit-improper-negative.lisp" ]]; then
     # Існуюче SENS-визначення ідентичне для direct, paired і повного файла.
     binding_sources=(--binding-source lib/d11-srfi1-find-presence.lisp)
   elif [[ "$file" == "tests/semantic/d11-srfi1-filter-map-law.lisp" ||

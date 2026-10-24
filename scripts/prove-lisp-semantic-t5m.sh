@@ -814,7 +814,10 @@ cat -- lib/d11-srfi1-find-presence.lisp tests/semantic/d11-srfi1-find-presence-i
 run_case run_law d11-srfi1-find-presence-positive "$d11_presence_positive" 1
 run_case run_law d11-srfi1-find-presence-mutant "$d11_presence_mutant" 0
 run_case run_type_rejection d11-srfi1-find-presence-improper-tail-type "$d11_presence_bad_tail" 'car expects a non-empty list'
-sha256sum lib/d11-srfi1-find-presence.lisp tests/semantic/d11-srfi1-find-presence-law.lisp tests/semantic/d11-srfi1-find-presence-mutant.lisp tests/semantic/d11-srfi1-find-presence-improper-tail-negative.lisp > "$evidence/d11-find-presence-inputs.sha256"
+d11_presence_early="$evidence/d11-find-presence-early-improper.lisp"
+cat -- lib/d11-srfi1-find-presence.lisp tests/semantic/d11-srfi1-find-presence-early-hit-improper-negative.lisp > "$d11_presence_early"
+run_case run_type_rejection d11-find-presence-early-hit-improper "$d11_presence_early" "car expects a non-empty list"
+sha256sum lib/d11-srfi1-find-presence.lisp tests/semantic/d11-srfi1-find-presence-law.lisp tests/semantic/d11-srfi1-find-presence-mutant.lisp tests/semantic/d11-srfi1-find-presence-improper-tail-negative.lisp tests/semantic/d11-srfi1-find-presence-early-hit-improper-negative.lisp > "$evidence/d11-find-presence-inputs.sha256"
 # Д11 SRFI-1 FILTER-MAP: D1:ні відкидається, структурне () зберігається.
 # Справжній SENS source → Zig/T5M → парний і самостійний SENS.
 d11_filter_map_positive="$evidence/d11-srfi1-filter-map-positive.lisp"
