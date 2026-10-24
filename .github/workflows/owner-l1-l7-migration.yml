@@ -1,0 +1,30 @@
+name: Owner L1-L7 migration gate
+
+on:
+  pull_request:
+    paths:
+      - 'scripts/owner_l1_l7_gate.py'
+      - 'tests/test_owner_l1_l7_gate.py'
+      - 'docs/migration/owner-l1-l7-20261009.uk.md'
+      - '.github/workflows/owner-l1-l7-migration.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/owner_l1_l7_gate.py'
+      - 'tests/test_owner_l1_l7_gate.py'
+      - '.github/workflows/owner-l1-l7-migration.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  owner-l1-l7:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Python syntax
+        run: python3 -m py_compile scripts/owner_l1_l7_gate.py tests/test_owner_l1_l7_gate.py
+      - name: Fail-closed L1-L7 tests
+        run: python3 -m unittest discover -s tests -p 'test_owner_l1_l7_gate.py' -v
