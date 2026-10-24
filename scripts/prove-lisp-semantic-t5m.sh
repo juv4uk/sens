@@ -507,9 +507,15 @@ run_case run_law d4-first-class-predicate-mutant tests/semantic/d4-first-class-p
 # Ратифікація 1024/1024 не підміняє фізичного позитиву й мутанта.
 run_case run_law d10-empty-queue-positive tests/semantic/d10-empty-queue-law.lisp 1 core4
 run_case run_law d10-empty-queue-mutant tests/semantic/d10-empty-queue-mutant.lisp 0 core4
-# Д6:101100 CURRY — мовне DEFINE в Core4, дві фізичні D1-перевірки.
-run_case run_law d6-curry-binding-positive tests/semantic/d6-curry-binding-law.lisp 1 core4
-run_case run_law d6-curry-binding-mutant tests/semantic/d6-curry-binding-mutant.lisp 0 core4
+# Д6:101100 CURRY — живе SENS DEFINE з lib/d6-curry-binding.lisp.
+# Direct, Zig/T5M, paired та standalone виконують повне джерело Сенс.
+d6_curry_positive="$evidence/d6-curry-binding-positive-complete.lisp"
+d6_curry_mutant="$evidence/d6-curry-binding-mutant-complete.lisp"
+cat -- lib/d6-curry-binding.lisp tests/semantic/d6-curry-binding-law.lisp >"$d6_curry_positive"
+cat -- lib/d6-curry-binding.lisp tests/semantic/d6-curry-binding-mutant.lisp >"$d6_curry_mutant"
+run_case run_law d6-curry-binding-positive "$d6_curry_positive" 1
+run_case run_law d6-curry-binding-mutant "$d6_curry_mutant" 0
+sha256sum lib/d6-curry-binding.lisp tests/semantic/d6-curry-binding-law.lisp tests/semantic/d6-curry-binding-mutant.lisp >"$evidence/d6-curry-inputs.sha256"
 # D6 COMPOSE/FLIP/CURRY are derived SENS functions, so their law and
 # counterexample must pass the same physical Zig/T5M -> SENS route.
 run_case run_law d6-compose-flip-positive tests/semantic/d6-compose-flip-law.lisp 1 core4
