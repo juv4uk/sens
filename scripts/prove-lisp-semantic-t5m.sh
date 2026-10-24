@@ -520,6 +520,9 @@ sha256sum benchmarks/recursion.lisp tests/semantic/d4-recursion-benchmark-law.li
 # Складені селектори Д4: шість тверджень у Lisp та точний D1-негатив.
 run_case run_law d4-selector-composition-positive tests/semantic/d4-selector-composition-law.lisp 1
 run_case run_law d4-selector-composition-mutant tests/semantic/d4-selector-composition-mutant.lisp 0
+# Д4: вибірка трьома селекторами; самовердикт D1 і хибний вибір цілі.
+run_case run_law d4-selector-domain-positive tests/semantic/d4-selector-domain-law.lisp 1
+run_case run_law d4-selector-domain-mutant tests/semantic/d4-selector-domain-mutant.lisp 0
 run_case run_law d4-escaped-closure-positive tests/semantic/d4-escaped-lexical-closure-law.lisp 1
 run_case run_law d4-escaped-closure-mutant tests/semantic/d4-escaped-lexical-closure-mutant.lisp 0
 # D4 lexical capture/shadowing: SENS Lisp — єдиний семантичний оракул.
