@@ -495,6 +495,18 @@ run_case run_law d7-single-glyph-bound-head-mutant tests/semantic/d7-single-glyp
 # Д4 EVAL: цитований Lisp повертає порожнечу, а мутант підміняє результат.
 run_case run_law d4-eval-quote-positive tests/semantic/d4-eval-value-call-laws.lisp 1
 run_case run_law d4-eval-quote-mutant tests/semantic/d4-eval-value-call-mutant.lisp 0
+# Д4: вихідні селектори CAAR/CDAR/CADR є законами чинної драбини.
+# Точні D1 значення й неправильний D1-хвіст доводить SENS, не host.
+run_case run_law d4-selector-foundation-positive tests/semantic/d4-nested-pair-selectors-law.lisp 1
+run_case run_law d4-selector-foundation-mutant tests/semantic/d4-nested-pair-selectors-mutant.lisp 0
+run_case run_law d4-second-selector-positive tests/semantic/d4-second-selector-law.lisp 1
+run_case run_law d4-second-selector-mutant tests/semantic/d4-second-selector-mutant.lisp 0
+run_case run_type_rejection d4-second-improper-d1-tail tests/semantic/d4-second-improper-d1-tail-negative.lisp 'car expects a non-empty list'
+sha256sum tests/semantic/d4-nested-pair-selectors-law.lisp \
+  tests/semantic/d4-nested-pair-selectors-mutant.lisp \
+  tests/semantic/d4-second-selector-law.lisp \
+  tests/semantic/d4-second-selector-mutant.lisp \
+  tests/semantic/d4-second-improper-d1-tail-negative.lisp > "$evidence/d4-selector-foundation-inputs.sha256"
 run_case run_law d4-lambda-application-positive tests/semantic/d4-lambda-application-law.lisp 1
 run_case run_law d4-lambda-application-mutant tests/semantic/d4-lambda-application-mutant.lisp 0
 run_case run_law d4-late-binding-positive tests/semantic/d4-late-definition-binding-law.lisp 1
