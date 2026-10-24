@@ -505,7 +505,7 @@ run_native_t5m_program() {
       standalone_physical="$dir/d6-any-all-full.sens"
       if ! cat -- tests/fixtures/epistemic-d1-names.lisp "$local_d6_source" "$file" > "$d6_complete_source" ||
          ! timeout "$native_timeout" "$binary" --t5m-mint "$d6_complete_source" "$standalone_physical" >"$dir/d6-complete-mint.stdout" 2>"$dir/d6-complete-mint.stderr" ||
-         ! timeout "$native_timeout" "$native_open" open "$standalone_physical" >"$dir/d6-complete.view" 2>"$dir/d6-complete-open.stderr" ||
+         ! timeout "$native_timeout" "$native_open" open "$standalone_physical" >"${standalone_physical%.sens}" 2>"$dir/d6-complete-open.stderr" ||
          ! timeout "$native_timeout" "$native_open" verify-view "$standalone_physical" >"$dir/d6-complete-inverse.stdout" 2>"$dir/d6-complete-inverse.stderr"; then
         echo "::error::T5M_D6_DEPENDENCY_COMPLETE_INVALID source=$file" >&2
         mark_file_failed
@@ -542,7 +542,7 @@ run_native_t5m_program() {
       if ! timeout "$native_timeout" "$binary" --t5m-mint "$epistemic_complete_source" "$standalone_physical" \
           >"$dir/epistemic-mint.stdout" 2>"$dir/epistemic-mint.stderr" ||
          ! timeout "$native_timeout" "$native_open" open "$standalone_physical" \
-          >"$dir/epistemic-complete.view" 2>"$dir/epistemic-open.stderr" ||
+          >"${standalone_physical%.sens}" 2>"$dir/epistemic-open.stderr" ||
          ! timeout "$native_timeout" "$native_open" verify-view "$standalone_physical" \
           >"$dir/epistemic-verify.stdout" 2>"$dir/epistemic-verify.stderr"; then
         for diagnostic in "$dir/epistemic-mint.stderr" "$dir/epistemic-open.stderr" "$dir/epistemic-verify.stderr"; do
@@ -589,7 +589,7 @@ run_native_t5m_program() {
          ! timeout "$native_timeout" "$binary" --t5m-mint "$frequencies_complete_source" "$standalone_physical" \
              >"$dir/d11-frequencies-mint.stdout" 2>"$dir/d11-frequencies-mint.stderr" ||
          ! timeout "$native_timeout" "$native_open" open "$standalone_physical" \
-             >"$dir/d11-frequencies-full.view" 2>"$dir/d11-frequencies-open.stderr" ||
+             >"${standalone_physical%.sens}" 2>"$dir/d11-frequencies-open.stderr" ||
          ! timeout "$native_timeout" "$native_open" verify-view "$standalone_physical" \
              >"$dir/d11-frequencies-verify.stdout" 2>"$dir/d11-frequencies-verify.stderr"; then
         echo "::error::D11_FREQUENCIES_PHYSICAL_STANDALONE_MINT_FAILED source=$file layer=zig-t5m" >&2
@@ -617,7 +617,7 @@ run_native_t5m_program() {
          ! timeout "$native_timeout" "$binary" --t5m-mint "$filter_map_complete_source" "$standalone_physical" \
               >"$dir/d11-filter-map-mint.stdout" 2>"$dir/d11-filter-map-mint.stderr" ||
          ! timeout "$native_timeout" "$native_open" open "$standalone_physical" \
-              >"$dir/d11-filter-map-full.view" 2>"$dir/d11-filter-map-open.stderr" ||
+              >"${standalone_physical%.sens}" 2>"$dir/d11-filter-map-open.stderr" ||
          ! timeout "$native_timeout" "$native_open" verify-view "$standalone_physical" \
               >"$dir/d11-filter-map-verify.stdout" 2>"$dir/d11-filter-map-verify.stderr"; then
         echo "::error::D11_FILTER_MAP_STANDALONE_MINT_FAILED source=$file layer=zig-t5m" >&2
@@ -645,7 +645,7 @@ run_native_t5m_program() {
          ! timeout "$native_timeout" "$binary" --t5m-mint "$tree_complete_source" "$standalone_physical" \
               >"$dir/d11-tree-test-mint.stdout" 2>"$dir/d11-tree-test-mint.stderr" ||
          ! timeout "$native_timeout" "$native_open" open "$standalone_physical" \
-              >"$dir/d11-tree-test-full.view" 2>"$dir/d11-tree-test-open.stderr" ||
+              >"${standalone_physical%.sens}" 2>"$dir/d11-tree-test-open.stderr" ||
          ! timeout "$native_timeout" "$native_open" verify-view "$standalone_physical" \
               >"$dir/d11-tree-test-verify.stdout" 2>"$dir/d11-tree-test-verify.stderr"; then
         echo "::error::D11_TREE_TEST_PHYSICAL_STANDALONE_MINT_FAILED source=$file layer=zig-t5m" >&2
