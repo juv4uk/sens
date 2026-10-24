@@ -340,3 +340,65 @@ test "Драбина: точні коди, хибні назви, повтори
     try std.testing.expectEqual(@as(usize, 1), result.unknown);
     try std.testing.expectEqual(@as(usize, 1), result.structural);
 }
+
+test "Драбина: точний породжувальний закон центральної чверті селекторів" {
+    // D7 є текстом; D12 є математикою. Не виводимо з геометрії допуск D13.
+    const widths = [_]u8{ 3, 4, 5, 6, 8, 9, 10, 11 };
+    for (widths) |width| {
+        const shift: u6 = @intCast(width - 3);
+        const quarter: usize = @as(usize, 1) << shift;
+        const expected: usize = 2 * quarter;
+        const first: usize = 3 * quarter;
+        const last_exclusive: usize = first + expected;
+        var seen = [_]bool{false} ** 512;
+        var selector_count: usize = 0;
+
+        const table = source(width) orelse return error.MissingDomainTable;
+        var lines = std.mem.splitScalar(u8, table, '\n');
+        while (lines.next()) |line| {
+            const row = parseRow(width, line) orelse continue;
+            const word = try std.fmt.parseInt(usize, row.bits, 2);
+            const in_quarter = word >= first and word < last_exclusive;
+
+            var is_selector = row.lisp.len == @as(usize, width);
+            if (is_selector) {
+                is_selector = row.lisp[0] == 'C' and row.lisp[row.lisp.len - 1] == 'R';
+                if (is_selector) {
+                    for (row.lisp[1 .. row.lisp.len - 1]) |letter| {
+                        if (letter != 'A' and letter != 'D') {
+                            is_selector = false;
+                            break;
+                        }
+                    }
+                }
+            }
+            // Жоден не-селектор не може займати середню чверть.
+            // Жоден селектор не може жити поза нею.
+            try std.testing.expectEqual(in_quarter, is_selector);
+            if (!is_selector) continue;
+
+            const index = word - first;
+            try std.testing.expect(!seen[index]);
+            seen[index] = true;
+            selector_count += 1;
+
+            // D3-корені: 011=CDR, 100=CAR.
+            const root: u8 = if (std.mem.eql(u8, row.bits[0..3], "011"))
+                'D'
+            else if (std.mem.eql(u8, row.bits[0..3], "100"))
+                'A'
+            else
+                return error.ForeignSelectorRoot;
+            try std.testing.expectEqual(root, row.lisp[1]);
+
+            // Кожен наступний 0 означає A/CAR, 1 означає D/CDR.
+            for (row.bits[3..], 0..) |bit, index_in_tail| {
+                const expected_letter: u8 = if (bit == '0') 'A' else if (bit == '1') 'D' else return error.InvalidSelectorBit;
+                try std.testing.expectEqual(expected_letter, row.lisp[index_in_tail + 2]);
+            }
+        }
+
+        try std.testing.expectEqual(expected, selector_count);
+        for (seen[0..expected]) |present| try std.testing.expect(present);
+    }
+}
