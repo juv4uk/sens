@@ -604,6 +604,20 @@ cat -- lib/d11-tree-equal-by-test.lisp tests/semantic/d11-tree-equal-by-test-mut
 run_case run_law d11-tree-test-positive "$d11_tree_test_law_bundle" 1
 run_case run_law d11-tree-test-mutant "$d11_tree_test_mutant_bundle" 0
 sha256sum lib/d11-tree-equal-by-test.lisp tests/semantic/d11-tree-equal-by-test-law.lisp tests/semantic/d11-tree-equal-by-test-mutant.lisp > "$evidence/d11-tree-test-inputs.sha256"
+# F11-PROOF-TRACE: нативний закон SENS, жодної додаткової D11-координати.
+# Фактичні визначення беруться лише з lib/reason.lisp (та D9 уніфікатора).
+# SENS виконує 2 D1 закони й 2 очікувані Type-помилки через Zig/T5M.
+reason_trace_common="$evidence/d11-reason-proof-trace-definitions.lisp"
+cat -- lib/unify.lisp lib/reason.lisp > "$reason_trace_common"
+for kind in law mutant improper-provenance-negative improper-count-negative; do
+  cat -- "$reason_trace_common" "tests/semantic/d11-reason-proof-trace-$kind.lisp" > "$evidence/d11-reason-proof-trace-$kind-complete.lisp"
+done
+run_case run_law d11-reason-proof-trace-law "$evidence/d11-reason-proof-trace-law-complete.lisp" 1 core4
+run_case run_law d11-reason-proof-trace-mutant "$evidence/d11-reason-proof-trace-mutant-complete.lisp" 0 core4
+run_case run_error_rejection d11-reason-proof-trace-improper-provenance "$evidence/d11-reason-proof-trace-improper-provenance-negative-complete.lisp" Type 'car expects a non-empty list' core4
+run_case run_error_rejection d11-reason-proof-trace-improper-count "$evidence/d11-reason-proof-trace-improper-count-negative-complete.lisp" Type 'car expects a non-empty list' core4
+sha256sum lib/unify.lisp lib/reason.lisp tests/semantic/d11-reason-proof-trace-*.lisp > "$evidence/d11-reason-proof-trace-inputs.sha256"
+
 # D11 SRFI-1 lset: позитив і мутант виконують справжні DEFINE мови SENS.
 # Немає нових opcode; Zig/T5M лише фізично переносить код і значення.
 d11_set_law_bundle="$evidence/d11-srfi1-set-relations-law-complete.lisp"
