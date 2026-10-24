@@ -181,12 +181,29 @@ class Core4WidthFirewall(unittest.TestCase):
         heads = active_heads(self.source)
         self.assertEqual(heads["00001010"], 0)
         self.assertEqual(heads["макрос"], 7)
+        # Визначення мають бути реальними формами в AST, а не рядковими
+        # фрагментами SENS, продубльованими у Python.
+        definitions = {
+            form.children[1].atom
+            for form in parser.parse(self.source)
+            if len(form.children) >= 2 and form.children[0].atom == "визначити"
+        }
         for name in ["та", "або", "нехай", "нехай-послідовно", "потік-перший", "потік-останній",
                      "матеріалізувати-сталі-відповідники"]:
-            self.assertIn(f"(визначити {name}", self.source)
+            self.assertIn(name, definitions)
 
     def test_negative_old_macro_head_is_rejected(self):
-        mutated = self.source.replace("(визначити та", "(00001010 та", 1)
+        # Міняємо точний токен голови визначення, не зберігаємо SENS-код
+        # як строковий шаблон усередині Python.
+        definition = next(
+            (form for form in parser.parse(self.source)
+             if len(form.children) >= 2 and form.children[0].atom == "визначити"
+             and form.children[1].atom == "та"),
+            None,
+        )
+        self.assertIsNotNone(definition)
+        head = definition.children[0]
+        mutated = self.source[:head.start] + "00001010" + self.source[head.end:]
         with self.assertRaisesRegex(ValueError, "forbidden migrated head"):
             verify(mutated)
 
@@ -196,7 +213,25 @@ class Core4WidthFirewall(unittest.TestCase):
             verify(mutated)
 
     def test_negative_host_truth_is_rejected(self):
-        mutated = self.source.replace("(порожній? (як-є ()))", "t", 1)
+        # Шукаємо справжній виклик предиката над цитованим D3:(),
+        # змінюємо його AST-діапазон, не переносимо SENS-семантику в тест.
+        stack = list(parser.parse(self.source))
+        victim = None
+        while stack:
+            form = stack.pop()
+            if form.opaque or not form.children:
+                continue
+            if (len(form.children) == 2
+                    and form.children[0].atom == "порожній?"
+                    and len(form.children[1].children) == 2
+                    and form.children[1].children[0].atom == "як-є"
+                    and form.children[1].children[1].atom is None
+                    and not form.children[1].children[1].children):
+                victim = form
+                break
+            stack.extend(form.children)
+        self.assertIsNotNone(victim)
+        mutated = self.source[:victim.start] + "t" + self.source[victim.end:]
         with self.assertRaisesRegex(ValueError, "host truth"):
             verify(mutated)
 
