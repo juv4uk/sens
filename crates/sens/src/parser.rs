@@ -5,12 +5,64 @@ use std::rc::Rc;
 /// nodes — `(a b . c)` becomes `Pair(a, Pair(b, c))`, the same shape `cons`
 /// builds at runtime. Every node shares the whole list's span; only the
 /// individual `items`/`tail` sub-expressions keep their own precise spans.
-fn dotted_list(items: Vec<Expr>, tail: Expr, start: usize, end: usize) -> Expr {
+/// Враховує реальну глибину вузлів D2 (List/Pair), а не лише дужки
+/// джерела. Явний стек потрібний, щоб сама перевірка була безпечною.
+fn dotted_subtree_within_depth(expr: &Expr, depth: u32) -> bool {
+    let mut pending = vec![(expr, depth)];
+    while let Some((node, depth)) = pending.pop() {
+        match &node.kind {
+            ExprKind::List(items) => {
+                if depth > crate::syntax::MAX_STRUCTURE_DEPTH {
+                    return false;
+                }
+                pending.extend(items.iter().map(|item| (item, depth + 1)));
+            }
+            ExprKind::Pair(head, tail) => {
+                if depth > crate::syntax::MAX_STRUCTURE_DEPTH {
+                    return false;
+                }
+                pending.push((head, depth + 1));
+                pending.push((tail, depth + 1));
+            }
+            _ => {}
+        }
+    }
+    true
+}
+
+/// Плоска форма (a b ... . z) створює N вкладених Pair, хоча в
+/// тексті має лише одну пару дужок. Перевірити майбутню глибину
+/// ДО створення першої Pair; не допустити рекурсивний drop гігантського
+/// Rc-ланцюга або переповнення стеку у споживачів AST.
+fn dotted_list(
+    items: Vec<Expr>,
+    tail: Expr,
+    start: usize,
+    end: usize,
+    containing_depth: u32,
+) -> Result<Expr, LanguageError> {
+    let max_depth = crate::syntax::MAX_STRUCTURE_DEPTH;
+    let pairs_available = max_depth.saturating_sub(containing_depth) + 1;
+    let admitted = containing_depth > 0
+        && containing_depth <= max_depth
+        && items.len() <= pairs_available as usize
+        && items.iter().enumerate().all(|(index, item)| {
+            dotted_subtree_within_depth(item, containing_depth + index as u32 + 1)
+        })
+        && dotted_subtree_within_depth(&tail, containing_depth + items.len() as u32);
+    if !admitted {
+        return Err(LanguageError::new(
+            ErrorKind::Parse,
+            "nesting exceeds reader limit · hlybyna vkladennia perevyshchuie mezhu chytacha · Verschachtelungstiefe überschreitet das Reader-Limit",
+            Span { start, end },
+        ));
+    }
+
     let span = Span { start, end };
-    items.into_iter().rev().fold(tail, |acc, item| Expr {
+    Ok(items.into_iter().rev().fold(tail, |acc, item| Expr {
         kind: ExprKind::Pair(Rc::new(item), Rc::new(acc)),
         span,
-    })
+    }))
 }
 
 /// Звичайний читач для історичних споживачів восьмибітного носія.
@@ -323,7 +375,7 @@ impl Parser<'_> {
                         return match self.peek() {
                             Some(')') => {
                                 self.bump();
-                                Ok(dotted_list(items, tail, start, self.cursor))
+                                dotted_list(items, tail, start, self.cursor, self.depth)
                             }
                             _ => Err(self.error(
                                 "expected ')' after a dotted pair's tail · ochikuvalas ')' pislia khvosta dotted-pary · ')' nach dem Ende eines Dotted Pair erwartet",
@@ -1235,6 +1287,65 @@ mod tests {
         };
         assert!(matches!(&inner_head.kind, ExprKind::Symbol(s) if &**s == "b"));
         assert!(matches!(&inner_tail.kind, ExprKind::Symbol(s) if &**s == "c"));
+    }
+
+    #[test]
+    fn dotted_pair_generated_depth_is_bounded_before_allocating_pair_chain() {
+        // Один текстовий рівень дужок, проте тисячі вкладених D2 Pair.
+        let wide = format!("({} . кінець)", "а ".repeat(50_000));
+        for mode in [
+            ReaderMode::LegacyCompatibility,
+            ReaderMode::ExactDomain,
+            ReaderMode::CanonicalValueWire,
+        ] {
+            let error = parse_with_mode(&wide, mode)
+                .expect_err("плоский dotted список не повинен створити глибокий AST");
+            assert_eq!(error.kind, ErrorKind::Parse);
+            assert!(
+                error.message.contains("nesting exceeds reader limit"),
+                "має бути названа помилка ліміту читача"
+            );
+        }
+        // Широкий правильний список не стає глибоким Pair-ланцюгом.
+        let proper = format!("({})", "а ".repeat(1024));
+        assert!(parse(&proper).is_ok());
+    }
+
+    #[test]
+    fn dotted_pair_rejects_combined_tail_and_head_depth() {
+        // Кожна частина окремо нижче порога, та складена структура — вище.
+        let head_depth = format!(
+            "({} . {})",
+            "а ".repeat(400),
+            format!("{}кінець{}", "(".repeat(400), ")".repeat(400))
+        );
+        let head_item = format!(
+            "({} {} . кінець)",
+            "а ".repeat(400),
+            format!("{}мама", "'".repeat(400))
+        );
+        for source in [head_depth, head_item] {
+            let error = parse(&source).expect_err("складена глибина має бути обмежена");
+            assert_eq!(error.kind, ErrorKind::Parse);
+            assert!(error.message.contains("nesting exceeds reader limit"));
+        }
+    }
+
+    #[test]
+    fn dotted_pair_still_preserves_valid_pair_shape_and_spans() {
+        let source = "(а б . в)";
+        let forms = parse_exact_domain_source(source).expect("звичайна dotted пара");
+        let ExprKind::Pair(head, rest) = &forms[0].kind else {
+            panic!("потрібна пара");
+        };
+        assert_eq!(forms[0].span, Span { start: 0, end: source.len() });
+        assert!(matches!(&head.kind, ExprKind::Symbol(s) if s.as_ref() == "а"));
+        let ExprKind::Pair(second, tail) = &rest.kind else {
+            panic!("друга пара");
+        };
+        assert_eq!(rest.span, Span { start: 0, end: source.len() });
+        assert!(matches!(&second.kind, ExprKind::Symbol(s) if s.as_ref() == "б"));
+        assert!(matches!(&tail.kind, ExprKind::Symbol(s) if s.as_ref() == "в"));
     }
 
     #[test]
