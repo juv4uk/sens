@@ -13,7 +13,7 @@ const SCHEMA: &str = "sens-packed-visible-runtime/v1";
 // Keep the benchmark's session contract in one place so a focused test can
 // detect accidental Lisp macro bootstrap in the measured D1/D3 lanes.
 fn benchmark_session() -> Session {
-    Session::default()
+    Session::bare()
 }
 
 fn fingerprint(value: &Value, output: &[String]) -> String {
