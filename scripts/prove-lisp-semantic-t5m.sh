@@ -1730,6 +1730,22 @@ run_case run_law d11-interlisp-dwim-d3-mutant "$d11_dwim_d3_mutant" 0 core4
 sha256sum lib/d11-interlisp-safe-analysis.lisp \
   tests/semantic/d11-interlisp-dwim-d3-proper-law.lisp \
   tests/semantic/d11-interlisp-dwim-d3-proper-mutant.lisp > "$evidence/d11-interlisp-dwim-d3-inputs.sha256"
+
+# D11 DWIM: записи рівно з двох полів — SENS перевіряє ДО вибору кандидата.
+d11_dwim_exact_context_positive="$evidence/d11-dwim-exact-context-positive.lisp"
+d11_dwim_extra_field_bad="$evidence/d11-dwim-extra-field-bad.lisp"
+d11_dwim_unrelated_extra_bad="$evidence/d11-dwim-unrelated-extra-bad.lisp"
+d11_dwim_dotted_bad="$evidence/d11-dwim-dotted-record-bad.lisp"
+cat -- lib/d11-interlisp-safe-analysis.lisp tests/fixtures/d11-dwim-exact-context-positive.lisp > "$d11_dwim_exact_context_positive"
+cat -- lib/d11-interlisp-safe-analysis.lisp tests/fixtures/d11-dwim-extra-field-negative.lisp > "$d11_dwim_extra_field_bad"
+cat -- lib/d11-interlisp-safe-analysis.lisp tests/fixtures/d11-dwim-unrelated-extra-field-negative.lisp > "$d11_dwim_unrelated_extra_bad"
+cat -- lib/d11-interlisp-safe-analysis.lisp tests/fixtures/d11-dwim-dotted-record-negative.lisp > "$d11_dwim_dotted_bad"
+run_case run_law d11-dwim-exact-context-positive "$d11_dwim_exact_context_positive" 1 core4
+run_case run_error_rejection d11-dwim-extra-field-type "$d11_dwim_extra_field_bad" Type 'car expects a non-empty list' core4
+run_case run_error_rejection d11-dwim-unrelated-extra-field-type "$d11_dwim_unrelated_extra_bad" Type 'car expects a non-empty list' core4
+run_case run_error_rejection d11-dwim-dotted-record-type "$d11_dwim_dotted_bad" Type 'car expects a non-empty list' core4
+sha256sum lib/d11-interlisp-safe-analysis.lisp tests/fixtures/d11-dwim-*.lisp > "$evidence/d11-dwim-exact-record-inputs.sha256"
+
 # LAST-DEFINE: D7-текст має D8-рівність у нормативному Lisp, не D3 EQ Rust.
 # Повний MetaEval починається з невикличного D6 LENGTH (#5854). Для цієї
 # незалежної функції беремо ТОЧНО її визначення з чинного Lisp-файлу.

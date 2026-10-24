@@ -329,6 +329,12 @@ jobs:
                   "tests/fixtures/d11-list-equality-improper-right-must-error.lisp",
                   "tests/fixtures/d11-list-equality-invalid-singleton-must-error.lisp",
                   "tests/fixtures/d11-list-equality-invalid-third-must-error.lisp",
+                  # DWIM D11: ці SENS-свідки вимагають попередні DEFINE,
+                  # тому запускаються тільки як фізичні пакети law-runner.
+                  "tests/fixtures/d11-dwim-exact-context-positive.lisp",
+                  "tests/fixtures/d11-dwim-extra-field-negative.lisp",
+                  "tests/fixtures/d11-dwim-unrelated-extra-field-negative.lisp",
+                  "tests/fixtures/d11-dwim-dotted-record-negative.lisp",
                   # D11 UNFOLD terminal tail: виконувати тільки з canonical DEFINE через фізичний law-runner.
                   "tests/fixtures/d11-unfold-terminal-left-atom-must-error.lisp",
                   "tests/fixtures/d11-unfold-terminal-left-dotted-must-error.lisp",
