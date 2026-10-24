@@ -1938,6 +1938,15 @@ run_case run_law d6-union-proper "$evidence/d6-union-proper-law-complete.lisp" 1
 run_case run_law d6-union-proper-mutant "$evidence/d6-union-proper-mutant-complete.lisp" 0
 run_case run_type_rejection d6-union-improper-tail "$evidence/d6-union-improper-tail-negative-complete.lisp" 'car expects a non-empty list'
 run_case run_type_rejection d6-union-improper-root "$evidence/d6-union-improper-root-negative-complete.lisp" 'car expects a non-empty list'
+# Нові закони D6: права основа має бути правильним D3-списком.
+# До кожного тесту долучаємо той самий канонічний SENS-витяг, без host-оракула.
+for kind in right-validated-law right-root-negative right-tail-negative right-hidden-tail-negative; do
+  cat -- "$d6_union_source" "tests/semantic/d6-union-$kind.lisp" > "$evidence/d6-union-$kind-complete.lisp"
+done
+run_case run_law d6-union-right-validated "$evidence/d6-union-right-validated-law-complete.lisp" 1
+run_case run_type_rejection d6-union-right-root "$evidence/d6-union-right-root-negative-complete.lisp" 'car expects a non-empty list'
+run_case run_type_rejection d6-union-right-tail "$evidence/d6-union-right-tail-negative-complete.lisp" 'car expects a non-empty list'
+run_case run_type_rejection d6-union-right-hidden-tail "$evidence/d6-union-right-hidden-tail-negative-complete.lisp" 'car expects a non-empty list'
 sha256sum lib/core4.lisp lib/core4-parts/core4-codec.lisp lib/core4-parts/core4-language.lisp \
   tests/semantic/d6-union-*.lisp > "$evidence/d6-union-inputs.sha256"
 
