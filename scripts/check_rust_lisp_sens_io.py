@@ -14,6 +14,7 @@ Physical path law (owner #5777/#5779, sterile Zig corridor):
 - Neither path uses JSON/serde_json as a side-channel between Rust and SENS.
 
 Fail-closed J-rules over the core Rust modules that touch these files:
+J0  every mandatory core module must exist as a regular non-symlink file.
 J1  a module that names `.sens` and performs host I/O must use `fs::read(`
     (binary), or state the Zig corridor byte path (no text decode of T5).
 J2  a module that names `.lisp` must have a legal text path (read_to_string /
@@ -75,12 +76,11 @@ def _lisp_extension_only(src: str) -> bool:
 
 def check(root: Path) -> list:
     problems = []
-    seen = 0
     for rel in CORE:
         path = root / rel
-        if not path.is_file():
+        if not path.is_file() or path.is_symlink():
+            problems.append(f"J0: {rel} required Rust source missing-or-symlink")
             continue
-        seen += 1
         src = path.read_text(encoding="utf-8", errors="replace")
 
         names_sens = ".sens" in src
@@ -118,11 +118,8 @@ def check(root: Path) -> list:
                 "Rust and SENS"
             )
 
-    if seen == 0:
-        return ["no core Rust .lisp/.sens module found under the expected paths"]
-
     main = root / "crates/sens-cli/src/main.rs"
-    if main.is_file():
+    if main.is_file() and not main.is_symlink():
         src = main.read_text(encoding="utf-8", errors="replace")
         if "no Rust fallback" not in src and "Zig transport corridor" not in src:
             problems.append(

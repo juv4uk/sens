@@ -32,16 +32,35 @@ class RustLispSensIoTests(unittest.TestCase):
     def setUp(self) -> None:
         self.tmp = tempfile.TemporaryDirectory()
         self.root = Path(self.tmp.name)
-        p = self.root / "crates/sens-cli/src/main.rs"
-        p.parent.mkdir(parents=True, exist_ok=True)
-        p.write_text(MAIN_OK, encoding="utf-8")
         self.module = load_checker()
+        for rel in self.module.CORE:
+            p = self.root / rel
+            p.parent.mkdir(parents=True, exist_ok=True)
+            p.write_text(MAIN_OK if rel.endswith("/main.rs") else "", encoding="utf-8")
 
     def tearDown(self) -> None:
         self.tmp.cleanup()
 
     def test_real_shape_passes(self) -> None:
         self.assertEqual(self.module.check(self.root), [])
+
+    def test_missing_one_required_core_file_fails_closed(self) -> None:
+        missing = self.module.CORE[2]
+        (self.root / missing).unlink()
+        problems = self.module.check(self.root)
+        self.assertTrue(any(problem.startswith("J0:") and missing in problem
+                            for problem in problems), problems)
+
+    def test_symlink_required_core_file_fails_closed(self) -> None:
+        linked = self.module.CORE[2]
+        path = self.root / linked
+        target = self.root / "outside-core.rs"
+        target.write_text("", encoding="utf-8")
+        path.unlink()
+        path.symlink_to(target)
+        problems = self.module.check(self.root)
+        self.assertTrue(any(problem.startswith("J0:") and linked in problem
+                            for problem in problems), problems)
 
     def test_sens_as_text_is_blocked(self) -> None:
         p = self.root / "crates/sens-cli/src/main.rs"
