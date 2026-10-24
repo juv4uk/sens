@@ -229,15 +229,17 @@ pub(crate) mod fasl {
     }
 
     fn get_u32(bytes: &[u8], pos: &mut usize) -> Option<u32> {
-        let slice = bytes.get(*pos..*pos + 4)?;
-        *pos += 4;
+        let end = pos.checked_add(4)?;
+        let slice = bytes.get(*pos..end)?;
+        *pos = end;
         Some(u32::from_le_bytes(slice.try_into().ok()?))
     }
 
     fn get_str<'a>(bytes: &'a [u8], pos: &mut usize) -> Option<&'a str> {
         let len = get_u32(bytes, pos)? as usize;
-        let slice = bytes.get(*pos..*pos + len)?;
-        *pos += len;
+        let end = pos.checked_add(len)?;
+        let slice = bytes.get(*pos..end)?;
+        *pos = end;
         std::str::from_utf8(slice).ok()
     }
 
@@ -338,12 +340,32 @@ pub(crate) mod fasl {
         }
     }
 
-    fn decode_expr(bytes: &[u8], pos: &mut usize) -> Option<Expr> {
+    // An untrusted FASL container must never consume one Rust call frame per
+    // D2 nesting level. Mirror the bounded explicit stack of the SENS wire
+    // decoder; this does not interpret or rename any exact domain identities.
+    enum Open {
+        List { remaining: usize, items: Vec<Expr> },
+        Pair { head: Option<Expr> },
+    }
+
+    enum Step {
+        Value(ExprKind),
+        Open(Open),
+    }
+
+    fn fasl_expr(kind: ExprKind) -> Expr {
+        Expr {
+            kind,
+            span: crate::Span { start: 0, end: 0 },
+        }
+    }
+
+    fn decode_step(bytes: &[u8], pos: &mut usize) -> Option<Step> {
         let tag = *bytes.get(*pos)?;
         *pos += 1;
         let kind = match tag {
             TAG_NUMBER => {
-                let bits = bytes.get(*pos..*pos + 8)?;
+                let bits = bytes.get(*pos..pos.checked_add(8)?)?;
                 *pos += 8;
                 let exact = match bytes.get(*pos)? {
                     0 => Exactness::Exact,
@@ -369,14 +391,7 @@ pub(crate) mod fasl {
                 *pos += domain_width;
                 ExprKind::BinaryNumber(BinaryNumber::from_numeric_domain_bits(domain_width, raw)?)
             }
-            TAG_BINARY => {
-                let value = *bytes.get(*pos)?;
-                *pos += 1;
-                {
-                    let _ = value;
-                    return None;
-                }
-            }
+            TAG_BINARY => return None,
             TAG_DOMAIN_IDENTITY => {
                 ExprKind::DomainIdentity(super::exact_domain_codec::get(bytes, pos)?)
             }
@@ -389,23 +404,23 @@ pub(crate) mod fasl {
             }
             TAG_LIST => {
                 let count = get_u32(bytes, pos)? as usize;
-                let mut items = Vec::with_capacity(count.min(1 << 22));
-                for _ in 0..count {
-                    items.push(decode_expr(bytes, pos)?);
+                // Every item must own at least a tag byte. Reject false
+                // counts before reserving memory or descending into children.
+                if count > bytes.len().saturating_sub(*pos) {
+                    return None;
                 }
-                ExprKind::List(items.into())
+                return Some(Step::Open(Open::List {
+                    remaining: count,
+                    items: Vec::with_capacity(count.min(1024)),
+                }));
             }
-            TAG_PAIR => {
-                let head = decode_expr(bytes, pos)?;
-                let tail = decode_expr(bytes, pos)?;
-                ExprKind::Pair(Rc::new(head), Rc::new(tail))
-            }
+            TAG_PAIR => return Some(Step::Open(Open::Pair { head: None })),
             TAG_I32_BUFFER => {
                 let count = get_u32(bytes, pos)? as usize;
                 let byte_len = count.checked_mul(std::mem::size_of::<i32>())?;
                 let raw = bytes.get(*pos..pos.checked_add(byte_len)?)?;
                 *pos += byte_len;
-                let mut values = Vec::with_capacity(count.min(1 << 22));
+                let mut values = Vec::with_capacity(count.min(1024));
                 for chunk in raw.as_chunks::<4>().0 {
                     values.push(i32::from_le_bytes(*chunk));
                 }
@@ -416,7 +431,7 @@ pub(crate) mod fasl {
                 let byte_len = count.checked_mul(std::mem::size_of::<u32>())?;
                 let raw = bytes.get(*pos..pos.checked_add(byte_len)?)?;
                 *pos += byte_len;
-                let mut values = Vec::with_capacity(count.min(1 << 22));
+                let mut values = Vec::with_capacity(count.min(1024));
                 for chunk in raw.as_chunks::<4>().0 {
                     let bits = u32::from_le_bytes(*chunk);
                     let value = f32::from_bits(bits);
@@ -429,11 +444,57 @@ pub(crate) mod fasl {
             }
             _ => return None,
         };
-        // Spans are debug metadata only; the snapshot records position zero.
-        Some(Expr {
-            kind,
-            span: crate::Span { start: 0, end: 0 },
-        })
+        Some(Step::Value(kind))
+    }
+
+    fn decode_expr(bytes: &[u8], pos: &mut usize) -> Option<Expr> {
+        let mut stack: Vec<Open> = Vec::new();
+        loop {
+            let mut done = match decode_step(bytes, pos)? {
+                Step::Value(kind) => fasl_expr(kind),
+                Step::Open(open) => {
+                    if stack.len() as u32 >= super::MAX_STRUCTURE_DEPTH {
+                        return None;
+                    }
+                    match open {
+                        Open::List { remaining: 0, .. } => {
+                            fasl_expr(ExprKind::List(Rc::from([])))
+                        }
+                        open => {
+                            stack.push(open);
+                            continue;
+                        }
+                    }
+                }
+            };
+
+            loop {
+                match stack.last_mut() {
+                    None => return Some(done),
+                    Some(Open::List { remaining, items }) => {
+                        items.push(done);
+                        *remaining -= 1;
+                        if *remaining > 0 {
+                            break;
+                        }
+                        let Some(Open::List { items, .. }) = stack.pop() else {
+                            unreachable!()
+                        };
+                        done = fasl_expr(ExprKind::List(items.into()));
+                    }
+                    Some(Open::Pair { head }) => {
+                        if head.is_none() {
+                            *head = Some(done);
+                            break;
+                        }
+                        let Some(Open::Pair { head: Some(head) }) = stack.pop() else {
+                            unreachable!()
+                        };
+                        done = fasl_expr(ExprKind::Pair(Rc::new(head), Rc::new(done)));
+                    }
+                }
+            }
+        }
     }
 
     /// Header: magic + format version + payload length. Source-hash is the
@@ -459,16 +520,20 @@ pub(crate) mod fasl {
         // Layout: magic | payload_len | version | source_hash | count | exprs
         let mut pos = 4;
         let payload_len = get_u32(bytes, &mut pos)? as usize;
-        if bytes.len() != pos + payload_len {
+        if bytes.len() != pos.checked_add(payload_len)? {
             return None;
         }
         if get_u32(bytes, &mut pos)? != FASL_FORMAT_VERSION {
             return None;
         }
-        let source_hash: [u8; 32] = bytes.get(pos..pos + 32)?.try_into().ok()?;
-        pos += 32;
+        let hash_end = pos.checked_add(32)?;
+        let source_hash: [u8; 32] = bytes.get(pos..hash_end)?.try_into().ok()?;
+        pos = hash_end;
         let count = get_u32(bytes, &mut pos)? as usize;
-        let mut out = Vec::with_capacity(count.min(1 << 16));
+        if count > bytes.len().saturating_sub(pos) {
+            return None;
+        }
+        let mut out = Vec::with_capacity(count.min(1024));
         for _ in 0..count {
             out.push(decode_expr(bytes, &mut pos)?);
         }
@@ -1271,6 +1336,76 @@ mod fasl_tests {
         // falls back — so here we only assert the hash came back tampered.
         let (_, decoded_hash) = decode_program(&encoded).expect("structural decode");
         assert_ne!(decoded_hash, source_hash);
+    }
+
+    fn fasl_with_one_raw_expression(raw: &[u8]) -> Vec<u8> {
+        let mut payload = Vec::new();
+        payload.extend_from_slice(&fasl::FASL_FORMAT_VERSION.to_le_bytes());
+        payload.extend_from_slice(&[0x3du8; 32]);
+        payload.extend_from_slice(&1u32.to_le_bytes());
+        payload.extend_from_slice(raw);
+        let mut bytes = b"MYF1".to_vec();
+        bytes.extend_from_slice(&(payload.len() as u32).to_le_bytes());
+        bytes.extend_from_slice(&payload);
+        bytes
+    }
+
+    #[test]
+    fn fasl_decoder_rejects_deep_untrusted_lists_and_pairs_without_recursion() {
+        let mut lists = Vec::new();
+        for _ in 0..50_000 {
+            lists.push(5u8); // TAG_LIST
+            lists.extend_from_slice(&1u32.to_le_bytes());
+        }
+        lists.push(3u8); // TAG_STRING
+        lists.extend_from_slice(&0u32.to_le_bytes());
+        assert!(
+            decode_program(&fasl_with_one_raw_expression(&lists)).is_none(),
+            "a deeply nested list must fail closed before native stack exhaustion"
+        );
+
+        let mut pairs = vec![6u8; 50_000]; // TAG_PAIR: nested head
+        pairs.push(3u8);
+        pairs.extend_from_slice(&0u32.to_le_bytes());
+        assert!(
+            decode_program(&fasl_with_one_raw_expression(&pairs)).is_none(),
+            "a deeply nested pair must fail closed before native stack exhaustion"
+        );
+    }
+
+    #[test]
+    fn fasl_decoder_round_trips_bounded_deep_pairs_with_exact_coordinates() {
+        // Pair(D3:001, Pair(D3:001, ... D10:1010101010)) is a DATA tree.
+        // No transport round-trip grants callability.
+        let mut raw = Vec::new();
+        for _ in 0..128 {
+            raw.push(6u8); // TAG_PAIR
+            raw.extend_from_slice(&[11u8, 3u8, 1u8]); // TAG_DOMAIN_IDENTITY D3:001
+        }
+        raw.extend_from_slice(&[11u8, 10u8, 0aau8, 0x02u8]);
+        let hash = [0x3du8; 32];
+        let encoded = fasl_with_one_raw_expression(&raw);
+        let (decoded, recovered_hash) =
+            decode_program(&encoded).expect("bounded FASL pair must decode");
+        assert_eq!(recovered_hash, hash);
+        assert_eq!(encode_program(&decoded, &hash), encoded);
+    }
+
+    #[test]
+    fn fasl_decoder_rejects_fake_lengths_and_truncated_nested_containers() {
+        let mut false_count = vec![5u8]; // TAG_LIST
+        false_count.extend_from_slice(&u32::MAX.to_le_bytes());
+        assert!(decode_program(&fasl_with_one_raw_expression(&false_count)).is_none());
+
+        let mut truncated_pair = vec![6u8, 3u8]; // pair with one string head only
+        truncated_pair.extend_from_slice(&0u32.to_le_bytes());
+        assert!(decode_program(&fasl_with_one_raw_expression(&truncated_pair)).is_none());
+
+        let mut truncated_list = vec![5u8];
+        truncated_list.extend_from_slice(&2u32.to_le_bytes());
+        truncated_list.push(3u8);
+        truncated_list.extend_from_slice(&0u32.to_le_bytes());
+        assert!(decode_program(&fasl_with_one_raw_expression(&truncated_list)).is_none());
     }
 
     #[test]
