@@ -57,6 +57,18 @@ impl Sexp {
 
     pub fn to_text(&self) -> String {
         match self {
+            // Invalid atom spelling must not inject delimiters into a
+            // newline-framed protocol. Emit it as a quoted text value,
+            // which is deliberately not an atom on subsequent reads.
+            Sexp::Atom(s)
+                if s.is_empty()
+                    || s.starts_with(';')
+                    || s.chars().any(|ch| {
+                        ch.is_whitespace() || matches!(ch, '(' | ')' | '"')
+                    }) =>
+            {
+                Sexp::Str(s.clone()).to_text()
+            }
             Sexp::Atom(s) => s.clone(),
             Sexp::Str(s) => {
                 // One wire/journal record must stay on one physical line.
@@ -266,6 +278,24 @@ mod tests {
         let frame = format!("{}\n", value.to_text());
         assert_eq!(frame.as_bytes().iter().filter(|&&b| b == b'\n').count(), 1);
         assert_eq!(parse(frame.trim_end()).unwrap(), value);
+    }
+
+    #[test]
+    fn malformed_atom_cannot_inject_a_second_message() {
+        let msg = Sexp::list(vec![
+            Sexp::atom("heartbeat"),
+            Sexp::atom("bad\n(evict (node victim))"),
+        ]);
+        let line = msg.to_text();
+        assert!(!line.contains('\n'));
+        assert_eq!(parse(&line).unwrap().head(), Some("heartbeat"));
+        assert_eq!(
+            parse(&line).unwrap(),
+            Sexp::list(vec![
+                Sexp::atom("heartbeat"),
+                Sexp::string("bad\n(evict (node victim))"),
+            ])
+        );
     }
 
     #[test]
