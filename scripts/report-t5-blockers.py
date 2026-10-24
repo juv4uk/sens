@@ -44,6 +44,26 @@ def blockers() -> dict[str, list[str]]:
     }
 
 
+def decode_diagnosis(sens_path: str) -> str:
+    """Чому файл не декодується — це і є діагноз, а не «BLOCKED».
+    Перевірено 2026-10-24: усі три решта блокери дають одну й ту саму помилку
+    SensT5Error: word exceeds exact W1..W11 width — тобто це НЕ канонічний T5M
+    (аудит: «new/modified .sens must use canonical T5M, not legacy T5»).
+    Фікс — пере-карбування в T5M, що вимагає тулчейну SENS."""
+    import sys as _sys
+    _sys.path.insert(0, str(ROOT / "scripts"))
+    try:
+        from sens_t5_t5m_codec import decode_bytes
+    except Exception as exc:  # pragma: no cover
+        return f"кодек недоступний: {exc}"
+    data = (ROOT / sens_path).read_bytes()
+    try:
+        words = decode_bytes(data)
+    except Exception as exc:
+        return f"{type(exc).__name__}: {exc} (НЕ канонічний T5M → треба пере-карбування)"
+    return f"декодується ({len(words)} слів) → вигляд можна регенерувати"
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--check", action="store_true", help="fail-closed: набір блокерів не сміє змінитись")
@@ -59,6 +79,9 @@ def main() -> int:
         print(f"  ВИГЛЯД БЛОК:   {path}")
     for path in b["view_missing"]:
         print(f"  ВИГЛЯД ВІДСУТНІЙ: {path}")
+    print("  ДІАГНОЗ (чому не виправляється одним регенеруванням):")
+    for path in (b["physical_blocked"] + b["view_missing"]):
+        print(f"    {path}: {decode_diagnosis(path)}")
     if args.check:
         print(f"T5-BLOCKERS: усі {total} блокери НАЗВАНО за ім'ям — не «BLOCKED» "
               "без імен. П'ятий (MISSING_NOT_CERTIFIED) названо теж.")
