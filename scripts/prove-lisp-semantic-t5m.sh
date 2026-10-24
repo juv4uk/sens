@@ -1124,6 +1124,22 @@ run_case run_error_rejection d11-unfold-right-nonpredicate-stop "$d11_unfold_rig
 sha256sum lib/d11-srfi1-unfold.lisp tests/fixtures/d11-unfold-nonpredicate-stop-must-error.lisp \
   tests/fixtures/d11-unfold-right-nonpredicate-stop-must-error.lisp > "$evidence/d11-unfold-type-inputs.sha256"
 
+# D11 UNFOLD: кінцевий хвіст має бути правильним D3-списком.
+d11_unfold_bad_terminal_left_atom="$evidence/d11-unfold-terminal-left-atom.lisp"
+d11_unfold_bad_terminal_left_dotted="$evidence/d11-unfold-terminal-left-dotted.lisp"
+d11_unfold_bad_terminal_right_atom="$evidence/d11-unfold-terminal-right-atom.lisp"
+d11_unfold_bad_terminal_right_dotted="$evidence/d11-unfold-terminal-right-dotted.lisp"
+cat -- lib/d11-srfi1-unfold.lisp tests/fixtures/d11-unfold-terminal-left-atom-must-error.lisp > "$d11_unfold_bad_terminal_left_atom"
+cat -- lib/d11-srfi1-unfold.lisp tests/fixtures/d11-unfold-terminal-left-dotted-must-error.lisp > "$d11_unfold_bad_terminal_left_dotted"
+cat -- lib/d11-srfi1-unfold.lisp tests/fixtures/d11-unfold-terminal-right-atom-must-error.lisp > "$d11_unfold_bad_terminal_right_atom"
+cat -- lib/d11-srfi1-unfold.lisp tests/fixtures/d11-unfold-terminal-right-dotted-must-error.lisp > "$d11_unfold_bad_terminal_right_dotted"
+run_case run_type_rejection d11-unfold-terminal-left-atom "$d11_unfold_bad_terminal_left_atom" 'car expects a non-empty list'
+run_case run_type_rejection d11-unfold-terminal-left-dotted "$d11_unfold_bad_terminal_left_dotted" 'car expects a non-empty list'
+run_case run_type_rejection d11-unfold-terminal-right-atom "$d11_unfold_bad_terminal_right_atom" 'car expects a non-empty list'
+run_case run_type_rejection d11-unfold-terminal-right-dotted "$d11_unfold_bad_terminal_right_dotted" 'car expects a non-empty list'
+sha256sum lib/d11-srfi1-unfold.lisp tests/fixtures/d11-unfold-terminal-*.lisp > "$evidence/d11-unfold-terminal-inputs.sha256"
+
+
 # Д11: повна композиція GROUP-BY → FREQUENCIES, з несуміжними ключами.
 # Міняємо тільки SENS law/mutant, а не координати або хостову семантику.
 d11_freq_key_positive="$evidence/d11-frequencies-key-order-positive-complete.lisp"
