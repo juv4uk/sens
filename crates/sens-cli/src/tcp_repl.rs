@@ -190,7 +190,7 @@ fn handle_tcp_line_connection(stream: TcpStream, allowed: &[String]) {
         );
         return;
     }
-    if let Err(error) = sens::load_process_library(&mut session) {
+    if let Err(error) = load_process_library(&mut session) {
         eprintln!(
             "TCP REPL: process library bootstrap failed: {}",
             error.render("<T5M process bootstrap>")
