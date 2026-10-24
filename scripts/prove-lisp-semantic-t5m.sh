@@ -578,6 +578,17 @@ run_case run_law d6-scan-reduce-terminal-positive tests/semantic/d6-scan-reduce-
 run_case run_law d6-scan-missing-initial-mutant tests/semantic/d6-scan-missing-initial-mutant.lisp 0 core4
 run_case run_error_rejection d6-scan-improper-tail tests/semantic/d6-scan-improper-tail-negative.lisp Type 'car expects a non-empty list' core4
 run_case run_error_rejection d6-scan-onto-atom tests/semantic/d6-scan-onto-atom-negative.lisp Type 'car expects a non-empty list' core4
+# Д8:10111001/10111011 — правий напрямок, закон SCAN та два Type-негативи.
+run_case run_law d8-right-fold-scan-positive tests/semantic/d8-right-fold-scan-law.lisp 1 core4
+run_case run_law d8-right-fold-order-mutant tests/semantic/d8-right-fold-order-mutant.lisp 0 core4
+run_case run_law d8-right-scan-initial-mutant tests/semantic/d8-right-scan-missing-initial-mutant.lisp 0 core4
+run_case run_error_rejection d8-right-fold-atom tests/semantic/d8-right-fold-atom-negative.lisp Type 'car expects a non-empty list' core4
+run_case run_error_rejection d8-right-scan-atom tests/semantic/d8-right-scan-atom-negative.lisp Type 'car expects a non-empty list' core4
+sha256sum lib/core4.lisp tests/semantic/d8-right-fold-scan-law.lisp \
+  tests/semantic/d8-right-fold-order-mutant.lisp \
+  tests/semantic/d8-right-scan-missing-initial-mutant.lisp \
+  tests/semantic/d8-right-fold-atom-negative.lisp \
+  tests/semantic/d8-right-scan-atom-negative.lisp > "$evidence/d8-right-fold-scan-inputs.sha256"
 # Д6 FILTER-ONTO: непорожній акумулятор має оборотний порядок; мутант хибний.
 run_case run_law d6-filter-onto-accumulator-positive tests/semantic/d6-filter-onto-accumulator-law.lisp 1 core4
 run_case run_law d6-filter-onto-accumulator-mutant tests/semantic/d6-filter-onto-accumulator-mutant.lisp 0 core4
