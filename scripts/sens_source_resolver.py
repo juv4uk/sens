@@ -71,10 +71,22 @@ def _strip_semicolon_comments(text: str) -> str:
     return "\n".join(line.split(";", 1)[0] for line in text.splitlines())
 
 
+# Маркер виведення файла з ужитку (стаб замість реєстру).
+RETIRED_MARKER = "ВИВЕДЕНО З УЖИТКУ"
+
+
 def load_historical_rows(path: Path) -> list[HistoricalRow]:
-    text = _strip_semicolon_comments(path.read_text(encoding="utf-8"))
+    raw = path.read_text(encoding="utf-8")
+    text = _strip_semicolon_comments(raw)
     rows = [HistoricalRow(*m.groups()) for m in HISTORICAL_ROW_RE.finditer(text)]
     if not rows:
+        # Першопричина: історичний реєстр плоских W8/SID виведено з ужитку
+        # (стаб із маркером), а резолвер усе ще ВИМАГАВ рядки й падав — тож
+        # валив усіх споживачів. Виведений реєстр дає порожній історичний
+        # індекс (живий шлях його не потребує), а справжня втрата рядків у
+        # НЕвиведеному файлі лишається помилкою.
+        if RETIRED_MARKER in raw:
+            return []
         raise ValueError(f"{path}: no historical rows")
     return rows
 
