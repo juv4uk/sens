@@ -36,12 +36,16 @@ mod paired {
             ExprKind::DomainCall(identity, args)
                 if identity.width() == 5
                     && matches!(identity.packed_bits(),
-                        0b01010 | 0b01011 | 0b10110 | 0b10111 | 0b11010 | 0b11011)
-                    // Unary DIFFERENCE and QUOTIENT already execute in the
-                    // SENS D5 evaluator. Other D5 math/predicates remain binary.
+                        0b01000 | 0b01001 | 0b01010 | 0b01011
+                            | 0b10110 | 0b10111 | 0b11010 | 0b11011)
+                    // ZEROP and NUMBERP are unary D5 laws; DIFFERENCE and
+                    // QUOTIENT also retain their existing unary forms.
                     && (args.len() == 2
                         || (args.len() == 1
-                            && matches!(identity.packed_bits(), 0b01011 | 0b10111))) =>
+                            && matches!(
+                                identity.packed_bits(),
+                                0b01000 | 0b01001 | 0b01011 | 0b10111
+                            ))) =>
             {
                 // Atomic binary operands must carry the SAME admitted Dn.
                 // Nested results (possibly widened by an earlier operation)
@@ -556,6 +560,58 @@ mod paired {
         }
 
         #[test]
+        fn d12_zero_and_number_predicates_execute_after_physical_t5m_roundtrip() {
+            // The two source fixtures are authored in SENS/Lisp. The paired
+            // source projector explicitly gives their integer leaves D12 identity.
+            let cases: [(&str, &str, bool); 7] = [
+                ("numberp-zero", "(число? 0)", true),
+                ("numberp-negative", "(число? -1)", true),
+                (
+                    "numberp-ratio",
+                    include_str!("../../../../tests/semantic/d5-d12-numberp-law.lisp"),
+                    true,
+                ),
+                ("zerop-zero", "(нуль? 0)", true),
+                (
+                    "zerop-computed-zero",
+                    include_str!("../../../../tests/semantic/d5-d12-zerop-law.lisp"),
+                    true,
+                ),
+                ("zerop-positive", "(нуль? 1)", false),
+                ("zerop-negative", "(нуль? -1)", false),
+            ];
+            for (id, source, expected) in cases {
+                let source = source.trim();
+                let qualified = qualify(source)
+                    .unwrap_or_else(|error| panic!("test_id={id} layer=SENS admission {error}"));
+                let words = expected_words(&qualified).unwrap();
+                let numeric_widths = words
+                    .iter()
+                    .filter(|word| word.width > 5)
+                    .map(|word| word.width)
+                    .collect::<Vec<_>>();
+                assert!(
+                    !numeric_widths.is_empty() && numeric_widths.iter().all(|&width| width == 12),
+                    "test_id={id} layer=D12 expected_only_D12_leaves actual={numeric_widths:?}"
+                );
+                let physical = zig_transport::encode_t5m_exact_words(&words)
+                    .unwrap_or_else(|error| panic!("test_id={id} layer=Zig-T5M encode {error}"));
+                assert_eq!(
+                    zig_transport::decode_t5m_exact_words(&physical).unwrap(),
+                    words,
+                    "test_id={id} layer=transport"
+                );
+                let actual = eval_verified(source, &physical)
+                    .unwrap_or_else(|error| panic!("test_id={id} layer=SENS eval {error}"));
+                assert_eq!(
+                    actual.as_predicate_bit(),
+                    Some(expected),
+                    "test_id={id} layer=D1 expected={expected}"
+                );
+            }
+        }
+
+        #[test]
         fn unsupported_unary_math_or_wrong_arity_cannot_be_physically_admitted() {
             for source in [
                 "(додати 1)".to_string(),
@@ -565,6 +621,10 @@ mod paired {
                 "(частка 1 2 3)".to_string(),
                 "(відняти 1 2 3)".to_string(),
                 "(частка)".to_string(),
+                "(нуль?)".to_string(),
+                "(число?)".to_string(),
+                "(нуль? 1 2)".to_string(),
+                "(число? 1 2)".to_string(),
             ] {
                 assert!(
                     qualify(&source).is_err(),
