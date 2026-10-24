@@ -161,16 +161,21 @@ def verify_derivation() -> None:
     declared = {n: c for n, (c, *_r) in DISPATCH_ANCHORS.items()}
     declared[7] = 0
     declared[11] = 0
-    # Для bindings-щаблів окремий інваріант: bindings МУСЯТЬ покривати
-    # селекторні координати закону. Саме тут викрито D5 (6 bindings проти 8).
+    # Перевірено власними очима: це НЕ прогалина, а задум.
+    #   • mod.rs:927 — selector_law::is_selector перевіряється ПЕРШИМ, до
+    #     binding-шляху, тож селектори виконуються без binding;
+    #   • core4.lisp:180-195 — DEFINE для всіх 8 селекторів D5 ІСНУЮТЬ;
+    #   • check-d5-definition-bindings.py:55-67 — D5 має «затверджений перший
+    #     зріз» рівно з 6 рядків і падає, якщо проєкція інша.
+    # Тому відсутність binding у селектора — норма, і «прогалиною» вона НЕ є.
     for n in (5, 6, 9, 10):
         bind = bindings(n)
         if bind is None:
             continue
-        missing = selector_coordinates(n) - bind
-        if missing:
-            print(f"D5-GAP-WARNING: D{n}: {len(missing)} селекторних координат "
-                  f"за законом НЕ покриті bindings: {sorted(missing)[:4]}")
+        law_only = selector_coordinates(n) - bind
+        if law_only:
+            print(f"D{n}-LAW-NOTE: {len(law_only)} селекторних координат виконуються "
+                  f"ЗАКОНОМ, а не binding (за задумом, mod.rs:927): {sorted(law_only)[:4]}")
     for n, count in declared.items():
         floor = derived_floor(n)
         extras = count - floor
