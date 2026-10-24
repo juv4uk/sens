@@ -886,6 +886,18 @@ run_case run_law d5-arithmetic-native-t5m-mutant tests/semantic/d5-arithmetic-na
 # Цей повний Lisp-пакет кодується Zig/T5M і виконується фізичним SENS.
 # Відокремлений .lisp-свідок не є автономною програмою — без lib/ він не викличний.
 
+# Д11: відбір над канонічними D1/D3; позитив і мутант — SENS.
+# Код і закон беруться з чинного lib/ та tests/semantic/, не з shell.
+d11_selection_d1_law="$evidence/d11-family-selection-d1-structural-positive.lisp"
+d11_selection_d1_mutant="$evidence/d11-family-selection-d1-structural-mutant.lisp"
+cat -- lib/d11-family-selection.lisp tests/semantic/d11-family-selection-d1-structural-law.lisp > "$d11_selection_d1_law"
+cat -- lib/d11-family-selection.lisp tests/semantic/d11-family-selection-d1-structural-mutant.lisp > "$d11_selection_d1_mutant"
+run_case run_law d11-family-selection-d1-structural-positive "$d11_selection_d1_law" 1
+run_case run_law d11-family-selection-d1-structural-mutant "$d11_selection_d1_mutant" 0
+sha256sum lib/d11-family-selection.lisp \
+  tests/semantic/d11-family-selection-d1-structural-law.lisp \
+  tests/semantic/d11-family-selection-d1-structural-mutant.lisp > "$evidence/d11-family-selection-d1-inputs.sha256"
+
 # Д11 SRFI-1 lset-adjoin: перевірка лише SENS через фізичний Zig/T5M.
 # Негативні свідки мусять дати D3 ПЕРШЕ Type, а не мовчазний результат.
 d11_adjoin_law_bundle="$evidence/d11-srfi1-adjoin-law-complete.lisp"
