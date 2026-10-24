@@ -993,6 +993,23 @@ sha256sum lib/d11-family-selection.lisp \
   tests/semantic/d11-family-selection-d1-structural-law.lisp \
   tests/semantic/d11-family-selection-d1-structural-mutant.lisp > "$evidence/d11-family-selection-d1-inputs.sha256"
 
+# D11 TAKE-WHILE: композиція єдиного чинного SENS SPAN, без нового opcode.
+# Прямий і обидва фізичні шляхи обчислюють позитив, мутант та D3 Type.
+d11_take_while_positive="$evidence/d11-take-while-first-class-positive-complete.lisp"
+d11_take_while_mutant="$evidence/d11-take-while-first-class-mutant-complete.lisp"
+d11_take_while_bad="$evidence/d11-take-while-first-class-improper-tail-complete.lisp"
+cat -- lib/d11-srfi1-span-break.lisp lib/d11-srfi1-take-while.lisp \
+  tests/semantic/d11-take-while-first-class-law.lisp > "$d11_take_while_positive"
+cat -- lib/d11-srfi1-span-break.lisp lib/d11-srfi1-take-while.lisp \
+  tests/semantic/d11-take-while-first-class-mutant.lisp > "$d11_take_while_mutant"
+cat -- lib/d11-srfi1-span-break.lisp lib/d11-srfi1-take-while.lisp \
+  tests/semantic/d11-take-while-first-class-improper-tail-negative.lisp > "$d11_take_while_bad"
+run_case run_law d11-take-while-first-class-positive "$d11_take_while_positive" 1
+run_case run_law d11-take-while-first-class-mutant "$d11_take_while_mutant" 0
+run_case run_type_rejection d11-take-while-first-class-improper-tail "$d11_take_while_bad" 'car expects a non-empty list'
+sha256sum lib/d11-srfi1-span-break.lisp lib/d11-srfi1-take-while.lisp \
+  tests/semantic/d11-take-while-first-class-*.lisp > "$evidence/d11-take-while-first-class-inputs.sha256"
+
 # Д11 SRFI-1 lset-adjoin: перевірка лише SENS через фізичний Zig/T5M.
 # Негативні свідки мусять дати D3 ПЕРШЕ Type, а не мовчазний результат.
 d11_adjoin_law_bundle="$evidence/d11-srfi1-adjoin-law-complete.lisp"

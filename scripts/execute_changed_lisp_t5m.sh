@@ -1125,6 +1125,12 @@ while IFS= read -r file || [[ -n "$file" ]]; do
     # Частоти викликають чинне DEFINE групування: обидва кроки виконуються SENS.
     binding_sources=(--binding-source lib/d11-clojure-group-by.lisp
                      --binding-source lib/d11-clojure-frequencies-unary.lisp)
+  elif [[ "$file" == "tests/semantic/d11-take-while-first-class-law.lisp" ||
+          "$file" == "tests/semantic/d11-take-while-first-class-mutant.lisp" ||
+          "$file" == "tests/semantic/d11-take-while-first-class-improper-tail-negative.lisp" ]]; then
+    # Бібліотечна D11-композиція: SPAN і TAKE-WHILE виконує тільки SENS.
+    binding_sources=(--binding-source lib/d11-srfi1-span-break.lisp
+                     --binding-source lib/d11-srfi1-take-while.lisp)
   elif [[ "$file" == "tests/semantic/d11-family-selection-law.lisp" ||
           "$file" == "tests/semantic/d11-family-selection-mutant.lisp" ||
           "$file" == "tests/semantic/d11-family-selection-d1-structural-law.lisp" ||
