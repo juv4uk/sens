@@ -954,6 +954,12 @@ run_case run_type_rejection d8-string-symbol-nontext-type-negative tests/semanti
 run_case run_type_rejection d8-contextual-d1-serialize-type-negative tests/semantic/d8-contextual-d1-serialize-type-negative.lisp 'write-to-string cannot serialize contextual predicate results'
 # Ділення на обчислений нуль є мовним DivisionByZero, не довільною помилкою reader-а.
 run_case run_division_by_zero_rejection d24-computed-zero-denominator tests/semantic/d24-reader-zero-denominator-negative.lisp 'division by zero'
+# D5:01000/01001 — мовні закони перевіряються SENS; фізичний D12 маршрут
+# окремо доводить точну ширину після справжнього Zig/T5M round-trip.
+run_case run_law d5-d12-numberp-ratio tests/semantic/d5-d12-numberp-law.lisp 1
+run_case run_law d5-d12-zerop-computed-zero tests/semantic/d5-d12-zerop-law.lisp 1
+run_case run_law d5-numberp-text-is-not-number tests/semantic/d5-numberp-nonnumber-law.lisp 0
+sha256sum tests/semantic/d5-d12-numberp-law.lisp tests/semantic/d5-d12-zerop-law.lisp tests/semantic/d5-numberp-nonnumber-law.lisp > "$evidence/d5-d12-number-predicate-inputs.sha256"
 # D24+ арифметика використовує ті самі справжні визначення Core4 на всіх
 # трьох маршрутах; позитив і мутант доводять точні D1:1 / D1:0.
 run_case run_law exact-arithmetic-positive tests/semantic/exact-arithmetic-laws.lisp 1 core4
