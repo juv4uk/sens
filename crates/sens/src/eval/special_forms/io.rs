@@ -21,6 +21,29 @@ fn contains_predicate_bit(value: &Value) -> bool {
     }
 }
 
+// Канонічний дріт приймає лише ті legacy exact f64, для яких
+// перетворення на i64 не насичується і не змінює значення.
+// Точні числа D24+ мають окремий BinaryNumber-носій і сюди не входять.
+fn contains_noncanonical_exact_number(value: &Value) -> bool {
+    match value {
+        Value::Number(number, crate::Exactness::Exact) => {
+            !number.is_finite()
+                || number.fract() != 0.0
+                || *number < i64::MIN as f64
+                || *number >= -(i64::MIN as f64)
+        }
+        Value::Pair(node) => {
+            contains_noncanonical_exact_number(&node.head)
+                || contains_noncanonical_exact_number(&node.tail)
+        }
+        Value::Vector(values) => values
+            .borrow()
+            .iter()
+            .any(contains_noncanonical_exact_number),
+        _ => false,
+    }
+}
+
 pub(crate) fn write_to_string_values(
     arguments: &[Value],
     _environment: &Environment,
@@ -31,6 +54,13 @@ pub(crate) fn write_to_string_values(
         return Err(LanguageError::new(
             ErrorKind::Type,
             "write-to-string cannot serialize contextual predicate results",
+            span,
+        ));
+    }
+    if contains_noncanonical_exact_number(&arguments[0]) {
+        return Err(LanguageError::new(
+            ErrorKind::Type,
+            "write-to-string cannot serialize a legacy exact Number without loss",
             span,
         ));
     }
@@ -188,6 +218,46 @@ mod tests {
         )
         .expect("ordinary exact Number wire remains supported");
         assert_eq!(number, Value::String(Rc::from("#q2:1/1")));
+    }
+
+    #[test]
+    fn legacy_exact_number_wire_refuses_saturating_float_to_integer_cast() {
+        // as i64 насичує 2^63 до i64::MAX: це не канонічний запис.
+        let above_max = Value::Number(-(i64::MIN as f64), crate::Exactness::Exact);
+        let below_min = Value::Number((i64::MIN as f64) * 2.0, crate::Exactness::Exact);
+        let nested = Value::list([Value::Number(
+            -(i64::MIN as f64),
+            crate::Exactness::Exact,
+        )]);
+        let vector = Value::Vector(Rc::new(std::cell::RefCell::new(vec![
+            Value::Number(1.0, crate::Exactness::Exact),
+            above_max.clone(),
+        ])));
+        for value in [
+            above_max,
+            below_min,
+            nested,
+            vector,
+            Value::Number(f64::INFINITY, crate::Exactness::Exact),
+            Value::Number(0.5, crate::Exactness::Exact),
+        ] {
+            let error = write_to_string_values(
+                &[value],
+                &Environment::root(),
+                Span::default(),
+            )
+            .expect_err("непредставиме exact f64 не може дати успішний wire");
+            assert_eq!(error.kind, ErrorKind::Type);
+        }
+
+        // Нижня межа i64 представима точно; не відкидати коректні дані.
+        let lower_edge = Value::Number(i64::MIN as f64, crate::Exactness::Exact);
+        assert!(write_to_string_values(
+            &[lower_edge],
+            &Environment::root(),
+            Span::default(),
+        )
+        .is_ok());
     }
 
     #[test]
