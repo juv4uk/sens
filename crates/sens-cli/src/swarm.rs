@@ -660,15 +660,22 @@ fn handle_sexpr_connection(
             }
             eprintln!("TCP REPL: {peer} > request-bytes={}", line.len());
 
-            // The request envelope itself is read as literal data
-            // (`quote`), never evaluated — `(op eval)` deciding to
-            // evaluate `source` is the only place code ever runs.
+            // Транспортний інваріант: рівно одна форма запиту.
+            // Не виконуємо нічого, доки обидва розбори не підтвердили,
+            // що текст не закрив QUOTE і не додав виконувану форму.
+            // SENS залишається єдиним виконавцем семантики QUOTE.
             let quoted = format!("(quote {trimmed})");
-            let request = match parse(&quoted).ok().and_then(|ast| {
-                eval_parsed_expressions_incremental(&ast, &mut session)
-                    .ok()
-                    .map(|r| r.value)
-            }) {
+            let request = match parse(trimmed)
+                .ok()
+                .filter(|input| input.len() == 1)
+                .and_then(|_| parse(&quoted).ok())
+                .filter(|ast| ast.len() == 1)
+                .and_then(|ast| {
+                    eval_parsed_expressions_incremental(&ast, &mut session)
+                        .ok()
+                        .map(|r| r.value)
+                })
+            {
                 Some(value) => value,
                 None => {
                     let resp = error_response(
