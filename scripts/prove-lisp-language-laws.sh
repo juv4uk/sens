@@ -36,6 +36,10 @@ for id in d1-not d2-cond-laziness d3-structure d4-lexical-scope d4-second-select
     printf 'REGRESSION test_id=%s layer=fixture expected=distinct-pair actual=missing-or-identical\n' "$id" >&2
     exit 1
   fi
+  # D6 COMPOSE/FLIP живе у чинному Core4; нативний paired використовує
+  # той самий профіль, що й prove-lisp-semantic-t5m.sh, без host-оракула.
+  paired_profile=()
+  [[ "$id" != d6-compose-flip ]] || paired_profile=(--core4-runtime)
   for kind in law mutant; do
     file="$law"
     [[ "$kind" == mutant ]] && file="$mutant"
@@ -61,7 +65,7 @@ for id in d1-not d2-cond-laziness d3-structure d4-lexical-scope d4-second-select
     fi
     # Парне виконання SENS порівнює фізичні слова з вихідною програмою.
     # Shell не обчислює семантику й не оголошує standalone фізичного входу.
-    if ! timeout 45s "$cli" --t5m-pair "$file" "$physical" > "$tmp/actual" 2> "$tmp/stderr"; then
+    if ! timeout 45s "$cli" --t5m-pair "$file" "$physical" "${paired_profile[@]}" > "$tmp/actual" 2> "$tmp/stderr"; then
       printf 'REGRESSION test_id=%s layer=physical-eval input=%s expected=D1:%s actual=execution-error\n' "$id" "$file" "$expected" >&2
       cat "$tmp/stderr" >&2
       exit 1
