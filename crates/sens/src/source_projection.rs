@@ -127,10 +127,15 @@ fn magnitude_fits_signed_width(negative: bool, magnitude: &[u8], width: usize) -
         && magnitude[1..].iter().all(|bit| *bit == 0)
 }
 
-fn integer_width(token: &str, span: Span) -> Result<usize, LanguageError> {
+fn integer_width(
+    token: &str,
+    span: Span,
+    minimum_width: usize,
+) -> Result<usize, LanguageError> {
     let (negative, magnitude) = decimal_magnitude_bits(token, span)?;
     [12usize, 24, 48, 96, 192]
         .into_iter()
+        .filter(|width| *width >= minimum_width)
         .find(|width| magnitude_fits_signed_width(negative, &magnitude, *width))
         .ok_or_else(|| {
             LanguageError::new(
@@ -282,7 +287,8 @@ fn project_expr(
 
     let kind = match &expr.kind {
         ExprKind::List(items) if is_d5_call(expr) => {
-            let required = required_width_in_math_tree(expr, source, 0)?.unwrap_or(12);
+            let required =
+                required_width_in_math_tree(expr, source, 0, minimum_width)?.unwrap_or(minimum_width);
             let width = inherited_math_width.map_or(required, |outer| outer.max(required));
             ExprKind::List(
                 items
@@ -372,6 +378,86 @@ mod tests {
         };
         assert_eq!(value.numeric_domain_width(), Some(24));
         assert_eq!(value.to_decimal_string(), "2048");
+    }
+
+ 
+    #[test]
+    fn explicit_d12_projection_keeps_signed_boundaries_and_widens_exactly() {
+        let source = "(приклад 0 1 -1 2047 -2048 2048 -2049)";
+        let parsed = crate::parse(source).expect("source parses");
+        let projected =
+            project_ukr_decimal_integer_literals_with_minimum_width(&parsed, source, 12)
+                .expect("D12 source integers project to exact admitted numeric widths");
+        let ExprKind::List(items) = &projected[0].kind else {
+            panic!("expected one list")
+        };
+        let values: Vec<_> = items
+            .iter()
+            .skip(1)
+            .map(|expr| match &expr.kind {
+                ExprKind::BinaryNumber(number) => number.clone(),
+                other => panic!("expected a domain-qualified number, got {other:?}"),
+            })
+            .collect();
+        assert_eq!(
+            values.iter().map(BinaryNumber::numeric_domain_width).collect::<Vec<_>>(),
+            vec![Some(12), Some(12), Some(12), Some(12), Some(12), Some(24), Some(24)]
+        );
+        assert_eq!(
+            values.iter().map(BinaryNumber::to_decimal_string).collect::<Vec<_>>(),
+            vec!["0", "1", "-1", "2047", "-2048", "2048", "-2049"]
+        );
+
+        let positive_max = values[3].exact_numeric_domain_bits().unwrap();
+        let negative_min = values[4].exact_numeric_domain_bits().unwrap();
+        assert_eq!(positive_max, vec![0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]);
+        assert_eq!(negative_min, vec![1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
+    }
+
+    #[test]
+    fn explicit_d12_projection_runs_same_domain_arithmetic_and_carries_without_wrap() {
+        let source = "(додати 2047 1)";
+        let parsed = crate::parse(source).expect("source parses");
+        let projected =
+            project_ukr_decimal_integer_literals_with_minimum_width(&parsed, source, 12)
+                .expect("each literal starts in exact D12");
+        let ExprKind::List(items) = &projected[0].kind else {
+            panic!("expected one addition form")
+        };
+        assert!(items.iter().skip(1).all(|expr| matches!(
+            &expr.kind,
+            ExprKind::BinaryNumber(number) if number.numeric_domain_width() == Some(12)
+        )), "both source operands must retain exact D12 identity");
+
+        let mut session = crate::Session::default();
+        crate::load_core_library(&mut session).expect("SENS Core loads");
+        let result = crate::eval_parsed_expressions(&projected, &mut session)
+            .expect("SENS computes the exact result without modulo-4096 wrapping");
+        let crate::Value::BinaryNumber(sum) = result.value else {
+            panic!("D12 addition must return an exact numeric word")
+        };
+        assert_eq!(sum.numeric_domain_width(), Some(24));
+        assert_eq!(sum.to_decimal_string(), "2048");
+
+        let same_magnitude_d24 = BinaryNumber::from_numeric_domain_bits(24, &{
+            let mut bits = vec![0; 24];
+            bits[22] = 1;
+            bits
+        }).expect("explicit D24 2");
+        let d12_two = values_as_d12_two();
+        assert_ne!(d12_two, same_magnitude_d24);
+        assert_eq!(d12_two.add_admitted_numeric(&same_magnitude_d24), None);
+    }
+
+    fn values_as_d12_two() -> BinaryNumber {
+        let parsed = crate::parse("2").expect("simple integer source parses");
+        let projected =
+            project_ukr_decimal_integer_literals_with_minimum_width(&parsed, "2", 12)
+                .expect("explicit D12 projection");
+        match &projected[0].kind {
+            ExprKind::BinaryNumber(number) => number.clone(),
+            other => panic!("expected D12 number, got {other:?}"),
+        }
     }
 
     #[test]
