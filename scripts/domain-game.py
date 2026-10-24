@@ -59,7 +59,9 @@ CODEC_LEVELS = [
     ("C4", "Реальні довгі й непарні цикли encode/decode/reencode", (
         "D12 dense long and odd runs preserve bytes on reencode",
     )),
-    ("C5", "Явний кадр: версія, домен, довжина, цілісність", None),
+    ("C5", "Явний кадр: версія, домен, довжина, цілісність", (
+        "D12 dense explicit frame validates version domain length and integrity",
+    )),
 ]
 
 # D13 тут лише дослідний 13-бітний carrier, а не числовий чи викличний домен.
