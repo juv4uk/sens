@@ -291,7 +291,7 @@ pub use text7_projection::{encode_text7, render_text7, Text7Layout, Text7Project
 
 pub use binary_execution::{eval_e1_program, E1ExecutionError, ExactDomainWord, PhysicalT5Program};
 
-pub use eval::exact_arity;
+pub use eval::{exact_arity, read_single_quoted_datum};
 pub use eval::lower::lower_program;
 pub use eval::parse_json;
 pub use eval::{

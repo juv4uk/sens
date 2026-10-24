@@ -660,21 +660,16 @@ fn handle_sexpr_connection(
             }
             eprintln!("TCP REPL: {peer} > request-bytes={}", line.len());
 
-            // The request envelope itself is read as literal data
-            // (`quote`), never evaluated — `(op eval)` deciding to
-            // evaluate `source` is the only place code ever runs.
-            let quoted = format!("(quote {trimmed})");
-            let request = match parse(&quoted).ok().and_then(|ast| {
-                eval_parsed_expressions_incremental(&ast, &mut session)
-                    .ok()
-                    .map(|r| r.value)
-            }) {
-                Some(value) => value,
-                None => {
+            // One SENS datum per TCP frame. The canonical D3 QUOTE
+            // conversion is pure: malformed or multiple source forms
+            // are rejected before any evaluator or capability can run.
+            let request = match sens::read_single_quoted_datum(trimmed) {
+                Ok(value) => value,
+                Err(_) => {
                     let resp = error_response(
                         &Value::Nil,
                         "parse-error",
-                        "request envelope is not a valid s-expression",
+                        "request envelope is not exactly one valid s-expression",
                         &contract_version,
                     );
                     let _ = writeln!(stream, "{resp}");
@@ -960,6 +955,30 @@ mod oracle_result_tests {
             matches!(value, Value::Pair(_) | Value::Nil),
             "Guard default query returned an unexpected value: {value}"
         );
+    }
+
+    #[test]
+    fn tcp_request_reader_preserves_one_quoted_datum_without_evaluation() {
+        let input = r#"(request (id probe) (op contract-version) (source "(define injected 1)"))"#;
+        let request = sens::read_single_quoted_datum(input)
+            .expect("valid envelope must be read as inert SENS data");
+        let fields = list_items(&request);
+        assert_eq!(fields[0].to_string(), "request");
+        assert!(fields.iter().any(|field| field.to_string().contains("define injected 1")));
+    }
+
+    #[test]
+    fn tcp_request_reader_rejects_quote_breakout_before_execution() {
+        // The former concatenated-QUOTE reader parsed this as three executable
+        // forms. The new reader never receives an Environment or Session.
+        let injection = "(request (id probe) (op contract-version))) (define injected 1) (quote marker";
+        let legacy = format!("(quote {injection})");
+        assert_eq!(parse(&legacy).expect("legacy input parses").len(), 3);
+        assert!(
+            sens::read_single_quoted_datum(injection).is_err(),
+            "an untrusted frame cannot escape its data boundary",
+        );
+        assert!(sens::read_single_quoted_datum("(request (id probe) (op contract-version))").is_ok());
     }
 
     #[test]

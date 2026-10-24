@@ -73,6 +73,24 @@ use crate::{
     Span, Value,
 };
 
+/// Reads exactly one SENS datum without evaluating it.
+///
+/// Transport envelopes are untrusted data: do not turn them into a
+/// dynamically constructed QUOTE program. Reuse the language's existing
+/// D3 QUOTE data conversion, including exact-domain and D7 preservation,
+/// but never enter EVAL or require a mutable Session.
+pub fn read_single_quoted_datum(source: &str) -> Result<Value, LanguageError> {
+    let expressions = parse(source)?;
+    if expressions.len() != 1 {
+        return Err(LanguageError::new(
+            ErrorKind::InvalidForm,
+            "request envelope must contain exactly one top-level expression",
+            Span { start: 0, end: source.len() },
+        ));
+    }
+    special_forms::quoted(&expressions[0])
+}
+
 #[cfg(feature = "benchmark-ast-visits")]
 std::thread_local! {
     static EVAL_AST_VISITS: std::cell::Cell<Option<u64>> = const {
