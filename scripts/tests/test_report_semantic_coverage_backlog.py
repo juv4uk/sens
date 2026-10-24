@@ -36,6 +36,15 @@ class SemanticBacklogTests(unittest.TestCase):
         self.assertNotIn("MISSING_NEGATIVE_SENS", r.stdout)
         self.assertNotIn("готово ✓", r.stdout)
 
+    def test_suggest_gives_hints_but_never_claims_a_match(self):
+        # Дослівних збігів НЕМАЄ (перевірено), тож автозаповнення неможливе.
+        # Режим дає ПІДКАЗКИ за перетином токенів — і мусить це казати.
+        r = self.run_script("--suggest")
+        self.assertEqual(r.returncode, 0, r.stderr)
+        self.assertIn("ПІДКАЗКИ, не зіставлення", r.stdout)
+        self.assertIn("d3-dotted-pair", r.stdout)   # конкретна підказка
+        self.assertIn("~", r.stdout)
+
     def test_the_three_scopes_are_named(self):
         r = self.run_script()
         for scope in ("BULK_20261009", "EVAL_20261009", "TARGETED_20261009"):
