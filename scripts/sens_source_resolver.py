@@ -71,10 +71,22 @@ def _strip_semicolon_comments(text: str) -> str:
     return "\n".join(line.split(";", 1)[0] for line in text.splitlines())
 
 
+# Маркер виведення файла з ужитку (стаб замість реєстру).
+RETIRED_MARKER = "ВИВЕДЕНО З УЖИТКУ"
+
+
 def load_historical_rows(path: Path) -> list[HistoricalRow]:
-    text = _strip_semicolon_comments(path.read_text(encoding="utf-8"))
+    raw = path.read_text(encoding="utf-8")
+    text = _strip_semicolon_comments(raw)
     rows = [HistoricalRow(*m.groups()) for m in HISTORICAL_ROW_RE.finditer(text)]
     if not rows:
+        # Першопричина: історичний реєстр плоских W8/SID виведено з ужитку
+        # (стаб із маркером), а резолвер усе ще ВИМАГАВ рядки й падав — тож
+        # валив усіх споживачів. Виведений реєстр дає порожній історичний
+        # індекс (живий шлях його не потребує), а справжня втрата рядків у
+        # НЕвиведеному файлі лишається помилкою.
+        if RETIRED_MARKER in raw:
+            return []
         raise ValueError(f"{path}: no historical rows")
     return rows
 
@@ -175,6 +187,12 @@ class SourceResolver:
         self.registry_sid_fields = registry_sid_fields
         self.registry_surface_sids = registry_surface_sids
 
+        # Першопричина (#5997 → тут): порожній історичний індекс — це НЕ те
+        # саме, що «історичних даних немає». Після виведення SID-реєстру
+        # індекс порожній, і прохід 1/2/3 усе одно «виконувався», повертаючи
+        # впевнений результат без жодного знання. Тепер спроможність названа
+        # явно й падає закрито, а не вдає роботу.
+        self.historical_retired = not historical_rows
         self.hist_by_sid: dict[str, list[HistoricalRow]] = {}
         self.hist_by_my: dict[str, list[HistoricalRow]] = {}
         self.hist_by_upper: dict[str, list[HistoricalRow]] = {}
@@ -225,6 +243,18 @@ class SourceResolver:
     def resolve_head(self, token: str, *, source_era: str = "current") -> Resolution:
         if source_era not in {"current", "legacy"}:
             raise ValueError(f"невідома епоха джерела: {source_era}")
+        # Першопричина: якщо історичну спроможність виведено, жоден
+        # «історичний» прохід виконати НЕ МОЖНА. Порожній результат тут
+        # недопустимий: він не відрізняється від «перевірено й не історичне».
+        # Тож — fail-closed із прямою причиною; живий шлях (current) не зачеплено.
+        if source_era == "legacy" and self.historical_retired:
+            raise ValueError(
+                "historical capability retired: core1-historical-sid-map is a "
+                "stub, so no historical (legacy) head can be resolved. Refusing "
+                "to return a silently-empty historical pass. Use source_era="
+                "'current' for the live ratified surface, or restore a dated "
+                "historical register with explicit provenance."
+            )
         # Already-current operation-domain source is not one of the historical
         # passes; preserve exact width and identity.
         if re.fullmatch(r"[01]{3,6}", token):
