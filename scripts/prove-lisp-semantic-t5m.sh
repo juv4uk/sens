@@ -590,6 +590,14 @@ run_case run_error_rejection d8-right-fold-atom tests/semantic/d8-right-fold-ato
 run_case run_error_rejection d8-right-scan-atom tests/semantic/d8-right-scan-atom-negative.lisp Type 'car expects a non-empty list' core4
 run_case run_law d8-right-empty-base tests/semantic/d8-right-empty-base-law.lisp 1 core4
 run_case run_error_rejection d8-right-scan-improper-tail tests/semantic/d8-right-scan-improper-tail-negative.lisp Type 'car expects a non-empty list' core4
+# Д8: структурна Type CAR перед незалежною помилкою дії CDR.
+d8_right_fold_bad_action="$evidence/d8-right-fold-improper-before-action.lisp"
+d8_right_scan_bad_action="$evidence/d8-right-scan-improper-before-action.lisp"
+cat -- lib/core4.lisp tests/fixtures/d8-right-fold-improper-before-action-negative.lisp > "$d8_right_fold_bad_action"
+cat -- lib/core4.lisp tests/fixtures/d8-right-scan-improper-before-action-negative.lisp > "$d8_right_scan_bad_action"
+run_case run_error_rejection d8-right-fold-structure-before-action "$d8_right_fold_bad_action" Type 'car expects a non-empty list' core4
+run_case run_error_rejection d8-right-scan-structure-before-action "$d8_right_scan_bad_action" Type 'car expects a non-empty list' core4
+sha256sum lib/core4.lisp tests/fixtures/d8-right-fold-improper-before-action-negative.lisp tests/fixtures/d8-right-scan-improper-before-action-negative.lisp > "$evidence/d8-right-before-action-inputs.sha256"
 sha256sum lib/core4.lisp tests/semantic/d8-right-fold-scan-law.lisp \
   tests/semantic/d8-right-fold-order-mutant.lisp \
   tests/semantic/d8-right-scan-missing-initial-mutant.lisp \
