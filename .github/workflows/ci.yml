@@ -302,6 +302,10 @@ jobs:
                   # Ці дві допоміжні Lisp-бібліотеки виконуються лише в бандлі мовного свідка.
                   "tests/fixtures/witness-runner.lisp",
                   "tests/fixtures/epistemic-authority-witness.lisp",
+                  "tests/fixtures/d11-list-equality-improper-left-must-error.lisp",
+                  "tests/fixtures/d11-list-equality-improper-right-must-error.lisp",
+                  "tests/fixtures/d11-list-equality-invalid-singleton-must-error.lisp",
+                  "tests/fixtures/d11-list-equality-invalid-third-must-error.lisp",
                   # Вхід F6 producer для Rust producer→consumer інтеграційного тесту,
                   # не окремий мовний закон для самостійного виконання.
                   "tests/fixtures/wsm-fs-record-producer.lisp",
