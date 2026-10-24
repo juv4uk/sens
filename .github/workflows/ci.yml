@@ -247,6 +247,7 @@ jobs:
                   "tests/semantic/існує-за-предикатом-mutant.lisp",
                   # D6 ZIP dependent library-backed witnesses in native law suite.
                   "tests/semantic/d6-zip-proper-law.lisp",
+                  "tests/semantic/d6-zip-proper-mutant.lisp",
                   "tests/semantic/d6-zip-improper-tail-negative.lisp",
                   "tests/semantic/d6-zip-improper-root-negative.lisp",
                   "tests/semantic/ukr-lists-d24-language-law.lisp",
