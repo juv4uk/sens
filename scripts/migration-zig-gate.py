@@ -468,7 +468,7 @@ def main() -> int:
     steps.append(
         run_step(
             "ci_zig_purity",
-            [sys.executable, str(SCRIPTS / "ci_zig_purity.py")],
+            [str(SCRIPTS / "ci-zig-purity")],
         )
     )
 

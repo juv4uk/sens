@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+# Один Rust guard для CI й локального запуску; Python-дубля немає.
+set -euo pipefail
+root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+scratch="$(mktemp -d "${TMPDIR:-/tmp}/sens-zig-purity.XXXXXXXX")"
+trap 'rm -rf "$scratch"' EXIT
+if [[ ${1:-} == --self-test ]]; then
+  shift
+  rustc --edition=2021 -D warnings --test "$root/scripts/ci-zig-purity.rs" -o "$scratch/tests"
+  "$scratch/tests" "$@"
+else
+  rustc --edition=2021 -D warnings -O "$root/scripts/ci-zig-purity.rs" -o "$scratch/guard"
+  "$scratch/guard" --root "$root" "$@"
+fi

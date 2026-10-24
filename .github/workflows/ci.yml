@@ -476,7 +476,8 @@ jobs:
         run: |
           set -uo pipefail
           failed=0
-          python3 scripts/ci_zig_purity.py || failed=1
+          scripts/ci-zig-purity --self-test || failed=1
+          scripts/ci-zig-purity || failed=1
           zig test -lc research/zig-codecs/tests.zig || failed=1
           zig test -lc zig_transport_root.zig || failed=1
           zig test -O ReleaseFast -lc bench_t5m_test.zig || failed=1
