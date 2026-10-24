@@ -633,6 +633,38 @@ run_native_t5m_program() {
     # Для двох D3-законів виконуємо окремий САМОДОСТАТНІЙ фізичний
     # носій із тим самим чинним джерелом визначень. Жодного mock/host oracle.
     local standalone_physical="$physical"
+    if [[ "$file" == "tests/semantic/d11-srfi1-lset-diff-intersection-law.lisp" ||
+          "$file" == "tests/semantic/d11-srfi1-lset-diff-intersection-mutant.lisp" ]]; then
+      # Окремий самодостатній фізичний SENS-носій з тим самим DEFINE.
+      # Так SENS сам перевіряє всі перенесені закони, а Zig — лише байти.
+      local lset_full_source="$dir/d11-lset-diff-intersection-full.lisp"
+      standalone_physical="$dir/d11-lset-diff-intersection-full.sens"
+      if ! cat -- lib/d11-srfi1-lset-diff-intersection.lisp "$file" > "$lset_full_source" ||
+         ! timeout "$native_timeout" "$binary" "$lset_full_source" \
+              >"$dir/d11-lset-direct.stdout" 2>"$dir/d11-lset-direct.stderr" ||
+         ! timeout "$native_timeout" "$binary" --t5m-mint "$lset_full_source" "$standalone_physical" \
+              >"$dir/d11-lset-mint.stdout" 2>"$dir/d11-lset-mint.stderr" ||
+         ! timeout "$native_timeout" "$native_open" open "$standalone_physical" \
+              >"${standalone_physical%.sens}" 2>"$dir/d11-lset-open.stderr" ||
+         ! timeout "$native_timeout" "$native_open" verify-view "$standalone_physical" \
+              >"$dir/d11-lset-verify.stdout" 2>"$dir/d11-lset-verify.stderr"; then
+        echo "::error::D11_LSET_COMPLETE_SENS_FAILED source=$file layer=direct-or-zig-t5m" >&2
+        for diagnostic in "$dir"/d11-lset-*.stderr; do
+          [[ ! -f "$diagnostic" ]] || sed 's/^/D11 LSET: /' "$diagnostic" >&2
+        done
+        mark_file_failed
+        return
+      fi
+      local expected_lset_d1=1
+      [[ "$file" != *-mutant.lisp ]] || expected_lset_d1=0
+      printf '%s\n' "$expected_lset_d1" > "$dir/d11-lset.expected"
+      if ! cmp -s "$dir/native-paired.stdout" "$dir/d11-lset.expected" ||
+         ! cmp -s "$dir/d11-lset-direct.stdout" "$dir/d11-lset.expected"; then
+        echo "::error::D11_LSET_INCORRECT_SENS_VERDICT source=$file expected=D1:$expected_lset_d1 paired=$(cat "$dir/native-paired.stdout") direct=$(cat "$dir/d11-lset-direct.stdout")" >&2
+        mark_file_failed
+        return
+      fi
+    fi
     if [[ "$file" == "tests/semantic/d11-split-before-last-law.lisp" ||
           "$file" == "tests/semantic/d11-split-before-last-mutant.lisp" ]]; then
       # Повна SENS-програма, а не самостійний D7 виклик без DEFINE.
@@ -1221,6 +1253,11 @@ while IFS= read -r file || [[ -n "$file" ]]; do
           "$file" == "tests/semantic/d11-srfi1-find-presence-early-hit-improper-negative.lisp" ]]; then
     # Існуюче SENS-визначення ідентичне для direct, paired і повного файла.
     binding_sources=(--binding-source lib/d11-srfi1-find-presence.lisp)
+  elif [[ "$file" == "tests/semantic/d11-srfi1-lset-diff-intersection-law.lisp" ||
+          "$file" == "tests/semantic/d11-srfi1-lset-diff-intersection-mutant.lisp" ]]; then
+    # У DIFF/XOR семантика виключно в сімох чинних DEFINE SENS.
+    # Після перенесення законів не можна mint/pair голий Text7 виклик.
+    binding_sources=(--binding-source lib/d11-srfi1-lset-diff-intersection.lisp)
   elif [[ "$file" == "tests/semantic/d11-srfi1-filter-map-law.lisp" ||
           "$file" == "tests/semantic/d11-srfi1-filter-map-mutant.lisp" ]]; then
     # Д11 FILTER-MAP: після зміни окремого свідка Mint/Pair мають
