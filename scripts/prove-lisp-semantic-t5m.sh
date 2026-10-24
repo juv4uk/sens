@@ -1092,6 +1092,24 @@ run_case run_law d11-frequencies-key-order-positive "$d11_freq_key_positive" 1 c
 run_case run_law d11-frequencies-key-order-mutant "$d11_freq_key_mutant" 0 core4
 sha256sum lib/d11-clojure-group-by.lisp lib/d11-clojure-frequencies-unary.lisp \
   tests/semantic/d11-frequencies-key-order-law.lisp tests/semantic/d11-frequencies-key-order-mutant.lisp > "$evidence/d11-frequencies-key-order-inputs.sha256"
+# Д11 GROUP-BY: позитив, мутант, пріоритет структури D3 над ключем.
+d11_gb_law="$evidence/d11-gb-spine-law.lisp"
+d11_gb_mut="$evidence/d11-gb-spine-mutant.lisp"
+d11_gb_early="$evidence/d11-gb-spine-early.lisp"
+d11_gb_late="$evidence/d11-gb-spine-late.lisp"
+cat -- lib/d11-clojure-group-by.lisp tests/semantic/d11-group-by-spine-priority-law.lisp > "$d11_gb_law"
+cat -- lib/d11-clojure-group-by.lisp tests/semantic/d11-group-by-spine-priority-mutant.lisp > "$d11_gb_mut"
+cat -- lib/d11-clojure-group-by.lisp tests/semantic/d11-group-by-spine-priority-early-negative.lisp > "$d11_gb_early"
+cat -- lib/d11-clojure-group-by.lisp tests/semantic/d11-group-by-spine-priority-late-negative.lisp > "$d11_gb_late"
+run_case run_law d11-group-by-spine-priority-law "$d11_gb_law" 1 core4
+run_case run_law d11-group-by-spine-priority-mutant "$d11_gb_mut" 0 core4
+run_case run_error_rejection d11-group-by-spine-priority-early "$d11_gb_early" Type 'car expects a non-empty list' core4
+run_case run_error_rejection d11-group-by-spine-priority-late "$d11_gb_late" Type 'car expects a non-empty list' core4
+sha256sum lib/d11-clojure-group-by.lisp \
+  tests/semantic/d11-group-by-spine-priority-law.lisp \
+  tests/semantic/d11-group-by-spine-priority-mutant.lisp \
+  tests/semantic/d11-group-by-spine-priority-early-negative.lisp \
+  tests/semantic/d11-group-by-spine-priority-late-negative.lisp > "$evidence/d11-group-by-spine-priority.sha256"
 # Д11 GROUP-BY: чотири незалежні фізичні негативні свідки D3 Type.
 # Кожен джерельний SENS-файл отримує ті ж DEFINE, що й позитивний закон.
 # Жодне D7 текстове ім'я не підміняє неправильний D1-хвіст списку.
