@@ -548,6 +548,11 @@ run_case run_law d4-selector-composition-mutant tests/semantic/d4-selector-compo
 # Д5: композиції трьох рівнів D3→D4→D5, фізичні позитив і мутант.
 run_case run_law d5-selector-derived-positive tests/semantic/d5-selector-derived-law.lisp 1
 run_case run_law d5-selector-derived-mutant tests/semantic/d5-selector-derived-mutant.lisp 0
+# Д5 PAIRLIS/ASSOC/MEMBER: порядок, пріоритет першого збігу,
+# збереження хвоста та окремий мутант помилкового останнього збігу.
+# Усі мовні висновки робить SENS; shell лише запускає фізичний коридор.
+run_case run_law d5-pairlis-assoc-order-positive tests/semantic/d5-pairlis-assoc-order-laws.lisp 1 core4
+run_case run_law d5-pairlis-assoc-order-mutant tests/semantic/d5-pairlis-assoc-order-mutant.lisp 0 core4
 # Д4: вибірка трьома селекторами; самовердикт D1 і хибний вибір цілі.
 run_case run_law d4-selector-domain-positive tests/semantic/d4-selector-domain-law.lisp 1
 run_case run_law d4-selector-domain-mutant tests/semantic/d4-selector-domain-mutant.lisp 0
