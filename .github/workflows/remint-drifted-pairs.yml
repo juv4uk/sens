@@ -384,8 +384,8 @@ jobs:
             fi
             # Пари може ще не бути — refresh створює її канонічно (mint + view).
             bs=()
-            expect_args=()
             profile_args=()
+            expect_args=()
             case "$f" in
               tests/semantic/exact-arithmetic-laws.lisp|tests/semantic/exact-arithmetic-mutant.lisp) profile_args=(--core4-runtime);;
               tests/semantic/core-d3-car-cdr-cons-mutant.lisp) expect_args=(--expect-error "car expects a non-empty list");;
@@ -683,8 +683,8 @@ jobs:
                 continue
               fi
               bs=()
-              expect_args=()
               profile_args=()
+              expect_args=()
               case "$f" in
                 tests/semantic/exact-arithmetic-laws.lisp|tests/semantic/exact-arithmetic-mutant.lisp) profile_args=(--core4-runtime);;
               tests/semantic/core-d3-car-cdr-cons-mutant.lisp) expect_args=(--expect-error "car expects a non-empty list");;
