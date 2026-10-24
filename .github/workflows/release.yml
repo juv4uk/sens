@@ -72,6 +72,17 @@ jobs:
             --view tests/fixtures/migration-d1-cond-cohort/branch
           cargo test --locked -q -p sens --test migration_d1_cond_cohort -- --nocapture
 
+      # ДОКАЗ ВИКОНАННЯМ. Досі цей job НЕ збирав sens, тож доказ мовних законів
+      # тут був неможливий (prove-lisp-language-laws.sh виходить із «actual=missing»).
+      # Збірка дешева: Rust і Zig у job уже встановлені вище.
+      - name: Build native SENS executor for language-law proof
+        run: cargo build --locked -p sens-cli --bin sens --bin sens-trit
+
+      - name: Prove language laws by EXECUTION (same tagged SHA)
+        run: |
+          set -euo pipefail
+          bash scripts/prove-lisp-language-laws.sh "$PWD/target/debug/sens" "$RUNNER_TEMP/proof.json"
+
       - name: BLOCK tag publishing until ALL tracked T5 views and Ukrainian oracles are admitted
         shell: bash
         run: |
@@ -81,6 +92,7 @@ jobs:
           python3 scripts/report_t5_t5m_triplet_inventory.py . \
             --strict \
             --require-view tests/fixtures/migration-d1-cond-cohort/branch.sens \
+            --proof-report "$RUNNER_TEMP/proof.json" \
             --report "$RUNNER_TEMP/release-triple-inventory.json" || status=$?
           python3 scripts/check-release-triple-corpus.py \
             "$RUNNER_TEMP/release-triple-inventory.json" "$status"
@@ -164,7 +176,7 @@ jobs:
           - os: windows-latest
             target: x86_64-pc-windows-msvc
             artifact_name: sens.exe
-            asset_suffix: windows_x64
+            asset_suffix: windows_amd64
           - os: macos-15-intel
             target: x86_64-apple-darwin
             artifact_name: sens
@@ -190,13 +202,8 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          VERSION="${GITHUB_REF_NAME#l}"
-          if [[ ! "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-            echo "RELEASE_ASSET_ERROR: unexpected release tag $GITHUB_REF_NAME" >&2
-            exit 1
-          fi
           SRC="target/${{ matrix.target }}/release/${{ matrix.artifact_name }}"
-          DEST="sens-cli_${VERSION}_${{ matrix.asset_suffix }}"
+          DEST="sens-cli_${{ matrix.asset_suffix }}"
           if [[ "${{ matrix.artifact_name }}" == *.exe ]]; then
             DEST="${DEST}.exe"
           fi
@@ -222,7 +229,7 @@ jobs:
       - uses: Swatinem/rust-cache@49a0bdc70d2e1b713ca9e2869b211fcce03d3c1c # v2
 
       - name: Build
-        run: cargo build --locked --release -p sens-cli --bin sens
+        run: cargo build --locked --release -p sens-cli
 
       - name: Install WiX
         run: |
@@ -233,23 +240,13 @@ jobs:
         run: |
           $VERSION = $env:GITHUB_REF_NAME -replace '^l',''
           if ($VERSION -notmatch '^\d+\.\d+\.\d+$') { throw "cannot parse version from tag '$env:GITHUB_REF_NAME'" }
-          $binDir = (Resolve-Path -LiteralPath "target/release").Path
-          $sensExe = Join-Path $binDir "sens.exe"
-          if (-not (Test-Path -LiteralPath $sensExe -PathType Leaf)) { throw "missing built sens.exe" }
-          Copy-Item -LiteralPath $sensExe -Destination (Join-Path $binDir "my-lisp.exe") -ErrorAction Stop
-          $msi = "sens-cli_${VERSION}_windows_x64.msi"
-          & "$env:USERPROFILE\.dotnet\tools\wix.exe" build packaging/windows/sens.wxs -arch x64 -d "ProductVersion=$VERSION" -d "BinDir=$binDir" -o $msi
-          if ($LASTEXITCODE -ne 0) { throw "WiX build failed with exit code $LASTEXITCODE" }
-          if (-not (Test-Path -LiteralPath $msi -PathType Leaf) -or (Get-Item -LiteralPath $msi).Length -eq 0) {
-            throw "MSI asset missing or empty: $msi"
-          }
-          "MSI_ASSET_PATH=$msi" >> $env:GITHUB_ENV
+          & "$env:USERPROFILE\.dotnet\tools\wix.exe" build packaging/wix/sens-cli.wxs -d Version=$VERSION -o sens-cli.msi
 
       - name: Stage MSI (not a public release)
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: release-msi
-          path: ${{ env.MSI_ASSET_PATH }}
+          path: sens-cli.msi
           if-no-files-found: error
 
   build-web:
@@ -272,21 +269,23 @@ jobs:
           version: 'v0.15.0'
 
       - name: Build the WASM bindings
-        run: wasm-pack build crates/sens-wasm --target web --out-dir ../../packaging/web/pkg --release
+        # Першопричина: бандлер (scripts/make-portable-web.mjs:22,30) читає
+        # wasm/sens_wasm_bg.wasm і wasm/sens_wasm.js ВІДНОСНО каталогу вхідного
+        # HTML (public/), а .gitignore документує /public/wasm як вихід
+        # wasm-pack. Старий out-dir ../../packaging/web/pkg не збігався ->
+        # ENOENT у бандлері; fail-closed перевірки лишались недосяжними.
+        run: wasm-pack build crates/sens-wasm --target web --out-dir ../../public/wasm --release
 
       - name: Bundle the standalone HTML
-        run: python3 packaging/web/bundle.py
-
-      - name: Stage canonical HTML and byte-identical compatibility alias
         shell: bash
         run: |
           set -euo pipefail
-          test -s packaging/web/sens.html
-          cp packaging/web/sens.html sens-cli-web.html
-          cp packaging/web/sens.html my-lisp-cli-web.html
-          cmp sens-cli-web.html my-lisp-cli-web.html
+          # packaging/web/bundle.py НЕ існує; чинний бандлер — make-portable-web.mjs.
+          node scripts/make-portable-web.mjs public/my-lisp-cli-web.html sens-cli-web.html
+          cp sens-cli-web.html my-lisp-cli-web.html
+          cmp -s sens-cli-web.html my-lisp-cli-web.html
 
-      - name: Upload portable HTML assets (not a public release)
+      - name: Stage portable HTML (not a public release)
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: release-web
