@@ -365,6 +365,7 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--register", action="store_true", help="дописати виявлених кандидатів у реєстр D11")
     ap.add_argument("--advise", action="store_true", help="замість BLOCKED — конкретні поради, що виправити")
     ap.add_argument("--when", action="store_true", help="додати, коли й яким комітом уведено кожне визначення")
+    ap.add_argument("--lessons", action="store_true", help="показати ЦІННІ ЗНАННЯ: уроки історії з довідника")
     args = ap.parse_args(argv)
 
     ladder = ladder_names(ROOT)
@@ -391,6 +392,16 @@ def main(argv: list[str] | None = None) -> int:
         # Стан гачка — ПОПЕРЕДЖЕННЯ, не падіння: свіжий клон законно не має
         # ввімкненого гачка, доки не виконано scripts/install-hooks.sh.
         return 0 if ok else 1
+
+    if args.lessons:
+        # Знання живуть у САМОМУ охоронці: агент, який ним користується,
+        # дістає уроки однією командою, а не шукає окремий документ.
+        doc = ROOT / "docs" / "guard-history-reference.uk.md"
+        if not doc.is_file():
+            print("GUARD-DOMAIN-REUSE --lessons: немає docs/guard-history-reference.uk.md", file=sys.stderr)
+            return 2
+        print(doc.read_text(encoding="utf-8"))
+        return 0
 
     if not (args.staged or args.paths_from or args.file):
         ap.error("потрібен --staged / --paths-from / --file")
