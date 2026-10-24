@@ -142,8 +142,12 @@ def main() -> int:
                 shown += 1
             if shown >= 12:
                 break
-        print(f"SEMANTIC-BACKLOG: рядків із підказками показано={shown} "
-              "(це ПІДКАЗКИ, не зіставлення)")
+        print(f"SEMANTIC-BACKLOG: рядків із підказками показано={shown}")
+        print("SEMANTIC-BACKLOG: це ПІДКАЗКИ, не зіставлення. Перевірений "
+              "контрприклад: підказка d3-dotted-pair для рядка "
+              "mccarthy.rs::a_dotted_pair_used_directly_as_code_is_an_invalid_form "
+              "ХИБНА — закон каже «пара не стає атомом», а рядок — «пара як код "
+              "є недійсною формою». Тематична близькість не є тотожністю.")
     if args.check:
         print("SEMANTIC-BACKLOG: PASS квитанцій на не-COVERED немає (закон чесноти тримається)")
     return 0
