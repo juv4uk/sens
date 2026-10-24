@@ -51,7 +51,13 @@ run_native_t5m_program() {
   local committed_view="${committed%.sens}"
   local status=0
   local source_bytes native_timeout
-  local -a paired_runtime_args=() standalone_runtime=("$binary")
+  local -a paired_runtime_args=() standalone_runtime=("$binary") direct_runtime=("$binary")
+  if [[ "$file" == "tests/semantic/d6-any-all-cold-no-mechanism-negative.lisp" ]]; then
+    # CLI за замовчуванням запускає Core4: для холодного негативу
+    # необхідний явний Core3 без D6 ANY/ALL визначень.
+    direct_runtime=("$binary" --core=3)
+    standalone_runtime=("$binary" --core=3)
+  fi
   # D24+ корені «число-*» та мовна Д6 «довжина» створюються Core4;
   # профіль однаковий для парного й автономного фізичного виконання.
   case "$file" in
@@ -220,7 +226,7 @@ run_native_t5m_program() {
       direct_source="$dir/d6-union-bound-negative.lisp"
       cat -- "$dir/d6-union-exact-binding.lisp" "$file" > "$direct_source"
     fi
-    if timeout "$native_timeout" "$binary" "$direct_source" \
+    if timeout "$native_timeout" "${direct_runtime[@]}" "$direct_source" \
         >"$dir/native-direct.stdout" 2>"$dir/native-direct.stderr"; then
       echo "::error::T5M_EXPECTED_TYPE_DIRECT_ACCEPTED source=$file" >&2
       mark_file_failed

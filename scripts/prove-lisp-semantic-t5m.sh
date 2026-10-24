@@ -286,22 +286,28 @@ run_error_rejection() {
   # Bash лише класифікує справжню діагностику SENS, не створює семантичний вирок.
   local id="$1" source="$2" expected_kind="$3" diagnostic="$4" dir physical
   local profile="${5:-clean}"
-  local -a paired_args=() physical_command=()
+  local -a paired_args=() physical_command=() direct_command=()
   dir="$evidence/$id"
   physical="$dir/program.sens"
   mkdir -p "$dir"
   case "$profile" in
-    clean) physical_command=("$sens" "$physical") ;;
+    clean)
+      direct_command=("$sens" "$source")
+      physical_command=("$sens" "$physical") ;;
     core4)
+      direct_command=("$sens" "$source")
       paired_args=(--core4-runtime)
-      physical_command=("$trit" eval-core4 "$physical")
-      ;;
-    *) fail "$id" harness "profile=clean-or-core4" "$profile" ;;
+      physical_command=("$trit" eval-core4 "$physical") ;;
+    core3)
+      # Холодний SENS: жодного Core4 DEFINE у цій сесії.
+      direct_command=("$sens" --core=3 "$source")
+      physical_command=("$sens" --core=3 "$physical") ;;
+    *) fail "$id" harness "profile=clean-or-core3-or-core4" "$profile" ;;
   esac
   test -f "$source" && test ! -L "$source" ||
     fail "$id" source "regular-Lisp" "missing-or-symlink"
 
-  if profile_stage "$id" direct timeout 45s "$sens" "$source" >"$dir/direct.out" 2>"$dir/direct.err"; then
+  if profile_stage "$id" direct timeout 45s "${direct_command[@]}" >"$dir/direct.out" 2>"$dir/direct.err"; then
     fail "$id" sens-direct "$expected_kind-rejection" "unexpected-success"
   fi
   if ! grep -Fq "$diagnostic" "$dir/direct.err"; then
@@ -1251,7 +1257,7 @@ cat -- tests/fixtures/epistemic-d1-names.lisp "$d6_quantifier_source" tests/sema
 cat -- tests/fixtures/epistemic-d1-names.lisp "$d6_quantifier_source" tests/semantic/d6-any-all-first-class-mutant.lisp > "$d6_first_class_mutant_bundle"
 run_case run_law d6-any-all-first-class-law "$d6_first_class_law_bundle" 1
 run_case run_law d6-any-all-first-class-mutant "$d6_first_class_mutant_bundle" 0
-run_case run_type_rejection d6-any-all-cold-no-mechanism tests/semantic/d6-any-all-cold-no-mechanism-negative.lisp 'domain identity is not callable'
+run_case run_error_rejection d6-any-all-cold-no-mechanism tests/semantic/d6-any-all-cold-no-mechanism-negative.lisp Type 'domain identity is not callable' core3
 
 # Класифікуємо кореневі причини без повторного запуску SENS.
 printf 'SENS_RED_CAUSE root=d7-value-call count=%d ids=%s\n' "${#red_d7_ids[@]}" "${red_d7_ids[*]}"
