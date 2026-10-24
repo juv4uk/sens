@@ -833,6 +833,25 @@ fn spawn_auto_sync(node: &Arc<Node>) {
     });
 }
 
+/// Класифікація транспортного протоколу; жодної семантики SENS.
+/// Події з цих повідомлень не можна приймати від клієнтського TCP-сеансу.
+fn requires_registered_peer(head: Option<&str>) -> bool {
+    matches!(
+        head,
+        Some(
+            "peer-list"
+                | "heartbeat"
+                | "sync-hello"
+                | "sync-events"
+                | "sync-complete"
+                | "push-event"
+                | "event-ack"
+                | "claim-proposal"
+                | "claim-vote"
+        )
+    )
+}
+
 fn handle_connection(node: Arc<Node>, mut stream: TcpStream, initiator: bool) {
     let peer_addr = stream
         .peer_addr()
@@ -946,6 +965,20 @@ fn handle_connection(node: Arc<Node>, mut stream: TcpStream, initiator: bool) {
             first_message_seen = true;
             let _ = stream.set_read_timeout(None);
         }
+        // Лише зареєстрований peer має право надсилати міжвузлові
+        // повідомлення. Звичайний клієнт не може підкладати журналові
+        // факти через push-event/sync-events або підробляти sync-complete.
+        if requires_registered_peer(msg.head()) && peer_node_id.is_none() {
+            warn!("swarm-node: rejecting peer-only message {:?} from unauthenticated client {peer_addr}", msg.head());
+            send(
+                &mut stream,
+                &Sexp::list(vec![
+                    Sexp::atom("error"),
+                    Sexp::string("peer protocol message requires a registered peer connection"),
+                ]),
+            );
+            continue;
+        }
         match msg.head() {
             Some("peer-hello") => {
                 let their_node = msg.field_atom("node").unwrap_or("unknown").to_string();
@@ -991,6 +1024,12 @@ fn handle_connection(node: Arc<Node>, mut stream: TcpStream, initiator: bool) {
                 peer_node_id = Some(their_node);
             }
             Some("peer-welcome") => {
+                // peer-welcome відповідає на вихідний peer-hello; вхідний
+                // клієнт не може самостійно проголосити себе peer цим шляхом.
+                if !initiator || peer_node_id.is_some() {
+                    warn!("swarm-node: unexpected peer-welcome from {peer_addr}, closing");
+                    break;
+                }
                 let their_node = msg.field_atom("node").unwrap_or("unknown").to_string();
                 let their_port: u16 = msg
                     .field_atom("listen-port")
@@ -1803,7 +1842,17 @@ fn broadcast_to_peers(
     (written_to, dead)
 }
 
-/// Local client injects a fact: `(emit (type evidence-created) (payload (...)))`.
+/// Зарезервовані факти змінюють авторитетний стан задачі. Тільки
+/// спеціалізовані команди можуть створювати їх після перевірок.
+/// Звичайний emit залишається відкритим для evidence/work/help подій.
+fn is_reserved_task_event_type(typ: &str) -> bool {
+    matches!(
+        typ,
+        "task-defined" | "claim-committed" | "claim-released" | "task-completed"
+    )
+}
+
+/// Local client injects a non-authoritative fact: `(emit (type evidence-created) (payload (...)))`.
 fn handle_emit(node: &Arc<Node>, msg: &Sexp, stream: &mut TcpStream) {
     let Some(typ) = msg.field_atom("type") else {
         send(
@@ -1815,6 +1864,18 @@ fn handle_emit(node: &Arc<Node>, msg: &Sexp, stream: &mut TcpStream) {
         );
         return;
     };
+    if is_reserved_task_event_type(typ) {
+        send(
+            stream,
+            &Sexp::list(vec![
+                Sexp::atom("error"),
+                Sexp::string(format!(
+                    "emit forbids reserved task event `{typ}`; use a task-specific operation"
+                )),
+            ]),
+        );
+        return;
+    }
     let payload = msg
         .field("payload")
         .and_then(|f| f.first())

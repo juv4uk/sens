@@ -1902,3 +1902,156 @@ fn compaction_preserves_work_state_and_help_requests() {
         "help-request/offer projection must be byte-identical before/after compaction"
     );
 }
+
+#[test]
+fn generic_emit_rejects_reserved_task_events_without_mutating_journal() {
+    let port = alloc_ports(1);
+    let _node = spawn(port, "fence-node", &data_dir("emit-task-fence"), None);
+    let definition = request(
+        port,
+        "(define-task (task FENCED) (priority 1) (capabilities ()) (depends-on ()) (description \"protected\"))",
+    );
+    assert!(definition.starts_with("(ok"), "define failed: {definition}");
+
+    let state_before = request(port, "(task-state (task FENCED))");
+    let def_before = request(port, "(task-def (task FENCED))");
+    let metrics_before = request(port, "(metrics)");
+    let event_count = |metrics: &str| -> u64 {
+        let after = metrics
+            .split("(event-count ")
+            .nth(1)
+            .expect("metrics must include event-count");
+        after
+            .split(')')
+            .next()
+            .expect("event-count must be terminated")
+            .parse()
+            .expect("event-count must be numeric")
+    };
+    let count_before = event_count(&metrics_before);
+
+    for typ in [
+        "task-defined",
+        "claim-committed",
+        "claim-released",
+        "task-completed",
+    ] {
+        let cmd = format!(
+            "(emit (type {typ}) (payload ((task FENCED) (generation 999) (agent impostor) (priority 999))))"
+        );
+        let reply = request(port, &cmd);
+        assert!(
+            reply.starts_with("(error") && reply.contains("emit forbids reserved task event"),
+            "reserved {typ} must be rejected: {reply}"
+        );
+        assert_eq!(
+            request(port, "(task-state (task FENCED))"),
+            state_before,
+            "reserved {typ} changed task state"
+        );
+        assert_eq!(
+            request(port, "(task-def (task FENCED))"),
+            def_before,
+            "reserved {typ} changed task definition"
+        );
+        assert_eq!(
+            event_count(&request(port, "(metrics)")),
+            count_before,
+            "reserved {typ} was written to the event journal"
+        );
+    }
+
+    let ordinary = request(
+        port,
+        "(emit (type evidence-created) (payload (artifact \"allowed\")))",
+    );
+    assert!(ordinary.starts_with("(ok"), "ordinary event rejected: {ordinary}");
+    assert_eq!(event_count(&request(port, "(metrics)")), count_before + 1);
+
+    let claim = request(port, "(claim-task (task FENCED))");
+    assert!(claim.starts_with("(ok"), "legal claim rejected: {claim}");
+    let state = request(port, "(task-state (task FENCED))");
+    assert!(state.contains("(holder fence-node)"), "wrong holder: {state}");
+    let complete = request(port, "(complete-task (task FENCED) (generation 1))");
+    assert!(complete.starts_with("(ok"), "legal completion rejected: {complete}");
+    let final_state = request(port, "(task-state (task FENCED))");
+    assert!(final_state.contains("(completed t)"), "completion lost: {final_state}");
+}
+
+#[test]
+fn unregistered_clients_cannot_inject_peer_events_but_real_peers_replicate() {
+    let base = alloc_ports(2);
+    let (a, b) = (base, base + 1);
+    let _a = spawn(a, "peer-gate-a", &data_dir("peer-gate-a"), None);
+
+    let defined = request(
+        a,
+        "(define-task (task GUARDED) (priority 1) (capabilities ()) (depends-on ()) (description \"safe\"))",
+    );
+    assert!(defined.starts_with("(ok"), "task definition failed: {defined}");
+    let initial_state = request(a, "(task-state (task GUARDED))");
+    let initial_def = request(a, "(task-def (task GUARDED))");
+
+    let count = |port: u16| -> u64 {
+        let metrics = request(port, "(metrics)");
+        metrics
+            .split("(event-count ")
+            .nth(1)
+            .expect("metrics must include event-count")
+            .split(')')
+            .next()
+            .expect("event count must be terminated")
+            .parse()
+            .expect("event count must be numeric")
+    };
+    let before = count(a);
+
+    // Синтаксично правильна авторитетна подія, але TCP-сеанс не є peer.
+    let event = "(event (id impostor:777) (node impostor) (seq 777) (lamport 99) (type task-completed) (payload ((task GUARDED) (generation 999) (agent impostor))))";
+    for command in [
+        format!("(push-event (event {event}))"),
+        format!("(sync-events (from impostor) (events ({event})))"),
+        "(sync-complete (from impostor))".to_string(),
+    ] {
+        let reply = request(a, &command);
+        assert!(
+            reply.starts_with("(error")
+                && reply.contains("requires a registered peer connection"),
+            "unregistered peer command was not rejected: {command} => {reply}"
+        );
+        assert_eq!(request(a, "(task-state (task GUARDED))"), initial_state);
+        assert_eq!(request(a, "(task-def (task GUARDED))"), initial_def);
+        assert_eq!(count(a), before, "unregistered command modified journal");
+    }
+
+    // Вхідне peer-welcome не є автентифікованим рукостисканням.
+    let fabricated_welcome = request(
+        a,
+        "(peer-welcome (node impostor) (listen-port 0) (advertise-host 127.0.0.1))",
+    );
+    assert!(
+        fabricated_welcome.is_empty(),
+        "unsolicited peer-welcome should close the socket: {fabricated_welcome}"
+    );
+    assert_eq!(count(a), before);
+
+    // Легальна реплікація між двома справжніми локальними процесами.
+    let _b = spawn(b, "peer-gate-b", &data_dir("peer-gate-b"), Some(a));
+    let presence = eventually(a, "(metrics)", Duration::from_secs(5), |r| {
+        r.contains("(peer-count 1)")
+    });
+    assert!(presence.contains("(peer-count 1)"), "peer connection failed: {presence}");
+
+    let result = request(
+        a,
+        "(define-task (task POSTLINK) (priority 2) (capabilities ()) (depends-on ()) (description \"replicated\"))",
+    );
+    assert!(result.starts_with("(ok"), "legal task event rejected: {result}");
+    let replicated = eventually(b, "(task-def (task POSTLINK))", Duration::from_secs(5), |r| {
+        r.contains("(priority 2)") && r.contains("(task POSTLINK)")
+    });
+    assert!(
+        replicated.contains("(priority 2)"),
+        "registered peers failed to replicate: {replicated}"
+    );
+}
