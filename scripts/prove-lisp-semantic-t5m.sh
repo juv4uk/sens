@@ -661,8 +661,8 @@ reason_index_pair_law="$evidence/d11-reason-index-pair-key-law-complete.lisp"
 reason_index_pair_mutant="$evidence/d11-reason-index-pair-key-mutant-complete.lisp"
 cat -- lib/unify.lisp lib/reason.lisp tests/semantic/d11-reason-index-pair-key-law.lisp > "$reason_index_pair_law"
 cat -- lib/unify.lisp lib/reason.lisp tests/semantic/d11-reason-index-pair-key-mutant.lisp > "$reason_index_pair_mutant"
-run_case run_law d11-reason-index-pair-key-law "$reason_index_pair_law" 1
-run_case run_law d11-reason-index-pair-key-mutant "$reason_index_pair_mutant" 0
+run_case run_law d11-reason-index-pair-key-law "$reason_index_pair_law" 1 core4
+run_case run_law d11-reason-index-pair-key-mutant "$reason_index_pair_mutant" 0 core4
 sha256sum lib/reason.lisp \
   tests/semantic/d11-reason-index-pair-key-law.lisp \
   tests/semantic/d11-reason-index-pair-key-mutant.lisp > "$evidence/d11-reason-index-pair-key-inputs.sha256"
