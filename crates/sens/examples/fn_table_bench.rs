@@ -158,6 +158,14 @@ fn bench(
     (median(xa), median(xb), rmin, rmax)
 }
 
+fn require_measurements(measured_ok: usize) -> Result<(), &'static str> {
+    if measured_ok == 0 {
+        Err("FN_TABLE_NO_VALID_MEASUREMENTS")
+    } else {
+        Ok(())
+    }
+}
+
 fn main() {
     let args: Vec<String> = env::args().collect();
     let table = fs::read_to_string(args.get(1).expect("TABLE.tsv")).expect("read table");
@@ -165,6 +173,7 @@ fn main() {
     let target_ms: f64 = args.get(3).and_then(|s| s.parse().ok()).unwrap_or(40.0);
 
     println!("FN\tcode\ten\tstatus\targs\ten_ns\tsens_ns\ten/sens\tratio_min\tratio_max\tnote");
+    let mut measured_ok = 0usize;
     for line in table.lines() {
         let cols: Vec<&str> = line.split('\t').collect();
         let (code, en) = (cols[0], cols[1]);
@@ -267,12 +276,23 @@ fn main() {
                 ""
             }
         );
+        measured_ok += 1;
+    }
+    if let Err(reason) = require_measurements(measured_ok) {
+        eprintln!("{reason}");
+        std::process::exit(2);
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use super::{bench, verify_clean_pair};
+    use super::{bench, require_measurements, verify_clean_pair};
+
+    #[test]
+    fn нуль_вимірювань_не_є_успіхом() {
+        assert_eq!(require_measurements(0), Err("FN_TABLE_NO_VALID_MEASUREMENTS"));
+        assert_eq!(require_measurements(1), Ok(()));
+    }
 
     #[test]
     fn чиста_перевірка_перед_таймером_використовує_дві_сесії() {
