@@ -511,6 +511,9 @@ run_case run_law d10-empty-queue-mutant tests/semantic/d10-empty-queue-mutant.li
 # counterexample must pass the same physical Zig/T5M -> SENS route.
 run_case run_law d6-compose-flip-positive tests/semantic/d6-compose-flip-law.lisp 1 core4
 run_case run_law d6-compose-flip-order-mutant tests/semantic/d6-compose-flip-mutant.lisp 0 core4
+# D6:010101 GCD — сам SENS доводить невід'ємний знак у парі позитив/мутант.
+run_case run_law d6-gcd-sign-positive tests/semantic/d6-gcd-sign-law.lisp 1 core4
+run_case run_law d6-gcd-sign-mutant tests/semantic/d6-gcd-sign-mutant.lisp 0 core4
 # D6-квантори перевіряємо нижче як повні програми з визначеннями Core4.
 # D4 рекурсивна правильність списків: позитив та навмисне порушення.
 run_case run_law d4-proper-list-positive tests/semantic/d4-proper-list-recursion-law.lisp 1
