@@ -116,6 +116,27 @@ fn ack_timeout() -> Duration {
     }
 }
 
+/// A logical peer may reconnect while an earlier socket is still winding down.
+/// Only the exact generation that failed may be retired.
+struct PeerLink {
+    stream: TcpStream,
+    generation: u64,
+}
+
+/// Reject stale disconnects and stale failed broadcasts.
+fn retire_peer_if_current(
+    peers: &mut HashMap<String, PeerLink>,
+    peer_id: &str,
+    generation: u64,
+) -> bool {
+    if peers.get(peer_id).is_some_and(|peer| peer.generation == generation) {
+        peers.remove(peer_id);
+        true
+    } else {
+        false
+    }
+}
+
 struct Node {
     identity: Identity,
     project: String,
@@ -125,7 +146,9 @@ struct Node {
     advertise_host: String,
     journal: Mutex<Journal>,
     lamport: AtomicU64,
-    peers: Mutex<HashMap<String, TcpStream>>,
+    peers: Mutex<HashMap<String, PeerLink>>,
+    /// Monotonic physical-connection generation; a node-id is NOT a socket id.
+    next_peer_generation: AtomicU64,
     /// `node-id -> (ip, listen-port)` for every peer we've ever handshaken
     /// with or heard about via gossip — the address book that lets a
     /// freshly-joined node reach the rest of the mesh through just one
@@ -548,6 +571,7 @@ fn main() -> std::io::Result<()> {
         journal: Mutex::new(journal),
         lamport: AtomicU64::new(lamport_start),
         peers: Mutex::new(HashMap::new()),
+        next_peer_generation: AtomicU64::new(0),
         peer_addrs: Mutex::new(HashMap::new()),
         dialing: Mutex::new(HashSet::new()),
         pending_votes: Mutex::new(HashMap::new()),
@@ -770,7 +794,7 @@ fn spawn_heartbeat(node: &Arc<Node>) {
         for id in &stale {
             if let Some(stream) = peers.remove(id) {
                 warn!("swarm-node: peer {id} silent for over {STALE_PEER_TIMEOUT:?}, closing connection");
-                let _ = stream.shutdown(std::net::Shutdown::Both);
+                let _ = stream.stream.shutdown(std::net::Shutdown::Both);
             }
         }
     });
@@ -891,6 +915,7 @@ fn handle_connection(node: Arc<Node>, mut stream: TcpStream, initiator: bool) {
     }
 
     let mut peer_node_id: Option<String> = None;
+    let mut peer_generation: Option<u64> = None;
     let reader = BufReader::new(reader_stream);
     for line in reader.lines() {
         let line = match line {
@@ -986,7 +1011,7 @@ fn handle_connection(node: Arc<Node>, mut stream: TcpStream, initiator: bool) {
                     ]),
                 );
                 send_sync_hello(&node, &mut stream);
-                register_peer(&node, &their_node, &mut stream, their_addr, their_port);
+                peer_generation = register_peer(&node, &their_node, &mut stream, their_addr, their_port);
                 send_peer_list(&node, &their_node, &mut stream);
                 peer_node_id = Some(their_node);
             }
@@ -1002,7 +1027,7 @@ fn handle_connection(node: Arc<Node>, mut stream: TcpStream, initiator: bool) {
                     continue;
                 }
                 info!("swarm-node: peer-welcome from {their_node}");
-                register_peer(&node, &their_node, &mut stream, their_addr, their_port);
+                peer_generation = register_peer(&node, &their_node, &mut stream, their_addr, their_port);
                 send_peer_list(&node, &their_node, &mut stream);
                 peer_node_id = Some(their_node);
             }
@@ -1129,16 +1154,20 @@ fn handle_connection(node: Arc<Node>, mut stream: TcpStream, initiator: bool) {
             }
         }
     }
-    if let Some(id) = peer_node_id {
-        node.peers
+    if let (Some(id), Some(generation)) = (peer_node_id, peer_generation) {
+        let mut peers = node
+            .peers
             .lock()
-            .unwrap_or_else(|poisoned| poisoned.into_inner())
-            .remove(&id);
-        node.last_seen
-            .lock()
-            .unwrap_or_else(|poisoned| poisoned.into_inner())
-            .remove(&id);
-        info!("swarm-node: connection to {id} closed");
+            .unwrap_or_else(|poisoned| poisoned.into_inner());
+        if retire_peer_if_current(&mut peers, &id, generation) {
+            // Keep the table and liveness entry consistent under the same lock:
+            // a fresh reconnect cannot slip between removing each of them.
+            node.last_seen
+                .lock()
+                .unwrap_or_else(|poisoned| poisoned.into_inner())
+                .remove(&id);
+            info!("swarm-node: connection to {id} closed (generation {generation})");
+        }
     }
 }
 
@@ -1186,13 +1215,27 @@ fn register_peer(
     stream: &mut TcpStream,
     their_ip: &str,
     their_port: u16,
-) {
-    if let Ok(clone) = stream.try_clone() {
-        node.peers
-            .lock()
-            .unwrap_or_else(|poisoned| poisoned.into_inner())
-            .insert(their_node.to_string(), clone);
-    }
+) -> Option<u64> {
+    // Reserve an identity for THIS socket, not the logical node name.
+    // A failed clone must never replace a working peer.
+    let generation = match stream.try_clone() {
+        Ok(clone) => {
+            let generation = node
+                .next_peer_generation
+                .fetch_add(1, Ordering::SeqCst)
+                .checked_add(1)
+                .expect("peer generation exhausted");
+            node.peers
+                .lock()
+                .unwrap_or_else(|poisoned| poisoned.into_inner())
+                .insert(their_node.to_string(), PeerLink { stream: clone, generation });
+            generation
+        }
+        Err(error) => {
+            warn!("swarm-node: cannot register {their_node}: clone failed: {error}");
+            return None;
+        }
+    };
     node.last_seen
         .lock()
         .unwrap_or_else(|poisoned| poisoned.into_inner())
@@ -1201,19 +1244,16 @@ fn register_peer(
         let is_new = node
             .peer_addrs
             .lock()
-            .unwrap()
+            .unwrap_or_else(|poisoned| poisoned.into_inner())
             .insert(their_node.to_string(), (their_ip.to_string(), their_port))
             .is_none();
         if is_new {
             announce_peer(node, their_node, their_ip, their_port);
         }
     }
-    // Reconnect redelivery: this peer has a fresh stream again, so re-push
-    // any of our events whose delivery to it failed while it was away
-    // (`SWARM-PUSH-EVENT-RETRY-QUEUE`). Receiver dedups via `Journal::has()`,
-    // so re-pushing is idempotent; events no longer in the journal (e.g.
-    // compacted away) are dropped with their queue entry.
+    // Preserve existing durable redelivery semantics on reconnect.
     drain_retry_for_peer(node, their_node, stream);
+    Some(generation)
 }
 
 /// Re-pushes every event queued for `peer_id` (see `retry.rs`) onto the
@@ -1320,23 +1360,10 @@ fn announce_peer(node: &Arc<Node>, new_id: &str, new_ip: &str, new_port: u16) {
             ])]),
         ]),
     ]);
-    let mut peers = node
-        .peers
-        .lock()
-        .unwrap_or_else(|poisoned| poisoned.into_inner());
-    let mut dead = Vec::new();
-    let line = format!("{}\n", announcement.to_text());
-    for (peer_id, stream) in peers.iter_mut() {
-        if peer_id == new_id {
-            continue;
-        }
-        if stream.write_all(line.as_bytes()).is_err() {
-            dead.push(peer_id.clone());
-        }
-    }
-    for id in dead {
-        peers.remove(&id);
-    }
+    // No network I/O while holding the global peers mutex. The same
+    // per-peer writer lock used by catch-up trains prevents interleaving.
+    // A stale failed write may retire only its own socket generation.
+    let _ = broadcast_to_peers(node, &announcement, Some(new_id));
 }
 
 /// Shares everything we know about the mesh (minus the recipient itself)
@@ -1757,7 +1784,10 @@ fn broadcast_to_peers(
 ) -> (Vec<String>, Vec<String>) {
     const PEER_WRITE_TIMEOUT: Duration = Duration::from_secs(5);
     let line = format!("{}\n", msg.to_text());
-    let targets: Vec<(String, std::net::TcpStream)> = {
+    // Clone handles under the table lock, then do all socket I/O outside it.
+    // The generation is carried alongside each clone so a failed old write
+    // cannot retire a freshly reconnected peer with the same logical id.
+    let targets: Vec<(String, u64, std::io::Result<TcpStream>)> = {
         let peers = node
             .peers
             .lock()
@@ -1765,14 +1795,20 @@ fn broadcast_to_peers(
         peers
             .iter()
             .filter(|(id, _)| Some(id.as_str()) != skip_origin)
-            .map(|(id, s)| (id.clone(), s.try_clone().expect("peer stream try_clone")))
+            .map(|(id, peer)| (id.clone(), peer.generation, peer.stream.try_clone()))
             .collect()
     };
-    let mut dead = Vec::new();
+    let mut dead: Vec<(String, u64)> = Vec::new();
     let mut written_to = Vec::new();
-    for (id, mut stream) in targets {
-        // Review fix #4: serialize against other long-lived writers
-        // (catch-up trains) on the same socket.
+    for (id, generation, cloned_stream) in targets {
+        let mut stream = match cloned_stream {
+            Ok(stream) => stream,
+            Err(error) => {
+                warn!("swarm-node: clone for peer {id} failed: {error}");
+                dead.push((id, generation));
+                continue;
+            }
+        };
         let lock = Arc::clone(
             node.peer_write_locks
                 .lock()
@@ -1781,12 +1817,25 @@ fn broadcast_to_peers(
                 .or_insert_with(|| Arc::new(Mutex::new(()))),
         );
         let _guard = lock.lock().unwrap_or_else(|poisoned| poisoned.into_inner());
-        let _ = stream.set_write_timeout(Some(PEER_WRITE_TIMEOUT));
-        if stream.write_all(line.as_bytes()).is_err() {
-            warn!(
-                "swarm-node: write to peer {id} failed/errored -- dropping and queueing for retry"
-            );
-            dead.push(id);
+        // Do not even attempt to write an obsolete snapshot if reconnect
+        // already replaced that peer while waiting for its write lock.
+        let still_current = node
+            .peers
+            .lock()
+            .unwrap_or_else(|poisoned| poisoned.into_inner())
+            .get(&id)
+            .is_some_and(|peer| peer.generation == generation);
+        if !still_current {
+            continue;
+        }
+        if let Err(error) = stream.set_write_timeout(Some(PEER_WRITE_TIMEOUT)) {
+            warn!("swarm-node: timeout setup for peer {id} failed: {error}");
+            dead.push((id, generation));
+            continue;
+        }
+        if let Err(error) = stream.write_all(line.as_bytes()) {
+            warn!("swarm-node: write to peer {id} failed: {error}; queueing for retry");
+            dead.push((id, generation));
         } else {
             written_to.push(id);
         }
@@ -1796,11 +1845,12 @@ fn broadcast_to_peers(
             .peers
             .lock()
             .unwrap_or_else(|poisoned| poisoned.into_inner());
-        for id in &dead {
-            peers.remove(id);
+        for (id, generation) in &dead {
+            retire_peer_if_current(&mut peers, id, *generation);
         }
     }
-    (written_to, dead)
+    let dead_ids = dead.into_iter().map(|(id, _)| id).collect();
+    (written_to, dead_ids)
 }
 
 /// Local client injects a fact: `(emit (type evidence-created) (payload (...)))`.
@@ -3305,7 +3355,7 @@ fn handle_evict(node: &Arc<Node>, msg: &Sexp, stream: &mut TcpStream) {
                 .unwrap_or_else(|poisoned| poisoned.into_inner())
                 .remove(target)
             {
-                let _ = zombie.shutdown(std::net::Shutdown::Both);
+                let _ = zombie.stream.shutdown(std::net::Shutdown::Both);
             }
             send(
                 stream,
@@ -3615,5 +3665,48 @@ mod poison_recovery_tests {
             *guard, 1,
             "the write made before the panic should still be visible"
         );
+    }
+}
+
+#[cfg(test)]
+mod peer_connection_generation_tests {
+    use super::*;
+
+    fn local_pair() -> (TcpStream, TcpStream) {
+        let listener = TcpListener::bind("127.0.0.1:0").unwrap();
+        let client = TcpStream::connect(listener.local_addr().unwrap()).unwrap();
+        let (server, _) = listener.accept().unwrap();
+        (client, server)
+    }
+
+    #[test]
+    fn obsolete_disconnect_must_not_remove_reconnected_peer() {
+        let (old_stream, _old_remote) = local_pair();
+        let (new_stream, _new_remote) = local_pair();
+        let mut peers = HashMap::new();
+        peers.insert("same-node".to_string(), PeerLink {
+            stream: old_stream,
+            generation: 1,
+        });
+        peers.insert("same-node".to_string(), PeerLink {
+            stream: new_stream,
+            generation: 2,
+        });
+        assert!(!retire_peer_if_current(&mut peers, "same-node", 1));
+        assert_eq!(peers["same-node"].generation, 2);
+        assert!(retire_peer_if_current(&mut peers, "same-node", 2));
+        assert!(!peers.contains_key("same-node"));
+    }
+
+    #[test]
+    fn socket_generation_can_be_retired_at_most_once() {
+        let (stream, _remote) = local_pair();
+        let mut peers = HashMap::new();
+        peers.insert("node".into(), PeerLink {
+            stream,
+            generation: 17,
+        });
+        assert!(retire_peer_if_current(&mut peers, "node", 17));
+        assert!(!retire_peer_if_current(&mut peers, "node", 17));
     }
 }
