@@ -1082,12 +1082,18 @@ run_case run_law d11-families-benchmark-mutant "$d11_families_mutant" 0
 d11_family_filter_bad="$evidence/d11-family-selection-filter-bad.lisp"
 d11_family_partition_bad="$evidence/d11-family-selection-partition-bad.lisp"
 d11_family_reject_bad="$evidence/d11-family-selection-reject-bad.lisp"
+d11_family_filter_atomic_bad="$evidence/d11-family-selection-filter-atomic-root-bad.lisp"
+d11_family_partition_atomic_bad="$evidence/d11-family-selection-partition-atomic-root-bad.lisp"
 cat -- lib/d11-family-selection.lisp tests/fixtures/d11-family-selection-filter-improper-tail-must-error.lisp > "$d11_family_filter_bad"
 cat -- lib/d11-family-selection.lisp tests/fixtures/d11-family-selection-partition-improper-tail-must-error.lisp > "$d11_family_partition_bad"
 cat -- lib/d11-family-selection.lisp tests/fixtures/d11-family-selection-reject-atom-must-error.lisp > "$d11_family_reject_bad"
+cat -- lib/d11-family-selection.lisp tests/fixtures/d11-family-selection-filter-atomic-root-must-error.lisp > "$d11_family_filter_atomic_bad"
+cat -- lib/d11-family-selection.lisp tests/fixtures/d11-family-selection-partition-atomic-root-must-error.lisp > "$d11_family_partition_atomic_bad"
 run_case run_type_rejection d11-family-selection-filter-improper-tail-type "$d11_family_filter_bad" 'car expects a non-empty list'
 run_case run_type_rejection d11-family-selection-partition-improper-tail-type "$d11_family_partition_bad" 'car expects a non-empty list'
 run_case run_type_rejection d11-family-selection-reject-atom-type "$d11_family_reject_bad" 'car expects a non-empty list'
+run_case run_type_rejection d11-family-selection-filter-atomic-root-type "$d11_family_filter_atomic_bad" 'car expects a non-empty list'
+run_case run_type_rejection d11-family-selection-partition-atomic-root-type "$d11_family_partition_atomic_bad" 'car expects a non-empty list'
 sha256sum lib/d11-family-selection.lisp tests/fixtures/d11-family-selection-*.lisp > "$evidence/d11-family-selection-type-inputs.sha256"
 # Вимірюємо ТІЛЬКИ справжній фізичний SENS, після доведеного D1 закону.
 # Це p50 цілого процесу на shared runner, не ізольований час eval.
