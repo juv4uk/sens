@@ -803,6 +803,16 @@ run_case run_law d11-unary-count-mutant "$d11_unary_count_mutant" 0
 run_case run_type_rejection d11-unary-count-improper-tail-type "$d11_unary_count_bad_tail" 'car expects a non-empty list'
 run_case run_type_rejection d11-unary-count-improper-right-type "$d11_unary_count_bad_right" 'car expects a non-empty list'
 sha256sum lib/d11-srfi1-unary-count.lisp tests/semantic/d11-srfi1-unary-count-law.lisp tests/semantic/d11-srfi1-unary-count-mutant.lisp tests/semantic/d11-srfi1-unary-count-improper-tail-negative.lisp tests/semantic/d11-srfi1-unary-count-improper-right-negative.lisp > "$evidence/d11-unary-count-inputs.sha256"
+# Д11 НАС-форм: перед раннім збігом обов'язкова правильна D3-структура.
+# Перевірка здійснюється самим SENS на direct, Zig/T5M paired і standalone.
+run_case run_law d11-form-presence-selftest-positive lib/d11-form-presence.lisp 1
+d11_form_bad_match="$evidence/d11-form-presence-improper-match.lisp"
+cat -- lib/d11-form-presence.lisp tests/fixtures/d11-form-presence-improper-match-negative.lisp > "$d11_form_bad_match"
+run_case run_type_rejection d11-form-presence-improper-match "$d11_form_bad_match" 'car expects a non-empty list'
+d11_form_bad_miss="$evidence/d11-form-presence-improper-miss.lisp"
+cat -- lib/d11-form-presence.lisp tests/fixtures/d11-form-presence-improper-miss-negative.lisp > "$d11_form_bad_miss"
+run_case run_type_rejection d11-form-presence-improper-miss "$d11_form_bad_miss" 'car expects a non-empty list'
+sha256sum lib/d11-form-presence.lisp tests/fixtures/d11-form-presence-improper-{match,miss}-negative.lisp > "$evidence/d11-form-presence-inputs.sha256"
 # Д11 FIND-PRESENCE: прапорець наявності незалежний від знайденого значення.
 # Чинний SENS DEFINE, точний D1 позитив/мутант та неправильний D1-хвіст.
 d11_presence_positive="$evidence/d11-srfi1-find-presence-positive-complete.lisp"
