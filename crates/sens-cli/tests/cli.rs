@@ -1166,7 +1166,7 @@ fn sexpr_protocol_rejects_extra_top_level_form_before_evaluation() {
             }
 
             // Окремо перевіряємо можливий побічний ефект D4 DEFINE.
-            writeln!(stream, "()) (визначити envelope_probe (як-є ()))")?;
+            writeln!(stream, "()) (визначити envelope_probe (як-є ())")?;
             let mut rejected_definition = String::new();
             if reader.read_line(&mut rejected_definition)? == 0 {
                 return Err(io::ErrorKind::UnexpectedEof.into());
