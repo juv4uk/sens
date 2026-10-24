@@ -507,15 +507,25 @@ run_case run_law d4-first-class-predicate-mutant tests/semantic/d4-first-class-p
 # Ратифікація 1024/1024 не підміняє фізичного позитиву й мутанта.
 run_case run_law d10-empty-queue-positive tests/semantic/d10-empty-queue-law.lisp 1 core4
 run_case run_law d10-empty-queue-mutant tests/semantic/d10-empty-queue-mutant.lisp 0 core4
-# Д6:101100 CURRY — живе SENS DEFINE з lib/d6-curry-binding.lisp.
-# Direct, Zig/T5M, paired та standalone виконують повне джерело Сенс.
+# Д6:101100 CURRY — єдине джерело SENS DEFINE у чинному lib/core.lisp.
+# Витягти рівно одну наявну форму, не дублювати закон у новій бібліотеці.
+d6_curry_definition="$evidence/d6-curry-existing-definition.lisp"
+if ! awk '
+  $0 == "(визначити частково-застосувати" { if (found++) exit 2; copying = 1 }
+  copying && NF == 0 { copying = 0; complete++; next }
+  copying { print }
+  END { if (found != 1 || complete != 1 || copying) exit 2 }
+' lib/core.lisp >"$d6_curry_definition"; then
+  echo "::error::D6_CURRY_CANONICAL_DEFINE_MISSING_OR_DUPLICATE source=lib/core.lisp" >&2
+  exit 1
+fi
 d6_curry_positive="$evidence/d6-curry-binding-positive-complete.lisp"
 d6_curry_mutant="$evidence/d6-curry-binding-mutant-complete.lisp"
-cat -- lib/d6-curry-binding.lisp tests/semantic/d6-curry-binding-law.lisp >"$d6_curry_positive"
-cat -- lib/d6-curry-binding.lisp tests/semantic/d6-curry-binding-mutant.lisp >"$d6_curry_mutant"
+cat -- "$d6_curry_definition" tests/semantic/d6-curry-binding-law.lisp >"$d6_curry_positive"
+cat -- "$d6_curry_definition" tests/semantic/d6-curry-binding-mutant.lisp >"$d6_curry_mutant"
 run_case run_law d6-curry-binding-positive "$d6_curry_positive" 1
 run_case run_law d6-curry-binding-mutant "$d6_curry_mutant" 0
-sha256sum lib/d6-curry-binding.lisp tests/semantic/d6-curry-binding-law.lisp tests/semantic/d6-curry-binding-mutant.lisp >"$evidence/d6-curry-inputs.sha256"
+sha256sum lib/core.lisp tests/semantic/d6-curry-binding-law.lisp tests/semantic/d6-curry-binding-mutant.lisp >"$evidence/d6-curry-inputs.sha256"
 # D6 COMPOSE/FLIP/CURRY are derived SENS functions, so their law and
 # counterexample must pass the same physical Zig/T5M -> SENS route.
 run_case run_law d6-compose-flip-positive tests/semantic/d6-compose-flip-law.lisp 1 core4
