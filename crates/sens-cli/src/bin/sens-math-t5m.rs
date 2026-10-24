@@ -66,8 +66,15 @@ mod paired {
     }
 
     fn qualify(source: &str) -> Result<Expr, String> {
-        // Входом є людський Lisp; кодові та бітові літерали не можуть
-        // замінити SENS-кваліфікацію десяткового числа до точного D24+.
+        // The paired math/T5M executable surface starts source integers at D12.
+        qualify_with_minimum_width(source, 12)
+    }
+
+    fn qualify_with_minimum_width(
+        source: &str,
+        minimum_width: usize,
+    ) -> Result<Expr, String> {
+        // Вхід — людський Lisp; encoded literals cannot grant numeric identity.
         if source.lines().any(|line| {
             let code = line.split(';').next().unwrap_or("");
             ["#d", "#b", "#q2"].iter().any(|tag| code.contains(*tag))
@@ -75,12 +82,15 @@ mod paired {
             return Err("SENS admission: encoded literals forbidden in executable Lisp".into());
         }
         let parsed = sens::parse(source).map_err(|error| format!("SENS reader: {error}"))?;
-        // Share the owner-ratified source projection with WASM and the IDE:
-        // decimal source text is converted before domain lowering, never by
-        // the physical T5M codec and never via host floating point.
+        // The SENS source projector owns numeric width selection; transport only
+        // preserves the resulting explicit width and bits.
         let projected =
-            sens::source_projection::project_ukr_decimal_integer_literals(&parsed, source)
-                .map_err(|error| format!("SENS decimal source: {error}"))?;
+            sens::source_projection::project_ukr_decimal_integer_literals_with_minimum_width(
+                &parsed,
+                source,
+                minimum_width,
+            )
+            .map_err(|error| format!("SENS decimal source: {error}"))?;
         let lowered = sens::lower_program(&projected);
         let [root] = lowered.as_slice() else {
             return Err("SENS admission: expected exactly one mathematical form".into());
@@ -270,14 +280,14 @@ mod paired {
         }
 
         #[test]
-        fn physical_t5m_restores_d24_and_executes_only_with_explicit_sens_admission() {
+        fn physical_t5m_restores_exact_d12plus_words_with_explicit_sens_admission() {
             for (id, source, expected_width, expected_human) in [
                 ("sum", source("додати", 1, 2), 12, "3"),
                 ("negative", source("відняти", 1, 3), 12, "-2"),
                 ("promote", source("додати", 8_388_607, 1), 48, "8388608"),
                 ("product", source("помножити", 7, 6), 12, "42"),
             ] {
-                let qualified = qualify(&source).expect("ratified D5 and D24 source");
+                let qualified = qualify(&source).expect("ratified D5 and D12+ source");
                 let words = expected_words(&qualified).unwrap();
                 let physical =
                     zig_transport::encode_t5m_exact_words(&words).expect("real Zig T5M egress");
@@ -378,7 +388,7 @@ mod paired {
         #[test]
         fn t5m_delivers_division_operands_but_sens_alone_creates_exact_ratio() {
             // D5:10111 is the current owner-ratified QUOTIENT, surface «частка».
-            // The physical T5M words are two D24 integers, never a flat fraction.
+            // The physical T5M words are two exact D12 integers, never a flat fraction.
             let source_expr = source("частка", 1, 3);
             let words = expected_words(&qualify(&source_expr).unwrap()).unwrap();
             let physical = zig_transport::encode_t5m_exact_words(&words).unwrap();
@@ -393,7 +403,7 @@ mod paired {
             let zero_words = expected_words(&qualify(&zero_source).unwrap()).unwrap();
             let zero_physical = zig_transport::encode_t5m_exact_words(&zero_words).unwrap();
             let error = eval_verified(&zero_source, &zero_physical)
-                .expect_err("SENS must reject division by D24 zero");
+                .expect_err("SENS must reject division by D12 zero");
             assert!(
                 error.contains("SENS eval:"),
                 "test_id=divide-by-zero layer=eval expected=rejection actual={error}"
@@ -402,7 +412,7 @@ mod paired {
 
         #[test]
         fn nested_d5_ratios_are_exact_through_zig_t5m_and_sens() {
-            // Three D5 calls (9 control words) plus four D24 leaves.
+            // Three D5 calls (9 control words) plus four exact D12 leaves.
             let nested = format!(
                 "(додати {} {})",
                 source("частка", 1, 2),
@@ -410,7 +420,7 @@ mod paired {
             );
             let root = qualify(&nested).expect("ratified nested math");
             let words = expected_words(&root).unwrap();
-            assert_eq!(words.len(), 13, "three D5 applications and four D24 leaves");
+            assert_eq!(words.len(), 13, "three D5 applications and four D12 leaves");
             let bytes = zig_transport::encode_t5m_exact_words(&words).unwrap();
             assert_eq!(
                 zig_transport::decode_t5m_exact_words(&bytes).unwrap(),
@@ -421,14 +431,27 @@ mod paired {
                 matches!(actual, Value::NumericComposition(_)),
                 "test_id=ratio-sum layer=eval expected=reduced-RATIO"
             );
-            let expected = sens::eval_program(&source("частка", 5, 6), &mut Session::default())
-                .expect("independent SENS arithmetic oracle")
-                .value;
-            assert_eq!(actual, expected, "test_id=ratio-sum expected=5/6");
+            let oracle_source = source("частка", 5, 6);
+            let oracle_parsed =
+                sens::parse(&oracle_source).expect("independent SENS source parses");
+            let oracle_projected =
+                sens::source_projection::project_ukr_decimal_integer_literals_with_minimum_width(
+                    &oracle_parsed,
+                    &oracle_source,
+                    12,
+                )
+                .expect("independent SENS oracle uses the same explicit D12 profile");
+            let expected = sens::eval_parsed_expressions(
+                &oracle_projected,
+                &mut Session::default(),
+            )
+            .expect("independent SENS arithmetic oracle")
+            .value;
+            assert_eq!(actual, expected, "test_id=ratio-sum expected=5/6 at D12");
 
             let mut changed = words.clone();
-            let final_number = changed.iter_mut().rfind(|word| word.width == 24).unwrap();
-            final_number.bits[23] ^= 1;
+            let final_number = changed.iter_mut().rfind(|word| word.width == 12).unwrap();
+            *final_number.bits.last_mut().expect("D12 leaf is nonempty") ^= 1;
             let malformed_pair = zig_transport::encode_t5m_exact_words(&changed).unwrap();
             assert!(eval_verified(&nested, &malformed_pair)
                 .unwrap_err()
@@ -439,13 +462,13 @@ mod paired {
         fn unary_d5_negative_and_reciprocal_execute_via_zig_t5m() {
             // D5 DIFFERENCE (- x) and QUOTIENT (/ x) have existing
             // same-domain unary Core mechanisms. Zig only carries their words.
-            for (id, head, input, expected, expected_width, is_ratio) in [
-                ("neg-plus-three", "відняти", 3, "-3", 24, false),
-                ("neg-minus-three", "відняти", -3, "3", 24, false),
-                ("neg-d24-min", "відняти", -8_388_608, "8388608", 48, false),
-                ("reciprocal-three", "частка", 3, "1/3", 24, true),
-                ("reciprocal-minus-two", "частка", -2, "-1/2", 24, true),
-                ("reciprocal-one", "частка", 1, "1", 24, false),
+            for (id, head, input, input_width, expected, expected_width, is_ratio) in [
+                ("neg-plus-three", "відняти", 3, 12, "-3", 12, false),
+                ("neg-minus-three", "відняти", -3, 12, "3", 12, false),
+                ("neg-d24-min", "відняти", -8_388_608, 24, "8388608", 48, false),
+                ("reciprocal-three", "частка", 3, 12, "1/3", 12, true),
+                ("reciprocal-minus-two", "частка", -2, 12, "-1/2", 12, true),
+                ("reciprocal-one", "частка", 1, 12, "1", 12, false),
             ] {
                 let source = format!("({head} {input})");
                 let admitted = qualify(&source)
@@ -454,7 +477,7 @@ mod paired {
                 assert_eq!(words.len(), 4, "test_id={id} layer=D2 expected=unary-call");
                 assert_eq!(
                     words.iter().map(|w| w.width).collect::<Vec<_>>(),
-                    vec![2, 5, 24, 2],
+                    vec![2, 5, input_width, 2],
                     "test_id={id} layer=carrier"
                 );
                 let physical = zig_transport::encode_t5m_exact_words(&words)
@@ -492,7 +515,7 @@ mod paired {
                 let words = expected_words(&qualify(source).unwrap()).unwrap();
                 assert_eq!(
                     words.iter().map(|w| w.width).collect::<Vec<_>>(),
-                    vec![2, 5, 24, 2],
+                    vec![2, 5, 12, 2],
                     "test_id={id} layer=domain"
                 );
                 let physical = zig_transport::encode_t5m_exact_words(&words).unwrap();
@@ -516,10 +539,10 @@ mod paired {
             let packed = zig_transport::encode_t5m_exact_words(&words).unwrap();
             let result = eval_verified(&neg_zero, &packed).unwrap();
             let Value::BinaryNumber(ref number) = result else {
-                panic!("test_id=negative-zero layer=eval expected=D24 zero");
+                panic!("test_id=negative-zero layer=eval expected=D12 zero");
             };
-            assert_eq!(number.numeric_domain_width(), Some(24));
-            assert_eq!(number.exact_numeric_domain_bits(), Some(vec![0; 24]));
+            assert_eq!(number.numeric_domain_width(), Some(12));
+            assert_eq!(number.exact_numeric_domain_bits(), Some(vec![0; 12]));
 
             let zero_reciprocal = "(частка 0)".to_string();
             let words = expected_words(&qualify(&zero_reciprocal).unwrap()).unwrap();
@@ -551,8 +574,8 @@ mod paired {
         }
 
         #[test]
-        fn signed_d24_comparisons_return_exact_d1_over_physical_t5m() {
-            // D5:11010 LESSP and 11011 GREATERP come from current D5 table.
+        fn signed_d12_comparisons_return_exact_d1_over_physical_t5m() {
+            // D5:11010 LESSP and 11011 GREATERP compare exact D12 operands.
             // The D1 predicate is produced by SENS, not decoded from T5M.
             for (head, left, right, expected) in [
                 ("менше?", -1, 1, true),
@@ -673,9 +696,12 @@ mod paired {
                 }),
                 ("width", {
                     let mut words = words.clone();
-                    // Same unsigned payload at another width is NOT same Dn.
-                    words[2] = ExactT5MWord::new(48, [vec![0; 24], words[2].bits.clone()].concat())
-                        .unwrap();
+                    // Same payload at a different explicit width is NOT the same Dn.
+                    let original_width = words[2].width;
+                    words[2] = ExactT5MWord::new(
+                        original_width * 2,
+                        [vec![0; original_width], words[2].bits.clone()].concat(),
+                    ).unwrap();
                     words
                 }),
                 ("structure", {
@@ -710,14 +736,14 @@ mod paired {
             let admitted = source("додати", 1, 2);
             let words = expected_words(&qualify(&admitted).unwrap()).unwrap();
             let mut altered = words.clone();
-            altered[3].bits[23] ^= 1;
+            *altered[3].bits.last_mut().expect("numeric leaf is nonempty") ^= 1;
             let alien =
                 zig_transport::encode_t5m_exact_words(&altered).expect("valid but wrong T5M data");
             assert!(eval_verified(&admitted, &alien)
                 .unwrap_err()
                 .contains("T5M_PAIR_MISMATCH"));
 
-            // Exactly equal bare 24-bit payload does NOT carry proof of
+            // Exactly equal bare 12-bit payload does NOT carry proof of
             // source identity: without its Lisp companion, this is not runnable.
             let bare = zig_transport::encode_t5m_exact_words(&[words[2].clone()]).unwrap();
             assert!(eval_verified(&admitted, &bare)
