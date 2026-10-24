@@ -44,8 +44,34 @@ def filled(row: dict[str, str], column: str) -> bool:
     return row.get(column, "-") not in ("-", "")
 
 
+def blockers(row: dict[str, str], root: Path) -> list[str]:
+    """Які саме з вимог COVERED не виконано — ТЗ для конкретного рядка.
+    Правила взяті з validate():132-151 самої охорони, не з прози."""
+    out: list[str] = []
+    candidate = row.get("candidate_sens_witness", "-")
+    negative = row.get("negative_sens_witness", "-")
+    if candidate in ("-", ""):
+        out.append("NO_CANDIDATE_WITNESS")
+    elif not candidate.endswith(".sens"):
+        out.append(f"UNVERIFIED_NATIVE_PHYSICAL (кандидат {Path(candidate).suffix}, треба .sens)")
+    elif not (root / candidate).is_file():
+        out.append("CANDIDATE_FILE_MISSING")
+    if negative in ("-", ""):
+        out.append("MISSING_NEGATIVE_SENS")
+    elif not (negative.startswith("tests/") and negative.endswith(".sens")
+              and (root / negative).is_file()):
+        out.append(f"MISSING_NEGATIVE_SENS (негатив {Path(negative).suffix} або поза tests/)")
+    if len(row.get("claim_slice", "-").strip()) <= 20:
+        out.append("UNMAPPED_SEMANTIC_CLAIM")
+    # 4-6: квитанція/url/commit; 7: звірка з логом — статично не перевіряється.
+    out.append("NEEDS_NATIVE_RUN (SHA256+URL+commit)")
+    return out
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
+    ap.add_argument("--ready", action="store_true",
+                    help="показати, які вимоги COVERED не виконано для рядків із кандидатом")
     ap.add_argument("--check", action="store_true",
                     help="fail-closed: жоден PENDING не сміє нести квитанцію")
     args = ap.parse_args()
@@ -69,6 +95,13 @@ def main() -> int:
     if bad:
         raise SystemExit(
             f"FAIL: FALSE_RECEIPT_ON_UNCOVERED — {len(bad)} не-COVERED рядків несуть квитанцію")
+    if args.ready:
+        print("SEMANTIC-BACKLOG: готовність рядків із кандидатом")
+        for row in with_candidate:
+            print(f"  {row['retired_test_id'][:64]}")
+            print(f"    кандидат: {row['candidate_sens_witness']}")
+            for blocker in blockers(row, ROOT):
+                print(f"    ✗ {blocker}")
     if args.check:
         print("SEMANTIC-BACKLOG: PASS квитанцій на не-COVERED немає (закон чесноти тримається)")
     return 0
