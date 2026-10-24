@@ -46,6 +46,18 @@ fail() {
 profile_stage() {
   local id="$1" stage="$2" started_ns ended_ns elapsed_us code=0
   shift 2
+  # Одна назва sens-standalone раніше змішувала різні виконувані CLI.
+  # Маршрут — частина виміру; заміна runner не може виглядати як speedup.
+  if [[ "$stage" == sens-standalone ]]; then
+    if [[ "${1:-}" == timeout && "${3:-}" == "$sens" ]]; then
+      stage=sens-standalone-sens
+    elif [[ "${1:-}" == timeout && "${3:-}" == "$trit" && "${4:-}" == eval-core4 ]]; then
+      stage=sens-standalone-trit-core4
+    else
+      echo "::error::SENS_STAGE_EXECUTOR_UNKNOWN id=$id stage=$stage" >&2
+      return 2
+    fi
+  fi
   started_ns="$(date +%s%N)"
   "$@" || code=$?
   ended_ns="$(date +%s%N)"
