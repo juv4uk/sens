@@ -24,6 +24,48 @@ pub fn orderForSample(sample: usize) [2]Operation {
     return if (sample % 2 == 0) .{ .decode, .encode } else .{ .encode, .decode };
 }
 
+
+fn observeDecoded(words: []const codec.DecodedWord, bit_storage: []const u8) void {
+    // Escape both allocations before deinit: a length-only sink permits
+    // dead-store elimination of payload work in ReleaseFast.
+    std.mem.doNotOptimizeAway(words.ptr);
+    std.mem.doNotOptimizeAway(bit_storage.ptr);
+}
+
+fn observeEncoded(bytes: []const u8) void {
+    std.mem.doNotOptimizeAway(bytes.ptr);
+}
+
+/// One measured operation, shared by the native Zig test and timed loop.
+/// The observer receives the live payload before its buffer is freed.
+pub fn decodeOnce(
+    allocator: std.mem.Allocator,
+    bytes: []const u8,
+    comptime observer: fn ([]const codec.DecodedWord, []const u8) void,
+) !usize {
+    var decoded = try codec.decode(allocator, bytes);
+    defer decoded.deinit(allocator);
+    // Keep both output allocations observable in ReleaseFast even if an
+    // observer changes: the pointer escape is part of the measured helper.
+    std.mem.doNotOptimizeAway(decoded.words.ptr);
+    std.mem.doNotOptimizeAway(decoded.bit_storage.ptr);
+    observer(decoded.words, decoded.bit_storage);
+    return decoded.words.len;
+}
+
+pub fn encodeOnce(
+    allocator: std.mem.Allocator,
+    words: []const codec.Word,
+    comptime observer: fn ([]const u8) void,
+) !usize {
+    const encoded = try codec.encode(allocator, words);
+    defer allocator.free(encoded);
+    // The bytes must remain materialized until the observer has run.
+    std.mem.doNotOptimizeAway(encoded.ptr);
+    observer(encoded);
+    return encoded.len;
+}
+
 pub fn main(init: std.process.Init) !void {
     const allocator = std.heap.page_allocator;
     const io = init.io;
@@ -50,16 +92,10 @@ pub fn main(init: std.process.Init) !void {
 
     // Прогрів поза таймером на тому самому корпусі і тому самому codec.
     for (0..iterations) |_| {
-        var decoded = try codec.decode(allocator, physical);
-        guard += decoded.words.len;
-        std.mem.doNotOptimizeAway(decoded.words.len);
-        decoded.deinit(allocator);
+        guard += try decodeOnce(allocator, physical, observeDecoded);
     }
     for (0..iterations) |_| {
-        const encoded = try codec.encode(allocator, words);
-        guard += encoded.len;
-        std.mem.doNotOptimizeAway(encoded.len);
-        allocator.free(encoded);
+        guard += try encodeOnce(allocator, words, observeEncoded);
     }
 
     // Калібруємо кожну пробу за мінімальною тривалістю, а не за фіксованими
@@ -79,10 +115,7 @@ pub fn main(init: std.process.Init) !void {
                     var decode_batches: usize = 0;
                     while (elapsed_decode < min_sample_ns) {
                         for (0..iterations) |_| {
-                            var decoded = try codec.decode(allocator, physical);
-                            guard += decoded.words.len;
-                            std.mem.doNotOptimizeAway(decoded.words.len);
-                            decoded.deinit(allocator);
+                            guard += try decodeOnce(allocator, physical, observeDecoded);
                         }
                         decoded_ops += @intCast(iterations);
                         decode_batches += 1;
@@ -102,10 +135,7 @@ pub fn main(init: std.process.Init) !void {
                     var encode_batches: usize = 0;
                     while (elapsed_encode < min_sample_ns) {
                         for (0..iterations) |_| {
-                            const encoded = try codec.encode(allocator, words);
-                            guard += encoded.len;
-                            std.mem.doNotOptimizeAway(encoded.len);
-                            allocator.free(encoded);
+                            guard += try encodeOnce(allocator, words, observeEncoded);
                         }
                         encoded_ops += @intCast(iterations);
                         encode_batches += 1;

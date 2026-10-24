@@ -38,3 +38,38 @@ test "T5M benchmark alternates decode and encode order across paired samples" {
         try std.testing.expectEqual(pair[1], actual[1]);
     }
 }
+
+test "T5M benchmark observer sees full single-word payload before release" {
+    const allocator = std.testing.allocator;
+    const Spy = struct {
+        var encoded_first: u8 = 0;
+        var decoded_first: u8 = 0;
+
+        fn encoded(bytes: []const u8) void {
+            std.debug.assert(bytes.len == 1);
+            encoded_first = bytes[0];
+        }
+
+        fn decoded(words: []const codec.DecodedWord, bit_storage: []const u8) void {
+            std.debug.assert(words.len == 1 and bit_storage.len == 1);
+            decoded_first = bit_storage[0];
+        }
+    };
+    const cases = [_]struct { bits: []const u8, physical_byte: u8 }{
+        .{ .bits = "0", .physical_byte = 80 },
+        .{ .bits = "1", .physical_byte = 161 },
+    };
+    for (cases) |case| {
+        Spy.encoded_first = 0xff;
+        Spy.decoded_first = 0xff;
+        const words = [_]codec.Word{.{ .width = 1, .bits = case.bits }};
+        const encoded_count = try benchmark.encodeOnce(allocator, &words, Spy.encoded);
+        try std.testing.expectEqual(@as(usize, 1), encoded_count);
+        try std.testing.expectEqual(case.physical_byte, Spy.encoded_first);
+
+        const physical_word = [_]u8{case.physical_byte};
+        const decoded_count = try benchmark.decodeOnce(allocator, &physical_word, Spy.decoded);
+        try std.testing.expectEqual(@as(usize, 1), decoded_count);
+        try std.testing.expectEqual(case.bits[0], Spy.decoded_first);
+    }
+}
