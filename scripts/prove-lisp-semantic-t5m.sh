@@ -507,6 +507,9 @@ run_case run_law d4-first-class-predicate-mutant tests/semantic/d4-first-class-p
 # Ратифікація 1024/1024 не підміняє фізичного позитиву й мутанта.
 run_case run_law d10-empty-queue-positive tests/semantic/d10-empty-queue-law.lisp 1 core4
 run_case run_law d10-empty-queue-mutant tests/semantic/d10-empty-queue-mutant.lisp 0 core4
+# Д6:101100 CURRY — мовне DEFINE в Core4, дві фізичні D1-перевірки.
+run_case run_law d6-curry-binding-positive tests/semantic/d6-curry-binding-law.lisp 1 core4
+run_case run_law d6-curry-binding-mutant tests/semantic/d6-curry-binding-mutant.lisp 0 core4
 # D6 COMPOSE/FLIP/CURRY are derived SENS functions, so their law and
 # counterexample must pass the same physical Zig/T5M -> SENS route.
 run_case run_law d6-compose-flip-positive tests/semantic/d6-compose-flip-law.lisp 1 core4
