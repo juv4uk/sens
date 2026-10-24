@@ -16,6 +16,10 @@ extern "c" fn fread([*]u8, usize, usize, *CFile) usize;
 extern "c" fn fwrite([*]const u8, usize, usize, *CFile) usize;
 extern "c" fn fflush(*CFile) c_int;
 extern "c" fn remove([*:0]const u8) c_int;
+extern "c" fn mkstemp([*:0]u8) c_int;
+extern "c" fn fdopen(c_int, [*:0]const u8) ?*CFile;
+extern "c" fn close(c_int) c_int;
+extern "c" fn link([*:0]const u8, [*:0]const u8) c_int;
 
 const Error = error{
     Usage,
@@ -54,41 +58,68 @@ fn readFile(allocator: std.mem.Allocator, path: []const u8, max_bytes: usize) ![
     return bytes;
 }
 
-/// "wbx" means create exclusively, no existing-file overwrite.
-/// If output verification fails, the newly created file is deleted.
-fn writeFileNew(allocator: std.mem.Allocator, path: []const u8, body: []const u8) !void {
-    const zpath = try allocator.dupeZ(u8, path);
-    defer allocator.free(zpath);
-    const file = fopen(zpath.ptr, "wbx") orelse return Error.OutputExistsOrUnavailable;
-    var failed = true;
+/// Create a private stage in the destination directory. Verification failures
+/// remove ONLY this stage, never a public destination owned by another writer.
+fn createVerifiedStage(
+    allocator: std.mem.Allocator,
+    dest_path: []const u8,
+    body: []const u8,
+    expected: []const u8,
+) ![:0]u8 {
+    const suffix = ".tmp.XXXXXX";
+    const stage = try allocator.allocSentinel(u8, dest_path.len + suffix.len, 0);
+    errdefer allocator.free(stage);
+    @memcpy(stage[0..dest_path.len], dest_path);
+    @memcpy(stage[dest_path.len..stage.len], suffix);
+
+    // Unique, exclusive 0600 file on the SAME filesystem as the final name.
+    const fd = mkstemp(stage.ptr);
+    if (fd < 0) return Error.OutputWriteFailed;
+    errdefer _ = remove(stage.ptr);
+    const file = fdopen(fd, "wb") orelse {
+        _ = close(fd);
+        return Error.OutputWriteFailed;
+    };
+    var open = true;
     defer {
-        _ = fclose(file);
-        if (failed) _ = remove(zpath.ptr);
+        if (open) _ = fclose(file);
     }
     if (body.len != 0 and fwrite(body.ptr, 1, body.len, file) != body.len)
         return Error.OutputWriteFailed;
     if (fflush(file) != 0) return Error.OutputWriteFailed;
-    // The exact physical output must exist and be verified before success;
-    // fclose is intentionally explicit before reading again via the caller.
-    failed = false;
-}
+    const close_result = fclose(file);
+    open = false;
+    if (close_result != 0) return Error.OutputWriteFailed;
 
-/// Reopen and verify ONLY an output successfully created by writeFileNew.
-/// The cleanup path is allocated before creation so even an allocation or
-/// readback error cannot strand a potentially unverified migration artifact.
-/// Failed verification never touches a pre-existing destination: exclusive
-/// creation by the caller is a required precondition.
-fn verifyCreatedFile(
-    allocator: std.mem.Allocator,
-    path: []const u8,
-    cleanup_path: [*:0]const u8,
-    expected: []const u8,
-) !void {
-    errdefer _ = remove(cleanup_path);
-    const reopened = try readFile(allocator, path, t5.MAX_PHYSICAL_BYTES + 1);
+    // Exact known size, including large presegmented trit fixtures.
+    const reopened = try readFile(allocator, stage, body.len);
     defer allocator.free(reopened);
     if (!std.mem.eql(u8, reopened, expected))
         return Error.CanonicalRoundtripMismatch;
+    return stage;
+}
+
+/// Publish only by creating a NEW hard link. Existing names are never
+/// overwritten, even if another process created them after stage verification.
+fn publishVerifiedStage(
+    allocator: std.mem.Allocator,
+    stage: [:0]const u8,
+    dest_path: []const u8,
+) !void {
+    const dest = try allocator.dupeZ(u8, dest_path);
+    defer allocator.free(dest);
+    if (link(stage.ptr, dest.ptr) != 0) return Error.OutputExistsOrUnavailable;
+}
+
+fn writeVerifiedNew(
+    allocator: std.mem.Allocator,
+    dest_path: []const u8,
+    body: []const u8,
+) !void {
+    const stage = try createVerifiedStage(allocator, dest_path, body, body);
+    defer allocator.free(stage);
+    defer _ = remove(stage.ptr);
+    try publishVerifiedStage(allocator, stage, dest_path);
 }
 
 /// Physical T5 emission from PRE-SEGMENTED, opaque trits.
@@ -305,18 +336,12 @@ pub fn main(init: std.process.Init) !void {
         return Error.CanonicalRoundtripMismatch;
     }
 
-    // Reserve the cleanup path BEFORE exclusive file creation. Every
-    // verification failure, including allocation/open/read error, deletes
-    // only this newly created artifact; no false release evidence survives.
-    const cleanup_path = try allocator.dupeZ(u8, dest_path);
-    defer allocator.free(cleanup_path);
-    try writeFileNew(allocator, dest_path, output);
-    try verifyCreatedFile(allocator, dest_path, cleanup_path.ptr, output);
+    // No shared output exists until verification has succeeded.
+    // Never unlink the destination on any failure, including a writer race.
+    try writeVerifiedNew(allocator, dest_path, output);
 }
 
-test "Zig migration output is removed on failed readback, retained only when exact" {
-    // Zig 0.16 std.testing's isolated directory is owned by this test.
-    // Files carry opaque physical bytes; no SENS semantic admission.
+test "Zig stages bytes before publishing and preserves a concurrent winner" {
     var tmp = std.testing.tmpDir(.{});
     defer tmp.cleanup();
     const allocator = std.testing.allocator;
@@ -325,26 +350,40 @@ test "Zig migration output is removed on failed readback, retained only when exa
 
     const failed = try std.fs.path.join(allocator, &.{ parent, "unverified.sens" });
     defer allocator.free(failed);
-    const failed_z = try allocator.dupeZ(u8, failed);
-    defer allocator.free(failed_z);
-    try writeFileNew(allocator, failed, &.{ 0x00, 0x00 });
-    // Distinct bytes / source provenance cannot become a released artifact.
-    try std.testing.expectError(error.CanonicalRoundtripMismatch, verifyCreatedFile(allocator, failed, failed_z.ptr, &.{0x00}));
-    try std.testing.expectError(error.InputReadFailed, readFile(allocator, failed, t5.MAX_PHYSICAL_BYTES + 1));
+    try std.testing.expectError(error.CanonicalRoundtripMismatch, createVerifiedStage(
+        allocator, failed, &.{ 0x00, 0x00 }, &.{0x00},
+    ));
+    try std.testing.expectError(error.InputReadFailed, readFile(
+        allocator, failed, t5.MAX_PHYSICAL_BYTES + 1,
+    ));
 
     const passed = try std.fs.path.join(allocator, &.{ parent, "verified.sens" });
     defer allocator.free(passed);
-    const passed_z = try allocator.dupeZ(u8, passed);
-    defer allocator.free(passed_z);
     const physical = [_]u8{ 0x63, 0x89, 0x06, 0xa1 };
-    try writeFileNew(allocator, passed, &physical);
-    try verifyCreatedFile(allocator, passed, passed_z.ptr, &physical);
+    try writeVerifiedNew(allocator, passed, &physical);
     const restored = try readFile(allocator, passed, t5.MAX_PHYSICAL_BYTES + 1);
     defer allocator.free(restored);
     try std.testing.expectEqualSlices(u8, &physical, restored);
-    // Exclusive output is never overwritten by a concurrent/second writer.
-    try std.testing.expectError(error.OutputExistsOrUnavailable, writeFileNew(allocator, passed, &.{0xff}));
-    try std.testing.expectEqualSlices(u8, &physical, restored);
+    try std.testing.expectError(error.OutputExistsOrUnavailable, writeVerifiedNew(
+        allocator, passed, &.{0xff},
+    ));
+    const preserved = try readFile(allocator, passed, t5.MAX_PHYSICAL_BYTES + 1);
+    defer allocator.free(preserved);
+    try std.testing.expectEqualSlices(u8, &physical, preserved);
+
+    // Another writer creates the public name AFTER our stage was verified.
+    const collided = try std.fs.path.join(allocator, &.{ parent, "contended.sens" });
+    defer allocator.free(collided);
+    const stage = try createVerifiedStage(allocator, collided, &.{0x11}, &.{0x11});
+    defer allocator.free(stage);
+    defer _ = remove(stage.ptr);
+    try writeVerifiedNew(allocator, collided, &.{0x22});
+    try std.testing.expectError(error.OutputExistsOrUnavailable, publishVerifiedStage(
+        allocator, stage, collided,
+    ));
+    const winner = try readFile(allocator, collided, t5.MAX_PHYSICAL_BYTES + 1);
+    defer allocator.free(winner);
+    try std.testing.expectEqualSlices(u8, &.{0x22}, winner);
 }
 
 test "Zig opaque trit carry preserves widths and rejects malformed boundaries" {
@@ -402,7 +441,7 @@ test "Zig migration accepts presegmented trits longer than packed T5 bound" {
         // D1:0 separated by physical boundary trit 2. End on payload.
         byte.* = if (i % 2 == 0) '0' else '2';
     }
-    try writeFileNew(allocator, input_path, presegmented);
+    try writeVerifiedNew(allocator, input_path, presegmented);
     try std.testing.expectError(Error.InputTooLarge, readFile(allocator, input_path, old_limit));
 
     const carried_input = try readFile(allocator, input_path, t5.MAX_PHYSICAL_BYTES * 5);
