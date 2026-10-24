@@ -433,6 +433,35 @@ mod incarnation_tests {
     }
 
     #[test]
+    fn durable_journal_preserves_multiline_payload_as_one_record() {
+        let dir = test_dir("one-physical-record");
+        let payload = Sexp::list(vec![
+            Sexp::atom("description"),
+            Sexp::string("початок\n(complete-task (task X) (generation 1))\r\nкінець"),
+        ]);
+        let original = Event {
+            node: "source".into(),
+            incarnation: Some("abcdef".into()),
+            seq: 1,
+            lamport: 1,
+            typ: "task-defined".into(),
+            payload: payload.clone(),
+        };
+        {
+            let mut journal = Journal::open(&dir).unwrap();
+            journal.append(original).unwrap();
+        }
+        let raw = fs::read_to_string(dir.join("events.log")).unwrap();
+        assert_eq!(raw.lines().count(), 1, "one event must be one physical record");
+        assert!(raw.ends_with('\n'));
+        let reloaded = Journal::open(&dir).unwrap();
+        assert_eq!(reloaded.events.len(), 1);
+        assert_eq!(reloaded.events[0].payload, payload);
+        drop(reloaded);
+        fs::remove_dir_all(dir).unwrap();
+    }
+
+    #[test]
     fn legacy_events_parse_without_incarnation() {
         let line = "(event (id a1:1) (node a1) (seq 1) (lamport 2) (type task-defined) (payload ((task T))))";
         let back = Event::from_sexp(&parse(line).unwrap()).unwrap();
