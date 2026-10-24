@@ -29,6 +29,15 @@
        (provenance "Закон ширин SENS: три ритми Драбини, дослід 2026-10-24")
        (unknown-route ask-owner))
       (reference
+       (topic d7-repl-exact-text-boundary)
+       (summary "Чинне рішення власника: Unicode дозволено лише на межі людського REPL, машинний текст SENS має точні D7 v2 координати. Поточний crates/sens-cli/src/repl.rs::string_value_expression ще перетворює Value::String на D24 Unicode scalar + D8 CODE-CHAR, а його Rust-тест очікує історичну поведінку. Це відомий дефект фізичної міграції, не нова семантика D24 і не підстава переозначувати D14. Прибирати маршрут лише разом із повним D7 фізичним перенесенням і живим SENS-свідком.")
+       (authority (AGENTS.md language-contract.lisp contracts/d7-ratification.lisp crates/sens-cli/src/repl.rs crates/sens/src/eval/canon.rs))
+       (how-to (trace-Value-String-result-path preserve-REPL-only-Unicode-projection use-ratified-D7-v2-coordinates keep-Zig-as-physical-gate reject-unmappable-REPL-glyph remove-D24-scalar-CODE-CHAR-fallback-after-typed-D7-proof))
+       (verify (exact-D7-bit-roundtrip native-SENS-positive-text-witness native-SENS-negative-unmappable-glyph-witness no-D24-unicode-scalar-bridge no-implicit-English-layout-fallback))
+       (lifecycle owner-rule-current-implementation-debt)
+       (provenance "Власницька межа REPL/D7 від 23.10.2026, перевірка коду 24.10.2026")
+       (unknown-route ask-owner))
+      (reference
        (topic d13-selector-double-suffix-research)
        (summary "D13 наразі не має ратифікованої доменної таблиці. Дослідний закон: із 512 селекторів D11 вивести по чотири двокрокові композиції p(s_a(s_b(x))), де s_0=CAR, s_1=CDR; кандидат координати дорівнює 11 біт батька та суфіксу ab. Це 2048 унікальних 13-бітних пропозицій із 8192 можливих місць, але НЕ прямі opcode, НЕ нативно доведена семантика і НЕ рішення власника. Математична драбина D12→D24→D48 не включає D13; дослідний транспорт ESC13 теж не є доменом D13.")
        (authority (AGENTS.md lib/domains/d11.lisp scripts/check_d11_selector_seed.py contracts/numeric-domains-ratification.lisp research/zig-codecs/esc13_ladder_game.md research/zig-codecs/d13_selector_game.zig knowledge/d13/селекторні-кандидати-2048-20261024.lisp .github/workflows/d11-ladder-contest.yml))
