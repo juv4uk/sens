@@ -97,42 +97,59 @@ impl Parser<'_> {
         }
     }
 
-    /// Reader sugar: `'form` produces the ratified exact D3:001 QUOTE head.
-    /// No historical SID8 or human-name identity is introduced by the reader.
+    /// Reader sugar: 'form creates the ratified exact D3:001 QUOTE head.
+    /// Apostrophes count as D2 list nesting. Accumulate consecutive prefixes
+    /// on the heap, avoiding unbounded recursive calls to expression().
     fn quote_sugar(&mut self, start: usize) -> Result<Expr, LanguageError> {
-        self.bump();
-        self.skip_ignored();
-        if self.cursor >= self.source.len() {
-            return Err(self.error(
-                "expected an expression after apostrophe · pislia apostrofa ochikuietsia vyraz · nach dem Apostroph wird ein Ausdruck erwartet",
-                start,
-                self.cursor,
-            ));
+        let mut quote_starts = Vec::new();
+        loop {
+            self.enter(self.cursor)?;
+            quote_starts.push(self.cursor);
+            self.bump();
+            self.skip_ignored();
+            if self.cursor >= self.source.len() {
+                return Err(self.error(
+                    "expected an expression after apostrophe · pislia apostrofa ochikuietsia vyraz · nach dem Apostroph wird ein Ausdruck erwartet",
+                    start,
+                    self.cursor,
+                ));
+            }
+            if self.peek() != Some('\'') {
+                break;
+            }
         }
-        let quoted = self.expression()?;
-        Ok(Expr {
-            kind: ExprKind::List(
-                vec![
-                    Expr {
-                        kind: ExprKind::DomainIdentity(crate::DomainIdentity::D3(
-                            crate::Bija3::from_word(
-                                crate::Bit3::new(0b001).expect("ratified D3 QUOTE word"),
-                            ),
-                        )),
-                        span: Span {
-                            start,
-                            end: start + 1,
+
+        // Keep all QUOTE layers charged while reading the operand. This also
+        // caps mixed quote/list/numeric-buffer nesting at the shared limit.
+        let result = self.expression();
+        self.depth -= quote_starts.len() as u32;
+        let mut quoted = result?;
+        for quote_start in quote_starts.into_iter().rev() {
+            quoted = Expr {
+                kind: ExprKind::List(
+                    vec![
+                        Expr {
+                            kind: ExprKind::DomainIdentity(crate::DomainIdentity::D3(
+                                crate::Bija3::from_word(
+                                    crate::Bit3::new(0b001).expect("ratified D3 QUOTE word"),
+                                ),
+                            )),
+                            span: Span {
+                                start: quote_start,
+                                end: quote_start + 1,
+                            },
                         },
-                    },
-                    quoted,
-                ]
-                .into(),
-            ),
-            span: Span {
-                start,
-                end: self.cursor,
-            },
-        })
+                        quoted,
+                    ]
+                    .into(),
+                ),
+                span: Span {
+                    start: quote_start,
+                    end: self.cursor,
+                },
+            };
+        }
+        Ok(quoted)
     }
 
     fn numeric_buffer(&mut self, start: usize, f32_elements: bool) -> Result<Expr, LanguageError> {
@@ -1327,6 +1344,57 @@ mod tests {
                 if word.word().packed_bits() == 0b001
         ));
         assert!(matches!(&items[1].kind, ExprKind::Symbol(name) if name.as_ref() == "мама"));
+    }
+
+    #[test]
+    fn quote_sugar_respects_reader_depth_in_every_mode() {
+        let quote_only = format!("{}мама", "'".repeat(50_000));
+        let mixed = format!(
+            "{}{}мама{}",
+            "'".repeat(400),
+            "(".repeat(400),
+            ")".repeat(400)
+        );
+        for source in [quote_only, mixed] {
+            for mode in [
+                ReaderMode::LegacyCompatibility,
+                ReaderMode::ExactDomain,
+                ReaderMode::CanonicalValueWire,
+            ] {
+                let error = parse_with_mode(&source, mode)
+                    .expect_err("deep quote nesting must fail before stack exhaustion");
+                assert_eq!(error.kind, ErrorKind::Parse);
+                assert!(error.message.contains("nesting exceeds reader limit"));
+            }
+        }
+    }
+
+    #[test]
+    fn nested_quote_sugar_retains_exact_d3_identity_and_source_spans() {
+        let source = format!("{}мама", "'".repeat(32));
+        let forms = parse_exact_domain_source(&source).expect("bounded quote nesting");
+        assert_eq!(forms.len(), 1);
+        let mut node = &forms[0];
+        for offset in 0..32 {
+            assert_eq!(node.span, Span { start: offset, end: source.len() });
+            let ExprKind::List(items) = &node.kind else {
+                panic!("quote must expand into a D2 list");
+            };
+            assert_eq!(items.len(), 2);
+            assert!(matches!(
+                &items[0].kind,
+                ExprKind::DomainIdentity(crate::DomainIdentity::D3(word))
+                    if word.word().packed_bits() == 0b001
+            ));
+            assert_eq!(items[0].span, Span { start: offset, end: offset + 1 });
+            node = &items[1];
+        }
+        assert!(matches!(&node.kind, ExprKind::Symbol(name) if name.as_ref() == "мама"));
+
+        let error = parse("'''").expect_err("incomplete quote chain must fail named");
+        assert_eq!(error.kind, ErrorKind::Parse);
+        assert!(error.message.contains("expected an expression after apostrophe"));
+        parse("' ; коментар\n'мама").expect("comment between quotes");
     }
 
     #[test]
