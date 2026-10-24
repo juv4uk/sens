@@ -128,10 +128,47 @@ def independent(row_id: str, artifact: str) -> str:
     return "REJECTED"
 
 
+# ВІДОМІ ВИПАДКИ: правило мусить давати САМЕ ЦІ вердикти, інакше воно зламане.
+# Це і є стабілізація: невідомі випадки застосовуються ЛИШЕ після того, як
+# правило довело себе на відомих.
+KNOWN_CASES = (
+    # (артефакт, очікуваний механічний вердикт, чому відомий)
+    ("meta-eval-first-class-d1", "UNJUDGEABLE", "немає .lisp-джерела — перевірено"),
+    ("d3-dotted-pair", "REJECTED", "закон і рядок про РІЗНЕ — доведено PR #6034"),
+)
+
+
+def self_test() -> int:
+    bad = 0
+    for artifact, want, why in KNOWN_CASES:
+        got = independent(_artifact_row(artifact), artifact)
+        ok = got == want
+        bad += not ok
+        print(f"MAP-VERIFY-SELFTEST: {'OK  ' if ok else 'ЗЛАМАНО'} {artifact}: "
+              f"очікувано={want} отримано={got} ({why})")
+    if bad:
+        raise SystemExit(f"FAIL: правило перевіряча зламано на {bad} відомих випадках")
+    print("MAP-VERIFY-SELFTEST: PASS правило стабільне на відомих випадках")
+    return 0
+
+
+def _artifact_row(artifact: str) -> str:
+    """Рядок мапи, де артефакт у другій колонці — щоб дістати retired_test_id."""
+    for line in MAP.read_text(encoding="utf-8").splitlines():
+        cells = line.split("\t")
+        if len(cells) >= 3 and cells[1] == artifact:
+            return cells[0]
+    return ""
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--check", action="store_true", help="fail-closed на розбіжностях")
+    ap.add_argument("--self-test", action="store_true",
+                    help="правило мусить дати відомі вердикти, інакше воно зламане")
     args = ap.parse_args()
+    if args.self_test:
+        return self_test()
     disagree = []
     for row_id, mine in map_entries():
         # артефакт — з другої колонки мапи
