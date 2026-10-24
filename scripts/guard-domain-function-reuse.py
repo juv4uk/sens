@@ -428,7 +428,8 @@ def changed_files(args) -> list[str]:
     if args.paths_from:
         return [ln.strip() for ln in Path(args.paths_from).read_text(encoding="utf-8").splitlines() if ln.strip()]
     if args.staged:
-        command = ["git", "-c", "core.quotepath=false", "diff", "--name-only", "--cached", "--diff-filter=ACMR"]
+        # -z не втрачає Unicode, пробіли та вбудовані переноси рядків у шляхах Git.
+        command = ["git", "-c", "core.quotepath=false", "diff", "--name-only", "--cached", "--diff-filter=ACMR", "-z"]
         try:
             result = subprocess.run(
                 command, cwd=ROOT, capture_output=True, text=True, check=False,
@@ -443,7 +444,8 @@ def changed_files(args) -> list[str]:
                 file=sys.stderr,
             )
             raise SystemExit(2)
-        return [ln.strip() for ln in result.stdout.splitlines() if ln.strip()]
+        # Ніколи не strip(): пробіли можуть бути частиною реального імені файлу.
+        return [rel for rel in result.stdout.split("\0") if rel]
     return []
 
 
@@ -774,6 +776,20 @@ def main(argv: list[str] | None = None) -> int:
             else:
                 staged_ok = False
         print(f"GUARD-DOMAIN-REUSE self-test: git staged fail-closed {'OK' if staged_ok else 'FAIL'}")
+        # Як і ls-files, staged diff читає NUL, а не розрізає назви за рядками.
+        # Злам цього контракту приховує DEFINE в незвично названих Lisp-файлах.
+        staged_paths = ["lib/назва із пробілами.lisp", "lib/другий" + chr(10) + "рядок.lisp"]
+        with patch.object(
+            subprocess, "run",
+            return_value=subprocess.CompletedProcess(
+                ["git", "diff"], 0, chr(0).join(staged_paths) + chr(0), ""
+            ),
+        ) as staged_mock:
+            staged_paths_ok = (
+                changed_files(argparse.Namespace(file=None, paths_from=None, staged=True)) == staged_paths
+                and "-z" in staged_mock.call_args.args[0]
+            )
+        print(f"GUARD-DOMAIN-REUSE self-test: git staged NUL-шляхи {'OK' if staged_paths_ok else 'FAIL'}")
         # Недоступний індекс проєкту не повинен приховувати дубль DEFINE.
         with patch.object(
             subprocess, "run",
@@ -809,7 +825,7 @@ def main(argv: list[str] | None = None) -> int:
         print(f"GUARD-DOMAIN-REUSE self-test: гачок {'OK' if hok else 'НЕ УВІМКНЕНО (попередження)'} — {hmsg}")
         # Стан гачка — ПОПЕРЕДЖЕННЯ, не падіння: свіжий клон законно не має
         # ввімкненого гачка, доки не виконано scripts/install-hooks.sh.
-        return 0 if ok and intent_ok and d11_ok and staged_ok and project_sites_ok and paths_ok else 1
+        return 0 if ok and intent_ok and d11_ok and staged_ok and staged_paths_ok and project_sites_ok and paths_ok else 1
 
     if args.lessons:
         # Знання живуть у САМОМУ охоронці: агент, який ним користується,
