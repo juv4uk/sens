@@ -54,6 +54,15 @@ SEMANTIC_PREFIX = "tests/semantic/"
 MINIMUM_RATIFIED_SURFACES = 1001
 DEF = re.compile(r"\(" + "визначити" + r"\s+([^\s()]+)")
 
+# Коди причин BLOCKED. Класифікація в --advise ухвалює рішення за ТОЧНИМ кодом
+# причини, а не за підрядком у її тексті: інакше «дубль наявної поверхні драбини»
+# (клас А) зливається з «нове ім'я без виклику драбини…» (окремий клас), бо
+# обидві причини містять підрядок «драбини» — і клас А виходить завищеним.
+REASON_DUP_IN_FILE = "повторне визначення в одному файлі"
+REASON_SHADOW_LADDER = "дубль наявної поверхні драбини"
+REASON_SHADOW_PROJECT = "дубль наявного визначення проєкту"
+REASON_FRESH_NAME = "нове ім'я без виклику драбини і без маркера D11-пропозиції"
+
 
 def _load_discover():
     """Імпорт ЄДИНОГО механізму виявлення поверхонь — без власної копії логіки."""
@@ -779,18 +788,18 @@ def main(argv: list[str] | None = None) -> int:
                 continue  # наявне входження; перевіряємо лише приріст
             new_defs[rel] = new_defs.get(rel, 0) + 1
             if seen_counts[name] > 1:
-                blocked.append((rel, name, "повторне визначення в одному файлі"))
+                blocked.append((rel, name, REASON_DUP_IN_FILE))
                 continue
             if name in ladder:
-                blocked.append((rel, name, "дубль наявної поверхні драбини"))
+                blocked.append((rel, name, REASON_SHADOW_LADDER))
                 continue
             if duplicates_project_definition(project_sites, name, rel):
-                blocked.append((rel, name, "дубль наявного визначення проєкту"))
+                blocked.append((rel, name, REASON_SHADOW_PROJECT))
                 continue
             if not marked and not _calls_ladder(body, ladder):
                 # Нове ім'я без жодного виклику поверхні драбини і без маркера —
                 # це або перевинахід наявної операції, або неусвідомлена нова.
-                blocked.append((rel, name, "нове ім'я без виклику драбини і без маркера D11-пропозиції"))
+                blocked.append((rel, name, REASON_FRESH_NAME))
                 continue
             candidates.append((rel, name))
 
@@ -813,9 +822,11 @@ def main(argv: list[str] | None = None) -> int:
         print("НЕ ЗАРЕЄСТРОВАНО в D11: є BLOCKED; спершу виправ усі порушення.")
 
     if args.advise and blocked:
-        shadow = [(r, n) for r, n, w in blocked if "драбини" in w]
-        project = [(r, n) for r, n, w in blocked if "проєкту" in w]
-        fresh = [(r, n) for r, n, w in blocked if "драбини" not in w and "проєкту" not in w]
+        # Точна класифікація за кодом причини, а не за підрядком у тексті.
+        shadow = [(r, n) for r, n, w in blocked if w == REASON_SHADOW_LADDER]
+        project = [(r, n) for r, n, w in blocked if w == REASON_SHADOW_PROJECT]
+        fresh = [(r, n) for r, n, w in blocked if w == REASON_FRESH_NAME]
+        dupfile = [(r, n) for r, n, w in blocked if w == REASON_DUP_IN_FILE]
         print(f"\nПОРАДИ (--advise): {len(blocked)} виправлень у {len({r for r, _, _ in blocked})} файлах")
         if shadow:
             print(f"\n  А) ЗАТІНЮЄ ДРАБИНУ ({len(shadow)}) — ужий наявну поверхню, не перевизначай:")
@@ -837,6 +848,12 @@ def main(argv: list[str] | None = None) -> int:
                 print(f"     {r}: «{n}» — додай вживання поверхні драбини, або `; D11-пропозиція: <причина>`{when}")
             if len(fresh) > 12:
                 print(f"     … ще {len(fresh) - 12}")
+        if dupfile:
+            print(f"\n  Г) ПОВТОРНЕ ВИЗНАЧЕННЯ ({len(dupfile)}) — лиши одне визначення на файл:")
+            for r, n in dupfile[:12]:
+                print(f"     {r}: «{n}» визначено двічі в одному файлі — прибери повтор")
+            if len(dupfile) > 12:
+                print(f"     … ще {len(dupfile) - 12}")
         print()
     if blocked:
         for rel, name, why in blocked:
