@@ -83,17 +83,20 @@ fn meta_f4_routed(ci: &str, script: &str) -> BTreeSet<String> {
     let active = commands(ci).iter().any(|line|
         line.starts_with("bash scripts/prove-meta-eval-lexical-shadow-d1.sh ")
     );
+    // Лише живі shell-команди: закоментований, echo або згаданий
+    // у повідомленні F4-виклик не стає фізичною атестацією.
+    let lines = commands(script);
+    let executes = |prefix: &str| lines.iter().any(|line| line.starts_with(prefix));
     if !active
-        || !script.contains("mapfile -t forms")
-        || !script.contains("mapfile -t mutant_forms")
-        || !script.contains("\"$cli\" --t5m-pair \"$physical_aggregate\" \"$physical_aggregate_carrier\"")
-        || !script.contains("\"$cli\" --t5m-pair \"$physical_aggregate_mutant\" \"$physical_aggregate_mutant_carrier\"")
-        || !script.contains("\"$cli\" --t5m-pair \"$physical_aggregate_mutant\" \"$physical_aggregate_carrier\"")
-        || !script.contains("T5M_PHYSICAL_PAIR_MISMATCH")
+        || !executes("mapfile -t forms ")
+        || !executes("mapfile -t mutant_forms ")
+        || !executes("if ! \"$cli\" --t5m-pair \"$physical_aggregate\" \"$physical_aggregate_carrier\" ")
+        || !executes("if ! \"$cli\" --t5m-pair \"$physical_aggregate_mutant\" \"$physical_aggregate_mutant_carrier\" ")
+        || !executes("if \"$cli\" --t5m-pair \"$physical_aggregate_mutant\" \"$physical_aggregate_carrier\" ")
+        || !executes("if ! grep -Fq 'T5M_PHYSICAL_PAIR_MISMATCH' ")
     {
         return BTreeSet::new();
     }
-    let lines = commands(script);
     let mut sources = BTreeSet::new();
     for variable in ["law", "mutant", "mutants", "physical_aggregate",
                      "physical_aggregate_mutant"] {
@@ -404,6 +407,12 @@ echo bash scripts/prove-meta-eval-lexical-shadow-d1.sh";
         script.replacen(
             "physical_aggregate_mutant=tests/semantic/",
             "physical_aggregate_mutant=tests/fixtures/", 1),
+        script.replacen(
+            "if ! \"$cli\" --t5m-pair \"$physical_aggregate\"",
+            "# if ! \"$cli\" --t5m-pair \"$physical_aggregate\"", 1),
+        script.replacen(
+            "if ! grep -Fq 'T5M_PHYSICAL_PAIR_MISMATCH'",
+            "echo T5M_PHYSICAL_PAIR_MISMATCH", 1),
     ] {
         if !meta_f4_routed(ci, &broken).is_empty() {
             return Err("broken MetaEval physical witness was falsely registered".into());
