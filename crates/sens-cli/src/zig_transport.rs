@@ -1008,7 +1008,7 @@ pub fn decode_e1_words(bytes: &[u8]) -> Result<Vec<sens::BinarySourceWord>, Stri
     let mut be3 = vec![0u8; MAX_E1_WORDS * 3];
     let written =
         unsafe { sens_zig_e1_decode_be3(bytes.as_ptr(), bytes.len(), be3.as_mut_ptr(), be3.len()) };
-    if written <= 0
+    if written < 0
         || usize::try_from(written)
             .ok()
             .filter(|&n| n <= be3.len() && n % 3 == 0)
@@ -1110,6 +1110,22 @@ mod zig_exact_egress_tests {
         encode_f3, encode_t5m_direct, exact_words_to_be3, require_same_exact_words,
         validate_t5_coordinates, validate_t5m,
     };
+
+    /// Canonical empty E1 is physically valid; SENS rejects its empty program.
+    #[test]
+    fn canonical_empty_e1_is_physical_success_but_sens_parse_error() {
+        const EMPTY: [u8; 8] = [0x53, 0x33, 1, 0, 0xc7, 0xca, 0x15, 0xd8];
+        let words = decode_e1_words(&EMPTY).expect("canonical empty E1 must decode");
+        assert!(words.is_empty());
+        let error = sens::PhysicalT5Program::from_exact_words(&words)
+            .err()
+            .expect("SENS rejects empty program");
+        assert_eq!(error.kind, sens::ErrorKind::Parse);
+        assert_eq!(error.message, "T5M SENS program has no exact words");
+        let mut damaged = EMPTY;
+        damaged[7] ^= 1;
+        assert!(decode_e1_words(&damaged).is_err());
+    }
 
     #[test]
     fn live_guard_reference_bytes_cross_only_the_zig_adapter() {
