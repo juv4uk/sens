@@ -541,6 +541,17 @@ run_native_t5m_program() {
         echo "::notice file=$file,title=SENS D3/D5 language::PASS native=SENS carrier=Zig/T5M result=D1:$local_expected"
         ;;
     esac
+    # Окремий мутант TAKE-UNTIL — хибний закон повертає саме D1:ні.
+    # Shell перевіряє тільки фізичний результат SENS, не обчислює списки.
+    if [[ "$file" == "tests/semantic/d11-srfi1-span-break-mutant.lisp" ]]; then
+      printf '%s\n' 0 > "$dir/d11-break-mutant.expected"
+      if ! cmp -s "$dir/native-paired.stdout" "$dir/d11-break-mutant.expected"; then
+        echo "::error::SENS_D11_BREAK_MUTANT_WRONG_D1 source=$file expected=D1:0 actual=$(cat "$dir/native-paired.stdout")" >&2
+        mark_file_failed
+        return
+      fi
+      echo "SENS_D11_BREAK_MUTANT_PASS source=$file result=D1:0 native=SENS carrier=Zig/T5M"
+    fi
     # Свідки D11: кінцева мовна істина належить тільки виконанню SENS.
     case "$file" in
       tests/semantic/d11-srfi1-unfold-positive.lisp|tests/semantic/d11-srfi1-unfold-mutant.lisp)
@@ -1344,7 +1355,8 @@ while IFS= read -r file || [[ -n "$file" ]]; do
           "$file" == "tests/semantic/d11-srfi1-find-tail-improper-tail-negative.lisp" ]]; then
     # Лише визначення із справжньої бібліотеки SENS, без host-оракула.
     binding_sources=(--binding-source lib/d11-srfi1-find-tail.lisp)
-  elif [[ "$file" == "tests/semantic/d11-srfi1-span-break-laws.lisp" ]]; then
+  elif [[ "$file" == "tests/semantic/d11-srfi1-span-break-laws.lisp" ||
+          "$file" == "tests/semantic/d11-srfi1-span-break-mutant.lisp" ]]; then
     # SENS визначає мову; Zig лише переносить біти фізичного T5M.
     binding_sources=(--binding-source lib/d11-srfi1-span-break.lisp)
   elif [[ "$file" == "tests/semantic/d11-clojure-partition-by-laws.lisp" ||
