@@ -514,6 +514,9 @@ run_case run_law d6-compose-flip-order-mutant tests/semantic/d6-compose-flip-mut
 # D8 AND/OR: обидва макроси належать SENS Core4, а не хостовому виконавцю.
 run_case run_law d8-and-or-lazy-positive tests/semantic/d8-and-or-lazy-law.lisp 1 core4
 run_case run_law d8-and-or-lazy-mutant tests/semantic/d8-and-or-lazy-mutant.lisp 0 core4
+# Ізольовані SENS-свідки точного місця збою D7 у недосяжних гілках.
+run_case run_law d8-and-false-lazy-positive tests/semantic/d8-and-false-lazy-law.lisp 1 core4
+run_case run_law d8-or-true-lazy-positive tests/semantic/d8-or-true-lazy-law.lisp 1 core4
 # D6-квантори перевіряємо нижче як повні програми з визначеннями Core4.
 # D4 рекурсивна правильність списків: позитив та навмисне порушення.
 run_case run_law d4-proper-list-positive tests/semantic/d4-proper-list-recursion-law.lisp 1
