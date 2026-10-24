@@ -1,12 +1,9 @@
-# Відновлення
+# Відновлення test_domain_function_reuse_rule.py
 
-## test_domain_function_reuse_rule.py (host_debt=0)
 ```bash
-python3 knowledge/d11/restore/apply-debt0-test.py
+python3 knowledge/d11/restore/apply-fulltest.py
+python3 -m unittest tests.test_domain_function_reuse_rule tests.test_language_stays_in_sens -q
 ```
-Після placeholder на main — обов'язково.
 
-## guard
-```bash
-python3 knowledge/d11/restore/apply-guard-restore.py
-```
+Першопричина host_debt: суцільні `(визначити` у probe-рядках.
+Фікстури: `tests/_guard_probe_fixtures.py`.
