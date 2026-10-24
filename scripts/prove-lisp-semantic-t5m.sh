@@ -609,9 +609,10 @@ sha256sum lib/d11-tree-equal-by-test.lisp tests/semantic/d11-tree-equal-by-test-
 # SENS виконує 2 D1 закони й 2 очікувані Type-помилки через Zig/T5M.
 reason_trace_common="$evidence/d11-reason-proof-trace-definitions.lisp"
 cat -- lib/unify.lisp lib/reason.lisp > "$reason_trace_common"
-for kind in law mutant improper-provenance-negative improper-count-negative; do
-  cat -- "$reason_trace_common" "tests/semantic/d11-reason-proof-trace-$kind.lisp" > "$evidence/d11-reason-proof-trace-$kind-complete.lisp"
-done
+cat -- "$reason_trace_common" tests/semantic/d11-reason-proof-trace-law.lisp > "$evidence/d11-reason-proof-trace-law-complete.lisp"
+cat -- "$reason_trace_common" tests/semantic/d11-reason-proof-trace-mutant.lisp > "$evidence/d11-reason-proof-trace-mutant-complete.lisp"
+cat -- "$reason_trace_common" tests/semantic/d11-reason-proof-trace-improper-provenance-negative.lisp > "$evidence/d11-reason-proof-trace-improper-provenance-negative-complete.lisp"
+cat -- "$reason_trace_common" tests/semantic/d11-reason-proof-trace-improper-count-negative.lisp > "$evidence/d11-reason-proof-trace-improper-count-negative-complete.lisp"
 run_case run_law d11-reason-proof-trace-law "$evidence/d11-reason-proof-trace-law-complete.lisp" 1 core4
 run_case run_law d11-reason-proof-trace-mutant "$evidence/d11-reason-proof-trace-mutant-complete.lisp" 0 core4
 run_case run_error_rejection d11-reason-proof-trace-improper-provenance "$evidence/d11-reason-proof-trace-improper-provenance-negative-complete.lisp" Type 'car expects a non-empty list' core4
