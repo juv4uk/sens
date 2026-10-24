@@ -67,6 +67,13 @@ jobs:
         run: |
           python3 scripts/check-domain-surfaces-d1-d4.py
           python3 scripts/check-d9-definition-bindings.py
+          python3 scripts/check-d6-definition-bindings.py
+          python3 scripts/check-d10-definition-bindings.py
+          python3 scripts/check-domain-bitness-witness.py
+          python3 scripts/check-d10-lisp-machine-evaluator-harvest-v1.py
+          # Закон чесноти: жоден Rust/TSV/blob не доводить семантику SENS;
+          # охоронець відкидає фальшиве COVERED. Ніхто його не запускав.
+          python3 scripts/check-semantic-coverage-ledger.py --check --self-test
           cargo test --locked -p sens --test domain_ladder --test domain_ladder_only_kernel --test domain_ast_value_identity
       - name: Verify migrated user demo sources run through canonical Core
         run: cargo test --locked -p sens --test exact_domain_migrated_demos
@@ -126,7 +133,9 @@ jobs:
           cargo test --locked -p sens --test time_host_surface
       - name: Mechanical stale-D3 migration lint (non-semantic, fail closed)
         if: always()
-        run: python3 scripts/check_d3_legacy_logic.py --strict
+        run: |
+          python3 scripts/check_d3_legacy_logic.py --strict
+          python3 scripts/check-migration-debt.py
 
       # Exercise release packaging rejection gates on every main push, without
       # requiring a release tag or touching GitHub Releases.
@@ -158,3 +167,8 @@ jobs:
       - name: Release publication and pre-tag gate structural regressions
         if: always()
         run: python3 -m unittest discover -s packaging/tests -p 'test_release_publication_gate.py' -v
+
+      # Hohorona okhorontsiv: a guard on the workflows themselves ran nowhere.
+      - name: Workflow hygiene - every workflow parses with jobs
+        if: always()
+        run: python3 scripts/check-workflow-yaml.py
