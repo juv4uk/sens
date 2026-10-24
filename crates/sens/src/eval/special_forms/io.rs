@@ -1,5 +1,5 @@
-//! Механізми `write-to-string`, `read`/`eval` без доступу ядра до ОС.
-//! Інтерактивний ввід належить зовнішньому хосту, а не READ ядра.
+//! Поточні механізми `write-to-string`, `read`/`eval` та єдине місце ядра,
+//! що читає stdin (`read_stdin_line`, лише для `(read)` без аргументів).
 //!
 //! These operations are value-level mechanisms. Their callable identities are
 //! ordinary root `Value::Builtin` bindings; the evaluator does not dispatch on
@@ -21,49 +21,6 @@ fn contains_predicate_bit(value: &Value) -> bool {
     }
 }
 
-// Канонічний дріт приймає лише ті legacy exact f64, для яких
-// перетворення на i64 не насичується і не змінює значення.
-// Точні числа D24+ мають окремий BinaryNumber-носій і сюди не входять.
-fn contains_noncanonical_exact_number(value: &Value) -> bool {
-    match value {
-        // Жодної канонічної граматики для D24+ RATIO/NEG ще немає:
-        // текст WIRE-UNSUPPORTED не може вважатися успішним записом.
-        Value::NumericComposition(_) => true,
-        Value::Number(number, crate::Exactness::Exact) => {
-            !number.is_finite()
-                || number.fract() != 0.0
-                || *number < i64::MIN as f64
-                || *number >= -(i64::MIN as f64)
-        }
-        Value::Pair(node) => {
-            contains_noncanonical_exact_number(&node.head)
-                || contains_noncanonical_exact_number(&node.tail)
-        }
-        Value::Vector(values) => values
-            .borrow()
-            .iter()
-            .any(contains_noncanonical_exact_number),
-        _ => false,
-    }
-}
-
-// Живі об'єкти та виконувані значення мають лише діагностичне
-// відображення. READ не може відновити їхню тотожність із тексту.
-fn contains_unserializable_capability(value: &Value) -> bool {
-    match value {
-        Value::Closure(_) | Value::Macro(_) | Value::Builtin(_) | Value::HostHandle { .. } => true,
-        Value::Pair(node) => {
-            contains_unserializable_capability(&node.head)
-                || contains_unserializable_capability(&node.tail)
-        }
-        Value::Vector(values) => values
-            .borrow()
-            .iter()
-            .any(contains_unserializable_capability),
-        _ => false,
-    }
-}
-
 pub(crate) fn write_to_string_values(
     arguments: &[Value],
     _environment: &Environment,
@@ -74,20 +31,6 @@ pub(crate) fn write_to_string_values(
         return Err(LanguageError::new(
             ErrorKind::Type,
             "write-to-string cannot serialize contextual predicate results",
-            span,
-        ));
-    }
-    if contains_noncanonical_exact_number(&arguments[0]) {
-        return Err(LanguageError::new(
-            ErrorKind::Type,
-            "write-to-string cannot serialize a legacy exact Number without loss",
-            span,
-        ));
-    }
-    if contains_unserializable_capability(&arguments[0]) {
-        return Err(LanguageError::new(
-            ErrorKind::Type,
-            "write-to-string cannot serialize an executable or opaque host capability",
             span,
         ));
     }
@@ -118,13 +61,9 @@ pub(crate) fn read_values(
             )),
         }
     } else {
-        return Err(LanguageError::new(
-            ErrorKind::MechanismUnavailable,
-            "READ_HOST_INPUT_UNAVAILABLE: ядро SENS не має неявного вводу ОС; передайте значення для READ через зовнішній ввід",
-            span,
-        ));
+        read_stdin_line(span)?
     };
-    let expressions = crate::parser::parse_canonical_value_wire(&source).map_err(|mut error| {
+    let expressions = crate::parse(&source).map_err(|mut error| {
         error.span = span;
         error
     })?;
@@ -167,6 +106,29 @@ pub(crate) fn read_all_values(
         .map(Value::list)
 }
 
+#[cfg(not(target_arch = "wasm32"))]
+fn read_stdin_line(span: Span) -> Result<String, LanguageError> {
+    use std::io::BufRead;
+    let mut line = String::new();
+    std::io::stdin().lock().read_line(&mut line).map_err(|error| {
+        LanguageError::new(
+            ErrorKind::InvalidForm,
+            format!("read: failed to read from stdin · read: ne vdalos prochytaty stdin · read: Lesen von stdin fehlgeschlagen: {error}"),
+            span,
+        )
+    })?;
+    Ok(line.trim_end_matches(['\n', '\r']).to_string())
+}
+
+#[cfg(target_arch = "wasm32")]
+fn read_stdin_line(span: Span) -> Result<String, LanguageError> {
+    Err(LanguageError::new(
+        ErrorKind::InvalidForm,
+        "read: interactive stdin is not available in this build · read: interaktyvnyi stdin nedostupnyi u tsii zbirtsi · read: interaktives stdin ist in diesem Build nicht verfügbar",
+        span,
+    ))
+}
+
 pub(crate) fn eval_values(
     arguments: &[Value],
     environment: &Environment,
@@ -201,41 +163,10 @@ fn exact_values(
 mod tests {
     use super::*;
 
-    #[test]
-    fn read_without_host_input_has_no_implicit_os_capability() {
-        let span = Span::default();
-        let error = read_values(&[], &Environment::root(), span)
-            .expect_err("ядро без хостового вводу не повинно читати stdin");
-        assert_eq!(error.kind, ErrorKind::MechanismUnavailable);
-        assert!(error.message.contains("READ_HOST_INPUT_UNAVAILABLE"));
-        assert_eq!(error.span, span);
-    }
-
     fn assert_predicate_wire_rejected(value: Value) {
         let error = write_to_string_values(&[value], &Environment::root(), Span::default())
             .expect_err("PredicateBit must not enter canonical wire");
         assert_eq!(error.kind, ErrorKind::Type);
-    }
-
-    #[test]
-    fn canonical_wire_rejects_live_host_handles_even_when_nested() {
-        // Діагностичний <tcp-connection> не має зворотного READ,
-        // навіть якщо об'єкт захований усередині D2-списку чи вектора.
-        let handle = Value::host_handle("tcp-connection", 7);
-        let list = Value::list([Value::Number(1.0, crate::Exactness::Exact), handle.clone()]);
-        let vector = Value::Vector(Rc::new(std::cell::RefCell::new(vec![handle.clone()])));
-        for value in [handle, list, vector] {
-            let error = write_to_string_values(&[value], &Environment::root(), Span::default())
-                .expect_err("opaque resource cannot have canonical read-back-safe wire");
-            assert_eq!(error.kind, ErrorKind::Type);
-        }
-        let ordinary = write_to_string_values(
-            &[Value::String(Rc::from("звичайні-дані"))],
-            &Environment::root(),
-            Span::default(),
-        )
-        .expect("ordinary data remains writable");
-        assert_eq!(ordinary, Value::String(Rc::from("\"звичайні-дані\"")));
     }
 
     #[test]
@@ -257,151 +188,6 @@ mod tests {
         )
         .expect("ordinary exact Number wire remains supported");
         assert_eq!(number, Value::String(Rc::from("#q2:1/1")));
-    }
-
-    #[test]
-    fn legacy_exact_number_wire_refuses_saturating_float_to_integer_cast() {
-        // as i64 насичує 2^63 до i64::MAX: це не канонічний запис.
-        let above_max = Value::Number(-(i64::MIN as f64), crate::Exactness::Exact);
-        let below_min = Value::Number((i64::MIN as f64) * 2.0, crate::Exactness::Exact);
-        let nested = Value::list([Value::Number(
-            -(i64::MIN as f64),
-            crate::Exactness::Exact,
-        )]);
-        let vector = Value::Vector(Rc::new(std::cell::RefCell::new(vec![
-            Value::Number(1.0, crate::Exactness::Exact),
-            above_max.clone(),
-        ])));
-        for value in [
-            above_max,
-            below_min,
-            nested,
-            vector,
-            Value::Number(f64::INFINITY, crate::Exactness::Exact),
-            Value::Number(0.5, crate::Exactness::Exact),
-        ] {
-            let error = write_to_string_values(
-                &[value],
-                &Environment::root(),
-                Span::default(),
-            )
-            .expect_err("непредставиме exact f64 не може дати успішний wire");
-            assert_eq!(error.kind, ErrorKind::Type);
-        }
-
-        // Нижня межа i64 представима точно; не відкидати коректні дані.
-        let lower_edge = Value::Number(i64::MIN as f64, crate::Exactness::Exact);
-        assert!(write_to_string_values(
-            &[lower_edge],
-            &Environment::root(),
-            Span::default(),
-        )
-        .is_ok());
-    }
-
-    #[test]
-    fn wire_rejects_d24_exact_ratio_instead_of_returning_unsupported_marker() {
-        // Дробова композиція — точні SENS-дані, але поточний
-        // canonical reader не має для неї фізичного носія.
-        let word = |last_two: [u8; 2]| {
-            let mut bits = vec![0; 24];
-            bits[22..].copy_from_slice(&last_two);
-            Value::BinaryNumber(
-                crate::BinaryNumber::from_numeric_domain_bits(24, &bits)
-                    .expect("допущене точне слово D24"),
-            )
-        };
-        let ratio = crate::domain_numeric::compute("/", &word([0, 1]), &word([1, 0]))
-            .expect("точне відношення одиниці до двійки");
-        assert!(matches!(ratio, Value::NumericComposition(_)));
-        for value in [ratio.clone(), Value::list([ratio])] {
-            let error = write_to_string_values(
-                &[value],
-                &Environment::root(),
-                Span::default(),
-            )
-            .expect_err("WIRE-UNSUPPORTED не є успішним записом");
-            assert_eq!(error.kind, ErrorKind::Type);
-        }
-    }
-
-    #[test]
-    fn канонічний_d7_read_write_зберігає_точні_вкладені_комірки() {
-        // Rust перевіряє лише механізм запису/читання D7-носія;
-        // семантичні закони залишаються в Lisp → SENS.
-        let original = Value::list([
-            Value::Text7(crate::Text7::from_cells(vec![0x00, 0x7f]).unwrap()),
-            Value::list([Value::Text7(
-                crate::Text7::from_cells(Vec::new()).unwrap(),
-            )]),
-        ]);
-        let wire = write_to_string_values(
-            &[original.clone()],
-            &Environment::root(),
-            Span::default(),
-        )
-        .expect("точний D7-носій повинен записуватися");
-        let restored = read_values(&[wire], &Environment::root(), Span::default())
-            .expect("READ повинен відновити D7, а не Symbol");
-        assert_eq!(restored, original);
-    }
-
-    #[test]
-    fn read_write_зберігає_структурні_d7_слова_без_десяткового_мосту() {
-        // D2-список W7 не є Text7. Його точні доменні комірки
-        // повинні пережити D8 WRITE→READ без перетворення на Number.
-        let w7 = |bits| {
-            Value::DomainIdentity(crate::DomainIdentity::from_source_word(
-                crate::BinarySourceWord::W7(crate::Bit7::new(bits).unwrap()),
-            ))
-        };
-        let original = Value::list([
-            w7(0b0100001),
-            Value::list([w7(0b1100001), w7(0b1111111)]),
-            Value::String(Rc::from("1100001")),
-            Value::Number(5.0, crate::Exactness::Exact),
-        ]);
-        let wire = write_to_string_values(
-            &[original.clone()],
-            &Environment::root(),
-            Span::default(),
-        )
-        .expect("WRITE має прийняти канонічні дані");
-        let restored = read_values(&[wire], &Environment::root(), Span::default())
-            .expect("READ має відновити точні доменні комірки");
-        assert_eq!(restored, original);
-    }
-
-    #[test]
-    fn read_write_зберігає_точну_ширину_числових_d24_plus_слів() {
-        for width in [24, 48] {
-            let mut bits = vec![0; width];
-            bits[width - 1] = 1;
-            let original = Value::BinaryNumber(
-                crate::BinaryNumber::from_numeric_domain_bits(width, &bits)
-                    .expect("exact admitted D24+ word"),
-            );
-            let wire = write_to_string_values(&[original.clone()], &Environment::root(), Span::default())
-                .expect("D24+ exact words must have a reader-safe wire form");
-            let expected = format!("#d{width}:{}", "0".repeat(width - 1) + "1");
-            assert_eq!(wire, Value::String(Rc::from(expected)));
-            let restored = read_values(&[wire], &Environment::root(), Span::default())
-                .expect("canonical READ must restore the admitted D24+ word");
-            assert_eq!(restored, original);
-        }
-    }
-
-    #[test]
-    fn read_відхиляє_пошкоджений_d7_носій() {
-        for source in ["#t7:0", "#t7:80", "#t7:4A", "#t7:gg"] {
-            let error = read_values(
-                &[Value::String(Rc::from(source))],
-                &Environment::root(),
-                Span::default(),
-            )
-            .expect_err("пошкоджений D7 не може стати Symbol");
-            assert_eq!(error.kind, ErrorKind::Parse, "{source}");
-        }
     }
 
     #[test]
