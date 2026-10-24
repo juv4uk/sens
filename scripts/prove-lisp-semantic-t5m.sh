@@ -1436,9 +1436,13 @@ run_case run_type_rejection d11-scan-fold-d3-right-bad "$d11_scan_fold_bad_right
 sha256sum lib/d11-historical-scan-fold.lisp tests/semantic/d11-scan-fold-d3-tail-*.lisp > "$evidence/d11-scan-fold-d3-inputs.sha256"
 
 d11_span_bundle="$evidence/d11-srfi1-span-break-complete.lisp"
+d11_span_mutant_bundle="$evidence/d11-srfi1-span-break-mutant-complete.lisp"
 cat -- lib/d11-srfi1-span-break.lisp tests/semantic/d11-srfi1-span-break-laws.lisp > "$d11_span_bundle"
-sha256sum lib/d11-srfi1-span-break.lisp tests/semantic/d11-srfi1-span-break-laws.lisp > "$evidence/d11-srfi1-inputs.sha256"
+cat -- lib/d11-srfi1-span-break.lisp tests/semantic/d11-srfi1-span-break-mutant.lisp > "$d11_span_mutant_bundle"
+sha256sum lib/d11-srfi1-span-break.lisp tests/semantic/d11-srfi1-span-break-laws.lisp \
+  tests/semantic/d11-srfi1-span-break-mutant.lisp > "$evidence/d11-srfi1-inputs.sha256"
 run_case run_law d11-srfi1-span-break-physical "$d11_span_bundle" 1
+run_case run_law d11-srfi1-span-break-mutant "$d11_span_mutant_bundle" 0
 # Д11: SPAN/BREAK не повинні пропускати атомний D1-хвіст суфікса.
 d11_span_improper="$evidence/d11-srfi1-span-improper-suffix.lisp"
 cat -- lib/d11-srfi1-span-break.lisp tests/semantic/d11-srfi1-span-improper-suffix-negative.lisp > "$d11_span_improper"
