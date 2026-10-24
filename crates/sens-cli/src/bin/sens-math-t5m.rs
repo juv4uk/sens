@@ -1,14 +1,14 @@
-//! Експериментальний, ЯВНО парний вузький зріз математики D5/D24+.
+//! Експериментальний, ЯВНО парний вузький зріз математики D5/D12+.
 //!
 //! `name.lisp` містить українську D5-голову та десяткові цілі операнди.
-//! Адаптер формує exact D24+ до фізичного Zig T5M без host-float.
+//! Адаптер формує exact D12+ до фізичного Zig T5M без host-float.
 //! Машинні #d/#b/#q2 літерали не є людською виконуваною поверхнею.
 //! Фізичний `name.sens` перевозить лише слова через Zig T5M.
-//! ПРИМІТКА: сама ширина фізичного слова не надає D24-identity.
+//! ПРИМІТКА: сама ширина фізичного слова не надає числової D12+-тотожності.
 //! Домен береться тільки з перевіреного SENS AST парного джерела;
 //! байтове/словесне розходження закриває виконання.
 //! Це не standalone T5M interpreter і не фізичний формат результату RATIO.
-//! Вкладені D5-вирази з точними D24+ листками дозволені.
+//! Вкладені D5-вирази з точними D12+ листками дозволені.
 //! Одномісні D5:01011 і D5:10111 допускаються за чинним законом SENS.
 //!
 //! Виклик: sens-math-t5m encode source.lisp
@@ -26,7 +26,7 @@ mod paired {
     };
 
     // The physical codec supplies widths and bits, never semantic admission.
-    // D5 heads and D24+ leaf identity are selected by SENS lowering alone.
+    // D5 heads and D12+ leaf identity are selected by SENS lowering alone.
     fn admit(expr: &Expr, depth: usize) -> Result<(), String> {
         if depth > 64 {
             return Err("SENS admission: nested arithmetic exceeds depth limit".into());
@@ -59,7 +59,7 @@ mod paired {
                 Ok(())
             }
             _ => Err(format!(
-                "SENS admission: only qualified D24+ atoms and admitted binary D5 math/predicate calls; actual={:?}",
+                "SENS admission: only qualified D12+ atoms and admitted binary D5 math/predicate calls; actual={:?}",
                 expr.kind
             )),
         }
@@ -272,10 +272,10 @@ mod paired {
         #[test]
         fn physical_t5m_restores_d24_and_executes_only_with_explicit_sens_admission() {
             for (id, source, expected_width, expected_human) in [
-                ("sum", source("додати", 1, 2), 24, "3"),
-                ("negative", source("відняти", 1, 3), 24, "-2"),
+                ("sum", source("додати", 1, 2), 12, "3"),
+                ("negative", source("відняти", 1, 3), 12, "-2"),
                 ("promote", source("додати", 8_388_607, 1), 48, "8388608"),
-                ("product", source("помножити", 7, 6), 24, "42"),
+                ("product", source("помножити", 7, 6), 12, "42"),
             ] {
                 let qualified = qualify(&source).expect("ratified D5 and D24 source");
                 let words = expected_words(&qualified).unwrap();
@@ -301,13 +301,13 @@ mod paired {
         #[test]
         fn decimal_ukrainian_lisp_through_physical_zig_t5m_and_sens_math() {
             for (id, text, input_width, expected) in [
-                ("sum", "(додати 1 2)", 24, "3"),
-                ("negative", "(відняти 1 3)", 24, "-2"),
-                ("signed", "(додати -3 1)", 24, "-2"),
+                ("sum", "(додати 1 2)", 12, "3"),
+                ("negative", "(відняти 1 3)", 12, "-2"),
+                ("signed", "(додати -3 1)", 12, "-2"),
                 ("carry", "(додати 8388607 1)", 24, "8388608"),
                 ("wide", "(додати 8388608 1)", 48, "8388609"),
                 ("wide-reverse", "(додати 1 8388608)", 48, "8388609"),
-                ("product", "(помножити 7 6)", 24, "42"),
+                ("product", "(помножити 7 6)", 12, "42"),
             ] {
                 let words = expected_words(&qualify(text).unwrap()).unwrap();
                 assert_eq!(words[2].width, input_width, "test_id={id} layer=source");
@@ -333,6 +333,46 @@ mod paired {
                     "test_id=invalid-math-source layer=SENS actual={invalid}"
                 );
             }
+        }
+
+        #[test]
+        fn d12_edges_roundtrip_and_grow_through_zig_t5m_and_sens_math() {
+            for (id, text, input_width, output_width, expected) in [
+                ("positive-overflow", "(додати 2047 1)", 12, 24, "2048"),
+                ("negative-overflow", "(додати -2048 -1)", 12, 24, "-2049"),
+                ("signed-cancellation", "(додати -2048 2047)", 12, 12, "-1"),
+            ] {
+                let words = expected_words(&qualify(text).unwrap()).unwrap();
+                assert_eq!(words[2].width, input_width, "id={id} layer=source");
+                let physical = zig_transport::encode_t5m_exact_words(&words)
+                    .unwrap_or_else(|error| panic!("id={id} layer=Zig-T5M encode {error}"));
+                assert_eq!(
+                    zig_transport::decode_t5m_exact_words(&physical).unwrap(),
+                    words,
+                    "id={id} layer=Zig-T5M roundtrip"
+                );
+                let result = eval_verified(text, &physical)
+                    .unwrap_or_else(|error| panic!("id={id} layer=SENS {error}"));
+                let Value::BinaryNumber(number) = result else {
+                    panic!("id={id} layer=SENS expected exact D{output_width} integer");
+                };
+                assert_eq!(number.numeric_domain_width(), Some(output_width), "id={id}");
+                assert_eq!(number.to_decimal_string(), expected, "id={id}");
+            }
+
+            // Негативний фізичний свідок: шлях D12 передає обидва операнди,
+            // але SENS мусить відхилити ділення на доменний нуль.
+            let text = "(частка 1 0)";
+            let words = expected_words(&qualify(text).unwrap()).unwrap();
+            assert_eq!(words[2].width, 12, "id=d12-zero-division layer=source");
+            assert_eq!(words[3].width, 12, "id=d12-zero-division layer=source");
+            let physical = zig_transport::encode_t5m_exact_words(&words).unwrap();
+            let error = eval_verified(text, &physical)
+                .expect_err("D12 division by zero must fail in SENS after T5M roundtrip");
+            assert!(
+                error.contains("SENS eval:"),
+                "id=d12-zero-division layer=SENS error={error}"
+            );
         }
 
         #[test]
