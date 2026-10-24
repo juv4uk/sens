@@ -1,5 +1,5 @@
-//! Contract 11.9 / owner 2026-10-12: binary words are not numbers.
-//! Only exact D24+ qualified values may enter mathematical mechanisms.
+//! Contract 11.9 / owner 2026-10-24: binary words are not numbers.
+//! Only exact D12+ qualified values may enter mathematical mechanisms.
 //! These witnesses use real Core evaluation, not an auxiliary arithmetic
 //! simulator, and do not admit any new source syntax or numeric literal.
 
@@ -68,7 +68,7 @@ fn all_representable_non_numeric_domain_words_are_rejected_by_math() {
                 identity.width()
             );
             assert!(
-                error.message.contains("D24+"),
+                error.message.contains("D12+"),
                 "D{}: {error}",
                 identity.width()
             );
@@ -109,7 +109,7 @@ fn bare_numbers_and_numeric_spelling_cannot_bypass_d24_admission() {
         ] {
             let error = exact_call(source, &mut session).unwrap_err();
             assert_eq!(error.kind, ErrorKind::Type, "{name}: {source}");
-            assert!(error.message.contains("D24+"), "{name}: {error}");
+            assert!(error.message.contains("D12+"), "{name}: {error}");
         }
     }
     // Source digit strings without a D24+ domain remain non-mathematical,
@@ -125,7 +125,7 @@ fn bare_numbers_and_numeric_spelling_cannot_bypass_d24_admission() {
     ] {
         let error = eval_program(source, &mut session).unwrap_err();
         assert_eq!(error.kind, ErrorKind::Type, "{source}");
-        assert!(error.message.contains("D24+"), "{source}: {error}");
+        assert!(error.message.contains("D12+"), "{source}: {error}");
     }
 }
 
@@ -192,7 +192,7 @@ fn d1_predicates_and_d3_eq_remain_non_arithmetic_laws() {
     // The same D1 operands MUST be rejected by mathematical ordering.
     let error = exact_call("(11010 left right)", &mut session).unwrap_err();
     assert_eq!(error.kind, ErrorKind::Type);
-    assert!(error.message.contains("D24+"), "{error}");
+    assert!(error.message.contains("D12+"), "{error}");
 }
 
 #[test]
@@ -216,7 +216,7 @@ fn ten_bit_domain_ratification_does_not_invent_d10_callability_or_arithmetic() {
     // D24+ number. The value's own domain is never inferred from digits.
     let error = exact_call("(01010 number 0000000001)", &mut session).unwrap_err();
     assert_eq!(error.kind, ErrorKind::Type);
-    assert!(error.message.contains("D24+"), "{error}");
+    assert!(error.message.contains("D12+"), "{error}");
 }
 
 /// Prove the admissible replacement for Core4 length-onto's old
