@@ -26,13 +26,11 @@ fn is_explicit_non_implementation(rel: &str) -> bool {
         || rel.starts_with("lib/surface/")
         || rel == "lib/machine/encoding/coverage.lisp"
         || rel == "lib/machine/encoding/admitted-iclass-index.lisp"
-        // Декларативні джерела: core4 — таблиця з колонками san/en/LISP/sym
-        // і опкодами (класичні назви, не перейменовуються), yantra — зовнішні
-        // формати (JSON-рядки, адреси). Обидва принципово не кодуються через
-        // 128-символьну Д7 без руйнування вмісту, тож не є виконуваними
-        // програмами укр-проєкції (як lib/domains/*).
+        // Core4 — декларативна таблиця з колонками san/en/LISP/sym.
+        // lib/yantra.lisp має справжні (визначити ...) і тому належить
+        // до активного виконуваного корпусу, навіть якщо фізична T5M
+        // трійка ще не допущена. Наявність JSON-рядків не робить код даними.
         || rel == "lib/core4.lisp"
-        || rel == "lib/yantra.lisp"
         // core-math і core2 — «опис принципів / профілю», навмисно без
         // виконуваних визначень (так само виключені у remint-drifted-pairs).
         || rel == "lib/core-math.lisp"
@@ -369,6 +367,7 @@ fn actual_active_lib_collection_excludes_only_validated_generated_catalogue() {
         .collect();
     assert!(!selected.contains(&"lib/machine/encoding/admitted-iclass-index.lisp".to_owned()));
     assert!(selected.contains(&"lib/compiler-nucleus.lisp".to_owned()));
+    assert!(selected.contains(&"lib/yantra.lisp".to_owned()));
     assert!(selected.contains(&"lib/machine/dispatch/native-first.lisp".to_owned()));
     assert!(selected.contains(&"lib/machine/layout/pair-x86-64.lisp".to_owned()));
 }
@@ -395,9 +394,10 @@ fn completion_gate_exclusions_are_narrow_and_explicit() {
     assert!(!is_explicit_non_implementation(
         "lib/machine/encoding/admitted-iclass-index-extra.lisp"
     ));
-    // core4 і yantra — декларативні джерела, не виконувані програми.
+    // Core4 — декларативні дані. Yantra визначає виконувані функції,
+    // тому не може бути виключена за назвою або через JSON-рядки.
     assert!(is_explicit_non_implementation("lib/core4.lisp"));
-    assert!(is_explicit_non_implementation("lib/yantra.lisp"));
+    assert!(!is_explicit_non_implementation("lib/yantra.lisp"));
     assert!(is_explicit_non_implementation("lib/core-math.lisp"));
     assert!(is_explicit_non_implementation("lib/core2.lisp"));
     assert!(!is_explicit_non_implementation("lib/core.lisp"));
