@@ -92,4 +92,49 @@ if ! cmp -s "$tmp/expected-mutant" "$tmp/mutant.out"; then
 fi
 printf 'NATIVE_SENS_NEGATIVE id=%s-mutant expected=D1:0 actual_sha256=' "$id"
 sha256sum "$tmp/mutant.out"
+# F4 — committed physical T5M is the authority for the binary witness.
+# F2 source evaluation above does not attest any .sens carrier bytes.
+physical_law="${law%.lisp}.sens"
+physical_mutant="${mutant%.lisp}.sens"
+for physical in "$physical_law" "$physical_mutant"; do
+  if [[ ! -s "$physical" || -L "$physical" ]]; then
+    printf 'REGRESSION id=%s layer=physical-f4 fixture=%s expected=committed-T5M actual=missing-or-invalid\n' "$id" "$physical" >&2
+    exit 1
+  fi
+done
+sha256sum "$physical_law" "$physical_mutant"
+if ! "$cli" --t5m-pair "$law" "$physical_law" --binding-source "$lib" \
+    > "$tmp/paired-positive.out" 2> "$tmp/paired-positive.err"; then
+  printf 'REGRESSION id=%s layer=physical-f4 fixture=%s expected=D1:1 actual=execution-error\n' "$id" "$physical_law" >&2
+  cat "$tmp/paired-positive.err" >&2
+  exit 1
+fi
+if ! cmp -s "$tmp/expected" "$tmp/paired-positive.out"; then
+  printf 'REGRESSION id=%s layer=physical-f4 fixture=%s expected=D1:1 actual=wrong-verdict\n' "$id" "$physical_law" >&2
+  sha256sum "$tmp/expected" "$tmp/paired-positive.out" >&2
+  exit 1
+fi
+if ! "$cli" --t5m-pair "$mutant" "$physical_mutant" --binding-source "$lib" \
+    > "$tmp/paired-mutant.out" 2> "$tmp/paired-mutant.err"; then
+  printf 'REGRESSION id=%s-mutant layer=physical-f4 fixture=%s expected=D1:0 actual=execution-error\n' "$id" "$physical_mutant" >&2
+  cat "$tmp/paired-mutant.err" >&2
+  exit 1
+fi
+if ! cmp -s "$tmp/expected-mutant" "$tmp/paired-mutant.out"; then
+  printf 'REGRESSION id=%s-mutant layer=physical-f4 fixture=%s expected=D1:0 actual=wrong-verdict\n' "$id" "$physical_mutant" >&2
+  sha256sum "$tmp/expected-mutant" "$tmp/paired-mutant.out" >&2
+  exit 1
+fi
+# Same bytes with different Lisp must fail at the exact domain-word identity gate.
+if "$cli" --t5m-pair "$mutant" "$physical_law" --binding-source "$lib" \
+    > "$tmp/paired-foreign.out" 2> "$tmp/paired-foreign.err"; then
+  printf 'REGRESSION id=%s-mutant layer=physical-f4 expected=pair-rejection actual=accepted\n' "$id" >&2
+  exit 1
+fi
+if ! grep -Fq 'T5M_PHYSICAL_PAIR_MISMATCH' "$tmp/paired-foreign.err"; then
+  printf 'REGRESSION id=%s-mutant layer=physical-f4 expected=pair-mismatch actual=other-rejection\n' "$id" >&2
+  cat "$tmp/paired-foreign.err" >&2
+  exit 1
+fi
+printf 'NATIVE_SENS_PHYSICAL_F4_PASS id=%s positive=D1:1 mutant=D1:0 paired_source=EXACT physical=Zig/T5M\n' "$id"
 printf 'NATIVE_SENS_PASS id=%s checks=7 mutant=D1:0 semantic_authority=SENS\n' "$id"
