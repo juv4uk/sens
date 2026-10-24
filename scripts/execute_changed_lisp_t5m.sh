@@ -665,6 +665,37 @@ run_native_t5m_program() {
         return
       fi
     fi
+    if [[ "$file" == "tests/semantic/d11-form-presence-law.lisp" ||
+          "$file" == "tests/semantic/d11-form-presence-mutant.lisp" ]]; then
+      # Справжня самодостатня SENS-програма: визначення + один закон.
+      local form_presence_complete="$dir/d11-form-presence-full.lisp"
+      standalone_physical="$dir/d11-form-presence-full.sens"
+      if ! cat -- lib/d11-form-presence.lisp "$file" > "$form_presence_complete" ||
+         ! timeout "$native_timeout" "$binary" "$form_presence_complete" \
+             >"$dir/d11-form-presence-direct.stdout" 2>"$dir/d11-form-presence-direct.stderr" ||
+         ! timeout "$native_timeout" "$binary" --t5m-mint "$form_presence_complete" "$standalone_physical" \
+             >"$dir/d11-form-presence-mint.stdout" 2>"$dir/d11-form-presence-mint.stderr" ||
+         ! timeout "$native_timeout" "$native_open" open "$standalone_physical" \
+             >"${standalone_physical%.sens}" 2>"$dir/d11-form-presence-open.stderr" ||
+         ! timeout "$native_timeout" "$native_open" verify-view "$standalone_physical" \
+             >"$dir/d11-form-presence-verify.stdout" 2>"$dir/d11-form-presence-verify.stderr"; then
+        echo "::error::D11_FORM_PRESENCE_NATIVE_EXECUTION_FAILED source=$file" >&2
+        for diagnostic in "$dir"/d11-form-presence-*.stderr; do
+          [[ ! -f "$diagnostic" ]] || sed 's/^/D11 FORM-PRESENCE: /' "$diagnostic" >&2
+        done
+        mark_file_failed
+        return
+      fi
+      local form_expected=1
+      [[ "$file" != *-mutant.lisp ]] || form_expected=0
+      printf '%s\n' "$form_expected" > "$dir/d11-form-presence-expected.d1"
+      if ! cmp -s "$dir/native-paired.stdout" "$dir/d11-form-presence-expected.d1" ||
+         ! cmp -s "$dir/d11-form-presence-direct.stdout" "$dir/d11-form-presence-expected.d1"; then
+        echo "::error::D11_FORM_PRESENCE_INCORRECT_D1 source=$file expected=$form_expected" >&2
+        mark_file_failed
+        return
+      fi
+    fi
     if [[ "$file" == "tests/semantic/d11-split-before-last-law.lisp" ||
           "$file" == "tests/semantic/d11-split-before-last-mutant.lisp" ]]; then
       # Повна SENS-програма, а не самостійний D7 виклик без DEFINE.
@@ -1258,6 +1289,10 @@ while IFS= read -r file || [[ -n "$file" ]]; do
     # У DIFF/XOR семантика виключно в сімох чинних DEFINE SENS.
     # Після перенесення законів не можна mint/pair голий Text7 виклик.
     binding_sources=(--binding-source lib/d11-srfi1-lset-diff-intersection.lisp)
+  elif [[ "$file" == "tests/semantic/d11-form-presence-law.lisp" ||
+          "$file" == "tests/semantic/d11-form-presence-mutant.lisp" ]]; then
+    # Мовні DEFINE завантажуються раніше від SENS-свідків; Zig лише переносить біти.
+    binding_sources=(--binding-source lib/d11-form-presence.lisp)
   elif [[ "$file" == "tests/semantic/d11-srfi1-filter-map-law.lisp" ||
           "$file" == "tests/semantic/d11-srfi1-filter-map-mutant.lisp" ]]; then
     # Д11 FILTER-MAP: після зміни окремого свідка Mint/Pair мають
