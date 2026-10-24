@@ -49,6 +49,15 @@ run_native_t5m_program() {
   local committed_view="${committed%.sens}"
   local status=0
   local source_bytes native_timeout
+  local -a paired_runtime_args=() standalone_runtime=("$binary")
+  # D24+ корені «число-*» створюються з Core4; той самий профіль
+  # обов'язковий під час парного та самостійного фізичного виконання.
+  case "$file" in
+    tests/semantic/exact-arithmetic-laws.lisp|tests/semantic/exact-arithmetic-mutant.lisp)
+      paired_runtime_args=(--core4-runtime)
+      standalone_runtime=("$native_open" eval-core4)
+      ;;
+  esac
   source_bytes=$(wc -c < "$file")
   native_timeout=45s
   # Мінімальний свідок може підвантажувати 300+ KiB визначень.
@@ -262,12 +271,24 @@ run_native_t5m_program() {
   fi
 
   # Критичний доказ — реальне парне виконання фізичних Zig-байтів.
-  if timeout "$native_timeout" "$binary" --t5m-pair "$file" "$physical" "${binding_sources[@]}" \
+  if timeout "$native_timeout" "$binary" --t5m-pair "$file" "$physical" "${binding_sources[@]}" "${paired_runtime_args[@]}" \
       >"$dir/native-paired.stdout" 2>"$dir/native-paired.stderr"; then
     if [[ "$file" == "tests/semantic/meta-fc-predicates-d1-mutant.lisp" ]]; then
       echo "::error::T5M_META_FC_MUTANT_ACCEPTED source=$file" >&2
       mark_file_failed
       return
+    fi
+    # Точна арифметика: сам Lisp завершує D1, shell лише порівнює
+    # фактичний SENS-вердикт 1/0 після фізичного Zig/T5M.
+    if [[ "$file" == "tests/semantic/exact-arithmetic-laws.lisp" ||
+          "$file" == "tests/semantic/exact-arithmetic-mutant.lisp" ]]; then
+      local expected_exact_d1=1
+      [[ "$file" != *-mutant.lisp ]] || expected_exact_d1=0
+      if [[ "$(cat "$dir/native-paired.stdout")" != "$expected_exact_d1" ]]; then
+        echo "::error::T5M_EXACT_ARITHMETIC_WRONG_D1 source=$file layer=sens-paired expected=$expected_exact_d1 actual=$(cat "$dir/native-paired.stdout")" >&2
+        mark_file_failed
+        return
+      fi
     fi
     # Д11-позитив: точний SENS D1:YES, не успіх довільної відповіді.
     if [[ "$file" == "tests/semantic/meta-fc-predicates-d1-law.lisp" ]]; then
@@ -480,7 +501,7 @@ run_native_t5m_program() {
         return
       fi
     fi
-    if timeout "$native_timeout" "$binary" "$standalone_physical" \
+    if timeout "$native_timeout" "${standalone_runtime[@]}" "$standalone_physical" \
         >"$dir/native-standalone.stdout" 2>"$dir/native-standalone.stderr"; then
       if ! cmp -s "$dir/native-standalone.stdout" "$dir/native-paired.stdout"; then
         echo "::error::T5M_NATIVE_EXECUTION_OUTPUT_DRIFT source=$file" >&2
