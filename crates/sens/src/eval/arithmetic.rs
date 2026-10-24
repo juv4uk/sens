@@ -1,4 +1,4 @@
-//! Current exact D24+ mathematical operations. D1–D10 words, host numeric
+//! Current exact D12+ mathematical operations. D1–D10 words, host numeric
 //! literals, legacy Number/Rational and unqualified BinaryNumber are never
 //! admitted arithmetic operands. The legacy value projection helper remains
 //! only for independent non-mathematical readers (e.g. JSON).
@@ -30,11 +30,11 @@ fn division_error(span: Span) -> LanguageError {
     )
 }
 
-/// Only explicit numeric D24/D48/... values admit Core mathematical operations.
+/// Only explicit numeric D12/D24/D48/... values admit Core mathematical operations.
 /// Reader literals and host/Rust Number remain representable as data, not math.
 fn require_math_domain(values: &[Value], span: Span) -> Result<(), LanguageError> {
     const REASON: &str =
-        "math requires explicit D24+ operands; D1-D10 bit words and unqualified numbers are not arithmetic values";
+        "math requires explicit D12+ operands; D1-D10 bit words and unqualified numbers are not arithmetic values";
     if values.is_empty() {
         return Err(LanguageError::new(ErrorKind::Type, REASON, span));
     }
@@ -48,7 +48,7 @@ fn require_math_domain(values: &[Value], span: Span) -> Result<(), LanguageError
         let kind = match rejected {
             Value::Number(..) => "legacy-number",
             Value::Rational(..) => "unqualified-rational",
-            Value::BinaryNumber(..) => "non-D24-binary",
+            Value::BinaryNumber(..) => "non-D12-binary",
             Value::DomainIdentity(..) => "domain-word",
             Value::Nil => "structural-empty",
             _ => "non-numeric",
@@ -97,7 +97,7 @@ fn check_domain_result_limit(
     Ok(())
 }
 
-/// No literal/legacy fallback: one admitted D24+ arithmetic execution path.
+/// No literal/legacy fallback: one admitted D12+ arithmetic execution path.
 pub(super) fn arithmetic_on_values(
     operator: &str,
     values: &[Value],
@@ -121,7 +121,7 @@ pub(super) fn arithmetic_on_values(
     Ok(result)
 }
 
-/// D24+ reciprocal and exact rational division, never legacy float/Rational.
+/// D12+ reciprocal and exact rational division, never legacy float/Rational.
 pub(super) fn division_on_values(
     values: &[Value],
     argument_count: usize,
@@ -179,7 +179,7 @@ pub(super) fn division_on_values(
     Ok(result)
 }
 
-/// Numeric order is D24+ only. D3 EQ remains a distinct identity law.
+/// Numeric order is D12+ only. D3 EQ remains a distinct identity law.
 pub(super) fn comparison_on_values(
     operator: &str,
     values: &[Value],
@@ -289,6 +289,77 @@ mod qualified_numeric_domain_value_tests {
             BinaryNumber::from_numeric_domain_bits(width, &bits)
                 .expect("exact numeric domain bits"),
         )
+    }
+
+    #[test]
+    fn core_runtime_d12_signed_arithmetic_and_ratio_are_exact() {
+        let env = Environment::root();
+        let mut maximum_bits = vec![1u8; 12];
+        maximum_bits[0] = 0;
+        let maximum = in_domain(12, maximum_bits.clone());
+
+        let mut minimum_bits = vec![0u8; 12];
+        minimum_bits[0] = 1;
+        let minimum = in_domain(12, minimum_bits);
+
+        let mut one_bits = vec![0u8; 12];
+        one_bits[11] = 1;
+        let one = in_domain(12, one_bits);
+        let zero = in_domain(12, vec![0u8; 12]);
+        let three = in_domain(12, {
+            let mut bits = vec![0u8; 12];
+            bits[10] = 1;
+            bits[11] = 1;
+            bits
+        });
+
+        let retained = arithmetic_on_values(
+            "+", &[maximum.clone(), zero.clone()], &env, Span::default()
+        ).expect("D12 non-overflow result stays in D12");
+        let Value::BinaryNumber(retained) = retained else {
+            panic!("D12 integer result remains a qualified binary word");
+        };
+        assert_eq!(retained.numeric_domain_width(), Some(12));
+        assert_eq!(retained.exact_numeric_domain_bits(), Some(maximum_bits));
+        assert_eq!(retained.to_decimal_string(), "2047");
+
+        let positive_overflow = arithmetic_on_values(
+            "+", &[maximum.clone(), one.clone()], &env, Span::default()
+        ).expect("2047 + 1 widens exactly");
+        let Value::BinaryNumber(positive_overflow) = positive_overflow else {
+            panic!("positive overflow is an exact integer");
+        };
+        assert_eq!(positive_overflow.numeric_domain_width(), Some(24));
+        assert_eq!(positive_overflow.to_decimal_string(), "2048");
+
+        let negative_overflow = arithmetic_on_values(
+            "-", &[minimum, one.clone()], &env, Span::default()
+        ).expect("-2048 - 1 widens exactly");
+        let Value::BinaryNumber(negative_overflow) = negative_overflow else {
+            panic!("negative overflow is an exact integer");
+        };
+        assert_eq!(negative_overflow.numeric_domain_width(), Some(24));
+        assert_eq!(negative_overflow.to_decimal_string(), "-2049");
+
+        let ratio = division_on_values(
+            &[one.clone(), three], 2, &env, Span::default()
+        ).expect("D12 rational division remains exact");
+        let Value::NumericComposition(ratio_parts) = &ratio else {
+            panic!("1/3 is the exact canonical ratio composition");
+        };
+        assert_eq!(ratio_parts.domain_width(), 12);
+        assert_eq!(ratio.to_string(), "1/3");
+
+        let mixed = arithmetic_on_values(
+            "+", &[maximum.clone(), in_domain(24, vec![0u8; 24])],
+            &env, Span::default()
+        ).expect_err("D12 and D24 must not be coerced");
+        assert_eq!(mixed.kind, ErrorKind::Type);
+
+        let division_by_zero = division_on_values(
+            &[one, zero], 2, &env, Span::default()
+        ).expect_err("D12 division by zero must fail");
+        assert_eq!(division_by_zero.kind, ErrorKind::DivisionByZero);
     }
 
     #[test]
