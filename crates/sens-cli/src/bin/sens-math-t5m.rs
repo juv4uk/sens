@@ -295,8 +295,12 @@ mod paired {
                 let source_path = Path::new(env!("CARGO_MANIFEST_DIR"))
                     .join("../../tests/semantic")
                     .join(fixture);
-                let text = std::fs::read_to_string(&source_path)
-                    .unwrap_or_else(|error| panic!("id={id} fixture={} error={error}", source_path.display()));
+                let text = std::fs::read_to_string(&source_path).unwrap_or_else(|error| {
+                    panic!(
+                        "id={id} fixture={} error={error}",
+                        source_path.display()
+                    )
+                });
                 let admitted = qualify(&text)
                     .unwrap_or_else(|error| panic!("id={id} layer=SENS-source {error}"));
                 let words = expected_words(&admitted)
