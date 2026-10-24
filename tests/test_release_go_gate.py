@@ -90,7 +90,7 @@ class GoGateTests(unittest.TestCase):
 
     def test_structural_only_does_not_hide_a_red_corridor(self) -> None:
         self._all_receipts()
-        self._write("check_rust_isolated_only_zig.py", 1, "RED")
+        self._write("check_rust_isolated_only_zig.sh", 1, "RED")
         proc = subprocess.run(
             [sys.executable, str(CHECKER), str(self.root), "--structural-only"],
             capture_output=True, text=True, check=False,
@@ -101,7 +101,7 @@ class GoGateTests(unittest.TestCase):
 
     def test_one_red_is_no_go(self) -> None:
         self._all_receipts()
-        self._write("check_rust_isolated_only_zig.py", 1, "RED")
+        self._write("check_rust_isolated_only_zig.sh", 1, "RED")
         proc = subprocess.run([sys.executable, str(CHECKER), str(self.root)],
                               capture_output=True, text=True)
         self.assertEqual(proc.returncode, 1)
