@@ -541,6 +541,34 @@ run_native_t5m_program() {
         return
       fi
     fi
+    if [[ "$file" == "tests/semantic/d11-frequencies-key-order-law.lisp" ||
+          "$file" == "tests/semantic/d11-frequencies-key-order-mutant.lisp" ]]; then
+      # Повний standalone носій мусить містити ті самі SENS DEFINE,
+      # що були передані paired evaluator; source-only файл ними не володіє.
+      local frequencies_complete_source="$dir/d11-frequencies-full.lisp"
+      standalone_physical="$dir/d11-frequencies-full.sens"
+      if ! cat -- lib/d11-clojure-group-by.lisp lib/d11-clojure-frequencies-unary.lisp "$file" > "$frequencies_complete_source" ||
+         ! timeout "$native_timeout" "$binary" --t5m-mint "$frequencies_complete_source" "$standalone_physical" \
+             >"$dir/d11-frequencies-mint.stdout" 2>"$dir/d11-frequencies-mint.stderr" ||
+         ! timeout "$native_timeout" "$native_open" open "$standalone_physical" \
+             >"$dir/d11-frequencies-full.view" 2>"$dir/d11-frequencies-open.stderr" ||
+         ! timeout "$native_timeout" "$native_open" verify-view "$standalone_physical" \
+             >"$dir/d11-frequencies-verify.stdout" 2>"$dir/d11-frequencies-verify.stderr"; then
+        echo "::error::D11_FREQUENCIES_PHYSICAL_STANDALONE_MINT_FAILED source=$file layer=zig-t5m" >&2
+        for diagnostic in "$dir"/d11-frequencies-*.stderr; do
+          [[ ! -f "$diagnostic" ]] || sed 's/^/D11 FREQUENCIES: /' "$diagnostic" >&2
+        done
+        mark_file_failed
+        return
+      fi
+      local expected_frequencies_d1=1
+      [[ "$file" != *-mutant.lisp ]] || expected_frequencies_d1=0
+      if [[ "$(cat "$dir/native-paired.stdout")" != "$expected_frequencies_d1" ]]; then
+        echo "::error::D11_FREQUENCIES_WRONG_PAIRED_VERDICT source=$file expected=$expected_frequencies_d1 actual=$(cat "$dir/native-paired.stdout")" >&2
+        mark_file_failed
+        return
+      fi
+    fi
     if [[ "$file" == "tests/semantic/d11-tree-equal-by-test-law.lisp" ||
           "$file" == "tests/semantic/d11-tree-equal-by-test-mutant.lisp" ]]; then
       # Фізична самодостатність: одна й та сама SENS-бібліотека + SENS-свідок.
