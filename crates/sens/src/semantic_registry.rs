@@ -343,6 +343,12 @@ pub(crate) fn selector_ukr_for_exact(identity: DomainIdentity) -> Option<&'stati
 ///
 /// The table is generated from Lisp-owned projection data and may only supply
 /// a mechanism to an identity already ratified by #3305/#3331.
+/// Перелік вже ратифікованих власником SENS-визначень D5.
+/// У цьому переліку немає нового допуску: лише наявні імена проєкції.
+pub(crate) fn d5_lisp_definition_names() -> impl Iterator<Item = &'static str> {
+    D5_DEFINITION_BINDINGS.iter().map(|row| row.name)
+}
+
 pub(crate) fn d5_binding_identity_for_definition(name: &str) -> Option<CoreDomainIdentity> {
     D5_DEFINITION_BINDINGS
         .iter()
