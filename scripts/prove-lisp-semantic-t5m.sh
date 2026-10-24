@@ -1334,6 +1334,23 @@ run_case run_law d5-d12-numberp-ratio tests/semantic/d5-d12-numberp-law.lisp 1
 run_case run_law d5-d12-zerop-computed-zero tests/semantic/d5-d12-zerop-law.lisp 1
 run_case run_law d5-numberp-text-is-not-number tests/semantic/d5-numberp-nonnumber-law.lisp 0
 sha256sum tests/semantic/d5-d12-numberp-law.lisp tests/semantic/d5-d12-zerop-law.lisp tests/semantic/d5-numberp-nonnumber-law.lisp > "$evidence/d5-d12-number-predicate-inputs.sha256"
+# Д6:111110 INTEGERP і Д6:111111 RATIONALP: тільки SENS семантика чисел.
+# Цей загальний маршрут перевіряє предикати; фізичну D12-ширину доводить
+# окремий парний D12/T5M тест, а не розмір літерала у цих формах.
+run_case run_law d6-exact-integer-rational tests/semantic/d6-d12-integer-rational-law.lisp 1 core4
+run_case run_law d6-ratio-normalizes-integer tests/semantic/d6-d12-ratio-normalizes-integer-law.lisp 1 core4
+run_case run_law d6-rationalp-text-mutant tests/semantic/d6-rationalp-text-negative.lisp 0 core4
+run_case run_law d6-rationalp-list-mutant tests/semantic/d6-rationalp-list-negative.lisp 0 core4
+run_case run_law d6-integerp-fraction-mutant tests/semantic/d6-integerp-ratio-mutant.lisp 0 core4
+run_case run_law d6-integerp-text-mutant tests/semantic/d6-integerp-text-negative.lisp 0 core4
+sha256sum lib/core4.lisp lib/core4-parts/core4-d6b.lisp \
+  tests/semantic/d6-d12-integer-rational-law.lisp \
+  tests/semantic/d6-d12-ratio-normalizes-integer-law.lisp \
+  tests/semantic/d6-rationalp-text-negative.lisp \
+  tests/semantic/d6-rationalp-list-negative.lisp \
+  tests/semantic/d6-integerp-ratio-mutant.lisp \
+  tests/semantic/d6-integerp-text-negative.lisp > "$evidence/d6-exact-number-predicate-inputs.sha256"
+
 # D24+ арифметика використовує ті самі справжні визначення Core4 на всіх
 # трьох маршрутах; позитив і мутант доводять точні D1:1 / D1:0.
 run_case run_law exact-arithmetic-positive tests/semantic/exact-arithmetic-laws.lisp 1 core4
