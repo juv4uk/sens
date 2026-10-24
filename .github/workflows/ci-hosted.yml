@@ -67,6 +67,8 @@ jobs:
         run: |
           python3 scripts/check-domain-surfaces-d1-d4.py
           python3 scripts/check-d9-definition-bindings.py
+          python3 scripts/check-d6-definition-bindings.py
+          python3 scripts/check-d10-definition-bindings.py
           cargo test --locked -p sens --test domain_ladder --test domain_ladder_only_kernel --test domain_ast_value_identity
       - name: Verify migrated user demo sources run through canonical Core
         run: cargo test --locked -p sens --test exact_domain_migrated_demos
