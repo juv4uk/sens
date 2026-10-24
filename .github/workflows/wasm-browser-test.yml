@@ -31,3 +31,27 @@ jobs:
 
       - name: Run WASM tests in headless Firefox
         run: wasm-pack test --headless --firefox crates/sens-wasm
+
+      # Першопричина: усе вище тестує Rust-КРЕЙТ, а не ВІДВАНТАЖЕНУ сторінку.
+      # Крейт сам зізнається, що не перетинає межу wasm-bindgen/JavaScript,
+      # а жоден тест не доводив, що портативний REPL ВИКОНУЄ Сенс. Тож job
+      # «WASM Browser Test» міг бути зеленим на REPL, який лише вантажиться.
+      # Тепер збираємо справжній портативний HTML і вимагаємо виконання.
+      - name: Set up Node
+        uses: actions/setup-node@1d0ff469bff94528cc1f4574573e1b86c2c9dc7d # v4
+        with:
+          node-version: "20"
+
+      - name: Build the shipped portable HTML
+        shell: bash
+        run: |
+          set -euo pipefail
+          wasm-pack build crates/sens-wasm --target web --out-dir ../../public/wasm --release
+          node scripts/make-portable-web.mjs public/my-lisp-cli-web.html sens-cli-web.html
+          test -s sens-cli-web.html
+
+      - name: Install Playwright chromium
+        run: npx --yes playwright@1.47.2 install --with-deps chromium
+
+      - name: Assert the shipped REPL EXECUTES SENS
+        run: node scripts/verify-web-repl-execution.mjs sens-cli-web.html
