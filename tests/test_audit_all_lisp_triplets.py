@@ -270,6 +270,51 @@ class AllLispTripletCensusTests(unittest.TestCase):
         self.assertIn("old-call", str(report["blocked_sample"]))
         self.assertEqual(report["potential_program_missing_sens"], 1)
 
+    def test_invalid_callable_source_cannot_report_full_t5m_proof(self):
+        # Перевіряємо політику обліку, не семантику SENS: навіть
+        # коректна за формою квитанція кодека не легалізує old-call.
+        import hashlib
+
+        source = self.put("lib/проба.lisp",
+                          "(визначити проба (old-call так))\n")
+        physical = self.put("lib/проба.sens", b"mechanical-receipt-fixture")
+        view = self.put("lib/проба", "0\n")
+
+        def accepted_mechanical_receipt(actual_source, actual_physical, actual_view):
+            files = (actual_source, actual_physical, actual_view)
+            source_hash, physical_hash, view_hash = (
+                hashlib.sha256(file.read_bytes()).hexdigest() for file in files
+            )
+            return {
+                "schema": "sens-uk-t5-view-bounded-proof/v1",
+                "status": "BOUNDED_TRIPLE_PARITY_ONLY_NOT_RELEASE_ADMISSION",
+                "canonical_uk_roundtrip": True,
+                "program_identity_roundtrip": True,
+                "canonical_view_roundtrip": True,
+                "physical_codec": "t5m",
+                "physical_T5_roundtrip": False,
+                "physical_T5M_roundtrip": True,
+                "source": str(actual_source),
+                "sens": str(actual_physical),
+                "view": str(actual_view),
+                "source_sha256": source_hash,
+                "physical_sha256": physical_hash,
+                "view_sha256": view_hash,
+                "typed_word_sha256": "0" * 64,
+                "typed_word_count": 1,
+                "runtime_oracle_admitted_by_this_audit": False,
+                "old_originals_migrated_by_this_audit": 0,
+            }
+
+        report = scan(self.root, verify_bounded=True,
+                      validator=accepted_mechanical_receipt)
+        self.assertEqual(report["bounded_verified"], 1)
+        self.assertFalse(report["all_bounded_reverse_verified"])
+        self.assertFalse(report["all_current_t5m_bounded_reverse_verified"])
+        self.assertEqual(report["invalid_program_source_projection"], 1)
+        self.assertIn("old-call", str(report["blocked_sample"]))
+        self.assertFalse(report["release_ready"])
+
     def test_current_t5m_triplet_is_counted_only_after_real_reverse_proof(self):
         from sens_t5_t5m_codec import encode_t5m_projection
         fixture = ROOT / "tests/semantic/native-t5"

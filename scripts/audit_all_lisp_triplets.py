@@ -158,6 +158,7 @@ def scan(root: Path, *, verify_bounded: bool = False, validator=None, limit: int
                   comment_only_style_warnings=0,
                   comment_only_with_physical=0,
                   program_style_warnings=0,
+                  invalid_program_source_projection=0,
                   bounded_verified_t5m=0, bounded_verified_legacy_t5=0)
     blocked: list[dict[str, str]] = []
 
@@ -198,6 +199,7 @@ def scan(root: Path, *, verify_bounded: bool = False, validator=None, limit: int
             if source_problem is None:
                 counts["program_style_warnings"] += 1
             else:
+                counts["invalid_program_source_projection"] += 1
                 reject(relative, "виконувана Lisp-проєкція: " + source_problem)
         binary_disguised = misnamed_binary_d2(source)
         if binary_disguised:
@@ -252,6 +254,7 @@ def scan(root: Path, *, verify_bounded: bool = False, validator=None, limit: int
         # whitespace and quoted external protocol data are not executable
         # program identity; do not let them veto proved roundtrips.
         and counts["misnamed_binary_lisp"] == 0
+        and counts["invalid_program_source_projection"] == 0
         # Відхилений .lisp (зокрема симлінк) не може зникнути
         # зі знаменника й дати хибний загальний PASS.
         and counts["undecidable_lisp_files"] == 0
