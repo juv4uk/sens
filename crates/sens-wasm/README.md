@@ -5,7 +5,7 @@ WASM-прив'язка тримає сталу `Session` між викликам
 ## Surface API
 
 ```javascript
-wasm.set_surface("uk");
+wasm.set_surface("ук");
 wasm.set_surface("ukr");
 wasm.set_surface("en");
 wasm.set_surface("sa");
