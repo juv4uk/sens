@@ -75,7 +75,7 @@ fn all_representable_non_numeric_domain_words_are_rejected_by_math() {
         }
         for source in ["(001110 left)", "(001111 left)"] {
             let error = exact_call(source, &mut session)
-                .expect_err("D6 successor/predecessor requires a D24+ operand");
+                .expect_err("D6 successor/predecessor requires a D12+ operand");
             assert_eq!(
                 error.kind,
                 ErrorKind::Type,
@@ -83,7 +83,7 @@ fn all_representable_non_numeric_domain_words_are_rejected_by_math() {
                 identity.width()
             );
             assert!(
-                error.message.contains("D24+"),
+                error.message.contains("D12+"),
                 "D{}: {error}",
                 identity.width()
             );
@@ -301,7 +301,7 @@ fn lisp_owned_d24_length_fold_uses_ratified_d6_add1_without_number_literals() {
     let err = eval_program("(довжина-д24-до items seed)", &mut session)
         .expect_err("unqualified zero must not enter D6 ADD1");
     assert_eq!(err.kind, ErrorKind::Type);
-    assert!(err.message.contains("D24+"), "{err}");
+    assert!(err.message.contains("D12+"), "{err}");
 }
 
 /// A second Core4 migration slice: nth's old numeric (01011 i 1)
@@ -351,7 +351,7 @@ fn lisp_owned_d24_nth_uses_d3_identity_and_d6_sub1_without_number_literals() {
     let error = eval_program("(елемент-д24 i xs zero)", &mut session)
         .expect_err("unqualified index refused by exact D6 SUB1");
     assert_eq!(error.kind, ErrorKind::Type);
-    assert!(error.message.contains("D24+"), "{error}");
+    assert!(error.message.contains("D12+"), "{error}");
 }
 
 #[test]
