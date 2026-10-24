@@ -369,6 +369,19 @@ jobs:
               echo "REMINT_DATA_ONLY source=$f classification=SCHEMA_INVENTORY"
               continue
             fi
+            # Ці два машинні профілі — таблиці механізмів, не SENS-виклики.
+            # Як і суцільний облік, звіряємо шлях ТА чинну кореневу схему.
+            # Якщо їхній вміст зміниться на Lisp-програму, її не пропускаємо.
+            machine_schema=""
+            case "$f" in
+              lib/machine/intel-core-i5-6400.lisp) machine_schema="machine-profile-1" ;;
+              lib/machine/profile/current-domain-x86-64.lisp) machine_schema="machine-domain-profile-3" ;;
+            esac
+            if [[ -n "$machine_schema" && ! -L "$f" ]] &&
+               LC_ALL=C grep -Eq "^[[:space:]]*\\($machine_schema([[:space:]]|$)" -- "$f"; then
+              echo "REMINT_DATA_ONLY source=$f classification=EXACT_SCHEMA:$machine_schema"
+              continue
+            fi
             if [[ ! -L "$f" ]] &&
                ! LC_ALL=C grep -Eq '^[[:space:]]*[^[:space:];]' -- "$f"; then
               echo "REMINT_DATA_ONLY source=$f classification=COMMENT_ONLY"
