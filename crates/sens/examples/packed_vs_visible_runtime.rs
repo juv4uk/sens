@@ -10,6 +10,12 @@ use std::{hint::black_box, time::Instant};
 
 const SCHEMA: &str = "sens-packed-visible-runtime/v1";
 
+// Keep the benchmark's session contract in one place so a focused test can
+// detect accidental Lisp macro bootstrap in the measured D1/D3 lanes.
+fn benchmark_session() -> Session {
+    Session::bare()
+}
+
 fn fingerprint(value: &Value, output: &[String]) -> String {
     format!("{value:?}|{output:?}")
 }
@@ -109,9 +115,9 @@ fn benchmark(case: &str, source: &str, forms: usize, samples: usize) -> Result<(
 
     // Independent output parity must hold BEFORE any measured sample. Evaluated
     // results may share empty-list spelling, so distinguish exact D1 here.
-    let left = eval_parsed_expressions(&from_text, &mut Session::default())
+    let left = eval_parsed_expressions(&from_text, &mut benchmark_session())
         .map_err(|e| format!("{case}: visible eval: {e:?}"))?;
-    let right = eval_parsed_expressions(&from_bytes, &mut Session::default())
+    let right = eval_parsed_expressions(&from_bytes, &mut benchmark_session())
         .map_err(|e| format!("{case}: physical eval: {e:?}"))?;
     if fingerprint(&left.value, &left.output) != fingerprint(&right.value, &right.output) {
         return Err(format!("{case}: mismatched program result: BLOCK"));
@@ -126,7 +132,7 @@ fn benchmark(case: &str, source: &str, forms: usize, samples: usize) -> Result<(
 
     let iterations = (4096 / forms).clamp(16, 512);
     let lowered = lower_program(&from_text);
-    let mut already_lowered_session = Session::default();
+    let mut already_lowered_session = benchmark_session();
     let eval_only = measured_baseline(
         || {
             let out = eval_lowered_expressions(black_box(&lowered), &mut already_lowered_session)
@@ -137,8 +143,8 @@ fn benchmark(case: &str, source: &str, forms: usize, samples: usize) -> Result<(
         samples,
     );
 
-    let mut session_text = Session::default();
-    let mut session_bytes = Session::default();
+    let mut session_text = benchmark_session();
+    let mut session_bytes = benchmark_session();
     let (warm_a, warm_b) = paired(
         || {
             let ast = parse_canonical_binary(black_box(&text)).expect("preflighted visible D2");
@@ -173,14 +179,14 @@ fn benchmark(case: &str, source: &str, forms: usize, samples: usize) -> Result<(
 
     let (cold_a, cold_b) = paired(
         || {
-            let mut session = Session::default();
+            let mut session = benchmark_session();
             let ast = parse_canonical_binary(black_box(&text)).expect("preflighted visible D2");
             let out =
                 eval_parsed_expressions(&ast, &mut session).expect("preflighted visible execution");
             black_box(out.value);
         },
         || {
-            let mut session = Session::default();
+            let mut session = benchmark_session();
             let ast = parse_canonical_packed_words(black_box(&physical), black_box(&widths))
                 .expect("preflighted packed D2");
             let out =
@@ -231,5 +237,25 @@ fn main() {
             eprintln!("BENCHMARK BLOCKED: {err}");
             std::process::exit(2);
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn benchmark_session_skips_macro_bootstrap_and_evaluates_d3() {
+        let mut session = benchmark_session();
+        assert!(
+            session.environment.get("defmacro").is_none(),
+            "D1/D3 ingest benchmark must not time Lisp macro bootstrap"
+        );
+        let forms =
+            parse_canonical_binary("10 001 00 000 01").expect("exact D3 QUOTE fixture");
+        let result = eval_parsed_expressions(&forms, &mut session)
+            .expect("bare benchmark Session evaluates exact D3 QUOTE");
+        assert!(matches!(result.value, Value::Nil));
+        assert!(result.output.is_empty());
     }
 }
