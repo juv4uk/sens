@@ -258,6 +258,9 @@ jobs:
                   # Ці дві допоміжні Lisp-бібліотеки виконуються лише в бандлі мовного свідка.
                   "tests/fixtures/witness-runner.lisp",
                   "tests/fixtures/epistemic-authority-witness.lisp",
+                  # Вхід F6 producer для Rust producer→consumer інтеграційного тесту,
+                  # не окремий мовний закон для самостійного виконання.
+                  "tests/fixtures/wsm-fs-record-producer.lisp",
               }:
                   print(f"T5M_DEPENDENT_FIXTURE path={name} status=NOT_STANDALONE")
                   continue

@@ -9,7 +9,18 @@ repo_root="$(git rev-parse --show-toplevel)"
 python3 "$repo_root/scripts/guard_ukr_lisp_keyboard.py" --staged
 # Охоронець повторного визначення застосовується лише до змін Lisp-проекції.
 # Rust/Zig та інші зміни без staged .lisp не є його вхідними даними.
-mapfile -t staged_lisp < <(git diff --cached --name-only --diff-filter=ACMR -- '*.lisp')
+# Вирівняти вхід гачка з областю guard-domain-function-reuse.py:
+# мовні закони tests/semantic і бібліотечні Lisp-файли перевіряються;
+# fixtures, таблиці та згенеровані фрагменти до його області не входять.
+mapfile -t staged_lisp < <(
+    git -c core.quotepath=false diff --cached --name-only --diff-filter=ACMR -- '*.lisp' |
+    awk '
+        /^tests\// && !/^tests\/semantic\// { next }
+        /^lib\/(generated|surface|domains|machine|core4-parts)\// { next }
+        /^(vendor|benchmarks)\// { next }
+        { print }
+    '
+)
 if ((${#staged_lisp[@]} > 0)); then
     # Перевіряти лише нові DEFINE відносно HEAD: наявні визначення в
     # зміненому файлі не є новою роботою й не мають повторно блокувати коміт.
