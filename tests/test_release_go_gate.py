@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import importlib.util
+import shlex
 import subprocess
 import sys
 import tempfile
@@ -33,8 +34,17 @@ class GoGateTests(unittest.TestCase):
         self.tmp.cleanup()
 
     def _write(self, name: str, rc: int, msg: str) -> None:
-        (self.root / "scripts" / name).write_text(
-            f"import sys\nprint({msg!r})\nsys.exit({rc})\n", encoding="utf-8")
+        path = self.root / "scripts" / name
+        if path.suffix == ".sh":
+            path.write_text(
+                "#!/usr/bin/env bash\n"
+                f"printf '%s\\n' {shlex.quote(msg)}\n"
+                f"exit {rc}\n",
+                encoding="utf-8",
+            )
+        else:
+            path.write_text(
+                f"import sys\nprint({msg!r})\nsys.exit({rc})\n", encoding="utf-8")
 
     def _all_receipts(self) -> None:
         # The existing checkers emit these independently named success tokens.
@@ -49,6 +59,21 @@ class GoGateTests(unittest.TestCase):
             [sys.executable, str(CHECKER), str(self.root)],
             capture_output=True, text=True, check=False,
         )
+
+    def test_shell_gate_runs_with_bash(self) -> None:
+        script = "scripts/check_rust_isolated_only_zig.sh"
+        marker = self.module.SUCCESS_MARKERS[script]
+        checker = self.root / script
+        checker.write_text(
+            "#!/usr/bin/env bash\n"
+            "set -euo pipefail\n"
+            "[[ \"${BASH_VERSION:-}\" != \"\" ]]\n"
+            f"printf '%s\\n' {marker!r}\n",
+            encoding="utf-8",
+        )
+        verdict, note = self.module.run_gate(self.root, script)
+        self.assertEqual(verdict, "GO", note)
+        self.assertIn(marker, note)
 
     def test_all_structural_checks_green_is_not_an_artificial_red(self) -> None:
         self._all_receipts()

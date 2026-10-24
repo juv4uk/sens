@@ -78,8 +78,9 @@ def run_gate(root: Path, script: str) -> tuple[str, str]:
     if (root / "scripts").is_symlink() or path.is_symlink() or not path.is_file():
         return "UNVERIFIED", "missing regular checker script"
     marker = SUCCESS_MARKERS[script]
+    command = ["bash", str(path), str(root)] if path.suffix == ".sh" else [sys.executable, str(path), str(root)]
     try:
-        proc = subprocess.run([sys.executable, str(path), str(root)],
+        proc = subprocess.run(command,
                               capture_output=True, text=True, timeout=120)
     except (OSError, subprocess.TimeoutExpired, UnicodeError) as exc:
         return "UNVERIFIED", f"could not run: {exc}"
