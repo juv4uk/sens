@@ -92,19 +92,19 @@ fn try_eval(src: &str, session: &mut Session) -> Result<String, String> {
 fn bench(
     src_a: &str,
     src_b: &str,
-    sa: &mut Session,
-    sb: &mut Session,
     samples: usize,
     target_ms: f64,
 ) -> (f64, f64, f64, f64) {
     let fa = parse(src_a).unwrap();
     let fb = parse(src_b).unwrap();
+    // Калібрування має власне середовище: прогрів не змінює стан замірів.
+    let mut calibration = fresh();
     // Калібрування на SENS-формі.
     let mut iters = 1usize;
     loop {
         let t = Instant::now();
         for _ in 0..iters {
-            let result = eval_parsed_expressions(&fb, sb)
+            let result = eval_parsed_expressions(&fb, &mut calibration)
                 .unwrap_or_else(|error| panic!("SENS calibration failed: {error}"));
             black_box(result.value);
         }
@@ -117,6 +117,10 @@ fn bench(
         }
         iters *= 4;
     }
+    // Пошук аргументів і калібрування могли змінити середовище.
+    // Обидві серії отримують незалежні чисті сесії лише після калібрування.
+    let mut sa = fresh();
+    let mut sb = fresh();
     let (mut xa, mut xb, mut ratios) = (Vec::new(), Vec::new(), Vec::new());
     for s in 0..samples {
         let run = |f: &[_], sess: &mut Session| {
@@ -227,8 +231,6 @@ fn main() {
         let (en_ns, sens_ns, rmin, rmax) = bench(
             &format!("({en} {a})"),
             &sens_src,
-            &mut sa,
-            &mut sb,
             samples,
             target_ms,
         );
@@ -241,5 +243,21 @@ fn main() {
                 ""
             }
         );
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::bench;
+
+    #[test]
+    fn окремі_сесії_бенчмарка_вимірюють_обидві_чисті_форми() {
+        // Старий інтерфейс приймав уже змінені пробами Session.
+        // Тепер виклик не може передати забруднену сесію до замірів.
+        let (en_ns, sens_ns, ratio_min, ratio_max) =
+            bench("(quote a)", "(quote a)", 3, 1.0);
+        for value in [en_ns, sens_ns, ratio_min, ratio_max] {
+            assert!(value.is_finite(), "benchmark emitted non-finite timing: {value}");
+        }
     }
 }
