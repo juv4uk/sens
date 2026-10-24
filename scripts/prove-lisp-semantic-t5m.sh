@@ -967,6 +967,18 @@ sha256sum lib/d11-family-selection.lisp lib/d11-srfi1-alist-protocol.lisp \
   tests/semantic/d11-families-benchmark-mutant.lisp > "$evidence/d11-families-inputs.sha256"
 run_case run_law d11-families-benchmark-positive "$d11_families_law" 1
 run_case run_law d11-families-benchmark-mutant "$d11_families_mutant" 0
+# Д11 відбір: кожний із трьох готових SENS-свідків відхиляє атом
+# саме D3 Type через ПЕРШЕ. Domain-not-callable від (ні) вже заборонений.
+d11_family_filter_bad="$evidence/d11-family-selection-filter-bad.lisp"
+d11_family_partition_bad="$evidence/d11-family-selection-partition-bad.lisp"
+d11_family_reject_bad="$evidence/d11-family-selection-reject-bad.lisp"
+cat -- lib/d11-family-selection.lisp tests/fixtures/d11-family-selection-filter-improper-tail-must-error.lisp > "$d11_family_filter_bad"
+cat -- lib/d11-family-selection.lisp tests/fixtures/d11-family-selection-partition-improper-tail-must-error.lisp > "$d11_family_partition_bad"
+cat -- lib/d11-family-selection.lisp tests/fixtures/d11-family-selection-reject-atom-must-error.lisp > "$d11_family_reject_bad"
+run_case run_type_rejection d11-family-selection-filter-improper-tail-type "$d11_family_filter_bad" 'car expects a non-empty list'
+run_case run_type_rejection d11-family-selection-partition-improper-tail-type "$d11_family_partition_bad" 'car expects a non-empty list'
+run_case run_type_rejection d11-family-selection-reject-atom-type "$d11_family_reject_bad" 'car expects a non-empty list'
+sha256sum lib/d11-family-selection.lisp tests/fixtures/d11-family-selection-*.lisp > "$evidence/d11-family-selection-type-inputs.sha256"
 # Вимірюємо ТІЛЬКИ справжній фізичний SENS, після доведеного D1 закону.
 # Це p50 цілого процесу на shared runner, не ізольований час eval.
 # Сирі зразки + SHA залишаються в артефакті CI; червоне не маскуємо.
