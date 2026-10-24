@@ -260,13 +260,20 @@ jobs:
         run: wasm-pack build crates/sens-wasm --target web --out-dir ../../packaging/web/pkg --release
 
       - name: Bundle the standalone HTML
-        run: python3 packaging/web/bundle.py
+        shell: bash
+        run: |
+          set -euo pipefail
+          node scripts/make-portable-web.mjs public/my-lisp-cli-web.html sens-cli-web.html
+          cp sens-cli-web.html my-lisp-cli-web.html
+          cmp -s sens-cli-web.html my-lisp-cli-web.html
 
       - name: Stage portable HTML (not a public release)
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: release-web
-          path: packaging/web/sens.html
+          path: |
+            sens-cli-web.html
+            my-lisp-cli-web.html
           if-no-files-found: error
 
   release-publish:
