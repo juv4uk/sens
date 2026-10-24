@@ -1,0 +1,72 @@
+#!/usr/bin/env python3
+"""Мої твердження — машинно-перевірні, а не на віру.
+
+Причина: я тричі помилився в цій роботі (не той декодер — двічі, .bits-кандидат
+— раз). Кожного разу мене виправляла власна перевірка, не охорона. Твердження,
+яке не можна перевірити командою, — це не знання, а спогад.
+
+Цей звіт перераховує ключові числа з дерева й каже, чи вони ще тримаються.
+Нічого не змінює.
+"""
+from __future__ import annotations
+
+import argparse
+import csv
+import sys
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[1]
+LEDGER = ROOT / "docs/archaeology/semantic-coverage-ledger-2026-10-14.tsv"
+SEMANTIC = ROOT / "tests/semantic"
+
+
+def ledger_rows() -> list[dict[str, str]]:
+    with LEDGER.open(encoding="utf-8") as handle:
+        return list(csv.DictReader(handle, delimiter="\t"))
+
+
+def filled(row: dict[str, str], col: str) -> bool:
+    return row.get(col, "-") not in ("-", "")
+
+
+def claims() -> list[tuple[str, int, int]]:
+    """(опис, виміряно, очікувано)"""
+    rows = ledger_rows()
+    laws = sorted(p.stem[:-4] for p in SEMANTIC.glob("*-law.sens"))
+    opaque = [x for x in laws if not (SEMANTIC / f"{x}-law.lisp").is_file()]
+    arts = {str(p) for p in SEMANTIC.glob("*.sens")}
+    ref = {r[c] for r in rows for c in ("candidate_sens_witness", "negative_sens_witness")
+           if filled(r, c)}
+    return [
+        ("рядків ledger", len(rows), 221),
+        ("з кандидатом-свідком", sum(filled(r, "candidate_sens_witness") for r in rows), 4),
+        ("з негативним свідком", sum(filled(r, "negative_sens_witness") for r in rows), 4),
+        ("без кандидата", sum(not filled(r, "candidate_sens_witness") for r in rows), 217),
+        ("*-law.sens", len(laws), 119),
+        ("*-law.sens без .lisp", len(opaque), 46),
+        (".sens у tests/semantic", len(arts), 549),
+        # Твердження «N незгаданих артефактів» ПРИБРАНО: хибне за формою.
+        # Ledger посилається і на .bits-кандидата (не .sens), тож перетин
+        # залежить від способу порівняння — будь-яке одне число вводить в
+        # оману. Це викрив цей же чекер; я не підганяю число, а знімаю тезу.
+    ]
+
+
+def main() -> int:
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--check", action="store_true", help="fail-closed: усі твердження мусять триматись")
+    args = ap.parse_args()
+    bad = 0
+    for label, got, want in claims():
+        ok = got == want
+        bad += not ok
+        print(f"CLAIMS: {'OK  ' if ok else 'ЗСУВ'} {label}: виміряно={got} очікувано={want}")
+    if bad:
+        raise SystemExit(f"FAIL: {bad} тверджень зсунулись — перевір, чи це не моя помилка")
+    if args.check:
+        print("CLAIMS: PASS усі твердження тримаються")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
