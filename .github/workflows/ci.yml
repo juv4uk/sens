@@ -260,6 +260,8 @@ jobs:
                   "tests/semantic/d6-zip-proper-mutant.lisp",
                   "tests/semantic/d6-zip-improper-tail-negative.lisp",
                   "tests/semantic/d6-zip-improper-root-negative.lisp",
+                  # Core4 D6 FILTER fixture: execute with exact Core4 profile in the semantic bundle below.
+                  "tests/semantic/d6-filter-improper-tail-negative.lisp",
                   "tests/semantic/ukr-lists-d24-language-law.lisp",
                   "tests/semantic/d24-polynomial-language-law.lisp",
                   "tests/semantic/d24-polynomial-language-mutant.lisp",

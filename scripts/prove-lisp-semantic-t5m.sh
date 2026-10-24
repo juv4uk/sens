@@ -514,6 +514,11 @@ run_case run_law d6-compose-flip-order-mutant tests/semantic/d6-compose-flip-mut
 # D6 FILTER: безпосередня SENS-рекурсія з D3/D4; закон і мутант.
 run_case run_law d6-filter-independent-positive tests/semantic/d6-filter-independent-law.lisp 1 core4
 run_case run_law d6-filter-independent-mutant tests/semantic/d6-filter-independent-mutant.lisp 0 core4
+# D6 FILTER must reject an improper tail with the actual SENS Type diagnostic.
+run_error_rejection d6-filter-improper-tail tests/semantic/d6-filter-improper-tail-negative.lisp Type 'car expects a non-empty list' core4
+sha256sum lib/core4.lisp tests/semantic/d6-filter-independent-law.lisp \
+  tests/semantic/d6-filter-independent-mutant.lisp \
+  tests/semantic/d6-filter-improper-tail-negative.lisp > "$evidence/d6-filter-inputs.sha256"
 # D6-квантори перевіряємо нижче як повні програми з визначеннями Core4.
 # D4 рекурсивна правильність списків: позитив та навмисне порушення.
 run_case run_law d4-proper-list-positive tests/semantic/d4-proper-list-recursion-law.lisp 1
