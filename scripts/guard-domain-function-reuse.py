@@ -18,6 +18,8 @@
   • нові імена, яких немає в драбинах → КАНДИДАТИ D11 (інформативно).
 
 Використання:
+  python3 scripts/guard-domain-function-reuse.py --catalog [запит]
+  python3 scripts/guard-domain-function-reuse.py --better "обробити список"
   python3 scripts/guard-domain-function-reuse.py --staged
   python3 scripts/guard-domain-function-reuse.py --paths-from FILE
   python3 scripts/guard-domain-function-reuse.py --file lib/x.lisp
@@ -64,14 +66,25 @@ REASON_SHADOW_PROJECT = "дубль наявного визначення про
 REASON_FRESH_NAME = "нове ім'я без виклику драбини і без маркера D11-пропозиції"
 
 
+_DISCOVER_MODULE = None
+
+
 def _load_discover():
-    """Імпорт ЄДИНОГО механізму виявлення поверхонь — без власної копії логіки."""
+    """Імпорт ЄДИНОГО механізму виявлення поверхонь — без власної копії логіки.
+
+    Модуль кешується: каталог і підказка звертаються до нього багато разів, а
+    повторний exec_module — зайва праця. Логіка виявлення лишається одна.
+    """
+    global _DISCOVER_MODULE
+    if _DISCOVER_MODULE is not None:
+        return _DISCOVER_MODULE
     spec = importlib.util.spec_from_file_location("discover_domain_function_candidates", DISCOVER)
     if spec is None or spec.loader is None:
         raise SystemExit("GUARD-DOMAIN-REUSE: не вдалося завантажити discover_domain_function_candidates.py")
     module = importlib.util.module_from_spec(spec)
     sys.modules[spec.name] = module
     spec.loader.exec_module(module)
+    _DISCOVER_MODULE = module
     return module
 
 
@@ -701,6 +714,162 @@ def knowledge_inference(text: str, facts: list[tuple[str, str, str, str]]):
     return rules, inferred
 
 
+# --- КАТАЛОГ наявних функцій драбини (для агента ПЕРЕД писанням) -------------- #
+# Мета власника: агент, перш ніж писати програму, має ВЗАГАЛІ бачити, ЯКІ в нас
+# є функції d1–d11 — і брати наявну/влучнішу, а не винаходити наново.
+#
+# Джерело істини — discover_domain_function_candidates (ІМПОРТ, не копія):
+# load_domain_tables + aliases + classify. Це ЧИТАННЯ поверхонь (каталог), а не
+# рушій і не реєстр; той самий механізм уже вживають search-domain-function.py
+# і сам охоронець — тож другого сканера драбин не заводимо.
+
+_HUMAN_COLS = ("ук", "укр", "san", "en", "LISP")
+
+
+def _catalog_entries(root: Path):
+    """(domain, row, aliases, object_kind, callable) на кожну поверхню драбини."""
+    discover = _load_discover()
+    entries = []
+    for domain, rows in discover.load_domain_tables(root).items():
+        for row in rows:
+            kind, callable_ = discover.classify(row)
+            entries.append((domain, row, discover.aliases(row), kind, callable_))
+    return entries
+
+
+def _entry_names(entry) -> dict:
+    """Людиночитані колонки поверхні (порожні/цитовані пропускаємо)."""
+    _domain, row, _aliases, _kind, _callable = entry
+    out: dict[str, str] = {}
+    for col in _HUMAN_COLS:
+        value = row[col]
+        if row.get(col + "_quoted") or value in {"", "()", "<compound>"}:
+            continue
+        out[col] = value
+    return out
+
+
+def _entry_line(entry) -> str:
+    """Один рядок каталогу: укр-ім'я, координата, домен, призначення(en), роль."""
+    domain, row, _aliases, kind, _callable = entry
+    names = _entry_names(entry)
+    ukr = names.get("укр") or names.get("ук") or "?"
+    en = names.get("en", "")
+    lisp = names.get("LISP", "")
+    parts = [f"{ukr}  [D{domain}:{row['bits']}]  домен D{domain}"]
+    purpose = en or lisp
+    if purpose:
+        parts.append(f"призначення(en): {purpose}")
+    if lisp and lisp != purpose:
+        parts.append(f"LISP={lisp}")
+    parts.append(f"роль: {kind}")
+    return "  ".join(parts)
+
+
+def catalog_overview(root: Path) -> int:
+    """Огляд: скільки функцій у кожному домені + кілька прикладів."""
+    entries = _catalog_entries(root)
+    by_domain: dict[int, list] = {}
+    for entry in entries:
+        by_domain.setdefault(entry[0], []).append(entry)
+    callable_n = sum(1 for entry in entries if entry[4])
+    print("КАТАЛОГ ФУНКЦІЙ ДРАБИНИ D1–D11 (що вже Є — бери наявне, не вигадуй)")
+    print("джерело: discover_domain_function_candidates (lib/domains/d1..d11.lisp)")
+    print(f"усього поверхонь: {len(entries)}; викличних кандидатів: {callable_n}")
+    print()
+    for d in sorted(by_domain):
+        rows = by_domain[d]
+        n_call = sum(1 for entry in rows if entry[4])
+        examples = [(names.get("укр") or names.get("ук") or "?")
+                    for names in (_entry_names(entry) for entry in rows[:5])]
+        print(f"  D{d}: {len(rows)} поверхонь ({n_call} викличних) — напр.: {', '.join(examples)}")
+    print()
+    print("ПОШУК за назвою/призначенням:  --catalog <запит>")
+    print("ПІДКАЗКА влучніших:           --better \"обробити список\"")
+    return 0
+
+
+def catalog_search(root: Path, query: str) -> int:
+    """Пошук за підрядком (укр./en/призначення) — відсортований список наявного."""
+    entries = _catalog_entries(root)
+    q = query.strip().lower()
+    hits = []
+    for entry in entries:
+        hay = [value.lower() for value in _entry_names(entry).values()]
+        hay.append(entry[3].lower())
+        if any(q in item for item in hay):
+            hits.append(entry)
+    hits.sort(key=lambda entry: (entry[0], entry[1]["bits"]))
+    if not hits:
+        print(f"НЕ ЗНАЙДЕНО у каталозі D1–D11: {query}")
+        print("Якщо операції справді немає — визнач її й познач `; D11-пропозиція: <причина>` перед визначенням.")
+        return 0
+    print(f"КАТАЛОГ D1–D11 за запитом «{query}» — знайдено {len(hits)}:")
+    for entry in hits[:60]:
+        print("  " + _entry_line(entry))
+    if len(hits) > 60:
+        print(f"  … ще {len(hits) - 60}")
+    return 0
+
+
+# --- Підказка ВЛУЧНІШИХ функцій -------------------------------------------- #
+# Для типової задачі показати наявні ВИЩІ функції драбини (map/filter/reduce/
+# apply/compose…), а не ручну рекурсію чи цикл. Джерело — наявні поверхні
+# драбини (шукаємо за призначенням, не вигадуємо імена).
+BETTER_RULES = (
+    (("список", "перебрати", "кожен", "обробити", "елемент", "перетворити"),
+     ("map", "filter", "reduce", "scan"), "замість ручної рекурсії/циклу по списку"),
+    (("відібрати", "фільтр", "фільтрувати", "лишити", "відсіяти"),
+     ("filter",), "замість ручного відбору з умовою"),
+    (("порахувати", "підсумувати", "сума", "звести", "згорнути", "накопичити", "добуток"),
+     ("reduce", "scan"), "замість ручного накопичення в циклі"),
+    (("застосувати функцію", "викликати функцію", "apply", "розкласти аргументи"),
+     ("apply",), "замість ручного розкладання аргументів"),
+    (("скласти", "композиція", "скомпонувати", "об'єднати функції"),
+     ("compose",), "замість вкладеного виклику"),
+    (("рекурсія", "рекурсивно", "цикл", "вручну"),
+     ("map", "filter", "reduce", "scan", "apply", "compose"),
+     "вища функція дешевша за ручну рекурсію"),
+)
+DEFAULT_BETTER = ("map", "filter", "reduce", "scan", "apply", "compose")
+
+
+def _by_en(root: Path) -> dict:
+    """Індекс en-ім'я → список поверхонь (одне ім'я може стояти в кількох доменах)."""
+    index: dict[str, list] = {}
+    for entry in _catalog_entries(root):
+        en = _entry_names(entry).get("en")
+        if en:
+            index.setdefault(en.lower(), []).append(entry)
+    return index
+
+
+def better_advice(root: Path, task: str) -> int:
+    """Показати наявні влучніші (вищі) функції драбини для типової задачі."""
+    index = _by_en(root)
+    tl = task.lower()
+    matched: list[str] = []
+    notes: list[str] = []
+    for keywords, names, note in BETTER_RULES:
+        if any(keyword in tl for keyword in keywords):
+            matched.extend(names)
+            notes.append(note)
+    if not matched:
+        matched = list(DEFAULT_BETTER)
+        notes = ["вищі функції драбини дешевші за ручну рекурсію/цикл"]
+    ordered = list(dict.fromkeys(matched))
+    print(f"ПІДКАЗКА ВЛУЧНІШИХ для задачі «{task}» (наявні функції драбини — не вигадуй):")
+    shown = 0
+    for name in ordered:
+        for entry in index.get(name, [])[:1]:
+            print("  " + _entry_line(entry))
+            shown += 1
+    if notes:
+        print("  → " + "; ".join(dict.fromkeys(notes)))
+    print("  глянь ширше: --catalog <запит>")
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description="guard: вживати функції драбин D1–D10")
     ap.add_argument("--staged", action="store_true")
@@ -713,6 +882,10 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--when", action="store_true", help="додати, коли й яким комітом уведено кожне визначення")
     ap.add_argument("--lessons", action="store_true", help="показати ЦІННІ ЗНАННЯ: уроки історії з довідника")
     ap.add_argument("--knowledge", action="store_true", help="показати БАЗУ ЗНАНЬ охоронця (CLIPS-факти й поради)")
+    ap.add_argument("--catalog", nargs="?", const="", default=None, metavar="ЗАПИТ",
+                    help="КАТАЛОГ наявних функцій d1–d11: без запиту — огляд, із запитом — пошук")
+    ap.add_argument("--better", metavar="ЗАДАЧА",
+                    help="підказка влучніших наявних функцій (map/reduce/filter…) для задачі")
     args = ap.parse_args(argv)
 
     ladder = ladder_names(ROOT)
@@ -728,6 +901,14 @@ def main(argv: list[str] | None = None) -> int:
             file=sys.stderr,
         )
         return 2
+
+    # КАТАЛОГ і підказка влучніших — ЧИТАННЯ драбини ДО писання програми.
+    # Повертаються раніше за project_sites: тут git-індекс не потрібен.
+    if args.catalog is not None:
+        return catalog_overview(ROOT) if args.catalog == "" else catalog_search(ROOT, args.catalog)
+    if args.better:
+        return better_advice(ROOT, args.better)
+
     project_sites = project_definition_sites(ROOT)
 
     if args.self_test:
@@ -1016,6 +1197,9 @@ def main(argv: list[str] | None = None) -> int:
                 print(f"     {r}: «{n}» визначено двічі в одному файлі — прибери повтор")
             if len(dupfile) > 12:
                 print(f"     … ще {len(dupfile) - 12}")
+        print("\n  підказка: для типової задачі глянь наявні ВИЩІ функції (map/reduce/filter…) — ")
+        print("     python3 scripts/guard-domain-function-reuse.py --better \"обробити список\"")
+        print("     весь каталог d1–d11: python3 scripts/guard-domain-function-reuse.py --catalog")
         print()
     if blocked:
         for rel, name, why in blocked:
