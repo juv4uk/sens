@@ -454,6 +454,33 @@ jobs:
             echo "::error file=research/zig-codecs/ladder_memory_game.zig,title=Zig ladder memory game::REGRESSION layer=game expected=512-question-complete-round actual=failed"
             zig_failed=1
           fi
+          if zig test -lc research/zig-codecs/d2_ladder_game.zig \
+              > "$RUNNER_TEMP/zig-d2-ladder-game.log" 2>&1; then
+            cat "$RUNNER_TEMP/zig-d2-ladder-game.log"
+            echo "::notice title=Zig D2 payload game::PASS scope=payload-only semantics=NOT_TESTED"
+          else
+            cat "$RUNNER_TEMP/zig-d2-ladder-game.log" >&2
+            echo "::error file=research/zig-codecs/d2_ladder_game.zig,title=Zig D2 payload game::REGRESSION layer=codec-test expected=exact-roundtrip actual=failed"
+            zig_failed=1
+          fi
+          if zig run -O ReleaseFast -lc research/zig-codecs/d2_ladder_bench.zig \
+              > "$RUNNER_TEMP/zig-d2-ladder-bench.log" 2>&1; then
+            cat "$RUNNER_TEMP/zig-d2-ladder-bench.log"
+            echo "::notice title=Zig D2 ladder A/B::MEASURED scope=payload-only position-map=ABSENT"
+          else
+            cat "$RUNNER_TEMP/zig-d2-ladder-bench.log" >&2
+            echo "::error file=research/zig-codecs/d2_ladder_bench.zig,title=Zig D2 ladder benchmark::REGRESSION layer=codec-benchmark expected=measured-parity actual=failed"
+            zig_failed=1
+          fi
+          if zig run -O ReleaseFast -lc research/zig-codecs/ladder_memory_bench.zig \
+              > "$RUNNER_TEMP/zig-ladder-memory-bench.log" 2>&1; then
+            cat "$RUNNER_TEMP/zig-ladder-memory-bench.log"
+            echo "::notice title=Zig D11 memory benchmark::MEASURED scope=inventory-lookup-and-game semantics=NOT_TESTED"
+          else
+            cat "$RUNNER_TEMP/zig-ladder-memory-bench.log" >&2
+            echo "::error file=research/zig-codecs/ladder_memory_bench.zig,title=Zig D11 memory benchmark::REGRESSION layer=game-benchmark expected=measured-parity actual=failed"
+            zig_failed=1
+          fi
           if zig test -lc research/zig-codecs/d11_selector_contest.zig \
               > "$RUNNER_TEMP/zig-d11-selector-tests.log" 2>&1; then
             cat "$RUNNER_TEMP/zig-d11-selector-tests.log"

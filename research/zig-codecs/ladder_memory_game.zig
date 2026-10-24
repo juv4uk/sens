@@ -22,6 +22,8 @@ pub const Score = struct {
     duplicate: usize = 0,
     unknown: usize = 0,
     structural: usize = 0,
+    invalid_suffix: usize = 0,
+    non_selector: usize = 0,
     answered: usize = 0,
     missing: usize = 0,
 };
@@ -37,6 +39,18 @@ extern "c" fn ftell(*CFile) c_long;
 extern "c" fn fread([*]u8, usize, usize, *CFile) usize;
 
 var table_cache = [_]?[]u8{null} ** 11;
+// Індекс — лише механіка пошуку у вже прочитаних Lisp-таблицях.
+// Record зберігає зрізи тих самих джерельних байтів: нової семантики немає.
+var coordinate_index_cache = [_]?[]?Record{null} ** 11;
+
+fn bitCoordinate(bits: []const u8) ?usize {
+    var coordinate: usize = 0;
+    for (bits) |digit| {
+        if (digit != '0' and digit != '1') return null;
+        coordinate = (coordinate << 1) | @as(usize, digit - '0');
+    }
+    return coordinate;
+}
 
 fn source(width: u8) ?[]const u8 {
     const path: [*:0]const u8 = switch (width) {
@@ -91,15 +105,99 @@ fn parseRow(width: u8, line: []const u8) ?Record {
     return .{ .width = width, .bits = bits, .lisp = value[0..end] };
 }
 
-pub fn lookup(width: u8, bits: []const u8) ?Record {
-    if (bits.len != @as(usize, width)) return null;
+pub const D11Guess = struct {
+    parent_bits: []const u8,
+    suffix: u8,
+    child_lisp: []const u8,
+};
+
+fn isD10Selector(name: []const u8) bool {
+    if (name.len != 10 or name[0] != 'C' or name[9] != 'R') return false;
+    for (name[1..9]) |letter| {
+        if (letter != 'A' and letter != 'D') return false;
+    }
+    return true;
+}
+
+/// Раунд D11: учасник пригадує похідний селектор за точним D10-батьком.
+/// Це перевірка таблиці та композиційної координати, не допуск до SENS.
+pub fn gradeD11(guesses: []const D11Guess) Score {
+    var result: Score = .{};
+    for (guesses, 0..) |guess, index| {
+        var repeated = false;
+        for (guesses[0..index]) |previous| {
+            if (previous.suffix == guess.suffix and
+                std.mem.eql(u8, previous.parent_bits, guess.parent_bits))
+            {
+                repeated = true;
+                break;
+            }
+        }
+        if (repeated) {
+            result.duplicate += 1;
+            continue;
+        }
+        if (guess.parent_bits.len != 10) {
+            result.unknown += 1;
+            continue;
+        }
+        if (guess.suffix != '0' and guess.suffix != '1') {
+            result.invalid_suffix += 1;
+            continue;
+        }
+        const parent = lookup(10, guess.parent_bits) orelse {
+            result.unknown += 1;
+            continue;
+        };
+        if (!isD10Selector(parent.lisp)) {
+            result.non_selector += 1;
+            continue;
+        }
+        var bits: [11]u8 = undefined;
+        @memcpy(bits[0..10], guess.parent_bits);
+        bits[10] = guess.suffix;
+        const child = lookup(11, &bits) orelse {
+            result.unknown += 1;
+            continue;
+        };
+        if (std.ascii.eqlIgnoreCase(child.lisp, guess.child_lisp)) {
+            result.correct += 1;
+        } else {
+            result.wrong += 1;
+        }
+    }
+    result.answered = result.correct;
+    const total = questionCount(11);
+    result.missing = if (total > result.correct) total - result.correct else 0;
+    return result;
+}
+
+fn coordinateIndex(width: u8) ?[]?Record {
+    if (width == 0 or width > 11) return null;
+    const domain_index = @as(usize, width) - 1;
+    if (coordinate_index_cache[domain_index]) |records| return records;
+
     const table = source(width) orelse return null;
+    const shift: u6 = @intCast(width);
+    const capacity = @as(usize, 1) << shift;
+    const records = std.heap.page_allocator.alloc(?Record, capacity) catch return null;
+    @memset(records, null);
     var lines = std.mem.splitScalar(u8, table, '\n');
     while (lines.next()) |line| {
         const row = parseRow(width, line) orelse continue;
-        if (std.mem.eql(u8, row.bits, bits)) return row;
+        const coordinate = bitCoordinate(row.bits) orelse continue;
+        // Як і послідовний пошук, повертаємо перший запис координати.
+        if (records[coordinate] == null) records[coordinate] = row;
     }
-    return null;
+    coordinate_index_cache[domain_index] = records;
+    return records;
+}
+
+pub fn lookup(width: u8, bits: []const u8) ?Record {
+    if (bits.len != @as(usize, width)) return null;
+    const coordinate = bitCoordinate(bits) orelse return null;
+    const records = coordinateIndex(width) orelse return null;
+    return records[coordinate];
 }
 
 // Завданням конкурсу є пригадати назву та код. Порожня LISP-поверхня
@@ -217,6 +315,23 @@ pub fn gradeDomain(width: u8, guesses: []const Guess) Score {
     const total = questionCount(width);
     result.missing = if (total > answered) total - answered else 0;
     return result;
+}
+
+test "Драбина: індекс зберігає кожен запис і відкидає не-двійковий код" {
+    var width: u8 = 1;
+    while (width <= 11) : (width += 1) {
+        const table = source(width) orelse return error.MissingDomainTable;
+        var lines = std.mem.splitScalar(u8, table, '\n');
+        while (lines.next()) |line| {
+            const row = parseRow(width, line) orelse continue;
+            const indexed = lookup(width, row.bits) orelse return error.MissingIndexedRecord;
+            try std.testing.expectEqualStrings(row.lisp, indexed.lisp);
+            try std.testing.expectEqualStrings(row.bits, indexed.bits);
+        }
+    }
+    try std.testing.expect(lookup(11, "0110000000x") == null);
+    try std.testing.expect(lookup(11, "0110000000") == null);
+    try std.testing.expect(lookup(12, "011000000000") == null);
 }
 
 test "Драбина D11: правильний код з хибною назвою не означає пригадану функцію" {
@@ -401,4 +516,62 @@ test "Драбина: точний породжувальний закон це�
         try std.testing.expectEqual(expected, selector_count);
         for (seen[0..expected]) |present| try std.testing.expect(present);
     }
+}
+
+test "Драбина D11: 512 унікальних похідних точно виконують закон суфікса" {
+    try std.testing.expectEqual(@as(usize, 512), questionCount(11));
+    var seen = [_]bool{false} ** 2048;
+    for (0..questionCount(11)) |i| {
+        const child = questionAt(11, i).?;
+        const parent = lookup(10, child.bits[0..10]).?;
+        try std.testing.expect(isD10Selector(parent.lisp));
+        try std.testing.expect(child.bits[10] == '0' or child.bits[10] == '1');
+        var coordinate: usize = 0;
+        for (child.bits) |digit| coordinate = (coordinate << 1) | @as(usize, digit - '0');
+        try std.testing.expect(!seen[coordinate]);
+        seen[coordinate] = true;
+        var expected: [11]u8 = undefined;
+        @memcpy(expected[0..9], parent.lisp[0..9]);
+        expected[9] = if (child.bits[10] == '0') 'A' else 'D';
+        expected[10] = 'R';
+        try std.testing.expectEqualStrings(&expected, child.lisp);
+        var sibling_bits: [11]u8 = undefined;
+        @memcpy(sibling_bits[0..], child.bits);
+        sibling_bits[10] = if (child.bits[10] == '0') '1' else '0';
+        try std.testing.expect(lookup(11, &sibling_bits) != null);
+    }
+}
+
+test "Конкурс D11: вірна назва, хибна, повтор, не-селектор і зіпсований суфікс" {
+    const guesses = [_]D11Guess{
+        .{ .parent_bits = "0110000000", .suffix = '0', .child_lisp = "cdaaaaaaaar" },
+        .{ .parent_bits = "0110000000", .suffix = '0', .child_lisp = "WRONG" },
+        .{ .parent_bits = "0110000000", .suffix = '1', .child_lisp = "WRONG" },
+        .{ .parent_bits = "0110000000", .suffix = '2', .child_lisp = "CDAAAAAAAAR" },
+        .{ .parent_bits = "0000000000", .suffix = '0', .child_lisp = "CDAAAAAAAAR" },
+    };
+    const score = gradeD11(&guesses);
+    try std.testing.expectEqual(@as(usize, 1), score.correct);
+    try std.testing.expectEqual(@as(usize, 1), score.wrong);
+    try std.testing.expectEqual(@as(usize, 1), score.duplicate);
+    try std.testing.expectEqual(@as(usize, 0), score.unknown);
+    try std.testing.expectEqual(@as(usize, 1), score.invalid_suffix);
+    try std.testing.expectEqual(@as(usize, 1), score.non_selector);
+    try std.testing.expectEqual(@as(usize, 1), score.answered);
+    try std.testing.expectEqual(@as(usize, 511), score.missing);
+}
+
+test "Конкурс D11: обидва суфікси та повтор зіпсованої відповіді" {
+    const guesses = [_]D11Guess{
+        .{ .parent_bits = "0110000000", .suffix = '0', .child_lisp = "CDAAAAAAAAR" },
+        .{ .parent_bits = "0110000000", .suffix = '1', .child_lisp = "CDAAAAAAADR" },
+        .{ .parent_bits = "0110000000", .suffix = '2', .child_lisp = "WRONG" },
+        .{ .parent_bits = "0110000000", .suffix = '2', .child_lisp = "WRONG" },
+    };
+    const score = gradeD11(&guesses);
+    try std.testing.expectEqual(@as(usize, 2), score.correct);
+    try std.testing.expectEqual(@as(usize, 1), score.duplicate);
+    try std.testing.expectEqual(@as(usize, 1), score.invalid_suffix);
+    try std.testing.expectEqual(@as(usize, 2), score.answered);
+    try std.testing.expectEqual(@as(usize, 510), score.missing);
 }

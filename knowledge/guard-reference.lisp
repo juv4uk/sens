@@ -11,6 +11,24 @@
 (визначити *довідник-гвардії*
   (як-є
     ((reference
+       (topic d11-memory-contest-native-scoring)
+       (summary "Конкурс пам'яті D11 має оцінювати похідні селектори за точним D10-батьком та останнім бітом, розрізняти correct, wrong, duplicate, invalid_suffix, unknown і non_selector. 512 назв з таблиці є інвентарем, а не 512 доказами виконуваності SENS. Бенчмарк gradeD11 показує ціну пошуку й оцінювання, але не замінює нативних семантичних тестів.")
+       (authority (lib/domains/d10.lisp lib/domains/d11.lisp research/zig-codecs/ladder_memory_game.zig research/zig-codecs/ladder_memory_bench.zig AGENTS.md))
+       (how-to (validate-exact-domain-and-parent verify-both-zero-and-one-suffixes reject-duplicate-guesses reject-invalid-suffix reject-non-selector-parent measure-lookup-and-grading-separately keep-lisp-semantics-in-sens))
+       (verify (512-unique-d11-derivations positive-and-negative-native-zig-tests five-round-native-timings no-claim-of-sens-eval))
+       (lifecycle code-fix-written-native-verification-pending)
+       (provenance "Драбина: конкурс D11 та аналіз червоного CI, 2026-10-24")
+       (unknown-route ask-owner))
+      (reference
+       (topic d2-payload-codec-benchmark-honesty)
+       (summary "Мікробенчмарк D2 pack/unpack без карти позицій вимірює тільки фізичне представлення окремих тернарних прогонів. Два файли можуть мати менший payload, але більший повний кадр через позиції, типи, довжини та контроль помилок. Злитий CAAR і перервані CAAR-прогони потрібно оцінювати окремо, з канонічним roundtrip, парними вимірами encode/decode і явним scope=payload-only.")
+       (authority (research/zig-codecs/d2_ladder_game.zig research/zig-codecs/d2_ladder_bench.zig research/zig-codecs/esc13_ladder_game.md AGENTS.md))
+       (how-to (assert-roundtrip-before-timing compare-merged-and-interrupted-runs measure-encode-and-decode alternate-order report-position-map-absent never-extrapolate-to-full-frame))
+       (verify (native-zig-roundtrip-positive-and-negative five-round-timing-both-cases no-full-codec-claim))
+       (lifecycle research-code-native-verification-pending)
+       (provenance "Драбина: межі доказу payload-бенчмарку D2, 2026-10-24")
+       (unknown-route ask-agent))
+      (reference
        (topic selector-quarter-generative-law)
        (summary "Селекторна родина функціональних доменів D3,D4,D5,D6,D8,D9,D10,D11 має точні коди {011,100}||{0,1}^(n-3), кількість 2^(n-2), рівно одну чверть місткості Dn. Корені D3: 011=CDR, 100=CAR; кожний суфіксний 0 відповідає A/CAR, 1 відповідає D/CDR. D6→D8 додає два біти, не привласнюючи текстовий D7. D11→D13 додає два біти, не привласнюючи числовий D12; 2048 D13 слів є лише дослідними кандидатами. Сама ширина не надає доменного допуску або викличності.")
        (authority (contracts/bija3-l1-l5-ratification.lisp contracts/d5-ratification.lisp contracts/d6-ratification.lisp contracts/d8-ratification.lisp docs/research/D10-SELECTOR-SEMANTICS-PROOF-20261012.uk.md lib/domains/d11.lisp research/zig-codecs/d13_selector_game.zig))
