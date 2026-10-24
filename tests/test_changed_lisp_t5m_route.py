@@ -48,6 +48,10 @@ case "$1" in
   verify-view)
     if [ -f reject-inverse ]; then echo 'inverse refused' >&2; exit 31; fi
     ;;
+  eval-core4)
+    if [ -f reject-core4 ]; then echo 'native core4 eval refused' >&2; exit 41; fi
+    printf '1\n'
+    ;;
   *)
     exit 32
     ;;
@@ -224,6 +228,35 @@ class ChangedLispT5MRouteTests(unittest.TestCase):
         self.assertIn("T5M_NATIVE_STANDALONE_AND_PAIRED_PASS", result.stdout)
         self.assertIn("files_checked=2 files_failed=1", result.stdout)
         self.assertIn("native_paired_executed=1 native_standalone_parity=1", result.stdout)
+
+    def test_explicit_core4_native_execution_has_own_witness_count(self):
+        # Shell-облік, НЕ Python-оракул семантики: обидва виконання
+        # заглушки збігаються, але Core4 не стає bare CLI SENS.
+        core4 = self.root / "tests/semantic/d5-arithmetic-native-t5m-law.lisp"
+        core4.parent.mkdir(parents=True)
+        core4.write_text("(атом? (як-є ()))\n", encoding="utf-8")
+        (self.root / "changed.txt").write_text(
+            "tests/semantic/d5-arithmetic-native-t5m-law.lisp\n", encoding="utf-8"
+        )
+        result = self.run_shell()
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertIn("T5M_NATIVE_EXPLICIT_CORE4_PAIRED_PASS", result.stdout)
+        self.assertIn("native_paired_executed=1 native_standalone_parity=0 native_explicit_core4_parity=1", result.stdout)
+        self.assertNotIn("T5M_NATIVE_STANDALONE_AND_PAIRED_PASS", result.stdout)
+        self.assertNotIn("release=GO", result.stdout)
+
+    def test_failed_explicit_core4_does_not_enter_either_parity_count(self):
+        core4 = self.root / "tests/semantic/d5-arithmetic-native-t5m-law.lisp"
+        core4.parent.mkdir(parents=True)
+        core4.write_text("(атом? (як-є ()))\n", encoding="utf-8")
+        (self.root / "changed.txt").write_text(
+            "tests/semantic/d5-arithmetic-native-t5m-law.lisp\n", encoding="utf-8"
+        )
+        self.stamp("reject-core4")
+        result = self.run_shell()
+        self.assertEqual(result.returncode, 2, result.stdout + result.stderr)
+        self.assertIn("T5M_NATIVE_STANDALONE_UNEXPECTED_FAIL", result.stderr)
+        self.assertIn("native_standalone_parity=0 native_explicit_core4_parity=0", result.stdout)
 
 
 if __name__ == "__main__":

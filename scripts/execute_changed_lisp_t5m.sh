@@ -31,6 +31,8 @@ declare -A native_view_roundtrip_paths=()
 declare -A native_fragment_parity_paths=()
 declare -A native_paired_executed_paths=()
 declare -A native_standalone_parity_paths=()
+# Успішний explicit Core4 є окремим фізичним класом, не bare SENS.
+declare -A native_explicit_core4_parity_paths=()
 # Одне джерело може мати кілька реальних порушень (байти, перегляд,
 # виконання). Звітуємо всі, але files_failed рахує саме файли.
 declare -A failed_file_paths=()
@@ -581,6 +583,7 @@ SENS_D1_NEGATIVE
           fi
           echo "T5M_NATIVE_STANDALONE_AND_PAIRED_PASS source=$file physical=ZIG_VERIFIED semantic=NOT_CERTIFIED release=NOT_CERTIFIED"
         else
+          native_explicit_core4_parity_paths["$file"]=1
           echo "T5M_NATIVE_EXPLICIT_CORE4_PAIRED_PASS source=$file runner=sens-trit/eval-core4 bare=NOT_TESTED physical=ZIG_VERIFIED semantic=NOT_CERTIFIED release=NOT_CERTIFIED"
         fi
       else
@@ -868,9 +871,9 @@ while IFS= read -r file || [[ -n "$file" ]]; do
   fi
   run_native_t5m_program
 done < "$manifest"
-printf 'T5M_CHANGED_SUMMARY files_checked=%s files_failed=%s native_view_roundtrip=%s native_fragment_parity=%s native_paired_executed=%s native_standalone_parity=%s scope=changed_manifest semantic=NOT_CERTIFIED release=NOT_CERTIFIED\n' \
+printf 'T5M_CHANGED_SUMMARY files_checked=%s files_failed=%s native_view_roundtrip=%s native_fragment_parity=%s native_paired_executed=%s native_standalone_parity=%s native_explicit_core4_parity=%s scope=changed_manifest semantic=NOT_CERTIFIED release=NOT_CERTIFIED\n' \
   "$checked_files" "$failed_files" \
-  "${#native_view_roundtrip_paths[@]}" "${#native_fragment_parity_paths[@]}" "${#native_paired_executed_paths[@]}" "${#native_standalone_parity_paths[@]}"
+  "${#native_view_roundtrip_paths[@]}" "${#native_fragment_parity_paths[@]}" "${#native_paired_executed_paths[@]}" "${#native_standalone_parity_paths[@]}" "${#native_explicit_core4_parity_paths[@]}"
 if (( failed_files > 0 )); then
   exit 2
 fi
