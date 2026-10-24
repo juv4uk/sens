@@ -52,4 +52,32 @@ awk -F '\t' 'NR==FNR{if(FNR>1) state[$1]=$2;next} FNR>1{printf "%s\t%s\t%s\t%s\t
 while IFS="$(printf '\t')" read -r duration id stage exit_code state; do
  printf '| %s | %s | %s | %s | %s |\n' "$id" "$stage" "$exit_code" "$state" "$duration" >> "$report"
 done
+# Ненульовий exit може бути очікуваним Type-negative, а не прискоренням.
+# Окремі розподіли не дають ранньому відхиленню зменшити оцінку успішного шляху.
+{
+ echo
+ echo '### Часи за класом завершення'
+ echo 'Exit!=0 сам по собі не означає RED: зіставляйте з Lisp-вердиктом вище.'
+ echo 'Порівнювати швидкодію можна лише між однаковими класами завершення, на однаковому корпусі та SHA.'
+ echo
+ echo '| Етап | Exit-клас | Проб | p50 мкс | p90 мкс | max мкс |'
+ echo '|---|---|---:|---:|---:|---:|'
+} >> "$report"
+for stage in direct codec-mint zig-open zig-verify sens-paired sens-paired-core4-diagnostic sens-standalone; do
+ for exit_class in zero nonzero; do
+  awk -F '\t' -v st="$stage" -v cls="$exit_class" \
+    'NR>1 && $2==st && (($3=="0") == (cls=="zero")) {print $4}' "$phases" | sort -n > "$tmp/sorted"
+  count="$(wc -l < "$tmp/sorted" | tr -d '[:space:]')"
+  if [[ "$exit_class" == zero ]]; then label='exit=0'; else label='exit!=0'; fi
+  if (( count==0 )); then
+   printf '| %s | %s | 0 | — | — | — |\n' "$stage" "$label" >> "$report"
+   continue
+  fi
+  p50="$(sed -n "$(((count+1)/2))p" "$tmp/sorted")"
+  p90="$(sed -n "$(((9*count+9)/10))p" "$tmp/sorted")"
+  high="$(tail -n 1 "$tmp/sorted")"
+  printf '| %s | %s | %s | %s | %s | %s |\n' "$stage" "$label" "$count" "$p50" "$p90" "$high" >> "$report"
+  echo "SENS_PHASE_EXIT_CLASS stage=$stage exit_class=$exit_class count=$count p50_us=$p50 p90_us=$p90 max_us=$high scope=mixed-witnesses"
+ done
+done
 printf 'SENS_PHASE_BENCHMARK_SUMMARY checked=%s passed=%s red=%s report=%s\n' "$checked" "$passed" "$red" "$report"
