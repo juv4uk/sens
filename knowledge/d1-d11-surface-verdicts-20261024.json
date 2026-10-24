@@ -32838,5 +32838,258 @@
       },
       "reason": "proved selector/composition law"
     }
-  ]
+  ],
+  "reconciliation": {
+    "schema": "sens.d1-d11-surface-reconciliation/v1",
+    "date": "2026-10-24",
+    "join_key": "(domain,bits)",
+    "audit_a": {
+      "file": "sens_d1_d11_stubs.csv",
+      "rows": 1420,
+      "verdict": "заглушка",
+      "implementation_layer": "none"
+    },
+    "audit_b": {
+      "file": "sens_counterpart_verdicts_d4_d5_d8_d10_d11.csv",
+      "rows": 1840,
+      "companion": "sens_d1_d11_surface_verdicts.csv (all 2558)",
+      "classes": {
+        "ЖИВЕ_ПІД_ІНШИМ_ІМЕНЕМ": 840,
+        "НЕ_ПІДТВЕРДЖЕНО": 580
+      },
+      "evidence_kinds": {
+        "semantic-manual": 11,
+        "name-match": 292,
+        "": 580,
+        "selector-law": 537
+      }
+    },
+    "total_1420": 1420,
+    "живе": 303,
+    "композиція": 537,
+    "відкладено": 0,
+    "невизначено": 580,
+    "unmatched": 0,
+    "distribution": {
+      "живе_під_іншим_іменем": 303,
+      "композиція_або_селектор": 537,
+      "відкладено": 0,
+      "невизначено": 580
+    },
+    "by_domain": {
+      "D10": {
+        "живе": 171,
+        "невизначено": 541
+      },
+      "D11": {
+        "композиція": 512
+      },
+      "D4": {
+        "живе": 5
+      },
+      "D5": {
+        "живе": 7
+      },
+      "D8": {
+        "живе": 120,
+        "композиція": 25,
+        "невизначено": 39
+      }
+    },
+    "examples": {
+      "живе": [
+        {
+          "domain": "D4",
+          "bits": "0000",
+          "en": "apply",
+          "uk": "застосувати",
+          "klass": "ЖИВЕ_ПІД_ІНШИМ_ІМЕНЕМ",
+          "evidence_kind": "semantic-manual",
+          "evidence": "apply -> застосувати-примітив-мета (lib/meta-eval.lisp:441)",
+          "source_line": "lib/domains/d4.lisp:9"
+        },
+        {
+          "domain": "D4",
+          "bits": "1010",
+          "en": "lookup",
+          "uk": "знайти",
+          "klass": "ЖИВЕ_ПІД_ІНШИМ_ІМЕНЕМ",
+          "evidence_kind": "semantic-manual",
+          "evidence": "lookup -> знайти-значення-імені-в-лексичному-середовищі (lib/meta-eval.lisp:294)",
+          "source_line": "lib/domains/d4.lisp:19"
+        },
+        {
+          "domain": "D4",
+          "bits": "1011",
+          "en": "bind",
+          "uk": "зв'язати",
+          "klass": "ЖИВЕ_ПІД_ІНШИМ_ІМЕНЕМ",
+          "evidence_kind": "semantic-manual",
+          "evidence": "bind -> зв'язати-аргументи-з-лямбда-параметрами (lib/meta-eval.lisp:601)",
+          "source_line": "lib/domains/d4.lisp:20"
+        },
+        {
+          "domain": "D4",
+          "bits": "1100",
+          "en": "evcon",
+          "uk": "обчислити-умови",
+          "klass": "ЖИВЕ_ПІД_ІНШИМ_ІМЕНЕМ",
+          "evidence_kind": "semantic-manual",
+          "evidence": "evcon -> обчислити-гілки-за-умовою (lib/meta-eval.lisp:717)",
+          "source_line": "lib/domains/d4.lisp:21"
+        },
+        {
+          "domain": "D4",
+          "bits": "1101",
+          "en": "evlis",
+          "uk": "обчислити-список",
+          "klass": "ЖИВЕ_ПІД_ІНШИМ_ІМЕНЕМ",
+          "evidence_kind": "semantic-manual",
+          "evidence": "evlis -> обчислити-список-мета (lib/meta-eval.lisp:630)",
+          "source_line": "lib/domains/d4.lisp:22"
+        }
+      ],
+      "композиція": [
+        {
+          "domain": "D8",
+          "bits": "10100011",
+          "en": "sort!",
+          "uk": "сортувати!",
+          "klass": "ЖИВЕ_ПІД_ІНШИМ_ІМЕНЕМ",
+          "evidence_kind": "selector-law",
+          "evidence": "p0=p(CAR(x)), p1=p(CDR(x)) [proven composition family]",
+          "source_line": "lib/domains/d8.lisp:175"
+        },
+        {
+          "domain": "D8",
+          "bits": "10100111",
+          "en": "&optional",
+          "uk": "необов'язкові-аргументи",
+          "klass": "ЖИВЕ_ПІД_ІНШИМ_ІМЕНЕМ",
+          "evidence_kind": "selector-law",
+          "evidence": "p0=p(CAR(x)), p1=p(CDR(x)) [proven composition family]",
+          "source_line": "lib/domains/d8.lisp:179"
+        },
+        {
+          "domain": "D8",
+          "bits": "10101000",
+          "en": "round",
+          "uk": "округлити",
+          "klass": "ЖИВЕ_ПІД_ІНШИМ_ІМЕНЕМ",
+          "evidence_kind": "selector-law",
+          "evidence": "p0=p(CAR(x)), p1=p(CDR(x)) [proven composition family]",
+          "source_line": "lib/domains/d8.lisp:180"
+        },
+        {
+          "domain": "D8",
+          "bits": "10101010",
+          "en": "set-cdr",
+          "uk": "встановити-решту",
+          "klass": "ЖИВЕ_ПІД_ІНШИМ_ІМЕНЕМ",
+          "evidence_kind": "selector-law",
+          "evidence": "p0=p(CAR(x)), p1=p(CDR(x)) [proven composition family]",
+          "source_line": "lib/domains/d8.lisp:182"
+        },
+        {
+          "domain": "D8",
+          "bits": "10101101",
+          "en": "prin1",
+          "uk": "друкувати-читабельно",
+          "klass": "ЖИВЕ_ПІД_ІНШИМ_ІМЕНЕМ",
+          "evidence_kind": "selector-law",
+          "evidence": "p0=p(CAR(x)), p1=p(CDR(x)) [proven composition family]",
+          "source_line": "lib/domains/d8.lisp:185"
+        }
+      ],
+      "невизначено": [
+        {
+          "domain": "D8",
+          "bits": "00000010",
+          "en": "terpri",
+          "uk": "завершити-рядок",
+          "klass": "НЕ_ПІДТВЕРДЖЕНО",
+          "evidence_kind": "",
+          "evidence": "",
+          "source_line": "lib/domains/d8.lisp:14"
+        },
+        {
+          "domain": "D8",
+          "bits": "00000111",
+          "en": "delete!",
+          "uk": "видалити!",
+          "klass": "НЕ_ПІДТВЕРДЖЕНО",
+          "evidence_kind": "",
+          "evidence": "",
+          "source_line": "lib/domains/d8.lisp:19"
+        },
+        {
+          "domain": "D8",
+          "bits": "00001111",
+          "en": "rotate!",
+          "uk": "обертати!",
+          "klass": "НЕ_ПІДТВЕРДЖЕНО",
+          "evidence_kind": "",
+          "evidence": "",
+          "source_line": "lib/domains/d8.lisp:27"
+        },
+        {
+          "domain": "D8",
+          "bits": "00010010",
+          "en": "named-lambda",
+          "uk": "іменована-функція",
+          "klass": "НЕ_ПІДТВЕРДЖЕНО",
+          "evidence_kind": "",
+          "evidence": "",
+          "source_line": "lib/domains/d8.lisp:30"
+        },
+        {
+          "domain": "D8",
+          "bits": "00010100",
+          "en": "canonicalize",
+          "uk": "канонізувати",
+          "klass": "НЕ_ПІДТВЕРДЖЕНО",
+          "evidence_kind": "",
+          "evidence": "",
+          "source_line": "lib/domains/d8.lisp:32"
+        }
+      ]
+    },
+    "unmatched_detail": {
+      "count": 0,
+      "reason": "немає (усі 1420 зійшлись за ключем (domain,bits))",
+      "rows": []
+    },
+    "audit_b_json_cross_check": {
+      "file": "knowledge/d1-d11-surface-verdicts-20261024.json",
+      "note": "рекомпіляція аудиту Б по всіх 2558; інша схема вердиктів, ніж counterpart CSV",
+      "rows_found": 1420,
+      "rows_missing": 0,
+      "raw_verdicts": {
+        "виконуваний-як-композиція-або-селектор": 517,
+        "живе-під-іменем": 286,
+        "живе-під-іншим-іменем": 1,
+        "живе-як-примітив": 4,
+        "навмисно-відкладено": 232,
+        "невизначено": 380
+      },
+      "folded": {
+        "живе": 291,
+        "композиція": 517,
+        "відкладено": 232,
+        "невизначено": 380
+      }
+    },
+    "true_stub_candidates_check": {
+      "file": "sens_true_stub_candidates.csv",
+      "rows": 592,
+      "equals_counterpart_unconfirmed": true,
+      "overlap_with_1420": 580
+    },
+    "notes": [
+      "Ключ (domain,bits) збігається точно: ширина бітів унікальна на домен (D4=4, D5=5, D8=8, D10=10, D11=11) в обох файлах; форматування без змін.",
+      "Усі 1420 заглушок аудиту А мають пару в counterpart CSV — unmatched=0.",
+      "Розподіл дано за полем evidence_kind у counterpart CSV (єдине джерело, що розрізняє живе/композицію для цих 1420). Клас 'відкладено' у counterpart CSV відсутній -> 0; його дає лише JSON-рекомпіляція (232 з 1420) у cross_check.",
+      "Аудит А позначив 1420 поверхонь як заглушки (implementation_layer=none), але аудит Б підтвердив живе існування 840 з них (303 за іменем, 537 як виконувана композиція/селектор); не підтверджено лишилось 580."
+    ]
+  }
 }
