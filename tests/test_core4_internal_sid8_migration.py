@@ -142,7 +142,7 @@ def verify(source: str) -> None:
     if unknown_names:
         raise ValueError("stable D9 keys are not full-column укр projections: " + ", ".join(unknown_names))
 
-    if heads["mono-ns"] != 1:
+    if heads["монотонний-наносекунди"] != 1:
         raise ValueError("Core4 must retain exactly one honest MONO-NS mechanism boundary")
     if domain_rows(10).get("0011110110") != "MONO-NS":
         raise ValueError("D10 MONO-NS authority drifted")
@@ -169,29 +169,34 @@ class Core4WidthFirewall(unittest.TestCase):
         start = self.source.index("(визначити сталі-відповідники-за-ідентичностями")
         end = self.source.index("(визначити знайти-групу-відповідників-за-ідентичністю", start)
         block = self.source[start:end]
-        self.assertNotRegex(block, r"\\(д9\\s+[01]{9}(?=[\\s)])")
-        for _, (_, ukr_name) in D9_REQUIRED.items():
-            self.assertIn(f"(д9 {ukr_name} ({ukr_name}))", block)
+        self.assertNotRegex(block, r"\(д9\s+[01]{9}(?=[\s)])")
+        named_rows = re.findall(r"^\s*\(д9\s+([^\s()]+)\s+\(([^\s()]+)\)\)\s*$",
+                                block, flags=re.MULTILINE)
+        self.assertEqual(len(named_rows), 20)
+        for key, alias in named_rows:
+            self.assertEqual(key, alias)
+            self.assertNotRegex(key, r"^[01]{9}$")
 
     def test_seven_macros_are_language_owned_not_w8_defmacro(self):
         heads = active_heads(self.source)
         self.assertEqual(heads["00001010"], 0)
-        self.assertEqual(heads["make-macro"], 7)
-        for name in ["and", "or", "let", "let*", "->", "->>", "матеріалізувати-сталі-відповідники"]:
-            self.assertIn(f"(0011 {name}", self.source)
+        self.assertEqual(heads["макрос"], 7)
+        for name in ["та", "або", "нехай", "нехай-послідовно", "потік-перший", "потік-останній",
+                     "матеріалізувати-сталі-відповідники"]:
+            self.assertIn(f"(визначити {name}", self.source)
 
     def test_negative_old_macro_head_is_rejected(self):
-        mutated = self.source.replace("(0011 and", "(00001010 and", 1)
+        mutated = self.source.replace("(визначити та", "(00001010 та", 1)
         with self.assertRaisesRegex(ValueError, "forbidden migrated head"):
             verify(mutated)
 
     def test_negative_cross_width_collision_is_rejected(self):
-        mutated = self.source.replace("(110101011 ", "(11100000 ")
-        with self.assertRaisesRegex(ValueError, "lost exact D9"):
+        mutated = self.source.replace("(рядок-перший", "(11100000")
+        with self.assertRaisesRegex(ValueError, "lost Ukrainian D9 projection"):
             verify(mutated)
 
     def test_negative_host_truth_is_rejected(self):
-        mutated = self.source.replace("(010 (001 ()))", "t", 1)
+        mutated = self.source.replace("(порожній? (як-є ()))", "t", 1)
         with self.assertRaisesRegex(ValueError, "host truth"):
             verify(mutated)
 
