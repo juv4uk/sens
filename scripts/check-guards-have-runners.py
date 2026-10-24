@@ -29,19 +29,30 @@ CONSUMER_GLOBS = (
 )
 # Перевірені вручну 2026-10-24. НОВИЙ сирота падає — тут його немає.
 KNOWN_ORPHANS = {
-    "audit-foundation-d7-version.py",
     "audit-test-languages.py",
     "audit-three-pass-d11-resident-shadow.py",
     "check-core-universal-contract.py",
     "check-d10-island-bridge-v1.py",
-    "check-d10-lisp-machine-evaluator-harvest-v1.py",
-    "check-domain-bitness-witness.py",
     "check-lisp15-arithmetic-provenance.py",
     "check-meta-eval-evidence.py",
     "check-od005-d5-baseline.py",
     "check-semantic-coverage-ledger.py",
     "check-world-knowledge-authority.py",
 }
+
+
+SELF_DECLARED_NOT_GATE = "automatic_ci_gate"
+
+
+def self_declares_not_gate(name: str) -> bool:
+    """Guard, який САМ себе оголошує не-CI-гейтом (`automatic_ci_gate: False`),
+    не є боргом: він аудит за задумом, а не забутий охоронець."""
+    path = SCRIPTS / name
+    try:
+        text = path.read_text(encoding="utf-8", errors="ignore")
+    except OSError:
+        return False
+    return SELF_DECLARED_NOT_GATE in text and "False" in text
 
 
 def guards() -> set[str]:
@@ -74,7 +85,7 @@ def main() -> int:
     args = ap.parse_args()
     all_guards = guards()
     runners = runner_texts()
-    orphan, wired = [], []
+    orphan, wired, declared_not_gate = [], [], []
     for name in sorted(all_guards):
         # ЗГАДКА ≠ ЗАПУСК. Шукаємо виклик із шляхом `scripts/<ім'я>`, як у
         # workflow (`python3 scripts/check-d9-…`) чи тесті (subprocess).
@@ -89,9 +100,14 @@ def main() -> int:
         needles = (f"scripts/{name}", f'"scripts" / "{name}"')
         who = [rel for rel, text in runners
                if any(n in text for n in needles) and Path(rel).name != name]
+        if not who and self_declares_not_gate(name):
+            declared_not_gate.append(name)
+            continue
         (wired if who else orphan).append((name, who))
     print(f"GUARDS-RUNNERS: guard-скриптів={len(all_guards)} "
-          f"мають запуск={len(wired)} борг={len(orphan)}")
+          f"мають запуск={len(wired)} сам-не-гейт={len(declared_not_gate)} борг={len(orphan)}")
+    for name in declared_not_gate:
+        print(f"  {name}: сам оголосив не-CI-гейтом")
     for name, who in orphan:
         print(f"  {name}: НІХТО не запускає")
     # Себе не вважаємо «новим»: чекер не може вимагати власного запуску,
