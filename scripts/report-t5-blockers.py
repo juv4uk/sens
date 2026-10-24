@@ -38,6 +38,8 @@ def blockers() -> dict[str, list[str]]:
     return {
         "physical_blocked": [f["sens"] for f in files if f.get("physical_status") == "BLOCKED"],
         "view_blocked": [f["sens"] for f in files if f.get("view_status") == "BLOCKED"],
+        "view_missing": [f["sens"] for f in files
+                         if f.get("view_status") == "MISSING_NOT_CERTIFIED"],
         "status": [report.get("status", "?")],
     }
 
@@ -47,17 +49,19 @@ def main() -> int:
     ap.add_argument("--check", action="store_true", help="fail-closed: набір блокерів не сміє змінитись")
     args = ap.parse_args()
     b = blockers()
-    total = len(b["physical_blocked"]) + len(b["view_blocked"])
+    total = (len(b["physical_blocked"]) + len(b["view_blocked"]) + len(b["view_missing"]))
     print(f"T5-BLOCKERS: status={b['status'][0]} фізичних={len(b['physical_blocked'])} "
-          f"виглядів={len(b['view_blocked'])} усього={total}")
+          f"виглядів={len(b['view_blocked'])} вигляд-відсутній={len(b['view_missing'])} "
+          f"усього={total}")
     for path in b["physical_blocked"]:
         print(f"  ФІЗИЧНИЙ БЛОК: {path}")
     for path in b["view_blocked"]:
         print(f"  ВИГЛЯД БЛОК:   {path}")
+    for path in b["view_missing"]:
+        print(f"  ВИГЛЯД ВІДСУТНІЙ: {path}")
     if args.check:
-        print(f"T5-BLOCKERS: названо {total} файлів за іменем; п'ятий блокер "
-              "(spaced_view_missing=1) звіт рахує окремим ключем, не як файл "
-              "у files[] — його ім'я цим звітом НЕ встановлено.")
+        print(f"T5-BLOCKERS: усі {total} блокери НАЗВАНО за ім'ям — не «BLOCKED» "
+              "без імен. П'ятий (MISSING_NOT_CERTIFIED) названо теж.")
     return 0
 
 
