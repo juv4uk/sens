@@ -351,12 +351,18 @@ def _contains_source_definitions(path: Path) -> bool:
         forms = parse_lisp_tokens(tokenize_lisp(path.read_text(encoding="utf-8")))
     except (OSError, UnicodeError, ValueError):
         return True
-    return any(
-        isinstance(form, LispForm)
-        and bool(form.items)
-        and _atom_value(form.items[0]) in {"визначити", "define"}
-        for form in forms
-    )
+    for form in forms:
+        if not isinstance(form, LispForm) or not form.items:
+            continue
+        head = _atom_value(form.items[0])
+        # Програма: верхній DEFINE (визначити/define) — або верхній виклик
+        # сирого бінарного голова (незавершена міграція). Чисті записи-дані
+        # мають англійський ключ-тег і не мають жодного з цих двох.
+        if head in {"визначити", "define"}:
+            return True
+        if head is not None and RAW_BINARY_HEAD.match(head):
+            return True
+    return False
 
 
 def iter_projectable_source_files(root: Path) -> tuple[list[Path], int]:
@@ -372,9 +378,13 @@ def iter_projectable_source_files(root: Path) -> tuple[list[Path], int]:
     excluded = 0
     for path in all_files:
         relative = path.relative_to(root).as_posix()
-        # Виконувані DEFINE у lib/surface — не каталог. Раніше всі вони
-        # випадали зі знаменника, приховуючи реальні незавершені програми.
-        if relative.startswith("lib/surface/") and not _contains_source_definitions(path):
+        # Першопричина: раніше «файл = програма» перевірялося ЛИШЕ для
+        # lib/surface/. Через це чисті записи-дані (машинні межі, профілі,
+        # інвентарі, санскритська поверхня) потрапляли у знаменник, і їхні
+        # англійські КЛЮЧІ рахувалися як «незавершені викличні голови».
+        # Тепер перевірка застосовується до ВСІХ файлів: програма — це файл
+        # із верхнім DEFINE; самі лише дані зі знаменника випадають.
+        if not _contains_source_definitions(path):
             excluded += 1
             continue
         if relative in NONPROGRAM_LIB_FILES or any(
