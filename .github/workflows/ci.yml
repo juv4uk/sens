@@ -792,6 +792,7 @@ jobs:
           test -x "$binary"
           # Зберігаємо тільки завершені перевірки, а не заздалегідь оголошений PASS.
           : > "$RUNNER_TEMP/benchmark-law-status.tsv"
+          law_failure_count=0
           check_lisp_law() {
             local id="$1" source="$2" expected="$3" actual
             if ! actual="$(timeout 45s "$binary" "$source")"; then
@@ -802,11 +803,13 @@ jobs:
                 printf '%s\n' "$actual" | tail -n 16 >&2
               fi
               echo "::error file=$source,title=SENS Lisp law::REGRESSION id=$id layer=eval expected=$expected actual=execution-failure partial_stdout=see-log"
-              return 1
+              law_failure_count=$((law_failure_count + 1))
+              return 0
             fi
             if [[ "$actual" != "$expected" ]]; then
               echo "::error file=$source,title=SENS Lisp law::REGRESSION id=$id layer=semantics expected=$expected actual=$actual"
-              return 1
+              law_failure_count=$((law_failure_count + 1))
+              return 0
             fi
             echo "::notice file=$source,title=SENS Lisp law::PASS id=$id native=SENS result=$actual"
           }
@@ -815,16 +818,23 @@ jobs:
           bash scripts/prove-lisp-language-laws.sh "$binary"
           # Д24 списки: усі очікування належать Lisp; Rust більше не порівнює 10/0/2.
           # Фізичний D6 LENGTH ще не атестовано (#5854): direct=SENS, T5M=NOT_CERTIFIED.
+          lists_before=$law_failure_count
           cat -- benchmarks/lists.lisp tests/semantic/ukr-lists-d24-language-law.lisp > "$RUNNER_TEMP/ukr-lists-d24-native.lisp"
           check_lisp_law d24-list-language "$RUNNER_TEMP/ukr-lists-d24-native.lisp" '1'
-          printf 'lists\tPASS_DIRECT\n' >> "$RUNNER_TEMP/benchmark-law-status.tsv"
+          if (( law_failure_count == lists_before )); then
+            printf 'lists\tPASS_DIRECT\n' >> "$RUNNER_TEMP/benchmark-law-status.tsv"
+          fi
           # Поліном Д24: Lisp-закон і контрприклад замість Rust-оракула.
+          arithmetic_before=$law_failure_count
           cat -- benchmarks/arithmetic.lisp tests/semantic/d24-polynomial-language-law.lisp > "$RUNNER_TEMP/d24-polynomial-law.lisp"
           check_lisp_law d24-polynomial-language-positive "$RUNNER_TEMP/d24-polynomial-law.lisp" '1'
           cat -- benchmarks/arithmetic.lisp tests/semantic/d24-polynomial-language-mutant.lisp > "$RUNNER_TEMP/d24-polynomial-mutant.lisp"
           check_lisp_law d24-polynomial-language-mutant "$RUNNER_TEMP/d24-polynomial-mutant.lisp" '0'
-          printf 'arithmetic\tPASS_DIRECT\n' >> "$RUNNER_TEMP/benchmark-law-status.tsv"
+          if (( law_failure_count == arithmetic_before )); then
+            printf 'arithmetic\tPASS_DIRECT\n' >> "$RUNNER_TEMP/benchmark-law-status.tsv"
+          fi
           # Читач Д24/D7: самовердикти в Lisp, Rust не є мовним оракулом.
+          parser_before=$law_failure_count
           cat -- benchmarks/parser.lisp tests/semantic/d24-reader-fraction-language-law.lisp > "$RUNNER_TEMP/d24-reader-positive.lisp"
           check_lisp_law d24-reader-fraction-language-positive "$RUNNER_TEMP/d24-reader-positive.lisp" '1'
           cat -- benchmarks/parser.lisp tests/semantic/d24-reader-fraction-language-mutant.lisp > "$RUNNER_TEMP/d24-reader-mutant.lisp"
@@ -844,22 +854,27 @@ jobs:
           cat -- benchmarks/parser.lisp tests/semantic/d24-reader-zero-denominator-negative.lisp > "$RUNNER_TEMP/d24-reader-denominator.lisp"
           if timeout 45s "$binary" "$RUNNER_TEMP/d24-reader-denominator.lisp" > "$RUNNER_TEMP/d24-reader-denominator.log" 2>&1; then
             echo "::error file=tests/semantic/d24-reader-zero-denominator-negative.lisp,title=SENS Lisp law::REGRESSION id=d24-reader-zero-denominator layer=semantics expected=division-by-zero actual=accepted"
-            exit 1
-          fi
-          if ! grep -Eiq 'division by zero|ділення на нуль' "$RUNNER_TEMP/d24-reader-denominator.log"; then
+            law_failure_count=$((law_failure_count + 1))
+          elif ! grep -Eiq 'division by zero|ділення на нуль' "$RUNNER_TEMP/d24-reader-denominator.log"; then
             cat "$RUNNER_TEMP/d24-reader-denominator.log"
             echo "::error file=tests/semantic/d24-reader-zero-denominator-negative.lisp,title=SENS Lisp law::REGRESSION id=d24-reader-zero-denominator layer=eval expected=division-by-zero actual=other-error"
-            exit 1
+            law_failure_count=$((law_failure_count + 1))
+          else
+            echo "::notice file=tests/semantic/d24-reader-zero-denominator-negative.lisp,title=SENS Lisp law::PASS id=d24-reader-zero-denominator native=SENS rejection=division-by-zero"
           fi
-          echo "::notice file=tests/semantic/d24-reader-zero-denominator-negative.lisp,title=SENS Lisp law::PASS id=d24-reader-zero-denominator native=SENS rejection=division-by-zero"
-          printf 'parser\tPASS_DIRECT\n' >> "$RUNNER_TEMP/benchmark-law-status.tsv"
+          if (( law_failure_count == parser_before )); then
+            printf 'parser\tPASS_DIRECT\n' >> "$RUNNER_TEMP/benchmark-law-status.tsv"
+          fi
           # Д4: рекурсивний обхід — прямий Lisp позитив/мутант D1.
           # Фізична розбіжність D7 перевіряється окремо і не стає PASS.
+          recursion_before=$law_failure_count
           cat -- benchmarks/recursion.lisp tests/semantic/d4-recursion-atom-result-law.lisp > "$RUNNER_TEMP/recursion-benchmark-positive.lisp"
           check_lisp_law d4-recursion-benchmark-language-positive "$RUNNER_TEMP/recursion-benchmark-positive.lisp" '1'
           cat -- benchmarks/recursion.lisp tests/semantic/d4-recursion-atom-result-mutant.lisp > "$RUNNER_TEMP/recursion-benchmark-mutant.lisp"
           check_lisp_law d4-recursion-benchmark-language-mutant "$RUNNER_TEMP/recursion-benchmark-mutant.lisp" '0'
-          printf 'recursion\tPASS_DIRECT\n' >> "$RUNNER_TEMP/benchmark-law-status.tsv"
+          if (( law_failure_count == recursion_before )); then
+            printf 'recursion\tPASS_DIRECT\n' >> "$RUNNER_TEMP/benchmark-law-status.tsv"
+          fi
           check_lisp_law d3-ukr-self-verdict tests/semantic/d3-ukr-language-self-verdict.lisp '1'
           check_lisp_law d5-ukr-self-verdict tests/semantic/d5-ukr-arithmetic-self-verdict.lisp '1'
           check_lisp_law d5-physical-law tests/semantic/d5-arithmetic-native-t5m-law.lisp '1'
@@ -886,6 +901,10 @@ jobs:
           check_lisp_law d11-srfi1-span-break-language "$RUNNER_TEMP/d11-srfi1-span-break-native.lisp" '1'
           cat -- lib/d11-srfi1-find-tail.lisp tests/semantic/d11-srfi1-find-tail-laws.lisp > "$RUNNER_TEMP/d11-srfi1-find-tail-native.lisp"
           check_lisp_law d11-srfi1-find-tail-language "$RUNNER_TEMP/d11-srfi1-find-tail-native.lisp" '1'
+          if (( law_failure_count > 0 )); then
+            echo "::error title=SENS Lisp law summary::REGRESSION layer=independent-laws failed=$law_failure_count; completed=all-available"
+            exit 1
+          fi
 
       # Час ЦІЛОГО процесу: CLI + bootstrap + SENS eval на shared runner.
       # Це діагностика затримок, а не ізольований eval чи міжмашинний speedup.
