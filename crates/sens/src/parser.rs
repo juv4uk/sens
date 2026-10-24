@@ -515,7 +515,9 @@ impl Parser<'_> {
             if numeric_prefix
                 || token.starts_with("#b")
                 || token.starts_with("#d")
-                || token.starts_with("#q2:")
+                // #q2 is a value-level WRITE→READ carrier, not a program
+                // literal. Admit it only in CanonicalValueWire mode.
+                || (self.mode == ReaderMode::ExactDomain && token.starts_with("#q2:"))
             {
                 return Err(self.error(
                     "арифметичні літерали поза явно кваліфікованим D24+ заборонені",
@@ -737,6 +739,20 @@ mod tests {
             assert_eq!(identity.width(), source.len(), "{source}");
             assert_eq!(identity.to_string(), source, "{source}");
         }
+    }
+
+    #[test]
+    fn canonical_value_wire_accepts_q2_but_exact_program_source_does_not() {
+        // D8 WRITE uses #q2 for legacy exact Number/Rational values.
+        // The exact program reader must still reject textual numeric literals.
+        let forms = parse_canonical_value_wire("#q2:101/1")
+            .expect("canonical WRITE→READ must retain the exact number");
+        assert!(matches!(
+            forms.as_slice(),
+            [Expr { kind: ExprKind::Number(5.0, Exactness::Exact), .. }]
+        ));
+        assert!(parse_exact_domain_source("#q2:101/1").is_err());
+        assert!(parse_canonical_value_wire("5").is_err());
     }
 
     #[test]
