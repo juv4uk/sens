@@ -9,15 +9,16 @@ const SAMPLES: usize = 11;
 const BATCH: usize = 512;
 
 fn main() {
-    assert!(!SOURCE.is_empty(), "source must not be empty");
+    assert!(SOURCE.len() >= BATCH, "source must contain a full observation batch");
     let mut dest = vec![0u8; SOURCE.len()];
     let mut samples = [0u128; SAMPLES];
-    let mut checksum = 0u8;
+    let mut checksum = 0u64;
     for sample in 0..=SAMPLES {
         let start = Instant::now();
-        for _ in 0..BATCH {
+        for offset in 0..BATCH {
             black_box(dest.as_mut_slice()).copy_from_slice(black_box(SOURCE));
-            checksum ^= black_box(dest[0]);
+            // Спостерігаємо різні байти: XOR того самого байта 512 разів завжди давав 0.
+            checksum = checksum.wrapping_add(u64::from(black_box(dest[offset])));
         }
         let elapsed = start.elapsed().as_nanos();
         assert_eq!(dest.as_slice(), SOURCE, "Rust mechanism lost bytes");
@@ -25,6 +26,7 @@ fn main() {
             samples[sample - 1] = elapsed;
         }
     }
+    assert_ne!(checksum, 0, "benchmark observations cancelled unexpectedly");
     samples.sort_unstable();
     assert!(samples[0] > 0, "clock resolution too coarse");
     println!(
