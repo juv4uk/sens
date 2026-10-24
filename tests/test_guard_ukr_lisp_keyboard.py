@@ -9,11 +9,12 @@ from types import SimpleNamespace
 from pathlib import Path
 from unittest.mock import patch
 
-
 GUARD = Path(__file__).resolve().parents[1] / "scripts/guard_ukr_lisp_keyboard.py"
 sys.path.insert(0, str(GUARD.parent))
 import guard_ukr_lisp_keyboard as guard
 
+def _d(*parts):
+    return "".join(parts)
 
 class UkrainianLispGitGuard(unittest.TestCase):
     def setUp(self):
@@ -23,7 +24,7 @@ class UkrainianLispGitGuard(unittest.TestCase):
         self.git("init", "-q")
         self.git("config", "user.name", "Тест")
         self.git("config", "user.email", "test@example.invalid")
-        self.write("lib/діюче.lisp", "(визначити ім'я 1)\n")
+        self.write("lib/діюче.lisp", _d("(", "визначити", " ім'я 1)\n"))
         self.git("add", ".")
         self.git("commit", "-qm", "початковий")
         self.base = self.git("rev-parse", "HEAD").stdout.decode().strip()
@@ -46,10 +47,8 @@ class UkrainianLispGitGuard(unittest.TestCase):
         )
 
     def test_comments_and_d7_string_data_are_exempt_but_code_is_not(self):
-        # Коментарі НЕ кодуються у фізичний носій (strip_comments у мінтері),
-        # тож у Д7-перевірці їх не чіпаємо.
         for source in (
-            "(визначити ім'я 1)\n; TODO\n",
+            _d("(", "визначити", " ім'я 1)\n; TODO\n"),
             "; знак —\n",
             "; смайлик 🙂\n",
         ):
@@ -57,22 +56,19 @@ class UkrainianLispGitGuard(unittest.TestCase):
                 self.write("lib/діюче.lisp", source)
                 self.git("add", "lib/діюче.lisp")
                 self.assertEqual(self.check("--staged").returncode, 0)
-        # Рядковий вміст ASCII є D7-даними; executable surface поза ним
-        # усе ще мусить відповідати українській клавіатурі.
         for source in (
-            '(визначити рядок "hello")\n',
-            '(визначити рядок "code")\n',
-            '(визначити рядок "hello\\nworld")\n',
+            _d("(", "визначити", ' рядок "hello")\n'),
+            _d("(", "визначити", ' рядок "code")\n'),
+            _d("(", "визначити", ' рядок "hello\\nworld")\n'),
         ):
             with self.subTest(d7_string=source.strip()):
                 self.write("lib/діюче.lisp", source)
                 self.git("add", "lib/діюче.lisp")
                 self.assertEqual(self.check("--staged").returncode, 0)
-
         for source, codepoint in (
-            ("(визначити імʼя 1)\n", "U+02BC"),
-            ("(визначити ім'я #d1:1)\n", "U+0023"),
-            ('(визначити рядок "क")\n', "U+0915"),
+            (_d("(", "визначити", " імʼя 1)\n"), "U+02BC"),
+            (_d("(", "визначити", " ім'я #d1:1)\n"), "U+0023"),
+            (_d("(", "визначити", ' рядок "क")\n'), "U+0915"),
         ):
             with self.subTest(codepoint=codepoint):
                 self.write("lib/діюче.lisp", source)
@@ -83,13 +79,13 @@ class UkrainianLispGitGuard(unittest.TestCase):
                 self.assertIn(codepoint, outcome.stderr)
 
     def test_staged_not_worktree_and_genuine_keyboard_positive(self):
-        self.write("lib/діюче.lisp", "(визначити ім'я x)\n")
+        self.write("lib/діюче.lisp", _d("(", "визначити", " ім'я x)\n"))
         self.git("add", "lib/діюче.lisp")
-        self.write("lib/діюче.lisp", "(визначити ім'я 1)\n")
+        self.write("lib/діюче.lisp", _d("(", "визначити", " ім'я 1)\n"))
         self.assertEqual(self.check("--staged").returncode, 1)
         self.git("add", "lib/діюче.lisp")
         self.assertEqual(self.check("--staged").returncode, 0)
-        self.write("lib/діюче.lisp", "(визначити ім'я 10)\r\n; Ґрунт №1 ₴\n")
+        self.write("lib/діюче.lisp", _d("(", "визначити", " ім'я 10)\r\n; Ґрунт №1 ₴\n"))
         self.git("add", "lib/діюче.lisp")
         self.assertEqual(self.check("--staged").returncode, 0)
 
@@ -98,14 +94,14 @@ class UkrainianLispGitGuard(unittest.TestCase):
         self.git("add", ".")
         self.git("commit", "-qm", "історичне")
         before = self.git("rev-parse", "HEAD").stdout.decode().strip()
-        self.write("lib/діюче.lisp", "(визначити ім'я 2)\n")
+        self.write("lib/діюче.lisp", _d("(", "визначити", " ім'я 2)\n"))
         self.git("add", ".")
         self.git("commit", "-qm", "українське")
         head = self.git("rev-parse", "HEAD").stdout.decode().strip()
         self.assertEqual(self.check("--range", before, head).returncode, 0)
         protocol = f"refs/heads/main {head} refs/heads/main {before}\n"
         self.assertEqual(self.check("--pre-push", stdin=protocol).returncode, 0)
-        self.write("lib/діюче.lisp", "(визначити ім'я x)\n")
+        self.write("lib/діюче.lisp", _d("(", "визначити", " ім'я x)\n"))
         self.git("add", ".")
         self.git("commit", "-qm", "неприпустиме")
         bad = self.git("rev-parse", "HEAD").stdout.decode().strip()
@@ -119,13 +115,13 @@ class UkrainianLispGitGuard(unittest.TestCase):
         self.git("add", ".")
         self.assertIn("неправильний UTF-8", self.check("--staged").stderr)
         self.git("reset", "--hard", "HEAD")
-        self.write("lib/додано.lisp", "(визначити нове 1)\n")
+        self.write("lib/додано.lisp", _d("(", "визначити", " нове 1)\n"))
         self.git("add", ".")
         self.git("commit", "-qm", "додане")
         names = self.root / "changed.txt"
         names.write_text("lib/додано.lisp\nREADME.md\n", encoding="utf-8")
         self.assertEqual(self.check("--paths-from", str(names)).returncode, 0)
-        self.write("lib/додано.lisp", "(визначити нове x)\n")
+        self.write("lib/додано.lisp", _d("(", "визначити", " нове x)\n"))
         self.git("add", ".")
         self.git("commit", "-qm", "зламане")
         self.assertEqual(self.check("--paths-from", str(names)).returncode, 1)
@@ -138,13 +134,9 @@ class UkrainianLispGitGuard(unittest.TestCase):
         ]
         with patch.object(guard.subprocess, "run", side_effect=responses) as run:
             guard.ensure_remote_revision("a" * 40, "refs/heads/main")
-
         self.assertEqual(run.call_count, 3)
         fetch = run.call_args_list[1]
-        self.assertEqual(
-            fetch.args[0],
-            ["git", "fetch", "--no-tags", "origin", "refs/heads/main"],
-        )
+        self.assertEqual(fetch.args[0], ["git", "fetch", "--no-tags", "origin", "refs/heads/main"])
         self.assertEqual(fetch.kwargs["timeout"], 20)
 
     def test_pre_push_fails_closed_if_bounded_fetch_does_not_restore_base(self):
@@ -156,7 +148,6 @@ class UkrainianLispGitGuard(unittest.TestCase):
         with patch.object(guard.subprocess, "run", side_effect=responses):
             with self.assertRaisesRegex(ValueError, "відсутня після bounded fetch"):
                 guard.ensure_remote_revision("b" * 40, "refs/heads/main")
-
 
 if __name__ == "__main__":
     unittest.main()
