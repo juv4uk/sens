@@ -37,6 +37,12 @@ fn paths_in(line: &str) -> BTreeSet<String> {
     paths
 }
 
+// Шлях тесту береться лише з SOURCE, а не з EXPECTED чи тексту повідомлення.
+fn source_arg(line: &str, position: usize) -> Option<&str> {
+    line.split_whitespace().nth(position)
+        .map(|token| token.trim_matches(|ch| ch == '"' || ch == '\''))
+}
+
 fn routed(script: &str) -> BTreeSet<String> {
     let lines = commands(script);
     let calls: Vec<&String> = lines.iter().filter(|s|
@@ -47,7 +53,9 @@ fn routed(script: &str) -> BTreeSet<String> {
             || s.starts_with("run_case run_division_by_zero_rejection ")
     ).collect();
     let mut result = BTreeSet::new();
-    for call in &calls { result.extend(paths_in(call)); }
+    for call in &calls {
+        if let Some(source) = source_arg(call, 3) { result.extend(paths_in(source)); }
+    }
     for line in lines.iter().filter(|s| s.starts_with("cat ")) {
         let Some((_, dest)) = line.rsplit_once('>') else { continue };
         let name = dest.trim().trim_matches('"').trim_matches('\'')
@@ -59,13 +67,8 @@ fn routed(script: &str) -> BTreeSet<String> {
         let braced = "$".to_string() + "{" + name + "}";
         // $bundle_extra — інша змінна Bash, а не живий маршрут $bundle.
         // Приймаємо $bundle і ${bundle}, звіряючи точну межу ідентифікатора.
-        if calls.iter().any(|call| {
-            let call = call.as_str();
-            call.contains(&braced) || call.match_indices(plain.as_str()).any(|(at, _)| {
-                !call[at + plain.len()..].chars().next().is_some_and(|ch|
-                    ch.is_ascii_alphanumeric() || ch == '_')
-            })
-        }) {
+        if calls.iter().any(|call| source_arg(call, 3)
+            .is_some_and(|source| source == plain.as_str() || source == braced.as_str())) {
             result.extend(paths_in(line));
         }
     }
@@ -77,7 +80,7 @@ fn routed(script: &str) -> BTreeSet<String> {
 fn direct_ci_routed(ci: &str) -> BTreeSet<String> {
     commands(ci).into_iter()
         .filter(|line| line.starts_with("check_lisp_law "))
-        .flat_map(|line| paths_in(&line))
+        .flat_map(|line| source_arg(&line, 2).map(paths_in).unwrap_or_default())
         .collect()
 }
 
@@ -113,7 +116,11 @@ fn audit(added: &[String], runner: &str, ci: &str,
     let direct_routes = direct_ci_routed(ci);
     let registered = |path: &str| routes.contains(path) || direct_routes.contains(path);
     let mut errs = Vec::new();
-    if !ci.contains("bash scripts/prove-lisp-semantic-t5m.sh") {
+    let runner_call = "bash scripts/prove-lisp-semantic-t5m.sh";
+    let call_with_args = format!("{runner_call} ");
+    let native_runner_active = commands(ci).iter().any(|line|
+        line.as_str() == runner_call || line.starts_with(call_with_args.as_str()));
+    if !native_runner_active {
         errs.push("NATIVE_LANGUAGE_RUNNER_NOT_IN_CI".into());
     }
     for stage in ["--t5m-mint", "verify-view", "--t5m-pair", "sens-standalone"] {
@@ -375,6 +382,34 @@ run_case run_law sample-mut tests/semantic/sample-mutant.lisp 0\n\
         &collision_runner, ci, |_| true, |_| Ok(String::new()));
     if !collision.iter().any(|e| e.contains("SENS_LAW_NOT_REGISTERED")) {
         return Err("lookalike Bash bundle falsely registered a Lisp law".into());
+    }
+    // SOURCE, а не EXPECTED: згадка bundle чи Lisp-шляху як еталону не запускає закон.
+    let wrong_source = runner.replace(
+        "sample \"$bundle\" 1", "sample tests/semantic/other.lisp \"$bundle\"");
+    let misplaced = audit(&["tests/semantic/sample-law.lisp".into()],
+        &wrong_source, ci, |_| true, |_| Ok(String::new()));
+    if !misplaced.iter().any(|e| e.contains("SENS_LAW_NOT_REGISTERED")) {
+        return Err("bundle in EXPECTED falsely registered an unrouted Lisp law".into());
+    }
+    let wrong_literal_runner = runner.replace(
+        "sample \"$bundle\" 1", "sample tests/semantic/other.lisp tests/semantic/sample-law.lisp");
+    let misplaced_literal = audit(&["tests/semantic/sample-law.lisp".into()],
+        &wrong_literal_runner, ci, |_| true, |_| Ok(String::new()));
+    if !misplaced_literal.iter().any(|e| e.contains("SENS_LAW_NOT_REGISTERED")) {
+        return Err("Lisp path in EXPECTED falsely registered native SENS law".into());
+    }
+    let wrong_direct_runner = runner.replace(
+        "sample \"$bundle\" 1", "sample tests/semantic/other.lisp 1");
+    let wrong_direct_ci = format!("{ci}\ncheck_lisp_law misplaced tests/semantic/other.lisp tests/semantic/sample-law.lisp\n");
+    let misplaced_direct = audit(&["tests/semantic/sample-law.lisp".into()],
+        &wrong_direct_runner, &wrong_direct_ci, |_| true, |_| Ok(String::new()));
+    if !misplaced_direct.iter().any(|e| e.contains("SENS_LAW_NOT_REGISTERED")) {
+        return Err("Lisp path in EXPECTED falsely registered direct SENS law".into());
+    }
+    let false_ci = "# bash scripts/prove-lisp-semantic-t5m.sh\necho bash scripts/prove-lisp-semantic-t5m.sh\n";
+    let inactive = audit(&[], runner, false_ci, |_| true, |_| Ok(String::new()));
+    if !inactive.iter().any(|e| e == "NATIVE_LANGUAGE_RUNNER_NOT_IN_CI") {
+        return Err("commented or echoed native runner falsely admitted".into());
     }
     // Bash-форма ${bundle} залишається чинним посиланням на той самий bundle.
     let braced_runner = runner.replace(
