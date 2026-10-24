@@ -18,15 +18,23 @@ assert SPEC and SPEC.loader
 parser = importlib.util.module_from_spec(SPEC)
 sys.modules[SPEC.name] = parser
 SPEC.loader.exec_module(parser)
-COHORT = (
-    "scripts/build-dependency-classification.lisp",
-    "scripts/check-core4-predicate-answer-scale.lisp",
-    "scripts/check-core4-predicate-answer-boundary.lisp",
-    "experiments/probabilistic-decision-jev-like.lisp",
-    "scripts/generate-function-table.lisp",
-    "scripts/generate-uk-surface-audit.lisp",
-    "scripts/verify-repo.lisp",
+# Першопричина: раніше тут був РУЧНИЙ перелік 7 файлів — інваріант «немає
+# старих виконуваних голів» перевірявся лише для них, а не для дерева. Тепер
+# набір виконуваних файлів виводиться з дерева (дані/таблиці/свідки — винятки).
+NONPROGRAM_TREE_PATHS = (
+    "lib/domains/", "lib/generated/", "contracts/", "knowledge/", "docs/",
+    "tests/", "fixtures/", "examples/binary", "examples/migrated/", "crates/",
 )
+
+
+def executable_lisp_files():
+    for path in sorted(ROOT.rglob("*.lisp")):
+        if ".git" in path.parts or not path.is_file():
+            continue
+        rel = path.relative_to(ROOT).as_posix()
+        if any(rel.startswith(prefix) for prefix in NONPROGRAM_TREE_PATHS):
+            continue
+        yield rel, path
 
 
 def executable_sites(source: str):
@@ -75,15 +83,15 @@ class TestBroaderSid8LispCutover(unittest.TestCase):
 
     def test_current_ukr_map_heads_keep_two_arguments(self):
         total = 0
-        for path in COHORT:
-            with self.subTest(path=path):
-                source = (ROOT / path).read_text(encoding="utf-8")
+        for rel, path in executable_lisp_files():
+            with self.subTest(path=rel):
+                source = path.read_text(encoding="utf-8")
                 sites = list(executable_sites(source))
                 old = [site for site in sites if site[0] != "відобразити"]
-                self.assertFalse(old, f"{path}: старі виконувані голови: {old}")
+                self.assertFalse(old, f"{rel}: старі виконувані голови: {old}")
                 maps = [site for site in sites if site[0] == "відобразити"]
                 for head, arguments, line in maps:
-                    self.assertEqual(arguments, 2, f"{path}:{line}: {head}")
+                    self.assertEqual(arguments, 2, f"{rel}:{line}: {head}")
                 total += len(maps)
         self.assertGreater(total, 0)
 
@@ -98,11 +106,11 @@ class TestBroaderSid8LispCutover(unittest.TestCase):
         self.assertEqual([(head, argc) for head, argc, _ in executable_sites(source)], [("відобразити", 2)])
 
     def test_no_old_definition_call_heads_in_executable_cohort(self):
-        for path in COHORT:
-            with self.subTest(path=path):
-                source = (ROOT / path).read_text(encoding="utf-8")
+        for rel, path in executable_lisp_files():
+            with self.subTest(path=rel):
+                source = path.read_text(encoding="utf-8")
                 old = [site for site in executable_sites(source) if site[0] == "00001001"]
-                self.assertFalse(old, f"{path}: застаріле виконуване визначення: {old}")
+                self.assertFalse(old, f"{rel}: застаріле виконуване визначення: {old}")
 
 if __name__ == "__main__":
     unittest.main()
