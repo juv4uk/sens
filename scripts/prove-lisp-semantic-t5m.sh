@@ -30,6 +30,9 @@ if ! timeout 45s "$sens" "$bootstrap_source" >"$evidence/bootstrap.stdout" 2>"$e
 fi
 echo "SENS_BOOTSTRAP_EXECUTABLE source=$bootstrap_source semantic=NOT_CERTIFIED"
 
+# Невід'ємність вимірів і справжні коди виходу перевіряє сам Bash-механізм.
+bash scripts/test_law_stage_clock.sh
+
 fail() {
   local id="$1" layer="$2" expected="$3" actual="$4"
   # Передаємо точний шар відмови до квитанції, без повторної евристики stderr.
@@ -44,7 +47,7 @@ fail() {
 # Вимірюємо повний процес кожного етапу (запуск CLI включно), без host-оракула.
 # Одна проба на етап: це профіль для пошуку вузького місця, НЕ p50 або speedup.
 profile_stage() {
-  local id="$1" stage="$2" started_ns ended_ns elapsed_us code=0
+  local id="$1" stage="$2" started_us ended_us elapsed_us code=0
   shift 2
   # Одна назва sens-standalone раніше змішувала різні виконувані CLI.
   # Маршрут — частина виміру; заміна runner не може виглядати як speedup.
@@ -58,10 +61,11 @@ profile_stage() {
       return 2
     fi
   fi
-  started_ns="$(date +%s%N)"
+  # Bash-годинник без fork/exec: зовнішній date спотворює короткі етапи.
+  started_us="${EPOCHREALTIME/./}"
   "$@" || code=$?
-  ended_ns="$(date +%s%N)"
-  elapsed_us="$(((ended_ns - started_ns) / 1000))"
+  ended_us="${EPOCHREALTIME/./}"
+  elapsed_us="$((ended_us - started_us))"
   printf '%s\t%s\t%s\t%s\n' "$id" "$stage" "$code" "$elapsed_us" >> "$evidence/law-stage-timings.tsv"
   return "$code"
 }
@@ -397,8 +401,8 @@ red_receipt() {
   echo "SENS_RED_RECEIPT id=$id layer=$layer source_sha256=$source_hash physical_sha256=$physical_hash view_sha256=$view_hash physical_form_index=$form_index file=$evidence/law-red-receipts.tsv"
 }
 run_case() {
-  local id="$2" start_ns end_ns wall_ms status
-  start_ns="$(date +%s%N)"
+  local id="$2" start_us end_us wall_ms status
+  start_us="${EPOCHREALTIME/./}"
   checked=$((checked + 1))
   if ( "$@" ); then
     status=PASS
@@ -410,8 +414,8 @@ run_case() {
     # Цитата й фізичний індекс пояснюють один RED. Сама помилка лишається RED.
     red_receipt "$id" "${3:-}"
   fi
-  end_ns="$(date +%s%N)"
-  wall_ms="$(((end_ns - start_ns) / 1000000))"
+  end_us="${EPOCHREALTIME/./}"
+  wall_ms="$(((end_us - start_us) / 1000))"
   printf '%s\t%s\t%s\n' "$id" "$status" "$wall_ms" >> "$evidence/law-timings.tsv"
   echo "SENS_LAW_WALL_TIME id=$id status=$status wall_ms=$wall_ms scope=full-execution"
   # Діагностика поза редиректами stdout/stderr справжнього SENS.
@@ -686,20 +690,20 @@ if [[ -s "$d11_bench_evidence/program.sens" &&
   physical_sha256="$(sha256sum "$d11_bench_evidence/program.sens" | cut -d' ' -f1)"
   printf 'sample\telapsed_us\tstdout_sha256\tsource_sha256\tphysical_sha256\n' > "$d11_bench_samples"
   for iteration in {1..11}; do
-    start_ns="$(date +%s%N)"
+    start_us="${EPOCHREALTIME/./}"
     if ! timeout 45s "$sens" "$d11_bench_evidence/program.sens" > "$evidence/d11-families-physical-$iteration.out" 2>"$evidence/d11-families-physical-$iteration.err"; then
       cat "$evidence/d11-families-physical-$iteration.err" >&2
       echo "::error title=SENS D11 benchmark::REGRESSION layer=physical-repeatability iteration=$iteration expected=SENS-execution actual=rejected" >&2
       exit 1
     fi
-    end_ns="$(date +%s%N)"
+    end_us="${EPOCHREALTIME/./}"
     if ! cmp -s "$d11_bench_evidence/physical.out" "$evidence/d11-families-physical-$iteration.out"; then
       echo "::error title=SENS D11 benchmark::REGRESSION layer=output-parity iteration=$iteration expected=byte-exact-SENS actual=divergent" >&2
       exit 1
     fi
     sample_sha256="$(sha256sum "$evidence/d11-families-physical-$iteration.out" | cut -d' ' -f1)"
     printf '%s\t%s\t%s\t%s\t%s\n' \
-      "$iteration" "$(((end_ns - start_ns) / 1000))" \
+      "$iteration" "$((end_us - start_us))" \
       "$sample_sha256" "$source_sha256" "$physical_sha256" >> "$d11_bench_samples"
   done
   mapfile -t sorted_wall < <(tail -n +2 "$d11_bench_samples" | cut -f2 | sort -n)
