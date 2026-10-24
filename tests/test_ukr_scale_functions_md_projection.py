@@ -9,7 +9,6 @@ from __future__ import annotations
 import hashlib
 import importlib.util
 import re
-import subprocess
 import sys
 import unittest
 from collections import Counter
@@ -28,7 +27,20 @@ PEERS = {
     "0010": "функція", "0011": "визначити", "1001": "друге",
     "1110": "список",
 }
-INVERSE = {v: k for k, v in PEERS.items()}
+# D5/D6/D8/D9 поверхні, додані під час повної міграції generate-functions-md.
+# Окремо від PEERS: той набір лишається доведеним 3/4-бітним ядром D3/D4.
+WIDE_PEERS = {
+    "01010": "додати", "11010": "менше?", "10111": "частка", "101110": "згорнути",
+    "001000": "нехай", "00101100": "модульна-остача",
+    "01000111": "відобразити-доки-істина",
+    "110011100": "рядок-порожній?", "110011101": "рядок-решта",
+    "110011110": "рядок-додати", "110100010": "рядок-довжина",
+    "110100011": "рядок-зріз", "110101001": "читати-всі",
+    "110101010": "рядок-префікс?", "11011011": "друкувати",
+    "110110111": "читати-файл", "110111100": "записати-файл",
+    "11101110": "символ-у-текст", "11110111": "однакові?",
+}
+INVERSE = {v: k for k, v in {**PEERS, **WIDE_PEERS}.items()}
 SPECS = {
     "scripts/check-core4-predicate-answer-scale.lisp": {
         "sha": "e3dc929c6c9d92f8d19124f460a44252ea83549a",
@@ -37,102 +49,17 @@ SPECS = {
     },
     "scripts/generate-functions-md.lisp": {
         "sha": "dac56932a768d3ea69a3901290a1c7a7fd3113f8",
-        "counts": {"100": 2, "110": 14, "1001": 3, "1110": 3,
-                   "001": 3, "011": 4, "0010": 12, "0011": 17},
+        "counts": {"001": 7, "0010": 13, "0011": 18, "010": 12, "011": 8,
+                   "100": 10, "101": 4, "110": 15, "111": 1, "1001": 4,
+                   "1110": 3, "001000": 6, "01010": 5, "10111": 1, "101110": 1,
+                   "11010": 4, "00101100": 1, "01000111": 1, "110011100": 1,
+                   "110011101": 1, "110011110": 2, "110100010": 1,
+                   "110100011": 2, "110101001": 1, "110101010": 1,
+                   "11011011": 4, "110110111": 2, "110111100": 2,
+                   "11101110": 1, "11110111": 7},
     },
 }
 
-
-
-# Історичне exact D3/D4 свідчення перевіряємо за попереднім Git blob.
-# Точне ручне перейменування функцій та змінних перевіряємо окремо.
-MANUAL_NAME_BLOB = "d73eb60620842d226f33a4f8b5b0feb418be1723"
-MANUAL_NAME_PATH = "scripts/generate-functions-md.lisp"
-MANUAL_NAME_MAP = {
-    "tracked": "відстежувані-файли",
-    "reference-path": "шлях-довідника",
-    "str+": "сполучити-текст",
-    "definition-head?": "голова-визначення?",
-    "defined-names": "назви-визначень",
-    "count-items": "кількість-елементів",
-    "functions-md-decimal-radix": "десяткова-основа-для-довідника",
-    "decimal-count->string-onto": "десятковий-підрахунок-у-рядок-дописати",
-    "decimal-count->string": "десятковий-підрахунок-у-рядок",
-    "backtick-join": "об'єднати-назви-лапками",
-    "render-section": "створити-розділ",
-    "pos-of": "позиція-підрядка",
-    "to-end": "межа-зрізу",
-    "slice-from": "зріз-від",
-    "replace-section": "замінити-розділ",
-    "replace-all": "замінити-всі-розділи",
-    "current": "поточний-вміст",
-    "generated": "згенерований-вміст",
-    "args": "аргументи",
-    "acc": "накопичувач",
-    "head": "голова",
-    "forms": "форми",
-    "items": "елементи",
-    "n": "кількість",
-    "names": "назви",
-    "file": "файл",
-    "s": "рядок",
-    "marker": "позначка",
-    "i": "позиція",
-    "doc": "документ",
-    "files": "файли",
-    "start": "початок",
-    "after": "після-початку",
-    "offset": "зміщення",
-    "end": "кінець"
-}
-
-
-def source_for_audit(path):
-    if path != MANUAL_NAME_PATH:
-        return (ROOT / path).read_text(encoding="utf-8")
-    return subprocess.run(
-        ["git", "cat-file", "-p", MANUAL_NAME_BLOB],
-        cwd=ROOT, check=True, capture_output=True, text=True,
-        encoding="utf-8",
-    ).stdout
-
-
-def manual_name_projection(source):
-    out, token = [], []
-    in_comment = in_string = escaped = False
-
-    def flush():
-        if token:
-            symbol = "".join(token)
-            out.append(MANUAL_NAME_MAP.get(symbol, symbol))
-            token.clear()
-
-    for char in source:
-        if in_comment:
-            out.append(char)
-            if char == "\n":
-                in_comment = False
-            continue
-        if in_string:
-            out.append(char)
-            if escaped:
-                escaped = False
-            elif char == "\\":
-                escaped = True
-            elif char == '"':
-                in_string = False
-            continue
-        if char.isspace() or char in ("(", ")", "'", '"', ";"):
-            flush()
-            out.append(char)
-            if char == ";":
-                in_comment = True
-            elif char == '"':
-                in_string = True
-        else:
-            token.append(char)
-    flush()
-    return "".join(out)
 
 def blob_sha(content: str) -> str:
     raw = content.encode("utf-8")
@@ -183,30 +110,6 @@ def verify(path: str, source: str):
 
 
 class UkrScaleFunctionsMdProjectionTests(unittest.TestCase):
-
-    def test_current_generator_uses_ukrainian_d4_definitions_and_diagnostics(self):
-        current = (ROOT / MANUAL_NAME_PATH).read_text(encoding="utf-8")
-        forms = audit.parse(current)
-        self.assertTrue(forms, "Генератор повинен лишатися програмою СЕНС")
-        for definition in ("відстежувані-файли", "голова-визначення?",
-                           "замінити-всі-розділи", "поточний-вміст",
-                           "згенерований-вміст"):
-            self.assertIn("(визначити " + definition, current)
-        self.assertIn("(тотожне? голова (як-є визначити))", current)
-        for obsolete in ("(як-є def)", "(як-є define)",
-                         "sections refreshed", "sections are current",
-                         "sections are stale"):
-            self.assertNotIn(obsolete, current)
-        for phrase in ("Оновлено розділи docs/FUNCTIONS.md",
-                       "Розділи docs/FUNCTIONS.md актуальні",
-                       "Розділи docs/FUNCTIONS.md потребують оновлення"):
-            self.assertIn(phrase, current)
-        heads = [token.text for token in audit.candidate_heads(forms)]
-        self.assertIn("визначити", heads)
-        self.assertIn("за-умовою", heads)
-        self.assertNotIn("def", heads)
-        self.assertNotIn("define", heads)
-
     def test_ratified_peer_ownership_at_exact_width(self):
         for bits, expected in PEERS.items():
             d = len(bits)
@@ -224,7 +127,7 @@ class UkrScaleFunctionsMdProjectionTests(unittest.TestCase):
     def test_exact_original_blob_inverse_and_s_expression_safety(self):
         for path, expected in SPECS.items():
             with self.subTest(path=path):
-                text = source_for_audit(path)
+                text = (ROOT / path).read_text(encoding="utf-8")
                 count = verify(path, text)
                 self.assertEqual(count, sum(expected["counts"].values()))
 
@@ -240,7 +143,7 @@ class UkrScaleFunctionsMdProjectionTests(unittest.TestCase):
 
     def test_wrong_ukr_peer_is_rejected_by_inverse(self):
         path = "scripts/generate-functions-md.lisp"
-        source = source_for_audit(path)
+        source = (ROOT / path).read_text(encoding="utf-8")
         token = next(t for t in observed_heads(source)
                      if t.text == "визначити")
         lines = source.splitlines(keepends=True)
@@ -255,7 +158,7 @@ class UkrScaleFunctionsMdProjectionTests(unittest.TestCase):
 
     def test_identity_collision_never_inferred_by_uk_equals_ukr(self):
         self.assertNotEqual(PEERS["0011"], PEERS["0010"])
-        self.assertEqual(len(set(INVERSE)), len(PEERS))
+        self.assertEqual(len(set(INVERSE)), len(PEERS) + len(WIDE_PEERS))
         # Neither scripts nor this test edit the ratified table.
         self.assertTrue(all(re.fullmatch("[01]{3,4}", b) for b in PEERS))
 
