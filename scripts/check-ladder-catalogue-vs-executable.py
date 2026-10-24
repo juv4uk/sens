@@ -50,11 +50,49 @@ def host_mechanisms() -> dict[int, set[str]]:
     return found
 
 
+def declared_source(n: int) -> dict[str, object] | None:
+    """Щаблі, чиє джерело допуску ЯВНО каже, скільки виконуваних.
+
+    Без цього D7 і D11 звітували «не замаплено», хоча межа вже написана:
+      D7  — crates/sens/src/d7_display_registry_generated.rs: «never authorizes a callable»
+      D11 — knowledge/d11-selector-seed.json: accounting.callable = 0
+    """
+    if n == 7:
+        path = ROOT / "crates/sens/src/d7_display_registry_generated.rs"
+        if not path.is_file():
+            return None
+        text = path.read_text(encoding="utf-8")
+        if "never authorizes a callable" not in text:
+            raise SystemExit("FAIL: D7 registry втратив застереження про виклик")
+        return {"executable": 0, "note": "клавіатурні дані; виклик не дозволено (шапка реєстру)"}
+    if n == 11:
+        path = ROOT / "knowledge/d11-selector-seed.json"
+        if not path.is_file():
+            return None
+        import json
+        seed = json.loads(path.read_text(encoding="utf-8"))
+        acct = seed.get("accounting", {})
+        if "callable" not in acct:
+            raise SystemExit("FAIL: D11 сід втратив accounting.callable")
+        return {"executable": int(acct["callable"]),
+                "note": f"selector-похідні без прямого опкоду ({acct.get('derived_selectors_without_direct_opcode_admission')})"}
+    return None
+
+
 def survey() -> list[dict[str, object]]:
     rows = []
     host = host_mechanisms()
     for n in RUNGS:
         cat = catalogue(n)
+        declared = declared_source(n)
+        if declared is not None:
+            rows.append({"rung": n, "catalogue": len(cat), "mapped": True,
+                         "bindings": None, "declared": declared,
+                         "executable": declared["executable"],
+                         "carrier_only": len(cat) - int(declared["executable"]),
+                         "wrong_width": [], "outside": [],
+                         "note": declared["note"]})
+            continue
         bind = bindings(n)
         if bind is not None:
             bind = bind | host.get(n, set())
@@ -82,6 +120,10 @@ def main() -> int:
         n = r["rung"]
         if not r["mapped"]:
             print(f"{'D'+str(n):>6} {r['catalogue']:>8} {'—':>9} {'—':>13}  не замаплено (джерела допуску немає)")
+            continue
+        if r.get("declared") is not None:
+            print(f"{'D'+str(n):>6} {r['catalogue']:>8} {r['executable']:>9} {r['carrier_only']:>13}  "
+                  f"задекларовано: {r['note']}")
             continue
         if r["wrong_width"] or r["outside"]:
             bad = True
