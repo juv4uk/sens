@@ -1,9 +1,12 @@
-# Відновлення охоронця
+# Відновлення
 
-На main `scripts/guard-domain-function-reuse.py` тимчасово зіпсовано placeholder.
+## test_domain_function_reuse_rule.py (host_debt=0)
+```bash
+python3 knowledge/d11/restore/apply-debt0-test.py
+```
+Після placeholder на main — обов'язково.
 
+## guard
 ```bash
 python3 knowledge/d11/restore/apply-guard-restore.py
 ```
-
-Після цього: self-test з `GITHUB_ACTIONS=true` зелений без hooks; локально потрібні hooks.
