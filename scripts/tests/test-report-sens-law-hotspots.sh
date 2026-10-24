@@ -25,8 +25,16 @@ grep -Fq '| sens-standalone | exit!=0 | 1 | 190 | 190 | 190 |' "$tmp/report.md"
 grep -Fq 'SENS_PHASE_EXIT_CLASS stage=sens-standalone-trit-core4 exit_class=zero count=1 p50_us=310' "$tmp/log"
 grep -Fq 'SENS_PHASE_EXIT_CLASS stage=direct exit_class=zero count=1 p50_us=100' "$tmp/log"
 grep -Fq 'SENS_PHASE_EXIT_CLASS stage=direct exit_class=nonzero count=2 p50_us=200' "$tmp/log"
+# Семантичний RED з exit=0 не входить до розподілу успішних вимірів.
+printf 'semantic-red\tRED\t5\n' >> "$tmp/ev/law-timings.tsv"
+printf 'semantic-red\tdirect\t0\t1\n' >> "$tmp/ev/law-stage-timings.tsv"
+bash "$tool" "$tmp/ev" "$tmp/report-semantic-red.md" > "$tmp/log-semantic-red"
+grep -Fq '| direct | PASS + exit=0 | 1 | 100 | 100 | 100 |' "$tmp/report-semantic-red.md"
+grep -Fq '| zig-open | PASS + exit=0 | 1 | 15 | 15 | 15 |' "$tmp/report-semantic-red.md"
+grep -Fq 'SENS_PHASE_VERIFIED_SUCCESS stage=direct count=1 p50_us=100' "$tmp/log-semantic-red"
+grep -Fq '| sens-standalone-trit-core4 | PASS + exit=0 | 1 | 310 | 310 | 310 |' "$tmp/report-semantic-red.md"
 printf 'bad\trow\n' >> "$tmp/ev/law-stage-timings.tsv"
 if bash "$tool" "$tmp/ev" "$tmp/invalid.md" > "$tmp/invalid.out" 2>&1; then
  echo 'REPORTER_TEST_FAILED: malformed evidence was accepted' >&2; exit 1
 fi
-echo 'REPORTER_TEST_PASS checks=18 evidence=synthetic reporting_only=true'
+echo 'REPORTER_TEST_PASS checks=22 evidence=synthetic reporting_only=true'
