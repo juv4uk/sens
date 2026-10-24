@@ -174,10 +174,25 @@ fn carryTrits(allocator: std.mem.Allocator, source: []const u8) ![]u8 {
 fn carryT5M(allocator: std.mem.Allocator, source: []const u8) ![]u8 {
     if (source.len == 0 or source.len > t5m.MAX_PHYSICAL_BYTES * 5)
         return Error.InvalidTritBoundary;
+    // First pass: validate every character and all word boundaries before
+    // allocating a word array. A malformed frame must report its grammar
+    // error even when the allocator has no free memory.
+    // Invalid characters retain precedence over malformed boundaries.
     var count: usize = 1;
-    for (source) |ch| {
-        if (ch == '2') count += 1 else if (ch != '0' and ch != '1') return Error.InvalidTrit;
+    var start_of_word: usize = 0;
+    var malformed_boundary = false;
+    for (source, 0..) |ch, i| {
+        if (ch == '2') {
+            if (i == start_of_word) malformed_boundary = true;
+            start_of_word = i + 1;
+            count += 1;
+        } else if (ch != '0' and ch != '1') {
+            return Error.InvalidTrit;
+        }
     }
+    if (malformed_boundary or start_of_word == source.len)
+        return Error.InvalidTritBoundary;
+
     const words = try allocator.alloc(t5m.Word, count);
     defer allocator.free(words);
     var start: usize = 0;
@@ -419,6 +434,19 @@ test "default T5M CLI carry packs exact opaque words five trits per byte" {
     try std.testing.expectEqualStrings("00000000001", decoded.words[0].bits);
     try std.testing.expectError(Error.InvalidTritBoundary, carryT5M(allocator, "201"));
     try std.testing.expectError(Error.InvalidTrit, carryT5M(allocator, "10x"));
+}
+
+test "T5M malformed separators are rejected before word allocation" {
+    // A zero-capacity allocator proves the parser rejects malformed grammar
+    // before requesting storage proportional to attacker-controlled separators.
+    var empty_storage: [0]u8 = .{};
+    var fixed = std.heap.FixedBufferAllocator.init(&empty_storage);
+    const allocator = fixed.allocator();
+
+    try std.testing.expectError(Error.InvalidTritBoundary, carryT5M(allocator, "2"));
+    try std.testing.expectError(Error.InvalidTritBoundary, carryT5M(allocator, "02"));
+    try std.testing.expectError(Error.InvalidTritBoundary, carryT5M(allocator, "0221"));
+    try std.testing.expectError(Error.InvalidTrit, carryT5M(allocator, "0x"));
 }
 
 test "Zig migration accepts presegmented trits longer than packed T5 bound" {
