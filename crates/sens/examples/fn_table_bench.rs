@@ -7,6 +7,8 @@
 //! 2. той самий виклик через SENS-код: працює / немає механізму;
 //! 3. результати звіряються (для недетермінованих функцій — лише факт);
 //! 4. обидва виклики, розібрані один раз, міряються по черзі.
+//! Помилка виконання на калібруванні чи повторі перериває вимірювання:
+//! швидкий Err ніколи не зараховується як швидке обчислення.
 //!
 //! `cargo run --release -p sens --example fn_table_bench -- TABLE.tsv [SAMPLES] [TARGET_MS]`
 
@@ -102,7 +104,9 @@ fn bench(
     loop {
         let t = Instant::now();
         for _ in 0..iters {
-            black_box(eval_parsed_expressions(&fb, sb).ok());
+            let result = eval_parsed_expressions(&fb, sb)
+                .unwrap_or_else(|error| panic!("SENS calibration failed: {error}"));
+            black_box(result.value);
         }
         let ms = t.elapsed().as_secs_f64() * 1e3;
         if ms >= target_ms / 4.0 || iters >= 1 << 24 {
@@ -118,7 +122,9 @@ fn bench(
         let run = |f: &[_], sess: &mut Session| {
             let t = Instant::now();
             for _ in 0..iters {
-                black_box(eval_parsed_expressions(f, sess).ok());
+                let result = eval_parsed_expressions(f, sess)
+                    .unwrap_or_else(|error| panic!("benchmark sample failed: {error}"));
+                black_box(result.value);
             }
             t.elapsed().as_nanos() as f64 / iters as f64
         };
