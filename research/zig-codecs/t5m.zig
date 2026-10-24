@@ -262,8 +262,26 @@ test "T5M transports adjacent D24 words without interpreting ratio semantics" {
     }
 }
 
+test "T5M preserves signed D12 boundary words without interpreting their meaning" {
+    const words = [_]Word{
+        .{ .width = 12, .bits = "100000000000" }, // caller-formed -2048
+        .{ .width = 12, .bits = "111111111111" }, // caller-formed -1
+        .{ .width = 12, .bits = "011111111111" }, // caller-formed 2047
+    };
+    const encoded = try encode(std.testing.allocator, &words);
+    defer std.testing.allocator.free(encoded);
+
+    var decoded = try decode(std.testing.allocator, encoded);
+    defer decoded.deinit(std.testing.allocator);
+    try std.testing.expectEqual(words.len, decoded.words.len);
+    for (words, decoded.words) |expected, actual| {
+        try std.testing.expectEqual(expected.width, actual.width);
+        try std.testing.expectEqualStrings(expected.bits, actual.bits);
+    }
+}
+
 test "T5M preserves opaque exact widths without interpreting numeric construction" {
-    const widths = [_]usize{ 24, 48, 96, 192, 384 };
+    const widths = [_]usize{ 12, 24, 48, 96, 192, 384 };
     for (widths) |width| {
         const bits = try std.testing.allocator.alloc(u8, width);
         defer std.testing.allocator.free(bits);
