@@ -397,6 +397,8 @@ jobs:
           cargo test --locked -p sens-host --test capability_scoping local_model_ -- --nocapture
           cargo test --locked -p sens-lsp --lib transport::tests:: -- --nocapture
           cargo test --locked -p sens-cli --bin sens t5m_quoted_ -- --nocapture
+          # D12 first-rung numeric source → real Zig/T5M → the SENS evaluator.
+          cargo test --locked -p sens-cli --bin sens-math-t5m -- --nocapture
           # Реальна межа TCP-кадру: UTF-8, EOF, overflow і абсолютний дедлайн.
           cargo test --locked -p sens-cli --bin sens tcp_repl_frame_ -- --nocapture
           # F6 — тільки механізм двозаписового Rust-транспорту.
