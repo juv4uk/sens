@@ -573,10 +573,34 @@ run_case run_error_rejection d6-map-onto-improper-tail tests/semantic/d6-map-ont
 run_case run_law d6-reduce-left-positive tests/semantic/d6-reduce-left-law.lisp 1 core4
 run_case run_law d6-reduce-left-mutant tests/semantic/d6-reduce-left-mutant.lisp 0 core4
 run_case run_error_rejection d6-reduce-improper-tail tests/semantic/d6-reduce-improper-tail-negative.lisp Type 'car expects a non-empty list' core4
-# Д6 SCAN: хвостове накопичення станів, мутант та точний Type.
-run_case run_law d6-scan-tail-state-positive tests/semantic/d6-scan-tail-state-law.lisp 1 core4
-run_case run_law d6-scan-tail-state-mutant tests/semantic/d6-scan-tail-state-mutant.lisp 0 core4
-run_case run_error_rejection d6-scan-tail-improper tests/semantic/d6-scan-tail-improper-negative.lisp Type 'car expects a non-empty list' core4
+# Д6 SCAN: обчислити саме чинні DEFINE SENS, а не викликати Text7 без зв'язування.
+# Витяг із єдиного чинного Core4-блоку; Type-негатив не можна зарахувати
+# за невідоме ім'я, лише за нативне D3 CAR Type після фізичного виконання.
+d6_scan_source="$evidence/d6-scan-tail-definitions.lisp"
+if ! awk '
+  $0 == "(визначити накопичувати-зворотні-стани" { found++; active = 1 }
+  $0 == "(визначити накопичувати-до" { found++; active = 1 }
+  $0 == "(визначити накопичувати" { if (found == 2) { stop = 1; exit }; bad = 1; exit }
+  active { print }
+  END { if (found != 2 || !stop || bad) exit 2 }
+' lib/core4-parts/core4-d6b.lisp > "$d6_scan_source"; then
+  echo "::error::D6_SCAN_SOURCE_NOT_ISOLATABLE" >&2
+  exit 2
+fi
+d6_scan_law="$evidence/d6-scan-tail-law-complete.lisp"
+d6_scan_mutant="$evidence/d6-scan-tail-mutant-complete.lisp"
+d6_scan_improper="$evidence/d6-scan-tail-improper-complete.lisp"
+cat -- "$d6_scan_source" tests/semantic/d6-scan-tail-state-law.lisp > "$d6_scan_law"
+cat -- "$d6_scan_source" tests/semantic/d6-scan-tail-state-mutant.lisp > "$d6_scan_mutant"
+cat -- "$d6_scan_source" tests/semantic/d6-scan-tail-improper-negative.lisp > "$d6_scan_improper"
+run_case run_law d6-scan-tail-state-positive "$d6_scan_law" 1 core4
+run_case run_law d6-scan-tail-state-mutant "$d6_scan_mutant" 0 core4
+run_case run_error_rejection d6-scan-tail-improper "$d6_scan_improper" Type 'car expects a non-empty list' core4
+sha256sum lib/core4-parts/core4-d6b.lisp \
+  tests/semantic/d6-scan-tail-state-law.lisp \
+  tests/semantic/d6-scan-tail-state-mutant.lisp \
+  tests/semantic/d6-scan-tail-improper-negative.lisp \
+  > "$evidence/d6-scan-tail-inputs.sha256"
 # Д6:101111 SCAN: послідовність станів, зв'язок із REDUCE та структурні відмови.
 run_case run_law d6-scan-reduce-terminal-positive tests/semantic/d6-scan-reduce-terminal-law.lisp 1 core4
 run_case run_law d6-scan-missing-initial-mutant tests/semantic/d6-scan-missing-initial-mutant.lisp 0 core4
