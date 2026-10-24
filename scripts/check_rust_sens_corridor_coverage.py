@@ -99,20 +99,69 @@ def _live_rust(source: str) -> str:
     return "".join(active)
 
 
-CFG_TEST_ATTR = re.compile(r"#\s*\[\s*cfg\s*\(\s*test\s*\)\s*\]")
+CFG_ATTR = re.compile(r"#\s*\[\s*cfg\s*\(")
+
+
+def _cfg_requires_test(expression: str) -> bool:
+    """Prove that a cfg predicate implies `test` in every active branch.
+
+    `all` requires test when any operand requires it; `any` requires it
+    only when every operand does. Unknown predicates stay production-visible.
+    """
+    expression = expression.strip()
+    if expression == "test":
+        return True
+    compound = re.match(r"^(all|any)\s*\(", expression)
+    if compound is not None and expression.endswith(")"):
+        operator = compound.group(1)
+        inner = expression[compound.end():-1]
+        operands: list[str] = []
+        depth = 0
+        split = 0
+        for index, char in enumerate(inner):
+            if char == "(":
+                depth += 1
+            elif char == ")":
+                depth -= 1
+            elif char == "," and depth == 0:
+                operands.append(inner[split:index])
+                split = index + 1
+        operands.append(inner[split:])
+        required = [_cfg_requires_test(value) for value in operands if value.strip()]
+        return any(required) if operator == "all" else bool(required) and all(required)
+    return False
 
 
 def _production_rust(active: str) -> str:
-    """Erase only cfg(test) items, retaining production Rust after them.
+    """Erase all Rust cfg items proven test-only, preserving later items.
 
-    _live_rust erased comments and literals. Ambiguous test-only item
-    boundaries fail closed instead of legitimizing a codec bypass.
+    Do not let a test-only Zig call attest production codec access. Ambiguous
+    item boundaries fail closed instead of legitimizing a transport bypass.
     """
     output = list(active)
     position = 0
-    while (match := CFG_TEST_ATTR.search(active, position)) is not None:
+    while (match := CFG_ATTR.search(active, position)) is not None:
         start = match.start()
-        item = match.end()
+        scan = match.end()
+        depth = 1
+        while scan < len(active) and depth:
+            if active[scan] == "(":
+                depth += 1
+            elif active[scan] == ")":
+                depth -= 1
+            scan += 1
+        if depth:
+            raise ValueError("unterminated cfg predicate")
+        expression = active[match.end():scan - 1]
+        close = scan
+        while close < len(active) and active[close].isspace():
+            close += 1
+        if close >= len(active) or active[close] != "]":
+            raise ValueError("cfg attribute has no closing bracket")
+        position = close + 1
+        if not _cfg_requires_test(expression):
+            continue
+        item = position
         # Additional attributes may decorate the same test-only item.
         while True:
             while item < len(active) and active[item].isspace():
@@ -120,35 +169,35 @@ def _production_rust(active: str) -> str:
             attribute = re.match(r"#\s*\[", active[item:])
             if attribute is None:
                 break
-            depth = 1
+            attr_depth = 1
             item += attribute.end()
-            while item < len(active) and depth:
+            while item < len(active) and attr_depth:
                 if active[item] == "[":
-                    depth += 1
+                    attr_depth += 1
                 elif active[item] == "]":
-                    depth -= 1
+                    attr_depth -= 1
                 item += 1
-            if depth:
+            if attr_depth:
                 raise ValueError("unterminated test-only attribute")
         if item >= len(active):
-            raise ValueError("cfg(test) has no Rust item")
+            raise ValueError("test-only cfg has no Rust item")
         brace = active.find("{", item)
         semicolon = active.find(";", item)
         if semicolon >= 0 and (brace < 0 or semicolon < brace):
             end = semicolon + 1
         elif brace >= 0:
-            depth = 1
+            brace_depth = 1
             end = brace + 1
-            while end < len(active) and depth:
+            while end < len(active) and brace_depth:
                 if active[end] == "{":
-                    depth += 1
+                    brace_depth += 1
                 elif active[end] == "}":
-                    depth -= 1
+                    brace_depth -= 1
                 end += 1
-            if depth:
-                raise ValueError("unterminated cfg(test) Rust item")
+            if brace_depth:
+                raise ValueError("unterminated cfg Rust item")
         else:
-            raise ValueError("cfg(test) Rust item has no terminator")
+            raise ValueError("test-only cfg Rust item has no terminator")
         output[start:end] = " " * (end - start)
         position = end
     return "".join(output)

@@ -146,6 +146,43 @@ class CorridorCoverageTests(unittest.TestCase):
             "test_id=zig-real-ingress-after-tests layer=transport expected=COVERAGE_OK",
         )
 
+    def test_cfg_all_test_only_zig_is_not_production_proof(self) -> None:
+        # Even compound test-only cfg attributes cannot authorize bypassing Zig.
+        for gate in (
+            'all(test, feature = "bench")',
+            'all(feature = "bench", test)',
+            'all ( feature = "bench", test )',
+            'all (test)',
+            'all(unix, any(test, all(test, feature = "bench")))',
+            'any(all(test, unix), all(test, windows))',
+        ):
+            with self.subTest(gate=gate):
+                write_crate(
+                    self.root, "compound",
+                    "fn live() { sens::decode_binary_frame(&[]); }\n"
+                    f"#[cfg({gate})]\n"
+                    "mod test_only { fn witness() { "
+                    "zig_transport::decode_t5_words(&[]); } }\n",
+                )
+                write_registry(self.root, [])
+                errors = self.module.check(self.root)
+                self.assertTrue(
+                    any("crates/compound/src/lib.rs" in error for error in errors),
+                    f"test_id=zig-compound-test-only layer=transport "
+                    f"expected=COVERAGE_BLOCKED gate={gate} actual={errors!r}",
+                )
+
+    def test_cfg_any_test_or_feature_stays_production_visible(self) -> None:
+        # cfg(any(test, feature=...)) can be enabled outside test builds.
+        write_crate(
+            self.root, "conditional",
+            "fn live() { sens::decode_binary_frame(&[]); }\n"
+            '#[cfg(any(test, feature = "physical"))]\n'
+            "fn possible_ingress() { zig_transport::decode_t5_words(&[]); }\n",
+        )
+        write_registry(self.root, [])
+        self.assertEqual(self.module.check(self.root), [])
+
     def test_unterminated_cfg_test_item_fails_closed(self) -> None:
         write_crate(
             self.root, "badtest",
