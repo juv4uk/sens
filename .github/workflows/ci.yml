@@ -1,4 +1,4 @@
-name: SENS — український Lisp і фізичний коридор
+name: "SENS — короткий CI: охоронець, Rust, Zig, SENS"
 
 on:
   push:
@@ -7,29 +7,19 @@ on:
     branches: [main]
   workflow_dispatch:
 
-# Спрощений ci.yml за версією 22.10.2026.
-# Один автоматичний workflow; важкі дослідження — лише вручну в ci-heavy.yml.
-# PASS коридору не є релізним допуском.
-#
-# Драбина D1–24+ — рамка навігації; чинні резиденти й закони визначаються контрактом.
-#   python3 scripts/search-domain-function.py <ім'я>      (--all <частина>, --domain d6)
-# Знайшов — вживай наявну; немає в програмі — визнач; немає в драбинах — кандидат D11 (далі D12…).
-# Охоронець scripts/guard-domain-function-reuse.py ловить дубль наявної поверхні (BLOCKED)
-# і друкує кандидатів D11. Драбина росте від потреби, а не від звички.
+# Повні дослідження/бенчмарки: ручний ci-heavy.yml.
+# Відновлення фізичних пар: ручний remint-drifted-pairs.yml.
+# Червоний результат не приховуємо; PASS коридору не є допуском релізу.
 permissions:
   contents: read
 
-# Окремий SHA має незалежний прогін: не скасовуємо попередні й не ставимо їх у чергу за гілкою.
-# Семантичні RED залишаються видимими на кожному перевіреному коміті.
 concurrency:
   group: sens-ci-${{ github.workflow }}-${{ github.sha }}-${{ github.event_name }}
   cancel-in-progress: false
 
 jobs:
   sens:
-    outputs:
-      changed_lisp_files: ${{ steps.changed-t5m-lisp.outputs.lisp_files }}
-    name: Українська проєкція, 3 бенчмарки та SENS/Zig/T5M
+    name: Охоронець · Rust · Zig · SENS
     runs-on: ubuntu-24.04
     timeout-minutes: 60
     steps:
@@ -46,8 +36,6 @@ jobs:
           python3 scripts/ci_one_focused_workflow.py
           python3 scripts/check_ci_bash_blocks.py
 
-      # Перевіряємо синтаксис CLI перед довгими тестами й бенчмарками.
-      # rustfmt тут лише парсить Rust; стилістичних змін не вимагаємо.
       - name: Rust CLI — рання перевірка синтаксису REPL
         shell: bash
         run: |
@@ -94,22 +82,8 @@ jobs:
           python3 scripts/check-domain-ladder-identity.py --check
           python3 scripts/check-numeric-domain-ratification.py --self-test
           python3 scripts/check_d10_owner_whole_domain_ratification.py
-          # D11: тотожність усіх 512 похідних координат і негативні мутанти.
           python3 scripts/check_d11_selector_seed.py --json
-          python3 -m unittest discover -s tests -p test_d11_selector_seed.py
-          python3 -m unittest discover -s tests -p test_add_d11_function.py
-          python3 -m unittest discover -s tests -p test_domain_game.py
 
-      - name: УКР-ПРОЄКЦІЯ — вчорашні анотації прогресу Lisp
-        if: ${{ always() }}
-        shell: bash
-        run: |
-          set -euo pipefail
-          python3 scripts/report_ukr_projection_progress.py \
-            --json "$RUNNER_TEMP/ukr-projection-progress.json"
-
-      # Незалежний механічний/мовний доказ не зникає після RED аудиту:
-      # збій залишається RED, але маніфест і SENS-коридор все одно працюють.
       - name: Знайти змінені Lisp-програми, а не історичні таблиці
         id: changed-t5m-lisp
         if: ${{ always() }}
@@ -308,8 +282,6 @@ jobs:
               print(f"T5M_CHANGED_FILE {name}")
           PY
 
-      # Інженерний бар'єр: новий мовний закон не рахується перевіреним
-      # від одного успішного mint чи Rust assert. Вимагаємо явний нативний маршрут.
       - uses: dtolnay/rust-toolchain@1.99.0
         if: ${{ always() }}
 
@@ -324,7 +296,7 @@ jobs:
             --base "$(cat "$RUNNER_TEMP/native-semantic-base.sha")" \
             --head "$GITHUB_SHA"
 
-      - name: Звірити резидентність і повторне використання функцій D1–24+
+      - name: Звірити повторне використання функцій D1–D11
         env:
           BEFORE_SHA: ${{ github.event.before }}
         run: |
@@ -356,331 +328,42 @@ jobs:
       - uses: ./.github/actions/install-zig
         if: ${{ always() }}
 
-      - name: Rust — обрамлення й помилки вводу, без мовного оракула
+      - name: Rust — механізм без мовного оракула
         if: ${{ always() }}
-        run: |
-          set -euo pipefail
-          cargo test --locked -p wsm-guard-slice --bin wsm-guard-slice tests::event_frame_rejects_overlong_duplicate_unknown_and_non_ascii_fields -- --exact --nocapture
-          cargo test --locked -p sens-lsp --lib transport::tests:: -- --nocapture
-          cargo test --locked -p sens --test d5_list_search_laws -- --nocapture
-          # Rust перевіряє механізм завантаження/виконання Lisp, без власних семантичних очікувань.
-          cargo test --locked -p sens --test d11_srfi1_find_tail -- --nocapture
-          # JSON false/null is a Rust decoder-mechanism boundary, not a Lisp semantic oracle.
-          cargo test --locked -p sens --lib parse_json_keeps_false_distinct_from_null -- --nocapture
-          # Rust перевіряє тільки носій D7: чинне українське зв'язування
-          # після Zig/T5M доступне, а незв'язаний гліф не стає функцією.
-          cargo test --locked -p sens --lib physical_d7_existing_binding_regressions -- --nocapture
-          # Rust перевіряє механіку канонічного D7 READ/WRITE, включно з пошкодженими носіями.
-          cargo test --locked -p sens --lib io::tests:: -- --nocapture
-          cargo test --locked -p sens --test ukr_unpaired_benchmark_runtime два_українські_рекурсивні_джерела_завантажуються_як_lisp -- --exact --nocapture
-          # Rust перевіряє тільки ідемпотентність точного D6 зв'язування Lisp-макроса.
-          # Сам закон LET/LET* лишається мовним SENS-свідком.
-          cargo test --locked -p sens --lib core4_bootstrap_cache_tests::d6_macro_mechanism_rebinding_is_idempotent_after_core4 -- --exact --nocapture
-          # Rust тестує тільки прив'язку ратифікованого D8 механізму; закон перевіряє Lisp.
-          cargo test --locked -p sens --lib core4_bootstrap_cache_tests::d8_string_to_symbol_projection_is_installed_after_core4 -- --exact --nocapture
-          # Канарейка саме bare CLI Environment::root(): Core4 → D7 макрос → D6 слоти → UTF-8/TCP.
-          # Rust тут перевіряє встановлення, не мовний вирок LET.
-          cargo test --locked -p sens --lib exact_surface_domain_query_migration_tests::bare_cli_session_recovers_lisp_macros_through_d7_and_exact_d6_slots -- --exact --nocapture
-          # Rust бенчмарк тільки реального I/O байтів Lisp. Він не обчислює D1.
-          # 11 проб із прогрівом, p50/p90, явно запускаємо ignored benchmark.
-          cargo test --locked -p sens-cli --test mechanism_file_io_benchmark -- --include-ignored --nocapture
-          # Smoke the self-contained Rust benchmark sample modes so CI compiles and checks
-          # the exact-width and packing implementations rather than only their runner.
-          cargo build --locked -p sens --example domain12345678_bench --example byte_pack_bench
-          target/debug/examples/domain12345678_bench series d3 10000 5 > "$RUNNER_TEMP/rust-domain-smoke.tsv"
-          test "$(grep -c '^RUST_DOMAIN_SAMPLE[[:space:]]' "$RUNNER_TEMP/rust-domain-smoke.tsv")" -eq 5
-          test "$(grep -c '^RUST_DOMAIN_SUMMARY[[:space:]]' "$RUNNER_TEMP/rust-domain-smoke.tsv")" -eq 1
-          target/debug/examples/byte_pack_bench series mixed 128 5 > "$RUNNER_TEMP/rust-pack-smoke.tsv"
-          test "$(grep -c '^PACK_BENCH_PREFLIGHT[[:space:]]' "$RUNNER_TEMP/rust-pack-smoke.tsv")" -eq 1
-          test "$(grep -c '^PACK_BENCH_SAMPLE[[:space:]]' "$RUNNER_TEMP/rust-pack-smoke.tsv")" -eq 15
-          test "$(grep -c '^PACK_BENCH_SUMMARY[[:space:]]' "$RUNNER_TEMP/rust-pack-smoke.tsv")" -eq 3
-          cat "$RUNNER_TEMP/rust-domain-smoke.tsv" "$RUNNER_TEMP/rust-pack-smoke.tsv"
-          # Rust exact-width ingest benchmark: same D2/domain AST preflight, no JSON/Python corpus.
-          # This measures only visible vs packed Rust readers; semantic verdicts stay in Lisp → Zig/T5M → SENS.
-          bash benchmarks/rust-packed-visible/run.sh "$RUNNER_TEMP/rust-packed-visible"
-          cat "$RUNNER_TEMP/rust-packed-visible/summary.md" >> "$GITHUB_STEP_SUMMARY"
-          # Семантика D11 перевіряється в окремому Lisp-кроці через SENS/T5M.
-          # Не дублюємо мовний оракул у механічному Rust-шарі.
-
-      - name: Zig — кодеки, ABI та безпечна межа копіювання
-        if: ${{ always() }}
-        shell: bash
-        run: |
-          set -euo pipefail
-          # Незалежні механічні перевірки виконуються рівно один раз кожна.
-          # Не маскувати RED першого набору успішним завершенням другого.
-          zig_failed=0
-          if zig test -lc research/zig-codecs/tests.zig; then
-            echo "::notice title=Zig codecs::PASS layer=codec"
-          else
-            echo "::error file=research/zig-codecs/tests.zig,title=Zig codecs::REGRESSION layer=codec expected=pass actual=nonzero"
-            zig_failed=1
-          fi
-          if zig test -lc zig_transport_root.zig; then
-            echo "::notice title=Zig ABI::PASS layer=abi"
-          else
-            echo "::error file=zig_transport_root.zig,title=Zig ABI::REGRESSION layer=abi expected=pass actual=nonzero"
-            zig_failed=1
-          fi
-          # Вимірюємо ТІЛЬКИ T5M transport Zig, без виконання мовних законів.
-          # У Zig 0.16 — Io.Clock.awake, а не видалений std.time.Timer.
-          # Фізичні позитивні/негативні контрприклади Zig не залежать від бенчмарка.
-          if zig test -O ReleaseFast -lc bench_t5m_test.zig \
-              > "$RUNNER_TEMP/zig-t5m-mechanism-tests.log" 2>&1; then
-            cat "$RUNNER_TEMP/zig-t5m-mechanism-tests.log"
-            echo "::notice title=Zig T5M mechanism::PASS codec=physical-roundtrip-and-fail-closed semantics=NOT_TESTED"
-          else
-            cat "$RUNNER_TEMP/zig-t5m-mechanism-tests.log" >&2
-            echo "::error file=bench_t5m_test.zig,title=Zig T5M mechanism::REGRESSION layer=codec-test expected=physical-parity actual=failed"
-            zig_failed=1
-          fi
-          if zig run -O ReleaseFast -lc bench_t5m.zig \
-              > "$RUNNER_TEMP/zig-t5m-benchmark.log" 2>&1; then
-            cat "$RUNNER_TEMP/zig-t5m-benchmark.log"
-            echo "::notice title=Zig T5M benchmark::MEASURED provenance=$(git rev-parse HEAD) physical=benchmarks/lists.sens language_truth=NOT_ASSERTED"
-          else
-            cat "$RUNNER_TEMP/zig-t5m-benchmark.log" >&2
-            echo "::error file=bench_t5m.zig,title=Zig benchmark::REGRESSION layer=codec-benchmark expected=canonical-roundtrip actual=failed"
-            zig_failed=1
-          fi
-          # Гра пам'яті використовує чинні Lisp-таблиці та доводить повне покриття D11.
-          # Тут перевіряється тільки механіка гри; мовні закони виконуються SENS.
-          if zig test -lc research/zig-codecs/ladder_memory_game.zig \
-              > "$RUNNER_TEMP/zig-ladder-memory-game.log" 2>&1; then
-            cat "$RUNNER_TEMP/zig-ladder-memory-game.log"
-            echo "::notice title=Zig ladder memory game::PASS D11 questions=512 reproducible=YES semantics=NOT_TESTED"
-          else
-            cat "$RUNNER_TEMP/zig-ladder-memory-game.log" >&2
-            echo "::error file=research/zig-codecs/ladder_memory_game.zig,title=Zig ladder memory game::REGRESSION layer=game expected=512-question-complete-round actual=failed"
-            zig_failed=1
-          fi
-          if zig test -lc research/zig-codecs/d11_selector_contest.zig \
-              > "$RUNNER_TEMP/zig-d11-selector-tests.log" 2>&1; then
-            cat "$RUNNER_TEMP/zig-d11-selector-tests.log"
-            echo "::notice title=Zig D11 selector codec::PASS selectors=512 modes=9-bit,11-bit,raw16 semantics=NOT_TESTED"
-          else
-            cat "$RUNNER_TEMP/zig-d11-selector-tests.log" >&2
-            echo "::error file=research/zig-codecs/d11_selector_contest.zig,title=Zig D11 selector codec::REGRESSION layer=codec-test expected=exact-roundtrip actual=failed"
-            zig_failed=1
-          fi
-          # Той самий потік D11 міряється трьома поданнями; preflight перевіряє точний roundtrip.
-          # 15 чергованих зразків, p50/p90; цифри — payload+encode/decode, не SENS semantics.
-          if zig build-exe -lc -O ReleaseFast research/zig-codecs/d11_selector_contest.zig \
-              -femit-bin="$RUNNER_TEMP/sens-d11-selector-contest"; then
-            if "$RUNNER_TEMP/sens-d11-selector-contest" > "$RUNNER_TEMP/zig-d11-selector-benchmark.log" 2>&1; then
-              cat "$RUNNER_TEMP/zig-d11-selector-benchmark.log"
-              if grep -Fq 'mode=selector9 words=64 bytes=72' "$RUNNER_TEMP/zig-d11-selector-benchmark.log" &&
-                 grep -Fq 'mode=dense11 words=64 bytes=88' "$RUNNER_TEMP/zig-d11-selector-benchmark.log" &&
-                 grep -Fq 'mode=raw16 words=64 bytes=128' "$RUNNER_TEMP/zig-d11-selector-benchmark.log" &&
-                 grep -Fq 'mode=selector9 words=512 bytes=576' "$RUNNER_TEMP/zig-d11-selector-benchmark.log" &&
-                 grep -Fq 'mode=dense11 words=512 bytes=704' "$RUNNER_TEMP/zig-d11-selector-benchmark.log" &&
-                 grep -Fq 'mode=raw16 words=512 bytes=1024' "$RUNNER_TEMP/zig-d11-selector-benchmark.log" &&
-                 [[ "$(grep -c '^D11_CONTEST mode=' "$RUNNER_TEMP/zig-d11-selector-benchmark.log")" -eq 6 ]] &&
-                 grep -Fq 'samples=15' "$RUNNER_TEMP/zig-d11-selector-benchmark.log" &&
-                 grep -Fq 'p50_ns_per_roundtrip=' "$RUNNER_TEMP/zig-d11-selector-benchmark.log" &&
-                 grep -Fq 'p90_ns_per_roundtrip=' "$RUNNER_TEMP/zig-d11-selector-benchmark.log" &&
-                 grep -Fq 'D11_CONTEST_METHOD paired=YES alternating=YES samples=15' "$RUNNER_TEMP/zig-d11-selector-benchmark.log" &&
-                 [[ "$(grep -c 'roundtrip=EXACT paired=YES' "$RUNNER_TEMP/zig-d11-selector-benchmark.log")" -eq 6 ]]; then
-                cat "$RUNNER_TEMP/zig-d11-selector-benchmark.log" >> "$GITHUB_STEP_SUMMARY"
-                echo "::notice title=Zig D11 codec benchmark::MEASURED sizes=64,512 modes=selector9,dense11,raw16 samples=15 exact_parity=YES"
-              else
-                echo "::error title=Zig D11 codec benchmark::REGRESSION layer=benchmark-contract expected=6-exact-paired-p50-p90-rows actual=missing-or-invalid"
-                zig_failed=1
-              fi
-            else
-              cat "$RUNNER_TEMP/zig-d11-selector-benchmark.log" >&2
-              echo "::error title=Zig D11 codec benchmark::REGRESSION layer=benchmark-run expected=success actual=nonzero"
-              zig_failed=1
-            fi
-          else
-            echo "::error title=Zig D11 codec benchmark::REGRESSION layer=benchmark-build expected=success actual=nonzero"
-            zig_failed=1
-          fi
-          # Драбина кодеків: D12 dense проти BE16 на тих самих 4096 словах.
-          # Це тільки payload-механіка Zig; SENS-значення і D12-допуск не заявляємо.
-          if zig test -O ReleaseFast -lc research/zig-codecs/d12_dense_experiment.zig \
-              > "$RUNNER_TEMP/zig-d12-dense-tests.log" 2>&1; then
-            cat "$RUNNER_TEMP/zig-d12-dense-tests.log"
-            echo "::notice title=Zig D12 dense::PASS layer=mechanism semantics=NOT_TESTED"
-          else
-            cat "$RUNNER_TEMP/zig-d12-dense-tests.log" >&2
-            echo "::error file=research/zig-codecs/d12_dense_experiment.zig,title=Zig D12 dense::REGRESSION layer=codec-test expected=roundtrip actual=failed"
-            zig_failed=1
-          fi
-          if zig run -O ReleaseFast -lc bench_d12_dense.zig \
-              > "$RUNNER_TEMP/zig-d12-dense-bench.log" 2>&1; then
-            cat "$RUNNER_TEMP/zig-d12-dense-bench.log"
-            echo "::notice title=Zig D12 A/B::MEASURED provenance=$(git rev-parse HEAD) scope=raw-payload-only"
-          else
-            cat "$RUNNER_TEMP/zig-d12-dense-bench.log" >&2
-            echo "::error file=bench_d12_dense.zig,title=Zig D12 A/B::REGRESSION layer=codec-benchmark expected=preflight-and-measurement actual=failed"
-            zig_failed=1
-          fi
-          # D13 — лише дослідна фізична щільність. Чинна математична сім'я: D12,D24,D48…
-          # Сім неканонічних хвостів мають відмовляти без часткових вихідних слів.
-          if zig test -O ReleaseFast -lc research/zig-codecs/d13_dense_experiment.zig \
-              > "$RUNNER_TEMP/zig-d13-research-tests.log" 2>&1; then
-            cat "$RUNNER_TEMP/zig-d13-research-tests.log"
-            echo "::notice title=Zig D13 research::PASS layer=mechanism semantics=NOT_TESTED domain=NOT_RATIFIED"
-          else
-            cat "$RUNNER_TEMP/zig-d13-research-tests.log" >&2
-            echo "::error file=research/zig-codecs/d13_dense_experiment.zig,title=Zig D13 research::REGRESSION layer=codec-test expected=8192-roundtrips-and-seven-fail-closed-tails actual=failed"
-            zig_failed=1
-          fi
-          if zig run -O ReleaseFast -lc research/zig-codecs/d13_dense_experiment.zig \
-              > "$RUNNER_TEMP/zig-d13-research-bench.log" 2>&1; then
-            cat "$RUNNER_TEMP/zig-d13-research-bench.log"
-            if grep -Fq 'mode=dense13 words=64 bytes=104' "$RUNNER_TEMP/zig-d13-research-bench.log" &&
-               grep -Fq 'mode=raw16 words=64 bytes=128' "$RUNNER_TEMP/zig-d13-research-bench.log" &&
-               grep -Fq 'mode=dense13 words=512 bytes=832' "$RUNNER_TEMP/zig-d13-research-bench.log" &&
-               grep -Fq 'mode=raw16 words=512 bytes=1024' "$RUNNER_TEMP/zig-d13-research-bench.log" &&
-               [[ "$(grep -c '^D13_EXPERIMENT mode=' "$RUNNER_TEMP/zig-d13-research-bench.log")" -eq 4 ]] &&
-               [[ "$(grep -c 'roundtrip=EXACT frame=EXCLUDED semantics=NOT_TESTED' "$RUNNER_TEMP/zig-d13-research-bench.log")" -eq 4 ]] &&
-               grep -Fq 'D13_EXPERIMENT_METHOD width=13' "$RUNNER_TEMP/zig-d13-research-bench.log"; then
-              cat "$RUNNER_TEMP/zig-d13-research-bench.log" >> "$GITHUB_STEP_SUMMARY"
-              echo "::notice title=Zig D13 research benchmark::MEASURED provenance=$(git rev-parse HEAD) width=13 semantic_domain=NOT_RATIFIED"
-            else
-              echo "::error title=Zig D13 research benchmark::REGRESSION layer=benchmark-contract expected=4-exact-rows-and-method actual=missing-or-invalid"
-              zig_failed=1
-            fi
-          else
-            cat "$RUNNER_TEMP/zig-d13-research-bench.log" >&2
-            echo "::error title=Zig D13 research benchmark::REGRESSION layer=benchmark-run expected=success actual=nonzero"
-            zig_failed=1
-          fi
-          # Д13-гра: лише похідні D11-селектори, без семантичної ратифікації.
-          # Негативні кадри і всі 2048 точних координат перевіряє сам Zig.
-          # Д13-гра: генератор і перевірка 2048 кандидатів від чинних D11-таблиць.
-          # Механічна перевірка не оголошує новий домен або виконуваний opcode.
-          if zig test -O ReleaseFast -lc research/zig-codecs/d13_selector_game.zig \
-              > "$RUNNER_TEMP/zig-d13-selector-game.log" 2>&1; then
-            cat "$RUNNER_TEMP/zig-d13-selector-game.log"
-            echo "::notice title=Zig D13 selector game::PASS candidates=2048 parents=512 semantic_status=UNRATIFIED"
-          else
-            cat "$RUNNER_TEMP/zig-d13-selector-game.log" >&2
-            echo "::error file=research/zig-codecs/d13_selector_game.zig,title=Zig D13 selector game::REGRESSION layer=derived-coordinate-game expected=2048-exact-unique-candidates actual=failed"
-            zig_failed=1
-          fi
-          if zig test -O ReleaseFast -lc research/zig-codecs/d13_selector_contest.zig \
-              > "$RUNNER_TEMP/zig-d13-selector-tests.log" 2>&1; then
-            cat "$RUNNER_TEMP/zig-d13-selector-tests.log"
-            echo "::notice title=Zig D13 selector research::PASS layer=mechanism parents=512 derived=2048 semantics=NOT_TESTED"
-          else
-            cat "$RUNNER_TEMP/zig-d13-selector-tests.log" >&2
-            echo "::error file=research/zig-codecs/d13_selector_contest.zig,title=Zig D13 selectors::REGRESSION layer=codec-test input=D11-parent-table expected=2048-exact-derived-coordinates-and-negative-tests actual=failed"
-            zig_failed=1
-          fi
-          if zig run -O ReleaseFast -lc research/zig-codecs/d13_selector_contest.zig \
-              > "$RUNNER_TEMP/zig-d13-selector-bench.log" 2>&1; then
-            cat "$RUNNER_TEMP/zig-d13-selector-bench.log"
-            if grep -Fq 'mode=selector11 words=64 bytes=88' "$RUNNER_TEMP/zig-d13-selector-bench.log" &&
-               grep -Fq 'mode=dense13 words=64 bytes=104' "$RUNNER_TEMP/zig-d13-selector-bench.log" &&
-               grep -Fq 'mode=raw16 words=64 bytes=128' "$RUNNER_TEMP/zig-d13-selector-bench.log" &&
-               grep -Fq 'mode=selector11 words=2048 bytes=2816' "$RUNNER_TEMP/zig-d13-selector-bench.log" &&
-               grep -Fq 'mode=dense13 words=2048 bytes=3328' "$RUNNER_TEMP/zig-d13-selector-bench.log" &&
-               grep -Fq 'mode=raw16 words=2048 bytes=4096' "$RUNNER_TEMP/zig-d13-selector-bench.log" &&
-               [[ "$(grep -c '^D13_CONTEST mode=' "$RUNNER_TEMP/zig-d13-selector-bench.log")" -eq 6 ]] &&
-               grep -Fq 'D13_CONTEST_METHOD paired=YES alternating=YES samples=15' "$RUNNER_TEMP/zig-d13-selector-bench.log"; then
-              cat "$RUNNER_TEMP/zig-d13-selector-bench.log" >> "$GITHUB_STEP_SUMMARY"
-              echo "::notice title=Zig D13 selector benchmark::MEASURED provenance=$(git rev-parse HEAD) frame=EXCLUDED semantics=NOT_TESTED"
-            else
-              echo "::error title=Zig D13 selector benchmark::REGRESSION layer=benchmark-contract expected=six-exact-rows-and-method actual=missing-or-invalid"
-              zig_failed=1
-            fi
-          else
-            cat "$RUNNER_TEMP/zig-d13-selector-bench.log" >&2
-            echo "::error title=Zig D13 selector benchmark::REGRESSION layer=benchmark-run expected=success actual=nonzero"
-            zig_failed=1
-          fi
-          # Дослідний кодек DWC1 — окремий від production Zig/T5M.
-          # На кожному корпусі перевіряємо exact (width,bits) перед AB/BA замірами.
-          if zig test -O ReleaseFast -lc research/zig-codecs/domain_codebook_experiment.zig \
-              > "$RUNNER_TEMP/zig-dwc1-tests.log" 2>&1; then
-            cat "$RUNNER_TEMP/zig-dwc1-tests.log"
-            echo "::notice title=Zig DWC1 experiment::PASS layer=mechanism semantics=NOT_TESTED"
-          else
-            cat "$RUNNER_TEMP/zig-dwc1-tests.log" >&2
-            echo "::error file=research/zig-codecs/domain_codebook_experiment.zig,title=Zig DWC1 tests::REGRESSION layer=codec-experiment expected=roundtrip-and-fail-closed actual=failed"
-            zig_failed=1
-          fi
-          if zig run -O ReleaseFast -lc bench_domain_codebook.zig \
-              > "$RUNNER_TEMP/zig-dwc1-benchmark.log" 2>&1; then
-            cat "$RUNNER_TEMP/zig-dwc1-benchmark.log"
-            echo "::notice title=Zig DWC1 A/B::MEASURED corpora=4 provenance=$(git rev-parse HEAD) semantics=NOT_TESTED"
-          else
-            cat "$RUNNER_TEMP/zig-dwc1-benchmark.log" >&2
-            echo "::error file=bench_domain_codebook.zig,title=Zig DWC1 A/B::REGRESSION layer=codec-experiment expected=paired-measurements actual=failed"
-            zig_failed=1
-          fi
-          # Дослідний багатобайтовий T33 — окремо від production T5M та DWC1.
-          if zig test -O ReleaseFast -lc research/zig-codecs/t33_experiment.zig \
-              > "$RUNNER_TEMP/zig-t33-tests.log" 2>&1; then
-            cat "$RUNNER_TEMP/zig-t33-tests.log"
-            echo "::notice title=Zig T33 experiment::PASS layer=mechanism semantics=NOT_TESTED"
-          else
-            cat "$RUNNER_TEMP/zig-t33-tests.log" >&2
-            echo "::error file=research/zig-codecs/t33_experiment.zig,title=Zig T33 tests::REGRESSION layer=codec-experiment expected=exact-roundtrip-and-fail-closed actual=failed"
-            zig_failed=1
-          fi
-          if zig run -O ReleaseFast -lc bench_t33.zig \
-              > "$RUNNER_TEMP/zig-t33-benchmark.log" 2>&1; then
-            cat "$RUNNER_TEMP/zig-t33-benchmark.log"
-            echo "::notice title=Zig T33 A/B::MEASURED corpora=4 provenance=$(git rev-parse HEAD) semantics=NOT_TESTED"
-          else
-            cat "$RUNNER_TEMP/zig-t33-benchmark.log" >&2
-            echo "::error file=bench_t33.zig,title=Zig T33 A/B::REGRESSION layer=codec-experiment expected=paired-measurements actual=failed"
-            zig_failed=1
-          fi
-          exit "$zig_failed"
-
-      # Окремі бенчмарки MECHANISM_COPY_BENCH: не змішувати з Lisp-законами.
-      # По одному прогону Rust/Zig на коміт, p50/p90 без автоматичного gate швидкості.
-      - name: Rust/Zig — мікробенчмарки механізму байтового транспорту
-        if: ${{ always() }}
-        shell: bash
-        timeout-minutes: 6
-        run: |
-          set -euo pipefail
-          rustc -O --edition=2021 benchmarks/mechanism/rust-byte-copy-bench.rs -o "$RUNNER_TEMP/sens-rust-copy-bench"
-          "$RUNNER_TEMP/sens-rust-copy-bench"
-          zig test -O ReleaseFast -lc benchmarks/mechanism/zig-byte-copy-bench.zig
-          echo "::notice title=Rust Zig mechanism benchmarks::MEASURED samples=11 batch=512 source=lib/core4.lisp semantic=NOT_ASSERTED"
-
-      # Д11: Rust і Zig виконують ті самі три операції з тими самими даними.
-      # Однакова часова межа, повторно використовувані буфери, 15 чергованих зразків.
-      - name: Rust/Zig — порівнюваний бенчмарк сімейств D11
-        if: ${{ always() }}
-        shell: bash
-        timeout-minutes: 5
-        run: |
-          set -euo pipefail
-          bash benchmarks/native/run-d11-families.sh "$RUNNER_TEMP/d11-families"
-          cat "$RUNNER_TEMP/d11-families/summary.tsv" >> "$GITHUB_STEP_SUMMARY"
-
-      # Rust тут перевіряє тільки механізм CLI. Жоден результат арифметики
-      # або Lisp-закон не визначається Rust-тестами.
-      - name: Rust CLI — механізм запуску бенчмарків, без мовного оракула
-        id: benchmark-cli
-        if: ${{ always() }}
-        shell: bash
         timeout-minutes: 15
+        shell: bash
         run: |
           set -euo pipefail
-          export CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0
-          # Механічна проєкція цитованих ASCII D7: перевірити точні комірки
-          # на справжньому Rust→Zig маршруті, без host-оракула семантики.
+          cargo test --locked -p sens --lib io::tests:: -- --nocapture
+          cargo test --locked -p sens --test d5_list_search_laws -- --nocapture
+          cargo test --locked -p sens-lsp --lib transport::tests:: -- --nocapture
           cargo test --locked -p sens-cli --bin sens t5m_quoted_ -- --nocapture
-          cargo test --locked -p sens-cli --test arithmetic_benchmark_cli -- --nocapture
-          # Rust вимірює тільки власну фізичну рамку запису: не Lisp-істинність.
-          cargo test --locked -p sens --example rust_record_framing_bench -- --nocapture
-          # Окремі Session для калібрування та замірів; це тест механізму бенчмарка.
           cargo test --locked -p sens --example fn_table_bench -- --nocapture
-          cargo run --locked -p sens --example rust_record_framing_bench \
-            > "$RUNNER_TEMP/rust-framing-benchmark.log"
-          cat "$RUNNER_TEMP/rust-framing-benchmark.log"
-          echo "::notice title=Rust framing benchmark::MEASURED provenance=$(git rev-parse HEAD) layer=rust-framing language_truth=NOT_ASSERTED"
 
-      # Одного білда з AST вистачає для коридору, фізичних Lisp-законів та звіту.
+      - name: Zig — точний кодек, ABI, пошкоджені кадри
+        if: ${{ always() }}
+        shell: bash
+        run: |
+          set -uo pipefail
+          failed=0
+          python3 scripts/ci_zig_purity.py || failed=1
+          zig test -lc research/zig-codecs/tests.zig || failed=1
+          zig test -lc zig_transport_root.zig || failed=1
+          zig test -O ReleaseFast -lc bench_t5m_test.zig || failed=1
+          if (( failed != 0 )); then
+            echo "::error title=ZIG_TRANSPORT_REGRESSION::id=zig-codec-abi layer=Zig expected=all-tests-pass actual=one-or-more-failures repro=zig-test sha=$GITHUB_SHA"
+          fi
+          exit "$failed"
+
+      - name: Один транспортний бенчмарк — Zig T5M
+        if: ${{ always() }}
+        timeout-minutes: 5
+        shell: bash
+        run: |
+          set -euo pipefail
+          zig run -O ReleaseFast -lc bench_t5m.zig
+          echo "MEASURED layer=Zig/T5M sha=$GITHUB_SHA semantics=NOT_TESTED"
+
       - name: Зібрати нативний SENS і Zig/T5M лише один раз
         id: native-build
         if: ${{ always() }}
@@ -692,33 +375,7 @@ jobs:
           cargo build --locked -p sens-cli --bin sens --bin sens-trit --features benchmark-ast-visits
           test -x "$PWD/target/debug/sens"
           test -x "$PWD/target/debug/sens-trit"
-      - name: Rust — smoke фізичного T5 бенчмарка після перевірки паритету
-        id: physical_t5_benchmark_smoke
-        if: ${{ always() && steps.native-build.outcome == 'success' }}
-        shell: bash
-        timeout-minutes: 8
-        run: |
-          set -euo pipefail
-          out="$RUNNER_TEMP/physical-t5-mechanism-smoke.tsv"
-          SENS_PHYSICAL_T5_SENS="$PWD/target/debug/sens" \
-          SENS_PHYSICAL_T5_TRIT="$PWD/target/debug/sens-trit" \
-          SENS_PHYSICAL_T5_REPS=5 SENS_PHYSICAL_T5_WARMUPS=1 \
-            cargo test --locked -p sens-cli --features benchmark-ast-visits \
-              --test physical_sens_runtime_benchmark -- --ignored --nocapture \
-              > "$out" 2>&1 || {
-                cat "$out" >&2
-                exit 1
-              }
-          test "$(grep -c '^RUST_PHYSICAL_T5_PREFLIGHT[[:space:]]' "$out")" -eq 8
-          test "$(grep -c '^RUST_PHYSICAL_T5_SAMPLE[[:space:]]' "$out")" -eq 120
-          test "$(grep -c '^RUST_PHYSICAL_T5_SUMMARY[[:space:]]' "$out")" -eq 24
-          grep -E '^RUST_PHYSICAL_T5_(PREFLIGHT|SUMMARY)[[:space:]]' "$out"
 
-
-      # Маршрут 22.10: кожен push із .lisp МУСИТЬ дійти до реального
-      # SENS → Zig/T5M mint/verify-view → парного й фізичного SENS-виконання.
-      # Для таблиць/залежних фікстур маніфест містить виконувані Lisp-закони;
-      # порожній маніфест після push .lisp — помилка, не тихий SKIP.
       - name: PUSH Lisp → кодек Zig/T5M → виконання SENS
         id: t5m_changed_execute
         if: ${{ always() && steps.native-build.outcome == 'success' }}
@@ -750,556 +407,13 @@ jobs:
           echo "::notice file=.github/workflows/ci.yml,title=SENS Lisp→Zig/T5M→SENS::PASS physical_codec=Zig/T5M execution=SENS release=NOT_CERTIFIED"
 
 
-
-      # Незалежний від загального corpus: сторонній RED не приховує доказ
-      # мовних законів. Кодек і Zig перевіряють лише носій.
-      - name: Lisp → Zig/T5M → SENS — нативні позитивні й негативні мовні закони
+      - name: Lisp → Zig/T5M → SENS — позитивні та негативні закони
         if: ${{ always() && steps.native-build.outcome == 'success' }}
+        timeout-minutes: 15
         shell: bash
-        timeout-minutes: 8
         run: |
           set -euo pipefail
-          export CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0
-          # Перевірити механічну прив'язку індексу до Lisp-рядка до RED-прогону.
-          bash scripts/tests/test-diagnose-sens-physical-form.sh
           bash scripts/prove-lisp-semantic-t5m.sh \
             "$PWD/target/debug/sens" "$PWD/target/debug/sens-trit" \
-            "$RUNNER_TEMP/changed-t5m-pairs/lisp-laws"
-
-      # Один набір реальних SENS/Zig вимірів, навіть коли один закон RED.
-      # Shell тільки агрегує наявні дані; нового запуску SENS немає.
-      - name: Профіль вузьких місць SENS/Zig з наявних бенчмарків
-        if: always()
-        shell: bash
-        run: |
-          set -euo pipefail
-          bash scripts/tests/test-report-sens-law-hotspots.sh
-          evidence="$RUNNER_TEMP/changed-t5m-pairs/lisp-laws"
-          report="$RUNNER_TEMP/sens-law-hotspots.md"
-          bash scripts/report-sens-law-hotspots.sh "$evidence" "$report"
-          cat "$report" >> "$GITHUB_STEP_SUMMARY"
-
-      # Логіка перевірки всередині Lisp. Bash лише звіряє фактичний D1-вивід.
-      # Rust відповідає за механізми Rust, Zig — за власний T5M/ABI.
-      - name: Lisp-семантика Д1/Д3/Д4 — позитив і негатив у справжньому SENS
-        id: benchmark-laws
-        if: ${{ always() && steps.native-build.outcome == 'success' }}
-        shell: bash
-        timeout-minutes: 10
-        run: |
-          set -euo pipefail
-          binary="$PWD/target/debug/sens"
-          # Бінарники зібрано один раз вище, тут перевіряється лише SENS-семантика.
-          export CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0
-          test -x "$binary"
-          # Зберігаємо тільки завершені перевірки, а не заздалегідь оголошений PASS.
-          : > "$RUNNER_TEMP/benchmark-law-status.tsv"
-          law_failure_count=0
-          check_lisp_law() {
-            local id="$1" source="$2" expected="$3" actual
-            if ! actual="$(timeout 45s "$binary" "$source")"; then
-              # У довгих Lisp-бандлах останні успішні форми вже обчислено
-              # справжнім SENS. Не губимо їх при ненульовому exit-коді.
-              if [[ -n "$actual" ]]; then
-                echo "SENS_LAW_PARTIAL_STDOUT id=$id source=$source (останні 16 рядків)" >&2
-                printf '%s\n' "$actual" | tail -n 16 >&2
-              fi
-              echo "::error file=$source,title=SENS Lisp law::REGRESSION id=$id layer=eval expected=$expected actual=execution-failure partial_stdout=see-log"
-              law_failure_count=$((law_failure_count + 1))
-              return 0
-            fi
-            if [[ "$actual" != "$expected" ]]; then
-              echo "::error file=$source,title=SENS Lisp law::REGRESSION id=$id layer=semantics expected=$expected actual=$actual"
-              law_failure_count=$((law_failure_count + 1))
-              return 0
-            fi
-            echo "::notice file=$source,title=SENS Lisp law::PASS id=$id native=SENS result=$actual"
-          }
-          check_lisp_law d3-d4-positive tests/semantic/d3-d4-ukr-native-laws.lisp '(1 1 1 1 1 1 1 1 1 1 1 1)'
-          check_lisp_law d3-d4-negative tests/semantic/d3-d4-ukr-native-mutant.lisp '0'
-          bash scripts/prove-lisp-language-laws.sh "$binary"
-          # Д24 списки: усі очікування належать Lisp; Rust більше не порівнює 10/0/2.
-          # Фізичний D6 LENGTH ще не атестовано (#5854): direct=SENS, T5M=NOT_CERTIFIED.
-          lists_before=$law_failure_count
-          cat -- benchmarks/lists.lisp tests/semantic/ukr-lists-d24-language-law.lisp > "$RUNNER_TEMP/ukr-lists-d24-native.lisp"
-          check_lisp_law d24-list-language "$RUNNER_TEMP/ukr-lists-d24-native.lisp" '1'
-          if (( law_failure_count == lists_before )); then
-            printf 'lists\tPASS_DIRECT\n' >> "$RUNNER_TEMP/benchmark-law-status.tsv"
-          fi
-          # Поліном Д24: Lisp-закон і контрприклад замість Rust-оракула.
-          arithmetic_before=$law_failure_count
-          cat -- benchmarks/arithmetic.lisp tests/semantic/d24-polynomial-language-law.lisp > "$RUNNER_TEMP/d24-polynomial-law.lisp"
-          check_lisp_law d24-polynomial-language-positive "$RUNNER_TEMP/d24-polynomial-law.lisp" '1'
-          cat -- benchmarks/arithmetic.lisp tests/semantic/d24-polynomial-language-mutant.lisp > "$RUNNER_TEMP/d24-polynomial-mutant.lisp"
-          check_lisp_law d24-polynomial-language-mutant "$RUNNER_TEMP/d24-polynomial-mutant.lisp" '0'
-          if (( law_failure_count == arithmetic_before )); then
-            printf 'arithmetic\tPASS_DIRECT\n' >> "$RUNNER_TEMP/benchmark-law-status.tsv"
-          fi
-          # Читач Д24/D7: самовердикти в Lisp, Rust не є мовним оракулом.
-          parser_before=$law_failure_count
-          cat -- benchmarks/parser.lisp tests/semantic/d24-reader-fraction-language-law.lisp > "$RUNNER_TEMP/d24-reader-positive.lisp"
-          check_lisp_law d24-reader-fraction-language-positive "$RUNNER_TEMP/d24-reader-positive.lisp" '1'
-          cat -- benchmarks/parser.lisp tests/semantic/d24-reader-fraction-language-mutant.lisp > "$RUNNER_TEMP/d24-reader-mutant.lisp"
-          check_lisp_law d24-reader-fraction-language-mutant "$RUNNER_TEMP/d24-reader-mutant.lisp" '0'
-          # Д24: закон, базові випадки та незалежний контрприклад визначає Lisp.
-          # Фізичний D6 LENGTH/T5M ще не сертифіковано (#5854).
-          cat -- benchmarks/cross-language/sens-vs-python/sens/ackermann.setup.lisp tests/semantic/d24-ackermann-language-law.lisp > "$RUNNER_TEMP/ackermann-law.lisp"
-          check_lisp_law d24-ackermann-positive "$RUNNER_TEMP/ackermann-law.lisp" '1'
-          cat -- benchmarks/cross-language/sens-vs-python/sens/ackermann.setup.lisp tests/semantic/d24-ackermann-language-mutant.lisp > "$RUNNER_TEMP/ackermann-mutant.lisp"
-          check_lisp_law d24-ackermann-mutant "$RUNNER_TEMP/ackermann-mutant.lisp" '0'
-          cat -- benchmarks/cross-language/sens-vs-python/sens/fib.setup.lisp tests/semantic/d24-fibonacci-language-law.lisp > "$RUNNER_TEMP/fibonacci-law.lisp"
-          check_lisp_law d24-fibonacci-positive "$RUNNER_TEMP/fibonacci-law.lisp" '1'
-          cat -- benchmarks/cross-language/sens-vs-python/sens/fib.setup.lisp tests/semantic/d24-fibonacci-language-mutant.lisp > "$RUNNER_TEMP/fibonacci-mutant.lisp"
-          check_lisp_law d24-fibonacci-mutant "$RUNNER_TEMP/fibonacci-mutant.lisp" '0'
-          # Відмова з нульовим знаменником має бути діленням на нуль,
-          # а не загальним невдалим bootstrap чи помилкою синтаксису.
-          cat -- benchmarks/parser.lisp tests/semantic/d24-reader-zero-denominator-negative.lisp > "$RUNNER_TEMP/d24-reader-denominator.lisp"
-          if timeout 45s "$binary" "$RUNNER_TEMP/d24-reader-denominator.lisp" > "$RUNNER_TEMP/d24-reader-denominator.log" 2>&1; then
-            echo "::error file=tests/semantic/d24-reader-zero-denominator-negative.lisp,title=SENS Lisp law::REGRESSION id=d24-reader-zero-denominator layer=semantics expected=division-by-zero actual=accepted"
-            law_failure_count=$((law_failure_count + 1))
-          elif ! grep -Eiq 'division by zero|ділення на нуль' "$RUNNER_TEMP/d24-reader-denominator.log"; then
-            cat "$RUNNER_TEMP/d24-reader-denominator.log"
-            echo "::error file=tests/semantic/d24-reader-zero-denominator-negative.lisp,title=SENS Lisp law::REGRESSION id=d24-reader-zero-denominator layer=eval expected=division-by-zero actual=other-error"
-            law_failure_count=$((law_failure_count + 1))
-          else
-            echo "::notice file=tests/semantic/d24-reader-zero-denominator-negative.lisp,title=SENS Lisp law::PASS id=d24-reader-zero-denominator native=SENS rejection=division-by-zero"
-          fi
-          if (( law_failure_count == parser_before )); then
-            printf 'parser\tPASS_DIRECT\n' >> "$RUNNER_TEMP/benchmark-law-status.tsv"
-          fi
-          # Д4: рекурсивний обхід — прямий Lisp позитив/мутант D1.
-          # Фізична розбіжність D7 перевіряється окремо і не стає PASS.
-          recursion_before=$law_failure_count
-          cat -- benchmarks/recursion.lisp tests/semantic/d4-recursion-atom-result-law.lisp > "$RUNNER_TEMP/recursion-benchmark-positive.lisp"
-          check_lisp_law d4-recursion-benchmark-language-positive "$RUNNER_TEMP/recursion-benchmark-positive.lisp" '1'
-          cat -- benchmarks/recursion.lisp tests/semantic/d4-recursion-atom-result-mutant.lisp > "$RUNNER_TEMP/recursion-benchmark-mutant.lisp"
-          check_lisp_law d4-recursion-benchmark-language-mutant "$RUNNER_TEMP/recursion-benchmark-mutant.lisp" '0'
-          if (( law_failure_count == recursion_before )); then
-            printf 'recursion\tPASS_DIRECT\n' >> "$RUNNER_TEMP/benchmark-law-status.tsv"
-          fi
-          check_lisp_law d3-ukr-self-verdict tests/semantic/d3-ukr-language-self-verdict.lisp '1'
-          check_lisp_law d5-ukr-self-verdict tests/semantic/d5-ukr-arithmetic-self-verdict.lisp '1'
-          check_lisp_law d5-physical-law tests/semantic/d5-arithmetic-native-t5m-law.lisp '1'
-          check_lisp_law d5-physical-mutant tests/semantic/d5-arithmetic-native-t5m-mutant.lisp '0'
-          echo "::warning file=tests/semantic/d5-arithmetic-native-t5m-law.lisp,title=TRANSITIONAL #5854::D6 LENGTH D6 000000 невикличний фізично; D5 T5M=NOT_CERTIFIED"
-          check_lisp_law d3-physical-law tests/semantic/d3-structural-native-t5m-law.lisp '1'
-          check_lisp_law d3-physical-mutant tests/semantic/d3-structural-native-t5m-mutant.lisp '0'
-          check_lisp_law d4-late-binding tests/semantic/d4-late-definition-binding-law.lisp '1'
-          check_lisp_law d4-escaped-closure tests/semantic/d4-escaped-lexical-closure-law.lisp '1'
-          check_lisp_law d3-atom-cond tests/semantic/lisp-d3-atom-cond-laws.lisp '1'
-          check_lisp_law d3-cons-selectors tests/semantic/lisp-d3-cons-selectors-laws.lisp '1'
-          check_lisp_law d3-eq-branches tests/semantic/lisp-d3-eq-branches-laws.lisp '1'
-          check_lisp_law d4-recursive-list-positive tests/semantic/lisp-d4-recursive-list-laws.lisp '1'
-          check_lisp_law d4-recursive-list-mutant tests/semantic/lisp-d4-recursive-list-mutant.lisp '0'
-          check_lisp_law d3-d4-selection-positive tests/semantic/d3-d4-logic-selection-law.lisp '1'
-          check_lisp_law d3-d4-selection-mutant tests/semantic/d3-d4-logic-selection-mutant.lisp '0'
-          check_lisp_law d4-selector-domain-positive tests/semantic/d4-selector-domain-law.lisp '1'
-          check_lisp_law exact-arithmetic-positive tests/semantic/exact-arithmetic-laws.lisp '1'
-          check_lisp_law exact-arithmetic-mutant tests/semantic/exact-arithmetic-mutant.lisp '0'
-          # Механізм конкатенації — shell; усі очікувані результати — SENS Lisp.
-          cat -- lib/d11-clojure-juxt.lisp tests/semantic/d11-clojure-juxt-laws.lisp > "$RUNNER_TEMP/d11-clojure-juxt-native.lisp"
-          check_lisp_law d11-clojure-juxt-language "$RUNNER_TEMP/d11-clojure-juxt-native.lisp" '1'
-          # Лише конкатенація джерел: весь вердикт виконує Lisp/SENS.
-          cat -- lib/d11-srfi1-span-break.lisp tests/semantic/d11-srfi1-span-break-laws.lisp > "$RUNNER_TEMP/d11-srfi1-span-break-native.lisp"
-          check_lisp_law d11-srfi1-span-break-language "$RUNNER_TEMP/d11-srfi1-span-break-native.lisp" '1'
-          cat -- lib/d11-srfi1-find-tail.lisp tests/semantic/d11-srfi1-find-tail-laws.lisp > "$RUNNER_TEMP/d11-srfi1-find-tail-native.lisp"
-          check_lisp_law d11-srfi1-find-tail-language "$RUNNER_TEMP/d11-srfi1-find-tail-native.lisp" '1'
-          if (( law_failure_count > 0 )); then
-            echo "::error title=SENS Lisp law summary::REGRESSION layer=independent-laws failed=$law_failure_count; completed=all-available"
-            exit 1
-          fi
-
-      # Час ЦІЛОГО процесу: CLI + bootstrap + SENS eval на shared runner.
-      # Це діагностика затримок, а не ізольований eval чи міжмашинний speedup.
-      # 11 проб, p50/p90, межі та сирі дані зі SHA джерела і stdout.
-      - name: Чотири Lisp-бенчмарки — p50/p90 та розкид нативного SENS
-        id: benchmark-time
-        if: ${{ always() && steps.native-build.outcome == 'success' }}
-        shell: bash
-        timeout-minutes: 5
-        run: |
-          set -euo pipefail
-          binary="$PWD/target/debug/sens"
-          verified="$RUNNER_TEMP/benchmark-law-status.tsv"
-          measurements="$RUNNER_TEMP/benchmark-times.tsv"
-          : > "$measurements"
-          bench_sha="$(git rev-parse HEAD)"
-          # Окремо вимірюємо вартість мінімального процесу SENS.
-          # Це НЕ eval-only: baseline містить bootstrap і виконання D1-свідка.
-          baseline_source="tests/semantic/d1-not-law.lisp"
-          baseline_dir="$RUNNER_TEMP/bench-time/bootstrap"
-          mkdir -p "$baseline_dir"
-          sha256sum "$baseline_source" > "$baseline_dir/source.sha256"
-          if ! timeout 45s "$binary" "$baseline_source" > "$baseline_dir/reference.out" 2> "$baseline_dir/warmup.err"; then
-            cat "$baseline_dir/warmup.err" >&2
-            echo "::error file=$baseline_source,title=SENS benchmark baseline::REGRESSION layer=warmup"
-            exit 1
-          fi
-          : > "$baseline_dir/samples.us"
-          printf 'sample\telapsed_us\tsha\n' > "$baseline_dir/samples.tsv"
-          for repetition in {1..11}; do
-            start_ns="$(date +%s%N)"
-            if ! timeout 45s "$binary" "$baseline_source" > "$baseline_dir/$repetition.out" 2> "$baseline_dir/$repetition.err"; then
-              cat "$baseline_dir/$repetition.err" >&2
-              echo "::error file=$baseline_source,title=SENS benchmark baseline::REGRESSION layer=execution repeat=$repetition"
-              exit 1
-            fi
-            end_ns="$(date +%s%N)"
-            if ! cmp -s "$baseline_dir/reference.out" "$baseline_dir/$repetition.out"; then
-              echo "::error file=$baseline_source,title=SENS benchmark baseline::REGRESSION layer=repeatability repeat=$repetition"
-              exit 1
-            fi
-            elapsed_us="$(((end_ns - start_ns) / 1000))"
-            if (( elapsed_us <= 0 )); then
-              echo "::error file=$baseline_source,title=SENS benchmark baseline::REGRESSION layer=clock"
-              exit 1
-            fi
-            printf '%s\n' "$elapsed_us" >> "$baseline_dir/samples.us"
-            printf '%s\t%s\t%s\n' "$repetition" "$elapsed_us" "$bench_sha" >> "$baseline_dir/samples.tsv"
-          done
-          sort -n "$baseline_dir/samples.us" > "$baseline_dir/sorted.us"
-          baseline_p50="$(sed -n '6p' "$baseline_dir/sorted.us")"
-          baseline_p90="$(sed -n '10p' "$baseline_dir/sorted.us")"
-          printf '%s\t%s\t%s\t%s\n' "$baseline_p50" "$baseline_p90" "$bench_sha" "$baseline_source" > "$RUNNER_TEMP/benchmark-baseline.tsv"
-          echo "::notice file=$baseline_source,title=SENS startup baseline::MEASURED p50_us=$baseline_p50 p90_us=$baseline_p90 repeats=11 scope=CLI_bootstrap_plus_minimal_D1"
-          for spec in \
-            'lists|benchmarks/lists.lisp' \
-            'arithmetic|benchmarks/arithmetic.lisp' \
-            'parser|benchmarks/parser.lisp' \
-            'recursion|benchmarks/recursion.lisp'; do
-            IFS='|' read -r id source <<< "$spec"
-            if [[ ! -f "$verified" ]] || ! grep -Fxq "$(printf '%s\tPASS_DIRECT' "$id")" "$verified"; then
-              echo "::warning file=$source,title=SENS benchmark::NOT_MEASURED id=$id cause=unverified-Lisp-law"
-              continue
-            fi
-            dir="$RUNNER_TEMP/bench-time/$id"
-            mkdir -p "$dir"
-            cp -- "$source" "$dir/source.lisp"
-            sha256sum "$source" > "$dir/source.sha256"
-            printf 'sample\telapsed_us\tsha\n' > "$dir/samples.tsv"
-            if ! timeout 45s "$binary" "$source" > "$dir/reference.out" 2> "$dir/warmup.err"; then
-              cat "$dir/warmup.err" >&2
-              echo "::error file=$source,title=SENS wall-time::REGRESSION id=$id layer=warmup"
-              exit 1
-            fi
-            : > "$dir/samples.us"
-            for repetition in {1..11}; do
-              start_ns="$(date +%s%N)"
-              if ! timeout 45s "$binary" "$source" > "$dir/$repetition.out" 2> "$dir/$repetition.err"; then
-                cat "$dir/$repetition.err" >&2
-                echo "::error file=$source,title=SENS wall-time::REGRESSION id=$id layer=execution repeat=$repetition"
-                exit 1
-              fi
-              end_ns="$(date +%s%N)"
-              if ! cmp -s "$dir/reference.out" "$dir/$repetition.out"; then
-                echo "::error file=$source,title=SENS wall-time::REGRESSION id=$id layer=repeatability repeat=$repetition"
-                exit 1
-              fi
-              elapsed_us="$(((end_ns - start_ns) / 1000))"
-              if (( elapsed_us <= 0 )); then
-                echo "::error file=$source,title=SENS wall-time::REGRESSION id=$id layer=clock expected=positive-duration actual=$elapsed_us"
-                exit 1
-              fi
-              printf '%s\n' "$elapsed_us" >> "$dir/samples.us"
-              printf '%s\t%s\t%s\n' "$repetition" "$elapsed_us" "$bench_sha" >> "$dir/samples.tsv"
-            done
-            sort -n "$dir/samples.us" > "$dir/sorted.us"
-            p50="$(sed -n '6p' "$dir/sorted.us")"
-            p90="$(sed -n '10p' "$dir/sorted.us")"
-            min_us="$(sed -n '1p' "$dir/sorted.us")"
-            max_us="$(sed -n '11p' "$dir/sorted.us")"
-            hash="$(sha256sum "$dir/reference.out" | cut -d' ' -f1)"
-            printf '%s\t%s\t%s\t%s\t%s\t%s\t11\t%s\n' "$id" "$p50" "$p90" "$min_us" "$max_us" "$hash" "$bench_sha" >> "$measurements"
-            # Різниця двох медіан — лише орієнтир, НЕ ізольований час eval.
-            if (( p50 > baseline_p50 )); then
-              extra_us=$((p50 - baseline_p50))
-            else
-              extra_us=0
-            fi
-            echo "::notice file=$source,title=SENS wall-time $id::MEASURED p50_us=$p50 p90_us=$p90 min_us=$min_us max_us=$max_us baseline_p50_us=$baseline_p50 approximate_extra_us=$extra_us repeats=11 warmup=1 sha=$bench_sha stdout_sha256=$hash scope=CLI_bootstrap_eval"
-            if (( p90 > 2 * p50 )); then
-              echo "::warning file=$source,title=SENS wall-time $id::HIGH_JITTER p50_us=$p50 p90_us=$p90 ratio_gt_2=true shared_runner=true"
-            fi
-          done
-          # Однакові p50 чотирьох РІЗНИХ задач — привід шукати спільні накладні витрати.
-          # Це лише сигнал для профілювання bootstrap, не доказ eval-only чи регресії.
-          if [[ "$(wc -l < "$measurements")" -eq 4 ]]; then
-            min_p50="$(cut -f2 "$measurements" | sort -n | head -n 1)"
-            max_p50="$(cut -f2 "$measurements" | sort -n | tail -n 1)"
-            if [[ "$min_p50" =~ ^[0-9]+$ && "$max_p50" =~ ^[0-9]+$ ]] && (( min_p50 > 0 )); then
-              spread_pct=$(((max_p50 - min_p50) * 100 / min_p50))
-              echo "::notice title=SENS benchmark spread::MEASURED smallest_p50_us=$min_p50 largest_p50_us=$max_p50 spread_pct=$spread_pct samples_per_case=11 scope=CLI_bootstrap_eval"
-              if (( spread_pct <= 5 )); then
-                echo "::warning title=SENS benchmark spread::SIMILAR_P50_WATCH common_startup_or_shared_overhead_possible=true spread_pct=$spread_pct investigate=bootstrap_vs_eval not_a_semantic_or_release_verdict"
-              fi
-            else
-              echo "::error title=SENS benchmark spread::REGRESSION layer=timing expected=positive-numeric-p50 actual=invalid" >&2
-              exit 1
-            fi
-          fi
-
-      # Фінальні анотації будуються лише із фактично записаних SENS-вердиктів.
-      # RED законів не маскується часовими числами; без свідка лишається NOT_MEASURED.
-      - name: Чотири Lisp-бенчмарки — фактичні мовні анотації та підсумок
-        if: ${{ always() }}
-        shell: bash
-        env:
-          CLI_OUTCOME: ${{ steps.benchmark-cli.outcome }}
-          LAWS_OUTCOME: ${{ steps.benchmark-laws.outcome }}
-        run: |
-          set -euo pipefail
-          verified="$RUNNER_TEMP/benchmark-law-status.tsv"
-          summary="$RUNNER_TEMP/benchmark-status-summary.txt"
-          measurements="$RUNNER_TEMP/benchmark-times.tsv"
-          measured=0
-          passed=0
-          missing=0
-          {
-            echo '## Бенчмарки Lisp — перевірені факти'
-            echo
-            echo "Rust CLI (лише I/O): \`$CLI_OUTCOME\`; нативний крок SENS: \`$LAWS_OUTCOME\`."
-            echo 'Вимірювання: 11 проб, один прогрів; p50 — шоста проба, p90 — десята у відсортованому ряді. Час цілого процесу, не eval-only.'
-            baseline_file="$RUNNER_TEMP/benchmark-baseline.tsv"
-            if [[ -s "$baseline_file" ]]; then
-              if ! IFS=$'\t' read -r baseline_p50 baseline_p90 baseline_sha baseline_source < "$baseline_file"; then
-                echo "::error file=.github/workflows/ci.yml,title=SENS startup baseline::REGRESSION layer=report expected=complete-baseline actual=unreadable" >&2
-                exit 1
-              fi
-              if [[ ! "$baseline_p50" =~ ^[0-9]+$ || ! "$baseline_p90" =~ ^[0-9]+$ || ! "$baseline_sha" =~ ^[0-9a-f]{40}$ || "$baseline_source" != "tests/semantic/d1-not-law.lisp" ]] || (( baseline_p50 <= 0 || baseline_p50 > baseline_p90 )); then
-                echo "::error file=.github/workflows/ci.yml,title=SENS startup baseline::REGRESSION layer=report expected=sorted-native-SENS-p50-p90 actual=malformed" >&2
-                exit 1
-              fi
-              printf 'Контрольний CLI startup+D1: p50=%d.%03d мс, p90=%d.%03d мс (11 проб, не чистий eval).\n' "$((baseline_p50 / 1000))" "$((baseline_p50 % 1000))" "$((baseline_p90 / 1000))" "$((baseline_p90 % 1000))"
-            else
-              echo 'Контрольний CLI startup+D1: NOT_MEASURED (немає нативного підтвердження).'
-            fi
-            echo
-            echo '| Lisp-джерело | Семантика, прямий SENS | p50, мс | p90, мс | Фізичний Zig/T5M |'
-            echo '|---|---|---:|---:|---|'
-          } >> "$GITHUB_STEP_SUMMARY"
-          for spec in \
-            'lists|benchmarks/lists.lisp|d24-list-language' \
-            'arithmetic|benchmarks/arithmetic.lisp|d24-polynomial-language' \
-            'parser|benchmarks/parser.lisp|d24-reader-fraction-language' \
-            'recursion|benchmarks/recursion.lisp|d4-recursion-atom-language'; do
-            IFS='|' read -r id source law <<< "$spec"
-            if [[ -f "$verified" ]] && grep -Fxq "$(printf '%s\tPASS_DIRECT' "$id")" "$verified"; then
-              status=PASS_DIRECT
-              passed=$((passed + 1))
-              echo "::notice file=$source,title=SENS benchmark $id::PASS_DIRECT law=$law executor=SENS metric=SEMANTIC_ONLY t5m=NOT_CERTIFIED"
-            else
-              status=NOT_VERIFIED
-              missing=$((missing + 1))
-              echo "::warning file=$source,title=SENS benchmark $id::NOT_VERIFIED law=$law laws_step=$LAWS_OUTCOME expected=completed-SENS-witness actual=missing"
-            fi
-            wall=NOT_MEASURED
-            tail=NOT_MEASURED
-            if [[ -f "$measurements" ]]; then
-              sample="$(grep -F "$id"$'\t' "$measurements" | head -n 1 || true)"
-              if [[ -n "$sample" ]]; then
-                IFS=$'\t' read -r sample_id wall tail min_us max_us hash repeats bench_sha <<< "$sample"
-                if [[ "$sample_id" != "$id" || ! "$wall" =~ ^[0-9]+$ || ! "$tail" =~ ^[0-9]+$ || ! "$min_us" =~ ^[0-9]+$ || ! "$max_us" =~ ^[0-9]+$ || ! "$hash" =~ ^[0-9a-f]{64}$ || "$repeats" != 11 || ! "$bench_sha" =~ ^[0-9a-f]{40}$ ]]; then
-                  echo "::error file=$source,title=SENS benchmark report::REGRESSION layer=timing expected=complete-evidence actual=malformed"
-                  exit 1
-                fi
-                if (( min_us <= 0 || min_us > wall || wall > tail || tail > max_us )); then
-                  echo "::error file=$source,title=SENS benchmark report::REGRESSION layer=timing expected=sorted-quantiles actual=invalid"
-                  exit 1
-                fi
-                wall="$(printf '%d.%03d' "$((wall / 1000))" "$((wall % 1000))")"
-                tail="$(printf '%d.%03d' "$((tail / 1000))" "$((tail % 1000))")"
-                measured=$((measured + 1))
-              fi
-            fi
-            printf '| %s | %s (%s) | %s | %s | NOT_CERTIFIED |\n' "$source" "$status" "$law" "$wall" "$tail" >> "$GITHUB_STEP_SUMMARY"
-          done
-          printf 'прямі Lisp-закони=%s/4; p50/p90=%s/4; Rust CLI=%s; T5M=NOT_CERTIFIED\n' "$passed" "$measured" "$CLI_OUTCOME" > "$summary"
-          echo 'PASS_DIRECT означає лише перевірену мовну семантику, а не продуктивність чи фізичну T5M-атестацію. Сирі проби та SHA збережені в артефакті.' >> "$GITHUB_STEP_SUMMARY"
-          if (( missing > 0 )) && [[ "$LAWS_OUTCOME" == success ]]; then
-            echo "::error file=.github/workflows/ci.yml,title=SENS benchmark evidence::REGRESSION layer=report expected=4-completed-witnesses actual=$passed"
-            exit 1
-          fi
-
-      # Негативний свідок не є позитивним входом загального T5M-коридору.
-      - name: Lisp D3 — CAR/CDR/CONS закон і негативний мутант
-        if: ${{ always() && steps.native-build.outcome == 'success' }}
-        shell: bash
-        timeout-minutes: 3
-        run: |
-          set -euo pipefail
-          binary="$PWD/target/debug/sens"
-          law="tests/semantic/core-d3-car-cdr-cons-law.lisp"
-          mutant="tests/semantic/core-d3-car-cdr-cons-mutant.lisp"
-          test -x "$binary"
-          if ! timeout 45s "$binary" "$law" > "$RUNNER_TEMP/d3-core-law.out" 2> "$RUNNER_TEMP/d3-core-law.err"; then
-            echo "::error file=$law,title=SENS D3 law::REGRESSION layer=eval expected=D1:1 actual=execution-failure"
-            cat "$RUNNER_TEMP/d3-core-law.err" >&2
-            exit 1
-          fi
-          actual="$(tail -n 1 "$RUNNER_TEMP/d3-core-law.out")"
-          if [[ "$actual" != "1" ]]; then
-            echo "::error file=$law,title=SENS D3 law::REGRESSION layer=eval expected=D1:1 actual=$actual"
-            exit 1
-          fi
-          if timeout 45s "$binary" "$mutant" > "$RUNNER_TEMP/d3-core-mutant.out" 2> "$RUNNER_TEMP/d3-core-mutant.err"; then
-            echo "::error file=$mutant,title=SENS D3 mutant::REGRESSION layer=eval expected=CAR-type-rejection actual=unexpected-success"
-            exit 1
-          else
-            status=$?
-          fi
-          if [[ "$status" -eq 124 ]] || ! grep -Fq 'car expects a non-empty list' "$RUNNER_TEMP/d3-core-mutant.err"; then
-            echo "::error file=$mutant,title=SENS D3 mutant::UNINFORMATIVE-NEGATIVE layer=eval expected=CAR-type-rejection actual=other-error status=$status"
-            cat "$RUNNER_TEMP/d3-core-mutant.err" >&2
-            exit 1
-          fi
-          echo "::notice file=$law,title=SENS D3 language law::PASS native=SENS expected=D1:1 observed=$actual mutant=CAR-type-rejected"
-
-      # Учорашній BENCH-LISP→SENS: анотації лише зі справжніх нативних метрик.
-      - name: Lisp → T5M → SENS — анотації розміру й AST
-        if: ${{ always() }}
-        env:
-          CORRIDOR_RESULT: ${{ steps.t5m_changed_execute.outcome }}
-        shell: bash
-        timeout-minutes: 5
-        run: |
-          set -euo pipefail
-          staged="$RUNNER_TEMP/changed-t5m-pairs"
-          mkdir -p "$staged"
-          report="$staged/ast-size.md"
-          {
-            echo '## Змінені Lisp → Zig/T5M → SENS'
-            echo
-            echo '| Lisp | Lisp, байт | T5M, байт | AST | Відвідування | Результат |'
-            echo '|---|---:|---:|---:|---:|---|'
-          } > "$report"
-          if [[ "$CORRIDOR_RESULT" != success ]]; then
-            echo "::warning title=SENS T5M::Коридор не пройдено; AST=NOT_MEASURED; release=NOT_CERTIFIED"
-            echo '| — | — | — | — | — | NOT_VERIFIED |' >> "$report"
-          else
-            measured=0
-            missed=0
-            while IFS= read -r file || [[ -n "$file" ]]; do
-              [[ -n "$file" ]] || continue
-              id="$(printf '%s' "$file" | sha256sum | cut -c1-16)"
-              dir="$staged/$id"
-              physical="$dir/$(basename "$file" .lisp).sens"
-              if [[ ! -s "$physical" || ! -f "$dir/native-standalone.stdout" ||
-                    ! -f "$dir/native-paired.stdout" ]] ||
-                 ! cmp -s "$dir/native-standalone.stdout" "$dir/native-paired.stdout"; then
-                echo "::warning file=$file,title=SENS AST::NOT_MEASURED: самостійність/парність не доведена"
-                missed=$((missed + 1))
-                continue
-              fi
-              if ! timeout 45s "$PWD/target/debug/sens-trit" verify-view "$physical" >"$dir/ast-verify.stdout" 2>"$dir/ast-verify.stderr" ||
-                 ! timeout 90s "$PWD/target/debug/sens" --benchmark-physical "$physical" >"$dir/ast.stdout" 2>"$dir/ast.stderr"; then
-                echo "::warning file=$file,title=SENS AST::NOT_MEASURED: нативний виконавець відхилив вимір"
-                missed=$((missed + 1))
-                continue
-              fi
-              record="$(grep '^SENS_BINARY_BENCH ' "$dir/ast.stderr" || true)"
-              if [[ "$record" =~ ^SENS_BINARY_BENCH[[:space:]]AST_NODES=([0-9]+)[[:space:]]EVAL_VISITS=([0-9]+)[[:space:]]RESULT=(.+)$ ]]; then
-                nodes="${BASH_REMATCH[1]}"
-                visits="${BASH_REMATCH[2]}"
-                result="${BASH_REMATCH[3]}"
-              else
-                echo "::warning file=$file,title=SENS AST::NOT_MEASURED: відсутні нативні лічильники"
-                missed=$((missed + 1))
-                continue
-              fi
-              if ! cmp -s "$dir/ast.stdout" "$dir/native-standalone.stdout" ||
-                 [[ "$result" != "$(tail -n 1 "$dir/ast.stdout")" ]]; then
-                echo "::error file=$file,title=SENS AST::Результат виміру не збігається з фізичним виконанням"
-                exit 1
-              fi
-              source_bytes="$(wc -c < "$file" | tr -d '[:space:]')"
-              t5m_bytes="$(wc -c < "$physical" | tr -d '[:space:]')"
-              echo "::notice file=$file,title=SENS Lisp→T5M::PASS lisp_bytes=$source_bytes t5m_bytes=$t5m_bytes ast_nodes=$nodes eval_visits=$visits result=$result"
-              printf '| `%s` | %s | %s | %s | %s | `%s` |\n' "$file" "$source_bytes" "$t5m_bytes" "$nodes" "$visits" "$result" >> "$report"
-              measured=$((measured + 1))
-            done < "$RUNNER_TEMP/changed-t5m-lisp.txt"
-            if (( missed > 0 )); then
-              ast_status=PARTIAL
-              echo "::warning title=SENS фізичний коридор::PARTIAL measured=$measured unmeasured=$missed release=NOT_CERTIFIED"
-            elif (( measured == 0 )); then
-              ast_status=NOT_MEASURED
-              echo "::notice title=SENS фізичний коридор::NOT_MEASURED measured=0 source=empty-or-no-executable-Lisp release=NOT_CERTIFIED"
-            else
-              ast_status=PASS
-              echo "::notice title=SENS фізичний коридор::PASS measured=$measured unmeasured=0 release=NOT_CERTIFIED"
-            fi
-            echo "AST-статус: **$ast_status**. Виміряно: **$measured**; без AST-метрики: **$missed**. Релізний допуск не встановлено." >> "$report"
-          fi
-          cat "$report" >> "$GITHUB_STEP_SUMMARY"
-
-      - name: Зберегти фізичні свідки та AST-звіт
-        if: ${{ always() }}
-        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2, Node 24, pinned
-        with:
-          name: sens-lisp-t5m-${{ github.sha }}
-          path: |
-            ${{ runner.temp }}/changed-t5m-pairs/
-            ${{ runner.temp }}/bench-time/
-            ${{ runner.temp }}/benchmark-times.tsv
-          if-no-files-found: warn
-          retention-days: 14
-
-      # Повний прогін — усе, що можливо перевірити незалежно від змінених файлів.
-      # Нічого з попередніх кроків не замінює: лише додає.
-      - name: Короткі результати — зведення в анотації
-        if: ${{ always() }}
-        shell: bash
-        run: |
-          set -uo pipefail
-          ladder="$(python3 scripts/check-domain-ladder-identity.py --check 2>&1 | grep -oE 'D1=[0-9]+ .*D10=[0-9]+' | head -1 || true)"
-          echo "::notice title=SENS · драбина D1–24+::${ladder:-НЕ ПЕРЕВІРЕНО}"
-          debt="$(python3 -c "import json;print(json.load(open('knowledge/tests-legacy-binary-heads.json'))['count'])" 2>/dev/null || echo '?')"
-          echo "::notice title=SENS · борг кодових голів у тестах::${debt} файлів — мусить скорочуватися до 0"
-          if [[ -f "$RUNNER_TEMP/benchmark-status-summary.txt" ]]; then
-            bench="$(cat "$RUNNER_TEMP/benchmark-status-summary.txt")"
-          else
-            bench='НЕ ПЕРЕВІРЕНО'
-          fi
-          echo "::notice title=SENS · бенчмарки::$bench"
-          physical_nonempty=0
-          physical_empty=0
-          lisp_without_sens=0
-          triplets=0
-          missing_views=0
-          while IFS= read -r -d '' source; do
-            carrier="${source%.lisp}.sens"
-            view="${source%.lisp}"
-            if [[ ! -f "$carrier" ]]; then
-              ((lisp_without_sens += 1))
-            elif [[ ! -s "$carrier" ]]; then
-              ((physical_empty += 1))
-            else
-              ((physical_nonempty += 1))
-              if [[ -s "$view" ]]; then
-                ((triplets += 1))
-              else
-                ((missing_views += 1))
-              fi
-            fi
-          done < <(git ls-files -z -- '*.lisp')
-          pairs="непорожні=$physical_nonempty порожні=$physical_empty без_пари=$lisp_without_sens трійки=$triplets без_вигляду=$missing_views"
-          echo "::notice title=SENS · фізичні пари Lisp↔sens::${pairs}"
-          {
-            echo '## SENS — короткі результати'
-            echo
-            echo '| показник | значення |'
-            echo '|---|---|'
-            echo "| Драбина D1–24+ | \`${ladder:-НЕ ПЕРЕВІРЕНО}\` |"
-            echo "| Борг кодових голів у тестах | ${debt} файлів (мусить → 0) |"
-            echo "| Бенчмарки (нативний SENS) | ${bench} |"
-            echo "| Фізичні пари Lisp↔sens | ${pairs} |"
-          } >> "$GITHUB_STEP_SUMMARY"
-
-  remint-pairs:
-    name: Нативні трійки Lisp / Zig T5M
-    needs: [sens]
-    if: ${{ always() && github.ref == 'refs/heads/main' && github.event_name != 'pull_request' }}
-    permissions:
-      contents: write
-    uses: ./.github/workflows/remint-drifted-pairs.yml
-    with:
-      files: ${{ needs.sens.outputs.changed_lisp_files }}
+            "$RUNNER_TEMP/sens-language-laws"
+          bash scripts/prove-lisp-language-laws.sh "$PWD/target/debug/sens"
