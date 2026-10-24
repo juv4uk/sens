@@ -513,6 +513,13 @@ run_case run_law d4-first-class-predicate-mutant tests/semantic/d4-first-class-p
 # Ратифікація 1024/1024 не підміняє фізичного позитиву й мутанта.
 run_case run_law d10-empty-queue-positive tests/semantic/d10-empty-queue-law.lisp 1 core4
 run_case run_law d10-empty-queue-mutant tests/semantic/d10-empty-queue-mutant.lisp 0 core4
+# Перевірка кореня D5: D3 CDR не повинен перетворювати D1:ні на D3:().
+# SENS дає позитив D1:так і негатив D1:ні, Zig переносить лише фізичний код.
+run_case run_law d3-d4-no-tail-boundary-positive tests/semantic/d3-d4-no-tail-boundary-law.lisp 1
+run_case run_law d3-d4-no-tail-boundary-mutant tests/semantic/d3-d4-no-tail-boundary-mutant.lisp 0
+sha256sum tests/semantic/d3-d4-no-tail-boundary-law.lisp \
+  tests/semantic/d3-d4-no-tail-boundary-mutant.lisp > "$evidence/d3-d4-no-tail-boundary.sha256"
+
 # Д5 REVERSE/REVERSE-ONTO: SENS-закон, порядок і дві точні Type-відмови.
 run_case run_law d5-reverse-onto-proper-positive tests/semantic/d5-reverse-onto-proper-law.lisp 1 core4
 run_case run_law d5-reverse-onto-order-mutant tests/semantic/d5-reverse-onto-order-mutant.lisp 0 core4
