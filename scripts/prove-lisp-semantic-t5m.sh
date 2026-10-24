@@ -1822,18 +1822,32 @@ d6_zip_positive="$evidence/d6-zip-proper-complete.lisp"
 d6_zip_mutant="$evidence/d6-zip-proper-mutant-complete.lisp"
 d6_zip_bad_tail="$evidence/d6-zip-improper-tail-complete.lisp"
 d6_zip_bad_root="$evidence/d6-zip-improper-root-complete.lisp"
+d6_zip_order="$evidence/d6-zip-structural-order-complete.lisp"
+d6_zip_right_root="$evidence/d6-zip-right-root-complete.lisp"
+d6_zip_right_tail="$evidence/d6-zip-right-tail-complete.lisp"
 cat -- "$d6_zip_source" tests/semantic/d6-zip-proper-law.lisp > "$d6_zip_positive"
 cat -- "$d6_zip_source" tests/semantic/d6-zip-proper-mutant.lisp > "$d6_zip_mutant"
 cat -- "$d6_zip_source" tests/semantic/d6-zip-improper-tail-negative.lisp > "$d6_zip_bad_tail"
 cat -- "$d6_zip_source" tests/semantic/d6-zip-improper-root-negative.lisp > "$d6_zip_bad_root"
+cat -- "$d6_zip_source" tests/semantic/d6-zip-structural-order-law.lisp > "$d6_zip_order"
+cat -- "$d6_zip_source" tests/semantic/d6-zip-right-root-atom-negative.lisp > "$d6_zip_right_root"
+cat -- "$d6_zip_source" tests/semantic/d6-zip-right-tail-atom-negative.lisp > "$d6_zip_right_tail"
 sha256sum lib/core4.lisp lib/core4-parts/core4-d6b.lisp \
   tests/semantic/d6-zip-proper-law.lisp tests/semantic/d6-zip-proper-mutant.lisp \
   tests/semantic/d6-zip-improper-tail-negative.lisp \
-  tests/semantic/d6-zip-improper-root-negative.lisp > "$evidence/d6-zip-inputs.sha256"
+  tests/semantic/d6-zip-improper-root-negative.lisp \
+  tests/semantic/d6-zip-structural-order-law.lisp \
+  tests/semantic/d6-zip-right-root-atom-negative.lisp \
+  tests/semantic/d6-zip-right-tail-atom-negative.lisp \
+  tests/semantic/d6-d8-zip-swap-interoperability-law.lisp > "$evidence/d6-zip-inputs.sha256"
 run_case run_law d6-zip-proper "$d6_zip_positive" 1
 run_case run_law d6-zip-proper-mutant "$d6_zip_mutant" 0
 run_case run_type_rejection d6-zip-improper-tail "$d6_zip_bad_tail" 'car expects a non-empty list'
 run_case run_type_rejection d6-zip-improper-root "$d6_zip_bad_root" 'car expects a non-empty list'
+run_case run_law d6-zip-structural-order "$d6_zip_order" 1
+run_case run_type_rejection d6-zip-right-root "$d6_zip_right_root" 'car expects a non-empty list'
+run_case run_type_rejection d6-zip-right-tail "$d6_zip_right_tail" 'car expects a non-empty list'
+run_case run_law d6-d8-zip-swap-interoperability tests/semantic/d6-d8-zip-swap-interoperability-law.lisp 1 core4
 
 # D6 UNION: одна точна SENS-бібліотека, лише витяг чинних DEFINE.
 # Неправильний D1-хвіст має відхилятися Type, а не повертати обрізаний результат.
