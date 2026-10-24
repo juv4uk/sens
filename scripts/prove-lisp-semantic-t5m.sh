@@ -1080,7 +1080,16 @@ cat -- lib/list-append-general.lisp tests/semantic/d4-append-general-improper-ta
 run_case run_law d4-append-general-proper "$d4_append_positive" 1 core4
 run_case run_error_rejection d4-append-general-atomic-left "$d4_append_atom" Type 'car expects a non-empty list' core4
 run_case run_error_rejection d4-append-general-improper-tail "$d4_append_tail" Type 'car expects a non-empty list' core4
-sha256sum lib/list-append-general.lisp tests/semantic/d4-append-general-proper-law.lisp tests/semantic/d4-append-general-atomic-left-negative.lisp tests/semantic/d4-append-general-improper-tail-negative.lisp > "$evidence/d4-append-general-inputs.sha256"
+d4_append_right_atom="$evidence/d4-append-general-atomic-right-complete.lisp"
+d4_append_right_tail="$evidence/d4-append-general-improper-right-complete.lisp"
+cat -- lib/list-append-general.lisp tests/semantic/d4-append-general-atomic-right-negative.lisp > "$d4_append_right_atom"
+cat -- lib/list-append-general.lisp tests/semantic/d4-append-general-improper-right-negative.lisp > "$d4_append_right_tail"
+run_case run_error_rejection d4-append-general-atomic-right "$d4_append_right_atom" Type 'car expects a non-empty list' core4
+run_case run_error_rejection d4-append-general-improper-right "$d4_append_right_tail" Type 'car expects a non-empty list' core4
+sha256sum lib/list-append-general.lisp tests/semantic/d4-append-general-proper-law.lisp \
+  tests/semantic/d4-append-general-atomic-left-negative.lisp \
+  tests/semantic/d4-append-general-improper-tail-negative.lisp \
+  tests/semantic/d4-append-general-atomic-right-negative.lisp tests/semantic/d4-append-general-improper-right-negative.lisp > "$evidence/d4-append-general-inputs.sha256"
 
 # Д11 SRFI-1 LSET-DIFF+INTERSECTION: статично ідентифіковані фізичні джерела.
 # Rust ownership guard пов'язує лише ЯВНИЙ SENS шлях у cat із run_case;
