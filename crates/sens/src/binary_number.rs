@@ -473,11 +473,11 @@ impl BinaryNumber {
         a
     }
 
-    /// Owner-ratified numeric domain family D24, D48, D96, D192, ...
-    /// A width is legitimate only when it is 24 * 2^k, k >= 0.
-    /// This helper checks the *domain family*, not resident admissibility.
+    /// Owner-ratified exact numeric domain family D12, D24, D48, D96, ...
+    /// A width is legitimate only when it is 12 * 2^k, k >= 0.
+    /// This checks domain-family membership, not physical transport or callability.
     pub fn is_numeric_domain_width(width: usize) -> bool {
-        width >= 24 && width.is_multiple_of(24) && (width / 24).is_power_of_two()
+        width >= 12 && width.is_multiple_of(12) && (width / 12).is_power_of_two()
     }
 
     /// Exact magnitude capacity of one admitted numeric domain.
@@ -584,6 +584,45 @@ impl fmt::Display for BinaryNumber {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn d12_signed_domain_preserves_identity_and_widens_without_wrap() {
+        let mut maximum_bits = vec![1u8; 12];
+        maximum_bits[0] = 0;
+        let maximum = BinaryNumber::from_numeric_domain_bits(12, &maximum_bits).unwrap();
+
+        let mut minimum_bits = vec![0u8; 12];
+        minimum_bits[0] = 1;
+        let minimum = BinaryNumber::from_numeric_domain_bits(12, &minimum_bits).unwrap();
+
+        let minus_one = BinaryNumber::from_numeric_domain_bits(12, &[1u8; 12]).unwrap();
+        let mut one_bits = vec![0u8; 12];
+        one_bits[11] = 1;
+        let one = BinaryNumber::from_numeric_domain_bits(12, &one_bits).unwrap();
+
+        assert!(BinaryNumber::is_numeric_domain_width(12));
+        assert!(BinaryNumber::is_numeric_domain_width(24));
+        assert!(!BinaryNumber::is_numeric_domain_width(18));
+        assert_eq!(maximum.numeric_domain_width(), Some(12));
+        assert_eq!(maximum.to_decimal_string(), "2047");
+        assert_eq!(minimum.numeric_domain_width(), Some(12));
+        assert_eq!(minimum.to_decimal_string(), "-2048");
+        assert_eq!(minus_one.to_decimal_string(), "-1");
+        assert_eq!(maximum.exact_numeric_domain_bits(), Some(maximum_bits));
+
+        let positive_overflow = maximum.add_admitted_numeric(&one).unwrap();
+        assert_eq!(positive_overflow.numeric_domain_width(), Some(24));
+        assert_eq!(positive_overflow.to_decimal_string(), "2048");
+
+        let negative_overflow = minimum.checked_sub_admitted_numeric(&one).unwrap();
+        assert_eq!(negative_overflow.numeric_domain_width(), Some(24));
+        assert_eq!(negative_overflow.to_decimal_string(), "-2049");
+
+        let same_payload_d24 = BinaryNumber::from_numeric_domain_bits(24, &vec![0u8; 24]).unwrap();
+        assert!(maximum.add_admitted_numeric(&same_payload_d24).is_none());
+        assert!(maximum.add_admitted_numeric(&BinaryNumber::one()).is_none());
+        assert!(BinaryNumber::from_numeric_domain_bits(12, &vec![0u8; 11]).is_none());
+    }
 
     #[test]
     fn d24_twos_complement_words_have_signed_decimal_projection() {
