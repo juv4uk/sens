@@ -31,9 +31,11 @@ PEERS = {
 INVERSE = {v: k for k, v in PEERS.items()}
 SPECS = {
     "scripts/check-core4-predicate-answer-scale.lisp": {
-        "sha": "e3dc929c6c9d92f8d19124f460a44252ea83549a",
-        "counts": {"100": 4, "110": 1, "1001": 2, "1110": 5,
-                   "001": 59, "011": 2, "0010": 4, "0011": 15},
+        # Файл легітимно переписано (коміт a3a6a115: check-core4 → живі свідки D1).
+        # Стара картина (59 голів 001, 8-бітні цитати) більше не існує.
+        "sha": "746e6768f8c1c78356ab83f166e9a423d1f15ebb",
+        "counts": {"0011": 1, "0010": 1, "110": 3, "010": 2,
+                   "001": 8, "101": 2, "1110": 1},
     },
     "scripts/generate-functions-md.lisp": {
         "sha": "dac56932a768d3ea69a3901290a1c7a7fd3113f8",
@@ -229,14 +231,17 @@ class UkrScaleFunctionsMdProjectionTests(unittest.TestCase):
                 self.assertEqual(count, sum(expected["counts"].values()))
 
     def test_quoted_numeric_data_left_untouched(self):
+        # Першопричина: тест пінив історичний 8-бітний цитований блок файла,
+        # який легітимно переписали на живі свідки D1. Тепер — інваріант:
+        # живі цитовані дані лишаються даними, історичного блоку немає.
         source = (ROOT / "scripts" /
                   "check-core4-predicate-answer-scale.lisp").read_text(
                       encoding="utf-8"
                   )
-        self.assertIn("(001 (00000000 11111111))", source)
-        self.assertIn("(001 ((0) () (1)))", source)
-        self.assertEqual(source.count("(001 (1))"), 7)
-        self.assertNotIn("(як-є (00000000 11111111))", source)
+        self.assertIn("(як-є ())", source)
+        self.assertIn("(як-є а)", source)
+        self.assertNotIn("(001 (00000000 11111111))", source)
+        self.assertNotIn("(001 (1))", source)
 
     def test_wrong_ukr_peer_is_rejected_by_inverse(self):
         path = "scripts/generate-functions-md.lisp"
