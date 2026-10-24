@@ -1761,6 +1761,17 @@ cat -- lib/d11-clojure-juxt.lisp tests/semantic/d11-clojure-juxt-mutant.lisp > "
 sha256sum lib/d11-clojure-juxt.lisp tests/semantic/d11-clojure-juxt-laws.lisp tests/semantic/d11-clojure-juxt-mutant.lisp > "$evidence/d11-clojure-juxt-inputs.sha256"
 run_case run_law d11-clojure-juxt-positive "$d11_juxt_law_bundle" 1
 run_case run_law d11-clojure-juxt-mutant "$d11_juxt_mutant_bundle" 0
+
+# D11 JUХT: неправильний D1-хвіст має дати саме D3 CAR Type до
+# сторонньої функції (вона дала б CDR) і вже в момент конструктора.
+d11_juxt_bad_tail="$evidence/d11-clojure-juxt-poison-improper-tail-complete.lisp"
+d11_juxt_bad_ctor="$evidence/d11-clojure-juxt-constructor-improper-tail-complete.lisp"
+cat -- lib/d11-clojure-juxt.lisp tests/semantic/d11-clojure-juxt-poison-improper-tail-negative.lisp > "$d11_juxt_bad_tail"
+cat -- lib/d11-clojure-juxt.lisp tests/semantic/d11-clojure-juxt-constructor-improper-tail-negative.lisp > "$d11_juxt_bad_ctor"
+run_case run_error_rejection d11-clojure-juxt-poison-improper-tail "$d11_juxt_bad_tail" Type 'car expects a non-empty list'
+run_case run_error_rejection d11-clojure-juxt-constructor-improper-tail "$d11_juxt_bad_ctor" Type 'car expects a non-empty list'
+sha256sum tests/semantic/d11-clojure-juxt-poison-improper-tail-negative.lisp \
+  tests/semantic/d11-clojure-juxt-constructor-improper-tail-negative.lisp > "$evidence/d11-clojure-juxt-negative-inputs.sha256"
 # Д11 Clojure: два комплекти законів перенесено з Rust у справжній Lisp.
 # Їхня залежність SRFI-1 SPAN завантажується перед DEFINE групування.
 for suite in d11-clojure-partition-by d11-clojure-dedupe; do
