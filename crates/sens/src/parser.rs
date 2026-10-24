@@ -749,7 +749,7 @@ mod tests {
             .expect("canonical WRITE→READ must retain the exact number");
         assert!(matches!(
             forms.as_slice(),
-            [Expr { kind: ExprKind::Number(5.0, Exactness::Exact), .. }]
+            [Expr { kind: ExprKind::Number(value, Exactness::Exact), .. }] if *value == 5.0
         ));
         assert!(parse_exact_domain_source("#q2:101/1").is_err());
         assert!(parse_canonical_value_wire("5").is_err());
