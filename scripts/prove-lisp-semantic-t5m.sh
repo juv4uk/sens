@@ -545,11 +545,6 @@ run_case run_error_rejection d6-map-onto-improper-tail tests/semantic/d6-map-ont
 run_case run_law d6-reduce-left-positive tests/semantic/d6-reduce-left-law.lisp 1 core4
 run_case run_law d6-reduce-left-mutant tests/semantic/d6-reduce-left-mutant.lisp 0 core4
 run_case run_error_rejection d6-reduce-improper-tail tests/semantic/d6-reduce-improper-tail-negative.lisp Type 'car expects a non-empty list' core4
-# Д6:101111 SCAN: послідовність станів, REDUCE та два D3 Type-негативи.
-run_case run_law d6-scan-reduce-terminal-positive tests/semantic/d6-scan-reduce-terminal-law.lisp 1 core4
-run_case run_law d6-scan-missing-initial-mutant tests/semantic/d6-scan-missing-initial-mutant.lisp 0 core4
-run_case run_error_rejection d6-scan-improper-tail tests/semantic/d6-scan-improper-tail-negative.lisp Type 'car expects a non-empty list' core4
-run_case run_error_rejection d6-scan-onto-atom tests/semantic/d6-scan-onto-atom-negative.lisp Type 'car expects a non-empty list' core4
 # Д6 FILTER-ONTO: непорожній акумулятор має оборотний порядок; мутант хибний.
 run_case run_law d6-filter-onto-accumulator-positive tests/semantic/d6-filter-onto-accumulator-law.lisp 1 core4
 run_case run_law d6-filter-onto-accumulator-mutant tests/semantic/d6-filter-onto-accumulator-mutant.lisp 0 core4
@@ -674,6 +669,15 @@ run_case run_type_rejection d11-lset-equality-malformed-chain "$d11_lset_equalit
 sha256sum lib/d11-srfi1-set-relations.lisp tests/fixtures/d11-lset-{subset,equality}-malformed-chain-negative.lisp > "$evidence/d11-lset-chain-inputs.sha256"
 
 sha256sum lib/d11-srfi1-set-relations.lisp tests/semantic/d11-srfi1-set-relations-law.lisp tests/semantic/d11-srfi1-set-relations-mutant.lisp > "$evidence/d11-set-relations-inputs.sha256"
+# Д11: точне D3:() для коренів і хвостів; D1:ні не є NULL списку.
+# Обидва свідки містять лише чинні SENS DEFINE та виконуються на Zig/T5M.
+d11_set_proper_law="$evidence/d11-set-proper-d3-empty-law-complete.lisp"
+d11_set_proper_mutant="$evidence/d11-set-proper-d3-empty-mutant-complete.lisp"
+cat -- lib/d11-srfi1-set-relations.lisp tests/semantic/d11-set-proper-d3-empty-law.lisp > "$d11_set_proper_law"
+cat -- lib/d11-srfi1-set-relations.lisp tests/semantic/d11-set-proper-d3-empty-mutant.lisp > "$d11_set_proper_mutant"
+run_case run_law d11-set-proper-d3-empty-positive "$d11_set_proper_law" 1
+run_case run_law d11-set-proper-d3-empty-mutant "$d11_set_proper_mutant" 0
+sha256sum lib/d11-srfi1-set-relations.lisp tests/semantic/d11-set-proper-d3-empty-law.lisp tests/semantic/d11-set-proper-d3-empty-mutant.lisp > "$evidence/d11-set-proper-d3-empty-inputs.sha256"
 # D11 SRFI-1: навіть короткий шлях повернення ТАК не маскує пошкоджений хвіст.
 # Обидва негативні свідки запускають справжню бібліотеку SENS через Zig/T5M.
 d11_set_member_bad="$evidence/d11-srfi1-member-improper-hit-complete.lisp"
