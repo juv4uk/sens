@@ -186,6 +186,8 @@ run_native_t5m_program() {
       negative_type_diagnostic='car expects a non-empty list' ;;
     tests/semantic/d11-srfi1-find-tail-improper-tail-negative.lisp|tests/semantic/d11-family-aggregation-mutant.lisp)
       negative_type_diagnostic='car expects a non-empty list' ;;
+    tests/semantic/d11-srfi1-span-improper-suffix-negative.lisp|tests/semantic/d11-srfi1-break-improper-suffix-negative.lisp)
+      negative_type_diagnostic='car expects a non-empty list' ;;
     tests/semantic/d6-union-improper-tail-negative.lisp|tests/semantic/d6-union-improper-root-negative.lisp)
       negative_type_diagnostic='car expects a non-empty list' ;;
     tests/semantic/d3-car-atomic-dotted-tail-type-negative.lisp)
