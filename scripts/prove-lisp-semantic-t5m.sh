@@ -1043,6 +1043,19 @@ for variant in atom-input improper-tail remove-improper-tail select-improper-tai
 done
 sha256sum lib/d11-clojure-group-by.lisp \
   tests/fixtures/d11-group-by-*-must-error.lisp > "$evidence/d11-group-by-type-inputs.sha256"
+# Д3/Д4: APPEND-GENERAL завершує тільки точне (), а не D1:ні.
+# Всі три докази йдуть через SENS → Zig/T5M → SENS.
+d4_append_positive="$evidence/d4-append-general-proper-complete.lisp"
+d4_append_atom="$evidence/d4-append-general-atomic-left-complete.lisp"
+d4_append_tail="$evidence/d4-append-general-improper-tail-complete.lisp"
+cat -- lib/list-append-general.lisp tests/semantic/d4-append-general-proper-law.lisp > "$d4_append_positive"
+cat -- lib/list-append-general.lisp tests/semantic/d4-append-general-atomic-left-negative.lisp > "$d4_append_atom"
+cat -- lib/list-append-general.lisp tests/semantic/d4-append-general-improper-tail-negative.lisp > "$d4_append_tail"
+run_case run_law d4-append-general-proper "$d4_append_positive" 1 core4
+run_case run_error_rejection d4-append-general-atomic-left "$d4_append_atom" Type 'car expects a non-empty list' core4
+run_case run_error_rejection d4-append-general-improper-tail "$d4_append_tail" Type 'car expects a non-empty list' core4
+sha256sum lib/list-append-general.lisp tests/semantic/d4-append-general-proper-law.lisp tests/semantic/d4-append-general-atomic-left-negative.lisp tests/semantic/d4-append-general-improper-tail-negative.lisp > "$evidence/d4-append-general-inputs.sha256"
+
 # Д11 SRFI-1 LSET-DIFF+INTERSECTION: статично ідентифіковані фізичні джерела.
 # Rust ownership guard пов'язує лише ЯВНИЙ SENS шлях у cat із run_case;
 # приховане динамічне ім'я не є доказом реєстрації нового закону.
