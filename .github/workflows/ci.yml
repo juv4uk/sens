@@ -381,6 +381,8 @@ jobs:
           cargo test --locked -p sens-cli --bin sens t5m_quoted_ -- --nocapture
           # Реальна межа TCP-кадру: UTF-8, EOF, overflow і абсолютний дедлайн.
           cargo test --locked -p sens-cli --bin sens tcp_repl_frame_ -- --nocapture
+          # Читання кадрів семантичного TCP-оракула: EOF, квота і LF.
+          cargo test --locked -p sens-cli --bin sens oracle_frame_ -- --nocapture
           # F6 — тільки механізм двозаписового Rust-транспорту.
           # Мовні закони й семантика виконуються окремо у фізичному SENS.
           cargo test --locked -p sens-cli --bin wsm-fs-record-producer -- --nocapture
