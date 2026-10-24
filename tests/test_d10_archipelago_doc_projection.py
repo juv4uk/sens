@@ -9,12 +9,24 @@ import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
 PATH = ROOT / "scripts/check-d10-archipelago-doc-projection.py"
-spec = importlib.util.spec_from_file_location("d10_archipelago_doc_projection", PATH)
-guard = importlib.util.module_from_spec(spec)
-sys.modules[spec.name] = guard
-spec.loader.exec_module(guard)
+# Першопричина: guard і його workflow переведено в
+# research/paused-actions/20261011/d10-archipelago-doc-projection.yml.
+# Скрипт вилучено, а тест лишився — і валив збір УСЬОГО набору ImportError'ом
+# на рівні модуля. Тепер модуль імпортується завжди, а тести явно
+# пропускаються з причиною: суб'єкта тесту більше немає в чинному дереві.
+guard = None
+if PATH.is_file():
+    spec = importlib.util.spec_from_file_location("d10_archipelago_doc_projection", PATH)
+    guard = importlib.util.module_from_spec(spec)
+    sys.modules[spec.name] = guard
+    spec.loader.exec_module(guard)
 
 
+@unittest.skipUnless(
+    guard is not None,
+    "d10 archipelago doc-projection guard paused -> "
+    "research/paused-actions/20261011/d10-archipelago-doc-projection.yml",
+)
 class D10ArchipelagoProjectionTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
