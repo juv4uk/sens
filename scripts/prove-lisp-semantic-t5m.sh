@@ -1045,16 +1045,22 @@ if ! awk -v target="(визначити спарувати-послідовно�
   echo "::error::D6_ZIP_SOURCE_NOT_ISOLATABLE" >&2
   exit 2
 fi
-for kind in proper-law proper-mutant improper-tail-negative improper-root-negative; do
-  cat -- "$d6_zip_source" "tests/semantic/d6-zip-$kind.lisp" > "$evidence/d6-zip-$kind-complete.lisp"
-done
+d6_zip_positive="$evidence/d6-zip-proper-complete.lisp"
+d6_zip_mutant="$evidence/d6-zip-proper-mutant-complete.lisp"
+d6_zip_bad_tail="$evidence/d6-zip-improper-tail-complete.lisp"
+d6_zip_bad_root="$evidence/d6-zip-improper-root-complete.lisp"
+cat -- "$d6_zip_source" tests/semantic/d6-zip-proper-law.lisp > "$d6_zip_positive"
+cat -- "$d6_zip_source" tests/semantic/d6-zip-proper-mutant.lisp > "$d6_zip_mutant"
+cat -- "$d6_zip_source" tests/semantic/d6-zip-improper-tail-negative.lisp > "$d6_zip_bad_tail"
+cat -- "$d6_zip_source" tests/semantic/d6-zip-improper-root-negative.lisp > "$d6_zip_bad_root"
 sha256sum lib/core4.lisp lib/core4-parts/core4-d6b.lisp \
- tests/semantic/d6-zip-proper-law.lisp tests/semantic/d6-zip-proper-mutant.lisp tests/semantic/d6-zip-improper-tail-negative.lisp \
- tests/semantic/d6-zip-improper-root-negative.lisp > "$evidence/d6-zip-inputs.sha256"
-run_case run_law d6-zip-proper "$evidence/d6-zip-proper-law-complete.lisp" 1
-run_case run_law d6-zip-proper-mutant "$evidence/d6-zip-proper-mutant-complete.lisp" 0
-run_case run_type_rejection d6-zip-improper-tail "$evidence/d6-zip-improper-tail-negative-complete.lisp" 'car expects a non-empty list'
-run_case run_type_rejection d6-zip-improper-root "$evidence/d6-zip-improper-root-negative-complete.lisp" 'car expects a non-empty list'
+  tests/semantic/d6-zip-proper-law.lisp tests/semantic/d6-zip-proper-mutant.lisp \
+  tests/semantic/d6-zip-improper-tail-negative.lisp \
+  tests/semantic/d6-zip-improper-root-negative.lisp > "$evidence/d6-zip-inputs.sha256"
+run_case run_law d6-zip-proper "$d6_zip_positive" 1
+run_case run_law d6-zip-proper-mutant "$d6_zip_mutant" 0
+run_case run_type_rejection d6-zip-improper-tail "$d6_zip_bad_tail" 'car expects a non-empty list'
+run_case run_type_rejection d6-zip-improper-root "$d6_zip_bad_root" 'car expects a non-empty list'
 
 # Семантика D6 ALL — виконувані мовні закони з чинним визначенням Core4.
 d6_quantifier_source="$evidence/d6-first-class-predicate-quantifiers.lisp"
