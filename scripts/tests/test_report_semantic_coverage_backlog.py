@@ -30,9 +30,10 @@ class SemanticBacklogTests(unittest.TestCase):
         # без негатива. Звіт мусить назвати саме це, а не «готово».
         r = self.run_script("--ready")
         self.assertEqual(r.returncode, 0, r.stderr)
-        self.assertIn("UNVERIFIED_NATIVE_PHYSICAL", r.stdout)   # .bits-кандидати
-        self.assertIn("MISSING_NEGATIVE_SENS", r.stdout)        # немає негатива
+        self.assertIn("UNVERIFIED_NATIVE_PHYSICAL", r.stdout)   # .bits-кандидат (SHA-пришпилений)
         self.assertIn("NEEDS_NATIVE_RUN", r.stdout)             # потрібен запуск
+        # Усі 4 рядки тепер мають негативний свідок — блокера немає.
+        self.assertNotIn("MISSING_NEGATIVE_SENS", r.stdout)
         self.assertNotIn("готово ✓", r.stdout)
 
     def test_the_three_scopes_are_named(self):
