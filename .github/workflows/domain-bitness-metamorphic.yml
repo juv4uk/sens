@@ -1,0 +1,26 @@
+name: Доменна бітність — 2046 координат та Hamming-1
+
+on:
+  pull_request:
+    paths:
+      - "scripts/check-domain-bitness-witness.py"
+      - "scripts/domain_tables.py"
+      - "lib/domains/d*.lisp"
+      - ".github/workflows/domain-bitness-metamorphic.yml"
+  push:
+    branches: [main]
+    paths:
+      - "scripts/check-domain-bitness-witness.py"
+      - "scripts/domain_tables.py"
+      - "lib/domains/d*.lisp"
+      - ".github/workflows/domain-bitness-metamorphic.yml"
+
+jobs:
+  exact-domain-bitness-witness:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Мутаційні негативні приклади перевіряльника
+        run: python3 scripts/check-domain-bitness-witness.py --self-test
+      - name: Усі 2046 резидентів та 18434 одно-бітових переходів
+        run: python3 scripts/check-domain-bitness-witness.py
