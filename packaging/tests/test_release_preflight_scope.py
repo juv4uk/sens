@@ -16,7 +16,8 @@ WORKFLOW = ROOT / ".github" / "workflows" / "release-preflight.yml"
 # executes them. Comments, echoes, disabled snippets and wrong steps cannot
 # certify a complete release after the Zig transport gate.
 REQUIRED_WORKSPACE_STEPS = (
-    ("Full workspace tests (pre-tag, exact SHA)", "cargo test --locked --workspace"),
+    ("Full workspace tests (pre-tag, exact SHA)",
+     "cargo test --locked --workspace --no-fail-fast"),
     ("Full workspace Clippy (pre-tag, exact SHA)",
      "cargo clippy --locked --workspace --all-targets -- -D warnings"),
 )
@@ -169,7 +170,6 @@ def require_manual_preflight(source: str) -> None:
     receipt_body = source.split(receipt_step, 1)[1].split("\n      - name:", 1)[0]
     required_upload_lines = (
         "        if: always()",
-        "        uses: actions/upload-artifact@v4",
         "        with:",
         "          name: release-go-gate",
         "          path: ${{ runner.temp }}/release-go-gate.json",
@@ -181,6 +181,16 @@ def require_manual_preflight(source: str) -> None:
                 "RELEASE_BLOCKED: missing fail-closed GO-gate artifact evidence: "
                 + expected_line.strip()
             )
+    # Першопричина: дію закріплено повним 40-hex SHA (не плаваючим @vN тегом);
+    # стара вимога до @v4 суперечила контракту publication_gate.
+    if re.search(
+        r"(?m)^        uses: actions/upload-artifact@[0-9a-f]{40} # v\d+$",
+        receipt_body,
+    ) is None:
+        raise AssertionError(
+            "RELEASE_BLOCKED: missing fail-closed GO-gate artifact evidence: "
+            "pinned actions/upload-artifact SHA"
+        )
 
 
 class ReleasePreflightScopeTest(unittest.TestCase):
@@ -193,6 +203,10 @@ class ReleasePreflightScopeTest(unittest.TestCase):
 
 
     def test_go_gate_report_is_required_and_cannot_be_spoofed(self):
+        upload_pin = re.search(
+            r"(?m)^        uses: actions/upload-artifact@[0-9a-f]{40} # v\d+$",
+            self.workflow,
+        ).group(0) + "\n"
         expected = "          if-no-files-found: error\n"
         self.assertIn(expected, self.workflow)
         live = "      - name: Upload release GO-gate report\n"
@@ -205,8 +219,7 @@ class ReleasePreflightScopeTest(unittest.TestCase):
              "          path: ${{ runner.temp }}/unrelated.json\n"),
             ("          name: release-go-gate\n",
              "          name: unrelated-artifact\n"),
-            ("        uses: actions/upload-artifact@v4\n",
-             "        uses: actions/upload-artifact@v5\n"),
+            (upload_pin, "        uses: actions/upload-artifact@v5\n"),
             (live, "      - name: Unrelated upload step\n"),
         )
         for before, after in mutations:
