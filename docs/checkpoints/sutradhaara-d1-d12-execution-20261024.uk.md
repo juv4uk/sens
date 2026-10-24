@@ -182,9 +182,8 @@
 - `tests/fixtures/d11-list-equality-improper-right-must-error.lisp`;
 - `tests/fixtures/d11-list-equality-invalid-singleton-must-error.lisp`;
 - `tests/fixtures/d11-list-equality-invalid-third-must-error.lisp`.
-  Чотири нові негативні файли поки **не підключені до фізичного
-  очікуваного відхилення**. Жоден із них не є нормативним PASS без
-  реального SENS-виконання.
+
+**Оновлення Sūtradhāra, 24.10.2026 · commit `d04b9a1bac6111d100af86994e68e6b753d879da`:** усі чотири негативні входи підключені до чинного `scripts/prove-lisp-semantic-t5m.sh`. Кожен проходить через `run_type_rejection`, який вимагає реальну Type-відмову з діагностикою невикличної D1-голови на direct SENS, paired Zig/T5M/SENS та standalone physical SENS. Маніфест SHA тепер охоплює бібліотеку, позитив, мутант і всі чотири негативні fixtures. Це **підключені перевірки, не підтверджений PASS**: потрібен завершений hosted CI на точному SHA.
 
 **Перевірено з поточного GitHub-вмісту:** шість змінених і доданих
 SENS-файлів коректно збалансовані за формами/коментарями/рядками.
