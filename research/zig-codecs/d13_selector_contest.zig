@@ -43,15 +43,29 @@ fn encodeWords(comptime width: usize, comptime base: u16, words: []const u16, ou
         if (word < base or word >= limit) return error.InvalidWord;
     }
     if (output.len < n) return error.OutputTooSmall;
-    @memset(output[0..n], 0);
-    for (words, 0..) |word, i| {
-        const value: u16 = word - base;
-        for (0..width) |j| {
-            const cursor = i * width + j;
-            const bit: u8 = @intCast((value >> @as(u4, @intCast(width - j - 1))) & 1);
-            output[cursor / 8] |= bit << @as(u3, @intCast(7 - cursor % 8));
+
+    // Потоковий акумулятор: кожний байт записується рівно один раз.
+    // Після скидання повних байтів у ньому лишається менш ніж 8 біт.
+    const shift: u5 = @intCast(width);
+    var acc: u32 = 0;
+    var bits: u5 = 0;
+    var pos: usize = 0;
+    for (words) |word| {
+        acc = (acc << shift) | @as(u32, word - base);
+        bits += shift;
+        while (bits >= 8) {
+            bits -= 8;
+            output[pos] = @intCast((acc >> bits) & 0xff);
+            pos += 1;
+            acc &= (@as(u32, 1) << bits) - 1;
         }
     }
+    if (bits != 0) {
+        // Невикористані хвостові біти завжди нульові (канонічна форма).
+        output[pos] = @intCast(acc << @as(u5, 8 - bits));
+        pos += 1;
+    }
+    std.debug.assert(pos == n);
     return n;
 }
 
@@ -64,13 +78,21 @@ fn decodeWords(comptime width: usize, comptime base: u16, data: []const u8, coun
         const mask: u8 = (@as(u8, 1) << @as(u3, @intCast(padding))) - 1;
         if ((data[n - 1] & mask) != 0) return error.NonCanonicalTail;
     }
+
+    const shift: u5 = @intCast(width);
+    const mask: u32 = (@as(u32, 1) << shift) - 1;
+    var acc: u32 = 0;
+    var bits: u5 = 0;
+    var pos: usize = 0;
     for (0..count) |i| {
-        var value: u16 = 0;
-        for (0..width) |j| {
-            const cursor = i * width + j;
-            value = (value << 1) | @as(u16, (data[cursor / 8] >> @as(u3, @intCast(7 - cursor % 8))) & 1);
+        while (bits < shift) {
+            acc = (acc << 8) | @as(u32, data[pos]);
+            bits += 8;
+            pos += 1;
         }
-        output[i] = base + value;
+        bits -= shift;
+        output[i] = base + @as(u16, @intCast((acc >> bits) & mask));
+        acc &= (@as(u32, 1) << bits) - 1;
     }
 }
 
@@ -114,6 +136,39 @@ test "D13 Драбина: усі 2048 селекторів мають точни
         var decoded: [1]u16 = undefined;
         try decodeSelectors(&payload, 1, &decoded);
         try std.testing.expectEqualSlices(u16, &source, &decoded);
+    }
+}
+
+test "D13 Драбина: потоковий кодек зберігає точні байти та всі хвости" {
+    const selectors = [_]u16{ selector_first, selector_last };
+    const expected11 = [_]u8{ 0x00, 0x1f, 0xfc };
+    var bytes11: [3]u8 = undefined;
+    try std.testing.expectEqual(expected11.len, try encodeSelectors(&selectors, &bytes11));
+    try std.testing.expectEqualSlices(u8, &expected11, &bytes11);
+
+    const full = [_]u16{ 0, 0x1fff };
+    const expected13 = [_]u8{ 0x00, 0x07, 0xff, 0xc0 };
+    var bytes13: [4]u8 = undefined;
+    try std.testing.expectEqual(expected13.len, try encodeD13(&full, &bytes13));
+    try std.testing.expectEqualSlices(u8, &expected13, &bytes13);
+
+    var source: [16]u16 = undefined;
+    for (&source, 0..) |*word, i| {
+        word.* = selector_first + @as(u16, @intCast((i * 173) % selector_count));
+    }
+    var packed11: [26]u8 = undefined;
+    var packed13: [26]u8 = undefined;
+    var restored: [16]u16 = undefined;
+    for (1..17) |count| {
+        const n11 = try encodeSelectors(source[0..count], &packed11);
+        try std.testing.expectEqual((count * 11 + 7) / 8, n11);
+        try decodeSelectors(packed11[0..n11], count, &restored);
+        try std.testing.expectEqualSlices(u16, source[0..count], restored[0..count]);
+
+        const n13 = try encodeD13(source[0..count], &packed13);
+        try std.testing.expectEqual((count * 13 + 7) / 8, n13);
+        try decodeD13(packed13[0..n13], count, &restored);
+        try std.testing.expectEqualSlices(u16, source[0..count], restored[0..count]);
     }
 }
 
