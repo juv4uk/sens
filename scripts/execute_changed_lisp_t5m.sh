@@ -55,7 +55,7 @@ run_native_t5m_program() {
   # D24+ корені «число-*» та мовна Д6 «довжина» створюються Core4;
   # профіль однаковий для парного й автономного фізичного виконання.
   case "$file" in
-    tests/semantic/exact-arithmetic-laws.lisp|tests/semantic/exact-arithmetic-mutant.lisp|tests/semantic/d5-arithmetic-native-t5m-law.lisp|tests/semantic/d5-arithmetic-native-t5m-mutant.lisp|tests/semantic/d10-empty-queue-law.lisp|tests/semantic/d10-empty-queue-mutant.lisp|lib/lisp-fs.lisp)
+    tests/semantic/exact-arithmetic-laws.lisp|tests/semantic/exact-arithmetic-mutant.lisp|tests/semantic/d5-arithmetic-native-t5m-law.lisp|tests/semantic/d5-arithmetic-native-t5m-mutant.lisp|tests/semantic/d11-frequencies-key-order-law.lisp|tests/semantic/d11-frequencies-key-order-mutant.lisp|tests/semantic/d10-empty-queue-law.lisp|tests/semantic/d10-empty-queue-mutant.lisp|lib/lisp-fs.lisp)
       paired_runtime_args=(--core4-runtime)
       standalone_runtime=("$native_open" eval-core4)
       ;;
@@ -779,6 +779,12 @@ while IFS= read -r file || [[ -n "$file" ]]; do
     # Mint і paired мусять завантажити його чинне DEFINE, інакше отримуємо
     # хибний UnknownSymbol замість мовного D1:1 / D1:0. Rust/Zig не оракули.
     binding_sources=(--binding-source benchmarks/d3-proper-tail-hot.lisp)
+  elif [[ "$file" == "tests/semantic/d11-frequencies-key-order-law.lisp" ||
+          "$file" == "tests/semantic/d11-frequencies-key-order-mutant.lisp" ]]; then
+    # D11 FREQUENCIES: той самий явний SENS-профіль, що й законодавчий раннер.
+    # Без GROUP-BY/унарної FREQUENCIES парний evaluator бачить невідомий Text7.
+    binding_sources=(--binding-source lib/d11-clojure-group-by.lisp
+                     --binding-source lib/d11-clojure-frequencies-unary.lisp)
   elif [[ "$file" == "tests/semantic/d11-tree-equal-by-test-law.lisp" ||
           "$file" == "tests/semantic/d11-tree-equal-by-test-mutant.lisp" ]]; then
     # F11-TREE-TEST: точний D11-кандидат — викличне Lisp-визначення,
