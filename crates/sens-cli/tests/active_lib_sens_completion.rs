@@ -23,7 +23,10 @@ fn tool() -> Command {
 
 fn is_explicit_non_implementation(rel: &str) -> bool {
     rel.starts_with("lib/generated/")
-        || rel.starts_with("lib/surface/")
+        // Semantic registry is a callable Lisp entry point, unlike the
+        // tabular surfaces. Do not hide it behind a directory-wide exception.
+        || (rel.starts_with("lib/surface/")
+            && rel != "lib/surface/semantic-registry.lisp")
         || rel == "lib/machine/encoding/coverage.lisp"
         // Core4 — декларативна таблиця з колонками san/en/LISP/sym.
         // lib/yantra.lisp має справжні (визначити ...) і тому належить
@@ -378,6 +381,7 @@ fn actual_active_lib_collection_excludes_only_validated_generated_catalogue() {
     assert!(!selected.contains(&"lib/machine/encoding/admitted-iclass-index.lisp".to_owned()));
     assert!(selected.contains(&"lib/compiler-nucleus.lisp".to_owned()));
     assert!(selected.contains(&"lib/yantra.lisp".to_owned()));
+    assert!(selected.contains(&"lib/surface/semantic-registry.lisp".to_owned()));
     assert!(selected.contains(&"lib/machine/dispatch/native-first.lisp".to_owned()));
     assert!(selected.contains(&"lib/machine/layout/pair-x86-64.lisp".to_owned()));
 }
@@ -393,6 +397,9 @@ fn completion_gate_exclusions_are_narrow_and_explicit() {
     ));
     assert!(is_explicit_non_implementation(
         "lib/surface/uk-acceptance.lisp"
+    ));
+    assert!(!is_explicit_non_implementation(
+        "lib/surface/semantic-registry.lisp"
     ));
     assert!(is_explicit_non_implementation(
         "lib/generated/function-table.lisp"
