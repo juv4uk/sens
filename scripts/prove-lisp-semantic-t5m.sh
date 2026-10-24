@@ -824,6 +824,11 @@ sha256sum lib/d11-clojure-frequencies-unary.lisp tests/semantic/d11-clojure-freq
 d11_find_tail_bundle="$evidence/d11-srfi1-find-tail-complete.lisp"
 cat -- lib/d11-srfi1-find-tail.lisp tests/semantic/d11-srfi1-find-tail-laws.lisp > "$d11_find_tail_bundle"
 run_case run_law d11-srfi1-find-tail-physical "$d11_find_tail_bundle" 1
+# Д11 FIND-TAIL: незалежний негативний D1-мутант, не злитий з позитивом.
+d11_find_tail_mutant="$evidence/d11-srfi1-find-tail-mutant-complete.lisp"
+cat -- lib/d11-srfi1-find-tail.lisp tests/semantic/d11-srfi1-find-tail-mutant.lisp > "$d11_find_tail_mutant"
+run_case run_law d11-srfi1-find-tail-mutant "$d11_find_tail_mutant" 0
+
 # Сувора границя SRFI-1: неправильний D1-хвіст не можна приймати за NIL.
 # Прямий SENS, Zig T5M і фізичний SENS мусять відхилити тим самим Type.
 d11_find_tail_bad="$evidence/d11-srfi1-find-tail-improper-complete.lisp"
