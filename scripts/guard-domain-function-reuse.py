@@ -96,6 +96,15 @@ def definitions(text: str) -> list[str]:
 
 MARKER = re.compile(r";\s*D11-пропозиція\s*:", re.IGNORECASE)
 
+# Клас А («дубль наявної поверхні драбини»): закон може НАВМИСНЕ визначити
+# однойменну функцію з ІНШИМ тілом (не дубль). Маркер діє ЛИШЕ з непорожньою
+# причиною після `—`/`:` — порожній маркер не приймається, інакше це діра
+# для вимкнення охоронця.
+MARKER_INTENT = re.compile(
+    r";\s*НАВМИСНО\s*:\s*інший закон\s*[—–:\-]\s*\S",
+    re.IGNORECASE,
+)
+
 
 _HISTORY_INDEX: dict | None = None
 
@@ -288,18 +297,19 @@ def _form_end(masked: str, start: int) -> int | None:
 
 
 def definitions_with_bodies(text: str):
-    """Return each DEFINE's own body and whether its D11 marker is present."""
+    """Return each DEFINE's own body, D11 marker and intent-marker presence."""
     out = []
     masked = _mask_quotes(text)
     for m in DEF.finditer(masked):
         name = m.group(1)
         before = text[max(0, m.start() - 200):m.start()]
         marked = bool(MARKER.search(before))
+        intent = bool(MARKER_INTENT.search(before))
         end = _form_end(masked, m.start())
         # A malformed form has no executable body for purposes of this guard;
         # the caller must not treat unrelated later text as use of the ladder.
         body = masked[m.end():end - 1] if end is not None else ""
-        out.append((name, body, marked))
+        out.append((name, body, marked, intent))
     return out
 
 
@@ -735,6 +745,7 @@ def main(argv: list[str] | None = None) -> int:
     hot_warning(changed_files(args))
 
     blocked: list[tuple[str, str, str]] = []
+    intentional_shadows: list[tuple[str, str]] = []
     usage: dict[str, int] = {}
     new_defs: dict[str, int] = {}
     candidates: list[tuple[str, str]] = []
@@ -775,14 +786,14 @@ def main(argv: list[str] | None = None) -> int:
                     capture_output=True, text=True, check=False).stdout
             except Exception:
                 old_text = ""
-            known_counts.update(n for n, _, _ in definitions_with_bodies(old_text))
+            known_counts.update(n for n, *_ in definitions_with_bodies(old_text))
         seen_counts: Counter[str] = Counter()
         active_text = _mask_quotes(text)
         usage[rel] = sum(
             1 for head in re.findall(r"\(\s*([^\s()]{2,})", active_text)
             if head in ladder and head not in STRUCTURAL
         )
-        for name, body, marked in definitions_with_bodies(text):
+        for name, body, marked, intent in definitions_with_bodies(text):
             seen_counts[name] += 1
             if args.base and seen_counts[name] <= known_counts[name]:
                 continue  # наявне входження; перевіряємо лише приріст
@@ -791,6 +802,11 @@ def main(argv: list[str] | None = None) -> int:
                 blocked.append((rel, name, REASON_DUP_IN_FILE))
                 continue
             if name in ladder:
+                if intent:
+                    # Клас А з маркером: закон НАВМИСНЕ визначає однойменну
+                    # функцію з ІНШИМ тілом (не дубль) — не блокуємо.
+                    intentional_shadows.append((rel, name))
+                    continue
                 blocked.append((rel, name, REASON_SHADOW_LADDER))
                 continue
             if duplicates_project_definition(project_sites, name, rel):
@@ -813,6 +829,10 @@ def main(argv: list[str] | None = None) -> int:
 
     for rel, name in candidates:
         print(f"КАНДИДАТ D11: {rel}: {name} — немає в драбинах; пропозиція D11 (далі D12…)")
+    if intentional_shadows:
+        print(f"НАВМИСНИЙ ІНШИЙ ЗАКОН (клас А, позначено маркером): {len(intentional_shadows)}")
+        for rel, name in intentional_shadows:
+            print(f"     {rel}: «{name}» — позначено `; НАВМИСНО: інший закон — <причина>`")
     # Заблокований зріз не має змінювати реєстр кандидатів D11.
     if args.register and candidates and not blocked:
         n = register_candidates(candidates)
@@ -836,6 +856,7 @@ def main(argv: list[str] | None = None) -> int:
                 print(f"        де саме: python3 scripts/search-domain-function.py {n}")
             if len(shadow) > 12:
                 print(f"     … ще {len(shadow) - 12}")
+            print("     навмисний інший закон? познач `; НАВМИСНО: інший закон — <причина>` перед визначенням")
         if project:
             print(f"\n  Б) ЗАТІНЮЄ ПРОЄКТ ({len(project)}) — ужий наявне визначення проєкту:")
             for r, n in project[:8]:
@@ -859,7 +880,7 @@ def main(argv: list[str] | None = None) -> int:
         for rel, name, why in blocked:
             print(f"BLOCKED: {rel}: «{name}» — {why}. Вжий наявну поверхню драбини, або познач "
                   f"`; D11-пропозиція: <причина>` перед визначенням, якщо операції справді немає.")
-        print(f"GUARD-DOMAIN-REUSE: BLOCKED ({len(blocked)} порушень серед {checked} файлів)")
+        print(f"GUARD-DOMAIN-REUSE: BLOCKED ({len(blocked)} порушень серед {checked} файлів, навмисних: {len(intentional_shadows)})")
         return 1
 
     # Мертвий охоронець не має права казати OK. Якщо він не побачив ЖОДНОГО
@@ -872,7 +893,7 @@ def main(argv: list[str] | None = None) -> int:
               "й гачок активний (bash scripts/install-hooks.sh).", file=sys.stderr)
         print(f"GUARD-DOMAIN-REUSE: НЕ ПЕРЕВІРЕНО (0 файлів)")
         return 2
-    print(f"GUARD-DOMAIN-REUSE: OK ({checked} файлів, {len(candidates)} кандидатів D11)")
+    print(f"GUARD-DOMAIN-REUSE: OK ({checked} файлів, {len(candidates)} кандидатів D11, навмисних: {len(intentional_shadows)})")
     return 0
 
 
