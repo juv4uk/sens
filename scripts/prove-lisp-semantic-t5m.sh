@@ -850,6 +850,23 @@ d11_presence_early="$evidence/d11-find-presence-early-improper.lisp"
 cat -- lib/d11-srfi1-find-presence.lisp tests/semantic/d11-srfi1-find-presence-early-hit-improper-negative.lisp > "$d11_presence_early"
 run_case run_type_rejection d11-find-presence-early-hit-improper "$d11_presence_early" "car expects a non-empty list"
 sha256sum lib/d11-srfi1-find-presence.lisp tests/semantic/d11-srfi1-find-presence-law.lisp tests/semantic/d11-srfi1-find-presence-mutant.lisp tests/semantic/d11-srfi1-find-presence-improper-tail-negative.lisp tests/semantic/d11-srfi1-find-presence-early-hit-improper-negative.lisp > "$evidence/d11-find-presence-inputs.sha256"
+# Д11 FIND-LAST-PRESENCE: єдиний валідатор D3, чистий рекурсивний SENS.
+# Залежності — точні DEFINE з FIND-PRESENCE та цього бібліотечного файла.
+d11_last_positive="$evidence/d11-find-last-presence-positive.lisp"
+d11_last_mutant="$evidence/d11-find-last-presence-mutant.lisp"
+d11_last_invalid="$evidence/d11-find-last-presence-improper.lisp"
+cat -- lib/d11-srfi1-find-presence.lisp lib/d11-srfi1-find-last-presence.lisp \
+  tests/semantic/d11-find-last-presence-law.lisp > "$d11_last_positive"
+cat -- lib/d11-srfi1-find-presence.lisp lib/d11-srfi1-find-last-presence.lisp \
+  tests/semantic/d11-find-last-presence-mutant.lisp > "$d11_last_mutant"
+cat -- lib/d11-srfi1-find-presence.lisp lib/d11-srfi1-find-last-presence.lisp \
+  tests/semantic/d11-find-last-presence-improper-negative.lisp > "$d11_last_invalid"
+run_case run_law d11-find-last-presence-positive "$d11_last_positive" 1
+run_case run_law d11-find-last-presence-mutant "$d11_last_mutant" 0
+run_case run_type_rejection d11-find-last-presence-improper "$d11_last_invalid" 'car expects a non-empty list'
+sha256sum lib/d11-srfi1-find-presence.lisp lib/d11-srfi1-find-last-presence.lisp \
+  tests/semantic/d11-find-last-presence-*.lisp > "$evidence/d11-find-last-presence-inputs.sha256"
+
 # Д11 SRFI-1 FILTER-MAP: D1:ні відкидається, структурне () зберігається.
 # Справжній SENS source → Zig/T5M → парний і самостійний SENS.
 d11_filter_map_positive="$evidence/d11-srfi1-filter-map-positive.lisp"

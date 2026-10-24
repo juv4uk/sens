@@ -178,6 +178,8 @@ run_native_t5m_program() {
       negative_type_diagnostic='domain identity is not callable under its ratified law: D1 ' ;;
     tests/semantic/d11-srfi1-unary-count-improper-tail-negative.lisp|tests/semantic/d11-srfi1-unary-count-improper-right-negative.lisp)
       negative_type_diagnostic='car expects a non-empty list' ;;
+    tests/semantic/d11-find-last-presence-improper-negative.lisp)
+      negative_type_diagnostic='car expects a non-empty list' ;;
     tests/semantic/d11-srfi1-find-presence-improper-tail-negative.lisp)
       negative_type_diagnostic='car expects a non-empty list' ;;
     tests/semantic/d3-eq-nonatom-type-negative.lisp)
@@ -230,6 +232,9 @@ run_native_t5m_program() {
             "$file" == "tests/semantic/d11-srfi1-unary-count-improper-right-negative.lisp" ]]; then
       direct_source="$dir/d11-unary-count-bound-negative.lisp"
       cat -- lib/d11-srfi1-unary-count.lisp "$file" > "$direct_source"
+    elif [[ "$file" == "tests/semantic/d11-find-last-presence-improper-negative.lisp" ]]; then
+      direct_source="$dir/d11-find-last-presence-complete-negative.lisp"
+      cat -- lib/d11-srfi1-find-presence.lisp lib/d11-srfi1-find-last-presence.lisp "$file" > "$direct_source"
     elif [[ "$file" == "tests/semantic/d11-srfi1-find-presence-improper-tail-negative.lisp" ]]; then
       direct_source="$dir/d11-find-presence-bound-negative.lisp"
       cat -- lib/d11-srfi1-find-presence.lisp "$file" > "$direct_source"
@@ -275,7 +280,22 @@ run_native_t5m_program() {
       mark_file_failed
       return
     fi
-    if timeout "$native_timeout" "$binary" "$physical" \
+    # Для окремого D11-негативу самодостатній фізичний носій містить
+    # точні SENS DEFINE. Перевіряємо Type, не списуємо відмову на D7 ім'я.
+    local negative_standalone_physical="$physical"
+    if [[ "$file" == "tests/semantic/d11-find-last-presence-improper-negative.lisp" ]]; then
+      local complete_last_source="$dir/d11-last-complete-negative.lisp"
+      negative_standalone_physical="$dir/d11-last-complete-negative.sens"
+      if ! cat -- lib/d11-srfi1-find-presence.lisp lib/d11-srfi1-find-last-presence.lisp "$file" > "$complete_last_source" ||
+         ! timeout "$native_timeout" "$binary" --t5m-mint "$complete_last_source" "$negative_standalone_physical" >"$dir/d11-last-mint.stdout" 2>"$dir/d11-last-mint.stderr" ||
+         ! timeout "$native_timeout" "$native_open" open "$negative_standalone_physical" >"$dir/d11-last-complete-negative" 2>"$dir/d11-last-open.stderr" ||
+         ! timeout "$native_timeout" "$native_open" verify-view "$negative_standalone_physical" >"$dir/d11-last-verify.stdout" 2>"$dir/d11-last-verify.stderr"; then
+        echo "::error::T5M_D11_LAST_COMPLETE_NEGATIVE_MINT_FAILED source=$file" >&2
+        mark_file_failed
+        return
+      fi
+    fi
+    if timeout "$native_timeout" "$binary" "$negative_standalone_physical" \
         >"$dir/native-standalone.stdout" 2>"$dir/native-standalone.stderr"; then
       echo "::error::T5M_EXPECTED_TYPE_STANDALONE_ACCEPTED source=$file" >&2
       mark_file_failed
@@ -987,6 +1007,11 @@ while IFS= read -r file || [[ -n "$file" ]]; do
           "$file" == "tests/semantic/d11-list-terminator-mutant.lisp" ]]; then
     # Повторно використовуємо лише справжній SENS DEFINE, Zig переносить форму.
     binding_sources=(--binding-source lib/d11-list-terminator-evidence.lisp)
+  elif [[ "$file" == "tests/semantic/d11-find-last-presence-law.lisp" ||
+          "$file" == "tests/semantic/d11-find-last-presence-mutant.lisp" ||
+          "$file" == "tests/semantic/d11-find-last-presence-improper-negative.lisp" ]]; then
+    binding_sources=(--binding-source lib/d11-srfi1-find-presence.lisp
+                     --binding-source lib/d11-srfi1-find-last-presence.lisp)
   elif [[ "$file" == "tests/semantic/d11-srfi1-find-presence-law.lisp" ||
           "$file" == "tests/semantic/d11-srfi1-find-presence-mutant.lisp" ||
           "$file" == "tests/semantic/d11-srfi1-find-presence-improper-tail-negative.lisp" ||
