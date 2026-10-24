@@ -831,6 +831,22 @@ while IFS= read -r file || [[ -n "$file" ]]; do
   elif [[ "$file" == "tests/semantic/core1-gc-reachability-laws.lisp" ]]; then
     # Обхід коренів і циклів виконує лише наявний Core1 Lisp.
     binding_sources=(--binding-source lib/core1.lisp)
+  elif [[ "$file" == "tests/semantic/d6-rassoc-atomic-law.lisp" ||
+           "$file" == "tests/semantic/d6-rassoc-atomic-mutant.lisp" ]]; then
+    # Використовуємо справжнє DEFINE з Core4, без Rust/Python семантики.
+    rassoc_definition="$dir/d6-rassoc-definition.lisp"
+    if ! awk '
+      $0 == "(визначити знайти-за-значенням" { started++; inside=1 }
+      inside && $0 == "; intersection (перетин)" { inside=0; ended++; next }
+      inside { print }
+      END { if (started != 1 || ended != 1 || inside) exit 2 }
+    ' lib/core4.lisp > "$rassoc_definition"; then
+      echo "::error::D6_RASSOC_DEFINITION_NOT_ISOLATABLE source=lib/core4.lisp" >&2
+      mark_file_failed
+      continue
+    fi
+    test -s "$rassoc_definition"
+    binding_sources=(--binding-source "$rassoc_definition")
   elif [[ "$file" == "tests/semantic/d11-clojure-juxt-laws.lisp" || "$file" == "tests/semantic/d11-clojure-juxt-mutant.lisp" ]]; then
     # Реальні DEFINE мови, не дубль Rust-реалізації закону.
     binding_sources=(--binding-source lib/d11-clojure-juxt.lisp)
