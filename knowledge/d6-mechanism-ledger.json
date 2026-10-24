@@ -15,7 +15,7 @@
     "LISP_OWNED": 0,
     "MISSING": 60
   },
-  "rule": "Ratified D6 residency is distinct from callability. ADD1, SUB1 and NEG are admitted exact LOWER_DOMAIN_COMPOSITION over D5 PLUS/DIFFERENCE (0 or 1 in the same D24+ domain). INTEGERP is a direct D24+ -> D1 predicate. All other D6 residents remain MISSING until proven.",
+  "rule": "Ratified D6 residency is distinct from callability. ADD1, SUB1 and NEG are admitted exact LOWER_DOMAIN_COMPOSITION over D5 PLUS/DIFFERENCE (0 or 1 in the same admitted D12+ domain). INTEGERP is a direct D12+ -> D1 predicate. All other D6 residents remain MISSING until proven.",
   "rows": [
     {
       "coordinate": "000000",
@@ -257,7 +257,7 @@
       "identity_status": "RATIFIED",
       "mechanism_status": "LOWER_DOMAIN_COMPOSITION",
       "evidence": [
-        "crates/sens/src/eval/d6_arithmetic.rs: D6 NEG = D5 DIFFERENCE(exact D24+ zero, x); no host unary arithmetic",
+        "crates/sens/src/eval/d6_arithmetic.rs: D6 NEG = D5 DIFFERENCE(exact D12+ zero, x); no host unary arithmetic",
         "crates/sens/tests/d6_add1_sub1_mechanisms.rs: SENS evaluator and exact-D6 signed/fractional/arity/type witnesses"
       ],
       "negative_cross_domain_control": "D7 or D8 with the same payload is not admitted D6 NEG"
@@ -827,7 +827,7 @@
       "identity_status": "RATIFIED",
       "mechanism_status": "DIRECT_LAW",
       "evidence": [
-        "crates/sens/src/eval/d6_arithmetic.rs: D6 INTEGERP checks explicitly admitted D24+ BinaryNumber and returns D1",
+        "crates/sens/src/eval/d6_arithmetic.rs: D6 INTEGERP checks explicitly admitted D12+ BinaryNumber and returns D1",
         "crates/sens/src/eval/d6_arithmetic.rs: unit positive/noninteger/non-D24 and arity witnesses"
       ],
       "negative_cross_domain_control": "D7 digits, legacy Rational and host strings cannot be converted to D6 INTEGERP truth"
