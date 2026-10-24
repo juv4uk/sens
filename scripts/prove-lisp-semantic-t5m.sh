@@ -1270,26 +1270,29 @@ sha256sum lib/d11-family-selection.lisp \
 d11_take_while_positive="$evidence/d11-take-while-first-class-positive-complete.lisp"
 d11_take_while_mutant="$evidence/d11-take-while-first-class-mutant-complete.lisp"
 d11_take_while_bad="$evidence/d11-take-while-first-class-improper-tail-complete.lisp"
-cat -- lib/d11-srfi1-span-break.lisp lib/d11-srfi1-take-while.lisp \
+cat -- lib/d11-srfi1-find-presence.lisp lib/d11-srfi1-span-break.lisp lib/d11-srfi1-take-while.lisp \
   tests/semantic/d11-take-while-first-class-law.lisp > "$d11_take_while_positive"
-cat -- lib/d11-srfi1-span-break.lisp lib/d11-srfi1-take-while.lisp \
+cat -- lib/d11-srfi1-find-presence.lisp lib/d11-srfi1-span-break.lisp lib/d11-srfi1-take-while.lisp \
   tests/semantic/d11-take-while-first-class-mutant.lisp > "$d11_take_while_mutant"
-cat -- lib/d11-srfi1-span-break.lisp lib/d11-srfi1-take-while.lisp \
+cat -- lib/d11-srfi1-find-presence.lisp lib/d11-srfi1-span-break.lisp lib/d11-srfi1-take-while.lisp \
   tests/semantic/d11-take-while-first-class-improper-tail-negative.lisp > "$d11_take_while_bad"
 run_case run_law d11-take-while-first-class-positive "$d11_take_while_positive" 1
 run_case run_law d11-take-while-first-class-mutant "$d11_take_while_mutant" 0
 run_case run_type_rejection d11-take-while-first-class-improper-tail "$d11_take_while_bad" 'car expects a non-empty list'
+d11_take_while_precedence="$evidence/d11-take-while-precedence-complete.lisp"
+cat -- lib/d11-srfi1-find-presence.lisp lib/d11-srfi1-span-break.lisp lib/d11-srfi1-take-while.lisp tests/semantic/d11-take-while-first-class-predicate-precedence-negative.lisp > "$d11_take_while_precedence"
+run_case run_type_rejection d11-take-while-first-class-type-precedence "$d11_take_while_precedence" 'car expects a non-empty list'
 d11_take_while_root="$evidence/d11-take-while-first-class-atomic-root-complete.lisp"
 d11_take_while_late="$evidence/d11-take-while-first-class-late-improper-complete.lisp"
-cat -- lib/d11-srfi1-span-break.lisp lib/d11-srfi1-take-while.lisp \
+cat -- lib/d11-srfi1-find-presence.lisp lib/d11-srfi1-span-break.lisp lib/d11-srfi1-take-while.lisp \
   tests/semantic/d11-take-while-first-class-atomic-root-negative.lisp > "$d11_take_while_root"
-cat -- lib/d11-srfi1-span-break.lisp lib/d11-srfi1-take-while.lisp \
+cat -- lib/d11-srfi1-find-presence.lisp lib/d11-srfi1-span-break.lisp lib/d11-srfi1-take-while.lisp \
   tests/semantic/d11-take-while-first-class-late-improper-negative.lisp > "$d11_take_while_late"
 run_case run_type_rejection d11-take-while-first-class-atomic-root "$d11_take_while_root" 'car expects a non-empty list'
 run_case run_type_rejection d11-take-while-first-class-late-improper "$d11_take_while_late" 'car expects a non-empty list'
 
 
-sha256sum lib/d11-srfi1-span-break.lisp lib/d11-srfi1-take-while.lisp \
+sha256sum lib/d11-srfi1-find-presence.lisp lib/d11-srfi1-span-break.lisp lib/d11-srfi1-take-while.lisp \
   tests/semantic/d11-take-while-first-class-*.lisp > "$evidence/d11-take-while-first-class-inputs.sha256"
 
 # Д11 SRFI-1 lset-adjoin: перевірка лише SENS через фізичний Zig/T5M.
