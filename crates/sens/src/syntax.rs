@@ -1382,7 +1382,7 @@ mod fasl_tests {
             raw.push(6u8); // TAG_PAIR
             raw.extend_from_slice(&[11u8, 3u8, 1u8]); // TAG_DOMAIN_IDENTITY D3:001
         }
-        raw.extend_from_slice(&[11u8, 10u8, 0aau8, 0x02u8]);
+        raw.extend_from_slice(&[11u8, 10u8, 0xaau8, 0x02u8]);
         let hash = [0x3du8; 32];
         let encoded = fasl_with_one_raw_expression(&raw);
         let (decoded, recovered_hash) =
