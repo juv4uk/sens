@@ -768,6 +768,30 @@ while IFS= read -r file || [[ -n "$file" ]]; do
     # SENS визначає UNFOLD/UNFOLD-RIGHT у бібліотеці, яку фізично
     # додаємо до mint/paired, замість допуску невідомого Text7 імені.
     binding_sources=(--binding-source lib/d11-srfi1-unfold.lisp)
+  elif [[ "$file" == "tests/semantic/d6-union-proper-law.lisp" ||
+          "$file" == "tests/semantic/d6-union-proper-mutant.lisp" ||
+          "$file" == "tests/semantic/d6-union-improper-tail-negative.lisp" ||
+          "$file" == "tests/semantic/d6-union-improper-root-negative.lisp" ]]; then
+    # Д6 UNION: виділити чинні SENS-визначення, не створювати host-функцію.
+    # Обидва маршрути mint/paired мусять отримати ту саму послідовність DEFINE.
+    d6_union_binding="$dir/d6-union-exact-binding.lisp"
+    : > "$d6_union_binding"
+    for spec in 'lib/core4-parts/core4-language.lisp|значення-у-списку?' 'lib/core4-parts/core4-codec.lisp|об'"'"'єднання'; do
+      d6_union_file="${spec%%|*}"
+      d6_union_name="${spec#*|}"
+      if ! awk -v target="(визначити $d6_union_name" '
+        $0 == target { if (found++) exit 2; copying = 1 }
+        copying && NF == 0 { copying = 0; complete++; next }
+        copying { print }
+        END { if (found != 1 || complete != 1 || copying) exit 2 }
+      ' "$d6_union_file" >> "$d6_union_binding"; then
+        echo "::error::T5M_D6_UNION_BINDING_NOT_ISOLATABLE source=$file definition=$d6_union_name" >&2
+        mark_file_failed
+        continue 2
+      fi
+      printf '\n' >> "$d6_union_binding"
+    done
+    binding_sources=(--binding-source "$d6_union_binding")
   elif [[ "$file" == "tests/semantic/d11-srfi1-find-tail-laws.lisp" ||
           "$file" == "tests/semantic/d11-srfi1-find-tail-improper-tail-negative.lisp" ]]; then
     # Лише визначення із справжньої бібліотеки SENS, без host-оракула.

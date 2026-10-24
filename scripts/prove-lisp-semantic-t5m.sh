@@ -1071,6 +1071,34 @@ run_case run_law d6-zip-proper-mutant "$d6_zip_mutant" 0
 run_case run_type_rejection d6-zip-improper-tail "$d6_zip_bad_tail" 'car expects a non-empty list'
 run_case run_type_rejection d6-zip-improper-root "$d6_zip_bad_root" 'car expects a non-empty list'
 
+# D6 UNION: одна точна SENS-бібліотека, лише витяг чинних DEFINE.
+# Неправильний D1-хвіст має відхилятися Type, а не повертати обрізаний результат.
+d6_union_source="$evidence/d6-union-exact-definitions.lisp"
+: > "$d6_union_source"
+for spec in 'lib/core4-parts/core4-language.lisp|значення-у-списку?' 'lib/core4-parts/core4-codec.lisp|об'"'"'єднання'; do
+  d6_union_file="${spec%%|*}"
+  d6_union_name="${spec#*|}"
+  if ! awk -v target="(визначити $d6_union_name" '
+    $0 == target { if (found++) exit 2; copying = 1 }
+    copying && NF == 0 { copying = 0; complete++; next }
+    copying { print }
+    END { if (found != 1 || complete != 1 || copying) exit 2 }
+  ' "$d6_union_file" >> "$d6_union_source"; then
+    echo "::error::D6_UNION_DEFINITION_NOT_ISOLATABLE function=$d6_union_name source=$d6_union_file" >&2
+    exit 2
+  fi
+  printf '\n' >> "$d6_union_source"
+done
+for kind in proper-law proper-mutant improper-tail-negative improper-root-negative; do
+  cat -- "$d6_union_source" "tests/semantic/d6-union-$kind.lisp" > "$evidence/d6-union-$kind-complete.lisp"
+done
+run_case run_law d6-union-proper "$evidence/d6-union-proper-law-complete.lisp" 1
+run_case run_law d6-union-proper-mutant "$evidence/d6-union-proper-mutant-complete.lisp" 0
+run_case run_type_rejection d6-union-improper-tail "$evidence/d6-union-improper-tail-negative-complete.lisp" 'car expects a non-empty list'
+run_case run_type_rejection d6-union-improper-root "$evidence/d6-union-improper-root-negative-complete.lisp" 'car expects a non-empty list'
+sha256sum lib/core4.lisp lib/core4-parts/core4-codec.lisp lib/core4-parts/core4-language.lisp \
+  tests/semantic/d6-union-*.lisp > "$evidence/d6-union-inputs.sha256"
+
 # Семантика D6 ALL — виконувані мовні закони з чинним визначенням Core4.
 d6_quantifier_source="$evidence/d6-first-class-predicate-quantifiers.lisp"
 : > "$d6_quantifier_source"
