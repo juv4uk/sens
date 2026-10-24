@@ -539,6 +539,9 @@ sha256sum lib/core4.lisp tests/semantic/d6-filter-independent-law.lisp \
   tests/semantic/d6-filter-independent-mutant.lisp \
   tests/semantic/d6-filter-onto-accumulator-law.lisp \
   tests/semantic/d6-filter-onto-accumulator-mutant.lisp \
+  tests/semantic/d6-map-onto-accumulator-law.lisp \
+  tests/semantic/d6-map-onto-order-mutant.lisp \
+  tests/semantic/d6-map-onto-improper-tail-negative.lisp \
   tests/semantic/d6-filter-improper-tail-negative.lisp > "$evidence/d6-filter-inputs.sha256"
 # D6-квантори перевіряємо нижче як повні програми з визначеннями Core4.
 # D4 рекурсивна правильність списків: позитив та навмисне порушення.
