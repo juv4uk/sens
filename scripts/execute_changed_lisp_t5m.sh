@@ -614,6 +614,34 @@ run_native_t5m_program() {
         return
       fi
     fi
+    if [[ "$file" == "lib/d11-common-suffix-checked.lisp" ||
+          "$file" == "tests/semantic/d11-common-suffix-checked-law.lisp" ||
+          "$file" == "tests/semantic/d11-common-suffix-checked-mutant.lisp" ]]; then
+      local suffix_complete_source="$dir/d11-checked-suffix-complete.lisp"
+      standalone_physical="$dir/d11-checked-suffix-complete.sens"
+      local -a suffix_dependencies=(lib/list-common-suffix-general.lisp
+                                   lib/d11-list-terminator-evidence.lisp)
+      if [[ "$file" != "lib/d11-common-suffix-checked.lisp" ]]; then
+        suffix_dependencies+=(lib/d11-common-suffix-checked.lisp)
+      fi
+      if ! cat -- "${suffix_dependencies[@]}" "$file" > "$suffix_complete_source" ||
+         ! timeout "$native_timeout" "$binary" --t5m-mint "$suffix_complete_source" "$standalone_physical" >"$dir/d11-suffix-mint.out" 2>"$dir/d11-suffix-mint.err" ||
+         ! timeout "$native_timeout" "$native_open" open "$standalone_physical" >"${standalone_physical%.sens}" 2>"$dir/d11-suffix-open.err" ||
+         ! timeout "$native_timeout" "$native_open" verify-view "$standalone_physical" >"$dir/d11-suffix-verify.out" 2>"$dir/d11-suffix-verify.err"; then
+        echo "::error::D11_CHECKED_SUFFIX_MINT_RED source=$file layer=Zig-T5M" >&2
+        mark_file_failed
+        return
+      fi
+      if [[ "$file" == tests/semantic/d11-common-suffix-checked-*.lisp ]]; then
+        local expected_checked_suffix=1
+        [[ "$file" != *-mutant.lisp ]] || expected_checked_suffix=0
+        if [[ "$(cat "$dir/native-paired.stdout")" != "$expected_checked_suffix" ]]; then
+          echo "::error::D11_CHECKED_SUFFIX_WRONG_D1 source=$file layer=SENS expected=D1:$expected_checked_suffix actual=$(cat "$dir/native-paired.stdout")" >&2
+          mark_file_failed
+          return
+        fi
+      fi
+    fi
     if [[ "$file" == "tests/semantic/d11-tree-equal-by-test-law.lisp" ||
           "$file" == "tests/semantic/d11-tree-equal-by-test-mutant.lisp" ]]; then
       # Фізична самодостатність: одна й та сама SENS-бібліотека + SENS-свідок.
@@ -902,6 +930,14 @@ while IFS= read -r file || [[ -n "$file" ]]; do
           "$file" == "tests/semantic/d11-srfi1-set-relations-mutant.lisp" ]]; then
     # D11-множини: SENS-функції бере лише з чинного бібліотечного джерела.
     binding_sources=(--binding-source lib/d11-srfi1-set-relations.lisp)
+  elif [[ "$file" == "lib/d11-common-suffix-checked.lisp" ]]; then
+    binding_sources=(--binding-source lib/list-common-suffix-general.lisp
+                     --binding-source lib/d11-list-terminator-evidence.lisp)
+  elif [[ "$file" == "tests/semantic/d11-common-suffix-checked-law.lisp" ||
+          "$file" == "tests/semantic/d11-common-suffix-checked-mutant.lisp" ]]; then
+    binding_sources=(--binding-source lib/list-common-suffix-general.lisp
+                     --binding-source lib/d11-list-terminator-evidence.lisp
+                     --binding-source lib/d11-common-suffix-checked.lisp)
   elif [[ "$file" == "tests/semantic/d11-srfi1-find-tail-laws.lisp" ||
           "$file" == "tests/semantic/d11-srfi1-find-tail-improper-tail-negative.lisp" ]]; then
     # Лише визначення із справжньої бібліотеки SENS, без host-оракула.
