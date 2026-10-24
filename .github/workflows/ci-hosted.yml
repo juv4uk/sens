@@ -128,7 +128,9 @@ jobs:
           cargo test --locked -p sens --test time_host_surface
       - name: Mechanical stale-D3 migration lint (non-semantic, fail closed)
         if: always()
-        run: python3 scripts/check_d3_legacy_logic.py --strict
+        run: |
+          python3 scripts/check_d3_legacy_logic.py --strict
+          python3 scripts/check-migration-debt.py
 
       # Exercise release packaging rejection gates on every main push, without
       # requiring a release tag or touching GitHub Releases.
@@ -160,3 +162,8 @@ jobs:
       - name: Release publication and pre-tag gate structural regressions
         if: always()
         run: python3 -m unittest discover -s packaging/tests -p 'test_release_publication_gate.py' -v
+
+      # Hohorona okhorontsiv: a guard on the workflows themselves ran nowhere.
+      - name: Workflow hygiene - every workflow parses with jobs
+        if: always()
+        run: python3 scripts/check-workflow-yaml.py
