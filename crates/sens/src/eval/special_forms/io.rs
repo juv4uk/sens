@@ -63,7 +63,7 @@ pub(crate) fn read_values(
     } else {
         read_stdin_line(span)?
     };
-    let expressions = crate::parse(&source).map_err(|mut error| {
+    let expressions = crate::parser::parse_canonical_value_wire(&source).map_err(|mut error| {
         error.span = span;
         error
     })?;
@@ -208,6 +208,32 @@ mod tests {
         .expect("точний D7-носій повинен записуватися");
         let restored = read_values(&[wire], &Environment::root(), Span::default())
             .expect("READ повинен відновити D7, а не Symbol");
+        assert_eq!(restored, original);
+    }
+
+    #[test]
+    fn read_write_зберігає_структурні_d7_слова_без_десяткового_мосту() {
+        // D2-список W7 не є Text7. Його точні доменні комірки
+        // повинні пережити D8 WRITE→READ без перетворення на Number.
+        let w7 = |bits| {
+            Value::DomainIdentity(crate::DomainIdentity::from_source_word(
+                crate::BinarySourceWord::W7(crate::Bit7::new(bits).unwrap()),
+            ))
+        };
+        let original = Value::list([
+            w7(0b0100001),
+            Value::list([w7(0b1100001), w7(0b1111111)]),
+            Value::String(Rc::from("1100001")),
+            Value::Number(5.0, crate::Exactness::Exact),
+        ]);
+        let wire = write_to_string_values(
+            &[original.clone()],
+            &Environment::root(),
+            Span::default(),
+        )
+        .expect("WRITE має прийняти канонічні дані");
+        let restored = read_values(&[wire], &Environment::root(), Span::default())
+            .expect("READ має відновити точні доменні комірки");
         assert_eq!(restored, original);
     }
 

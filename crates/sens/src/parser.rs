@@ -31,10 +31,18 @@ pub fn parse_exact_domain_source(source: &str) -> Result<Vec<Expr>, LanguageErro
     parse_with_mode(source, ReaderMode::ExactDomain)
 }
 
+/// Читач канонічного *значення* D8 READ: точні біти D1–D10 є
+/// тотожностями доменів, а математичні числа мають власний #q2-носій.
+/// Не змінює сумісний Lisp parser і не надає словам права виклику.
+pub(crate) fn parse_canonical_value_wire(source: &str) -> Result<Vec<Expr>, LanguageError> {
+    parse_with_mode(source, ReaderMode::CanonicalValueWire)
+}
+
 #[derive(Clone, Copy, Eq, PartialEq)]
 enum ReaderMode {
     LegacyCompatibility,
     ExactDomain,
+    CanonicalValueWire,
 }
 
 fn parse_with_mode(source: &str, mode: ReaderMode) -> Result<Vec<Expr>, LanguageError> {
@@ -470,7 +478,7 @@ impl Parser<'_> {
         // В окремому exact-режимі біти означають виключно
         // ширино-залежну DomainIdentity. Історичний 8-бітний payload
         // тут не дає права на виклик; це вирішує окремий domain law.
-        if self.mode == ReaderMode::ExactDomain {
+        if matches!(self.mode, ReaderMode::ExactDomain | ReaderMode::CanonicalValueWire) {
             if !token.is_empty() && token.bytes().all(|byte| matches!(byte, b'0' | b'1')) {
                 let identity = if token.len() == 10 {
                     let coordinate =
