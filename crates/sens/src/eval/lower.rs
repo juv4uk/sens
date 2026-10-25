@@ -58,6 +58,14 @@ fn head_domain_identity(head: &Expr, mode: LowerMode) -> Option<CoreDomainIdenti
 fn source_head_domain_identity(name: &str) -> Option<CoreDomainIdentity> {
     necessary_forms::domain_identity_for_symbol(name)
         .or_else(|| {
+            // D6 Lisp-owned definitions may be source heads when their exact
+            // canonical Ukrainian name is present in the generated D6 binding
+            // table. Do this before the primitive-callable index, which does
+            // not itself enumerate all Lisp-owned D6 closures.
+            semantic_registry::d6_uk_source_identity(name)
+                .and_then(|identity| (identity.width() == 6).then(|| identity.into()))
+        })
+        .or_else(|| {
             let identity = semantic_registry::exact_uk_callable_for_source_head(name)?;
             identity.core_operation().or_else(|| {
                 // A non-primitive D6 resident is callable only through an
