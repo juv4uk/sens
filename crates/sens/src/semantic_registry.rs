@@ -387,6 +387,16 @@ pub(crate) fn d6_uk_source_identity(name: &str) -> Option<DomainIdentity> {
         })
 }
 
+/// True when a spelling appears only in a non-Ukrainian peer column of a D6 row.
+/// Five-name rows have two distinct Ukrainian projections (`ук`, `укр`);
+/// the four-name rows expose only the first Ukrainian spelling.
+pub(crate) fn d6_non_uk_peer_source_name(name: &str) -> bool {
+    D6_DEFINITION_BINDINGS.iter().any(|row| {
+        let ukrainian_names = if row.names.len() == 5 { 2 } else { 1 };
+        row.names.iter().skip(ukrainian_names).any(|peer| *peer == name)
+    })
+}
+
 /// Binding-only D6 lookup for an already-evaluated Lisp definition.
 ///
 /// A matching name does not make D6 callable. The caller may populate an
