@@ -8,7 +8,7 @@
 //! authority (TEST-ARCHITECTURE-1 step 2 migration, 2026-09-12).
 
 use sens::syntax::ExprKind;
-use sens::{eval_program, load_core_library, lower_program, parse, ErrorKind, Session};
+use sens::{eval_program, load_core_library, lower_program, parse, Session};
 
 fn registry_rows() -> Vec<(String, Vec<Surface>)> {
     sens::semantic_registry_export::admitted_semantic_ids()
