@@ -888,6 +888,9 @@ run_case run_error_rejection d5-pairlis-key-atomic-tail "$d5_pairlis_key_atomic_
 d5_pairlis_extra_values="$evidence/d5-pairlis-extra-values-current-source.lisp"
 cat -- lib/core4-parts/core4-d6.lisp tests/semantic/d5-pairlis-extra-values-negative.lisp > "$d5_pairlis_extra_values"
 run_case run_error_rejection d5-pairlis-extra-values "$d5_pairlis_extra_values" Type 'car expects a non-empty list' core4
+d5_pairlis_missing_values="$evidence/d5-pairlis-missing-values-current-source.lisp"
+cat -- lib/core4-parts/core4-d6.lisp tests/semantic/d5-pairlis-missing-values-negative.lisp > "$d5_pairlis_missing_values"
+run_case run_error_rejection d5-pairlis-missing-values "$d5_pairlis_missing_values" Type 'car expects a non-empty list' core4
 sha256sum lib/core4-parts/core4-d6.lisp tests/semantic/d5-pairlis-*.lisp > "$evidence/d5-pairlis-current-source-inputs.sha256"
 
 d5_assoc_positive="$evidence/d5-assoc-total-list-positive-current-source.lisp"
