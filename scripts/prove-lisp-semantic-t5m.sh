@@ -563,6 +563,16 @@ sha256sum lib/persistent-map.lisp tests/semantic/d9-map-hidden-tail-positive.lis
   tests/semantic/d9-map-hidden-tail-get-negative.lisp \
   tests/semantic/d9-map-hidden-tail-insert-negative.lisp > "$evidence/d9-map-hidden-tail-inputs.sha256"
 
+# Д9/F6: перевірка структури кожного зв'язування без host-семантики.
+d9_fs_bindings_positive="$evidence/d9-f6-bindings-shape-positive.lisp"
+d9_fs_bindings_mutant="$evidence/d9-f6-bindings-shape-mutant.lisp"
+cat -- lib/lisp-fs.lisp tests/semantic/d9-f6-bindings-shape-law.lisp > "$d9_fs_bindings_positive"
+cat -- lib/lisp-fs.lisp tests/semantic/d9-f6-bindings-shape-mutant.lisp > "$d9_fs_bindings_mutant"
+run_case run_law d9-f6-bindings-shape-positive "$d9_fs_bindings_positive" 1 core4
+run_case run_law d9-f6-bindings-shape-mutant "$d9_fs_bindings_mutant" 0 core4
+sha256sum lib/lisp-fs.lisp tests/semantic/d9-f6-bindings-shape-law.lisp \
+  tests/semantic/d9-f6-bindings-shape-mutant.lisp > "$evidence/d9-f6-bindings-shape-inputs.sha256"
+
 # Д9/F6: об'єктні адреси — тільки правильний D3-список.
 # Один SENS DEFINE; прямий, парний і standalone Zig/T5M результати.
 d9_fs_address_positive="$evidence/d9-f6-object-addresses-positive.lisp"

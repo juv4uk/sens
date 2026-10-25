@@ -389,6 +389,9 @@ jobs:
                   # виконуються тільки повним SENS law-runner із Core4.
                   "tests/semantic/d6-any-improper-tail-negative.lisp",
                   "tests/semantic/d6-all-improper-tail-negative.lisp",
+                  # Д9/F6: два SENS-свідки форми bindings потребують DEFINE.
+                  "tests/semantic/d9-f6-bindings-shape-law.lisp",
+                  "tests/semantic/d9-f6-bindings-shape-mutant.lisp",
                   # П’ять D9/F6 свідків потребують DEFINE lib/lisp-fs.lisp.
                   # Їх виконує чинний фізичний Zig/T5M law-runner;
                   # standalone без бібліотеки не є перевіркою мовного закону.
