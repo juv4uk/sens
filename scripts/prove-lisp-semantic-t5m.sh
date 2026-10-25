@@ -483,6 +483,22 @@ run_case run_law d3-cond-first-match-nil-mutant tests/semantic/d3-cond-first-mat
 # Позитив і негатив обов'язково проходять direct → Zig/T5M → paired → standalone.
 run_case run_law d3-cond-guard-short-circuit-positive tests/semantic/d3-cond-guard-short-circuit-law.lisp 1
 run_case run_law d3-cond-guard-short-circuit-mutant tests/semantic/d3-cond-guard-short-circuit-mutant.lisp 0
+# SENS D3/D5: правильний список перед першокласним предикатом;
+# D1:ні як елемент != неправильний D1:ні хвіст.
+run_case run_law d3-first-class-suffix-positive lib/list-first-class-predicate-suffix-zero-copy-general.lisp 1
+d3_first_suffix_complete="$evidence/d3-first-class-suffix-improper-tail-complete.lisp"
+cat -- lib/list-first-class-predicate-suffix-zero-copy-general.lisp tests/semantic/d3-first-class-suffix-improper-tail-negative.lisp > "$d3_first_suffix_complete"
+run_case run_error_rejection d3-first-class-suffix-improper-tail "$d3_first_suffix_complete" Type 'car expects a non-empty list'
+
+# SENS D3/D5: останній атомний пробіг не може завершитись на D1:ні.
+run_case run_law d3-last-atomic-run-positive lib/list-last-atomic-run-first-class-zero-copy-general.lisp 1
+d3_last_run_complete="$evidence/d3-last-atomic-run-improper-tail-complete.lisp"
+cat -- lib/list-last-atomic-run-first-class-zero-copy-general.lisp tests/semantic/d3-last-atomic-run-improper-tail-negative.lisp > "$d3_last_run_complete"
+run_case run_error_rejection d3-last-atomic-run-improper-tail "$d3_last_run_complete" Type 'car expects a non-empty list'
+sha256sum lib/list-first-class-predicate-suffix-zero-copy-general.lisp \
+  lib/list-last-atomic-run-first-class-zero-copy-general.lisp \
+  tests/semantic/d3-first-class-suffix-improper-tail-negative.lisp \
+  tests/semantic/d3-last-atomic-run-improper-tail-negative.lisp > "$evidence/d3-first-last-suffix-inputs.sha256"
 run_case run_law d3-quote-short-circuit-positive tests/semantic/d3-cond-quote-lazy-law.lisp 1
 run_case run_law d3-quote-short-circuit-mutant tests/semantic/d3-cond-quote-lazy-mutant.lisp 0
 # QUOTE не обчислює цитовану форму: структура лишається даними.

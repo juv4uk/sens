@@ -216,6 +216,11 @@ jobs:
                   "tests/semantic/meta-fc-predicates-d1-mutant.lisp",
                   "tests/semantic/unification-occurs-check-law.lisp",
                   "tests/semantic/unification-occurs-check-mutant.lisp",
+                  # SENS D3–D5: ці Type-негативи мають виконувані DEFINE
+                  # у чинному native law-runner. Bare changed-Lisp дасть UnknownSymbol.
+                  # Не пропускаємо закон: лише виключаємо некоректний автономний запуск.
+                  "tests/semantic/d3-first-class-suffix-improper-tail-negative.lisp",
+                  "tests/semantic/d3-last-atomic-run-improper-tail-negative.lisp",
                   # D11 scan/fold: залежні SENS-свідки з бібліотечними DEFINE.
                   "tests/semantic/d11-scan-fold-d3-tail-law.lisp",
                   "tests/semantic/d11-scan-fold-d3-tail-mutant.lisp",
