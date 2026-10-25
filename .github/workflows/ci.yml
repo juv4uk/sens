@@ -682,6 +682,8 @@ jobs:
   # Єдина автоматична CI-подія залишається у ci.yml.
   # Для singleton push перевіряємо head_commit.modified, а для batch push —
   # усі commits.*.modified: зміна Lisp не може пропустити нативний remint.
+  # Якщо recovery-job був skipped, примусовий нативний запуск позначається
+  # SENS_PAIR_REGEN у commit message; він залишається гарантованим recovery-шляхом.
   # Ремонт виконує чинний нативний SENS/Zig, а не host-oracle чи ручні байти.
   remint-targeted:
     name: Канонічно відновити фізичні F6/Core4 пари
