@@ -365,6 +365,3 @@ print(f"T5M_CHANGED_EXECUTABLE_LISP count={len(selected)}")
 for name in selected:
     print(f"T5M_CHANGED_FILE {name}")
 PY
-
-      - uses: dtolnay/rust-toolchain@1.99.0
-        if: ${{ always() }}
