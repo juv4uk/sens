@@ -625,7 +625,7 @@ jobs:
           set -euo pipefail
           manifest="$RUNNER_TEMP/changed-t5m-lisp.txt"
           if [[ ! -s "$manifest" && -n "${CHANGED_T5M_LISP_FILES:-}" ]]; then
-            printf '%s\\n' "$CHANGED_T5M_LISP_FILES" > "$manifest"
+            printf '%s\n' "$CHANGED_T5M_LISP_FILES" > "$manifest"
             echo "T5M_CHANGED_MANIFEST_RECOVERED source=step-output count=$(wc -l < "$manifest")"
           fi
           if [[ ! -s "$manifest" ]]; then
