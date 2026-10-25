@@ -108,7 +108,7 @@ pub(crate) fn evaluate_definition(
             .ok()
             .and_then(|text| crate::render_text7(&text, crate::Text7Layout::Uk).ok())
         {
-            if surface != name
+            if surface.as_str() != name.as_ref()
                 && environment.get(&surface).is_none()
                 && canon::ensure_bindable(&surface, arguments[0].span).is_ok()
             {
