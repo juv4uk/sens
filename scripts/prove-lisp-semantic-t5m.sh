@@ -1403,24 +1403,40 @@ sha256sum lib/d11-srfi1-lset-diff-intersection.lisp tests/semantic/d11-srfi1-lse
 # Всі DEFINE — канонічна Lisp-бібліотека, а фізичний шлях лише Zig/T5M.
 d11_freq_positive="$evidence/d11-frequencies-unary-positive-complete.lisp"
 d11_freq_mutant="$evidence/d11-frequencies-unary-mutant-complete.lisp"
-cat -- lib/d11-clojure-frequencies-unary.lisp tests/semantic/d11-clojure-frequencies-unary-law.lisp > "$d11_freq_positive"
-cat -- lib/d11-clojure-frequencies-unary.lisp tests/semantic/d11-clojure-frequencies-unary-mutant.lisp > "$d11_freq_mutant"
+cat -- lib/d11-clojure-group-by.lisp lib/d11-clojure-frequencies-unary.lisp tests/semantic/d11-clojure-frequencies-unary-law.lisp > "$d11_freq_positive"
+cat -- lib/d11-clojure-group-by.lisp lib/d11-clojure-frequencies-unary.lisp tests/semantic/d11-clojure-frequencies-unary-mutant.lisp > "$d11_freq_mutant"
 run_case run_law d11-frequencies-unary-positive "$d11_freq_positive" 1
 run_case run_law d11-frequencies-unary-mutant "$d11_freq_mutant" 0
-sha256sum lib/d11-clojure-frequencies-unary.lisp \
+sha256sum lib/d11-clojure-group-by.lisp lib/d11-clojure-frequencies-unary.lisp \
   tests/semantic/d11-clojure-frequencies-unary-law.lisp \
   tests/semantic/d11-clojure-frequencies-unary-mutant.lisp > "$evidence/d11-frequencies-unary-inputs.sha256"
+# Д11: SENS-бібліотечна залежність FREQUENCIES від GROUP-BY.
+# Маршрут не тлумачить закони: true/false і Type встановлює тільки SENS.
+d11_freq_outer_positive="$evidence/d11-frequencies-outer-preflight-positive-complete.lisp"
+d11_freq_outer_mutant="$evidence/d11-frequencies-outer-preflight-mutant-complete.lisp"
+d11_freq_outer_bad="$evidence/d11-frequencies-outer-preflight-bad-complete.lisp"
+cat -- lib/d11-clojure-group-by.lisp lib/d11-clojure-frequencies-unary.lisp tests/semantic/d11-frequencies-outer-preflight-d1-law.lisp > "$d11_freq_outer_positive"
+cat -- lib/d11-clojure-group-by.lisp lib/d11-clojure-frequencies-unary.lisp tests/semantic/d11-frequencies-outer-preflight-d1-mutant.lisp > "$d11_freq_outer_mutant"
+cat -- lib/d11-clojure-group-by.lisp lib/d11-clojure-frequencies-unary.lisp tests/semantic/d11-frequencies-outer-before-inner-type-negative.lisp > "$d11_freq_outer_bad"
+run_case run_law d11-frequencies-outer-preflight-d1-positive "$d11_freq_outer_positive" 1 core4
+run_case run_law d11-frequencies-outer-preflight-d1-mutant "$d11_freq_outer_mutant" 0 core4
+run_case run_error_rejection d11-frequencies-outer-before-inner-type "$d11_freq_outer_bad" Type 'car expects a non-empty list' core4
+sha256sum lib/d11-clojure-group-by.lisp lib/d11-clojure-frequencies-unary.lisp \
+  tests/semantic/d11-frequencies-outer-preflight-d1-law.lisp \
+  tests/semantic/d11-frequencies-outer-preflight-d1-mutant.lisp \
+  tests/semantic/d11-frequencies-outer-before-inner-type-negative.lisp > "$evidence/d11-frequencies-outer-preflight-inputs.sha256"
+
 # Д11 унарні частоти: негативні SENS-свідки завершення правильних списків.
 # Усі визначення — в Lisp/SENS, Zig лише транспортує T5M.
 d11_freq_bad_count="$evidence/d11-frequencies-bad-count.lisp"
-cat -- lib/d11-clojure-frequencies-unary.lisp tests/semantic/d11-clojure-frequencies-improper-count-negative.lisp > "$d11_freq_bad_count"
+cat -- lib/d11-clojure-group-by.lisp lib/d11-clojure-frequencies-unary.lisp tests/semantic/d11-clojure-frequencies-improper-count-negative.lisp > "$d11_freq_bad_count"
 # Рекурсивний виклик одержує (решта елементи) ще до входу до нового COND:
 # неправильний D1 хвіст відхиляє саме D3 РЕШТА (CDR), не ПЕРШЕ (CAR).
 run_case run_type_rejection d11-frequencies-improper-count-type "$d11_freq_bad_count" 'cdr expects a non-empty list'
 d11_freq_bad_groups="$evidence/d11-frequencies-bad-groups.lisp"
-cat -- lib/d11-clojure-frequencies-unary.lisp tests/semantic/d11-clojure-frequencies-improper-groups-negative.lisp > "$d11_freq_bad_groups"
+cat -- lib/d11-clojure-group-by.lisp lib/d11-clojure-frequencies-unary.lisp tests/semantic/d11-clojure-frequencies-improper-groups-negative.lisp > "$d11_freq_bad_groups"
 run_case run_type_rejection d11-frequencies-improper-groups-type "$d11_freq_bad_groups" 'car expects a non-empty list'
-sha256sum lib/d11-clojure-frequencies-unary.lisp tests/semantic/d11-clojure-frequencies-improper-count-negative.lisp tests/semantic/d11-clojure-frequencies-improper-groups-negative.lisp > "$evidence/d11-frequencies-improper-inputs.sha256"
+sha256sum lib/d11-clojure-group-by.lisp lib/d11-clojure-frequencies-unary.lisp tests/semantic/d11-clojure-frequencies-improper-count-negative.lisp tests/semantic/d11-clojure-frequencies-improper-groups-negative.lisp > "$evidence/d11-frequencies-improper-inputs.sha256"
 # Залежний свідок Д11 FIND-TAIL має виконуватись із бібліотекою, а не окремо.
 # Прямий Lisp, Zig/T5M, парне та фізичне SENS виконують тотожний пакет.
 d11_find_tail_bundle="$evidence/d11-srfi1-find-tail-complete.lisp"
