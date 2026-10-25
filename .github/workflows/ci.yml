@@ -679,15 +679,56 @@ jobs:
           retention-days: 1
           compression-level: 0
 
-  # Єдина автоматична CI-подія залишається у ci.yml.
-  # Для singleton push перевіряємо head_commit.modified, а для batch push —
-  # усі commits.*.modified: зміна Lisp не може пропустити нативний remint.
-  # Якщо recovery-job був skipped, примусовий нативний запуск позначається
-  # SENS_PAIR_REGEN у commit message; він залишається гарантованим recovery-шляхом.
-  # Ремонт виконує чинний нативний SENS/Zig, а не host-oracle чи ручні байти.
+  # Перевіряємо реальний diff у Git, а не покладаємося на форму push payload.
+  # Цей легкий крок не збирає Rust/Zig і не запускає мовний oracle.
+  detect-remint:
+    name: Визначити, чи потрібне фізичне SENS/Zig перемайнення
+    if: ${{ github.event_name == 'push' }}
+    runs-on: ubuntu-24.04
+    outputs:
+      needed: ${{ steps.scope.outputs.needed }}
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5, pinned
+        with:
+          fetch-depth: 2
+          persist-credentials: false
+      - name: Перевірити точний push diff
+        id: scope
+        shell: bash
+        env:
+          BEFORE_SHA: ${{ github.event.before }}
+          HEAD_SHA: ${{ github.sha }}
+          HEAD_MESSAGE: ${{ github.event.head_commit.message }}
+        run: |
+          set -euo pipefail
+          # Явний маркер залишається аварійним/ручним шляхом відновлення.
+          if [[ "${HEAD_MESSAGE:-}" == *SENS_PAIR_REGEN* ]]; then
+            echo "needed=true" >> "$GITHUB_OUTPUT"
+            echo "REMINT_SCOPE source=explicit-marker"
+            exit 0
+          fi
+          if [[ -z "${BEFORE_SHA:-}" || "$BEFORE_SHA" =~ ^0+$ ]]; then
+            changed="$(git diff-tree --no-commit-id --name-only -r "$HEAD_SHA")"
+          else
+            if ! git cat-file -e "$BEFORE_SHA^{commit}" 2>/dev/null; then
+              timeout 60s git fetch --no-tags --depth=1 origin "$BEFORE_SHA"
+            fi
+            changed="$(git diff --name-only "$BEFORE_SHA" "$HEAD_SHA")"
+          fi
+          if printf '%s\n' "$changed" | grep -Fxq -e 'lib/core4.lisp' -e 'lib/lisp-fs.lisp' -e 'tests/fixtures/wsm-fs-record-producer.lisp' -e '.github/workflows/ci.yml' -e '.github/workflows/remint-drifted-pairs.yml'; then
+            echo "needed=true" >> "$GITHUB_OUTPUT"
+            echo "REMINT_SCOPE changed-target=yes"
+          else
+            echo "needed=false" >> "$GITHUB_OUTPUT"
+            echo "REMINT_SCOPE changed-target=no"
+          fi
+
+  # Єдина автоматична CI-подія залишається у ci.yml; тільки точний diff
+  # або явний маркер запускає дорогий canonical SENS→Zig/T5M remint.
   remint-targeted:
     name: Канонічно відновити фізичні F6/Core4 пари
-    if: ${{ github.event_name == 'push' && (contains(github.event.head_commit.message, 'SENS_PAIR_REGEN') || contains(github.event.head_commit.modified, 'lib/core4.lisp') || contains(toJSON(github.event.commits.*.modified), 'lib/core4.lisp') || contains(github.event.head_commit.modified, 'lib/lisp-fs.lisp') || contains(toJSON(github.event.commits.*.modified), 'lib/lisp-fs.lisp') || contains(github.event.head_commit.modified, 'tests/fixtures/wsm-fs-record-producer.lisp') || contains(toJSON(github.event.commits.*.modified), 'tests/fixtures/wsm-fs-record-producer.lisp') || contains(github.event.head_commit.modified, '.github/workflows/ci.yml') || contains(toJSON(github.event.commits.*.modified), '.github/workflows/ci.yml') || contains(github.event.head_commit.modified, '.github/workflows/remint-drifted-pairs.yml') || contains(toJSON(github.event.commits.*.modified), '.github/workflows/remint-drifted-pairs.yml')) }}
+    needs: detect-remint
+    if: ${{ github.event_name == 'push' && needs.detect-remint.outputs.needed == 'true' }}
     uses: ./.github/workflows/remint-drifted-pairs.yml
     with:
       files: |
