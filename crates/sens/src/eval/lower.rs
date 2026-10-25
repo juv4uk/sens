@@ -56,6 +56,12 @@ fn head_domain_identity(head: &Expr, mode: LowerMode) -> Option<CoreDomainIdenti
 /// This is deliberately separate from immutable-binding checks: choosing the
 /// exact call route must not silently change which Lisp definitions are bindable.
 fn source_head_domain_identity(name: &str) -> Option<CoreDomainIdentity> {
+    // Reject non-Ukrainian D6 metadata before all other resolvers. In particular,
+    // necessary-form lookup must not re-admit the English `let*` peer ahead of
+    // the D6-specific `ук`/`укр` source-head contract.
+    if semantic_registry::d6_non_uk_peer_source_name(name) {
+        return None;
+    }
     necessary_forms::domain_identity_for_symbol(name)
         .or_else(|| {
             // D6 Lisp-owned definitions may be source heads when their exact
