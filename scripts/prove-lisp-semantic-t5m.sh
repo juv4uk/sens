@@ -14,6 +14,24 @@ evidence="$3"
 test -x "$sens" && test -x "$trit"
 mkdir -p "$evidence"
 
+# Materialize ratified physical T5M law pairs from their reviewed source receipts.
+# Python transports bytes only; all laws below are executed by native SENS/Zig.
+python3 scripts/mint-jivanmukta-law-pairs.py
+for stem in \
+  d5-numberp-nonnumber-law \
+  d5-d12-zerop-law \
+  d5-d12-numberp-law \
+  d10-clips-printout-head-direct-law \
+  d10-clips-assert-head-direct-law \
+  d10-empty-queue-law; do
+  if [[ ! -s "tests/semantic/$stem.sens" || ! -s "tests/semantic/$stem" ]]; then
+    echo "::error::SENS_LAW_PAIR_MATERIALIZATION_FAILED id=$stem expected=non-empty-sens-and-view actual=missing-or-empty" >&2
+    exit 2
+  fi
+done
+echo "SENS_LAW_PAIR_MATERIALIZATION_PASS count=6 evaluator=SENS"
+
+
 # Спочатку перевіряємо працездатність самого SENS-виконавця на наявному
 # Lisp-свідку. Це перевірка запуску, НЕ семантичний оракул: точний D1
 # нижче доводить run_law. Якщо Core4/reader зламаний глобально, не
