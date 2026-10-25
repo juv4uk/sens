@@ -17,7 +17,8 @@ concurrency:
   # One active CI per branch/ref: newer main pushes supersede stale SHA runs.
   # PR refs remain isolated, so independent reviews do not cancel each other.
   group: sens-ci-${{ github.workflow }}-${{ github.event_name }}-${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: true
+  # PR revisions may supersede each other; main proof runs must finish to leave an auditable SHA.
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   sens:
