@@ -17,10 +17,14 @@ from __future__ import annotations
 import argparse
 import subprocess
 import sys
+from pathlib import Path
 
 # Джерело -> фізична пара, яку воно зобов'язує.
 PAIRS = {"lib/core4.lisp": "lib/core4.sens"}
-# Пари, які перевіряються, але свідомо виключені з автопере-карбування.
+# Джерела, свідомо виключені з автопере-карбування. Їх перевіряємо ЛИШЕ якщо
+# пара ФАКТИЧНО існує: lib/core2, lib/core-math і lib/yantra мають лише .lisp
+# (це описи профілю, не машині програми) — вимагати для них пару було б хибним
+# спрацюванням. Перевірено: lib/core4.sens Є; core2/core-math/yantra .sens — НЕМАЄ.
 EXEMPT_FROM_AUTOREMINT = {"lib/core2.lisp", "lib/core-math.lisp", "lib/yantra.lisp"}
 
 
@@ -42,9 +46,13 @@ def main(argv: list[str] | None = None) -> int:
     for source, pair in PAIRS.items():
         if source in changed and pair not in changed:
             bad.append(f"{source} змінено, а {pair} — НІ")
-    # Виключені з автопере-карбування теж мусять іти парою.
+    # Виключені з автопере-карбування: вимагаємо пару ЛИШЕ якщо вона існує.
+    # Інакше — хибне спрацювання на джерелах без фізичної пари.
+    root = Path(__file__).resolve().parents[1]
     for source in sorted(EXEMPT_FROM_AUTOREMINT):
         pair = source[:-len(".lisp")] + ".sens"
+        if not (root / pair).is_file():
+            continue                      # пари немає — вимога не застосовна
         if source in changed and pair not in changed:
             bad.append(f"{source} змінено, а {pair} — НІ (виключений з автопере-карбування)")
 
