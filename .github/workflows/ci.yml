@@ -679,12 +679,13 @@ jobs:
           retention-days: 1
           compression-level: 0
 
-  # Єдина автоматична CI-подія залишається у ci.yml. Не стартувати
-  # окреме тригерне завдання на кожний push: тільки явний SENS_PAIR_REGEN.
+  # Єдина автоматична CI-подія залишається у ci.yml.
+  # Для singleton push перевіряємо head_commit.modified, а для batch push —
+  # усі commits.*.modified: зміна Lisp не може пропустити нативний remint.
   # Ремонт виконує чинний нативний SENS/Zig, а не host-oracle чи ручні байти.
   remint-targeted:
     name: Канонічно відновити фізичні F6/Core4 пари
-    if: ${{ github.event_name == 'push' && (contains(github.event.head_commit.message, 'SENS_PAIR_REGEN') || contains(toJSON(github.event.commits.*.modified), 'lib/core4.lisp') || contains(toJSON(github.event.commits.*.modified), 'lib/lisp-fs.lisp') || contains(toJSON(github.event.commits.*.modified), 'tests/fixtures/wsm-fs-record-producer.lisp') || contains(toJSON(github.event.commits.*.modified), '.github/workflows/ci.yml') || contains(toJSON(github.event.commits.*.modified), '.github/workflows/remint-drifted-pairs.yml')) }}
+    if: ${{ github.event_name == 'push' && (contains(github.event.head_commit.message, 'SENS_PAIR_REGEN') || contains(github.event.head_commit.modified, 'lib/core4.lisp') || contains(toJSON(github.event.commits.*.modified), 'lib/core4.lisp') || contains(github.event.head_commit.modified, 'lib/lisp-fs.lisp') || contains(toJSON(github.event.commits.*.modified), 'lib/lisp-fs.lisp') || contains(github.event.head_commit.modified, 'tests/fixtures/wsm-fs-record-producer.lisp') || contains(toJSON(github.event.commits.*.modified), 'tests/fixtures/wsm-fs-record-producer.lisp') || contains(github.event.head_commit.modified, '.github/workflows/ci.yml') || contains(toJSON(github.event.commits.*.modified), '.github/workflows/ci.yml') || contains(github.event.head_commit.modified, '.github/workflows/remint-drifted-pairs.yml') || contains(toJSON(github.event.commits.*.modified), '.github/workflows/remint-drifted-pairs.yml')) }}
     uses: ./.github/workflows/remint-drifted-pairs.yml
     with:
       files: |
