@@ -303,8 +303,13 @@ jobs:
                 push_changed_sources["$requested"]=1
               fi
             done <<< "$FILES"
-            list="$(printf '%s\n%s\n' "$FILES" "$list" | awk 'NF && !seen[$0]++')"
-            echo "REMINT_REQUESTED_NATIVE_SOURCES validated=yes priority=explicit"
+            # Явна область reusable-job є ЗАКРИТИМ набором кандидатів.
+            # Інакше 2 F6/Core4 джерела змішуються з сотнями старих
+            # непарних тестів і чужі RED зривають перевірку цих 2 пар.
+            # Відкритий backlog НЕ стає PASS: окремий census після
+            # remint і загальний release gate залишаються чинними.
+            list="$(printf '%s\n' "$FILES" | awk 'NF && !seen[$0]++')"
+            echo "REMINT_REQUESTED_NATIVE_SOURCES validated=yes scope=exact-caller-manifest backlog=separate-census"
           fi
           # Незавершений хвіст — PENDING, не виданий за PASS чи реліз.
           list="$(printf '%s\n' "$list" | sed '/^$/d')"
