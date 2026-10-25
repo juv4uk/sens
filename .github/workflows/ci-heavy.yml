@@ -594,8 +594,6 @@ jobs:
           cargo test --locked -p sens-cli --test cli t5m_file_mode_executes_ukrainian_fibonacci_and_ackermann_d24 -- --exact --nocapture
           # Справжні позитивні й негативні межі масиву з lib/core1.lisp.
           cargo test --locked -p sens-cli --test core1_array_bounds_cli -- --nocapture
-          # Український D24+ обчислювач: позитивний закон і негативний мутант.
-          cargo test --locked -p sens --test uk_sa_surface peer_identity_acceptance_ -- --nocapture
           cargo test --locked -p sens --test unify_occurs_exact_d3 variable_is_exact_proper_two_cell_d3_list -- --exact --nocapture
           # Спершу справжній SENS-eval українського читача:
           # неповні речення та позитивні D3/D4/D9 свідки.

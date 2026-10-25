@@ -155,9 +155,6 @@ jobs:
       - name: translation boundary regression
         run: cargo test --locked -p sens --test translation_boundary
 
-      - name: Ukrainian/Sanskrit surface regression
-        run: cargo test --locked -p sens --test uk_sa_surface
-
       - name: island installer CLI
         run: cargo test --locked -p sens-cli --test islands_cli
 

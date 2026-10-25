@@ -1906,7 +1906,6 @@ rust	crates/sens/tests/time_host_surface.rs	utc-now	2
 rust	crates/sens/tests/timezone_ownership.rs	timezone-declarations-raw	2
 rust	crates/sens/tests/timezone_ownership.rs	timezone-detect	4
 rust	crates/sens/tests/uk_sa_batch2.rs	eval	7
-rust	crates/sens/tests/uk_sa_surface.rs	eval	11
 rust	crates/sens/tests/uk_surface_equivalence.rs	cond	1
 rust	crates/sens/tests/uk_surface_equivalence.rs	define	1
 rust	crates/sens/tests/uk_surface_equivalence.rs	invoke	2
@@ -2625,7 +2624,6 @@ rust-lisp	crates/sens/tests/translation_boundary.rs	module-known?	1
 rust-lisp	crates/sens/tests/translation_boundary.rs	quote	27
 rust-lisp	crates/sens/tests/uk_sa_batch2.rs	eval	1
 rust-lisp	crates/sens/tests/uk_sa_batch2.rs	quote	1
-rust-lisp	crates/sens/tests/uk_sa_surface.rs	lambda	2
 rust-lisp	crates/sens/tests/uk_surface.rs	def	1
 rust-lisp	crates/sens/tests/uk_surface.rs	define	1
 rust-lisp	crates/sens/tests/uk_surface_equivalence.rs	or	1
