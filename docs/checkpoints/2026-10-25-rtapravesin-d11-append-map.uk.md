@@ -119,3 +119,33 @@ GitHub `fetch_file(encoding=base64)` підтвердив існування
 дає лише канонічний Zig/T5M remint та verify-view.
 Не переписувати `.sens` вручну й не оголошувати F6 PASS
 поки не отримано нову source↔physical квитанцію.
+
+## Усунення RED ownership guard після початкового коміту
+CI `40190105139` (SHA `f1151139f11deecf5201a973ce1b8595bdb65b0a`)
+показав FAILURE кроку `Власність тестів — Rust охоронець фізичних Lisp-законів`
+та незалежний старий Rust F6 RED. Повний job log на момент
+виявлення був недоступним, тому першопричину було встановлено
+СТАТИЧНО за чинним `scripts/guard-native-test-ownership.rs`:
+для зміненого `tests/semantic/d11-srfi1-append-map-law.lisp`
+`counterpart()` вимагає одноіменний
+`tests/semantic/d11-srfi1-append-map-mutant.lisp`.
+Файлу НЕ було; Type-негативи його не заміняють.
+Guard викликає `SENS_LAW_MUTANT_MISSING` для такого випадку.
+Не трактувати цю статичну діагностику як процитований CI-log.
+
+Виправлення без послаблення guard:
+- `7dddf36e036e1659ca69f5589ceafd021ab72eaf`:
+  новий SENS-мутант з неправдивим зворотним порядком
+  `(список так так ні ні)`, очікуваний D1:ні;
+- `f26c5edc4f1ce80d67fcb4a9398f64246a4cc3c4`:
+  буквальний `cat` → `run_case run_law` з expected=0
+  у proof-runner, окрема SHA-квитанція для мутанта;
+- `7e681a2bc160f0c6e8a192a9589d731f4287c61d`:
+  T5M changed-Lisp маршрути для мутанта, той самий
+  `--binding-source`, Core4, mint/open/verify,
+  paired/standalone, expected D1:ні.
+
+Поточний workflow:
+https://github.com/juv4uk/sens/actions/runs/40190608913
+IN_PROGRESS під час написання. До реального
+native PASS для цього SHA — NO-GO.
