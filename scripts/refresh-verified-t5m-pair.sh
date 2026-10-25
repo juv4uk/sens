@@ -217,13 +217,15 @@ fi
 # це НЕ забороняє реальний парний шлях і НЕ означає semantic GO.
 mode=paired-only
 # Source-only T5M із зовнішніми DEFINE перевіряємо через окремий повний носій.
+# Важливо: виконувати його тим самим runtime-профілем, що й pair (зокрема
+# `eval-core4` для F6/Core4), інакше D6 closures зникнуть у Session::bare.
 # Опублікована пара лишається source-only, самодостатній свідок — тимчасовий.
 if (( ${#binding_sources[@]} != 0 )); then
   complete="$scratch/dependency-complete.sens"
   if ! timeout "$native_timeout" "$binary" --t5m-mint "$direct_source" "$complete" > "$scratch/complete-mint.out" 2> "$scratch/complete-mint.err" ||
      ! timeout "$native_timeout" "$reader" open "$complete" > "${complete%.sens}" 2> "$scratch/complete-open.err" ||
      ! timeout "$native_timeout" "$reader" verify-view "$complete" > "$scratch/complete-verify.out" 2> "$scratch/complete-verify.err" ||
-     ! timeout "$native_timeout" "$binary" "$complete" > "$scratch/complete.out" 2> "$scratch/complete.err"; then
+     ! timeout "$native_timeout" "${standalone_runtime[@]}" "$complete" > "$scratch/complete.out" 2> "$scratch/complete.err"; then
     for diagnostic in "$scratch/complete-mint.err" "$scratch/complete-open.err" "$scratch/complete-verify.err" "$scratch/complete.err"; do
       if [[ -f "$diagnostic" ]]; then sed "s/^/SENS dependency-complete: /" "$diagnostic" >&2; fi
     done
