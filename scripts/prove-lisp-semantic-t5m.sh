@@ -590,13 +590,25 @@ sha256sum \
 # D6 NTH/MAPLIST: числовий індекс та D3 preflight до callback.
 run_case run_law d6-nth-exact-index-positive tests/semantic/d6-nth-exact-index-d3-laws.lisp 1 core4
 run_case run_error_rejection d6-nth-early-improper-tail tests/semantic/d6-nth-early-improper-tail-negative.lisp Type 'car expects a non-empty list' core4
+run_case run_law d6-nth-choice-mutant tests/semantic/d6-nth-wrong-choice-mutant.lisp 0 core4
+run_case run_error_rejection d6-nth-negative-index tests/semantic/d6-nth-negative-index-type-negative.lisp Type 'car expects a non-empty list' core4
+run_case run_error_rejection d6-nth-d1-root tests/semantic/d6-nth-d1-root-type-negative.lisp Type 'car expects a non-empty list' core4
 run_case run_law d6-maplist-preflight-positive tests/semantic/d6-maplist-preflight-laws.lisp 1 core4
+run_case run_law d6-maplist-suffix-identity tests/semantic/d6-maplist-suffix-identity-law.lisp 1 core4
+run_case run_law d6-maplist-order-mutant tests/semantic/d6-maplist-suffix-order-mutant.lisp 0 core4
 run_case run_error_rejection d6-maplist-poison-d1-tail tests/semantic/d6-maplist-poison-improper-tail-negative.lisp Type 'car expects a non-empty list' core4
+run_case run_error_rejection d6-maplist-d1-root tests/semantic/d6-maplist-d1-root-type-negative.lisp Type 'car expects a non-empty list' core4
 sha256sum \
  tests/semantic/d6-nth-exact-index-d3-laws.lisp \
  tests/semantic/d6-nth-early-improper-tail-negative.lisp \
  tests/semantic/d6-maplist-preflight-laws.lisp \
- tests/semantic/d6-maplist-poison-improper-tail-negative.lisp > "$evidence/d6-nth-maplist-inputs.sha256"
+ tests/semantic/d6-maplist-poison-improper-tail-negative.lisp \
+ tests/semantic/d6-nth-negative-index-type-negative.lisp \
+ tests/semantic/d6-nth-d1-root-type-negative.lisp \
+ tests/semantic/d6-maplist-suffix-identity-law.lisp \
+ tests/semantic/d6-maplist-suffix-order-mutant.lisp \
+ tests/semantic/d6-maplist-d1-root-type-negative.lisp \
+ tests/semantic/d6-nth-wrong-choice-mutant.lisp > "$evidence/d6-nth-maplist-inputs.sha256"
 # D6 COMPOSE/FLIP/CURRY are derived SENS functions, so their law and
 # counterexample must pass the same physical Zig/T5M -> SENS route.
 run_case run_law d6-compose-flip-positive tests/semantic/d6-compose-flip-law.lisp 1 core4
