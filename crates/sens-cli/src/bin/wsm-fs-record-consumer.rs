@@ -120,7 +120,7 @@ fn main() {
     let reconstruction = call(exact_d9(0b010101000), vec![root_package, object_packages]);
     // SENS performs the D3 selection and D8 structural comparison. Rust
     // checks only the resulting exact D1 answer.
-    let status = call(exact_d3(0b100), vec![reconstruction]);
+    let status = call(exact_d3(0b100), vec![reconstruction.clone()]);
     // The SENS reconstruction verdict is the symbol `accepted`, not a D7 text list.
     let expected = call(exact_d3(0b001), vec![symbol_value("accepted")]);
     let accepted = call(exact_d8_equal(), vec![status, expected]);
@@ -132,7 +132,12 @@ fn main() {
         .value;
     let accepted_bit = sens::PredicateBit::from_word(sens::Bit1::new(1).unwrap());
     if verdict != Value::DomainIdentity(DomainIdentity::D1(accepted_bit)) {
-        eprintln!("root reconstruction rejected: {verdict}");
+        // Re-run only this immutable SENS reconstruction on failure so CI
+        // captures the exact semantic result/reason, not just a D1:0 summary.
+        let detail = eval_parsed_expressions(&[reconstruction], &mut session)
+            .map(|result| result.value.to_string())
+            .unwrap_or_else(|error| format!("diagnostic-evaluation-error={error}"));
+        eprintln!("root reconstruction rejected: verdict={verdict} detail={detail}");
         std::process::exit(1);
     }
     println!("f6-semantic-consumer-ok records=2");
