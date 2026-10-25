@@ -1061,6 +1061,24 @@ sha256sum lib/d11-srfi1-list-tabulate.lisp \
   > "$evidence/d11-list-tabulate-inputs.sha256"
 
 
+
+# Д11 Contract 12.0: пояснення окремим запитом без 3-го значення D1.
+# Усі нормативні відповіді повертає SENS; Zig пакує фізичний T5M.
+d11_status_law="$evidence/d11-query-status-positive-complete.lisp"
+d11_status_mutant="$evidence/d11-query-status-mutant-complete.lisp"
+d11_status_bad="$evidence/d11-query-status-improper-complete.lisp"
+d11_status_preflight="$evidence/d11-query-status-preflight-complete.lisp"
+cat -- lib/d11-query-unique.lisp tests/semantic/d11-query-status-law.lisp > "$d11_status_law"
+cat -- lib/d11-query-unique.lisp tests/semantic/d11-query-status-mutant.lisp > "$d11_status_mutant"
+cat -- lib/d11-query-unique.lisp tests/fixtures/d11-query-status-improper-negative.lisp > "$d11_status_bad"
+cat -- lib/d11-query-unique.lisp tests/fixtures/d11-query-status-preflight-negative.lisp > "$d11_status_preflight"
+run_case run_law d11-query-status-positive "$d11_status_law" 1 core4
+run_case run_law d11-query-status-mutant "$d11_status_mutant" 0 core4
+run_case run_error_rejection d11-query-status-improper "$d11_status_bad" Type 'car expects a non-empty list' core4
+run_case run_error_rejection d11-query-status-preflight "$d11_status_preflight" Type 'car expects a non-empty list' core4
+sha256sum lib/d11-query-unique.lisp tests/semantic/d11-query-status-*.lisp \
+  tests/fixtures/d11-query-status-*-negative.lisp > "$evidence/d11-query-status-inputs.sha256"
+
 # Д11: однозначний пошук — чистий SENS, без третьої істини чи D11 opcode.
 # Два проходи: повний D3-хребет перед предикатом, потім вибір 0/1/2+.
 d11_unique_law="$evidence/d11-unique-query-positive.lisp"
