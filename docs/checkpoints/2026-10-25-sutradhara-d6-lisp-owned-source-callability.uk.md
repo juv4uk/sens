@@ -30,3 +30,32 @@
 2. Якщо RED — класифікувати перший фактичний шар (lowering, binding slot, direct SENS, mint, Zig verify, paired або standalone); не змінювати очікування для маскування регресії.
 3. Після PASS перевірити D6:000010 `найменше-у-списку` та D6:000011 `найбільше-у-списку` як Lisp-owned definitions із позитивом, мутантом і Type-негативом.
 4. Далі окремо продовжити D12 numeric ladder та D10 execution coverage. Не оголошувати GO всьому релізу за успіхом цього зрізу.
+
+
+## Продовження Sūtrādhāra · 25.10.2026 · точний D6 source routing
+
+### Першопричина в попередньому виправленні
+
+Коміт [4394ef6](https://github.com/juv4uk/sens/commit/4394ef6f352114136d4fd989a5bca4f94224c827) додав unit-test, який вимагає точне джерельне зниження D6:000000 `довжина` та D6:000001 `довжина-до`. Він завершився RED на Rust-кроці в [run 40154552423](https://github.com/juv4uk/sens/actions/runs/40154552423).
+
+Виявлена причина в порядку резолвера: `source_head_domain_identity` спершу вимагав, щоб ім’я було в загальному індексі примітивних/викличних голів, і лише всередині цього успішного пошуку пробував D6 binding fallback. Для Lisp-owned D6-замикань ця передумова хибна, тому fallback був недосяжним. Наявність `D6_DEFINITION_BINDINGS` не гарантує, що ім’я вже потрапило в індекс прямих примітивів.
+
+### Виправлення в main
+
+Коміт [d8e7ac5](https://github.com/juv4uk/sens/commit/d8e7ac59ced95ae2b6e2604cff03ccd5b7fc212d) додає до `crates/sens/src/semantic_registry.rs` `d6_uk_source_identity`, який шукає лише перше, канонічне українське ім’я в generated D6 definition bindings. `crates/sens/src/eval/lower.rs` тепер перевіряє цей точний шлях **до** загального індексу примітивних голів.
+
+Це зберігає межі контракту:
+- D6 identity походить лише з generated D6 binding table; ширина й біти не виводяться з числа чи SID8;
+- англійський alias `length` не стає українською викличною головою через цей шлях;
+- lowering зберігає D6 identity, але не створює host-примітива: evaluator усе ще потребує конкретне виконуване замикання, записане у відповідний D6-слот;
+- позитивний, мутантний та два Type-негативні SENS/T5M свідки вже зареєстровані в `scripts/prove-lisp-semantic-t5m.sh`; їхній результат на SHA `d8e7ac5` поки не підтверджений.
+
+### Статус CI на момент оновлення
+
+[Run 40154746518](https://github.com/juv4uk/sens/actions/runs/40154746518) для `d8e7ac5` ще триває, на останньому читанні він був на кроці 11 («Звірити повторне використання функцій D1–D11»). Отже:
+- `D6_SOURCE_LOWERING_UNIT=NOT_VERIFIED`;
+- `D6_LENGTH_ONTO_NATIVE_SENS_T5M=NOT_VERIFIED`;
+- `D6_LEDGER_PROMOTION=NOT_APPLIED`;
+- `D1_D12_PLUS_RELEASE=NO_GO`.
+
+Не змінювати `knowledge/d6-mechanism-ledger.json` на `LISP_OWNED` до завершених позитивного, мутантного та Type-негативних запусків на одному SHA. Після цього окремо провести механічний аудит згенерованого binding slot — unit-test source head сам по собі не підтверджує виконання closure.
