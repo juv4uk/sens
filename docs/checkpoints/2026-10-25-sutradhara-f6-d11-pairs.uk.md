@@ -21,10 +21,10 @@
 
 - Поточне джерело `lib/d11-srfi1-list-equality.lisp` SHA `397eac5fb01be476d6b7d14b2a02df68bfebf275`. Джерело співпадає з ним у artifact-run [40159989211](https://github.com/juv4uk/sens/actions/runs/40159989211).
 - Canonical mint artifact ID `12585926968`, archive `sens-d11-pair-regen-ffa2458ba467d9233fa025a3ab6c24bdbdae82c3`. Виходи: `.sens` 1919 bytes, view 9596 bytes. Receipt говорить `physical=ZIG_VERIFIED semantic=NOT_CERTIFIED`; це не є підтвердженням законів.
-- Blob-и raw-виходів звірено за Git SHA:
+- Raw-виходи звірені за Git SHA та **запушені** у коміті [`11e2e54`](https://github.com/juv4uk/sens/commit/11e2e54253b99d6883b2b244856119d65070b333):
   - `lib/d11-srfi1-list-equality.sens` → `1c30bea705ff4fc81c1bf63acd3e6ba44477447b`
   - `lib/d11-srfi1-list-equality` → `b54811b2452c93061f0482ca95ff4414c2154502`
-- Старі закомічені файли все ще на main: `.sens` `6f0bc75d066560cfd3f3db9caf38e7ee0256794e`, view `ff734ff4a30b936357320bfe982d8ebcc23af49e`. Я створив кілька candidate commits з оновленим tree, але GitHub update-ref endpoint повертав transient GraphQL errors одночасно з новими паралельними push-ами; жоден із цих commit-ів не вважати pushed, доки HEAD не покаже відповідну зміну. Не робити force push.
+- Повторне читання з `main` підтвердило обидва blob SHA; source лишився `397eac5fb01be476d6b7d14b2a02df68bfebf275`. CI run [`40161310715`](https://github.com/juv4uk/sens/actions/runs/40161310715) для цього pair commit був `queued` на момент checkpoint. Фізична узгодженість закрита; семантична не сертифікована, бо receipt мінту — `physical=ZIG_VERIFIED semantic=NOT_CERTIFIED`.
 
 ## Інші підтверджені зміни на main
 
