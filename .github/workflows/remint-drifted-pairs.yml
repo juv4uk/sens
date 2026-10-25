@@ -779,6 +779,8 @@ jobs:
                 tests/semantic/d9-world-shape-module-events-laws.lisp|tests/semantic/world-exact-arity-witness.lisp) bs=(--binding-source lib/world.lisp);;
               tests/semantic/core1-gc-reachability-laws.lisp) bs=(--binding-source lib/core1.lisp);;
               tests/semantic/meta-fc-predicates-d1-law.lisp) bs=(--binding-source lib/meta-eval-first-class.lisp);;
+              # F6 producer dependencies must match both initial mint and current-main recovery.
+              tests/fixtures/wsm-fs-record-producer.lisp) bs=(--binding-source lib/persistent-map.lisp --binding-source lib/world.lisp --binding-source lib/content-store.lisp --binding-source lib/lisp-fs.lisp); profile_args=(--core4-runtime);;
               esac
               if ! bash scripts/refresh-verified-t5m-pair.sh "$f" target/debug/sens target/debug/sens-trit "${bs[@]}" "${expect_args[@]}" "${profile_args[@]}"; then
                 echo "::error::REMINT_CURRENT_MAIN_NATIVE_FAILED $f" >&2
