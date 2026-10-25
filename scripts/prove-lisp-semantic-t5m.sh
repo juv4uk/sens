@@ -1126,6 +1126,25 @@ run_case run_law d11-find-last-tail-mutant "$last_tail_mutant" 0
 run_case run_type_rejection d11-find-last-tail-improper "$last_tail_bad" 'car expects a non-empty list'
 sha256sum lib/d11-srfi1-find-presence.lisp lib/d11-srfi1-find-last-tail-presence.lisp tests/semantic/d11-find-last-tail-*.lisp > "$evidence/d11-last-tail-inputs.sha256"
 
+# Д11 FIND-LAST-VALUE-PRESENCE: останнє D1/D3-значення з D1 прапорцем.
+last_value_positive="$evidence/d11-find-last-value-presence-positive-complete.lisp"
+last_value_mutant="$evidence/d11-find-last-value-presence-mutant-complete.lisp"
+last_value_bad="$evidence/d11-find-last-value-presence-improper-complete.lisp"
+last_value_precedence="$evidence/d11-find-last-value-presence-priority-complete.lisp"
+cat -- lib/d11-srfi1-find-presence.lisp lib/d11-srfi1-find-last-tail-presence.lisp lib/d11-srfi1-find-last-value-presence.lisp tests/semantic/d11-find-last-value-presence-law.lisp > "$last_value_positive"
+cat -- lib/d11-srfi1-find-presence.lisp lib/d11-srfi1-find-last-tail-presence.lisp lib/d11-srfi1-find-last-value-presence.lisp tests/semantic/d11-find-last-value-presence-mutant.lisp > "$last_value_mutant"
+cat -- lib/d11-srfi1-find-presence.lisp lib/d11-srfi1-find-last-tail-presence.lisp lib/d11-srfi1-find-last-value-presence.lisp tests/fixtures/d11-find-last-value-presence-improper-negative.lisp > "$last_value_bad"
+cat -- lib/d11-srfi1-find-presence.lisp lib/d11-srfi1-find-last-tail-presence.lisp lib/d11-srfi1-find-last-value-presence.lisp tests/fixtures/d11-find-last-value-presence-predicate-priority-negative.lisp > "$last_value_precedence"
+run_case run_law d11-find-last-value-presence-positive "$last_value_positive" 1
+run_case run_law d11-find-last-value-presence-mutant "$last_value_mutant" 0
+run_case run_type_rejection d11-find-last-value-presence-improper "$last_value_bad" 'car expects a non-empty list'
+run_case run_type_rejection d11-find-last-value-presence-before-predicate "$last_value_precedence" 'car expects a non-empty list'
+sha256sum lib/d11-srfi1-find-presence.lisp lib/d11-srfi1-find-last-tail-presence.lisp \
+  lib/d11-srfi1-find-last-value-presence.lisp \
+  tests/semantic/d11-find-last-value-presence-*.lisp \
+  tests/fixtures/d11-find-last-value-presence-*.lisp \
+  > "$evidence/d11-find-last-value-presence-inputs.sha256"
+
 # Д11: розділити перед останнім збігом, явний D1 прапорець.
 # Значення, порядок, хибна перша позиція й Type — SENS, не shell.
 split_last_positive="$evidence/d11-split-last-positive.lisp"

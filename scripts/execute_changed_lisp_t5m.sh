@@ -593,6 +593,19 @@ run_native_t5m_program() {
       fi
       echo "D11_ALIST_VALUE_PHYSICAL_PASS source=$file native=SENS result=D1:$d11_value_expected"
     fi
+    # Останнє значення: точний D1 закон та хибний D1 мутант.
+    if [[ "$file" == "tests/semantic/d11-find-last-value-presence-law.lisp" ||
+          "$file" == "tests/semantic/d11-find-last-value-presence-mutant.lisp" ]]; then
+      local last_value_expected=1
+      [[ "$file" != *-mutant.lisp ]] || last_value_expected=0
+      printf '%s\n' "$last_value_expected" > "$dir/d11-last-value.expected"
+      if ! cmp -s "$dir/native-paired.stdout" "$dir/d11-last-value.expected"; then
+        echo "::error::SENS_D11_LAST_VALUE_WRONG_D1 source=$file expected=D1:$last_value_expected actual=$(cat "$dir/native-paired.stdout")" >&2
+        mark_file_failed
+        return
+      fi
+      echo "SENS_D11_LAST_VALUE_PASS source=$file result=D1:$last_value_expected native=SENS carrier=Zig/T5M"
+    fi
     # Окремий мутант TAKE-UNTIL — хибний закон повертає саме D1:ні.
     # Shell перевіряє тільки фізичний результат SENS, не обчислює списки.
     if [[ "$file" == "tests/semantic/d11-srfi1-span-break-mutant.lisp" ]]; then
@@ -1613,6 +1626,12 @@ while IFS= read -r file || [[ -n "$file" ]]; do
           "$file" == "tests/semantic/d11-alist-value-presence-mutant.lisp" ]]; then
     # Мовний результат формує SENS, транспорт бере тільки точні байти T5M.
     binding_sources=(--binding-source lib/d11-srfi1-alist-protocol.lisp)
+  elif [[ "$file" == "tests/semantic/d11-find-last-value-presence-law.lisp" ||
+          "$file" == "tests/semantic/d11-find-last-value-presence-mutant.lisp" ]]; then
+    # Всі три перевірені SENS DEFINE; Zig переносить лише фізичні слова.
+    binding_sources=(--binding-source lib/d11-srfi1-find-presence.lisp
+                     --binding-source lib/d11-srfi1-find-last-tail-presence.lisp
+                     --binding-source lib/d11-srfi1-find-last-value-presence.lisp)
   elif [[ "$file" == "tests/semantic/d11-family-aggregation-law.lisp" ||
           "$file" == "tests/semantic/d11-family-aggregation-mutant.lisp" ]]; then
     # Частоти викликають чинне DEFINE групування: обидва кроки виконуються SENS.
