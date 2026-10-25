@@ -10,12 +10,44 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 WORKFLOW = ROOT / ".github" / "workflows" / "remint-drifted-pairs.yml"
+CI_WORKFLOW = ROOT / ".github" / "workflows" / "ci.yml"
 
 
 class RemintExplicitManifestScopeTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         cls.source = WORKFLOW.read_text(encoding="utf-8")
+        cls.ci_source = CI_WORKFLOW.read_text(encoding="utf-8")
+
+    def test_remint_trigger_uses_exact_git_diff_and_explicit_recovery_marker(self) -> None:
+        detector_start = self.ci_source.index("  detect-remint:\\n")
+        remint_start = self.ci_source.index("  remint-targeted:\\n", detector_start)
+        detector = self.ci_source[detector_start:remint_start]
+        remint = self.ci_source[remint_start:]
+
+        # GitHub push payloads vary between single-commit and batch pushes.
+        # The exact commit range is the authority for deciding whether to remint.
+        self.assertIn('HEAD_SHA: ${{ github.sha }}', detector)
+        self.assertIn('BEFORE_SHA: ${{ github.event.before }}', detector)
+        self.assertIn('if [[ "${HEAD_MESSAGE:-}" == *SENS_PAIR_REGEN* ]]; then', detector)
+        self.assertIn('git diff-tree --no-commit-id --name-only -r "$HEAD_SHA"', detector)
+        self.assertIn('git diff --name-only "$BEFORE_SHA" "$HEAD_SHA"', detector)
+        for target in (
+            "lib/core4.lisp",
+            "lib/lisp-fs.lisp",
+            "tests/fixtures/wsm-fs-record-producer.lisp",
+            ".github/workflows/ci.yml",
+            ".github/workflows/remint-drifted-pairs.yml",
+        ):
+            self.assertIn(f"'{target}'", detector)
+
+        # The expensive reusable workflow may run only when this diff says so.
+        self.assertIn("needs: detect-remint", remint)
+        self.assertIn(
+            "if: ${{ github.event_name == 'push' && needs.detect-remint.outputs.needed == 'true' }}",
+            remint,
+        )
+        self.assertNotIn("github.event.commits.*.modified", remint)
 
     def test_commit_recovery_receives_the_original_manifest(self) -> None:
         self.assertIn("REMINT_FILES: ${{ inputs.files }}", self.source)
