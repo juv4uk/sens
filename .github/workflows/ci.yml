@@ -397,6 +397,11 @@ jobs:
                   # виконуються тільки повним SENS law-runner із Core4.
                   "tests/semantic/d6-any-improper-tail-negative.lisp",
                   "tests/semantic/d6-all-improper-tail-negative.lisp",
+                  # D9/F6 package-key laws need persistent-map/world/content-store/lisp-fs.
+                  # The dedicated native law runner assembles that dependency stack; do not
+                  # execute these leaf witnesses alone in the generic changed-file runner.
+                  "tests/semantic/d9-f6-package-key-canonicalization-law.lisp",
+                  "tests/semantic/d9-f6-package-key-canonicalization-mutant.lisp",
                   # Д9/F6: два SENS-свідки форми bindings потребують DEFINE.
                   "tests/semantic/d9-f6-bindings-shape-law.lisp",
                   "tests/semantic/d9-f6-bindings-shape-mutant.lisp",
