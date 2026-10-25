@@ -77,6 +77,36 @@ struct BenchmarkRow {
     source: String,
     expected: &'static str,
     percentiles: Percentiles,
+    footprint: ProgramFootprint,
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+struct ProgramFootprint {
+    domain_words: usize,
+    domain_bits: usize,
+    t5m_bytes: usize,
+}
+
+fn program_footprint(
+    words: &[crate::zig_transport::ExactT5MWord],
+    physical_t5m: &[u8],
+) -> Result<ProgramFootprint, String> {
+    if words.is_empty() || physical_t5m.is_empty() {
+        return Err("empty SENS program has no measurable footprint".into());
+    }
+    let domain_bits = words.iter().try_fold(0usize, |total, word| {
+        if word.width == 0 || word.bits.len() != word.width || word.bits.iter().any(|bit| *bit > 1)
+        {
+            return None;
+        }
+        total.checked_add(word.width)
+    });
+    let domain_bits = domain_bits.ok_or("invalid or oversized exact SENS program")?;
+    Ok(ProgramFootprint {
+        domain_words: words.len(),
+        domain_bits,
+        t5m_bytes: physical_t5m.len(),
+    })
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -201,6 +231,10 @@ fn run_suite(
         if let Some(setup) = &case.setup {
             evaluate_visible(&mut state, setup)?;
         }
+        let exact_words = super::prepare_t5m_repl_words(&case.source, surface, &state.session)?;
+        let carrier_words = super::exact_t5m_carrier_words(&exact_words)?;
+        let physical_t5m = crate::zig_transport::encode_t5m_exact_words(&carrier_words)?;
+        let footprint = program_footprint(&carrier_words, &physical_t5m)?;
         let baseline = evaluate_visible(&mut state, &case.source)?;
         if baseline != case.expected {
             return Err(format!(
@@ -234,6 +268,7 @@ fn run_suite(
             source: case.source,
             expected: case.expected,
             percentiles,
+            footprint,
         });
     }
 
@@ -292,6 +327,7 @@ fn draw_report(frame: &mut Frame, report: &BenchmarkReport) {
             std::env::consts::ARCH
         )),
         Line::from("Час на рядок REPL (нс); вивід у термінал не міряється."),
+        Line::from("Розмір: точні доменні біти та фізичний T5M-носій кожної програми."),
         Line::from(match report.memory {
             Some(memory) => format!(
                 "RSS процесу: {}→{} KiB · новий пік +{} KiB.",
@@ -318,6 +354,10 @@ fn draw_report(frame: &mut Frame, report: &BenchmarkReport) {
             row.name, p.p50, p.p95, p.p99, throughput, row.expected
         )));
         lines.push(Line::from(format!("  {}", row.source)));
+        lines.push(Line::from(format!(
+            "  код: {} слів · {} доменних бітів · T5M: {} байт",
+            row.footprint.domain_words, row.footprint.domain_bits, row.footprint.t5m_bytes
+        )));
     }
     lines.push(Line::from(""));
     lines.push(Line::from(
@@ -342,8 +382,8 @@ fn draw_report(frame: &mut Frame, report: &BenchmarkReport) {
 #[cfg(test)]
 mod tests {
     use super::{
-        draw_report, memory_delta, parse_process_memory, run_suite, BenchmarkReport, BenchmarkRow,
-        MemoryDelta, Percentiles, ProcessMemory,
+        draw_report, memory_delta, parse_process_memory, program_footprint, run_suite,
+        BenchmarkReport, BenchmarkRow, MemoryDelta, Percentiles, ProcessMemory, ProgramFootprint,
     };
     use crate::repl::{ReplState, ReplSurface};
     use ratatui::{backend::TestBackend, Terminal};
@@ -421,6 +461,29 @@ mod tests {
         assert_eq!(memory_delta(start, None), None);
     }
 
+    #[test]
+    fn program_footprint_counts_exact_domain_bits_and_physical_t5m_bytes() {
+        let words = [
+            crate::zig_transport::ExactT5MWord::new(2, vec![1, 0]).unwrap(),
+            crate::zig_transport::ExactT5MWord::new(7, vec![1, 0, 0, 0, 0, 0, 1]).unwrap(),
+            crate::zig_transport::ExactT5MWord::new(
+                24,
+                (0..24).map(|bit| (bit % 2) as u8).collect(),
+            )
+            .unwrap(),
+        ];
+
+        assert_eq!(
+            program_footprint(&words, &[0; 7]).unwrap(),
+            ProgramFootprint {
+                domain_words: 3,
+                domain_bits: 33,
+                t5m_bytes: 7,
+            }
+        );
+        assert!(program_footprint(&[], &[]).is_err());
+    }
+
     #[cfg(feature = "zig-transport")]
     #[test]
     fn benchmark_workloads_keep_expected_results_and_do_not_change_repl_surface() {
@@ -465,6 +528,11 @@ mod tests {
                     p95: 200,
                     p99: 300,
                 },
+                footprint: ProgramFootprint {
+                    domain_words: 3,
+                    domain_bits: 33,
+                    t5m_bytes: 7,
+                },
             }],
             memory: Some(MemoryDelta {
                 start_rss_kib: 16_384,
@@ -490,5 +558,7 @@ mod tests {
         assert!(visible.contains("0 не означає без алокацій"), "{visible}");
         assert!(visible.contains("579"), "{visible}");
         assert!(visible.contains("Zig T5M"), "{visible}");
+        assert!(visible.contains("33 доменних бітів"), "{visible}");
+        assert!(visible.contains("T5M: 7 байт"), "{visible}");
     }
 }
