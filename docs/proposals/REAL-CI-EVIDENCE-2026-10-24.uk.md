@@ -191,3 +191,57 @@ Datei; die Fehlermeldung zeigt auf Zeile 1:8 — einen KOMMENTAR.
 
 The mechanism: the law and mutant bundles differ only in the last file; the
 error points at line 1:8 — a COMMENT.
+
+---
+
+# Додаток 3 (Saṅkhyā, 2026-10-24): мою гіпотезу ВИМІР ВІДКИДАЄ
+
+## Гіпотеза була
+
+«Латиниця в коментарі стає Text7-літералом без прив'язки» — і тому
+`d11-clojure-juxt-laws.lisp` падає.
+
+## Вимір її відкидає
+
+```
+усього .lisp у tests/semantic : 559
+з латиницею >=4 у КОМЕНТАРЯХ : 274
+без латиниці в коментарях    : 285
+```
+
+**274 файли мають латиницю в коментарях — і майже всі ПРОХОДЯТЬ** (418/420).
+Отже латиниця в коментарі **не ламає виконання**. Гіпотеза **ХИБНА**.
+
+Приклади серед тих, що проходять: `clips-deftemplate-d1-law.lisp`,
+`clips-form-dispatch-d1-law.lisp`, `core-d3-car-cdr-cons-law.lisp`.
+
+## Що це залишає
+
+Дефект **специфічний для `d11-clojure-juxt-laws.lisp`**, а не класовий.
+Єдина **структурна** відмінність цього файла:
+
+| | ім'я | зміст |
+|---|---|---|
+| падаючий | `…-laws.lisp` (**множина**) | **24 свідки** в одному файлі |
+| успішний | `…-mutant.lisp` (однина) | один контрприклад |
+
+І помилка — на `physical_form_index=35`: `lib/` дає ~33 форми, отже це **перша
+форма `…-laws.lisp`**. Саме вона й не знаходить прив'язки.
+
+## Наступна перевірка (не «коментар», а ЗЧЕПЛЕННЯ)
+
+Назва `підтвердити-набір-одномісних-функцій` **не існує в дереві**, а виклик у
+коді — `застосувати-набір-одномісних-функцій` (**інший префікс**). Отже
+перевіряти треба **не коментар, а те, як перша форма резолвиться після
+зчеплення** `lib/` + `…-laws.lisp`: чи не **зсувається** межа форм, і чи не
+**розрізає** `cat` одну форму навпіл.
+
+## Deutsch
+
+Meine Hypothese ist durch Messung widerlegt: 274 Dateien mit Latein in
+Kommentaren bestehen. Der Defekt ist spezifisch für die laws-Datei.
+
+## English
+
+My hypothesis is disproved by measurement: 274 files with Latin in comments
+pass. The defect is specific to the laws file.
