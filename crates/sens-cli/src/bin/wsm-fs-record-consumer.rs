@@ -110,18 +110,17 @@ fn main() {
         eprintln!("wsm-fs-record-consumer: physical F6 bootstrap failed: {error}");
         std::process::exit(1);
     }
-    // These exact identities are the ratified D9/D4 entries in
-    // lib/domains/d9.lisp and lib/domains/d4.lisp. Rust builds only an exact
-    // SENS call tree; all record parsing and validation executes in SENS.
-    // Root/object packets must be lists, not CADR selector applications.
-    let root_package = d4_list(vec![call(
-        exact_d9(0b001110011),
-        vec![string_value(&records[0])],
-    )]);
-    let object_value = d4_list(vec![call(
-        exact_d9(0b101000110),
-        vec![string_value(&records[1])],
-    )]);
+    // The D9 deserializers return a decision pair: (accepted payload).
+    // D4:1001 CADR extracts the payload; D4:1110 LIST packages the collection.
+    // Rust builds only the exact SENS call tree; validation remains in SENS.
+    let root_package = call(
+        exact_d4(0b1001),
+        vec![call(exact_d9(0b001110011), vec![string_value(&records[0])])],
+    );
+    let object_value = call(
+        exact_d4(0b1001),
+        vec![call(exact_d9(0b101000110), vec![string_value(&records[1])])],
+    );
     let object_package = call(exact_d9(0b010100010), vec![object_value]);
     let object_packages = d4_list(vec![object_package]);
     let reconstruction = call(exact_d9(0b010101000), vec![root_package, object_packages]);
