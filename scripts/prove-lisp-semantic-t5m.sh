@@ -1044,6 +1044,11 @@ for kind in law values-law mutant; do
   [[ "$kind" != mutant ]] || tabulate_expected=0
   run_case run_law "d11-list-tabulate-$kind" "$tabulate_source" "$tabulate_expected" core4
 done
+# Незалежний D11 мутант: D3:() всередині cons не є порожнім зовнішнім списком.
+tabulate_empty_element_mutant="$evidence/d11-list-tabulate-empty-element-mutant.lisp"
+cat -- lib/d11-srfi1-list-tabulate.lisp \
+  tests/semantic/d11-srfi1-list-tabulate-empty-element-mutant.lisp > "$tabulate_empty_element_mutant"
+run_case run_law d11-list-tabulate-empty-element-mutant "$tabulate_empty_element_mutant" 0 core4
 for invalid in d1-count negative-count fraction-count; do
   tabulate_negative="$evidence/d11-list-tabulate-$invalid-type.lisp"
   cat -- lib/d11-srfi1-list-tabulate.lisp "tests/fixtures/d11-srfi1-list-tabulate-$invalid-negative.lisp" > "$tabulate_negative"
