@@ -7,6 +7,51 @@
 use sens::{load_core_library, Environment, Session, Value};
 
 const MAX_RECORD_BYTES: usize = 64 * 1024;
+const MAX_SENS_MARKER_SCAN_NODES: usize = 4096;
+
+// SENS rejection markers may be nested inside a record value. Search the
+// returned value with a strict work bound; this is diagnostic only and never
+// converts structural data into external text.
+fn f6_sens_rejection_marker(value: &Value) -> Option<String> {
+    fn known(marker: &str) -> bool {
+        marker.starts_with("f6-")
+            || matches!(
+                marker,
+                "reconstruction-rejected"
+                    | "reconstruction-mismatch"
+                    | "root-format-not-symbol"
+                    | "object-format-not-symbol"
+                    | "valid-root-rejected"
+                    | "serialized-root-rejected"
+                    | "serialized-object-rejected"
+                    | "empty-root-rejected"
+                    | "empty-value-rejected"
+                    | "missing-objects-accepted"
+                    | "missing-bindings-accepted"
+                    | "missing-value-accepted"
+            )
+    }
+
+    let mut pending = vec![value];
+    let mut inspected = 0usize;
+    while let Some(next) = pending.pop() {
+        inspected += 1;
+        if inspected > MAX_SENS_MARKER_SCAN_NODES {
+            return None;
+        }
+        match next {
+            Value::Symbol(marker) if known(marker.as_str()) => {
+                return Some(marker.to_string());
+            }
+            Value::Pair(node) => {
+                pending.push(&node.tail);
+                pending.push(&node.head);
+            }
+            _ => {}
+        }
+    }
+    None
+}
 
 fn bounded_two_line_records(value: &Value) -> Result<[String; 2], &'static str> {
     let mut records = Vec::with_capacity(2);
@@ -83,7 +128,7 @@ fn main() {
     // or read-back law failed. Preserve the exact marker in CI diagnostics:
     // a generic "non-string" would misclassify this *semantic* rejection
     // as a Rust record-envelope problem. Rust does not decide that law.
-    if let Value::Symbol(marker) = &result.value {
+    if let Some(marker) = f6_sens_rejection_marker(&result.value) {
         eprintln!(
             "wsm-fs-record-producer: F6_SENS_WITNESS_REJECTED marker={marker} layer=sens"
         );
@@ -107,6 +152,30 @@ mod tests {
 
     fn records(lines: &[&str]) -> Value {
         Value::list(lines.iter().map(|line| Value::String((*line).into())))
+    }
+
+    #[test]
+    fn f6_surfaces_nested_sens_rejection_markers_with_a_work_bound() {
+        let nested = Value::list([
+            Value::list([Value::Symbol("root-format-not-symbol".into())]),
+            Value::String("object".into()),
+        ]);
+        assert_eq!(
+            f6_sens_rejection_marker(&nested).as_deref(),
+            Some("root-format-not-symbol")
+        );
+
+        let direct = Value::Symbol("reconstruction-rejected".into());
+        assert_eq!(
+            f6_sens_rejection_marker(&direct).as_deref(),
+            Some("reconstruction-rejected")
+        );
+
+        let ordinary = Value::list([
+            Value::Symbol("ordinary-data".into()),
+            Value::String("object".into()),
+        ]);
+        assert_eq!(f6_sens_rejection_marker(&ordinary), None);
     }
 
     #[test]
