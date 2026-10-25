@@ -137,6 +137,12 @@ class NirbhayaMintPairsTests(unittest.TestCase):
             if target != raced_target:
                 self.assertEqual(target.read_bytes(), payload)
 
+    def test_symlinked_mint_executable_is_rejected(self) -> None:
+        alias = self.root / "sens-alias"
+        alias.symlink_to(self.sens)
+        with self.assertRaisesRegex(RuntimeError, "NIRBHAYA_INPUT_NOT_REGULAR"):
+            MINT.mint_all(self.root, alias, self.trit)
+
     def test_source_change_during_mint_aborts_without_publishing(self) -> None:
         old = self._seed_old_targets()
         source = self.semantic / f"{MINT.STEMS[0]}.lisp"
