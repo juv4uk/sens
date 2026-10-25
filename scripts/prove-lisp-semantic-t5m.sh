@@ -1060,6 +1060,24 @@ sha256sum lib/d11-srfi1-list-tabulate.lisp \
   tests/fixtures/d11-srfi1-list-tabulate-*-negative.lisp \
   > "$evidence/d11-list-tabulate-inputs.sha256"
 
+
+# Д11: однозначний пошук — чистий SENS, без третьої істини чи D11 opcode.
+# Два проходи: повний D3-хребет перед предикатом, потім вибір 0/1/2+.
+d11_unique_law="$evidence/d11-unique-query-positive.lisp"
+d11_unique_mutant="$evidence/d11-unique-query-mutant.lisp"
+d11_unique_improper="$evidence/d11-unique-query-improper.lisp"
+d11_unique_poisoned="$evidence/d11-unique-query-poisoned.lisp"
+cat -- lib/d11-query-unique.lisp tests/semantic/d11-query-unique-law.lisp > "$d11_unique_law"
+cat -- lib/d11-query-unique.lisp tests/semantic/d11-query-unique-mutant.lisp > "$d11_unique_mutant"
+cat -- lib/d11-query-unique.lisp tests/fixtures/d11-query-unique-improper-negative.lisp > "$d11_unique_improper"
+cat -- lib/d11-query-unique.lisp tests/fixtures/d11-query-unique-preflight-negative.lisp > "$d11_unique_poisoned"
+run_case run_law d11-unique-query-positive "$d11_unique_law" 1 core4
+run_case run_law d11-unique-query-mutant "$d11_unique_mutant" 0 core4
+run_case run_error_rejection d11-unique-query-improper-tail "$d11_unique_improper" Type 'car expects a non-empty list' core4
+run_case run_error_rejection d11-unique-query-preflight "$d11_unique_poisoned" Type 'car expects a non-empty list' core4
+sha256sum lib/d11-query-unique.lisp tests/semantic/d11-query-unique-*.lisp \
+  tests/fixtures/d11-query-unique-*-negative.lisp > "$evidence/d11-unique-query-inputs.sha256"
+
 # SRFI-1 list=: алгоритм з чинної lib/D11, очікувані предикати тільки в Lisp.
 # Не тестуємо D11-операцію Rust-оракулом; Zig тільки кодує фізичні байти.
 d11_list_equal_law_bundle="$evidence/d11-list-equality-positive.lisp"
