@@ -206,7 +206,7 @@ run_native_t5m_program() {
       negative_type_diagnostic='car expects a non-empty list' ;;
     tests/semantic/d11-find-last-tail-improper-negative.lisp)
       negative_type_diagnostic='car expects a non-empty list' ;;
-    tests/semantic/d11-find-first-tail-presence-improper-negative.lisp)
+    tests/semantic/d11-find-first-tail-presence-improper-negative.lisp|tests/semantic/d11-find-first-tail-presence-helper-atom-negative.lisp)
       negative_type_diagnostic='car expects a non-empty list' ;;
     tests/semantic/d11-srfi1-find-presence-improper-tail-negative.lisp)
       negative_type_diagnostic='car expects a non-empty list' ;;
@@ -288,7 +288,8 @@ run_native_t5m_program() {
     elif [[ "$file" == "tests/semantic/d11-find-last-tail-improper-negative.lisp" ]]; then
       direct_source="$dir/d11-last-tail-negative-bound.lisp"
       cat -- lib/d11-srfi1-find-presence.lisp lib/d11-srfi1-find-last-tail-presence.lisp "$file" > "$direct_source"
-    elif [[ "$file" == "tests/semantic/d11-find-first-tail-presence-improper-negative.lisp" ]]; then
+    elif [[ "$file" == "tests/semantic/d11-find-first-tail-presence-improper-negative.lisp" ||
+            "$file" == "tests/semantic/d11-find-first-tail-presence-helper-atom-negative.lisp" ]]; then
       direct_source="$dir/d11-first-tail-presence-negative-bound.lisp"
       cat -- lib/d11-srfi1-find-tail.lisp lib/d11-srfi1-find-tail-presence.lisp "$file" > "$direct_source"
     elif [[ "$file" == "tests/semantic/d11-split-before-last-improper-negative.lisp" ]]; then
@@ -419,7 +420,8 @@ run_native_t5m_program() {
         return
       fi
     fi
-    if [[ "$file" == "tests/semantic/d11-find-first-tail-presence-improper-negative.lisp" ]]; then
+    if [[ "$file" == "tests/semantic/d11-find-first-tail-presence-improper-negative.lisp" ||
+          "$file" == "tests/semantic/d11-find-first-tail-presence-helper-atom-negative.lisp" ]]; then
       local full_bad_source="$dir/d11-first-tail-presence-complete-negative.lisp"
       negative_standalone_physical="$dir/d11-first-tail-presence-complete-negative.sens"
       if ! cat -- lib/d11-srfi1-find-tail.lisp lib/d11-srfi1-find-tail-presence.lisp "$file" > "$full_bad_source" ||
@@ -1411,7 +1413,8 @@ while IFS= read -r file || [[ -n "$file" ]]; do
                      --binding-source lib/d11-srfi1-find-last-tail-presence.lisp)
   elif [[ "$file" == "tests/semantic/d11-find-first-tail-presence-law.lisp" ||
           "$file" == "tests/semantic/d11-find-first-tail-presence-mutant.lisp" ||
-          "$file" == "tests/semantic/d11-find-first-tail-presence-improper-negative.lisp" ]]; then
+          "$file" == "tests/semantic/d11-find-first-tail-presence-improper-negative.lisp" ||
+          "$file" == "tests/semantic/d11-find-first-tail-presence-helper-atom-negative.lisp" ]]; then
     binding_sources=(--binding-source lib/d11-srfi1-find-tail.lisp
                      --binding-source lib/d11-srfi1-find-tail-presence.lisp)
   elif [[ "$file" == "tests/semantic/d11-split-before-last-law.lisp" ||
