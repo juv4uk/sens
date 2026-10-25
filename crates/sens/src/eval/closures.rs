@@ -2,7 +2,11 @@
 //! Pobudova `lambda` ta zastosuvannia zamykan/makrosiv do arhumentiv.
 //! Bau von `lambda` und Anwendung von Closures/Makros auf Argumente.
 
-use super::{canon, capabilities, evaluate, necessary_forms, special_forms::quoted, EvalStep};
+use super::{
+    canon, capabilities, evaluate, necessary_forms,
+    special_forms::quoted_macro_argument,
+    EvalStep,
+};
 use crate::canonical_reader::text7_binding_key;
 use crate::semantic_registry;
 use crate::{
@@ -774,12 +778,16 @@ pub(super) fn apply_macro(
 
     let mut slots = Vec::with_capacity(closure.slot_names.len());
     for argument in &arguments[..closure.parameters.len()] {
-        slots.push(quoted(argument)?); // Do NOT evaluate arguments
+        // Macro arguments are syntax, not evaluated data. A bare D2/W7 name
+        // frame is restored to its canonical `Text7` atom (like a source
+        // symbol), so a name is an atom for the macro body — while QUOTE and
+        // ordinary data keep the structural frame.
+        slots.push(quoted_macro_argument(argument)?);
     }
     if closure.rest.is_some() {
         let mut rest_values: Vec<Value> = Vec::with_capacity(arguments.len());
         for argument in &arguments[closure.parameters.len()..] {
-            rest_values.push(quoted(argument)?); // Do NOT evaluate arguments
+            rest_values.push(quoted_macro_argument(argument)?);
         }
         slots.push(Value::list(rest_values));
     }

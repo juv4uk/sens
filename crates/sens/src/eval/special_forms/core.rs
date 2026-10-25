@@ -252,7 +252,31 @@ pub(crate) fn exact_domain_arity(
 }
 
 pub(crate) fn quoted(expression: &Expr) -> Result<Value, LanguageError> {
-    fn go(expression: &Expr, depth: u32) -> Result<Value, LanguageError> {
+    quoted_with_macro_syntax(expression, false)
+}
+
+/// Цитування аргументів макроса. Те саме, що `quoted`, але чиста D2/W7-рамка
+/// імені відновлюється до канонічного атома `Value::Text7` — точного значення,
+/// яке звичайний читач дає для голих джерельних імен. Канонічний читач лишається
+/// структурним (див. `quote_keeps_a_d2_framed_w7_run_as_a_structural_list`), а
+/// `macro_expansion_to_expr` повертає `Text7` у ту саму W7-рамку, тож макрос, що
+/// повертає аргумент без змін, відтворює побайтово ідентичний синтаксис.
+/// Тлумачення імені отримують лише аргументи макроса — ніколи QUOTE чи дані.
+/// Без цього `атом?` бачив би рамку імені як пару, і макрос `нехай` хибно
+/// потрапляв у свою гілку-помилку `(перше (як-є ()))`.
+///
+/// Macro-argument quoting: a pure D2/W7 name frame becomes the canonical
+/// `Value::Text7` atom, matching a bare source name. QUOTE and data are
+/// unchanged; `macro_expansion_to_expr` restores the identical frame.
+pub(crate) fn quoted_macro_argument(expression: &Expr) -> Result<Value, LanguageError> {
+    quoted_with_macro_syntax(expression, true)
+}
+
+fn quoted_with_macro_syntax(
+    expression: &Expr,
+    macro_syntax: bool,
+) -> Result<Value, LanguageError> {
+    fn go(expression: &Expr, depth: u32, macro_syntax: bool) -> Result<Value, LanguageError> {
         if depth > crate::syntax::MAX_STRUCTURE_DEPTH {
             return Err(LanguageError::new(
                 ErrorKind::Parse,
@@ -298,22 +322,30 @@ pub(crate) fn quoted(expression: &Expr) -> Result<Value, LanguageError> {
                 ));
             }
             ExprKind::List(items) => {
+                // У позиції аргументу макроса чиста D2/W7-рамка є іменем, а не
+                // структурою даних: повертаємо канонічний D7-атом. Звичайне
+                // цитування лишає рамку структурним списком.
+                if macro_syntax {
+                    if let Some(text) = crate::canonical_reader::text7_atom(expression) {
+                        return Ok(Value::Text7(text));
+                    }
+                }
                 let mut out = Vec::with_capacity(items.len());
                 for item in items.iter() {
-                    out.push(go(item, depth + 1)?);
+                    out.push(go(item, depth + 1, macro_syntax)?);
                 }
                 Value::list(out)
             }
             ExprKind::Pair(head, tail) => Value::Pair(Rc::new(PairNode {
-                head: go(head, depth + 1)?,
-                tail: go(tail, depth + 1)?,
+                head: go(head, depth + 1, macro_syntax)?,
+                tail: go(tail, depth + 1, macro_syntax)?,
             })),
             // Зведений виклик як дані — список із функцією СЕНС у голові.
             ExprKind::Call(sid, arguments) => {
                 let mut out = Vec::with_capacity(arguments.len() + 1);
                 out.push(Value::Sid(*sid));
                 for argument in arguments.iter() {
-                    out.push(go(argument, depth + 1)?);
+                    out.push(go(argument, depth + 1, macro_syntax)?);
                 }
                 Value::list(out)
             }
@@ -321,13 +353,13 @@ pub(crate) fn quoted(expression: &Expr) -> Result<Value, LanguageError> {
                 let mut out = Vec::with_capacity(arguments.len() + 1);
                 out.push(Value::DomainIdentity((*identity).into()));
                 for argument in arguments.iter() {
-                    out.push(go(argument, depth + 1)?);
+                    out.push(go(argument, depth + 1, macro_syntax)?);
                 }
                 Value::list(out)
             }
         })
     }
-    go(expression, 0)
+    go(expression, 0, macro_syntax)
 }
 
 // ── contract 2.1: value-level entry points (first-class builtins) ──
