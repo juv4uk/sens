@@ -79,6 +79,16 @@ fn main() {
             std::process::exit(1);
         }
     };
+    // SENS returns an explicit quoted marker when its own reconstruction
+    // or read-back law failed. Preserve the exact marker in CI diagnostics:
+    // a generic "non-string" would misclassify this *semantic* rejection
+    // as a Rust record-envelope problem. Rust does not decide that law.
+    if let Value::Symbol(marker) = &result.value {
+        eprintln!(
+            "wsm-fs-record-producer: F6_SENS_WITNESS_REJECTED marker={marker} layer=sens"
+        );
+        std::process::exit(1);
+    }
     let records = match bounded_two_line_records(&result.value) {
         Ok(records) => records,
         Err(error) => {
