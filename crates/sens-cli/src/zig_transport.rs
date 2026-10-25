@@ -13,6 +13,12 @@ mod asset_ffi;
 #[link(name = "sens_zig_transport", kind = "static")]
 unsafe extern "C" {
     fn sens_zig_codec_abi_version() -> u32;
+    fn sens_zig_bitpack_fields(
+        input: *const u8,
+        byte_len: usize,
+        output: *mut u8,
+        capacity: usize,
+    ) -> isize;
     fn sens_zig_t5m_validate(input: *const u8, len: usize) -> i32;
     fn sens_zig_t5m_encode_be3(
         input: *const u8,
