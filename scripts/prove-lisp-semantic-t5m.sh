@@ -291,8 +291,12 @@ diagnostic_matches() {
   case "$expected" in
     'car expects a non-empty list')
       grep -Fq -- 'Помилка типу: перше очікує непорожній список' "$log" ;;
+    'cdr expects a non-empty list')
+      grep -Fq -- 'Помилка типу: решта очікує непорожній список' "$log" ;;
     'eq expects two atoms')
-      grep -Fq -- 'Помилка типу: еквівалентність очікує два атоми' "$log" ;;
+      grep -Fq -- 'Помилка типу: тотожне? очікує два атоми' "$log" ;;
+    'division by zero')
+      grep -Fq -- 'Ділення на нуль' "$log" ;;
     *)
       return 1 ;;
   esac
