@@ -25,7 +25,7 @@ fi
 if ! git cat-file -e "$base^{commit}" 2>/dev/null; then
   timeout 60s git fetch --no-tags --depth=1 origin "$base"
 fi
-git -c core.quotePath=false diff --name-only -z --diff-filter=ACMRT "$base" "$GITHUB_SHA" -- '*.lisp' '*.sens' '*.rs' '*.zig' '.github/workflows/ci.yml' 'scripts/prove-lisp-semantic-t5m.sh' 'scripts/prove-lisp-language-laws.sh' 'scripts/execute_changed_lisp_t5m.sh' > "$raw"
+git -c core.quotePath=false diff --name-only -z --diff-filter=ACMRT "$base" "$GITHUB_SHA" -- '*.lisp' '*.sens' '*.rs' '*.zig' '.github/workflows/ci.yml' '.github/workflows/ci-heavy.yml' 'scripts/prove-lisp-semantic-t5m.sh' 'scripts/prove-lisp-language-laws.sh' 'scripts/execute_changed_lisp_t5m.sh' 'scripts/ci-*' 'scripts/ci_*.py' 'scripts/check-*.py' 'scripts/check_*.py' 'scripts/guard-*.py' 'scripts/mint-*.py' 'scripts/report_ukr_projection_progress.py' > "$raw"
 printf '%s\n' "$base" > "$RUNNER_TEMP/native-semantic-base.sha"
 python3 - "$raw" "$manifest" "$GITHUB_OUTPUT" <<'PY'
 from pathlib import Path
@@ -70,7 +70,19 @@ try:
 except (ValueError, UnicodeError) as exc:
     raise SystemExit(f"::error::T5M_CHANGED_UNREPRESENTABLE_PATH {exc}") from exc
 for original in changed_paths:
-    if original in {".github/workflows/ci.yml", "scripts/prove-lisp-semantic-t5m.sh", "scripts/prove-lisp-language-laws.sh", "scripts/execute_changed_lisp_t5m.sh"}:
+    if (
+        original in {
+            ".github/workflows/ci.yml",
+            ".github/workflows/ci-heavy.yml",
+            "scripts/prove-lisp-semantic-t5m.sh",
+            "scripts/prove-lisp-language-laws.sh",
+            "scripts/execute_changed_lisp_t5m.sh",
+            "scripts/report_ukr_projection_progress.py",
+        }
+        or original.startswith(
+            ("scripts/ci-", "scripts/ci_", "scripts/check-", "scripts/check_", "scripts/guard-", "scripts/mint-")
+        )
+    ):
         workflow_changed = True
         continue
     if original.endswith(".lisp"):
