@@ -245,3 +245,54 @@ Kommentaren bestehen. Der Defekt ist spezifisch für die laws-Datei.
 
 My hypothesis is disproved by measurement: 274 files with Latin in comments
 pass. The defect is specific to the laws file.
+
+---
+
+# Додаток 4 (Sandhi, 2026-10-24): індекс 35 при 34 формах — аномалія
+
+## Вимір (reader'ом, тим самим, що в міграції)
+
+```
+lib/d11-clojure-juxt.lisp          9 форм
+tests/semantic/…-laws.lisp        25 форм
+        разом                    34 форми
+bundle після cat                  34 форми   ← ЗЧЕПЛЕННЯ ЧИСТЕ, межі не зсунуто
+
+tests/semantic/…-mutant.lisp       1 форма
+        lib + mutant              10 форм    ← і цей комплект ПРОХОДИТЬ
+```
+
+**Зчеплення не винне:** `cat` дає рівно 34 форми — стільки ж, скільки сума.
+Гіпотезу «`cat` розрізає форму» **відкинуто виміром**.
+
+## Але ось АНОМАЛІЯ
+
+CI каже:
+
+```
+unknown Text7 binding: #t7:… [physical_form_index=35 physical_word_start=5797
+                              physical_word_end=5917]
+```
+
+**`physical_form_index=35` — а у bundle ЛИШЕ 34 форми.** Індекс **на одиницю поза
+межами**. Тобто:
+
+- або індексація **1-базована**, і 35 = «наступна після останньої» → виконавець
+  **шукає форму, якої немає**;
+- або **mint додає одну форму** (обгортку), якої немає в джерелі;
+- або `lib/` дає **не 9**, а 10 форм **для компілятора** (наприклад, неявний
+  `(початок …)` навколо модуля).
+
+**Це і є найсильніший слід:** помилка вказує **за межі** наявних форм. Досі всі
+шукали дефект **усередині** свідка; а він, можливо, **у тому, як виконавець
+індексує форми** — і тоді він вразить **кожен свідок**, а не лише цей.
+
+## Deutsch
+
+Der Fehler zeigt auf Index 35, aber das Bundle hat nur 34 Formen — der Index
+liegt außerhalb. Das ist die stärkste Spur.
+
+## English
+
+The error points at index 35, but the bundle has only 34 forms — the index is
+out of range. That is the strongest lead.
