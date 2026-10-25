@@ -870,6 +870,15 @@ run_case run_error_rejection d6-length-onto-d1-root-type tests/semantic/d6-lengt
 run_case run_error_rejection d6-length-onto-late-d1-tail-type tests/semantic/d6-length-onto-late-d1-tail-negative.lisp Type 'car expects a non-empty list' core4
 run_case run_law d6-filter-independent-positive tests/semantic/d6-filter-independent-law.lisp 1 core4
 run_case run_law d6-filter-independent-mutant tests/semantic/d6-filter-independent-mutant.lisp 0 core4
+# Д6:101000 MAP — прямий виклик SENS-DEFINE за точним D6-зв'язуванням.
+# Доказуємо порядок, дублікати, first-class callback, порожню базу й хибний порядок.
+run_case run_law d6-map-direct-call-positive tests/semantic/d6-map-direct-call-law.lisp 1 core4
+run_case run_law d6-map-direct-call-order-mutant tests/semantic/d6-map-direct-call-order-mutant.lisp 0 core4
+run_case run_error_rejection d6-map-direct-call-improper-tail tests/semantic/d6-map-direct-call-improper-tail-negative.lisp Type 'car expects a non-empty list' core4
+sha256sum \
+  tests/semantic/d6-map-direct-call-law.lisp \
+  tests/semantic/d6-map-direct-call-order-mutant.lisp \
+  tests/semantic/d6-map-direct-call-improper-tail-negative.lisp > "$evidence/d6-map-direct-call-inputs.sha256"
 # Д6:101010 MAP-ONTO · закон, мутант, неправильний D3-хвіст.
 run_case run_law d6-map-onto-accumulator-positive tests/semantic/d6-map-onto-accumulator-law.lisp 1 core4
 run_case run_law d6-map-onto-order-mutant tests/semantic/d6-map-onto-order-mutant.lisp 0 core4
