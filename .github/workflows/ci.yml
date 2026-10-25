@@ -14,8 +14,10 @@ permissions:
   contents: read
 
 concurrency:
-  group: sens-ci-${{ github.workflow }}-${{ github.sha }}-${{ github.event_name }}
-  cancel-in-progress: false
+  # One active CI per branch/ref: newer main pushes supersede stale SHA runs.
+  # PR refs remain isolated, so independent reviews do not cancel each other.
+  group: sens-ci-${{ github.workflow }}-${{ github.event_name }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 jobs:
   sens:
