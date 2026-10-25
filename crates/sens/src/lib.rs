@@ -690,7 +690,29 @@ fn bind_existing_d9_language_mechanisms(environment: &Environment) {
             continue;
         };
         if environment.domain_code_slot(identity).is_none() {
-            let _ = environment.bind_domain_code_slot_once(identity, value);
+            let _ = environment.bind_domain_code_slot_once(identity, value.clone());
+        }
+        // A language-defined D9 macro may also carry owner-ratified
+        // compatibility spellings — e.g. the symbolic `->`/`->>` of
+        // THREAD-FIRST/THREAD-LAST — recorded as lexical peers of its
+        // documented name. Mirror load_macro_library: bind only the missing
+        // peers of the already-evaluated macro value. No new law is added and
+        // no existing binding is overwritten.
+        if matches!(value, Value::Macro(_)) {
+            for definition_name in semantic_registry::d9_definition_names(identity)
+                .iter()
+                .copied()
+            {
+                for peer in semantic_registry::lexical_peer_spellings_for_documented_name(
+                    definition_name,
+                ) {
+                    if environment.get(peer).is_none()
+                        && eval::canon::ensure_bindable(peer, Span::default()).is_ok()
+                    {
+                        environment.define(peer, value.clone());
+                    }
+                }
+            }
         }
     }
 }

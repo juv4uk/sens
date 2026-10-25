@@ -394,6 +394,23 @@ pub(crate) fn d9_binding_identity_for_definition(name: &str) -> Option<DomainIde
         })
 }
 
+/// Every owner-ratified name spelling of one exact D9 definition row.
+///
+/// The list is projection-only: it identifies the spellings that share the
+/// coordinate, never a new admission. Callers may bind the already-evaluated
+/// value under these names, mirroring the documented-peer step of the macro
+/// library. An unknown or non-D9 identity yields an empty slice.
+pub(crate) fn d9_definition_names(identity: DomainIdentity) -> &'static [&'static str] {
+    let DomainIdentity::D9(word) = identity else {
+        return &[];
+    };
+    D9_DEFINITION_BINDINGS
+        .iter()
+        .find(|row| row.bits == word.word().packed_bits())
+        .map(|row| row.names)
+        .unwrap_or(&[])
+}
+
 /// Resolve an owner-ratified **Ukrainian source head** from the D9 ladder.
 /// Unlike binding-only aliases, only the first (укр/ук) spelling is eligible
 /// for this executable-source path; the evaluator must still require a
