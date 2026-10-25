@@ -234,6 +234,10 @@ jobs:
                   "tests/semantic/meta-fc-predicates-d1-mutant.lisp",
                   "tests/semantic/unification-occurs-check-law.lisp",
                   "tests/semantic/unification-occurs-check-mutant.lisp",
+                  # Д3: залежні Type-негативи мають DEFINE з бібліотеки,
+                  # тому не запускати їх standalone без прив'язки; виконує SENS law runner.
+                  "tests/semantic/d3-atom-compound-boundary-improper-immediate-negative.lisp",
+                  "tests/semantic/d3-atom-compound-boundary-improper-after-match-negative.lisp",
                   # D11 scan/fold: залежні SENS-свідки з бібліотечними DEFINE.
                   # D9 MAP: тести потребують lib/persistent-map.lisp.
                   # Їх уже виконує обов'язковий SENS → Zig/T5M native law runner

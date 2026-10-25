@@ -483,6 +483,16 @@ run_case run_law d3-cond-first-match-nil-mutant tests/semantic/d3-cond-first-mat
 # Позитив і негатив обов'язково проходять direct → Zig/T5M → paired → standalone.
 run_case run_law d3-cond-guard-short-circuit-positive tests/semantic/d3-cond-guard-short-circuit-law.lisp 1
 run_case run_law d3-cond-guard-short-circuit-mutant tests/semantic/d3-cond-guard-short-circuit-mutant.lisp 0
+# D3: кінець списку — тільки структурна D3:(). D1:ні як CDR — Type.
+# Окремо перевіряємо неправильний хвіст одразу й після знайденої межі.
+run_case run_law d3-atom-compound-boundary-positive lib/list-last-atom-to-compound-boundary-zero-copy-general.lisp 1
+d3_boundary_immediate="$evidence/d3-atom-compound-boundary-improper-immediate-bound.lisp"
+cat -- lib/list-last-atom-to-compound-boundary-zero-copy-general.lisp tests/semantic/d3-atom-compound-boundary-improper-immediate-negative.lisp > "$d3_boundary_immediate"
+run_case run_error_rejection d3-atom-compound-boundary-improper-immediate "$d3_boundary_immediate" Type 'car expects a non-empty list'
+d3_boundary_after_match="$evidence/d3-atom-compound-boundary-improper-after-match-bound.lisp"
+cat -- lib/list-last-atom-to-compound-boundary-zero-copy-general.lisp tests/semantic/d3-atom-compound-boundary-improper-after-match-negative.lisp > "$d3_boundary_after_match"
+run_case run_error_rejection d3-atom-compound-boundary-improper-after-match "$d3_boundary_after_match" Type 'car expects a non-empty list'
+sha256sum lib/list-last-atom-to-compound-boundary-zero-copy-general.lisp tests/semantic/d3-atom-compound-boundary-improper-immediate-negative.lisp tests/semantic/d3-atom-compound-boundary-improper-after-match-negative.lisp > "$evidence/d3-atom-compound-boundary-inputs.sha256"
 run_case run_law d3-quote-short-circuit-positive tests/semantic/d3-cond-quote-lazy-law.lisp 1
 run_case run_law d3-quote-short-circuit-mutant tests/semantic/d3-cond-quote-lazy-mutant.lisp 0
 # QUOTE не обчислює цитовану форму: структура лишається даними.
