@@ -113,6 +113,54 @@ Rust/Zig/codec/opcode/координати не редагувалися.
 `NATIVE_SENS_NEGATIVE=NOT_VERIFIED`
 `RELEASE=NO-GO`
 
+
+## Доповнення цього ходу: строга D3-термінація всього CLIPS сімейства
+
+Нова незалежна першопричина: `усі-твердження-кліпс?` і
+`прибрати-виведення-кліпс` завершували рекурсію на **будь-якому**
+атомі через `(атом? форми)`. Це помилково ототожнювало D1:ні із
+структурним кінцем D3:(), дозволяло `ALL-ASSERTS` повернути
+`так` та `DROP-PRINTOUTS` повернути усічений список.
+
+Нові коміти на `main`:
+
+- `d05a02f06a7ae85f04cc7ebae0ffb1f07ab2f7c9`:
+  обидва SENS DEFINE спочатку перевіряють `атом?`,
+  а потім через `однакові?` **лише D3:()**.
+  Інший атом викидає справжню SENS Type через
+  `(перше форми)`, а не тихо повертає результат.
+- `47b02478118058c304fa5c500530c06d295c8a38`:
+  SENS негатив `tests/semantic/d10-clips-all-asserts-improper-tail-negative.lisp`.
+- `bdadfc5a93aad28ec2866d155d8488b442fcbfa6`:
+  SENS негатив `tests/semantic/d10-clips-drop-printouts-improper-tail-negative.lisp`.
+- `566e377f9cd6cdf367ee912589ddd4cd77f42ecd`:
+  два `run_error_rejection` додані до того самого фізичного
+  Zig/T5M proof-runner з точним очікуванням `Type:
+  car expects a non-empty list` та SHA-квитанцією.
+- `cdc613e31199919b3729e36d5d1b85292f616bc5`:
+  позитивний SENS-law доповнено для
+  `усі-твердження-кліпс? (як-є ())`,
+  двох правильних ASSERT і фільтра
+  `((assert а) (printout б) (assert в))`.
+
+Спеціально НЕ змінено семантику D3 `тотожне?`,
+D8 `однакові?`, числові D12+ значення або Rust-виконавець.
+Чинні коди D10:0100101000 та D10:0100101001 залишаються
+власними ратифікованими адресами, не новими D11 кандидатами.
+
+Для наступного агента: окремо перевірити **п'ять** фізичних
+маршрутів нової групи: позитив D1:1, мутант D1:0,
+ALL-ASSERTS improper D3 CAR Type,
+DROP-PRINTOUTS improper D3 CAR Type, а також 22 наявні
+`tests/semantic/d10-clips-derived-laws.lisp` (у цьому файлі
+22 окремі топ-рівневі форми, тож не прирівнювати лише останнє
+значення до перевірки всіх 22 без явного fail-closed контракту).
+
+`NATIVE_SENS_POSITIVE=NOT_VERIFIED`
+`NATIVE_SENS_NEGATIVE=NOT_VERIFIED`
+`PHYSICAL_CORE4=NEEDS_CANONICAL_REMINT`
+`RELEASE=NO-GO`
+
 ---
 Deutsch: D10 CLIPS-Köpfe werden jetzt in SENS strukturell
 verglichen. Der native Zig/T5M-Nachweis steht noch aus.
