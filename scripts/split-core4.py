@@ -35,6 +35,45 @@ BLOCKS = [
 HDR = "; core4 · блок «{name}» · рядки {a}–{b} оригіналу\n; {desc}\n; Згенеровано scripts/split-core4.py — НЕ редагувати руками; правте блок і перезберіть.\n"
 
 
+def require_complete_forms(fragment: str, label: str) -> None:
+    """Механічна межа: жодна SENS-форма не повинна перетинати блоки.
+
+    Не оцінює Lisp, не тлумачить домени та не підмінює native SENS.
+    Враховує рядкові літерали, escape і коментарі до кінця рядка.
+    """
+    depth = 0
+    quoted = False
+    escaped = False
+    comment = False
+    for ch in fragment:
+        if comment:
+            if ch == "\n":
+                comment = False
+            continue
+        if quoted:
+            if escaped:
+                escaped = False
+            elif ch == "\\":
+                escaped = True
+            elif ch == '"':
+                quoted = False
+            continue
+        if ch == ";":
+            comment = True
+        elif ch == '"':
+            quoted = True
+        elif ch == "(":
+            depth += 1
+        elif ch == ")":
+            depth -= 1
+            if depth < 0:
+                raise SystemExit(f"CORE4_FRAGMENT_UNBALANCED part={label} unexpected=close")
+    if depth or quoted:
+        raise SystemExit(
+            f"CORE4_FRAGMENT_UNBALANCED part={label} unclosed={depth} string={quoted}"
+        )
+
+
 def bounds(source: str) -> list[int]:
     cuts = [0]
     for name, marker, _ in BLOCKS[1:]:
@@ -45,6 +84,8 @@ def bounds(source: str) -> list[int]:
     cuts.append(len(source))
     if cuts != sorted(set(cuts)):
         raise SystemExit("межі Core4 не є строго впорядкованими")
+    for i, (name, _, _) in enumerate(BLOCKS):
+        require_complete_forms(source[cuts[i]:cuts[i + 1]], name)
     return cuts
 
 
@@ -75,7 +116,9 @@ def build() -> str:
         header_and_fragment = file.read_text(encoding="utf-8").split("\n", 3)
         if len(header_and_fragment) != 4:
             raise SystemExit(f"пошкоджений заголовок {file}")
-        fragments.append(header_and_fragment[3])
+        fragment = header_and_fragment[3]
+        require_complete_forms(fragment, name)
+        fragments.append(fragment)
     return "".join(fragments)
 
 
