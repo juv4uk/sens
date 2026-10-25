@@ -715,3 +715,30 @@ fn filesystem_packages_reject_nonatomic_extra_keys_in_native_sens() {
         );
     }
 }
+
+#[test]
+fn filesystem_all_package_keys_have_one_unified_native_sens_uniqueness_law() {
+    // Структуру і D1-вердикт обчислює SENS, хост лише перевіряє доказ.
+    let mut s = session();
+    for (id, source, expected) in [
+        (
+            "d9-fs-all-keys-unique-positive",
+            include_str!("../../../tests/fixtures/d9-fs-all-keys-unique-law.lisp"),
+            true,
+        ),
+        (
+            "d9-fs-all-keys-unique-mutant",
+            include_str!("../../../tests/fixtures/d9-fs-all-keys-unique-mutant.lisp"),
+            false,
+        ),
+    ] {
+        let result = eval_program(source, &mut s)
+            .unwrap_or_else(|error| panic!("test_id={id} layer=SENS error={error}"));
+        assert_eq!(
+            result.value.as_predicate_bit(),
+            Some(expected),
+            "test_id={id} layer=SENS expected=D1:{expected} actual={}",
+            result.value
+        );
+    }
+}
