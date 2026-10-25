@@ -555,6 +555,60 @@ run_case run_law d9-string-append-physical-positive tests/semantic/d9-string-app
 run_case run_law d9-string-append-physical-mutant tests/semantic/d9-string-append-physical-mutant.lisp 0 core4
 sha256sum tests/semantic/d9-string-append-physical.lisp \
   tests/semantic/d9-string-append-physical-mutant.lisp > "$evidence/d9-string-append-inputs.sha256"
+# Діагностичні SENS-закони: розділити складений D9/F6 RED по першій неправильній умові.
+# Ці файли створюються лише в тимчасовому каталозі evidence; виконує їх реальний SENS/T5M.
+d9_fs_probe_dependencies="$evidence/d9-f6-probe-dependencies.lisp"
+cat -- lib/persistent-map.lisp lib/world.lisp lib/content-store.lisp lib/lisp-fs.lisp > "$d9_fs_probe_dependencies"
+for d9_key in format version revision bindings objects address value op name root; do
+  d9_key_law="$evidence/d9-f6-canonical-key-$d9_key.lisp"
+  d9_key_complete="$evidence/d9-f6-canonical-key-$d9_key-complete.lisp"
+  cat > "$d9_key_law" <<SENS_LAW
+(за-умовою
+  ((хибне?
+     (фс-пакет-однаковий-ключ?
+       (як-є $d9_key)
+       (текст-у-символ "$d9_key")))
+   ні)
+  (так так))
+SENS_LAW
+  cat -- "$d9_fs_probe_dependencies" "$d9_key_law" > "$d9_key_complete"
+  run_case run_law "d9-f6-canonical-key-$d9_key" "$d9_key_complete" 1 core4
+
+  d9_admit_law="$evidence/d9-f6-admit-key-$d9_key.lisp"
+  d9_admit_complete="$evidence/d9-f6-admit-key-$d9_key-complete.lisp"
+  cat > "$d9_admit_law" <<SENS_LAW
+(фс-пакет-ключ-допустимий? (текст-у-символ "$d9_key"))
+SENS_LAW
+  cat -- "$d9_fs_probe_dependencies" "$d9_admit_law" > "$d9_admit_complete"
+  run_case run_law "d9-f6-admit-key-$d9_key" "$d9_admit_complete" 1 core4
+done
+
+d9_unknown_key_law="$evidence/d9-f6-admit-unknown-key.lisp"
+d9_unknown_key_complete="$evidence/d9-f6-admit-unknown-key-complete.lisp"
+cat > "$d9_unknown_key_law" <<'SENS_LAW'
+(фс-пакет-ключ-допустимий? (текст-у-символ "sens-unknown-key"))
+SENS_LAW
+cat -- "$d9_fs_probe_dependencies" "$d9_unknown_key_law" > "$d9_unknown_key_complete"
+run_case run_law d9-f6-admit-unknown-key "$d9_unknown_key_complete" 0 core4
+
+d9_bindings_shape_law="$evidence/d9-f6-bindings-shape-isolated.lisp"
+d9_bindings_shape_complete="$evidence/d9-f6-bindings-shape-isolated-complete.lisp"
+cat > "$d9_bindings_shape_law" <<'SENS_LAW'
+(за-умовою
+  ((хибне? (фс-зв'язки-правильні? (як-є ()))) ні)
+  ((хибне?
+     (фс-зв'язки-правильні?
+       (список (сполучити (як-є a) (як-є адреса))))) ні)
+  ((фс-зв'язки-правильні? (список (як-є пошкоджений-запис))) ні)
+  ((фс-зв'язки-правильні?
+     (список (сполучити (як-є a) (як-є адреса)) (як-є пошкоджений-запис))) ні)
+  ((фс-зв'язки-правильні?
+     (сполучити (сполучити (як-є a) (як-є адреса)) ні)) ні)
+  (так так))
+SENS_LAW
+cat -- "$d9_fs_probe_dependencies" "$d9_bindings_shape_law" > "$d9_bindings_shape_complete"
+run_case run_law d9-f6-bindings-shape-isolated "$d9_bindings_shape_complete" 1 core4
+
 # D9/F6: канонізація лише десяти фіксованих ключів протоколу.
 # SENS сам перевіряє D7/D8-еквівалентність, дублі, відсутнє/порожнє поле та malformed tail.
 # Shell тільки з'єднує джерельні DEFINE і свідки; оцінює SENS через фізичний Zig/T5M.
