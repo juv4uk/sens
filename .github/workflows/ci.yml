@@ -720,10 +720,30 @@ jobs:
           if printf '%s\n' "$changed" | grep -Fxq -e 'lib/core4.lisp' -e 'lib/lisp-fs.lisp' -e 'tests/fixtures/wsm-fs-record-producer.lisp' -e '.github/workflows/ci.yml' -e '.github/workflows/remint-drifted-pairs.yml'; then
             echo "needed=true" >> "$GITHUB_OUTPUT"
             echo "REMINT_SCOPE changed-target=yes"
-          else
-            echo "needed=false" >> "$GITHUB_OUTPUT"
-            echo "REMINT_SCOPE changed-target=no"
+            exit 0
           fi
+          # Recover an interrupted/cancelled remint on a later unrelated push:
+          # a newer Lisp source than its committed physical T5M pair is still
+          # pending work even when the current push only changed tooling.
+          for source in lib/core4.lisp lib/lisp-fs.lisp tests/fixtures/wsm-fs-record-producer.lisp; do
+            pair="${source%.lisp}.sens"
+            [[ -f "$source" && ! -L "$source" ]] || continue
+            if [[ ! -s "$pair" || -L "$pair" ]]; then
+              echo "needed=true" >> "$GITHUB_OUTPUT"
+              echo "REMINT_SCOPE missing-physical-pair source=$source"
+              exit 0
+            fi
+            source_commit="$(git log -1 --format=%H -- "$source")"
+            pair_commit="$(git log -1 --format=%H -- "$pair")"
+            if [[ -n "$source_commit" && -n "$pair_commit" ]] &&
+               ! git merge-base --is-ancestor "$source_commit" "$pair_commit"; then
+              echo "needed=true" >> "$GITHUB_OUTPUT"
+              echo "REMINT_SCOPE source-newer-than-pair source=$source pair=$pair"
+              exit 0
+            fi
+          done
+          echo "needed=false" >> "$GITHUB_OUTPUT"
+          echo "REMINT_SCOPE changed-target=no pending-drift=no"
 
   # Єдина автоматична CI-подія залишається у ci.yml; тільки точний diff
   # або явний маркер запускає дорогий canonical SENS→Zig/T5M remint.
