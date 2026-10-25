@@ -37,6 +37,8 @@ OLD_LAW = """
         (lowering partial)
         (clips-result-observation blocked)
         (four-island-round-trip pending)))))
+
+(core3-profile-status)
 """
 
 
@@ -91,6 +93,9 @@ def canonicalize(ast, names):
             "ядро3-маршрут": "core3-route",
             "ядро3-додати-маршрути": "core3-add-routes",
             "ядро3-стан-профілю": "core3-profile-status",
+            # Додано 2026-10-25: файл уживає українську назву механізму, а
+            # словник проєкції її не мав — через це canonicalize давав іншу форму.
+            "вибрати-механізм": "mechanism-select",
         }.get(ast, ast)
     if not ast:
         return []
@@ -108,8 +113,17 @@ def verify(source):
     forms = scan(source)
     if [canonicalize(x, names) for x in forms] != scan(OLD_LAW):
         raise AssertionError("Core3 exact D3/D4 law or quoted data changed")
-    if len(forms) != 4 or any(x[0] != "визначити" for x in forms):
+    # Оновлено 2026-10-25: коміт 74f92fc7 «lib: кінцевий виклик-свідок для 18
+    # бібліотечних файлів» НАВМИСНО додав п'яту форму — виклик-свідок
+    # (ядро3-стан-профілю) у кінці. Тому перевіряємо: 4 ВИЗНАЧЕННЯ + 1 виклик.
+    definitions = [x for x in forms if x and x[0] == "визначити"]
+    trailing = [x for x in forms if not (x and x[0] == "визначити")]
+    if len(definitions) != 4:
         raise AssertionError("Core3 owner-bound Ukrainian D4 definition lost")
+    if len(trailing) != 1 or trailing[0][0] != "ядро3-стан-профілю":
+        raise AssertionError(
+            "Core3 кінцевий виклик-свідок мусить бути рівно один і саме "
+            "(ядро3-стан-профілю), як у коміті 74f92fc7")
     return True
 
 
