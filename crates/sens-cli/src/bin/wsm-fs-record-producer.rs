@@ -37,7 +37,16 @@ fn f6_sens_rejection_marker(value: &Value) -> Option<String> {
             Value::Symbol(marker) if known(marker.as_str()) => {
                 return Some(marker.to_string());
             }
-            Value::Pair(node) => next = &node.tail,
+            Value::Pair(node) => {
+                // Markers are carried in record positions (the pair head),
+                // not only as the entire result or as a list tail.
+                if let Value::Symbol(marker) = &node.head {
+                    if known(marker.as_str()) {
+                        return Some(marker.to_string());
+                    }
+                }
+                next = &node.tail;
+            }
             _ => return None,
         }
     }
