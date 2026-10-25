@@ -413,16 +413,22 @@ mod domain_ladder_lowering_migration_tests {
 
     #[test]
     fn source_heads_preserve_exact_d6_identity_for_lisp_owned_definitions() {
-        for (name, bits) in [("довжина", 0b000000u16), ("довжина-до", 0b000001u16)] {
+        for (name, bits) in [
+            ("довжина", 0b000000u16),
+            ("довжина-до", 0b000001u16),
+            ("нехай*", 0b001001u16),
+            ("нехай-послідовно", 0b001001u16),
+        ] {
             let identity = source_head_domain_identity(name)
                 .unwrap_or_else(|| panic!("ratified Ukrainian D6 binding must lower: {name}"));
             assert_eq!(identity.width(), 6, "{name} must retain D6 width");
             assert_eq!(identity.packed_bits(), bits, "{name} exact D6 coordinate");
         }
 
-        // English aliases do not become Ukrainian source heads through the
-        // binding-only table.
-        assert!(source_head_domain_identity("length").is_none());
+        // Non-Ukrainian peer names are metadata, not Ukrainian source heads.
+        for name in ["length", "let*", "krama-sthānika-bandha"] {
+            assert!(source_head_domain_identity(name).is_none(), "{name} is not a Ukrainian source head");
+        }
     }
 
     #[test]

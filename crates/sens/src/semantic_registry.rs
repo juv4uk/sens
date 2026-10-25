@@ -372,7 +372,13 @@ pub(crate) fn d5_binding_identity_for_definition(name: &str) -> Option<CoreDomai
 pub(crate) fn d6_uk_source_identity(name: &str) -> Option<DomainIdentity> {
     D6_DEFINITION_BINDINGS
         .iter()
-        .find(|row| row.names.first().copied() == Some(name))
+        .find(|row| {
+            row.names.first().copied() == Some(name)
+                // Five-name rows carry distinct uk and ukr projections;
+                // the second name is still Ukrainian, unlike Sanskrit/English
+                // peers which follow it. Keep both UI surfaces on one D6 word.
+                || (row.names.len() == 5 && row.names.get(1).copied() == Some(name))
+        })
         .map(|row| {
             DomainIdentity::D6(CoreD6::from_word(
                 Bit6::new(row.bits).expect("generated D6 source word is exactly six bits"),
