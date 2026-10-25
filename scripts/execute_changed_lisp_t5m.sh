@@ -87,6 +87,12 @@ run_native_t5m_program() {
     paired_runtime_args=(--core4-runtime)
     standalone_runtime=("$native_open" eval-core4)
   fi
+  # Д11 LIST-TABULATE: точні числа D24+ та SENS-замикання.
+  if [[ "$file" == tests/semantic/d11-srfi1-list-tabulate-*.lisp ||
+        "$file" == tests/fixtures/d11-srfi1-list-tabulate-*-negative.lisp ]]; then
+    paired_runtime_args=(--core4-runtime)
+    standalone_runtime=("$native_open" eval-core4)
+  fi
   # Д11 LIST-INDEX використовує Д24+ числовий накопичувач:
   # direct, paired та standalone мають той самий SENS Core4.
   if [[ "$file" == tests/semantic/d11-srfi1-list-index-presence-*.lisp ||
@@ -210,6 +216,8 @@ run_native_t5m_program() {
   case "$file" in
     tests/semantic/d11-srfi1-zip-with-improper-*-negative.lisp)
       negative_type_diagnostic='car expects a non-empty list' ;;
+    tests/fixtures/d11-srfi1-list-tabulate-*-negative.lisp)
+      negative_type_diagnostic='car expects a non-empty list' ;;
     tests/fixtures/d11-srfi1-list-equality-*-negative.lisp)
       negative_type_diagnostic='car expects a non-empty list' ;;
     tests/fixtures/d11-srfi1-list-index-nonpredicate-negative.lisp)
@@ -284,6 +292,9 @@ run_native_t5m_program() {
     if [[ "$file" == tests/semantic/d11-srfi1-zip-with-improper-*-negative.lisp ]]; then
       direct_source="$dir/d11-zip-with-bound-negative.lisp"
       cat -- lib/d11-srfi1-zip-with.lisp "$file" > "$direct_source"
+    elif [[ "$file" == tests/fixtures/d11-srfi1-list-tabulate-*-negative.lisp ]]; then
+      direct_source="$dir/d11-tabulate-negative-complete.lisp"
+      cat -- lib/d11-srfi1-list-tabulate.lisp "$file" > "$direct_source"
     elif [[ "$file" == tests/fixtures/d11-srfi1-list-equality-*-negative.lisp ]]; then
       direct_source="$dir/d11-list-equality-bound-negative.lisp"
       cat -- lib/d11-srfi1-list-equality.lisp "$file" > "$direct_source"
@@ -401,6 +412,16 @@ run_native_t5m_program() {
          ! timeout "$native_timeout" "$native_open" open "$negative_standalone_physical" >"${negative_standalone_physical%.sens}" 2>"$dir/d11-zip-open.stderr" ||
          ! timeout "$native_timeout" "$native_open" verify-view "$negative_standalone_physical" >"$dir/d11-zip-verify.stdout" 2>"$dir/d11-zip-verify.stderr"; then
         echo "::error::D11_ZIP_WITH_NEGATIVE_PHYSICAL_INVALID source=$file" >&2
+        mark_file_failed
+        return
+      fi
+    fi
+    if [[ "$file" == tests/fixtures/d11-srfi1-list-tabulate-*-negative.lisp ]]; then
+      negative_standalone_physical="$dir/d11-tabulate-negative-complete.sens"
+      if ! timeout "$native_timeout" "$binary" --t5m-mint "$direct_source" "$negative_standalone_physical" >"$dir/d11-tab-mint.out" 2>"$dir/d11-tab-mint.err" ||
+         ! timeout "$native_timeout" "$native_open" open "$negative_standalone_physical" >"${negative_standalone_physical%.sens}" 2>"$dir/d11-tab-open.err" ||
+         ! timeout "$native_timeout" "$native_open" verify-view "$negative_standalone_physical" >"$dir/d11-tab-verify.out" 2>"$dir/d11-tab-verify.err"; then
+        echo "::error::D11_TABULATE_NEGATIVE_PHYSICAL_INVALID source=$file" >&2
         mark_file_failed
         return
       fi
@@ -855,6 +876,28 @@ run_native_t5m_program() {
       if ! cmp -s "$dir/native-paired.stdout" "$dir/d11-zip.expected" ||
          ! cmp -s "$dir/d11-zip-direct.stdout" "$dir/d11-zip.expected"; then
         echo "::error::D11_ZIP_WITH_WRONG_D1 source=$file expected=$zip_expected" >&2
+        mark_file_failed
+        return
+      fi
+    fi
+    if [[ "$file" == tests/semantic/d11-srfi1-list-tabulate-*.lisp ]]; then
+      local complete_tab="$dir/d11-tabulate-complete.lisp"
+      standalone_physical="$dir/d11-tabulate-complete.sens"
+      if ! cat -- lib/d11-srfi1-list-tabulate.lisp "$file" > "$complete_tab" ||
+         ! timeout "$native_timeout" "$binary" "$complete_tab" >"$dir/d11-tab-direct.out" 2>"$dir/d11-tab-direct.err" ||
+         ! timeout "$native_timeout" "$binary" --t5m-mint "$complete_tab" "$standalone_physical" >"$dir/d11-tab-mint.out" 2>"$dir/d11-tab-mint.err" ||
+         ! timeout "$native_timeout" "$native_open" open "$standalone_physical" >"${standalone_physical%.sens}" 2>"$dir/d11-tab-open.err" ||
+         ! timeout "$native_timeout" "$native_open" verify-view "$standalone_physical" >"$dir/d11-tab-verify.out" 2>"$dir/d11-tab-verify.err"; then
+        echo "::error::D11_TABULATE_BOUND_EXECUTION_INVALID source=$file" >&2
+        mark_file_failed
+        return
+      fi
+      local expected_tab=1
+      [[ "$file" != *-mutant.lisp ]] || expected_tab=0
+      printf '%s\n' "$expected_tab" > "$dir/d11-tab.expected"
+      if ! cmp -s "$dir/native-paired.stdout" "$dir/d11-tab.expected" ||
+         ! cmp -s "$dir/d11-tab-direct.out" "$dir/d11-tab.expected"; then
+        echo "::error::D11_TABULATE_WRONG_D1 source=$file expected=$expected_tab" >&2
         mark_file_failed
         return
       fi
@@ -1574,6 +1617,9 @@ while IFS= read -r file || [[ -n "$file" ]]; do
     binding_sources=(--binding-source lib/d11-srfi1-lset-diff-intersection.lisp)
   elif [[ "$file" == tests/semantic/d11-srfi1-zip-with-*.lisp ]]; then
     binding_sources=(--binding-source lib/d11-srfi1-zip-with.lisp)
+  elif [[ "$file" == tests/semantic/d11-srfi1-list-tabulate-*.lisp ||
+          "$file" == tests/fixtures/d11-srfi1-list-tabulate-*-negative.lisp ]]; then
+    binding_sources=(--binding-source lib/d11-srfi1-list-tabulate.lisp)
   elif [[ "$file" == "tests/semantic/d11-srfi1-list-equality-law.lisp" ||
           "$file" == "tests/semantic/d11-srfi1-list-equality-structure-law.lisp" ||
           "$file" == "tests/semantic/d11-srfi1-list-equality-structure-mutant.lisp" ||

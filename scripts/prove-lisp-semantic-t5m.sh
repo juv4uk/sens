@@ -1035,6 +1035,26 @@ sha256sum "$d11_idx_library" \
   tests/semantic/d11-srfi1-list-index-presence-{law,mutant}.lisp \
   tests/fixtures/d11-srfi1-list-index-*-negative.lisp > "$evidence/d11-list-index-presence-inputs.sha256"
 
+# SRFI-1 LIST-TABULATE: лише SENS створює елементи й виносить D1-вердикт.
+# Усі три шляхи мають той самий Core4 (D24+, D3, D4, D6 REVERSE).
+for kind in law values-law mutant; do
+  tabulate_source="$evidence/d11-list-tabulate-$kind.lisp"
+  cat -- lib/d11-srfi1-list-tabulate.lisp "tests/semantic/d11-srfi1-list-tabulate-$kind.lisp" > "$tabulate_source"
+  tabulate_expected=1
+  [[ "$kind" != mutant ]] || tabulate_expected=0
+  run_case run_law "d11-list-tabulate-$kind" "$tabulate_source" "$tabulate_expected" core4
+done
+for invalid in d1-count negative-count fraction-count; do
+  tabulate_negative="$evidence/d11-list-tabulate-$invalid-type.lisp"
+  cat -- lib/d11-srfi1-list-tabulate.lisp "tests/fixtures/d11-srfi1-list-tabulate-$invalid-negative.lisp" > "$tabulate_negative"
+  run_case run_error_rejection "d11-list-tabulate-$invalid" "$tabulate_negative" \
+    Type 'car expects a non-empty list' core4
+done
+sha256sum lib/d11-srfi1-list-tabulate.lisp \
+  tests/semantic/d11-srfi1-list-tabulate-*.lisp \
+  tests/fixtures/d11-srfi1-list-tabulate-*-negative.lisp \
+  > "$evidence/d11-list-tabulate-inputs.sha256"
+
 # SRFI-1 list=: алгоритм з чинної lib/D11, очікувані предикати тільки в Lisp.
 # Не тестуємо D11-операцію Rust-оракулом; Zig тільки кодує фізичні байти.
 d11_list_equal_law_bundle="$evidence/d11-list-equality-positive.lisp"
