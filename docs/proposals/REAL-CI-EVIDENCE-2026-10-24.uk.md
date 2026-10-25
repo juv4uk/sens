@@ -540,3 +540,56 @@ verschiedene Formzahlen (Python 34, Rust ≥36).
 
 The error is on the `direct` stage — two readers of the same language yield
 different form counts (Python 34, Rust ≥36).
+
+---
+
+# Додаток 9: ПРИЧИНА ЧЕРВОНИХ — гілка відстала від main на 449 комітів
+
+## Вимір (GitHub API)
+
+```
+main head:  acb1f17011
+гілка head: a9df774558
+compare main...feat/semantic-backlog-measurement:
+  behind_by = 449      ← гілка ВІДСТАЄ на 449 комітів
+  ahead_by  = 82       ← і випереджає на 82
+```
+
+## Що це пояснює
+
+Обидва RED-id'и — `d11-clojure-juxt-positive` і
+`d11-clojure-juxt-constructor-improper-tail` — **не існують у поточному дереві**:
+
+```
+grep «constructor-improper» → лише мій власний документ
+tests/semantic/d11-clojure-juxt-constructor-improper-tail-negative.lisp → 404 (і на SHA 664d7013)
+scripts/prove-lisp-semantic-t5m.sh на SHA: 99408 Б   ← а зараз 78808 Б
+```
+
+**Скрипт доказу на ревізії CI був на 20 КБ БІЛЬШИЙ за поточний.** Тобто **CI ганяв
+іншу ревізію**, ніж та, яку я читав, — і саме тому звітує про id'и, яких немає.
+
+## Отже «червоні» — двох різних прирід
+
+1. **Червоні від застарілої бази** — id'и й фікстури, яких у `main` уже немає.
+   **Лікування: освіжити гілку на поточний `main`** — не лагодити свідка, якого
+   немає.
+2. **Червоні, що лишаться й після освіження** — `lib/core4.sens` (фізичний дрейф)
+   і, ймовірно, `d11-clojure-juxt-*`. Їх треба перевіряти **після** освіження, на
+   свіжому дереві.
+
+## Чесний висновок
+
+**Я не можу «виправити червоні» наосліп.** Половина з них — **тіні застарілої
+бази**; лагодити їх означало б лагодити код, якого в проєкті вже немає. **Перший
+правильний крок — освіжити гілку**, і тільки потім дивитися, що лишилось червоним.
+
+## Deutsch
+
+Die Zweige sind 449 Commits hinter `main`; die roten Prüfungen gehören teils zu
+einer veralteten Basis.
+
+## English
+
+The branch is 449 commits behind `main`; part of the red checks belongs to a
+stale base.
