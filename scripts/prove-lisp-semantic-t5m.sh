@@ -525,6 +525,14 @@ run_case run_law d4-first-class-predicate-mutant tests/semantic/d4-first-class-p
 # Ратифікація 1024/1024 не підміняє фізичного позитиву й мутанта.
 run_case run_law d10-empty-queue-positive tests/semantic/d10-empty-queue-law.lisp 1 core4
 run_case run_law d10-empty-queue-mutant tests/semantic/d10-empty-queue-mutant.lisp 0 core4
+# Д10:0100100110/0100100111 — CLIPS ASSERT/PRINTOUT як точні структурні дані.
+# D8 однакові? не спричиняє D3 EQ Type для зовнішньої цитованої голови.
+# Обидві форми доводить саме SENS; Zig/T5M лише переносить точні байти.
+run_case run_law d10-clips-equal-head-positive tests/semantic/d10-clips-equal-head-law.lisp 1 core4
+run_case run_law d10-clips-equal-head-mutant tests/semantic/d10-clips-equal-head-mutant.lisp 0 core4
+sha256sum lib/core4.lisp \
+  tests/semantic/d10-clips-equal-head-law.lisp \
+  tests/semantic/d10-clips-equal-head-mutant.lisp > "$evidence/d10-clips-equal-head-inputs.sha256"
 # Перевірка кореня D5: D3 CDR не повинен перетворювати D1:ні на D3:().
 # SENS дає позитив D1:так і негатив D1:ні, Zig переносить лише фізичний код.
 run_case run_law d3-d4-no-tail-boundary-positive tests/semantic/d3-d4-no-tail-boundary-law.lisp 1
