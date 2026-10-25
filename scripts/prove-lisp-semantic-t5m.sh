@@ -1192,6 +1192,23 @@ run_case run_law d11-split-last-mutant "$split_last_mutant" 0
 run_case run_type_rejection d11-split-last-improper "$split_last_invalid" 'car expects a non-empty list'
 sha256sum lib/d11-srfi1-find-presence.lisp lib/d11-split-before-last-presence.lisp tests/semantic/d11-split-before-last-*.lisp > "$evidence/d11-split-last-inputs.sha256"
 
+# Д11 APPEND-MAP: суворий SENS-профіль чинного D10:0011001010 MAPPEND.
+# Core4 визначає сам D10 MAPPEND, бібліотека D11 додає лише перевірку D3.
+# Джерело закону, результат і Type-відмови — SENS, не Shell/Rust/Python.
+d11_append_map_positive="$evidence/d11-append-map-positive-complete.lisp"
+d11_append_map_bad_input="$evidence/d11-append-map-bad-input-complete.lisp"
+d11_append_map_bad_output="$evidence/d11-append-map-bad-output-complete.lisp"
+cat -- lib/d11-srfi1-append-map.lisp tests/semantic/d11-srfi1-append-map-law.lisp > "$d11_append_map_positive"
+cat -- lib/d11-srfi1-append-map.lisp tests/semantic/d11-srfi1-append-map-improper-input-negative.lisp > "$d11_append_map_bad_input"
+cat -- lib/d11-srfi1-append-map.lisp tests/semantic/d11-srfi1-append-map-improper-output-negative.lisp > "$d11_append_map_bad_output"
+run_case run_law d11-append-map-d10-equivalence "$d11_append_map_positive" 1 core4
+run_case run_error_rejection d11-append-map-improper-input "$d11_append_map_bad_input" Type 'car expects a non-empty list' core4
+run_case run_error_rejection d11-append-map-improper-output "$d11_append_map_bad_output" Type 'car expects a non-empty list' core4
+sha256sum lib/d11-srfi1-append-map.lisp tests/semantic/d11-srfi1-append-map-law.lisp \
+  tests/semantic/d11-srfi1-append-map-improper-input-negative.lisp \
+  tests/semantic/d11-srfi1-append-map-improper-output-negative.lisp \
+  > "$evidence/d11-append-map-inputs.sha256"
+
 # Д11 SRFI-1 FILTER-MAP: D1:ні відкидається, структурне () зберігається.
 # Справжній SENS source → Zig/T5M → парний і самостійний SENS.
 d11_filter_map_positive="$evidence/d11-srfi1-filter-map-positive.lisp"
