@@ -193,6 +193,24 @@ jobs:
               path = Path(name)
               if not path.is_file() or path.is_symlink():
                   raise SystemExit(f"T5M_CHANGED_SOURCE_INVALID path={name}")
+              # Core4 parts are byte-range fragments, often beginning within
+              # an open SENS form. They are NOT standalone source programs:
+              # testing each with T5M mint reports a false parser regression.
+              # Always test the whole generated Core4 SENS program instead.
+              # Keep committed pair/view drift RED until native Zig/T5M remint.
+              if name.startswith("lib/core4-parts/"):
+                  full_source = Path("lib/core4.lisp")
+                  if not full_source.is_file() or full_source.is_symlink():
+                      raise SystemExit(
+                          f"::error::T5M_CORE4_AGGREGATE_MISSING fragment={name}"
+                      )
+                  if "lib/core4.lisp" not in selected:
+                      selected.append("lib/core4.lisp")
+                  print(
+                      f"T5M_CORE4_FRAGMENT_IN_AGGREGATE fragment={name} "
+                      "source=lib/core4.lisp standalone=NOT_APPLICABLE"
+                  )
+                  continue
               if name.startswith("lib/surface/") and not _contains_source_definitions(path):
                   print(f"T5M_NONPROGRAM_SURFACE path={name}")
                   continue
