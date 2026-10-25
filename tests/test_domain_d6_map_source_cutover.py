@@ -15,8 +15,8 @@ import unittest
 
 КОРІНЬ = Path(__file__).resolve().parents[1]
 ДЖЕРЕЛА = {
-    "lib/yantra.lisp": 4,
-    "lib/linter.lisp": 8,
+    "lib/yantra.lisp": 0,  # оновлено 2026-10-25: старих викликів (101000 немає; другий ассерт тесту це підтверджує
+    "lib/linter.lisp": 0,  # оновлено 2026-10-25: старих викликів (101000 немає
     "lib/core.lisp": 0,
     "lib/knowledge.lisp": 0,
 }
