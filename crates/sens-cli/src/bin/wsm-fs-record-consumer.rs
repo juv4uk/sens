@@ -155,6 +155,29 @@ mod tests {
     use std::io::Cursor;
 
     #[test]
+    fn f6_quoted_marker_matches_native_source() {
+        // Обидва об'єкти створює та обчислює SENS; хост не визначає
+        // рівність source-атома та інертного D7-списку гліфів.
+        let mut session = Session {
+            environment: Environment::root(),
+        };
+        load_core_library(&mut session).expect("native SENS Core");
+        let expected_from_source = sens::eval_program("(як-є accepted)", &mut session)
+            .expect("native SENS quoted symbol")
+            .value;
+        let expected_from_wire = eval_parsed_expressions(
+            &[call(exact_d3(0b001), vec![symbol_value("accepted")])],
+            &mut session,
+        )
+        .expect("native D3:001 SENS QUOTE")
+        .value;
+        assert_eq!(
+            expected_from_wire, expected_from_source,
+            "test_id=F6-QUOTED-MARKER layer=SENS expected=source-quote actual=transport-AST"
+        );
+    }
+
+    #[test]
     fn f6_reader_accepts_exactly_two_records_and_preserves_whitespace() {
         let decoded = read_two_records(" root \nobject \n".as_bytes()).unwrap();
         assert_eq!(decoded, [" root ".to_owned(), "object ".to_owned()]);
