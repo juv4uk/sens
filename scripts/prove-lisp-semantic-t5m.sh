@@ -295,6 +295,12 @@ diagnostic_matches() {
       grep -Fq -- 'Помилка типу: решта очікує непорожній список' "$log" ;;
     'eq expects two atoms')
       grep -Fq -- 'Помилка типу: тотожне? очікує два атоми' "$log" ;;
+    'string->symbol expects a string')
+      grep -Fq -- 'Помилка типу: string->symbol очікує текст' "$log" ;;
+    'math requires explicit D12+ operands')
+      grep -Fq -- 'Помилка типу: для математики потрібні явні операнди D12+' "$log" ;;
+    'D3:110 COND expects exact D1:1 / D1:0')
+      grep -Fq -- 'Помилка типу: D3:110 COND очікує exact D1:1 / D1:0' "$log" ;;
     'division by zero')
       grep -Fq -- 'Ділення на нуль' "$log" ;;
     *)
