@@ -1811,6 +1811,15 @@ run_case run_error_rejection d11-dwim-dotted-record-type "$d11_dwim_dotted_bad" 
 d11_masterscope_bad_tail="$evidence/d11-masterscope-improper-root-tail-complete.lisp"
 cat -- lib/d11-interlisp-safe-analysis.lisp tests/fixtures/d11-masterscope-improper-root-tail-negative.lisp > "$d11_masterscope_bad_tail"
 run_case run_error_rejection d11-masterscope-improper-root-tail-type "$d11_masterscope_bad_tail" Type 'car expects a non-empty list' core4
+# Вкладена D3-пара з пізнім D1-хвостом за раннім прямим збігом.
+d11_masterscope_nested_bad="$evidence/d11-masterscope-improper-nested-tail-complete.lisp"
+cat -- lib/d11-interlisp-safe-analysis.lisp tests/fixtures/d11-masterscope-improper-nested-tail-negative.lisp > "$d11_masterscope_nested_bad"
+run_case run_error_rejection d11-masterscope-improper-nested-tail-type "$d11_masterscope_nested_bad" Type 'car expects a non-empty list' core4
+# Дані під як-є є цитатою: навіть крапкова пара не є пошкодженим викликом.
+d11_masterscope_quoted_datum="$evidence/d11-masterscope-quoted-improper-datum-complete.lisp"
+cat -- lib/d11-interlisp-safe-analysis.lisp tests/fixtures/d11-masterscope-quoted-improper-datum-positive.lisp > "$d11_masterscope_quoted_datum"
+run_case run_law d11-masterscope-quoted-improper-datum-positive "$d11_masterscope_quoted_datum" 1 core4
+sha256sum lib/d11-interlisp-safe-analysis.lisp tests/fixtures/d11-masterscope-improper-nested-tail-negative.lisp tests/fixtures/d11-masterscope-quoted-improper-datum-positive.lisp > "$evidence/d11-masterscope-nested-form-inputs.sha256"
 sha256sum lib/d11-interlisp-safe-analysis.lisp tests/fixtures/d11-masterscope-improper-root-tail-negative.lisp > "$evidence/d11-masterscope-improper-root-tail-inputs.sha256"
 sha256sum lib/d11-interlisp-safe-analysis.lisp tests/fixtures/d11-dwim-*.lisp > "$evidence/d11-dwim-exact-record-inputs.sha256"
 
