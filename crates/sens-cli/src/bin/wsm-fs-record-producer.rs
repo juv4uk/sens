@@ -8,6 +8,41 @@ use sens::{load_core_library, Environment, Session, Value};
 
 const MAX_RECORD_BYTES: usize = 64 * 1024;
 
+// The SENS witness can return its rejection marker either as the whole
+// result or as one of the two record positions. Surface known markers before
+// applying the external text-record contract; never serialize a Pair here.
+fn f6_sens_rejection_marker(value: &Value) -> Option<String> {
+    fn known(marker: &str) -> bool {
+        marker.starts_with("f6-")
+            || matches!(
+                marker,
+                "reconstruction-rejected"
+                    | "reconstruction-mismatch"
+                    | "root-format-not-symbol"
+                    | "object-format-not-symbol"
+                    | "valid-root-rejected"
+                    | "serialized-root-rejected"
+                    | "serialized-object-rejected"
+                    | "empty-root-rejected"
+                    | "empty-value-rejected"
+                    | "missing-objects-accepted"
+                    | "missing-bindings-accepted"
+                    | "missing-value-accepted"
+            )
+    }
+
+    let mut next = value;
+    loop {
+        match next {
+            Value::Symbol(marker) if known(marker.as_str()) => {
+                return Some(marker.to_string());
+            }
+            Value::Pair(node) => next = &node.tail,
+            _ => return None,
+        }
+    }
+}
+
 fn bounded_two_line_records(value: &Value) -> Result<[String; 2], &'static str> {
     let mut records = Vec::with_capacity(2);
     let mut next = value;
@@ -83,7 +118,7 @@ fn main() {
     // or read-back law failed. Preserve the exact marker in CI diagnostics:
     // a generic "non-string" would misclassify this *semantic* rejection
     // as a Rust record-envelope problem. Rust does not decide that law.
-    if let Value::Symbol(marker) = &result.value {
+    if let Some(marker) = f6_sens_rejection_marker(&result.value) {
         eprintln!(
             "wsm-fs-record-producer: F6_SENS_WITNESS_REJECTED marker={marker} layer=sens"
         );
@@ -107,6 +142,32 @@ mod tests {
 
     fn records(lines: &[&str]) -> Value {
         Value::list(lines.iter().map(|line| Value::String((*line).into())))
+    }
+
+    #[test]
+    fn f6_surfaces_sens_rejection_marker_at_record_position() {
+        let nested = Value::list([
+            Value::Symbol("root-format-not-symbol".into()),
+            Value::String("object".into()),
+        ]);
+        assert_eq!(
+            f6_sens_rejection_marker(&nested).as_deref(),
+            Some("root-format-not-symbol")
+        );
+
+        let direct = Value::Symbol("reconstruction-rejected".into());
+        assert_eq!(
+            f6_sens_rejection_marker(&direct).as_deref(),
+            Some("reconstruction-rejected")
+        );
+
+        // Ordinary symbols are still rejected by the text-only envelope
+        // validator rather than mislabeled as an explicit SENS witness marker.
+        let ordinary = Value::list([
+            Value::Symbol("a".into()),
+            Value::String("object".into()),
+        ]);
+        assert_eq!(f6_sens_rejection_marker(&ordinary), None);
     }
 
     #[test]
