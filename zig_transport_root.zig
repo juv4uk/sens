@@ -27,6 +27,7 @@ test "Rust bootstrap slot checks do not resolve projections" {
 // Keep all existing public C exports reachable without re-implementing them.
 comptime {
     _ = abi.sens_zig_codec_abi_version;
+    _ = abi.sens_zig_bitpack_fields;
     _ = abi.sens_zig_t5_validate;
     _ = abi.sens_zig_t5_validate_coordinates;
     _ = abi.sens_zig_t5_encode_be3;
