@@ -63,19 +63,20 @@ fn source_head_domain_identity(name: &str) -> Option<CoreDomainIdentity> {
             // table. Do this before the primitive-callable index, which does
             // not itself enumerate all Lisp-owned D6 closures.
             semantic_registry::d6_uk_source_identity(name)
-                .and_then(|identity| (identity.width() == 6).then(|| identity.into()))
+                .and_then(|identity| match identity {
+                    // Convert the explicit D6 coordinate, not the wrapper
+                    // DomainIdentity. Only this exact width has a CoreD6
+                    // representation; other variants stay non-routable here.
+                    crate::DomainIdentity::D6(word) => Some(CoreDomainIdentity::D6(word)),
+                    _ => None,
+                })
         })
         .or_else(|| {
             let identity = semantic_registry::exact_uk_callable_for_source_head(name)?;
-            identity.core_operation().or_else(|| {
-                // A non-primitive D6 resident is callable only through an
-                // already evaluated, language-owned definition bound under
-                // this exact coordinate. The source route records identity;
-                // invoke_domain_identity still fails closed if no closure is
-                // present. This does not admit a new host mechanism.
-                let binding = semantic_registry::d6_binding_identity_for_definition(name)?;
-                (identity.width() == 6 && binding == identity).then(|| identity.into())
-            })
+            // Lisp-owned D6 bindings are handled by the explicit canonical
+            // Ukrainian route above. This index admits only concrete core
+            // operations or selector routes that already expose one.
+            identity.core_operation()
         })
         .or_else(|| semantic_registry::domain_identity_for_surface(name))
 }
