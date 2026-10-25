@@ -533,11 +533,18 @@ sha256sum tests/semantic/d9-string-append-physical.lisp \
 # Shell тільки з'єднує джерельні DEFINE і свідки; оцінює SENS через фізичний Zig/T5M.
 d9_fs_keys_positive="$evidence/d9-f6-package-key-canonicalization-positive-complete.lisp"
 d9_fs_keys_mutant="$evidence/d9-f6-package-key-canonicalization-mutant-complete.lisp"
-cat -- lib/lisp-fs.lisp tests/semantic/d9-f6-package-key-canonicalization-law.lisp > "$d9_fs_keys_positive"
-cat -- lib/lisp-fs.lisp tests/semantic/d9-f6-package-key-canonicalization-mutant.lisp > "$d9_fs_keys_mutant"
+# WRITE→READ повного кореня/об'єкта викликає реальні SENS-визначення
+# immutable map → world content-address → content store → filesystem.
+# Без цих бібліотек позитив хибно падає на unknown Text7 binding
+# «внутрішня-мапа-список» ще до перевірки D9/F6 закону.
+# Обидва свідки мають однаковий стек джерел; жодних host-оракулів.
+cat -- lib/persistent-map.lisp lib/world.lisp lib/content-store.lisp \
+  lib/lisp-fs.lisp tests/semantic/d9-f6-package-key-canonicalization-law.lisp > "$d9_fs_keys_positive"
+cat -- lib/persistent-map.lisp lib/world.lisp lib/content-store.lisp \
+  lib/lisp-fs.lisp tests/semantic/d9-f6-package-key-canonicalization-mutant.lisp > "$d9_fs_keys_mutant"
 run_case run_law d9-f6-package-key-canonicalization-positive "$d9_fs_keys_positive" 1 core4
 run_case run_law d9-f6-package-key-canonicalization-mutant "$d9_fs_keys_mutant" 0 core4
-sha256sum lib/lisp-fs.lisp \
+sha256sum lib/persistent-map.lisp lib/world.lisp lib/content-store.lisp lib/lisp-fs.lisp \
   tests/semantic/d9-f6-package-key-canonicalization-law.lisp \
   tests/semantic/d9-f6-package-key-canonicalization-mutant.lisp \
   > "$evidence/d9-f6-package-key-canonicalization-inputs.sha256"
