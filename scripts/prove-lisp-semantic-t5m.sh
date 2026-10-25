@@ -1601,6 +1601,27 @@ run_case run_law d11-frequencies-unary-mutant "$d11_freq_mutant" 0
 sha256sum lib/d11-clojure-group-by.lisp lib/d11-clojure-frequencies-unary.lisp \
   tests/semantic/d11-clojure-frequencies-unary-law.lisp \
   tests/semantic/d11-clojure-frequencies-unary-mutant.lisp > "$evidence/d11-frequencies-unary-inputs.sha256"
+
+# Д11 FREQUENCIES: точна пара (ключ елементи). У всіх чотирьох
+# незалежних фізичних доказах використовуємо ті самі чинні DEFINE SENS.
+d11_exact_group_positive="$evidence/d11-exact-group-pair-positive-complete.lisp"
+d11_exact_group_mutant="$evidence/d11-exact-group-pair-mutant-complete.lisp"
+d11_exact_group_extra="$evidence/d11-exact-group-pair-extra-type-complete.lisp"
+d11_exact_group_missing="$evidence/d11-exact-group-pair-missing-type-complete.lisp"
+cat -- lib/d11-clojure-group-by.lisp lib/d11-clojure-frequencies-unary.lisp tests/fixtures/d11-frequencies-exact-group-pair-law.lisp > "$d11_exact_group_positive"
+cat -- lib/d11-clojure-group-by.lisp lib/d11-clojure-frequencies-unary.lisp tests/fixtures/d11-frequencies-exact-group-pair-mutant.lisp > "$d11_exact_group_mutant"
+cat -- lib/d11-clojure-group-by.lisp lib/d11-clojure-frequencies-unary.lisp tests/fixtures/d11-frequencies-extra-group-field-negative.lisp > "$d11_exact_group_extra"
+cat -- lib/d11-clojure-group-by.lisp lib/d11-clojure-frequencies-unary.lisp tests/fixtures/d11-frequencies-missing-group-field-negative.lisp > "$d11_exact_group_missing"
+run_case run_law d11-exact-group-pair-positive "$d11_exact_group_positive" 1
+run_case run_law d11-exact-group-pair-mutant "$d11_exact_group_mutant" 0
+run_case run_type_rejection d11-exact-group-pair-extra-type "$d11_exact_group_extra" 'car expects a non-empty list'
+run_case run_type_rejection d11-exact-group-pair-missing-type "$d11_exact_group_missing" 'car expects a non-empty list'
+sha256sum lib/d11-clojure-group-by.lisp lib/d11-clojure-frequencies-unary.lisp \
+  tests/fixtures/d11-frequencies-exact-group-pair-law.lisp \
+  tests/fixtures/d11-frequencies-exact-group-pair-mutant.lisp \
+  tests/fixtures/d11-frequencies-extra-group-field-negative.lisp \
+  tests/fixtures/d11-frequencies-missing-group-field-negative.lisp > "$evidence/d11-exact-group-pair-inputs.sha256"
+
 # Д11: SENS-бібліотечна залежність FREQUENCIES від GROUP-BY.
 # Маршрут не тлумачить закони: true/false і Type встановлює тільки SENS.
 d11_freq_outer_positive="$evidence/d11-frequencies-outer-preflight-positive-complete.lisp"
