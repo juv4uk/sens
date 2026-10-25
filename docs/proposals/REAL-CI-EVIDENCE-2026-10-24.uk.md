@@ -359,3 +359,71 @@ im Codec `--t5m-mint`, nicht im `.lisp`.
 
 Three hypotheses disproved; the source is correct — the corruption arises in
 the `--t5m-mint` codec, not in the `.lisp`.
+
+---
+
+# Додаток 6 (Pravāha, 2026-10-24): індекс 0-базований — і це міняє арифметику
+
+## Код, що формує індекс
+
+`crates/sens/src/binary_execution.rs:137-156`:
+
+```rust
+pub fn execute(&self, session: &mut Session) -> Result<EvalResult, LanguageError> {
+    let mut cursor = 0;
+    let mut form_index = 0usize;                 // ← СТАРТ З НУЛЯ
+    loop {
+        let physical_word_start = cursor;
+        let Some(form) = next_lowered_exact_form(&self.words, &mut cursor)? else { break; };
+        value = eval_lowered_expressions(std::slice::from_ref(&form), session)
+            .map_err(|mut error| {
+                error.message = format!(
+                    "{} [physical_form_index={} physical_word_start={} physical_word_end={}]",
+                    error.message, form_index, physical_word_start, cursor);
+                error
+            })?;
+        form_index += 1;                         // ← ІНКРЕМЕНТ ПІСЛЯ
+    }
+```
+
+**`form_index` починається з `0`** і збільшується **після** обробки. Отже:
+
+| | значення |
+|---|---|
+| перша форма | `physical_form_index=0` |
+| N форм | індекси `0 … N-1` |
+| **CI повідомив** | **`physical_form_index=35`** |
+| **потрібно форм** | **≥ 36** |
+| **джерело має** | **34** (9 + 25) |
+
+**Розбіжність — ДВІ форми, а не одна.** Тобто **mint виробляє щонайменше 36
+фізичних форм із 34 форм джерела.**
+
+## Чому це важливо
+
+Раніше я припускав 1-базований індекс і «+1 обгортку». **Код це відкидає:**
+`form_index` **0-базований**, отже йдеться про **дві зайві форми**.
+
+І `binary_execution.rs:678` (тест, що стверджує `physical_form_index=1`) — це
+**не** перша форма: при 0-базовому індексі `1` = **друга**. Тест **не суперечить**
+коду; він підтверджує, що перша — `0`.
+
+## Що це лишає
+
+**Джерело має 34 форми, а фізика — щонайменше 36.** Значить, `--t5m-mint` **додає
+або розщеплює** форми. І серед цих зайвих — та, що містить
+`підтвердити-набір-одномісних-функцій`.
+
+**Перевіряти треба:** скільки форм дає **сам кодек** на цьому вході — і **які
+саме** дві форми зайві. Це вже не питання свідка: це питання **відповідності
+джерело↔фізика**.
+
+## Deutsch
+
+`form_index` beginnt bei 0; der Fehler bei 35 verlangt ≥36 Formen, die Quelle hat
+34 — der Codec erzeugt zwei zusätzliche Formen.
+
+## English
+
+`form_index` starts at 0; an error at 35 requires ≥36 forms while the source has
+34 — the codec produces two extra forms.
