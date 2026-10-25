@@ -234,7 +234,7 @@ fn ambiguous_translation_is_evidence_not_knowledge() {
     "#;
     assert_eq!(
         eval_translation(source),
-        "(ambiguous translator-ambiguous 1 1 ())"
+        "(ambiguous translator-ambiguous 1 1 0)"
     );
 }
 
@@ -332,7 +332,7 @@ fn translation_alternatives_reject_improper_d3_tail_in_live_sens() {
     // Справжній SENS eval; не плутати атомарний хвіст і канонічний NIL.
     for (alternatives, expected) in [
         ("(((hot mercury-planet)) ((hot mercury-element)))", "1"),
-        ("(((hot mercury-planet)) . зіпсований-хвіст)", "()"),
+        ("(((hot mercury-planet)) . зіпсований-хвіст)", "0"),
     ] {
         let expression = format!(
             "(альтернативні-варіанти-перекладу-коректні? (як-є clause) (як-є {alternatives}))"
@@ -376,9 +376,8 @@ fn malformed_protocol_envelope_is_named_before_semantic_admission() {
 }
 
 #[test]
-fn translation_source_classification_requires_d1_member() {
-    // Класифікатор повертає (class-membership string member/nonmember):
-    // це дані, а D3 COND має отримати тільки точний D1 предикат.
+fn translation_source_requires_exact_d1_string_predicate() {
+    // D9 рядок? безпосередньо засвідчує тип джерела точним D1-бітом.
     let valid = r#"
         (структура-обгортки-перекладу-коректна?
           (як-є (translation-1 candidate query "текст" (metallic plato))))
@@ -388,7 +387,7 @@ fn translation_source_classification_requires_d1_member() {
           (як-є (translation-1 candidate query (не-текст) (metallic plato))))
     "#;
     assert_eq!(eval_translation(valid), "1", "SENS: рядкове джерело");
-    assert_eq!(eval_translation(invalid), "()", "SENS: нестрокове джерело");
+    assert_eq!(eval_translation(invalid), "0", "SENS: D1:ні для нестрокового джерела");
 }
 
 #[test]
@@ -431,8 +430,9 @@ fn translation_symbol_law_rejects_non_symbols_in_live_sens() {
 #[test]
 fn translation_exact_five_fields_rejects_short_long_and_dotted_lists() {
     let mut session = Session::default();
+    sens::load_core_library(&mut session)
+        .expect("чинний Core4 забезпечує штатні числові зв'язування");
     for library in [
-        include_str!("../../../lib/core.lisp"),
         include_str!("../../../lib/unify.lisp"),
         include_str!("../../../lib/reason.lisp"),
         include_str!("../../../lib/forward.lisp"),
@@ -487,7 +487,7 @@ fn translation_review_rejects_extra_field_in_live_sens() {
         (запис-огляду-перекладу-коректний?
           (як-є (translation-review-1 accepted query (пропозиція) (деталь) зайве)))
     "#;
-    assert_eq!(eval_translation(source), "()");
+    assert_eq!(eval_translation(source), "0");
 }
 
 #[test]
@@ -536,11 +536,11 @@ fn translation_review_evidence_named_sens_functions_execute_positive_and_negativ
     for (proposal, expected) in [
         (
             r#"(translation-1 candidate query "текст" (metallic plato))"#,
-            "(query 1 ())",
+            "(query 1 0)",
         ),
         (
             r#"(translation-1 rejected clause "текст" unsupported-translation)"#,
-            "(translator-rejected 0 ())",
+            "(translator-rejected 0 0)",
         ),
     ] {
         // D4 DEFINE має рівно два операнди: ім'я та значення.
