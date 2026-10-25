@@ -35,6 +35,8 @@ jobs:
           set -euo pipefail
           python3 scripts/ci_one_focused_workflow.py
           python3 scripts/check_ci_bash_blocks.py
+          # Catch shell-quoting regressions before builds/native SENS laws (e.g. apostrophes in Ukrainian identifiers).
+          bash -n scripts/prove-lisp-semantic-t5m.sh
           # Негативний контроль повноти обліку файлів — один швидкий Bash-тест.
           bash tests/test-count-executable-lisp-git-inventory.sh
           python3 tests/test_single_data_schema.py
