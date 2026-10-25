@@ -3,11 +3,25 @@
 # Усі закони, входи, логічні умови й мутанти написані в .lisp.
 set -euo pipefail
 cd "$(dirname "$0")/.."
-if (( $# > 1 )); then
-  echo 'usage: bash scripts/prove-lisp-language-laws.sh [native-sens-path]' >&2
+if (( $# > 2 )); then
+  echo 'usage: bash scripts/prove-lisp-language-laws.sh [native-sens-path] [report.json]' >&2
   exit 2
 fi
 cli="${1:-target/debug/sens}"
+report="${2:-}"
+# Звіт лише ДРУКУЄ результат виконання; він не змінює вердикт і не допускає
+# нічого сам. Порожній звіт = відсутність доказу, а не допуск.
+if [[ -n "$report" ]]; then
+  printf '{"schema":"sens-language-law-proof/v1","cases":[' > "$report"
+fi
+case_records=0
+record_case() {
+  [[ -n "$report" ]] || return 0
+  if (( case_records > 0 )); then printf ',' >> "$report"; fi
+  printf '{"test_id":"%s","kind":"%s","expected":"%s","actual":"%s"}' \
+    "$1" "$2" "$3" "$4" >> "$report"
+  case_records=$((case_records + 1))
+}
 if [[ ! -x "$cli" ]]; then
   printf 'REGRESSION test_id=lisp-language-laws layer=executor expected=native-sens actual=missing path=%s\n' "$cli" >&2
   exit 1
@@ -75,6 +89,7 @@ for id in d1-not d2-cond-laziness d3-structure d4-lexical-scope d4-second-select
       cat "$tmp/stderr" >&2
       exit 1
     fi
+    record_case "$id" "$kind" "D1:$(cat "$tmp/expected")" "D1:$(cat "$tmp/actual")"
     if ! cmp -s "$tmp/expected" "$tmp/actual"; then
       printf 'REGRESSION test_id=%s layer=eval input=%s expected=D1:%s actual=%q\n' "$id" "$file" "$expected" "$(cat "$tmp/actual")" >&2
       exit 1
@@ -82,4 +97,8 @@ for id in d1-not d2-cond-laziness d3-structure d4-lexical-scope d4-second-select
     printf 'NATIVE_SENS_PASS test_id=%s kind=%s expected=D1:%s executor=SENS carrier=Zig/T5M standalone=NOT_CLAIMED\n' "$id" "$kind" "$expected"
   done
 done
+
+if [[ -n "$report" ]]; then
+  printf '],"cases_recorded":%d,"authority":"SENS"}\n' "$case_records" >> "$report"
+fi
 printf 'NATIVE_SENS_SUITE_PASS suite=lisp-language-laws laws=15 mutants=15 authority=SENS\n'
