@@ -591,24 +591,6 @@ SENS_LAW
 cat -- "$d9_fs_probe_dependencies" "$d9_unknown_key_law" > "$d9_unknown_key_complete"
 run_case run_law d9-f6-admit-unknown-key "$d9_unknown_key_complete" 0 core4
 
-d9_bindings_shape_law="$evidence/d9-f6-bindings-shape-isolated.lisp"
-d9_bindings_shape_complete="$evidence/d9-f6-bindings-shape-isolated-complete.lisp"
-cat > "$d9_bindings_shape_law" <<'SENS_LAW'
-(за-умовою
-  ((хибне? (фс-зв'язки-правильні? (як-є ()))) ні)
-  ((хибне?
-     (фс-зв'язки-правильні?
-       (список (сполучити (як-є a) (як-є адреса))))) ні)
-  ((фс-зв'язки-правильні? (список (як-є пошкоджений-запис))) ні)
-  ((фс-зв'язки-правильні?
-     (список (сполучити (як-є a) (як-є адреса)) (як-є пошкоджений-запис))) ні)
-  ((фс-зв'язки-правильні?
-     (сполучити (сполучити (як-є a) (як-є адреса)) ні)) ні)
-  (так так))
-SENS_LAW
-cat -- "$d9_fs_probe_dependencies" "$d9_bindings_shape_law" > "$d9_bindings_shape_complete"
-run_case run_law d9-f6-bindings-shape-isolated "$d9_bindings_shape_complete" 1 core4
-
 # Діагностика bindings: кожен інваріант окремим нативним SENS-законом.
 # Це локалізує першу неправильну умову без зміни семантичних очікувань.
 d9_binding_probe() {
@@ -631,6 +613,8 @@ d9_binding_probe d1-false-tail-is-invalid \
   '(за-умовою ((хибне? (фс-зв'язки-правильні? (сполучити (сполучити (як-є a) (як-є адреса)) ні))) так) (так ні))' 1
 d9_binding_probe invalid-addresses-rejected \
   '(за-умовою ((хибне? (усі-адреси-зв'язувань-у-файловій-системі-наявні? (список (як-є пошкоджений-запис)) (як-є ()))) так) (так ні))' 1
+
+
 
 
 # D9/F6: канонізація лише десяти фіксованих ключів протоколу.
