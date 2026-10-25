@@ -45,7 +45,7 @@
 ; свідок у SENS. Порівняльний бенчмарк оцінює механізм, а не ратифікує
 ; значення. Рішення про зміну контракту належить лише власнику.
 
-((major . #d12) (minor . 0)
+((major . "12") (minor . "0")
  (canonical-contract . "contracts/language-contract-12.lisp")
  (owner-ratification . "2026-10-25: явне затвердження власника")
  (implementation-status . ratified-law-migration-not-complete)
