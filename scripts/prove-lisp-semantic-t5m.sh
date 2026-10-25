@@ -528,12 +528,17 @@ run_case run_law d10-empty-queue-mutant tests/semantic/d10-empty-queue-mutant.li
 # Д10:0100100110/0100100111 — CLIPS ASSERT/PRINTOUT як точні структурні дані.
 # D8 однакові? не спричиняє D3 EQ Type для зовнішньої цитованої голови.
 # Обидві форми доводить саме SENS; Zig/T5M лише переносить точні байти.
+# Дві мінімальні незалежні D10:0100100110/0100100111 head-квитанції.
+run_case run_law d10-clips-assert-head-direct-positive tests/semantic/d10-clips-assert-head-direct-law.lisp 1 core4
+run_case run_law d10-clips-printout-head-direct-positive tests/semantic/d10-clips-printout-head-direct-law.lisp 1 core4
 run_case run_law d10-clips-equal-head-positive tests/semantic/d10-clips-equal-head-law.lisp 1 core4
 run_case run_law d10-clips-equal-head-mutant tests/semantic/d10-clips-equal-head-mutant.lisp 0 core4
 run_case run_error_rejection d10-clips-all-asserts-improper-tail tests/semantic/d10-clips-all-asserts-improper-tail-negative.lisp Type 'car expects a non-empty list' core4
 run_case run_error_rejection d10-clips-drop-printouts-improper-tail tests/semantic/d10-clips-drop-printouts-improper-tail-negative.lisp Type 'car expects a non-empty list' core4
 sha256sum lib/core4.lisp \
   tests/semantic/d10-clips-equal-head-law.lisp \
+  tests/semantic/d10-clips-assert-head-direct-law.lisp \
+  tests/semantic/d10-clips-printout-head-direct-law.lisp \
   tests/semantic/d10-clips-equal-head-mutant.lisp \
   tests/semantic/d10-clips-all-asserts-improper-tail-negative.lisp \
   tests/semantic/d10-clips-drop-printouts-improper-tail-negative.lisp > "$evidence/d10-clips-equal-head-inputs.sha256"
