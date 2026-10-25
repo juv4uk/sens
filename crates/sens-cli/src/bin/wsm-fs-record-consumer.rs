@@ -110,18 +110,13 @@ fn main() {
         eprintln!("wsm-fs-record-consumer: physical F6 bootstrap failed: {error}");
         std::process::exit(1);
     }
-    // The D9 deserializers return a decision pair: (accepted payload).
-    // D4:1001 CADR extracts the payload; D4:1110 LIST packages the collection.
-    // Rust builds only the exact SENS call tree; validation remains in SENS.
-    let root_package = call(
-        exact_d4(0b1001),
-        vec![call(exact_d9(0b001110011), vec![string_value(&records[0])])],
-    );
-    let object_value = call(
-        exact_d4(0b1001),
-        vec![call(exact_d9(0b101000110), vec![string_value(&records[1])])],
-    );
-    let object_package = call(exact_d9(0b010100010), vec![object_value]);
+    // Точні зовнішні оболонки — дані, не програми.
+    // D8:11101010 READ повертає самі пакети, без зайвого
+    // deserialize -> CADR -> repackage, що могло змінити оболонку.
+    // Наявний D9 FS-RECONSTRUCT-ROOT перевіряє структуру й адреси
+    // обох оригінальних пакетів за законами SENS.
+    let root_package = call(exact_d8_read(), vec![string_value(&records[0])]);
+    let object_package = call(exact_d8_read(), vec![string_value(&records[1])]);
     let object_packages = d4_list(vec![object_package]);
     let reconstruction = call(exact_d9(0b010101000), vec![root_package, object_packages]);
     // SENS performs the D3 selection and D8 structural comparison. Rust
@@ -147,6 +142,12 @@ fn main() {
         std::process::exit(1);
     }
     println!("f6-semantic-consumer-ok records=2");
+}
+
+fn exact_d8_read() -> DomainIdentity {
+    DomainIdentity::D8(sens::CoreD8::from_word(
+        sens::Bit8::new(0b11101010).expect("D8 READ identity"),
+    ))
 }
 
 fn exact_d8_equal() -> DomainIdentity {
