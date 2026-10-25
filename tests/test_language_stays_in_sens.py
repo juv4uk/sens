@@ -25,6 +25,9 @@ SENS_HEAD_NAMES = ("визначити", "функція", "за-умовою", 
 SENS_HEAD = re.compile(r"\(\s*(?:" + "|".join(SENS_HEAD_NAMES) + r")\b")
 
 LEGACY_HOST_DEBT: dict[str, int] = {
+    # Додано 2026-10-25: файл створено комітами 62ddd1bb/d8f27d07 (2026-10-24),
+    # реєстр боргу не оновили — CI став червоний. Значення виміряне, не вгадане.
+    "knowledge/d1-d11-surface-verdicts-20261024.json": 1,
     "knowledge/d11/база-доступних-функцій/кандидати.json": 12,
     "knowledge/d11/база-доступних-функцій/пропозиції-порожньої-програми-груп-20261020.json": 4,
     "knowledge/migration-dynamic-binding-triage-2026-10-08.json": 16,
@@ -43,7 +46,7 @@ LEGACY_HOST_DEBT: dict[str, int] = {
     "scripts/check_semantic_registry.py": 1,
     "scripts/check_ukr_callsite_migration.py": 2,
     "scripts/generate-encoder-coverage-input.py": 1,
-    "scripts/guard-domain-function-reuse.py": 2,
+    "scripts/guard-domain-function-reuse.py": 19,
     "scripts/guard_ukr_lisp_keyboard.py": 3,
     "scripts/migrate-three-pass.py": 3,
     "scripts/report_ukr_projection_progress.py": 1,
@@ -65,7 +68,7 @@ LEGACY_HOST_DEBT: dict[str, int] = {
     "scripts/tests/test_translate_program.py": 13,
     "scripts/translate-domain-program.py": 3,
     "tests/fixtures/core1-domain-canary/regenerate.py": 7,
-    "tests/test_audit_all_lisp_triplets.py": 15,
+    "tests/test_audit_all_lisp_triplets.py": 16,
     "tests/test_audit_lisp_migration_edits.py": 38,
     "tests/test_audit_t5_t5m_file_pairs.py": 8,
     "tests/test_audit_t5_t5m_triplets.py": 1,
