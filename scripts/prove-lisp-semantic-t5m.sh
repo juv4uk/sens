@@ -857,6 +857,13 @@ run_case run_error_rejection d5-member-hidden-tail tests/semantic/d5-member-hidd
 run_case run_error_rejection d5-member-nonlist-root tests/semantic/d5-member-nonlist-negative.lisp Type 'car expects a non-empty list' core4
 sha256sum lib/core4-parts/core4-d6.lisp tests/semantic/d5-member-*.lisp > "$evidence/d5-member-total-list-inputs.sha256"
 
+# D5:11100 ASSOC (saṃbandha) — повний D3-хребет і всі записи.
+run_case run_law d5-assoc-total-list-positive tests/semantic/d5-assoc-total-list-law.lisp 1 core4
+run_case run_law d5-assoc-total-list-mutant tests/semantic/d5-assoc-total-list-mutant.lisp 0 core4
+run_case run_error_rejection d5-assoc-hidden-tail tests/semantic/d5-assoc-hidden-tail-negative.lisp Type 'car expects a non-empty list' core4
+run_case run_error_rejection d5-assoc-late-record tests/semantic/d5-assoc-late-record-negative.lisp Type 'car expects a non-empty list' core4
+sha256sum lib/core4-parts/core4-d6.lisp tests/semantic/d5-assoc-*.lisp > "$evidence/d5-assoc-total-list-inputs.sha256"
+
 # Д5: композиції трьох рівнів D3→D4→D5, фізичні позитив і мутант.
 run_case run_law d5-selector-derived-positive tests/semantic/d5-selector-derived-law.lisp 1
 run_case run_law d5-selector-derived-mutant tests/semantic/d5-selector-derived-mutant.lisp 0
@@ -2441,7 +2448,7 @@ run_case run_law result-status-goal-tags-mutant "$result_status_goal_tags_mutant
 # Відсутнє/дубльоване визначення — помилка, а не замовчуваний SKIP.
 epistemic_constructor_source="$evidence/epistemic-canonical-core4-dependencies.lisp"
 : > "$epistemic_constructor_source"
-for constructor in значення-у-списку? знайти-за-ключем створити-спостереження створити-твердження створити-доказ створити-намір спостереження? твердження? доказ? намір?; do
+for constructor in значення-у-списку?-ядро значення-у-списку? знайти-за-ключем-ядро знайти-за-ключем створити-спостереження створити-твердження створити-доказ створити-намір спостереження? твердження? доказ? намір?; do
   if ! awk -v target="(визначити $constructor" '
     $0 == target {
       if (found++) exit 2
