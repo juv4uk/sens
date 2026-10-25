@@ -598,19 +598,23 @@ sha256sum \
   tests/semantic/d6-max-list-interior-nonnumeric-type-negative.lisp > "$evidence/d6-min-max-preflight-inputs.sha256"
 # D6 NTH/MAPLIST: числовий індекс та D3 preflight до callback.
 run_case run_law d6-nth-exact-index-positive tests/semantic/d6-nth-exact-index-d3-laws.lisp 1 core4
+run_case run_law d6-nth-exact-index-mutant tests/semantic/d6-nth-exact-index-d3-mutant.lisp 0 core4
 run_case run_error_rejection d6-nth-early-improper-tail tests/semantic/d6-nth-early-improper-tail-negative.lisp Type 'car expects a non-empty list' core4
 run_case run_law d6-nth-choice-mutant tests/semantic/d6-nth-wrong-choice-mutant.lisp 0 core4
 run_case run_error_rejection d6-nth-negative-index tests/semantic/d6-nth-negative-index-type-negative.lisp Type 'car expects a non-empty list' core4
 run_case run_error_rejection d6-nth-d1-root tests/semantic/d6-nth-d1-root-type-negative.lisp Type 'car expects a non-empty list' core4
 run_case run_law d6-maplist-preflight-positive tests/semantic/d6-maplist-preflight-laws.lisp 1 core4
+run_case run_law d6-maplist-preflight-mutant tests/semantic/d6-maplist-preflight-mutant.lisp 0 core4
 run_case run_law d6-maplist-suffix-identity tests/semantic/d6-maplist-suffix-identity-law.lisp 1 core4
 run_case run_law d6-maplist-order-mutant tests/semantic/d6-maplist-suffix-order-mutant.lisp 0 core4
 run_case run_error_rejection d6-maplist-poison-d1-tail tests/semantic/d6-maplist-poison-improper-tail-negative.lisp Type 'car expects a non-empty list' core4
 run_case run_error_rejection d6-maplist-d1-root tests/semantic/d6-maplist-d1-root-type-negative.lisp Type 'car expects a non-empty list' core4
 sha256sum \
  tests/semantic/d6-nth-exact-index-d3-laws.lisp \
+ tests/semantic/d6-nth-exact-index-d3-mutant.lisp \
  tests/semantic/d6-nth-early-improper-tail-negative.lisp \
  tests/semantic/d6-maplist-preflight-laws.lisp \
+ tests/semantic/d6-maplist-preflight-mutant.lisp \
  tests/semantic/d6-maplist-poison-improper-tail-negative.lisp \
  tests/semantic/d6-nth-negative-index-type-negative.lisp \
  tests/semantic/d6-nth-d1-root-type-negative.lisp \
@@ -620,11 +624,17 @@ sha256sum \
  tests/semantic/d6-nth-wrong-choice-mutant.lisp > "$evidence/d6-nth-maplist-inputs.sha256"
 # D6 LET/LET*: D3 хребет і рівно два поля перед розгортанням.
 run_case run_law d6-let-letstar-preflight-positive tests/semantic/d6-let-letstar-preflight-law.lisp 1 core4
+run_case run_error_rejection d6-let-boolean-name tests/semantic/d6-let-boolean-name-negative.lisp Type 'car expects a non-empty list' core4
+run_case run_error_rejection d6-letstar-false-name tests/semantic/d6-letstar-false-name-negative.lisp Type 'car expects a non-empty list' core4
+run_case run_error_rejection d6-let-numeric-name tests/semantic/d6-let-numeric-name-negative.lisp Type 'car expects a non-empty list' core4
 run_case run_error_rejection d6-let-three-fields tests/semantic/d6-let-malformed-three-fields-negative.lisp Type 'car expects a non-empty list' core4
 run_case run_error_rejection d6-letstar-three-fields tests/semantic/d6-letstar-malformed-three-fields-negative.lisp Type 'car expects a non-empty list' core4
 run_case run_error_rejection d6-let-d1-tail tests/semantic/d6-let-improper-spine-negative.lisp Type 'car expects a non-empty list' core4
 sha256sum \
  tests/semantic/d6-let-letstar-preflight-law.lisp \
+ tests/semantic/d6-let-boolean-name-negative.lisp \
+ tests/semantic/d6-letstar-false-name-negative.lisp \
+ tests/semantic/d6-let-numeric-name-negative.lisp \
  tests/semantic/d6-let-malformed-three-fields-negative.lisp \
  tests/semantic/d6-letstar-malformed-three-fields-negative.lisp \
  tests/semantic/d6-let-improper-spine-negative.lisp > "$evidence/d6-let-letstar-preflight-inputs.sha256"
