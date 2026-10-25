@@ -1,12 +1,6 @@
 name: Audit T5 file pairs
 
 on:
-  # Перевірка пар МУСИТЬ бігти на кожному PR: саме тут застаріла пара входила в
-  # main. Скрипт УЖЕ обробляє pull_request (читає github.event.pull_request.base.sha
-  # і каже «No source modification, no git push»), але тригер не стріляв — тому
-  # перевірка не мала наслідків.
-  pull_request:
-    branches: [main]
   workflow_dispatch:
 
 permissions:
