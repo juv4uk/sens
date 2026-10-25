@@ -318,11 +318,67 @@ fn pinned_zig() -> std::ffi::OsString {
     compiler
 }
 
+fn build_zig_transport(root: &Path, output: &Path, compiler: &std::ffi::OsStr) {
+    println!("cargo:rustc-check-cfg=cfg(sens_rust_bitpack_reference)");
+    println!("cargo:rerun-if-env-changed=CARGO_CFG_TARGET_ENV");
+    println!("cargo:rerun-if-env-changed=CARGO_CFG_TARGET_OS");
+    println!("cargo:rerun-if-env-changed=CARGO_CFG_TARGET_ARCH");
+    for path in [
+        ".zig-version",
+        "zig_transport_root.zig",
+        "research/zig-codecs/transport_abi.zig",
+        "research/zig-codecs/transport/fields.zig",
+        "research/zig-codecs/t5m.zig",
+        "research/zig-codecs/t5/t5.zig",
+        "research/zig-codecs/f3c/f3c.zig",
+        "domain_projection_assets.zig",
+    ] {
+        println!("cargo:rerun-if-changed={}", root.join(path).display());
+    }
+
+    // wasm32 keeps the reference carrier until the Zig archive is built for
+    // the final wasm linker profile; native Rust targets use the Zig packer.
+    if env::var("CARGO_CFG_TARGET_ARCH").as_deref() == Ok("wasm32") {
+        println!("cargo:rustc-cfg=sens_rust_bitpack_reference");
+        return;
+    }
+
+    let target_env = env::var("CARGO_CFG_TARGET_ENV").unwrap_or_default();
+    let target_os = env::var("CARGO_CFG_TARGET_OS").unwrap_or_default();
+    let target_arch = env::var("CARGO_CFG_TARGET_ARCH").expect("CARGO_CFG_TARGET_ARCH");
+    let archive_name = if target_env == "msvc" {
+        "sens_zig_transport.lib"
+    } else {
+        "libsens_zig_transport.a"
+    };
+    let archive = output.join(archive_name);
+    let mut command = Command::new(compiler);
+    command.current_dir(root)
+        .arg("build-lib")
+        .arg("zig_transport_root.zig")
+        .arg("-O").arg("ReleaseSafe")
+        .arg("-fcompiler-rt")
+        .arg("-lc");
+    if target_env == "msvc" {
+        command.arg("-target").arg(format!("{target_arch}-windows-msvc"));
+    }
+    if target_os != "windows" {
+        command.arg("-fPIC");
+    }
+    let result = command.arg(format!("-femit-bin={}", archive.display()))
+        .status()
+        .expect("sens core requires the pinned Zig physical packer");
+    assert!(result.success(), "sens core: Zig transport archive build failed");
+    println!("cargo:rustc-link-search=native={}", output.display());
+    println!("cargo:rustc-link-lib=static=sens_zig_transport");
+}
+
 fn main() {
     let root =
         PathBuf::from(env::var_os("CARGO_MANIFEST_DIR").expect("manifest dir")).join("../..");
     let output = PathBuf::from(env::var_os("OUT_DIR").expect("OUT_DIR"));
     let compiler = pinned_zig();
+    build_zig_transport(&root, &output, &compiler);
     binary_bootstrap_words(&root, &output, &compiler);
     let mut generated = String::from("pub(super) static ENTRIES: &[Entry] = &[\n");
     domain_tables(&root, &compiler, &mut generated);
