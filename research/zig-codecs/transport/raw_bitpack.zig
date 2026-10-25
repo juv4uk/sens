@@ -36,7 +36,8 @@ pub fn packFields(
 
     const bit_len = fields.measure(values) catch return -1;
     const required = bit_len / 8 + @as(usize, @intFromBool(bit_len % 8 != 0));
-    if (required > std.math.maxInt(isize)) return -1;
+    const max_result_bytes: usize = @intCast(std.math.maxInt(isize));
+    if (required > max_result_bytes) return -1;
     if (capacity == 0) return @intCast(required);
     if (capacity < required) return -2;
     const written = fields.pack(dst[0..required], values) catch return -1;
