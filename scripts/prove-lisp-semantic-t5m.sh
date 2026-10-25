@@ -1657,6 +1657,24 @@ sha256sum lib/list-append-general.lisp tests/semantic/d4-append-general-proper-l
   tests/semantic/d4-append-general-improper-tail-negative.lisp \
   tests/semantic/d4-append-general-atomic-right-negative.lisp tests/semantic/d4-append-general-improper-right-negative.lisp > "$evidence/d4-append-general-inputs.sha256"
 
+# Д3/Д4 ZIP: однакові довжини, цілі D3-хребти, без обрізання даних.
+d4_zip_pos="$evidence/d4-zip-equal-length-positive-complete.lisp"
+d4_zip_mut="$evidence/d4-zip-equal-length-mutant-complete.lisp"
+d4_zip_er="$evidence/d4-zip-extra-right-negative-complete.lisp"
+d4_zip_el="$evidence/d4-zip-extra-left-negative-complete.lisp"
+d4_zip_ir="$evidence/d4-zip-improper-right-negative-complete.lisp"
+cat -- lib/list-zip-general.lisp tests/semantic/d4-zip-equal-length-law.lisp > "$d4_zip_pos"
+cat -- lib/list-zip-general.lisp tests/semantic/d4-zip-equal-length-mutant.lisp > "$d4_zip_mut"
+cat -- lib/list-zip-general.lisp tests/semantic/d4-zip-extra-right-negative.lisp > "$d4_zip_er"
+cat -- lib/list-zip-general.lisp tests/semantic/d4-zip-extra-left-negative.lisp > "$d4_zip_el"
+cat -- lib/list-zip-general.lisp tests/semantic/d4-zip-improper-right-negative.lisp > "$d4_zip_ir"
+run_case run_law d4-zip-equal-length-positive "$d4_zip_pos" 1 core4
+run_case run_law d4-zip-equal-length-mutant "$d4_zip_mut" 0 core4
+run_case run_error_rejection d4-zip-extra-right "$d4_zip_er" Type 'car expects a non-empty list' core4
+run_case run_error_rejection d4-zip-extra-left "$d4_zip_el" Type 'car expects a non-empty list' core4
+run_case run_error_rejection d4-zip-improper-right "$d4_zip_ir" Type 'car expects a non-empty list' core4
+sha256sum lib/list-zip-general.lisp tests/semantic/d4-zip-*.lisp > "$evidence/d4-zip-equal-length-inputs.sha256"
+
 # Д11 SRFI-1 LSET-DIFF+INTERSECTION: статично ідентифіковані фізичні джерела.
 # Rust ownership guard пов'язує лише ЯВНИЙ SENS шлях у cat із run_case;
 # приховане динамічне ім'я не є доказом реєстрації нового закону.
