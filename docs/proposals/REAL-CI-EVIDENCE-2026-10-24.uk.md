@@ -79,3 +79,55 @@ Echte CI-Daten: 418/420 Gesetze bestehen; 2 semantische Defekte.
 ## English
 
 Real CI data: 418/420 laws pass; 2 semantic defects.
+
+---
+
+# Додаток (Akṣara, 2026-10-24): hex розшифровано — і він веде до відсутньої назви
+
+## Розшифровка
+
+Hex з логу `#t7:67736c6e6474686c626e622d79662c73682d6a6c796a76736379625b2d61657972777371`
+— це UTF-8 **латинського гіберіша** `gslndthlbnb-yf,sh-jlyjvscyb[-aeyrwsq`.
+Через українську розкладку ЙЦУКЕН він дає:
+
+```
+gslndthlbnb-yf,sh-jlyjvscyb[-aeyrwsq
+  → підтвердити-набір-одномісних-функцій
+```
+
+Тобто **текст набрано не тією клавіатурною розкладкою**, і SENS-оцінювач не має
+прив'язки для такого Text7-літерала.
+
+## Але назва НЕ ІСНУЄ в дереві
+
+```
+grep -rln "підтвердити-набір" .   → ПОРОЖНЬО
+grep -rln "застосувати-набір" .   → lib/d11-clojure-juxt.lisp,
+                                    tests/semantic/d11-clojure-juxt-laws.lisp,
+                                    knowledge/d11/база-доступних-функцій/…
+```
+
+`lib/d11-clojure-juxt.lisp` визначає **`застосувати-набір-одномісних-функцій`** —
+**інший префікс** (`застосувати`, не `підтвердити`).
+
+## Що це означає
+
+Помилка вказує на **рядок 1:8 — КОМЕНТАР** свідка. Тобто **runner сам утворює
+Text7-літерал** із чогось (імовірно, з тексту ствердження або з імені), і цей
+літерал **не має прив'язки**. Назва `підтвердити-набір-одномісних-функцій`
+**не існує ні в одному файлі дерева** — отже вона **виникає під час виконання**,
+а не читається з джерела.
+
+**Тобто дефект не в свідку й не в `lib/`, а в ШЛЯХУ, який будує прив'язки.**
+Саме тому фікстура `d11-clojure-juxt-laws.lisp` **сама по собі коректна**, а її
+виконання — ні.
+
+## Deutsch
+
+Der Hex ist eine ukrainische Phrase in falscher Tastaturbelegung; der Name
+existiert nirgends im Baum — der Defekt liegt im Bindungspfad, nicht im Zeugen.
+
+## English
+
+The hex is a Ukrainian phrase in the wrong keyboard layout; the name exists
+nowhere in the tree — the defect is in the binding path, not the witness.
