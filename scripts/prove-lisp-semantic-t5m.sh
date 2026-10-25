@@ -1180,7 +1180,15 @@ run_case run_type_rejection d11-unfold-terminal-left-atom "$d11_unfold_bad_termi
 run_case run_type_rejection d11-unfold-terminal-left-dotted "$d11_unfold_bad_terminal_left_dotted" 'car expects a non-empty list'
 run_case run_type_rejection d11-unfold-terminal-right-atom "$d11_unfold_bad_terminal_right_atom" 'car expects a non-empty list'
 run_case run_type_rejection d11-unfold-terminal-right-dotted "$d11_unfold_bad_terminal_right_dotted" 'car expects a non-empty list'
-sha256sum lib/d11-srfi1-unfold.lisp tests/fixtures/d11-unfold-terminal-*.lisp > "$evidence/d11-unfold-terminal-inputs.sha256"
+# D11: підтвердження D3 хвоста має випереджати отруйний callback.
+d11_unfold_priority_atom="$evidence/d11-unfold-right-priority-atom-complete.lisp"
+d11_unfold_priority_deep="$evidence/d11-unfold-right-priority-deep-complete.lisp"
+cat -- lib/d11-srfi1-unfold.lisp tests/fixtures/d11-unfold-right-priority-atomic-tail-must-error.lisp > "$d11_unfold_priority_atom"
+cat -- lib/d11-srfi1-unfold.lisp tests/fixtures/d11-unfold-right-priority-deep-tail-must-error.lisp > "$d11_unfold_priority_deep"
+run_case run_type_rejection d11-unfold-right-priority-atom "$d11_unfold_priority_atom" 'car expects a non-empty list'
+run_case run_type_rejection d11-unfold-right-priority-deep "$d11_unfold_priority_deep" 'car expects a non-empty list'
+sha256sum lib/d11-srfi1-unfold.lisp tests/fixtures/d11-unfold-terminal-*.lisp \
+  tests/fixtures/d11-unfold-right-priority-*-tail-must-error.lisp > "$evidence/d11-unfold-terminal-inputs.sha256"
 
 
 # Д11: повна композиція GROUP-BY → FREQUENCIES, з несуміжними ключами.
