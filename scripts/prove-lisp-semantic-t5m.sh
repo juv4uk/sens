@@ -577,14 +577,19 @@ sha256sum lib/lisp-fs.lisp tests/semantic/d9-f6-object-addresses-law.lisp \
 # на корені й пізньому cdr навіть після знайденого збігу.
 last_occurrence_root="$evidence/d11-last-occurrence-improper-root-complete.lisp"
 last_occurrence_tail="$evidence/d11-last-occurrence-improper-late-tail-complete.lisp"
+last_occurrence_d1_value="$evidence/d11-last-occurrence-d1-value-complete.lisp"
+cat -- lib/list-last-occurrence-suffix.lisp \
+  tests/fixtures/d11-last-occurrence-d1-value-law.lisp > "$last_occurrence_d1_value"
 cat -- lib/list-last-occurrence-suffix.lisp \
   tests/fixtures/d11-last-occurrence-improper-root.lisp > "$last_occurrence_root"
 cat -- lib/list-last-occurrence-suffix.lisp \
   tests/fixtures/d11-last-occurrence-improper-late-tail.lisp > "$last_occurrence_tail"
 run_case run_law d11-last-occurrence-existing-laws lib/list-last-occurrence-suffix.lisp 1 core4
+run_case run_law d11-last-occurrence-d1-value "$last_occurrence_d1_value" 1 core4
 run_case run_error_rejection d11-last-occurrence-improper-root "$last_occurrence_root" Type 'car expects a non-empty list' core4
 run_case run_error_rejection d11-last-occurrence-improper-late-tail "$last_occurrence_tail" Type 'car expects a non-empty list' core4
 sha256sum lib/list-last-occurrence-suffix.lisp \
+  tests/fixtures/d11-last-occurrence-d1-value-law.lisp \
   tests/fixtures/d11-last-occurrence-improper-root.lisp \
   tests/fixtures/d11-last-occurrence-improper-late-tail.lisp > "$evidence/d11-last-occurrence-inputs.sha256"
 # Д11 PREFIX: похідний SENS D1/D3/D8 закон, а не нова координата.
