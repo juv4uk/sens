@@ -290,11 +290,11 @@ pub(super) fn render_in_repl(parent: &ReplState, samples: usize) -> Result<(), S
         .clamp(80, 160);
     let height = 24u16;
     let backend = ratatui::backend::TestBackend::new(width, height);
-    let mut terminal =
-        ratatui::Terminal::new(backend).map_err(|error| format!("Ratatui terminal: {error}"))?;
+    let mut terminal = ratatui::Terminal::new(backend)
+        .map_err(|error| format!("Помилка термінала Ratatui: {error}"))?;
     terminal
         .draw(|frame| draw_report(frame, &report))
-        .map_err(|error| format!("Ratatui draw: {error}"))?;
+        .map_err(|error| format!("Помилка відображення Ratatui: {error}"))?;
 
     let buffer = terminal.backend().buffer();
     for row in 0..height {
@@ -318,9 +318,9 @@ fn draw_report(frame: &mut Frame, report: &BenchmarkReport) {
         Line::from(format!(
             "Профіль: {} · прогрів: {} · вимірів на випадок: {} · архітектура: {}",
             if cfg!(debug_assertions) {
-                "debug (не для порівняння швидкодії)"
+                "налагоджувальна збірка (не для порівняння швидкодії)"
             } else {
-                "release"
+                "випускна збірка"
             },
             report.warmups,
             report.samples,
@@ -330,12 +330,14 @@ fn draw_report(frame: &mut Frame, report: &BenchmarkReport) {
         Line::from("Розмір: точні доменні біти та фізичний T5M-носій кожної програми."),
         Line::from(match report.memory {
             Some(memory) => format!(
-                "RSS процесу: {}→{} KiB · новий пік +{} KiB.",
+                "Пам'ять RSS процесу: {}→{} KiB · приріст нового піку +{} KiB.",
                 memory.start_rss_kib, memory.end_rss_kib, memory.peak_growth_kib
             ),
-            None => "RSS недоступний на цій платформі.".to_string(),
+            None => "Пам'ять RSS недоступна на цій платформі.".to_string(),
         }),
-        Line::from("RSS охоплює REPL; Δ піку = новий high-water (0 не означає без алокацій)."),
+        Line::from(
+            "RSS охоплює REPL; нульовий приріст пікового використання не означає відсутності виділень пам'яті.",
+        ),
         Line::from(""),
         Line::from(format!(
             "{:<18} {:>9} {:>9} {:>9} {:>9}  {:<8}",
@@ -361,12 +363,12 @@ fn draw_report(frame: &mut Frame, report: &BenchmarkReport) {
     }
     lines.push(Line::from(""));
     lines.push(Line::from(
-        "Мікробенчмарк: порівнюй той самий хост, профіль збірки і SHA.",
+        "Мікровимірювання: порівнюй те саме обладнання, профіль збірки й SHA.",
     ));
     lines.push(Line::from("Звіт виведено без зміни стану REPL."));
 
     let block = Block::default()
-        .title(" SENS REPL · Ratatui benchmark ")
+        .title(" SENS REPL · звіт вимірювання ")
         .borders(Borders::ALL)
         .border_style(
             Style::default()
@@ -555,7 +557,14 @@ mod tests {
         assert!(visible.contains("p95 нс"), "{visible}");
         assert!(visible.contains("p99 нс"), "{visible}");
         assert!(visible.contains("RSS"), "{visible}");
-        assert!(visible.contains("0 не означає без алокацій"), "{visible}");
+        assert!(
+            visible.contains("нульовий приріст пікового використання"),
+            "{visible}"
+        );
+        assert!(visible.contains("Мікровимірювання"), "{visible}");
+        assert!(visible.contains("налагоджувальна збірка"), "{visible}");
+        assert!(!visible.contains("Ratatui benchmark"), "{visible}");
+        assert!(!visible.contains("debug"), "{visible}");
         assert!(visible.contains("579"), "{visible}");
         assert!(visible.contains("Zig T5M"), "{visible}");
         assert!(visible.contains("33 доменних бітів"), "{visible}");

@@ -964,6 +964,54 @@ fn default_ukrainian_repl_uses_cyrillic_d1_replies_and_unknown_name_feedback() {
     assert!(!stdout.contains("echo мама"), "{stdout}");
 }
 
+#[test]
+fn default_ukrainian_repl_localizes_errors_and_help_prose() {
+    use std::io::Write;
+    use std::process::Stdio;
+
+    let home =
+        std::env::temp_dir().join(format!("sens-cli-repl-ukr-errors-{}", std::process::id()));
+    std::fs::create_dir_all(&home).expect("should create isolated REPL home");
+    let mut child = sens()
+        .env("HOME", &home)
+        .env("USERPROFILE", &home)
+        .stdin(Stdio::piped())
+        .stdout(Stdio::piped())
+        .stderr(Stdio::piped())
+        .spawn()
+        .expect("REPL should start");
+    child
+        .stdin
+        .take()
+        .expect("stdin should be piped")
+        .write_all(":допомога\n)\n".as_bytes())
+        .expect("should request help and send invalid syntax");
+    let output = child.wait_with_output().expect("REPL should finish at EOF");
+    let _ = std::fs::remove_dir_all(&home);
+
+    assert!(output.status.success());
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    let stderr = String::from_utf8_lossy(&output.stderr);
+    assert!(stdout.contains("SENS REPL версії"), "{stdout}");
+    assert!(!stdout.contains("Rust mechanisms"), "{stdout}");
+    assert!(stdout.contains("Додаткова команда:"), "{stdout}");
+    assert!(stdout.contains("тотожність"), "{stdout}");
+    assert!(stdout.contains("визначення й замикання"), "{stdout}");
+    assert!(!stdout.contains("semantic identity"), "{stdout}");
+    assert!(!stdout.contains("define/closures"), "{stdout}");
+    assert!(stderr.contains("Помилка REPL/T5M:"), "{stderr}");
+    assert!(
+        stderr.contains("Синтаксична помилка: неочікувана закривна дужка"),
+        "{stderr}"
+    );
+    assert!(stderr.contains("рядок 1, стовпець 1"), "{stderr}");
+    assert!(
+        !stderr.contains("unexpected closing parenthesis"),
+        "{stderr}"
+    );
+    assert!(!stderr.contains("line/riadok/Zeile"), "{stderr}");
+}
+
 /// The echo fallback must not leak into non-interactive execution: running a
 /// file whose whole content is a lone unknown symbol still fails named.
 /// Echo-fallback ne povynen proshkodzhuvaty v neinteraktyvne vykonannia:

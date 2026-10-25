@@ -1293,7 +1293,9 @@ fn prepare_t5m_repl_words(
     surface: ReplSurface,
     session: &Session,
 ) -> Result<Vec<ExactDomainWord>, String> {
-    let parsed = sens::parse_mixed_exact_domain(line).map_err(|error| error.render(line))?;
+    let parsed = sens::parse_mixed_exact_domain(line).map_err(|error| {
+        sens::render_error_for_presentation(&error, line, surface.presentation())
+    })?;
     let mut source_bindings = Vec::new();
     for expression in &parsed {
         collect_t5m_source_bindings(line, expression, &mut source_bindings);
@@ -1522,9 +1524,12 @@ fn eval_t5m_repl_line(
     surface: ReplSurface,
 ) -> Result<sens::EvalResult, String> {
     let program = prepare_t5m_repl_program(line, surface, session)?;
-    let mut result = program
-        .execute(session)
-        .map_err(|error| format!("SENS binary evaluator: {}", error.render(line)))?;
+    let mut result = program.execute(session).map_err(|error| {
+        format!(
+            "Помилка виконання SENS/T5M:\n{}",
+            sens::render_error_for_presentation(&error, line, surface.presentation())
+        )
+    })?;
     // A defined closure is retained in the persistent SENS environment, but
     // it is not itself an exact-domain data word to send back through T5M.
     // Keep the evaluator's opaque runtime result for REPL presentation; all
@@ -1869,7 +1874,7 @@ fn render_repl_ast(
 
     let mut lines = Vec::new();
     lines.push(format!(
-        "T5M Zig roundtrip: {} точних слів; виконання не запускалося.",
+        "Зворотний шлях Zig/T5M: {} точних слів; виконання не запускалося.",
         restored.len()
     ));
     for (index, form) in forms.iter().enumerate() {
@@ -1900,14 +1905,14 @@ fn print_surface_help() {
     println!("Показати дерево розбору без виконання: :розбір <форма>");
     println!("Показати дерево й виконати форму: :розбір-виконати <форма>");
     println!("Поверхні: :мова ук | укр | en | sa | LISP | core");
-    println!("Технічний alias: :surface ук | укр | en | sa | LISP | core");
+    println!("Додаткова команда: :surface ук | укр | en | sa | LISP | core");
     println!("Каталог поточної людської поверхні: :імена / :names");
-    println!("Одна semantic identity у всіх людських поверхнях: :ім'я <назва> / :name <name>");
+    println!("Одна й та сама тотожність у всіх людських поверхнях: :ім'я <назва> / :name <name>");
     println!("Стан людських поверхонь: :поверхні / :surfaces");
-    println!("Виміряти REPL через Zig T5M і переглянути Ratatui звіт: :бенч [вимірів 100..10000]");
+    println!("Виміряти REPL через Zig T5M і переглянути термінальний звіт: :бенч [вимірів 100..10000]");
     println!("Сире лексичне середовище без фільтрації поверхнею: (середовище) / (env)");
     println!("LISP — окрема проєкція з доменних таблиць; core — канонічний машинний шар.");
-    println!("Перемикання змінює лише surface-frame; ваші define/closures лишаються живими.");
+    println!("Перемикання змінює лише поверхню; ваші визначення й замикання лишаються доступними.");
 }
 
 fn handle_meta_command(line: &str, state: &mut ReplState) -> bool {
@@ -1996,7 +2001,7 @@ fn handle_meta_command(line: &str, state: &mut ReplState) -> bool {
                 return true;
             }
             if let Err(error) = benchmark::render_in_repl(state, samples) {
-                eprintln!("REPL benchmark: {error}");
+                eprintln!("Помилка вимірювання REPL: {error}");
             }
             true
         }
@@ -2073,13 +2078,13 @@ pub(crate) fn run_repl(session: Session, initial_surface: ReplSurface, sens_loop
     let mut state = match ReplState::new(session, initial_surface, sens_loop) {
         Ok(state) => state,
         Err(error) => {
-            eprintln!("Error: could not initialize REPL surface: {error}");
+            eprintln!("Помилка: не вдалося налаштувати поверхню REPL: {error}");
             process::exit(1);
         }
     };
 
     println!(
-        "sens REPL v{} (Zig T5M → binary SENS → Rust mechanisms)",
+        "SENS REPL версії {} · Zig T5M → двійкові слова SENS → механізми Rust",
         env!("CARGO_PKG_VERSION")
     );
     println!(
@@ -2097,7 +2102,7 @@ pub(crate) fn run_repl(session: Session, initial_surface: ReplSurface, sens_loop
     let mut rl = match DefaultEditor::new() {
         Ok(editor) => editor,
         Err(err) => {
-            eprintln!("Error: could not start the REPL line editor: {err}");
+            eprintln!("Помилка: не вдалося запустити редактор рядка REPL: {err}");
             process::exit(1);
         }
     };
@@ -2142,14 +2147,14 @@ pub(crate) fn run_repl(session: Session, initial_surface: ReplSurface, sens_loop
                         if is_interaction_only_unresolved_name(line, &error) {
                             println!("{}", render_interaction_echo(line, state.surface));
                         } else {
-                            eprintln!("REPL/T5M: {error}");
+                            eprintln!("Помилка REPL/T5M: {error}");
                         }
                     }
                 }
             }
             Err(ReadlineError::Interrupted | ReadlineError::Eof) => break,
             Err(err) => {
-                eprintln!("Error: {err:?}");
+                eprintln!("Помилка введення REPL: {err:?}");
                 break;
             }
         }
