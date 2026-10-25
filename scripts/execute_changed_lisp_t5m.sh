@@ -181,6 +181,8 @@ run_native_t5m_program() {
   # Названі випадки проходять і paired, і standalone; інша причина відмови — RED.
   local negative_type_diagnostic=""
   case "$file" in
+    tests/semantic/d11-clojure-partition-direct-helper-bad-tail-negative.lisp|tests/fixtures/d11-unfold-right-priority-atomic-tail-must-error.lisp|tests/fixtures/d11-unfold-right-priority-deep-tail-must-error.lisp)
+      negative_type_diagnostic='car expects a non-empty list' ;;
     tests/fixtures/d8-right-fold-improper-before-action-negative.lisp|tests/fixtures/d8-right-scan-improper-before-action-negative.lisp)
       negative_type_diagnostic='car expects a non-empty list' ;;
     tests/semantic/d11-srfi1-filter-map-improper-root-negative.lisp|tests/semantic/d11-srfi1-filter-map-improper-tail-negative.lisp)
@@ -240,7 +242,14 @@ run_native_t5m_program() {
     # Помилка Type має збігатися до і після фізичного Zig/T5M.
     # Залежний D11-свідок запускається з живим DEFINE, а не з host-оракулом.
     local direct_source="$file"
-    if [[ "$file" == "tests/semantic/d11-srfi1-member-improper-hit-negative.lisp" ||
+    if [[ "$file" == "tests/semantic/d11-clojure-partition-direct-helper-bad-tail-negative.lisp" ]]; then
+      direct_source="$dir/d11-partition-direct-helper-complete-negative.lisp"
+      cat -- lib/d11-srfi1-span-break.lisp lib/d11-clojure-partition-by.lisp "$file" > "$direct_source"
+    elif [[ "$file" == "tests/fixtures/d11-unfold-right-priority-atomic-tail-must-error.lisp" ||
+            "$file" == "tests/fixtures/d11-unfold-right-priority-deep-tail-must-error.lisp" ]]; then
+      direct_source="$dir/d11-unfold-right-priority-complete-negative.lisp"
+      cat -- lib/d11-srfi1-unfold.lisp "$file" > "$direct_source"
+    elif [[ "$file" == "tests/semantic/d11-srfi1-member-improper-hit-negative.lisp" ||
           "$file" == "tests/semantic/d11-srfi1-subset-improper-empty-negative.lisp" ]]; then
       direct_source="$dir/d11-set-relations-bound-negative.lisp"
       cat -- lib/d11-srfi1-set-relations.lisp "$file" > "$direct_source"
@@ -330,6 +339,20 @@ run_native_t5m_program() {
     # Для окремого D11-негативу самодостатній фізичний носій містить
     # точні SENS DEFINE. Перевіряємо Type, не списуємо відмову на D7 ім'я.
     local negative_standalone_physical="$physical"
+    if [[ "$file" == "tests/semantic/d11-clojure-partition-direct-helper-bad-tail-negative.lisp" ||
+          "$file" == "tests/fixtures/d11-unfold-right-priority-atomic-tail-must-error.lisp" ||
+          "$file" == "tests/fixtures/d11-unfold-right-priority-deep-tail-must-error.lisp" ]]; then
+      # Автономний негатив виконує ТОЧНО ТІ SENS DEFINE, що були на прямому
+      # та парному шляхах. UnknownSymbol НЕ є дозволеною підміною CAR Type.
+      negative_standalone_physical="$dir/d11-priority-bound-negative.sens"
+      if ! timeout "$native_timeout" "$binary" --t5m-mint "$direct_source" "$negative_standalone_physical" >"$dir/d11-priority-mint.stdout" 2>"$dir/d11-priority-mint.stderr" ||
+         ! timeout "$native_timeout" "$native_open" open "$negative_standalone_physical" >"${negative_standalone_physical%.sens}" 2>"$dir/d11-priority-open.stderr" ||
+         ! timeout "$native_timeout" "$native_open" verify-view "$negative_standalone_physical" >"$dir/d11-priority-verify.stdout" 2>"$dir/d11-priority-verify.stderr"; then
+        echo "::error::D11_PRIORITY_NEGATIVE_PHYSICAL_INVALID source=$file" >&2
+        mark_file_failed
+        return
+      fi
+    fi
     if [[ "$file" == "tests/semantic/d11-split-before-last-improper-negative.lisp" ]]; then
       local split_bad_source="$dir/d11-split-last-bad-complete.lisp"
       negative_standalone_physical="$dir/d11-split-last-bad-complete.sens"
@@ -1374,11 +1397,17 @@ while IFS= read -r file || [[ -n "$file" ]]; do
     binding_sources=(--binding-source lib/d11-srfi1-span-break.lisp)
   elif [[ "$file" == "tests/semantic/d11-clojure-partition-by-laws.lisp" ||
           "$file" == "tests/semantic/d11-clojure-partition-by-d7-parity.lisp" ||
-          "$file" == "tests/semantic/d11-clojure-dedupe-laws.lisp" ]]; then
+          "$file" == "tests/semantic/d11-clojure-dedupe-laws.lisp" ||
+          "$file" == "tests/semantic/d11-clojure-partition-singleton-key-law.lisp" ||
+          "$file" == "tests/semantic/d11-clojure-partition-direct-helper-bad-tail-negative.lisp" ]]; then
     # Порядок DEFINE суттєвий: спочатку SPAN, потім Clojure-композиції.
     # Жодної семантики у shell, Rust або Zig.
     binding_sources=(--binding-source lib/d11-srfi1-span-break.lisp
                      --binding-source lib/d11-clojure-partition-by.lisp)
+  elif [[ "$file" == "tests/fixtures/d11-unfold-right-priority-atomic-tail-must-error.lisp" ||
+          "$file" == "tests/fixtures/d11-unfold-right-priority-deep-tail-must-error.lisp" ]]; then
+    # D11 UNFOLD-RIGHT: для парного SENS потрібний реальний DEFINE ядра.
+    binding_sources=(--binding-source lib/d11-srfi1-unfold.lisp)
   elif [[ "$file" == "lib/d11-clojure-partition-by.lisp" ]]; then
     # Partition-by викликає чинні DEFINE із SRFI-1 span/break.
     # Ті самі SENS-зв'язування вже використовують remint і нативний census.
