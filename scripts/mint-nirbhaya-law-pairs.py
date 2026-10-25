@@ -119,8 +119,7 @@ def mint_all(
     sens_trit_binary = Path(sens_trit_binary)
     if not sens_trit_binary.is_absolute():
         sens_trit_binary = root / sens_trit_binary
-    sens_binary = sens_binary.resolve()
-    sens_trit_binary = sens_trit_binary.resolve()
+    # Do not resolve away a symlink before the fail-closed file check.
     require_regular_file(sens_binary, executable=True)
     require_regular_file(sens_trit_binary, executable=True)
 
