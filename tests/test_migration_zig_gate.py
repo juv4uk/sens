@@ -36,6 +36,12 @@ class MigrationZigGateTests(unittest.TestCase):
         self.assertEqual(report["status"], "PASS")
         self.assertIn("0.16.0", report["detail"])
 
+    def test_exact_domain_authority_uses_current_migrator_return_shape(self) -> None:
+        report = self.mod.load_exact_domain_authority()
+        self.assertEqual(report["step"], "migrate-exact-domain-authority")
+        self.assertEqual(report["status"], "PASS")
+        self.assertIn("surfaces=", report["detail"])
+
     def test_self_test_passes_without_zig_binary(self) -> None:
         completed = subprocess.run(
             [sys.executable, str(SCRIPT), "--self-test"],

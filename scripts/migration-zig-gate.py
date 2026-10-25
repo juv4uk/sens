@@ -269,42 +269,31 @@ def check_zig_pin() -> dict:
     }
 
 
-def validate_migration_identities(surfaces: dict, legacy: dict, safe_old: set) -> None:
-    """Verify exact owner coordinates in BOTH migration lanes.
+def validate_migration_identities(surfaces: dict) -> None:
+    """Verify identities returned by the current D3/D4 surface authority.
 
-    The migration authority supplies identities; this gate never assigns
-    meaning, adds callable functions, or turns historical SID8 into D8.
-    Historical eight-bit keys are donor provenance, not domain identities.
+    The migrator's live contract is one surface-to-identity mapping. Historical
+    SID8 donor records are not returned by this API and are not loaded here.
     """
     failures: list[str] = []
-    for lane, mapping in (("surface", surfaces), ("historical", legacy)):
-        if not isinstance(mapping, dict):
-            raise ValueError(f"EXACT_MIGRATION_AUTHORITY lane={lane} expected=mapping")
-        for key, identity in mapping.items():
-            domain = getattr(identity, "domain", None)
-            bits = getattr(identity, "bits", None)
-            label = getattr(identity, "label", None)
-            if not isinstance(key, str) or not key:
-                failures.append(f"{lane}:{key!r} invalid-key")
-            if lane == "historical" and (
-                not isinstance(key, str) or re.fullmatch(r"[01]{8}", key) is None
-            ):
-                failures.append(f"{lane}:{key!r} invalid-8bit-donor-provenance")
-            # This migrator imports owner-ratified D3/D4 heads ONLY.
-            # Widening to D8/D10/D24 is never implicit semantic admission.
-            if domain not in ("D3", "D4"):
-                failures.append(f"{lane}:{key!r} unexpected-domain={domain!r}")
-                continue
-            width = 3 if domain == "D3" else 4
-            if (not isinstance(bits, str) or len(bits) != width
-                    or re.fullmatch(r"[01]+", bits) is None):
-                failures.append(
-                    f"{lane}:{key!r} domain={domain} invalid-exact-bits={bits!r}"
-                )
-            if lane == "historical" and (domain, label) not in safe_old:
-                failures.append(
-                    f"{lane}:{key!r} domain={domain} unratified-donor={label!r}"
-                )
+    if not isinstance(surfaces, dict):
+        raise ValueError("EXACT_MIGRATION_AUTHORITY expected=surface-mapping")
+    for key, identity in surfaces.items():
+        domain = getattr(identity, "domain", None)
+        bits = getattr(identity, "bits", None)
+        if not isinstance(key, str) or not key:
+            failures.append(f"surface:{key!r} invalid-key")
+        # This migrator imports the D3/D4 surfaces it explicitly reads.
+        # No domain identity or callability is inferred from width alone.
+        if domain not in ("D3", "D4"):
+            failures.append(f"surface:{key!r} unexpected-domain={domain!r}")
+            continue
+        width = 3 if domain == "D3" else 4
+        if (not isinstance(bits, str) or len(bits) != width
+                or re.fullmatch(r"[01]+", bits) is None):
+            failures.append(
+                f"surface:{key!r} domain={domain} invalid-exact-bits={bits!r}"
+            )
     if failures:
         raise ValueError(
             "EXACT_MIGRATION_AUTHORITY: " + "; ".join(failures[:8])
@@ -320,15 +309,15 @@ def load_exact_domain_authority() -> dict:
     mod = importlib.util.module_from_spec(spec)
     sys.modules[spec.name] = mod
     spec.loader.exec_module(mod)
-    surfaces, legacy = mod.load_authority(ROOT)
-    validate_migration_identities(surfaces, legacy, mod.SAFE_OLD)
+    surfaces = mod.load_authority(ROOT)
+    validate_migration_identities(surfaces)
     return {
         "step": "migrate-exact-domain-authority",
         "status": "PASS",
         "exit": 0,
         "detail": (
-            f"surfaces={len(surfaces)} legacy_keys={len(legacy)} "
-            f"width_axiom=PASS safe_old={sorted(mod.SAFE_OLD)}"
+            f"surfaces={len(surfaces)} "
+            "width_axiom=PASS owner-ratified=D3/D4"
         ),
     }
 
