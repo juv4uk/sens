@@ -420,7 +420,16 @@ jobs:
             profile_args=()
             expect_args=()
             case "$f" in
-              tests/semantic/exact-arithmetic-laws.lisp|tests/semantic/exact-arithmetic-mutant.lisp|lib/lisp-fs.lisp) profile_args=(--core4-runtime);;
+              tests/semantic/exact-arithmetic-laws.lisp|tests/semantic/exact-arithmetic-mutant.lisp|tests/semantic/d5-arithmetic-native-t5m-law.lisp|tests/semantic/d5-arithmetic-native-t5m-mutant.lisp|lib/lisp-fs.lisp) profile_args=(--core4-runtime);;
+              # Ті самі чинні SENS DEFINE, що у фізичному law-runner: без них
+              # ремінт запускав самі свідки як «невикличні» D5/D7 голови.
+              tests/semantic/d24-reader-fraction-language-law.lisp|tests/semantic/d24-reader-fraction-language-mutant.lisp) bs=(--binding-source benchmarks/parser.lisp);;
+              tests/semantic/d3-proper-tail-hot-law.lisp|tests/semantic/d3-proper-tail-hot-mutant.lisp) bs=(--binding-source benchmarks/d3-proper-tail-hot.lisp);;
+              tests/semantic/d3-structural-bench-law.lisp|tests/semantic/d3-structural-bench-mutant.lisp) bs=(--binding-source benchmarks/d3-structural-bench.lisp);;
+              tests/semantic/d4-append-general-proper-law.lisp|tests/semantic/d4-append-general-proper-mutant.lisp) bs=(--binding-source lib/list-append-general.lisp);;
+              tests/semantic/d4-append-general-atomic-left-negative.lisp|tests/semantic/d4-append-general-atomic-right-negative.lisp) bs=(--binding-source lib/list-append-general.lisp); expect_args=(--expect-error "car expects a non-empty list");;
+              tests/semantic/d5-assoc-total-list-law.lisp|tests/semantic/d5-assoc-total-list-mutant.lisp) bs=(--binding-source lib/core4-parts/core4-d6.lisp);;
+              tests/semantic/d5-assoc-hidden-tail-negative.lisp|tests/semantic/d5-assoc-late-record-negative.lisp) bs=(--binding-source lib/core4-parts/core4-d6.lisp); expect_args=(--expect-error "car expects a non-empty list");;
               tests/semantic/core-d3-car-cdr-cons-mutant.lisp) expect_args=(--expect-error "car expects a non-empty list");;
               tests/semantic/d4-recursion-atom-result-law.lisp|tests/semantic/d4-recursion-atom-result-mutant.lisp|tests/semantic/d4-recursion-benchmark-law.lisp|tests/semantic/d4-recursion-benchmark-mutant.lisp) bs=(--binding-source benchmarks/recursion.lisp);;
               lib/persistent-vector.lisp|lib/knowledge.lisp) bs=(--binding-source "$RUNNER_TEMP/sens-core4-d24-roots.lisp");;
@@ -734,7 +743,16 @@ jobs:
               profile_args=()
               expect_args=()
               case "$f" in
-                tests/semantic/exact-arithmetic-laws.lisp|tests/semantic/exact-arithmetic-mutant.lisp|lib/lisp-fs.lisp) profile_args=(--core4-runtime);;
+                tests/semantic/exact-arithmetic-laws.lisp|tests/semantic/exact-arithmetic-mutant.lisp|tests/semantic/d5-arithmetic-native-t5m-law.lisp|tests/semantic/d5-arithmetic-native-t5m-mutant.lisp|lib/lisp-fs.lisp) profile_args=(--core4-runtime);;
+              # Ті самі чинні SENS DEFINE, що у фізичному law-runner: без них
+              # ремінт запускав самі свідки як «невикличні» D5/D7 голови.
+              tests/semantic/d24-reader-fraction-language-law.lisp|tests/semantic/d24-reader-fraction-language-mutant.lisp) bs=(--binding-source benchmarks/parser.lisp);;
+              tests/semantic/d3-proper-tail-hot-law.lisp|tests/semantic/d3-proper-tail-hot-mutant.lisp) bs=(--binding-source benchmarks/d3-proper-tail-hot.lisp);;
+              tests/semantic/d3-structural-bench-law.lisp|tests/semantic/d3-structural-bench-mutant.lisp) bs=(--binding-source benchmarks/d3-structural-bench.lisp);;
+              tests/semantic/d4-append-general-proper-law.lisp|tests/semantic/d4-append-general-proper-mutant.lisp) bs=(--binding-source lib/list-append-general.lisp);;
+              tests/semantic/d4-append-general-atomic-left-negative.lisp|tests/semantic/d4-append-general-atomic-right-negative.lisp) bs=(--binding-source lib/list-append-general.lisp); expect_args=(--expect-error "car expects a non-empty list");;
+              tests/semantic/d5-assoc-total-list-law.lisp|tests/semantic/d5-assoc-total-list-mutant.lisp) bs=(--binding-source lib/core4-parts/core4-d6.lisp);;
+              tests/semantic/d5-assoc-hidden-tail-negative.lisp|tests/semantic/d5-assoc-late-record-negative.lisp) bs=(--binding-source lib/core4-parts/core4-d6.lisp); expect_args=(--expect-error "car expects a non-empty list");;
               tests/semantic/core-d3-car-cdr-cons-mutant.lisp) expect_args=(--expect-error "car expects a non-empty list");;
               tests/semantic/d4-recursion-atom-result-law.lisp|tests/semantic/d4-recursion-atom-result-mutant.lisp|tests/semantic/d4-recursion-benchmark-law.lisp|tests/semantic/d4-recursion-benchmark-mutant.lisp) bs=(--binding-source benchmarks/recursion.lisp);;
                 lib/persistent-vector.lisp|lib/knowledge.lisp) bs=(--binding-source "$RUNNER_TEMP/sens-core4-d24-roots.lisp");;
