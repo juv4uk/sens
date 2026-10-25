@@ -69,6 +69,7 @@ run_native_t5m_program() {
   fi
   # D11 APPEND-MAP використовує вже визначений D10 MAPPEND із Core4.
   if [[ "$file" == "tests/semantic/d11-srfi1-append-map-law.lisp" ||
+        "$file" == "tests/semantic/d11-srfi1-append-map-mutant.lisp" ||
         "$file" == "tests/semantic/d11-srfi1-append-map-improper-input-negative.lisp" ||
         "$file" == "tests/semantic/d11-srfi1-append-map-improper-output-negative.lisp" ]]; then
     paired_runtime_args=(--core4-runtime)
@@ -1317,7 +1318,8 @@ run_native_t5m_program() {
         return
       fi
     fi
-    if [[ "$file" == "tests/semantic/d11-srfi1-append-map-law.lisp" ]]; then
+    if [[ "$file" == "tests/semantic/d11-srfi1-append-map-law.lisp" ||
+          "$file" == "tests/semantic/d11-srfi1-append-map-mutant.lisp" ]]; then
       # Повний фізичний потік містить D11 DEFINE і чинну SENS Core4.
       local append_map_full_source="$dir/d11-append-map-full.lisp"
       standalone_physical="$dir/d11-append-map-full.sens"
@@ -1329,8 +1331,10 @@ run_native_t5m_program() {
         mark_file_failed
         return
       fi
-      if [[ "$(cat "$dir/native-paired.stdout")" != 1 ]]; then
-        echo "::error::D11_APPEND_MAP_WRONG_D1 source=$file expected=1 actual=$(cat "$dir/native-paired.stdout")" >&2
+      local append_map_expected_d1=1
+      [[ "$file" != *-mutant.lisp ]] || append_map_expected_d1=0
+      if [[ "$(cat "$dir/native-paired.stdout")" != "$append_map_expected_d1" ]]; then
+        echo "::error::D11_APPEND_MAP_WRONG_D1 source=$file expected=$append_map_expected_d1 actual=$(cat "$dir/native-paired.stdout")" >&2
         mark_file_failed
         return
       fi
@@ -1689,6 +1693,7 @@ while IFS= read -r file || [[ -n "$file" ]]; do
     # Усі свідки поділяють одне чинне джерело DEFINE мовою SENS.
     binding_sources=(--binding-source lib/d11-form-presence.lisp)
   elif [[ "$file" == "tests/semantic/d11-srfi1-append-map-law.lisp" ||
+          "$file" == "tests/semantic/d11-srfi1-append-map-mutant.lisp" ||
           "$file" == "tests/semantic/d11-srfi1-append-map-improper-input-negative.lisp" ||
           "$file" == "tests/semantic/d11-srfi1-append-map-improper-output-negative.lisp" ]]; then
     # Спільне визначення і D10 MAPPEND в одному парному Core4-сеансі.
