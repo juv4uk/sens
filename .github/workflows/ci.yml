@@ -616,9 +616,17 @@ jobs:
         if: ${{ always() && steps.native-build.outcome == 'success' }}
         shell: bash
         timeout-minutes: 15
+        env:
+          # Use the exact path list emitted by the selector as a recovery source.
+          # If both representations are empty while has_lisp=true, fail closed.
+          CHANGED_T5M_LISP_FILES: ${{ steps.changed-t5m-lisp.outputs.lisp_files }}
         run: |
           set -euo pipefail
           manifest="$RUNNER_TEMP/changed-t5m-lisp.txt"
+          if [[ ! -s "$manifest" && -n "${CHANGED_T5M_LISP_FILES:-}" ]]; then
+            printf '%s\n' "$CHANGED_T5M_LISP_FILES" > "$manifest"
+            echo "T5M_CHANGED_MANIFEST_RECOVERED source=step-output count=$(wc -l < "$manifest")"
+          fi
           if [[ ! -s "$manifest" ]]; then
             # Без змін Lisp порожній список програм — NOT_APPLICABLE, а не успіх мовного доказу.
             # Помилковий відбір або порожній список після Lisp-змін залишаються RED.
