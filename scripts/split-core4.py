@@ -22,13 +22,15 @@ ROOT = Path(__file__).resolve().parents[1]
 CORE4 = ROOT / "lib" / "core4.lisp"
 PARTS = ROOT / "lib" / "core4-parts"
 
+# Межі визначено стабільними SENS-якорями, не номерами рядків.
 BLOCKS = [
-    ("core4-language", 1, 697, "мова: тотожність, макроси та/або, список, числа, базові предикати"),
-    ("core4-d6", 698, 916, "похідні Д6, партії 1-3"),
-    ("core4-codec", 917, 1470, "НСД + кодек T5M + T5M3 (упаковка й декодер)"),
-    ("core4-d6b", 1471, 2287, "похідні Д6, партії 4-5"),
-    ("core4-d8-d9", 2288, None, "Д8/Д9: масиви, рядки, content-store"),
+    ("core4-language", None, "мова: тотожність, макроси та/або, список, числа, базові предикати"),
+    ("core4-d6", "; Д5:11101 MEMBER. Точне Д1 рішення і хвостова рекурсія.", "похідні Д6, партії 1-3"),
+    ("core4-codec", "; cddddr (р-р-р-р)", "НСД + кодек T5M + T5M3 (упаковка й декодер)"),
+    ("core4-d6b", "(визначити т5м3-15-із-частки", "похідні Д6, партії 4-5"),
+    ("core4-d8-d9", "; Д8:10010111 CADADDDR — Д3 перше/решта без нового семантичного коду.", "Д8/Д9: масиви, рядки, content-store"),
 ]
+
 HDR = "; core4 · блок «{name}» · рядки {a}–{b} оригіналу\n; {desc}\n" \
       "; Згенеровано scripts/split-core4.py — НЕ редагувати руками; правте блок і перезберіть.\n"
 
@@ -36,14 +38,25 @@ HDR = "; core4 · блок «{name}» · рядки {a}–{b} оригіналу
 def split() -> int:
     lines = CORE4.read_text(encoding="utf-8").split("\n")
     PARTS.mkdir(exist_ok=True)
-    for name, a, b, desc in BLOCKS:
-        b = len(lines) if b is None else b
-        seg = lines[a - 1:b]
+    starts: list[int] = []
+    for name, marker, _ in BLOCKS:
+        if marker is None:
+            starts.append(0)
+            continue
+        hits = [i for i, line in enumerate(lines) if line == marker]
+        if len(hits) != 1:
+            raise SystemExit(f"неоднозначна межа SENS {name}: {len(hits)} точних якорів")
+        starts.append(hits[0])
+    if starts != sorted(set(starts)):
+        raise SystemExit("SENS межі не зростають або повторені")
+    ends = starts[1:] + [len(lines)]
+    for (name, _, desc), start, end in zip(BLOCKS, starts, ends):
+        seg = lines[start:end]
         (PARTS / f"{name}.lisp").write_text(
-            HDR.format(name=name, a=a, b=b, desc=desc) + "\n".join(seg) + "\n", encoding="utf-8")
-        print(f"  {name}: {a}-{b} ({len(seg)} рядків)")
+            HDR.format(name=name, a=start + 1, b=end, desc=desc) + "\n".join(seg) + "\n",
+            encoding="utf-8")
+        print(f"  {name}: {start+1}-{end} ({len(seg)} рядків)")
     return 0
-
 
 def build() -> str:
     """Точне склеювання: збираємо ВСІ рядки блоків (без 3 рядків заголовка)
