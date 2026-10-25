@@ -42,6 +42,17 @@ class RemintExplicitManifestScopeTests(unittest.TestCase):
             helper,
         )
 
+        # The dependency-complete carrier must use the selected runtime profile.
+        # A bare sens <.sens> is intentionally Session::bare and rejects D6 closures.
+        self.assertIn(
+            '! timeout "$native_timeout" "${standalone_runtime[@]}" "$complete" > "$scratch/complete.out"',
+            helper,
+        )
+        self.assertNotIn(
+            '! timeout "$native_timeout" "$binary" "$complete" > "$scratch/complete.out"',
+            helper,
+        )
+
     def test_explicit_manifest_suppresses_global_recovery_expansion(self) -> None:
         function_start = self.source.index("regenerate_on_current_main() {")
         recovery_start = self.source.index(
