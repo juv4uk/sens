@@ -1,6 +1,10 @@
 name: Current exact-domain corpus
 
 on:
+  # Переведено на pull_request: workflow УЖЕ читає PR-дані
+  # (github.event.pull_request.*), але тригер не стріляв.
+  pull_request:
+    branches: [main]
   workflow_dispatch:
 concurrency:
   group: current-exact-domain-corpus-${{ github.event.pull_request.number || github.ref }}
