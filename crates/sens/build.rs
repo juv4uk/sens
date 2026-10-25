@@ -325,7 +325,9 @@ fn build_zig_transport(root: &Path, output: &Path, compiler: &std::ffi::OsStr) {
     for path in [
         ".zig-version",
         "zig_transport_root.zig",
+        "zig_bitpack_root.zig",
         "research/zig-codecs/transport_abi.zig",
+        "research/zig-codecs/transport/raw_bitpack.zig",
         "research/zig-codecs/transport/fields.zig",
         "research/zig-codecs/t5m.zig",
         "research/zig-codecs/t5/t5.zig",
@@ -348,7 +350,7 @@ fn build_zig_transport(root: &Path, output: &Path, compiler: &std::ffi::OsStr) {
     let mut command = Command::new(compiler);
     command.current_dir(root)
         .arg("build-lib")
-        .arg("zig_transport_root.zig")
+        .arg(if wasm { "zig_bitpack_root.zig" } else { "zig_transport_root.zig" })
         .arg("-O").arg("ReleaseSafe")
         .arg("-fcompiler-rt");
     if wasm {
