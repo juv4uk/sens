@@ -75,6 +75,37 @@ mod paired {
         qualify_with_minimum_width(source, 12)
     }
 
+    // D12/T5M source admits signed decimal INTEGER lexemes only.
+    // The human REPL may parse exact rationals (including Ukrainian comma
+    // decimals and exponent notation), but those values must not cross this
+    // integer-only physical operand boundary as if they were D12 words.
+    fn contains_non_integer_numeric_lexeme(expr: &Expr, source: &str) -> bool {
+        fn is_integer_lexeme(expr: &Expr, source: &str) -> bool {
+            let Some(token) = source.get(expr.span.start..expr.span.end) else {
+                return false;
+            };
+            let digits = token
+                .strip_prefix('-')
+                .or_else(|| token.strip_prefix('+'))
+                .unwrap_or(token);
+            !digits.is_empty() && digits.bytes().all(|byte| byte.is_ascii_digit())
+        }
+
+        match &expr.kind {
+            ExprKind::Rational(_) | ExprKind::Number(_, _) => !is_integer_lexeme(expr, source),
+            ExprKind::List(items)
+            | ExprKind::Call(_, items)
+            | ExprKind::DomainCall(_, items) => items
+                .iter()
+                .any(|item| contains_non_integer_numeric_lexeme(item, source)),
+            ExprKind::Pair(left, right) => {
+                contains_non_integer_numeric_lexeme(left, source)
+                    || contains_non_integer_numeric_lexeme(right, source)
+            }
+            _ => false,
+        }
+    }
+
     fn qualify_with_minimum_width(
         source: &str,
         minimum_width: usize,
@@ -87,6 +118,12 @@ mod paired {
             return Err("SENS admission: encoded literals forbidden in executable Lisp".into());
         }
         let parsed = sens::parse(source).map_err(|error| format!("SENS reader: {error}"))?;
+        if parsed.iter().any(|expr| contains_non_integer_numeric_lexeme(expr, source)) {
+            return Err(
+                "SENS admission: the D12/T5M operand profile accepts signed decimal integers only; exact rationals remain REPL values"
+                    .into(),
+            );
+        }
         // The SENS source projector owns numeric width selection; transport only
         // preserves the resulting explicit width and bits.
         let projected =
