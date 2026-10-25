@@ -173,6 +173,34 @@ run_native_t5m_program() {
   fi
   native_view_roundtrip_paths["$file"]=1
 
+  # Тільки дві змінені SENS-бібліотеки: квитанція точних фізичних байтів
+  # після SENS mint + Zig open/verify. Ніякої host-семантики й PASS.
+  # Дрібні base64 свідчення потрібні для канонічного Git-blob remint.
+  case "$file" in
+    lib/list-first-class-predicate-suffix-zero-copy-general.lisp|\
+    lib/list-last-atomic-run-first-class-zero-copy-general.lisp)
+      if [[ "${GITHUB_ACTIONS:-}" == true && -f "$committed" &&
+            ! -L "$committed" && ! -L "$committed_view" ]] &&
+         { ! cmp -s "$physical" "$committed" ||
+           ! cmp -s "$view" "$committed_view"; }; then
+        local byte_count view_count
+        byte_count=$(wc -c < "$physical")
+        view_count=$(wc -c < "$view")
+        if (( byte_count <= 65536 && view_count <= 65536 )); then
+          echo "T5M_DRIFT_NATIVE_RECEIPT source=$file source_sha256=$(sha256sum "$file" | cut -d' ' -f1) pair_sha256=$(sha256sum "$physical" | cut -d' ' -f1) view_sha256=$(sha256sum "$view" | cut -d' ' -f1) verified=ZIG_ROUNDTRIP release=NOT_CERTIFIED"
+          printf 'T5M_DRIFT_NATIVE_B64 source=%s kind=pair payload=' "$file"
+          base64 -w0 "$physical"
+          printf '\n'
+          printf 'T5M_DRIFT_NATIVE_B64 source=%s kind=view payload=' "$file"
+          base64 -w0 "$view"
+          printf '\n'
+        else
+          echo "::error::T5M_DRIFT_RECEIPT_OVERSIZE source=$file pair_bytes=$byte_count view_bytes=$view_count"
+        fi
+      fi
+      ;;
+  esac
+
   if [[ -e "$committed" || -L "$committed" ]]; then
     if [[ ! -f "$committed" || -L "$committed" ]]; then
       echo "::error::T5M_COMMITTED_PAIR_NOT_REGULAR source=$file companion=$committed" >&2
