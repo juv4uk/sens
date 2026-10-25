@@ -572,3 +572,4 @@
 ; Ідентичності D9/D10 належать lib/domains/d9.lisp і d10.lisp, а не
 ; дубльованим латинським DEFINE у виконуваному джерелі.
 ; Протокольні мітки (fs, wsm-fs-*) залишаються незмінними цитованими даними.
+; SENS_PAIR_REGEN: 2026-10-25 mint lib/lisp-fs after physical T5M source drift.
