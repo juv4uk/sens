@@ -19,8 +19,25 @@ fn bounded_two_line_records(value: &Value) -> Result<[String; 2], &'static str> 
                 if records.len() == 2 {
                     return Err("F6_RECORD_COUNT expected=2 actual=more-than-2");
                 }
-                let Value::String(record) = &node.head else {
-                    return Err("F6_RECORD_TYPE expected=String actual=non-string");
+                // Механізм I/O: обидва чинні носії тексту SENS мають
+                // один канонічний зовнішній рядковий запис. Text7
+                // декодуємо ЛИШЕ явно обраною клавіатурною проєкцією;
+                // структури, символи й числові значення не серіалізуємо.
+                let record = match &node.head {
+                    Value::String(record) => record.to_string(),
+                    Value::Text7(text) => {
+                        if text.cells().len() > MAX_RECORD_BYTES {
+                            return Err("F6_RECORD_SIZE expected=1..65536");
+                        }
+                        sens::render_text7(text, sens::Text7Layout::En)
+                            .map_err(|_| "F6_RECORD_TEXT7 unrenderable-en-layout")?
+                    }
+                    Value::Pair(_) => {
+                        return Err("F6_RECORD_TYPE expected=String-or-Text7 actual=Pair")
+                    }
+                    _ => {
+                        return Err("F6_RECORD_TYPE expected=String-or-Text7 actual=non-text")
+                    }
                 };
                 let bytes = record.as_bytes();
                 if bytes.is_empty() || bytes.len() > MAX_RECORD_BYTES {
@@ -31,7 +48,7 @@ fn bounded_two_line_records(value: &Value) -> Result<[String; 2], &'static str> 
                 if bytes.iter().any(|byte| matches!(*byte, b'\n' | b'\r' | b'\0')) {
                     return Err("F6_RECORD_DELIMITER expected=single-line");
                 }
-                records.push(record.to_string());
+                records.push(record);
                 next = &node.tail;
             }
             Value::Nil => break,
@@ -105,6 +122,29 @@ mod tests {
         );
         assert!(bounded_two_line_records(&records(&["root"])).is_err());
         assert!(bounded_two_line_records(&Value::Bool(true)).is_err());
+    }
+
+    #[test]
+    fn f6_accepts_exact_d7_text_projection_for_external_records() {
+        let root = sens::encode_text7("(root)", sens::Text7Layout::En).unwrap();
+        let object = sens::encode_text7("(object)", sens::Text7Layout::En).unwrap();
+        let actual = Value::list([Value::Text7(root), Value::Text7(object)]);
+        assert_eq!(
+            bounded_two_line_records(&actual).unwrap(),
+            ["(root)".to_owned(), "(object)".to_owned()]
+        );
+    }
+
+    #[test]
+    fn f6_rejects_structural_values_instead_of_forging_text_records() {
+        let not_text = Value::list([
+            Value::list([Value::Symbol("root".into())]),
+            Value::String("object".into()),
+        ]);
+        assert_eq!(
+            bounded_two_line_records(&not_text).unwrap_err(),
+            "F6_RECORD_TYPE expected=String-or-Text7 actual=Pair"
+        );
     }
 
     #[test]
