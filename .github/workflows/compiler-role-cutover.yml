@@ -1,10 +1,6 @@
 name: Compiler role authority cutover
 
 on:
-  # Переведено на pull_request: workflow УЖЕ читає PR-дані
-  # (github.event.pull_request.*), але тригер не стріляв.
-  pull_request:
-    branches: [main]
   workflow_dispatch:
 concurrency:
   group: compiler-role-cutover-${{ github.event.pull_request.number || github.ref }}
