@@ -20,6 +20,28 @@ class RemintExplicitManifestScopeTests(unittest.TestCase):
     def test_commit_recovery_receives_the_original_manifest(self) -> None:
         self.assertIn("REMINT_FILES: ${{ inputs.files }}", self.source)
 
+    def test_f6_producer_uses_exact_dependency_stack_with_core4(self) -> None:
+        self.assertIn(
+            "tests/fixtures/wsm-fs-record-producer.lisp) "
+            "bs=(--binding-source lib/persistent-map.lisp "
+            "--binding-source lib/world.lisp "
+            "--binding-source lib/content-store.lisp "
+            "--binding-source lib/lisp-fs.lisp); "
+            "profile_args=(--core4-runtime);;",
+            self.source,
+        )
+        helper = (ROOT / "scripts" / "refresh-verified-t5m-pair.sh").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn(
+            'tests/semantic/d5-arithmetic-native-t5m-mutant.lisp|lib/lisp-fs.lisp|tests/fixtures/wsm-fs-record-producer.lisp) ;;',
+            helper,
+        )
+        self.assertIn(
+            '"${binding_sources[*]}" != "lib/persistent-map.lisp lib/world.lisp lib/content-store.lisp lib/lisp-fs.lisp"',
+            helper,
+        )
+
     def test_explicit_manifest_suppresses_global_recovery_expansion(self) -> None:
         function_start = self.source.index("regenerate_on_current_main() {")
         recovery_start = self.source.index(
