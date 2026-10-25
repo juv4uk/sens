@@ -38,6 +38,8 @@ jobs:
           # Негативний контроль повноти обліку файлів — один швидкий Bash-тест.
           bash tests/test-count-executable-lisp-git-inventory.sh
           python3 tests/test_single_data_schema.py
+          # The Nirbhaya helper must mint from current sources, never restore archived T5M blobs.
+          python3 -m unittest tests.test_mint_nirbhaya_law_pairs -v
 
       - name: Чинний SENS захист — host debt та незмінність мови
         shell: bash
