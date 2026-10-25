@@ -80,10 +80,7 @@ mod paired {
     // decimals and exponent notation), but those values must not cross this
     // integer-only physical operand boundary as if they were D12 words.
     fn contains_non_integer_numeric_lexeme(expr: &Expr, source: &str) -> bool {
-        fn is_integer_lexeme(expr: &Expr, source: &str) -> bool {
-            let Some(token) = source.get(expr.span.start..expr.span.end) else {
-                return false;
-            };
+        fn integer_token(token: &str) -> bool {
             let digits = token
                 .strip_prefix('-')
                 .or_else(|| token.strip_prefix('+'))
@@ -91,8 +88,52 @@ mod paired {
             !digits.is_empty() && digits.bytes().all(|byte| byte.is_ascii_digit())
         }
 
+        fn numeric_fractional_spelling(expr: &Expr, source: &str) -> bool {
+            // The general SENS REPL accepts exact decimal/exponent literals,
+            // but this physical D12/T5M profile is deliberately integer-only.
+            // Check the original source spelling even when the reader leaves a
+            // numeric-looking token as Symbol (for example 0,5 under a
+            // surface-specific read path). Otherwise the general REPL
+            // projection can silently turn it into a D5 quotient call.
+            let Some(token) = source.get(expr.span.start..expr.span.end) else {
+                return false;
+            };
+            let unsigned = token
+                .strip_prefix('-')
+                .or_else(|| token.strip_prefix('+'))
+                .unwrap_or(token);
+            let starts_with_digit = unsigned
+                .as_bytes()
+                .first()
+                .is_some_and(u8::is_ascii_digit);
+            let comma_prefixed_digits = unsigned
+                .strip_prefix(',')
+                .is_some_and(|digits| {
+                    !digits.is_empty() && digits.bytes().all(|byte| byte.is_ascii_digit())
+                });
+            let has_fractional_marker = unsigned
+                .bytes()
+                .any(|byte| matches!(byte, b',' | b'.' | b'e' | b'E'))
+                || unsigned.contains('е')
+                || unsigned.contains('Е');
+            (starts_with_digit || comma_prefixed_digits)
+                && has_fractional_marker
+                && !integer_token(token)
+        }
+
+        // Validate the source lexeme before the REPL projection can normalize
+        // an exact decimal into D5 QUOTIENT over D12+ components.
+        if numeric_fractional_spelling(expr, source) {
+            return true;
+        }
+
         match &expr.kind {
-            ExprKind::Rational(_) | ExprKind::Number(_, _) => !is_integer_lexeme(expr, source),
+            ExprKind::Rational(_) | ExprKind::Number(_, _) => {
+                let Some(token) = source.get(expr.span.start..expr.span.end) else {
+                    return true;
+                };
+                !integer_token(token)
+            }
             ExprKind::List(items)
             | ExprKind::Call(_, items)
             | ExprKind::DomainCall(_, items) => items
