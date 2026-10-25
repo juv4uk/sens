@@ -164,7 +164,8 @@ jobs:
         if: ${{ always() }}
 
       - name: Zig bitpacker — build real WASM target without Rust fallback
-        if: ${{ always() }}
+        # Cross-target check only when Rust/Zig sources changed, or on manual full validation.
+        if: ${{ always() && (steps.changed-t5m-lisp.outputs.has_zig == 'true' || steps.changed-t5m-lisp.outputs.has_rust == 'true' || github.event_name == 'workflow_dispatch') }}
         timeout-minutes: 15
         shell: bash
         run: |
@@ -200,7 +201,8 @@ jobs:
           exit "$failed"
 
       - name: Один транспортний бенчмарк — Zig T5M
-        if: ${{ always() }}
+        # Performance measurement is opt-in; correctness checks remain mandatory.
+        if: ${{ github.event_name == 'push' && startsWith(github.event.head_commit.message, 'BENCH-T5M:') }}
         timeout-minutes: 5
         shell: bash
         run: |
