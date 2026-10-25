@@ -1,20 +1,6 @@
 name: Release Preflight
 
 on:
-  # Переведено на pull_request: workflow УЖЕ читає PR-дані,
-  # але тригер не стріляв — перевірка не мала наслідків.
-  pull_request:
-    branches: [main]
-    paths:
-      # Важка перевірка: запускати лише коли змінився КОД, а не документація.
-      - 'lib/**'
-      - 'crates/**'
-      - 'tests/**'
-      - 'scripts/**'
-      - 'knowledge/**'
-      - 'Cargo.toml'
-      - 'Cargo.lock'
-      - '.github/workflows/**'
   workflow_dispatch:
 
 concurrency:
