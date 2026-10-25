@@ -222,6 +222,8 @@ run_native_t5m_program() {
   case "$file" in
     tests/semantic/d11-srfi1-zip-with-improper-*-negative.lisp)
       negative_type_diagnostic='car expects a non-empty list' ;;
+    tests/fixtures/d11-frequencies-extra-group-field-negative.lisp|tests/fixtures/d11-frequencies-missing-group-field-negative.lisp)
+      negative_type_diagnostic='car expects a non-empty list' ;;
     tests/fixtures/d11-srfi1-append-reverse-*-negative.lisp)
       negative_type_diagnostic='car expects a non-empty list' ;;
     tests/fixtures/d11-srfi1-list-tabulate-*-negative.lisp)
@@ -1658,6 +1660,11 @@ while IFS= read -r file || [[ -n "$file" ]]; do
     # У DIFF/XOR семантика виключно в сімох чинних DEFINE SENS.
     # Після перенесення законів не можна mint/pair голий Text7 виклик.
     binding_sources=(--binding-source lib/d11-srfi1-lset-diff-intersection.lisp)
+  elif [[ "$file" == tests/fixtures/d11-frequencies-exact-group-pair-*.lisp ||
+          "$file" == tests/fixtures/d11-frequencies-extra-group-field-negative.lisp ||
+          "$file" == tests/fixtures/d11-frequencies-missing-group-field-negative.lisp ]]; then
+    # Ті самі два канонічні DEFINE у прямому, парному та фізичному SENS.
+    binding_sources=(--binding-source lib/d11-clojure-group-by.lisp --binding-source lib/d11-clojure-frequencies-unary.lisp)
   elif [[ "$file" == tests/semantic/d11-srfi1-zip-with-*.lisp ]]; then
     binding_sources=(--binding-source lib/d11-srfi1-zip-with.lisp)
   elif [[ "$file" == tests/semantic/d11-srfi1-append-reverse-*.lisp ||
