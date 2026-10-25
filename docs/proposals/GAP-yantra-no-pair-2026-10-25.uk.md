@@ -61,3 +61,60 @@ Lücke: `lib/yantra.lisp` ist ausführbarer Code ohne physisches Paar und ohne P
 ## English
 
 Gap: `lib/yantra.lisp` is executable code with no physical pair and no check.
+
+---
+
+# Додаток (Apekṣā, 2026-10-25): карта прогалин — чотири, а не одна
+
+## Повний скан `lib/**/*.lisp`
+
+```
+усього: 404
+  з кодом і з парою/виглядом: 374
+  comment-only (пара не потрібна): 9
+  З КОДОМ, АЛЕ БЕЗ ПАРИ Й ВИГЛЯДУ: 21
+```
+
+## Уточнення: виконуване проти даних
+
+Розрізнив за наявністю `(визначити …)` — це **виконувані** файли; решта — **дані**.
+
+**Усі `lib/domains/d1.lisp` … `d11.lisp` — ДАНІ** (0 `визначити` у кожному, попри
+1026 рядків у `d10`). Тобто вони — **ратифіковані колонки**, а не програми, і пари
+не потребують. Те саме: `lib/generated/function-table.lisp`,
+`lib/machine/intel-core-i5-6400.lisp`, `lib/machine/profile/current-domain-x86-64.lisp`,
+`lib/surface/semantic-registry.lisp`, `lib/surface/uk-sa-coverage.lisp`,
+`lib/domains/archive/d11-rejected-43.lisp`.
+
+**ВИКОНУВАНИХ без пари — ЧОТИРИ:**
+
+| файл | `визначити` | `функція` |
+|---|---|---|
+| `lib/yantra.lisp` | **79** | 70 |
+| `lib/d11-srfi1-append-map.lisp` | 4 | 5 |
+| `lib/d11-srfi1-find-last-value-presence.lisp` | 5 | 5 |
+| `lib/d11-srfi1-list-index-presence.lisp` | 5 | 6 |
+
+## Отже прогалина не одна
+
+`yantra` — **не виняток, а найбільший із чотирьох**. Три `d11-srfi1-*` — його брати:
+**виконувані, без пари, без вигляду, поза перевіркою**.
+
+І це **не випадковість**: `prove-lisp-semantic-t5m.sh:575` уже використовує
+`lib/d11-srfi1-find-tail.lisp` (у якого пара **є**). Тобто **частина родини
+`srfi1` має пари, а частина — ні**. Це та сама хвороба, що й `core4`: **пара
+існує там, де хтось її створив, і не існує там, де не створив**.
+
+## Що це додає до передачі
+
+Раніше я казав: «перевір, чи `yantra` потребує пари». Тепер точніше:
+**перевір чотири файли** — і з'ясуй, чому в `d11-srfi1-find-tail` пара **є**, а в
+трьох його сусідів — **немає**. **Відповідь на це «чому» і є остання прогалина.**
+
+## Deutsch
+
+Vier ausführbare Dateien ohne Paar — nicht eine.
+
+## English
+
+Four executable files without a pair — not one.
