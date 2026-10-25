@@ -54,7 +54,7 @@ assert len(foundation["domains"]["D8"]["residents"])==256
 assert len(foundation["domains"]["D9"]["residents"])==512
 assert len(set(foundation["domains"]["D9"]["residents"].values()))==512
 
-assert "(minor . 9)" in contract
+assert '(minor . "0")' in contract  # оновлено: Contract 12.0 (було (minor . 9))
 assert "Contract 11.8" in contract
 assert "#4008" in contract
 assert "Core.D9 is OWNER-RATIFIED 512/512 under #4008" in contract
