@@ -1041,6 +1041,20 @@ cat -- lib/d11-srfi1-list-equality.lisp tests/semantic/d11-srfi1-list-equality-s
 cat -- lib/d11-srfi1-list-equality.lisp tests/semantic/d11-srfi1-list-equality-structure-mutant.lisp > "$d11_list_equal_structure_mutant"
 run_case run_law d11-srfi1-list-equality-structure-positive "$d11_list_equal_structure" 1
 run_case run_law d11-srfi1-list-equality-structure-mutant "$d11_list_equal_structure_mutant" 0
+# Д11 LIST=: WRONG D3 є Type, а не D1:ні. Після валідного префікса
+# відмова повинна виникнути ДО порівнювача, навіть якщо він отруєний.
+for improper in wrong-root late-improper-tail outer-improper-tail nested-improper-preflight; do
+  list_equal_type_source="$evidence/d11-list-equality-$improper-expected-type.lisp"
+  cat -- lib/d11-srfi1-list-equality.lisp \
+    "tests/fixtures/d11-srfi1-list-equality-$improper-negative.lisp" > "$list_equal_type_source"
+  run_case run_error_rejection "d11-list-equality-$improper" "$list_equal_type_source" \
+    Type 'car expects a non-empty list' core4
+done
+sha256sum lib/d11-srfi1-list-equality.lisp \
+  tests/semantic/d11-srfi1-list-equality-{law,structure-law,structure-mutant}.lisp \
+  tests/fixtures/d11-srfi1-list-equality-*-negative.lisp \
+  > "$evidence/d11-list-equality-d3-type-boundary.sha256"
+
 for family in pairs nullary; do
   witness="$evidence/d11-list-equality-$family-isolated.lisp"
   cat -- lib/d11-srfi1-list-equality.lisp "tests/semantic/d11-srfi1-list-equality-$family-law.lisp" > "$witness"

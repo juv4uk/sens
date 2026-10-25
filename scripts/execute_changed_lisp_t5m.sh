@@ -74,6 +74,14 @@ run_native_t5m_program() {
     paired_runtime_args=(--core4-runtime)
     standalone_runtime=("$native_open" eval-core4)
   fi
+  # Д11 LIST=: позитив, мутант і Type-відмови мають один Core4 профіль.
+  if [[ "$file" == "tests/semantic/d11-srfi1-list-equality-law.lisp" ||
+        "$file" == "tests/semantic/d11-srfi1-list-equality-structure-law.lisp" ||
+        "$file" == "tests/semantic/d11-srfi1-list-equality-structure-mutant.lisp" ||
+        "$file" == tests/fixtures/d11-srfi1-list-equality-*-negative.lisp ]]; then
+    paired_runtime_args=(--core4-runtime)
+    standalone_runtime=("$native_open" eval-core4)
+  fi
   # Д11 LIST-INDEX використовує Д24+ числовий накопичувач:
   # direct, paired та standalone мають той самий SENS Core4.
   if [[ "$file" == tests/semantic/d11-srfi1-list-index-presence-*.lisp ||
@@ -195,6 +203,8 @@ run_native_t5m_program() {
   # Названі випадки проходять і paired, і standalone; інша причина відмови — RED.
   local negative_type_diagnostic=""
   case "$file" in
+    tests/fixtures/d11-srfi1-list-equality-*-negative.lisp)
+      negative_type_diagnostic='car expects a non-empty list' ;;
     tests/fixtures/d11-srfi1-list-index-nonpredicate-negative.lisp)
       negative_type_diagnostic='D3:110 COND expects exact D1:1 / D1:0' ;;
     tests/fixtures/d11-srfi1-list-index-*-negative.lisp)
@@ -264,7 +274,10 @@ run_native_t5m_program() {
     # Помилка Type має збігатися до і після фізичного Zig/T5M.
     # Залежний D11-свідок запускається з живим DEFINE, а не з host-оракулом.
     local direct_source="$file"
-    if [[ "$file" == tests/fixtures/d11-srfi1-list-index-*-negative.lisp ]]; then
+    if [[ "$file" == tests/fixtures/d11-srfi1-list-equality-*-negative.lisp ]]; then
+      direct_source="$dir/d11-list-equality-bound-negative.lisp"
+      cat -- lib/d11-srfi1-list-equality.lisp "$file" > "$direct_source"
+    elif [[ "$file" == tests/fixtures/d11-srfi1-list-index-*-negative.lisp ]]; then
       direct_source="$dir/d11-list-index-bound-negative.lisp"
       cat -- lib/d11-srfi1-list-index-presence.lisp "$file" > "$direct_source"
     elif [[ "$file" == "tests/fixtures/d11-form-presence-deep-improper-negative.lisp" ]]; then
@@ -372,6 +385,16 @@ run_native_t5m_program() {
     # Для окремого D11-негативу самодостатній фізичний носій містить
     # точні SENS DEFINE. Перевіряємо Type, не списуємо відмову на D7 ім'я.
     local negative_standalone_physical="$physical"
+    if [[ "$file" == tests/fixtures/d11-srfi1-list-equality-*-negative.lisp ]]; then
+      negative_standalone_physical="$dir/d11-list-equality-bound-negative.sens"
+      if ! timeout "$native_timeout" "$binary" --t5m-mint "$direct_source" "$negative_standalone_physical" >"$dir/d11-eq-mint.stdout" 2>"$dir/d11-eq-mint.stderr" ||
+         ! timeout "$native_timeout" "$native_open" open "$negative_standalone_physical" >"${negative_standalone_physical%.sens}" 2>"$dir/d11-eq-open.stderr" ||
+         ! timeout "$native_timeout" "$native_open" verify-view "$negative_standalone_physical" >"$dir/d11-eq-verify.stdout" 2>"$dir/d11-eq-verify.stderr"; then
+        echo "::error::D11_LIST_EQUALITY_NEGATIVE_PHYSICAL_INVALID source=$file" >&2
+        mark_file_failed
+        return
+      fi
+    fi
     if [[ "$file" == tests/fixtures/d11-srfi1-list-index-*-negative.lisp ]]; then
       # Самодостатній негатив: фізичний T5M містить справжні DEFINE SENS.
       negative_standalone_physical="$dir/d11-list-index-bound-negative.sens"
@@ -789,6 +812,30 @@ run_native_t5m_program() {
       if ! cmp -s "$dir/native-paired.stdout" "$dir/d11-lset.expected" ||
          ! cmp -s "$dir/d11-lset-direct.stdout" "$dir/d11-lset.expected"; then
         echo "::error::D11_LSET_INCORRECT_SENS_VERDICT source=$file expected=D1:$expected_lset_d1 paired=$(cat "$dir/native-paired.stdout") direct=$(cat "$dir/d11-lset-direct.stdout")" >&2
+        mark_file_failed
+        return
+      fi
+    fi
+    if [[ "$file" == "tests/semantic/d11-srfi1-list-equality-law.lisp" ||
+          "$file" == "tests/semantic/d11-srfi1-list-equality-structure-law.lisp" ||
+          "$file" == "tests/semantic/d11-srfi1-list-equality-structure-mutant.lisp" ]]; then
+      local eq_complete="$dir/d11-list-equality-complete.lisp"
+      standalone_physical="$dir/d11-list-equality-complete.sens"
+      if ! cat -- lib/d11-srfi1-list-equality.lisp "$file" > "$eq_complete" ||
+         ! timeout "$native_timeout" "$binary" "$eq_complete" >"$dir/d11-eq-direct.stdout" 2>"$dir/d11-eq-direct.stderr" ||
+         ! timeout "$native_timeout" "$binary" --t5m-mint "$eq_complete" "$standalone_physical" >"$dir/d11-eq-mint.stdout" 2>"$dir/d11-eq-mint.stderr" ||
+         ! timeout "$native_timeout" "$native_open" open "$standalone_physical" >"${standalone_physical%.sens}" 2>"$dir/d11-eq-open.stderr" ||
+         ! timeout "$native_timeout" "$native_open" verify-view "$standalone_physical" >"$dir/d11-eq-verify.stdout" 2>"$dir/d11-eq-verify.stderr"; then
+        echo "::error::D11_LIST_EQUALITY_BOUND_EXECUTION_INVALID source=$file" >&2
+        mark_file_failed
+        return
+      fi
+      local eq_expected=1
+      [[ "$file" != *-mutant.lisp ]] || eq_expected=0
+      printf '%s\n' "$eq_expected" > "$dir/d11-eq.expected"
+      if ! cmp -s "$dir/native-paired.stdout" "$dir/d11-eq.expected" ||
+         ! cmp -s "$dir/d11-eq-direct.stdout" "$dir/d11-eq.expected"; then
+        echo "::error::D11_LIST_EQUALITY_WRONG_D1 source=$file expected=$eq_expected" >&2
         mark_file_failed
         return
       fi
@@ -1482,6 +1529,11 @@ while IFS= read -r file || [[ -n "$file" ]]; do
     # У DIFF/XOR семантика виключно в сімох чинних DEFINE SENS.
     # Після перенесення законів не можна mint/pair голий Text7 виклик.
     binding_sources=(--binding-source lib/d11-srfi1-lset-diff-intersection.lisp)
+  elif [[ "$file" == "tests/semantic/d11-srfi1-list-equality-law.lisp" ||
+          "$file" == "tests/semantic/d11-srfi1-list-equality-structure-law.lisp" ||
+          "$file" == "tests/semantic/d11-srfi1-list-equality-structure-mutant.lisp" ||
+          "$file" == tests/fixtures/d11-srfi1-list-equality-*-negative.lisp ]]; then
+    binding_sources=(--binding-source lib/d11-srfi1-list-equality.lisp)
   elif [[ "$file" == "tests/semantic/d11-srfi1-list-index-presence-law.lisp" ||
           "$file" == "tests/semantic/d11-srfi1-list-index-presence-mutant.lisp" ||
           "$file" == tests/fixtures/d11-srfi1-list-index-*-negative.lisp ]]; then
