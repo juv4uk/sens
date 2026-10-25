@@ -17,9 +17,17 @@
       "filesystem": true
     },
     {
+      "path": "crates/sens/src/binary_bootstrap.rs",
+      "kind": "filesystem",
+      "sha256": "9fbb0a28c29f532e9a3ce79efbe769e2283618057bc4f9dd3c3b80d086d9eb71",
+      "corridor": false,
+      "direct_semantic": false,
+      "filesystem": true
+    },
+    {
       "path": "crates/sens/src/binary_execution.rs",
       "kind": "direct",
-      "sha256": "f44844d54a6a7ff97b64f51e840ac965e5a5c79962ff1b46707d404108b059fa",
+      "sha256": "dce81b1c4e067c6dc20fee956c47cbc34a7e1dec3aa65701aa9e41c0167aa0b6",
       "corridor": false,
       "direct_semantic": true,
       "filesystem": false
@@ -35,7 +43,7 @@
     {
       "path": "crates/sens/src/canonical_reader.rs",
       "kind": "direct",
-      "sha256": "a5394443eef50c8efed8f2198895e443e64a5f5a1d9dc6227d136b40efba024c",
+      "sha256": "cbbbf6d79c0c7c9d6b33ec65cf916d0e2becec14a8d51ab59d9fbb560bba21ab",
       "corridor": false,
       "direct_semantic": true,
       "filesystem": false
@@ -99,7 +107,7 @@
     {
       "path": "crates/sens/src/domain_projection_catalog.rs",
       "kind": "filesystem",
-      "sha256": "197c1e1cc5e0ded9fbfdace05c7e17977abdd198e248d41772844155e05731e0",
+      "sha256": "c0f00da04ce61b6baeff556222be3bd7a7e79deab44427a73f1753e63b47f11a",
       "corridor": false,
       "direct_semantic": false,
       "filesystem": true
@@ -115,7 +123,7 @@
     {
       "path": "crates/sens/src/environment.rs",
       "kind": "filesystem",
-      "sha256": "46e4bbffe818e406f09b75249a34425c1464b2b83c11af166df3e5ba959d7359",
+      "sha256": "48ecb78edbf752d0f71e7d853e8e1830ae558032ee4dc701c90a271acbcbf536",
       "corridor": false,
       "direct_semantic": false,
       "filesystem": true
@@ -123,7 +131,7 @@
     {
       "path": "crates/sens/src/eval/arithmetic.rs",
       "kind": "direct",
-      "sha256": "e4b1d19f4530117b2533bb966e7edb00ea469d604cf38dcb242a37b16b12d902",
+      "sha256": "1060d4a4d5e22932459428c08d048445790880bc7dbe2d1f0de9e3efe3467ad2",
       "corridor": false,
       "direct_semantic": true,
       "filesystem": false
@@ -137,9 +145,17 @@
       "filesystem": false
     },
     {
+      "path": "crates/sens/src/eval/canon.rs",
+      "kind": "filesystem",
+      "sha256": "15be105452e93bc4df272d0b868148fad727c360f0751df7f5bb5d87dfd1e35e",
+      "corridor": false,
+      "direct_semantic": false,
+      "filesystem": true
+    },
+    {
       "path": "crates/sens/src/eval/capabilities.rs",
       "kind": "direct",
-      "sha256": "b83d418afbac246f907aa225e71fadd55803dbc461dba854e27ec642c8c9983e",
+      "sha256": "74e3c3d61e7796fa197532efd32d7805bfc51359f122d92d52f6e1760fccc885",
       "corridor": false,
       "direct_semantic": true,
       "filesystem": false
@@ -147,7 +163,7 @@
     {
       "path": "crates/sens/src/eval/closures.rs",
       "kind": "direct",
-      "sha256": "6c081a2c01a965604f8e12c9697d4ad7017b9afff900b7488850cecd30c52818",
+      "sha256": "204a520bab1ebc26f3f7960938958b0302bc1bd5020e788346cdfc6cd516a732",
       "corridor": false,
       "direct_semantic": true,
       "filesystem": false
@@ -155,7 +171,7 @@
     {
       "path": "crates/sens/src/eval/lower.rs",
       "kind": "direct",
-      "sha256": "cddde7dbbf9fe08ece868f30fdf34f2ac7909e310a617d907da050597bc75943",
+      "sha256": "c4460ac342fba8f081328d4970d63e03874d475d1f9be355d864ffa3d9e557f4",
       "corridor": false,
       "direct_semantic": true,
       "filesystem": false
@@ -171,7 +187,7 @@
     {
       "path": "crates/sens/src/eval/mod.rs",
       "kind": "direct",
-      "sha256": "4bbbb7154359a5923e5ea624fbc33ce2bc06e104f556e955f0f43b13e28bcc8d",
+      "sha256": "63dd17a09fa6c47b208e16cbc803ee2bc7d81e1565c7b9e0272da91e3aa76a49",
       "corridor": false,
       "direct_semantic": true,
       "filesystem": false
@@ -211,7 +227,7 @@
     {
       "path": "crates/sens/src/eval/special_forms/core.rs",
       "kind": "direct",
-      "sha256": "7d55e3b9d7e8c2580b1aeb2e79b200e7e4d6038cfefeb50627185895452bd67e",
+      "sha256": "61f731f7866133f7258d67f7eedd06f797d8e3aa5d3c04167ba46c4fc3e0ace7",
       "corridor": false,
       "direct_semantic": true,
       "filesystem": true
@@ -219,7 +235,7 @@
     {
       "path": "crates/sens/src/eval/special_forms/io.rs",
       "kind": "direct",
-      "sha256": "1a0ddaf75338142d40146a87f7a031d53827b870e96cf687925088ec569325f9",
+      "sha256": "1146510aaecb5bae726affc163debc1a7663c7eeecbc1e27efb69a24c06f7ddc",
       "corridor": false,
       "direct_semantic": true,
       "filesystem": false
@@ -267,7 +283,7 @@
     {
       "path": "crates/sens/src/frame3_small.rs",
       "kind": "direct",
-      "sha256": "28ada96b56bb06cc73fcceac0f53d69dac3f4e8ab8d0ccf257385ecbd3726b12",
+      "sha256": "41503da9306d5ce8adc6219ba7812bd717f9b280824689b4b053fa41ca59df60",
       "corridor": false,
       "direct_semantic": true,
       "filesystem": true
@@ -299,7 +315,7 @@
     {
       "path": "crates/sens/src/lib.rs",
       "kind": "direct",
-      "sha256": "849852a5f5ce20d9105a207dc1d133a775e59ac32b29fabf943caaec735a6401",
+      "sha256": "4ba6b1eef3a67cebb979d2caf5eefe7f78c4cfc50c1f28e3f7b047a5080e8f0e",
       "corridor": false,
       "direct_semantic": true,
       "filesystem": true
@@ -307,7 +323,7 @@
     {
       "path": "crates/sens/src/mixed_source.rs",
       "kind": "direct",
-      "sha256": "398fff1338278d33968c2b6892485c7ae7dc6061a78872735a1289b55a90eda0",
+      "sha256": "1a4e3716e299e6ea6cdd3339715314723995dc0ad53467930b71ab48d25099c8",
       "corridor": false,
       "direct_semantic": true,
       "filesystem": true
@@ -315,7 +331,7 @@
     {
       "path": "crates/sens/src/numeric_domains_generated.rs",
       "kind": "filesystem",
-      "sha256": "81a9c0f69869e2b148dd0e1bd4258436610dd8feff5686afce12a5dff7c712f4",
+      "sha256": "40bb74ab50e581c172e3e314a796480b7347c85427113269838663665faec04c",
       "corridor": false,
       "direct_semantic": false,
       "filesystem": true
@@ -323,7 +339,7 @@
     {
       "path": "crates/sens/src/parser.rs",
       "kind": "direct",
-      "sha256": "d76370dafc4a7284662cee4481c60d7569000917e1ccabb168672a715b5e5116",
+      "sha256": "e47013a2bb2fa49fa8eaf4e86f557dc2a4bf176ec72abd4942cb51a1dd4595bd",
       "corridor": false,
       "direct_semantic": true,
       "filesystem": false
@@ -331,7 +347,7 @@
     {
       "path": "crates/sens/src/presentation.rs",
       "kind": "direct",
-      "sha256": "d1334c8f077b52a4ab43e2a727b4c7df13363da6c288b3db4a8a48b319f3359e",
+      "sha256": "33e6de91e962f43462d7a88354e9997b64979694f96d2c62c7a962cae16f3dda",
       "corridor": false,
       "direct_semantic": true,
       "filesystem": false
@@ -347,7 +363,7 @@
     {
       "path": "crates/sens/src/semantic_registry.rs",
       "kind": "direct",
-      "sha256": "7df1f3ea509a70142d3144e1a003d7af29f64155c04b2698771041232e019c61",
+      "sha256": "275636f591b88e5f2a08408b373ab601ee72d461b1918782229eb0a57ed5e6f5",
       "corridor": false,
       "direct_semantic": true,
       "filesystem": true
@@ -371,7 +387,7 @@
     {
       "path": "crates/sens/src/source_projection.rs",
       "kind": "direct",
-      "sha256": "4410612f8e2b246e9b837b9b9b78c8f8ccd4ac13050c797c416d981a48b8c85e",
+      "sha256": "3ce05f7f61f050ee889bb6a55aa8a1068739684a90a24483ec708b6befc11130",
       "corridor": false,
       "direct_semantic": true,
       "filesystem": true
@@ -385,145 +401,9 @@
       "filesystem": true
     },
     {
-      "path": "crates/sens/src/staged-out/binary_execution.rs",
-      "kind": "direct",
-      "sha256": "4a6a511f6d6eb781c57e4b8817b8e7a7562f4c765ad81d3e5cdaf22394e3bef9",
-      "corridor": false,
-      "direct_semantic": true,
-      "filesystem": false
-    },
-    {
-      "path": "crates/sens/src/staged-out/binary_framing.rs",
-      "kind": "direct",
-      "sha256": "e2c93ef676ee4f5e999930943eedb1367ca7cb304bc828e2e810ee9de784e3f9",
-      "corridor": false,
-      "direct_semantic": true,
-      "filesystem": true
-    },
-    {
-      "path": "crates/sens/src/staged-out/canonical_reader.rs",
-      "kind": "direct",
-      "sha256": "14fcdb969f22ca7068482aaee4e7ab175431edcfd7996018927768862d346aba",
-      "corridor": false,
-      "direct_semantic": true,
-      "filesystem": false
-    },
-    {
-      "path": "crates/sens/src/staged-out/compiler_language.rs",
-      "kind": "direct",
-      "sha256": "8fab563a1e001e819eb57b9ca5d4201f033f20fa0aa04367a517f3c3d5e800fd",
-      "corridor": false,
-      "direct_semantic": true,
-      "filesystem": true
-    },
-    {
-      "path": "crates/sens/src/staged-out/frame3_domain.rs",
-      "kind": "direct",
-      "sha256": "d9a6393eae00c5d74ef7da3ec7bcb30dc64e2a1b6c1913ad0e2737835dc760e5",
-      "corridor": false,
-      "direct_semantic": true,
-      "filesystem": true
-    },
-    {
-      "path": "crates/sens/src/staged-out/frame3_grammar.rs",
-      "kind": "direct",
-      "sha256": "236ff3b9fb49d9e9a8ccf909ae36220e88dd914ebc2380db2cd336c0fa9b522d",
-      "corridor": false,
-      "direct_semantic": true,
-      "filesystem": true
-    },
-    {
-      "path": "crates/sens/src/staged-out/frame3_micro_v5_lambda.rs",
-      "kind": "direct",
-      "sha256": "58e3a89223cdca244b53a2e02e55bfbebe46010f6c53883091f951d355fa175c",
-      "corridor": false,
-      "direct_semantic": true,
-      "filesystem": false
-    },
-    {
-      "path": "crates/sens/src/staged-out/frame3_micro_v5_lambda_app.rs",
-      "kind": "direct",
-      "sha256": "b1d252c9a14c6178e5cfa218f1512683fb6a7625fdaff6666e23c8eccc493c66",
-      "corridor": false,
-      "direct_semantic": true,
-      "filesystem": false
-    },
-    {
-      "path": "crates/sens/src/staged-out/frame3_semantic.rs",
-      "kind": "direct",
-      "sha256": "323df4b200375ab819f86f3223c8eb8ddebb046cd3767879b230e6ed2de02605",
-      "corridor": false,
-      "direct_semantic": true,
-      "filesystem": false
-    },
-    {
-      "path": "crates/sens/src/staged-out/frame3_small.rs",
-      "kind": "direct",
-      "sha256": "59dbbd98a5d76cd9f1ab938cdc8fc9063082967a3b8d0d99f35e8c0428d5e151",
-      "corridor": false,
-      "direct_semantic": true,
-      "filesystem": true
-    },
-    {
-      "path": "crates/sens/src/staged-out/parser.rs",
-      "kind": "direct",
-      "sha256": "29a2e2e0bf2710b23ad082db7428f479a777a1a26b089b3a563a3d3a61e33098",
-      "corridor": false,
-      "direct_semantic": true,
-      "filesystem": false
-    },
-    {
-      "path": "crates/sens/src/staged-out/semantic_registry.rs",
-      "kind": "filesystem",
-      "sha256": "3245ee65216e557e35b8b301868f8c83c05310591a106e3648aaca2eb86d6411",
-      "corridor": false,
-      "direct_semantic": false,
-      "filesystem": true
-    },
-    {
-      "path": "crates/sens/src/staged-out/source_packing.rs",
-      "kind": "direct",
-      "sha256": "61f99e557b7ff280935e2d09aa22bb82311475a4261dcdee3a221d992dd6b9db",
-      "corridor": false,
-      "direct_semantic": true,
-      "filesystem": false
-    },
-    {
-      "path": "crates/sens/src/staged-out/syntax.rs",
-      "kind": "direct",
-      "sha256": "49f755a2643dd8ccd4b4b34e8cf011132c95ee3cae9f546b635bf35c76d535c7",
-      "corridor": false,
-      "direct_semantic": true,
-      "filesystem": false
-    },
-    {
-      "path": "crates/sens/src/staged-out/ternary_transport.rs",
-      "kind": "direct",
-      "sha256": "b2c647565eb8e58a2d777d55987153514dc6dd188c22900be2c0ec1b2a2010bb",
-      "corridor": false,
-      "direct_semantic": true,
-      "filesystem": true
-    },
-    {
-      "path": "crates/sens/src/staged-out/text7.rs",
-      "kind": "direct",
-      "sha256": "6a82efe0df987f098f4ca49f82cdf60c797cbd7c8801573e368ae437ca3b3245",
-      "corridor": false,
-      "direct_semantic": true,
-      "filesystem": false
-    },
-    {
-      "path": "crates/sens/src/staged-out/universal_frame3.rs",
-      "kind": "direct",
-      "sha256": "05082736b80c4f4c678147876838e9bf0367c0be8021174cb3c270dce5742594",
-      "corridor": false,
-      "direct_semantic": true,
-      "filesystem": false
-    },
-    {
       "path": "crates/sens/src/syntax.rs",
       "kind": "direct",
-      "sha256": "9e72316bd78c7623f1fcc0f7a9b31e5094fe56507566da59622a3596d885eaaf",
+      "sha256": "9368aac50136ccffb5399e0ee992354301d975fc173fb603085733e28c00c00b",
       "corridor": false,
       "direct_semantic": true,
       "filesystem": false
@@ -531,7 +411,7 @@
     {
       "path": "crates/sens/src/ternary_transport.rs",
       "kind": "direct",
-      "sha256": "5797d4f9de1e1dc6f8b28e6ae788fb48501132c5064dfd0d85f9ca169cf93787",
+      "sha256": "6154f3ccc6f70b3b498baf6d58393d69ebc3bd5e4cac0f0961ba10c74bacc457",
       "corridor": false,
       "direct_semantic": true,
       "filesystem": true
@@ -595,7 +475,7 @@
     {
       "path": "crates/sens-cli/src/bin/sens-math-t5m.rs",
       "kind": "mixed",
-      "sha256": "d2001429b48c540731042a93a0dd7078dd29557cc58dfca72f02637d4241daa5",
+      "sha256": "b9b23ad8cc5afe69bc8e5fe23f2e644af93943bd1412fb3c90a2cc784e5b0522",
       "corridor": true,
       "direct_semantic": true,
       "filesystem": true
@@ -611,26 +491,18 @@
     {
       "path": "crates/sens-cli/src/bin/sens-trit.rs",
       "kind": "mixed",
-      "sha256": "bed631fcaade3b3ff5860b01bf783f9cc61be672626ac9ac3e95bf6c29684777",
+      "sha256": "e8267fec4e3e50d7ac01236388f4619857caebe1ed5847ddb1c57bc2a0be2a1d",
       "corridor": true,
       "direct_semantic": true,
       "filesystem": true
     },
     {
       "path": "crates/sens-cli/src/bin/wsm-fs-record-consumer.rs",
-      "kind": "corridor",
-      "sha256": "24d6b3df3d20fbc4a83ddeb4140d38252ac0deb7d270d05f312df75e6781b615",
-      "corridor": true,
-      "direct_semantic": false,
-      "filesystem": true
-    },
-    {
-      "path": "crates/sens-cli/src/bin/wsm-fs-record-producer.rs",
-      "kind": "corridor",
-      "sha256": "5e638ba98ac922bd6135e4ae3830e5654a6547b35b856710388d9e8d6849a8f0",
-      "corridor": true,
-      "direct_semantic": false,
-      "filesystem": true
+      "kind": "direct",
+      "sha256": "cdadeab6ac3b254f8a6050886dba5ab2fb87fd4fd169b4fe9d73182eed4c6ad4",
+      "corridor": false,
+      "direct_semantic": true,
+      "filesystem": false
     },
     {
       "path": "crates/sens-cli/src/islands.rs",
@@ -643,7 +515,7 @@
     {
       "path": "crates/sens-cli/src/lib.rs",
       "kind": "corridor",
-      "sha256": "928d1c9b50c34adec0460e982ab39165f593d8247140b4129b063d61eb34fd01",
+      "sha256": "414be1242bd1a9ef6c1bdee3b5696e4e1c58ee42560b7c184c19556aa752a57b",
       "corridor": true,
       "direct_semantic": false,
       "filesystem": false
@@ -651,15 +523,23 @@
     {
       "path": "crates/sens-cli/src/main.rs",
       "kind": "mixed",
-      "sha256": "e6d2af4b4d397e72383aa487f9e7a076f07eb4f2ee61345e34f0fff637803af4",
+      "sha256": "d63d7f749692690cefdb0aa6b6e752efe6b7503faf3f265ef5c093f7a5961b9c",
       "corridor": true,
       "direct_semantic": true,
       "filesystem": true
     },
     {
+      "path": "crates/sens-cli/src/repl/benchmark.rs",
+      "kind": "corridor",
+      "sha256": "551b153cc16afaeaee5e79b268cd1e0c9ada24eaa6894762e6ad3cdd90ab9a86",
+      "corridor": true,
+      "direct_semantic": false,
+      "filesystem": true
+    },
+    {
       "path": "crates/sens-cli/src/repl/surface_catalog.rs",
       "kind": "mixed",
-      "sha256": "3f911b8af1526d690870454abee01e37b40d383962620dab709dd22be94e5ee2",
+      "sha256": "8e50cb510774685334b47a97f17de3fc713ff8666a4a35a0bb99a8eb90565aac",
       "corridor": true,
       "direct_semantic": true,
       "filesystem": true
@@ -667,7 +547,7 @@
     {
       "path": "crates/sens-cli/src/repl.rs",
       "kind": "mixed",
-      "sha256": "eff51dc4bd1d341903ce5947a1fb8bfa055ea258f28ef378564f7f597178e3a3",
+      "sha256": "33913adb1e8ae68b1f5ee198025c83b7f568eae97c2d828b18a46eae94bd1075",
       "corridor": true,
       "direct_semantic": true,
       "filesystem": true
@@ -675,7 +555,7 @@
     {
       "path": "crates/sens-cli/src/swarm.rs",
       "kind": "corridor",
-      "sha256": "c979dd94f3e44a12b43be5b8d16e83987c9438aedf266d84d660578247d2eb2e",
+      "sha256": "89f7a62ad2a74f32a8f011f22864bc42f0c44bba23fdcbf8dffcf83da49cb80f",
       "corridor": true,
       "direct_semantic": false,
       "filesystem": true
@@ -683,7 +563,7 @@
     {
       "path": "crates/sens-cli/src/tcp_repl.rs",
       "kind": "filesystem",
-      "sha256": "a7a2aac41b487d169b43c94a4beb0c23d4e5f15a8314cdc8ffecbd13031516f6",
+      "sha256": "97b1dc7977ebf485003f8e23a6f554f5f12630e04fba2a7fbe8f8ed9001b8d95",
       "corridor": false,
       "direct_semantic": false,
       "filesystem": true
@@ -691,7 +571,7 @@
     {
       "path": "crates/sens-cli/src/zig_transport.rs",
       "kind": "mixed",
-      "sha256": "ada7e5594b86f48d885ee85aaabd099e08dc50bf9faeec07366f5a609293cd07",
+      "sha256": "61b83636231b6dfbc9c8e504a9a442f51ee96bc139fcd154b555b8d065ebbd6a",
       "corridor": true,
       "direct_semantic": true,
       "filesystem": true
@@ -699,7 +579,7 @@
     {
       "path": "crates/sens-cli/src/zig_transport_assets.rs",
       "kind": "corridor",
-      "sha256": "2b48f566b4fce7c331dbd08fc1910e743033bd1fe98e639425cf5fb8cb50d34c",
+      "sha256": "594ee9c7553509517fb50fdd6b122b6bd5d74f7f082d8cb4ceda24ff7866a61c",
       "corridor": true,
       "direct_semantic": false,
       "filesystem": false
@@ -803,7 +683,7 @@
     {
       "path": "crates/swarm-node/src/main.rs",
       "kind": "filesystem",
-      "sha256": "6939f4782cb6fa06e0f2ae97a202f967fec69f7f75ab0735be3a3786e5790877",
+      "sha256": "56933df2e108a195d3061ecdad25b1d56e045f9afebd6adffd57a1bc655ffb9c",
       "corridor": false,
       "direct_semantic": false,
       "filesystem": true
@@ -834,11 +714,11 @@
     },
     {
       "path": "crates/wsm-guard-core/src/lib.rs",
-      "kind": "mixed",
-      "sha256": "d6fc4ee2a85ab67d21666be2bedecaa86ad40243f4e2af52951e64af4644c7b3",
+      "kind": "corridor",
+      "sha256": "d0479eb816126a9976f5b2c586fce8d047c4596db0bcd2ffa27d93a1020c5c32",
       "corridor": true,
-      "direct_semantic": true,
-      "filesystem": true
+      "direct_semantic": false,
+      "filesystem": false
     },
     {
       "path": "crates/wsm-guard-facts/src/main.rs",
@@ -905,25 +785,9 @@
       "filesystem": true
     },
     {
-      "path": "crates/xtask.bak/src/checks.rs",
-      "kind": "filesystem",
-      "sha256": "4f91d8c201ab248731715154f096512ccc7f4a18c0ccb3b1d3a8e238e4f40ea9",
-      "corridor": false,
-      "direct_semantic": false,
-      "filesystem": true
-    },
-    {
-      "path": "crates/xtask.bak/src/external_oracle.rs",
-      "kind": "direct",
-      "sha256": "9b1b1c74e6fc9446347fc964853d48a8ba1bea1ffafd046d01bd83864e5db69e",
-      "corridor": false,
-      "direct_semantic": true,
-      "filesystem": false
-    },
-    {
       "path": "crates/sens/build.rs",
       "kind": "filesystem",
-      "sha256": "9f79ff9e1cf1628b41ddc6a0b0bc382f039d1f9c02106ad147d9708c1711f643",
+      "sha256": "bb51706f4f42e180e827278f64989267420d1110bd31c6ab0d484d2cf358ef63",
       "corridor": false,
       "direct_semantic": false,
       "filesystem": true
@@ -931,7 +795,7 @@
     {
       "path": "crates/sens-cli/build.rs",
       "kind": "filesystem",
-      "sha256": "06373f014b42e8d5052dd0f3eac70a2aa93e40d60f9d94b8ea1cac1f1f8232a1",
+      "sha256": "d523037ae3c4a6c8c681774e723c44ce35921bb5c7f5e3d6f4159d0d675292c2",
       "corridor": false,
       "direct_semantic": false,
       "filesystem": true
@@ -939,7 +803,7 @@
     {
       "path": "crates/sens-wasm/build.rs",
       "kind": "filesystem",
-      "sha256": "65584f32c641bc5aea4b0031dfa53e3258d40fbd2c11e72454055e2f883bebb6",
+      "sha256": "8e455abbf82d408537f87e8c430745f5e301af399615bd48d97dfcf0ecdcd8b6",
       "corridor": false,
       "direct_semantic": false,
       "filesystem": true
@@ -947,7 +811,7 @@
     {
       "path": "crates/wsm-guard-core/build.rs",
       "kind": "filesystem",
-      "sha256": "f4ef3d81f6a303a87b33ff7d07310b0595f2719023fb243e42f3e4c1022eed72",
+      "sha256": "906d9c39b21fd9127eb1b5b0963cf8e5a0785beb913c6df68b22cba384292a3b",
       "corridor": false,
       "direct_semantic": false,
       "filesystem": true
@@ -983,22 +847,6 @@
     "crates/sens/src/source_packing.rs",
     "crates/sens/src/source_projection.rs",
     "crates/sens/src/source_words.rs",
-    "crates/sens/src/staged-out/binary_execution.rs",
-    "crates/sens/src/staged-out/binary_framing.rs",
-    "crates/sens/src/staged-out/canonical_reader.rs",
-    "crates/sens/src/staged-out/compiler_language.rs",
-    "crates/sens/src/staged-out/frame3_domain.rs",
-    "crates/sens/src/staged-out/frame3_grammar.rs",
-    "crates/sens/src/staged-out/frame3_micro_v5_lambda.rs",
-    "crates/sens/src/staged-out/frame3_micro_v5_lambda_app.rs",
-    "crates/sens/src/staged-out/frame3_semantic.rs",
-    "crates/sens/src/staged-out/frame3_small.rs",
-    "crates/sens/src/staged-out/parser.rs",
-    "crates/sens/src/staged-out/source_packing.rs",
-    "crates/sens/src/staged-out/syntax.rs",
-    "crates/sens/src/staged-out/ternary_transport.rs",
-    "crates/sens/src/staged-out/text7.rs",
-    "crates/sens/src/staged-out/universal_frame3.rs",
     "crates/sens/src/syntax.rs",
     "crates/sens/src/ternary_transport.rs",
     "crates/sens/src/text7.rs",
@@ -1006,19 +854,19 @@
     "crates/sens-cli/src/bin/gen-fasl.rs",
     "crates/sens-cli/src/bin/guard-reference-schema-check.rs",
     "crates/sens-cli/src/bin/sens-to-sens.rs",
+    "crates/sens-cli/src/bin/wsm-fs-record-consumer.rs",
     "crates/sens-host/src/lib.rs",
     "crates/sens-lsp/src/analysis.rs",
     "crates/sens-lsp/src/guard_knowledge.rs",
     "crates/sens-semantic/src/karaka.rs",
     "crates/sens-semantic/src/lib.rs",
-    "crates/xtask/src/external_oracle.rs",
-    "crates/xtask.bak/src/external_oracle.rs"
+    "crates/xtask/src/external_oracle.rs"
   ],
   "unresolved_bypasses": [
     {
       "path": "crates/sens/src/binary_execution.rs",
       "kind": "direct",
-      "sha256": "f44844d54a6a7ff97b64f51e840ac965e5a5c79962ff1b46707d404108b059fa"
+      "sha256": "dce81b1c4e067c6dc20fee956c47cbc34a7e1dec3aa65701aa9e41c0167aa0b6"
     },
     {
       "path": "crates/sens/src/binary_framing.rs",
@@ -1028,7 +876,7 @@
     {
       "path": "crates/sens/src/canonical_reader.rs",
       "kind": "direct",
-      "sha256": "a5394443eef50c8efed8f2198895e443e64a5f5a1d9dc6227d136b40efba024c"
+      "sha256": "cbbbf6d79c0c7c9d6b33ec65cf916d0e2becec14a8d51ab59d9fbb560bba21ab"
     },
     {
       "path": "crates/sens/src/compiler_language.rs",
@@ -1048,7 +896,7 @@
     {
       "path": "crates/sens/src/eval/arithmetic.rs",
       "kind": "direct",
-      "sha256": "e4b1d19f4530117b2533bb966e7edb00ea469d604cf38dcb242a37b16b12d902"
+      "sha256": "1060d4a4d5e22932459428c08d048445790880bc7dbe2d1f0de9e3efe3467ad2"
     },
     {
       "path": "crates/sens/src/eval/builtins.rs",
@@ -1058,32 +906,32 @@
     {
       "path": "crates/sens/src/eval/capabilities.rs",
       "kind": "direct",
-      "sha256": "b83d418afbac246f907aa225e71fadd55803dbc461dba854e27ec642c8c9983e"
+      "sha256": "74e3c3d61e7796fa197532efd32d7805bfc51359f122d92d52f6e1760fccc885"
     },
     {
       "path": "crates/sens/src/eval/closures.rs",
       "kind": "direct",
-      "sha256": "6c081a2c01a965604f8e12c9697d4ad7017b9afff900b7488850cecd30c52818"
+      "sha256": "204a520bab1ebc26f3f7960938958b0302bc1bd5020e788346cdfc6cd516a732"
     },
     {
       "path": "crates/sens/src/eval/lower.rs",
       "kind": "direct",
-      "sha256": "cddde7dbbf9fe08ece868f30fdf34f2ac7909e310a617d907da050597bc75943"
+      "sha256": "c4460ac342fba8f081328d4970d63e03874d475d1f9be355d864ffa3d9e557f4"
     },
     {
       "path": "crates/sens/src/eval/mod.rs",
       "kind": "direct",
-      "sha256": "4bbbb7154359a5923e5ea624fbc33ce2bc06e104f556e955f0f43b13e28bcc8d"
+      "sha256": "63dd17a09fa6c47b208e16cbc803ee2bc7d81e1565c7b9e0272da91e3aa76a49"
     },
     {
       "path": "crates/sens/src/eval/special_forms/core.rs",
       "kind": "direct",
-      "sha256": "7d55e3b9d7e8c2580b1aeb2e79b200e7e4d6038cfefeb50627185895452bd67e"
+      "sha256": "61f731f7866133f7258d67f7eedd06f797d8e3aa5d3c04167ba46c4fc3e0ace7"
     },
     {
       "path": "crates/sens/src/eval/special_forms/io.rs",
       "kind": "direct",
-      "sha256": "1a0ddaf75338142d40146a87f7a031d53827b870e96cf687925088ec569325f9"
+      "sha256": "1146510aaecb5bae726affc163debc1a7663c7eeecbc1e27efb69a24c06f7ddc"
     },
     {
       "path": "crates/sens/src/frame3_domain.rs",
@@ -1113,7 +961,7 @@
     {
       "path": "crates/sens/src/frame3_small.rs",
       "kind": "direct",
-      "sha256": "28ada96b56bb06cc73fcceac0f53d69dac3f4e8ab8d0ccf257385ecbd3726b12"
+      "sha256": "41503da9306d5ce8adc6219ba7812bd717f9b280824689b4b053fa41ca59df60"
     },
     {
       "path": "crates/sens/src/frame3_v2.rs",
@@ -1123,22 +971,22 @@
     {
       "path": "crates/sens/src/lib.rs",
       "kind": "direct",
-      "sha256": "849852a5f5ce20d9105a207dc1d133a775e59ac32b29fabf943caaec735a6401"
+      "sha256": "4ba6b1eef3a67cebb979d2caf5eefe7f78c4cfc50c1f28e3f7b047a5080e8f0e"
     },
     {
       "path": "crates/sens/src/mixed_source.rs",
       "kind": "direct",
-      "sha256": "398fff1338278d33968c2b6892485c7ae7dc6061a78872735a1289b55a90eda0"
+      "sha256": "1a4e3716e299e6ea6cdd3339715314723995dc0ad53467930b71ab48d25099c8"
     },
     {
       "path": "crates/sens/src/parser.rs",
       "kind": "direct",
-      "sha256": "d76370dafc4a7284662cee4481c60d7569000917e1ccabb168672a715b5e5116"
+      "sha256": "e47013a2bb2fa49fa8eaf4e86f557dc2a4bf176ec72abd4942cb51a1dd4595bd"
     },
     {
       "path": "crates/sens/src/presentation.rs",
       "kind": "direct",
-      "sha256": "d1334c8f077b52a4ab43e2a727b4c7df13363da6c288b3db4a8a48b319f3359e"
+      "sha256": "33e6de91e962f43462d7a88354e9997b64979694f96d2c62c7a962cae16f3dda"
     },
     {
       "path": "crates/sens/src/program_data.rs",
@@ -1148,7 +996,7 @@
     {
       "path": "crates/sens/src/semantic_registry.rs",
       "kind": "direct",
-      "sha256": "7df1f3ea509a70142d3144e1a003d7af29f64155c04b2698771041232e019c61"
+      "sha256": "275636f591b88e5f2a08408b373ab601ee72d461b1918782229eb0a57ed5e6f5"
     },
     {
       "path": "crates/sens/src/source_packing.rs",
@@ -1158,7 +1006,7 @@
     {
       "path": "crates/sens/src/source_projection.rs",
       "kind": "direct",
-      "sha256": "4410612f8e2b246e9b837b9b9b78c8f8ccd4ac13050c797c416d981a48b8c85e"
+      "sha256": "3ce05f7f61f050ee889bb6a55aa8a1068739684a90a24483ec708b6befc11130"
     },
     {
       "path": "crates/sens/src/source_words.rs",
@@ -1166,94 +1014,14 @@
       "sha256": "5eaa5d85d82e5e8739e042e950010aa77a43d497cb58a8c28fe3706ee907c729"
     },
     {
-      "path": "crates/sens/src/staged-out/binary_execution.rs",
-      "kind": "direct",
-      "sha256": "4a6a511f6d6eb781c57e4b8817b8e7a7562f4c765ad81d3e5cdaf22394e3bef9"
-    },
-    {
-      "path": "crates/sens/src/staged-out/binary_framing.rs",
-      "kind": "direct",
-      "sha256": "e2c93ef676ee4f5e999930943eedb1367ca7cb304bc828e2e810ee9de784e3f9"
-    },
-    {
-      "path": "crates/sens/src/staged-out/canonical_reader.rs",
-      "kind": "direct",
-      "sha256": "14fcdb969f22ca7068482aaee4e7ab175431edcfd7996018927768862d346aba"
-    },
-    {
-      "path": "crates/sens/src/staged-out/compiler_language.rs",
-      "kind": "direct",
-      "sha256": "8fab563a1e001e819eb57b9ca5d4201f033f20fa0aa04367a517f3c3d5e800fd"
-    },
-    {
-      "path": "crates/sens/src/staged-out/frame3_domain.rs",
-      "kind": "direct",
-      "sha256": "d9a6393eae00c5d74ef7da3ec7bcb30dc64e2a1b6c1913ad0e2737835dc760e5"
-    },
-    {
-      "path": "crates/sens/src/staged-out/frame3_grammar.rs",
-      "kind": "direct",
-      "sha256": "236ff3b9fb49d9e9a8ccf909ae36220e88dd914ebc2380db2cd336c0fa9b522d"
-    },
-    {
-      "path": "crates/sens/src/staged-out/frame3_micro_v5_lambda.rs",
-      "kind": "direct",
-      "sha256": "58e3a89223cdca244b53a2e02e55bfbebe46010f6c53883091f951d355fa175c"
-    },
-    {
-      "path": "crates/sens/src/staged-out/frame3_micro_v5_lambda_app.rs",
-      "kind": "direct",
-      "sha256": "b1d252c9a14c6178e5cfa218f1512683fb6a7625fdaff6666e23c8eccc493c66"
-    },
-    {
-      "path": "crates/sens/src/staged-out/frame3_semantic.rs",
-      "kind": "direct",
-      "sha256": "323df4b200375ab819f86f3223c8eb8ddebb046cd3767879b230e6ed2de02605"
-    },
-    {
-      "path": "crates/sens/src/staged-out/frame3_small.rs",
-      "kind": "direct",
-      "sha256": "59dbbd98a5d76cd9f1ab938cdc8fc9063082967a3b8d0d99f35e8c0428d5e151"
-    },
-    {
-      "path": "crates/sens/src/staged-out/parser.rs",
-      "kind": "direct",
-      "sha256": "29a2e2e0bf2710b23ad082db7428f479a777a1a26b089b3a563a3d3a61e33098"
-    },
-    {
-      "path": "crates/sens/src/staged-out/source_packing.rs",
-      "kind": "direct",
-      "sha256": "61f99e557b7ff280935e2d09aa22bb82311475a4261dcdee3a221d992dd6b9db"
-    },
-    {
-      "path": "crates/sens/src/staged-out/syntax.rs",
-      "kind": "direct",
-      "sha256": "49f755a2643dd8ccd4b4b34e8cf011132c95ee3cae9f546b635bf35c76d535c7"
-    },
-    {
-      "path": "crates/sens/src/staged-out/ternary_transport.rs",
-      "kind": "direct",
-      "sha256": "b2c647565eb8e58a2d777d55987153514dc6dd188c22900be2c0ec1b2a2010bb"
-    },
-    {
-      "path": "crates/sens/src/staged-out/text7.rs",
-      "kind": "direct",
-      "sha256": "6a82efe0df987f098f4ca49f82cdf60c797cbd7c8801573e368ae437ca3b3245"
-    },
-    {
-      "path": "crates/sens/src/staged-out/universal_frame3.rs",
-      "kind": "direct",
-      "sha256": "05082736b80c4f4c678147876838e9bf0367c0be8021174cb3c270dce5742594"
-    },
-    {
       "path": "crates/sens/src/syntax.rs",
       "kind": "direct",
-      "sha256": "9e72316bd78c7623f1fcc0f7a9b31e5094fe56507566da59622a3596d885eaaf"
+      "sha256": "9368aac50136ccffb5399e0ee992354301d975fc173fb603085733e28c00c00b"
     },
     {
       "path": "crates/sens/src/ternary_transport.rs",
       "kind": "direct",
-      "sha256": "5797d4f9de1e1dc6f8b28e6ae788fb48501132c5064dfd0d85f9ca169cf93787"
+      "sha256": "6154f3ccc6f70b3b498baf6d58393d69ebc3bd5e4cac0f0961ba10c74bacc457"
     },
     {
       "path": "crates/sens/src/text7.rs",
@@ -1278,7 +1046,7 @@
     {
       "path": "crates/sens-cli/src/bin/sens-math-t5m.rs",
       "kind": "mixed",
-      "sha256": "d2001429b48c540731042a93a0dd7078dd29557cc58dfca72f02637d4241daa5"
+      "sha256": "b9b23ad8cc5afe69bc8e5fe23f2e644af93943bd1412fb3c90a2cc784e5b0522"
     },
     {
       "path": "crates/sens-cli/src/bin/sens-to-sens.rs",
@@ -1288,27 +1056,32 @@
     {
       "path": "crates/sens-cli/src/bin/sens-trit.rs",
       "kind": "mixed",
-      "sha256": "bed631fcaade3b3ff5860b01bf783f9cc61be672626ac9ac3e95bf6c29684777"
+      "sha256": "e8267fec4e3e50d7ac01236388f4619857caebe1ed5847ddb1c57bc2a0be2a1d"
+    },
+    {
+      "path": "crates/sens-cli/src/bin/wsm-fs-record-consumer.rs",
+      "kind": "direct",
+      "sha256": "cdadeab6ac3b254f8a6050886dba5ab2fb87fd4fd169b4fe9d73182eed4c6ad4"
     },
     {
       "path": "crates/sens-cli/src/main.rs",
       "kind": "mixed",
-      "sha256": "e6d2af4b4d397e72383aa487f9e7a076f07eb4f2ee61345e34f0fff637803af4"
+      "sha256": "d63d7f749692690cefdb0aa6b6e752efe6b7503faf3f265ef5c093f7a5961b9c"
     },
     {
       "path": "crates/sens-cli/src/repl/surface_catalog.rs",
       "kind": "mixed",
-      "sha256": "3f911b8af1526d690870454abee01e37b40d383962620dab709dd22be94e5ee2"
+      "sha256": "8e50cb510774685334b47a97f17de3fc713ff8666a4a35a0bb99a8eb90565aac"
     },
     {
       "path": "crates/sens-cli/src/repl.rs",
       "kind": "mixed",
-      "sha256": "eff51dc4bd1d341903ce5947a1fb8bfa055ea258f28ef378564f7f597178e3a3"
+      "sha256": "33913adb1e8ae68b1f5ee198025c83b7f568eae97c2d828b18a46eae94bd1075"
     },
     {
       "path": "crates/sens-cli/src/zig_transport.rs",
       "kind": "mixed",
-      "sha256": "ada7e5594b86f48d885ee85aaabd099e08dc50bf9faeec07366f5a609293cd07"
+      "sha256": "61b83636231b6dfbc9c8e504a9a442f51ee96bc139fcd154b555b8d065ebbd6a"
     },
     {
       "path": "crates/sens-host/src/lib.rs",
@@ -1336,11 +1109,6 @@
       "sha256": "500677d2e244ace13fc264de4cc96d544d4076eefd06b7a8edaa167c87c99cc5"
     },
     {
-      "path": "crates/wsm-guard-core/src/lib.rs",
-      "kind": "mixed",
-      "sha256": "d6fc4ee2a85ab67d21666be2bedecaa86ad40243f4e2af52951e64af4644c7b3"
-    },
-    {
       "path": "crates/xtask/src/compiler_compile.rs",
       "kind": "mixed",
       "sha256": "e6590edf61181e0b294da1ea52d337c2f6eed815117ac97fe01e400e5120bbdb"
@@ -1354,11 +1122,6 @@
       "path": "crates/xtask/src/external_oracle.rs",
       "kind": "direct",
       "sha256": "4dc8e89367d52520a2909d5143f4af513b625d06ed4b7b77be2a9d4d7f34e47f"
-    },
-    {
-      "path": "crates/xtask.bak/src/external_oracle.rs",
-      "kind": "direct",
-      "sha256": "9b1b1c74e6fc9446347fc964853d48a8ba1bea1ffafd046d01bd83864e5db69e"
     }
   ]
 }
