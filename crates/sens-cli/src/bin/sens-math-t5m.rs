@@ -384,12 +384,53 @@ mod paired {
                 let got = eval_verified(text, &packed).unwrap();
                 assert_eq!(got.to_string(), expected, "test_id={id} layer=SENS");
             }
-            // Нова реальність: D12-first source profile widens exactly through D24+,
-            // тож 2^127 — законне точне ціле, а не «завеликий» літерал. Невалідними
-            // лишаються десяткові дроби, експоненти, хибна арність і не-число.
+            // Точні десяткові дроби та експоненти тепер проєктуються
+            // самим SENS у D12+/D5-дерево; Zig лише переносить ці слова.
+            // Обов'язково звіряємо фізичне обчислення з незалежним прямим SENS.
+            for (id, text) in [
+                ("ukrainian-rational", "(додати 0,5 2)"),
+                ("latin-exponent", "(додати 1e2 2)"),
+                ("ukrainian-exponent", "(додати 1е2 2)"),
+            ] {
+                let root = qualify(text)
+                    .unwrap_or_else(|error| panic!("test_id={id} layer=SENS-source {error}"));
+                let words = expected_words(&root)
+                    .unwrap_or_else(|error| panic!("test_id={id} layer=SENS-admission {error}"));
+                let physical = zig_transport::encode_t5m_exact_words(&words)
+                    .unwrap_or_else(|error| panic!("test_id={id} layer=Zig-T5M encode {error}"));
+                assert_eq!(
+                    zig_transport::decode_t5m_exact_words(&physical).unwrap(),
+                    words,
+                    "test_id={id} layer=physical-roundtrip"
+                );
+                let actual = eval_verified(text, &physical)
+                    .unwrap_or_else(|error| panic!("test_id={id} layer=physical-SENS {error}"));
+                let parsed = sens::parse(text)
+                    .unwrap_or_else(|error| panic!("test_id={id} layer=direct-reader {error}"));
+                let projected =
+                    sens::source_projection::project_ukr_decimal_integer_literals_with_minimum_width(
+                        &parsed, text, 12,
+                    ).unwrap_or_else(|error| panic!("test_id={id} layer=direct-projection {error}"));
+                let expected = sens::eval_parsed_expressions(
+                    &projected, &mut Session::default(),
+                ).unwrap_or_else(|error| panic!("test_id={id} layer=direct-SENS {error}")).value;
+                assert_eq!(actual, expected, "test_id={id} layer=physical-vs-direct-SENS");
+                if id == "ukrainian-rational" {
+                    assert!(
+                        matches!(actual, Value::NumericComposition(_)),
+                        "test_id={id} layer=SENS expected=exact-rational"
+                    );
+                } else {
+                    let Value::BinaryNumber(ref number) = actual else {
+                        panic!("test_id={id} layer=SENS expected=exact-integer");
+                    };
+                    assert_eq!(number.to_decimal_string(), "102", "test_id={id}");
+                }
+            }
+
+            // Невалідні лишаються некоректна арність, нечисловий корінь і
+            // машинні/ширинні записи: transport не може надати їм D12+ identity.
             for invalid in [
-                "(додати 0,5 2)",
-                "(додати 1e2 2)",
                 "(додати 1 2 3)",
                 "(як-є 1)",
             ] {
@@ -835,7 +876,6 @@ mod paired {
         #[test]
         fn physical_t5m_cannot_invent_numeric_admission_or_mutate_exact_bits() {
             for invalid in [
-                "(додати 0,5 2)",
                 "(додати 1 2 3)",
                 "(додати #d24:000000000000000000000001 2)",
                 "(додати #b101 2)",
