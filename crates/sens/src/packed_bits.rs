@@ -1,12 +1,11 @@
-//! ZIG-OWNED: native physical bit-packing is implemented by the sterile Zig ABI.
-//! Rust BitPacker is a compatibility facade: it stages exact-width value records,
+//! ZIG-OWNED: physical bit-packing is implemented by the sterile Zig ABI on
+//! native and wasm32 targets. Rust BitPacker only stages exact-width value records,
 //! then delegates raw MSB-first byte emission to sens_zig_bitpack_fields.
 //! PackedBitstream remains the exact-byte-count container/read adapter.
-//! wasm32 currently uses an explicitly named reference path until a compatible
-//! Zig archive is built for that final linker profile.
 //!
 //! This module assigns no SENS meaning and invents no word boundaries. The
-//! caller owns exact widths and the meaningful bit count; Zig owns native bytes.
+//! caller owns exact widths and the meaningful bit count; Rust contains no
+//! physical bit-emission path.
 //!
 //! ```
 //! use sens::{Bit2, Bit3, BitPacker};
