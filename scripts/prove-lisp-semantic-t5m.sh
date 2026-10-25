@@ -530,9 +530,13 @@ run_case run_law d10-empty-queue-mutant tests/semantic/d10-empty-queue-mutant.li
 # Обидві форми доводить саме SENS; Zig/T5M лише переносить точні байти.
 run_case run_law d10-clips-equal-head-positive tests/semantic/d10-clips-equal-head-law.lisp 1 core4
 run_case run_law d10-clips-equal-head-mutant tests/semantic/d10-clips-equal-head-mutant.lisp 0 core4
+run_case run_error_rejection d10-clips-all-asserts-improper-tail tests/semantic/d10-clips-all-asserts-improper-tail-negative.lisp Type 'car expects a non-empty list' core4
+run_case run_error_rejection d10-clips-drop-printouts-improper-tail tests/semantic/d10-clips-drop-printouts-improper-tail-negative.lisp Type 'car expects a non-empty list' core4
 sha256sum lib/core4.lisp \
   tests/semantic/d10-clips-equal-head-law.lisp \
-  tests/semantic/d10-clips-equal-head-mutant.lisp > "$evidence/d10-clips-equal-head-inputs.sha256"
+  tests/semantic/d10-clips-equal-head-mutant.lisp \
+  tests/semantic/d10-clips-all-asserts-improper-tail-negative.lisp \
+  tests/semantic/d10-clips-drop-printouts-improper-tail-negative.lisp > "$evidence/d10-clips-equal-head-inputs.sha256"
 # Перевірка кореня D5: D3 CDR не повинен перетворювати D1:ні на D3:().
 # SENS дає позитив D1:так і негатив D1:ні, Zig переносить лише фізичний код.
 run_case run_law d3-d4-no-tail-boundary-positive tests/semantic/d3-d4-no-tail-boundary-law.lisp 1
