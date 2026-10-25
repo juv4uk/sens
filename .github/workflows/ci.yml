@@ -686,5 +686,6 @@ jobs:
       files: |
         lib/core4.lisp
         lib/lisp-fs.lisp
+        tests/fixtures/wsm-fs-record-producer.lisp
     permissions:
       contents: write
