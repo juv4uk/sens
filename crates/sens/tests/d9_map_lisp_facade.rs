@@ -67,7 +67,7 @@ fn source_cutover_blocks_old_d6_let_and_unadmitted_d9_map_heads() {
         (
             "lib/lisp-fs.lisp",
             include_str!("../../../lib/lisp-fs.lisp"),
-            13,
+            0,
         ),
     ] {
         for head in [
@@ -138,11 +138,12 @@ fn persistent_map_uses_exact_d3_d4_heads_and_ratified_d8_structural_equality() {
     );
     assert!(
         heads.iter().all(|(width, bits)| match width {
+            1 => *bits == 1, // D1:так is a predicate value in the final condition arm.
             3 | 4 => true,
             8 => *bits == 0b1111_0111,
             _ => false,
         }),
-        "persistent map may use D3/D4 mechanisms and only D8 structural equality; got {heads:?}"
+        "persistent map may use D1 predicate values, D3/D4 mechanisms, and D8 structural equality; got {heads:?}"
     );
     assert!(
         heads.contains(&(8, 0b1111_0111)),
@@ -153,7 +154,7 @@ fn persistent_map_uses_exact_d3_d4_heads_and_ratified_d8_structural_equality() {
 #[test]
 fn internal_map_facade_is_not_d9_auto_dispatch() {
     let mut session = session();
-    let empty = eval_program("(внутрішня-мапа-список мапа-порожній)", &mut session)
+    let empty = eval_program("(внутрішня-мапа-список (мапа-порожній))", &mut session)
         .expect("private derived мапа-список closure");
     assert_eq!(empty.value.to_string(), "()");
     let failure = sens::parse_mixed_exact_domain("(101001100 (001 ()))")
@@ -177,7 +178,7 @@ fn persistent_map_bounded_update_space_matches_independent_model() {
     // exhaustive state-space witness rather than another single fixture.
     for trace in 0usize..81 {
         let mut n = trace;
-        let mut source = "мапа-порожній".to_string();
+        let mut source = "(мапа-порожній)".to_string();
         let mut model = std::collections::BTreeMap::<&str, String>::new();
 
         for step in 0..4 {
@@ -224,7 +225,7 @@ fn persistent_map_replaces_equal_key_without_growing_a_duplicate_entry() {
     let source = "(внутрішня-мапа-список
            (внутрішня-мапа-вставити \"a\" \"new\"
              (внутрішня-мапа-вставити \"b\" \"bee\"
-               (внутрішня-мапа-вставити \"a\" \"old\" мапа-порожній))))";
+               (внутрішня-мапа-вставити \"a\" \"old\" (мапа-порожній)))))";
     let listed = eval_program(source, &mut session)
         .expect("persistent association map replacement")
         .value
@@ -236,13 +237,13 @@ fn persistent_map_replaces_equal_key_without_growing_a_duplicate_entry() {
 fn internal_map_facade_inserts_and_reads_one_element() {
     let mut session = session();
     let inserted = eval_program(
-        "(внутрішня-мапа-отримати \"a\" (внутрішня-мапа-вставити \"a\" 7 мапа-порожній))",
+        "(внутрішня-мапа-отримати \"a\" (внутрішня-мапа-вставити \"a\" 7 (мапа-порожній)))",
         &mut session,
     )
     .expect("one-key persistent map insert and read use Lisp closures");
     assert_eq!(inserted.value.to_string(), "(7)");
     let listed = eval_program(
-        "(внутрішня-мапа-список (внутрішня-мапа-вставити \"a\" 7 мапа-порожній))",
+        "(внутрішня-мапа-список (внутрішня-мапа-вставити \"a\" 7 (мапа-порожній)))",
         &mut session,
     )
     .expect("one-key persistent map should traverse without D9 dispatch");

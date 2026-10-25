@@ -67,7 +67,7 @@ pub(crate) fn read_values(
             span,
         ));
     };
-    let expressions = crate::parse(&source).map_err(|mut error| {
+    let expressions = crate::parse_canonical_value_wire(&source).map_err(|mut error| {
         error.span = span;
         error
     })?;
@@ -109,7 +109,6 @@ pub(crate) fn read_all_values(
         .collect::<Result<Vec<_>, _>>()
         .map(Value::list)
 }
-
 
 pub(crate) fn eval_values(
     arguments: &[Value],
@@ -153,6 +152,24 @@ mod tests {
         assert_eq!(error.kind, ErrorKind::MechanismUnavailable);
         assert!(error.message.contains("READ_HOST_INPUT_UNAVAILABLE"));
         assert_eq!(error.span, span);
+    }
+
+    #[test]
+    fn read_preserves_exact_d7_word_from_canonical_write_wire() {
+        let result = read_values(
+            &[Value::String(Rc::from("1100110"))],
+            &Environment::root(),
+            Span::default(),
+        )
+        .expect("canonical D7 word must be readable as data");
+
+        assert_eq!(
+            result,
+            Value::DomainIdentity(crate::DomainIdentity::D7(crate::D7DataWord::from_word(
+                crate::Bit7::new(0b1100110).unwrap(),
+            ))),
+            "D7 W7 identity must not turn into a mathematical number during READ"
+        );
     }
 
     fn assert_predicate_wire_rejected(value: Value) {

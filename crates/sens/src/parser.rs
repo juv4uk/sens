@@ -86,9 +86,7 @@ pub fn parse_exact_domain_source(source: &str) -> Result<Vec<Expr>, LanguageErro
 /// Читач канонічного *значення* D8 READ: точні біти D1–D10 є
 /// тотожностями доменів, а математичні числа мають власний #q2-носій.
 /// Не змінює сумісний Lisp parser і не надає словам права виклику.
-// Тестовий вхід для перевірки режиму читача; production READ має власний маршрут.
-#[cfg(test)]
-fn parse_canonical_value_wire(source: &str) -> Result<Vec<Expr>, LanguageError> {
+pub(crate) fn parse_canonical_value_wire(source: &str) -> Result<Vec<Expr>, LanguageError> {
     parse_with_mode(source, ReaderMode::CanonicalValueWire)
 }
 

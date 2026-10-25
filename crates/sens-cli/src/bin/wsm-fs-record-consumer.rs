@@ -2,8 +2,8 @@
 //! Stored envelopes are quoted data; this binary never evaluates their payload.
 
 use sens::{
-    eval_parsed_expressions, load_core_library, Bija3, Bit3, Bit4, Bit9, CoreD4, CoreD9,
-    DomainIdentity, Environment, Expr, ExprKind, Session, Span, Value,
+    eval_parsed_expressions, load_core_library, Bija3, Bit3, Bit4, Bit7, Bit9, CoreD4, CoreD9,
+    D7DataWord, DomainIdentity, Environment, Expr, ExprKind, Session, Span, Value,
 };
 use std::io::{self, Read};
 use std::rc::Rc;
@@ -46,9 +46,21 @@ fn string_value(value: &str) -> Expr {
     }
 }
 
-fn symbol_value(value: &str) -> Expr {
+fn d7_text_data(value: &str) -> Expr {
+    assert!(value.is_ascii(), "F6 protocol marker must be ASCII D7 data");
     Expr {
-        kind: ExprKind::Symbol(Rc::from(value)),
+        kind: ExprKind::List(
+            value
+                .bytes()
+                .map(|byte| Expr {
+                    kind: ExprKind::DomainIdentity(DomainIdentity::D7(D7DataWord::from_word(
+                        Bit7::new(byte).expect("ASCII byte fits D7"),
+                    ))),
+                    span: Span::default(),
+                })
+                .collect::<Vec<_>>()
+                .into(),
+        ),
         span: Span::default(),
     }
 }
@@ -118,12 +130,15 @@ fn main() {
     let root_package = call(exact_d8_read(), vec![string_value(&records[0])]);
     let object_package = call(exact_d8_read(), vec![string_value(&records[1])]);
     let object_packages = d4_list(vec![object_package]);
-    let reconstruction = call(exact_d9(0b010101000), vec![root_package.clone(), object_packages]);
+    let reconstruction = call(
+        exact_d9(0b010101000),
+        vec![root_package.clone(), object_packages],
+    );
     // SENS performs the D3 selection and D8 structural comparison. Rust
     // checks only the resulting exact D1 answer.
     let status = call(exact_d3(0b100), vec![reconstruction.clone()]);
-    // The SENS reconstruction verdict is the symbol `accepted`, not a D7 text list.
-    let expected = call(exact_d3(0b001), vec![symbol_value("accepted")]);
+    // READ повертає текст як список точних D7-слів; звіряємо саме цей носій.
+    let expected = call(exact_d3(0b001), vec![d7_text_data("accepted")]);
     let accepted = call(exact_d8_equal(), vec![status, expected]);
     let verdict = eval_parsed_expressions(&[accepted], &mut session)
         .unwrap_or_else(|error| {
@@ -147,12 +162,15 @@ fn main() {
             exact_d3(0b011), // D3 CDR of the first (format . value) pair
             vec![call(exact_d3(0b100), vec![root_package.clone()])],
         );
-        let source_marker = call(exact_d3(0b001), vec![symbol_value("wsm-fs-root")]);
+        let source_marker = call(exact_d3(0b001), vec![d7_text_data("wsm-fs-root")]);
         let read_marker = call(exact_d8_read(), vec![string_value("wsm-fs-root")]);
         let format_proof = d4_list(vec![
             call(exact_d8_equal(), vec![format_value.clone(), source_marker]),
             call(exact_d8_equal(), vec![format_value.clone(), read_marker]),
-            call(exact_d8_equal(), vec![format_value, string_value("wsm-fs-root")]),
+            call(
+                exact_d8_equal(),
+                vec![format_value, string_value("wsm-fs-root")],
+            ),
         ]);
         let format_proof_result = eval_parsed_expressions(&[format_proof], &mut session)
             .map(|result| result.value.to_string())
@@ -183,26 +201,18 @@ mod tests {
     use std::io::Cursor;
 
     #[test]
-    fn f6_quoted_marker_matches_native_source() {
-        // Обидва об'єкти створює та обчислює SENS; хост не визначає
-        // рівність source-атома та інертного D7-списку гліфів.
-        let mut session = Session {
-            environment: Environment::root(),
+    fn f6_accepted_marker_is_encoded_as_exact_d7_words() {
+        let value = d7_text_data("accepted");
+        let ExprKind::List(words) = value.kind else {
+            panic!("text data must be a D7 word list");
         };
-        load_core_library(&mut session).expect("native SENS Core");
-        let expected_from_source = sens::eval_program("(як-є accepted)", &mut session)
-            .expect("native SENS quoted symbol")
-            .value;
-        let expected_from_wire = eval_parsed_expressions(
-            &[call(exact_d3(0b001), vec![symbol_value("accepted")])],
-            &mut session,
-        )
-        .expect("native D3:001 SENS QUOTE")
-        .value;
-        assert_eq!(
-            expected_from_wire, expected_from_source,
-            "test_id=F6-QUOTED-MARKER layer=SENS expected=source-quote actual=transport-AST"
-        );
+        assert_eq!(words.len(), "accepted".len());
+        for (word, byte) in words.iter().zip(b"accepted") {
+            let ExprKind::DomainIdentity(DomainIdentity::D7(word)) = &word.kind else {
+                panic!("text symbol must lower only to D7 identities");
+            };
+            assert_eq!(word.word().packed_bits(), *byte);
+        }
     }
 
     #[test]
@@ -244,7 +254,10 @@ mod tests {
             &b"root\nob\0ject\n"[..],
             &b"\xff\nobject\n"[..],
         ] {
-            assert!(read_two_records(stream).is_err(), "пошкоджені байти прийнято");
+            assert!(
+                read_two_records(stream).is_err(),
+                "пошкоджені байти прийнято"
+            );
         }
         let oversized = format!("{}\nobject\n", "x".repeat(MAX_RECORD_BYTES + 1));
         assert!(read_two_records(oversized.as_bytes()).is_err());

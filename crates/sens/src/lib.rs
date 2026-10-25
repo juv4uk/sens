@@ -307,6 +307,7 @@ pub use eval::{
     eval_parsed_expressions_incremental, eval_program, evaluate as eval_expr, EvalResult,
 };
 pub use eval::{exact_arity, read_single_quoted_datum};
+pub(crate) use parser::parse_canonical_value_wire;
 pub use parser::{parse, parse_exact_domain_source};
 pub use presentation::{
     ast_nodes, present_system_message, render_ast, render_ast_node, render_error_for_presentation,

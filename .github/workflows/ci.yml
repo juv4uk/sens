@@ -745,7 +745,7 @@ jobs:
       # exact D11 generator bytes survive even when the later suite times out.
       - name: Export canonical D11 SENS/Zig T5M pair regeneration evidence
         if: ${{ always() && contains(github.event.head_commit.message, 'SENS_PAIR_REGEN') }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: sens-d11-pair-regen-${{ github.sha }}
           path: ${{ runner.temp }}/changed-t5m-pairs/**
@@ -768,7 +768,7 @@ jobs:
       # SENS CLI + Zig/T5M route when explicitly requested for pair regeneration.
       - name: Export canonical SENS/Zig T5M pair regeneration evidence
         if: ${{ always() && contains(github.event.head_commit.message, 'SENS_PAIR_REGEN') }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: sens-pair-regen-${{ github.sha }}
           # Artifact contains only the physical Core4 minted by this exact

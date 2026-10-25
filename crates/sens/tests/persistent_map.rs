@@ -25,13 +25,13 @@ fn observe(session: &mut Session, source: &str) -> Value {
 #[test]
 fn порожня_мапа_не_повертає_вигаданих_значень() {
     let mut session = map_session();
-    assert_eq!(observe(&mut session, "мапа-порожній").to_string(), "()");
+    assert_eq!(observe(&mut session, "(мапа-порожній)").to_string(), "()");
     assert_eq!(
-        observe(&mut session, "(мапа-отримати (як-є a) мапа-порожній)").to_string(),
+        observe(&mut session, "(мапа-отримати (як-є a) (мапа-порожній))").to_string(),
         "()"
     );
     assert_eq!(
-        observe(&mut session, "(мапа-містить? (як-є a) мапа-порожній)").as_predicate_bit(),
+        observe(&mut session, "(мапа-містить? (як-є a) (мапа-порожній))").as_predicate_bit(),
         Some(false),
     );
 }
@@ -39,7 +39,7 @@ fn порожня_мапа_не_повертає_вигаданих_значен
 #[test]
 fn вставлення_та_пошук_виконуються_українським_lisp() {
     let mut session = map_session();
-    let m = "(мапа-вставити (як-є a) (як-є v) мапа-порожній)";
+    let m = "(мапа-вставити (як-є a) (як-є v) (мапа-порожній))";
     let get = format!("(мапа-отримати (як-є a) {m})");
     assert_eq!(observe(&mut session, &get).to_string(), "(v)");
     let contains = format!("(мапа-містить? (як-є a) {m})");
@@ -57,7 +57,7 @@ fn вставлення_та_пошук_виконуються_українсь�
 #[test]
 fn відсутність_не_дорівнює_записаному_nil() {
     let mut session = map_session();
-    let m = "(мапа-вставити (як-є a) (як-є ()) мапа-порожній)";
+    let m = "(мапа-вставити (як-є a) (як-є ()) (мапа-порожній))";
     assert_eq!(
         observe(&mut session, &format!("(мапа-отримати (як-є a) {m})")).to_string(),
         "(())"
@@ -72,7 +72,7 @@ fn відсутність_не_дорівнює_записаному_nil() {
 fn рівний_ключ_замінює_значення_без_дублікатів() {
     let mut session = map_session();
     let m = "(мапа-вставити (як-є a) (як-є new)
-                 (мапа-вставити (як-є a) (як-є old) мапа-порожній))";
+                 (мапа-вставити (як-є a) (як-є old) (мапа-порожній)))";
     assert_eq!(
         observe(&mut session, &format!("(мапа-отримати (як-є a) {m})")).to_string(),
         "(new)"
@@ -86,7 +86,7 @@ fn рівний_ключ_замінює_значення_без_дублікат
 #[test]
 fn нова_мапа_зберігає_стару_і_порядок_пар() {
     let mut session = map_session();
-    let original = "(мапа-вставити (як-є b) (як-є bee) мапа-порожній)";
+    let original = "(мапа-вставити (як-є b) (як-є bee) (мапа-порожній))";
     let updated = format!("(мапа-вставити (як-є a) (як-є aye) {original})");
     assert_eq!(
         observe(&mut session, &format!("(мапа-список {original})")).to_string(),
