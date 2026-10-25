@@ -106,3 +106,16 @@ Checkpoint Satya від коміту 0644564 прямо вказує, що F6 в
 Спостережені статичні перевірки: обидва нові Lisp-свідки мають збалансовані дужки та закриті рядки; у runner присутній виклик обох законів і запис SHA-256 в evidence. **Нативний прогін не виконано в цьому ході**: Combined Status API повернув порожній список статусів для перевірених commits — це не доказ workflow PASS. Отже, ці нові свідки — під'єднані до runner, але їхній результат досі `NOT_VERIFIED`, доки немає справжньої квитанції SENS/Zig/T5M.
 
 Ці тимчасові bundle-тести не ремонтують зафіксований паралельним агентом фізичний F6-блокер. Для producer→consumer інтеграції окремо перевипустити canonical `lib/lisp-fs.sens` і `tests/fixtures/wsm-fs-record-producer.sens` через чинний SENS/Zig/T5M mint та перевірити source/physical SHA. Не ручно генерувати байти й не трактувати сам факт оновлення `.lisp` як remint.
+
+
+## Nirbheeka · цільовий фізичний remint, переданий штатному CI · 25.10.2026
+
+Підтверджено на поточному `main`, що `.github/workflows/ci.yml` містить job `remint-targeted`, який викликає `.github/workflows/remint-drifted-pairs.yml` і передає точні входи:
+- `lib/core4.lisp`
+- `lib/lisp-fs.lisp`
+
+Job запускається тільки коли commit-повідомлення містить точний маркер `SENS_PAIR_REGEN`. Це штатний шлях для повторного відтворення фізичних пар поточним SENS/Zig/T5M; двійкові `.sens` не редагуються вручну.
+
+Поточний release blocker залишається фізичним: попередній hosted run `40196586075` мав job `Канонічно відновити фізичні F6/Core4 пари` зі статусом `skipped`, бо той запуск не задовольнив умову маркера. Старі результати D10/D6 із run `40191821188` належать іншому SHA; їх не переносимо як актуальний verdict. Після remint необхідно окремо перевірити актуальні source/physical hashes, `scripts/split-core4.py --check`, F6 producer→consumer і повний фізичний SENS/Zig/T5M proof на одному candidate SHA.
+
+Цю контрольну точку навмисно збережено під commit message з `SENS_PAIR_REGEN`, щоб активувати саме вже наявний у `main` native remint-job. Сам commit не є результатом remint, нативним PASS чи релізним дозволом.
