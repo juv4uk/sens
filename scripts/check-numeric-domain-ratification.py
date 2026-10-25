@@ -85,7 +85,6 @@ def validate(ratification, lang):
     for needle in (
         "(number-ladder-all-kernels",
         "(numeric-domain-current-d12-law-20261024",
-        "(numeric-domain-current-signed-integer-law-20261018",
         "(binary-domain-words-not-arithmetic-operands",
         "D(12 * 2^n)",
         "D12",
@@ -93,6 +92,29 @@ def validate(ratification, lang):
         "contracts/numeric-domains-ratification.lisp",
     ):
         need(needle in lang, "language contract: " + needle)
+
+    # Contract 12.0 supersedes the old standalone 2026-10-18 signed-integer
+    # marker with its normative numeric-first invariant and explicit release gate.
+    # Accept either the historical amendment or the current Contract 12.0 form,
+    # but never accept a language contract with no owner-ratified signed law.
+    contract12_active = all(marker in lang for marker in (
+        "(contract-12-owner-decision",
+        "(contract-12-numeric-first",
+        "(contract-12-release-gate",
+    ))
+    legacy_signed_law = "(numeric-domain-current-signed-integer-law-20261018" in lang
+    need(legacy_signed_law or contract12_active,
+         "language contract: missing owner-ratified signed-integer authority")
+    if contract12_active:
+        need(
+            "2026-10-24 D12 signed two's-complement arithmetic overrides ALL older D24-first" in lang,
+            "Contract 12.0 D12 signed numeric-first law",
+        )
+        need(
+            "native SENS and Zig/T5M proof of exact domain words" in lang
+            and "D12 numeric boundaries" in lang,
+            "Contract 12.0 explicit native-execution release gate",
+        )
     need("number-width-ratified.json" not in lang, "language still cites retired JSON")
     expected = (("D12", 12), ("D24", 24), ("D48", 48),
                 ("D96", 96), ("D192", 192))
@@ -250,6 +272,11 @@ def selftest(ratification, lang):
         (damage("(current-normative-source .", "(obsolete-source ."), lang),
         (ratification, lang.replace("(numeric-domain-current-d12-law-20261024",
                                     "(removed-d12-law", 1)),
+        (ratification, lang.replace("(contract-12-numeric-first",
+                                    "(removed-contract-12-numeric-first", 1)),
+        (ratification, lang.replace(
+            "2026-10-24 D12 signed two's-complement arithmetic overrides ALL older D24-first",
+            "D12 signed-integer statement deliberately removed", 1)),
     )
     for index, (damaged_contract, damaged_lang) in enumerate(mutants):
         need((damaged_contract, damaged_lang) != (ratification, lang),
