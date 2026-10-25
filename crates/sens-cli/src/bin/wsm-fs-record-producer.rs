@@ -10,25 +10,29 @@ const MAX_RECORD_BYTES: usize = 64 * 1024;
 
 // I/O-only diagnosis: identify the actual SENS runtime carrier, but never
 // coerce it into text or admit it as a valid external record.
-fn f6_record_type_error(value: &Value) -> &'static str {
+fn f6_record_type_error(value: &Value) -> String {
     match value {
-        Value::Nil => "F6_RECORD_TYPE expected=String-or-Text7 actual=Nil",
-        Value::Bool(_) => "F6_RECORD_TYPE expected=String-or-Text7 actual=Bool",
-        Value::Number(_, _) => "F6_RECORD_TYPE expected=String-or-Text7 actual=Number",
-        Value::Rational(_) => "F6_RECORD_TYPE expected=String-or-Text7 actual=Rational",
-        Value::BinaryNumber(_) => "F6_RECORD_TYPE expected=String-or-Text7 actual=BinaryNumber",
-        Value::NumericComposition(_) => "F6_RECORD_TYPE expected=String-or-Text7 actual=NumericComposition",
-        Value::Sid(_) => "F6_RECORD_TYPE expected=String-or-Text7 actual=LegacySlot",
-        Value::DomainIdentity(_) => "F6_RECORD_TYPE expected=String-or-Text7 actual=DomainIdentity",
-        Value::Symbol(_) => "F6_RECORD_TYPE expected=String-or-Text7 actual=Symbol",
-        Value::Closure(_) => "F6_RECORD_TYPE expected=String-or-Text7 actual=Closure",
-        Value::Macro(_) => "F6_RECORD_TYPE expected=String-or-Text7 actual=Macro",
-        Value::Builtin(_) => "F6_RECORD_TYPE expected=String-or-Text7 actual=Builtin",
-        Value::HostHandle { .. } => "F6_RECORD_TYPE expected=String-or-Text7 actual=HostHandle",
-        Value::Vector(_) => "F6_RECORD_TYPE expected=String-or-Text7 actual=Vector",
-        Value::NumericBuffer(_) => "F6_RECORD_TYPE expected=String-or-Text7 actual=NumericBuffer",
-        Value::Pair(_) => "F6_RECORD_TYPE expected=String-or-Text7 actual=Pair",
-        Value::String(_) | Value::Text7(_) => "F6_RECORD_TYPE internal-classifier-error",
+        Value::Nil => "F6_RECORD_TYPE expected=String-or-Text7 actual=Nil".to_owned(),
+        Value::Bool(_) => "F6_RECORD_TYPE expected=String-or-Text7 actual=Bool".to_owned(),
+        Value::Number(_, _) => "F6_RECORD_TYPE expected=String-or-Text7 actual=Number".to_owned(),
+        Value::Rational(_) => "F6_RECORD_TYPE expected=String-or-Text7 actual=Rational".to_owned(),
+        Value::BinaryNumber(_) => "F6_RECORD_TYPE expected=String-or-Text7 actual=BinaryNumber".to_owned(),
+        Value::NumericComposition(_) => "F6_RECORD_TYPE expected=String-or-Text7 actual=NumericComposition".to_owned(),
+        Value::Sid(_) => "F6_RECORD_TYPE expected=String-or-Text7 actual=LegacySlot".to_owned(),
+        Value::DomainIdentity(identity) => format!(
+            "F6_RECORD_TYPE expected=String-or-Text7 actual=DomainIdentity D{}:{}",
+            identity.width(),
+            identity
+        ),
+        Value::Symbol(_) => "F6_RECORD_TYPE expected=String-or-Text7 actual=Symbol".to_owned(),
+        Value::Closure(_) => "F6_RECORD_TYPE expected=String-or-Text7 actual=Closure".to_owned(),
+        Value::Macro(_) => "F6_RECORD_TYPE expected=String-or-Text7 actual=Macro".to_owned(),
+        Value::Builtin(_) => "F6_RECORD_TYPE expected=String-or-Text7 actual=Builtin".to_owned(),
+        Value::HostHandle { .. } => "F6_RECORD_TYPE expected=String-or-Text7 actual=HostHandle".to_owned(),
+        Value::Vector(_) => "F6_RECORD_TYPE expected=String-or-Text7 actual=Vector".to_owned(),
+        Value::NumericBuffer(_) => "F6_RECORD_TYPE expected=String-or-Text7 actual=NumericBuffer".to_owned(),
+        Value::Pair(_) => "F6_RECORD_TYPE expected=String-or-Text7 actual=Pair".to_owned(),
+        Value::String(_) | Value::Text7(_) => "F6_RECORD_TYPE internal-classifier-error".to_owned(),
     }
 }
 
@@ -177,7 +181,7 @@ mod tests {
             f6_record_type_error(&Value::DomainIdentity(
                 sens::DomainIdentity::D1(sens::PredicateBit::from_word(sens::Bit1::new(1).unwrap()))
             )),
-            "F6_RECORD_TYPE expected=String-or-Text7 actual=DomainIdentity"
+            "F6_RECORD_TYPE expected=String-or-Text7 actual=DomainIdentity D1:1"
         );
     }
 
