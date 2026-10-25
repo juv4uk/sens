@@ -372,6 +372,8 @@
 
 ; Будь-яка зміна цього джерела вимагає native SENS → Zig/T5M remint
 ; lib/lisp-fs.sens до semantic-law sweep; source/physical drift — RED.
+; RELEASE REPAIR 2026-10-25: mint and F6 producer→consumer proof must use
+; this exact post-D9-key-order source and one exact main SHA.
 ; F6: список зв'язувань містить ЛИШЕ пари (ім'я . адреса).
 ; Д3:() завершує обхід; атомний запис або хвіст не приймаються.
 ; Тут перевіряємо форму, не перейменовуємо і не обчислюємо D7-адреси.
