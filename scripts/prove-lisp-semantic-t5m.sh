@@ -1116,6 +1116,22 @@ run_case run_error_rejection d11-query-status-preflight "$d11_status_preflight" 
 sha256sum lib/d11-query-unique.lisp tests/semantic/d11-query-status-*.lisp \
   tests/fixtures/d11-query-status-*-negative.lisp > "$evidence/d11-query-status-inputs.sha256"
 
+# D11: два конкретні свідки неоднозначності без нової координати.
+d11_two_law="$evidence/d11-query-two-witness-positive.lisp"
+d11_two_mutant="$evidence/d11-query-two-witness-mutant.lisp"
+d11_two_bad="$evidence/d11-query-two-witness-improper.lisp"
+d11_two_poison="$evidence/d11-query-two-witness-preflight.lisp"
+cat -- lib/d11-query-unique.lisp tests/semantic/d11-query-two-witness-law.lisp > "$d11_two_law"
+cat -- lib/d11-query-unique.lisp tests/semantic/d11-query-two-witness-mutant.lisp > "$d11_two_mutant"
+cat -- lib/d11-query-unique.lisp tests/fixtures/d11-query-two-witness-improper-negative.lisp > "$d11_two_bad"
+cat -- lib/d11-query-unique.lisp tests/fixtures/d11-query-two-witness-preflight-negative.lisp > "$d11_two_poison"
+run_case run_law d11-query-two-witness-positive "$d11_two_law" 1 core4
+run_case run_law d11-query-two-witness-mutant "$d11_two_mutant" 0 core4
+run_case run_error_rejection d11-query-two-witness-improper "$d11_two_bad" Type 'car expects a non-empty list' core4
+run_case run_error_rejection d11-query-two-witness-preflight "$d11_two_poison" Type 'car expects a non-empty list' core4
+sha256sum lib/d11-query-unique.lisp tests/semantic/d11-query-two-witness-*.lisp \
+  tests/fixtures/d11-query-two-witness-*-negative.lisp > "$evidence/d11-query-two-witness-inputs.sha256"
+
 # Д11: однозначний пошук — чистий SENS, без третьої істини чи D11 opcode.
 # Два проходи: повний D3-хребет перед предикатом, потім вибір 0/1/2+.
 d11_unique_law="$evidence/d11-unique-query-positive.lisp"
