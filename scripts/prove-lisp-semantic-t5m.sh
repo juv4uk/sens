@@ -14,22 +14,37 @@ evidence="$3"
 test -x "$sens" && test -x "$trit"
 mkdir -p "$evidence"
 
-# Materialize ratified physical T5M law pairs from their reviewed source receipts.
-# Python transports bytes only; all laws below are executed by native SENS/Zig.
+# Materialize every reviewed T5M law-pair receipt before the native sweep.
+# These scripts transport reviewed bytes only; all law semantics are executed by SENS/Zig.
 python3 scripts/mint-jivanmukta-law-pairs.py
+python3 scripts/mint-moksha-law-pairs.py
+python3 scripts/mint-samadhi-law-pairs.py
 for stem in \
   d5-numberp-nonnumber-law \
   d5-d12-zerop-law \
   d5-d12-numberp-law \
   d10-clips-printout-head-direct-law \
   d10-clips-assert-head-direct-law \
-  d10-empty-queue-law; do
+  d10-empty-queue-law \
+  d6-all-invalid-root-law \
+  d6-any-invalid-root-law \
+  d6-d12-ratio-normalizes-integer-law \
+  d4-append-general-proper-law \
+  d6-d12-integer-rational-law \
+  d6-let-letstar-preflight-law \
+  compiler-reverse-onto-proper-law \
+  d6-intersection-order-law \
+  d5-pairlis-total-list-law \
+  d5-member-total-list-law \
+  d5-assoc-total-list-law \
+  d9-f6-object-addresses-law \
+  result-status-d7-label-law; do
   if [[ ! -s "tests/semantic/$stem.sens" || ! -s "tests/semantic/$stem" ]]; then
     echo "::error::SENS_LAW_PAIR_MATERIALIZATION_FAILED id=$stem expected=non-empty-sens-and-view actual=missing-or-empty" >&2
     exit 2
   fi
 done
-echo "SENS_LAW_PAIR_MATERIALIZATION_PASS count=6 evaluator=SENS"
+echo "SENS_LAW_PAIR_MATERIALIZATION_PASS count=19 evaluator=SENS"
 
 
 # Спочатку перевіряємо працездатність самого SENS-виконавця на наявному
