@@ -40,6 +40,8 @@ jobs:
           python3 tests/test_single_data_schema.py
           # The Nirbhaya helper must mint from current sources, never restore archived T5M blobs.
           python3 -m unittest tests.test_mint_nirbhaya_law_pairs -v
+          # Concurrent remint recovery must not widen an explicit source manifest.
+          python3 -m unittest tests.test_remint_explicit_manifest_scope -v
 
       - name: Чинний SENS захист — host debt та незмінність мови
         shell: bash
