@@ -397,6 +397,14 @@ jobs:
                   # виконуються тільки повним SENS law-runner із Core4.
                   "tests/semantic/d6-any-improper-tail-negative.lisp",
                   "tests/semantic/d6-all-improper-tail-negative.lisp",
+                  # Д3/Д4 ZIP laws depend on lib/list-zip-general.lisp and are run
+                  # by the canonical SENS law runner with that library prepended.
+                  # Do not execute these witnesses as isolated changed-file programs.
+                  "tests/semantic/d4-zip-equal-length-law.lisp",
+                  "tests/semantic/d4-zip-equal-length-mutant.lisp",
+                  "tests/semantic/d4-zip-extra-left-negative.lisp",
+                  "tests/semantic/d4-zip-extra-right-negative.lisp",
+                  "tests/semantic/d4-zip-improper-right-negative.lisp",
                   # D9/F6 package-key laws need persistent-map/world/content-store/lisp-fs.
                   # The dedicated native law runner assembles that dependency stack; do not
                   # execute these leaf witnesses alone in the generic changed-file runner.
