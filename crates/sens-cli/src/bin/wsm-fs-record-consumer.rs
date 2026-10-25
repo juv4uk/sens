@@ -2,8 +2,8 @@
 //! Stored envelopes are quoted data; this binary never evaluates their payload.
 
 use sens::{
-    eval_parsed_expressions, load_core_library, Bija3, Bit3, Bit4, Bit7, Bit9, CoreD4, CoreD9,
-    D7DataWord, DomainIdentity, Environment, Expr, ExprKind, Session, Span, Value,
+    eval_parsed_expressions, load_core_library, Bija3, Bit3, Bit4, Bit9, CoreD4, CoreD9,
+    DomainIdentity, Environment, Expr, ExprKind, Session, Span, Value,
 };
 use std::io::{self, Read};
 use std::rc::Rc;
@@ -40,20 +40,9 @@ fn string_value(value: &str) -> Expr {
     }
 }
 
-fn d7_text(value: &str) -> Expr {
+fn symbol_value(value: &str) -> Expr {
     Expr {
-        kind: ExprKind::List(
-            value
-                .bytes()
-                .map(|byte| Expr {
-                    kind: ExprKind::DomainIdentity(DomainIdentity::D7(D7DataWord::from_word(
-                        Bit7::new(byte).expect("D7 protocol glyph"),
-                    ))),
-                    span: Span::default(),
-                })
-                .collect::<Vec<_>>()
-                .into(),
-        ),
+        kind: ExprKind::Symbol(Rc::from(value)),
         span: Span::default(),
     }
 }
@@ -132,7 +121,8 @@ fn main() {
     // SENS performs the D3 selection and D8 structural comparison. Rust
     // checks only the resulting exact D1 answer.
     let status = call(exact_d3(0b100), vec![reconstruction]);
-    let expected = call(exact_d3(0b001), vec![d7_text("accepted")]);
+    // The SENS reconstruction verdict is the symbol `accepted`, not a D7 text list.
+    let expected = call(exact_d3(0b001), vec![symbol_value("accepted")]);
     let accepted = call(exact_d8_equal(), vec![status, expected]);
     let verdict = eval_parsed_expressions(&[accepted], &mut session)
         .unwrap_or_else(|error| {
