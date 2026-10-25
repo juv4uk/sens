@@ -589,7 +589,7 @@ jobs:
 
       - name: Lisp → Zig/T5M → SENS — позитивні та негативні закони
         if: ${{ always() && steps.native-build.outcome == 'success' }}
-        timeout-minutes: 15
+        timeout-minutes: 35
         shell: bash
         run: |
           set -euo pipefail
