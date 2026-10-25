@@ -365,10 +365,6 @@ pub(crate) fn d5_binding_identity_for_definition(name: &str) -> Option<CoreDomai
         .map(|row| CoreDomainIdentity::D5(CoreD5::from_word(Bit5::new(row.bits).unwrap())))
 }
 
-/// Binding-only D6 lookup for an already-evaluated Lisp definition.
-///
-/// A matching name does not make D6 callable. The caller may populate an
-/// exact mechanism slot only when a real root callable value exists.
 /// Resolve only the canonical Ukrainian source spelling for a D6 Lisp-owned definition.
 ///
 /// The binding table is the identity authority; English/Sanskrit peer names remain
@@ -384,6 +380,10 @@ pub(crate) fn d6_uk_source_identity(name: &str) -> Option<DomainIdentity> {
         })
 }
 
+/// Binding-only D6 lookup for an already-evaluated Lisp definition.
+///
+/// A matching name does not make D6 callable. The caller may populate an
+/// exact mechanism slot only when a real root callable value exists.
 pub(crate) fn d6_binding_identity_for_definition(name: &str) -> Option<DomainIdentity> {
     D6_DEFINITION_BINDINGS
         .iter()
