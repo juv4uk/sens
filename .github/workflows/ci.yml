@@ -367,6 +367,11 @@ jobs:
                   # Ці дві допоміжні Lisp-бібліотеки виконуються лише в бандлі мовного свідка.
                   "tests/fixtures/witness-runner.lisp",
                   "tests/fixtures/epistemic-authority-witness.lisp",
+                  # Д5/Д11 last-occurrence: ці свідки залежать від DEFINE з lib/;
+                  # перевіряються обов’язковим нативним SENS/Zig/T5M law-runner.
+                  "tests/fixtures/d11-last-occurrence-d1-value-law.lisp",
+                  "tests/fixtures/d11-last-occurrence-improper-root.lisp",
+                  "tests/fixtures/d11-last-occurrence-improper-late-tail.lisp",
                   "tests/fixtures/d11-list-equality-improper-left-must-error.lisp",
                   "tests/fixtures/d11-list-equality-improper-right-must-error.lisp",
                   "tests/fixtures/d11-list-equality-invalid-singleton-must-error.lisp",
