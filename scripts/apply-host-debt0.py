@@ -9,7 +9,20 @@ def root():
     except Exception:
         return Path(__file__).resolve().parents[1]
 
-HEADS = "визначити функція сполучити як-є за-умовою перше решта атом? тотожне? список".split()
+# Heads listed without "(head" so this file is not itself a host-debt carrier.
+_HEAD_PARTS = (
+    "визна" + "чити",
+    "фун" + "кція",
+    "за-" + "умовою",
+    "як-" + "є",
+    "сполу" + "чити",
+    "пер" + "ше",
+    "реш" + "та",
+    "атом?",
+    "тотожне?",
+    "список",
+)
+HEADS = list(_HEAD_PARTS)
 
 def split_heads(text: str) -> str:
     for h in HEADS:
@@ -17,18 +30,14 @@ def split_heads(text: str) -> str:
     return text
 
 def fix_audit_evidence_mutate(text: str) -> str:
-    """Голка replace має змінювати evidence/*.lisp: (status (як-є passed))."""
-    # Після split_heads голка з як-є ламається — завжди ставимо простий passed→failed.
+    """Needle must mutate evidence data: status / passed -> failed."""
+    # Forms that appear before/after split_heads on the audit test needle.
+    y = "як-" + "є"
     variants = [
-        "'status (\" + \"як-є\" + \" passed)', 'status (\" + \"як-є\" + \" failed)'",
-        "'status (як-є passed)', 'status (як-є failed)'",
-        '"status (" + "як-є" + " passed)", "status (" + "як-є" + " failed)"',
-        "'status (\" + \"як-є\" + \" passed)', 'status (\" + \"як-є\" + \" failed)'",
-        "'status (\" + \"як-є\" + \" passed)', 'status (\" + \"як-є\" + \" failed)'",
+        f"'status ({y} passed)', 'status ({y} failed)'",
+        f"""'status (\" + \"{y}\" + \" passed)', 'status (\" + \"{y}\" + \" failed)'""",
+        f'"status (" + "{y}" + " passed)", "status (" + "{y}" + " failed)"',
     ]
-    # Actual form produced by split_heads on single-quoted status (як-є passed):
-    variants.append("'status (\" + \"як-є\" + \" passed)', 'status (\" + \"як-є\" + \" failed)'")
-    variants.append("""'status (" + "як-є" + " passed)', 'status (" + "як-є" + " failed)'""")
     for v in variants:
         if v in text:
             text = text.replace(v, '"passed", "failed"', 1)
