@@ -118,7 +118,7 @@ fn main() {
     let root_package = call(exact_d8_read(), vec![string_value(&records[0])]);
     let object_package = call(exact_d8_read(), vec![string_value(&records[1])]);
     let object_packages = d4_list(vec![object_package]);
-    let reconstruction = call(exact_d9(0b010101000), vec![root_package, object_packages]);
+    let reconstruction = call(exact_d9(0b010101000), vec![root_package.clone(), object_packages]);
     // SENS performs the D3 selection and D8 structural comparison. Rust
     // checks only the resulting exact D1 answer.
     let status = call(exact_d3(0b100), vec![reconstruction.clone()]);
@@ -138,7 +138,28 @@ fn main() {
         let detail = eval_parsed_expressions(&[reconstruction], &mut session)
             .map(|result| result.value.to_string())
             .unwrap_or_else(|error| format!("diagnostic-evaluation-error={error}"));
-        eprintln!("root reconstruction rejected: verdict={verdict} detail={detail}");
+        // F6 fail-closed proof: inspect only the D1 equality verdicts of
+        // the exact FIRST root field. Do not render the incoming payload:
+        // only SENS decides whether WRITE→READ preserved the format identity.
+        // This differentiates a quoted D7 marker, a D8 READ marker, and a
+        // host String without accepting any of them as an extra protocol type.
+        let format_value = call(
+            exact_d3(0b011), // D3 CDR of the first (format . value) pair
+            vec![call(exact_d3(0b100), vec![root_package.clone()])],
+        );
+        let source_marker = call(exact_d3(0b001), vec![symbol_value("wsm-fs-root")]);
+        let read_marker = call(exact_d8_read(), vec![string_value("wsm-fs-root")]);
+        let format_proof = d4_list(vec![
+            call(exact_d8_equal(), vec![format_value.clone(), source_marker]),
+            call(exact_d8_equal(), vec![format_value.clone(), read_marker]),
+            call(exact_d8_equal(), vec![format_value, string_value("wsm-fs-root")]),
+        ]);
+        let format_proof_result = eval_parsed_expressions(&[format_proof], &mut session)
+            .map(|result| result.value.to_string())
+            .unwrap_or_else(|error| format!("proof-type-error={error}"));
+        eprintln!(
+            "root reconstruction rejected: verdict={verdict} detail={detail} F6_FORMAT_BRIDGE_D1=[quote,read,string]:{format_proof_result}"
+        );
         std::process::exit(1);
     }
     println!("f6-semantic-consumer-ok records=2");
