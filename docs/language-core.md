@@ -531,10 +531,11 @@ no byte padding between the three domains. A D7 word may cross a byte boundary;
 a 9-bit domain may occupy bits spanning two physical bytes without becoming a
 9-bit semantic "byte".
 
-The native Zig corridor (`sens_zig_bitpack_fields` → `transport/fields.zig`)
-owns physical assembly. Rust's `BitPacker` is a compatibility facade that
-stages exact-width values; `PackedBitstream` carries the resulting bytes and
-exact meaningful bit length. Domain carriers own logical width and typing.
+The Zig corridor (`sens_zig_bitpack_fields` → `transport/fields.zig`)
+owns physical assembly on native and wasm32 targets. Rust's `BitPacker` is a
+compatibility facade that stages exact-width records; `PackedBitstream` carries
+the resulting bytes and exact meaningful bit length. Domain carriers own logical
+width and typing. Rust contains no physical bit-emission implementation.
 
 Backend може:
 
