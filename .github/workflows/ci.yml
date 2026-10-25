@@ -469,6 +469,9 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          # Execute the exact D6 source-head routing contract directly; do not leave
+          # its unit test merely compiled as an unrelated cargo --lib filter.
+          cargo test --locked -p sens --lib source_heads_preserve_exact_d6_identity_for_lisp_owned_definitions -- --nocapture
           cargo test --locked -p sens --test build_projection_transfer -- --nocapture
           cargo test --locked -p sens-cli --test utf8_physical_d1 -- --nocapture
           cargo test --locked -p sens --lib utf8_partial_bootstrap_is_not_reported_as_complete -- --nocapture
