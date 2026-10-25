@@ -12,6 +12,8 @@ jobs:
         run: python3 -m unittest discover -s tests -p 'test_core4_internal_sid8_migration.py' -v
       - name: Перевірити незмінність D24+ боргу Core4
         run: python3 scripts/check-core4-d24-migration.py --check
+      - name: Запобіжник проти двох відкочуваних регресій Core4 (COND/CLIPS)
+        run: python3 scripts/check-core4-regressions.py --check
       - uses: dtolnay/rust-toolchain@stable
       - name: Перевірити точний шлях читання Core4
         run: cargo test --locked -p sens --lib mixed_source::tests::core4_source_has_no_numeric_0100_in_executable_call_head_positions
