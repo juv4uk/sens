@@ -153,6 +153,10 @@ impl Ord for Rational {
 /// enough to exercise directly in a test.
 const MAX_DECIMAL_LITERAL_EXPONENT_MAGNITUDE: i32 = 10_000;
 
+/// Private numeric-token separator, using the ASCII SYN control codepoint
+/// (W7 coordinate 0010110) as an unambiguous shared internal marker.
+pub(crate) const NUMERIC_EXPONENT_SEPARATOR: char = '\u{0016}';
+
 impl Rational {
     pub fn new(numerator: i64, denominator: i64) -> Option<Self> {
         Self::from_big(BigInt::from_i64(numerator), BigInt::from_i64(denominator))
@@ -181,8 +185,19 @@ impl Rational {
     /// silently degrade into an ordinary symbol (S3) — that would turn a valid
     /// numeric literal into an identifier only because of an internal limit.
     pub fn from_decimal_literal(text: &str) -> Result<Self, DecimalLiteralError> {
-        let text = text.to_lowercase();
-        let (base_str, exp_str) = if let Some((b, e)) = text.split_once('e') {
+        // The numeric lexer maps surface spellings (`e`/`е`) to the shared
+        // D7 SYN control coordinate. This sentinel is private to numeric
+        // parsing; quoted D7 text remains unchanged.
+        let text = text
+            .to_lowercase()
+            .chars()
+            .map(|character| match character {
+                'е' | 'e' => NUMERIC_EXPONENT_SEPARATOR,
+                other => other,
+            })
+            .collect::<String>();
+        let (base_str, exp_str) = if let Some((b, e)) = text.split_once(NUMERIC_EXPONENT_SEPARATOR)
+        {
             (b, Some(e))
         } else {
             (text.as_str(), None)
@@ -1080,10 +1095,19 @@ mod exact_domain_value_tests {
                 let expected = spine(16_384, Value::Nil);
                 let identical = spine(16_384, Value::Nil);
                 let different = spine(16_384, Value::Symbol("змінено".into()));
-                assert_eq!(expected, identical, "test_id=CONS-EQ-DEEP expected=structural-equality");
-                assert_ne!(expected, different, "test_id=CONS-EQ-DEEP expected=distinguish-final-tail");
+                assert_eq!(
+                    expected, identical,
+                    "test_id=CONS-EQ-DEEP expected=structural-equality"
+                );
+                assert_ne!(
+                    expected, different,
+                    "test_id=CONS-EQ-DEEP expected=distinguish-final-tail"
+                );
                 let shared = expected.clone();
-                assert_eq!(shared, expected, "test_id=CONS-EQ-SHARED expected=identity-preservation");
+                assert_eq!(
+                    shared, expected,
+                    "test_id=CONS-EQ-SHARED expected=identity-preservation"
+                );
             })
             .expect("test_id=CONS-EQ-DEEP spawn")
             .join()
@@ -1134,8 +1158,6 @@ mod host_handle_tests {
         assert!(handle
             .as_host_resource::<RefCell<u32>>("another-resource")
             .is_none());
-        assert!(handle
-            .as_host_resource::<u32>("test-resource")
-            .is_none());
+        assert!(handle.as_host_resource::<u32>("test-resource").is_none());
     }
 }

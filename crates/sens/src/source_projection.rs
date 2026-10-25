@@ -1,21 +1,21 @@
-//! Projection of human-facing Ukrainian decimal integers into exact SENS D12+ values.
+//! Projection of human-facing decimal numbers into exact SENS D12+ values.
 //!
 //! The source spelling supplies the digits; it is not itself a domain identity.
 //! This boundary is shared by embedders. It never promotes D1-D10 words or
-//! host numbers into arithmetic. Fractions remain expressible with the admitted
-//! Ukrainian `частка` operation.
+//! host numbers into arithmetic. Rational literals lower to the admitted D5
+//! Ukrainian `частка` operation; their integer components are exact D12+ words.
 //!
-//! Integers are source-qualified to the smallest signed D12/D24/D48/D96/D192 word
-//! that contains their value. Within one connected D5 numeric expression tree,
-//! all source integer leaves receive the same widest required domain. This
-//! prevents an expression such as `(додати 8388608 1)` from mixing D48 and D24.
-//! Values are converted digit-by-digit and fail only beyond signed D192, never through a host integer or float.
+//! Integer and rational components are source-qualified to the smallest signed
+//! D12/D24/D48/D96/D192 word that contains them. Within one connected D5 numeric
+//! expression tree, all numeric components receive the same widest required
+//! domain. This avoids mixed-Dn operands and never routes exact input through a
+//! host integer or float.
 
 use crate::syntax::{Expr, ExprKind, Span};
 use crate::{BinaryNumber, ErrorKind, LanguageError};
 use std::rc::Rc;
 
-/// Project integer literals in Ukrainian source before evaluation.
+/// Project exact decimal integer and rational literals before evaluation.
 ///
 /// Numeric literals in one connected D5 call tree share the widest required
 /// numeric domain; independent values retain the smallest exact domain no
@@ -44,7 +44,10 @@ pub fn project_ukr_decimal_integer_literals_with_minimum_width(
             ErrorKind::InvalidForm,
             format!("unsupported numeric projection floor D{minimum_width}"),
             expressions.first().map_or(
-                Span { start: 0, end: source.len() },
+                Span {
+                    start: 0,
+                    end: source.len(),
+                },
                 |expr| expr.span,
             ),
         ));
@@ -128,11 +131,7 @@ fn magnitude_fits_signed_width(negative: bool, magnitude: &[u8], width: usize) -
         && magnitude[1..].iter().all(|bit| *bit == 0)
 }
 
-fn integer_width(
-    token: &str,
-    span: Span,
-    minimum_width: usize,
-) -> Result<usize, LanguageError> {
+fn integer_width(token: &str, span: Span, minimum_width: usize) -> Result<usize, LanguageError> {
     let (negative, magnitude) = decimal_magnitude_bits(token, span)?;
     [12usize, 24, 48, 96, 192]
         .into_iter()
@@ -193,6 +192,65 @@ fn project_integer(
     })
 }
 
+fn rational_component_spelling(value: &crate::Rational) -> (String, String) {
+    let spelling = value.to_string();
+    spelling
+        .split_once('/')
+        .map_or((spelling.clone(), "1".to_string()), |(n, d)| {
+            (n.to_string(), d.to_string())
+        })
+}
+
+fn exact_source_rational(expr: &Expr, source: &str) -> Option<crate::Rational> {
+    if !matches!(&expr.kind, ExprKind::Number(_, crate::Exactness::Exact)) {
+        return None;
+    }
+    let token = source.get(expr.span.start..expr.span.end)?;
+    let normalized = token.replace(',', ".").replace('е', "e").replace('Е', "e");
+    crate::Rational::from_decimal_literal(&normalized).ok()
+}
+
+fn rational_required_width(
+    value: &crate::Rational,
+    span: Span,
+    minimum_width: usize,
+) -> Result<usize, LanguageError> {
+    let (numerator, denominator) = rational_component_spelling(value);
+    Ok(
+        integer_width(&numerator, span, minimum_width)?.max(integer_width(
+            &denominator,
+            span,
+            minimum_width,
+        )?),
+    )
+}
+
+fn project_rational(
+    value: &crate::Rational,
+    span: Span,
+    inherited_width: Option<usize>,
+    minimum_width: usize,
+) -> Result<ExprKind, LanguageError> {
+    let required = rational_required_width(value, span, minimum_width)?;
+    let width = inherited_width.unwrap_or(required).max(required);
+    let (numerator, denominator) = rational_component_spelling(value);
+    let numerator = project_integer(&numerator, span, width, minimum_width)?;
+    let denominator = project_integer(&denominator, span, width, minimum_width)?;
+    let quotient = crate::semantic_registry_export::admitted_core_domain_for_surface("частка")
+        .filter(|identity| identity.width() == 5)
+        .ok_or_else(|| {
+            LanguageError::new(
+                ErrorKind::MechanismUnavailable,
+                "exact source ratio has no admitted D5 quotient identity",
+                span,
+            )
+        })?;
+    Ok(ExprKind::DomainCall(
+        quotient,
+        vec![numerator, denominator].into(),
+    ))
+}
+
 /// Human source remains symbol-headed at reader level. Consult the canonical
 /// registry instead of maintaining a local list of D5 function names.
 fn is_d5_call(expr: &Expr) -> bool {
@@ -225,6 +283,19 @@ fn required_width_in_math_tree(
     }
     if let Some(token) = integer_lexeme(expr, source) {
         return integer_width(token, expr.span, minimum_width).map(Some);
+    }
+    if let ExprKind::Rational(value) = &expr.kind {
+        return rational_required_width(value, expr.span, minimum_width).map(Some);
+    }
+    if let Some(value) = exact_source_rational(expr, source) {
+        let (numerator, denominator) = rational_component_spelling(&value);
+        return Ok(Some(
+            integer_width(&numerator, expr.span, minimum_width)?.max(integer_width(
+                &denominator,
+                expr.span,
+                minimum_width,
+            )?),
+        ));
     }
     if !is_d5_call(expr) {
         return Ok(None);
@@ -285,11 +356,36 @@ fn project_expr(
         };
         return project_integer(token, expr.span, width, minimum_width);
     }
+    if let ExprKind::Rational(value) = &expr.kind {
+        return Ok(Expr {
+            kind: project_rational(value, expr.span, inherited_math_width, minimum_width)?,
+            span: expr.span,
+        });
+    }
+    if let Some(value) = exact_source_rational(expr, source) {
+        let spelling = value.to_string();
+        let kind = if spelling.contains('/') {
+            project_rational(&value, expr.span, inherited_math_width, minimum_width)?
+        } else {
+            let required = integer_width(&spelling, expr.span, minimum_width)?;
+            project_integer(
+                &spelling,
+                expr.span,
+                inherited_math_width.unwrap_or(required),
+                minimum_width,
+            )?
+            .kind
+        };
+        return Ok(Expr {
+            kind,
+            span: expr.span,
+        });
+    }
 
     let kind = match &expr.kind {
         ExprKind::List(items) if is_d5_call(expr) => {
-            let required =
-                required_width_in_math_tree(expr, source, 0, minimum_width)?.unwrap_or(minimum_width);
+            let required = required_width_in_math_tree(expr, source, 0, minimum_width)?
+                .unwrap_or(minimum_width);
             let width = inherited_math_width.map_or(required, |outer| outer.max(required));
             ExprKind::List(
                 items
@@ -370,11 +466,25 @@ mod tests {
             })
             .collect();
         assert_eq!(
-            values.iter().map(BinaryNumber::numeric_domain_width).collect::<Vec<_>>(),
-            vec![Some(12), Some(12), Some(12), Some(12), Some(12), Some(24), Some(24)]
+            values
+                .iter()
+                .map(BinaryNumber::numeric_domain_width)
+                .collect::<Vec<_>>(),
+            vec![
+                Some(12),
+                Some(12),
+                Some(12),
+                Some(12),
+                Some(12),
+                Some(24),
+                Some(24)
+            ]
         );
         assert_eq!(
-            values.iter().map(BinaryNumber::to_decimal_string).collect::<Vec<_>>(),
+            values
+                .iter()
+                .map(BinaryNumber::to_decimal_string)
+                .collect::<Vec<_>>(),
             vec!["0", "1", "-1", "2047", "-2048", "2048", "-2049"]
         );
 
@@ -394,10 +504,13 @@ mod tests {
         let ExprKind::List(items) = &projected[0].kind else {
             panic!("expected one addition form")
         };
-        assert!(items.iter().skip(1).all(|expr| matches!(
-            &expr.kind,
-            ExprKind::BinaryNumber(number) if number.numeric_domain_width() == Some(12)
-        )), "both source operands must retain exact D12 identity");
+        assert!(
+            items.iter().skip(1).all(|expr| matches!(
+                &expr.kind,
+                ExprKind::BinaryNumber(number) if number.numeric_domain_width() == Some(12)
+            )),
+            "both source operands must retain exact D12 identity"
+        );
 
         let mut session = crate::Session::default();
         crate::load_core_library(&mut session).expect("SENS Core loads");
@@ -413,7 +526,8 @@ mod tests {
             let mut bits = vec![0; 24];
             bits[22] = 1;
             bits
-        }).expect("explicit D24 2");
+        })
+        .expect("explicit D24 2");
         let d12_two = values_as_d12_two();
         assert_ne!(d12_two, same_magnitude_d24);
         assert_eq!(d12_two.add_admitted_numeric(&same_magnitude_d24), None);
@@ -421,9 +535,8 @@ mod tests {
 
     fn values_as_d12_two() -> BinaryNumber {
         let parsed = crate::parse("2").expect("simple integer source parses");
-        let projected =
-            project_ukr_decimal_integer_literals_with_minimum_width(&parsed, "2", 12)
-                .expect("explicit D12 projection");
+        let projected = project_ukr_decimal_integer_literals_with_minimum_width(&parsed, "2", 12)
+            .expect("explicit D12 projection");
         match &projected[0].kind {
             ExprKind::BinaryNumber(number) => number.clone(),
             other => panic!("expected D12 number, got {other:?}"),
@@ -466,6 +579,49 @@ mod tests {
             })
             .collect();
         assert_eq!(widths, vec![Some(48), Some(48)]);
+    }
+
+    #[test]
+    fn rational_and_integer_literals_share_the_widest_domain_in_one_math_tree() {
+        let source = "(додати 1е-7 1е-20)";
+        let parsed = crate::parse(source).expect("decimal and Ukrainian exponent parse exactly");
+        let projected =
+            project_ukr_decimal_integer_literals_with_minimum_width(&parsed, source, 12)
+                .expect("all ratio components fit D12+");
+
+        fn widths(expression: &Expr, found: &mut Vec<usize>) {
+            match &expression.kind {
+                ExprKind::BinaryNumber(number) => {
+                    found.push(number.numeric_domain_width().expect("numeric domain"));
+                }
+                ExprKind::DomainCall(_, arguments) => {
+                    for argument in arguments.iter() {
+                        widths(argument, found);
+                    }
+                }
+                ExprKind::List(items) => {
+                    for item in items.iter() {
+                        widths(item, found);
+                    }
+                }
+                _ => {}
+            }
+        }
+
+        let mut found = Vec::new();
+        widths(&projected[0], &mut found);
+        assert!(!found.is_empty());
+        assert!(found.iter().all(|width| *width == 96), "{found:?}");
+
+        let source = "(додати 2.0 1е-20)";
+        let parsed = crate::parse(source).expect("exact decimal integer and exponent parse");
+        let projected =
+            project_ukr_decimal_integer_literals_with_minimum_width(&parsed, source, 12)
+                .expect("exact decimal values must share the required width");
+        let mut found = Vec::new();
+        widths(&projected[0], &mut found);
+        assert!(!found.is_empty());
+        assert!(found.iter().all(|width| *width == 96), "{found:?}");
     }
 
     #[test]

@@ -549,7 +549,10 @@ impl Parser<'_> {
         // В окремому exact-режимі біти означають виключно
         // ширино-залежну DomainIdentity. Історичний 8-бітний payload
         // тут не дає права на виклик; це вирішує окремий domain law.
-        if matches!(self.mode, ReaderMode::ExactDomain | ReaderMode::CanonicalValueWire) {
+        if matches!(
+            self.mode,
+            ReaderMode::ExactDomain | ReaderMode::CanonicalValueWire
+        ) {
             if !token.is_empty() && token.bytes().all(|byte| matches!(byte, b'0' | b'1')) {
                 let identity = if token.len() == 10 {
                     let coordinate =
@@ -669,6 +672,16 @@ impl Parser<'_> {
             None
         };
         let decimal_text = decimal_with_dot.as_deref().unwrap_or(token);
+        let normalized_exponent = decimal_text.replace('е', "e").replace('Е', "e");
+        // Surface spellings converge on a private numeric separator whose
+        // codepoint is D7/W7 SYN (0010110). This does not alter D7 text data.
+        let internal_exponent = normalized_exponent
+            .chars()
+            .map(|character| match character {
+                'e' | 'E' => crate::value::NUMERIC_EXPONENT_SEPARATOR,
+                other => other,
+            })
+            .collect::<String>();
         // `Rational::from_literal` parses arbitrary-precision numerator/denominator
         // text directly (see bignum.rs) — a token like `123456789012345678901/2`,
         // far too big for `i64`, is still an exact rational literal, not a symbol.
@@ -686,26 +699,32 @@ impl Parser<'_> {
             } else {
                 ExprKind::Symbol(token.into())
             }
-        } else if token.contains(['.', ',', 'e', 'E']) {
+        } else if token.contains(['.', ',', 'e', 'E', 'е', 'Е']) {
             // У канонічному READ точні числа мають окремий #q2-носій.
             // Отже десятковий текст WRITE — саме скінченний inexact f64.
             // Звичайний Lisp-reader лишає десятковий синтаксис точним.
             if self.mode == ReaderMode::CanonicalValueWire {
-                if let Ok(number) = decimal_text.parse::<f64>() {
+                if let Ok(number) = normalized_exponent.parse::<f64>() {
                     if !number.is_finite() {
                         return Err(LanguageError::new(
                             ErrorKind::NumericOverflow,
                             "canonical inexact wire number must be finite",
-                            Span { start, end: self.cursor },
+                            Span {
+                                start,
+                                end: self.cursor,
+                            },
                         ));
                     }
                     return Ok(Expr {
                         kind: ExprKind::Number(number, Exactness::Inexact),
-                        span: Span { start, end: self.cursor },
+                        span: Span {
+                            start,
+                            end: self.cursor,
+                        },
                     });
                 }
             }
-            let kind = match crate::value::Rational::from_decimal_literal(decimal_text) {
+            let kind = match crate::value::Rational::from_decimal_literal(&internal_exponent) {
                 Ok(r) => match r.as_precise_i64() {
                     Some(value) => ExprKind::Number(value as f64, Exactness::Exact),
                     None => ExprKind::Rational(r),
@@ -814,10 +833,19 @@ mod tests {
             let error = parse_canonical_value_wire(token)
                 .expect_err("wire не приймає некваліфіковане десяткове число");
             assert_eq!(error.kind, ErrorKind::Parse, "{token}");
-            assert_eq!(error.span, Span { start: 0, end: token.len() });
+            assert_eq!(
+                error.span,
+                Span {
+                    start: 0,
+                    end: token.len()
+                }
+            );
             let ordinary = parse(token).expect("людський Lisp source parser");
             assert!(
-                matches!(ordinary[0].kind, ExprKind::Number(_, Exactness::Exact) | ExprKind::Rational(_)),
+                matches!(
+                    ordinary[0].kind,
+                    ExprKind::Number(_, Exactness::Exact) | ExprKind::Rational(_)
+                ),
                 "людська десяткова проєкція має лишатися точною: {token}"
             );
         }
@@ -1151,6 +1179,25 @@ mod tests {
         }
     }
 
+    #[test]
+    fn ukrainian_exponent_marker_parses_as_exact_decimal_without_changing_quoted_d7_text() {
+        for (literal, expected) in [
+            ("1е-7", "1/10000000"),
+            ("1Е-7", "1/10000000"),
+            ("1,25е-3", "1/800"),
+        ] {
+            let ExprKind::Rational(value) = parse_one(literal).kind else {
+                panic!("{literal} must be an exact rational");
+            };
+            assert_eq!(value.to_string(), expected);
+        }
+
+        let ExprKind::List(items) = parse_one("(як-є \"1е-7\")").kind else {
+            panic!("quoted D7 text remains a list form");
+        };
+        assert!(matches!(&items[1].kind, ExprKind::String(text) if &**text == "1е-7"));
+    }
+
     /// R2 (owner-directed, 2026-09-02, follows R1 in commit d7f3118): the
     /// exact ±10000 boundary is now cheap enough (~0.08s measured via
     /// crates/wsm-guard-core/examples/profile_reader_scaling.rs, this
@@ -1331,12 +1378,24 @@ mod tests {
         let ExprKind::Pair(head, rest) = &forms[0].kind else {
             panic!("потрібна пара");
         };
-        assert_eq!(forms[0].span, Span { start: 0, end: source.len() });
+        assert_eq!(
+            forms[0].span,
+            Span {
+                start: 0,
+                end: source.len()
+            }
+        );
         assert!(matches!(&head.kind, ExprKind::Symbol(s) if s.as_ref() == "а"));
         let ExprKind::Pair(second, tail) = &rest.kind else {
             panic!("друга пара");
         };
-        assert_eq!(rest.span, Span { start: 0, end: source.len() });
+        assert_eq!(
+            rest.span,
+            Span {
+                start: 0,
+                end: source.len()
+            }
+        );
         assert!(matches!(&second.kind, ExprKind::Symbol(s) if s.as_ref() == "б"));
         assert!(matches!(&tail.kind, ExprKind::Symbol(s) if s.as_ref() == "в"));
     }
@@ -1480,7 +1539,13 @@ mod tests {
         assert_eq!(forms.len(), 1);
         let mut node = &forms[0];
         for offset in 0..32 {
-            assert_eq!(node.span, Span { start: offset, end: source.len() });
+            assert_eq!(
+                node.span,
+                Span {
+                    start: offset,
+                    end: source.len()
+                }
+            );
             let ExprKind::List(items) = &node.kind else {
                 panic!("quote must expand into a D2 list");
             };
@@ -1490,14 +1555,22 @@ mod tests {
                 ExprKind::DomainIdentity(crate::DomainIdentity::D3(word))
                     if word.word().packed_bits() == 0b001
             ));
-            assert_eq!(items[0].span, Span { start: offset, end: offset + 1 });
+            assert_eq!(
+                items[0].span,
+                Span {
+                    start: offset,
+                    end: offset + 1
+                }
+            );
             node = &items[1];
         }
         assert!(matches!(&node.kind, ExprKind::Symbol(name) if name.as_ref() == "мама"));
 
         let error = parse("'''").expect_err("incomplete quote chain must fail named");
         assert_eq!(error.kind, ErrorKind::Parse);
-        assert!(error.message.contains("expected an expression after apostrophe"));
+        assert!(error
+            .message
+            .contains("expected an expression after apostrophe"));
         parse("' ; коментар\n'мама").expect("comment between quotes");
     }
 

@@ -4,7 +4,9 @@
 //! користуються conformance-перевірки, машинні протоколи й точне відтворення
 //! джерела. Цей модуль змінює лише те, що інтерактивна поверхня показує людині.
 
-use crate::{semantic_registry, ErrorKind, Exactness, Expr, ExprKind, LanguageError, NumericBuffer, Value};
+use crate::{
+    semantic_registry, ErrorKind, Exactness, Expr, ExprKind, LanguageError, NumericBuffer, Value,
+};
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum PresentationLanguage {
     Canonical,
@@ -15,6 +17,11 @@ pub enum PresentationLanguage {
 
 fn uk_operation_name(name: &str) -> String {
     match name {
+        "atom" => "атом?".to_string(),
+        "eq" => "тотожне?".to_string(),
+        "cons" => "сполучити".to_string(),
+        "car" => "перше".to_string(),
+        "cdr" => "решта".to_string(),
         "PRIM_ATOM" => "атом?".to_string(),
         "PRIM_EQ" => "тотожне?".to_string(),
         "PRIM_CONS" => "сполучити".to_string(),
@@ -321,6 +328,19 @@ fn ukrainian_message(message: &str) -> String {
 
     let english = message.split(" · ").next().unwrap_or(message).trim();
 
+    const NUMERIC_DOMAIN_ERROR: &str = "math requires explicit D12+ operands; D1-D10 bit words and unqualified numbers are not arithmetic values";
+    if let Some(suffix) = english.strip_prefix(NUMERIC_DOMAIN_ERROR) {
+        let suffix = suffix
+            .replace("operand_position=", "позиція_операнда=")
+            .replace("actual_kind=non-numeric", "фактичний_тип=нечисловий")
+            .replace("physical_form_index=", "номер_фізичної_форми=")
+            .replace("physical_word_start=", "початок_фізичного_слова=")
+            .replace("physical_word_end=", "кінець_фізичного_слова=");
+        return format!(
+            "для математики потрібні явні операнди D12+; бітові слова D1–D10 і числа без домену не є математичними операндами{suffix}"
+        );
+    }
+
     match english {
         "unexpected closing parenthesis" => "неочікувана закривна дужка".to_string(),
         "unclosed list" => "незакритий список".to_string(),
@@ -328,6 +348,9 @@ fn ukrainian_message(message: &str) -> String {
         "unclosed numeric buffer" => "незакритий числовий буфер".to_string(),
         "unexpected end of input" | "unexpected eof" => "неочікуваний кінець вводу".to_string(),
         "division by zero" => "Ділення на нуль".to_string(),
+        "numeric division requires admitted same-Dn values" => {
+            "числове ділення потребує допущених значень одного числового домену".to_string()
+        }
         "a dotted pair is not executable code" => {
             "крапкова пара не є виконуваним кодом".to_string()
         }
@@ -386,6 +409,19 @@ fn uk_error_line(error: &LanguageError) -> String {
     }
 }
 
+/// Render an evaluator diagnostic without assuming its span indexes source
+/// text. Physical T5M execution spans are exact-word offsets, not UTF-8 bytes.
+pub fn render_error_summary_for_presentation(
+    error: &LanguageError,
+    language: PresentationLanguage,
+) -> String {
+    if language == PresentationLanguage::Ukrainian {
+        uk_error_line(error)
+    } else {
+        format!("{:?}: {}", error.kind, error.message)
+    }
+}
+
 pub fn render_error_for_presentation(
     error: &LanguageError,
     source: &str,
@@ -397,10 +433,16 @@ pub fn render_error_for_presentation(
 
     let (line, column) = error.line_col(source);
     let line_text = source.lines().nth(line - 1).unwrap_or("");
-    let span_chars = source[error.span.start.min(source.len())..error.span.end.min(source.len())]
-        .chars()
-        .count()
-        .max(1);
+    let clamp = |offset: usize| {
+        let mut offset = offset.min(source.len());
+        while !source.is_char_boundary(offset) {
+            offset -= 1;
+        }
+        offset
+    };
+    let span_start = clamp(error.span.start);
+    let span_end = clamp(error.span.end).max(span_start);
+    let span_chars = source[span_start..span_end].chars().count().max(1);
     let gutter = format!("{line}");
     let indent = " ".repeat(gutter.len());
     let caret = " ".repeat(column.saturating_sub(1)) + &"^".repeat(span_chars);
@@ -585,9 +627,8 @@ mod tests {
     fn українська_повна_проєкція_д5_не_підмінюється_коротким_іменем_чи_сід8() {
         // Д5:01100 має різні «ук» і «укр». Інтерфейс людини показує
         // винятково повну ратифіковану «укр», не коротке чи старе W8.
-        let identity = crate::DomainIdentity::D5(crate::CoreD5::from_word(
-            crate::Bit5::new(0b01100).unwrap(),
-        ));
+        let identity =
+            crate::DomainIdentity::D5(crate::CoreD5::from_word(crate::Bit5::new(0b01100).unwrap()));
         let value = Value::DomainIdentity(identity);
         assert_eq!(
             render_value_for_presentation(&value, PresentationLanguage::Ukrainian),
@@ -627,9 +668,7 @@ mod tests {
             crate::DomainD10::new(0).unwrap(),
         ));
         assert_eq!(
-            render_value_for_presentation(
-                &d10_without_projection, PresentationLanguage::Ukrainian
-            ),
+            render_value_for_presentation(&d10_without_projection, PresentationLanguage::Ukrainian),
             "#<домен D10:0000000000>"
         );
     }
@@ -788,6 +827,34 @@ mod tests {
         assert!(rendered.contains("Синтаксична помилка"), "{rendered}");
         assert!(
             rendered.contains("неочікувана закривна дужка"),
+            "{rendered}"
+        );
+    }
+
+    #[test]
+    fn ukrainian_runtime_error_summary_translates_numeric_failure_without_source_offsets() {
+        let error = crate::LanguageError::new(
+            ErrorKind::Type,
+            "numeric division requires admitted same-Dn values",
+            Span { start: 10, end: 11 },
+        );
+        let rendered =
+            render_error_summary_for_presentation(&error, PresentationLanguage::Ukrainian);
+        assert_eq!(
+            rendered,
+            "Помилка типу: числове ділення потребує допущених значень одного числового домену"
+        );
+    }
+
+    #[test]
+    fn ukrainian_source_error_renderer_clamps_utf8_spans_to_character_boundaries() {
+        let source = "(додати е 1)";
+        let error =
+            crate::LanguageError::new(ErrorKind::Type, "invalid form", Span { start: 10, end: 11 });
+        let rendered =
+            render_error_for_presentation(&error, source, PresentationLanguage::Ukrainian);
+        assert!(
+            rendered.contains("Помилка типу: некоректна форма"),
             "{rendered}"
         );
     }
@@ -962,7 +1029,11 @@ fn ast_label(language: PresentationLanguage, node: &AstNode) -> String {
             }
         }
         AstNodeKind::Pair => {
-            if uk { "Пара".to_string() } else { "Pair".to_string() }
+            if uk {
+                "Пара".to_string()
+            } else {
+                "Pair".to_string()
+            }
         }
         AstNodeKind::Call {
             identity,
@@ -985,10 +1056,18 @@ fn ast_label(language: PresentationLanguage, node: &AstNode) -> String {
             }
         }
         AstNodeKind::Number => {
-            if uk { format!("Число: {}", node.excerpt) } else { format!("Number: {}", node.excerpt) }
+            if uk {
+                format!("Число: {}", node.excerpt)
+            } else {
+                format!("Number: {}", node.excerpt)
+            }
         }
         AstNodeKind::Rational => {
-            if uk { format!("Дріб: {}", node.excerpt) } else { format!("Rational: {}", node.excerpt) }
+            if uk {
+                format!("Дріб: {}", node.excerpt)
+            } else {
+                format!("Rational: {}", node.excerpt)
+            }
         }
         AstNodeKind::BinaryNumber => {
             if uk {
@@ -1019,10 +1098,18 @@ fn ast_label(language: PresentationLanguage, node: &AstNode) -> String {
             }
         }
         AstNodeKind::String => {
-            if uk { format!("Рядок: {}", node.excerpt) } else { format!("String: {}", node.excerpt) }
+            if uk {
+                format!("Рядок: {}", node.excerpt)
+            } else {
+                format!("String: {}", node.excerpt)
+            }
         }
         AstNodeKind::Symbol => {
-            if uk { format!("Символ: {}", node.excerpt) } else { format!("Symbol: {}", node.excerpt) }
+            if uk {
+                format!("Символ: {}", node.excerpt)
+            } else {
+                format!("Symbol: {}", node.excerpt)
+            }
         }
         AstNodeKind::Local { depth, index } => {
             if uk {
@@ -1073,13 +1160,21 @@ mod ast_render_tests {
     fn shared_ast_renderer_reports_nested_forms_languages_and_spans() {
         let source = "(визначити площа (добуток 3 4))\n";
         let uk = render_ast(source, PresentationLanguage::Ukrainian).expect("parses");
-        assert!(uk[0].text.contains("Список (3 елементів)"), "{:?}", uk[0].text);
-        assert!(uk.iter().any(|line| line.text.contains("Список (3 елементів)")));
+        assert!(
+            uk[0].text.contains("Список (3 елементів)"),
+            "{:?}",
+            uk[0].text
+        );
+        assert!(uk
+            .iter()
+            .any(|line| line.text.contains("Список (3 елементів)")));
         // Спан зовнішньої форми починається з нуля — хостам є що підсвітити.
         assert_eq!(uk[0].span.0, 0);
 
         let en = render_ast(source, PresentationLanguage::English).expect("parses");
-        assert!(en.iter().any(|line| line.text.contains("List (3 elements)")));
+        assert!(en
+            .iter()
+            .any(|line| line.text.contains("List (3 elements)")));
     }
 
     #[test]

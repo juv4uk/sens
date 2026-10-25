@@ -295,7 +295,6 @@ pub use text7_projection::{encode_text7, render_text7, Text7Layout, Text7Project
 
 pub use binary_execution::{eval_e1_program, E1ExecutionError, ExactDomainWord, PhysicalT5Program};
 
-pub use eval::{exact_arity, read_single_quoted_datum};
 pub use eval::lower::lower_program;
 pub use eval::parse_json;
 pub use eval::{
@@ -307,10 +306,12 @@ pub use eval::{
     eval_exact_domain_program, eval_lowered_expressions, eval_parsed_expressions,
     eval_parsed_expressions_incremental, eval_program, evaluate as eval_expr, EvalResult,
 };
+pub use eval::{exact_arity, read_single_quoted_datum};
 pub use parser::{parse, parse_exact_domain_source};
 pub use presentation::{
-    present_system_message, render_error_for_presentation, render_value_for_presentation, AstLine,
-    render_ast, render_ast_node, AstNode, AstNodeKind, ast_nodes, PresentationLanguage,
+    ast_nodes, present_system_message, render_ast, render_ast_node, render_error_for_presentation,
+    render_error_summary_for_presentation, render_value_for_presentation, AstLine, AstNode,
+    AstNodeKind, PresentationLanguage,
 };
 pub use program_data::{expr_to_exact_program_data, lowered_program_to_exact_data};
 pub use syntax::fasl::{
@@ -676,7 +677,10 @@ fn bind_existing_d6_language_mechanisms(environment: &Environment) {
         // LET/LET* are SENS-owned macros: they carry source AST, not eager values.
         // Transfer only the already-executed root binding to the exact D6 slot.
         // This grants no code/residency a callable mechanism by itself.
-        if matches!(value, Value::Closure(_) | Value::Builtin(_) | Value::Macro(_)) {
+        if matches!(
+            value,
+            Value::Closure(_) | Value::Builtin(_) | Value::Macro(_)
+        ) {
             let _ = environment.bind_domain_code_slot_once(identity, value);
         }
     }
@@ -710,9 +714,9 @@ fn bind_existing_d9_language_mechanisms(environment: &Environment) {
                 .iter()
                 .copied()
             {
-                for peer in semantic_registry::lexical_peer_spellings_for_documented_name(
-                    definition_name,
-                ) {
+                for peer in
+                    semantic_registry::lexical_peer_spellings_for_documented_name(definition_name)
+                {
                     if environment.get(peer).is_none()
                         && eval::canon::ensure_bindable(peer, Span::default()).is_ok()
                     {
@@ -864,9 +868,9 @@ pub fn load_utf8_library(session: &mut Session) -> Result<EvalResult, LanguageEr
         });
     }
     let result = binary_bootstrap::utf8_program()?.execute(session)?;
-    session.environment.complete_bootstrap(
-        binary_bootstrap::UTF8_DEFINITION, result.value.clone(),
-    );
+    session
+        .environment
+        .complete_bootstrap(binary_bootstrap::UTF8_DEFINITION, result.value.clone());
     bind_missing_stable_surface_peers(&session.environment);
     Ok(result)
 }
@@ -999,7 +1003,10 @@ fn bind_process_tcp_lisp_owned_macros(session: &mut Session) -> Result<(), Langu
                 )
             })?;
 
-        if !session.environment.bind_domain_code_slot_once(identity, implementation) {
+        if !session
+            .environment
+            .bind_domain_code_slot_once(identity, implementation)
+        {
             return Err(LanguageError::new(
                 ErrorKind::InvalidForm,
                 format!("could not bind Lisp-owned {full_ukr_surface} to exact D6"),
@@ -1133,7 +1140,10 @@ mod core4_bootstrap_cache_tests {
             assert_eq!(identity.width(), 6);
             assert_eq!(identity.packed_bits(), bits);
             assert!(
-                matches!(session.environment.domain_code_slot(identity), Some(Value::Macro(_))),
+                matches!(
+                    session.environment.domain_code_slot(identity),
+                    Some(Value::Macro(_))
+                ),
                 "D6 {surface} завантажено тільки як реальний Lisp-макрос"
             );
         }
@@ -1154,10 +1164,15 @@ mod core4_bootstrap_cache_tests {
                 "11101101",
                 "ук",
             ),
-            Some(domain_projection_catalog::ProjectionValue::Symbol("текст-у-символ"))
+            Some(domain_projection_catalog::ProjectionValue::Symbol(
+                "текст-у-символ"
+            ))
         );
         assert!(
-            matches!(session.environment.get("текст-у-символ"), Some(Value::Builtin(_))),
+            matches!(
+                session.environment.get("текст-у-символ"),
+                Some(Value::Builtin(_))
+            ),
             "вже реалізований D8 механізм має бути доступним звичайному Lisp"
         );
     }
@@ -1388,10 +1403,9 @@ mod core4_bootstrap_cache_tests {
     fn utf8_partial_bootstrap_is_not_reported_as_complete() {
         let mut session = Session::default();
         load_core_library(&mut session).expect("Core4 bootstrap");
-        assert!(session.environment.bind_domain_code_slot_once(
-            binary_bootstrap::UTF8_DEFINITION,
-            Value::Nil,
-        ));
+        assert!(session
+            .environment
+            .bind_domain_code_slot_once(binary_bootstrap::UTF8_DEFINITION, Value::Nil,));
         let error = load_utf8_dependency(&mut session)
             .expect_err("наявність одного слота не доводить завершення бібліотеки");
         assert_eq!(error.kind, ErrorKind::InvalidForm);
@@ -1489,7 +1503,10 @@ mod exact_surface_domain_query_migration_tests {
                 .expect("ратифікований код D6 макроса");
             assert_eq!(identity.width(), 6, "D6 identity for {name}");
             assert!(
-                matches!(session.environment.domain_code_slot(identity), Some(Value::Macro(_))),
+                matches!(
+                    session.environment.domain_code_slot(identity),
+                    Some(Value::Macro(_))
+                ),
                 "test_id=BARE-CLI-D6-MACRO-INSTALL missing exact macro for {name}"
             );
         }

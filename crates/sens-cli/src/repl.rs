@@ -59,7 +59,10 @@ fn load_sens_repl_bootstraps(environment: &Environment) -> Result<(), String> {
             environment: environment.clone(),
         };
         sens::load_time_library(&mut root).map_err(|error| {
-            format!("REPL T5M time bootstrap: {}", error.render("<T5M time bootstrap>"))
+            format!(
+                "REPL T5M time bootstrap: {}",
+                error.render("<T5M time bootstrap>")
+            )
         })?;
         let meta_eval = crate::zig_transport::meta_eval_t5m_bytes()?;
         execute_zig_t5m_asset(&meta_eval, "MetaEval", &mut root)?;
@@ -262,8 +265,7 @@ fn append_t5m_expression_context(
                     } else {
                         layout
                     };
-                    sens::encode_text7(name, symbol_layout)
-                        .is_ok_and(|text| text.len() == 1)
+                    sens::encode_text7(name, symbol_layout).is_ok_and(|text| text.len() == 1)
                 } else {
                     false
                 };
@@ -639,7 +641,9 @@ fn project_repl_surface_expression_in_scope(
     // it does not fold arbitrary variables or computed expressions.
     if let Some(name) = t5m_text7_surface_name(expression, t5m_surface_layout(surface)) {
         if matches!(name.as_str(), "число-нуль" | "число-один")
-            && !bound.iter().any(|candidate| candidate.as_ref() == name.as_str())
+            && !bound
+                .iter()
+                .any(|candidate| candidate.as_ref() == name.as_str())
         {
             if let Some(value) = session.environment.get(&name) {
                 if let Value::BinaryNumber(number) = &value {
@@ -1401,9 +1405,8 @@ pub(crate) fn mint_t5m_source_pair(source: &str) -> Result<(Vec<u8>, String), St
 #[cfg(feature = "zig-transport")]
 fn core4_t5m_source_session() -> Result<Session, String> {
     let mut session = Session::default();
-    sens::load_core_library(&mut session).map_err(|error| {
-        format!("T5M_CORE4_BOOTSTRAP: {}", error.message)
-    })?;
+    sens::load_core_library(&mut session)
+        .map_err(|error| format!("T5M_CORE4_BOOTSTRAP: {}", error.message))?;
     Ok(session)
 }
 
@@ -1541,9 +1544,15 @@ fn eval_t5m_repl_line(
 ) -> Result<sens::EvalResult, String> {
     let program = prepare_t5m_repl_program(line, surface, session)?;
     let mut result = program.execute(session).map_err(|error| {
+        let presentation = surface.presentation();
+        let heading = if presentation == sens::PresentationLanguage::Ukrainian {
+            "Помилка виконання SENS/T5M"
+        } else {
+            "SENS/T5M execution error"
+        };
         format!(
-            "Помилка виконання SENS/T5M:\n{}",
-            sens::render_error_for_presentation(&error, line, surface.presentation())
+            "{heading}:\n{}",
+            sens::render_error_summary_for_presentation(&error, presentation)
         )
     })?;
     // A defined closure is retained in the persistent SENS environment, but
@@ -1599,9 +1608,7 @@ pub(crate) fn eval_t5m_source_in_session_preserving_result(
 /// файлів лишаються доступними наступним. Це композиція файлів у CLI, не
 /// мовний `include` і не дозвіл на виклик D7-резидентів.
 #[cfg(feature = "zig-transport")]
-pub(crate) fn eval_t5m_source_files(
-    files: &[(&str, &str)],
-) -> Result<sens::EvalResult, String> {
+pub(crate) fn eval_t5m_source_files(files: &[(&str, &str)]) -> Result<sens::EvalResult, String> {
     if files.is_empty() {
         return Err("T5M_FILES_EMPTY: pass at least one .lisp source".into());
     }
@@ -1717,10 +1724,7 @@ fn render_surface_status() -> Result<String, String> {
     surface_catalog::render_status()
 }
 
-fn build_surface_layer(
-    base: &Environment,
-    surface: ReplSurface,
-) -> Result<Environment, String> {
+fn build_surface_layer(base: &Environment, surface: ReplSurface) -> Result<Environment, String> {
     // D4 DEFINE may install a mechanism at an exact D10 target identity, and
     // that target slot is root-only. Ensure shared time mechanisms before
     // creating a projection child; loading is idempotent after prior bootstrap.
@@ -1926,7 +1930,9 @@ fn print_surface_help() {
     println!("Каталог поточної людської поверхні: :імена / :names");
     println!("Одна й та сама тотожність у всіх людських поверхнях: :ім'я <назва> / :name <name>");
     println!("Стан людських поверхонь: :поверхні / :surfaces");
-    println!("Виміряти REPL через Zig T5M і переглянути термінальний звіт: :бенч [вимірів 100..10000]");
+    println!(
+        "Виміряти REPL через Zig T5M і переглянути термінальний звіт: :бенч [вимірів 100..10000]"
+    );
     println!("Сире лексичне середовище без фільтрації поверхнею: (середовище) / (env)");
     println!("LISP — окрема проєкція з доменних таблиць; core — канонічний машинний шар.");
     println!("Перемикання змінює лише поверхню; ваші визначення й замикання лишаються доступними.");
@@ -1940,11 +1946,7 @@ fn handle_meta_command(line: &str, state: &mut ReplState) -> bool {
 
     match command {
         ":завантажити" | ":load" => {
-            let raw_path = line
-                .trim_start()
-                .strip_prefix(command)
-                .unwrap_or("")
-                .trim();
+            let raw_path = line.trim_start().strip_prefix(command).unwrap_or("").trim();
             let path = raw_path
                 .strip_prefix('"')
                 .and_then(|value| value.strip_suffix('"'))
@@ -2279,10 +2281,13 @@ mod tests {
             ["unify", "reason", "forward", "knowledge"],
             "D4 DEFINE reasoning programs must cross Zig as ordered root T5M pairs"
         );
-        let surface_assets = surface_prerequisite_t5m_assets()
-            .expect("REPL child-frame T5M assets via Zig");
+        let surface_assets =
+            surface_prerequisite_t5m_assets().expect("REPL child-frame T5M assets via Zig");
         assert_eq!(
-            surface_assets.iter().map(|(name, _)| *name).collect::<Vec<_>>(),
+            surface_assets
+                .iter()
+                .map(|(name, _)| *name)
+                .collect::<Vec<_>>(),
             ["persistent-vector"]
         );
 
@@ -2291,8 +2296,10 @@ mod tests {
         sens::load_time_library(&mut session).expect("time bootstrap");
 
         for (name, physical) in reasoning_assets.into_iter().chain(surface_assets) {
-            let forms = execute_zig_t5m_asset(&physical, name, &mut session)
-                .unwrap_or_else(|error| panic!("{name} executes from exact T5M domain words: {error}"));
+            let forms =
+                execute_zig_t5m_asset(&physical, name, &mut session).unwrap_or_else(|error| {
+                    panic!("{name} executes from exact T5M domain words: {error}")
+                });
             assert!(forms > 0, "{name} must contain executable domain forms");
         }
 
@@ -2345,7 +2352,8 @@ mod tests {
         );
         let program = PhysicalT5Program::from_exact_domain_words(&words)
             .expect("exact D24+ root-reference program");
-        let result = program.execute(&mut session)
+        let result = program
+            .execute(&mut session)
             .expect("nested root lookup through physical SENS");
         let expected_root = session
             .environment
@@ -2358,10 +2366,17 @@ mod tests {
             panic!("physical definition must return an exact D24+ number");
         };
         assert_eq!(actual.numeric_domain_width(), Some(24));
-        assert_eq!(actual.numeric_domain_width(), expected.numeric_domain_width());
         assert_eq!(
-            actual.exact_numeric_domain_bits().expect("actual D24+ bits"),
-            expected.exact_numeric_domain_bits().expect("expected D24+ bits"),
+            actual.numeric_domain_width(),
+            expected.numeric_domain_width()
+        );
+        assert_eq!(
+            actual
+                .exact_numeric_domain_bits()
+                .expect("actual D24+ bits"),
+            expected
+                .exact_numeric_domain_bits()
+                .expect("expected D24+ bits"),
             "physical root lookup must preserve the exact typed word"
         );
     }
@@ -2382,15 +2397,23 @@ mod tests {
         let mut source_session = Session::default();
         let source_result =
             sens::load_core_library(&mut source_session).expect("source Core4 bootstrap");
-        assert_eq!(binary_result.value.to_string(), source_result.value.to_string());
-        for probe in ["(додати-1 число-один)", "(змінити-знак число-один)"] {
+        assert_eq!(
+            binary_result.value.to_string(),
+            source_result.value.to_string()
+        );
+        for probe in ["(додати-1 число-один)", "(змінити-знак число-один)"]
+        {
             let source_value = eval_program(probe, &mut source_session)
                 .unwrap_or_else(|error| panic!("source Core4 probe {probe}: {error}"))
                 .value;
             let binary_value = eval_program(probe, &mut binary_session)
                 .unwrap_or_else(|error| panic!("T5M Core4 probe {probe}: {error}"))
                 .value;
-            assert_eq!(binary_value.to_string(), source_value.to_string(), "{probe}");
+            assert_eq!(
+                binary_value.to_string(),
+                source_value.to_string(),
+                "{probe}"
+            );
         }
     }
 
@@ -2398,11 +2421,23 @@ mod tests {
     #[test]
     fn t5m_core4_parts_load_sequentially_through_one_session() {
         let parts = [
-            ("language", include_str!("../../../lib/core4-parts/core4-language.lisp")),
+            (
+                "language",
+                include_str!("../../../lib/core4-parts/core4-language.lisp"),
+            ),
             ("d6", include_str!("../../../lib/core4-parts/core4-d6.lisp")),
-            ("codec", include_str!("../../../lib/core4-parts/core4-codec.lisp")),
-            ("d6b", include_str!("../../../lib/core4-parts/core4-d6b.lisp")),
-            ("d8-d9", include_str!("../../../lib/core4-parts/core4-d8-d9.lisp")),
+            (
+                "codec",
+                include_str!("../../../lib/core4-parts/core4-codec.lisp"),
+            ),
+            (
+                "d6b",
+                include_str!("../../../lib/core4-parts/core4-d6b.lisp"),
+            ),
+            (
+                "d8-d9",
+                include_str!("../../../lib/core4-parts/core4-d8-d9.lisp"),
+            ),
         ];
         let mut sources = parts
             .iter()
@@ -2838,12 +2873,10 @@ mod tests {
                 .expect("ratified non-callable D8 resident lookup")
                 .is_none()
         );
-        let english_string_to_symbol = selected_surface_callable(
-            ReplSurface::English,
-            "string->symbol",
-        )
-        .expect("English projection lookup")
-        .expect("English table declares the D8 string->symbol surface");
+        let english_string_to_symbol =
+            selected_surface_callable(ReplSurface::English, "string->symbol")
+                .expect("English projection lookup")
+                .expect("English table declares the D8 string->symbol surface");
         assert_eq!(english_string_to_symbol.width(), 8);
         assert_eq!(english_string_to_symbol.packed_bits(), 0b11101101);
 
@@ -2871,12 +2904,9 @@ mod tests {
         // Structural EQUAL is D8:11110111, not the superficially similar D3 EQ.
         // The mixed reader may already have represented its source head as a
         // DomainIdentity, so assert the complete projection-to-T5M route.
-        let equality_words = prepare_t5m_repl_words(
-            "(однакові? а б)",
-            ReplSurface::UkrainianFull,
-            &session,
-        )
-        .expect("D8 structural equality retains its exact identity in T5M");
+        let equality_words =
+            prepare_t5m_repl_words("(однакові? а б)", ReplSurface::UkrainianFull, &session)
+                .expect("D8 structural equality retains its exact identity in T5M");
         assert!(
             equality_words.iter().any(|word| matches!(
                 word,
@@ -2908,16 +2938,16 @@ mod tests {
         let ExprKind::List(items) = &forms[0].kind else {
             panic!("D9 string-append source must be one call");
         };
-        assert!(matches!(
-            items.first().map(|head| &head.kind),
-            Some(ExprKind::Symbol(name)) if name.as_ref() == "рядок-додати"
-        ), "human source must preserve its Ukrainian surface before lowering");
-        let words = prepare_t5m_repl_words(
-            &source,
-            ReplSurface::UkrainianFull,
-            &Session::default(),
-        )
-        .expect("source surface lowers through the selected domain projection");
+        assert!(
+            matches!(
+                items.first().map(|head| &head.kind),
+                Some(ExprKind::Symbol(name)) if name.as_ref() == "рядок-додати"
+            ),
+            "human source must preserve its Ukrainian surface before lowering"
+        );
+        let words =
+            prepare_t5m_repl_words(&source, ReplSurface::UkrainianFull, &Session::default())
+                .expect("source surface lowers through the selected domain projection");
         assert!(
             words.iter().any(|word| matches!(
                 word,
@@ -3010,7 +3040,9 @@ mod tests {
                 .unwrap_or_else(|error| panic!("{} value {name:?}: {error}", surface.code()));
             assert_eq!(
                 words,
-                [ExactDomainWord::Identity(t5m_domain_identity(width, bits).unwrap())],
+                [ExactDomainWord::Identity(
+                    t5m_domain_identity(width, bits).unwrap()
+                )],
                 "{} projection {name:?}",
                 surface.code()
             );
@@ -3107,6 +3139,96 @@ mod tests {
                 .to_decimal_string(),
             "3"
         );
+    }
+
+    #[cfg(feature = "zig-transport")]
+    #[test]
+    fn scientific_notation_projects_ratio_components_to_one_numeric_domain() {
+        let mut session = Session::default();
+        let result = eval_t5m_repl_line("1е-7", &mut session, ReplSurface::UkrainianFull)
+            .expect("exact scientific notation must lower through D12+ and Zig/T5M");
+        let Value::NumericComposition(ref composition) = result.value else {
+            panic!("nonintegral decimal remains an exact rational composition");
+        };
+        let (negative, numerator, denominator) = composition.as_parts();
+        assert!(!negative);
+        assert_eq!(numerator.to_decimal_string(), "1");
+        assert_eq!(
+            denominator
+                .expect("ratio has denominator")
+                .to_decimal_string(),
+            "10000000"
+        );
+    }
+
+    #[cfg(feature = "zig-transport")]
+    #[test]
+    fn t5m_exact_fraction_and_float_style_source_add_without_mixed_domains() {
+        let mut session = Session::default();
+        let result = eval_t5m_repl_line(
+            "(додати 2.0 1е-20)",
+            &mut session,
+            ReplSurface::UkrainianFull,
+        )
+        .expect("decimal and exponential exact operands share a D12+ domain");
+        let Value::NumericComposition(ref composition) = result.value else {
+            panic!("nonintegral exact sum remains a rational composition");
+        };
+        let (negative, numerator, denominator) = composition.as_parts();
+        assert!(!negative);
+        assert_eq!(numerator.to_decimal_string(), "200000000000000000001");
+        assert_eq!(
+            denominator.expect("sum denominator").to_decimal_string(),
+            "100000000000000000000"
+        );
+    }
+
+    #[cfg(feature = "zig-transport")]
+    #[test]
+    fn t5m_decimal_and_slash_fractions_are_exact_not_host_floats() {
+        let mut session = Session::default();
+        for (source, expected_numerator, expected_denominator) in [
+            ("(додати 0,1 0,2)", "3", "10"),
+            ("(додати 1546/8464 1/3)", "6551", "12696"),
+        ] {
+            let result = eval_t5m_repl_line(source, &mut session, ReplSurface::UkrainianFull)
+                .unwrap_or_else(|error| panic!("{source}: {error}"));
+            let Value::NumericComposition(ref composition) = result.value else {
+                panic!("{source} must produce an exact ratio composition");
+            };
+            let (negative, numerator, denominator) = composition.as_parts();
+            assert!(!negative, "{source}");
+            assert_eq!(
+                numerator.to_decimal_string(),
+                expected_numerator,
+                "{source}"
+            );
+            assert_eq!(
+                denominator
+                    .expect("fraction denominator")
+                    .to_decimal_string(),
+                expected_denominator,
+                "{source}"
+            );
+        }
+    }
+
+    #[cfg(feature = "zig-transport")]
+    #[test]
+    fn ukrainian_repl_runtime_errors_use_ukrainian_messages_not_physical_byte_spans() {
+        let mut session = Session::default();
+        let error = eval_t5m_repl_line(
+            "(додати (як-є \"текст\") 1)",
+            &mut session,
+            ReplSurface::UkrainianFull,
+        )
+        .expect_err("adding text to a number must remain a SENS type error");
+        assert!(error.contains("Помилка виконання SENS/T5M"), "{error}");
+        assert!(error.contains("Помилка типу"), "{error}");
+        assert!(!error.contains("line/riadok/Zeile"), "{error}");
+        assert!(!error.contains("expects"), "{error}");
+        assert!(!error.contains("numeric"), "{error}");
+        assert!(!error.contains("requires"), "{error}");
     }
 
     #[cfg(feature = "zig-transport")]
@@ -3208,23 +3330,25 @@ mod tests {
         append_t5m_expression(&forms[0], sens::Text7Layout::Uk, &mut actual, 0)
             .expect("single-cell D7 datum is exactly representable");
 
-        let identity = |width, bits| {
-            ExactDomainWord::Identity(t5m_domain_identity(width, bits).unwrap())
-        };
+        let identity =
+            |width, bits| ExactDomainWord::Identity(t5m_domain_identity(width, bits).unwrap());
         let expected = vec![
-            identity(2, 0b10),       // source QUOTE list
-            identity(3, 0b001),      // canonical quote identity
+            identity(2, 0b10),  // source QUOTE list
+            identity(3, 0b001), // canonical quote identity
             identity(2, 0b00),
-            identity(2, 0b10),       // quoted proper list
-            identity(7, 0b1100110),  // а: scalar W7 datum, not (а)
+            identity(2, 0b10),      // quoted proper list
+            identity(7, 0b1100110), // а: scalar W7 datum, not (а)
             identity(2, 0b00),
-            identity(2, 0b10),       // nested singleton list (б)
-            identity(7, 0b0101100),  // б: scalar *inside* the D2 list
+            identity(2, 0b10),      // nested singleton list (б)
+            identity(7, 0b0101100), // б: scalar *inside* the D2 list
             identity(2, 0b01),
             identity(2, 0b01),
             identity(2, 0b01),
         ];
-        assert_eq!(actual, expected, "D7 scalar identity must not erase D2 nesting");
+        assert_eq!(
+            actual, expected,
+            "D7 scalar identity must not erase D2 nesting"
+        );
 
         let dotted_source = "(як-є (а . б))";
         let dotted = sens::parse_mixed_exact_domain(dotted_source)
@@ -3266,9 +3390,8 @@ mod tests {
         let words = prepare_t5m_repl_words("(як-є (а))", ReplSurface::UkrainianFull, &session)
             .expect("quoted list lowers");
         assert!(matches!(&parsed[0].kind, ExprKind::List(_)));
-        let identity = |width, bits| {
-            ExactDomainWord::Identity(t5m_domain_identity(width, bits).unwrap())
-        };
+        let identity =
+            |width, bits| ExactDomainWord::Identity(t5m_domain_identity(width, bits).unwrap());
         assert_eq!(
             words,
             vec![
@@ -3291,12 +3414,8 @@ mod tests {
             scalar.value
         );
 
-        let singleton = eval_t5m_repl_line(
-            "(як-є (а))",
-            &mut session,
-            ReplSurface::UkrainianFull,
-        )
-        .expect("quoted one-element D2 list survives T5M");
+        let singleton = eval_t5m_repl_line("(як-є (а))", &mut session, ReplSurface::UkrainianFull)
+            .expect("quoted one-element D2 list survives T5M");
         assert!(
             matches!(singleton.value, Value::Pair(_)),
             "parenthesized singleton must remain a pair, got {}",
@@ -3433,8 +3552,16 @@ mod tests {
         // Еталонні біти виведені незалежно з ASCII "sha256:abc".
         let expected = Value::list(
             [
-                0b1110011_u16, 0b1101000, 0b1100001, 0b0110010, 0b0110101,
-                0b0110110, 0b0111010, 0b1100001, 0b1100010, 0b1100011,
+                0b1110011_u16,
+                0b1101000,
+                0b1100001,
+                0b0110010,
+                0b0110101,
+                0b0110110,
+                0b0111010,
+                0b1100001,
+                0b1100010,
+                0b1100011,
             ]
             .into_iter()
             .map(|bits| {
@@ -3475,9 +3602,8 @@ mod tests {
 
         let mut session = Session::default();
         sens::load_core_library(&mut session).expect("Core4");
-        let program =
-            prepare_t5m_repl_program("\"Привіт\"", ReplSurface::UkrainianFull, &session)
-                .expect("D7-admitted Ukrainian text lowers into physical transport");
+        let program = prepare_t5m_repl_program("\"Привіт\"", ReplSurface::UkrainianFull, &session)
+            .expect("D7-admitted Ukrainian text lowers into physical transport");
         let actual = program
             .execute(&mut session)
             .expect("D7-admitted text executes after Zig/T5M transport");
@@ -3485,9 +3611,10 @@ mod tests {
 
         // Emoji may appear in Unicode REPL UI, but have NO D7 identity.
         // They must not silently become D24 Unicode scalars in a program.
-        let rejected = prepare_t5m_repl_program(
-            "\"Привіт🙂\"", ReplSurface::UkrainianFull, &session,
-        ).err().expect("unsupported REPL glyph must not bypass D7");
+        let rejected =
+            prepare_t5m_repl_program("\"Привіт🙂\"", ReplSurface::UkrainianFull, &session)
+                .err()
+                .expect("unsupported REPL glyph must not bypass D7");
         assert!(rejected.contains("T5M_D7_TEXT_NOT_ADMITTED"), "{rejected}");
     }
 
@@ -3552,24 +3679,31 @@ mod tests {
             })
             .collect::<Vec<_>>();
         assert_eq!(restored_cells.as_slice(), expected.cells());
-        let quotes = actual.iter().filter(|word| matches!(
-            word,
-            ExactDomainWord::Identity(identity)
-                if identity.width() == 3 && identity.packed_bits() == 0b001
-        )).count();
+        let quotes = actual
+            .iter()
+            .filter(|word| {
+                matches!(
+                    word,
+                    ExactDomainWord::Identity(identity)
+                        if identity.width() == 3 && identity.packed_bits() == 0b001
+                )
+            })
+            .count();
         assert_eq!(
             quotes, 1,
             "цитований непорожній D7-текст має один зовнішній QUOTE, без прихованої вкладеності"
         );
 
-        let unadmitted =
-            sens::parse_mixed_exact_domain("(як-є \"🙂\")")
-                .expect("REPL Unicode syntax can be parsed before D7 admission");
+        let unadmitted = sens::parse_mixed_exact_domain("(як-є \"🙂\")")
+            .expect("REPL Unicode syntax can be parsed before D7 admission");
         actual.clear();
-        let rejection = append_t5m_expression(
-            &unadmitted[0], sens::Text7Layout::Uk, &mut actual, 0
-        ).expect_err("quoted Unicode outside D7 must not enter physical words");
-        assert!(rejection.contains("T5M_D7_TEXT_NOT_ADMITTED"), "{rejection}");
+        let rejection =
+            append_t5m_expression(&unadmitted[0], sens::Text7Layout::Uk, &mut actual, 0)
+                .expect_err("quoted Unicode outside D7 must not enter physical words");
+        assert!(
+            rejection.contains("T5M_D7_TEXT_NOT_ADMITTED"),
+            "{rejection}"
+        );
 
         let executable =
             sens::parse_mixed_exact_domain("\"аб\"").expect("executable Ukrainian string source");
