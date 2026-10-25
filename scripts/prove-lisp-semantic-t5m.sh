@@ -1826,7 +1826,7 @@ done
 test -s "$compiler_reverse_defs" || { echo "::error::COMPILER_REVERSE_ONTO_EMPTY_SENS_DEFINITIONS" >&2; exit 2; }
 sha256sum lib/compiler-nucleus.lisp "$compiler_reverse_defs" \
   tests/semantic/compiler-reverse-onto-proper-law.lisp \
-  tests/semantic/compiler-reverse-onto-order-mutant.lisp \
+  tests/semantic/compiler-reverse-onto-proper-mutant.lisp \
   tests/semantic/compiler-reverse-onto-improper-tail-negative.lisp \
   tests/semantic/compiler-reverse-onto-d1-root-negative.lisp \
   > "$evidence/compiler-reverse-onto-exact-inputs.sha256"
@@ -1836,7 +1836,7 @@ compiler_reverse_mutant="$evidence/compiler-reverse-onto-mutant-complete.lisp"
 compiler_reverse_bad_tail="$evidence/compiler-reverse-onto-bad-tail-complete.lisp"
 compiler_reverse_bad_root="$evidence/compiler-reverse-onto-bad-root-complete.lisp"
 cat -- "$compiler_reverse_defs" tests/semantic/compiler-reverse-onto-proper-law.lisp > "$compiler_reverse_positive"
-cat -- "$compiler_reverse_defs" tests/semantic/compiler-reverse-onto-order-mutant.lisp > "$compiler_reverse_mutant"
+cat -- "$compiler_reverse_defs" tests/semantic/compiler-reverse-onto-proper-mutant.lisp > "$compiler_reverse_mutant"
 cat -- "$compiler_reverse_defs" tests/semantic/compiler-reverse-onto-improper-tail-negative.lisp > "$compiler_reverse_bad_tail"
 cat -- "$compiler_reverse_defs" tests/semantic/compiler-reverse-onto-d1-root-negative.lisp > "$compiler_reverse_bad_root"
 run_case run_law compiler-reverse-onto-positive "$compiler_reverse_positive" 1
