@@ -103,6 +103,10 @@ class H2ZigNativeCarrier(unittest.TestCase):
         ):
             self.assertIn(required, h2.H2_TRACKED_INPUTS)
 
+    def test_h2_source_pin_contains_the_default_t5m_import_closure(self):
+        closure = h2.verify_zig_import_closure(ROOT, h2.H2_TRACKED_INPUTS)
+        self.assertIn("research/zig-codecs/t5m.zig", closure)
+
     def test_native_shells_no_longer_write_T5_in_python(self):
         for source in h2.RUST_DRIVERS:
             script = (ROOT / source).read_text(encoding="utf-8")
