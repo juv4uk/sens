@@ -1,4 +1,4 @@
-//! Single caller-owned transport ABI v2; no padded host structs or heap crossing.
+//! Single caller-owned transport ABI v2; no padded host structs cross the boundary.
 const std = @import("std");
 const t5 = @import("t5/t5.zig");
 const t5m = @import("t5m.zig");
@@ -63,7 +63,9 @@ test "raw bitstream ABI packs exact widths through Zig with zero canonical tail"
         2, 0, 0, 0, 0, 0, 0, 0, 1,
         3, 0, 0, 0, 0, 0, 0, 0, 7,
     };
-    try std.testing.expectEqual(@as(isize, 1), sens_zig_bitpack_fields(&records, records.len, undefined, 0));
+    var query_dst: [1]u8 = .{0xa5};
+    try std.testing.expectEqual(@as(isize, 1), sens_zig_bitpack_fields(&records, records.len, &query_dst, 0));
+    try std.testing.expectEqual(@as(u8, 0xa5), query_dst[0]);
     var output: [1]u8 = undefined;
     try std.testing.expectEqual(@as(isize, 1), sens_zig_bitpack_fields(&records, records.len, &output, output.len));
     try std.testing.expectEqual(@as(u8, 0xaf), output[0]);
@@ -81,10 +83,12 @@ test "raw bitstream ABI rejects short output without partial writes" {
 
 test "raw bitstream ABI rejects malformed width, value overflow, and partial records" {
     const zero_width = [_]u8{ 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-    try std.testing.expectEqual(@as(isize, -1), sens_zig_bitpack_fields(&zero_width, zero_width.len, undefined, 0));
+    var query_dst: [1]u8 = .{0x5a};
+    try std.testing.expectEqual(@as(isize, -1), sens_zig_bitpack_fields(&zero_width, zero_width.len, &query_dst, 0));
+    try std.testing.expectEqual(@as(u8, 0x5a), query_dst[0]);
     const overflow = [_]u8{ 3, 0, 0, 0, 0, 0, 0, 0, 8 };
-    try std.testing.expectEqual(@as(isize, -1), sens_zig_bitpack_fields(&overflow, overflow.len, undefined, 0));
-    try std.testing.expectEqual(@as(isize, -1), sens_zig_bitpack_fields(&overflow, overflow.len - 1, undefined, 0));
+    try std.testing.expectEqual(@as(isize, -1), sens_zig_bitpack_fields(&overflow, overflow.len, &query_dst, 0));
+    try std.testing.expectEqual(@as(isize, -1), sens_zig_bitpack_fields(&overflow, overflow.len - 1, &query_dst, 0));
 }
 
 /// Default physical transport ABI: T5M stores five trits in one byte.
