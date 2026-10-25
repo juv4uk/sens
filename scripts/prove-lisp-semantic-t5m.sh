@@ -2474,7 +2474,7 @@ run_case run_law d6-union-right-validated "$evidence/d6-union-right-validated-la
 run_case run_type_rejection d6-union-right-root "$evidence/d6-union-right-root-negative-complete.lisp" 'car expects a non-empty list'
 run_case run_type_rejection d6-union-right-tail "$evidence/d6-union-right-tail-negative-complete.lisp" 'car expects a non-empty list'
 run_case run_type_rejection d6-union-right-hidden-tail "$evidence/d6-union-right-hidden-tail-negative-complete.lisp" 'car expects a non-empty list'
-sha256sum lib/core4.lisp lib/core4-parts/core4-codec.lisp lib/core4-parts/core4-language.lisp \
+sha256sum lib/core4.lisp lib/core4-parts/core4-d6.lisp lib/core4-parts/core4-d6b.lisp \
   tests/semantic/d6-union-*.lisp > "$evidence/d6-union-inputs.sha256"
 
 run_case run_law d6-intersection-order-positive tests/semantic/d6-intersection-order-law.lisp 1 core4
