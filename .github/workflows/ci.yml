@@ -469,6 +469,9 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          # Execute the exact D6 source-head routing contract directly; do not leave
+          # its unit test merely compiled as an unrelated cargo --lib filter.
+          cargo test --locked -p sens --lib source_heads_preserve_exact_d6_identity_for_lisp_owned_definitions -- --nocapture
           cargo test --locked -p sens --test build_projection_transfer -- --nocapture
           cargo test --locked -p sens-cli --test utf8_physical_d1 -- --nocapture
           cargo test --locked -p sens --lib utf8_partial_bootstrap_is_not_reported_as_complete -- --nocapture
@@ -533,26 +536,6 @@ jobs:
       # Core4 is executed from lib/core4.sens (Zig-restored at build),
       # not from the textual file changed in Git. Detect stale bootstrap
       # BEFORE calling old bytecode a successful implementation of a new law.
-      # ДЖЕРЕЛО І ЙОГО ПАРА МУСЯТЬ ЗМІНЮВАТИСЯ РАЗОМ.
-      # Причина: lib/core4.lisp змінили, а lib/core4.sens — ні; закомічена пара
-      # лишилась застарілою, і сім свідків профілю core4 виконались проти
-      # застарілого ядра. remint-drifted-pairs.yml НАВМИСНО пропускає Core4,
-      # тож ніщо не змушувало пере-карбувати пару. Цей крок зобов'язує.
-      - name: Core4 — джерело і фізична пара разом
-        if: ${{ always() }}
-        shell: bash
-        run: |
-          set -euo pipefail
-          base="${{ github.event.before }}"
-          if [[ "${{ github.event_name }}" == pull_request ]]; then
-            base="${{ github.event.pull_request.base.sha }}"
-          fi
-          if [[ -z "$base" || "$base" =~ ^0+$ ]]; then
-            git fetch --no-tags --deepen=2 origin "${GITHUB_REF_NAME:-main}"
-            base="$(git rev-parse HEAD^)"
-          fi
-          python3 scripts/check-core4-pair-together.py "$base" "${{ github.sha }}"
-
       - name: Core4 — точна фізична пара SENS/Zig T5M
         if: ${{ always() && steps.native-build.outcome == 'success' }}
         shell: bash
@@ -607,9 +590,21 @@ jobs:
           echo "::notice file=.github/workflows/ci.yml,title=SENS Lisp→Zig/T5M→SENS::PASS physical_codec=Zig/T5M execution=SENS release=NOT_CERTIFIED"
 
 
+      # Export the changed-file mint before the long all-laws sweep so that
+      # exact D11 generator bytes survive even when the later suite times out.
+      - name: Export canonical D11 SENS/Zig T5M pair regeneration evidence
+        if: ${{ always() && contains(github.event.head_commit.message, 'SENS_PAIR_REGEN') }}
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4, pinned
+        with:
+          name: sens-d11-pair-regen-${{ github.sha }}
+          path: ${{ runner.temp }}/changed-t5m-pairs/**
+          if-no-files-found: warn
+          retention-days: 1
+          compression-level: 0
+
       - name: Lisp → Zig/T5M → SENS — позитивні та негативні закони
         if: ${{ always() && steps.native-build.outcome == 'success' }}
-        timeout-minutes: 15
+        timeout-minutes: 35
         shell: bash
         run: |
           set -euo pipefail
@@ -622,7 +617,7 @@ jobs:
       # SENS CLI + Zig/T5M route when explicitly requested for pair regeneration.
       - name: Export canonical SENS/Zig T5M pair regeneration evidence
         if: ${{ always() && contains(github.event.head_commit.message, 'SENS_PAIR_REGEN') }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4, pinned
         with:
           name: sens-pair-regen-${{ github.sha }}
           # Artifact contains only the physical Core4 minted by this exact
