@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
 
 # Повні дослідження/бенчмарки: ручний ci-heavy.yml.
-# Відновлення фізичних пар: ручний remint-drifted-pairs.yml.
+# Відновлення фізичних пар: ручний запуск або цільовий reusable job у цьому CI.
 # Червоний результат не приховуємо; PASS коридору не є допуском релізу.
 permissions:
   contents: read
@@ -652,3 +652,17 @@ jobs:
           if-no-files-found: error
           retention-days: 1
           compression-level: 0
+
+  # Єдина автоматична CI-подія залишається у ci.yml. Не стартувати
+  # окреме тригерне завдання на кожний push: тільки явний SENS_PAIR_REGEN.
+  # Ремонт виконує чинний нативний SENS/Zig, а не host-oracle чи ручні байти.
+  remint-targeted:
+    name: Канонічно відновити фізичні F6/Core4 пари
+    if: ${{ github.event_name == 'push' && contains(github.event.head_commit.message, 'SENS_PAIR_REGEN') }}
+    uses: ./.github/workflows/remint-drifted-pairs.yml
+    with:
+      files: |
+        lib/core4.lisp
+        lib/lisp-fs.lisp
+    permissions:
+      contents: write

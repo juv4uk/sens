@@ -289,6 +289,23 @@ jobs:
             list="$(printf '%s\n' "${changed_sources[@]}" "${pending_sources[@]}" "${other_sources[@]}")"
             echo "REMINT_PUSH_FIRST sources=${#changed_sources[@]} unpaired=${#pending_sources[@]} native=SENS_ZIG"
           fi
+          # Reusable workflow отримує точний список від ci.yml.
+          # Push-диф не повинен стирати явно замовлений нативний remint;
+          # ці джерела мають пріоритет над історичним backlog.
+          if [[ -n "$FILES" ]]; then
+            while IFS= read -r requested; do
+              [[ -n "$requested" ]] || continue
+              if [[ "$requested" != *.lisp || ! -f "$requested" || -L "$requested" ]]; then
+                echo "::error::REMINT_REQUESTED_SOURCE_INVALID source=$requested" >&2
+                exit 2
+              fi
+              if [[ "$EVENT_NAME" == push ]]; then
+                push_changed_sources["$requested"]=1
+              fi
+            done <<< "$FILES"
+            list="$(printf '%s\n%s\n' "$FILES" "$list" | awk 'NF && !seen[$0]++')"
+            echo "REMINT_REQUESTED_NATIVE_SOURCES validated=yes priority=explicit"
+          fi
           # Незавершений хвіст — PENDING, не виданий за PASS чи реліз.
           list="$(printf '%s\n' "$list" | sed '/^$/d')"
           initial_total="$(printf '%s\n' "$list" | sed '/^$/d' | wc -l)"
