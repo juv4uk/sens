@@ -131,7 +131,7 @@ jobs:
             --base "$(cat "$RUNNER_TEMP/native-semantic-base.sha")" \
             --head "$GITHUB_SHA"
 
-      - name: Звірити повторне використання функцій D1–D11
+      - name: Охоронець повторного використання змінених доменних функцій
         env:
           BEFORE_SHA: ${{ github.event.before }}
         run: |
@@ -161,7 +161,7 @@ jobs:
 
 
       - uses: ./.github/actions/install-zig
-        if: ${{ always() }}
+        if: ${{ always() && steps.changed-t5m-lisp.outcome == 'success' && (steps.changed-t5m-lisp.outputs.has_lisp == 'true' || steps.changed-t5m-lisp.outputs.has_files == 'true' || steps.changed-t5m-lisp.outputs.has_rust == 'true' || steps.changed-t5m-lisp.outputs.has_zig == 'true' || github.event_name == 'workflow_dispatch') }}
 
       - name: Zig bitpacker — build real WASM target without Rust fallback
         # Cross-target check only when Rust/Zig sources changed, or on manual full validation.
@@ -180,12 +180,13 @@ jobs:
           fi
 
       - name: Rust — механізм без мовного оракула
-        if: ${{ always() }}
+        # Native mechanism tests are needed for code/runtime changes, not docs-only pushes.
+        if: ${{ always() && steps.changed-t5m-lisp.outcome == 'success' && (steps.changed-t5m-lisp.outputs.has_lisp == 'true' || steps.changed-t5m-lisp.outputs.has_files == 'true' || steps.changed-t5m-lisp.outputs.has_rust == 'true' || steps.changed-t5m-lisp.outputs.has_zig == 'true' || github.event_name == 'workflow_dispatch') }}
         timeout-minutes: 15
         shell: bash
         run: bash scripts/ci-rust-mechanism-checks.sh
       - name: Zig — точний кодек, ABI, пошкоджені кадри
-        if: ${{ always() }}
+        if: ${{ always() && steps.changed-t5m-lisp.outcome == 'success' && (steps.changed-t5m-lisp.outputs.has_lisp == 'true' || steps.changed-t5m-lisp.outputs.has_files == 'true' || steps.changed-t5m-lisp.outputs.has_rust == 'true' || steps.changed-t5m-lisp.outputs.has_zig == 'true' || github.event_name == 'workflow_dispatch') }}
         shell: bash
         run: |
           set -uo pipefail
@@ -212,7 +213,7 @@ jobs:
 
       - name: Зібрати нативний SENS і Zig/T5M лише один раз
         id: native-build
-        if: ${{ always() }}
+        if: ${{ always() && steps.changed-t5m-lisp.outcome == 'success' && (steps.changed-t5m-lisp.outputs.has_lisp == 'true' || steps.changed-t5m-lisp.outputs.has_files == 'true' || steps.changed-t5m-lisp.outputs.has_rust == 'true' || steps.changed-t5m-lisp.outputs.has_zig == 'true' || github.event_name == 'workflow_dispatch') }}
         shell: bash
         timeout-minutes: 12
         run: |
@@ -248,7 +249,7 @@ jobs:
           fi
           echo "SENS_CORE4_PHYSICAL_PARITY_PASS source=lib/core4.lisp physical=lib/core4.sens codec=Zig/T5M"
 
-      - name: PUSH Lisp → кодек Zig/T5M → виконання SENS
+      - name: Змінені Lisp-програми → кодек Zig/T5M → виконання SENS
         id: t5m_changed_execute
         if: ${{ always() && steps.native-build.outcome == 'success' }}
         shell: bash
@@ -290,8 +291,10 @@ jobs:
           retention-days: 1
           compression-level: 0
 
-      - name: Lisp → Zig/T5M → SENS — позитивні та негативні закони
-        if: ${{ always() && steps.native-build.outcome == 'success' }}
+      - name: Повний мовний sweep — SENS/Zig/T5M, позитиви й мутанти
+        # Full suite on PR/manual run or explicitly marked release-preflight push.
+        # Ordinary pushes execute only the changed-program manifest above.
+        if: ${{ always() && steps.native-build.outcome == 'success' && (github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, 'SENS_FULL_LAW_SWEEP')) }}
         timeout-minutes: 35
         shell: bash
         run: |
