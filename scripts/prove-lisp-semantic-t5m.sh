@@ -663,6 +663,19 @@ sha256sum lib/core4.lisp \
   tests/semantic/d5-reverse-onto-order-mutant.lisp \
   tests/semantic/d5-reverse-onto-improper-tail-negative.lisp \
   tests/semantic/d5-reverse-improper-tail-negative.lisp > "$evidence/d5-reverse-inputs.sha256"
+# Д5:11110 PAIRLIS: повні D3-списки, D1-позитив/мутант і три Type-негативи.
+run_case run_law d5-pairlis-total-list-positive tests/semantic/d5-pairlis-total-list-law.lisp 1 core4
+run_case run_law d5-pairlis-total-list-mutant tests/semantic/d5-pairlis-total-list-mutant.lisp 0 core4
+run_case run_error_rejection d5-pairlis-improper-key-tail tests/semantic/d5-pairlis-improper-key-tail-negative.lisp Type 'car expects a non-empty list' core4
+run_case run_error_rejection d5-pairlis-improper-value-tail tests/semantic/d5-pairlis-improper-value-tail-negative.lisp Type 'car expects a non-empty list' core4
+run_case run_error_rejection d5-pairlis-extra-value tests/semantic/d5-pairlis-extra-value-negative.lisp Type 'car expects a non-empty list' core4
+sha256sum \
+  tests/semantic/d5-pairlis-total-list-law.lisp \
+  tests/semantic/d5-pairlis-total-list-mutant.lisp \
+  tests/semantic/d5-pairlis-improper-key-tail-negative.lisp \
+  tests/semantic/d5-pairlis-improper-value-tail-negative.lisp \
+  tests/semantic/d5-pairlis-extra-value-negative.lisp > "$evidence/d5-pairlis-inputs.sha256"
+
 # D5/D24+: точні числові величини, мутант, неправильний D1-хвіст.
 # Усі вердикти формулює SENS. Shell тільки з'єднує бібліотеку та свідки.
 d5_exact_number_source=lib/залишити-точні-числа.lisp
