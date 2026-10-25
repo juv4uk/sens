@@ -3,6 +3,10 @@
 name: audit-t5-program-syntax
 
 on:
+  # Переведено на pull_request: цей workflow УЖЕ обробляє PR-події
+  # (github.event.pull_request), але тригер не стріляв — перевірка не мала наслідків.
+  pull_request:
+    branches: [main]
   workflow_dispatch:
 
 permissions:
