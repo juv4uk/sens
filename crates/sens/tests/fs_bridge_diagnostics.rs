@@ -631,3 +631,31 @@ fn filesystem_binding_map_requires_complete_d3_spine_before_accepting_a_snapshot
         }
     }
 }
+
+#[test]
+fn filesystem_packages_reject_duplicate_required_fields_in_sens() {
+    // Обидва вердикти обчислює SENS із мовних свідків;
+    // Rust перевіряє лише точний вихідний біт D1.
+    let mut s = session();
+    for (id, source, expected) in [
+        (
+            "d9-fs-unique-fields-positive",
+            include_str!("../../../tests/semantic/d9-fs-unique-fields-law.lisp"),
+            true,
+        ),
+        (
+            "d9-fs-unique-fields-mutant",
+            include_str!("../../../tests/semantic/d9-fs-unique-fields-mutant.lisp"),
+            false,
+        ),
+    ] {
+        let result = eval_program(source, &mut s)
+            .unwrap_or_else(|error| panic!("test_id={id} layer=SENS error={error}"));
+        assert_eq!(
+            result.value.as_predicate_bit(),
+            Some(expected),
+            "test_id={id} layer=SENS expected=D1:{expected} actual={}",
+            result.value
+        );
+    }
+}
