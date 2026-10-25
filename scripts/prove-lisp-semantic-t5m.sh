@@ -1927,6 +1927,14 @@ run_case run_error_rejection d11-masterscope-improper-nested-tail-type "$d11_mas
 d11_masterscope_quoted_datum="$evidence/d11-masterscope-quoted-improper-datum-complete.lisp"
 cat -- lib/d11-interlisp-safe-analysis.lisp tests/fixtures/d11-masterscope-quoted-improper-datum-positive.lisp > "$d11_masterscope_quoted_datum"
 run_case run_law d11-masterscope-quoted-improper-datum-positive "$d11_masterscope_quoted_datum" 1 core4
+# Окрема D3-перевірка спискової голови до збігу в аргументах.
+d11_masterscope_bad_head="$evidence/d11-masterscope-improper-call-head-complete.lisp"
+cat -- lib/d11-interlisp-safe-analysis.lisp tests/fixtures/d11-masterscope-improper-call-head-negative.lisp > "$d11_masterscope_bad_head"
+run_case run_error_rejection d11-masterscope-improper-call-head-type "$d11_masterscope_bad_head" Type 'car expects a non-empty list' core4
+d11_masterscope_proper_head="$evidence/d11-masterscope-proper-call-head-complete.lisp"
+cat -- lib/d11-interlisp-safe-analysis.lisp tests/fixtures/d11-masterscope-proper-call-head-positive.lisp > "$d11_masterscope_proper_head"
+run_case run_law d11-masterscope-proper-call-head-positive "$d11_masterscope_proper_head" 1 core4
+sha256sum lib/d11-interlisp-safe-analysis.lisp tests/fixtures/d11-masterscope-improper-call-head-negative.lisp tests/fixtures/d11-masterscope-proper-call-head-positive.lisp > "$evidence/d11-masterscope-call-head-inputs.sha256"
 sha256sum lib/d11-interlisp-safe-analysis.lisp tests/fixtures/d11-masterscope-improper-nested-tail-negative.lisp tests/fixtures/d11-masterscope-quoted-improper-datum-positive.lisp > "$evidence/d11-masterscope-nested-form-inputs.sha256"
 sha256sum lib/d11-interlisp-safe-analysis.lisp tests/fixtures/d11-masterscope-improper-root-tail-negative.lisp > "$evidence/d11-masterscope-improper-root-tail-inputs.sha256"
 sha256sum lib/d11-interlisp-safe-analysis.lisp tests/fixtures/d11-dwim-*.lisp > "$evidence/d11-dwim-exact-record-inputs.sha256"
