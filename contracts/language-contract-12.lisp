@@ -11,7 +11,8 @@
 
 (
   (schema . sens-language-contract-12/1)
-  (version . (12 0))
+  ; Version is textual contract metadata, never a numeric SENS operand.
+  (version . "12.0")
   (date . "2026-10-25")
   (status . owner-ratified-active)
   (owner-decision-requested . fulfilled)
