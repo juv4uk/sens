@@ -1775,6 +1775,50 @@ cat -- "$last_define_definition" tests/semantic/d11-meta-last-define-laws.lisp >
 cat -- "$last_define_definition" tests/semantic/d11-meta-last-define-mutant.lisp > "$last_define_mutant_bundle"
 run_case run_law d11-meta-last-define-positive "$last_define_positive_bundle" 1
 run_case run_law d11-meta-last-define-mutant "$last_define_mutant_bundle" 0
+# D5/D3 компіляторне обернення: беремо ТОЧНІ чинні DEFINE з SENS.
+# Bash/AWK лише відділяє вже визначені форми; закон і Type — тільки SENS.
+# Якщо форма відсутня, неоднозначна або не закінчується — fail-closed.
+compiler_reverse_defs="$evidence/compiler-reverse-onto-exact-source-definitions.lisp"
+: > "$compiler_reverse_defs"
+for name in істина-компілятора компілятор-зворот-до; do
+  if ! awk -v target="(визначити $name" '
+    $0 == target {
+      if (found++) exit 2
+      copying = 1
+    }
+    copying && NF == 0 {
+      copying = 0
+      complete++
+      next
+    }
+    copying { print }
+    END { if (found != 1 || complete != 1 || copying) exit 2 }
+  ' lib/compiler-nucleus.lisp >> "$compiler_reverse_defs"; then
+    echo "::error::COMPILER_REVERSE_ONTO_EXACT_SENS_DEFINITION_MISSING name=$name" >&2
+    exit 2
+  fi
+done
+test -s "$compiler_reverse_defs" || { echo "::error::COMPILER_REVERSE_ONTO_EMPTY_SENS_DEFINITIONS" >&2; exit 2; }
+sha256sum lib/compiler-nucleus.lisp "$compiler_reverse_defs" \
+  tests/semantic/compiler-reverse-onto-proper-law.lisp \
+  tests/semantic/compiler-reverse-onto-order-mutant.lisp \
+  tests/semantic/compiler-reverse-onto-improper-tail-negative.lisp \
+  tests/semantic/compiler-reverse-onto-d1-root-negative.lisp \
+  > "$evidence/compiler-reverse-onto-exact-inputs.sha256"
+
+compiler_reverse_positive="$evidence/compiler-reverse-onto-positive-complete.lisp"
+compiler_reverse_mutant="$evidence/compiler-reverse-onto-mutant-complete.lisp"
+compiler_reverse_bad_tail="$evidence/compiler-reverse-onto-bad-tail-complete.lisp"
+compiler_reverse_bad_root="$evidence/compiler-reverse-onto-bad-root-complete.lisp"
+cat -- "$compiler_reverse_defs" tests/semantic/compiler-reverse-onto-proper-law.lisp > "$compiler_reverse_positive"
+cat -- "$compiler_reverse_defs" tests/semantic/compiler-reverse-onto-order-mutant.lisp > "$compiler_reverse_mutant"
+cat -- "$compiler_reverse_defs" tests/semantic/compiler-reverse-onto-improper-tail-negative.lisp > "$compiler_reverse_bad_tail"
+cat -- "$compiler_reverse_defs" tests/semantic/compiler-reverse-onto-d1-root-negative.lisp > "$compiler_reverse_bad_root"
+run_case run_law compiler-reverse-onto-positive "$compiler_reverse_positive" 1
+run_case run_law compiler-reverse-onto-order-mutant "$compiler_reverse_mutant" 0
+run_case run_error_rejection compiler-reverse-onto-d1-root-type "$compiler_reverse_bad_root" Type 'car expects a non-empty list'
+run_case run_error_rejection compiler-reverse-onto-improper-tail-type "$compiler_reverse_bad_tail" Type 'car expects a non-empty list'
+
 # Д11 juxt: першокласні одномісні функції та контрприклад перевіряє SENS.
 # Bash лише додає чинні DEFINE та проводить обидва свідки через Zig/T5M.
 d11_juxt_law_bundle="$evidence/d11-clojure-juxt-positive-complete.lisp"
