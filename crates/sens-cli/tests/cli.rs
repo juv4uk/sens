@@ -1012,6 +1012,55 @@ fn default_ukrainian_repl_localizes_errors_and_help_prose() {
     assert!(!stderr.contains("line/riadok/Zeile"), "{stderr}");
 }
 
+#[test]
+fn repl_loads_a_ukrainian_file_into_the_live_t5m_session() {
+    use std::io::Write;
+    use std::process::Stdio;
+
+    let home = std::env::temp_dir().join(format!("sens-cli-repl-load-home-{}", std::process::id()));
+    let source_path = std::env::temp_dir().join(format!(
+        "sens cli repl load {}.lisp",
+        std::process::id()
+    ));
+    std::fs::create_dir_all(&home).expect("should create isolated REPL home");
+    std::fs::write(
+        &source_path,
+        "(визначити завантажена-функція (функція (значення) (додати значення 2)))\n",
+    )
+    .expect("should write Ukrainian Lisp source");
+
+    let mut child = sens()
+        .env("HOME", &home)
+        .env("USERPROFILE", &home)
+        .stdin(Stdio::piped())
+        .stdout(Stdio::piped())
+        .stderr(Stdio::piped())
+        .spawn()
+        .expect("REPL should start");
+    child
+        .stdin
+        .take()
+        .expect("stdin should be piped")
+        .write_all(
+            format!(
+                ":завантажити \"{}\"\n(завантажена-функція 40)\n",
+                source_path.display()
+            )
+            .as_bytes(),
+        )
+        .expect("should load the file and call its definition");
+    let output = child.wait_with_output().expect("REPL should finish at EOF");
+    let _ = std::fs::remove_dir_all(&home);
+    let _ = std::fs::remove_file(&source_path);
+
+    assert!(output.status.success());
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    let stderr = String::from_utf8_lossy(&output.stderr);
+    assert!(stdout.contains("Завантажено"), "stdout={stdout}\nstderr={stderr}");
+    assert!(stdout.contains("42"), "stdout={stdout}\nstderr={stderr}");
+    assert!(!stderr.contains("Помилка REPL/T5M"), "{stderr}");
+}
+
 /// The echo fallback must not leak into non-interactive execution: running a
 /// file whose whole content is a lone unknown symbol still fails named.
 /// Echo-fallback ne povynen proshkodzhuvaty v neinteraktyvne vykonannia:

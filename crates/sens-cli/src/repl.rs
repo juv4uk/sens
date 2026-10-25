@@ -1901,6 +1901,7 @@ pub(crate) fn history_path() -> Option<PathBuf> {
 }
 
 fn print_surface_help() {
+    println!("Завантажити файл у поточну сесію: :завантажити <шлях>");
     println!("Показати дерево розбору без виконання: :розбір <форма>");
     println!("Показати дерево й виконати форму: :розбір-виконати <форма>");
     println!("Поверхні: :мова ук | укр | en | sa | LISP | core");
@@ -1921,6 +1922,54 @@ fn handle_meta_command(line: &str, state: &mut ReplState) -> bool {
     };
 
     match command {
+        ":завантажити" | ":load" => {
+            let raw_path = line
+                .trim_start()
+                .strip_prefix(command)
+                .unwrap_or("")
+                .trim();
+            let path = raw_path
+                .strip_prefix('"')
+                .and_then(|value| value.strip_suffix('"'))
+                .or_else(|| {
+                    raw_path
+                        .strip_prefix('\'')
+                        .and_then(|value| value.strip_suffix('\''))
+                })
+                .unwrap_or(raw_path);
+            if path.is_empty() {
+                eprintln!("Використання: :завантажити <шлях>");
+                return true;
+            }
+            #[cfg(feature = "zig-transport")]
+            {
+                let source = match std::fs::read_to_string(path) {
+                    Ok(source) => source,
+                    Err(error) => {
+                        eprintln!("Помилка читання файла {}: {error}", path);
+                        return true;
+                    }
+                };
+                match eval_t5m_source_in_session(&source, &mut state.session, state.surface) {
+                    Ok(result) => {
+                        for out in result.output {
+                            println!("{out}");
+                        }
+                        println!("Завантажено: {path}");
+                        println!(
+                            "{}",
+                            render_repl_reply(&result.value, state.surface.presentation())
+                        );
+                    }
+                    Err(error) => eprintln!("Помилка завантаження {path}: {error}"),
+                }
+            }
+            #[cfg(not(feature = "zig-transport"))]
+            eprintln!(
+                "Помилка: :завантажити потребує Zig T5M; RUST_ZIG_ONLY означає відсутній транспорт."
+            );
+            true
+        }
         ":мова" | ":surface" => {
             let Some(requested) = parts.next() else {
                 println!(
