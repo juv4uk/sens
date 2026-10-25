@@ -2154,6 +2154,7 @@ sha256sum lib/core4.lisp lib/core4-parts/core4-d6b.lisp \
   tests/semantic/d6-any-invalid-root-law.lisp \
   tests/semantic/d6-all-invalid-root-law.lisp \
   tests/semantic/d8-quantifier-composition-law.lisp \
+  tests/semantic/d8-quantifier-composition-mutant.lisp \
   tests/semantic/d8-notany-invalid-root-law.lisp \
   tests/semantic/d8-notevery-invalid-root-law.lisp \
   tests/semantic/d8-all-not-invalid-root-law.lisp > "$evidence/d6-d8-quantifier-inputs.sha256"
