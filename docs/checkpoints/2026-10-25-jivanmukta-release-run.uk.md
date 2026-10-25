@@ -51,3 +51,31 @@ Run: https://github.com/juv4uk/sens/actions/runs/40208478645
 5. Закрити 770 відсутніх `.sens`/triplets по одному перевіреному програмному джерелу; відділяти справжні програми від документів/тестових даних. Після цього переаудитувати D6 ledger за Contract 12.0 і продовжити D10/D12+.
 
 **Вердикт на SHA `c4ca399`: `RELEASE=NO-GO`.** Target remint не завершився успішно, один Rust-крок червоний, фізична виконуваність усієї драбини D1–D12+ не підтверджена.
+
+## Додаток Jīvanmukta — 2026-10-25, після manifest/F6-патчів
+
+Поточний source HEAD на момент цього запису:
+`ab805e8d97f357ca35fc60b4ba81851ce7f9b2dd`.
+
+### Наступні виправлення в main
+
+- [`b43eb09`](https://github.com/juv4uk/sens/commit/b43eb091592452ca247f083a113cc0ea5fd95be6): зберігати caller manifest після non-fast-forward; глобальні scans вмикаються лише для запуску без `inputs.files`.
+- [`814cbfd`](https://github.com/juv4uk/sens/commit/814cbfd5e372a5f016eaa59fa3c83b6129a28a06): дозволити Core4 profile для F6 producer лише з чотирма точними залежностями SENS; інші комбінації залишено забороненими.
+- [`e1e15df`](https://github.com/juv4uk/sens/commit/e1e15df4e2bbd3c117751db03c90a1ac4dc69165): призначити producer той самий dependency stack, який використовує вже наявний F6 WRITE→READ law runner: `lib/persistent-map.lisp`, `lib/world.lisp`, `lib/content-store.lisp`, `lib/lisp-fs.lisp`.
+- [`ab805e8`](https://github.com/juv4uk/sens/commit/ab805e8d97f357ca35fc60b4ba81851ce7f9b2dd): виправити координатну помилку в новому Python workflow-invariant test. У тесті координати підрядка тепер порівнюються в одній системі індексів.
+
+### CI-квитанція на момент запису
+
+- [Run 40209958355](https://github.com/juv4uk/sens/actions/runs/40209958355) має exact SHA `ab805e8`, але статус `queued`; фінального результату немає.
+- Попередні run-и для SHA до `ab805e8` містили власну невірну assertion-умову тесту або використовували ще стару remint-конфігурацію. Їх не можна рахувати перевіркою виправленого тесту/нового dependency stack.
+- Ручна перевірка текстових інваріантів підтвердила наявність manifest guard, producer-case dependency list і точного Core4 allowlist. Це не замінює запуску Python unit test чи нативного SENS/Zig/T5M.
+
+### Оновлений вердикт і передача
+
+`RELEASE=NO-GO`. Нативні CI та remint на `ab805e8` очікують виконання. Після завершення перевірити в першу чергу:
+1. Python `test_remint_explicit_manifest_scope` — має пройти без помилки індексації;
+2. ремінт має залишитися в межах трьох початкових джерел після recovery;
+3. producer повинен отримати повний dependency stack і відтворити WRITE→READ; невідомий Text7 key не можна дозволяти автоматично чи зводити до іншого ключа;
+4. Core4/lisp-fs physical hash/source receipts повинні бути взяті лише з успішного завершеного job;
+5. Rust RED зі старих SHA не переносити на `ab805e8`; так само жоден старий PASS не є підтвердженням нового HEAD.
+
