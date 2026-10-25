@@ -105,6 +105,14 @@ impl ExactT5MWord {
 
 /// Кодує точні слова через фізичний кодек Zig T5M без стелі BE3 W1–W9.
 pub fn encode_t5m_exact_words(words: &[ExactT5MWord]) -> Result<Vec<u8>, String> {
+    encode_t5m_exact_words_and_restore(words).map(|(physical, _)| physical)
+}
+
+/// Кодує, один раз декодує через Zig для перевірки й повертає відновлені слова.
+/// REPL може використати той самий результат зворотного шляху без повторного декодування.
+pub fn encode_t5m_exact_words_and_restore(
+    words: &[ExactT5MWord],
+) -> Result<(Vec<u8>, Vec<ExactT5MWord>), String> {
     version()?;
     if words.is_empty() {
         return Err("Zig T5M cannot encode an empty word sequence".into());
@@ -157,7 +165,7 @@ pub fn encode_t5m_exact_words(words: &[ExactT5MWord]) -> Result<Vec<u8>, String>
     if restored != words {
         return Err("Zig T5M змінив ширину слова або його біти".into());
     }
-    Ok(physical)
+    Ok((physical, restored))
 }
 
 /// Декодує T5M через Zig зі збереженням довільних точних додатних ширин.
@@ -1166,6 +1174,21 @@ mod zig_exact_egress_tests {
         assert_eq!(restored[0].width(), 5);
         assert_eq!(restored[1].width(), 8);
         assert_ne!(restored[0], restored[1]);
+    }
+
+    #[test]
+    fn verified_t5m_encode_returns_the_words_it_already_decoded() {
+        use super::{decode_t5m_exact_words, encode_t5m_exact_words_and_restore, ExactT5MWord};
+
+        let source = [
+            ExactT5MWord::new(3, vec![0, 1, 0]).unwrap(),
+            ExactT5MWord::new(24, [vec![0; 23], vec![1]].concat()).unwrap(),
+        ];
+
+        let (physical, restored) =
+            encode_t5m_exact_words_and_restore(&source).expect("verified Zig T5M roundtrip");
+        assert_eq!(restored, source);
+        assert_eq!(decode_t5m_exact_words(&physical).unwrap(), restored);
     }
 
     #[test]

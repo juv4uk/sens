@@ -997,8 +997,7 @@ fn restore_t5m_words(
 #[cfg(feature = "zig-transport")]
 fn t5m_roundtrip_words(words: &[ExactDomainWord]) -> Result<Vec<ExactDomainWord>, String> {
     let carrier = exact_t5m_carrier_words(words)?;
-    let physical = crate::zig_transport::encode_t5m_exact_words(&carrier)?;
-    let decoded = crate::zig_transport::decode_t5m_exact_words(&physical)?;
+    let (_, decoded) = crate::zig_transport::encode_t5m_exact_words_and_restore(&carrier)?;
     restore_t5m_words(words, &decoded)
 }
 
