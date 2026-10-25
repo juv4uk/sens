@@ -33,21 +33,76 @@ HDR = "; core4 · блок «{name}» · рядки {a}–{b} оригіналу
       "; Згенеровано scripts/split-core4.py — НЕ редагувати руками; правте блок і перезберіть.\n"
 
 
+def complete_form_cutoffs(lines: list[str]) -> list[int]:
+    """Позиції кінця цілих форм SENS (D2), а не фіксовані рядки.
+
+    Коментарі й екрановані рядки не змінюють структуру. Пошкоджений
+    Core4 відхиляємо, а не розрізаємо посеред невизначеної форми.
+    """
+    depth = 0
+    quoted = False
+    escaped = False
+    safe: list[int] = []
+    for line_no, line in enumerate(lines, 1):
+        for char in line:
+            if quoted:
+                if escaped:
+                    escaped = False
+                elif char == "\\":
+                    escaped = True
+                elif char == '"':
+                    quoted = False
+                continue
+            if char == ";":
+                break
+            if char == '"':
+                quoted = True
+            elif char == "(":
+                depth += 1
+            elif char == ")":
+                depth -= 1
+                if depth < 0:
+                    raise SystemExit(f"Core4: зайва ')' у рядку {line_no}")
+        if depth == 0 and not quoted:
+            safe.append(line_no)
+    if depth != 0 or quoted:
+        raise SystemExit("Core4: незакрита форма або рядок")
+
+    chosen: list[int] = []
+    previous = 0
+    for _name, _start, end, _description in BLOCKS[:-1]:
+        possible = [position for position in safe if position > previous]
+        if not possible:
+            raise SystemExit("Core4: немає безпечної межі частини")
+        cut = min(possible, key=lambda position: (abs(position - end), position))
+        chosen.append(cut)
+        previous = cut
+    return chosen
+
+
+def expected_parts(lines: list[str]) -> list[tuple[Path, str]]:
+    cuts = [0, *complete_form_cutoffs(lines), len(lines)]
+    rendered = []
+    for i, (name, _a, _b, desc) in enumerate(BLOCKS):
+        a, b = cuts[i] + 1, cuts[i + 1]
+        segment = lines[a - 1:b]
+        content = HDR.format(name=name, a=a, b=b, desc=desc) + "\n".join(segment) + "\n"
+        rendered.append((PARTS / f"{name}.lisp", content))
+    return rendered
+
+
 def split() -> int:
     lines = CORE4.read_text(encoding="utf-8").split("\n")
     PARTS.mkdir(exist_ok=True)
-    for name, a, b, desc in BLOCKS:
-        b = len(lines) if b is None else b
-        seg = lines[a - 1:b]
-        (PARTS / f"{name}.lisp").write_text(
-            HDR.format(name=name, a=a, b=b, desc=desc) + "\n".join(seg) + "\n", encoding="utf-8")
-        print(f"  {name}: {a}-{b} ({len(seg)} рядків)")
+    for path, content in expected_parts(lines):
+        path.write_text(content, encoding="utf-8")
+        print(f"  {path.name}: {len(content)} символів")
     return 0
 
 
 def build() -> str:
     """Точне склеювання: збираємо ВСІ рядки блоків (без 3 рядків заголовка)
-    і з'єднуємо одним \\n. Це відтворює оригінал байт-у-байт."""
+    і з'єднуємо одним \n. Це відтворює оригінал байт-у-байт."""
     all_lines: list[str] = []
     for name, *_ in BLOCKS:
         p = PARTS / f"{name}.lisp"
@@ -73,8 +128,13 @@ def main(argv: list[str] | None = None) -> int:
         rebuilt = build()
         orig = CORE4.read_text(encoding="utf-8")
         if rebuilt == orig:
-            print("ЗБІРКА ТОЧНА: блоки відтворюють core4.lisp байт-у-байт")
-            return 0
+            expected = expected_parts(orig.split("\n"))
+            if all(path.is_file() and path.read_text(encoding="utf-8") == content
+                   for path, content in expected):
+                print("ЗБІРКА ТОЧНА: блоки й цілі форми SENS відтворюють core4")
+                return 0
+            print("РОЗБІЖНІСТЬ: межа розрізає SENS-форму або частини застарілі")
+            return 1
         print(f"РОЗБІЖНІСТЬ: блоки дають {len(rebuilt)} символів, core4 має {len(orig)}")
         return 1
     ap.error("дай --split / --build / --check")
