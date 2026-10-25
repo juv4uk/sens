@@ -1659,7 +1659,9 @@ while IFS= read -r file || [[ -n "$file" ]]; do
     # Обидва маршрути mint/paired мусять отримати ту саму послідовність DEFINE.
     d6_union_binding="$dir/d6-union-exact-binding.lisp"
     : > "$d6_union_binding"
-    for spec in 'lib/core4-parts/core4-language.lisp|значення-у-списку?' 'lib/core4-parts/core4-codec.lisp|об'"'"'єднання'; do
+    for spec in 'lib/core4-parts/core4-d6.lisp|значення-у-списку?' \
+      'lib/core4-parts/core4-d6b.lisp|об'"'"'єднання-перевірити-правий' \
+      'lib/core4-parts/core4-d6b.lisp|об'"'"'єднання'; do
       d6_union_file="${spec%%|*}"
       d6_union_name="${spec#*|}"
       if ! awk -v target="(визначити $d6_union_name" '
