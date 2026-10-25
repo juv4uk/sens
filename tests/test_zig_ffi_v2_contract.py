@@ -20,9 +20,10 @@ ASSET_ZIG_PATH = ROOT / "zig_transport_root.zig"
 ASSET_RUST_PATH = ROOT / "crates/sens-cli/src/zig_transport_assets.rs"
 
 # No semantic function identities, domain numbers, or host-specific layouts:
-# nine reviewed *physical* ABI v2 functions; D10 validator is coordinate-only.
+# ten reviewed *physical* ABI v2 functions; D10 validator is coordinate-only.
 EXPECTED = {
     "sens_zig_codec_abi_version": ((), "version"),
+    "sens_zig_bitpack_fields": (("source", "length", "destination", "length"), "size"),
     "sens_zig_t5_validate": (("source", "length"), "status"),
     # Reviewed #5777: physical D1..D10 coordinate profile (NO execution).
     "sens_zig_t5_validate_coordinates": (("source", "length"), "status"),
