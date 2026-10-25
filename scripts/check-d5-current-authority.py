@@ -33,7 +33,7 @@ assert d["relation_classes"]=={
 for bits,name in d["residents"].items():
     assert f"(D5:{bits} {name})" in contract,(bits,name)
 
-assert "(minor . 9)" in lang
+assert '(minor . "0")' in lang  # оновлено: Contract 12.0 (було (minor . 9))
 assert "#3305" in lang
 assert "D5  full compact — exact 5-bit keys (32/32)" in current
 assert "D5 **OWNER-RATIFIED #3305**" in core
