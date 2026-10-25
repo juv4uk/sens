@@ -44,6 +44,8 @@ H2_TRACKED_INPUTS = (
     "research/zig-codecs/host-c/verify_h2_cross_host.py",
     C_SOURCE, C_ABI_HEADER, C_DRIVER, H1_VERIFIER, ZIG_ABI,
     "research/zig-codecs/t5/t5.zig",
+    # transport_abi.zig imports this distinct T5M module as well as T5.
+    "research/zig-codecs/t5m.zig",
     "research/zig-codecs/f3c/f3c.zig",
     # Zig ABI v2 now imports E1; all transitively compiled Zig sources
     # must be part of the exact HEAD/index/worktree H2 provenance pin.
