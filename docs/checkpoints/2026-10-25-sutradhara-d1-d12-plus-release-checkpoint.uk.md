@@ -12,7 +12,7 @@
 4. D4/D6: п'ять пар `.sens.b64`/`.view.b64` є в `knowledge/d11/restore/udyoga/`. Mint/наявність файлу не є фізичним PASS.
 
 ## Відкриті першопричини
-- F6 producer → consumer: старий CI `40158590271` показав RED `root reconstruction rejected: 0`. Попередня зміна expected-маркера на SENS-символ була недостатня. Аудит `lib/domains/d4.lisp` виявив точну помилку AST у Rust-транспортному драйвері: root/object оболонки викликали D4:`1001` (CADR), а мали будувати список через D4:`1110` (LIST). Коміт `087843fbe447cfb022d1e622853cc28a2d9ce378` додає `d4_list` із точною ідентичністю D4:1110 і застосовує її до root/object/object-packages. Це виправлення конструктора; фізичний F6 PASS ще не підтверджено.
+- F6 producer → consumer: старий CI `40158590271` показав RED `root reconstruction rejected: 0`. Коміт `087843fbe447cfb022d1e622853cc28a2d9ce378` помилково замінив D4:`1001` (CADR) на LIST для root/object payload. Перевірка `lib/lisp-fs.lisp` підтвердила, що обидва D9-десеріалізатори повертають рішення `(accepted payload)`, тому CADR потрібен для отримання payload; LIST застосовується лише для колекції пакетів. Коміт `33f7d91db8d3cf8e78f1dbc0784fe0ef2d25e2d8` відновлює CADR для двох payload-ів. Першопричина `root reconstruction rejected: 0` далі НЕ встановлена: треба показати власний SENS-вердикт реконструкції `(rejected причина)` у фізичному трасуванні, а не робити висновки лише з фінального D1:ні.
 - D11 LIST=: неправильна D3-структура повинна дати Type-відмову, не бути замаскована як D1:ні.
 - D6 LET/LET*: старий RED показував D3 COND arity замість очікуваного D3 CAR Type до macro expansion. Перевірити актуальну фізичну пару Core4 і порядок валідації, не послаблювати COND.
 - D12 named bounds: probe у Rust-драйвері не є окремим SENS-законом; знайти мовний шлях exact-domain межових значень без сирих десяткових літералів у виконуваних Lisp.
@@ -29,8 +29,10 @@
 `HOST_DEBT_GUARD=PASS_ON_SHA_f4590; NEWER_SHA_PENDING`
 `D12_SELECTED_TRANSPORT=16_PASS_ON_SHA_7f8dbf8; FULL_RESIDENT_MATRIX=OPEN`
 `D11_LIST_EQUALITY_LATEST_NATIVE_RESULT=PENDING`
-`F6_ROOT_MARKER_REPRESENTATION=PREVIOUS_FIX_INSUFFICIENT`
+`F6_ROOT_MARKER_REPRESENTATION=UNPROVEN_AS_ROOT_CAUSE`
 `D4_D6_RESTORATION_PAIRS=PRESENT; PHYSICAL_EXECUTION=NOT_CERTIFIED`
 `D10_FULL_PHYSICAL_EXECUTION=NOT_VERIFIED`
 `D1_D12_PLUS_RELEASE=NO_GO`
 `F6_NATIVE_RECONSTRUCTION=NOT_VERIFIED_UNTIL_CURRENT_CI_COMPLETES`
+
+`F6_ROOT_RECONSTRUCTION_CAUSE=OPEN`
