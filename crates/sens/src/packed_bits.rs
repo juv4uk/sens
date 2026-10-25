@@ -222,24 +222,45 @@ impl PackedBitstream {
 /// Every pushed word is appended immediately after the preceding word. Bytes
 /// are emitted only because physical storage is byte-addressed; they never
 /// align or pad semantic words.
+/// Logical stream builder. Native builds delegate physical packing to Zig's
+/// single exact-width MSB-first ABI; wasm32 temporarily retains the named
+/// reference path until the Zig archive is built for that final linker profile.
 #[derive(Default)]
 pub struct BitPacker {
+    #[cfg(sens_rust_bitpack_reference)]
     bytes: Vec<u8>,
+    #[cfg(not(sens_rust_bitpack_reference))]
+    records: Vec<u8>,
     bit_len: usize,
+}
+
+#[cfg(not(sens_rust_bitpack_reference))]
+#[link(name = "sens_zig_transport", kind = "static")]
+unsafe extern "C" {
+    /// Input records: repeated [width:u8][value:u64 big-endian]. Output is the
+    /// canonical raw MSB-first payload. capacity=0 queries the exact byte count.
+    fn sens_zig_bitpack_fields(src: *const u8, byte_len: usize, dst: *mut u8, capacity: usize) -> isize;
 }
 
 impl BitPacker {
     pub const fn new() -> Self {
         Self {
+            #[cfg(sens_rust_bitpack_reference)]
             bytes: Vec::new(),
+            #[cfg(not(sens_rust_bitpack_reference))]
+            records: Vec::new(),
             bit_len: 0,
         }
     }
 
-    /// Reserve enough storage for approximately `bit_capacity` payload bits.
+    /// Reserve an estimate for a stream of this many meaningful bits.
     pub fn with_capacity_bits(bit_capacity: usize) -> Self {
+        let record_capacity = byte_len_for_bits(bit_capacity).saturating_mul(9);
         Self {
+            #[cfg(sens_rust_bitpack_reference)]
             bytes: Vec::with_capacity(byte_len_for_bits(bit_capacity)),
+            #[cfg(not(sens_rust_bitpack_reference))]
+            records: Vec::with_capacity(record_capacity),
             bit_len: 0,
         }
     }
@@ -249,139 +270,140 @@ impl BitPacker {
         self.bit_len
     }
 
-    /// Current minimal physical byte count.
+    /// Minimal byte count the final canonical payload will occupy.
     pub fn byte_len(&self) -> usize {
-        self.bytes.len()
+        byte_len_for_bits(self.bit_len)
     }
 
     /// Append one exact-width word and return its starting bit offset.
-    ///
-    /// Bits are copied most-significant first, matching `Bits<N>::bit`.
-    /// No alignment or padding is inserted before or after the word.
+    /// Rust stores only width-qualified values; native physical bits are emitted
+    /// by the Zig ABI at finish, never by a second Rust packer.
     pub fn push<const N: usize>(&mut self, word: Bits<N>) -> usize {
-        // Bits<N> is constructible only for 1..=8. The same bounded
-        // MSB-first window serves all exact widths without a per-bit loop.
         self.append_exact_window(N, u16::from(word.packed_bits()))
     }
 
-    /// Append one exact small-domain word through a three-byte MSB window.
-    ///
-    /// The input width and payload were validated by Bit9/DomainCoordinate.
-    /// Existing low tail bits are zero; no padding occurs between words.
-    /// At most three target bytes are touched, even for unaligned D10.
-    #[inline]
-    fn append_exact_window(&mut self, width: usize, bits: u16) -> usize {
-        debug_assert!((1..=10).contains(&width));
-        debug_assert!(u32::from(bits) < (1u32 << width));
-        let start = self.bit_len;
-        let end = start.checked_add(width).expect("packed bit count overflow");
-        let byte_index = start / 8;
-        let occupied = start % 8 + width;
-        let window = u32::from(bits) << (24 - occupied);
-
-        self.bytes.resize(byte_len_for_bits(end), 0);
-        self.bytes[byte_index] |= (window >> 16) as u8;
-        if occupied > 8 {
-            self.bytes[byte_index + 1] |= (window >> 8) as u8;
-        }
-        if occupied > 16 {
-            self.bytes[byte_index + 2] |= window as u8;
-        }
-        self.bit_len = end;
-        start
-    }
-
-    /// Append one exact W9 word with no interior alignment or padding.
+    /// Append one exact W9 word without truncating the ninth bit.
     pub fn push_w9(&mut self, word: Bit9) -> usize {
         self.append_exact_window(9, word.packed_bits())
     }
 
-    /// Append a ratified D1–D10 coordinate, retaining exact width and zeros.
-    ///
-    /// This mechanism never infers domain identity from the numeric payload.
+    /// Append a ratified D1-D10 coordinate without inferring identity from value.
     pub fn push_coordinate(&mut self, coordinate: DomainCoordinate) -> usize {
         self.append_exact_window(usize::from(coordinate.width()), coordinate.bits())
     }
 
-    /// Append an already-canonical bitstream without inserting alignment.
-    ///
-    /// The exact source bit length is authoritative: low tail bits in the
-    /// source's final byte are not copied as payload. Full bytes are copied
-    /// directly when both streams are aligned; all other cases copy bounded
-    /// chunks while preserving MSB-first order. The caller retains the domain
-    /// width schedule separately; this operation invents no word boundaries.
-    ///
-    /// Returns the starting bit offset, or `None` before modifying the
-    /// destination if the resulting length or allocation reservation fails.
+    /// Stage a width-qualified value; on native targets this records metadata
+    /// and payload only. Zig is the only physical packer.
+    #[inline]
+    fn append_exact_window(&mut self, width: usize, bits: u16) -> usize {
+        assert!((1..=10).contains(&width), "unsupported exact-width carrier");
+        assert!(u32::from(bits) < (1u32 << width), "payload exceeds exact width");
+        let start = self.bit_len;
+        let end = start.checked_add(width).expect("packed bit count overflow");
+
+        #[cfg(not(sens_rust_bitpack_reference))]
+        {
+            self.records.try_reserve(9).expect("reserve Zig field record");
+            self.records.push(width as u8);
+            self.records.extend_from_slice(&u64::from(bits).to_be_bytes());
+        }
+
+        #[cfg(sens_rust_bitpack_reference)]
+        {
+            let byte_index = start / 8;
+            let occupied = start % 8 + width;
+            let window = u32::from(bits) << (24 - occupied);
+            self.bytes.resize(byte_len_for_bits(end), 0);
+            self.bytes[byte_index] |= (window >> 16) as u8;
+            if occupied > 8 {
+                self.bytes[byte_index + 1] |= (window >> 8) as u8;
+            }
+            if occupied > 16 {
+                self.bytes[byte_index + 2] |= window as u8;
+            }
+        }
+
+        self.bit_len = end;
+        start
+    }
+
+    /// Append an already-canonical stream with no interior padding. The caller
+    /// owns its exact source length and word schedule; only chunks are staged,
+    /// then Zig emits the destination's canonical physical bytes on finish.
     pub fn push_stream(&mut self, source: &PackedBitstream) -> Option<usize> {
         let start = self.bit_len;
         let end = start.checked_add(source.bit_len)?;
-        let final_byte_len = byte_len_for_bits(end);
-        let additional_bytes = final_byte_len.checked_sub(self.bytes.len())?;
-        self.bytes.try_reserve(additional_bytes).ok()?;
+        let chunks = source.bit_len.checked_add(7)? / 8;
 
-        if source.bit_len == 0 {
-            return Some(start);
+        #[cfg(not(sens_rust_bitpack_reference))]
+        {
+            self.records.try_reserve(chunks.checked_mul(9)?).ok()?;
+        }
+        #[cfg(sens_rust_bitpack_reference)]
+        {
+            let final_byte_len = byte_len_for_bits(end);
+            let additional_bytes = final_byte_len.checked_sub(self.bytes.len())?;
+            self.bytes.try_reserve(additional_bytes).ok()?;
         }
 
-        // The common aligned case needs no per-bit or per-chunk operations.
-        if start % 8 == 0 && source.bit_len % 8 == 0 {
-            self.bytes.extend_from_slice(&source.bytes);
-            self.bit_len = end;
-            return Some(start);
-        }
-
-        // If the destination starts aligned, complete source bytes can be
-        // copied as-is even when the source has a final partial byte.
-        let whole_bytes = if start % 8 == 0 {
-            source.bit_len / 8
-        } else {
-            0
-        };
-        if whole_bytes != 0 {
-            self.bytes.extend_from_slice(&source.bytes[..whole_bytes]);
-            self.bit_len += whole_bytes * 8;
-        }
-
-        let mut source_offset = whole_bytes * 8;
+        let mut source_offset = 0usize;
         while source_offset < source.bit_len {
             let width = (source.bit_len - source_offset).min(8);
-            let chunk = source
-                .read_chunk(source_offset, width)
-                .expect("a validated stream contains every bounded chunk in its exact bit length");
-            self.push_chunk(chunk, width);
+            let chunk = source.read_chunk(source_offset, width)?;
+            self.append_exact_window(width, u16::from(chunk));
             source_offset += width;
         }
-
         debug_assert_eq!(self.bit_len, end);
         Some(start)
     }
 
-    /// Append one bounded MSB-first chunk. `width` is checked by the caller.
-    fn push_chunk(&mut self, chunk: u8, width: usize) {
-        debug_assert!((1..=8).contains(&width));
-        let end = self.bit_len + width;
-        self.bytes.resize(byte_len_for_bits(end), 0);
-
-        let bit_in_byte = self.bit_len % 8;
-        let first_byte = self.bit_len / 8;
-        if bit_in_byte + width <= 8 {
-            self.bytes[first_byte] |= chunk << (8 - bit_in_byte - width);
-        } else {
-            let fits = 8 - bit_in_byte;
-            self.bytes[first_byte] |= chunk >> (width - fits);
-            let remaining = width - fits;
-            self.bytes[first_byte + 1] |= chunk << (8 - remaining);
+    /// Finish packing. Native builds invoke the single Zig physical packer.
+    /// try_finish exposes ABI failures; this compatibility method fails loudly.
+    pub fn finish(self) -> PackedBitstream {
+        #[cfg(sens_rust_bitpack_reference)]
+        {
+            PackedBitstream { bytes: self.bytes, bit_len: self.bit_len }
         }
-        self.bit_len = end;
+        #[cfg(not(sens_rust_bitpack_reference))]
+        {
+            self.try_finish().unwrap_or_else(|error| panic!("Zig bitpack failed: {error}"))
+        }
     }
 
-    /// Finish packing without adding any semantic padding or delimiter.
-    pub fn finish(self) -> PackedBitstream {
-        PackedBitstream {
-            bytes: self.bytes,
-            bit_len: self.bit_len,
+    #[cfg(not(sens_rust_bitpack_reference))]
+    pub fn try_finish(self) -> Result<PackedBitstream, String> {
+        if self.bit_len == 0 {
+            if !self.records.is_empty() {
+                return Err("empty Zig bitstream has non-empty field records".into());
+            }
+            return Ok(PackedBitstream { bytes: Vec::new(), bit_len: 0 });
         }
+        let queried = unsafe {
+            sens_zig_bitpack_fields(
+                self.records.as_ptr(),
+                self.records.len(),
+                std::ptr::NonNull::<u8>::dangling().as_ptr(),
+                0,
+            )
+        };
+        let required = usize::try_from(queried)
+            .ok()
+            .filter(|&size| size == byte_len_for_bits(self.bit_len))
+            .ok_or_else(|| format!("Zig bitpack size query rejected: {queried}"))?;
+        let mut bytes = vec![0u8; required];
+        let written = unsafe {
+            sens_zig_bitpack_fields(
+                self.records.as_ptr(),
+                self.records.len(),
+                bytes.as_mut_ptr(),
+                bytes.len(),
+            )
+        };
+        if written != queried {
+            return Err(format!("Zig bitpack output mismatch: expected={queried} actual={written}"));
+        }
+        PackedBitstream::from_parts(bytes, self.bit_len)
+            .ok_or_else(|| "Zig returned non-canonical packed tail".into())
     }
 }
 
