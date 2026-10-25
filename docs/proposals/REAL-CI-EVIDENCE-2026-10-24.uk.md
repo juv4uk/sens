@@ -131,3 +131,63 @@ existiert nirgends im Baum — der Defekt liegt im Bindungspfad, nicht im Zeugen
 
 The hex is a Ukrainian phrase in the wrong keyboard layout; the name exists
 nowhere in the tree — the defect is in the binding path, not the witness.
+
+---
+
+# Додаток 2 (Udbhava, 2026-10-24): МЕХАНІЗМ падіння знайдено
+
+## Творець id — знайдено
+
+`scripts/prove-lisp-semantic-t5m.sh:839-847`:
+
+```sh
+# Д11 juxt: першокласні одномісні функції та контрприклад перевіряє SENS.
+d11_juxt_law_bundle="$evidence/d11-clojure-juxt-positive-complete.lisp"
+d11_juxt_mutant_bundle="$evidence/d11-clojure-juxt-mutant-complete.lisp"
+cat -- lib/d11-clojure-juxt.lisp tests/semantic/d11-clojure-juxt-laws.lisp > "$d11_juxt_law_bundle"
+cat -- lib/d11-clojure-juxt.lisp tests/semantic/d11-clojure-juxt-mutant.lisp > "$d11_juxt_mutant_bundle"
+run_case run_law d11-clojure-juxt-positive "$d11_juxt_law_bundle" 1
+run_case run_law d11-clojure-juxt-mutant "$d11_juxt_mutant_bundle" 0
+```
+
+Тобто **id народжується тут** — у скрипті, а не в манифесті.
+
+## Що це дає
+
+**LAW-комплект і MUTANT-комплект відрізняються ЛИШЕ останнім файлом:**
+
+| | склад | результат CI |
+|---|---|---|
+| law | `lib/d11-clojure-juxt.lisp` + `…-laws.lisp` | **RED** (unknown Text7 binding) |
+| mutant | `lib/d11-clojure-juxt.lisp` + `…-mutant.lisp` | **PASS** |
+
+**Той самий `lib/`, той самий код запуску — а результат протилежний.** Отже
+дефект **у `…-laws.lisp`**, а не в `lib/` і не в шляху запуску.
+
+## Перевірене й ВІДКИНУТЕ
+
+- **Гіпотеза «`cat` зліплює рядки»** — **ВІДКИНУТО**: усі три файли закінчуються
+  `\n` (перевірено `tail -c 1 | od -c`), зліплення чисте.
+- **Латиниця в джерелі** — у `…-laws.lisp` є лише `Clojure` (назва мови), у
+  `lib/…` — `runtime`, `opcode`. Шуканого гіберіша **немає в жодному файлі**
+  (`grep -c "pstdverdyty\|gslndthlbnb"` → 0 в обох).
+
+## Що лишається з'ясувати
+
+Помилка вказує на **рядок 1:8 — це КОМЕНТАР** `; Мовні закони D11: одномісне
+зіставлення Clojure juxt у SENS Lisp.`
+
+Тобто **mint перетворює текст із коментаря на Text7-літерал**, і цей літерал не
+має прив'язки. **Перевір гіпотезу:** прибери/зміни коментар першого рядка — і
+подивись, чи зникне `unknown Text7 binding`. Це **єдина логічна нитка**, що
+лишилась: різниця між law і mutant — у файлі, а помилка вказує на **коментар**.
+
+## Deutsch
+
+Der Mechanismus: law- und mutant-Bundle unterscheiden sich nur in der letzten
+Datei; die Fehlermeldung zeigt auf Zeile 1:8 — einen KOMMENTAR.
+
+## English
+
+The mechanism: the law and mutant bundles differ only in the last file; the
+error points at line 1:8 — a COMMENT.
