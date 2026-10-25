@@ -592,3 +592,42 @@ fn journal_module_probe_fail_closed_on_malformed_event() {
         );
     }
 }
+
+#[test]
+fn filesystem_binding_map_requires_complete_d3_spine_before_accepting_a_snapshot() {
+    // Логіку та вердикт D1 обчислює SENS; Rust лише запускає свідки.
+    let mut s = session();
+    let positive_source =
+        include_str!("../../../tests/semantic/d9-fs-binding-map-strict-law.lisp");
+    let positive = eval_program(positive_source, &mut s)
+        .expect("test_id=d9-fs-binding-map-strict layer=SENS positive program")
+        .value;
+    assert_eq!(
+        positive.as_predicate_bit(),
+        Some(true),
+        "test_id=d9-fs-binding-map-strict expected=D1:так actual={positive}"
+    );
+    for (id, source) in [
+        (
+            "d9-fs-binding-map-atomic-root",
+            include_str!("../../../tests/semantic/d9-fs-binding-map-atomic-root-negative.lisp"),
+        ),
+        (
+            "d9-fs-binding-map-atomic-tail",
+            include_str!("../../../tests/semantic/d9-fs-binding-map-atomic-tail-negative.lisp"),
+        ),
+    ] {
+        match eval_program(source, &mut s) {
+            Ok(result) => panic!(
+                "test_id={id} layer=SENS expected=D3-CAR-Type actual=accepted:{}",
+                result.value
+            ),
+            Err(error) => {
+                assert!(
+                    error.to_string().contains("car expects a non-empty list"),
+                    "test_id={id} layer=SENS expected=D3-CAR-Type actual={error}"
+                );
+            }
+        }
+    }
+}
