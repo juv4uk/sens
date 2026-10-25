@@ -39,6 +39,18 @@ jobs:
           bash tests/test-count-executable-lisp-git-inventory.sh
           python3 tests/test_single_data_schema.py
 
+      - name: Чинний SENS захист — host debt та незмінність мови
+        shell: bash
+        run: |
+          set -euo pipefail
+          # Єдиний автоматичний CI виконує ці вже наявні охоронці.
+          # Семантика лишається у SENS; Bash/Python перевіряють лише межу.
+          bash scripts/ensure-host-debt0.sh
+          python3 -m unittest \
+            tests.test_language_stays_in_sens.LanguageStaysInSens.test_frozen_host_debt_only_shrinks \
+            tests.test_language_stays_in_sens.LanguageStaysInSens.test_no_new_host_file_carries_sens_semantics \
+            -v
+
       - name: Rust CLI — рання перевірка синтаксису REPL
         shell: bash
         run: |
