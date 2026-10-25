@@ -682,7 +682,7 @@ jobs:
   # Ремонт виконує чинний нативний SENS/Zig, а не host-oracle чи ручні байти.
   remint-targeted:
     name: Канонічно відновити фізичні F6/Core4 пари
-    if: ${{ github.event_name == 'push' && contains(github.event.head_commit.message, 'SENS_PAIR_REGEN') }}
+    if: ${{ github.event_name == 'push' && (contains(github.event.head_commit.message, 'SENS_PAIR_REGEN') || contains(toJSON(github.event.commits.*.modified), 'lib/core4.lisp') || contains(toJSON(github.event.commits.*.modified), 'lib/lisp-fs.lisp') || contains(toJSON(github.event.commits.*.modified), 'tests/fixtures/wsm-fs-record-producer.lisp') || contains(toJSON(github.event.commits.*.modified), '.github/workflows/ci.yml') || contains(toJSON(github.event.commits.*.modified), '.github/workflows/remint-drifted-pairs.yml')) }}
     uses: ./.github/workflows/remint-drifted-pairs.yml
     with:
       files: |
