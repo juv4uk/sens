@@ -216,6 +216,10 @@ jobs:
                   "tests/semantic/meta-fc-predicates-d1-mutant.lisp",
                   "tests/semantic/unification-occurs-check-law.lisp",
                   "tests/semantic/unification-occurs-check-mutant.lisp",
+                  # Д3: залежний негатив перевіряється лише разом із DEFINE бібліотеки.
+                  # Цей самий свідок ОБОВ'ЯЗКОВО виконує prove-lisp-semantic-t5m.sh,
+                  # із прямим/парним/автономним Type; окремий запуск дав би UnknownSymbol.
+                  "tests/semantic/d3-first-class-suffix-improper-tail-negative.lisp",
                   # D11 scan/fold: залежні SENS-свідки з бібліотечними DEFINE.
                   "tests/semantic/d11-scan-fold-d3-tail-law.lisp",
                   "tests/semantic/d11-scan-fold-d3-tail-mutant.lisp",
