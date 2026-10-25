@@ -42,13 +42,15 @@
 
 ### Виправлення в main
 
-Коміт [d8e7ac5](https://github.com/juv4uk/sens/commit/d8e7ac59ced95ae2b6e2604cff03ccd5b7fc212d) додає до `crates/sens/src/semantic_registry.rs` `d6_uk_source_identity`, який шукає лише перше, канонічне українське ім’я в generated D6 definition bindings. `crates/sens/src/eval/lower.rs` тепер перевіряє цей точний шлях **до** загального індексу примітивних голів.
+Коміт [d8e7ac5](https://github.com/juv4uk/sens/commit/d8e7ac59ced95ae2b6e2604cff03ccd5b7fc212d) додає `d6_uk_source_identity` та переносить exact D6 lookup перед загальним індексом примітивних голів. Початковий варіант мав невалідне generic `.into()`; коміт [dcfcf00](https://github.com/juv4uk/sens/commit/dcfcf005c8643650f0f28c8ccb246b35f9a238b8) виправив його явним `DomainIdentity::D6(word) => CoreDomainIdentity::D6(word)` і відхиленням інших варіантів.
+
+Коміт [30778c7](https://github.com/juv4uk/sens/commit/30778c70846569b7729789b29adcb4101ffd4427) розширив той самий контракт на точні українські `ук`/`укр` назви, коли generated п’ятиіменний запис має окремі першу й другу українські поверхні. Unit-test тепер перевіряє D6:000000 `довжина`, D6:000001 `довжина-до`, D6:001001 `нехай*` і `нехай-послідовно`. Англійські `length`/`let*` та Sanskrit `krama-sthānika-bandha` залишаються недопущеними як українські source heads.
 
 Це зберігає межі контракту:
 - D6 identity походить лише з generated D6 binding table; ширина й біти не виводяться з числа чи SID8;
-- англійський alias `length` не стає українською викличною головою через цей шлях;
+- uk/ukr можуть проєктувати дві ратифіковані назви на одну точну D6 координату; решта мовних колонок не стають source-head дозволом;
 - lowering зберігає D6 identity, але не створює host-примітива: evaluator усе ще потребує конкретне виконуване замикання, записане у відповідний D6-слот;
-- позитивний, мутантний та два Type-негативні SENS/T5M свідки вже зареєстровані в `scripts/prove-lisp-semantic-t5m.sh`; їхній результат на SHA `d8e7ac5` поки не підтверджений.
+- чотири SENS/T5M свідки LENGTH/LENGTH-ONTO вже зареєстровані в `scripts/prove-lisp-semantic-t5m.sh`; їхній результат на виправленому SHA ще не підтверджений.
 
 ### Статус CI на момент оновлення
 
@@ -69,3 +71,8 @@
 `DomainIdentity::D6(word) => Some(CoreDomainIdentity::D6(word))`, а всі інші варіанти відхиляються. Це кращий доказовий бар’єр: джерельний маршрут не може випадково прийняти інший домен через загальне `Into`.
 
 **Поточна перевірка ще не завершена:** run [40154818762](https://github.com/juv4uk/sens/actions/runs/40154818762) для `dcfcf00` під час останнього запиту ще був на встановленні Zig (крок 12), до Rust-кроку. Додатковий run [40154825127](https://github.com/juv4uk/sens/actions/runs/40154825127) для коментарного уточнення також триває. Тож `D6_SOURCE_LOWERING_UNIT=NOT_VERIFIED`, `D6_LENGTH_ONTO_NATIVE_SENS_T5M=NOT_VERIFIED`; жоден D6 ledger promotion не зроблено.
+
+
+### Перевірка uk/ukr-розширення
+
+На HEAD [`30778c7`](https://github.com/juv4uk/sens/commit/30778c70846569b7729789b29adcb4101ffd4427) додано перевірку чотирьох українських source heads та негативну заборону для трьох неукраїнських peer names. Hosted run [40154920750](https://github.com/juv4uk/sens/actions/runs/40154920750) ще триває на Rust-механізмі; `D6_SOURCE_ROUTING_UNIT=NOT_VERIFIED`, `D6_LENGTH_ONTO_NATIVE_SENS_T5M=NOT_VERIFIED`, `D6_LETSTAR_NATIVE_SENS_T5M=NOT_VERIFIED`. Не оновлювати D6 ledger до отримання фізичного PASS.

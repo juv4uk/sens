@@ -365,10 +365,11 @@ pub(crate) fn d5_binding_identity_for_definition(name: &str) -> Option<CoreDomai
         .map(|row| CoreDomainIdentity::D5(CoreD5::from_word(Bit5::new(row.bits).unwrap())))
 }
 
-/// Resolve only the canonical Ukrainian source spelling for a D6 Lisp-owned definition.
+/// Resolve a ratified Ukrainian `ук` or `укр` source spelling for a D6 Lisp-owned definition.
 ///
-/// The binding table is the identity authority; English/Sanskrit peer names remain
-/// metadata and must not become executable source heads through this route.
+/// In generated five-name rows, the first two spellings are the distinct Ukrainian
+/// peers; four-name rows have one deduplicated Ukrainian spelling. Sanskrit,
+/// English, and LISP names remain metadata rather than source-head authority.
 pub(crate) fn d6_uk_source_identity(name: &str) -> Option<DomainIdentity> {
     D6_DEFINITION_BINDINGS
         .iter()
