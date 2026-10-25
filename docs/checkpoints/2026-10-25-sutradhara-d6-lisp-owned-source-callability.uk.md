@@ -76,3 +76,14 @@
 ### Перевірка uk/ukr-розширення
 
 На HEAD [`30778c7`](https://github.com/juv4uk/sens/commit/30778c70846569b7729789b29adcb4101ffd4427) додано перевірку чотирьох українських source heads та негативну заборону для трьох неукраїнських peer names. Hosted run [40154920750](https://github.com/juv4uk/sens/actions/runs/40154920750) ще триває на Rust-механізмі; `D6_SOURCE_ROUTING_UNIT=NOT_VERIFIED`, `D6_LENGTH_ONTO_NATIVE_SENS_T5M=NOT_VERIFIED`, `D6_LETSTAR_NATIVE_SENS_T5M=NOT_VERIFIED`. Не оновлювати D6 ledger до отримання фізичного PASS.
+
+## Додаткова першопричина: широкий fallback скасовував заборону D6 alias-ів
+
+Коміт [`238926a`](https://github.com/juv4uk/sens/commit/238926a8f7f56b6f67ce777261fae3a4e151c864) обмежує останній `domain_identity_for_surface(name)` fallback у `source_head_domain_identity`: якщо отриманий identity є D6, він приймається лише тоді, коли `d6_uk_source_identity(name)` підтверджує точне українське `ук`/`укр` ім'я з generated Lisp-owned binding table. Це закриває шлях, який раніше знову допускав англійські `length`/`let*` і санскритський peer після проходження первинної перевірки.
+
+Перевірка після цього commit:
+- Поточний HEAD: `104a62e77f2e0010f317c176d99118673d0443f5`; його батько — `238926a8f7f56b6f67ce777261fae3a4e151c864`, тому fix присутній у дереві `main`.
+- Run [`40155780990`](https://github.com/juv4uk/sens/actions/runs/40155780990) для alias-фікса на останньому читанні ще виконував Rust-крок 13; його результат — `NOT_VERIFIED` до завершення.
+- Run [`40155580648`](https://github.com/juv4uk/sens/actions/runs/40155580648) для HEAD `4c4ecaa` завершив Rust-крок RED, дійшов до Core4 фізичної пари та зафіксував stale pair failure. Його артефакт ще не доступний на момент цього checkpoint.
+
+Не змінювати статуси D6 ledger на основі одного lowering-тесту; потрібні завершений targeted Rust unit test і фізичні SENS/T5M позитивні/негативні закони на актуальному SHA.
