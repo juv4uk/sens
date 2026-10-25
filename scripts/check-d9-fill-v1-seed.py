@@ -89,7 +89,7 @@ assert state["recovery_queue"]["automatic_admission"] is False
 # advanced to 11.8 and owner-ratifies D1–D9. Requiring the old version in the
 # live source incorrectly makes a provenance check fail after a valid contract update.
 assert state["foundation"]["contract"]=="11.7"
-assert "(major . #d11) (minor . 9)" in lang
+assert '(major . "12") (minor . "0")' in lang  # оновлено: Contract 12.0 (було (major . #d11) (minor . 9))
 assert "Contract 11.8" in lang
 assert "owner-ratifies D1–D9" in lang
 
