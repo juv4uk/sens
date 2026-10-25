@@ -285,26 +285,13 @@ mod paired {
         }
 
         #[test]
-        fn canonical_d5_d12_predicate_laws_execute_via_zig_t5m_and_sens() {
-            // The Lisp fixtures own the semantic claim. This test only routes
-            // their exact source through the D12-first SENS projection, Zig/T5M
-            // round-trip, and the existing SENS evaluator; it is not a host oracle.
-            for (id, fixture, expected, min_d12_operands) in [
-                ("d5-d12-zerop", "d5-d12-zerop-law.lisp", true, 2),
-                ("d5-d12-numberp-ratio", "d5-d12-numberp-law.lisp", true, 2),
-                ("d5-d12-zerop-negative-limit", "d5-d12-zerop-negative-limit-law.lisp", false, 1),
-                ("d5-d12-zerop-promoted-nonzero", "d5-d12-zerop-promoted-nonzero-law.lisp", false, 2),
-            ] {
-                let source_path = Path::new(env!("CARGO_MANIFEST_DIR"))
-                    .join("../../tests/semantic")
-                    .join(fixture);
-                let text = std::fs::read_to_string(&source_path).unwrap_or_else(|error| {
-                    panic!(
-                        "id={id} fixture={} error={error}",
-                        source_path.display()
-                    )
-                });
-                let admitted = qualify(&text)
+        fn d12_first_numeric_predicate_transport_preserves_sens_results() {
+            // SENS owns each predicate. This transport test proves that the
+            // explicit D12-first projection and Zig/T5M preserve the result;
+            // decimal boundary values stay test inputs here, not executable
+            // Lisp literals that would bypass the source-domain guard.
+            let check = |id: &str, text: &str, expected: bool, min_d12_operands: usize| {
+                let admitted = qualify(text)
                     .unwrap_or_else(|error| panic!("id={id} layer=SENS-source {error}"));
                 let words = expected_words(&admitted)
                     .unwrap_or_else(|error| panic!("id={id} layer=SENS-admission {error}"));
@@ -313,14 +300,12 @@ mod paired {
                     d12_operands >= min_d12_operands,
                     "id={id} layer=projection expected_at_least_D12_operands={min_d12_operands} actual={d12_operands}"
                 );
-
                 let physical = zig_transport::encode_t5m_exact_words(&words)
                     .unwrap_or_else(|error| panic!("id={id} layer=Zig-T5M encode {error}"));
                 let restored = zig_transport::decode_t5m_exact_words(&physical)
                     .unwrap_or_else(|error| panic!("id={id} layer=Zig-T5M decode {error}"));
                 assert_eq!(restored, words, "id={id} layer=physical-roundtrip");
-
-                let actual = eval_verified(&text, &physical)
+                let actual = eval_verified(text, &physical)
                     .unwrap_or_else(|error| panic!("id={id} layer=SENS-eval {error}"));
                 assert_eq!(
                     actual.as_predicate_bit(),
@@ -328,7 +313,25 @@ mod paired {
                     "id={id} layer=SENS-law expected={} actual={actual}",
                     if expected { "D1:так" } else { "D1:ні" }
                 );
+            };
+
+            // Canonical Lisp witnesses remain the authority for the two positive laws.
+            for (id, fixture) in [
+                ("d5-d12-zerop", "d5-d12-zerop-law.lisp"),
+                ("d5-d12-numberp-ratio", "d5-d12-numberp-law.lisp"),
+            ] {
+                let source_path = Path::new(env!("CARGO_MANIFEST_DIR"))
+                    .join("../../tests/semantic")
+                    .join(fixture);
+                let text = std::fs::read_to_string(&source_path).unwrap_or_else(|error| {
+                    panic!("id={id} fixture={} error={error}", source_path.display())
+                });
+                check(id, &text, true, 2);
             }
+
+            // Boundary probes are test-driver inputs, not checked-in executable Lisp.
+            check("d5-d12-zerop-negative-limit", "(нуль? -2048)", false, 1);
+            check("d5-d12-zerop-promoted-nonzero", "(нуль? (додати 2047 1))", false, 2);
         }
 
         #[test]
