@@ -558,6 +558,23 @@ sha256sum "$d5_exact_number_source" \
   tests/semantic/d5-exact-numbers-filter-law.lisp \
   tests/semantic/d5-exact-numbers-filter-mutant.lisp \
   tests/semantic/d5-exact-numbers-filter-improper-tail-negative.lisp > "$evidence/d5-exact-numbers-inputs.sha256"
+# Д6:000010/000011 MIN-LIST/MAX-LIST, санскритські śreṇī-alpatara/śreṇī-brhattara.
+# Залежності D3 CAR/CDR/CONS, D4 NULL, D5 LESSP/GREATERP, D12+ values.
+# D3 структура перевіряється ДО числових порівнянь. Справжній SENS
+# свідчить чотири відмови, а не host-оракул.
+run_case run_law d6-min-max-preflight-positive tests/semantic/d6-min-max-list-d3-preflight-law.lisp 1 core4
+run_case run_law d6-min-max-preflight-mutant tests/semantic/d6-min-max-list-d3-preflight-mutant.lisp 0 core4
+run_case run_error_rejection d6-min-list-root-d1-type tests/semantic/d6-min-list-d1-root-type-negative.lisp Type 'car expects a non-empty list' core4
+run_case run_error_rejection d6-min-list-late-poison-type tests/semantic/d6-min-list-poison-late-tail-negative.lisp Type 'car expects a non-empty list' core4
+run_case run_error_rejection d6-max-list-late-tail-type tests/semantic/d6-max-list-d1-tail-type-negative.lisp Type 'car expects a non-empty list' core4
+run_case run_error_rejection d6-max-list-single-nonnumeric-type tests/semantic/d6-max-list-single-nonnumeric-type-negative.lisp Type 'math requires explicit D12+ operands' core4
+sha256sum \
+  tests/semantic/d6-min-max-list-d3-preflight-law.lisp \
+  tests/semantic/d6-min-max-list-d3-preflight-mutant.lisp \
+  tests/semantic/d6-min-list-d1-root-type-negative.lisp \
+  tests/semantic/d6-min-list-poison-late-tail-negative.lisp \
+  tests/semantic/d6-max-list-d1-tail-type-negative.lisp \
+  tests/semantic/d6-max-list-single-nonnumeric-type-negative.lisp > "$evidence/d6-min-max-preflight-inputs.sha256"
 # D6 COMPOSE/FLIP/CURRY are derived SENS functions, so their law and
 # counterexample must pass the same physical Zig/T5M -> SENS route.
 run_case run_law d6-compose-flip-positive tests/semantic/d6-compose-flip-law.lisp 1 core4
