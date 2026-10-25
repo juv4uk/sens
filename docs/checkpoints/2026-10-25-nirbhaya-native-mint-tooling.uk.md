@@ -6,16 +6,16 @@
 
 ## Запушене виправлення
 
-- Commit 29f8cfbe44c05b536449e9d0ca3d26ef086c8f96 оновлює scripts/mint-nirbhaya-law-pairs.py.
+- Commit 29f8cfbe44c05b536449e9d0ca3d26ef086c8f96 замінив архівне відновлення на нативний mint; commit 4f8a1f9ca965624d536a60ccddaa0d681ed9bba4 додатково закрив обхід перевірки executable через symlink.
 - Тепер джерелом є рівно п'ять поточних .lisp файлів із STEMS. Helper запускає чинний sens --t5m-mint, генерує view через sens-trit view і вимагає sens-trit verify-view для кожної staged-пари.
 - Перед публікацією збираються всі п'ять пар у тимчасовому каталозі. Helper записує SHA-256 джерела, повторно перевіряє його після mint і перед публікацією, відхиляє зміну цільового файла стороннім writer-ом та відновлює попередні байти в разі помилки публікації.
 - Архівні файли лишаються лише provenance; runtime-helper більше не читає їх. Статус повідомлення спеціально каже native_semantics=NOT_CERTIFIED_BY_MINT: mint/view-парність не є доказом виконання закону.
 
 ## Тести й CI
 
-- Commit d4fb96123546d0de81d43ee45721d93a3156b389 додає tests/test_mint_nirbhaya_law_pairs.py: stale archive is ignored, concurrent target write aborts before publishing, source mutation during mint aborts without publishing.
+- Commit d4fb96123546d0de81d43ee45721d93a3156b389 додає tests/test_mint_nirbhaya_law_pairs.py; commit 8c8c38493a5d55794acebcbcd45e20cfb288c3aa додає четвертий тест. Перевіряються: stale archive ignored, concurrent target write aborts before publishing, source mutation during mint aborts without publishing, symlinked mint executable rejected.
 - Commit 922fa05acec3b34b00efb721b99b9fcddd6071fc підключає цей тест до короткого .github/workflows/ci.yml.
-- GitHub Combined Status для цих commit SHA повернув порожні arrays. Це не PASS. У цьому ході я не мав локальних sens/sens-trit бінарників, тому не стверджую, що Python unit test або нативний T5M mint фактично пройшли.
+- GitHub Combined Status для перевірених commit SHA повернув порожні arrays. Це не PASS. У цьому ході я не мав локальних sens/sens-trit бінарників, тому не стверджую, що Python unit test або нативний T5M mint фактично пройшли.
 
 ## Точний handoff
 
