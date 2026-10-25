@@ -36,7 +36,7 @@ fn f6_record_type_error(value: &Value) -> String {
     }
 }
 
-fn bounded_two_line_records(value: &Value) -> Result<[String; 2], &'static str> {
+fn bounded_two_line_records(value: &Value) -> Result<[String; 2], String> {
     let mut records = Vec::with_capacity(2);
     let mut next = value;
     loop {
@@ -45,7 +45,7 @@ fn bounded_two_line_records(value: &Value) -> Result<[String; 2], &'static str> 
                 // SENS визначає дані, Rust лише передає рівно два фізичні записи.
                 // Перевірка ДО копіювання запобігає необмеженому накопиченню.
                 if records.len() == 2 {
-                    return Err("F6_RECORD_COUNT expected=2 actual=more-than-2");
+                    return Err("F6_RECORD_COUNT expected=2 actual=more-than-2".to_owned());
                 }
                 // Механізм I/O: обидва чинні носії тексту SENS мають
                 // один канонічний зовнішній рядковий запис. Text7
@@ -55,35 +55,35 @@ fn bounded_two_line_records(value: &Value) -> Result<[String; 2], &'static str> 
                     Value::String(record) => record.to_string(),
                     Value::Text7(text) => {
                         if text.cells().len() > MAX_RECORD_BYTES {
-                            return Err("F6_RECORD_SIZE expected=1..65536");
+                            return Err("F6_RECORD_SIZE expected=1..65536".to_owned());
                         }
                         sens::render_text7(text, sens::Text7Layout::En)
-                            .map_err(|_| "F6_RECORD_TEXT7 unrenderable-en-layout")?
+                            .map_err(|_| "F6_RECORD_TEXT7 unrenderable-en-layout".to_owned())?
                     }
                     Value::Pair(_) => {
-                        return Err("F6_RECORD_TYPE expected=String-or-Text7 actual=Pair")
+                        return Err("F6_RECORD_TYPE expected=String-or-Text7 actual=Pair".to_owned())
                     }
                     other => return Err(f6_record_type_error(other))
                 };
                 let bytes = record.as_bytes();
                 if bytes.is_empty() || bytes.len() > MAX_RECORD_BYTES {
-                    return Err("F6_RECORD_SIZE expected=1..65536");
+                    return Err("F6_RECORD_SIZE expected=1..65536".to_owned());
                 }
                 // Зовнішній протокол — один запис на рядок. Дані SENS
                 // не повинні додавати третій фізичний рядок чи NUL.
                 if bytes.iter().any(|byte| matches!(*byte, b'\n' | b'\r' | b'\0')) {
-                    return Err("F6_RECORD_DELIMITER expected=single-line");
+                    return Err("F6_RECORD_DELIMITER expected=single-line".to_owned());
                 }
                 records.push(record);
                 next = &node.tail;
             }
             Value::Nil => break,
-            _ => return Err("F6_RECORD_LIST expected=proper-list"),
+            _ => return Err("F6_RECORD_LIST expected=proper-list".to_owned()),
         }
     }
     records
         .try_into()
-        .map_err(|_| "F6_RECORD_COUNT expected=2 actual=fewer-than-2")
+        .map_err(|_| "F6_RECORD_COUNT expected=2 actual=fewer-than-2".to_owned())
 }
 
 fn main() {
