@@ -97,3 +97,25 @@ Type-негативи `d11-append-map-improper-input`,
    не випускати реліз без рішення власника.
 
 GO/NO-GO — лише власника, зараз NO-GO.
+
+## Пізніша перевірка F6: точні джерела й фізичні супутники
+GitHub `fetch_file(encoding=base64)` підтвердив існування
+чотирьох файлів у живому main:
+- `lib/lisp-fs.lisp`: blob `ad8d5c61220a4b5516fd43042e84f2575f974468`;
+- `lib/lisp-fs.sens`: blob `7c560c1cdd8c7ddb3de0aa2f6c64a6b985a367c8`;
+- `tests/fixtures/wsm-fs-record-producer.lisp`: blob `50769893a510811d1c639dde7a6b7cb95fc9aa67`;
+- `tests/fixtures/wsm-fs-record-producer.sens`: blob `8f374eb0250f60dbf80cfd4f84b90373f5252a94`.
+
+За журналом останньої зміни: `lisp-fs.lisp` — коміт
+`561ed31e57309583b8f8317ce3d9311bd535fe7b`,
+`lisp-fs.sens` — `c285e11cf0fa352e63cf62ff6e05d90873bd2f1c`;
+`wsm-fs-record-producer.lisp` —
+`0644564259c7e80051f149c43be3988ea3f1fba4`,
+`wsm-fs-record-producer.sens` —
+`2abf9d379726d24418ac8fe4a000c5cfdc72e02b`.
+Отже, відповідні Lisp-файли змінювались ПІСЛЯ фізичних.
+Це пряма підстава для перевірки відставання трійок, але
+сам по собі Git-time **не доводить** byte drift; точний вирок
+дає лише канонічний Zig/T5M remint та verify-view.
+Не переписувати `.sens` вручну й не оголошувати F6 PASS
+поки не отримано нову source↔physical квитанцію.
