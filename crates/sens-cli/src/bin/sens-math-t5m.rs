@@ -911,6 +911,43 @@ mod paired {
         }
 
         #[test]
+        fn d12_t5m_rejects_rational_literals_but_preserves_sens_computed_ratios() {
+            // Physical D12/T5M admits integer source operands only. Exact
+            // rational values remain valid when produced by SENS's own D5
+            // quotient operation and carried as the operation's integer inputs.
+            for invalid in [
+                "(число? 1/3)",
+                "(число? -1/3)",
+                "(число? 0,5)",
+                "(число? 1e2)",
+            ] {
+                assert!(
+                    qualify(invalid).is_err(),
+                    "test_id=d12-rational-literal layer=admission expected=reject source={invalid}"
+                );
+            }
+
+            let source = "(число? (частка 1 3))";
+            let admitted = qualify(source)
+                .expect("SENS-computed rational is not a rational source literal");
+            let words = expected_words(&admitted).expect("exact D5/D12+ carrier");
+            let physical = zig_transport::encode_t5m_exact_words(&words)
+                .expect("Zig/T5M carries exact integer operands");
+            assert_eq!(
+                zig_transport::decode_t5m_exact_words(&physical).unwrap(),
+                words,
+                "test_id=d12-computed-ratio layer=transport"
+            );
+            let actual = eval_verified(source, &physical)
+                .expect("SENS computes and tests the exact ratio after physical roundtrip");
+            assert_eq!(
+                actual.as_predicate_bit(),
+                Some(true),
+                "test_id=d12-computed-ratio layer=SENS expected=D1:так actual={actual}"
+            );
+        }
+
+        #[test]
         fn physical_t5m_cannot_invent_numeric_admission_or_mutate_exact_bits() {
             for invalid in [
                 "(додати 0,5 2)",
