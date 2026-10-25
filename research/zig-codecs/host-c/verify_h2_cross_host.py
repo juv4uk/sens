@@ -52,6 +52,7 @@ H2_TRACKED_INPUTS = (
     "research/zig-codecs/transport/e1.zig",
     "research/zig-codecs/transport/e1_writer.zig",
     "research/zig-codecs/transport/fields.zig",
+    "research/zig-codecs/transport/raw_bitpack.zig",
     "scripts/sens_t5_t5m_codec.py", "scripts/zig_codec_bridge.py",
     "scripts/prepare_h2_zig_t5.py", ".zig-version", *RUST_DRIVERS,
     *(f"tests/semantic/{name}-{role}.bits"
