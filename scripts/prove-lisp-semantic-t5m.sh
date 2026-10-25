@@ -876,6 +876,9 @@ run_case run_error_rejection d5-member-nonlist-root "$d5_member_root" Type 'car 
 d5_pairlis_total_positive="$evidence/d5-pairlis-total-positive-current-source.lisp"
 cat -- lib/core4-parts/core4-d6.lisp tests/semantic/d5-pairlis-total-positive.lisp > "$d5_pairlis_total_positive"
 run_case run_law d5-pairlis-total-positive "$d5_pairlis_total_positive" 1 core4
+d5_pairlis_order_positive="$evidence/d5-pairlis-order-positive-current-source.lisp"
+cat -- lib/core4-parts/core4-d6.lisp tests/semantic/d5-pairlis-order-positive.lisp > "$d5_pairlis_order_positive"
+run_case run_law d5-pairlis-order-positive "$d5_pairlis_order_positive" 1 core4
 d5_pairlis_order_mutant="$evidence/d5-pairlis-order-mutant-current-source.lisp"
 cat -- lib/core4-parts/core4-d6.lisp tests/semantic/d5-pairlis-order-mutant.lisp > "$d5_pairlis_order_mutant"
 run_case run_law d5-pairlis-order-mutant "$d5_pairlis_order_mutant" 0 core4
