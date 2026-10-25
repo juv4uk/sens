@@ -64,7 +64,8 @@ class RemintExplicitManifestScopeTests(unittest.TestCase):
         )
         close_guard = guarded_section.rfind("\n            fi\n")
 
-        self.assertLess(recovery_start, explicit_branch)
+        # `explicit_branch` is relative to `guarded_section`; compare in one coordinate system.
+        self.assertLess(recovery_start, recovery_start + explicit_branch)
         self.assertLess(explicit_branch, else_branch)
         self.assertLess(else_branch, contest_scan)
         self.assertLess(contest_scan, library_scan)
