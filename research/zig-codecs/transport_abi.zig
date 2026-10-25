@@ -64,12 +64,19 @@ test "raw bitstream ABI packs exact widths through Zig with zero canonical tail"
         3, 0, 0, 0, 0, 0, 0, 0, 7,
     };
     try std.testing.expectEqual(@as(isize, 1), sens_zig_bitpack_fields(&records, records.len, undefined, 0));
-    var short: [1]u8 = .{0xa5};
-    try std.testing.expectEqual(@as(isize, -2), sens_zig_bitpack_fields(&records, records.len, &short, 0));
-    try std.testing.expectEqual(@as(u8, 0xa5), short[0]);
     var output: [1]u8 = undefined;
     try std.testing.expectEqual(@as(isize, 1), sens_zig_bitpack_fields(&records, records.len, &output, output.len));
     try std.testing.expectEqual(@as(u8, 0xaf), output[0]);
+}
+
+test "raw bitstream ABI rejects short output without partial writes" {
+    const records = [_]u8{
+        5, 0, 0, 0, 0, 0, 0, 0, 31,
+        4, 0, 0, 0, 0, 0, 0, 0, 15,
+    };
+    var short: [1]u8 = .{0xa5};
+    try std.testing.expectEqual(@as(isize, -2), sens_zig_bitpack_fields(&records, records.len, &short, short.len));
+    try std.testing.expectEqual(@as(u8, 0xa5), short[0]);
 }
 
 test "raw bitstream ABI rejects malformed width, value overflow, and partial records" {
