@@ -114,11 +114,13 @@ for path in "${inputs[@]}"; do
   "$trit" open "$path" > "$tmp/view" || error "Zig open $path"
   cmp -s "$view" "$tmp/view" || error "необоротний вигляд $path"
   "$trit" verify-view "$path" >/dev/null || error "Zig verify-view $path"
-  "$sens" --t5m-pair "$source" "$path" > "$tmp/paired" || error "SENS paired $path"
+  # D6/D5 library heads such as LENGTH are SENS Core4 closures.
+  # Use one Core4 profile for paired source→T5M and the standalone CLI.
+  "$sens" --t5m-pair "$source" "$path" --core4-runtime > "$tmp/paired" || error "SENS paired $path"
   "$sens" "$path" > "$tmp/standalone" || error "SENS standalone $path"
   cmp -s "$tmp/paired" "$tmp/standalone" || error "розбіжність виконання $path"
   { cat "$source"; printf "\n(як-є ())\n"; } > "$tmp/mutant.lisp"
-  if "$sens" --t5m-pair "$tmp/mutant.lisp" "$path" >/dev/null 2>"$tmp/negative"; then error "мутант прийнято $path"; fi
+  if "$sens" --t5m-pair "$tmp/mutant.lisp" "$path" --core4-runtime >/dev/null 2>"$tmp/negative"; then error "мутант прийнято $path"; fi
   grep -Fq T5M_PHYSICAL_PAIR_MISMATCH "$tmp/negative" || error "некоректна негативна перевірка $path"
   # Звичайний конкурс має AST/visits. Інтеграційний суд без фічі
   # benchmark-ast-visits перевіряє ті самі живі входи й самостійний
@@ -398,7 +400,7 @@ for path in "${inputs[@]}"; do
       error "Zig не відкрив змінний вхід $path №$witness_index"
     "$trit" verify-view "$witness_binary" >/dev/null ||
       error "необоротний змінний вхід $path №$witness_index"
-    "$sens" --t5m-pair "$witness_source" "$witness_binary" > "$tmp/вхід-$witness_index.paired" ||
+    "$sens" --t5m-pair "$witness_source" "$witness_binary" --core4-runtime > "$tmp/вхід-$witness_index.paired" ||
       error "не виконано парний змінний вхід $path №$witness_index"
     "$sens" "$witness_binary" > "$tmp/вхід-$witness_index.actual" ||
       error "не виконано автономний змінний вхід $path №$witness_index"
