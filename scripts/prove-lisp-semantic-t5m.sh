@@ -872,6 +872,21 @@ run_case run_error_rejection d5-member-hidden-tail "$d5_member_tail" Type 'car e
 d5_member_root="$evidence/d5-member-nonlist-root-current-source.lisp"
 cat -- lib/core4-parts/core4-d6.lisp tests/semantic/d5-member-nonlist-negative.lisp > "$d5_member_root"
 run_case run_error_rejection d5-member-nonlist-root "$d5_member_root" Type 'car expects a non-empty list' core4
+# Д5:11110 PAIRLIS — те саме чинне SENS-джерело для всіх фізичних свідків.
+d5_pairlis_total_positive="$evidence/d5-pairlis-total-positive-current-source.lisp"
+cat -- lib/core4-parts/core4-d6.lisp tests/semantic/d5-pairlis-total-positive.lisp > "$d5_pairlis_total_positive"
+run_case run_law d5-pairlis-total-positive "$d5_pairlis_total_positive" 1 core4
+d5_pairlis_order_mutant="$evidence/d5-pairlis-order-mutant-current-source.lisp"
+cat -- lib/core4-parts/core4-d6.lisp tests/semantic/d5-pairlis-order-mutant.lisp > "$d5_pairlis_order_mutant"
+run_case run_law d5-pairlis-order-mutant "$d5_pairlis_order_mutant" 0 core4
+d5_pairlis_key_atomic_tail="$evidence/d5-pairlis-key-atomic-tail-current-source.lisp"
+cat -- lib/core4-parts/core4-d6.lisp tests/semantic/d5-pairlis-key-atomic-tail-negative.lisp > "$d5_pairlis_key_atomic_tail"
+run_case run_error_rejection d5-pairlis-key-atomic-tail "$d5_pairlis_key_atomic_tail" Type 'car expects a non-empty list' core4
+d5_pairlis_extra_values="$evidence/d5-pairlis-extra-values-current-source.lisp"
+cat -- lib/core4-parts/core4-d6.lisp tests/semantic/d5-pairlis-extra-values-negative.lisp > "$d5_pairlis_extra_values"
+run_case run_error_rejection d5-pairlis-extra-values "$d5_pairlis_extra_values" Type 'car expects a non-empty list' core4
+sha256sum lib/core4-parts/core4-d6.lisp tests/semantic/d5-pairlis-*.lisp > "$evidence/d5-pairlis-current-source-inputs.sha256"
+
 d5_assoc_positive="$evidence/d5-assoc-total-list-positive-current-source.lisp"
 cat -- lib/core4-parts/core4-d6.lisp tests/semantic/d5-assoc-total-list-law.lisp > "$d5_assoc_positive"
 run_case run_law d5-assoc-total-list-positive "$d5_assoc_positive" 1 core4
