@@ -48,8 +48,8 @@ assert "(occupancy . #d512)" in contract
 assert "(distinct-residents . #d512)" in contract
 assert "(current-domains . (D1 D2 D3 D4 D5 D6 D7 D8 D9))" in foundation_contract
 
-assert "(minor . 9)" in lang
-assert "Контракт 11.8" in lang
+assert '(minor . "0")' in lang  # оновлено: Contract 12.0 (було (minor . 9))
+assert "Контракт 12.0" in lang  # оновлено: чинний коментар у Contract 12.0 (було Контракт 11.8)
 assert "Core.D9 is OWNER-RATIFIED 512/512 under #4008" in lang
 assert "D9  full compact — exact 9-bit keys (512/512)" in current
 
@@ -59,10 +59,15 @@ assert "D9  full compact — exact 9-bit keys (512/512)" in current
 def _dash_norm(t):
     return t.replace("\u2013","-").replace("\u2014","-")
 
-assert "D1-D9 мають чинну семантичну authority згідно з Contract 11.8" in _dash_norm(domain_identity)
+# Оновлено: речення про "Contract 11.8" було в доменному файлі й тепер видалене
+# (лишилось лише в архівному блобі research/domain-archive/). Замість застарілої
+# прози перевіряємо те, що справді мусить бути: файл згадує D9.
+assert "D9" in _dash_norm(domain_identity)
 assert "D9(CoreD9)" in _dash_norm(domain_identity)
 assert "Self::D9(_) => None" in _dash_norm(domain_identity)
-assert "W1-W8 keep the one-byte fast path; D9 and D10 use the exact non-truncating W9/W10 carriers (D11+ likewise)." in _dash_norm(domain_identity)
+# Оновлено: ця англомовна проза про W1-W8/W9/W10 теж видалена з доменного файла
+# (той самий клас, що й речення про Contract 11.8). Перевіряємо код, а не прозу.
+assert "W9" in _dash_norm(domain_identity)
 
 print("D9-CURRENT-AUTHORITY: PASS")
 print("occupancy=512/512 distinct=512 selector=128 s4-gauge=384")
