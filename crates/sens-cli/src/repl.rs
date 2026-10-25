@@ -2045,19 +2045,10 @@ fn handle_meta_command(line: &str, state: &mut ReplState) -> bool {
     }
 }
 
-fn is_interaction_only_unresolved_name(line: &str, error: &str) -> bool {
-    let standalone_name = sens::parse_mixed_exact_domain(line)
-        .ok()
-        .is_some_and(|forms| {
-            forms.len() == 1
-                && matches!(
-                    forms[0].kind,
-                    ExprKind::Symbol(_) | ExprKind::DomainIdentity(DomainIdentity::D7(_))
-                )
-        });
-    let unresolved_name =
-        error.contains("unknown symbol") || error.contains("domain identity is not callable");
-    standalone_name && unresolved_name
+// Хост тільки передає помилку нативного SENS; невідоме ім'я,
+// D7 non-callable та reader Type не стають успішним stdout echo.
+fn repl_transport_error_message(error: &str) -> String {
+    format!("REPL/T5M: {error}")
 }
 
 pub(crate) fn run_repl(session: Session, initial_surface: ReplSurface, sens_loop: bool) {
@@ -2128,13 +2119,8 @@ pub(crate) fn run_repl(session: Session, initial_surface: ReplSurface, sens_loop
                         );
                     }
                     Err(error) => {
-                        // Зберігаємо interaction policy для окремого невідомого імені;
-                        // усі форми оцінюються тільки після Zig T5M roundtrip.
-                        if is_interaction_only_unresolved_name(line, &error) {
-                            println!("echo {line}");
-                        } else {
-                            eprintln!("REPL/T5M: {error}");
-                        }
+                        // Тільки stderr, без Rust semantic fallback/echo.
+                        eprintln!("{}", repl_transport_error_message(&error));
                     }
                 }
             }
@@ -2442,15 +2428,17 @@ mod tests {
     }
 
     #[test]
-    fn standalone_d7_text_identity_uses_repl_echo_without_granting_callability() {
-        let error =
-            "SENS binary evaluator: domain identity is not callable under its ratified law: D7";
-        assert!(is_interaction_only_unresolved_name("мама", error));
-        assert!(!is_interaction_only_unresolved_name("(мама)", error));
-        assert!(!is_interaction_only_unresolved_name(
-            "мама",
-            "unrelated error"
-        ));
+    fn host_reports_native_sens_rejection_without_echo_fallback() {
+        // SENS володіє семантикою; Rust лише прозоро форматує stderr.
+        for error in [
+            "SENS binary evaluator: domain identity is not callable under its ratified law: D7",
+            "SENS binary reader: unclosed list",
+            "unknown symbol",
+        ] {
+            let message = repl_transport_error_message(error);
+            assert_eq!(message, format!("REPL/T5M: {error}"));
+            assert!(!message.starts_with("echo "));
+        }
     }
 
     #[test]
