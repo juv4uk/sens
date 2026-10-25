@@ -338,7 +338,7 @@ jobs:
             echo 'parser_benchmark_tests=true' >> "$GITHUB_OUTPUT"
           fi
           # Зміна чинної Lisp-семантики має запускати SENS, не лише source audit.
-          if grep -Eq '^(lib/translation\.lisp|lib/world\.lisp|lib/knowledge\.lisp|lib/core\.lisp|crates/sens/tests/translation_boundary\.rs|tests/test_code_runs\.py|lib/domains/d9[.]lisp|crates/sens/src/d9_definition_bindings_generated[.]rs|crates/sens/tests/d9_binary_surface_native[.]rs|tests/semantic/d9-four-uk-projections-laws[.]lisp|\.github/workflows/ci\.yml)$' "$changed_all"; then
+          if grep -Eq '^(lib/translation\.lisp|lib/world\.lisp|lib/knowledge\.lisp|lib/core\.lisp|crates/sens/tests/translation_boundary\.rs|tests/test_code_runs\.py|lib/domains/d9[.]lisp|crates/sens/src/d9_definition_bindings_generated[.]rs|crates/sens/tests/d9_binary_surface_native[.]rs|tests/semantic/d9-string-append-physical[.]lisp|\.github/workflows/ci\.yml)$' "$changed_all"; then
             echo 'translation_tests=true' >> "$GITHUB_OUTPUT"
           fi
           if grep -Eq '^(crates/sens-cli/src/(main|repl)\.rs|crates/sens-cli/src/bin/sens-trit\.rs|crates/sens-cli/tests/(cli|physical_core4_sequence_cli|physical_bare_session_cli)\.rs|scripts/execute_changed_lisp_t5m\.sh|scripts/refresh-verified-t5m-pair\.sh|scripts/refresh-executed-t5m-pair\.sh|benchmarks/contest-uk/(run-native\.sh|judge\.sh|[^/]+\.(lisp|sens))|\.github/workflows/ci\.yml)$' "$changed_all"; then
@@ -1581,8 +1581,8 @@ jobs:
           fi
           # Вісім справжніх D9 законів: SENS сам виконує кожен через Zig/T5M,
           # тест повідомляє точний номер RED; не вводимо Python-семантику.
-          if grep -Eq '^(tests/semantic/d9-four-uk-projections-laws[.]lisp|crates/sens-cli/src/repl[.]rs|[.]github/workflows/ci[.]yml)$' "$RUNNER_TEMP/changed-core-dependencies.txt"; then
-            CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 240s cargo test --locked -p sens-cli --bin sens d9_four_ukr_witnesses_execute_individually_in_native_sens -- --nocapture
+          if grep -Eq '^(tests/semantic/d9-string-append-physical[.]lisp|crates/sens-cli/src/repl[.]rs|[.]github/workflows/ci[.]yml)$' "$RUNNER_TEMP/changed-core-dependencies.txt"; then
+            CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 240s cargo test --locked -p sens-cli --bin sens d9_string_append_executes_through_native_zig_t5m_repl -- --nocapture
           fi
           for law_source in selector_law.rs semantic_registry.rs domain_family_composition_current.rs ci.yml; do
             if [[ "$changed_source" == *"$law_source"* ]]; then

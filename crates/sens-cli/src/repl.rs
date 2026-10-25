@@ -578,6 +578,11 @@ fn collect_t5m_source_bindings(
 }
 
 fn t5m_text7_surface_name(expression: &Expr, layout: sens::Text7Layout) -> Option<String> {
+    // The mixed reader may preserve a source name as a Symbol directly.
+    // Exact D7-cell lists still cover the physical Text7 representation.
+    if let ExprKind::Symbol(name) = &expression.kind {
+        return Some(name.to_string());
+    }
     let ExprKind::List(items) = &expression.kind else {
         return None;
     };
@@ -2695,18 +2700,21 @@ mod tests {
             assert_eq!(actual.packed_bits(), bits, "{name}");
         }
 
-        // A resident without an executable mechanism stays inert; foreign
-        // spelling and D7 text never become D8 by width or name similarity.
+        // A resident without an executable mechanism stays inert; each
+        // projection resolves only the exact surface declared by its table.
         assert!(
             selected_surface_callable(ReplSurface::UkrainianFull, "вектор")
                 .expect("ratified non-callable D8 resident lookup")
                 .is_none()
         );
-        assert!(
-            selected_surface_callable(ReplSurface::English, "string->symbol")
-                .expect("English projection must not elevate new D8 calls")
-                .is_none()
-        );
+        let english_string_to_symbol = selected_surface_callable(
+            ReplSurface::English,
+            "string->symbol",
+        )
+        .expect("English projection lookup")
+        .expect("English table declares the D8 string->symbol surface");
+        assert_eq!(english_string_to_symbol.width(), 8);
+        assert_eq!(english_string_to_symbol.packed_bits(), 0b11101101);
 
         // The former real RED interpreted this admitted nested call as a
         // Text7 variable (#t7:...). Check it now lowers to exact SENS words,
@@ -2733,7 +2741,7 @@ mod tests {
         // The mixed reader may already have represented its source head as a
         // DomainIdentity, so assert the complete projection-to-T5M route.
         let equality_words = prepare_t5m_repl_words(
-            "(однакові? x y)",
+            "(однакові? а б)",
             ReplSurface::UkrainianFull,
             &session,
         )
@@ -2759,62 +2767,50 @@ mod tests {
 
     #[cfg(feature = "zig-transport")]
     #[test]
-    fn d9_witness_source_is_carried_by_zig_and_readable_by_sens() {
-        let bytes =
-            crate::zig_transport::d9_witness_source_bytes().expect("Zig carries D9 witness bytes");
-        let source = String::from_utf8(bytes).expect("D9 witness source is UTF-8");
-        let forms =
-            sens::parse_mixed_exact_domain(&source).expect("SENS reads the D9 witness source");
-        let call = forms.last().expect("D9 witness entry");
-        let ExprKind::List(items) = &call.kind else {
-            panic!("D9 witness entry must be a source call");
+    fn d9_string_append_source_is_carried_by_zig_and_readable_by_sens() {
+        let bytes = crate::zig_transport::d9_string_append_source_bytes()
+            .expect("Zig carries D9 string-append source bytes");
+        let source = String::from_utf8(bytes).expect("D9 source is UTF-8");
+        let forms = sens::parse_mixed_exact_domain(&source)
+            .expect("SENS reads the D9 string-append source");
+        assert_eq!(forms.len(), 1, "one physical D9 operation source");
+        let ExprKind::List(items) = &forms[0].kind else {
+            panic!("D9 string-append source must be one call");
         };
-        let ExprKind::List(witnesses) = &items[1].kind else {
-            panic!("D9 witness must supply one SENS list of assertions");
-        };
-        assert_eq!(witnesses.len() - 1, 8, "eight native SENS witness laws");
+        assert!(matches!(
+            items.first().map(|head| &head.kind),
+            Some(ExprKind::Symbol(name)) if name.as_ref() == "рядок-додати"
+        ), "human source must preserve its Ukrainian surface before lowering");
+        let words = prepare_t5m_repl_words(
+            &source,
+            ReplSurface::UkrainianFull,
+            &Session::default(),
+        )
+        .expect("source surface lowers through the selected domain projection");
+        assert!(
+            words.iter().any(|word| matches!(
+                word,
+                ExactDomainWord::Identity(DomainIdentity::D9(identity))
+                    if identity.word().packed_bits() == 0b110011110
+            )),
+            "lowered source head must be exact D9:110011110 STRING-APPEND"
+        );
     }
 
     #[cfg(feature = "zig-transport")]
     #[test]
-    fn d9_four_ukr_witnesses_execute_individually_in_native_sens() {
-        // One false witness used to collapse to a generic CAR-of-NIL error.
-        // Diagnose the actual Lisp source one law at a time using precisely
-        // the same SENS -> Zig T5M -> SENS path as --t5m-pair.
-        // This code extracts AST spans only; Rust never calculates law truth.
+    fn d9_string_append_executes_through_native_zig_t5m_repl() {
         let source = String::from_utf8(
-            crate::zig_transport::d9_witness_source_bytes().expect("Zig carries D9 witness bytes"),
+            crate::zig_transport::d9_string_append_source_bytes()
+                .expect("Zig carries D9 string-append source bytes"),
         )
-        .expect("D9 witness source is UTF-8");
-        let forms = sens::parse_mixed_exact_domain(&source)
-            .expect("D9 native Lisp source must be readable");
-        let call = forms.last().expect("eight native witness assertions");
-        let ExprKind::List(call_items) = &call.kind else {
-            panic!("D9 witness entry must be a source call");
-        };
-        let ExprKind::List(witnesses) = &call_items[1].kind else {
-            panic!("D9 witness must supply one SENS list of assertions");
-        };
-        assert_eq!(witnesses.len() - 1, 8, "eight existing SENS laws");
-        let definitions = &source[..call.span.start];
-        for (index, witness) in witnesses.iter().enumerate().skip(1) {
-            let law_source = &source[witness.span.start..witness.span.end];
-            let program = format!("{definitions}\n{law_source}\n");
-            let result = eval_t5m_source_file(&program).unwrap_or_else(|error| {
-                panic!(
-                    "test_id=D9-EIGHT-{} layer=SENS_ZIG_T5M source={} actual_error={error}",
-                    index, law_source
-                )
-            });
-            assert_eq!(
-                result.value.as_predicate_bit(),
-                Some(true),
-                "test_id=D9-EIGHT-{} layer=SENS_ZIG_T5M input={} expected=D1:true actual={}",
-                index,
-                law_source,
-                result.value
-            );
-        }
+        .expect("D9 string-append source is UTF-8");
+        let result = eval_t5m_source_file(&source)
+            .expect("admitted D9 STRING-APPEND through SENS -> Zig T5M -> SENS");
+        assert!(matches!(
+            result.value,
+            Value::String(ref value) if value.as_ref() == "сенсмова"
+        ));
     }
 
     #[cfg(feature = "zig-transport")]

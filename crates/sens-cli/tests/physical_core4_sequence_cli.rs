@@ -1349,14 +1349,12 @@ fn contest_uk_all_physical_programs_have_native_execution_and_peers() {
 }
 
 #[test]
-fn d9_native_witness_executes_current_lisp_with_zig_t5m() {
-    // SENS вирішує семантику, Zig — фізичну оберненість.
-    // Не підтверджувати старий SYMBOL? статичним порівнянням із Core4:
-    // Text7 не є Value::Symbol і не допускає SYMBOL->STRING.
+fn d9_native_string_append_executes_current_lisp_with_zig_t5m() {
+    // SENS виконує допущений D9 STRING-APPEND; Zig доводить фізичну пару T5M.
     let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../..");
-    let source = root.join("tests/semantic/d9-four-uk-projections-laws.lisp");
+    let source = root.join("tests/semantic/d9-string-append-physical.lisp");
     let id = UNIQUE.fetch_add(1, Ordering::Relaxed);
-    let stem = format!("sens-d9-{}-{id}", std::process::id());
+    let stem = format!("sens-d9-string-append-{}-{id}", std::process::id());
     let physical = std::env::temp_dir().join(format!("{stem}.sens"));
     let view = physical.with_extension("");
     let altered = std::env::temp_dir().join(format!("{stem}.lisp"));
@@ -1364,7 +1362,7 @@ fn d9_native_witness_executes_current_lisp_with_zig_t5m() {
 
     let mint = Command::new(env!("CARGO_BIN_EXE_sens"))
         .arg("--t5m-mint").arg(&source).arg(&physical)
-        .output().expect("нативний SENS mint Д9");
+        .output().expect("нативний SENS mint D9 STRING-APPEND");
     assert!(mint.status.success(), "SENS mint: {}", error(&mint));
     assert!(physical.is_file(), "SENS mint не створив T5M");
 
@@ -1381,11 +1379,14 @@ fn d9_native_witness_executes_current_lisp_with_zig_t5m() {
 
     let paired = Command::new(env!("CARGO_BIN_EXE_sens"))
         .arg("--t5m-pair").arg(&source).arg(&physical).output()
-        .expect("виконання живого Д9 Lisp із парою");
+        .expect("виконання живого D9 STRING-APPEND Lisp із парою");
     assert!(paired.status.success(), "SENS paired: {}", error(&paired));
+    let paired_value = String::from_utf8(paired.stdout.clone())
+        .expect("SENS повертає UTF-8 рядок для українського свідка");
+    assert_eq!(paired_value.trim(), "\"сенсмова\"");
     let standalone = Command::new(env!("CARGO_BIN_EXE_sens"))
         .arg(&physical).output()
-        .expect("незалежне фізичне виконання Д9");
+        .expect("незалежне фізичне виконання D9 STRING-APPEND");
     assert!(standalone.status.success(), "SENS standalone: {}", error(&standalone));
     assert_eq!(paired.stdout, standalone.stdout, "виконання джерела та T5M не збігається");
 

@@ -359,9 +359,12 @@ pub fn repl_reasoning_t5m_assets() -> Result<Vec<(&'static str, Vec<u8>)>, Strin
     ])
 }
 
-/// Opaque D9 witness source bytes carried through the Zig root ABI.
-pub fn d9_witness_source_bytes() -> Result<Vec<u8>, String> {
-    opaque_zig_asset(asset_ffi::sens_zig_d9_witness_bytes_copy, "ZIG_D9_WITNESS")
+/// Opaque D9 string-append source bytes carried through the Zig root ABI.
+pub fn d9_string_append_source_bytes() -> Result<Vec<u8>, String> {
+    opaque_zig_asset(
+        asset_ffi::sens_zig_d9_string_append_bytes_copy,
+        "ZIG_D9_STRING_APPEND",
+    )
 }
 
 /// Перечитує актуальний Guard-довідник через Zig; шлях зафіксований у Zig,

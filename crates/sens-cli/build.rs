@@ -56,7 +56,7 @@ fn main() {
     println!("cargo:rerun-if-changed=../../tests/fixtures/wsm-fs-record-producer.sens");
     println!("cargo:rerun-if-changed=../../lib/persistent-vector.sens");
     println!("cargo:rerun-if-changed=../../lib/time.lisp");
-    println!("cargo:rerun-if-changed=../../tests/semantic/d9-four-uk-projections-laws.lisp");
+    println!("cargo:rerun-if-changed=../../tests/semantic/d9-string-append-physical.lisp");
     println!("cargo:rerun-if-changed=../../lib/epistemic.sens");
     println!("cargo:rerun-if-changed=../../lib/meta-eval.sens");
     println!("cargo:rerun-if-changed=../../lib/repl-core.sens");
