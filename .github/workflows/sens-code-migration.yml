@@ -11,6 +11,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
+      - uses: ./.github/actions/install-zig
+      - uses: dtolnay/rust-toolchain@1.99.0
+      - name: Перевірити Zig T5M через Rust ABI
+        run: cargo test --locked -p sens-cli --test t5m_zig_abi
       - name: Test manifest-driven migration and three-pass classifier
         run: |
           set +e
@@ -18,8 +22,7 @@ jobs:
             tests/test_sens_code_migration.py \
             tests/test_classify_lisp_source_forms.py \
             tests/test_three_pass_migration.py \
-            tests/test_migrate_approved_t5m.py \
-            tests/test_sens_t5_t5m_codec.py > migration-test.log 2>&1
+            tests/test_migrate_approved_t5m.py > migration-test.log 2>&1
           status=$?
           cat migration-test.log
           echo "$status" > migration-test.status

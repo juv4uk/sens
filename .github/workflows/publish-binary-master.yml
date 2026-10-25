@@ -15,10 +15,12 @@ jobs:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
       - uses: ./.github/actions/install-zig
       - uses: dtolnay/rust-toolchain@1.99.0
-      - name: Test strict T5 and three-pass migration
+      - name: Test three-pass migration
         run: |
           set -euo pipefail
-          python3 -m unittest tests/test_three_pass_migration.py tests/test_sens_t5_t5m_codec.py
+          python3 -m unittest tests/test_three_pass_migration.py
+      - name: Test physical T5M through Zig ABI from Rust
+        run: cargo test --locked -p sens-cli --test t5m_zig_abi
       - name: Preview new same-name .sens binaries
         shell: bash
         run: |
