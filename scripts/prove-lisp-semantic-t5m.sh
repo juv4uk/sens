@@ -528,6 +528,20 @@ run_case run_law d9-string-append-physical-positive tests/semantic/d9-string-app
 run_case run_law d9-string-append-physical-mutant tests/semantic/d9-string-append-physical-mutant.lisp 0 core4
 sha256sum tests/semantic/d9-string-append-physical.lisp \
   tests/semantic/d9-string-append-physical-mutant.lisp > "$evidence/d9-string-append-inputs.sha256"
+# D9/F6: канонізація лише десяти фіксованих ключів протоколу.
+# SENS сам перевіряє D7/D8-еквівалентність, дублі, відсутнє/порожнє поле та malformed tail.
+# Shell тільки з'єднує джерельні DEFINE і свідки; оцінює SENS через фізичний Zig/T5M.
+d9_fs_keys_positive="$evidence/d9-f6-package-key-canonicalization-positive-complete.lisp"
+d9_fs_keys_mutant="$evidence/d9-f6-package-key-canonicalization-mutant-complete.lisp"
+cat -- lib/lisp-fs.lisp tests/semantic/d9-f6-package-key-canonicalization-law.lisp > "$d9_fs_keys_positive"
+cat -- lib/lisp-fs.lisp tests/semantic/d9-f6-package-key-canonicalization-mutant.lisp > "$d9_fs_keys_mutant"
+run_case run_law d9-f6-package-key-canonicalization-positive "$d9_fs_keys_positive" 1 core4
+run_case run_law d9-f6-package-key-canonicalization-mutant "$d9_fs_keys_mutant" 0 core4
+sha256sum lib/lisp-fs.lisp \
+  tests/semantic/d9-f6-package-key-canonicalization-law.lisp \
+  tests/semantic/d9-f6-package-key-canonicalization-mutant.lisp \
+  > "$evidence/d9-f6-package-key-canonicalization-inputs.sha256"
+
 # Д10: чотири ратифіковані MAP-виклики, усі 12 SENS-предикатів — один D1 доказ.
 # Негативний свідок повинен давати саме D1:ні, не Type і не host результат.
 run_case run_law d10-map-derived-twelve-positive tests/semantic/d10-map-derived-native-laws.lisp 1 core4
