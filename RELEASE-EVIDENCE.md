@@ -1,8 +1,8 @@
 # SENS l0.42.0 — release evidence ledger
 
-> **DRAFT · NO-GO (2026-10-12).** Не є release certificate. Цей файл навмисно відокремлює **підтверджену мовну ратифікацію** від **ще не перевіреної готовності конкретного релізного SHA**. Невідоме = BLOCK, не PASS.
+> **DRAFT · NO-GO · оновлено 2026-10-25.** Не є сертифікатом релізу. Контракт 12.0 ратифікований, але його повнота реалізації не заявлена. Candidate SHA, повні CI-докази, власницький GO та артефакти не встановлені.
 
-**Уточнення 21.10.2026 до чинного контракту 11.9:** для нових фізичних файлів `.sens` типовим є **Zig/T5M**, не історичний T5. Легкі статичні аудити та побайтовий roundtrip не підтверджують еквівалентності виконання; перевіряти програму на незалежному SENS reader/eval. Відсутність релізного свідка зупиняє тільки непідтверджений тег/публікацію, не незалежні виправлення в `main`. Червоне виправляти за фактичною причиною, без нових загальних HOLD/FREEZE чи приховування тестів.
+**Чинний зріз:** Contract 12.0 у `contracts/language-contract-12.lisp` зберігає ідентичності D1–D11, D10 whole-domain authority та D12-first числове рішення; реалізаційна повнота не засвідчена. Для фізичних `.sens` використовується T5M; історичний T5 не є активним маршрутом. Roundtrip сам по собі не доводить виконання. Записи нижче з датами до 25.10.2026 — історичні докази стану на свої SHA, а не опис чинної норми.
 
 ## 2026-10-14 · Точковий meta-eval non-atom proof
 
@@ -20,7 +20,7 @@
 | Candidate Git SHA (40 hex) | **UNSET** |
 | Date/time UTC | **UNSET** |
 | Contract source SHA-256 | **UNSET** |
-| Contract generation | **11.9** (перевірити з pinned tree) |
+| Contract generation | **12.0** (`contracts/language-contract-12.lisp`; implementation completeness not asserted) |
 | Rust version / rustup toolchain digest | Rust `1.99.0` pinned in `rust-toolchain.toml` and release/CI workflows; rustup distribution digest and runner-image digests **UNSET** |
 | Cargo.lock SHA-256 | **UNSET** |
 | CI run ID and immutable logs | **UNSET** |
@@ -32,11 +32,11 @@
 
 | Модель | Authority / задекларований рівень | Виконуваність / незалежний релізний свідок |
 |---|---|---|
-| D1–D9 | Ратифікований фундамент Contract 11.9 | **NOT YET CERTIFIED ON CANDIDATE SHA** |
-| D10 | Whole-domain 1024/1024 ратифіковано 2026-10-12 | F1/F2/F3/runtime/T5: **PENDING**, не називати 1024 callable |
-| D24+ | Окрема ратифікована числова драбина | Повне загальне physical T5 admission: **NOT CLAIMED** |
+| D1–D11 | Ратифіковані резидентні ідентичності; виконання не випливає з ратифікації | **NOT VERIFIED ON CANDIDATE SHA** |
+| D10 | Цілісний каталог 1024/1024 ратифіковано 2026-10-12 | Runtime/callability witnesses: **NOT VERIFIED**, не називати всі 1024 виконуваними |
+| D12+ | Чинна числова драбина починається з D12 | Загальна реалізація та виконання: **NOT VERIFIED ON CANDIDATE SHA** |
 | T5M (`.sens`) | Чинний типовий фізичний носій; Zig пакує точні слова, але не встановлює семантику | Оберненість усього виконуваного корпусу та незалежний SENS runtime parity: **PENDING** |
-| Історичний T5 | Лише явний сумісний маршрут; самі фізичні байти деяких коротких слів можуть бути T5M-сумісними | Не є окремим дозволом на виконання чи свідком релізу |
+| Історичний T5 | Архівна provenance, не активний codec route | Не є дозволом на виконання чи свідком релізу |
 | F3C (`.senc`) | Explicit tiny compact route | Ще потрібен exact-candidate stage/replay/digest |
 | F3M (`.f3m`) | Bounded enumerative research | НЕ general-production release promise |
 

@@ -105,14 +105,14 @@ D1 1  ≠  D2 01  ≠  D3 001  ≠  D4 0001
 
 ## Фізичні кодеки: семантика SENS одна, носії різні
 
-Фізичний кодек **не створює іншу мову**. Чинний T5M, явний legacy T5,
+Фізичний кодек **не створює іншу мову**. Чинний T5M,
 Frame3 Carrier (F3C) і Frame3-Micro (F3M) мають відновити ті самі точні доменні слова; після
 декодування вони передаються тому самому канонічному SENS reader/evaluator.
 
 | Назва | Носій | Статус / роль |
 |---|---|---|
 | **T5M** | `.sens` | чинний загальний фізичний transport; production default |
-| **T5** | явний legacy-маршрут | сумісність зі старим фізичним кодуванням; не default |
+| **T5** | історичні дані та provenance | не є активним кодеком або маршрутом виконання |
 | **Frame3 Carrier (F3C)** | `.senc` | явно вибраний компактний carrier для дуже малих програм; історичні CLI/докази ще використовують коротку назву `F3` |
 | **Frame3-Micro (F3M)** | `.f3m` | bounded dense micro-rank: сімейство вибирається явно, а профіль визначає **довжина 1/2/3/4/5 байтів**; без внутрішньої magic/version мітки |
 | **Envelope E1/E2/E3** | research carriers | самодостатні metadata-heavy оболонки, історично `S3/v1-v3`; це **не версії Frame3** |
@@ -158,7 +158,7 @@ witness `03 B1 C7 07 93` із усіма D1–D3 capability-класами + LAM
 
 ## `.sens`: трійкова межа всередині, звичайний пробіл назовні
 
-**Мова залишається строго двійковою.** Для фізичного файла `.sens` чинним default є T5M (транспортні трити `0/1/2`, п'ять тритів на фізичний байт); старий T5 доступний лише через явний compatibility-маршрут. `2` означає лише межу доменних слів: декодер показує її як **звичайний пробіл**. **Окремого завершувача `22` немає:** кінець визначає сам файл, у фінальному байті можуть бути лише 0–4 трити `2` для доповнення.
+**Мова залишається строго двійковою.** Фізичний файл `.sens` пакує T5M (транспортні трити `0/1/2`, п'ять тритів на фізичний байт). Історичний T5 зберігається лише як provenance, не як активний compatibility-маршрут. `2` означає лише межу доменних слів: декодер показує її як **звичайний пробіл**. **Окремого завершувача `22` немає:** кінець визначає сам файл, у фінальному байті можуть бути лише 0–4 трити `2` для доповнення.
 
 ~~~text
 Двійкові слова:  10 | 001 | 00 | 000 | 01
@@ -179,7 +179,7 @@ cargo run -q -p sens-cli --bin sens-trit -- eval tests/fixtures/migration-quote-
 
 **Поточна виконавча межа:** `sens file.sens` читає фізичні T5M-байти, перевіряє канонічну D2-структуру й передає точні доменні слова чинному SENS-виконавцю **без** текстового Lisp-reader, неявного Core4-bootstrap або host capabilities. `sens-trit open file.sens` тільки показує бітовий перегляд, не виконує його. `sens-trit eval-core4 file.sens` є окремим *явним* запитом завантажити Core4, а не наслідком відкриття файлу. Недопущені закони чи дефектний транспорт викликають відмову; чистий CLI-запуск сам по собі не є доказом історичної/української semantic-oracle parity. Перевірка механіки — [Physical binary SENS CLI smoke](.github/workflows/physical-binary-sens-cli.yml).
 
-**Правило міграції репозиторіїв:** існуючий `каталог/назва.lisp` має відповідник `каталог/назва.sens` із байтами чинного T5M-кодека; legacy T5 застосовують лише за явним вибором. Транспортна `2` розділяє точні двійкові слова. Створювати **третій однойменний файл `каталог/назва` без розширення** як похідний перевірюваний перегляд точних бітових слів `0/1`, розділених **одним ASCII-пробілом**, із одним завершальним LF. Не зберігати текст `0/1/2` у `.sens` і не підміняти фізичні байти видимим бітовим записом. `.lisp`, `.sens` і файл-view мають проходити спільний перевірений roundtrip; сам лише транспортний view **не підтверджує семантичного допуску**. [Міграція `.lisp → .sens`](docs/SENS-LISP-TO-T5-MIGRATION-2026-10-08.uk.md), [координація агентів #4449](https://github.com/juv4uk/sens/issues/4449).
+**Правило міграції репозиторіїв:** існуючий `каталог/назва.lisp` має відповідник `каталог/назва.sens` із байтами чинного T5M-кодека. Транспортна `2` розділяє точні двійкові слова. Створювати **третій однойменний файл `каталог/назва` без розширення** як похідний перевірюваний перегляд точних бітових слів `0/1`, розділених **одним ASCII-пробілом**, із одним завершальним LF. Не зберігати текст `0/1/2` у `.sens` і не підміняти фізичні байти видимим бітовим записом. `.lisp`, `.sens` і файл-view мають проходити спільний перевірений roundtrip; сам лише транспортний view **не підтверджує семантичного допуску**. [Міграція `.lisp → .sens`](docs/SENS-LISP-TO-T5-MIGRATION-2026-10-08.uk.md), [координація агентів #4449](https://github.com/juv4uk/sens/issues/4449).
 
 Файл `.sens` **фізично двійковий**, не ASCII. `open/view` декодує його у текст для людини; звичайному редактору потрібен окремий codec provider або file association. Деталі історичного T5 wire та сумісного перегляду: [T5 `.sens` — відображення пробілів](docs/sens-t5-space-view.uk.md). Формальна ратифікація всього wire-v1, зокрема EOS, лишається окремою задачею #4444.
 
@@ -201,7 +201,7 @@ cargo run -q -p sens-cli --bin sens-trit -- eval tests/fixtures/migration-quote-
 - 2 байти (`F3 XX YY`): 9–14 трит, **39 276 програм** — повноцінні D2-форми з 2–5 внутрішніми атомами.
 - У вимірі канонічний для того часу legacy T5 для `(10 10 00 01 01)` = 16 трит (4 Б); Frame-3 = 12 трит (3 Б) — **3× стиснення**.
 
-Це датований замір legacy T5 Rule A, не опис чинного default: нині `.sens` використовує T5M, а T5 лишається лише явним compatibility-маршрутом. Дослідницький Frame3 Carrier живе в `research/framed3/` (Rule B); історичні результати та raw evidence не переписуються.
+Це датований замір legacy T5 Rule A, не опис чинного default: нині `.sens` використовує T5M; історичні результати та raw evidence не переписуються. Дослідницький Frame3 Carrier живе в `research/framed3/` (Rule B).
 
 ---
 ## Незалежна перевірка: dense F3M-1 використовує всі 256 байтів
@@ -911,7 +911,7 @@ exact bits + exact domain + proved/ratified law
 
 Width is part of identity. A byte or u8 carrier is only storage.
 
-Current Contract 11.9 preserves D1–D9, owner-ratifies D10 as a single 1024-code domain and keeps separately ratified D12+ numeric domains. D10 residency alone does not grant a callable mechanism; T5M transports exact words but does not grant execution. D2 owns source structure; D3 and higher domains own semantic residents according to their own laws.
+Current Contract 12.0 preserves ratified D1–D11 resident identities, D10 whole-domain authority, and the D12-first numeric decision. Ratification does not establish implementation completeness, and legacy SID8/Sens8 runtime paths are marked for removal. T5M transports exact words but does not grant execution. D2 owns source structure; other domains own residents according to their ratified laws.
 
 Canonical binary source is visible binary, not decimal IDs, #b..., quoted binary strings, or host opcode wrappers.
 

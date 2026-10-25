@@ -69,8 +69,8 @@ jobs:
           fi
           gh release create "$GITHUB_REF_NAME" dist/* \
             --draft --verify-tag \
-            --title "SENS $GITHUB_REF_NAME · Contract 11.9" \
-            --notes "SENS Contract 11.9 release on exact commit $GITHUB_SHA. Source of truth: RELEASE.md and RELEASE-EVIDENCE.md at this commit."
+            --title "SENS $GITHUB_REF_NAME · Contract 12.0" \
+            --notes "SENS Contract 12.0 release on exact commit $GITHUB_SHA. Джерела стану й меж релізу: RELEASE.md та RELEASE-EVIDENCE.md у цьому коміті."
           mkdir -p "$RUNNER_TEMP/release-replay"
           gh release download "$GITHUB_REF_NAME" --dir "$RUNNER_TEMP/release-replay"
           python3 scripts/verify_release_assets.py replay \

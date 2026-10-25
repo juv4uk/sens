@@ -138,7 +138,7 @@ class ReleaseAssetsTest(unittest.TestCase):
 
 
 class ReleaseWorkflowOrderingTest(unittest.TestCase):
-    """Keep the workflow's last-moment SHA/owner-authorization barrier covered."""
+    """Keep current release entry points and published artifact flow covered."""
 
     def test_web_bundle_source_and_generated_wasm_names(self):
         root = Path(__file__).resolve().parents[1]
@@ -146,8 +146,14 @@ class ReleaseWorkflowOrderingTest(unittest.TestCase):
         bundler = (root / "scripts" / "make-portable-web.mjs").read_text(encoding="utf-8")
         self.assertTrue((root / "public" / "my-lisp-cli-web.html").is_file())
         self.assertIn(
+            "--out-dir ../../public/wasm --release",
+            workflow,
+            "WASM bindings must be written where the standalone bundler reads them",
+        )
+        self.assertIn(
             "node scripts/make-portable-web.mjs public/my-lisp-cli-web.html sens-cli-web.html",
             workflow,
+            "release must use the checked-in standalone HTML bundler",
         )
         self.assertIn("cp sens-cli-web.html my-lisp-cli-web.html", workflow)
         self.assertIn("cmp -s sens-cli-web.html my-lisp-cli-web.html", workflow)
@@ -159,24 +165,30 @@ class ReleaseWorkflowOrderingTest(unittest.TestCase):
 
     def test_main_sha_and_owner_go_are_rechecked_after_replay_before_publish(self):
         root = Path(__file__).resolve().parents[1]
-        workflow = (root / ".github" / "workflows" / "release.yml").read_text(encoding="utf-8")
+        entry = (root / ".github" / "workflows" / "release.yml").read_text(encoding="utf-8")
+        publisher = (root / ".github" / "workflows" / "release-publish.yml").read_text(
+            encoding="utf-8"
+        )
+        delegated = entry[entry.index("  release-publish:"):]
+        self.assertIn(
+            "needs: [test, publish-island-manifest, build-cli, build-msi, build-web]",
+            delegated,
+        )
+        self.assertIn("uses: ./.github/workflows/release-publish.yml", delegated)
 
-        replay = workflow.rfind("python3 scripts/verify_release_assets.py replay")
-        publish = workflow.rfind('gh release edit "$GITHUB_REF_NAME" --draft=false')
-        last_fetch = workflow.rfind("git fetch --no-tags --depth=1 origin main")
-        last_compare = workflow.rfind('test "$(git rev-parse FETCH_HEAD)" = "$GITHUB_SHA"')
+        replay = publisher.rfind("python3 scripts/verify_release_assets.py replay")
+        publish = publisher.rfind('gh release edit "$GITHUB_REF_NAME" --draft=false')
+        last_fetch = publisher.rfind("git fetch --no-tags --depth=1 origin main")
+        last_compare = publisher.rfind('test "$(git rev-parse FETCH_HEAD)" = "$GITHUB_SHA"')
 
         self.assertGreaterEqual(replay, 0, "draft replay verifier is required")
         self.assertGreater(last_fetch, replay, "main must be refetched after byte replay")
         self.assertGreater(last_compare, last_fetch, "fresh main ref must be compared to tagged SHA")
         self.assertGreater(publish, last_compare, "nothing may publish before the final SHA guard")
-        final_guard = workflow[last_fetch:publish]
+        final_guard = publisher[last_fetch:publish]
         self.assertIn("RELEASE_GO_SHA", final_guard)
         self.assertIn("RELEASE_GO_TAG", final_guard)
         self.assertIn("RELEASE_BLOCKED", final_guard)
-
-
-
 
 class TaggedReleaseWorkflowWiringTests(unittest.TestCase):
     """Guard the actual tag workflow's connection to the canonical release verifier."""
@@ -257,8 +269,9 @@ class ReleaseVersionParityTest(unittest.TestCase):
         self.assertIn(f"releases/download/l{version}/", installer)
 
         release_script = (root / "scripts" / "release.lisp").read_text(encoding="utf-8")
-        self.assertIn(f"scripts/release.lisp {version}", release_script)
-        self.assertIn(f"Потрібна одна версія: {version}", release_script)
+        self.assertIn("ФАЙЛ ВИВЕДЕНО З УЖИТКУ", release_script)
+        self.assertIn(f"Потрібна версія релізу: {version}.", release_script)
+        self.assertNotIn("gh release", release_script)
 
 class ReleaseWebDemoLinkTests(unittest.TestCase):
     """CI_GLUE_NO_SEMANTICS: stable README link across asset renames."""

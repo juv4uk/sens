@@ -153,6 +153,11 @@ class ReleasePublicationGateTest(unittest.TestCase):
     def test_manual_release_delegates_to_sha_pinned_publisher(self):
         """Tagged entry delegates publication only after all asset jobs finish."""
         self.assertIn("on:\n  workflow_dispatch:\n", self.entry_source)
+        release_scope = (ROOT / "RELEASE.md").read_text(encoding="utf-8")
+        self.assertIn("Contract 12.0", release_scope)
+        self.assertIn("contracts/language-contract-12.lisp", release_scope)
+        self.assertIn('Contract 12.0"', self.source)
+        self.assertNotIn("Contract 11.9", self.source)
         entry = self.entry_source[self.entry_source.index("  release-publish:"):]
         self.assertIn(
             "needs: [test, publish-island-manifest, build-cli, build-msi, build-web]",
