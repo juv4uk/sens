@@ -60,3 +60,32 @@ fn d11_clojure_frequencies_unary_run_in_sens() {
         );
     }
 }
+
+#[test]
+fn d11_frequencies_group_records_are_exact_pairs_in_native_sens() {
+    // Тільки SENS обчислює закон. Rust перевіряє точний D1/Type.
+    let mut s = Session::bare();
+    load_core_library(&mut s).expect("чинний Core SENS");
+    eval_program(include_str!("../../../lib/d11-clojure-group-by.lisp"), &mut s)
+        .expect("групування SENS");
+    eval_program(include_str!("../../../lib/d11-clojure-frequencies-unary.lisp"), &mut s)
+        .expect("частоти SENS");
+    for (id, source, expected) in [
+        ("d11-group-pair-positive", include_str!("../../../tests/fixtures/d11-frequencies-exact-group-pair-law.lisp"), true),
+        ("d11-group-pair-mutant", include_str!("../../../tests/fixtures/d11-frequencies-exact-group-pair-mutant.lisp"), false),
+    ] {
+        let result = eval_program(source, &mut s)
+            .unwrap_or_else(|e| panic!("test_id={id} layer=SENS error={e}")).value;
+        assert_eq!(result.as_predicate_bit(), Some(expected),
+            "test_id={id} layer=SENS expected=D1:{expected} actual={result}");
+    }
+    for (id, source) in [
+        ("d11-group-extra-field", include_str!("../../../tests/fixtures/d11-frequencies-extra-group-field-negative.lisp")),
+        ("d11-group-missing-field", include_str!("../../../tests/fixtures/d11-frequencies-missing-group-field-negative.lisp")),
+    ] {
+        let error = eval_program(source, &mut s).err()
+            .unwrap_or_else(|| panic!("test_id={id} layer=SENS expected=D3-CAR-Type actual=accepted"));
+        assert!(error.to_string().contains("car expects a non-empty list"),
+            "test_id={id} layer=SENS expected=D3-CAR-Type actual={error}");
+    }
+}
