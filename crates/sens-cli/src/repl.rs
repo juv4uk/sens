@@ -2,6 +2,7 @@
 //! перемикання програмних поверхонь. `:мова` / `:surface` не є Lisp syntax:
 //! це команди оболонки над одним і тим самим семантичним ядром.
 
+mod benchmark;
 mod surface_catalog;
 
 use rustyline::error::ReadlineError;
@@ -1894,6 +1895,7 @@ fn print_surface_help() {
     println!("Каталог поточної людської поверхні: :імена / :names");
     println!("Одна semantic identity у всіх людських поверхнях: :ім'я <назва> / :name <name>");
     println!("Стан людських поверхонь: :поверхні / :surfaces");
+    println!("Виміряти REPL через Zig T5M і переглянути Ratatui звіт: :бенч [вимірів 100..10000]");
     println!("Сире лексичне середовище без фільтрації поверхнею: (середовище) / (env)");
     println!("LISP — окрема проєкція з доменних таблиць; core — канонічний машинний шар.");
     println!("Перемикання змінює лише surface-frame; ваші define/closures лишаються живими.");
@@ -1966,6 +1968,26 @@ fn handle_meta_command(line: &str, state: &mut ReplState) -> bool {
             match render_surface_status() {
                 Ok(output) => println!("{output}"),
                 Err(error) => eprintln!("Помилка стану поверхонь: {error}"),
+            }
+            true
+        }
+        ":бенч" | ":bench" => {
+            let samples = match parts.next() {
+                Some(value) => match value.parse::<usize>() {
+                    Ok(samples) if (100..=10_000).contains(&samples) => samples,
+                    _ => {
+                        eprintln!("Використання: :бенч [вимірів 100..10000]");
+                        return true;
+                    }
+                },
+                None => benchmark::DEFAULT_SAMPLES,
+            };
+            if parts.next().is_some() {
+                eprintln!("Використання: :бенч [вимірів 100..10000]");
+                return true;
+            }
+            if let Err(error) = benchmark::render_in_repl(state, samples) {
+                eprintln!("REPL benchmark: {error}");
             }
             true
         }

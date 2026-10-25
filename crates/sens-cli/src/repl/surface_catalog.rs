@@ -254,6 +254,15 @@ pub(super) fn ukr_name_for_identity(identity: &str) -> Result<Option<String>, St
     Ok(ukr_index()?.get(identity).cloned())
 }
 
+/// Return one exact projection spelling for a known table identity.
+pub(super) fn name_for_identity(surface: &str, identity: &str) -> Result<Option<String>, String> {
+    Ok(registry_entries()?
+        .iter()
+        .find(|entry| entry.identity == identity)
+        .and_then(|entry| surface_name(entry, surface))
+        .and_then(|name| name.name.clone()))
+}
+
 fn rendered_name(surface: Option<&SurfaceName>) -> String {
     surface
         .and_then(|surface| surface.name.as_deref())
