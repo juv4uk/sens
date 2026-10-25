@@ -78,7 +78,19 @@ fn source_head_domain_identity(name: &str) -> Option<CoreDomainIdentity> {
             // operations or selector routes that already expose one.
             identity.core_operation()
         })
-        .or_else(|| semantic_registry::domain_identity_for_surface(name))
+        .or_else(|| {
+            let identity = semantic_registry::domain_identity_for_surface(name)?;
+            // D6 source heads are restricted to the exact Ukrainian uk/ukr
+            // spelling admitted by the generated Lisp-owned binding table.
+            // Otherwise this broad surface fallback would undo the negative
+            // alias checks above for English and Sanskrit D6 metadata.
+            if matches!(identity, CoreDomainIdentity::D6(_))
+                && semantic_registry::d6_uk_source_identity(name).is_none()
+            {
+                return None;
+            }
+            Some(identity)
+        })
 }
 
 /// Binding identity is intentionally unchanged by the source-head routing fix.
