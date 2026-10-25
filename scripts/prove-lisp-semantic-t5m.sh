@@ -528,6 +528,12 @@ run_case run_law d9-string-append-physical-positive tests/semantic/d9-string-app
 run_case run_law d9-string-append-physical-mutant tests/semantic/d9-string-append-physical-mutant.lisp 0 core4
 sha256sum tests/semantic/d9-string-append-physical.lisp \
   tests/semantic/d9-string-append-physical-mutant.lisp > "$evidence/d9-string-append-inputs.sha256"
+# Д10: чотири ратифіковані MAP-виклики, усі 12 SENS-предикатів — один D1 доказ.
+# Негативний свідок повинен давати саме D1:ні, не Type і не host результат.
+run_case run_law d10-map-derived-twelve-positive tests/semantic/d10-map-derived-native-laws.lisp 1 core4
+run_case run_law d10-map-derived-empty-mutant tests/semantic/d10-map-derived-native-mutant.lisp 0 core4
+sha256sum tests/semantic/d10-map-derived-native-laws.lisp \
+  tests/semantic/d10-map-derived-native-mutant.lisp > "$evidence/d10-map-derived-inputs.sha256"
 run_case run_law d10-empty-queue-positive tests/semantic/d10-empty-queue-law.lisp 1 core4
 run_case run_law d10-empty-queue-mutant tests/semantic/d10-empty-queue-mutant.lisp 0 core4
 # Д10:0100100110/0100100111 — CLIPS ASSERT/PRINTOUT як точні структурні дані.
