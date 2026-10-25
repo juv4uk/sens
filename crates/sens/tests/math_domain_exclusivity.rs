@@ -1,4 +1,4 @@
-//! Contract 11.9 / owner 2026-10-24: binary words are not numbers.
+//! Contract 12.0: binary words are not numbers; mathematical words begin at D12.
 //! Only exact D12+ qualified values may enter mathematical mechanisms.
 //! These witnesses use real Core evaluation, not an auxiliary arithmetic
 //! simulator, and do not admit any new source syntax or numeric literal.
@@ -92,7 +92,7 @@ fn all_representable_non_numeric_domain_words_are_rejected_by_math() {
 }
 
 #[test]
-fn bare_numbers_and_numeric_spelling_cannot_bypass_d24_admission() {
+fn unqualified_runtime_values_cannot_bypass_d12_admission_but_decimal_source_projects() {
     let mut session = Session::default();
     for (name, value) in [
         ("legacy-float", Value::Number(1.0, Exactness::Exact)),
@@ -112,27 +112,31 @@ fn bare_numbers_and_numeric_spelling_cannot_bypass_d24_admission() {
             assert!(error.message.contains("D12+"), "{name}: {error}");
         }
     }
-    // Source digit strings without a D24+ domain remain non-mathematical,
-    // independent of their length; the reader cannot grant domain identity.
-    for source in [
-        "(+ 1 1)",
-        "(+ 100 100)",
-        "(+ 0000000001 0000000001)",
-        "(* 24 48)",
-        // A 24/48-bit-looking source spelling is not a D24/D48
-        // qualified value. Width alone has no numeric-domain authority.
-        "(+ 000000000000000000000001 000000000000000000000001)",
+    // Human source digits are decimal projection data, not bit strings.
+    // The mixed-source boundary qualifies them into the selected D24 Core4
+    // profile; leading zeroes do not turn the token into a D10 identity.
+    for (source, expected) in [
+        ("(01010 1 1)", 2),
+        ("(01010 100 100)", 200),
+        ("(01010 0000000001 0000000001)", 2),
+        ("(10110 24 48)", 1152),
+        (
+            "(01010 000000000000000000000001 000000000000000000000001)",
+            2,
+        ),
     ] {
-        let error = eval_program(source, &mut session).unwrap_err();
-        assert_eq!(error.kind, ErrorKind::Type, "{source}");
-        assert!(error.message.contains("D12+"), "{source}: {error}");
+        assert_eq!(
+            exact_call(source, &mut session).unwrap_or_else(|error| panic!("{source}: {error}")),
+            numeric(24, expected),
+            "decimal projection: {source}"
+        );
     }
 }
 
 #[test]
-fn d5_d6_operator_codes_compute_without_literals_across_d24_d384() {
+fn d5_d6_operator_codes_compute_without_literals_across_d12_d384() {
     let mut session = Session::default();
-    for width in [24usize, 48, 96, 192, 384] {
+    for width in [12usize, 24, 48, 96, 192, 384] {
         session.environment.define("left", numeric(width, 7));
         session.environment.define("right", numeric(width, 2));
         for (source, expected) in [
@@ -212,11 +216,13 @@ fn ten_bit_domain_ratification_does_not_invent_d10_callability_or_arithmetic() {
         );
     }
 
-    // Nor can a ten-digit spelling be a substitute for a qualified
-    // D24+ number. The value's own domain is never inferred from digits.
-    let error = exact_call("(01010 number 0000000001)", &mut session).unwrap_err();
-    assert_eq!(error.kind, ErrorKind::Type);
-    assert!(error.message.contains("D12+"), "{error}");
+    // In operand position, the same glyphs are an ordinary decimal numeral
+    // one, projected under the D24 Core4 profile. They do not denote a D10
+    // bit word, and the arithmetic result keeps that explicit numeric domain.
+    assert_eq!(
+        exact_call("(01010 number 0000000001)", &mut session).unwrap(),
+        numeric(24, 10)
+    );
 }
 
 /// Prove the admissible replacement for Core4 length-onto's old
