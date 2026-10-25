@@ -2452,11 +2452,17 @@ for spec in 'lib/core4-parts/core4-d6.lisp|значення-у-списку?' \
   fi
   printf '\n' >> "$d6_union_source"
 done
-for kind in proper-law proper-mutant improper-tail-negative improper-root-negative; do
+# Охоронець власності бачить точний SOURCE і одне використання кожного bundle.
+# Семантика не переходить у shell: лише з'єднуємо канонічні DEFINE та SENS закон.
+d6_union_proper_source="$evidence/d6-union-proper-law-complete.lisp"
+d6_union_mutant_source="$evidence/d6-union-proper-mutant-complete.lisp"
+cat -- "$d6_union_source" tests/semantic/d6-union-proper-law.lisp > "$d6_union_proper_source"
+cat -- "$d6_union_source" tests/semantic/d6-union-proper-mutant.lisp > "$d6_union_mutant_source"
+for kind in improper-tail-negative improper-root-negative; do
   cat -- "$d6_union_source" "tests/semantic/d6-union-$kind.lisp" > "$evidence/d6-union-$kind-complete.lisp"
 done
-run_case run_law d6-union-proper "$evidence/d6-union-proper-law-complete.lisp" 1
-run_case run_law d6-union-proper-mutant "$evidence/d6-union-proper-mutant-complete.lisp" 0
+run_case run_law d6-union-proper "$d6_union_proper_source" 1
+run_case run_law d6-union-proper-mutant "$d6_union_mutant_source" 0
 run_case run_type_rejection d6-union-improper-tail "$evidence/d6-union-improper-tail-negative-complete.lisp" 'car expects a non-empty list'
 run_case run_type_rejection d6-union-improper-root "$evidence/d6-union-improper-root-negative-complete.lisp" 'car expects a non-empty list'
 # Нові закони D6: права основа має бути правильним D3-списком.
