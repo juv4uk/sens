@@ -38,6 +38,7 @@ C_HOST_DIR = "research/zig-codecs/host-c"
 PHYSICAL_IMPORT_PREFIXES = ("t5m.zig", "t5/", "f3c/", "transport/")
 FORBIDDEN_IMPORT_RE = re.compile(r"registry|semantic|host|sens", re.I)
 REQUIRED_ABI_EXPORTS = (
+    "sens_zig_bitpack_fields",
     "sens_zig_t5m_validate",
     "sens_zig_t5m_encode_be3",
     "sens_zig_t5m_decode_be3",
