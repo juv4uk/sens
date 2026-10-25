@@ -1,6 +1,10 @@
 name: Historical pre-bīja3 exact-width corpus donor
 
 on:
+  # Переведено на pull_request: workflow УЖЕ читає PR-дані,
+  # але тригер не стріляв — перевірка не мала наслідків.
+  pull_request:
+    branches: [main]
   workflow_dispatch:
 
 concurrency:
