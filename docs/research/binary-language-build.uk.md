@@ -24,7 +24,7 @@
 | Шар | Файл | Роль |
 |---|---|---|
 | Точні ширини | `crates/sens/src/bits.rs` (`Bits<N>`) | логічне слово точної ширини |
-| Канонічне пакування | `packed_bits.rs` (`BitPacker`/`PackedBitstream`) | MSB-first, без вирівнювання |
+| Канонічне фізичне пакування | `zig_transport_root.zig` → `transport_abi.zig` → `transport/fields.zig` | канонічне MSB-first пакування; Rust лише буферизує записи |
 | Бінарне джерело | `source_words.rs` | видиме джерело `.lisp` як точні слова |
 | Доменні носії | `domain_words.rs` | носії ширини БЕЗ семантики на бітах |
 | Текст-ідентичність | `text7.rs` (`Text7`) | 7-бітні клітинки (UPC-7) |
