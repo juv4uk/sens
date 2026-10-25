@@ -527,6 +527,21 @@ jobs:
       - uses: ./.github/actions/install-zig
         if: ${{ always() }}
 
+      - name: Zig bitpacker — build real WASM target without Rust fallback
+        if: ${{ always() }}
+        timeout-minutes: 15
+        shell: bash
+        run: |
+          set -euo pipefail
+          rustup target add wasm32-unknown-unknown
+          if cargo build --locked -p sens-wasm --target wasm32-unknown-unknown; then
+            echo "SENS_ZIG_BITPACK_WASM_PASS target=wasm32-unknown-unknown"
+          else
+            status=$?
+            echo "::error::SENS_ZIG_BITPACK_WASM_FAILED status=$status command=cargo build --locked -p sens-wasm --target wasm32-unknown-unknown"
+            exit "$status"
+          fi
+
       - name: Rust — механізм без мовного оракула
         if: ${{ always() }}
         timeout-minutes: 15
