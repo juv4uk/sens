@@ -2505,6 +2505,23 @@ sha256sum lib/core4.lisp lib/core4-parts/core4-d6b.lisp \
   tests/semantic/d8-notevery-invalid-root-law.lisp \
   tests/semantic/d8-all-not-invalid-root-law.lisp > "$evidence/d6-d8-quantifier-inputs.sha256"
 
+# Д11 ZIP-WITH: відображення двох списків із повним D3-доказом.
+# Реальні позитив, мутант і два Type-негативи виконуються в SENS.
+# Залежність завжди зберігаємо як канонічне Lisp DEFINE до самого свідка.
+d11_zip_with_positive="$evidence/d11-zip-with-positive-complete.lisp"
+d11_zip_with_mutant="$evidence/d11-zip-with-mutant-complete.lisp"
+d11_zip_with_bad_left="$evidence/d11-zip-with-bad-left-complete.lisp"
+d11_zip_with_bad_right="$evidence/d11-zip-with-bad-right-complete.lisp"
+cat -- lib/d11-srfi1-zip-with.lisp tests/semantic/d11-srfi1-zip-with-law.lisp > "$d11_zip_with_positive"
+cat -- lib/d11-srfi1-zip-with.lisp tests/semantic/d11-srfi1-zip-with-mutant.lisp > "$d11_zip_with_mutant"
+cat -- lib/d11-srfi1-zip-with.lisp tests/semantic/d11-srfi1-zip-with-improper-left-negative.lisp > "$d11_zip_with_bad_left"
+cat -- lib/d11-srfi1-zip-with.lisp tests/semantic/d11-srfi1-zip-with-improper-right-negative.lisp > "$d11_zip_with_bad_right"
+run_case run_law d11-zip-with-order-shorter-positive "$d11_zip_with_positive" 1 core4
+run_case run_law d11-zip-with-swapped-pair-mutant "$d11_zip_with_mutant" 0 core4
+run_case run_error_rejection d11-zip-with-improper-left "$d11_zip_with_bad_left" Type 'car expects a non-empty list' core4
+run_case run_error_rejection d11-zip-with-improper-right "$d11_zip_with_bad_right" Type 'car expects a non-empty list' core4
+sha256sum lib/d11-srfi1-zip-with.lisp tests/semantic/d11-srfi1-zip-with-*.lisp > "$evidence/d11-zip-with-inputs.sha256"
+
 # Класифікуємо кореневі причини без повторного запуску SENS.
 printf 'SENS_RED_CAUSE root=d7-value-call count=%d ids=%s\n' "${#red_d7_ids[@]}" "${red_d7_ids[*]}"
 printf 'SENS_RED_CAUSE root=d3-car-type count=%d ids=%s\n' "${#red_d3_car_ids[@]}" "${red_d3_car_ids[*]}"
