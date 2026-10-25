@@ -1810,6 +1810,15 @@ fn render_repl_reply(value: &Value, language: PresentationLanguage) -> String {
     }
 }
 
+fn render_interaction_echo(line: &str, surface: ReplSurface) -> String {
+    match surface {
+        ReplSurface::Ukrainian | ReplSurface::UkrainianFull => {
+            format!("ВІДЛУННЯ {}", line.to_uppercase())
+        }
+        _ => format!("echo {line}"),
+    }
+}
+
 fn render_repl_pair(value: &Value, language: PresentationLanguage) -> String {
     let mut output = String::from("(");
     let mut current = value;
@@ -2082,7 +2091,7 @@ pub(crate) fn run_repl(session: Session, initial_surface: ReplSurface, sens_loop
         println!("Режим: repl-core ініціалізовано; кожна інтерактивна форма проходить Zig T5M.");
     }
     println!("Символи можна вводити малими літерами; REPL друкує їх ВЕЛИКИМИ.");
-    println!("D1 лишається 1/0 у Canon; людські проекції друкуються ВЕЛИКИМИ.");
+    println!("D1 у канонічному поданні — 1/0; українська проєкція D1 — ТАК/НІ.");
     println!("Ctrl-C або Ctrl-D — вихід.");
 
     let mut rl = match DefaultEditor::new() {
@@ -2131,7 +2140,7 @@ pub(crate) fn run_repl(session: Session, initial_surface: ReplSurface, sens_loop
                         // Зберігаємо interaction policy для окремого невідомого імені;
                         // усі форми оцінюються тільки після Zig T5M roundtrip.
                         if is_interaction_only_unresolved_name(line, &error) {
-                            println!("echo {line}");
+                            println!("{}", render_interaction_echo(line, state.surface));
                         } else {
                             eprintln!("REPL/T5M: {error}");
                         }

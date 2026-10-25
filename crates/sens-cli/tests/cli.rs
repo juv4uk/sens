@@ -928,6 +928,42 @@ fn repl_history_persists_across_separate_sessions() {
     assert!(history.contains("(додати 3 4)"));
 }
 
+#[test]
+fn default_ukrainian_repl_uses_cyrillic_d1_replies_and_unknown_name_feedback() {
+    use std::io::Write;
+    use std::process::Stdio;
+
+    let home = std::env::temp_dir().join(format!("sens-cli-repl-ukr-d1-{}", std::process::id()));
+    std::fs::create_dir_all(&home).expect("should create isolated REPL home");
+    let mut child = sens()
+        .env("HOME", &home)
+        .env("USERPROFILE", &home)
+        .stdin(Stdio::piped())
+        .stdout(Stdio::piped())
+        .stderr(Stdio::piped())
+        .spawn()
+        .expect("REPL should start");
+    child
+        .stdin
+        .take()
+        .expect("stdin should be piped")
+        .write_all("мама\n(атом? (як-є ()))\n(хибне? (атом? (як-є ())))\n".as_bytes())
+        .expect("should send Ukrainian source forms");
+    let output = child.wait_with_output().expect("REPL should finish at EOF");
+    let _ = std::fs::remove_dir_all(&home);
+
+    assert!(output.status.success());
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(
+        stdout.contains("Поверхня: українська (повна) (укр)"),
+        "{stdout}"
+    );
+    assert!(stdout.contains("ВІДЛУННЯ МАМА"), "{stdout}");
+    assert!(stdout.contains("ТАК"), "{stdout}");
+    assert!(stdout.contains("НІ"), "{stdout}");
+    assert!(!stdout.contains("echo мама"), "{stdout}");
+}
+
 /// The echo fallback must not leak into non-interactive execution: running a
 /// file whose whole content is a lone unknown symbol still fails named.
 /// Echo-fallback ne povynen proshkodzhuvaty v neinteraktyvne vykonannia:
