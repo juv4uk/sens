@@ -3,7 +3,7 @@
 use sens::{
     parse_canonical_binary,
     parse_canonical_packed_words,
-    BinarySourceWord, BitPacker, ErrorKind, Session, Value,
+    BinarySourceWord, BitPacker, Session, Value,
 };
 use sens_cli::zig_transport;
 
@@ -258,6 +258,10 @@ fn d3_semantics_are_executed_and_decided_by_binary_sens() {
                 .map(|token| token.word)
                 .collect::<Vec<_>>(),
         ).unwrap();
+        assert_eq!(
+            re_encoded, physical,
+            "Zig T5M must preserve the exact domain-code stream"
+        );
         let result = eval_reference_t5m(physical, &mut Session::default())
             .expect("SENS self-test must execute directly from packed T5M");
         assert!(result.output.is_empty(), "pure SENS self-test does not print");

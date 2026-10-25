@@ -2867,20 +2867,22 @@ mod tests {
     fn callable_projection_names_lower_to_the_same_first_class_domain_code() {
         let session = Session::default();
         let cases = [
-            (ReplSurface::Ukrainian, "додати"),
-            (ReplSurface::UkrainianFull, "додати"),
-            (ReplSurface::Lisp, "plus"),
+            (ReplSurface::UkrainianFull, "додати", 5, 0b01010),
+            (ReplSurface::UkrainianFull, "відняти", 5, 0b01011),
+            (ReplSurface::UkrainianFull, "помножити", 5, 0b10110),
+            (ReplSurface::UkrainianFull, "частка-остача", 9, 0b110111111),
+            (ReplSurface::Ukrainian, "додати", 5, 0b01010),
         ];
-        let expected = ExactDomainWord::Identity(DomainIdentity::from(
-            selected_surface_callable(ReplSurface::UkrainianFull, "додати")
-                .expect("Ukrainian full projection")
-                .expect("D5 addition callable"),
-        ));
 
-        for (surface, name) in cases {
+        for (surface, name, width, bits) in cases {
             let words = prepare_t5m_repl_words(name, surface, &session)
                 .unwrap_or_else(|error| panic!("{} value {name:?}: {error}", surface.code()));
-            assert_eq!(words, [expected.clone()], "{} projection", surface.code());
+            assert_eq!(
+                words,
+                [ExactDomainWord::Identity(t5m_domain_identity(width, bits).unwrap())],
+                "{} projection {name:?}",
+                surface.code()
+            );
         }
     }
 

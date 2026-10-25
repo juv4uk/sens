@@ -96,7 +96,18 @@ pub(crate) fn evaluate_definition(
     if let Some(name) = crate::canonical_reader::text7_binding_key(&arguments[0]) {
         canon::ensure_bindable(&name, arguments[0].span)?;
         let value = evaluate(&arguments[1], environment)?;
-        canon::bind_language_definition(&name, &value, environment);
+        // The wire token is the stable identifier carried by the binary
+        // source. Resolve its selected Ukrainian projection only to find the
+        // ratified domain-table row; the row's exact bits, not its spelling,
+        // populate the callable slot.
+        let surface = crate::Text7::from_canonical_wire_token(&name)
+            .ok()
+            .and_then(|text| crate::render_text7(&text, crate::Text7Layout::Uk).ok());
+        canon::bind_language_definition(
+            surface.as_deref().unwrap_or(name.as_ref()),
+            &value,
+            environment,
+        );
         environment.define(name.clone(), value.clone());
         // A physical Core4 DEFINE target arrives as a canonical D7 word token,
         // but the definition must also be resolvable by its ratified Ukrainian
@@ -104,10 +115,7 @@ pub(crate) fn evaluate_definition(
         // readers (named D24+ roots) key on that spelling, not the wire token.
         // Mirror bind_core_runtime_mechanisms: project only the already
         // evaluated callable, never a bare resident.
-        if let Some(surface) = crate::Text7::from_canonical_wire_token(&name)
-            .ok()
-            .and_then(|text| crate::render_text7(&text, crate::Text7Layout::Uk).ok())
-        {
+        if let Some(surface) = surface {
             if surface.as_str() != name.as_ref()
                 && environment.get(&surface).is_none()
                 && canon::ensure_bindable(&surface, arguments[0].span).is_ok()
