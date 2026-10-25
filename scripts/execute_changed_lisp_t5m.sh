@@ -780,6 +780,28 @@ run_native_t5m_program() {
         return
       fi
     fi
+    if [[ "$file" == "tests/semantic/d8-quantifier-composition-law.lisp" ||
+          "$file" == "tests/semantic/d8-quantifier-composition-mutant.lisp" ]]; then
+      # Фізичний standalone має містити ту саму повну SENS-програму.
+      # Zig переносить бітові слова; підсумковий вердикт належить SENS.
+      local d8_complete_source="$dir/d8-quantifier-complete.lisp"
+      standalone_physical="$dir/d8-quantifier-complete.sens"
+      if ! cat -- tests/fixtures/epistemic-d1-names.lisp "$d8_quantifier_source" "$file" > "$d8_complete_source" ||
+         ! timeout "$native_timeout" "$binary" --t5m-mint "$d8_complete_source" "$standalone_physical" >"$dir/d8-quantifier-mint.stdout" 2>"$dir/d8-quantifier-mint.stderr" ||
+         ! timeout "$native_timeout" "$native_open" open "$standalone_physical" >"${standalone_physical%.sens}" 2>"$dir/d8-quantifier-open.stderr" ||
+         ! timeout "$native_timeout" "$native_open" verify-view "$standalone_physical" >"$dir/d8-quantifier-verify.stdout" 2>"$dir/d8-quantifier-verify.stderr"; then
+        echo "::error::D8_QUANTIFIER_STANDALONE_NOT_VERIFIED source=$file" >&2
+        mark_file_failed
+        return
+      fi
+      local expected_d8=1
+      [[ "$file" != *-mutant.lisp ]] || expected_d8=0
+      if [[ "$(cat "$dir/native-paired.stdout")" != "$expected_d8" ]]; then
+        echo "::error::D8_QUANTIFIER_WRONG_D1 source=$file expected=$expected_d8 actual=$(cat "$dir/native-paired.stdout")" >&2
+        mark_file_failed
+        return
+      fi
+    fi
     if [[ "$file" == "lib/persistent-vector.lisp" ]]; then
       # Автономний SENS повинен одержати ті самі чинні Lisp-корені D24+,
       # що й парне виконання; source-only носій лишається для byte-parity.
@@ -1542,6 +1564,29 @@ while IFS= read -r file || [[ -n "$file" ]]; do
     sha256sum lib/core4-parts/core4-d6b.lisp "$local_d6_source" > "$dir/d6-definition-provenance.sha256"
     binding_sources=(--binding-source tests/fixtures/epistemic-d1-names.lisp
                      --binding-source "$local_d6_source")
+  elif [[ "$file" == "tests/semantic/d8-quantifier-composition-law.lisp" ||
+          "$file" == "tests/semantic/d8-quantifier-composition-mutant.lisp" ]]; then
+    # Відтворюємо рівно п'ять чинних мовних DEFINE, а не host-семантику.
+    # Голий змінений файл не містить D6/D8-зв'язувань: UnknownSymbol
+    # не є свідком правильності чи хибності кванторного закону.
+    d8_quantifier_source="$dir/d8-quantifiers-exact-sens.lisp"
+    : > "$d8_quantifier_source"
+    for quantifier in будь-яке? усі? є-що-не-задовольняє? усі-не-задовольняють? жодне-не-задовольняє?; do
+      if ! awk -v target="(визначити $quantifier" '
+        $0 == target { if (found++) exit 2; copying = 1 }
+        copying && NF == 0 { copying = 0; complete++; next }
+        copying { print }
+        END { if (found != 1 || complete != 1 || copying) exit 2 }
+      ' lib/core4-parts/core4-d6b.lisp >> "$d8_quantifier_source"; then
+        echo "::error::D8_QUANTIFIER_SENS_DEFINITION_MISSING source=$file target=$quantifier" >&2
+        mark_file_failed
+        continue 2
+      fi
+      printf '\n' >> "$d8_quantifier_source"
+    done
+    sha256sum lib/core4-parts/core4-d6b.lisp "$d8_quantifier_source" > "$dir/d8-quantifier-source.sha256"
+    binding_sources=(--binding-source tests/fixtures/epistemic-d1-names.lisp
+                     --binding-source "$d8_quantifier_source")
   elif [[ "$file" == "tests/semantic/d11-family-association-law.lisp" ||
           "$file" == "tests/semantic/d11-family-association-mutant.lisp" ||
           "$file" == "tests/semantic/d11-family-association-late-record-negative.lisp" ||
