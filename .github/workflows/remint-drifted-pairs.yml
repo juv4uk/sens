@@ -425,6 +425,7 @@ jobs:
             profile_args=()
             expect_args=()
             case "$f" in
+              tests/semantic/d9-f6-package-key-canonicalization-law.lisp|tests/semantic/d9-f6-package-key-canonicalization-mutant.lisp) bs=(--binding-source lib/lisp-fs.lisp); profile_args=(--core4-runtime);;
               tests/semantic/exact-arithmetic-laws.lisp|tests/semantic/exact-arithmetic-mutant.lisp|lib/lisp-fs.lisp) profile_args=(--core4-runtime);;
               tests/semantic/core-d3-car-cdr-cons-mutant.lisp) expect_args=(--expect-error "car expects a non-empty list");;
               tests/semantic/d4-recursion-atom-result-law.lisp|tests/semantic/d4-recursion-atom-result-mutant.lisp|tests/semantic/d4-recursion-benchmark-law.lisp|tests/semantic/d4-recursion-benchmark-mutant.lisp) bs=(--binding-source benchmarks/recursion.lisp);;
@@ -760,7 +761,8 @@ jobs:
               profile_args=()
               expect_args=()
               case "$f" in
-                tests/semantic/exact-arithmetic-laws.lisp|tests/semantic/exact-arithmetic-mutant.lisp|lib/lisp-fs.lisp) profile_args=(--core4-runtime);;
+                tests/semantic/d9-f6-package-key-canonicalization-law.lisp|tests/semantic/d9-f6-package-key-canonicalization-mutant.lisp) bs=(--binding-source lib/lisp-fs.lisp); profile_args=(--core4-runtime);;
+              tests/semantic/exact-arithmetic-laws.lisp|tests/semantic/exact-arithmetic-mutant.lisp|lib/lisp-fs.lisp) profile_args=(--core4-runtime);;
               tests/semantic/core-d3-car-cdr-cons-mutant.lisp) expect_args=(--expect-error "car expects a non-empty list");;
               tests/semantic/d4-recursion-atom-result-law.lisp|tests/semantic/d4-recursion-atom-result-mutant.lisp|tests/semantic/d4-recursion-benchmark-law.lisp|tests/semantic/d4-recursion-benchmark-mutant.lisp) bs=(--binding-source benchmarks/recursion.lisp);;
                 lib/persistent-vector.lisp|lib/knowledge.lisp) bs=(--binding-source "$RUNNER_TEMP/sens-core4-d24-roots.lisp");;
