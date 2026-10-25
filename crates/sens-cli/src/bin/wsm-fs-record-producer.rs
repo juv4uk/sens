@@ -8,6 +8,30 @@ use sens::{load_core_library, Environment, Session, Value};
 
 const MAX_RECORD_BYTES: usize = 64 * 1024;
 
+// I/O-only diagnosis: identify the actual SENS runtime carrier, but never
+// coerce it into text or admit it as a valid external record.
+fn f6_record_type_error(value: &Value) -> &'static str {
+    match value {
+        Value::Nil => "F6_RECORD_TYPE expected=String-or-Text7 actual=Nil",
+        Value::Bool(_) => "F6_RECORD_TYPE expected=String-or-Text7 actual=Bool",
+        Value::Number(_, _) => "F6_RECORD_TYPE expected=String-or-Text7 actual=Number",
+        Value::Rational(_) => "F6_RECORD_TYPE expected=String-or-Text7 actual=Rational",
+        Value::BinaryNumber(_) => "F6_RECORD_TYPE expected=String-or-Text7 actual=BinaryNumber",
+        Value::NumericComposition(_) => "F6_RECORD_TYPE expected=String-or-Text7 actual=NumericComposition",
+        Value::Sid(_) => "F6_RECORD_TYPE expected=String-or-Text7 actual=LegacySlot",
+        Value::DomainIdentity(_) => "F6_RECORD_TYPE expected=String-or-Text7 actual=DomainIdentity",
+        Value::Symbol(_) => "F6_RECORD_TYPE expected=String-or-Text7 actual=Symbol",
+        Value::Closure(_) => "F6_RECORD_TYPE expected=String-or-Text7 actual=Closure",
+        Value::Macro(_) => "F6_RECORD_TYPE expected=String-or-Text7 actual=Macro",
+        Value::Builtin(_) => "F6_RECORD_TYPE expected=String-or-Text7 actual=Builtin",
+        Value::HostHandle { .. } => "F6_RECORD_TYPE expected=String-or-Text7 actual=HostHandle",
+        Value::Vector(_) => "F6_RECORD_TYPE expected=String-or-Text7 actual=Vector",
+        Value::NumericBuffer(_) => "F6_RECORD_TYPE expected=String-or-Text7 actual=NumericBuffer",
+        Value::Pair(_) => "F6_RECORD_TYPE expected=String-or-Text7 actual=Pair",
+        Value::String(_) | Value::Text7(_) => "F6_RECORD_TYPE internal-classifier-error",
+    }
+}
+
 fn bounded_two_line_records(value: &Value) -> Result<[String; 2], &'static str> {
     let mut records = Vec::with_capacity(2);
     let mut next = value;
@@ -35,9 +59,7 @@ fn bounded_two_line_records(value: &Value) -> Result<[String; 2], &'static str> 
                     Value::Pair(_) => {
                         return Err("F6_RECORD_TYPE expected=String-or-Text7 actual=Pair")
                     }
-                    _ => {
-                        return Err("F6_RECORD_TYPE expected=String-or-Text7 actual=non-text")
-                    }
+                    other => return Err(f6_record_type_error(other))
                 };
                 let bytes = record.as_bytes();
                 if bytes.is_empty() || bytes.len() > MAX_RECORD_BYTES {
@@ -142,6 +164,20 @@ mod tests {
         assert_eq!(
             bounded_two_line_records(&actual).unwrap(),
             ["(root)".to_owned(), "(object)".to_owned()]
+        );
+    }
+
+    #[test]
+    fn f6_type_diagnostic_names_the_actual_runtime_carrier_without_coercion() {
+        assert_eq!(
+            f6_record_type_error(&Value::Bool(true)),
+            "F6_RECORD_TYPE expected=String-or-Text7 actual=Bool"
+        );
+        assert_eq!(
+            f6_record_type_error(&Value::DomainIdentity(
+                sens::DomainIdentity::D1(sens::PredicateBit::from_word(sens::Bit1::new(1).unwrap()))
+            )),
+            "F6_RECORD_TYPE expected=String-or-Text7 actual=DomainIdentity"
         );
     }
 
