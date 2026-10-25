@@ -483,6 +483,15 @@ run_case run_law d3-cond-first-match-nil-mutant tests/semantic/d3-cond-first-mat
 # Позитив і негатив обов'язково проходять direct → Zig/T5M → paired → standalone.
 run_case run_law d3-cond-guard-short-circuit-positive tests/semantic/d3-cond-guard-short-circuit-law.lisp 1
 run_case run_law d3-cond-guard-short-circuit-mutant tests/semantic/d3-cond-guard-short-circuit-mutant.lisp 0
+# D3/D5: only D3:() terminates a proper list; non-empty atomic CDR is Type.
+run_case run_law d3-last-adjacent-equal-positive lib/list-last-adjacent-equal-atom-suffix-general.lisp 1
+d3_adjacent_improper="$evidence/d3-last-adjacent-equal-improper-bound.lisp"
+cat -- lib/list-last-adjacent-equal-atom-suffix-general.lisp tests/semantic/d3-last-adjacent-equal-improper-tail-negative.lisp > "$d3_adjacent_improper"
+run_case run_error_rejection d3-last-adjacent-equal-improper "$d3_adjacent_improper" Type 'car expects a non-empty list'
+d3_adjacent_after="$evidence/d3-last-adjacent-equal-after-match-bound.lisp"
+cat -- lib/list-last-adjacent-equal-atom-suffix-general.lisp tests/semantic/d3-last-adjacent-equal-after-match-improper-tail-negative.lisp > "$d3_adjacent_after"
+run_case run_error_rejection d3-last-adjacent-equal-after-match-improper "$d3_adjacent_after" Type 'car expects a non-empty list'
+sha256sum lib/list-last-adjacent-equal-atom-suffix-general.lisp tests/semantic/d3-last-adjacent-equal-improper-tail-negative.lisp tests/semantic/d3-last-adjacent-equal-after-match-improper-tail-negative.lisp > "$evidence/d3-last-adjacent-equal-inputs.sha256"
 run_case run_law d3-quote-short-circuit-positive tests/semantic/d3-cond-quote-lazy-law.lisp 1
 run_case run_law d3-quote-short-circuit-mutant tests/semantic/d3-cond-quote-lazy-mutant.lisp 0
 # QUOTE не обчислює цитовану форму: структура лишається даними.
