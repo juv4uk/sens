@@ -1141,6 +1141,7 @@ sha256sum lib/d11-srfi1-find-presence.lisp lib/d11-srfi1-find-last-presence.lisp
 first_tail_presence_positive="$evidence/d11-find-first-tail-presence-positive.lisp"
 first_tail_presence_mutant="$evidence/d11-find-first-tail-presence-mutant.lisp"
 first_tail_presence_bad="$evidence/d11-find-first-tail-presence-improper.lisp"
+first_tail_presence_helper_bad="$evidence/d11-find-first-tail-presence-helper-atom.lisp"
 cat -- lib/d11-srfi1-find-tail.lisp lib/d11-srfi1-find-tail-presence.lisp \
   tests/semantic/d11-find-first-tail-presence-law.lisp > "$first_tail_presence_positive"
 cat -- lib/d11-srfi1-find-tail.lisp lib/d11-srfi1-find-tail-presence.lisp \
@@ -1150,6 +1151,9 @@ cat -- lib/d11-srfi1-find-tail.lisp lib/d11-srfi1-find-tail-presence.lisp \
 run_case run_law d11-find-first-tail-presence-positive "$first_tail_presence_positive" 1
 run_case run_law d11-find-first-tail-presence-mutant "$first_tail_presence_mutant" 0
 run_case run_type_rejection d11-find-first-tail-presence-improper "$first_tail_presence_bad" 'car expects a non-empty list'
+cat -- lib/d11-srfi1-find-tail.lisp lib/d11-srfi1-find-tail-presence.lisp \
+  tests/semantic/d11-find-first-tail-presence-helper-atom-negative.lisp > "$first_tail_presence_helper_bad"
+run_case run_type_rejection d11-find-first-tail-presence-helper-atom "$first_tail_presence_helper_bad" 'car expects a non-empty list'
 sha256sum lib/d11-srfi1-find-tail.lisp lib/d11-srfi1-find-tail-presence.lisp \
   tests/semantic/d11-find-first-tail-presence-*.lisp > "$evidence/d11-find-first-tail-presence-inputs.sha256"
 
