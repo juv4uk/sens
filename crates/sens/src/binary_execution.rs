@@ -278,7 +278,7 @@ fn parse_exact_domain_words(words: &[ExactDomainWord]) -> Result<Vec<Expr>, Lang
         let word = words
             .get(index)
             .ok_or_else(|| error("expected an exact SENS domain word", index))?;
-        if depth > 128 {
+        if depth > crate::MAX_EXACT_D2_READER_DEPTH {
             return Err(error("exact D2 nesting exceeds AST depth limit", index));
         }
         if d2(word, OPEN) {

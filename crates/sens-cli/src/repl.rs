@@ -136,8 +136,11 @@ fn append_t5m_lambda_parameters(
     words: &mut Vec<ExactDomainWord>,
     depth: usize,
 ) -> Result<(), String> {
-    if depth > 128 {
-        return Err("T5M_SOURCE_DEPTH_NOT_ADMITTED: exact physical D2 reader limit=128".into());
+    if depth > sens::MAX_EXACT_D2_READER_DEPTH {
+        return Err(format!(
+            "T5M_SOURCE_DEPTH_NOT_ADMITTED: exact physical D2 reader limit={}",
+            sens::MAX_EXACT_D2_READER_DEPTH
+        ));
     }
     let ExprKind::Pair(head, tail) = &expression.kind else {
         return append_t5m_expression_context(expression, layout, words, depth, false);
@@ -168,12 +171,14 @@ fn append_t5m_expression_context(
     depth: usize,
     quoted_data: bool,
 ) -> Result<(), String> {
-    // Двійковий читач SENS у binary_execution.rs має межу D2=128.
-    // Не видавати Zig/T5M байти для джерела, яке той самий reader
-    // гарантовано відхилить. Глобальна межа source AST (768) не є
-    // доказом фізичного D2-допуску.
-    if depth > 128 {
-        return Err("T5M_SOURCE_DEPTH_NOT_ADMITTED: exact physical D2 reader limit=128".into());
+    // depth — позиція, з якої exact D2 reader почне читати цей вираз.
+    // Заміна вузла його точним представленням не додає глибини; її
+    // збільшують дочірні слова створеної D2-рамки.
+    if depth > sens::MAX_EXACT_D2_READER_DEPTH {
+        return Err(format!(
+            "T5M_SOURCE_DEPTH_NOT_ADMITTED: exact physical D2 reader limit={}",
+            sens::MAX_EXACT_D2_READER_DEPTH
+        ));
     }
     let control = |bits| t5m_domain_identity(2, bits).map(ExactDomainWord::Identity);
     match &expression.kind {
@@ -313,6 +318,7 @@ fn append_t5m_expression_context(
                 )?));
                 return Ok(());
             }
+            ensure_t5m_d2_children_admitted(depth)?;
             words.push(control(0b10)?);
             for (index, cell) in text.cells().iter().enumerate() {
                 if index > 0 {
@@ -330,7 +336,7 @@ fn append_t5m_expression_context(
             // Точне зниження до D24+ вже існує для звичайних числових джерел;
             // використовуємо його ж, без текстового W7 або host-арифметики.
             let exact = exact_integer_source_word(&value.to_string())?;
-            append_t5m_expression_context(&exact, layout, words, depth + 1, quoted_data)?;
+            append_t5m_expression_context(&exact, layout, words, depth, quoted_data)?;
         }
         ExprKind::Rational(value) => {
             let spelling = value.to_string();
@@ -344,7 +350,7 @@ fn append_t5m_expression_context(
                 kind: ExprKind::DomainCall(quotient, vec![numerator, denominator].into()),
                 span: expression.span,
             };
-            append_t5m_expression_context(&ratio, layout, words, depth + 1, quoted_data)?;
+            append_t5m_expression_context(&ratio, layout, words, depth, quoted_data)?;
         }
         ExprKind::String(text) => {
             // Людський Unicode існує лише на вході REPL. Перш ніж
@@ -360,6 +366,7 @@ fn append_t5m_expression_context(
                 format!("T5M_D7_TEXT_NOT_ADMITTED: REPL glyph cannot enter binary SENS as Unicode: {error}")
             })?;
             if quoted_data {
+                ensure_t5m_d2_children_admitted(depth)?;
                 // Як і цитовані символи, ASCII-рядки є D7-даними EN,
                 // навіть коли виклична поверхня вибрана українською.
                 // Інакше "sha256:abc" хибно шукатиме латинське 's' у Uk.
@@ -396,7 +403,7 @@ fn append_t5m_expression_context(
                 }
             } else {
                 let lowered = string_value_expression(text)?;
-                append_t5m_expression_context(&lowered, layout, words, depth + 1, false)?;
+                append_t5m_expression_context(&lowered, layout, words, depth, false)?;
             }
         }
         ExprKind::NumericBuffer(..) => {
@@ -408,6 +415,16 @@ fn append_t5m_expression_context(
         ExprKind::Local { .. } => {
             return Err("T5M REPL cannot transport an unresolved lexical slot".into());
         }
+    }
+    Ok(())
+}
+
+fn ensure_t5m_d2_children_admitted(depth: usize) -> Result<(), String> {
+    if depth >= sens::MAX_EXACT_D2_READER_DEPTH {
+        return Err(format!(
+            "T5M_SOURCE_DEPTH_NOT_ADMITTED: generated D2 frame at reader depth {depth} has children beyond limit {}",
+            sens::MAX_EXACT_D2_READER_DEPTH
+        ));
     }
     Ok(())
 }
@@ -2650,6 +2667,36 @@ mod tests {
             error.contains("T5M_SOURCE_DEPTH_NOT_ADMITTED"),
             "test_id=T5M-D2-DEPTH layer=SENS-source expected=pre-mint-fail-closed actual={error}"
         );
+    }
+
+    #[test]
+    fn t5m_depth_limit_accepts_a_ratio_at_the_physical_reader_boundary() {
+        let source = format!("{}1/2{}", "(".repeat(127), ")".repeat(127));
+        let expressions = sens::parse_mixed_exact_domain(&source)
+            .expect("text reader admits 128 nested D2 frames");
+        let mut words = Vec::new();
+        append_t5m_expression(&expressions[0], sens::Text7Layout::Uk, &mut words, 0)
+            .expect("a lowered D24+ ratio must use the source expression's reader depth");
+        PhysicalT5Program::from_exact_domain_words(&words)
+            .expect("the emitted words must match the reader's accepted depth");
+    }
+
+    #[test]
+    fn t5m_depth_limit_counts_the_d2_frame_added_for_a_text_name() {
+        let expression = Expr {
+            kind: ExprKind::Symbol("я".into()),
+            span: Default::default(),
+        };
+        let mut words = Vec::new();
+        let error = append_t5m_expression_context(
+            &expression,
+            sens::Text7Layout::Uk,
+            &mut words,
+            128,
+            false,
+        )
+        .expect_err("the D2 text wrapper would put its D7 cell beyond reader depth 128");
+        assert!(error.contains("T5M_SOURCE_DEPTH_NOT_ADMITTED"), "{error}");
     }
 
     #[cfg(feature = "zig-transport")]

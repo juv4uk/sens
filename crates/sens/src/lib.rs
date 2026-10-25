@@ -7,6 +7,10 @@
 //! installed into this core's registry at startup by whichever embedder
 //! wants them (the CLI does; WASM does not). See eval/capabilities.rs.
 
+/// Максимальна глибина рекурсії читачів фізичних D2-рамок.
+/// Енкодери мають звіряти з нею синтетичні D2-обгортки.
+pub const MAX_EXACT_D2_READER_DEPTH: usize = 128;
+
 mod arena;
 mod bignum;
 mod binary_number;
