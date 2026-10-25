@@ -483,6 +483,15 @@ run_case run_law d3-cond-first-match-nil-mutant tests/semantic/d3-cond-first-mat
 # Позитив і негатив обов'язково проходять direct → Zig/T5M → paired → standalone.
 run_case run_law d3-cond-guard-short-circuit-positive tests/semantic/d3-cond-guard-short-circuit-law.lisp 1
 run_case run_law d3-cond-guard-short-circuit-mutant tests/semantic/d3-cond-guard-short-circuit-mutant.lisp 0
+# D3/D5: атомний D1:ні корінь допустимий як дані, але CDR після CONS — Type.
+run_case run_law d3-tail-after-last-compound-positive lib/list-tail-after-last-compound-linear-zero-copy-general.lisp 1
+d3_tail_last_bad_early="$evidence/d3-tail-after-last-compound-improper-early-bound.lisp"
+cat -- lib/list-tail-after-last-compound-linear-zero-copy-general.lisp tests/semantic/d3-tail-after-last-compound-improper-early-negative.lisp > "$d3_tail_last_bad_early"
+run_case run_error_rejection d3-tail-after-last-compound-improper-early "$d3_tail_last_bad_early" Type 'car expects a non-empty list'
+d3_tail_last_bad_after="$evidence/d3-tail-after-last-compound-improper-after-match-bound.lisp"
+cat -- lib/list-tail-after-last-compound-linear-zero-copy-general.lisp tests/semantic/d3-tail-after-last-compound-improper-after-match-negative.lisp > "$d3_tail_last_bad_after"
+run_case run_error_rejection d3-tail-after-last-compound-improper-after-match "$d3_tail_last_bad_after" Type 'car expects a non-empty list'
+sha256sum lib/list-tail-after-last-compound-linear-zero-copy-general.lisp tests/semantic/d3-tail-after-last-compound-improper-early-negative.lisp tests/semantic/d3-tail-after-last-compound-improper-after-match-negative.lisp > "$evidence/d3-tail-after-last-compound-inputs.sha256"
 run_case run_law d3-quote-short-circuit-positive tests/semantic/d3-cond-quote-lazy-law.lisp 1
 run_case run_law d3-quote-short-circuit-mutant tests/semantic/d3-cond-quote-lazy-mutant.lisp 0
 # QUOTE не обчислює цитовану форму: структура лишається даними.

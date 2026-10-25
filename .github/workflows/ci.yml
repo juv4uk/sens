@@ -238,6 +238,10 @@ jobs:
                   "tests/semantic/meta-fc-predicates-d1-mutant.lisp",
                   "tests/semantic/unification-occurs-check-law.lisp",
                   "tests/semantic/unification-occurs-check-mutant.lisp",
+                  # D3/D5: Type-негативи вимагають бібліотечного DEFINE.
+                  # Чинний фізичний law-runner їх виконує з повним SENS-кодом.
+                  "tests/semantic/d3-tail-after-last-compound-improper-early-negative.lisp",
+                  "tests/semantic/d3-tail-after-last-compound-improper-after-match-negative.lisp",
                   # D11 scan/fold: залежні SENS-свідки з бібліотечними DEFINE.
                   # D9 MAP: тести потребують lib/persistent-map.lisp.
                   # Їх уже виконує обов'язковий SENS → Zig/T5M native law runner
