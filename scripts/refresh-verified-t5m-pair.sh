@@ -61,12 +61,19 @@ done
 # Не допускати тихої зміни профілю решти джерел або неперевірених комбінацій.
 if (( core4_runtime )); then
   case "$source_file" in
-    tests/semantic/exact-arithmetic-laws.lisp|tests/semantic/exact-arithmetic-mutant.lisp|tests/semantic/d5-arithmetic-native-t5m-law.lisp|tests/semantic/d5-arithmetic-native-t5m-mutant.lisp|lib/lisp-fs.lisp) ;;
+    tests/semantic/exact-arithmetic-laws.lisp|tests/semantic/exact-arithmetic-mutant.lisp|tests/semantic/d5-arithmetic-native-t5m-law.lisp|tests/semantic/d5-arithmetic-native-t5m-mutant.lisp|lib/lisp-fs.lisp|tests/fixtures/wsm-fs-record-producer.lisp) ;;
     *) echo "T5M_REPAIR_CORE4_PROFILE_UNREGISTERED source=$source_file" >&2; exit 2 ;;
   esac
   if (( ${#binding_args[@]} != 0 )) || [[ -n "$expected_error" ]]; then
-    echo "T5M_REPAIR_CORE4_PROFILE_INCOMPATIBLE source=$source_file" >&2
-    exit 2
+    # The F6 producer fixture is a Core4 consumer AND needs the exact same
+    # SENS-owned dependency stack as its WRITE→READ semantic laws. Keep this
+    # one combination closed; do not generalize arbitrary Core4+binding runs.
+    if [[ "$source_file" != "tests/fixtures/wsm-fs-record-producer.lisp" ||
+          -n "$expected_error" ||
+          "${binding_sources[*]}" != "lib/persistent-map.lisp lib/world.lisp lib/content-store.lisp lib/lisp-fs.lisp" ]]; then
+      echo "T5M_REPAIR_CORE4_PROFILE_INCOMPATIBLE source=$source_file" >&2
+      exit 2
+    fi
   fi
 fi
 if [[ "$source_file" != *.lisp || ! -f "$source_file" || -L "$source_file" ]]; then
