@@ -481,3 +481,62 @@ Grenze der statischen Prüfung erreicht: die D2-Rahmen brauchen den Rust-Pfad.
 ## English
 
 Limit of static checking reached: D2 framing requires the Rust path.
+
+---
+
+# Додаток 8 (Yajña, 2026-10-24): помилка на стадії `direct` — розбіжність ЧИТАЧІВ
+
+## Що каже лог
+
+```
+SENS_LAW_STAGE id=d11-clojure-juxt-positive stage=direct exit=1 elapsed_us=528311
+```
+
+**Помилка — на стадії `direct`**, тобто на виклику `sens <bundle.lisp>` (читання
+`.lisp` **напряму**, ще до карбування). Дивись `run_law`:
+
+```sh
+if ! profile_stage "$id" direct timeout 45s "$sens" "$source" >"$dir/direct.out" ...
+```
+
+## Що це означає
+
+`physical_form_index=35` походить **не від T5M-карбування**, а від **читання
+`.lisp`**. Отже:
+
+| читач | форм із `cat lib + laws` |
+|---|---|
+| **Python** (`migrate-three-pass.py`, я ним міряв) | **34** |
+| **Rust** (`sens`, судячи з index=35 при 0-базовому) | **≥ 36** |
+
+**Два читачі тієї самої мови дають різну кількість форм.** І оскільки `form_index`
+0-базований, Rust-читач бачить **щонайменше 36** форм там, де Python бачить 34.
+
+## Чому це найсильніший слід із усіх
+
+1. **Це не питання свідка.** Обидва читачі читають **той самий файл**.
+2. **Це не питання карбування.** Помилка — на стадії `direct`.
+3. **Це не питання зчеплення.** `cat` дає рівно суму (перевірено).
+
+**Це розбіжність ДВОХ РЕАЛІЗАЦІЙ ОДНОГО READER'А.** Якщо Rust-читач бачить
+форми, яких немає (або розщеплює наявні), то **`physical_form_index` у кожному
+повідомленні про помилку вказує не туди** — і **всі, хто «лагодив свідка» за цим
+індексом, лагодили не те**.
+
+## Де шукати
+
+- **`crates/sens/src/`** — Rust-reader `.lisp` (той, що живить стадію `direct`).
+- **`scripts/migrate-three-pass.py`** — Python-reader (я ним міряв).
+- **Розбіжність** між ними на **одному** вході — ось де корінь. Візьми
+  `lib/d11-clojure-juxt.lisp` + `…-laws.lisp`, прочитай **обома** і **порівняй
+  форми по одній**.
+
+## Deutsch
+
+Der Fehler liegt auf der Stufe `direct` — zwei Reader derselben Sprache liefern
+verschiedene Formzahlen (Python 34, Rust ≥36).
+
+## English
+
+The error is on the `direct` stage — two readers of the same language yield
+different form counts (Python 34, Rust ≥36).
