@@ -565,6 +565,31 @@ sha256sum lib/lisp-fs.lisp tests/semantic/d9-f6-object-addresses-law.lisp \
   tests/semantic/d9-f6-object-addresses-d1-tail-negative.lisp \
   tests/semantic/d9-f6-object-addresses-empty-address-negative.lisp > "$evidence/d9-f6-object-addresses-inputs.sha256"
 
+# Д11 PREFIX: похідний SENS D1/D3/D8 закон, а не нова координата.
+# Кожний шлях має точну source → native SENS → Zig/T5M → SENS реєстрацію.
+d11_prefix_positive="$evidence/d11-prefix-proper-positive.lisp"
+d11_prefix_mutant="$evidence/d11-prefix-proper-mutant.lisp"
+d11_prefix_left_tail="$evidence/d11-prefix-proper-left-tail-negative.lisp"
+d11_prefix_right_hidden="$evidence/d11-prefix-proper-right-hidden-tail-negative.lisp"
+d11_prefix_left_root="$evidence/d11-prefix-proper-left-root-negative.lisp"
+cat -- lib/d11-prefix-proper.lisp tests/semantic/d11-prefix-proper-law.lisp > "$d11_prefix_positive"
+cat -- lib/d11-prefix-proper.lisp tests/semantic/d11-prefix-proper-mutant.lisp > "$d11_prefix_mutant"
+cat -- lib/d11-prefix-proper.lisp tests/semantic/d11-prefix-proper-left-tail-negative.lisp > "$d11_prefix_left_tail"
+cat -- lib/d11-prefix-proper.lisp tests/semantic/d11-prefix-proper-right-hidden-tail-negative.lisp > "$d11_prefix_right_hidden"
+cat -- lib/d11-prefix-proper.lisp tests/semantic/d11-prefix-proper-left-root-negative.lisp > "$d11_prefix_left_root"
+run_case run_law d11-prefix-proper-positive "$d11_prefix_positive" 1 core4
+run_case run_law d11-prefix-proper-mutant "$d11_prefix_mutant" 0 core4
+run_case run_error_rejection d11-prefix-proper-left-tail "$d11_prefix_left_tail" Type 'car expects a non-empty list' core4
+run_case run_error_rejection d11-prefix-proper-right-hidden "$d11_prefix_right_hidden" Type 'car expects a non-empty list' core4
+run_case run_error_rejection d11-prefix-proper-left-root "$d11_prefix_left_root" Type 'car expects a non-empty list' core4
+sha256sum lib/d11-prefix-proper.lisp \
+  tests/semantic/d11-prefix-proper-law.lisp \
+  tests/semantic/d11-prefix-proper-mutant.lisp \
+  tests/semantic/d11-prefix-proper-left-tail-negative.lisp \
+  tests/semantic/d11-prefix-proper-right-hidden-tail-negative.lisp \
+  tests/semantic/d11-prefix-proper-left-root-negative.lisp \
+  > "$evidence/d11-prefix-proper-inputs.sha256"
+
 # Д10: чотири ратифіковані MAP-виклики, усі 12 SENS-предикатів — один D1 доказ.
 # Негативний свідок повинен давати саме D1:ні, не Type і не host результат.
 run_case run_law d10-map-derived-twelve-positive tests/semantic/d10-map-derived-native-laws.lisp 1 core4
