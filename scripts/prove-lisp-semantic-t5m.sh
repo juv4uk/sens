@@ -857,19 +857,35 @@ sha256sum benchmarks/recursion.lisp tests/semantic/d4-recursion-benchmark-law.li
 # Складені селектори Д4: шість тверджень у Lisp та точний D1-негатив.
 run_case run_law d4-selector-composition-positive tests/semantic/d4-selector-composition-law.lisp 1
 run_case run_law d4-selector-composition-mutant tests/semantic/d4-selector-composition-mutant.lisp 0
-# D5:11101 sambaddha — один повний D3-хребет перед D1-висновком.
-run_case run_law d5-member-total-list-positive tests/semantic/d5-member-total-list-law.lisp 1 core4
-run_case run_law d5-member-total-list-mutant tests/semantic/d5-member-total-list-mutant.lisp 0 core4
-run_case run_error_rejection d5-member-hidden-tail tests/semantic/d5-member-hidden-tail-negative.lisp Type 'car expects a non-empty list' core4
-run_case run_error_rejection d5-member-nonlist-root tests/semantic/d5-member-nonlist-negative.lisp Type 'car expects a non-empty list' core4
-sha256sum lib/core4-parts/core4-d6.lisp tests/semantic/d5-member-*.lisp > "$evidence/d5-member-total-list-inputs.sha256"
-
-# D5:11100 ASSOC (saṃbandha) — повний D3-хребет і всі записи.
-run_case run_law d5-assoc-total-list-positive tests/semantic/d5-assoc-total-list-law.lisp 1 core4
-run_case run_law d5-assoc-total-list-mutant tests/semantic/d5-assoc-total-list-mutant.lisp 0 core4
-run_case run_error_rejection d5-assoc-hidden-tail tests/semantic/d5-assoc-hidden-tail-negative.lisp Type 'car expects a non-empty list' core4
-run_case run_error_rejection d5-assoc-late-record tests/semantic/d5-assoc-late-record-negative.lisp Type 'car expects a non-empty list' core4
-sha256sum lib/core4-parts/core4-d6.lisp tests/semantic/d5-assoc-*.lisp > "$evidence/d5-assoc-total-list-inputs.sha256"
+# Д5 MEMBER/ASSOC: виконувана поточна SENS-бібліотека, НЕ історичний bootstrap.
+# Кожний свідок з'єднаний з власним D3-повним ядром: direct/paired/standalone.
+# Rust/Zig лише транспорт і діагностика; семантика лишається в SENS.
+d5_member_positive="$evidence/d5-member-total-list-positive-current-source.lisp"
+cat -- lib/core4-parts/core4-d6.lisp tests/semantic/d5-member-total-list-law.lisp > "$d5_member_positive"
+run_case run_law d5-member-total-list-positive "$d5_member_positive" 1 core4
+d5_member_mutant="$evidence/d5-member-total-list-mutant-current-source.lisp"
+cat -- lib/core4-parts/core4-d6.lisp tests/semantic/d5-member-total-list-mutant.lisp > "$d5_member_mutant"
+run_case run_law d5-member-total-list-mutant "$d5_member_mutant" 0 core4
+d5_member_tail="$evidence/d5-member-hidden-tail-current-source.lisp"
+cat -- lib/core4-parts/core4-d6.lisp tests/semantic/d5-member-hidden-tail-negative.lisp > "$d5_member_tail"
+run_case run_error_rejection d5-member-hidden-tail "$d5_member_tail" Type 'car expects a non-empty list' core4
+d5_member_root="$evidence/d5-member-nonlist-root-current-source.lisp"
+cat -- lib/core4-parts/core4-d6.lisp tests/semantic/d5-member-nonlist-negative.lisp > "$d5_member_root"
+run_case run_error_rejection d5-member-nonlist-root "$d5_member_root" Type 'car expects a non-empty list' core4
+d5_assoc_positive="$evidence/d5-assoc-total-list-positive-current-source.lisp"
+cat -- lib/core4-parts/core4-d6.lisp tests/semantic/d5-assoc-total-list-law.lisp > "$d5_assoc_positive"
+run_case run_law d5-assoc-total-list-positive "$d5_assoc_positive" 1 core4
+d5_assoc_mutant="$evidence/d5-assoc-total-list-mutant-current-source.lisp"
+cat -- lib/core4-parts/core4-d6.lisp tests/semantic/d5-assoc-total-list-mutant.lisp > "$d5_assoc_mutant"
+run_case run_law d5-assoc-total-list-mutant "$d5_assoc_mutant" 0 core4
+d5_assoc_tail="$evidence/d5-assoc-hidden-tail-current-source.lisp"
+cat -- lib/core4-parts/core4-d6.lisp tests/semantic/d5-assoc-hidden-tail-negative.lisp > "$d5_assoc_tail"
+run_case run_error_rejection d5-assoc-hidden-tail "$d5_assoc_tail" Type 'car expects a non-empty list' core4
+d5_assoc_record="$evidence/d5-assoc-late-record-current-source.lisp"
+cat -- lib/core4-parts/core4-d6.lisp tests/semantic/d5-assoc-late-record-negative.lisp > "$d5_assoc_record"
+run_case run_error_rejection d5-assoc-late-record "$d5_assoc_record" Type 'car expects a non-empty list' core4
+sha256sum lib/core4-parts/core4-d6.lisp tests/semantic/d5-member-*.lisp \
+  tests/semantic/d5-assoc-*.lisp > "$evidence/d5-member-assoc-current-source-inputs.sha256"
 
 # Д5: композиції трьох рівнів D3→D4→D5, фізичні позитив і мутант.
 run_case run_law d5-selector-derived-positive tests/semantic/d5-selector-derived-law.lisp 1
