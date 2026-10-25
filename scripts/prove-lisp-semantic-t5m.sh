@@ -850,6 +850,13 @@ sha256sum benchmarks/recursion.lisp tests/semantic/d4-recursion-benchmark-law.li
 # Складені селектори Д4: шість тверджень у Lisp та точний D1-негатив.
 run_case run_law d4-selector-composition-positive tests/semantic/d4-selector-composition-law.lisp 1
 run_case run_law d4-selector-composition-mutant tests/semantic/d4-selector-composition-mutant.lisp 0
+# D5:11101 sambaddha — один повний D3-хребет перед D1-висновком.
+run_case run_law d5-member-total-list-positive tests/semantic/d5-member-total-list-law.lisp 1 core4
+run_case run_law d5-member-total-list-mutant tests/semantic/d5-member-total-list-mutant.lisp 0 core4
+run_case run_error_rejection d5-member-hidden-tail tests/semantic/d5-member-hidden-tail-negative.lisp Type 'car expects a non-empty list' core4
+run_case run_error_rejection d5-member-nonlist-root tests/semantic/d5-member-nonlist-negative.lisp Type 'car expects a non-empty list' core4
+sha256sum lib/core4-parts/core4-d6.lisp tests/semantic/d5-member-*.lisp > "$evidence/d5-member-total-list-inputs.sha256"
+
 # Д5: композиції трьох рівнів D3→D4→D5, фізичні позитив і мутант.
 run_case run_law d5-selector-derived-positive tests/semantic/d5-selector-derived-law.lisp 1
 run_case run_law d5-selector-derived-mutant tests/semantic/d5-selector-derived-mutant.lisp 0
@@ -2587,7 +2594,8 @@ sha256sum lib/core4.lisp lib/core4-parts/core4-d6b.lisp \
 # Неправильний D1-хвіст має відхилятися Type, а не повертати обрізаний результат.
 d6_union_source="$evidence/d6-union-exact-definitions.lisp"
 : > "$d6_union_source"
-for spec in 'lib/core4-parts/core4-d6.lisp|значення-у-списку?' \
+for spec in 'lib/core4-parts/core4-d6.lisp|значення-у-списку?-ядро' \
+  'lib/core4-parts/core4-d6.lisp|значення-у-списку?' \
   'lib/core4-parts/core4-d6b.lisp|об'"'"'єднання-перевірити-правий' \
   'lib/core4-parts/core4-d6b.lisp|об'"'"'єднання'; do
   d6_union_file="${spec%%|*}"
