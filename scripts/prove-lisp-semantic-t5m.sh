@@ -549,6 +549,20 @@ sha256sum lib/persistent-map.lisp lib/world.lisp lib/content-store.lisp lib/lisp
   tests/semantic/d9-f6-package-key-canonicalization-mutant.lisp \
   > "$evidence/d9-f6-package-key-canonicalization-inputs.sha256"
 
+# D9 MAP: перевірка хвоста ПІСЛЯ збігу; один позитив і два фізичні Type.
+d9_map_tail_positive="$evidence/d9-map-hidden-tail-positive-complete.lisp"
+d9_map_tail_get_negative="$evidence/d9-map-hidden-tail-get-negative-complete.lisp"
+d9_map_tail_insert_negative="$evidence/d9-map-hidden-tail-insert-negative-complete.lisp"
+cat -- lib/persistent-map.lisp tests/semantic/d9-map-hidden-tail-positive.lisp > "$d9_map_tail_positive"
+cat -- lib/persistent-map.lisp tests/semantic/d9-map-hidden-tail-get-negative.lisp > "$d9_map_tail_get_negative"
+cat -- lib/persistent-map.lisp tests/semantic/d9-map-hidden-tail-insert-negative.lisp > "$d9_map_tail_insert_negative"
+run_case run_law d9-map-hidden-tail-positive "$d9_map_tail_positive" 1 core4
+run_case run_error_rejection d9-map-hidden-tail-get "$d9_map_tail_get_negative" Type 'car expects a non-empty list' core4
+run_case run_error_rejection d9-map-hidden-tail-insert "$d9_map_tail_insert_negative" Type 'car expects a non-empty list' core4
+sha256sum lib/persistent-map.lisp tests/semantic/d9-map-hidden-tail-positive.lisp \
+  tests/semantic/d9-map-hidden-tail-get-negative.lisp \
+  tests/semantic/d9-map-hidden-tail-insert-negative.lisp > "$evidence/d9-map-hidden-tail-inputs.sha256"
+
 # Д9/F6: об'єктні адреси — тільки правильний D3-список.
 # Один SENS DEFINE; прямий, парний і standalone Zig/T5M результати.
 d9_fs_address_positive="$evidence/d9-f6-object-addresses-positive.lisp"
