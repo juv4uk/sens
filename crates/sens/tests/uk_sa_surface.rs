@@ -32,8 +32,8 @@
 //!   against their UK/symbolic peers.
 
 use sens::{
-    Session, eval_parsed_expressions, eval_program, load_core_library, lower_program,
-    parse_mixed_exact_domain,
+    eval_parsed_expressions, eval_program, load_core_library, lower_program,
+    parse_mixed_exact_domain, Session,
 };
 
 fn load_surface_prerequisites(session: &mut Session) {
@@ -66,9 +66,8 @@ fn sa_session() -> Session {
     let mut session = Session::default();
     load_core_library(&mut session).expect("core bootstrap");
     load_surface_prerequisites(&mut session);
-    // Canon 0+7 names are resolved by their stable identities. The separate
-    // `sa.lisp` candidate alias inventory is not itself a fully executable
-    // program and must not be treated as one by this runtime test.
+    eval_program(include_str!("../../../lib/surface/sa.lisp"), &mut session)
+        .expect("Sanskrit surface should load");
     session
 }
 
@@ -120,21 +119,24 @@ fn uk_le_ge_comparisons_work() {
     );
 }
 
-// ── The current Ukrainian names are covered here in addition to the
-//    registry-driven equivalence sweep. ──
+// ── Aliases absent from semantic-registry.lisp (за-номером/містить? are
+//    plain `(define ... )` aliases in uk.lisp, not registry-tracked rows),
+//    so no registry-driven sweep sees them. ──
 
 #[test]
-fn uk_current_nth_member_names_work() {
+fn uk_legacy_nth_member_aliases_work() {
     let mut s = uk_session();
-    let r = eval_program("(елемент-списку-за-індексом 1 (список 10 20 30))", &mut s).expect("eval");
+    let r = eval_program("(за-номером 1 (список 10 20 30))", &mut s).expect("eval");
     assert_eq!(r.value.to_string(), "20");
-    let r2 = eval_program("(значення-у-списку? 2 (список 1 2 3))", &mut s).expect("eval");
-    assert_eq!(r2.value.to_string(), "1");
+    let r2 = eval_program("(містить? 2 (список 1 2 3))", &mut s).expect("eval");
+    assert_eq!(r2.value.to_string(), "t");
 }
 
 // ── Sanskrit surface: no SA/EN registry-driven equivalence sweep exists
-//    yet (uk_surface_equivalence.rs only compares EN/UK); this checks the
-//    stable svarūpa (quote)/ādi (car)/śeṣa (cdr) identities. ──
+//    yet (uk_surface_equivalence.rs only compares EN/UK); these svarūpa
+//    (quote)/ādi (car)/śeṣa (cdr) and list/higher-order checks are the
+//    only coverage for SA identity outside the specific IDs
+//    runtime_peer_operators.rs's CASES table already hardcodes. ──
 
 #[test]
 fn sa_canon_works() {
@@ -145,6 +147,21 @@ fn sa_canon_works() {
     assert_eq!(r2.value.to_string(), "10");
     let r3 = eval_program("(śeṣa (saṃyuj 10 20))", &mut s).expect("eval");
     assert_eq!(r3.value.to_string(), "20");
+}
+
+#[test]
+fn sa_lists_higher_order_work() {
+    let mut s = sa_session();
+    let r = eval_program("(śreṇī 1 2 3)", &mut s).expect("eval");
+    assert_eq!(r.value.to_string(), "(1 2 3)");
+    let r2 = eval_program("(pramāṇa (śreṇī 1 2 3))", &mut s).expect("eval");
+    assert_eq!(r2.value.to_string(), "3");
+    let r3 =
+        eval_program("(āvartana (lambda (x) (guṇana x 2)) (śreṇī 1 2 3))", &mut s).expect("eval");
+    assert_eq!(r3.value.to_string(), "(2 4 6)");
+    let r4 =
+        eval_program("(kalpana (lambda (x) (hīna? x 3)) (śreṇī 1 2 3 4))", &mut s).expect("eval");
+    assert_eq!(r4.value.to_string(), "(1 2)");
 }
 
 // ── Ukrainian acceptance program: semantic truth lives in the `.my`
@@ -161,8 +178,8 @@ fn uk_acceptance_program_passes() {
     .expect("Ukrainian acceptance program should evaluate");
     assert_eq!(
         r.value.to_string(),
-        "(uk-acceptance (status pass))",
-        "acceptance fixture must return its current structured pass witness"
+        "успіх",
+        "Ukrainian acceptance program must return 'успіх (success)"
     );
 }
 
@@ -185,13 +202,9 @@ fn peer_identity_acceptance_program_passes() {
 #[test]
 fn peer_identity_acceptance_wrong_abs_expectation_is_detected() {
     let source = include_str!("../../../lib/surface/peer-identity-acceptance.lisp");
-    let correct = "(однакове-число? (модуль (відняти приймання-число-нуль приймання-число-сім)) приймання-число-сім)";
+    let correct = "(однакове-число? (модуль (відняти 0 7)) 7)";
     assert_eq!(source.matches(correct).count(), 1, "втрачено точний свідок");
-    let mutant = source.replacen(
-        correct,
-        "(однакове-число? (модуль (відняти приймання-число-нуль приймання-число-сім)) приймання-число-п'ять)",
-        1,
-    );
+    let mutant = source.replacen(correct, "(однакове-число? (модуль (відняти 0 7)) 8)", 1);
     let mut s = uk_session();
     let parsed = parse_mixed_exact_domain(&mutant)
         .expect("негативний мутант повинен зберігати чинний D1/D24+ синтаксис");
