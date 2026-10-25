@@ -87,6 +87,12 @@ run_native_t5m_program() {
     paired_runtime_args=(--core4-runtime)
     standalone_runtime=("$native_open" eval-core4)
   fi
+  # Д11 APPEND-REVERSE: Core4 через справжні SENS D3 / D8 композиції.
+  if [[ "$file" == tests/semantic/d11-srfi1-append-reverse-*.lisp ||
+        "$file" == tests/fixtures/d11-srfi1-append-reverse-*-negative.lisp ]]; then
+    paired_runtime_args=(--core4-runtime)
+    standalone_runtime=("$native_open" eval-core4)
+  fi
   # Д11 LIST-TABULATE: точні числа D24+ та SENS-замикання.
   if [[ "$file" == tests/semantic/d11-srfi1-list-tabulate-*.lisp ||
         "$file" == tests/fixtures/d11-srfi1-list-tabulate-*-negative.lisp ]]; then
@@ -216,6 +222,8 @@ run_native_t5m_program() {
   case "$file" in
     tests/semantic/d11-srfi1-zip-with-improper-*-negative.lisp)
       negative_type_diagnostic='car expects a non-empty list' ;;
+    tests/fixtures/d11-srfi1-append-reverse-*-negative.lisp)
+      negative_type_diagnostic='car expects a non-empty list' ;;
     tests/fixtures/d11-srfi1-list-tabulate-*-negative.lisp)
       negative_type_diagnostic='car expects a non-empty list' ;;
     tests/fixtures/d11-srfi1-list-equality-*-negative.lisp)
@@ -292,6 +300,9 @@ run_native_t5m_program() {
     if [[ "$file" == tests/semantic/d11-srfi1-zip-with-improper-*-negative.lisp ]]; then
       direct_source="$dir/d11-zip-with-bound-negative.lisp"
       cat -- lib/d11-srfi1-zip-with.lisp "$file" > "$direct_source"
+    elif [[ "$file" == tests/fixtures/d11-srfi1-append-reverse-*-negative.lisp ]]; then
+      direct_source="$dir/d11-append-reverse-negative-complete.lisp"
+      cat -- lib/d11-srfi1-append-reverse.lisp "$file" > "$direct_source"
     elif [[ "$file" == tests/fixtures/d11-srfi1-list-tabulate-*-negative.lisp ]]; then
       direct_source="$dir/d11-tabulate-negative-complete.lisp"
       cat -- lib/d11-srfi1-list-tabulate.lisp "$file" > "$direct_source"
@@ -412,6 +423,16 @@ run_native_t5m_program() {
          ! timeout "$native_timeout" "$native_open" open "$negative_standalone_physical" >"${negative_standalone_physical%.sens}" 2>"$dir/d11-zip-open.stderr" ||
          ! timeout "$native_timeout" "$native_open" verify-view "$negative_standalone_physical" >"$dir/d11-zip-verify.stdout" 2>"$dir/d11-zip-verify.stderr"; then
         echo "::error::D11_ZIP_WITH_NEGATIVE_PHYSICAL_INVALID source=$file" >&2
+        mark_file_failed
+        return
+      fi
+    fi
+    if [[ "$file" == tests/fixtures/d11-srfi1-append-reverse-*-negative.lisp ]]; then
+      negative_standalone_physical="$dir/d11-append-reverse-negative-complete.sens"
+      if ! timeout "$native_timeout" "$binary" --t5m-mint "$direct_source" "$negative_standalone_physical" >"$dir/d11-ar-mint.out" 2>"$dir/d11-ar-mint.err" ||
+         ! timeout "$native_timeout" "$native_open" open "$negative_standalone_physical" >"${negative_standalone_physical%.sens}" 2>"$dir/d11-ar-open.err" ||
+         ! timeout "$native_timeout" "$native_open" verify-view "$negative_standalone_physical" >"$dir/d11-ar-verify.out" 2>"$dir/d11-ar-verify.err"; then
+        echo "::error::D11_APPEND_REVERSE_NEGATIVE_PHYSICAL_INVALID source=$file" >&2
         mark_file_failed
         return
       fi
@@ -876,6 +897,28 @@ run_native_t5m_program() {
       if ! cmp -s "$dir/native-paired.stdout" "$dir/d11-zip.expected" ||
          ! cmp -s "$dir/d11-zip-direct.stdout" "$dir/d11-zip.expected"; then
         echo "::error::D11_ZIP_WITH_WRONG_D1 source=$file expected=$zip_expected" >&2
+        mark_file_failed
+        return
+      fi
+    fi
+    if [[ "$file" == tests/semantic/d11-srfi1-append-reverse-*.lisp ]]; then
+      local complete_ar="$dir/d11-append-reverse-complete.lisp"
+      standalone_physical="$dir/d11-append-reverse-complete.sens"
+      if ! cat -- lib/d11-srfi1-append-reverse.lisp "$file" > "$complete_ar" ||
+         ! timeout "$native_timeout" "$binary" "$complete_ar" >"$dir/d11-ar-direct.out" 2>"$dir/d11-ar-direct.err" ||
+         ! timeout "$native_timeout" "$binary" --t5m-mint "$complete_ar" "$standalone_physical" >"$dir/d11-ar-mint.out" 2>"$dir/d11-ar-mint.err" ||
+         ! timeout "$native_timeout" "$native_open" open "$standalone_physical" >"${standalone_physical%.sens}" 2>"$dir/d11-ar-open.err" ||
+         ! timeout "$native_timeout" "$native_open" verify-view "$standalone_physical" >"$dir/d11-ar-verify.out" 2>"$dir/d11-ar-verify.err"; then
+        echo "::error::D11_APPEND_REVERSE_BOUND_EXECUTION_INVALID source=$file" >&2
+        mark_file_failed
+        return
+      fi
+      local expected_ar=1
+      [[ "$file" != *-mutant.lisp ]] || expected_ar=0
+      printf '%s\n' "$expected_ar" > "$dir/d11-ar.expected"
+      if ! cmp -s "$dir/native-paired.stdout" "$dir/d11-ar.expected" ||
+         ! cmp -s "$dir/d11-ar-direct.out" "$dir/d11-ar.expected"; then
+        echo "::error::D11_APPEND_REVERSE_WRONG_D1 source=$file expected=$expected_ar" >&2
         mark_file_failed
         return
       fi
@@ -1617,6 +1660,9 @@ while IFS= read -r file || [[ -n "$file" ]]; do
     binding_sources=(--binding-source lib/d11-srfi1-lset-diff-intersection.lisp)
   elif [[ "$file" == tests/semantic/d11-srfi1-zip-with-*.lisp ]]; then
     binding_sources=(--binding-source lib/d11-srfi1-zip-with.lisp)
+  elif [[ "$file" == tests/semantic/d11-srfi1-append-reverse-*.lisp ||
+          "$file" == tests/fixtures/d11-srfi1-append-reverse-*-negative.lisp ]]; then
+    binding_sources=(--binding-source lib/d11-srfi1-append-reverse.lisp)
   elif [[ "$file" == tests/semantic/d11-srfi1-list-tabulate-*.lisp ||
           "$file" == tests/fixtures/d11-srfi1-list-tabulate-*-negative.lisp ]]; then
     binding_sources=(--binding-source lib/d11-srfi1-list-tabulate.lisp)

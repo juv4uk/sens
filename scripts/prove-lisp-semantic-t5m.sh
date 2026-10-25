@@ -1072,6 +1072,29 @@ sha256sum "$d11_idx_library" \
   tests/semantic/d11-srfi1-list-index-presence-{law,mutant}.lisp \
   tests/fixtures/d11-srfi1-list-index-*-negative.lisp > "$evidence/d11-list-index-presence-inputs.sha256"
 
+# Д11 SRFI-1 APPEND-REVERSE: правильна голова, довільний атомарний tail.
+# Лише справжній SENS обчислює D1 і D3: direct / Zig T5M / paired / standalone.
+for kind in law dotted-tail-law mutant; do
+  rev_append_source="$evidence/d11-append-reverse-$kind-complete.lisp"
+  cat -- lib/d11-srfi1-append-reverse.lisp \
+    "tests/semantic/d11-srfi1-append-reverse-$kind.lisp" > "$rev_append_source"
+  rev_append_expected=1
+  [[ "$kind" != mutant ]] || rev_append_expected=0
+  run_case run_law "d11-append-reverse-$kind" \
+    "$rev_append_source" "$rev_append_expected" core4
+done
+for invalid in d1-root late-improper deep-improper; do
+  rev_append_negative="$evidence/d11-append-reverse-$invalid-complete.lisp"
+  cat -- lib/d11-srfi1-append-reverse.lisp \
+    "tests/fixtures/d11-srfi1-append-reverse-$invalid-negative.lisp" > "$rev_append_negative"
+  run_case run_error_rejection "d11-append-reverse-$invalid" \
+    "$rev_append_negative" Type 'car expects a non-empty list' core4
+done
+sha256sum lib/d11-srfi1-append-reverse.lisp \
+  tests/semantic/d11-srfi1-append-reverse-*.lisp \
+  tests/fixtures/d11-srfi1-append-reverse-*-negative.lisp \
+  > "$evidence/d11-append-reverse-inputs.sha256"
+
 # SRFI-1 LIST-TABULATE: лише SENS створює елементи й виносить D1-вердикт.
 # Усі три шляхи мають той самий Core4 (D24+, D3, D4, D6 REVERSE).
 for kind in law values-law mutant; do
