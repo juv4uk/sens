@@ -542,6 +542,22 @@ sha256sum lib/lisp-fs.lisp \
   tests/semantic/d9-f6-package-key-canonicalization-mutant.lisp \
   > "$evidence/d9-f6-package-key-canonicalization-inputs.sha256"
 
+# Д9/F6: об'єктні адреси — тільки правильний D3-список.
+# Один SENS DEFINE; прямий, парний і standalone Zig/T5M результати.
+d9_fs_address_bundle="$evidence/d9-f6-object-addresses"
+cat -- lib/lisp-fs.lisp tests/semantic/d9-f6-object-addresses-law.lisp > "${d9_fs_address_bundle}-positive.lisp"
+cat -- lib/lisp-fs.lisp tests/semantic/d9-f6-object-addresses-mutant.lisp > "${d9_fs_address_bundle}-mutant.lisp"
+cat -- lib/lisp-fs.lisp tests/semantic/d9-f6-object-addresses-d1-root-negative.lisp > "${d9_fs_address_bundle}-root-negative.lisp"
+cat -- lib/lisp-fs.lisp tests/semantic/d9-f6-object-addresses-d1-tail-negative.lisp > "${d9_fs_address_bundle}-tail-negative.lisp"
+run_case run_law d9-f6-object-addresses-positive "${d9_fs_address_bundle}-positive.lisp" 1 core4
+run_case run_law d9-f6-object-addresses-mutant "${d9_fs_address_bundle}-mutant.lisp" 0 core4
+run_case run_error_rejection d9-f6-object-addresses-d1-root "${d9_fs_address_bundle}-root-negative.lisp" Type 'car expects a non-empty list' core4
+run_case run_error_rejection d9-f6-object-addresses-d1-tail "${d9_fs_address_bundle}-tail-negative.lisp" Type 'car expects a non-empty list' core4
+sha256sum lib/lisp-fs.lisp tests/semantic/d9-f6-object-addresses-law.lisp \
+  tests/semantic/d9-f6-object-addresses-mutant.lisp \
+  tests/semantic/d9-f6-object-addresses-d1-root-negative.lisp \
+  tests/semantic/d9-f6-object-addresses-d1-tail-negative.lisp > "$evidence/d9-f6-object-addresses-inputs.sha256"
+
 # Д10: чотири ратифіковані MAP-виклики, усі 12 SENS-предикатів — один D1 доказ.
 # Негативний свідок повинен давати саме D1:ні, не Type і не host результат.
 run_case run_law d10-map-derived-twelve-positive tests/semantic/d10-map-derived-native-laws.lisp 1 core4
