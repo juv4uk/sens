@@ -23,51 +23,60 @@ CORE4 = ROOT / "lib" / "core4.lisp"
 PARTS = ROOT / "lib" / "core4-parts"
 
 # Межі визначено стабільними SENS-якорями, не номерами рядків.
+# Унікальні топ-рівневі DEFINE-якорі замість фіксованих ліній:
+# старе розбиття розривало SENS-форми після вставлення нових визначень.
 BLOCKS = [
     ("core4-language", None, "мова: тотожність, макроси та/або, список, числа, базові предикати"),
-    ("core4-d6", "; Д5:11101 MEMBER. Точне Д1 рішення і хвостова рекурсія.", "похідні Д6, партії 1-3"),
-    ("core4-codec", "; cddddr (р-р-р-р)", "НСД + кодек T5M + T5M3 (упаковка й декодер)"),
-    ("core4-d6b", "(визначити т5м3-15-із-частки", "похідні Д6, партії 4-5"),
-    ("core4-d8-d9", "; Д8:10010111 CADADDDR — Д3 перше/решта без нового семантичного коду.", "Д8/Д9: масиви, рядки, content-store"),
+    ("core4-d6", "(визначити значення-у-списку?-ядро", "похідні Д5/Д6, партії 1-3"),
+    ("core4-codec", "(визначити п-р-п-р", "структурні селектори, НСД + кодек T5M + T5M3"),
+    ("core4-d6b", "(визначити т5-додати-слово", "похідні Д6, партії 4-5 та кодек"),
+    ("core4-d8-d9", "(визначити перше-від-решта-від-решта-від-решта-від-перше-від-решта", "Д8/Д9: масиви, рядки, content-store"),
 ]
+HDR = "; core4 · блок «{name}» · рядки {a}–{b} оригіналу\n; {desc}\n; Згенеровано scripts/split-core4.py — НЕ редагувати руками; правте блок і перезберіть.\n"
 
-HDR = "; core4 · блок «{name}» · рядки {a}–{b} оригіналу\n; {desc}\n" \
-      "; Згенеровано scripts/split-core4.py — НЕ редагувати руками; правте блок і перезберіть.\n"
+
+def bounds(source: str) -> list[int]:
+    cuts = [0]
+    for name, marker, _ in BLOCKS[1:]:
+        needle = "\n" + marker + "\n"
+        if source.count(needle) != 1:
+            raise SystemExit(f"межа {name}: очікувався рівно один точний DEFINE {marker}")
+        cuts.append(source.index(needle) + 1)
+    cuts.append(len(source))
+    if cuts != sorted(set(cuts)):
+        raise SystemExit("межі Core4 не є строго впорядкованими")
+    return cuts
 
 
 def split() -> int:
-    lines = CORE4.read_text(encoding="utf-8").split("\n")
+    source = CORE4.read_text(encoding="utf-8")
+    cuts = bounds(source)
     PARTS.mkdir(exist_ok=True)
-    starts: list[int] = []
-    for name, marker, _ in BLOCKS:
-        if marker is None:
-            starts.append(0)
-            continue
-        hits = [i for i, line in enumerate(lines) if line == marker]
-        if len(hits) != 1:
-            raise SystemExit(f"неоднозначна межа SENS {name}: {len(hits)} точних якорів")
-        starts.append(hits[0])
-    if starts != sorted(set(starts)):
-        raise SystemExit("SENS межі не зростають або повторені")
-    ends = starts[1:] + [len(lines)]
-    for (name, _, desc), start, end in zip(BLOCKS, starts, ends):
-        seg = lines[start:end]
+    for i, (name, marker, desc) in enumerate(BLOCKS):
+        start, stop = cuts[i:i + 2]
+        first_line = source.count("\n", 0, start) + 1
+        last_line = source.count("\n", 0, stop)
+        fragment = source[start:stop]
         (PARTS / f"{name}.lisp").write_text(
-            HDR.format(name=name, a=start + 1, b=end, desc=desc) + "\n".join(seg) + "\n",
-            encoding="utf-8")
-        print(f"  {name}: {start+1}-{end} ({len(seg)} рядків)")
+            HDR.format(name=name, a=first_line, b=last_line, desc=desc) + fragment,
+            encoding="utf-8",
+        )
+        print(f"  {name}: {first_line}-{last_line}")
     return 0
 
+
 def build() -> str:
-    """Точне склеювання: збираємо ВСІ рядки блоків (без 3 рядків заголовка)
-    і з'єднуємо одним \\n. Це відтворює оригінал байт-у-байт."""
-    all_lines: list[str] = []
+    """Точна конкатенація без втрати/додавання LF і розриву SENS-форм."""
+    fragments: list[str] = []
     for name, *_ in BLOCKS:
-        p = PARTS / f"{name}.lisp"
-        if not p.is_file():
-            raise SystemExit(f"немає блоку {p}")
-        all_lines.extend(p.read_text(encoding="utf-8").split("\n")[3:-1])
-    return "\n".join(all_lines)
+        file = PARTS / f"{name}.lisp"
+        if not file.is_file():
+            raise SystemExit(f"немає блоку {file}")
+        header_and_fragment = file.read_text(encoding="utf-8").split("\n", 3)
+        if len(header_and_fragment) != 4:
+            raise SystemExit(f"пошкоджений заголовок {file}")
+        fragments.append(header_and_fragment[3])
+    return "".join(fragments)
 
 
 def main(argv: list[str] | None = None) -> int:
