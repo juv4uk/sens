@@ -483,6 +483,12 @@ run_case run_law d3-cond-first-match-nil-mutant tests/semantic/d3-cond-first-mat
 # Позитив і негатив обов'язково проходять direct → Zig/T5M → paired → standalone.
 run_case run_law d3-cond-guard-short-circuit-positive tests/semantic/d3-cond-guard-short-circuit-law.lisp 1
 run_case run_law d3-cond-guard-short-circuit-mutant tests/semantic/d3-cond-guard-short-circuit-mutant.lisp 0
+# D3/D5: атомарний корінь != неправильний хвіст вже розпочатого D3-списку.
+run_case run_law d3-last-compound-positive lib/list-suffix-from-last-compound-zero-copy-general.lisp 1
+d3_last_compound_bad="$evidence/d3-last-compound-improper-tail-bound.lisp"
+cat -- lib/list-suffix-from-last-compound-zero-copy-general.lisp tests/semantic/d3-last-compound-improper-tail-negative.lisp > "$d3_last_compound_bad"
+sha256sum lib/list-suffix-from-last-compound-zero-copy-general.lisp tests/semantic/d3-last-compound-improper-tail-negative.lisp > "$evidence/d3-last-compound-inputs.sha256"
+run_case run_error_rejection d3-last-compound-improper-tail "$d3_last_compound_bad" Type 'car expects a non-empty list'
 run_case run_law d3-quote-short-circuit-positive tests/semantic/d3-cond-quote-lazy-law.lisp 1
 run_case run_law d3-quote-short-circuit-mutant tests/semantic/d3-cond-quote-lazy-mutant.lisp 0
 # QUOTE не обчислює цитовану форму: структура лишається даними.
