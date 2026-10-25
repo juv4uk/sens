@@ -687,3 +687,31 @@ fn filesystem_journal_duplicate_keys_are_rejected_by_native_sens() {
         );
     }
 }
+
+#[test]
+fn filesystem_packages_reject_nonatomic_extra_keys_in_native_sens() {
+    // Логіка належить SENS. Rust тут тільки перевіряє точний D1-вердикт
+    // на коректному свідку та навмисно хибному мутанті.
+    let mut s = session();
+    for (id, source, expected) in [
+        (
+            "d9-fs-package-nested-key-positive",
+            include_str!("../../../tests/fixtures/d9-fs-package-nested-key-law.lisp"),
+            true,
+        ),
+        (
+            "d9-fs-package-nested-key-mutant",
+            include_str!("../../../tests/fixtures/d9-fs-package-nested-key-mutant.lisp"),
+            false,
+        ),
+    ] {
+        let result = eval_program(source, &mut s)
+            .unwrap_or_else(|error| panic!("test_id={id} layer=SENS error={error}"));
+        assert_eq!(
+            result.value.as_predicate_bit(),
+            Some(expected),
+            "test_id={id} layer=SENS expected=D1:{expected} actual={}",
+            result.value
+        );
+    }
+}
