@@ -633,6 +633,16 @@ cat -- lib/persistent-map.lisp lib/world.lisp lib/content-store.lisp \
   lib/lisp-fs.lisp tests/semantic/d9-f6-package-key-canonicalization-mutant.lisp > "$d9_fs_keys_mutant"
 run_case run_law d9-f6-package-key-canonicalization-positive "$d9_fs_keys_positive" 1 core4
 run_case run_law d9-f6-package-key-canonicalization-mutant "$d9_fs_keys_mutant" 0 core4
+
+# Regression: compound D3 values must be returned before any atom-only identity test.
+d9_fs_shape_positive="$evidence/d9-f6-canonical-key-structured-positive-complete.lisp"
+d9_fs_shape_mutant="$evidence/d9-f6-canonical-key-structured-mutant-complete.lisp"
+cat -- lib/persistent-map.lisp lib/world.lisp lib/content-store.lisp \
+  lib/lisp-fs.lisp tests/semantic/d9-f6-canonical-key-structured-positive.lisp > "$d9_fs_shape_positive"
+cat -- lib/persistent-map.lisp lib/world.lisp lib/content-store.lisp \
+  lib/lisp-fs.lisp tests/semantic/d9-f6-canonical-key-structured-mutant.lisp > "$d9_fs_shape_mutant"
+run_case run_law d9-f6-canonical-key-structured-positive "$d9_fs_shape_positive" 1 core4
+run_case run_law d9-f6-canonical-key-structured-mutant "$d9_fs_shape_mutant" 0 core4
 sha256sum lib/persistent-map.lisp lib/world.lisp lib/content-store.lisp lib/lisp-fs.lisp \
   tests/semantic/d9-f6-package-key-canonicalization-law.lisp \
   tests/semantic/d9-f6-package-key-canonicalization-mutant.lisp \
