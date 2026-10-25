@@ -523,6 +523,11 @@ run_case run_law d4-first-class-predicate-positive tests/semantic/d4-first-class
 run_case run_law d4-first-class-predicate-mutant tests/semantic/d4-first-class-predicate-mutant.lisp 0
 # Д10:0011000010 — конкретне визначення SENS: черга-порожня?.
 # Ратифікація 1024/1024 не підміняє фізичного позитиву й мутанта.
+# Д9:110011110 — SENS D1 позитив та мутант, без host-string-оракула.
+run_case run_law d9-string-append-physical-positive tests/semantic/d9-string-append-physical.lisp 1 core4
+run_case run_law d9-string-append-physical-mutant tests/semantic/d9-string-append-physical-mutant.lisp 0 core4
+sha256sum tests/semantic/d9-string-append-physical.lisp \
+  tests/semantic/d9-string-append-physical-mutant.lisp > "$evidence/d9-string-append-inputs.sha256"
 run_case run_law d10-empty-queue-positive tests/semantic/d10-empty-queue-law.lisp 1 core4
 run_case run_law d10-empty-queue-mutant tests/semantic/d10-empty-queue-mutant.lisp 0 core4
 # Д10:0100100110/0100100111 — CLIPS ASSERT/PRINTOUT як точні структурні дані.
