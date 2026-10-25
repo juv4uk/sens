@@ -1,6 +1,10 @@
 name: D1 D8 runtime cutover
 
 on:
+  # Переведено на pull_request: workflow УЖЕ читає PR-дані
+  # (github.event.pull_request.*), але тригер не стріляв.
+  pull_request:
+    branches: [main]
   workflow_dispatch:
 
 jobs:
