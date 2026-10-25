@@ -30,13 +30,27 @@ fn all_128_w7_cells_preserve_identity_and_project_from_the_owner_keyboard() {
             sens::Text7Layout::SaIast,
         )
         .unwrap();
+        // Керувальні координати належать D7 як дані, але UI не має
+        // виводити їх сирими байтами (NUL, ESC тощо). Для них лишається
+        // точна доменна тотожність; клавіатурний кодек окремо перевіряє
+        // повну зворотну проєкцію всіх 128 координат.
+        let safe_uk = if raw < 32 || raw == 127 {
+            exact.clone()
+        } else {
+            uk.to_string()
+        };
+        let safe_san = if raw < 32 || raw == 127 {
+            exact.clone()
+        } else {
+            san_iast.clone()
+        };
         assert_eq!(
             render_value_for_presentation(&value, PresentationLanguage::Ukrainian),
-            uk.to_string()
+            safe_uk
         );
         assert_eq!(
             render_value_for_presentation(&value, PresentationLanguage::Sanskrit),
-            san_iast
+            safe_san
         );
         // No printable Devanagari survives the canonical human D7 display.
         if (32..=126).contains(&raw) {

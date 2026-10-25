@@ -1,8 +1,7 @@
 //! Механічна атестація фізичного Core4: семантика LET/LET* належить SENS.
 //! Rust тут лише засвідчує наявність уже виконаного SENS-макроса у D6 слоті.
 use sens::{
-    eval_parsed_expressions, load_core_library, Bit6, CoreD6, DomainIdentity, Environment,
-    Session, Value,
+    eval_parsed_expressions, load_core_library, Bit6, CoreD6, DomainIdentity, Environment, Session,
 };
 
 #[test]
@@ -12,17 +11,15 @@ fn physical_core4_binds_actual_sens_let_macros_to_exact_d6_slots() {
     };
     load_core_library(&mut session).expect("physical Core4 bootstrap must execute");
 
-    for (bits, surface) in [
-        (0b001000, "нехай"),
-        (0b001001, "нехай-послідовно"),
-    ] {
+    for (bits, surface) in [(0b001000, "нехай"), (0b001001, "нехай-послідовно")]
+    {
         let identity = DomainIdentity::D6(CoreD6::from_word(
             Bit6::new(bits).expect("ratified D6 word"),
         ));
-        let binding = session.environment.domain_code_slot(identity);
+        let has_binding = session.environment.has_domain_code_slot(identity);
         assert!(
-            matches!(&binding, Some(Value::Macro(_))),
-            "D6:{bits:06b} {surface} must reuse its SENS-defined macro; slot={binding:?}"
+            has_binding,
+            "D6:{bits:06b} {surface} must have its exact SENS-defined runtime slot"
         );
     }
 

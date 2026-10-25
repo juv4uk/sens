@@ -50,6 +50,34 @@ fn uk_decimal(text: String) -> String {
     text.replace('.', ",")
 }
 
+fn render_d7_identity(
+    identity: crate::DomainIdentity,
+    mode: crate::d7_keyboard::D7Mode,
+) -> Option<String> {
+    let crate::DomainIdentity::D7(word) = identity else {
+        return None;
+    };
+    let code = word.word().packed_bits() as u8;
+    if code < 32 || code == 127 {
+        return Some(identity.to_string());
+    }
+    crate::d7_keyboard::project(code, mode)
+        .ok()
+        .map(|character| character.to_string())
+}
+
+fn render_d7_sanskrit_identity(identity: crate::DomainIdentity) -> Option<String> {
+    let crate::DomainIdentity::D7(word) = identity else {
+        return None;
+    };
+    let code = word.word().packed_bits() as u8;
+    if code < 32 || code == 127 {
+        return Some(identity.to_string());
+    }
+    let text = crate::Text7::from_cells(vec![code]).ok()?;
+    crate::render_text7(&text, crate::Text7Layout::SaIast).ok()
+}
+
 fn render_uk(value: &Value) -> String {
     match value {
         Value::Builtin(builtin) => {
@@ -128,8 +156,11 @@ fn render_uk(value: &Value) -> String {
             }
         }
         Value::DomainIdentity(identity) => {
-            semantic_registry::surface_for_domain_identity(*identity, "ukr")
-                .map(str::to_string)
+            render_d7_identity(*identity, crate::d7_keyboard::D7Mode::Uk)
+                .or_else(|| {
+                    semantic_registry::surface_for_domain_identity(*identity, "ukr")
+                        .map(str::to_string)
+                })
                 .unwrap_or_else(|| format!("#<домен D{}:{identity}>", identity.width()))
         }
         Value::String(text) => {
@@ -190,11 +221,11 @@ fn unchanged_non_domain_presentation(value: &Value) -> String {
 
 fn render_sa(value: &Value) -> String {
     match value {
-        Value::DomainIdentity(identity) => {
-            semantic_registry::surface_for_domain_identity(*identity, "sa")
-                .map(str::to_string)
-                .unwrap_or_else(|| value.to_string())
-        }
+        Value::DomainIdentity(identity) => render_d7_sanskrit_identity(*identity)
+            .or_else(|| {
+                semantic_registry::surface_for_domain_identity(*identity, "sa").map(str::to_string)
+            })
+            .unwrap_or_else(|| value.to_string()),
         Value::Pair(_) => {
             let mut output = String::from("(");
             let mut current = value;
