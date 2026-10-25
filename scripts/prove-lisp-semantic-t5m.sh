@@ -790,6 +790,13 @@ run_case run_error_rejection d6-length-onto-d1-root-type tests/semantic/d6-lengt
 run_case run_error_rejection d6-length-onto-late-d1-tail-type tests/semantic/d6-length-onto-late-d1-tail-negative.lisp Type 'car expects a non-empty list' core4
 run_case run_law d6-filter-independent-positive tests/semantic/d6-filter-independent-law.lisp 1 core4
 run_case run_law d6-filter-independent-mutant tests/semantic/d6-filter-independent-mutant.lisp 0 core4
+# Д6:101000 MAP · повний D3-preflight до callback.
+run_case run_law d6-map-preflight-positive tests/semantic/d6-map-preflight-positive.lisp 1 core4
+run_case run_law d6-map-preflight-mutant tests/semantic/d6-map-preflight-mutant.lisp 0 core4
+run_case run_error_rejection d6-map-preflight-before-callback tests/semantic/d6-map-preflight-before-callback-negative.lisp Type 'car expects a non-empty list' core4
+run_case run_error_rejection d6-map-preflight-root-negative tests/semantic/d6-map-preflight-root-negative.lisp Type 'car expects a non-empty list' core4
+run_case run_law d6-map-preflight-empty-law tests/semantic/d6-map-preflight-empty-law.lisp 1 core4
+run_case run_law d6-map-preflight-empty-mutant tests/semantic/d6-map-preflight-empty-mutant.lisp 0 core4
 # Д6:101010 MAP-ONTO · закон, мутант, неправильний D3-хвіст.
 run_case run_law d6-map-onto-accumulator-positive tests/semantic/d6-map-onto-accumulator-law.lisp 1 core4
 run_case run_law d6-map-onto-order-mutant tests/semantic/d6-map-onto-order-mutant.lisp 0 core4
