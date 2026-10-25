@@ -39,6 +39,18 @@ jobs:
           bash tests/test-count-executable-lisp-git-inventory.sh
           python3 tests/test_single_data_schema.py
 
+      - name: Чинний SENS захист — host debt та незмінність мови
+        shell: bash
+        run: |
+          set -euo pipefail
+          # Єдиний автоматичний CI виконує ці вже наявні охоронці.
+          # Семантика лишається у SENS; Bash/Python перевіряють лише межу.
+          bash scripts/ensure-host-debt0.sh
+          python3 -m unittest \
+            tests.test_language_stays_in_sens.LanguageStaysInSens.test_frozen_host_debt_only_shrinks \
+            tests.test_language_stays_in_sens.LanguageStaysInSens.test_no_new_host_file_carries_sens_semantics \
+            -v
+
       - name: Rust CLI — рання перевірка синтаксису REPL
         shell: bash
         run: |
@@ -204,12 +216,46 @@ jobs:
                   "tests/semantic/meta-fc-predicates-d1-mutant.lisp",
                   "tests/semantic/unification-occurs-check-law.lisp",
                   "tests/semantic/unification-occurs-check-mutant.lisp",
+                  # D11 scan/fold: залежні SENS-свідки з бібліотечними DEFINE.
+                  "tests/semantic/d11-scan-fold-d3-tail-law.lisp",
+                  "tests/semantic/d11-scan-fold-d3-tail-mutant.lisp",
+                  "tests/semantic/d11-scan-fold-d3-tail-scan-improper-negative.lisp",
+                  "tests/semantic/d11-scan-fold-d3-tail-left-improper-negative.lisp",
+                  "tests/semantic/d11-scan-fold-d3-tail-right-improper-negative.lisp",
                   "tests/semantic/d11-srfi1-list-equality-law.lisp",
+                  # Д11: залежні свідки вилучення асоціацій з SENS-бібліотекою.
+                  # Без DEFINE standalone відхиляється; виконує лише law runner.
+                  "tests/semantic/d11-assoc-delete-proper-law.lisp",
+                  "tests/semantic/d11-assoc-delete-order-mutant.lisp",
+                  "tests/semantic/d11-assoc-delete-improper-tail-negative.lisp",
+                  "tests/semantic/d11-assoc-delete-invalid-record-negative.lisp",
                   # D11 list=: залежні позитиви, справжні визначення lib/ перед ними.
                   "tests/semantic/d11-srfi1-list-equality-structure-law.lisp",
                   "tests/semantic/d11-srfi1-list-equality-pairs-law.lisp",
+                  "tests/semantic/d11-srfi1-list-equality-directed-pairs-law.lisp",
+                  "tests/semantic/d11-srfi1-list-equality-directed-adjacent-law.lisp",
+                  "tests/semantic/d11-srfi1-list-equality-directed-mutant.lisp",
+                  "tests/semantic/d11-srfi1-list-equality-directed-law.lisp",
+                  "tests/semantic/d11-srfi1-list-equality-directed-pairs-mutant.lisp",
+                  "tests/semantic/d11-srfi1-list-equality-directed-adjacent-mutant.lisp",
                   "tests/semantic/d11-srfi1-list-equality-nullary-law.lisp",
                   "tests/semantic/d11-srfi1-list-equality-mutant.lisp",
+                  # F11-PROOF-TRACE запускається в єдиному нативному law runner із DEFINE lib/reason.lisp.
+                  "tests/semantic/d11-reason-proof-trace-law.lisp",
+                  "tests/semantic/d11-reason-proof-results-law.lisp",
+                  "tests/semantic/d11-reason-proof-results-mutant.lisp",
+                  "tests/semantic/d11-reason-proof-results-improper-accum-negative.lisp",
+                  "tests/semantic/d11-reason-proof-results-improper-scan-negative.lisp",
+                  "tests/semantic/d11-reason-proof-results-improper-map-negative.lisp",
+                  "tests/semantic/d11-reason-proof-results-improper-attach-negative.lisp",
+                  "tests/semantic/d11-reason-index-law.lisp",
+                  "tests/semantic/d11-reason-index-mutant.lisp",
+                  "tests/semantic/d11-reason-index-improper-reverse-negative.lisp",
+                  "tests/semantic/d11-reason-index-improper-buckets-negative.lisp",
+                  "tests/semantic/d11-reason-index-improper-rules-negative.lisp",
+                  "tests/semantic/d11-reason-proof-trace-mutant.lisp",
+                  "tests/semantic/d11-reason-proof-trace-improper-provenance-negative.lisp",
+                  "tests/semantic/d11-reason-proof-trace-improper-count-negative.lisp",
                   # D11 FIND-TAIL requires its canonical Lisp DEFINE from lib/.
                   # It is executed in the native bundled law step and in the
                   # physical law runner; never misclassify it as standalone.
@@ -291,6 +337,30 @@ jobs:
                   # Ці дві допоміжні Lisp-бібліотеки виконуються лише в бандлі мовного свідка.
                   "tests/fixtures/witness-runner.lisp",
                   "tests/fixtures/epistemic-authority-witness.lisp",
+                  "tests/fixtures/d11-list-equality-improper-left-must-error.lisp",
+                  "tests/fixtures/d11-list-equality-improper-right-must-error.lisp",
+                  "tests/fixtures/d11-list-equality-invalid-singleton-must-error.lisp",
+                  "tests/fixtures/d11-list-equality-invalid-third-must-error.lisp",
+                  # DWIM D11: ці SENS-свідки вимагають попередні DEFINE,
+                  # тому запускаються тільки як фізичні пакети law-runner.
+                  "tests/fixtures/d11-dwim-exact-context-positive.lisp",
+                  "tests/fixtures/d11-dwim-extra-field-negative.lisp",
+                  "tests/fixtures/d11-dwim-unrelated-extra-field-negative.lisp",
+                  "tests/fixtures/d11-dwim-dotted-record-negative.lisp",
+                  # D11 UNFOLD terminal tail: виконувати тільки з canonical DEFINE через фізичний law-runner.
+                  "tests/fixtures/d11-unfold-terminal-left-atom-must-error.lisp",
+                  "tests/fixtures/d11-unfold-terminal-left-dotted-must-error.lisp",
+                  "tests/fixtures/d11-unfold-terminal-right-atom-must-error.lisp",
+                  "tests/fixtures/d11-unfold-terminal-right-dotted-must-error.lisp",
+                  # Д5/D24+: залежні SENS-свідки із DEFINE чинної числової бібліотеки.
+                  # Працюють тільки як зібрані SENS-програми law-runner.
+                  "tests/semantic/d5-exact-numbers-filter-law.lisp",
+                  "tests/semantic/d5-exact-numbers-filter-mutant.lisp",
+                  "tests/semantic/d5-exact-numbers-filter-improper-tail-negative.lisp",
+                  # Д6 ANY/ALL: негативні Type-свідки навмисне відхиляються;
+                  # виконуються тільки повним SENS law-runner із Core4.
+                  "tests/semantic/d6-any-improper-tail-negative.lisp",
+                  "tests/semantic/d6-all-improper-tail-negative.lisp",
                   # Вхід F6 producer для Rust producer→consumer інтеграційного тесту,
                   # не окремий мовний закон для самостійного виконання.
                   "tests/fixtures/wsm-fs-record-producer.lisp",
@@ -429,7 +499,8 @@ jobs:
         run: |
           set -uo pipefail
           failed=0
-          python3 scripts/ci_zig_purity.py || failed=1
+          scripts/ci-zig-purity --self-test || failed=1
+          scripts/ci-zig-purity || failed=1
           zig test -lc research/zig-codecs/tests.zig || failed=1
           zig test -lc zig_transport_root.zig || failed=1
           zig test -O ReleaseFast -lc bench_t5m_test.zig || failed=1
@@ -458,6 +529,52 @@ jobs:
           cargo build --locked -p sens-cli --bin sens --bin sens-trit --features benchmark-ast-visits
           test -x "$PWD/target/debug/sens"
           test -x "$PWD/target/debug/sens-trit"
+
+      # Core4 is executed from lib/core4.sens (Zig-restored at build),
+      # not from the textual file changed in Git. Detect stale bootstrap
+      # BEFORE calling old bytecode a successful implementation of a new law.
+      # ДЖЕРЕЛО І ЙОГО ПАРА МУСЯТЬ ЗМІНЮВАТИСЯ РАЗОМ.
+      # Причина: lib/core4.lisp змінили, а lib/core4.sens — ні; закомічена пара
+      # лишилась застарілою, і сім свідків профілю core4 виконались проти
+      # застарілого ядра. remint-drifted-pairs.yml НАВМИСНО пропускає Core4,
+      # тож ніщо не змушувало пере-карбувати пару. Цей крок зобов'язує.
+      - name: Core4 — джерело і фізична пара разом
+        if: ${{ always() }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          base="${{ github.event.before }}"
+          if [[ "${{ github.event_name }}" == pull_request ]]; then
+            base="${{ github.event.pull_request.base.sha }}"
+          fi
+          if [[ -z "$base" || "$base" =~ ^0+$ ]]; then
+            git fetch --no-tags --deepen=2 origin "${GITHUB_REF_NAME:-main}"
+            base="$(git rev-parse HEAD^)"
+          fi
+          python3 scripts/check-core4-pair-together.py "$base" "${{ github.sha }}"
+
+      - name: Core4 — точна фізична пара SENS/Zig T5M
+        if: ${{ always() && steps.native-build.outcome == 'success' }}
+        shell: bash
+        timeout-minutes: 5
+        run: |
+          set -euo pipefail
+          physical_dir="$RUNNER_TEMP/changed-t5m-pairs/core4-parity"
+          mkdir -p "$physical_dir"
+          # Only real SENS emits words; pinned Zig packages the binary.
+          timeout 180s "$PWD/target/debug/sens" --t5m-mint-pair        lib/core4.lisp "$physical_dir/core4.sens"
+          timeout 45s "$PWD/target/debug/sens-trit" verify-view             "$physical_dir/core4.sens" >"$physical_dir/core4-verified.txt"
+          # SHA of the exact source checkout; never apply this artifact to a
+          # different main tree even if its filename still matches.
+          git rev-parse --verify HEAD > "$physical_dir/source-commit.sha"
+          sha256sum lib/core4.lisp > "$physical_dir/source-core4.sha256"
+          sha256sum lib/core4.lisp lib/core4.sens \
+            "$physical_dir/core4.sens" > "$physical_dir/sha256.txt"
+          if ! cmp -s lib/core4.sens "$physical_dir/core4.sens"; then
+            echo "::error file=lib/core4.sens,title=SENS_CORE4_PHYSICAL_DRIFT::REGRESSION layer=bootstrap expected=exact-current-SENS-source actual=outdated-physical bytes=Zig/T5M release=NO-GO" >&2
+            exit 1
+          fi
+          echo "SENS_CORE4_PHYSICAL_PARITY_PASS source=lib/core4.lisp physical=lib/core4.sens codec=Zig/T5M"
 
       - name: PUSH Lisp → кодек Zig/T5M → виконання SENS
         id: t5m_changed_execute
@@ -508,7 +625,9 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: sens-pair-regen-${{ github.sha }}
-          path: ${{ runner.temp }}/changed-t5m-pairs/**
-          if-no-files-found: warn
+          # Artifact contains only the physical Core4 minted by this exact
+          # commit, plus its SHA receipts and Zig verify-view output.
+          path: ${{ runner.temp }}/changed-t5m-pairs/core4-parity/**
+          if-no-files-found: error
           retention-days: 1
           compression-level: 0
