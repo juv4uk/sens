@@ -400,6 +400,13 @@ jobs:
                   "tests/semantic/d9-f6-object-addresses-d1-root-negative.lisp",
                   "tests/semantic/d9-f6-object-addresses-d1-tail-negative.lisp",
                   "tests/semantic/d9-f6-object-addresses-empty-address-negative.lisp",
+                  # D5 PAIRLIS: залежні від чинного SENS DEFINE у Core4.
+                  # Усі п'ять уже зареєстровані в native Zig/T5M law-runner.
+                  "tests/semantic/d5-pairlis-total-list-law.lisp",
+                  "tests/semantic/d5-pairlis-total-list-mutant.lisp",
+                  "tests/semantic/d5-pairlis-improper-key-tail-negative.lisp",
+                  "tests/semantic/d5-pairlis-improper-value-tail-negative.lisp",
+                  "tests/semantic/d5-pairlis-extra-value-negative.lisp",
                   # Вхід F6 producer для Rust producer→consumer інтеграційного тесту,
                   # не окремий мовний закон для самостійного виконання.
                   "tests/fixtures/wsm-fs-record-producer.lisp",
