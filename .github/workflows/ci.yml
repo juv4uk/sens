@@ -279,13 +279,12 @@ jobs:
           echo "::notice file=.github/workflows/ci.yml,title=SENS Lisp→Zig/T5M→SENS::PASS physical_codec=Zig/T5M execution=SENS release=NOT_CERTIFIED"
 
 
-      # Export the changed-file mint before the long all-laws sweep so that
-      # exact D11 generator bytes survive even when the later suite times out.
-      - name: Export canonical D11 SENS/Zig T5M pair regeneration evidence
+      # Keep the exact changed-file mint output when physical-pair regeneration was requested.
+      - name: Export changed-file SENS/Zig T5M mint evidence
         if: ${{ always() && contains(github.event.head_commit.message, 'SENS_PAIR_REGEN') }}
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          name: sens-d11-pair-regen-${{ github.sha }}
+          name: sens-changed-pairs-regen-${{ github.sha }}
           path: ${{ runner.temp }}/changed-t5m-pairs/**
           if-no-files-found: warn
           retention-days: 1
