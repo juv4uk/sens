@@ -1769,6 +1769,12 @@ run_case run_law d11-dwim-exact-context-positive "$d11_dwim_exact_context_positi
 run_case run_error_rejection d11-dwim-extra-field-type "$d11_dwim_extra_field_bad" Type 'car expects a non-empty list' core4
 run_case run_error_rejection d11-dwim-unrelated-extra-field-type "$d11_dwim_unrelated_extra_bad" Type 'car expects a non-empty list' core4
 run_case run_error_rejection d11-dwim-dotted-record-type "$d11_dwim_dotted_bad" Type 'car expects a non-empty list' core4
+# Masterscope: D3-форма перевіряється ПЕРЕД прямим збігом голови.
+# D1:ні як неправильний хвіст мусить спричинити CAR Type, не D1:так.
+d11_masterscope_bad_tail="$evidence/d11-masterscope-improper-root-tail-complete.lisp"
+cat -- lib/d11-interlisp-safe-analysis.lisp tests/fixtures/d11-masterscope-improper-root-tail-negative.lisp > "$d11_masterscope_bad_tail"
+run_case run_error_rejection d11-masterscope-improper-root-tail-type "$d11_masterscope_bad_tail" Type 'car expects a non-empty list' core4
+sha256sum lib/d11-interlisp-safe-analysis.lisp tests/fixtures/d11-masterscope-improper-root-tail-negative.lisp > "$evidence/d11-masterscope-improper-root-tail-inputs.sha256"
 sha256sum lib/d11-interlisp-safe-analysis.lisp tests/fixtures/d11-dwim-*.lisp > "$evidence/d11-dwim-exact-record-inputs.sha256"
 
 # LAST-DEFINE: D7-текст має D8-рівність у нормативному Lisp, не D3 EQ Rust.
