@@ -93,6 +93,10 @@ jobs:
           done
           # Структура DEFINE та SENS має бути перевірена в тому самому кроці.
           python3 scripts/check-sens-definitions.py
+          # Core4: кожний фізичний блок має містити ЦІЛІ SENS-форми;
+          # зібране джерело має бути байт-у-байт ідентичним Core4.
+          # Механічний Python не обчислює закони SENS.
+          python3 scripts/split-core4.py --check
           # Поверхні звіряються з джерелами D1–24+; тут не фіксуємо межу драбини.
           python3 scripts/check-domain-ladder-identity.py --check
           python3 scripts/check-numeric-domain-ratification.py --self-test
