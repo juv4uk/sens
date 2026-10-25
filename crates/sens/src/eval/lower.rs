@@ -58,8 +58,16 @@ fn head_domain_identity(head: &Expr, mode: LowerMode) -> Option<CoreDomainIdenti
 fn source_head_domain_identity(name: &str) -> Option<CoreDomainIdentity> {
     necessary_forms::domain_identity_for_symbol(name)
         .or_else(|| {
-            semantic_registry::exact_uk_callable_for_source_head(name)
-                .and_then(|identity| identity.core_operation())
+            let identity = semantic_registry::exact_uk_callable_for_source_head(name)?;
+            identity.core_operation().or_else(|| {
+                // A non-primitive D6 resident is callable only through an
+                // already evaluated, language-owned definition bound under
+                // this exact coordinate. The source route records identity;
+                // invoke_domain_identity still fails closed if no closure is
+                // present. This does not admit a new host mechanism.
+                let binding = semantic_registry::d6_binding_identity_for_definition(name)?;
+                (identity.width() == 6 && binding == identity).then(|| identity.into())
+            })
         })
         .or_else(|| semantic_registry::domain_identity_for_surface(name))
 }
@@ -392,6 +400,20 @@ mod domain_ladder_lowering_migration_tests {
             .expect("ratified Ukrainian D8 EQUAL source route");
         assert_eq!(identity.width(), 8, "D8 must not collapse to D3 EQ");
         assert_eq!(identity.packed_bits(), 0b11110111, "exact D8 EQUAL word");
+    }
+
+    #[test]
+    fn source_heads_preserve_exact_d6_identity_for_lisp_owned_definitions() {
+        for (name, bits) in [("довжина", 0b000000u16), ("довжина-до", 0b000001u16)] {
+            let identity = source_head_domain_identity(name)
+                .unwrap_or_else(|| panic!("ratified Ukrainian D6 binding must lower: {name}"));
+            assert_eq!(identity.width(), 6, "{name} must retain D6 width");
+            assert_eq!(identity.packed_bits(), bits, "{name} exact D6 coordinate");
+        }
+
+        // English aliases do not become Ukrainian source heads through the
+        // binding-only table.
+        assert!(source_head_domain_identity("length").is_none());
     }
 
     #[test]
