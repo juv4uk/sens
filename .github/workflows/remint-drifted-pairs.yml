@@ -24,11 +24,14 @@ on:
 permissions:
   contents: write
 
-# Останній push охоплює всі ще не обернуті та відсталі .lisp нижче.
-# Не тримати десятки застарілих build: один native remint на чинному main.
+# У main кілька агентів можуть писати одночасно. Застарілий SHA уже
+# не має права витрачати десятки хвилин на повторний mint та гонку push.
+# Новий виклик скасовує старий, але не зараховує його як PASS:
+# кожен чинний native RED і незавершена T5M трійка лишаються блокерами.
+# Різні гілки не скасовують одна одну; фізичний proof — лише на своєму SHA.
 concurrency:
   group: remint-queued-v2-${{ github.ref }}
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   remint:
