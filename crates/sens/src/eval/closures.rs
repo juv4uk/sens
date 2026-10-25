@@ -350,39 +350,70 @@ fn classify_head(head: &Expr, own: &[Rc<str>], environment: &Environment) -> Hea
             .map(|core| domain_head(core, environment))
             .unwrap_or(Head::Opaque),
         ExprKind::Sid(sid) => sid_head(*sid, environment),
-        ExprKind::Symbol(name) => {
-            // Ratified exact-domain surfaces must reach the same head policy as
-            // DomainCall. In particular, Ukrainian D3 QUOTE/COND are not
-            // reclassified through their historical SID8 compatibility bytes.
-            if let Some(identity) = super::lower::immutable_surface_domain_identity(name) {
-                return domain_head(identity, environment);
-            }
-            if let Some(sid) = canon::routed_sid_for_surface(name) {
-                return sid_head(sid, environment);
-            }
-            match necessary_forms::identity_for_symbol(name) {
-                Some(necessary_forms::NecessaryFormIdentity::Lambda) => return Head::Lambda,
-                Some(necessary_forms::NecessaryFormIdentity::Define) => return Head::Define,
-                _ => {}
-            }
-            if capabilities::capability_installed(name) {
-                return Head::Opaque;
-            }
-            if own.iter().any(|parameter| **parameter == **name) {
-                return Head::Call;
-            }
-            match environment.get(name) {
-                Some(Value::Macro(_) | Value::Builtin(_)) => Head::Opaque,
-                Some(Value::DomainIdentity(identity)) => identity
-                    .core_operation()
-                    .map(|core| domain_head(core, environment))
-                    .unwrap_or(Head::Opaque),
-                Some(Value::Sid(sid)) => sid_head(sid, environment),
-                _ => Head::Call,
-            }
-        }
+        ExprKind::Symbol(name) => classify_symbol_head(name, own, environment),
+        // Голова-носій D7 (список точних W7-комірок) — це Text7-ім'я, яке
+        // виконавець розпізнає тим самим маршрутом, що й джерельний символ
+        // (`dispatch_call` через `text7_binding_key`). Розв'язувач мусить
+        // бачити його так само: інакше голова макроса, породжена розкриттям
+        // (напр. вкладене «нехай-послідовно»), вважається звичайним викликом,
+        // і посилання в ЩЕ НЕ обчислених аргументах макроса хибно
+        // перетворюються на лексичні слоти — а тоді `quote` бачить `Local`
+        // там, де мусить бути джерельний символ.
+        ExprKind::List(_) => match text7_head_name(head, environment) {
+            Some(name) => classify_symbol_head(&name, own, environment),
+            None => Head::Call,
+        },
         _ => Head::Call,
     }
+}
+
+fn classify_symbol_head(name: &Rc<str>, own: &[Rc<str>], environment: &Environment) -> Head {
+    // Ratified exact-domain surfaces must reach the same head policy as
+    // DomainCall. In particular, Ukrainian D3 QUOTE/COND are not
+    // reclassified through their historical SID8 compatibility bytes.
+    if let Some(identity) = super::lower::immutable_surface_domain_identity(name) {
+        return domain_head(identity, environment);
+    }
+    if let Some(sid) = canon::routed_sid_for_surface(name) {
+        return sid_head(sid, environment);
+    }
+    match necessary_forms::identity_for_symbol(name) {
+        Some(necessary_forms::NecessaryFormIdentity::Lambda) => return Head::Lambda,
+        Some(necessary_forms::NecessaryFormIdentity::Define) => return Head::Define,
+        _ => {}
+    }
+    if capabilities::capability_installed(name) {
+        return Head::Opaque;
+    }
+    if own.iter().any(|parameter| **parameter == **name) {
+        return Head::Call;
+    }
+    match environment.get(name) {
+        Some(Value::Macro(_) | Value::Builtin(_)) => Head::Opaque,
+        Some(Value::DomainIdentity(identity)) => identity
+            .core_operation()
+            .map(|core| domain_head(core, environment))
+            .unwrap_or(Head::Opaque),
+        Some(Value::Sid(sid)) => sid_head(sid, environment),
+        _ => Head::Call,
+    }
+}
+
+/// Джерельне ім'я голови-носія D7. Повертає канонічний `#t7:`-ключ, якщо він
+/// зв'язаний, інакше — ратифіковане українське прочитання. Лише точне наявне
+/// зв'язування дає ім'я; незв'язана D7-структура лишається звичайним викликом
+/// (`None` → `Head::Call`), тож маршрут голови не розширюється на дані.
+fn text7_head_name(head: &Expr, environment: &Environment) -> Option<Rc<str>> {
+    let key = text7_binding_key(head)?;
+    if environment.get(&key).is_some() {
+        return Some(key);
+    }
+    let text = crate::Text7::from_canonical_wire_token(&key).ok()?;
+    let surface = crate::render_text7(&text, crate::Text7Layout::Uk).ok()?;
+    if environment.get(&surface).is_some() {
+        return Some(Rc::from(surface.as_str()));
+    }
+    None
 }
 
 /// Чи тіло не може додати нове ім'я в кадр виклику.
