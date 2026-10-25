@@ -598,7 +598,15 @@ d9_binding_probe() {
   local law="$evidence/d9-f6-bindings-probe-$name.lisp"
   local complete="$evidence/d9-f6-bindings-probe-$name-complete.lisp"
   cat > "$law"
+  if [[ ! -s "$law" ]]; then
+    echo "::error::SENS_PROBE_INPUT_EMPTY id=d9-f6-bindings-probe-$name expected=non-empty-heredoc actual=empty" >&2
+    return 2
+  fi
   cat -- "$d9_fs_probe_dependencies" "$law" > "$complete"
+  if [[ ! -s "$complete" ]]; then
+    echo "::error::SENS_PROBE_FIXTURE_EMPTY id=d9-f6-bindings-probe-$name expected=dependencies-and-law actual=empty" >&2
+    return 2
+  fi
   run_case run_law "d9-f6-bindings-probe-$name" "$complete" "$expected" core4
 }
 d9_binding_probe empty-is-valid 1 <<'SENS_LAW'
