@@ -31,7 +31,7 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
       - name: Prove current Rust W7 occupancy, projection and physical transport
         run: |
-          cargo test --locked -p sens --test d7_w7_pack --test d7_keyboard_t5 --test d7_runtime_presentation --test text7_canonical_wire
+          cargo test --locked -p sens --features rust-t5-reference --test d7_w7_pack --test d7_keyboard_t5 --test d7_runtime_presentation --test text7_canonical_wire
           cargo test --locked -p sens --lib text7_projection::tests
           cargo test --locked -p sens --lib d7_keyboard::tests
       - name: Execute binary SENS-owned domain and compiler selector self-verdicts

@@ -16,4 +16,4 @@ jobs:
       - name: Actual historical three-pass conversion and physical byte law
         run: python3 -m unittest discover -s tests -p test_migration_d4_selector_cohort.py -v
       - name: Current exact D4 selector Rust oracle and negative controls
-        run: cargo test -p sens --test migration_d4_selector_cohort -- --nocapture
+        run: cargo test -p sens --features rust-t5-reference --test migration_d4_selector_cohort -- --nocapture

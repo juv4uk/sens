@@ -113,9 +113,9 @@ jobs:
           assert record["old_originals_migrated_by_this_audit"] == 0, record
           PY
       - name: Current Rust interpreter independently executes committed T5
-        run: cargo test -q -p sens --test migration_d1_cond_cohort -- --nocapture
+        run: cargo test -q -p sens --features rust-t5-reference --test migration_d1_cond_cohort -- --nocapture
       - name: Independently run current Rust D3 CAR CDR CONS oracle
-        run: cargo test -q -p sens --test migration_pair_car_cdr_cons_main -- --nocapture
+        run: cargo test -q -p sens --features rust-t5-reference --test migration_pair_car_cdr_cons_main -- --nocapture
       - name: Read-only verified Ukrainian D4 CAAR source / T5 / ASCII view
         shell: bash
         run: |
@@ -138,7 +138,7 @@ jobs:
           print("Proven source/T5/view; independent D4 evaluator is next step")
           PY
       - name: Independently execute current Rust D4 CAAR T5
-        run: cargo test -q -p sens --test migration_d4_selector_cohort -- --nocapture
+        run: cargo test -q -p sens --features rust-t5-reference --test migration_d4_selector_cohort -- --nocapture
 
       - name: Prove verification produced no writes
         shell: bash

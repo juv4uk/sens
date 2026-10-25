@@ -48,4 +48,4 @@ jobs:
             > /tmp/sens-branch-rust-view
           cmp tests/fixtures/migration-d1-cond-cohort/branch /tmp/sens-branch-rust-view
       - name: Independent current D1 COND execution oracle
-        run: cargo test -p sens --test migration_d1_cond_cohort -- --nocapture
+        run: cargo test -p sens --features rust-t5-reference --test migration_d1_cond_cohort -- --nocapture

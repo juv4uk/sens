@@ -36,7 +36,7 @@ jobs:
           cmp -s "$RUNNER_TEMP/verified-views/tests/fixtures/migration-d1-cond-cohort/branch"             tests/fixtures/migration-d1-cond-cohort/branch
           test -z "$(git status --porcelain --untracked-files=all)"
       - name: Independently execute actual Ukrainian D1 COND canary in current Rust SENS
-        run: cargo test -q -p sens --test migration_d1_cond_cohort -- --nocapture
+        run: cargo test -q -p sens --features rust-t5-reference --test migration_d1_cond_cohort -- --nocapture
       - name: Verify strict view codec and fail-closed negative cases
         run: python3 -m unittest discover -s tests -p 'test_sens_spaced_view.py' -v
       - name: Prove three independent triplet checkers agree on SHA and semantic boundaries

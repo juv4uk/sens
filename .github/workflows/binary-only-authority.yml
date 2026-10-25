@@ -33,7 +33,7 @@ jobs:
 
       - uses: dtolnay/rust-toolchain@stable
       - name: Execute real binary T5 programs
-        run: cargo test --locked -p sens --test physical_t5m_execution
+        run: cargo test --locked -p sens --features rust-t5-reference --test physical_t5m_execution
 
       - name: Diff hygiene
         run: git diff --check

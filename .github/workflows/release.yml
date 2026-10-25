@@ -70,7 +70,7 @@ jobs:
             --lisp tests/fixtures/migration-d1-cond-cohort/branch.lisp \
             --sens tests/fixtures/migration-d1-cond-cohort/branch.sens \
             --view tests/fixtures/migration-d1-cond-cohort/branch
-          cargo test --locked -q -p sens --test migration_d1_cond_cohort -- --nocapture
+          cargo test --locked -q -p sens --features rust-t5-reference --test migration_d1_cond_cohort -- --nocapture
 
       # ДОКАЗ ВИКОНАННЯМ. Досі цей job НЕ збирав sens, тож доказ мовних законів
       # тут був неможливий. Rust і Zig у job уже встановлені вище.

@@ -96,7 +96,7 @@ fn rust_zig_d3_selftest_and_one_bit_mutant_are_executed_only_via_zig() {
     );
     assert_eq!(
         backend.stdout,
-        b"transport=zig abi=2 semantic_authority=SENS\n"
+        b"transport=zig codec=T5M abi=2 semantic_authority=SENS\n"
     );
 
     let positive = fixture.join("exact-d3-logic-selftest.sens");
@@ -174,7 +174,7 @@ fn rust_zig_sens_real_file_link_exact_bytes_and_fail_closed() {
     );
     assert_eq!(
         backend.stdout,
-        b"transport=zig abi=2 semantic_authority=SENS\n"
+        b"transport=zig codec=T5M abi=2 semantic_authority=SENS\n"
     );
 
     let pair = Pair::new(&source);

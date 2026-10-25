@@ -14,4 +14,4 @@ jobs:
       - name: Validate exact source and physical T5
         run: python3 -m unittest discover -s tests -p 'test_migration_atom_cohort.py' -v
       - name: Current SENS oracle executes physical migrated program
-        run: cargo test -p sens --test migration_atom_cohort
+        run: cargo test -p sens --features rust-t5-reference --test migration_atom_cohort

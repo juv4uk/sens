@@ -16,4 +16,4 @@ jobs:
       - name: Verify Ukrainian pair-cons source, canonical T5 view and no-clobber
         run: python3 -m unittest discover -s tests -p test_migration_pair_cons_uk_triplet.py -v
       - name: Exact CAR/CDR/CONS packed T5 decode plus real evaluator parity
-        run: cargo test -p sens --test migration_pair_car_cdr_cons_main -- --nocapture
+        run: cargo test -p sens --features rust-t5-reference --test migration_pair_car_cdr_cons_main -- --nocapture

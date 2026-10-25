@@ -14,4 +14,4 @@ jobs:
       - uses: actions/checkout@v5
       - uses: dtolnay/rust-toolchain@stable
       - name: Run historical EQ/COND T5 transport-only checks
-        run: cargo test -q -p sens --test migration_eq_cond_main
+        run: cargo test -q -p sens --features rust-t5-reference --test migration_eq_cond_main

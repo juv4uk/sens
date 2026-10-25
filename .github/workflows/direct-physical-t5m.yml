@@ -14,7 +14,7 @@ jobs:
       - uses: ./.github/actions/install-zig
       - uses: dtolnay/rust-toolchain@stable
       - name: Physical input / visible reference semantic parity
-        run: cargo test --locked -q -p sens --test direct_t5m_pipeline
+        run: cargo test --locked -q -p sens --features rust-t5-reference --test direct_t5m_pipeline
       - name: Exact-domain T5M execution — pointwise width witnesses
         run: cargo test --locked -p sens --lib exact_t5m_cutover_tests -- --nocapture
       - name: Original SENS CLI evaluation and diagnostic regression

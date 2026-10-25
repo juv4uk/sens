@@ -83,7 +83,7 @@ fn rust_host_zig_e1_preserves_binary_sens_verdict_and_rejects_corruption() {
     );
     assert_eq!(
         backend.stdout,
-        b"transport=zig abi=2 semantic_authority=SENS\n"
+        b"transport=zig codec=T5M abi=2 semantic_authority=SENS\n"
     );
 
     let mut results = Vec::new();

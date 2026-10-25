@@ -19,7 +19,7 @@ jobs:
       - name: Перевірити пряме читання упакованих байтів D2 без текстового джерела
         run: cargo test --locked -p sens --lib canonical_reader::tests::packed_
       - name: Виконати фізичний .sens із типізованих двійкових слів
-        run: cargo test --locked -p sens --test physical_t5m_execution
+        run: cargo test --locked -p sens --features rust-t5-reference --test physical_t5m_execution
       - name: Перевірити, що заповнення D3–D10 походить лише з ратифікованих карт
         run: python3 scripts/generate-domain-owner-registry.py --check
       - name: Перевірити фізичне заповнення D8/D9 без допуску до семантичного виконання

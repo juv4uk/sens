@@ -14,4 +14,4 @@ jobs:
       - name: Three-pass exact migration + physical T5 checks
         run: python3 -m unittest discover -s tests -p 'test_migration_pair_cohort.py' -v
       - name: Current SENS oracle executes migrated physical programs
-        run: cargo test -p sens --test migration_pair_cohort
+        run: cargo test -p sens --features rust-t5-reference --test migration_pair_cohort

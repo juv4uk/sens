@@ -14,4 +14,4 @@ jobs:
       - name: Three-pass exact migration and physical T5 parity
         run: python3 -m unittest discover -s tests -p 'test_migration_eq_cond_cohort.py' -v
       - name: Historical EQ/COND physical T5 transport (no semantic oracle)
-        run: cargo test -p sens --test migration_eq_cond_cohort
+        run: cargo test -p sens --features rust-t5-reference --test migration_eq_cond_cohort

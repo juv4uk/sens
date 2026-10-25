@@ -49,4 +49,4 @@ jobs:
             ${{ runner.temp }}/physical-view-preview-ledger.json
             ${{ runner.temp }}/physical-view-verified-ledger.json
       - name: Current Rust D1-only COND oracle reads committed physical bytes
-        run: cargo test -p sens --test migration_d1_cond_cohort -- --nocapture
+        run: cargo test -p sens --features rust-t5-reference --test migration_d1_cond_cohort -- --nocapture

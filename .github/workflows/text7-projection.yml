@@ -22,4 +22,4 @@ jobs:
           python3 -m unittest discover -s tests -p 'test_d7_t5_keyboard.py' -v
       - uses: dtolnay/rust-toolchain@stable
       - name: Current D7 Rust / Text7 / D2 boundaries
-        run: cargo test --locked -p sens --test d7_keyboard_t5 --test text7_canonical_wire
+        run: cargo test --locked -p sens --features rust-t5-reference --test d7_keyboard_t5 --test text7_canonical_wire

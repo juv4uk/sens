@@ -15,4 +15,4 @@ jobs:
       - name: Verify real three-pass .lisp migration and physical T5 receipts
         run: python3 -m unittest discover -s tests -p 'test_migration_eq_cohort.py' -v
       - name: Check executable D3 EQ -> exact D1 oracle parity
-        run: cargo test -p sens --test migration_eq_cohort
+        run: cargo test -p sens --features rust-t5-reference --test migration_eq_cohort

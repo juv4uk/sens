@@ -19,7 +19,7 @@ jobs:
       - name: SHA-pinned single-file physical T5 CLI, negative controls, no-clobber
         run: python3 -m unittest discover -s tests -p 'test_migrate_selected_lisp.py' -v
       - name: Independently execute current admitted D4 CAAR oracle
-        run: cargo test -p sens --test migration_d4_selector_cohort -- --nocapture
+        run: cargo test -p sens --features rust-t5-reference --test migration_d4_selector_cohort -- --nocapture
       - name: Inspect REAL tracked original Lisp sources (no publishing)
         # The retired legacy/current source-era flags NEVER grant D8 callability.
         shell: bash

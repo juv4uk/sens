@@ -14,7 +14,7 @@ jobs:
       - uses: ./.github/actions/install-zig
       - uses: dtolnay/rust-toolchain@stable
       - name: "Run physical binary SENS transport/mechanism witness"
-        run: cargo test --locked -p sens --test binary_sens_d1_cond_oracle -- --nocapture
+        run: cargo test --locked -p sens --features rust-t5-reference --test binary_sens_d1_cond_oracle -- --nocapture
       - name: "Verify existing current exact-binary interpreter preflight"
         run: cargo test --locked -p sens --test current_binary_preflight -- --nocapture
 

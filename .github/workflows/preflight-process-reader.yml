@@ -16,7 +16,7 @@ jobs:
       - name: "TCP точковий свідок: 7 бітів і всі 2046 координат D1-D10"
         run: python3 -m unittest discover -s tests -p test_tcp_d1_fallback.py -v
       - name: TCP виконуваний двостановий D1 і відхилення Number 1
-        run: cargo test --locked -p sens --test tcp_d1_fallback -- --nocapture
+        run: cargo test --locked -p sens --features rust-t5-reference --test tcp_d1_fallback -- --nocapture
       - name: "Process direct W1 D1: full source provenance, all domains and negative mutations"
         run: python3 -m unittest discover -s tests -p test_process_d1_direct.py -v
       - name: "Process strict D1: five real AST values and conditional short-circuit"
