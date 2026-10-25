@@ -5,7 +5,7 @@ const t5m = @import("t5m.zig");
 const f3c = @import("f3c/f3c.zig");
 const e1 = @import("transport/e1.zig");
 const e1_writer = @import("transport/e1_writer.zig");
-const raw_fields = @import("transport/fields.zig");
+const raw_bitpack = @import("transport/raw_bitpack.zig");
 // ABI v2 uses caller-owned byte triplets; no padded host structs cross the boundary.
 /// ABI v2: the preferred boundary uses explicit [width, payload-MSB, payload-LSB]
 /// per word, NOT a C struct with host-dependent padding/alignment/endianness.
@@ -25,35 +25,7 @@ pub export fn sens_zig_bitpack_fields(
     dst: [*]u8,
     capacity: usize,
 ) isize {
-    const record_size: usize = 9;
-    if (byte_len == 0 or byte_len % record_size != 0) return -1;
-    const count = byte_len / record_size;
-    const source_addr = @intFromPtr(src);
-    const dest_addr = @intFromPtr(dst);
-    if (capacity > 0 and
-        ((source_addr <= dest_addr and dest_addr - source_addr < byte_len) or
-            (dest_addr < source_addr and source_addr - dest_addr < capacity))) return -1;
-
-    const fields = std.heap.page_allocator.alloc(raw_fields.Field, count) catch return -1;
-    defer std.heap.page_allocator.free(fields);
-    var offset: usize = 0;
-    for (fields) |*field| {
-        const width = src[offset];
-        if (width == 0 or width > 64) return -1;
-        var value: u64 = 0;
-        for (src[offset + 1 .. offset + record_size]) |byte| {
-            value = (value << 8) | @as(u64, byte);
-        }
-        field.* = .{ .width = width, .bits = value };
-        offset += record_size;
-    }
-    const bit_len = raw_fields.measure(fields) catch return -1;
-    const required = bit_len / 8 + @as(usize, @intFromBool(bit_len % 8 != 0));
-    if (capacity == 0) return @intCast(required);
-    if (capacity < required) return -2;
-    const written = raw_fields.pack(dst[0..required], fields) catch return -1;
-    if (written != bit_len) return -1;
-    return @intCast(required);
+    return raw_bitpack.packFields(src, byte_len, dst, capacity);
 }
 
 test "raw bitstream ABI packs exact widths through Zig with zero canonical tail" {
