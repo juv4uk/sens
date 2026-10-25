@@ -20,8 +20,8 @@ class RemintExplicitManifestScopeTests(unittest.TestCase):
         cls.ci_source = CI_WORKFLOW.read_text(encoding="utf-8")
 
     def test_remint_trigger_uses_exact_git_diff_and_explicit_recovery_marker(self) -> None:
-        detector_start = self.ci_source.index("  detect-remint:\\n")
-        remint_start = self.ci_source.index("  remint-targeted:\\n", detector_start)
+        detector_start = self.ci_source.index("  detect-remint:\n")
+        remint_start = self.ci_source.index("  remint-targeted:\n", detector_start)
         detector = self.ci_source[detector_start:remint_start]
         remint = self.ci_source[remint_start:]
 
