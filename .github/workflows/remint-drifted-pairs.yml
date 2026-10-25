@@ -477,6 +477,17 @@ jobs:
             echo "failed=false" >> "$GITHUB_OUTPUT"
           fi
 
+      # Після remint перевіряємо реальний F6 producer→consumer на ТІЙ САМІЙ
+      # робочій копії, де щойно згенеровані фізичні T5M активи.
+      # build.rs / Zig @embedFile бачать змінені .sens файли через Cargo rebuild.
+      # Невдала пара не може бути закомічена лише тому, що сам mint завершився.
+      - name: F6 — нативний producer → фізичний T5M → consumer
+        id: f6_physical_proof
+        shell: bash
+        run: |
+          set -euo pipefail
+          cargo test --locked -p sens-cli --test wsm_fs_f6_pipeline -- --nocapture
+
       # Один нативний суд одночасно перевіряє всі фізичні програми
       # й друкує CONTEST_NATIVE_VERIFIED_EXECUTABLES. Другий повний
       # count-executable-lisp до push дублював SENS/Zig виконання,
@@ -494,7 +505,7 @@ jobs:
         # Публікація тільки реальних SENS/Zig пар; суперечливий або старий
         # фізичний код не перебазовувати поверх свіжої української програми.
         # Після гонки refs заново майнити джерела на актуальному main.
-        if: ${{ !cancelled() && steps.remint.outcome == 'success' }}
+        if: ${{ !cancelled() && steps.remint.outcome == 'success' && steps.f6_physical_proof.outcome == 'success' }}
         env:
           REMINT_CONTEST: ${{ steps.remint.outputs.contest }}
           REMINT_GITHUB_REF: ${{ github.ref }}
