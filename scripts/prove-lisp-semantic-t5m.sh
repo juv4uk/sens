@@ -1038,7 +1038,11 @@ run_case run_type_rejection d11-form-presence-improper-match "$d11_form_bad_matc
 d11_form_bad_miss="$evidence/d11-form-presence-improper-miss.lisp"
 cat -- lib/d11-form-presence.lisp tests/fixtures/d11-form-presence-improper-miss-negative.lisp > "$d11_form_bad_miss"
 run_case run_type_rejection d11-form-presence-improper-miss "$d11_form_bad_miss" 'car expects a non-empty list'
-sha256sum lib/d11-form-presence.lisp tests/fixtures/d11-form-presence-improper-{match,miss}-negative.lisp > "$evidence/d11-form-presence-inputs.sha256"
+# Вкладений D1-хвіст не приховується раннім збігом DEFINE.
+d11_form_bad_deep="$evidence/d11-form-presence-deep-improper-complete.lisp"
+cat -- lib/d11-form-presence.lisp tests/fixtures/d11-form-presence-deep-improper-negative.lisp > "$d11_form_bad_deep"
+run_case run_type_rejection d11-form-presence-deep-improper "$d11_form_bad_deep" 'car expects a non-empty list'
+sha256sum lib/d11-form-presence.lisp tests/fixtures/d11-form-presence-improper-{match,miss}-negative.lisp tests/fixtures/d11-form-presence-deep-improper-negative.lisp > "$evidence/d11-form-presence-inputs.sha256"
 # Д11 LIST-TERMINATOR: D1:ні є даними неправильного хвоста, D3:() — кінець.
 # Фізична SENS-бібліотека та незалежний позитив/мутант використовують одні DEFINE.
 d11_terminator_positive="$evidence/d11-list-terminator-positive-complete.lisp"
