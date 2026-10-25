@@ -594,27 +594,31 @@ run_case run_law d9-f6-admit-unknown-key "$d9_unknown_key_complete" 0 core4
 # Діагностика bindings: кожен інваріант окремим нативним SENS-законом.
 # Це локалізує першу неправильну умову без зміни семантичних очікувань.
 d9_binding_probe() {
-  local name="$1" expression="$2" expected="$3"
+  local name="$1" expected="$2"
   local law="$evidence/d9-f6-bindings-probe-$name.lisp"
   local complete="$evidence/d9-f6-bindings-probe-$name-complete.lisp"
-  printf '%s\n' "$expression" > "$law"
+  cat > "$law"
   cat -- "$d9_fs_probe_dependencies" "$law" > "$complete"
   run_case run_law "d9-f6-bindings-probe-$name" "$complete" "$expected" core4
 }
-d9_binding_probe empty-is-valid \
-  "(за-умовою ((фс-зв'язки-правильні? (як-є ())) так) (так ні))" 1
-d9_binding_probe one-pair-is-valid \
-  "(за-умовою ((фс-зв'язки-правильні? (список (сполучити (як-є a) (як-є адреса)))) так) (так ні))" 1
-d9_binding_probe atom-record-is-invalid \
-  "(за-умовою ((хибне? (фс-зв'язки-правильні? (список (як-є пошкоджений-запис)))) так) (так ні))" 1
-d9_binding_probe bad-record-after-valid-is-invalid \
-  "(за-умовою ((хибне? (фс-зв'язки-правильні? (список (сполучити (як-є a) (як-є адреса)) (як-є пошкоджений-запис)))) так) (так ні))" 1
-d9_binding_probe d1-false-tail-is-invalid \
-  "(за-умовою ((хибне? (фс-зв'язки-правильні? (сполучити (сполучити (як-є a) (як-є адреса)) ні))) так) (так ні))" 1
-d9_binding_probe invalid-addresses-rejected \
-  "(за-умовою ((хибне? (усі-адреси-зв'язувань-у-файловій-системі-наявні? (список (як-є пошкоджений-запис)) (як-є ()))) так) (так ні))" 1
-
-
+d9_binding_probe empty-is-valid 1 <<'SENS_LAW'
+(за-умовою ((фс-зв'язки-правильні? (як-є ())) так) (так ні))
+SENS_LAW
+d9_binding_probe one-pair-is-valid 1 <<'SENS_LAW'
+(за-умовою ((фс-зв'язки-правильні? (список (сполучити (як-є a) (як-є адреса)))) так) (так ні))
+SENS_LAW
+d9_binding_probe atom-record-is-invalid 1 <<'SENS_LAW'
+(за-умовою ((хибне? (фс-зв'язки-правильні? (список (як-є пошкоджений-запис)))) так) (так ні))
+SENS_LAW
+d9_binding_probe bad-record-after-valid-is-invalid 1 <<'SENS_LAW'
+(за-умовою ((хибне? (фс-зв'язки-правильні? (список (сполучити (як-є a) (як-є адреса)) (як-є пошкоджений-запис)))) так) (так ні))
+SENS_LAW
+d9_binding_probe d1-false-tail-is-invalid 1 <<'SENS_LAW'
+(за-умовою ((хибне? (фс-зв'язки-правильні? (сполучити (сполучити (як-є a) (як-є адреса)) ні))) так) (так ні))
+SENS_LAW
+d9_binding_probe invalid-addresses-rejected 1 <<'SENS_LAW'
+(за-умовою ((хибне? (усі-адреси-зв'язувань-у-файловій-системі-наявні? (список (як-є пошкоджений-запис)) (як-є ()))) так) (так ні))
+SENS_LAW
 
 
 # D9/F6: канонізація лише десяти фіксованих ключів протоколу.
