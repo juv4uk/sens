@@ -97,7 +97,24 @@ pub(crate) fn evaluate_definition(
         canon::ensure_bindable(&name, arguments[0].span)?;
         let value = evaluate(&arguments[1], environment)?;
         canon::bind_language_definition(&name, &value, environment);
-        environment.define(name, value.clone());
+        environment.define(name.clone(), value.clone());
+        // A physical Core4 DEFINE target arrives as a canonical D7 word token,
+        // but the definition must also be resolvable by its ratified Ukrainian
+        // source spelling: the D7-frame call reader and direct environment
+        // readers (named D24+ roots) key on that spelling, not the wire token.
+        // Mirror bind_core_runtime_mechanisms: project only the already
+        // evaluated callable, never a bare resident.
+        if let Some(surface) = crate::Text7::from_canonical_wire_token(&name)
+            .ok()
+            .and_then(|text| crate::render_text7(&text, crate::Text7Layout::Uk).ok())
+        {
+            if surface != name
+                && environment.get(&surface).is_none()
+                && canon::ensure_bindable(&surface, arguments[0].span).is_ok()
+            {
+                environment.define(surface, value.clone());
+            }
+        }
         return Ok(value);
     }
 
@@ -162,6 +179,23 @@ pub(crate) fn evaluate_definition(
                     format!("exact DEFINE target was concurrently bound: {target}"),
                     arguments[0].span,
                 ));
+            }
+
+            // The physical Core4 carrier encodes a ratified D9/D10 DEFINE
+            // target as its exact domain coordinate, so the reader binds no
+            // text name for it. Also bind the ratified Ukrainian source
+            // spelling of this concrete definition, so callers resolve it as a
+            // source head instead of failing with `unknown symbol`. Residency
+            // alone still grants nothing: the slot was bound only above, and a
+            // missing coordinate never reaches this arm.
+            if let Some(surface) =
+                crate::semantic_registry::surface_for_domain_identity(target, "ukr")
+            {
+                if environment.get(surface).is_none()
+                    && canon::ensure_bindable(surface, arguments[0].span).is_ok()
+                {
+                    environment.define(surface, value.clone());
+                }
             }
 
             Ok(value)
