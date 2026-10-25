@@ -1,17 +1,12 @@
-//! ZIG-OWNED: physical bit-packing is the sterile Zig corridor's job (t5/f3c/transport.zig).
-//! Rust is byte-addressed and must NOT pack: Zig hands it already-packed programs.
-//! This module is retained only for the staged removal (#5617/#5609). Do not extend it.
-//! Dense sequential packing for exact-width small SENS words.
+//! ZIG-OWNED: native physical bit-packing is implemented by the sterile Zig ABI.
+//! Rust BitPacker is a compatibility facade: it stages exact-width value records,
+//! then delegates raw MSB-first byte emission to sens_zig_bitpack_fields.
+//! PackedBitstream remains the exact-byte-count container/read adapter.
+//! wasm32 currently uses an explicitly named reference path until a compatible
+//! Zig archive is built for that final linker profile.
 //!
-//! This module is mechanical transport/storage infrastructure only. It packs
-//! already-typed `Bits<N>` values into one continuous MSB-first bitstream.
-//! Semantic word order is preserved, but physical byte boundaries are ignored:
-//! a word may begin in one byte and end in the next.
-//!
-//! The packed payload stores only bytes plus the exact number of valid bits.
-//! It does not assign SENS meaning, encode semantic word boundaries, or choose
-//! a wire representation for the bit length. Those framing concerns remain
-//! outside this module.
+//! This module assigns no SENS meaning and invents no word boundaries. The
+//! caller owns exact widths and the meaningful bit count; Zig owns native bytes.
 //!
 //! ```
 //! use sens::{Bit2, Bit3, BitPacker};
@@ -255,6 +250,7 @@ impl BitPacker {
 
     /// Reserve an estimate for a stream of this many meaningful bits.
     pub fn with_capacity_bits(bit_capacity: usize) -> Self {
+        #[cfg(not(sens_rust_bitpack_reference))]
         let record_capacity = byte_len_for_bits(bit_capacity).saturating_mul(9);
         Self {
             #[cfg(sens_rust_bitpack_reference)]
@@ -333,6 +329,7 @@ impl BitPacker {
     pub fn push_stream(&mut self, source: &PackedBitstream) -> Option<usize> {
         let start = self.bit_len;
         let end = start.checked_add(source.bit_len)?;
+        #[cfg(not(sens_rust_bitpack_reference))]
         let chunks = source.bit_len.checked_add(7)? / 8;
 
         #[cfg(not(sens_rust_bitpack_reference))]
