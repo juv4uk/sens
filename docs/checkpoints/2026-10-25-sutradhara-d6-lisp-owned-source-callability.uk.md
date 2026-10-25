@@ -59,3 +59,13 @@
 - `D1_D12_PLUS_RELEASE=NO_GO`.
 
 Не змінювати `knowledge/d6-mechanism-ledger.json` на `LISP_OWNED` до завершених позитивного, мутантного та Type-негативних запусків на одному SHA. Після цього окремо провести механічний аудит згенерованого binding slot — unit-test source head сам по собі не підтверджує виконання closure.
+
+
+## Корекція після Rust RED · 25.10.2026
+
+[Run 40154746518](https://github.com/juv4uk/sens/actions/runs/40154746518) для [`d8e7ac5`](https://github.com/juv4uk/sens/commit/d8e7ac59ced95ae2b6e2604cff03ccd5b7fc212d) підтвердив RED на кроці 13 «Rust — механізм без мовного оракула». Причиною було саме перетворення `identity.into()`: у цьому місці загальне перетворення `DomainIdentity` на `CoreDomainIdentity` не було коректним.
+
+Коміт [`dcfcf00`](https://github.com/juv4uk/sens/commit/dcfcf005c8643650f0f28c8ccb246b35f9a238b8) виправив це явним pattern match:
+`DomainIdentity::D6(word) => Some(CoreDomainIdentity::D6(word))`, а всі інші варіанти відхиляються. Це кращий доказовий бар’єр: джерельний маршрут не може випадково прийняти інший домен через загальне `Into`.
+
+**Поточна перевірка ще не завершена:** run [40154818762](https://github.com/juv4uk/sens/actions/runs/40154818762) для `dcfcf00` під час останнього запиту ще був на встановленні Zig (крок 12), до Rust-кроку. Додатковий run [40154825127](https://github.com/juv4uk/sens/actions/runs/40154825127) для коментарного уточнення також триває. Тож `D6_SOURCE_LOWERING_UNIT=NOT_VERIFIED`, `D6_LENGTH_ONTO_NATIVE_SENS_T5M=NOT_VERIFIED`; жоден D6 ledger promotion не зроблено.
