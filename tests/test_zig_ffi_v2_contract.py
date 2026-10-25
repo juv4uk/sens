@@ -550,7 +550,7 @@ class ZigAbiV2DeclarationContractTest(unittest.TestCase):
 
     def test_root_asset_copy_is_separate_from_nine_function_abi_v2(self):
         check_root_asset_corridor(self.asset_zig, self.asset_rust, self.rust)
-        self.assertEqual(len(EXPECTED), 9)
+        self.assertEqual(len(EXPECTED), 10)
         self.assertEqual(set(declarations(strip_c_comments(self.rust), "rust")), set(EXPECTED))
 
     def test_unify_repl_uses_physical_t5m_asset_and_keeps_root_load_order(self):
