@@ -281,6 +281,23 @@ run_bound_law() {
 
 # Негатив типу: мовний текст застосовує EQ до пари й атома.
 # Не перетворюємо Type у false; транспорт лише зберігає фізичну форму.
+# SENS diagnostics are presentation-localized. Keep the semantic error class
+# and recognize the canonical Ukrainian spelling alongside the legacy English text.
+diagnostic_matches() {
+  local expected="$1" log="$2"
+  if grep -Fq -- "$expected" "$log"; then
+    return 0
+  fi
+  case "$expected" in
+    'car expects a non-empty list')
+      grep -Fq -- 'Помилка типу: перше очікує непорожній список' "$log" ;;
+    'eq expects two atoms')
+      grep -Fq -- 'Помилка типу: еквівалентність очікує два атоми' "$log" ;;
+    *)
+      return 1 ;;
+  esac
+}
+
 run_error_rejection() {
   # Перевіряємо названий клас помилки на прямому, парному та фізичному шляху.
   # Bash лише класифікує справжню діагностику SENS, не створює семантичний вирок.
@@ -310,7 +327,7 @@ run_error_rejection() {
   if profile_stage "$id" direct timeout 45s "${direct_command[@]}" >"$dir/direct.out" 2>"$dir/direct.err"; then
     fail "$id" sens-direct "$expected_kind-rejection" "unexpected-success"
   fi
-  if ! grep -Fq "$diagnostic" "$dir/direct.err"; then
+  if ! diagnostic_matches "$diagnostic" "$dir/direct.err"; then
     cat "$dir/direct.err" >&2
     fail "$id" sens-direct "expected-$expected_kind-diagnostic" "unclassified-rejection"
   fi
@@ -331,7 +348,7 @@ run_error_rejection() {
   if profile_stage "$id" sens-paired timeout 45s "$sens" --t5m-pair "$source" "$physical" "${paired_args[@]}" >"$dir/paired.out" 2>"$dir/paired.err"; then
     fail "$id" sens-physical "$expected_kind-rejection" "paired-accepted"
   fi
-  if ! grep -Fq "$diagnostic" "$dir/paired.err" ||
+  if ! diagnostic_matches "$diagnostic" "$dir/paired.err" ||
      ! grep -Fq "kind=$expected_kind" "$dir/paired.err"; then
     cat "$dir/paired.err" >&2
     fail "$id" sens-physical "$expected_kind" "unexpected-paired-error"
@@ -339,7 +356,7 @@ run_error_rejection() {
   if profile_stage "$id" sens-standalone timeout 45s "${physical_command[@]}" >"$dir/physical.out" 2>"$dir/physical.err"; then
     fail "$id" sens-physical "$expected_kind-rejection" "standalone-accepted"
   fi
-  if ! grep -Fq "$diagnostic" "$dir/physical.err"; then
+  if ! diagnostic_matches "$diagnostic" "$dir/physical.err"; then
     cat "$dir/physical.err" >&2
     fail "$id" sens-physical "$expected_kind" "unexpected-standalone-error"
   fi
