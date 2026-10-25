@@ -495,6 +495,8 @@ jobs:
         env:
           REMINT_CONTEST: ${{ steps.remint.outputs.contest }}
           REMINT_GITHUB_REF: ${{ github.ref }}
+          # Preserve the caller's closed candidate set after a non-fast-forward.
+          REMINT_FILES: ${{ inputs.files }}
         run: |
           set -euo pipefail
           # Native proof повертається виключно до ref, який його запустив.
@@ -553,74 +555,79 @@ jobs:
             # Новий незалежний конкурсант міг з'явитися, коли workflow
             # уже майнив старий HEAD. Push від GITHUB_TOKEN не запускає
             # наступний push-workflow: забираємо його в поточний native mint.
-            for source in benchmarks/contest-uk/*.lisp; do
-              [[ -f "$source" && ! -L "$source" ]] || continue
-              pair="${source%.lisp}.sens"
-              view="${source%.lisp}"
-              needs_pair=0
-              if [[ ! -s "$pair" || ! -f "$view" ||
-                    -L "$pair" || -L "$view" ]]; then
-                needs_pair=1
-              else
-                source_commit="$(git log -1 --format=%H -- "$source")"
-                pair_commit="$(git log -1 --format=%H -- "$pair")"
-                if [[ -n "$source_commit" && -n "$pair_commit" ]] &&
-                   ! git merge-base --is-ancestor "$source_commit" "$pair_commit"; then
+            if [[ -n "${REMINT_FILES:-}" ]]; then
+              echo "REMINT_CURRENT_MAIN_SCOPE explicit-manifest=preserved"
+            else
+              for source in benchmarks/contest-uk/*.lisp; do
+                [[ -f "$source" && ! -L "$source" ]] || continue
+                pair="${source%.lisp}.sens"
+                view="${source%.lisp}"
+                needs_pair=0
+                if [[ ! -s "$pair" || ! -f "$view" ||
+                      -L "$pair" || -L "$view" ]]; then
                   needs_pair=1
+                else
+                  source_commit="$(git log -1 --format=%H -- "$source")"
+                  pair_commit="$(git log -1 --format=%H -- "$pair")"
+                  if [[ -n "$source_commit" && -n "$pair_commit" ]] &&
+                     ! git merge-base --is-ancestor "$source_commit" "$pair_commit"; then
+                    needs_pair=1
+                  fi
                 fi
-              fi
-              # Свіжий main може міняти фізичні байти без зміни .lisp.
-              # Перевіряємо чинний SENS/Zig mint перед конкурсним judge,
-              # щоб старий НСД не зупиняв нових справних учасників.
-              if (( ! needs_pair )) && [[ "$REMINT_CONTEST" == true ]]; then
-                probe_dir="$(mktemp -d "$RUNNER_TEMP/sens-contest-probe.XXXXXX")"
-                if ! target/debug/sens --t5m-mint "$source" "$probe_dir/probe.sens" >/dev/null ||
-                   ! cmp -s "$probe_dir/probe.sens" "$pair" ||
-                   ! target/debug/sens-trit view "$pair" | cmp -s - "$view"; then
+                # Свіжий main може міняти фізичні байти без зміни .lisp.
+                # Перевіряємо чинний SENS/Zig mint перед конкурсним judge,
+                # щоб старий НСД не зупиняв нових справних учасників.
+                if (( ! needs_pair )) && [[ "$REMINT_CONTEST" == true ]]; then
+                  probe_dir="$(mktemp -d "$RUNNER_TEMP/sens-contest-probe.XXXXXX")"
+                  if ! target/debug/sens --t5m-mint "$source" "$probe_dir/probe.sens" >/dev/null ||
+                     ! cmp -s "$probe_dir/probe.sens" "$pair" ||
+                     ! target/debug/sens-trit view "$pair" | cmp -s - "$view"; then
+                    needs_pair=1
+                    echo "REMINT_RECOVER_CONTEST_DRIFT source=$source native=SENS_ZIG"
+                  fi
+                  rm -rf -- "$probe_dir"
+                fi
+                if (( needs_pair )); then
+                  REMINT_CONTEST=true
+                  if ! grep -Fxq -- "$source" "$RUNNER_TEMP/sens-remint-candidates.list"; then
+                    printf '%s\n' "$source" >> "$RUNNER_TEMP/sens-remint-candidates.list"
+                    echo "REMINT_RECOVER_CONTEST_SOURCE source=$source"
+                  fi
+                fi
+              done
+              # Якщо попередні queued push скасовано, після rebase потрібно
+              # забрати й нові бібліотечні Lisp. Інакше незмінений старий
+              # кандидат-список ніколи не помітить їхні відсутні T5M пари.
+              # Тільки непарні або новіші за носій: без масового перемайну.
+              for source in lib/*.lisp tests/semantic/d9-string-append-physical.lisp tests/semantic/core1-gc-reachability-laws.lisp tests/semantic/біджа3-уточнення-атома-1968.lisp tests/semantic/meta-fc-predicates-d1-law.lisp tests/semantic/repl-uk-queue-law.lisp tests/semantic/repl-uk-queue-mutant.lisp lib/reverse-three.lisp lib/axioms-d1-principle-five.lisp lib/life-1-scheduler.lisp lib/lisp-fs.lisp lib/world.lisp lib/reason.lisp lib/forward.lisp lib/knowledge.lisp lib/unify.lisp lib/clips-import.lisp lib/machine/projection/x86-64.lisp lib/machine/lowering/semantic-x86-64.lisp; do
+                [[ -f "$source" && ! -L "$source" ]] || continue
+                # Незмінні описові й окремо діагностовані великі модулі
+                # не запускаються при чужому push; власна зміна — у diff вище.
+                case "$source" in
+                  lib/core2.lisp|lib/core-math.lisp|lib/core4.lisp|lib/yantra.lisp) continue ;;
+                esac
+                pair="${source%.lisp}.sens"
+                view="${source%.lisp}"
+                needs_pair=0
+                if [[ ! -s "$pair" || ! -f "$view" ||
+                      -L "$pair" || -L "$view" ]]; then
                   needs_pair=1
-                  echo "REMINT_RECOVER_CONTEST_DRIFT source=$source native=SENS_ZIG"
+                else
+                  source_commit="$(git log -1 --format=%H -- "$source")"
+                  pair_commit="$(git log -1 --format=%H -- "$pair")"
+                  if [[ -n "$source_commit" && -n "$pair_commit" ]] &&
+                     ! git merge-base --is-ancestor "$source_commit" "$pair_commit"; then
+                    needs_pair=1
+                  fi
                 fi
-                rm -rf -- "$probe_dir"
-              fi
-              if (( needs_pair )); then
-                REMINT_CONTEST=true
-                if ! grep -Fxq -- "$source" "$RUNNER_TEMP/sens-remint-candidates.list"; then
+                if (( needs_pair )) &&
+                   ! grep -Fxq -- "$source" "$RUNNER_TEMP/sens-remint-candidates.list"; then
                   printf '%s\n' "$source" >> "$RUNNER_TEMP/sens-remint-candidates.list"
-                  echo "REMINT_RECOVER_CONTEST_SOURCE source=$source"
+                  echo "REMINT_RECOVER_LIBRARY_SOURCE source=$source"
                 fi
-              fi
-            done
-            # Якщо попередні queued push скасовано, після rebase потрібно
-            # забрати й нові бібліотечні Lisp. Інакше незмінений старий
-            # кандидат-список ніколи не помітить їхні відсутні T5M пари.
-            # Тільки непарні або новіші за носій: без масового перемайну.
-            for source in lib/*.lisp tests/semantic/d9-string-append-physical.lisp tests/semantic/core1-gc-reachability-laws.lisp tests/semantic/біджа3-уточнення-атома-1968.lisp tests/semantic/meta-fc-predicates-d1-law.lisp tests/semantic/repl-uk-queue-law.lisp tests/semantic/repl-uk-queue-mutant.lisp lib/reverse-three.lisp lib/axioms-d1-principle-five.lisp lib/life-1-scheduler.lisp lib/lisp-fs.lisp lib/world.lisp lib/reason.lisp lib/forward.lisp lib/knowledge.lisp lib/unify.lisp lib/clips-import.lisp lib/machine/projection/x86-64.lisp lib/machine/lowering/semantic-x86-64.lisp; do
-              [[ -f "$source" && ! -L "$source" ]] || continue
-              # Незмінні описові й окремо діагностовані великі модулі
-              # не запускаються при чужому push; власна зміна — у diff вище.
-              case "$source" in
-                lib/core2.lisp|lib/core-math.lisp|lib/core4.lisp|lib/yantra.lisp) continue ;;
-              esac
-              pair="${source%.lisp}.sens"
-              view="${source%.lisp}"
-              needs_pair=0
-              if [[ ! -s "$pair" || ! -f "$view" ||
-                    -L "$pair" || -L "$view" ]]; then
-                needs_pair=1
-              else
-                source_commit="$(git log -1 --format=%H -- "$source")"
-                pair_commit="$(git log -1 --format=%H -- "$pair")"
-                if [[ -n "$source_commit" && -n "$pair_commit" ]] &&
-                   ! git merge-base --is-ancestor "$source_commit" "$pair_commit"; then
-                  needs_pair=1
-                fi
-              fi
-              if (( needs_pair )) &&
-                 ! grep -Fxq -- "$source" "$RUNNER_TEMP/sens-remint-candidates.list"; then
-                printf '%s\n' "$source" >> "$RUNNER_TEMP/sens-remint-candidates.list"
-                echo "REMINT_RECOVER_LIBRARY_SOURCE source=$source"
-              fi
-            done
+              done
+            fi
+
             # Відновлення після зсуву main: нові українські конкурсні
             # програми без T5M мають бути першими у короткому пакеті.
             # Інакше старий список із 24 бібліотечних записів витісняє
