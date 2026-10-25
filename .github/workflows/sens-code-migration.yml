@@ -1,10 +1,6 @@
 name: sens-code-migration
 
 on:
-  # Переведено на pull_request: workflow УЖЕ читає PR-дані,
-  # але тригер не стріляв — перевірка не мала наслідків.
-  pull_request:
-    branches: [main]
   workflow_dispatch:
 concurrency:
   group: sens-code-migration-${{ github.event.pull_request.number || github.ref }}
