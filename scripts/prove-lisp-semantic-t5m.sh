@@ -1002,6 +1002,28 @@ cat -- lib/d11-srfi1-set-relations.lisp tests/semantic/d11-srfi1-subset-improper
 run_case run_type_rejection d11-srfi1-member-improper-hit "$d11_set_member_bad" 'car expects a non-empty list'
 run_case run_type_rejection d11-srfi1-subset-improper-empty "$d11_set_subset_bad" 'car expects a non-empty list'
 sha256sum lib/d11-srfi1-set-relations.lisp tests/semantic/d11-srfi1-member-improper-hit-negative.lisp tests/semantic/d11-srfi1-subset-improper-empty-negative.lisp > "$evidence/d11-set-improper-inputs.sha256"
+# Д11 SRFI-1 LIST-INDEX: точний Д24+ індекс і окремий Д1 прапорець.
+# Повний D3 preflight ОБОХ списків до першого callback, навіть якщо
+# лівий порожній або ранній збіг сховав би зіпсований правий хвіст.
+d11_idx_library=lib/d11-srfi1-list-index-presence.lisp
+d11_idx_law="$evidence/d11-list-index-law-complete.lisp"
+d11_idx_mutant="$evidence/d11-list-index-mutant-complete.lisp"
+cat -- "$d11_idx_library" tests/semantic/d11-srfi1-list-index-presence-law.lisp > "$d11_idx_law"
+cat -- "$d11_idx_library" tests/semantic/d11-srfi1-list-index-presence-mutant.lisp > "$d11_idx_mutant"
+run_case run_law d11-list-index-presence-law "$d11_idx_law" 1 core4
+run_case run_law d11-list-index-presence-mutant "$d11_idx_mutant" 0 core4
+for fixture in improper-after-hit pair-right-tail pair-empty-left-bad-right; do
+  witness="$evidence/d11-list-index-$fixture-complete.lisp"
+  cat -- "$d11_idx_library" "tests/fixtures/d11-srfi1-list-index-$fixture-negative.lisp" > "$witness"
+  run_case run_error_rejection "d11-list-index-$fixture" "$witness" Type 'car expects a non-empty list' core4
+done
+d11_idx_bad_pred="$evidence/d11-list-index-nonpredicate-complete.lisp"
+cat -- "$d11_idx_library" tests/fixtures/d11-srfi1-list-index-nonpredicate-negative.lisp > "$d11_idx_bad_pred"
+run_case run_error_rejection d11-list-index-nonpredicate "$d11_idx_bad_pred" Type 'D3:110 COND expects exact D1:1 / D1:0' core4
+sha256sum "$d11_idx_library" \
+  tests/semantic/d11-srfi1-list-index-presence-{law,mutant}.lisp \
+  tests/fixtures/d11-srfi1-list-index-*-negative.lisp > "$evidence/d11-list-index-presence-inputs.sha256"
+
 # SRFI-1 list=: алгоритм з чинної lib/D11, очікувані предикати тільки в Lisp.
 # Не тестуємо D11-операцію Rust-оракулом; Zig тільки кодує фізичні байти.
 d11_list_equal_law_bundle="$evidence/d11-list-equality-positive.lisp"
