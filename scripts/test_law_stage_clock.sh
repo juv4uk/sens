@@ -8,7 +8,7 @@ test -f "$source_path"
 source <(sed -n '/^profile_stage() {/,/^}/p' "$source_path")
 declare -F profile_stage >/dev/null
 evidence="$(mktemp -d)"
-trap 'rm -f -- "$evidence/law-stage-timings.tsv"; rmdir -- "$evidence"' EXIT
+trap 'rm -f -- "$evidence/law-stage-timings.tsv" "$evidence/clock-unknown.stderr"; rmdir -- "$evidence"' EXIT
 
 date() {
   echo "LAW_CLOCK_UNEXPECTED_DATE" >&2
@@ -22,9 +22,16 @@ trit=/bin/true
 profile_stage clock-clean sens-standalone timeout 5s "$trit" eval fixture.sens
 profile_stage clock-core4 sens-standalone timeout 5s "$trit" eval-core4 fixture.sens
 unknown_code=0
-profile_stage clock-unknown sens-standalone timeout 5s "$trit" decode fixture.sens || unknown_code=$?
+profile_stage clock-unknown sens-standalone timeout 5s "$trit" decode fixture.sens 2>"$evidence/clock-unknown.stderr" || unknown_code=$?
 if [[ "$unknown_code" != 2 ]]; then
   echo "LAW_CLOCK_UNKNOWN_EXECUTOR expected=2 actual=$unknown_code" >&2
+  exit 1
+fi
+# Очікуваний негатив — справжня помилка механізму, але вона не повинна
+# породжувати червону GitHub Actions анотацію в успішній самоперевірці.
+# Відсутній або змінений діагностичний текст робить цей self-test RED.
+if ! grep -Fq 'SENS_STAGE_EXECUTOR_UNKNOWN id=clock-unknown stage=sens-standalone' "$evidence/clock-unknown.stderr"; then
+  echo "LAW_CLOCK_UNKNOWN_EXECUTOR_DIAGNOSTIC_MISSING" >&2
   exit 1
 fi
 negative_code=0
