@@ -79,3 +79,28 @@ Run: https://github.com/juv4uk/sens/actions/runs/40208478645
 4. Core4/lisp-fs physical hash/source receipts повинні бути взяті лише з успішного завершеного job;
 5. Rust RED зі старих SHA не переносити на `ab805e8`; так само жоден старий PASS не є підтвердженням нового HEAD.
 
+## Додаток Jīvanmukta — D6 Core4 профіль повного фізичного пакета
+
+**Знімок коду:** `92bf131c736389a85e54cd7edd534e5990b28484` (попередня база контрольної точки — `ab805e8`).
+
+### Встановлена першопричина в run 40209958355
+
+У [run 40209958355](https://github.com/juv4uk/sens/actions/runs/40209958355) на попередньому helper:
+- pair-виконання producer уже мало `--core4-runtime` і чотири точні `--binding-source`;
+- source-only фізичні пари `lib/core4.lisp` і `lib/lisp-fs.lisp` успішно пройшли свій профіль;
+- але dependency-complete перевірка запускала `sens dependency-complete.sens`. CLI цього маршруту навмисно створює стерильний `Session::bare`; він не встановлює closure слот D6 LENGTH, тому повернув `domain identity is not callable under its ratified law: D6 000000`. Помилка стояла у verifier, не доводила дефекту SENS-алгоритму довжини.
+- До цієї діагностики фізичний mint/обернення Zig/T5M були успішні, але producer мав `physical=NOT_CERTIFIED`; увесь remint правильно лишився RED.
+
+### Точковий патч
+
+- [`7272c28`](https://github.com/juv4uk/sens/commit/7272c288cc78fa65831b53d039357bcd5960e951) додає regression assertion: dependency-complete carrier мусить використовувати обраний runtime-профіль.
+- [`92bf131`](https://github.com/juv4uk/sens/commit/92bf131c736389a85e54cd7edd534e5990b28484) змінює тільки виконавчу команду helper-а: `"${standalone_runtime[@]}" "$complete"`. За `--core4-runtime` це вже зареєстрований фізичний маршрут `sens-trit eval-core4`; у звичайному профілі зберігається звичайний runner. D6 не обходиться і не дозволяється автоматично.
+
+### Поточний hosted verdict і естафета
+
+- Новий run [40210368443](https://github.com/juv4uk/sens/actions/runs/40210368443) для `92bf131` був у черзі на останньому опитуванні. Тестовий run [40210355888](https://github.com/juv4uk/sens/actions/runs/40210355888) також очікував виконання.
+- Старий run [40209958355](https://github.com/juv4uk/sens/actions/runs/40209958355) — `failure` до цього виправлення і не є вердиктом нового коду.
+- Після нового запуску перевірити: (1) Python test `test_remint_explicit_manifest_scope`; (2) producer `T5M_REPAIR_OK` із фактичним dependency-complete Core4 round-trip; (3) негативний physical mutant rejected; (4) точні source/physical receipts; (5) загальний Rust/Zig/SENS job за exact SHA.
+
+**Вердикт на час контрольної точки: `RELEASE=NO-GO`; новий root-cause patch внесений, hosted підтвердження очікується.** Не переносити ні RED, ні PASS з іншого SHA.
+
