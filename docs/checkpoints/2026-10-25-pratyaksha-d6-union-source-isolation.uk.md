@@ -147,3 +147,36 @@ der positive Beweis ist jetzt fail-closed. Native Ergebnisse stehen aus.
 English: D6 UNION source isolation paths now match real canonical files;
 the native positive witness no longer ends in a trivially true expression.
 CI certification remains pending.
+
+## Додатковий ремонт після нативного сигналу ownership guard
+
+У CI `40165827026` (SHA `3348b1fc9816639b2f1645cd68007e801b75de07`)
+ранній крок `Власність тестів — Rust охоронець фізичних Lisp-законів`
+одержав статус FAILURE. Конкретна текстова причина не була
+доступна з незавершеного log на момент аудиту, проте статичний
+аналіз `scripts/guard-native-test-ownership.rs` встановив
+реальну прогалину маршрутизації: `routed()` перевіряє **буквальні**
+шляхи `tests/semantic/*.lisp`, що потрапляють до `cat`
+з точним іменованим bundle, який згодом використовує `run_case`.
+Старий динамічний рядок `d6-union-$kind.lisp` не містив
+буквального повного SOURCE та не міг пройти таку перевірку
+для зміненого позитивного SENS файла.
+
+Додатковий коміт
+`85ff1ddcc77189cb72e8415a9accb97c17cf4282`
+у `scripts/prove-lisp-semantic-t5m.sh`:
+- `tests/semantic/d6-union-proper-law.lisp` →
+  `$d6_union_proper_source` → `run_case run_law d6-union-proper`;
+- `tests/semantic/d6-union-proper-mutant.lisp` →
+  `$d6_union_mutant_source` → `run_case run_law d6-union-proper-mutant`.
+
+Той самий канонічний `$d6_union_source` з трьох існуючих
+SENS DEFINE, без нової semantics у скрипті. Негативні
+`improper-tail` і `improper-root` не змінювались,
+їхній фізичний маршрут зберігся.
+Головний принцип: не «лікувати» червоний власний guard
+його відключенням; уточнити маршрут справжнього тесту.
+
+`NATIVE_LAW_OWNERSHIP=SOURCE_ROUTE_REPAIRED_NOT_YET_VERIFIED`.
+`NATIVE_SENS_POSITIVE=NOT_VERIFIED`.
+`NATIVE_SENS_NEGATIVE=NOT_VERIFIED`.
