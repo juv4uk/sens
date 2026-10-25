@@ -1072,17 +1072,24 @@ sha256sum "$d11_idx_library" \
   tests/semantic/d11-srfi1-list-index-presence-{law,mutant}.lisp \
   tests/fixtures/d11-srfi1-list-index-*-negative.lisp > "$evidence/d11-list-index-presence-inputs.sha256"
 
-# Д11 SRFI-1 APPEND-REVERSE: правильна голова, довільний атомарний tail.
-# Лише справжній SENS обчислює D1 і D3: direct / Zig T5M / paired / standalone.
-for kind in law dotted-tail-law mutant; do
-  rev_append_source="$evidence/d11-append-reverse-$kind-complete.lisp"
-  cat -- lib/d11-srfi1-append-reverse.lisp \
-    "tests/semantic/d11-srfi1-append-reverse-$kind.lisp" > "$rev_append_source"
-  rev_append_expected=1
-  [[ "$kind" != mutant ]] || rev_append_expected=0
-  run_case run_law "d11-append-reverse-$kind" \
-    "$rev_append_source" "$rev_append_expected" core4
-done
+# Д11 SRFI-1 APPEND-REVERSE: статичні SENS-джерела і явні маршрути.
+# Rust ownership guard бачить конкретний SOURCE, не $kind-підміну.
+rev_append_law="$evidence/d11-append-reverse-law-complete.lisp"
+cat -- lib/d11-srfi1-append-reverse.lisp tests/semantic/d11-srfi1-append-reverse-law.lisp > "$rev_append_law"
+run_case run_law d11-append-reverse-law "$rev_append_law" 1 core4
+
+rev_append_mutant="$evidence/d11-append-reverse-mutant-complete.lisp"
+cat -- lib/d11-srfi1-append-reverse.lisp tests/semantic/d11-srfi1-append-reverse-mutant.lisp > "$rev_append_mutant"
+run_case run_law d11-append-reverse-mutant "$rev_append_mutant" 0 core4
+
+rev_append_dotted="$evidence/d11-append-reverse-dotted-tail-law-complete.lisp"
+cat -- lib/d11-srfi1-append-reverse.lisp tests/semantic/d11-srfi1-append-reverse-dotted-tail-law.lisp > "$rev_append_dotted"
+run_case run_law d11-append-reverse-dotted-tail-law "$rev_append_dotted" 1 core4
+
+rev_append_dotted_mutant="$evidence/d11-append-reverse-dotted-tail-mutant-complete.lisp"
+cat -- lib/d11-srfi1-append-reverse.lisp tests/semantic/d11-srfi1-append-reverse-dotted-tail-mutant.lisp > "$rev_append_dotted_mutant"
+run_case run_law d11-append-reverse-dotted-tail-mutant "$rev_append_dotted_mutant" 0 core4
+
 for invalid in d1-root late-improper deep-improper; do
   rev_append_negative="$evidence/d11-append-reverse-$invalid-complete.lisp"
   cat -- lib/d11-srfi1-append-reverse.lisp \

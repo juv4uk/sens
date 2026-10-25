@@ -40,9 +40,11 @@ SRFI-1 і реєстр кандидатів; D12+ — ще не доведена
   явний dotted tail D1:ні й точна нееквівалентність D3:().
 - `tests/semantic/d11-srfi1-append-reverse-mutant.lisp`:
   хибне припущення, що елементи не обернулися (D1:ні).
+- `tests/semantic/d11-srfi1-append-reverse-dotted-tail-mutant.lisp`:
+  хибне ототожнення D1:ні хвоста з D3:() (D1:ні).
 - Три незалежні Type негативи: D1 корінь, пізній і глибокий
   неправильний D1 хвіст у першому аргументі.
-- `scripts/prove-lisp-semantic-t5m.sh` запускає шість SENS законів
+- `scripts/prove-lisp-semantic-t5m.sh` запускає сім SENS законів
   через direct / Zig T5M mint+open+verify / paired / standalone core4;
   порівнює D1:1, D1:0 або точний CAR Type та створює SHA256 квитанції.
 - `scripts/execute_changed_lisp_t5m.sh` забезпечує ті самі
@@ -64,7 +66,7 @@ Desktop Commander раніше не мав активного підключен
 Реліз `l0.42.0`: **NO-GO**, доки власник не ратифікує GO.
 
 ## Завдання наступному Swarm
-1. Прогнати всі шість D11 APPEND-REVERSE свідків на точному SHA,
+1. Прогнати всі сім D11 APPEND-REVERSE свідків на точному SHA,
    не оголошувати PASS до реального direct/paired/standalone.
 2. Якщо будь-який RED: надати id, шар, source SHA256, індекс фізичної
    форми, очікуваний і фактичний D1/Type. Не повторювати червоні workflow.
@@ -81,5 +83,11 @@ Deutsch: APPEND-REVERSE in reinem SENS; D1:nein ist als dotted
 Tail keine D3-Leerliste. Native CI-Bestätigung ausstehend.
 
 English: Pure SENS SRFI-1 append-reverse with full first-list
-preflight, arbitrary tail, three laws and three exact Type negatives.
+preflight, arbitrary tail, four laws/mutants and three exact Type negatives.
 Native verification not claimed.
+
+## Додатковий доказ ownership guard
+Оновлено зв'язування позитивів із мутантами: два позитиви мають по
+одному контрприкладу. `scripts/prove-lisp-semantic-t5m.sh` більше не
+ховає SOURCE за динамічним `$kind`: кожен із чотирьох тестів має
+явний `cat` і явний `run_case`. Строгість охоронця не знижено.
