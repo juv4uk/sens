@@ -69,6 +69,8 @@
        . "Owner ratification is now effective; migration completion is NOT yet attested. Current release needs native SENS and Zig/T5M proof of exact domain words, D1 predicates, COND two-field rejection, D12 numeric boundaries and zero runnable SID8/Sens8/Function8 paths, plus separate owner GO decision.")
       (binary-domain-identity
        . "Every canonical semantic object is identified by its exact binary number together with its exact domain and the proved or ratified law that interprets that object in that domain. Equal packed numeric payloads in different widths or domains are not thereby the same identity.")
+      (projection-does-not-change-code
+       . "A domain code is its exact domain-qualified binary number/word and width; textual binary renderings and human-readable projection names are presentations or mappings, not the code identity. Correcting, renaming, adding or changing a projection must preserve the existing domain identity, exact width and bits. A projection name cannot grant or revoke callability; call admission is governed independently by the ratified domain law.")
       (machine-binary-default
        . "SENS machine semantics uses exact domain-qualified binary words directly. D1-D10 predicate, structure, function and text identities must never travel through decimal-number identifiers or any binary-to-decimal-to-binary conversion. Preserve exact width, leading zeroes, domain and law; host integers for indexing or transport have no semantic authority.")
       (d7-digits-are-text
@@ -86,7 +88,7 @@
       (flat-eight-current-runtime-ban
        . "Contract 12.0 retires ALL SID8/Sens8/Function8 execution and compatibility projections in active reader/evaluator/compiler/Zig/runtime. Historical archival provenance may remain only outside executable paths. All old live paths are blocking migration defects.")
       (surface-non-authority
-       . "Human-language and symbolic surfaces are optional source/UI routing metadata. A surface may resolve mechanically to an already-admitted domain-qualified identity ; it never creates semantic identity, owns meaning, or becomes semantic authority.")
+       . "Human-language and symbolic surfaces are optional source/UI routing metadata. A surface may resolve mechanically to an already-admitted domain-qualified identity ; it never creates semantic identity, owns meaning, or becomes semantic authority. Correcting or changing a surface preserves the mapped exact domain, width and bits and does not alter independent call admission.")
       (predicate-one-bit
        . "Core.D1 PredicateBit answers are exactly one contextual bit: 1 means YES and 0 means NO. PredicateBit is not Number, host Bool, T/NIL, Symbol, structural (), or any wider-domain value. No third predicate answer and no graded-width truth value is active.")
       (structure-two-bit
