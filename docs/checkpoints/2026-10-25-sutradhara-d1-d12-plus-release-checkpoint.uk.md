@@ -12,7 +12,7 @@
 4. D4/D6: п'ять пар `.sens.b64`/`.view.b64` є в `knowledge/d11/restore/udyoga/`. Mint/наявність файлу не є фізичним PASS.
 
 ## Відкриті першопричини
-- F6 producer → consumer: старий CI `40158590271` показав RED `root reconstruction rejected: 0`. Коміт `087843fbe447cfb022d1e622853cc28a2d9ce378` помилково замінив D4:`1001` (CADR) на LIST для root/object payload. Перевірка `lib/lisp-fs.lisp` підтвердила, що обидва D9-десеріалізатори повертають рішення `(accepted payload)`, тому CADR потрібен для отримання payload; LIST застосовується лише для колекції пакетів. Коміт `33f7d91db8d3cf8e78f1dbc0784fe0ef2d25e2d8` відновлює CADR для двох payload-ів. Першопричина `root reconstruction rejected: 0` далі НЕ встановлена: треба показати власний SENS-вердикт реконструкції `(rejected причина)` у фізичному трасуванні, а не робити висновки лише з фінального D1:ні.
+- F6 producer → consumer: старий CI `40158590271` показав RED `root reconstruction rejected: 0`. Коміт `087843fbe447cfb022d1e622853cc28a2d9ce378` помилково замінив D4:`1001` (CADR) на LIST для root/object payload. Перевірка `lib/lisp-fs.lisp` підтвердила, що обидва D9-десеріалізатори повертають рішення `(accepted payload)`, тому CADR потрібен для отримання payload; LIST застосовується лише для колекції пакетів. Коміт `33f7d91db8d3cf8e78f1dbc0784fe0ef2d25e2d8` відновлює CADR для двох payload-ів. Першопричина `root reconstruction rejected: 0` далі НЕ встановлена. Новий commit `d29d2d17af1a20dc64d74c9cfe9da3608ac070cc` додає в failure-path друк точного результату повторного SENS D9-виклику (`SENS_D9_RECONSTRUCTION=...`), а також змінює D9 `фс-зв'язки-з-список`: некоректний атомний хвіст тепер завершується D3 CAR Type, а не частково успішною мапою. Обидва зміни мають пройти нативний CI; фактичної нової діагностики ще немає.
 - D11 LIST=: неправильна D3-структура повинна дати Type-відмову, не бути замаскована як D1:ні.
 - D6 LET/LET*: старий RED показував D3 COND arity замість очікуваного D3 CAR Type до macro expansion. Перевірити актуальну фізичну пару Core4 і порядок валідації, не послаблювати COND.
 - D12 named bounds: probe у Rust-драйвері не є окремим SENS-законом; знайти мовний шлях exact-domain межових значень без сирих десяткових літералів у виконуваних Lisp.
@@ -36,3 +36,5 @@
 `F6_NATIVE_RECONSTRUCTION=NOT_VERIFIED_UNTIL_CURRENT_CI_COMPLETES`
 
 `F6_ROOT_RECONSTRUCTION_CAUSE=OPEN`
+
+`F6_D9_RECONSTRUCTION_DETAIL=ADDED_IN_d29d2d1; CI_PENDING`
