@@ -33,6 +33,12 @@ fn call(identity: DomainIdentity, arguments: Vec<Expr>) -> Expr {
     }
 }
 
+// D4:1110 is the canonical LIST resident. D4:1001 is CADR,
+// a selector, and must never be used as a packet/list constructor.
+fn d4_list(arguments: Vec<Expr>) -> Expr {
+    call(exact_d4(0b1110), arguments)
+}
+
 fn string_value(value: &str) -> Expr {
     Expr {
         kind: ExprKind::String(Rc::from(value)),
@@ -107,16 +113,17 @@ fn main() {
     // These exact identities are the ratified D9/D4 entries in
     // lib/domains/d9.lisp and lib/domains/d4.lisp. Rust builds only an exact
     // SENS call tree; all record parsing and validation executes in SENS.
-    let root_package = call(
-        exact_d4(0b1001),
-        vec![call(exact_d9(0b001110011), vec![string_value(&records[0])])],
-    );
-    let object_value = call(
-        exact_d4(0b1001),
-        vec![call(exact_d9(0b101000110), vec![string_value(&records[1])])],
-    );
+    // Root/object packets must be lists, not CADR selector applications.
+    let root_package = d4_list(vec![call(
+        exact_d9(0b001110011),
+        vec![string_value(&records[0])],
+    )]);
+    let object_value = d4_list(vec![call(
+        exact_d9(0b101000110),
+        vec![string_value(&records[1])],
+    )]);
     let object_package = call(exact_d9(0b010100010), vec![object_value]);
-    let object_packages = call(exact_d4(0b1110), vec![object_package]);
+    let object_packages = d4_list(vec![object_package]);
     let reconstruction = call(exact_d9(0b010101000), vec![root_package, object_packages]);
     // SENS performs the D3 selection and D8 structural comparison. Rust
     // checks only the resulting exact D1 answer.
