@@ -548,7 +548,7 @@ class ZigAbiV2DeclarationContractTest(unittest.TestCase):
         check_contract(self.zig, self.rust, self.header)
 
 
-    def test_root_asset_copy_is_separate_from_nine_function_abi_v2(self):
+    def test_root_asset_copy_is_separate_from_ten_function_abi_v2(self):
         check_root_asset_corridor(self.asset_zig, self.asset_rust, self.rust)
         self.assertEqual(len(EXPECTED), 10)
         self.assertEqual(set(declarations(strip_c_comments(self.rust), "rust")), set(EXPECTED))
