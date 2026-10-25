@@ -33,6 +33,12 @@ enum {
 };
 
 uint32_t sens_zig_codec_abi_version(void);
+/* Raw MSB-first fields: repeated [width:u8][value:u64 big-endian].
+ * Returns exact output byte length; capacity=0 queries length, -1 invalid,
+ * -2 insufficient capacity. This is an in-process ABI, not .sens wire data.
+ */
+ptrdiff_t sens_zig_bitpack_fields(const uint8_t *src, size_t byte_len,
+                                  uint8_t *dst, size_t capacity);
 /* Ordinary D1..D9 T5: physical success only, never semantic admission. */
 int sens_zig_t5_validate(const uint8_t *src, size_t len);
 /* Explicit D1..D10 COORDINATE-ONLY physical validation (0 or -1).
