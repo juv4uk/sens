@@ -67,6 +67,13 @@ run_native_t5m_program() {
     paired_runtime_args=(--core4-runtime)
     standalone_runtime=("$native_open" eval-core4)
   fi
+  # D11 APPEND-MAP використовує вже визначений D10 MAPPEND із Core4.
+  if [[ "$file" == "tests/semantic/d11-srfi1-append-map-law.lisp" ||
+        "$file" == "tests/semantic/d11-srfi1-append-map-improper-input-negative.lisp" ||
+        "$file" == "tests/semantic/d11-srfi1-append-map-improper-output-negative.lisp" ]]; then
+    paired_runtime_args=(--core4-runtime)
+    standalone_runtime=("$native_open" eval-core4)
+  fi
   source_bytes=$(wc -c < "$file")
   native_timeout=45s
   # Мінімальний свідок може підвантажувати 300+ KiB визначень.
@@ -187,6 +194,8 @@ run_native_t5m_program() {
       negative_type_diagnostic='car expects a non-empty list' ;;
     tests/fixtures/d8-right-fold-improper-before-action-negative.lisp|tests/fixtures/d8-right-scan-improper-before-action-negative.lisp)
       negative_type_diagnostic='car expects a non-empty list' ;;
+    tests/semantic/d11-srfi1-append-map-improper-input-negative.lisp|tests/semantic/d11-srfi1-append-map-improper-output-negative.lisp)
+      negative_type_diagnostic='car expects a non-empty list' ;;
     tests/semantic/d11-srfi1-filter-map-improper-root-negative.lisp|tests/semantic/d11-srfi1-filter-map-improper-tail-negative.lisp)
       negative_type_diagnostic='domain identity is not callable under its ratified law: D1 ' ;;
     tests/semantic/d11-srfi1-unary-count-improper-tail-negative.lisp|tests/semantic/d11-srfi1-unary-count-improper-right-negative.lisp)
@@ -258,6 +267,10 @@ run_native_t5m_program() {
           "$file" == "tests/semantic/d11-srfi1-subset-improper-empty-negative.lisp" ]]; then
       direct_source="$dir/d11-set-relations-bound-negative.lisp"
       cat -- lib/d11-srfi1-set-relations.lisp "$file" > "$direct_source"
+    elif [[ "$file" == "tests/semantic/d11-srfi1-append-map-improper-input-negative.lisp" ||
+            "$file" == "tests/semantic/d11-srfi1-append-map-improper-output-negative.lisp" ]]; then
+      direct_source="$dir/d11-append-map-bound-negative.lisp"
+      cat -- lib/d11-srfi1-append-map.lisp "$file" > "$direct_source"
     elif [[ "$file" == "tests/semantic/d11-srfi1-filter-map-improper-root-negative.lisp" ||
             "$file" == "tests/semantic/d11-srfi1-filter-map-improper-tail-negative.lisp" ]]; then
       direct_source="$dir/d11-filter-map-bound-negative.lisp"
@@ -351,6 +364,18 @@ run_native_t5m_program() {
          ! timeout "$native_timeout" "$native_open" open "$negative_standalone_physical" >"${negative_standalone_physical%.sens}" 2>"$dir/d11-form-deep-open.stderr" ||
          ! timeout "$native_timeout" "$native_open" verify-view "$negative_standalone_physical" >"$dir/d11-form-deep-verify.stdout" 2>"$dir/d11-form-deep-verify.stderr"; then
         echo "::error::D11_FORM_DEEP_NEGATIVE_PHYSICAL_INVALID source=$file" >&2
+        mark_file_failed
+        return
+      fi
+    fi
+    if [[ "$file" == "tests/semantic/d11-srfi1-append-map-improper-input-negative.lisp" ||
+          "$file" == "tests/semantic/d11-srfi1-append-map-improper-output-negative.lisp" ]]; then
+      # Самостійний SENS-чек має містити ті самі DEFINE, що прямий.
+      negative_standalone_physical="$dir/d11-append-map-bound-negative.sens"
+      if ! timeout "$native_timeout" "$binary" --t5m-mint "$direct_source" "$negative_standalone_physical" >"$dir/d11-append-map-neg-mint.stdout" 2>"$dir/d11-append-map-neg-mint.stderr" ||
+         ! timeout "$native_timeout" "$native_open" open "$negative_standalone_physical" >"${negative_standalone_physical%.sens}" 2>"$dir/d11-append-map-neg-open.stderr" ||
+         ! timeout "$native_timeout" "$native_open" verify-view "$negative_standalone_physical" >"$dir/d11-append-map-neg-verify.stdout" 2>"$dir/d11-append-map-neg-verify.stderr"; then
+        echo "::error::D11_APPEND_MAP_NEGATIVE_PHYSICAL_INVALID source=$file" >&2
         mark_file_failed
         return
       fi
@@ -1063,6 +1088,24 @@ run_native_t5m_program() {
         return
       fi
     fi
+    if [[ "$file" == "tests/semantic/d11-srfi1-append-map-law.lisp" ]]; then
+      # Повний фізичний потік містить D11 DEFINE і чинну SENS Core4.
+      local append_map_full_source="$dir/d11-append-map-full.lisp"
+      standalone_physical="$dir/d11-append-map-full.sens"
+      if ! cat -- lib/d11-srfi1-append-map.lisp "$file" > "$append_map_full_source" ||
+         ! timeout "$native_timeout" "$binary" --t5m-mint "$append_map_full_source" "$standalone_physical" >"$dir/d11-append-map-mint.stdout" 2>"$dir/d11-append-map-mint.stderr" ||
+         ! timeout "$native_timeout" "$native_open" open "$standalone_physical" >"${standalone_physical%.sens}" 2>"$dir/d11-append-map-open.stderr" ||
+         ! timeout "$native_timeout" "$native_open" verify-view "$standalone_physical" >"$dir/d11-append-map-verify.stdout" 2>"$dir/d11-append-map-verify.stderr"; then
+        echo "::error::D11_APPEND_MAP_STANDALONE_MINT_FAILED source=$file" >&2
+        mark_file_failed
+        return
+      fi
+      if [[ "$(cat "$dir/native-paired.stdout")" != 1 ]]; then
+        echo "::error::D11_APPEND_MAP_WRONG_D1 source=$file expected=1 actual=$(cat "$dir/native-paired.stdout")" >&2
+        mark_file_failed
+        return
+      fi
+    fi
     if [[ "$file" == "tests/semantic/d11-srfi1-filter-map-law.lisp" ||
           "$file" == "tests/semantic/d11-srfi1-filter-map-mutant.lisp" ]]; then
       # Повний фізичний носій має містити ті самі чинні SENS DEFINE,
@@ -1392,6 +1435,11 @@ while IFS= read -r file || [[ -n "$file" ]]; do
           "$file" == "tests/fixtures/d11-form-presence-deep-improper-negative.lisp" ]]; then
     # Усі свідки поділяють одне чинне джерело DEFINE мовою SENS.
     binding_sources=(--binding-source lib/d11-form-presence.lisp)
+  elif [[ "$file" == "tests/semantic/d11-srfi1-append-map-law.lisp" ||
+          "$file" == "tests/semantic/d11-srfi1-append-map-improper-input-negative.lisp" ||
+          "$file" == "tests/semantic/d11-srfi1-append-map-improper-output-negative.lisp" ]]; then
+    # Спільне визначення і D10 MAPPEND в одному парному Core4-сеансі.
+    binding_sources=(--binding-source lib/d11-srfi1-append-map.lisp)
   elif [[ "$file" == "tests/semantic/d11-srfi1-filter-map-law.lisp" ||
           "$file" == "tests/semantic/d11-srfi1-filter-map-mutant.lisp" ]]; then
     # Д11 FILTER-MAP: після зміни окремого свідка Mint/Pair мають
