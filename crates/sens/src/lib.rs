@@ -669,7 +669,10 @@ fn bind_existing_d6_language_mechanisms(environment: &Environment) {
         else {
             continue;
         };
-        if matches!(value, Value::Closure(_) | Value::Builtin(_)) {
+        // LET/LET* are SENS-owned macros: they carry source AST, not eager values.
+        // Transfer only the already-executed root binding to the exact D6 slot.
+        // This grants no code/residency a callable mechanism by itself.
+        if matches!(value, Value::Closure(_) | Value::Builtin(_) | Value::Macro(_)) {
             let _ = environment.bind_domain_code_slot_once(identity, value);
         }
     }
