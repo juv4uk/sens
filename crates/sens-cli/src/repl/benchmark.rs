@@ -41,6 +41,36 @@ fn nearest_rank(sorted: &[u128], percentile: usize) -> u128 {
     sorted[rank.saturating_sub(1).min(sorted.len() - 1)]
 }
 
+fn parse_process_memory(status: &str) -> Option<ProcessMemory> {
+    fn field_kib(status: &str, field: &str) -> Option<u64> {
+        status.lines().find_map(|line| {
+            let value = line.strip_prefix(field)?.trim();
+            let mut parts = value.split_whitespace();
+            let kib = parts.next()?.parse().ok()?;
+            (parts.next() == Some("kB")).then_some(kib)
+        })
+    }
+
+    Some(ProcessMemory {
+        rss_kib: field_kib(status, "VmRSS:")?,
+        peak_rss_kib: field_kib(status, "VmHWM:")?,
+    })
+}
+
+fn process_memory_snapshot() -> Option<ProcessMemory> {
+    let status = std::fs::read_to_string("/proc/self/status").ok()?;
+    parse_process_memory(&status)
+}
+
+fn memory_delta(start: Option<ProcessMemory>, end: Option<ProcessMemory>) -> Option<MemoryDelta> {
+    let (start, end) = (start?, end?);
+    Some(MemoryDelta {
+        start_rss_kib: start.rss_kib,
+        end_rss_kib: end.rss_kib,
+        peak_growth_kib: end.peak_rss_kib.saturating_sub(start.peak_rss_kib),
+    })
+}
+
 #[derive(Clone, Debug)]
 struct BenchmarkRow {
     name: &'static str,
@@ -49,12 +79,26 @@ struct BenchmarkRow {
     percentiles: Percentiles,
 }
 
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+struct ProcessMemory {
+    rss_kib: u64,
+    peak_rss_kib: u64,
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+struct MemoryDelta {
+    start_rss_kib: u64,
+    end_rss_kib: u64,
+    peak_growth_kib: u64,
+}
+
 #[derive(Clone, Debug)]
 struct BenchmarkReport {
     surface: ReplSurface,
     warmups: usize,
     samples: usize,
     rows: Vec<BenchmarkRow>,
+    memory: Option<MemoryDelta>,
 }
 
 #[derive(Clone, Debug)]
@@ -150,6 +194,7 @@ fn run_suite(
     }
     let surface = benchmark_surface(parent.surface);
     let mut rows = Vec::new();
+    let memory_start = process_memory_snapshot();
 
     for case in cases_for(surface)? {
         let mut state = isolated_repl_state(parent, surface);
@@ -197,6 +242,7 @@ fn run_suite(
         warmups,
         samples: requested_samples,
         rows,
+        memory: memory_delta(memory_start, process_memory_snapshot()),
     })
 }
 
@@ -246,6 +292,14 @@ fn draw_report(frame: &mut Frame, report: &BenchmarkReport) {
             std::env::consts::ARCH
         )),
         Line::from("Час на рядок REPL (нс); вивід у термінал не міряється."),
+        Line::from(match report.memory {
+            Some(memory) => format!(
+                "RSS процесу: {}→{} KiB · новий пік +{} KiB.",
+                memory.start_rss_kib, memory.end_rss_kib, memory.peak_growth_kib
+            ),
+            None => "RSS недоступний на цій платформі.".to_string(),
+        }),
+        Line::from("RSS охоплює REPL; Δ піку = новий high-water (0 не означає без алокацій)."),
         Line::from(""),
         Line::from(format!(
             "{:<18} {:>9} {:>9} {:>9} {:>9}  {:<8}",
@@ -287,7 +341,10 @@ fn draw_report(frame: &mut Frame, report: &BenchmarkReport) {
 
 #[cfg(test)]
 mod tests {
-    use super::{draw_report, run_suite, BenchmarkReport, BenchmarkRow, Percentiles};
+    use super::{
+        draw_report, memory_delta, parse_process_memory, run_suite, BenchmarkReport, BenchmarkRow,
+        MemoryDelta, Percentiles, ProcessMemory,
+    };
     use crate::repl::{ReplState, ReplSurface};
     use ratatui::{backend::TestBackend, Terminal};
     use sens::Session;
@@ -327,6 +384,41 @@ mod tests {
                 p99: 17,
             })
         );
+    }
+
+    #[test]
+    fn proc_status_parser_reads_current_and_peak_rss_without_assuming_field_order() {
+        let status = "Name:\tsens\nVmHWM:\t24576 kB\nThreads:\t1\nVmRSS:\t16384 kB\n";
+        assert_eq!(
+            parse_process_memory(status),
+            Some(ProcessMemory {
+                rss_kib: 16_384,
+                peak_rss_kib: 24_576,
+            })
+        );
+        assert_eq!(parse_process_memory("Name:\tsens\nVmRSS:\t10 kB\n"), None);
+        assert_eq!(parse_process_memory("Name:\tsens\nVmHWM:\tbad kB\n"), None);
+    }
+
+    #[test]
+    fn memory_delta_reports_new_process_peak_only() {
+        let start = Some(ProcessMemory {
+            rss_kib: 10_000,
+            peak_rss_kib: 12_000,
+        });
+        let end = Some(ProcessMemory {
+            rss_kib: 10_500,
+            peak_rss_kib: 12_256,
+        });
+        assert_eq!(
+            memory_delta(start, end),
+            Some(MemoryDelta {
+                start_rss_kib: 10_000,
+                end_rss_kib: 10_500,
+                peak_growth_kib: 256,
+            })
+        );
+        assert_eq!(memory_delta(start, None), None);
     }
 
     #[cfg(feature = "zig-transport")]
@@ -374,6 +466,11 @@ mod tests {
                     p99: 300,
                 },
             }],
+            memory: Some(MemoryDelta {
+                start_rss_kib: 16_384,
+                end_rss_kib: 16_512,
+                peak_growth_kib: 128,
+            }),
         };
         let mut terminal = Terminal::new(TestBackend::new(120, 24)).unwrap();
         terminal.draw(|frame| draw_report(frame, &report)).unwrap();
@@ -389,6 +486,8 @@ mod tests {
         assert!(visible.contains("p50 нс"), "{visible}");
         assert!(visible.contains("p95 нс"), "{visible}");
         assert!(visible.contains("p99 нс"), "{visible}");
+        assert!(visible.contains("RSS"), "{visible}");
+        assert!(visible.contains("0 не означає без алокацій"), "{visible}");
         assert!(visible.contains("579"), "{visible}");
         assert!(visible.contains("Zig T5M"), "{visible}");
     }
