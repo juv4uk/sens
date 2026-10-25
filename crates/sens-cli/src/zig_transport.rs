@@ -76,6 +76,41 @@ unsafe extern "C" {
         -> isize;
 }
 
+
+/// Pack caller-owned exact-width raw fields through Zig's canonical raw
+/// MSB-first bitpacker. Each nine-byte record is [width:u8][value:u64 BE].
+/// This is a mechanical payload helper, not SENS semantic admission.
+pub fn pack_raw_bit_fields(records: &[u8]) -> Result<Vec<u8>, String> {
+    if records.is_empty() {
+        return Err("Zig raw bitpack rejects an empty field schema".into());
+    }
+    let queried = unsafe {
+        sens_zig_bitpack_fields(
+            records.as_ptr(),
+            records.len(),
+            std::ptr::NonNull::<u8>::dangling().as_ptr(),
+            0,
+        )
+    };
+    let required = usize::try_from(queried)
+        .ok()
+        .filter(|&size| size > 0)
+        .ok_or_else(|| format!("Zig raw bitpack size query rejected: {queried}"))?;
+    let mut output = vec![0u8; required];
+    let written = unsafe {
+        sens_zig_bitpack_fields(
+            records.as_ptr(),
+            records.len(),
+            output.as_mut_ptr(),
+            output.len(),
+        )
+    };
+    if written != queried {
+        return Err(format!("Zig raw bitpack length mismatch: expected={queried} actual={written}"));
+    }
+    Ok(output)
+}
+
 fn version() -> Result<(), String> {
     if unsafe { sens_zig_codec_abi_version() } != 2 {
         return Err("Zig codec C ABI version mismatch".into());
