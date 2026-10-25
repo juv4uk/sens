@@ -289,9 +289,11 @@ mod paired {
             // The Lisp fixtures own the semantic claim. This test only routes
             // their exact source through the D12-first SENS projection, Zig/T5M
             // round-trip, and the existing SENS evaluator; it is not a host oracle.
-            for (id, fixture) in [
-                ("d5-d12-zerop", "d5-d12-zerop-law.lisp"),
-                ("d5-d12-numberp-ratio", "d5-d12-numberp-law.lisp"),
+            for (id, fixture, expected, min_d12_operands) in [
+                ("d5-d12-zerop", "d5-d12-zerop-law.lisp", true, 2),
+                ("d5-d12-numberp-ratio", "d5-d12-numberp-law.lisp", true, 2),
+                ("d5-d12-zerop-negative-limit", "d5-d12-zerop-negative-limit-law.lisp", false, 1),
+                ("d5-d12-zerop-promoted-nonzero", "d5-d12-zerop-promoted-nonzero-law.lisp", false, 2),
             ] {
                 let source_path = Path::new(env!("CARGO_MANIFEST_DIR"))
                     .join("../../tests/semantic")
@@ -308,8 +310,8 @@ mod paired {
                     .unwrap_or_else(|error| panic!("id={id} layer=SENS-admission {error}"));
                 let d12_operands = words.iter().filter(|word| word.width == 12).count();
                 assert!(
-                    d12_operands >= 2,
-                    "id={id} layer=projection expected=D12-operands actual={d12_operands}"
+                    d12_operands >= min_d12_operands,
+                    "id={id} layer=projection expected_at_least_D12_operands={min_d12_operands} actual={d12_operands}"
                 );
 
                 let physical = zig_transport::encode_t5m_exact_words(&words)
@@ -322,8 +324,9 @@ mod paired {
                     .unwrap_or_else(|error| panic!("id={id} layer=SENS-eval {error}"));
                 assert_eq!(
                     actual.as_predicate_bit(),
-                    Some(true),
-                    "id={id} layer=SENS-law expected=D1:так actual={actual}"
+                    Some(expected),
+                    "id={id} layer=SENS-law expected={} actual={actual}",
+                    if expected { "D1:так" } else { "D1:ні" }
                 );
             }
         }
