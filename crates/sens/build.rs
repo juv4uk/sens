@@ -319,7 +319,6 @@ fn pinned_zig() -> std::ffi::OsString {
 }
 
 fn build_zig_transport(root: &Path, output: &Path, compiler: &std::ffi::OsStr) {
-    println!("cargo:rustc-check-cfg=cfg(sens_rust_bitpack_reference)");
     println!("cargo:rerun-if-env-changed=CARGO_CFG_TARGET_ENV");
     println!("cargo:rerun-if-env-changed=CARGO_CFG_TARGET_OS");
     println!("cargo:rerun-if-env-changed=CARGO_CFG_TARGET_ARCH");
@@ -336,16 +335,10 @@ fn build_zig_transport(root: &Path, output: &Path, compiler: &std::ffi::OsStr) {
         println!("cargo:rerun-if-changed={}", root.join(path).display());
     }
 
-    // wasm32 keeps the reference carrier until the Zig archive is built for
-    // the final wasm linker profile; native Rust targets use the Zig packer.
-    if env::var("CARGO_CFG_TARGET_ARCH").as_deref() == Ok("wasm32") {
-        println!("cargo:rustc-cfg=sens_rust_bitpack_reference");
-        return;
-    }
-
     let target_env = env::var("CARGO_CFG_TARGET_ENV").unwrap_or_default();
     let target_os = env::var("CARGO_CFG_TARGET_OS").unwrap_or_default();
     let target_arch = env::var("CARGO_CFG_TARGET_ARCH").expect("CARGO_CFG_TARGET_ARCH");
+    let wasm = target_arch == "wasm32";
     let archive_name = if target_env == "msvc" {
         "sens_zig_transport.lib"
     } else {
@@ -357,13 +350,18 @@ fn build_zig_transport(root: &Path, output: &Path, compiler: &std::ffi::OsStr) {
         .arg("build-lib")
         .arg("zig_transport_root.zig")
         .arg("-O").arg("ReleaseSafe")
-        .arg("-fcompiler-rt")
-        .arg("-lc");
-    if target_env == "msvc" {
-        command.arg("-target").arg(format!("{target_arch}-windows-msvc"));
-    }
-    if target_os != "windows" {
-        command.arg("-fPIC");
+        .arg("-fcompiler-rt");
+    if wasm {
+        // Match the rustc wasm32-unknown-unknown profile; no host libc or PIC.
+        command.arg("-target").arg("wasm32-freestanding");
+    } else {
+        command.arg("-lc");
+        if target_env == "msvc" {
+            command.arg("-target").arg(format!("{target_arch}-windows-msvc"));
+        }
+        if target_os != "windows" {
+            command.arg("-fPIC");
+        }
     }
     let result = command.arg(format!("-femit-bin={}", archive.display()))
         .status()
