@@ -5,12 +5,79 @@ const t5m = @import("t5m.zig");
 const f3c = @import("f3c/f3c.zig");
 const e1 = @import("transport/e1.zig");
 const e1_writer = @import("transport/e1_writer.zig");
+const raw_fields = @import("transport/fields.zig");
 // ABI v2 uses caller-owned byte triplets; no padded host structs cross the boundary.
 /// ABI v2: the preferred boundary uses explicit [width, payload-MSB, payload-LSB]
 /// per word, NOT a C struct with host-dependent padding/alignment/endianness.
 /// This triplet stream is an in-process FFI representation, NEVER .sens wire.
 pub export fn sens_zig_codec_abi_version() u32 {
     return 2;
+}
+
+/// Dense raw MSB-first binary packing for exact-width words.
+/// Input records are fixed [width:u8][value:u64 big-endian] triples of bytes
+/// expanded to nine bytes per word. This is an in-process ABI, not wire data.
+/// capacity=0 queries exact byte count; -1 rejects malformed records; -2 is
+/// insufficient output capacity. No output bytes are written on either error.
+pub export fn sens_zig_bitpack_fields(
+    src: [*]const u8,
+    byte_len: usize,
+    dst: [*]u8,
+    capacity: usize,
+) isize {
+    const record_size: usize = 9;
+    if (byte_len == 0 or byte_len % record_size != 0) return -1;
+    const count = byte_len / record_size;
+    const source_addr = @intFromPtr(src);
+    const dest_addr = @intFromPtr(dst);
+    if (capacity > 0 and
+        ((source_addr <= dest_addr and dest_addr - source_addr < byte_len) or
+            (dest_addr < source_addr and source_addr - dest_addr < capacity))) return -1;
+
+    const fields = std.heap.page_allocator.alloc(raw_fields.Field, count) catch return -1;
+    defer std.heap.page_allocator.free(fields);
+    var offset: usize = 0;
+    for (fields) |*field| {
+        const width = src[offset];
+        if (width == 0 or width > 64) return -1;
+        var value: u64 = 0;
+        for (src[offset + 1 .. offset + record_size]) |byte| {
+            value = (value << 8) | @as(u64, byte);
+        }
+        field.* = .{ .width = width, .bits = value };
+        offset += record_size;
+    }
+    const bit_len = raw_fields.measure(fields) catch return -1;
+    const required = bit_len / 8 + @as(usize, @intFromBool(bit_len % 8 != 0));
+    if (capacity == 0) return @intCast(required);
+    if (capacity < required) return -2;
+    const written = raw_fields.pack(dst[0..required], fields) catch return -1;
+    if (written != bit_len) return -1;
+    return @intCast(required);
+}
+
+test "raw bitstream ABI packs exact widths through Zig with zero canonical tail" {
+    // 3 bits 101 + 2 bits 01 + 3 bits 111 = 10101111.
+    const records = [_]u8{
+        3, 0, 0, 0, 0, 0, 0, 0, 5,
+        2, 0, 0, 0, 0, 0, 0, 0, 1,
+        3, 0, 0, 0, 0, 0, 0, 0, 7,
+    };
+    try std.testing.expectEqual(@as(isize, 1), sens_zig_bitpack_fields(&records, records.len, undefined, 0));
+    var short: [1]u8 = .{0xa5};
+    try std.testing.expectEqual(@as(isize, -2), sens_zig_bitpack_fields(&records, records.len, &short, 0));
+    try std.testing.expectEqual(@as(u8, 0xa5), short[0]);
+    var output: [1]u8 = undefined;
+    try std.testing.expectEqual(@as(isize, 1), sens_zig_bitpack_fields(&records, records.len, &output, output.len));
+    try std.testing.expectEqual(@as(u8, 0xaf), output[0]);
+}
+
+test "raw bitstream ABI rejects malformed width, value overflow, and partial records" {
+    const zero_width = [_]u8{ 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+    try std.testing.expectEqual(@as(isize, -1), sens_zig_bitpack_fields(&zero_width, zero_width.len, undefined, 0));
+    const overflow = [_]u8{ 3, 0, 0, 0, 0, 0, 0, 0, 8 };
+    try std.testing.expectEqual(@as(isize, -1), sens_zig_bitpack_fields(&overflow, overflow.len, undefined, 0));
+    try std.testing.expectEqual(@as(isize, -1), sens_zig_bitpack_fields(&overflow, overflow.len - 1, undefined, 0));
 }
 
 /// Default physical transport ABI: T5M stores five trits in one byte.
