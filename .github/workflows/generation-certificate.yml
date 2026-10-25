@@ -1,6 +1,10 @@
 name: Selector generation certificate research
 
 on:
+  # Переведено на pull_request: workflow УЖЕ читає PR-дані,
+  # але тригер не стріляв — перевірка не мала наслідків.
+  pull_request:
+    branches: [main]
   workflow_dispatch:
 
 concurrency:
