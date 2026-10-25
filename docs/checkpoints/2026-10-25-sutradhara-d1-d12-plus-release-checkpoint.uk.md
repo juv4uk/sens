@@ -12,7 +12,7 @@
 4. D4/D6: п'ять пар `.sens.b64`/`.view.b64` є в `knowledge/d11/restore/udyoga/`. Mint/наявність файлу не є фізичним PASS.
 
 ## Відкриті першопричини
-- F6 producer → consumer: старий CI `40158590271` показав RED `root reconstruction rejected: 0`. Виявлена конкретна розбіжність у споживачі: фактичний SENS verdict — символ `accepted`, але Rust AST будував очікування як D7-список літер. Поточний коміт виправляє представлення очікуваного значення на SENS-символ; позитивний F6 фізичний тест і негативний конверт мають підтвердити це у CI.
+- F6 producer → consumer: старий CI `40158590271` показав RED `root reconstruction rejected: 0`. Попередня зміна expected-маркера на SENS-символ була недостатня. Аудит `lib/domains/d4.lisp` виявив точну помилку AST у Rust-транспортному драйвері: root/object оболонки викликали D4:`1001` (CADR), а мали будувати список через D4:`1110` (LIST). Коміт `087843fbe447cfb022d1e622853cc28a2d9ce378` додає `d4_list` із точною ідентичністю D4:1110 і застосовує її до root/object/object-packages. Це виправлення конструктора; фізичний F6 PASS ще не підтверджено.
 - D11 LIST=: неправильна D3-структура повинна дати Type-відмову, не бути замаскована як D1:ні.
 - D6 LET/LET*: старий RED показував D3 COND arity замість очікуваного D3 CAR Type до macro expansion. Перевірити актуальну фізичну пару Core4 і порядок валідації, не послаблювати COND.
 - D12 named bounds: probe у Rust-драйвері не є окремим SENS-законом; знайти мовний шлях exact-domain межових значень без сирих десяткових літералів у виконуваних Lisp.
@@ -29,7 +29,7 @@
 `HOST_DEBT_GUARD=PASS_ON_SHA_f4590; NEWER_SHA_PENDING`
 `D12_SELECTED_TRANSPORT=16_PASS_ON_SHA_7f8dbf8; FULL_RESIDENT_MATRIX=OPEN`
 `D11_LIST_EQUALITY_LATEST_NATIVE_RESULT=PENDING`
-`F6_ROOT_MARKER_REPRESENTATION=FIXED_IN_THIS_COMMIT; CI_PENDING`
+`F6_ROOT_MARKER_REPRESENTATION=PREVIOUS_FIX_INSUFFICIENT`
 `D4_D6_RESTORATION_PAIRS=PRESENT; PHYSICAL_EXECUTION=NOT_CERTIFIED`
 `D10_FULL_PHYSICAL_EXECUTION=NOT_VERIFIED`
 `D1_D12_PLUS_RELEASE=NO_GO`
