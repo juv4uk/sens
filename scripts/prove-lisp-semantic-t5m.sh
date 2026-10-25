@@ -1908,6 +1908,48 @@ cat -- "$last_define_definition" tests/semantic/d11-meta-last-define-laws.lisp >
 cat -- "$last_define_definition" tests/semantic/d11-meta-last-define-mutant.lisp > "$last_define_mutant_bundle"
 run_case run_law d11-meta-last-define-positive "$last_define_positive_bundle" 1
 run_case run_law d11-meta-last-define-mutant "$last_define_mutant_bundle" 0
+# Компілятор D3/D5 · пошук авторитету: помилку даних не плутати з D3:().
+# Точні SENS DEFINE беруться лише з чинного lib/compiler-nucleus.lisp.
+compiler_authority_defs="$evidence/compiler-authority-exact-source-definitions.lisp"
+: > "$compiler_authority_defs"
+for name in знайти-авторитет-компілятора ядро-компілятора; do
+  if ! awk -v target="(визначити $name" '
+    $0 == target {
+      if (found++) exit 2
+      copying = 1
+    }
+    copying && NF == 0 {
+      copying = 0
+      complete++
+      next
+    }
+    copying { print }
+    END { if (found != 1 || complete != 1 || copying) exit 2 }
+  ' lib/compiler-nucleus.lisp >> "$compiler_authority_defs"; then
+    echo "::error::COMPILER_AUTHORITY_EXACT_SENS_DEFINITION_MISSING name=$name" >&2
+    exit 2
+  fi
+done
+test -s "$compiler_authority_defs" || { echo "::error::COMPILER_AUTHORITY_EMPTY_DEFINITIONS" >&2; exit 2; }
+sha256sum lib/compiler-nucleus.lisp "$compiler_authority_defs" \
+  tests/semantic/compiler-authority-proper-law.lisp \
+  tests/semantic/compiler-authority-proper-mutant.lisp \
+  tests/semantic/compiler-authority-d1-root-negative.lisp \
+  tests/semantic/compiler-authority-improper-tail-negative.lisp \
+  > "$evidence/compiler-authority-exact-inputs.sha256"
+compiler_authority_positive="$evidence/compiler-authority-positive-complete.lisp"
+compiler_authority_mutant="$evidence/compiler-authority-mutant-complete.lisp"
+compiler_authority_root="$evidence/compiler-authority-root-complete.lisp"
+compiler_authority_tail="$evidence/compiler-authority-tail-complete.lisp"
+cat -- "$compiler_authority_defs" tests/semantic/compiler-authority-proper-law.lisp > "$compiler_authority_positive"
+cat -- "$compiler_authority_defs" tests/semantic/compiler-authority-proper-mutant.lisp > "$compiler_authority_mutant"
+cat -- "$compiler_authority_defs" tests/semantic/compiler-authority-d1-root-negative.lisp > "$compiler_authority_root"
+cat -- "$compiler_authority_defs" tests/semantic/compiler-authority-improper-tail-negative.lisp > "$compiler_authority_tail"
+run_case run_law compiler-authority-positive "$compiler_authority_positive" 1
+run_case run_law compiler-authority-mutant "$compiler_authority_mutant" 0
+run_case run_error_rejection compiler-authority-d1-root-type "$compiler_authority_root" Type 'car expects a non-empty list'
+run_case run_error_rejection compiler-authority-improper-tail-type "$compiler_authority_tail" Type 'car expects a non-empty list'
+
 # СЕНС · compiler APPEND: чинні DEFINE — єдине джерело семантики.
 # Механічно витягаємо незмінні SENS-форми, не додаємо host-правил.
 compiler_append_defs="$evidence/compiler-append-exact-source-definitions.lisp"
