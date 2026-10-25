@@ -1860,6 +1860,48 @@ cat -- "$last_define_definition" tests/semantic/d11-meta-last-define-laws.lisp >
 cat -- "$last_define_definition" tests/semantic/d11-meta-last-define-mutant.lisp > "$last_define_mutant_bundle"
 run_case run_law d11-meta-last-define-positive "$last_define_positive_bundle" 1
 run_case run_law d11-meta-last-define-mutant "$last_define_mutant_bundle" 0
+# СЕНС · compiler APPEND: чинні DEFINE — єдине джерело семантики.
+# Механічно витягаємо незмінні SENS-форми, не додаємо host-правил.
+compiler_append_defs="$evidence/compiler-append-exact-source-definitions.lisp"
+: > "$compiler_append_defs"
+for name in істина-компілятора компілятор-приєднати; do
+  if ! awk -v target="(визначити $name" '
+    $0 == target {
+      if (found++) exit 2
+      copying = 1
+    }
+    copying && NF == 0 {
+      copying = 0
+      complete++
+      next
+    }
+    copying { print }
+    END { if (found != 1 || complete != 1 || copying) exit 2 }
+  ' lib/compiler-nucleus.lisp >> "$compiler_append_defs"; then
+    echo "::error::COMPILER_APPEND_EXACT_SENS_DEFINITION_MISSING name=$name" >&2
+    exit 2
+  fi
+done
+test -s "$compiler_append_defs" || { echo "::error::COMPILER_APPEND_EMPTY_SOURCE" >&2; exit 2; }
+sha256sum lib/compiler-nucleus.lisp "$compiler_append_defs" \
+  tests/semantic/compiler-append-proper-law.lisp \
+  tests/semantic/compiler-append-proper-mutant.lisp \
+  tests/semantic/compiler-append-d1-root-negative.lisp \
+  tests/semantic/compiler-append-improper-tail-negative.lisp \
+  > "$evidence/compiler-append-exact-inputs.sha256"
+compiler_append_positive="$evidence/compiler-append-positive-complete.lisp"
+compiler_append_mutant="$evidence/compiler-append-mutant-complete.lisp"
+compiler_append_root="$evidence/compiler-append-d1-root-complete.lisp"
+compiler_append_tail="$evidence/compiler-append-bad-tail-complete.lisp"
+cat -- "$compiler_append_defs" tests/semantic/compiler-append-proper-law.lisp > "$compiler_append_positive"
+cat -- "$compiler_append_defs" tests/semantic/compiler-append-proper-mutant.lisp > "$compiler_append_mutant"
+cat -- "$compiler_append_defs" tests/semantic/compiler-append-d1-root-negative.lisp > "$compiler_append_root"
+cat -- "$compiler_append_defs" tests/semantic/compiler-append-improper-tail-negative.lisp > "$compiler_append_tail"
+run_case run_law compiler-append-positive "$compiler_append_positive" 1
+run_case run_law compiler-append-mutant "$compiler_append_mutant" 0
+run_case run_error_rejection compiler-append-d1-root-type "$compiler_append_root" Type 'car expects a non-empty list'
+run_case run_error_rejection compiler-append-improper-tail-type "$compiler_append_tail" Type 'car expects a non-empty list'
+
 # D5/D3 компіляторне обернення: беремо ТОЧНІ чинні DEFINE з SENS.
 # Bash/AWK лише відділяє вже визначені форми; закон і Type — тільки SENS.
 # Якщо форма відсутня, неоднозначна або не закінчується — fail-closed.
