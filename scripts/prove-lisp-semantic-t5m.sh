@@ -613,6 +613,16 @@ sha256sum \
  tests/semantic/d6-maplist-suffix-order-mutant.lisp \
  tests/semantic/d6-maplist-d1-root-type-negative.lisp \
  tests/semantic/d6-nth-wrong-choice-mutant.lisp > "$evidence/d6-nth-maplist-inputs.sha256"
+# D6 LET/LET*: D3 хребет і рівно два поля перед розгортанням.
+run_case run_law d6-let-letstar-preflight-positive tests/semantic/d6-let-letstar-preflight-law.lisp 1 core4
+run_case run_error_rejection d6-let-three-fields tests/semantic/d6-let-malformed-three-fields-negative.lisp Type 'car expects a non-empty list' core4
+run_case run_error_rejection d6-letstar-three-fields tests/semantic/d6-letstar-malformed-three-fields-negative.lisp Type 'car expects a non-empty list' core4
+run_case run_error_rejection d6-let-d1-tail tests/semantic/d6-let-improper-spine-negative.lisp Type 'car expects a non-empty list' core4
+sha256sum \
+ tests/semantic/d6-let-letstar-preflight-law.lisp \
+ tests/semantic/d6-let-malformed-three-fields-negative.lisp \
+ tests/semantic/d6-letstar-malformed-three-fields-negative.lisp \
+ tests/semantic/d6-let-improper-spine-negative.lisp > "$evidence/d6-let-letstar-preflight-inputs.sha256"
 # D6 COMPOSE/FLIP/CURRY are derived SENS functions, so their law and
 # counterexample must pass the same physical Zig/T5M -> SENS route.
 run_case run_law d6-compose-flip-positive tests/semantic/d6-compose-flip-law.lisp 1 core4
