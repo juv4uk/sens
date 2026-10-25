@@ -36,7 +36,7 @@ jobs:
           python3 -m unittest tests.test_check_rust_sens_corridor_coverage -v
           python3 scripts/check_corridor_axiom_binding.py .
           python3 -m unittest tests.test_check_corridor_axiom_binding -v
-          python3 scripts/report_rust_zig_sens_boundary.py
+          python3 scripts/report_rust_zig_sens_boundary.py --out "$RUNNER_TEMP/rust-zig-sens-boundary.json"
           python3 scripts/check_migration_zig_only_path.py .
           python3 -m unittest tests.test_check_migration_zig_only_path -v
           python3 scripts/check_axiom_coverage.py .

@@ -40,6 +40,11 @@ class ReleaseSterileCorridorWorkflowTests(unittest.TestCase):
     def test_release_preflight_runs_full_sterile_corridor_set(self) -> None:
         self._assert_full_set(PREFLIGHT, "release-preflight.yml")
         yml = PREFLIGHT.read_text(encoding="utf-8")
+        self.assertIn(
+            'report_rust_zig_sens_boundary.py --out "$RUNNER_TEMP/rust-zig-sens-boundary.json"',
+            yml,
+            "the boundary report must not dirty the exact-SHA checkout before physical replay",
+        )
         self.assertIn("migration-zig-gate.py --require-zig", yml)
         self.assertIn("test_check_rust_sens_corridor_coverage", yml)
         self.assertIn("test_rust_zig_sens_boundary", yml)
