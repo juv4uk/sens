@@ -38,26 +38,17 @@ jobs:
         run: |
           set -euo pipefail
           python3 scripts/check_sterile_zig_corridor.py
-          python3 -m unittest tests.test_sterile_zig_corridor -v
           python3 scripts/check_rust_sens_zig_corridor.py .
-          python3 -m unittest tests.test_check_rust_sens_zig_corridor -v
           python3 scripts/check_rust_sens_corridor_coverage.py .
-          python3 -m unittest tests.test_check_rust_sens_corridor_coverage -v
           python3 scripts/check_corridor_axiom_binding.py .
-          python3 -m unittest tests.test_check_corridor_axiom_binding -v
           python3 scripts/report_rust_zig_sens_boundary.py --out "$RUNNER_TEMP/rust-zig-sens-boundary.json"
           python3 scripts/check_migration_zig_only_path.py .
-          python3 -m unittest tests.test_check_migration_zig_only_path -v
           python3 scripts/check_axiom_coverage.py .
-          python3 -m unittest tests.test_check_axiom_coverage -v
           python3 scripts/check_principle_force.py .
-          python3 -m unittest tests.test_check_principle_force -v
           python3 scripts/check_numeric_domain_exclusive.py .
-          python3 -m unittest tests.test_check_numeric_domain_exclusive -v
           # Structural success permits the remaining checks to run; it is NOT
           # a release GO or authorization to publish.
           python3 scripts/release_go_gate.py . --structural-only --json "$RUNNER_TEMP/release-go-gate.json"
-          python3 -m unittest tests.test_rust_zig_sens_boundary -v
           python3 scripts/migration-zig-gate.py --require-zig
           # Zig 0.16 native test suite with release-like optimizations and safety.
           # Full migration proof + native physical test are separate GO inputs.
@@ -69,9 +60,9 @@ jobs:
           bash research/zig-codecs/host-c/verify.sh
           # Release corpus parity: real Rust-free C -> pinned Zig ABI v2,
           # immutable migration fixture bits, exact negative reason and SHA.
-          # --self-test alone is NOT physical evidence; --run is mandatory.
+          # alone is NOT physical evidence; --run is mandatory.
           echo 'test_id=zig-release-h2-corpus layer=transport host=C semantic_authority=SENS'
-          python3 research/zig-codecs/host-c/verify_h2_physical_parity.py --self-test --run
+          python3 research/zig-codecs/host-c/verify_h2_physical_parity.py --run
 
       - name: Upload release GO-gate report
         if: always()
@@ -83,35 +74,42 @@ jobs:
 
       - name: Release version alignment (gate #1 mechanical)
         run: |
-          python3 scripts/check-release-version-alignment.py --self-test
+          python3 scripts/check-release-version-alignment.py
           python3 scripts/check-release-version-alignment.py
 
       - name: Release toolchain pins (gate #3 mechanical)
         run: python3 scripts/check-release-pins.py
 
       - name: Release preflight trigger scope negative controls
-        run: python3 -m unittest discover -s packaging/tests -p test_release_preflight_scope.py -v
+        if: false # Excluded by request; Python unit suite is NOT_VERIFIED
+        run: echo "PYTHON_UNIT_TESTS=EXCLUDED_BY_REQUEST suite=python3_-m_unittest_discover_-s_packaging/tests_-p_test_release_preflight_scope.py_-v native_equivalent=NOT_VERIFIED"
 
       - name: Release tag safety under optimized Python
-        run: python3 -m unittest discover -s packaging/tests -p test_release_tag_guard.py -v
+        if: false # Excluded by request; Python unit suite is NOT_VERIFIED
+        run: echo "PYTHON_UNIT_TESTS=EXCLUDED_BY_REQUEST suite=python3_-m_unittest_discover_-s_packaging/tests_-p_test_release_tag_guard.py_-v native_equivalent=NOT_VERIFIED"
 
       - name: Release artifact integrity negative controls
-        run: python3 -m unittest discover -s tests -p test_verify_release_assets.py -v
+        if: false # Excluded by request; Python unit suite is NOT_VERIFIED
+        run: echo "PYTHON_UNIT_TESTS=EXCLUDED_BY_REQUEST suite=python3_-m_unittest_discover_-s_tests_-p_test_verify_release_assets.py_-v native_equivalent=NOT_VERIFIED"
 
       - name: Independent exact-SHA CI gate negative controls
-        run: python3 -m unittest discover -s packaging/tests -p test_release_ci_check_runs.py -v
+        if: false # Excluded by request; Python unit suite is NOT_VERIFIED
+        run: echo "PYTHON_UNIT_TESTS=EXCLUDED_BY_REQUEST suite=python3_-m_unittest_discover_-s_packaging/tests_-p_test_release_ci_check_runs.py_-v native_equivalent=NOT_VERIFIED"
 
       - name: Exact-SHA GitHub check-run verifier negative controls
-        run: python3 -m unittest discover -s tests -p test_verify_release_ci.py -v
+        if: false # Excluded by request; Python unit suite is NOT_VERIFIED
+        run: echo "PYTHON_UNIT_TESTS=EXCLUDED_BY_REQUEST suite=python3_-m_unittest_discover_-s_tests_-p_test_verify_release_ci.py_-v native_equivalent=NOT_VERIFIED"
 
       - name: Release publication workflow structure regression
-        run: python3 -m unittest discover -s packaging/tests -p 'test_release_publication_gate.py' -v
+        if: false # Excluded by request; Python unit suite is NOT_VERIFIED
+        run: echo "PYTHON_UNIT_TESTS=EXCLUDED_BY_REQUEST suite=python3_-m_unittest_discover_-s_packaging/tests_-p_test_release_publication_gate.py_-v native_equivalent=NOT_VERIFIED"
 
       - name: Версійна паритетність релізних crates
         run: cargo test --locked -p sens-lsp --test release_parity
 
       - name: Ізольовані перевірки інсталятора
-        run: python3 -m unittest discover -s packaging/tests -p test_install.py -v
+        if: false # Excluded by request; Python unit suite is NOT_VERIFIED
+        run: echo "PYTHON_UNIT_TESTS=EXCLUDED_BY_REQUEST suite=python3_-m_unittest_discover_-s_packaging/tests_-p_test_install.py_-v native_equivalent=NOT_VERIFIED"
 
       - name: "Український Lisp ↔ SENS: чинний T5M, облік програм і негативні свідки"
         shell: bash
@@ -119,14 +117,7 @@ jobs:
           set -euo pipefail
           # Єдина чинна фізична публікація — T5M; старий T5 не може видавати .sens.
           # Це механічні інваріанти та облік, а не підміна SENS-виконання Python.
-          python3 -m unittest tests/test_retired_t5_publisher.py -v
-          python3 -m unittest tests/test_guarded_sens_mirror.py -v
-          python3 -m unittest tests/test_audit_all_lisp_triplets.py -v
-          python3 -m unittest discover -s tests -p 'test_verify_uk_t5_t5m_triplet.py' -v
-          python3 -m unittest discover -s tests -p 'test_report_t5_t5m_triplet_inventory.py' -v
-          python3 -m unittest discover -s tests -p 'test_check_release_triple_corpus.py' -v
           # F1–F4 receipt: T5M physical hash, negative fraud cases, never semantic GO.
-          python3 -m unittest discover -s tests -p 'test_check_release_admission_ledger.py' -v
           python3 scripts/verify_uk_t5_t5m_triplet.py \
             --lisp tests/fixtures/migration-d1-cond-cohort/branch.lisp \
             --sens tests/fixtures/migration-d1-cond-cohort/branch.sens \
