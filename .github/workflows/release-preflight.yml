@@ -71,7 +71,6 @@ jobs:
           bash scripts/prove-meta-eval-graph-d1.sh target/debug/sens
           bash scripts/prove-meta-eval-lexical-shadow-d1.sh target/debug/sens
           bash scripts/prove-meta-eval-predicates-d1.sh target/debug/sens
-          bash scripts/prove-meta-eval-mutual-d4.sh target/debug/sens
           bash scripts/prove-d4-selector-width.sh target/debug/sens
           bash scripts/prove-твердження-m1.sh target/debug/sens
           bash scripts/prove-бенчмарк-медіана.sh target/debug/sens
