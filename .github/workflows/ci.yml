@@ -78,7 +78,7 @@ jobs:
 
   native:
     name: Ручний native Rust/Zig smoke
-    if: ${{ (github.event_name == 'workflow_dispatch' && inputs.suite == 'native') || (github.event_name == 'push' && contains(github.event.head_commit.message, 'SENS_NATIVE_LAWS')) }}
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.suite == 'native' }}
     runs-on: ubuntu-24.04
     timeout-minutes: 25
     steps:
@@ -101,8 +101,8 @@ jobs:
 
   laws:
     name: Ручні SENS/Zig/T5M закони
-    # Explicit push marker SENS_NATIVE_LAWS runs this same exact-head suite.
-    if: ${{ (github.event_name == 'workflow_dispatch' && inputs.suite == 'laws') || (github.event_name == 'push' && contains(github.event.head_commit.message, 'SENS_NATIVE_LAWS')) }}
+    # Full semantic laws are opt-in; regular push keeps the quick guard only.
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.suite == 'laws' }}
     runs-on: ubuntu-24.04
     timeout-minutes: 50
     steps:
@@ -149,7 +149,7 @@ jobs:
     # SENS_REMINT_META_EVAL_GRAPH_D1 is a closed two-source remint scope; never scan backlog.
     # A specific source-push marker repairs only the two MetaEval graph pairs.
     # Manual remint remains scoped to the exact explicit files supplied.
-    if: ${{ (github.event_name == 'workflow_dispatch' && inputs.suite == 'remint' && inputs.files != '') || (github.event_name == 'push' && contains(github.event.head_commit.message, 'SENS_REMINT_META_EVAL_GRAPH_D1')) }}
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.suite == 'remint' && inputs.files != '' }}
     uses: ./.github/workflows/remint-drifted-pairs.yml
     with:
       files: |
@@ -161,7 +161,7 @@ jobs:
 
   release-preflight:
     name: Ручний exact-SHA release preflight
-    if: ${{ (github.event_name == 'workflow_dispatch' && inputs.suite == 'release-preflight') || (github.event_name == 'push' && contains(github.event.head_commit.message, 'SENS_RELEASE_PREFLIGHT')) }}
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.suite == 'release-preflight' }}
     uses: ./.github/workflows/release-preflight.yml
     permissions:
       contents: read
