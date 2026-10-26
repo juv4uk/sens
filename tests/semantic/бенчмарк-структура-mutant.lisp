@@ -1,19 +1,5 @@
-; SENS_SOURCE=tests/semantic/бенчмарк-структура-mutant.lisp
-; NATIVE_SENS_POSITIVE=NOT_VERIFIED
-; NATIVE_SENS_NEGATIVE=NOT_VERIFIED
-;
-; Мутант: хибна тотожність так≡ні після правильного структурного шляху.
-
-(за-умовою
-  ((порожній? (як-є ()))
-   (за-умовою
-     ((хибне? (порожній? (сполучити так (як-є ()))))
-      (за-умовою
-        ((порожній? (решта (сполучити так (як-є ()))))
-         (за-умовою
-           ((тотожне? так ні)
-            так)
-           (так (ні))))
-        (так (ні))))
-     (так (ні))))
-  (так (ні)))
+; SENS_SOURCE=tests/semantic/бенчмарк-структура-mutant.lisp + lib/твердження.lisp
+; NATIVE_SENS_POSITIVE=not applicable: intentional negative witness
+; NATIVE_SENS_NEGATIVE=lib/твердження.lisp + false identity assertion returns D1:ні
+; The mutant wrongly expects equality for distinct D1 values.
+(твердження-однаковості так (тотожне? так ні))

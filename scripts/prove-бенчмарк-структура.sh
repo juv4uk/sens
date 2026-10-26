@@ -23,7 +23,7 @@ trap 'rm -rf "$tmp"' EXIT
 printf '1\n' > "$tmp/expected-positive"
 printf '0\n' > "$tmp/expected-negative"
 
-if ! timeout 45s "$cli" "$law" > "$tmp/positive.out" 2> "$tmp/positive.err"; then
+if ! timeout 45s "$cli" --t5m-files lib/твердження.lisp "$law" > "$tmp/positive.out" 2> "$tmp/positive.err"; then
   printf 'REGRESSION id=%s layer=sens-positive actual=execution-error\n' "$id" >&2
   cat "$tmp/positive.err" >&2
   exit 1
@@ -33,7 +33,7 @@ if ! cmp -s "$tmp/expected-positive" "$tmp/positive.out"; then
   exit 1
 fi
 
-if ! timeout 45s "$cli" "$mutant" > "$tmp/mutant.out" 2> "$tmp/mutant.err"; then
+if ! timeout 45s "$cli" --t5m-files lib/твердження.lisp "$mutant" > "$tmp/mutant.out" 2> "$tmp/mutant.err"; then
   printf 'REGRESSION id=%s-mutant layer=sens-negative actual=execution-error\n' "$id" >&2
   cat "$tmp/mutant.err" >&2
   exit 1
@@ -46,7 +46,7 @@ fi
 printf 'sample\telapsed_us\tstdout_bytes\n' > "$tmp/samples.tsv"
 for iteration in {1..11}; do
   start_us="${EPOCHREALTIME/./}"
-  if ! timeout 45s "$cli" "$law" > "$tmp/sample-$iteration.out" 2> "$tmp/sample-$iteration.err"; then
+  if ! timeout 45s "$cli" --t5m-files lib/твердження.lisp "$law" > "$tmp/sample-$iteration.out" 2> "$tmp/sample-$iteration.err"; then
     printf 'REGRESSION id=%s layer=sens-repeat iteration=%s actual=execution-error\n' "$id" "$iteration" >&2
     cat "$tmp/sample-$iteration.err" >&2
     exit 1
