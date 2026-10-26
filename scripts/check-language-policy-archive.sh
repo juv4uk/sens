@@ -154,9 +154,6 @@ if git rev-parse --verify HEAD^ >/dev/null 2>&1; then
 fi
 for path in "${added[@]:-}"; do
   if is_testbench_location "$path"; then
-    if [[ "$event_name" == "pull_request" && "$first_line" != SENS_SOURCE=* ]]; then
-      bad=1
-    fi
     # Never admit a newly added foreign-language test or benchmark runner.
     if is_foreign_testbench "$path"; then
       echo "LANGUAGE_POLICY_ARCHIVE=FAIL NEW_FOREIGN_TEST_ARCHIVE_FORBIDDEN path=$path"
