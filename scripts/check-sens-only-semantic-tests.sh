@@ -100,13 +100,13 @@ self_test() {
 }
 if [[ "${1:-}" == "--self-test" ]]; then self_test; exit 0; fi
 
-event_name="\${SENS_EVENT_NAME:-\${GITHUB_EVENT_NAME:-}}"
+event_name="${SENS_EVENT_NAME:-${GITHUB_EVENT_NAME:-}}"
 if [[ "$event_name" == "pull_request" ]]; then
   # GitHub passes exact event fields via environment; no JSON parser.
-  pr_body="\${SENS_PR_BODY:-}"
-  first_field="\${pr_body%%$'\n'*}"
-  base_sha="\${SENS_PR_BASE_SHA:-}"
-  head_sha="\${SENS_PR_HEAD_SHA:-}"
+  pr_body="${SENS_PR_BODY:-}"
+  first_field="${pr_body%%$'\n'*}"
+  base_sha="${SENS_PR_BASE_SHA:-}"
+  head_sha="${SENS_PR_HEAD_SHA:-}"
   [[ "$base_sha" =~ ^[0-9a-f]{40}$ && "$head_sha" =~ ^[0-9a-f]{40}$ ]] ||
     die "немає pinned PR base/head SHA"
   git cat-file -e "$base_sha^{commit}" 2>/dev/null ||
@@ -137,9 +137,9 @@ while IFS= read -r workflow; do
     fi
   fi
 done < <(find .github/workflows -maxdepth 1 -type f \( -name '*.yml' -o -name '*.yaml' \) -print | sort)
-if (("\${#missing_runner_workflows[@]}" != 0)); then
-  printf 'МОВНИЙ_ГЕЙТ=RED причина=успадковані workflow без рядків ARCHIVE count=%s\n' "\${#missing_runner_workflows[@]}" >&2
-  printf '  missing_archive: %s\n' "\${missing_runner_workflows[@]}" >&2
+if (("${#missing_runner_workflows[@]}" != 0)); then
+  printf 'МОВНИЙ_ГЕЙТ=RED причина=успадковані workflow без рядків ARCHIVE count=%s\n' "${#missing_runner_workflows[@]}" >&2
+  printf '  missing_archive: %s\n' "${missing_runner_workflows[@]}" >&2
   exit 1
 fi
 
