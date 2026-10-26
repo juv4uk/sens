@@ -122,7 +122,7 @@ jobs:
         env:
           # The public Linux asset must target baseline x86-64, never runner-native AVX.
           CARGO_TARGET_X86_64_UNKNOWN_LINUX_GNU_RUSTFLAGS: "-C target-cpu=x86-64"
-          SENS_ZIG_PORTABLE_LINUX: "1"
+          SENS_ZIG_PORTABLE_LINUX: ${{ matrix.target == 'x86_64-unknown-linux-gnu' && '1' || '0' }}
         run: cargo build --locked --release -p sens-cli --target ${{ matrix.target }}
 
       - name: Перевірити ABI й базовий CPU Linux-артефакту

@@ -322,6 +322,7 @@ fn build_zig_transport(root: &Path, output: &Path, compiler: &std::ffi::OsStr) {
     println!("cargo:rerun-if-env-changed=CARGO_CFG_TARGET_ENV");
     println!("cargo:rerun-if-env-changed=CARGO_CFG_TARGET_OS");
     println!("cargo:rerun-if-env-changed=CARGO_CFG_TARGET_ARCH");
+    println!("cargo:rerun-if-env-changed=SENS_ZIG_PORTABLE_LINUX");
     for path in [
         ".zig-version",
         "zig_transport_root.zig",
@@ -341,6 +342,7 @@ fn build_zig_transport(root: &Path, output: &Path, compiler: &std::ffi::OsStr) {
     let target_os = env::var("CARGO_CFG_TARGET_OS").unwrap_or_default();
     let target_arch = env::var("CARGO_CFG_TARGET_ARCH").expect("CARGO_CFG_TARGET_ARCH");
     let wasm = target_arch == "wasm32";
+    let portable_linux = env::var("SENS_ZIG_PORTABLE_LINUX").unwrap_or_default() == "1";
     let archive_name = if target_env == "msvc" {
         "sens_zig_transport.lib"
     } else {
@@ -358,7 +360,17 @@ fn build_zig_transport(root: &Path, output: &Path, compiler: &std::ffi::OsStr) {
         command.arg("-target").arg("wasm32-freestanding");
     } else {
         command.arg("-lc");
-        if target_env == "msvc" {
+        if portable_linux {
+            assert_eq!(target_os, "linux", "portable Linux Zig target requested for non-Linux build");
+            assert_eq!(target_arch, "x86_64", "portable Linux Zig target is x86-64 only");
+            assert_eq!(target_env, "gnu", "portable Linux Zig target requires the GNU ABI");
+            // The core archive must share the release target/CPU of sens-cli's Zig archive.
+            command
+                .arg("-target")
+                .arg("x86_64-linux-gnu.2.35")
+                .arg("-mcpu")
+                .arg("baseline");
+        } else if target_env == "msvc" {
             command.arg("-target").arg(format!("{target_arch}-windows-msvc"));
         }
         if target_os != "windows" {
