@@ -125,9 +125,9 @@ jobs:
           workflow_source="$(
             awk '
               /^      - name: Мовна межа/ { skip = 1 }
-              /^      - name: Мовна політика/ { skip = 1 }
+              /^      - name: (Мовна політика|Дозволені мови)/ { skip = 1 }
               /^      - name:/ {
-                if ($0 !~ /Мовна межа|Мовна політика/) skip = 0
+                if ($0 !~ /Мовна межа|Мовна політика|Дозволені мови/) skip = 0
               }
               !skip { print }
             ' .github/workflows/release-preflight.yml
