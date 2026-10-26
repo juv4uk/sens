@@ -290,6 +290,8 @@ fn translator_refusal_is_recordable_evidence_and_never_knowledge() {
 
 #[test]
 fn existing_explicit_opposite_overrules_an_external_candidate() {
+    // Canonical D4 хибне? inside quoted knowledge data must retain D4 identity
+    // through the mixed-source reader; it must not degrade to an unbound Text7.
     // Явний заперечний факт має правильну вкладеність списку клауз.
     let source = r#"
         (повідомити-знання (як-є corpus) (як-є (((хибне? (human socrates))))))
