@@ -233,7 +233,7 @@ mod tests {
 
         // After a D24 carry, ADD1 must continue in the new exact D48 domain.
         // The successor must not become a source literal, wrap, or stall.
-        let resumed = invoke(add1, &[carried.clone()], &env, Span::default())
+        let resumed = invoke(add1, std::slice::from_ref(&carried), &env, Span::default())
             .unwrap()
             .unwrap();
         let Value::BinaryNumber(ref resumed_number) = resumed else {
