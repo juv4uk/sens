@@ -45,7 +45,7 @@ runs:
         fi
         test "$actual" = "$sha"
         if [ "$ext" = zip ]; then
-          7z x "$archive" -o"$RUNNER_TEMP" -y >/dev/null
+          powershell -NoProfile -Command "Expand-Archive -LiteralPath '$archive' -DestinationPath '$RUNNER_TEMP' -Force"
         else
           tar -xJf "$archive" -C "$RUNNER_TEMP"
         fi
