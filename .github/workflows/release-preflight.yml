@@ -82,6 +82,15 @@ jobs:
           bash scripts/prove-d3-атом-межа.sh target/debug/sens
           bash scripts/prove-d3-як-є-щит.sh target/debug/sens
 
+      - name: Compiler nucleus exact source → T5M → view parity
+        id: compiler_nucleus_physical_parity
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          cargo build --locked -p sens-cli --bin sens --bin sens-trit
+          bash scripts/check-triple-projection.sh --fixture lib/compiler-nucleus.lisp
+
       - name: Clippy
         id: workspace_clippy
         if: always()
