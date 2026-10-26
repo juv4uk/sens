@@ -1,44 +1,46 @@
 #!/usr/bin/env bash
-# CI_GLUE_NO_SEMANTICS: SENS mutual D4; use the ratified binary source and physical pair.
+# CI_GLUE_NO_SEMANTICS: перевірка наявних фізичних SENS D4-свідків.
+# Семантика — в SENS; оболонка перевіряє лише вердикт і точну негативну діагностику.
+# Без Python, JSON, SHA-256 і нових артефактів.
 set -euo pipefail
 cd "$(dirname "$0")/.."
-trit="${SENS_TRIT:-target/debug/sens-trit}"
-source=tests/semantic/meta-eval-mutual-d4-law.bits
-physical=tests/semantic/meta-eval-mutual-d4-law.sens
+cli="${1:-target/debug/sens}"
 id=meta-eval-mutual-d4
-
-for path in "$trit" "$source" "$physical"; do
-  if [[ ! -s "$path" || -L "$path" ]]; then
-    printf 'REGRESSION test_id=%s layer=fixture missing-or-invalid=%s\n' "$id" "$path" >&2
+law_bits=tests/semantic/meta-eval-mutual-d4-law.bits
+mutant_bits=tests/semantic/meta-eval-mutual-d4-mutant.bits
+law=tests/semantic/meta-eval-mutual-d4-law.sens
+mutant=tests/semantic/meta-eval-mutual-d4-mutant.sens
+if [[ ! -x "$cli" ]]; then
+  printf 'REGRESSION test_id=%s layer=physical actual=executor-missing\n' "$id" >&2
+  exit 1
+fi
+for witness in "$law_bits" "$mutant_bits" "$law" "$mutant"; do
+  if [[ ! -s "$witness" || -L "$witness" ]]; then
+    printf 'REGRESSION test_id=%s layer=physical witness=%s actual=missing-or-link\n' "$id" "$witness" >&2
     exit 1
   fi
 done
-if [[ ! -x "$trit" ]]; then
-  printf 'REGRESSION test_id=%s actual=executor-not-executable path=%s\n' "$id" "$trit" >&2
-  exit 1
-fi
-
 tmp="$(mktemp -d)"
 trap 'rm -rf "$tmp"' EXIT
-cp -- "$source" "$tmp/source.bits"
-if ! "$trit" encode "$tmp/source.bits" >"$tmp/encode.out" 2>"$tmp/encode.err"; then
-  printf 'REGRESSION test_id=%s layer=Zig-T5M-encode actual=execution-error\n' "$id" >&2
-  cat "$tmp/encode.err" >&2
+printf '1\n' > "$tmp/expected"
+printf 'NATIVE_SENS_EXECUTOR id=%s path=%s version=%s\n' "$id" "$cli" "$("$cli" --version 2>/dev/null || echo unknown)"
+if ! "$cli" "$law" > "$tmp/actual" 2> "$tmp/positive.err"; then
+  printf 'REGRESSION test_id=%s layer=physical-positive actual=execution-error\n' "$id" >&2
+  cat "$tmp/positive.err" >&2
   exit 1
 fi
-if ! cmp -s "$physical" "$tmp/source.sens"; then
-  printf 'REGRESSION test_id=%s layer=physical-pair expected=canonical-T5M actual=byte-drift\n' "$id" >&2
-  exit 1
-fi
-
-if ! "$trit" eval "$physical" >"$tmp/actual" 2>"$tmp/eval.err"; then
-  printf 'REGRESSION test_id=%s layer=physical-SENS expected=D1:1 actual=execution-error\n' "$id" >&2
-  cat "$tmp/eval.err" >&2
-  exit 1
-fi
-printf '1\n' >"$tmp/expected"
 if ! cmp -s "$tmp/expected" "$tmp/actual"; then
-  printf 'REGRESSION test_id=%s layer=physical-SENS expected=D1:1 actual=wrong-verdict\n' "$id" >&2
+  printf 'REGRESSION test_id=%s layer=physical-positive actual=wrong-verdict\n' "$id" >&2
   exit 1
 fi
-printf 'NATIVE_SENS_PASS id=%s source=binary-SENS carrier=Zig/T5M evidence=cmp\n' "$id"
+if "$cli" "$mutant" > "$tmp/mutant.out" 2> "$tmp/mutant.err"; then
+  printf 'REGRESSION test_id=%s-mutant layer=physical-negative actual=unexpected-success\n' "$id" >&2
+  cat "$tmp/mutant.out" >&2
+  exit 1
+fi
+if ! grep -Fq 'domain identity is not callable under its ratified law: D1' "$tmp/mutant.err"; then
+  printf 'REGRESSION test_id=%s-mutant layer=physical-negative expected=D1-non-callable actual=unrelated-error\n' "$id" >&2
+  cat "$tmp/mutant.err" >&2
+  exit 1
+fi
+printf 'NATIVE_SENS_PASS id=%s positive=D1:1 negative=D1-non-callable authority=SENS carrier=physical-T5M\n' "$id"
