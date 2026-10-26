@@ -532,11 +532,11 @@ mod tests {
                         admitted += 1;
                         assert_eq!(packet.admitted_role(), role);
                         assert_eq!(packet.opcode.width(), usize::from(width));
-                        assert_eq!(u16::from(packet.opcode.packed_bits()), bits);
+                        assert_eq!(packet.opcode.packed_bits(), bits);
                         assert_eq!(packet.encode().unwrap(), wire);
                     }
                     (None, Err(GpuExecutionPacketError::UnsupportedWidth { width: got }))
-                        if matches!(width, 1 | 2 | 7 | 3..=6 | 8) =>
+                        if matches!(width, 1..=8) =>
                     {
                         assert_eq!(got, usize::from(width));
                     }
