@@ -37,7 +37,7 @@ fn rust_mechanism_read_real_lisp_bytes() {
     // чутливий до планувальника/таймера shared runner. Міряємо тільки
     // warm-cache file I/O; перевірка байтів не визначає семантику мови.
     let mut ns_per_read = [0_u128; REPEATS];
-    for sample in 0..REPEATS {
+    for (sample, sample_ns_per_read) in ns_per_read.iter_mut().enumerate() {
         let began = Instant::now();
         let mut reads = 0_u64;
         let mut last_bytes = Vec::new();
@@ -61,10 +61,10 @@ fn rust_mechanism_read_real_lisp_bytes() {
             last_bytes, reference,
             "байти останнього прочитання зобов'язані збігатися"
         );
-        ns_per_read[sample] = elapsed / u128::from(reads);
+        *sample_ns_per_read = elapsed / u128::from(reads);
         eprintln!(
             "RUST_MECHANISM_SAMPLE id=fs-read-lisp sample={} elapsed_ns={} operations={} ns_per_read={} bytes={} scope=warm-cache-file-io",
-            sample + 1, elapsed, reads, ns_per_read[sample], reference.len()
+            sample + 1, elapsed, reads, *sample_ns_per_read, reference.len()
         );
     }
 
