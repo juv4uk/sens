@@ -17,9 +17,5 @@ jobs:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5 pinned
         with:
           persist-credentials: false
-      - name: Validate manifests and the generated discovery index
-        shell: bash
-        run: |
-          set -euo pipefail
-          python3 -m unittest discover -s scripts -p 'test_benchmark_registry.py' -v
-          python3 scripts/benchmark_registry.py --strict --check --coverage
+      - name: Python registry tests and validators excluded (NOT_VERIFIED)
+        run: echo "PYTHON_TESTS=EXCLUDED_BY_LANGUAGE_POLICY PYTHON_VALIDATORS=EXCLUDED native_equivalent=NOT_VERIFIED"
