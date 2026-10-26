@@ -18,6 +18,7 @@ files=(
   .github/workflows/binary-only-authority.yml
   .github/workflows/vertical-day-immutable-smoke.yml
   .github/workflows/vertical-day-smoke.yml
+  .github/workflows/physical-t5-evidence-integrity.yml
 )
 # These are execution commands, not mentions in comments. Do not match the
 # explicitly allowed Guile, C, Assembler, Rust, Zig, or native SENS runners.
