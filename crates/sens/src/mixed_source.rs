@@ -331,6 +331,7 @@ pub fn parse_mixed_exact_domain_reasoning_source(
             | "lib/content-store.lisp"
             | "lib/lisp-fs.lisp"
             | "lib/clips-import.lisp"
+            | "lib/translation.lisp"
     ) {
         return Err(LanguageError::new(
             ErrorKind::Parse,
