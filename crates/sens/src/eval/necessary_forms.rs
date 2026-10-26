@@ -170,8 +170,8 @@ mod exact_d4_necessary_form_migration_tests {
         assert_eq!(d3_atom.width(), 3);
         assert_eq!(d4_lambda.width(), 4);
         assert_eq!(
-            u16::from(d3_atom.packed_bits()),
-            u16::from(d4_lambda.packed_bits()),
+            d3_atom.packed_bits(),
+            d4_lambda.packed_bits(),
             "D3:010 and D4:0010 share a numeric payload only",
         );
         assert_eq!(identity_for_domain_identity(d3_atom), None);
