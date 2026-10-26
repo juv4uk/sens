@@ -123,6 +123,27 @@ def _is_legacy_signature_metadata_row(
     return LEGACY_SIGNATURE_ROW.fullmatch(source[start:end].rstrip("\r")) is not None
 
 
+CONFORMANCE_PATH = "tests/fixtures/conformance.lisp"
+# Fixture records store executable source as strings and tier as record metadata.
+# Only the numeric value of the explicit (tier . N) field is metadata; numbers
+# elsewhere in this file must still be checked by the live-source guard.
+CONFORMANCE_TIER_VALUE = re.compile(
+    r'^\\s*\\(\\(expr \\. "(?:\\\\.|[^"\\\\])*".*?'
+    r'\\(tier \\. (?P<value>[0-9]+)\\)'
+)
+
+
+def _is_conformance_tier_metadata(
+    source: str, path: str | Path | None, offset: int,
+) -> bool:
+    if path is None or Path(path).as_posix() != CONFORMANCE_PATH:
+        return False
+    start, end = _source_line_bounds(source, offset)
+    line = source[start:end].rstrip("\\r")
+    match = CONFORMANCE_TIER_VALUE.match(line)
+    return bool(match and start + match.start("value") == offset)
+
+
 def _is_numeric_data_exemption(source: str, path: str | Path | None, offset: int) -> bool:
     if path is None:
         return False
@@ -131,6 +152,7 @@ def _is_numeric_data_exemption(source: str, path: str | Path | None, offset: int
         _is_domain_table_data_row(source, relative, offset)
         or _is_legacy_signature_metadata_row(source, relative, offset)
         or _is_frozen_source_snapshot(relative)
+        or _is_conformance_tier_metadata(source, relative, offset)
         or relative in MACHINE_FACT_NUMERIC_PATHS
         or MACHINE_ISA_FACT_PATH.fullmatch(relative)
     )

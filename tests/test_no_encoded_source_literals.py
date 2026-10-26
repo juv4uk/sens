@@ -240,6 +240,22 @@ class EncodedSourceLiteralTests(unittest.TestCase):
             "числових літералів або закодованих W8/D-domain токенів",
         )
 
+    def test_conformance_tier_metadata_is_not_live_numeric_source(self):
+        relative = "tests/fixtures/conformance.lisp"
+        row = (
+            '((expr . "(частка (частка (частка 5 6) 8) 7)") '
+            '(id . "F-8bc31cae9e7e39b9") (expected . "5/336") '
+            '(tier . 2) (axioms . (S1)))\\n'
+        )
+        self.assertEqual(CHECK.find_forbidden_literals(row, path=relative), [])
+        # The exemption is only for the record's numeric tier field, not a
+        # raw numeric operand accidentally placed outside the expr string.
+        unsafe = row + "(виконати 3)\\n"
+        self.assertEqual(
+            [(item.token, item.reason) for item in CHECK.find_forbidden_literals(unsafe, path=relative)],
+            [("3", "numeric source literal")],
+        )
+
     def test_unquoted_numeric_literals_are_rejected(self):
         found = CHECK.find_forbidden_literals("(сума 235 2.1564)\n")
         self.assertEqual(
