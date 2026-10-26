@@ -1,4 +1,5 @@
 name: Release Preflight
+# SENS_RELEASE_PREFLIGHT: pushing this explicit marker opts this exact SHA into the full pre-tag gate.
 
 on:
   workflow_dispatch:
