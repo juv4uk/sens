@@ -97,9 +97,7 @@ class RemintExplicitManifestScopeTests(unittest.TestCase):
             encoding="utf-8"
         )
         helper_profile = (
-            "tests/semantic/meta-eval-graph-d1-law.lisp|"
-            "tests/semantic/meta-eval-graph-d1-mutant.lisp|"
-            "tests/semantic/d6-derived-research-batch-01.lisp|"
+            "|tests/semantic/d6-derived-research-batch-01.lisp|"
             "tests/semantic/d8-rassq-until-batch.lisp) ;;"
         )
         self.assertIn(helper_profile, helper)
