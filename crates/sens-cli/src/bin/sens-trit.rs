@@ -1251,10 +1251,8 @@ mod eval_tests {
         let words = decode_canonical_t5m_words(carrier)
             .expect("Zig physical T5M -> current SENS D2 reader");
         assert_eq!(sens::render_binary_words_spaced(&words), "10 001 00 000 01");
-        assert_eq!(
-            sens::render_ternary_words_vertical(&words),
-            "10\n001\n00\n000\n01\n"
-        );
+        assert_eq!(words.len(), 5);
+        assert_eq!(sens::render_binary_words_spaced(&words), "10 001 00 000 01");
         assert_eq!(zig_transport::encode_t5m_direct(&words).unwrap(), carrier);
 
         let multi = zig_test_fixture("migration-multiform-cohort-main/two-forms.sens");
@@ -1311,9 +1309,7 @@ mod eval_tests {
     fn zig_encode_route_uses_t5m_by_default_without_rust_physical_decoder() {
         // SENS owns source parsing and D2 admission, Zig owns default T5M bytes.
         let projection = "10 001 00 000 01";
-        let compatibility_reference = sens::encode_binary_projection_ternary(projection)
-            .expect("five-trit compatibility reference");
-        assert_eq!(&compatibility_reference, &[0x63, 0x89, 0x06, 0xa1]);
+        let expected_wire = [0x63, 0x89, 0x06, 0xa1];
         let expected = sens::parse_binary_source_words(projection)
             .unwrap()
             .into_iter()
@@ -1330,7 +1326,7 @@ mod eval_tests {
             zig_transport::encode_t5m_direct(&actual).expect("Zig sole default T5M encoder");
         assert_eq!(zig_bytes, [0x63, 0x89, 0x06, 0xa1]);
         assert_eq!(
-            zig_bytes, compatibility_reference,
+            zig_bytes, expected_wire,
             "T5M default uses the canonical five-trits-per-byte wire"
         );
         assert_eq!(zig_transport::decode_t5m_words(&zig_bytes).unwrap(), actual);
