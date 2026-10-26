@@ -409,7 +409,7 @@ jobs:
             fi
             changed="$(git diff --name-only "$BEFORE_SHA" "$HEAD_SHA")"
           fi
-          if printf '%s\n' "$changed" | grep -Eq '^(\.github/workflows/(ci|release-preflight)\.yml|crates/xtask/|crates/sens/src/compiler_bootstrap\.rs$|crates/sens/tests/|tests/fixtures/conformance\.lisp$|lib/machine/encoding/coverage\.lisp$|lib/machine/xed/generated/machine-evidence\.lisp$)'; then
+          if printf '%s\n' "$changed" | grep -Eq '^(\.github/workflows/(ci|release-preflight)\.yml|crates/xtask/|crates/sens/src/compiler_bootstrap\.rs$|crates/sens/tests/|tests/fixtures/conformance\.lisp$|packaging/tests/test_release_preflight_scope\.py$|lib/(core4|lisp-fs|time|reason|compiler-nucleus|clips-import)(\.lisp|\.sens)?$|tests/fixtures/wsm-fs-record-producer(\.lisp|\.sens)?$|lib/machine/encoding/coverage\.lisp$|lib/machine/xed/generated/machine-evidence\.lisp$)'; then
             echo "needed=true" >> "$GITHUB_OUTPUT"
             echo "RELEASE_PREFLIGHT_SCOPE release-critical-change=yes"
           else
