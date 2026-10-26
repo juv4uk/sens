@@ -166,8 +166,13 @@ jobs:
               echo "RELEASE_ASSET_ERROR: cannot read macOS deployment target from $DEST" >&2
               exit 1
             fi
+            if [[ ! "$minos" =~ ^[0-9]+\.[0-9]+$ ]]; then
+              echo "RELEASE_ASSET_ERROR: invalid macOS deployment target $minos from $DEST" >&2
+              exit 1
+            fi
             major="${minos%%.*}"
-            if [ "$major" -gt 11 ]; then
+            minor="${minos#*.}"
+            if (( major > 11 || (major == 11 && minor > 0) )); then
               echo "RELEASE_ASSET_ERROR: $DEST requires macOS $minos, above 11.0" >&2
               exit 1
             fi
@@ -188,9 +193,10 @@ jobs:
           if ($bytes[$pe] -ne 0x50 -or $bytes[$pe+1] -ne 0x45) { throw "RELEASE_ASSET_ERROR: $path has no PE signature" }
           $osMajor = [BitConverter]::ToUInt16($bytes, $pe + 24 + 40)
           $subMajor = [BitConverter]::ToUInt16($bytes, $pe + 24 + 48)
-          Write-Output "PORTABILITY asset=windows_x64 os=$osMajor subsystem=$subMajor"
-          if ($subMajor -gt 6) {
-            throw "RELEASE_ASSET_ERROR: $path requires subsystem $subMajor, above 6.0"
+          $subMinor = [BitConverter]::ToUInt16($bytes, $pe + 24 + 50)
+          Write-Output "PORTABILITY asset=windows_x64 os=$osMajor subsystem=$subMajor.$subMinor"
+          if (($subMajor -gt 6) -or ($subMajor -eq 6 -and $subMinor -gt 0)) {
+            throw "RELEASE_ASSET_ERROR: $path requires subsystem $subMajor.$subMinor, above 6.0"
           }
 
       - name: Stage CLI asset (one unique artifact per matrix leg)
