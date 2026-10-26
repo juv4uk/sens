@@ -672,12 +672,26 @@ jobs:
             while IFS= read -r candidate; do
               [[ -n "$candidate" ]] || continue
               if [[ "$candidate" == benchmarks/contest-uk/*.lisp &&
-                    -f "$candidate" && ! -L "$candidate" ]] &&
-                 { [[ ! -s "${candidate%.lisp}.sens" ||
-                       ! -f "${candidate%.lisp}" ||
-                       -L "${candidate%.lisp}.sens" ||
-                       -L "${candidate%.lisp}" ]]; }; then
-                printf '%s\n' "$candidate" >> "$priority_list"
+                    -f "$candidate" && ! -L "$candidate" ]]; then
+                pair="${candidate%.lisp}.sens"
+                view="${candidate%.lisp}"
+                needs_pair=0
+                if [[ ! -s "$pair" || ! -f "$view" || -L "$pair" || -L "$view" ]]; then
+                  needs_pair=1
+                else
+                  source_commit="$(git log -1 --format=%H -- "$candidate")"
+                  pair_commit="$(git log -1 --format=%H -- "$pair")"
+                  if [[ -n "$source_commit" && -n "$pair_commit" ]] &&
+                     ! git merge-base --is-ancestor "$source_commit" "$pair_commit"; then
+                    needs_pair=1
+                    echo "REMINT_PRIORITY_CONTEST_DRIFT source=$candidate native=SENS_ZIG"
+                  fi
+                fi
+                if (( needs_pair )); then
+                  printf '%s\n' "$candidate" >> "$priority_list"
+                else
+                  printf '%s\n' "$candidate" >> "$deferred_list"
+                fi
               elif [[ "$candidate" == lib/*.lisp &&
                       "$candidate" != lib/*/*.lisp &&
                       -f "$candidate" && ! -L "$candidate" ]] &&
@@ -698,7 +712,8 @@ jobs:
             # перетворювати пакет на сотні незалежних програм. Решта —
             # явно PENDING, ніколи не зараховується як обернена/виконана.
             # Той самий нативний SENS/Zig маршрут лишається обов'язковим.
-            recovery_limit=24
+            # One bounded recovery batch fits all 37 known drifted contest sources plus a small library tail.
+            recovery_limit=48
             recovery_selected=0
             recovery_pending=0
             recovery_list="$RUNNER_TEMP/sens-remint-current-main-batch.list"
