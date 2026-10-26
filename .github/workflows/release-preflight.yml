@@ -116,7 +116,7 @@ jobs:
         if: ${{ always() && inputs.full }}
         run: cargo clippy --locked --workspace --all-targets -- -D warnings
 
-      - name: Дозволені мови: SENS/Rust/Zig/Guile/C/Assembler
+      - name: "Дозволені мови: SENS/Rust/Zig/Guile/C/Assembler"
         id: native_language_policy
         if: always()
         shell: bash
