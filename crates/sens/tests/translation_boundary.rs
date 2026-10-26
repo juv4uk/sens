@@ -56,6 +56,26 @@ fn eval_translation(source: &str) -> String {
     .to_string()
 }
 
+#[test]
+fn knowledge_accepts_canonical_d7_heads_without_eq_on_lists() {
+    // A proposition name produced by SENS text-to-symbol is a canonical D7
+    // glyph sequence, not a scalar D8 symbol. The knowledge guard must use
+    // the structural SENS validator and must still reject nested-list heads.
+    let source = r#"
+        (визначити літерал
+          (список (текст-у-символ "людина") (текст-у-символ "сократ")))
+        (список
+          (клауза-бази-знань-коректна? (список літерал))
+          (знання-символ?
+            (список (список (як-є nested)) (як-є tail))))
+    "#;
+    assert_eq!(
+        eval_translation(source),
+        "(1 0)",
+        "canonical D7 goals must be accepted by SENS; nested-list heads rejected"
+    );
+}
+
 const TRANSLATION_FIXTURE: &str = include_str!("../../../tests/fixtures/translation-corpus-v1.lisp");
 
 fn with_translation_fixture(source: &str) -> String {
