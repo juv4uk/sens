@@ -323,6 +323,54 @@ fn build_zig_transport(root: &Path, output: &Path, compiler: &std::ffi::OsStr) {
     println!("cargo:rerun-if-env-changed=CARGO_CFG_TARGET_OS");
     println!("cargo:rerun-if-env-changed=CARGO_CFG_TARGET_ARCH");
     println!("cargo:rerun-if-env-changed=SENS_ZIG_PORTABLE_LINUX");
+
+    // Zig @embedFile dependencies are opaque to Cargo. Watch every embedded
+    // source/physical asset explicitly: remint can update a .sens file after
+    // the first build in this job, and tests must relink the archive against
+    // those exact new bytes rather than retain an old T5M image.
+    for path in [
+        "crates/sens/src/eval/special_forms/io.rs",
+        "crates/sens/src/lib.rs",
+        "crates/sens/build.rs",
+        "lib/repl-core.sens",
+        "lib/meta-eval.sens",
+        "lib/unify.sens",
+        "lib/reason.sens",
+        "lib/forward.sens",
+        "lib/knowledge.sens",
+        "lib/world.sens",
+        "lib/content-store.sens",
+        "lib/lisp-fs.sens",
+        "tests/fixtures/wsm-fs-record-producer.sens",
+        "lib/linter.sens",
+        "language-contract.lisp",
+        "lib/surface/sa.lisp",
+        "lib/surface/ukr.lisp",
+        "lib/surface/uk.lisp",
+        "lib/surface/uk-docs.lisp",
+        "lib/unify.lisp",
+        "lib/reason.lisp",
+        "lib/forward.lisp",
+        "lib/knowledge.lisp",
+        "packaging/islands-manifest-v1.json",
+        "lib/persistent-map.lisp",
+        "lib/persistent-map.sens",
+        "lib/world.lisp",
+        "lib/content-store.lisp",
+        "lib/persistent-vector.sens",
+        "tests/semantic/d9-string-append-physical.lisp",
+        "lib/epistemic.sens",
+        "lib/lisp-fs.lisp",
+        "lib/compiler-nucleus.lisp",
+        "contracts/compiler-nucleus-identity-corpus-v1.tsv",
+        "knowledge/bija3-l1-l5-structure-projection.json",
+        "contracts/bija3-l1-l5-ratification.lisp",
+        "knowledge/d4-bootstrap-compiler-structure-projection.json",
+        "contracts/d4-bootstrap-ratification.lisp",
+    ] {
+        println!("cargo:rerun-if-changed={}", root.join(path).display());
+    }
+
     for path in [
         ".zig-version",
         "zig_transport_root.zig",
