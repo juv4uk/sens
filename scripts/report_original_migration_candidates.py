@@ -188,8 +188,8 @@ NONPROGRAM_MANIFESTS = (
     ("domain-table", "knowledge/migration-nonprogram-domain-tables-2026-10-08.json", 11),
     ("comment-only-loader", "knowledge/migration-nonprogram-comment-only-loaders-2026-10-08.json", 2),
     ("isa", "knowledge/migration-nonprogram-isa-manifest-2026-10-08.json", 25),
-    ("schema", "knowledge/migration-nonprogram-schema-manifest-2026-10-08.json", 19),
-    ("evidence", "knowledge/migration-nonprogram-evidence-manifest-2026-10-08.json", 8),
+    ("schema", "knowledge/migration-nonprogram-schema-manifest-2026-10-08.json", 23),
+    ("evidence", "knowledge/migration-nonprogram-evidence-manifest-2026-10-08.json", 10),
     ("expr-record", "knowledge/migration-nonprogram-expr-records-2026-10-08.json", 13),
     ("knowledge-record", "knowledge/migration-nonprogram-knowledge-records-2026-10-08.json", 12),
 )
