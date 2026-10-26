@@ -117,7 +117,7 @@ fn observe_monotonic_nanoseconds(
     Ok(Value::BinaryNumber(exact))
 }
 
-/// `read-energy-uj` — RAPL-лічильники через powercap sysfs.
+/// `читати-енергію-у-мікроджоулях` — RAPL-лічильники через powercap sysfs.
 ///
 /// Повертає ПАРУ точних D64-слів: (package, dram), у мікроджоулях.
 /// Механізм німий: жодної семантики тут — перетворення й нормування
@@ -134,7 +134,7 @@ fn read_energy_microjoules(
     if !arguments.is_empty() {
         return Err(LanguageError::new(
             ErrorKind::Arity,
-            "read-energy-uj expects exactly zero arguments",
+            "читати-енергію-у-мікроджоулях expects exactly zero arguments",
             span,
         ));
     }
@@ -144,7 +144,7 @@ fn read_energy_microjoules(
             LanguageError::new(
                 ErrorKind::InvalidForm,
                 format!(
-                    "read-energy-uj: {label} counter unavailable at {path}: {error} · лічильник недоступний · Zähler nicht verfügbar"
+                    "читати-енергію-у-мікроджоулях: {label} counter unavailable at {path}: {error} · лічильник недоступний · Zähler nicht verfügbar"
                 ),
                 span,
             )
@@ -152,7 +152,7 @@ fn read_energy_microjoules(
         let value: u64 = text.trim().parse().map_err(|error| {
             LanguageError::new(
                 ErrorKind::InvalidForm,
-                format!("read-energy-uj: {label} counter is not an integer: {error}"),
+                format!("читати-енергію-у-мікроджоулях: {label} counter is not an integer: {error}"),
                 span,
             )
         })?;
@@ -842,7 +842,7 @@ fn evaluate_load(
 pub fn install() {
     register_evaluated_capability("clock-mono-raw", 0, observe_monotonic_nanoseconds);
     #[cfg(not(target_arch = "wasm32"))]
-    register_evaluated_capability("read-energy-uj", 0, read_energy_microjoules);
+    register_evaluated_capability("читати-енергію-у-мікроджоулях", 0, read_energy_microjoules);
     register_evaluated_capability("read-dir", 1, evaluate_read_dir);
     register_evaluated_capability("read-file-bytes", 1, evaluate_read_file_bytes);
     register_evaluated_capability("читати-сирий-текст-файла", 1, evaluate_read_file_utf8_raw);
