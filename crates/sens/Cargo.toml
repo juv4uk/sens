@@ -230,7 +230,6 @@ path = "examples/zig_t5_matched_bench.rs"
 required-features = ["rust-t5-reference"]
 
 [dev-dependencies]
-sens-cli = { path = "../sens-cli" }
 # Ці залежності використовують лише тести; вони не входять до робочого
 # середовища бібліотеки та не розширюють її доступ до операційної системи.
 sens-host = { path = "../sens-host" }
