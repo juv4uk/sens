@@ -53,9 +53,9 @@ jobs:
           while IFS= read -r file; do
             [[ -n "$file" ]] || continue
             case "$file" in
-              *.rs|*.zig|*.sens|*.lisp) continue ;;
+              *.rs|*.zig|*.sens|*.lisp|*.scm|*.ss|*.sld|*.c|*.h|*.S|*.s|*.asm) continue ;;
               *.md|*.yml|*.yaml|*.toml|*.json|*.jsonl|*.txt|*.tsv|*.b64|*.bits|*.lock|*.orig|*.patch|*.contract|*.svg|*.expected|*.call|*.stderr|*.t5m3|*.tape|*.f3m|*.jsonl|LICENSE|.gitignore|.gitattributes|.zig-version|rust-toolchain.toml) continue ;;
-              *.py|*.pyi|*.js|*.mjs|*.cjs|*.ts|*.tsx|*.jsx|*.sh|*.bash|*.ps1|*.c|*.h|*.cc|*.cpp|*.hpp|*.scm|*.ss|*.rkt|*.pl|*.clp|*.lua|*.sv|*.v|*.S)
+              *.py|*.pyi|*.js|*.mjs|*.cjs|*.ts|*.tsx|*.jsx|*.sh|*.bash|*.ps1|*.cc|*.cpp|*.hpp|*.rkt|*.pl|*.clp|*.lua|*.sv|*.v)
                 count=$((count + 1))
                 if [[ "$count" -le 80 ]]; then printf '%s\n' "$file" >> "$examples"; fi ;;
               *)
@@ -66,13 +66,13 @@ jobs:
                 esac ;;
             esac
           done < <(git ls-files)
-          echo "LANGUAGE_POLICY tracked_forbidden_source_files=$count allowed=Rust,Zig,SENS"
+          echo "LANGUAGE_POLICY tracked_forbidden_source_files=$count allowed=Rust,Zig,SENS,Guile,C,Assembler"
           if [[ "$count" -ne 0 ]]; then
             sed -n '1,80p' "$examples"
-            echo "::error title=SOURCE_LANGUAGE_CONTAMINATION::Tracked source outside Rust/Zig/SENS remains. Migrate or remove it; do not certify main as language-clean."
+            echo "::error title=SOURCE_LANGUAGE_CONTAMINATION::Tracked source outside Rust/Zig/SENS/Guile/C/Assembler remains forbidden."
             exit 1
           fi
-          echo "LANGUAGE_POLICY=PASS allowed=Rust,Zig,SENS full_tree=true"
+          echo "LANGUAGE_POLICY=PASS allowed=Rust,Zig,SENS,Guile,C,Assembler full_tree=true"
       - name: Canonical workflows must not execute Python tools
         shell: bash
         run: |
