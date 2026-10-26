@@ -83,7 +83,7 @@ jobs:
                   continue
                 fi
                 count=$((count + 1))
-                if [[ "$count" -le 80 ]]; then printf '%s\\n' "$file" >> "$examples"; fi ;;
+                if [[ "$count" -le 80 ]]; then printf '%s\n' "$file" >> "$examples"; fi ;;
             esac
           done < <(git ls-files)
           echo "LANGUAGE_POLICY active_source_forbidden_files=$count excluded_support_files=$excluded physical_sens_views=$physical_sens_views allowed=Rust,Zig,SENS,Guile,C,Assembler excluded_tests_benchmarks=NOT_VERIFIED"
