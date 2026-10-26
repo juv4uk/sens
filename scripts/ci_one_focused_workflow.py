@@ -72,7 +72,19 @@ def verify():
                         raise ValueError("pull_request не може фільтрувати потрібні перевірки: " + disallowed)
                 auto.append(path.name)
             elif automatic:
-                raise ValueError(f"додатковий автоматичний тригер {sorted(automatic)}")
+                # Реліз запускається ВИКЛЮЧНО по тегу s<version> — це явна дія
+                # власника, а не автозапуск на кожен коміт. Такий push не
+                # споживає бюджет гілкового CI, тому дозволяємо РІВНО його:
+                # push із фільтром tags і БЕЗ фільтра branches. Усе інше —
+                # додатковий автоматичний тригер і далі провал.
+                tag_only = (
+                    automatic == {"push"}
+                    and "tags:" in found["push"]
+                    and "branches:" not in found["push"]
+                    and "branches-ignore:" not in found["push"]
+                )
+                if not tag_only:
+                    raise ValueError(f"додатковий автоматичний тригер {sorted(automatic)}")
         except (ValueError, OSError) as exc:
             errors.append(f"{path.name}: {exc}")
     if auto != ["ci.yml"]:
@@ -110,15 +122,20 @@ def verify():
         ("name", r"^      - name: (.+?)\s*$"),
         ("id", r"^        id:\s*([a-zA-Z][a-zA-Z0-9_-]*)\s*$"),
     ):
+        # Повтор шукаємо В МЕЖАХ ОДНОГО job, а не по всьому файлу: два різні
+        # jobs законно можуть мати крок з однаковою назвою (наприклад,
+        # «Build native SENS» у двох незалежних перевірках). Охоронець ловить
+        # саме помилкове злиття в одному job, як і сказано в коментарі вище.
         matches = re.findall(pattern, ci_text, flags=re.MULTILINE)
         if field == "name" and not matches:
             errors.append("CI_STEPS_MISSING: немає іменованих кроків")
-        seen = set()
         duplicates = set()
-        for item in matches:
-            if item in seen:
-                duplicates.add(item)
-            seen.add(item)
+        for job_block in re.split(r"^  [a-zA-Z][a-zA-Z0-9_-]*:\s*$", ci_text, flags=re.MULTILINE):
+            seen: set[str] = set()
+            for item in re.findall(pattern, job_block, flags=re.MULTILINE):
+                if item in seen:
+                    duplicates.add(item)
+                seen.add(item)
         if duplicates:
             errors.append(
                 "CI_STEPS_DUPLICATED field=" + field
