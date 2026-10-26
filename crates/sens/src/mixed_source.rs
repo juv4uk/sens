@@ -118,16 +118,7 @@ fn lift_pinned_d8_io(source: &str, expression: Expr, depth: u32) -> Result<Expr,
             kind: ExprKind::DomainIdentity(DomainIdentity::from_source_word(word)),
             span: lifted[0].span,
         };
-    } else if head_spelling == Some("символ-за-кодом") {
-        // CODE-CHAR is not currently an admitted D8 execution mechanism.
-        // Use the existing minimal runtime representation bridge by its
-        // compatibility symbol; it materializes a scalar only and does not
-        // implement UTF-8 policy.
-        lifted[0] = Expr {
-            kind: ExprKind::Symbol(Rc::from("codepoint->string")),
-            span: lifted[0].span,
-        };
-    } else if matches!(
+remove unadmitted CODE-CHAR bridge    } else if matches!(
         head_spelling,
         Some("11100000" | "11110100" | "11101010" | "11101101" | "11101110")
     ) {

@@ -533,6 +533,9 @@ pub(crate) fn invoke_domain_identity(
     span: Span,
 ) -> Result<Value, LanguageError> {
     if let CoreDomainIdentity::D9(_) = identity {
+        if let Some(result) = super::selector_law::invoke(identity.into(), args, span) {
+            return result;
+        }
         let domain_identity = crate::DomainIdentity::from(identity);
         // A concrete language-owned definition bound to this exact D9 identity
         // takes precedence. Residency alone still grants nothing: the slot is

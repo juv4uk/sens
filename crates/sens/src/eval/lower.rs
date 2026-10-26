@@ -304,6 +304,26 @@ fn lower(expression: &Expr, depth: u32, mode: LowerMode) -> Expr {
                 None => ExprKind::List(lower_all(items, depth, mode)),
             }
         }
+        ExprKind::Symbol(name) if mode == LowerMode::ExactDomain => {
+            let Some(text) = crate::encode_text7(name, crate::Text7Layout::Uk).ok() else {
+                return expression.clone();
+            };
+            let mut glyphs = Vec::with_capacity(text.cells().len());
+            for cell in text.cells() {
+                let bits = format!("{:07b}", cell);
+                let Ok(words) = crate::parse_binary_source_words(&bits) else {
+                    return expression.clone();
+                };
+                let Some(word) = words.first() else {
+                    return expression.clone();
+                };
+                glyphs.push(Expr {
+                    kind: ExprKind::DomainIdentity(crate::DomainIdentity::from_source_word(word.word)),
+                    span: expression.span,
+                });
+            }
+            ExprKind::List(Rc::from(glyphs.into_boxed_slice()))
+        }
         _ => return expression.clone(),
     };
     Expr {
