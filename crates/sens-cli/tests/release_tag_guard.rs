@@ -145,6 +145,25 @@ fn release_workflows_accept_only_the_s_tag_prefix() {
             && publisher.contains("cmp -- \"dist/${file#./}\" \"$replay/${file#./}\""),
         "publisher must compare the exact artifact set and replayed bytes"
     );
+    for asset in [
+        "\"sens-cli_${version}_linux_amd64\"",
+        "\"sens-cli_${version}_windows_x64.exe\"",
+        "\"sens-cli_${version}_windows_x64.msi\"",
+        "\"sens-cli_${version}_macos_x64\"",
+        "\"sens-cli_${version}_macos_arm64\"",
+    ] {
+        assert!(publisher.contains(asset), "publisher artifact manifest is missing {asset}");
+    }
+    for suffix in ["linux_amd64", "windows_x64", "macos_x64", "macos_arm64"] {
+        assert!(
+            release.contains(&format!("asset_suffix: {suffix}")),
+            "CLI matrix does not stage expected platform asset suffix {suffix}"
+        );
+    }
+    assert!(
+        release.contains("\"sens-cli_${VERSION}_windows_x64.msi\""),
+        "Windows MSI name must match the publisher artifact manifest"
+    );
     assert!(
         release.contains("os: ubuntu-22.04")
             && publisher.contains("\"sens-cli · ubuntu-22.04\"")
