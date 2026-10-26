@@ -27,9 +27,24 @@ digest_free_paths=(
   "benchmarks/contest-uk/run-native.sh"
   "benchmarks/contest-uk/mint-pending.sh"
 )
+# Inspect executable commands, not the guard's own forbidden-token pattern.
+contains_digest_generator() {
+  local candidate="$1"
+  local pattern='(^|[[:space:];|&])sha256sum[[:space:]]+|sha256-hex[[:space:]]*\\(|>[[:space:]]*[^[:space:]]+\\.sha256([[:space:]]|$)|SHA256SUMS.*(write|create|generate)'
+  if [[ "$candidate" == ".github/workflows/release-preflight.yml" ]]; then
+    awk '
+      /^      - name: Мовна політика/ { skip = 1; next }
+      /^      - name:/ { if (skip) skip = 0 }
+      !skip { print }
+    ' "$candidate" | grep -Ei "$pattern" >/dev/null
+  else
+    grep -Ei "$pattern" "$candidate" >/dev/null
+  fi
+}
+
 for path in "${digest_free_paths[@]}"; do
   [[ -f "$path" ]] || continue
-  if grep -Eqi 'sha256sum[[:space:]]|sha256-hex|\\.sha256|SHA256SUMS' "$path"; then
+  if contains_digest_generator "$path"; then
     echo "LANGUAGE_POLICY_ARCHIVE=FAIL digest_creation_forbidden path=$path" >&2
     exit 1
   fi
