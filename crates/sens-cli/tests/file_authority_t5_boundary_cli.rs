@@ -120,9 +120,24 @@ fn exact_d2_projection_reaches_physical_t5_and_current_sens() {
     let physical = fs::read(&pair.physical).expect("байти T5 реально створено");
     assert!(!physical.is_empty());
     assert!(physical.iter().all(|byte| *byte < 243));
-    assert_eq!(sens::open_ternary_program(&physical).unwrap(), WORDS);
     assert_eq!(
-        sens::encode_binary_projection_ternary(WORDS).unwrap(),
+        sens_cli::zig_transport::decode_t5m_words(&physical)
+            .expect("Zig фізично відновлює точні D2-слова"),
+        sens::parse_binary_source_words(WORDS)
+            .expect("SENS читає точну бінарну проєкцію")
+            .into_iter()
+            .map(|token| token.word)
+            .collect::<Vec<_>>()
+    );
+    assert_eq!(
+        sens_cli::zig_transport::encode_t5m_direct(
+            &sens::parse_binary_source_words(WORDS)
+                .expect("SENS точна проєкція")
+                .into_iter()
+                .map(|token| token.word)
+                .collect::<Vec<_>>(),
+        )
+        .expect("Zig фізичне кодування T5M"),
         physical
     );
     let opened = pair.trit("open");
@@ -157,11 +172,19 @@ fn ratified_uk_d1_cond_triplet_is_physical_without_text_fallback() {
     assert!(SOURCE.contains("перше"));
     let exact_words = VIEW.trim_end_matches('\n');
     assert_eq!(
-        sens::open_ternary_program(PHYSICAL).expect("канонічний фізичний T5"),
+        sens_cli::zig_transport::decode_t5m_words(PHYSICAL)
+            .expect("канонічний фізичний T5M"),
         exact_words
     );
     assert_eq!(
-        sens::encode_binary_projection_ternary(exact_words).unwrap(),
+        sens_cli::zig_transport::encode_t5m_direct(
+            &sens::parse_binary_source_words(exact_words)
+                .expect("SENS точне D2-представлення")
+                .into_iter()
+                .map(|token| token.word)
+                .collect::<Vec<_>>(),
+        )
+        .expect("Zig фізичне кодування T5M"),
         PHYSICAL
     );
 
