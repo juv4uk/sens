@@ -47,7 +47,7 @@ fn eval_translation(source: &str) -> String {
     // асиметрія: world.lisp завантажувався з ліфтингом, а вираз без нього,
     // і D9-голова лишалась Text7-послідовністю → невідомо Text7 binding.
     eval_parsed_expressions(
-        &sens::parse_mixed_exact_domain_reasoning_source("lib/world.lisp", source)
+        &sens::parse_mixed_exact_domain_reasoning_source("lib/translation.lisp", source)
             .unwrap_or_else(|error| panic!("чинний D1–D10 reader: {error}; source: {source}")),
         &mut session,
     )
