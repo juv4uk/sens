@@ -60,6 +60,16 @@ jobs:
             exit 1
           fi
           echo "LANGUAGE_POLICY=PASS allowed=Rust,Zig,SENS full_tree=true"
+      - name: Мовна межа — JSON і SHA-256 не є викличними формами SENS
+        shell: bash
+        run: |
+          set -euo pipefail
+          files=(lib/domains/d9.lisp lib/surface/uk-sa-coverage.lisp contracts/d9-ratification.lisp knowledge/d9-ratified.json docs/generated/function-table.md)
+          if grep -nEi 'json-parse|sha256-hex|JSON-PARSE|SHA256-HEX' "${files[@]}"; then
+            echo "::error title=SENS_LANGUAGE_BOUNDARY::Retired external utility name leaked into active language catalog."
+            exit 1
+          fi
+          echo "SENS_LANGUAGE_BOUNDARY=PASS json_callable=false sha256_callable=false"
       - name: Canonical workflows must not execute Python tools
         shell: bash
         run: |
