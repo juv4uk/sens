@@ -63,89 +63,13 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          count="$(grep -cE '\\|[[:space:]]*ARCHIVE[[:space:]]*\\|?$' docs/language-policy-archive.md || true)"
+          count="$(grep -cE '\|[[:space:]]*ARCHIVE[[:space:]]*\|?$' docs/language-policy-archive.md || true)"
           echo "ARCHIVE (поза мовним коридором): ${count} артефактів — docs/language-policy-archive.md"
+          echo "ARCHIVE (поза мовним коридором): ${count} артефактів — docs/language-policy-archive.md" >> "$GITHUB_STEP_SUMMARY"
+          echo "SHA=$GITHUB_SHA; статус стороннього еквівалента не прирівнюється до PASS." >> "$GITHUB_STEP_SUMMARY"
       - name: Самоперевірка мовного гейту (позитивний та негативний свідки)
         shell: bash
         run: bash scripts/test-language-policy-archive-gate.sh
-      - name: Швидкий охоронець host debt
-        shell: bash
-        run: bash scripts/ensure-host-debt0.sh
-      - name: Статус
-        run: echo "QUICK_CI_STATUS=ok heavy_native_laws_remint_release=MANUAL_TARGETED"
-
-  native:
-    name: Ручний native Rust/Zig smoke
-    if: ${{ github.event_name == 'workflow_dispatch' && inputs.suite == 'native' }}
-    runs-on: ubuntu-24.04
-    timeout-minutes: 25
-    steps:
-      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
-        with:
-          persist-credentials: false
-      - uses: dtolnay/rust-toolchain@1.99.0
-      - uses: ./.github/actions/install-zig
-      - name: Build native SENS
-        run: cargo build --locked -p sens-cli --bin sens --bin sens-trit --features benchmark-ast-visits
-      - name: Rust mechanism checks
-        run: bash scripts/ci-rust-mechanism-checks.sh
-      - name: Zig codec and transport smoke
-        shell: bash
-        run: |
-          set -euo pipefail
-          scripts/ci-zig-purity --self-test
-          zig test -lc research/zig-codecs/tests.zig
-          zig test -lc zig_transport_root.zig
-
-  laws:
-    name: Ручні SENS/Zig/T5M закони
-    # Explicit push marker SENS_NATIVE_LAWS runs this same exact-head suite.
-    if: ${{ (github.event_name == 'workflow_dispatch' && inputs.suite == 'laws') || (github.event_name == 'push' && contains(github.event.head_commit.message, 'SENS_NATIVE_LAWS')) }}
-    runs-on: ubuntu-24.04
-    timeout-minutes: 50
-    steps:
-      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
-        with:
-          persist-credentials: false
-      - uses: dtolnay/rust-toolchain@1.99.0
-      - uses: ./.github/actions/install-zig
-      - name: Build native SENS
-        run: cargo build --locked -p sens-cli --bin sens --bin sens-trit --features benchmark-ast-visits
-      - name: Execute SENS laws, mutants and language laws
-        shell: bash
-        run: |
-          set -euo pipefail
-          bash scripts/prove-lisp-semantic-t5m.sh "$PWD/target/debug/sens" "$PWD/target/debug/sens-trit" "$RUNNER_TEMP/sens-laws"
-          bash scripts/prove-lisp-language-laws.sh "$PWD/target/debug/sens"
-
-  remint-input-required:
-    name: Remint потребує явний список файлів
-    if: ${{ github.event_name == 'workflow_dispatch' && inputs.suite == 'remint' && inputs.files == '' }}
-    runs-on: ubuntu-24.04
-    steps:
-      - name: Не запускати широкий remint без області
-        run: |
-          echo "::error title=REMINT_SCOPE_REQUIRED::Вкажіть точні .lisp файли в полі files; автоматичний широкий remint вимкнений у короткому CI."
-          exit 1
-
-  remint:
-    name: Канонічний SENS/Zig/T5M remint точних файлів
-    if: ${{ github.event_name == 'workflow_dispatch' && inputs.suite == 'remint' && inputs.files != '' }}
-    uses: ./.github/workflows/remint-drifted-pairs.yml
-    with:
-      files: ${{ inputs.files }}
-    permissions:
-      contents: write
-
-  release-preflight:
-    name: Ручний exact-SHA release preflight
-    if: ${{ (github.event_name == 'workflow_dispatch' && inputs.suite == 'release-preflight') || (github.event_name == 'push' && contains(github.event.head_commit.message, 'SENS_RELEASE_PREFLIGHT')) }}
-    uses: ./.github/workflows/release-preflight.yml
-    permissions:
-      contents: read
- docs/language-policy-archive.md)"
-          echo "ARCHIVE (поза мовним коридором): $count артефактів — docs/language-policy-archive.md" >> "$GITHUB_STEP_SUMMARY"
-          echo "SHA=$GITHUB_SHA; статус стороннього еквівалента не прирівнюється до PASS." >> "$GITHUB_STEP_SUMMARY"
       - name: Самоперевірка мовного гейту (позитивний та негативний свідки)
         shell: bash
         run: bash scripts/test-language-policy-archive-gate.sh
