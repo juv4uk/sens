@@ -134,7 +134,7 @@ fn build_surface_layer(base: &Environment, surface: WebSurface) -> Result<Enviro
             environment: layer.clone(),
         };
         for (name, asset) in SURFACE_PREREQUISITES {
-            let source = asset.map(|asset| source_asset(asset)).transpose()?;
+            let source = asset.map(source_asset).transpose()?;
             load_surface_prerequisite(name, source.as_deref(), &mut session)?;
         }
         let (name, asset) = match surface {
