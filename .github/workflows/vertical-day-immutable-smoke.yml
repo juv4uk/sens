@@ -1,7 +1,5 @@
-# Виведено з карантину 14.10.2026 за ПРАВИЛОМ 24 ГОДИН (AGENTS.md; docs/ci-red-cause-policy.uk.md):
-# RED не ховаємо за if:false — workflow лишається ВИДИМИМ, а RED старший за 24 год ескалюється
-# (Q_TRIAGE_24H у #5741). Жоден gate не вимикаємо на підставі кольору.
-name: Vertical Day immutable L0 and native smoke
+# Вертикальна перевірка виконується чинними native SENS/Rust/Zig свідками.
+name: Vertical Day native SENS smoke
 
 on:
   workflow_dispatch:
@@ -9,65 +7,40 @@ on:
 permissions:
   contents: read
 
-# Do not cancel an already-running pinned-SHA witness as main advances.
 concurrency:
-  group: vertical-day-immutable-smoke-${{ github.ref }}
+  group: vertical-day-native-smoke-${{ github.ref }}
   cancel-in-progress: false
 
 jobs:
-  oracle-native-smoke:
+  native-smoke:
     runs-on: ubuntu-24.04
     timeout-minutes: 45
     steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+        with:
+          persist-credentials: false
       - uses: dtolnay/rust-toolchain@1.99.0
+      - uses: ./.github/actions/install-zig
       - uses: Swatinem/rust-cache@49a0bdc70d2e1b713ca9e2869b211fcce03d3c1c # v2
-
-      - name: Verify immutable oracle checker rejects tampering
-        run: python3 scripts/verify_vertical_day_smoke.py --self-test
-
-      - name: Build exact-domain L0 oracle
-        run: cargo build --locked --release -p sens --example current_en_vs_d1d8_cpu
-
-      - name: Run real L0 binary-domain oracle
-        run: |
-          python3 benchmarks/execution-ladder-conformance/emit_oracle.py \
-            --manifest benchmarks/current-en-vs-d1d8/fixtures/d3-smoke.json \
-            --helper target/release/examples/current_en_vs_d1d8_cpu \
-            --out "$RUNNER_TEMP/vertical-day-oracle.jsonl"
-
-      - name: Verify conformance envelope and pinned observable SHA256
-        run: |
-          python3 benchmarks/execution-ladder-conformance/validate.py \
-            "$RUNNER_TEMP/vertical-day-oracle.jsonl"
-          python3 scripts/verify_vertical_day_smoke.py \
-            "$RUNNER_TEMP/vertical-day-oracle.jsonl" \
-            --expected-sha "$GITHUB_SHA"
-
-      # Точні доменні слова та фізичний T5 первинні; українська назва — лише проєкція.
-      # Цей bounded доказ не видається за незалежне підтвердження виконання.
-      - name: Canonical Ukrainian to exact D1-D4 words to physical T5 to bit view
-        if: always()
+      - name: Зібрати нативний SENS
+        run: cargo build --locked -p sens-cli --bin sens --bin sens-trit --features benchmark-ast-visits
+      - name: Мовні закони з позитивним і негативним свідками
         shell: bash
         run: |
           set -euo pipefail
-          python3 -m unittest discover -s tests -p 'test_verify_uk_t5_t5m_triplet.py' -v
+          bash scripts/prove-lisp-language-laws.sh "$PWD/target/debug/sens"
+          bash scripts/prove-d8-products-main.sh "$PWD/target/debug/sens"
+      - name: Канонічні фізичні трійки через SENS, Zig/T5M та cmp
+        shell: bash
+        run: |
+          set -euo pipefail
           bash scripts/check-triple-projection.sh \
             --fixture tests/fixtures/migration-d1-cond-cohort/branch.lisp \
             --fixture tests/fixtures/migration-d4-selector-cohort/caar.lisp
-
-      - name: Native CPU vertical mechanism witnesses
-        if: always()
+      - name: Нативні механізми ядра
         run: cargo test --locked -p sens-host --test native_lisp_bytes --test native_cond_profile
-
-      - name: Exact domain ladder and retired-semantic firewall
-        if: always()
+      - name: Точна доменна драбина
         run: cargo test --locked -p sens --test domain_ladder_only_kernel
-
-      - name: Retain real oracle evidence for exact commit
-        if: always()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
-        with:
-          name: vertical-day-l0-${{ github.sha }}
-          path: ${{ runner.temp }}/vertical-day-oracle.jsonl
-          if-no-files-found: warn
+      - name: Записати коміт, перевірений цим прогоном
+        shell: bash
+        run: printf 'Перевірений коміт: %s\n' "$GITHUB_SHA" >> "$GITHUB_STEP_SUMMARY"

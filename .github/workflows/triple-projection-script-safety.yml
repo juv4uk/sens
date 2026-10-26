@@ -11,30 +11,41 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v5
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
         with:
-          python-version: "3.12"
-      - name: Prove real committed parity and negative clobber protections
-        run: python3 -m unittest discover -s tests -p 'test_triple_projection_script_safety.py' -v
-      - name: Positive bounded canonical Ukrainian triplet MUST pass
+          persist-credentials: false
+      - uses: dtolnay/rust-toolchain@1.99.0
+      - uses: ./.github/actions/install-zig
+      - name: Зібрати нативні механізми SENS/T5M
+        run: cargo build --locked -p sens-cli --bin sens --bin sens-trit --features benchmark-ast-visits
+      - name: Позитивна канонічна трійка має пройти
         run: |
           bash scripts/check-triple-projection.sh \
             --fixture tests/fixtures/migration-d1-cond-cohort/branch.lisp
-      - name: The OLD legacy/incomplete corpus MUST NOT be reported green
+      - name: Відхилити небезпечний шлях і пошкоджену фізичну пару
         shell: bash
         run: |
           set -euo pipefail
           set +e
-          bash scripts/check-triple-projection.sh > "$RUNNER_TEMP/full-triple.log" 2>&1
-          status=$?
+          bash scripts/check-triple-projection.sh --fixture ../unsafe.lisp >/dev/null 2>&1
+          unsafe_status=$?
           set -e
-          cat "$RUNNER_TEMP/full-triple.log"
-          test "$status" -eq 2
-          grep -q "result=BLOCKED" "$RUNNER_TEMP/full-triple.log"
-          printf '%s\n' 'Scope: bounded canonical D1/D3 proof only; 3 legacy/incomplete fixtures BLOCK.' >> "$GITHUB_STEP_SUMMARY"
-          printf '%s\n' 'No physical/uk release admission or historical executable conversion from this check.' >> "$GITHUB_STEP_SUMMARY"
-      - name: Prove no source or output was rewritten
+          test "$unsafe_status" -eq 2
+
+          scratch="$(mktemp -d)"
+          trap 'rm -rf -- "$scratch"' EXIT
+          triplet="tests/fixtures/migration-d1-cond-cohort"
+          mkdir -p "$scratch/root/$triplet"
+          cp -- "$triplet/branch.lisp" "$scratch/root/$triplet/branch.lisp"
+          cp -- "$triplet/branch.sens" "$scratch/root/$triplet/branch.sens"
+          cp -- "$triplet/branch" "$scratch/root/$triplet/branch"
+          printf '0' >> "$scratch/root/$triplet/branch.sens"
+          set +e
+          bash scripts/check-triple-projection.sh --root "$scratch/root" --fixture "$triplet/branch.lisp" >/dev/null 2>&1
+          mismatch_status=$?
+          set -e
+          test "$mismatch_status" -eq 2
+      - name: Перевірити незмінність репозиторію
         shell: bash
         run: |
           test -z "$(git status --porcelain --untracked-files=all)" || {

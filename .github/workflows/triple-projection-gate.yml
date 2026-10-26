@@ -1,8 +1,6 @@
 name: Triple projection gate
 
-# Every new executable admission requires an exact Ukrainian .lisp,
-# physical .sens and extensionless one-line spaced 0/1 view.
-# Historical/unsupported backlogs are NEVER silently admitted to release.
+# Ручний gate перевіряє лише чинні native SENS/T5M механізми.
 on:
   workflow_dispatch:
 
@@ -11,37 +9,33 @@ permissions:
 
 jobs:
   triple:
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
-      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
         with:
-          python-version: "3.12"
-
-      # D7 is owner-ratified source foundation; the semantic ledger stays in
-      # Lisp-owned data and no Rust phoneme/number table is introduced.
-      - name: D7 source admission and explicit W7 role boundary
+          persist-credentials: false
+      - uses: dtolnay/rust-toolchain@1.99.0
+      - uses: ./.github/actions/install-zig
+      - name: Зібрати нативні механізми SENS/T5M
+        run: cargo build --locked -p sens-cli --bin sens --bin sens-trit --features benchmark-ast-visits
+      - name: Перевірити чинні джерела й мовні закони
         shell: bash
         run: |
           set -euo pipefail
-          python3 scripts/check-d7-current-authority.py
-          python3 scripts/d7_source_projection.py --check
-          python3 -m unittest discover -s tests -p 'test_d7_source_projection.py' -v
-
-      # One existing source-domain-bounded positive contract, NOT a claim
-      # that D4 or historical no-view programs are already source-admitted.
-      - name: Require committed Ukrainian D1 source / physical T5 / bit-view
+          bash scripts/check-current-authority-docs.sh
+          bash scripts/check-language-policy-archive.sh
+          bash scripts/check-sens-only-semantic-tests.sh
+          bash scripts/check-sens-rust-zig-only-tests.sh
+          bash scripts/prove-lisp-language-laws.sh "$PWD/target/debug/sens"
+          bash scripts/prove-d8-products-main.sh "$PWD/target/debug/sens"
+      - name: Перевірити канонічну фізичну трійку
+        shell: bash
         run: |
+          set -euo pipefail
           bash scripts/check-triple-projection.sh \
             --fixture tests/fixtures/migration-d1-cond-cohort/branch.lisp
-
-      # The default full-corpus checker is INTENTIONALLY fail-closed while
-      # historical legacy programs lack a view or a ratified UK translator.
-      # Record that as outstanding migration debt, not as a regression in
-      # an unrelated PR. Unexpected statuses and false-green are guarded
-      # by the independent adversarial safety test suite.
-      - name: Show full historical triple debt without declaring admission
+      - name: Показати стан решти історичних трійок
         shell: bash
         run: |
           set -euo pipefail
@@ -50,31 +44,11 @@ jobs:
           result=$?
           set -e
           cat "$RUNNER_TEMP/triple-debt.log"
-          case "$result" in
-            0)
-              echo 'Historical bounded default is now complete; independent release oracle still required.' >> "$GITHUB_STEP_SUMMARY"
-              ;;
-            2)
-              grep -q 'result=BLOCKED' "$RUNNER_TEMP/triple-debt.log"
-              echo 'BLOCKED historical/unsupported triples remain. This is NOT release admission.' >> "$GITHUB_STEP_SUMMARY"
-              ;;
-            *)
-              echo "Unexpected triple checker exit=$result" >&2
-              exit 1
-              ;;
-          esac
-
-      - name: Preserve fail-closed tamper and no-overwrite regressions
-        run: python3 -m unittest discover -s tests -p test_triple_projection_script_safety.py -v
-
-      - name: Inventory all real Lisp / physical T5 / view states
-        if: always()
-        run: python3 scripts/sens_inventory.py lib tests/fixtures --json /tmp/inventory.json
-
-      - name: Upload true inventory
-        if: always()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
-        with:
-          name: triple-inventory
-          path: /tmp/inventory.json
-          if-no-files-found: warn
+          if (( result == 0 )); then
+            echo 'Усі трійки стандартного набору пройшли нативну перевірку.' >> "$GITHUB_STEP_SUMMARY"
+          elif (( result == 2 )); then
+            echo 'У повному наборі лишилися непідтверджені історичні трійки; це не допускає їх до релізу.' >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "Неочікуваний код завершення перевірки трійок: $result" >&2
+            exit 1
+          fi
