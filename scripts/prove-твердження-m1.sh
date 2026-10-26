@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # CI_GLUE_NO_SEMANTICS: запускає SENS-авторські свідки бібліотеки тверджень.
-# Жодного Python, JSON чи SHA-256: лише native sens і побайтове cmp.
+# Мовний вирок — SENS; механічна перевірка байтів — cmp.
 set -euo pipefail
 cd "$(dirname "$0")/.."
 if [[ $# -gt 1 ]]; then
@@ -20,7 +20,7 @@ tmp="$(mktemp -d)"
 trap 'rm -rf "$tmp"' EXIT
 cp "$law" "$tmp/positive.lisp"
 cp "$mutant" "$tmp/mutant.lisp"
-printf 'NATIVE_SENS_EXECUTOR id=%s path=%s version=%s\n' "$id" "$cli" "$("$cli" --version 2>/dev/null || echo unknown)"
+printf 'ВИКОНАВЕЦЬ_SENS id=%s path=%s version=%s\n' "$id" "$cli" "$("$cli" --version 2>/dev/null || echo unknown)"
 printf '1\n' > "$tmp/expected"
 if ! "$cli" "$tmp/positive.lisp" > "$tmp/actual" 2> "$tmp/positive.err"; then
   printf 'REGRESSION id=%s layer=eval fixture=%s actual=execution-error\n' "$id" "$law" >&2
