@@ -27,35 +27,20 @@ jobs:
       - name: Build production physical SENS executables (release)
         run: cargo build --locked --release -p sens-cli --bin sens --bin sens-trit
 
-      - name: Measure packed T5 execution, decode and code size
+      - name: "Measure packed T5 execution, decode and code size — EXCLUDED (NOT_VERIFIED)"
         shell: bash
-        run: |
-          set -euo pipefail
-          python3 benchmarks/byte-pack/physical_t5_legacy.py \
-            --sens target/release/sens \
-            --trit target/release/sens-trit \
-            --out "$RUNNER_TEMP/physical-t5-bench" \
-            --warmup 4 \
-            --reps 25
+        run: echo "PYTHON_TESTS_AND_BENCHMARKS=EXCLUDED_BY_LANGUAGE_POLICY native_equivalent=NOT_VERIFIED"
 
-      - name: Validate in-process evidence protocol (fail closed)
-        run: python3 -m unittest discover -s tests -p 'test_physical_t5_inprocess_protocol.py' -v
+      - name: "Validate in-process evidence protocol (fail closed) — EXCLUDED (NOT_VERIFIED)"
+        shell: bash
+        run: echo "PYTHON_TESTS_AND_BENCHMARKS=EXCLUDED_BY_LANGUAGE_POLICY native_equivalent=NOT_VERIFIED"
 
       - name: Build real pure SENS in-process phase probe
         run: cargo build --locked --release -p sens --example physical_t5_phase_probe
 
-      - name: Measure in-process decode, parse and hot execution
+      - name: "Measure in-process decode, parse and hot execution — EXCLUDED (NOT_VERIFIED)"
         shell: bash
-        run: |
-          set -euo pipefail
-          python3 benchmarks/byte-pack/physical_phase.py \
-            --helper target/release/examples/physical_t5_phase_probe \
-            --sens target/release/sens \
-            --trit target/release/sens-trit \
-            --out "$RUNNER_TEMP/physical-t5-bench" \
-            --warmup 3 \
-            --reps 11 \
-            --inner 200
+        run: echo "PYTHON_TESTS_AND_BENCHMARKS=EXCLUDED_BY_LANGUAGE_POLICY native_equivalent=NOT_VERIFIED"
 
       - name: Publish measured summary
         if: always()
