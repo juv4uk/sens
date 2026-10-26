@@ -10,14 +10,14 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
-      - name: Re-check current Rust trace census — EXCLUDED (NOT_VERIFIED)
-        if: false
-        shell: bash
-        run: echo "FOREIGN_LANGUAGE_TEST_BENCH=EXCLUDED_BY_POLICY native_equivalent=NOT_VERIFIED"
-      - name: Run adversarial graph corpus — EXCLUDED (NOT_VERIFIED)
-        if: false
-        shell: bash
-        run: echo "FOREIGN_LANGUAGE_TEST_BENCH=EXCLUDED_BY_POLICY native_equivalent=NOT_VERIFIED"
+      - name: Re-check current Rust trace census
+        run: python3 benchmarks/gc-current-rust-trace-census/run.py
+
+      - name: Run adversarial graph corpus
+        run: |
+          rm -rf /tmp/gc-stress-oracle
+          python3 benchmarks/gc-stress-oracle/run.py             --deep-chain 100000             --out /tmp/gc-stress-oracle
+
       - name: Publish report
         if: always()
         run: |
