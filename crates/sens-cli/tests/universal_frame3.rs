@@ -7,19 +7,19 @@
 //!
 //! Тут `zig_transport` рідний, цикл зникає, тип один.
 
-use sens::universal_frame3::*;
-use sens::*;
+use ::sens::universal_frame3::*;
+use ::sens::*;
 
 mod tests {
-    fn encode_ternary_words(words: &[crate::BinarySourceWord]) -> Result<Vec<u8>, String> {
+    fn encode_ternary_words(words: &[::sens::BinarySourceWord]) -> Result<Vec<u8>, String> {
         sens_cli::zig_transport::encode_t5m_direct(words)
     }
-    fn decode_ternary_words(bytes: &[u8]) -> Result<Vec<crate::BinarySourceWord>, String> {
+    fn decode_ternary_words(bytes: &[u8]) -> Result<Vec<::sens::BinarySourceWord>, String> {
         sens_cli::zig_transport::decode_t5m_words(bytes)
     }
 
     use super::*;
-    use crate::parse_binary_source_words;
+    use ::sens::parse_binary_source_words;
 
     fn source(s: &str) -> Vec<BinarySourceWord> {
         parse_binary_source_words(s)
@@ -172,7 +172,6 @@ mod tests {
     #[cfg(feature = "rust-f3-reference")]
     #[test]
     fn e1_t5_f3c_exact_physical_size_matrix() {
-        use crate::{decode_ternary_words};
 
         let corpus = include_str!(concat!(
             env!("CARGO_MANIFEST_DIR"),
@@ -214,11 +213,11 @@ mod tests {
                 decode_ternary_words(bytes).is_ok_and(|recovered| recovered == words)
             });
             let f3c = t5.as_ref().and_then(|bytes| {
-                crate::frame3_small::encode_explicit_small_f3(bytes)
+                ::sens::frame3_small::encode_explicit_small_f3(bytes)
                     .ok()
                     .flatten()
                     .filter(|packed| {
-                        crate::frame3_small::decode_explicit_small_f3(packed)
+                        ::sens::frame3_small::decode_explicit_small_f3(packed)
                             .is_ok_and(|recovered| recovered == *bytes)
                     })
             });
@@ -258,11 +257,11 @@ mod tests {
         assert_eq!(decode(&e1_tiny).unwrap(), tiny_words);
         assert_eq!(encode_ternary_words(&tiny_words).unwrap(), tiny_t5);
         assert_eq!(
-            crate::frame3_small::encode_explicit_small_f3(&tiny_t5).unwrap(),
+            ::sens::frame3_small::encode_explicit_small_f3(&tiny_t5).unwrap(),
             Some(tiny_f3c.to_vec())
         );
         assert_eq!(
-            crate::frame3_small::decode_explicit_small_f3(&tiny_f3c).unwrap(),
+            ::sens::frame3_small::decode_explicit_small_f3(&tiny_f3c).unwrap(),
             tiny_t5
         );
         let tiny_bits: usize = tiny_words.iter().map(|word| word.width()).sum();
