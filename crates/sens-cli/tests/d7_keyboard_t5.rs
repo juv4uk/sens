@@ -2,7 +2,7 @@
 //! Keyboard projection produces W7 coordinates; Zig alone packs/unpacks T5M.
 //! No legacy Rust physical codec is imported by these tests.
 
-use sens::{BinarySourceWord, Bit7};
+use sens::{BinarySourceWord, Bit2, Bit7};
 use sens::d7_keyboard::{self, D7Mode, D7CodecError};
 use sens_cli::zig_transport;
 
@@ -74,7 +74,7 @@ fn ukrainian_uppercase_is_one_seven_bit_cell() {
 
 #[test]
 fn old_reserved_coordinates_are_current_text_data() {
-    for (bits, glyph) in [(33, "!"), (42, "*"), (97, "ф")] {
+    for glyph in ["!", "*", "ф"] {
         let physical = encode_d7_uk_t5(glyph).unwrap();
         let words = decode_t5m_via_zig(&physical);
         assert_eq!(words.len(), 1);
