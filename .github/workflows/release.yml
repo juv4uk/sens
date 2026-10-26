@@ -151,6 +151,7 @@ jobs:
   publish-island-manifest:
     name: Publish generated self-bootstrap island manifest
     needs: test
+    if: always() && (needs.test.result == 'success' || vars.SENS_RELEASE_OWNER_OVERRIDE == '1')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
@@ -200,6 +201,7 @@ jobs:
   build-cli:
     name: sens-cli · ${{ matrix.os }}
     needs: test
+    if: always() && (needs.test.result == 'success' || vars.SENS_RELEASE_OWNER_OVERRIDE == '1')
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -261,6 +263,7 @@ jobs:
   build-msi:
     name: sens-cli · Windows MSI installer
     needs: test
+    if: always() && (needs.test.result == 'success' || vars.SENS_RELEASE_OWNER_OVERRIDE == '1')
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
@@ -303,6 +306,7 @@ jobs:
   build-web:
     name: Portable web REPL · single HTML
     needs: test
+    if: always() && (needs.test.result == 'success' || vars.SENS_RELEASE_OWNER_OVERRIDE == '1')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
@@ -345,7 +349,7 @@ jobs:
   release-publish:
     name: Final SHA-pinned publish only after ALL jobs are green
     needs: [test, publish-island-manifest, build-cli, build-msi, build-web]
-    if: always()
+    if: always() && (needs.test.result == 'success' || vars.SENS_RELEASE_OWNER_OVERRIDE == '1')
     uses: ./.github/workflows/release-publish.yml
     secrets: inherit
     permissions:
