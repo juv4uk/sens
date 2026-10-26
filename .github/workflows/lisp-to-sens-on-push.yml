@@ -1,0 +1,113 @@
+name: Lisp → SENS на пуш (змінені або нові .lisp)
+
+# Вимога власника: коли .lisp змінено або створено — пуш сам запускає
+# перетворення на .sens і комітить фізичний носій.
+#
+# Чому окремий workflow, а не remint-drifted-pairs.yml:
+#   remint важкий (карбує всі пари, ганяє F6, конкурс) і його коміт
+#   відхиляється прапорцем regenerated_failed. Тут — лише те, що змінилось:
+#   один прохід по змінених .lisp, той самий канонічний карб
+#   (scripts/refresh-verified-t5m-pair.sh), один коміт.
+#
+# Джерело істини карбу — Zig/T5M через sens-trit, не Python.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "**.lisp"
+
+# Не скасовувати попередні прогони (правило власника) і не ставити в чергу
+# один поверх одного: карбування пише в git, тож паралельність тут шкідлива.
+concurrency:
+  group: lisp-to-sens-on-push
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  mint:
+    name: Перетворити змінені .lisp на .sens
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+          persist-credentials: true
+
+      - name: Встановити Zig
+        uses: ./.github/actions/install-zig
+
+      - uses: dtolnay/rust-toolchain@1.99.0
+
+      - name: Збудувати SENS-бінарники (sens + sens-trit)
+        run: cargo build --locked -p sens-cli --bin sens --bin sens-trit
+
+      - name: Перетворити змінені або нові .lisp на .sens
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          before='${{ github.event.before }}'
+          # Перший пуш у гілку дає нульовий SHA — тоді беремо попередній коміт.
+          if [[ "$before" =~ ^0+$ ]] || [[ -z "$before" ]] || ! git cat-file -e "$before^{commit}" 2>/dev/null; then
+            before="$(git rev-parse "${GITHUB_SHA}^" 2>/dev/null || echo "")"
+          fi
+
+          if [[ -z "$before" ]]; then
+            echo "LISP_TO_SENS_NO_BASE (перший коміт у гілці) — нічого не перетворюю"
+            exit 0
+          fi
+
+          # Дзеркало виключень міграції: generated/surface — не джерела мови,
+          # docs/research — історія, superseded — карантин.
+          changed="$(git diff --name-only "$before" "$GITHUB_SHA" -- '*.lisp' \
+            | grep -vE '^(lib/generated/|lib/surface/|docs/|research/|superseded/|target/)' || true)"
+
+          if [[ -z "$changed" ]]; then
+            echo "LISP_TO_SENS_NO_CHANGES"
+            exit 0
+          fi
+
+          echo "LISP_TO_SENS_CHANGED:"
+          printf '%s\n' "$changed"
+
+          fail=0
+          while IFS= read -r f; do
+            [[ -n "$f" ]] || continue
+            if [[ ! -f "$f" ]]; then
+              # Видалене джерело: пару прибирає окремий census, не цей крок.
+              echo "LISP_TO_SENS_SKIP_MISSING $f"
+              continue
+            fi
+            echo "LISP_TO_SENS_MINT $f"
+            if ! bash scripts/refresh-verified-t5m-pair.sh "$f" target/debug/sens target/debug/sens-trit; then
+              echo "::error::LISP_TO_SENS_MINT_FAILED $f"
+              fail=1
+            fi
+          done <<< "$changed"
+
+          exit "$fail"
+
+      - name: Закомітити оновлені .sens
+        if: success()
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name  "sens-mint-bot"
+          git config user.email "sens-mint-bot@users.noreply.github.com"
+
+          git add -A -- '*.sens'
+          if git diff --cached --quiet; then
+            echo "LISP_TO_SENS_NO_BYTE_CHANGES"
+            exit 0
+          fi
+
+          echo "LISP_TO_SENS_COMMIT:"
+          git diff --cached --stat
+
+          git commit -m "Lisp → SENS: перекарбовано змінені джерела (пуш)"
+          git push origin HEAD:main
+          echo "LISP_TO_SENS_PUSHED sha=$(git rev-parse HEAD)"
