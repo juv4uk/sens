@@ -29,39 +29,37 @@ jobs:
           # Без цього fetch окремого попереднього SHA вичерпував 60 с.
           fetch-depth: 2
 
-      - name: Мовна політика main — лише Rust, Zig і SENS для активного коду
+      - name: Мовна політика main — аудит усього відстежуваного дерева
         shell: bash
-        env:
-          BEFORE_SHA: ${{ github.event.before }}
-          PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
         run: |
           set -euo pipefail
-          base="${BEFORE_SHA:-}"
-          if [[ "$GITHUB_EVENT_NAME" == "pull_request" ]]; then base="$PR_BASE_SHA"; fi
-          if [[ -z "$base" || "$base" =~ ^0+$ ]]; then base="$(git rev-parse HEAD^1)"; fi
-          git cat-file -e "$base^{commit}"
           forbidden=0
+          count=0
+          examples="$RUNNER_TEMP/forbidden-source-languages.txt"
+          : > "$examples"
           while IFS= read -r file; do
             [[ -n "$file" ]] || continue
             case "$file" in
-              *.rs|*.zig|*.sens|*.lisp) ;;
-              *.md|*.yml|*.yaml|*.toml|*.json|*.jsonl|*.txt|*.tsv|*.b64|*.bits|*.lock|*.orig|*.patch|*.contract|*.svg|*.expected|*.call|*.stderr|*.t5m3|*.tape) ;;
+              *.rs|*.zig|*.sens|*.lisp) continue ;;
+              *.md|*.yml|*.yaml|*.toml|*.json|*.jsonl|*.txt|*.tsv|*.b64|*.bits|*.lock|*.orig|*.patch|*.contract|*.svg|*.expected|*.call|*.stderr|*.t5m3|*.tape|*.f3m|*.jsonl|LICENSE|.gitignore|.gitattributes|.zig-version|rust-toolchain.toml) continue ;;
               *.py|*.pyi|*.js|*.mjs|*.cjs|*.ts|*.tsx|*.jsx|*.sh|*.bash|*.ps1|*.c|*.h|*.cc|*.cpp|*.hpp|*.scm|*.ss|*.rkt|*.pl|*.clp|*.lua|*.sv|*.v|*.S)
-                echo "::error file=$file,title=FORBIDDEN_SOURCE_LANGUAGE::Only Rust, Zig and SENS source are allowed in main."
-                forbidden=1 ;;
+                count=$((count + 1))
+                if [[ "$count" -le 80 ]]; then printf '%s\n' "$file" >> "$examples"; fi ;;
               *)
                 case "$file" in
-                  crates/*|lib/*|scripts/*|tests/semantic/*|src/*)
-                    echo "::error file=$file,title=UNCLASSIFIED_SOURCE_FILE::Classify or migrate this executable/source file; only Rust, Zig and SENS are allowed."
-                    forbidden=1 ;;
+                  crates/*|lib/*|scripts/*|tests/*|benchmarks/*|research/*|src/*|tools/*)
+                    count=$((count + 1))
+                    if [[ "$count" -le 80 ]]; then printf '%s\n' "$file" >> "$examples"; fi ;;
                 esac ;;
             esac
-          done < <(git diff --name-only "$base" "$GITHUB_SHA")
-          if [[ "$forbidden" -ne 0 ]]; then
-            echo "LANGUAGE_POLICY=FAIL allowed=Rust,Zig,SENS"
+          done < <(git ls-files)
+          echo "LANGUAGE_POLICY tracked_forbidden_source_files=$count allowed=Rust,Zig,SENS"
+          if [[ "$count" -ne 0 ]]; then
+            sed -n '1,80p' "$examples"
+            echo "::error title=SOURCE_LANGUAGE_CONTAMINATION::Tracked source outside Rust/Zig/SENS remains. Migrate or remove it; do not certify main as language-clean."
             exit 1
           fi
-          echo "LANGUAGE_POLICY=PASS allowed=Rust,Zig,SENS changed_files_only=true"
+          echo "LANGUAGE_POLICY=PASS allowed=Rust,Zig,SENS full_tree=true"
       - name: Canonical workflows must not execute Python tools
         shell: bash
         run: |
