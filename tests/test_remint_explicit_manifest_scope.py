@@ -127,7 +127,7 @@ class RemintExplicitManifestScopeTests(unittest.TestCase):
         push_mint = push_workflow.index(
             'bash scripts/refresh-verified-t5m-pair.sh "$f" target/debug/sens target/debug/sens-trit'
         )
-        push_core4 = push_workflow.index('elif [[ "$f" == "lib/core4.lisp" ]] then'.replace(" ]] then", " ]]; then"), push_mint)
+        push_core4 = push_workflow.index('elif [[ "$f" == "lib/core4.lisp" ]]; then', push_mint)
         push_rebuild = push_workflow.index(
             "cargo build --locked -p sens-cli --bin sens --bin sens-trit",
             push_core4,
