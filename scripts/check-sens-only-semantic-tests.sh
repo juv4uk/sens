@@ -92,7 +92,7 @@ self_test() {
   gate_new_artifact "$first_artifact" false "" || die "self-test позитив: зареєстрований архів відхилено"
   counted="$(archive_rows | awk 'END {print NR+0}')"
   [[ "$counted" -eq "$archive_count" ]] || die "self-test позитив: ARCHIVE counter не врахував рядок"
-  simulated_new="tests/__gate_self_test_foreign.py"
+  simulated_new="tests/__gate_self_test_foreign.native"
   if gate_new_artifact "$simulated_new" true ""; then
     die "self-test негатив: новий чужий тест без SENS_SOURCE прийнято"
   fi
@@ -102,49 +102,13 @@ if [[ "${1:-}" == "--self-test" ]]; then self_test; exit 0; fi
 
 event_name="${SENS_EVENT_NAME:-${GITHUB_EVENT_NAME:-}}"
 if [[ "$event_name" == "pull_request" ]]; then
-  # GitHub passes the exact event fields via env; no JSON payload parser.
   pr_body="${SENS_PR_BODY:-}"
-  first_field="${pr_body%%
-  [[ "$base_sha" =~ ^[0-9a-f]{40}$ && "$head_sha" =~ ^[0-9a-f]{40}$ ]] || die "немає pinned PR base/head SHA"
-  git cat-file -e "$base_sha^{commit}" 2>/dev/null || git fetch --no-tags origin "$base_sha" --depth=1
-  while IFS=$'\t' read -r status path; do
-    [[ "$status" == A* ]] || continue
-    case "$path" in
-      tests/*|crates/*/tests/*|benchmarks/*)
-        if ! first_field_is_sens_source "$first_field"; then
-          die "новий gated test/benchmark $path без SENS_SOURCE першим полем PR-body; виключення заборонено"
-        fi
-        ;;
-    esac
-  done <<<"$(git diff --name-status "$base_sha...$head_sha" || true)"
-fi
-
-runner_pattern='python3?[[:space:]]+.*(test|bench|benchmark|trial|run\.py)|pytest([[:space:]]|$)|node[[:space:]]+--test|npm[[:space:]]+(test|run[[:space:]]+(test|bench|benchmark))|npx[[:space:]]+(jest|vitest|mocha)|bun[[:space:]]+test|deno[[:space:]]+test|go[[:space:]]+test([[:space:]]|$)|racket[[:space:]]+.*(test|bench)'
-workflow_count=0
-missing_runner_workflows=()
-while IFS= read -r workflow; do
-  [[ -f "$workflow" ]] || continue
-  if grep -Eq "$runner_pattern" "$workflow"; then
-    workflow_count=$((workflow_count + 1))
-    if ! archive_has_location "$workflow"; then
-      missing_runner_workflows+=("$workflow")
-    fi
-  fi
-done <<<"$(find .github/workflows -maxdepth 1 -type f \( -name '*.yml' -o -name '*.yaml' \) -print | sort)"
-if (("${#missing_runner_workflows[@]}" != 0)); then
-  printf 'МОВНИЙ_ГЕЙТ=RED причина=успадковані workflow без рядків ARCHIVE count=%s\n' "${#missing_runner_workflows[@]}" >&2
-  printf '  missing_archive: %s\n' "${missing_runner_workflows[@]}" >&2
-  exit 1
-fi
-
-self_test
-echo "ARCHIVE (поза мовним коридором): $archive_count артефактів — $ARCHIVE_URL"
-echo "МОВНИЙ_ГЕЙТ=OK registry=ARCHIVE runner_workflows=$workflow_count evidence=NOT_VERIFIED"
-\n'*}"
+  first_field="${pr_body%%$'\n'*}"
   base_sha="${SENS_PR_BASE_SHA:-}"
   head_sha="${SENS_PR_HEAD_SHA:-}"
-  [[ "$base_sha" =~ ^[0-9a-f]{40}$ && "$head_sha" =~ ^[0-9a-f]{40}$ ]] || die "немає pinned PR base/head SHA"
+  [[ "$base_sha" =~ ^[0-9a-f]{40}$ && "$head_sha" =~ ^[0-9a-f]{40}$ ]] || die "немає pinned PR base/head"
   git cat-file -e "$base_sha^{commit}" 2>/dev/null || git fetch --no-tags origin "$base_sha" --depth=1
+  git cat-file -e "$head_sha^{commit}" 2>/dev/null || git fetch --no-tags origin "$head_sha" --depth=1
   while IFS=$'\t' read -r status path; do
     [[ "$status" == A* ]] || continue
     case "$path" in
@@ -154,7 +118,7 @@ echo "МОВНИЙ_ГЕЙТ=OK registry=ARCHIVE runner_workflows=$workflow_count
         fi
         ;;
     esac
-  done <<<"$(git diff --name-status "$base_sha...$head_sha" || true)"
+  done <<<"$(git diff --name-status "$base_sha...$head_sha")"
 fi
 
 runner_pattern='python3?[[:space:]]+.*(test|bench|benchmark|trial|run\.py)|pytest([[:space:]]|$)|node[[:space:]]+--test|npm[[:space:]]+(test|run[[:space:]]+(test|bench|benchmark))|npx[[:space:]]+(jest|vitest|mocha)|bun[[:space:]]+test|deno[[:space:]]+test|go[[:space:]]+test([[:space:]]|$)|racket[[:space:]]+.*(test|bench)'
