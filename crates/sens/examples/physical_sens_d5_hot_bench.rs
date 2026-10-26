@@ -5,11 +5,12 @@
 //! and agreeing entrypoints are NOT an independent language oracle.
 
 use sens::{
-    decode_ternary_words, eval_lowered_expressions, eval_parsed_expressions, lower_program,
+    eval_lowered_expressions, eval_parsed_expressions, lower_program,
     parse_canonical_word_sequence, Session,
 };
 use std::{env, fs, hint::black_box, time::Instant};
 
+use sens_cli::zig_transport;
 fn measure(mut f: impl FnMut(), iterations: usize, samples: usize) -> Vec<u128> {
     for _ in 0..3 {
         f();
@@ -50,7 +51,7 @@ fn main() {
     assert!((3..=101).contains(&samples) && samples % 2 == 1);
 
     let physical = fs::read(&argv[1]).expect("physical T5 file");
-    let words = decode_ternary_words(&physical).expect("ratified T5 transport");
+    let words = zig_transport::decode_t5m_words(&physical).expect("ratified T5 transport");
     let ast = parse_canonical_word_sequence(&words).expect("canonical D2");
     assert!(!ast.is_empty(), "empty D5 corpus");
     let lowered = lower_program(&ast);
@@ -77,7 +78,7 @@ fn main() {
         let observed = match phase {
             "t5_decode_parse" => measure(
                 || {
-                    let decoded = decode_ternary_words(black_box(&physical))
+                    let decoded = zig_transport::decode_t5m_words(black_box(&physical))
                         .expect("measured physical T5 decoder");
                     black_box(parse_canonical_word_sequence(&decoded).expect("measured D2 parser"));
                 },
