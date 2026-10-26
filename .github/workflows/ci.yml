@@ -83,6 +83,7 @@ jobs:
 
   laws:
     name: Ручні SENS/Zig/T5M закони
+    # Explicit push marker SENS_NATIVE_LAWS runs this same exact-head suite.
     if: ${{ (github.event_name == 'workflow_dispatch' && inputs.suite == 'laws') || (github.event_name == 'push' && contains(github.event.head_commit.message, 'SENS_NATIVE_LAWS')) }}
     runs-on: ubuntu-24.04
     timeout-minutes: 50
