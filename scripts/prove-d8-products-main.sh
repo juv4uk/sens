@@ -6,7 +6,16 @@ cli="${1:-target/debug/sens}"
 id=d8-products-main
 law=tests/semantic/d8-products-main-laws.lisp
 mutant=tests/semantic/d8-products-main-mutant.lisp
-[[ -f "$law" ]] || law=tests/semantic/d8-acons-swapped-main-laws.lisp
+expected_verdict=1
+if [[ ! -f "$law" ]]; then
+  law=tests/semantic/d8-acons-swapped-main-laws.lisp
+  # The fallback is a three-case positive/negative witness, not the older
+  # one-bit products law: empty, non-empty, and swapped-order rejection.
+  # Compare the full SENS result so the negative witness cannot be dropped.
+  if [[ -f "$law" ]]; then
+    expected_verdict='(1 1 0)'
+  fi
+fi
 if [[ ! -x "$cli" ]]; then
   printf 'REGRESSION test_id=%s actual=executor-missing\n' "$id" >&2; exit 1
 fi
@@ -14,7 +23,7 @@ if [[ ! -f "$law" ]]; then
   echo "SENS_NATIVE_CHECK=scheduled id=$id evidence=fixture-absent"; exit 0
 fi
 tmp="$(mktemp -d)"; trap 'rm -rf "$tmp"' EXIT
-printf '1\n' > "$tmp/expected"
+printf '%s\n' "$expected_verdict" > "$tmp/expected"
 if ! "$cli" "$law" > "$tmp/actual" 2>"$tmp/err"; then
   printf 'REGRESSION id=%s actual=execution-error\n' "$id" >&2; cat "$tmp/err" >&2; exit 1
 fi
