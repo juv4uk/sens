@@ -48,8 +48,8 @@ fn sens_trit_open_reads_default_t5m_fixtures_without_execution_or_mutation() {
     for relative in DEFAULT_T5M_OPEN_FIXTURES {
         let file = repo_path(relative);
         let original = fs::read(&file).expect("real tracked physical fixture");
-        let words = sens::decode_ternary_words(&original)
-            .unwrap_or_else(|error| panic!("{relative}: exact-width reference decode: {error:?}"));
+        let words = sens_cli::zig_transport::decode_t5m_words(&original)
+            .unwrap_or_else(|error| panic!("{relative}: Zig/T5M exact-width reference decode: {error}"));
         let expected = format!("{}\n", sens::render_binary_words_spaced(&words));
         let opened = trit_open(&file);
         assert!(
