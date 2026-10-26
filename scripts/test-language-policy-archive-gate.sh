@@ -23,10 +23,35 @@ git -C "$tmp" commit -qm "baseline archive fixture"
 printf 'self-test positive witness\n' > "$tmp/docs/note.md"
 git -C "$tmp" add docs/note.md
 git -C "$tmp" commit -qm "positive archive witness"
-positive="$(SENS_PR_FIRST_FIELD='SENS_SOURCE=tests/legacy/test_old.sens' bash "$gate" --root "$tmp" 2>&1)"
+positive="$(SENS_EVENT_NAME=pull_request SENS_PR_FIRST_FIELD='SENS_SOURCE=tests/legacy/test_old.sens' bash "$gate" --root "$tmp" 2>&1)"
 if [[ "$positive" != *"ARCHIVE (поза мовним коридором): 2 артефактів — docs/language-policy-archive.md"* ]]; then
   echo "LANGUAGE_POLICY_ARCHIVE_SELFTEST=FAIL positive witness did not report one archived artifact"
   printf '%s\n' "$positive"
+  exit 1
+fi
+# Push має власний native SENS test без PR-body; не вимагати
+# довільного префікса коміт-повідомлення замість PR-контракту.
+mkdir -p "$tmp/tests/new"
+printf '(твердження)\\n' > "$tmp/tests/new/push_native.lisp"
+git -C "$tmp" add tests/new/push_native.lisp
+git -C "$tmp" commit -qm "native SENS test on push"
+if ! SENS_EVENT_NAME=push SENS_PR_FIRST_FIELD='' bash "$gate" --root "$tmp" > "$tmp/push-native.log" 2>&1; then
+  echo "LANGUAGE_POLICY_ARCHIVE_SELFTEST=FAIL new SENS test on push was rejected without PR metadata"
+  cat "$tmp/push-native.log"
+  exit 1
+fi
+# Pull request with a new native test requires SENS_SOURCE first.
+printf '(твердження)\\n' > "$tmp/tests/new/pr_native.lisp"
+git -C "$tmp" add tests/new/pr_native.lisp
+git -C "$tmp" commit -qm "native SENS test in PR"
+if SENS_EVENT_NAME=pull_request SENS_PR_FIRST_FIELD='' bash "$gate" --root "$tmp" > "$tmp/pr-native-negative.log" 2>&1; then
+  echo "LANGUAGE_POLICY_ARCHIVE_SELFTEST=FAIL native PR test without SENS_SOURCE was accepted"
+  cat "$tmp/pr-native-negative.log"
+  exit 1
+fi
+if ! grep -q 'SENS_SOURCE_FIRST_FIELD_REQUIRED path=tests/new/pr_native.lisp' "$tmp/pr-native-negative.log"; then
+  echo "LANGUAGE_POLICY_ARCHIVE_SELFTEST=FAIL native PR test failed for the wrong reason"
+  cat "$tmp/pr-native-negative.log"
   exit 1
 fi
 # Existing shell benchmark without an archive row must be rejected too.
@@ -48,7 +73,7 @@ mkdir -p "$tmp/tests/new"
 printf 'print("new foreign test")\n' > "$tmp/tests/new/test_foreign.py"
 git -C "$tmp" add tests/new/test_foreign.py
 git -C "$tmp" commit -qm "negative foreign test witness"
-if SENS_PR_FIRST_FIELD='' bash "$gate" --root "$tmp" > "$tmp/negative.log" 2>&1; then
+if SENS_EVENT_NAME=pull_request SENS_PR_FIRST_FIELD='' bash "$gate" --root "$tmp" > "$tmp/negative.log" 2>&1; then
   echo "LANGUAGE_POLICY_ARCHIVE_SELFTEST=FAIL negative witness was accepted"
   cat "$tmp/negative.log"
   exit 1
