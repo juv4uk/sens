@@ -50,6 +50,8 @@ jobs:
           bash -n scripts/ci-rust-mechanism-checks.sh
           bash -n scripts/execute_changed_lisp_t5m.sh
           bash -n scripts/prove-lisp-semantic-t5m.sh
+          bash -n scripts/check-sens-rust-zig-only-tests.sh
+          bash scripts/check-sens-rust-zig-only-tests.sh
       - name: Перевірити межу власності мовних тестів
         shell: bash
         env:
