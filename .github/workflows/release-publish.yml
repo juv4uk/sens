@@ -57,7 +57,6 @@ jobs:
             "sens-cli_${version}_macos_arm64" \
             "sens-cli-web.html" \
             "my-lisp-cli-web.html" \
-            "islands-manifest-v1.json" \
             "install.sh" | LC_ALL=C sort > "$expected"
           find dist -mindepth 1 -maxdepth 1 -printf '%f\n' | LC_ALL=C sort > "$actual"
           cmp -- "$expected" "$actual"
