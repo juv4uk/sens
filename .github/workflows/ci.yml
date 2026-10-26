@@ -144,7 +144,10 @@ jobs:
 
   remint:
     name: Канонічний SENS/Zig/T5M remint точних файлів
-    if: ${{ github.event_name == 'workflow_dispatch' && inputs.suite == 'remint' && inputs.files != '' }}
+    # Explicit SENS_REMINT on a source push invokes the native pair refresher.
+    # The refresher mints via SENS, validates via Zig and commits only changed,
+    # physically verified .sens pairs; no source/hash receipt is generated.
+    if: ${{ (github.event_name == 'workflow_dispatch' && inputs.suite == 'remint' && inputs.files != '') || (github.event_name == 'push' && contains(github.event.head_commit.message, 'SENS_REMINT')) }}
     uses: ./.github/workflows/remint-drifted-pairs.yml
     with:
       files: ${{ inputs.files }}
