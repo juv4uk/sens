@@ -74,10 +74,14 @@ jobs:
       - name: focused release clippy
         run: cargo clippy --locked -p sens -p sens-cli --all-targets -- -D warnings
 
+  release-preflight:
+    name: focused release preflight
+    uses: ./.github/workflows/release-preflight.yml
+
   build-cli:
     name: sens-cli · ${{ matrix.os }}
-    needs: test
-    if: needs.test.result == 'success'
+    needs: [test, release-preflight]
+    if: ${{ needs.test.result == 'success' && needs.release-preflight.result == 'success' }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -139,8 +143,8 @@ jobs:
 
   build-msi:
     name: sens-cli · Windows MSI installer
-    needs: test
-    if: needs.test.result == 'success'
+    needs: [test, release-preflight]
+    if: ${{ needs.test.result == 'success' && needs.release-preflight.result == 'success' }}
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
@@ -183,8 +187,8 @@ jobs:
 
   release-publish:
     name: Публікація лише після успіху всіх перевірок і збірок
-    needs: [test, build-cli, build-msi]
-    if: ${{ needs.test.result == 'success' && needs.build-cli.result == 'success' && needs.build-msi.result == 'success' }}
+    needs: [test, release-preflight, build-cli, build-msi]
+    if: ${{ needs.test.result == 'success' && needs.release-preflight.result == 'success' && needs.build-cli.result == 'success' && needs.build-msi.result == 'success' }}
     uses: ./.github/workflows/release-publish.yml
     secrets: inherit
     permissions:
