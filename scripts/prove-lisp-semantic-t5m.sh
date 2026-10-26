@@ -768,6 +768,14 @@ if [[ -s "$d10_queue_physical" && -f "$d10_queue_reference" ]]; then
     fi
     printf '%s\t%s\n' "$iteration" "$((end_us - start_us))" >> "$d10_queue_samples"
   done
+  mapfile -t d10_queue_sorted < <(tail -n +2 "$d10_queue_samples" | cut -f2 | sort -n)
+  if (( ${#d10_queue_sorted[@]} != 5 )); then
+    echo "::error title=SENS D10 benchmark::REGRESSION layer=sample-count expected=5 actual=${#d10_queue_sorted[@]}" >&2
+    exit 1
+  fi
+  printf 'p50_us\t%s\np80_us\t%s\nmin_us\t%s\nmax_us\t%s\nsamples\t5\n' \
+    "${d10_queue_sorted[2]}" "${d10_queue_sorted[3]}" "${d10_queue_sorted[0]}" "${d10_queue_sorted[4]}" > "$evidence/d10-empty-queue-benchmark-metrics.tsv"
+  echo "::notice title=SENS D10 physical benchmark::MEASURED p50_us=${d10_queue_sorted[2]} p80_us=${d10_queue_sorted[3]} samples=5 native=SENS"
 else
   echo "::error title=SENS D10 benchmark::REGRESSION layer=physical-evidence expected=program-and-output" >&2
   exit 1
