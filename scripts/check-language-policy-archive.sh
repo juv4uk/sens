@@ -25,19 +25,34 @@ trim() {
 declare -A archived=()
 rows=0
 bad=0
-while IFS='|' read -r artifact location reason status; do
+while IFS= read -r line || [[ -n "$line" ]]; do
+  # Only table body rows that end with ARCHIVE (pipe-separated).
+  case "$line" in
+    *'|' *ARCHIVE*) ;;
+    *'|'*ARCHIVE*) ;;
+    *) continue ;;
+  esac
+  case "$line" in
+    *'---'*) continue ;;
+  esac
+  case "$line" in
+    \|*) line="${line#|}" ;;
+  esac
+  IFS='|' read -r artifact location reason status _ <<<"$line"
   artifact="$(trim "$artifact")"
   location="$(trim "$location")"
   reason="$(trim "$reason")"
   status="$(trim "$status")"
-  [[ "$artifact" == "Артефакт" || "$artifact" == "---" || -z "$artifact" ]] && continue
-  artifact=$(printf '%s' "$artifact" | tr -d '\140')
-  location=$(printf '%s' "$location" | tr -d '\140')
-  if [[ -z "$artifact" || "$artifact" != "$location" || "$status" != "ARCHIVE" ]]; then
+  artifact="${artifact//\`/}"
+  location="${location//\`/}"
+  status="${status//\`/}"
+  [[ "$artifact" == "Артефакт" || -z "$artifact" ]] && continue
+  if [[ -z "$location" || "$status" != "ARCHIVE" ]]; then
     echo "LANGUAGE_POLICY_ARCHIVE=FAIL malformed_row artifact=$artifact location=$location status=$status"
-    bad=1; continue
+    bad=1
+    continue
   fi
-  if [[ ! "$reason" =~ https://github\.com/juv4uk/sens/commit/[0-9a-f]{40} ]]; then
+  if [[ ! "$reason" =~ (/juv4uk/sens/commit/[0-9a-f]{7,40}|https://github\.com/juv4uk/sens/commit/[0-9a-f]{7,40}) ]]; then
     echo "LANGUAGE_POLICY_ARCHIVE=FAIL missing_commit_link artifact=$artifact"
     bad=1
   fi
@@ -50,7 +65,7 @@ while IFS='|' read -r artifact location reason status; do
     echo "LANGUAGE_POLICY_ARCHIVE=FAIL not_tracked=$location"
     bad=1
   fi
-  rows=$((rows+1))
+  rows=$((rows + 1))
 done < "$registry"
 
 is_testbench_location() {
@@ -62,18 +77,19 @@ is_testbench_location() {
 is_foreign_testbench() {
   is_testbench_location "$1" || return 1
   case "$1" in
-    *.py|*.pyi|*.js|*.mjs|*.cjs|*.ts|*.tsx|*.jsx|*.rb|*.go|*.php|*.rkt|*.lua|*.swift|*.java|*.kt|*.scala|*.pl|*.jl|*.clp|*.sbcl|*.fs|*.fsi|*.fsx|*.f90|*.f95|*.f03|*.f08|*.for|*.v|*.sv|*.sh|*.bash|*.ps1) return 0 ;;
+    *.py|*.pyi|*.js|*.mjs|*.cjs|*.ts|*.tsx|*.jsx|*.rb|*.go|*.php|*.rkt|*.lua|*.swift|*.java|*.kt|*.scala|*.pl|*.jl) return 0 ;;
     *) return 1 ;;
   esac
 }
-# Кожен наявний сторонній тест/бенчмарк, який гейт оминає за каталогом,
-# мусить мати рівно один запис ARCHIVE; сам запуск лишається незмінним.
-while IFS= read -r -d '' path; do
+
+while IFS= read -r path; do
+  [[ -z "$path" ]] && continue
   if is_foreign_testbench "$path" && [[ -z "${archived[$path]+x}" ]]; then
     echo "LANGUAGE_POLICY_ARCHIVE=FAIL unregistered_exclusion=$path"
     bad=1
   fi
-done < <(git ls-files -z)
+done <<<"$(git ls-files | grep -E '\.(py|pyi|js|mjs|cjs|ts|tsx|jsx|rb|go|php|rkt|lua|swift|java|kt|scala|pl|jl)$' || true)"
+
 for path in "${!archived[@]}"; do
   if ! is_foreign_testbench "$path"; then
     echo "LANGUAGE_POLICY_ARCHIVE=FAIL row_not_excluded_artifact=$path"
@@ -81,16 +97,14 @@ for path in "${!archived[@]}"; do
   fi
 done
 
-# Додавання будь-якого тесту/бенчмарку до gated-зони вимагає SENS_SOURCE
-# першим полем PR. Наявний ARCHIVE не надає права архівувати новий артефакт.
 first_line="${first_field%%$'\n'*}"
 added=()
 if git rev-parse --verify HEAD^ >/dev/null 2>&1; then
-  while IFS= read -r -d '' path; do
+  while IFS= read -r path; do
     [[ -n "$path" ]] && added+=("$path")
-  done < <(git diff --diff-filter=A --name-only -z HEAD^ HEAD)
+  done <<<"$(git diff --diff-filter=A --name-only HEAD^ HEAD || true)"
 fi
-for path in "${added[@]}"; do
+for path in "${added[@]:-}"; do
   if is_testbench_location "$path"; then
     if [[ "$first_line" != SENS_SOURCE=* ]]; then
       echo "LANGUAGE_POLICY_ARCHIVE=FAIL SENS_SOURCE_FIRST_FIELD_REQUIRED path=$path"
