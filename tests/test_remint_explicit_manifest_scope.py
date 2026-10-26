@@ -115,6 +115,48 @@ class RemintExplicitManifestScopeTests(unittest.TestCase):
             push_workflow,
         )
 
+    def test_core4_remint_rebuilds_embedded_runtime_before_dependent_laws(self) -> None:
+        push_workflow = (ROOT / ".github" / "workflows" / "lisp-to-sens-on-push.yml").read_text(
+            encoding="utf-8"
+        )
+        build_script = (ROOT / "crates" / "sens" / "build.rs").read_text(encoding="utf-8")
+        self.assertIn('"lib/core4.sens"', build_script)
+
+        # The push workflow first refreshes the canonical physical pair, then rebuilds
+        # the CLI that embeds it, before it proceeds to later changed Lisp laws.
+        push_mint = push_workflow.index(
+            'bash scripts/refresh-verified-t5m-pair.sh "$f" target/debug/sens target/debug/sens-trit'
+        )
+        push_core4 = push_workflow.index('elif [[ "$f" == "lib/core4.lisp" ]] then'.replace(" ]] then", " ]]; then"), push_mint)
+        push_rebuild = push_workflow.index(
+            "cargo build --locked -p sens-cli --bin sens --bin sens-trit",
+            push_core4,
+        )
+        self.assertLess(push_mint, push_core4)
+        self.assertLess(push_core4, push_rebuild)
+
+        expected_remint_build = (
+            "cargo build --locked -p sens-cli --bin sens --bin sens-trit "
+            "--bin lisp-data-schema-guard --features benchmark-ast-visits"
+        )
+        initial_refresh = self.source.index(
+            'if bash scripts/refresh-verified-t5m-pair.sh "$f" target/debug/sens target/debug/sens-trit'
+        )
+        initial_core4 = self.source.index('if [[ "$f" == "lib/core4.lisp" ]]; then', initial_refresh)
+        initial_rebuild = self.source.index(expected_remint_build, initial_core4)
+        self.assertLess(initial_refresh, initial_core4)
+        self.assertLess(initial_core4, initial_rebuild)
+
+        recovery_start = self.source.index("regenerate_on_current_main() {")
+        recovery_refresh = self.source.index(
+            'if ! bash scripts/refresh-verified-t5m-pair.sh "$f" target/debug/sens target/debug/sens-trit',
+            recovery_start,
+        )
+        recovery_core4 = self.source.index('elif [[ "$f" == "lib/core4.lisp" ]]; then', recovery_refresh)
+        recovery_rebuild = self.source.index(expected_remint_build, recovery_core4)
+        self.assertLess(recovery_refresh, recovery_core4)
+        self.assertLess(recovery_core4, recovery_rebuild)
+
     def test_explicit_manifest_suppresses_global_recovery_expansion(self) -> None:
         function_start = self.source.index("regenerate_on_current_main() {")
         recovery_start = self.source.index(
