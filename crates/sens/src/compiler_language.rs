@@ -319,9 +319,9 @@ fn compiler_surface_text(value: &Value) -> Option<String> {
         Value::Text7(value) => {
             crate::text7_projection::render_text7(value, crate::Text7Layout::En).ok()
         }
-        // The SENS compiler nucleus returns quoted D7 text as a proper list
-        // of exact D7 identities. Decode that representation only at this
-        // boundary; never widen, mask, or reinterpret non-D7 values as text.
+        // Ядро компілятора СЕНС повертає цитований D7-текст як правильний список
+        // точних D7-ідентичностей. Декодуємо його лише на цій межі;
+        // не розширюємо ширину, не маскуємо біти й не тлумачимо інші типи як текст.
         Value::Pair(_) => {
             let mut cells = Vec::new();
             let mut cursor = value;
@@ -1199,7 +1199,7 @@ mod tests {
             .expect("role label must be representable in D7");
         let exact_cells = Value::list(text.cells().iter().map(|cell| {
             Value::DomainIdentity(DomainIdentity::D7(crate::D7DataWord::from_word(
-                crate::Bit7::new(*cell).expect("exact D7 cell"),
+                crate::Bit7::new(*cell).expect("точна комірка D7"),
             )))
         }));
         assert_eq!(
@@ -1215,10 +1215,10 @@ mod tests {
     }
 
     #[test]
-    fn compiler_surface_text_accepts_exact_d7_lists_and_rejects_mixed_values() {
+    fn проєкція_компілятора_приймає_точний_D7_список_і_відхиляє_змішане() {
         let expected = "compiler-compilation-artifact-1";
         let text = crate::text7_projection::encode_text7(expected, crate::Text7Layout::En)
-            .expect("schema must have an exact D7 v2 projection");
+            .expect("схема має мати точну проєкцію D7 v2");
         let exact = Value::list(text.cells().iter().map(|cell| {
             Value::DomainIdentity(DomainIdentity::D7(crate::D7DataWord::from_word(
                 crate::Bit7::new(*cell).expect("exact D7 cell"),
@@ -1228,13 +1228,13 @@ mod tests {
 
         let mixed = Value::list([
             Value::DomainIdentity(DomainIdentity::D7(crate::D7DataWord::from_word(
-                crate::Bit7::new(b'c').expect("ASCII cell fits D7"),
+                crate::Bit7::new(b'c').expect("ASCII-комірка вміщується в D7"),
             ))),
             Value::predicate_bit(false),
         ]);
         assert!(
             compiler_surface_text(&mixed).is_none(),
-            "mixed data must not be coerced into a D7 text name"
+            "змішані дані не можна перетворювати на ім'я тексту D7"
         );
     }
 
