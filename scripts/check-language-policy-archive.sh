@@ -29,7 +29,7 @@ digest_free_paths=(
 )
 for path in "${digest_free_paths[@]}"; do
   [[ -f "$path" ]] || continue
-  if grep -Eqi '(^|[[:space:];|&])sha256sum[[:space:]]+|sha256-hex[[:space:]]*\\(|>[[:space:]]*[^[:space:]]+\\.sha256([[:space:]]|$)|SHA256SUMS.*(write|create|generate)' "$path"; then
+  if grep -Eqi 'sha256sum[[:space:]]|sha256-hex|\\.sha256|SHA256SUMS' "$path"; then
     echo "LANGUAGE_POLICY_ARCHIVE=FAIL digest_creation_forbidden path=$path" >&2
     exit 1
   fi
