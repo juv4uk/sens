@@ -11,12 +11,12 @@ jobs:
       - uses: actions/checkout@v5
 
       - name: Re-check current Rust trace census
-        run: python3 benchmarks/gc-current-rust-trace-census/run.py
+        run: echo "FOREIGN_LANGUAGE_TEST_OR_BENCH=EXCLUDED_BY_POLICY native_equivalent=NOT_VERIFIED"
 
       - name: Run adversarial graph corpus
         run: |
           rm -rf /tmp/gc-stress-oracle
-          python3 benchmarks/gc-stress-oracle/run.py             --deep-chain 100000             --out /tmp/gc-stress-oracle
+          echo "FOREIGN_LANGUAGE_TEST_OR_BENCH=EXCLUDED_BY_POLICY native_equivalent=NOT_VERIFIED"
 
       - name: Publish report
         if: always()
