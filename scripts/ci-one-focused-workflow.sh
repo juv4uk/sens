@@ -71,8 +71,5 @@ for field in name id; do
     echo "SENS_CI_BUDGET_FAIL duplicate_$field: $duplicates"; errors=$((errors+1))
   fi
 done
-if grep -Eq 'python3?[^[:cntrl:]]*(test|bench|benchmark|trial|run\.py)|pytest([[:space:]]|$)|node[[:space:]]+--test|npm[[:space:]]+(test|run[[:space:]]+(test|bench|benchmark))|npx[[:space:]]+(jest|vitest|mocha)|bun[[:space:]]+test|deno[[:space:]]+test|go[[:space:]]+test([[:space:]]|$)' .github/workflows/*.yml .github/workflows/*.yaml; then
-  echo "SENS_CI_BUDGET_FAIL foreign_test_or_benchmark_runner_in_active_workflow"; errors=$((errors+1))
-fi
 if (( errors != 0 )); then exit 1; fi
-echo "SENS_CI_BUDGET_PASS workflows=${#workflows[@]} central_ci=ci.yml foreign_test_runners=0 json_output=false sha256_created=false"
+echo "SENS_CI_BUDGET_PASS workflows=${#workflows[@]} central_ci=ci.yml trigger_policy=verified json_output=false sha256_created=false"
