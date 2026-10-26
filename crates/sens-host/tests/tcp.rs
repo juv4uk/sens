@@ -136,7 +136,7 @@ fn tcp_connect_to_a_closed_port_fails_named_not_silently() {
         .environment
         .define("порт", Value::Number(port as f64, Exactness::Exact));
     let source = r#"(tcp-connect "127.0.0.1" порт)"#;
-    let error = eval_program(&source, &mut session)
+    let error = eval_program(source, &mut session)
         .expect_err("connecting to a port nothing listens on must fail named, not hang or panic");
     assert_eq!(error.kind, ErrorKind::InvalidForm);
     assert!(error.message.contains("tcp-connect: failed to connect"));
