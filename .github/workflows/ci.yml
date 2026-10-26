@@ -144,13 +144,15 @@ jobs:
 
   remint:
     name: Канонічний SENS/Zig/T5M remint точних файлів
-    # Explicit SENS_REMINT on a source push invokes the native pair refresher.
-    # The refresher mints via SENS, validates via Zig and commits only changed,
-    # physically verified .sens pairs; no source/hash receipt is generated.
-    if: ${{ (github.event_name == 'workflow_dispatch' && inputs.suite == 'remint' && inputs.files != '') || (github.event_name == 'push' && contains(github.event.head_commit.message, 'SENS_REMINT')) }}
+    # A specific source-push marker repairs only the two MetaEval graph pairs.
+    # Manual remint remains scoped to the exact explicit files supplied.
+    if: ${{ (github.event_name == 'workflow_dispatch' && inputs.suite == 'remint' && inputs.files != '') || (github.event_name == 'push' && contains(github.event.head_commit.message, 'SENS_REMINT_META_EVAL_GRAPH_D1')) }}
     uses: ./.github/workflows/remint-drifted-pairs.yml
     with:
-      files: ${{ inputs.files }}
+      files: |
+        ${{ inputs.files }}
+        ${{ github.event_name == 'push' && contains(github.event.head_commit.message, 'SENS_REMINT_META_EVAL_GRAPH_D1') && 'tests/semantic/meta-eval-graph-d1-law.lisp' || '' }}
+        ${{ github.event_name == 'push' && contains(github.event.head_commit.message, 'SENS_REMINT_META_EVAL_GRAPH_D1') && 'tests/semantic/meta-eval-graph-d1-mutant.lisp' || '' }}
     permissions:
       contents: write
 
