@@ -9,10 +9,8 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v5
-      - name: Негативні свідки цілісності та рухомих рядків — EXCLUDED (NOT_VERIFIED)
-        if: false
-        shell: bash
-        run: echo "FOREIGN_LANGUAGE_TEST_BENCH=EXCLUDED_BY_POLICY native_equivalent=NOT_VERIFIED"
+      - name: Негативні свідки цілісності та рухомих рядків
+        run: python3 tests/test_d10_yantra_donor_provenance.py
       - name: Перевірити розширення історичного добору D10 Panini
         run: python3 scripts/check-d10-crossrepo-panini-v1.py
       - name: Перевірити повноваження й облік D10
