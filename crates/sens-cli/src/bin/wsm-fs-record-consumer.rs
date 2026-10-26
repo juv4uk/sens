@@ -5,7 +5,6 @@ use sens::{
     eval_parsed_expressions, load_core_library, Bija3, Bit3, Bit4, Bit9, CoreD4, CoreD9,
     DomainIdentity, Environment, Expr, ExprKind, Session, Span, Value,
 };
-#[cfg(test)]
 use sens::{Bit7, D7DataWord};
 use std::io::{self, Read};
 use std::rc::Rc;
@@ -57,7 +56,6 @@ fn symbol_value(value: &str) -> Expr {
     }
 }
 
-#[cfg(test)]
 fn d7_text_data(value: &str) -> Expr {
     assert!(value.is_ascii(), "F6 protocol marker must be ASCII D7 data");
     Expr {
@@ -150,7 +148,7 @@ fn main() {
     // checks only the resulting exact D1 answer.
     let status = call(exact_d3(0b100), vec![reconstruction.clone()]);
     // READ повертає текст як список точних D7-слів; звіряємо саме цей носій.
-    let expected = call(exact_d3(0b001), vec![symbol_value("accepted")]);
+    let expected = call(exact_d3(0b001), vec![d7_text_data("accepted")]);
     let accepted = call(exact_d8_equal(), vec![status, expected]);
     let verdict = eval_parsed_expressions(&[accepted], &mut session)
         .unwrap_or_else(|error| {
