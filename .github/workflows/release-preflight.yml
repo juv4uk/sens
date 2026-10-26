@@ -103,7 +103,6 @@ jobs:
       - name: Compiler nucleus exact source → T5M → view parity
         if: ${{ always() && inputs.full }}
         id: compiler_nucleus_physical_parity
-        if: always()
         shell: bash
         run: |
           set -euo pipefail
@@ -113,7 +112,6 @@ jobs:
       - name: Clippy
         if: ${{ always() && inputs.full }}
         id: workspace_clippy
-        if: always()
         run: cargo clippy --locked --workspace --all-targets -- -D warnings
 
       - name: Мовна політика — лише SENS/Rust/Zig
