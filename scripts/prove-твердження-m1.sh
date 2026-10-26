@@ -35,7 +35,7 @@ fi
 printf '0\n' > "$tmp/expected-mutant"
 if ! "$cli" "$tmp/mutant.lisp" > "$tmp/mutant.out" 2> "$tmp/mutant.err"; then
   # відмова виконання мутанта також припустима як негативний свідок
-  printf 'NATIVE_SENS_NEGATIVE id=%s-mutant mode=execution-reject\n' "$id"
+  printf 'НЕГАТИВНИЙ_СВІДОК id=%s-mutant mode=execution-reject\n' "$id"
 else
   if ! cmp -s "$tmp/expected-mutant" "$tmp/mutant.out"; then
     # мутант не зобов'язаний друкувати 0; достатньо що він не друкує 1
@@ -44,7 +44,7 @@ else
       exit 1
     fi
   fi
-  printf 'NATIVE_SENS_NEGATIVE id=%s-mutant mode=verdict-not-yes\n' "$id"
+  printf 'НЕГАТИВНИЙ_СВІДОК id=%s-mutant mode=verdict-not-yes\n' "$id"
 fi
-printf 'NATIVE_SENS_POSITIVE id=%s fixture=%s verdict=yes\n' "$id" "$law"
+printf 'ПОЗИТИВНИЙ_СВІДОК id=%s fixture=%s verdict=yes\n' "$id" "$law"
 echo "М1_ТВЕРДЖЕННЯ=OK evidence=native-sens cmp=byte-identity"
