@@ -51,7 +51,7 @@ fn connection_handle_keeps_identity_and_display_across_close() {
         .environment
         .define("port", Value::Number(port as f64, Exactness::Exact));
     let source = r#"(tcp-connect "127.0.0.1" port)"#;
-    let connection = eval_program(&source, &mut session)
+    let connection = eval_program(source, &mut session)
         .expect("connection should be an opaque runtime value")
         .value;
     assert_eq!(connection, connection.clone());
