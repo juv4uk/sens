@@ -51,6 +51,7 @@ jobs:
           bash -n scripts/ci-rust-mechanism-checks.sh
           bash -n scripts/execute_changed_lisp_t5m.sh
           bash -n scripts/prove-lisp-semantic-t5m.sh
+          python3 scripts/split-core4.py --check
       - name: Перевірити межу власності мовних тестів
         shell: bash
         run: bash scripts/check-sens-only-semantic-tests.sh
