@@ -842,6 +842,13 @@ jobs:
               if ! bash scripts/refresh-verified-t5m-pair.sh "$f" target/debug/sens target/debug/sens-trit "${bs[@]}" "${expect_args[@]}" "${profile_args[@]}"; then
                 echo "::error::REMINT_CURRENT_MAIN_NATIVE_FAILED $f" >&2
                 regenerated_failed=1
+              elif [[ "$f" == "lib/core4.lisp" ]]; then
+                # Rebase recovery can remint Core4 too; refresh the embedded runtime before dependent candidates.
+                echo "REMINT_CURRENT_MAIN_REBUILD_CORE4_EMBEDDED"
+                if ! cargo build --locked -p sens-cli --bin sens --bin sens-trit --bin lisp-data-schema-guard --features benchmark-ast-visits; then
+                  echo "::error::REMINT_CURRENT_MAIN_CORE4_REBUILD_FAILED" >&2
+                  exit 2
+                fi
               fi
             done < "$RUNNER_TEMP/sens-remint-candidates.list"
             # Перевірити дійсний конкурс уже на тих самих поточних джерелах.
