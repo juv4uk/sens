@@ -116,11 +116,13 @@ jobs:
         run: cargo build --locked -p sens-cli --bin sens --bin sens-trit --features benchmark-ast-visits
       - name: Точковий SENS REPL — некоректний стан повертає мовну відмову
         run: cargo test --locked -p sens --test repl_core_malformed_tails repl_step_rejects_atomic_state_as_sens_data -- --nocapture
+      - name: MetaEval — SENS law, mutant і точна фізична T5M-пара
+        shell: bash
+        run: bash scripts/prove-meta-eval-graph-d1.sh "$PWD/target/debug/sens"
       - name: Execute SENS-native laws, mutants and benchmarks
         shell: bash
         run: |
           set -euo pipefail
-          bash scripts/prove-meta-eval-graph-d1.sh "$PWD/target/debug/sens"
           bash scripts/prove-meta-eval-lexical-shadow-d1.sh "$PWD/target/debug/sens"
           bash scripts/prove-meta-eval-predicates-d1.sh "$PWD/target/debug/sens"
           bash scripts/prove-meta-eval-mutual-d4.sh "$PWD/target/debug/sens"
