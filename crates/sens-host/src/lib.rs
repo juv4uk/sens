@@ -139,7 +139,7 @@ fn read_energy_microjoules(
             span,
         ));
     }
-    const WIDTH: usize = 64;
+    const WIDTH: usize = 96;
     fn read_one(path: &str, label: &str, span: Span) -> Result<Value, LanguageError> {
         let text = std::fs::read_to_string(path).map_err(|error| {
             LanguageError::new(
@@ -157,9 +157,14 @@ fn read_energy_microjoules(
                 span,
             )
         })?;
+        // Лічильник RAPL — u64, але числовий домен починається з D12 і
+            // йде кроками 12: D24, D48, D96. D64 у драбині НЕМАЄ, тож
+            // 64-бітне значення розширюємо до D96 (як clock-mono-raw).
         let bits: Vec<u8> = (0..WIDTH)
             .rev()
-            .map(|shift| ((value >> shift) & 1) as u8)
+            .map(|shift| {
+                if shift >= 64 { 0 } else { ((value >> shift) & 1) as u8 }
+            })
             .collect();
         let exact = sens::BinaryNumber::from_numeric_domain_bits(WIDTH, &bits)
             .expect("the checked 64-bit RAPL counter is an exact D64 word");
