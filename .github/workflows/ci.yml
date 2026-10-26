@@ -29,6 +29,9 @@ jobs:
           # Без цього fetch окремого попереднього SHA вичерпував 60 с.
           fetch-depth: 2
 
+      - name: Перевірка — жодних чужомовних test/benchmark runners у канонічному шляху
+        shell: bash
+        run: bash scripts/check-sens-only-semantic-tests.sh
       - name: Мовна межа — JSON/SHA не є викличними формами SENS
         shell: bash
         run: |

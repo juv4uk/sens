@@ -17,6 +17,9 @@ jobs:
     steps:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
       - uses: ./.github/actions/install-zig
+      - name: Перевірка — жодних чужомовних test/benchmark runners у канонічному шляху
+        shell: bash
+        run: bash scripts/check-sens-only-semantic-tests.sh
       - name: Мовна межа — JSON/SHA не є викличними формами SENS
         shell: bash
         run: |
