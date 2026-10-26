@@ -29,10 +29,10 @@ fn trial(
     for _ in 0..repetitions {
         match operation {
             "encode" => {
-                black_box(zig_transport::encode_t5m_direct(black_box(words)).expect("T5 encode"));
+                black_box(zig_transport::encode_t5m_direct(black_box(words)).expect("T5-кодування"));
             }
             "decode" => {
-                black_box(zig_transport::decode_t5m_words(black_box(physical)).expect("T5 decode"));
+                black_box(zig_transport::decode_t5m_words(black_box(physical)).expect("T5-декодування"));
             }
             _ => panic!("unsupported benchmark operation"),
         }
@@ -58,8 +58,8 @@ fn main() {
         for _ in 0..forms {
             words.extend_from_slice(&pattern);
         }
-        let physical = zig_transport::encode_t5m_direct(&words).expect("T5 encode");
-        let recovered = zig_transport::decode_t5m_words(&physical).expect("T5 decode");
+        let physical = zig_transport::encode_t5m_direct(&words).expect("T5-кодування");
+        let recovered = zig_transport::decode_t5m_words(&physical).expect("T5-декодування");
         assert_eq!(recovered, words, "mechanical T5 parity");
         println!(
             "fixture impl=rust forms={} words={} bytes={} fnv64={:x}",
@@ -75,8 +75,8 @@ fn main() {
         println!();
 
         for _ in 0..3 {
-            black_box(zig_transport::encode_t5m_direct(&words).expect("warm encode"));
-            black_box(zig_transport::decode_t5m_words(&physical).expect("warm decode"));
+            black_box(zig_transport::encode_t5m_direct(&words).expect("прогріте кодування"));
+            black_box(zig_transport::decode_t5m_words(&physical).expect("прогріте декодування"));
         }
         for _ in 0..5 {
             trial("encode", &words, &physical, forms, repetitions);
