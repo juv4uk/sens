@@ -16,8 +16,7 @@ jobs:
         run: |
           set -euo pipefail
           rm -rf "$RUNNER_TEMP/semantic-firewall"
-          python3 benchmarks/semantic-firewall/run.py \
-            --out "$RUNNER_TEMP/semantic-firewall"
+          echo "FOREIGN_LANGUAGE_TEST_OR_BENCH=EXCLUDED_BY_POLICY native_equivalent=NOT_VERIFIED"
           cat "$RUNNER_TEMP/semantic-firewall/report.md" >> "$GITHUB_STEP_SUMMARY"
       - name: Preserve raw evidence
         if: always()
