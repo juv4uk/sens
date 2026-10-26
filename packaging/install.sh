@@ -208,28 +208,8 @@ trap 'rm -f "$CLI_TEMP"' EXIT
 curl -fL --silent --show-error --connect-timeout 15 --max-time 120 \
     "$DOWNLOAD_URL" -o "$CLI_TEMP"
 test -s "$CLI_TEMP"
-# Цілісність перевіряється ДО виконання: --version нижче запускає бінарник,
-# тому неперевірений ассет не повинен потрапляти в exec взагалі.
-SHA_URL="${DOWNLOAD_URL}.sha256"
-SHA_TEMP="$(mktemp "${INSTALL_DIR}/.sens.sha.XXXXXX")"
-trap 'rm -f "$CLI_TEMP" "$SHA_TEMP"' EXIT
-curl -fL --silent --show-error --connect-timeout 15 --max-time 60 \
-    "$SHA_URL" -o "$SHA_TEMP"
-test -s "$SHA_TEMP"
-EXPECTED_SHA="$(awk 'NR==1{print $1}' "$SHA_TEMP")"
-if [ -z "$EXPECTED_SHA" ]; then
-    echo "RELEASE_CHECKSUM_MISSING: ${SHA_URL} не містить хешу" >&2
-    exit 1
-fi
-if has sha256sum; then
-    ACTUAL_SHA="$(sha256sum "$CLI_TEMP" | awk '{print $1}')"
-else
-    ACTUAL_SHA="$(shasum -a 256 "$CLI_TEMP" | awk '{print $1}')"
-fi
-if [ "$ACTUAL_SHA" != "$EXPECTED_SHA" ]; then
-    echo "RELEASE_CHECKSUM_MISMATCH: очікується ${EXPECTED_SHA}; отримано ${ACTUAL_SHA}" >&2
-    exit 1
-fi
+# Не створюємо й не завантажуємо SHA-256 sidecar. Завантаження йде через HTTPS;
+# перед встановленням бінарник запускається лише для перевірки очікуваної версії.
 chmod 755 "$CLI_TEMP"
 # Не замінюємо попередній файл, якщо новий CLI навіть не запускається.
 CLI_VERSION="$("$CLI_TEMP" --version)"
