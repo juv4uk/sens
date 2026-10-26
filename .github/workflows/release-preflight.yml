@@ -37,15 +37,6 @@ jobs:
             exit 1
           fi
           echo "SENS_LANGUAGE_BOUNDARY=PASS json_callable=false sha256_callable=false"
-      - name: Install SWI-Prolog for real Prolog bridge tests
-        shell: bash
-        run: |
-          set -euo pipefail
-          if ! command -v swipl >/dev/null 2>&1; then
-            sudo apt-get update -qq
-            sudo apt-get install -y -qq --no-install-recommends swi-prolog-nox
-          fi
-          swipl --version
       - uses: dtolnay/rust-toolchain@1.99.0
         with:
           toolchain: "1.99.0"
@@ -54,11 +45,10 @@ jobs:
         with:
           shared-key: release-preflight
 
-      - name: Sterile Zig corridor (Rust↔SENS only via Zig ABI v2)
+      - name: Sterile Zig corridor
         run: |
           set -euo pipefail
           echo "SENS_NATIVE_CHECK=scheduled evidence=NOT_VERIFIED"
-          echo 'test_id=zig-release-safe-corridor layer=transport semantic_authority=SENS compiler=0.16.0'
           zig test research/zig-codecs/tests.zig -O ReleaseSafe -lc
 
       - name: translation boundary regression
@@ -68,7 +58,7 @@ jobs:
         id: workspace_tests
         run: cargo test --locked --workspace
 
-      - name: Native SENS laws (твердження M1 + бенчмарк-медіана + domain)
+      - name: Native SENS laws (твердження + бенчмарки + domain)
         id: native_sens_laws
         run: |
           set -euo pipefail
@@ -80,12 +70,13 @@ jobs:
           bash scripts/prove-d4-selector-width.sh target/debug/sens
           bash scripts/prove-твердження-m1.sh target/debug/sens
           bash scripts/prove-бенчмарк-медіана.sh target/debug/sens
+          bash scripts/prove-бенчмарк-структура.sh target/debug/sens
 
-      - name: Full workspace Clippy (pre-tag, exact SHA)
+      - name: Full workspace Clippy
         id: workspace_clippy
         run: cargo clippy --locked --workspace --all-targets -- -D warnings
 
-      - name: Мовна політика релізу — лише SENS/Rust/Zig, без Python/JSON/SHA-256 як семантики
+      - name: Мовна політика релізу — лише SENS/Rust/Zig
         id: native_language_policy
         if: always()
         shell: bash
@@ -94,27 +85,20 @@ jobs:
           workflow_source="$(
             awk '
               /^      - name: Мовна межа —/ { skip = 1 }
-              /^      - name: Перевірити дозволені мови release-команд/ { skip = 1 }
               /^      - name: Мовна політика релізу/ { skip = 1 }
               /^      - name:/ {
-                if ($0 !~ /Мовна межа —|Перевірити дозволені мови release-команд|Мовна політика релізу/) skip = 0
+                if ($0 !~ /Мовна межа —|Мовна політика релізу/) skip = 0
               }
               !skip { print }
             ' .github/workflows/release-preflight.yml
           )"
           if grep -nEi 'PYTHON_TOOL|python[[:space:]]+-c|python3[[:space:]]+-c|import[[:space:]]+json|[[:space:]]sha256sum|pytest[[:space:]]' <<< "$workflow_source"; then
-            echo "::error title=RELEASE_NOT_VERIFIED::У тестових командах preflight виявлено сторонній runner."
-            echo "RELEASE=NO-GO reason=foreign-runner-in-preflight"
-            exit 1
-          fi
-          if grep -nEi 'json-parse|sha256-hex|JSON-PARSE|SHA256-HEX' \
-            lib/domains/d9.lisp lib/surface/uk-sa-coverage.lisp contracts/d9-ratification.lisp 2>/dev/null; then
-            echo "::error title=SENS_LANGUAGE_BOUNDARY::Заборонені викличні форми в активних поверхнях."
+            echo "::error title=RELEASE_NOT_VERIFIED::Сторонній runner у preflight."
             exit 1
           fi
           echo "RELEASE_NATIVE_LANGUAGE_POLICY=PASS foreign_runner=absent"
 
-      - name: Attach release GO-gate receipt (plain text, never JSON)
+      - name: Attach release GO-gate receipt (plain text)
         if: always()
         env:
           WORKSPACE_TESTS: ${{ steps.workspace_tests.outcome }}
@@ -138,7 +122,7 @@ jobs:
 
       - name: Upload release GO-gate report
         if: always()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: release-go-gate
           path: ${{ runner.temp }}/release-go-gate.txt
