@@ -85,6 +85,38 @@ class RemintExplicitManifestScopeTests(unittest.TestCase):
             helper,
         )
 
+    def test_d6_d8_association_laws_use_explicit_core4_profile(self) -> None:
+        profile_case = (
+            "tests/semantic/exact-arithmetic-laws.lisp|tests/semantic/exact-arithmetic-mutant.lisp|"
+            "lib/lisp-fs.lisp|tests/semantic/d6-derived-research-batch-01.lisp|"
+            "tests/semantic/d8-rassq-until-batch.lisp) profile_args=(--core4-runtime);;"
+        )
+        self.assertGreaterEqual(self.source.count(profile_case), 2)
+
+        helper = (ROOT / "scripts" / "refresh-verified-t5m-pair.sh").read_text(
+            encoding="utf-8"
+        )
+        helper_profile = (
+            "tests/semantic/meta-eval-graph-d1-law.lisp|"
+            "tests/semantic/meta-eval-graph-d1-mutant.lisp|"
+            "tests/semantic/d6-derived-research-batch-01.lisp|"
+            "tests/semantic/d8-rassq-until-batch.lisp) ;;"
+        )
+        self.assertIn(helper_profile, helper)
+
+        push_workflow = (ROOT / ".github" / "workflows" / "lisp-to-sens-on-push.yml").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn(
+            "tests/semantic/d6-derived-research-batch-01.lisp|"
+            "tests/semantic/d8-rassq-until-batch.lisp) profile_args=(--core4-runtime);;",
+            push_workflow,
+        )
+        self.assertIn(
+            '"${profile_args[@]}"',
+            push_workflow,
+        )
+
     def test_explicit_manifest_suppresses_global_recovery_expansion(self) -> None:
         function_start = self.source.index("regenerate_on_current_main() {")
         recovery_start = self.source.index(
