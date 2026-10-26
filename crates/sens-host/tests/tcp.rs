@@ -72,14 +72,12 @@ fn raw_tcp_server_receives_one_byte_from_peer() {
     let port = free_port();
     let server = thread::spawn(move || {
         let mut session = tcp_session_with_port(port);
-        let source = format!(
-            r#"
+        let source = r#"
             (визначити слухач (протокол-передавання-сире-слухання "127.0.0.1" порт))
             (визначити підключення (tcp-accept слухач))
             (протокол-передавання-сире-читання підключення)
-            "#
-        );
-        eval_program(&source, &mut session)
+            "#;
+        eval_program(source, &mut session)
             .unwrap_or_else(|error| panic!("TCP reader failed: {error}"))
             .value
             .to_string()
