@@ -90,6 +90,14 @@ jobs:
             if ! bash scripts/refresh-verified-t5m-pair.sh "$f" target/debug/sens target/debug/sens-trit "${profile_args[@]}"; then
               echo "::error::LISP_TO_SENS_MINT_FAILED $f"
               fail=1
+            elif [[ "$f" == "lib/core4.lisp" ]]; then
+              # The compiled SENS binary embeds the Core4 T5M present at build time.
+              # Refresh it now, before any changed laws run against Core4.
+              echo "LISP_TO_SENS_REBUILD_CORE4_EMBEDDED"
+              if ! cargo build --locked -p sens-cli --bin sens --bin sens-trit; then
+                echo "::error::LISP_TO_SENS_CORE4_REBUILD_FAILED" >&2
+                exit 1
+              fi
             fi
           done <<< "$changed"
 
