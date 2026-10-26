@@ -15,10 +15,6 @@ mkdir -p "$OUT_DIR"
 
 rustc -O "$SRC" -o "$BIN"
 
-git_sha="$(git -C "$ROOT" rev-parse HEAD)"
-corpus_sha="$(sha256sum "$SRC" | awk '{print $1}')"
-binary_sha="$(sha256sum "$BIN" | awk '{print $1}')"
-channels_sha="$(sha256sum "$ROOT/channels.scm" | awk '{print $1}')"
 cpu="$(grep -m1 '^model name' /proc/cpuinfo 2>/dev/null | cut -d: -f2- | xargs || true)"
 rustc_version="$(rustc --version)"
 valgrind_version="$(valgrind --version)"
@@ -29,7 +25,6 @@ header=(
   root_selections bits_consumed generator_apps registry_lookups residue_lookups
   cache_hits cache_misses allocations allocated_bytes object_bytes wire_bits
   compiler_phase machine_insts code_bytes loads stores branches calls spills
-  corpus_sha binary_sha git_sha guix_channels_sha cpu valgrind_version
   prepared_bytes peak_prepare_bytes relation_edge_reads observer_fields
   quotient_lookups word_compares checksum
 )
@@ -72,7 +67,6 @@ emit_row() {
     "$case_id" "$candidate" "foundation-ladder" "" "$mode" "$reps" "$irefs" ""
     "" "" "" "" "" "" "" "" "" "$prepared_bytes" "" ""
     "" "" "" "" "" "" ""
-    "$corpus_sha" "$binary_sha" "$git_sha" "$channels_sha" "$cpu" "$valgrind_version"
     "$prepared_bytes" "$peak_prepare_bytes" "$relation_edge_reads" "$observer_fields"
     "$quotient_lookups" "$word_compares" "$checksum"
   )
@@ -158,10 +152,6 @@ done
   echo
   echo "Semantic parity is checked exhaustively for graph sizes 32, 128 and 512 before performance evidence is emitted."
   echo
-  printf -- '- git: `%s`\n' "$git_sha"
-  printf -- '- corpus/source sha256: `%s`\n' "$corpus_sha"
-  printf -- '- binary sha256: `%s`\n' "$binary_sha"
-  printf -- '- channels.scm sha256: `%s`\n' "$channels_sha"
   printf -- '- toolchain: `%s`\n' "$rustc_version"
   printf -- '- valgrind: `%s`\n' "$valgrind_version"
   printf -- '- cpu: `%s`\n' "$cpu"
