@@ -1,37 +1,11 @@
-name: Cross-language native baseline
+name: Cross-language native baseline (excluded by language policy)
 
 on:
   workflow_dispatch:
 
-permissions:
-  contents: read
-
 jobs:
-  native-baseline:
-    runs-on: ubuntu-24.04
-    timeout-minutes: 12
+  policy-exclusion:
+    runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
-      - uses: dtolnay/rust-toolchain@stable
-      - name: Run parity-first native baseline
-        run: |
-          set -euo pipefail
-          rm -rf "$RUNNER_TEMP/native-baseline"
-          python3 benchmarks/cross-language/native-baseline/run.py \
-            --n 200000 --reps 9 --warmups 2 \
-            --out "$RUNNER_TEMP/native-baseline"
-          python3 benchmarks/cross-language/native-baseline/tree_run.py \
-            --depth 18 --reps 7 --warmups 2 \
-            --out "$RUNNER_TEMP/native-tree"
-          cat "$RUNNER_TEMP/native-baseline/report.md" >> "$GITHUB_STEP_SUMMARY"
-          cat "$RUNNER_TEMP/native-tree/report.md" >> "$GITHUB_STEP_SUMMARY"
-      - name: Preserve raw evidence
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: cross-language-native-baseline-${{ github.sha }}
-          path: |
-            ${{ runner.temp }}/native-baseline/
-            ${{ runner.temp }}/native-tree/
-          if-no-files-found: warn
-          retention-days: 14
+      - name: Non-Rust/Zig/SENS baseline excluded
+        run: echo "FOREIGN_LANGUAGE_BENCHMARK=EXCLUDED_BY_POLICY native_equivalent=NOT_VERIFIED"
