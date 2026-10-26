@@ -33,16 +33,20 @@ runs:
             exit 1 ;;
         esac
         archive="$RUNNER_TEMP/zig-${arch}-${os}-${version}.${ext}"
+        echo "ZIG_ARCHIVE=$archive"
         curl --fail --location --retry 3 --silent --show-error \
           "https://ziglang.org/download/${version}/zig-${arch}-${os}-${version}.${ext}" \
           --output "$archive"
-        if command -v sha256sum >/dev/null 2>&1; then
+        if [ "$os" = "windows" ]; then
+          actual="$(powershell -NoProfile -Command "(Get-FileHash -Algorithm SHA256 -LiteralPath '$archive').Hash" | tr '[:upper:]' '[:lower:]')"
+        elif command -v sha256sum >/dev/null 2>&1; then
           actual="$(sha256sum "$archive" | awk '{print $1}')"
         elif command -v shasum >/dev/null 2>&1; then
           actual="$(shasum -a 256 "$archive" | awk '{print $1}')"
         else
           actual="$(openssl dgst -sha256 "$archive" | awk '{print $NF}')"
         fi
+        echo "ZIG_ACTUAL=$actual"
         test "$actual" = "$sha"
         if [ "$ext" = zip ]; then
           powershell -NoProfile -Command "Expand-Archive -LiteralPath '$archive' -DestinationPath '$RUNNER_TEMP' -Force"
