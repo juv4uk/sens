@@ -75,7 +75,7 @@ fn value_fingerprint(value: &Value) -> String {
 }
 
 fn evaluate(source: &str) -> Result<SemanticSnapshot, String> {
-    let parsed = parse_canonical_binary(source)?;
+    let parsed = parse_canonical_binary(source).map_err(|error| error.to_string())?;
     let lowered = lower_program(&parsed);
     let semantic_trace = trace_program(&lowered)?;
 
@@ -133,7 +133,7 @@ fn run() -> Result<(), String> {
         fs::read_to_string(&args[1]).map_err(|error| format!("read {}: {error}", args[1]))?;
     let source = source.trim();
 
-    let tokens = parse_binary_source_words(source)?;
+    let tokens = parse_binary_source_words(source).map_err(|error| error.to_string())?;
     let widths = tokens
         .iter()
         .map(|token| token.word.width())
