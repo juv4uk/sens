@@ -40,7 +40,7 @@ Rust/Cargo закріплено на **1.99.0**, Zig — на **0.16.0**. Rust �
 ## Ролі
 
 - `dev` — Rust/Cargo + GCC + certs + git + Racket.
-- `bench` — `dev` + Python + Valgrind + taskset/coreutils.
+- `bench` — `dev` + native SENS/Zig physical judge; no separate benchmark runtime.
 - `native` — `dev` + GCC/binutils/LLVM/LLD/GDB/strace/NASM.
 - `islands` — `dev` + SWI-Prolog + CLIPS + SBCL.
 - `fpga` — `dev` + Yosys + Icarus Verilog + Verilator.
@@ -49,11 +49,11 @@ Rust/Cargo закріплено на **1.99.0**, Zig — на **0.16.0**. Rust �
 
 ```sh
 ./guix/run dev -- cargo test -p sens
-./guix/run bench -- python3 benchmarks/sens-surface/run.py --help
+./guix/run bench -- bash benchmarks/contest-uk/judge.sh
 ./guix/run islands -- swipl --version
 ./guix/run --container fpga -- yosys -V
 ./guix/run --container --network dev -- cargo fetch
-./guix/run --gc-root .guix-env bench -- cargo bench
+./guix/run --gc-root .guix-env bench -- bash benchmarks/contest-uk/judge.sh
 ```
 
 `--container` ділиться лише поточним checkout як `/workspace`; мережа вимкнена,

@@ -25,7 +25,7 @@ usage() {
 Він не призначений для portable/evidence build.
 
 Приклад:
-  ./guix/run bench -- python3 benchmarks/sens-surface/run.py --help
+  ./guix/run bench -- bash benchmarks/contest-uk/judge.sh
 EOF
 }
 container=0
@@ -80,7 +80,7 @@ fi
 manifests=(-m "$ROOT/manifest.scm")
 case "$role" in
   dev) ;;
-  bench) manifests+=(-m "$ROOT/benchmarks/sens-surface/manifest.scm") ;;
+  bench) ;;
   native) manifests+=(-m "$ROOT/guix/manifests/native.scm") ;;
   islands)
     manifests+=(-m "$ROOT/guix/manifests/islands.scm")
@@ -88,7 +88,6 @@ case "$role" in
     ;;
   fpga) manifests+=(-m "$ROOT/guix/manifests/fpga.scm") ;;
   all)
-    manifests+=(-m "$ROOT/benchmarks/sens-surface/manifest.scm")
     manifests+=(-m "$ROOT/guix/manifests/native.scm")
     manifests+=(-m "$ROOT/guix/manifests/islands.scm")
     manifests+=(-f "$ROOT/packaging/guix/clips.scm")
