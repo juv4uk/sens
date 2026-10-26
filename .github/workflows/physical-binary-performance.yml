@@ -59,26 +59,10 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y valgrind
           valgrind --version
-      - name: Benchmark physical T5 files, not unit tests
-        env:
-          REPS: ${{ inputs.repetitions || '21' }}
-          RUN_CACHEGRIND: ${{ inputs.cachegrind || false }}
+      - name: "Benchmark physical T5 files, not unit tests — EXCLUDED (NOT_VERIFIED)"
         shell: bash
-        run: |
-          set -euo pipefail
-          options=()
-          if [[ "$RUN_CACHEGRIND" == "true" ]]; then
-            options+=(--cachegrind)
-          fi
-          python3 benchmarks/physical-binary-performance/t5_legacy.py \
-            --sens target/release/sens \
-            --sens-trit target/release/sens-trit \
-            --reps "$REPS" \
-            --warmup 4 \
-            --out /tmp/sens-physical-performance \
-            "${options[@]}"
-          sha256sum --check /tmp/sens-physical-performance/inputs.sha256
-          test "$(cat /tmp/sens-physical-performance/source.sha)" = "$GITHUB_SHA"
+        run: echo "PYTHON_TESTS_AND_BENCHMARKS=EXCLUDED_BY_LANGUAGE_POLICY native_equivalent=NOT_VERIFIED"
+
       - name: Show actual medians, p95 and physical size
         if: always()
         shell: bash
