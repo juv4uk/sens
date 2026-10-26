@@ -158,6 +158,7 @@ jobs:
         ${{ inputs.files }}
         ${{ github.event_name == 'push' && contains(github.event.head_commit.message, 'SENS_REMINT_META_EVAL_GRAPH_D1') && 'tests/semantic/meta-eval-graph-d1-law.lisp' || '' }}
         ${{ github.event_name == 'push' && contains(github.event.head_commit.message, 'SENS_REMINT_META_EVAL_GRAPH_D1') && 'tests/semantic/meta-eval-graph-d1-mutant.lisp' || '' }}
+        ${{ github.event_name == 'push' && contains(github.event.head_commit.message, 'SENS_REMINT_COMPILER_NUCLEUS') && 'lib/compiler-nucleus.lisp' || '' }}
     permissions:
       contents: write
 
