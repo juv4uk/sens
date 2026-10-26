@@ -23,6 +23,7 @@ cp "$law" "$tmp/positive.lisp"
 cp "$negative" "$tmp/negative.lisp"
 cp "$mutant" "$tmp/mutant.lisp"
 printf 'ВИКОНАВЕЦЬ_SENS id=%s path=%s version=%s\n' "$id" "$cli" "$("$cli" --version 2>/dev/null || echo unknown)"
+printf '1\n' > "$tmp/expected"
 trit="${SENS_TRIT_BINARY:-target/debug/sens-trit}"
 if [[ ! -x "$trit" ]]; then
   printf 'REGRESSION test_id=%s layer=physical-eval actual=zig-t5m-reader-missing\n' "$id" >&2
