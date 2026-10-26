@@ -1,17 +1,47 @@
-//! Current D7 keyboard/v2 exact W7 data through physical T5M.
-//! In code, quoted function identities come from the domain ladder first.
+//! Current D7 keyboard/v2 exact W7 data through physical Zig T5M.
+//! Keyboard projection produces W7 coordinates; Zig alone packs/unpacks T5M.
+//! No legacy Rust physical codec is imported by these tests.
 
-use sens::{decode_d7_uk_t5, encode_d7_uk_t5, BinarySourceWord, Bit2, Bit7, D7T5Error};
+use sens::{BinarySourceWord, Bit7};
+use sens::d7_keyboard::{self, D7Mode, D7CodecError};
 use sens_cli::zig_transport;
+
+#[derive(Debug, Eq, PartialEq)]
+enum D7PhysicalDecodeError {
+    NonD7Word,
+    PhysicalFrame,
+    Projection(D7CodecError),
+}
+
+fn encode_d7_uk_t5(source: &str) -> Result<Vec<u8>, D7CodecError> {
+    let codes = d7_keyboard::encode(source, D7Mode::Uk)?;
+    let words = codes.into_iter()
+        .map(|code| BinarySourceWord::W7(Bit7::new(code).expect("D7 projection is seven-bit")))
+        .collect::<Vec<_>>();
+    Ok(zig_transport::encode_t5m_direct(&words)
+        .expect("valid homogeneous W7 data must be encodable by Zig T5M"))
+}
+
+fn decode_d7_uk_t5(bytes: &[u8]) -> Result<String, D7PhysicalDecodeError> {
+    let words = zig_transport::decode_t5m_words(bytes)
+        .map_err(|_| D7PhysicalDecodeError::PhysicalFrame)?;
+    let mut codes = Vec::with_capacity(words.len());
+    for word in words {
+        match word {
+            BinarySourceWord::W7(cell) => codes.push(cell.packed_bits()),
+            _ => return Err(D7PhysicalDecodeError::NonD7Word),
+        }
+    }
+    d7_keyboard::decode(&codes, D7Mode::Uk)
+        .map_err(D7PhysicalDecodeError::Projection)
+}
 
 fn encode_via_zig(source: &str) -> Vec<u8> {
     let tokens = sens::parse_binary_source_words(source)
         .expect("binary projection parses to exact-width tokens");
-    let words = tokens
-        .into_iter()
-        .map(|token| token.word)
-        .collect::<Vec<_>>();
-    zig_transport::encode_t5m_direct(&words).expect("Zig T5M encoder must produce physical bytes")
+    let words = tokens.into_iter().map(|token| token.word).collect::<Vec<_>>();
+    zig_transport::encode_t5m_direct(&words)
+        .expect("Zig T5M encoder must produce physical bytes")
 }
 
 fn decode_t5m_via_zig(bytes: &[u8]) -> Vec<sens::BinarySourceWord> {
@@ -58,7 +88,7 @@ fn d2_grammar_words_do_not_become_d7_text_even_for_same_characters() {
     for bits in [0b00, 0b01, 0b10, 0b11] {
         let words = vec![BinarySourceWord::W2(Bit2::new(bits).unwrap())];
         let physical = zig_transport::encode_t5m_direct(&words).unwrap();
-        assert_eq!(decode_d7_uk_t5(&physical), Err(D7T5Error::NonD7Word));
+        assert_eq!(decode_d7_uk_t5(&physical), Err(D7PhysicalDecodeError::NonD7Word));
     }
     for text in ["(", ")", ".", " ", "\n"] {
         let physical = encode_d7_uk_t5(text).unwrap();
@@ -93,7 +123,7 @@ fn d7_stack_glyph_projection_preserves_t5m_and_multibyte_error_offset() {
     // offset reports the first byte, not a character ordinal or host number.
     assert_eq!(
         encode_d7_uk_t5("Кі🙂"),
-        Err(D7T5Error::UnassignedKeyboardGlyph { byte_offset: 4 })
+        Err(D7CodecError::CharacterNotAdmitted('🙂'))
     );
 }
 
@@ -121,9 +151,7 @@ fn d7_repeated_utf8_uses_exact_words_without_post_encode_decode() {
     assert_eq!(decode_d7_uk_t5(&packed).unwrap(), source);
     assert_eq!(
         encode_d7_uk_t5(&(source.clone() + "🙂")),
-        Err(D7T5Error::UnassignedKeyboardGlyph {
-            byte_offset: source.len()
-        })
+        Err(D7CodecError::CharacterNotAdmitted('🙂'))
     );
 }
 
@@ -131,7 +159,7 @@ fn d7_repeated_utf8_uses_exact_words_without_post_encode_decode() {
 fn invalid_unicode_or_bad_physical_byte_fails_closed() {
     assert!(matches!(
         encode_d7_uk_t5("🙂"),
-        Err(D7T5Error::UnassignedKeyboardGlyph { .. })
+        Err(D7CodecError::CharacterNotAdmitted('🙂'))
     ));
     assert!(zig_transport::decode_t5m_words(&[243]).is_err());
 }
