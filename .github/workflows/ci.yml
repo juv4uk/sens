@@ -387,14 +387,14 @@ jobs:
     if: ${{ github.event_name == 'push' }}
     runs-on: ubuntu-24.04
     outputs:
-      needed: ${{ steps.scope.outputs.needed }}
+      needed: ${{ steps.release-scope.outputs.needed }}
     steps:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5, pinned
         with:
           fetch-depth: 2
           persist-credentials: false
       - name: Перевірити релізно-критичний diff
-        id: scope
+        id: release-scope
         shell: bash
         env:
           BEFORE_SHA: ${{ github.event.before }}
