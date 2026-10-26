@@ -147,6 +147,18 @@ fn release_workflows_accept_only_the_s_tag_prefix() {
         );
     }
     assert!(
+        release.contains("os: ubuntu-22.04")
+            && publisher.contains("\"sens-cli · ubuntu-22.04\"")
+            && !publisher.contains("\"sens-cli · ubuntu-latest\""),
+        "publisher must require the actual Linux matrix check-run name"
+    );
+    assert!(
+        release.contains("Get-FileHash -LiteralPath $msi -Algorithm SHA256")
+            && release.contains("[System.IO.File]::WriteAllText(\"$msi.sha256\"")
+            && release.contains("${{ env.MSI_ASSET_PATH }}.sha256"),
+        "Windows MSI must stage its checksum sidecar"
+    );
+    assert!(
         !publisher.contains("python3"),
         "release publisher must not invoke Python"
     );
