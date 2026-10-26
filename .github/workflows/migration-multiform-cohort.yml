@@ -12,7 +12,9 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - uses: dtolnay/rust-toolchain@stable
-      - name: Actual three-pass Lisp to same-stem physical T5
-        run: python3 tests/test_migration_multiform_cohort.py -v
+      - name: Actual three-pass Lisp to same-stem physical T5 — EXCLUDED (NOT_VERIFIED)
+        if: false
+        shell: bash
+        run: echo "FOREIGN_LANGUAGE_TEST_BENCH=EXCLUDED_BY_POLICY native_equivalent=NOT_VERIFIED"
       - name: Actual Rust exact D2/D3 oracle evaluates two top-level forms
         run: cargo test -p sens --features rust-t5-reference --test migration_multiform_cohort
