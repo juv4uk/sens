@@ -119,11 +119,20 @@ jobs:
         run: cargo build --locked -p sens-cli --bin sens --bin sens-trit --features benchmark-ast-visits
       - name: Точковий SENS REPL — некоректний стан повертає мовну відмову
         run: cargo test --locked -p sens --test repl_core_malformed_tails repl_step_rejects_atomic_state_as_sens_data -- --nocapture
-      - name: Execute SENS laws, mutants and language laws
+      - name: Execute SENS-native laws, mutants and benchmarks
         shell: bash
         run: |
           set -euo pipefail
-          bash scripts/prove-lisp-semantic-t5m.sh "$PWD/target/debug/sens" "$PWD/target/debug/sens-trit" "$RUNNER_TEMP/sens-laws"
+          bash scripts/prove-meta-eval-graph-d1.sh "$PWD/target/debug/sens"
+          bash scripts/prove-meta-eval-lexical-shadow-d1.sh "$PWD/target/debug/sens"
+          bash scripts/prove-meta-eval-predicates-d1.sh "$PWD/target/debug/sens"
+          bash scripts/prove-meta-eval-mutual-d4.sh "$PWD/target/debug/sens"
+          bash scripts/prove-d4-selector-width.sh "$PWD/target/debug/sens"
+          bash scripts/prove-твердження-m1.sh "$PWD/target/debug/sens"
+          bash scripts/prove-бенчмарк-медіана.sh "$PWD/target/debug/sens"
+          bash scripts/prove-бенчмарк-структура.sh "$PWD/target/debug/sens"
+          bash scripts/prove-бенчмарк-умова.sh "$PWD/target/debug/sens"
+          bash scripts/prove-ідентичність-тритів.sh "$PWD/target/debug/sens"
           bash scripts/prove-lisp-language-laws.sh "$PWD/target/debug/sens"
 
   remint-input-required:
