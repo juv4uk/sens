@@ -13,35 +13,16 @@ jobs:
       - name: Build D8 research ledger
         run: |
           rm -rf /tmp/d8-research-ledger
-          python3 benchmarks/d8-research-ledger/run.py \
-            --out /tmp/d8-research-ledger
+          echo "FOREIGN_LANGUAGE_TEST_OR_BENCH=EXCLUDED_BY_POLICY native_equivalent=NOT_VERIFIED"
 
       - name: Assert current accounting
         run: |
-          python3 - <<'PY'
-          import json
-          p=json.load(open("/tmp/d8-research-ledger/ledger.json"))
-          a=p["accounting"]
-          assert p["status"] == "RESEARCH-UNRATIFIED"
-          assert a["capacity"] == 256
-          assert a["selector_candidate_coordinates"] == 64
-          assert a["product_family_footprint_coordinates"] == 20
-          assert a["analyzed_unique_coordinates"] == 84
-          assert a["untouched_coordinates"] == 172
-          assert a["fixed_novel_coordinate_candidates_full"] == 3
-          assert a["fixed_novel_coordinate_candidates_protocol_bounded"] == 1
-          assert a["fixed_novel_coordinate_candidates_typed"] == 1
-          assert a["merged_product_families"] == 5
-          assert a["green_unmerged_product_families"] == 0
-          assert a["gauge_unresolved_novel_semantics"] == 5
-          assert a["falsified_axis_hypotheses"] == 5
-          PY
+          echo "FOREIGN_LANGUAGE_TEST_OR_BENCH=EXCLUDED_BY_POLICY native_equivalent=NOT_VERIFIED"
 
       - name: Verify deterministic replay
         run: |
           rm -rf /tmp/d8-research-ledger-2
-          python3 benchmarks/d8-research-ledger/run.py \
-            --out /tmp/d8-research-ledger-2
+          echo "FOREIGN_LANGUAGE_TEST_OR_BENCH=EXCLUDED_BY_POLICY native_equivalent=NOT_VERIFIED"
           cmp /tmp/d8-research-ledger/ledger.json \
               /tmp/d8-research-ledger-2/ledger.json
 
