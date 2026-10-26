@@ -284,8 +284,15 @@ fn lift_pinned_d9_language_calls(
         || is_exact_quote(&lifted[0])
         || spelling == Some("'")
     {
+        // Translation sources use the pinned reasoning path, not the D8-I/O
+        // loader. Preserve the quote carrier but normalize only ratified D4
+        // identities inside its payload; exact unknown names remain inert data.
+        let mut quoted = items.to_vec();
+        for item in quoted.iter_mut().skip(1) {
+            *item = lift_quoted_d4_identity_data(source, item.clone(), depth + 1)?;
+        }
         return Ok(Expr {
-            kind: ExprKind::List(items),
+            kind: ExprKind::List(Rc::from(quoted.into_boxed_slice())),
             span,
         });
     }
@@ -1437,6 +1444,41 @@ mod tests {
             &quote[1].kind,
             ExprKind::DomainIdentity(identity)
                 if identity.width() == 4 && identity.packed_bits() == 0b0100
+        ));
+    }
+
+    #[test]
+    fn translation_reader_preserves_nested_quoted_d4_negation_and_unknown_data() {
+        let nested = only(
+            parse_mixed_exact_domain_reasoning_source(
+                "lib/translation.lisp",
+                "(список (як-є хибне?) (як-є непогоджена-функція))",
+            )
+            .expect("translation reader keeps nested quote data"),
+        );
+        let ExprKind::List(items) = nested.kind else {
+            panic!("outer list");
+        };
+        let ExprKind::List(negation) = &items[1].kind else {
+            panic!("quoted D4 negation");
+        };
+        assert!(matches!(
+            &negation[0].kind,
+            ExprKind::DomainIdentity(identity)
+                if identity.width() == 3 && identity.packed_bits() == 0b001
+        ));
+        assert!(matches!(
+            &negation[1].kind,
+            ExprKind::DomainIdentity(identity)
+                if identity.width() == 4 && identity.packed_bits() == 0b0100
+        ));
+
+        let ExprKind::List(unknown) = &items[2].kind else {
+            panic!("quoted unknown data");
+        };
+        assert!(matches!(
+            &unknown[1].kind,
+            ExprKind::Symbol(name) if name.as_ref() == "непогоджена-функція"
         ));
     }
 
