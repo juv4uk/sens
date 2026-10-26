@@ -14,10 +14,10 @@ evidence="$3"
 test -x "$sens" && test -x "$trit"
 mkdir -p "$evidence"
 
-# Materialize every reviewed T5M law-pair receipt before the native sweep.
-# These scripts transport reviewed bytes only; all law semantics are executed by SENS/Zig.
+# SENS-код є власною точною тритовою послідовністю: зовнішні квитанції не є ідентичністю.
+# SENS визначає закон; Zig/T5M переносить фізичне представлення без підміни семантики.
 # Заборонені хостові генератори не запускаються.
-# Законні фізичні пари мають існувати до старту перевірки.
+# Наявність фізичних пар перевіряється як умова виконання, не як квитанція.
 for stem in \
   d5-numberp-nonnumber-law \
   d5-d12-zerop-law \
