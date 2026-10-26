@@ -536,6 +536,15 @@ run_case run_law assertion-library-self-calibration "$assert_library_law" 1 core
 run_case run_law assertion-library-self-calibration-mutant "$assert_library_mutant" 0 core4
 run_case run_error_rejection assertion-library-improper-tail "$assert_library_bad_tail" Type 'car expects a non-empty list' core4
 
+# M3: функції сортування/медіани з бібліотеки перевіряються окремо,
+# а свідок містить тільки структурні виміри та закони.
+benchmark_median_law="$evidence/benchmark-median-law-complete.lisp"
+benchmark_median_mutant="$evidence/benchmark-median-mutant-complete.lisp"
+cat -- lib/бенчмарк.lisp tests/semantic/бенчмарк-медіана-law.lisp > "$benchmark_median_law"
+cat -- lib/бенчмарк.lisp tests/semantic/бенчмарк-медіана-mutant.lisp > "$benchmark_median_mutant"
+run_case run_law benchmark-median-positive "$benchmark_median_law" 1 core4
+run_case run_law benchmark-median-mutant "$benchmark_median_mutant" 0 core4
+
 # Повна пара власне мовного заперечення Д1: джерело тільки Lisp.
 run_case run_law d1-not-positive tests/semantic/d1-not-law.lisp 1
 run_case run_law d1-not-mutant tests/semantic/d1-not-mutant.lisp 0

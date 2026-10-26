@@ -1429,6 +1429,26 @@ run_native_t5m_program() {
         fi
       fi
     fi
+    if [[ "$file" == "tests/semantic/бенчмарк-медіана-law.lisp" ||
+          "$file" == "tests/semantic/бенчмарк-медіана-mutant.lisp" ]]; then
+      local median_full_source="$dir/benchmark-median-full.lisp"
+      standalone_physical="$dir/benchmark-median-full.sens"
+      if ! cat -- lib/бенчмарк.lisp "$file" > "$median_full_source" ||
+         ! timeout "$native_timeout" "$binary" --t5m-mint "$median_full_source" "$standalone_physical" >"$dir/benchmark-median-mint.stdout" 2>"$dir/benchmark-median-mint.stderr" ||
+         ! timeout "$native_timeout" "$native_open" open "$standalone_physical" >"${standalone_physical%.sens}" 2>"$dir/benchmark-median-open.stderr" ||
+         ! timeout "$native_timeout" "$native_open" verify-view "$standalone_physical" >"$dir/benchmark-median-verify.stdout" 2>"$dir/benchmark-median-verify.stderr"; then
+        echo "::error::SENS_BENCHMARK_MEDIAN_STANDALONE_MINT_FAILED source=$file" >&2
+        mark_file_failed
+        return
+      fi
+      local median_expected_d1=1
+      [[ "$file" != *-mutant.lisp ]] || median_expected_d1=0
+      if [[ "$(cat "$dir/native-paired.stdout")" != "$median_expected_d1" ]]; then
+        echo "::error::SENS_BENCHMARK_MEDIAN_WRONG_D1 source=$file expected=$median_expected_d1 actual=$(cat "$dir/native-paired.stdout")" >&2
+        mark_file_failed
+        return
+      fi
+    fi
     if timeout "$native_timeout" "${standalone_runtime[@]}" "$standalone_physical" \
         >"$dir/native-standalone.stdout" 2>"$dir/native-standalone.stderr"; then
       if ! cmp -s "$dir/native-standalone.stdout" "$dir/native-paired.stdout"; then
@@ -1598,6 +1618,11 @@ while IFS= read -r file || [[ -n "$file" ]]; do
           "$file" == "tests/semantic/assertion-library-mutant.lisp" ||
           "$file" == "tests/semantic/assertion-library-bad-tail-negative.lisp" ]]; then
     binding_sources=(--binding-source lib/твердження.lisp)
+  elif [[ "$file" == "lib/бенчмарк.lisp" ]]; then
+    binding_sources=(--binding-source lib/core4.lisp)
+  elif [[ "$file" == "tests/semantic/бенчмарк-медіана-law.lisp" ||
+          "$file" == "tests/semantic/бенчмарк-медіана-mutant.lisp" ]]; then
+    binding_sources=(--binding-source lib/core4.lisp --binding-source lib/бенчмарк.lisp)
   elif [[ "$file" == "tests/semantic/result-status-d7-label-law.lisp" ||
           "$file" == "tests/semantic/result-status-d7-label-mutant.lisp" ||
           "$file" == "tests/semantic/result-status-dotted-law.lisp" ||
