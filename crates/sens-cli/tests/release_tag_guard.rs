@@ -171,6 +171,12 @@ fn release_workflows_accept_only_the_s_tag_prefix() {
         "publisher must require the actual Linux matrix check-run name"
     );
     assert!(
+        release.contains("major == 11 && minor > 0")
+            && release.contains("$subMinor = [BitConverter]::ToUInt16($bytes, $pe + 24 + 50)")
+            && release.contains("$subMajor -eq 6 -and $subMinor -gt 0"),
+        "macOS and Windows portability gates must compare major and minor versions"
+    );
+    assert!(
         !publisher.contains("python3"),
         "release publisher must not invoke Python"
     );
