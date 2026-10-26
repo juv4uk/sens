@@ -47,7 +47,7 @@ jobs:
             "Охоронець · Rust · Zig · SENS"
             "focused release smoke before publish"
             "focused release preflight"
-            "sens-cli · ubuntu-latest"
+            "sens-cli · ubuntu-22.04"
             "sens-cli · windows-latest"
             "sens-cli · macos-15-intel"
             "sens-cli · macos-14"
