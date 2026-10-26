@@ -128,8 +128,8 @@ CONFORMANCE_PATH = "tests/fixtures/conformance.lisp"
 # Only the numeric value of the explicit (tier . N) field is metadata; numbers
 # elsewhere in this file must still be checked by the live-source guard.
 CONFORMANCE_TIER_VALUE = re.compile(
-    r'^\\s*\\(\\(expr \\. "(?:\\\\.|[^"\\\\])*".*?'
-    r'\\(tier \\. (?P<value>[0-9]+)\\)'
+    r'^\s*\(\(expr \. "(?:\\.|[^"\\])*".*?'
+    r'\(tier \. (?P<value>[0-9]+)\)'
 )
 
 
@@ -139,7 +139,7 @@ def _is_conformance_tier_metadata(
     if path is None or Path(path).as_posix() != CONFORMANCE_PATH:
         return False
     start, end = _source_line_bounds(source, offset)
-    line = source[start:end].rstrip("\\r")
+    line = source[start:end].rstrip("\r")
     match = CONFORMANCE_TIER_VALUE.match(line)
     return bool(match and start + match.start("value") == offset)
 
