@@ -523,6 +523,18 @@ run_case() {
     echo "::warning title=SENS Lisp/T5M::CONTINUE_AFTER_RED id=$id remaining_witnesses=will_run" >&2
   fi
 }
+# M1: SENS-власний runner тестів. Хост тільки проводить джерело через нативний шлях.
+# Закон та мутант мають спільну бібліотеку; неправильний D3-хвіст мусить дати Type.
+assert_library_law="$evidence/assertion-library-law-complete.lisp"
+assert_library_mutant="$evidence/assertion-library-mutant-complete.lisp"
+assert_library_bad_tail="$evidence/assertion-library-bad-tail-complete.lisp"
+cat -- tests/semantic/assertion-library.lisp tests/semantic/assertion-library-law.lisp > "$assert_library_law"
+cat -- tests/semantic/assertion-library.lisp tests/semantic/assertion-library-mutant.lisp > "$assert_library_mutant"
+cat -- tests/semantic/assertion-library.lisp tests/semantic/assertion-library-bad-tail-negative.lisp > "$assert_library_bad_tail"
+run_case run_law assertion-library-self-calibration "$assert_library_law" 1 core4
+run_case run_law assertion-library-self-calibration-mutant "$assert_library_mutant" 0 core4
+run_case run_error_rejection assertion-library-improper-tail "$assert_library_bad_tail" Type 'car expects a non-empty list' core4
+
 # Повна пара власне мовного заперечення Д1: джерело тільки Lisp.
 run_case run_law d1-not-positive tests/semantic/d1-not-law.lisp 1
 run_case run_law d1-not-mutant tests/semantic/d1-not-mutant.lisp 0
