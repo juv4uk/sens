@@ -31,13 +31,12 @@ fn execute_with_negative(source_name: &str, source: &str, original: &str, change
     // Негатив запускається іншою реальною SENS-сесією, не Rust-інтерпретатором.
     let mutant = source.replacen(original, changed, 1);
     let mut negative_session = Session::default();
-    match eval_program(&mutant, &mut negative_session) {
-        Ok(value) => assert_ne!(
+    if let Ok(value) = eval_program(&mutant, &mut negative_session) {
+        assert_ne!(
             value.value, expected,
             "test_id=ukr-four-list layer=SENS source={source_name} case=mutant expected=non-true actual=D1:так"
-        ),
-        Err(_) => {} // Дозволене семантичне відхилення хибної гілки, а не PASS мутації.
-    }
+        );
+    } // Дозволене семантичне відхилення хибної гілки, а не PASS мутації.
 }
 
 #[test]
