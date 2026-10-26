@@ -422,9 +422,26 @@ pub(crate) fn cons_values(
 /// Актуальна ратифікація 2026-10-08 supersedes старе #3161 формулювання.
 pub(crate) fn eq_values(left: Value, right: Value, span: Span) -> Result<Value, LanguageError> {
     if !left.is_atom() || !right.is_atom() {
+        // Діагностика називає БІК і вид носія. Без цього повідомлення
+        // «eq expects two atoms» не відрізняє `(eq пара x)` від `(eq x пара)`,
+        // і пошук причини йде навмання по всьому lib/.
+        // Значення не рендеримо: воно може бути величезним списком.
+        let side = match (left.is_atom(), right.is_atom()) {
+            (false, true) => "left",
+            (true, false) => "right",
+            _ => "both",
+        };
+        let carrier = if matches!(left, Value::Pair(_)) || matches!(right, Value::Pair(_)) {
+            "pair"
+        } else {
+            "non-atom"
+        };
         return Err(LanguageError::new(
             ErrorKind::Type,
-            "eq expects two atoms · eq ochikuie dva atomy · eq erwartet zwei Atome",
+            format!(
+                "eq expects two atoms · eq ochikuie dva atomy · eq erwartet zwei Atome · \
+                 non-atomic {side} · carrier {carrier}"
+            ),
             span,
         ));
     }
