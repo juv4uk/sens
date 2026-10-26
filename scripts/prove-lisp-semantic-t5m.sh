@@ -524,6 +524,7 @@ run_case() {
   fi
 }
 # M1: SENS-власний runner тестів. Хост тільки проводить джерело через нативний шлях.
+# Самокалібрування: істина/хиба, вкладена рівність, різний елемент і різна довжина.
 # Закон та мутант мають спільну бібліотеку; неправильний D3-хвіст мусить дати Type.
 assert_library_law="$evidence/assertion-library-law-complete.lisp"
 assert_library_mutant="$evidence/assertion-library-mutant-complete.lisp"
