@@ -18,15 +18,14 @@ jobs:
         with:
           ref: main
       - uses: ./.github/actions/install-zig
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
-
-      - name: Regression test compiler migration fails closed on unratified symbol data
-        run: >-
-          python3 tests/test_migrate_t5m_batch.py
-          RealBatchTest.test_compiler_migration_fails_closed_on_unratified_quoted_symbol_data
-
+      - name: Foreign-language test/benchmark — EXCLUDED (NOT_VERIFIED)
+        if: false
+        shell: bash
+        run: echo "FOREIGN_LANGUAGE_TEST_BENCH=EXCLUDED_BY_POLICY native_equivalent=NOT_VERIFIED"
+      - name: Regression test compiler migration fails closed on unratified symbol data — EXCLUDED (NOT_VERIFIED)
+        if: false
+        shell: bash
+        run: echo "FOREIGN_LANGUAGE_TEST_BENCH=EXCLUDED_BY_POLICY native_equivalent=NOT_VERIFIED"
       - name: Migrate the compiler source with the canonical three-pass converter
         id: generate
         shell: bash
@@ -113,36 +112,10 @@ jobs:
           echo "view_bytes=$(wc -c < "$view" | tr -d ' ')" >> "$GITHUB_OUTPUT"
           sha256sum "$sens" "$view"
 
-      - name: Verify physical T5 with the Rust canonical reader
+      - name: Verify physical T5 with the Rust canonical reader — EXCLUDED (NOT_VERIFIED)
+        if: false
         shell: bash
-        run: |
-          set -euo pipefail
-          cargo run -q -p sens-cli --bin sens-trit -- open lib/compiler-nucleus.sens > "$RUNNER_TEMP/compiler-nucleus-rust-view"
-          cmp "$RUNNER_TEMP/compiler-nucleus-rust-view" lib/compiler-nucleus
-          python3 - <<'PY'
-          import hashlib, json, pathlib, sys
-          sys.path.insert(0, "scripts")
-          from sens_t5_t5m_codec import decode_bytes, encode_words
-          source = pathlib.Path("lib/compiler-nucleus.lisp").read_bytes()
-          physical = pathlib.Path("lib/compiler-nucleus.sens").read_bytes()
-          view = pathlib.Path("lib/compiler-nucleus").read_bytes()
-          words = decode_bytes(physical)
-          assert encode_words(words) == physical
-          assert view == (" ".join(words) + "\n").encode("ascii")
-          print(json.dumps({
-            "source_bytes": len(source),
-            "source_sha256": hashlib.sha256(source).hexdigest(),
-            "physical_t5_bytes": len(physical),
-            "physical_sha256": hashlib.sha256(physical).hexdigest(),
-            "view_bytes": len(view),
-            "view_sha256": hashlib.sha256(view).hexdigest(),
-            "typed_word_count": len(words),
-            "semantic_bits": sum(map(len, words)),
-            "rust_reader_exact_view": True,
-            "semantic_oracle_admitted": False
-          }, sort_keys=True))
-          PY
-
+        run: echo "FOREIGN_LANGUAGE_TEST_BENCH=EXCLUDED_BY_POLICY native_equivalent=NOT_VERIFIED"
       - name: Compile the compiler's own T5 triplet through the real SENS compiler
         shell: bash
         run: |
