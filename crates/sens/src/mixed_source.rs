@@ -237,9 +237,14 @@ fn lift_pinned_d9_language_calls(
         "рядок?",
         "читати-всі",
     ];
-    // This Lisp-defined D9 function is admitted only for pinned reasoning
-    // sources. Its resident coordinate alone does not install a runtime slot.
-    const UKRAINIAN_D9_LISP_CALLS: [&str; 1] = ["порадити-світ"];
+    // These Lisp-defined D9 calls are materialized only for pinned reasoning
+    // sources. Exact identity does not install a runtime slot; evaluated SENS
+    // definitions must still provide the concrete mechanism before dispatch.
+    const UKRAINIAN_D9_LISP_CALLS: [&str; 3] = [
+        "порадити-світ",
+        "світ-повідомити-всі",
+        "порада-рішення-у-світ",
+    ];
     if depth > MAX_STRUCTURE_DEPTH {
         return Err(LanguageError::new(
             ErrorKind::Parse,
