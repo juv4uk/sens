@@ -212,7 +212,7 @@ impl Arena {
     /// уже чорний або не має комірки — лише відкидає його; інакше сірить обох
     /// нащадків **перш ніж** почорнити сам вузол (інваріант Дейкстри «чорний
     /// не вказує на білого»). Повертає `false` лише коли сірих більше немає.
-    pub(crate) fn tricolor_step(&self, grey: &mut Vec<CellRef>, black: &mut Vec<bool>) -> bool {
+    pub(crate) fn tricolor_step(&self, grey: &mut Vec<CellRef>, black: &mut [bool]) -> bool {
         let Some(link) = grey.pop() else {
             return false; // `(порожній? сірі)`
         };

@@ -67,8 +67,8 @@ fn total(c: &Counts, n: usize, d: usize) -> Result<u128, Frame3MicroEnumerateErr
 
 fn build_counts() -> Result<Counts, Frame3MicroEnumerateError> {
     let mut c = [[[0u128; 2]; MAX_DEPTH + 1]; MAX_NODES + 1];
-    for d in 0..=MAX_DEPTH {
-        c[1][d] = [6, d as u128];
+    for (d, row) in c[1].iter_mut().enumerate() {
+        *row = [6, d as u128];
     }
 
     for n in 2..=MAX_NODES {
@@ -387,7 +387,7 @@ fn unrank_new(
     }
     if n == 1 {
         return (rank < d as u128)
-            .then(|| F3m5LambdaExpr::Bound(rank as u8))
+            .then_some(F3m5LambdaExpr::Bound(rank as u8))
             .ok_or(Frame3MicroEnumerateError::RankOutOfRange);
     }
 
@@ -659,8 +659,8 @@ pub fn encode_candidate(e: &F3m5LambdaExpr) -> Result<[u8; 5], Frame3MicroEnumer
     }
     let c = counts();
     let mut rank = 0;
-    for n in 1..e.node_count() {
-        rank = add(rank, c[n][0][1])?;
+    for row in c.iter().take(e.node_count()).skip(1) {
+        rank = add(rank, row[0][1])?;
     }
     rank = add(rank, rank_new(e, 0, c)?)?;
     if rank >= F3M5_LAMBDA_CAPACITY {

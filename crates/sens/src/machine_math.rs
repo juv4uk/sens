@@ -79,14 +79,14 @@ pub(crate) fn exact_i24_integer_op(operator: &str, left: i64, right: i64) -> Opt
         // SAFETY: фіксований SysV ABI, параметри — числа у знаковій межі
         // D24. Навіть добуток крайніх D24 не перевищує знакові 48 бітів.
         // SIMD не потрібен: ADD/SUB/IMUL дозволені у звичайному x86-64.
-        return Some(unsafe {
+        Some(unsafe {
             match operator {
                 "+" => sens_i24_add_exact(left, right),
                 "-" => sens_i24_sub_exact(left, right),
                 "*" => sens_i24_mul_exact(left, right),
                 _ => return None,
             }
-        });
+        })
     }
     #[cfg(not(all(target_arch = "x86_64", target_os = "linux")))]
     match operator {
@@ -110,7 +110,7 @@ pub(crate) fn exact_i48_integer_op(op: &str, left: i64, right: i64) -> Option<i1
     {
         // SAFETY: D48 аргументи знакові, ABI System V, &mut high
         // зберігає старші 64 біти множення без втрати перенесення.
-        return Some(unsafe {
+        Some(unsafe {
             match op {
                 "+" => i128::from(sens_i24_add_exact(left, right)),
                 "-" => i128::from(sens_i24_sub_exact(left, right)),
@@ -121,7 +121,7 @@ pub(crate) fn exact_i48_integer_op(op: &str, left: i64, right: i64) -> Option<i1
                 }
                 _ => return None,
             }
-        });
+        })
     }
     #[cfg(not(all(target_arch = "x86_64", target_os = "linux")))]
     match op {
@@ -164,7 +164,7 @@ pub(crate) fn exact_i96_add_sub(op: &str, left: i128, right: i128) -> Option<i12
                 _ => return None,
             }
         };
-        return Some((i128::from(high) << 64) | i128::from(low));
+        Some((i128::from(high) << 64) | i128::from(low))
     }
     #[cfg(not(all(target_arch = "x86_64", target_os = "linux")))]
     match op {
@@ -196,7 +196,7 @@ pub(crate) fn exact_u96_multiply(a: u128, b: u128) -> Option<[u64; 3]> {
                 &mut high,
             )
         };
-        return Some([low, middle, high]);
+        Some([low, middle, high])
     }
     #[cfg(not(all(target_arch = "x86_64", target_os = "linux")))]
     {
@@ -311,7 +311,7 @@ pub(crate) fn exact_words_div_rem_u64(input: &[u64], divisor: u64) -> Option<(Ve
                 &mut remainder,
             );
         }
-        return Some((output, remainder));
+        Some((output, remainder))
     }
     #[cfg(not(all(target_arch = "x86_64", target_os = "linux")))]
     {
@@ -391,7 +391,7 @@ pub(crate) fn exact_small_integer_quotient(width: usize, a: i64, b: i64) -> Opti
         // тому IDIV не переповнить i64, &mut remainder придатний для запису.
         let mut remainder = 0_i64;
         let quotient = unsafe { sens_i64_divrem_exact(a, b, &mut remainder) };
-        return (remainder == 0).then_some(quotient);
+        (remainder == 0).then_some(quotient)
     }
     #[cfg(not(all(target_arch = "x86_64", target_os = "linux")))]
     {

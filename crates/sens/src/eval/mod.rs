@@ -555,7 +555,7 @@ fn evaluate_list(
         if let Some(key) = text7_binding_key(&framed) {
             if environment.get(&key).is_some() {
                 let head = Expr {
-                    kind: ExprKind::Symbol(key.into()),
+                    kind: ExprKind::Symbol(key),
                     span: items[0].span,
                 };
                 return dispatch_call(None, None, Some(&head), &items[1..], environment, span);
@@ -610,7 +610,7 @@ fn evaluate_list(
             ));
         }
         let head = Expr {
-            kind: ExprKind::Symbol(key.into()),
+            kind: ExprKind::Symbol(key),
             span: items[0].span,
         };
         return dispatch_call(None, None, Some(&head), &items[1..], environment, span);

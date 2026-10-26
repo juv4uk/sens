@@ -701,10 +701,10 @@ pub fn first_global_rank_with_capabilities(
         }
 
         let mut earliest = None;
-        for mask in 0..64 {
+        for (mask, rank) in minima[nodes].iter().enumerate() {
             if (mask as u8) & required == required {
-                if let Some(rank) = minima[nodes][mask] {
-                    update_minimum(&mut earliest, rank);
+                if let Some(rank) = rank {
+                    update_minimum(&mut earliest, *rank);
                 }
             }
         }

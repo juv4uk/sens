@@ -116,7 +116,7 @@ pub fn pack7(codes: &[u8]) -> Result<Vec<u8>, D7CodecError> {
 }
 
 pub fn unpack7(bytes: &[u8], bit_len: usize) -> Result<Vec<u8>, D7CodecError> {
-    if bit_len % 7 != 0 {
+    if !bit_len.is_multiple_of(7) {
         return Err(D7CodecError::WrongBitLength(bit_len));
     }
     let expected = bit_len.checked_add(7).ok_or(D7CodecError::Overflow)? / 8;
@@ -126,7 +126,7 @@ pub fn unpack7(bytes: &[u8], bit_len: usize) -> Result<Vec<u8>, D7CodecError> {
             expected,
         });
     }
-    if bit_len % 8 != 0 && !bytes.is_empty() {
+    if !bit_len.is_multiple_of(8) && !bytes.is_empty() {
         let pad = 8 - bit_len % 8;
         if bytes[bytes.len() - 1] & ((1_u8 << pad) - 1) != 0 {
             return Err(D7CodecError::NonzeroPadding);

@@ -652,8 +652,8 @@ pub(crate) fn encode_extension(expr: &Frame3MicroExpr) -> Result<u128, Frame3Mic
         return Err(Frame3MicroEnumerateError::RankOutOfRange);
     }
     let mut rank = 0u128;
-    for n in 1..nodes {
-        rank = checked_add(rank, counts[n][1])?;
+    for row in counts.iter().take(nodes).skip(1) {
+        rank = checked_add(rank, row[1])?;
     }
     rank = checked_add(rank, rank_extended_exact(expr, &counts)?)?;
     if rank >= F3M5_CAPACITY {
