@@ -258,7 +258,7 @@ run_law() {
     fail "$id" sens-logic "result:$expected" "$actual"
   fi
   echo "::notice file=$source,title=SENS Lisp→T5M→SENS::PASS id=$id result=$actual native=SENS"
-  sha256sum "$source" "$physical" >"$dir/sha256.txt"
+  # Квитанція результату зберігається в results.txt; хешування не виконується.
   printf '%s\n' "id=$id source=$source expected=$expected actual=$actual" >>"$evidence/results.txt"
 }
 
@@ -307,7 +307,7 @@ run_bound_law() {
   [[ "$actual" == "$expected" ]] ||
     fail "$id" sens-logic "D1:$expected" "$actual"
   echo "::notice file=$source,title=SENS unification law::PASS id=$id D1=$actual native=SENS carrier=Zig/T5M"
-  sha256sum "$source" lib/unify.lisp "$physical" >"$dir/sha256.txt"
+  # Квитанція результату зберігається в results.txt; хешування не виконується.
   printf '%s\n' "id=$id source=$source dependency=lib/unify.lisp expected=D1:$expected actual=D1:$actual" >>"$evidence/results.txt"
 }
 
@@ -403,7 +403,7 @@ run_error_rejection() {
     fail "$id" sens-physical "$expected_kind" "unexpected-standalone-error"
   fi
 
-  sha256sum "$source" "$physical" >"$dir/sha256.txt"
+  # Квитанція результату зберігається в results.txt; хешування не виконується.
   echo "::notice file=$source,title=SENS Lisp→T5M→SENS::PASS id=$id expected=$expected_kind diagnostic=$diagnostic direct=REJECTED paired=REJECTED physical=REJECTED"
   printf '%s\n' "id=$id source=$source expected=$expected_kind actual=$expected_kind" >>"$evidence/results.txt"
 }
