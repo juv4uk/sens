@@ -22,6 +22,10 @@ jobs:
     name: focused release preflight
     runs-on: ubuntu-latest
     timeout-minutes: 45
+    env:
+      # Діагностика eq: друкує стек виклику, коли eq отримує не-атом.
+      # Без цього адресу виклику не видно, і пошук іде навмання по lib/.
+      SENS_EQ_TRACE: "1"
     steps:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09
       - uses: ./.github/actions/install-zig
