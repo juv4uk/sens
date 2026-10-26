@@ -14,6 +14,7 @@
 ((expr . "(+ (/ 1 3) (/ 1 3))") (expected . "2/3") (tier . 2) (axioms . (S1)))
 ((expr . "(- 1 (/ 1 3))") (expected . "2/3") (tier . 2) (axioms . (S1)))
 ((expr . "(* (/ 2 3) (/ 9 4))") (expected . "3/2") (tier . 2) (axioms . (S1)))
+((expr . "(частка (частка (частка 5 6) 8) 7)") (id . "F-8bc31cae9e7e39b9") (expected . "5/336") (tier . 2) (axioms . (S1)))
 ((expr . "(/ 1 0)") (error . "DivisionByZero") (tier . 2) (axioms . (S2 S3)) (note . "іменована помилка, не мовчазне переозначення (S3)"))
 ((expr . "(функція (x))") (error . "Arity") (tier . 2) (axioms . (S2)))
 ((expr . "(як-є a b)") (error . "Arity") (tier . 1) (axioms . (S2)) (role . "constitutive"))

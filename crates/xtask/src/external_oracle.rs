@@ -8,9 +8,10 @@
 //!
 //! ## Corpus loading
 //!
-//! `load_corpus()` reads `tests/fixtures/conformance.lisp` and
-//! `tests/fixtures/inventory.lisp` positionally (same as `scripts/oracle-batch.lisp`):
-//! both files must have the same fixture count; they are walked in lockstep.
+//! `load_corpus()` reads the active `tests/fixtures/conformance.lisp` source.
+//! The retired generated inventory is not consulted. An explicit `(id . \"F-…\")`
+//! field preserves a published fixture identity; other rows receive deterministic
+//! content-derived IDs for this external-oracle transport only.
 //!
 //! ## Export
 //!
@@ -26,7 +27,7 @@ use sens::{Exactness, Expr, ExprKind};
 /// One fixture as read from the corpus pair.
 #[derive(Debug, Clone)]
 pub struct CorpusFixture {
-    /// Stable F-… identifier from `inventory.lisp`.
+    /// Explicit or content-derived F-… identifier for this fixture record.
     pub id: String,
     /// Source expression text from `conformance.lisp`.
     pub source: String,
@@ -36,49 +37,35 @@ pub struct CorpusFixture {
     pub is_s1: bool,
 }
 
-/// Load and pair conformance.lisp + inventory.lisp.
+/// Load the current conformance corpus without relying on the retired inventory projection.
 ///
-/// Both files are read from `repo_root/tests/fixtures/`.  Returns an error
-/// string if the files cannot be read, are malformed, or have different counts.
+/// Rows are source records from `tests/fixtures/conformance.lisp`. Stable fixture
+/// IDs are metadata, not semantics: use an explicit `(id . "F-…")` when a
+/// published identity must be preserved; otherwise derive the ID from the exact
+/// UTF-8 record bytes. Duplicate IDs fail closed rather than aliasing fixtures.
 pub fn load_corpus(repo_root: &str) -> Result<Vec<CorpusFixture>, String> {
     let conformance_path = format!("{repo_root}/tests/fixtures/conformance.lisp");
-    let inventory_path = format!("{repo_root}/tests/fixtures/inventory.lisp");
-
     let conformance_text = std::fs::read_to_string(&conformance_path)
         .map_err(|e| format!("cannot read {conformance_path}: {e}"))?;
-    let inventory_text = std::fs::read_to_string(&inventory_path)
-        .map_err(|e| format!("cannot read {inventory_path}: {e}"))?;
 
-    // Collect top-level forms from each file (one fixture per form).
-    let conformance_lines: Vec<&str> = conformance_text
-        .lines()
-        .filter(|l| {
-            let t = l.trim();
-            t.starts_with("((expr . ") || t.starts_with("((expr . \"")
-        })
-        .collect();
+    let mut fixtures = Vec::new();
+    let mut seen_ids = std::collections::BTreeSet::new();
 
-    let inventory_lines: Vec<&str> = inventory_text
-        .lines()
-        .filter(|l| l.trim().starts_with("(fixture "))
-        .collect();
+    for line in conformance_text.lines() {
+        let record = line.trim();
+        if !record.starts_with("((expr . ") {
+            continue;
+        }
 
-    if conformance_lines.len() != inventory_lines.len() {
-        return Err(format!(
-            "corpus/inventory count mismatch: conformance has {} fixtures, inventory has {}",
-            conformance_lines.len(),
-            inventory_lines.len()
-        ));
-    }
+        let source = parse_field(record, "expr")
+            .ok_or_else(|| format!("conformance line missing (expr . \"...\") field: {record}"))?;
+        let expected = parse_field(record, "expected");
+        let is_s1 = record.contains("(axioms . (S1") || record.contains("(axioms S1");
+        let id = parse_field(record, "id").unwrap_or_else(|| content_fixture_id(record));
 
-    let mut fixtures = Vec::with_capacity(conformance_lines.len());
-    for (c_line, i_line) in conformance_lines.iter().zip(inventory_lines.iter()) {
-        let source = parse_field(c_line, "expr")
-            .ok_or_else(|| format!("conformance line missing (expr . \"...\") field: {c_line}"))?;
-        let expected = parse_field(c_line, "expected");
-        let is_s1 = c_line.contains("(axioms . (S1") || c_line.contains("(axioms S1");
-        let id = parse_id_field(i_line)
-            .ok_or_else(|| format!("inventory line missing (id . \"...\") field: {i_line}"))?;
+        if !seen_ids.insert(id.clone()) {
+            return Err(format!("duplicate fixture id {id} in {conformance_path}"));
+        }
 
         fixtures.push(CorpusFixture {
             id,
@@ -89,6 +76,15 @@ pub fn load_corpus(repo_root: &str) -> Result<Vec<CorpusFixture>, String> {
     }
 
     Ok(fixtures)
+}
+
+fn content_fixture_id(record: &str) -> String {
+    let digest = sens::sha256_source(record.as_bytes());
+    let short_hex: String = digest[..8]
+        .iter()
+        .map(|byte| format!("{byte:02x}"))
+        .collect();
+    format!("F-{short_hex}")
 }
 
 fn parse_field(line: &str, field: &str) -> Option<String> {
