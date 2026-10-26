@@ -112,7 +112,7 @@ fn language_derived_d24_two_creates_a_single_separating_witness() {
         atom(D24_TWO).exact_numeric_domain_bits()
     );
 
-    let observed = signature(&one, &two);
+    let observed = signature(&one, two);
     assert_eq!(
         distinct_count(&observed),
         FUNCTIONS.len(),
