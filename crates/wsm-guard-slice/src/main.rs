@@ -59,7 +59,7 @@ fn parse_event(line: &str) -> Result<Event, String> {
 
 fn evaluate(policy: &str, event: &Event) -> Result<String, String> {
     let call = format!(
-        "(guard-evaluate (quote {}) (quote {}) (quote {}))",
+        "(guard-evaluate (як-є {}) (як-є {}) (як-є {}))",
         event.kind, event.subject, event.evidence
     );
     wsm_guard_core::evaluate(policy, &call)
@@ -221,7 +221,7 @@ mod tests {
         let path = env::temp_dir().join(format!("guard-reload-{}.wsm", std::process::id()));
         fs::write(&path, ALLOW_POLICY).unwrap();
         let first = process_line(&path, "kind=read subject=docs evidence=confirmed");
-        fs::write(&path, ALLOW_POLICY.replace("(quote allow)", "(quote warn)")).unwrap();
+        fs::write(&path, ALLOW_POLICY.replace("(як-є allow)", "(як-є warn)")).unwrap();
         let second = process_line(&path, "kind=read subject=docs evidence=confirmed");
         fs::remove_file(path).unwrap();
         assert!(first.contains("(decision allow)"));

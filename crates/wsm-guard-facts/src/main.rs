@@ -209,7 +209,7 @@ fn observe_line(line: &str) -> Result<Fact, String> {
 
 fn evaluate(policy: &str, fact: &Fact) -> Result<String, String> {
     let call = format!(
-        "(guard-fact-evaluate (quote (fact (source {}) (subject {}) (state {}) {})))",
+        "(guard-fact-evaluate (як-є (fact (source {}) (subject {}) (state {}) {})))",
         fact.source,
         fact.subject,
         fact.state,
@@ -378,11 +378,11 @@ mod tests {
     fn policy_reload_changes_classification_without_recompiling_rust() {
         let path = env::temp_dir().join(format!("fact-reload-{}.wsm", std::process::id()));
         let allow_policy = r#"
-          (def guard-fact-evaluate
-            (lambda (fact)
-              (make-guard-finding (quote allow) (quote confirmed) (quote test)
-                (quote read-only) (quote contract) (quote ()) (quote none)
-                (quote continue) (list fact))))"#;
+          (визначити guard-fact-evaluate
+            (функція (fact)
+              (створити-захист-висновок (як-є allow) (як-є confirmed) (як-є test)
+                (як-є read-only) (як-є contract) (як-є ()) (як-є none)
+                (як-є continue) (список fact))))"#;
         fs::write(&path, allow_policy).unwrap();
         // A real git-tracked directory that exists in ANY checkout, not
         // just this one machine -- CARGO_MANIFEST_DIR is wherever this
@@ -394,7 +394,7 @@ mod tests {
         // confirmed via `gh run list` history, not assumed.
         let observation = format!("source=git repo={}", env!("CARGO_MANIFEST_DIR"));
         let first = process_line(&path, &observation);
-        fs::write(&path, allow_policy.replace("(quote allow)", "(quote warn)")).unwrap();
+        fs::write(&path, allow_policy.replace("(як-є allow)", "(як-є warn)")).unwrap();
         let second = process_line(&path, &observation);
         fs::remove_file(path).unwrap();
         assert!(first.contains("(decision allow)"), "{first}");
