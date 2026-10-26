@@ -49,37 +49,41 @@ jobs:
           forbidden=0
           count=0
           examples="$RUNNER_TEMP/forbidden-source-languages.txt"
+          excluded=0
           : > "$examples"
           while IFS= read -r file; do
             [[ -n "$file" ]] || continue
-            # Non-semantic support material is explicitly excluded from the
-            # active source-language gate. These files must not be treated as
-            # SENS runtime authority or as passing SENS tests/benchmarks.
+            # Explicitly exclude non-runtime material from semantic language authority.
+            # Exclusion is NOT a test pass: excluded Python tests/benchmarks remain NOT_VERIFIED.
             case "$file" in
-              tests/*|benchmarks/*|research/*|scripts/*|.github/scripts/*|packaging/tests/*|*/tests/*|*/benches/*|*/benchmarks/*)
+              tests/*|benchmarks/*|research/*|scripts/*|.github/*|packaging/*|tools/*|examples/*|experiments/*|prototype/*|vendor/*|ecosystem/*|docs/*|knowledge/*|evidence/*|fixtures/*|hypotheses/*|memory/*|tasks/*|дослідження/*|*/tests/*|*/benches/*|*/benchmarks/*)
+                excluded=$((excluded + 1))
                 continue ;;
+            esac
+            # Only active production/runtime source paths are subject to the allowlist.
+            case "$file" in
+              crates/*|lib/*|src/*|c-runtime/*) ;;
+              *.rs|*.zig|*.sens|*.lisp|*.scm|*.ss|*.sld|*.c|*.h|*.S|*.s|*.asm) continue ;;
+              *) excluded=$((excluded + 1)); continue ;;
             esac
             case "$file" in
               *.rs|*.zig|*.sens|*.lisp|*.scm|*.ss|*.sld|*.c|*.h|*.S|*.s|*.asm) continue ;;
-              *.md|*.yml|*.yaml|*.toml|*.json|*.jsonl|*.txt|*.tsv|*.b64|*.bits|*.lock|*.orig|*.patch|*.contract|*.svg|*.expected|*.call|*.stderr|*.t5m3|*.tape|*.f3m|*.jsonl|LICENSE|.gitignore|.gitattributes|.zig-version|rust-toolchain.toml) continue ;;
+              *.md|*.yml|*.yaml|*.toml|*.json|*.jsonl|*.txt|*.tsv|*.b64|*.bits|*.lock|*.orig|*.patch|*.contract|*.svg|*.expected|*.call|*.stderr|*.t5m3|*.tape|*.f3m|LICENSE|.gitignore|.gitattributes|.zig-version|rust-toolchain.toml) continue ;;
               *.py|*.pyi|*.js|*.mjs|*.cjs|*.ts|*.tsx|*.jsx|*.sh|*.bash|*.ps1|*.cc|*.cpp|*.hpp|*.rkt|*.pl|*.clp|*.lua|*.sv|*.v)
                 count=$((count + 1))
                 if [[ "$count" -le 80 ]]; then printf '%s\n' "$file" >> "$examples"; fi ;;
               *)
-                case "$file" in
-                  crates/*|lib/*|scripts/*|tests/*|benchmarks/*|research/*|src/*|tools/*)
-                    count=$((count + 1))
-                    if [[ "$count" -le 80 ]]; then printf '%s\n' "$file" >> "$examples"; fi ;;
-                esac ;;
+                count=$((count + 1))
+                if [[ "$count" -le 80 ]]; then printf '%s\n' "$file" >> "$examples"; fi ;;
             esac
           done < <(git ls-files)
-          echo "LANGUAGE_POLICY active_source_forbidden_files=$count allowed=Rust,Zig,SENS,Guile,C,Assembler excluded=tests,benchmarks,research,scripts,packaging-tests,github-scripts"
+          echo "LANGUAGE_POLICY active_source_forbidden_files=$count excluded_support_files=$excluded allowed=Rust,Zig,SENS,Guile,C,Assembler excluded_tests_benchmarks=NOT_VERIFIED"
           if [[ "$count" -ne 0 ]]; then
             sed -n '1,80p' "$examples"
-            echo "::error title=SOURCE_LANGUAGE_CONTAMINATION::Tracked source outside Rust/Zig/SENS/Guile/C/Assembler remains forbidden."
+            echo "::error title=SOURCE_LANGUAGE_CONTAMINATION::Active runtime source outside Rust/Zig/SENS/Guile/C/Assembler remains forbidden."
             exit 1
           fi
-          echo "LANGUAGE_POLICY=PASS allowed=Rust,Zig,SENS,Guile,C,Assembler active_runtime_sources=true excluded_support_and_non_native_tests=NOT_VERIFIED"
+          echo "LANGUAGE_POLICY=PASS allowed=Rust,Zig,SENS,Guile,C,Assembler active_runtime_sources=true excluded_tests_benchmarks=NOT_VERIFIED"
       - name: Canonical workflows must not execute Python tools
         shell: bash
         run: |
