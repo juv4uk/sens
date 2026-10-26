@@ -106,8 +106,16 @@ fn lift_pinned_d8_io(source: &str, expression: Expr, depth: u32) -> Result<Expr,
         || is_exact_quote(&lifted[0])
         || head_spelling == Some("'")
     {
+        // Після проходження саме цього pinned D8 reader-а quoted predicate
+        // є об'єктними даними knowledge clause. Зберігаємо ratified D4 NOT
+        // identity так само, як у звичайному reasoning reader; інші імена
+        // не підвищуються до callable identity лише через написання.
+        let mut quoted = items.to_vec();
+        for item in quoted.iter_mut().skip(1) {
+            *item = lift_quoted_d4_identity_data(item.clone(), depth + 1)?;
+        }
         return Ok(Expr {
-            kind: ExprKind::List(items),
+            kind: ExprKind::List(Rc::from(quoted.into_boxed_slice())),
             span,
         });
     }
@@ -1368,6 +1376,42 @@ mod tests {
             &quote[1].kind,
             ExprKind::DomainIdentity(identity)
                 if identity.width() == 4 && identity.packed_bits() == 0b0100
+        ));
+    }
+
+    #[test]
+    fn pinned_reasoning_reader_preserves_quoted_d4_negation_and_unknown_data() {
+        let quoted = only(
+            parse_mixed_exact_domain_reasoning_source("lib/world.lisp", "(як-є хибне?)")
+                .expect("pinned reasoning quote"),
+        );
+        let ExprKind::List(form) = quoted.kind else {
+            panic!("QUOTE form");
+        };
+        assert!(matches!(
+            &form[0].kind,
+            ExprKind::DomainIdentity(identity)
+                if identity.width() == 3 && identity.packed_bits() == 0b001
+        ));
+        assert!(matches!(
+            &form[1].kind,
+            ExprKind::DomainIdentity(identity)
+                if identity.width() == 4 && identity.packed_bits() == 0b0100
+        ));
+
+        let unknown = only(
+            parse_mixed_exact_domain_reasoning_source(
+                "lib/world.lisp",
+                "(як-є непогоджена-функція)",
+            )
+            .expect("pinned reasoning quote with ordinary data"),
+        );
+        let ExprKind::List(form) = unknown.kind else {
+            panic!("QUOTE form");
+        };
+        assert!(matches!(
+            &form[1].kind,
+            ExprKind::Symbol(name) if name.as_ref() == "непогоджена-функція"
         ));
     }
 
