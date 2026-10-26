@@ -23,7 +23,7 @@ trap 'rm -rf "$tmp"' EXIT
 printf '1\n' > "$tmp/expected-positive"
 printf '0\n' > "$tmp/expected-negative"
 
-if ! timeout 45s "$cli" --t5m-files lib/твердження.lisp "$law" > "$tmp/positive.out" 2> "$tmp/positive.err"; then
+if ! timeout 45s "$cli" --t5m-files lib/core4-parts/core4-language.lisp lib/твердження.lisp "$law" > "$tmp/positive.out" 2> "$tmp/positive.err"; then
   printf 'REGRESSION id=%s layer=positive actual=execution-error\n' "$id" >&2
   cat "$tmp/positive.err" >&2
   exit 1
@@ -33,7 +33,7 @@ if ! cmp -s "$tmp/expected-positive" "$tmp/positive.out"; then
   exit 1
 fi
 
-if ! timeout 45s "$cli" --t5m-files lib/твердження.lisp "$mutant" > "$tmp/negative.out" 2> "$tmp/negative.err"; then
+if ! timeout 45s "$cli" --t5m-files lib/core4-parts/core4-language.lisp lib/твердження.lisp "$mutant" > "$tmp/negative.out" 2> "$tmp/negative.err"; then
   printf 'REGRESSION id=%s-mutant layer=negative actual=execution-error\n' "$id" >&2
   cat "$tmp/negative.err" >&2
   exit 1
