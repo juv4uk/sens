@@ -37,7 +37,7 @@ fn run_case(name: &str, source: &str) {
         .into_iter()
         .map(|item| item.word)
         .collect();
-    let t5 = zig_transport::encode_t5m_direct(&words).expect("T5 encoded corpus");
+    let t5 = zig_transport::encode_t5m_direct(&words).expect("закодований корпус T5");
     let v1 = encode(&words).expect("Frame3/v1 encoded corpus");
     let v2 = encode_v2(&words).expect("Frame3/v2 encoded corpus");
     let v3_words: Vec<Word> = words.iter().map(|w| Word::Core(w.clone())).collect();
