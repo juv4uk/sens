@@ -1066,43 +1066,38 @@ fn lift_quoted_d4_identity_data(expression: Expr, depth: u32) -> Result<Expr, La
     }
     let Expr { kind, span } = expression;
     match kind {
-        ExprKind::Symbol(name)
-            if matches!(name.as_ref(), "хибне?" | "визначити") =>
-        {
-            // У цитованих SENS-даних зберігаємо точну ідентичність двох
-            // D4-голів, які потрібні відповідно для заперечної клаузи та
-            // для коду, який продукує Lisp-макрос. DomainIdentity тут — дані;
-            // викличність виникає лише тоді, коли SENS пізніше оцінює згенеровану форму.
-            let expected_bits = match name.as_ref() {
-                "хибне?" => 0b0100,
-                "визначити" => 0b0011,
-                _ => unreachable!(),
-            };
-            let identity = crate::semantic_registry::exact_uk_callable_for_source_head(&name)
-                .filter(|identity| identity.width() == 4 && identity.packed_bits() == expected_bits);
-            if let Some(identity) = identity {
-                Ok(Expr {
-                    kind: ExprKind::DomainIdentity(identity),
-                    span,
-                })
-            } else {
-                Ok(Expr {
-                    kind: ExprKind::Symbol(name),
-                    span,
-                })
-            }
-        }
         ExprKind::List(items) => {
-            let mapped = items
+            let mut mapped = items
                 .iter()
                 .cloned()
                 .map(|item| lift_quoted_d4_identity_data(item, depth + 1))
                 .collect::<Result<Vec<_>, _>>()?;
+
+            // Promote only the head of a quoted executable form. A symbol
+            // with the same spelling in an argument position remains data.
+            if let Some(head) = mapped.first_mut() {
+                if let ExprKind::Symbol(name) = &head.kind {
+                    let expected_bits = match name.as_ref() {
+                        "хибне?" => Some(0b0100),
+                        "визначити" => Some(0b0011),
+                        _ => None,
+                    };
+                    if let Some(expected_bits) = expected_bits {
+                        let identity = crate::semantic_registry::exact_uk_callable_for_source_head(name)
+                            .filter(|identity| identity.width() == 4 && identity.packed_bits() == expected_bits);
+                        if let Some(identity) = identity {
+                            head.kind = ExprKind::DomainIdentity(identity);
+                        }
+                    }
+                }
+            }
+
             Ok(Expr {
                 kind: ExprKind::List(Rc::from(mapped.into_boxed_slice())),
                 span,
             })
         }
+        // A bare symbol in quote data never becomes callable from spelling.
         other => Ok(Expr { kind: other, span }),
     }
 }
@@ -1295,6 +1290,24 @@ mod tests {
         assert!(matches!(
             &data[1].kind,
             ExprKind::Symbol(name) if name.as_ref() == "журнал-знань"
+        ));
+    }
+
+    #[test]
+    fn quoted_macro_define_argument_remains_plain_data() {
+        let expression = only(
+            parse_mixed_exact_domain("(як-є (список визначити))")
+                .expect("quoted list data must parse"),
+        );
+        let ExprKind::List(quote) = expression.kind else {
+            panic!("QUOTE");
+        };
+        let ExprKind::List(data) = &quote[1].kind else {
+            panic!("quoted data");
+        };
+        assert!(matches!(
+            &data[1].kind,
+            ExprKind::Symbol(name) if name.as_ref() == "визначити"
         ));
     }
 
