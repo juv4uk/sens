@@ -2,10 +2,11 @@
 //! Never relabel S3/v1-v3 as original Frame-3; original F3 is imported from
 //! research/framed3/rust_codec/senc.rs. No execution of arbitrary repository
 //! files, only real Rust canonical reader admission. This is a research bench.
-use sens::{decode_ternary_words, encode_ternary_words, parse_canonical_word_sequence};
+use sens::{parse_canonical_word_sequence};
 #[path = "support/reference_t5m.rs"]
 mod reference_t5m;
 use std::{fs, path::Path, process::Command, time::Instant};
+use sens_cli::zig_transport;
 #[path = "../../../research/framed3/rust_codec/senc.rs"]
 mod senc;
 
@@ -72,8 +73,8 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
             continue;
         };
         let words =
-            decode_ternary_words(&raw).map_err(|e| format!("T5 decode after admission: {e:?}"))?;
-        if encode_ternary_words(&words).map_err(|e| format!("T5 encode: {e:?}"))? != raw {
+            zig_transport::decode_t5m_words(&raw).map_err(|e| format!("T5 decode after admission: {e:?}"))?;
+        if zig_transport::encode_t5m_direct(&words).map_err(|e| format!("T5 encode: {e:?}"))? != raw {
             return Err(format!("noncanonical physical T5 accepted: {path}").into());
         }
         let parse = parse_canonical_word_sequence(&words);
@@ -89,10 +90,10 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
             })
             .collect::<Vec<_>>();
         let t5_en = time_ns(|| {
-            std::hint::black_box(encode_ternary_words(std::hint::black_box(&words)).unwrap());
+            std::hint::black_box(zig_transport::encode_t5m_direct(std::hint::black_box(&words)).unwrap());
         });
         let t5_de = time_ns(|| {
-            std::hint::black_box(decode_ternary_words(std::hint::black_box(&raw)).unwrap());
+            std::hint::black_box(zig_transport::decode_t5m_words(std::hint::black_box(&raw)).unwrap());
         });
         let Ok(body) = senc::frame_encode(&as_text) else {
             println!(
