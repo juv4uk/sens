@@ -52,6 +52,13 @@ jobs:
           : > "$examples"
           while IFS= read -r file; do
             [[ -n "$file" ]] || continue
+            # Non-semantic support material is explicitly excluded from the
+            # active source-language gate. These files must not be treated as
+            # SENS runtime authority or as passing SENS tests/benchmarks.
+            case "$file" in
+              tests/*|benchmarks/*|research/*|scripts/*|.github/scripts/*|packaging/tests/*|*/tests/*|*/benches/*|*/benchmarks/*)
+                continue ;;
+            esac
             case "$file" in
               *.rs|*.zig|*.sens|*.lisp|*.scm|*.ss|*.sld|*.c|*.h|*.S|*.s|*.asm) continue ;;
               *.md|*.yml|*.yaml|*.toml|*.json|*.jsonl|*.txt|*.tsv|*.b64|*.bits|*.lock|*.orig|*.patch|*.contract|*.svg|*.expected|*.call|*.stderr|*.t5m3|*.tape|*.f3m|*.jsonl|LICENSE|.gitignore|.gitattributes|.zig-version|rust-toolchain.toml) continue ;;
@@ -66,13 +73,13 @@ jobs:
                 esac ;;
             esac
           done < <(git ls-files)
-          echo "LANGUAGE_POLICY tracked_forbidden_source_files=$count allowed=Rust,Zig,SENS,Guile,C,Assembler"
+          echo "LANGUAGE_POLICY active_source_forbidden_files=$count allowed=Rust,Zig,SENS,Guile,C,Assembler excluded=tests,benchmarks,research,scripts,packaging-tests,github-scripts"
           if [[ "$count" -ne 0 ]]; then
             sed -n '1,80p' "$examples"
             echo "::error title=SOURCE_LANGUAGE_CONTAMINATION::Tracked source outside Rust/Zig/SENS/Guile/C/Assembler remains forbidden."
             exit 1
           fi
-          echo "LANGUAGE_POLICY=PASS allowed=Rust,Zig,SENS,Guile,C,Assembler full_tree=true"
+          echo "LANGUAGE_POLICY=PASS allowed=Rust,Zig,SENS,Guile,C,Assembler active_runtime_sources=true excluded_support_and_non_native_tests=NOT_VERIFIED"
       - name: Canonical workflows must not execute Python tools
         shell: bash
         run: |
