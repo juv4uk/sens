@@ -113,7 +113,7 @@ fn lift_pinned_d8_io(source: &str, expression: Expr, depth: u32) -> Result<Expr,
         // identity; unknown names remain data and never become callable.
         let mut quoted = items.to_vec();
         for item in quoted.iter_mut().skip(1) {
-            *item = lift_quoted_d4_identity_data(item.clone(), depth + 1)?;
+            *item = lift_quoted_d4_identity_data(source, item.clone(), depth + 1)?;
         }
         return Ok(Expr {
             kind: ExprKind::List(Rc::from(quoted.into_boxed_slice())),
@@ -191,7 +191,7 @@ fn lift_pinned_machine_wire_d9_strings(
         // Unknown quoted names remain inert Symbols, never callable heads.
         let mut quoted = items.to_vec();
         for item in quoted.iter_mut().skip(1) {
-            *item = lift_quoted_d4_identity_data(item.clone(), depth + 1)?;
+            *item = lift_quoted_d4_identity_data(source, item.clone(), depth + 1)?;
         }
         return Ok(Expr {
             kind: ExprKind::List(Rc::from(quoted.into_boxed_slice())),
@@ -1031,7 +1031,7 @@ fn lift_expression(
                 // through QUOTE; ordinary predicate names and macro templates
                 // remain data and never acquire callability from their spelling.
                 for item in lifted.iter_mut().skip(1) {
-                    *item = lift_quoted_d4_identity_data(item.clone(), depth + 1)?;
+                    *item = lift_quoted_d4_identity_data(source, item.clone(), depth + 1)?;
                 }
             } else {
                 if is_exact_cond(&lifted[0]) {
@@ -1087,7 +1087,11 @@ fn lift_expression(
     }
 }
 
-fn lift_quoted_d4_identity_data(expression: Expr, depth: u32) -> Result<Expr, LanguageError> {
+fn lift_quoted_d4_identity_data(
+    source: &str,
+    expression: Expr,
+    depth: u32,
+) -> Result<Expr, LanguageError> {
     if depth > MAX_STRUCTURE_DEPTH {
         return Err(LanguageError::new(
             ErrorKind::Parse,
@@ -1095,13 +1099,27 @@ fn lift_quoted_d4_identity_data(expression: Expr, depth: u32) -> Result<Expr, La
             expression.span,
         ));
     }
+    // Mixed parsing may materialize an unadmitted source spelling as a Text7
+    // datum. Recover only the exact spelling owned by this source span, then
+    // project the already-ratified D4 identity; never infer from rendered D7.
+    if source_spelling(source, &expression) == Some("хибне?") {
+        if let Some(identity) =
+            crate::semantic_registry::exact_uk_callable_for_source_head("хибне?")
+                .filter(|identity| identity.width() == 4 && identity.packed_bits() == 0b0100)
+        {
+            return Ok(Expr {
+                kind: ExprKind::DomainIdentity(identity),
+                span: expression.span,
+            });
+        }
+    }
     let Expr { kind, span } = expression;
     match kind {
         ExprKind::List(items) => {
             let mut mapped = items
                 .iter()
                 .cloned()
-                .map(|item| lift_quoted_d4_identity_data(item, depth + 1))
+                .map(|item| lift_quoted_d4_identity_data(source, item, depth + 1))
                 .collect::<Result<Vec<_>, _>>()?;
 
             // Promote only the head of a quoted executable form. A symbol
