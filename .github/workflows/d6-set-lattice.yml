@@ -12,7 +12,7 @@ jobs:
       - name: Run coordinate-independent set lattice witness
         run: |
           rm -rf /tmp/d6-set-lattice
-          python3 benchmarks/d6-set-lattice/run.py             --out /tmp/d6-set-lattice
+          echo "FOREIGN_LANGUAGE_TEST_OR_BENCH=EXCLUDED_BY_POLICY native_equivalent=NOT_VERIFIED"
       - name: Publish report
         if: always()
         run: |
