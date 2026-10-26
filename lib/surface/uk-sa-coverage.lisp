@@ -224,12 +224,12 @@
   (entry (other let* нехай* — stable missing "Послідовне локальне зв'язування"))
   (entry (other -> -> — compatibility-only compatibility-only "Макрос послідовного передавання значення"))
   (entry (other ->> ->> — compatibility-only compatibility-only "Макрос послідовного передавання останнім аргументом"))
-  (entry (other json-parse — — compatibility-only compatibility-only "Назва зовнішнього формату"))
-  (entry (other sha256-hex — — compatibility-only compatibility-only "Назва алгоритму"))
+  ;; JSON decoding and SHA-256 are transport/integrity mechanisms, not SENS
+  ;; callable vocabulary. Their historical D9 slots do not grant callability.
 
   ;; ── Підсумкова статистика ────────────────────────────────────
   (summary
-    (total-eligible 161)
+    (total-eligible 159)
     (stable-uk 140)
     (candidate-uk 0)
     (missing-uk 0)
