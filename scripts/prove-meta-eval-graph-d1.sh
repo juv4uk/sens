@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # CI_GLUE_NO_SEMANTICS: run real library + SENS-authored D1/COND proof.
 # Nothing here assigns meaning to a domain code, a predicate or an error.
+# Exact-SHA law gate: evaluate the current source and its Zig/T5M carrier in SENS.
 # Без Python, JSON, SHA-256 — лише native sens + cmp.
 set -euo pipefail
 cd "$(dirname "$0")/.."
