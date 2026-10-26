@@ -203,10 +203,9 @@ jobs:
           NATIVE_LANGUAGE_POLICY: ${{ steps.native_language_policy.outcome }}
         run: |
           set -euo pipefail
-          printf '{"schema":"sens-release-preflight-receipt/v1","candidate_sha":"%s","workspace_tests":"%s","native_sens_laws":"%s","workspace_clippy":"%s","native_language_policy":"%s","release_go":false,"release_admission":"NOT_VERIFIED"}\\n' \\
-            "$GITHUB_SHA" "${WORKSPACE_TESTS:-unknown}" "${NATIVE_SENS_LAWS:-unknown}" \\
-            "${WORKSPACE_CLIPPY:-unknown}" "${NATIVE_LANGUAGE_POLICY:-unknown}" \\
-            > "$RUNNER_TEMP/release-go-gate.json"
+          cat > "$RUNNER_TEMP/release-go-gate.json" <<EOF
+{"schema":"sens-release-preflight-receipt/v1","candidate_sha":"$GITHUB_SHA","workspace_tests":"${WORKSPACE_TESTS:-unknown}","native_sens_laws":"${NATIVE_SENS_LAWS:-unknown}","workspace_clippy":"${WORKSPACE_CLIPPY:-unknown}","native_language_policy":"${NATIVE_LANGUAGE_POLICY:-unknown}","release_go":false,"release_admission":"NOT_VERIFIED"}
+EOF
           cat "$RUNNER_TEMP/release-go-gate.json"
 
       - name: Upload release GO-gate report
