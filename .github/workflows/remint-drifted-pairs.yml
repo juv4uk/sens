@@ -426,6 +426,7 @@ jobs:
               tests/semantic/core-d3-car-cdr-cons-mutant.lisp) expect_args=(--expect-error "car expects a non-empty list");;
               tests/semantic/d4-recursion-atom-result-law.lisp|tests/semantic/d4-recursion-atom-result-mutant.lisp|tests/semantic/d4-recursion-benchmark-law.lisp|tests/semantic/d4-recursion-benchmark-mutant.lisp) bs=(--binding-source benchmarks/recursion.lisp);;
               lib/persistent-vector.lisp|lib/knowledge.lisp) bs=(--binding-source "$RUNNER_TEMP/sens-core4-d24-roots.lisp");;
+              lib/world.lisp|lib/yantra.lisp) bs=(--binding-source "$RUNNER_TEMP/sens-core4-d24-roots.lisp");;
               lib/reason.lisp) bs=(--binding-source "$RUNNER_TEMP/sens-core4-d24-roots.lisp" --binding-source lib/unify.lisp);;
               lib/forward.lisp) bs=(--binding-source lib/unify.lisp);;
               lib/d11-clojure-partition-by.lisp) bs=(--binding-source lib/d11-srfi1-span-break.lisp);;
@@ -763,6 +764,7 @@ jobs:
               tests/semantic/core-d3-car-cdr-cons-mutant.lisp) expect_args=(--expect-error "car expects a non-empty list");;
               tests/semantic/d4-recursion-atom-result-law.lisp|tests/semantic/d4-recursion-atom-result-mutant.lisp|tests/semantic/d4-recursion-benchmark-law.lisp|tests/semantic/d4-recursion-benchmark-mutant.lisp) bs=(--binding-source benchmarks/recursion.lisp);;
                 lib/persistent-vector.lisp|lib/knowledge.lisp) bs=(--binding-source "$RUNNER_TEMP/sens-core4-d24-roots.lisp");;
+                lib/world.lisp|lib/yantra.lisp) bs=(--binding-source "$RUNNER_TEMP/sens-core4-d24-roots.lisp");;
                 lib/reason.lisp) bs=(--binding-source "$RUNNER_TEMP/sens-core4-d24-roots.lisp" --binding-source lib/unify.lisp);;
               lib/forward.lisp) bs=(--binding-source lib/unify.lisp);;
               lib/d11-clojure-partition-by.lisp) bs=(--binding-source lib/d11-srfi1-span-break.lisp);;
