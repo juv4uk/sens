@@ -47,7 +47,7 @@ fn encode_f3_carrier(bytes: &[u8]) -> Result<Option<Vec<u8>>, String> {
         if parsed.form_count() != 1 || bytes.len() > 16 {
             return Ok(None);
         }
-        return zig_transport::encode_f3(bytes);
+        zig_transport::encode_f3(bytes)
     }
     #[cfg(not(feature = "zig-transport"))]
     {
