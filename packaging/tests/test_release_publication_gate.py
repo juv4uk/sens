@@ -95,6 +95,14 @@ def require_supported_macos_intel_runner(source: str) -> None:
         raise AssertionError("Intel macOS release runner must be macos-15-intel")
 
 
+def require_reusable_publish_permission(source: str) -> None:
+    """The caller's token ceiling must permit its reusable publisher to write."""
+    if not re.search(r"(?m)^permissions:\n  contents: write$", source):
+        raise AssertionError(
+            "manual release caller must grant contents: write to its reusable publisher"
+        )
+
+
 class ReleasePublicationGateTest(unittest.TestCase):
     def setUp(self):
         self.source = PUBLISH_WORKFLOW.read_text(encoding="utf-8")
@@ -153,6 +161,7 @@ class ReleasePublicationGateTest(unittest.TestCase):
     def test_manual_release_delegates_to_sha_pinned_publisher(self):
         """Tagged entry delegates publication only after all asset jobs finish."""
         self.assertIn("on:\n  workflow_dispatch:\n", self.entry_source)
+        require_reusable_publish_permission(self.entry_source)
         release_scope = (ROOT / "RELEASE.md").read_text(encoding="utf-8")
         self.assertIn("Contract 12.0", release_scope)
         self.assertIn("contracts/language-contract-12.lisp", release_scope)
@@ -167,6 +176,16 @@ class ReleasePublicationGateTest(unittest.TestCase):
         self.assertIn("secrets: inherit", entry)
         self.assertIn("RELEASE_GO_SHA: ${{ vars.SENS_RELEASE_GO_SHA }}", self.source)
         self.assertIn("RELEASE_GO_TAG: ${{ vars.SENS_RELEASE_GO_TAG }}", self.source)
+
+    def test_release_caller_with_read_only_token_is_rejected(self):
+        require_reusable_publish_permission(self.entry_source)
+        read_only = self.entry_source.replace(
+            "permissions:\n  contents: write",
+            "permissions:\n  contents: read",
+            1,
+        )
+        with self.assertRaisesRegex(AssertionError, "grant contents: write"):
+            require_reusable_publish_permission(read_only)
 
     def test_retired_local_driver_cannot_publish(self):
         """Retired Lisp shim is no longer a source of tag authority."""
