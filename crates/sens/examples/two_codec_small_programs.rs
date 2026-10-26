@@ -1,4 +1,3 @@
-use sens_cli::zig_transport;
 //! Two *explicit* research physical codecs: canonical T5 for ordinary programs,
 //! Frame3 Carrier (F3C, historical `.senc`) for very small programs.
 //! NOT Envelope E1/E2/E3 and NOT the one-byte Frame3-Micro (F3M, `.f3m`).
@@ -8,6 +7,7 @@ use sens_cli::zig_transport;
 //! Select F3 only when the WHOLE file (including 0xF3 label) is shorter,
 //! the input T5 is at most 16 bytes, and a real F3 exact-word roundtrip passes.
 //! Unknown/ambiguous extensions never trigger content-based sniffing.
+use sens_cli::zig_transport;
 use std::{
     fs::{self, OpenOptions},
     io::Write,
