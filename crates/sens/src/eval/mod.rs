@@ -599,7 +599,9 @@ fn evaluate_list(
                     span,
                 );
             }
-            if let Some(name) = surface.filter(|name| environment.get(name).is_some()) {
+            // `surface` лишається доступною для діагностики нижче: саме вона
+            // показує, у що декодер перетворив Text7-токен.
+            if let Some(name) = surface.as_deref().filter(|name| environment.get(name).is_some()) {
                 let head = Expr {
                     kind: ExprKind::Symbol(name.into()),
                     span: items[0].span,
@@ -608,7 +610,13 @@ fn evaluate_list(
             }
             return Err(LanguageError::new(
                 ErrorKind::UnknownSymbol,
-                format!("unknown Text7 binding: {key}"),
+                format!(
+                    "unknown Text7 binding: {key} (decoded surface: {surface:?}; bound: {})",
+                    surface
+                        .as_deref()
+                        .map(|name| environment.get(name).is_some())
+                        .unwrap_or(false)
+                ),
                 items[0].span,
             ));
         }
