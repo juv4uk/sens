@@ -63,7 +63,9 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          count="$(grep -cE '\\|[[:space:]]*ARCHIVE[[:space:]]*      - name: Самоперевірка мовного гейту (позитивний та негативний свідки)
+          count="$(grep -cE '\\|[[:space:]]*ARCHIVE[[:space:]]*\\|?$' docs/language-policy-archive.md || true)"
+          echo "ARCHIVE (поза мовним коридором): ${count} артефактів — docs/language-policy-archive.md"
+      - name: Самоперевірка мовного гейту (позитивний та негативний свідки)
         shell: bash
         run: bash scripts/test-language-policy-archive-gate.sh
       - name: Швидкий охоронець host debt
