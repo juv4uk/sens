@@ -786,7 +786,7 @@ mod exact_registry_vs_historical_slot_tests {
             let identity = domain_identity_for_surface(surface)
                 .expect("generated ratified D3 surface must have an exact domain");
             assert_eq!(identity.width(), width);
-            assert_eq!(u16::from(identity.packed_bits()), bits);
+            assert_eq!(identity.packed_bits(), bits);
         }
         assert_eq!(domain_identity_for_surface("__unknown_domain_name__"), None);
     }
