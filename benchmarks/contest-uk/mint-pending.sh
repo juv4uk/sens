@@ -26,17 +26,25 @@ for source in "$dir"/*.lisp; do
     failed=$((failed+1))
     continue
   fi
-  # Конкурс не має допускати байти, якщо Lisp змінено під час суду.
-  source_sha="$(sha256sum "$source" | cut -d' ' -f1)"
+  # Побайтовий знімок джерела перевіряється на кожній межі виконання.
   name="${stem##*/}"
+  source_snapshot="$tmp/$name.source.snapshot"
+  cp -- "$source" "$source_snapshot"
+  source_stable() { cmp -s "$source_snapshot" "$source"; }
   stage="$tmp/$name.sens"
   rm -f -- "$stage" "$tmp/$name"
-  if ! "$sens" --t5m-mint "$source" "$stage" >"$tmp/mint.out" 2>"$tmp/error" ||
+  if ! source_stable ||
+     ! "$sens" --t5m-mint "$source" "$stage" >"$tmp/mint.out" 2>"$tmp/error" ||
+     ! source_stable ||
      [[ ! -s "$stage" ]] ||
      ! "$trit" open "$stage" >"$tmp/$name" 2>>"$tmp/error" ||
+     ! source_stable ||
      ! "$trit" verify-view "$stage" >/dev/null 2>>"$tmp/error" ||
+     ! source_stable ||
      ! "$sens" --t5m-pair "$source" "$stage" >"$tmp/paired" 2>>"$tmp/error" ||
+     ! source_stable ||
      ! "$sens" "$stage" >"$tmp/standalone" 2>>"$tmp/error" ||
+     ! source_stable ||
      ! cmp -s "$tmp/paired" "$tmp/standalone"; then
     echo "CONTEST_NATIVE_RED source=$source stage=preflight" >&2
     cat "$tmp/error" >&2
@@ -65,7 +73,7 @@ for source in "$dir"/*.lisp; do
     failed=$((failed+1))
     continue
   fi
-  if [[ "$source_sha" != "$(sha256sum "$source" | cut -d' ' -f1)" ]]; then
+  if ! source_stable; then
     rm -f -- "$stem.sens" "$stem"
     unverified=""
     echo "CONTEST_SOURCE_CHANGED source=$source action=reject_stale_proof" >&2
