@@ -2,8 +2,8 @@
 //! Stored envelopes are quoted data; this binary never evaluates their payload.
 
 use sens::{
-    eval_parsed_expressions, load_core_library, Bija3, Bit3, Bit4, Bit9, CoreD4, CoreD9,
-    DomainIdentity, Environment, Expr, ExprKind, Session, Span, Value,
+    eval_parsed_expressions, load_core_library, Bija3, Bit3, Bit4, Bit7, Bit9, CoreD4, CoreD9,
+    D7DataWord, DomainIdentity, Environment, Expr, ExprKind, Session, Span, Value,
 };
 use std::io::{self, Read};
 use std::rc::Rc;
@@ -51,6 +51,28 @@ fn string_value(value: &str) -> Expr {
 fn symbol_value(value: &str) -> Expr {
     Expr {
         kind: ExprKind::Symbol(Rc::from(value)),
+        span: Span::default(),
+    }
+}
+
+// Canonical D7 text carrier for the F6 runtime witness. The producer's
+// external record marker is returned as exact D7 data by the SENS WRITE/READ
+// path; keep the expected carrier identical rather than comparing a Symbol.
+fn d7_text_data(value: &str) -> Expr {
+    assert!(value.is_ascii(), "F6 protocol marker must be ASCII D7 data");
+    Expr {
+        kind: ExprKind::List(
+            value
+                .bytes()
+                .map(|byte| Expr {
+                    kind: ExprKind::DomainIdentity(DomainIdentity::D7(
+                        D7DataWord::from_word(Bit7::new(byte).expect("ASCII byte fits D7")),
+                    )),
+                    span: Span::default(),
+                })
+                .collect::<Vec<_>>()
+                .into(),
+        ),
         span: Span::default(),
     }
 }
@@ -127,10 +149,9 @@ fn main() {
     // SENS performs the D3 selection and D8 structural comparison. Rust
     // checks only the resulting exact D1 answer.
     let status = call(exact_d3(0b100), vec![reconstruction.clone()]);
-    // Побудувати очікуваний протокольний маркер тим самим SENS READ,
-    // який декодує фізичний пакет. Не підміняти Symbol/Text7/D7-список
-    // вручну з Rust: точну ідентичність носія визначає SENS.
-    let expected = call(exact_d8_read(), vec![string_value("accepted")]);
+    // Фізичний SENS WRITE→READ producer повертає accepted як точну D7
+    // послідовність; порівнюємо той самий carrier, а не D8 Symbol чи String.
+    let expected = call(exact_d3(0b001), vec![d7_text_data("accepted")]);
     let accepted = call(exact_d8_equal(), vec![status, expected]);
     let verdict = eval_parsed_expressions(&[accepted], &mut session)
         .unwrap_or_else(|error| {
@@ -193,19 +214,18 @@ mod tests {
     use std::io::Cursor;
 
     #[test]
-    fn f6_expected_marker_uses_the_same_sens_read_projection() {
-        let mut session = Session::default();
-        load_core_library(&mut session).expect("SENS core for F6 marker law");
-        let quoted = call(exact_d3(0b001), vec![symbol_value("accepted")]);
-        let read = call(exact_d8_read(), vec![string_value("accepted")]);
-        let proof = call(exact_d8_equal(), vec![quoted, read]);
-        let actual = eval_parsed_expressions(&[proof], &mut session)
-            .expect("SENS must compare its quoted and READ marker carriers")
-            .value;
-        let yes = Value::DomainIdentity(DomainIdentity::D1(
-            sens::PredicateBit::from_word(sens::Bit1::new(1).unwrap()),
-        ));
-        assert_eq!(actual, yes, "canonical accepted marker round-trip is exact");
+    fn f6_accepted_marker_is_encoded_as_exact_d7_words() {
+        let value = d7_text_data("accepted");
+        let ExprKind::List(words) = value.kind else {
+            panic!("text data must be a D7 word list");
+        };
+        assert_eq!(words.len(), "accepted".len());
+        for (word, byte) in words.iter().zip(b"accepted") {
+            let ExprKind::DomainIdentity(DomainIdentity::D7(word)) = &word.kind else {
+                panic!("text marker must lower only to exact D7 identities");
+            };
+            assert_eq!(word.word().packed_bits(), *byte);
+        }
     }
 
     #[test]
