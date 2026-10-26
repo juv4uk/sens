@@ -2595,19 +2595,43 @@ fn task_target_fields_problem(kind: Option<&str>, target: Option<&Sexp>) -> Opti
     if !matches!(kind, Some("тест" | "бенчмарк")) {
         return None;
     }
-    let Some(target) = target else {
+    let Some(Sexp::List(entries)) = target else {
         return Some("тест/бенчмарк потребує ціль із функцією реєстру, властивістю та класом входу");
     };
-    for field in ["функція", "властивість", "клас-входу"] {
-        let Some(value) = target.field_atom(field) else {
-            return Some("тест/бенчмарк потребує ціль із функцією реєстру, властивістю та класом входу");
+    let mut seen = [false; 3];
+    for entry in entries {
+        let Sexp::List(parts) = entry else {
+            return Some("кожне поле цілі має бути однозначною парою");
         };
-        let normalized = value.trim().to_lowercase();
+        let [key, value] = parts.as_slice() else {
+            return Some("кожне поле цілі має містити рівно назву та значення");
+        };
+        let Sexp::Atom(key) = key else {
+            return Some("назва поля цілі має бути канонічним символом");
+        };
+        let index = match key.as_str() {
+            "функція" => 0,
+            "властивість" => 1,
+            "клас-входу" => 2,
+            _ => return Some("ціль містить невідоме поле; дозволено функцію, властивість і клас входу"),
+        };
+        if seen[index] {
+            return Some("ціль містить повторене поле");
+        }
+        seen[index] = true;
+        let value = match value {
+            Sexp::Atom(value) | Sexp::Str(value) => value.trim(),
+            _ => return Some("значення поля цілі має бути одним іменем з каталогу"),
+        };
+        let normalized = value.to_lowercase();
         if normalized.is_empty()
             || matches!(normalized.as_str(), "невідомо" | "будь-яка" | "усе" | "all" | "*" | "unknown")
         {
             return Some("ціль тесту/бенчмарку не може містити порожній або невизначений селектор");
         }
+    }
+    if seen.iter().any(|present| !present) {
+        return Some("ціль мусить мати всі три поля: функцію, властивість і клас входу");
     }
     None
 }
