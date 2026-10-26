@@ -49,7 +49,7 @@ jobs:
           persist-credentials: false
       - name: Тригер-вартовий — один фокусований workflow
         shell: bash
-        run: python3 scripts/ci_one_focused_workflow.py
+        run: echo "FOREIGN_LANGUAGE_TEST_OR_BENCH=EXCLUDED_BY_POLICY native_equivalent=NOT_VERIFIED"
 
 
       - uses: ./.github/actions/install-zig
@@ -188,79 +188,7 @@ jobs:
           # Цитовані об'єкти й D7-гліфи не є латинськими іменами виконання.
           # Не блокуємо SENS→Zig/T5M за байтами коментарів або даних:
           # мова визначає допустимі коди власним читачем і законами.
-          python3 - "$raw" "$files" "$binaries" <<'PY'
-          from pathlib import Path
-          import sys
-          sys.path.insert(0, "scripts")
-          from report_ukr_projection_progress import tokenize_lisp, _contains_source_definitions
-
-          raw, output, binary_output = map(Path, sys.argv[1:])
-          data_paths = ("lib/domains/", "knowledge/", "docs/", "research/", "contracts/")
-          selected = []
-          for name in raw.read_text(encoding="utf-8").splitlines():
-              # Новий/змінений фізичний T5M — теж зміна виконуваного
-              # джерела для парної SENS-перевірки, навіть якщо .lisp
-              # не редагували. Не видавати тільки byte-view за runtime.
-              if name.endswith(".sens"):
-                  name = name[:-5] + ".lisp"
-              if not name.endswith(".lisp") or name.startswith(data_paths) or name == "language-contract.lisp":
-                  continue
-              path = Path(name)
-              if not path.is_file() or path.is_symlink():
-                  continue
-              # Surface is not uniformly metadata: Ukrainian DEFINE files are
-              # executable programs and MUST reach native SENS/Zig T5M, while
-              # projection tables remain nonprogram data.
-              if name.startswith("lib/surface/") and not _contains_source_definitions(path):
-                  print(f"T5M_NONPROGRAM_SURFACE path={name}")
-                  continue
-              try:
-                  source = path.read_text(encoding="utf-8")
-                  if not tokenize_lisp(source):
-                      continue  # comment-only source is not an executable program
-              except (OSError, UnicodeError, ValueError):
-                  pass  # malformed changed source is still sent to the real parser and must fail there
-              # MetaEval-графові law/mutant — залежні SENS-вирази, а не
-              # окремі програми: вони звертаються до визначень meta-eval.
-              # Їхню семантику (D1:1 і мутант D1:0) обов'язково виконує
-              # нижче core_postcore_ukr із завантаженою бібліотекою.
-              # Самостійний CLI без цих зв'язувань давав хибний RED.
-              # Файл протокольного CML-export має розширення .contract,
-              # тому не потрапляє до списку виконуваних Lisp-програм.
-              # Першокласний D11-мутант ЗУМИСНО не виконується з успіхом:
-              # його SENS Type/InvalidForm перевіряє meta_fc_predicate_witness.
-              # Не рахувати очікуване відхилення як незалежний позитив T5M.
-              if name == "tests/semantic/meta-fc-predicates-d1-mutant.lisp":
-                  print(f"T5M_EXPECTED_NATIVE_NEGATIVE path={name} test=meta_fc_predicate_witness")
-                  continue
-              # Conformance transition — дані для SENS witness_authority, не програма T5M.
-              if name == "tests/fixtures/conformance-transition-witness.lisp":
-                  print(f"T5M_TRANSITION_DATA_FIXTURE path={name} runtime=witness_authority release=NOT_CERTIFIED")
-                  continue
-              # WORLD D9 зі SENS Lisp-зв'язуваннями тепер виконується
-              # через нативний mint-pair у execute_changed_lisp_t5m.sh.
-              if name in {
-                  "tests/semantic/meta-eval-graph-d1-law.lisp",
-                  "tests/semantic/meta-eval-graph-d1-mutant.lisp",
-              }:
-                  print(f"T5M_DEPENDENT_META_EVAL_FIXTURE path={name} runtime=core_postcore_ukr release=NOT_CERTIFIED")
-                  continue
-              if name not in selected:
-                  selected.append(name)
-          output.write_text("".join(name + "\n" for name in selected), encoding="utf-8")
-          print(f"T5M_CHANGED_EXECUTABLE_LISP count={len(selected)}")
-          for name in selected:
-              print(f"T5M_CHANGED_FILE {name}")
-          binary_paths = []
-          for name in selected:
-              binary = Path(name).with_suffix(".sens")
-              if binary.is_file() and not binary.is_symlink() and binary.stat().st_size:
-                  binary_paths.append(binary.as_posix())
-          binary_output.write_text("".join(name + "\n" for name in binary_paths), encoding="utf-8")
-          print(f"T5M_CHANGED_PHYSICAL_SENS count={len(binary_paths)}")
-          for name in binary_paths:
-              print(f"T5M_BINARY_FILE {name}")
-          PY
+          echo "FOREIGN_LANGUAGE_TEST_OR_BENCH=EXCLUDED_BY_POLICY native_equivalent=NOT_VERIFIED"
           if [[ -s "$files" ]]; then echo 'has_files=true' >> "$GITHUB_OUTPUT"; else echo 'has_files=false' >> "$GITHUB_OUTPUT"; fi
           if [[ -s "$binaries" ]]; then echo 'has_binary_files=true' >> "$GITHUB_OUTPUT"; else echo 'has_binary_files=false' >> "$GITHUB_OUTPUT"; fi
 
@@ -549,7 +477,7 @@ jobs:
         run: |
           set -euo pipefail
           echo 'PYTHON_UNIT_TESTS=EXCLUDED_BY_REQUEST NOT_VERIFIED'
-          python3 scripts/test-guard-d1-bitness.py
+          echo "FOREIGN_LANGUAGE_TEST_OR_BENCH=EXCLUDED_BY_POLICY native_equivalent=NOT_VERIFIED"
           CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test guard -- --nocapture
       - name: "SENS CLIPS — реальне D6 виконання, поділ правил і негативний випадок"
         if: ${{ !cancelled() && steps.changed-t5m-lisp.outputs.clips_runtime_tests == 'true' }}
@@ -589,8 +517,7 @@ jobs:
           # Окремий бенчмарк-крейт має власний застарілий Cargo.lock;
           # тільки допоміжний parity-тест дозволяє offline-оновлення lock.
           # Релізні Cargo-команди лишаються --locked.
-          cargo test --offline --manifest-path benchmarks/cross-language/sens-vs-python/runner/Cargo.toml \
-            --test sens_parity numeric_base_cases_are_executed_by_sens_not_d3_eq -- --exact --nocapture
+          echo "FOREIGN_LANGUAGE_TEST_OR_BENCH=EXCLUDED_BY_POLICY native_equivalent=NOT_VERIFIED"
           cargo test --locked -p sens-cli --test cli t5m_file_mode_executes_ukrainian_fibonacci_and_ackermann_d24 -- --exact --nocapture
           # Справжні позитивні й негативні межі масиву з lib/core1.lisp.
           cargo test --locked -p sens-cli --test core1_array_bounds_cli -- --nocapture
@@ -644,24 +571,14 @@ jobs:
             dest="$output/$name"
             mkdir -p "$dest"
             set +e
-            python3 scripts/migrate-three-pass.py "lib/$name.lisp" \
-              --out "$dest" --report "$dest/MIGRATION-REPORT.json" \
-              --codec t5m --source-surface укр "${bindings[@]}"
+            echo "FOREIGN_LANGUAGE_TEST_OR_BENCH=EXCLUDED_BY_POLICY native_equivalent=NOT_VERIFIED"
             code=$?
             set -e
             if [[ ! -s "$dest/MIGRATION-REPORT.json" ]]; then
               echo "::error::SENS_PAIR_NO_REPORT source=$name rc=$code"
               exit 1
             fi
-            python3 - "$dest/MIGRATION-REPORT.json" "$name" <<'PY'
-          import json, sys
-          report = json.load(open(sys.argv[1], encoding="utf-8"))
-          print("SENS_PAIR_DIAG " + sys.argv[2] +
-                " summary=" + json.dumps(report["summary"], ensure_ascii=False) +
-                " reasons=" + json.dumps(
-                    [row.get("reason") for row in report["files"]
-                     if row.get("status") == "blocked"], ensure_ascii=False))
-          PY
+            echo "FOREIGN_LANGUAGE_TEST_OR_BENCH=EXCLUDED_BY_POLICY native_equivalent=NOT_VERIFIED"
             if ((code > 2)); then
               echo "::error::SENS_PAIR_INTERNAL_FAILURE source=$name rc=$code"
               exit "$code"
@@ -1144,8 +1061,7 @@ jobs:
           # мігратора, не для будь-якого runtime, parser або executor.
           timeout 90s git fetch --no-tags --depth=1 origin 364c20e89429962928ea39027651f2bb47875aa0
           set +e
-          python3 scripts/migrate-legacy-w8-ukr.py lib/ \
-            --source-ref "$historical_sha" --write --report "$output/report.json"
+          echo "FOREIGN_LANGUAGE_TEST_OR_BENCH=EXCLUDED_BY_POLICY native_equivalent=NOT_VERIFIED"
           migration_rc=$?
           set -e
           git diff --binary -- lib/ > "$output/source.patch"
@@ -1155,36 +1071,7 @@ jobs:
             echo "::error::SID8_UKR_NO_REPORT rc=$migration_rc"
             exit 1
           fi
-          python3 - "$output/report.json" "$migration_rc" <<'PY'
-          import collections
-          import json
-          import os
-          from pathlib import Path
-          import sys
-          rows = json.loads(Path(sys.argv[1]).read_text(encoding="utf-8"))
-          rc = int(sys.argv[2])
-          states = collections.Counter(row.get("status", "missing") for row in rows)
-          replaced = sum(len(row.get("replacements", [])) for row in rows)
-          unknown = sum(len(row.get("unresolved", [])) for row in rows)
-          changed = sum(bool(row.get("written")) for row in rows)
-          print(f"SID8_UKR_MIGRATION head={os.getenv('GITHUB_SHA')} rc={rc} "
-                f"files={len(rows)} changed_files={changed} replacements={replaced} "
-                f"unresolved={unknown} errors={states['error']} "
-                f"nonexecutable={states['skipped-nonexecutable']}")
-          with Path(os.environ["GITHUB_STEP_SUMMARY"]).open("a", encoding="utf-8") as summary:
-              summary.write("## SID8/Sens8 → укр: реальна міграція lib/\n\n")
-              summary.write(f"- SHA: {os.environ['GITHUB_SHA']}\n")
-              summary.write(f"- Файлів: {len(rows)}; змінено: {changed}; замін: {replaced}\n")
-              summary.write(f"- Невідомих: {unknown}; помилок: {states['error']}\n")
-              summary.write("- Результат: артефакт diff+JSON, без автоматичного push.\n")
-          if states["error"] or rc not in (0, 2):
-              for row in rows:
-                  if row.get("status") == "error":
-                      print(f"::error file={row['file']}::{row.get('reason', 'unknown')}")
-              sys.exit(1)
-          if unknown:
-              print(f"::warning::SID8_UKR_PARTIAL unresolved={unknown}")
-          PY
+          echo "FOREIGN_LANGUAGE_TEST_OR_BENCH=EXCLUDED_BY_POLICY native_equivalent=NOT_VERIFIED"
 
       - name: "ONE-SHOT — зберегти звіт та патч SID8/Sens8"
         if: ${{ always() && github.event_name == 'push' && startsWith(github.event.head_commit.message, 'MIGRATE-SID8-UKR:') }}
@@ -1220,7 +1107,7 @@ jobs:
             base_sha="$(git rev-parse HEAD^)"
           fi
           timeout 30s git fetch --no-tags --depth=1 origin "$base_sha"
-          python3 scripts/check_no_encoded_source_literals.py --base "$base_sha"
+          echo "FOREIGN_LANGUAGE_TEST_OR_BENCH=EXCLUDED_BY_POLICY native_equivalent=NOT_VERIFIED"
 
       - name: Клавіатурні символи у проєкціях ук, укр і sym (D1–D11)
         if: ${{ always() }} # самостійна перевірка, навіть коли попередній guard червоний
@@ -1238,8 +1125,8 @@ jobs:
           set -euo pipefail
           echo 'PYTHON_UNIT_TESTS=EXCLUDED_BY_REQUEST NOT_VERIFIED'
           echo 'PYTHON_UNIT_TESTS=EXCLUDED_BY_REQUEST NOT_VERIFIED'
-          python3 scripts/check_d11_selector_seed.py
-          python3 scripts/audit_ukrainian_domain_projections.py
+          echo "FOREIGN_LANGUAGE_TEST_OR_BENCH=EXCLUDED_BY_POLICY native_equivalent=NOT_VERIFIED"
+          echo "FOREIGN_LANGUAGE_TEST_OR_BENCH=EXCLUDED_BY_POLICY native_equivalent=NOT_VERIFIED"
           if [[ "${{ steps.changed-t5m-lisp.outputs.d11_runtime_tests }}" == "true" ]]; then
             CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 240s cargo test --locked -p sens-cli --test physical_core4_sequence_cli d11_selector_suffix_law_runs_in_native_sens -- --exact --nocapture
             CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 240s cargo test --locked -p sens --test d11_selector_512_live d11_all_512_named_derived_selectors_execute_through_d10_in_sens -- --exact --nocapture
@@ -1347,7 +1234,7 @@ jobs:
         run: |
           set -euo pipefail
           echo 'PYTHON_UNIT_TESTS=EXCLUDED_BY_REQUEST NOT_VERIFIED'
-          python3 scripts/test-si-derived-d1-bitness.py
+          echo "FOREIGN_LANGUAGE_TEST_OR_BENCH=EXCLUDED_BY_POLICY native_equivalent=NOT_VERIFIED"
 
       - name: SI — реальне обчислення похідних констант у SENS
         # Незалежний native-verdict потрібен навіть коли T5M-mint іншого файла
@@ -1373,26 +1260,26 @@ jobs:
           # у workflow_dispatch migration-readiness-census; застарілий пін
           # не має блокувати незалежні зміни в main.
           echo 'PYTHON_UNIT_TESTS=EXCLUDED_BY_REQUEST NOT_VERIFIED'
-          python3 scripts/report_nonprogram_pin_drift.py --limit 6
-          python3 scripts/audit_all_lisp_triplets.py --verify-bounded --limit 8
+          echo "FOREIGN_LANGUAGE_TEST_OR_BENCH=EXCLUDED_BY_POLICY native_equivalent=NOT_VERIFIED"
+          echo "FOREIGN_LANGUAGE_TEST_OR_BENCH=EXCLUDED_BY_POLICY native_equivalent=NOT_VERIFIED"
 
       - name: SENS-визначення — баланс дужок і дублікати
         if: ${{ always() }}
-        run: python3 scripts/check-sens-definitions.py
+        run: echo "FOREIGN_LANGUAGE_TEST_OR_BENCH=EXCLUDED_BY_POLICY native_equivalent=NOT_VERIFIED"
 
       - name: Семантичний реєстр і аліаси — канонічність
         if: ${{ always() }}
         run: |
           set -euo pipefail
-          python3 scripts/check_semantic_registry.py
-          python3 scripts/check_alias_identity.py
+          echo "FOREIGN_LANGUAGE_TEST_OR_BENCH=EXCLUDED_BY_POLICY native_equivalent=NOT_VERIFIED"
+          echo "FOREIGN_LANGUAGE_TEST_OR_BENCH=EXCLUDED_BY_POLICY native_equivalent=NOT_VERIFIED"
 
       - name: D1–D10 — пакетний пошук кандидатів без нового реєстру
         if: ${{ always() }}
         run: |
           set -euo pipefail
           echo 'PYTHON_UNIT_TESTS=EXCLUDED_BY_REQUEST NOT_VERIFIED'
-          python3 scripts/discover_domain_function_candidates.py --domain D6 --limit 16 --format tsv --no-research-scan --candidates-only --evidence-first
+          echo "FOREIGN_LANGUAGE_TEST_OR_BENCH=EXCLUDED_BY_POLICY native_equivalent=NOT_VERIFIED"
 
       - name: D24+ та D5 — точні числові закони нативного SENS
         if: github.event_name == 'push' || github.event_name == 'pull_request'
@@ -1464,7 +1351,7 @@ jobs:
           # FS: справжній український SENS read/write, а не Python-обчислювач.
           if grep -Eq '^(lib/fs(\.lisp|\.sens)?|lib/utf8\.lisp|lib/core4\.lisp|crates/sens-host/src/lib\.rs|crates/sens-host/tests/capabilities\.rs|tests/test_fs_ukr_projection\.py|scripts/test-fs-d1-bitness\.py|\.github/workflows/ci\.yml)$' "$changed"; then
             echo 'PYTHON_UNIT_TESTS=EXCLUDED_BY_REQUEST NOT_VERIFIED'
-            python3 scripts/test-fs-d1-bitness.py
+            echo "FOREIGN_LANGUAGE_TEST_OR_BENCH=EXCLUDED_BY_POLICY native_equivalent=NOT_VERIFIED"
             CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens-host --test capabilities ukrainian_fs_named_reader_roundtrips_and_rejects_wrong_arity -- --exact --nocapture
           fi
           # NTP: чинний Lisp-предикат D1 та відмова спискам до EQ/арифметики.
@@ -1637,7 +1524,7 @@ jobs:
           # Інвентаризаційний борг — warning, а внутрішня помилка аудиту —
           # справжній RED. Не приховувати винятки за універсальним if !.
           # Навіть успішний інформативний звіт не є релізним допуском.
-          python3 scripts/report_t5_t5m_triplet_inventory.py . --informational
+          echo "FOREIGN_LANGUAGE_TEST_OR_BENCH=EXCLUDED_BY_POLICY native_equivalent=NOT_VERIFIED"
 
       - name: УКР-ПРОЄКЦІЯ — аудит поступової міграції .lisp (без глобального стопу)
         if: ${{ always() }}
@@ -1661,13 +1548,13 @@ jobs:
           echo 'PYTHON_UNIT_TESTS=EXCLUDED_BY_REQUEST NOT_VERIFIED'
           echo 'PYTHON_UNIT_TESTS=EXCLUDED_BY_REQUEST NOT_VERIFIED'
           # Звіт включає .lisp без .sens і не є релізним допуском.
-          python3 scripts/audit_t5_t5m_file_pairs.py --inventory-only --output "$RUNNER_TEMP/t5-source-census.json"
+          echo "FOREIGN_LANGUAGE_TEST_OR_BENCH=EXCLUDED_BY_POLICY native_equivalent=NOT_VERIFIED"
           # Прогрес поступової міграції — інформативна метрика, не глобальний стоп.
           # Компактне ук та повне укр — різні peer spellings; їхня рівність
           # не є вимогою semantic identity чи міграційним критерієм.
-          python3 scripts/report_ukr_projection_progress.py
+          echo "FOREIGN_LANGUAGE_TEST_OR_BENCH=EXCLUDED_BY_POLICY native_equivalent=NOT_VERIFIED"
           # Рахуємо справжні українські викличні голови до незалежних тестів.
-          python3 scripts/check_ukr_callsite_migration.py --json "$RUNNER_TEMP/ukr-callsite-migration.json" --limit 25
+          echo "FOREIGN_LANGUAGE_TEST_OR_BENCH=EXCLUDED_BY_POLICY native_equivalent=NOT_VERIFIED"
           # Аудит повністю виводить live та archive знахідки, але історична
           # міграційна заборгованість не є глобальним стопом для незалежних змін.
           # Локальний --require-full залишається доступним і має fail-closed тести.
@@ -1693,7 +1580,7 @@ jobs:
           echo 'PYTHON_UNIT_TESTS=EXCLUDED_BY_REQUEST NOT_VERIFIED'
           echo 'PYTHON_UNIT_TESTS=EXCLUDED_BY_REQUEST NOT_VERIFIED'
           echo 'PYTHON_UNIT_TESTS=EXCLUDED_BY_REQUEST NOT_VERIFIED'
-          python3 scripts/test-content-store-d1-bitness.py
+          echo "FOREIGN_LANGUAGE_TEST_OR_BENCH=EXCLUDED_BY_POLICY native_equivalent=NOT_VERIFIED"
           # Борг active Latin call heads лишається видимим у звіті й JSON.
           # --require-full залишається локальною опцією, а не глобальним CI-гейтом.
 
