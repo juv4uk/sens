@@ -46,5 +46,19 @@ else
   fi
   printf 'NATIVE_SENS_NEGATIVE id=%s-mutant mode=verdict-not-yes\n' "$id"
 fi
+# M1/M2: same invalid D1 verdict witness through the real native SENS session.
+invalid_verdict_source="$tmp/assertion-library-invalid-verdict.lisp"
+cat -- lib/твердження.lisp tests/semantic/assertion-library-invalid-verdict-law.lisp > "$invalid_verdict_source"
+if ! "$cli" "$invalid_verdict_source" > "$tmp/invalid-verdict.out" 2> "$tmp/invalid-verdict.err"; then
+  printf 'REGRESSION test_id=assertion-library-invalid-verdict layer=eval actual=execution-error\n' >&2
+  cat "$tmp/invalid-verdict.err" >&2
+  exit 1
+fi
+if ! cmp -s "$tmp/expected" "$tmp/invalid-verdict.out"; then
+  printf 'REGRESSION test_id=assertion-library-invalid-verdict layer=eval expected=YES actual=wrong-verdict\n' >&2
+  cat "$tmp/invalid-verdict.out" >&2
+  exit 1
+fi
+printf 'NATIVE_SENS_POSITIVE id=assertion-library-invalid-verdict fixture=tests/semantic/assertion-library-invalid-verdict-law.lisp verdict=yes\n'
 printf 'NATIVE_SENS_POSITIVE id=%s fixture=%s verdict=yes\n' "$id" "$law"
 echo "М1_ТВЕРДЖЕННЯ=OK evidence=native-sens cmp=byte-identity"
