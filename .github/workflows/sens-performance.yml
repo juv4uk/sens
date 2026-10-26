@@ -24,25 +24,11 @@ jobs:
           persist-credentials: false
       - uses: dtolnay/rust-toolchain@1.99.0
       - uses: ./.github/actions/install-zig
-      - name: Record exact runner and toolchain provenance
-        shell: bash
+      - name: Show toolchain versions in the run log only
         run: |
-          set -euo pipefail
-          out="$RUNNER_TEMP/sens-mechanisms"
-          mkdir -p "$out"
-          {
-            echo "commit=$GITHUB_SHA"
-            echo "runner=${RUNNER_NAME:-unknown}"
-            echo "architecture=$(uname -m)"
-            echo "system=$(uname -s)"
-            cargo --version
-            rustc -Vv
-            zig version
-            sha256sum crates/sens/examples/byte_pack_bench.rs
-            sha256sum crates/sens/examples/domain12345678_bench.rs
-            sha256sum crates/sens/examples/packed_vs_visible_bench.rs
-            sha256sum research/zig-codecs/t5/bench.zig
-          } > "$out/environment.txt"
+          cargo --version
+          rustc -Vv
+          zig version
       - name: Build native Rust mechanism benchmarks
         shell: bash
         run: |
