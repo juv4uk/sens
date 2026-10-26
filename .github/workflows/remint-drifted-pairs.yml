@@ -70,9 +70,28 @@ jobs:
             fi
             # Обʼєднати точну push-різницю зі списком, отриманим від CI-вибору.
             # Жодне джерело з вхідного маніфесту не губиться через повторний diff.
-            if [[ -n "$FILES" ]]; then
-              list="$(printf '%s\n%s\n' "$list" "$FILES" | awk 'NF && !seen[$0]++')"
+            # Close the non-Core4 pair-drift gap: also include every changed
+            # Lisp source that already has a committed physical T5M + view,
+            # regardless of which historical pathspec originally selected it.
+            # Added/modified only: deleting a source must not mint it back.
+            if [[ "$BEFORE" =~ ^0+$ ]]; then
+              all_changed_lisp_sources="$(git -c core.quotePath=false diff-tree --no-commit-id --diff-filter=AM --name-only -r HEAD -- '*.lisp')"
+            else
+              all_changed_lisp_sources="$(git -c core.quotePath=false diff --diff-filter=AM --name-only "$BEFORE" "$AFTER" -- '*.lisp')"
             fi
+            while IFS= read -r source; do
+              [[ -n "$source" && -f "$source" && ! -L "$source" ]] || continue
+              case "$source" in
+                lib/core2.lisp|lib/core-math.lisp|lib/core4.lisp|lib/yantra.lisp) continue ;;
+              esac
+              pair="${source%.lisp}.sens"
+              view="${source%.lisp}"
+              [[ -s "$pair" && -f "$view" && ! -L "$pair" && ! -L "$view" ]] || continue
+              if ! printf '%s\n' "$list" | grep -Fxq -- "$source"; then
+                list="$(printf '%s\n%s' "$list" "$source")"
+                echo "REMINT_PAIRED_SOURCE_CHANGED source=$source"
+              fi
+            done <<< "$all_changed_lisp_sources"
             # Зміна самого SENS-нижувача потребує перевірки його
             # СПОЖИВАЧА навіть коли вихідний свідок і байти ще не змінювались.
             # Не намагатись виконати бібліотеку як невідомий текстовий виклик.
