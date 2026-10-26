@@ -1395,6 +1395,17 @@ run_native_t5m_program() {
         return
       fi
     fi
+    if [[ "$file" == "tests/semantic/бенчмарк-медіана-law.lisp" ||
+          "$file" == "tests/semantic/бенчмарк-медіана-mutant.lisp" ]]; then
+      # M3: очікуваний вердикт саме D1 із живого SENS, не host-медіана.
+      local benchmark_expected_d1=1
+      [[ "$file" != *-mutant.lisp ]] || benchmark_expected_d1=0
+      if [[ "$(cat "$dir/native-paired.stdout")" != "$benchmark_expected_d1" ]]; then
+        echo "::error::SENS_BENCHMARK_MEDIAN_WRONG_D1 source=$file expected=$benchmark_expected_d1 actual=$(cat "$dir/native-paired.stdout")" >&2
+        mark_file_failed
+        return
+      fi
+    fi
     if timeout "$native_timeout" "${standalone_runtime[@]}" "$standalone_physical" \
         >"$dir/native-standalone.stdout" 2>"$dir/native-standalone.stderr"; then
       if ! cmp -s "$dir/native-standalone.stdout" "$dir/native-paired.stdout"; then
