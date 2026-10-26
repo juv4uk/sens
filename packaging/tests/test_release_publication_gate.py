@@ -161,9 +161,12 @@ class ReleasePublicationGateTest(unittest.TestCase):
         with self.assertRaisesRegex(AssertionError, "final exact-SHA release CI recheck"):
             require_final_publication_guard(self.source[:job_start] + broken_job)
 
-    def test_manual_release_delegates_to_sha_pinned_publisher(self):
+    def test_tag_release_delegates_to_sha_pinned_publisher(self):
         """Tagged entry delegates publication only after all asset jobs finish."""
-        self.assertIn("on:\n  workflow_dispatch:\n", self.entry_source)
+        self.assertIn(
+            "on:\n  push:\n    tags: ['l*']\n  workflow_dispatch:\n",
+            self.entry_source,
+        )
         require_reusable_publish_permission(self.entry_source)
         release_scope = (ROOT / "RELEASE.md").read_text(encoding="utf-8")
         self.assertIn("Contract 12.0", release_scope)
