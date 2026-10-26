@@ -43,7 +43,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          git diff --check
+          git diff --check HEAD^ HEAD
           bash -n scripts/check-sens-only-semantic-tests.sh
           bash -n scripts/ensure-host-debt0.sh
           bash -n scripts/ci-rust-mechanism-checks.sh
