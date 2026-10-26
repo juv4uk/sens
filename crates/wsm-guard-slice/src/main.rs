@@ -124,11 +124,11 @@ mod tests {
 
     const DEFAULT_POLICY: &str = include_str!("../../../knowledge/guard-runtime-policy.lisp");
     const ALLOW_POLICY: &str = r#"
-      (def guard-evaluate
-        (lambda (kind subject evidence)
-          (make-guard-finding (quote allow) (quote confirmed) subject
-            kind (quote test-contract) (quote ()) (quote no-impact)
-            (quote no-action) (list evidence))))"#;
+      (визначити guard-evaluate
+        (функція (вид суб'єкт докази)
+          (створити-захист-висновок (як-є allow) (як-є confirmed) суб'єкт вид
+            (як-є test-contract) (як-є ()) (як-є no-impact)
+            (як-є no-action) (список докази))))"#;
 
     #[test]
     fn parses_only_bounded_normalized_events() {
