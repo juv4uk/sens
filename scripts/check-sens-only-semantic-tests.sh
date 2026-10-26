@@ -107,13 +107,21 @@ fi
 # від самого факту реєстрації.
 runner_pattern='python3?[[:space:]]+.*(test|bench|benchmark|trial|run\.py)|pytest([[:space:]]|$)|node[[:space:]]+--test|npm[[:space:]]+(test|run[[:space:]]+(test|bench|benchmark))|npx[[:space:]]+(jest|vitest|mocha)|bun[[:space:]]+test|deno[[:space:]]+test|go[[:space:]]+test([[:space:]]|$)|racket[[:space:]]+.*(test|bench)'
 workflow_count=0
+missing_runner_workflows=()
 while IFS= read -r workflow; do
   [[ -f "$workflow" ]] || continue
   if grep -Eq "$runner_pattern" "$workflow"; then
     workflow_count=$((workflow_count + 1))
-    archive_has_location "$workflow" || die "успадкований сторонній runner у $workflow без рядка реєстру"
+    if ! archive_has_location "$workflow"; then
+      missing_runner_workflows+=("$workflow")
+    fi
   fi
 done < <(find .github/workflows -maxdepth 1 -type f \( -name '*.yml' -o -name '*.yaml' \) -print | sort)
+if (("${#missing_runner_workflows[@]}" != 0)); then
+  printf 'МОВНИЙ_ГЕЙТ=RED причина=успадковані workflow без рядків ARCHIVE count=%s\n' "${#missing_runner_workflows[@]}" >&2
+  printf '  missing_archive: %s\n' "${missing_runner_workflows[@]}" >&2
+  exit 1
+fi
 
 self_test
 echo "ARCHIVE (поза мовним коридором): $archive_count артефактів — $ARCHIVE_URL"
