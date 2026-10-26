@@ -280,8 +280,8 @@ fn unqualified_numeric_literals_fail_closed_d24_negative_and_ratio_execute() {
 #[test]
 fn numeric_d24_d48_domain_values_survive_actual_fasl_and_wire() {
     // No numeric source literals are used to construct these values.
-    let first = BinaryNumber::from_numeric_domain_bits(24, &vec![0; 24]).expect("D24 exact zero");
-    let second = BinaryNumber::from_numeric_domain_bits(48, &vec![0; 48]).expect("D48 exact zero");
+    let first = BinaryNumber::from_numeric_domain_bits(24, &[0; 24]).expect("D24 exact zero");
+    let second = BinaryNumber::from_numeric_domain_bits(48, &[0; 48]).expect("D48 exact zero");
     assert_ne!(first, second);
     let forms = [first.clone(), second.clone()]
         .into_iter()
@@ -308,7 +308,7 @@ fn numeric_d24_d48_domain_values_survive_actual_fasl_and_wire() {
 
 #[test]
 fn numeric_domain_ast_formats_reject_invalid_width_and_truncation() {
-    let number = BinaryNumber::from_numeric_domain_bits(24, &vec![1; 24]).unwrap();
+    let number = BinaryNumber::from_numeric_domain_bits(24, &[1; 24]).unwrap();
     let forms = vec![Expr {
         kind: ExprKind::BinaryNumber(number),
         span: Span::default(),
