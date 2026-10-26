@@ -249,8 +249,8 @@ mod tests {
             assert_eq!(coordinate.width(), 7);
             assert_eq!(coordinate.bits(), bits);
             let admission = coordinate.owner_residency().expect("D7 has owner rows");
-            assert_eq!(
-                admission, true,
+            assert!(
+                admission,
                 "every exact W7 keyboard coordinate is ratified data"
             );
             admitted += usize::from(admission);
