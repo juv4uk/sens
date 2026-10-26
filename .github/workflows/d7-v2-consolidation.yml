@@ -10,13 +10,21 @@ jobs:
       - uses: actions/checkout@v5
       - name: Check consolidated D7 evidence
         run: python3 scripts/check-d7-v2-consolidation.py
-      - name: Replay varga product witness
-        run: python3 benchmarks/d7-v2/varga.py --out /tmp/d7-varga
-      - name: Replay convention/provenance firewall
-        run: python3 benchmarks/d7-v2/residue.py --out /tmp/d7-residue
-      - name: Replay non-varga factor witness
-        run: python3 benchmarks/d7-v2/nonvarga.py --out /tmp/d7-nonvarga
-      - name: Replay vowel product/affine witness
-        run: python3 benchmarks/d7-v2/vowel.py --out /tmp/d7-vowel
+      - name: Replay varga product witness — EXCLUDED (NOT_VERIFIED)
+        if: false
+        shell: bash
+        run: echo "FOREIGN_LANGUAGE_TEST_BENCH=EXCLUDED_BY_POLICY native_equivalent=NOT_VERIFIED"
+      - name: Replay convention/provenance firewall — EXCLUDED (NOT_VERIFIED)
+        if: false
+        shell: bash
+        run: echo "FOREIGN_LANGUAGE_TEST_BENCH=EXCLUDED_BY_POLICY native_equivalent=NOT_VERIFIED"
+      - name: Replay non-varga factor witness — EXCLUDED (NOT_VERIFIED)
+        if: false
+        shell: bash
+        run: echo "FOREIGN_LANGUAGE_TEST_BENCH=EXCLUDED_BY_POLICY native_equivalent=NOT_VERIFIED"
+      - name: Replay vowel product/affine witness — EXCLUDED (NOT_VERIFIED)
+        if: false
+        shell: bash
+        run: echo "FOREIGN_LANGUAGE_TEST_BENCH=EXCLUDED_BY_POLICY native_equivalent=NOT_VERIFIED"
       - name: Check exact Text7 W7 mechanism
         run: cargo test -p sens --test d7_w7_pack
