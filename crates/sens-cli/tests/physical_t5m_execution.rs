@@ -5,6 +5,13 @@ use sens::{
 };
 use sens_cli::zig_transport;
 
+/// Спільне джерело для двох тестів: раніше було локальним `const` усередині
+/// `multiform_ukr_...`, через що другий тест (`physical_domain_words_...`)
+/// не бачив `SOURCE` → error[E0425]. Винесено на рівень модуля.
+const SOURCE: &str =
+    include_str!("../../../tests/fixtures/migration-multiform-cohort-main/two-forms.lisp");
+
+
 const QUOTE_T5M: &[u8] =
     include_bytes!("../../../tests/fixtures/migration-quote-cohort-main/quote-legacy.sens");
 const MULTIFORM_T5M: &[u8] =
@@ -42,8 +49,6 @@ fn physical_multi_form_program_executes_as_a_single_exact_domain_stream() {
 
 #[test]
 fn multiform_ukr_and_physical_t5m_execute_to_the_same_sens_value() {
-    const SOURCE: &str =
-        include_str!("../../../tests/fixtures/migration-multiform-cohort-main/two-forms.lisp");
     let source_value = sens::eval_program(SOURCE, &mut Session::default())
         .expect("test_id=D2-MULTIFORM-UKR layer=SENS native source execution")
         .value;
