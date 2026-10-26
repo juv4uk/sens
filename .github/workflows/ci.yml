@@ -70,9 +70,6 @@ jobs:
       - name: Самоперевірка мовного гейту (позитивний та негативний свідки)
         shell: bash
         run: bash scripts/test-language-policy-archive-gate.sh
-      - name: Самоперевірка мовного гейту (позитивний та негативний свідки)
-        shell: bash
-        run: bash scripts/test-language-policy-archive-gate.sh
       - name: Швидкий охоронець host debt
         shell: bash
         run: bash scripts/ensure-host-debt0.sh
