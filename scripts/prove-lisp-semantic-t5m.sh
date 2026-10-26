@@ -746,6 +746,8 @@ run_case run_law d10-map-derived-twelve-positive tests/semantic/d10-map-derived-
 run_case run_law d10-map-derived-empty-mutant tests/semantic/d10-map-derived-native-mutant.lisp 0 core4
 run_case run_law d10-empty-queue-positive tests/semantic/d10-empty-queue-law.lisp 1 core4
 run_case run_law d10-empty-queue-mutant tests/semantic/d10-empty-queue-mutant.lisp 0 core4
+# Бенчмарк також проходить справжній SENS→T5M→SENS як позитивний закон.
+run_case run_law d10-empty-queue-benchmark benchmarks/sens-d10-queue-workload.lisp 1 core4
 # Д10:0100100110/0100100111 — CLIPS ASSERT/PRINTOUT як точні структурні дані.
 # D8 однакові? не спричиняє D3 EQ Type для зовнішньої цитованої голови.
 # Обидві форми доводить саме SENS; Zig/T5M лише переносить точні байти.
