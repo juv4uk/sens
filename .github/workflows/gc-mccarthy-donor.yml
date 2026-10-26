@@ -12,21 +12,15 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v5
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-      - name: Run historical donor witness
-        run: python3 benchmarks/gc-mccarthy-donor/run.py
-      - name: Publish boundary
-        if: always()
-        run: |
-          {
-            echo "## #2549 GC historical donor witness"
-            echo
-            echo '~~~text'
-            python3 benchmarks/gc-mccarthy-donor/run.py
-            echo '~~~'
-            echo
-            echo "- Historical donor only; not a SENS heap implementation."
-            echo "- Slot names/addresses are not semantic identities."
-          } >> "$GITHUB_STEP_SUMMARY"
+      - name: Foreign-language test/benchmark — EXCLUDED (NOT_VERIFIED)
+        if: false
+        shell: bash
+        run: echo "FOREIGN_LANGUAGE_TEST_BENCH=EXCLUDED_BY_POLICY native_equivalent=NOT_VERIFIED"
+      - name: Run historical donor witness — EXCLUDED (NOT_VERIFIED)
+        if: false
+        shell: bash
+        run: echo "FOREIGN_LANGUAGE_TEST_BENCH=EXCLUDED_BY_POLICY native_equivalent=NOT_VERIFIED"
+      - name: Publish boundary — EXCLUDED (NOT_VERIFIED)
+        if: false
+        shell: bash
+        run: echo "FOREIGN_LANGUAGE_TEST_BENCH=EXCLUDED_BY_POLICY native_equivalent=NOT_VERIFIED"
