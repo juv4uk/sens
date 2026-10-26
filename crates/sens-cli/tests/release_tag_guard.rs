@@ -128,8 +128,13 @@ fn release_workflows_accept_only_the_s_tag_prefix() {
     );
     assert!(release.contains("-replace '^s',''"), "MSI version must remove only s");
     assert!(
-        publisher.contains("test \"$GITHUB_REF_NAME\" = \"s$(python3"),
-        "publisher must compare its tag to the s-prefixed package version"
+        publisher.contains("VERSION=\"$(sed -n")
+            && publisher.contains("test \"$GITHUB_REF_NAME\" = \"s$VERSION\""),
+        "publisher must derive package version with shell-only parsing and compare the s-prefixed tag"
+    );
+    assert!(
+        !publisher.contains("python3"),
+        "release publisher must not invoke Python"
     );
     assert!(!release.contains("tags: ['l*']"), "retired l tags must not trigger release");
     assert!(
