@@ -994,7 +994,15 @@ fn lift_expression(
                 || is_exact_quote(&lifted[0])
                 || source_spelling(source, &lifted[0]) == Some("'");
 
-            if !quote_data {
+            if quote_data {
+                // A canonical D4 negation head can occur as object-language
+                // data inside a knowledge clause. Preserve its exact identity
+                // through QUOTE; ordinary predicate names and macro templates
+                // remain data and never acquire callability from their spelling.
+                for item in lifted.iter_mut().skip(1) {
+                    *item = lift_quoted_d4_negation_data(item.clone(), depth + 1)?;
+                }
+            } else {
                 if is_exact_cond(&lifted[0]) {
                     for clause in lifted.iter_mut().skip(1) {
                         *clause = lift_cond_clause(
@@ -1043,6 +1051,46 @@ fn lift_expression(
                     span,
                 })
             }
+        }
+        other => Ok(Expr { kind: other, span }),
+    }
+}
+
+fn lift_quoted_d4_negation_data(expression: Expr, depth: u32) -> Result<Expr, LanguageError> {
+    if depth > MAX_STRUCTURE_DEPTH {
+        return Err(LanguageError::new(
+            ErrorKind::Parse,
+            "quoted domain data exceeds structure depth",
+            expression.span,
+        ));
+    }
+    let Expr { kind, span } = expression;
+    match kind {
+        ExprKind::Symbol(name) if name.as_ref() == "хибне?" => {
+            let identity = crate::semantic_registry::exact_uk_callable_for_source_head(&name)
+                .filter(|identity| identity.width() == 4 && identity.packed_bits() == 0b0100);
+            if let Some(identity) = identity {
+                Ok(Expr {
+                    kind: ExprKind::DomainIdentity(identity),
+                    span,
+                })
+            } else {
+                Ok(Expr {
+                    kind: ExprKind::Symbol(name),
+                    span,
+                })
+            }
+        }
+        ExprKind::List(items) => {
+            let mapped = items
+                .iter()
+                .cloned()
+                .map(|item| lift_quoted_d4_negation_data(item, depth + 1))
+                .collect::<Result<Vec<_>, _>>()?;
+            Ok(Expr {
+                kind: ExprKind::List(Rc::from(mapped.into_boxed_slice())),
+                span,
+            })
         }
         other => Ok(Expr { kind: other, span }),
     }
@@ -1214,6 +1262,30 @@ mod tests {
     fn only(mut expressions: Vec<Expr>) -> Expr {
         assert_eq!(expressions.len(), 1);
         expressions.remove(0)
+    }
+
+    #[test]
+    fn quoted_knowledge_negation_keeps_exact_d4_identity() {
+        let expression = only(
+            parse_mixed_exact_domain("(як-є (хибне? (human socrates)))")
+                .expect("quoted object-language negation must preserve its ratified D4 word"),
+        );
+        let ExprKind::List(quote) = expression.kind else {
+            panic!("QUOTE");
+        };
+        let ExprKind::List(clause) = &quote[1].kind else {
+            panic!("quoted clause");
+        };
+        assert!(matches!(
+            &clause[0].kind,
+            ExprKind::DomainIdentity(identity)
+                if identity.width() == 4 && identity.packed_bits() == 0b0100
+        ));
+        let ExprKind::List(goal) = &clause[1].kind else {
+            panic!("goal data");
+        };
+        assert!(matches!(&goal[0].kind, ExprKind::Symbol(name) if name.as_ref() == "human"));
+        assert!(matches!(&goal[1].kind, ExprKind::Symbol(name) if name.as_ref() == "socrates"));
     }
 
     #[test]
