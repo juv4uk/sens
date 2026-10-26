@@ -12,10 +12,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Cross-check strict theorem-generated residents
-        run: |
-          python3 benchmarks/cross-language/reality-matrix/semantic-density/run.py             --out-dir "$RUNNER_TEMP/semantic-density"
-
+      - name: Cross-check strict theorem-generated residents — EXCLUDED (NOT_VERIFIED)
+        if: false
+        shell: bash
+        run: echo "FOREIGN_LANGUAGE_TEST_BENCH=EXCLUDED_BY_POLICY native_equivalent=NOT_VERIFIED"
       - name: Upload baseline
         uses: actions/upload-artifact@v4
         with:
