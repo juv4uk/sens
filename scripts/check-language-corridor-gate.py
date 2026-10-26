@@ -23,7 +23,7 @@ ARCHIVE_ROW_RE = re.compile(
     re.MULTILINE | re.IGNORECASE,
 )
 ARCHIVE_COMMIT_RE = re.compile(
-    r"https://github\\.com/juv4uk/sens/commit/[0-9a-f]{40}",
+    r"https://github\.com/juv4uk/sens/commit/[0-9a-f]{40}",
     re.IGNORECASE,
 )
 
