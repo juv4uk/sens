@@ -1115,7 +1115,28 @@ fn lift_quoted_d4_identity_data(expression: Expr, depth: u32) -> Result<Expr, La
                 span,
             })
         }
-        // A bare symbol in quote data never becomes callable from spelling.
+        // The bare quoted D4 NOT identity is an object-language predicate
+        // value used as a clause head by the knowledge reasoner. Preserve its
+        // exact ratified identity as data; it is not dispatched until a later
+        // SENS reasoning step consumes the clause. Syntax forms such as DEFINE
+        // deliberately remain ordinary quoted data (see macro-code law).
+        ExprKind::Symbol(name) if name.as_ref() == "хибне?" => {
+            let identity = crate::semantic_registry::exact_uk_callable_for_source_head(&name)
+                .filter(|identity| identity.width() == 4 && identity.packed_bits() == 0b0100);
+            if let Some(identity) = identity {
+                Ok(Expr {
+                    kind: ExprKind::DomainIdentity(identity),
+                    span,
+                })
+            } else {
+                Ok(Expr {
+                    kind: ExprKind::Symbol(name),
+                    span,
+                })
+            }
+        }
+        // Other bare symbols in quote data remain data; spelling alone does
+        // not authorize arbitrary callable identities.
         other => Ok(Expr { kind: other, span }),
     }
 }
@@ -1326,6 +1347,27 @@ mod tests {
         assert!(matches!(
             &data[1].kind,
             ExprKind::Symbol(name) if name.as_ref() == "визначити"
+        ));
+    }
+
+    #[test]
+    fn quoted_standalone_knowledge_negation_keeps_exact_d4_identity() {
+        let expression = only(
+            parse_mixed_exact_domain("(як-є хибне?)")
+                .expect("quoted D4 NOT symbol used as knowledge-clause head"),
+        );
+        let ExprKind::List(quote) = expression.kind else {
+            panic!("QUOTE");
+        };
+        assert!(matches!(
+            &quote[0].kind,
+            ExprKind::DomainIdentity(identity)
+                if identity.width() == 3 && identity.packed_bits() == 0b001
+        ));
+        assert!(matches!(
+            &quote[1].kind,
+            ExprKind::DomainIdentity(identity)
+                if identity.width() == 4 && identity.packed_bits() == 0b0100
         ));
     }
 
