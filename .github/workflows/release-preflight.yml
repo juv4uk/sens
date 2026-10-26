@@ -88,8 +88,9 @@ jobs:
 
       - name: Release version alignment (gate #1 mechanical)
         run: |
-          echo "PYTHON_TOOL_EXCLUDED_BY_LANGUAGE_POLICY native_equivalent=NOT_VERIFIED"
-          echo "PYTHON_TOOL_EXCLUDED_BY_LANGUAGE_POLICY native_equivalent=NOT_VERIFIED"
+          set -euo pipefail
+          cargo test --locked -p sens-lsp --test release_parity release_version_alignment_is_consistent_across_native_surfaces -- --exact
+          cargo test --locked -p sens-lsp --test release_parity release_version_alignment_fails_closed_on_stale_missing_duplicate_and_registry_mutants -- --exact
 
       - name: Release toolchain pins (gate #3 mechanical)
         run: echo "PYTHON_TOOL_EXCLUDED_BY_LANGUAGE_POLICY native_equivalent=NOT_VERIFIED"
