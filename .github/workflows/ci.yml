@@ -74,19 +74,16 @@ jobs:
                 count=$((count + 1))
                 if [[ "$count" -le 80 ]]; then printf '%s\n' "$file" >> "$examples"; fi ;;
               *)
-                # Extensionless lib entries count as SENS physical views only
-                # when paired with source and strictly bit-coded.
-                case "$file" in
-                  lib/*)
-                    if [[ "$file" != *.* && -s "$file" && ( -f "$file.lisp" || -f "$file.sens" ) ]] &&
-                      ! LC_ALL=C grep -qv '^[01 ]*$' "$file"; then
-                      physical_sens_views=$((physical_sens_views + 1))
-                      continue
-                    fi
-                    ;;
-                esac
+                # A non-source file is a physical SENS view only if content proves it:
+                # non-empty, words of 0/1 separated by single spaces, terminal LF.
+                last_byte="$(tail -c 1 "$file" | od -An -t x1 | tr -d '[:space:]')"
+                if [[ -s "$file" && "$last_byte" == "0a" ]] && \
+                   ! LC_ALL=C grep -qvE '^[01]+( [01]+)*$' "$file"; then
+                  physical_sens_views=$((physical_sens_views + 1))
+                  continue
+                fi
                 count=$((count + 1))
-                if [[ "$count" -le 80 ]]; then printf '%s\n' "$file" >> "$examples"; fi ;;
+                if [[ "$count" -le 80 ]]; then printf '%s\\n' "$file" >> "$examples"; fi ;;
             esac
           done < <(git ls-files)
           echo "LANGUAGE_POLICY active_source_forbidden_files=$count excluded_support_files=$excluded physical_sens_views=$physical_sens_views allowed=Rust,Zig,SENS,Guile,C,Assembler excluded_tests_benchmarks=NOT_VERIFIED"
