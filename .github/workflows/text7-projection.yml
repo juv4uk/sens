@@ -16,10 +16,10 @@ jobs:
         run: |
           python3 scripts/check-d7-keyboard-v2-table.py
           python3 scripts/check-d7-runtime-projection.py
-      - name: Test Ukrainian keyboard data and exact T5 — EXCLUDED (NOT_VERIFIED)
-        if: false
-        shell: bash
-        run: echo "FOREIGN_LANGUAGE_TEST_BENCH=EXCLUDED_BY_POLICY native_equivalent=NOT_VERIFIED"
+      - name: Test Ukrainian keyboard data and exact T5
+        run: |
+          python3 -m unittest discover -s tests -p 'test_d7_symbol_codec.py' -v
+          python3 -m unittest discover -s tests -p 'test_d7_t5_keyboard.py' -v
       - uses: dtolnay/rust-toolchain@stable
       - name: Current D7 Rust / Text7 / D2 boundaries
         run: cargo test --locked -p sens --features rust-t5-reference --test d7_keyboard_t5 --test text7_canonical_wire

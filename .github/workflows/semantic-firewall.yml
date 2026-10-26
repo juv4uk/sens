@@ -12,10 +12,13 @@ jobs:
     timeout-minutes: 8
     steps:
       - uses: actions/checkout@v5
-      - name: Run negative-control tournament — EXCLUDED (NOT_VERIFIED)
-        if: false
-        shell: bash
-        run: echo "FOREIGN_LANGUAGE_TEST_BENCH=EXCLUDED_BY_POLICY native_equivalent=NOT_VERIFIED"
+      - name: Run negative-control tournament
+        run: |
+          set -euo pipefail
+          rm -rf "$RUNNER_TEMP/semantic-firewall"
+          python3 benchmarks/semantic-firewall/run.py \
+            --out "$RUNNER_TEMP/semantic-firewall"
+          cat "$RUNNER_TEMP/semantic-firewall/report.md" >> "$GITHUB_STEP_SUMMARY"
       - name: Preserve raw evidence
         if: always()
         uses: actions/upload-artifact@v4
