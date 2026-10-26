@@ -19,8 +19,8 @@ mod reference_t5m;
 
 fn verify_one(code: u8) -> Result<(usize, String, Frame3MicroExpr), String> {
     let payload = [code];
-    let expr = decode_payload(&payload).map_err(|error| format!("{error:?}"))?;
-    if encode_expr(&expr).map_err(|error| format!("{error:?}"))? != payload {
+    let expr = decode_payload(&payload)?;
+    if encode_expr(&expr)? != payload {
         return Err(format!("noncanonical dense F3M-1 rank: {code:02x}"));
     }
 
@@ -35,7 +35,7 @@ fn verify_one(code: u8) -> Result<(usize, String, Frame3MicroExpr), String> {
         .into_iter()
         .map(|token| token.word)
         .collect::<Vec<_>>();
-    let t5 = zig_transport::encode_t5m_direct(&typed).map_err(|error| format!("T5: {error:?}"))?;
+    let t5 = zig_transport::encode_t5m_direct(&typed).map_err(|error| error.to_string())?;
 
     let expected = eval_parsed_expressions(&parsed, &mut Session::default())
         .map_err(|error| format!("evaluator: {error:?}"))?;
@@ -84,7 +84,7 @@ fn bench_speed() -> Result<(), Box<dyn std::error::Error>> {
     // Under the dense active order CAR(CONS(1,NIL)) moved from the historical
     // sparse witness 0x45 to canonical global rank 62 = 0x3e.
     let one_byte = [0x3e];
-    let expr = decode_payload(&one_byte).map_err(|error| format!("{error:?}"))?;
+    let expr = decode_payload(&one_byte)?;
     if expr.human_projection() != "CAR(CONS(1,NIL))" {
         return Err("dense F3M-1 trophy rank drifted".into());
     }
@@ -93,7 +93,7 @@ fn bench_speed() -> Result<(), Box<dyn std::error::Error>> {
     let tokens = parse_binary_source_words(&visible)?;
     let typed = tokens.iter().map(|token| token.word).collect::<Vec<_>>();
     let full_t5 =
-        zig_transport::encode_t5m_direct(&typed).map_err(|error| format!("T5 physical encode: {error:?}"))?;
+        zig_transport::encode_t5m_direct(&typed).map_err(|error| error.to_string())?;
     if full_t5.len() != 5 || encode_expr(&expr)? != one_byte {
         return Err("wrong physical size or broken dense roundtrip".into());
     }
@@ -172,7 +172,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         return Err(format!("dense F3M-1 did not cover all 256 codes: {}", seen.len()).into());
     }
 
-    let trophy = decode_payload(&[0x3e]).map_err(|error| format!("{error:?}"))?;
+    let trophy = decode_payload(&[0x3e])?;
     if trophy.human_projection() != "CAR(CONS(1,NIL))" {
         return Err("dense trophy did not reconstruct CAR(CONS(1,NIL))".into());
     }

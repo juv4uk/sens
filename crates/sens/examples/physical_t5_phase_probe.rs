@@ -65,8 +65,8 @@ fn measure() -> Result<(), String> {
 
     // Disk I/O is explicitly OUTSIDE the timed phases.
     let bytes = fs::read(&source).map_err(|error| format!("read: {error}"))?;
-    let words = zig_transport::decode_t5m_words(&bytes).map_err(|error| format!("T5 decode: {error:?}"))?;
-    if zig_transport::encode_t5m_direct(&words).map_err(|error| format!("T5 encode: {error:?}"))? != bytes {
+    let words = zig_transport::decode_t5m_words(&bytes).map_err(|error| error.to_string())?;
+    if zig_transport::encode_t5m_direct(&words).map_err(|error| error.to_string())? != bytes {
         return Err("physical byte parity mismatch".into());
     }
     let forms =
@@ -99,7 +99,7 @@ fn measure() -> Result<(), String> {
                     }
                     "decode_t5" => {
                         let decoded = zig_transport::decode_t5m_words(black_box(&bytes))
-                            .map_err(|e| format!("T5 in loop: {e:?}"))?;
+                            .map_err(|e| e.to_string())?;
                         black_box(decoded);
                     }
                     "parse_d2" => {

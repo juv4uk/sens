@@ -10,12 +10,12 @@ const BINARY: &str = "canonical-d1d8";
 
 fn parse_source(candidate: &str, source: &str) -> Result<Vec<Expr>, String> {
     match candidate {
-        ENGLISH => parse(source).map_err(|e| format!("{e:?}")),
+        ENGLISH => parse(source).map_err(|e| e.to_string()),
         // Current source authority is the ratified Ukrainian surface. English
         // names remain display/compatibility projections and do not create
         // callable identity in this lane.
-        UKRAINIAN => parse_mixed_exact_domain(source).map_err(|e| format!("{e:?}")),
-        BINARY => parse_canonical_binary(source).map_err(|e| format!("{e:?}")),
+        UKRAINIAN => parse_mixed_exact_domain(source).map_err(|e| e.to_string()),
+        BINARY => parse_canonical_binary(source).map_err(|e| e.to_string()),
         other => Err(format!("unknown candidate: {other}")),
     }
 }
@@ -74,7 +74,7 @@ fn trace_program(expressions: &[Expr]) -> Result<String, String> {
 
 fn prepared_session() -> Result<Session, String> {
     let mut session = Session::default();
-    load_core_library(&mut session).map_err(|e| format!("{e:?}"))?;
+    load_core_library(&mut session)?;
     Ok(session)
 }
 
@@ -110,7 +110,7 @@ fn preflight(candidate: &str, source: &str) -> Result<(), String> {
     // exact-width binary source (QUOTE/CAR only). It deliberately does not
     // grant callable meaning to English aliases or use a legacy SID table.
     let mut session = Session::default();
-    let result = eval_lowered_expressions(&lowered, &mut session).map_err(|e| format!("{e:?}"))?;
+    let result = eval_lowered_expressions(&lowered, &mut session)?;
     emit(
         0,
         &semantic_trace,
@@ -156,7 +156,7 @@ fn measure(candidate: &str, phase: &str, source: &str, repeat: usize) -> Result<
             let mut session = prepared_session()?;
             let started = Instant::now();
             let result =
-                eval_lowered_expressions(&lowered, &mut session).map_err(|e| format!("{e:?}"))?;
+                eval_lowered_expressions(&lowered, &mut session)?;
             emit(
                 started.elapsed().as_nanos(),
                 "",
@@ -170,7 +170,7 @@ fn measure(candidate: &str, phase: &str, source: &str, repeat: usize) -> Result<
             let parsed = parse_source(candidate, source)?;
             let lowered = lower_program(&parsed);
             let result =
-                eval_lowered_expressions(&lowered, &mut session).map_err(|e| format!("{e:?}"))?;
+                eval_lowered_expressions(&lowered, &mut session)?;
             emit(
                 started.elapsed().as_nanos(),
                 "",
@@ -190,7 +190,7 @@ fn measure(candidate: &str, phase: &str, source: &str, repeat: usize) -> Result<
             for _ in 0..repeat {
                 last = Some(
                     eval_lowered_expressions(&lowered, &mut session)
-                        .map_err(|e| format!("{e:?}"))?,
+                        ?,
                 );
             }
             let result = last.expect("repeat > 0");

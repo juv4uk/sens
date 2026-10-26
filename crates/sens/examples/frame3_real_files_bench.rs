@@ -73,8 +73,8 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
             continue;
         };
         let words =
-            zig_transport::decode_t5m_words(&raw).map_err(|e| format!("T5 decode after admission: {e:?}"))?;
-        if zig_transport::encode_t5m_direct(&words).map_err(|e| format!("T5 encode: {e:?}"))? != raw {
+            zig_transport::decode_t5m_words(&raw).map_err(|e| e.to_string())?;
+        if zig_transport::encode_t5m_direct(&words).map_err(|e| e.to_string())? != raw {
             return Err(format!("noncanonical physical T5 accepted: {path}").into());
         }
         let parse = parse_canonical_word_sequence(&words);
