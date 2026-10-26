@@ -132,6 +132,19 @@ fn release_workflows_accept_only_the_s_tag_prefix() {
             && publisher.contains("test \"$GITHUB_REF_NAME\" = \"s$VERSION\""),
         "publisher must derive package version with shell-only parsing and compare the s-prefixed tag"
     );
+    // Every CLI archive includes its checksum sidecar; the exact-artifact
+    // publication allow-list must account for all four or `cmp` blocks release.
+    for checksum in [
+        "\"sens-cli_${version}_linux_amd64.sha256\"",
+        "\"sens-cli_${version}_windows_x64.exe.sha256\"",
+        "\"sens-cli_${version}_macos_x64.sha256\"",
+        "\"sens-cli_${version}_macos_arm64.sha256\"",
+    ] {
+        assert!(
+            publisher.contains(checksum),
+            "publisher exact-artifact allow-list must include checksum sidecar {checksum}"
+        );
+    }
     assert!(
         !publisher.contains("python3"),
         "release publisher must not invoke Python"
