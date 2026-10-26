@@ -29,6 +29,21 @@ if [[ "$positive" != *"ARCHIVE (поза мовним коридором): 2 а�
   printf '%s\n' "$positive"
   exit 1
 fi
+# Existing shell benchmark without an archive row must be rejected too.
+printf '#!/usr/bin/env sh\necho unregistered historical runner\n' > "$tmp/benchmarks/legacy/unregistered_runner.sh"
+git -C "$tmp" add benchmarks/legacy/unregistered_runner.sh
+git -C "$tmp" commit -qm "negative unregistered shell archive witness"
+if SENS_PR_FIRST_FIELD='SENS_SOURCE=tests/legacy/test_old.sens' bash "$gate" --root "$tmp" > "$tmp/shell-negative.log" 2>&1; then
+  echo "LANGUAGE_POLICY_ARCHIVE_SELFTEST=FAIL unregistered historical shell runner was accepted"
+  cat "$tmp/shell-negative.log"
+  exit 1
+fi
+if ! grep -q 'unregistered_exclusion=benchmarks/legacy/unregistered_runner.sh' "$tmp/shell-negative.log"; then
+  echo "LANGUAGE_POLICY_ARCHIVE_SELFTEST=FAIL shell archive escaped complete extension scan"
+  cat "$tmp/shell-negative.log"
+  exit 1
+fi
+# Required new foreign-test negative witness.
 mkdir -p "$tmp/tests/new"
 printf 'print("new foreign test")\n' > "$tmp/tests/new/test_foreign.py"
 git -C "$tmp" add tests/new/test_foreign.py

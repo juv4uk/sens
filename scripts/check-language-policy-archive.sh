@@ -84,7 +84,7 @@ while IFS= read -r path; do
     echo "LANGUAGE_POLICY_ARCHIVE=FAIL unregistered_exclusion=$path"
     bad=1
   fi
-done <<<"$(git ls-files | grep -E '\.(py|pyi|js|mjs|cjs|ts|tsx|jsx|rb|go|php|rkt|lua|swift|java|kt|scala|pl|jl)$' || true)"
+done <<<"$(git ls-files | grep -E '\.(py|pyi|js|mjs|cjs|ts|tsx|jsx|rb|go|php|rkt|lua|swift|java|kt|scala|pl|jl|sh|f90|clp|sbcl|fs|v)$' || true)"
 
 for path in "${!archived[@]}"; do
   if ! is_foreign_testbench "$path"; then
