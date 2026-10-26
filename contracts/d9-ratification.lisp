@@ -1,5 +1,7 @@
 ; contracts/d9-ratification.lisp
-; РАТИФІКОВАНО ВЛАСНИКОМ 2026-10-07 — issue #4008.
+; D9-РАМКА РАТИФІКОВАНА 2026-10-07 (#4008); ВЛАСНИК ВІДКЛИКАВ ДВІ МОВНІ НАЗВИ 2026-10-26.
+; Координати 110011000 та 110100100 лишаються зарезервованими невикличними слотами.
+; Вони зберігають щільність координатної карти, але не визначають зовнішні мовні операції.
 ; Нормативний зріз D9: 512/512 різних резидентів.
 ; Повна точна карта: knowledge/d9-ratified.json
 ; Джерело-кандидат: #4007 / 99913a3645576ce0a2035832b549bed574a1591e
@@ -22,9 +24,9 @@
 
   (laws
     . ((identity . "exact 9-bit coordinate + Core.D9 + owner-ratified resident law")
-       (dense . "all 512 exact D9 coordinates are occupied by distinct owner-ratified residents")
+       (dense . "all 512 exact D9 coordinates remain occupied by distinct entries; retired external-utility coordinates are reserved tombstones and are not callable language residents")
        (derivability . "derived/generated semantics may be residents; derivability does not revoke residency")
-       (runtime-separation . "ratified residency does not imply callable mechanism; missing D9 mechanisms fail closed")
+       (runtime-separation . "catalogue residency does not imply callable mechanism; missing D9 mechanisms fail closed; retired reserved slots have no callable surface")
        (legacy-non-authority . "Sens8/Sid8/Function8, semantic-registry source codes and historical placement coordinates have zero D9 placement authority unless independently re-derived")
        (gauge-authority . "the #4007 S4 gauge representative is normative by owner decision #4008 while remaining provenance-distinct from theorem-forced selector coordinates")))
 
@@ -437,7 +439,7 @@
     (resident "110010101" "DEFINE-CONDITION" owner-ratified-s4-gauge-choice S4-CANONICAL-GAUGE)
     (resident "110010110" "DEFSTRUCT" owner-ratified-s4-gauge-choice S4-CANONICAL-GAUGE)
     (resident "110010111" "DEFTYPE" owner-ratified-s4-gauge-choice S4-CANONICAL-GAUGE)
-    (resident "110011000" "SHA256-HEX" owner-ratified-s4-gauge-choice S4-CANONICAL-GAUGE)
+    (resident "110011000" "RETIRED-RESERVED-SLOT-110011000" owner-ratified-s4-gauge-choice S4-CANONICAL-GAUGE)
     (resident "110011001" "I32-BUFFER" owner-ratified-s4-gauge-choice S4-CANONICAL-GAUGE)
     (resident "110011010" "NUMERIC-BUFFER-LENGTH" owner-ratified-s4-gauge-choice S4-CANONICAL-GAUGE)
     (resident "110011011" "NUMERIC-BUFFERP" owner-ratified-s4-gauge-choice S4-CANONICAL-GAUGE)
@@ -449,7 +451,7 @@
     (resident "110100001" "F32-BUFFER" owner-ratified-s4-gauge-choice S4-CANONICAL-GAUGE)
     (resident "110100010" "STRING-LENGTH" owner-ratified-s4-gauge-choice S4-CANONICAL-GAUGE)
     (resident "110100011" "STRING-SLICE" owner-ratified-s4-gauge-choice S4-CANONICAL-GAUGE)
-    (resident "110100100" "JSON-PARSE" owner-ratified-s4-gauge-choice S4-CANONICAL-GAUGE)
+    (resident "110100100" "RETIRED-RESERVED-SLOT-110100100" owner-ratified-s4-gauge-choice S4-CANONICAL-GAUGE)
     (resident "110100101" "NUMERIC-EQUALITY" owner-ratified-s4-gauge-choice S4-CANONICAL-GAUGE)
     (resident "110100110" "STRINGP" owner-ratified-s4-gauge-choice S4-CANONICAL-GAUGE)
     (resident "110100111" "NUMERIC-BUFFER-REF" owner-ratified-s4-gauge-choice S4-CANONICAL-GAUGE)
