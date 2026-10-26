@@ -51,7 +51,7 @@ fn main() {
     assert!((3..=101).contains(&samples) && samples % 2 == 1);
 
     let physical = fs::read(&argv[1]).expect("physical T5 file");
-    let words = zig_transport::decode_t5m_words(&physical).expect("ratified T5 transport");
+    let words = zig_transport::decode_t5m_words(&physical).expect("ратифікований транспорт T5");
     let ast = parse_canonical_word_sequence(&words).expect("canonical D2");
     assert!(!ast.is_empty(), "empty D5 corpus");
     let lowered = lower_program(&ast);
