@@ -53,6 +53,9 @@ default = ["zig-transport"]
 zig-transport = ["wsm-guard-core/zig-source"]
 # Opt-in instrumentation for benchmarks of physical binary SENS programs.
 benchmark-ast-visits = ["sens/benchmark-ast-visits"]
+# Opt-in only: size-matrix comparison against historical Rust F3 reference.
+# Default release path stays Zig/T5M; feature exists so cfg is not unexpected under -D warnings.
+rust-f3-reference = ["sens/rust-f3-reference"]
 # Without this default, physical CLI commands fail closed; there is no Rust fallback.
 
 [dependencies]
