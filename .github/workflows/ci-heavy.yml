@@ -49,7 +49,7 @@ jobs:
           persist-credentials: false
       - name: Тригер-вартовий — один фокусований workflow
         shell: bash
-        run: python3 scripts/ci_one_focused_workflow.py
+        run: bash scripts/ci-one-focused-workflow.sh
 
 
       - uses: ./.github/actions/install-zig
@@ -446,7 +446,8 @@ jobs:
       - name: "System One research — Python unit test excluded"
         if: ${{ always() && steps.changed-t5m-lisp.outputs.system_one_research_tests == 'true' }}
         shell: bash
-        run: echo "PYTHON_UNIT_TESTS=EXCLUDED_BY_REQUEST native_equivalent=NOT_VERIFIED"
+        run: |
+          echo 'PYTHON_UNIT_TESTS=EXCLUDED_BY_REQUEST native_equivalent=NOT_VERIFIED'
 
       - name: Д1/Core1 — справжнє виконання масивів при зміні залежностей
         if: ${{ always() && steps.changed-t5m-lisp.outputs.core1_tests == 'true' && !startsWith(github.event.head_commit.message, 'LISP-TIER:') }}
@@ -788,11 +789,14 @@ jobs:
           source="$repair_dir/current.lisp"
           printf '(атом? (як-є ()))\n' > "$source"
           bash scripts/refresh-verified-t5m-pair.sh "$source" "$PWD/target/debug/sens" "$PWD/target/debug/sens-trit"
-          initial_sha="$(sha256sum "$repair_dir/current.sens" | cut -d' ' -f1)"
+          cp -- "$repair_dir/current.sens" "$repair_dir/initial.sens"
           printf '(атом? (як-є (())))\n' > "$source"
           bash scripts/refresh-verified-t5m-pair.sh "$source" "$PWD/target/debug/sens" "$PWD/target/debug/sens-trit"
-          repaired_sha="$(sha256sum "$repair_dir/current.sens" | cut -d' ' -f1)"
-          test "$initial_sha" != "$repaired_sha"
+          if cmp -s "$repair_dir/initial.sens" "$repair_dir/current.sens"; then
+            echo "::error::T5M_REPAIR_DID_NOT_CHANGE_PHYSICAL_PAIR" >&2
+            exit 1
+          fi
+          cp -- "$repair_dir/current.sens" "$repair_dir/repaired.sens"
           "$PWD/target/debug/sens-trit" view "$repair_dir/current.sens" > "$repair_dir/readback"
           cmp "$repair_dir/readback" "$repair_dir/current"
           printf '(невідома-функція ())\n' > "$source"
@@ -800,7 +804,7 @@ jobs:
             echo "::error::T5M_REPAIR_BAD_SOURCE_ACCEPTED" >&2
             exit 1
           fi
-          test "$(sha256sum "$repair_dir/current.sens" | cut -d' ' -f1)" = "$repaired_sha"
+          cmp "$repair_dir/repaired.sens" "$repair_dir/current.sens"
           cmp "$repair_dir/readback" "$repair_dir/current"
           # Фізичний publisher перевіряється реальним SENS/Zig, без Python/JSON.
           bash -n scripts/refresh-executed-t5m-pair.sh
@@ -811,13 +815,13 @@ jobs:
           test -s "${executed_source}.sens"
           test -s "$executed_source"
           "$PWD/target/debug/sens-trit" verify-view "${executed_source}.sens"
-          executed_sha="$(sha256sum "${executed_source}.sens" | cut -d' ' -f1)"
+          cp -- "${executed_source}.sens" "$repair_dir/executed.sens"
           printf '(невідома-функція ())\n' > "${executed_source}.lisp"
           if bash scripts/refresh-executed-t5m-pair.sh "${executed_source}.lisp" "$PWD/target/debug/sens"; then
             echo "::error::T5M_EXECUTED_REFRESH_BAD_SOURCE_ACCEPTED" >&2
             exit 1
           fi
-          test "$(sha256sum "${executed_source}.sens" | cut -d' ' -f1)" = "$executed_sha"
+          cmp "$repair_dir/executed.sens" "${executed_source}.sens"
           echo "T5M_EXECUTED_REFRESH_LIVE_SENS PASS: native mint, paired execution, Zig inverse, negative no-clobber"
           echo "T5M_REPAIR_LIVE_SENS PASS: native mint, pair, replacement, inverse view, negative"
 
@@ -924,7 +928,7 @@ jobs:
           while IFS= read -r source || [[ -n "$source" ]]; do
             [[ -n "$source" ]] || continue
             total=$((total + 1))
-            id="$(printf '%s' "$source" | sha256sum | cut -c1-16)"
+            id="$total"
             dir="$staged/$id"
             physical="$dir/$(basename "$source" .lisp).sens"
             if [[ ! -f "$source" || -L "$source" || ! -s "$physical" || -L "$physical" ||
@@ -1315,7 +1319,7 @@ jobs:
             }
             if ! cmp -s "$temp_d11/program.sens" "$physical"; then
               echo "D11_T5M_BYTES_DRIFT layer=physical input=$source expected=$physical actual=$temp_d11/program.sens" >&2
-              sha256sum "$physical" "$temp_d11/program.sens" >&2
+              printf 'expected_bytes=%s actual_bytes=%s\n' "$(wc -c < "$physical")" "$(wc -c < "$temp_d11/program.sens")" >&2
               exit 1
             fi
             if ! target/debug/sens-trit view "$physical" | cmp -s - "$bitview"; then
@@ -1708,7 +1712,7 @@ jobs:
           output="$RUNNER_TEMP/sens-lib-triplets"
           mkdir -p "$output"
           report="$output/NATIVE-RESULTS.tsv"
-          printf 'source\tstatus\tsha256_source\tsha256_sens\tsha256_view\n' > "$report"
+          printf 'source\tstatus\tsource_bytes\tsens_bytes\tview_bytes\n' > "$report"
           printf '%s\n' "$GITHUB_SHA" > "$output/EXPORT-HEAD"
           CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 \
             cargo build --locked -p sens-cli --bin sens --bin sens-trit
@@ -1770,9 +1774,9 @@ jobs:
               cp -- "$source" "$stem.sens" "$stem" "$output/$(dirname "$source")/"
               printf '%s\t%s\t%s\t%s\t%s\n' \
                 "$source" "$native_status" \
-                "$(sha256sum "$source" | cut -d' ' -f1)" \
-                "$(sha256sum "$stem.sens" | cut -d' ' -f1)" \
-                "$(sha256sum "$stem" | cut -d' ' -f1)" >> "$report"
+                "$(wc -c < "$source")" \
+                "$(wc -c < "$stem.sens")" \
+                "$(wc -c < "$stem")" >> "$report"
             else
               printf '::error::LIB_NATIVE_TRIPLET_RED source=%s\n' "$source" >&2
               printf '%s\tNATIVE_REJECTED\t-\t-\t-\n' "$source" >> "$report"
