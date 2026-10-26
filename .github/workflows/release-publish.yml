@@ -115,6 +115,7 @@ jobs:
             "sens-cli_${version}_windows_x64.exe" \
             "sens-cli_${version}_windows_x64.exe.sha256" \
             "sens-cli_${version}_windows_x64.msi" \
+            "sens-cli_${version}_windows_x64.msi.sha256" \
             "sens-cli_${version}_macos_x64" \
             "sens-cli_${version}_macos_x64.sha256" \
             "sens-cli_${version}_macos_arm64" \
