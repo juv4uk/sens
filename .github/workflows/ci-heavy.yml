@@ -446,7 +446,7 @@ jobs:
       - name: "System One research — один адресний тест учителя, учня та метрик"
         if: ${{ always() && steps.changed-t5m-lisp.outputs.system_one_research_tests == 'true' }}
         shell: bash
-        echo 'PYTHON_UNIT_TESTS=EXCLUDED_BY_REQUEST NOT_VERIFIED'
+        run: echo 'PYTHON_UNIT_TESTS=EXCLUDED_BY_REQUEST NOT_VERIFIED'
 
       - name: Д1/Core1 — справжнє виконання масивів при зміні залежностей
         if: ${{ always() && steps.changed-t5m-lisp.outputs.core1_tests == 'true' && !startsWith(github.event.head_commit.message, 'LISP-TIER:') }}
@@ -1197,7 +1197,7 @@ jobs:
 
       - name: Локальний Windows-шлях до пінованого Zig — без послаблення версії
         if: ${{ always() }}
-        echo 'PYTHON_UNIT_TESTS=EXCLUDED_BY_REQUEST NOT_VERIFIED'
+        run: echo 'PYTHON_UNIT_TESTS=EXCLUDED_BY_REQUEST NOT_VERIFIED'
 
       - name: Заборона закодованих літералів у Lisp
         shell: bash
@@ -1223,7 +1223,7 @@ jobs:
 
       - name: Клавіатурні символи у проєкціях ук, укр і sym (D1–D11)
         if: ${{ always() }} # самостійна перевірка, навіть коли попередній guard червоний
-        echo 'PYTHON_UNIT_TESTS=EXCLUDED_BY_REQUEST NOT_VERIFIED'
+        run: echo 'PYTHON_UNIT_TESTS=EXCLUDED_BY_REQUEST NOT_VERIFIED'
       - name: Безпечність dry-run і чинні українські Core-бібліотеки
         if: ${{ always() }}
         run: |
