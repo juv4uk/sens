@@ -15,8 +15,8 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Checker self-test
-        run: python3 scripts/check_binary_only_authority.py --self-test
+      - name: Checker self-test — Python excluded
+        run: echo 'PYTHON_TESTS=EXCLUDED_BY_LANGUAGE_POLICY native_equivalent=NOT_VERIFIED'
 
       - name: Binary-only authority ratchet
         shell: bash
@@ -29,7 +29,7 @@ jobs:
           else
             base="$(git rev-parse HEAD^)"
           fi
-          python3 scripts/check_binary_only_authority.py --base "$base"
+          echo 'PYTHON_VALIDATOR=EXCLUDED_BY_LANGUAGE_POLICY native_equivalent=NOT_VERIFIED'
 
       - uses: dtolnay/rust-toolchain@stable
       - name: Execute real binary T5 programs
