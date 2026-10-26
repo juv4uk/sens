@@ -86,7 +86,9 @@ gate_new_artifact() {
 
 self_test() {
   local first_artifact simulated_new counted
-  first_artifact="$(archive_rows | awk -F'|' 'NR==1 {print $1; exit}')"
+  # Read archive_rows to EOF: an early awk exit closes the pipe and can
+  # SIGPIPE the producer under set -o pipefail (exit 141).
+  first_artifact="$(archive_rows | awk -F'|' 'NR==1 {print $1}')"
   [[ -n "$first_artifact" ]] || die "self-test не знайшов зареєстрований артефакт"
   archive_has_artifact "$first_artifact" || die "self-test позитив: архівний артефакт не зараховано"
   gate_new_artifact "$first_artifact" false "" || die "self-test позитив: зареєстрований архів відхилено"
