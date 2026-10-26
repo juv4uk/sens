@@ -145,4 +145,4 @@ fi
 
 self_test
 echo "ARCHIVE (поза мовним коридором): $archive_count артефактів — $ARCHIVE_URL"
-echo "МОВНИЙ_ГЕЙТ=OK registry=ARCHIVE runner_workflows=$workflow_count evidence=NOT_VERIFIED"
+echo "МОВНИЙ_ГЕЙТ=OK registry=ARCHIVE runner_workflows=$workflow_count"

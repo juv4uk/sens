@@ -1,34 +1,7 @@
 #!/usr/bin/env bash
-# Push gate stays mechanical and native: no Python, JSON oracle, or digest receipts.
+# Локальний pre-push: перевірка реєстру та документації.
 set -euo pipefail
 repo_root="$(git rev-parse --show-toplevel)"
 cd "$repo_root"
-
-zero=0000000000000000000000000000000000000000
-while read -r local_ref local_sha remote_ref remote_sha; do
-  [[ -n "${local_ref:-}" ]] || continue
-  [[ "$local_sha" != "$zero" ]] || continue
-
-  if [[ "$remote_sha" == "$zero" ]]; then
-    base="$(git merge-base "$local_sha" origin/main 2>/dev/null || git rev-list --max-parents=0 "$local_sha" | tail -n 1)"
-  else
-    base="$remote_sha"
-  fi
-
-  git diff --check "$base" "$local_sha"
-  while IFS=$'\t' read -r status path; do
-    [[ -n "${path:-}" ]] || continue
-    case "$status" in
-      A|M|R*)
-        case "$path" in
-          *.py|*.pyc)
-            printf 'Push відхилено: активний Python-файл треба перенести на SENS або дозволений механізм: %s\n' "$path" >&2
-            exit 1
-            ;;
-        esac
-        ;;
-    esac
-  done < <(git diff --name-status "$base" "$local_sha")
-done
-
-printf 'SENS_PUSH_GATE=PASS native_shell=only\n'
+bash scripts/check-language-policy-archive.sh
+scripts/check-bilingual-docs

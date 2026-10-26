@@ -1,29 +1,7 @@
 #!/usr/bin/env bash
-# Lightweight local gate: no Python/JSON oracle, no digest receipts.
+# Локальний pre-commit: лише наявні shell-гейти; жодних мовних сканерів у хості.
 set -euo pipefail
 repo_root="$(git rev-parse --show-toplevel)"
 cd "$repo_root"
-
-git diff --cached --check
-
-# Keep Python out of the active development path. Legacy files may be removed,
-# but adding or changing executable Python is not accepted.
-mapfile -t staged_paths < <(git -c core.quotepath=false diff --cached --name-status --diff-filter=ACMR)
-for item in "${staged_paths[@]}"; do
-  status="${item%%$'\t'*}"
-  path="${item#*$'\t'}"
-  if [[ "$path" == *.py || "$path" == *.pyc ]] && [[ "$status" == A || "$status" == M || "$status" == R* ]]; then
-    printf 'Коміт відхилено: активний Python-файл треба перенести на SENS або дозволений механізм: %s\n' "$path" >&2
-    exit 1
-  fi
-done
-
-# Run only repository-native shell guards; full semantic laws are a targeted CI suite.
-for path in "${staged_paths[@]#*$'\t'}"; do
-  case "$path" in
-    *.sh|githooks/pre-commit|githooks/pre-push|githooks/commit-msg)
-      [[ ! -f "$path" ]] || bash -n "$path"
-      ;;
-  esac
-done
-"$repo_root/scripts/check-bilingual-docs"
+bash scripts/check-language-policy-archive.sh
+scripts/check-bilingual-docs

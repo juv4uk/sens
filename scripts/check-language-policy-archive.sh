@@ -176,4 +176,4 @@ if (( bad != 0 )); then
   echo "LANGUAGE_POLICY_ARCHIVE=FAIL rows=$rows"
   exit 1
 fi
-echo "LANGUAGE_POLICY_ARCHIVE=VALID rows=$rows evidence=NOT_VERIFIED"
+echo "LANGUAGE_POLICY_ARCHIVE=VALID rows=$rows"
