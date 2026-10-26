@@ -67,7 +67,7 @@ fn signed_and_rational_values_roundtrip_without_domain_loss() {
             let from_parts = PackedBitstream::from_parts(reconstructed_bytes, reconstructed_len)
                 .expect("canonical padding and exact meaningful bit count");
             assert_eq!(decode_packed_numeric_value(&from_parts).unwrap(), value);
-            if packed.bit_len() % 8 != 0 {
+            if !packed.bit_len().is_multiple_of(8) {
                 let (mut bytes, bit_len) = packed.clone().into_parts();
                 *bytes.last_mut().unwrap() |= 1; // a forbidden physical padding bit
                 assert!(PackedBitstream::from_parts(bytes, bit_len).is_none());
