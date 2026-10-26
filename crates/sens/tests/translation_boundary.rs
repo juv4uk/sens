@@ -42,12 +42,13 @@ fn eval_translation(source: &str) -> String {
         sens::eval_pinned_reasoning_source(path, library, &mut session)
             .expect("чинна reasoning-бібліотека має завантажуватися через точний pinned reader");
     }
-    // Вираз іде ТИМ САМИМ reader-ом, що й бібліотеки: reasoning-шлях ліфтить
-    // D9-голови (порада-рішення-у-світ тощо), загальний — ні. Раніше тут була
-    // асиметрія: world.lisp завантажувався з ліфтингом, а вираз без нього,
-    // і D9-голова лишалась Text7-послідовністю → невідомо Text7 binding.
+    // Зовнішній B4-кандидат є даними перекладу, тож парсимо його в
+    // контексті lib/translation.lisp. Це зберігає невідомі імена у quoted
+    // payload як інертні дані замість вимагати D8-I/O Text7 binding.
+    // parse_mixed_exact_domain_reasoning_source виконує спільний підйом
+    // дозволених D9-заголовків незалежно від pinned шляху.
     eval_parsed_expressions(
-        &sens::parse_mixed_exact_domain_reasoning_source("lib/world.lisp", source)
+        &sens::parse_mixed_exact_domain_reasoning_source("lib/translation.lisp", source)
             .unwrap_or_else(|error| panic!("чинний D1–D10 reader: {error}; source: {source}")),
         &mut session,
     )
