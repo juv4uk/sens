@@ -180,7 +180,7 @@ fn accepted_translation_review_is_pure_and_only_exposes_an_admission_payload() {
         (визначити proposal
           (як-є (translation-1 candidate clause
                    "Socrates is human."
-                   ((human socrates)))))
+                   (human socrates))))
         (визначити review (переклад-перевірка (як-є corpus) proposal))
         (список
           (переклад-перевірка-стан review)
