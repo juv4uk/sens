@@ -1,27 +1,18 @@
-name: D6 set lattice research
+name: "D6 set-lattice — excluded by Rust/Zig/SENS language policy"
 
 on:
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
-  lattice:
+  policy-exclusion:
+    name: Foreign-language test/benchmark excluded (NOT_VERIFIED)
     runs-on: ubuntu-latest
-    timeout-minutes: 5
     steps:
-      - uses: actions/checkout@v5
-      - name: Run coordinate-independent set lattice witness
+      - name: Report exclusion without implying a passing test
         run: |
-          rm -rf /tmp/d6-set-lattice
-          python3 benchmarks/d6-set-lattice/run.py             --out /tmp/d6-set-lattice
-      - name: Publish report
-        if: always()
-        run: |
-          if test -f /tmp/d6-set-lattice/report.md; then
-            cat /tmp/d6-set-lattice/report.md >> "$GITHUB_STEP_SUMMARY"
-          fi
-      - uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: d6-set-lattice
-          path: /tmp/d6-set-lattice/
-          retention-days: 14
+          echo "FOREIGN_LANGUAGE_TEST_BENCH=EXCLUDED_BY_POLICY"
+          echo "NATIVE_EQUIVALENT=NOT_VERIFIED"
+          echo "NO_PASS_CLAIM=MADE"
