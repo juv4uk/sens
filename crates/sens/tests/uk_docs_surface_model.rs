@@ -54,8 +54,8 @@ fn documented_ids() -> Vec<String> {
             let identity = fields.next()?;
             let (domain, bits) = identity.split_once(':')?;
             let width = domain.strip_prefix('D')?.parse::<usize>().ok()?;
-            (width >= 1
-                && width <= 10
+            ((1..=10).contains(&width)
+                &&
                 && bits.len() == width
                 && bits.bytes().all(|bit| matches!(bit, b'0' | b'1')))
                 .then(|| identity.to_string())

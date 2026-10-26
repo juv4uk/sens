@@ -801,7 +801,7 @@ mod tests {
 
     #[test]
     fn d10_descriptor_and_padding_are_canonical_without_implicit_callability() {
-        let d10 = Word::D10(DomainD10::new(0b1010_1010_10).unwrap());
+        let d10 = Word::D10(DomainD10::new(0b10_1010_1010).unwrap());
         assert_eq!(d10.descriptor_cost(), 1);
         let one = vec![d10.clone()];
         let encoded = encode(&one).unwrap();
