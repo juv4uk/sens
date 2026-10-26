@@ -69,18 +69,19 @@ pub fn parse_mixed_exact_domain_machine_source(
     }
 }
 
-/// Already-admitted D8 I/O names and exact words from the owner domain ladder.
+/// Already-admitted D8 mechanism names and exact words from the owner domain ladder.
 /// Shared by ordinary Ukrainian source and path-pinned readers. Neither bare
 /// historical W8 bytes nor quoted/bound words obtain callable authority.
-fn admitted_d8_io_uk_bits(spelling: &str) -> Option<&'static str> {
-    // Called only by explicit path-pinned D8 readers. Admit the exact ratified
-    // words alongside their Ukrainian surfaces in those files only. Ordinary
-    // mixed source and quoted payloads still treat W8-shaped bits as data.
+fn admitted_d8_uk_bits(spelling: &str) -> Option<&'static str> {
+    // Admit only exact ratified words alongside their Ukrainian surfaces.
+    // Ordinary source cannot infer width from arbitrary numeric-looking text;
+    // quoted payloads remain opaque and do not acquire callable authority.
     match spelling {
         "код-символу" | "11100000" => Some("11100000"),
         "текст-у-символ" | "11101101" => Some("11101101"),
         "символ-у-текст" | "11101110" => Some("11101110"),
         "значення-у-текст" | "11110100" => Some("11110100"),
+        "однакові?" | "11110111" => Some("11110111"),
         _ => None,
     }
 }
@@ -121,7 +122,7 @@ fn lift_pinned_d8_io(source: &str, expression: Expr, depth: u32) -> Result<Expr,
         });
     }
 
-    if let Some(bits) = head_spelling.and_then(admitted_d8_io_uk_bits) {
+    if let Some(bits) = head_spelling.and_then(admitted_d8_uk_bits) {
         let word = parse_binary_source_words(bits)?[0].word;
         lifted[0] = Expr {
             kind: ExprKind::DomainIdentity(DomainIdentity::from_source_word(word)),
@@ -1263,7 +1264,7 @@ fn lift_head(
             // Ordinary mixed source admits D3–D6 callable heads. D8 is a
             // narrower, explicit Ukrainian allowlist; D9/D10 stay path-pinned.
             let admitted_width = (3..=6).contains(&identity.width())
-                || (identity.width() == 8 && (admitted_d8_io_uk_bits(spelling).is_some() || spelling == "однакові?"));
+                || (identity.width() == 8 && admitted_d8_uk_bits(spelling).is_some());
             if admitted_width {
                 return Ok(Expr {
                     kind: ExprKind::DomainIdentity(identity),
@@ -1274,7 +1275,7 @@ fn lift_head(
         // D8 I/O was already admitted by the same reader in pinned modules.
         // Apply its exact Ukrainian address in ordinary source as well:
         // binder names above win; quoted data never reaches lift_head.
-        if let Some(bits) = admitted_d8_io_uk_bits(spelling) {
+        if let Some(bits) = admitted_d8_uk_bits(spelling) {
             let word = parse_binary_source_words(bits)?[0].word;
             return Ok(Expr {
                 kind: ExprKind::DomainIdentity(DomainIdentity::from_source_word(word)),
@@ -1836,6 +1837,28 @@ mod tests {
                 "{surface} must select only its exact D8 identity"
             );
         }
+    }
+
+    #[test]
+    fn core4_pinned_source_lifts_ratified_d8_structural_equality() {
+        let expression = only(
+            parse_mixed_exact_domain_core_source(
+                "lib/core4.lisp",
+                "(однакові? (як-є (а)) (як-є (а)))",
+            )
+            .expect("Core4 structural equality is an explicitly admitted D8 mechanism"),
+        );
+        let ExprKind::List(call) = expression.kind else {
+            panic!("structural equality call");
+        };
+        assert!(
+            matches!(
+                &call[0].kind,
+                ExprKind::DomainIdentity(identity)
+                    if identity.width() == 8 && identity.packed_bits() == 0b11110111
+            ),
+            "Core4 must preserve the exact D8 EQUAL identity"
+        );
     }
 
     #[test]
