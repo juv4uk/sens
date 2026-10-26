@@ -105,7 +105,7 @@ jobs:
   laws:
     name: SENS/Zig/T5M закони — ручний набір або цільовий коміт
     # Точний маркер запускає доказ на тому самому SHA; решта push лишається легким.
-    if: ${{ (github.event_name == 'workflow_dispatch' && inputs.suite == 'laws') || (github.event_name == 'push' && contains(github.event.head_commit.message, 'SENS_NATIVE_LAWS')) }}
+    if: ${{ (github.event_name == 'workflow_dispatch' && inputs.suite == 'laws') || (github.event_name == 'push' && contains(github.event.head_commit.message, 'SENS_NATIVE_LAWS')) || (github.event_name == 'pull_request' && contains(github.event.pull_request.title, 'SENS_TRANSLATION_BOUNDARY')) }}
     runs-on: ubuntu-24.04
     timeout-minutes: 50
     steps:
