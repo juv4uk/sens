@@ -1080,6 +1080,9 @@ fn lift_quoted_d4_identity_data(expression: Expr, depth: u32) -> Result<Expr, La
                     let expected_bits = match name.as_ref() {
                         "хибне?" => Some(0b0100),
                         "визначити" => Some(0b0011),
+                        // Macros such as повідомити-знання generate an
+                        // executable D4 append head from quoted SENS data.
+                        "приєднати" => Some(0b1111),
                         _ => None,
                     };
                     if let Some(expected_bits) = expected_bits {
@@ -1333,6 +1336,33 @@ mod tests {
         };
         assert!(matches!(&goal[0].kind, ExprKind::Symbol(name) if name.as_ref() == "human"));
         assert!(matches!(&goal[1].kind, ExprKind::Symbol(name) if name.as_ref() == "socrates"));
+    }
+
+    #[test]
+    fn quoted_macro_append_keeps_exact_d4_identity_and_arguments_as_data() {
+        let expression = only(
+            parse_mixed_exact_domain("(як-є (приєднати журнал-знань події))")
+                .expect("quoted macro-generated append must parse"),
+        );
+        let ExprKind::List(quote) = expression.kind else {
+            panic!("QUOTE");
+        };
+        let ExprKind::List(data) = &quote[1].kind else {
+            panic!("quoted macro data");
+        };
+        assert!(matches!(
+            &data[0].kind,
+            ExprKind::DomainIdentity(identity)
+                if identity.width() == 4 && identity.packed_bits() == 0b1111
+        ));
+        assert!(matches!(
+            &data[1].kind,
+            ExprKind::Symbol(name) if name.as_ref() == "журнал-знань"
+        ));
+        assert!(matches!(
+            &data[2].kind,
+            ExprKind::Symbol(name) if name.as_ref() == "події"
+        ));
     }
 
     #[test]
