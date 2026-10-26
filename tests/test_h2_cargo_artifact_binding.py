@@ -29,7 +29,7 @@ class H2CargoActualExecutable(unittest.TestCase):
         self.source = self.root / "crates/sens-cli/src/main.rs"
         self.artifact = {
             "reason": "compiler-artifact",
-            "package_id": "path+file:///workspace#sens-cli@0.42.0",
+            "package_id": "path+file:///workspace#sens-cli@0.42.1",
             "manifest_path": str(self.manifest),
             "target": {"kind": ["bin"], "name": "sens",
                        "src_path": str(self.source)},

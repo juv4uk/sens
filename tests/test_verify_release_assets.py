@@ -10,7 +10,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
 from verify_release_assets import _expected, prepare, verify_replay
 
-TAG = "l0.42.0"
+TAG = "l0.42.1"
 SHA = "a" * 40
 
 
@@ -40,7 +40,7 @@ class ReleaseAssetsTest(unittest.TestCase):
         # A second pathname to the same inode is not a downloaded artifact.
         # One shared binary or even the checksum receipt invalidates replay.
         prepare(self.dist, TAG, SHA)
-        for name in ("sens-cli_0.42.0_linux_amd64", "SHA256SUMS"):
+        for name in ("sens-cli_0.42.1_linux_amd64", "SHA256SUMS"):
             with self.subTest(asset=name):
                 downloaded = self.root / ("downloaded-hardlinked-" + name)
                 shutil.copytree(self.dist, downloaded)
@@ -52,7 +52,7 @@ class ReleaseAssetsTest(unittest.TestCase):
                     verify_replay(self.dist, downloaded, TAG, SHA)
 
     def test_missing_msi_rejected(self):
-        (self.dist / "sens-cli_0.42.0_windows_x64.msi").unlink()
+        (self.dist / "sens-cli_0.42.1_windows_x64.msi").unlink()
         with self.assertRaisesRegex(ValueError, "missing"):
             prepare(self.dist, TAG, SHA)
 
@@ -86,7 +86,7 @@ class ReleaseAssetsTest(unittest.TestCase):
     def test_bad_downloaded_checksum_rejected(self):
         prepare(self.dist, TAG, SHA)
         replay = self.replay()
-        (replay / "sens-cli_0.42.0_macos_arm64").write_bytes(b"corrupt")
+        (replay / "sens-cli_0.42.1_macos_arm64").write_bytes(b"corrupt")
         with self.assertRaisesRegex(ValueError, "digest/size mismatch"):
             verify_replay(self.dist, replay, TAG, SHA)
 
@@ -125,7 +125,7 @@ class ReleaseAssetsTest(unittest.TestCase):
 
     def test_wrong_tag_rejected(self):
         # Asset staging must use the same canonical tag grammar as tag admission.
-        for tag in ("main", "l00.42.0", "l0.042.0", "l0.42.00", "l0.42", "l0.42.0-rc1"):
+        for tag in ("main", "l00.42.1", "l0.042.1", "l0.42.1.0", "l0.42", "l0.42.1-rc1"):
             with self.subTest(tag=tag), self.assertRaisesRegex(ValueError, "malformed release tag"):
                 prepare(self.dist, tag, SHA)
 

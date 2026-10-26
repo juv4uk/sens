@@ -1,11 +1,11 @@
 # Випуск підготовленого snapshot SENS
 
-Цей документ описує **умови** випуску, а не підтверджує GO для кандидата. Поточний задум — `l0.42.0` / Cargo `0.42.0` / Contract 12.0; див. кореневі [RELEASE.md](../../RELEASE.md) та [RELEASE-EVIDENCE.md](../../RELEASE-EVIDENCE.md).
+Цей документ описує **умови** випуску, а не підтверджує GO для кандидата. Поточний задум — `l0.42.1` / Cargo `0.42.1` / Contract 12.0; див. кореневі [RELEASE.md](../../RELEASE.md) та [RELEASE-EVIDENCE.md](../../RELEASE-EVIDENCE.md).
 
-1. Переконатися, що сім канонічних crates, їхні записи в `Cargo.lock`, Guix та активні asset URL в `packaging/install.sh` узгоджені на `0.42.0`. `scripts/release.lisp` — виведений з ужитку файл-позначка, не драйвер релізу. Не редагувати історичні snapshots/архіви для косметичного усунення старих номерів.
+1. Переконатися, що сім канонічних crates, їхні записи в `Cargo.lock`, Guix та активні asset URL в `packaging/install.sh` узгоджені на `0.42.1`. `scripts/release.lisp` — виведений з ужитку файл-позначка, не драйвер релізу. Не редагувати історичні snapshots/архіви для косметичного усунення старих номерів.
 2. Зафіксувати повний SHA поточного `main`; Rust toolchain задається `rust-toolchain.toml` (`1.99.0`). Перевірити provenance і всі зміни на цьому SHA.
 3. На **цьому самому SHA** вимагати завершені успішні Hosted CI та Release Preflight. Release Preflight повинен пройти `cargo test --locked --workspace`, `cargo clippy --locked --workspace --all-targets -- -D warnings`, version/installer guards, asset integrity, публікаційний guard і bounded T5/triple witnesses. Якщо для SHA немає прогона, запустити **Actions → Release Preflight → Run workflow** для `main`; відсутність прогона або успіх сусіднього SHA — не PASS.
-4. Лише після перегляду доказів власник має явно встановити repository variables `SENS_RELEASE_GO_SHA=<точний 40-hex SHA>` та `SENS_RELEASE_GO_TAG=l0.42.0`. Ці змінні — явне підтвердження рішення власника; автоматично їх не створювати й не підставляти.
+4. Лише після перегляду доказів власник має явно встановити repository variables `SENS_RELEASE_GO_SHA=<точний 40-hex SHA>` та `SENS_RELEASE_GO_TAG=l0.42.1`. Ці змінні — явне підтвердження рішення власника; автоматично їх не створювати й не підставляти.
 5. Після перевірки доказів власник окремо запускає затверджений tag/release workflow для точного SHA. Автоматичний скрипт `scripts/release.lisp` не використовується: файл навмисно виведений з ужитку.
 6. Після тегування Release workflow збирає платформні артефакти як CI artifacts. Єдина фінальна job вимагає повний набір CLI (Linux/Windows/macOS x64/arm64), Windows MSI, portable Web REPL і installer/manifest; генерує SHA-256 та provenance; створює чернетку, завантажує її назад для перевірки побайтової тотожності й digest і публікує тільки після повторної перевірки exact-main SHA та owner GO.
 

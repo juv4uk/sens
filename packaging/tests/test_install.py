@@ -128,7 +128,7 @@ cp "$TEST_PAYLOAD" "$destination"
 
     def test_downloaded_cli_version_must_match_release_before_replacement(self):
         target = self.local_bin / "sens"
-        for reported_version in ("sens 0.41.0", "my-lisp 0.42.0", "sens 0.42.0 extra"):
+        for reported_version in ("sens 0.41.0", "my-lisp 0.42.1", "sens 0.42.1 extra"):
             with self.subTest(reported_version=reported_version):
                 target.write_text("previous binary")
                 self.log.write_text("")

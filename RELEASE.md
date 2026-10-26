@@ -1,8 +1,9 @@
-# SENS / СЕНС — межі релізу l0.42.0
+# SENS / СЕНС — межі релізу l0.42.1
 
-> **DRAFT · NO-GO · оновлено 2026-10-25.** Це межі запропонованого релізу, а не сертифікат готовності чи дозвіл створити тег. Чинний контракт 12.0 ратифіковано, але контракт прямо не засвідчує повноту реалізації. Candidate SHA, release GO і доказовий пакунок ще не встановлені.
+> **DRAFT · NO-GO · оновлено 2026-10-26.** Це межі запропонованого релізу, а не сертифікат готовності чи дозвіл створити тег. Чинний контракт 12.0 ратифіковано, але контракт прямо не засвідчує повноту реалізації. Candidate SHA, release GO і доказовий пакунок ще не встановлені.
 
-**Тег-кандидат:** `l0.42.0` (продовження чинного ланцюга; НЕ `v1.0` без окремого рішення).  
+**Тег-кандидат:** `l0.42.1` (продовження чинного ланцюга; НЕ `v1.0` без окремого рішення).  
+**Причина patch-версії:** неопублікований `l0.42.0` лишається на своєму SHA; після нього `main` отримав зміни CI-політики, тому випуск продовжується як `l0.42.1` без переміщення старого тегу.  
 **Покоління контракту:** Contract 12.0.
 **Дата/SHA випуску:** не встановлені; визначаються лише після GO.  
 **Єдина влада:** [контракт 12.0](contracts/language-contract-12.lisp) і його активна точка входу [language-contract.lisp](language-contract.lisp) → ратифіковані карти доменів, незалежні докази та допущені свідки.
@@ -28,7 +29,7 @@ SENS — експериментальна двійкова мова з *точн
 
 ## Релізні ворота: NO-GO до доказу на одному SHA
 
-1. Підтвердити версійну паритетність: сім канонічних Cargo crates, `Cargo.lock`, Guix та installer мають відповідати `0.42.0`; це має пройти `release_parity` й installer tests на одному candidate SHA. `scripts/release.lisp` виведено з ужитку; він не є запускним релізним драйвером.
+1. Підтвердити версійну паритетність: сім канонічних Cargo crates, `Cargo.lock`, Guix та installer мають відповідати `0.42.1`; це має пройти `release_parity` й installer tests на одному candidate SHA. `scripts/release.lisp` виведено з ужитку; він не є запускним релізним драйвером.
 2. Закрити фактичні P0, включно з [#5406](https://github.com/juv4uk/sens/issues/5406) (T5 authority), [#5408](https://github.com/juv4uk/sens/issues/5408) (quantity witness), [#2170](https://github.com/juv4uk/sens/issues/2170) (exact-width), та всі обов'язкові release blockers із [#4196](https://github.com/juv4uk/sens/issues/4196). Не заміняти незалежного свідка host-перевіркою, не робити BLOCK «зеленим».
 3. Rust compiler тепер закріплено як `1.99.0` у `rust-toolchain.toml` та як явний `toolchain` у release, release-preflight і основних CI workflows. До обіцянки ідентичного бінарного відтворення все ще потрібні точні runner-image та зовнішні tool/distribution digests і їхній запис у доказах.
 4. Для **одного повного SHA** зафіксувати `cargo test --locked --workspace`, `cargo clippy --locked --workspace --all-targets -- -D warnings`, свідків Contract 12.0, точні D12+ межі, T5M/F3C roundtrip, суворий corpus-wide source/`.sens`/view parity gate, release preflight та всі потрібні Hosted/Native CI. Позначати недоступні substrates **UNVERIFIED**, не PASS.

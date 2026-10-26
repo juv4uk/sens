@@ -23,7 +23,7 @@ import tomllib
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-EXPECTED = "0.42.0"
+EXPECTED = "0.42.1"
 TAG = f"l{EXPECTED}"
 
 RELEASE_CRATES = (
