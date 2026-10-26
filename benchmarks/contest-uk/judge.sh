@@ -124,7 +124,13 @@ for path in "${inputs[@]}"; do
     result="$(tail -n 1 "$tmp/standalone")"
     nodes="НЕ_ВИМІРЮВАЛОСЯ"; visits="НЕ_ВИМІРЮВАЛОСЯ"
   else
-    "$sens" --benchmark-physical "$path" > "$tmp/bench.out" 2>"$tmp/bench.err" || error "нативні метрики $path"
+    if ! "$sens" --benchmark-physical "$path" > "$tmp/bench.out" 2>"$tmp/bench.err"; then
+      sed 's/^/SENS physical benchmark: /' "$tmp/bench.err" >&2
+      if [[ -s "$tmp/bench.out" ]]; then
+        sed 's/^/SENS physical benchmark stdout: /' "$tmp/bench.out" >&2
+      fi
+      error "нативні метрики $path"
+    fi
     cmp -s "$tmp/standalone" "$tmp/bench.out" || error "бенчмарк змінив результат $path"
     line="$(grep "^SENS_BINARY_BENCH " "$tmp/bench.err")" || error "немає метрик $path"
     [[ "$line" =~ ^SENS_BINARY_BENCH[[:space:]]AST_NODES=([0-9]+)[[:space:]]EVAL_VISITS=([0-9]+)[[:space:]]RESULT=(.+)$ ]] || error "невірні метрики $path"
