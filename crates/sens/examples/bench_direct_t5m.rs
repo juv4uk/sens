@@ -1,13 +1,14 @@
 //! Measurement-only pilot: separate physical decode, D2 admission,
 //! visible-source baseline, and repeated interpretation on the SAME hardware.
 //! Reports observations, never asserts a synthetic speedup or a native ISA.
-use sens::{
-    decode_ternary_words, eval_parsed_expressions, lower_program, open_ternary_program,
+use sens::{render_binary_words_spaced, 
+    eval_parsed_expressions, lower_program,
     parse_canonical_binary, PhysicalT5Program, Session,
 };
 #[path = "support/reference_t5m.rs"]
 mod reference_t5m;
 use std::{hint::black_box, time::Instant};
+use sens_cli::zig_transport;
 const QUOTE: &[u8] =
     include_bytes!("../../../tests/fixtures/migration-quote-cohort-main/quote-legacy.sens");
 const ATOM: &[u8] = include_bytes!("../../../tests/fixtures/migration-atom-cohort/atom-empty.sens");
@@ -32,9 +33,9 @@ fn main() {
     );
     println!("fixture,bytes,forms,t5m_reference_decode_only_ns,t5m_exact_word_admission_ns,t5m_reference_decode_parse_lower_ns,visible_parse_lower_ns,cached_lowered_eval_ns");
     for (label, bytes) in [("quote", QUOTE), ("atom", ATOM), ("cond", COND)] {
-        let words = decode_ternary_words(bytes).unwrap();
+        let words = zig_transport::decode_t5m_words(bytes).unwrap();
         let program = reference_t5m::program(bytes).unwrap();
-        let visible = open_ternary_program(bytes).unwrap();
+        let visible = render_binary_words_spaced(&zig_transport::decode_t5m_words(bytes)).unwrap();
         let reference = parse_canonical_binary(&visible).unwrap();
         let expected = eval_parsed_expressions(&reference, &mut Session::default()).unwrap();
         let actual = program.execute(&mut Session::default()).unwrap();
@@ -42,7 +43,7 @@ fn main() {
         assert_eq!(expected.output, actual.output);
         // Untimed warmups. No reliance on timing to establish semantics.
         for _ in 0..100 {
-            black_box(decode_ternary_words(black_box(bytes)).unwrap());
+            black_box(zig_transport::decode_t5m_words(black_box(bytes)).unwrap());
             black_box(PhysicalT5Program::from_exact_words(black_box(&words)).unwrap());
             black_box(reference_t5m::program(black_box(bytes)).unwrap());
             black_box(lower_program(
@@ -52,7 +53,7 @@ fn main() {
         }
         let decode_ns = measure(
             || {
-                black_box(decode_ternary_words(black_box(bytes)).unwrap());
+                black_box(zig_transport::decode_t5m_words(black_box(bytes)).unwrap());
             },
             iterations,
         );
