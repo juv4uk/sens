@@ -12,6 +12,10 @@ fn eval_translation(source: &str) -> String {
     sens::load_core_library(&mut session)
         .expect("штатний Core4 SENS потрібний бібліотеці перекладу");
     for (path, library) in [
+        (
+            "lib/persistent-map.lisp",
+            include_str!("../../../lib/persistent-map.lisp"),
+        ),
         ("lib/unify.lisp", include_str!("../../../lib/unify.lisp")),
         ("lib/reason.lisp", include_str!("../../../lib/reason.lisp")),
         (
