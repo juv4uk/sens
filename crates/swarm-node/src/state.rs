@@ -20,6 +20,12 @@ pub struct TaskDef {
     pub depends_on: Vec<String>,
     pub blocked_by: Vec<String>,
     pub description: Option<String>,
+    /// Optional task class. Registry-targeted test/benchmark tasks are
+    /// explicitly marked with Ukrainian wire values `тест` / `бенчмарк`.
+    pub kind: Option<String>,
+    /// Structured task goal: exact registry function + property + input class.
+    /// This is data from the coordination event, not a second semantic registry.
+    pub target: Option<Sexp>,
     /// Owning repository id (M1.1b provenance). `None` = unresolved:
     /// defined before M1.1b or without an explicit origin.
     pub origin: Option<String>,
@@ -45,6 +51,11 @@ pub fn task_def(journal: &Journal, task: &str) -> Option<TaskDef> {
         let depends_on = string_list(&ev.payload, "depends-on");
         let blocked_by = string_list(&ev.payload, "blocked-by");
         let description = ev.payload.field_atom("description").map(|s| s.to_string());
+        let kind = ev.payload.field_atom("вид").map(|s| s.to_string());
+        let target = ev
+            .payload
+            .field("ціль")
+            .map(|fields| Sexp::list(fields.to_vec()));
         let origin = ev.payload.field_atom("origin").map(|s| s.to_string());
         def = Some(TaskDef {
             priority,
@@ -52,6 +63,8 @@ pub fn task_def(journal: &Journal, task: &str) -> Option<TaskDef> {
             depends_on,
             blocked_by,
             description,
+            kind,
+            target,
             origin,
         });
     }
