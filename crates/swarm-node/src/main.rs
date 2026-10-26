@@ -2591,14 +2591,13 @@ fn handle_task_status(node: &Arc<Node>, msg: &Sexp, stream: &mut TcpStream) {
 /// The function value must be the exact canonical name resolved from the
 /// SENS function registry by the task author; this coordination layer validates
 /// shape only and deliberately does not duplicate or reinterpret that registry.
-fn task_target_problem(msg: &Sexp, kind: Option<&str>) -> Option<&'static str> {
+fn task_target_fields_problem(kind: Option<&str>, target: Option<&Sexp>) -> Option<&'static str> {
     if !matches!(kind, Some("тест" | "бенчмарк")) {
         return None;
     }
-    let Some(fields) = msg.field("ціль") else {
+    let Some(target) = target else {
         return Some("тест/бенчмарк потребує ціль із функцією реєстру, властивістю та класом входу");
     };
-    let target = Sexp::list(fields.to_vec());
     for field in ["функція", "властивість", "клас-входу"] {
         let Some(value) = target.field_atom(field) else {
             return Some("тест/бенчмарк потребує ціль із функцією реєстру, властивістю та класом входу");
@@ -2611,6 +2610,11 @@ fn task_target_problem(msg: &Sexp, kind: Option<&str>) -> Option<&'static str> {
         }
     }
     None
+}
+
+fn task_target_problem(msg: &Sexp, kind: Option<&str>) -> Option<&'static str> {
+    let target = msg.field("ціль").map(|fields| Sexp::list(fields.to_vec()));
+    task_target_fields_problem(kind, target.as_ref())
 }
 
 fn handle_define_task(node: &Arc<Node>, msg: &Sexp, stream: &mut TcpStream) {
@@ -3470,6 +3474,16 @@ fn sync_tasks_from_text(
     let tasks =
         tasks_file::parse_tasks_file(text).map_err(|e| format!("parse error in `{path}`: {e}"))?;
 
+    // Preflight the complete file before appending any event. A single
+    // unbound test/benchmark target must not leave a partially imported plan.
+    for task in &tasks {
+        if let Some(problem) =
+            task_target_fields_problem(task.kind.as_deref(), task.target.as_ref())
+        {
+            return Err(format!("task `{}`: {problem}", task.id));
+        }
+    }
+
     let mut defined = 0;
     let mut completed = 0;
     for t in &tasks {
@@ -3490,6 +3504,14 @@ fn sync_tasks_from_text(
         ];
         if let Some(d) = &t.description {
             fields.push(Sexp::list(vec![Sexp::atom("description"), Sexp::string(d)]));
+        }
+        if let Some(k) = &t.kind {
+            fields.push(Sexp::list(vec![Sexp::atom("вид"), Sexp::atom(k)]));
+        }
+        if let Some(Sexp::List(target_fields)) = &t.target {
+            let mut target = vec![Sexp::atom("ціль")];
+            target.extend(target_fields.iter().cloned());
+            fields.push(Sexp::list(target));
         }
         if let Some(o) = t.origin.as_deref().or(msg_origin) {
             fields.push(Sexp::list(vec![Sexp::atom("origin"), Sexp::string(o)]));
