@@ -43,17 +43,14 @@ run_native_binary_semantics() {
   local selector_result selector_peer
   if ! selector_result="$("$bindir/sens" "$selector_law")"; then
     printf 'REGRESSION id=reason-index-width-selectors layer=eval fixture=%s expected=D1:1 actual=execution-error\n' "$selector_law" >&2
-    sha256sum "$selector_law" >&2
     return 1
   fi
   if [[ "$selector_result" != "1" ]]; then
     printf 'REGRESSION id=reason-index-width-selectors layer=eval fixture=%s expected=D1:1 actual=%s\n' "$selector_law" "$selector_result" >&2
-    sha256sum "$selector_law" >&2
     return 1
   fi
   if ! selector_peer="$("$bindir/sens-trit" eval "$selector_law")" || [[ "$selector_peer" != "$selector_result" ]]; then
     printf 'REGRESSION id=reason-index-width-selectors-peer layer=eval fixture=%s expected=D1:1 actual=%s\n' "$selector_law" "$selector_peer" >&2
-    sha256sum "$selector_law" >&2
     return 1
   fi
   # Не перетворювати будь-який nonzero exit (reader crash / T5 decode error)
@@ -62,14 +59,12 @@ run_native_binary_semantics() {
   if selector_mutant_diagnostic="$("$bindir/sens" "$selector_mutant" 2>&1)"; then
     printf 'REGRESSION id=reason-index-width-selectors-mutant layer=eval fixture=%s expected=D1-noncallable actual=accepted reproduce=%q\n' \
       "$selector_mutant" "$bindir/sens $selector_mutant" >&2
-    sha256sum "$bindir/sens" "$selector_mutant" >&2
     return 1
   fi
   if [[ "$selector_mutant_diagnostic" != *"domain identity is not callable under its ratified law: D1"* ]]; then
     printf 'UNINFORMATIVE-NEGATIVE id=reason-index-width-selectors-mutant layer=eval fixture=%s expected=D1-noncallable actual=unrelated-error first_diff=unknown reproduce=%q\n' \
       "$selector_mutant" "$bindir/sens $selector_mutant" >&2
     printf '%s\n' "$selector_mutant_diagnostic" >&2
-    sha256sum "$bindir/sens" "$selector_mutant" >&2
     return 1
   fi
   printf 'SENS_NATIVE_NEGATIVE id=reason-index-width-selectors-mutant outcome=D1-noncallable input=%s\n' "$selector_mutant"
@@ -83,19 +78,15 @@ run_native_binary_semantics() {
   printf '1\n' > "$migration_tmp/expected"
   printf 'SENS_NATIVE_WIDTH_PROOF id=core-d4-vs-d8-width-law executor=%s version=%s reproduce=%q\n' \
     "$bindir/sens" "$("$bindir/sens" --version)" "$migration_fixture"
-  sha256sum "$bindir/sens" "$migration_fixture" "$migration_projection"
   if ! "$bindir/sens" "$migration_fixture" > "$migration_tmp/actual" 2> "$migration_tmp/stderr"; then
     printf 'REGRESSION id=core-d4-vs-d8-width-law layer=eval executor=%s fixture=%s expected=D1:1 actual=execution-error\n' \
       "$bindir/sens" "$migration_fixture" >&2
     cat "$migration_tmp/stderr" >&2
-    sha256sum "$migration_tmp/expected" "$migration_tmp/actual" >&2
     rm -rf "$migration_tmp"
     return 1
   fi
   printf 'SENS_NATIVE_WIDTH_DIGESTS id=core-d4-vs-d8-width-law expected='
-  sha256sum "$migration_tmp/expected"
   printf 'SENS_NATIVE_WIDTH_DIGESTS id=core-d4-vs-d8-width-law actual='
-  sha256sum "$migration_tmp/actual"
   if ! cmp -s "$migration_tmp/expected" "$migration_tmp/actual"; then
     printf 'REGRESSION id=core-d4-vs-d8-width-law layer=eval expected=D1:1 actual=' >&2
     cat "$migration_tmp/actual" >&2
