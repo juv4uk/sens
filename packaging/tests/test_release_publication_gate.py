@@ -121,6 +121,13 @@ class ReleasePublicationGateTest(unittest.TestCase):
                     self.entry_source.replace("os: macos-15-intel", f"os: {stale}", 1)
                 )
 
+    def test_owner_override_is_explicit_and_unverified(self):
+        """An override may skip CI, but never silently or without labelling."""
+        self.assertIn("SENS_RELEASE_OWNER_OVERRIDE", self.source)
+        self.assertIn("if: vars.SENS_RELEASE_OWNER_OVERRIDE != '1'", self.source)
+        self.assertIn("UNVERIFIED", self.source)
+        self.assertIn("if: always()", self.entry_source)
+
     def test_workflow_rechecks_main_after_replay_and_before_publish(self):
         require_final_publication_guard(self.source)
 

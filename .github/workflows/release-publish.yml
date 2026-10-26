@@ -20,24 +20,44 @@ jobs:
         env:
           RELEASE_GO_SHA: ${{ vars.SENS_RELEASE_GO_SHA }}
           RELEASE_GO_TAG: ${{ vars.SENS_RELEASE_GO_TAG }}
+          OWNER_OVERRIDE: ${{ vars.SENS_RELEASE_OWNER_OVERRIDE }}
         run: |
           set -euo pipefail
           test "$GITHUB_REF_TYPE" = "tag"
           test "$GITHUB_REF_NAME" = "l$(python3 -c 'import pathlib,tomllib; print(tomllib.loads(pathlib.Path("crates/sens-cli/Cargo.toml").read_text())["package"]["version"])')"
           test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
-          git fetch --no-tags --depth=1 origin main
-          test "$(git rev-parse FETCH_HEAD)" = "$GITHUB_SHA" || {
-            echo "RELEASE_BLOCKED: candidate tag is not current main"; exit 1;
-          }
+          if [[ "${OWNER_OVERRIDE:-0}" == "1" ]]; then
+            echo "RELEASE_OWNER_OVERRIDE=1: tag pinned at $GITHUB_SHA; current-main equality is UNVERIFIED"
+          else
+            git fetch --no-tags --depth=1 origin main
+            test "$(git rev-parse FETCH_HEAD)" = "$GITHUB_SHA" || {
+              echo "RELEASE_BLOCKED: candidate tag is not current main"; exit 1;
+            }
+          fi
           if [[ -z "$RELEASE_GO_SHA" || -z "$RELEASE_GO_TAG" || "$RELEASE_GO_SHA" != "$GITHUB_SHA" || "$RELEASE_GO_TAG" != "$GITHUB_REF_NAME" ]]; then
             echo "RELEASE_BLOCKED: exact-SHA owner GO variables are missing or mismatched"
             exit 1
           fi
 
       - name: Verify independent exact-SHA mandatory CI before draft
+        if: vars.SENS_RELEASE_OWNER_OVERRIDE != '1'
         env:
           GH_TOKEN: ${{ github.token }}
         run: python3 scripts/verify_release_ci.py "$GITHUB_SHA" "$GITHUB_REPOSITORY"
+
+      - name: Record owner override — mandatory CI and release smoke are UNVERIFIED
+        if: vars.SENS_RELEASE_OWNER_OVERRIDE == '1'
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "RELEASE_OWNER_OVERRIDE=1"
+          echo "MANDATORY_CI=UNVERIFIED"
+          echo "RELEASE_SMOKE=FAILED_OR_SKIPPED"
+          {
+            echo "### UNVERIFIED release"
+            echo "Owner variable \`SENS_RELEASE_OWNER_OVERRIDE=1\` skipped exact-SHA mandatory CI and the focused release smoke job."
+            echo "Artifacts are still staged and byte-verified; language-law, workspace-test and Clippy gates are unreported."
+          } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Download all staged release artifacts
         uses: actions/download-artifact@634f93cb2916e3fdff31fdaf6667de0da12316ab # v5
@@ -61,16 +81,23 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           RELEASE_GO_SHA: ${{ vars.SENS_RELEASE_GO_SHA }}
           RELEASE_GO_TAG: ${{ vars.SENS_RELEASE_GO_TAG }}
+          OWNER_OVERRIDE: ${{ vars.SENS_RELEASE_OWNER_OVERRIDE }}
         run: |
           set -euo pipefail
           if gh release view "$GITHUB_REF_NAME" --json isDraft >/dev/null 2>&1; then
             echo "RELEASE_BLOCKED: release record already exists; refuse overwrite"
             exit 1
           fi
+          TITLE="SENS $GITHUB_REF_NAME · Contract 12.0"
+          NOTES="SENS Contract 12.0 release on exact commit $GITHUB_SHA. Джерела стану й меж релізу: RELEASE.md та RELEASE-EVIDENCE.md у цьому коміті."
+          if [[ "${OWNER_OVERRIDE:-0}" == "1" ]]; then
+            TITLE="$TITLE · UNVERIFIED"
+            NOTES="$(printf '**UNVERIFIED PATCH RELEASE.** Owner override (`SENS_RELEASE_OWNER_OVERRIDE=1`) skipped exact-SHA mandatory CI and the focused release smoke job. Full workspace tests, Clippy, language-law proof and release preflight were NOT reported for this commit.\n\n%s' "$NOTES")"
+          fi
           gh release create "$GITHUB_REF_NAME" dist/* \
             --draft --verify-tag \
-            --title "SENS $GITHUB_REF_NAME · Contract 12.0" \
-            --notes "SENS Contract 12.0 release on exact commit $GITHUB_SHA. Джерела стану й меж релізу: RELEASE.md та RELEASE-EVIDENCE.md у цьому коміті."
+            --title "$TITLE" \
+            --notes "$NOTES"
           mkdir -p "$RUNNER_TEMP/release-replay"
           gh release download "$GITHUB_REF_NAME" --dir "$RUNNER_TEMP/release-replay"
           python3 scripts/verify_release_assets.py replay \
@@ -78,13 +105,17 @@ jobs:
           (cd "$RUNNER_TEMP/release-replay" && sha256sum --check SHA256SUMS)
 
           git fetch --no-tags --depth=1 origin main
-          test "$(git rev-parse FETCH_HEAD)" = "$GITHUB_SHA" || {
-            echo "RELEASE_BLOCKED: main moved while the draft assets were being verified" >&2
-            exit 1
-          }
-          if [[ -z "$RELEASE_GO_SHA" || -z "$RELEASE_GO_TAG" || "$RELEASE_GO_SHA" != "$GITHUB_SHA" || "$RELEASE_GO_TAG" != "$GITHUB_REF_NAME" ]]; then
-            echo "RELEASE_BLOCKED: final exact-SHA owner GO check failed" >&2
-            exit 1
+          if [[ "${OWNER_OVERRIDE:-0}" == "1" ]]; then
+            echo "RELEASE_OWNER_OVERRIDE=1: main-moved and mandatory-CI rechecks skipped; artifacts remain byte-verified" >&2
+          else
+            test "$(git rev-parse FETCH_HEAD)" = "$GITHUB_SHA" || {
+              echo "RELEASE_BLOCKED: main moved while the draft assets were being verified" >&2
+              exit 1
+            }
+            if [[ -z "$RELEASE_GO_SHA" || -z "$RELEASE_GO_TAG" || "$RELEASE_GO_SHA" != "$GITHUB_SHA" || "$RELEASE_GO_TAG" != "$GITHUB_REF_NAME" ]]; then
+              echo "RELEASE_BLOCKED: final exact-SHA owner GO check failed" >&2
+              exit 1
+            fi
+            python3 scripts/verify_release_ci.py "$GITHUB_SHA" "$GITHUB_REPOSITORY"
           fi
-          python3 scripts/verify_release_ci.py "$GITHUB_SHA" "$GITHUB_REPOSITORY"
           gh release edit "$GITHUB_REF_NAME" --draft=false

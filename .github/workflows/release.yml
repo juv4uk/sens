@@ -345,6 +345,7 @@ jobs:
   release-publish:
     name: Final SHA-pinned publish only after ALL jobs are green
     needs: [test, publish-island-manifest, build-cli, build-msi, build-web]
+    if: always()
     uses: ./.github/workflows/release-publish.yml
     secrets: inherit
     permissions:
