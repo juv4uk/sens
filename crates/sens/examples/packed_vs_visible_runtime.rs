@@ -64,9 +64,9 @@ fn measured_baseline<F: FnMut()>(mut f: F, iterations: usize, samples: usize) ->
     median(&timings)
 }
 
-fn emit(
-    case: &str,
-    phase: &str,
+struct EmitRecord<'a> {
+    case: &'a str,
+    phase: &'a str,
     forms: usize,
     samples: usize,
     iterations: usize,
@@ -75,9 +75,25 @@ fn emit(
     text_bytes: usize,
     width_entries: usize,
     execution_baseline_ns: f64,
-    visible_samples: &[f64],
-    packed_samples: &[f64],
-) -> Result<(), String> {
+    visible_samples: &'a [f64],
+    packed_samples: &'a [f64],
+}
+
+fn emit(record: EmitRecord<'_>) -> Result<(), String> {
+    let EmitRecord {
+        case,
+        phase,
+        forms,
+        samples,
+        iterations,
+        semantic_bits,
+        packed_bytes,
+        text_bytes,
+        width_entries,
+        execution_baseline_ns,
+        visible_samples,
+        packed_samples,
+    } = record;
     let a = median(visible_samples);
     let b = median(packed_samples);
     if !(a > 0.0 && b > 0.0 && a.is_finite() && b.is_finite()) {
@@ -91,8 +107,7 @@ fn emit(
 }
 
 fn benchmark(case: &str, source: &str, forms: usize, samples: usize) -> Result<(), String> {
-    let text = std::iter::repeat(source)
-        .take(forms)
+    let text = std::iter::repeat_n(source, forms)
         .collect::<Vec<_>>()
         .join("\n");
     let tokens =
@@ -156,20 +171,20 @@ fn benchmark(case: &str, source: &str, forms: usize, samples: usize) -> Result<(
         iterations,
         samples,
     );
-    emit(
+    emit(EmitRecord {
         case,
-        "warm-session-parse-lower-eval",
+        phase: "warm-session-parse-lower-eval",
         forms,
         samples,
         iterations,
-        physical.bit_len(),
-        physical.byte_len(),
-        text.len(),
-        widths.len(),
-        eval_only,
-        &warm_a,
-        &warm_b,
-    )?;
+        semantic_bits: physical.bit_len(),
+        packed_bytes: physical.byte_len(),
+        text_bytes: text.len(),
+        width_entries: widths.len(),
+        execution_baseline_ns: eval_only,
+        visible_samples: &warm_a,
+        packed_samples: &warm_b,
+    })?;
 
     let (cold_a, cold_b) = paired(
         || {
@@ -190,20 +205,20 @@ fn benchmark(case: &str, source: &str, forms: usize, samples: usize) -> Result<(
         iterations,
         samples,
     );
-    emit(
+    emit(EmitRecord {
         case,
-        "fresh-session-parse-lower-eval",
+        phase: "fresh-session-parse-lower-eval",
         forms,
         samples,
         iterations,
-        physical.bit_len(),
-        physical.byte_len(),
-        text.len(),
-        widths.len(),
-        eval_only,
-        &cold_a,
-        &cold_b,
-    )
+        semantic_bits: physical.bit_len(),
+        packed_bytes: physical.byte_len(),
+        text_bytes: text.len(),
+        width_entries: widths.len(),
+        execution_baseline_ns: eval_only,
+        visible_samples: &cold_a,
+        packed_samples: &cold_b,
+    })
 }
 
 fn main() {
