@@ -57,7 +57,8 @@ fn symbol_value(value: &str) -> Expr {
     }
 }
 
-#[cfg(test)]
+// Canonical D7 text carrier for the F6 runtime witness. The production consumer uses
+// it only as the expected value for SENS D8 EQUAL; reconstruction/verdict logic stays in SENS.
 fn d7_text_data(value: &str) -> Expr {
     assert!(value.is_ascii(), "F6 protocol marker must be ASCII D7 data");
     Expr {
