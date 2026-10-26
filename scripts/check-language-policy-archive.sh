@@ -100,15 +100,7 @@ for path in "${!archived[@]}"; do
 done
 
 event_name="${SENS_EVENT_NAME:-${GITHUB_EVENT_NAME:-push}}"
-first_line="${first_field%%
-
-echo "ARCHIVE (поза мовним коридором): $rows артефактів — $registry"
-if (( bad != 0 )); then
-  echo "LANGUAGE_POLICY_ARCHIVE=FAIL rows=$rows"
-  exit 1
-fi
-echo "LANGUAGE_POLICY_ARCHIVE=VALID rows=$rows evidence=NOT_VERIFIED"
-\n'*}"
+first_line="${first_field%%$'\n'*}"
 added=()
 if git rev-parse --verify HEAD^ >/dev/null 2>&1; then
   while IFS= read -r path; do
@@ -117,12 +109,12 @@ if git rev-parse --verify HEAD^ >/dev/null 2>&1; then
 fi
 for path in "${added[@]:-}"; do
   if is_testbench_location "$path"; then
-    # SENS_SOURCE is a PR-body contract, not an arbitrary commit-message prefix.
+    # The SENS_SOURCE first-field contract applies to PR descriptions only.
     if [[ "$event_name" == "pull_request" && "$first_line" != SENS_SOURCE=* ]]; then
       echo "LANGUAGE_POLICY_ARCHIVE=FAIL SENS_SOURCE_FIRST_FIELD_REQUIRED path=$path"
       bad=1
     fi
-    # A new foreign test is forbidden on every event, regardless of registry rows.
+    # Never admit a newly added foreign-language test or benchmark runner.
     if is_foreign_testbench "$path"; then
       echo "LANGUAGE_POLICY_ARCHIVE=FAIL NEW_FOREIGN_TEST_ARCHIVE_FORBIDDEN path=$path"
       bad=1
