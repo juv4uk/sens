@@ -61,11 +61,13 @@ fn ukrainian_d3_codes_are_passed_and_invoked_as_first_class_functions() {
         "test_id=D3-FIRST-CLASS-UKR expected=unique_negative_mutation_site");
     let mutant = source.replacen(before, after, 1);
     let mut negative_session = Session::default();
-    match sens::eval_program(&mutant, &mut negative_session) {
-        Ok(value) => assert_ne!(value.value.as_predicate_bit(), Some(true),
-            "test_id=D3-FIRST-CLASS-UKR layer=SENS mutant_was_accepted"),
-        Err(_) => {} // СЕНС може обґрунтовано відхилити REШТА від атома.
-    }
+    if let Ok(value) = sens::eval_program(&mutant, &mut negative_session) {
+        assert_ne!(
+            value.value.as_predicate_bit(),
+            Some(true),
+            "test_id=D3-FIRST-CLASS-UKR layer=SENS mutant_was_accepted"
+        );
+    } // Відхилення некоректного хвоста також є допустимим негативним результатом.
 }
 
 #[test]
@@ -89,9 +91,11 @@ fn last_atomic_run_uses_real_first_class_d3_predicate_without_copying_pairs() {
         "test_id=D3-LAST-ATOMIC-RUN layer=mutant expected=unique_site");
     let mutant = source.replacen(before, after, 1);
     let mut negative = Session::default();
-    match sens::eval_program(&mutant, &mut negative) {
-        Ok(value) => assert_ne!(value.value.as_predicate_bit(), Some(true),
-            "test_id=D3-LAST-ATOMIC-RUN layer=SENS mutant_accepted"),
-        Err(_) => {} // Реальний SENS має право відкинути хибну форму через D3 CAR.
-    }
+    if let Ok(value) = sens::eval_program(&mutant, &mut negative) {
+        assert_ne!(
+            value.value.as_predicate_bit(),
+            Some(true),
+            "test_id=D3-LAST-ATOMIC-RUN layer=SENS mutant_accepted"
+        );
+    } // Реальний SENS має право відкинути хибну форму через D3 CAR.
 }
