@@ -160,6 +160,35 @@ jobs:
           CARGO_TARGET_X86_64_UNKNOWN_LINUX_GNU_RUSTFLAGS: "-C target-cpu=x86-64"
           SENS_ZIG_PORTABLE_LINUX: "1"
         run: cargo build --locked --release -p sens-cli --bin sens --target x86_64-unknown-linux-gnu
+
+      # Гейт перевіряє те, що збирає: портативність не можна лишати
+      # припущенням. Релізний ассет мусить бути baseline x86-64 і glibc ≤ 2.35.
+      - name: Verify public Linux binary portability — baseline x86-64, glibc 2.35
+        shell: bash
+        run: |
+          set -euo pipefail
+          bin="target/x86_64-unknown-linux-gnu/release/sens"
+          test -f "$bin" || { echo "RELEASE_ASSET_ERROR: $bin not built" >&2; exit 1; }
+          max_glibc="$(objdump -T "$bin" | grep -o 'GLIBC_2\.[0-9]*' | sort -uV | tail -1)"
+          echo "PORTABILITY max_glibc=$max_glibc"
+          if [ "$(printf '%s\n' "$max_glibc" GLIBC_2.35 | sort -V | tail -1)" != "GLIBC_2.35" ]; then
+            echo "RELEASE_ASSET_ERROR: $bin requires $max_glibc, above GLIBC_2.35" >&2
+            exit 1
+          fi
+          zmm="$(objdump -d "$bin" | grep -c zmm || true)"
+          echo "PORTABILITY zmm=$zmm"
+          if [ "$zmm" -ne 0 ]; then
+            echo "RELEASE_ASSET_ERROR: $bin contains $zmm AVX-512 instructions" >&2
+            exit 1
+          fi
+          echo "PORTABILITY_PASS baseline x86-64, glibc $max_glibc, no AVX-512"
+
+      - name: Stage portable Linux binary for inspection
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: preflight-linux-portable
+          path: target/x86_64-unknown-linux-gnu/release/sens
+          if-no-files-found: error
       - name: Verify Linux ABI floor and reject AVX-512
         shell: bash
         run: |
