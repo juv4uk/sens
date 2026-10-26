@@ -172,9 +172,9 @@ fn collect(base: &Path, files: &mut Vec<PathBuf>, errors: &mut Vec<String>) {
         }
         children.sort();
         for child in children {
-            if child.is_dir() && !child.is_symlink() {
-                collect(&child, files, errors);
-            } else if child.extension().and_then(|x| x.to_str()) == Some("lisp") {
+            if (child.is_dir() && !child.is_symlink())
+                || child.extension().and_then(|x| x.to_str()) == Some("lisp")
+            {
                 collect(&child, files, errors);
             }
         }
