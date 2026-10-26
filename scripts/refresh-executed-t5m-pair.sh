@@ -29,9 +29,9 @@ if [[ ! -f "$source_file" || -L "$source_file" || ! -x "$binary" || ! -x "$reade
   echo 'ПОМИЛКА: джерело або чинний виконуваний SENS недоступні' >&2
   exit 2
 fi
-source_hash="$(sha256sum "$source_file" | cut -d' ' -f1)"
 dir="$(mktemp -d)"
 trap 'rm -rf "$dir"' EXIT
+cp -- "$source_file" "$dir/source.snapshot"
 name="$(basename "${source_file%.lisp}")"
 pair="$dir/$name.sens"
 view="$dir/$name"
@@ -107,7 +107,7 @@ mode=paired
 # обох SENS-входів побайтно, не host-оракулом і не лише exit=0.
 if timeout "$native_timeout" "$binary" "$pair" >"$dir/standalone.stdout" 2>"$dir/standalone.stderr"; then
   if ! cmp -s "$dir/standalone.stdout" "$dir/paired.stdout"; then
-    echo "ПОМИЛКА: T5M_PAIRED_RESULT_MISMATCH standalone_sha256=$(sha256sum "$dir/standalone.stdout" | cut -d' ' -f1) paired_sha256=$(sha256sum "$dir/paired.stdout" | cut -d' ' -f1); пару не змінено" >&2
+    echo "ПОМИЛКА: T5M_PAIRED_RESULT_MISMATCH standalone_bytes=$(wc -c < "$dir/standalone.stdout") paired_bytes=$(wc -c < "$dir/paired.stdout"); пару не змінено" >&2
     exit 2
   fi
   mode=paired-and-standalone
@@ -142,7 +142,7 @@ if ! grep -Fq 'T5M_PHYSICAL_PAIR_MISMATCH' "$dir/mutant.stderr"; then
   exit 2
 fi
 echo "T5M_REFRESH_MUTANT_REJECTED source=$source_file reason=T5M_PHYSICAL_PAIR_MISMATCH"
-if [[ "$(sha256sum "$source_file" | cut -d' ' -f1)" != "$source_hash" ]]; then
+if ! cmp -s "$dir/source.snapshot" "$source_file"; then
   echo 'ПОМИЛКА: вихідний Lisp змінився під час перевірки; пару не змінено' >&2
   exit 2
 fi
@@ -238,7 +238,7 @@ if (( had_view )); then
 elif [[ -e "$committed_view" || -L "$committed_view" ]]; then
   echo "T5M_REFRESH_CONCURRENT_CHANGE path=$committed_view" >&2; exit 2
 fi
-if [[ "$(sha256sum "$source_file" | cut -d' ' -f1)" != "$source_hash" ]]; then
+if ! cmp -s "$dir/source.snapshot" "$source_file"; then
   echo 'ПОМИЛКА: вихідний Lisp змінився перед записом; пару не змінено' >&2
   exit 2
 fi
@@ -266,7 +266,7 @@ cmp "$publish_dir/expected.view" "$committed_view"
 # Джерело може змінитися під час двох rename навіть після попередньої
 # SHA-перевірки. Не оголошувати застарілу T5M-пару успішною публікацією.
 # При розходженні чинний EXIT trap відкотить лише наші власні inode.
-if [[ "$(sha256sum "$source_file" | cut -d' ' -f1)" != "$source_hash" ]]; then
+if ! cmp -s "$dir/source.snapshot" "$source_file"; then
   echo "ПОМИЛКА: джерело змінилося під час публікації T5M; відкотити пару: $source_file" >&2
   exit 2
 fi
