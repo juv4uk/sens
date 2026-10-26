@@ -990,8 +990,9 @@ fn lift_expression(
 
             // Exact D3 QUOTE keeps its argument as reader data. Apostrophe
             // sugar also stays data-owned without naming legacy byte identity.
-            let quote_data =
-                is_exact_quote(&lifted[0]) || source_spelling(source, &lifted[0]) == Some("'");
+            let quote_data = is_source_quote(source, &lifted[0])
+                || is_exact_quote(&lifted[0])
+                || source_spelling(source, &lifted[0]) == Some("'");
 
             if !quote_data {
                 if is_exact_cond(&lifted[0]) {
