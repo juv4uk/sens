@@ -371,3 +371,177 @@ impl Frame3Decoder {
         decode(&self.buffer)
     }
 }
+
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::parse_binary_source_words;
+
+    fn source(s: &str) -> Vec<BinarySourceWord> {
+        parse_binary_source_words(s)
+            .unwrap()
+            .into_iter()
+            .map(|t| t.word)
+            .collect()
+    }
+
+    fn roundtrip(s: &str) {
+        let words = source(s);
+        let encoded = encode(&words).unwrap();
+        assert_eq!(decode(&encoded).unwrap(), words);
+        assert_eq!(encode(&decode(&encoded).unwrap()).unwrap(), encoded);
+        for size in [1, 2, 3, 7, 64] {
+            let mut reader = Frame3Decoder::new();
+            for chunk in encoded.chunks(size) {
+                reader.push(chunk).unwrap();
+            }
+            assert_eq!(reader.finish().unwrap(), words);
+        }
+        for end in 0..encoded.len() {
+            assert!(decode(&encoded[..end]).is_err(), "truncation at {end}");
+        }
+        let mut added = encoded.clone();
+        added.push(0);
+        assert!(decode(&added).is_err());
+    }
+
+    #[test]
+    fn exact_widths_and_multiple_roots() {
+        for sample in [
+            "",
+            "0",
+            "1",
+            "10 01",
+            "10 001 01",
+            "10 000000001 01",
+            "10 111111111 01",
+            "10 01 10 01",
+            "10 0 01 10 1 01",
+        ] {
+            roundtrip(sample);
+        }
+        // D2:00 та D2:11 — структурні, НЕ окремі атоми.
+        roundtrip("10 0 00 1 01");
+        roundtrip("10 1 11 0 01");
+        for width in [1, 3, 4, 5, 6, 7, 8, 9] {
+            let word = "0".repeat(width);
+            roundtrip(&word);
+            let max = "1".repeat(width);
+            roundtrip(&max);
+        }
+    }
+
+    #[test]
+    fn long_repeats_and_mixed_byte_blocks() {
+        let mut text = String::from("10 ");
+        for _ in 0..150 {
+            text.push_str("000000001 ");
+        }
+        text.push_str("01");
+        roundtrip(&text);
+        let words = source(&text);
+        let data = encode(&words).unwrap();
+        assert!(data.contains(&REPEAT));
+    }
+
+    #[test]
+    fn physical_overhead_and_corruption() {
+        let bytes = encode(&source("10 001 01")).unwrap();
+        assert_eq!(&bytes[..3], &MAGIC);
+        assert_eq!(
+            physical_crc32(&bytes[..bytes.len() - 4]).to_be_bytes(),
+            bytes[bytes.len() - 4..]
+        );
+        for i in 0..bytes.len() {
+            let mut damaged = bytes.clone();
+            damaged[i] ^= 0x40;
+            assert!(decode(&damaged).is_err(), "mutation at {i}");
+        }
+    }
+
+    #[test]
+    fn e1_rust_reference_shared_raw_physical_golden_bytes_only() {
+        // Legacy E1 byte fixture for this module's private reference codec; not a SENS semantic verdict.
+        let words = source("10 001 01");
+        let bytes = [
+            0x53, 0x33, 0x01, 0x03, 0x00, 0x03, 0x23, 0x20, 0x8a, 0x36, 0x20, 0x5d, 0x52,
+        ];
+        assert_eq!(encode(&words).unwrap(), bytes);
+        assert_eq!(decode(&bytes).unwrap(), words);
+    }
+
+    #[test]
+    fn wrong_d2_rejected() {
+        assert_eq!(encode(&source("01")), Err(Frame3Error::InvalidD2));
+        assert_eq!(encode(&source("10")), Err(Frame3Error::InvalidD2));
+        assert_eq!(
+            decode(b"T5 not a universal frame"),
+            Err(Frame3Error::BadVersion)
+        );
+    }
+
+    #[test]
+    fn malformed_physical_aliases_rejected_even_with_matching_crc() {
+        fn framed(mut payload: Vec<u8>) -> Vec<u8> {
+            let crc = physical_crc32(&payload);
+            payload.extend_from_slice(&crc.to_be_bytes());
+            payload
+        }
+        // Той самий атом 0 у повторному режимі: неканонічний alias raw.
+        let alias = framed(vec![b'S', b'3', 1, 1, REPEAT, 1, 1, 0]);
+        assert_eq!(decode(&alias), Err(Frame3Error::NonCanonical));
+        // Довжина 1, записана двома байтами, заборонена.
+        let nonminimal = framed(vec![b'S', b'3', 1, 0x81, 0, RAW, 1, 0x10, 0]);
+        assert_eq!(decode(&nonminimal), Err(Frame3Error::NonCanonical));
+        // Додані padding bits є неканонічними, навіть із новим CRC.
+        let padding = framed(vec![b'S', b'3', 1, 1, RAW, 1, 0x10, 1]);
+        assert_eq!(decode(&padding), Err(Frame3Error::NonCanonical));
+        // Exact-width D2 CLOSE не може бути самостійним верхнім виразом.
+        let bad_d2 = framed(vec![b'S', b'3', 1, 1, RAW, 1, 0x20, 0x40]);
+        assert_eq!(decode(&bad_d2), Err(Frame3Error::InvalidD2));
+        let bad_tag = framed(vec![b'S', b'3', 1, 1, 0xff, 1, 0x10, 0]);
+        assert_eq!(decode(&bad_tag), Err(Frame3Error::Malformed));
+    }
+
+    #[test]
+    fn oversized_chunk_poisoned_stream() {
+        let valid = encode(&source("0")).unwrap();
+        let mut decoder = Frame3Decoder::new();
+        decoder.push(&valid).unwrap();
+        assert_eq!(
+            decoder.push(&vec![0; MAX_FILE_BYTES]),
+            Err(Frame3Error::TooLarge)
+        );
+        assert_eq!(decoder.finish(), Err(Frame3Error::TooLarge));
+    }
+
+    #[test]
+    fn dp_matches_independent_bounded_enumeration() {
+        fn brute(words: &[BinarySourceWord]) -> usize {
+            if words.is_empty() {
+                return 0;
+            }
+            let mut best = usize::MAX;
+            for n in 1..=words.len().min(MAX_BLOCK_WORDS) {
+                let chunk = &words[..n];
+                let bits: usize = chunk.iter().map(|w| w.width()).sum();
+                let raw = 1 + varint_len(n) + n.div_ceil(2) + bits.div_ceil(8);
+                best = best.min(raw + brute(&words[n..]));
+                if chunk.iter().all(|w| *w == chunk[0]) {
+                    let run = 1 + varint_len(n) + 1 + chunk[0].width().div_ceil(8);
+                    best = best.min(run + brute(&words[n..]));
+                }
+            }
+            best
+        }
+        for width in 1..=9 {
+            for n in 0..=7 {
+                let words = std::iter::repeat(new_word(width, 0).unwrap())
+                    .take(n)
+                    .collect::<Vec<_>>();
+                assert_eq!(choose_plan(&words)[0].bytes, brute(&words));
+            }
+        }
+    }
+}
