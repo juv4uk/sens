@@ -1943,7 +1943,7 @@ run_case run_type_rejection d11-family-selection-filter-false-atomic-root-type "
 run_case run_type_rejection d11-family-selection-partition-atomic-root-type "$d11_family_partition_atomic_bad" 'car expects a non-empty list'
 # Вимірюємо ТІЛЬКИ справжній фізичний SENS, після доведеного D1 закону.
 # Це p50 цілого процесу на shared runner, не ізольований час eval.
-# Сирі зразки + SHA залишаються в артефакті CI; червоне не маскуємо.
+# Сирі зразки та побайтова перевірка зберігаються в артефакті CI.
 d11_bench_evidence="$evidence/d11-families-benchmark-positive"
 if [[ -s "$d11_bench_evidence/program.sens" &&
       -f "$d11_bench_evidence/physical.out" ]] &&
@@ -1971,7 +1971,7 @@ if [[ -s "$d11_bench_evidence/program.sens" &&
   fi
   source_bytes="$(wc -c < "$d11_families_law" | tr -d '[:space:]')"
   physical_bytes="$(wc -c < "$d11_bench_evidence/program.sens" | tr -d '[:space:]')"
-  printf 'p50_us\t%s\np90_us\t%s\nmin_us\t%s\nmax_us\t%s\nsamples\t11\nsource_bytes\t%s\nphysical_bytes\t%s\nsource_sha256\t%s\nphysical_sha256\t%s\n' \
+  printf 'p50_us\t%s\np90_us\t%s\nmin_us\t%s\nmax_us\t%s\nsamples\t11\nsource_bytes\t%s\nphysical_bytes\t%s\n' \
     "${sorted_wall[5]}" "${sorted_wall[9]}" "${sorted_wall[0]}" "${sorted_wall[10]}" \
     "$source_bytes" "$physical_bytes" > "$evidence/d11-families-benchmark-metrics.tsv"
   echo "::notice title=SENS D11 physical benchmark::MEASURED p50_us=${sorted_wall[5]} p90_us=${sorted_wall[9]} min_us=${sorted_wall[0]} max_us=${sorted_wall[10]} source_bytes=$source_bytes physical_bytes=$physical_bytes samples=11 native=SENS semantic=D1:1 verified=YES scope=whole-process"
