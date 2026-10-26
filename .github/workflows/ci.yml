@@ -100,9 +100,9 @@ jobs:
           zig test -lc zig_transport_root.zig
 
   laws:
-    name: Ручні SENS/Zig/T5M закони
-    # Full semantic laws are opt-in; regular push keeps the quick guard only.
-    if: ${{ github.event_name == 'workflow_dispatch' && inputs.suite == 'laws' }}
+    name: SENS/Zig/T5M закони — ручний набір або цільовий коміт
+    # Точний маркер запускає доказ на тому самому SHA; решта push лишається легким.
+    if: ${{ (github.event_name == 'workflow_dispatch' && inputs.suite == 'laws') || (github.event_name == 'push' && contains(github.event.head_commit.message, 'SENS_NATIVE_LAWS')) }}
     runs-on: ubuntu-24.04
     timeout-minutes: 50
     steps:
