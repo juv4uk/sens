@@ -132,20 +132,19 @@ fn release_workflows_accept_only_the_s_tag_prefix() {
             && publisher.contains("test \"$GITHUB_REF_NAME\" = \"s$VERSION\""),
         "publisher must derive package version with shell-only parsing and compare the s-prefixed tag"
     );
-    // Every CLI archive includes its checksum sidecar; the exact-artifact
-    // publication allow-list must account for all four or `cmp` blocks release.
-    for checksum in [
-        "\"sens-cli_${version}_linux_amd64.sha256\"",
-        "\"sens-cli_${version}_windows_x64.exe.sha256\"",
-        "\"sens-cli_${version}_windows_x64.msi.sha256\"",
-        "\"sens-cli_${version}_macos_x64.sha256\"",
-        "\"sens-cli_${version}_macos_arm64.sha256\"",
-    ] {
-        assert!(
-            publisher.contains(checksum),
-            "publisher exact-artifact allow-list must include checksum sidecar {checksum}"
-        );
-    }
+    // Release stages only original assets. The publisher verifies both the
+    // exact file set and byte-for-byte replay instead of generating digest receipts.
+    assert!(
+        !release.contains("sha256sum")
+            && !release.contains("Get-FileHash")
+            && !publisher.contains(".sha256"),
+        "release must not create or require digest sidecars"
+    );
+    assert!(
+        publisher.contains("cmp -- \"$expected\" \"$actual\"")
+            && publisher.contains("cmp -- \"dist/${file#./}\" \"$replay/${file#./}\""),
+        "publisher must compare the exact artifact set and replayed bytes"
+    );
     assert!(
         release.contains("os: ubuntu-22.04")
             && publisher.contains("\"sens-cli · ubuntu-22.04\"")
@@ -153,11 +152,6 @@ fn release_workflows_accept_only_the_s_tag_prefix() {
         "publisher must require the actual Linux matrix check-run name"
     );
     assert!(
-        release.contains("Get-FileHash -LiteralPath $msi -Algorithm SHA256")
-            && release.contains("[System.IO.File]::WriteAllText(\"$msi.sha256\"")
-            && release.contains("${{ env.MSI_ASSET_PATH }}.sha256"),
-        "Windows MSI must stage its checksum sidecar"
-    );
     assert!(
         !publisher.contains("python3"),
         "release publisher must not invoke Python"
