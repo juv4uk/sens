@@ -6,6 +6,8 @@ cli="${1:-target/debug/sens}"
 id=d3-як-є-щит
 law=tests/semantic/d3-як-є-щит-law.lisp
 mutant=tests/semantic/d3-як-є-щит-mutant.lisp
+# Core4 defines D8 structural equality; without this source the physical T5M
+# negative witness can fail with unknown Text7 before producing its D1 verdict.
 
 if [[ ! -x "$cli" ]]; then
   printf 'REGRESSION id=%s layer=executor actual=missing\n' "$id" >&2
