@@ -167,14 +167,14 @@ fn main() {
     // Direct physical T5 bytes to exact D2 words, without making a string.
     // The T5 separator trits supply the word boundaries; no independent
     // width discovery, new parser or human semantic name table is involved.
-    let t5_words = zig_transport::decode_t5m_words(&physical).expect("raw physical T5 words");
+    let t5_words = zig_transport::decode_t5m_words(&physical).expect("сирі фізичні слова T5");
     assert_eq!(
         two_pass_t5_allocation_control(&t5_words),
         physical,
         "two-pass measurement control differs from source physical T5"
     );
     assert_eq!(
-        zig_transport::encode_t5m_direct(&t5_words).expect("current T5 encoder"),
+        zig_transport::encode_t5m_direct(&t5_words).expect("чинний кодувальник T5"),
         physical,
         "streaming T5 encoder differs from source physical T5"
     );
@@ -196,7 +196,7 @@ fn main() {
     assert_eq!(word_parsed.len(), forms, "typed word form count drift");
     // Fair end-to-end T5->AST comparator: unlike t5_open_d2, this
     // completes the canonical visible-word parse and returns an actual AST.
-    let text_round_trip = render_binary_words_spaced(&zig_transport::decode_t5m_words(&physical)).expect("text T5 view");
+    let text_round_trip = render_binary_words_spaced(&zig_transport::decode_t5m_words(&physical)).expect("текстовий вид T5");
     let visible_parsed = parse_canonical_binary(&text_round_trip).expect("T5 -> text -> D2 AST");
     assert_eq!(visible_parsed.len(), forms, "visible T5 form count drift");
     let lowered = lower_program(&parsed);
@@ -277,7 +277,7 @@ fn main() {
             ),
             "t5_visible_parse_d2" => measure(
                 || {
-                    let text = render_binary_words_spaced(&zig_transport::decode_t5m_words(black_box(&physical))).expect("T5 visible view");
+                    let text = render_binary_words_spaced(&zig_transport::decode_t5m_words(black_box(&physical))).expect("видимий вид T5");
                     black_box(parse_canonical_binary(&text).expect("visible D2 AST"));
                 },
                 count,
@@ -285,7 +285,7 @@ fn main() {
             ),
             "t5_direct_d2" => measure(
                 || {
-                    let words = zig_transport::decode_t5m_words(black_box(&physical)).expect("T5 bytes");
+                    let words = zig_transport::decode_t5m_words(black_box(&physical)).expect("T5-байти");
                     let widths = words.iter().map(|word| word.width()).collect::<Vec<_>>();
                     let bits = pack_binary_source_words(&words);
                     black_box(parse_canonical_packed_words(&bits, &widths).expect("direct T5/D2"));
@@ -295,7 +295,7 @@ fn main() {
             ),
             "t5_words_d2" => measure(
                 || {
-                    let words = zig_transport::decode_t5m_words(black_box(&physical)).expect("T5 bytes");
+                    let words = zig_transport::decode_t5m_words(black_box(&physical)).expect("T5-байти");
                     black_box(parse_canonical_word_sequence(&words).expect("typed T5/D2"));
                 },
                 count,
@@ -337,7 +337,7 @@ fn main() {
             "t5_encode_streaming" => measure(
                 || {
                     black_box(
-                        zig_transport::encode_t5m_direct(black_box(&t5_words)).expect("streaming T5 encoder"),
+                        zig_transport::encode_t5m_direct(black_box(&t5_words)).expect("потоковий кодувальник T5"),
                     );
                 },
                 count,
