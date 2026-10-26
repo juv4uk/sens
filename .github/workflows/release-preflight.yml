@@ -4,7 +4,19 @@ name: Release Preflight
 
 on:
   workflow_dispatch:
+    inputs:
+      full:
+        description: "Run the complete standalone preflight"
+        required: false
+        type: boolean
+        default: true
   workflow_call:
+    inputs:
+      full:
+        description: "Run full preflight unless the caller already runs the release test gate"
+        required: false
+        type: boolean
+        default: true
 jobs:
   release-preflight:
     name: focused release preflight
@@ -49,15 +61,18 @@ jobs:
         run: zig test research/zig-codecs/tests.zig -O ReleaseSafe -lc
 
       - name: translation boundary
+        if: ${{ inputs.full }}
         run: cargo test --locked -p sens --test translation_boundary
 
       - name: F6 physical WRITE→READ producer/consumer — exact SHA
         run: cargo test --locked -p sens-cli --test wsm_fs_f6_pipeline -- --nocapture
 
       - name: Release tag guard — shell-only publisher contract
+        if: ${{ inputs.full }}
         run: cargo test --locked -p sens-cli --test release_tag_guard -- --nocapture
 
       - name: Workspace tests
+        if: ${{ inputs.full }}
         id: workspace_tests
         run: cargo test --locked --workspace
 
@@ -86,6 +101,7 @@ jobs:
           bash scripts/prove-d3-як-є-щит.sh target/debug/sens
 
       - name: Compiler nucleus exact source → T5M → view parity
+        if: ${{ always() && inputs.full }}
         id: compiler_nucleus_physical_parity
         if: always()
         shell: bash
@@ -95,6 +111,7 @@ jobs:
           bash scripts/check-triple-projection.sh --fixture lib/compiler-nucleus.lisp
 
       - name: Clippy
+        if: ${{ always() && inputs.full }}
         id: workspace_clippy
         if: always()
         run: cargo clippy --locked --workspace --all-targets -- -D warnings
