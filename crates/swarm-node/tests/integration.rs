@@ -712,6 +712,65 @@ fn define_task_is_idempotent_for_an_identical_redefinition() {
     );
 }
 
+#[test]
+fn registry_target_is_required_for_test_and_benchmark_tasks() {
+    let port = alloc_ports(1);
+    let _a = spawn(port, "node-a", &data_dir("targeted-tests"), None);
+
+    let missing = request(
+        port,
+        "(define-task (task TEST-WITHOUT-TARGET) (priority 3) (capabilities ()) (depends-on ()) (вид тест) (description \"write a test\"))",
+    );
+    assert!(
+        missing.starts_with("(error") && missing.contains("ціль"),
+        "test task without a target must fail closed: {missing}"
+    );
+    let absent = request(port, "(task-def (task TEST-WITHOUT-TARGET))");
+    assert!(
+        absent.contains("(defined nil)"),
+        "a rejected task must not be written to the journal: {absent}"
+    );
+
+    let incomplete = request(
+        port,
+        "(define-task (task TEST-INCOMPLETE-TARGET) (priority 3) (capabilities ()) (depends-on ()) (вид тест) (ціль (функція значення-у-списку?) (властивість присутній-елемент-дає-так)) (description \"test the registered member function\"))",
+    );
+    assert!(
+        incomplete.starts_with("(error") && incomplete.contains("класом входу"),
+        "target without an input class must fail: {incomplete}"
+    );
+
+    let complete = "(define-task (task TEST-MEMBER-TARGET) (priority 3) (capabilities ()) (depends-on ()) (вид тест) (ціль (функція значення-у-списку?) (властивість присутній-елемент-дає-так) (клас-входу правильний-список)) (description \"test one exact registry function\"))";
+    let created = request(port, complete);
+    assert!(
+        created.starts_with("(ok"),
+        "a complete registry-bound target should be accepted: {created}"
+    );
+    let projected = request(port, "(task-def (task TEST-MEMBER-TARGET))");
+    assert!(
+        projected.contains("(вид тест)")
+            && projected.contains("(функція значення-у-списку?)")
+            && projected.contains("(властивість присутній-елемент-дає-так)")
+            && projected.contains("(клас-входу правильний-список)"),
+        "the target must survive event projection: {projected}"
+    );
+
+    let repeat = request(port, complete);
+    assert!(
+        repeat.contains("(unchanged t)"),
+        "an identical targeted task must remain idempotent: {repeat}"
+    );
+
+    let benchmark_missing = request(
+        port,
+        "(define-task (task BENCH-WITHOUT-TARGET) (priority 2) (capabilities ()) (depends-on ()) (вид бенчмарк) (description \"measure something\"))",
+    );
+    assert!(
+        benchmark_missing.starts_with("(error") && benchmark_missing.contains("ціль"),
+        "benchmark task without a target must fail closed: {benchmark_missing}"
+    );
+}
+
 // ---------------------------------------------------------------------------
 // M1.1a: incarnation-safe event identity
 // ---------------------------------------------------------------------------
