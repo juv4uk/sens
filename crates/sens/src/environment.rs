@@ -313,7 +313,10 @@ impl Environment {
         let allowed_host = if allowed_processes.is_empty() {
             Vec::new()
         } else {
-            vec!["process-run-raw".to_owned(), "процес-запустити-сирий".to_owned()]
+            vec![
+                "process-run-raw".to_owned(),
+                "процес-запустити-сирий".to_owned(),
+            ]
         };
         Self::root()
             .with_process_allowlist(allowed_processes)
@@ -525,7 +528,10 @@ impl Environment {
     }
 
     pub(crate) fn complete_bootstrap(&self, identity: DomainIdentity, value: Value) {
-        self.2.borrow_mut().bootstrap_results.insert(identity, value);
+        self.2
+            .borrow_mut()
+            .bootstrap_results
+            .insert(identity, value);
     }
 
     /// Canonical exact-domain language slot.
@@ -876,9 +882,13 @@ mod tests {
         }
         env.activate_untrusted_runtime_limits();
         for _ in 0..100_000 {
-            env.try_alloc_cons().expect("post-bootstrap budget admitted");
+            env.try_alloc_cons()
+                .expect("post-bootstrap budget admitted");
         }
-        assert!(env.try_alloc_cons().is_err(), "network cons allocation must stop");
+        assert!(
+            env.try_alloc_cons().is_err(),
+            "network cons allocation must stop"
+        );
         let limited = env.2.borrow();
         assert_eq!(limited.numeric_bit_limit, Some(4096));
         assert_eq!(limited.transcript.cap, Some(256));
@@ -1357,7 +1367,10 @@ mod tests {
     #[test]
     fn arena_cons_does_not_adopt_a_foreign_pair_that_reuses_a_freed_address() {
         let environment = Environment::root();
-        assert!(environment.arena_cons_enabled(), "арена — типове подання cons");
+        assert!(
+            environment.arena_cons_enabled(),
+            "арена — типове подання cons"
+        );
 
         // (1) Пара, народжена крізь шов арени: її адреса зареєстрована в
         //     `arena_handles`.

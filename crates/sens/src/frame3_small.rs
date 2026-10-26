@@ -29,8 +29,8 @@ pub fn encode_explicit_small_f3(t5_input: &[u8]) -> Result<Option<Vec<u8>>, Smal
     // Один точний T5 decode служить і перевірці форми, і canonical re-encode.
     // Повторний decode у цьому гарячому маршруті не додавав жодної перевірки.
     let typed = decode_ternary_words(t5_input).map_err(|_| SmallF3Error::InvalidProgram)?;
-    let parsed = PhysicalT5Program::from_exact_words(&typed)
-        .map_err(|_| SmallF3Error::InvalidProgram)?;
+    let parsed =
+        PhysicalT5Program::from_exact_words(&typed).map_err(|_| SmallF3Error::InvalidProgram)?;
     if parsed.form_count() != 1 || t5_input.len() > MAX_TINY_T5_BYTES {
         return Ok(None);
     }

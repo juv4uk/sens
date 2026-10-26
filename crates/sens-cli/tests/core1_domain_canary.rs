@@ -7,16 +7,24 @@ const T5: &[u8] = include_bytes!("../../../tests/fixtures/core1-domain-canary/se
 
 #[test]
 fn physical_core1_second_canary_preserves_exact_t5m_words() {
-    assert_eq!(T5.len(), 22, "the committed T5M fixture is exactly 22 bytes");
+    assert_eq!(
+        T5.len(),
+        22,
+        "the committed T5M fixture is exactly 22 bytes"
+    );
     // The entrypoint is *physical bytes*, not a handcrafted evaluator value.
-    let words = zig_transport::decode_t5m_words(T5)
-        .expect("canonical T5M and D2 source structure");
-    let visible = sens::render_ternary_words_spaced(&words);
-    assert_eq!(sens_cli::zig_transport::decode_t5m_words(T5).unwrap().into_iter()
-        .map(|w| sens::render_ternary_words_spaced(&[w])).collect::<Vec<_>>()
-        .join(" "), visible);
-    let re_encoded = zig_transport::encode_t5m_direct(&words)
-        .expect("Zig T5M re-encode");
+    let words = zig_transport::decode_t5m_words(T5).expect("canonical T5M and D2 source structure");
+    let visible = sens::render_binary_words_spaced(&words);
+    assert_eq!(
+        sens_cli::zig_transport::decode_t5m_words(T5)
+            .unwrap()
+            .into_iter()
+            .map(|w| sens::render_binary_words_spaced(&[w]))
+            .collect::<Vec<_>>()
+            .join(" "),
+        visible
+    );
+    let re_encoded = zig_transport::encode_t5m_direct(&words).expect("Zig T5M re-encode");
     assert_eq!(re_encoded, T5);
 }
 

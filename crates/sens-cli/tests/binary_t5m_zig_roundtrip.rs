@@ -53,19 +53,24 @@ fn assert_bit_projection(source: &str) {
 fn encode_binary_via_zig(source: &str) -> Vec<u8> {
     let tokens = sens::parse_binary_source_words(source)
         .expect("binary projection parses to exact-width tokens");
-    let words = tokens.into_iter().map(|token| token.word).collect::<Vec<_>>();
-    zig_transport::encode_t5m_direct(&words)
-        .expect("Zig T5M encoder must produce physical bytes")
+    let words = tokens
+        .into_iter()
+        .map(|token| token.word)
+        .collect::<Vec<_>>();
+    zig_transport::encode_t5m_direct(&words).expect("Zig T5M encoder must produce physical bytes")
 }
 
 fn decode_t5m_via_zig(bytes: &[u8]) -> Vec<sens::BinarySourceWord> {
-    zig_transport::decode_t5m_words(bytes)
-        .expect("Zig T5M decoder must recover exact words")
+    zig_transport::decode_t5m_words(bytes).expect("Zig T5M decoder must recover exact words")
 }
 
-fn open_ternary_via_zig(bytes: &[u8]) -> String {
+fn render_binary_words_via_zig(bytes: &[u8]) -> String {
     let words = decode_t5m_via_zig(bytes);
-    sens::render_ternary_words_spaced(&words)
+    words
+        .iter()
+        .map(ToString::to_string)
+        .collect::<Vec<_>>()
+        .join(" ")
 }
 
 #[test]
@@ -74,7 +79,7 @@ fn executable_bit_projection_roundtrips_through_zig_t5m_without_retyping() {
     let physical = encode_binary_via_zig(BINARY_PROGRAM);
     assert!(!physical.is_empty());
     let words = decode_t5m_via_zig(&physical);
-    let visible = open_ternary_via_zig(&physical);
+    let visible = render_binary_words_via_zig(&physical);
     let normalized = BINARY_PROGRAM
         .split_whitespace()
         .collect::<Vec<_>>()
@@ -83,7 +88,14 @@ fn executable_bit_projection_roundtrips_through_zig_t5m_without_retyping() {
         visible, normalized,
         "T5M must preserve each exact-width word"
     );
-    assert_eq!(visible, sens::render_ternary_words_spaced(&words));
+    assert_eq!(
+        visible,
+        words
+            .iter()
+            .map(ToString::to_string)
+            .collect::<Vec<_>>()
+            .join(" ")
+    );
     let re_encoded = encode_binary_via_zig(&visible);
     assert_eq!(re_encoded, physical);
 }
@@ -93,7 +105,7 @@ fn d3_primitive_program_is_only_width_qualified_binary_source() {
     assert_bit_projection(D3_PRIMITIVES_PROGRAM);
     let physical = encode_binary_via_zig(D3_PRIMITIVES_PROGRAM);
     let words = decode_t5m_via_zig(&physical);
-    let visible = open_ternary_via_zig(&physical);
+    let visible = render_binary_words_via_zig(&physical);
     assert_eq!(
         visible,
         D3_PRIMITIVES_PROGRAM
@@ -101,7 +113,14 @@ fn d3_primitive_program_is_only_width_qualified_binary_source() {
             .collect::<Vec<_>>()
             .join(" ")
     );
-    assert_eq!(visible, sens::render_ternary_words_spaced(&words));
+    assert_eq!(
+        visible,
+        words
+            .iter()
+            .map(ToString::to_string)
+            .collect::<Vec<_>>()
+            .join(" ")
+    );
     let re_encoded = encode_binary_via_zig(&visible);
     assert_eq!(re_encoded, physical);
 }
@@ -111,13 +130,20 @@ fn d5_label_recursion_keeps_d5_and_d7_coordinates_in_binary_ast() {
     assert_bit_projection(D5_LABEL_RECURSION_PROGRAM);
     let physical = encode_binary_via_zig(D5_LABEL_RECURSION_PROGRAM);
     let words = decode_t5m_via_zig(&physical);
-    let visible = open_ternary_via_zig(&physical);
+    let visible = render_binary_words_via_zig(&physical);
     let normalized = D5_LABEL_RECURSION_PROGRAM
         .split_whitespace()
         .collect::<Vec<_>>()
         .join(" ");
     assert_eq!(visible, normalized);
-    assert_eq!(visible, sens::render_ternary_words_spaced(&words));
+    assert_eq!(
+        visible,
+        words
+            .iter()
+            .map(ToString::to_string)
+            .collect::<Vec<_>>()
+            .join(" ")
+    );
     let re_encoded = encode_binary_via_zig(&visible);
     assert_eq!(re_encoded, physical);
 
@@ -136,13 +162,20 @@ fn d5_label_list_copy_preserves_exact_d1_and_empty_data_coordinates() {
     assert_bit_projection(D5_LABEL_COPY_PROGRAM);
     let physical = encode_binary_via_zig(D5_LABEL_COPY_PROGRAM);
     let words = decode_t5m_via_zig(&physical);
-    let visible = open_ternary_via_zig(&physical);
+    let visible = render_binary_words_via_zig(&physical);
     let normalized = D5_LABEL_COPY_PROGRAM
         .split_whitespace()
         .collect::<Vec<_>>()
         .join(" ");
     assert_eq!(visible, normalized);
-    assert_eq!(visible, sens::render_ternary_words_spaced(&words));
+    assert_eq!(
+        visible,
+        words
+            .iter()
+            .map(ToString::to_string)
+            .collect::<Vec<_>>()
+            .join(" ")
+    );
     let re_encoded = encode_binary_via_zig(&visible);
     assert_eq!(re_encoded, physical);
 
@@ -157,13 +190,20 @@ fn d5_label_map_preserves_higher_order_d7_binding_coordinates() {
     assert_bit_projection(D5_LABEL_MAP_PROGRAM);
     let physical = encode_binary_via_zig(D5_LABEL_MAP_PROGRAM);
     let words = decode_t5m_via_zig(&physical);
-    let visible = open_ternary_via_zig(&physical);
+    let visible = render_binary_words_via_zig(&physical);
     let normalized = D5_LABEL_MAP_PROGRAM
         .split_whitespace()
         .collect::<Vec<_>>()
         .join(" ");
     assert_eq!(visible, normalized);
-    assert_eq!(visible, sens::render_ternary_words_spaced(&words));
+    assert_eq!(
+        visible,
+        words
+            .iter()
+            .map(ToString::to_string)
+            .collect::<Vec<_>>()
+            .join(" ")
+    );
     let re_encoded = encode_binary_via_zig(&visible);
     assert_eq!(re_encoded, physical);
 
@@ -177,7 +217,7 @@ fn d5_label_map_preserves_higher_order_d7_binding_coordinates() {
 fn d3_cond_program_preserves_d1_and_d3_widths_in_structural_ast() {
     assert_bit_projection(D3_COND_PROGRAM);
     let physical = encode_binary_via_zig(D3_COND_PROGRAM);
-    let visible = open_ternary_via_zig(&physical);
+    let visible = render_binary_words_via_zig(&physical);
     assert_eq!(
         visible,
         D3_COND_PROGRAM
@@ -258,9 +298,14 @@ fn structural_d2_errors_remain_fail_closed_under_zig_t5m() {
         let recovered = zig_transport::decode_t5m_words(&packed)
             .expect("Zig decoder recovers exact words from T5M");
         assert_eq!(recovered, words);
-        // The D2 grammar must reject these at the SENS layer
+        let visible = recovered
+            .iter()
+            .map(ToString::to_string)
+            .collect::<Vec<_>>()
+            .join(" ");
+        // The D2 grammar must reject these at the SENS layer.
         assert!(
-            sens::open_ternary_program(&packed).is_err(),
+            parse_canonical_binary(&visible).is_err(),
             "invalid D2 control word unexpectedly opened: {source}"
         );
     }

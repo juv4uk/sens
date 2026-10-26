@@ -280,10 +280,7 @@ pub(crate) fn quoted_macro_argument(expression: &Expr) -> Result<Value, Language
     quoted_with_macro_syntax(expression, true)
 }
 
-fn quoted_with_macro_syntax(
-    expression: &Expr,
-    macro_syntax: bool,
-) -> Result<Value, LanguageError> {
+fn quoted_with_macro_syntax(expression: &Expr, macro_syntax: bool) -> Result<Value, LanguageError> {
     fn go(expression: &Expr, depth: u32, macro_syntax: bool) -> Result<Value, LanguageError> {
         if depth > crate::syntax::MAX_STRUCTURE_DEPTH {
             return Err(LanguageError::new(

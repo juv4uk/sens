@@ -3,9 +3,7 @@
 //! Bau von `lambda` und Anwendung von Closures/Makros auf Argumente.
 
 use super::{
-    canon, capabilities, evaluate, necessary_forms,
-    special_forms::quoted_macro_argument,
-    EvalStep,
+    canon, capabilities, evaluate, necessary_forms, special_forms::quoted_macro_argument, EvalStep,
 };
 use crate::canonical_reader::text7_binding_key;
 use crate::semantic_registry;

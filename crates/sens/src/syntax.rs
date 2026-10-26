@@ -457,9 +457,7 @@ pub(crate) mod fasl {
                         return None;
                     }
                     match open {
-                        Open::List { remaining: 0, .. } => {
-                            fasl_expr(ExprKind::List(Rc::from([])))
-                        }
+                        Open::List { remaining: 0, .. } => fasl_expr(ExprKind::List(Rc::from([]))),
                         open => {
                             stack.push(open);
                             continue;

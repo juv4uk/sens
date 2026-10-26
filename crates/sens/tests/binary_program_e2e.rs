@@ -66,7 +66,7 @@ fn executable_bit_projection_roundtrips_through_physical_t5_without_retyping() {
         visible, normalized,
         "T5 must preserve each exact-width word"
     );
-    assert_eq!(visible, sens::render_ternary_words_spaced(&words));
+    assert_eq!(visible, sens::render_binary_words_spaced(&words));
     assert_eq!(
         encode_binary_projection_ternary(&visible).unwrap(),
         physical
@@ -87,7 +87,7 @@ fn d3_primitive_program_is_only_width_qualified_binary_source() {
             .collect::<Vec<_>>()
             .join(" ")
     );
-    assert_eq!(visible, sens::render_ternary_words_spaced(&words));
+    assert_eq!(visible, sens::render_binary_words_spaced(&words));
     assert_eq!(
         encode_binary_projection_ternary(&visible).unwrap(),
         physical
@@ -106,7 +106,7 @@ fn d5_label_recursion_keeps_d5_and_d7_coordinates_in_binary_ast() {
         .collect::<Vec<_>>()
         .join(" ");
     assert_eq!(visible, normalized);
-    assert_eq!(visible, sens::render_ternary_words_spaced(&words));
+    assert_eq!(visible, sens::render_binary_words_spaced(&words));
     assert_eq!(
         encode_binary_projection_ternary(&visible).unwrap(),
         physical
@@ -134,7 +134,7 @@ fn d5_label_list_copy_preserves_exact_d1_and_empty_data_coordinates() {
         .collect::<Vec<_>>()
         .join(" ");
     assert_eq!(visible, normalized);
-    assert_eq!(visible, sens::render_ternary_words_spaced(&words));
+    assert_eq!(visible, sens::render_binary_words_spaced(&words));
     assert_eq!(
         encode_binary_projection_ternary(&visible).unwrap(),
         physical
@@ -158,7 +158,7 @@ fn d5_label_map_preserves_higher_order_d7_binding_coordinates() {
         .collect::<Vec<_>>()
         .join(" ");
     assert_eq!(visible, normalized);
-    assert_eq!(visible, sens::render_ternary_words_spaced(&words));
+    assert_eq!(visible, sens::render_binary_words_spaced(&words));
     assert_eq!(
         encode_binary_projection_ternary(&visible).unwrap(),
         physical

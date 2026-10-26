@@ -313,9 +313,9 @@ mod qualified_numeric_domain_value_tests {
             bits
         });
 
-        let retained = arithmetic_on_values(
-            "+", &[maximum.clone(), zero.clone()], &env, Span::default()
-        ).expect("D12 non-overflow result stays in D12");
+        let retained =
+            arithmetic_on_values("+", &[maximum.clone(), zero.clone()], &env, Span::default())
+                .expect("D12 non-overflow result stays in D12");
         let Value::BinaryNumber(ref retained) = retained else {
             panic!("D12 integer result remains a qualified binary word");
         };
@@ -323,27 +323,26 @@ mod qualified_numeric_domain_value_tests {
         assert_eq!(retained.exact_numeric_domain_bits(), Some(maximum_bits));
         assert_eq!(retained.to_decimal_string(), "2047");
 
-        let positive_overflow = arithmetic_on_values(
-            "+", &[maximum.clone(), one.clone()], &env, Span::default()
-        ).expect("2047 + 1 widens exactly");
+        let positive_overflow =
+            arithmetic_on_values("+", &[maximum.clone(), one.clone()], &env, Span::default())
+                .expect("2047 + 1 widens exactly");
         let Value::BinaryNumber(ref positive_overflow) = positive_overflow else {
             panic!("positive overflow is an exact integer");
         };
         assert_eq!(positive_overflow.numeric_domain_width(), Some(24));
         assert_eq!(positive_overflow.to_decimal_string(), "2048");
 
-        let negative_overflow = arithmetic_on_values(
-            "-", &[minimum, one.clone()], &env, Span::default()
-        ).expect("-2048 - 1 widens exactly");
+        let negative_overflow =
+            arithmetic_on_values("-", &[minimum, one.clone()], &env, Span::default())
+                .expect("-2048 - 1 widens exactly");
         let Value::BinaryNumber(ref negative_overflow) = negative_overflow else {
             panic!("negative overflow is an exact integer");
         };
         assert_eq!(negative_overflow.numeric_domain_width(), Some(24));
         assert_eq!(negative_overflow.to_decimal_string(), "-2049");
 
-        let ratio = division_on_values(
-            &[one.clone(), three], 2, &env, Span::default()
-        ).expect("D12 rational division remains exact");
+        let ratio = division_on_values(&[one.clone(), three], 2, &env, Span::default())
+            .expect("D12 rational division remains exact");
         let Value::NumericComposition(ratio_parts) = &ratio else {
             panic!("1/3 is the exact canonical ratio composition");
         };
@@ -351,14 +350,16 @@ mod qualified_numeric_domain_value_tests {
         assert_eq!(ratio.to_string(), "1/3");
 
         let mixed = arithmetic_on_values(
-            "+", &[maximum.clone(), in_domain(24, vec![0u8; 24])],
-            &env, Span::default()
-        ).expect_err("D12 and D24 must not be coerced");
+            "+",
+            &[maximum.clone(), in_domain(24, vec![0u8; 24])],
+            &env,
+            Span::default(),
+        )
+        .expect_err("D12 and D24 must not be coerced");
         assert_eq!(mixed.kind, ErrorKind::Type);
 
-        let division_by_zero = division_on_values(
-            &[one, zero], 2, &env, Span::default()
-        ).expect_err("D12 division by zero must fail");
+        let division_by_zero = division_on_values(&[one, zero], 2, &env, Span::default())
+            .expect_err("D12 division by zero must fail");
         assert_eq!(division_by_zero.kind, ErrorKind::DivisionByZero);
     }
 
@@ -629,25 +630,15 @@ mod qualified_numeric_domain_value_tests {
         };
 
         let seven = d24(7);
-        let zero = arithmetic_on_values(
-            "-",
-            &[seven.clone(), seven],
-            &env,
-            Span::default(),
-        )
-        .expect("exact D24 subtraction produces an admitted zero");
+        let zero = arithmetic_on_values("-", &[seven.clone(), seven], &env, Span::default())
+            .expect("exact D24 subtraction produces an admitted zero");
         assert!(
             matches!(&zero, Value::BinaryNumber(number) if number.is_zero()),
             "subtraction must retain the canonical exact D24 zero, got {zero:?}"
         );
 
-        let error = division_on_values(
-            &[d24(5), zero],
-            2,
-            &env,
-            Span::default(),
-        )
-        .expect_err("a computed exact zero denominator must be rejected");
+        let error = division_on_values(&[d24(5), zero], 2, &env, Span::default())
+            .expect_err("a computed exact zero denominator must be rejected");
         assert_eq!(error.kind, ErrorKind::DivisionByZero);
         assert!(
             error.message.contains("division by zero"),

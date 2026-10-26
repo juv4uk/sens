@@ -1,9 +1,7 @@
 //! Physical T5M and the human bit-view must use the SAME D2 and evaluator
 //! laws, but the production path must not construct the bit-view at all.
 
-use sens::{
-    eval_parsed_expressions, parse_canonical_binary, Session,
-};
+use sens::{eval_parsed_expressions, parse_canonical_binary, Session};
 use sens_cli::zig_transport;
 
 const QUOTE: &[u8] =
@@ -14,16 +12,18 @@ const MULTIFORM: &[u8] =
     include_bytes!("../../../tests/fixtures/migration-multiform-cohort-main/two-forms.sens");
 
 fn decode_t5m_via_zig(bytes: &[u8]) -> Vec<sens::BinarySourceWord> {
-    zig_transport::decode_t5m_words(bytes)
-        .expect("Zig T5M decoder must recover exact words")
+    zig_transport::decode_t5m_words(bytes).expect("Zig T5M decoder must recover exact words")
 }
 
 fn open_ternary_via_zig(bytes: &[u8]) -> String {
     let words = decode_t5m_via_zig(bytes);
-    sens::render_ternary_words_spaced(&words)
+    sens::render_binary_words_spaced(&words)
 }
 
-fn eval_reference_t5m(bytes: &[u8], session: &mut Session) -> Result<sens::EvalResult, sens::LanguageError> {
+fn eval_reference_t5m(
+    bytes: &[u8],
+    session: &mut Session,
+) -> Result<sens::EvalResult, sens::LanguageError> {
     let words = decode_t5m_via_zig(bytes);
     let program = sens::PhysicalT5Program::from_exact_words(&words)?;
     program.execute(session)
@@ -37,8 +37,8 @@ fn physical_execute_matches_reference_visible_path_for_admitted_fixtures() {
         ("cond", COND),
         ("multi", MULTIFORM),
     ] {
-        let program = sens::PhysicalT5Program::from_exact_words(&decode_t5m_via_zig(physical))
-            .expect(label);
+        let program =
+            sens::PhysicalT5Program::from_exact_words(&decode_t5m_via_zig(physical)).expect(label);
         assert!(program.form_count() > 0, "{label}");
         assert_eq!(program.form_count(), if label == "multi" { 2 } else { 1 });
 
@@ -63,8 +63,7 @@ fn all_invalid_physical_or_d2_inputs_are_rejected_before_interpreter() {
         assert!(zig_transport::decode_t5m_words(invalid).is_err());
     }
     // The physical word 01 is a D2 CLOSE, not an executable value.
-    let close_word = sens::parse_binary_source_words("01")
-        .unwrap()[0].word;
+    let close_word = sens::parse_binary_source_words("01").unwrap()[0].word;
     let close = vec![close_word];
     let bad_structure = zig_transport::encode_t5m_direct(&close).unwrap();
     assert!(eval_reference_t5m(&bad_structure, &mut Session::default()).is_err());
@@ -82,8 +81,11 @@ fn exact_widths_remain_distinct_before_any_surface_lookup() {
     assert_ne!(a, b);
     assert_ne!(b, c);
     for physical in [&a, &b, &c] {
-        assert_eq!(sens::PhysicalT5Program::from_exact_words(
-            &decode_t5m_via_zig(physical)
-        ).unwrap().form_count(), 1);
+        assert_eq!(
+            sens::PhysicalT5Program::from_exact_words(&decode_t5m_via_zig(physical))
+                .unwrap()
+                .form_count(),
+            1
+        );
     }
 }

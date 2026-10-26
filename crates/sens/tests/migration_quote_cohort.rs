@@ -1,7 +1,7 @@
 //! #4455 — фізичний T5 round-trip for historical quote cohort; laws remain Lisp-owned.
 use sens::{
     decode_ternary_program, encode_binary_projection_ternary, open_ternary_program,
-    render_ternary_words_spaced, TernaryTransportError,
+    render_binary_words_spaced, TernaryTransportError,
 };
 
 const T5: &[u8] =
@@ -15,7 +15,7 @@ const LISP15_T5: &[u8] =
 fn physical_quote_legacy_migration_preserves_exact_t5_transport() {
     assert_eq!(T5, [0x63, 0x89, 0x06, 0xa1]);
     let words = decode_ternary_program(T5).expect("canonical T5 bytes + D2 syntax");
-    let visible = render_ternary_words_spaced(&words);
+    let visible = render_binary_words_spaced(&words);
     assert_eq!(visible, "10 001 00 000 01");
     assert_eq!(open_ternary_program(T5).unwrap(), visible);
     assert_eq!(encode_binary_projection_ternary(&visible).unwrap(), T5);

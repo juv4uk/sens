@@ -93,10 +93,6 @@ mod semantic_registry;
 pub mod sens;
 mod source_packing;
 mod source_words;
-// Rust T5 is reference/compatibility code. Production frontends can compile
-// SENS without it and route physical bytes through the sterile Zig corridor.
-#[cfg(any(test, feature = "rust-t5-reference"))]
-mod ternary_transport;
 /// Deliberately thin, crate-external view onto `semantic_registry` — exposes
 /// exactly the (namespace, spelling) pairs a consumer like the CML semantic
 /// export needs, without making the internal parsing/index machinery public.
@@ -253,10 +249,9 @@ pub use compiler_language::{
     compiler_execution_role_from_sens, compiler_lowering_role_from_sens,
     compiler_program_artifact_from_sens, compiler_program_bootstrap_bundle,
     compiler_program_requests_from_sens, compiler_semantic_input_from_sens,
-    compiler_semantic_input_from_sens_with_sources,
-    verify_compiler_program_artifact_from_sens, CompilerProgramBootstrapBundle,
-    CompilerLanguageSources, CompilerSemanticInput, VerifiedCompilerProgramArtifact,
-    VerifiedCompilerProgramRequest,
+    compiler_semantic_input_from_sens_with_sources, verify_compiler_program_artifact_from_sens,
+    CompilerLanguageSources, CompilerProgramBootstrapBundle, CompilerSemanticInput,
+    VerifiedCompilerProgramArtifact, VerifiedCompilerProgramRequest,
 };
 pub use compiler_role::{compiler_execution_role, CompilerExecutionRole, CompilerLoweringRole};
 pub use d7_projection::{decode_d7_uk_words, encode_d7_uk_words, D7ProjectionError};
@@ -282,8 +277,8 @@ pub use source_packing::{
     unpack_binary_source_words, unpack_domain_coordinates, PackedTransportAccounting,
 };
 pub use source_words::{
-    parse_binary_source_words, parse_domain_ladder_source_words, BinarySourceToken,
-    BinarySourceWord, DomainLadderSourceToken, CANONICAL_SOURCE_EXTENSION,
+    parse_binary_source_words, parse_domain_ladder_source_words, render_binary_words_spaced,
+    BinarySourceToken, BinarySourceWord, DomainLadderSourceToken, CANONICAL_SOURCE_EXTENSION,
 };
 pub use text7::{Text7, Text7CellError, Text7W7Error, Text7WireError, Text7WordError};
 pub use text7_projection::{encode_text7, render_text7, Text7Layout, Text7ProjectionError};
@@ -471,7 +466,7 @@ fn canonical_core4_fasl_bytes() -> Option<std::rc::Rc<[u8]>> {
             let hash = sha256_source(CORE_LIBRARY_SOURCE.as_bytes());
             Some(std::rc::Rc::<[u8]>::from(fasl_encode(&expressions, &hash)))
         })
-            .clone()
+        .clone()
     })
 }
 
@@ -499,7 +494,7 @@ fn current_core_verified_lowered() -> Option<std::rc::Rc<[Expr]>> {
             let lowered = eval::lower::lower_program(&expressions);
             Some(std::rc::Rc::<[Expr]>::from(lowered))
         })
-            .clone()
+        .clone()
     })
 }
 
@@ -1231,7 +1226,7 @@ mod core4_bootstrap_cache_tests {
                 CORE_LIBRARY_FASL,
                 use_verified_cache,
             )
-                .expect("independent Lisp-owned Core4 bootstrap");
+            .expect("independent Lisp-owned Core4 bootstrap");
             black_box(result);
             assert_eq!(
                 session.environment.selected_core_profile(),
@@ -1377,7 +1372,7 @@ mod core4_bootstrap_cache_tests {
                 &session.environment,
                 Span::default(),
             )
-                .is_err(),
+            .is_err(),
             "one explicit D10 mechanism must not make other D10 residents callable"
         );
     }
@@ -1462,7 +1457,7 @@ mod core4_bootstrap_cache_tests {
             "(нехай-послідовно ((перший 7) (другий перший)) другий)",
             &mut session,
         )
-            .expect("sequential bindings must see previous values");
+        .expect("sequential bindings must see previous values");
         assert_eq!(dependent_sequential.value.to_string(), "7");
     }
 }

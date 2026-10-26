@@ -6,27 +6,26 @@
 //! A PASS narrows #4774's "machine-block-one" failure to global/closure/list
 //! binding or a more specific current runtime path, not generic D3 QUOTE.
 
-use sens::{
-    eval_parsed_expressions, parse_canonical_binary, Session,
-};
+use sens::{eval_parsed_expressions, parse_canonical_binary, Session};
 use sens_cli::zig_transport;
 
 fn encode_via_zig(source: &str) -> Vec<u8> {
     let tokens = sens::parse_binary_source_words(source)
         .expect("binary projection parses to exact-width tokens");
-    let words = tokens.into_iter().map(|token| token.word).collect::<Vec<_>>();
-    zig_transport::encode_t5m_direct(&words)
-        .expect("Zig T5M encoder must produce physical bytes")
+    let words = tokens
+        .into_iter()
+        .map(|token| token.word)
+        .collect::<Vec<_>>();
+    zig_transport::encode_t5m_direct(&words).expect("Zig T5M encoder must produce physical bytes")
 }
 
 fn decode_t5m_via_zig(bytes: &[u8]) -> Vec<sens::BinarySourceWord> {
-    zig_transport::decode_t5m_words(bytes)
-        .expect("Zig T5M decoder must recover exact words")
+    zig_transport::decode_t5m_words(bytes).expect("Zig T5M decoder must recover exact words")
 }
 
 fn open_ternary_via_zig(bytes: &[u8]) -> String {
     let words = decode_t5m_via_zig(bytes);
-    sens::render_ternary_words_spaced(&words)
+    sens::render_binary_words_spaced(&words)
 }
 
 fn current_value(source: &str) -> Result<String, String> {

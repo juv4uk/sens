@@ -1,22 +1,21 @@
 //! Current D7 keyboard/v2 exact W7 data through physical T5M.
 //! In code, quoted function identities come from the domain ladder first.
 
-use sens::{
-    decode_d7_uk_t5, encode_d7_uk_t5, BinarySourceWord, Bit2, Bit7, D7T5Error,
-};
+use sens::{decode_d7_uk_t5, encode_d7_uk_t5, BinarySourceWord, Bit2, Bit7, D7T5Error};
 use sens_cli::zig_transport;
 
 fn encode_via_zig(source: &str) -> Vec<u8> {
     let tokens = sens::parse_binary_source_words(source)
         .expect("binary projection parses to exact-width tokens");
-    let words = tokens.into_iter().map(|token| token.word).collect::<Vec<_>>();
-    zig_transport::encode_t5m_direct(&words)
-        .expect("Zig T5M encoder must produce physical bytes")
+    let words = tokens
+        .into_iter()
+        .map(|token| token.word)
+        .collect::<Vec<_>>();
+    zig_transport::encode_t5m_direct(&words).expect("Zig T5M encoder must produce physical bytes")
 }
 
 fn decode_t5m_via_zig(bytes: &[u8]) -> Vec<sens::BinarySourceWord> {
-    zig_transport::decode_t5m_words(bytes)
-        .expect("Zig T5M decoder must recover exact words")
+    zig_transport::decode_t5m_words(bytes).expect("Zig T5M decoder must recover exact words")
 }
 
 #[test]
@@ -24,7 +23,7 @@ fn every_w7_keyboard_coordinate_survives_physical_t5m() {
     let words: Vec<_> = (0u8..=127)
         .map(|bits| BinarySourceWord::W7(Bit7::new(bits).unwrap()))
         .collect();
-    let transport = encode_via_zig(&sens::render_ternary_words_spaced(&words));
+    let transport = encode_via_zig(&sens::render_binary_words_spaced(&words));
     let recovered = decode_t5m_via_zig(&transport);
     assert_eq!(recovered, words);
     let expected: String = (0u8..=127)
@@ -85,7 +84,7 @@ fn d7_stack_glyph_projection_preserves_t5m_and_multibyte_error_offset() {
         "same exact W7 identities after physical roundtrip"
     );
     assert_eq!(
-        encode_via_zig(&sens::render_ternary_words_spaced(&words)),
+        encode_via_zig(&sens::render_binary_words_spaced(&words)),
         physical,
         "stack projection must not modify packed T5M bytes"
     );
@@ -110,7 +109,7 @@ fn d7_repeated_utf8_uses_exact_words_without_post_encode_decode() {
     let packed = encode_d7_uk_t5(&source).unwrap();
     assert_eq!(
         packed,
-        encode_via_zig(&sens::render_ternary_words_spaced(&expected_words)),
+        encode_via_zig(&sens::render_binary_words_spaced(&expected_words)),
         "T5M bytes must match the independent W7 encoding"
     );
     let actual = decode_t5m_via_zig(&packed);

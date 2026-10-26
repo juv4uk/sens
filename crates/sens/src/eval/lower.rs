@@ -68,14 +68,13 @@ fn source_head_domain_identity(name: &str) -> Option<CoreDomainIdentity> {
             // canonical Ukrainian name is present in the generated D6 binding
             // table. Do this before the primitive-callable index, which does
             // not itself enumerate all Lisp-owned D6 closures.
-            semantic_registry::d6_uk_source_identity(name)
-                .and_then(|identity| match identity {
-                    // Convert the explicit D6 coordinate, not the wrapper
-                    // DomainIdentity. Only this exact width has a CoreD6
-                    // representation; other variants stay non-routable here.
-                    crate::DomainIdentity::D6(word) => Some(CoreDomainIdentity::D6(word)),
-                    _ => None,
-                })
+            semantic_registry::d6_uk_source_identity(name).and_then(|identity| match identity {
+                // Convert the explicit D6 coordinate, not the wrapper
+                // DomainIdentity. Only this exact width has a CoreD6
+                // representation; other variants stay non-routable here.
+                crate::DomainIdentity::D6(word) => Some(CoreDomainIdentity::D6(word)),
+                _ => None,
+            })
         })
         .or_else(|| {
             let identity = semantic_registry::exact_uk_callable_for_source_head(name)?;
@@ -318,7 +317,9 @@ fn lower(expression: &Expr, depth: u32, mode: LowerMode) -> Expr {
                     return expression.clone();
                 };
                 glyphs.push(Expr {
-                    kind: ExprKind::DomainIdentity(crate::DomainIdentity::from_source_word(word.word)),
+                    kind: ExprKind::DomainIdentity(crate::DomainIdentity::from_source_word(
+                        word.word,
+                    )),
                     span: expression.span,
                 });
             }
@@ -465,7 +466,10 @@ mod domain_ladder_lowering_migration_tests {
 
         // Non-Ukrainian peer names are metadata, not Ukrainian source heads.
         for name in ["length", "let*", "krama-sthānika-bandha"] {
-            assert!(source_head_domain_identity(name).is_none(), "{name} is not a Ukrainian source head");
+            assert!(
+                source_head_domain_identity(name).is_none(),
+                "{name} is not a Ukrainian source head"
+            );
         }
     }
 

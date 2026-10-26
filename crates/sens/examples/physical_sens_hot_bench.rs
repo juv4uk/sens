@@ -6,7 +6,7 @@ use sens::{
     decode_ternary_words, encode_ternary_words, eval_lowered_expressions, eval_parsed_expressions,
     lower_program, open_ternary_program, pack_binary_source_tokens, pack_binary_source_words,
     parse_binary_source_words, parse_canonical_binary, parse_canonical_packed_words,
-    parse_canonical_word_sequence, render_ternary_words_spaced, BinaryNumber, DomainIdentity,
+    parse_canonical_word_sequence, render_binary_words_spaced, BinaryNumber, DomainIdentity,
     ExactDomainWord, PhysicalT5Program, Session, Value,
 };
 use std::{env, fs, hint::black_box, time::Instant};
@@ -182,7 +182,7 @@ fn main() {
     // має бути рівною початковому формату для кожного реального T5.
     assert_eq!(
         legacy_visible_word_renderer(&t5_words),
-        render_ternary_words_spaced(&t5_words),
+        render_binary_words_spaced(&t5_words),
         "оптимізація не може змінити exact-width вивід"
     );
     let t5_widths = t5_words.iter().map(|word| word.width()).collect::<Vec<_>>();
@@ -262,7 +262,7 @@ fn main() {
             ),
             "t5_render_one_pass" => measure(
                 || {
-                    black_box(render_ternary_words_spaced(black_box(&t5_words)));
+                    black_box(render_binary_words_spaced(black_box(&t5_words)));
                 },
                 count,
                 samples,

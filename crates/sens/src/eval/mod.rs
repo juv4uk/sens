@@ -85,7 +85,10 @@ pub fn read_single_quoted_datum(source: &str) -> Result<Value, LanguageError> {
         return Err(LanguageError::new(
             ErrorKind::InvalidForm,
             "request envelope must contain exactly one top-level expression",
-            Span { start: 0, end: source.len() },
+            Span {
+                start: 0,
+                end: source.len(),
+            },
         ));
     }
     special_forms::quoted(&expressions[0])
@@ -654,8 +657,8 @@ mod tests {
             .collect::<Vec<_>>()
             .join(" ");
         let physical_source = format!("10 10 {glyphs} 01 1 01");
-        let expressions = crate::parse_canonical_binary(&physical_source)
-            .expect("physical D2/D7 call head");
+        let expressions =
+            crate::parse_canonical_binary(&physical_source).expect("physical D2/D7 call head");
         let mut bound_session = Session::bare();
         bound_session.environment.define(
             name,
@@ -682,14 +685,14 @@ mod tests {
         // D7 1111000 — один гліф української клавіатури, не функція D7.
         // Позитив перевіряє тільки механізм пошуку наявного зв'язування.
         let name = "х";
-        let text7 = crate::encode_text7(name, crate::Text7Layout::Uk)
-            .expect("ratified D7 Ukrainian glyph");
+        let text7 =
+            crate::encode_text7(name, crate::Text7Layout::Uk).expect("ratified D7 Ukrainian glyph");
         assert_eq!(text7.cells().len(), 1);
         let wire = text7.to_canonical_wire_token();
         let glyph = format!("{:07b}", text7.cells()[0]);
         let source = format!("10 10 {glyph} 01 1 01");
-        let expressions = crate::parse_canonical_binary(&source)
-            .expect("exact physical single-glyph call");
+        let expressions =
+            crate::parse_canonical_binary(&source).expect("exact physical single-glyph call");
         let mut session = Session::bare();
         session.environment.define(
             name,
@@ -1115,12 +1118,7 @@ fn dispatch_call(
         .and_then(crate::semantic_registry::d6_binding_identity_for_definition)
         .filter(|identity| environment.domain_code_slot(*identity).is_some())
     {
-        return apply_exact_domain_value(
-            &identity,
-            arguments,
-            environment,
-            span,
-        );
+        return apply_exact_domain_value(&identity, arguments, environment, span);
     }
 
     if let Some(name) = head_name {
@@ -1137,7 +1135,9 @@ fn dispatch_call(
         )?,
     };
     match &function {
-        Value::DomainIdentity(identity) => apply_exact_domain_value(identity, arguments, environment, span),
+        Value::DomainIdentity(identity) => {
+            apply_exact_domain_value(identity, arguments, environment, span)
+        }
         Value::Sid(sid) => {
             // #1455: макрос, прив'язаний до коду, розгортається до обчислення аргументів.
             if !canon::has_primitive(*sid) {
@@ -1281,27 +1281,32 @@ mod exact_domain_surface_value_position_tests {
             ),
         ] {
             let mut session = Session::default();
-            session.environment.define("код-для-передачі", Value::DomainIdentity(domain));
+            session
+                .environment
+                .define("код-для-передачі", Value::DomainIdentity(domain));
             let mut input = "(як-є атом?)".to_owned();
             for _ in 0..depth {
                 input = format!("(сполучити {input} (як-є ()))");
             }
-            let program = format!(
-                "((функція (операція) (операція {input})) код-для-передачі)"
-            );
+            let program = format!("((функція (операція) (операція {input})) код-для-передачі)");
             let result = eval_program(&program, &mut session)
                 .expect("ратифікований код передається як значення, а потім виконується");
-            assert_eq!(result.value, expected, "Д{}: точна identity має бути першокласною", domain.width());
+            assert_eq!(
+                result.value,
+                expected,
+                "Д{}: точна identity має бути першокласною",
+                domain.width()
+            );
         }
     }
 
     #[test]
     fn unadmitted_d10_code_is_a_value_but_not_a_fabricated_function() {
         let mut session = Session::default();
-        let code = crate::DomainIdentity::D10(
-            crate::DomainD10::new(0b0000000010).unwrap(),
-        );
-        session.environment.define("невикличний-код", Value::DomainIdentity(code));
+        let code = crate::DomainIdentity::D10(crate::DomainD10::new(0b0000000010).unwrap());
+        session
+            .environment
+            .define("невикличний-код", Value::DomainIdentity(code));
         assert_eq!(
             eval_program("невикличний-код", &mut session)
                 .expect("резидент є першокласним значенням")
@@ -1311,7 +1316,11 @@ mod exact_domain_surface_value_position_tests {
         let error = eval_program("(невикличний-код)", &mut session)
             .expect_err("невизначений механізм не створюється з ширини");
         assert_eq!(error.kind, ErrorKind::Type);
-        assert!(error.message.contains("domain identity"), "{}", error.message);
+        assert!(
+            error.message.contains("domain identity"),
+            "{}",
+            error.message
+        );
     }
 }
 
@@ -1513,7 +1522,6 @@ mod domain_eval_cutover_d3_compatibility {
     }
 }
 
-
 #[cfg(test)]
 mod physical_d7_existing_binding_regressions {
     use super::*;
@@ -1531,8 +1539,7 @@ mod physical_d7_existing_binding_regressions {
         assert_eq!(text.len(), 1, "справжнє однословне D7 ім'я");
         let glyph = text.cells()[0];
         let source = format!("10 {glyph:07b} 1 01");
-        let forms = crate::parse_canonical_binary(&source)
-            .expect("фізична форма D2(D7, D1)");
+        let forms = crate::parse_canonical_binary(&source).expect("фізична форма D2(D7, D1)");
 
         let mut bound = Session::bare();
         bound.environment.define(
@@ -1542,7 +1549,10 @@ mod physical_d7_existing_binding_regressions {
             })),
         );
         assert!(
-            bound.environment.get(&text.to_canonical_wire_token()).is_none(),
+            bound
+                .environment
+                .get(&text.to_canonical_wire_token())
+                .is_none(),
             "допуск не створює прихованого D7 binding"
         );
         let result = eval_parsed_expressions(&forms, &mut bound)
@@ -1584,9 +1594,7 @@ mod physical_d7_existing_binding_regressions {
         // bootstrap binding installed by its source spelling.
         let environment = Environment::root();
         environment.define(spelling, Value::Nil);
-        assert!(environment
-            .get(&text.to_canonical_wire_token())
-            .is_none());
+        assert!(environment.get(&text.to_canonical_wire_token()).is_none());
 
         let value = evaluate(&reference, &environment)
             .expect("a previously defined source name is readable from D7");

@@ -10,13 +10,12 @@ const SOURCE: &str =
 const PROJECTION: &str = "10 001 00 000 01 00 10 111 00 10 001 00 000 01 00 10 001 00 000 01 01";
 
 fn decode_t5m_via_zig(bytes: &[u8]) -> Vec<sens::BinarySourceWord> {
-    zig_transport::decode_t5m_words(bytes)
-        .expect("Zig T5M decoder must recover exact words")
+    zig_transport::decode_t5m_words(bytes).expect("Zig T5M decoder must recover exact words")
 }
 
 fn open_ternary_via_zig(bytes: &[u8]) -> String {
     let words = decode_t5m_via_zig(bytes);
-    sens::render_ternary_words_spaced(&words)
+    sens::render_binary_words_spaced(&words)
 }
 
 #[test]
@@ -37,8 +36,7 @@ fn physical_two_form_source_retains_d2_boundary_and_roundtrips() {
         "D2 inter-form separator"
     );
     assert_eq!(visible, PROJECTION);
-    let re_encoded = zig_transport::encode_t5m_direct(&words)
-        .expect("re-encode via Zig T5M");
+    let re_encoded = zig_transport::encode_t5m_direct(&words).expect("re-encode via Zig T5M");
     assert_eq!(re_encoded, T5);
 
     let forms = sens::parse_canonical_binary(&visible).expect("parse two current-domain forms");

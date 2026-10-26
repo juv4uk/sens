@@ -227,6 +227,18 @@ impl fmt::Debug for BinarySourceWord {
     }
 }
 
+/// Render already recovered exact-width source words as visible binary tokens.
+///
+/// This is a presentation helper only: physical T5M bytes are transported by
+/// the Zig corridor, and this function performs no packing or decoding.
+pub fn render_binary_words_spaced(words: &[BinarySourceWord]) -> String {
+    words
+        .iter()
+        .map(ToString::to_string)
+        .collect::<Vec<_>>()
+        .join(" ")
+}
+
 /// One canonical binary word together with its exact byte span in UTF-8 source.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct BinarySourceToken {

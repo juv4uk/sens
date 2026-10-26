@@ -643,7 +643,6 @@ mod tests {
         );
     }
 
-
     #[test]
     fn d12_is_the_first_signed_numeric_domain_and_preserves_exact_boundaries() {
         assert!(BinaryNumber::is_numeric_domain_width(12));
@@ -653,14 +652,12 @@ mod tests {
             assert!(!BinaryNumber::is_numeric_domain_width(width), "D{width}");
         }
 
-        let minimum = BinaryNumber::from_numeric_domain_bits(
-            12,
-            &[1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        ).unwrap();
-        let maximum = BinaryNumber::from_numeric_domain_bits(
-            12,
-            &[0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-        ).unwrap();
+        let minimum =
+            BinaryNumber::from_numeric_domain_bits(12, &[1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
+                .unwrap();
+        let maximum =
+            BinaryNumber::from_numeric_domain_bits(12, &[0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1])
+                .unwrap();
         let minus_one = BinaryNumber::from_numeric_domain_bits(12, &[1; 12]).unwrap();
         assert_eq!(minimum.numeric_domain_width(), Some(12));
         assert_eq!(maximum.numeric_domain_width(), Some(12));
@@ -668,10 +665,8 @@ mod tests {
         assert_eq!(maximum.to_decimal_string(), "2047");
         assert_eq!(minus_one.to_decimal_string(), "-1");
 
-        let one = BinaryNumber::from_numeric_domain_bits(
-            12,
-            &[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-        ).unwrap();
+        let one = BinaryNumber::from_numeric_domain_bits(12, &[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1])
+            .unwrap();
         let two = one.add_admitted_numeric(&one).unwrap();
         assert_eq!(two.numeric_domain_width(), Some(12));
         assert_eq!(two.to_decimal_string(), "2");
@@ -687,7 +682,10 @@ mod tests {
         d24_two_bits[22] = 1;
         let d24_two = BinaryNumber::from_numeric_domain_bits(24, &d24_two_bits).unwrap();
         assert_eq!(two.to_decimal_string(), d24_two.to_decimal_string());
-        assert_ne!(two, d24_two, "equal magnitudes in D12 and D24 keep distinct identities");
+        assert_ne!(
+            two, d24_two,
+            "equal magnitudes in D12 and D24 keep distinct identities"
+        );
         assert_eq!(two.add_admitted_numeric(&d24_two), None);
     }
 

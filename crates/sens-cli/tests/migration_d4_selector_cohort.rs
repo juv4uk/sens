@@ -14,7 +14,7 @@ const EXPECTED_PHYSICAL: &[u8] = &[
 fn historical_selector_fixture_preserves_exact_width_words_and_t5m() {
     assert_eq!(T5, EXPECTED_PHYSICAL);
     let words = zig_transport::decode_t5m_words(T5).expect("must decode canonical physical T5M");
-    let visible = sens::render_ternary_words_spaced(&words);
+    let visible = sens::render_binary_words_spaced(&words);
     assert_eq!(visible, VISIBLE);
     assert_eq!(
         words
@@ -24,8 +24,7 @@ fn historical_selector_fixture_preserves_exact_width_words_and_t5m() {
             .join(" "),
         VISIBLE
     );
-    let re_encoded = zig_transport::encode_t5m_direct(&words)
-        .expect("Zig T5M re-encode");
+    let re_encoded = zig_transport::encode_t5m_direct(&words).expect("Zig T5M re-encode");
     assert_eq!(re_encoded, T5);
 }
 

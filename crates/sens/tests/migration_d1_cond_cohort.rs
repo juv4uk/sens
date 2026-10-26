@@ -3,7 +3,7 @@
 
 use sens::{
     decode_ternary_program, encode_binary_projection_ternary, open_ternary_program,
-    render_ternary_words_spaced, TernaryTransportError,
+    render_binary_words_spaced, TernaryTransportError,
 };
 
 const T5: &[u8] = include_bytes!("../../../tests/fixtures/migration-d1-cond-cohort/branch.sens");
@@ -17,7 +17,7 @@ fn physical_t5_d1_cond_preserves_source_and_transport_views() {
         [0x67, 0x38, 0x65, 0x15, 0xbf, 0x12, 0x3b, 0x2d, 0xc4, 0xa9, 0xb1, 0xa1]
     );
     let words = decode_ternary_program(T5).expect("committed file must be canonical T5");
-    let current = render_ternary_words_spaced(&words);
+    let current = render_binary_words_spaced(&words);
     assert_eq!(current, WORDS);
     assert_eq!(SPACED_VIEW, format!("{current}\n"));
     assert_eq!(encode_binary_projection_ternary(SPACED_VIEW).unwrap(), T5);

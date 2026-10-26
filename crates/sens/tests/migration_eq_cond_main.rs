@@ -3,7 +3,7 @@
 
 use sens::{
     decode_ternary_program, encode_binary_projection_ternary, open_ternary_program,
-    render_ternary_words_spaced, TernaryTransportError,
+    render_binary_words_spaced, TernaryTransportError,
 };
 
 const HISTORICAL_SOURCE: &str =
@@ -17,7 +17,7 @@ const SKIP_T5: &[u8] =
 fn original_eq_cond_images_roundtrip_as_historical_transport_only() {
     for data in [SELECT_T5, SKIP_T5] {
         let words = decode_ternary_program(data).expect("historical T5 must decode");
-        let visible = render_ternary_words_spaced(&words);
+        let visible = render_binary_words_spaced(&words);
         assert_eq!(open_ternary_program(data).unwrap(), visible);
         assert_eq!(encode_binary_projection_ternary(&visible).unwrap(), data);
     }

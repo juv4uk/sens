@@ -14,8 +14,9 @@ const EXPECTED_PHYSICAL: &[u8] = &[
 #[test]
 fn third_domain_canary_preserves_exact_physical_t5m_words() {
     assert_eq!(T5, EXPECTED_PHYSICAL);
-    let words = zig_transport::decode_t5m_words(T5).expect("canonical physical T5M, 0..4 pad trits");
-    let visible = sens::render_ternary_words_spaced(&words);
+    let words =
+        zig_transport::decode_t5m_words(T5).expect("canonical physical T5M, 0..4 pad trits");
+    let visible = sens::render_binary_words_spaced(&words);
     assert_eq!(visible, VISIBLE);
     assert_eq!(
         words
@@ -25,8 +26,7 @@ fn third_domain_canary_preserves_exact_physical_t5m_words() {
             .join(" "),
         VISIBLE
     );
-    let re_encoded = zig_transport::encode_t5m_direct(&words)
-        .expect("Zig T5M re-encode");
+    let re_encoded = zig_transport::encode_t5m_direct(&words).expect("Zig T5M re-encode");
     assert_eq!(re_encoded, T5);
 }
 

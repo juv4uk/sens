@@ -246,7 +246,11 @@ pub(crate) fn exact_uk_callable_for_source_head(name: &str) -> Option<crate::Dom
         return Some(identity);
     }
     if let Some(bits) = admitted_d8_uk_callable_bits(name) {
-        let word = crate::parse_binary_source_words(bits).ok()?.into_iter().next()?.word;
+        let word = crate::parse_binary_source_words(bits)
+            .ok()?
+            .into_iter()
+            .next()?
+            .word;
         return Some(DomainIdentity::from_source_word(word));
     }
     higher_selector_uk_index()
@@ -393,7 +397,10 @@ pub(crate) fn d6_uk_source_identity(name: &str) -> Option<DomainIdentity> {
 pub(crate) fn d6_non_uk_peer_source_name(name: &str) -> bool {
     D6_DEFINITION_BINDINGS.iter().any(|row| {
         let ukrainian_names = if row.names.len() == 5 { 2 } else { 1 };
-        row.names.iter().skip(ukrainian_names).any(|peer| *peer == name)
+        row.names
+            .iter()
+            .skip(ukrainian_names)
+            .any(|peer| *peer == name)
     })
 }
 
@@ -565,7 +572,9 @@ pub(crate) fn surface_for_domain_identity(
                     .and_then(|row| {
                         // Генератор згортає лише однакові ук/укр:
                         // 5 імен => окреме повне укр, інакше перше вже повне.
-                        row.names.get(if row.names.len() == 5 { 1 } else { 0 }).copied()
+                        row.names
+                            .get(if row.names.len() == 5 { 1 } else { 0 })
+                            .copied()
                     });
             }
             DomainIdentity::D10(word) => {
@@ -573,7 +582,9 @@ pub(crate) fn surface_for_domain_identity(
                     .iter()
                     .find(|row| row.bits == word.packed_bits())
                     .and_then(|row| {
-                        row.names.get(if row.names.len() == 5 { 1 } else { 0 }).copied()
+                        row.names
+                            .get(if row.names.len() == 5 { 1 } else { 0 })
+                            .copied()
                     });
             }
             _ => {}

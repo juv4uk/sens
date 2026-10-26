@@ -647,7 +647,10 @@ mod tests {
                 }
             }
         }
-        assert_eq!(sorted(arena.reachable(&[root])), sorted(vec![a, root, inserted]));
+        assert_eq!(
+            sorted(arena.reachable(&[root])),
+            sorted(vec![a, root, inserted])
+        );
     }
 
     /// Міст до чинного `Rc`-`Value`: переніс, збирання за коренем, відновлення.
@@ -698,7 +701,7 @@ mod tests {
         let mut arena = Arena::new();
         // Ациклічний лист: (t . ()) — має відновитися точно.
         let leaf = arena.alloc_with(Edge::Atom(Value::Bool(true)), Edge::None); // 0
-        // Цикл a -> b -> a.
+                                                                                // Цикл a -> b -> a.
         let a = arena.alloc(); // 1
         let b = arena.alloc(); // 2
         assert!(arena.write(a, Edge::Cell(b), Edge::None));

@@ -444,7 +444,10 @@ mod exact_t5m_cutover_tests {
 
         // Це межа поточного фізичного adapter, не акт ратифікації доменів.
         // Числова ширина має належати D(12 * 2^n), а не довільній кратності.
-        for width in (11..=23).filter(|width| *width != 12).chain([25, 36, 72, 120]) {
+        for width in (11..=23)
+            .filter(|width| *width != 12)
+            .chain([25, 36, 72, 120])
+        {
             assert!(
                 ExactDomainWord::from_physical_width_bits(width, &vec![0; width]).is_err(),
                 "D{width} поза поточними підтриманими родинами фізичного adapter"

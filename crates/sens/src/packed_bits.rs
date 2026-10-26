@@ -231,7 +231,12 @@ pub struct BitPacker {
 unsafe extern "C" {
     /// Input records: repeated [width:u8][value:u64 big-endian]. Output is the
     /// canonical raw MSB-first payload. capacity=0 queries the exact byte count.
-    fn sens_zig_bitpack_fields(src: *const u8, byte_len: usize, dst: *mut u8, capacity: usize) -> isize;
+    fn sens_zig_bitpack_fields(
+        src: *const u8,
+        byte_len: usize,
+        dst: *mut u8,
+        capacity: usize,
+    ) -> isize;
 }
 
 impl BitPacker {
@@ -280,12 +285,18 @@ impl BitPacker {
     #[inline]
     fn append_exact_window(&mut self, width: usize, bits: u16) -> usize {
         assert!((1..=10).contains(&width), "unsupported exact-width carrier");
-        assert!(u32::from(bits) < (1u32 << width), "payload exceeds exact width");
+        assert!(
+            u32::from(bits) < (1u32 << width),
+            "payload exceeds exact width"
+        );
         let start = self.bit_len;
         let end = start.checked_add(width).expect("packed bit count overflow");
-        self.records.try_reserve(9).expect("reserve Zig field record");
+        self.records
+            .try_reserve(9)
+            .expect("reserve Zig field record");
         self.records.push(width as u8);
-        self.records.extend_from_slice(&u64::from(bits).to_be_bytes());
+        self.records
+            .extend_from_slice(&u64::from(bits).to_be_bytes());
         self.bit_len = end;
         start
     }
@@ -319,7 +330,10 @@ impl BitPacker {
             if !self.records.is_empty() {
                 return Err("empty Zig bitstream has non-empty field records".into());
             }
-            return Ok(PackedBitstream { bytes: Vec::new(), bit_len: 0 });
+            return Ok(PackedBitstream {
+                bytes: Vec::new(),
+                bit_len: 0,
+            });
         }
         let queried = unsafe {
             sens_zig_bitpack_fields(
@@ -343,7 +357,9 @@ impl BitPacker {
             )
         };
         if written != queried {
-            return Err(format!("Zig bitpack output mismatch: expected={queried} actual={written}"));
+            return Err(format!(
+                "Zig bitpack output mismatch: expected={queried} actual={written}"
+            ));
         }
         PackedBitstream::from_parts(bytes, self.bit_len)
             .ok_or_else(|| "Zig returned non-canonical packed tail".into())

@@ -14,15 +14,20 @@ fn physical_t5m_d1_cond_preserves_source_and_transport_views() {
         [0x67, 0x38, 0x65, 0x15, 0xbf, 0x12, 0x3b, 0x2d, 0xc4, 0xa9, 0xb1, 0xa1]
     );
     let words = zig_transport::decode_t5m_words(T5).expect("committed file must be canonical T5M");
-    let current = sens::render_ternary_words_spaced(&words);
+    let current = sens::render_binary_words_spaced(&words);
     assert_eq!(current, WORDS);
     assert_eq!(SPACED_VIEW, format!("{current}\n"));
-    let re_encoded = zig_transport::encode_t5m_direct(&words)
-        .expect("Zig T5M re-encode");
+    let re_encoded = zig_transport::encode_t5m_direct(&words).expect("Zig T5M re-encode");
     assert_eq!(re_encoded, T5);
-    assert_eq!(sens_cli::zig_transport::decode_t5m_words(T5).unwrap().into_iter()
-        .map(|w| sens::render_ternary_words_spaced(&[w])).collect::<Vec<_>>()
-        .join(" "), WORDS);
+    assert_eq!(
+        sens_cli::zig_transport::decode_t5m_words(T5)
+            .unwrap()
+            .into_iter()
+            .map(|w| sens::render_binary_words_spaced(&[w]))
+            .collect::<Vec<_>>()
+            .join(" "),
+        WORDS
+    );
 }
 
 #[test]

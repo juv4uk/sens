@@ -154,20 +154,38 @@ mod tests {
             assert_eq!(number.exact_numeric_domain_bits().unwrap().len(), width);
         };
 
-        assert_integer(invoke(add1, &[d12(7)], &env, Span::default()).unwrap().unwrap(), 12, "8");
-        assert_integer(invoke(sub1, &[d12(7)], &env, Span::default()).unwrap().unwrap(), 12, "6");
         assert_integer(
-            invoke(add1, &[d12(2047)], &env, Span::default()).unwrap().unwrap(),
+            invoke(add1, &[d12(7)], &env, Span::default())
+                .unwrap()
+                .unwrap(),
+            12,
+            "8",
+        );
+        assert_integer(
+            invoke(sub1, &[d12(7)], &env, Span::default())
+                .unwrap()
+                .unwrap(),
+            12,
+            "6",
+        );
+        assert_integer(
+            invoke(add1, &[d12(2047)], &env, Span::default())
+                .unwrap()
+                .unwrap(),
             24,
             "2048",
         );
         assert_integer(
-            invoke(sub1, &[d12(-2048)], &env, Span::default()).unwrap().unwrap(),
+            invoke(sub1, &[d12(-2048)], &env, Span::default())
+                .unwrap()
+                .unwrap(),
             24,
             "-2049",
         );
         assert_integer(
-            invoke(neg, &[d12(-2048)], &env, Span::default()).unwrap().unwrap(),
+            invoke(neg, &[d12(-2048)], &env, Span::default())
+                .unwrap()
+                .unwrap(),
             24,
             "2048",
         );
@@ -252,11 +270,7 @@ mod tests {
         let neg = CoreDomainIdentity::D6(crate::CoreD6::from_word(
             crate::Bit6::new(0b010010).unwrap(),
         ));
-        for (operand, expected) in [
-            (d24(0), d24(0)),
-            (d24(7), d24(-7)),
-            (d24(-7), d24(7)),
-        ] {
+        for (operand, expected) in [(d24(0), d24(0)), (d24(7), d24(-7)), (d24(-7), d24(7))] {
             assert_eq!(
                 invoke(neg, &[operand], &env, Span::default())
                     .unwrap()

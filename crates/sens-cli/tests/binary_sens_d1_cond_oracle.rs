@@ -3,9 +3,7 @@
 //! This Rust file may check canonical bytes, framing and executability, but
 //! must not encode a language truth table or expected D1 result.
 
-use sens::{
-    eval_parsed_expressions, parse_canonical_binary, Session,
-};
+use sens::{eval_parsed_expressions, parse_canonical_binary, Session};
 use sens_cli::zig_transport;
 
 const LOGIC: &str = include_str!("../../../tests/oracles/d1-cond-law/proof.bits");
@@ -16,25 +14,24 @@ const PROCESS_BINDING_LOGIC: &str =
 fn encode_via_zig(source: &str) -> Vec<u8> {
     let tokens = sens::parse_binary_source_words(source)
         .expect("binary projection parses to exact-width tokens");
-    let words = tokens.into_iter().map(|token| token.word).collect::<Vec<_>>();
-    zig_transport::encode_t5m_direct(&words)
-        .expect("Zig T5M encoder must produce physical bytes")
+    let words = tokens
+        .into_iter()
+        .map(|token| token.word)
+        .collect::<Vec<_>>();
+    zig_transport::encode_t5m_direct(&words).expect("Zig T5M encoder must produce physical bytes")
 }
 
 fn decode_t5m_via_zig(bytes: &[u8]) -> Vec<sens::BinarySourceWord> {
-    zig_transport::decode_t5m_words(bytes)
-        .expect("Zig T5M decoder must recover exact words")
+    zig_transport::decode_t5m_words(bytes).expect("Zig T5M decoder must recover exact words")
 }
 
-fn open_ternary_via_zig(bytes: &[u8]) -> String {
+fn render_binary_words_via_zig(bytes: &[u8]) -> String {
     let words = decode_t5m_via_zig(bytes);
-    sens::render_ternary_words_spaced(&words)
-}
-
-fn ternary_transport_accounting(
-    words: &[sens::BinarySourceWord],
-) -> Result<sens::TernaryTransportAccounting, sens::TernaryTransportError> {
-    sens::ternary_transport_accounting(words)
+    words
+        .iter()
+        .map(ToString::to_string)
+        .collect::<Vec<_>>()
+        .join(" ")
 }
 
 #[test]
@@ -43,30 +40,25 @@ fn physical_binary_sens_transport_and_execution_are_mechanical_only() {
     assert!(LOGIC
         .split_whitespace()
         .all(|w| w.bytes().all(|c| c == b'0' || c == b'1')));
-    
+
     let words = decode_t5m_via_zig(PHYSICAL);
     let physical_zig = encode_via_zig(LOGIC);
     assert_eq!(physical_zig, PHYSICAL);
-    let opened = open_ternary_via_zig(PHYSICAL);
+    let opened = render_binary_words_via_zig(PHYSICAL);
     assert_eq!(
         opened.split_whitespace().collect::<Vec<_>>(),
         LOGIC.split_whitespace().collect::<Vec<_>>()
     );
-    
-    // Accounting via the same mechanical path
-    let accounting = ternary_transport_accounting(&words).unwrap();
-    assert_eq!(accounting.physical_bytes, PHYSICAL.len());
-    assert_eq!(
-        accounting.semantic_bits,
-        LOGIC.split_whitespace().map(str::len).sum()
-    );
-    assert_eq!(accounting.word_count, LOGIC.split_whitespace().count());
+
+    let semantic_bits = words.iter().map(|word| word.width()).sum::<usize>();
+    assert_eq!(PHYSICAL.len(), physical_zig.len());
+    assert_eq!(semantic_bits, LOGIC.split_whitespace().map(str::len).sum());
+    assert_eq!(words.len(), LOGIC.split_whitespace().count());
     println!(
-        "binary SENS: {} words, {} exact semantic bits, {} separator trits, {} physical bytes",
-        accounting.word_count,
-        accounting.semantic_bits,
-        accounting.separating_trits,
-        accounting.physical_bytes
+        "binary SENS: {} words, {} exact semantic bits, {} physical bytes",
+        words.len(),
+        semantic_bits,
+        PHYSICAL.len()
     );
 
     // Execution here is a mechanism smoke only. Do not compare the returned
@@ -101,7 +93,7 @@ fn process_binding_semantics_are_self_verdicts_written_in_binary_sens() {
         .split_whitespace()
         .all(|word| word.bytes().all(|bit| bit == b'0' || bit == b'1')));
     let physical = encode_via_zig(PROCESS_BINDING_LOGIC);
-    let opened = open_ternary_via_zig(&physical);
+    let opened = render_binary_words_via_zig(&physical);
     assert_eq!(
         opened.split_whitespace().collect::<Vec<_>>(),
         PROCESS_BINDING_LOGIC.split_whitespace().collect::<Vec<_>>(),

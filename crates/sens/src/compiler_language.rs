@@ -15,8 +15,8 @@ use crate::{
     canonical_value_sha256_mechanism, domain_identity_shape_mechanism,
     domain_identity_shape_or_empty_mechanism, eval_parsed_expressions, load_core_library,
     parse_mixed_exact_domain, sha256_source, CompilerExecutionRole, CompilerLoweringRole,
-    CoreDomainIdentity, DomainIdentity,
-    ErrorKind, Exactness, Expr, ExprKind, LanguageError, Session, Span, Value,
+    CoreDomainIdentity, DomainIdentity, ErrorKind, Exactness, Expr, ExprKind, LanguageError,
+    Session, Span, Value,
 };
 use std::rc::Rc;
 
@@ -326,8 +326,8 @@ fn compiler_surface_text(value: &Value) -> Option<String> {
 fn valid_lower_hex(value: &str, len: usize) -> bool {
     value.len() == len
         && value
-        .bytes()
-        .all(|byte| byte.is_ascii_digit() || matches!(byte, b'a'..=b'f'))
+            .bytes()
+            .all(|byte| byte.is_ascii_digit() || matches!(byte, b'a'..=b'f'))
 }
 
 fn verify_compiler_program_request(
@@ -401,10 +401,7 @@ fn authority_sha256_from(projection: &str) -> Result<String, LanguageError> {
     quoted_json_string(&projection[authority..], "sha256")
 }
 
-fn verify_projection_authority(
-    projection: &str,
-    authority: &str,
-) -> Result<(), LanguageError> {
+fn verify_projection_authority(projection: &str, authority: &str) -> Result<(), LanguageError> {
     let expected_authority_sha = authority_sha256_from(projection)?;
     let actual_authority_sha = sha256_hex(authority.as_bytes());
     if expected_authority_sha != actual_authority_sha {
@@ -618,7 +615,7 @@ fn language_role_call(identity: CoreDomainIdentity) -> Expr {
                 symbol(LAW_VALUE_NAME),
                 symbol(D4_LAW_VALUE_NAME),
             ]
-                .into_boxed_slice(),
+            .into_boxed_slice(),
         )),
         span: Span::default(),
     }
@@ -638,16 +635,13 @@ fn compiler_program_call() -> Expr {
                 symbol(D4_PROOF_VALUE_NAME),
                 symbol(PROVENANCE_VALUE_NAME),
             ]
-                .into_boxed_slice(),
+            .into_boxed_slice(),
         )),
         span: Span::default(),
     }
 }
 
-fn eval_compiler_nucleus_from(
-    session: &mut Session,
-    source: &str,
-) -> Result<(), LanguageError> {
+fn eval_compiler_nucleus_from(session: &mut Session, source: &str) -> Result<(), LanguageError> {
     let expressions = parse_mixed_exact_domain(source)?;
     eval_parsed_expressions(&expressions, session)?;
     Ok(())
@@ -675,7 +669,7 @@ fn compiler_program_artifact_call() -> Expr {
                 symbol(ARTIFACT_PROVENANCE_VALUE_NAME),
                 symbol(PROGRAM_DIGEST_VALUE_NAME),
             ]
-                .into_boxed_slice(),
+            .into_boxed_slice(),
         )),
         span: Span::default(),
     }
@@ -692,12 +686,12 @@ fn decode_language_lowering_role(
         Value::Symbol(name) => name.to_string(),
         Value::Text7(text) => crate::text7_projection::render_text7(text, crate::Text7Layout::En)
             .map_err(|error| {
-                LanguageError::new(
-                    ErrorKind::InvalidForm,
-                    format!("SENS compiler nucleus returned unrenderable D7 role text: {error}"),
-                    Span::default(),
-                )
-            })?,
+            LanguageError::new(
+                ErrorKind::InvalidForm,
+                format!("SENS compiler nucleus returned unrenderable D7 role text: {error}"),
+                Span::default(),
+            )
+        })?,
         // A source-written quoted D7 token can arrive as a proper list of
         // exact D7 identities. Normalize that representation here only; SENS
         // remains the authority that chose the role value.
@@ -721,7 +715,9 @@ fn decode_language_lowering_role(
                     other => {
                         return Err(LanguageError::new(
                             ErrorKind::InvalidForm,
-                            format!("SENS compiler nucleus returned an improper D7 role list: {other}"),
+                            format!(
+                                "SENS compiler nucleus returned an improper D7 role list: {other}"
+                            ),
                             Span::default(),
                         ));
                     }
@@ -738,7 +734,9 @@ fn decode_language_lowering_role(
                 |error| {
                     LanguageError::new(
                         ErrorKind::InvalidForm,
-                        format!("SENS compiler nucleus returned unrenderable D7 role text: {error}"),
+                        format!(
+                            "SENS compiler nucleus returned unrenderable D7 role text: {error}"
+                        ),
                         Span::default(),
                     )
                 },
@@ -871,8 +869,8 @@ pub fn compiler_program_artifact_from_sens(
 ) -> Result<Value, LanguageError> {
     if program_wire_sha256.len() != 64
         || !program_wire_sha256
-        .bytes()
-        .all(|byte| byte.is_ascii_digit() || matches!(byte, b'a'..=b'f'))
+            .bytes()
+            .all(|byte| byte.is_ascii_digit() || matches!(byte, b'a'..=b'f'))
     {
         return Err(invalid_projection(
             "compiler program wire digest must be exactly 64 lowercase hexadecimal characters",
@@ -880,8 +878,8 @@ pub fn compiler_program_artifact_from_sens(
     }
     if sens_revision.len() != 40
         || !sens_revision
-        .bytes()
-        .all(|byte| byte.is_ascii_digit() || matches!(byte, b'a'..=b'f'))
+            .bytes()
+            .all(|byte| byte.is_ascii_digit() || matches!(byte, b'a'..=b'f'))
     {
         return Err(invalid_projection(
             "compiler SENS revision must be exactly 40 lowercase hexadecimal characters",
@@ -1175,11 +1173,8 @@ mod tests {
 
     #[test]
     fn d7_cons_role_projection_is_normalized_and_malformed_lists_fail_closed() {
-        let text = crate::text7_projection::encode_text7(
-            "define-form",
-            crate::Text7Layout::En,
-        )
-        .expect("role label must be representable in D7");
+        let text = crate::text7_projection::encode_text7("define-form", crate::Text7Layout::En)
+            .expect("role label must be representable in D7");
         let exact_cells = Value::list(text.cells().iter().map(|cell| {
             Value::DomainIdentity(DomainIdentity::D7(crate::D7DataWord::from_word(
                 crate::Bit7::new(*cell).expect("exact D7 cell"),
@@ -1480,7 +1475,7 @@ mod tests {
                 &"00".repeat(32),
                 "0123456789abcdef0123456789abcdef01234567",
             )
-                .expect_err("duplicate authority field must be rejected");
+            .expect_err("duplicate authority field must be rejected");
             assert_eq!(error.kind, ErrorKind::InvalidForm);
             assert!(
                 error
@@ -1499,9 +1494,9 @@ mod tests {
             &"00".repeat(32),
             "0123456789abcdef0123456789abcdef01234567",
         )
-            .unwrap_err()
-            .to_string()
-            .contains("unsupported field"));
+        .unwrap_err()
+        .to_string()
+        .contains("unsupported field"));
     }
 
     #[test]
@@ -1608,7 +1603,7 @@ mod tests {
             &digest,
             "fedcba9876543210fedcba9876543210fedcba98"
         )
-            .is_err());
+        .is_err());
 
         let mut rows = list_values(&artifact)
             .into_iter()
@@ -1692,7 +1687,7 @@ mod tests {
             &crate::Environment::root(),
             Span::default(),
         )
-            .expect("representation-only request digest")
+        .expect("representation-only request digest")
         {
             Value::String(ref value) => value.to_string(),
             other => panic!("request digest mechanism returned non-string: {other}"),
@@ -1746,7 +1741,7 @@ mod tests {
             &digest,
             "0123456789abcdef0123456789abcdef01234567",
         )
-            .expect("semantic rejection is an artifact value, not a host traversal error");
+        .expect("semantic rejection is an artifact value, not a host traversal error");
         let rows = list_values(&artifact);
         assert!(matches!(
             rows.first(),
@@ -1766,7 +1761,7 @@ mod tests {
             "not-a-sha",
             "0123456789abcdef0123456789abcdef01234567",
         )
-            .expect_err("malformed mechanical provenance must fail before SENS invocation");
+        .expect_err("malformed mechanical provenance must fail before SENS invocation");
         assert!(error
             .to_string()
             .contains("64 lowercase hexadecimal characters"));

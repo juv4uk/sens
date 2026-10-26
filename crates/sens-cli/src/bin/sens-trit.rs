@@ -1101,7 +1101,7 @@ mod eval_tests {
     fn physical_quote_fixture_preserves_t5m_and_exact_d2_structure() {
         let bytes = zig_test_fixture("migration-quote-cohort-main/quote-legacy.sens");
         let words = zig_transport::decode_t5m_words(bytes).expect("canonical physical T5M");
-        let visible = sens::render_ternary_words_spaced(&words);
+        let visible = sens::render_binary_words_spaced(&words);
         assert_eq!(visible, "10 001 00 000 01");
         assert_eq!(zig_transport::encode_t5m_direct(&words).unwrap(), bytes);
 
@@ -1250,10 +1250,7 @@ mod eval_tests {
         let carrier = zig_test_fixture("migration-quote-cohort-main/quote-legacy.sens");
         let words = decode_canonical_t5m_words(carrier)
             .expect("Zig physical T5M -> current SENS D2 reader");
-        assert_eq!(
-            sens::render_ternary_words_spaced(&words),
-            "10 001 00 000 01"
-        );
+        assert_eq!(sens::render_binary_words_spaced(&words), "10 001 00 000 01");
         assert_eq!(
             sens::render_ternary_words_vertical(&words),
             "10\n001\n00\n000\n01\n"

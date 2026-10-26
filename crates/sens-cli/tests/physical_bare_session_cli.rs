@@ -50,7 +50,7 @@ fn sens_trit_open_reads_default_t5m_fixtures_without_execution_or_mutation() {
         let original = fs::read(&file).expect("real tracked physical fixture");
         let words = sens::decode_ternary_words(&original)
             .unwrap_or_else(|error| panic!("{relative}: exact-width reference decode: {error:?}"));
-        let expected = format!("{}\n", sens::render_ternary_words_spaced(&words));
+        let expected = format!("{}\n", sens::render_binary_words_spaced(&words));
         let opened = trit_open(&file);
         assert!(
             opened.status.success(),
@@ -119,7 +119,6 @@ fn corrupt_transport_fails_before_any_execution() {
     );
 }
 
-
 #[test]
 fn part_ii_exact_carrier_preserves_value_across_ukrainian_projection() {
     // Конкретна Part II: ратифіковане слово -> Zig T5M -> бінарний SENS,
@@ -131,7 +130,9 @@ fn part_ii_exact_carrier_preserves_value_across_ukrainian_projection() {
         ("000", "(як-є ())\n", "()\n"),
     ] {
         let words = sens::parse_binary_source_words(bits)
-            .unwrap_or_else(|error| panic!("test_id=part-ii layer=reader bits={bits} error={error}"))
+            .unwrap_or_else(|error| {
+                panic!("test_id=part-ii layer=reader bits={bits} error={error}")
+            })
             .into_iter()
             .map(|token| token.word)
             .collect::<Vec<_>>();
@@ -139,11 +140,17 @@ fn part_ii_exact_carrier_preserves_value_across_ukrainian_projection() {
             .expect("test_id=part-ii layer=Zig-T5M-encode");
         let recovered = sens_cli::zig_transport::decode_t5m_words(&bytes)
             .expect("test_id=part-ii layer=Zig-T5M-inverse");
-        assert_eq!(recovered, words, "test_id=part-ii layer=carrier bits={bits}");
+        assert_eq!(
+            recovered, words,
+            "test_id=part-ii layer=carrier bits={bits}"
+        );
 
         let binary = TempPhysical::write(&bytes, "sens");
         let opened = trit_open(&binary.path);
-        assert!(opened.status.success(), "test_id=part-ii layer=open bits={bits}");
+        assert!(
+            opened.status.success(),
+            "test_id=part-ii layer=open bits={bits}"
+        );
         assert_eq!(
             opened.stdout,
             format!("{bits}\n").as_bytes(),
@@ -166,12 +173,25 @@ fn part_ii_exact_carrier_preserves_value_across_ukrainian_projection() {
             "test_id=part-ii layer=Ukrainian-SENS bits={bits} error={}",
             String::from_utf8_lossy(&projected.stderr)
         );
-        assert_eq!(physical.stdout, expected.as_bytes(), "test_id=part-ii layer=binary-result bits={bits}");
-        assert_eq!(projected.stdout, physical.stdout, "test_id=part-ii layer=projection-parity bits={bits}");
+        assert_eq!(
+            physical.stdout,
+            expected.as_bytes(),
+            "test_id=part-ii layer=binary-result bits={bits}"
+        );
+        assert_eq!(
+            projected.stdout, physical.stdout,
+            "test_id=part-ii layer=projection-parity bits={bits}"
+        );
 
         let explicit = full_macro_baseline(&binary.path);
-        assert!(explicit.status.success(), "test_id=part-ii layer=Zig-eval bits={bits}");
-        assert_eq!(explicit.stdout, physical.stdout, "test_id=part-ii layer=execution-paths bits={bits}");
+        assert!(
+            explicit.status.success(),
+            "test_id=part-ii layer=Zig-eval bits={bits}"
+        );
+        assert_eq!(
+            explicit.stdout, physical.stdout,
+            "test_id=part-ii layer=execution-paths bits={bits}"
+        );
     }
 
     // Відмінність доменів є семантичною, не лише друкарською:
@@ -204,7 +224,10 @@ fn part_ii_exact_carrier_preserves_value_across_ukrainian_projection() {
         if allowed {
             assert_eq!(result.stdout, b"1\n", "test_id=part-ii layer=COND-D1:1");
         } else {
-            assert!(result.stdout.is_empty(), "test_id=part-ii layer=fail-closed");
+            assert!(
+                result.stdout.is_empty(),
+                "test_id=part-ii layer=fail-closed"
+            );
         }
     }
 }

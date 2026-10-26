@@ -332,8 +332,12 @@ mod honesty_tests {
         assert_eq!(result.to_string(), "0011");
 
         let denied = dispatch_sens_capability(
-            sens, &[], &Environment::untrusted_tcp(Vec::new()), Span::default(),
-        ).expect("registered exact host mechanism");
+            sens,
+            &[],
+            &Environment::untrusted_tcp(Vec::new()),
+            Span::default(),
+        )
+        .expect("registered exact host mechanism");
         let error = match denied {
             Err(error) => error,
             Ok(_) => panic!("TCP must reject exact host mechanism"),
@@ -351,7 +355,10 @@ mod honesty_tests {
         let lock = RwLock::new(BTreeMap::new());
         lock.write().expect("new registry").insert(
             "demo".to_owned(),
-            HostHandler::Evaluated { arity: 1, handler: evaluated_handler },
+            HostHandler::Evaluated {
+                arity: 1,
+                handler: evaluated_handler,
+            },
         );
         let program = crate::parse("(demo missing)").expect("parse source");
         let crate::ExprKind::List(items) = &program[0].kind else {
@@ -359,8 +366,13 @@ mod honesty_tests {
         };
         let span = program[0].span;
         let blocked = dispatch_capability_from(
-            &lock, "demo", &items[1..], &Environment::untrusted_tcp(Vec::new()), span,
-        ).expect("registered name");
+            &lock,
+            "demo",
+            &items[1..],
+            &Environment::untrusted_tcp(Vec::new()),
+            span,
+        )
+        .expect("registered name");
         let error = match blocked {
             Err(error) => error,
             Ok(_) => panic!("host invocation must be denied"),
@@ -370,8 +382,12 @@ mod honesty_tests {
         let guest = Environment::untrusted_tcp(vec!["git".to_owned()]);
         assert!(guest.is_host_capability_allowed("process-run-raw"));
         assert!(guest.is_host_capability_allowed("процес-запустити-сирий"));
-        for forbidden in ["read-file-bytes", "tcp-connect", "native-call-u64-raw",
-            "модельний-розподіл-вибору-сире"] {
+        for forbidden in [
+            "read-file-bytes",
+            "tcp-connect",
+            "native-call-u64-raw",
+            "модельний-розподіл-вибору-сире",
+        ] {
             assert!(!guest.is_host_capability_allowed(forbidden), "{forbidden}");
         }
         assert!(!guest.are_exact_host_capabilities_allowed());

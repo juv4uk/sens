@@ -2,7 +2,7 @@
 //! Core1 selected-value laws are proved by the SENS/Lisp-owned witness.
 use sens::{
     decode_ternary_program, encode_binary_projection_ternary, open_ternary_program,
-    parse_canonical_binary, render_ternary_words_spaced, TernaryTransportError,
+    parse_canonical_binary, render_binary_words_spaced, TernaryTransportError,
 };
 
 const T5: &[u8] = include_bytes!("../../../tests/fixtures/core1-domain-canary/second.sens");
@@ -12,7 +12,7 @@ fn physical_core1_second_canary_preserves_exact_t5_words() {
     assert_eq!(T5.len(), 22, "the committed T5 fixture is exactly 22 bytes");
     // The entrypoint is *physical bytes*, not a handcrafted evaluator value.
     let words = decode_ternary_program(T5).expect("canonical T5 and D2 source structure");
-    let visible = render_ternary_words_spaced(&words);
+    let visible = render_binary_words_spaced(&words);
     assert_eq!(open_ternary_program(T5).unwrap(), visible);
     assert_eq!(encode_binary_projection_ternary(&visible).unwrap(), T5);
 }
