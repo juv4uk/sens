@@ -71,7 +71,7 @@ fn lane_call(lane: usize, words: &[BinarySourceWord], t5: &[u8], v1: &[u8], v2: 
 
 fn bench_case(index: usize, label: &str, source: &str, raw: &mut String) {
     let words = choose_words(source);
-    let t5 = zig_transport::encode_t5m_direct(&words).expect("T5 corpus admission");
+    let t5 = zig_transport::encode_t5m_direct(&words).expect("допуск корпусу T5");
     let v1 = encode(&words).expect("S3/v1 corpus admission");
     let v2 = encode_v2(&words).expect("S3/v2 corpus admission");
     assert_eq!(zig_transport::decode_t5m_words(&t5).unwrap(), words);
