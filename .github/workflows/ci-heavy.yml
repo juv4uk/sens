@@ -446,7 +446,6 @@ jobs:
 
       - name: "SENS REPL — реальне виконання обернених українських D4-викликів"
         if: "${{ always() && steps.changed-t5m-lisp.outputs.repl_runtime_tests == 'true' }}"
-        timeout-minutes: 6
         shell: bash
         run: |
           set -euo pipefail
