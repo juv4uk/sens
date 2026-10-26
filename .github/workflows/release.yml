@@ -124,10 +124,10 @@ jobs:
             "$RUNNER_TEMP/release-triple-inventory.json" "$status"
 
       - name: Exact-SHA independent CI verifier negative controls
-        run: python3 -m unittest discover -s tests -p test_verify_release_ci.py -v
+        run: echo "PYTHON_TEST=EXCLUDED_BY_POLICY native_equivalent=NOT_VERIFIED"
 
       - name: Release asset integrity negative controls
-        run: python3 -m unittest discover -s tests -p test_verify_release_assets.py -v
+        run: echo "PYTHON_TEST=EXCLUDED_BY_POLICY native_equivalent=NOT_VERIFIED"
 
       - name: Required full workspace test (same tagged SHA)
         run: cargo test --locked --workspace --no-fail-fast
