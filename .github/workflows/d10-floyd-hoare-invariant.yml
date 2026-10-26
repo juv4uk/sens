@@ -1,13 +1,18 @@
-name: D10 Floyd Hoare finite inductive invariant research
+name: "D10 Floyd-Hoare invariant — excluded by Rust/Zig/SENS language policy"
+
 on:
   workflow_dispatch:
+
 permissions:
   contents: read
+
 jobs:
-  exact-finite:
+  policy-exclusion:
+    name: Foreign-language tests/research excluded (NOT_VERIFIED)
     runs-on: ubuntu-latest
-    timeout-minutes: 8
     steps:
-      - uses: actions/checkout@v4
-      - name: Check 32768 exact finite transition-system witnesses
-        run: python3 tests/test_d10_floyd_hoare_inductiveness.py
+      - name: Record exclusion without asserting an outcome
+        run: |
+          echo "FOREIGN_LANGUAGE_TEST=EXCLUDED_BY_POLICY"
+          echo "NATIVE_EQUIVALENT=NOT_VERIFIED"
+          echo "NO_PASS_CLAIM=MADE"

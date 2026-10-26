@@ -1,17 +1,18 @@
-name: D10 forward harvest v1
+name: "D10 forward harvest — excluded by Rust/Zig/SENS language policy"
 
 on:
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
-  forward-harvest:
-    runs-on: ubuntu-24.04
-    timeout-minutes: 10
+  policy-exclusion:
+    name: Foreign-language tests/research excluded (NOT_VERIFIED)
+    runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
-      - name: Verify selector seed
-        run: python3 scripts/check-d10-fill-v1-seed.py
-      - name: Verify recovery v2
-        run: python3 scripts/check-d10-recovery-v2.py
-      - name: Verify library harvest v1
-        run: python3 scripts/check-d10-library-harvest-v1.py
+      - name: Record exclusion without asserting an outcome
+        run: |
+          echo "FOREIGN_LANGUAGE_TEST=EXCLUDED_BY_POLICY"
+          echo "NATIVE_EQUIVALENT=NOT_VERIFIED"
+          echo "NO_PASS_CLAIM=MADE"

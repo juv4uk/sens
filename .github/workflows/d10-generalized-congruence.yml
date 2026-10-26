@@ -1,19 +1,18 @@
-name: D10 generalized congruence evidence
+name: "D10 generalized congruence — excluded by Rust/Zig/SENS language policy"
 
 on:
   workflow_dispatch:
+
 permissions:
   contents: read
 
 jobs:
-  real-sympy-comparison:
+  policy-exclusion:
+    name: Foreign-language tests/research excluded (NOT_VERIFIED)
     runs-on: ubuntu-latest
-    timeout-minutes: 8
     steps:
-      - uses: actions/checkout@v4
-      - name: Install exact upstream SymPy donor
+      - name: Record exclusion without asserting an outcome
         run: |
-          python3 -m pip install --disable-pip-version-check --user 'sympy==1.14.0'
-          python3 -c 'import sympy; print("D10 CRT upstream SymPy", sympy.__version__)'
-      - name: Real donor, exhaustive canonical proof, and HOLD assertions
-        run: python3 -m unittest discover -s tests -p test_d10_generalized_crt.py -v
+          echo "FOREIGN_LANGUAGE_TEST=EXCLUDED_BY_POLICY"
+          echo "NATIVE_EQUIVALENT=NOT_VERIFIED"
+          echo "NO_PASS_CLAIM=MADE"
