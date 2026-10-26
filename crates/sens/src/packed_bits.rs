@@ -772,7 +772,7 @@ mod tests {
 
                     // Independent one-bit-at-a-time reference: no reuse of
                     // append_exact_window, read_coordinate or packed words.
-                    let mut expected = vec![0u8; (prefix + usize::from(width) + 7) / 8];
+                    let mut expected = vec![0u8; (prefix + usize::from(width)).div_ceil(8)];
                     for position in 0..prefix {
                         expected[position / 8] |= 1 << (7 - position % 8);
                     }
@@ -809,7 +809,7 @@ mod tests {
                     assert_eq!(offset, prefix);
                     let packed = packer.finish();
                     assert_eq!(packed.bit_len(), prefix + usize::from(width));
-                    assert_eq!(packed.byte_len(), (packed.bit_len() + 7) / 8);
+                    assert_eq!(packed.byte_len(), packed.bit_len().div_ceil(8));
                     assert_eq!(packed.read_coordinate(offset, width), Some(coordinate));
                     assert_eq!(packed.read_coordinate(offset + 1, width), None);
                     if width == 9 {
@@ -847,7 +847,7 @@ mod tests {
             assert_eq!(start, prefix);
             let joined = destination.finish();
             assert_eq!(joined.bit_len(), prefix + source.bit_len());
-            assert_eq!(joined.byte_len(), (joined.bit_len() + 7) / 8);
+            assert_eq!(joined.byte_len(), joined.bit_len().div_ceil(8));
             assert!(
                 PackedBitstream::from_parts(joined.bytes().to_vec(), joined.bit_len()).is_some(),
                 "joined tail must be canonical"
