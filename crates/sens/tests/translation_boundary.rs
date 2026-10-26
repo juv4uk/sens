@@ -114,8 +114,8 @@ fn world_direct_opposite_only_facts_not_unproved_rules() {
         let source = format!(
             "(визначити світ-для-перевірки \
                (світ-повідомити-всі (порожній-світ) (як-є corpus) (як-є {clauses}))) \
-             (перше (порада-рішення-у-світ світ-для-перевірки \
-               (як-є corpus) (як-є ((human socrates)))))"
+             (перше (перше (порадити-світ світ-для-перевірки \
+               (як-є corpus) (як-є {clauses}))))"
         );
         assert_eq!(
             eval_translation(&source),
