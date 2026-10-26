@@ -75,9 +75,9 @@ fn exact_widths_remain_distinct_before_any_surface_lookup() {
     let word1 = sens::parse_binary_source_words("1").unwrap()[0].word;
     let word2 = sens::parse_binary_source_words("001").unwrap()[0].word;
     let word3 = sens::parse_binary_source_words("000000001").unwrap()[0].word;
-    let a = zig_transport::encode_t5m_direct(&vec![word1]).unwrap();
-    let b = zig_transport::encode_t5m_direct(&vec![word2]).unwrap();
-    let c = zig_transport::encode_t5m_direct(&vec![word3]).unwrap();
+    let a = zig_transport::encode_t5m_direct(&[word1]).unwrap();
+    let b = zig_transport::encode_t5m_direct(&[word2]).unwrap();
+    let c = zig_transport::encode_t5m_direct(&[word3]).unwrap();
     assert_ne!(a, b);
     assert_ne!(b, c);
     for physical in [&a, &b, &c] {
