@@ -587,17 +587,13 @@ fn evaluate_list(
             let surface = text.as_ref().and_then(|text| {
                 crate::text7_projection::render_text7(text, crate::Text7Layout::Uk).ok()
             });
-            let exact_d6 = surface
+            let exact_callable = surface
                 .as_deref()
-                .and_then(crate::semantic_registry::d6_binding_identity_for_definition)
-                .filter(|identity| environment.domain_code_slot(*identity).is_some());
-            if let Some(crate::DomainIdentity::D6(word)) = exact_d6 {
-                return dispatch_domain_call(
-                    CoreDomainIdentity::D6(word),
-                    &items[1..],
-                    environment,
-                    span,
-                );
+                .and_then(crate::semantic_registry::exact_uk_callable_for_source_head)
+                .filter(|identity| environment.domain_code_slot(*identity).is_some())
+                .and_then(|identity| identity.core_operation());
+            if let Some(identity) = exact_callable {
+                return dispatch_domain_call(identity, &items[1..], environment, span);
             }
             // `surface` лишається доступною для діагностики нижче: саме вона
             // показує, у що декодер перетворив Text7-токен.
