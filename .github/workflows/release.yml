@@ -23,15 +23,6 @@ jobs:
     steps:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
       - uses: ./.github/actions/install-zig
-      - name: Install SWI-Prolog for real Prolog bridge tests
-        shell: bash
-        run: |
-          set -euo pipefail
-          if ! command -v swipl >/dev/null 2>&1; then
-            sudo apt-get update -qq
-            sudo apt-get install -y -qq --no-install-recommends swi-prolog-nox
-          fi
-          swipl --version
       - uses: dtolnay/rust-toolchain@1.99.0
         with:
           toolchain: "1.99.0"
@@ -57,10 +48,6 @@ jobs:
         run: cargo test --locked -p sens-lsp --test release_parity
       - name: translation boundary regression
         run: cargo test --locked -p sens --test translation_boundary
-      - name: island installer CLI
-        run: cargo test --locked -p sens-cli --test islands_cli
-      - name: release asset contract
-        run: cargo test --locked -p sens-cli --test islands_release_asset
       - name: Native physical T5M execution witnesses
         run: cargo test --locked -p sens-cli --test physical_t5m_execution
 
@@ -190,56 +177,10 @@ jobs:
           path: ${{ env.MSI_ASSET_PATH }}
           if-no-files-found: error
 
-  build-web:
-    name: Portable web REPL · single HTML
-    needs: test
-    if: needs.test.result == 'success'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
-      - name: Install pinned Zig source transport
-        uses: ./.github/actions/install-zig
-      - uses: dtolnay/rust-toolchain@1.99.0
-        with:
-          toolchain: "1.99.0"
-          targets: wasm32-unknown-unknown
-      - uses: Swatinem/rust-cache@49a0bdc70d2e1b713ca9e2869b211fcce03d3c1c # v2
-
-      - name: Install wasm-pack
-        uses: jetli/wasm-pack-action@0d096b08b4e5a7de8c28de67e11e945404e9eefa # v0.4.0
-        with:
-          version: 'v0.15.0'
-
-      - name: Build the WASM bindings
-        run: wasm-pack build crates/sens-wasm --target web --out-dir ../../public/wasm --release
-
-      - name: Bundle the standalone HTML
-        run: node scripts/make-portable-web.mjs public/my-lisp-cli-web.html sens-cli-web.html
-
-      - name: Stage canonical HTML and byte-identical compatibility alias
-        shell: bash
-        run: |
-          set -euo pipefail
-          test -s sens-cli-web.html
-          cp sens-cli-web.html my-lisp-cli-web.html
-          cp packaging/install.sh install.sh
-          test -s install.sh
-          cmp -s sens-cli-web.html my-lisp-cli-web.html
-
-      - name: Upload portable HTML assets (not a public release)
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
-        with:
-          name: release-web
-          path: |
-            sens-cli-web.html
-            my-lisp-cli-web.html
-            install.sh
-          if-no-files-found: error
-
   release-publish:
     name: Публікація лише після успіху всіх перевірок і збірок
-    needs: [test, build-cli, build-msi, build-web]
-    if: ${{ needs.test.result == 'success' && needs.build-cli.result == 'success' && needs.build-msi.result == 'success' && needs.build-web.result == 'success' }}
+    needs: [test, build-cli, build-msi]
+    if: ${{ needs.test.result == 'success' && needs.build-cli.result == 'success' && needs.build-msi.result == 'success' }}
     uses: ./.github/workflows/release-publish.yml
     secrets: inherit
     permissions:

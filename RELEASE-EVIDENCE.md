@@ -96,9 +96,9 @@ Authority: [CURRENT.md](CURRENT.md), [language-contract.lisp](language-contract.
 | T5 authority, quantity witness, exact-width blockers | [#5406](https://github.com/juv4uk/sens/issues/5406), [#5408](https://github.com/juv4uk/sens/issues/5408), [#2170](https://github.com/juv4uk/sens/issues/2170) | OPEN |
 | Filesystem runtime and exact-domain admission | Earlier [#5603](https://github.com/juv4uk/sens/issues/5603) / [run 38176345658](https://github.com/juv4uk/sens/actions/runs/38176345658): `content_store` 22/24 tests failed. Newer visible [run 38228581929](https://github.com/juv4uk/sens/actions/runs/38228581929) still fails overall: filesystem macro/alist path-bound witnesses, obsolete COND/ATOM/EQ scanner regressions, time-source witnesses and stale core-logic audit are red; its `content-store integration` step is green. | BLOCKED; rerun after fixes |
 | `release-preflight.yml` + mandatory hosted/native jobs | Exact SHA, all required checks | UNKNOWN |
-| Linux/Windows/macOS CLI + MSI + portable Web | Platform-specific install/smoke results | UNKNOWN |
+| Linux/Windows/macOS CLI + Windows MSI | Platform-specific install/smoke results | UNKNOWN |
 | Release asset bytes and independent clean replay | `release-publish.yml` stages the built assets, downloads the draft release independently, compares file sets and every file with `cmp`; no SHA256SUMS generation | IMPLEMENTED ON MAIN; **NOT RUN / UNKNOWN** |
-| Clean release publication (no incomplete visible release) | Single `release-publish` job; exact-main-SHA + explicit owner GO; complete staged/replayed asset-set and byte equality via `cmp`; no generated SHA256 or provenance-JSON receipts | IMPLEMENTED ON MAIN; preflight and failure-injection verification **UNKNOWN** |
+| Clean release publication (no incomplete visible release) | Single `release-publish` job; exact current-main Git commit + explicit owner GO; five CLI/MSI assets; byte-equal draft replay via `cmp`; no Python/JSON/JS publisher or digest manifest | PENDING new workflow CI and exact-candidate replay |
 
 **GO iff** всі потрібні gates на **одному** Git SHA позитивні, усі обіцяні платформи й файли перевірені, без жодного невирішеного `UNKNOWN/BLOCKED/FAIL`. Не підміняти невиконані platform gates успішними локальними тестами.
 

@@ -54,16 +54,12 @@ jobs:
             "sens-cli_${version}_windows_x64.exe" \
             "sens-cli_${version}_windows_x64.msi" \
             "sens-cli_${version}_macos_x64" \
-            "sens-cli_${version}_macos_arm64" \
-            "sens-cli-web.html" \
-            "my-lisp-cli-web.html" \
-            "install.sh" | LC_ALL=C sort > "$expected"
+            "sens-cli_${version}_macos_arm64" | LC_ALL=C sort > "$expected"
           find dist -mindepth 1 -maxdepth 1 -printf '%f\n' | LC_ALL=C sort > "$actual"
           cmp -- "$expected" "$actual"
           while IFS= read -r name; do
             test -f "dist/$name" && test ! -L "dist/$name" && test -s "dist/$name"
           done < "$expected"
-          cmp -- dist/sens-cli-web.html dist/my-lisp-cli-web.html
 
       - name: Створити чернетку, завантажити її й порівняти байти через cmp
         shell: bash
