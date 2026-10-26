@@ -165,6 +165,7 @@ jobs:
         ${{ github.event_name == 'push' && contains(github.event.head_commit.message, 'SENS_REMINT_RELEASE_REASONING_F6') && 'lib/core4.lisp' || '' }}
         ${{ github.event_name == 'push' && contains(github.event.head_commit.message, 'SENS_REMINT_RELEASE_REASONING_F6') && 'lib/knowledge.lisp' || '' }}
         ${{ github.event_name == 'push' && contains(github.event.head_commit.message, 'SENS_REMINT_RELEASE_REASONING_F6') && 'lib/world.lisp' || '' }}
+        ${{ github.event_name == 'push' && contains(github.event.head_commit.message, 'SENS_REMINT_RELEASE_REASONING_F6') && 'lib/reason.lisp' || '' }}
         ${{ github.event_name == 'push' && contains(github.event.head_commit.message, 'SENS_REMINT_RELEASE_REASONING_F6') && 'lib/translation.lisp' || '' }}
         ${{ github.event_name == 'push' && contains(github.event.head_commit.message, 'SENS_REMINT_RELEASE_REASONING_F6') && 'lib/lisp-fs.lisp' || '' }}
         ${{ github.event_name == 'push' && contains(github.event.head_commit.message, 'SENS_REMINT_RELEASE_REASONING_F6') && 'tests/fixtures/wsm-fs-record-producer.lisp' || '' }}
