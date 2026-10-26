@@ -31,8 +31,8 @@ while IFS='|' read -r artifact location reason status; do
   reason="$(trim "$reason")"
   status="$(trim "$status")"
   [[ "$artifact" == "Артефакт" || "$artifact" == "---" || -z "$artifact" ]] && continue
-  artifact="${artifact//`/}"
-  location="${location//`/}"
+  artifact=$(printf '%s' "$artifact" | tr -d '\140')
+  location=$(printf '%s' "$location" | tr -d '\140')
   if [[ -z "$artifact" || "$artifact" != "$location" || "$status" != "ARCHIVE" ]]; then
     echo "LANGUAGE_POLICY_ARCHIVE=FAIL malformed_row artifact=$artifact location=$location status=$status"
     bad=1; continue
@@ -62,7 +62,7 @@ is_testbench_location() {
 is_foreign_testbench() {
   is_testbench_location "$1" || return 1
   case "$1" in
-    *.py|*.pyi|*.js|*.mjs|*.cjs|*.ts|*.tsx|*.jsx|*.rb|*.go|*.php|*.rkt|*.lua|*.swift|*.java|*.kt|*.scala|*.pl|*.jl) return 0 ;;
+    *.py|*.pyi|*.js|*.mjs|*.cjs|*.ts|*.tsx|*.jsx|*.rb|*.go|*.php|*.rkt|*.lua|*.swift|*.java|*.kt|*.scala|*.pl|*.jl|*.clp|*.sbcl|*.fs|*.fsi|*.fsx|*.f90|*.f95|*.f03|*.f08|*.for|*.v|*.sv|*.sh|*.bash|*.ps1) return 0 ;;
     *) return 1 ;;
   esac
 }
