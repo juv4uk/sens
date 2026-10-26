@@ -58,53 +58,16 @@ jobs:
       - name: Зібрати нативний CLI SENS перед тестами
         run: cargo build --locked -p sens-cli --bin sens --bin sens-trit
 
-      - name: Sterile Zig corridor (Rust↔SENS only via Zig ABI v2)
+      - name: Zig transport ReleaseSafe tests and independent C ABI witness
+        shell: bash
         run: |
           set -euo pipefail
-          echo "SENS_NATIVE_CHECK=scheduled evidence=NOT_VERIFIED"
-          echo "SENS_NATIVE_CHECK=scheduled evidence=NOT_VERIFIED"
-          echo "SENS_NATIVE_CHECK=scheduled evidence=NOT_VERIFIED"
-          echo "SENS_NATIVE_CHECK=scheduled evidence=NOT_VERIFIED"
-          echo "SENS_NATIVE_CHECK=scheduled evidence=NOT_VERIFIED"
-          echo "SENS_NATIVE_CHECK=scheduled evidence=NOT_VERIFIED"
-          echo "SENS_NATIVE_CHECK=scheduled evidence=NOT_VERIFIED"
-          echo "SENS_NATIVE_CHECK=scheduled evidence=NOT_VERIFIED"
-          echo "SENS_NATIVE_CHECK=scheduled evidence=NOT_VERIFIED"
-          echo "SENS_NATIVE_CHECK=scheduled evidence=NOT_VERIFIED"
-          echo "SENS_NATIVE_CHECK=scheduled evidence=NOT_VERIFIED"
-          echo "SENS_NATIVE_CHECK=scheduled evidence=NOT_VERIFIED"
-          echo "SENS_NATIVE_CHECK=scheduled evidence=NOT_VERIFIED"
-          echo "SENS_NATIVE_CHECK=scheduled evidence=NOT_VERIFIED"
-          echo "SENS_NATIVE_CHECK=scheduled evidence=NOT_VERIFIED"
-          echo "SENS_NATIVE_CHECK=scheduled evidence=NOT_VERIFIED"
-          echo "SENS_NATIVE_CHECK=scheduled evidence=NOT_VERIFIED"
-          echo "SENS_NATIVE_CHECK=scheduled evidence=NOT_VERIFIED"
-          echo "SENS_NATIVE_CHECK=scheduled evidence=NOT_VERIFIED"
-          echo "SENS_NATIVE_CHECK=scheduled evidence=NOT_VERIFIED"
-          echo "SENS_NATIVE_CHECK=scheduled evidence=NOT_VERIFIED"
-          echo "SENS_NATIVE_CHECK=scheduled evidence=NOT_VERIFIED"
-          echo "SENS_NATIVE_CHECK=scheduled evidence=NOT_VERIFIED"
-          echo "SENS_NATIVE_CHECK=scheduled evidence=NOT_VERIFIED"
-          echo "SENS_NATIVE_CHECK=scheduled evidence=NOT_VERIFIED"
-          echo "SENS_NATIVE_CHECK=scheduled evidence=NOT_VERIFIED"
-          echo "SENS_NATIVE_CHECK=scheduled evidence=NOT_VERIFIED"
-          echo "SENS_NATIVE_CHECK=scheduled evidence=NOT_VERIFIED"
-          echo "SENS_NATIVE_CHECK=scheduled evidence=NOT_VERIFIED"
-          echo "SENS_NATIVE_CHECK=scheduled evidence=NOT_VERIFIED"
-          # Structural success permits the remaining checks to run; it is NOT
-          # a release GO or authorization to publish.
-          echo "SENS_NATIVE_CHECK=scheduled evidence=NOT_VERIFIED"
-          echo "SENS_NATIVE_CHECK=scheduled evidence=NOT_VERIFIED"
-          echo "SENS_NATIVE_CHECK=scheduled evidence=NOT_VERIFIED"
-          # Zig 0.16 native test suite with release-like optimizations and safety.
-          # Full migration proof + native physical test are separate GO inputs.
           echo 'test_id=zig-release-safe-corridor layer=transport semantic_authority=SENS compiler=0.16.0'
           zig test research/zig-codecs/tests.zig -O ReleaseSafe -lc
-          # Independent Rust-free C caller compiled and linked with Zig ABI v2.
-          echo "SENS_NATIVE_CHECK=scheduled evidence=NOT_VERIFIED"
-          echo "SENS_NATIVE_CHECK=scheduled evidence=NOT_VERIFIED"
-          echo "SENS_NATIVE_CHECK=scheduled evidence=NOT_VERIFIED"
-          echo "SENS_NATIVE_CHECK=scheduled evidence=NOT_VERIFIED"
+          echo 'test_id=zig-root-transport-boundary layer=transport semantic_authority=SENS'
+          zig test -lc zig_transport_root.zig -O ReleaseSafe
+          echo 'test_id=zig-release-c-host-abi-v2 layer=transport host=C semantic_authority=SENS'
+          bash research/zig-codecs/host-c/verify.sh
 
       - name: translation boundary regression
         run: cargo test --locked -p sens --test translation_boundary
