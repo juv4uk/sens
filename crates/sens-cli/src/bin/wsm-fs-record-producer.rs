@@ -63,7 +63,7 @@ fn bounded_two_line_records(value: &Value) -> Result<[String; 2], String> {
                     Value::Pair(_) => {
                         return Err("F6_RECORD_TYPE expected=String-or-Text7 actual=Pair".to_owned())
                     }
-                    other => return Err(f6_record_type_error(other))
+                    other => return Err(format!("{} record_index={}", f6_record_type_error(other), records.len()))
                 };
                 let bytes = record.as_bytes();
                 if bytes.is_empty() || bytes.len() > MAX_RECORD_BYTES {
@@ -119,6 +119,14 @@ fn main() {
         Ok(records) => records,
         Err(error) => {
             eprintln!("wsm-fs-record-producer: {error}");
+            // Diagnostics only: print the exact SENS return shape on a
+            // failing native F6 witness. This does not coerce or admit data.
+            if std::env::var_os("SENS_EQ_TRACE").is_some() {
+                eprintln!(
+                    "wsm-fs-record-producer: witness-value={}",
+                    result.value.to_canonical_wire_string()
+                );
+            }
             std::process::exit(1);
         }
     };
