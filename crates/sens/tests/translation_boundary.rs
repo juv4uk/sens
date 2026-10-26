@@ -416,10 +416,13 @@ fn translation_symbol_law_rejects_non_symbols_in_live_sens() {
         eval_parsed_expressions(&forms, &mut session).expect("чинна бібліотека SENS");
     }
     for (expression, expected) in [
-        // Only true atoms are tested with D3 EQ; compounds go straight to D9 SYMBOL?.
+        // Compound values are rejected before D9 SYMBOL?; D1 bits are rejected
+        // by exact equality; only remaining atomic values reach the symbol law.
         ("(як-є candidate)", true),
         ("\"candidate\"", false),
         ("7", false),
+        ("так", false),
+        ("ні", false),
         ("(як-є ())", false),
         ("(як-є (candidate))", false),
         ("(сполучити (як-є candidate) ні)", false),
