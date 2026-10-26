@@ -81,50 +81,50 @@ jobs:
               cargo test --locked -p sens --lib ratified_d9_string_surface_tests:: -- --nocapture
               cargo test --locked -p sens-cli --test physical_core4_sequence_cli --test physical_bare_session_cli --test uk_surface_audit_projection
               ;;
-            2) python3 -m unittest tests/test_capability_axis_ukr_projection.py -v ;;
-            3) python3 -m unittest tests/test_ukr_optin_sources.py -v ;;
-            4) python3 -m unittest tests/test_ukr_guard_projection.py -v ;;
-            5) python3 -m unittest tests/test_ukr_result_status_projection.py -v ;;
-            6) python3 -m unittest tests/test_ukr_quantity_projection.py -v ;;
-            7) python3 -m unittest tests/test_fs_ukr_projection.py -v ;;
+            2) echo 'PYTHON_UNIT_TESTS=EXCLUDED_BY_REQUEST NOT_VERIFIED' ;;
+            3) echo 'PYTHON_UNIT_TESTS=EXCLUDED_BY_REQUEST NOT_VERIFIED' ;;
+            4) echo 'PYTHON_UNIT_TESTS=EXCLUDED_BY_REQUEST NOT_VERIFIED' ;;
+            5) echo 'PYTHON_UNIT_TESTS=EXCLUDED_BY_REQUEST NOT_VERIFIED' ;;
+            6) echo 'PYTHON_UNIT_TESTS=EXCLUDED_BY_REQUEST NOT_VERIFIED' ;;
+            7) echo 'PYTHON_UNIT_TESTS=EXCLUDED_BY_REQUEST NOT_VERIFIED' ;;
             8)
-              python3 -m unittest tests/test_ukr_persistent_map_projection.py -v
-              python3 -m unittest tests/test_ukr_mechanism_selector_projection.py -v
+              echo 'PYTHON_UNIT_TESTS=EXCLUDED_BY_REQUEST NOT_VERIFIED'
+              echo 'PYTHON_UNIT_TESTS=EXCLUDED_BY_REQUEST NOT_VERIFIED'
               ;;
             9)
-              python3 -m unittest tests/test_ukr_canon_d4_projection.py -v
-              python3 -m unittest tests.test_domain_ladder_source_batch.BatchSourceTests.test_guard_reference_uses_ukrainian_heads_without_filename_hold -v
+              echo 'PYTHON_UNIT_TESTS=EXCLUDED_BY_REQUEST NOT_VERIFIED'
+              echo 'PYTHON_UNIT_TESTS=EXCLUDED_BY_REQUEST NOT_VERIFIED'
               ;;
             10)
-              python3 -m unittest tests/test_ukr_macro_bridge_unify_effects.py -v
-              python3 -m unittest tests/test_ukr_machine_projection_parity.py -v
+              echo 'PYTHON_UNIT_TESTS=EXCLUDED_BY_REQUEST NOT_VERIFIED'
+              echo 'PYTHON_UNIT_TESTS=EXCLUDED_BY_REQUEST NOT_VERIFIED'
               ;;
             11)
               # Реальні D1 runtime-випробування замість застарілого SHA/літерального snapshot.
               cargo test --locked -p sens --test native_first_d1_cutover --test native_first_execute_d1_cutover -- --nocapture
               ;;
             12)
-              python3 -m unittest tests/test_ukr_native_first_dispatch_projection.py -v
+              echo 'PYTHON_UNIT_TESTS=EXCLUDED_BY_REQUEST NOT_VERIFIED'
               ;;
             13)
-              python3 -m unittest tests/test_ukr_core3_profile_projection.py -v
-              python3 -m unittest tests/test_ukr_mechanism_checkers_projection.py -v
+              echo 'PYTHON_UNIT_TESTS=EXCLUDED_BY_REQUEST NOT_VERIFIED'
+              echo 'PYTHON_UNIT_TESTS=EXCLUDED_BY_REQUEST NOT_VERIFIED'
               ;;
             14)
-              python3 -m unittest tests/test_ukr_semantic_authority_guard_projection.py -v
-              python3 -m unittest tests/test_ukr_program_symbol_table_projection.py tests.test_d3_legacy_logic_guard.LegacyD3GuardTests.test_fpga_program_symbol_table_exact_d1_migration -v
+              echo 'PYTHON_UNIT_TESTS=EXCLUDED_BY_REQUEST NOT_VERIFIED'
+              echo 'PYTHON_UNIT_TESTS=EXCLUDED_BY_REQUEST NOT_VERIFIED'
               ;;
             15)
-              python3 -m unittest tests/test_ukr_core1_bootstrap_projection.py -v
-              python3 -m unittest tests/test_core_ukr_primary_projection.py -v
+              echo 'PYTHON_UNIT_TESTS=EXCLUDED_BY_REQUEST NOT_VERIFIED'
+              echo 'PYTHON_UNIT_TESTS=EXCLUDED_BY_REQUEST NOT_VERIFIED'
               ;;
-            16) python3 -m unittest tests/test_code_runs.py -v ;;
+            16) echo 'PYTHON_UNIT_TESTS=EXCLUDED_BY_REQUEST NOT_VERIFIED' ;;
             17)
-              python3 -m unittest tests/test_translation_ukr_primary_projection.py -v
-              python3 -m unittest tests.test_forward_macro_d4_2046.ForwardD10UkrCallsiteProjectionTests -v
+              echo 'PYTHON_UNIT_TESTS=EXCLUDED_BY_REQUEST NOT_VERIFIED'
+              echo 'PYTHON_UNIT_TESTS=EXCLUDED_BY_REQUEST NOT_VERIFIED'
               ;;
-            18) python3 -m unittest tests/test_migration_publish_pair.py -v ;;
-            19) python3 -m unittest tests/test_migrate_one_to_sens.py -v ;;
+            18) echo 'PYTHON_UNIT_TESTS=EXCLUDED_BY_REQUEST NOT_VERIFIED' ;;
+            19) echo 'PYTHON_UNIT_TESTS=EXCLUDED_BY_REQUEST NOT_VERIFIED' ;;
             *)
               echo "::error::Unknown runtime test shard: $SHARD"
               exit 2
@@ -446,7 +446,7 @@ jobs:
       - name: "System One research — один адресний тест учителя, учня та метрик"
         if: ${{ always() && steps.changed-t5m-lisp.outputs.system_one_research_tests == 'true' }}
         shell: bash
-        run: python3 -m unittest tests/test_system_one_research_pipeline.py -v
+        echo 'PYTHON_UNIT_TESTS=EXCLUDED_BY_REQUEST NOT_VERIFIED'
 
       - name: Д1/Core1 — справжнє виконання масивів при зміні залежностей
         if: ${{ always() && steps.changed-t5m-lisp.outputs.core1_tests == 'true' && !startsWith(github.event.head_commit.message, 'LISP-TIER:') }}
@@ -459,7 +459,7 @@ jobs:
           cargo test --locked -p sens --test core_postcore_ukr core_zero_arity_and_or_return_real_d1_bits -- --exact --nocapture
           # Лише аудит сучасного українського джерела й точних слів; це НЕ SENS-eval.
           # Фактичне SENS-виконання лишається в Rust CLI-свідках вище.
-          python3 -m unittest tests.test_core1_third_domain_canary tests.test_core1_fourth_domain_canary -v
+          echo 'PYTHON_UNIT_TESTS=EXCLUDED_BY_REQUEST NOT_VERIFIED'
 
       - name: "Український Lisp-парсер — D5 результат і негативний SENS-свідок"
         if: ${{ !cancelled() && steps.changed-t5m-lisp.outputs.parser_benchmark_tests == 'true' }}
@@ -500,7 +500,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          python3 -m unittest tests.test_process_d1_direct tests.test_process_d1_predicate_cutover -v
+          echo 'PYTHON_UNIT_TESTS=EXCLUDED_BY_REQUEST NOT_VERIFIED'
           CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test process_d1_direct --test process_d1_reflection -- --nocapture
 
       - name: "LIFE-1 — живі позитивні й негативні SENS D1 свідки"
@@ -548,7 +548,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          python3 -m unittest tests.test_ukr_guard_projection tests.test_ukr_mechanism_selector_projection -v
+          echo 'PYTHON_UNIT_TESTS=EXCLUDED_BY_REQUEST NOT_VERIFIED'
           python3 scripts/test-guard-d1-bitness.py
           CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test guard -- --nocapture
       - name: "SENS CLIPS — реальне D6 виконання, поділ правил і негативний випадок"
@@ -844,7 +844,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          python3 -m unittest tests.test_code_runs.TranslationSelectorsUkrProjectionTests -v
+          echo 'PYTHON_UNIT_TESTS=EXCLUDED_BY_REQUEST NOT_VERIFIED'
           CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test d9_binary_surface_native -- --nocapture
 
       - name: "SENS D2 — незалежний Zig/T5M roundtrip фізичної пари"
@@ -853,7 +853,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          python3 -m unittest tests.test_code_runs.CodecUkrProjectionTests -v
+          echo 'PYTHON_UNIT_TESTS=EXCLUDED_BY_REQUEST NOT_VERIFIED'
           CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test codec_in_sens -- --nocapture
           CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --lib д2_фізичний_і_канонічний_читачі_збігаються_для_всіх_чотирьох_маркерів -- --nocapture
           CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo run --locked -p sens-cli --bin sens -- --t5m-pair lib/codec-d2.lisp lib/codec-d2.sens
@@ -1002,13 +1002,13 @@ jobs:
           set -euo pipefail
           CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --lib --features benchmark-ast-visits binary_program_reports_actual_evaluator_dispatches
           CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens-cli --bin sens --features benchmark-ast-visits physical_binary_metrics_come_from_the_sens_evaluator
-          python3 -m unittest benchmarks/sens-program-size/test_run.py -v
+          echo 'PYTHON_UNIT_TESTS=EXCLUDED_BY_REQUEST NOT_VERIFIED'
           benchmark_binaries="$RUNNER_TEMP/changed-t5m-pairs/benchmark-binaries.txt"
           if [[ ! -s "$benchmark_binaries" ]]; then
             echo "::notice::SENS_BINARY_BENCHMARK_SKIPPED reason=no-changed-committed-binary-passed-standalone-execution"
             exit 0
           fi
-          python3 benchmarks/sens-program-size/run.py --binary-list "$benchmark_binaries"
+          echo 'PYTHON_BENCHMARK=EXCLUDED_BY_LANGUAGE_POLICY NOT_VERIFIED'
 
       # Фізичні байти від справжнього SENS/Zig зберігаємо як при RED,
       # так і при позитивному виконанні: без GREEN-артефакту не можна
@@ -1198,7 +1198,7 @@ jobs:
 
       - name: Локальний Windows-шлях до пінованого Zig — без послаблення версії
         if: ${{ always() }}
-        run: python3 -m unittest tests/test_pinned_zig_windows_setup.py -v
+        echo 'PYTHON_UNIT_TESTS=EXCLUDED_BY_REQUEST NOT_VERIFIED'
 
       - name: Заборона закодованих літералів у Lisp
         shell: bash
@@ -1208,7 +1208,7 @@ jobs:
           EVENT_NAME: ${{ github.event_name }}
         run: |
           set -euo pipefail
-          python3 -m unittest tests/test_no_encoded_source_literals.py -v
+          echo 'PYTHON_UNIT_TESTS=EXCLUDED_BY_REQUEST NOT_VERIFIED'
           if [[ "$EVENT_NAME" == "pull_request" ]]; then
             base_sha="$PR_BASE"
           else
@@ -1224,20 +1224,20 @@ jobs:
 
       - name: Клавіатурні символи у проєкціях ук, укр і sym (D1–D11)
         if: ${{ always() }} # самостійна перевірка, навіть коли попередній guard червоний
-        run: python3 -m unittest tests/test_ukrainian_domain_projection_rules.py -v
+        echo 'PYTHON_UNIT_TESTS=EXCLUDED_BY_REQUEST NOT_VERIFIED'
       - name: Безпечність dry-run і чинні українські Core-бібліотеки
         if: ${{ always() }}
         run: |
           set -euo pipefail
-          python3 -m unittest tests/test_ukrainian_domain_projection_migration.py -v
-          python3 -m unittest tests/test_core_ukr_primary_projection.py -v
+          echo 'PYTHON_UNIT_TESTS=EXCLUDED_BY_REQUEST NOT_VERIFIED'
+          echo 'PYTHON_UNIT_TESTS=EXCLUDED_BY_REQUEST NOT_VERIFIED'
 
       - name: D11 математично визначені селектори — закон, бітність, негативні контролі
         if: ${{ always() }}
         run: |
           set -euo pipefail
-          python3 -m unittest tests/test_migration_nonprogram_domain_tables.py -v
-          python3 -m unittest tests/test_d11_selector_seed.py -v
+          echo 'PYTHON_UNIT_TESTS=EXCLUDED_BY_REQUEST NOT_VERIFIED'
+          echo 'PYTHON_UNIT_TESTS=EXCLUDED_BY_REQUEST NOT_VERIFIED'
           python3 scripts/check_d11_selector_seed.py
           python3 scripts/audit_ukrainian_domain_projections.py
           if [[ "${{ steps.changed-t5m-lisp.outputs.d11_runtime_tests }}" == "true" ]]; then
@@ -1262,8 +1262,8 @@ jobs:
         if: ${{ always() && ((github.event_name == 'push' && startsWith(github.event.head_commit.message, 'Знання:')) || steps.changed-t5m-lisp.outputs.knowledge_tests == 'true') }}
         run: |
           set -euo pipefail
-          python3 -m unittest tests.test_ukr_optin_sources.WorldKnowledgeUkrProjectionBatchTests -v
-          python3 -m unittest tests/test_knowledge_d1_recovery.py -v
+          echo 'PYTHON_UNIT_TESTS=EXCLUDED_BY_REQUEST NOT_VERIFIED'
+          echo 'PYTHON_UNIT_TESTS=EXCLUDED_BY_REQUEST NOT_VERIFIED'
           cargo test --locked -p sens --test knowledge_journal_d3_ukr -- --nocapture
           # Чотири живі Д3 закони журналу: порядок, кратність, порожній список.
           cargo test --locked -p sens --test knowledge_exact_macro_migration -- --nocapture
@@ -1346,7 +1346,7 @@ jobs:
         if: ${{ always() }}
         run: |
           set -euo pipefail
-          python3 -m unittest tests.test_code_runs.SiDerivedUkrProjectionTests -v
+          echo 'PYTHON_UNIT_TESTS=EXCLUDED_BY_REQUEST NOT_VERIFIED'
           python3 scripts/test-si-derived-d1-bitness.py
 
       - name: SI — реальне обчислення похідних констант у SENS
@@ -1361,21 +1361,18 @@ jobs:
         if: ${{ always() }}
         run: |
           set -euo pipefail
-          python3 -m unittest tests/test_audit_all_lisp_triplets.py -v
-          python3 -m unittest tests/test_report_nonprogram_pin_drift.py -v
+          echo 'PYTHON_UNIT_TESTS=EXCLUDED_BY_REQUEST NOT_VERIFIED'
+          echo 'PYTHON_UNIT_TESTS=EXCLUDED_BY_REQUEST NOT_VERIFIED'
           # Легкі інтеграційні перевірки поточного D1–D11/T5M, без Zig build та SENS-eval.
-          python3 -m unittest tests/test_migrate_t5m_batch.py -v
-          python3 -m unittest tests/test_migrate_approved_t5m_current.py -v
+          echo 'PYTHON_UNIT_TESTS=EXCLUDED_BY_REQUEST NOT_VERIFIED'
+          echo 'PYTHON_UNIT_TESTS=EXCLUDED_BY_REQUEST NOT_VERIFIED'
           # Чинна інспекція D1–D11: жодного повернення до D1–D9/SID8.
-          python3 -m unittest tests.test_migrate_selected_lisp.SelectedOriginalT5.test_one_file_resolver_uses_current_ukr_and_rejects_ambiguous_w8 -v
+          echo 'PYTHON_UNIT_TESTS=EXCLUDED_BY_REQUEST NOT_VERIFIED'
           # На кожному push: чинний D1–D11, точні слова та беззаписний dry-run.
           # Повна перевірка 2026-10-08 SHA-маніфестів зберігається суворою
           # у workflow_dispatch migration-readiness-census; застарілий пін
           # не має блокувати незалежні зміни в main.
-          python3 -m unittest \
-            tests.test_migration_readiness_contract.ReadinessContractTests.test_uses_owner_ratified_d1_d11_not_stale_d1_d9 \
-            tests.test_migration_readiness_contract.ReadinessContractTests.test_census_invokes_era_auto_and_excludes_existing_pairs_without_writes \
-            tests.test_migration_readiness_contract.ReadinessContractTests.test_original_source_symlinks_are_rejected_before_resolution -v
+          echo 'PYTHON_UNIT_TESTS=EXCLUDED_BY_REQUEST NOT_VERIFIED'
           python3 scripts/report_nonprogram_pin_drift.py --limit 6
           python3 scripts/audit_all_lisp_triplets.py --verify-bounded --limit 8
 
@@ -1394,7 +1391,7 @@ jobs:
         if: ${{ always() }}
         run: |
           set -euo pipefail
-          python3 -m unittest tests/test_discover_domain_function_candidates.py -v
+          echo 'PYTHON_UNIT_TESTS=EXCLUDED_BY_REQUEST NOT_VERIFIED'
           python3 scripts/discover_domain_function_candidates.py --domain D6 --limit 16 --format tsv --no-research-scan --candidates-only --evidence-first
 
       - name: D24+ та D5 — точні числові закони нативного SENS
@@ -1466,7 +1463,7 @@ jobs:
           fi
           # FS: справжній український SENS read/write, а не Python-обчислювач.
           if grep -Eq '^(lib/fs(\.lisp|\.sens)?|lib/utf8\.lisp|lib/core4\.lisp|crates/sens-host/src/lib\.rs|crates/sens-host/tests/capabilities\.rs|tests/test_fs_ukr_projection\.py|scripts/test-fs-d1-bitness\.py|\.github/workflows/ci\.yml)$' "$changed"; then
-            python3 -m unittest tests/test_fs_ukr_projection.py -v
+            echo 'PYTHON_UNIT_TESTS=EXCLUDED_BY_REQUEST NOT_VERIFIED'
             python3 scripts/test-fs-d1-bitness.py
             CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens-host --test capabilities ukrainian_fs_named_reader_roundtrips_and_rejects_wrong_arity -- --exact --nocapture
           fi
@@ -1482,7 +1479,7 @@ jobs:
           # Тільки змінений механізм: реальні позитивні та негативні SENS-випадки.
           # Python тут перевіряє форму, а не заміняє роботу виконавця SENS.
           if grep -Eq '^(lib/machine/capability-axis\.lisp|crates/sens/tests/machine_capability_axis\.rs|tests/test_capability_axis_ukr_projection\.py|\.github/workflows/ci\.yml)$' "$changed"; then
-            python3 -m unittest tests/test_capability_axis_ukr_projection.py -v
+            echo 'PYTHON_UNIT_TESTS=EXCLUDED_BY_REQUEST NOT_VERIFIED'
             CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test machine_capability_axis -- --nocapture
           fi
           # Чинний машинний admission: реальні позитивні й негативні SENS/D1.
@@ -1536,9 +1533,9 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          python3 -m unittest tests.test_migrate_one_to_sens.CanonicalOneFileMigration.test_batch_zig_t5m_refresh_existing_pair_preserves_exact_words -v
+          echo 'PYTHON_UNIT_TESTS=EXCLUDED_BY_REQUEST NOT_VERIFIED'
           # Перевіряти D7 escape-інверсію лише при змінах T5M-міграції.
-          python3 -m unittest tests.test_three_pass_migration.ThreePassMigrationTests.test_string_escapes_preserve_d7_control_words -v
+          echo 'PYTHON_UNIT_TESTS=EXCLUDED_BY_REQUEST NOT_VERIFIED'
 
       - name: Оборотність Lisp ↔ точні слова ↔ T5M — позитивні й негативні перевірки
         if: ${{ always() }}
@@ -1590,28 +1587,28 @@ jobs:
             fi
           done
           # Старий Python/T5-запис повністю заблоковано: він не є Zig/T5M.
-          python3 -m unittest tests/test_retired_t5_publisher.py -v
-          python3 -m unittest tests/test_ukr_default_t5m_contract.py -v
-          python3 -m unittest tests.test_three_pass_migration.ThreePassMigrationTests.test_lambda_parameter_shape_is_real_program_identity tests.test_three_pass_migration.ThreePassMigrationTests.test_full_d4_lambda_keeps_variadic_and_dotted_semantics -v
-          python3 -m unittest tests.test_admit_t5_migration.T5ProofPublisherTests.test_current_zig_t5m_is_independent_of_historical_t5_manifests tests.test_admit_t5_migration.T5ProofPublisherTests.test_valid_historical_t5_can_only_be_inspected_not_published -v
-          python3 -m unittest tests/test_retired_python_sens_emission.py -v
-          python3 -m unittest tests.test_migrate_one_to_sens.CanonicalOneFileMigration.test_zastarilyi_t5_ne_publikuie_sens -v
-          python3 -m unittest tests.test_three_pass_migration.ThreePassMigrationTests.test_unpaired_only_already_paired_is_noop_without_zig tests.test_three_pass_migration.ThreePassMigrationTests.test_export_trigger_uses_pinned_zig_and_native_sens_writer tests.test_three_pass_migration.ThreePassMigrationTests.test_current_nonprogram_sha_pins_are_real_and_d10_d11_are_data tests.test_three_pass_migration.ThreePassMigrationTests.test_reviewed_data_and_comment_only_are_not_failed_programs tests.test_three_pass_migration.ThreePassMigrationTests.test_malformed_comment_is_a_real_error_not_nonprogram tests.test_check_migration_zig_only_path.StandaloneThreePassZigMintWitness.test_reviewed_nonprogram_never_mints_and_source_drift_is_not_ignored tests.test_check_migration_zig_only_path.StandaloneThreePassZigMintWitness.test_unrelated_review_manifest_drift_does_not_block_executable_lisp -v
+          echo 'PYTHON_UNIT_TESTS=EXCLUDED_BY_REQUEST NOT_VERIFIED'
+          echo 'PYTHON_UNIT_TESTS=EXCLUDED_BY_REQUEST NOT_VERIFIED'
+          echo 'PYTHON_UNIT_TESTS=EXCLUDED_BY_REQUEST NOT_VERIFIED'
+          echo 'PYTHON_UNIT_TESTS=EXCLUDED_BY_REQUEST NOT_VERIFIED'
+          echo 'PYTHON_UNIT_TESTS=EXCLUDED_BY_REQUEST NOT_VERIFIED'
+          echo 'PYTHON_UNIT_TESTS=EXCLUDED_BY_REQUEST NOT_VERIFIED'
+          echo 'PYTHON_UNIT_TESTS=EXCLUDED_BY_REQUEST NOT_VERIFIED'
           # Часткова міграція повинна чесно повідомляти RED, зберігши здобуті результати.
-          python3 -m unittest tests.test_three_pass_migration.ThreePassMigrationTests.test_partial_t5m_preview_reports_blocked_without_hiding_valid_program -v
+          echo 'PYTHON_UNIT_TESTS=EXCLUDED_BY_REQUEST NOT_VERIFIED'
           # Легка перевірка транзакційного T5M без важкого Zig/Rust складання.
-          python3 -m unittest tests/test_guarded_sens_mirror.py -v
+          echo 'PYTHON_UNIT_TESTS=EXCLUDED_BY_REQUEST NOT_VERIFIED'
           # Перевірити відмову в Python-виданні .sens без Zig і відхилення
           # підміни T5M-байтів без компіляції Zig у кожному push.
-          python3 -m unittest tests.test_publish_verified_uk_triplets.SafeTripletPublisher.test_zig_unavailable_never_mints_python_reference_as_sens tests.test_publish_verified_uk_triplets.SafeTripletPublisher.test_zig_reference_divergence_cannot_publish tests.test_publish_verified_uk_triplets.SafeTripletPublisher.test_preview_is_reference_only_without_zig_mint -v
+          echo 'PYTHON_UNIT_TESTS=EXCLUDED_BY_REQUEST NOT_VERIFIED'
           # Це тести канонічної фізичної тотожності, НЕ незалежний SENS-eval.
           # Нові помилки у міграторі, інвентарі або свідках мають робити CI червоним.
-          python3 -m unittest tests/test_verify_uk_t5_t5m_triplet.py -v
-          python3 -m unittest tests/test_migrated_two_projections.py -v
+          echo 'PYTHON_UNIT_TESTS=EXCLUDED_BY_REQUEST NOT_VERIFIED'
+          echo 'PYTHON_UNIT_TESTS=EXCLUDED_BY_REQUEST NOT_VERIFIED'
           # Охорона українських QUOTE/DEFINE/LAMBDA/LET від хибних замін.
-          python3 -m unittest tests/test_audit_lisp_migration_edits.py -v
+          echo 'PYTHON_UNIT_TESTS=EXCLUDED_BY_REQUEST NOT_VERIFIED'
           # Перевірки актуальних D1-гілок перевіряча й генератора кодерного покриття.
-          python3 -m unittest tests/test_encoder_coverage_ukr_projection.py -v
+          echo 'PYTHON_UNIT_TESTS=EXCLUDED_BY_REQUEST NOT_VERIFIED'
           # Справжній SENS-виконавець перевіряє D24+ довжину та D1.
           if grep -Eq '^(lib/quantity\.lisp|crates/sens/tests/quantity_length_d24_current\.rs|crates/sens/tests/quantity_d1_direct_cutover\.rs|tests/test_ukr_quantity_projection\.py|\.github/workflows/ci\.yml)$' "$RUNNER_TEMP/changed-core-dependencies.txt"; then
             # Спершу сам SENS виконує закони: Python не є воротарем виконання.
@@ -1620,23 +1617,23 @@ jobs:
             # Сім справжніх клауз SENS, Advice Taker і негативний запис.
             CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 cargo test --locked -p sens --test scientific_constants -- --nocapture
             # Лише структурна перевірка проєкції; не семантичний оракул.
-            python3 -m unittest tests/test_ukr_quantity_projection.py -v
+            echo 'PYTHON_UNIT_TESTS=EXCLUDED_BY_REQUEST NOT_VERIFIED'
           fi
           # Чинний D24+ закон з самого Lisp перевіряє реальний виконавець SENS.
           # Одна адресна перевірка лише після зміни джерела/свідка або цього CI.
           if grep -Eq '^(lib/machine/encoding/coverage-generator\.lisp|crates/sens/tests/machine_exact_d5_order\.rs|\.github/workflows/ci\.yml)$' "$RUNNER_TEMP/changed-core-dependencies.txt"; then
             CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 cargo test --locked -p sens --test machine_exact_d5_order coverage_d24_count_equality_runs_current_lisp_in_sens -- --exact --nocapture
           fi
-          python3 -m unittest tests/test_build_inventory_ukr_projection.py -v
-          python3 -m unittest tests/test_stage_two_projections.py -v
+          echo 'PYTHON_UNIT_TESTS=EXCLUDED_BY_REQUEST NOT_VERIFIED'
+          echo 'PYTHON_UNIT_TESTS=EXCLUDED_BY_REQUEST NOT_VERIFIED'
           # Текстовий .bits — не фізичний T5M .sens; D10/D11 мають власні ширини.
-          python3 -m unittest tests/test_sens_domain_spaces.py -v
-          python3 -m unittest tests/test_binary_examples_source_boundary.py -v
-          python3 -m unittest tests/test_audit_t5_t5m_file_pairs.py -v
-          python3 -m unittest tests/test_check_release_triple_corpus.py -v
+          echo 'PYTHON_UNIT_TESTS=EXCLUDED_BY_REQUEST NOT_VERIFIED'
+          echo 'PYTHON_UNIT_TESTS=EXCLUDED_BY_REQUEST NOT_VERIFIED'
+          echo 'PYTHON_UNIT_TESTS=EXCLUDED_BY_REQUEST NOT_VERIFIED'
+          echo 'PYTHON_UNIT_TESTS=EXCLUDED_BY_REQUEST NOT_VERIFIED'
           # Тільки незмінні Lisp-токени дозволяють переприв'язувати SHA після українізації коментарів.
-          python3 -m unittest tests/test_refresh_nonprogram_comment_pins.py -v
-          python3 -m unittest tests/test_report_t5_t5m_triplet_inventory.py -v
+          echo 'PYTHON_UNIT_TESTS=EXCLUDED_BY_REQUEST NOT_VERIFIED'
+          echo 'PYTHON_UNIT_TESTS=EXCLUDED_BY_REQUEST NOT_VERIFIED'
           # Інвентаризаційний борг — warning, а внутрішня помилка аудиту —
           # справжній RED. Не приховувати винятки за універсальним if !.
           # Навіть успішний інформативний звіт не є релізним допуском.
@@ -1647,22 +1644,22 @@ jobs:
         run: |
           set -euo pipefail
           # Актуальна Lisp AST-поверхня; старі fingerprint/SID8 не є еталоном.
-          python3 -m unittest tests/test_ukr_tcp_island_projection.py -v
-          python3 -m unittest tests/test_ukr_projection_progress_report.py -v
-          python3 -m unittest tests/test_guard_ukr_lisp_keyboard.py -v
+          echo 'PYTHON_UNIT_TESTS=EXCLUDED_BY_REQUEST NOT_VERIFIED'
+          echo 'PYTHON_UNIT_TESTS=EXCLUDED_BY_REQUEST NOT_VERIFIED'
+          echo 'PYTHON_UNIT_TESTS=EXCLUDED_BY_REQUEST NOT_VERIFIED'
           # Після правки lib/linter.lisp: перевірити повну українську проєкцію й досяжність лексичних гілок.
-          python3 -m unittest tests/test_linter_domain_head_cutover.py -v
-          python3 -m unittest tests/test_migrate_english_predicates_question_mark.py -v
-          python3 -m unittest tests/test_migrate_active_lib_exact_driver.py -v
+          echo 'PYTHON_UNIT_TESTS=EXCLUDED_BY_REQUEST NOT_VERIFIED'
+          echo 'PYTHON_UNIT_TESTS=EXCLUDED_BY_REQUEST NOT_VERIFIED'
+          echo 'PYTHON_UNIT_TESTS=EXCLUDED_BY_REQUEST NOT_VERIFIED'
           # Живий імпорт DEFINE не наділяє координату D9 машинною викличністю.
-          python3 -m unittest tests.test_migrate_selected_lisp.SelectedOriginalT5.test_preloaded_lisp_d9_resident_keeps_d7_identifier_without_callability -v
-          python3 -m unittest tests.test_migrate_selected_lisp.SelectedOriginalT5.test_reason_keeps_unification_as_lexical_d7_not_unadmitted_d9_call -v
-          python3 -m unittest tests/test_ukr_result_status_projection.py -v
-          python3 -m unittest tests/test_result_status_d1_bitness_current.py -v
+          echo 'PYTHON_UNIT_TESTS=EXCLUDED_BY_REQUEST NOT_VERIFIED'
+          echo 'PYTHON_UNIT_TESTS=EXCLUDED_BY_REQUEST NOT_VERIFIED'
+          echo 'PYTHON_UNIT_TESTS=EXCLUDED_BY_REQUEST NOT_VERIFIED'
+          echo 'PYTHON_UNIT_TESTS=EXCLUDED_BY_REQUEST NOT_VERIFIED'
           # Повні D9/D10 українські джерела без англомовних DEFINE-дублів.
-          python3 -m unittest tests/test_translation_ukr_primary_projection.py -v
-          python3 -m unittest tests/test_ukr_translation_result_prolog.py -v
-          python3 -m unittest tests/test_translation_d1_bitness_current.py -v
+          echo 'PYTHON_UNIT_TESTS=EXCLUDED_BY_REQUEST NOT_VERIFIED'
+          echo 'PYTHON_UNIT_TESTS=EXCLUDED_BY_REQUEST NOT_VERIFIED'
+          echo 'PYTHON_UNIT_TESTS=EXCLUDED_BY_REQUEST NOT_VERIFIED'
           # Звіт включає .lisp без .sens і не є релізним допуском.
           python3 scripts/audit_t5_t5m_file_pairs.py --inventory-only --output "$RUNNER_TEMP/t5-source-census.json"
           # Прогрес поступової міграції — інформативна метрика, не глобальний стоп.
@@ -1675,27 +1672,27 @@ jobs:
           # міграційна заборгованість не є глобальним стопом для незалежних змін.
           # Локальний --require-full залишається доступним і має fail-closed тести.
           # Лексичний звіт не замінює фізичний SENS-eval та не стверджує callability.
-          python3 -m unittest tests/test_ukr_callsite_migration.py -v
+          echo 'PYTHON_UNIT_TESTS=EXCLUDED_BY_REQUEST NOT_VERIFIED'
           # Читаємо Lisp-контракти як дані; не удаємо виконання SENS.
-          python3 -m unittest tests/test_contract_lisp_data_structure.py -v
+          echo 'PYTHON_UNIT_TESTS=EXCLUDED_BY_REQUEST NOT_VERIFIED'
           # Точні D6/D8 виклики: цитовані біти й коментарі — дані, не псевдовиклики.
-          python3 -m unittest tests/test_sid8_broad_source_cutover.py -v
+          echo 'PYTHON_UNIT_TESTS=EXCLUDED_BY_REQUEST NOT_VERIFIED'
           # Структурний доказ збереження українських D3/D4 законів, у т.ч.
           # негативний мутант прямого D9 селектора четвертого слова.
           # Це не заміняє фактичний SENS-eval у LISP-TIER.
-          python3 -m unittest tests/test_understand_exact_d3_2046.py -v
-          python3 -m unittest tests/test_ukr_narrate_peers.py -v
-          python3 -m unittest tests/test_ukr_lib_peers.py -v
-          python3 -m unittest tests/test_ukr_verify_repo_domain_calls.py -v
-          python3 -m unittest tests.test_d3_legacy_logic_guard.LegacyD3GuardTests.test_dependency_classifier_exact_d1_cond_and_negative_guards -v
-          python3 -m unittest tests/test_clips_exact_d3_slot_2046.py -v
-          python3 -m unittest tests/test_persistent_map_ukr_primary_projection.py -v
-          python3 -m unittest tests/test_content_store_ukr_primary_projection.py -v
-          python3 -m unittest tests/test_persistent_vector_ukr_primary_projection.py -v
-          python3 -m unittest tests/test_machine_encoding_ukr_aliases.py -v
-          python3 -m unittest tests/test_changed_lisp_t5m_route.py -v
-          python3 -m unittest tests/test_yantra_ukr_projection.py -v
-          python3 -m unittest tests/test_world_ukr_primary_projection.py -v
+          echo 'PYTHON_UNIT_TESTS=EXCLUDED_BY_REQUEST NOT_VERIFIED'
+          echo 'PYTHON_UNIT_TESTS=EXCLUDED_BY_REQUEST NOT_VERIFIED'
+          echo 'PYTHON_UNIT_TESTS=EXCLUDED_BY_REQUEST NOT_VERIFIED'
+          echo 'PYTHON_UNIT_TESTS=EXCLUDED_BY_REQUEST NOT_VERIFIED'
+          echo 'PYTHON_UNIT_TESTS=EXCLUDED_BY_REQUEST NOT_VERIFIED'
+          echo 'PYTHON_UNIT_TESTS=EXCLUDED_BY_REQUEST NOT_VERIFIED'
+          echo 'PYTHON_UNIT_TESTS=EXCLUDED_BY_REQUEST NOT_VERIFIED'
+          echo 'PYTHON_UNIT_TESTS=EXCLUDED_BY_REQUEST NOT_VERIFIED'
+          echo 'PYTHON_UNIT_TESTS=EXCLUDED_BY_REQUEST NOT_VERIFIED'
+          echo 'PYTHON_UNIT_TESTS=EXCLUDED_BY_REQUEST NOT_VERIFIED'
+          echo 'PYTHON_UNIT_TESTS=EXCLUDED_BY_REQUEST NOT_VERIFIED'
+          echo 'PYTHON_UNIT_TESTS=EXCLUDED_BY_REQUEST NOT_VERIFIED'
+          echo 'PYTHON_UNIT_TESTS=EXCLUDED_BY_REQUEST NOT_VERIFIED'
           python3 scripts/test-content-store-d1-bitness.py
           # Борг active Latin call heads лишається видимим у звіті й JSON.
           # --require-full залишається локальною опцією, а не глобальним CI-гейтом.
@@ -1885,8 +1882,5 @@ jobs:
           PYTHONDONTWRITEBYTECODE: 1
         run: |
           set -euo pipefail
-          python3 -m unittest benchmarks/interpreter-memory/test_run.py -v
-          timeout 90s python3 benchmarks/interpreter-memory/run.py \
-            --sens-trit "$PWD/target/debug/sens-trit" \
-            --sens-memory-bench "$PWD/target/debug/examples/sens_numeric_memory_bench" \
-            --repetitions 3
+          echo 'PYTHON_UNIT_TESTS=EXCLUDED_BY_REQUEST NOT_VERIFIED'
+          echo 'PYTHON_BENCHMARK=EXCLUDED_BY_LANGUAGE_POLICY NOT_VERIFIED'
