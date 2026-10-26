@@ -37,14 +37,10 @@ jobs:
           test -z "$(git status --porcelain --untracked-files=all)"
       - name: Independently execute actual Ukrainian D1 COND canary in current Rust SENS
         run: cargo test -q -p sens --features rust-t5-reference --test migration_d1_cond_cohort -- --nocapture
-      - name: Verify strict view codec and fail-closed negative cases — EXCLUDED (NOT_VERIFIED)
-        if: false
-        shell: bash
-        run: echo "FOREIGN_LANGUAGE_TEST_BENCH=EXCLUDED_BY_POLICY native_equivalent=NOT_VERIFIED"
-      - name: Prove three independent triplet checkers agree on SHA and semantic boundaries — EXCLUDED (NOT_VERIFIED)
-        if: false
-        shell: bash
-        run: echo "FOREIGN_LANGUAGE_TEST_BENCH=EXCLUDED_BY_POLICY native_equivalent=NOT_VERIFIED"
+      - name: Verify strict view codec and fail-closed negative cases
+        run: python3 -m unittest discover -s tests -p 'test_sens_spaced_view.py' -v
+      - name: Prove three independent triplet checkers agree on SHA and semantic boundaries
+        run: python3 -m unittest discover -s tests -p 'test_t5_t5m_triplet_crosscheck.py' -v
       - name: Verify committed fixture is exact T5 view, without release claims
         run: |
           python3 scripts/sens_spaced_view.py \
