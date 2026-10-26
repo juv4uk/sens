@@ -102,10 +102,13 @@ for source in "$here"/*.lisp; do
     збільшити-всі|збільшити-всі-*) expected="(4 3 2)" ;;
     *) echo "CONTEST_UNKNOWN_TASK: немає перевіреного очікуваного результату: $source" >&2; fail=1; continue ;;
   esac
-  # Знімок до суду: доказ має стосуватися саме виміряної версії.
-  source_sha="$(sha256sum "$source" | cut -d' ' -f1)"
-  pair_sha="$(sha256sum "$committed" | cut -d' ' -f1)"
-  view_sha="$(sha256sum "$committed_view" | cut -d' ' -f1)"
+  # Побайтові знімки до суду: без генерації digest.
+  source_snapshot="$scratch/$name.source.snapshot"
+  pair_snapshot="$scratch/$name.sens.snapshot"
+  view_snapshot="$scratch/$name.view.snapshot"
+  cp -- "$source" "$source_snapshot"
+  cp -- "$committed" "$pair_snapshot"
+  cp -- "$committed_view" "$view_snapshot"
   # Справжній суд уже виконує SENS mint, Zig inverse, paired/standalone,
   # перевірку результату, негативного мутанта і змінних входів.
   # Не повторювати цей дорогий нативний доказ для того самого файлу.
@@ -116,9 +119,9 @@ for source in "$here"/*.lisp; do
     fail=1
     continue
   fi
-  if [[ "$source_sha" != "$(sha256sum "$source" | cut -d' ' -f1)" ||
-        "$pair_sha" != "$(sha256sum "$committed" | cut -d' ' -f1)" ||
-        "$view_sha" != "$(sha256sum "$committed_view" | cut -d' ' -f1)" ]]; then
+  if ! cmp -s "$source_snapshot" "$source" ||
+     ! cmp -s "$pair_snapshot" "$committed" ||
+     ! cmp -s "$view_snapshot" "$committed_view"; then
     printf '%s\t-\t-\t0\tДЖЕРЕЛО_ЧИ_ПАРА_ЗМІНИЛИСЯ\n' "$name"
     fail=1
     continue
@@ -156,9 +159,9 @@ for source in "$here"/*.lisp; do
     printf '%s\t-\t-\t0\tНЕСТАБІЛЬНЕ_ВИКОНАННЯ\n' "$name"
     continue
   fi
-  if [[ "$source_sha" != "$(sha256sum "$source" | cut -d' ' -f1)" ||
-        "$pair_sha" != "$(sha256sum "$committed" | cut -d' ' -f1)" ||
-        "$view_sha" != "$(sha256sum "$committed_view" | cut -d' ' -f1)" ]]; then
+  if ! cmp -s "$source_snapshot" "$source" ||
+     ! cmp -s "$pair_snapshot" "$committed" ||
+     ! cmp -s "$view_snapshot" "$committed_view"; then
     printf '%s\t-\t-\t0\tДЖЕРЕЛО_ЧИ_ПАРА_ЗМІНИЛИСЯ\n' "$name"
     fail=1
     continue
