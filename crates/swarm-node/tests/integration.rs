@@ -1307,6 +1307,72 @@ fn spawn_with_auto_sync(
     node
 }
 
+#[test]
+fn sync_tasks_preflights_registry_targets_before_writing_any_task() {
+    let port = alloc_ports(1);
+    let dir = data_dir("target-preflight");
+    std::fs::create_dir_all(&dir).unwrap();
+    let tasks_file = dir.join("tasks.lisp");
+    let _n = spawn(port, "target-preflight", &dir, None);
+
+    std::fs::write(
+        &tasks_file,
+        r#"
+((kind . tasks-sens)
+ (tasks .
+  (("ORDINARY" . ((priority . 1) (description . "ordinary task")))
+   ("TEST-MISSING-TARGET" . ((priority . 2) (вид . тест)
+                              (description . "write a test"))))))
+"#,
+    )
+    .unwrap();
+
+    let rejected = request(
+        port,
+        &format!(r#"(sync-tasks (file "{}"))"#, tasks_file.display()),
+    );
+    assert!(
+        rejected.starts_with("(error") && rejected.contains("TEST-MISSING-TARGET"),
+        "one unbound test target must reject the whole import: {rejected}"
+    );
+    let ordinary = request(port, "(task-def (task ORDINARY))");
+    assert!(
+        ordinary.contains("(defined nil)"),
+        "preflight failure must not partially import earlier tasks: {ordinary}"
+    );
+
+    std::fs::write(
+        &tasks_file,
+        r#"
+((kind . tasks-sens)
+ (tasks .
+  (("TEST-TARGETED" . ((priority . 2)
+                       (вид . тест)
+                       (ціль . ((функція . значення-у-списку?)
+                                (властивість . присутній-елемент-дає-так)
+                                (клас-входу . правильний-список)))
+                       (description . "test one registered function"))))))
+"#,
+    )
+    .unwrap();
+    let accepted = request(
+        port,
+        &format!(r#"(sync-tasks (file "{}"))"#, tasks_file.display()),
+    );
+    assert!(
+        accepted.starts_with("(ok"),
+        "a complete target should allow the task file: {accepted}"
+    );
+    let projected = request(port, "(task-def (task TEST-TARGETED))");
+    assert!(
+        projected.contains("(вид тест)")
+            && projected.contains("(функція значення-у-списку?)")
+            && projected.contains("(властивість присутній-елемент-дає-так)")
+            && projected.contains("(клас-входу правильний-список)"),
+        "sync-tasks must preserve the exact task target: {projected}"
+    );
+}
+
 /// M1.2: a tasks.lisp file registered via --auto-sync is periodically
 /// re-read and its task definitions imported into the registry without
 /// any manual (sync-tasks) call. Modifying the file mid-flight must be
