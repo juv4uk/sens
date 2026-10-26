@@ -1585,7 +1585,7 @@ while IFS= read -r file || [[ -n "$file" ]]; do
     mark_file_failed
     continue
   fi
-  id="$(printf '%s' "$file" | sha256sum | cut -c1-16)"
+  id="$checked_files"
   dir="$outdir/$id"
   mkdir -p "$dir"
   echo "T5M_CHANGED_SOURCE path=$file"
@@ -1929,7 +1929,6 @@ while IFS= read -r file || [[ -n "$file" ]]; do
       mark_file_failed
       continue
     fi
-    sha256sum lib/meta-eval.lisp "$exact_meta_definition" > "$dir/meta-eval-source.sha256"
     binding_sources=(--binding-source "$exact_meta_definition")
   elif [[ "$file" == "benchmarks/d11-families.lisp" ]]; then
     # Чисті сімейства D11 використовують DEFINE зі справжніх Lisp-бібліотек.
@@ -1964,7 +1963,6 @@ while IFS= read -r file || [[ -n "$file" ]]; do
       fi
       printf '\n' >> "$local_d6_source"
     done
-    sha256sum lib/core4-parts/core4-d6b.lisp "$local_d6_source" > "$dir/d6-definition-provenance.sha256"
     binding_sources=(--binding-source tests/fixtures/epistemic-d1-names.lisp
                      --binding-source "$local_d6_source")
   elif [[ "$file" == "tests/semantic/d8-quantifier-composition-law.lisp" ||
@@ -1987,7 +1985,6 @@ while IFS= read -r file || [[ -n "$file" ]]; do
       fi
       printf '\n' >> "$d8_quantifier_source"
     done
-    sha256sum lib/core4-parts/core4-d6b.lisp "$d8_quantifier_source" > "$dir/d8-quantifier-source.sha256"
     binding_sources=(--binding-source tests/fixtures/epistemic-d1-names.lisp
                      --binding-source "$d8_quantifier_source")
   elif [[ "$file" == "tests/semantic/d11-family-association-law.lisp" ||
