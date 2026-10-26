@@ -63,4 +63,4 @@ if (( ${#sorted_wall[@]} != 11 )); then
   printf 'REGRESSION id=%s layer=benchmark expected=11-samples actual=%s\n' "$id" "${#sorted_wall[@]}" >&2
   exit 1
 fi
-printf 'БЕНЧМАРК_МЕДІАНА=PASS native=SENS libraries=lib/твердження.lisp+lib/бенчмарк.lisp positive=D1:так mutant=D1:ні samples=11 p50_us=%s p90_us=%s\n' "${sorted_wall[5]}" "${sorted_wall[9]}"
+printf 'БЕНЧМАРК_МЕДІАНА=PASS native=SENS libraries=lib/твердження.lisp+lib/бенчмарк.lisp law=tests/semantic/бенчмарк-медіана-law.lisp positive=D1:так mutant=D1:ні samples=11 p50_us=%s p90_us=%s\n' "${sorted_wall[5]}" "${sorted_wall[9]}"
