@@ -434,20 +434,14 @@ printf 'id\tstatus\twall_ms\n' > "$evidence/law-timings.tsv"
 printf 'id\tstage\texit\telapsed_us\n' > "$evidence/law-stage-timings.tsv"
 # Відтворювані докази RED без додаткових запусків SENS або кодека.
 # source/input, фізичний носій, бітовий перегляд і точна позиція відмови.
-printf 'id\tlayer\tsource_sha256\tphysical_sha256\tview_sha256\tphysical_form_index\n' > "$evidence/law-red-receipts.tsv"
+printf 'id\tlayer\tsource_present\tphysical_present\tview_present\tphysical_form_index\n' > "$evidence/law-red-receipts.tsv"
 red_receipt() {
   local id="$1" source_path="$2" dir="$evidence/$1"
-  local source_hash=NOT_PRODUCED physical_hash=NOT_PRODUCED view_hash=NOT_PRODUCED
+  local source_present=ні physical_present=ні view_present=ні
   local form_index=NOT_REPORTED layer=NOT_CLASSIFIED line
-  if [[ -f "$source_path" && ! -L "$source_path" ]]; then
-    source_hash="$(sha256sum "$source_path" | cut -d' ' -f1)"
-  fi
-  if [[ -f "$dir/program.sens" && ! -L "$dir/program.sens" ]]; then
-    physical_hash="$(sha256sum "$dir/program.sens" | cut -d' ' -f1)"
-  fi
-  if [[ -f "$dir/program" && ! -L "$dir/program" ]]; then
-    view_hash="$(sha256sum "$dir/program" | cut -d' ' -f1)"
-  fi
+  [[ -f "$source_path" && ! -L "$source_path" ]] && source_present=так
+  [[ -f "$dir/program.sens" && ! -L "$dir/program.sens" ]] && physical_present=так
+  [[ -f "$dir/program" && ! -L "$dir/program" ]] && view_present=так
   if [[ -s "$dir/failure-layer.txt" ]]; then
     layer="$(head -n 1 "$dir/failure-layer.txt")"
   elif [[ -f "$dir/paired.err" ]]; then
@@ -455,8 +449,6 @@ red_receipt() {
   elif [[ -f "$dir/direct.err" ]]; then
     layer="$(direct_failure_layer "$dir/direct.err")"
   fi
-  # Шар відмови та індекс фізичної форми — незалежні поля квитанції.
-  # fail() уже записав шар, але paired.err усе одно містить точну позицію.
   if [[ -f "$dir/paired.err" ]]; then
     while IFS= read -r line; do
       if [[ "$line" =~ physical_form_index=([0-9]+) ]]; then
@@ -466,9 +458,9 @@ red_receipt() {
     done < "$dir/paired.err"
   fi
   printf '%s\t%s\t%s\t%s\t%s\t%s\n' \
-    "$id" "$layer" "$source_hash" "$physical_hash" "$view_hash" "$form_index" \
+    "$id" "$layer" "$source_present" "$physical_present" "$view_present" "$form_index" \
     >> "$evidence/law-red-receipts.tsv"
-  echo "SENS_RED_RECEIPT id=$id layer=$layer source_sha256=$source_hash physical_sha256=$physical_hash view_sha256=$view_hash physical_form_index=$form_index file=$evidence/law-red-receipts.tsv"
+  echo "SENS_RED_RECEIPT id=$id layer=$layer source_present=$source_present physical_present=$physical_present view_present=$view_present physical_form_index=$form_index file=$evidence/law-red-receipts.tsv"
 }
 run_case() {
   local id="$2" start_us end_us wall_ms status
