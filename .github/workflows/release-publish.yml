@@ -64,37 +64,37 @@ jobs:
             selected_conclusion=""
             selected_app=""
             selected_url=""
-            while IFS=$'\t' read -r id check_name check_sha check_status check_conclusion check_app check_url; do
-            if [[ "$check_name" == "$required" && "$id" =~ ^[1-9][0-9]*$ ]] && (( id > selected_id )); then
-              selected_id="$id"
-              selected_sha="$check_sha"
-              selected_status="$check_status"
-              selected_conclusion="$check_conclusion"
-              selected_app="$check_app"
-              selected_url="$check_url"
+              while IFS=$'\t' read -r id check_name check_sha check_status check_conclusion check_app check_url; do
+              if [[ "$check_name" == "$required" && "$id" =~ ^[1-9][0-9]*$ ]] && (( id > selected_id )); then
+                selected_id="$id"
+                selected_sha="$check_sha"
+                selected_status="$check_status"
+                selected_conclusion="$check_conclusion"
+                selected_app="$check_app"
+                selected_url="$check_url"
+              fi
+            done <<< "$check_runs"
+            if [[ "$selected_id" == 0 ]]; then
+              echo "RELEASE_BLOCKED: немає обов'язкової перевірки '$required' на точному SHA" >&2
+              exit 1
             fi
-          done <<< "$check_runs"
-          if [[ "$selected_id" == 0 ]]; then
-            echo "RELEASE_BLOCKED: немає обов'язкової перевірки '$required' на точному SHA" >&2
-            exit 1
-          fi
-          [[ "$selected_sha" == "$GITHUB_SHA" ]] || { echo "RELEASE_BLOCKED: SHA mismatch для '$required'" >&2; exit 1; }
-          [[ "$selected_status" == "completed" && "$selected_conclusion" == "success" ]] || {
-            echo "RELEASE_BLOCKED: '$required' не завершено успішно ($selected_status/$selected_conclusion)" >&2
-            exit 1
-          }
-          [[ "$selected_app" == "github-actions" ]] || { echo "RELEASE_BLOCKED: недовірений постачальник '$required'" >&2; exit 1; }
-          prefix="https://github.com/${GITHUB_REPOSITORY}/actions/runs/"
-          case "$selected_url" in
-            "$prefix"*) suffix="${selected_url#"$prefix"}" ;;
-            *) echo "RELEASE_BLOCKED: недовірене посилання '$required'" >&2; exit 1 ;;
-          esac
-          [[ "$suffix" =~ ^[1-9][0-9]*(/job/[1-9][0-9]*)?/?$ ]] || {
-            echo "RELEASE_BLOCKED: некоректне посилання '$required'" >&2
-            exit 1
-          }
-        done
-        echo "RELEASE_EXACT_SHA_CHECKS=PASS count=${#required_checks[@]} sha=$GITHUB_SHA"
+            [[ "$selected_sha" == "$GITHUB_SHA" ]] || { echo "RELEASE_BLOCKED: SHA mismatch для '$required'" >&2; exit 1; }
+            [[ "$selected_status" == "completed" && "$selected_conclusion" == "success" ]] || {
+              echo "RELEASE_BLOCKED: '$required' не завершено успішно ($selected_status/$selected_conclusion)" >&2
+              exit 1
+            }
+            [[ "$selected_app" == "github-actions" ]] || { echo "RELEASE_BLOCKED: недовірений постачальник '$required'" >&2; exit 1; }
+            prefix="https://github.com/${GITHUB_REPOSITORY}/actions/runs/"
+            case "$selected_url" in
+              "$prefix"*) suffix="${selected_url#"$prefix"}" ;;
+              *) echo "RELEASE_BLOCKED: недовірене посилання '$required'" >&2; exit 1 ;;
+            esac
+            [[ "$suffix" =~ ^[1-9][0-9]*(/job/[1-9][0-9]*)?/?$ ]] || {
+              echo "RELEASE_BLOCKED: некоректне посилання '$required'" >&2
+              exit 1
+            }
+          done
+          echo "RELEASE_EXACT_SHA_CHECKS=PASS count=${#required_checks[@]} sha=$GITHUB_SHA"
 
       - name: Завантажити всі зібрані release-артефакти
         uses: actions/download-artifact@634f93cb2916e3fdff31fdaf6667de0da12316ab # v5
