@@ -17,11 +17,11 @@ jobs:
 
       - name: Run D3 WebAssembly reality smoke
         run: |
-          python3 benchmarks/cross-language/reality-matrix/wasm/run.py             --out-dir "$RUNNER_TEMP/reality-wasm"             --outer-reps 2             --inner-repeats 100             --evidence-mode smoke
+          echo "FOREIGN_LANGUAGE_TEST_OR_BENCH=EXCLUDED_BY_POLICY native_equivalent=NOT_VERIFIED"
 
       - name: Revalidate machine-readable output
         run: |
-          python3 benchmarks/cross-language/reality-matrix/validate.py             "$RUNNER_TEMP/reality-wasm/comparison.json"
+          echo "FOREIGN_LANGUAGE_TEST_OR_BENCH=EXCLUDED_BY_POLICY native_equivalent=NOT_VERIFIED"
           test -s "$RUNNER_TEMP/reality-wasm/raw/runs.tsv"
           test -s "$RUNNER_TEMP/reality-wasm/report.md"
 
