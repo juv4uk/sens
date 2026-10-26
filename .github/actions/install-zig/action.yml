@@ -37,10 +37,13 @@ runs:
           "https://ziglang.org/download/${version}/zig-${arch}-${os}-${version}.${ext}" \
           --output "$archive"
         if command -v sha256sum >/dev/null 2>&1; then
-          echo "${sha}  ${archive}" | sha256sum --check --status
+          actual="$(sha256sum "$archive" | awk '{print $1}')"
+        elif command -v shasum >/dev/null 2>&1; then
+          actual="$(shasum -a 256 "$archive" | awk '{print $1}')"
         else
-          echo "${sha}  ${archive}" | shasum -a 256 -c -
+          actual="$(openssl dgst -sha256 "$archive" | awk '{print $NF}')"
         fi
+        test "$actual" = "$sha"
         if [ "$ext" = zip ]; then
           7z x "$archive" -o"$RUNNER_TEMP" -y >/dev/null
         else
