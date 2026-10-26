@@ -84,6 +84,8 @@ jobs:
           bash scripts/prove-d3-пара.sh target/debug/sens
           bash scripts/prove-d1-not.sh target/debug/sens
           bash scripts/prove-бенчмарк-глибина.sh target/debug/sens
+          bash scripts/prove-d3-атом-межа.sh target/debug/sens
+          bash scripts/prove-d3-як-є-щит.sh target/debug/sens
 
       - name: Clippy
         id: workspace_clippy
