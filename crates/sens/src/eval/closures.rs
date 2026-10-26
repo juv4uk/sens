@@ -1033,14 +1033,14 @@ mod exact_domain_head_classification_tests {
         ] {
             let parsed = crate::parse(source).expect("canonical surface parses");
             let actual = classify_head(&parsed[0], own, &environment);
-            let valid = match (actual, expected) {
+            let valid = matches!(
+                (actual, expected),
                 (Head::Quote, "quote")
-                | (Head::Cond, "cond")
-                | (Head::Call, "call")
-                | (Head::Lambda, "lambda")
-                | (Head::Define, "define") => true,
-                _ => false,
-            };
+                    | (Head::Cond, "cond")
+                    | (Head::Call, "call")
+                    | (Head::Lambda, "lambda")
+                    | (Head::Define, "define")
+            );
             assert!(
                 valid,
                 "surface {source} must use ratified domain head policy"
