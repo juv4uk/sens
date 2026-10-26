@@ -93,7 +93,7 @@ if SENS_EVENT_NAME=pull_request SENS_PR_FIRST_FIELD='SENS_SOURCE=tests/legacy/te
   cat "$tmp/hash-negative.log"
   exit 1
 fi
-if ! grep -q 'canonical_SENS_carrier_creates_hash_receipt' "$tmp/hash-negative.log"; then
+if ! grep -q 'digest_creation_forbidden' "$tmp/hash-negative.log"; then
   echo "LANGUAGE_POLICY_ARCHIVE_SELFTEST=FAIL hash receipt rejected for wrong reason"
   cat "$tmp/hash-negative.log"
   exit 1
