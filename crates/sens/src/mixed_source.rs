@@ -50,7 +50,7 @@ pub fn parse_mixed_exact_domain_machine_source(
     // or D9 call heads; quoting and binder data remain opaque.
     let parsed = parse_mixed_source(source, true)?
         .into_iter()
-        .map(|expr| lift_pinned_d8_io(source, expr, 0))
+        .map(|expr| lift_pinned_d8_io(source, expr, 0, false))
         .collect::<Result<Vec<_>, _>>()?;
 
     // Only the admission/encoding wire paths need these four ratified D9
@@ -86,7 +86,12 @@ fn admitted_d8_uk_bits(spelling: &str) -> Option<&'static str> {
     }
 }
 
-fn lift_pinned_d8_io(source: &str, expression: Expr, depth: u32) -> Result<Expr, LanguageError> {
+fn lift_pinned_d8_io(
+    source: &str,
+    expression: Expr,
+    depth: u32,
+    preserve_legacy_w8_quote: bool,
+) -> Result<Expr, LanguageError> {
     if depth > MAX_STRUCTURE_DEPTH {
         return Err(LanguageError::new(
             ErrorKind::Parse,
@@ -106,6 +111,9 @@ fn lift_pinned_d8_io(source: &str, expression: Expr, depth: u32) -> Result<Expr,
     }
     let mut lifted = items.to_vec();
     let head_spelling = source_spelling(source, &lifted[0]);
+    if preserve_legacy_w8_quote && is_legacy_w8_quote_head(source, &lifted[0]) {
+        return Ok(Expr { kind: ExprKind::List(items), span });
+    }
     if is_legacy_w8_quote_head(source, &lifted[0])
         || is_exact_quote(&lifted[0])
         || head_spelling == Some("'")
@@ -129,7 +137,7 @@ fn lift_pinned_d8_io(source: &str, expression: Expr, depth: u32) -> Result<Expr,
             span: lifted[0].span,
         };
     } else if matches!(&lifted[0].kind, ExprKind::List(_)) {
-        lifted[0] = lift_pinned_d8_io(source, lifted[0].clone(), depth + 1)?;
+        lifted[0] = lift_pinned_d8_io(source, lifted[0].clone(), depth + 1, preserve_legacy_w8_quote)?;
     }
 
     let skip_binding_slot = is_legacy_w8_define_head(source, &items[0])
@@ -141,7 +149,7 @@ fn lift_pinned_d8_io(source: &str, expression: Expr, depth: u32) -> Result<Expr,
         if skip_binding_slot && index == 1 {
             continue;
         }
-        *item = lift_pinned_d8_io(source, item.clone(), depth + 1)?;
+        *item = lift_pinned_d8_io(source, item.clone(), depth + 1, preserve_legacy_w8_quote)?;
     }
     Ok(Expr {
         kind: ExprKind::List(Rc::from(lifted.into_boxed_slice())),
@@ -232,7 +240,7 @@ fn lift_pinned_machine_wire_d9_strings(
 fn parse_mixed_pinned_d8_io(source: &str) -> Result<Vec<Expr>, LanguageError> {
     parse_mixed_source(source, true)?
         .into_iter()
-        .map(|expr| lift_pinned_d8_io(source, expr, 0))
+        .map(|expr| lift_pinned_d8_io(source, expr, 0, false))
         .collect()
 }
 
@@ -243,6 +251,7 @@ fn lift_pinned_d9_language_calls(
     source: &str,
     expression: Expr,
     depth: u32,
+    preserve_legacy_w8_quote: bool,
 ) -> Result<Expr, LanguageError> {
     const UKRAINIAN_D9_MECHANISMS: [&str; 7] = [
         "рядок-додати",
@@ -281,6 +290,9 @@ fn lift_pinned_d9_language_calls(
 
     let mut lifted = items.to_vec();
     let spelling = source_spelling(source, &lifted[0]);
+    if preserve_legacy_w8_quote && is_legacy_w8_quote_head(source, &lifted[0]) {
+        return Ok(Expr { kind: ExprKind::List(items), span });
+    }
     if is_legacy_w8_quote_head(source, &lifted[0])
         || is_exact_quote(&lifted[0])
         || spelling == Some("'")
@@ -352,7 +364,7 @@ fn lift_pinned_d9_language_calls(
             };
         }
     } else if matches!(&lifted[0].kind, ExprKind::List(_)) {
-        lifted[0] = lift_pinned_d9_language_calls(source, lifted[0].clone(), depth + 1)?;
+        lifted[0] = lift_pinned_d9_language_calls(source, lifted[0].clone(), depth + 1, preserve_legacy_w8_quote)?;
     }
 
     let skip_binding = is_legacy_w8_define_head(source, &items[0])
@@ -363,7 +375,7 @@ fn lift_pinned_d9_language_calls(
         if skip_binding && index == 1 {
             continue;
         }
-        *item = lift_pinned_d9_language_calls(source, item.clone(), depth + 1)?;
+        *item = lift_pinned_d9_language_calls(source, item.clone(), depth + 1, preserve_legacy_w8_quote)?;
     }
     Ok(Expr {
         kind: ExprKind::List(Rc::from(lifted.into_boxed_slice())),
@@ -411,7 +423,7 @@ pub fn parse_mixed_exact_domain_reasoning_source(
         parse_mixed_source(source, true)?
     };
     base.into_iter()
-        .map(|expr| lift_pinned_d9_language_calls(source, expr, 0))
+        .map(|expr| lift_pinned_d9_language_calls(source, expr, 0, false))
         .collect()
 }
 
@@ -518,8 +530,8 @@ pub fn parse_mixed_exact_domain_utf8_source(
     }
     parse_mixed_source(source, true)?
         .into_iter()
-        .map(|expr| lift_pinned_d8_io(source, expr, 0))
-        .map(|expr| expr.and_then(|expr| lift_pinned_d9_language_calls(source, expr, 0)))
+        .map(|expr| lift_pinned_d8_io(source, expr, 0, false))
+        .map(|expr| expr.and_then(|expr| lift_pinned_d9_language_calls(source, expr, 0, false)))
         .map(|expr| expr.and_then(|expr| lift_pinned_utf8_d9_strings(source, expr, 0)))
         .map(|expr| expr.and_then(|expr| expand_pinned_utf8_let_star(source, expr, 0)))
         .map(|expr| expr.and_then(qualify_pinned_utf8_numbers))
@@ -721,7 +733,7 @@ pub fn parse_mixed_exact_domain_fs_source(
     }
     parse_mixed_source(source, true)?
         .into_iter()
-        .map(|expr| lift_pinned_d9_language_calls(source, expr, 0))
+        .map(|expr| lift_pinned_d9_language_calls(source, expr, 0, false))
         .collect()
 }
 
@@ -785,13 +797,13 @@ pub fn parse_mixed_exact_domain_core_source(
     // never gains width inference from this migration bridge.
     let parsed = parse_mixed_source(source, true)?
         .into_iter()
-        .map(|expr| lift_pinned_d8_io(source, expr, 0))
+        .map(|expr| lift_pinned_d8_io(source, expr, 0, true))
         .collect::<Result<Vec<_>, _>>()?;
     // Цитовані українські імена залишаються даними: побітовий
     // адаптер макросів уже фізично вилучено з runtime.
     parsed
         .into_iter()
-        .map(|expr| lift_pinned_d9_language_calls(source, expr, 0))
+        .map(|expr| lift_pinned_d9_language_calls(source, expr, 0, true))
         .collect()
 }
 
