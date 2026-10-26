@@ -27,11 +27,7 @@ rows=0
 bad=0
 while IFS= read -r line || [[ -n "$line" ]]; do
   # Only table body rows that end with ARCHIVE (pipe-separated).
-  case "$line" in
-    *'|' *ARCHIVE*) ;;
-    *'|'*ARCHIVE*) ;;
-    *) continue ;;
-  esac
+  [[ "$line" == *"| ARCHIVE |"* || "$line" == *"| ARCHIVE" ]] || continue
   case "$line" in
     *'---'*) continue ;;
   esac
