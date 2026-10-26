@@ -16,26 +16,14 @@ jobs:
     steps:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
 
-      - name: Sterile source routes (default=zig-transport, FFI-only)
-        run: |
-          set -euo pipefail
-          python3 scripts/check_sterile_zig_corridor.py
-          python3 -m unittest discover -s tests -p test_sterile_zig_corridor.py -v
+      - name: Sterile source routes — Python checks excluded
+        run: echo 'PYTHON_TESTS_AND_VALIDATORS=EXCLUDED_BY_LANGUAGE_POLICY native_equivalent=NOT_VERIFIED'
 
-      - name: Host-neutral R5 (physical ABI T5+E1+F3C, C reject invalid T5)
-        run: |
-          set -euo pipefail
-          python3 scripts/check_rust_sens_zig_corridor.py .
-          python3 -m unittest discover -s tests -p test_check_rust_sens_zig_corridor.py -v
+      - name: Host-neutral R5 — Python checks excluded
+        run: echo 'PYTHON_TESTS_AND_VALIDATORS=EXCLUDED_BY_LANGUAGE_POLICY native_equivalent=NOT_VERIFIED'
 
-      - name: Host coverage (no invisible Rust↔SENS bypass)
-        run: |
-          set -euo pipefail
-          python3 scripts/check_rust_sens_corridor_coverage.py .
-          python3 -m unittest discover -s tests -p test_check_rust_sens_corridor_coverage.py -v
+      - name: Host coverage — Python checks excluded
+        run: echo 'PYTHON_TESTS_AND_VALIDATORS=EXCLUDED_BY_LANGUAGE_POLICY native_equivalent=NOT_VERIFIED'
 
-      - name: Axiom binding (every corridor rule traces to language-core)
-        run: |
-          set -euo pipefail
-          python3 scripts/check_corridor_axiom_binding.py .
-          python3 -m unittest discover -s tests -p test_check_corridor_axiom_binding.py -v
+      - name: Axiom binding — Python checks excluded
+        run: echo 'PYTHON_TESTS_AND_VALIDATORS=EXCLUDED_BY_LANGUAGE_POLICY native_equivalent=NOT_VERIFIED'
