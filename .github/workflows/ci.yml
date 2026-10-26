@@ -56,7 +56,7 @@ jobs:
             # Explicitly exclude non-runtime material from semantic language authority.
             # Exclusion is NOT a test pass: excluded Python tests/benchmarks remain NOT_VERIFIED.
             case "$file" in
-              tests/*|benchmarks/*|research/*|scripts/*|.github/*|packaging/*|tools/*|examples/*|experiments/*|prototype/*|vendor/*|ecosystem/*|docs/*|knowledge/*|evidence/*|fixtures/*|hypotheses/*|memory/*|tasks/*|дослідження/*|*/tests/*|*/benches/*|*/benchmarks/*)
+              tests/*|benchmarks/*|research/*|scripts/*|.github/*|packaging/*|tools/*|examples/*|*/examples/*|experiments/*|prototype/*|vendor/*|ecosystem/*|docs/*|knowledge/*|evidence/*|fixtures/*|hypotheses/*|memory/*|tasks/*|дослідження/*|*/tests/*|*/benches/*|*/benchmarks/*)
                 excluded=$((excluded + 1))
                 continue ;;
             esac
@@ -68,11 +68,20 @@ jobs:
             esac
             case "$file" in
               *.rs|*.zig|*.sens|*.lisp|*.scm|*.ss|*.sld|*.c|*.h|*.S|*.s|*.asm) continue ;;
-              *.md|*.yml|*.yaml|*.toml|*.json|*.jsonl|*.txt|*.tsv|*.b64|*.bits|*.lock|*.orig|*.patch|*.contract|*.svg|*.expected|*.call|*.stderr|*.t5m3|*.tape|*.f3m|LICENSE|.gitignore|.gitattributes|.zig-version|rust-toolchain.toml) continue ;;
+              *.md|*.yml|*.yaml|*.toml|*.json|*.jsonl|*.txt|*.tsv|*.b64|*.bits|*.lock|*.orig|*.patch|*.contract|*.svg|*.expected|*.call|*.stderr|*.t5m3|*.tape|*.f3m|*.fasl|LICENSE|.gitignore|.gitattributes|.zig-version|rust-toolchain.toml) continue ;;
               *.py|*.pyi|*.js|*.mjs|*.cjs|*.ts|*.tsx|*.jsx|*.sh|*.bash|*.ps1|*.cc|*.cpp|*.hpp|*.rkt|*.pl|*.clp|*.lua|*.sv|*.v)
                 count=$((count + 1))
                 if [[ "$count" -le 80 ]]; then printf '%s\n' "$file" >> "$examples"; fi ;;
               *)
+                # Extensionless files under lib/ are physical SENS views only
+                # when an explicit SENS source companion is tracked in the checkout.
+                case "$file" in
+                  lib/*)
+                    if [[ "$file" != *.* && ( -f "$file.lisp" || -f "$file.sens" ) ]]; then
+                      continue
+                    fi
+                    ;;
+                esac
                 count=$((count + 1))
                 if [[ "$count" -le 80 ]]; then printf '%s\n' "$file" >> "$examples"; fi ;;
             esac
