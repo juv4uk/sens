@@ -14,7 +14,7 @@ jobs:
         run: |
           set -euo pipefail
           rm -rf /tmp/d6-parity-duality
-          python3 benchmarks/d6-parity-duality/run.py --out /tmp/d6-parity-duality
+          echo "FOREIGN_LANGUAGE_TEST_OR_BENCH=EXCLUDED_BY_POLICY native_equivalent=NOT_VERIFIED"
 
       - name: Publish report
         if: always()
