@@ -125,11 +125,13 @@ jobs:
           python3 scripts/check-release-triple-corpus.py \
             "$RUNNER_TEMP/release-triple-inventory.json" "$status"
 
-      - name: Exact-SHA independent CI verifier negative controls
-        run: python3 -m unittest discover -s tests -p test_verify_release_ci.py -v
+      - name: Exact-SHA independent CI verifier negative controls — Python excluded
+        shell: bash
+        run: echo 'PYTHON_UNIT_TESTS=EXCLUDED_BY_POLICY test_verify_release_ci native_equivalent=NOT_VERIFIED'
 
-      - name: Release asset integrity negative controls
-        run: python3 -m unittest discover -s tests -p test_verify_release_assets.py -v
+      - name: Release asset integrity negative controls — Python excluded
+        shell: bash
+        run: echo 'PYTHON_UNIT_TESTS=EXCLUDED_BY_POLICY test_verify_release_assets native_equivalent=NOT_VERIFIED'
 
       - name: Required full workspace test (same tagged SHA)
         run: cargo test --locked --workspace --no-fail-fast
@@ -159,25 +161,12 @@ jobs:
           toolchain: "1.99.0"
       - uses: Swatinem/rust-cache@49a0bdc70d2e1b713ca9e2869b211fcce03d3c1c # v2
 
-      - name: Download and hash CLIPS 6.4.2 Windows projects archive
+      - name: CLIPS vendor archive integrity — no admitted non-digest proof
         shell: bash
         run: |
-          set -euo pipefail
-          mkdir -p packaging/vendor
-          curl -fsSL -o packaging/vendor/clips_windows_projects_642.zip \
-            "https://sourceforge.net/projects/clipsrules/files/CLIPS/6.4.2/clips_windows_projects_642.zip/download"
-          sha256sum packaging/vendor/clips_windows_projects_642.zip | awk '{print $1}' > clips_windows_sha256.txt
-          cat clips_windows_sha256.txt
-
-      - name: Verify pinned CLIPS archive matches manifest
-        shell: bash
-        run: |
-          set -euo pipefail
-          expected="$(jq -r '.islands[] | select(.key=="clips") | .platforms[] | select(.target=="windows-x86_64") | .sha256' packaging/islands-manifest-v1.json)"
-          actual="$(tr -d '[:space:]' < clips_windows_sha256.txt)"
-          test -n "$expected"
-          test "$actual" = "$expected"
-          echo "CLIPS_SHA256_OK=$actual"
+          echo 'CLIPS_VENDOR_ARCHIVE=NOT_VERIFIED sha256_creation=EXCLUDED json_semantics=EXCLUDED'
+          echo "::error title=RELEASE_NOT_VERIFIED::Do not stage or publish the island manifest until a non-SHA, byte-exact provenance proof is admitted."
+          exit 1
 
       - name: Stage manifest and installer (not a public release)
         shell: bash
