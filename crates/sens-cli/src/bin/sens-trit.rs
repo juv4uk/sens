@@ -29,7 +29,7 @@ fn decode_f3_carrier(bytes: &[u8]) -> Result<Vec<u8>, String> {
         if parsed.form_count() != 1 {
             return Err("Zig F3C restored more than one root".into());
         }
-        return Ok(restored);
+        Ok(restored)
     }
     #[cfg(not(feature = "zig-transport"))]
     {
