@@ -14,7 +14,7 @@ for flag in avx2 fma; do
     exit 2
   fi
 done
-for compiler in gcc gfortran rustc zig awk sha256sum; do
+for compiler in gcc gfortran rustc zig awk; do
   command -v "$compiler" >/dev/null || {
     echo "Бракує інструмента: $compiler" >&2
     exit 2
@@ -131,26 +131,18 @@ done
   echo "- Робота: 65536 елементів, 2048 добутків, 5 чергованих повторів"
   echo "- Метрика: медіана часу цілого процесу (не окремої інструкції)"
   echo
-  echo '| Реалізація | Медіана, мс | Компіляція, мс | Бінарник, байт | SHA-256 джерела |'
-  echo '|---|---:|---:|---:|---|'
+  echo '| Реалізація | Медіана, мс | Компіляція, мс | Бінарник, байт |'
+  echo '|---|---:|---:|---:|'
   # В анотації використовуємо ті самі значення, що й у таблиці.
   brief_times=()
   for lang in "${variants[@]}"; do
     median_ns="$(awk -F '\t' -v lang="$lang" '$1==lang {print $3}' "$scratch/samples.tsv" | sort -n | sed -n '3p')"
     build_ns="$(awk -F '\t' -v lang="$lang" '$1==lang {print $2}' "$scratch/build.tsv")"
     binary_bytes="$(awk -F '\t' -v lang="$lang" '$1==lang {print $3}' "$scratch/build.tsv")"
-    case "$lang" in
-      fortran) files=(benchmarks/language-fit/dot.f90) ;;
-      c) files=(benchmarks/language-fit/dot.c) ;;
-      c-avx2) files=(benchmarks/language-fit/dot.c benchmarks/language-fit/dot-c-avx2.c) ;;
-      rust) files=(benchmarks/language-fit/dot.rs) ;;
-      zig) files=(benchmarks/language-fit/dot.zig benchmarks/language-fit/dot.c) ;;
-      asm-*) files=(benchmarks/language-fit/dot.c crates/sens/src/machine_math_skylake.S) ;;
-    esac
-    hash="$(cat "${files[@]}" | sha256sum | cut -d ' ' -f 1)"
+
     median_ms="$(awk -v ns="$median_ns" 'BEGIN {printf "%.3f", ns/1000000}')"
     build_ms="$(awk -v ns="$build_ns" 'BEGIN {printf "%.3f", ns/1000000}')"
-    printf '| %s | %s | %s | %s | %s |\n' "$lang" "$median_ms" "$build_ms" "$binary_bytes" "$hash"
+    printf '| %s | %s | %s | %s |\n' "$lang" "$median_ms" "$build_ms" "$binary_bytes"
     brief_times+=("$lang=${median_ms}ms")
   done
 
