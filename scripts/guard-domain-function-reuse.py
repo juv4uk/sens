@@ -228,6 +228,31 @@ def _mask_quotes(text: str) -> str:
             if text[pos] != "\n":
                 out[pos] = " "
 
+    # БЛОКОВІ КОМЕНТАРІ #| … |# — не семантичний носій.
+    # Раніше маскувались лише рядкові `;`, тому `(визначити довжина …)`
+    # усередині #| … |# вважалось справжнім визначенням і давало фальшивий
+    # BLOCKED. Коментар — не код: це те саме правило, що strip_comments
+    # у scripts/migrate-three-pass.py і «коментар не потрібно кодувати».
+    _depth = 0
+    _start = 0
+    _pos = 0
+    while _pos < n - 1:
+        if text[_pos] == "#" and text[_pos + 1] == "|":
+            if _depth == 0:
+                _start = _pos
+            _depth += 1
+            _pos += 2
+            continue
+        if text[_pos] == "|" and text[_pos + 1] == "#" and _depth:
+            _depth -= 1
+            _pos += 2
+            if _depth == 0:
+                blank(_start, _pos)
+            continue
+        _pos += 1
+    if _depth:
+        blank(_start, n)
+
     def string_end(start: int) -> int | None:
         pos = start + 1
         while pos < n:
