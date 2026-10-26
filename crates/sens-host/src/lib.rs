@@ -1,9 +1,10 @@
-//! sens-host - the OS capability layer for sens.
+//! sens-host — шар системних можливостей для SENS.
 //!
-//! The core installs no OS capabilities. This crate owns filesystem, process,
-//! and TCP mechanisms and registers them explicitly through [`install`].
-//! Trusted native sessions remain unrestricted by default; embeddings may opt
-//! into per-session filesystem/TCP scopes carried by `Environment`.
+//! Ядро SENS не встановлює можливостей доступу до операційної системи.
+//! Цей крейт містить файлові, процесні та мережеві засоби й явно
+//! реєструє їх через [`install`].
+//! Довірені нативні сеанси за замовчуванням мають повний доступ; вбудовувач
+//! може обмежити файлові й мережеві права окремого сеансу через `Environment`.
 
 use sens::{
     eval_expr, exact_arity, register_capability, register_evaluated_capability, BinaryNumber,
