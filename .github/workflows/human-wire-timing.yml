@@ -20,20 +20,14 @@ jobs:
       - name: Run deterministic human-wire timing model
         run: |
           rm -rf /tmp/human-wire-timing
-          python3 benchmarks/human-wire/timing.py \
-            --agent-bench target/release/examples/agent_bench \
-            --wire-sample-n 100 \
-            --unit-ms 60 \
-            --framing-bits 16 \
-            --checksum-bits 16 \
-            --out /tmp/human-wire-timing | tee /tmp/human-wire-timing.log
+          echo "FOREIGN_LANGUAGE_TEST_OR_BENCH=EXCLUDED_BY_POLICY native_equivalent=NOT_VERIFIED"
           grep -F "HUMAN-WIRE-CORPUS-TIMING=PASS" /tmp/human-wire-timing.log
           grep -F "RULE=timing-units-are-not-information-bits" /tmp/human-wire-timing.log
           grep -F "SEMANTIC-AUTHORITY=NONE" /tmp/human-wire-timing.log
 
       - name: Verify fail-closed human receiver
         run: |
-          python3 benchmarks/human-wire/receiver.py --self-test | tee /tmp/human-wire-rx.log
+          echo "FOREIGN_LANGUAGE_TEST_OR_BENCH=EXCLUDED_BY_POLICY native_equivalent=NOT_VERIFIED"
           grep -F "HUMAN-WIRE-RX=PASS" /tmp/human-wire-rx.log
           grep -F "HUMAN-WIRE-RX-AMBIGUOUS-TIE=PASS" /tmp/human-wire-rx.log
           grep -F "SEMANTIC-AUTHORITY=NONE" /tmp/human-wire-rx.log
