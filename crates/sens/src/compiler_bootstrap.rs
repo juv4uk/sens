@@ -11,9 +11,11 @@ use std::rc::Rc;
 
 /// Build an opt-in mechanism value that decomposes one exact DomainIdentity.
 ///
-/// Result:
+/// Result (SENS shape, not Rust code):
 ///
-///     (width (bit0 bit1 ... bitN))
+/// ```text
+/// (width (bit0 bit1 ... bitN))
+/// ```
 ///
 /// Bits are exact D1 PredicateBit values in source order (MSB first).
 /// Width is a host numeric representation fact, not a semantic-domain role.
