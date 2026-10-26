@@ -8,8 +8,9 @@
 
 use std::{collections::HashSet, path::Path};
 
+use sens_cli::zig_transport;
 use sens::{
-    encode_ternary_words, eval_parsed_expressions,
+    eval_parsed_expressions,
     frame3_micro_enumerator::{decode_payload, encode_expr, Frame3MicroExpr},
     parse_binary_source_words, parse_canonical_binary, Session,
 };
@@ -34,7 +35,7 @@ fn verify_one(code: u8) -> Result<(usize, String, Frame3MicroExpr), String> {
         .into_iter()
         .map(|token| token.word)
         .collect::<Vec<_>>();
-    let t5 = encode_ternary_words(&typed).map_err(|error| format!("T5: {error:?}"))?;
+    let t5 = zig_transport::encode_t5m_direct(&typed).map_err(|error| format!("T5: {error:?}"))?;
 
     let expected = eval_parsed_expressions(&parsed, &mut Session::default())
         .map_err(|error| format!("evaluator: {error:?}"))?;
@@ -92,7 +93,7 @@ fn bench_speed() -> Result<(), Box<dyn std::error::Error>> {
     let tokens = parse_binary_source_words(&visible)?;
     let typed = tokens.iter().map(|token| token.word).collect::<Vec<_>>();
     let full_t5 =
-        encode_ternary_words(&typed).map_err(|error| format!("T5 physical encode: {error:?}"))?;
+        zig_transport::encode_t5m_direct(&typed).map_err(|error| format!("T5 physical encode: {error:?}"))?;
     if full_t5.len() != 5 || encode_expr(&expr)? != one_byte {
         return Err("wrong physical size or broken dense roundtrip".into());
     }
@@ -120,7 +121,7 @@ fn bench_speed() -> Result<(), Box<dyn std::error::Error>> {
     bench_speed_one(
         "t5_encode_typed_words",
         || {
-            black_box(encode_ternary_words(black_box(&typed)).unwrap());
+            black_box(zig_transport::encode_t5m_direct(black_box(&typed)).unwrap());
         },
         SAMPLES,
         INNER,
@@ -136,7 +137,7 @@ fn bench_speed() -> Result<(), Box<dyn std::error::Error>> {
     bench_speed_one(
         "t5_decode_5b_to_typed_words",
         || {
-            black_box(sens::decode_ternary_words(black_box(&full_t5)).unwrap());
+            black_box(zig_transport::decode_t5m_words(black_box(&full_t5)).unwrap());
         },
         SAMPLES,
         INNER,
