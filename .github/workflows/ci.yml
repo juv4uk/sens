@@ -114,6 +114,8 @@ jobs:
       - uses: ./.github/actions/install-zig
       - name: Build native SENS
         run: cargo build --locked -p sens-cli --bin sens --bin sens-trit --features benchmark-ast-visits
+      - name: Точковий SENS REPL — некоректний стан повертає мовну відмову
+        run: cargo test --locked -p sens --test repl_core_malformed_tails repl_step_rejects_atomic_state_as_sens_data -- --nocapture
       - name: Execute SENS laws, mutants and language laws
         shell: bash
         run: |
