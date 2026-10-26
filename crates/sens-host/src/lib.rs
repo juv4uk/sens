@@ -841,13 +841,17 @@ fn evaluate_load(
 
 pub fn install() {
     register_evaluated_capability("clock-mono-raw", 0, observe_monotonic_nanoseconds);
+    register_evaluated_capability("годинник-моно-сирий", 0, observe_monotonic_nanoseconds);
     #[cfg(not(target_arch = "wasm32"))]
     register_evaluated_capability("читати-енергію-у-мікроджоулях", 0, read_energy_microjoules);
     register_evaluated_capability("read-dir", 1, evaluate_read_dir);
+    register_evaluated_capability("читати-каталог", 1, evaluate_read_dir);
     register_evaluated_capability("read-file-bytes", 1, evaluate_read_file_bytes);
+    register_evaluated_capability("читати-байти-файла", 1, evaluate_read_file_bytes);
     register_evaluated_capability("читати-сирий-текст-файла", 1, evaluate_read_file_utf8_raw);
     register_capability("записати-байти-файла", evaluate_write_file_bytes);
     register_capability("process-run-raw", process_raw::evaluate_process_run_raw);
+    register_capability("запустити-процес-сирий", process_raw::evaluate_process_run_raw);
     // Та сама сира можливість процесу для українського виконуваного Lisp.
     register_capability(
         "процес-запустити-сирий",
@@ -857,13 +861,17 @@ pub fn install() {
     // Українська виклична назва того самого механізму читання та обчислення файла.
     register_evaluated_capability("завантажити-файл", 1, evaluate_load);
     register_capability("tcp-connect", evaluate_tcp_connect);
+    register_capability("приєднати-мережу", evaluate_tcp_connect);
     register_capability("tcp-listen-raw", evaluate_tcp_listen_raw);
+    register_capability("слухати-мережу-сирий", evaluate_tcp_listen_raw);
     register_capability(
         "протокол-передавання-сире-слухання",
         evaluate_tcp_listen_raw,
     );
     register_evaluated_capability("tcp-accept", 1, evaluate_tcp_accept);
+    register_evaluated_capability("прийняти-мережу", 1, evaluate_tcp_accept);
     register_evaluated_capability("tcp-read-raw", 1, evaluate_tcp_read_raw);
+    register_evaluated_capability("читати-мережу-сирий", 1, evaluate_tcp_read_raw);
     register_evaluated_capability(
         "протокол-передавання-сире-читання",
         1,
@@ -872,6 +880,7 @@ pub fn install() {
     register_capability("tcp-write-raw", evaluate_tcp_write_raw);
     register_capability("протокол-передавання-сирий-запис", evaluate_tcp_write_raw);
     register_evaluated_capability("tcp-close", 1, evaluate_tcp_close);
+    register_evaluated_capability("закрити-мережу", 1, evaluate_tcp_close);
     // Механізм повертає лише розподіл і походження; рішення належить SENS.
     register_evaluated_capability(
         "модельний-розподіл-вибору-сире",
