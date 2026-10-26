@@ -1,3 +1,4 @@
+; SENS_REMINT: native pair refresh requested; this comment does not alter the law.
 ; Дійсний SENS-свідок графа залежностей MetaEval.
 ; Шість випадків мають дати D1:0, одне зв'язане ім'я — D1:1.
 ; Кожна гілка за-умовою має рівно два поля й обчислює D1.
