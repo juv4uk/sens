@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
-# Canonical release policy: semantic tests and benchmarks must execute through
-# Rust, Zig, or the native SENS runtime. Python unit suites and Python-driven
-# benchmark runners are excluded and never reported as passing evidence.
+# Canonical release policy: executable tests/benchmarks may use only the
+# owner-approved languages/mechanisms: Rust, Zig, SENS, Guile, C, and Assembler.
+# Python and all other foreign-language test/benchmark runners are excluded.
 set -euo pipefail
 root="$(git rev-parse --show-toplevel)"
 cd "$root"
@@ -15,4 +15,4 @@ if grep -nE '^[[:space:]]*(run:[[:space:]]*)?python3[[:space:]]+-m[[:space:]]+(u
   echo "EXECUTION_LANGUAGE_POLICY=FAIL python_test_or_benchmark_runner"
   exit 1
 fi
-echo "EXECUTION_LANGUAGE_POLICY=PASS allowed=Rust,Zig,SENS python_tests=EXCLUDED python_benchmarks=EXCLUDED native_replacements=REQUIRED"
+echo "EXECUTION_LANGUAGE_POLICY=PASS allowed=Rust,Zig,SENS,Guile,C,Assembler python_tests=EXCLUDED foreign_tests=EXCLUDED python_benchmarks=EXCLUDED foreign_benchmarks=EXCLUDED native_replacements=REQUIRED"
