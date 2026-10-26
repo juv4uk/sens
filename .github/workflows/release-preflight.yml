@@ -137,3 +137,39 @@ jobs:
             exit 1
           fi
           echo "RELEASE_NATIVE_LANGUAGE_POLICY=PASS semantic_authority=SENS mechanisms=Rust,Zig,Guile,C,Assembler"
+
+
+  linux-release-abi:
+    name: Linux release binary — baseline x86-64 / GLIBC 2.35
+    # Standalone full preflight verifies this before a release tag exists.
+    # A tagged release caller also runs it even when its other gates are parallel.
+    if: ${{ inputs.full || github.ref_type == 'tag' }}
+    runs-on: ubuntu-22.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09
+      - uses: ./.github/actions/install-zig
+      - uses: dtolnay/rust-toolchain@1.99.0
+        with:
+          toolchain: "1.99.0"
+      - uses: Swatinem/rust-cache@49a0bdc70d2e1b713ca9e2869b211fcce03d3c1c
+        with:
+          shared-key: linux-release-abi
+      - name: Build public Linux release binary for baseline x86-64
+        env:
+          CARGO_TARGET_X86_64_UNKNOWN_LINUX_GNU_RUSTFLAGS: "-C target-cpu=x86-64"
+        run: cargo build --locked --release -p sens-cli --bin sens --target x86_64-unknown-linux-gnu
+      - name: Verify Linux ABI floor and reject AVX-512
+        shell: bash
+        run: |
+          set -euo pipefail
+          binary=target/x86_64-unknown-linux-gnu/release/sens
+          if readelf --version-info "$binary" | grep -Eq 'GLIBC_2\.(3[6-9]|[4-9][0-9])'; then
+            echo "::error title=RELEASE_GLIBC_TOO_NEW::Linux asset requires GLIBC 2.36 or newer" >&2
+            exit 1
+          fi
+          if objdump -d "$binary" | grep -Eq '[[:space:]]%?zmm[0-9]+'; then
+            echo "::error title=RELEASE_AVX512_FORBIDDEN::Linux asset contains a ZMM instruction" >&2
+            exit 1
+          fi
+          echo "RELEASE_LINUX_ABI=PASS max_glibc<=2.35 cpu=baseline-x86-64"
