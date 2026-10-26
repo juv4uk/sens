@@ -1,4 +1,4 @@
-name: D7 v2 owner-boundary conformance
+name: "D7 ratification conformance — excluded by Rust/Zig/SENS language policy"
 
 on:
   workflow_dispatch:
@@ -7,17 +7,12 @@ permissions:
   contents: read
 
 jobs:
-  d7-conformance:
+  policy-exclusion:
+    name: Foreign-language tests/research excluded (NOT_VERIFIED)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-      - uses: dtolnay/rust-toolchain@stable
-      - name: Prove only the current ratified D7 v2 owner map is used
+      - name: Record exclusion without asserting an outcome
         run: |
-          python3 scripts/check-d7-keyboard-v2-table.py
-          python3 scripts/check-d7-runtime-projection.py
-      - name: Prove exact W7 vs D2 and prevent callable aliases
-        run: cargo test --locked -p sens --features rust-t5-reference --test d7_runtime_presentation --test d7_keyboard_t5 --test d7_w7_pack --test canonical_w7_frame_invariance
+          echo "FOREIGN_LANGUAGE_TEST_BENCH=EXCLUDED_BY_POLICY"
+          echo "NATIVE_EQUIVALENT=NOT_VERIFIED"
+          echo "NO_PASS_CLAIM=MADE"

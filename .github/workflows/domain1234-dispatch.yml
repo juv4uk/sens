@@ -1,37 +1,18 @@
-name: Historical pre-bīja3 D3-D4 dispatch benchmark
+name: "domain D1–D4 dispatch benchmark — excluded by Rust/Zig/SENS language policy"
 
 on:
   workflow_dispatch:
-concurrency:
-  group: d34-dispatch-${{ github.ref }}
-  cancel-in-progress: false
+
+permissions:
+  contents: read
 
 jobs:
-  bench:
+  policy-exclusion:
+    name: Foreign-language tests/research excluded (NOT_VERIFIED)
     runs-on: ubuntu-latest
-    timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v5
-      - name: Install Valgrind
+      - name: Record exclusion without asserting an outcome
         run: |
-          sudo apt-get update
-          sudo apt-get install -y valgrind gcc
-          valgrind --version
-          gcc --version
-      - name: Measure historical pre-bīja3 D3/D4 dispatch mechanisms
-        run: |
-          mkdir -p /tmp/d34
-          python3 benchmarks/domain1234-dispatch/run.py \
-            --out /tmp/d34/raw.tsv \
-            --report /tmp/d34/report.md \
-            --calls 200000 \
-            --reps 3
-      - name: Upload raw evidence
-        uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: historical-pre-bija3-d34-dispatch-cachegrind
-          path: |
-            /tmp/d34/raw.tsv
-            /tmp/d34/report.md
-          retention-days: 7
+          echo "FOREIGN_LANGUAGE_TEST_BENCH=EXCLUDED_BY_POLICY"
+          echo "NATIVE_EQUIVALENT=NOT_VERIFIED"
+          echo "NO_PASS_CLAIM=MADE"
