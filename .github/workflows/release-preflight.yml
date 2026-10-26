@@ -17,6 +17,8 @@ jobs:
     steps:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
       - uses: ./.github/actions/install-zig
+      - name: Мовна межа — семантика лише SENS, без Python unit tests
+        run: bash scripts/check-sens-only-semantic-tests.sh
       - name: Install SWI-Prolog for real Prolog bridge tests
         shell: bash
         run: |
