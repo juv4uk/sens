@@ -319,6 +319,28 @@ fn compiler_surface_text(value: &Value) -> Option<String> {
         Value::Text7(value) => {
             crate::text7_projection::render_text7(value, crate::Text7Layout::En).ok()
         }
+        // The SENS compiler nucleus returns quoted D7 text as a proper list
+        // of exact D7 identities. Decode that representation only at this
+        // boundary; never widen, mask, or reinterpret non-D7 values as text.
+        Value::Pair(_) => {
+            let mut cells = Vec::new();
+            let mut cursor = value;
+            loop {
+                match cursor {
+                    Value::Nil => break,
+                    Value::Pair(node) => {
+                        let Value::DomainIdentity(DomainIdentity::D7(cell)) = &node.head else {
+                            return None;
+                        };
+                        cells.push(cell.word().packed_bits());
+                        cursor = &node.tail;
+                    }
+                    _ => return None,
+                }
+            }
+            let text = crate::Text7::from_cells(cells).ok()?;
+            crate::text7_projection::render_text7(&text, crate::Text7Layout::En).ok()
+        }
         _ => None,
     }
 }
@@ -1189,6 +1211,30 @@ mod tests {
         assert!(
             decode_language_lowering_role(&malformed).is_err(),
             "non-D7 role content must fail closed"
+        );
+    }
+
+    #[test]
+    fn compiler_surface_text_accepts_exact_d7_lists_and_rejects_mixed_values() {
+        let expected = "compiler-compilation-artifact-1";
+        let text = crate::text7_projection::encode_text7(expected, crate::Text7Layout::En)
+            .expect("schema must have an exact D7 v2 projection");
+        let exact = Value::list(text.cells().iter().map(|cell| {
+            Value::DomainIdentity(DomainIdentity::D7(crate::D7DataWord::from_word(
+                crate::Bit7::new(*cell).expect("exact D7 cell"),
+            )))
+        }));
+        assert_eq!(compiler_surface_text(&exact).as_deref(), Some(expected));
+
+        let mixed = Value::list([
+            Value::DomainIdentity(DomainIdentity::D7(crate::D7DataWord::from_word(
+                crate::Bit7::new(b'c').expect("ASCII cell fits D7"),
+            ))),
+            Value::predicate_bit(false),
+        ]);
+        assert!(
+            compiler_surface_text(&mixed).is_none(),
+            "mixed data must not be coerced into a D7 text name"
         );
     }
 
