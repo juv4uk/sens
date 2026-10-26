@@ -85,37 +85,35 @@ fn owned_workspace_crates_point_directly_to_the_single_root_license_file() {
 fn semantic_fast_lane_is_lisp_owned_and_does_not_run_the_full_legacy_package_suite() {
     let root = workspace_root();
     let script = fs::read_to_string(root.join("scripts/test-current-semantic-slice.sh"))
-        .expect("#231 requires scripts/test-current-semantic-slice.sh");
+        .expect("current SENS semantic slice must be readable");
 
+    // The retired authority_guard_contract and semantic_ref_fail_closed targets
+    // belonged to the old my-lisp crate. The current workspace uses SENS-native
+    // witnesses instead of retaining stale test names.
     assert!(
-        script.contains("--test witness_authority"),
-        "the fast semantic lane must execute the Lisp-owned witness observer"
+        script.contains("--test witness_authority exact_d3_predicate_boundaries_are_judged_by_lisp_owned_witness_logic"),
+        "the focused lane must execute the current Lisp-owned D3 authority witness"
     );
     assert!(
-        script.contains("--test authority_guard_contract"),
-        "the fast semantic lane must keep the Lisp-owned authority boundary executable"
-    );
-    assert!(
-        script.contains("--test semantic_ref_fail_closed"),
-        "the fast semantic lane must retain fail-closed semantic identity evidence"
+        script.contains("witnesses/quantity-lambda-binding.lisp")
+            && script.contains("(authority lisp)"),
+        "the focused lane must keep sequential-binding semantics Lisp-owned"
     );
     assert!(
         !script.contains("canon_adversarial") && !script.contains("canon_language_authority"),
-        "legacy host-authored Canon expectations must not define the fast canonical semantic lane"
+        "legacy host-authored Canon expectations must not define the current semantic lane"
     );
 
     let workflow = fs::read_to_string(root.join(".github/workflows/ci.yml"))
         .expect("CI workflow must be readable");
     assert!(
-        workflow.contains("semantic=false") && workflow.contains("semantic=$semantic"),
-        "PR path classification must expose an explicit semantic-change lane"
+        workflow.contains("bash -n scripts/prove-lisp-semantic-t5m.sh")
+            && workflow.contains("python3 scripts/check_ci_bash_blocks.py"),
+        "short CI must syntax-check the native SENS proof runner and workflow shell blocks"
     );
     assert!(
-        workflow.contains("scripts/test-current-semantic-slice.sh"),
-        "PR and main fast paths must call the focused current-contract semantic script"
-    );
-    assert!(
-        workflow.contains("steps.changes.outputs.semantic != 'true'"),
-        "full package tests must be excluded from the focused semantic migration lane"
+        workflow.contains("Do not configure Actions concurrency here")
+            && workflow.contains("every push/commit must retain its own CI run"),
+        "each exact-main change must retain its own CI evidence"
     );
 }
