@@ -9,7 +9,7 @@ git -C "$tmp" init -q
 git -C "$tmp" config user.name "SENS gate self-test"
 git -C "$tmp" config user.email "sens-gate-self-test@example.invalid"
 mkdir -p "$tmp/tests/legacy" "$tmp/benchmarks/legacy" "$tmp/docs" "$tmp/scripts"
-printf '#!/usr/bin/env sh\\necho SENS runner\\n' > "$tmp/scripts/execute_changed_lisp_t5m.sh"
+printf '#!/usr/bin/env sh\necho SENS runner\n' > "$tmp/scripts/execute_changed_lisp_t5m.sh"
 printf 'print("historical artifact")\n' > "$tmp/tests/legacy/test_old.py"
 printf '#!/usr/bin/env sh\necho historical benchmark\n' > "$tmp/benchmarks/legacy/old_runner.sh"
 fake_sha=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
@@ -33,7 +33,7 @@ fi
 # Push має власний native SENS test без PR-body; не вимагати
 # довільного префікса коміт-повідомлення замість PR-контракту.
 mkdir -p "$tmp/tests/new"
-printf '(твердження)\\n' > "$tmp/tests/new/push_native.lisp"
+printf '(твердження)\n' > "$tmp/tests/new/push_native.lisp"
 git -C "$tmp" add tests/new/push_native.lisp
 git -C "$tmp" commit -qm "native SENS test on push"
 if ! SENS_EVENT_NAME=push SENS_PR_FIRST_FIELD='' bash "$gate" --root "$tmp" > "$tmp/push-native.log" 2>&1; then
@@ -42,7 +42,7 @@ if ! SENS_EVENT_NAME=push SENS_PR_FIRST_FIELD='' bash "$gate" --root "$tmp" > "$
   exit 1
 fi
 # Pull request with a new native test requires SENS_SOURCE first.
-printf '(твердження)\\n' > "$tmp/tests/new/pr_native.lisp"
+printf '(твердження)\n' > "$tmp/tests/new/pr_native.lisp"
 git -C "$tmp" add tests/new/pr_native.lisp
 git -C "$tmp" commit -qm "native SENS test in PR"
 if SENS_EVENT_NAME=pull_request SENS_PR_FIRST_FIELD='' bash "$gate" --root "$tmp" > "$tmp/pr-native-negative.log" 2>&1; then
@@ -93,9 +93,9 @@ git -C "$hash_tmp" init -q
 git -C "$hash_tmp" config user.name "SENS digest gate self-test"
 git -C "$hash_tmp" config user.email "sens-digest-gate@example.invalid"
 mkdir -p "$hash_tmp/scripts" "$hash_tmp/tests/legacy" "$hash_tmp/benchmarks/legacy" "$hash_tmp/docs"
-printf '#!/usr/bin/env sh\\necho native carrier\\n' > "$hash_tmp/scripts/execute_changed_lisp_t5m.sh"
-printf 'historical fixture\\n' > "$hash_tmp/tests/legacy/test_old.py"
-printf '#!/usr/bin/env sh\\necho legacy\\n' > "$hash_tmp/benchmarks/legacy/old_runner.sh"
+printf '#!/usr/bin/env sh\necho native carrier\n' > "$hash_tmp/scripts/execute_changed_lisp_t5m.sh"
+printf 'historical fixture\n' > "$hash_tmp/tests/legacy/test_old.py"
+printf '#!/usr/bin/env sh\necho legacy\n' > "$hash_tmp/benchmarks/legacy/old_runner.sh"
 cat > "$hash_tmp/docs/language-policy-archive.md" <<EOF
 Артефакт | Локація | Причина виключення з гейту | Статус
 --- | --- | --- | ---
@@ -104,7 +104,7 @@ benchmarks/legacy/old_runner.sh | benchmarks/legacy/old_runner.sh | Archived run
 EOF
 git -C "$hash_tmp" add .
 git -C "$hash_tmp" commit -qm "clean baseline for digest negative witness"
-printf '#!/usr/bin/env sh\\nsha256sum source > source.sha256\\n' > "$hash_tmp/scripts/execute_changed_lisp_t5m.sh"
+printf '#!/usr/bin/env sh\nsha256sum source > source.sha256\n' > "$hash_tmp/scripts/execute_changed_lisp_t5m.sh"
 git -C "$hash_tmp" add scripts/execute_changed_lisp_t5m.sh
 git -C "$hash_tmp" commit -qm "negative digest-generation witness"
 if SENS_EVENT_NAME=push SENS_PR_FIRST_FIELD='' bash "$gate" --root "$hash_tmp" > "$hash_tmp/hash-negative.log" 2>&1; then
