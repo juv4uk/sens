@@ -48,8 +48,12 @@ fn eval_translation(source: &str) -> String {
                 .expect("чинна бібліотека виконується SENS");
         }
     }
+    // Вираз іде ТИМ САМИМ reader-ом, що й бібліотеки: reasoning-шлях ліфтить
+    // D9-голови (порада-рішення-у-світ тощо), загальний — ні. Раніше тут була
+    // асиметрія: world.lisp завантажувався з ліфтингом, а вираз без нього,
+    // і D9-голова лишалась Text7-послідовністю → unknown Text7 binding.
     eval_parsed_expressions(
-        &parse_mixed_exact_domain(source)
+        &sens::parse_mixed_exact_domain_reasoning_source("lib/world.lisp", source)
             .unwrap_or_else(|error| panic!("чинний D1–D10 reader: {error}; source: {source}")),
         &mut session,
     )
