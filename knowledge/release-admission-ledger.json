@@ -3,7 +3,7 @@
   "entries": [
     {
       "sens": "tests/semantic/meta-eval-graph-d1-law.sens",
-      "typed_word_sha256": "d01268c05132611c32f79c30b9faa71594b5008106c7ad327df0aad9bdb0a98d",
+      "typed_word_sha256": "d1a8a8882461a28dcfe4c4876b832195ff1a805e69e930649106a56d03fb698c",
       "f1_donor_provenance": "juv4uk/sens@f845f6c3a19ba79323242cef5eeeb572f4cea026:lib/meta-eval.lisp:221",
       "f2_positive_witness": "juv4uk/sens@f845f6c3a19ba79323242cef5eeeb572f4cea026:tests/semantic/meta-eval-graph-d1-law.lisp:1",
       "f2_negative_witness": "juv4uk/sens@f845f6c3a19ba79323242cef5eeeb572f4cea026:tests/semantic/meta-eval-graph-d1-mutant.lisp:1",
