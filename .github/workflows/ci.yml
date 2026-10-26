@@ -382,6 +382,41 @@ jobs:
           echo "needed=false" >> "$GITHUB_OUTPUT"
           echo "REMINT_SCOPE changed-target=no pending-drift=no"
 
+  detect-release-preflight:
+    name: Визначити, чи потрібен повний release preflight
+    if: ${{ github.event_name == 'push' }}
+    runs-on: ubuntu-24.04
+    outputs:
+      needed: ${{ steps.scope.outputs.needed }}
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5, pinned
+        with:
+          fetch-depth: 2
+          persist-credentials: false
+      - name: Перевірити релізно-критичний diff
+        id: scope
+        shell: bash
+        env:
+          BEFORE_SHA: ${{ github.event.before }}
+          HEAD_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          if [[ -z "${BEFORE_SHA:-}" || "$BEFORE_SHA" =~ ^0+$ ]]; then
+            changed="$(git diff-tree --no-commit-id --name-only -r "$HEAD_SHA")"
+          else
+            if ! git cat-file -e "$BEFORE_SHA^{commit}" 2>/dev/null; then
+              timeout 60s git fetch --no-tags --depth=1 origin "$BEFORE_SHA"
+            fi
+            changed="$(git diff --name-only "$BEFORE_SHA" "$HEAD_SHA")"
+          fi
+          if printf '%s\n' "$changed" | grep -Eq '^(\.github/workflows/(ci|release-preflight)\.yml|crates/xtask/|crates/sens/src/compiler_bootstrap\.rs$|crates/sens/tests/|tests/fixtures/conformance\.lisp$|lib/machine/encoding/coverage\.lisp$|lib/machine/xed/generated/machine-evidence\.lisp$)'; then
+            echo "needed=true" >> "$GITHUB_OUTPUT"
+            echo "RELEASE_PREFLIGHT_SCOPE release-critical-change=yes"
+          else
+            echo "needed=false" >> "$GITHUB_OUTPUT"
+            echo "RELEASE_PREFLIGHT_SCOPE release-critical-change=no"
+          fi
+
   # Єдина автоматична CI-подія залишається у ci.yml; тільки точний diff
   # або явний маркер запускає дорогий canonical SENS→Zig/T5M remint.
   remint-targeted:
@@ -400,3 +435,13 @@ jobs:
         lib/clips-import.lisp
     permissions:
       contents: write
+
+  # Full workspace tests + Clippy remain part of the single automatic CI
+  # workflow. The called workflow never creates a tag or publishes a release.
+  release-preflight:
+    name: Full exact-SHA release gate
+    needs: detect-release-preflight
+    if: ${{ github.event_name == 'push' && needs.detect-release-preflight.outputs.needed == 'true' }}
+    uses: ./.github/workflows/release-preflight.yml
+    permissions:
+      contents: read
