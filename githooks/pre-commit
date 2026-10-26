@@ -1,31 +1,29 @@
 #!/usr/bin/env bash
-# Версіонований pre-commit hook. .git/hooks/ сам по собі не версіюється
-# git-ом, тому цей файл активується один раз через:
-#   git config core.hooksPath githooks
-# (див. scripts/install-hooks.sh -- запустити один раз на клон).
+# Lightweight local gate: no Python/JSON oracle, no digest receipts.
 set -euo pipefail
-
 repo_root="$(git rev-parse --show-toplevel)"
-python3 "$repo_root/scripts/guard_ukr_lisp_keyboard.py" --staged
-# Охоронець повторного визначення застосовується лише до змін Lisp-проекції.
-# Rust/Zig та інші зміни без staged .lisp не є його вхідними даними.
-# Вирівняти вхід гачка з областю guard-domain-function-reuse.py:
-# мовні закони tests/semantic і бібліотечні Lisp-файли перевіряються;
-# fixtures, таблиці та згенеровані фрагменти до його області не входять.
-mapfile -t staged_lisp < <(
-    git -c core.quotepath=false diff --cached --name-only --diff-filter=ACMR -- '*.lisp' |
-    awk '
-        /^tests\// && !/^tests\/semantic\// { next }
-        /^lib\/(generated|surface|domains|machine|core4-parts)\// { next }
-        /^(vendor|benchmarks)\// { next }
-        { print }
-    '
-)
-if ((${#staged_lisp[@]} > 0)); then
-    # Перевіряти лише нові DEFINE відносно HEAD: наявні визначення в
-    # зміненому файлі не є новою роботою й не мають повторно блокувати коміт.
-    python3 "$repo_root/scripts/guard-domain-function-reuse.py" --staged --base HEAD --advise --register
-else
-    printf 'GUARD-DOMAIN-REUSE: SKIP (немає staged .lisp файлів)\n'
-fi
+cd "$repo_root"
+
+git diff --cached --check
+
+# Keep Python out of the active development path. Legacy files may be removed,
+# but adding or changing executable Python is not accepted.
+mapfile -t staged_paths < <(git -c core.quotepath=false diff --cached --name-status --diff-filter=ACMR)
+for item in "${staged_paths[@]}"; do
+  status="${item%%$'\t'*}"
+  path="${item#*$'\t'}"
+  if [[ "$path" == *.py || "$path" == *.pyc ]] && [[ "$status" == A || "$status" == M || "$status" == R* ]]; then
+    printf 'Коміт відхилено: активний Python-файл треба перенести на SENS або дозволений механізм: %s\n' "$path" >&2
+    exit 1
+  fi
+done
+
+# Run only repository-native shell guards; full semantic laws are a targeted CI suite.
+for path in "${staged_paths[@]#*$'\t'}"; do
+  case "$path" in
+    *.sh|githooks/pre-commit|githooks/pre-push|githooks/commit-msg)
+      [[ ! -f "$path" ]] || bash -n "$path"
+      ;;
+  esac
+done
 "$repo_root/scripts/check-bilingual-docs"
