@@ -2,8 +2,9 @@
 //! Показує саме те, як Т5 має роздільник 2 між словами, а Рамка-3 (F3) його прибирає.
 use sens::frame3_domain::{decode as decode_v3, encode as encode_v3, Word};
 use sens::universal_frame3::{decode, decode_v2, encode, encode_v2};
+use sens_cli::zig_transport;
 use sens::{
-    decode_ternary_words, encode_ternary_words, parse_binary_source_words, BinarySourceWord,
+    parse_binary_source_words, BinarySourceWord,
 };
 
 #[path = "../../../research/framed3/rust_codec/senc.rs"]
@@ -75,7 +76,7 @@ fn demo(name: &str, source: &str) {
         })
         .collect();
 
-    let t5 = encode_ternary_words(&words).unwrap();
+    let t5 = zig_transport::encode_t5m_direct(&words).unwrap();
     let v1 = encode(&words).unwrap();
     let v2 = encode_v2(&words).unwrap();
     let v3_words: Vec<Word> = words.iter().map(|w| Word::Core(w.clone())).collect();
@@ -85,7 +86,7 @@ fn demo(name: &str, source: &str) {
     f3.extend_from_slice(&f3_body);
 
     // Кожна рамка мусить повернути ту саму програму.
-    assert_eq!(decode_ternary_words(&t5).unwrap(), words);
+    assert_eq!(zig_transport::decode_t5m_words(&t5).unwrap(), words);
     assert_eq!(decode(&v1).unwrap(), words);
     assert_eq!(decode_v2(&v2).unwrap(), words);
     assert_eq!(decode_v3(&v3).unwrap(), v3_words);
