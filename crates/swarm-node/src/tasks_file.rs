@@ -13,6 +13,9 @@ pub struct ParsedTask {
     pub depends_on: Vec<String>,
     pub done: bool,
     pub description: Option<String>,
+    pub kind: Option<String>,
+    /// Normalized target as ((функція NAME) (властивість LAW) (клас-входу CLASS)).
+    pub target: Option<Sexp>,
     /// Owning repository id, e.g. "cml" (M1.1b provenance). Absent = the
     /// file doesn't declare it; sync-tasks may fill a msg-level default.
     pub origin: Option<String>,
@@ -50,6 +53,39 @@ fn atom_text(sexp: &Sexp) -> Option<String> {
         Sexp::Atom(s) | Sexp::Str(s) => Some(s.clone()),
         _ => None,
     }
+}
+
+/// Convert tasks.lisp's dotted target alist to the swarm wire shape.
+/// The parser stays a data reader; semantic registry membership is resolved
+/// before defining the task and is never copied into a Rust-side registry.
+fn parse_target(value: Option<&Sexp>, task: &str) -> Result<Option<Sexp>, String> {
+    let Some(value) = value else { return Ok(None) };
+    let Sexp::List(entries) = value else {
+        return Err(format!("task `{task}` target must be a dotted alist"));
+    };
+    let mut normalized = Vec::new();
+    for entry in entries {
+        let Sexp::List(pair) = entry else {
+            return Err(format!("task `{task}` has malformed target field"));
+        };
+        let [key, dot, value] = pair.as_slice() else {
+            return Err(format!("task `{task}` has malformed target field"));
+        };
+        let Some(key) = atom_text(key) else {
+            return Err(format!("task `{task}` target field name must be an atom"));
+        };
+        if atom_text(dot).as_deref() != Some(".") {
+            return Err(format!("task `{task}` target field must use dotted-alist syntax"));
+        }
+        if !matches!(key.as_str(), "функція" | "властивість" | "клас-входу") {
+            return Err(format!("task `{task}` has unknown target field `{key}`"));
+        }
+        if atom_text(value).is_none() {
+            return Err(format!("task `{task}` target value for `{key}` must be one name"));
+        }
+        normalized.push(Sexp::list(vec![Sexp::atom(key), value.clone()]));
+    }
+    Ok(Some(Sexp::list(normalized)))
 }
 
 /// Parse task priority while preserving the historical decimal surface and
@@ -135,6 +171,8 @@ pub fn parse_tasks_file(text: &str) -> Result<Vec<ParsedTask>, String> {
             .map(is_done_value)
             .unwrap_or(false);
         let description = dotted_get(fields, "description").and_then(atom_text);
+        let kind = dotted_get(fields, "вид").and_then(atom_text);
+        let target = parse_target(dotted_get(fields, "ціль"), &id)?;
         let origin = dotted_get(fields, "origin").and_then(atom_text);
 
         parsed.push(ParsedTask {
@@ -144,6 +182,8 @@ pub fn parse_tasks_file(text: &str) -> Result<Vec<ParsedTask>, String> {
             depends_on,
             done,
             description,
+            kind,
+            target,
             origin,
         });
     }
@@ -212,6 +252,24 @@ mod tests {
 "#;
         let tasks = parse_tasks_file(text).unwrap();
         assert_eq!(tasks[0].priority, 1.0);
+    }
+
+    #[test]
+    fn parses_registry_target_for_task() {
+        let text = r#"
+((kind . tasks-sens)
+ (tasks .
+  (("TARGETED-TEST" . ((вид . тест)
+                       (ціль . ((функція . значення-у-списку?)
+                                (властивість . присутній-елемент-дає-так)
+                                (клас-входу . правильний-список))))))))
+"#;
+        let tasks = parse_tasks_file(text).unwrap();
+        assert_eq!(tasks[0].kind.as_deref(), Some("тест"));
+        let target = tasks[0].target.as_ref().expect("target should be preserved");
+        assert_eq!(target.field_atom("функція"), Some("значення-у-списку?"));
+        assert_eq!(target.field_atom("властивість"), Some("присутній-елемент-дає-так"));
+        assert_eq!(target.field_atom("клас-входу"), Some("правильний-список"));
     }
 
     #[test]
