@@ -1074,7 +1074,7 @@ run_native_t5m_program() {
          ! timeout "$native_timeout" "$binary" --t5m-mint "$d8_complete_source" "$standalone_physical" >"$dir/d8-quantifier-mint.stdout" 2>"$dir/d8-quantifier-mint.stderr" ||
          ! timeout "$native_timeout" "$native_open" open "$standalone_physical" >"${standalone_physical%.sens}" 2>"$dir/d8-quantifier-open.stderr" ||
          ! timeout "$native_timeout" "$native_open" verify-view "$standalone_physical" >"$dir/d8-quantifier-verify.stdout" 2>"$dir/d8-quantifier-verify.stderr"; then
-        echo "::error::D8_QUANTIFIER_STANDALONE_NOT_VERIFIED source=$file" >&2
+        echo "::error::Окреме фізичне виконання D8-квантора не підтверджено: source=$file" >&2
         mark_file_failed
         return
       fi
