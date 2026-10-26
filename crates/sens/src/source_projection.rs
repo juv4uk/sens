@@ -206,7 +206,7 @@ fn exact_source_rational(expr: &Expr, source: &str) -> Option<crate::Rational> {
         return None;
     }
     let token = source.get(expr.span.start..expr.span.end)?;
-    let normalized = token.replace(',', ".").replace('е', "e").replace('Е', "e");
+    let normalized = token.replace(',', ".").replace(['е', 'Е'], "e");
     crate::Rational::from_decimal_literal(&normalized).ok()
 }
 

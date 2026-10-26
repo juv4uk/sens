@@ -57,7 +57,7 @@ fn render_d7_identity(
     let crate::DomainIdentity::D7(word) = identity else {
         return None;
     };
-    let code = word.word().packed_bits() as u8;
+    let code = word.word().packed_bits();
     if code < 32 || code == 127 {
         return Some(identity.to_string());
     }
@@ -70,7 +70,7 @@ fn render_d7_sanskrit_identity(identity: crate::DomainIdentity) -> Option<String
     let crate::DomainIdentity::D7(word) = identity else {
         return None;
     };
-    let code = word.word().packed_bits() as u8;
+    let code = word.word().packed_bits();
     if code < 32 || code == 127 {
         return Some(identity.to_string());
     }

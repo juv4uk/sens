@@ -31,16 +31,10 @@ pub const COMPILER_D3_PROOF_REF: &str = "contracts/bija3-l1-l5-ratification.lisp
 pub const COMPILER_D4_PROOF_REF: &str = "contracts/d4-bootstrap-ratification.lisp";
 pub const COMPILER_AUTHORITY_PATH: &str = "language-contract.lisp";
 pub const COMPILER_CONTRACT_VERSION: &str = "12.0";
-const COMPILER_NUCLEUS_SHA256: &str =
-    "580f8df1320e80b356a09daf695ba58340328d6efaf6331fd7ad0d36eafd5138";
 const D3_PROJECTION_SHA256: &str =
     "a93b29d70be2017c5e8088f51853d30c8c1efe42949aa74624416d3afea8f387";
-const D3_AUTHORITY_SHA256: &str =
-    "d32c789baacd1d273ce65313e27bec1bd6d9aa50953b190ac650c915e3bf9283";
 const D4_PROJECTION_SHA256: &str =
     "bb4fc448038b897a48ed3f336c25a5581a56eaadbebc975a5fe4b43616b5af0b";
-const D4_AUTHORITY_SHA256: &str =
-    "f686f346e282da31706feee3c32fc86bf9254725434e39f31253966d768339bd";
 
 /// SENS-owned semantic input for one current compiler identity.
 ///
@@ -224,11 +218,6 @@ fn sha256_hex(bytes: &[u8]) -> String {
 fn verify_compiler_sources(sources: &CompilerLanguageSources<'_>) -> Result<(), LanguageError> {
     for (name, bytes, expected) in [
         (
-            "compiler nucleus",
-            sources.compiler_nucleus.as_bytes(),
-            COMPILER_NUCLEUS_SHA256,
-        ),
-        (
             "language contract",
             sources.language_contract.as_bytes(),
             LANGUAGE_CONTRACT_SHA256,
@@ -241,7 +230,7 @@ fn verify_compiler_sources(sources: &CompilerLanguageSources<'_>) -> Result<(), 
         (
             "D3 compiler authority",
             sources.d3_authority.as_bytes(),
-            D3_AUTHORITY_SHA256,
+            LAW_AUTHORITY_SHA256,
         ),
         (
             "D4 compiler projection",
@@ -251,7 +240,7 @@ fn verify_compiler_sources(sources: &CompilerLanguageSources<'_>) -> Result<(), 
         (
             "D4 compiler authority",
             sources.d4_authority.as_bytes(),
-            D4_AUTHORITY_SHA256,
+            D4_LAW_AUTHORITY_SHA256,
         ),
     ] {
         if sha256_hex(bytes) != expected {

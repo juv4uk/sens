@@ -127,11 +127,11 @@ fn lift_pinned_d8_io(source: &str, expression: Expr, depth: u32) -> Result<Expr,
         || is_legacy_w8_macro_head(source, &items[0])
         || is_exact_d4_binding_head(&items[0]);
 
-    for index in 1..lifted.len() {
+    for (index, item) in lifted.iter_mut().enumerate().skip(1) {
         if skip_binding_slot && index == 1 {
             continue;
         }
-        lifted[index] = lift_pinned_d8_io(source, lifted[index].clone(), depth + 1)?;
+        *item = lift_pinned_d8_io(source, item.clone(), depth + 1)?;
     }
     Ok(Expr {
         kind: ExprKind::List(Rc::from(lifted.into_boxed_slice())),
@@ -201,12 +201,11 @@ fn lift_pinned_machine_wire_d9_strings(
         || is_legacy_w8_macro_head(source, &items[0])
         || is_exact_d4_binding_head(&items[0]);
 
-    for index in 1..lifted.len() {
+    for (index, item) in lifted.iter_mut().enumerate().skip(1) {
         if skip_binding_slot && index == 1 {
             continue;
         }
-        lifted[index] =
-            lift_pinned_machine_wire_d9_strings(source, lifted[index].clone(), depth + 1)?;
+        *item = lift_pinned_machine_wire_d9_strings(source, item.clone(), depth + 1)?;
     }
     Ok(Expr {
         kind: ExprKind::List(Rc::from(lifted.into_boxed_slice())),
@@ -301,11 +300,11 @@ fn lift_pinned_d9_language_calls(
         || is_legacy_w8_lambda_head(source, &items[0])
         || is_legacy_w8_macro_head(source, &items[0])
         || is_exact_d4_binding_head(&items[0]);
-    for index in 1..lifted.len() {
+    for (index, item) in lifted.iter_mut().enumerate().skip(1) {
         if skip_binding && index == 1 {
             continue;
         }
-        lifted[index] = lift_pinned_d9_language_calls(source, lifted[index].clone(), depth + 1)?;
+        *item = lift_pinned_d9_language_calls(source, item.clone(), depth + 1)?;
     }
     Ok(Expr {
         kind: ExprKind::List(Rc::from(lifted.into_boxed_slice())),
@@ -434,11 +433,11 @@ fn lift_pinned_utf8_d9_strings(
         || is_legacy_w8_lambda_head(source, &items[0])
         || is_legacy_w8_macro_head(source, &items[0])
         || is_exact_d4_binding_head(&items[0]);
-    for index in 1..lifted.len() {
+    for (index, item) in lifted.iter_mut().enumerate().skip(1) {
         if skip_binding && index == 1 {
             continue;
         }
-        lifted[index] = lift_pinned_utf8_d9_strings(source, lifted[index].clone(), depth + 1)?;
+        *item = lift_pinned_utf8_d9_strings(source, item.clone(), depth + 1)?;
     }
     Ok(Expr {
         kind: ExprKind::List(Rc::from(lifted.into_boxed_slice())),
@@ -575,11 +574,11 @@ fn expand_pinned_utf8_let_star(
         || is_legacy_w8_lambda_head(source, &items[0])
         || is_legacy_w8_macro_head(source, &items[0])
         || is_exact_d4_binding_head(&items[0]);
-    for index in 1..lifted.len() {
+    for (index, item) in lifted.iter_mut().enumerate().skip(1) {
         if skip_binding && index == 1 {
             continue;
         }
-        lifted[index] = expand_pinned_utf8_let_star(source, lifted[index].clone(), depth + 1)?;
+        *item = expand_pinned_utf8_let_star(source, item.clone(), depth + 1)?;
     }
     Ok(Expr {
         kind: ExprKind::List(Rc::from(lifted.into_boxed_slice())),
@@ -1071,10 +1070,16 @@ fn lift_head(
         if let Some(identity) =
             crate::semantic_registry::exact_uk_callable_for_source_head(spelling)
         {
-            return Ok(Expr {
-                kind: ExprKind::DomainIdentity(identity),
-                span: head.span,
-            });
+            // Ordinary mixed source admits D3–D6 callable heads. D8 is a
+            // narrower, explicit Ukrainian allowlist; D9/D10 stay path-pinned.
+            let admitted_width = (3..=6).contains(&identity.width())
+                || (identity.width() == 8 && admitted_d8_io_uk_bits(spelling).is_some());
+            if admitted_width {
+                return Ok(Expr {
+                    kind: ExprKind::DomainIdentity(identity),
+                    span: head.span,
+                });
+            }
         }
         // D8 I/O was already admitted by the same reader in pinned modules.
         // Apply its exact Ukrainian address in ordinary source as well:
@@ -1279,7 +1284,7 @@ mod tests {
 
         let unadmitted = only(
             parse_mixed_exact_domain("(символ-за-кодом 65)")
-                .expect("нератифікований D8 не змінюється від читання"),
+                .expect("не допущений до цього читача D8 не змінюється від читання"),
         );
         let ExprKind::List(parts) = unadmitted.kind else {
             panic!("call");

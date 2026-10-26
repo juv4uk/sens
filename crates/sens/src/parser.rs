@@ -670,7 +670,7 @@ impl Parser<'_> {
             None
         };
         let decimal_text = decimal_with_dot.as_deref().unwrap_or(token);
-        let normalized_exponent = decimal_text.replace('е', "e").replace('Е', "e");
+        let normalized_exponent = decimal_text.replace(['е', 'Е'], "e");
         // Surface spellings converge on a private numeric separator whose
         // codepoint is D7/W7 SYN (0010110). This does not alter D7 text data.
         let internal_exponent = normalized_exponent

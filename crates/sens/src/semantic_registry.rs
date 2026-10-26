@@ -404,7 +404,7 @@ pub(crate) fn d6_non_uk_peer_source_name(name: &str) -> bool {
 pub(crate) fn d6_binding_identity_for_definition(name: &str) -> Option<DomainIdentity> {
     D6_DEFINITION_BINDINGS
         .iter()
-        .find(|row| row.names.iter().any(|candidate| *candidate == name))
+        .find(|row| row.names.contains(&name))
         .map(|row| {
             DomainIdentity::D6(CoreD6::from_word(
                 Bit6::new(row.bits).expect("generated D6 binding is exactly six bits"),
@@ -418,7 +418,7 @@ pub(crate) fn d6_binding_identity_for_definition(name: &str) -> Option<DomainIde
 pub(crate) fn d9_binding_identity_for_definition(name: &str) -> Option<DomainIdentity> {
     D9_DEFINITION_BINDINGS
         .iter()
-        .find(|row| row.names.iter().any(|candidate| *candidate == name))
+        .find(|row| row.names.contains(&name))
         .map(|row| {
             DomainIdentity::D9(CoreD9::from_word(
                 Bit9::new(row.bits).expect("generated D9 binding is exactly nine bits"),
@@ -463,7 +463,7 @@ pub(crate) fn d9_uk_source_identity(name: &str) -> Option<DomainIdentity> {
 pub(crate) fn d10_binding_identity_for_definition(name: &str) -> Option<DomainIdentity> {
     D10_DEFINITION_BINDINGS
         .iter()
-        .find(|row| row.names.iter().any(|candidate| *candidate == name))
+        .find(|row| row.names.contains(&name))
         .map(|row| {
             DomainIdentity::D10(
                 crate::DomainD10::new(row.bits).expect("generated D10 binding is exactly ten bits"),
