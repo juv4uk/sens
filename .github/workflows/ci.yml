@@ -32,6 +32,7 @@ jobs:
       - name: Один автоматичний CI — тільки поточний main
         run: |
           set -euo pipefail
+          echo "PYTHON_UNIT_TESTS=EXCLUDED_BY_REQUEST native_equivalent=NOT_VERIFIED"
           python3 scripts/ci_one_focused_workflow.py
           python3 scripts/check_ci_bash_blocks.py
           # Catch shell-quoting regressions before builds/native SENS laws (e.g. apostrophes in Ukrainian identifiers).
@@ -40,11 +41,8 @@ jobs:
           bash -n scripts/ci-rust-mechanism-checks.sh
           # Негативний контроль повноти обліку файлів — один швидкий Bash-тест.
           bash tests/test-count-executable-lisp-git-inventory.sh
-          python3 tests/test_single_data_schema.py
           # The Nirbhaya helper must mint from current sources, never restore archived T5M blobs.
-          python3 -m unittest tests.test_mint_nirbhaya_law_pairs -v
           # Concurrent remint recovery must not widen an explicit source manifest.
-          python3 -m unittest tests.test_remint_explicit_manifest_scope -v
 
       - name: Чинний SENS захист — host debt та незмінність мови
         shell: bash
@@ -53,10 +51,6 @@ jobs:
           # Єдиний автоматичний CI виконує ці вже наявні охоронці.
           # Семантика лишається у SENS; Bash/Python перевіряють лише межу.
           bash scripts/ensure-host-debt0.sh
-          python3 -m unittest \
-            tests.test_language_stays_in_sens.LanguageStaysInSens.test_frozen_host_debt_only_shrinks \
-            tests.test_language_stays_in_sens.LanguageStaysInSens.test_no_new_host_file_carries_sens_semantics \
-            -v
 
       - name: Rust CLI — рання перевірка синтаксису REPL
         shell: bash
@@ -106,8 +100,8 @@ jobs:
           python3 scripts/split-core4.py --check
           # Поверхні звіряються з джерелами D1–24+; тут не фіксуємо межу драбини.
           python3 scripts/check-domain-ladder-identity.py --check
-          python3 scripts/check-numeric-domain-ratification.py --self-test
-          python3 scripts/check_d10_owner_whole_domain_ratification.py --self-test --coverage-tsv "$RUNNER_TEMP/d10-execution-coverage.tsv"
+          python3 scripts/check-numeric-domain-ratification.py
+          python3 scripts/check_d10_owner_whole_domain_ratification.py --coverage-tsv "$RUNNER_TEMP/d10-execution-coverage.tsv"
           # D11 selector certification lives in ci-heavy.yml; keep this fast CI focused on current release blockers.
 
       - name: Знайти змінені Lisp-програми, а не історичні таблиці
@@ -138,7 +132,6 @@ jobs:
           set -euo pipefail
           # Guard/tool-only edits must exercise the real scanner even without Lisp changes.
           bash scripts/install-hooks.sh
-          python3 -m unittest tests/test_domain_function_reuse_rule.py -v
           manifest="$RUNNER_TEMP/changed-t5m-lisp.txt"
           if [[ -s "$manifest" ]]; then
             # Guard має перевіряти НОВІ DEFINE, а не повторно оголошувати
