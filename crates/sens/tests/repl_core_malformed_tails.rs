@@ -220,13 +220,24 @@ fn d11_four_repl_library_laws_run_inside_sens() {
 #[test]
 fn repl_step_rejects_atomic_state_as_sens_data() {
     let mut session = repl_session();
-    let source = "(репл-крок (як-є (визначити нова (як-є альфа))) (як-є битий-стан))";
-    let value = eval_program(source, &mut session)
-        .unwrap_or_else(|error| panic!("SENS REPL should reject an atomic state as data: {error:?}"))
-        .value;
-    assert_eq!(
-        value.to_string(),
-        "неправильний-стан-репл",
-        "test_id=repl-step-atomic-state layer=SENS expected=explicit-error-data actual={value}"
-    );
+    for (kind, state) in [
+        ("symbol", "(як-є битий-стан)"),
+        ("empty-list", "(як-є ())"),
+        ("true", "(як-є так)"),
+        ("false", "(як-є ні)"),
+    ] {
+        let source = format!(
+            "(репл-крок (як-є (визначити нова (як-є альфа))) {state})"
+        );
+        let value = eval_program(&source, &mut session)
+            .unwrap_or_else(|error| {
+                panic!("SENS REPL should reject atomic state kind={kind} source={source}: {error:?}")
+            })
+            .value;
+        assert_eq!(
+            value.to_string(),
+            "неправильний-стан-репл",
+            "test_id=repl-step-atomic-state layer=SENS kind={kind} expected=explicit-error-data actual={value}"
+        );
+    }
 }
