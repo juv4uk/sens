@@ -43,10 +43,6 @@ run_form() {
   printf '%s\n' "$form" > "$tmp/form.lisp"
   cat "$lib" "$tmp/form.lisp" > "$source"
   if ! timeout 45s "$cli" "$source" > "$output" 2> "$err"; then
-    if [[ "$expected" == "0" ]]; then
-      printf 'NATIVE_SENS_NEGATIVE id=%s case=%s mode=execution-reject\n' "$role" "$number"
-      return 0
-    fi
     printf 'REGRESSION test_id=%s case=%s layer=SENS-law expected=D1:%s actual=execution-error\n' "$id" "$number" "$expected" >&2
     cat "$err" >&2
     return 1
@@ -100,15 +96,16 @@ if ! timeout 45s "$cli" --t5m-mint-pair "$tmp/first-mutant.lisp" "$tmp/first-mut
   cat "$tmp/mint.err" >&2
   exit 1
 fi
-if timeout 45s "$cli" --t5m-pair "$tmp/first-mutant.lisp" "$tmp/first-mutant.sens" --core4-runtime --binding-source "$lib" \
+if ! timeout 45s "$cli" --t5m-pair "$tmp/first-mutant.lisp" "$tmp/first-mutant.sens" --core4-runtime --binding-source "$lib" \
     > "$tmp/physical-mutant.out" 2> "$tmp/physical-mutant.err"; then
-  printf '0\n' > "$tmp/expected-mutant"
-  if ! cmp -s "$tmp/expected-mutant" "$tmp/physical-mutant.out"; then
-    printf 'REGRESSION test_id=%s layer=physical-mutant expected=D1:0 actual=false-positive\n' "$id" >&2
-    exit 1
-  fi
-  printf 'NATIVE_SENS_NEGATIVE id=%s-first-mutant layer=physical-T5M verdict=D1:0\n' "$id"
-else
-  printf 'NATIVE_SENS_NEGATIVE id=%s-first-mutant layer=physical-T5M mode=execution-reject\n' "$id"
+  printf 'REGRESSION test_id=%s layer=physical-mutant expected=D1:0 actual=execution-error\n' "$id" >&2
+  cat "$tmp/physical-mutant.err" >&2
+  exit 1
 fi
+printf '0\n' > "$tmp/expected-mutant"
+if ! cmp -s "$tmp/expected-mutant" "$tmp/physical-mutant.out"; then
+  printf 'REGRESSION test_id=%s layer=physical-mutant expected=D1:0 actual=false-positive\n' "$id" >&2
+  exit 1
+fi
+printf 'NATIVE_SENS_NEGATIVE id=%s-first-mutant layer=physical-T5M verdict=D1:0\n' "$id"
 printf 'NATIVE_SENS_PASS id=%s laws=8 mutants=8 authority=SENS carrier=Zig/T5M\n' "$id"
