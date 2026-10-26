@@ -2651,8 +2651,8 @@ mod tests {
             if matches!(&items[0].kind, ExprKind::Number(value, _) if *value == 100.0)
                 || matches!(&items[0].kind, ExprKind::BinaryNumber(number) if number.numeric_domain_width() == Some(24) && number.bits() == "1100100")
             {
-                let start = expression.span.start as usize;
-                let end = expression.span.end as usize;
+                let start = expression.span.start;
+                let end = expression.span.end;
                 let line = source[..start.min(source.len())].matches('\n').count() + 1;
                 let snippet_end = end.min(start.saturating_add(100)).min(source.len());
                 hits.push(format!(
@@ -2829,8 +2829,8 @@ mod tests {
                 && (matches!(&head.kind, ExprKind::Number(value, _) if *value == 100.0)
                     || matches!(&head.kind, ExprKind::BinaryNumber(number) if number.numeric_domain_width() == Some(24) && number.bits() == "1100100"))
             {
-                let start = expression.span.start as usize;
-                let end = expression.span.end as usize;
+                let start = expression.span.start;
+                let end = expression.span.end;
                 let line = source[..start.min(source.len())].matches('\n').count() + 1;
                 hits.push(format!(
                     "line={line} span={start}..{end} form={:?}",
