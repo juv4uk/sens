@@ -2269,6 +2269,55 @@ mod tests {
 
     #[cfg(feature = "zig-transport")]
     #[test]
+    fn assertion_library_batch_and_warm_session_have_identical_verdicts() {
+        // Same SENS sources in the same order: Core4 bootstrap, assertion
+        // library, and its self-calibration law. Rust compares only transport
+        // routes; the expected semantic verdict remains inside SENS.
+        let sources = [
+            ("core4", include_str!("../../../lib/core4.lisp")),
+            (
+                "assertion-library",
+                include_str!("../../../tests/semantic/assertion-library.lisp"),
+            ),
+            (
+                "assertion-library-law",
+                include_str!("../../../tests/semantic/assertion-library-law.lisp"),
+            ),
+        ];
+
+        let batch = eval_t5m_source_files(&sources)
+            .expect("ordered assertion suite executes in one SENS batch session");
+
+        let mut session = Session::default();
+        let mut warm_value = String::new();
+        let mut warm_output = Vec::new();
+        for (path, source) in sources {
+            let result = eval_t5m_source_in_session(
+                source,
+                &mut session,
+                ReplSurface::UkrainianFull,
+            )
+            .unwrap_or_else(|error| {
+                panic!("{path} executes in the reused warm SENS session: {error}")
+            });
+            warm_value = result.value.to_string();
+            warm_output.extend(result.output);
+        }
+
+        assert_eq!(
+            batch.value.to_string(),
+            warm_value,
+            "batch and warm-session final SENS values must agree"
+        );
+        assert_eq!(
+            batch.output,
+            warm_output,
+            "batch and warm-session output streams must agree byte-for-byte"
+        );
+    }
+
+    #[cfg(feature = "zig-transport")]
+    #[test]
     fn repl_prerequisite_pairs_execute_as_t5m_domain_words() {
         let reasoning_assets = crate::zig_transport::repl_reasoning_t5m_assets()
             .expect("REPL reasoning T5M assets via Zig");
