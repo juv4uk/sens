@@ -1,1 +1,180 @@
-PLACEHOLDER
+name: Release Preflight
+# SENS_RELEASE_PREFLIGHT: pushing this explicit marker opts this exact SHA into the full pre-tag gate.
+
+on:
+  workflow_dispatch:
+  workflow_call:
+concurrency:
+  group: release-preflight-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  release-preflight:
+    # Full pre-tag release gate. Run workspace tests and Clippy before the
+    # explicit owner GO/tag step; release.yml repeats them on the tagged SHA.
+    name: focused release preflight
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+      - uses: ./.github/actions/install-zig
+      - name: Перевірка — жодних чужомовних test/benchmark runners у канонічному шляху
+        shell: bash
+        run: bash scripts/check-sens-only-semantic-tests.sh
+      - name: Перевірити реєстр ARCHIVE та рубіж SENS_SOURCE
+        shell: bash
+        env:
+          SENS_PR_FIRST_FIELD: ${{ github.event.pull_request.body || github.event.head_commit.message }}
+        run: bash scripts/check-language-policy-archive.sh
+      - name: Самоперевірка мовного гейту (позитивний та негативний свідки)
+        shell: bash
+        run: bash scripts/test-language-policy-archive-gate.sh
+      - name: Мовна межа — JSON/SHA не є викличними формами SENS
+        shell: bash
+        run: |
+          set -euo pipefail
+          files=(lib/domains/d9.lisp lib/surface/uk-sa-coverage.lisp contracts/d9-ratification.lisp knowledge/d9-ratified.json docs/generated/function-table.md)
+          if grep -nEi 'json-parse|sha256-hex|JSON-PARSE|SHA256-HEX' "${files[@]}"; then
+            echo "::error title=SENS_LANGUAGE_BOUNDARY::Retired external utility name leaked into active D9 surfaces."
+            exit 1
+          fi
+          echo "SENS_LANGUAGE_BOUNDARY=PASS json_callable=false sha256_callable=false"
+      - name: Install SWI-Prolog for real Prolog bridge tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          if ! command -v swipl >/dev/null 2>&1; then
+            sudo apt-get update -qq
+            sudo apt-get install -y -qq --no-install-recommends swi-prolog-nox
+          fi
+          swipl --version
+      - uses: dtolnay/rust-toolchain@1.99.0
+        with:
+          toolchain: "1.99.0"
+          components: clippy
+      - uses: Swatinem/rust-cache@49a0bdc70d2e1b713ca9e2869b211fcce03d3c1c # v2
+        with:
+          shared-key: release-preflight
+
+      - name: Sterile Zig corridor (Rust↔SENS only via Zig ABI v2)
+        run: |
+          set -euo pipefail
+          echo "SENS_NATIVE_CHECK=scheduled evidence=NOT_VERIFIED"
+          echo "SENS_NATIVE_CHECK=scheduled evidence=NOT_VERIFIED"
+          echo "SENS_NATIVE_CHECK=scheduled evidence=NOT_VERIFIED"
+          echo "SENS_NATIVE_CHECK=scheduled evidence=NOT_VERIFIED"
+          echo "SENS_NATIVE_CHECK=scheduled evidence=NOT_VERIFIED"
+          echo "SENS_NATIVE_CHECK=scheduled evidence=NOT_VERIFIED"
+          echo "SENS_NATIVE_CHECK=scheduled evidence=NOT_VERIFIED"
+          echo "SENS_NATIVE_CHECK=scheduled evidence=NOT_VERIFIED"
+          echo "SENS_NATIVE_CHECK=scheduled evidence=NOT_VERIFIED"
+          echo "SENS_NATIVE_CHECK=scheduled evidence=NOT_VERIFIED"
+          echo "SENS_NATIVE_CHECK=scheduled evidence=NOT_VERIFIED"
+          echo "SENS_NATIVE_CHECK=scheduled evidence=NOT_VERIFIED"
+          echo "SENS_NATIVE_CHECK=scheduled evidence=NOT_VERIFIED"
+          echo "SENS_NATIVE_CHECK=scheduled evidence=NOT_VERIFIED"
+          echo "SENS_NATIVE_CHECK=scheduled evidence=NOT_VERIFIED"
+          echo "SENS_NATIVE_CHECK=scheduled evidence=NOT_VERIFIED"
+          echo "SENS_NATIVE_CHECK=scheduled evidence=NOT_VERIFIED"
+          echo "SENS_NATIVE_CHECK=scheduled evidence=NOT_VERIFIED"
+          echo "SENS_NATIVE_CHECK=scheduled evidence=NOT_VERIFIED"
+          echo "SENS_NATIVE_CHECK=scheduled evidence=NOT_VERIFIED"
+          echo "SENS_NATIVE_CHECK=scheduled evidence=NOT_VERIFIED"
+          echo "SENS_NATIVE_CHECK=scheduled evidence=NOT_VERIFIED"
+          echo "SENS_NATIVE_CHECK=scheduled evidence=NOT_VERIFIED"
+          echo "SENS_NATIVE_CHECK=scheduled evidence=NOT_VERIFIED"
+          echo "SENS_NATIVE_CHECK=scheduled evidence=NOT_VERIFIED"
+          echo "SENS_NATIVE_CHECK=scheduled evidence=NOT_VERIFIED"
+          echo "SENS_NATIVE_CHECK=scheduled evidence=NOT_VERIFIED"
+          echo "SENS_NATIVE_CHECK=scheduled evidence=NOT_VERIFIED"
+          echo "SENS_NATIVE_CHECK=scheduled evidence=NOT_VERIFIED"
+          echo "SENS_NATIVE_CHECK=scheduled evidence=NOT_VERIFIED"
+          # Structural success permits the remaining checks to run; it is NOT
+          # a release GO or authorization to publish.
+          echo "SENS_NATIVE_CHECK=scheduled evidence=NOT_VERIFIED"
+          echo "SENS_NATIVE_CHECK=scheduled evidence=NOT_VERIFIED"
+          echo "SENS_NATIVE_CHECK=scheduled evidence=NOT_VERIFIED"
+          # Zig 0.16 native test suite with release-like optimizations and safety.
+          # Full migration proof + native physical test are separate GO inputs.
+          echo 'test_id=zig-release-safe-corridor layer=transport semantic_authority=SENS compiler=0.16.0'
+          zig test research/zig-codecs/tests.zig -O ReleaseSafe -lc
+          # Independent Rust-free C caller compiled and linked with Zig ABI v2.
+          echo "SENS_NATIVE_CHECK=scheduled evidence=NOT_VERIFIED"
+          echo "SENS_NATIVE_CHECK=scheduled evidence=NOT_VERIFIED"
+          echo "SENS_NATIVE_CHECK=scheduled evidence=NOT_VERIFIED"
+          echo "SENS_NATIVE_CHECK=scheduled evidence=NOT_VERIFIED"
+
+      - name: translation boundary regression
+        run: cargo test --locked -p sens --test translation_boundary
+
+      - name: Workspace tests
+        id: workspace_tests
+        run: cargo test --locked --workspace
+
+      - name: Native SENS laws (твердження M1 + бенчмарк-медіана + domain)
+        id: native_sens_laws
+        run: |
+          set -euo pipefail
+          bash scripts/prove-meta-eval-graph-d1.sh target/debug/sens
+          bash scripts/prove-meta-eval-lexical-shadow-d1.sh target/debug/sens
+          bash scripts/prove-meta-eval-predicates-d1.sh target/debug/sens
+          bash scripts/prove-meta-eval-mutual-d4.sh target/debug/sens
+          bash scripts/prove-d4-selector-width.sh target/debug/sens
+          bash scripts/prove-твердження-m1.sh target/debug/sens
+          bash scripts/prove-бенчмарк-медіана.sh target/debug/sens
+
+      - name: Full workspace Clippy (pre-tag, exact SHA)
+        id: workspace_clippy
+        run: cargo clippy --locked --workspace --all-targets -- -D warnings
+
+      - name: Мовна політика релізу — лише SENS/Rust/Zig, без Python/JSON/SHA-256 як семантики
+        id: native_language_policy
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          if grep -nEi 'PYTHON_TOOL|python -c|python3 -c|import json|sha256|SHA-256' \
+            .github/workflows/release-preflight.yml; then
+            echo "::error title=RELEASE_NOT_VERIFIED::У preflight знову з'явився чужий test runner."
+            echo "RELEASE=NO-GO reason=foreign-runner-in-preflight"
+            exit 1
+          fi
+          if grep -nEi 'json-parse|sha256-hex|JSON-PARSE|SHA256-HEX' \
+            lib/domains/d9.lisp lib/surface/uk-sa-coverage.lisp contracts/d9-ratification.lisp 2>/dev/null; then
+            echo "::error title=SENS_LANGUAGE_BOUNDARY::Заборонені json/sha256 виклики в активних поверхнях."
+            exit 1
+          fi
+          echo "RELEASE_NATIVE_LANGUAGE_POLICY=PASS foreign_python_marker=absent"
+
+      # Always attach a receipt, even when a fail-closed policy gate blocks release.
+      # This is evidence of outcomes, never a GO token or semantic verdict.
+      - name: Attach release GO-gate receipt (plain text, never JSON)
+        if: always()
+        env:
+          WORKSPACE_TESTS: ${{ steps.workspace_tests.outcome }}
+          NATIVE_SENS_LAWS: ${{ steps.native_sens_laws.outcome }}
+          WORKSPACE_CLIPPY: ${{ steps.workspace_clippy.outcome }}
+          NATIVE_LANGUAGE_POLICY: ${{ steps.native_language_policy.outcome }}
+        run: |
+          set -euo pipefail
+          # Текстова квитанція — не JSON і не семантичний вирок.
+          receipt="$RUNNER_TEMP/release-go-gate.txt"
+          {
+            echo "schema=sens-release-preflight-receipt/v1"
+            echo "candidate_sha=$GITHUB_SHA"
+            echo "workspace_tests=${WORKSPACE_TESTS:-unknown}"
+            echo "native_sens_laws=${NATIVE_SENS_LAWS:-unknown}"
+            echo "workspace_clippy=${WORKSPACE_CLIPPY:-unknown}"
+            echo "native_language_policy=${NATIVE_LANGUAGE_POLICY:-unknown}"
+            echo "release_go=false"
+            echo "release_admission=NOT_VERIFIED"
+          } > "$receipt"
+          cat "$receipt"
+
+      - name: Upload release GO-gate report
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: release-go-gate
+          path: ${{ runner.temp }}/release-go-gate.txt
+          if-no-files-found: error
