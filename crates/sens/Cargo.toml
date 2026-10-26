@@ -242,5 +242,4 @@ sens-host = { path = "../sens-host" }
 # dev-цикл, бо sens-cli залежить від sens лише як звичайна залежність.
 # Deutsch: dev-Abhängigkeit für den Zig-T5M-Pfad in Tests.
 # English: dev-dependency so tests reach the Zig T5M corridor.
-sens-cli = { path = "../sens-cli" }
 serde_json = "1"
