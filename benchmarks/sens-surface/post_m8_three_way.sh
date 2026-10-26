@@ -2,7 +2,7 @@
 # Native SENS physical benchmark entry point.
 # The former EN-text/SENS-text/FASL comparison is obsolete after M8:
 # admitted human surfaces lower to canonical SENS calls.
-# This wrapper delegates execution and judging; it creates no receipts or JSON.
+# This wrapper delegates execution and judging; identity is exact bytes.
 set -eu
 ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/../.." && pwd)
 cd "$ROOT"
