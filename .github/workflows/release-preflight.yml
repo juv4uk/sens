@@ -60,8 +60,8 @@ jobs:
       - name: Sterile Zig corridor
         run: zig test research/zig-codecs/tests.zig -O ReleaseSafe -lc
 
-      - name: translation boundary
-        if: ${{ inputs.full }}
+      - name: translation boundary (required for every release preflight)
+        if: ${{ always() }}
         run: cargo test --locked -p sens --test translation_boundary
 
       - name: F6 physical WRITE→READ producer/consumer — exact SHA
