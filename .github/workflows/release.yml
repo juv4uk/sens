@@ -222,6 +222,10 @@ jobs:
           set -euo pipefail
           test -s sens-cli-web.html
           cp sens-cli-web.html my-lisp-cli-web.html
+          cp packaging/islands-manifest-v1.json islands-manifest-v1.json
+          cp packaging/install.sh install.sh
+          test -s islands-manifest-v1.json
+          test -s install.sh
           cmp -s sens-cli-web.html my-lisp-cli-web.html
 
       - name: Upload portable HTML assets (not a public release)
@@ -231,6 +235,8 @@ jobs:
           path: |
             sens-cli-web.html
             my-lisp-cli-web.html
+            islands-manifest-v1.json
+            install.sh
           if-no-files-found: error
 
   release-publish:
