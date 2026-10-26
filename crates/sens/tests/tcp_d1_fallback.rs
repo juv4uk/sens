@@ -1,7 +1,7 @@
 
-use sens_cli::zig_transport;//! Exhaustive two-state D1 fallback for migrated TCP source; no UTF-8/D24 dependency.
-use sens::{BinarySourceWord, eval_parsed_expressions, parse_mixed_exact_domain_process_tcp_source, ErrorKind, Session,
-};
+//! Exhaustive two-state D1 fallback for migrated TCP source; no UTF-8/D24 dependency.
+use sens::{eval_parsed_expressions, parse_mixed_exact_domain_process_tcp_source, ErrorKind, Session};
+use sens_cli::zig_transport;
 
 const PATH: &str = "lib/tcp.lisp";
 const SOURCE: &str = include_str!("../../../lib/tcp.lisp");
@@ -13,14 +13,6 @@ fn eval_exact(source: &str) -> Result<sens::Value, sens::LanguageError> {
 
 
 
-// Обгортки над чинним Zig T5M: staged-out ternary виведено (f5a5b213).
-fn encode_ternary_words(words: &[BinarySourceWord]) -> Result<Vec<u8>, String> {
-    zig_transport::encode_t5m_direct(words)
-}
-
-fn decode_ternary_program(bytes: &[u8]) -> Result<Vec<BinarySourceWord>, String> {
-    zig_transport::decode_t5m_words(bytes)
-}
 
 #[test]
 fn fallback_value_is_strict_d1_yes_and_not_number_one() {
@@ -104,9 +96,9 @@ fn tcp_semantic_law_is_decided_by_physical_binary_sens_only() {
         .collect::<Vec<_>>();
     assert_eq!(words.len(), 51, "точний D2 синтаксичний транспорт");
     assert_eq!(words.iter().map(|word| word.width()).sum::<usize>(), 127);
-    let physical = encode_ternary_words(&words).expect("безвтратне D2/T5");
+    let physical = zig_transport::encode_t5m_direct(&words).expect("безвтратне фізичне Zig T5M");
     assert_eq!(
-        decode_ternary_program(&physical).expect("фізичний T5"),
+        zig_transport::decode_t5m_words(&physical).expect("фізичний T5M"),
         words
     );
 

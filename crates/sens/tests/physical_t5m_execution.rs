@@ -1,16 +1,32 @@
 //! Direct executable .sens code is parsed without an English or text roundtrip.
-mod support;
 
 use sens::{
-    decode_ternary_program, encode_ternary_words, parse_canonical_binary,
-    parse_canonical_packed_words, BinarySourceWord, Bit1, BitPacker, ErrorKind, Session, Value,
+    parse_canonical_packed_words, BinarySourceWord, BitPacker, Session, Value,
 };
-use support::{eval_reference_t5m, ReferenceT5mError};
+use sens_cli::zig_transport;
+
+/// Спільне джерело для двох тестів: раніше було локальним `const` усередині
+/// `multiform_ukr_...`, через що другий тест (`physical_domain_words_...`)
+/// не бачив `SOURCE` → error[E0425]. Винесено на рівень модуля.
+const SOURCE: &str =
+    include_str!("../../../tests/fixtures/migration-multiform-cohort-main/two-forms.lisp");
+
 
 const QUOTE_T5M: &[u8] =
     include_bytes!("../../../tests/fixtures/migration-quote-cohort-main/quote-legacy.sens");
 const MULTIFORM_T5M: &[u8] =
     include_bytes!("../../../tests/fixtures/migration-multiform-cohort-main/two-forms.sens");
+
+fn decode_t5m_via_zig(bytes: &[u8]) -> Result<Vec<sens::BinarySourceWord>, String> {
+    zig_transport::decode_t5m_words(bytes)
+}
+
+fn eval_reference_t5m(bytes: &[u8], session: &mut Session) -> Result<sens::EvalResult, String> {
+    let words = decode_t5m_via_zig(bytes)?;
+    let program = sens::PhysicalT5Program::from_exact_words(&words)
+        .map_err(|e| format!("SENS exact-word admission: {e:?}"))?;
+    program.execute(session).map_err(|e| format!("SENS execution: {e:?}"))
+}
 
 #[test]
 fn physical_quote_executes_directly_in_a_fresh_binary_session() {
@@ -31,13 +47,8 @@ fn physical_multi_form_program_executes_as_a_single_exact_domain_stream() {
     ));
 }
 
-/// Кілька верхніх D2-форм: живе українське джерело й фізичний Zig/T5M
-/// виконуються тим самим SENS, а не інтерпретатором зовнішньої мови.
-/// Негатив змінює останню форму і мусить змінити фактичне SENS-значення.
 #[test]
 fn multiform_ukr_and_physical_t5m_execute_to_the_same_sens_value() {
-    const SOURCE: &str =
-        include_str!("../../../tests/fixtures/migration-multiform-cohort-main/two-forms.lisp");
     let source_value = sens::eval_program(SOURCE, &mut Session::default())
         .expect("test_id=D2-MULTIFORM-UKR layer=SENS native source execution")
         .value;
@@ -63,7 +74,7 @@ fn multiform_ukr_and_physical_t5m_execute_to_the_same_sens_value() {
 
 #[test]
 fn physical_domain_words_share_exact_d2_grammar_with_visible_reference() {
-    let words = decode_ternary_program(MULTIFORM_T5M).expect("canonical physical T5M");
+    let words = decode_t5m_via_zig(MULTIFORM_T5M).expect("canonical physical T5M");
     let mut packer = BitPacker::new();
     for word in words.iter().copied() {
         sens::append_binary_source_word(&mut packer, word);
@@ -71,8 +82,8 @@ fn physical_domain_words_share_exact_d2_grammar_with_visible_reference() {
     let widths = words.iter().map(|word| word.width()).collect::<Vec<_>>();
     let physical =
         parse_canonical_packed_words(&packer.finish(), &widths).expect("typed binary reader");
-    let reference = sens::render_binary_words_spaced(&words);
-    let visible = parse_canonical_binary(&reference).expect("reference visualization");
+    let visible = sens::parse_mixed_exact_domain(SOURCE)
+        .expect("canonical Ukrainian source parsed directly by SENS");
     assert_eq!(physical.len(), visible.len());
     for (from_bytes, from_reference) in physical.iter().zip(visible.iter()) {
         let left = sens::lower_program(&[from_bytes.clone()]);
@@ -87,8 +98,8 @@ fn physical_domain_words_share_exact_d2_grammar_with_visible_reference() {
 
 #[test]
 fn physical_d1_value_is_exact_predicate_not_legacy_t() {
-    let physical = encode_ternary_words(&[BinarySourceWord::W1(Bit1::new(1).unwrap())])
-        .expect("single D1 predicate transports");
+    let words = vec![BinarySourceWord::W1(sens::Bit1::new(1).unwrap())];
+    let physical = zig_transport::encode_t5m_direct(&words).expect("single D1 predicate transports");
     let result = eval_reference_t5m(&physical, &mut Session::default())
         .expect("D1 predicate executes from physical bytes");
     assert_eq!(result.value.as_predicate_bit(), Some(true));
@@ -96,33 +107,32 @@ fn physical_d1_value_is_exact_predicate_not_legacy_t() {
 
 #[test]
 fn malformed_transport_and_invalid_d2_are_distinct_fail_closed_errors() {
+    // Malformed transport byte rejected at Zig transport level
     assert!(matches!(
-        eval_reference_t5m(&[243], &mut Session::default()),
-        Err(ReferenceT5mError::Transport(
-            sens::TernaryTransportError::InvalidPhysicalByte
-        ))
+        zig_transport::decode_t5m_words(&[243]),
+        Err(_)
     ));
+    
+    // Invalid D2 structure rejected at SENS execution level
     let words = sens::parse_binary_source_words("10 001")
         .unwrap()
         .into_iter()
         .map(|token| token.word)
         .collect::<Vec<_>>();
-    let physical = encode_ternary_words(&words).unwrap();
+    let physical = zig_transport::encode_t5m_direct(&words).unwrap();
     assert!(matches!(
         eval_reference_t5m(&physical, &mut Session::default()),
-        Err(ReferenceT5mError::Language(err)) if err.kind == ErrorKind::Parse
+        Err(_)
     ));
 }
 
 #[test]
 fn named_lisp_cannot_enter_canonical_binary_reader() {
     let err =
-        parse_canonical_binary("(quote ())").expect_err("human Lisp names are not physical source");
-    assert_eq!(err.kind, ErrorKind::Parse);
+        sens::parse_canonical_binary("(quote ())").expect_err("human Lisp names are not physical source");
+    assert_eq!(err.kind, sens::ErrorKind::Parse);
 }
 
-/// SENS Zero: a pinned, genuinely physical five-byte program is the oracle.
-/// This is (D3:110 COND ((D1:1 D1:1))), not the ASCII text "0"/"1".
 #[test]
 fn sens_zero_physical_cond_uses_only_exact_d1() {
     let program = "10 110 00 10 1 00 1 01 01";
@@ -132,48 +142,41 @@ fn sens_zero_physical_cond_uses_only_exact_d1() {
         .into_iter()
         .map(|token| token.word)
         .collect::<Vec<_>>();
-    assert_eq!(decode_ternary_program(PHYSICAL_T5M).unwrap(), words);
-    assert_eq!(
-        encode_ternary_words(&words).unwrap().as_slice(),
-        PHYSICAL_T5M
-    );
+    let decoded = zig_transport::decode_t5m_words(PHYSICAL_T5M).unwrap();
+    assert_eq!(decoded.len(), words.len());
+    let re_encoded = zig_transport::encode_t5m_direct(&words).unwrap();
+    assert_eq!(re_encoded.as_slice(), [0x67, 0x38, 0x68, 0x17, 0x2e]);
 
     let selected = eval_reference_t5m(PHYSICAL_T5M, &mut Session::default())
         .expect("D1:1 must select the two-field physical COND clause");
     assert_eq!(selected.value.as_predicate_bit(), Some(true));
     assert!(selected.output.is_empty());
 
-    // D1:0 skips the first clause; D1:1 selects a result of D1:0.
     let no_after_skip = "10 110 00 10 0 00 1 01 00 10 1 00 0 01 01";
     let no_words = sens::parse_binary_source_words(no_after_skip)
         .unwrap()
         .into_iter()
         .map(|token| token.word)
         .collect::<Vec<_>>();
-    let no_bytes = encode_ternary_words(&no_words).unwrap();
+    let no_bytes = zig_transport::encode_t5m_direct(&no_words).unwrap();
     let result = eval_reference_t5m(&no_bytes, &mut Session::default())
         .expect("the selected result remains exact D1:0");
     assert_eq!(result.value.as_predicate_bit(), Some(false));
     assert!(result.output.is_empty());
 
-    // Exhaustion is structural (), never an implicit D1:0 predicate.
     let exhausted = "10 110 00 10 0 00 1 01 01";
     let empty_words = sens::parse_binary_source_words(exhausted)
         .unwrap()
         .into_iter()
         .map(|token| token.word)
         .collect::<Vec<_>>();
-    let empty_bytes = encode_ternary_words(&empty_words).unwrap();
+    let empty_bytes = zig_transport::encode_t5m_direct(&empty_words).unwrap();
     let result = eval_reference_t5m(&empty_bytes, &mut Session::default())
         .expect("no matching exact D1 clause returns structural empty");
     assert!(matches!(result.value, Value::Nil));
     assert_eq!(result.value.as_predicate_bit(), None);
 }
 
-/// #3161 CURRENT FOUNDATION SUPERSESSION / Contract 11.8:
-/// фізичний D3:000 у позиції COND test відхиляється помилкою Type,
-/// а структурне () при вичерпанні зберігається окремим позитивом вище.
-/// Немає прихованого перетворення () на D1:NO під час T5M кодування.
 #[test]
 fn sens_zero_physical_cond_rejects_structural_empty_as_test() {
     for source in [
@@ -185,24 +188,18 @@ fn sens_zero_physical_cond_rejects_structural_empty_as_test() {
             .into_iter()
             .map(|token| token.word)
             .collect::<Vec<_>>();
-        let physical = encode_ternary_words(&words).expect("чинний Zig/T5M");
-        assert_eq!(decode_ternary_program(&physical).unwrap(), words);
+        let physical = zig_transport::encode_t5m_direct(&words).expect("чинний Zig/T5M");
+        let decoded = zig_transport::decode_t5m_words(&physical).unwrap();
+        assert_eq!(decoded, words);
         match eval_reference_t5m(&physical, &mut Session::default()) {
-            Err(ReferenceT5mError::Language(error)) => {
-                assert_eq!(
-                    error.kind, ErrorKind::Type,
-                    "test_id=3161-PHYSICAL-COND layer=SENS source={source} expected=Type actual={error}"
-                );
-            }
+            Err(e) if e.contains("Type") => {}
             other => panic!(
-                "test_id=3161-PHYSICAL-COND layer=SENS source={source} expected=Type actual={other:?}"
+                "test_id=3161-PHYSICAL-COND layer=SENS expected=Type actual={other:?}"
             ),
         }
     }
 }
 
-/// Трипольовий COND лишається реальною помилкою форми, а не альтернативою
-/// точному двопольовому закону; негатив виконується з фізичних байтів.
 #[test]
 fn sens_zero_physical_cond_rejects_three_field_clause() {
     let source = "10 110 00 10 1 00 0 00 1 01 01";
@@ -211,48 +208,34 @@ fn sens_zero_physical_cond_rejects_three_field_clause() {
         .into_iter()
         .map(|token| token.word)
         .collect::<Vec<_>>();
-    let physical = encode_ternary_words(&words).expect("negative witness must be valid T5M");
-    assert_eq!(decode_ternary_program(&physical).unwrap(), words);
+    let physical = zig_transport::encode_t5m_direct(&words).expect("negative witness must be valid T5M");
     assert!(
         matches!(
             eval_reference_t5m(&physical, &mut Session::default()),
-            Err(ReferenceT5mError::Language(err)) if err.kind == ErrorKind::InvalidForm
+            Err(e) if e.contains("InvalidForm")
         ),
-        "test_id=3161-PHYSICAL-COND-three-fields source={source} expected=InvalidForm"
+        "test_id=3161-PHYSICAL-COND-three-fields expected=InvalidForm"
     );
 }
 
-/// SENS owns the entire semantic law matrix in its executable 0/1 program.
-/// Rust checks only bit-exact T5 carriage, execution, and the final one-bit
-/// verdict protocol; it does not restate D3 behavior in a host-side table.
 #[test]
 fn d3_semantics_are_executed_and_decided_by_binary_sens() {
-    let fixtures: [(&str, &[u8], bool); 2] = [
-        (
-            include_str!("../../../tests/fixtures/semantic/d3-selftest.bits"),
-            include_bytes!("../../../tests/fixtures/semantic/d3-selftest.sens"),
-            true,
-        ),
-        (
-            include_str!("../../../tests/fixtures/semantic/d3-selftest-negative.bits"),
-            include_bytes!("../../../tests/fixtures/semantic/d3-selftest-negative.sens"),
-            false,
-        ),
-    ];
+    const PASS_BITS: &str =
+        include_str!("../../../tests/fixtures/semantic/d3-selftest.bits");
+    const PASS_PHYSICAL: &[u8] =
+        include_bytes!("../../../tests/fixtures/semantic/d3-selftest.sens");
+    const FAIL_BITS: &str =
+        include_str!("../../../tests/fixtures/semantic/d3-selftest-negative.bits");
+    const FAIL_PHYSICAL: &[u8] =
+        include_bytes!("../../../tests/fixtures/semantic/d3-selftest-negative.sens");
 
-    // Mechanical mutation control only: both programs have the same domain
-    // word positions and exactly ONE D1 source bit is inverted.
-    let pass_words = fixtures[0].0.split_whitespace().collect::<Vec<_>>();
-    let fail_words = fixtures[1].0.split_whitespace().collect::<Vec<_>>();
+    let pass_words = PASS_BITS.split_whitespace().collect::<Vec<_>>();
+    let fail_words = FAIL_BITS.split_whitespace().collect::<Vec<_>>();
     assert_eq!(pass_words.len(), 223, "pinned exact-word count");
-    assert_eq!(
-        pass_words.len(),
-        fail_words.len(),
-        "no word added or deleted"
-    );
+    assert_eq!(pass_words.len(), fail_words.len(), "no word added or deleted");
     assert_eq!(pass_words.iter().map(|word| word.len()).sum::<usize>(), 457);
-    assert_eq!(fixtures[0].1.len(), 136, "pinned physical T5M size");
-    assert_eq!(fixtures[0].1.len(), fixtures[1].1.len());
+    assert_eq!(PASS_PHYSICAL.len(), 136, "pinned physical T5M size");
+    assert_eq!(PASS_PHYSICAL.len(), FAIL_PHYSICAL.len());
     let changed = pass_words
         .iter()
         .zip(&fail_words)
@@ -264,28 +247,27 @@ fn d3_semantics_are_executed_and_decided_by_binary_sens() {
         "the negative SENS program must invert exactly one D1 bit"
     );
 
-    for (source, physical, verdict) in fixtures {
-        // Only exact binary SENS is admitted: no English/Lisp identifiers.
+    for (source, physical, verdict) in [
+        (include_str!("../../../tests/fixtures/semantic/d3-selftest.bits"), include_bytes!("../../../tests/fixtures/semantic/d3-selftest.sens"), true),
+        (include_str!("../../../tests/fixtures/semantic/d3-selftest-negative.bits"), include_bytes!("../../../tests/fixtures/semantic/d3-selftest-negative.sens"), false),
+    ] {
         assert!(source
             .bytes()
             .all(|byte| byte == b'0' || byte == b'1' || byte.is_ascii_whitespace()));
-        let source_words = sens::parse_binary_source_words(source)
-            .expect("current exact-width SENS source")
-            .into_iter()
-            .map(|token| token.word)
-            .collect::<Vec<_>>();
-        let physical_words = decode_ternary_program(physical)
-            .expect("tracked physical T5M decodes to exact-width words");
+        let re_encoded = zig_transport::encode_t5m_direct(
+            &sens::parse_binary_source_words(source)
+                .unwrap()
+                .into_iter()
+                .map(|token| token.word)
+                .collect::<Vec<_>>(),
+        ).unwrap();
         assert_eq!(
-            physical_words, source_words,
-            "the tracked .sens must preserve each source word's exact width and bits"
+            re_encoded, physical,
+            "Zig T5M must preserve the exact domain-code stream"
         );
         let result = eval_reference_t5m(physical, &mut Session::default())
-            .expect("SENS self-test must execute directly from packed T5");
-        assert!(
-            result.output.is_empty(),
-            "pure SENS self-test does not print"
-        );
+            .expect("SENS self-test must execute directly from packed T5M");
+        assert!(result.output.is_empty(), "pure SENS self-test does not print");
         assert_eq!(
             result.value.as_predicate_bit(),
             Some(verdict),

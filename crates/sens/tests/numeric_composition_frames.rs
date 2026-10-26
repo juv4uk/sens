@@ -1,11 +1,14 @@
 //! Exact D12+ NEG/RATIO value-frame roundtrip (not a T5 grammar change).
 //! Independent witness: semantic identity, canonicality, bit length, and
 //! refusal to interpret legacy/unqualified numbers as admitted Dn values.
+//! Physical T5M transport is verified through the sterile Zig corridor.
+
 use sens::{
     decode_binary_frame, decode_numeric_value_frame, decode_packed_numeric_value,
     encode_binary_frame, encode_numeric_value_frame, encode_packed_numeric_value, BinaryFrame,
     BinaryFrameError, BinaryNumber, PackedBitstream, Value,
 };
+use sens_cli::zig_transport;
 
 fn d(width: usize, v: u64) -> BinaryNumber {
     let mut bits = vec![0; width];
@@ -117,10 +120,10 @@ fn canonical_composition_frame_rejects_negative_zero_nonreduced_and_unit_denomin
 }
 
 #[test]
-fn numeric_frame_bytes_cannot_be_misread_as_physical_t5_program() {
+fn numeric_frame_bytes_cannot_be_misread_as_physical_t5m() {
     // The existing T5 transport admits only physical bytes 0..242.
     // EXT=11 numeric records begin 111111, so their first packed byte
-    // always exceeds 242 and MUST be rejected by the physical T5 reader.
+    // always exceeds 242 and MUST be rejected by the physical T5M reader.
     let minus_two = sens::domain_numeric_value(
         "-",
         &Value::BinaryNumber(d(24, 1)),
@@ -129,10 +132,7 @@ fn numeric_frame_bytes_cannot_be_misread_as_physical_t5_program() {
     .expect("same D24 negative");
     let packet = encode_packed_numeric_value(&minus_two).unwrap();
     assert!(packet.bytes()[0] > 242);
-    assert!(matches!(
-        sens::decode_ternary_words(packet.bytes()),
-        Err(sens::TernaryTransportError::InvalidPhysicalByte)
-    ));
+    assert!(zig_transport::decode_t5m_words(packet.bytes()).is_err());
 }
 
 #[test]

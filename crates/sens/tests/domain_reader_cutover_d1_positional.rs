@@ -1,9 +1,9 @@
-
-use sens_cli::zig_transport;//! #5605: bounded D1 canonical reader / historical compatibility evidence.
+//! #5605: bounded D1 canonical reader / historical compatibility evidence.
 //! This is a reader-and-physical-roundtrip test, NOT a SENS COND execution oracle.
 //! No new law, no D8/SID8 projection, no Zig semantic registry.
 
-use sens::{BinarySourceWord, parse, parse_binary_source_words,
+use sens::{
+    parse, parse_binary_source_words,
     parse_canonical_binary, parse_canonical_word_sequence, parse_exact_domain_source,
     DomainIdentity, Exactness, ExprKind,
 };
@@ -17,16 +17,11 @@ fn assert_d1(expression: &sens::Expr, expected_bit: u16) {
     assert_eq!(word.word().packed_bits() as u16, expected_bit);
 }
 
-
-
-// Обгортки над чинним Zig T5M: staged-out ternary виведено (f5a5b213).
-fn encode_ternary_words(words: &[BinarySourceWord]) -> Result<Vec<u8>, String> {
-    zig_transport::encode_t5m_direct(words)
+fn encode_t5m_via_zig(words: &[sens::BinarySourceWord]) -> Vec<u8> {
+    sens_cli::zig_transport::encode_t5m_direct(words)
+        .expect("Zig T5M encoder must produce physical bytes")
 }
 
-fn decode_ternary_words(bytes: &[u8]) -> Result<Vec<BinarySourceWord>, String> {
-    zig_transport::decode_t5m_words(bytes)
-}
 
 #[test]
 fn bare_d1_bits_inside_d2_structure_are_canonical_without_width_tags() {
@@ -72,7 +67,7 @@ fn old_compatibility_reader_still_needs_temporary_d1_projection() {
 }
 
 #[test]
-fn original_d1_identity_survives_t5_word_roundtrip_without_tags() {
+fn original_d1_identity_survives_t5m_word_roundtrip_without_tags() {
     let words: Vec<_> = parse_binary_source_words(BARE_D1_D2_FRAME)
         .expect("canonical width-bearing words")
         .into_iter()
@@ -82,11 +77,12 @@ fn original_d1_identity_survives_t5_word_roundtrip_without_tags() {
         words.iter().map(|w| w.width()).collect::<Vec<_>>(),
         vec![2, 3, 2, 1, 2, 1, 2]
     );
-    let physical = encode_ternary_words(&words).expect("mechanical T5 encode");
-    let decoded = decode_ternary_words(&physical).expect("mechanical T5 decode");
+    let physical = encode_t5m_via_zig(&words);
+    let decoded = sens_cli::zig_transport::decode_t5m_words(&physical)
+        .expect("mechanical T5M decode");
     assert_eq!(
         decoded, words,
-        "T5 must preserve full exact widths and bits"
+        "T5M must preserve full exact widths and bits"
     );
     let parsed = parse_canonical_word_sequence(&decoded)
         .expect("SENS D2 structure reader after T5 physical words");

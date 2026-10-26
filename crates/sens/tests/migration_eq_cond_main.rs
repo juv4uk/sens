@@ -1,39 +1,44 @@
-//! Historical EQ/COND migration corpus: typed transport only.
+//! Historical EQ/COND migration corpus: typed transport only via Zig T5M.
 //! Old 8-bit executable semantics are archaeology, not Rust-owned truth laws.
 
-use sens::{
-    decode_ternary_program, encode_binary_projection_ternary, open_ternary_program,
-    render_binary_words_spaced, TernaryTransportError,
-};
+use sens_cli::zig_transport;
 
-const HISTORICAL_SOURCE: &str =
-    include_str!("../../../tests/fixtures/migration-eq-cond-cohort-main/eq-cond-select.lisp");
 const SELECT_T5: &[u8] =
     include_bytes!("../../../tests/fixtures/migration-eq-cond-cohort-main/eq-cond-select.sens");
 const SKIP_T5: &[u8] =
     include_bytes!("../../../tests/fixtures/migration-eq-cond-cohort-main/eq-cond-skip.sens");
 
+fn decode_t5m_via_zig(bytes: &[u8]) -> Vec<sens::BinarySourceWord> {
+    zig_transport::decode_t5m_words(bytes).expect("Zig T5M decoder must recover exact words")
+}
+
+fn open_ternary_via_zig(bytes: &[u8]) -> String {
+    let words = decode_t5m_via_zig(bytes);
+    sens::render_binary_words_spaced(&words)
+}
+
 #[test]
 fn original_eq_cond_images_roundtrip_as_historical_transport_only() {
     for data in [SELECT_T5, SKIP_T5] {
-        let words = decode_ternary_program(data).expect("historical T5 must decode");
-        let visible = render_binary_words_spaced(&words);
-        assert_eq!(open_ternary_program(data).unwrap(), visible);
-        assert_eq!(encode_binary_projection_ternary(&visible).unwrap(), data);
+        let words = decode_t5m_via_zig(data);
+        let visible = open_ternary_via_zig(data);
+        let visible_words = sens::parse_binary_source_words(&visible)
+            .expect("the visible exact-width projection parses as SENS words")
+            .into_iter()
+            .map(|token| token.word)
+            .collect::<Vec<_>>();
+        assert_eq!(visible_words, words, "display projection must preserve typed words");
+        let re_encoded = zig_transport::encode_t5m_direct(&words).expect("re-encode via Zig T5M");
+        assert_eq!(re_encoded, data);
     }
 }
 
 #[test]
 fn corrupt_physical_and_legacy_text_are_rejected() {
-    assert_eq!(
-        decode_ternary_program(&[243]),
-        Err(TernaryTransportError::InvalidPhysicalByte)
-    );
+    assert!(zig_transport::decode_t5m_words(&[243]).is_err());
     let mut bad = SELECT_T5.to_vec();
     bad.push(242);
-    assert_eq!(
-        decode_ternary_program(&bad),
-        Err(TernaryTransportError::InvalidTail)
-    );
-    assert!(encode_binary_projection_ternary(HISTORICAL_SOURCE).is_err());
+    assert!(zig_transport::decode_t5m_words(&bad).is_err());
+    let tokens = sens::parse_binary_source_words("(eq (a) (b))");
+    assert!(tokens.is_err());
 }

@@ -1,12 +1,12 @@
-
-use sens_cli::zig_transport;//! Binary-source structural and T5 transport canary.
-//! Rust checks exact-width domain words, D2 framing, and physical bytes only;
+//! Binary-source structural and T5M transport canary via Zig corridor.
+//! CLI verifies exact-width domain words, D2 framing, and physical bytes only;
 //! result laws belong to SENS/Lisp-owned witnesses and the physical CLI gate.
 
 use sens::{
     parse_canonical_binary,
     syntax::{Expr, ExprKind},
 };
+use sens_cli::zig_transport;
 
 const BINARY_PROGRAM: &str = include_str!("../../../examples/binary/d7-first-program.bits");
 const D3_COND_PROGRAM: &str = include_str!("../../../examples/binary/d3-cond-program.bits");
@@ -50,60 +50,62 @@ fn assert_bit_projection(source: &str) {
     }
 }
 
-
-
-// Обгортки над чинним Zig T5M: staged-out ternary виведено (f5a5b213).
-fn encode_ternary_words(words: &[BinarySourceWord]) -> Result<Vec<u8>, String> {
-    zig_transport::encode_t5m_direct(words)
-}
-
-fn decode_ternary_program(bytes: &[u8]) -> Result<Vec<BinarySourceWord>, String> {
-    zig_transport::decode_t5m_words(bytes)
-}
-
-fn open_ternary_program(bytes: &[u8]) -> Result<String, String> {
-    zig_transport::decode_t5m_words(bytes).map(|words| render_binary_words_spaced(&words))
-}
-
-fn encode_binary_projection_ternary(source: &str) -> Result<Vec<u8>, String> {
-    let words: Vec<BinarySourceWord> = sens::parse_binary_source_words(source)
-        .map_err(|error| format!("{error:?}"))?
+fn encode_binary_via_zig(source: &str) -> Vec<u8> {
+    let tokens = sens::parse_binary_source_words(source)
+        .expect("binary projection parses to exact-width tokens");
+    let words = tokens
         .into_iter()
         .map(|token| token.word)
-        .collect();
-    zig_transport::encode_t5m_direct(&words)
+        .collect::<Vec<_>>();
+    zig_transport::encode_t5m_direct(&words).expect("Zig T5M encoder must produce physical bytes")
+}
+
+fn decode_t5m_via_zig(bytes: &[u8]) -> Vec<sens::BinarySourceWord> {
+    zig_transport::decode_t5m_words(bytes).expect("Zig T5M decoder must recover exact words")
+}
+
+fn render_binary_words_via_zig(bytes: &[u8]) -> String {
+    let words = decode_t5m_via_zig(bytes);
+    words
+        .iter()
+        .map(ToString::to_string)
+        .collect::<Vec<_>>()
+        .join(" ")
 }
 
 #[test]
-fn executable_bit_projection_roundtrips_through_physical_t5_without_retyping() {
+fn executable_bit_projection_roundtrips_through_zig_t5m_without_retyping() {
     assert_bit_projection(BINARY_PROGRAM);
-    let physical = encode_binary_projection_ternary(BINARY_PROGRAM)
-        .expect("exact-width binary source encodes to physical T5");
+    let physical = encode_binary_via_zig(BINARY_PROGRAM);
     assert!(!physical.is_empty());
-    let words = decode_ternary_program(&physical).expect("canonical T5 bytes decode");
-    let visible = open_ternary_program(&physical).expect("T5 opens as a bit projection");
+    let words = decode_t5m_via_zig(&physical);
+    let visible = render_binary_words_via_zig(&physical);
     let normalized = BINARY_PROGRAM
         .split_whitespace()
         .collect::<Vec<_>>()
         .join(" ");
     assert_eq!(
         visible, normalized,
-        "T5 must preserve each exact-width word"
+        "T5M must preserve each exact-width word"
     );
-    assert_eq!(visible, sens::render_binary_words_spaced(&words));
     assert_eq!(
-        encode_binary_projection_ternary(&visible).unwrap(),
-        physical
+        visible,
+        words
+            .iter()
+            .map(ToString::to_string)
+            .collect::<Vec<_>>()
+            .join(" ")
     );
+    let re_encoded = encode_binary_via_zig(&visible);
+    assert_eq!(re_encoded, physical);
 }
 
 #[test]
 fn d3_primitive_program_is_only_width_qualified_binary_source() {
     assert_bit_projection(D3_PRIMITIVES_PROGRAM);
-    let physical = encode_binary_projection_ternary(D3_PRIMITIVES_PROGRAM)
-        .expect("D3 primitive projection encodes as physical T5");
-    let words = decode_ternary_program(&physical).expect("D3 T5 source decodes");
-    let visible = open_ternary_program(&physical).expect("D3 T5 opens");
+    let physical = encode_binary_via_zig(D3_PRIMITIVES_PROGRAM);
+    let words = decode_t5m_via_zig(&physical);
+    let visible = render_binary_words_via_zig(&physical);
     assert_eq!(
         visible,
         D3_PRIMITIVES_PROGRAM
@@ -111,30 +113,39 @@ fn d3_primitive_program_is_only_width_qualified_binary_source() {
             .collect::<Vec<_>>()
             .join(" ")
     );
-    assert_eq!(visible, sens::render_binary_words_spaced(&words));
     assert_eq!(
-        encode_binary_projection_ternary(&visible).unwrap(),
-        physical
+        visible,
+        words
+            .iter()
+            .map(ToString::to_string)
+            .collect::<Vec<_>>()
+            .join(" ")
     );
+    let re_encoded = encode_binary_via_zig(&visible);
+    assert_eq!(re_encoded, physical);
 }
 
 #[test]
 fn d5_label_recursion_keeps_d5_and_d7_coordinates_in_binary_ast() {
     assert_bit_projection(D5_LABEL_RECURSION_PROGRAM);
-    let physical = encode_binary_projection_ternary(D5_LABEL_RECURSION_PROGRAM)
-        .expect("D5 LABEL source encodes as physical T5");
-    let words = decode_ternary_program(&physical).expect("D5 T5 words decode");
-    let visible = open_ternary_program(&physical).expect("D5 T5 opens as exact-width words");
+    let physical = encode_binary_via_zig(D5_LABEL_RECURSION_PROGRAM);
+    let words = decode_t5m_via_zig(&physical);
+    let visible = render_binary_words_via_zig(&physical);
     let normalized = D5_LABEL_RECURSION_PROGRAM
         .split_whitespace()
         .collect::<Vec<_>>()
         .join(" ");
     assert_eq!(visible, normalized);
-    assert_eq!(visible, sens::render_binary_words_spaced(&words));
     assert_eq!(
-        encode_binary_projection_ternary(&visible).unwrap(),
-        physical
+        visible,
+        words
+            .iter()
+            .map(ToString::to_string)
+            .collect::<Vec<_>>()
+            .join(" ")
     );
+    let re_encoded = encode_binary_via_zig(&visible);
+    assert_eq!(re_encoded, physical);
 
     let parsed = parse_canonical_binary(&visible)
         .expect("D2 reader preserves D5 LABEL and D7 binding heads");
@@ -149,20 +160,24 @@ fn d5_label_recursion_keeps_d5_and_d7_coordinates_in_binary_ast() {
 #[test]
 fn d5_label_list_copy_preserves_exact_d1_and_empty_data_coordinates() {
     assert_bit_projection(D5_LABEL_COPY_PROGRAM);
-    let physical = encode_binary_projection_ternary(D5_LABEL_COPY_PROGRAM)
-        .expect("D5 recursive list-copy source encodes as physical T5");
-    let words = decode_ternary_program(&physical).expect("recursive list-copy T5 decodes");
-    let visible = open_ternary_program(&physical).expect("recursive list-copy T5 opens");
+    let physical = encode_binary_via_zig(D5_LABEL_COPY_PROGRAM);
+    let words = decode_t5m_via_zig(&physical);
+    let visible = render_binary_words_via_zig(&physical);
     let normalized = D5_LABEL_COPY_PROGRAM
         .split_whitespace()
         .collect::<Vec<_>>()
         .join(" ");
     assert_eq!(visible, normalized);
-    assert_eq!(visible, sens::render_binary_words_spaced(&words));
     assert_eq!(
-        encode_binary_projection_ternary(&visible).unwrap(),
-        physical
+        visible,
+        words
+            .iter()
+            .map(ToString::to_string)
+            .collect::<Vec<_>>()
+            .join(" ")
     );
+    let re_encoded = encode_binary_via_zig(&visible);
+    assert_eq!(re_encoded, physical);
 
     let parsed = parse_canonical_binary(&visible)
         .expect("canonical D2 reader preserves the recursive list-copy program");
@@ -173,20 +188,24 @@ fn d5_label_list_copy_preserves_exact_d1_and_empty_data_coordinates() {
 #[test]
 fn d5_label_map_preserves_higher_order_d7_binding_coordinates() {
     assert_bit_projection(D5_LABEL_MAP_PROGRAM);
-    let physical = encode_binary_projection_ternary(D5_LABEL_MAP_PROGRAM)
-        .expect("D5 higher-order map source encodes as physical T5");
-    let words = decode_ternary_program(&physical).expect("D5 map T5 decodes");
-    let visible = open_ternary_program(&physical).expect("D5 map T5 opens");
+    let physical = encode_binary_via_zig(D5_LABEL_MAP_PROGRAM);
+    let words = decode_t5m_via_zig(&physical);
+    let visible = render_binary_words_via_zig(&physical);
     let normalized = D5_LABEL_MAP_PROGRAM
         .split_whitespace()
         .collect::<Vec<_>>()
         .join(" ");
     assert_eq!(visible, normalized);
-    assert_eq!(visible, sens::render_binary_words_spaced(&words));
     assert_eq!(
-        encode_binary_projection_ternary(&visible).unwrap(),
-        physical
+        visible,
+        words
+            .iter()
+            .map(ToString::to_string)
+            .collect::<Vec<_>>()
+            .join(" ")
     );
+    let re_encoded = encode_binary_via_zig(&visible);
+    assert_eq!(re_encoded, physical);
 
     let parsed = parse_canonical_binary(&visible)
         .expect("canonical D2 reader preserves D5 recursion and D7 mapper names");
@@ -197,9 +216,8 @@ fn d5_label_map_preserves_higher_order_d7_binding_coordinates() {
 #[test]
 fn d3_cond_program_preserves_d1_and_d3_widths_in_structural_ast() {
     assert_bit_projection(D3_COND_PROGRAM);
-    let physical = encode_binary_projection_ternary(D3_COND_PROGRAM)
-        .expect("exact-width COND projection encodes as physical T5");
-    let visible = open_ternary_program(&physical).expect("COND T5 opens");
+    let physical = encode_binary_via_zig(D3_COND_PROGRAM);
+    let visible = render_binary_words_via_zig(&physical);
     assert_eq!(
         visible,
         D3_COND_PROGRAM
@@ -220,8 +238,9 @@ fn human_language_spellings_never_pass_the_binary_transport_gate() {
         "(100 x)",
         "10 0011 00 name 01",
     ] {
+        let tokens = sens::parse_binary_source_words(source);
         assert!(
-            encode_binary_projection_ternary(source).is_err(),
+            tokens.is_err(),
             "human spelling passed as binary source: {source}"
         );
     }
@@ -257,17 +276,16 @@ fn exact_width_payloads_remain_distinct_across_d1_d3_d7_and_d9() {
             assert_ne!(coordinates[left].0, coordinates[right].0);
         }
     }
-    assert!(
-        encode_binary_projection_ternary("0000000001").is_err(),
-        "D10 must not be silently truncated into the D1..D9 T5 carrier"
-    );
+    // D10 must not be silently truncated into the D1..D9 T5M carrier
+    let tokens = sens::parse_binary_source_words("0000000001");
+    assert!(tokens.is_err());
 }
 
 #[test]
-fn structural_d2_errors_remain_fail_closed_under_physical_t5() {
+fn structural_d2_errors_remain_fail_closed_under_zig_t5m() {
     for source in ["01", "10"] {
         // Bypass only the D2 grammar gate: encode these exact-width words
-        // directly into physical T5 so the decoder sees valid transport but
+        // directly into physical T5M so the decoder sees valid transport but
         // structurally invalid program input.
         let tokens = sens::parse_binary_source_words(source)
             .expect("invalid D2 form is still a valid width-qualified word");
@@ -275,21 +293,30 @@ fn structural_d2_errors_remain_fail_closed_under_physical_t5() {
             .into_iter()
             .map(|token| token.word)
             .collect::<Vec<_>>();
-        let packed = sens::encode_ternary_words(&words)
-            .expect("exact words encode into physical T5 independently of D2 grammar");
+        let packed = zig_transport::encode_t5m_direct(&words)
+            .expect("exact words encode into physical T5M independently of D2 grammar");
+        let recovered = zig_transport::decode_t5m_words(&packed)
+            .expect("Zig decoder recovers exact words from T5M");
+        assert_eq!(recovered, words);
+        let visible = recovered
+            .iter()
+            .map(ToString::to_string)
+            .collect::<Vec<_>>()
+            .join(" ");
+        // The D2 grammar must reject these at the SENS layer.
         assert!(
-            open_ternary_program(&packed).is_err(),
+            parse_canonical_binary(&visible).is_err(),
             "invalid D2 control word unexpectedly opened: {source}"
         );
     }
     assert!(
-        decode_ternary_program(&[243u8]).is_err(),
+        zig_transport::decode_t5m_words(&[243u8]).is_err(),
         "invalid base-3 byte must fail closed"
     );
-    let mut valid = encode_binary_projection_ternary("10 001 00 000 01").unwrap();
+    let mut valid = encode_binary_via_zig("10 001 00 000 01");
     valid.push(242u8);
     assert!(
-        decode_ternary_program(&valid).is_err(),
+        zig_transport::decode_t5m_words(&valid).is_err(),
         "noncanonical trailer must fail closed"
     );
 }

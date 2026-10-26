@@ -1,22 +1,38 @@
-
-use sens_cli::zig_transport;//! Focused diagnostic for #4774: is nested D3 QUOTE intrinsically broken
-//! in the CURRENT physical T5 -> D2 parser -> pure Rust evaluator pipeline?
+//! Focused diagnostic for #4774: is nested D3 QUOTE intrinsically broken
+//! in the CURRENT physical T5M -> D2 parser -> pure Rust evaluator pipeline?!
 //!
 //! This deliberately does not import the draft #3910 Text7/global-binder law,
 //! does not rewrite old source, and cannot admit an original executable file.
 //! A PASS narrows #4774's "machine-block-one" failure to global/closure/list
 //! binding or a more specific current runtime path, not generic D3 QUOTE.
 
-use sens::{BinarySourceWord, render_binary_words_spaced, eval_parsed_expressions,
-    parse_canonical_binary, Session,
-};
+use sens::{eval_parsed_expressions, parse_canonical_binary, Session};
+use sens_cli::zig_transport;
+
+fn encode_via_zig(source: &str) -> Vec<u8> {
+    let tokens = sens::parse_binary_source_words(source)
+        .expect("binary projection parses to exact-width tokens");
+    let words = tokens
+        .into_iter()
+        .map(|token| token.word)
+        .collect::<Vec<_>>();
+    zig_transport::encode_t5m_direct(&words).expect("Zig T5M encoder must produce physical bytes")
+}
+
+fn decode_t5m_via_zig(bytes: &[u8]) -> Vec<sens::BinarySourceWord> {
+    zig_transport::decode_t5m_words(bytes).expect("Zig T5M decoder must recover exact words")
+}
+
+fn open_ternary_via_zig(bytes: &[u8]) -> String {
+    let words = decode_t5m_via_zig(bytes);
+    sens::render_binary_words_spaced(&words)
+}
 
 fn current_value(source: &str) -> Result<String, String> {
-    // Prove actual FILE T5 physical codec bytes, not English evaluator parsing
+    // Prove actual FILE T5M physical codec bytes, not English evaluator parsing
     // or an extensionless text shortcut.
-    let packed = encode_binary_projection_ternary(source)
-        .map_err(|error| format!("T5 encode: {error:?}"))?;
-    let visible = open_ternary_program(&packed).map_err(|error| format!("T5 decode: {error:?}"))?;
+    let packed = encode_via_zig(source);
+    let visible = open_ternary_via_zig(&packed);
     if visible != source {
         return Err(format!(
             "exact typed word surface changed: {visible} != {source}"
@@ -29,24 +45,8 @@ fn current_value(source: &str) -> Result<String, String> {
     Ok(format!("{}", result.value))
 }
 
-
-
-// Обгортки над чинним Zig T5M: staged-out ternary виведено (f5a5b213).
-fn open_ternary_program(bytes: &[u8]) -> Result<String, String> {
-    zig_transport::decode_t5m_words(bytes).map(|words| render_binary_words_spaced(&words))
-}
-
-fn encode_binary_projection_ternary(source: &str) -> Result<Vec<u8>, String> {
-    let words: Vec<BinarySourceWord> = sens::parse_binary_source_words(source)
-        .map_err(|error| format!("{error:?}"))?
-        .into_iter()
-        .map(|token| token.word)
-        .collect();
-    zig_transport::encode_t5m_direct(&words)
-}
-
 #[test]
-fn standalone_d3_quote_empty_is_executable_from_physical_t5() {
+fn standalone_d3_quote_empty_is_executable_from_physical_t5m() {
     let quote_empty = "10 001 00 000 01";
     assert_eq!(current_value(quote_empty).unwrap(), "()");
 }
