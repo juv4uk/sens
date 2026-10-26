@@ -1,26 +1,34 @@
-name: host-debt0 + language-stays
-# Автоматичні перевірки зосереджені в ci.yml, не дублюють push/PR.
-# Цей workflow залишено для окремої ручної діагностики.
+name: SENS native laws (manual diagnostic)
+# This diagnostic runs SENS-authored laws directly; it does not mutate source files.
 on:
   workflow_dispatch:
 permissions:
   contents: read
 jobs:
-  host-debt0:
-    runs-on: ubuntu-latest
-    timeout-minutes: 8
+  sens-native:
+    name: Execute SENS laws and benchmarks
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09
+      - uses: dtolnay/rust-toolchain@1.99.0
         with:
-          python-version: "3.12"
-      - name: host_debt → 0
-        run: bash scripts/ensure-host-debt0.sh
-      - name: language stays in SENS (frozen host debt)
+          toolchain: "1.99.0"
+      - uses: ./.github/actions/install-zig
+      - name: Build native SENS
+        run: cargo build --locked -p sens-cli --bin sens --bin sens-trit
+      - name: Execute SENS laws, mutants and benchmarks
+        shell: bash
         run: |
-          python3 -m unittest \
-            tests.test_language_stays_in_sens.LanguageStaysInSens.test_frozen_host_debt_only_shrinks \
-            tests.test_language_stays_in_sens.LanguageStaysInSens.test_no_new_host_file_carries_sens_semantics \
-            -v
-      - name: domain function reuse rule
-        run: python3 -m unittest tests.test_domain_function_reuse_rule -v
+          set -euo pipefail
+          bash scripts/prove-meta-eval-graph-d1.sh "$PWD/target/debug/sens"
+          bash scripts/prove-meta-eval-lexical-shadow-d1.sh "$PWD/target/debug/sens"
+          bash scripts/prove-meta-eval-predicates-d1.sh "$PWD/target/debug/sens"
+          bash scripts/prove-meta-eval-mutual-d4.sh "$PWD/target/debug/sens"
+          bash scripts/prove-d4-selector-width.sh "$PWD/target/debug/sens"
+          bash scripts/prove-твердження-m1.sh "$PWD/target/debug/sens"
+          bash scripts/prove-бенчмарк-медіана.sh "$PWD/target/debug/sens"
+          bash scripts/prove-бенчмарк-структура.sh "$PWD/target/debug/sens"
+          bash scripts/prove-бенчмарк-умова.sh "$PWD/target/debug/sens"
+          bash scripts/prove-ідентичність-тритів.sh "$PWD/target/debug/sens"
+          bash scripts/prove-lisp-language-laws.sh "$PWD/target/debug/sens"
