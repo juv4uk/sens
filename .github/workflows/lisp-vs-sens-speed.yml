@@ -1,68 +1,19 @@
-name: Lisp vs SENS speed (manual)
-# Ручний бенчмарк ШВИДКОСТІ В ЧАСІ (wall/user/sys/RSS), не інструкцій.
-# Стенд benchmarks/sens-surface/run.py: спершу перевіряє правильність усіх форм,
-# лише потім міряє. Повні розміри навантажень (не --small, той для valgrind).
-# Не запускається автоматично.
+name: "EXCLUDED — Lisp-vs-SENS speed benchmark"
+
 on:
   workflow_dispatch:
-    inputs:
-      samples:
-        description: "замірів на навантаження×форму"
-        default: "7"
-      forms:
-        description: "форми через кому (en,sens,uk,wrap)"
-        default: "en,sens"
-      only:
-        description: "лише ці навантаження через кому (порожньо = усі)"
-        default: ""
+
+permissions:
+  contents: read
 
 jobs:
-  speed:
-    if: false # Python-driven benchmark harness is excluded; no timing result is asserted.
-    runs-on: ubuntu-latest
-
-  policy-exclusion:
-    name: Python benchmark excluded (NOT_VERIFIED)
+  exclusion:
+    name: "Excluded by Rust/Zig/SENS-only policy (NOT_VERIFIED)"
     runs-on: ubuntu-latest
     steps:
-      - run: echo "PYTHON_BENCHMARKS=EXCLUDED_BY_LANGUAGE_POLICY native_equivalent=NOT_VERIFIED"
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 2
-      - name: Встановити Zig 0.16.0 (збірка sens його вимагає)
+      - name: Record exclusion (no test or benchmark executed)
         shell: bash
         run: |
-          set -euo pipefail
-          curl --fail --location --retry 3 --silent --show-error \
-            https://ziglang.org/download/0.16.0/zig-x86_64-linux-0.16.0.tar.xz \
-            --output "$RUNNER_TEMP/zig-0.16.0.tar.xz"
-          echo '70e49664a74374b48b51e6f3fdfbf437f6395d42509050588bd49abe52ba3d00  '"$RUNNER_TEMP/zig-0.16.0.tar.xz" | sha256sum --check --status
-          tar -xJf "$RUNNER_TEMP/zig-0.16.0.tar.xz" -C "$RUNNER_TEMP"
-          echo "$RUNNER_TEMP/zig-x86_64-linux-0.16.0" >> "$GITHUB_PATH"
-          "$RUNNER_TEMP/zig-x86_64-linux-0.16.0/zig" version
-      - name: Зібрати sens CLI (release)
-        # Бінарник `sens` живе в крейті sens-cli, не в крейті sens.
-        run: cargo build --locked --release -p sens-cli --bin sens
-      - name: Швидкість Lisp (en) проти SENS (sens)
-        shell: bash
-        run: |
-          set -euo pipefail
-          OUT="$RUNNER_TEMP/lisp-vs-sens-speed"
-          ONLY_ARG=""
-          if [ -n "${{ inputs.only }}" ]; then ONLY_ARG="--only ${{ inputs.only }}"; fi
-          python3 benchmarks/sens-surface/run.py \
-            --sens "$PWD/target/release/sens" \
-            --forms "${{ inputs.forms }}" \
-            --samples "${{ inputs.samples }}" \
-            --out "$OUT" $ONLY_ARG
-          echo "===== runs.tsv ====="
-          cat "$OUT/runs.tsv" 2>/dev/null || true
-          echo "===== summary.json ====="
-          cat "$OUT/summary.json" 2>/dev/null || true
-      - name: Зберегти сирі заміри
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: lisp-vs-sens-speed-${{ github.sha }}
-          path: ${{ runner.temp }}/lisp-vs-sens-speed
+          echo "LANGUAGE_POLICY=EXCLUDED allowed=Rust,Zig,SENS"
+          echo "EXCLUSION_REASON=Python benchmark harness"
+          echo "RESULT=NOT_VERIFIED (not PASS)"
