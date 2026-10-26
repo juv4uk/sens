@@ -164,7 +164,7 @@ jobs:
 
   release-preflight:
     name: Exact-SHA release preflight — ручний або позначений коміт
-    # Перевірка релізу йде лише за явним власницьким маркером на точному SHA.
+    # Повний preflight запускається вручну або за явним маркером; звичайний push лишається швидким.
     if: ${{ (github.event_name == 'workflow_dispatch' && inputs.suite == 'release-preflight') || (github.event_name == 'push' && contains(github.event.head_commit.message, 'SENS_RELEASE_PREFLIGHT')) }}
     uses: ./.github/workflows/release-preflight.yml
     with:
