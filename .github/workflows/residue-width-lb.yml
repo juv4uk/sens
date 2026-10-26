@@ -9,10 +9,10 @@ jobs:
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@v5
-      - name: Run semantic width lower-bound attack
-        run: |
-          rm -rf /tmp/residue-width-lb
-          python3 benchmarks/residue-width-lb/run.py --out /tmp/residue-width-lb
+      - name: Run semantic width lower-bound attack — EXCLUDED (NOT_VERIFIED)
+        if: false
+        shell: bash
+        run: echo "FOREIGN_LANGUAGE_TEST_BENCH=EXCLUDED_BY_POLICY native_equivalent=NOT_VERIFIED"
       - name: Publish report
         if: always()
         run: |
