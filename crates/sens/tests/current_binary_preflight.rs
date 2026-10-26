@@ -240,8 +240,8 @@ fn time_library_top_level_replay_reports_first_noncallable_form() {
     for (index, expression) in parsed.iter().enumerate() {
         if let Err(error) = eval_parsed_expressions(std::slice::from_ref(expression), &mut session)
         {
-            let start = (expression.span.start as usize).min(source.len());
-            let end = (expression.span.end as usize).min(source.len()).max(start);
+            let start = (expression.span.start).min(source.len());
+            let end = (expression.span.end).min(source.len()).max(start);
             let preview_end = end.min(start.saturating_add(180));
             let snippet = String::from_utf8_lossy(&source.as_bytes()[start..preview_end]);
             panic!(
@@ -269,17 +269,17 @@ fn time_library_loader_reports_first_failing_form() {
     sens::load_core_library(&mut session).expect("Core4 bootstrap");
 
     sens::load_time_library(&mut session).unwrap_or_else(|error| {
-        let start = (error.span.start as usize).min(source.len());
-        let end = (error.span.end as usize).min(source.len()).max(start);
+        let start = (error.span.start).min(source.len());
+        let end = (error.span.end).min(source.len()).max(start);
         let form = parsed.iter().enumerate().find(|(_, expression)| {
-            let form_start = expression.span.start as usize;
-            let form_end = expression.span.end as usize;
+            let form_start = expression.span.start;
+            let form_end = expression.span.end;
             form_start <= start && end <= form_end
         });
         let (form_label, snippet) = form
             .map(|(index, expression)| {
-                let form_start = (expression.span.start as usize).min(source.len());
-                let form_end = (expression.span.end as usize)
+                let form_start = (expression.span.start).min(source.len());
+                let form_end = (expression.span.end)
                     .min(source.len())
                     .max(form_start);
                 let preview_end = form_end.min(form_start.saturating_add(180));
