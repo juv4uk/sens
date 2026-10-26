@@ -1,0 +1,4 @@
+ARCHIVE_POLICY_SHA=e5cd9c2d3715a34fca3c5856be38658aa4b61c4c
+SEMANTICS=NOT_VERIFIED
+SCOPE=all_.github/workflows_with_foreign_test_runners
+NOTE=Explicit path shards may coexist; sentinel covers full set.

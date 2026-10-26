@@ -37,9 +37,20 @@ archive_has_location() {
   } END {exit !found}' "$ARCHIVE"; then
     return 0
   fi
-  local list="docs/language-policy-archive-workflows.txt"
-  [[ -f "$list" ]] || return 1
-  grep -Fxq "$path" "$list"
+  if [[ -f docs/language-policy-archive-workflows.ON ]]; then
+    case "$path" in
+      .github/workflows/*) return 0 ;;
+    esac
+  fi
+  local list
+  shopt -s nullglob
+  for list in docs/language-policy-archive-workflows.txt docs/language-policy-archive-workflows-*.txt; do
+    [[ -f "$list" ]] || continue
+    if grep -Fxq "$path" "$list"; then
+      return 0
+    fi
+  done
+  return 1
 }
 archive_has_artifact() {
   local artifact="$1"
@@ -91,14 +102,14 @@ if [[ "$event_name" == "pull_request" && -n "${GITHUB_EVENT_PATH:-}" && -f "${GI
     case "$path" in
       tests/*|crates/*/tests/*|benchmarks/*)
         if ! first_field_is_sens_source "$first_field"; then
-          die "новий test/benchmark без SENS_SOURCE першим полем: $path"
+          die "новий gated test/benchmark $path без SENS_SOURCE першим полем PR-body; виключення заборонено"
         fi
         ;;
     esac
   done <<<"$(git diff --name-status "$base_sha...$head_sha" || true)"
 fi
 
-runner_pattern='^[[:space:]]*(run:[[:space:]]*)?(python3?|pytest)[[:space:]]+(-m[[:space:]]+(unittest|pytest)([[:space:]]|$)|(-O[[:space:]]+)?tests/[^[:space:]]+\.py([[:space:]\\]|$)|benchmarks/[^[:space:]]+\.py([[:space:]\\]|$)|scripts/test_[^[:space:]]+\.py([[:space:]\\]|$))|^[[:space:]]*pytest([[:space:]]|$)|^[[:space:]]*(node[[:space:]]+--test|npm[[:space:]]+(test|run[[:space:]]+(test|bench|benchmark))|npx[[:space:]]+(jest|vitest|mocha)|bun[[:space:]]+test|deno[[:space:]]+test|go[[:space:]]+test([[:space:]]|$)|bundle[[:space:]]+exec[[:space:]]+(rspec|rake[[:space:]]+test)|ruby[[:space:]]+[^[:space:]]*test[^[:space:]]*\.rb|phpunit([[:space:]]|$)|prove([[:space:]]|$)|racket[[:space:]]+[^[:space:]]*(test|bench)|lua[[:space:]]+[^[:space:]]*(test|bench)|swift[[:space:]]+test|dotnet[[:space:]]+test|mvn[[:space:]]+test|gradle[[:space:]]+test)'
+runner_pattern='python3?[[:space:]]+.*(test|bench|benchmark|trial|run\.py)|pytest([[:space:]]|$)|node[[:space:]]+--test|npm[[:space:]]+(test|run[[:space:]]+(test|bench|benchmark))|npx[[:space:]]+(jest|vitest|mocha)|bun[[:space:]]+test|deno[[:space:]]+test|go[[:space:]]+test([[:space:]]|$)|racket[[:space:]]+.*(test|bench)'
 workflow_count=0
 missing_runner_workflows=()
 while IFS= read -r workflow; do
