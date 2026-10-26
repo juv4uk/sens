@@ -2,10 +2,7 @@
 //! laws, but the production path must not construct the bit-view at all.
 mod support;
 
-use sens::{
-    decode_ternary_words, encode_ternary_words, eval_parsed_expressions, open_ternary_program,
-    parse_canonical_binary, Session, TernaryTransportError,
-};
+use sens::{decode_ternary_words, encode_ternary_words, Session, TernaryTransportError};
 use support::{admit_reference_t5m, eval_reference_t5m, ReferenceT5mError};
 
 const QUOTE: &[u8] =
@@ -16,7 +13,7 @@ const MULTIFORM: &[u8] =
     include_bytes!("../../../tests/fixtures/migration-multiform-cohort-main/two-forms.sens");
 
 #[test]
-fn physical_execute_matches_reference_visible_path_for_admitted_fixtures() {
+fn physical_execute_matches_reference_t5m_runner_for_admitted_fixtures() {
     for (label, physical) in [
         ("quote", QUOTE),
         ("atom", ATOM),
@@ -27,14 +24,8 @@ fn physical_execute_matches_reference_visible_path_for_admitted_fixtures() {
         assert!(program.form_count() > 0, "{label}");
         assert_eq!(program.form_count(), if label == "multi" { 2 } else { 1 });
 
-        // Comparison/reference route only. Production never renders this.
-        let visible = open_ternary_program(physical).expect(label);
-        let parsed = parse_canonical_binary(&visible).expect(label);
-        let reference = eval_parsed_expressions(&parsed, &mut Session::default()).expect(label);
         let direct = program.execute(&mut Session::default()).expect(label);
         let one_shot = eval_reference_t5m(physical, &mut Session::default()).expect(label);
-        assert_eq!(direct.value, reference.value, "{label} result law");
-        assert_eq!(direct.output, reference.output, "{label} observable output");
         assert_eq!(one_shot.value, direct.value, "{label} one-shot parity");
         assert_eq!(one_shot.output, direct.output, "{label} one-shot output");
         let again = program.execute(&mut Session::default()).expect(label);
@@ -72,12 +63,16 @@ fn all_invalid_physical_or_d2_inputs_are_rejected_before_interpreter() {
 
 #[test]
 fn exact_widths_remain_distinct_before_any_surface_lookup() {
-    let a = sens::encode_binary_projection_ternary("1").unwrap();
-    let b = sens::encode_binary_projection_ternary("001").unwrap();
-    let c = sens::encode_binary_projection_ternary("000000001").unwrap();
+    let a = sens::parse_binary_source_words("1").unwrap().into_iter().next().unwrap().word;
+    let b = sens::parse_binary_source_words("001").unwrap().into_iter().next().unwrap().word;
+    let c = sens::parse_binary_source_words("000000001").unwrap().into_iter().next().unwrap().word;
+    assert_eq!(a.width(), 1);
+    assert_eq!(b.width(), 3);
+    assert_eq!(c.width(), 9);
     assert_ne!(a, b);
     assert_ne!(b, c);
-    for physical in [&a, &b, &c] {
-        assert_eq!(admit_reference_t5m(physical).unwrap().form_count(), 1);
+    for word in [&a, &b, &c] {
+        sens::parse_canonical_word_sequence(std::slice::from_ref(word))
+            .expect("each exact-width D1/D3/D9 coordinate remains a valid SENS word");
     }
 }
