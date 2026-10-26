@@ -2798,8 +2798,13 @@ mod tests {
             panic!("quoted data");
         };
         assert!(
-            matches!(&quoted_data[0].kind, ExprKind::Number(value, _) if *value == 100.0),
-            "0100 under W8 QUOTE is data and is not promoted to a callable identity"
+            matches!(
+                &quoted_data[0].kind,
+                ExprKind::BinaryNumber(number)
+                    if number.numeric_domain_width() == Some(24)
+                        && number.bits() == "1100100"
+            ),
+            "0100 under W8 QUOTE remains exact D24 data and is not promoted to a callable identity"
         );
 
         let wrong_path = parse_mixed_exact_domain_core_source("lib/core.lisp", source)
