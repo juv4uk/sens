@@ -11,9 +11,11 @@ use ::sens::universal_frame3::*;
 use ::sens::*;
 
 mod tests {
+    #[cfg(feature = "rust-f3-reference")]
     fn encode_ternary_words(words: &[::sens::BinarySourceWord]) -> Result<Vec<u8>, String> {
         sens_cli::zig_transport::encode_t5m_direct(words)
     }
+    #[cfg(feature = "rust-f3-reference")]
     fn decode_ternary_words(bytes: &[u8]) -> Result<Vec<::sens::BinarySourceWord>, String> {
         sens_cli::zig_transport::decode_t5m_words(bytes)
     }
@@ -130,7 +132,9 @@ mod tests {
             assert_eq!(hex.len() % 2, 0, "odd hex case={label}");
             let expected = hex
                 .as_bytes()
-                .chunks_exact(2)
+                .as_chunks::<2>()
+                .0
+                .iter()
                 .map(|pair| {
                     let digits = std::str::from_utf8(pair).expect("physical hex ASCII");
                     u8::from_str_radix(digits, 16).expect("valid physical hex")
@@ -297,7 +301,7 @@ mod tests {
         let mut decoder = Frame3Decoder::new();
         decoder.push(&valid).unwrap();
         assert_eq!(
-            decoder.push(&vec![0; (1 << 20)]),
+            decoder.push(&vec![0; 1 << 20]),
             Err(Frame3Error::TooLarge)
         );
         assert_eq!(decoder.finish(), Err(Frame3Error::TooLarge));
