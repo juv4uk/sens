@@ -748,6 +748,30 @@ run_case run_law d10-empty-queue-positive tests/semantic/d10-empty-queue-law.lis
 run_case run_law d10-empty-queue-mutant tests/semantic/d10-empty-queue-mutant.lisp 0 core4
 # Бенчмарк також проходить справжній SENS→T5M→SENS як позитивний закон.
 run_case run_law d10-empty-queue-benchmark benchmarks/sens-d10-queue-workload.lisp 1 core4
+# Фізичний бенчмарк: час вимірює оболонка, вердикт визначає лише SENS.
+# Виконується тільки після успішного нативного закону вище.
+d10_queue_physical="$evidence/d10-empty-queue-benchmark/program.sens"
+d10_queue_reference="$evidence/d10-empty-queue-benchmark/physical.out"
+if [[ -s "$d10_queue_physical" && -f "$d10_queue_reference" ]]; then
+  d10_queue_samples="$evidence/d10-empty-queue-wall-us.tsv"
+  printf 'sample\telapsed_us\n' > "$d10_queue_samples"
+  for iteration in {1..5}; do
+    start_us="${EPOCHREALTIME/./}"
+    if ! timeout 45s "$sens" "$d10_queue_physical" > "$evidence/d10-queue-$iteration.out" 2> "$evidence/d10-queue-$iteration.err"; then
+      echo "::error title=SENS D10 benchmark::REGRESSION layer=physical iteration=$iteration" >&2
+      exit 1
+    fi
+    end_us="${EPOCHREALTIME/./}"
+    if ! cmp -s "$d10_queue_reference" "$evidence/d10-queue-$iteration.out"; then
+      echo "::error title=SENS D10 benchmark::REGRESSION layer=output-parity iteration=$iteration" >&2
+      exit 1
+    fi
+    printf '%s\t%s\n' "$iteration" "$((end_us - start_us))" >> "$d10_queue_samples"
+  done
+else
+  echo "::error title=SENS D10 benchmark::REGRESSION layer=physical-evidence expected=program-and-output" >&2
+  exit 1
+fi
 # Д10:0100100110/0100100111 — CLIPS ASSERT/PRINTOUT як точні структурні дані.
 # D8 однакові? не спричиняє D3 EQ Type для зовнішньої цитованої голови.
 # Обидві форми доводить саме SENS; Zig/T5M лише переносить точні байти.
