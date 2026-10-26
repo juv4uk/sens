@@ -39,14 +39,14 @@ fn d8_writer_survives_d4_lambdas_and_user_defined_calls() {
         &mut session,
     )
     .expect("ordinary Ukrainian DEFINE/LAMBDA must load");
-    for (source, expected) in [("(внутрішній-текст (як-є (a b)))", "\"(a b)\"")] {
-        assert_eq!(
-            run(source, &mut session)
-                .expect("user D4 closure calls current D8 mechanism")
-                .to_string(),
-            expected
-        );
-    }
+    let source = "(внутрішній-текст (як-є (a b)))";
+    let expected = "\"(a b)\"";
+    assert_eq!(
+        run(source, &mut session)
+            .expect("user D4 closure calls current D8 mechanism")
+            .to_string(),
+        expected
+    );
 }
 
 // Закон D8 TEXT→SYMBOL та його мутант виконуються тільки SENS із Lisp:
