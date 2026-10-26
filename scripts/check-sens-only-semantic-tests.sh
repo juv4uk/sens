@@ -6,7 +6,7 @@ set -euo pipefail
 
 print_archive_summary() {
   if [[ -f docs/language-policy-archive.md ]]; then
-    archive_n="$(grep -cE '\| ARCHIVE \|' docs/language-policy-archive.md || true)"
+    archive_n="$(grep -cE '\|[[:space:]]*ARCHIVE[[:space:]]*$' docs/language-policy-archive.md || true)"
     echo "ARCHIVE (поза мовним коридором): ${archive_n} артефактів — docs/language-policy-archive.md"
   else
     echo "ARCHIVE (поза мовним коридором): MISSING_REGISTRY — docs/language-policy-archive.md"
