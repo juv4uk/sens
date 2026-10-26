@@ -60,11 +60,8 @@ jobs:
           SENS_PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
           SENS_PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
         run: bash scripts/check-sens-only-semantic-tests.sh
-      - name: Перевірити реєстр ARCHIVE та рубіж SENS_SOURCE
+      - name: Перевірити реєстр ARCHIVE та сторонні runners
         shell: bash
-        env:
-          SENS_EVENT_NAME: ${{ github.event_name }}
-          SENS_PR_FIRST_FIELD: ${{ github.event.pull_request.body || github.event.head_commit.message }}
         run: bash scripts/check-language-policy-archive.sh
       - name: Публічний підсумок коридору / архіву
         shell: bash

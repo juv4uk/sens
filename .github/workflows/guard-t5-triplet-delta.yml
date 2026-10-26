@@ -16,12 +16,14 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
         with:
           fetch-depth: 0
           persist-credentials: false
+      - uses: dtolnay/rust-toolchain@1.99.0
+      - uses: ./.github/actions/install-zig
       - name: Build the existing native SENS/T5M mechanisms
-        run: cargo build --locked -p sens-cli --bin sens --bin sens-trit
+        run: cargo build --locked -p sens-cli --bin sens --bin sens-trit --features benchmark-ast-visits
       - name: Verify changed physical-view triples through SENS, Zig, and cmp
         env:
           MANUAL_BASE: ${{ inputs.base_sha }}

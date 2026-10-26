@@ -443,12 +443,6 @@ jobs:
           set -euo pipefail
           cargo test --locked -p sens-cli --bin sens-math-t5m -- --nocapture
 
-      - name: "System One research — Python unit test excluded"
-        if: ${{ always() && steps.changed-t5m-lisp.outputs.system_one_research_tests == 'true' }}
-        shell: bash
-        run: |
-          echo 'PYTHON_UNIT_TESTS=EXCLUDED_BY_REQUEST native_equivalent=NOT_VERIFIED'
-
       - name: Д1/Core1 — справжнє виконання масивів при зміні залежностей
         if: ${{ always() && steps.changed-t5m-lisp.outputs.core1_tests == 'true' && !startsWith(github.event.head_commit.message, 'LISP-TIER:') }}
         shell: bash

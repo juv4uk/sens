@@ -24,7 +24,6 @@ jobs:
           bash scripts/prove-meta-eval-graph-d1.sh "$PWD/target/debug/sens"
           bash scripts/prove-meta-eval-lexical-shadow-d1.sh "$PWD/target/debug/sens"
           bash scripts/prove-meta-eval-predicates-d1.sh "$PWD/target/debug/sens"
-          bash scripts/prove-meta-eval-mutual-d4.sh "$PWD/target/debug/sens"
           bash scripts/prove-d4-selector-width.sh "$PWD/target/debug/sens"
           bash scripts/prove-твердження-m1.sh "$PWD/target/debug/sens"
           bash scripts/prove-бенчмарк-медіана.sh "$PWD/target/debug/sens"

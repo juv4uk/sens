@@ -24,7 +24,7 @@ git -C "$tmp" commit -qm "baseline archive fixture"
 printf 'self-test positive witness\n' > "$tmp/docs/note.md"
 git -C "$tmp" add docs/note.md
 git -C "$tmp" commit -qm "positive archive witness"
-positive="$(SENS_EVENT_NAME=pull_request SENS_PR_FIRST_FIELD='SENS_SOURCE=tests/legacy/test_old.sens' bash "$gate" --root "$tmp" 2>&1)"
+positive="$(bash "$gate" --root "$tmp" 2>&1)"
 if [[ "$positive" != *"ARCHIVE (поза мовним коридором): 2 артефактів — docs/language-policy-archive.md"* ]]; then
   echo "LANGUAGE_POLICY_ARCHIVE_SELFTEST=FAIL positive witness did not report one archived artifact"
   printf '%s\n' "$positive"
@@ -36,30 +36,25 @@ mkdir -p "$tmp/tests/new"
 printf '(твердження)\\n' > "$tmp/tests/new/push_native.lisp"
 git -C "$tmp" add tests/new/push_native.lisp
 git -C "$tmp" commit -qm "native SENS test on push"
-if ! SENS_EVENT_NAME=push SENS_PR_FIRST_FIELD='' bash "$gate" --root "$tmp" > "$tmp/push-native.log" 2>&1; then
+if ! bash "$gate" --root "$tmp" > "$tmp/push-native.log" 2>&1; then
   echo "LANGUAGE_POLICY_ARCHIVE_SELFTEST=FAIL new SENS test on push was rejected without PR metadata"
   cat "$tmp/push-native.log"
   exit 1
 fi
-# Pull request with a new native test requires SENS_SOURCE first.
+# Новий нативний SENS-тест не потребує шаблонних полів у PR-описі.
 printf '(твердження)\\n' > "$tmp/tests/new/pr_native.lisp"
 git -C "$tmp" add tests/new/pr_native.lisp
 git -C "$tmp" commit -qm "native SENS test in PR"
-if SENS_EVENT_NAME=pull_request SENS_PR_FIRST_FIELD='' bash "$gate" --root "$tmp" > "$tmp/pr-native-negative.log" 2>&1; then
-  echo "LANGUAGE_POLICY_ARCHIVE_SELFTEST=FAIL native PR test without SENS_SOURCE was accepted"
-  cat "$tmp/pr-native-negative.log"
-  exit 1
-fi
-if ! grep -q 'SENS_SOURCE_FIRST_FIELD_REQUIRED path=tests/new/pr_native.lisp' "$tmp/pr-native-negative.log"; then
-  echo "LANGUAGE_POLICY_ARCHIVE_SELFTEST=FAIL native PR test failed for the wrong reason"
-  cat "$tmp/pr-native-negative.log"
+if ! bash "$gate" --root "$tmp" > "$tmp/pr-native.log" 2>&1; then
+  echo "LANGUAGE_POLICY_ARCHIVE_SELFTEST=FAIL native SENS test rejected without fixed PR fields"
+  cat "$tmp/pr-native.log"
   exit 1
 fi
 # Existing shell benchmark without an archive row must be rejected too.
 printf '#!/usr/bin/env sh\necho unregistered historical runner\n' > "$tmp/benchmarks/legacy/unregistered_runner.sh"
 git -C "$tmp" add benchmarks/legacy/unregistered_runner.sh
 git -C "$tmp" commit -qm "negative unregistered shell archive witness"
-if SENS_PR_FIRST_FIELD='SENS_SOURCE=tests/legacy/test_old.sens' bash "$gate" --root "$tmp" > "$tmp/shell-negative.log" 2>&1; then
+if bash "$gate" --root "$tmp" > "$tmp/shell-negative.log" 2>&1; then
   echo "LANGUAGE_POLICY_ARCHIVE_SELFTEST=FAIL unregistered historical shell runner was accepted"
   cat "$tmp/shell-negative.log"
   exit 1
@@ -74,12 +69,12 @@ mkdir -p "$tmp/tests/new"
 printf 'print("new foreign test")\n' > "$tmp/tests/new/test_foreign.py"
 git -C "$tmp" add tests/new/test_foreign.py
 git -C "$tmp" commit -qm "negative foreign test witness"
-if SENS_EVENT_NAME=pull_request SENS_PR_FIRST_FIELD='' bash "$gate" --root "$tmp" > "$tmp/negative.log" 2>&1; then
+if bash "$gate" --root "$tmp" > "$tmp/negative.log" 2>&1; then
   echo "LANGUAGE_POLICY_ARCHIVE_SELFTEST=FAIL negative witness was accepted"
   cat "$tmp/negative.log"
   exit 1
 fi
-if ! grep -q 'SENS_SOURCE_FIRST_FIELD_REQUIRED' "$tmp/negative.log" || ! grep -q 'unregistered_exclusion=tests/new/test_foreign.py' "$tmp/negative.log" || ! grep -q 'NEW_FOREIGN_TEST_ARCHIVE_FORBIDDEN' "$tmp/negative.log"; then
+if ! grep -q 'unregistered_exclusion=tests/new/test_foreign.py' "$tmp/negative.log" || ! grep -q 'NEW_FOREIGN_TEST_ARCHIVE_FORBIDDEN' "$tmp/negative.log"; then
   echo "LANGUAGE_POLICY_ARCHIVE_SELFTEST=FAIL negative witness failed for the wrong reason"
   cat "$tmp/negative.log"
   exit 1
@@ -94,7 +89,7 @@ git -C "$tmp" commit -qm "isolate digest-policy witness"
 printf '#!/usr/bin/env sh\nsha256sum source > source.sha256\n' > "$tmp/scripts/execute_changed_lisp_t5m.sh"
 git -C "$tmp" add scripts/execute_changed_lisp_t5m.sh
 git -C "$tmp" commit -qm "negative hash-receipt witness"
-if SENS_EVENT_NAME=pull_request SENS_PR_FIRST_FIELD='SENS_SOURCE=tests/legacy/test_old.sens' bash "$gate" --root "$tmp" > "$tmp/hash-negative.log" 2>&1; then
+if bash "$gate" --root "$tmp" > "$tmp/hash-negative.log" 2>&1; then
   echo "LANGUAGE_POLICY_ARCHIVE_SELFTEST=FAIL hash receipt was accepted"
   cat "$tmp/hash-negative.log"
   exit 1
@@ -108,7 +103,7 @@ fi
 printf '#!/usr/bin/env sh\npython3 tests/semantic/oracle.py\n' > "$tmp/scripts/execute_changed_lisp_t5m.sh"
 git -C "$tmp" add scripts/execute_changed_lisp_t5m.sh
 git -C "$tmp" commit -qm "negative foreign host-oracle witness"
-if SENS_EVENT_NAME=pull_request SENS_PR_FIRST_FIELD='SENS_SOURCE=tests/legacy/test_old.sens' bash "$gate" --root "$tmp" > "$tmp/foreign-oracle.log" 2>&1; then
+if bash "$gate" --root "$tmp" > "$tmp/foreign-oracle.log" 2>&1; then
   echo "LANGUAGE_POLICY_ARCHIVE_SELFTEST=FAIL foreign semantic runner was accepted"
   cat "$tmp/foreign-oracle.log"
   exit 1

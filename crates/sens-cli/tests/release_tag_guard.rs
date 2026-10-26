@@ -122,10 +122,18 @@ fn release_workflows_accept_only_the_s_tag_prefix() {
         .expect("release publisher is readable");
 
     assert!(release.contains("tags: ['s*']"), "release trigger must select s tags");
+    assert!(
+        release.contains("VERSION=\"${GITHUB_REF_NAME#s}\""),
+        "CLI asset version must remove only s"
+    );
     assert!(release.contains("-replace '^s',''"), "MSI version must remove only s");
     assert!(
         publisher.contains("test \"$GITHUB_REF_NAME\" = \"s$(python3"),
         "publisher must compare its tag to the s-prefixed package version"
     );
     assert!(!release.contains("tags: ['l*']"), "retired l tags must not trigger release");
+    assert!(
+        !release.contains("GITHUB_REF_NAME#l"),
+        "retired l prefix must not remain in release asset parsing"
+    );
 }
