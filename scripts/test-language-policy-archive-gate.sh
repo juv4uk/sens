@@ -14,7 +14,7 @@ fake_sha=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
 cat > "$tmp/docs/language-policy-archive.md" <<EOF
 Артефакт | Локація | Причина виключення з гейту | Статус
 --- | --- | --- | ---
-`tests/legacy/test_old.py` | `tests/legacy/test_old.py` | Legacy archive fixture; [commit] (https://github.com/juv4uk/sens/commit/$fake_sha) | ARCHIVE
+tests/legacy/test_old.py | tests/legacy/test_old.py | Legacy archive fixture; https://github.com/juv4uk/sens/commit/$fake_sha | ARCHIVE
 EOF
 git -C "$tmp" add .
 git -C "$tmp" commit -qm "baseline archive fixture"
