@@ -68,7 +68,7 @@ bash scripts/test_sens_law_hotspots_empty.sh
 
 fail() {
   local id="$1" layer="$2" expected="$3" actual="$4"
-  # Передаємо точний шар відмови до квитанції, без повторної евристики stderr.
+  # Зберігаємо точний шар відмови для діагностики, не для ідентичності коду.
   if [[ -d "$evidence/$id" ]]; then
     printf '%s\n' "$layer" > "$evidence/$id/failure-layer.txt"
   fi
@@ -432,36 +432,7 @@ red_other_ids=()
 # Одна проба на свідок: діагностичний wall-time, не p50 і не порівняння мов.
 printf 'id\tstatus\twall_ms\n' > "$evidence/law-timings.tsv"
 printf 'id\tstage\texit\telapsed_us\n' > "$evidence/law-stage-timings.tsv"
-# Відтворювані докази RED без додаткових запусків SENS або кодека.
-# source/input, фізичний носій, бітовий перегляд і точна позиція відмови.
-printf 'id\tlayer\tsource_present\tphysical_present\tview_present\tphysical_form_index\n' > "$evidence/law-red-receipts.tsv"
-red_receipt() {
-  local id="$1" source_path="$2" dir="$evidence/$1"
-  local source_present=ні physical_present=ні view_present=ні
-  local form_index=NOT_REPORTED layer=NOT_CLASSIFIED line
-  [[ -f "$source_path" && ! -L "$source_path" ]] && source_present=так
-  [[ -f "$dir/program.sens" && ! -L "$dir/program.sens" ]] && physical_present=так
-  [[ -f "$dir/program" && ! -L "$dir/program" ]] && view_present=так
-  if [[ -s "$dir/failure-layer.txt" ]]; then
-    layer="$(head -n 1 "$dir/failure-layer.txt")"
-  elif [[ -f "$dir/paired.err" ]]; then
-    layer="$(paired_failure_layer "$dir/paired.err")"
-  elif [[ -f "$dir/direct.err" ]]; then
-    layer="$(direct_failure_layer "$dir/direct.err")"
-  fi
-  if [[ -f "$dir/paired.err" ]]; then
-    while IFS= read -r line; do
-      if [[ "$line" =~ physical_form_index=([0-9]+) ]]; then
-        form_index="${BASH_REMATCH[1]}"
-        break
-      fi
-    done < "$dir/paired.err"
-  fi
-  printf '%s\t%s\t%s\t%s\t%s\t%s\n' \
-    "$id" "$layer" "$source_present" "$physical_present" "$view_present" "$form_index" \
-    >> "$evidence/law-red-receipts.tsv"
-  echo "SENS_RED_RECEIPT id=$id layer=$layer source_present=$source_present physical_present=$physical_present view_present=$view_present physical_form_index=$form_index file=$evidence/law-red-receipts.tsv"
-}
+# RED повідомляється без зовнішніх квитанцій: точний SENS stderr і шар помилки.
 run_case() {
   local id="$2" start_us end_us wall_ms status
   start_us="${EPOCHREALTIME/./}"
@@ -473,8 +444,8 @@ run_case() {
     status=RED
     failed=$((failed + 1))
     failed_ids+=("$id")
-    # Цитата й фізичний індекс пояснюють один RED. Сама помилка лишається RED.
-    red_receipt "$id" "${3:-}"
+    # Зберігаємо RED та ідентифікатор закону; окрема квитанція не створюється.
+    echo "::error title=SENS law::REGRESSION id=$id source=${3:-NOT_REPORTED}" >&2
   fi
   end_us="${EPOCHREALTIME/./}"
   wall_ms="$(((end_us - start_us) / 1000))"
