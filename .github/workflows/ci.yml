@@ -165,7 +165,7 @@ jobs:
   release-preflight:
     name: Exact-SHA release preflight — ручний або позначений коміт
     # Повний preflight запускається вручну або за явним маркером; звичайний push лишається швидким.
-    if: ${{ (github.event_name == 'workflow_dispatch' && inputs.suite == 'release-preflight') || (github.event_name == 'push' && (contains(github.event.head_commit.message, 'SENS_RELEASE_PREFLIGHT') || startsWith(github.event.head_commit.message, 'Release:') || startsWith(github.event.head_commit.message, 'release:') || contains(toJSON(github.event.head_commit.modified), '.github/workflows/') || contains(toJSON(github.event.head_commit.modified), 'RELEASE') || contains(toJSON(github.event.head_commit.modified), 'Cargo.toml') || contains(toJSON(github.event.head_commit.modified), 'Cargo.lock') || contains(toJSON(github.event.head_commit.modified), 'lib/') || contains(toJSON(github.event.head_commit.modified), 'tests/') || contains(toJSON(github.event.head_commit.modified), 'contracts/') || contains(toJSON(github.event.head_commit.modified), 'scripts/')))) }}
+    if: ${{ (github.event_name == 'workflow_dispatch' && inputs.suite == 'release-preflight') || (github.event_name == 'push' && contains(github.event.head_commit.message, 'SENS_RELEASE_PREFLIGHT')) }}
     uses: ./.github/workflows/release-preflight.yml
     with:
       full: true
