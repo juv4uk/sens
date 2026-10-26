@@ -1,5 +1,6 @@
 name: Release Preflight
 # SENS_RELEASE_PREFLIGHT
+# Ідентичність — унікальна послідовність тритів SENS. Квитанції не потрібні.
 
 on:
   workflow_dispatch:
@@ -16,18 +17,22 @@ jobs:
     steps:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09
       - uses: ./.github/actions/install-zig
-      - name: Перевірка — жодних чужомовних runners
+
+      - name: Перевірка — жодних чужомовних runners у коридорі
         shell: bash
         run: bash scripts/check-sens-only-semantic-tests.sh
-      - name: Реєстр ARCHIVE та SENS_SOURCE
+
+      - name: Реєстр ARCHIVE та рубіж SENS_SOURCE
         shell: bash
         env:
           SENS_PR_FIRST_FIELD: ${{ github.event.pull_request.body || github.event.head_commit.message }}
         run: bash scripts/check-language-policy-archive.sh
+
       - name: Самоперевірка мовного гейту
         shell: bash
         run: bash scripts/test-language-policy-archive-gate.sh
-      - name: Мовна межа — JSON/SHA не callable
+
+      - name: Мовна межа — JSON/SHA не callable у SENS
         shell: bash
         run: |
           set -euo pipefail
@@ -37,6 +42,7 @@ jobs:
             exit 1
           fi
           echo "SENS_LANGUAGE_BOUNDARY=PASS"
+
       - uses: dtolnay/rust-toolchain@1.99.0
         with:
           toolchain: "1.99.0"
@@ -44,14 +50,18 @@ jobs:
       - uses: Swatinem/rust-cache@49a0bdc70d2e1b713ca9e2869b211fcce03d3c1c
         with:
           shared-key: release-preflight
+
       - name: Sterile Zig corridor
         run: zig test research/zig-codecs/tests.zig -O ReleaseSafe -lc
+
       - name: translation boundary
         run: cargo test --locked -p sens --test translation_boundary
+
       - name: Workspace tests
         id: workspace_tests
         run: cargo test --locked --workspace
-      - name: Native SENS laws
+
+      - name: Native SENS laws — вирок у тритах, без квитанцій
         id: native_sens_laws
         run: |
           set -euo pipefail
@@ -65,9 +75,12 @@ jobs:
           bash scripts/prove-бенчмарк-медіана.sh target/debug/sens
           bash scripts/prove-бенчмарк-структура.sh target/debug/sens
           bash scripts/prove-бенчмарк-умова.sh target/debug/sens
+          bash scripts/prove-ідентичність-тритів.sh target/debug/sens
+
       - name: Clippy
         id: workspace_clippy
         run: cargo clippy --locked --workspace --all-targets -- -D warnings
+
       - name: Мовна політика — лише SENS/Rust/Zig
         id: native_language_policy
         if: always()
@@ -88,32 +101,4 @@ jobs:
             echo "::error title=RELEASE_NOT_VERIFIED::foreign runner"
             exit 1
           fi
-          echo "RELEASE_NATIVE_LANGUAGE_POLICY=PASS"
-      - name: Receipt plain-text
-        if: always()
-        env:
-          WORKSPACE_TESTS: ${{ steps.workspace_tests.outcome }}
-          NATIVE_SENS_LAWS: ${{ steps.native_sens_laws.outcome }}
-          WORKSPACE_CLIPPY: ${{ steps.workspace_clippy.outcome }}
-          NATIVE_LANGUAGE_POLICY: ${{ steps.native_language_policy.outcome }}
-        run: |
-          set -euo pipefail
-          receipt="$RUNNER_TEMP/release-go-gate.txt"
-          {
-            echo "schema=sens-release-preflight-receipt/v1"
-            echo "candidate_sha=$GITHUB_SHA"
-            echo "workspace_tests=${WORKSPACE_TESTS:-unknown}"
-            echo "native_sens_laws=${NATIVE_SENS_LAWS:-unknown}"
-            echo "workspace_clippy=${WORKSPACE_CLIPPY:-unknown}"
-            echo "native_language_policy=${NATIVE_LANGUAGE_POLICY:-unknown}"
-            echo "release_go=false"
-            echo "release_admission=NOT_VERIFIED"
-          } > "$receipt"
-          cat "$receipt"
-      - name: Upload receipt
-        if: always()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
-        with:
-          name: release-go-gate
-          path: ${{ runner.temp }}/release-go-gate.txt
-          if-no-files-found: error
+          echo "RELEASE_NATIVE_LANGUAGE_POLICY=PASS authority=SENS_trits"
