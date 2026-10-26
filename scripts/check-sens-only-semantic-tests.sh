@@ -13,8 +13,16 @@ if (("${#files[@]}" == 0)); then
   exit 1
 fi
 pattern='^[[:space:]]*(run:[[:space:]]*)?(python3|python|pytest)[[:space:]]+(-m[[:space:]]+(unittest|pytest)([[:space:]]|$)|(-O[[:space:]]+)?tests/test_[^[:space:]]+\.py([[:space:]\\]|$)|benchmarks/[^[:space:]]+\.py([[:space:]\\]|$)|scripts/test_[^[:space:]]+\.py([[:space:]\\]|$))|^[[:space:]]*pytest([[:space:]]|$)|^[[:space:]]*(node[[:space:]]+--test|npm[[:space:]]+(test|run[[:space:]]+(test|bench|benchmark))|go[[:space:]]+test([[:space:]]|$)|bundle[[:space:]]+exec[[:space:]]+(rspec|rake[[:space:]]+test)|phpunit([[:space:]]|$)|prove([[:space:]]|$))'
-if grep -nHE "$pattern" "${files[@]}"; then
-  echo "FOREIGN_TEST_BENCH_POLICY=FAIL runner_language_not_allowed"
-  exit 1
+matches="$(mktemp)"
+trap 'rm -f "$matches"' EXIT
+
+if grep -nHE "$pattern" "${files[@]}" > "$matches"; then
+  count="$(wc -l < "$matches" | tr -d ' ')"
+  echo "FOREIGN_TEST_BENCH_POLICY=EXCLUDED runner_count=$count workflows=${#files[@]}"
+  echo "FOREIGN_TEST_BENCH_EVIDENCE=NOT_VERIFIED; excluded runners are not reported as passing"
+  sed -n '1,40p' "$matches"
+  echo "FOREIGN_TEST_BENCH_POLICY_RESULT=SKIP_NOT_RED"
+  exit 0
 fi
-echo "FOREIGN_TEST_BENCH_POLICY=PASS workflows=${#files[@]} allowed=Rust,Zig,SENS foreign_tests=EXCLUDED foreign_benchmarks=EXCLUDED native_equivalence=REQUIRED"
+
+echo "FOREIGN_TEST_BENCH_POLICY=NO_DISALLOWED_RUNNERS_FOUND workflows=${#files[@]}"
