@@ -40,6 +40,10 @@ path = "src/bin/sens-trit.rs"
 name = "lisp-source-guard"
 path = "src/bin/lisp-source-guard.rs"
 
+[[bin]]
+name = "lisp-data-schema-guard"
+path = "src/bin/lisp-data-schema-guard.rs"
+
 [features]
 # Owner decision 2026-10-14: Zig is the DEFAULT physical transport codec.
 # T5M is the default physical .sens WIRE FORMAT; legacy T5 is explicit.
