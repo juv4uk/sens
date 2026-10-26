@@ -122,7 +122,7 @@ jobs:
 
   release-preflight:
     name: Ручний exact-SHA release preflight
-    if: ${{ github.event_name == 'workflow_dispatch' && inputs.suite == 'release-preflight' }}
+    if: ${{ (github.event_name == 'workflow_dispatch' && inputs.suite == 'release-preflight') || (github.event_name == 'push' && contains(github.event.head_commit.message, 'SENS_RELEASE_PREFLIGHT')) }}
     uses: ./.github/workflows/release-preflight.yml
     permissions:
       contents: read
