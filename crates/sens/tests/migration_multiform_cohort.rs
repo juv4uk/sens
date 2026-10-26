@@ -1,8 +1,7 @@
-//! #4455 — two top-level D2 forms in one exact physical T5 source.
+
+use sens_cli::zig_transport;//! #4455 — two top-level D2 forms in one exact physical T5 source.
 //! Rust checks transport and syntax boundaries; program-result laws remain Lisp-owned.
-use sens::{
-    decode_ternary_program, encode_binary_projection_ternary, open_ternary_program,
-    parse_canonical_binary,
+use sens::{BinarySourceWord, render_binary_words_spaced, parse_canonical_binary,
 };
 
 const T5: &[u8] =
@@ -10,6 +9,26 @@ const T5: &[u8] =
 const SOURCE: &str =
     include_str!("../../../tests/fixtures/migration-multiform-cohort/two-forms.lisp");
 const PROJECTION: &str = "10 001 00 000 01 00 10 111 00 10 001 00 000 01 00 10 001 00 000 01 01";
+
+
+
+// Обгортки над чинним Zig T5M: staged-out ternary виведено (f5a5b213).
+fn decode_ternary_program(bytes: &[u8]) -> Result<Vec<BinarySourceWord>, String> {
+    zig_transport::decode_t5m_words(bytes)
+}
+
+fn open_ternary_program(bytes: &[u8]) -> Result<String, String> {
+    zig_transport::decode_t5m_words(bytes).map(|words| render_binary_words_spaced(&words))
+}
+
+fn encode_binary_projection_ternary(source: &str) -> Result<Vec<u8>, String> {
+    let words: Vec<BinarySourceWord> = sens::parse_binary_source_words(source)
+        .map_err(|error| format!("{error:?}"))?
+        .into_iter()
+        .map(|token| token.word)
+        .collect();
+    zig_transport::encode_t5m_direct(&words)
+}
 
 #[test]
 fn physical_two_form_source_retains_d2_boundary_and_roundtrips() {
