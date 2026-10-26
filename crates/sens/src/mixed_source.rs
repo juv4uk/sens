@@ -237,6 +237,9 @@ fn lift_pinned_d9_language_calls(
         "рядок?",
         "читати-всі",
     ];
+    // This Lisp-defined D9 function is admitted only for pinned reasoning
+    // sources. Its resident coordinate alone does not install a runtime slot.
+    const UKRAINIAN_D9_LISP_CALLS: [&str; 1] = ["порадити-світ"];
     if depth > MAX_STRUCTURE_DEPTH {
         return Err(LanguageError::new(
             ErrorKind::Parse,
@@ -280,13 +283,20 @@ fn lift_pinned_d9_language_calls(
             kind: ExprKind::DomainIdentity(identity),
             span: lifted[0].span,
         };
-    } else if spelling.is_some_and(|name| UKRAINIAN_D9_MECHANISMS.contains(&name)) {
-        if let Some(identity) = spelling
-            .and_then(crate::semantic_registry::d9_binding_identity_for_definition)
-            .filter(|identity| crate::eval::canon::has_d9_mechanism(*identity))
+    } else if let Some(name) = spelling.filter(|name| {
+        UKRAINIAN_D9_MECHANISMS.contains(name) || UKRAINIAN_D9_LISP_CALLS.contains(name)
+    }) {
+        if let Some(identity) = crate::semantic_registry::d9_binding_identity_for_definition(name)
+            .filter(|identity| {
+                (UKRAINIAN_D9_MECHANISMS.contains(&name)
+                    && crate::eval::canon::has_d9_mechanism(*identity))
+                    || (UKRAINIAN_D9_LISP_CALLS.contains(&name)
+                        && crate::semantic_registry::is_admitted_exact_definition_target(*identity))
+            })
         {
-            // The source projection and concrete mechanism must both agree.
-            // D9 residency alone never promotes an arbitrary surface to a call.
+            // Native D9 operations require their concrete native mechanism.
+            // The path-pinned Lisp-owned advice function requires an admitted
+            // exact DEFINE target; runtime dispatch still requires its slot.
             lifted[0] = Expr {
                 kind: ExprKind::DomainIdentity(identity),
                 span: lifted[0].span,
@@ -1363,6 +1373,34 @@ mod tests {
             &data[2].kind,
             ExprKind::Symbol(name) if name.as_ref() == "події"
         ));
+    }
+
+    #[test]
+    fn pinned_reader_lifts_only_the_ratified_lisp_owned_d9_advice_call() {
+        let source = "(порадити-світ світ corpus клаузи)";
+        let pinned = only(
+            parse_mixed_exact_domain_reasoning_source("lib/world.lisp", source)
+                .expect("the World reader admits its ratified D9 function"),
+        );
+        let ExprKind::List(pinned_parts) = pinned.kind else {
+            panic!("pinned advice call");
+        };
+        assert!(matches!(
+            &pinned_parts[0].kind,
+            ExprKind::DomainIdentity(identity)
+                if identity.width() == 9 && identity.packed_bits() == 0b111110111
+        ));
+
+        let ordinary = only(
+            parse_mixed_exact_domain(source).expect("ordinary source remains parseable"),
+        );
+        let ExprKind::List(ordinary_parts) = ordinary.kind else {
+            panic!("ordinary advice call");
+        };
+        assert!(
+            !matches!(&ordinary_parts[0].kind, ExprKind::DomainIdentity(identity) if identity.width() == 9),
+            "ordinary source must not infer a D9 call from its Ukrainian spelling"
+        );
     }
 
     #[test]
