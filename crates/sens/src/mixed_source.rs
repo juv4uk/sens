@@ -118,20 +118,6 @@ fn lift_pinned_d8_io(source: &str, expression: Expr, depth: u32) -> Result<Expr,
             kind: ExprKind::DomainIdentity(DomainIdentity::from_source_word(word)),
             span: lifted[0].span,
         };
-remove unadmitted CODE-CHAR bridge    } else if matches!(
-        head_spelling,
-        Some("11100000" | "11110100" | "11101010" | "11101101" | "11101110")
-    ) {
-        let words =
-            parse_binary_source_words(head_spelling.expect("known ratified D8 mechanism head"))?;
-        let word = words
-            .first()
-            .expect("one static ratified D8 source word")
-            .word;
-        lifted[0] = Expr {
-            kind: ExprKind::DomainIdentity(DomainIdentity::from_source_word(word)),
-            span: lifted[0].span,
-        };
     } else if matches!(&lifted[0].kind, ExprKind::List(_)) {
         lifted[0] = lift_pinned_d8_io(source, lifted[0].clone(), depth + 1)?;
     }
