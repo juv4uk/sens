@@ -2,11 +2,9 @@
 //! Stored envelopes are quoted data; this binary never evaluates their payload.
 
 use sens::{
-    eval_parsed_expressions, load_core_library, Bija3, Bit3, Bit4, Bit9, CoreD4, CoreD9,
-    DomainIdentity, Environment, Expr, ExprKind, Session, Span, Value,
+    eval_parsed_expressions, load_core_library, Bija3, Bit3, Bit4, Bit7, Bit9, CoreD4, CoreD9,
+    D7DataWord, DomainIdentity, Environment, Expr, ExprKind, Session, Span, Value,
 };
-#[cfg(test)]
-use sens::{Bit7, D7DataWord};
 use std::io::{self, Read};
 use std::rc::Rc;
 
