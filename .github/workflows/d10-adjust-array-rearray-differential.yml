@@ -1,20 +1,18 @@
-name: D10 ADJUST-ARRAY vs historical REARRAY differential review
+name: "D10 ADJUST-ARRAY differential — excluded by Rust/Zig/SENS language policy"
+
 on:
   workflow_dispatch:
+
+permissions:
+  contents: read
+
 jobs:
-  differential-review:
+  policy-exclusion:
+    name: Foreign-language tests/oracles excluded (NOT_VERIFIED)
     runs-on: ubuntu-latest
-    timeout-minutes: 5
     steps:
-      - uses: actions/checkout@v5
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.x"
-      - name: Install independent Common Lisp oracle runtime
+      - name: Record exclusion; do not claim evidence
         run: |
-          sudo apt-get update
-          sudo apt-get install -y sbcl
-      - name: Execute standard ADJUST-ARRAY behavioral witnesses
-        run: sbcl --script tests/oracles/d10_adjust_array_rearray_oracle.lisp
-      - name: Verify pinned foundation, existing neighbors, and no promotion
-        run: python3 scripts/check_d10_adjust_array_rearray_differential.py --self-test
+          echo "FOREIGN_LANGUAGE_TEST=EXCLUDED_BY_POLICY"
+          echo "NATIVE_EQUIVALENT=NOT_VERIFIED"
+          echo "NO_PASS_CLAIM=MADE"

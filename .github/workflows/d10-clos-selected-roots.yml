@@ -1,15 +1,18 @@
-name: D10 CLOS selected research roots
+name: "D10 CLOS selected roots — excluded by Rust/Zig/SENS language policy"
+
 on:
   workflow_dispatch:
+
+permissions:
+  contents: read
+
 jobs:
-  proof-gate:
+  policy-exclusion:
+    name: Foreign-language tests/oracles excluded (NOT_VERIFIED)
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout exact PR state
-        uses: actions/checkout@v4
-      - name: D10 selector and accounting authority
-        run: python3 scripts/check-d10-fill-v1-seed.py
-      - name: Verify immutable 625-row baseline and two transitions 625 to 627 to 630
-        run: python3 scripts/check_d10_selection_transition_history.py --self-test
-      - name: CLOS research root fail-closed gate
-        run: python3 scripts/check_d10_clos_roots_selection.py --self-test
+      - name: Record exclusion; do not claim evidence
+        run: |
+          echo "FOREIGN_LANGUAGE_TEST=EXCLUDED_BY_POLICY"
+          echo "NATIVE_EQUIVALENT=NOT_VERIFIED"
+          echo "NO_PASS_CLAIM=MADE"

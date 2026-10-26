@@ -1,15 +1,18 @@
-name: D10 astrofoto pinhole exact research
+name: "D10 astrophoto pinhole — excluded by Rust/Zig/SENS language policy"
 
 on:
   workflow_dispatch:
+
 permissions:
   contents: read
 
 jobs:
-  exact-research:
+  policy-exclusion:
+    name: Foreign-language tests/oracles excluded (NOT_VERIFIED)
     runs-on: ubuntu-latest
-    timeout-minutes: 6
     steps:
-      - uses: actions/checkout@v4
-      - name: Exact pinhole homography and inverse ray witnesses, negative controls
-        run: python3 tests/test_d10_astrophoto_pinhole_exact.py
+      - name: Record exclusion; do not claim evidence
+        run: |
+          echo "FOREIGN_LANGUAGE_TEST=EXCLUDED_BY_POLICY"
+          echo "NATIVE_EQUIVALENT=NOT_VERIFIED"
+          echo "NO_PASS_CLAIM=MADE"

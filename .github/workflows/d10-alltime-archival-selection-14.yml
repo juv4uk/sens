@@ -1,20 +1,18 @@
-name: D10 alltime archive 14 historical source proofs
+name: "D10 archival selection — excluded by Rust/Zig/SENS language policy"
+
 on:
   workflow_dispatch:
+
 permissions:
   contents: read
+
 jobs:
-  validate-fourteen-archival-laws:
-    runs-on: ubuntu-24.04
+  policy-exclusion:
+    name: Foreign-language tests/oracles excluded (NOT_VERIFIED)
+    runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - name: Verify 11 exact source Git blobs and 14 research-only admissions
+      - name: Record exclusion; do not claim evidence
         run: |
-          set -euo pipefail
-          python3 scripts/check_d10_alltime_archived_14_selection.py --self-test
-          python3 -O scripts/check_d10_alltime_archived_14_selection.py --self-test
-      - name: Verify original D10 historical append-only proof and pending ledger
-        run: |
-          set -euo pipefail
-          python3 scripts/check_d10_selection_transition_history.py --self-test
-          true
+          echo "FOREIGN_LANGUAGE_TEST=EXCLUDED_BY_POLICY"
+          echo "NATIVE_EQUIVALENT=NOT_VERIFIED"
+          echo "NO_PASS_CLAIM=MADE"

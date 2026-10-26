@@ -1,20 +1,18 @@
-name: D10 historical CLOS promotion integrity
+name: "D10 CLOS promotion guard — excluded by Rust/Zig/SENS language policy"
+
 on:
   workflow_dispatch:
+
+permissions:
+  contents: read
+
 jobs:
-  historical-snapshot-to-selected-transition:
+  policy-exclusion:
+    name: Foreign-language tests/oracles excluded (NOT_VERIFIED)
     runs-on: ubuntu-latest
-    timeout-minutes: 7
     steps:
-      - uses: actions/checkout@v4
-      - name: Confirm historical CLOS proposals remain source pinned
+      - name: Record exclusion; do not claim evidence
         run: |
-          python3 scripts/check_d10_clos_slot_state_history.py --self-test
-          python3 scripts/check_d10_historical_clos_interlisp_review.py
-          python3 scripts/check_d10_clos_slot_observation_v1.py --static-only
-      - name: Exercise lawful transition and reject unsafe promotion
-        run: python3 -m unittest discover -s tests -p 'test_d10_clos_research_selection_transition.py' -v
-      - name: Confirm current D10 counts and library donor isolation
-        run: |
-          python3 scripts/check-d10-v1-semantic-inventory.py
-          python3 -m unittest discover -s tests -p 'test_d10_library_source_symbols_v1.py' -v
+          echo "FOREIGN_LANGUAGE_TEST=EXCLUDED_BY_POLICY"
+          echo "NATIVE_EQUIVALENT=NOT_VERIFIED"
+          echo "NO_PASS_CLAIM=MADE"
