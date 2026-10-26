@@ -174,7 +174,11 @@ fn ratified_uk_d1_cond_triplet_is_physical_without_text_fallback() {
     assert_eq!(
         sens_cli::zig_transport::decode_t5m_words(PHYSICAL)
             .expect("канонічний фізичний T5M"),
-        exact_words
+        sens::parse_binary_source_words(exact_words)
+            .expect("SENS exact-width words of the ratified D2 view")
+            .into_iter()
+            .map(|token| token.word)
+            .collect::<Vec<_>>()
     );
     assert_eq!(
         sens_cli::zig_transport::encode_t5m_direct(
