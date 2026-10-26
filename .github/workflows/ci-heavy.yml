@@ -1160,8 +1160,15 @@ jobs:
           retention-days: 7
 
 
-      - name: Локальний Windows-шлях до пінованого Zig — без послаблення версії
+      - name: Windows Zig setup — статичний pin-контракт (runtime NOT_VERIFIED)
         if: ${{ always() }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -s .zig-version
+          grep -Fq '$env:ZIG = $zigExe' scripts/with-pinned-zig.ps1
+          grep -Fq 'if ($actualVersion -ne $version)' scripts/with-pinned-zig.ps1
+          echo "WINDOWS_ZIG_RUNTIME=NOT_VERIFIED static_pin_contract=PASS"
 
       - name: Заборона закодованих літералів у Lisp
         shell: bash
@@ -1184,12 +1191,19 @@ jobs:
           timeout 30s git fetch --no-tags --depth=1 origin "$base_sha"
           python3 scripts/check_no_encoded_source_literals.py --base "$base_sha"
 
-      - name: Клавіатурні символи у проєкціях ук, укр і sym (D1–D11)
+      - name: Клавіатурні символи у проєкціях ук, укр і sym (D1–D11) — Rust
         if: ${{ always() }} # самостійна перевірка, навіть коли попередній guard червоний
-      - name: Безпечність dry-run і чинні українські Core-бібліотеки
-        if: ${{ always() }}
+        shell: bash
         run: |
           set -euo pipefail
+          CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens-cli --test uk_surface_audit_projection -- --nocapture
+      - name: Безпечність dry-run і чинні українські Core-бібліотеки — нативний SENS
+        if: ${{ always() }}
+        shell: bash
+        timeout-minutes: 8
+        run: |
+          set -euo pipefail
+          SENS_BINARY_BUILT=1 bash scripts/test-current-semantic-slice.sh --native-binary-only
 
       - name: D11 математично визначені селектори — закон, бітність, негативні контролі
         if: ${{ always() }}
