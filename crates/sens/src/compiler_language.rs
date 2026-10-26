@@ -31,7 +31,7 @@ pub const COMPILER_ROLE_LAW_REF: &str =
 pub const COMPILER_D3_PROOF_REF: &str = "contracts/bija3-l1-l5-ratification.lisp";
 pub const COMPILER_D4_PROOF_REF: &str = "contracts/d4-bootstrap-ratification.lisp";
 pub const COMPILER_AUTHORITY_PATH: &str = "language-contract.lisp";
-pub const COMPILER_CONTRACT_VERSION: &str = "11.9";
+pub const COMPILER_CONTRACT_VERSION: &str = "12.0";
 
 /// SENS-owned semantic input for one current compiler identity.
 ///
@@ -1104,6 +1104,21 @@ mod tests {
             decode_language_lowering_role(&malformed).is_err(),
             "non-D7 role content must fail closed"
         );
+    }
+
+    #[test]
+    fn compiler_contract_version_matches_current_root_authority() {
+        let root = include_str!("../../../language-contract.lisp");
+        let ratification = include_str!("../../../contracts/language-contract-12.lisp");
+        assert!(
+            root.contains("12.0"),
+            "current root language contract must identify Contract 12.0"
+        );
+        assert!(
+            ratification.contains("(version . \"12.0\")"),
+            "the ratified Contract 12.0 source must carry its exact version"
+        );
+        assert_eq!(COMPILER_CONTRACT_VERSION, "12.0");
     }
 
     #[test]
