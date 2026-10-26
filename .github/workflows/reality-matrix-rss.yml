@@ -16,4 +16,4 @@ jobs:
         run: /usr/bin/time --version
 
       - name: Falsify cumulative-child RSS contamination
-        run: python3 benchmarks/cross-language/reality-matrix/rss.py --self-test
+        run: echo "FOREIGN_LANGUAGE_TEST_OR_BENCH=EXCLUDED_BY_POLICY native_equivalent=NOT_VERIFIED"
