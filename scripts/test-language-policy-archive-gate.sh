@@ -84,6 +84,12 @@ if ! grep -q 'SENS_SOURCE_FIRST_FIELD_REQUIRED' "$tmp/negative.log" || ! grep -q
   cat "$tmp/negative.log"
   exit 1
 fi
+
+# Isolate the following digest-policy witness from the intentionally
+# unregistered foreign artifacts above. Otherwise the gate can fail early for
+# the stale exclusions and the digest assertion reports a misleading reason.
+git -C "$tmp" rm -q -- benchmarks/legacy/unregistered_runner.sh tests/new/test_foreign.py
+git -C "$tmp" commit -qm "isolate digest-policy witness"
 # The canonical T5M carrier must reject SHA-256 receipt generation.
 printf '#!/usr/bin/env sh\nsha256sum source > source.sha256\n' > "$tmp/scripts/execute_changed_lisp_t5m.sh"
 git -C "$tmp" add scripts/execute_changed_lisp_t5m.sh
