@@ -162,6 +162,21 @@ jobs:
           else
             shasum -a 256 "$DEST" | awk '{print $1}' > "${DEST}.sha256"
           fi
+          # Портативність macOS: minos мусить бути <= 11.0 (перший Apple Silicon).
+          # Linux перевіряється в release-preflight; тут — решта платформ.
+          if [[ "${{ matrix.asset_suffix }}" == macos_* ]]; then
+            minos="$(otool -l "$DEST" | awk '/LC_BUILD_VERSION|LC_VERSION_MIN_MACOSX/{f=1} f && $1=="minos"{print $2; exit} f && $1=="version"{print $2; exit}')"
+            echo "PORTABILITY asset=${{ matrix.asset_suffix }} minos=$minos"
+            if [ -z "$minos" ]; then
+              echo "RELEASE_ASSET_ERROR: cannot read macOS deployment target from $DEST" >&2
+              exit 1
+            fi
+            major="${minos%%.*}"
+            if [ "$major" -gt 11 ]; then
+              echo "RELEASE_ASSET_ERROR: $DEST requires macOS $minos, above 11.0" >&2
+              exit 1
+            fi
+          fi
           echo "ASSET_PATH=$DEST" >> "$GITHUB_ENV"
 
       - name: Stage CLI asset (one unique artifact per matrix leg)
