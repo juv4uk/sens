@@ -82,15 +82,8 @@ jobs:
         run: cargo test --locked -p sens-cli --test islands_cli
       - name: release asset contract
         run: cargo test --locked -p sens-cli --test islands_release_asset
-      - name: Current bounded Ukrainian source -> T5 -> ASCII triple proof
-        shell: bash
-        run: |
-          set -euo pipefail
-          python3 scripts/verify_uk_t5_t5m_triplet.py \
-            --lisp tests/fixtures/migration-d1-cond-cohort/branch.lisp \
-            --sens tests/fixtures/migration-d1-cond-cohort/branch.sens \
-            --view tests/fixtures/migration-d1-cond-cohort/branch
-          cargo test --locked -q -p sens --features rust-t5-reference --test migration_d1_cond_cohort -- --nocapture
+      - name: Native physical T5M execution witnesses
+        run: cargo test --locked -p sens-cli --test physical_t5m_execution
 
       # ДОКАЗ ВИКОНАННЯМ. Досі цей job НЕ збирав sens, тож доказ мовних законів
       # тут був неможливий. Rust і Zig у job уже встановлені вище.
@@ -101,20 +94,6 @@ jobs:
         run: |
           set -euo pipefail
           bash scripts/prove-lisp-language-laws.sh "$PWD/target/debug/sens" "$RUNNER_TEMP/proof.json"
-
-      - name: BLOCK tag publishing until ALL tracked T5 views and Ukrainian oracles are admitted
-        shell: bash
-        run: |
-          set -euo pipefail
-          echo "PYTHON_TEST=EXCLUDED_BY_POLICY native_equivalent=NOT_VERIFIED"
-          status=0
-          python3 scripts/report_t5_t5m_triplet_inventory.py . \
-            --strict \
-            --require-view tests/fixtures/migration-d1-cond-cohort/branch.sens \
-            --proof-report "$RUNNER_TEMP/proof.json" \
-            --report "$RUNNER_TEMP/release-triple-inventory.json" || status=$?
-          python3 scripts/check-release-triple-corpus.py \
-            "$RUNNER_TEMP/release-triple-inventory.json" "$status"
 
       - name: Exact-SHA independent CI verifier negative controls — Python excluded
         shell: bash

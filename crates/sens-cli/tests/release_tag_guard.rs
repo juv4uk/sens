@@ -137,3 +137,27 @@ fn release_workflows_accept_only_the_s_tag_prefix() {
         "retired l prefix must not remain in release asset parsing"
     );
 }
+
+#[test]
+fn release_workflow_uses_native_t5m_execution_not_retired_t5_gates() {
+    let root = root();
+    let release = fs::read_to_string(root.join(".github/workflows/release.yml"))
+        .expect("release workflow is readable");
+
+    for retired in [
+        "-> T5 ->",
+        "verify_uk_t5_t5m_triplet.py",
+        "rust-t5-reference",
+        "report_t5_t5m_triplet_inventory.py",
+        "check-release-triple-corpus.py",
+    ] {
+        assert!(
+            !release.contains(retired),
+            "release workflow must not admit retired T5 gate {retired}"
+        );
+    }
+    assert!(
+        release.contains("cargo test --locked -p sens-cli --test physical_t5m_execution"),
+        "release workflow must execute the native positive and negative T5M witnesses"
+    );
+}
