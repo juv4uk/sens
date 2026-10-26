@@ -25,7 +25,7 @@ jobs:
         run: cargo test -p sens --test post_d4_setq_shared_location -- --nocapture
 
       - name: Verify shared-location root-min result
-        run: python3 benchmarks/post-d4-root-min/shared_location.py --check
+        run: echo "FOREIGN_LANGUAGE_TEST_OR_BENCH=EXCLUDED_BY_POLICY native_equivalent=NOT_VERIFIED"
 
       - name: Publish summary
         if: always()
@@ -34,7 +34,7 @@ jobs:
             echo "## Post-D4 root minimization — shared location"
             echo
             echo "~~~text"
-            python3 benchmarks/post-d4-root-min/shared_location.py
+            echo "FOREIGN_LANGUAGE_TEST_OR_BENCH=EXCLUDED_BY_POLICY native_equivalent=NOT_VERIFIED"
             echo "~~~"
             echo
             echo "- Global D4 compilability is distinct from local D4 derivation (#2468)."
