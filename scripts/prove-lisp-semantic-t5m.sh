@@ -178,7 +178,7 @@ report_physical_red_source() {
   if [[ "$line" =~ ^[0-9]+$ ]]; then
     echo "::error file=$source,line=$line,title=SENS physical failure::RED id=$id source_form=CANDIDATE semantic=NOT_ASSERTED" >&2
   fi
-  sha256sum "$source" "$physical" >&2
+  cmp -l "$source" "$physical" | head -n 20 >&2 || true
 }
 
 run_law() {
@@ -234,7 +234,7 @@ run_law() {
           echo "SENS_D7_PROFILE_DIAGNOSTIC id=$id clean=RED core4=EXIT0 output=BYTE_PARITY verdict=RED" >&2
         else
           echo "SENS_D7_PROFILE_DIAGNOSTIC id=$id clean=RED core4=EXIT0 output=DIVERGENT verdict=RED" >&2
-          sha256sum "$dir/direct.out" "$dir/paired-core4.out" >&2
+          cmp -l "$dir/direct.out" "$dir/paired-core4.out" | head -n 20 >&2 || true
         fi
       else
         echo "SENS_D7_PROFILE_DIAGNOSTIC id=$id clean=RED core4=EXIT_NONZERO verdict=RED" >&2
