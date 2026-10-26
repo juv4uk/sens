@@ -11,8 +11,11 @@ files=(
   .github/workflows/ci-heavy.yml
   .github/workflows/benchmark-registry.yml
 )
-if grep -nE '^[[:space:]]*(run:[[:space:]]*)?python3[[:space:]]+-m[[:space:]]+(unittest|pytest)([[:space:]]|$)|^[[:space:]]*pytest([[:space:]]|$)|python3[[:space:]]+benchmarks/[^[:space:]]+/(run|bench|test)[^[:space:]]*\.py' "${files[@]}"; then
-  echo "EXECUTION_LANGUAGE_POLICY=FAIL python_test_or_benchmark_runner"
+# These are execution commands, not mentions in comments. Do not match the
+# explicitly allowed Guile, C, Assembler, Rust, Zig, or native SENS runners.
+foreign_runner='^[[:space:]]*((run:[[:space:]]*)?((python3?|pypy3?)[[:space:]]+-m[[:space:]]+(unittest|pytest)([[:space:]]|$)|pytest([[:space:]]|$)|python3?[[:space:]]+.*(tests?/|benchmarks?/|test_[^/[:space:]]*\.py|[^/[:space:]]*_test\.py|[^/[:space:]]*bench[^/[:space:]]*\.py|run\.py)|node[[:space:]]+.*(test|bench|benchmark|/run\.)|npm[[:space:]]+(test|run[[:space:]]+(test|bench|benchmark))|npx[[:space:]]+(jest|vitest|mocha)|bun[[:space:]]+test|deno[[:space:]]+test|go[[:space:]]+test([[:space:]]|$)|racket[[:space:]]+.*(test|bench)|lua[0-9.]*[[:space:]]+.*(test|bench)|ruby[[:space:]]+.*(test|bench)|php[[:space:]]+.*(test|bench)|mvn[[:space:]]+test|gradle[[:space:]]+test))'
+if grep -nE "$foreign_runner" "${files[@]}"; then
+  echo "EXECUTION_LANGUAGE_POLICY=FAIL foreign_test_or_benchmark_runner"
   exit 1
 fi
 echo "EXECUTION_LANGUAGE_POLICY=PASS allowed=Rust,Zig,SENS,Guile,C,Assembler python_tests=EXCLUDED foreign_tests=EXCLUDED python_benchmarks=EXCLUDED foreign_benchmarks=EXCLUDED native_replacements=REQUIRED"
