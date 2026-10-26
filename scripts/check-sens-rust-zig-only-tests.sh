@@ -6,12 +6,18 @@ set -euo pipefail
 root="$(git rev-parse --show-toplevel)"
 cd "$root"
 files=(
+  # Canonical CI, benchmark registry, and every release entry point.
   .github/workflows/ci.yml
-  .github/workflows/release-preflight.yml
   .github/workflows/ci-heavy.yml
   .github/workflows/benchmark-registry.yml
+  .github/workflows/release-preflight.yml
+  .github/workflows/release.yml
+  .github/workflows/release-publish.yml
+  .github/workflows/release-smoke-short.yml
   .github/workflows/sens-rust-zig-corridor-guard.yml
   .github/workflows/binary-only-authority.yml
+  .github/workflows/vertical-day-immutable-smoke.yml
+  .github/workflows/vertical-day-smoke.yml
 )
 # These are execution commands, not mentions in comments. Do not match the
 # explicitly allowed Guile, C, Assembler, Rust, Zig, or native SENS runners.
