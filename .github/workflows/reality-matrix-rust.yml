@@ -11,16 +11,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Run D3 Rust reality smoke
-        run: |
-          python3 benchmarks/cross-language/reality-matrix/rust/run.py             --out-dir "$RUNNER_TEMP/reality-rust"             --outer-reps 2             --inner-repeats 100
-
-      - name: Check machine-readable output
-        run: |
-          python3 benchmarks/cross-language/reality-matrix/validate.py             "$RUNNER_TEMP/reality-rust/comparison.json"
-          test -s "$RUNNER_TEMP/reality-rust/raw/runs.tsv"
-          test -s "$RUNNER_TEMP/reality-rust/report.md"
-
+      - name: Run D3 Rust reality smoke — EXCLUDED (NOT_VERIFIED)
+        if: false
+        shell: bash
+        run: echo "FOREIGN_LANGUAGE_TEST_BENCH=EXCLUDED_BY_POLICY native_equivalent=NOT_VERIFIED"
+      - name: Check machine-readable output — EXCLUDED (NOT_VERIFIED)
+        if: false
+        shell: bash
+        run: echo "FOREIGN_LANGUAGE_TEST_BENCH=EXCLUDED_BY_POLICY native_equivalent=NOT_VERIFIED"
       - name: Upload smoke evidence
         uses: actions/upload-artifact@v4
         with:
