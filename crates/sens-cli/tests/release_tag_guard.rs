@@ -137,6 +137,7 @@ fn release_workflows_accept_only_the_s_tag_prefix() {
     for checksum in [
         "\"sens-cli_${version}_linux_amd64.sha256\"",
         "\"sens-cli_${version}_windows_x64.exe.sha256\"",
+        "\"sens-cli_${version}_windows_x64.msi.sha256\"",
         "\"sens-cli_${version}_macos_x64.sha256\"",
         "\"sens-cli_${version}_macos_arm64.sha256\"",
     ] {
