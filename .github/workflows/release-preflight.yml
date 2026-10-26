@@ -161,6 +161,17 @@ jobs:
       - name: release asset contract
         run: cargo test --locked -p sens-cli --test islands_release_asset
 
+      - name: Install SWI-Prolog for real Prolog↔Lisp↔Datalog integration
+        shell: bash
+        run: |
+          set -euo pipefail
+          if ! command -v swipl >/dev/null 2>&1; then
+            sudo apt-get update
+            sudo apt-get install --yes --no-install-recommends swi-prolog-nox
+          fi
+          command -v swipl
+          swipl --version
+
       - name: Full workspace tests (pre-tag, exact SHA)
         run: cargo test --locked --workspace --no-fail-fast
 
