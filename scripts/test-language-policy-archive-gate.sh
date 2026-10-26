@@ -104,4 +104,18 @@ if ! grep -q 'digest_creation_forbidden' "$tmp/hash-negative.log"; then
   cat "$tmp/hash-negative.log"
   exit 1
 fi
-echo "LANGUAGE_POLICY_ARCHIVE_SELFTEST=VALID positive=ARCHIVE_COUNTED negative=NEW_FOREIGN_TEST_RED"
+# Фікстура стороннього runner-а лише сканується гейтом; команда не запускається.
+printf '#!/usr/bin/env sh\npython3 tests/semantic/oracle.py\n' > "$tmp/scripts/execute_changed_lisp_t5m.sh"
+git -C "$tmp" add scripts/execute_changed_lisp_t5m.sh
+git -C "$tmp" commit -qm "negative foreign host-oracle witness"
+if SENS_EVENT_NAME=pull_request SENS_PR_FIRST_FIELD='SENS_SOURCE=tests/legacy/test_old.sens' bash "$gate" --root "$tmp" > "$tmp/foreign-oracle.log" 2>&1; then
+  echo "LANGUAGE_POLICY_ARCHIVE_SELFTEST=FAIL foreign semantic runner was accepted"
+  cat "$tmp/foreign-oracle.log"
+  exit 1
+fi
+if ! grep -q 'foreign_semantic_runner_forbidden path=scripts/execute_changed_lisp_t5m.sh' "$tmp/foreign-oracle.log"; then
+  echo "LANGUAGE_POLICY_ARCHIVE_SELFTEST=FAIL foreign runner rejected for wrong reason"
+  cat "$tmp/foreign-oracle.log"
+  exit 1
+fi
+echo "LANGUAGE_POLICY_ARCHIVE_SELFTEST=VALID positive=ARCHIVE_COUNTED negative=NEW_FOREIGN_TEST_RED_AND_HOST_ORACLE_RED"

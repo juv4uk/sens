@@ -47,10 +47,21 @@ contains_digest_generator() {
   fi
 }
 
+contains_foreign_semantic_runner() {
+  local candidate="$1"
+  # Канонічні носії не запускають зовнішні семантичні оракули.
+  # Перевіряємо лише виконувальні рядки, не коментарі з описом політики.
+  sed '/^[[:space:]]*#/d; s/[[:space:]]#.*$//' "$candidate" |
+    grep -Eiq '^[[:space:]]*(env[[:space:]]+)?(python3?|pytest|jq)([[:space:]]|$)|[|;&][[:space:]]*(python3?|pytest|jq)([[:space:]]|$)|\$\((python3?|pytest|jq)([[:space:]]|$)'
+}
 for path in "${digest_free_paths[@]}"; do
   [[ -f "$path" ]] || continue
   if contains_digest_generator "$path"; then
     echo "LANGUAGE_POLICY_ARCHIVE=FAIL digest_creation_forbidden path=$path" >&2
+    exit 1
+  fi
+  if contains_foreign_semantic_runner "$path"; then
+    echo "LANGUAGE_POLICY_ARCHIVE=FAIL foreign_semantic_runner_forbidden path=$path" >&2
     exit 1
   fi
 done
