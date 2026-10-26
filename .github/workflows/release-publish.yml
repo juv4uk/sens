@@ -64,63 +64,6 @@ jobs:
             selected_conclusion=""
             selected_app=""
             selected_url=""
-            while IFS=
-        uses: actions/download-artifact@634f93cb2916e3fdff31fdaf6667de0da12316ab # v5
-        with:
-          path: dist
-          merge-multiple: true
-
-      - name: Перевірити точний комплект релізних артефактів
-        shell: bash
-        run: |
-          set -euo pipefail
-          version="${GITHUB_REF_NAME#s}"
-          expected="$RUNNER_TEMP/release-expected"
-          actual="$RUNNER_TEMP/release-actual"
-          printf '%s\n' \
-            "sens-cli_${version}_linux_amd64" \
-            "sens-cli_${version}_windows_x64.exe" \
-            "sens-cli_${version}_windows_x64.msi" \
-            "sens-cli_${version}_macos_x64" \
-            "sens-cli_${version}_macos_arm64" | LC_ALL=C sort > "$expected"
-          find dist -mindepth 1 -maxdepth 1 -printf '%f\n' | LC_ALL=C sort > "$actual"
-          cmp -- "$expected" "$actual"
-          while IFS= read -r name; do
-            test -f "dist/$name" && test ! -L "dist/$name" && test -s "dist/$name"
-          done < "$expected"
-
-      - name: Створити чернетку, завантажити її й порівняти байти через cmp
-        shell: bash
-        env:
-          GH_TOKEN: ${{ github.token }}
-          RELEASE_GO_SHA: ${{ vars.SENS_RELEASE_GO_SHA }}
-          RELEASE_GO_TAG: ${{ vars.SENS_RELEASE_GO_TAG }}
-        run: |
-          set -euo pipefail
-          if gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1; then
-            echo "RELEASE_BLOCKED: запис релізу вже існує; перезапис заборонено" >&2
-            exit 1
-          fi
-          gh release create "$GITHUB_REF_NAME" dist/* --draft --verify-tag \
-            --title "SENS $GITHUB_REF_NAME · Contract 12.0" \
-            --notes "SENS Contract 12.0. Джерело — точний commit $GITHUB_SHA; межі релізу описані в RELEASE.md."
-          replay="$RUNNER_TEMP/release-replay"
-          mkdir -p "$replay"
-          gh release download "$GITHUB_REF_NAME" --dir "$replay"
-          (cd dist && find . -type f -print | LC_ALL=C sort) > "$RUNNER_TEMP/staged-files"
-          (cd "$replay" && find . -type f -print | LC_ALL=C sort) > "$RUNNER_TEMP/replayed-files"
-          cmp -- "$RUNNER_TEMP/staged-files" "$RUNNER_TEMP/replayed-files"
-          while IFS= read -r file; do
-            cmp -- "dist/${file#./}" "$replay/${file#./}"
-          done < "$RUNNER_TEMP/staged-files"
-          git fetch --no-tags --depth=1 origin main
-          test "$(git rev-parse FETCH_HEAD)" = "$GITHUB_SHA" || {
-            echo "RELEASE_BLOCKED: main змінився під час перевірки артефактів" >&2
-            exit 1
-          }
-          test "$RELEASE_GO_SHA" = "$GITHUB_SHA"
-          test "$RELEASE_GO_TAG" = "$GITHUB_REF_NAME"
-          gh release edit "$GITHUB_REF_NAME" --draft=false
 \t' read -r id check_name check_sha check_status check_conclusion check_app check_url; do
               if [[ "$check_name" == "$required" && "$id" =~ ^[1-9][0-9]*$ ]] && (( id > selected_id )); then
                 selected_id="$id"
