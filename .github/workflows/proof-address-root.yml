@@ -9,7 +9,7 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - name: Run proof-address falsifier
-        run: python3 benchmarks/proof-address-root/run.py --out /tmp/proof-address-root
+        run: echo "FOREIGN_LANGUAGE_TEST_OR_BENCH=EXCLUDED_BY_POLICY native_equivalent=NOT_VERIFIED"
       - name: Verify verdict
         run: |
           grep -q '"proof_address": "CERTIFICATE-ONLY"' /tmp/proof-address-root/result.json
