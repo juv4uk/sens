@@ -1,7 +1,6 @@
-# КАРАНТИН (повернено 14.10.2026 за тріажем): ШКІДЛИВА перевірка — застаріла передумова: карантин не скасований ратифікованим свідком.
-# Не дає сигналу про код (run 38566033327). Повторні запуски/runner — заборонені.
-# Чинний сигнал про D24 лишається у видимих ci-hosted / vertical-day-*.
-name: T5 migration inventory (М0)
+# Explicitly excluded: this inventory workflow requires non-approved-language test/report runners.
+# The historical job remains NOT_VERIFIED and does not report a passing result.
+name: "T5 migration inventory — EXCLUDED (NOT_VERIFIED)"
 
 on:
   workflow_dispatch:
@@ -10,17 +9,11 @@ permissions:
   contents: read
 
 jobs:
-  inventory:
-    if: ${{ false }} # КАРАНТИН: шкідлива, run 38566033327
+  exclusion:
+    name: "Python migration-inventory lane excluded by language policy"
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
-      - name: Незалежний негативний свідок
-        run: python3 scripts/test-t5m-migration-inventory.py
-      - name: Live-реєстр == закомічений manifest (fail-closed)
-        run: python3 scripts/report_t5m_migration_inventory.py --check data/t5-migration-inventory.jsonl
+      - shell: bash
+        run: |
+          echo "LANGUAGE_POLICY=EXCLUDED allowed=Rust,Zig,SENS"
+          echo "T5_MIGRATION_INVENTORY=NOT_VERIFIED native_equivalent=NOT_VERIFIED"
