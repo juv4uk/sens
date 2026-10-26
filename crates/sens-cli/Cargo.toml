@@ -70,4 +70,5 @@ serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 
 [dev-dependencies]
-sens = { path = "../sens", features = ["rust-t5-reference"] }
+# Keep integration tests on the production Zig/T5M path. Rust T5 is retired.
+sens = { path = "../sens", default-features = false }
