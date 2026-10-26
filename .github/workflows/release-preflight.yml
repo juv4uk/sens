@@ -22,11 +22,8 @@ jobs:
         shell: bash
         run: bash scripts/check-sens-only-semantic-tests.sh
 
-      - name: Реєстр ARCHIVE та рубіж SENS_SOURCE
+      - name: Реєстр ARCHIVE мовних виключень
         shell: bash
-        env:
-          SENS_EVENT_NAME: ${{ github.event_name }}
-          SENS_PR_FIRST_FIELD: ${{ github.event.pull_request.body || github.event.head_commit.message }}
         run: bash scripts/check-language-policy-archive.sh
 
       - name: Самоперевірка мовного гейту
