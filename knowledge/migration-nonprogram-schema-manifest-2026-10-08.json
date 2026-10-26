@@ -82,6 +82,22 @@
     {
       "path": "tests/fixtures/island-math-evidence/unsupported-executor.lisp",
       "git_blob_sha1": "ef3d61d0d9a6967398d7d97dcc15a8e7a2bd8113"
+    },
+    {
+      "path": "lib/generated/function-table.lisp",
+      "git_blob_sha1": "423e331bfa4a1080516302b767cac62ea7502907"
+    },
+    {
+      "path": "lib/machine/intel-core-i5-6400.lisp",
+      "git_blob_sha1": "1082debd01d1623e125819aabd84e25e4777c766"
+    },
+    {
+      "path": "lib/machine/profile/current-domain-x86-64.lisp",
+      "git_blob_sha1": "4448e030a0ed4ac99f5896f0e21bb241fb57da0e"
+    },
+    {
+      "path": "lib/surface/semantic-registry.lisp",
+      "git_blob_sha1": "e643c9ff8a72c532efb28ba817049f4b11761252"
     }
   ]
 }
