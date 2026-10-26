@@ -45,7 +45,7 @@ jobs:
       - uses: dtolnay/rust-toolchain@1.99.0
 
       - name: Build SENS binaries (sens + sens-trit)
-        run: cargo build --locked -p sens-cli --bin sens --bin sens-trit --features benchmark-ast-visits
+        run: cargo build --locked -p sens-cli --bin sens --bin sens-trit --bin lisp-data-schema-guard --features benchmark-ast-visits
 
       - name: Канонічні D24 корені для фізичного вектора
         run: |
@@ -390,7 +390,7 @@ jobs:
             # Перевіряємо і точний шлях, і форму даних: зміна на програму
             # не може бути непомітно пропущена.
             if [[ "$f" == knowledge/silent-fallback-inventory.lisp && ! -L "$f" ]] &&
-               python3 scripts/check-single-data-schema.py silent-fallback-inventory "$f"; then
+               target/debug/lisp-data-schema-guard silent-fallback-inventory "$f"; then
               echo "REMINT_DATA_ONLY source=$f classification=SCHEMA_INVENTORY"
               continue
             fi
@@ -403,7 +403,7 @@ jobs:
               lib/machine/profile/current-domain-x86-64.lisp) machine_schema="machine-domain-profile-3" ;;
             esac
             if [[ -n "$machine_schema" && ! -L "$f" ]] &&
-               python3 scripts/check-single-data-schema.py "$machine_schema" "$f"; then
+               target/debug/lisp-data-schema-guard "$machine_schema" "$f"; then
               echo "REMINT_DATA_ONLY source=$f classification=EXACT_SCHEMA:$machine_schema"
               continue
             fi
@@ -731,7 +731,7 @@ jobs:
               # Перевіряємо і точний шлях, і форму даних: зміна на програму
               # не може бути непомітно пропущена.
               if [[ "$f" == knowledge/silent-fallback-inventory.lisp && ! -L "$f" ]] &&
-                 python3 scripts/check-single-data-schema.py silent-fallback-inventory "$f"; then
+                 target/debug/lisp-data-schema-guard silent-fallback-inventory "$f"; then
                 echo "REMINT_CURRENT_MAIN_DATA_ONLY source=$f classification=SCHEMA_INVENTORY"
                 continue
               fi
@@ -743,7 +743,7 @@ jobs:
                 lib/machine/profile/current-domain-x86-64.lisp) machine_schema="machine-domain-profile-3" ;;
               esac
               if [[ -n "$machine_schema" && ! -L "$f" ]] &&
-                 python3 scripts/check-single-data-schema.py "$machine_schema" "$f"; then
+                 target/debug/lisp-data-schema-guard "$machine_schema" "$f"; then
                 echo "REMINT_CURRENT_MAIN_DATA_ONLY source=$f classification=EXACT_SCHEMA:$machine_schema"
                 continue
               fi
@@ -983,7 +983,7 @@ jobs:
             git reset --hard origin/$target_branch
             # Кожний новий main має отримати свій справжній SENS binary:
             # ніколи не перевіряти поточний Lisp за старим виконуваним кодом.
-            cargo build --locked -p sens-cli --bin sens --bin sens-trit --features benchmark-ast-visits
+            cargo build --locked -p sens-cli --bin sens --bin sens-trit --bin lisp-data-schema-guard --features benchmark-ast-visits
             regenerate_on_current_main
             # Ознаку успішного відновлення дозволено лише після
             # нативного remint і суду на новому main. Старий RED не є
