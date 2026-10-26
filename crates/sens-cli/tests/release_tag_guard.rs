@@ -152,7 +152,6 @@ fn release_workflows_accept_only_the_s_tag_prefix() {
         "publisher must require the actual Linux matrix check-run name"
     );
     assert!(
-    assert!(
         !publisher.contains("python3"),
         "release publisher must not invoke Python"
     );
