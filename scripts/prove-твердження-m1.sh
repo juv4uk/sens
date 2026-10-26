@@ -34,9 +34,11 @@ if ! cmp -s "$tmp/expected" "$tmp/actual"; then
 fi
 printf '0\n' > "$tmp/expected-mutant"
 if ! "$cli" "$tmp/mutant.lisp" > "$tmp/mutant.out" 2> "$tmp/mutant.err"; then
+  # відмова виконання мутанта також припустима як негативний свідок
   printf 'NATIVE_SENS_NEGATIVE id=%s-mutant mode=execution-reject\n' "$id"
 else
   if ! cmp -s "$tmp/expected-mutant" "$tmp/mutant.out"; then
+    # мутант не зобов'язаний друкувати 0; достатньо що він не друкує 1
     if cmp -s "$tmp/expected" "$tmp/mutant.out"; then
       printf 'REGRESSION id=%s-mutant layer=eval fixture=%s actual=false-positive\n' "$id" "$mutant" >&2
       exit 1
