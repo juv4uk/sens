@@ -292,7 +292,7 @@ jobs:
             echo 'needs_zig=true' >> "$GITHUB_OUTPUT"
           fi
           # D3: точна фізична T5M-семантика COND, не текстовий оракул.
-          if grep -Eq '^(crates/sens/tests/physical_t5m_execution[.]rs|crates/sens/src/eval/special_forms/core[.]rs|contracts/answer-contract[.]lisp|[.]github/workflows/ci[.]yml)$' "$changed_all"; then
+          if grep -Eq '^(crates/sens-cli/tests/physical_t5m_execution[.]rs|crates/sens/src/eval/special_forms/core[.]rs|contracts/answer-contract[.]lisp|[.]github/workflows/ci[.]yml)$' "$changed_all"; then
             echo 'physical_d3_runtime_tests=true' >> "$GITHUB_OUTPUT"
           fi
           # REPL: лише після зміни мовного джерела або чинного SENS-свідка.
@@ -492,7 +492,7 @@ jobs:
         timeout-minutes: 5
         run: |
           set -euo pipefail
-          CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --features rust-t5-reference --test physical_t5m_execution -- --nocapture
+          CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens-cli --test physical_t5m_execution -- --nocapture
       - name: "SENS FUNCTIONS — справжні D1 позитивний і негативні входи"
         if: ${{ !cancelled() && steps.changed-t5m-lisp.outputs.functions_md_d1_tests == 'true' }}
         timeout-minutes: 5
