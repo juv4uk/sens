@@ -301,32 +301,14 @@ fn lift_pinned_d9_language_calls(
     // with the same ratified D4-data rule; unknown names remain inert data.
     if spelling == Some("як-є") && lifted.len() == 2 {
         let mut quoted = items.to_vec();
-        // A packed Text7 child may carry a lossy/local span. The enclosing
-        // source span still names the exact quoted form, so recover only this
-        // one payload spelling from the original form, never from its glyph.
-        let exact_payload = source_spelling(
-            source,
-            &Expr {
-                kind: ExprKind::List(Rc::from(items.to_vec().into_boxed_slice())),
-                span,
-            },
-        )
-        .and_then(|form| form.trim().strip_prefix("(як-є"))
-        .and_then(|tail| tail.strip_suffix(')'))
-        .map(str::trim);
-        if exact_payload == Some("хибне?") {
-            if let Some(identity) =
-                crate::semantic_registry::exact_uk_callable_for_source_head("хибне?")
-                    .filter(|identity| identity.width() == 4 && identity.packed_bits() == 0b0100)
-            {
-                quoted[1] = Expr {
-                    kind: ExprKind::DomainIdentity(identity),
-                    span: quoted[1].span,
-                };
-            } else {
-                quoted[1] =
-                    lift_quoted_d4_identity_data(source, quoted[1].clone(), depth + 1)?;
-            }
+        // Use the enclosing quote's source span, not the payload's lossy
+        // Text7-local span. Only exact D4 identity is promoted; unknown data
+        // remains inert.
+        if let Some(identity) = exact_quoted_d4_identity(source, span) {
+            quoted[1] = Expr {
+                kind: ExprKind::DomainIdentity(identity),
+                span: quoted[1].span,
+            };
         } else {
             quoted[1] = lift_quoted_d4_identity_data(source, quoted[1].clone(), depth + 1)?;
         }
@@ -1133,6 +1115,28 @@ fn lift_expression(
     }
 }
 
+// Recover an exact payload from the outer quote form. The mixed reader may
+// attach a lossy Text7-local span to the payload node (e.g. D4:0100 rendered
+// as "п-р"), so domain preservation must use the enclosing source bytes.
+fn exact_quoted_d4_identity(source: &str, quote_span: Span) -> Option<DomainIdentity> {
+    let form = source.get(quote_span.start..quote_span.end)?.trim();
+    let payload = form
+        .strip_prefix("(як-є")?
+        .strip_suffix(')')?
+        .trim();
+
+    if payload == "хибне?" {
+        return crate::semantic_registry::exact_uk_callable_for_source_head("хибне?")
+            .filter(|identity| identity.width() == 4 && identity.packed_bits() == 0b0100);
+    }
+    if payload.len() != 4 || !payload.bytes().all(|byte| matches!(byte, b'0' | b'1')) {
+        return None;
+    }
+    let word = parse_binary_source_words(payload).ok()?.first()?.word;
+    let identity = DomainIdentity::from_source_word(word);
+    (identity.width() == 4).then_some(identity)
+}
+
 fn lift_quoted_d4_identity_data(
     source: &str,
     expression: Expr,
@@ -1445,6 +1449,22 @@ mod tests {
         ));
         assert!(matches!(
             &form[1].kind,
+            ExprKind::DomainIdentity(identity)
+                if identity.width() == 4 && identity.packed_bits() == 0b0100
+        ));
+
+        // The same ratified D4 identity may arrive as its exact four-bit word.
+        // Do not trust the child's lossy Text7 span ("п-р"); recover it from
+        // the full quote expression and preserve exact domain identity.
+        let binary = only(
+            parse_mixed_exact_domain_reasoning_source("lib/translation.lisp", "(як-є 0100)")
+                .expect("explicit D4 word inside quote"),
+        );
+        let ExprKind::List(binary_form) = binary.kind else {
+            panic!("binary QUOTE form");
+        };
+        assert!(matches!(
+            &binary_form[1].kind,
             ExprKind::DomainIdentity(identity)
                 if identity.width() == 4 && identity.packed_bits() == 0b0100
         ));
