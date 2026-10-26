@@ -407,17 +407,18 @@ fn translation_symbol_law_rejects_non_symbols_in_live_sens() {
     // Завантаження лише core.lisp помилково створює RED до перевірки D1.
     sens::load_core_library(&mut session)
         .expect("повний SENS Core4 має визначати чинний текст-у-символ");
-    for library in [
-        include_str!("../../../lib/persistent-map.lisp"),
-        include_str!("../../../lib/unify.lisp"),
-        include_str!("../../../lib/reason.lisp"),
-        include_str!("../../../lib/forward.lisp"),
-        include_str!("../../../lib/knowledge.lisp"),
-        include_str!("../../../lib/result-status.lisp"),
-        include_str!("../../../lib/translation.lisp"),
+    for (path, library) in [
+        ("lib/persistent-map.lisp", include_str!("../../../lib/persistent-map.lisp")),
+        ("lib/unify.lisp", include_str!("../../../lib/unify.lisp")),
+        ("lib/reason.lisp", include_str!("../../../lib/reason.lisp")),
+        ("lib/forward.lisp", include_str!("../../../lib/forward.lisp")),
+        ("lib/knowledge.lisp", include_str!("../../../lib/knowledge.lisp")),
+        ("lib/world.lisp", include_str!("../../../lib/world.lisp")),
+        ("lib/result-status.lisp", include_str!("../../../lib/result-status.lisp")),
+        ("lib/translation.lisp", include_str!("../../../lib/translation.lisp")),
     ] {
-        let forms = parse_mixed_exact_domain(library).expect("чинний доменний SENS reader");
-        eval_parsed_expressions(&forms, &mut session).expect("чинна бібліотека SENS");
+        sens::eval_pinned_reasoning_source(path, library, &mut session)
+            .unwrap_or_else(|error| panic!("чинна reasoning-бібліотека {path}: {error}"));
     }
     for (expression, expected) in [
         // Compound values are rejected before D9 SYMBOL?; D1 bits are rejected
@@ -433,7 +434,8 @@ fn translation_symbol_law_rejects_non_symbols_in_live_sens() {
     ] {
         let source = format!("(переклад-внутрішній-символ? {expression})");
         let actual = eval_parsed_expressions(
-            &parse_mixed_exact_domain(&source).unwrap_or_else(|error| panic!("{source}: {error}")),
+            &sens::parse_mixed_exact_domain_reasoning_source("lib/world.lisp", &source)
+                .unwrap_or_else(|error| panic!("чинний D1–D10 reader: {error}; source: {source}")),
             &mut session,
         )
         .unwrap_or_else(|error| panic!("{source}: {error}"))
