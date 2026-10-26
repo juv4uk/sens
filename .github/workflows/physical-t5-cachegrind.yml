@@ -33,15 +33,9 @@ jobs:
       - name: Build real production SENS binaries (release)
         run: cargo build --locked --release -p sens-cli --bin sens --bin sens-trit
 
-      - name: Measure Cachegrind I refs on actual packed .sens
+      - name: "Measure Cachegrind I refs on actual packed .sens — EXCLUDED (NOT_VERIFIED)"
         shell: bash
-        run: |
-          set -euo pipefail
-          python3 benchmarks/physical-sens-runtime/irefs.py \
-            --sens target/release/sens \
-            --trit target/release/sens-trit \
-            --out "$RUNNER_TEMP/sens-t5-irefs" \
-            --reps 3
+        run: echo "PYTHON_TESTS_AND_BENCHMARKS=EXCLUDED_BY_LANGUAGE_POLICY native_equivalent=NOT_VERIFIED"
 
       - name: Report numeric evidence even on failure
         if: always()
