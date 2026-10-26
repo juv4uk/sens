@@ -14,8 +14,9 @@ use std::time::Instant;
 
 use sens::frame3_grammar::{encode_body_at_known_length, ExactWord};
 use sens::universal_frame3::{decode, decode_v2, encode, encode_v2};
+use sens_cli::zig_transport;
 use sens::{
-    decode_ternary_words, encode_ternary_words, parse_binary_source_words, BinarySourceWord,
+    parse_binary_source_words, BinarySourceWord,
 };
 
 const SAMPLES: usize = 21;
@@ -47,7 +48,7 @@ fn choose_words(source: &str) -> Vec<BinarySourceWord> {
 fn lane_call(lane: usize, words: &[BinarySourceWord], t5: &[u8], v1: &[u8], v2: &[u8]) {
     match lane {
         0 => {
-            black_box(encode_ternary_words(black_box(words)).unwrap());
+            black_box(zig_transport::encode_t5m_direct(black_box(words)).unwrap());
         }
         1 => {
             black_box(encode(black_box(words)).unwrap());
@@ -56,7 +57,7 @@ fn lane_call(lane: usize, words: &[BinarySourceWord], t5: &[u8], v1: &[u8], v2: 
             black_box(encode_v2(black_box(words)).unwrap());
         }
         3 => {
-            black_box(decode_ternary_words(black_box(t5)).unwrap());
+            black_box(zig_transport::decode_t5m_words(black_box(t5)).unwrap());
         }
         4 => {
             black_box(decode(black_box(v1)).unwrap());
@@ -70,10 +71,10 @@ fn lane_call(lane: usize, words: &[BinarySourceWord], t5: &[u8], v1: &[u8], v2: 
 
 fn bench_case(index: usize, label: &str, source: &str, raw: &mut String) {
     let words = choose_words(source);
-    let t5 = encode_ternary_words(&words).expect("T5 corpus admission");
+    let t5 = zig_transport::encode_t5m_direct(&words).expect("T5 corpus admission");
     let v1 = encode(&words).expect("S3/v1 corpus admission");
     let v2 = encode_v2(&words).expect("S3/v2 corpus admission");
-    assert_eq!(decode_ternary_words(&t5).unwrap(), words);
+    assert_eq!(zig_transport::decode_t5m_words(&t5).unwrap(), words);
     assert_eq!(decode(&v1).unwrap(), words);
     assert_eq!(decode_v2(&v2).unwrap(), words);
     assert_eq!(encode_v2(&decode_v2(&v2).unwrap()).unwrap(), v2);

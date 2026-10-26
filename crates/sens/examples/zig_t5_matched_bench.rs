@@ -4,8 +4,9 @@
 use std::hint::black_box;
 use std::time::Instant;
 
+use sens_cli::zig_transport;
 use sens::{
-    decode_ternary_words, encode_ternary_words, parse_binary_source_words, BinarySourceWord,
+    parse_binary_source_words, BinarySourceWord,
 };
 
 #[global_allocator]
@@ -28,10 +29,10 @@ fn trial(
     for _ in 0..repetitions {
         match operation {
             "encode" => {
-                black_box(encode_ternary_words(black_box(words)).expect("T5 encode"));
+                black_box(zig_transport::encode_t5m_direct(black_box(words)).expect("T5 encode"));
             }
             "decode" => {
-                black_box(decode_ternary_words(black_box(physical)).expect("T5 decode"));
+                black_box(zig_transport::decode_t5m_words(black_box(physical)).expect("T5 decode"));
             }
             _ => panic!("unsupported benchmark operation"),
         }
@@ -57,8 +58,8 @@ fn main() {
         for _ in 0..forms {
             words.extend_from_slice(&pattern);
         }
-        let physical = encode_ternary_words(&words).expect("T5 encode");
-        let recovered = decode_ternary_words(&physical).expect("T5 decode");
+        let physical = zig_transport::encode_t5m_direct(&words).expect("T5 encode");
+        let recovered = zig_transport::decode_t5m_words(&physical).expect("T5 decode");
         assert_eq!(recovered, words, "mechanical T5 parity");
         println!(
             "fixture impl=rust forms={} words={} bytes={} fnv64={:x}",
@@ -74,8 +75,8 @@ fn main() {
         println!();
 
         for _ in 0..3 {
-            black_box(encode_ternary_words(&words).expect("warm encode"));
-            black_box(decode_ternary_words(&physical).expect("warm decode"));
+            black_box(zig_transport::encode_t5m_direct(&words).expect("warm encode"));
+            black_box(zig_transport::decode_t5m_words(&physical).expect("warm decode"));
         }
         for _ in 0..5 {
             trial("encode", &words, &physical, forms, repetitions);

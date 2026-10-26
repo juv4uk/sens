@@ -4,11 +4,12 @@
 //! or claim the hot evaluator time includes startup, I/O, or Core4 bootstrap.
 //! The same physical bytes must decode, re-encode, parse and execute first.
 use sens::{
-    decode_ternary_words, encode_ternary_words, eval_parsed_expressions,
+    eval_parsed_expressions,
     parse_canonical_word_sequence, Session,
 };
 use std::{env, fs, hint::black_box, process::ExitCode, time::Instant};
 
+use sens_cli::zig_transport;
 const PHASES: [&str; 6] = [
     "session",
     "decode_t5",
@@ -64,8 +65,8 @@ fn measure() -> Result<(), String> {
 
     // Disk I/O is explicitly OUTSIDE the timed phases.
     let bytes = fs::read(&source).map_err(|error| format!("read: {error}"))?;
-    let words = decode_ternary_words(&bytes).map_err(|error| format!("T5 decode: {error:?}"))?;
-    if encode_ternary_words(&words).map_err(|error| format!("T5 encode: {error:?}"))? != bytes {
+    let words = zig_transport::decode_t5m_words(&bytes).map_err(|error| format!("T5 decode: {error:?}"))?;
+    if zig_transport::encode_t5m_direct(&words).map_err(|error| format!("T5 encode: {error:?}"))? != bytes {
         return Err("physical byte parity mismatch".into());
     }
     let forms =
@@ -97,7 +98,7 @@ fn measure() -> Result<(), String> {
                         black_box(Session::default());
                     }
                     "decode_t5" => {
-                        let decoded = decode_ternary_words(black_box(&bytes))
+                        let decoded = zig_transport::decode_t5m_words(black_box(&bytes))
                             .map_err(|e| format!("T5 in loop: {e:?}"))?;
                         black_box(decoded);
                     }
@@ -118,7 +119,7 @@ fn measure() -> Result<(), String> {
                         black_box(result);
                     }
                     "full_in_memory" => {
-                        let decoded = decode_ternary_words(black_box(&bytes))
+                        let decoded = zig_transport::decode_t5m_words(black_box(&bytes))
                             .map_err(|e| format!("full T5: {e:?}"))?;
                         let parsed = parse_canonical_word_sequence(&decoded)
                             .map_err(|e| format!("full D2: {e}"))?;

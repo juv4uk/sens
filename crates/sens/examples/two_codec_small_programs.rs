@@ -1,3 +1,4 @@
+use sens_cli::zig_transport;
 //! Two *explicit* research physical codecs: canonical T5 for ordinary programs,
 //! Frame3 Carrier (F3C, historical `.senc`) for very small programs.
 //! NOT Envelope E1/E2/E3 and NOT the one-byte Frame3-Micro (F3M, `.f3m`).
@@ -15,7 +16,7 @@ use std::{
 };
 
 use sens::{
-    decode_ternary_words, encode_ternary_words, eval_parsed_expressions, parse_binary_source_words,
+    eval_parsed_expressions, parse_binary_source_words,
     parse_canonical_binary, parse_canonical_word_sequence, Session,
 };
 #[path = "support/reference_t5m.rs"]
@@ -61,8 +62,8 @@ fn read_t5_canon(raw: &[u8]) -> Result<Vec<sens::BinarySourceWord>, String> {
     if p.form_count() == 0 {
         return Err("zero canonical forms: not a program".into());
     }
-    let words = decode_ternary_words(raw).map_err(|e| format!("T5 transport: {e:?}"))?;
-    let repeated = encode_ternary_words(&words).map_err(|e| format!("T5 re-encode: {e:?}"))?;
+    let words = zig_transport::decode_t5m_words(raw).map_err(|e| format!("T5 transport: {e:?}"))?;
+    let repeated = zig_transport::encode_t5m_direct(&words).map_err(|e| format!("T5 re-encode: {e:?}"))?;
     if repeated != raw {
         return Err("noncanonical T5 physical bytes".into());
     }
@@ -114,7 +115,7 @@ fn select_from_t5(raw: &[u8]) -> Result<Choice, String> {
         .into_iter()
         .map(|w| w.word)
         .collect::<Vec<_>>();
-    if encode_ternary_words(&retyped).map_err(|e| format!("independent bridge encode: {e:?}"))?
+    if zig_transport::encode_t5m_direct(&retyped).map_err(|e| format!("independent bridge encode: {e:?}"))?
         != raw
     {
         return Err("F3 bridge not bit-exact against production physical T5".into());
@@ -148,7 +149,7 @@ fn explicit_decode(raw: &[u8], extension: &str) -> Result<Vec<u8>, String> {
                 .map(|t| t.word)
                 .collect::<Vec<_>>();
             let reconstructed =
-                encode_ternary_words(&words).map_err(|e| format!("F3 -> production T5: {e:?}"))?;
+                zig_transport::encode_t5m_direct(&words).map_err(|e| format!("F3 -> production T5: {e:?}"))?;
             read_t5_canon(&reconstructed)?;
             let selected = select_from_t5(&reconstructed)?;
             if selected.codec != Codec::OriginalFrame3 || selected.physical != raw {
@@ -181,7 +182,7 @@ fn self_test() -> Result<(), String> {
         .into_iter()
         .map(|x| x.word)
         .collect::<Vec<_>>();
-    let raw = encode_ternary_words(&words).map_err(|e| format!("self-test T5: {e:?}"))?;
+    let raw = zig_transport::encode_t5m_direct(&words).map_err(|e| format!("self-test T5: {e:?}"))?;
     let chosen = select_from_t5(&raw)?;
     verify_roundtrip(&raw, &chosen)?;
     // Prove this is executable SENS code, not merely a balanced D2 tree.
@@ -229,7 +230,7 @@ fn self_test() -> Result<(), String> {
         .into_iter()
         .map(|t| t.word)
         .collect::<Vec<_>>();
-    let huge = encode_ternary_words(&huge_words).map_err(|e| format!("large T5: {e:?}"))?;
+    let huge = zig_transport::encode_t5m_direct(&huge_words).map_err(|e| format!("large T5: {e:?}"))?;
     let large = select_from_t5(&huge)?;
     if large.codec != Codec::T5 || large.reason != "T5_OVER_16B" {
         return Err("large T5 was not preserved".into());

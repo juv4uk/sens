@@ -6,8 +6,9 @@ use std::time::Instant;
 
 use sens::frame3_domain::{decode as decode_v3, encode as encode_v3, Word};
 use sens::universal_frame3::{decode, decode_v2, encode, encode_v2};
+use sens_cli::zig_transport;
 use sens::{
-    decode_ternary_words, encode_ternary_words, parse_binary_source_words, BinarySourceWord,
+    parse_binary_source_words, BinarySourceWord,
 };
 
 #[path = "../../../research/framed3/rust_codec/senc.rs"]
@@ -38,12 +39,12 @@ fn run_case(name: &str, source: &str) {
         .into_iter()
         .map(|item| item.word)
         .collect();
-    let t5 = encode_ternary_words(&words).expect("T5 encoded corpus");
+    let t5 = zig_transport::encode_t5m_direct(&words).expect("T5 encoded corpus");
     let v1 = encode(&words).expect("Frame3/v1 encoded corpus");
     let v2 = encode_v2(&words).expect("Frame3/v2 encoded corpus");
     let v3_words: Vec<Word> = words.iter().map(|w| Word::Core(w.clone())).collect();
     let v3 = encode_v3(&v3_words).expect("Frame3/v3 encoded corpus");
-    assert_eq!(decode_ternary_words(&t5).unwrap(), words);
+    assert_eq!(zig_transport::decode_t5m_words(&t5).unwrap(), words);
     assert_eq!(decode(&v1).unwrap(), words);
     assert_eq!(decode_v2(&v2).unwrap(), words);
     assert_eq!(decode_v3(&v3).unwrap(), v3_words);
@@ -98,7 +99,7 @@ fn run_case(name: &str, source: &str) {
     assert_eq!(f3_decoded, word_strings);
 
     let (t5_en_p50, t5_en_p95) = timings(|| {
-        black_box(encode_ternary_words(black_box(&words)).unwrap());
+        black_box(zig_transport::encode_t5m_direct(black_box(&words)).unwrap());
     });
     let (v1_en_p50, v1_en_p95) = timings(|| {
         black_box(encode(black_box(&words)).unwrap());
@@ -116,7 +117,7 @@ fn run_case(name: &str, source: &str) {
         black_box(full);
     });
     let (t5_de_p50, t5_de_p95) = timings(|| {
-        black_box(decode_ternary_words(black_box(&t5)).unwrap());
+        black_box(zig_transport::decode_t5m_words(black_box(&t5)).unwrap());
     });
     let (v1_de_p50, v1_de_p95) = timings(|| {
         black_box(decode(black_box(&v1)).unwrap());
