@@ -478,7 +478,7 @@ fn translation_exact_five_fields_rejects_short_long_and_dotted_lists() {
         ("а", false),
         ("(а б в г . ґ)", false),
     ] {
-        let source = format!("(переклад-рівно-п'ять-полів? (як-є {value}))");
+        let source = format!("(переклад-рівно-пять-полів? (як-є {value}))");
         let actual = eval_parsed_expressions(
             &parse_mixed_exact_domain(&source).unwrap_or_else(|error| panic!("{source}: {error}")),
             &mut session,
