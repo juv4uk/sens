@@ -10,8 +10,8 @@ const BINARY: &str = "canonical-d1d8";
 
 fn parse_source(candidate: &str, source: &str) -> Result<Vec<Expr>, String> {
     match candidate {
-        ENGLISH => parse(source),
-        BINARY => parse_canonical_binary(source),
+        ENGLISH => parse(source).map_err(|error| error.to_string()),
+        BINARY => parse_canonical_binary(source).map_err(|error| error.to_string()),
         other => Err(format!("unknown candidate: {other}")),
     }
 }
@@ -84,7 +84,7 @@ fn program_node_count(expressions: &[Expr]) -> usize {
 
 fn prepared_session() -> Result<Session, String> {
     let mut session = Session::default();
-    load_core_library(&mut session)?;
+    load_core_library(&mut session).map_err(|error| error.to_string())?;
     Ok(session)
 }
 
@@ -120,7 +120,7 @@ fn run(candidate: &str, source: &str) -> Result<(), String> {
 
     let mut session = prepared_session()?;
     let result =
-        eval_lowered_expressions(&lowered, &mut session)?;
+        eval_lowered_expressions(&lowered, &mut session).map_err(|error| error.to_string())?;
 
     let mut semantic_payload_bits = None;
     let mut tail_unused_bits = None;
@@ -129,7 +129,7 @@ fn run(candidate: &str, source: &str) -> Result<(), String> {
     let mut packing_efficiency = None;
 
     if candidate == BINARY {
-        let tokens = parse_binary_source_words(source)?;
+        let tokens = parse_binary_source_words(source).map_err(|error| error.to_string())?;
         let packed = pack_binary_source_tokens(&tokens);
         let accounting = packed_transport_accounting(&packed, 0);
 
