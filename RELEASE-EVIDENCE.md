@@ -1,6 +1,8 @@
 # SENS s0.42.1 — release evidence ledger
 
 > **DRAFT · NO-GO · оновлено 2026-10-26.** Не є сертифікатом релізу. Контракт 12.0 ратифікований, але його повнота реалізації не заявлена. Candidate SHA, повні CI-докази, власницький GO та артефакти не встановлені.
+>
+> **Перевірка поточного main (2026-10-26):** `main@6dddcd69da835377f34f0c7ddad0bc4c4e82edc6`. CI `40325855011` має успішний вузький guard, але ручні SENS/Zig/T5M закони, native smoke, remint і exact-SHA preflight позначені `skipped`. Це **не** release PASS; candidate SHA залишається `UNSET`.
 
 **Додаток 2026-10-26:** неопублікований тег `l0.42.1` не переміщується. Префікс релізу змінено на `s`, тому кандидат продовжується як `s0.42.1` (`Cargo 0.42.1`); записи нижче з давнішими датами лишаються історичними доказами своїх SHA.
 
@@ -21,10 +23,10 @@
 | Candidate tag | `s0.42.1` |
 | Candidate Git SHA (40 hex) | **UNSET** |
 | Date/time UTC | **UNSET** |
-| Contract source SHA-256 | **UNSET** |
+| Contract source identity (Git commit) | **UNSET until candidate freeze** |
 | Contract generation | **12.0** (`contracts/language-contract-12.lisp`; implementation completeness not asserted) |
-| Rust version / rustup toolchain digest | Rust `1.99.0` pinned in `rust-toolchain.toml` and release/CI workflows; rustup distribution digest and runner-image digests **UNSET** |
-| Cargo.lock SHA-256 | **UNSET** |
+| Rust toolchain | Rust `1.99.0` pinned in `rust-toolchain.toml` and release/CI workflows; native run on exact candidate SHA **UNVERIFIED** |
+| Cargo.lock package/version parity | **UNVERIFIED until exact candidate tests** |
 | CI run ID and immutable logs | **UNSET** |
 | OS, CPU arch, container/runner image identifiers | **UNSET** |
 | Owner release authorization | **UNSET** |
@@ -39,7 +41,7 @@
 | D12+ | Чинна числова драбина починається з D12 | Загальна реалізація та виконання: **NOT VERIFIED ON CANDIDATE SHA** |
 | T5M (`.sens`) | Чинний типовий фізичний носій; Zig пакує точні слова, але не встановлює семантику | Оберненість усього виконуваного корпусу та незалежний SENS runtime parity: **PENDING** |
 | Історичний T5 | Архівна provenance, не активний codec route | Не є дозволом на виконання чи свідком релізу |
-| F3C (`.senc`) | Explicit tiny compact route | Ще потрібен exact-candidate stage/replay/digest |
+| F3C (`.senc`) | Explicit tiny compact route | Exact-candidate byte-level roundtrip and corrupted-input refusal: **PENDING** |
 | F3M (`.f3m`) | Bounded enumerative research | НЕ general-production release promise |
 
 Authority: [CURRENT.md](CURRENT.md), [language-contract.lisp](language-contract.lisp), [проектна реальність](docs/project-reality-2026-10-12.uk.md).
@@ -84,19 +86,19 @@ Authority: [CURRENT.md](CURRENT.md), [language-contract.lisp](language-contract.
 |---|---|---|
 | `cargo test --locked --workspace` | URL, runner, SHA, raw log | UNKNOWN |
 | `cargo clippy --locked --workspace --all-targets -- -D warnings` | URL, runner, SHA | UNKNOWN |
-| Release package/tag version alignment | Seven canonical Cargo manifests, their seven `Cargo.lock` entries, `scripts/release.lisp`, `guix.scm`, and `packaging/install.sh` now target `0.42.0` / `l0.42.0` | UNKNOWN until `release_parity` + installer tests pass on candidate SHA |
+| Release package/tag version alignment | Seven Cargo crates and `Cargo.lock`, `guix.scm`, `packaging/install.sh`; current line is `0.42.1` / `s0.42.1`; native gates are `release_parity` + `release_tag_guard` | **UNKNOWN until both pass on a frozen candidate SHA** |
 | D1–D9 exact-width / COND/ATOM/EQ negative controls | Source+binary/oracle parity & run URL | UNKNOWN |
 | D1–D10 binary-word ≠ Number; D12+-only mathematical operands | `crates/sens/tests/math_domain_exclusivity.rs` (D1–D9 operands, D10 unadmitted call heads, D12+ admission negatives); `eval::d6_arithmetic::tests` (D12 signed boundaries/widening plus D24→D48 ADD1 carry); `scripts/check-numeric-domain-ratification.py --self-test`; exact candidate SHA and Core/Hosted CI logs | **UNKNOWN** — focused Rust execution not verified on candidate SHA |
 | Core4 exact-domain FASL and bootstrap-dependent arithmetic | `core4_bootstrap_cache_tests::valid_fasl_path_selects_core4_and_evaluates_current_core`; matching-hash wrong-reader negative witness; migrate `lib/core4.lisp` LENGTH accumulator (`acc + 1`, seed `0`) using explicitly admitted D24+ objects | **BLOCKED** — legacy literals lack D24+ domain admission |
-| D10 owner-ratification metadata and proof limits | Pinned manifest digest; negative callable tests | UNKNOWN |
+| D10 owner-ratification metadata and proof limits | Owner-ratification source plus negative callable witnesses; no generated digest receipt | UNKNOWN |
 | T5 and F3C roundtrip + corrupted input refusal | Physical byte golden fixtures | UNKNOWN |
 | All release-scope `.lisp` ↔ `.sens` ↔ extensionless triples | Full corpus inventory + independent Ukrainian oracle ledger | UNKNOWN |
 | T5 authority, quantity witness, exact-width blockers | [#5406](https://github.com/juv4uk/sens/issues/5406), [#5408](https://github.com/juv4uk/sens/issues/5408), [#2170](https://github.com/juv4uk/sens/issues/2170) | OPEN |
 | Filesystem runtime and exact-domain admission | Earlier [#5603](https://github.com/juv4uk/sens/issues/5603) / [run 38176345658](https://github.com/juv4uk/sens/actions/runs/38176345658): `content_store` 22/24 tests failed. Newer visible [run 38228581929](https://github.com/juv4uk/sens/actions/runs/38228581929) still fails overall: filesystem macro/alist path-bound witnesses, obsolete COND/ATOM/EQ scanner regressions, time-source witnesses and stale core-logic audit are red; its `content-store integration` step is green. | BLOCKED; rerun after fixes |
 | `release-preflight.yml` + mandatory hosted/native jobs | Exact SHA, all required checks | UNKNOWN |
 | Linux/Windows/macOS CLI + MSI + portable Web | Platform-specific install/smoke results | UNKNOWN |
-| SHA-256 of every release asset and independent clean replay | Workflow computes `SHA256SUMS` and re-downloads / byte-compares draft assets; no candidate tag or release artifacts exist yet | IMPLEMENTED, NOT RUN / UNKNOWN |
-| Clean release publication (no incomplete visible release) | Single `release-publish` job; staged artifacts; exact-main-SHA + explicit owner GO; complete asset set, provenance, SHA256SUMS and byte-exact draft replay; commit [50048ecc](https://github.com/juv4uk/sens/commit/50048ecc3edd782e2a4ab5f9ed42aeb86f4b0280) | IMPLEMENTED ON MAIN; CI / failure-injection verification UNKNOWN (still blocks GO) |
+| Release asset bytes and independent clean replay | `release-publish.yml` stages the built assets, downloads the draft release independently, compares file sets and every file with `cmp`; no SHA256SUMS generation | IMPLEMENTED ON MAIN; **NOT RUN / UNKNOWN** |
+| Clean release publication (no incomplete visible release) | Single `release-publish` job; exact-main-SHA + explicit owner GO; complete staged/replayed asset-set and byte equality via `cmp`; no generated SHA256 or provenance-JSON receipts | IMPLEMENTED ON MAIN; preflight and failure-injection verification **UNKNOWN** |
 
 **GO iff** всі потрібні gates на **одному** Git SHA позитивні, усі обіцяні платформи й файли перевірені, без жодного невирішеного `UNKNOWN/BLOCKED/FAIL`. Не підміняти невиконані platform gates успішними локальними тестами.
 
