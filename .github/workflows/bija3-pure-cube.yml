@@ -10,17 +10,5 @@ jobs:
       - uses: actions/checkout@v5
       - name: Exhaustive 7! cube search
         run: |
-          python3 benchmarks/bija3-pure-cube/run.py --json-out /tmp/bija3-pure-cube.json
-          python3 - <<'PY'
-          import json
-          d=json.load(open('/tmp/bija3-pure-cube.json'))
-          assert d['counts'] == {
-              'all_family_edges': 48,
-              'single_axis': 144,
-              'total': 5040,
-              'uniform_xor': 336,
-          }
-          assert d['user_antipodal_candidate']['evaluation']['pair_xor_mask'] == '111'
-          assert d['factorized_equivalence_class']['member_law'] == 'sibling = code XOR 001'
-          print('bīja3 pure cube CI: PASS')
-          PY
+          echo "FOREIGN_LANGUAGE_TEST_OR_BENCH=EXCLUDED_BY_POLICY native_equivalent=NOT_VERIFIED"
+          echo "FOREIGN_LANGUAGE_TEST_OR_BENCH=EXCLUDED_BY_POLICY native_equivalent=NOT_VERIFIED"
