@@ -12,13 +12,13 @@ if [[ ! -x "$cli" ]]; then
 fi
 tmp="$(mktemp -d)"; trap 'rm -rf "$tmp"' EXIT
 printf '1\n' > "$tmp/expected"
-if ! "$cli" "$law" > "$tmp/actual" 2>"$tmp/err"; then
+if ! "$cli" --t5m-files lib/твердження.lisp "$law" > "$tmp/actual" 2>"$tmp/err"; then
   printf 'REGRESSION id=%s actual=execution-error\n' "$id" >&2; cat "$tmp/err" >&2; exit 1
 fi
 if ! cmp -s "$tmp/expected" "$tmp/actual"; then
   printf 'REGRESSION id=%s actual=wrong-verdict\n' "$id" >&2; exit 1
 fi
-if "$cli" "$mutant" > "$tmp/m.out" 2>/dev/null; then
+if "$cli" --t5m-files lib/твердження.lisp "$mutant" > "$tmp/m.out" 2>/dev/null; then
   if cmp -s "$tmp/expected" "$tmp/m.out"; then
     printf 'REGRESSION id=%s-mutant actual=false-positive\n' "$id" >&2; exit 1
   fi

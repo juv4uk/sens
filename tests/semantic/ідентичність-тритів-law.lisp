@@ -1,17 +1,17 @@
-; SENS_SOURCE=tests/semantic/ідентичність-тритів-law.lisp
-; NATIVE_SENS_POSITIVE=NOT_VERIFIED
-; NATIVE_SENS_NEGATIVE=NOT_VERIFIED
-;
-; Ідентичність — сама форма. Квитанції не потрібні.
-; Тотожність і відмінність несуться структурою SENS.
-
+; SENS_SOURCE=tests/semantic/ідентичність-тритів-law.lisp + lib/твердження.lisp
+; NATIVE_SENS_POSITIVE=lib/твердження.lisp + same-structure equality and atom equality return D1:так
+; NATIVE_SENS_NEGATIVE=the mutant asserts equality for distinct structures and returns D1:ні
+; D3 тотожне? compares atoms only; structures use the existing structural equality operation.
 (за-умовою
-  ((тотожне? (як-є ()) (як-є ()))
+  ((однакові? (як-є ()) (як-є ()))
    (за-умовою
-     ((хибне? (тотожне? (як-є ()) (сполучити так (як-є ()))))
+     ((хибне? (однакові? (як-є ()) (сполучити так (як-є ()))))
       (за-умовою
         ((тотожне? так так)
-         так)
+         (за-умовою
+           ((хибне? (тотожне? так ні))
+            так)
+           (так (ні))))
         (так (ні))))
      (так (ні))))
   (так (ні)))
