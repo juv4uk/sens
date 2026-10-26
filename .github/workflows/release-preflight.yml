@@ -55,6 +55,9 @@ jobs:
       - name: translation boundary
         run: cargo test --locked -p sens --test translation_boundary
 
+      - name: Release tag guard — shell-only publisher contract
+        run: cargo test --locked -p sens-cli --test release_tag_guard -- --nocapture
+
       - name: Workspace tests
         id: workspace_tests
         run: cargo test --locked --workspace
