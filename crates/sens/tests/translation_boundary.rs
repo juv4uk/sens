@@ -405,6 +405,7 @@ fn translation_symbol_law_rejects_non_symbols_in_live_sens() {
     sens::load_core_library(&mut session)
         .expect("повний SENS Core4 має визначати чинний текст-у-символ");
     for library in [
+        include_str!("../../../lib/persistent-map.lisp"),
         include_str!("../../../lib/unify.lisp"),
         include_str!("../../../lib/reason.lisp"),
         include_str!("../../../lib/forward.lisp"),
