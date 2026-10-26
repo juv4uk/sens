@@ -1,13 +1,15 @@
 #[test]
-fn release_workflow_blocks_island_manifest_without_native_provenance_proof() {
+fn release_pipeline_excludes_unproven_island_manifest_and_compares_exact_bytes() {
     let workflow = include_str!("../../../.github/workflows/release.yml");
+    let publisher = include_str!("../../../.github/workflows/release-publish.yml");
     let manifest = include_str!("../../../packaging/islands-manifest-v1.json");
 
-    assert!(workflow.contains("packaging/islands-manifest-v1.json"));
-    assert!(workflow.contains("CLIPS_VENDOR_ARCHIVE=NOT_VERIFIED"));
-    assert!(workflow.contains("non-SHA, byte-exact provenance proof"));
-    assert!(!workflow.contains("sha256sum packaging/vendor/clips_windows_projects_642.zip"));
-    assert!(workflow.contains("islands-manifest-v1.json"));
+    assert!(!workflow.contains("islands-manifest-v1.json"));
+    assert!(!publisher.contains("islands-manifest-v1.json"));
+    assert!(publisher.contains("cmp --"));
+    assert!(!publisher.contains("python3"));
+    assert!(!publisher.contains("sha256sum"));
+
     assert!(manifest.contains("sens-islands-manifest-1"));
     assert!(manifest.contains("\"four-kernel\""));
     assert!(manifest.contains("\"common-lisp\""));
