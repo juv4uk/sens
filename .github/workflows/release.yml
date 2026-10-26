@@ -234,9 +234,9 @@ jobs:
           if-no-files-found: error
 
   release-publish:
-    name: Final SHA-pinned publish only after ALL jobs are green
-    needs: [test, publish-island-manifest, build-cli, build-msi, build-web]
-    if: needs.test.result == 'success'
+    name: Публікація лише після успіху всіх перевірок і збірок
+    needs: [test, build-cli, build-msi, build-web]
+    if: ${{ needs.test.result == 'success' && needs.build-cli.result == 'success' && needs.build-msi.result == 'success' && needs.build-web.result == 'success' }}
     uses: ./.github/workflows/release-publish.yml
     secrets: inherit
     permissions:
