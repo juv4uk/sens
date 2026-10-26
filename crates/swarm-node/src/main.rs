@@ -2595,7 +2595,9 @@ fn task_target_problem(msg: &Sexp, kind: Option<&str>) -> Option<&'static str> {
     if !matches!(kind, Some("тест" | "бенчмарк")) {
         return None;
     }
-    let fields = msg.field("ціль")?;
+    let Some(fields) = msg.field("ціль") else {
+        return Some("тест/бенчмарк потребує ціль із функцією реєстру, властивістю та класом входу");
+    };
     let target = Sexp::list(fields.to_vec());
     for field in ["функція", "властивість", "клас-входу"] {
         let Some(value) = target.field_atom(field) else {
