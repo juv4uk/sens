@@ -100,3 +100,53 @@ Vier Release-Gates grün, eines blockiert — und der Block ist berechtigt.
 ## English
 
 Four release gates green, one blocks — and the block is justified.
+
+## РЕЛІЗНИЙ СВІТЛОФОР — згенеровано й перевірено наскрізь
+
+`python3 scripts/report_t5_t5m_triplet_inventory.py --report /tmp/rep.json`
+дає `schema: sens-t5-triplet-inventory/v1`, і
+`check-release-triple-corpus.py /tmp/rep.json 0` відповідає:
+
+```
+RELEASE_BLOCKED: a physical inventory cannot certify Ukrainian semantics
+or release admission; independent exact-SHA evidence is required
+```
+
+**Це не збій — це правильна відмова.** Механічний інвентар не може засвідчити
+семантику. Моя попередня спроба дала «unknown triple proof schema» лише тому, що я
+подав **не той файл** (admission-реєстр замість інвентаря) — помилка була моя.
+
+### Числа
+
+| показник | значення |
+|---|---|
+| `.lisp`-джерел усього | **2295** |
+| з фізичною парою `.sens` | **1351** |
+| без пари | **944** |
+| — з них **програм** без пари | **884** |
+| — з них дані/коментарі | 60 |
+| фізичних пар побачено | 1471 |
+| view валідні / відсутні / небезпечні | **1471 / 0 / 0** |
+| `original_executable_migrations_certified` | **0** |
+| `release_admitted` | **0** |
+| `uk_oracle_verified` | **0** |
+| `status` | **INCOMPLETE_SOURCE_PAIRS** |
+
+### Що це означає для релізу
+
+**Справжній блокер релізу — 884 програмних `.lisp` без фізичної пари `.sens`.**
+Не реєстр, не піни, не workflow'и: усі вони зелені. Реліз не пройде, поки ці 884
+джерела не отримають канонічну пару SENS/Zig T5M.
+
+Добрі новини: **наявні 1471 пара — усі з валідними view**, нуль відсутніх і нуль
+небезпечних. Тобто механізм пар працює; бракує **покриття**, а не якості.
+
+### Три умови допуску (усі три зараз 0)
+
+1. `original_executable_migrations_certified > 0`
+2. `uk_oracle_verified > 0`
+3. `release_admitted > 0`
+
+Перші дві вимагають **незалежного доказу з точним SHA**, третя — пере-засвідчення
+admission-реєстру (див. розділ вище). **Усі три потребують native `sens`/`sens-trit`,
+яких у моєму середовищі немає** (`cargo` відсутній).
