@@ -73,11 +73,14 @@ pub fn parse_mixed_exact_domain_machine_source(
 /// Shared by ordinary Ukrainian source and path-pinned readers. Neither bare
 /// historical W8 bytes nor quoted/bound words obtain callable authority.
 fn admitted_d8_io_uk_bits(spelling: &str) -> Option<&'static str> {
+    // Called only by explicit path-pinned D8 readers. Admit the exact ratified
+    // words alongside their Ukrainian surfaces in those files only. Ordinary
+    // mixed source and quoted payloads still treat W8-shaped bits as data.
     match spelling {
-        "код-символу" => Some("11100000"),
-        "текст-у-символ" => Some("11101101"),
-        "символ-у-текст" => Some("11101110"),
-        "значення-у-текст" => Some("11110100"),
+        "код-символу" | "11100000" => Some("11100000"),
+        "текст-у-символ" | "11101101" => Some("11101101"),
+        "символ-у-текст" | "11101110" => Some("11101110"),
+        "значення-у-текст" | "11110100" => Some("11110100"),
         _ => None,
     }
 }
