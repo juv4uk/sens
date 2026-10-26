@@ -236,4 +236,11 @@ required-features = ["rust-t5-reference"]
 # Тести можуть явно підключати host-capability crate, тоді як сама бібліотека
 # sens лишається без runtime-залежностей і прямого доступу до ОС.
 sens-host = { path = "../sens-host" }
+# Тести SENS перевіряють фізичний T5M через чинний Zig-коридор
+# (`sens_cli::zig_transport`), а не через виведений Rust-кодек. Це dev-залежність:
+# сама бібліотека `sens` лишається без runtime-залежностей. Cargo дозволяє
+# dev-цикл, бо sens-cli залежить від sens лише як звичайна залежність.
+# Deutsch: dev-Abhängigkeit für den Zig-T5M-Pfad in Tests.
+# English: dev-dependency so tests reach the Zig T5M corridor.
+sens-cli = { path = "../sens-cli" }
 serde_json = "1"
