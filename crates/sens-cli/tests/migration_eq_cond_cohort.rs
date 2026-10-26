@@ -23,6 +23,12 @@ fn historical_eq_cond_images_preserve_typed_transport_without_evaluating_old_log
     for physical in [SELECT_T5, SKIP_T5] {
         let words = decode_t5m_via_zig(physical);
         let visible = open_ternary_via_zig(physical);
+        let visible_words = sens::parse_binary_source_words(&visible)
+            .expect("the visible exact-width projection parses as SENS words")
+            .into_iter()
+            .map(|token| token.word)
+            .collect::<Vec<_>>();
+        assert_eq!(visible_words, words, "display projection must preserve typed words");
         let re_encoded = zig_transport::encode_t5m_direct(&words).expect("re-encode via Zig T5M");
         assert_eq!(re_encoded, physical);
     }
