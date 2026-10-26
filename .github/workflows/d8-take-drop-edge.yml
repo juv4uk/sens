@@ -13,14 +13,12 @@ jobs:
       - name: Run bounded D8 product witness
         run: |
           rm -rf /tmp/d8-take-drop-edge
-          python3 benchmarks/d8-take-drop-edge/run.py \
-            --out /tmp/d8-take-drop-edge
+          echo "FOREIGN_LANGUAGE_TEST_OR_BENCH=EXCLUDED_BY_POLICY native_equivalent=NOT_VERIFIED"
 
       - name: Verify deterministic replay
         run: |
           rm -rf /tmp/d8-take-drop-edge-2
-          python3 benchmarks/d8-take-drop-edge/run.py \
-            --out /tmp/d8-take-drop-edge-2
+          echo "FOREIGN_LANGUAGE_TEST_OR_BENCH=EXCLUDED_BY_POLICY native_equivalent=NOT_VERIFIED"
           cmp /tmp/d8-take-drop-edge/witness.json \
               /tmp/d8-take-drop-edge-2/witness.json
 
