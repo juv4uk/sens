@@ -39,4 +39,5 @@ jobs:
         run: cargo test --locked -p sens --test domain_ladder_only_kernel
       - name: Записати коміт, перевірений цим прогоном
         shell: bash
-        run: printf 'Перевірений коміт: %s\n' "$GITHUB_SHA" >> "$GITHUB_STEP_SUMMARY"
+        run: |
+          printf 'Перевірений коміт: %s\n' "$GITHUB_SHA" >> "$GITHUB_STEP_SUMMARY"
