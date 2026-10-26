@@ -85,7 +85,7 @@ if ! grep -q 'SENS_SOURCE_FIRST_FIELD_REQUIRED' "$tmp/negative.log" || ! grep -q
   exit 1
 fi
 # The canonical T5M carrier must reject SHA-256 receipt generation.
-printf '#!/usr/bin/env sh\\nsha256sum source > source.sha256\\n' > "$tmp/scripts/execute_changed_lisp_t5m.sh"
+printf '#!/usr/bin/env sh\nsha256sum source > source.sha256\n' > "$tmp/scripts/execute_changed_lisp_t5m.sh"
 git -C "$tmp" add scripts/execute_changed_lisp_t5m.sh
 git -C "$tmp" commit -qm "negative hash-receipt witness"
 if SENS_EVENT_NAME=pull_request SENS_PR_FIRST_FIELD='SENS_SOURCE=tests/legacy/test_old.sens' bash "$gate" --root "$tmp" > "$tmp/hash-negative.log" 2>&1; then
