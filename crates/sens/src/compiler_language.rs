@@ -414,10 +414,11 @@ fn authority_sha256_from(projection: &str) -> Result<String, LanguageError> {
 
 fn verify_projection_authority(
     projection: &str,
-    authority_sha256: &str,
+    authority: &str,
 ) -> Result<(), LanguageError> {
     let expected_authority_sha = authority_sha256_from(projection)?;
-    if expected_authority_sha != authority_sha256 {
+    let actual_authority_sha = sha256_hex(authority.as_bytes());
+    if expected_authority_sha != actual_authority_sha {
         return Err(invalid_projection(
             "generated structural projection is stale against its ratified authority",
         ));
