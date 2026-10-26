@@ -1,25 +1,18 @@
-name: D10 finite Bayesian update selection
+name: "D10 finite Bayes selection — excluded by Rust/Zig/SENS language policy"
+
 on:
   workflow_dispatch:
+
+permissions:
+  contents: read
+
 jobs:
-  source-backed-research-selection:
+  policy-exclusion:
+    name: Foreign-language tests/oracles excluded (NOT_VERIFIED)
     runs-on: ubuntu-latest
-    timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
-      - name: Verify the immutable 625-based append-only history
-        run: python3 scripts/check_d10_selection_transition_history.py --self-test
-      - name: Verify Gray historical snapshot remains valid after this append
-        run: python3 scripts/check_d10_gray_word_selection.py
-      - name: Verify selected Bayesian row and reject authority leakage
-        run: python3 scripts/check_d10_finite_bayes_selection.py --self-test
-      - name: Re-run the independent exact-rational Bayes oracle
-        run: python3 -m unittest discover -s tests -p 'test_d10_finite_bayes_update.py' -v
-      - name: Test selection metadata and authority boundary
-        run: python3 -m unittest discover -s tests -p 'test_d10_finite_bayes_selection.py' -v
-      - name: D10 proposal and fill accounting gates
+      - name: Record exclusion without asserting an outcome
         run: |
-          python3 scripts/check-d10-fill-v1-seed.py
-          true
-      - name: No generated changes
-        run: git diff --exit-code
+          echo "FOREIGN_LANGUAGE_TEST=EXCLUDED_BY_POLICY"
+          echo "NATIVE_EQUIVALENT=NOT_VERIFIED"
+          echo "NO_PASS_CLAIM=MADE"

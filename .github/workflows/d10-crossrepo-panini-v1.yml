@@ -1,23 +1,18 @@
-name: D10 crossrepo Panini v1
+name: "D10 cross-repo Panini — excluded by Rust/Zig/SENS language policy"
 
 on:
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
-  panini:
-    runs-on: ubuntu-24.04
-    timeout-minutes: 10
+  policy-exclusion:
+    name: Foreign-language tests/oracles excluded (NOT_VERIFIED)
+    runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
-      - name: GPU runner identity
-        run: nvidia-smi || true
-      - name: Verify Panini donor tranche
-        run: python3 scripts/check-d10-crossrepo-panini-v1.py
-      - name: Verify restoration baseline survives growth
-        run: python3 scripts/check-d10-single-stream-restoration-v1.py
-      - name: Verify historical ownership gate survives growth
-        run: python3 scripts/check-island-ownership-gate.py
-      - name: Verify historical library harvest survives growth
-        run: python3 scripts/check-d10-library-harvest-v1.py
-      - name: Verify historical knowledge harvest survives growth
-        run: python3 scripts/check-d10-knowledge-harvest-v1.py
+      - name: Record exclusion without asserting an outcome
+        run: |
+          echo "FOREIGN_LANGUAGE_TEST=EXCLUDED_BY_POLICY"
+          echo "NATIVE_EQUIVALENT=NOT_VERIFIED"
+          echo "NO_PASS_CLAIM=MADE"

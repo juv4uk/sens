@@ -1,21 +1,18 @@
-name: D10 historical DLL unit closure
+name: "D10 DLL 1962 unit closure — excluded by Rust/Zig/SENS language policy"
 
 on:
   workflow_dispatch:
+
 permissions:
   contents: read
 
 jobs:
-  original-proof-law-real-sat-donor:
+  policy-exclusion:
+    name: Foreign-language tests/oracles excluded (NOT_VERIFIED)
     runs-on: ubuntu-latest
-    timeout-minutes: 9
     steps:
-      - uses: actions/checkout@v4
-      - name: Independent 2304 finite model and BCP fixed-point cases
-        run: python3 -m unittest discover -s tests -p test_d10_dll1962_unit_closure.py -v
-      - name: Install real SAT engine PySAT Glucose3
+      - name: Record exclusion without asserting an outcome
         run: |
-          python3 -m pip install --disable-pip-version-check --user 'python-sat==1.8.dev30'
-          python3 -c 'from pysat.solvers import Glucose3; import pysat; print("SAT donor", pysat.__version__, Glucose3)'
-      - name: Compare actual compiled propagation on 600 canonical cases
-        run: python3 tests/oracles/d10_real_pysat_unit.py
+          echo "FOREIGN_LANGUAGE_TEST=EXCLUDED_BY_POLICY"
+          echo "NATIVE_EQUIVALENT=NOT_VERIFIED"
+          echo "NO_PASS_CLAIM=MADE"
