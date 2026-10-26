@@ -19,9 +19,13 @@ digest_free_paths=(
   ".github/workflows/ci-heavy.yml"
   ".github/workflows/release-preflight.yml"
   "scripts/execute_changed_lisp_t5m.sh"
+  "scripts/prove-lisp-semantic-t5m.sh"
+  "scripts/prove-lisp-language-laws.sh"
+  "scripts/ci-rust-mechanism-checks.sh"
   "scripts/refresh-verified-t5m-pair.sh"
   "scripts/refresh-executed-t5m-pair.sh"
   "benchmarks/contest-uk/run-native.sh"
+  "benchmarks/contest-uk/mint-pending.sh"
 )
 for path in "${digest_free_paths[@]}"; do
   [[ -f "$path" ]] || continue
