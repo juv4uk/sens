@@ -23,27 +23,51 @@ cp "$law" "$tmp/positive.lisp"
 cp "$negative" "$tmp/negative.lisp"
 cp "$mutant" "$tmp/mutant.lisp"
 printf 'ВИКОНАВЕЦЬ_SENS id=%s path=%s version=%s\n' "$id" "$cli" "$("$cli" --version 2>/dev/null || echo unknown)"
-printf '1\n' > "$tmp/expected"
-if ! "$cli" --t5m-files lib/твердження.lisp "$tmp/positive.lisp" > "$tmp/actual" 2> "$tmp/positive.err"; then
-  printf 'REGRESSION id=%s layer=eval fixture=%s actual=execution-error\n' "$id" "$law" >&2
-  cat "$tmp/positive.err" >&2
+trit="${SENS_TRIT_BINARY:-target/debug/sens-trit}"
+if [[ ! -x "$trit" ]]; then
+  printf 'REGRESSION test_id=%s layer=physical-eval actual=zig-t5m-reader-missing\n' "$id" >&2
   exit 1
 fi
-if ! cmp -s "$tmp/expected" "$tmp/actual"; then
-  printf 'REGRESSION id=%s layer=eval fixture=%s expected=YES actual=wrong-verdict\n' "$id" "$law" >&2
-  printf 'actual-bytes: '; od -An -tx1 "$tmp/actual" | head -2 >&2
-  exit 1
-fi
-printf '1\n' > "$tmp/expected-negative-law"
-if ! "$cli" --t5m-files lib/твердження.lisp "$tmp/negative.lisp" > "$tmp/negative.out" 2> "$tmp/negative.err"; then
-  printf 'REGRESSION id=%s-negative layer=eval fixture=%s actual=execution-error\n' "$id" "$negative" >&2
-  cat "$tmp/negative.err" >&2
-  exit 1
-fi
-if ! cmp -s "$tmp/expected-negative-law" "$tmp/negative.out"; then
-  printf 'REGRESSION id=%s-negative layer=eval fixture=%s expected=YES actual=wrong-verdict\n' "$id" "$negative" >&2
-  exit 1
-fi
+run_core4_witness() {
+  local label="$1" source="$2" expected="$3"
+  local full="$tmp/$label-full.lisp"
+  local physical="$tmp/$label.sens"
+  local view="$tmp/$label.view"
+  local paired="$tmp/$label.paired"
+  local standalone="$tmp/$label.standalone"
+  local err="$tmp/$label.err"
+  if ! cat -- lib/твердження.lisp "$source" > "$full" ||
+     ! "$cli" --t5m-mint "$full" "$physical" >"$tmp/$label.mint.out" 2>"$tmp/$label.mint.err" ||
+     ! "$trit" open "$physical" > "$view" 2>"$tmp/$label.open.err" ||
+     ! "$trit" verify-view "$physical" >"$tmp/$label.verify.out" 2>"$tmp/$label.verify.err"; then
+    printf 'REGRESSION id=%s-%s layer=physical-mint actual=failed\n' "$id" "$label" >&2
+    cat "$tmp/$label.mint.err" "$tmp/$label.open.err" "$tmp/$label.verify.err" >&2 2>/dev/null || true
+    exit 1
+  fi
+  if ! "$cli" --t5m-pair "$full" "$physical" --core4-runtime >"$paired" 2>"$err"; then
+    printf 'REGRESSION id=%s-%s layer=paired-core4 actual=execution-error\n' "$id" "$label" >&2
+    cat "$err" >&2
+    exit 1
+  fi
+  if ! "$trit" eval-core4 "$physical" >"$standalone" 2>"$tmp/$label.standalone.err"; then
+    printf 'REGRESSION id=%s-%s layer=standalone-core4 actual=execution-error\n' "$id" "$label" >&2
+    cat "$tmp/$label.standalone.err" >&2
+    exit 1
+  fi
+  if ! cmp -s "$paired" "$standalone"; then
+    printf 'REGRESSION id=%s-%s layer=paired-standalone actual=output-drift\n' "$id" "$label" >&2
+    exit 1
+  fi
+  printf '%s\n' "$expected" > "$tmp/$label.expected"
+  if ! cmp -s "$tmp/$label.expected" "$standalone"; then
+    printf 'REGRESSION id=%s-%s layer=eval fixture=%s expected=%s actual=wrong-verdict\n' "$id" "$label" "$source" "$expected" >&2
+    printf 'actual-bytes: '; od -An -tx1 "$standalone" | head -2 >&2
+    exit 1
+  fi
+  printf 'SENS_T5M_CORE4_WITNESS_PASS id=%s-%s source=%s physical=ZIG_VERIFIED paired=PASS standalone=PASS verdict=%s\n' "$id" "$label" "$source" "$expected"
+}
+run_core4_witness positive "$tmp/positive.lisp" 1
+run_core4_witness negative-law "$tmp/negative.lisp" 1
 printf 'НЕГАТИВНИЙ_СВІДОК id=%s-negative fixture=%s verdict=yes\n' "$id" "$negative"
 printf '0\n' > "$tmp/expected-mutant"
 if ! "$cli" "$tmp/mutant.lisp" > "$tmp/mutant.out" 2> "$tmp/mutant.err"; then
