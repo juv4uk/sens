@@ -848,8 +848,7 @@ mod tests {
         let projected = project_ukr_decimal_integer_literals(&parsed, invalid)
             .expect("нуль також є допустимим цілим операндом D12+");
         let error = crate::eval_parsed_expressions(&projected, &mut session)
-            .err()
-            .expect("SENS сам забороняє ділення на нуль");
+            .expect_err("SENS сам забороняє ділення на нуль");
         assert_eq!(error.kind, ErrorKind::DivisionByZero);
     }
 }
