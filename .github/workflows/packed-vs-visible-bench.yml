@@ -132,13 +132,9 @@ jobs:
           PY
           cat artifacts/performance/runtime-summary.md >> "$GITHUB_STEP_SUMMARY"
 
-      - name: Measure actual new-process, bare Session and Lisp-owned Core4 startup
-        run: |
-          python3 benchmarks/packed-vs-visible/cold_start.py \
-            --probe target/release/examples/sens_cold_start_probe \
-            --samples 11 --warmup 2 \
-            --out artifacts/performance/cold-start.json
-          cat artifacts/performance/cold-start-summary.md >> "$GITHUB_STEP_SUMMARY"
+      - name: "Measure actual new-process, bare Session and Lisp-owned Core4 startup — EXCLUDED (NOT_VERIFIED)"
+        shell: bash
+        run: echo "PYTHON_TESTS_AND_BENCHMARKS=EXCLUDED_BY_LANGUAGE_POLICY native_equivalent=NOT_VERIFIED"
 
       - name: Measure controlled cached-vs-uncached full Core4 bootstrap
         shell: bash
