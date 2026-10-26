@@ -46,6 +46,15 @@ fn string_value(value: &str) -> Expr {
     }
 }
 
+/// Хост-маркер як СИМВОЛ — саме цю форму доводив тест f6_quoted_marker_matches_native_source
+/// (видалявся комітом 3c2e259b7). Нативне SENS-цитування (як-є accepted) дає символ, не D7-список.
+fn symbol_value(value: &str) -> Expr {
+    Expr {
+        kind: ExprKind::Symbol(Rc::from(value)),
+        span: Span::default(),
+    }
+}
+
 fn d7_text_data(value: &str) -> Expr {
     assert!(value.is_ascii(), "F6 protocol marker must be ASCII D7 data");
     Expr {
@@ -138,7 +147,7 @@ fn main() {
     // checks only the resulting exact D1 answer.
     let status = call(exact_d3(0b100), vec![reconstruction.clone()]);
     // READ повертає текст як список точних D7-слів; звіряємо саме цей носій.
-    let expected = call(exact_d3(0b001), vec![d7_text_data("accepted")]);
+    let expected = call(exact_d3(0b001), vec![symbol_value("accepted")]);
     let accepted = call(exact_d8_equal(), vec![status, expected]);
     let verdict = eval_parsed_expressions(&[accepted], &mut session)
         .unwrap_or_else(|error| {
@@ -162,7 +171,7 @@ fn main() {
             exact_d3(0b011), // D3 CDR of the first (format . value) pair
             vec![call(exact_d3(0b100), vec![root_package.clone()])],
         );
-        let source_marker = call(exact_d3(0b001), vec![d7_text_data("wsm-fs-root")]);
+        let source_marker = call(exact_d3(0b001), vec![symbol_value("wsm-fs-root")]);
         let read_marker = call(exact_d8_read(), vec![string_value("wsm-fs-root")]);
         let format_proof = d4_list(vec![
             call(exact_d8_equal(), vec![format_value.clone(), source_marker]),
@@ -269,5 +278,28 @@ mod tests {
         let mut reader = Cursor::new(bytes);
         assert!(read_two_records(&mut reader).is_err());
         assert_eq!(reader.position(), (MAX_WIRE_BYTES + 1) as u64);
+    }
+
+    /// ПОВЕРНУТО (видалявся комітом 3c2e259b7 разом із заміною symbol_value -> d7_text_data).
+    /// Доводить, що ПОТОЧНИЙ виробничий хелпер (d7_text_data) мусить збігатися з НАТИВНИМ SENS-цитуванням (як-є accepted). Якщо падає — виробниче представлення маркера хибне.
+    #[test]
+    fn f6_quoted_marker_matches_native_source() {
+        let mut session = Session {
+            environment: Environment::root(),
+        };
+        load_core_library(&mut session).expect("native SENS Core");
+        let expected_from_source = sens::eval_program("(як-є accepted)", &mut session)
+            .expect("native SENS quoted symbol")
+            .value;
+        let expected_from_wire = eval_parsed_expressions(
+            &[call(exact_d3(0b001), vec![symbol_value("accepted")])],
+            &mut session,
+        )
+        .expect("native D3:001 SENS QUOTE")
+        .value;
+        assert_eq!(
+            expected_from_wire, expected_from_source,
+            "test_id=F6-QUOTED-MARKER layer=SENS expected=source-quote actual=transport-AST"
+        );
     }
 }
