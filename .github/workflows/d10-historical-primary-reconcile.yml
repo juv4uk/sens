@@ -1,13 +1,18 @@
-name: D10 historical source manual review guard
+name: "D10 historical primary reconcile — excluded by Rust/Zig/SENS language policy"
+
 on:
   workflow_dispatch:
+
+permissions:
+  contents: read
+
 jobs:
-  history-safety:
+  policy-exclusion:
+    name: Foreign-language tests/research excluded (NOT_VERIFIED)
     runs-on: ubuntu-latest
-    timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
-      - name: Check 13 historical HOLDs, legacy reconciliation and negative cases
-        run: python3 scripts/check_d10_historical_primary_reconcile.py --self-test
-      - name: Verify no source edits from checker
-        run: git diff --exit-code
+      - name: Record exclusion without asserting an outcome
+        run: |
+          echo "FOREIGN_LANGUAGE_TEST=EXCLUDED_BY_POLICY"
+          echo "NATIVE_EQUIVALENT=NOT_VERIFIED"
+          echo "NO_PASS_CLAIM=MADE"

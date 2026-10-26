@@ -1,14 +1,18 @@
-name: D10 Interlisp DWIM safe correction research
+name: "D10 InterLisp DWIM suggestion — excluded by Rust/Zig/SENS language policy"
+
 on:
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
-  fail-closed-dwim-research:
+  policy-exclusion:
+    name: Foreign-language tests/research excluded (NOT_VERIFIED)
     runs-on: ubuntu-latest
-    timeout-minutes: 8
     steps:
-      - uses: actions/checkout@v4
-      - name: Hard domain and no-ratification gate
-        run: python3 -B scripts/check_d10_interlisp_dwim_safe_suggestion.py --verify-repo
-      - name: Reference witness + adversarial tests
-        run: python3 -m unittest discover -s tests -p 'test_d10_interlisp_dwim_safe_suggestion.py' -v
+      - name: Record exclusion without asserting an outcome
+        run: |
+          echo "FOREIGN_LANGUAGE_TEST=EXCLUDED_BY_POLICY"
+          echo "NATIVE_EQUIVALENT=NOT_VERIFIED"
+          echo "NO_PASS_CLAIM=MADE"

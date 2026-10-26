@@ -1,15 +1,18 @@
-name: D10 hobby clock radio exact math laws
+name: "D10 hobby clock radio selection — excluded by Rust/Zig/SENS language policy"
+
 on:
   workflow_dispatch:
+
+permissions:
+  contents: read
+
 jobs:
-  clock-radio-laws:
+  policy-exclusion:
+    name: Foreign-language tests/research excluded (NOT_VERIFIED)
     runs-on: ubuntu-latest
-    timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
-      - name: Verify monotonic 630->634 research selection and exact source models
-        run: python3 scripts/check_d10_hobby_clock_radio_selection.py --self-test
-      - name: Verify all prior D10 transitions
-        run: python3 scripts/check_d10_selection_transition_history.py --self-test
-      - name: Ensure no test mutates checked-in source
-        run: git diff --exit-code
+      - name: Record exclusion without asserting an outcome
+        run: |
+          echo "FOREIGN_LANGUAGE_TEST=EXCLUDED_BY_POLICY"
+          echo "NATIVE_EQUIVALENT=NOT_VERIFIED"
+          echo "NO_PASS_CLAIM=MADE"

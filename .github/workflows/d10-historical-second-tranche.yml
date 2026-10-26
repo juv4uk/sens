@@ -1,13 +1,18 @@
-name: D10 historical second tranche monotonic 638
+name: "D10 historical second tranche — excluded by Rust/Zig/SENS language policy"
+
 on:
   workflow_dispatch:
+
+permissions:
+  contents: read
+
 jobs:
-  semantic-proof:
+  policy-exclusion:
+    name: Foreign-language tests/research excluded (NOT_VERIFIED)
     runs-on: ubuntu-latest
-    timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
-      - name: Check 638-row monotonic D10 and adversarial bit/hash witnesses
-        run: python3 scripts/check_d10_historical_second_tranche.py --self-test
-      - name: Check no mutation of source tree
-        run: git diff --exit-code
+      - name: Record exclusion without asserting an outcome
+        run: |
+          echo "FOREIGN_LANGUAGE_TEST=EXCLUDED_BY_POLICY"
+          echo "NATIVE_EQUIVALENT=NOT_VERIFIED"
+          echo "NO_PASS_CLAIM=MADE"

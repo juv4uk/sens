@@ -1,17 +1,18 @@
-name: D10 interdisciplinary science research admission
+name: "D10 interdisciplinary science — excluded by Rust/Zig/SENS language policy"
+
 on:
   workflow_dispatch:
+
+permissions:
+  contents: read
+
 jobs:
-  research-law-oracle:
+  policy-exclusion:
+    name: Foreign-language tests/research excluded (NOT_VERIFIED)
     runs-on: ubuntu-latest
-    timeout-minutes: 8
     steps:
-      - uses: actions/checkout@v4
-      - name: Exact rational scientific oracle, sourced identities, anti-forgery negatives
-        run: python3 scripts/check_d10_science_interests_v1.py
-      - name: Canonical selected state and append-only Git SHA history
+      - name: Record exclusion without asserting an outcome
         run: |
-          python3 scripts/check-d10-fill-v1-seed.py
-          python3 scripts/check_d10_selection_transition_history.py --self-test
-      - name: First historical admission and original 625 unchanged
-        run: python3 scripts/check_d10_historical_admission_batch1.py --self-test
+          echo "FOREIGN_LANGUAGE_TEST=EXCLUDED_BY_POLICY"
+          echo "NATIVE_EQUIVALENT=NOT_VERIFIED"
+          echo "NO_PASS_CLAIM=MADE"

@@ -1,4 +1,4 @@
-name: D10 historical hobby source-law replay
+name: "D10 hobbies source laws replay — excluded by Rust/Zig/SENS language policy"
 
 on:
   workflow_dispatch:
@@ -7,14 +7,12 @@ permissions:
   contents: read
 
 jobs:
-  historical-hobby-model:
-    runs-on: ubuntu-24.04
-    timeout-minutes: 10
+  policy-exclusion:
+    name: Foreign-language tests/research excluded (NOT_VERIFIED)
+    runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - name: Verify preserved source-pinned proposal-only metadata and independent models
-        run: python3 -m unittest discover -s tests -p 'test_d10_hobbies_source_laws_v1.py' -v
-      - name: Evidence boundary
+      - name: Record exclusion without asserting an outcome
         run: |
-          echo "## Historical D10 hobby source-law replay" >> "$GITHUB_STEP_SUMMARY"
-          echo "Independent model checks only; no donor-runtime parity, selection, ratification, coordinate or GPU proof." >> "$GITHUB_STEP_SUMMARY"
+          echo "FOREIGN_LANGUAGE_TEST=EXCLUDED_BY_POLICY"
+          echo "NATIVE_EQUIVALENT=NOT_VERIFIED"
+          echo "NO_PASS_CLAIM=MADE"
