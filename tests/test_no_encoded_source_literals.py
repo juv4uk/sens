@@ -245,12 +245,12 @@ class EncodedSourceLiteralTests(unittest.TestCase):
         row = (
             '((expr . "(частка (частка (частка 5 6) 8) 7)") '
             '(id . "F-8bc31cae9e7e39b9") (expected . "5/336") '
-            '(tier . 2) (axioms . (S1)))\\n'
+            '(tier . 2) (axioms . (S1)))\n'
         )
         self.assertEqual(CHECK.find_forbidden_literals(row, path=relative), [])
         # The exemption is only for the record's numeric tier field, not a
         # raw numeric operand accidentally placed outside the expr string.
-        unsafe = row + "(виконати 3)\\n"
+        unsafe = row + "(виконати 3)\n"
         self.assertEqual(
             [(item.token, item.reason) for item in CHECK.find_forbidden_literals(unsafe, path=relative)],
             [("3", "numeric source literal")],
