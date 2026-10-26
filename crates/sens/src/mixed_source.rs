@@ -296,6 +296,17 @@ fn lift_pinned_d9_language_calls(
             span,
         });
     }
+    // The Ukrainian quote carrier can arrive as its exact source spelling
+    // rather than an already-lifted D3 identity. Lift only its single payload
+    // with the same ratified D4-data rule; unknown names remain inert data.
+    if spelling == Some("як-є") && lifted.len() == 2 {
+        let mut quoted = items.to_vec();
+        quoted[1] = lift_quoted_d4_identity_data(source, quoted[1].clone(), depth + 1)?;
+        return Ok(Expr {
+            kind: ExprKind::List(Rc::from(quoted.into_boxed_slice())),
+            span,
+        });
+    }
     if spelling.is_some_and(|s| s.len() == 9 && s.bytes().all(|b| matches!(b, b'0' | b'1'))) {
         let word = parse_binary_source_words(spelling.expect("D9 spelling"))?[0].word;
         let identity = DomainIdentity::from_source_word(word);
