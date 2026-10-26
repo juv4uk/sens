@@ -160,28 +160,25 @@ jobs:
           toolchain: "1.99.0"
       - uses: Swatinem/rust-cache@49a0bdc70d2e1b713ca9e2869b211fcce03d3c1c # v2
 
-      - name: Download and hash CLIPS 6.4.2 Windows runtime archive
+      - name: Download and hash CLIPS 6.4.2 Windows projects archive
         shell: bash
         run: |
           set -euo pipefail
           mkdir -p packaging/vendor
-          curl -fsSL -o packaging/vendor/clips_windows_x86_64_cli.zip \
-            "https://sourceforge.net/projects/clipsrules/files/CLIPS/6.4.2/clips_windows_x86_64_cli.zip/download"
-          python3 - <<'PY'
-          import hashlib, pathlib
-          p = pathlib.Path("packaging/vendor/clips_windows_x86_64_cli.zip")
-          digest = hashlib.sha256(p.read_bytes()).hexdigest()
-          print(f"CLIPS_WINDOWS_SHA256={digest}")
-          pathlib.Path("clips_windows_sha256.txt").write_text(digest + "\n", encoding="utf-8")
-          PY
+          curl -fsSL -o packaging/vendor/clips_windows_projects_642.zip \
+            "https://sourceforge.net/projects/clipsrules/files/CLIPS/6.4.2/clips_windows_projects_642.zip/download"
+          sha256sum packaging/vendor/clips_windows_projects_642.zip | awk '{print $1}' > clips_windows_sha256.txt
+          cat clips_windows_sha256.txt
 
-      - name: Materialize release manifest with verified asset hashes
+      - name: Verify pinned CLIPS archive matches manifest
         shell: bash
         run: |
           set -euo pipefail
-          python3 scripts/generate_islands_manifest.py \
-            --output packaging/islands-manifest-v1.json \
-            --clips-windows-sha256 "$(cat clips_windows_sha256.txt)"
+          expected="$(jq -r '.islands[] | select(.key=="clips") | .platforms[] | select(.target=="windows-x86_64") | .sha256' packaging/islands-manifest-v1.json)"
+          actual="$(tr -d '[:space:]' < clips_windows_sha256.txt)"
+          test -n "$expected"
+          test "$actual" = "$expected"
+          echo "CLIPS_SHA256_OK=$actual"
 
       - name: Stage manifest and installer (not a public release)
         shell: bash
@@ -229,6 +226,7 @@ jobs:
         with:
           toolchain: "1.99.0"
           targets: ${{ matrix.target }}
+      - uses: ./.github/actions/install-zig
       - uses: Swatinem/rust-cache@49a0bdc70d2e1b713ca9e2869b211fcce03d3c1c # v2
         with:
           key: ${{ matrix.target }}
@@ -270,6 +268,7 @@ jobs:
       - uses: dtolnay/rust-toolchain@1.99.0
         with:
           toolchain: "1.99.0"
+      - uses: ./.github/actions/install-zig
       - uses: Swatinem/rust-cache@49a0bdc70d2e1b713ca9e2869b211fcce03d3c1c # v2
 
       - name: Build
