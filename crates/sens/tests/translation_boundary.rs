@@ -77,10 +77,10 @@ fn translation_reads_current_knowledge_journal_in_real_sens() {
     // Доказова різниця: до повідомлення журнал порожній, після нього
     // український reader бачить поточну версію; протилежна клауза
     // відхиляється справжнім SENS, а не лексичною перевіркою Python.
-    // Макрос приймає список клауз: (((not? мета))), а не одну ((not? мета)).
+    // Макрос приймає список клауз: (((хибне? мета))), а не одну ((хибне? мета)).
     let source = r#"
         (визначити журнал-до (поточний-журнал-знань))
-        (повідомити-знання (як-є corpus) (як-є (((not? (human socrates))))))
+        (повідомити-знання (як-є corpus) (як-є (((хибне? (human socrates))))))
         (список
           (порожній? журнал-до)
           (хибне? (порожній? (поточний-журнал-знань)))
@@ -101,9 +101,9 @@ fn world_direct_opposite_only_facts_not_unproved_rules() {
     // факт протилежності відхиляється; голова правила з недоведеною
     // передумовою не стає доказом самої себе.
     for (clauses, expected) in [
-        ("(((not? (human socrates))))", "conflict"),
+        ("(((хибне? (human socrates))))", "conflict"),
         (
-            "(((not? (human socrates)) (unknown-premise socrates)))",
+            "(((хибне? (human socrates)) (unknown-premise socrates)))",
             "accepted",
         ),
     ] {
@@ -288,7 +288,7 @@ fn translator_refusal_is_recordable_evidence_and_never_knowledge() {
 fn existing_explicit_opposite_overrules_an_external_candidate() {
     // Явний заперечний факт має правильну вкладеність списку клауз.
     let source = r#"
-        (повідомити-знання (як-є corpus) (як-є (((not? (human socrates))))))
+        (повідомити-знання (як-є corpus) (як-є (((хибне? (human socrates))))))
         (визначити before журнал-знань)
         (визначити proposal
           (як-є (translation-1 candidate clause
