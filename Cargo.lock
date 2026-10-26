@@ -669,7 +669,6 @@ dependencies = [
 name = "sens"
 version = "0.42.1"
 dependencies = [
- "sens-cli",
  "sens-host",
  "serde_json",
 ]
