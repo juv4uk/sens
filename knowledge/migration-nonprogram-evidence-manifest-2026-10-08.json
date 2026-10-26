@@ -37,6 +37,14 @@
     {
       "path": "tests/fixtures/semantic-authority-guard/allowed-lisp-host-evidence.lisp",
       "git_blob_sha1": "e1abc979d8a300bfeb6808607659823fc2571f30"
+    },
+    {
+      "path": "lib/surface/uk-sa-coverage.lisp",
+      "git_blob_sha1": "17671f4579a83e9d569031376b702866165bf8cd"
+    },
+    {
+      "path": "lib/domains/archive/d11-rejected-43.lisp",
+      "git_blob_sha1": "2cc87c897ad07ebf540cfe369de2c4a69a657c98"
     }
   ]
 }
