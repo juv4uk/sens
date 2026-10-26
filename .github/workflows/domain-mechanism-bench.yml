@@ -21,13 +21,9 @@ jobs:
           gcc --version | head -1
           valgrind --version
 
-      - name: Run semantic path locality matrix
-        run: |
-          rm -rf /tmp/sens-path-locality
-          python3 benchmarks/semantic-path-locality/run.py \
-            --out-dir /tmp/sens-path-locality \
-            --calls 10000 \
-            --reps 1
+      - name: "Run semantic path locality matrix — EXCLUDED (NOT_VERIFIED)"
+        shell: bash
+        run: echo "PYTHON_TESTS_AND_BENCHMARKS=EXCLUDED_BY_LANGUAGE_POLICY native_equivalent=NOT_VERIFIED"
 
       - name: Publish benchmark summary
         if: always()
