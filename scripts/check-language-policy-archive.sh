@@ -21,6 +21,7 @@ digest_free_paths=(
   "scripts/ci-rust-mechanism-checks.sh"
   "scripts/refresh-verified-t5m-pair.sh"
   "scripts/refresh-executed-t5m-pair.sh"
+  "benchmarks/contest-uk/judge.sh"
   "benchmarks/contest-uk/run-native.sh"
   "benchmarks/contest-uk/mint-pending.sh"
 )
