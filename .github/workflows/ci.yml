@@ -29,6 +29,16 @@ jobs:
           # Без цього fetch окремого попереднього SHA вичерпував 60 с.
           fetch-depth: 2
 
+      - name: Мовна межа — JSON/SHA не є викличними формами SENS
+        shell: bash
+        run: |
+          set -euo pipefail
+          files=(lib/domains/d9.lisp lib/surface/uk-sa-coverage.lisp contracts/d9-ratification.lisp knowledge/d9-ratified.json docs/generated/function-table.md)
+          if grep -nEi 'json-parse|sha256-hex|JSON-PARSE|SHA256-HEX' "${files[@]}"; then
+            echo "::error title=SENS_LANGUAGE_BOUNDARY::Retired external utility name leaked into active D9 surfaces."
+            exit 1
+          fi
+          echo "SENS_LANGUAGE_BOUNDARY=PASS json_callable=false sha256_callable=false"
       - name: Мовна політика main — аудит усього відстежуваного дерева
         shell: bash
         run: |

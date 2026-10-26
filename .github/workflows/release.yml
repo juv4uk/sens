@@ -43,19 +43,29 @@ jobs:
         with:
           toolchain: "1.99.0"
       - uses: Swatinem/rust-cache@49a0bdc70d2e1b713ca9e2869b211fcce03d3c1c # v2
+      - name: Мовна межа — JSON/SHA не є викличними формами SENS
+        shell: bash
+        run: |
+          set -euo pipefail
+          files=(lib/domains/d9.lisp lib/surface/uk-sa-coverage.lisp contracts/d9-ratification.lisp knowledge/d9-ratified.json docs/generated/function-table.md)
+          if grep -nEi 'json-parse|sha256-hex|JSON-PARSE|SHA256-HEX' "${files[@]}"; then
+            echo "::error title=SENS_LANGUAGE_BOUNDARY::Retired external utility name leaked into active D9 surfaces."
+            exit 1
+          fi
+          echo "SENS_LANGUAGE_BOUNDARY=PASS json_callable=false sha256_callable=false"
       - name: Sterile Zig corridor (Rust↔SENS only via Zig ABI v2)
         run: |
           set -euo pipefail
           python3 scripts/check_sterile_zig_corridor.py
-          python3 -m unittest tests.test_sterile_zig_corridor -v
+          echo "PYTHON_TEST=EXCLUDED_BY_POLICY native_equivalent=NOT_VERIFIED"
           python3 scripts/check_rust_sens_zig_corridor.py .
-          python3 -m unittest tests.test_check_rust_sens_zig_corridor -v
+          echo "PYTHON_TEST=EXCLUDED_BY_POLICY native_equivalent=NOT_VERIFIED"
           python3 scripts/check_rust_sens_corridor_coverage.py .
-          python3 -m unittest tests.test_check_rust_sens_corridor_coverage -v
+          echo "PYTHON_TEST=EXCLUDED_BY_POLICY native_equivalent=NOT_VERIFIED"
           python3 scripts/check_corridor_axiom_binding.py .
-          python3 -m unittest tests.test_check_corridor_axiom_binding -v
+          echo "PYTHON_TEST=EXCLUDED_BY_POLICY native_equivalent=NOT_VERIFIED"
           python3 scripts/report_rust_zig_sens_boundary.py
-          python3 -m unittest tests.test_rust_zig_sens_boundary -v
+          echo "PYTHON_TEST=EXCLUDED_BY_POLICY native_equivalent=NOT_VERIFIED"
           python3 scripts/migration-zig-gate.py --require-zig
 
       - name: Release version alignment (gate #1 mechanical)
@@ -70,7 +80,7 @@ jobs:
         run: |
           set -euo pipefail
           python3 scripts/verify_release_tag.py "$RELEASE_TAG"
-          python3 -m unittest discover -s packaging/tests -v
+          echo "PYTHON_TEST=EXCLUDED_BY_POLICY native_equivalent=NOT_VERIFIED"
       - name: Узгодженість версій усіх релізних crates
         run: cargo test --locked -p sens-lsp --test release_parity
       - name: translation boundary regression
@@ -103,7 +113,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          python3 -m unittest discover -s tests -p test_check_release_triple_corpus.py -v
+          echo "PYTHON_TEST=EXCLUDED_BY_POLICY native_equivalent=NOT_VERIFIED"
           status=0
           python3 scripts/report_t5_t5m_triplet_inventory.py . \
             --strict \
@@ -127,6 +137,13 @@ jobs:
 
       - name: focused release clippy
         run: cargo clippy --locked -p sens -p sens-cli --all-targets -- -D warnings
+
+      - name: Release gate — excluded Python safety tests remain NOT_VERIFIED
+        shell: bash
+        run: |
+          echo "RELEASE_PYTHON_SAFETY_TESTS=EXCLUDED_BY_POLICY native_equivalent=NOT_VERIFIED"
+          echo "::error title=RELEASE_NOT_VERIFIED::Publication remains blocked until native Rust/Zig/SENS proofs replace excluded Python safety tests."
+          exit 1
 
   publish-island-manifest:
     name: Publish generated self-bootstrap island manifest

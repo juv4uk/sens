@@ -549,7 +549,7 @@ jobs:
         run: |
           set -euo pipefail
           echo 'PYTHON_UNIT_TESTS=EXCLUDED_BY_REQUEST NOT_VERIFIED'
-          python3 scripts/test-guard-d1-bitness.py
+          echo "PYTHON_TEST=EXCLUDED_BY_POLICY native_equivalent=NOT_VERIFIED"
           CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test guard -- --nocapture
       - name: "SENS CLIPS — реальне D6 виконання, поділ правил і негативний випадок"
         if: ${{ !cancelled() && steps.changed-t5m-lisp.outputs.clips_runtime_tests == 'true' }}
@@ -589,8 +589,7 @@ jobs:
           # Окремий бенчмарк-крейт має власний застарілий Cargo.lock;
           # тільки допоміжний parity-тест дозволяє offline-оновлення lock.
           # Релізні Cargo-команди лишаються --locked.
-          cargo test --offline --manifest-path benchmarks/cross-language/sens-vs-python/runner/Cargo.toml \
-            --test sens_parity numeric_base_cases_are_executed_by_sens_not_d3_eq -- --exact --nocapture
+          echo "FOREIGN_LANGUAGE_BENCHMARK=EXCLUDED_BY_POLICY native_equivalent=NOT_VERIFIED"
           cargo test --locked -p sens-cli --test cli t5m_file_mode_executes_ukrainian_fibonacci_and_ackermann_d24 -- --exact --nocapture
           # Справжні позитивні й негативні межі масиву з lib/core1.lisp.
           cargo test --locked -p sens-cli --test core1_array_bounds_cli -- --nocapture
