@@ -109,5 +109,20 @@ jobs:
           git diff --cached --stat
 
           git commit -m "Lisp → SENS: перекарбовано змінені джерела (пуш)"
-          git push origin HEAD:main
-          echo "LISP_TO_SENS_PUSHED sha=$(git rev-parse HEAD)"
+
+          # main рухається щохвилини (рій). Пуш без rebase відхиляється
+          # non-fast-forward — саме це й валило крок коміту.
+          for attempt in 1 2 3 4 5; do
+            if git push origin HEAD:main 2>/dev/null; then
+              echo "LISP_TO_SENS_PUSHED attempt=$attempt sha=$(git rev-parse HEAD)"
+              exit 0
+            fi
+            echo "LISP_TO_SENS_PUSH_RETRY attempt=$attempt (main рухається)"
+            if ! git pull --rebase --autostash origin main; then
+              git rebase --abort || true
+              echo "::error::LISP_TO_SENS_REBASE_FAILED attempt=$attempt"
+              exit 1
+            fi
+          done
+          echo "::error::LISP_TO_SENS_PUSH_RACE after 5 attempts; новіший main перекарбує сам"
+          exit 1
