@@ -9,10 +9,8 @@ jobs:
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
-      - name: Test polarity, source preservation and fail-closed staging — EXCLUDED (NOT_VERIFIED)
-        if: false
-        shell: bash
-        run: echo "FOREIGN_LANGUAGE_TEST_BENCH=EXCLUDED_BY_POLICY native_equivalent=NOT_VERIFIED"
+      - name: Test polarity, source preservation and fail-closed staging
+        run: python3 scripts/test_cond_modernize.py
       - name: Audit active library parse completeness (read-only)
         shell: bash
         run: |
