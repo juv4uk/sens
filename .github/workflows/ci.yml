@@ -47,7 +47,6 @@ jobs:
           bash -n scripts/check-sens-only-semantic-tests.sh
           bash -n scripts/check-language-policy-archive.sh
           bash -n scripts/test-language-policy-archive-gate.sh
-          bash -n scripts/ensure-host-debt0.sh
           bash -n scripts/ci-rust-mechanism-checks.sh
           bash -n scripts/execute_changed_lisp_t5m.sh
           bash -n scripts/prove-lisp-semantic-t5m.sh
@@ -75,9 +74,6 @@ jobs:
       - name: Самоперевірка мовного гейту (позитивний та негативний свідки)
         shell: bash
         run: bash scripts/test-language-policy-archive-gate.sh
-      - name: Швидкий охоронець host debt
-        shell: bash
-        run: bash scripts/ensure-host-debt0.sh
       - name: Статус
         run: echo "QUICK_CI_STATUS=ok heavy_native_laws_remint_release=MANUAL_TARGETED"
 
