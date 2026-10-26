@@ -130,11 +130,11 @@ jobs:
         run: |
           set -euo pipefail
           binary="target/${{ matrix.target }}/release/${{ matrix.artifact_name }}"
-          if readelf --version-info "$binary" | grep -Eq 'GLIBC_2\\.(3[6-9]|[4-9][0-9])'; then
+          if readelf --version-info "$binary" | grep -Eq 'GLIBC_2\.(3[6-9]|[4-9][0-9])'; then
             echo "::error title=RELEASE_GLIBC_TOO_NEW::Linux asset must remain compatible with GLIBC_2.35" >&2
             exit 1
           fi
-          if objdump -d "$binary" | grep -Eq '\\bzmm[0-9]+'; then
+          if objdump -d "$binary" | grep -Eq '\bzmm[0-9]+'; then
             echo "::error title=RELEASE_AVX512_FORBIDDEN::Linux asset contains a ZMM instruction and is not baseline x86-64" >&2
             exit 1
           fi
