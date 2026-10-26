@@ -11,6 +11,12 @@ while (($#)); do
   esac
 done
 cd "$root"
+# Тритова програма та шлях джерела є ідентичністю; T5M-носій не створює SHA-256 квитанцій.
+canonical_carrier="scripts/execute_changed_lisp_t5m.sh"
+if [[ -f "$canonical_carrier" ]] && grep -nEi 'sha256sum|sha256-hex|\.sha256([[:space:]]|$)' "$canonical_carrier"; then
+  echo "LANGUAGE_POLICY_ARCHIVE=FAIL canonical_SENS_carrier_creates_hash_receipt" >&2
+  exit 1
+fi
 registry="docs/language-policy-archive.md"
 if [[ ! -f "$registry" ]]; then
   echo "LANGUAGE_POLICY_ARCHIVE=FAIL missing_registry=$registry"
