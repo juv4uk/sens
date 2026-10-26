@@ -156,13 +156,21 @@ jobs:
             DEST="${DEST}.exe"
           fi
           cp "$SRC" "$DEST"
+          # Хеш публікується поруч з ассетом; install.sh звіряє його ДО запуску.
+          if command -v sha256sum >/dev/null 2>&1; then
+            sha256sum "$DEST" | awk '{print $1}' > "${DEST}.sha256"
+          else
+            shasum -a 256 "$DEST" | awk '{print $1}' > "${DEST}.sha256"
+          fi
           echo "ASSET_PATH=$DEST" >> "$GITHUB_ENV"
 
       - name: Stage CLI asset (one unique artifact per matrix leg)
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: release-cli-${{ matrix.asset_suffix }}
-          path: ${{ env.ASSET_PATH }}
+          path: |
+            ${{ env.ASSET_PATH }}
+            ${{ env.ASSET_PATH }}.sha256
           if-no-files-found: error
 
   build-msi:
