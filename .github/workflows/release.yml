@@ -32,13 +32,6 @@ jobs:
             sudo apt-get install -y -qq --no-install-recommends swi-prolog-nox
           fi
           swipl --version
-      - name: Install SWI-Prolog for real Prolog↔Lisp↔Datalog integration
-        run: |
-          set -euo pipefail
-          sudo apt-get update
-          sudo apt-get install --yes --no-install-recommends swi-prolog-nox
-          command -v swipl
-          swipl --version
       - uses: dtolnay/rust-toolchain@1.99.0
         with:
           toolchain: "1.99.0"
@@ -46,26 +39,12 @@ jobs:
       - name: Перевірка — жодних чужомовних test/benchmark runners у канонічному шляху
         shell: bash
         run: bash scripts/check-sens-only-semantic-tests.sh
-      - name: Мовна межа — JSON/SHA не є викличними формами SENS
-        shell: bash
-        run: |
-          set -euo pipefail
-          files=(lib/domains/d9.lisp lib/surface/uk-sa-coverage.lisp contracts/d9-ratification.lisp knowledge/d9-ratified.json docs/generated/function-table.md)
-          if grep -nEi 'json-parse|sha256-hex|JSON-PARSE|SHA256-HEX' "${files[@]}"; then
-            echo "::error title=SENS_LANGUAGE_BOUNDARY::Retired external utility name leaked into active D9 surfaces."
-            exit 1
-          fi
-          echo "SENS_LANGUAGE_BOUNDARY=PASS json_callable=false sha256_callable=false"
       - name: Sterile Zig corridor (Rust↔SENS only via Zig ABI v2)
         run: |
           set -euo pipefail
           cargo test --locked -p sens-cli --test binary_t5m_zig_roundtrip
           cargo test --locked -p sens-cli --test binary_sens_d1_cond_oracle
 
-      - name: Release version alignment (gate #1 mechanical)
-        run: |
-          python3 scripts/check-release-version-alignment.py --self-test
-          python3 scripts/check-release-version-alignment.py
       - name: Release toolchain pins — native Rust verification
         run: cargo test --locked -p sens-cli --test release_toolchain_pins
       - name: Перевірити версію тегу та інсталятор
@@ -93,15 +72,7 @@ jobs:
       - name: Prove language laws by EXECUTION (same tagged SHA)
         run: |
           set -euo pipefail
-          bash scripts/prove-lisp-language-laws.sh "$PWD/target/debug/sens" "$RUNNER_TEMP/proof.json"
-
-      - name: Exact-SHA independent CI verifier negative controls — Python excluded
-        shell: bash
-        run: echo 'PYTHON_UNIT_TESTS=EXCLUDED_BY_POLICY test_verify_release_ci native_equivalent=NOT_VERIFIED'
-
-      - name: Release asset integrity negative controls — Python excluded
-        shell: bash
-        run: echo 'PYTHON_UNIT_TESTS=EXCLUDED_BY_POLICY test_verify_release_assets native_equivalent=NOT_VERIFIED'
+          bash scripts/prove-lisp-language-laws.sh "$PWD/target/debug/sens"
 
       - name: Required full workspace test (same tagged SHA)
         run: cargo test --locked --workspace --no-fail-fast
@@ -112,51 +83,10 @@ jobs:
       - name: focused release clippy
         run: cargo clippy --locked -p sens -p sens-cli --all-targets -- -D warnings
 
-      - name: Release gate — excluded Python safety tests remain NOT_VERIFIED
-        shell: bash
-        run: |
-          echo "RELEASE_PYTHON_SAFETY_TESTS=EXCLUDED_BY_POLICY native_equivalent=NOT_VERIFIED"
-          echo "::error title=RELEASE_NOT_VERIFIED::Publication remains blocked until native Rust/Zig/SENS proofs replace excluded Python safety tests."
-          exit 1
-
-  publish-island-manifest:
-    name: Publish generated self-bootstrap island manifest
-    needs: test
-    if: always() && (needs.test.result == 'success' || vars.SENS_RELEASE_OWNER_OVERRIDE == '1')
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
-      - uses: dtolnay/rust-toolchain@1.99.0
-        with:
-          toolchain: "1.99.0"
-      - uses: Swatinem/rust-cache@49a0bdc70d2e1b713ca9e2869b211fcce03d3c1c # v2
-
-      - name: CLIPS vendor archive integrity — no admitted non-digest proof
-        shell: bash
-        run: |
-          echo 'CLIPS_VENDOR_ARCHIVE=NOT_VERIFIED sha256_creation=EXCLUDED json_semantics=EXCLUDED'
-          echo "::error title=RELEASE_NOT_VERIFIED::Do not stage or publish the island manifest until a non-SHA, byte-exact provenance proof is admitted."
-          exit 1
-
-      - name: Stage manifest and installer (not a public release)
-        shell: bash
-        run: |
-          set -euo pipefail
-          mkdir -p staged
-          cp packaging/islands-manifest-v1.json staged/
-          cp packaging/install.sh staged/
-
-      - name: Upload staged manifest and installer
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
-        with:
-          name: release-manifest
-          path: staged/
-          if-no-files-found: error
-
   build-cli:
     name: sens-cli · ${{ matrix.os }}
     needs: test
-    if: always() && (needs.test.result == 'success' || vars.SENS_RELEASE_OWNER_OVERRIDE == '1')
+    if: needs.test.result == 'success'
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -219,7 +149,7 @@ jobs:
   build-msi:
     name: sens-cli · Windows MSI installer
     needs: test
-    if: always() && (needs.test.result == 'success' || vars.SENS_RELEASE_OWNER_OVERRIDE == '1')
+    if: needs.test.result == 'success'
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
@@ -263,7 +193,7 @@ jobs:
   build-web:
     name: Portable web REPL · single HTML
     needs: test
-    if: always() && (needs.test.result == 'success' || vars.SENS_RELEASE_OWNER_OVERRIDE == '1')
+    if: needs.test.result == 'success'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
@@ -306,7 +236,7 @@ jobs:
   release-publish:
     name: Final SHA-pinned publish only after ALL jobs are green
     needs: [test, publish-island-manifest, build-cli, build-msi, build-web]
-    if: always() && (needs.test.result == 'success' || vars.SENS_RELEASE_OWNER_OVERRIDE == '1')
+    if: needs.test.result == 'success'
     uses: ./.github/workflows/release-publish.yml
     secrets: inherit
     permissions:

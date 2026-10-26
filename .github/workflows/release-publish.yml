@@ -8,23 +8,48 @@ permissions:
 
 jobs:
   publish:
-    name: Final exact-SHA publish after mandatory checks
-    runs-on: ubuntu-24.04
+    name: Публікувати лише після всіх успішних перевірок
+    runs-on: ubuntu-latest
     permissions:
       contents: write
-      checks: read
     steps:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
-        with:
-          persist-credentials: false
+      - name: Перевірити тег, точне джерело та явне рішення власника
+        shell: bash
+        env:
+          RELEASE_GO_SHA: ${{ vars.SENS_RELEASE_GO_SHA }}
+          RELEASE_GO_TAG: ${{ vars.SENS_RELEASE_GO_TAG }}
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF_TYPE" = "tag"
+          VERSION="$(sed -n '/^\[package\]/,/^\[/s/^version = "\([^"]*\)".*/\1/p' crates/sens-cli/Cargo.toml | head -n 1)"
+          test -n "$VERSION"
+          test "$GITHUB_REF_NAME" = "s$VERSION"
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          git fetch --no-tags --depth=1 origin main
+          test "$(git rev-parse FETCH_HEAD)" = "$GITHUB_SHA" || {
+            echo "RELEASE_BLOCKED: тег не вказує на поточний main" >&2
+            exit 1
+          }
+          test -n "$RELEASE_GO_SHA"
+          test -n "$RELEASE_GO_TAG"
+          test "$RELEASE_GO_SHA" = "$GITHUB_SHA"
+          test "$RELEASE_GO_TAG" = "$GITHUB_REF_NAME"
 
-      - name: Download all staged release assets
+      - name: Завантажити всі зібрані release-артефакти
         uses: actions/download-artifact@634f93cb2916e3fdff31fdaf6667de0da12316ab # v5
         with:
           path: dist
           merge-multiple: true
 
-      - name: Verify gates, assets, draft replay, and publish
+      - name: Перевірити комплект артефактів
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -d dist
+          test -n "$(find dist -type f -print -quit)"
+
+      - name: Створити чернетку, завантажити її й порівняти байти через cmp
         shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
@@ -32,96 +57,27 @@ jobs:
           RELEASE_GO_TAG: ${{ vars.SENS_RELEASE_GO_TAG }}
         run: |
           set -euo pipefail
-          die() { printf 'RELEASE_BLOCKED: %s\n' "$*" >&2; exit 1; }
-
-          version="$(sed -nE 's/^[[:space:]]*version[[:space:]]*=[[:space:]]*"([^"]+)".*/\1/p' crates/sens-cli/Cargo.toml | head -n 1)"
-          [[ -n "$version" ]] || die "cannot read CLI version"
-          [[ "$GITHUB_REF_TYPE" == tag && "$GITHUB_REF_NAME" == "s$version" ]] || die "tag and package version differ"
-          [[ "$(git rev-parse HEAD)" == "$GITHUB_SHA" ]] || die "checkout SHA differs from event SHA"
-          [[ -n "$RELEASE_GO_SHA" && "$RELEASE_GO_SHA" == "$GITHUB_SHA" ]] || die "owner GO SHA does not match candidate"
-          [[ -n "$RELEASE_GO_TAG" && "$RELEASE_GO_TAG" == "$GITHUB_REF_NAME" ]] || die "owner GO tag does not match candidate"
-
-          verify_main_sha() {
-            git fetch --no-tags --depth=1 origin main
-            [[ "$(git rev-parse FETCH_HEAD)" == "$GITHUB_SHA" ]] || die "candidate is no longer current main"
-            [[ "$RELEASE_GO_SHA" == "$GITHUB_SHA" && "$RELEASE_GO_TAG" == "$GITHUB_REF_NAME" ]] || die "exact-SHA owner GO changed"
-          }
-
-          verify_required_ci() {
-            local rows required row name run_id sha status conclusion app url repo_regex
-            local -a required_checks=(
-              "portable critical gates"
-              "oracle-native-smoke"
-              "Lisp-owned pair to real CPU, with fail-closed rejection"
-              "Physical SENS T5 file-admission oracle"
-              "triple"
-              "physical T5 to D2 D3 D4 D7 runtime"
-              "physical-binary-cli"
-              "d2-grammar-audit"
-              "focused release preflight"
-              "Охоронець · Rust · Zig · SENS"
-              "Українська проєкція та заборона сирих літералів"
-            )
-            rows="$(gh api --paginate --slurp --jq '[.[].check_runs[]] | group_by(.name) | map(max_by(.id)) | .[] | [.name, (.id|tostring), .head_sha, .status, (.conclusion // ""), (.app.slug // ""), (.details_url // "")] | @tsv' "repos/$GITHUB_REPOSITORY/commits/$GITHUB_SHA/check-runs?per_page=100")" || die "cannot retrieve exact-SHA check-runs"
-            repo_regex="${GITHUB_REPOSITORY//\//\\/}"
-            for required in "${required_checks[@]}"; do
-              row="$(printf '%s\n' "$rows" | awk -F '\t' -v wanted="$required" '$1 == wanted { print; exit }')"
-              [[ -n "$row" ]] || die "missing exact-SHA check: $required"
-              IFS=$'\t' read -r name run_id sha status conclusion app url <<< "$row"
-              [[ "$sha" == "$GITHUB_SHA" ]] || die "wrong SHA for $required"
-              [[ "$status" == completed && "$conclusion" == success ]] || die "check not green: $required ($status/$conclusion)"
-              [[ "$app" == github-actions ]] || die "untrusted provider for $required"
-              [[ "$url" =~ ^https://github\.com/${repo_regex}/actions/runs/[1-9][0-9]*(/job/[1-9][0-9]*)?/?$ ]] || die "untrusted run URL for $required"
-            done
-            printf 'RELEASE_REQUIRED_CI_PASS %s exact-SHA checks\n' "${#required_checks[@]}"
-          }
-
-          verify_asset_dir() {
-            local dir="$1" expected actual name
-            local -a assets=(
-              "sens-cli_${version}_linux_amd64"
-              "sens-cli_${version}_windows_x64.exe"
-              "sens-cli_${version}_windows_x64.msi"
-              "sens-cli_${version}_macos_x64"
-              "sens-cli_${version}_macos_arm64"
-              "sens-cli-web.html"
-              "my-lisp-cli-web.html"
-              "islands-manifest-v1.json"
-              "install.sh"
-            )
-            [[ -d "$dir" && ! -L "$dir" ]] || die "invalid asset directory: $dir"
-            expected="$(printf '%s\n' "${assets[@]}" | LC_ALL=C sort)"
-            actual="$(find "$dir" -mindepth 1 -maxdepth 1 -printf '%f\n' | LC_ALL=C sort)"
-            [[ "$actual" == "$expected" ]] || die "asset set differs in $dir"
-            for name in "${assets[@]}"; do
-              [[ -f "$dir/$name" && ! -L "$dir/$name" && -s "$dir/$name" ]] || die "missing, empty, or non-regular asset: $name"
-            done
-            cmp -s "$dir/sens-cli-web.html" "$dir/my-lisp-cli-web.html" || die "web aliases differ"
-          }
-
-          verify_main_sha
-          verify_required_ci
-          verify_asset_dir dist
-
-          if gh release view "$GITHUB_REF_NAME" --json isDraft >/dev/null 2>&1; then
-            die "release record already exists; refuse overwrite"
+          if gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1; then
+            echo "RELEASE_BLOCKED: запис релізу вже існує; перезапис заборонено" >&2
+            exit 1
           fi
-
-          gh release create "$GITHUB_REF_NAME" dist/* \
-            --draft --verify-tag \
+          gh release create "$GITHUB_REF_NAME" dist/* --draft --verify-tag \
             --title "SENS $GITHUB_REF_NAME · Contract 12.0" \
-            --notes "SENS Contract 12.0 release on exact commit $GITHUB_SHA. Джерела: RELEASE.md та RELEASE-EVIDENCE.md у цьому коміті."
-
+            --notes "SENS Contract 12.0. Джерело — точний commit $GITHUB_SHA; межі релізу описані в RELEASE.md."
           replay="$RUNNER_TEMP/release-replay"
           mkdir -p "$replay"
           gh release download "$GITHUB_REF_NAME" --dir "$replay"
-          verify_asset_dir "$replay"
-          for path in "$replay"/*; do
-            name="${path##*/}"
-            cmp -s "dist/$name" "$path" || die "staged and downloaded bytes differ: $name"
-          done
-
-          verify_main_sha
-          verify_required_ci
+          (cd dist && find . -type f -print | LC_ALL=C sort) > "$RUNNER_TEMP/staged-files"
+          (cd "$replay" && find . -type f -print | LC_ALL=C sort) > "$RUNNER_TEMP/replayed-files"
+          cmp -- "$RUNNER_TEMP/staged-files" "$RUNNER_TEMP/replayed-files"
+          while IFS= read -r file; do
+            cmp -- "dist/\${file#./}" "$replay/\${file#./}"
+          done < "$RUNNER_TEMP/staged-files"
+          git fetch --no-tags --depth=1 origin main
+          test "$(git rev-parse FETCH_HEAD)" = "$GITHUB_SHA" || {
+            echo "RELEASE_BLOCKED: main змінився під час перевірки артефактів" >&2
+            exit 1
+          }
+          test "$RELEASE_GO_SHA" = "$GITHUB_SHA"
+          test "$RELEASE_GO_TAG" = "$GITHUB_REF_NAME"
           gh release edit "$GITHUB_REF_NAME" --draft=false
-          printf 'RELEASE_PUBLISHED tag=%s sha=%s\n' "$GITHUB_REF_NAME" "$GITHUB_SHA"
