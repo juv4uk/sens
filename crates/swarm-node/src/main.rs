@@ -2426,6 +2426,20 @@ fn handle_task_def(node: &Arc<Node>, msg: &Sexp, stream: &mut TcpStream) {
                         None => Sexp::List(vec![]),
                     },
                 ]),
+                Sexp::list(vec![
+                    Sexp::atom("вид"),
+                    match &d.kind {
+                        Some(k) => Sexp::atom(k),
+                        None => Sexp::List(vec![]),
+                    },
+                ]),
+                {
+                    let mut fields = vec![Sexp::atom("ціль")];
+                    if let Some(Sexp::List(target_fields)) = &d.target {
+                        fields.extend(target_fields.iter().cloned());
+                    }
+                    Sexp::list(fields)
+                },
             ]),
         ),
         None => send(
@@ -2573,6 +2587,30 @@ fn handle_task_status(node: &Arc<Node>, msg: &Sexp, stream: &mut TcpStream) {
 /// `blocked-by` carries cross-project dependencies (SYNERGY-CROSS-REPO-
 /// TASK-LINKING): task `<id>` waits on the named tasks being completed,
 /// visible swarm-wide via `(task-status <id>)`.
+/// A test/benchmark task is not claimable from a vague selector alone.
+/// The function value must be the exact canonical name resolved from the
+/// SENS function registry by the task author; this coordination layer validates
+/// shape only and deliberately does not duplicate or reinterpret that registry.
+fn task_target_problem(msg: &Sexp, kind: Option<&str>) -> Option<&'static str> {
+    if !matches!(kind, Some("тест" | "бенчмарк")) {
+        return None;
+    }
+    let fields = msg.field("ціль")?;
+    let target = Sexp::list(fields.to_vec());
+    for field in ["функція", "властивість", "клас-входу"] {
+        let Some(value) = target.field_atom(field) else {
+            return Some("тест/бенчмарк потребує ціль із функцією реєстру, властивістю та класом входу");
+        };
+        let normalized = value.trim().to_lowercase();
+        if normalized.is_empty()
+            || matches!(normalized.as_str(), "невідомо" | "будь-яка" | "усе" | "all" | "*" | "unknown")
+        {
+            return Some("ціль тесту/бенчмарку не може містити порожній або невизначений селектор");
+        }
+    }
+    None
+}
+
 fn handle_define_task(node: &Arc<Node>, msg: &Sexp, stream: &mut TcpStream) {
     let Some(task) = msg.field_atom("task") else {
         send(
@@ -2601,6 +2639,22 @@ fn handle_define_task(node: &Arc<Node>, msg: &Sexp, stream: &mut TcpStream) {
         .cloned()
         .unwrap_or(Sexp::List(vec![]));
     let description = msg.field_atom("description");
+    let kind = msg.field_atom("вид");
+    let target = msg
+        .field("ціль")
+        .map(|fields| Sexp::list(fields.to_vec()));
+
+    if let Some(problem) = task_target_problem(msg, kind) {
+        send(
+            stream,
+            &Sexp::list(vec![
+                Sexp::atom("error"),
+                Sexp::string(problem),
+            ]),
+        );
+        return;
+    }
+
     // M1.1b provenance: optional owning-repository id. Absent = unresolved.
     let origin = msg.field_atom("origin");
 
@@ -2630,6 +2684,15 @@ fn handle_define_task(node: &Arc<Node>, msg: &Sexp, stream: &mut TcpStream) {
     if let Some(d) = description {
         payload_fields.push(Sexp::list(vec![Sexp::atom("description"), Sexp::string(d)]));
     }
+    if let Some(k) = kind {
+        payload_fields.push(Sexp::list(vec![Sexp::atom("вид"), Sexp::atom(k)]));
+    }
+    if let Some(t) = &target {
+        let Sexp::List(fields) = t else { unreachable!("target is constructed as a list") };
+        let mut target_field = vec![Sexp::atom("ціль")];
+        target_field.extend(fields.iter().cloned());
+        payload_fields.push(Sexp::list(target_field));
+    }
     if let Some(o) = origin {
         payload_fields.push(Sexp::list(vec![Sexp::atom("origin"), Sexp::string(o)]));
     }
@@ -2656,6 +2719,8 @@ fn handle_define_task(node: &Arc<Node>, msg: &Sexp, stream: &mut TcpStream) {
             && existing.depends_on == depends_on_list
             && existing.blocked_by == blocked_by_list
             && existing.description.as_deref() == description
+            && existing.kind.as_deref() == kind
+            && existing.target.as_ref() == target.as_ref()
             && existing.origin.as_deref() == origin;
         if same {
             drop(journal);
