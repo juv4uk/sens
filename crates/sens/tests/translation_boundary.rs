@@ -2,7 +2,7 @@
 //! The translator may propose versioned Lisp data; only Lisp validation and
 //! the existing advice boundary decide whether knowledge is admissible.
 
-use sens::{eval_parsed_expressions, parse, parse_mixed_exact_domain, Session};
+use sens::{eval_parsed_expressions, parse, Session};
 
 fn eval_translation(source: &str) -> String {
     let mut session = Session::default();
