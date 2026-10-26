@@ -79,6 +79,8 @@ jobs:
           bash scripts/prove-ідентичність-тритів.sh target/debug/sens
           bash scripts/prove-lisp-language-laws.sh target/debug/sens
           bash scripts/prove-d1-порожність.sh target/debug/sens
+          bash scripts/prove-d1-empty-identity.sh target/debug/sens
+          bash scripts/prove-d3-пара.sh target/debug/sens
 
       - name: Clippy
         id: workspace_clippy
