@@ -28,10 +28,22 @@ digest_free_paths=(
 # forbidden tokens as policy text and are therefore not scanned as generators.
 contains_digest_generator() {
   local candidate="$1"
-  grep -qF sha256sum "$candidate" ||
-    grep -qF sha256-hex "$candidate" ||
-    grep -qF .sha256 "$candidate" ||
-    grep -qF SHA256SUMS "$candidate"
+  # У release-preflight є guard, який ЛИШЕ шукає заборонену callable-назву
+  # sha256-hex. Це не створення квитанції. Відфільтровуємо тільки точний
+  # рядок цього сканера, але лишаємо перевірку решти workflow на генератори.
+  if [[ "$candidate" == ".github/workflows/release-preflight.yml" ]]; then
+    local executable_source
+    executable_source="$(grep -vF "if grep -nEi 'json-parse|sha256-hex|JSON-PARSE|SHA256-HEX'" "$candidate")"
+    grep -qF sha256sum <<<"$executable_source" ||
+      grep -qF sha256-hex <<<"$executable_source" ||
+      grep -qF .sha256 <<<"$executable_source" ||
+      grep -qF SHA256SUMS <<<"$executable_source"
+  else
+    grep -qF sha256sum "$candidate" ||
+      grep -qF sha256-hex "$candidate" ||
+      grep -qF .sha256 "$candidate" ||
+      grep -qF SHA256SUMS "$candidate"
+  fi
 }
 
 for path in "${digest_free_paths[@]}"; do
