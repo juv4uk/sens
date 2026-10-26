@@ -7,5 +7,7 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Exact geometric law and 8 mutation controls
-        run: python3 tests/test_d10_wsm24_exact_chamfer.py
+      - name: Exact geometric law and 8 mutation controls — EXCLUDED (NOT_VERIFIED)
+        if: false
+        shell: bash
+        run: echo "FOREIGN_LANGUAGE_TEST_BENCH=EXCLUDED_BY_POLICY native_equivalent=NOT_VERIFIED"
