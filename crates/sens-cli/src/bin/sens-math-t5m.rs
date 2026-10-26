@@ -853,7 +853,7 @@ mod paired {
             // Обидва операнди вже D48 за Д24+ числовим законом,
             // без нав'язаного текстом #d48 і без примусової ширини.
             let source = "(помножити -8388609 8388608)";
-            let expected = expected_words(&qualify(&source).unwrap()).unwrap();
+            let expected = expected_words(&qualify(source).unwrap()).unwrap();
             assert_eq!(
                 expected.iter().map(|w| w.width).collect::<Vec<_>>(),
                 vec![2, 5, 48, 48, 2]
@@ -863,7 +863,7 @@ mod paired {
                 zig_transport::decode_t5m_exact_words(&physical).unwrap(),
                 expected
             );
-            let value = eval_verified(&source, &physical).unwrap();
+            let value = eval_verified(source, &physical).unwrap();
             let Value::BinaryNumber(ref number) = value else {
                 panic!("test_id=d48-negative layer=eval expected=integer D48");
             };
