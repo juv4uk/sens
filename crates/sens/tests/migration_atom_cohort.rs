@@ -1,10 +1,29 @@
-//! Physical T5 transport canary; ATOM's result law remains SENS/Lisp-owned.
-use sens::{
-    decode_ternary_program, encode_binary_projection_ternary, open_ternary_program,
-    render_binary_words_spaced,
+
+use sens_cli::zig_transport;//! Physical T5 transport canary; ATOM's result law remains SENS/Lisp-owned.
+use sens::{BinarySourceWord, render_binary_words_spaced,
 };
 
 const T5: &[u8] = include_bytes!("../../../tests/fixtures/migration-atom-cohort/atom-empty.sens");
+
+
+
+// Обгортки над чинним Zig T5M: staged-out ternary виведено (f5a5b213).
+fn decode_ternary_program(bytes: &[u8]) -> Result<Vec<BinarySourceWord>, String> {
+    zig_transport::decode_t5m_words(bytes)
+}
+
+fn open_ternary_program(bytes: &[u8]) -> Result<String, String> {
+    zig_transport::decode_t5m_words(bytes).map(|words| render_binary_words_spaced(&words))
+}
+
+fn encode_binary_projection_ternary(source: &str) -> Result<Vec<u8>, String> {
+    let words: Vec<BinarySourceWord> = sens::parse_binary_source_words(source)
+        .map_err(|error| format!("{error:?}"))?
+        .into_iter()
+        .map(|token| token.word)
+        .collect();
+    zig_transport::encode_t5m_direct(&words)
+}
 
 #[test]
 fn physical_atom_fixture_roundtrips_exact_t5_transport() {
