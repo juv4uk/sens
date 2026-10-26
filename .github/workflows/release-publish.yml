@@ -64,7 +64,7 @@ jobs:
             selected_conclusion=""
             selected_app=""
             selected_url=""
-\t' read -r id check_name check_sha check_status check_conclusion check_app check_url; do
+            while IFS=$'\t' read -r id check_name check_sha check_status check_conclusion check_app check_url; do
               if [[ "$check_name" == "$required" && "$id" =~ ^[1-9][0-9]*$ ]] && (( id > selected_id )); then
                 selected_id="$id"
                 selected_sha="$check_sha"
