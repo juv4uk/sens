@@ -1,7 +1,7 @@
 //! Measurement-only pilot: separate physical decode, D2 admission,
 //! visible-source baseline, and repeated interpretation on the SAME hardware.
 //! Reports observations, never asserts a synthetic speedup or a native ISA.
-use sens::{render_binary_words_spaced, 
+use sens::{render_binary_words_spaced,
     eval_parsed_expressions, lower_program,
     parse_canonical_binary, PhysicalT5Program, Session,
 };
