@@ -145,6 +145,7 @@ jobs:
     outputs:
       has_sources: ${{ steps.scope.outputs.has_sources }}
       files: ${{ steps.scope.outputs.files }}
+      has_release_gate_changes: ${{ steps.scope.outputs.has_release_gate_changes }}
     steps:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09
         if: ${{ github.event_name == 'push' }}
@@ -161,22 +162,30 @@ jobs:
         run: |
           set -euo pipefail
           files=()
+          release_gate_files=()
           if [[ "${EVENT_NAME}" == "push" ]]; then
             if [[ "${PUSH_BEFORE}" =~ ^0+$ ]]; then
-              paths="$(git -c core.quotePath=false diff-tree --root --no-commit-id --name-only -r --diff-filter=AM "${PUSH_AFTER}" -- '*.lisp')"
+              paths="$(git -c core.quotePath=false diff-tree --root --no-commit-id --name-only -r "${PUSH_AFTER}")"
             else
               if ! git cat-file -e "${PUSH_BEFORE}^{commit}" 2>/dev/null; then
                 git fetch --no-tags --depth=1 origin "${PUSH_BEFORE}"
               fi
-              paths="$(git -c core.quotePath=false diff --no-ext-diff --diff-filter=AM --name-only "${PUSH_BEFORE}" "${PUSH_AFTER}" -- '*.lisp')"
+              paths="$(git -c core.quotePath=false diff --no-ext-diff --name-only "${PUSH_BEFORE}" "${PUSH_AFTER}")"
             fi
             while IFS= read -r path; do
               [[ -n "${path}" ]] || continue
-              [[ "${path}" == *.lisp && -f "${path}" && ! -L "${path}" ]] || continue
-              files+=("${path}")
+              if [[ "${path}" == *.lisp && -f "${path}" && ! -L "${path}" ]]; then
+                files+=("${path}")
+              fi
+              case "${path}" in
+                lib/*|crates/sens/*|crates/sens-cli/*|crates/sens-host/*|crates/sens-wasm/*|research/zig-codecs/*|zig_transport_root.zig|zig_bitpack_root.zig|domain_projection_assets.zig|wasm_source_assets.zig|Cargo.toml|Cargo.lock|crates/*/Cargo.toml|.github/workflows/ci.yml|.github/workflows/ci-heavy.yml|.github/workflows/release.yml|.github/workflows/release-preflight.yml|.github/workflows/release-publish.yml|tests/fixtures/wsm-fs-record-producer.lisp|benchmarks/contest-uk/*|scripts/refresh-verified-t5m-pair.sh)
+                  release_gate_files+=("${path}")
+                  ;;
+              esac
             done <<< "${paths:-}"
           fi
           printf 'REMINT_SOURCE_SCOPE count=%s\n' "${#files[@]}"
+          printf 'RELEASE_GATE_SCOPE count=%s\n' "${#release_gate_files[@]}"
           {
             echo 'files<<SENS_REMINT_FILES_END'
             printf '%s\n' "${files[@]}"
@@ -186,6 +195,11 @@ jobs:
             echo 'has_sources=true' >> "${GITHUB_OUTPUT}"
           else
             echo 'has_sources=false' >> "${GITHUB_OUTPUT}"
+          fi
+          if (("${#release_gate_files[@]}" > 0)); then
+            echo "has_release_gate_changes=true" >> "${GITHUB_OUTPUT}"
+          else
+            echo "has_release_gate_changes=false" >> "${GITHUB_OUTPUT}"
           fi
 
   remint-input-required:
@@ -232,7 +246,7 @@ jobs:
     name: Exact-SHA release preflight — ручний або позначений коміт
     needs: remint-source-scope
     # Повний preflight запускається вручну або за явним маркером; звичайний push лишається швидким.
-    if: ${{ (github.event_name == 'workflow_dispatch' && inputs.suite == 'release-preflight') || (github.event_name == 'push' && (contains(github.event.head_commit.message, 'SENS_RELEASE_PREFLIGHT') || contains(github.event.head_commit.message, 'SENS_REMINT_RELEASE_REASONING_F6') || contains(needs['remint-source-scope'].outputs.files, 'lib/') || startsWith(github.event.head_commit.message, 'ремонт пар:') || startsWith(github.event.head_commit.message, 'Translation boundary:') || startsWith(github.event.head_commit.message, 'Переклад:') || startsWith(github.event.head_commit.message, 'SENS:') || startsWith(github.event.head_commit.message, 'Tests:') || startsWith(github.event.head_commit.message, 'CI:') || startsWith(github.event.head_commit.message, 'GPU smoke:') || startsWith(github.event.head_commit.message, 'Release:') || startsWith(github.event.head_commit.message, 'Реліз:') || startsWith(github.event.head_commit.message, 'Мова:') || startsWith(github.event.head_commit.message, 'release:') || contains(github.event.head_commit.modified, '.github/workflows/ci.yml') || contains(toJSON(github.event.commits), '.github/workflows/ci.yml') || contains(github.event.head_commit.modified, '.github/workflows/ci-heavy.yml') || contains(github.event.head_commit.modified, '.github/workflows/release.yml') || contains(github.event.head_commit.modified, '.github/workflows/release-preflight.yml') || contains(github.event.head_commit.modified, '.github/workflows/release-publish.yml') || contains(github.event.head_commit.modified, 'RELEASE-EVIDENCE.md') || contains(join(github.event.head_commit.modified, ','), 'lib/') || contains(join(github.event.head_commit.modified, ','), 'Cargo.toml') || contains(join(github.event.head_commit.modified, ','), 'Cargo.lock') || contains(github.event.head_commit.modified, 'Cargo.toml') || contains(github.event.head_commit.modified, 'Cargo.lock') || contains(github.event.head_commit.modified, 'crates/sens/Cargo.toml') || contains(github.event.head_commit.modified, 'crates/sens-cli/Cargo.toml') || contains(github.event.head_commit.modified, 'crates/sens/tests/translation_boundary.rs') || contains(github.event.head_commit.modified, 'crates/sens/src/mixed_source.rs') || contains(github.event.head_commit.modified, 'crates/sens/src/compiler_language.rs') || contains(github.event.head_commit.modified, 'crates/sens/src/eval/lower.rs') || contains(github.event.head_commit.modified, 'crates/sens/src/parser.rs') || contains(github.event.head_commit.modified, 'crates/sens/src/source_projection.rs') || contains(github.event.head_commit.modified, 'crates/sens/src/semantic_registry.rs') || contains(github.event.head_commit.modified, 'crates/sens-cli/src/bin/sens-trit.rs') || contains(github.event.head_commit.modified, 'crates/sens-cli/src/zig_transport.rs') || contains(github.event.head_commit.modified, 'crates/sens-cli/tests/binary_t5m_zig_roundtrip.rs') || contains(github.event.head_commit.modified, 'crates/sens-cli/tests/physical_t5m_execution.rs') || contains(github.event.head_commit.modified, 'crates/sens-host/src/lib.rs'))) }}
+    if: ${{ (github.event_name == 'workflow_dispatch' && inputs.suite == 'release-preflight') || (github.event_name == 'push' && (needs['remint-source-scope'].outputs.has_release_gate_changes == 'true' || contains(github.event.head_commit.message, 'SENS_RELEASE_PREFLIGHT') || contains(github.event.head_commit.message, 'SENS_REMINT_RELEASE_REASONING_F6') || contains(needs['remint-source-scope'].outputs.files, 'lib/') || startsWith(github.event.head_commit.message, 'ремонт пар:') || startsWith(github.event.head_commit.message, 'Translation boundary:') || startsWith(github.event.head_commit.message, 'Переклад:') || startsWith(github.event.head_commit.message, 'SENS:') || startsWith(github.event.head_commit.message, 'Tests:') || startsWith(github.event.head_commit.message, 'CI:') || startsWith(github.event.head_commit.message, 'GPU smoke:') || startsWith(github.event.head_commit.message, 'Release:') || startsWith(github.event.head_commit.message, 'Реліз:') || startsWith(github.event.head_commit.message, 'Мова:') || startsWith(github.event.head_commit.message, 'release:') || contains(github.event.head_commit.modified, '.github/workflows/ci.yml') || contains(toJSON(github.event.commits), '.github/workflows/ci.yml') || contains(github.event.head_commit.modified, '.github/workflows/ci-heavy.yml') || contains(github.event.head_commit.modified, '.github/workflows/release.yml') || contains(github.event.head_commit.modified, '.github/workflows/release-preflight.yml') || contains(github.event.head_commit.modified, '.github/workflows/release-publish.yml') || contains(github.event.head_commit.modified, 'RELEASE-EVIDENCE.md') || contains(join(github.event.head_commit.modified, ','), 'lib/') || contains(join(github.event.head_commit.modified, ','), 'Cargo.toml') || contains(join(github.event.head_commit.modified, ','), 'Cargo.lock') || contains(github.event.head_commit.modified, 'Cargo.toml') || contains(github.event.head_commit.modified, 'Cargo.lock') || contains(github.event.head_commit.modified, 'crates/sens/Cargo.toml') || contains(github.event.head_commit.modified, 'crates/sens-cli/Cargo.toml') || contains(github.event.head_commit.modified, 'crates/sens/tests/translation_boundary.rs') || contains(github.event.head_commit.modified, 'crates/sens/src/mixed_source.rs') || contains(github.event.head_commit.modified, 'crates/sens/src/compiler_language.rs') || contains(github.event.head_commit.modified, 'crates/sens/src/eval/lower.rs') || contains(github.event.head_commit.modified, 'crates/sens/src/parser.rs') || contains(github.event.head_commit.modified, 'crates/sens/src/source_projection.rs') || contains(github.event.head_commit.modified, 'crates/sens/src/semantic_registry.rs') || contains(github.event.head_commit.modified, 'crates/sens-cli/src/bin/sens-trit.rs') || contains(github.event.head_commit.modified, 'crates/sens-cli/src/zig_transport.rs') || contains(github.event.head_commit.modified, 'crates/sens-cli/tests/binary_t5m_zig_roundtrip.rs') || contains(github.event.head_commit.modified, 'crates/sens-cli/tests/physical_t5m_execution.rs') || contains(github.event.head_commit.modified, 'crates/sens-host/src/lib.rs'))) }}
     uses: ./.github/workflows/release-preflight.yml
     with:
       full: true
