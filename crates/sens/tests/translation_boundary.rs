@@ -102,18 +102,23 @@ fn world_direct_opposite_only_facts_not_unproved_rules() {
     // Перевіряється справжній SENS reader/eval, а не текстовий сканер:
     // факт протилежності відхиляється; голова правила з недоведеною
     // передумовою не стає доказом самої себе.
-    for (clauses, expected) in [
-        ("(((хибне? (human socrates))))", "conflict"),
+    for (clauses, query_clause, expected) in [
+        (
+            "(((хибне? (human socrates))))",
+            "((хибне? (human socrates)))",
+            "conflict",
+        ),
         (
             "(((хибне? (human socrates)) (unknown-premise socrates)))",
+            "((хибне? (human socrates)) (unknown-premise socrates))",
             "accepted",
         ),
     ] {
         let source = format!(
-            "(визначити світ-для-перевірки \
-               (світ-повідомити-всі (порожній-світ) (як-є corpus) (як-є {clauses}))) \
-             (перше (перше (порадити-світ світ-для-перевірки \
-               (як-є corpus) (як-є {clauses}))))"
+            "(визначити світ-для-перевірки \\
+               (світ-повідомити-всі (порожній-світ) (як-є corpus) (як-є {clauses}))) \\
+             (перше (перше (порадити-світ світ-для-перевірки \\
+               (як-є corpus) (як-є {query_clause}))))"
         );
         assert_eq!(
             eval_translation(&source),
@@ -203,7 +208,7 @@ fn accepted_candidate_becomes_knowledge_only_after_explicit_advise() {
         (визначити proposal
           (як-є (translation-1 candidate clause
                    "Socrates is human."
-                   ((human socrates)))))
+                   (human socrates))))
         (визначити review (переклад-перевірка (як-є corpus) proposal))
         (визначити before-known (модуль-відомий? (як-є corpus)))
         (повідомити-знання (як-є corpus) (список (переклад-допуск-вміст review)))
@@ -297,7 +302,7 @@ fn existing_explicit_opposite_overrules_an_external_candidate() {
         (визначити proposal
           (як-є (translation-1 candidate clause
                    "Socrates is human."
-                   ((human socrates)))))
+                   (human socrates))))
         (визначити review (переклад-перевірка (як-є corpus) proposal))
         (список
           (переклад-перевірка-стан review)
