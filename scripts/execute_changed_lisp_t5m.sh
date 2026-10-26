@@ -1408,7 +1408,6 @@ run_native_t5m_program() {
     fi
     if [[ "$file" == "tests/semantic/assertion-library-law.lisp" ||
           "$file" == "tests/semantic/assertion-library-mutant.lisp" ||
-          "$file" == "tests/semantic/assertion-library-invalid-verdict-law.lisp" ||
           "$file" == "tests/semantic/assertion-library-bad-tail-negative.lisp" ]]; then
       local assertion_full_source="$dir/assertion-library-full.lisp"
       standalone_physical="$dir/assertion-library-full.sens"
@@ -1617,7 +1616,6 @@ while IFS= read -r file || [[ -n "$file" ]]; do
     binding_sources=(--binding-source lib/unify.lisp)
   elif [[ "$file" == "tests/semantic/assertion-library-law.lisp" ||
           "$file" == "tests/semantic/assertion-library-mutant.lisp" ||
-          "$file" == "tests/semantic/assertion-library-invalid-verdict-law.lisp" ||
           "$file" == "tests/semantic/assertion-library-bad-tail-negative.lisp" ]]; then
     binding_sources=(--binding-source lib/твердження.lisp)
   elif [[ "$file" == "lib/бенчмарк.lisp" ]]; then
