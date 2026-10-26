@@ -40,7 +40,7 @@ jobs:
       - uses: dtolnay/rust-toolchain@1.99.0
 
       - name: Build SENS binaries (sens + sens-trit)
-        run: cargo build --locked -p sens-cli --bin sens --bin sens-trit --bin lisp-data-schema-guard --features benchmark-ast-visits
+        run: cargo build --locked -p sens-cli --bin sens --bin sens-trit --bin lisp-data-schema-guard --bin wsm-fs-record-producer --bin wsm-fs-record-consumer --features benchmark-ast-visits
 
       - name: Канонічні D24 корені для фізичного вектора
         run: |
@@ -1001,7 +1001,7 @@ jobs:
             git reset --hard origin/$target_branch
             # Кожний новий main має отримати свій справжній SENS binary:
             # ніколи не перевіряти поточний Lisp за старим виконуваним кодом.
-            cargo build --locked -p sens-cli --bin sens --bin sens-trit --bin lisp-data-schema-guard --features benchmark-ast-visits
+            cargo build --locked -p sens-cli --bin sens --bin sens-trit --bin lisp-data-schema-guard --bin wsm-fs-record-producer --bin wsm-fs-record-consumer --features benchmark-ast-visits
             regenerate_on_current_main
             # Ознаку успішного відновлення дозволено лише після
             # нативного remint і суду на новому main. Старий RED не є
