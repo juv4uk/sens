@@ -1,30 +1,18 @@
-name: D3-D8 remap solver research
+name: "D3/D8 remap solver — excluded by Rust/Zig/SENS language policy"
 
 on:
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
-  s1:
+  policy-exclusion:
+    name: Foreign-language tests/research excluded (NOT_VERIFIED)
     runs-on: ubuntu-latest
-    timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v5
-
-      - name: Run exhaustive D3 and bounded D4 search
+      - name: Record exclusion without asserting an outcome
         run: |
-          rm -rf /tmp/d3-d8-remap-solver
-          python3 benchmarks/d3-d8-remap-solver/run.py             --out /tmp/d3-d8-remap-solver
-
-      - name: Publish report
-        if: always()
-        run: |
-          if test -f /tmp/d3-d8-remap-solver/report.md; then
-            cat /tmp/d3-d8-remap-solver/report.md >> "$GITHUB_STEP_SUMMARY"
-          fi
-
-      - uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: d3-d8-remap-solver-s1
-          path: /tmp/d3-d8-remap-solver/
-          retention-days: 14
+          echo "FOREIGN_LANGUAGE_TEST=EXCLUDED_BY_POLICY"
+          echo "NATIVE_EQUIVALENT=NOT_VERIFIED"
+          echo "NO_PASS_CLAIM=MADE"

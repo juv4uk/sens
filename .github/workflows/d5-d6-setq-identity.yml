@@ -1,4 +1,4 @@
-name: D5 D6 SETQ identity consistency
+name: "D5/D6 SETQ identity — excluded by Rust/Zig/SENS language policy"
 
 on:
   workflow_dispatch:
@@ -7,24 +7,12 @@ permissions:
   contents: read
 
 jobs:
-  identity:
+  policy-exclusion:
+    name: Foreign-language tests/research excluded (NOT_VERIFIED)
     runs-on: ubuntu-latest
-    timeout-minutes: 5
     steps:
-      - uses: actions/checkout@v5
-      - name: Reject stale cross-domain SETQ identity replay
+      - name: Record exclusion without asserting an outcome
         run: |
-          rm -rf /tmp/d5-d6-setq-identity
-          python3 benchmarks/d5-d6-setq-identity/run.py \
-            --out /tmp/d5-d6-setq-identity | tee /tmp/d5-d6-setq-identity.log
-          grep -F "D5-D6-SETQ-IDENTITY=PASS" /tmp/d5-d6-setq-identity.log
-          grep -F "D6-SETQ-NAME=ABSENT" /tmp/d5-d6-setq-identity.log
-          grep -F "STALE-D6-SETQ-REPLAY=REJECTED" /tmp/d5-d6-setq-identity.log
-      - uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: d5-d6-setq-identity
-          path: |
-            /tmp/d5-d6-setq-identity/
-            /tmp/d5-d6-setq-identity.log
-          retention-days: 14
+          echo "FOREIGN_LANGUAGE_TEST=EXCLUDED_BY_POLICY"
+          echo "NATIVE_EQUIVALENT=NOT_VERIFIED"
+          echo "NO_PASS_CLAIM=MADE"

@@ -1,41 +1,18 @@
-name: D3-D8 remap null research
+name: "D3/D8 remap null — excluded by Rust/Zig/SENS language policy"
 
 on:
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
-  null-ensemble:
+  policy-exclusion:
+    name: Foreign-language tests/research excluded (NOT_VERIFIED)
     runs-on: ubuntu-latest
-    timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v5
-
-      - name: Re-check merged candidate scorer
+      - name: Record exclusion without asserting an outcome
         run: |
-          rm -rf /tmp/d3-d8-remap-solver
-          python3 benchmarks/d3-d8-remap-solver/run.py \
-            --out /tmp/d3-d8-remap-solver \
-            --random-seed 3043 \
-            --random-samples 4096
-
-      - name: Run matched null ensembles
-        run: |
-          rm -rf /tmp/d3-d8-remap-null
-          python3 benchmarks/d3-d8-remap-null/run.py \
-            --out /tmp/d3-d8-remap-null \
-            --samples 4096 \
-            --seed 3049
-
-      - name: Publish report
-        if: always()
-        run: |
-          if test -f /tmp/d3-d8-remap-null/report.md; then
-            cat /tmp/d3-d8-remap-null/report.md >> "$GITHUB_STEP_SUMMARY"
-          fi
-
-      - uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: d3-d8-remap-null
-          path: /tmp/d3-d8-remap-null/
-          retention-days: 14
+          echo "FOREIGN_LANGUAGE_TEST=EXCLUDED_BY_POLICY"
+          echo "NATIVE_EQUIVALENT=NOT_VERIFIED"
+          echo "NO_PASS_CLAIM=MADE"

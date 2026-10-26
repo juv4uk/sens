@@ -1,13 +1,18 @@
-name: D10 точний префіксний код і сума Крафта
+name: "D10 Kraft isolated evidence — excluded by Rust/Zig/SENS language policy"
+
 on:
   workflow_dispatch:
+
+permissions:
+  contents: read
+
 jobs:
-  independent-exact-oracles:
-    runs-on: ubuntu-24.04
-    timeout-minutes: 5
+  policy-exclusion:
+    name: Foreign-language tests/research excluded (NOT_VERIFIED)
+    runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - run: python3 scripts/check_d10_prefix_free_kraft_certificate.py
-      - run: python3 -O scripts/check_d10_prefix_free_kraft_certificate.py
-      - run: python3 scripts/check_d10_selection_transition_history.py --self-test
-      - run: true
+      - name: Record exclusion without asserting an outcome
+        run: |
+          echo "FOREIGN_LANGUAGE_TEST=EXCLUDED_BY_POLICY"
+          echo "NATIVE_EQUIVALENT=NOT_VERIFIED"
+          echo "NO_PASS_CLAIM=MADE"

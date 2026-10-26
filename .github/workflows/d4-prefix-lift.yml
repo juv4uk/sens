@@ -1,11 +1,18 @@
-name: D4 prefix lift
+name: "D4 prefix lift — excluded by Rust/Zig/SENS language policy"
 
 on:
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
-  verify:
+  policy-exclusion:
+    name: Foreign-language tests/research excluded (NOT_VERIFIED)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
-      - run: python3 benchmarks/d4-prefix-lift/run.py
+      - name: Record exclusion without asserting an outcome
+        run: |
+          echo "FOREIGN_LANGUAGE_TEST=EXCLUDED_BY_POLICY"
+          echo "NATIVE_EQUIVALENT=NOT_VERIFIED"
+          echo "NO_PASS_CLAIM=MADE"
