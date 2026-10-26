@@ -374,6 +374,13 @@ impl Frame3Decoder {
 
 #[cfg(test)]
 mod tests {
+    fn encode_ternary_words(words: &[crate::BinarySourceWord]) -> Result<Vec<u8>, String> {
+        sens_cli::zig_transport::encode_t5m_direct(words)
+    }
+    fn decode_ternary_words(bytes: &[u8]) -> Result<Vec<crate::BinarySourceWord>, String> {
+        sens_cli::zig_transport::decode_t5m_words(bytes)
+    }
+
     use super::*;
     use crate::parse_binary_source_words;
 
@@ -528,7 +535,7 @@ mod tests {
     #[cfg(feature = "rust-f3-reference")]
     #[test]
     fn e1_t5_f3c_exact_physical_size_matrix() {
-        use crate::{decode_ternary_words, encode_ternary_words};
+        use crate::{decode_ternary_words};
 
         let corpus = include_str!(concat!(
             env!("CARGO_MANIFEST_DIR"),
