@@ -11,15 +11,6 @@ use ::sens::universal_frame3::*;
 use ::sens::*;
 
 mod tests {
-    #[cfg(feature = "rust-f3-reference")]
-    fn encode_ternary_words(words: &[::sens::BinarySourceWord]) -> Result<Vec<u8>, String> {
-        sens_cli::zig_transport::encode_t5m_direct(words)
-    }
-    #[cfg(feature = "rust-f3-reference")]
-    fn decode_ternary_words(bytes: &[u8]) -> Result<Vec<::sens::BinarySourceWord>, String> {
-        sens_cli::zig_transport::decode_t5m_words(bytes)
-    }
-
     use super::*;
     use ::sens::parse_binary_source_words;
 
@@ -169,9 +160,8 @@ mod tests {
     /// These are bytes, NOT throughput, execution cost or semantic authority.
     /// F3C eligibility is decided by the existing explicit tiny program
     /// codec, not silently projected to zero or to an E1/T5 length.
-    #[cfg(feature = "rust-f3-reference")]
     #[test]
-    fn e1_t5_f3c_exact_physical_size_matrix() {
+    fn e1_t5_exact_physical_size_matrix() {
 
         let corpus = include_str!(concat!(
             env!("CARGO_MANIFEST_DIR"),
@@ -181,7 +171,6 @@ mod tests {
         let mut total_e1 = 0usize;
         let mut total_t5 = 0usize;
         let mut t5_cases = 0usize;
-        let mut f3c_cases = 0usize;
         let mut e1_smaller = 0usize;
         let mut t5_smaller = 0usize;
         let mut equal = 0usize;
@@ -209,25 +198,18 @@ mod tests {
                 "E1 width loss: {label}"
             );
 
-            let t5 = encode_ternary_words(&words).ok().filter(|bytes| {
-                decode_ternary_words(bytes).is_ok_and(|recovered| recovered == words)
-            });
-            let f3c = t5.as_ref().and_then(|bytes| {
-                ::sens::frame3_small::encode_explicit_small_f3(bytes)
-                    .ok()
-                    .flatten()
-                    .filter(|packed| {
-                        ::sens::frame3_small::decode_explicit_small_f3(packed)
-                            .is_ok_and(|recovered| recovered == *bytes)
-                    })
-            });
+            let t5 = sens_cli::zig_transport::encode_t5m_direct(&words)
+                .ok()
+                .filter(|bytes| {
+                    sens_cli::zig_transport::decode_t5m_words(bytes)
+                        .is_ok_and(|recovered| recovered == words)
+                });
             let t5_bytes = t5.as_ref().map(|v| v.len());
-            let f3c_bytes = f3c.as_ref().map(|v| v.len());
             let size_repr =
                 |n: Option<usize>| n.map_or_else(|| "NA".to_string(), |size| size.to_string());
             println!(
-                "E1_SIZE_RECORD case={label} words={} exact_bits={bits} e1_bytes={} t5_bytes={} f3c_bytes={}",
-                words.len(), physical_e1.len(), size_repr(t5_bytes), size_repr(f3c_bytes)
+                "E1_T5_SIZE_RECORD case={label} words={} exact_bits={} e1_bytes={} t5_bytes={}",
+                words.len(), bits, physical_e1.len(), size_repr(t5_bytes)
             );
             total_e1 += physical_e1.len();
             if let Some(t5_size) = t5_bytes {
@@ -241,33 +223,22 @@ mod tests {
                     equal += 1;
                 }
             }
-            if f3c_bytes.is_some() {
-                f3c_cases += 1;
-            }
             cases += 1;
         }
-        // A separately proven SENS tiny F3C witness is included to avoid
-        // claiming F3C lacks useful cases just because the fixed E1 set has none.
-        // This is NOT a 17th case in the immutable E1 byte-parity corpus.
+        // Independent tiny T5M witness: compare only canonical physical E1/T5 bytes.
+        // The retired Rust F3 reference transport is deliberately not part of this test.
         let tiny_t5 = [0x63, 0x89, 0x06, 0xa1];
-        let tiny_f3c = [0xf3, 0x40, 0x60];
-        let tiny_words =
-            decode_ternary_words(&tiny_t5).expect("original tiny SENS fixture must decode exactly");
+        let tiny_words = sens_cli::zig_transport::decode_t5m_words(&tiny_t5)
+            .expect("canonical tiny T5M fixture must decode exactly");
         let e1_tiny = encode(&tiny_words).expect("E1 physical carrier for tiny fixture");
         assert_eq!(decode(&e1_tiny).unwrap(), tiny_words);
-        assert_eq!(encode_ternary_words(&tiny_words).unwrap(), tiny_t5);
         assert_eq!(
-            ::sens::frame3_small::encode_explicit_small_f3(&tiny_t5).unwrap(),
-            Some(tiny_f3c.to_vec())
-        );
-        assert_eq!(
-            ::sens::frame3_small::decode_explicit_small_f3(&tiny_f3c).unwrap(),
+            sens_cli::zig_transport::encode_t5m_direct(&tiny_words).unwrap(),
             tiny_t5
         );
         let tiny_bits: usize = tiny_words.iter().map(|word| word.width()).sum();
         println!(
-            "E1_F3C_TINY_REFERENCE case=admitted_quote words={} exact_bits={} \
-             e1_bytes={} t5_bytes=4 f3c_bytes=3 semantic_authority=SENS",
+            "E1_T5_TINY case=admitted_quote words={} exact_bits={} e1_bytes={} t5_bytes=4 semantic_authority=SENS",
             tiny_words.len(),
             tiny_bits,
             e1_tiny.len()
@@ -278,7 +249,7 @@ mod tests {
         );
         assert_eq!(e1_smaller + t5_smaller + equal, t5_cases);
         println!(
-            "E1_SIZE_SUMMARY cases={cases} t5_representable={t5_cases} f3c_eligible={f3c_cases} \
+            "E1_SIZE_SUMMARY cases={cases} t5_representable={t5_cases} \
              sum_e1_bytes={total_e1} sum_t5_comparable_bytes={total_t5} \
              e1_smaller={e1_smaller} t5_smaller={t5_smaller} equal={equal} \
              speed=NOT_MEASURED semantic_authority=SENS"
