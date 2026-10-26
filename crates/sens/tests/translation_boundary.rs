@@ -80,7 +80,7 @@ fn translation_reads_current_knowledge_journal_in_real_sens() {
     // Макрос приймає список клауз: (((not? мета))), а не одну ((not? мета)).
     let source = r#"
         (визначити журнал-до (поточний-журнал-знань))
-        (повідомити-знання corpus (як-є (((not? (human socrates))))))
+        (повідомити-знання (як-є corpus) (як-є (((not? (human socrates))))))
         (список
           (порожній? журнал-до)
           (хибне? (порожній? (поточний-журнал-знань)))
@@ -204,7 +204,7 @@ fn accepted_candidate_becomes_knowledge_only_after_explicit_advise() {
                    ((human socrates)))))
         (визначити review (переклад-перевірка (як-є corpus) proposal))
         (визначити before-known (модуль-відомий? (як-є corpus)))
-        (повідомити-знання corpus (список (переклад-допуск-вміст review)))
+        (повідомити-знання (як-є corpus) (список (переклад-допуск-вміст review)))
         (список
           before-known
           (модуль-відомий? (як-є corpus))
@@ -288,7 +288,7 @@ fn translator_refusal_is_recordable_evidence_and_never_knowledge() {
 fn existing_explicit_opposite_overrules_an_external_candidate() {
     // Явний заперечний факт має правильну вкладеність списку клауз.
     let source = r#"
-        (повідомити-знання corpus (як-є (((not? (human socrates))))))
+        (повідомити-знання (як-є corpus) (як-є (((not? (human socrates))))))
         (визначити before журнал-знань)
         (визначити proposal
           (як-є (translation-1 candidate clause
