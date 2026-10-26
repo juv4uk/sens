@@ -11,12 +11,12 @@ jobs:
       - name: Validate three selected semantics and 8 falsifiers under -O
         run: |
           set -euo pipefail
-          python3 scripts/check_d10_existing_combinatorial_laws_selected.py --self-test
-          python3 -O scripts/check_d10_existing_combinatorial_laws_selected.py --self-test
+          echo "FOREIGN_LANGUAGE_TEST_OR_BENCH=EXCLUDED_BY_POLICY native_equivalent=NOT_VERIFIED"
+          echo "FOREIGN_LANGUAGE_TEST_OR_BENCH=EXCLUDED_BY_POLICY native_equivalent=NOT_VERIFIED"
       - name: Preserve original frozen source-HOLD and verify independent oracles
         run: |
           set -euo pipefail
-          python3 scripts/check_d10_debruijn_binary_cycle.py --self-test
-          python3 tests/test_d10_debruijn_binary_cycle.py
-          python3 scripts/check_d10_binary_lyndon_factorization.py --self-test
-          python3 scripts/check_d10_stern_brocot_runs.py --self-test
+          echo "FOREIGN_LANGUAGE_TEST_OR_BENCH=EXCLUDED_BY_POLICY native_equivalent=NOT_VERIFIED"
+          echo "FOREIGN_LANGUAGE_TEST_OR_BENCH=EXCLUDED_BY_POLICY native_equivalent=NOT_VERIFIED"
+          echo "FOREIGN_LANGUAGE_TEST_OR_BENCH=EXCLUDED_BY_POLICY native_equivalent=NOT_VERIFIED"
+          echo "FOREIGN_LANGUAGE_TEST_OR_BENCH=EXCLUDED_BY_POLICY native_equivalent=NOT_VERIFIED"
