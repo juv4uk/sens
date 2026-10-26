@@ -19,12 +19,16 @@ GATED_DIRS = [
 ]
 SENS_SOURCE_RE = re.compile(r"^\s*;\s*SENS_SOURCE\s*[=:]", re.MULTILINE)
 ARCHIVE_ROW_RE = re.compile(
-    r"^\|\s*`([^`]+)`\s*\|\s*`([^`]+)`\s*\|\s*([^|]+)\|\s*`([0-9a-f]+)`\s*\|\s*ARCHIVE\s*\|",
+    r"^\s*\|?\s*`([^`]+)`\s*\|\s*`([^`]+)`\s*\|\s*([^|]+?)\s*\|\s*ARCHIVE\s*\|?\s*$",
     re.MULTILINE | re.IGNORECASE,
+)
+ARCHIVE_COMMIT_RE = re.compile(
+    r"https://github\\.com/juv4uk/sens/commit/[0-9a-f]{40}",
+    re.IGNORECASE,
 )
 
 
-def load_archive() -> list[tuple[str, str, str, str]]:
+def load_archive() -> list[tuple[str, str, str]]:
     if not ARCHIVE.is_file():
         print("LANGUAGE_CORRIDOR=RED archive_missing path=docs/language-policy-archive.md")
         sys.exit(1)
@@ -33,7 +37,14 @@ def load_archive() -> list[tuple[str, str, str, str]]:
     if not rows:
         print("LANGUAGE_CORRIDOR=RED archive_empty path=docs/language-policy-archive.md")
         sys.exit(1)
-    return [(a.strip(), b.strip(), c.strip(), d.strip()) for a, b, c, d in rows]
+    parsed = [(a.strip(), b.strip(), c.strip()) for a, b, c in rows]
+    missing_links = [artifact for artifact, _location, reason in parsed if not ARCHIVE_COMMIT_RE.search(reason)]
+    if missing_links:
+        print(f"LANGUAGE_CORRIDOR=RED archive_missing_full_commit_link count={len(missing_links)}")
+        for artifact in missing_links[:10]:
+            print(f"  missing_commit_link: {artifact}")
+        sys.exit(1)
+    return parsed
 
 
 def check_sens_source_on_laws() -> list[str]:
@@ -50,7 +61,7 @@ def check_sens_source_on_laws() -> list[str]:
     return problems
 
 
-def selftest_positive(rows: list) -> None:
+def selftest_positive(rows: list[tuple[str, str, str]]) -> None:
     n = len(rows)
     assert n >= 1, "positive selftest: registry must be non-empty"
     print(f"GATE_SELFTEST_POSITIVE=OK archive_rows={n}")
@@ -80,7 +91,7 @@ def main() -> int:
     print(f"ARCHIVE (поза мовним коридором): {n} артефактів — docs/language-policy-archive.md")
     print(f"ARCHIVE_COUNT={n}")
 
-    missing_files = [loc for _n, loc, _r, _s in rows if not (ROOT / loc).is_file()]
+    missing_files = [loc for _n, loc, _r in rows if not (ROOT / loc).is_file()]
     if missing_files:
         print(
             "LANGUAGE_CORRIDOR=NOTE archive_paths_absent_on_disk count=%d"
