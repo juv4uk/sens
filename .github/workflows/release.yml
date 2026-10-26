@@ -329,3 +329,4 @@ jobs:
     secrets: inherit
     permissions:
       contents: write
+      checks: read
