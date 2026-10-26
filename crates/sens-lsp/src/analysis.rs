@@ -96,7 +96,7 @@ fn surface_domain_coordinate(surface: &str) -> Option<(usize, u16)> {
         .into_iter()
         .find(|item| item.name == surface)
         .and_then(|item| item.domain_identity)
-        .map(|identity| (identity.width(), u16::from(identity.packed_bits())))
+        .map(|identity| (identity.width(), identity.packed_bits()))
 }
 
 /// True when an expression is Core.D3 QUOTE.
@@ -111,7 +111,7 @@ fn is_quote_head(expr: &Expr) -> bool {
         }
         ExprKind::Sid(identity) => {
             // No historical eight-bit payload can establish D3 QUOTE.
-            (identity.width(), u16::from(identity.packed_bits())) == D3_QUOTE
+            (identity.width(), identity.packed_bits()) == D3_QUOTE
         }
         ExprKind::Symbol(surface) => surface_domain_coordinate(surface) == Some(D3_QUOTE),
         _ => false,
