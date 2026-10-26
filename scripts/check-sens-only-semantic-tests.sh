@@ -3,6 +3,15 @@
 # and Assembler. Scan all active GitHub Actions workflows for other-language
 # runners. Excluded runner references are NOT_VERIFIED, never evidence of PASS.
 set -euo pipefail
+
+print_archive_summary() {
+  if [[ -f docs/language-policy-archive.md ]]; then
+    archive_n="$(grep -cE '\| ARCHIVE \|' docs/language-policy-archive.md || true)"
+    echo "ARCHIVE (поза мовним коридором): ${archive_n} артефактів — docs/language-policy-archive.md"
+  else
+    echo "ARCHIVE (поза мовним коридором): MISSING_REGISTRY — docs/language-policy-archive.md"
+  fi
+}
 root="$(git rev-parse --show-toplevel)"
 cd "$root"
 shopt -s nullglob
@@ -22,8 +31,10 @@ if grep -nHE "$pattern" "${files[@]}" > "$matches"; then
   echo "FOREIGN_TEST_BENCH_EVIDENCE=NOT_VERIFIED; excluded runners are not reported as passing"
   sed -n '1,40p' "$matches"
   echo "FOREIGN_TEST_BENCH_POLICY_RESULT=SKIP_NOT_RED"
+  print_archive_summary
   exit 0
 fi
 
 echo "EXECUTION_LANGUAGE_ALLOWLIST=Rust,Zig,SENS,Guile,C,Assembler"
 echo "FOREIGN_TEST_BENCH_POLICY=NO_DISALLOWED_RUNNERS_FOUND workflows=${#files[@]}"
+print_archive_summary
