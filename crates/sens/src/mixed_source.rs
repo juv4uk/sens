@@ -1263,7 +1263,7 @@ fn lift_head(
             // Ordinary mixed source admits D3–D6 callable heads. D8 is a
             // narrower, explicit Ukrainian allowlist; D9/D10 stay path-pinned.
             let admitted_width = (3..=6).contains(&identity.width())
-                || (identity.width() == 8 && admitted_d8_io_uk_bits(spelling).is_some());
+                || (identity.width() == 8 && (admitted_d8_io_uk_bits(spelling).is_some() || spelling == "однакові?"));
             if admitted_width {
                 return Ok(Expr {
                     kind: ExprKind::DomainIdentity(identity),
@@ -1836,6 +1836,25 @@ mod tests {
                 "{surface} must select only its exact D8 identity"
             );
         }
+    }
+
+    #[test]
+    fn ordinary_ukrainian_source_lifts_ratified_d8_structural_equality() {
+        let expression = only(
+            parse_mixed_exact_domain("(однакові? (як-є (а)) (як-є (а)))")
+                .expect("ratified D8 structural equality source"),
+        );
+        let ExprKind::List(call) = expression.kind else {
+            panic!("structural equality call");
+        };
+        assert!(
+            matches!(
+                &call[0].kind,
+                ExprKind::DomainIdentity(identity)
+                    if identity.width() == 8 && identity.packed_bits() == 0b11110111
+            ),
+            "ordinary source must preserve the exact D8 EQUAL identity"
+        );
     }
 
     #[test]
