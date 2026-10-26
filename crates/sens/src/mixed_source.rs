@@ -1149,6 +1149,19 @@ fn lift_quoted_d4_identity_data(
             expression.span,
         ));
     }
+    // A quoted, exact-width D4 coordinate is still its D4 identity.
+    // Only this ratified NOT datum is lifted here; other bit widths and
+    // coordinates remain data, so the quote reader cannot create callability.
+    if source_spelling(source, &expression) == Some("0100") {
+        let word = parse_binary_source_words("0100")?[0].word;
+        let identity = DomainIdentity::from_source_word(word);
+        if identity.width() == 4 && identity.packed_bits() == 0b0100 {
+            return Ok(Expr {
+                kind: ExprKind::DomainIdentity(identity),
+                span: expression.span,
+            });
+        }
+    }
     // Mixed parsing may materialize an unadmitted source spelling as a Text7
     // datum. Recover only the exact spelling owned by this source span, then
     // project the already-ratified D4 identity; never infer from rendered D7.
