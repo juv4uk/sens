@@ -81,7 +81,7 @@ jobs:
 
   native:
     name: Ручний native Rust/Zig smoke
-    if: ${{ github.event_name == 'workflow_dispatch' && inputs.suite == 'native' }}
+    if: ${{ (github.event_name == 'workflow_dispatch' && inputs.suite == 'native') || (github.event_name == 'push' && contains(github.event.head_commit.message, 'SENS_NATIVE_LAWS')) }}
     runs-on: ubuntu-24.04
     timeout-minutes: 25
     steps:
