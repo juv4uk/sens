@@ -93,8 +93,8 @@ jobs:
           cargo test --locked -p sens-lsp --test release_parity release_version_alignment_is_consistent_across_native_surfaces -- --exact
           cargo test --locked -p sens-lsp --test release_parity release_version_alignment_fails_closed_on_stale_missing_duplicate_and_registry_mutants -- --exact
 
-      - name: Release toolchain pins (gate #3 mechanical)
-        run: echo "PYTHON_TOOL_EXCLUDED_BY_LANGUAGE_POLICY native_equivalent=NOT_VERIFIED"
+      - name: Release toolchain pins — native Rust verification
+        run: cargo test --locked -p sens-cli --test release_toolchain_pins
 
       - name: Release preflight trigger scope — Python test excluded (NOT_VERIFIED)
         run: echo "PYTHON_TOOL_EXCLUDED_BY_LANGUAGE_POLICY native_equivalent=NOT_VERIFIED"

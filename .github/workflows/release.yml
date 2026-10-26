@@ -75,8 +75,8 @@ jobs:
         run: |
           python3 scripts/check-release-version-alignment.py --self-test
           python3 scripts/check-release-version-alignment.py
-      - name: Release toolchain pins (gate #3 mechanical)
-        run: python3 scripts/check-release-pins.py
+      - name: Release toolchain pins — native Rust verification
+        run: cargo test --locked -p sens-cli --test release_toolchain_pins
       - name: Перевірити версію тегу та інсталятор
         env:
           RELEASE_TAG: ${{ github.ref_name }}
