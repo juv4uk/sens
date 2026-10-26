@@ -113,6 +113,8 @@ jobs:
       - uses: ./.github/actions/install-zig
       - name: Build native SENS
         run: cargo build --locked -p sens-cli --bin sens --bin sens-trit --features benchmark-ast-visits
+      - name: F6 physical WRITE→READ producer/consumer
+        run: cargo test --locked -p sens-cli --test wsm_fs_f6_pipeline -- --nocapture
       - name: Точковий SENS REPL — некоректний стан повертає мовну відмову
         run: cargo test --locked -p sens --test repl_core_malformed_tails repl_step_rejects_atomic_state_as_sens_data -- --nocapture
       - name: MetaEval — SENS law, mutant і точна фізична T5M-пара
