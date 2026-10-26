@@ -181,6 +181,18 @@ jobs:
           command -v swipl
           swipl --version
 
+      - name: Regenerate SENS conformance inventory from canonical source
+        shell: bash
+        run: |
+          set -euo pipefail
+          cargo run --locked -p sens-cli --bin sens -- scripts/build-inventory.lisp > "$RUNNER_TEMP/inventory.lisp"
+          test -s "$RUNNER_TEMP/inventory.lisp"
+          install -m 0644 "$RUNNER_TEMP/inventory.lisp" tests/fixtures/inventory.lisp
+          conformance_count=$(grep -Ec '^[[:space:]]*\(\(expr \. ' tests/fixtures/conformance.lisp || true)
+          inventory_count=$(grep -Ec '^[[:space:]]*\(fixture ' tests/fixtures/inventory.lisp || true)
+          printf 'SENS_CONFORMANCE_INVENTORY_REGENERATED conformance=%s inventory=%s\n' "$conformance_count" "$inventory_count"
+          test "$conformance_count" -eq "$inventory_count"
+
       - name: Full workspace tests (pre-tag, exact SHA)
         run: cargo test --locked --workspace --no-fail-fast
 
