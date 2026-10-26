@@ -446,6 +446,13 @@ run_case() {
     failed_ids+=("$id")
     # Зберігаємо RED та ідентифікатор закону; окрема квитанція не створюється.
     echo "::error title=SENS law::REGRESSION id=$id source=${3:-NOT_REPORTED}" >&2
+    if [[ -f "$evidence/$id/paired.err" ]]; then
+      echo "SENS_NATIVE_STDERR id=$id" >&2
+      cat "$evidence/$id/paired.err" >&2
+    elif [[ -f "$evidence/$id/direct.err" ]]; then
+      echo "SENS_NATIVE_STDERR id=$id" >&2
+      cat "$evidence/$id/direct.err" >&2
+    fi
   fi
   end_us="${EPOCHREALTIME/./}"
   wall_ms="$(((end_us - start_us) / 1000))"
@@ -758,7 +765,7 @@ fi
 # Д10:0100100110/0100100111 — CLIPS ASSERT/PRINTOUT як точні структурні дані.
 # D8 однакові? не спричиняє D3 EQ Type для зовнішньої цитованої голови.
 # Обидві форми доводить саме SENS; Zig/T5M лише переносить точні байти.
-# Дві мінімальні незалежні D10:0100100110/0100100111 head-квитанції.
+# Два незалежні нативні закони D10:0100100110/0100100111; ідентичність — трити SENS.
 run_case run_law d10-clips-assert-head-direct-positive tests/semantic/d10-clips-assert-head-direct-law.lisp 1 core4
 run_case run_law d10-clips-printout-head-direct-positive tests/semantic/d10-clips-printout-head-direct-law.lisp 1 core4
 run_case run_law d10-clips-equal-head-positive tests/semantic/d10-clips-equal-head-law.lisp 1 core4
