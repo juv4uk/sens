@@ -99,8 +99,8 @@ jobs:
       - name: Release preflight trigger scope — Python test excluded (NOT_VERIFIED)
         run: echo "PYTHON_TOOL_EXCLUDED_BY_LANGUAGE_POLICY native_equivalent=NOT_VERIFIED"
 
-      - name: Release tag safety — Python test excluded (NOT_VERIFIED)
-        run: echo "PYTHON_TOOL_EXCLUDED_BY_LANGUAGE_POLICY native_equivalent=NOT_VERIFIED"
+      - name: Release tag safety — native Rust self-calibration
+        run: cargo test --locked -p sens-cli --test release_tag_guard
 
       - name: Release artifact integrity — Python test excluded (NOT_VERIFIED)
         run: echo "PYTHON_TOOL_EXCLUDED_BY_LANGUAGE_POLICY native_equivalent=NOT_VERIFIED"
