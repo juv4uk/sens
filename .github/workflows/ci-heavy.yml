@@ -821,8 +821,8 @@ jobs:
           CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --lib д2_фізичний_і_канонічний_читачі_збігаються_для_всіх_чотирьох_маркерів -- --nocapture
           CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo run --locked -p sens-cli --bin sens -- --t5m-pair lib/codec-d2.lisp lib/codec-d2.sens
 
-      - name: "SENS runtime перекладу: позитивні й негативні свідки"
-        if: ${{ !cancelled() && steps.changed-t5m-lisp.outputs.translation_tests == 'true' }}
+      - name: "SENS runtime перекладу: позитивні й негативні свідки (#6183)"
+        if: ${{ !cancelled() }}
         timeout-minutes: 12
         shell: bash
         run: |
