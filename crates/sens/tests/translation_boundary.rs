@@ -414,11 +414,13 @@ fn translation_symbol_law_rejects_non_symbols_in_live_sens() {
         eval_parsed_expressions(&forms, &mut session).expect("чинна бібліотека SENS");
     }
     for (expression, expected) in [
+        // Only true atoms are tested with D3 EQ; compounds go straight to D9 SYMBOL?.
         ("(як-є candidate)", true),
         ("\"candidate\"", false),
         ("7", false),
         ("(як-є ())", false),
         ("(як-є (candidate))", false),
+        ("(сполучити (як-є candidate) ні)", false),
     ] {
         let source = format!("(переклад-внутрішній-символ? {expression})");
         let actual = eval_parsed_expressions(
