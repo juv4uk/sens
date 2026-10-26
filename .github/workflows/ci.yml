@@ -71,7 +71,6 @@ jobs:
           count="$(grep -cE '\|[[:space:]]*ARCHIVE[[:space:]]*\|?$' docs/language-policy-archive.md || true)"
           echo "ARCHIVE (поза мовним коридором): ${count} артефактів — docs/language-policy-archive.md"
           echo "ARCHIVE (поза мовним коридором): ${count} артефактів — docs/language-policy-archive.md" >> "$GITHUB_STEP_SUMMARY"
-          echo "SHA=$GITHUB_SHA; статус стороннього еквівалента не прирівнюється до PASS." >> "$GITHUB_STEP_SUMMARY"
       - name: Самоперевірка мовного гейту (позитивний та негативний свідки)
         shell: bash
         run: bash scripts/test-language-policy-archive-gate.sh
