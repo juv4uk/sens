@@ -132,6 +132,8 @@ jobs:
           bash scripts/prove-бенчмарк-структура.sh "$PWD/target/debug/sens"
           bash scripts/prove-бенчмарк-умова.sh "$PWD/target/debug/sens"
           bash scripts/prove-ідентичність-тритів.sh "$PWD/target/debug/sens"
+          bash scripts/prove-d3-атом-межа.sh "$PWD/target/debug/sens"
+          bash scripts/prove-d3-як-є-щит.sh "$PWD/target/debug/sens"
           bash scripts/prove-lisp-language-laws.sh "$PWD/target/debug/sens"
 
   remint-input-required:
