@@ -2,6 +2,11 @@ name: SENS — короткий локальний GPU smoke
 
 on:
   workflow_dispatch:
+    inputs:
+      release_probe:
+        description: "Прогнати релізні нативні перевірки (translation_boundary, core4_migration_point, коннектор леджера)"
+        type: boolean
+        default: false
 
 permissions: {}
 
@@ -51,3 +56,35 @@ jobs:
           printf 'operation=add-i32 input=-3,0,3 expected=%s actual=%s\n' "$expected" "$actual"
           test "$actual" = "$expected"
           printf 'CML_GPU_WORKER_SMOKE_PASS physical_device=GTX_1050_Ti vectors=3 semantic_authority=SENS_ONLY\n' >> "$GITHUB_STEP_SUMMARY"
+
+  # Релізні нативні перевірки на локальній машині (там є cargo/zig).
+  # Окремий job, щоб не чіпати GPU-smoke і його таймаут.
+  release-probe:
+    if: ${{ inputs.release_probe }}
+    name: Релізні нативні перевірки · GTX 1050 Ti
+    runs-on: [self-hosted, Linux, X64, gpu, gtx-1050-ti]
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v5
+      - name: translation_boundary (блокер релізу)
+        shell: bash
+        run: |
+          set -uo pipefail
+          cargo test --locked -p sens --test translation_boundary 2>&1 | tail -60
+          rc=${PIPESTATUS[0]}
+          echo "TRANSLATION_BOUNDARY_RC=$rc"
+          exit 0
+      - name: core4_migration_point (F6-фікс d8ced25e)
+        shell: bash
+        run: |
+          set -uo pipefail
+          cargo test --locked -p sens --test core4_migration_point 2>&1 | tail -40
+          echo "CORE4_POINT_RC=${PIPESTATUS[0]}"
+          exit 0
+      - name: Коннектор леджера релізу (нативний)
+        shell: bash
+        run: |
+          set -uo pipefail
+          python3 scripts/connect-release-admission-native.py 2>&1 | tail -25
+          echo "LEDGER_CONNECTOR_RC=${PIPESTATUS[0]}"
+          exit 0
