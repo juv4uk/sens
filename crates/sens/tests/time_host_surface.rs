@@ -184,7 +184,7 @@ fn time_stable_peers_reuse_the_same_lisp_closures() {
         match (&original, &localized) {
             (Some(Value::Closure(left)), Some(Value::Closure(right))) => {
                 assert!(
-                    Rc::ptr_eq(&left, &right),
+                    Rc::ptr_eq(left, right),
                     "{peer} має бути тим самим Lisp-замиканням, що й {source}"
                 );
             }
