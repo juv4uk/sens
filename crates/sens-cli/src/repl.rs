@@ -2117,6 +2117,10 @@ fn handle_meta_command(line: &str, state: &mut ReplState) -> bool {
     }
 }
 
+fn render_repl_error(error: &str) -> String {
+    format!("Помилка REPL/T5M: {error}")
+}
+
 pub(crate) fn run_repl(session: Session, initial_surface: ReplSurface, sens_loop: bool) {
     let mut state = match ReplState::new(session, initial_surface, sens_loop) {
         Ok(state) => state,
@@ -2186,7 +2190,7 @@ pub(crate) fn run_repl(session: Session, initial_surface: ReplSurface, sens_loop
                     }
                     Err(error) => {
                         // Нативну відмову SENS не можна перетворювати на успішний echo хоста.
-                        eprintln!("Помилка REPL/T5M: {error}");
+                        eprintln!("{}", render_repl_error(&error));
                     }
                 }
             }
@@ -2528,11 +2532,17 @@ mod tests {
 
     #[test]
     fn repl_error_presentation_never_emits_successful_echo() {
-        // Перевірка лише хостового контракту; семантику діагностує SENS.
-        let diagnostic = "Помилка REPL/T5M: SENS відхилив форму";
-        assert!(diagnostic.starts_with("Помилка REPL/T5M: "));
-        assert!(!diagnostic.starts_with("echo "));
-        assert!(!diagnostic.starts_with("ВІДЛУННЯ "));
+        for error in [
+            "SENS binary evaluator: domain identity is not callable under its ratified law: D7",
+            "SENS binary reader: unclosed list",
+            "unknown symbol: unresolved-name",
+        ] {
+            let diagnostic = render_repl_error(error);
+            assert!(diagnostic.contains(error));
+            assert!(diagnostic.starts_with("Помилка REPL/T5M: "));
+            assert!(!diagnostic.starts_with("echo "));
+            assert!(!diagnostic.starts_with("ВІДЛУННЯ "));
+        }
     }
 
     #[test]
