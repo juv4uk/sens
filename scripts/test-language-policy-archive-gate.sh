@@ -8,7 +8,8 @@ trap 'rm -rf "$tmp"' EXIT
 git -C "$tmp" init -q
 git -C "$tmp" config user.name "SENS gate self-test"
 git -C "$tmp" config user.email "sens-gate-self-test@example.invalid"
-mkdir -p "$tmp/tests/legacy" "$tmp/benchmarks/legacy" "$tmp/docs"
+mkdir -p "$tmp/tests/legacy" "$tmp/benchmarks/legacy" "$tmp/docs" "$tmp/scripts"
+printf '#!/usr/bin/env sh\\necho SENS runner\\n' > "$tmp/scripts/execute_changed_lisp_t5m.sh"
 printf 'print("historical artifact")\n' > "$tmp/tests/legacy/test_old.py"
 printf '#!/usr/bin/env sh\necho historical benchmark\n' > "$tmp/benchmarks/legacy/old_runner.sh"
 fake_sha=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
@@ -81,6 +82,20 @@ fi
 if ! grep -q 'SENS_SOURCE_FIRST_FIELD_REQUIRED' "$tmp/negative.log" || ! grep -q 'unregistered_exclusion=tests/new/test_foreign.py' "$tmp/negative.log" || ! grep -q 'NEW_FOREIGN_TEST_ARCHIVE_FORBIDDEN' "$tmp/negative.log"; then
   echo "LANGUAGE_POLICY_ARCHIVE_SELFTEST=FAIL negative witness failed for the wrong reason"
   cat "$tmp/negative.log"
+  exit 1
+fi
+# The canonical T5M carrier must reject SHA-256 receipt generation.
+printf '#!/usr/bin/env sh\\nsha256sum source > source.sha256\\n' > "$tmp/scripts/execute_changed_lisp_t5m.sh"
+git -C "$tmp" add scripts/execute_changed_lisp_t5m.sh
+git -C "$tmp" commit -qm "negative hash-receipt witness"
+if SENS_EVENT_NAME=pull_request SENS_PR_FIRST_FIELD='SENS_SOURCE=tests/legacy/test_old.sens' bash "$gate" --root "$tmp" > "$tmp/hash-negative.log" 2>&1; then
+  echo "LANGUAGE_POLICY_ARCHIVE_SELFTEST=FAIL hash receipt was accepted"
+  cat "$tmp/hash-negative.log"
+  exit 1
+fi
+if ! grep -q 'canonical_SENS_carrier_creates_hash_receipt' "$tmp/hash-negative.log"; then
+  echo "LANGUAGE_POLICY_ARCHIVE_SELFTEST=FAIL hash receipt rejected for wrong reason"
+  cat "$tmp/hash-negative.log"
   exit 1
 fi
 echo "LANGUAGE_POLICY_ARCHIVE_SELFTEST=VALID positive=ARCHIVE_COUNTED negative=NEW_FOREIGN_TEST_RED"
