@@ -85,7 +85,7 @@ jobs:
             echo "LISP_TO_SENS_MINT $f"
             profile_args=()
             case "$f" in
-              tests/semantic/d6-derived-research-batch-01.lisp|tests/semantic/d8-rassq-until-batch.lisp) profile_args=(--core4-runtime);;
+              tests/semantic/d6-derived-research-batch-01.lisp|tests/semantic/d8-rassq-until-batch.lisp|scripts/check-domain-logic-laws.lisp) profile_args=(--core4-runtime);;
             esac
             if ! bash scripts/refresh-verified-t5m-pair.sh "$f" target/debug/sens target/debug/sens-trit "${profile_args[@]}"; then
               echo "::error::LISP_TO_SENS_MINT_FAILED $f"
