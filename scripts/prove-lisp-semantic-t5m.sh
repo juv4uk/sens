@@ -532,9 +532,12 @@ assert_library_bad_tail="$evidence/assertion-library-bad-tail-complete.lisp"
 cat -- lib/твердження.lisp tests/semantic/assertion-library-law.lisp > "$assert_library_law"
 cat -- lib/твердження.lisp tests/semantic/assertion-library-mutant.lisp > "$assert_library_mutant"
 cat -- lib/твердження.lisp tests/semantic/assertion-library-bad-tail-negative.lisp > "$assert_library_bad_tail"
+assert_library_cardinality="$evidence/assertion-library-cardinality-complete.lisp"
+cat -- lib/твердження.lisp tests/semantic/assertion-library-cardinality-law.lisp > "$assert_library_cardinality"
 run_case run_law assertion-library-self-calibration "$assert_library_law" 1 core4
 run_case run_law assertion-library-self-calibration-mutant "$assert_library_mutant" 0 core4
 run_case run_error_rejection assertion-library-improper-tail "$assert_library_bad_tail" Type 'car expects a non-empty list' core4
+run_case run_law assertion-library-empty-singleton "$assert_library_cardinality" 1 core4
 
 # Повна пара власне мовного заперечення Д1: джерело тільки Lisp.
 run_case run_law d1-not-positive tests/semantic/d1-not-law.lisp 1

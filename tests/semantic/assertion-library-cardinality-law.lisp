@@ -1,0 +1,29 @@
+; SENS_SOURCE=tests/semantic/assertion-library-cardinality-law.lisp
+; NATIVE_SENS_POSITIVE=NOT_VERIFIED
+; NATIVE_SENS_NEGATIVE=NOT_VERIFIED
+; M1: self-tests cardinality boundaries of the SENS-owned runner.
+; Empty suite => zero in all counters; singleton PASS/FAIL => exact D1 counts.
+; This law is concatenated with lib/твердження.lisp by the native T5M runner.
+
+(та
+  (однакові?
+    (запустити-твердження (як-є ()))
+    (список (як-є ()) (як-є ()) (як-є ()) (як-є ())))
+  (однакові?
+    (запустити-твердження
+      (список
+        (список (як-є одиночний-прохід) (функція () так))))
+    (список
+      (сполучити так (як-є ()))
+      (сполучити так (як-є ()))
+      (як-є ())
+      (як-є ())))
+  (однакові?
+    (запустити-твердження
+      (список
+        (список (як-є одиночний-провал) (функція () ні))))
+    (список
+      (сполучити так (як-є ()))
+      (як-є ())
+      (сполучити так (як-є ()))
+      (список (як-є одиночний-провал)))))
