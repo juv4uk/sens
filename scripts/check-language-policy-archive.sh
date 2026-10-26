@@ -73,7 +73,7 @@ is_testbench_location() {
 is_foreign_testbench() {
   is_testbench_location "$1" || return 1
   case "$1" in
-    *.py|*.pyi|*.js|*.mjs|*.cjs|*.ts|*.tsx|*.jsx|*.rb|*.go|*.php|*.rkt|*.lua|*.swift|*.java|*.kt|*.scala|*.pl|*.jl) return 0 ;;
+    *.py|*.pyi|*.js|*.mjs|*.cjs|*.ts|*.tsx|*.jsx|*.rb|*.go|*.php|*.rkt|*.lua|*.swift|*.java|*.kt|*.scala|*.pl|*.jl|*.sh|*.f90|*.clp|*.sbcl|*.fs|*.v) return 0 ;;
     *) return 1 ;;
   esac
 }
