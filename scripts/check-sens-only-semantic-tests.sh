@@ -98,7 +98,7 @@ if [[ "$event_name" == "pull_request" && -n "${GITHUB_EVENT_PATH:-}" && -f "${GI
   done <<<"$(git diff --name-status "$base_sha...$head_sha" || true)"
 fi
 
-runner_pattern='python3?[[:space:]]+.*(test|bench|benchmark|trial|run\.py)|pytest([[:space:]]|$)|node[[:space:]]+--test|npm[[:space:]]+(test|run[[:space:]]+(test|bench|benchmark))|npx[[:space:]]+(jest|vitest|mocha)|bun[[:space:]]+test|deno[[:space:]]+test|go[[:space:]]+test([[:space:]]|$)|racket[[:space:]]+.*(test|bench)'
+runner_pattern='^[[:space:]]*(run:[[:space:]]*)?(python3?|pytest)[[:space:]]+(-m[[:space:]]+(unittest|pytest)([[:space:]]|$)|(-O[[:space:]]+)?tests/[^[:space:]]+\.py([[:space:]\\]|$)|benchmarks/[^[:space:]]+\.py([[:space:]\\]|$)|scripts/test_[^[:space:]]+\.py([[:space:]\\]|$))|^[[:space:]]*pytest([[:space:]]|$)|^[[:space:]]*(node[[:space:]]+--test|npm[[:space:]]+(test|run[[:space:]]+(test|bench|benchmark))|npx[[:space:]]+(jest|vitest|mocha)|bun[[:space:]]+test|deno[[:space:]]+test|go[[:space:]]+test([[:space:]]|$)|bundle[[:space:]]+exec[[:space:]]+(rspec|rake[[:space:]]+test)|ruby[[:space:]]+[^[:space:]]*test[^[:space:]]*\.rb|phpunit([[:space:]]|$)|prove([[:space:]]|$)|racket[[:space:]]+[^[:space:]]*(test|bench)|lua[[:space:]]+[^[:space:]]*(test|bench)|swift[[:space:]]+test|dotnet[[:space:]]+test|mvn[[:space:]]+test|gradle[[:space:]]+test)'
 workflow_count=0
 missing_runner_workflows=()
 while IFS= read -r workflow; do
