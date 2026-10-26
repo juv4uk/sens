@@ -622,12 +622,58 @@ fn decode_language_lowering_role(
         Value::Symbol(name) => name.to_string(),
         Value::Text7(text) => crate::text7_projection::render_text7(text, crate::Text7Layout::En)
             .map_err(|error| {
-            LanguageError::new(
-                ErrorKind::InvalidForm,
-                format!("SENS compiler nucleus returned unrenderable D7 role text: {error}"),
-                Span::default(),
-            )
-        })?,
+                LanguageError::new(
+                    ErrorKind::InvalidForm,
+                    format!("SENS compiler nucleus returned unrenderable D7 role text: {error}"),
+                    Span::default(),
+                )
+            })?,
+        // A source-written quoted D7 token can arrive as a proper list of
+        // exact D7 identities. Normalize that representation here only; SENS
+        // remains the authority that chose the role value.
+        Value::Pair(_) => {
+            let mut cells = Vec::new();
+            let mut cursor = value;
+            loop {
+                match cursor {
+                    Value::Nil => break,
+                    Value::Pair(pair) => {
+                        let Value::DomainIdentity(DomainIdentity::D7(cell)) = &pair.head else {
+                            return Err(LanguageError::new(
+                                ErrorKind::InvalidForm,
+                                "SENS compiler nucleus returned a role list containing non-D7 data",
+                                Span::default(),
+                            ));
+                        };
+                        cells.push(cell.word().packed_bits());
+                        cursor = &pair.tail;
+                    }
+                    other => {
+                        return Err(LanguageError::new(
+                            ErrorKind::InvalidForm,
+                            format!("SENS compiler nucleus returned an improper D7 role list: {other}"),
+                            Span::default(),
+                        ));
+                    }
+                }
+            }
+            let text = crate::Text7::from_cells(cells).map_err(|_| {
+                LanguageError::new(
+                    ErrorKind::InvalidForm,
+                    "SENS compiler nucleus returned malformed D7 role cells",
+                    Span::default(),
+                )
+            })?;
+            crate::text7_projection::render_text7(&text, crate::Text7Layout::En).map_err(
+                |error| {
+                    LanguageError::new(
+                        ErrorKind::InvalidForm,
+                        format!("SENS compiler nucleus returned unrenderable D7 role text: {error}"),
+                        Span::default(),
+                    )
+                },
+            )?
+        }
         other => {
             return Err(LanguageError::new(
                 ErrorKind::InvalidForm,
@@ -1034,6 +1080,30 @@ mod tests {
         CoreDomainIdentity::D4(crate::CoreD4::from_word(
             crate::Bit4::new(raw).expect("D4 test word"),
         ))
+    }
+
+    #[test]
+    fn d7_cons_role_projection_is_normalized_and_malformed_lists_fail_closed() {
+        let text = crate::text7_projection::encode_text7(
+            "define-form",
+            crate::Text7Layout::En,
+        )
+        .expect("role label must be representable in D7");
+        let exact_cells = Value::list(text.cells().iter().map(|cell| {
+            Value::DomainIdentity(DomainIdentity::D7(crate::D7DataWord::from_word(
+                crate::Bit7::new(*cell).expect("exact D7 cell"),
+            )))
+        }));
+        assert_eq!(
+            decode_language_lowering_role(&exact_cells).expect("exact D7 list decodes"),
+            Some(CompilerLoweringRole::DefineForm)
+        );
+
+        let malformed = Value::list([Value::predicate_bit(false)]);
+        assert!(
+            decode_language_lowering_role(&malformed).is_err(),
+            "non-D7 role content must fail closed"
+        );
     }
 
     #[test]
