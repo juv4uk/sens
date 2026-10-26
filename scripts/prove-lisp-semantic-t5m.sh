@@ -575,11 +575,6 @@ run_case run_law d4-selector-foundation-mutant tests/semantic/d4-nested-pair-sel
 run_case run_law d4-second-selector-positive tests/semantic/d4-second-selector-law.lisp 1
 run_case run_law d4-second-selector-mutant tests/semantic/d4-second-selector-mutant.lisp 0
 run_case run_type_rejection d4-second-improper-d1-tail tests/semantic/d4-second-improper-d1-tail-negative.lisp 'car expects a non-empty list'
-sha256sum tests/semantic/d4-nested-pair-selectors-law.lisp \
-  tests/semantic/d4-nested-pair-selectors-mutant.lisp \
-  tests/semantic/d4-second-selector-law.lisp \
-  tests/semantic/d4-second-selector-mutant.lisp \
-  tests/semantic/d4-second-improper-d1-tail-negative.lisp > "$evidence/d4-selector-foundation-inputs.sha256"
 run_case run_law d4-lambda-application-positive tests/semantic/d4-lambda-application-law.lisp 1
 run_case run_law d4-lambda-application-mutant tests/semantic/d4-lambda-application-mutant.lisp 0
 run_case run_law d4-late-binding-positive tests/semantic/d4-late-definition-binding-law.lisp 1
@@ -599,8 +594,6 @@ run_case run_law d4-first-class-predicate-mutant tests/semantic/d4-first-class-p
 # Д9:110011110 — SENS D1 позитив та мутант, без host-string-оракула.
 run_case run_law d9-string-append-physical-positive tests/semantic/d9-string-append-physical.lisp 1 core4
 run_case run_law d9-string-append-physical-mutant tests/semantic/d9-string-append-physical-mutant.lisp 0 core4
-sha256sum tests/semantic/d9-string-append-physical.lisp \
-  tests/semantic/d9-string-append-physical-mutant.lisp > "$evidence/d9-string-append-inputs.sha256"
 # Діагностичні SENS-закони: розділити складений D9/F6 RED по першій неправильній умові.
 # Ці файли створюються лише в тимчасовому каталозі evidence; виконує їх реальний SENS/T5M.
 d9_fs_probe_dependencies="$evidence/d9-f6-probe-dependencies.lisp"
@@ -691,10 +684,6 @@ cat -- lib/persistent-map.lisp lib/world.lisp lib/content-store.lisp \
   lib/lisp-fs.lisp tests/semantic/d9-f6-package-key-canonicalization-mutant.lisp > "$d9_fs_keys_mutant"
 run_case run_law d9-f6-package-key-canonicalization-positive "$d9_fs_keys_positive" 1 core4
 run_case run_law d9-f6-package-key-canonicalization-mutant "$d9_fs_keys_mutant" 0 core4
-sha256sum lib/persistent-map.lisp lib/world.lisp lib/content-store.lisp lib/lisp-fs.lisp \
-  tests/semantic/d9-f6-package-key-canonicalization-law.lisp \
-  tests/semantic/d9-f6-package-key-canonicalization-mutant.lisp \
-  > "$evidence/d9-f6-package-key-canonicalization-inputs.sha256"
 
 # D9 MAP: перевірка хвоста ПІСЛЯ збігу; один позитив і два фізичні Type.
 d9_map_tail_positive="$evidence/d9-map-hidden-tail-positive-complete.lisp"
@@ -706,9 +695,6 @@ cat -- lib/persistent-map.lisp tests/semantic/d9-map-hidden-tail-insert-negative
 run_case run_law d9-map-hidden-tail-positive "$d9_map_tail_positive" 1 core4
 run_case run_error_rejection d9-map-hidden-tail-get "$d9_map_tail_get_negative" Type 'car expects a non-empty list' core4
 run_case run_error_rejection d9-map-hidden-tail-insert "$d9_map_tail_insert_negative" Type 'car expects a non-empty list' core4
-sha256sum lib/persistent-map.lisp tests/semantic/d9-map-hidden-tail-positive.lisp \
-  tests/semantic/d9-map-hidden-tail-get-negative.lisp \
-  tests/semantic/d9-map-hidden-tail-insert-negative.lisp > "$evidence/d9-map-hidden-tail-inputs.sha256"
 
 # Д9/F6: перевірка структури кожного зв'язування без host-семантики.
 d9_fs_bindings_positive="$evidence/d9-f6-bindings-shape-positive.lisp"
@@ -717,8 +703,6 @@ cat -- lib/lisp-fs.lisp tests/semantic/d9-f6-bindings-shape-law.lisp > "$d9_fs_b
 cat -- lib/lisp-fs.lisp tests/semantic/d9-f6-bindings-shape-mutant.lisp > "$d9_fs_bindings_mutant"
 run_case run_law d9-f6-bindings-shape-positive "$d9_fs_bindings_positive" 1 core4
 run_case run_law d9-f6-bindings-shape-mutant "$d9_fs_bindings_mutant" 0 core4
-sha256sum lib/lisp-fs.lisp tests/semantic/d9-f6-bindings-shape-law.lisp \
-  tests/semantic/d9-f6-bindings-shape-mutant.lisp > "$evidence/d9-f6-bindings-shape-inputs.sha256"
 
 # Д9/F6: об'єктні адреси — тільки правильний D3-список.
 # Один SENS DEFINE; прямий, парний і standalone Zig/T5M результати.
@@ -737,11 +721,6 @@ run_case run_law d9-f6-object-addresses-mutant "$d9_fs_address_mutant" 0 core4
 run_case run_error_rejection d9-f6-object-addresses-d1-root "$d9_fs_address_root_negative" Type 'car expects a non-empty list' core4
 run_case run_error_rejection d9-f6-object-addresses-d1-tail "$d9_fs_address_tail_negative" Type 'car expects a non-empty list' core4
 run_case run_error_rejection d9-f6-object-addresses-empty-address "$d9_fs_address_empty_negative" Type 'car expects a non-empty list' core4
-sha256sum lib/lisp-fs.lisp tests/semantic/d9-f6-object-addresses-law.lisp \
-  tests/semantic/d9-f6-object-addresses-mutant.lisp \
-  tests/semantic/d9-f6-object-addresses-d1-root-negative.lisp \
-  tests/semantic/d9-f6-object-addresses-d1-tail-negative.lisp \
-  tests/semantic/d9-f6-object-addresses-empty-address-negative.lisp > "$evidence/d9-f6-object-addresses-inputs.sha256"
 
 # Д11 PREFIX: похідний SENS D1/D3/D8 закон, а не нова координата.
 # Кожний шлях має точну source → native SENS → Zig/T5M → SENS реєстрацію.
@@ -760,20 +739,11 @@ run_case run_law d11-prefix-proper-mutant "$d11_prefix_mutant" 0 core4
 run_case run_error_rejection d11-prefix-proper-left-tail "$d11_prefix_left_tail" Type 'car expects a non-empty list' core4
 run_case run_error_rejection d11-prefix-proper-right-hidden "$d11_prefix_right_hidden" Type 'car expects a non-empty list' core4
 run_case run_error_rejection d11-prefix-proper-left-root "$d11_prefix_left_root" Type 'car expects a non-empty list' core4
-sha256sum lib/d11-prefix-proper.lisp \
-  tests/semantic/d11-prefix-proper-law.lisp \
-  tests/semantic/d11-prefix-proper-mutant.lisp \
-  tests/semantic/d11-prefix-proper-left-tail-negative.lisp \
-  tests/semantic/d11-prefix-proper-right-hidden-tail-negative.lisp \
-  tests/semantic/d11-prefix-proper-left-root-negative.lisp \
-  > "$evidence/d11-prefix-proper-inputs.sha256"
 
 # Д10: чотири ратифіковані MAP-виклики, усі 12 SENS-предикатів — один D1 доказ.
 # Негативний свідок повинен давати саме D1:ні, не Type і не host результат.
 run_case run_law d10-map-derived-twelve-positive tests/semantic/d10-map-derived-native-laws.lisp 1 core4
 run_case run_law d10-map-derived-empty-mutant tests/semantic/d10-map-derived-native-mutant.lisp 0 core4
-sha256sum tests/semantic/d10-map-derived-native-laws.lisp \
-  tests/semantic/d10-map-derived-native-mutant.lisp > "$evidence/d10-map-derived-inputs.sha256"
 run_case run_law d10-empty-queue-positive tests/semantic/d10-empty-queue-law.lisp 1 core4
 run_case run_law d10-empty-queue-mutant tests/semantic/d10-empty-queue-mutant.lisp 0 core4
 # Д10:0100100110/0100100111 — CLIPS ASSERT/PRINTOUT як точні структурні дані.
@@ -786,42 +756,22 @@ run_case run_law d10-clips-equal-head-positive tests/semantic/d10-clips-equal-he
 run_case run_law d10-clips-equal-head-mutant tests/semantic/d10-clips-equal-head-mutant.lisp 0 core4
 run_case run_error_rejection d10-clips-all-asserts-improper-tail tests/semantic/d10-clips-all-asserts-improper-tail-negative.lisp Type 'car expects a non-empty list' core4
 run_case run_error_rejection d10-clips-drop-printouts-improper-tail tests/semantic/d10-clips-drop-printouts-improper-tail-negative.lisp Type 'car expects a non-empty list' core4
-sha256sum lib/core4.lisp \
-  tests/semantic/d10-clips-equal-head-law.lisp \
-  tests/semantic/d10-clips-assert-head-direct-law.lisp \
-  tests/semantic/d10-clips-printout-head-direct-law.lisp \
-  tests/semantic/d10-clips-equal-head-mutant.lisp \
-  tests/semantic/d10-clips-all-asserts-improper-tail-negative.lisp \
-  tests/semantic/d10-clips-drop-printouts-improper-tail-negative.lisp > "$evidence/d10-clips-equal-head-inputs.sha256"
 # Перевірка кореня D5: D3 CDR не повинен перетворювати D1:ні на D3:().
 # SENS дає позитив D1:так і негатив D1:ні, Zig переносить лише фізичний код.
 run_case run_law d3-d4-no-tail-boundary-positive tests/semantic/d3-d4-no-tail-boundary-law.lisp 1
 run_case run_law d3-d4-no-tail-boundary-mutant tests/semantic/d3-d4-no-tail-boundary-mutant.lisp 0
-sha256sum tests/semantic/d3-d4-no-tail-boundary-law.lisp \
-  tests/semantic/d3-d4-no-tail-boundary-mutant.lisp > "$evidence/d3-d4-no-tail-boundary.sha256"
 
 # Д5 REVERSE/REVERSE-ONTO: SENS-закон, порядок і дві точні Type-відмови.
 run_case run_law d5-reverse-onto-proper-positive tests/semantic/d5-reverse-onto-proper-law.lisp 1 core4
 run_case run_law d5-reverse-onto-order-mutant tests/semantic/d5-reverse-onto-order-mutant.lisp 0 core4
 run_case run_error_rejection d5-reverse-onto-improper-tail tests/semantic/d5-reverse-onto-improper-tail-negative.lisp Type 'car expects a non-empty list' core4
 run_case run_error_rejection d5-reverse-improper-tail tests/semantic/d5-reverse-improper-tail-negative.lisp Type 'car expects a non-empty list' core4
-sha256sum lib/core4.lisp \
-  tests/semantic/d5-reverse-onto-proper-law.lisp \
-  tests/semantic/d5-reverse-onto-order-mutant.lisp \
-  tests/semantic/d5-reverse-onto-improper-tail-negative.lisp \
-  tests/semantic/d5-reverse-improper-tail-negative.lisp > "$evidence/d5-reverse-inputs.sha256"
 # Д5:11110 PAIRLIS: повні D3-списки, D1-позитив/мутант і три Type-негативи.
 run_case run_law d5-pairlis-total-list-positive tests/semantic/d5-pairlis-total-list-law.lisp 1 core4
 run_case run_law d5-pairlis-total-list-mutant tests/semantic/d5-pairlis-total-list-mutant.lisp 0 core4
 run_case run_error_rejection d5-pairlis-improper-key-tail tests/semantic/d5-pairlis-improper-key-tail-negative.lisp Type 'car expects a non-empty list' core4
 run_case run_error_rejection d5-pairlis-improper-value-tail tests/semantic/d5-pairlis-improper-value-tail-negative.lisp Type 'car expects a non-empty list' core4
 run_case run_error_rejection d5-pairlis-extra-value tests/semantic/d5-pairlis-extra-value-negative.lisp Type 'car expects a non-empty list' core4
-sha256sum \
-  tests/semantic/d5-pairlis-total-list-law.lisp \
-  tests/semantic/d5-pairlis-total-list-mutant.lisp \
-  tests/semantic/d5-pairlis-improper-key-tail-negative.lisp \
-  tests/semantic/d5-pairlis-improper-value-tail-negative.lisp \
-  tests/semantic/d5-pairlis-extra-value-negative.lisp > "$evidence/d5-pairlis-inputs.sha256"
 
 # D5/D24+: точні числові величини, мутант, неправильний D1-хвіст.
 # Усі вердикти формулює SENS. Shell тільки з'єднує бібліотеку та свідки.
@@ -835,10 +785,6 @@ cat -- "$d5_exact_number_source" tests/semantic/d5-exact-numbers-filter-improper
 run_case run_law d5-exact-numbers-filter-positive "$d5_exact_number_law_bundle" 1 core4
 run_case run_law d5-exact-numbers-filter-mutant "$d5_exact_number_mutant_bundle" 0 core4
 run_case run_error_rejection d5-exact-numbers-filter-improper-tail "$d5_exact_number_negative_bundle" Type 'car expects a non-empty list' core4
-sha256sum "$d5_exact_number_source" \
-  tests/semantic/d5-exact-numbers-filter-law.lisp \
-  tests/semantic/d5-exact-numbers-filter-mutant.lisp \
-  tests/semantic/d5-exact-numbers-filter-improper-tail-negative.lisp > "$evidence/d5-exact-numbers-inputs.sha256"
 # Д6:000010/000011 MIN-LIST/MAX-LIST, санскритські śreṇī-alpatara/śreṇī-brhattara.
 # Залежності D3 CAR/CDR/CONS, D4 NULL, D5 LESSP/GREATERP, D12+ values.
 # D3 структура перевіряється ДО числових порівнянь. Справжній SENS
@@ -851,15 +797,6 @@ run_case run_error_rejection d6-max-list-late-tail-type tests/semantic/d6-max-li
 run_case run_error_rejection d6-max-list-single-nonnumeric-type tests/semantic/d6-max-list-single-nonnumeric-type-negative.lisp Type 'math requires explicit D12+ operands' core4
 run_case run_error_rejection d6-min-list-interior-nonnumeric-type tests/semantic/d6-min-list-interior-nonnumeric-type-negative.lisp Type 'math requires explicit D12+ operands' core4
 run_case run_error_rejection d6-max-list-interior-nonnumeric-type tests/semantic/d6-max-list-interior-nonnumeric-type-negative.lisp Type 'math requires explicit D12+ operands' core4
-sha256sum \
-  tests/semantic/d6-min-max-list-d3-preflight-law.lisp \
-  tests/semantic/d6-min-max-list-d3-preflight-mutant.lisp \
-  tests/semantic/d6-min-list-d1-root-type-negative.lisp \
-  tests/semantic/d6-min-list-poison-late-tail-negative.lisp \
-  tests/semantic/d6-max-list-d1-tail-type-negative.lisp \
-  tests/semantic/d6-max-list-single-nonnumeric-type-negative.lisp \
-  tests/semantic/d6-min-list-interior-nonnumeric-type-negative.lisp \
-  tests/semantic/d6-max-list-interior-nonnumeric-type-negative.lisp > "$evidence/d6-min-max-preflight-inputs.sha256"
 # D6 NTH/MAPLIST: числовий індекс та D3 preflight до callback.
 run_case run_law d6-nth-exact-index-positive tests/semantic/d6-nth-exact-index-d3-laws.lisp 1 core4
 run_case run_law d6-nth-exact-index-mutant tests/semantic/d6-nth-exact-index-d3-mutant.lisp 0 core4
@@ -873,19 +810,6 @@ run_case run_law d6-maplist-suffix-identity tests/semantic/d6-maplist-suffix-ide
 run_case run_law d6-maplist-order-mutant tests/semantic/d6-maplist-suffix-order-mutant.lisp 0 core4
 run_case run_error_rejection d6-maplist-poison-d1-tail tests/semantic/d6-maplist-poison-improper-tail-negative.lisp Type 'car expects a non-empty list' core4
 run_case run_error_rejection d6-maplist-d1-root tests/semantic/d6-maplist-d1-root-type-negative.lisp Type 'car expects a non-empty list' core4
-sha256sum \
- tests/semantic/d6-nth-exact-index-d3-laws.lisp \
- tests/semantic/d6-nth-exact-index-d3-mutant.lisp \
- tests/semantic/d6-nth-early-improper-tail-negative.lisp \
- tests/semantic/d6-maplist-preflight-laws.lisp \
- tests/semantic/d6-maplist-preflight-mutant.lisp \
- tests/semantic/d6-maplist-poison-improper-tail-negative.lisp \
- tests/semantic/d6-nth-negative-index-type-negative.lisp \
- tests/semantic/d6-nth-d1-root-type-negative.lisp \
- tests/semantic/d6-maplist-suffix-identity-law.lisp \
- tests/semantic/d6-maplist-suffix-order-mutant.lisp \
- tests/semantic/d6-maplist-d1-root-type-negative.lisp \
- tests/semantic/d6-nth-wrong-choice-mutant.lisp > "$evidence/d6-nth-maplist-inputs.sha256"
 # D6 LET/LET*: D3 хребет і рівно два поля перед розгортанням.
 run_case run_law d6-let-letstar-preflight-positive tests/semantic/d6-let-letstar-preflight-law.lisp 1 core4
 run_case run_error_rejection d6-let-boolean-name tests/semantic/d6-let-boolean-name-negative.lisp Type 'car expects a non-empty list' core4
@@ -894,14 +818,6 @@ run_case run_error_rejection d6-let-numeric-name tests/semantic/d6-let-numeric-n
 run_case run_error_rejection d6-let-three-fields tests/semantic/d6-let-malformed-three-fields-negative.lisp Type 'car expects a non-empty list' core4
 run_case run_error_rejection d6-letstar-three-fields tests/semantic/d6-letstar-malformed-three-fields-negative.lisp Type 'car expects a non-empty list' core4
 run_case run_error_rejection d6-let-d1-tail tests/semantic/d6-let-improper-spine-negative.lisp Type 'car expects a non-empty list' core4
-sha256sum \
- tests/semantic/d6-let-letstar-preflight-law.lisp \
- tests/semantic/d6-let-boolean-name-negative.lisp \
- tests/semantic/d6-letstar-false-name-negative.lisp \
- tests/semantic/d6-let-numeric-name-negative.lisp \
- tests/semantic/d6-let-malformed-three-fields-negative.lisp \
- tests/semantic/d6-letstar-malformed-three-fields-negative.lisp \
- tests/semantic/d6-let-improper-spine-negative.lisp > "$evidence/d6-let-letstar-preflight-inputs.sha256"
 # D6 COMPOSE/FLIP/CURRY are derived SENS functions, so their law and
 # counterexample must pass the same physical Zig/T5M -> SENS route.
 run_case run_law d6-compose-flip-positive tests/semantic/d6-compose-flip-law.lisp 1 core4
@@ -947,11 +863,6 @@ cat -- "$d6_scan_source" tests/semantic/d6-scan-tail-improper-negative.lisp > "$
 run_case run_law d6-scan-tail-state-positive "$d6_scan_law" 1 core4
 run_case run_law d6-scan-tail-state-mutant "$d6_scan_mutant" 0 core4
 run_case run_error_rejection d6-scan-tail-improper "$d6_scan_improper" Type 'car expects a non-empty list' core4
-sha256sum lib/core4-parts/core4-d6b.lisp \
-  tests/semantic/d6-scan-tail-state-law.lisp \
-  tests/semantic/d6-scan-tail-state-mutant.lisp \
-  tests/semantic/d6-scan-tail-improper-negative.lisp \
-  > "$evidence/d6-scan-tail-inputs.sha256"
 # Д6:101111 SCAN: послідовність станів, зв'язок із REDUCE та структурні відмови.
 run_case run_law d6-scan-reduce-terminal-positive tests/semantic/d6-scan-reduce-terminal-law.lisp 1 core4
 run_case run_law d6-scan-missing-initial-mutant tests/semantic/d6-scan-missing-initial-mutant.lisp 0 core4
@@ -971,38 +882,11 @@ run_case run_error_rejection d8-right-fold-improper-tail tests/semantic/d8-right
 # Direct, pair --core4-runtime і standalone eval-core4 мають однаковий закон.
 run_case run_error_rejection d8-right-fold-structure-before-action tests/fixtures/d8-right-fold-improper-before-action-negative.lisp Type 'car expects a non-empty list' core4
 run_case run_error_rejection d8-right-scan-structure-before-action tests/fixtures/d8-right-scan-improper-before-action-negative.lisp Type 'car expects a non-empty list' core4
-sha256sum lib/core4.lisp tests/fixtures/d8-right-fold-improper-before-action-negative.lisp tests/fixtures/d8-right-scan-improper-before-action-negative.lisp > "$evidence/d8-right-before-action-inputs.sha256"
-sha256sum lib/core4.lisp tests/semantic/d8-right-fold-scan-law.lisp \
-  tests/semantic/d8-right-fold-order-mutant.lisp \
-  tests/semantic/d8-right-scan-missing-initial-mutant.lisp \
-  tests/semantic/d8-right-fold-atom-negative.lisp \
-  tests/semantic/d8-right-scan-atom-negative.lisp \
-  tests/semantic/d8-right-empty-base-law.lisp \
-  tests/semantic/d8-right-scan-improper-tail-negative.lisp \
-  tests/semantic/d8-right-fold-improper-tail-negative.lisp > "$evidence/d8-right-fold-scan-inputs.sha256"
 # Д6 FILTER-ONTO: непорожній акумулятор має оборотний порядок; мутант хибний.
 run_case run_law d6-filter-onto-accumulator-positive tests/semantic/d6-filter-onto-accumulator-law.lisp 1 core4
 run_case run_law d6-filter-onto-accumulator-mutant tests/semantic/d6-filter-onto-accumulator-mutant.lisp 0 core4
 # D6 FILTER must reject an improper tail with the actual SENS Type diagnostic.
 run_case run_error_rejection d6-filter-improper-tail tests/semantic/d6-filter-improper-tail-negative.lisp Type 'car expects a non-empty list' core4
-sha256sum lib/core4.lisp tests/semantic/d6-filter-independent-law.lisp \
-  tests/semantic/d6-filter-independent-mutant.lisp \
-  tests/semantic/d6-filter-onto-accumulator-law.lisp \
-  tests/semantic/d6-filter-onto-accumulator-mutant.lisp \
-  tests/semantic/d6-map-onto-accumulator-law.lisp \
-  tests/semantic/d6-map-onto-order-mutant.lisp \
-  tests/semantic/d6-map-onto-improper-tail-negative.lisp \
-  tests/semantic/d6-reduce-left-law.lisp \
-  tests/semantic/d6-reduce-left-mutant.lisp \
-  tests/semantic/d6-reduce-improper-tail-negative.lisp \
-  tests/semantic/d6-scan-reduce-terminal-law.lisp \
-  tests/semantic/d6-scan-missing-initial-mutant.lisp \
-  tests/semantic/d6-scan-improper-tail-negative.lisp \
-  tests/semantic/d6-scan-onto-atom-negative.lisp \
-  tests/semantic/d6-scan-tail-state-law.lisp \
-  tests/semantic/d6-scan-tail-state-mutant.lisp \
-  tests/semantic/d6-scan-tail-improper-negative.lisp \
-  tests/semantic/d6-filter-improper-tail-negative.lisp > "$evidence/d6-filter-inputs.sha256"
 # D6-квантори перевіряємо нижче як повні програми з визначеннями Core4.
 # D4 рекурсивна правильність списків: позитив та навмисне порушення.
 run_case run_law d4-proper-list-positive tests/semantic/d4-proper-list-recursion-law.lisp 1
@@ -1037,7 +921,6 @@ cat -- benchmarks/recursion.lisp tests/semantic/d4-recursion-atom-result-law.lis
 cat -- benchmarks/recursion.lisp tests/semantic/d4-recursion-atom-result-mutant.lisp > "$recursion_atom_mutant_bundle"
 run_case run_law d4-recursion-atom-positive "$recursion_atom_law_bundle" 1
 run_case run_law d4-recursion-atom-mutant "$recursion_atom_mutant_bundle" 0
-sha256sum benchmarks/recursion.lisp tests/semantic/d4-recursion-benchmark-law.lisp tests/semantic/d4-recursion-benchmark-mutant.lisp > "$evidence/d4-recursion-inputs.sha256"
 # Складені селектори Д4: шість тверджень у Lisp та точний D1-негатив.
 run_case run_law d4-selector-composition-positive tests/semantic/d4-selector-composition-law.lisp 1
 run_case run_law d4-selector-composition-mutant tests/semantic/d4-selector-composition-mutant.lisp 0
@@ -1068,8 +951,6 @@ run_case run_error_rejection d5-assoc-hidden-tail "$d5_assoc_tail" Type 'car exp
 d5_assoc_record="$evidence/d5-assoc-late-record-current-source.lisp"
 cat -- lib/core4-parts/core4-d6.lisp tests/semantic/d5-assoc-late-record-negative.lisp > "$d5_assoc_record"
 run_case run_error_rejection d5-assoc-late-record "$d5_assoc_record" Type 'car expects a non-empty list' core4
-sha256sum lib/core4-parts/core4-d6.lisp tests/semantic/d5-member-*.lisp \
-  tests/semantic/d5-assoc-*.lisp > "$evidence/d5-member-assoc-current-source-inputs.sha256"
 
 # Д5: композиції трьох рівнів D3→D4→D5, фізичні позитив і мутант.
 run_case run_law d5-selector-derived-positive tests/semantic/d5-selector-derived-law.lisp 1
@@ -1102,11 +983,6 @@ run_case run_law d11-family-association-positive "$d11_association_positive" 1
 run_case run_law d11-family-association-mutant "$d11_association_mutant" 0
 run_case run_type_rejection d11-family-association-late-record-type "$d11_association_late_record" 'car expects a non-empty list'
 run_case run_type_rejection d11-family-association-invalid-update-type "$d11_association_invalid_update" 'car expects a non-empty list'
-sha256sum lib/d11-srfi1-alist-protocol.lisp \
-  tests/semantic/d11-family-association-law.lisp \
-  tests/semantic/d11-family-association-mutant.lisp \
-  tests/semantic/d11-family-association-late-record-negative.lisp \
-  tests/semantic/d11-family-association-invalid-update-negative.lisp > "$evidence/d11-family-association-inputs.sha256"
 # Д11 ALIST: явна присутність ЗНАЧЕННЯ запису, а не лише запису.
 # Справжній SENS відрізняє знайдені D1:ні/D3:() від відсутнього ключа.
 d11_alist_value_positive="$evidence/d11-alist-value-presence-positive-complete.lisp"
@@ -1121,10 +997,6 @@ run_case run_law d11-alist-value-presence-positive "$d11_alist_value_positive" 1
 run_case run_law d11-alist-value-presence-mutant "$d11_alist_value_mutant" 0
 run_case run_type_rejection d11-alist-value-presence-late-invalid "$d11_alist_value_late" 'car expects a non-empty list'
 run_case run_type_rejection d11-alist-value-presence-priority "$d11_alist_value_priority" 'car expects a non-empty list'
-sha256sum lib/d11-srfi1-alist-protocol.lisp \
-  tests/semantic/d11-alist-value-presence-*.lisp \
-  tests/fixtures/d11-alist-value-presence-*.lisp \
-  > "$evidence/d11-alist-value-presence-inputs.sha256"
 
 # Д11: видалення всіх alist-записів зі строгою перевіркою D3 структури.
 # SENS сам визначає результат D1/Type; transport перевіряється реальною Zig/T5M парою.
@@ -1141,11 +1013,6 @@ run_case run_law d11-assoc-delete-positive "$d11_assoc_delete_positive" 1 core4
 run_case run_law d11-assoc-delete-mutant "$d11_assoc_delete_mutant" 0 core4
 run_case run_error_rejection d11-assoc-delete-improper-tail "$d11_assoc_delete_tail" Type 'car expects a non-empty list' core4
 run_case run_error_rejection d11-assoc-delete-invalid-record "$d11_assoc_delete_record" Type 'car expects a non-empty list' core4
-sha256sum "$d11_assoc_delete_source" \
-  tests/semantic/d11-assoc-delete-proper-law.lisp \
-  tests/semantic/d11-assoc-delete-order-mutant.lisp \
-  tests/semantic/d11-assoc-delete-improper-tail-negative.lisp \
-  tests/semantic/d11-assoc-delete-invalid-record-negative.lisp > "$evidence/d11-assoc-delete-inputs.sha256"
 # F11-TREE-TEST: двоаргументне SENS-замикання порівнює лише атомні листки.
 # Д3 CAR/CDR перевіряє структуру, Zig — лише точний T5M-носій.
 d11_tree_test_law_bundle="$evidence/d11-tree-test-law-complete.lisp"
@@ -1158,9 +1025,6 @@ run_case run_law d11-tree-test-mutant "$d11_tree_test_mutant_bundle" 0
 d11_tree_test_invalid_bundle="$evidence/d11-tree-test-nonpredicate-negative-complete.lisp"
 cat -- lib/d11-tree-equal-by-test.lisp tests/semantic/d11-tree-equal-by-test-nonpredicate-negative.lisp > "$d11_tree_test_invalid_bundle"
 run_case run_error_rejection d11-tree-test-nonpredicate-negative "$d11_tree_test_invalid_bundle" Type 'D3:110 COND expects exact D1:1 / D1:0'
-sha256sum lib/d11-tree-equal-by-test.lisp tests/semantic/d11-tree-equal-by-test-law.lisp \
-  tests/semantic/d11-tree-equal-by-test-mutant.lisp \
-  tests/semantic/d11-tree-equal-by-test-nonpredicate-negative.lisp > "$evidence/d11-tree-test-inputs.sha256"
 # Д11 REASON INDEX: D8 порівнює складені ключі, без D3-atom gate.
 reason_index_pair_law="$evidence/d11-reason-index-pair-key-law-complete.lisp"
 reason_index_pair_mutant="$evidence/d11-reason-index-pair-key-mutant-complete.lisp"
@@ -1168,9 +1032,6 @@ cat -- lib/unify.lisp lib/reason.lisp tests/semantic/d11-reason-index-pair-key-l
 cat -- lib/unify.lisp lib/reason.lisp tests/semantic/d11-reason-index-pair-key-mutant.lisp > "$reason_index_pair_mutant"
 run_case run_law d11-reason-index-pair-key-law "$reason_index_pair_law" 1 core4
 run_case run_law d11-reason-index-pair-key-mutant "$reason_index_pair_mutant" 0 core4
-sha256sum lib/reason.lisp \
-  tests/semantic/d11-reason-index-pair-key-law.lisp \
-  tests/semantic/d11-reason-index-pair-key-mutant.lisp > "$evidence/d11-reason-index-pair-key-inputs.sha256"
 # Д11 REASON: точний хвіст перевіряється ще до першого збігу.
 reason_early_hit_positive="$evidence/d11-reason-early-hit-proper-positive-complete.lisp"
 reason_early_hit_bad_tail="$evidence/d11-reason-early-hit-bad-tail-complete.lisp"
@@ -1181,10 +1042,6 @@ cat -- lib/unify.lisp lib/reason.lisp tests/semantic/d11-reason-early-hit-improp
 run_case run_law d11-reason-early-hit-proper-positive "$reason_early_hit_positive" 1 core4
 run_case run_law d11-reason-early-hit-proper-mutant "$reason_early_hit_mutant" 0 core4
 run_case run_error_rejection d11-reason-early-hit-improper-tail-type "$reason_early_hit_bad_tail" Type 'car expects a non-empty list' core4
-sha256sum lib/unify.lisp lib/reason.lisp \
-  tests/semantic/d11-reason-early-hit-proper-law.lisp \
-  tests/semantic/d11-reason-early-hit-proper-mutant.lisp \
-  tests/semantic/d11-reason-early-hit-improper-tail-negative.lisp > "$evidence/d11-reason-early-hit-inputs.sha256"
 
 # Д11: реальний SENS індекс — закон, мутант і три точні D3 Type-відмови.
 reason_index_law_bundle="$evidence/d11-reason-index-law-complete.lisp"
@@ -1202,7 +1059,6 @@ run_case run_law d11-reason-index-mutant "$reason_index_mutant_bundle" 0 core4
 run_case run_error_rejection d11-reason-index-improper-reverse "$reason_index_bad_reverse_bundle" Type 'car expects a non-empty list' core4
 run_case run_error_rejection d11-reason-index-improper-buckets "$reason_index_bad_buckets_bundle" Type 'car expects a non-empty list' core4
 run_case run_error_rejection d11-reason-index-improper-rules "$reason_index_bad_rules_bundle" Type 'car expects a non-empty list' core4
-sha256sum lib/reason.lisp lib/unify.lisp tests/semantic/d11-reason-index-*.lisp > "$evidence/d11-reason-index-inputs.sha256"
 
 # D11 proof-results: лише SENS визначає D1, Zig/T5M переносить реальний код.
 reason_results_law_bundle="$evidence/d11-reason-proof-results-law-complete.lisp"
@@ -1223,7 +1079,6 @@ run_case run_error_rejection d11-reason-proof-results-improper-accum "$reason_re
 run_case run_error_rejection d11-reason-proof-results-improper-scan "$reason_results_scan_bundle" Type 'car expects a non-empty list' core4
 run_case run_error_rejection d11-reason-proof-results-improper-map "$reason_results_map_bundle" Type 'car expects a non-empty list' core4
 run_case run_error_rejection d11-reason-proof-results-improper-attach "$reason_results_attach_bundle" Type 'car expects a non-empty list' core4
-sha256sum lib/unify.lisp lib/reason.lisp tests/semantic/d11-reason-proof-results-*.lisp > "$evidence/d11-reason-proof-results-inputs.sha256"
 
 # D11 REASON PROVENANCE: точний SENS D3 NIL та D1-невідповідність.
 provenance_leaf_law_bundle="$evidence/d11-reason-provenance-children-law-complete.lisp"
@@ -1238,7 +1093,6 @@ run_case run_law d11-reason-provenance-children-law "$provenance_leaf_law_bundle
 run_case run_law d11-reason-provenance-children-mutant "$provenance_leaf_mutant_bundle" 0 core4
 run_case run_error_rejection d11-reason-provenance-improper-children "$provenance_bad_children_bundle" Type 'car expects a non-empty list' core4
 run_case run_error_rejection d11-reason-provenance-improper-explanation "$provenance_bad_explanation_bundle" Type 'car expects a non-empty list' core4
-sha256sum lib/unify.lisp lib/reason.lisp tests/semantic/d11-reason-provenance-*.lisp > "$evidence/d11-reason-provenance-inputs.sha256"
 
 # F11-PROOF-TRACE: нативний закон SENS, жодної додаткової D11-координати.
 # Фактичні визначення беруться лише з lib/reason.lisp (та D9 уніфікатора).
@@ -1257,7 +1111,6 @@ run_case run_law d11-reason-proof-trace-law "$reason_trace_law_bundle" 1 core4
 run_case run_law d11-reason-proof-trace-mutant "$reason_trace_mutant_bundle" 0 core4
 run_case run_error_rejection d11-reason-proof-trace-improper-provenance "$reason_trace_bad_provenance_bundle" Type 'car expects a non-empty list' core4
 run_case run_error_rejection d11-reason-proof-trace-improper-count "$reason_trace_bad_count_bundle" Type 'car expects a non-empty list' core4
-sha256sum lib/unify.lisp lib/reason.lisp tests/semantic/d11-reason-proof-trace-*.lisp > "$evidence/d11-reason-proof-trace-inputs.sha256"
 
 # D11 SRFI-1 lset: позитив і мутант виконують справжні DEFINE мови SENS.
 # Немає нових opcode; Zig/T5M лише фізично переносить код і значення.
@@ -1275,9 +1128,7 @@ run_case run_type_rejection d11-lset-subset-malformed-chain "$d11_lset_subset_ch
 d11_lset_equality_chain_bad="$evidence/d11-lset-equality-malformed-chain.lisp"
 cat -- lib/d11-srfi1-set-relations.lisp tests/fixtures/d11-lset-equality-malformed-chain-negative.lisp > "$d11_lset_equality_chain_bad"
 run_case run_type_rejection d11-lset-equality-malformed-chain "$d11_lset_equality_chain_bad" 'car expects a non-empty list'
-sha256sum lib/d11-srfi1-set-relations.lisp tests/fixtures/d11-lset-{subset,equality}-malformed-chain-negative.lisp > "$evidence/d11-lset-chain-inputs.sha256"
 
-sha256sum lib/d11-srfi1-set-relations.lisp tests/semantic/d11-srfi1-set-relations-law.lisp tests/semantic/d11-srfi1-set-relations-mutant.lisp > "$evidence/d11-set-relations-inputs.sha256"
 # Д11: точне D3:() для коренів і хвостів; D1:ні не є NULL списку.
 # Обидва свідки містять лише чинні SENS DEFINE та виконуються на Zig/T5M.
 d11_set_proper_law="$evidence/d11-set-proper-d3-empty-law-complete.lisp"
@@ -1286,7 +1137,6 @@ cat -- lib/d11-srfi1-set-relations.lisp tests/semantic/d11-set-proper-d3-empty-l
 cat -- lib/d11-srfi1-set-relations.lisp tests/semantic/d11-set-proper-d3-empty-mutant.lisp > "$d11_set_proper_mutant"
 run_case run_law d11-set-proper-d3-empty-positive "$d11_set_proper_law" 1
 run_case run_law d11-set-proper-d3-empty-mutant "$d11_set_proper_mutant" 0
-sha256sum lib/d11-srfi1-set-relations.lisp tests/semantic/d11-set-proper-d3-empty-law.lisp tests/semantic/d11-set-proper-d3-empty-mutant.lisp > "$evidence/d11-set-proper-d3-empty-inputs.sha256"
 # D11 SRFI-1: навіть короткий шлях повернення ТАК не маскує пошкоджений хвіст.
 # Обидва негативні свідки запускають справжню бібліотеку SENS через Zig/T5M.
 d11_set_member_bad="$evidence/d11-srfi1-member-improper-hit-complete.lisp"
@@ -1295,7 +1145,6 @@ cat -- lib/d11-srfi1-set-relations.lisp tests/semantic/d11-srfi1-member-improper
 cat -- lib/d11-srfi1-set-relations.lisp tests/semantic/d11-srfi1-subset-improper-empty-negative.lisp > "$d11_set_subset_bad"
 run_case run_type_rejection d11-srfi1-member-improper-hit "$d11_set_member_bad" 'car expects a non-empty list'
 run_case run_type_rejection d11-srfi1-subset-improper-empty "$d11_set_subset_bad" 'car expects a non-empty list'
-sha256sum lib/d11-srfi1-set-relations.lisp tests/semantic/d11-srfi1-member-improper-hit-negative.lisp tests/semantic/d11-srfi1-subset-improper-empty-negative.lisp > "$evidence/d11-set-improper-inputs.sha256"
 # Д11 SRFI-1 LIST-INDEX: точний Д24+ індекс і окремий Д1 прапорець.
 # Повний D3 preflight ОБОХ списків до першого callback, навіть якщо
 # лівий порожній або ранній збіг сховав би зіпсований правий хвіст.
@@ -1314,9 +1163,6 @@ done
 d11_idx_bad_pred="$evidence/d11-list-index-nonpredicate-complete.lisp"
 cat -- "$d11_idx_library" tests/fixtures/d11-srfi1-list-index-nonpredicate-negative.lisp > "$d11_idx_bad_pred"
 run_case run_error_rejection d11-list-index-nonpredicate "$d11_idx_bad_pred" Type 'D3:110 COND expects exact D1:1 / D1:0' core4
-sha256sum "$d11_idx_library" \
-  tests/semantic/d11-srfi1-list-index-presence-{law,mutant}.lisp \
-  tests/fixtures/d11-srfi1-list-index-*-negative.lisp > "$evidence/d11-list-index-presence-inputs.sha256"
 
 # Д11 SRFI-1 APPEND-REVERSE: статичні SENS-джерела і явні маршрути.
 # Rust ownership guard бачить конкретний SOURCE, не $kind-підміну.
@@ -1343,10 +1189,6 @@ for invalid in d1-root late-improper deep-improper; do
   run_case run_error_rejection "d11-append-reverse-$invalid" \
     "$rev_append_negative" Type 'car expects a non-empty list' core4
 done
-sha256sum lib/d11-srfi1-append-reverse.lisp \
-  tests/semantic/d11-srfi1-append-reverse-*.lisp \
-  tests/fixtures/d11-srfi1-append-reverse-*-negative.lisp \
-  > "$evidence/d11-append-reverse-inputs.sha256"
 
 # SRFI-1 LIST-TABULATE: лише SENS створює елементи й виносить D1-вердикт.
 # Усі три шляхи мають той самий Core4 (D24+, D3, D4, D6 REVERSE).
@@ -1368,10 +1210,6 @@ for invalid in d1-count negative-count fraction-count; do
   run_case run_error_rejection "d11-list-tabulate-$invalid" "$tabulate_negative" \
     Type 'car expects a non-empty list' core4
 done
-sha256sum lib/d11-srfi1-list-tabulate.lisp \
-  tests/semantic/d11-srfi1-list-tabulate-*.lisp \
-  tests/fixtures/d11-srfi1-list-tabulate-*-negative.lisp \
-  > "$evidence/d11-list-tabulate-inputs.sha256"
 
 
 
@@ -1389,8 +1227,6 @@ run_case run_law d11-query-status-positive "$d11_status_law" 1 core4
 run_case run_law d11-query-status-mutant "$d11_status_mutant" 0 core4
 run_case run_error_rejection d11-query-status-improper "$d11_status_bad" Type 'car expects a non-empty list' core4
 run_case run_error_rejection d11-query-status-preflight "$d11_status_preflight" Type 'car expects a non-empty list' core4
-sha256sum lib/d11-query-unique.lisp tests/semantic/d11-query-status-*.lisp \
-  tests/fixtures/d11-query-status-*-negative.lisp > "$evidence/d11-query-status-inputs.sha256"
 
 # D11: два конкретні свідки неоднозначності без нової координати.
 d11_two_law="$evidence/d11-query-two-witness-positive.lisp"
@@ -1405,8 +1241,6 @@ run_case run_law d11-query-two-witness-positive "$d11_two_law" 1 core4
 run_case run_law d11-query-two-witness-mutant "$d11_two_mutant" 0 core4
 run_case run_error_rejection d11-query-two-witness-improper "$d11_two_bad" Type 'car expects a non-empty list' core4
 run_case run_error_rejection d11-query-two-witness-preflight "$d11_two_poison" Type 'car expects a non-empty list' core4
-sha256sum lib/d11-query-unique.lisp tests/semantic/d11-query-two-witness-*.lisp \
-  tests/fixtures/d11-query-two-witness-*-negative.lisp > "$evidence/d11-query-two-witness-inputs.sha256"
 
 # Д11: однозначний пошук — чистий SENS, без третьої істини чи D11 opcode.
 # Два проходи: повний D3-хребет перед предикатом, потім вибір 0/1/2+.
@@ -1422,8 +1256,6 @@ run_case run_law d11-unique-query-positive "$d11_unique_law" 1 core4
 run_case run_law d11-unique-query-mutant "$d11_unique_mutant" 0 core4
 run_case run_error_rejection d11-unique-query-improper-tail "$d11_unique_improper" Type 'car expects a non-empty list' core4
 run_case run_error_rejection d11-unique-query-preflight "$d11_unique_poisoned" Type 'car expects a non-empty list' core4
-sha256sum lib/d11-query-unique.lisp tests/semantic/d11-query-unique-*.lisp \
-  tests/fixtures/d11-query-unique-*-negative.lisp > "$evidence/d11-unique-query-inputs.sha256"
 
 # SRFI-1 list=: алгоритм з чинної lib/D11, очікувані предикати тільки в Lisp.
 # Не тестуємо D11-операцію Rust-оракулом; Zig тільки кодує фізичні байти.
@@ -1451,17 +1283,12 @@ for improper in wrong-root late-improper-tail outer-improper-tail nested-imprope
   run_case run_error_rejection "d11-list-equality-$improper" "$list_equal_type_source" \
     Type 'car expects a non-empty list' core4
 done
-sha256sum lib/d11-srfi1-list-equality.lisp \
-  tests/semantic/d11-srfi1-list-equality-{law,structure-law,structure-mutant}.lisp \
-  tests/fixtures/d11-srfi1-list-equality-*-negative.lisp \
-  > "$evidence/d11-list-equality-d3-type-boundary.sha256"
 
 for family in pairs nullary; do
   witness="$evidence/d11-list-equality-$family-isolated.lisp"
   cat -- lib/d11-srfi1-list-equality.lisp "tests/semantic/d11-srfi1-list-equality-$family-law.lisp" > "$witness"
   run_case run_law "d11-srfi1-list-equality-$family-positive" "$witness" 1
 done
-sha256sum tests/semantic/d11-srfi1-list-equality-{structure,pairs,nullary}-law.lisp > "$evidence/d11-list-equality-isolated-inputs.sha256"
 
 run_case run_law d11-srfi1-list-equality-mutant "$d11_list_equal_mutant_bundle" 0
 # Д11 LIST=: один точний шлях для кожного закону й мутанта.
@@ -1483,7 +1310,6 @@ run_case run_law d11-direction-directed-adjacent-law "$d11_direction_4" 1
 d11_direction_5="$evidence/directed-adjacent-mutant-witness.lisp"
 cat -- lib/d11-srfi1-list-equality.lisp tests/semantic/d11-srfi1-list-equality-directed-adjacent-mutant.lisp > "$d11_direction_5"
 run_case run_law d11-direction-directed-adjacent-mutant "$d11_direction_5" 0
-sha256sum tests/semantic/d11-srfi1-list-equality-directed-law.lisp tests/semantic/d11-srfi1-list-equality-directed-mutant.lisp tests/semantic/d11-srfi1-list-equality-directed-pairs-law.lisp tests/semantic/d11-srfi1-list-equality-directed-pairs-mutant.lisp tests/semantic/d11-srfi1-list-equality-directed-adjacent-law.lisp tests/semantic/d11-srfi1-list-equality-directed-adjacent-mutant.lisp > "$evidence/d11-directed-inputs.sha256"
 
 
 # SRFI-1 list= rejects malformed input even when early length/value cases could
@@ -1504,7 +1330,6 @@ run_case run_type_rejection d11-list-equality-improper-left-type "$d11_list_equa
 run_case run_type_rejection d11-list-equality-improper-right-type "$d11_list_equal_bad_right" "$d11_list_equal_type_error"
 run_case run_type_rejection d11-list-equality-invalid-singleton-type "$d11_list_equal_bad_singleton" "$d11_list_equal_type_error"
 run_case run_type_rejection d11-list-equality-invalid-third-type "$d11_list_equal_bad_third" "$d11_list_equal_type_error"
-sha256sum lib/d11-srfi1-list-equality.lisp tests/semantic/d11-srfi1-list-equality-law.lisp tests/semantic/d11-srfi1-list-equality-mutant.lisp tests/fixtures/d11-list-equality-improper-left-must-error.lisp tests/fixtures/d11-list-equality-improper-right-must-error.lisp tests/fixtures/d11-list-equality-invalid-singleton-must-error.lisp tests/fixtures/d11-list-equality-invalid-third-must-error.lisp > "$evidence/d11-list-equality-inputs.sha256"
 # Д11 SRFI-1 COUNT: без D24 та host-арифметики; результат — D1 унарний список.
 # Незалежні SENS law/mutant і дві строгі помилки неправильного хвоста.
 d11_unary_count_positive="$evidence/d11-unary-count-positive-complete.lisp"
@@ -1519,7 +1344,6 @@ run_case run_law d11-unary-count-positive "$d11_unary_count_positive" 1
 run_case run_law d11-unary-count-mutant "$d11_unary_count_mutant" 0
 run_case run_type_rejection d11-unary-count-improper-tail-type "$d11_unary_count_bad_tail" 'car expects a non-empty list'
 run_case run_type_rejection d11-unary-count-improper-right-type "$d11_unary_count_bad_right" 'car expects a non-empty list'
-sha256sum lib/d11-srfi1-unary-count.lisp tests/semantic/d11-srfi1-unary-count-law.lisp tests/semantic/d11-srfi1-unary-count-mutant.lisp tests/semantic/d11-srfi1-unary-count-improper-tail-negative.lisp tests/semantic/d11-srfi1-unary-count-improper-right-negative.lisp > "$evidence/d11-unary-count-inputs.sha256"
 # Д11 НАС-форм: перед раннім збігом обов'язкова правильна D3-структура.
 # Перевірка здійснюється самим SENS на direct, Zig/T5M paired і standalone.
 d11_form_positive="$evidence/d11-form-presence-positive-complete.lisp"
@@ -1538,7 +1362,6 @@ run_case run_type_rejection d11-form-presence-improper-miss "$d11_form_bad_miss"
 d11_form_bad_deep="$evidence/d11-form-presence-deep-improper-complete.lisp"
 cat -- lib/d11-form-presence.lisp tests/fixtures/d11-form-presence-deep-improper-negative.lisp > "$d11_form_bad_deep"
 run_case run_type_rejection d11-form-presence-deep-improper "$d11_form_bad_deep" 'car expects a non-empty list'
-sha256sum lib/d11-form-presence.lisp tests/fixtures/d11-form-presence-improper-{match,miss}-negative.lisp tests/fixtures/d11-form-presence-deep-improper-negative.lisp > "$evidence/d11-form-presence-inputs.sha256"
 # Д11 LIST-TERMINATOR: D1:ні є даними неправильного хвоста, D3:() — кінець.
 # Фізична SENS-бібліотека та незалежний позитив/мутант використовують одні DEFINE.
 d11_terminator_positive="$evidence/d11-list-terminator-positive-complete.lisp"
@@ -1547,7 +1370,6 @@ cat -- lib/d11-list-terminator-evidence.lisp tests/semantic/d11-list-terminator-
 cat -- lib/d11-list-terminator-evidence.lisp tests/semantic/d11-list-terminator-mutant.lisp > "$d11_terminator_mutant"
 run_case run_law d11-list-terminator-positive "$d11_terminator_positive" 1
 run_case run_law d11-list-terminator-mutant "$d11_terminator_mutant" 0
-sha256sum lib/d11-list-terminator-evidence.lisp tests/semantic/d11-list-terminator-law.lisp tests/semantic/d11-list-terminator-mutant.lisp > "$evidence/d11-list-terminator-inputs.sha256"
 # Д11 FIND-PRESENCE: прапорець наявності незалежний від знайденого значення.
 # Чинний SENS DEFINE, точний D1 позитив/мутант та неправильний D1-хвіст.
 d11_presence_positive="$evidence/d11-srfi1-find-presence-positive-complete.lisp"
@@ -1565,7 +1387,6 @@ run_case run_type_rejection d11-find-presence-atomic-root-type "$d11_presence_at
 d11_presence_early="$evidence/d11-find-presence-early-improper.lisp"
 cat -- lib/d11-srfi1-find-presence.lisp tests/semantic/d11-srfi1-find-presence-early-hit-improper-negative.lisp > "$d11_presence_early"
 run_case run_type_rejection d11-find-presence-early-hit-improper "$d11_presence_early" "car expects a non-empty list"
-sha256sum lib/d11-srfi1-find-presence.lisp tests/semantic/d11-srfi1-find-presence-law.lisp tests/semantic/d11-srfi1-find-presence-mutant.lisp tests/semantic/d11-srfi1-find-presence-improper-tail-negative.lisp tests/semantic/d11-srfi1-find-presence-early-hit-improper-negative.lisp > "$evidence/d11-find-presence-inputs.sha256"
 # Д11 FIND-LAST-PRESENCE: єдиний валідатор D3, чистий рекурсивний SENS.
 # Залежності — точні DEFINE з FIND-PRESENCE та цього бібліотечного файла.
 d11_last_positive="$evidence/d11-find-last-presence-positive.lisp"
@@ -1580,8 +1401,6 @@ cat -- lib/d11-srfi1-find-presence.lisp lib/d11-srfi1-find-last-presence.lisp \
 run_case run_law d11-find-last-presence-positive "$d11_last_positive" 1
 run_case run_law d11-find-last-presence-mutant "$d11_last_mutant" 0
 run_case run_type_rejection d11-find-last-presence-improper "$d11_last_invalid" 'car expects a non-empty list'
-sha256sum lib/d11-srfi1-find-presence.lisp lib/d11-srfi1-find-last-presence.lisp \
-  tests/semantic/d11-find-last-presence-*.lisp > "$evidence/d11-find-last-presence-inputs.sha256"
 
 # Д11 FIRST-TAIL-PRESENCE: D1 наявність окремо від D3 суфікса.
 # Нативний SENS → Zig/T5M → paired/standalone SENS, без host-оцінювання.
@@ -1601,8 +1420,6 @@ run_case run_type_rejection d11-find-first-tail-presence-improper "$first_tail_p
 cat -- lib/d11-srfi1-find-tail.lisp lib/d11-srfi1-find-tail-presence.lisp \
   tests/semantic/d11-find-first-tail-presence-helper-atom-negative.lisp > "$first_tail_presence_helper_bad"
 run_case run_type_rejection d11-find-first-tail-presence-helper-atom "$first_tail_presence_helper_bad" 'car expects a non-empty list'
-sha256sum lib/d11-srfi1-find-tail.lisp lib/d11-srfi1-find-tail-presence.lisp \
-  tests/semantic/d11-find-first-tail-presence-*.lisp > "$evidence/d11-find-first-tail-presence-inputs.sha256"
 
 # Д11 LAST-TAIL: підтвердити суфікс останнього збігу лише мовою SENS.
 last_tail_positive="$evidence/d11-last-tail-positive.lisp"
@@ -1614,7 +1431,6 @@ cat -- lib/d11-srfi1-find-presence.lisp lib/d11-srfi1-find-last-tail-presence.li
 run_case run_law d11-find-last-tail-positive "$last_tail_positive" 1
 run_case run_law d11-find-last-tail-mutant "$last_tail_mutant" 0
 run_case run_type_rejection d11-find-last-tail-improper "$last_tail_bad" 'car expects a non-empty list'
-sha256sum lib/d11-srfi1-find-presence.lisp lib/d11-srfi1-find-last-tail-presence.lisp tests/semantic/d11-find-last-tail-*.lisp > "$evidence/d11-last-tail-inputs.sha256"
 
 # Д11 FIND-LAST-VALUE-PRESENCE: останнє D1/D3-значення з D1 прапорцем.
 last_value_positive="$evidence/d11-find-last-value-presence-positive-complete.lisp"
@@ -1629,11 +1445,6 @@ run_case run_law d11-find-last-value-presence-positive "$last_value_positive" 1
 run_case run_law d11-find-last-value-presence-mutant "$last_value_mutant" 0
 run_case run_type_rejection d11-find-last-value-presence-improper "$last_value_bad" 'car expects a non-empty list'
 run_case run_type_rejection d11-find-last-value-presence-before-predicate "$last_value_precedence" 'car expects a non-empty list'
-sha256sum lib/d11-srfi1-find-presence.lisp lib/d11-srfi1-find-last-tail-presence.lisp \
-  lib/d11-srfi1-find-last-value-presence.lisp \
-  tests/semantic/d11-find-last-value-presence-*.lisp \
-  tests/fixtures/d11-find-last-value-presence-*.lisp \
-  > "$evidence/d11-find-last-value-presence-inputs.sha256"
 
 # Д11: розділити перед останнім збігом, явний D1 прапорець.
 # Значення, порядок, хибна перша позиція й Type — SENS, не shell.
@@ -1646,7 +1457,6 @@ cat -- lib/d11-srfi1-find-presence.lisp lib/d11-split-before-last-presence.lisp 
 run_case run_law d11-split-last-positive "$split_last_positive" 1
 run_case run_law d11-split-last-mutant "$split_last_mutant" 0
 run_case run_type_rejection d11-split-last-improper "$split_last_invalid" 'car expects a non-empty list'
-sha256sum lib/d11-srfi1-find-presence.lisp lib/d11-split-before-last-presence.lisp tests/semantic/d11-split-before-last-*.lisp > "$evidence/d11-split-last-inputs.sha256"
 
 # Д11 APPEND-MAP: суворий SENS-профіль чинного D10:0011001010 MAPPEND.
 # Core4 визначає сам D10 MAPPEND, бібліотека D11 додає лише перевірку D3.
@@ -1663,11 +1473,6 @@ run_case run_law d11-append-map-d10-equivalence "$d11_append_map_positive" 1 cor
 run_case run_law d11-append-map-order-mutant "$d11_append_map_mutant" 0 core4
 run_case run_error_rejection d11-append-map-improper-input "$d11_append_map_bad_input" Type 'car expects a non-empty list' core4
 run_case run_error_rejection d11-append-map-improper-output "$d11_append_map_bad_output" Type 'car expects a non-empty list' core4
-sha256sum lib/d11-srfi1-append-map.lisp tests/semantic/d11-srfi1-append-map-law.lisp \
-  tests/semantic/d11-srfi1-append-map-mutant.lisp \
-  tests/semantic/d11-srfi1-append-map-improper-input-negative.lisp \
-  tests/semantic/d11-srfi1-append-map-improper-output-negative.lisp \
-  > "$evidence/d11-append-map-inputs.sha256"
 
 # Д11 SRFI-1 FILTER-MAP: D1:ні відкидається, структурне () зберігається.
 # Справжній SENS source → Zig/T5M → парний і самостійний SENS.
@@ -1677,7 +1482,6 @@ cat -- lib/d11-srfi1-filter-map.lisp tests/semantic/d11-srfi1-filter-map-law.lis
 cat -- lib/d11-srfi1-filter-map.lisp tests/semantic/d11-srfi1-filter-map-mutant.lisp > "$d11_filter_map_mutant"
 run_case run_law d11-srfi1-filter-map-positive "$d11_filter_map_positive" 1
 run_case run_law d11-srfi1-filter-map-mutant "$d11_filter_map_mutant" 0
-sha256sum lib/d11-srfi1-filter-map.lisp tests/semantic/d11-srfi1-filter-map-law.lisp tests/semantic/d11-srfi1-filter-map-mutant.lisp > "$evidence/d11-srfi1-filter-map-inputs.sha256"
 # Д11 FILTER-MAP: атомарний корінь та D1-хвіст мають давати SENS Type,
 # а не помилковий успіх, тихе усікання чи D7 UnknownSymbol.
 d11_filter_bad_root="$evidence/d11-filter-map-improper-root-complete.lisp"
@@ -1692,8 +1496,6 @@ run_case run_type_rejection d11-srfi1-filter-map-improper-tail-type "$d11_filter
 d11_filter_prevalidate_bad="$evidence/d11-filter-map-prevalidate-bad-complete.lisp"
 cat -- lib/d11-srfi1-filter-map.lisp tests/fixtures/d11-filter-map-improper-precedes-transform-negative.lisp > "$d11_filter_prevalidate_bad"
 run_case run_type_rejection d11-filter-map-prevalidate-before-transform-type "$d11_filter_prevalidate_bad" 'car expects a non-empty list'
-sha256sum lib/d11-srfi1-filter-map.lisp tests/fixtures/d11-filter-map-improper-precedes-transform-negative.lisp > "$evidence/d11-filter-map-prevalidate-inputs.sha256"
-sha256sum lib/d11-srfi1-filter-map.lisp tests/semantic/d11-srfi1-filter-map-improper-root-negative.lisp tests/semantic/d11-srfi1-filter-map-improper-tail-negative.lisp > "$evidence/d11-filter-map-improper-inputs.sha256"
 
 # Д11 SRFI-1: UNFOLD/UNFOLD-RIGHT є чистими композиціями SENS.
 # Джерело тестів — Lisp, Zig лише несе T5M; помилковий порядок = D1:ні.
@@ -1703,7 +1505,6 @@ cat -- lib/d11-srfi1-unfold.lisp tests/semantic/d11-srfi1-unfold-positive.lisp >
 cat -- lib/d11-srfi1-unfold.lisp tests/semantic/d11-srfi1-unfold-mutant.lisp > "$d11_unfold_mutant"
 run_case run_law d11-srfi1-unfold-positive "$d11_unfold_positive" 1
 run_case run_law d11-srfi1-unfold-mutant "$d11_unfold_mutant" 0
-sha256sum lib/d11-srfi1-unfold.lisp tests/semantic/d11-srfi1-unfold-positive.lisp tests/semantic/d11-srfi1-unfold-mutant.lisp > "$evidence/d11-srfi1-unfold-inputs.sha256"
 # Д11 UNFOLD обох напрямків: структурний D3:() не є D1-предикатом.
 # Два незалежні строгі SENS Type-свідки, Zig/T5M і повне фізичне виконання.
 d11_unfold_bad_predicate="$evidence/d11-unfold-nonpredicate-stop-complete.lisp"
@@ -1712,8 +1513,6 @@ cat -- lib/d11-srfi1-unfold.lisp tests/fixtures/d11-unfold-nonpredicate-stop-mus
 cat -- lib/d11-srfi1-unfold.lisp tests/fixtures/d11-unfold-right-nonpredicate-stop-must-error.lisp > "$d11_unfold_right_bad_predicate"
 run_case run_error_rejection d11-unfold-nonpredicate-stop "$d11_unfold_bad_predicate" Type 'D3:110 COND expects exact D1:1 / D1:0'
 run_case run_error_rejection d11-unfold-right-nonpredicate-stop "$d11_unfold_right_bad_predicate" Type 'D3:110 COND expects exact D1:1 / D1:0'
-sha256sum lib/d11-srfi1-unfold.lisp tests/fixtures/d11-unfold-nonpredicate-stop-must-error.lisp \
-  tests/fixtures/d11-unfold-right-nonpredicate-stop-must-error.lisp > "$evidence/d11-unfold-type-inputs.sha256"
 
 # D11 UNFOLD: кінцевий хвіст має бути правильним D3-списком.
 d11_unfold_bad_terminal_left_atom="$evidence/d11-unfold-terminal-left-atom.lisp"
@@ -1735,8 +1534,6 @@ cat -- lib/d11-srfi1-unfold.lisp tests/fixtures/d11-unfold-right-priority-atomic
 cat -- lib/d11-srfi1-unfold.lisp tests/fixtures/d11-unfold-right-priority-deep-tail-must-error.lisp > "$d11_unfold_priority_deep"
 run_case run_type_rejection d11-unfold-right-priority-atom "$d11_unfold_priority_atom" 'car expects a non-empty list'
 run_case run_type_rejection d11-unfold-right-priority-deep "$d11_unfold_priority_deep" 'car expects a non-empty list'
-sha256sum lib/d11-srfi1-unfold.lisp tests/fixtures/d11-unfold-terminal-*.lisp \
-  tests/fixtures/d11-unfold-right-priority-*-tail-must-error.lisp > "$evidence/d11-unfold-terminal-inputs.sha256"
 
 
 # Д11: повна композиція GROUP-BY → FREQUENCIES, з несуміжними ключами.
@@ -1747,8 +1544,6 @@ cat -- lib/d11-clojure-group-by.lisp lib/d11-clojure-frequencies-unary.lisp test
 cat -- lib/d11-clojure-group-by.lisp lib/d11-clojure-frequencies-unary.lisp tests/semantic/d11-frequencies-key-order-mutant.lisp > "$d11_freq_key_mutant"
 run_case run_law d11-frequencies-key-order-positive "$d11_freq_key_positive" 1 core4
 run_case run_law d11-frequencies-key-order-mutant "$d11_freq_key_mutant" 0 core4
-sha256sum lib/d11-clojure-group-by.lisp lib/d11-clojure-frequencies-unary.lisp \
-  tests/semantic/d11-frequencies-key-order-law.lisp tests/semantic/d11-frequencies-key-order-mutant.lisp > "$evidence/d11-frequencies-key-order-inputs.sha256"
 # Д11 GROUP-BY: позитив, мутант, пріоритет структури D3 над ключем.
 d11_gb_law="$evidence/d11-gb-spine-law.lisp"
 d11_gb_mut="$evidence/d11-gb-spine-mutant.lisp"
@@ -1762,11 +1557,6 @@ run_case run_law d11-group-by-spine-priority-law "$d11_gb_law" 1 core4
 run_case run_law d11-group-by-spine-priority-mutant "$d11_gb_mut" 0 core4
 run_case run_error_rejection d11-group-by-spine-priority-early "$d11_gb_early" Type 'car expects a non-empty list' core4
 run_case run_error_rejection d11-group-by-spine-priority-late "$d11_gb_late" Type 'car expects a non-empty list' core4
-sha256sum lib/d11-clojure-group-by.lisp \
-  tests/semantic/d11-group-by-spine-priority-law.lisp \
-  tests/semantic/d11-group-by-spine-priority-mutant.lisp \
-  tests/semantic/d11-group-by-spine-priority-early-negative.lisp \
-  tests/semantic/d11-group-by-spine-priority-late-negative.lisp > "$evidence/d11-group-by-spine-priority.sha256"
 # Д11 GROUP-BY: чотири незалежні фізичні негативні свідки D3 Type.
 # Кожен джерельний SENS-файл отримує ті ж DEFINE, що й позитивний закон.
 # Жодне D7 текстове ім'я не підміняє неправильний D1-хвіст списку.
@@ -1776,8 +1566,6 @@ for variant in atom-input improper-tail remove-improper-tail select-improper-tai
   cat -- lib/d11-clojure-group-by.lisp "$fixture" > "$complete"
   run_case run_error_rejection "d11-group-by-${variant}" "$complete" Type 'car expects a non-empty list' core4
 done
-sha256sum lib/d11-clojure-group-by.lisp \
-  tests/fixtures/d11-group-by-*-must-error.lisp > "$evidence/d11-group-by-type-inputs.sha256"
 # Д3/Д4: APPEND-GENERAL завершує тільки точне (), а не D1:ні.
 # Всі три докази йдуть через SENS → Zig/T5M → SENS.
 d4_append_positive="$evidence/d4-append-general-proper-complete.lisp"
@@ -1798,11 +1586,6 @@ cat -- lib/list-append-general.lisp tests/semantic/d4-append-general-atomic-righ
 cat -- lib/list-append-general.lisp tests/semantic/d4-append-general-improper-right-negative.lisp > "$d4_append_right_tail"
 run_case run_error_rejection d4-append-general-atomic-right "$d4_append_right_atom" Type 'car expects a non-empty list' core4
 run_case run_error_rejection d4-append-general-improper-right "$d4_append_right_tail" Type 'car expects a non-empty list' core4
-sha256sum lib/list-append-general.lisp tests/semantic/d4-append-general-proper-law.lisp \
-  tests/semantic/d4-append-general-proper-mutant.lisp \
-  tests/semantic/d4-append-general-atomic-left-negative.lisp \
-  tests/semantic/d4-append-general-improper-tail-negative.lisp \
-  tests/semantic/d4-append-general-atomic-right-negative.lisp tests/semantic/d4-append-general-improper-right-negative.lisp > "$evidence/d4-append-general-inputs.sha256"
 
 # Д11 SRFI-1 LSET-DIFF+INTERSECTION: статично ідентифіковані фізичні джерела.
 # Rust ownership guard пов'язує лише ЯВНИЙ SENS шлях у cat із run_case;
@@ -1819,11 +1602,6 @@ run_case run_law d11-lset-diff-intersection-law "$d11_lset_positive" 1 core4
 run_case run_law d11-lset-diff-intersection-mutant "$d11_lset_mutant" 0 core4
 run_case run_error_rejection d11-lset-diff-intersection-improper-left "$d11_lset_bad_left" Type 'car expects a non-empty list' core4
 run_case run_error_rejection d11-lset-diff-intersection-improper-right "$d11_lset_bad_right" Type 'car expects a non-empty list' core4
-sha256sum lib/d11-srfi1-lset-diff-intersection.lisp \
-  tests/semantic/d11-srfi1-lset-diff-intersection-law.lisp \
-  tests/semantic/d11-srfi1-lset-diff-intersection-mutant.lisp \
-  tests/semantic/d11-srfi1-lset-diff-intersection-improper-left-negative.lisp \
-  tests/semantic/d11-srfi1-lset-diff-intersection-improper-right-negative.lisp > "$evidence/d11-lset-diff-intersection-inputs.sha256"
 # Д11 LSET-XOR: три справжні негативні виклики SENS із тим самим DEFINE.
 # Лівий/правий атом D1 замість D3 () → CAR Type, компаратор D3 → COND Type.
 d11_xor_bad_left="$evidence/d11-lset-xor-improper-left-complete.lisp"
@@ -1835,7 +1613,6 @@ cat -- lib/d11-srfi1-lset-diff-intersection.lisp tests/semantic/d11-srfi1-lset-x
 run_case run_error_rejection d11-lset-xor-improper-left "$d11_xor_bad_left" Type 'car expects a non-empty list' core4
 run_case run_error_rejection d11-lset-xor-improper-right "$d11_xor_bad_right" Type 'car expects a non-empty list' core4
 run_case run_error_rejection d11-lset-xor-nonpredicate "$d11_xor_bad_comparator" Type 'D3:110 COND expects exact D1:1 / D1:0' core4
-sha256sum lib/d11-srfi1-lset-diff-intersection.lisp tests/semantic/d11-srfi1-lset-xor-improper-left-negative.lisp tests/semantic/d11-srfi1-lset-xor-improper-right-negative.lisp tests/semantic/d11-srfi1-lset-xor-nonpredicate-negative.lisp > "$evidence/d11-lset-xor-negative-inputs.sha256"
 
 
 
@@ -1848,9 +1625,6 @@ cat -- lib/d11-clojure-group-by.lisp lib/d11-clojure-frequencies-unary.lisp test
 cat -- lib/d11-clojure-group-by.lisp lib/d11-clojure-frequencies-unary.lisp tests/semantic/d11-clojure-frequencies-unary-mutant.lisp > "$d11_freq_mutant"
 run_case run_law d11-frequencies-unary-positive "$d11_freq_positive" 1
 run_case run_law d11-frequencies-unary-mutant "$d11_freq_mutant" 0
-sha256sum lib/d11-clojure-group-by.lisp lib/d11-clojure-frequencies-unary.lisp \
-  tests/semantic/d11-clojure-frequencies-unary-law.lisp \
-  tests/semantic/d11-clojure-frequencies-unary-mutant.lisp > "$evidence/d11-frequencies-unary-inputs.sha256"
 
 # Д11 FREQUENCIES: точна пара (ключ елементи). У всіх чотирьох
 # незалежних фізичних доказах використовуємо ті самі чинні DEFINE SENS.
@@ -1866,11 +1640,6 @@ run_case run_law d11-exact-group-pair-positive "$d11_exact_group_positive" 1
 run_case run_law d11-exact-group-pair-mutant "$d11_exact_group_mutant" 0
 run_case run_type_rejection d11-exact-group-pair-extra-type "$d11_exact_group_extra" 'car expects a non-empty list'
 run_case run_type_rejection d11-exact-group-pair-missing-type "$d11_exact_group_missing" 'car expects a non-empty list'
-sha256sum lib/d11-clojure-group-by.lisp lib/d11-clojure-frequencies-unary.lisp \
-  tests/fixtures/d11-frequencies-exact-group-pair-law.lisp \
-  tests/fixtures/d11-frequencies-exact-group-pair-mutant.lisp \
-  tests/fixtures/d11-frequencies-extra-group-field-negative.lisp \
-  tests/fixtures/d11-frequencies-missing-group-field-negative.lisp > "$evidence/d11-exact-group-pair-inputs.sha256"
 
 # Д11: SENS-бібліотечна залежність FREQUENCIES від GROUP-BY.
 # Маршрут не тлумачить закони: true/false і Type встановлює тільки SENS.
@@ -1883,10 +1652,6 @@ cat -- lib/d11-clojure-group-by.lisp lib/d11-clojure-frequencies-unary.lisp test
 run_case run_law d11-frequencies-outer-preflight-d1-positive "$d11_freq_outer_positive" 1 core4
 run_case run_law d11-frequencies-outer-preflight-d1-mutant "$d11_freq_outer_mutant" 0 core4
 run_case run_error_rejection d11-frequencies-outer-before-inner-type "$d11_freq_outer_bad" Type 'car expects a non-empty list' core4
-sha256sum lib/d11-clojure-group-by.lisp lib/d11-clojure-frequencies-unary.lisp \
-  tests/semantic/d11-frequencies-outer-preflight-d1-law.lisp \
-  tests/semantic/d11-frequencies-outer-preflight-d1-mutant.lisp \
-  tests/semantic/d11-frequencies-outer-before-inner-type-negative.lisp > "$evidence/d11-frequencies-outer-preflight-inputs.sha256"
 
 # Д11 унарні частоти: негативні SENS-свідки завершення правильних списків.
 # Усі визначення — в Lisp/SENS, Zig лише транспортує T5M.
@@ -1898,7 +1663,6 @@ run_case run_type_rejection d11-frequencies-improper-count-type "$d11_freq_bad_c
 d11_freq_bad_groups="$evidence/d11-frequencies-bad-groups.lisp"
 cat -- lib/d11-clojure-group-by.lisp lib/d11-clojure-frequencies-unary.lisp tests/semantic/d11-clojure-frequencies-improper-groups-negative.lisp > "$d11_freq_bad_groups"
 run_case run_type_rejection d11-frequencies-improper-groups-type "$d11_freq_bad_groups" 'car expects a non-empty list'
-sha256sum lib/d11-clojure-group-by.lisp lib/d11-clojure-frequencies-unary.lisp tests/semantic/d11-clojure-frequencies-improper-count-negative.lisp tests/semantic/d11-clojure-frequencies-improper-groups-negative.lisp > "$evidence/d11-frequencies-improper-inputs.sha256"
 # Залежний свідок Д11 FIND-TAIL має виконуватись із бібліотекою, а не окремо.
 # Прямий Lisp, Zig/T5M, парне та фізичне SENS виконують тотожний пакет.
 d11_find_tail_bundle="$evidence/d11-srfi1-find-tail-complete.lisp"
@@ -1917,7 +1681,6 @@ run_case run_type_rejection d11-find-tail-improper-d1-type-negative "$d11_find_t
 d11_find_tail_atomic_root="$evidence/d11-find-tail-atomic-root-complete.lisp"
 cat -- lib/d11-srfi1-find-tail.lisp tests/fixtures/d11-find-tail-atomic-root-negative.lisp > "$d11_find_tail_atomic_root"
 run_case run_type_rejection d11-find-tail-atomic-root-type "$d11_find_tail_atomic_root" 'car expects a non-empty list'
-sha256sum lib/d11-srfi1-find-tail.lisp tests/semantic/d11-srfi1-find-tail-laws.lisp > "$evidence/d11-find-tail-inputs.sha256"
 # Фізичні закони Д3 не залежать від недопущеного виклику D6 LENGTH.
 run_case run_law d3-structural-positive tests/semantic/d3-structural-native-t5m-law.lisp 1
 run_case run_law d3-structural-mutant tests/semantic/d3-structural-native-t5m-mutant.lisp 0
@@ -1969,7 +1732,6 @@ run_case run_division_by_zero_rejection d24-computed-zero-denominator tests/sema
 run_case run_law d5-d12-numberp-ratio tests/semantic/d5-d12-numberp-law.lisp 1
 run_case run_law d5-d12-zerop-computed-zero tests/semantic/d5-d12-zerop-law.lisp 1
 run_case run_law d5-numberp-text-is-not-number tests/semantic/d5-numberp-nonnumber-law.lisp 0
-sha256sum tests/semantic/d5-d12-numberp-law.lisp tests/semantic/d5-d12-zerop-law.lisp tests/semantic/d5-numberp-nonnumber-law.lisp > "$evidence/d5-d12-number-predicate-inputs.sha256"
 # Д6:111110 INTEGERP і Д6:111111 RATIONALP: тільки SENS семантика чисел.
 # Цей загальний маршрут перевіряє предикати; фізичну D12-ширину доводить
 # окремий парний D12/T5M тест, а не розмір літерала у цих формах.
@@ -1979,13 +1741,6 @@ run_case run_law d6-rationalp-text-mutant tests/semantic/d6-rationalp-text-negat
 run_case run_law d6-rationalp-list-mutant tests/semantic/d6-rationalp-list-negative.lisp 0 core4
 run_case run_law d6-integerp-fraction-mutant tests/semantic/d6-integerp-ratio-mutant.lisp 0 core4
 run_case run_law d6-integerp-text-mutant tests/semantic/d6-integerp-text-negative.lisp 0 core4
-sha256sum lib/core4.lisp lib/core4-parts/core4-d6b.lisp \
-  tests/semantic/d6-d12-integer-rational-law.lisp \
-  tests/semantic/d6-d12-ratio-normalizes-integer-law.lisp \
-  tests/semantic/d6-rationalp-text-negative.lisp \
-  tests/semantic/d6-rationalp-list-negative.lisp \
-  tests/semantic/d6-integerp-ratio-mutant.lisp \
-  tests/semantic/d6-integerp-text-negative.lisp > "$evidence/d6-exact-number-predicate-inputs.sha256"
 
 # D24+ арифметика використовує ті самі справжні визначення Core4 на всіх
 # трьох маршрутах; позитив і мутант доводять точні D1:1 / D1:0.
@@ -2037,9 +1792,6 @@ cat -- lib/d11-family-selection.lisp tests/semantic/d11-family-selection-d1-stru
 cat -- lib/d11-family-selection.lisp tests/semantic/d11-family-selection-d1-structural-mutant.lisp > "$d11_selection_d1_mutant"
 run_case run_law d11-family-selection-d1-structural-positive "$d11_selection_d1_law" 1
 run_case run_law d11-family-selection-d1-structural-mutant "$d11_selection_d1_mutant" 0
-sha256sum lib/d11-family-selection.lisp \
-  tests/semantic/d11-family-selection-d1-structural-law.lisp \
-  tests/semantic/d11-family-selection-d1-structural-mutant.lisp > "$evidence/d11-family-selection-d1-inputs.sha256"
 
 # D11 DROP-WHILE — суфікс чинного SPAN із повною перевіркою D3 до предиката.
 d11_drop_while_law="$evidence/d11-drop-while-first-class-law-complete.lisp"
@@ -2054,7 +1806,6 @@ run_case run_law d11-drop-while-first-class-positive "$d11_drop_while_law" 1
 run_case run_law d11-drop-while-first-class-mutant "$d11_drop_while_mutant" 0
 run_case run_type_rejection d11-drop-while-first-class-atomic-root "$d11_drop_while_root" 'car expects a non-empty list'
 run_case run_type_rejection d11-drop-while-first-class-predicate-precedence "$d11_drop_while_precedence" 'car expects a non-empty list'
-sha256sum lib/d11-srfi1-find-presence.lisp lib/d11-srfi1-span-break.lisp lib/d11-srfi1-drop-while.lisp tests/semantic/d11-drop-while-first-class-*.lisp > "$evidence/d11-drop-while-first-class-inputs.sha256"
 
 # D11 TAKE-WHILE: композиція єдиного чинного SENS SPAN, без нового opcode.
 # Прямий і обидва фізичні шляхи обчислюють позитив, мутант та D3 Type.
@@ -2083,8 +1834,6 @@ run_case run_type_rejection d11-take-while-first-class-atomic-root "$d11_take_wh
 run_case run_type_rejection d11-take-while-first-class-late-improper "$d11_take_while_late" 'car expects a non-empty list'
 
 
-sha256sum lib/d11-srfi1-find-presence.lisp lib/d11-srfi1-span-break.lisp lib/d11-srfi1-take-while.lisp \
-  tests/semantic/d11-take-while-first-class-*.lisp > "$evidence/d11-take-while-first-class-inputs.sha256"
 
 # Д11 SRFI-1 lset-adjoin: перевірка лише SENS через фізичний Zig/T5M.
 # Негативні свідки мусять дати D3 ПЕРШЕ Type, а не мовчазний результат.
@@ -2107,7 +1856,6 @@ cat -- lib/d11-srfi1-set-relations.lisp tests/fixtures/d11-srfi1-adjoin-atomic-c
 cat -- lib/d11-srfi1-set-relations.lisp tests/fixtures/d11-srfi1-adjoin-improper-candidates-tail-negative.lisp > "$d11_adjoin_improper_candidates_tail"
 run_case run_type_rejection d11-srfi1-adjoin-atomic-candidates "$d11_adjoin_atomic_candidates" 'car expects a non-empty list'
 run_case run_type_rejection d11-srfi1-adjoin-improper-candidates-tail "$d11_adjoin_improper_candidates_tail" 'car expects a non-empty list'
-sha256sum lib/d11-srfi1-set-relations.lisp tests/semantic/d11-srfi1-adjoin-*.lisp > "$evidence/d11-srfi1-adjoin-inputs.sha256"
 
 # Д11 reductions / pair-fold: реальний SENS позитив, мутант і Type-відмови.
 # Файли залежать від бібліотечних DEFINE; окремий запуск не є атестацією.
@@ -2126,14 +1874,11 @@ run_case run_law d11-scan-fold-d3-mutant "$d11_scan_fold_mutant_bundle" 0
 run_case run_type_rejection d11-scan-fold-d3-scan-bad "$d11_scan_fold_bad_scan" 'car expects a non-empty list'
 run_case run_type_rejection d11-scan-fold-d3-left-bad "$d11_scan_fold_bad_left" 'car expects a non-empty list'
 run_case run_type_rejection d11-scan-fold-d3-right-bad "$d11_scan_fold_bad_right" 'car expects a non-empty list'
-sha256sum lib/d11-historical-scan-fold.lisp tests/semantic/d11-scan-fold-d3-tail-*.lisp > "$evidence/d11-scan-fold-d3-inputs.sha256"
 
 d11_span_bundle="$evidence/d11-srfi1-span-break-complete.lisp"
 d11_span_mutant_bundle="$evidence/d11-srfi1-span-break-mutant-complete.lisp"
 cat -- lib/d11-srfi1-span-break.lisp tests/semantic/d11-srfi1-span-break-laws.lisp > "$d11_span_bundle"
 cat -- lib/d11-srfi1-span-break.lisp tests/semantic/d11-srfi1-span-break-mutant.lisp > "$d11_span_mutant_bundle"
-sha256sum lib/d11-srfi1-span-break.lisp tests/semantic/d11-srfi1-span-break-laws.lisp \
-  tests/semantic/d11-srfi1-span-break-mutant.lisp > "$evidence/d11-srfi1-inputs.sha256"
 run_case run_law d11-srfi1-span-break-physical "$d11_span_bundle" 1
 run_case run_law d11-srfi1-span-break-mutant "$d11_span_mutant_bundle" 0
 # Д11: SPAN/BREAK не повинні пропускати атомний D1-хвіст суфікса.
@@ -2151,10 +1896,6 @@ cat -- lib/d11-srfi1-span-break.lisp tests/fixtures/d11-take-until-early-hit-imp
 cat -- lib/d11-srfi1-span-break.lisp tests/fixtures/d11-drop-until-structure-before-predicate-negative.lisp > "$d11_until_priority_bad"
 run_case run_type_rejection d11-take-until-early-hit-spine "$d11_until_early_bad" 'car expects a non-empty list'
 run_case run_type_rejection d11-drop-until-before-predicate "$d11_until_priority_bad" 'car expects a non-empty list'
-sha256sum lib/d11-srfi1-span-break.lisp \
-  tests/fixtures/d11-take-until-early-hit-improper-negative.lisp \
-  tests/fixtures/d11-drop-until-structure-before-predicate-negative.lisp \
-  > "$evidence/d11-until-type-priority-inputs.sha256"
 
 # D11 SPAN/BREAK: CAR неправильного D3-хвоста мусить передувати
 # іншій CDR Type усередині першокласного SENS-предиката.
@@ -2164,8 +1905,6 @@ cat -- lib/d11-srfi1-span-break.lisp tests/fixtures/d11-span-improper-before-pre
 cat -- lib/d11-srfi1-span-break.lisp tests/fixtures/d11-break-improper-before-predicate-negative.lisp > "$d11_break_precedence_bad"
 run_case run_type_rejection d11-span-structure-before-predicate-type "$d11_span_precedence_bad" 'car expects a non-empty list'
 run_case run_type_rejection d11-break-structure-before-predicate-type "$d11_break_precedence_bad" 'car expects a non-empty list'
-sha256sum lib/d11-srfi1-span-break.lisp tests/fixtures/d11-span-improper-before-predicate-negative.lisp tests/fixtures/d11-break-improper-before-predicate-negative.lisp > "$evidence/d11-span-break-precedence-inputs.sha256"
-sha256sum lib/d11-srfi1-span-break.lisp tests/semantic/d11-srfi1-span-improper-suffix-negative.lisp tests/semantic/d11-srfi1-break-improper-suffix-negative.lisp > "$evidence/d11-span-break-improper-inputs.sha256"
 
 # Д11: НЕ втрачати бенчмарк сімейств, навіть коли він не змінювався в commit.
 # Композиції й позитив/мутант — виключно справжній Lisp/SENS; Bash тільки
@@ -2180,10 +1919,6 @@ d11_families_law="$evidence/d11-families-positive.lisp"
 d11_families_mutant="$evidence/d11-families-mutant.lisp"
 cat -- "$d11_families_source" tests/semantic/d11-families-benchmark-law.lisp > "$d11_families_law"
 cat -- "$d11_families_source" tests/semantic/d11-families-benchmark-mutant.lisp > "$d11_families_mutant"
-sha256sum lib/d11-family-selection.lisp lib/d11-srfi1-alist-protocol.lisp \
-  lib/d11-clojure-group-by.lisp lib/d11-clojure-frequencies-unary.lisp \
-  benchmarks/d11-families.lisp tests/semantic/d11-families-benchmark-law.lisp \
-  tests/semantic/d11-families-benchmark-mutant.lisp > "$evidence/d11-families-inputs.sha256"
 run_case run_law d11-families-benchmark-positive "$d11_families_law" 1
 run_case run_law d11-families-benchmark-mutant "$d11_families_mutant" 0
 # Д11 відбір: кожний із трьох готових SENS-свідків відхиляє атом
@@ -2206,7 +1941,6 @@ run_case run_type_rejection d11-family-selection-reject-atom-type "$d11_family_r
 run_case run_type_rejection d11-family-selection-filter-atomic-root-type "$d11_family_filter_atomic_bad" 'car expects a non-empty list'
 run_case run_type_rejection d11-family-selection-filter-false-atomic-root-type "$d11_family_filter_false_atomic_bad" 'car expects a non-empty list'
 run_case run_type_rejection d11-family-selection-partition-atomic-root-type "$d11_family_partition_atomic_bad" 'car expects a non-empty list'
-sha256sum lib/d11-family-selection.lisp tests/fixtures/d11-family-selection-*.lisp > "$evidence/d11-family-selection-type-inputs.sha256"
 # Вимірюємо ТІЛЬКИ справжній фізичний SENS, після доведеного D1 закону.
 # Це p50 цілого процесу на shared runner, не ізольований час eval.
 # Сирі зразки + SHA залишаються в артефакті CI; червоне не маскуємо.
@@ -2276,7 +2010,6 @@ if ! awk '
   exit 2
 fi
 test -s "$meta_sixth_definition" || { echo "::error::D11_META_SIXTH_SOURCE_EMPTY" >&2; exit 2; }
-sha256sum lib/meta-eval.lisp "$meta_sixth_definition" > "$evidence/d11-meta-sixth-source.sha256"
 meta_sixth_law_bundle="$evidence/d11-meta-sixth-positive-complete.lisp"
 meta_sixth_mutant_bundle="$evidence/d11-meta-sixth-mutant-complete.lisp"
 cat -- "$meta_sixth_definition" tests/semantic/d11-meta-sixth-laws.lisp > "$meta_sixth_law_bundle"
@@ -2304,7 +2037,6 @@ if ! awk -v target="(визначити порівняти-два-значенн
   exit 2
 fi
 test -s "$meta_compare_definition" || { echo "::error::D11_META_COMPARE_SOURCE_EMPTY" >&2; exit 2; }
-sha256sum lib/meta-eval.lisp "$meta_compare_definition" > "$evidence/d11-meta-compare-source.sha256"
 meta_compare_law_bundle="$evidence/d11-meta-compare-positive-complete.lisp"
 meta_compare_mutant_bundle="$evidence/d11-meta-compare-mutant-complete.lisp"
 cat -- "$meta_compare_definition" tests/semantic/d11-meta-compare-laws.lisp > "$meta_compare_law_bundle"
@@ -2337,9 +2069,6 @@ cat -- lib/d11-interlisp-safe-analysis.lisp tests/semantic/d11-interlisp-dwim-d3
 cat -- lib/d11-interlisp-safe-analysis.lisp tests/semantic/d11-interlisp-dwim-d3-proper-mutant.lisp > "$d11_dwim_d3_mutant"
 run_case run_law d11-interlisp-dwim-d3-proper "$d11_dwim_d3_proper" 1 core4
 run_case run_law d11-interlisp-dwim-d3-mutant "$d11_dwim_d3_mutant" 0 core4
-sha256sum lib/d11-interlisp-safe-analysis.lisp \
-  tests/semantic/d11-interlisp-dwim-d3-proper-law.lisp \
-  tests/semantic/d11-interlisp-dwim-d3-proper-mutant.lisp > "$evidence/d11-interlisp-dwim-d3-inputs.sha256"
 
 # D11 DWIM: записи рівно з двох полів — SENS перевіряє ДО вибору кандидата.
 d11_dwim_exact_context_positive="$evidence/d11-dwim-exact-context-positive.lisp"
@@ -2374,10 +2103,6 @@ run_case run_error_rejection d11-masterscope-improper-call-head-type "$d11_maste
 d11_masterscope_proper_head="$evidence/d11-masterscope-proper-call-head-complete.lisp"
 cat -- lib/d11-interlisp-safe-analysis.lisp tests/fixtures/d11-masterscope-proper-call-head-positive.lisp > "$d11_masterscope_proper_head"
 run_case run_law d11-masterscope-proper-call-head-positive "$d11_masterscope_proper_head" 1 core4
-sha256sum lib/d11-interlisp-safe-analysis.lisp tests/fixtures/d11-masterscope-improper-call-head-negative.lisp tests/fixtures/d11-masterscope-proper-call-head-positive.lisp > "$evidence/d11-masterscope-call-head-inputs.sha256"
-sha256sum lib/d11-interlisp-safe-analysis.lisp tests/fixtures/d11-masterscope-improper-nested-tail-negative.lisp tests/fixtures/d11-masterscope-quoted-improper-datum-positive.lisp > "$evidence/d11-masterscope-nested-form-inputs.sha256"
-sha256sum lib/d11-interlisp-safe-analysis.lisp tests/fixtures/d11-masterscope-improper-root-tail-negative.lisp > "$evidence/d11-masterscope-improper-root-tail-inputs.sha256"
-sha256sum lib/d11-interlisp-safe-analysis.lisp tests/fixtures/d11-dwim-*.lisp > "$evidence/d11-dwim-exact-record-inputs.sha256"
 
 # LAST-DEFINE: D7-текст має D8-рівність у нормативному Lisp, не D3 EQ Rust.
 # Повний MetaEval починається з невикличного D6 LENGTH (#5854). Для цієї
@@ -2401,7 +2126,6 @@ if ! awk -v target="(визначити останнє-ім'я-визначен�
   exit 2
 fi
 test -s "$last_define_definition" || { echo "::error::D11_META_LAST_DEFINE_SOURCE_EMPTY" >&2; exit 2; }
-sha256sum lib/meta-eval.lisp "$last_define_definition" > "$evidence/d11-meta-last-define-source.sha256"
 last_define_positive_bundle="$evidence/d11-meta-last-define-positive-complete.lisp"
 last_define_mutant_bundle="$evidence/d11-meta-last-define-mutant-complete.lisp"
 cat -- "$last_define_definition" tests/semantic/d11-meta-last-define-laws.lisp > "$last_define_positive_bundle"
@@ -2431,12 +2155,6 @@ for name in знайти-авторитет-компілятора ядро-ко
   fi
 done
 test -s "$compiler_authority_defs" || { echo "::error::COMPILER_AUTHORITY_EMPTY_DEFINITIONS" >&2; exit 2; }
-sha256sum lib/compiler-nucleus.lisp "$compiler_authority_defs" \
-  tests/semantic/compiler-authority-proper-law.lisp \
-  tests/semantic/compiler-authority-proper-mutant.lisp \
-  tests/semantic/compiler-authority-d1-root-negative.lisp \
-  tests/semantic/compiler-authority-improper-tail-negative.lisp \
-  > "$evidence/compiler-authority-exact-inputs.sha256"
 compiler_authority_positive="$evidence/compiler-authority-positive-complete.lisp"
 compiler_authority_mutant="$evidence/compiler-authority-mutant-complete.lisp"
 compiler_authority_root="$evidence/compiler-authority-root-complete.lisp"
@@ -2473,12 +2191,6 @@ for name in істина-компілятора компілятор-приєд�
   fi
 done
 test -s "$compiler_append_defs" || { echo "::error::COMPILER_APPEND_EMPTY_SOURCE" >&2; exit 2; }
-sha256sum lib/compiler-nucleus.lisp "$compiler_append_defs" \
-  tests/semantic/compiler-append-proper-law.lisp \
-  tests/semantic/compiler-append-proper-mutant.lisp \
-  tests/semantic/compiler-append-d1-root-negative.lisp \
-  tests/semantic/compiler-append-improper-tail-negative.lisp \
-  > "$evidence/compiler-append-exact-inputs.sha256"
 compiler_append_positive="$evidence/compiler-append-positive-complete.lisp"
 compiler_append_mutant="$evidence/compiler-append-mutant-complete.lisp"
 compiler_append_root="$evidence/compiler-append-d1-root-complete.lisp"
@@ -2516,12 +2228,6 @@ for name in істина-компілятора компілятор-зворо�
   fi
 done
 test -s "$compiler_reverse_defs" || { echo "::error::COMPILER_REVERSE_ONTO_EMPTY_SENS_DEFINITIONS" >&2; exit 2; }
-sha256sum lib/compiler-nucleus.lisp "$compiler_reverse_defs" \
-  tests/semantic/compiler-reverse-onto-proper-law.lisp \
-  tests/semantic/compiler-reverse-onto-proper-mutant.lisp \
-  tests/semantic/compiler-reverse-onto-improper-tail-negative.lisp \
-  tests/semantic/compiler-reverse-onto-d1-root-negative.lisp \
-  > "$evidence/compiler-reverse-onto-exact-inputs.sha256"
 
 compiler_reverse_positive="$evidence/compiler-reverse-onto-positive-complete.lisp"
 compiler_reverse_mutant="$evidence/compiler-reverse-onto-mutant-complete.lisp"
@@ -2542,7 +2248,6 @@ d11_juxt_law_bundle="$evidence/d11-clojure-juxt-positive-complete.lisp"
 d11_juxt_mutant_bundle="$evidence/d11-clojure-juxt-mutant-complete.lisp"
 cat -- lib/d11-clojure-juxt.lisp tests/semantic/d11-clojure-juxt-laws.lisp > "$d11_juxt_law_bundle"
 cat -- lib/d11-clojure-juxt.lisp tests/semantic/d11-clojure-juxt-mutant.lisp > "$d11_juxt_mutant_bundle"
-sha256sum lib/d11-clojure-juxt.lisp tests/semantic/d11-clojure-juxt-laws.lisp tests/semantic/d11-clojure-juxt-mutant.lisp > "$evidence/d11-clojure-juxt-inputs.sha256"
 run_case run_law d11-clojure-juxt-positive "$d11_juxt_law_bundle" 1
 run_case run_law d11-clojure-juxt-mutant "$d11_juxt_mutant_bundle" 0
 
@@ -2554,8 +2259,6 @@ cat -- lib/d11-clojure-juxt.lisp tests/semantic/d11-clojure-juxt-poison-improper
 cat -- lib/d11-clojure-juxt.lisp tests/semantic/d11-clojure-juxt-constructor-improper-tail-negative.lisp > "$d11_juxt_bad_ctor"
 run_case run_error_rejection d11-clojure-juxt-poison-improper-tail "$d11_juxt_bad_tail" Type 'car expects a non-empty list'
 run_case run_error_rejection d11-clojure-juxt-constructor-improper-tail "$d11_juxt_bad_ctor" Type 'car expects a non-empty list'
-sha256sum tests/semantic/d11-clojure-juxt-poison-improper-tail-negative.lisp \
-  tests/semantic/d11-clojure-juxt-constructor-improper-tail-negative.lisp > "$evidence/d11-clojure-juxt-negative-inputs.sha256"
 # Д11 Clojure: два комплекти законів перенесено з Rust у справжній Lisp.
 # Їхня залежність SRFI-1 SPAN завантажується перед DEFINE групування.
 for suite in d11-clojure-partition-by d11-clojure-dedupe; do
@@ -2573,10 +2276,6 @@ cat -- lib/d11-srfi1-span-break.lisp lib/d11-clojure-partition-by.lisp tests/sem
 run_case run_law d11-clojure-partition-singleton-key-law "$d11_partition_singleton_law" 1
 run_case run_law d11-clojure-partition-singleton-key-mutant "$d11_partition_singleton_mutant" 0
 run_case run_error_rejection d11-clojure-partition-singleton-key-error "$d11_partition_singleton_bad" Type 'car expects a non-empty list'
-sha256sum lib/d11-clojure-partition-by.lisp \
-  tests/semantic/d11-clojure-partition-singleton-key-law.lisp \
-  tests/semantic/d11-clojure-partition-singleton-key-mutant.lisp \
-  tests/semantic/d11-clojure-partition-singleton-key-error-negative.lisp > "$evidence/d11-clojure-partition-singleton-key-inputs.sha256"
 
 # Д11: атом D1:ні не є кінцем D3-списку. PARTITION використовує
 # канонічний SPAN-валідатор перед викликом ключа, тому це D3 CAR Type.
@@ -2602,10 +2301,6 @@ d11_partition_direct_helper_bad="$evidence/d11-clojure-partition-direct-helper-b
 cat -- lib/d11-srfi1-span-break.lisp lib/d11-clojure-partition-by.lisp \
   tests/semantic/d11-clojure-partition-direct-helper-bad-tail-negative.lisp > "$d11_partition_direct_helper_bad"
 run_case run_error_rejection d11-clojure-partition-direct-helper-bad-tail "$d11_partition_direct_helper_bad" Type 'car expects a non-empty list'
-sha256sum lib/d11-srfi1-span-break.lisp lib/d11-clojure-partition-by.lisp \
-  tests/semantic/d11-clojure-partition-early-bad-tail-negative.lisp \
-  tests/semantic/d11-clojure-partition-late-bad-tail-negative.lisp \
-  tests/semantic/d11-clojure-partition-direct-helper-bad-tail-negative.lisp > "$evidence/d11-clojure-partition-spine-inputs.sha256"
 # Один quoted D7-гліф має бути точним W7-атомом; вкладений список лишається D2.
 # Багатогліфовий Text7 далі є послідовністю, а не таємно interned-атомом.
 d11_partition_d7_bundle="$evidence/d11-clojure-partition-by-d7-parity.lisp"
@@ -2622,8 +2317,6 @@ result_status_d7_law="$evidence/result-status-d7-label-positive.lisp"
 result_status_d7_mutant="$evidence/result-status-d7-label-mutant.lisp"
 cat -- lib/result-status.lisp tests/semantic/result-status-d7-label-law.lisp > "$result_status_d7_law"
 cat -- lib/result-status.lisp tests/semantic/result-status-d7-label-mutant.lisp > "$result_status_d7_mutant"
-sha256sum lib/result-status.lisp tests/semantic/result-status-d7-label-law.lisp \
-  tests/semantic/result-status-d7-label-mutant.lisp > "$evidence/result-status-d7-inputs.sha256"
 run_case run_law result-status-d7-label-positive "$result_status_d7_law" 1
 run_case run_law result-status-d7-label-mutant "$result_status_d7_mutant" 0
 # Незалежна Lisp-пара локалізує правильний UNKNOWN проти крапкового D7-хвоста.
@@ -2682,7 +2375,6 @@ test -s "$epistemic_constructor_source" || {
   echo "::error::EPISTEMIC_D10_SOURCE_EMPTY" >&2
   exit 2
 }
-sha256sum lib/core4.lisp "$epistemic_constructor_source" > "$evidence/epistemic-core4-dependencies.sha256"
 
 # Епістемічні закони належать Lisp: посилання, вимоги та вкладена рівність.
 # Той самий живий SENS-корпус спрацьовує на позитиві, а хибне очікування
@@ -2704,7 +2396,6 @@ test -f "$epistemic_d1_source" && test ! -L "$epistemic_d1_source" || {
 }
 cat -- "$epistemic_d1_source" "$epistemic_constructor_source" "${epistemic_sources[@]}" tests/semantic/language-law-epistemic-records.lisp > "$epistemic_law_bundle"
 cat -- "$epistemic_d1_source" "$epistemic_constructor_source" "${epistemic_sources[@]}" tests/semantic/language-mutant-epistemic-records.lisp > "$epistemic_mutant_bundle"
-sha256sum "$epistemic_d1_source" "$epistemic_constructor_source" "${epistemic_sources[@]}" tests/semantic/language-law-epistemic-records.lisp tests/semantic/language-mutant-epistemic-records.lisp > "$evidence/epistemic-record-logic-inputs.sha256"
 run_case run_law epistemic-record-logic-positive "$epistemic_law_bundle" 1 core4
 # Назва, статус, фактичний та очікуваний D1 доведені D8 всередині Lisp.
 # Перевіряємо рівно один D1:1 від усіх фізичних виконавців без host-проєкції D7.
@@ -2744,7 +2435,6 @@ d3_hot_law="$evidence/d3-structural-bench-positive.lisp"
 d3_hot_mutant="$evidence/d3-structural-bench-mutant.lisp"
 cat -- benchmarks/d3-structural-bench.lisp tests/semantic/d3-structural-bench-law.lisp > "$d3_hot_law"
 cat -- benchmarks/d3-structural-bench.lisp tests/semantic/d3-structural-bench-mutant.lisp > "$d3_hot_mutant"
-sha256sum benchmarks/d3-structural-bench.lisp tests/semantic/d3-structural-bench-law.lisp tests/semantic/d3-structural-bench-mutant.lisp > "$evidence/d3-structural-bench-inputs.sha256"
 run_case run_law d3-structural-bench-positive "$d3_hot_law" 1
 run_case run_law d3-structural-bench-mutant "$d3_hot_mutant" 0
 
@@ -2773,14 +2463,6 @@ cat -- "$d6_zip_source" tests/semantic/d6-zip-improper-root-negative.lisp > "$d6
 cat -- "$d6_zip_source" tests/semantic/d6-zip-structural-order-law.lisp > "$d6_zip_order"
 cat -- "$d6_zip_source" tests/semantic/d6-zip-right-root-atom-negative.lisp > "$d6_zip_right_root"
 cat -- "$d6_zip_source" tests/semantic/d6-zip-right-tail-atom-negative.lisp > "$d6_zip_right_tail"
-sha256sum lib/core4.lisp lib/core4-parts/core4-d6b.lisp \
-  tests/semantic/d6-zip-proper-law.lisp tests/semantic/d6-zip-proper-mutant.lisp \
-  tests/semantic/d6-zip-improper-tail-negative.lisp \
-  tests/semantic/d6-zip-improper-root-negative.lisp \
-  tests/semantic/d6-zip-structural-order-law.lisp \
-  tests/semantic/d6-zip-right-root-atom-negative.lisp \
-  tests/semantic/d6-zip-right-tail-atom-negative.lisp \
-  tests/semantic/d6-d8-zip-swap-interoperability-law.lisp > "$evidence/d6-zip-inputs.sha256"
 run_case run_law d6-zip-proper "$d6_zip_positive" 1
 run_case run_law d6-zip-proper-mutant "$d6_zip_mutant" 0
 run_case run_type_rejection d6-zip-improper-tail "$d6_zip_bad_tail" 'car expects a non-empty list'
@@ -2796,13 +2478,6 @@ run_case run_error_rejection d6-unzip-atom-root tests/semantic/d6-unzip-atom-roo
 run_case run_error_rejection d6-unzip-atom-tail tests/semantic/d6-unzip-atom-tail-negative.lisp Type 'car expects a non-empty list' core4
 run_case run_error_rejection d6-unzip-atom-element tests/semantic/d6-unzip-atom-element-negative.lisp Type 'car expects a non-empty list' core4
 run_case run_error_rejection d6-unzip-empty-pair tests/semantic/d6-unzip-empty-pair-negative.lisp Type 'car expects a non-empty list' core4
-sha256sum lib/core4.lisp lib/core4-parts/core4-d6b.lisp \
-  tests/semantic/d6-unzip-single-pass-law.lisp \
-  tests/semantic/d6-unzip-single-pass-mutant.lisp \
-  tests/semantic/d6-unzip-atom-root-negative.lisp \
-  tests/semantic/d6-unzip-atom-tail-negative.lisp \
-  tests/semantic/d6-unzip-atom-element-negative.lisp \
-  tests/semantic/d6-unzip-empty-pair-negative.lisp > "$evidence/d6-unzip-inputs.sha256"
 
 # D6 UNION: одна точна SENS-бібліотека, лише витяг чинних DEFINE.
 # Неправильний D1-хвіст має відхилятися Type, а не повертати обрізаний результат.
@@ -2847,15 +2522,10 @@ run_case run_law d6-union-right-validated "$evidence/d6-union-right-validated-la
 run_case run_type_rejection d6-union-right-root "$evidence/d6-union-right-root-negative-complete.lisp" 'car expects a non-empty list'
 run_case run_type_rejection d6-union-right-tail "$evidence/d6-union-right-tail-negative-complete.lisp" 'car expects a non-empty list'
 run_case run_type_rejection d6-union-right-hidden-tail "$evidence/d6-union-right-hidden-tail-negative-complete.lisp" 'car expects a non-empty list'
-sha256sum lib/core4.lisp lib/core4-parts/core4-d6.lisp lib/core4-parts/core4-d6b.lisp \
-  tests/semantic/d6-union-*.lisp > "$evidence/d6-union-inputs.sha256"
 
 run_case run_law d6-intersection-order-positive tests/semantic/d6-intersection-order-law.lisp 1 core4
 run_case run_law d6-intersection-duplicates-mutant tests/semantic/d6-intersection-duplicates-mutant.lisp 0 core4
 run_case run_error_rejection d6-intersection-left-tail tests/semantic/d6-intersection-left-tail-negative.lisp Type 'car expects a non-empty list' core4
-sha256sum lib/core4.lisp tests/semantic/d6-intersection-order-law.lisp \
-  tests/semantic/d6-intersection-duplicates-mutant.lisp \
-  tests/semantic/d6-intersection-left-tail-negative.lisp > "$evidence/d6-intersection-inputs.sha256"
 # Семантика D6 ALL — виконувані мовні закони з чинним визначенням Core4.
 d6_quantifier_source="$evidence/d6-first-class-predicate-quantifiers.lisp"
 : > "$d6_quantifier_source"
@@ -2886,7 +2556,6 @@ cat -- tests/fixtures/epistemic-d1-names.lisp "$d6_quantifier_source" tests/sema
 cat -- tests/fixtures/epistemic-d1-names.lisp "$d6_quantifier_source" tests/semantic/усі-за-предикатом-mutant.lisp > "$all_quantifier_mutant_bundle"
 cat -- tests/fixtures/epistemic-d1-names.lisp "$d6_quantifier_source" tests/semantic/існує-за-предикатом-law.lisp > "$any_quantifier_law_bundle"
 cat -- tests/fixtures/epistemic-d1-names.lisp "$d6_quantifier_source" tests/semantic/існує-за-предикатом-mutant.lisp > "$any_quantifier_mutant_bundle"
-sha256sum lib/core4-parts/core4-d6b.lisp tests/fixtures/epistemic-d1-names.lisp tests/semantic/усі-за-предикатом-law.lisp tests/semantic/усі-за-предикатом-mutant.lisp tests/semantic/існує-за-предикатом-law.lisp tests/semantic/існує-за-предикатом-mutant.lisp > "$evidence/d6-quantifier-inputs.sha256"
 run_case run_law all-predicate-quantifier-law "$all_quantifier_law_bundle" 1
 run_case run_law all-predicate-quantifier-mutant "$all_quantifier_mutant_bundle" 0
 run_case run_law exists-predicate-quantifier-law "$any_quantifier_law_bundle" 1
@@ -2915,17 +2584,6 @@ run_case run_law d8-quantifier-composition-mutant tests/semantic/d8-quantifier-c
 run_case run_error_rejection d8-notany-invalid-root tests/semantic/d8-notany-invalid-root-law.lisp Type 'car expects a non-empty list' core4
 run_case run_error_rejection d8-notevery-invalid-root tests/semantic/d8-notevery-invalid-root-law.lisp Type 'car expects a non-empty list' core4
 run_case run_error_rejection d8-all-not-invalid-root tests/semantic/d8-all-not-invalid-root-law.lisp Type 'car expects a non-empty list' core4
-sha256sum lib/core4-parts/core4-d6b.lisp tests/semantic/d6-any-all-native-call-law.lisp tests/semantic/d6-any-all-native-call-mutant.lisp > "$evidence/d6-any-all-native-call-inputs.sha256"
-sha256sum lib/core4.lisp lib/core4-parts/core4-d6b.lisp \
-  tests/semantic/d6-any-all-exact-empty-law.lisp \
-  tests/semantic/d6-any-vacuous-mutant.lisp \
-  tests/semantic/d6-any-invalid-root-law.lisp \
-  tests/semantic/d6-all-invalid-root-law.lisp \
-  tests/semantic/d8-quantifier-composition-law.lisp \
-  tests/semantic/d8-quantifier-composition-mutant.lisp \
-  tests/semantic/d8-notany-invalid-root-law.lisp \
-  tests/semantic/d8-notevery-invalid-root-law.lisp \
-  tests/semantic/d8-all-not-invalid-root-law.lisp > "$evidence/d6-d8-quantifier-inputs.sha256"
 
 # Д11 ZIP-WITH: відображення двох списків із повним D3-доказом.
 # Реальні позитив, мутант і два Type-негативи виконуються в SENS.
@@ -2942,7 +2600,6 @@ run_case run_law d11-zip-with-order-shorter-positive "$d11_zip_with_positive" 1 
 run_case run_law d11-zip-with-swapped-pair-mutant "$d11_zip_with_mutant" 0 core4
 run_case run_error_rejection d11-zip-with-improper-left "$d11_zip_with_bad_left" Type 'car expects a non-empty list' core4
 run_case run_error_rejection d11-zip-with-improper-right "$d11_zip_with_bad_right" Type 'car expects a non-empty list' core4
-sha256sum lib/d11-srfi1-zip-with.lisp tests/semantic/d11-srfi1-zip-with-*.lisp > "$evidence/d11-zip-with-inputs.sha256"
 
 # Класифікуємо кореневі причини без повторного запуску SENS.
 printf 'SENS_RED_CAUSE root=d7-value-call count=%d ids=%s\n' "${#red_d7_ids[@]}" "${red_d7_ids[*]}"
