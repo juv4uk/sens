@@ -93,6 +93,11 @@ fn d2_grammar_words_do_not_become_d7_text_even_for_same_characters() {
     for text in ["(", ")", ".", " ", "\n"] {
         let physical = encode_d7_uk_t5(text).unwrap();
         let words = decode_t5m_via_zig(&physical);
+        assert_eq!(words.len(), text.chars().count());
+        assert!(
+            words.iter().all(|word| word.width() == 7),
+            "D7 glyphs must stay exact seven-bit data: {text:?}"
+        );
         assert_eq!(decode_d7_uk_t5(&physical).unwrap(), text);
     }
 }
