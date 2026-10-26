@@ -1,26 +1,20 @@
 #!/usr/bin/env bash
-# Foreign-language test/benchmark runners may not be treated as SENS evidence.
-# Mechanical Python helpers outside this forbidden runner set are tooling only.
-# Do not ban inline packaging/hash helpers unless they execute a test or benchmark.
+# Language policy: test and benchmark evidence may run only through Rust, Zig,
+# or the native SENS runtime. Scan every active GitHub Actions workflow so a
+# legacy or research workflow cannot reintroduce a foreign-language runner.
+# Python/other-language test suites excluded here are NOT_VERIFIED, not PASS.
 set -euo pipefail
 root="$(git rev-parse --show-toplevel)"
 cd "$root"
-files=(
-  .github/workflows/ci.yml
-  .github/workflows/ci-heavy.yml
-  .github/workflows/release-preflight.yml
-  .github/workflows/release.yml
-  .github/workflows/bija123-recursive-cube.yml
-  .github/workflows/bija3-pure-cube.yml
-  .github/workflows/cross-language-native-baseline.yml
-  .github/workflows/lisp-vs-sens-bench.yml
-  .github/workflows/lisp-vs-sens-speed.yml
-  .github/workflows/physical-sens-benchmark.yml
-  .github/workflows/physical-binary-performance.yml
-  .github/workflows/packed-vs-visible-bench.yml
-)
-if grep -nE '^[[:space:]]*(run:[[:space:]]*)?python3[[:space:]]+-m[[:space:]]+(unittest|pytest)([[:space:]]|$)|^[[:space:]]*python3[[:space:]]+tests/test_[^[:space:]]+\.py([[:space:]]|$)|^[[:space:]]*pytest([[:space:]]|$)|^[[:space:]]*python3[[:space:]]+benchmarks/[^[:space:]]+.*(run\.py|\.py)([[:space:]\\]|$)' "${files[@]}"; then
+shopt -s nullglob
+files=(.github/workflows/*.yml .github/workflows/*.yaml)
+if (("${#files[@]}" == 0)); then
+  echo "FOREIGN_TEST_BENCH_POLICY=FAIL no_workflows_found"
+  exit 1
+fi
+pattern='^[[:space:]]*(run:[[:space:]]*)?(python3|python|pytest)[[:space:]]+(-m[[:space:]]+(unittest|pytest)([[:space:]]|$)|(-O[[:space:]]+)?tests/test_[^[:space:]]+\.py([[:space:]\\]|$)|benchmarks/[^[:space:]]+\.py([[:space:]\\]|$)|scripts/test_[^[:space:]]+\.py([[:space:]\\]|$))|^[[:space:]]*pytest([[:space:]]|$)|^[[:space:]]*(node[[:space:]]+--test|npm[[:space:]]+(test|run[[:space:]]+(test|bench|benchmark))|go[[:space:]]+test([[:space:]]|$)|bundle[[:space:]]+exec[[:space:]]+(rspec|rake[[:space:]]+test)|phpunit([[:space:]]|$)|prove([[:space:]]|$))'
+if grep -nHE "$pattern" "${files[@]}"; then
   echo "FOREIGN_TEST_BENCH_POLICY=FAIL runner_language_not_allowed"
   exit 1
 fi
-echo "FOREIGN_TEST_BENCH_POLICY=PASS runners=Rust,Zig,SENS foreign_python_test_bench=EXCLUDED"
+echo "FOREIGN_TEST_BENCH_POLICY=PASS workflows=${#files[@]} allowed=Rust,Zig,SENS foreign_tests=EXCLUDED foreign_benchmarks=EXCLUDED native_equivalence=REQUIRED"
