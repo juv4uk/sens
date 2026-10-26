@@ -554,17 +554,36 @@ class ReleasePreflightScopeTest(unittest.TestCase):
                     AssertionError, "Zig release step must be unconditional"
                 ):
                     require_manual_preflight(changed)
+        corridor_start = self.workflow.index("      - name: Sterile Zig corridor ")
+        corridor_end = self.workflow.index(
+            "      - name: Upload release GO-gate report", corridor_start
+        )
+        corridor = self.workflow[corridor_start:corridor_end]
+        self.assertIn(shell, corridor)
         for inject in ("          set +e\n", "          set +u\n",
                        "          set +o pipefail\n",
                        "          set +o errexit\n"):
             with self.subTest(shell=inject):
-                changed = self.workflow.replace(shell, shell + inject, 1)
+                changed_corridor = corridor.replace(shell, shell + inject, 1)
+                self.assertNotEqual(changed_corridor, corridor)
+                changed = (
+                    self.workflow[:corridor_start]
+                    + changed_corridor
+                    + self.workflow[corridor_end:]
+                )
                 with self.assertRaisesRegex(
                     AssertionError, "Zig release shell must remain strict"
                 ):
                     require_manual_preflight(changed)
-        changed = self.workflow.replace(
-            shell, "          echo bypass\n" + shell, 1)
+        changed_corridor = corridor.replace(
+            shell, "          echo bypass\n" + shell, 1
+        )
+        self.assertNotEqual(changed_corridor, corridor)
+        changed = (
+            self.workflow[:corridor_start]
+            + changed_corridor
+            + self.workflow[corridor_end:]
+        )
         with self.assertRaisesRegex(
             AssertionError, "Zig release shell must remain strict"
         ):
