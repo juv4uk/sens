@@ -6,14 +6,7 @@ cd "$ROOT"
 OUT="${1:-/tmp/rust-packed-visible}"
 mkdir -p "$OUT"
 
-{
-  echo "commit=$(git rev-parse HEAD)"
-  echo "architecture=$(uname -m)"
-  echo "system=$(uname -s)"
-  cargo --version
-  rustc --version
-  sha256sum crates/sens/examples/packed_vs_visible_bench.rs
-} > "$OUT/environment.txt"
+
 
 CARGO_BUILD_JOBS=2 cargo run --locked --profile ci-meta -p sens \
   --example packed_vs_visible_bench -- --samples 15 \
@@ -34,7 +27,7 @@ fi
 {
   echo "# Rust exact-width visible/packed ingestion — measured output"
   echo
-  echo 'Exact Git SHA and toolchain: `environment.txt`.'
+  echo 'The benchmark executes the Rust mechanism after a verified SENS runtime build in the parent workflow.'
   echo 'The raw TSV contains all alternating samples and per-case quantiles.'
   echo
   echo '## Raw measurements'
