@@ -1,15 +1,18 @@
-name: D10 chess crossrepo research laws
+name: "D10 cross-repo chess proposals — excluded by Rust/Zig/SENS language policy"
 
 on:
   workflow_dispatch:
+
 permissions:
   contents: read
 
 jobs:
-  research-proof:
+  policy-exclusion:
+    name: Foreign-language research/test lane excluded (NOT_VERIFIED)
     runs-on: ubuntu-latest
-    timeout-minutes: 8
     steps:
-      - uses: actions/checkout@v4
-      - name: Перевірити шахові закони, математичний оракул і негативні контролі
-        run: python3 tests/test_d10_crossrepo_chess_semantic_donors.py
+      - name: Record exclusion without asserting an outcome
+        run: |
+          echo "FOREIGN_LANGUAGE_TEST=EXCLUDED_BY_POLICY"
+          echo "NATIVE_EQUIVALENT=NOT_VERIFIED"
+          echo "NO_PASS_CLAIM=MADE"

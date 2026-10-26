@@ -1,92 +1,18 @@
-name: D10 evidence supply and 1024 readiness
+name: "D10 completion readiness — excluded by Rust/Zig/SENS language policy"
+
 on:
   workflow_dispatch:
+
 permissions:
   contents: read
+
 jobs:
-  evidence-supply:
-    runs-on: ubuntu-24.04
-    timeout-minutes: 12
+  policy-exclusion:
+    name: Foreign-language research/test lane excluded (NOT_VERIFIED)
+    runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - name: Перевірити негативні контрприклади й дедуп
-        run: python3 -m unittest discover -s tests -p test_d10_completion_readiness.py -v
-      - name: Доказово перевірити всі 419 canonical v2 координат і 8 негативних мутацій
+      - name: Record exclusion without asserting an outcome
         run: |
-          python3 scripts/check_d10_v2_current_placement.py --self-test
-          python3 -m unittest discover -s tests -p test_d10_v2_current_placement.py -v
-      - name: Перевірити 23 відібраних із архіву кандидатів v3, донорні SHA й негативні тести
-        run: |
-          python3 scripts/check_d10_v3_archived_candidates.py --self-test
-          python3 -m unittest discover -s tests -p test_d10_v3_archived_candidates.py -v
-      - name: Перевірити 9 нових доказових кандидатів v4 та 8 негативних мутацій
-        run: |
-          python3 scripts/check_d10_v4_research_candidates.py --self-test
-          python3 -m unittest discover -s tests -p test_d10_v4_research_candidates.py -v
-      - name: Перевірити 8 нових D10 v5 семантик і 96 резервів кандидатів
-        run: |
-          python3 scripts/check_d10_v5_research_candidates.py
-          python3 scripts/check_d10_candidate_coordinate_queue.py
-          python3 scripts/check_d10_historical_candidate_queue.py
-      - name: Verify historical CLOS v6 archive including falsification tests
-        run: python3 scripts/check_d10_v6_historical_clos.py --self-test
-      - name: Reconcile unified candidate catalog and six negative tests
-        run: python3 scripts/check_d10_candidate_database.py --self-test
-      - name: Verify two historical Lisp stream laws in v7
-        run: python3 scripts/check_d10_v7_historical_lisp_streams.py
-      - name: Verify four MOP database selections in v8, including negative mutants
-        run: |
-          python3 scripts/check_d10_v8_mop_database.py --self-test
-          python3 -O scripts/check_d10_v8_mop_database.py --self-test
-      - name: Verify source-pinned 34-law D10 v9 F1-only research intake
-        run: |
-          python3 scripts/check_d10_v9_source_reviewed_batch.py --self-test
-          python3 -O scripts/check_d10_v9_source_reviewed_batch.py --self-test
-      - name: Verify D10 v10 +40 preliminary research laws without forged F2 F3 or coordinates
-        run: |
-          python3 scripts/check_d10_v10_p0_intake.py --self-test
-          python3 -O scripts/check_d10_v10_p0_intake.py --self-test
-      - name: Verify 24 v11 research laws and falsification without F2/F3 authority
-        run: |
-          python3 scripts/check_d10_v11_historical_law.py --self-test
-          python3 -O scripts/check_d10_v11_historical_law.py --self-test
-      - name: Verify v12 four historical semantic claims, reject fake oracle proofs
-        run: |
-          python3 scripts/check_d10_v12_historical_identity_types.py --self-test
-          python3 -O scripts/check_d10_v12_historical_identity_types.py --self-test
-      - name: Validate 22 v14 research-only laws, pinned source and negative mutants
-        run: |
-          python3 scripts/check_d10_v14_source_laws.py --self-test
-          python3 -O scripts/check_d10_v14_source_laws.py --self-test
-      - name: Validate D10 v15 archival source evidence and reject forged approvals
-        run: |
-          python3 scripts/check_d10_v15_source_laws.py --self-test
-          python3 -O scripts/check_d10_v15_source_laws.py --self-test
-      - name: D10 v16 check 32 historical law claims and 3 negative mutations
-        run: |
-          python3 scripts/check_d10_v16_archived_laws.py --self-test
-          python3 -O scripts/check_d10_v16_archived_laws.py --self-test
-      - name: D10 v17 exact-law drafts verify 54 definitions and negative mutants
-        run: |
-          python3 scripts/check_d10_v17_math_drafts.py --self-test
-          python3 -O scripts/check_d10_v17_math_drafts.py --self-test
-      - name: Validate D10 v18 full canonical research coordinate bijection, 305 transfers, 719 preserved
-        run: |
-          python3 scripts/check_d10_v18_research_placement.py --self-test
-          python3 -O scripts/check_d10_v18_research_placement.py --self-test
-      - name: Порахувати реальний запас D10
-        run: |
-          python3 scripts/check_d10_completion_readiness.py >"$RUNNER_TEMP/d10-readiness.json"
-          python3 - "$RUNNER_TEMP/d10-readiness.json" <<'PY'
-          import json,sys
-          x=json.load(open(sys.argv[1],encoding='utf-8'))
-          print("D10 READINESS",x["selected"],"/",x["capacity"],"remaining",x["remaining"])
-          print("D10 SOURCES",x["source_queue"]["distinct_source_names_unselected"])
-          print("D11 GATE","READY" if x["ready_to_start_d11"] else "BLOCKED")
-          print("D10 ERRORS",x["blocking_errors"])
-          print("D10 QUEUE", ",".join(y["semantic_name"] for y in x["source_queue"]["queue"]))
-          PY
-      - uses: actions/upload-artifact@v4
-        with:
-          name: d10-unselected-source-evidence
-          path: ${{ runner.temp }}/d10-readiness.json
+          echo "FOREIGN_LANGUAGE_TEST=EXCLUDED_BY_POLICY"
+          echo "NATIVE_EQUIVALENT=NOT_VERIFIED"
+          echo "NO_PASS_CLAIM=MADE"

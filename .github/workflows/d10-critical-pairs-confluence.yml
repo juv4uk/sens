@@ -1,4 +1,4 @@
-name: D10 Newman Knuth Bendix critical-pair confluence
+name: "D10 critical-pairs confluence — excluded by Rust/Zig/SENS language policy"
 
 on:
   workflow_dispatch:
@@ -7,10 +7,12 @@ permissions:
   contents: read
 
 jobs:
-  finite-critical-pairs:
+  policy-exclusion:
+    name: Foreign-language research/test lane excluded (NOT_VERIFIED)
     runs-on: ubuntu-latest
-    timeout-minutes: 8
     steps:
-      - uses: actions/checkout@v4
-      - name: Validate critical-pair theorem witnesses against independent exhaustive peaks
-        run: python3 -m unittest discover -s tests -p 'test_d10_critical_pairs_confluence.py' -v
+      - name: Record exclusion without asserting an outcome
+        run: |
+          echo "FOREIGN_LANGUAGE_TEST=EXCLUDED_BY_POLICY"
+          echo "NATIVE_EQUIVALENT=NOT_VERIFIED"
+          echo "NO_PASS_CLAIM=MADE"
