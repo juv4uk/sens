@@ -7,10 +7,6 @@ on:
 permissions:
   contents: read
 
-concurrency:
-  group: vertical-day-native-smoke-${{ github.ref }}
-  cancel-in-progress: false
-
 jobs:
   native-smoke:
     runs-on: ubuntu-24.04
