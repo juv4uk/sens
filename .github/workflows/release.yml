@@ -77,6 +77,10 @@ jobs:
   release-preflight:
     name: focused release preflight
     uses: ./.github/workflows/release-preflight.yml
+    with:
+      # The parallel test job already owns full workspace, tag, translation,
+      # compiler-source parity, and workspace-Clippy gates for this tagged SHA.
+      full: false
 
   build-cli:
     name: sens-cli · ${{ matrix.os }}
