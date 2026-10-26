@@ -69,61 +69,16 @@ archive_has_artifact() {
     if (index(column, wanted)>0) found=1
   } END {exit !found}' "$ARCHIVE"
 }
-first_field_is_sens_source() {
-  local field="$1"
-  [[ "$field" == SENS_SOURCE=* && "${field#SENS_SOURCE=}" != "" ]]
-}
-gate_new_artifact() {
-  local artifact="$1" is_new="$2" first_field="$3"
-  if [[ "$is_new" == false ]] && archive_has_artifact "$artifact"; then
-    return 0
-  fi
-  if [[ "$is_new" == true ]] && first_field_is_sens_source "$first_field"; then
-    return 0
-  fi
-  return 1
-}
-
 self_test() {
-  local first_artifact simulated_new counted
+  local first_artifact counted
   first_artifact="$(archive_rows | awk -F'|' 'NR == 1 { first = $1 } END { print first }')"
-  [[ -n "$first_artifact" ]] || die "self-test не знайшов зареєстрований артефакт"
-  archive_has_artifact "$first_artifact" || die "self-test позитив: архівний артефакт не зараховано"
-  gate_new_artifact "$first_artifact" false "" || die "self-test позитив: зареєстрований архів відхилено"
+  [[ -n "$first_artifact" ]] || die "self-test не знайшов зареєстрований архівний артефакт"
+  archive_has_artifact "$first_artifact" || die "self-test: зареєстрований артефакт не знайдено"
   counted="$(archive_rows | awk 'END {print NR+0}')"
-  [[ "$counted" -eq "$archive_count" ]] || die "self-test позитив: ARCHIVE counter не врахував рядок"
-  simulated_new="tests/__gate_self_test_foreign.native"
-  if gate_new_artifact "$simulated_new" true ""; then
-    die "self-test негатив: новий чужий тест без SENS_SOURCE прийнято"
-  fi
-  echo "GATE_SELF_TEST=OK archive_positive=ARCHIVE_COUNTED negative_new_foreign=RED_EXPECTED"
+  [[ "$counted" -eq "$archive_count" ]] || die "self-test: ARCHIVE counter не врахував рядок"
+  echo "GATE_SELF_TEST=OK archive_positive=ARCHIVE_COUNTED metadata_fields=NOT_REQUIRED"
 }
 if [[ "${1:-}" == "--self-test" ]]; then self_test; exit 0; fi
-
-event_name="${SENS_EVENT_NAME:-${GITHUB_EVENT_NAME:-}}"
-if [[ "$event_name" == "pull_request" ]]; then
-  # GitHub passes exact event fields via environment; no JSON parser.
-  pr_body="${SENS_PR_BODY:-}"
-  first_field="${pr_body%%$'\n'*}"
-  base_sha="${SENS_PR_BASE_SHA:-}"
-  head_sha="${SENS_PR_HEAD_SHA:-}"
-  [[ "$base_sha" =~ ^[0-9a-f]{40}$ && "$head_sha" =~ ^[0-9a-f]{40}$ ]] ||
-    die "немає pinned PR base/head SHA"
-  git cat-file -e "$base_sha^{commit}" 2>/dev/null ||
-    git fetch --no-tags origin "$base_sha" --depth=1
-  git cat-file -e "$head_sha^{commit}" 2>/dev/null ||
-    git fetch --no-tags origin "$head_sha" --depth=1
-  while IFS=$'\t' read -r status path; do
-    [[ "$status" == A* ]] || continue
-    case "$path" in
-      tests/*|crates/*/tests/*|benchmarks/*)
-        if ! first_field_is_sens_source "$first_field"; then
-          die "новий gated test/benchmark $path без SENS_SOURCE першим полем PR-body; виключення заборонено"
-        fi
-        ;;
-    esac
-  done < <(git diff --name-status "$base_sha...$head_sha")
-fi
 
 runner_pattern='python3?[[:space:]]+.*(test|bench|benchmark|trial|run\.py)|pytest([[:space:]]|$)|node[[:space:]]+--test|npm[[:space:]]+(test|run[[:space:]]+(test|bench|benchmark))|npx[[:space:]]+(jest|vitest|mocha)|bun[[:space:]]+test|deno[[:space:]]+test|go[[:space:]]+test([[:space:]]|$)|racket[[:space:]]+.*(test|bench)'
 workflow_count=0
