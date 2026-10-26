@@ -709,7 +709,7 @@ mod tests {
             data[0] = 0x80;
             *data.last_mut().unwrap() = 0x01;
             let value = Word::numeric(level, data).unwrap();
-            let physical = encode(&[value.clone()]).unwrap();
+            let physical = encode(std::slice::from_ref(&value)).unwrap();
             assert_eq!(decode(&physical).unwrap(), vec![value]);
         }
         assert_eq!(numeric_bytes(MAX_NUMERIC_LEVEL + 1), Err(Error::TooLarge));
