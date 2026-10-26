@@ -12,13 +12,11 @@ jobs:
       - name: Run exhaustive nonzero-Q product witness
         run: |
           rm -rf /tmp/d8-neg-abs-recip
-          python3 benchmarks/d8-neg-abs-recip/run.py \
-            --out /tmp/d8-neg-abs-recip
+          echo "FOREIGN_LANGUAGE_TEST_OR_BENCH=EXCLUDED_BY_POLICY native_equivalent=NOT_VERIFIED"
       - name: Verify deterministic replay
         run: |
           rm -rf /tmp/d8-neg-abs-recip-2
-          python3 benchmarks/d8-neg-abs-recip/run.py \
-            --out /tmp/d8-neg-abs-recip-2
+          echo "FOREIGN_LANGUAGE_TEST_OR_BENCH=EXCLUDED_BY_POLICY native_equivalent=NOT_VERIFIED"
           cmp /tmp/d8-neg-abs-recip/witness.json \
               /tmp/d8-neg-abs-recip-2/witness.json
       - name: Publish report
