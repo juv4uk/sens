@@ -29,6 +29,9 @@ jobs:
           # Без цього fetch окремого попереднього SHA вичерпував 60 с.
           fetch-depth: 2
 
+      - name: Мовна межа — семантика лише SENS, без Python unit tests
+        run: bash scripts/check-sens-only-semantic-tests.sh
+
       - name: Один автоматичний CI — тільки поточний main
         run: |
           set -euo pipefail
