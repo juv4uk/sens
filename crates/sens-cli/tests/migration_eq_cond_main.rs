@@ -22,6 +22,12 @@ fn original_eq_cond_images_roundtrip_as_historical_transport_only() {
     for data in [SELECT_T5, SKIP_T5] {
         let words = decode_t5m_via_zig(data);
         let visible = open_ternary_via_zig(data);
+        let visible_words = sens::parse_binary_source_words(&visible)
+            .expect("the visible exact-width projection parses as SENS words")
+            .into_iter()
+            .map(|token| token.word)
+            .collect::<Vec<_>>();
+        assert_eq!(visible_words, words, "display projection must preserve typed words");
         let re_encoded = zig_transport::encode_t5m_direct(&words).expect("re-encode via Zig T5M");
         assert_eq!(re_encoded, data);
     }

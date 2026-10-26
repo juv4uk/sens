@@ -110,11 +110,6 @@ fn parse_field(line: &str, field: &str) -> Option<String> {
     Some(rest[..end?].replace("\\\"", "\""))
 }
 
-fn parse_id_field(line: &str) -> Option<String> {
-    // inventory format: (fixture (id . "F-...") ...)
-    parse_field(line, "id")
-}
-
 // ── Export ────────────────────────────────────────────────────────────────────
 
 /// The outcome of attempting to build an external-oracle export request.
