@@ -1400,7 +1400,7 @@ mod tests {
         assert_eq!(d3_input.semantic_status, "current");
         assert_eq!(d3_input.authority_path, "language-contract.lisp");
         assert_eq!(d3_input.authority_sha256.len(), 64);
-        assert_eq!(d3_input.language_contract_version, "11.9");
+        assert_eq!(d3_input.language_contract_version, "12.0");
 
         let d4_input = compiler_semantic_input_from_sens(d4(0b0010))
             .expect("D4 semantic input")
