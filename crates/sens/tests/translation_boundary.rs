@@ -456,37 +456,37 @@ fn translation_symbol_law_rejects_non_symbols_in_live_sens() {
 
 #[test]
 fn translation_exact_five_fields_rejects_short_long_and_dotted_lists() {
-    let mut session = Session::default();
-    sens::load_core_library(&mut session)
-        .expect("чинний Core4 забезпечує штатні числові зв'язування");
-    for library in [
-        include_str!("../../../lib/unify.lisp"),
-        include_str!("../../../lib/reason.lisp"),
-        include_str!("../../../lib/forward.lisp"),
-        include_str!("../../../lib/knowledge.lisp"),
-        include_str!("../../../lib/result-status.lisp"),
-        include_str!("../../../lib/translation.lisp"),
+    // Публічна D9-межа викликається її точними двійковими адресами:
+    // 000101000 = переклад-перевірка, 000100011 = переклад-перевірка-код.
+    // Немає окремого незареєстрованого helper-а чи виклику через D7-ім'я.
+    for (proposal, expected) in [
+        (
+            r#"(translation-1 candidate query "Is Plato metallic?" (metallic plato))"#,
+            "query",
+        ),
+        (
+            r#"(translation-1 candidate query "Is Plato metallic?")"#,
+            "invalid-translation",
+        ),
+        (
+            r#"(translation-1 candidate query "Is Plato metallic?" (metallic plato) extra)"#,
+            "invalid-translation",
+        ),
+        (
+            r#"(translation-1 candidate query "Is Plato metallic?" . broken)"#,
+            "invalid-translation",
+        ),
+        ("()", "invalid-translation"),
+        ("а", "invalid-translation"),
     ] {
-        let forms = parse_mixed_exact_domain(library).expect("чинний доменний SENS reader");
-        eval_parsed_expressions(&forms, &mut session).expect("чинна бібліотека SENS");
-    }
-    // Перевіряємо саме публічну межу протоколу, не окремий helper поза D9.
-    for (value, expected) in [
-        (r#"(translation-1 candidate query "текст" (metallic plato))"#, true),
-        (r#"(translation-1 candidate query "текст")"#, false),
-        (r#"(translation-1 candidate query "текст" (metallic plato) extra)"#, false),
-        ("()", false),
-        ("а", false),
-        (r#"(translation-1 candidate query "текст" . ґ)"#, false),
-    ] {
-        let source = format!("(структура-обгортки-перекладу-коректна? (як-є {value}))");
-        let actual = eval_parsed_expressions(
-            &parse_mixed_exact_domain(&source).unwrap_or_else(|error| panic!("{source}: {error}")),
-            &mut session,
-        )
-        .unwrap_or_else(|error| panic!("{source}: {error}"))
-        .value;
-        assert_eq!(actual.as_predicate_bit(), Some(expected), "{source}");
+        let source = format!(
+            "(000100011 (000101000 (як-є corpus) (як-є {proposal})))"
+        );
+        assert_eq!(
+            eval_translation(&source),
+            expected,
+            "SENS rejected the wrong envelope shape: {proposal}"
+        );
     }
 }
 #[test]
