@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Foreign-language test/benchmark runners may not be treated as SENS evidence.
 # Mechanical Python helpers outside this forbidden runner set are tooling only.
+# Do not ban inline packaging/hash helpers unless they execute a test or benchmark.
 set -euo pipefail
 root="$(git rev-parse --show-toplevel)"
 cd "$root"
@@ -18,7 +19,7 @@ files=(
   .github/workflows/physical-binary-performance.yml
   .github/workflows/packed-vs-visible-bench.yml
 )
-if grep -nE '^[[:space:]]*(run:[[:space:]]*)?python3[[:space:]]+-m[[:space:]]+(unittest|pytest)([[:space:]]|$)|^[[:space:]]*python3[[:space:]]+tests/test_[^[:space:]]+\.py([[:space:]]|$)|^[[:space:]]*pytest([[:space:]]|$)|^[[:space:]]*python3[[:space:]]+benchmarks/[^[:space:]]+.*(run\.py|\.py)([[:space:]\\]|$)|^[[:space:]]*python3[[:space:]]+-[[:space:]]+<<'PY'([[:space:]]|$)' "${files[@]}"; then
+if grep -nE '^[[:space:]]*(run:[[:space:]]*)?python3[[:space:]]+-m[[:space:]]+(unittest|pytest)([[:space:]]|$)|^[[:space:]]*python3[[:space:]]+tests/test_[^[:space:]]+\.py([[:space:]]|$)|^[[:space:]]*pytest([[:space:]]|$)|^[[:space:]]*python3[[:space:]]+benchmarks/[^[:space:]]+.*(run\.py|\.py)([[:space:]\\]|$)' "${files[@]}"; then
   echo "FOREIGN_TEST_BENCH_POLICY=FAIL runner_language_not_allowed"
   exit 1
 fi
