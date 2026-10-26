@@ -642,13 +642,13 @@ fn project_repl_surface_expression_in_scope(
                 .iter()
                 .any(|candidate| candidate.as_ref() == name.as_str())
         {
-            if let Some(Value::BinaryNumber(number)) = session.environment.get(&name).as_ref()
-                && number.numeric_domain_width() == Some(24)
-            {
-                return Ok(Expr {
-                    kind: ExprKind::BinaryNumber(number.clone()),
-                    span: expression.span,
-                });
+            if let Some(Value::BinaryNumber(number)) = session.environment.get(&name).as_ref() {
+                if number.numeric_domain_width() == Some(24) {
+                    return Ok(Expr {
+                        kind: ExprKind::BinaryNumber(number.clone()),
+                        span: expression.span,
+                    });
+                }
             }
         }
     }
