@@ -814,7 +814,7 @@ mod exact_domain_primitive_tests {
 
         let result = invoke_domain_identity(
             d4(0b0001),
-            &[represented_program.clone()],
+            std::slice::from_ref(&represented_program),
             &environment,
             span,
         )
