@@ -156,12 +156,7 @@ jobs:
             DEST="${DEST}.exe"
           fi
           cp "$SRC" "$DEST"
-          # Хеш публікується поруч з ассетом; install.sh звіряє його ДО запуску.
-          if command -v sha256sum >/dev/null 2>&1; then
-            sha256sum "$DEST" | awk '{print $1}' > "${DEST}.sha256"
-          else
-            shasum -a 256 "$DEST" | awk '{print $1}' > "${DEST}.sha256"
-          fi
+          # No digest sidecar is generated; publishing replays and byte-compares the original asset.
           # Портативність macOS: minos мусить бути <= 11.0 (перший Apple Silicon).
           # Linux перевіряється в release-preflight; тут — решта платформ.
           if [[ "${{ matrix.asset_suffix }}" == macos_* ]]; then
@@ -202,9 +197,7 @@ jobs:
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: release-cli-${{ matrix.asset_suffix }}
-          path: |
-            ${{ env.ASSET_PATH }}
-            ${{ env.ASSET_PATH }}.sha256
+          path: ${{ env.ASSET_PATH }}
           if-no-files-found: error
 
   build-msi:
@@ -242,17 +235,13 @@ jobs:
           if (-not (Test-Path -LiteralPath $msi -PathType Leaf) -or (Get-Item -LiteralPath $msi).Length -eq 0) {
             throw "MSI asset missing or empty: $msi"
           }
-          $msiHash = (Get-FileHash -LiteralPath $msi -Algorithm SHA256).Hash.ToLowerInvariant()
-          [System.IO.File]::WriteAllText("$msi.sha256", $msiHash + "`n", [System.Text.Encoding]::ASCII)
           "MSI_ASSET_PATH=$msi" >> $env:GITHUB_ENV
 
-      - name: Stage MSI with SHA-256 sidecar (not a public release yet)
+      - name: Stage MSI without digest sidecar (not a public release yet)
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: release-msi
-          path: |
-            ${{ env.MSI_ASSET_PATH }}
-            ${{ env.MSI_ASSET_PATH }}.sha256
+          path: ${{ env.MSI_ASSET_PATH }}
           if-no-files-found: error
 
   release-publish:
