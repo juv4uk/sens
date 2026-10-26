@@ -97,9 +97,12 @@ def require_supported_macos_intel_runner(source: str) -> None:
 
 def require_reusable_publish_permission(source: str) -> None:
     """The caller's token ceiling must permit its reusable publisher to write."""
-    if not re.search(r"(?m)^permissions:\n  contents: write$", source):
+    if not re.search(
+        r"(?m)^permissions:\n  contents: write\n  checks: read$", source
+    ):
         raise AssertionError(
-            "manual release caller must grant contents: write to its reusable publisher"
+            "manual release caller must grant contents: write and checks: read "
+            "to its reusable publisher"
         )
 
 
@@ -180,12 +183,22 @@ class ReleasePublicationGateTest(unittest.TestCase):
     def test_release_caller_with_read_only_token_is_rejected(self):
         require_reusable_publish_permission(self.entry_source)
         read_only = self.entry_source.replace(
-            "permissions:\n  contents: write",
-            "permissions:\n  contents: read",
+            "permissions:\n  contents: write\n  checks: read",
+            "permissions:\n  contents: read\n  checks: read",
             1,
         )
-        with self.assertRaisesRegex(AssertionError, "grant contents: write"):
+        with self.assertRaisesRegex(
+            AssertionError, "grant contents: write and checks: read"
+        ):
             require_reusable_publish_permission(read_only)
+
+    def test_release_caller_without_checks_read_is_rejected(self):
+        require_reusable_publish_permission(self.entry_source)
+        missing_checks = self.entry_source.replace("\n  checks: read", "", 1)
+        with self.assertRaisesRegex(
+            AssertionError, "grant contents: write and checks: read"
+        ):
+            require_reusable_publish_permission(missing_checks)
 
     def test_retired_local_driver_cannot_publish(self):
         """Retired Lisp shim is no longer a source of tag authority."""
