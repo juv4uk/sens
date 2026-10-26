@@ -5,13 +5,14 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 cli="${1:-target/debug/sens}"
 id=бенчмарк-медіана
+library=lib/бенчмарк.lisp
 law=tests/semantic/бенчмарк-медіана-law.lisp
 mutant=tests/semantic/бенчмарк-медіана-mutant.lisp
 if [[ ! -x "$cli" ]]; then
   printf 'REGRESSION id=%s layer=executor actual=missing path=%s\n' "$id" "$cli" >&2
   exit 1
 fi
-for source in "$law" "$mutant"; do
+for source in "$library" "$law" "$mutant"; do
   if [[ ! -f "$source" || -L "$source" ]]; then
     printf 'REGRESSION id=%s layer=source actual=missing-or-symlink path=%s\n' "$id" "$source" >&2
     exit 1
@@ -20,6 +21,13 @@ done
 
 tmp="$(mktemp -d)"
 trap 'rm -rf "$tmp"' EXIT
+positive_source="$tmp/positive.lisp"
+negative_source="$tmp/negative.lisp"
+if ! cat -- "$library" "$law" > "$positive_source" ||
+   ! cat -- "$library" "$mutant" > "$negative_source"; then
+  printf 'REGRESSION id=%s layer=source-assembly actual=failed\n' "$id" >&2
+  exit 1
+fi
 printf '1\n' > "$tmp/expected-positive"
 printf '0\n' > "$tmp/expected-negative"
 
