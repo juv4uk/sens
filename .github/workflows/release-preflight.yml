@@ -86,14 +86,6 @@ jobs:
           echo 'test_id=zig-release-h2-corpus layer=transport host=C semantic_authority=SENS'
           echo "PYTHON_TOOL_EXCLUDED_BY_LANGUAGE_POLICY native_equivalent=NOT_VERIFIED"
 
-      - name: Upload release GO-gate report
-        if: always()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
-        with:
-          name: release-go-gate
-          path: ${{ runner.temp }}/release-go-gate.json
-          if-no-files-found: error
-
       - name: Release version alignment (gate #1 mechanical)
         run: |
           echo "PYTHON_TOOL_EXCLUDED_BY_LANGUAGE_POLICY native_equivalent=NOT_VERIFIED"
@@ -165,9 +157,11 @@ jobs:
           swipl --version
 
       - name: Full workspace tests (pre-tag, exact SHA)
+        id: workspace_tests
         run: cargo test --locked --workspace --no-fail-fast
 
       - name: "Native SENS F2/F4: позитивні та негативні докази на цьому SHA"
+        id: native_sens_laws
         shell: bash
         run: |
           set -euo pipefail
@@ -181,9 +175,11 @@ jobs:
           bash scripts/prove-d4-selector-width.sh target/debug/sens
 
       - name: Full workspace Clippy (pre-tag, exact SHA)
+        id: workspace_clippy
         run: cargo clippy --locked --workspace --all-targets -- -D warnings
 
       - name: Блокувати реліз до міграції Python safety checks на Rust/Zig/SENS
+        id: native_language_policy
         if: always()
         shell: bash
         run: |
@@ -194,3 +190,29 @@ jobs:
             exit 1
           fi
           echo "RELEASE_NATIVE_LANGUAGE_POLICY=PASS"
+
+      # Always attach a receipt, even when a fail-closed policy gate blocks release.
+      # This is evidence of outcomes, never a GO token or semantic verdict.
+      - name: Write exact-SHA release preflight receipt
+        if: always()
+        shell: bash
+        env:
+          WORKSPACE_TESTS: ${{ steps.workspace_tests.outcome }}
+          NATIVE_SENS_LAWS: ${{ steps.native_sens_laws.outcome }}
+          WORKSPACE_CLIPPY: ${{ steps.workspace_clippy.outcome }}
+          NATIVE_LANGUAGE_POLICY: ${{ steps.native_language_policy.outcome }}
+        run: |
+          set -euo pipefail
+          printf '{"schema":"sens-release-preflight-receipt/v1","candidate_sha":"%s","workspace_tests":"%s","native_sens_laws":"%s","workspace_clippy":"%s","native_language_policy":"%s","release_go":false,"release_admission":"NOT_VERIFIED"}\\n' \\
+            "$GITHUB_SHA" "${WORKSPACE_TESTS:-unknown}" "${NATIVE_SENS_LAWS:-unknown}" \\
+            "${WORKSPACE_CLIPPY:-unknown}" "${NATIVE_LANGUAGE_POLICY:-unknown}" \\
+            > "$RUNNER_TEMP/release-go-gate.json"
+          cat "$RUNNER_TEMP/release-go-gate.json"
+
+      - name: Upload release GO-gate report
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: release-go-gate
+          path: ${{ runner.temp }}/release-go-gate.json
+          if-no-files-found: error
