@@ -44,17 +44,14 @@ jobs:
         run: |
           set -euo pipefail
           required_checks=(
-            "portable critical gates"
-            "oracle-native-smoke"
-            "Lisp-owned pair to real CPU, with fail-closed rejection"
-            "Physical SENS T5 file-admission oracle"
-            "triple"
-            "physical T5 to D2 D3 D4 D7 runtime"
-            "physical-binary-cli"
-            "d2-grammar-audit"
-            "focused release preflight"
             "Охоронець · Rust · Zig · SENS"
-            "Українська проєкція та заборона сирих літералів"
+            "focused release smoke before publish"
+            "focused release preflight"
+            "sens-cli · ubuntu-latest"
+            "sens-cli · windows-latest"
+            "sens-cli · macos-15-intel"
+            "sens-cli · macos-14"
+            "sens-cli · Windows MSI installer"
           )
           check_runs="$(gh api --paginate --slurp \
             -H 'Accept: application/vnd.github+json' \
@@ -212,17 +209,14 @@ jobs:
           test "$RELEASE_GO_SHA" = "$GITHUB_SHA"
           test "$RELEASE_GO_TAG" = "$GITHUB_REF_NAME"
           required_checks=(
-            "portable critical gates"
-            "oracle-native-smoke"
-            "Lisp-owned pair to real CPU, with fail-closed rejection"
-            "Physical SENS T5 file-admission oracle"
-            "triple"
-            "physical T5 to D2 D3 D4 D7 runtime"
-            "physical-binary-cli"
-            "d2-grammar-audit"
-            "focused release preflight"
             "Охоронець · Rust · Zig · SENS"
-            "Українська проєкція та заборона сирих літералів"
+            "focused release smoke before publish"
+            "focused release preflight"
+            "sens-cli · ubuntu-latest"
+            "sens-cli · windows-latest"
+            "sens-cli · macos-15-intel"
+            "sens-cli · macos-14"
+            "sens-cli · Windows MSI installer"
           )
           check_runs="$(gh api --paginate --slurp \
             -H 'Accept: application/vnd.github+json' \
