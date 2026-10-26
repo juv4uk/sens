@@ -9,10 +9,10 @@ jobs:
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@v5
-      - name: Build D1-D5 chunking matrix — EXCLUDED (NOT_VERIFIED)
-        if: false
-        shell: bash
-        run: echo "FOREIGN_LANGUAGE_TEST_BENCH=EXCLUDED_BY_POLICY native_equivalent=NOT_VERIFIED"
+      - name: Build D1-D5 chunking matrix
+        run: |
+          rm -rf /tmp/human-wire-chunking
+          python3 benchmarks/human-wire/chunking.py             --out /tmp/human-wire-chunking
       - name: Publish report
         if: always()
         run: |
