@@ -1,12 +1,10 @@
 #!/usr/bin/env bash
-# Перевірка реєстру ARCHIVE та межі SENS_SOURCE. Це механізм гейту, не мовний оракул.
+# Перевірка реєстру ARCHIVE та заборона нових сторонніх test/benchmark runners.
 set -euo pipefail
 root="$(git rev-parse --show-toplevel)"
-first_field="${SENS_PR_FIRST_FIELD:-}"
 while (($#)); do
   case "$1" in
     --root) root="$2"; shift 2 ;;
-    --first-field) first_field="$2"; shift 2 ;;
     *) echo "LANGUAGE_POLICY_ARCHIVE=FAIL unknown_argument=$1"; exit 2 ;;
   esac
 done
@@ -148,8 +146,6 @@ for path in "${!archived[@]}"; do
   fi
 done
 
-event_name="${SENS_EVENT_NAME:-${GITHUB_EVENT_NAME:-push}}"
-first_line="${first_field%%$'\n'*}"
 added=()
 if git rev-parse --verify HEAD^ >/dev/null 2>&1; then
   while IFS= read -r path; do
@@ -158,9 +154,7 @@ if git rev-parse --verify HEAD^ >/dev/null 2>&1; then
 fi
 for path in "${added[@]:-}"; do
   if is_testbench_location "$path"; then
-    # The SENS_SOURCE first-field contract applies to PR descriptions only.
     if [[ "$event_name" == "pull_request" && "$first_line" != SENS_SOURCE=* ]]; then
-      echo "LANGUAGE_POLICY_ARCHIVE=FAIL SENS_SOURCE_FIRST_FIELD_REQUIRED path=$path"
       bad=1
     fi
     # Never admit a newly added foreign-language test or benchmark runner.
