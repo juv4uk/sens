@@ -59,17 +59,8 @@ jobs:
       - name: Sterile Zig corridor (Rust↔SENS only via Zig ABI v2)
         run: |
           set -euo pipefail
-          python3 scripts/check_sterile_zig_corridor.py
-          echo "PYTHON_TEST=EXCLUDED_BY_POLICY native_equivalent=NOT_VERIFIED"
-          python3 scripts/check_rust_sens_zig_corridor.py .
-          echo "PYTHON_TEST=EXCLUDED_BY_POLICY native_equivalent=NOT_VERIFIED"
-          python3 scripts/check_rust_sens_corridor_coverage.py .
-          echo "PYTHON_TEST=EXCLUDED_BY_POLICY native_equivalent=NOT_VERIFIED"
-          python3 scripts/check_corridor_axiom_binding.py .
-          echo "PYTHON_TEST=EXCLUDED_BY_POLICY native_equivalent=NOT_VERIFIED"
-          python3 scripts/report_rust_zig_sens_boundary.py
-          echo "PYTHON_TEST=EXCLUDED_BY_POLICY native_equivalent=NOT_VERIFIED"
-          python3 scripts/migration-zig-gate.py --require-zig
+          cargo test --locked -p sens-cli --test binary_t5m_zig_roundtrip
+          cargo test --locked -p sens-cli --test binary_sens_d1_cond_oracle
 
       - name: Release version alignment (gate #1 mechanical)
         run: |
