@@ -8,13 +8,15 @@ trap 'rm -rf "$tmp"' EXIT
 git -C "$tmp" init -q
 git -C "$tmp" config user.name "SENS gate self-test"
 git -C "$tmp" config user.email "sens-gate-self-test@example.invalid"
-mkdir -p "$tmp/tests/legacy" "$tmp/docs"
+mkdir -p "$tmp/tests/legacy" "$tmp/benchmarks/legacy" "$tmp/docs"
 printf 'print("historical artifact")\n' > "$tmp/tests/legacy/test_old.py"
+printf '#!/usr/bin/env sh\necho historical benchmark\n' > "$tmp/benchmarks/legacy/old_runner.sh"
 fake_sha=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
 cat > "$tmp/docs/language-policy-archive.md" <<EOF
 Артефакт | Локація | Причина виключення з гейту | Статус
 --- | --- | --- | ---
 tests/legacy/test_old.py | tests/legacy/test_old.py | Legacy archive fixture; https://github.com/juv4uk/sens/commit/$fake_sha | ARCHIVE
+benchmarks/legacy/old_runner.sh | benchmarks/legacy/old_runner.sh | Legacy archived runner fixture; https://github.com/juv4uk/sens/commit/$fake_sha | ARCHIVE
 EOF
 git -C "$tmp" add .
 git -C "$tmp" commit -qm "baseline archive fixture"
@@ -22,7 +24,7 @@ printf 'self-test positive witness\n' > "$tmp/docs/note.md"
 git -C "$tmp" add docs/note.md
 git -C "$tmp" commit -qm "positive archive witness"
 positive="$(SENS_PR_FIRST_FIELD='SENS_SOURCE=tests/legacy/test_old.sens' bash "$gate" --root "$tmp" 2>&1)"
-if [[ "$positive" != *"ARCHIVE (поза мовним коридором): 1 артефактів — docs/language-policy-archive.md"* ]]; then
+if [[ "$positive" != *"ARCHIVE (поза мовним коридором): 2 артефактів — docs/language-policy-archive.md"* ]]; then
   echo "LANGUAGE_POLICY_ARCHIVE_SELFTEST=FAIL positive witness did not report one archived artifact"
   printf '%s\n' "$positive"
   exit 1
