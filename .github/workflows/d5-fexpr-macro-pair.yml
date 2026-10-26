@@ -1,4 +1,4 @@
-name: D5 FEXPR MACRO residual law
+name: "D5 FEXPR/MACRO pair — excluded by Rust/Zig/SENS language policy"
 
 on:
   workflow_dispatch:
@@ -7,14 +7,12 @@ permissions:
   contents: read
 
 jobs:
-  classify:
-    name: D5 FEXPR/MACRO residual classification
+  policy-exclusion:
+    name: Foreign-language tests/research excluded (NOT_VERIFIED)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
-      - name: Replay merged donor evidence
+      - name: Record exclusion without asserting an outcome
         run: |
-          python3 scripts/research-2522-fexpr-protocol-cube.py
-          python3 benchmarks/d5-structural-discovery/special_call_factor.py --check
-      - name: Check D5 pair classification
-        run: python3 scripts/research-3025-d5-fexpr-macro-pair.py --check
+          echo "FOREIGN_LANGUAGE_TEST=EXCLUDED_BY_POLICY"
+          echo "NATIVE_EQUIVALENT=NOT_VERIFIED"
+          echo "NO_PASS_CLAIM=MADE"

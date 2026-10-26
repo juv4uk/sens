@@ -1,21 +1,18 @@
-name: D6 UNKNOWN frontier research
+name: "D6 unknown frontier — excluded by Rust/Zig/SENS language policy"
 
 on:
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
-  frontier:
+  policy-exclusion:
+    name: Foreign-language tests/research excluded (NOT_VERIFIED)
     runs-on: ubuntu-latest
-    timeout-minutes: 5
     steps:
-      - uses: actions/checkout@v5
-      - name: Classify D6 UNKNOWN frontier
+      - name: Record exclusion without asserting an outcome
         run: |
-          python3 benchmarks/d6-unknown-frontier/run.py --out /tmp/d6-unknown-frontier.json
-          python3 -c 'import json; d=json.load(open("/tmp/d6-unknown-frontier.json")); assert d["canonical"]["occupancy_mutations"] == 0; assert sum(d["frontier_counts"].values()) == 48'
-      - uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: d6-unknown-frontier
-          path: /tmp/d6-unknown-frontier.json
-          retention-days: 14
+          echo "FOREIGN_LANGUAGE_TEST=EXCLUDED_BY_POLICY"
+          echo "NATIVE_EQUIVALENT=NOT_VERIFIED"
+          echo "NO_PASS_CLAIM=MADE"
