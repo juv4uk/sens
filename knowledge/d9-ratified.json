@@ -27,7 +27,8 @@
     "derivability": "derived/generated semantics may be residents; derivability does not revoke residency",
     "runtime_separation": "ratified residency does not imply callable mechanism; missing D9 mechanisms fail closed",
     "legacy_non_authority": "Sens8/Sid8/Function8, semantic-registry source codes and historical placement coordinates have zero D9 placement authority unless independently re-derived",
-    "gauge_authority": "the #4007 S4 gauge representative is normative by owner decision #4008 while remaining provenance-distinct from theorem-forced selector coordinates"
+    "gauge_authority": "the #4007 S4 gauge representative is normative by owner decision #4008 while remaining provenance-distinct from theorem-forced selector coordinates",
+    "retirement": "retired slots count toward coordinate coverage, not callable language residents"
   },
   "residents": {
     "100000000": "CAAAAAAAR",
@@ -182,7 +183,7 @@
     "110010101": "DEFINE-CONDITION",
     "110010110": "DEFSTRUCT",
     "110010111": "DEFTYPE",
-    "110011000": "SHA256-HEX",
+    "110011000": "RETIRED-RESERVED-SLOT-110011000",
     "110011001": "I32-BUFFER",
     "110011010": "NUMERIC-BUFFER-LENGTH",
     "110011011": "NUMERIC-BUFFERP",
@@ -194,7 +195,7 @@
     "110100001": "F32-BUFFER",
     "110100010": "STRING-LENGTH",
     "110100011": "STRING-SLICE",
-    "110100100": "JSON-PARSE",
+    "110100100": "RETIRED-RESERVED-SLOT-110100100",
     "110100101": "NUMERIC-EQUALITY",
     "110100110": "STRINGP",
     "110100111": "NUMERIC-BUFFER-REF",
@@ -9114,23 +9115,18 @@
     },
     {
       "coordinate": "110011000",
-      "resident": "SHA256-HEX",
+      "resident": "RETIRED-RESERVED-SLOT-110011000",
       "stable_id": "d9.surface.1ff307a51199bf98",
-      "status": "OWNER-RATIFIED",
+      "status": "RETIRED-RESERVED",
       "coordinate_basis": "owner-ratified-s4-gauge-choice",
-      "prior_status": "GAUGE-FIXED",
+      "prior_status": "OWNER-RATIFIED",
       "law_status": "S4-CANONICAL-GAUGE",
-      "source_class": "PUBLIC-SIGNATURE-HARVEST",
-      "relation_class": "PUBLIC-LANGUAGE-CAPABILITY",
-      "semantic_behavior": "Return the SHA-256 hex digest",
+      "source_class": "OWNER-RETIREMENT-2026-10-26",
+      "relation_class": "RESERVED-NONCALLABLE-SLOT",
+      "semantic_behavior": "Reserved fixed-width D9 coordinate; no callable SENS language identity.",
       "evidence": [
-        "#3964",
-        "#3997",
-        "#4002",
-        "#4004",
-        "#4007",
-        "99913a3645576ce0a2035832b549bed574a1591e",
-        "#4008"
+        "owner instruction 2026-10-26",
+        "preserve fixed-width coordinate without exposing an external-format primitive"
       ]
     },
     {
@@ -9366,23 +9362,18 @@
     },
     {
       "coordinate": "110100100",
-      "resident": "JSON-PARSE",
+      "resident": "RETIRED-RESERVED-SLOT-110100100",
       "stable_id": "d9.surface.ad0553c64579b865",
-      "status": "OWNER-RATIFIED",
+      "status": "RETIRED-RESERVED",
       "coordinate_basis": "owner-ratified-s4-gauge-choice",
-      "prior_status": "GAUGE-FIXED",
+      "prior_status": "OWNER-RATIFIED",
       "law_status": "S4-CANONICAL-GAUGE",
-      "source_class": "PUBLIC-SIGNATURE-HARVEST",
-      "relation_class": "PUBLIC-LANGUAGE-CAPABILITY",
-      "semantic_behavior": "Parse JSON into sens values",
+      "source_class": "OWNER-RETIREMENT-2026-10-26",
+      "relation_class": "RESERVED-NONCALLABLE-SLOT",
+      "semantic_behavior": "Reserved fixed-width D9 coordinate; no callable SENS language identity.",
       "evidence": [
-        "#3964",
-        "#3997",
-        "#4002",
-        "#4004",
-        "#4007",
-        "99913a3645576ce0a2035832b549bed574a1591e",
-        "#4008"
+        "owner instruction 2026-10-26",
+        "preserve fixed-width coordinate without exposing an external-format primitive"
       ]
     },
     {
@@ -11296,5 +11287,6 @@
         "#4008"
       ]
     }
-  ]
+  ],
+  "owner_revision": "2026-10-26: two external utility names retired from callable SENS vocabulary; coordinates remain reserved and are not reassigned"
 }
