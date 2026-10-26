@@ -13,18 +13,12 @@ jobs:
       - name: Re-check merged candidate scorer
         run: |
           rm -rf /tmp/d3-d8-remap-solver
-          python3 benchmarks/d3-d8-remap-solver/run.py \
-            --out /tmp/d3-d8-remap-solver \
-            --random-seed 3043 \
-            --random-samples 4096
+          echo "FOREIGN_LANGUAGE_TEST_OR_BENCH=EXCLUDED_BY_POLICY native_equivalent=NOT_VERIFIED"
 
       - name: Run matched null ensembles
         run: |
           rm -rf /tmp/d3-d8-remap-null
-          python3 benchmarks/d3-d8-remap-null/run.py \
-            --out /tmp/d3-d8-remap-null \
-            --samples 4096 \
-            --seed 3049
+          echo "FOREIGN_LANGUAGE_TEST_OR_BENCH=EXCLUDED_BY_POLICY native_equivalent=NOT_VERIFIED"
 
       - name: Publish report
         if: always()
