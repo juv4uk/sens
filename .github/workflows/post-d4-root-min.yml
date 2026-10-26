@@ -24,14 +24,23 @@ jobs:
       - name: Re-check shared-location identity lower bound
         run: cargo test -p sens --test post_d4_setq_shared_location -- --nocapture
 
-      - name: Verify shared-location root-min result — EXCLUDED (NOT_VERIFIED)
-        if: false
-        shell: bash
-        run: echo "FOREIGN_LANGUAGE_TEST_BENCH=EXCLUDED_BY_POLICY native_equivalent=NOT_VERIFIED"
-      - name: Publish summary — EXCLUDED (NOT_VERIFIED)
-        if: false
-        shell: bash
-        run: echo "FOREIGN_LANGUAGE_TEST_BENCH=EXCLUDED_BY_POLICY native_equivalent=NOT_VERIFIED"
+      - name: Verify shared-location root-min result
+        run: python3 benchmarks/post-d4-root-min/shared_location.py --check
+
+      - name: Publish summary
+        if: always()
+        run: |
+          {
+            echo "## Post-D4 root minimization — shared location"
+            echo
+            echo "~~~text"
+            python3 benchmarks/post-d4-root-min/shared_location.py
+            echo "~~~"
+            echo
+            echo "- Global D4 compilability is distinct from local D4 derivation (#2468)."
+            echo "- CARRIER-PREMISE is not a root/width/resident/coordinate claim."
+          } >> "$GITHUB_STEP_SUMMARY"
+
       - uses: actions/upload-artifact@v4
         if: always()
         with:
