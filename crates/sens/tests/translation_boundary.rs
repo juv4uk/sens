@@ -36,31 +36,31 @@ fn eval_translation(source: &str) -> String {
             include_str!("../../../lib/translation.lisp"),
         ),
     ] {
-        // Production loads every reasoning library through its path-pinned
-        // exact-domain reader. Use the same route here: generic source parsing
-        // loses contextual D4/D7 bindings inside quoted macro templates.
+        // Бібліотеки міркування завантажуються через reader, закріплений
+        // за точним шляхом і доменом. Тут використовується той самий шлях:
+        // загальний розбір утрачає контекст D4/D7 у цитованих шаблонах.
         sens::eval_pinned_reasoning_source(path, library, &mut session)
             .expect("чинна reasoning-бібліотека має завантажуватися через точний pinned reader");
     }
-    // Вираз іде ТИМ САМИМ reader-ом, що й бібліотеки: reasoning-шлях ліфтить
-    // D9-голови (порада-рішення-у-світ тощо), загальний — ні. Раніше тут була
-    // асиметрія: world.lisp завантажувався з ліфтингом, а вираз без нього,
-    // і D9-голова лишалась Text7-послідовністю → невідомо Text7 binding.
+    // Зовнішня пропозиція B4 є даними перекладу, тому її розбираємо
+    // в контексті lib/translation.lisp. Дозволені D9-голови зберігають
+    // типізоване подання, а невідомі слова всередині цитованих даних
+    // не стають викличними зв'язуваннями Text7.
     eval_parsed_expressions(
         &sens::parse_mixed_exact_domain_reasoning_source("lib/translation.lisp", source)
             .unwrap_or_else(|error| panic!("чинний D1–D10 reader: {error}; source: {source}")),
         &mut session,
     )
-    .unwrap_or_else(|e| panic!("translation evaluation failed: {e}\nsource: {source}"))
+    .unwrap_or_else(|e| panic!("помилка виконання перекладу: {e}\nджерело: {source}"))
     .value
     .to_string()
 }
 
 #[test]
-fn knowledge_accepts_canonical_d7_heads_without_eq_on_lists() {
-    // A proposition name produced by SENS text-to-symbol is a canonical D7
-    // glyph sequence, not a scalar D8 symbol. The knowledge guard must use
-    // the structural SENS validator and must still reject nested-list heads.
+fn база_знань_приймає_канонічні_голови_d7_без_рівності_списків() {
+    // Назва твердження після перетворення тексту на символ є послідовністю
+    // гліфів D7, а не скалярним символом D8. Перевірка бази знань має приймати
+    // правильну структуру й відхиляти голову, яка сама є вкладеним списком.
     let source = r#"
         (визначити літерал
           (список (текст-у-символ "людина") (текст-у-символ "сократ")))
@@ -72,7 +72,7 @@ fn knowledge_accepts_canonical_d7_heads_without_eq_on_lists() {
     assert_eq!(
         eval_translation(source),
         "(1 0)",
-        "canonical D7 goals must be accepted by SENS; nested-list heads rejected"
+        "SENS має приймати канонічну D7-голову й відхиляти вкладений список"
     );
 }
 
