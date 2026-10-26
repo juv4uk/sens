@@ -1000,7 +1000,7 @@ fn lift_expression(
                 // through QUOTE; ordinary predicate names and macro templates
                 // remain data and never acquire callability from their spelling.
                 for item in lifted.iter_mut().skip(1) {
-                    *item = lift_quoted_d4_negation_data(item.clone(), depth + 1)?;
+                    *item = lift_quoted_d4_identity_data(item.clone(), depth + 1)?;
                 }
             } else {
                 if is_exact_cond(&lifted[0]) {
@@ -1056,7 +1056,7 @@ fn lift_expression(
     }
 }
 
-fn lift_quoted_d4_negation_data(expression: Expr, depth: u32) -> Result<Expr, LanguageError> {
+fn lift_quoted_d4_identity_data(expression: Expr, depth: u32) -> Result<Expr, LanguageError> {
     if depth > MAX_STRUCTURE_DEPTH {
         return Err(LanguageError::new(
             ErrorKind::Parse,
@@ -1066,9 +1066,20 @@ fn lift_quoted_d4_negation_data(expression: Expr, depth: u32) -> Result<Expr, La
     }
     let Expr { kind, span } = expression;
     match kind {
-        ExprKind::Symbol(name) if name.as_ref() == "хибне?" => {
+        ExprKind::Symbol(name)
+            if matches!(name.as_ref(), "хибне?" | "визначити") =>
+        {
+            // У цитованих SENS-даних зберігаємо точну ідентичність двох
+            // D4-голів, які потрібні відповідно для заперечної клаузи та
+            // для коду, який продукує Lisp-макрос. DomainIdentity тут — дані;
+            // викличність виникає лише тоді, коли SENS пізніше оцінює згенеровану форму.
+            let expected_bits = match name.as_ref() {
+                "хибне?" => 0b0100,
+                "визначити" => 0b0011,
+                _ => unreachable!(),
+            };
             let identity = crate::semantic_registry::exact_uk_callable_for_source_head(&name)
-                .filter(|identity| identity.width() == 4 && identity.packed_bits() == 0b0100);
+                .filter(|identity| identity.width() == 4 && identity.packed_bits() == expected_bits);
             if let Some(identity) = identity {
                 Ok(Expr {
                     kind: ExprKind::DomainIdentity(identity),
@@ -1085,7 +1096,7 @@ fn lift_quoted_d4_negation_data(expression: Expr, depth: u32) -> Result<Expr, La
             let mapped = items
                 .iter()
                 .cloned()
-                .map(|item| lift_quoted_d4_negation_data(item, depth + 1))
+                .map(|item| lift_quoted_d4_identity_data(item, depth + 1))
                 .collect::<Result<Vec<_>, _>>()?;
             Ok(Expr {
                 kind: ExprKind::List(Rc::from(mapped.into_boxed_slice())),
@@ -1262,6 +1273,29 @@ mod tests {
     fn only(mut expressions: Vec<Expr>) -> Expr {
         assert_eq!(expressions.len(), 1);
         expressions.remove(0)
+    }
+
+    #[test]
+    fn quoted_macro_define_keeps_exact_d4_identity() {
+        let expression = only(
+            parse_mixed_exact_domain("(як-є (визначити журнал-знань значення))")
+                .expect("quoted macro-generated DEFINE must preserve its exact D4 identity"),
+        );
+        let ExprKind::List(quote) = expression.kind else {
+            panic!("QUOTE");
+        };
+        let ExprKind::List(data) = &quote[1].kind else {
+            panic!("quoted macro data");
+        };
+        assert!(matches!(
+            &data[0].kind,
+            ExprKind::DomainIdentity(identity)
+                if identity.width() == 4 && identity.packed_bits() == 0b0011
+        ));
+        assert!(matches!(
+            &data[1].kind,
+            ExprKind::Symbol(name) if name.as_ref() == "журнал-знань"
+        ));
     }
 
     #[test]
