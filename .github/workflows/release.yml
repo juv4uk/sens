@@ -56,6 +56,10 @@ jobs:
       - name: Build native SENS executor for language-law proof
         run: cargo build --locked -p sens-cli --bin sens --bin sens-trit
 
+      - name: Compiler nucleus exact source → T5M → view parity
+        shell: bash
+        run: bash scripts/check-triple-projection.sh --fixture lib/compiler-nucleus.lisp
+
       - name: Prove language laws by EXECUTION (same tagged SHA)
         run: |
           set -euo pipefail
