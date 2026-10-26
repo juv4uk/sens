@@ -21,6 +21,14 @@ jobs:
       - name: Перевірка — жодних чужомовних test/benchmark runners у канонічному шляху
         shell: bash
         run: bash scripts/check-sens-only-semantic-tests.sh
+      - name: Перевірити реєстр ARCHIVE та рубіж SENS_SOURCE
+        shell: bash
+        env:
+          SENS_PR_FIRST_FIELD: ${{ github.event.pull_request.body || github.event.head_commit.message }}
+        run: bash scripts/check-language-policy-archive.sh
+      - name: Самоперевірка мовного гейту (позитивний та негативний свідки)
+        shell: bash
+        run: bash scripts/test-language-policy-archive-gate.sh
       - name: Мовна межа — JSON/SHA не є викличними формами SENS
         shell: bash
         run: |

@@ -45,6 +45,8 @@ jobs:
           set -euo pipefail
           git diff --check HEAD^ HEAD
           bash -n scripts/check-sens-only-semantic-tests.sh
+          bash -n scripts/check-language-policy-archive.sh
+          bash -n scripts/test-language-policy-archive-gate.sh
           bash -n scripts/ensure-host-debt0.sh
           bash -n scripts/ci-rust-mechanism-checks.sh
           bash -n scripts/execute_changed_lisp_t5m.sh
@@ -54,6 +56,14 @@ jobs:
         run: bash scripts/check-sens-only-semantic-tests.sh
       - name: Language corridor / archive registry
         run: python3 scripts/check-language-corridor-gate.py
+      - name: Перевірити реєстр ARCHIVE та рубіж SENS_SOURCE
+        shell: bash
+        env:
+          SENS_PR_FIRST_FIELD: ${{ github.event.pull_request.body || github.event.head_commit.message }}
+        run: bash scripts/check-language-policy-archive.sh
+      - name: Самоперевірка мовного гейту (позитивний та негативний свідки)
+        shell: bash
+        run: bash scripts/test-language-policy-archive-gate.sh
       - name: Швидкий охоронець host debt
         shell: bash
         run: bash scripts/ensure-host-debt0.sh
