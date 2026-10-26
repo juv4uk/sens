@@ -285,13 +285,6 @@ pub use source_words::{
     parse_binary_source_words, parse_domain_ladder_source_words, BinarySourceToken,
     BinarySourceWord, DomainLadderSourceToken, CANONICAL_SOURCE_EXTENSION,
 };
-#[cfg(any(test, feature = "rust-t5-reference"))]
-pub use ternary_transport::{
-    decode_d7_uk_t5, decode_ternary_program, decode_ternary_words,
-    encode_binary_projection_ternary, encode_d7_uk_t5, encode_ternary_words, open_ternary_program,
-    render_ternary_words_spaced, render_ternary_words_vertical, ternary_transport_accounting,
-    D7T5Error, TernaryTransportAccounting, TernaryTransportError,
-};
 pub use text7::{Text7, Text7CellError, Text7W7Error, Text7WireError, Text7WordError};
 pub use text7_projection::{encode_text7, render_text7, Text7Layout, Text7ProjectionError};
 
