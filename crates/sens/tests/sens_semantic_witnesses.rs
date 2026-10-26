@@ -217,8 +217,7 @@ fn epistemic_d3_eq_d1_law_and_one_bit_mutant() {
         parse_canonical_binary(lines[1]).expect("one-bit mutant must retain canonical D2 framing");
     assert_eq!(mutant.len(), 1);
     let failure = eval_parsed_expressions(&mutant, &mut Session::default())
-        .err()
-        .expect("SENS must reject its own one-bit falsifier");
+        .expect_err("SENS must reject its own one-bit falsifier");
     assert!(
         failure
             .to_string()
