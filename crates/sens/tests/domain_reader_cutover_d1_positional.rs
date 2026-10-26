@@ -1,9 +1,9 @@
-//! #5605: bounded D1 canonical reader / historical compatibility evidence.
+
+use sens_cli::zig_transport;//! #5605: bounded D1 canonical reader / historical compatibility evidence.
 //! This is a reader-and-physical-roundtrip test, NOT a SENS COND execution oracle.
 //! No new law, no D8/SID8 projection, no Zig semantic registry.
 
-use sens::{
-    decode_ternary_words, encode_ternary_words, parse, parse_binary_source_words,
+use sens::{BinarySourceWord, parse, parse_binary_source_words,
     parse_canonical_binary, parse_canonical_word_sequence, parse_exact_domain_source,
     DomainIdentity, Exactness, ExprKind,
 };
@@ -15,6 +15,17 @@ fn assert_d1(expression: &sens::Expr, expected_bit: u16) {
         panic!("D1 bit must not turn into numeric, D2 structural, or D3 EMPTY");
     };
     assert_eq!(word.word().packed_bits() as u16, expected_bit);
+}
+
+
+
+// Обгортки над чинним Zig T5M: staged-out ternary виведено (f5a5b213).
+fn encode_ternary_words(words: &[BinarySourceWord]) -> Result<Vec<u8>, String> {
+    zig_transport::encode_t5m_direct(words)
+}
+
+fn decode_ternary_words(bytes: &[u8]) -> Result<Vec<BinarySourceWord>, String> {
+    zig_transport::decode_t5m_words(bytes)
 }
 
 #[test]
