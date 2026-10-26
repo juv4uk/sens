@@ -147,8 +147,9 @@ fn main() {
     // SENS performs the D3 selection and D8 structural comparison. Rust
     // checks only the resulting exact D1 answer.
     let status = call(exact_d3(0b100), vec![reconstruction.clone()]);
-    // READ повертає текст як список точних D7-слів; звіряємо саме цей носій.
-    let expected = call(exact_d3(0b001), vec![d7_text_data("accepted")]);
+    // Рішення SENS повертається як ратифікований символ accepted;
+    // не підміняємо його D7-текстовою проєкцією у host-перевірці.
+    let expected = call(exact_d3(0b001), vec![symbol_value("accepted")]);
     let accepted = call(exact_d8_equal(), vec![status, expected]);
     let verdict = eval_parsed_expressions(&[accepted], &mut session)
         .unwrap_or_else(|error| {
