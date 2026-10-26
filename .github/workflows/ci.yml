@@ -151,7 +151,7 @@ jobs:
     # SENS_REMINT_META_EVAL_GRAPH_D1 is a closed two-source remint scope; never scan backlog.
     # A specific source-push marker repairs only the two MetaEval graph pairs.
     # Manual remint remains scoped to the exact explicit files supplied.
-    if: ${{ github.event_name == 'workflow_dispatch' && inputs.suite == 'remint' && inputs.files != '' }}
+    if: ${{ (github.event_name == 'workflow_dispatch' && inputs.suite == 'remint' && inputs.files != '') || (github.event_name == 'push' && (contains(github.event.head_commit.message, 'SENS_REMINT_META_EVAL_GRAPH_D1') || contains(github.event.head_commit.message, 'SENS_REMINT_COMPILER_NUCLEUS'))) }}
     uses: ./.github/workflows/remint-drifted-pairs.yml
     with:
       files: |
