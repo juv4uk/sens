@@ -470,15 +470,16 @@ fn translation_exact_five_fields_rejects_short_long_and_dotted_lists() {
         let forms = parse_mixed_exact_domain(library).expect("чинний доменний SENS reader");
         eval_parsed_expressions(&forms, &mut session).expect("чинна бібліотека SENS");
     }
+    // Перевіряємо саме публічну межу протоколу, не окремий helper поза D9.
     for (value, expected) in [
-        ("(а б в г ґ)", true),
-        ("(а б в г)", false),
-        ("(а б в г ґ д)", false),
+        (r#"(translation-1 candidate query "текст" (metallic plato))"#, true),
+        (r#"(translation-1 candidate query "текст")"#, false),
+        (r#"(translation-1 candidate query "текст" (metallic plato) extra)"#, false),
         ("()", false),
         ("а", false),
-        ("(а б в г . ґ)", false),
+        (r#"(translation-1 candidate query "текст" . ґ)"#, false),
     ] {
-        let source = format!("(переклад-рівно-пять-полів? (як-є {value}))");
+        let source = format!("(структура-обгортки-перекладу-коректна? (як-є {value}))");
         let actual = eval_parsed_expressions(
             &parse_mixed_exact_domain(&source).unwrap_or_else(|error| panic!("{source}: {error}")),
             &mut session,
@@ -488,7 +489,6 @@ fn translation_exact_five_fields_rejects_short_long_and_dotted_lists() {
         assert_eq!(actual.as_predicate_bit(), Some(expected), "{source}");
     }
 }
-
 #[test]
 fn translation_envelopes_reject_missing_and_excess_fields_in_live_sens() {
     // Вкладене D3 EQ повертає D1:NO, а НЕ D3:EMPTY.
