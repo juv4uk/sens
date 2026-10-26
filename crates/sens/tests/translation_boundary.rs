@@ -36,17 +36,11 @@ fn eval_translation(source: &str) -> String {
             include_str!("../../../lib/translation.lisp"),
         ),
     ] {
-        if path == "lib/world.lisp" {
-            // World — чинний власник рішення про допустимість поради.
-            // Його історично ширші кодові голови читає точний reader,
-            // а не Python, host-наслідування чи довільний текстовий alias.
-            sens::eval_pinned_reasoning_source(path, library, &mut session)
-                .expect("чинний SENS World повинен завантажитися");
-        } else {
-            let forms = parse_mixed_exact_domain(library).expect("чинний доменний SENS reader");
-            eval_parsed_expressions(&forms, &mut session)
-                .expect("чинна бібліотека виконується SENS");
-        }
+        // Production loads every reasoning library through its path-pinned
+        // exact-domain reader. Use the same route here: generic source parsing
+        // loses contextual D4/D7 bindings inside quoted macro templates.
+        sens::eval_pinned_reasoning_source(path, library, &mut session)
+            .expect("чинна reasoning-бібліотека має завантажуватися через точний pinned reader");
     }
     // Вираз іде ТИМ САМИМ reader-ом, що й бібліотеки: reasoning-шлях ліфтить
     // D9-голови (порада-рішення-у-світ тощо), загальний — ні. Раніше тут була
