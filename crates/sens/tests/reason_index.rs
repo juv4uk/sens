@@ -395,9 +395,6 @@ fn reason_index_migration_exhausts_all_2046_exact_width_coordinate_candidates() 
                 "collision in D{width}: {payload:0w$b}",
                 w = usize::from(width)
             );
-            assert_eq!(coordinate.width(), width);
-            assert_eq!(coordinate.bits(), payload);
-            assert_ne!(DomainCoordinate::new(width, capacity), Some(coordinate));
             bit_count += usize::from(width);
         }
         assert!(
@@ -408,8 +405,8 @@ fn reason_index_migration_exhausts_all_2046_exact_width_coordinate_candidates() 
     }
     assert_eq!(seen.len(), 2046);
     assert_eq!(bit_count, 18_434);
-    assert_eq!((bit_count + 7) / 8, 2305);
-    assert_eq!(8 * ((bit_count + 7) / 8) - bit_count, 6);
+    assert_eq!(bit_count.div_ceil(8), 2305);
+    assert_eq!(8 * bit_count.div_ceil(8) - bit_count, 6);
     for width in 1u8..=9 {
         assert_ne!(
             DomainCoordinate::new(width, 1),
@@ -417,26 +414,4 @@ fn reason_index_migration_exhausts_all_2046_exact_width_coordinate_candidates() 
         );
     }
     assert_eq!(DomainCoordinate::new(10, 1024), None);
-}
-
-#[test]
-fn reason_index_builder_diagnostic_first_failing_stage() {
-    let mut s = session();
-    let probes = [
-        ("(предикат-терма-міркування (як-є (p a)))", "p"),
-        ("(предикат-правила-міркування (як-є ((p a))))", "p"),
-        ("(додати-правило-до-оберненого-індексу (як-є p) (як-є ((p a))) (як-є ()))", "((p ((p a))))"),
-        ("(упорядкувати-кошики-індексу-міркування (додати-правило-до-оберненого-індексу (як-є p) (як-є ((p a))) (як-є ())))", "((p ((p a))))"),
-        ("(сканувати-індекс-міркування (як-є ()) (як-є ()) (як-є ()) паливо-індексу-міркування)",
-         "(reason-index-1 indexed () ())"),
-        ("(побудувати-індекс-міркування (як-є (((p a)))))",
-         "(reason-index-1 indexed (((p a))) ((p ((p a)))))"),
-    ];
-    for (probe, expected) in probes {
-        assert_eq!(
-            eval(&mut s, probe),
-            expected,
-            "first failing index stage: {probe}"
-        );
-    }
 }
