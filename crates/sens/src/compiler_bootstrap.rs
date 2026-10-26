@@ -13,7 +13,7 @@ use std::rc::Rc;
 ///
 /// Result (SENS shape, not Rust code):
 ///
-/// ```text
+/// ```ignore
 /// (width (bit0 bit1 ... bitN))
 /// ```
 ///
