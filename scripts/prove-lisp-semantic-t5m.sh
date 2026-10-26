@@ -16,9 +16,8 @@ mkdir -p "$evidence"
 
 # Materialize every reviewed T5M law-pair receipt before the native sweep.
 # These scripts transport reviewed bytes only; all law semantics are executed by SENS/Zig.
-python3 scripts/mint-jivanmukta-law-pairs.py
-python3 scripts/mint-moksha-law-pairs.py
-python3 scripts/mint-samadhi-law-pairs.py
+# Заборонені хостові генератори не запускаються.
+# Законні фізичні пари мають існувати до старту перевірки.
 for stem in \
   d5-numberp-nonnumber-law \
   d5-d12-zerop-law \
@@ -113,7 +112,7 @@ report_output_divergence() {
   printf 'T5M_OUTPUT_DIVERGENCE id=%s layer=carrier left=%s right=%s\n' \
     "$id" "$left_name" "$right_name" >&2
   wc -c "$left" "$right" >&2
-  sha256sum "$left" "$right" >&2
+  cmp -l "$left" "$right" | head -n 20 >&2 || true
   diff -u --label "$left_name" --label "$right_name" "$left" "$right" | head -n 40 >&2 || true
   fail "$id" carrier "$left_name-byte-exact-$right_name" divergent
 }
