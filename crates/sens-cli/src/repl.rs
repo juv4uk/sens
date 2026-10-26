@@ -1835,15 +1835,6 @@ fn render_repl_reply(value: &Value, language: PresentationLanguage) -> String {
     }
 }
 
-fn render_interaction_echo(line: &str, surface: ReplSurface) -> String {
-    match surface {
-        ReplSurface::Ukrainian | ReplSurface::UkrainianFull => {
-            format!("ВІДЛУННЯ {}", line.to_uppercase())
-        }
-        _ => format!("echo {line}"),
-    }
-}
-
 fn render_repl_pair(value: &Value, language: PresentationLanguage) -> String {
     let mut output = String::from("(");
     let mut current = value;
@@ -2126,21 +2117,6 @@ fn handle_meta_command(line: &str, state: &mut ReplState) -> bool {
     }
 }
 
-fn is_interaction_only_unresolved_name(line: &str, error: &str) -> bool {
-    let standalone_name = sens::parse_mixed_exact_domain(line)
-        .ok()
-        .is_some_and(|forms| {
-            forms.len() == 1
-                && matches!(
-                    forms[0].kind,
-                    ExprKind::Symbol(_) | ExprKind::DomainIdentity(DomainIdentity::D7(_))
-                )
-        });
-    let unresolved_name =
-        error.contains("unknown symbol") || error.contains("domain identity is not callable");
-    standalone_name && unresolved_name
-}
-
 pub(crate) fn run_repl(session: Session, initial_surface: ReplSurface, sens_loop: bool) {
     let mut state = match ReplState::new(session, initial_surface, sens_loop) {
         Ok(state) => state,
@@ -2209,13 +2185,8 @@ pub(crate) fn run_repl(session: Session, initial_surface: ReplSurface, sens_loop
                         );
                     }
                     Err(error) => {
-                        // Зберігаємо interaction policy для окремого невідомого імені;
-                        // усі форми оцінюються тільки після Zig T5M roundtrip.
-                        if is_interaction_only_unresolved_name(line, &error) {
-                            println!("{}", render_interaction_echo(line, state.surface));
-                        } else {
-                            eprintln!("Помилка REPL/T5M: {error}");
-                        }
+                        // Відмову нативного SENS не можна перетворювати на успішний echo хоста.
+                        eprintln!("Помилка REPL/T5M: {error}");
                     }
                 }
             }
@@ -2556,15 +2527,12 @@ mod tests {
     }
 
     #[test]
-    fn standalone_d7_text_identity_uses_repl_echo_without_granting_callability() {
-        let error =
-            "SENS binary evaluator: domain identity is not callable under its ratified law: D7";
-        assert!(is_interaction_only_unresolved_name("мама", error));
-        assert!(!is_interaction_only_unresolved_name("(мама)", error));
-        assert!(!is_interaction_only_unresolved_name(
-            "мама",
-            "unrelated error"
-        ));
+    fn repl_error_presentation_never_emits_successful_echo() {
+        // Хост перевіряє лише представлення відмови; семантику визначає SENS.
+        let diagnostic = "Помилка REPL/T5M: SENS відхилив форму";
+        assert!(diagnostic.starts_with("Помилка REPL/T5M: "));
+        assert!(!diagnostic.starts_with("echo "));
+        assert!(!diagnostic.starts_with("ВІДЛУННЯ "));
     }
 
     #[test]
