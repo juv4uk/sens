@@ -34,6 +34,7 @@ fn main() {
     println!("cargo:rerun-if-env-changed=ZIG");
     println!("cargo:rerun-if-env-changed=PATH");
     println!("cargo:rerun-if-env-changed=LOCALAPPDATA");
+    println!("cargo:rerun-if-env-changed=SENS_ZIG_PORTABLE_LINUX");
     // Explicit compatibility builds may compile the host but cannot load
     // SENS Guard sources. The Rust adapter below fails closed in that mode.
     if env::var_os("CARGO_FEATURE_ZIG_SOURCE").is_none() {
@@ -71,6 +72,7 @@ fn main() {
     let target_env = env::var("CARGO_CFG_TARGET_ENV").unwrap_or_default();
     let target_os = env::var("CARGO_CFG_TARGET_OS").unwrap_or_default();
     let target_arch = env::var("CARGO_CFG_TARGET_ARCH").expect("CARGO_CFG_TARGET_ARCH");
+    let portable_linux = env::var("SENS_ZIG_PORTABLE_LINUX").unwrap_or_default() == "1";
     // rustc resolves `static=sens_zig_guard_sources` to this MSVC archive name.
     // MinGW/Unix linkers use the conventional lib-prefixed .a archive.
     let archive_name = if target_env == "msvc" {
@@ -88,7 +90,16 @@ fn main() {
         .arg("ReleaseSafe")
         .arg("-fcompiler-rt")
         .arg("-lc");
-    if target_env == "msvc" {
+    if portable_linux {
+        assert_eq!(target_os, "linux", "portable Linux Zig target requested for non-Linux build");
+        assert_eq!(target_arch, "x86_64", "portable Linux Zig target is x86-64 only");
+        assert_eq!(target_env, "gnu", "portable Linux Zig target requires the GNU ABI");
+        command
+            .arg("-target")
+            .arg("x86_64-linux-gnu.2.35")
+            .arg("-mcpu")
+            .arg("baseline");
+    } else if target_env == "msvc" {
         command
             .arg("-target")
             .arg(format!("{target_arch}-windows-msvc"));
