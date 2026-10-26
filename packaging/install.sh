@@ -208,8 +208,7 @@ trap 'rm -f "$CLI_TEMP"' EXIT
 curl -fL --silent --show-error --connect-timeout 15 --max-time 120 \
     "$DOWNLOAD_URL" -o "$CLI_TEMP"
 test -s "$CLI_TEMP"
-# Не створюємо й не завантажуємо SHA-256 sidecar. Завантаження йде через HTTPS;
-# перед встановленням бінарник запускається лише для перевірки очікуваної версії.
+# Завантажуємо лише оригінальний бінарник через HTTPS і перевіряємо версію до встановлення.
 chmod 755 "$CLI_TEMP"
 # Не замінюємо попередній файл, якщо новий CLI навіть не запускається.
 CLI_VERSION="$("$CLI_TEMP" --version)"
