@@ -242,11 +242,11 @@ fn t5m_mint_request(args: &[String]) -> Option<Result<(&str, &str), &'static str
 
 // Явні Lisp-залежності SENS; жодного Python/JSON resolver.
 fn t5m_binding_paths(args: &[String]) -> Result<Vec<&str>, &'static str> {
-    if args.len() < 4 || (args.len() - 4) % 2 != 0 {
+    if args.len() < 4 || !(args.len() - 4).is_multiple_of(2) {
         return Err("expected zero or more --binding-source <source.lisp> pairs");
     }
     let mut paths = Vec::new();
-    for pair in args[4..].chunks_exact(2) {
+    for pair in args[4..].as_chunks::<2>().0 {
         if pair[0] != "--binding-source"
             || std::path::Path::new(&pair[1])
                 .extension()
@@ -272,7 +272,9 @@ fn read_t5m_binding_sources(paths: &[&str]) -> Result<Vec<String>, String> {
 
 /// Створити фізичний T5M та читабельні біти за одним SENS-reader/Zig
 /// roundtrip. Жодних Python-міграторів, JSON-квитанцій чи другого кодека.
-fn t5m_mint_pair_request(args: &[String]) -> Option<Result<(&str, &str, Vec<&str>), &'static str>> {
+type T5mMintPairRequest<'a> = Option<Result<(&'a str, &'a str, Vec<&'a str>), &'static str>>;
+
+fn t5m_mint_pair_request(args: &[String]) -> T5mMintPairRequest<'_> {
     if !args.iter().skip(1).any(|part| part == "--t5m-mint-pair") {
         return None;
     }
@@ -329,12 +331,14 @@ fn write_new_t5m_pair(path: &str, bytes: &[u8], view: &str) -> Result<(), String
     Ok(())
 }
 
+type T5mPairRequest<'a> = Option<Result<(&'a str, &'a str, Vec<&'a str>, bool), &'static str>>;
+
 /// Парне виконання дозволяє читати D24+ з реальних байтів Zig T5M,
 /// лише якщо український Lisp свідчить ТОЧНО ту саму доменну послідовність.
 /// Це не дозвіл трактувати довільний W24 за числову ідентичність.
 fn t5m_pair_request(
     args: &[String],
-) -> Option<Result<(&str, &str, Vec<&str>, bool), &'static str>> {
+) -> T5mPairRequest<'_> {
     if !args.iter().skip(1).any(|item| item == "--t5m-pair") {
         return None;
     }
@@ -388,10 +392,10 @@ fn t5m_pair_request(
 fn decode_physical_t5m_words(bytes: &[u8]) -> Result<Vec<sens::ExactDomainWord>, String> {
     #[cfg(feature = "zig-transport")]
     {
-        return zig_transport::decode_t5m_exact_words(bytes)?
+        zig_transport::decode_t5m_exact_words(bytes)?
             .into_iter()
             .map(|word| sens::ExactDomainWord::from_physical_width_bits(word.width, &word.bits))
-            .collect();
+            .collect()
     }
     #[cfg(not(feature = "zig-transport"))]
     {

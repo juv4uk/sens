@@ -346,11 +346,7 @@ fn draw_report(frame: &mut Frame, report: &BenchmarkReport) {
     ];
     for row in &report.rows {
         let p = row.percentiles;
-        let throughput = if p.p50 == 0 {
-            0
-        } else {
-            1_000_000_000u128 / p.p50
-        };
+        let throughput = 1_000_000_000u128.checked_div(p.p50).unwrap_or(0);
         lines.push(Line::from(format!(
             "{:<18} {:>9} {:>9} {:>9} {:>9}  {:<8}",
             row.name, p.p50, p.p95, p.p99, throughput, row.expected

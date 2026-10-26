@@ -344,7 +344,7 @@ fn append_t5m_expression_context(
             let spelling = value.to_string();
             let (numerator, denominator) = spelling
                 .split_once('/')
-                .map_or((spelling.as_str(), "1"), |parts| parts);
+                .unwrap_or((spelling.as_str(), "1"));
             let numerator = exact_integer_source_word(numerator)?;
             let denominator = exact_integer_source_word(denominator)?;
             let quotient = exact_d5_surface("частка")?;
@@ -565,12 +565,9 @@ fn collect_t5m_source_bindings(
     names: &mut Vec<(std::rc::Rc<str>, bool)>,
 ) {
     let ExprKind::List(items) = &expression.kind else {
-        match &expression.kind {
-            ExprKind::Pair(head, tail) => {
-                collect_t5m_source_bindings(source, head, names);
-                collect_t5m_source_bindings(source, tail, names);
-            }
-            _ => {}
+        if let ExprKind::Pair(head, tail) = &expression.kind {
+            collect_t5m_source_bindings(source, head, names);
+            collect_t5m_source_bindings(source, tail, names);
         }
         return;
     };
@@ -613,7 +610,7 @@ fn t5m_text7_surface_name(expression: &Expr, layout: sens::Text7Layout) -> Optio
         .iter()
         .map(|item| match &item.kind {
             ExprKind::DomainIdentity(DomainIdentity::D7(word)) => {
-                Some(word.word().packed_bits() as u8)
+                Some(word.word().packed_bits())
             }
             _ => None,
         })
@@ -645,15 +642,13 @@ fn project_repl_surface_expression_in_scope(
                 .iter()
                 .any(|candidate| candidate.as_ref() == name.as_str())
         {
-            if let Some(value) = session.environment.get(&name) {
-                if let Value::BinaryNumber(number) = &value {
-                    if number.numeric_domain_width() == Some(24) {
-                        return Ok(Expr {
-                            kind: ExprKind::BinaryNumber(number.clone()),
-                            span: expression.span,
-                        });
-                    }
-                }
+            if let Some(Value::BinaryNumber(number)) = session.environment.get(&name).as_ref()
+                && number.numeric_domain_width() == Some(24)
+            {
+                return Ok(Expr {
+                    kind: ExprKind::BinaryNumber(number.clone()),
+                    span: expression.span,
+                });
             }
         }
     }
@@ -731,7 +726,7 @@ fn project_repl_surface_expression_in_scope(
                 }
                 let mut projected = Vec::with_capacity(items.len());
                 projected.push(Expr {
-                    kind: ExprKind::DomainIdentity(DomainIdentity::from(identity)),
+                    kind: ExprKind::DomainIdentity(identity),
                     span: items[0].span,
                 });
                 if let Some(parameters) = parameters {
@@ -873,7 +868,7 @@ fn project_repl_surface_expression_in_scope(
     {
         if let Some(identity) = selected_surface_callable(surface, name)? {
             return Ok(Expr {
-                kind: ExprKind::DomainIdentity(DomainIdentity::from(identity)),
+                kind: ExprKind::DomainIdentity(identity),
                 span: expression.span,
             });
         }

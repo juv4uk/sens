@@ -191,11 +191,12 @@ fn find_entries<'a>(entries: &'a [SurfaceEntry], requested: &str) -> Vec<&'a Sur
 
 // Repeated lookups during a real T5M mint must be constant-time even for large
 // Lisp libraries; every entry remains owned by the exact Dn coordinate.
-static SURFACE_INDEX: OnceLock<Result<HashMap<(String, String), Option<String>>, String>> =
-    OnceLock::new();
+type SurfaceIndex = HashMap<(String, String), Option<String>>;
+
+static SURFACE_INDEX: OnceLock<Result<SurfaceIndex, String>> = OnceLock::new();
 static UKR_INDEX: OnceLock<Result<HashMap<String, String>, String>> = OnceLock::new();
 
-fn surface_index() -> Result<&'static HashMap<(String, String), Option<String>>, String> {
+fn surface_index() -> Result<&'static SurfaceIndex, String> {
     SURFACE_INDEX
         .get_or_init(|| {
             let mut index = HashMap::new();
