@@ -112,7 +112,7 @@ fn malformed_transport_and_invalid_d2_are_distinct_fail_closed_errors() {
         zig_transport::decode_t5m_words(&[243]),
         Err(_)
     ));
-    
+
     // Invalid D2 structure rejected at SENS execution level
     let words = sens::parse_binary_source_words("10 001")
         .unwrap()
