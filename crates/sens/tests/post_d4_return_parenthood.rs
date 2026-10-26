@@ -152,8 +152,8 @@ fn cps_compilability_changes_call_chain_protocol_and_is_not_local_parenthood() {
     // an explicit exit-continuation protocol that the source call chain lacked.
     const CPS_CAN_REPRODUCE_RETURN: bool = true;
     const CPS_PROVES_SAME_BASE_D4_PARENT: bool = false;
-    assert!(CPS_CAN_REPRODUCE_RETURN);
-    assert!(!CPS_PROVES_SAME_BASE_D4_PARENT);
+    const { assert!(CPS_CAN_REPRODUCE_RETURN); }
+    const { assert!(!CPS_PROVES_SAME_BASE_D4_PARENT); }
 }
 
 #[test]
@@ -165,8 +165,8 @@ fn go_and_return_have_different_structural_status() {
 
     const GO_LOCAL_STATE_MACHINE_DERIVED: bool = true;
     const RETURN_REQUIRES_NONLOCAL_EXIT_FACTOR: bool = true;
-    assert!(GO_LOCAL_STATE_MACHINE_DERIVED);
-    assert!(RETURN_REQUIRES_NONLOCAL_EXIT_FACTOR);
+    const { assert!(GO_LOCAL_STATE_MACHINE_DERIVED); }
+    const { assert!(RETURN_REQUIRES_NONLOCAL_EXIT_FACTOR); }
 }
 
 #[test]
@@ -185,7 +185,7 @@ fn prog_is_composite_not_evidence_for_a_single_resident() {
     assert_eq!(prog.return_factor, BaseOperation::DynamicExit);
 
     const PROG_SINGLE_RESIDENT_PROVED: bool = false;
-    assert!(!PROG_SINGLE_RESIDENT_PROVED);
+    const { assert!(!PROG_SINGLE_RESIDENT_PROVED); }
 }
 
 #[test]
@@ -207,8 +207,8 @@ fn no_parent_does_not_imply_width_root_or_coordinate() {
     const INDEPENDENT_ROOT_PROVED: bool = false;
     const COORDINATE_ALLOCATED: bool = false;
 
-    assert!(!SAME_BASE_D4_PARENT_FOUND);
-    assert!(!EXACT_WIDTH_KNOWN);
-    assert!(!INDEPENDENT_ROOT_PROVED);
-    assert!(!COORDINATE_ALLOCATED);
+    const { assert!(!SAME_BASE_D4_PARENT_FOUND); }
+    const { assert!(!EXACT_WIDTH_KNOWN); }
+    const { assert!(!INDEPENDENT_ROOT_PROVED); }
+    const { assert!(!COORDINATE_ALLOCATED); }
 }
