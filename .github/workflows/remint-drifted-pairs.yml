@@ -480,6 +480,15 @@ jobs:
             if bash scripts/refresh-verified-t5m-pair.sh "$f" target/debug/sens target/debug/sens-trit "${bs[@]}" "${expect_args[@]}" "${profile_args[@]}"; then
               ok=$((ok+1))
               printf '%s\n' "$f" >> "$RUNNER_TEMP/sens-remint-success.txt"
+              if [[ "$f" == "lib/core4.lisp" ]]; then
+                # Core4 is embedded into SENS at build time; dependent laws and F6
+                # must use the freshly reminted carrier, never the pre-remint binary.
+                echo "REMINT_REBUILD_CORE4_EMBEDDED"
+                if ! cargo build --locked -p sens-cli --bin sens --bin sens-trit --bin lisp-data-schema-guard --features benchmark-ast-visits; then
+                  echo "::error::REMINT_CORE4_EMBEDDED_REBUILD_FAILED" >&2
+                  exit 2
+                fi
+              fi
             else
               echo "SKIP_FAIL $f"; skip=$((skip+1))
               if [ -n "${GITHUB_STEP_SUMMARY:-}" ]; then
