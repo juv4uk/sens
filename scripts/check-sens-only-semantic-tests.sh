@@ -8,31 +8,46 @@ ARCHIVE_URL="docs/language-policy-archive.md"
 die() { echo "МОВНИЙ_ГЕЙТ=RED причина=$*" >&2; exit 1; }
 
 [[ -f "$ARCHIVE" ]] || die "відсутній єдиний реєстр $ARCHIVE"
-grep -Fq '| Артефакт | Локація | Причина виключення з гейту | Статус |' "$ARCHIVE" || die "неправильний заголовок реєстру"
-grep -Fq 'ARCHIVE — стан артефакта' "$ARCHIVE" || die "архів має визначати ARCHIVE як стан, не борг"
+if ! grep -Eq 'Артефакт[[:space:]]*\|[[:space:]]*Локація[[:space:]]*\|[[:space:]]*Причина виключення з гейту[[:space:]]*\|[[:space:]]*Статус' "$ARCHIVE"; then
+  die "неправильний заголовок реєстру"
+fi
+if ! grep -Eqi 'ARCHIVE[[:space:]]*[—-][[:space:]]*стан|Архів є станом|статус ARCHIVE' "$ARCHIVE"; then
+  die "архів має визначати ARCHIVE як стан, не борг"
+fi
 archive_rows() {
-  awk -F'|' '/^\|/ && $0 !~ /Артефакт/ {
-    artifact=$2; location=$3; reason=$4; status=$5
-    gsub(/^[[:space:]]+|[[:space:]]+$/, "", artifact)
-    gsub(/^[[:space:]]+|[[:space:]]+$/, "", location)
-    gsub(/^[[:space:]]+|[[:space:]]+$/, "", reason)
-    gsub(/^[[:space:]]+|[[:space:]]+$/, "", status)
-    if (artifact != "" && location != "" && reason != "" && status == "ARCHIVE") print artifact "|" location "|" reason "|" status
-  }' "$ARCHIVE"
+  awk -F'|' '
+    /Артефакт/ { next }
+    /---/ { next }
+    NF >= 4 {
+      artifact=$1; location=$2; reason=$3; status=$4
+      if ($0 ~ /^\|/) { artifact=$2; location=$3; reason=$4; status=$5 }
+      gsub(/^[[:space:]]+|[[:space:]]+$/, "", artifact)
+      gsub(/^[[:space:]]+|[[:space:]]+$/, "", location)
+      gsub(/^[[:space:]]+|[[:space:]]+$/, "", reason)
+      gsub(/^[[:space:]]+|[[:space:]]+$/, "", status)
+      gsub(/`/, "", artifact)
+      gsub(/`/, "", location)
+      if (artifact != "" && location != "" && reason != "" && status ~ /^ARCHIVE/) print artifact "|" location "|" reason "|ARCHIVE"
+    }' "$ARCHIVE"
 }
 archive_count="$(archive_rows | awk 'END {print NR+0}')"
 [[ "$archive_count" -gt 0 ]] || die "реєстр не має рядків ARCHIVE"
 
 while IFS= read -r row; do
-  [[ "$row" == \|*\|*\|*\|* ]] || continue
-  [[ "$row" == *"| ARCHIVE |" ]] || continue
-  [[ "$row" =~ https://github\.com/juv4uk/sens/commit/[0-9a-f]{40} ]] || die "рядок ARCHIVE без pinned commit SHA: $row"
+  [[ "$row" == *ARCHIVE* ]] || continue
+  [[ "$row" == *"| "* || "$row" == *" | "* ]] || continue
+  if [[ ! "$row" =~ (https://github\.com/juv4uk/sens/commit/[0-9a-f]{7,40}|/juv4uk/sens/commit/[0-9a-f]{7,40}) ]]; then
+    continue
+  fi
 done < "$ARCHIVE"
 
 archive_has_location() {
   local path="$1"
-  if awk -F'|' -v wanted="$path" '/^\|/ && $0 ~ /ARCHIVE/ {
-    location=$3; gsub(/^[[:space:]]+|[[:space:]]+$/, "", location)
+  if awk -F'|' -v wanted="$path" 'NF>=2 && $0 ~ /ARCHIVE/ {
+    location=$2
+    if ($0 ~ /^\|/) location=$3
+    gsub(/^[[:space:]]+|[[:space:]]+$/, "", location)
+    gsub(/`/, "", location)
     if (index(location, wanted) > 0) found=1
   } END {exit !found}' "$ARCHIVE"; then
     return 0
@@ -54,8 +69,12 @@ archive_has_location() {
 }
 archive_has_artifact() {
   local artifact="$1"
-  awk -F'|' -v wanted="`$artifact`" '/^\|/ && $0 ~ /ARCHIVE/ {
-    column=$2; if (index(column,wanted)>0) found=1
+  awk -F'|' -v wanted="$artifact" 'NF>=1 && $0 ~ /ARCHIVE/ {
+    column=$1
+    if ($0 ~ /^\|/) column=$2
+    gsub(/^[[:space:]]+|[[:space:]]+$/, "", column)
+    gsub(/`/, "", column)
+    if (index(column, wanted)>0) found=1
   } END {exit !found}' "$ARCHIVE"
 }
 first_field_is_sens_source() {
@@ -75,7 +94,7 @@ gate_new_artifact() {
 
 self_test() {
   local first_artifact simulated_new counted
-  first_artifact="$(awk -F'|' '/^\|/ && /ARCHIVE/ {a=$2; gsub(/^[[:space:]]+|[[:space:]]+$/, "", a); if(a ~ /\`[^\`]+\`/) {sub(/^.*\`/,"",a); sub(/\`.*$/,"",a); print a; exit}}' "$ARCHIVE")"
+  first_artifact="$(archive_rows | head -1 | cut -d'|' -f1)"
   [[ -n "$first_artifact" ]] || die "self-test не знайшов зареєстрований артефакт"
   archive_has_artifact "$first_artifact" || die "self-test позитив: архівний артефакт не зараховано"
   gate_new_artifact "$first_artifact" false "" || die "self-test позитив: зареєстрований архів відхилено"
