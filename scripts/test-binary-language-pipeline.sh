@@ -19,7 +19,11 @@ if [[ -x "$cli" ]]; then
     tests/semantic/твердження-самотест-law.lisp
   do
     if [[ -f "$law" ]]; then
-      out="$("$cli" "$law" 2>/dev/null || true)"
+      if [[ "$law" == "tests/semantic/твердження-самотест-law.lisp" || "$law" == "tests/semantic/твердження-негативні-law.lisp" ]]; then
+        out="$("$cli" --t5m-files lib/твердження.lisp "$law" 2>/dev/null || true)"
+      else
+        out="$("$cli" "$law" 2>/dev/null || true)"
+      fi
       if [[ "$out" == "1" ]]; then
         echo "SENS_OK $law"
       else

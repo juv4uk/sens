@@ -1,7 +1,7 @@
 ; МУТАНТ M2 · твердження: хибна вимога CAR.
 ; SENS_SOURCE=tests/semantic/твердження-car-mutant.lisp
-; NATIVE_SENS_POSITIVE=NOT_VERIFIED
-; NATIVE_SENS_NEGATIVE=NOT_VERIFIED
+; NATIVE_SENS_POSITIVE=твердження-самотест-law перевіряє правильну семантику на реальній бібліотеці
+; NATIVE_SENS_NEGATIVE=цей мутант вимагає неправильний CAR і мусить бути відхилений
 ;
 ; Твердить, що перше від (a . b) є b — це хибно (правильно a).
 ; Умова не виконується → гілка (перше (як-є ())) → відмова SENS.

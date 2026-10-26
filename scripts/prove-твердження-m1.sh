@@ -10,6 +10,7 @@ fi
 cli="${1:-target/debug/sens}"
 id=твердження-m1
 law=tests/semantic/твердження-самотест-law.lisp
+negative=tests/semantic/твердження-негативні-law.lisp
 mutant=tests/semantic/твердження-car-mutant.lisp
 reproduce="bash scripts/prove-твердження-m1.sh $cli"
 if [[ ! -x "$cli" ]]; then
@@ -19,10 +20,11 @@ fi
 tmp="$(mktemp -d)"
 trap 'rm -rf "$tmp"' EXIT
 cp "$law" "$tmp/positive.lisp"
+cp "$negative" "$tmp/negative.lisp"
 cp "$mutant" "$tmp/mutant.lisp"
 printf 'ВИКОНАВЕЦЬ_SENS id=%s path=%s version=%s\n' "$id" "$cli" "$("$cli" --version 2>/dev/null || echo unknown)"
 printf '1\n' > "$tmp/expected"
-if ! "$cli" "$tmp/positive.lisp" > "$tmp/actual" 2> "$tmp/positive.err"; then
+if ! "$cli" --t5m-files lib/твердження.lisp "$tmp/positive.lisp" > "$tmp/actual" 2> "$tmp/positive.err"; then
   printf 'REGRESSION id=%s layer=eval fixture=%s actual=execution-error\n' "$id" "$law" >&2
   cat "$tmp/positive.err" >&2
   exit 1
@@ -32,6 +34,17 @@ if ! cmp -s "$tmp/expected" "$tmp/actual"; then
   printf 'actual-bytes: '; od -An -tx1 "$tmp/actual" | head -2 >&2
   exit 1
 fi
+printf '1\n' > "$tmp/expected-negative-law"
+if ! "$cli" --t5m-files lib/твердження.lisp "$tmp/negative.lisp" > "$tmp/negative.out" 2> "$tmp/negative.err"; then
+  printf 'REGRESSION id=%s-negative layer=eval fixture=%s actual=execution-error\n' "$id" "$negative" >&2
+  cat "$tmp/negative.err" >&2
+  exit 1
+fi
+if ! cmp -s "$tmp/expected-negative-law" "$tmp/negative.out"; then
+  printf 'REGRESSION id=%s-negative layer=eval fixture=%s expected=YES actual=wrong-verdict\n' "$id" "$negative" >&2
+  exit 1
+fi
+printf 'НЕГАТИВНИЙ_СВІДОК id=%s-negative fixture=%s verdict=yes\n' "$id" "$negative"
 printf '0\n' > "$tmp/expected-mutant"
 if ! "$cli" "$tmp/mutant.lisp" > "$tmp/mutant.out" 2> "$tmp/mutant.err"; then
   # відмова виконання мутанта також припустима як негативний свідок

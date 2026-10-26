@@ -19,7 +19,11 @@ fn load(session: &mut Session, path: &str, source: &str) {
 fn m1_твердження_самотест_виконується() {
     let mut session = Session::bare();
     load_core_library(&mut session).expect("ініціалізація SENS");
-    // Law автономний (визначення всередині), core достатньо.
+    load(
+        &mut session,
+        "lib/твердження.lisp",
+        include_str!("../../../lib/твердження.lisp"),
+    );
     eval_program(
         include_str!("../../../tests/semantic/твердження-самотест-law.lisp"),
         &mut session,
@@ -31,6 +35,11 @@ fn m1_твердження_самотест_виконується() {
 fn m2_негативні_law_виконується() {
     let mut session = Session::bare();
     load_core_library(&mut session).expect("ініціалізація SENS");
+    load(
+        &mut session,
+        "lib/твердження.lisp",
+        include_str!("../../../lib/твердження.lisp"),
+    );
     eval_program(
         include_str!("../../../tests/semantic/твердження-негативні-law.lisp"),
         &mut session,
