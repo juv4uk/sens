@@ -11,14 +11,25 @@ while (($#)); do
   esac
 done
 cd "$root"
-# Тритова програма та шлях джерела є ідентичністю; T5M-носій не створює SHA-256 квитанцій.
-canonical_carrier="scripts/execute_changed_lisp_t5m.sh"
-if [[ -f "$canonical_carrier" ]]; then
-  if grep -qF sha256sum "$canonical_carrier" || grep -qF sha256-hex "$canonical_carrier" || grep -qF .sha256 "$canonical_carrier"; then
-    echo "LANGUAGE_POLICY_ARCHIVE=FAIL canonical_SENS_carrier_creates_hash_receipt" >&2
+# Ідентичність — джерельний шлях плюс точні байти, а не digest.
+# Ці файли утворюють активний SENS/Zig T5M path; жоден з них не має
+# створювати SHA-256 квитанції.
+digest_free_paths=(
+  ".github/workflows/ci.yml"
+  ".github/workflows/ci-heavy.yml"
+  ".github/workflows/release-preflight.yml"
+  "scripts/execute_changed_lisp_t5m.sh"
+  "scripts/refresh-verified-t5m-pair.sh"
+  "scripts/refresh-executed-t5m-pair.sh"
+  "benchmarks/contest-uk/run-native.sh"
+)
+for path in "${digest_free_paths[@]}"; do
+  [[ -f "$path" ]] || continue
+  if grep -qF sha256sum "$path" || grep -qF sha256-hex "$path" || grep -qF .sha256 "$path"; then
+    echo "LANGUAGE_POLICY_ARCHIVE=FAIL digest_creation_forbidden path=$path" >&2
     exit 1
   fi
-fi
+done
 registry="docs/language-policy-archive.md"
 if [[ ! -f "$registry" ]]; then
   echo "LANGUAGE_POLICY_ARCHIVE=FAIL missing_registry=$registry"
