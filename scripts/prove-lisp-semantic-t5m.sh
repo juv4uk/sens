@@ -1949,9 +1949,7 @@ if [[ -s "$d11_bench_evidence/program.sens" &&
       -f "$d11_bench_evidence/physical.out" ]] &&
    grep -Fq 'id=d11-families-benchmark-positive source=' "$evidence/results.txt"; then
   d11_bench_samples="$evidence/d11-families-physical-wall-us.tsv"
-  source_sha256="$(sha256sum "$d11_families_law" | cut -d' ' -f1)"
-  physical_sha256="$(sha256sum "$d11_bench_evidence/program.sens" | cut -d' ' -f1)"
-  printf 'sample\telapsed_us\tstdout_sha256\tsource_sha256\tphysical_sha256\n' > "$d11_bench_samples"
+  printf 'sample\telapsed_us\n' > "$d11_bench_samples"
   for iteration in {1..11}; do
     start_us="${EPOCHREALTIME/./}"
     if ! timeout 45s "$sens" "$d11_bench_evidence/program.sens" > "$evidence/d11-families-physical-$iteration.out" 2>"$evidence/d11-families-physical-$iteration.err"; then
@@ -1964,10 +1962,7 @@ if [[ -s "$d11_bench_evidence/program.sens" &&
       echo "::error title=SENS D11 benchmark::REGRESSION layer=output-parity iteration=$iteration expected=byte-exact-SENS actual=divergent" >&2
       exit 1
     fi
-    sample_sha256="$(sha256sum "$evidence/d11-families-physical-$iteration.out" | cut -d' ' -f1)"
-    printf '%s\t%s\t%s\t%s\t%s\n' \
-      "$iteration" "$((end_us - start_us))" \
-      "$sample_sha256" "$source_sha256" "$physical_sha256" >> "$d11_bench_samples"
+    printf '%s\t%s\n' "$iteration" "$((end_us - start_us))" >> "$d11_bench_samples"
   done
   mapfile -t sorted_wall < <(tail -n +2 "$d11_bench_samples" | cut -f2 | sort -n)
   if (( ${#sorted_wall[@]} != 11 )); then
@@ -1978,8 +1973,8 @@ if [[ -s "$d11_bench_evidence/program.sens" &&
   physical_bytes="$(wc -c < "$d11_bench_evidence/program.sens" | tr -d '[:space:]')"
   printf 'p50_us\t%s\np90_us\t%s\nmin_us\t%s\nmax_us\t%s\nsamples\t11\nsource_bytes\t%s\nphysical_bytes\t%s\nsource_sha256\t%s\nphysical_sha256\t%s\n' \
     "${sorted_wall[5]}" "${sorted_wall[9]}" "${sorted_wall[0]}" "${sorted_wall[10]}" \
-    "$source_bytes" "$physical_bytes" "$source_sha256" "$physical_sha256" > "$evidence/d11-families-benchmark-metrics.tsv"
-  echo "::notice title=SENS D11 physical benchmark::MEASURED p50_us=${sorted_wall[5]} p90_us=${sorted_wall[9]} min_us=${sorted_wall[0]} max_us=${sorted_wall[10]} source_bytes=$source_bytes physical_bytes=$physical_bytes samples=11 native=SENS semantic=D1:1 verified=YES source_sha256=$source_sha256 physical_sha256=$physical_sha256 scope=whole-process"
+    "$source_bytes" "$physical_bytes" > "$evidence/d11-families-benchmark-metrics.tsv"
+  echo "::notice title=SENS D11 physical benchmark::MEASURED p50_us=${sorted_wall[5]} p90_us=${sorted_wall[9]} min_us=${sorted_wall[0]} max_us=${sorted_wall[10]} source_bytes=$source_bytes physical_bytes=$physical_bytes samples=11 native=SENS semantic=D1:1 verified=YES scope=whole-process"
   if (( sorted_wall[5] > 0 && sorted_wall[9] > sorted_wall[5] * 2 )); then
     echo "::warning title=SENS D11 physical benchmark::HIGH_JITTER p50_us=${sorted_wall[5]} p90_us=${sorted_wall[9]} ratio_gt_2=true shared_runner=true" >&2
   fi
