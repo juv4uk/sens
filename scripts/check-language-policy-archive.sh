@@ -54,7 +54,8 @@ while IFS= read -r line || [[ -n "$line" ]]; do
     bad=1
     continue
   fi
-  if [[ ! "$reason" =~ (/juv4uk/sens/commit/[0-9a-f]{7,40}|https://github\.com/juv4uk/sens/commit/[0-9a-f]{7,40}) ]]; then
+  commit_link_re='(/juv4uk/sens/commit/[0-9a-f]{7,40}|https://github\.com/juv4uk/sens/commit/[0-9a-f]{7,40})'
+  if [[ ! "$reason" =~ $commit_link_re ]]; then
     echo "LANGUAGE_POLICY_ARCHIVE=FAIL missing_commit_link artifact=$artifact"
     bad=1
   fi
