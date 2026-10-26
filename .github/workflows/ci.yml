@@ -52,6 +52,9 @@ jobs:
       - name: Перевірити межу власності мовних тестів
         shell: bash
         run: bash scripts/check-sens-only-semantic-tests.sh
+      - name: Перевірити позитивний і негативний свідки архівного гейту
+        shell: bash
+        run: bash scripts/check-sens-only-semantic-tests.sh --self-test
       - name: Швидкий охоронець host debt
         shell: bash
         run: bash scripts/ensure-host-debt0.sh
