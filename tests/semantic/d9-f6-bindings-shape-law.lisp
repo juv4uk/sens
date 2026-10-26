@@ -1,3 +1,6 @@
+; SENS_SOURCE=lib/lisp-fs.lisp
+; NATIVE_SENS_POSITIVE=NOT_VERIFIED
+; NATIVE_SENS_NEGATIVE=NOT_VERIFIED
 ; D9/F6: кожне зв'язування — пара, а не довільне значення D1.
 ; Багатосимвольний D7-носій сам є D3-парою, тому не свідчить про атомність.
 ; Виявити D1-запис після коректної пари та неправильний D1-хвіст.
