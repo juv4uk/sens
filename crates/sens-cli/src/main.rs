@@ -456,7 +456,7 @@ fn eval_physical_t5_with_benchmark_metrics(
     let ast_nodes = program.forms().iter().map(count_physical_ast_nodes).sum();
     let mut pure = Session::bare();
     if load_core4 {
-        bootstrap_core(&mut pure, CliCore::Core4)?;
+        bootstrap_core(&mut pure, CliCore::Core4).map_err(|error| error.to_string())?;
     }
     sens::install_ratified_d5_macro_mechanism(&pure);
     let (result, eval_visits) = program
