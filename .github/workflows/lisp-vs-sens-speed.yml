@@ -18,7 +18,14 @@ on:
 
 jobs:
   speed:
+    if: false # Python-driven benchmark harness is excluded; no timing result is asserted.
     runs-on: ubuntu-latest
+
+  policy-exclusion:
+    name: Python benchmark excluded (NOT_VERIFIED)
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "PYTHON_BENCHMARKS=EXCLUDED_BY_LANGUAGE_POLICY native_equivalent=NOT_VERIFIED"
     steps:
       - uses: actions/checkout@v4
         with:
