@@ -202,7 +202,7 @@ LEGACY_TARGET="${INSTALL_DIR}/my-lisp"
 # Оновлюємо саме користувацьку копію, незалежно від старих CLI у PATH.
 # Тимчасовий файл поруч із ціллю дозволяє замінити її одним rename.
 echo "==> Завантаження sens (${ASSET_NAME})..."
-DOWNLOAD_URL="https://github.com/juv4uk/sens/releases/download/l0.42.1/${ASSET_NAME}"
+DOWNLOAD_URL="https://github.com/juv4uk/sens/releases/download/s0.42.1/${ASSET_NAME}"
 CLI_TEMP="$(mktemp "${INSTALL_DIR}/.sens.XXXXXX")"
 trap 'rm -f "$CLI_TEMP"' EXIT
 curl -fL --silent --show-error --connect-timeout 15 --max-time 120 \

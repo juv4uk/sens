@@ -8,7 +8,7 @@ Checks that:
   * every release crate Cargo.toml package.version equals EXPECTED
   * Cargo.lock has exactly one local package for each release crate at EXPECTED
   * guix.scm (version "…") equals EXPECTED
-  * packaging/install.sh embeds EXPECTED and tag l{EXPECTED}
+  * packaging/install.sh embeds EXPECTED and tag s{EXPECTED}
   * scripts/release.lisp mentions EXPECTED as the required release version
 
 Drift fails closed. Absence of a required path fails closed.
@@ -24,7 +24,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 EXPECTED = "0.42.1"
-TAG = f"l{EXPECTED}"
+TAG = f"s{EXPECTED}"
 
 RELEASE_CRATES = (
     "sens",
@@ -141,7 +141,7 @@ def install_surfaces() -> list[str]:
         if not re.search(pattern, text):
             raise AlignmentBlocked(f"packaging/install.sh: missing {label}")
         found.append(label)
-    for bad in re.findall(r"/releases/download/(l[0-9]+\.[0-9]+\.[0-9]+)/", text):
+    for bad in re.findall(r"/releases/download/(s[0-9]+\.[0-9]+\.[0-9]+)/", text):
         if bad != TAG:
             raise AlignmentBlocked(f"packaging/install.sh: unexpected tag {bad}")
     return found

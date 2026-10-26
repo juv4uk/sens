@@ -1,10 +1,10 @@
 name: Release
 
-# Реліз виконується на незмінному тегу l<version>; ручний запуск лишається
+# Реліз виконується на незмінному тегу s<version>; ручний запуск лишається
 # доступним лише як явна дія власника з уже створеного тегу.
 on:
   push:
-    tags: ['l*']
+    tags: ['s*']
   workflow_dispatch:
 
 permissions:
@@ -269,7 +269,7 @@ jobs:
       - name: Build MSI
         shell: pwsh
         run: |
-          $VERSION = $env:GITHUB_REF_NAME -replace '^l',''
+          $VERSION = $env:GITHUB_REF_NAME -replace '^s',''
           if ($VERSION -notmatch '^\d+\.\d+\.\d+$') { throw "cannot parse version from tag '$env:GITHUB_REF_NAME'" }
           $binDir = (Resolve-Path -LiteralPath "target/release").Path
           $sensExe = Join-Path $binDir "sens.exe"

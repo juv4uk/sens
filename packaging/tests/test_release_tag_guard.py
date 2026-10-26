@@ -24,21 +24,21 @@ class ReleaseTagGuardTest(unittest.TestCase):
         )
 
     def test_exact_tag_accepted(self):
-        self.assertEqual(verify_release_tag("l0.42.0", self.root), "0.42.0")
+        self.assertEqual(verify_release_tag("s0.42.0", self.root), "0.42.0")
 
     def test_other_tag_rejected(self):
         with self.assertRaisesRegex(ValueError, "RELEASE_BLOCKED"):
-            verify_release_tag("l0.41.0", self.root)
+            verify_release_tag("s0.41.0", self.root)
 
     def test_malformed_tag_rejected(self):
-        for tag in ("v0.42.0", "l0.42", "l00.42.0", "l0.42.0-dev", ""):
+        for tag in ("v0.42.0", "l0.42.0", "s0.42", "s00.42.0", "s0.42.0-dev", ""):
             with self.subTest(tag=tag), self.assertRaisesRegex(ValueError, "RELEASE_BLOCKED"):
                 verify_release_tag(tag, self.root)
 
     def test_python_optimized_does_not_bypass_negative_guard(self):
         script = ROOT / "scripts" / "verify_release_tag.py"
         result = subprocess.run(
-            [sys.executable, "-O", str(script), "l999.999.999"],
+            [sys.executable, "-O", str(script), "s999.999.999"],
             capture_output=True, text=True, check=False,
         )
         self.assertNotEqual(result.returncode, 0)
@@ -50,7 +50,7 @@ class ReleaseTagGuardTest(unittest.TestCase):
         )
         script = ROOT / "scripts" / "verify_release_tag.py"
         result = subprocess.run(
-            [sys.executable, "-O", str(script), "l" + current["package"]["version"]],
+            [sys.executable, "-O", str(script), "s" + current["package"]["version"]],
             capture_output=True, text=True, check=False,
         )
         self.assertEqual(result.returncode, 0, result.stderr)

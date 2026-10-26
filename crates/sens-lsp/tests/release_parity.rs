@@ -68,7 +68,7 @@ fn all_canonical_crates_share_one_release_version() {
 // Native replacement for scripts/check-release-version-alignment.py.
 // This is packaging provenance only: it grants no semantic or release GO.
 const RELEASE_EXPECTED_VERSION: &str = "0.42.1";
-const RELEASE_EXPECTED_TAG: &str = "l0.42.1";
+const RELEASE_EXPECTED_TAG: &str = "s0.42.1";
 const RELEASE_CRATES: &[&str] = &[
     "sens",
     "sens-cli",
@@ -254,7 +254,7 @@ fn verify_release_version_surfaces(root: &std::path::Path) -> Result<(), String>
         let Some((tag, next)) = tail.split_once('/') else {
             break;
         };
-        if tag.starts_with('l') && tag.bytes().filter(|b| *b == b'.').count() == 2
+        if tag.starts_with('s') && tag.bytes().filter(|b| *b == b'.').count() == 2
             && tag != RELEASE_EXPECTED_TAG
         {
             return Err(format!("installer contains unexpected release tag {tag}"));

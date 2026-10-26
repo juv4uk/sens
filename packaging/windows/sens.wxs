@@ -3,7 +3,7 @@
   Built by .github/workflows/release.yml with ProductVersion and BinDir.
   Installs sens.exe as the primary CLI and my-lisp.exe as the compatibility
   surface from the same sens-cli build. The historical UpgradeCode is
-  deliberately retained so l0.42+ upgrades the earlier my-lisp-branded MSI.
+  deliberately retained so s0.42+ upgrades the earlier my-lisp-branded MSI.
 -->
 <Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
 

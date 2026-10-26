@@ -30,8 +30,8 @@ class ReleaseVersionAlignmentTests(unittest.TestCase):
         self.assertEqual(report["expected"], "0.42.1")
         self.assertEqual(len(report["crates"]), 7)
 
-    def test_expected_tag_is_l_prefix(self) -> None:
-        self.assertEqual(self.mod.TAG, "l0.42.1")
+    def test_expected_tag_is_s_prefix(self) -> None:
+        self.assertEqual(self.mod.TAG, "s0.42.1")
 
     def test_release_crates_list_is_stable(self) -> None:
         self.assertIn("sens-cli", self.mod.RELEASE_CRATES)

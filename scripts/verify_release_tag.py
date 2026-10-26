@@ -11,11 +11,11 @@ from pathlib import Path
 
 
 def verify_release_tag(tag: str, root: Path) -> str:
-    if re.fullmatch(r"l(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)", tag) is None:
+    if re.fullmatch(r"s(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)", tag) is None:
         raise ValueError(f"RELEASE_BLOCKED: invalid release tag {tag!r}")
     manifest = root / "crates" / "sens-cli" / "Cargo.toml"
     version = tomllib.loads(manifest.read_text(encoding="utf-8"))["package"]["version"]
-    if tag != f"l{version}":
+    if tag != f"s{version}":
         raise ValueError(
             f"RELEASE_BLOCKED: tag {tag} does not match sens-cli package version {version}"
         )

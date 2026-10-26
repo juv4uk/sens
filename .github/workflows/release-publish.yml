@@ -24,7 +24,7 @@ jobs:
         run: |
           set -euo pipefail
           test "$GITHUB_REF_TYPE" = "tag"
-          test "$GITHUB_REF_NAME" = "l$(python3 -c 'import pathlib,tomllib; print(tomllib.loads(pathlib.Path("crates/sens-cli/Cargo.toml").read_text())["package"]["version"])')"
+          test "$GITHUB_REF_NAME" = "s$(python3 -c 'import pathlib,tomllib; print(tomllib.loads(pathlib.Path("crates/sens-cli/Cargo.toml").read_text())["package"]["version"])')"
           test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
           if [[ "${OWNER_OVERRIDE:-0}" == "1" ]]; then
             echo "RELEASE_OWNER_OVERRIDE=1: tag pinned at $GITHUB_SHA; current-main equality is UNVERIFIED"

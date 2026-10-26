@@ -171,7 +171,7 @@ class ReleasePublicationGateTest(unittest.TestCase):
     def test_tag_release_delegates_to_sha_pinned_publisher(self):
         """Tagged entry delegates publication only after all asset jobs finish."""
         self.assertIn(
-            "on:\n  push:\n    tags: ['l*']\n  workflow_dispatch:\n",
+            "on:\n  push:\n    tags: ['s*']\n  workflow_dispatch:\n",
             self.entry_source,
         )
         require_reusable_publish_permission(self.entry_source)
@@ -264,7 +264,7 @@ class ReleasePublicationGateTest(unittest.TestCase):
         self.assertIsNotNone(spec.loader)
         module = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(module)
-        tag, sha = "l0.42.0", "a" * 40
+        tag, sha = "s0.42.0", "a" * 40
 
         with tempfile.TemporaryDirectory() as tmp:
             staging = Path(tmp) / "staged"
