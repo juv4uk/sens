@@ -982,6 +982,7 @@ mod install_tests {
         let installed = sens::installed_capabilities();
         for name in [
             "clock-mono-raw",
+            "read-energy-uj",
             "read-dir",
             "read-file-bytes",
             "читати-сирий-текст-файла",
@@ -1002,6 +1003,50 @@ mod install_tests {
         ] {
             assert!(installed.iter().any(|n| n == name), "{name} not registered");
         }
+    }
+
+    #[test]
+    fn energy_capability_is_registered_and_rejects_wrong_arity_before_sysfs() {
+        super::install();
+        assert!(
+            sens::installed_capabilities().iter().any(|name| name == "read-energy-uj"),
+            "read-energy-uj must be installed as a host capability"
+        );
+        let mut session = sens::Session::default();
+        let error = sens::eval_program("(read-energy-uj (як-є ()))", &mut session)
+            .expect_err("extra argument must fail before touching powercap sysfs");
+        assert_eq!(error.kind, ErrorKind::Arity);
+        assert!(
+            format!("{error:?}").contains("read-energy-uj expects exactly zero arguments"),
+            "unexpected arity rejection: {error:?}"
+        );
+    }
+
+    #[test]
+    fn benchmark_energy_laws_are_fail_closed_and_keep_package_dram_pair() {
+        let mut session = sens::Session::default();
+        sens::load_core_library(&mut session).expect("Core4 SENS must load");
+        sens::eval_program(include_str!("../../../lib/бенчмарк.lisp"), &mut session)
+            .expect("the SENS benchmark library must load");
+        let result = sens::eval_program(
+            "(список
+               (хибне? (енергія-пара-не-спадає? (як-є ()) (як-є ())))
+               (однакові?
+                 (енергія-на-тисячу-форм (як-є ()) (як-є ()) число-нуль)
+                 (як-є invalid-energy-sample))
+               (однакові?
+                 (медіана-пари-енергії (як-є ()))
+                 (як-є invalid-energy-samples))
+               (однакові?
+                 (медіана-пари-енергії
+                   (список
+                     (список (як-є valid) число-нуль число-один)
+                     (список (як-є valid) число-один число-нуль)))
+                 (список число-нуль число-нуль)))",
+            &mut session,
+        )
+        .expect("energy monotonic, negative, and median laws must execute in SENS");
+        assert_eq!(result.value.to_string(), "(1 1 1 1)");
     }
 
     #[test]
