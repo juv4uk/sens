@@ -528,9 +528,9 @@ run_case() {
 assert_library_law="$evidence/assertion-library-law-complete.lisp"
 assert_library_mutant="$evidence/assertion-library-mutant-complete.lisp"
 assert_library_bad_tail="$evidence/assertion-library-bad-tail-complete.lisp"
-cat -- tests/semantic/assertion-library.lisp tests/semantic/assertion-library-law.lisp > "$assert_library_law"
-cat -- tests/semantic/assertion-library.lisp tests/semantic/assertion-library-mutant.lisp > "$assert_library_mutant"
-cat -- tests/semantic/assertion-library.lisp tests/semantic/assertion-library-bad-tail-negative.lisp > "$assert_library_bad_tail"
+cat -- lib/твердження.lisp tests/semantic/assertion-library-law.lisp > "$assert_library_law"
+cat -- lib/твердження.lisp tests/semantic/assertion-library-mutant.lisp > "$assert_library_mutant"
+cat -- lib/твердження.lisp tests/semantic/assertion-library-bad-tail-negative.lisp > "$assert_library_bad_tail"
 run_case run_law assertion-library-self-calibration "$assert_library_law" 1 core4
 run_case run_law assertion-library-self-calibration-mutant "$assert_library_mutant" 0 core4
 run_case run_error_rejection assertion-library-improper-tail "$assert_library_bad_tail" Type 'car expects a non-empty list' core4

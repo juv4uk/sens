@@ -1406,6 +1406,29 @@ run_native_t5m_program() {
         return
       fi
     fi
+    if [[ "$file" == "tests/semantic/assertion-library-law.lisp" ||
+          "$file" == "tests/semantic/assertion-library-mutant.lisp" ||
+          "$file" == "tests/semantic/assertion-library-bad-tail-negative.lisp" ]]; then
+      local assertion_full_source="$dir/assertion-library-full.lisp"
+      standalone_physical="$dir/assertion-library-full.sens"
+      if ! cat -- lib/твердження.lisp "$file" > "$assertion_full_source" ||
+         ! timeout "$native_timeout" "$binary" --t5m-mint "$assertion_full_source" "$standalone_physical" >"$dir/assertion-mint.stdout" 2>"$dir/assertion-mint.stderr" ||
+         ! timeout "$native_timeout" "$native_open" open "$standalone_physical" >"${standalone_physical%.sens}" 2>"$dir/assertion-open.stderr" ||
+         ! timeout "$native_timeout" "$native_open" verify-view "$standalone_physical" >"$dir/assertion-verify.stdout" 2>"$dir/assertion-verify.stderr"; then
+        echo "::error::SENS_ASSERTION_LIBRARY_STANDALONE_MINT_FAILED source=$file" >&2
+        mark_file_failed
+        return
+      fi
+      if [[ "$file" != tests/semantic/assertion-library-bad-tail-negative.lisp ]]; then
+        local assertion_expected_d1=1
+        [[ "$file" != *-mutant.lisp ]] || assertion_expected_d1=0
+        if [[ "$(cat "$dir/native-paired.stdout")" != "$assertion_expected_d1" ]]; then
+          echo "::error::SENS_ASSERTION_LIBRARY_WRONG_D1 source=$file expected=$assertion_expected_d1 actual=$(cat "$dir/native-paired.stdout")" >&2
+          mark_file_failed
+          return
+        fi
+      fi
+    fi
     if timeout "$native_timeout" "${standalone_runtime[@]}" "$standalone_physical" \
         >"$dir/native-standalone.stdout" 2>"$dir/native-standalone.stderr"; then
       if ! cmp -s "$dir/native-standalone.stdout" "$dir/native-paired.stdout"; then
@@ -1571,6 +1594,10 @@ while IFS= read -r file || [[ -n "$file" ]]; do
   elif [[ "$file" == "lib/forward.lisp" ]]; then
     # Чинний D9 уніфікатор визначено в українському Lisp, не в самій таблиці.
     binding_sources=(--binding-source lib/unify.lisp)
+  elif [[ "$file" == "tests/semantic/assertion-library-law.lisp" ||
+          "$file" == "tests/semantic/assertion-library-mutant.lisp" ||
+          "$file" == "tests/semantic/assertion-library-bad-tail-negative.lisp" ]]; then
+    binding_sources=(--binding-source lib/твердження.lisp)
   elif [[ "$file" == "tests/semantic/result-status-d7-label-law.lisp" ||
           "$file" == "tests/semantic/result-status-d7-label-mutant.lisp" ||
           "$file" == "tests/semantic/result-status-dotted-law.lisp" ||
