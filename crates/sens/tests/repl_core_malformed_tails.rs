@@ -216,6 +216,7 @@ fn d11_four_repl_library_laws_run_inside_sens() {
     }
 }
 
+// Executed by the exact-SHA SENS_NATIVE_LAWS lane in .github/workflows/ci.yml.
 #[test]
 fn repl_step_rejects_atomic_state_as_sens_data() {
     let mut session = repl_session();
