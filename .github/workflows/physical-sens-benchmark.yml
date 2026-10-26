@@ -11,8 +11,15 @@ permissions:
 
 jobs:
   physical-runtime:
-    name: median/p95 of physical T5, D2, startup and execution
+    if: false # Python-driven benchmark runners are excluded by the Rust/Zig/SENS-only policy.
+    name: median/p95 of physical T5, D2, startup and execution — EXCLUDED
     runs-on: ubuntu-24.04
+
+  policy-exclusion:
+    name: Python benchmarks excluded (NOT_VERIFIED)
+    runs-on: ubuntu-24.04
+    steps:
+      - run: echo "PYTHON_BENCHMARKS=EXCLUDED_BY_LANGUAGE_POLICY native_equivalent=NOT_VERIFIED"
     timeout-minutes: 40
     steps:
       - uses: actions/checkout@v5
