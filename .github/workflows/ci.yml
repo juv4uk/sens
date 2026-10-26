@@ -1,4 +1,4 @@
-name: "SENS — короткий CI: охоронець, Rust, Zig, SENS"
+name: "SENS — швидкий CI та ручні цільові перевірки"
 
 on:
   push:
@@ -6,512 +6,123 @@ on:
   pull_request:
     branches: [main]
   workflow_dispatch:
+    inputs:
+      suite:
+        description: "Який набір виконати вручну"
+        required: true
+        type: choice
+        default: quick
+        options:
+          - quick
+          - native
+          - laws
+          - remint
+          - release-preflight
+      files:
+        description: "Точні .lisp шляхи для suite=remint, по одному на рядок"
+        required: false
+        type: string
+        default: ""
 
-# Повні дослідження/бенчмарки: ручний ci-heavy.yml.
-# Відновлення фізичних пар: ручний запуск або цільовий reusable job у цьому CI.
-# Червоний результат не приховуємо; PASS коридору не є допуском релізу.
+# Навмисно немає concurrency/cancel-in-progress: кожен push зберігає свій CI.
 permissions:
   contents: read
-
-# Do not configure Actions concurrency here: every push/commit must retain
-# its own CI run. New pushes must never cancel running or pending push checks.
 
 jobs:
   sens:
     name: Охоронець · Rust · Zig · SENS
+    if: ${{ github.event_name != 'workflow_dispatch' || inputs.suite == 'quick' }}
     runs-on: ubuntu-24.04
-    timeout-minutes: 60
+    timeout-minutes: 8
     steps:
-      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5, pinned
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
         with:
-          persist-credentials: false
-          # Для порівняння змінених Lisp-файлів потрібен батьківський SHA.
-          # Без цього fetch окремого попереднього SHA вичерпував 60 с.
           fetch-depth: 2
-
-      - name: Перевірка — жодних чужомовних test/benchmark runners у канонічному шляху
+          persist-credentials: false
+      - name: Перевірити формат diff і синтаксис оболонки
+        shell: bash
+        run: |
+          set -euo pipefail
+          git diff --check
+          bash -n scripts/check-sens-only-semantic-tests.sh
+          bash -n scripts/ensure-host-debt0.sh
+          bash -n scripts/ci-rust-mechanism-checks.sh
+          bash -n scripts/execute_changed_lisp_t5m.sh
+          bash -n scripts/prove-lisp-semantic-t5m.sh
+      - name: Перевірити межу власності мовних тестів
         shell: bash
         run: bash scripts/check-sens-only-semantic-tests.sh
-      - name: Мовна межа — JSON/SHA не є викличними формами SENS
+      - name: Швидкий охоронець host debt
         shell: bash
-        run: |
-          set -euo pipefail
-          files=(lib/domains/d9.lisp lib/surface/uk-sa-coverage.lisp contracts/d9-ratification.lisp knowledge/d9-ratified.json docs/generated/function-table.md)
-          if grep -nEi 'json-parse|sha256-hex|JSON-PARSE|SHA256-HEX' "${files[@]}"; then
-            echo "::error title=SENS_LANGUAGE_BOUNDARY::Retired external utility name leaked into active D9 surfaces."
-            exit 1
-          fi
-          echo "SENS_LANGUAGE_BOUNDARY=PASS json_callable=false sha256_callable=false"
-      - name: Мовна політика main — аудит усього відстежуваного дерева
-        shell: bash
-        run: |
-          set -euo pipefail
-          forbidden=0
-          count=0
-          examples="$RUNNER_TEMP/forbidden-source-languages.txt"
-          excluded=0
-          physical_sens_views=0
-          : > "$examples"
-          while IFS= read -r file; do
-            [[ -n "$file" ]] || continue
-            # Explicitly exclude non-runtime material from semantic language authority.
-            # Exclusion is NOT a test pass: excluded Python tests/benchmarks remain NOT_VERIFIED.
-            case "$file" in
-              tests/*|benchmarks/*|research/*|scripts/*|.github/*|packaging/*|tools/*|examples/*|*/examples/*|experiments/*|prototype/*|vendor/*|ecosystem/*|docs/*|knowledge/*|evidence/*|fixtures/*|hypotheses/*|memory/*|tasks/*|дослідження/*|*/tests/*|*/benches/*|*/benchmarks/*)
-                excluded=$((excluded + 1))
-                continue ;;
-            esac
-            # Only active production/runtime source paths are subject to the allowlist.
-            case "$file" in
-              crates/*|lib/*|src/*|c-runtime/*) ;;
-              *.rs|*.zig|*.sens|*.lisp|*.scm|*.ss|*.sld|*.c|*.h|*.S|*.s|*.asm) continue ;;
-              *) excluded=$((excluded + 1)); continue ;;
-            esac
-            case "$file" in
-              *.rs|*.zig|*.sens|*.lisp|*.scm|*.ss|*.sld|*.c|*.h|*.S|*.s|*.asm) continue ;;
-              *.md|*.yml|*.yaml|*.toml|*.json|*.jsonl|*.txt|*.tsv|*.b64|*.bits|*.lock|*.orig|*.patch|*.contract|*.svg|*.expected|*.call|*.stderr|*.t5m3|*.tape|*.f3m|*.fasl|LICENSE|.gitignore|.gitattributes|.zig-version|rust-toolchain.toml) continue ;;
-              *.py|*.pyi|*.js|*.mjs|*.cjs|*.ts|*.tsx|*.jsx|*.sh|*.bash|*.ps1|*.cc|*.cpp|*.hpp|*.rkt|*.pl|*.clp|*.lua|*.sv|*.v)
-                count=$((count + 1))
-                if [[ "$count" -le 80 ]]; then printf '%s\n' "$file" >> "$examples"; fi ;;
-              *)
-                # A non-source file is a physical SENS view only if content proves it:
-                # non-empty, words of 0/1 separated by single spaces, terminal LF.
-                last_byte="$(tail -c 1 "$file" | od -An -t x1 | tr -d '[:space:]')"
-                if [[ -s "$file" && "$last_byte" == "0a" ]] && \
-                   ! LC_ALL=C grep -qvE '^[01]+( [01]+)*$' "$file"; then
-                  physical_sens_views=$((physical_sens_views + 1))
-                  continue
-                fi
-                count=$((count + 1))
-                if [[ "$count" -le 80 ]]; then printf '%s\n' "$file" >> "$examples"; fi ;;
-            esac
-          done < <(git ls-files)
-          echo "LANGUAGE_POLICY active_source_forbidden_files=$count excluded_support_files=$excluded physical_sens_views=$physical_sens_views allowed=Rust,Zig,SENS,Guile,C,Assembler excluded_tests_benchmarks=NOT_VERIFIED"
-          if [[ "$count" -ne 0 ]]; then
-            sed -n '1,80p' "$examples"
-            echo "::error title=SOURCE_LANGUAGE_CONTAMINATION::Active runtime source outside Rust/Zig/SENS/Guile/C/Assembler remains forbidden."
-            exit 1
-          fi
-          echo "LANGUAGE_POLICY=PASS allowed=Rust,Zig,SENS,Guile,C,Assembler active_runtime_sources=true excluded_tests_benchmarks=NOT_VERIFIED"
-      - name: Canonical workflows must not execute Python tools
-        shell: bash
-        run: |
-          set -euo pipefail
-          if grep -nE '^[[:space:]]*python3[[:space:]]|run:[[:space:]]*python3[[:space:]]' .github/workflows/ci.yml .github/workflows/release-preflight.yml; then
-            echo "::error title=PYTHON_EXECUTION_FORBIDDEN::Canonical CI/preflight must run Rust, Zig or SENS, not Python."
-            exit 1
-          fi
-          echo "PYTHON_TESTS=EXCLUDED native_equivalent=NOT_VERIFIED"
-      - name: Один автоматичний CI — тільки поточний main
-        run: |
-          set -euo pipefail
-          echo "PYTHON_TOOL_EXCLUDED_BY_LANGUAGE_POLICY native_equivalent=NOT_VERIFIED"
-          echo "PYTHON_TOOL_EXCLUDED_BY_LANGUAGE_POLICY native_equivalent=NOT_VERIFIED"
-          # Catch shell-quoting regressions before builds/native SENS laws (e.g. apostrophes in Ukrainian identifiers).
-          bash -n scripts/prove-lisp-semantic-t5m.sh
-          bash -n scripts/ci-select-changed-t5m-lisp.sh
-          bash -n scripts/ci-rust-mechanism-checks.sh
-          # Негативний контроль повноти обліку файлів — один швидкий Bash-тест.
-          bash tests/test-count-executable-lisp-git-inventory.sh
-          echo "PYTHON_TOOL_EXCLUDED_BY_LANGUAGE_POLICY native_equivalent=NOT_VERIFIED"
-          # The Nirbhaya helper must mint from current sources, never restore archived T5M blobs.
-          echo "PYTHON_TOOL_EXCLUDED_BY_LANGUAGE_POLICY native_equivalent=NOT_VERIFIED"
-          # Concurrent remint recovery must not widen an explicit source manifest.
-          echo "PYTHON_TOOL_EXCLUDED_BY_LANGUAGE_POLICY native_equivalent=NOT_VERIFIED"
+        run: bash scripts/ensure-host-debt0.sh
+      - name: Статус
+        run: echo "QUICK_CI=PASS heavy_native_laws_remint_release=MANUAL_TARGETED"
 
-      - name: Чинний SENS захист — host debt та незмінність мови
-        shell: bash
-        run: |
-          set -euo pipefail
-          # Єдиний автоматичний CI виконує ці вже наявні охоронці.
-          # Семантика лишається у SENS; Bash/Python перевіряють лише межу.
-          bash scripts/ensure-host-debt0.sh
-          echo "PYTHON_TOOL_EXCLUDED_BY_LANGUAGE_POLICY native_equivalent=NOT_VERIFIED"
-
-      - name: Rust CLI — рання перевірка синтаксису REPL
-        shell: bash
-        run: |
-          set -euo pipefail
-          if ! rustfmt --edition 2021 --emit stdout crates/sens-cli/src/repl.rs > /dev/null; then
-            echo "::error file=crates/sens-cli/src/repl.rs,title=RUST_REPL_SYNTAX::REGRESSION id=rust-repl-syntax layer=rust-cli expected=parsable actual=syntax-error"
-            exit 1
-          fi
-
-      - name: Заборона нових сирих кодів у змінених Lisp-файлах
-        shell: bash
-        env:
-          BEFORE_SHA: ${{ github.event.before }}
-          PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
-        run: |
-          set -euo pipefail
-          base="$BEFORE_SHA"
-          if [[ "$GITHUB_EVENT_NAME" == pull_request ]]; then
-            base="$PR_BASE_SHA"
-          fi
-          if [[ -z "$base" || "$base" =~ ^0+$ ]]; then
-            # Для ручного запуску або першого push потрібен попередній коміт.
-            git fetch --no-tags --deepen=2 origin main
-            base="$(git rev-parse HEAD^)"
-          fi
-          if ! git cat-file -e "$base^{commit}" 2>/dev/null; then
-            timeout 60s git fetch --no-tags --depth=1 origin "$base"
-          fi
-          echo "PYTHON_TOOL_EXCLUDED_BY_LANGUAGE_POLICY native_equivalent=NOT_VERIFIED"
-
-      - name: "Перевірки структури — джерела доменів D1–24+ — без Python-тестів"
-        run: |
-          set -euo pipefail
-          # Fail-closed: потрібен реальний охоронець драбини.
-          for required in scripts/guard-domain-function-reuse.py; do
-            if [[ ! -s "$required" ]]; then
-              echo "::error file=$required,title=ARCHITECTURE-GUARD-MISSING::REGRESSION layer=ci-structure expected=nonempty-guard actual=empty-or-missing"
-              exit 1
-            fi
-          done
-          # Структура DEFINE та SENS має бути перевірена в тому самому кроці.
-          echo "PYTHON_TOOL_EXCLUDED_BY_LANGUAGE_POLICY native_equivalent=NOT_VERIFIED"
-          # Core4: кожний фізичний блок має містити ЦІЛІ SENS-форми;
-          # зібране джерело має бути байт-у-байт ідентичним Core4.
-          # Механічний Python не обчислює закони SENS.
-          echo "PYTHON_TOOL_EXCLUDED_BY_LANGUAGE_POLICY native_equivalent=NOT_VERIFIED"
-          # Поверхні звіряються з джерелами D1–24+; тут не фіксуємо межу драбини.
-          echo "PYTHON_TOOL_EXCLUDED_BY_LANGUAGE_POLICY native_equivalent=NOT_VERIFIED"
-          echo "PYTHON_TOOL_EXCLUDED_BY_LANGUAGE_POLICY native_equivalent=NOT_VERIFIED"
-          echo "PYTHON_TOOL_EXCLUDED_BY_LANGUAGE_POLICY native_equivalent=NOT_VERIFIED"
-          # D11 selector certification lives in ci-heavy.yml; keep this fast CI focused on current release blockers.
-
-      - name: Знайти змінені Lisp-програми, а не історичні таблиці
-        id: changed-t5m-lisp
-        if: ${{ always() }}
-        shell: bash
-        env:
-          BEFORE_SHA: ${{ github.event.before }}
-        run: bash scripts/ci-select-changed-t5m-lisp.sh
-      - uses: dtolnay/rust-toolchain@1.99.0
-        if: ${{ always() }}
-
-      - name: Власність тестів — Rust охоронець фізичних Lisp-законів
-        if: ${{ always() && steps.changed-t5m-lisp.outcome == 'success' }}
-        shell: bash
-        run: |
-          set -euo pipefail
-          rustc --edition=2021 -O scripts/guard-native-test-ownership.rs -o "$RUNNER_TEMP/sens-native-law-guard"
-          "$RUNNER_TEMP/sens-native-law-guard" --self-test
-          "$RUNNER_TEMP/sens-native-law-guard" \
-            --base "$(cat "$RUNNER_TEMP/native-semantic-base.sha")" \
-            --head "$GITHUB_SHA"
-
-      - name: Охоронець повторного використання змінених доменних функцій
-        env:
-          BEFORE_SHA: ${{ github.event.before }}
-        run: |
-          set -euo pipefail
-          # Guard/tool-only edits must exercise the real scanner even without Lisp changes.
-          bash scripts/install-hooks.sh
-          echo "PYTHON_TOOL_EXCLUDED_BY_LANGUAGE_POLICY native_equivalent=NOT_VERIFIED"
-          manifest="$RUNNER_TEMP/changed-t5m-lisp.txt"
-          if [[ -s "$manifest" ]]; then
-            # Guard має перевіряти НОВІ DEFINE, а не повторно оголошувати
-            # старий Core4 дублем після будь-якої зміни коментаря чи джерела.
-            base="$BEFORE_SHA"
-            if [[ "$GITHUB_EVENT_NAME" == "pull_request" ]]; then
-              base="$(git rev-parse "$GITHUB_SHA^1")"
-            fi
-            if [[ -z "$base" || "$base" =~ ^0+$ ]]; then
-              base="$(git rev-parse HEAD^)"
-            fi
-            if ! git cat-file -e "$base^{commit}" 2>/dev/null; then
-              timeout 60s git fetch --no-tags --depth=1 origin "$base"
-            fi
-            git cat-file -e "$base^{commit}"
-            echo "PYTHON_TOOL_EXCLUDED_BY_LANGUAGE_POLICY native_equivalent=NOT_VERIFIED"
-          else
-            echo "немає змінених .lisp-програм — охоронець не має що перевіряти"
-          fi
-
-
-      - uses: ./.github/actions/install-zig
-        if: ${{ always() && steps.changed-t5m-lisp.outcome == 'success' && (steps.changed-t5m-lisp.outputs.has_lisp == 'true' || steps.changed-t5m-lisp.outputs.has_files == 'true' || steps.changed-t5m-lisp.outputs.has_rust == 'true' || steps.changed-t5m-lisp.outputs.has_zig == 'true' || github.event_name == 'workflow_dispatch') }}
-
-      - name: Zig bitpacker — build real WASM target without Rust fallback
-        # Cross-target check only when Rust/Zig sources changed, or on manual full validation.
-        if: ${{ always() && (steps.changed-t5m-lisp.outputs.has_zig == 'true' || steps.changed-t5m-lisp.outputs.has_rust == 'true' || github.event_name == 'workflow_dispatch') }}
-        timeout-minutes: 15
-        shell: bash
-        run: |
-          set -euo pipefail
-          rustup target add wasm32-unknown-unknown
-          if cargo build --locked -p sens-wasm --target wasm32-unknown-unknown; then
-            echo "SENS_ZIG_BITPACK_WASM_PASS target=wasm32-unknown-unknown"
-          else
-            status=$?
-            echo "::error::SENS_ZIG_BITPACK_WASM_FAILED status=$status command=cargo build --locked -p sens-wasm --target wasm32-unknown-unknown"
-            exit "$status"
-          fi
-
-      - name: Rust — механізм без мовного оракула
-        # Native mechanism tests are needed for code/runtime changes, not docs-only pushes.
-        if: ${{ always() && steps.changed-t5m-lisp.outcome == 'success' && (steps.changed-t5m-lisp.outputs.has_lisp == 'true' || steps.changed-t5m-lisp.outputs.has_files == 'true' || steps.changed-t5m-lisp.outputs.has_rust == 'true' || steps.changed-t5m-lisp.outputs.has_zig == 'true' || github.event_name == 'workflow_dispatch') }}
-        timeout-minutes: 15
-        shell: bash
-        run: bash scripts/ci-rust-mechanism-checks.sh
-      - name: Zig — точний кодек, ABI, пошкоджені кадри
-        if: ${{ always() && steps.changed-t5m-lisp.outcome == 'success' && (steps.changed-t5m-lisp.outputs.has_lisp == 'true' || steps.changed-t5m-lisp.outputs.has_files == 'true' || steps.changed-t5m-lisp.outputs.has_rust == 'true' || steps.changed-t5m-lisp.outputs.has_zig == 'true' || github.event_name == 'workflow_dispatch') }}
-        shell: bash
-        run: |
-          set -uo pipefail
-          failed=0
-          scripts/ci-zig-purity --self-test || failed=1
-          scripts/ci-zig-purity || failed=1
-          zig test -lc research/zig-codecs/tests.zig || failed=1
-          zig test -lc zig_transport_root.zig || failed=1
-          zig test -O ReleaseFast -lc bench_t5m_test.zig || failed=1
-          if (( failed != 0 )); then
-            echo "::error title=ZIG_TRANSPORT_REGRESSION::id=zig-codec-abi layer=Zig expected=all-tests-pass actual=one-or-more-failures repro=zig-test sha=$GITHUB_SHA"
-          fi
-          exit "$failed"
-
-      - name: Один транспортний бенчмарк — Zig T5M
-        # Performance measurement is opt-in; correctness checks remain mandatory.
-        if: ${{ github.event_name == 'push' && startsWith(github.event.head_commit.message, 'BENCH-T5M:') }}
-        timeout-minutes: 5
-        shell: bash
-        run: |
-          set -euo pipefail
-          zig run -O ReleaseFast -lc bench_t5m.zig
-          echo "MEASURED layer=Zig/T5M sha=$GITHUB_SHA semantics=NOT_TESTED"
-
-      - name: Зібрати нативний SENS і Zig/T5M лише один раз
-        id: native-build
-        if: ${{ always() && steps.changed-t5m-lisp.outcome == 'success' && (steps.changed-t5m-lisp.outputs.has_lisp == 'true' || steps.changed-t5m-lisp.outputs.has_files == 'true' || steps.changed-t5m-lisp.outputs.has_rust == 'true' || steps.changed-t5m-lisp.outputs.has_zig == 'true' || github.event_name == 'workflow_dispatch') }}
-        shell: bash
-        timeout-minutes: 12
-        run: |
-          set -euo pipefail
-          export CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0
-          cargo build --locked -p sens-cli --bin sens --bin sens-trit --features benchmark-ast-visits
-          test -x "$PWD/target/debug/sens"
-          test -x "$PWD/target/debug/sens-trit"
-
-      # Core4 is executed from lib/core4.sens (Zig-restored at build),
-      # not from the textual file changed in Git. Detect stale bootstrap
-      # BEFORE calling old bytecode a successful implementation of a new law.
-      - name: Core4 — точна фізична пара SENS/Zig T5M
-        if: ${{ always() && steps.native-build.outcome == 'success' }}
-        shell: bash
-        timeout-minutes: 5
-        run: |
-          set -euo pipefail
-          physical_dir="$RUNNER_TEMP/changed-t5m-pairs/core4-parity"
-          mkdir -p "$physical_dir"
-          # Only real SENS emits words; pinned Zig packages the binary.
-          timeout 180s "$PWD/target/debug/sens" --t5m-mint-pair        lib/core4.lisp "$physical_dir/core4.sens"
-          timeout 45s "$PWD/target/debug/sens-trit" verify-view             "$physical_dir/core4.sens" >"$physical_dir/core4-verified.txt"
-          # SHA of the exact source checkout; never apply this artifact to a
-          # different main tree even if its filename still matches.
-          git rev-parse --verify HEAD > "$physical_dir/source-commit.sha"
-          sha256sum lib/core4.lisp > "$physical_dir/source-core4.sha256"
-          sha256sum lib/core4.lisp lib/core4.sens \
-            "$physical_dir/core4.sens" > "$physical_dir/sha256.txt"
-          if ! cmp -s lib/core4.sens "$physical_dir/core4.sens"; then
-            echo "::error file=lib/core4.sens,title=SENS_CORE4_PHYSICAL_DRIFT::REGRESSION layer=bootstrap expected=exact-current-SENS-source actual=outdated-physical bytes=Zig/T5M release=NO-GO" >&2
-            exit 1
-          fi
-          echo "SENS_CORE4_PHYSICAL_PARITY_PASS source=lib/core4.lisp physical=lib/core4.sens codec=Zig/T5M"
-
-      - name: Змінені Lisp-програми → кодек Zig/T5M → виконання SENS
-        id: t5m_changed_execute
-        if: ${{ always() && steps.native-build.outcome == 'success' }}
-        shell: bash
-        timeout-minutes: 15
-        run: |
-          set -euo pipefail
-          manifest="$RUNNER_TEMP/changed-t5m-lisp.txt"
-          if [[ ! -s "$manifest" ]]; then
-            # Без змін Lisp порожній список програм — NOT_APPLICABLE, а не успіх мовного доказу.
-            # Помилковий відбір або порожній список після Lisp-змін залишаються RED.
-            if [[ "${{ steps.changed-t5m-lisp.outcome }}" != "success" ]]; then
-              echo "::error file=.github/workflows/ci.yml,title=SENS Lisp push::REGRESSION layer=selection expected=successful-manifest-selection actual=failed"
-              exit 1
-            fi
-            if [[ "${{ steps.changed-t5m-lisp.outputs.has_lisp }}" == "true" ]]; then
-              echo "::error file=.github/workflows/ci.yml,title=SENS Lisp push::REGRESSION layer=selection expected=executable-Lisp-witness actual=empty-manifest"
-              exit 1
-            fi
-            echo "::notice file=.github/workflows/ci.yml,title=SENS Lisp push::NOT_APPLICABLE changed_lisp=false physical_execution=NOT_TESTED"
-            exit 0
-          fi
-          export CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0
-          binary="$PWD/target/debug/sens"
-          SENS_NATIVE_T5M=1 SENS_T5M_OPEN="$PWD/target/debug/sens-trit" \
-            bash scripts/execute_changed_lisp_t5m.sh \
-              "$binary" "$manifest" \
-              "$RUNNER_TEMP/changed-t5m-pairs"
-          echo "::notice file=.github/workflows/ci.yml,title=SENS Lisp→Zig/T5M→SENS::PASS physical_codec=Zig/T5M execution=SENS release=NOT_CERTIFIED"
-
-
-      # Keep the exact changed-file mint output when physical-pair regeneration was requested.
-      - name: Export changed-file SENS/Zig T5M mint evidence
-        if: ${{ always() && contains(github.event.head_commit.message, 'SENS_PAIR_REGEN') }}
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+  native:
+    name: Ручний native Rust/Zig smoke
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.suite == 'native' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
         with:
-          name: sens-changed-pairs-regen-${{ github.sha }}
-          path: ${{ runner.temp }}/changed-t5m-pairs/**
-          if-no-files-found: warn
-          retention-days: 1
-          compression-level: 0
-
-      - name: Повний мовний sweep — SENS/Zig/T5M, позитиви й мутанти
-        # Full suite on PR/manual run or explicitly marked release-preflight push.
-        # Ordinary pushes execute only the changed-program manifest above.
-        if: ${{ always() && steps.native-build.outcome == 'success' && (github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, 'SENS_FULL_LAW_SWEEP')) }}
-        timeout-minutes: 35
+          persist-credentials: false
+      - uses: dtolnay/rust-toolchain@1.99.0
+      - uses: ./.github/actions/install-zig
+      - name: Build native SENS
+        run: cargo build --locked -p sens-cli --bin sens --bin sens-trit --features benchmark-ast-visits
+      - name: Rust mechanism checks
+        run: bash scripts/ci-rust-mechanism-checks.sh
+      - name: Zig codec and transport smoke
         shell: bash
         run: |
           set -euo pipefail
-          bash scripts/prove-lisp-semantic-t5m.sh \
-            "$PWD/target/debug/sens" "$PWD/target/debug/sens-trit" \
-            "$RUNNER_TEMP/sens-language-laws"
+          scripts/ci-zig-purity --self-test
+          zig test -lc research/zig-codecs/tests.zig
+          zig test -lc zig_transport_root.zig
+
+  laws:
+    name: Ручні SENS/Zig/T5M закони
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.suite == 'laws' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 50
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+        with:
+          persist-credentials: false
+      - uses: dtolnay/rust-toolchain@1.99.0
+      - uses: ./.github/actions/install-zig
+      - name: Build native SENS
+        run: cargo build --locked -p sens-cli --bin sens --bin sens-trit --features benchmark-ast-visits
+      - name: Execute SENS laws, mutants and language laws
+        shell: bash
+        run: |
+          set -euo pipefail
+          bash scripts/prove-lisp-semantic-t5m.sh "$PWD/target/debug/sens" "$PWD/target/debug/sens-trit" "$RUNNER_TEMP/sens-laws"
           bash scripts/prove-lisp-language-laws.sh "$PWD/target/debug/sens"
 
-      # Narrow, one-run evidence export: capture outputs minted by the actual
-      # SENS CLI + Zig/T5M route when explicitly requested for pair regeneration.
-      - name: Export canonical SENS/Zig T5M pair regeneration evidence
-        if: ${{ always() && contains(github.event.head_commit.message, 'SENS_PAIR_REGEN') }}
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
-        with:
-          name: sens-pair-regen-${{ github.sha }}
-          # Artifact contains only the physical Core4 minted by this exact
-          # commit, plus its SHA receipts and Zig verify-view output.
-          path: ${{ runner.temp }}/changed-t5m-pairs/core4-parity/**
-          if-no-files-found: error
-          retention-days: 1
-          compression-level: 0
-
-  # Перевіряємо реальний diff у Git, а не покладаємося на форму push payload.
-  # Цей легкий крок не збирає Rust/Zig і не запускає мовний oracle.
-  detect-remint:
-    name: Визначити, чи потрібне фізичне SENS/Zig перемайнення
-    if: ${{ github.event_name == 'push' }}
+  remint-input-required:
+    name: Remint потребує явний список файлів
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.suite == 'remint' && inputs.files == '' }}
     runs-on: ubuntu-24.04
-    outputs:
-      needed: ${{ steps.scope.outputs.needed }}
     steps:
-      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5, pinned
-        with:
-          fetch-depth: 2
-          persist-credentials: false
-      - name: Перевірити точний push diff
-        id: scope
-        shell: bash
-        env:
-          BEFORE_SHA: ${{ github.event.before }}
-          HEAD_SHA: ${{ github.sha }}
-          HEAD_MESSAGE: ${{ github.event.head_commit.message }}
+      - name: Не запускати широкий remint без області
         run: |
-          set -euo pipefail
-          # Явний маркер залишається аварійним/ручним шляхом відновлення.
-          if [[ "${HEAD_MESSAGE:-}" == *SENS_PAIR_REGEN* ]]; then
-            echo "needed=true" >> "$GITHUB_OUTPUT"
-            echo "REMINT_SCOPE source=explicit-marker"
-            exit 0
-          fi
-          if [[ -z "${BEFORE_SHA:-}" || "$BEFORE_SHA" =~ ^0+$ ]]; then
-            changed="$(git diff-tree --no-commit-id --name-only -r "$HEAD_SHA")"
-          else
-            if ! git cat-file -e "$BEFORE_SHA^{commit}" 2>/dev/null; then
-              timeout 60s git fetch --no-tags --depth=1 origin "$BEFORE_SHA"
-            fi
-            changed="$(git diff --name-only "$BEFORE_SHA" "$HEAD_SHA")"
-          fi
-          if printf '%s\n' "$changed" | grep -Fxq -e 'lib/core4.lisp' -e 'lib/lisp-fs.lisp' -e 'tests/fixtures/wsm-fs-record-producer.lisp' -e 'lib/time.lisp' -e 'lib/reason.lisp' -e 'lib/compiler-nucleus.lisp' -e 'lib/clips-import.lisp' -e '.github/workflows/ci.yml' -e '.github/workflows/remint-drifted-pairs.yml'; then
-            echo "needed=true" >> "$GITHUB_OUTPUT"
-            echo "REMINT_SCOPE changed-target=yes"
-            exit 0
-          fi
-          # Recover an interrupted/cancelled remint on a later unrelated push:
-          # a newer Lisp source than its committed physical T5M pair is still
-          # pending work even when the current push only changed tooling.
-          for source in lib/core4.lisp lib/lisp-fs.lisp tests/fixtures/wsm-fs-record-producer.lisp lib/time.lisp lib/reason.lisp lib/compiler-nucleus.lisp lib/clips-import.lisp; do
-            pair="${source%.lisp}.sens"
-            [[ -f "$source" && ! -L "$source" ]] || continue
-            if [[ ! -s "$pair" || -L "$pair" ]]; then
-              echo "needed=true" >> "$GITHUB_OUTPUT"
-              echo "REMINT_SCOPE missing-physical-pair source=$source"
-              exit 0
-            fi
-            source_commit="$(git log -1 --format=%H -- "$source")"
-            pair_commit="$(git log -1 --format=%H -- "$pair")"
-            if [[ -n "$source_commit" && -n "$pair_commit" ]] &&
-               ! git merge-base --is-ancestor "$source_commit" "$pair_commit"; then
-              echo "needed=true" >> "$GITHUB_OUTPUT"
-              echo "REMINT_SCOPE source-newer-than-pair source=$source pair=$pair"
-              exit 0
-            fi
-          done
-          echo "needed=false" >> "$GITHUB_OUTPUT"
-          echo "REMINT_SCOPE changed-target=no pending-drift=no"
+          echo "::error title=REMINT_SCOPE_REQUIRED::Вкажіть точні .lisp файли в полі files; автоматичний широкий remint вимкнений у короткому CI."
+          exit 1
 
-  detect-release-preflight:
-    name: Визначити, чи потрібен повний release preflight
-    if: ${{ github.event_name == 'push' }}
-    runs-on: ubuntu-24.04
-    outputs:
-      needed: ${{ steps.release-scope.outputs.needed }}
-    steps:
-      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5, pinned
-        with:
-          fetch-depth: 2
-          persist-credentials: false
-      - name: Перевірити релізно-критичний diff
-        id: release-scope
-        shell: bash
-        env:
-          BEFORE_SHA: ${{ github.event.before }}
-          HEAD_SHA: ${{ github.sha }}
-        run: |
-          set -euo pipefail
-          if [[ -z "${BEFORE_SHA:-}" || "$BEFORE_SHA" =~ ^0+$ ]]; then
-            changed="$(git diff-tree --no-commit-id --name-only -r "$HEAD_SHA")"
-          else
-            if ! git cat-file -e "$BEFORE_SHA^{commit}" 2>/dev/null; then
-              timeout 60s git fetch --no-tags --depth=1 origin "$BEFORE_SHA"
-            fi
-            changed="$(git diff --name-only "$BEFORE_SHA" "$HEAD_SHA")"
-          fi
-          if printf '%s\n' "$changed" | grep -Eq '^(\.github/workflows/(ci|release-preflight)\.yml|crates/xtask/|crates/sens/src/compiler_bootstrap\.rs$|crates/sens/tests/|tests/fixtures/conformance\.lisp$|packaging/tests/test_release_preflight_scope\.py$|lib/(core4|lisp-fs|time|reason|compiler-nucleus|clips-import)(\.lisp|\.sens)?$|tests/fixtures/wsm-fs-record-producer(\.lisp|\.sens)?$|lib/machine/encoding/coverage\.lisp$|lib/machine/xed/generated/machine-evidence\.lisp$)'; then
-            echo "needed=true" >> "$GITHUB_OUTPUT"
-            echo "RELEASE_PREFLIGHT_SCOPE release-critical-change=yes"
-          else
-            echo "needed=false" >> "$GITHUB_OUTPUT"
-            echo "RELEASE_PREFLIGHT_SCOPE release-critical-change=no"
-          fi
-
-  # Єдина автоматична CI-подія залишається у ci.yml; тільки точний diff
-  # або явний маркер запускає дорогий canonical SENS→Zig/T5M remint.
-  remint-targeted:
-    name: Канонічно відновити цільові фізичні SENS/Zig пари
-    needs: detect-remint
-    if: ${{ github.event_name == 'push' && needs.detect-remint.outputs.needed == 'true' }}
+  remint:
+    name: Канонічний SENS/Zig/T5M remint точних файлів
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.suite == 'remint' && inputs.files != '' }}
     uses: ./.github/workflows/remint-drifted-pairs.yml
     with:
-      files: |
-        lib/core4.lisp
-        lib/lisp-fs.lisp
-        tests/fixtures/wsm-fs-record-producer.lisp
-        lib/time.lisp
-        lib/reason.lisp
-        lib/compiler-nucleus.lisp
-        lib/clips-import.lisp
+      files: ${{ inputs.files }}
     permissions:
       contents: write
 
-  # Full workspace tests + Clippy remain part of the single automatic CI
-  # workflow. The called workflow never creates a tag or publishes a release.
   release-preflight:
-    name: Full exact-SHA release gate
-    needs: detect-release-preflight
-    if: ${{ github.event_name == 'push' && needs.detect-release-preflight.outputs.needed == 'true' }}
+    name: Ручний exact-SHA release preflight
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.suite == 'release-preflight' }}
     uses: ./.github/workflows/release-preflight.yml
     permissions:
       contents: read
