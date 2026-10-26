@@ -19,15 +19,21 @@
        (як-є reconstruction-missing-state))
       ((атом? (решта відновлене))
        (як-є reconstruction-invalid-state-tail))
-      ((хибне?
-         (однакові?
-           (друге (фс-читати (друге відновлене) "code"))
-           значення))
-       (як-є reconstruction-mismatch))
       (так
-       (список
-         (фс-серіалізувати-корінь система)
-         (фс-серіалізувати-об'єкт значення))))))
+       (нехай ((читання-коду (фс-читати (друге відновлене) "code")))
+         (за-умовою
+           ; READ may reject or return malformed data; never SELECT before
+           ; proving that both the response and its value field are present.
+           ((порожній? читання-коду) (як-є reconstruction-code-empty))
+           ((атом? читання-коду) (як-є reconstruction-code-non-list))
+           ((порожній? (решта читання-коду)) (як-є reconstruction-code-missing-value))
+           ((атом? (решта читання-коду)) (як-є reconstruction-code-improper-tail))
+           ((хибне? (однакові? (друге читання-коду) значення))
+            (як-є reconstruction-mismatch))
+           (так
+            (список
+              (фс-серіалізувати-корінь система)
+              (фс-серіалізувати-об'єкт значення))))))))
 
 ; F6: п'ять обов'язкових полів кореня, чотири поля об'єкта.
 ; Немає ототожнення «немає ключа» з «ключ присутній, дані D3:()».
