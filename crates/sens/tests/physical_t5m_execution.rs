@@ -269,11 +269,16 @@ fn d3_semantics_are_executed_and_decided_by_binary_sens() {
         assert!(source
             .bytes()
             .all(|byte| byte == b'0' || byte == b'1' || byte.is_ascii_whitespace()));
+        let source_words = sens::parse_binary_source_words(source)
+            .expect("current exact-width SENS source")
+            .into_iter()
+            .map(|token| token.word)
+            .collect::<Vec<_>>();
+        let physical_words = decode_ternary_program(physical)
+            .expect("tracked physical T5M decodes to exact-width words");
         assert_eq!(
-            sens::encode_binary_projection_ternary(source)
-                .expect("current exact D2/T5 SENS source"),
-            physical,
-            "the tracked .sens must match its binary source bit-for-bit"
+            physical_words, source_words,
+            "the tracked .sens must preserve each source word's exact width and bits"
         );
         let result = eval_reference_t5m(physical, &mut Session::default())
             .expect("SENS self-test must execute directly from packed T5");
