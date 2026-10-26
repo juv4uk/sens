@@ -117,6 +117,58 @@ fn observe_monotonic_nanoseconds(
     Ok(Value::BinaryNumber(exact))
 }
 
+/// `read-energy-uj` — RAPL-лічильники через powercap sysfs.
+///
+/// Повертає ПАРУ точних D64-слів: (package, dram), у мікроджоулях.
+/// Механізм німий: жодної семантики тут — перетворення й нормування
+/// живуть у lib/бенчмарк.lisp (мікроджоулі-у-джоулі, джоулів-на-тисячу-форм).
+///
+/// Якщо лічильника немає (не Intel, контейнер без MSR, немає прав) —
+/// ЧЕСНА ВІДМОВА з поясненням, а не нуль: нуль зіпсував би вимір тихо.
+#[cfg(not(target_arch = "wasm32"))]
+fn read_energy_microjoules(
+    arguments: &[(Value, Span)],
+    _environment: &Environment,
+    span: Span,
+) -> Result<Value, LanguageError> {
+    if !arguments.is_empty() {
+        return Err(LanguageError::new(
+            ErrorKind::Arity,
+            "read-energy-uj expects exactly zero arguments",
+            span,
+        ));
+    }
+    const WIDTH: usize = 64;
+    fn read_one(path: &str, label: &str, span: Span) -> Result<Value, LanguageError> {
+        let text = std::fs::read_to_string(path).map_err(|error| {
+            LanguageError::new(
+                ErrorKind::InvalidForm,
+                format!(
+                    "read-energy-uj: {label} counter unavailable at {path}: {error} · лічильник недоступний · Zähler nicht verfügbar"
+                ),
+                span,
+            )
+        })?;
+        let value: u64 = text.trim().parse().map_err(|error| {
+            LanguageError::new(
+                ErrorKind::InvalidForm,
+                format!("read-energy-uj: {label} counter is not an integer: {error}"),
+                span,
+            )
+        })?;
+        let bits: Vec<u8> = (0..WIDTH)
+            .rev()
+            .map(|shift| ((value >> shift) & 1) as u8)
+            .collect();
+        let exact = sens::BinaryNumber::from_numeric_domain_bits(WIDTH, &bits)
+            .expect("the checked 64-bit RAPL counter is an exact D64 word");
+        Ok(Value::BinaryNumber(exact))
+    }
+    let package = read_one("/sys/class/powercap/intel-rapl:0/energy_uj", "package", span)?;
+    let dram = read_one("/sys/class/powercap/intel-rapl:0:0/energy_uj", "dram", span)?;
+    Ok(Value::list(vec![package, dram]))
+}
+
 fn denied(operation: &str, detail: impl std::fmt::Display, span: Span) -> LanguageError {
     LanguageError::new(
         ErrorKind::InvalidForm,
@@ -789,6 +841,8 @@ fn evaluate_load(
 
 pub fn install() {
     register_evaluated_capability("clock-mono-raw", 0, observe_monotonic_nanoseconds);
+    #[cfg(not(target_arch = "wasm32"))]
+    register_evaluated_capability("read-energy-uj", 0, read_energy_microjoules);
     register_evaluated_capability("read-dir", 1, evaluate_read_dir);
     register_evaluated_capability("read-file-bytes", 1, evaluate_read_file_bytes);
     register_evaluated_capability("читати-сирий-текст-файла", 1, evaluate_read_file_utf8_raw);
