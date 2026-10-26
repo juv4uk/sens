@@ -64,6 +64,7 @@ jobs:
 
       - name: Native SENS laws — вирок у тритах, без квитанцій
         id: native_sens_laws
+        if: always()
         run: |
           set -euo pipefail
           cargo build --locked -p sens-cli --bin sens 2>/dev/null || cargo build --locked -p sens --bin sens
@@ -81,9 +82,12 @@ jobs:
           bash scripts/prove-d1-порожність.sh target/debug/sens
           bash scripts/prove-d1-empty-identity.sh target/debug/sens
           bash scripts/prove-d3-пара.sh target/debug/sens
+          bash scripts/prove-d1-not.sh target/debug/sens
+          bash scripts/prove-бенчмарк-глибина.sh target/debug/sens
 
       - name: Clippy
         id: workspace_clippy
+        if: always()
         run: cargo clippy --locked --workspace --all-targets -- -D warnings
 
       - name: Мовна політика — лише SENS/Rust/Zig
