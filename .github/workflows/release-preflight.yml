@@ -174,3 +174,17 @@ jobs:
             exit 1
           fi
           echo "RELEASE_LINUX_ABI=PASS max_glibc<=2.35 cpu=baseline-x86-64"
+
+      - name: Execute release Linux binary against SENS-native laws
+        shell: bash
+        run: |
+          set -euo pipefail
+          binary="$PWD/target/x86_64-unknown-linux-gnu/release/sens"
+          test -x "$binary"
+          # These three exact witnesses previously exposed SIGILL in the
+          # published Linux asset's compute path. Run them against this
+          # release-mode binary, not the separate debug test executable.
+          bash scripts/prove-meta-eval-graph-d1.sh "$binary"
+          bash scripts/prove-d4-selector-width.sh "$binary"
+          bash scripts/prove-ідентичність-тритів.sh "$binary"
+          echo "RELEASE_LINUX_RUNTIME_WITNESSES=PASS binary=release/sens authority=SENS"
