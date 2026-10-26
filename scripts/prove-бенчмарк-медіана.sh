@@ -23,7 +23,7 @@ trap 'rm -rf "$tmp"' EXIT
 printf '1\n' > "$tmp/expected-positive"
 printf '0\n' > "$tmp/expected-negative"
 
-if ! timeout 45s "$cli" "$law" > "$tmp/positive.out" 2> "$tmp/positive.err"; then
+if ! timeout 45s "$cli" --t5m-files lib/твердження.lisp lib/бенчмарк.lisp "$law" > "$tmp/positive.out" 2> "$tmp/positive.err"; then
   printf 'REGRESSION id=%s layer=sens-positive actual=execution-error\n' "$id" >&2
   cat "$tmp/positive.err" >&2
   exit 1
@@ -33,7 +33,7 @@ if ! cmp -s "$tmp/expected-positive" "$tmp/positive.out"; then
   exit 1
 fi
 
-if ! timeout 45s "$cli" "$mutant" > "$tmp/negative.out" 2> "$tmp/negative.err"; then
+if ! timeout 45s "$cli" --t5m-files lib/твердження.lisp lib/бенчмарк.lisp "$mutant" > "$tmp/negative.out" 2> "$tmp/negative.err"; then
   printf 'REGRESSION id=%s layer=sens-negative actual=execution-error\n' "$id" >&2
   cat "$tmp/negative.err" >&2
   exit 1
@@ -45,7 +45,7 @@ fi
 
 for iteration in {1..11}; do
   start_us="${EPOCHREALTIME/./}"
-  if ! timeout 45s "$cli" "$law" > "$tmp/sample.out" 2> "$tmp/sample.err"; then
+  if ! timeout 45s "$cli" --t5m-files lib/твердження.lisp lib/бенчмарк.lisp "$law" > "$tmp/sample.out" 2> "$tmp/sample.err"; then
     printf 'REGRESSION id=%s layer=benchmark iteration=%s actual=execution-error\n' "$id" "$iteration" >&2
     cat "$tmp/sample.err" >&2
     exit 1
