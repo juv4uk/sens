@@ -1,13 +1,34 @@
 //! #4455: historical selector fixture as exact-width physical T5 data.
 //! D4 operation meaning and arity laws are Lisp-owned, not Rust test oracles.
-use sens::{decode_ternary_program, encode_binary_projection_ternary, open_ternary_program};
+use sens::{BinarySourceWord, render_binary_words_spaced, encode_binary_projection_ternary};
 
+use sens_cli::zig_transport;
 const T5: &[u8] = include_bytes!("../../../tests/fixtures/migration-d4-selector-cohort/caar.sens");
 const VISIBLE: &str = "10 1000 00 10 111 00 10 111 00 10 001 00 000 01 00 10 001 00 000 01 01 00 10 001 00 000 01 01 01";
 const EXPECTED_PHYSICAL: &[u8] = &[
     0x66, 0x12, 0xc4, 0x7e, 0xc4, 0x7e, 0xc3, 0x2d, 0xa4, 0x2d, 0xc3, 0x2d, 0xa4, 0x2e, 0xa9, 0x37,
     0xa8, 0x13, 0xb1, 0xa1,
 ];
+
+
+
+// Обгортки над чинним Zig T5M: staged-out ternary виведено (f5a5b213).
+fn decode_ternary_program(bytes: &[u8]) -> Result<Vec<BinarySourceWord>, String> {
+    zig_transport::decode_t5m_words(bytes)
+}
+
+fn open_ternary_program(bytes: &[u8]) -> Result<String, String> {
+    zig_transport::decode_t5m_words(bytes).map(|words| render_binary_words_spaced(&words))
+}
+
+fn encode_binary_projection_ternary(source: &str) -> Result<Vec<u8>, String> {
+    let words: Vec<BinarySourceWord> = sens::parse_binary_source_words(source)
+        .map_err(|error| format!("{error:?}"))?
+        .into_iter()
+        .map(|token| token.word)
+        .collect();
+    zig_transport::encode_t5m_direct(&words)
+}
 
 #[test]
 fn historical_selector_fixture_preserves_exact_width_words_and_t5() {
