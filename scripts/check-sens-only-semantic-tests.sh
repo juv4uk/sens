@@ -33,14 +33,6 @@ archive_rows() {
 archive_count="$(archive_rows | awk 'END {print NR+0}')"
 [[ "$archive_count" -gt 0 ]] || die "реєстр не має рядків ARCHIVE"
 
-while IFS= read -r row; do
-  [[ "$row" == *ARCHIVE* ]] || continue
-  [[ "$row" == *"| "* || "$row" == *" | "* ]] || continue
-  if [[ ! "$row" =~ (https://github\.com/juv4uk/sens/commit/[0-9a-f]{7,40}|/juv4uk/sens/commit/[0-9a-f]{7,40}) ]]; then
-    continue
-  fi
-done < "$ARCHIVE"
-
 archive_has_location() {
   local path="$1"
   if awk -F'|' -v wanted="$path" 'NF>=2 && $0 ~ /ARCHIVE/ {
@@ -94,7 +86,7 @@ gate_new_artifact() {
 
 self_test() {
   local first_artifact simulated_new counted
-  first_artifact="$(archive_rows | head -1 | cut -d'|' -f1)"
+  first_artifact="$(archive_rows | awk -F'|' 'NR==1 {print $1; exit}')"
   [[ -n "$first_artifact" ]] || die "self-test не знайшов зареєстрований артефакт"
   archive_has_artifact "$first_artifact" || die "self-test позитив: архівний артефакт не зараховано"
   gate_new_artifact "$first_artifact" false "" || die "self-test позитив: зареєстрований архів відхилено"
