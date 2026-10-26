@@ -445,7 +445,7 @@ jobs:
           CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test prolog_bridge_current_d4 -- --nocapture
 
       - name: "SENS REPL — реальне виконання обернених українських D4-викликів"
-        if: "${{ always() && steps.changed-t5m-lisp.outputs.repl_runtime_tests == 'true' }}"
+        if: ${{ always() && steps.changed-t5m-lisp.outputs.repl_runtime_tests == 'true' }}
         shell: bash
         run: |
           set -euo pipefail
