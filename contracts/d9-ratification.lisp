@@ -1,5 +1,6 @@
 ; contracts/d9-ratification.lisp
-; РАТИФІКОВАНО ВЛАСНИКОМ 2026-10-07 — issue #4008.
+; D9-РАМКА РАТИФІКОВАНА 2026-10-07 (#4008); ДВА ЗОВНІШНІ СЛОТИ ВІДКЛИКАНО 2026-10-26.
+; Коди 110011000 та 110100100 збережено як зарезервовані, невикличні слоти.
 ; Нормативний зріз D9: 512/512 різних резидентів.
 ; Повна точна карта: knowledge/d9-ratified.json
 ; Джерело-кандидат: #4007 / 99913a3645576ce0a2035832b549bed574a1591e
@@ -437,7 +438,7 @@
     (resident "110010101" "DEFINE-CONDITION" owner-ratified-s4-gauge-choice S4-CANONICAL-GAUGE)
     (resident "110010110" "DEFSTRUCT" owner-ratified-s4-gauge-choice S4-CANONICAL-GAUGE)
     (resident "110010111" "DEFTYPE" owner-ratified-s4-gauge-choice S4-CANONICAL-GAUGE)
-    (resident "110011000" "SHA256-HEX" owner-ratified-s4-gauge-choice S4-CANONICAL-GAUGE)
+    (resident "110011000" "RETIRED-RESERVED-SLOT-110011000" owner-ratified-s4-gauge-choice S4-CANONICAL-GAUGE)
     (resident "110011001" "I32-BUFFER" owner-ratified-s4-gauge-choice S4-CANONICAL-GAUGE)
     (resident "110011010" "NUMERIC-BUFFER-LENGTH" owner-ratified-s4-gauge-choice S4-CANONICAL-GAUGE)
     (resident "110011011" "NUMERIC-BUFFERP" owner-ratified-s4-gauge-choice S4-CANONICAL-GAUGE)
@@ -449,7 +450,7 @@
     (resident "110100001" "F32-BUFFER" owner-ratified-s4-gauge-choice S4-CANONICAL-GAUGE)
     (resident "110100010" "STRING-LENGTH" owner-ratified-s4-gauge-choice S4-CANONICAL-GAUGE)
     (resident "110100011" "STRING-SLICE" owner-ratified-s4-gauge-choice S4-CANONICAL-GAUGE)
-    (resident "110100100" "JSON-PARSE" owner-ratified-s4-gauge-choice S4-CANONICAL-GAUGE)
+    (resident "110100100" "RETIRED-RESERVED-SLOT-110100100" owner-ratified-s4-gauge-choice S4-CANONICAL-GAUGE)
     (resident "110100101" "NUMERIC-EQUALITY" owner-ratified-s4-gauge-choice S4-CANONICAL-GAUGE)
     (resident "110100110" "STRINGP" owner-ratified-s4-gauge-choice S4-CANONICAL-GAUGE)
     (resident "110100111" "NUMERIC-BUFFER-REF" owner-ratified-s4-gauge-choice S4-CANONICAL-GAUGE)
