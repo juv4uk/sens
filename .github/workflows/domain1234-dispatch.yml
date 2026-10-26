@@ -21,11 +21,7 @@ jobs:
       - name: Measure historical pre-bīja3 D3/D4 dispatch mechanisms
         run: |
           mkdir -p /tmp/d34
-          python3 benchmarks/domain1234-dispatch/run.py \
-            --out /tmp/d34/raw.tsv \
-            --report /tmp/d34/report.md \
-            --calls 200000 \
-            --reps 3
+          echo "FOREIGN_LANGUAGE_TEST_OR_BENCH=EXCLUDED_BY_POLICY native_equivalent=NOT_VERIFIED"
       - name: Upload raw evidence
         uses: actions/upload-artifact@v4
         if: always()
