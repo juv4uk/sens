@@ -740,6 +740,15 @@ fn registry_target_is_required_for_test_and_benchmark_tasks() {
         "target without an input class must fail: {incomplete}"
     );
 
+    let duplicate_field = request(
+        port,
+        "(define-task (task TEST-DUPLICATE-TARGET) (priority 3) (capabilities ()) (depends-on ()) (вид тест) (ціль (функція значення-у-списку?) (функція значення-у-списку?) (властивість присутній-елемент-дає-так) (клас-входу правильний-список)))",
+    );
+    assert!(
+        duplicate_field.starts_with("(error") && duplicate_field.contains("повторене поле"),
+        "ambiguous duplicate function fields must be rejected: {duplicate_field}"
+    );
+
     let complete = "(define-task (task TEST-MEMBER-TARGET) (priority 3) (capabilities ()) (depends-on ()) (вид тест) (ціль (функція значення-у-списку?) (властивість присутній-елемент-дає-так) (клас-входу правильний-список)) (description \"test one exact registry function\"))";
     let created = request(port, complete);
     assert!(
