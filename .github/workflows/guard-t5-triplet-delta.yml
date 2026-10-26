@@ -20,9 +20,9 @@ jobs:
         with:
           fetch-depth: 0
           persist-credentials: false
-      - name: Test changed/new/deleted physical-view triples using real Git history
-        run: python3 -m unittest discover -s tests -p 'test_guard_t5m_triplet_delta.py' -v
-      - name: Only changed/new T5 physical files and view require exact parity
+      - name: Build the existing native SENS/T5M mechanisms
+        run: cargo build --locked -p sens-cli --bin sens --bin sens-trit
+      - name: Verify changed physical-view triples through SENS, Zig, and cmp
         env:
           MANUAL_BASE: ${{ inputs.base_sha }}
         shell: bash
@@ -40,7 +40,59 @@ jobs:
           if [[ ! "$BASE" =~ ^[0-9a-f]{40}$ ]]; then
             echo "BLOCK: missing immutable base SHA"; exit 2
           fi
-          python3 scripts/guard_t5m_triplet_delta.py \
-            --root . --base-sha "$BASE"
-          # This is only a mechanical delta gate, NOT release preflight.
-          # Canonical Ukrainian oracle and old-corpus debt remain gated.
+          git cat-file -e "$BASE^{commit}"
+          mapfile -t changed_paths < <(git diff --name-only "$BASE...$GITHUB_SHA")
+          declare -A changed=()
+          declare -A stems=()
+          has_rev_file() { git cat-file -e "$1:$2" 2>/dev/null; }
+          for path in "${changed_paths[@]}"; do
+            changed["$path"]=1
+          done
+          for path in "${changed_paths[@]}"; do
+            case "$path" in
+              *.lisp) stem="${path%.lisp}" ;;
+              *.sens) stem="${path%.sens}" ;;
+              *)
+                if has_rev_file "$BASE" "$path.lisp" || has_rev_file "$GITHUB_SHA" "$path.lisp" ||
+                   has_rev_file "$BASE" "$path.sens" || has_rev_file "$GITHUB_SHA" "$path.sens"; then
+                  stem="$path"
+                else
+                  continue
+                fi
+                ;;
+            esac
+            if has_rev_file "$BASE" "$stem.sens" || has_rev_file "$GITHUB_SHA" "$stem.sens" ||
+               has_rev_file "$BASE" "$stem" || has_rev_file "$GITHUB_SHA" "$stem"; then
+              stems["$stem"]=1
+            fi
+          done
+          if (( ${#stems[@]} == 0 )); then
+            echo "Зміни не зачіпають фізичних трійок SENS/T5M."
+            exit 0
+          fi
+          for stem in "${!stems[@]}"; do
+            source="$stem.lisp"
+            physical="$stem.sens"
+            view="$stem"
+            present=0
+            [[ -f "$source" && ! -L "$source" ]] && present=$((present+1))
+            [[ -f "$physical" && ! -L "$physical" ]] && present=$((present+1))
+            [[ -f "$view" && ! -L "$view" ]] && present=$((present+1))
+            if (( present == 0 )); then
+              for file in "$source" "$physical" "$view"; do
+                has_rev_file "$BASE" "$file" || { echo "Видалення неповної трійки: $stem" >&2; exit 2; }
+                [[ -n "${changed[$file]:-}" ]] || { echo "Змінено не всі файли видаленої трійки: $stem" >&2; exit 2; }
+                if has_rev_file "$GITHUB_SHA" "$file"; then
+                  echo "Файл трійки залишився після видалення: $file" >&2
+                  exit 2
+                fi
+              done
+              echo "Підтверджено: всі три файли видалено разом — $stem"
+              continue
+            fi
+            if (( present != 3 )); then
+              echo "Неповна фізична трійка: $stem" >&2
+              exit 2
+            fi
+            bash scripts/check-triple-projection.sh --fixture "$source"
+          done

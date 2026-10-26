@@ -64,13 +64,27 @@ for relative in "${FIXTURES[@]}"; do
   view="${source%.lisp}"
   n=$((n+1))
   # Open these ACTUAL committed files: no temporary generated stand-ins.
-  if proof="$(python3 "$SCRIPT_ROOT/scripts/verify_uk_t5_t5m_triplet.py" \
-      --lisp "$source" --sens "$physical" --view "$view" 2>&1)"; then
-    printf 'PASS %-64s укр=T5=view (bounded); release=NOT_ADMITTED\n' "$relative"
+  if [[ ! -f "$source" || -L "$source" || ! -f "$physical" || -L "$physical" || ! -f "$view" || -L "$view" ]]; then
+    echo "BLOCKED: трійка має відсутній файл або symlink: $relative" >&2
+    fail=1
+    continue
+  fi
+  if [[ ! -x "$SCRIPT_ROOT/target/debug/sens" || ! -x "$SCRIPT_ROOT/target/debug/sens-trit" ]]; then
+    echo "BLOCKED: спочатку зберіть нативні sens і sens-trit" >&2
+    exit 2
+  fi
+  scratch="$(mktemp -d)"
+  if (cd "$CHECK_ROOT" && "$SCRIPT_ROOT/target/debug/sens" --t5m-mint "$relative" "$scratch/expected.sens") &&
+     cmp -s "$scratch/expected.sens" "$physical" &&
+     (cd "$CHECK_ROOT" && "$SCRIPT_ROOT/target/debug/sens-trit" view "$physical" > "$scratch/expected.view") &&
+     cmp -s "$scratch/expected.view" "$view" &&
+     (cd "$CHECK_ROOT" && "$SCRIPT_ROOT/target/debug/sens-trit" verify-view "$physical" >/dev/null); then
+    printf 'Підтверджено нативне source → T5M → view: %s\n' "$relative"
   else
-    echo "BLOCKED: $relative: $proof" >&2
+    echo "BLOCKED: нативна трійка не збігається: $relative" >&2
     fail=1
   fi
+  rm -rf -- "$scratch"
 done
 
 if [ "$fail" -ne 0 ]; then
