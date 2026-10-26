@@ -1,6 +1,6 @@
-//! Exhaustive two-state D1 fallback for migrated TCP source; no UTF-8/D24 dependency.
-use sens::{
-    eval_parsed_expressions, parse_mixed_exact_domain_process_tcp_source, ErrorKind, Session,
+
+use sens_cli::zig_transport;//! Exhaustive two-state D1 fallback for migrated TCP source; no UTF-8/D24 dependency.
+use sens::{BinarySourceWord, eval_parsed_expressions, parse_mixed_exact_domain_process_tcp_source, ErrorKind, Session,
 };
 
 const PATH: &str = "lib/tcp.lisp";
@@ -9,6 +9,17 @@ const SOURCE: &str = include_str!("../../../lib/tcp.lisp");
 fn eval_exact(source: &str) -> Result<sens::Value, sens::LanguageError> {
     let parsed = parse_mixed_exact_domain_process_tcp_source(PATH, source)?;
     Ok(eval_parsed_expressions(&parsed, &mut Session::default())?.value)
+}
+
+
+
+// Обгортки над чинним Zig T5M: staged-out ternary виведено (f5a5b213).
+fn encode_ternary_words(words: &[BinarySourceWord]) -> Result<Vec<u8>, String> {
+    zig_transport::encode_t5m_direct(words)
+}
+
+fn decode_ternary_program(bytes: &[u8]) -> Result<Vec<BinarySourceWord>, String> {
+    zig_transport::decode_t5m_words(bytes)
 }
 
 #[test]
@@ -73,7 +84,7 @@ fn real_tcp_file_reads_with_current_domain_widths() {
 mod support;
 
 use sens::{
-    decode_ternary_program, encode_ternary_words, load_core_library, load_tcp_library,
+    load_core_library, load_tcp_library,
     parse_binary_source_words, ExprKind,
 };
 const SELFTEST: &str = include_str!("../../../tests/fixtures/semantic/tcp-exact-selftest.bits");
