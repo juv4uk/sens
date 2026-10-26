@@ -409,8 +409,11 @@ pub fn eval_e1_program(
 #[cfg(test)]
 mod exact_t5m_cutover_tests {
     use super::*;
-    use crate::{decode_ternary_words, encode_ternary_words, parse_binary_source_words, ExprKind};
+    use crate::{parse_binary_source_words, ExprKind};
+    #[cfg(feature = "rust-t5-reference")]
+    use crate::{decode_ternary_words, encode_ternary_words};
 
+    #[cfg(feature = "rust-t5-reference")]
     fn reference_t5_program(physical: &[u8]) -> Result<PhysicalT5Program, String> {
         let words = crate::decode_ternary_words(physical).map_err(|error| format!("{error:?}"))?;
         PhysicalT5Program::from_exact_words(&words).map_err(|error| format!("{error:?}"))
@@ -654,6 +657,7 @@ mod exact_t5m_cutover_tests {
         assert_eq!(visits, 3, "one D5 call and two binary numeric leaves");
     }
 
+    #[cfg(feature = "rust-t5-reference")]
     fn physical(source: &str) -> Vec<u8> {
         let words = parse_binary_source_words(source)
             .expect("only exact D1..D9 typed source words")
@@ -668,6 +672,7 @@ mod exact_t5m_cutover_tests {
     /// The physical SENS engine, not a host-side semantic oracle, must report
     /// which D2 form actually failed. The first form executes; the second
     /// rejects D3:000 in COND test position under current Contract 11.8.
+    #[cfg(feature = "rust-t5-reference")]
     #[test]
     fn physical_runtime_type_error_identifies_the_failing_second_form() {
         let bytes = physical("10 001 00 000 01 00 10 110 00 10 000 00 1 01 01");
@@ -685,6 +690,7 @@ mod exact_t5m_cutover_tests {
         );
     }
 
+    #[cfg(feature = "rust-t5-reference")]
     #[test]
     fn physical_d3_quote_is_exact_domain_call_not_historical_w8_dispatch() {
         let bytes = physical("10 001 00 000 01");
@@ -703,6 +709,7 @@ mod exact_t5m_cutover_tests {
         assert!(output.output.is_empty());
     }
 
+    #[cfg(feature = "rust-t5-reference")]
     #[test]
     fn physical_domain_width_cannot_be_inferred_from_equal_payload() {
         // Equal payloads in D1, D3 and D9 have DISTINCT identities; the
@@ -730,6 +737,7 @@ mod exact_t5m_cutover_tests {
         assert_eq!(widths, [1, 3, 9, 9]);
     }
 
+    #[cfg(feature = "rust-t5-reference")]
     #[test]
     fn physical_t5_rejects_d2_as_data_before_any_side_effect() {
         let raw = parse_binary_source_words("01")
@@ -757,6 +765,7 @@ mod exact_t5m_cutover_tests {
 
     /// 2046 are POSSIBLE exact coordinates, not 2046 admitted functions.
     /// Rust checks only the physical transport, never defines semantics.
+    #[cfg(feature = "rust-t5-reference")]
     #[test]
     fn all_2046_exact_coordinates_keep_every_bit_without_callability_lift() {
         use crate::domain_ladder::DomainCoordinate;

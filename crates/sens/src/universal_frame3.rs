@@ -525,6 +525,7 @@ mod tests {
     /// These are bytes, NOT throughput, execution cost or semantic authority.
     /// F3C eligibility is decided by the existing explicit tiny program
     /// codec, not silently projected to zero or to an E1/T5 length.
+    #[cfg(feature = "rust-f3-reference")]
     #[test]
     fn e1_t5_f3c_exact_physical_size_matrix() {
         use crate::{decode_ternary_words, encode_ternary_words};

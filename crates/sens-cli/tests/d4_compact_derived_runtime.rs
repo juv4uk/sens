@@ -47,7 +47,7 @@ fn width_qualified_words_roundtrip_without_borrowing_cross_domain_meaning() {
 fn physical_t5m_rejects_invalid_bytes_and_noncanonical_trailers() {
     for source in ["10 1110 01", "10 1111 01", "10 01110 01"] {
         let physical = encode_via_zig(source);
-        assert!(decode_t5m_via_zig(&physical).len() > 0);
+        assert!(!decode_t5m_via_zig(&physical).is_empty());
 
         let mut padded = physical.to_vec();
         padded.push(0xf2);
