@@ -109,7 +109,7 @@ jobs:
             ' .github/workflows/release-preflight.yml
           )"
           if grep -nEi 'PYTHON_TOOL|python[[:space:]]+-c|python3[[:space:]]+-c|import[[:space:]]+json|[[:space:]]sha256sum|pytest[[:space:]]' <<< "$workflow_source"; then
-            echo "::error title=RELEASE_NOT_VERIFIED::foreign runner"
+            echo "::error title=RELEASE_BLOCKED::активний workflow містить заборонений сторонній виконавець"
             exit 1
           fi
           echo "RELEASE_NATIVE_LANGUAGE_POLICY=PASS authority=SENS_trits"
