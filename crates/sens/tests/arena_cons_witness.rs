@@ -57,7 +57,7 @@ fn arena_backs_cons_on_the_real_eval_path_and_collects_the_unreachable() {
         "три cons мусять дати рівно три комірки арени"
     );
     assert!(on.environment.arena_backs(&lst), "список мусить опиратися на арену");
-    assert_eq!(on.environment.arena_reachable_count(&[lst.clone()]), 3);
+    assert_eq!(on.environment.arena_reachable_count(std::slice::from_ref(&lst)), 3);
 
     // ── Друга SENS-програма будує список, що стає недосяжним ──
     let dropped = eval_program(UNREACHABLE, &mut on)
@@ -66,14 +66,14 @@ fn arena_backs_cons_on_the_real_eval_path_and_collects_the_unreachable() {
     assert!(matches!(dropped, Value::Pair(_)));
     assert!(on.environment.arena_backs(&dropped));
     assert_eq!(on.environment.arena_len(), 5, "плюс два cons другої програми");
-    assert_eq!(on.environment.arena_reachable_count(&[lst.clone()]), 3);
-    assert_eq!(on.environment.arena_garbage_count(&[lst.clone()]), 2);
+    assert_eq!(on.environment.arena_reachable_count(std::slice::from_ref(&lst)), 3);
+    assert_eq!(on.environment.arena_garbage_count(std::slice::from_ref(&lst)), 2);
 
     // (3) Колектор збирає саме недосяжне з коренів.
-    let swept = on.environment.arena_collect(&[lst.clone()]);
+    let swept = on.environment.arena_collect(std::slice::from_ref(&lst));
     assert_eq!(swept, 2, "недосяжний список мусить бути вигрібений");
     assert!(on.environment.arena_backs(&lst), "досяжний список лишається живим");
     assert!(!on.environment.arena_backs(&dropped), "недосяжний список вигрібено");
-    assert_eq!(on.environment.arena_reachable_count(&[lst.clone()]), 3);
-    assert_eq!(on.environment.arena_garbage_count(&[lst.clone()]), 0);
+    assert_eq!(on.environment.arena_reachable_count(std::slice::from_ref(&lst)), 3);
+    assert_eq!(on.environment.arena_garbage_count(std::slice::from_ref(&lst)), 0);
 }
