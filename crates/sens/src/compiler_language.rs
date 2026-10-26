@@ -1246,6 +1246,31 @@ mod tests {
     }
 
     #[test]
+    fn compiler_structural_projection_accepts_current_authority_and_rejects_mutants() {
+        assert!(
+            verify_projection_authority(LAW_PROJECTION, LAW_AUTHORITY).is_ok(),
+            "D3 structural projection must match the current ratified source"
+        );
+        assert!(
+            verify_projection_authority(D4_LAW_PROJECTION, D4_LAW_AUTHORITY).is_ok(),
+            "D4 structural projection must match the current ratified source"
+        );
+
+        let stale_d3 = format!("{LAW_AUTHORITY}\\n; negative source mutant");
+        let stale_d4 = format!("{D4_LAW_AUTHORITY}\\n; negative source mutant");
+        assert!(
+            verify_projection_authority(LAW_PROJECTION, &stale_d3).is_err(),
+            "D3 projection must fail closed on changed authority source"
+        );
+        assert!(
+            verify_projection_authority(D4_LAW_PROJECTION, &stale_d4).is_err(),
+            "D4 projection must fail closed on changed authority source"
+        );
+        assert!(compiler_l1_l5_law_value().is_ok());
+        assert!(compiler_d4_bootstrap_law_value().is_ok());
+    }
+
+    #[test]
     fn compiler_nucleus_loads_each_definition_without_an_opaque_binding_failure() {
         let expressions = crate::binary_bootstrap::compiler_nucleus_program()
             .expect("compiler nucleus T5M words")
