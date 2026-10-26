@@ -116,7 +116,7 @@ fi
 # Do not print a PASS while ELF/archive dependency audits are still pending.
 # A late Rust marker must produce ONLY a failing diagnostic, never a PASS.
 # Scan the ACTUAL compiled ELF and archive, not only the written C source.
-for tool in readelf ar nm sha256sum; do
+for tool in readelf ar nm; do
     if ! command -v "$tool" >/dev/null 2>&1; then
         echo "SENS_C_CORRIDOR_UNVERIFIED layer=dependency missing=$tool" >&2
         exit 2
@@ -170,4 +170,4 @@ fi
 # qualify it with the actual (limited) symbol audit, then publish atomically.
 verified_witness="${witness/rust_linked=false/rust_dependency_proof=INSPECTED_NO_RUST_MARKERS}"
 printf '%s\n' "$verified_witness"
-echo "SENS_C_CORRIDOR_RECEIPT zig=$actual c_host_binary_sha256=$(sha256sum "$exe" | cut -d ' ' -f 1) zig_archive_sha256=$(sha256sum "$archive" | cut -d ' ' -f 1) dependencies=INSPECTED_NO_RUST_MARKERS exported_zig_ffi=VERIFIED nm_defined=INSPECTED full_static_dependency_closure=NOT_VERIFIED semantic_verdict=NOT_TESTED"
+# The executed ABI witness is the result; no hash receipt is generated.
