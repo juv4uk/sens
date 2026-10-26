@@ -2,19 +2,6 @@ name: Release Preflight
 
 on:
   workflow_dispatch:
-  # Run the existing full pre-tag gate when release-critical inputs change.
-  # This validates an exact main SHA; it does not create a tag or publish.
-  push:
-    branches: [main]
-    paths:
-      - ".github/workflows/release-preflight.yml"
-      - "crates/xtask/**"
-      - "crates/sens/src/compiler_bootstrap.rs"
-      - "crates/sens/tests/**"
-      - "tests/fixtures/conformance.lisp"
-      - "crates/xtask/tests/**"
-      - "lib/machine/encoding/coverage.lisp"
-      - "lib/machine/xed/generated/machine-evidence.lisp"
 
 concurrency:
   group: release-preflight-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
