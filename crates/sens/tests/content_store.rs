@@ -1,8 +1,8 @@
-use sens::{eval_program, Session};
+use sens::{eval_program, load_core_library, Session};
 
 fn eval_store(source: &str) -> String {
     let mut session = Session::default();
-    sens::eval_core_library_source(include_str!("../../../lib/core.lisp"), &mut session).unwrap();
+    load_core_library(&mut session).unwrap();
     sens::eval_pinned_reasoning_source(
         "lib/unify.lisp",
         include_str!("../../../lib/unify.lisp"),
@@ -59,7 +59,7 @@ fn eval_store(source: &str) -> String {
 
 fn eval_store_fixture(source: &str) -> String {
     let mut session = Session::default();
-    sens::eval_core_library_source(include_str!("../../../lib/core.lisp"), &mut session).unwrap();
+    load_core_library(&mut session).unwrap();
     sens::eval_pinned_reasoning_source(
         "lib/unify.lisp",
         include_str!("../../../lib/unify.lisp"),
@@ -120,7 +120,7 @@ fn eval_store_fixture(source: &str) -> String {
 
 fn eval_store_error(source: &str) -> String {
     let mut session = Session::default();
-    sens::eval_core_library_source(include_str!("../../../lib/core.lisp"), &mut session).unwrap();
+    load_core_library(&mut session).unwrap();
     sens::eval_pinned_reasoning_source(
         "lib/unify.lisp",
         include_str!("../../../lib/unify.lisp"),
