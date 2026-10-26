@@ -65,4 +65,3 @@ Expected: PASS.
 - [ ] **Step 2: Move `s0.42.1` only to that commit and push it**
 
 - [ ] **Step 3: Record the exact GitHub Actions URL and its final result**
-
