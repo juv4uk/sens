@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
-"""M1 твердження: materialize selftest pair from knowledge/d11/restore/m1-твердження/."""
+"""M1 твердження: materialize selftest .sens from knowledge/d11/restore/m1-твердження/.
+
+View: якщо quarters відсутні —
+  python3 scripts/migrate-one-to-sens.py tests/semantic/твердження-самотест-law.lisp
+"""
 from pathlib import Path
 import base64, subprocess
 
@@ -14,10 +18,14 @@ r = root()
 src = r / "knowledge" / "d11" / "restore" / "m1-твердження"
 sem = r / "tests" / "semantic"
 sb = base64.b64decode((src / f"{STEM}.sens.b64").read_text().strip())
-vb = base64.b64decode(
-    (src / f"{STEM}.view.part1.b64").read_text().strip()
-    + (src / f"{STEM}.view.part2.b64").read_text().strip()
-)
 (sem / f"{STEM}.sens").write_bytes(sb)
-(sem / STEM).write_bytes(vb)
-print("minted", STEM, len(sb), len(vb))
+print("minted", STEM, ".sens", len(sb))
+parts = ["part1a", "part1b", "part2a", "part2b"]
+if all((src / f"{STEM}.view.{p}.b64").is_file() for p in parts):
+    vb = base64.b64decode("".join(
+        (src / f"{STEM}.view.{p}.b64").read_text().strip() for p in parts
+    ))
+    (sem / STEM).write_bytes(vb)
+    print("minted", STEM, "view", len(vb))
+else:
+    print("view quarters відсутні — migrate-one-to-sens.py для extensionless view")
