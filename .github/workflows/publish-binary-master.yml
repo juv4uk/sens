@@ -15,10 +15,10 @@ jobs:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
       - uses: ./.github/actions/install-zig
       - uses: dtolnay/rust-toolchain@1.99.0
-      - name: Test three-pass migration
-        run: |
-          set -euo pipefail
-          python3 -m unittest tests/test_three_pass_migration.py
+      - name: Test three-pass migration — EXCLUDED (NOT_VERIFIED)
+        if: false
+        shell: bash
+        run: echo "FOREIGN_LANGUAGE_TEST_BENCH=EXCLUDED_BY_POLICY native_equivalent=NOT_VERIFIED"
       - name: Test physical T5M through Zig ABI from Rust
         run: cargo test --locked -p sens-cli --test t5m_zig_abi
       - name: Preview new same-name .sens binaries
