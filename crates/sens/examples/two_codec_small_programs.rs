@@ -62,8 +62,8 @@ fn read_t5_canon(raw: &[u8]) -> Result<Vec<sens::BinarySourceWord>, String> {
     if p.form_count() == 0 {
         return Err("zero canonical forms: not a program".into());
     }
-    let words = zig_transport::decode_t5m_words(raw).map_err(|e| format!("T5 transport: {e:?}"))?;
-    let repeated = zig_transport::encode_t5m_direct(&words).map_err(|e| format!("T5 re-encode: {e:?}"))?;
+    let words = zig_transport::decode_t5m_words(raw).map_err(|e| e.to_string())?;
+    let repeated = zig_transport::encode_t5m_direct(&words).map_err(|e| e.to_string())?;
     if repeated != raw {
         return Err("noncanonical T5 physical bytes".into());
     }
