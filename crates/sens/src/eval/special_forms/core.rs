@@ -436,11 +436,19 @@ pub(crate) fn eq_values(left: Value, right: Value, span: Span) -> Result<Value, 
         } else {
             "non-atom"
         };
+        // SENS_EQ_TRACE=1 додає стек виклику до повідомлення. Це діагностичний
+        // режим для CI: без нього адресу виклику не видно, і пошук іде навмання
+        // по всьому lib/. У звичайному режимі повідомлення лишається коротким.
+        let trace = if std::env::var_os("SENS_EQ_TRACE").is_some() {
+            format!("\n{}", std::backtrace::Backtrace::force_capture())
+        } else {
+            String::new()
+        };
         return Err(LanguageError::new(
             ErrorKind::Type,
             format!(
                 "eq expects two atoms · eq ochikuie dva atomy · eq erwartet zwei Atome · \
-                 non-atomic {side} · carrier {carrier}"
+                 non-atomic {side} · carrier {carrier}{trace}"
             ),
             span,
         ));
