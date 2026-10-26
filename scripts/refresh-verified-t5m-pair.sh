@@ -111,7 +111,7 @@ for target in "$physical" "$view"; do
 done
 scratch="$(mktemp -d)"
 trap 'rm -rf "$scratch"' EXIT
-snapshot="$(sha256sum "$source_file" | cut -d' ' -f1)"
+cp -- "$source_file" "$scratch/source.snapshot"
 staged="$scratch/program.sens"
 staged_view="$scratch/program"
 direct_source="$source_file"
@@ -233,14 +233,14 @@ if (( ${#binding_sources[@]} != 0 )); then
     exit 2
   fi
   if ! cmp -s "$scratch/out" "$scratch/complete.out"; then
-    echo "T5M_REPAIR_DEPENDENCY_COMPLETE_DIVERGENCE source=$source_file paired_sha256=$(sha256sum "$scratch/out" | cut -d' ' -f1) complete_sha256=$(sha256sum "$scratch/complete.out" | cut -d' ' -f1)" >&2
+    echo "T5M_REPAIR_DEPENDENCY_COMPLETE_DIVERGENCE source=$source_file paired_bytes=$(wc -c < "$scratch/out") complete_bytes=$(wc -c < "$scratch/complete.out")" >&2
     exit 2
   fi
   mode=paired-and-dependency-complete
 else
 if timeout "$native_timeout" "${standalone_runtime[@]}" "$staged" > "$scratch/standalone.out" 2> "$scratch/standalone.err"; then
   if ! cmp -s "$scratch/out" "$scratch/standalone.out"; then
-    echo "T5M_REPAIR_EXECUTION_DIVERGENCE source=$source_file paired_sha256=$(sha256sum "$scratch/out" | cut -d' ' -f1) standalone_sha256=$(sha256sum "$scratch/standalone.out" | cut -d' ' -f1)" >&2
+    echo "T5M_REPAIR_EXECUTION_DIVERGENCE source=$source_file paired_bytes=$(wc -c < "$scratch/out") standalone_bytes=$(wc -c < "$scratch/standalone.out")" >&2
     exit 2
   fi
   if (( core4_runtime )); then
@@ -285,7 +285,7 @@ if ! grep -Fq 'T5M_PHYSICAL_PAIR_MISMATCH' "$scratch/no.err"; then
   echo "T5M_REPAIR_MUTANT_WRONG_FAILURE path=$source_file" >&2
   exit 2
 fi
-if [[ "$snapshot" != "$(sha256sum "$source_file" | cut -d' ' -f1)" ]]; then
+if ! cmp -s "$scratch/source.snapshot" "$source_file"; then
   echo "T5M_REPAIR_SOURCE_CHANGED path=$source_file" >&2
   exit 2
 fi
@@ -376,7 +376,7 @@ if (( had_view )); then
 elif [[ -e "$view" || -L "$view" ]]; then
   echo "T5M_REPAIR_CONCURRENT_CHANGE path=$view" >&2; exit 2
 fi
-if [[ "$snapshot" != "$(sha256sum "$source_file" | cut -d' ' -f1)" ]]; then
+if ! cmp -s "$scratch/source.snapshot" "$source_file"; then
   echo "T5M_REPAIR_SOURCE_CHANGED path=$source_file" >&2; exit 2
 fi
 # Новий шлях створюється no-clobber; існуючий замінюється rename.
@@ -402,7 +402,7 @@ if (( ! had_view )); then rm -- "$publish_dir/new.view"; fi
 cmp "$publish_dir/expected.view" "$view"
 # Джерело могло змінитися між двома записами пари. Поки EXIT trap
 # активний, відкидаємо тільки власні inode, а не чужі паралельні зміни.
-if [[ "$snapshot" != "$(sha256sum "$source_file" | cut -d' ' -f1)" ]]; then
+if ! cmp -s "$scratch/source.snapshot" "$source_file"; then
   echo "T5M_REPAIR_SOURCE_CHANGED_AFTER_INSTALL path=$source_file; фізичну пару відкочено" >&2
   exit 2
 fi
