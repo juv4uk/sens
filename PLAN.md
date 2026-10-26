@@ -82,18 +82,18 @@ lexical і finite-data.
 - ✅ canonical data-only outcome algebra:
 
 ```lisp
-(proved statement results)
-(unknown subject)
+(доведено statement results)
+(невідомо subject)
 (partial value bound)
-(blocked reason)
+(заблоковано reason)
 (disputed evidence)
-(invalid reason payload)
+(некоректний reason payload)
 ```
 
-- ✅ `proved` зберігає всі alternatives;
+- ✅ `доведено` зберігає всі alternatives;
 - ✅ opposite proof ≠ absence of proof;
 - ✅ both sides → `disputed`;
-- ✅ malformed goal/module → `invalid`;
+- ✅ malformed goal/module → `некоректний`;
 - ✅ legacy `reason` / `reason-in` backward-compatible;
 - ✅ opt-in `reason-observe` / `reason-in-observe`.
 
@@ -102,10 +102,10 @@ Evidence: `reason_stack.rs`, `reason_scale.rs`, `result_status.rs`,
 
 ## A4. Explanation + adversarial Advice Taker loop — B2/B3
 
-- ✅ `narrate-outcome` зберігає distinction між `unknown`, `partial`, `blocked`,
-  `disputed`, `invalid`;
+- ✅ `narrate-outcome` зберігає distinction між `невідомо`, `partial`, `заблоковано`,
+  `disputed`, `некоректний`;
 - ✅ malformed/truncated tagged outcomes відхиляються як invalid presentation;
-- ✅ `proved` presentation зберігає proof/provenance;
+- ✅ `доведено` presentation зберігає proof/provenance;
 - ✅ 7-case end-to-end corpus: direct, multi-step, recursion, unknown, conflict,
   malformed advice, knowledge-package round-trip.
 
@@ -150,7 +150,7 @@ tcp listen address/port ranges
 Versioned protocol живе в `lib/translation.lisp`:
 
 ```lisp
-(translation-1 candidate|ambiguous|rejected clause|batch|query source payload)
+(переклад-версія-1 кандидат|неоднозначний|відхилений клауза|пакет|запит source payload)
 ```
 
 Підтверджена межа:
@@ -159,14 +159,14 @@ Versioned protocol живе в `lib/translation.lisp`:
 - ✅ candidate clause/batch повторно проходить чинні knowledge validators і
   `advice-decision` / `advice-all-decision`;
 - ✅ candidate query проходить `knowledge-goal-valid?`;
-- ✅ review є pure щодо `*knowledge-journal*` — навіть `accepted` нічого не пише;
+- ✅ review є pure щодо `*knowledge-journal*` — навіть `прийнятий` нічого не пише;
 - ✅ лише accepted clause/batch відкриває `translation-admission-payload`;
 - ✅ actual knowledge write лишається явним `advise` / `advise-all`;
 - ✅ existing explicit opposite перемагає зовнішню candidate-пропозицію;
 - ✅ ambiguous/rejected review може зберігатися як evidence, не knowledge;
 - ✅ ambiguity вимагає щонайменше двох валідних alternatives;
 - ✅ versioned data-only corpus покриває accepted/rejected/ambiguous та
-  downstream `proved`/`unknown`/`not-run` modes.
+  downstream `доведено`/`невідомо`/`не-виконано` modes.
 
 Evidence: `translation_boundary.rs`, `translation-corpus-v1.lisp`; substantive
 B4 tests/build/clippy пройшли в repair sequence #1050/#1051, final current-head
@@ -181,18 +181,18 @@ CI лишається authority перед сильнішим claim.
 Перший milestone виконаний: існують versioned candidate data, Lisp-owned
 validation/review, accepted/rejected/ambiguous distinction та evidence path.
 Зовнішній provider/LLM adapter, якщо його додавати, повинен лише породжувати
-`translation-1` data і не отримує API прямого запису knowledge state.
+`переклад-версія-1` data і не отримує API прямого запису knowledge state.
 
 Нормативний pipeline:
 
 ```text
 external translator
         ↓
-(translation-1 ...) data
+(переклад-версія-1 ...) data
         ↓
 translation-review          ← Lisp semantic authority
         ↓
-accepted knowledge candidate?
+прийнятий knowledge кандидат?
         ├── no  → evidence only
         └── yes → explicit advise / advise-all
                          ↓
@@ -226,7 +226,7 @@ Repeated-query public-path profile на одному незмінному 503-cl
 
 ```text
 6 distinct goals
-public reason-in-observe batch         ~3.823 s
+public reason-in-observe пакет         ~3.823 s
 prepared reason-observe + one index    ~1.092 s
 public/prepared                         3.50x
 6 repeated module projections          ~0.443 s
@@ -368,8 +368,8 @@ C5 не є активним feature-front. Повертатися сюди ли�
    #220/#1717 truth/control cleanup, #2817/#2953 removal of legacy universal identity
 2. C4 user-facing host capability scope — explicit operational decision, then implementation if ratified
 3. C3 shrink Rust / grow Lisp only where duplicate semantic authority is measurably removed with parity evidence
-4. B4 external-provider adapter only when a concrete translator exists and passes the versioned corpus
-5. D8 is owner-ratified 256/256 under #3960; runtime callability remains separate and fail-closed until mechanisms are admitted
+4. B4 external-provider adapter only when a concrete translator exists and passes the versioned корпус
+5. D8 is owner-ratified 256/256 under #3960; runtime callability remains separate and fail-closed until mechanisms are допущено
 6. CML/FPGA vertical: core.lisp → unify.lisp → reason.lisp on an independent backend when it advances Advice Taker
 7. B5 performance — return only for a new measured workload/bottleneck
 ```
@@ -381,7 +381,7 @@ C5 не є активним feature-front. Повертатися сюди ли�
 - CI червоний;
 - новий claim не має executable evidence;
 - failure mode прихований human-readable string замість stable data;
-- `unknown` використовується як synonym для false / invalid / blocked / disputed;
+- `невідомо` використовується як synonym для false / invalid / blocked / disputed;
 - новий primitive пропонується до перевірки, чи це можна виразити бібліотекою;
 - зовнішній translator може обійти `translation-review` / `advise` і прямо писати knowledge;
 - security mechanism декларується без adversarial bypass test;

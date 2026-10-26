@@ -10,26 +10,26 @@ translator semantic authority.
 An external parser, model or LLM may emit only versioned Lisp data:
 
 ```lisp
-(translation/1 candidate clause
+(переклад-версія-1 кандидат клауза
   "Socrates is human."
-  ((human socrates)))
+  ((людина сократ)))
 ```
 
 `lib/translation.lisp` owns the review protocol. The translator status is one of
-`candidate`, `ambiguous`, or `rejected`; the kind is `clause`, `batch`, or
-`query`. `translation-review` validates the protocol shell and then reuses the
+`кандидат`, `неоднозначний`, or `відхилений`; the kind is `клауза`, `пакет`, or
+`запит`. `translation-review` validates the protocol shell and then reuses the
 existing knowledge validators and `advice-decision` / `advice-all-decision`.
-It is pure with respect to the knowledge journal: even an `accepted` review
+It is pure with respect to the knowledge journal: even an `прийнятий` review
 writes nothing.
 
 ```lisp
 (def proposal
-  '(translation/1 candidate clause
+  '(переклад-версія-1 кандидат клауза
      "Socrates is human."
-     ((human socrates))))
+     ((людина сократ))))
 
 (def review (translation-review 'science proposal))
-; => (translation-review/1 accepted knowledge-accepted ...)
+; => (огляд-перекладу-версія-1 прийнятий знання-прийнято ...)
 
 (translation-admission-payload review)
 ; => ((human socrates))
@@ -38,7 +38,7 @@ writes nothing.
 Rejected and ambiguous translations are observations, not knowledge.
 `translation-evidence-next` can retain their structured reviews in a
 caller-owned evidence journal. A proposal with one alternative cannot claim
-`ambiguous`: ambiguity requires at least two structurally valid alternatives.
+`неоднозначний`: ambiguity requires at least two structurally valid alternatives.
 
 ### 2. Knowledge admission
 
@@ -60,9 +60,9 @@ The journal receives every clause in one update or receives none.
 
 Results remain stable data shapes rather than printed messages:
 
-- `(accepted (module name) (knowledge clause-or-clauses))`
-- `(rejected (reason invalid-module|invalid-clause|invalid-batch) (input value))`
-- `(conflict (new clause) (existing opposite) (proof result))`
+- `(прийнятий (module name) (knowledge clause-or-clauses))`
+- `(відхилений (reason некоректний-модуль|invalid-clause|некоректний-пакет) (input value))`
+- `(суперечність (new клауза) (existing opposite) (proof result))`
 
 Explicit negative knowledge uses a head such as `((not (planet pluto)))`.
 This is distinct from `(not goal)` inside a rule body, where the reasoning
@@ -73,11 +73,11 @@ The resulting authority chain is therefore:
 ```text
 external translator
         ↓
-(translation/1 ...)
+(переклад-версія-1 ...)
         ↓
 translation-review          Lisp-owned, no write
         ↓
-accepted knowledge payload?
+прийнятий knowledge payload?
         ├── no  → structured evidence only
         └── yes → explicit advise / advise-all
                         ↓
@@ -102,29 +102,29 @@ Advice Taker тепер має **дві окремі брами**, і жодна
 Зовнішній parser, модель або LLM може лише запропонувати versioned Lisp-дані:
 
 ```lisp
-(translation/1 candidate clause
+(переклад-версія-1 кандидат клауза
   "Socrates is human."
   ((human socrates)))
 ```
 
 `lib/translation.lisp` належить Lisp-рівню і вирішує, чи сама пропозиція
-структурно коректна. Статус перекладача — `candidate`, `ambiguous` або
-`rejected`; вид — `clause`, `batch` або `query`.
+структурно коректна. Статус перекладача — `кандидат`, `неоднозначний` або
+`відхилений`; вид — `клауза`, `пакет` або `запит`.
 
 `translation-review` не пише у `*knowledge-journal*`. Навіть результат
-`accepted` означає лише: «цей кандидат пройшов Lisp-перевірку і може бути
+`прийнятий` означає лише: «цей кандидат пройшов Lisp-перевірку і може бути
 переданий до брами знань». Він **ще не є знанням**.
 
 Відхилені та неоднозначні переклади лишаються evidence. Функція
 `translation-evidence-next` може додати структурований review до окремого
-журналу спостережень. `ambiguous` вимагає щонайменше двох валідних
+журналу спостережень. `неоднозначний` вимагає щонайменше двох валідних
 альтернатив — одна альтернатива не може маскуватися під неоднозначність.
 
 ### 2. Приймання знання
 
 `advise` лишається єдиною data-only брамою запису одного clause у символьний
 журнал знань. Вона перевіряє всю структуру, канонічні `(var name)` і явно
-відому протилежність, та змінює журнал лише після `accepted`.
+відому протилежність, та змінює журнал лише після `прийнятий`.
 
 Для кількох взаємозалежних clause використовується `advise-all`: пакет
 перевіряється атомарно разом із чинними й запропонованими знаннями — або
@@ -135,7 +135,7 @@ Advice Taker тепер має **дві окремі брами**, і жодна
 ```text
 зовнішній translator
         ↓
-(translation/1 ...)
+(переклад-версія-1 ...)
         ↓
 translation-review          ← рішення Lisp, без запису
         ↓
@@ -169,17 +169,17 @@ Ein externer Parser, ein Modell oder LLM darf nur versionierte Lisp-Daten
 vorschlagen:
 
 ```lisp
-(translation/1 candidate clause
+(переклад-версія-1 кандидат клауза
   "Socrates is human."
   ((human socrates)))
 ```
 
 `lib/translation.lisp` prüft die Protokollform sowie die vorhandenen
 Wissensregeln. `translation-review` verändert das Wissensjournal nicht. Auch
-ein `accepted`-Review bedeutet nur, dass der Kandidat die Lisp-Prüfung bestanden
+ein `прийнятий`-Review bedeutet nur, dass der Kandidat die Lisp-Prüfung bestanden
 hat und an die eigentliche Wissensgrenze weitergegeben werden darf.
 
-`ambiguous` und `rejected` bleiben strukturierte Evidenz, niemals Wissen.
+`неоднозначний` und `відхилений` bleiben strukturierte Evidenz, niemals Wissen.
 Mehrdeutigkeit erfordert mindestens zwei gültige Alternativen.
 
 ### 2. Wissensaufnahme

@@ -45,7 +45,7 @@ fn eval_translation(source: &str) -> String {
     // Вираз іде ТИМ САМИМ reader-ом, що й бібліотеки: reasoning-шлях ліфтить
     // D9-голови (порада-рішення-у-світ тощо), загальний — ні. Раніше тут була
     // асиметрія: world.lisp завантажувався з ліфтингом, а вираз без нього,
-    // і D9-голова лишалась Text7-послідовністю → unknown Text7 binding.
+    // і D9-голова лишалась Text7-послідовністю → невідомо Text7 binding.
     eval_parsed_expressions(
         &sens::parse_mixed_exact_domain_reasoning_source("lib/world.lisp", source)
             .unwrap_or_else(|error| panic!("чинний D1–D10 reader: {error}; source: {source}")),
@@ -63,7 +63,7 @@ fn reasoning_index_predicate_returns_d1_no_instead_of_cond_nil() {
     let source = r#"
       (список
         (індекс-міркування? (як-є ()))
-        (індекс-міркування? (як-є ((human socrates))))
+        (індекс-міркування? (як-є ((людина сократ))))
         (індекс-міркування? (список схема-індексу-міркування
                                        (як-є linear) (як-є ()) (як-є ()))))
     "#;
@@ -82,21 +82,21 @@ fn translation_reads_current_knowledge_journal_in_real_sens() {
     // Макрос приймає список клауз: (((хибне? мета))), а не одну ((хибне? мета)).
     let source = r#"
         (визначити літерал
-          (список (текст-у-символ "human") (текст-у-символ "socrates")))
+          (список (текст-у-символ "людина") (текст-у-символ "сократ")))
         (визначити протилежний-літерал (список (як-є хибне?) літерал))
         (визначити протилежна-клауза (список протилежний-літерал))
         (визначити журнал-до (поточний-журнал-знань))
-        (повідомити-знання (як-є corpus) (список протилежна-клауза))
+        (повідомити-знання (як-є корпус) (список протилежна-клауза))
         (список
           (порожній? журнал-до)
           (хибне? (порожній? (поточний-журнал-знань)))
           (однакові? (поточний-журнал-знань) журнал-знань)
-          (перше (отримати-рішення-за-порадою (як-є corpus)
+          (перше (отримати-рішення-за-порадою (як-є корпус)
                     (список літерал))))
     "#;
     assert_eq!(
         eval_translation(source),
-        "(1 1 1 conflict)",
+        "(1 1 1 суперечність)",
         "SENS має використовувати оновлений журнал і відхиляти суперечність"
     );
 }
@@ -108,21 +108,21 @@ fn world_direct_opposite_only_facts_not_unproved_rules() {
     // передумовою не стає доказом самої себе.
     let cases = [
         (
-            r#"(визначити літерал (список (текст-у-символ "human") (текст-у-символ "socrates")))
+            r#"(визначити літерал (список (текст-у-символ "людина") (текст-у-символ "сократ")))
                (визначити протилежний-літерал (список (як-є хибне?) літерал))
                (визначити клауза (список протилежний-літерал))
-               (визначити світ-для-перевірки (світ-повідомити-всі (порожній-світ) (як-є corpus) (список клауза)))
-               (перше (перше (порадити-світ світ-для-перевірки (як-є corpus) (список протилежний-літерал))))"#,
-            "conflict",
+               (визначити світ-для-перевірки (світ-повідомити-всі (порожній-світ) (як-є корпус) (список клауза)))
+               (перше (перше (порадити-світ світ-для-перевірки (як-є корпус) (список протилежний-літерал))))"#,
+            "суперечність",
         ),
         (
-            r#"(визначити літерал (список (текст-у-символ "human") (текст-у-символ "socrates")))
+            r#"(визначити літерал (список (текст-у-символ "людина") (текст-у-символ "сократ")))
                (визначити протилежний-літерал (список (як-є хибне?) літерал))
-               (визначити невідома-передумова (список (текст-у-символ "unknown-premise") (текст-у-символ "socrates")))
+               (визначити невідома-передумова (список (текст-у-символ "невідома-передумова") (текст-у-символ "сократ")))
                (визначити клауза (список протилежний-літерал невідома-передумова))
-               (визначити світ-для-перевірки (світ-повідомити-всі (порожній-світ) (як-є corpus) (список клауза)))
-               (перше (перше (порадити-світ світ-для-перевірки (як-є corpus) (список протилежний-літерал))))"#,
-            "accepted",
+               (визначити світ-для-перевірки (світ-повідомити-всі (порожній-світ) (як-є корпус) (список клауза)))
+               (перше (перше (порадити-світ світ-для-перевірки (як-є корпус) (список протилежний-літерал))))"#,
+            "прийнятий",
         ),
     ];
     for (source, expected) in cases {
@@ -137,11 +137,11 @@ fn d10_advice_decisions_are_pure_world_derived_sens_functions() {
     let source = r#"
         (визначити журнал-до журнал-знань)
         (визначити одиночне-рішення
-          (отримати-рішення-за-порадою (як-є corpus)
-            (як-є ((human socrates)))))
+          (отримати-рішення-за-порадою (як-є корпус)
+            (як-є ((людина сократ)))))
         (визначити пакетне-рішення
-          (узагальнене-рішення-за-всіма-порадами (як-є corpus)
-            (як-є (((human socrates))))))
+          (узагальнене-рішення-за-всіма-порадами (як-є корпус)
+            (як-є (((людина сократ))))))
         (список
           (перше одиночне-рішення)
           (перше пакетне-рішення)
@@ -149,7 +149,7 @@ fn d10_advice_decisions_are_pure_world_derived_sens_functions() {
     "#;
     assert_eq!(
         eval_translation(source),
-        "(accepted accepted 1)",
+        "(прийнятий прийнятий 1)",
         "обидва D10 рішення лише читають immutable World"
     );
 }
@@ -160,19 +160,19 @@ fn translation_content_validity_is_exact_d1_in_real_sens() {
     // перевіряється реальним SENS eval з чинними бібліотеками.
     for (source, expected) in [
         (
-            "(вміст-кандидата-перекладу-коректний? (як-є clause) (як-є ((human socrates))))",
+            "(вміст-кандидата-перекладу-коректний? (як-є клауза) (як-є ((людина сократ))))",
             "1",
         ),
         (
-            "(вміст-кандидата-перекладу-коректний? (як-є clause) (як-є ((human (var)))))",
+            "(вміст-кандидата-перекладу-коректний? (як-є клауза) (як-є ((human (var)))))",
             "0",
         ),
         (
-            "(вміст-кандидата-перекладу-коректний? (як-є batch) (як-є ()))",
+            "(вміст-кандидата-перекладу-коректний? (як-є пакет) (як-є ()))",
             "0",
         ),
         (
-            "(вміст-кандидата-перекладу-коректний? (як-є невідомий-вид) (як-є ((human socrates))))",
+            "(вміст-кандидата-перекладу-коректний? (як-є невідомий-вид) (як-є ((людина сократ))))",
             "0",
         ),
     ] {
@@ -186,12 +186,12 @@ fn accepted_translation_review_is_pure_and_only_exposes_an_admission_payload() {
         (визначити журнал-до журнал-знань)
         ; Payload будується як D3-клауза з явно створеним SENS-символом.
         (визначити літерал
-          (список (текст-у-символ "human") (текст-у-символ "socrates")))
+          (список (текст-у-символ "людина") (текст-у-символ "сократ")))
         (визначити клауза (список літерал))
         (визначити пропозиція
-          (список схема-перекладу (як-є candidate) (як-є clause)
+          (список схема-перекладу (як-є кандидат) (як-є клауза)
                  "Socrates is human." клауза))
-        (визначити огляд (переклад-перевірка (як-є corpus) пропозиція))
+        (визначити огляд (переклад-перевірка (як-є корпус) пропозиція))
         (список
           (переклад-перевірка-стан огляд)
           (переклад-перевірка-код огляд)
@@ -200,7 +200,7 @@ fn accepted_translation_review_is_pure_and_only_exposes_an_admission_payload() {
     "#;
     assert_eq!(
         eval_translation(source),
-        "(accepted knowledge-accepted 1 1)"
+        "(прийнятий знання-прийнято 1 1)"
     );
 }
 
@@ -210,21 +210,21 @@ fn accepted_candidate_becomes_knowledge_only_after_explicit_advise() {
     // Початкове значення «невідомий модуль» — D1 0, не D3 NIL.
     let source = r#"
         (визначити літерал
-          (список (текст-у-символ "human") (текст-у-символ "socrates")))
+          (список (текст-у-символ "людина") (текст-у-символ "сократ")))
         (визначити клауза (список літерал))
         (визначити пропозиція
-          (список схема-перекладу (як-є candidate) (як-є clause)
+          (список схема-перекладу (як-є кандидат) (як-є клауза)
                  "Socrates is human." клауза))
-        (визначити огляд (переклад-перевірка (як-є corpus) пропозиція))
-        (визначити модуль-до (модуль-відомий? (як-є corpus)))
-        (повідомити-знання (як-є corpus) (список (переклад-допуск-вміст огляд)))
+        (визначити огляд (переклад-перевірка (як-є корпус) пропозиція))
+        (визначити модуль-до (модуль-відомий? (як-є корпус)))
+        (повідомити-знання (як-є корпус) (список (переклад-допуск-вміст огляд)))
         (список
           модуль-до
-          (модуль-відомий? (як-є corpus))
+          (модуль-відомий? (як-є корпус))
           (результат-стан
-            (міркувати-у-спостерігати (як-є corpus) літерал)))
+            (міркувати-у-спостерігати (як-є корпус) літерал)))
     "#;
-    assert_eq!(eval_translation(source), "(0 1 proved)");
+    assert_eq!(eval_translation(source), "(0 1 доведено)");
 }
 
 #[test]
@@ -232,11 +232,11 @@ fn ambiguous_translation_is_evidence_not_knowledge() {
     let source = r#"
         (визначити журнал-до журнал-знань)
         (визначити пропозиція
-          (як-є (translation-1 ambiguous clause
+          (як-є (переклад-версія-1 неоднозначний клауза
                    "Mercury is hot."
                    (((hot mercury-planet))
                     ((hot mercury-element))))))
-        (визначити огляд (переклад-перевірка (як-є corpus) пропозиція))
+        (визначити огляд (переклад-перевірка (як-є корпус) пропозиція))
         (визначити докази (переклад-доказ-наступний огляд (як-є ())))
         (список
           (переклад-перевірка-стан огляд)
@@ -247,7 +247,7 @@ fn ambiguous_translation_is_evidence_not_knowledge() {
     "#;
     assert_eq!(
         eval_translation(source),
-        "(ambiguous translator-ambiguous 1 1 0)"
+        "(неоднозначний перекладач-неоднозначний 1 1 0)"
     );
 }
 
@@ -256,10 +256,10 @@ fn malformed_semantic_candidate_is_rejected_and_cannot_reach_advice() {
     let source = r#"
         (визначити журнал-до журнал-знань)
         (визначити пропозиція
-          (як-є (translation-1 candidate clause
+          (як-є (переклад-версія-1 кандидат клауза
                    "Socrates is human."
                    ((human (var))))))
-        (визначити огляд (переклад-перевірка (як-є corpus) пропозиція))
+        (визначити огляд (переклад-перевірка (як-є корпус) пропозиція))
         (визначити докази (переклад-доказ-наступний огляд (як-є ())))
         (список
           (переклад-перевірка-стан огляд)
@@ -270,7 +270,7 @@ fn malformed_semantic_candidate_is_rejected_and_cannot_reach_advice() {
     "#;
     assert_eq!(
         eval_translation(source),
-        "(rejected invalid-candidate 1 1 ())"
+        "(відхилений некоректний-кандидат 1 1 ())"
     );
 }
 
@@ -279,10 +279,10 @@ fn translator_refusal_is_recordable_evidence_and_never_knowledge() {
     let source = r#"
         (визначити журнал-до журнал-знань)
         (визначити пропозиція
-          (як-є (translation-1 rejected clause
+          (як-є (переклад-версія-1 відхилений клауза
                    "Colorless green ideas sleep furiously."
-                   unsupported-translation)))
-        (визначити огляд (переклад-перевірка (як-є corpus) пропозиція))
+                   непідтриманий-переклад)))
+        (визначити огляд (переклад-перевірка (як-є корпус) пропозиція))
         (визначити докази (переклад-доказ-наступний огляд (як-є ())))
         (список
           (переклад-перевірка-стан огляд)
@@ -293,7 +293,7 @@ fn translator_refusal_is_recordable_evidence_and_never_knowledge() {
     "#;
     assert_eq!(
         eval_translation(source),
-        "(rejected translator-rejected 1 1 ())"
+        "(відхилений перекладач-відхилив 1 1 ())"
     );
 }
 
@@ -304,16 +304,16 @@ fn existing_explicit_opposite_overrules_an_external_candidate() {
     // Явний заперечний факт має правильну вкладеність списку клауз.
     let source = r#"
         (визначити літерал
-          (список (текст-у-символ "human") (текст-у-символ "socrates")))
+          (список (текст-у-символ "людина") (текст-у-символ "сократ")))
         (визначити протилежний-літерал (список (як-є хибне?) літерал))
         (визначити протилежна-клауза (список протилежний-літерал))
         (визначити журнал-до журнал-знань)
-        (повідомити-знання (як-є corpus) (список протилежна-клауза))
+        (повідомити-знання (як-є корпус) (список протилежна-клауза))
         (визначити клауза (список літерал))
         (визначити пропозиція
-          (список схема-перекладу (як-є candidate) (як-є clause)
+          (список схема-перекладу (як-є кандидат) (як-є клауза)
                  "Socrates is human." клауза))
-        (визначити огляд (переклад-перевірка (як-є corpus) пропозиція))
+        (визначити огляд (переклад-перевірка (як-є корпус) пропозиція))
         (список
           (переклад-перевірка-стан огляд)
           (переклад-перевірка-код огляд)
@@ -322,7 +322,7 @@ fn existing_explicit_opposite_overrules_an_external_candidate() {
     "#;
     assert_eq!(
         eval_translation(source),
-        "(rejected knowledge-conflict 1 ())"
+        "(відхилений суперечність-знань 1 ())"
     );
 }
 
@@ -331,19 +331,19 @@ fn accepted_query_is_a_question_not_a_knowledge_write() {
     let source = r#"
         (визначити журнал-до журнал-знань)
         (визначити пропозиція
-          (як-є (translation-1 candidate query
+          (як-є (переклад-версія-1 кандидат запит
                    "Is Plato metallic?"
-                   (metallic plato))))
-        (визначити огляд (переклад-перевірка (як-є corpus) пропозиція))
+                   (металевий платон))))
+        (визначити огляд (переклад-перевірка (як-є корпус) пропозиція))
         (список
           (переклад-перевірка-стан огляд)
           (переклад-перевірка-код огляд)
           (переклад-допуск-вміст огляд)
           (однакові? журнал-до журнал-знань)
           (результат-стан
-            (міркувати-у-спостерігати (як-є corpus) (переклад-вміст пропозиція))))
+            (міркувати-у-спостерігати (як-є корпус) (переклад-вміст пропозиція))))
     "#;
-    assert_eq!(eval_translation(source), "(accepted query () 1 blocked)");
+    assert_eq!(eval_translation(source), "(прийнятий запит () 1 заблоковано)");
 }
 
 #[test]
@@ -354,7 +354,7 @@ fn translation_alternatives_reject_improper_d3_tail_in_live_sens() {
         ("(((hot mercury-planet)) . зіпсований-хвіст)", "0"),
     ] {
         let expression = format!(
-            "(альтернативні-варіанти-перекладу-коректні? (як-є clause) (як-є {alternatives}))"
+            "(альтернативні-варіанти-перекладу-коректні? (як-є клауза) (як-є {alternatives}))"
         );
         assert_eq!(
             eval_translation(&expression),
@@ -368,16 +368,16 @@ fn translation_alternatives_reject_improper_d3_tail_in_live_sens() {
 fn one_alternative_is_not_allowed_to_masquerade_as_ambiguity() {
     let source = r#"
         (визначити пропозиція
-          (як-є (translation-1 ambiguous clause
+          (як-є (переклад-версія-1 неоднозначний клауза
                    "Mercury is hot."
                    (((hot mercury))))))
-        (визначити огляд (переклад-перевірка (як-є corpus) пропозиція))
+        (визначити огляд (переклад-перевірка (як-є корпус) пропозиція))
         (список
           (переклад-перевірка-стан огляд)
           (переклад-перевірка-код огляд)
           (переклад-допуск-вміст огляд))
     "#;
-    assert_eq!(eval_translation(source), "(rejected invalid-ambiguity ())");
+    assert_eq!(eval_translation(source), "(відхилений некоректна-неоднозначність ())");
 }
 
 #[test]
@@ -385,13 +385,13 @@ fn malformed_protocol_envelope_is_named_before_semantic_admission() {
     let source = r#"
         (визначити огляд
           (переклад-перевірка
-            (як-є corpus)
-            (як-є (translation-2 candidate clause "text" ((human socrates))))))
+            (як-є корпус)
+            (як-є (translation-2 кандидат клауза "text" ((людина сократ))))))
         (список
           (переклад-перевірка-стан огляд)
           (переклад-перевірка-код огляд))
     "#;
-    assert_eq!(eval_translation(source), "(rejected invalid-translation)");
+    assert_eq!(eval_translation(source), "(відхилений некоректний-переклад)");
 }
 
 #[test]
@@ -399,14 +399,14 @@ fn translation_source_requires_exact_d1_string_predicate() {
     // D9 рядок? безпосередньо засвідчує тип джерела точним D1-бітом.
     let valid = r#"
         (структура-обгортки-перекладу-коректна?
-          (як-є (translation-1 candidate query "текст" (metallic plato))))
+          (як-є (переклад-версія-1 кандидат запит "текст" (металевий платон))))
     "#;
-    let invalid = r#"
+    let некоректний = r#"
         (структура-обгортки-перекладу-коректна?
-          (як-є (translation-1 candidate query (не-текст) (metallic plato))))
+          (як-є (переклад-версія-1 кандидат запит (не-текст) (металевий платон))))
     "#;
     assert_eq!(eval_translation(valid), "1", "SENS: рядкове джерело");
-    assert_eq!(eval_translation(invalid), "0", "SENS: D1:ні для нестрокового джерела");
+    assert_eq!(eval_translation(некоректний), "0", "SENS: D1:ні для нестрокового джерела");
 }
 
 #[test]
@@ -431,16 +431,16 @@ fn translation_symbol_law_rejects_non_symbols_in_live_sens() {
             .unwrap_or_else(|error| panic!("чинна reasoning-бібліотека {path}: {error}"));
     }
     for (expression, expected) in [
-        // Compound values are rejected before D9 SYMBOL?; D1 bits are rejected
+        // Compound values are відхилений before D9 SYMBOL?; D1 bits are відхилений
         // by exact equality; only remaining atomic values reach the symbol law.
-        ("(як-є candidate)", true),
-        ("\"candidate\"", false),
+        ("(як-є кандидат)", true),
+        ("\"кандидат\"", false),
         ("7", false),
         ("так", false),
         ("ні", false),
         ("(як-є ())", false),
-        ("(як-є (candidate))", false),
-        ("(сполучити (як-є candidate) ні)", false),
+        ("(як-є (кандидат))", false),
+        ("(сполучити (як-є кандидат) ні)", false),
     ] {
         let source = format!("(переклад-внутрішній-символ? {expression})");
         let actual = eval_parsed_expressions(
@@ -461,31 +461,31 @@ fn translation_exact_five_fields_rejects_short_long_and_dotted_lists() {
     // Немає окремого незареєстрованого helper-а чи виклику через D7-ім'я.
     for (proposal, expected) in [
         (
-            r#"(translation-1 candidate query "Is Plato metallic?" (metallic plato))"#,
-            "query",
+            r#"(переклад-версія-1 кандидат запит "Is Plato metallic?" (металевий платон))"#,
+            "запит",
         ),
         (
-            r#"(translation-1 candidate query "Is Plato metallic?")"#,
-            "invalid-translation",
+            r#"(переклад-версія-1 кандидат запит "Is Plato metallic?")"#,
+            "некоректний-переклад",
         ),
         (
-            r#"(translation-1 candidate query "Is Plato metallic?" (metallic plato) extra)"#,
-            "invalid-translation",
+            r#"(переклад-версія-1 кандидат запит "Is Plato metallic?" (металевий платон) extra)"#,
+            "некоректний-переклад",
         ),
         (
-            r#"(translation-1 candidate query "Is Plato metallic?" . broken)"#,
-            "invalid-translation",
+            r#"(переклад-версія-1 кандидат запит "Is Plato metallic?" . broken)"#,
+            "некоректний-переклад",
         ),
-        ("()", "invalid-translation"),
-        ("а", "invalid-translation"),
+        ("()", "некоректний-переклад"),
+        ("а", "некоректний-переклад"),
     ] {
         let source = format!(
-            "(000100011 (000101000 (як-є corpus) (як-є {proposal})))"
+            "(000100011 (000101000 (як-є корпус) (як-є {proposal})))"
         );
         assert_eq!(
             eval_translation(&source),
             expected,
-            "SENS rejected the wrong envelope shape: {proposal}"
+            "SENS відхилений the wrong envelope shape: {proposal}"
         );
     }
 }
@@ -494,16 +494,16 @@ fn translation_envelopes_reject_missing_and_excess_fields_in_live_sens() {
     // Вкладене D3 EQ повертає D1:NO, а НЕ D3:EMPTY.
     // Неправильну кількість полів має відкинути сама SENS-бібліотека.
     for proposal in [
-        "(translation-1 candidate query \"текст\")",
-        "(translation-1 candidate query \"текст\" (мета) зайве)",
+        "(переклад-версія-1 кандидат запит \"текст\")",
+        "(переклад-версія-1 кандидат запит \"текст\" (мета) зайве)",
     ] {
         let source = format!(
             "(переклад-перевірка-код (переклад-перевірка (як-є корпус) (як-є {proposal})))"
         );
         assert_eq!(
             eval_translation(&source),
-            "invalid-translation",
-            "SENS accepted malformed translation envelope: {proposal}"
+            "некоректний-переклад",
+            "SENS прийнятий malformed translation envelope: {proposal}"
         );
     }
 }
@@ -512,45 +512,45 @@ fn translation_envelopes_reject_missing_and_excess_fields_in_live_sens() {
 fn translation_review_rejects_extra_field_in_live_sens() {
     let source = r#"
         (запис-огляду-перекладу-коректний?
-          (як-є (translation-огляд-1 accepted query (пропозиція) (деталь) зайве)))
+          (як-є (translation-огляд-1 прийнятий запит (пропозиція) (деталь) зайве)))
     "#;
     assert_eq!(eval_translation(source), "0");
 }
 
 #[test]
 fn versioned_translation_corpus_is_data_only_and_contains_all_b4_modes() {
-    let corpus = include_str!("../../../tests/fixtures/translation-corpus-v1.lisp");
-    let forms = parse(corpus).expect("translation corpus must remain parseable data");
-    assert_eq!(forms.len(), 1, "corpus must be one versioned data value");
+    let корпус = include_str!("../../../tests/fixtures/translation-corpus-v1.lisp");
+    let forms = parse(корпус).expect("translation корпус must remain parseable data");
+    assert_eq!(forms.len(), 1, "корпус must be one versioned data value");
 
-    assert!(corpus.contains("(translation-corpus-1"));
-    let case_count = corpus
+    assert!(корпус.contains("(корпус-перекладів-версія-1"));
+    let case_count = корпус
         .lines()
-        .filter(|line| line.trim_start().starts_with("(translation-case-1"))
+        .filter(|line| line.trim_start().starts_with("(випадок-перекладу-версія-1"))
         .count();
     assert_eq!(case_count, 6);
 
     for id in [
-        "direct-fact",
-        "rule-batch",
-        "valid-question-without-proof",
+        "прямий-факт",
+        "пакет-правил",
+        "коректне-запитання-без-доказу",
         "malformed-semantic-candidate",
         "lexical-ambiguity",
         "translator-refusal",
     ] {
-        assert!(corpus.contains(id), "missing corpus case {id}");
+        assert!(корпус.contains(id), "missing корпус case {id}");
     }
 
-    for status in ["accepted", "rejected", "ambiguous"] {
+    for status in ["прийнятий", "відхилений", "неоднозначний"] {
         assert!(
-            corpus.contains(status),
-            "corpus must exercise review status {status}"
+            корпус.contains(status),
+            "корпус must exercise review status {status}"
         );
     }
-    for outcome in ["proved", "unknown", "not-run"] {
+    for outcome in ["доведено", "невідомо", "не-виконано"] {
         assert!(
-            corpus.contains(outcome),
-            "corpus must name downstream outcome {outcome}"
+            корпус.contains(outcome),
+            "корпус must name downstream outcome {outcome}"
         );
     }
 }
@@ -562,19 +562,19 @@ fn translation_review_evidence_named_sens_functions_execute_positive_and_negativ
     // Анонімний D5 value-call чи Python-підміна семантики тут не застосовуються.
     for (proposal, expected) in [
         (
-            r#"(translation-1 candidate query "текст" (metallic plato))"#,
-            "(query 1 0)",
+            r#"(переклад-версія-1 кандидат запит "текст" (металевий платон))"#,
+            "(запит 1 0)",
         ),
         (
-            r#"(translation-1 rejected clause "текст" unsupported-translation)"#,
-            "(translator-rejected 0 0)",
+            r#"(переклад-версія-1 відхилений клауза "текст" непідтриманий-переклад)"#,
+            "(перекладач-відхилив 0 0)",
         ),
     ] {
         // D4 DEFINE має рівно два операнди: ім'я та значення.
         // Огляд виконується окремою наступною SENS-формою — без host LET.
         let source = format!(
             r#"(визначити пара-огляду
-                 (переклад-перевірка-з-доказ (як-є corpus) (як-є {proposal}) (як-є ())))
+                 (переклад-перевірка-з-доказ (як-є корпус) (як-є {proposal}) (як-є ())))
                (список
                  (переклад-перевірка-код (перше пара-огляду))
                  (порожній? (друге пара-огляду))

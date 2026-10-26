@@ -1,72 +1,72 @@
 ; Дослідний корпус перекладу із зовнішньої природної мови.
 ; Його записи — дані свідчень, а не виконуваний код перекладача.
 ; Структура зберігає протокольні назви полів:
-;   (translation-corpus-1
-;     (translation-case-1 ID MODULE INPUT PROPOSAL EXPECTED-REVIEW-STATUS
+;   (корпус-перекладів-версія-1
+;     (випадок-перекладу-версія-1 ID MODULE INPUT PROPOSAL EXPECTED-REVIEW-STATUS
 ;                         DOWNSTREAM-QUERY EXPECTED-OUTCOME-STATUS)
 ;     ...)
-; Стан not-run означає, що пропозицію не допущено як знання;
+; Стан не-виконано означає, що пропозицію не допущено як знання;
 ; для неї не можна виконувати подальший запит Advice Taker.
 
-(translation-corpus-1
-  (translation-case-1
-    direct-fact
-    corpus
+(корпус-перекладів-версія-1
+  (випадок-перекладу-версія-1
+    прямий-факт
+    корпус
     "Socrates is human."
-    (translation-1 candidate clause "Socrates is human." ((human socrates)))
-    accepted
-    (human socrates)
-    proved)
+    (переклад-версія-1 кандидат клауза "Socrates is human." ((людина сократ)))
+    прийнятий
+    (людина сократ)
+    доведено)
 
-  (translation-case-1
-    rule-batch
-    corpus
+  (випадок-перекладу-версія-1
+    пакет-правил
+    корпус
     "Socrates is human. All humans are mortal."
-    (translation-1 candidate batch
+    (переклад-версія-1 кандидат пакет
       "Socrates is human. All humans are mortal."
-      (((human socrates))
-       ((mortal (var x)) (human (var x)))))
-    accepted
-    (mortal socrates)
-    proved)
+      (((людина сократ))
+       ((смертний (var x)) (людина (var x)))))
+    прийнятий
+    (смертний сократ)
+    доведено)
 
-  (translation-case-1
-    valid-question-without-proof
-    corpus
+  (випадок-перекладу-версія-1
+    коректне-запитання-без-доказу
+    корпус
     "Is Plato metallic?"
-    (translation-1 candidate query "Is Plato metallic?" (metallic plato))
-    accepted
-    (metallic plato)
-    unknown)
+    (переклад-версія-1 кандидат запит "Is Plato metallic?" (металевий платон))
+    прийнятий
+    (металевий платон)
+    невідомо)
 
-  (translation-case-1
+  (випадок-перекладу-версія-1
     malformed-semantic-candidate
-    corpus
+    корпус
     "Socrates is human."
-    (translation-1 candidate clause "Socrates is human." ((human (var))))
-    rejected
+    (переклад-версія-1 кандидат клауза "Socrates is human." ((людина (var))))
+    відхилений
     ()
-    not-run)
+    не-виконано)
 
-  (translation-case-1
+  (випадок-перекладу-версія-1
     lexical-ambiguity
-    corpus
+    корпус
     "Mercury is hot."
-    (translation-1 ambiguous clause
+    (переклад-версія-1 неоднозначний клауза
       "Mercury is hot."
       (((hot mercury-planet))
        ((hot mercury-element))))
-    ambiguous
+    неоднозначний
     ()
-    not-run)
+    не-виконано)
 
-  (translation-case-1
+  (випадок-перекладу-версія-1
     translator-refusal
-    corpus
+    корпус
     "Colorless green ideas sleep furiously."
-    (translation-1 rejected clause
+    (переклад-версія-1 відхилений клауза
       "Colorless green ideas sleep furiously."
-      unsupported-translation)
-    rejected
+      непідтриманий-переклад)
+    відхилений
     ()
-    not-run))
+    не-виконано))

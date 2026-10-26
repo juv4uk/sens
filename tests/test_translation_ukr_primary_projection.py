@@ -50,11 +50,12 @@ class TranslationUkrPrimaryProjectionTests(unittest.TestCase):
             r"(?m)^\(визначити\s+[^\s()]*[A-Za-z][^\s()]*",
             "Активний Lisp не повинен повертати історичні англомовні DEFINE",
         )
-        # Цитовані поля зовнішнього протоколу — дані, а не викличні імена.
-        self.assertIn("(як-є translation-1)", source)
-        self.assertIn("(як-є translation-review-1)", source)
-        self.assertIn("(як-є translation-evidence-1)", source)
-        self.assertIn("(як-є candidate)", source)
+        # Мітки протоколу — українські дані, а не викличні імена.
+        self.assertIn("(як-є переклад-версія-1)", source)
+        self.assertIn("(як-є огляд-перекладу-версія-1)", source)
+        self.assertIn("(як-є доказ-перекладу-версія-1)", source)
+        self.assertIn("(як-є кандидат)", source)
+        self.assertNotRegex(source, r"\(як-є\s+[A-Za-z][A-Za-z0-9_/-]*\)")
 
     def test_translation_names_match_ratified_d9_d10_projection_and_keep_width(self):
         source = read_source(SOURCE_PATH)
