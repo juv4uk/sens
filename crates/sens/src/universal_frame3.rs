@@ -431,8 +431,7 @@ mod tests {
 
         for width in 1..=9 {
             for n in 0..=7 {
-                let words = std::iter::repeat(new_word(width, 0).unwrap())
-                    .take(n)
+                let words = std::iter::repeat_n(new_word(width, 0).unwrap(), n)
                     .collect::<Vec<_>>();
                 assert_eq!(choose_plan(&words)[0].bytes, brute(&words));
             }
