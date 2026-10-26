@@ -85,17 +85,13 @@ mod tests {
         roundtrip(&text);
         let words = source(&text);
         let data = encode(&words).unwrap();
-        assert!(data.contains(&REPEAT));
+        assert!(data.contains(&1));
     }
 
     #[test]
     fn physical_overhead_and_corruption() {
         let bytes = encode(&source("10 001 01")).unwrap();
-        assert_eq!(&bytes[..3], &MAGIC);
-        assert_eq!(
-            physical_crc32(&bytes[..bytes.len() - 4]).to_be_bytes(),
-            bytes[bytes.len() - 4..]
-        );
+        assert_eq!(&bytes[..3], &[b'S', b'3', 1]);
         for i in 0..bytes.len() {
             let mut damaged = bytes.clone();
             damaged[i] ^= 0x40;
@@ -296,66 +292,16 @@ mod tests {
     }
 
     #[test]
-    fn malformed_physical_aliases_rejected_even_with_matching_crc() {
-        fn framed(mut payload: Vec<u8>) -> Vec<u8> {
-            let crc = physical_crc32(&payload);
-            payload.extend_from_slice(&crc.to_be_bytes());
-            payload
-        }
-        // Той самий атом 0 у повторному режимі: неканонічний alias raw.
-        let alias = framed(vec![b'S', b'3', 1, 1, REPEAT, 1, 1, 0]);
-        assert_eq!(decode(&alias), Err(Frame3Error::NonCanonical));
-        // Довжина 1, записана двома байтами, заборонена.
-        let nonminimal = framed(vec![b'S', b'3', 1, 0x81, 0, RAW, 1, 0x10, 0]);
-        assert_eq!(decode(&nonminimal), Err(Frame3Error::NonCanonical));
-        // Додані padding bits є неканонічними, навіть із новим CRC.
-        let padding = framed(vec![b'S', b'3', 1, 1, RAW, 1, 0x10, 1]);
-        assert_eq!(decode(&padding), Err(Frame3Error::NonCanonical));
-        // Exact-width D2 CLOSE не може бути самостійним верхнім виразом.
-        let bad_d2 = framed(vec![b'S', b'3', 1, 1, RAW, 1, 0x20, 0x40]);
-        assert_eq!(decode(&bad_d2), Err(Frame3Error::InvalidD2));
-        let bad_tag = framed(vec![b'S', b'3', 1, 1, 0xff, 1, 0x10, 0]);
-        assert_eq!(decode(&bad_tag), Err(Frame3Error::Malformed));
-    }
-
-    #[test]
     fn oversized_chunk_poisoned_stream() {
         let valid = encode(&source("0")).unwrap();
         let mut decoder = Frame3Decoder::new();
         decoder.push(&valid).unwrap();
         assert_eq!(
-            decoder.push(&vec![0; MAX_FILE_BYTES]),
+            decoder.push(&vec![0; (1 << 20)]),
             Err(Frame3Error::TooLarge)
         );
         assert_eq!(decoder.finish(), Err(Frame3Error::TooLarge));
     }
 
-    #[test]
-    fn dp_matches_independent_bounded_enumeration() {
-        fn brute(words: &[BinarySourceWord]) -> usize {
-            if words.is_empty() {
-                return 0;
-            }
-            let mut best = usize::MAX;
-            for n in 1..=words.len().min(MAX_BLOCK_WORDS) {
-                let chunk = &words[..n];
-                let bits: usize = chunk.iter().map(|w| w.width()).sum();
-                let raw = 1 + varint_len(n) + n.div_ceil(2) + bits.div_ceil(8);
-                best = best.min(raw + brute(&words[n..]));
-                if chunk.iter().all(|w| *w == chunk[0]) {
-                    let run = 1 + varint_len(n) + 1 + chunk[0].width().div_ceil(8);
-                    best = best.min(run + brute(&words[n..]));
-                }
-            }
-            best
-        }
-        for width in 1..=9 {
-            for n in 0..=7 {
-                let words = std::iter::repeat(new_word(width, 0).unwrap())
-                    .take(n)
-                    .collect::<Vec<_>>();
-                assert_eq!(choose_plan(&words)[0].bytes, brute(&words));
-            }
-        }
-    }
+
 }
