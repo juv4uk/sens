@@ -2,7 +2,7 @@
 //! Keyboard projection produces W7 coordinates; Zig alone packs/unpacks T5M.
 //! No legacy Rust physical codec is imported by these tests.
 
-use sens::{BinarySourceWord, Bit7};
+use sens::{BinarySourceWord, Bit2, Bit7};
 use sens::d7_keyboard::{self, D7Mode, D7CodecError};
 use sens_cli::zig_transport;
 
