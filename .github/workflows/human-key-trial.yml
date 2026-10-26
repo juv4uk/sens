@@ -9,14 +9,20 @@ jobs:
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@v5
-      - name: Run deterministic alignment/scorer self-tests — EXCLUDED (NOT_VERIFIED)
-        if: false
-        shell: bash
-        run: echo "FOREIGN_LANGUAGE_TEST_BENCH=EXCLUDED_BY_POLICY native_equivalent=NOT_VERIFIED"
-      - name: Run synthetic dry-run without human claim — EXCLUDED (NOT_VERIFIED)
-        if: false
-        shell: bash
-        run: echo "FOREIGN_LANGUAGE_TEST_BENCH=EXCLUDED_BY_POLICY native_equivalent=NOT_VERIFIED"
+      - name: Run deterministic alignment/scorer self-tests
+        run: python3 benchmarks/human-wire/trial.py --self-test
+      - name: Run synthetic dry-run without human claim
+        run: |
+          rm -rf /tmp/human-key-trial
+          python3 benchmarks/human-wire/trial.py             --dry-run             --condition D3-silent-known-randomized             --mode fixed-slot             --slot-ms 120             --session 0             --out /tmp/human-key-trial
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          data=json.loads(Path('/tmp/human-key-trial/trial.json').read_text())
+          assert data['metrics']['synthetic'] is True
+          assert data['metrics']['human_measurement'] is False
+          assert data['metrics']['edit_distance'] == 0
+          PY
       - uses: actions/upload-artifact@v4
         if: always()
         with:
