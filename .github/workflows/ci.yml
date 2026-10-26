@@ -52,11 +52,13 @@ jobs:
       - name: Перевірити межу власності мовних тестів
         shell: bash
         run: bash scripts/check-sens-only-semantic-tests.sh
+      - name: Language corridor / archive registry
+        run: python3 scripts/check-language-corridor-gate.py
       - name: Швидкий охоронець host debt
         shell: bash
         run: bash scripts/ensure-host-debt0.sh
       - name: Статус
-        run: echo "QUICK_CI=PASS heavy_native_laws_remint_release=MANUAL_TARGETED"
+        run: echo "QUICK_CI_STATUS=ok heavy_native_laws_remint_release=MANUAL_TARGETED"
 
   native:
     name: Ручний native Rust/Zig smoke
