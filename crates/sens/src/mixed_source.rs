@@ -187,8 +187,14 @@ fn lift_pinned_machine_wire_d9_strings(
         || is_exact_quote(&lifted[0])
         || spelling == Some("'")
     {
+        // Apply the narrow, ratified D4 data lift on this reader path too.
+        // Unknown quoted names remain inert Symbols, never callable heads.
+        let mut quoted = items.to_vec();
+        for item in quoted.iter_mut().skip(1) {
+            *item = lift_quoted_d4_identity_data(item.clone(), depth + 1)?;
+        }
         return Ok(Expr {
-            kind: ExprKind::List(items),
+            kind: ExprKind::List(Rc::from(quoted.into_boxed_slice())),
             span,
         });
     }
@@ -1356,6 +1362,42 @@ mod tests {
         assert!(matches!(
             &data[1].kind,
             ExprKind::Symbol(name) if name.as_ref() == "визначити"
+        ));
+    }
+
+    #[test]
+    fn translation_reader_preserves_quoted_d4_negation_and_unknown_data() {
+        let quoted = only(
+            parse_mixed_exact_domain_reasoning_source("lib/translation.lisp", "(як-є хибне?)")
+                .expect("translation source quote"),
+        );
+        let ExprKind::List(form) = quoted.kind else {
+            panic!("QUOTE form");
+        };
+        assert!(matches!(
+            &form[0].kind,
+            ExprKind::DomainIdentity(identity)
+                if identity.width() == 3 && identity.packed_bits() == 0b001
+        ));
+        assert!(matches!(
+            &form[1].kind,
+            ExprKind::DomainIdentity(identity)
+                if identity.width() == 4 && identity.packed_bits() == 0b0100
+        ));
+
+        let unknown = only(
+            parse_mixed_exact_domain_reasoning_source(
+                "lib/translation.lisp",
+                "(як-є непогоджена-функція)",
+            )
+            .expect("translation source quote with ordinary data"),
+        );
+        let ExprKind::List(form) = unknown.kind else {
+            panic!("QUOTE form");
+        };
+        assert!(matches!(
+            &form[1].kind,
+            ExprKind::Symbol(name) if name.as_ref() == "непогоджена-функція"
         ));
     }
 
