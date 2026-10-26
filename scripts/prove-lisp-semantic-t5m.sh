@@ -758,7 +758,8 @@ if [[ -s "$d10_queue_physical" && -f "$d10_queue_reference" ]]; then
   for iteration in {1..5}; do
     start_us="${EPOCHREALTIME/./}"
     if ! timeout 45s "$sens" "$d10_queue_physical" > "$evidence/d10-queue-$iteration.out" 2> "$evidence/d10-queue-$iteration.err"; then
-      echo "::error title=SENS D10 benchmark::REGRESSION layer=physical iteration=$iteration" >&2
+      cat "$evidence/d10-queue-$iteration.err" >&2
+      echo "::error title=SENS D10 benchmark::REGRESSION layer=physical iteration=$iteration expected=successful-SENS-execution actual=failed" >&2
       exit 1
     fi
     end_us="${EPOCHREALTIME/./}"
