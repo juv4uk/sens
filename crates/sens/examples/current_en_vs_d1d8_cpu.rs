@@ -74,7 +74,7 @@ fn trace_program(expressions: &[Expr]) -> Result<String, String> {
 
 fn prepared_session() -> Result<Session, String> {
     let mut session = Session::default();
-    load_core_library(&mut session)?;
+    load_core_library(&mut session).map_err(|error| error.to_string())?;
     Ok(session)
 }
 
@@ -110,7 +110,7 @@ fn preflight(candidate: &str, source: &str) -> Result<(), String> {
     // exact-width binary source (QUOTE/CAR only). It deliberately does not
     // grant callable meaning to English aliases or use a legacy SID table.
     let mut session = Session::default();
-    let result = eval_lowered_expressions(&lowered, &mut session)?;
+    let result = eval_lowered_expressions(&lowered, &mut session).map_err(|error| error.to_string())?;
     emit(
         0,
         &semantic_trace,
@@ -156,7 +156,7 @@ fn measure(candidate: &str, phase: &str, source: &str, repeat: usize) -> Result<
             let mut session = prepared_session()?;
             let started = Instant::now();
             let result =
-                eval_lowered_expressions(&lowered, &mut session)?;
+                eval_lowered_expressions(&lowered, &mut session).map_err(|error| error.to_string())?;
             emit(
                 started.elapsed().as_nanos(),
                 "",
@@ -170,7 +170,7 @@ fn measure(candidate: &str, phase: &str, source: &str, repeat: usize) -> Result<
             let parsed = parse_source(candidate, source)?;
             let lowered = lower_program(&parsed);
             let result =
-                eval_lowered_expressions(&lowered, &mut session)?;
+                eval_lowered_expressions(&lowered, &mut session).map_err(|error| error.to_string())?;
             emit(
                 started.elapsed().as_nanos(),
                 "",
@@ -190,7 +190,7 @@ fn measure(candidate: &str, phase: &str, source: &str, repeat: usize) -> Result<
             for _ in 0..repeat {
                 last = Some(
                     eval_lowered_expressions(&lowered, &mut session)
-                        ?,
+                        .map_err(|error| error.to_string())?,
                 );
             }
             let result = last.expect("repeat > 0");
