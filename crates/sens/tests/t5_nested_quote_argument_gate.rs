@@ -1,4 +1,5 @@
-//! Focused diagnostic for #4774: is nested D3 QUOTE intrinsically broken
+
+use sens_cli::zig_transport;//! Focused diagnostic for #4774: is nested D3 QUOTE intrinsically broken
 //! in the CURRENT physical T5 -> D2 parser -> pure Rust evaluator pipeline?
 //!
 //! This deliberately does not import the draft #3910 Text7/global-binder law,
@@ -6,8 +7,7 @@
 //! A PASS narrows #4774's "machine-block-one" failure to global/closure/list
 //! binding or a more specific current runtime path, not generic D3 QUOTE.
 
-use sens::{
-    encode_binary_projection_ternary, eval_parsed_expressions, open_ternary_program,
+use sens::{BinarySourceWord, render_binary_words_spaced, eval_parsed_expressions,
     parse_canonical_binary, Session,
 };
 
@@ -27,6 +27,22 @@ fn current_value(source: &str) -> Result<String, String> {
     let result = eval_parsed_expressions(&words, &mut Session::default())
         .map_err(|error| format!("current Rust oracle: {}", error.render(&visible)))?;
     Ok(format!("{}", result.value))
+}
+
+
+
+// Обгортки над чинним Zig T5M: staged-out ternary виведено (f5a5b213).
+fn open_ternary_program(bytes: &[u8]) -> Result<String, String> {
+    zig_transport::decode_t5m_words(bytes).map(|words| render_binary_words_spaced(&words))
+}
+
+fn encode_binary_projection_ternary(source: &str) -> Result<Vec<u8>, String> {
+    let words: Vec<BinarySourceWord> = sens::parse_binary_source_words(source)
+        .map_err(|error| format!("{error:?}"))?
+        .into_iter()
+        .map(|token| token.word)
+        .collect();
+    zig_transport::encode_t5m_direct(&words)
 }
 
 #[test]

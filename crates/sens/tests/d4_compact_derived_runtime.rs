@@ -1,7 +1,28 @@
 //! D4 exact-width carrier and physical T5 transport checks only.
 //! LIST/APPEND semantics and resident admission are SENS/Lisp-owned laws.
 
-use sens::{decode_ternary_program, encode_binary_projection_ternary, open_ternary_program};
+use sens::{BinarySourceWord, render_binary_words_spaced, encode_binary_projection_ternary};
+
+use sens_cli::zig_transport;
+
+
+// Обгортки над чинним Zig T5M: staged-out ternary виведено (f5a5b213).
+fn decode_ternary_program(bytes: &[u8]) -> Result<Vec<BinarySourceWord>, String> {
+    zig_transport::decode_t5m_words(bytes)
+}
+
+fn open_ternary_program(bytes: &[u8]) -> Result<String, String> {
+    zig_transport::decode_t5m_words(bytes).map(|words| render_binary_words_spaced(&words))
+}
+
+fn encode_binary_projection_ternary(source: &str) -> Result<Vec<u8>, String> {
+    let words: Vec<BinarySourceWord> = sens::parse_binary_source_words(source)
+        .map_err(|error| format!("{error:?}"))?
+        .into_iter()
+        .map(|token| token.word)
+        .collect();
+    zig_transport::encode_t5m_direct(&words)
+}
 
 #[test]
 fn width_qualified_words_roundtrip_without_borrowing_cross_domain_meaning() {

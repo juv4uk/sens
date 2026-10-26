@@ -1,9 +1,9 @@
-//! Binary-source structural and T5 transport canary.
+
+use sens_cli::zig_transport;//! Binary-source structural and T5 transport canary.
 //! Rust checks exact-width domain words, D2 framing, and physical bytes only;
 //! result laws belong to SENS/Lisp-owned witnesses and the physical CLI gate.
 
 use sens::{
-    decode_ternary_program, encode_binary_projection_ternary, open_ternary_program,
     parse_canonical_binary,
     syntax::{Expr, ExprKind},
 };
@@ -48,6 +48,30 @@ fn assert_bit_projection(source: &str) {
     for expression in &parsed {
         assert_exact_domain_ast(expression);
     }
+}
+
+
+
+// Обгортки над чинним Zig T5M: staged-out ternary виведено (f5a5b213).
+fn encode_ternary_words(words: &[BinarySourceWord]) -> Result<Vec<u8>, String> {
+    zig_transport::encode_t5m_direct(words)
+}
+
+fn decode_ternary_program(bytes: &[u8]) -> Result<Vec<BinarySourceWord>, String> {
+    zig_transport::decode_t5m_words(bytes)
+}
+
+fn open_ternary_program(bytes: &[u8]) -> Result<String, String> {
+    zig_transport::decode_t5m_words(bytes).map(|words| render_binary_words_spaced(&words))
+}
+
+fn encode_binary_projection_ternary(source: &str) -> Result<Vec<u8>, String> {
+    let words: Vec<BinarySourceWord> = sens::parse_binary_source_words(source)
+        .map_err(|error| format!("{error:?}"))?
+        .into_iter()
+        .map(|token| token.word)
+        .collect();
+    zig_transport::encode_t5m_direct(&words)
 }
 
 #[test]

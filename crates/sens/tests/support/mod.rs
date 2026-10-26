@@ -1,8 +1,8 @@
-//! Test-only composition of the reference Rust transport and SENS exact-word
+
+use sens_cli::zig_transport;//! Test-only composition of the reference Rust transport and SENS exact-word
 //! reader. Production callers must restore physical words through Zig.
 
-use sens::{
-    decode_ternary_words, EvalResult, LanguageError, PhysicalT5Program, Session,
+use sens::{BinarySourceWord, EvalResult, LanguageError, PhysicalT5Program, Session,
     TernaryTransportError,
 };
 
@@ -33,4 +33,9 @@ pub fn eval_reference_t5m(
     admit_reference_t5m(physical)?
         .execute(session)
         .map_err(ReferenceT5mError::Language)
+}
+
+// Обгортки над чинним Zig T5M: staged-out ternary виведено (f5a5b213).
+fn decode_ternary_words(bytes: &[u8]) -> Result<Vec<BinarySourceWord>, String> {
+    zig_transport::decode_t5m_words(bytes)
 }
