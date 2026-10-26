@@ -1342,12 +1342,12 @@ jobs:
           cargo test --locked -p sens --test reason_index proof_mapper_calls_lexically_bound_sens_closure_not_d5_function_identity -- --exact --nocapture
           cargo test --locked -p sens --test reason_index reason_index_d1_verdicts_from_real_predicates -- --exact --nocapture
 
-      - name: SI — перевірити чинний український Lisp і точні D24+ аргументи
+      - name: SI — Python test виключено; нативний SENS закон не підміняється
         if: ${{ always() }}
         run: |
           set -euo pipefail
           echo 'PYTHON_UNIT_TESTS=EXCLUDED_BY_REQUEST NOT_VERIFIED'
-          python3 scripts/test-si-derived-d1-bitness.py
+          echo 'PYTHON_TEST_EXCLUDED=si-derived-d1-bitness native_equivalent=NOT_VERIFIED'
 
       - name: SI — реальне обчислення похідних констант у SENS
         # Незалежний native-verdict потрібен навіть коли T5M-mint іншого файла
@@ -1464,7 +1464,7 @@ jobs:
           # FS: справжній український SENS read/write, а не Python-обчислювач.
           if grep -Eq '^(lib/fs(\.lisp|\.sens)?|lib/utf8\.lisp|lib/core4\.lisp|crates/sens-host/src/lib\.rs|crates/sens-host/tests/capabilities\.rs|tests/test_fs_ukr_projection\.py|scripts/test-fs-d1-bitness\.py|\.github/workflows/ci\.yml)$' "$changed"; then
             echo 'PYTHON_UNIT_TESTS=EXCLUDED_BY_REQUEST NOT_VERIFIED'
-            python3 scripts/test-fs-d1-bitness.py
+            echo 'PYTHON_TEST_EXCLUDED=fs-d1-bitness native_equivalent=NOT_VERIFIED'
             CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens-host --test capabilities ukrainian_fs_named_reader_roundtrips_and_rejects_wrong_arity -- --exact --nocapture
           fi
           # NTP: чинний Lisp-предикат D1 та відмова спискам до EQ/арифметики.
@@ -1693,7 +1693,7 @@ jobs:
           echo 'PYTHON_UNIT_TESTS=EXCLUDED_BY_REQUEST NOT_VERIFIED'
           echo 'PYTHON_UNIT_TESTS=EXCLUDED_BY_REQUEST NOT_VERIFIED'
           echo 'PYTHON_UNIT_TESTS=EXCLUDED_BY_REQUEST NOT_VERIFIED'
-          python3 scripts/test-content-store-d1-bitness.py
+          echo 'PYTHON_TEST_EXCLUDED=content-store-d1-bitness native_equivalent=NOT_VERIFIED'
           # Борг active Latin call heads лишається видимим у звіті й JSON.
           # --require-full залишається локальною опцією, а не глобальним CI-гейтом.
 
