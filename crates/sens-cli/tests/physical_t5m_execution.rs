@@ -1,9 +1,7 @@
 //! Direct executable .sens code is parsed without an English or text roundtrip.
 
 use sens::{
-    parse_canonical_binary,
-    parse_canonical_packed_words,
-    BinarySourceWord, BitPacker, Session, Value,
+    parse_canonical_packed_words, BinarySourceWord, BitPacker, Session, Value,
 };
 use sens_cli::zig_transport;
 
@@ -79,8 +77,8 @@ fn physical_domain_words_share_exact_d2_grammar_with_visible_reference() {
     let widths = words.iter().map(|word| word.width()).collect::<Vec<_>>();
     let physical =
         parse_canonical_packed_words(&packer.finish(), &widths).expect("typed binary reader");
-    let reference = sens::render_ternary_words_spaced(&words);
-    let visible = parse_canonical_binary(&reference).expect("reference visualization");
+    let visible = sens::parse_mixed_exact_domain(SOURCE)
+        .expect("canonical Ukrainian source parsed directly by SENS");
     assert_eq!(physical.len(), visible.len());
     for (from_bytes, from_reference) in physical.iter().zip(visible.iter()) {
         let left = sens::lower_program(&[from_bytes.clone()]);
