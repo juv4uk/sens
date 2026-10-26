@@ -20,10 +20,15 @@ ASSET_ZIG_PATH = ROOT / "zig_transport_root.zig"
 ASSET_RUST_PATH = ROOT / "crates/sens-cli/src/zig_transport_assets.rs"
 
 # No semantic function identities, domain numbers, or host-specific layouts:
-# ten reviewed *physical* ABI v2 functions; D10 validator is coordinate-only.
+# fifteen reviewed *physical* ABI v2 functions; D10 validator is coordinate-only.
 EXPECTED = {
     "sens_zig_codec_abi_version": ((), "version"),
     "sens_zig_bitpack_fields": (("source", "length", "destination", "length"), "size"),
+    "sens_zig_t5m_validate": (("source", "length"), "status"),
+    "sens_zig_t5m_encode_be3": (("source", "length", "destination", "length"), "size"),
+    "sens_zig_t5m_decode_be3": (("source", "length", "destination", "length"), "size"),
+    "sens_zig_t5m_encode_words": (("source", "length", "destination", "length"), "size"),
+    "sens_zig_t5m_decode_words": (("source", "length", "destination", "length"), "size"),
     "sens_zig_t5_validate": (("source", "length"), "status"),
     # Reviewed #5777: physical D1..D10 coordinate profile (NO execution).
     "sens_zig_t5_validate_coordinates": (("source", "length"), "status"),
@@ -166,7 +171,7 @@ def declarations(source: str, language: str) -> dict:
 
 # Root Zig source asset-copy exports are NOT codec ABI v2. Keep the
 # inventories exact: adding an unreviewed FFI declaration cannot silently
-# expand the physical nine-function v2 contract.
+# expand the physical ABI v2 contract.
 ASSET_NAMES = ("sens_zig_linter_bytes_copy", "sens_zig_contract_bytes_copy", "sens_zig_sanskrit_bytes_copy", "sens_zig_ukr_bytes_copy", "sens_zig_uk_bytes_copy", "sens_zig_islands_manifest_bytes_copy", "sens_zig_uk_docs_bytes_copy", "sens_zig_unify_bytes_copy", "sens_zig_reason_bytes_copy", "sens_zig_forward_bytes_copy", "sens_zig_knowledge_bytes_copy", "sens_zig_persistent_map_bytes_copy", "sens_zig_world_bytes_copy", "sens_zig_content_store_bytes_copy", "sens_zig_lisp_fs_bytes_copy")
 REPL_LOCAL_NAMES = ("sens_zig_repl_persistent_vector_bytes_copy", "sens_zig_repl_time_bytes_copy", "sens_zig_repl_epistemic_bytes_copy")
 LIVE_FILE_NAMES = ("sens_zig_guard_reference_bytes_copy",)
@@ -548,9 +553,9 @@ class ZigAbiV2DeclarationContractTest(unittest.TestCase):
         check_contract(self.zig, self.rust, self.header)
 
 
-    def test_root_asset_copy_is_separate_from_ten_function_abi_v2(self):
+    def test_root_asset_copy_is_separate_from_fifteen_function_abi_v2(self):
         check_root_asset_corridor(self.asset_zig, self.asset_rust, self.rust)
-        self.assertEqual(len(EXPECTED), 10)
+        self.assertEqual(len(EXPECTED), 15)
         self.assertEqual(set(declarations(strip_c_comments(self.rust), "rust")), set(EXPECTED))
 
     def test_unify_repl_uses_physical_t5m_asset_and_keeps_root_load_order(self):
