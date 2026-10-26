@@ -690,8 +690,8 @@ mod tests {
 
         // Six frozen F3M leaves plus one canonical bound-variable leaf for
         // every in-scope de Bruijn index 0..depth-1.
-        for depth in 0..DEPTHS {
-            closed[1][depth] = 6 + depth as u128;
+        for (depth, count) in closed[1].iter_mut().enumerate() {
+            *count = 6 + depth as u128;
         }
 
         for nodes in 2..=NODES {
