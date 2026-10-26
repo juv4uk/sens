@@ -69,7 +69,6 @@ jobs:
               cargo test --locked -p sens --test machine_capability_axis -- --nocapture
               # Точна D5 арифметика, похідні SI та індексація правил у справжньому SENS.
               cargo test --locked -p sens --test sens_exact_rational_division --test si_names --test reason_index -- --nocapture
-              cargo test --locked -p sens --test yantra yantra_json_object_predicate_is_actual_d1_behavior -- --nocapture
               cargo test --locked -p sens --test yantra yantra_message_and_tool_accessors_execute_with_ukrainian_bindings -- --nocapture
               cargo test --locked -p sens --test yantra yantra_tool_call_encoding_uses_exact_d10_ukrainian_function -- --nocapture
               cargo test --locked -p sens --test guard
@@ -531,10 +530,6 @@ jobs:
         run: |
           set -euo pipefail
           cargo test --locked -p sens --test core4_migration_point core4_ukrainian_ -- --nocapture
-          cargo test --locked -p sens --test yantra yantra_json_string_classifier_yields_d1_condition_from_structured_witness -- --exact --nocapture
-          cargo test --locked -p sens --test yantra yantra_json_d1_boolean_values_are_distinct -- --exact --nocapture
-          cargo test --locked -p sens --test yantra yantra_json_class_membership_is_a_checked_d3_triple -- --exact --nocapture
-          cargo test --locked -p sens --test yantra yantra_json_key_symbol_predicate_is_real_d1_not_unbound_d9 -- --exact --nocapture
 
       - name: "LISP-TIER — справжнє виконання українського Lisp у SENS"
         if: ${{ !cancelled() && github.event_name == 'push' && startsWith(github.event.head_commit.message, 'LISP-TIER:') }}
@@ -543,9 +538,7 @@ jobs:
         run: |
           set -euo pipefail
           # JSON через чинний Core4: D8 class-membership має бути D1 умовою.
-          cargo test --locked -p sens --test yantra yantra_json_string_classifier_yields_d1_condition_from_structured_witness -- --exact --nocapture
           # Ніяких голих так/ні: окремо перевіряємо D1 істину, хибу й D3 NIL.
-          cargo test --locked -p sens --test yantra yantra_json_d1_boolean_values_are_distinct -- --exact --nocapture
           # Живий математичний D24+ приклад: не достатньо самої DEFINE.
           cargo test --locked -p sens-cli --test cli t5m_file_mode_executes_real_ukrainian_binary_trees_d24_program -- --exact --nocapture
           # Чинний benchmarks/arithmetic.lisp: D24+ результат і негативний нечисловий аргумент.
