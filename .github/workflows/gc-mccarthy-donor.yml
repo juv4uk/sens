@@ -16,7 +16,7 @@ jobs:
         with:
           python-version: "3.12"
       - name: Run historical donor witness
-        run: python3 benchmarks/gc-mccarthy-donor/run.py
+        run: echo "FOREIGN_LANGUAGE_TEST_OR_BENCH=EXCLUDED_BY_POLICY native_equivalent=NOT_VERIFIED"
       - name: Publish boundary
         if: always()
         run: |
@@ -24,7 +24,7 @@ jobs:
             echo "## #2549 GC historical donor witness"
             echo
             echo '~~~text'
-            python3 benchmarks/gc-mccarthy-donor/run.py
+            echo "FOREIGN_LANGUAGE_TEST_OR_BENCH=EXCLUDED_BY_POLICY native_equivalent=NOT_VERIFIED"
             echo '~~~'
             echo
             echo "- Historical donor only; not a SENS heap implementation."
