@@ -165,12 +165,17 @@ fn physical_t5_request(args: &[String]) -> Option<Result<&str, &'static str>> {
 }
 
 /// Explicit instrumentation mode: its only input is the physical binary.
-fn physical_t5_benchmark_request(args: &[String]) -> Option<Result<&str, &'static str>> {
+fn physical_t5_benchmark_request(
+    args: &[String],
+) -> Option<Result<(&str, bool), &'static str>> {
     let position = args
         .iter()
         .position(|argument| argument == "--benchmark-physical")?;
-    if position != 1 || args.len() != 3 {
-        return Some(Err("usage: sens --benchmark-physical <program.sens>"));
+    let load_core4 = args.len() == 4 && args[3] == "--core4-runtime";
+    if position != 1 || !(args.len() == 3 || load_core4) {
+        return Some(Err(
+            "usage: sens --benchmark-physical <program.sens> [--core4-runtime]",
+        ));
     }
     if std::path::Path::new(&args[2])
         .extension()
@@ -181,7 +186,7 @@ fn physical_t5_benchmark_request(args: &[String]) -> Option<Result<&str, &'stati
             "--benchmark-physical accepts only a physical .sens binary",
         ));
     }
-    Some(Ok(args[2].as_str()))
+    Some(Ok((args[2].as_str(), load_core4)))
 }
 
 /// Явно обраний людський .lisp → українська проєкція → Zig T5M →
@@ -443,12 +448,16 @@ fn count_physical_ast_nodes(expression: &sens::Expr) -> usize {
 #[cfg(feature = "benchmark-ast-visits")]
 fn eval_physical_t5_with_benchmark_metrics(
     bytes: &[u8],
+    load_core4: bool,
 ) -> Result<(sens::EvalResult, usize, u64), String> {
     let words = decode_physical_t5m_words(bytes)?;
     let program = sens::PhysicalT5Program::from_exact_domain_words_owned(words)
         .map_err(|err| format!("exact SENS domain reader rejected: {err}"))?;
     let ast_nodes = program.forms().iter().map(count_physical_ast_nodes).sum();
     let mut pure = Session::bare();
+    if load_core4 {
+        bootstrap_core(&mut pure, CliCore::Core4)?;
+    }
     sens::install_ratified_d5_macro_mechanism(&pure);
     let (result, eval_visits) = program
         .execute_with_visit_count(&mut pure)
@@ -665,9 +674,9 @@ fn main() {
     if let Some(request) = physical_t5_benchmark_request(&raw_args) {
         #[cfg(feature = "benchmark-ast-visits")]
         let result = match request {
-            Ok(filename) => fs::read(filename)
+            Ok((filename, load_core4)) => fs::read(filename)
                 .map_err(|err| format!("read physical .sens: {err}"))
-                .and_then(|bytes| eval_physical_t5_with_benchmark_metrics(&bytes)),
+                .and_then(|bytes| eval_physical_t5_with_benchmark_metrics(&bytes, load_core4)),
             Err(message) => Err(message.to_owned()),
         };
         #[cfg(not(feature = "benchmark-ast-visits"))]
@@ -1316,7 +1325,17 @@ mod core_profile_bootstrap_tests {
         ];
         assert_eq!(
             physical_t5_benchmark_request(&args),
-            Some(Ok("program.sens"))
+            Some(Ok(("program.sens", false)))
+        );
+        let core4 = vec![
+            "sens".to_owned(),
+            "--benchmark-physical".to_owned(),
+            "program.sens".to_owned(),
+            "--core4-runtime".to_owned(),
+        ];
+        assert_eq!(
+            physical_t5_benchmark_request(&core4),
+            Some(Ok(("program.sens", true)))
         );
         let textual = vec![
             "sens".to_owned(),

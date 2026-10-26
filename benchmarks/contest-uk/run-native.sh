@@ -128,7 +128,7 @@ for source in "$here"/*.lisp; do
   fi
   # Після proof один автономний SENS запуск — тільки базова точка
   # виміру. Жодної сторонньої семантики чи Python/JSON.
-  if ! "$sens" "$committed" >"$scratch/standalone.out" 2>"$scratch/error"; then
+  if ! "$trit" eval-core4 "$committed" >"$scratch/standalone.out" 2>"$scratch/error"; then
     printf '%s\t-\t-\t0\tПОМИЛКА_ВИКОНАННЯ_SENS\n' "$name"
     sed 's/^/SENS eval: /' "$scratch/error" >&2
     fail=1
@@ -144,7 +144,7 @@ for source in "$here"/*.lisp; do
   samples=()
   for ((i=0; i<repeats; i++)); do
     start="$(date +%s%N)"
-    if ! "$sens" "$committed" >"$scratch/run.out" 2>"$scratch/error" ||
+    if ! "$trit" eval-core4 "$committed" >"$scratch/run.out" 2>"$scratch/error" ||
        ! cmp -s "$scratch/run.out" "$scratch/standalone.out"; then
       echo "CONTEST_NONDETERMINISTIC name=$name repeat=$i" >&2
       sed 's/^/SENS: /' "$scratch/error" >&2

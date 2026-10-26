@@ -439,6 +439,7 @@ jobs:
             profile_args=()
             expect_args=()
             case "$f" in
+              benchmarks/contest-uk/*.lisp) profile_args=(--core4-runtime);;
               tests/semantic/d9-f6-package-key-canonicalization-law.lisp|tests/semantic/d9-f6-package-key-canonicalization-mutant.lisp) bs=(--binding-source lib/lisp-fs.lisp); profile_args=(--core4-runtime);;
               tests/semantic/meta-eval-graph-d1-law.lisp|tests/semantic/meta-eval-graph-d1-mutant.lisp) bs=(--binding-source lib/meta-eval.lisp); profile_args=(--core4-runtime);;
               tests/semantic/exact-arithmetic-laws.lisp|tests/semantic/exact-arithmetic-mutant.lisp|lib/lisp-fs.lisp) profile_args=(--core4-runtime);;
@@ -777,6 +778,7 @@ jobs:
               profile_args=()
               expect_args=()
               case "$f" in
+                benchmarks/contest-uk/*.lisp) profile_args=(--core4-runtime);;
                 tests/semantic/d9-f6-package-key-canonicalization-law.lisp|tests/semantic/d9-f6-package-key-canonicalization-mutant.lisp) bs=(--binding-source lib/lisp-fs.lisp); profile_args=(--core4-runtime);;
               tests/semantic/meta-eval-graph-d1-law.lisp|tests/semantic/meta-eval-graph-d1-mutant.lisp) bs=(--binding-source lib/meta-eval.lisp); profile_args=(--core4-runtime);;
               tests/semantic/exact-arithmetic-laws.lisp|tests/semantic/exact-arithmetic-mutant.lisp|lib/lisp-fs.lisp) profile_args=(--core4-runtime);;
