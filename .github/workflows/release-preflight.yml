@@ -158,6 +158,7 @@ jobs:
       - name: Build public Linux release binary for baseline x86-64
         env:
           CARGO_TARGET_X86_64_UNKNOWN_LINUX_GNU_RUSTFLAGS: "-C target-cpu=x86-64"
+          SENS_ZIG_PORTABLE_LINUX: "1"
         run: cargo build --locked --release -p sens-cli --bin sens --target x86_64-unknown-linux-gnu
       - name: Verify Linux ABI floor and reject AVX-512
         shell: bash
