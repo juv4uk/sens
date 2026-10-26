@@ -86,8 +86,8 @@ fn physical_domain_words_share_exact_d2_grammar_with_visible_reference() {
         .expect("canonical Ukrainian source parsed directly by SENS");
     assert_eq!(physical.len(), visible.len());
     for (from_bytes, from_reference) in physical.iter().zip(visible.iter()) {
-        let left = sens::lower_program(&[from_bytes.clone()]);
-        let right = sens::lower_program(&[from_reference.clone()]);
+        let left = sens::lower_program(std::slice::from_ref(from_bytes));
+        let right = sens::lower_program(std::slice::from_ref(from_reference));
         assert_eq!(
             sens::expr_to_exact_program_data(&left[0]).unwrap(),
             sens::expr_to_exact_program_data(&right[0]).unwrap(),
@@ -108,10 +108,7 @@ fn physical_d1_value_is_exact_predicate_not_legacy_t() {
 #[test]
 fn malformed_transport_and_invalid_d2_are_distinct_fail_closed_errors() {
     // Malformed transport byte rejected at Zig transport level
-    assert!(matches!(
-        zig_transport::decode_t5m_words(&[243]),
-        Err(_)
-    ));
+    assert!(zig_transport::decode_t5m_words(&[243]).is_err());
     
     // Invalid D2 structure rejected at SENS execution level
     let words = sens::parse_binary_source_words("10 001")
@@ -120,10 +117,7 @@ fn malformed_transport_and_invalid_d2_are_distinct_fail_closed_errors() {
         .map(|token| token.word)
         .collect::<Vec<_>>();
     let physical = zig_transport::encode_t5m_direct(&words).unwrap();
-    assert!(matches!(
-        eval_reference_t5m(&physical, &mut Session::default()),
-        Err(_)
-    ));
+    assert!(eval_reference_t5m(&physical, &mut Session::default()).is_err());
 }
 
 #[test]
