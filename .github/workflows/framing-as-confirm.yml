@@ -23,10 +23,10 @@ jobs:
           valgrind --version
           rustc --version
 
-      - name: Run pinned 3-sample A-S confirmation — EXCLUDED (NOT_VERIFIED)
-        if: false
-        shell: bash
-        run: echo "FOREIGN_LANGUAGE_TEST_BENCH=EXCLUDED_BY_POLICY native_equivalent=NOT_VERIFIED"
+      - name: Run pinned 3-sample A-S confirmation
+        run: |
+          python3 benchmarks/framing-decode/run.py             --samples 3             --iterations 20000             --codecs a,s             --wrappers raw,container             --widths 3,8,16,65             --out "$RUNNER_TEMP/framing-as-confirm"             --source-sha 77d2edb0620c2c162f5c7e63386bc36113e9d0ef
+
       - name: Upload raw confirmation evidence
         uses: actions/upload-artifact@v4
         with:
