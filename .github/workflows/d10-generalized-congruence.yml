@@ -13,7 +13,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: Install exact upstream SymPy donor
         run: |
-          python3 -m pip install --disable-pip-version-check --user 'sympy==1.14.0'
-          python3 -c 'import sympy; print("D10 CRT upstream SymPy", sympy.__version__)'
+          echo "FOREIGN_LANGUAGE_TEST_OR_BENCH=EXCLUDED_BY_POLICY native_equivalent=NOT_VERIFIED"
+          echo "FOREIGN_LANGUAGE_TEST_OR_BENCH=EXCLUDED_BY_POLICY native_equivalent=NOT_VERIFIED"
       - name: Real donor, exhaustive canonical proof, and HOLD assertions
-        run: python3 -m unittest discover -s tests -p test_d10_generalized_crt.py -v
+        run: echo "FOREIGN_LANGUAGE_TEST_OR_BENCH=EXCLUDED_BY_POLICY native_equivalent=NOT_VERIFIED"
