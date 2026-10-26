@@ -1,9 +1,10 @@
 """Fail-closed byte verification for tagged release staging and draft replay.
 
-This validates packaging only; semantic admission comes from upstream CI.
+Packaging integrity is established by exact byte comparison of independently
+downloaded files and the immutable Git commit identity. No digest sidecars or
+checksum manifests are created.
 """
 
-import hashlib
 import json
 import re
 import sys
@@ -11,7 +12,7 @@ from pathlib import Path
 
 
 def _expected(tag):
-    if re.fullmatch(r"l(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)", tag) is None:
+    if re.fullmatch(r"l(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)", tag) is None:
         raise ValueError("RELEASE_BLOCKED: malformed release tag")
     version = tag[1:]
     return {
@@ -27,14 +28,6 @@ def _expected(tag):
     }
 
 
-def _sha256(path):
-    digest = hashlib.sha256()
-    with path.open("rb") as source:
-        for part in iter(lambda: source.read(1024 * 1024), b""):
-            digest.update(part)
-    return digest.hexdigest()
-
-
 def _check_files(root, names):
     if not root.is_dir() or root.is_symlink():
         raise ValueError("RELEASE_BLOCKED: no valid artifact directory")
@@ -48,39 +41,39 @@ def _check_files(root, names):
         path = root / name
         if not path.is_file() or path.is_symlink() or path.stat().st_size == 0:
             raise ValueError(f"RELEASE_BLOCKED: invalid, missing or empty asset {name}")
-    # The current SENS name and historical public URL must serve identical bytes.
-    if _sha256(root / "my-lisp-cli-web.html") != _sha256(root / "sens-cli-web.html"):
+    if (root / "my-lisp-cli-web.html").read_bytes() != (root / "sens-cli-web.html").read_bytes():
         raise ValueError("RELEASE_BLOCKED: web compatibility alias differs from canonical HTML")
 
 
-def _check_sha(sha):
-    if re.fullmatch(r"[0-9a-f]{40}", sha) is None:
-        raise ValueError("RELEASE_BLOCKED: malformed source SHA")
+def _check_git_commit(commit):
+    if re.fullmatch(r"[0-9a-f]{40}", commit) is None:
+        raise ValueError("RELEASE_BLOCKED: malformed Git commit identity")
 
 
-def prepare(root, tag, sha):
+def prepare(root, tag, commit):
     root = Path(root)
-    _check_sha(sha)
+    _check_git_commit(commit)
     names = _expected(tag)
     _check_files(root, names)
-    records = [
-        {"name": name, "sha256": _sha256(root / name), "bytes": (root / name).stat().st_size}
-        for name in sorted(names)
-    ]
-    manifest = {"schema": "sens-release-assets/v1", "tag": tag, "commit": sha,
-                "contract": "11.9", "assets": records}
+    manifest = {
+        "schema": "sens-release-assets/v1",
+        "tag": tag,
+        "commit": commit,
+        "contract": "12.0",
+        "assets": [
+            {"name": name, "bytes": (root / name).stat().st_size}
+            for name in sorted(names)
+        ],
+    }
     (root / "release-provenance.json").write_text(
-        json.dumps(manifest, ensure_ascii=False, sort_keys=True, indent=2) + "\n", encoding="utf-8"
+        json.dumps(manifest, ensure_ascii=False, sort_keys=True, indent=2) + "\\n",
+        encoding="utf-8",
     )
-    names.add("release-provenance.json")
-    lines = [f"{_sha256(root / name)}  {name}\n" for name in sorted(names)]
-    (root / "SHA256SUMS").write_text("".join(lines), encoding="ascii")
-    _check_files(root, names | {"SHA256SUMS"})
+    _check_files(root, names | {"release-provenance.json"})
     return manifest
 
 
 def _reject_duplicate_json_keys(pairs):
-    """Provenance JSON must have one unambiguous interpretation."""
     unique = {}
     for key, value in pairs:
         if key in unique:
@@ -89,20 +82,15 @@ def _reject_duplicate_json_keys(pairs):
     return unique
 
 
-def verify_replay(staged, downloaded, tag, sha):
+def verify_replay(staged, downloaded, tag, commit):
     staged, downloaded = Path(staged), Path(downloaded)
-    _check_sha(sha)
-    # A replay must compare two independent artifact directories. Passing the
-    # staging path (or an equivalent ../ alias) twice is NOT a download proof.
+    _check_git_commit(commit)
     if staged.resolve() == downloaded.resolve():
         raise ValueError("RELEASE_BLOCKED: replay requires independent download directory")
     names = _expected(tag)
-    all_names = names | {"release-provenance.json", "SHA256SUMS"}
+    all_names = names | {"release-provenance.json"}
     _check_files(staged, all_names)
     _check_files(downloaded, all_names)
-    # Different directory names do not prove an independent download: a
-    # hardlinked artifact has the same inode and bytes as staged output.
-    # Check the entire release receipt, including checksum and provenance.
     for name in sorted(all_names):
         staged_stat = (staged / name).stat()
         downloaded_stat = (downloaded / name).stat()
@@ -116,26 +104,19 @@ def verify_replay(staged, downloaded, tag, sha):
         object_pairs_hook=_reject_duplicate_json_keys,
     )
     if not isinstance(manifest, dict):
-        raise ValueError("RELEASE_BLOCKED: malformed provenance JSON object")
+        raise ValueError("RELEASE_BLOCKED: malformed provenance object")
     if (manifest.get("schema") != "sens-release-assets/v1" or
-            manifest.get("tag") != tag or manifest.get("commit") != sha or
-            manifest.get("contract") != "11.9"):
+            manifest.get("tag") != tag or manifest.get("commit") != commit or
+            manifest.get("contract") != "12.0"):
         raise ValueError("RELEASE_BLOCKED: provenance identity mismatch")
     expected_records = [
-        {"name": name, "sha256": _sha256(downloaded / name),
-         "bytes": (downloaded / name).stat().st_size}
+        {"name": name, "bytes": (downloaded / name).stat().st_size}
         for name in sorted(names)
     ]
     if manifest.get("assets") != expected_records:
-        raise ValueError("RELEASE_BLOCKED: manifest digest/size mismatch")
-    checksummed = names | {"release-provenance.json"}
-    expected_lines = "".join(
-        f"{_sha256(downloaded / name)}  {name}\n" for name in sorted(checksummed)
-    )
-    if downloaded.joinpath("SHA256SUMS").read_text(encoding="ascii") != expected_lines:
-        raise ValueError("RELEASE_BLOCKED: SHA256SUMS mismatch")
+        raise ValueError("RELEASE_BLOCKED: asset names/size mismatch")
     for name in sorted(all_names):
-        if _sha256(staged / name) != _sha256(downloaded / name):
+        if (staged / name).read_bytes() != (downloaded / name).read_bytes():
             raise ValueError(f"RELEASE_BLOCKED: staged/replayed bytes differ: {name}")
     return len(names)
 
@@ -143,12 +124,12 @@ def verify_replay(staged, downloaded, tag, sha):
 def main(argv):
     if len(argv) == 5 and argv[1] == "prepare":
         result = prepare(argv[2], argv[3], argv[4])
-        print(f"RELEASE_STAGE_PASS count={len(result['assets'])} sha={result['commit']}")
+        print(f"RELEASE_STAGE_PASS count={len(result['assets'])} commit={result['commit']}")
     elif len(argv) == 6 and argv[1] == "replay":
         n = verify_replay(argv[2], argv[3], argv[4], argv[5])
-        print(f"RELEASE_REPLAY_PASS count={n} sha={argv[5]}")
+        print(f"RELEASE_REPLAY_PASS count={n} commit={argv[5]}")
     else:
-        raise SystemExit("usage: verify_release_assets.py prepare DIR TAG SHA | replay STAGED DOWNLOADED TAG SHA")
+        raise SystemExit("usage: verify_release_assets.py prepare DIR TAG COMMIT | replay STAGED DOWNLOADED TAG COMMIT")
 
 
 if __name__ == "__main__":
