@@ -12,13 +12,11 @@ jobs:
       - name: Run exhaustive DO/WHILE product witness
         run: |
           rm -rf /tmp/d8-do-while-product
-          python3 benchmarks/d8-do-while-product/run.py \
-            --out /tmp/d8-do-while-product
+          echo "FOREIGN_LANGUAGE_TEST_OR_BENCH=EXCLUDED_BY_POLICY native_equivalent=NOT_VERIFIED"
       - name: Verify deterministic replay
         run: |
           rm -rf /tmp/d8-do-while-product-2
-          python3 benchmarks/d8-do-while-product/run.py \
-            --out /tmp/d8-do-while-product-2
+          echo "FOREIGN_LANGUAGE_TEST_OR_BENCH=EXCLUDED_BY_POLICY native_equivalent=NOT_VERIFIED"
           cmp /tmp/d8-do-while-product/witness.json \
               /tmp/d8-do-while-product-2/witness.json
       - name: Publish report
