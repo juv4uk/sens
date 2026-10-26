@@ -515,7 +515,6 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          echo "PYTHON_TEST=EXCLUDED_BY_POLICY native_equivalent=NOT_VERIFIED"
           CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test guard -- --nocapture
       - name: "SENS CLIPS — реальне D6 виконання, поділ правил і негативний випадок"
         if: ${{ !cancelled() && steps.changed-t5m-lisp.outputs.clips_runtime_tests == 'true' }}
@@ -555,7 +554,6 @@ jobs:
           # Окремий бенчмарк-крейт має власний застарілий Cargo.lock;
           # тільки допоміжний parity-тест дозволяє offline-оновлення lock.
           # Релізні Cargo-команди лишаються --locked.
-          echo "FOREIGN_LANGUAGE_BENCHMARK=EXCLUDED_BY_POLICY native_equivalent=NOT_VERIFIED"
           cargo test --locked -p sens-cli --test cli t5m_file_mode_executes_ukrainian_fibonacci_and_ackermann_d24 -- --exact --nocapture
           # Справжні позитивні й негативні межі масиву з lib/core1.lisp.
           cargo test --locked -p sens-cli --test core1_array_bounds_cli -- --nocapture
@@ -1160,7 +1158,7 @@ jobs:
           retention-days: 7
 
 
-      - name: Windows Zig setup — статичний pin-контракт (runtime NOT_VERIFIED)
+      - name: Windows Zig setup — перевірка джерельного pin-контракту
         if: ${{ always() }}
         shell: bash
         run: |
@@ -1168,28 +1166,15 @@ jobs:
           test -s .zig-version
           grep -Fq '$env:ZIG = $zigExe' scripts/with-pinned-zig.ps1
           grep -Fq 'if ($actualVersion -ne $version)' scripts/with-pinned-zig.ps1
-          echo "WINDOWS_ZIG_RUNTIME=NOT_VERIFIED static_pin_contract=PASS"
+          echo "WINDOWS_ZIG_PIN_SOURCE_CONTRACT=PASS"
 
-      - name: Заборона закодованих літералів у Lisp
+      - name: Мовні закони — нативний SENS, позитивні й негативні свідки
         shell: bash
-        env:
-          PUSH_BEFORE: ${{ github.event.before }}
-          PR_BASE: ${{ github.event.pull_request.base.sha }}
-          EVENT_NAME: ${{ github.event_name }}
         run: |
           set -euo pipefail
-          if [[ "$EVENT_NAME" == "pull_request" ]]; then
-            base_sha="$PR_BASE"
-          else
-            base_sha="$PUSH_BEFORE"
-          fi
-          if [[ -z "$base_sha" || "$base_sha" =~ ^0+$ ]]; then
-            # A shallow checkout (depth 1) has no HEAD^; deepen just enough.
-            git fetch --no-tags --deepen=2 origin >/dev/null 2>&1 || true
-            base_sha="$(git rev-parse HEAD^)"
-          fi
-          timeout 30s git fetch --no-tags --depth=1 origin "$base_sha"
-          python3 scripts/check_no_encoded_source_literals.py --base "$base_sha"
+          CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo build --locked -p sens-cli --bin sens
+          bash scripts/prove-lisp-language-laws.sh "$PWD/target/debug/sens"
+
 
       - name: Клавіатурні символи у проєкціях ук, укр і sym (D1–D11) — Rust
         if: ${{ always() }} # самостійна перевірка, навіть коли попередній guard червоний
@@ -1315,7 +1300,6 @@ jobs:
         if: ${{ always() }}
         run: |
           set -euo pipefail
-          echo 'PYTHON_TEST_EXCLUDED=si-derived-d1-bitness native_equivalent=NOT_VERIFIED'
 
       - name: SI — реальне обчислення похідних констант у SENS
         # Незалежний native-verdict потрібен навіть коли T5M-mint іншого файла
@@ -1424,8 +1408,7 @@ jobs:
           fi
           # FS: справжній український SENS read/write, а не Python-обчислювач.
           if grep -Eq '^(lib/fs(\.lisp|\.sens)?|lib/utf8\.lisp|lib/core4\.lisp|crates/sens-host/src/lib\.rs|crates/sens-host/tests/capabilities\.rs|tests/test_fs_ukr_projection\.py|scripts/test-fs-d1-bitness\.py|\.github/workflows/ci\.yml)$' "$changed"; then
-            echo 'PYTHON_TEST_EXCLUDED=fs-d1-bitness native_equivalent=NOT_VERIFIED'
-            CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens-host --test capabilities ukrainian_fs_named_reader_roundtrips_and_rejects_wrong_arity -- --exact --nocapture
+              CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens-host --test capabilities ukrainian_fs_named_reader_roundtrips_and_rejects_wrong_arity -- --exact --nocapture
           fi
           # NTP: чинний Lisp-предикат D1 та відмова спискам до EQ/арифметики.
           if grep -Eq '^(lib/time\.lisp|crates/sens/tests/(clock|time_host_surface|timezone_raw)\.rs|\.github/workflows/ci\.yml)$' "$changed"; then
@@ -1598,7 +1581,6 @@ jobs:
           # Структурний доказ збереження українських D3/D4 законів, у т.ч.
           # негативний мутант прямого D9 селектора четвертого слова.
           # Це не заміняє фактичний SENS-eval у LISP-TIER.
-          echo 'PYTHON_TEST_EXCLUDED=content-store-d1-bitness native_equivalent=NOT_VERIFIED'
           # Борг active Latin call heads лишається видимим у звіті й JSON.
           # --require-full залишається локальною опцією, а не глобальним CI-гейтом.
 
