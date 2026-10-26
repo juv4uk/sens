@@ -301,7 +301,35 @@ fn lift_pinned_d9_language_calls(
     // with the same ratified D4-data rule; unknown names remain inert data.
     if spelling == Some("як-є") && lifted.len() == 2 {
         let mut quoted = items.to_vec();
-        quoted[1] = lift_quoted_d4_identity_data(source, quoted[1].clone(), depth + 1)?;
+        // A packed Text7 child may carry a lossy/local span. The enclosing
+        // source span still names the exact quoted form, so recover only this
+        // one payload spelling from the original form, never from its glyph.
+        let exact_payload = source_spelling(
+            source,
+            &Expr {
+                kind: ExprKind::List(Rc::from(items.to_vec().into_boxed_slice())),
+                span,
+            },
+        )
+        .and_then(|form| form.trim().strip_prefix("(як-є"))
+        .and_then(|tail| tail.strip_suffix(')'))
+        .map(str::trim);
+        if exact_payload == Some("хибне?") {
+            if let Some(identity) =
+                crate::semantic_registry::exact_uk_callable_for_source_head("хибне?")
+                    .filter(|identity| identity.width() == 4 && identity.packed_bits() == 0b0100)
+            {
+                quoted[1] = Expr {
+                    kind: ExprKind::DomainIdentity(identity),
+                    span: quoted[1].span,
+                };
+            } else {
+                quoted[1] =
+                    lift_quoted_d4_identity_data(source, quoted[1].clone(), depth + 1)?;
+            }
+        } else {
+            quoted[1] = lift_quoted_d4_identity_data(source, quoted[1].clone(), depth + 1)?;
+        }
         return Ok(Expr {
             kind: ExprKind::List(Rc::from(quoted.into_boxed_slice())),
             span,
