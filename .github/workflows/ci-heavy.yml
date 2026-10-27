@@ -362,7 +362,7 @@ jobs:
           fi
 
           # Справжнє SENS-виконання змінюваного Core4/JSON, не Python-макет.
-          if grep -Eq '^(lib/core4\.lisp|lib/yantra\.lisp|crates/sens/tests/core4_migration_point\.rs|crates/sens/tests/yantra\.rs|\.github/workflows/ci\.yml)$' "$changed_all"; then
+          if grep -Eq '^(lib/core4\.lisp|lib/yantra\.lisp|crates/sens/tests/yantra\.rs|\.github/workflows/ci\.yml)$' "$changed_all"; then
             echo 'yantra_runtime_tests=true' >> "$GITHUB_OUTPUT"
           fi
 
@@ -527,7 +527,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          cargo test --locked -p sens --test core4_migration_point core4_ukrainian_ -- --nocapture
+          echo '::error::Видалено несанкціонований Rust-тест Core4; необхідні позитивний і негативний нативні свідки SENS через Zig/T5M'; exit 1
 
       - name: "LISP-TIER — справжнє виконання українського Lisp у SENS"
         if: ${{ !cancelled() && github.event_name == 'push' && startsWith(github.event.head_commit.message, 'LISP-TIER:') }}
