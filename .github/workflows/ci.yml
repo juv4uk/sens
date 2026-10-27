@@ -56,6 +56,12 @@ jobs:
       - name: Компіляція бібліотеки sens
         shell: bash
         run: cargo check --locked -p sens --lib
+      # rust-isolated — єдиний доказ ізоляції Rust↔SENS. Досі він жив лише
+      # в списку GATES файлу release_go_gate.py і не викликався жодним
+      # workflow: тобто не перевірявся ніде, крім ручного прогону.
+      - name: Ізоляція Rust↔SENS лише через Zig
+        shell: bash
+        run: bash scripts/check_rust_isolated_only_zig.sh
       - name: Перевірити формат diff і синтаксис оболонки
         shell: bash
         run: |
