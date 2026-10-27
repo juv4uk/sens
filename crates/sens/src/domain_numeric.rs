@@ -1542,7 +1542,7 @@ mod tests {
         assert_eq!(
             compute("+", &squared, &negated),
             Some(Value::BinaryNumber(
-                BinaryNumber::from_numeric_domain_bits(48, &vec![0; 48]).unwrap()
+                BinaryNumber::from_numeric_domain_bits(48, &[0; 48]).unwrap()
             ))
         );
         // The original operand still belongs to D24. No generic D24 <-> D48 bridge.
