@@ -457,6 +457,9 @@ pub(crate) fn eq_values(left: Value, right: Value, span: Span) -> Result<Value, 
                 Value::Closure(_) => "closure",
                 Value::Macro(_) => "macro",
                 Value::Builtin(_) => "builtin",
+                Value::HostHandle { .. } => "host-handle",
+                Value::Vector(_) => "vector",
+                Value::NumericBuffer(_) => "numeric-buffer",
             }
         }
         let (lk, rk) = (kind_tag(&left), kind_tag(&right));
