@@ -420,20 +420,6 @@ pub(crate) fn cons_values(
 /// Контракт 11.8: EQ — атомна операція; пара або значення поза
 /// доменом спричиняє іменовану помилку Type, не D1:NO чи D3:000.
 /// Актуальна ратифікація 2026-10-08 supersedes старе #3161 формулювання.
-thread_local! {
-    /// Останній доменний виклик у цьому потоці. Друкується лише коли
-    /// виставлено SENS_EQ_TRACE: без нього адресу виклику eq не видно,
-    /// бо SENS інтерпретується і стек містить тільки Rust-кадри.
-    static LAST_DOMAIN: std::cell::RefCell<String> = const { std::cell::RefCell::new(String::new()) };
-}
-
-/// Записати поточний доменний виклик для діагностики eq.
-pub(crate) fn note_domain_call(identity: &crate::DomainIdentity) {
-    if std::env::var_os("SENS_EQ_TRACE").is_some() {
-        LAST_DOMAIN.with(|cell| *cell.borrow_mut() = format!("{identity}"));
-    }
-}
-
 pub(crate) fn eq_values(left: Value, right: Value, span: Span) -> Result<Value, LanguageError> {
     if !left.is_atom() || !right.is_atom() {
         // Діагностика називає БІК і вид носія. Без цього повідомлення
@@ -450,23 +436,25 @@ pub(crate) fn eq_values(left: Value, right: Value, span: Span) -> Result<Value, 
         } else {
             "non-atom"
         };
-        // SENS_EQ_TRACE=1 додає стек виклику до повідомлення. Це діагностичний
-        // режим для CI: без нього адресу виклику не видно, і пошук іде навмання
-        // по всьому lib/. У звичайному режимі повідомлення лишається коротким.
-        let trace = if std::env::var_os("SENS_EQ_TRACE").is_some() {
-            let identity = LAST_DOMAIN.with(|cell| cell.borrow().clone());
-            format!(
-                " · domain {identity}\n{}",
-                std::backtrace::Backtrace::force_capture()
-            )
-        } else {
-            String::new()
-        };
+        // Діагностика типів БЕЗ рендеру значень (вони можуть бути величезними):
+        // лише тег виду. Саме цього бракувало, щоб знайти виклик наосліп.
+        fn kind_tag(v: &Value) -> &'static str {
+            match v {
+                Value::Pair(_) => "pair",
+                Value::Symbol(_) => "symbol",
+                Value::BinaryNumber(_) => "number",
+                Value::Builtin(_) => "builtin",
+                Value::Closure(_) => "closure",
+                Value::Macro(_) => "macro",
+                _ => "other",
+            }
+        }
+        let (lk, rk) = (kind_tag(&left), kind_tag(&right));
         return Err(LanguageError::new(
             ErrorKind::Type,
             format!(
                 "eq expects two atoms · eq ochikuie dva atomy · eq erwartet zwei Atome · \
-                 non-atomic {side} · carrier {carrier}{trace}"
+                 non-atomic {side} · carrier {carrier} · kinds {lk}/{rk}"
             ),
             span,
         ));
