@@ -9,25 +9,31 @@
     (за-умовою
       ; Перевірити форму результату ДО CAR/CDR.
       ; Порожній або атомний результат не можна читати як (accepted fs).
-      ((порожній? відновлене)
-       (як-є reconstruction-empty-result))
       ((атом? відновлене)
-       (як-є reconstruction-non-list-result))
+       (за-умовою
+         ((порожній? відновлене)
+          (як-є reconstruction-empty-result))
+         (так (як-є reconstruction-non-list-result))))
       ((хибне? (однакові? (перше відновлене) (як-є accepted)))
        (як-є reconstruction-rejected))
-      ((порожній? (решта відновлене))
-       (як-є reconstruction-missing-state))
       ((атом? (решта відновлене))
-       (як-є reconstruction-invalid-state-tail))
+       (за-умовою
+         ((порожній? (решта відновлене))
+          (як-є reconstruction-missing-state))
+         (так (як-є reconstruction-invalid-state-tail))))
       (так
        (нехай ((читання-коду (фс-читати (друге відновлене) "code")))
          (за-умовою
            ; READ may reject or return malformed data; never SELECT before
            ; proving that both the response and its value field are present.
-           ((порожній? читання-коду) (як-є reconstruction-code-empty))
-           ((атом? читання-коду) (як-є reconstruction-code-non-list))
-           ((порожній? (решта читання-коду)) (як-є reconstruction-code-missing-value))
-           ((атом? (решта читання-коду)) (як-є reconstruction-code-improper-tail))
+           ((атом? читання-коду)
+            (за-умовою
+              ((порожній? читання-коду) (як-є reconstruction-code-empty))
+              (так (як-є reconstruction-code-non-list))))
+           ((атом? (решта читання-коду))
+            (за-умовою
+              ((порожній? (решта читання-коду)) (як-є reconstruction-code-missing-value))
+              (так (як-є reconstruction-code-improper-tail))))
            ((хибне? (внутрішня-рівність-версій (друге читання-коду) значення))
             (як-є reconstruction-mismatch))
            (так
