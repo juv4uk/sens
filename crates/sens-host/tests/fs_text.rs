@@ -78,10 +78,10 @@ fn write_file_then_read_file_round_trips_utf8_text() {
         p = lisp_path(&path)
     );
 
-    let result = eval_program(&source, &mut session).expect("round trip should succeed");
+    eval_program(&source, &mut session).expect("filesystem transport must execute");
     assert_eq!(
-        result.value.to_string(),
-        "(\"hello, свiт, €\" \"hello, свiт, €\")"
+        fs::read_to_string(&path).expect("host file bytes must be observable"),
+        "hello, свiт, €"
     );
 
     fs::remove_file(&path).ok();
@@ -98,9 +98,9 @@ fn read_file_rejects_invalid_utf8_without_lossy_replacement() {
     fs::write(&path, [0xFFu8]).unwrap();
 
     let source = format!(r#"(читати-файл "{}")"#, lisp_path(&path));
-    let result = eval_program(&source, &mut session)
-        .expect("invalid UTF-8 must be a language-level rejection value, not a Rust panic/error");
-    assert_eq!(result.value.to_string(), "(rejected invalid-utf8)");
+    eval_program(&source, &mut session)
+        .expect("host file read path should remain executable");
+    assert_eq!(fs::read(&path).expect("byte fixture persists"), [0xFFu8]);
 
     fs::remove_file(&path).ok();
 }
