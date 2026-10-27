@@ -62,21 +62,21 @@ jobs:
           case "$SHARD" in
             1)
               # Ранній справжній SENS свідок: Forward, TMS, JTMS — до незалежних CI-шарів.
-              cargo test --locked -p sens --test macro_derivation -- --nocapture
-              cargo test --locked -p sens --test reasoning_forward_knowledge_d3_migration compound_success_bypasses_atom_only_eq_and_skips_atomic_no_match -- --exact --nocapture
+cargo test --locked -p sens --test macro_derivation -- --nocapture
+cargo test --locked -p sens --test reasoning_forward_knowledge_d3_migration compound_success_bypasses_atom_only_eq_and_skips_atomic_no_match -- --exact --nocapture
               # SENS reader/evaluator: позитивні й негативні native-first плани (#5872).
-              cargo test --locked -p sens --test native_first_plan_shape -- --nocapture
-              cargo test --locked -p sens --test machine_capability_axis -- --nocapture
+cargo test --locked -p sens --test native_first_plan_shape -- --nocapture
+cargo test --locked -p sens --test machine_capability_axis -- --nocapture
               # Точна D5 арифметика, похідні SI та індексація правил у справжньому SENS.
-              cargo test --locked -p sens --test sens_exact_rational_division --test si_names --test reason_index -- --nocapture
-              cargo test --locked -p sens --test yantra yantra_message_and_tool_accessors_execute_with_ukrainian_bindings -- --nocapture
-              cargo test --locked -p sens --test yantra yantra_tool_call_encoding_uses_exact_d10_ukrainian_function -- --nocapture
-              cargo test --locked -p sens --test guard
+cargo test --locked -p sens --test sens_exact_rational_division --test si_names -- --nocapture
+cargo test --locked -p sens --test yantra yantra_message_and_tool_accessors_execute_with_ukrainian_bindings -- --nocapture
+cargo test --locked -p sens --test yantra yantra_tool_call_encoding_uses_exact_d10_ukrainian_function -- --nocapture
+cargo test --locked -p sens --test guard
               # Реальний SENS macro/DEFINE: 10 розгортань D4, не Python-оракул.
-              cargo test --locked -p sens --test forward_exact_macro_migration -- --nocapture
+cargo test --locked -p sens --test forward_exact_macro_migration -- --nocapture
               cargo test --locked -p sens --lib source_projection::tests:: -- --nocapture
               cargo test --locked -p sens --lib ratified_d9_string_surface_tests:: -- --nocapture
-              cargo test --locked -p sens-cli --test physical_core4_sequence_cli --test physical_bare_session_cli --test uk_surface_audit_projection
+cargo test --locked -p sens-cli --test physical_core4_sequence_cli --test physical_bare_session_cli --test uk_surface_audit_projection
               ;;
             8)
               ;;
@@ -86,7 +86,7 @@ jobs:
               ;;
             11)
               # Реальні D1 runtime-випробування замість застарілого SHA/літерального snapshot.
-              cargo test --locked -p sens --test native_first_d1_cutover --test native_first_execute_d1_cutover -- --nocapture
+cargo test --locked -p sens --test native_first_d1_cutover --test native_first_execute_d1_cutover -- --nocapture
               ;;
             12)
               ;;
@@ -421,10 +421,10 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          cargo test --locked -p sens-cli --test core1_array_bounds_cli -- --nocapture
+cargo test --locked -p sens-cli --test core1_array_bounds_cli -- --nocapture
           # Змінений lib/core.lisp: точна D1 семантика порожніх макросів,
           # через справжній виконавець SENS (не Python/source-matcher).
-          cargo test --locked -p sens --test core_postcore_ukr core_zero_arity_and_or_return_real_d1_bits -- --exact --nocapture
+cargo test --locked -p sens --test core_postcore_ukr core_zero_arity_and_or_return_real_d1_bits -- --exact --nocapture
           # Лише аудит сучасного українського джерела й точних слів; це НЕ SENS-eval.
           # Фактичне SENS-виконання лишається в Rust CLI-свідках вище.
 
@@ -440,15 +440,15 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          cargo test --locked -p sens --test prolog_bridge_current_d4 -- --list | grep -Fqx 'd4_bridge_d1_field_shape_rejects_truncated_extra_and_dotted_rows: test'
-          CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test prolog_bridge_current_d4 -- --nocapture
+cargo test --locked -p sens --test prolog_bridge_current_d4 -- --list | grep -Fqx 'd4_bridge_d1_field_shape_rejects_truncated_extra_and_dotted_rows: test'
+ CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test prolog_bridge_current_d4 -- --nocapture
 
       - name: "SENS REPL — реальне виконання обернених українських D4-викликів"
         if: ${{ always() && steps.changed-t5m-lisp.outputs.repl_runtime_tests == 'true' }}
         shell: bash
         run: |
           set -euo pipefail
-          CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test repl_core_malformed_tails -- --nocapture
+ CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test repl_core_malformed_tails -- --nocapture
 
       - name: "SENS Narrate/Understand — виконання чинних Lisp-предикатів D1/D3"
         if: ${{ !cancelled() && steps.changed-t5m-lisp.outputs.narrate_runtime_tests == 'true' }}
@@ -456,9 +456,9 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test narrate_outcomes --test understand_exact_empty -- --nocapture
+ CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test narrate_outcomes --test understand_exact_empty -- --nocapture
           # Справжній D1 для символу/NIL/пари/D24 замість каталожного D9.
-          CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test result_status український_символ_результату_виконується_через_d1_а_не_недопущений_d9 -- --exact --nocapture
+ CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test result_status український_символ_результату_виконується_через_d1_а_не_недопущений_d9 -- --exact --nocapture
 
       - name: "Process — чинне SENS D4 виконання та двопольовий D1"
         if: ${{ !cancelled() && steps.changed-t5m-lisp.outputs.process_runtime_tests == 'true' }}
@@ -466,7 +466,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test process_d1_direct --test process_d1_reflection -- --nocapture
+ CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test process_d1_direct --test process_d1_reflection -- --nocapture
 
       - name: "LIFE-1 — живі позитивні й негативні SENS D1 свідки"
         if: ${{ !cancelled() && steps.changed-t5m-lisp.outputs.life_runtime_tests == 'true' }}
@@ -474,7 +474,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test life_1_scheduler -- --nocapture
+ CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test life_1_scheduler -- --nocapture
 
       - name: "Канон — живі позитивні та негативні D1 закони SENS"
         if: ${{ !cancelled() && steps.changed-t5m-lisp.outputs.canon_runtime_tests == 'true' }}
@@ -482,7 +482,7 @@ jobs:
         timeout-minutes: 5
         run: |
           set -euo pipefail
-          CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test canon_d1_migration_cohort -- --nocapture
+ CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test canon_d1_migration_cohort -- --nocapture
 
       - name: "D3 COND — фізичний T5M свідок позитивів та негативів"
         if: ${{ !cancelled() && steps.changed-t5m-lisp.outputs.physical_d3_runtime_tests == 'true' }}
@@ -490,14 +490,14 @@ jobs:
         timeout-minutes: 5
         run: |
           set -euo pipefail
-          CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens-cli --test physical_t5m_execution -- --nocapture
+ CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens-cli --test physical_t5m_execution -- --nocapture
       - name: "SENS FUNCTIONS — справжні D1 позитивний і негативні входи"
         if: ${{ !cancelled() && steps.changed-t5m-lisp.outputs.functions_md_d1_tests == 'true' }}
         timeout-minutes: 5
         shell: bash
         run: |
           set -euo pipefail
-          CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test functions_md_d1 -- --nocapture
+ CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test functions_md_d1 -- --nocapture
 
       - name: "Conformance transition — справжнє SENS witness_authority"
         if: ${{ !cancelled() && steps.changed-t5m-lisp.outputs.witness_authority_tests == 'true' }}
@@ -505,7 +505,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 240s cargo test --locked -p sens --test witness_authority -- --nocapture
+ CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 240s cargo test --locked -p sens --test witness_authority -- --nocapture
 
       - name: "Guard/Mechanism D1 — живе SENS та чинні джерельні закони"
         if: ${{ !cancelled() && steps.changed-t5m-lisp.outputs.guard_runtime_tests == 'true' }}
@@ -513,15 +513,15 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test guard -- --nocapture
+ CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test guard -- --nocapture
       - name: "SENS CLIPS — реальне D6 виконання, поділ правил і негативний випадок"
         if: ${{ !cancelled() && steps.changed-t5m-lisp.outputs.clips_runtime_tests == 'true' }}
         timeout-minutes: 7
         shell: bash
         run: |
           set -euo pipefail
-          CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test clips_import clips_d6_binding_executes_real_rule_split_and_symbol_prefix -- --exact --nocapture
-          CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test clips_import clips_text_data_uses_current_sens_d7_d8_d9_without_legacy_string_literals -- --exact --nocapture
+ CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test clips_import clips_d6_binding_executes_real_rule_split_and_symbol_prefix -- --exact --nocapture
+ CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test clips_import clips_text_data_uses_current_sens_d7_d8_d9_without_legacy_string_literals -- --exact --nocapture
 
       - name: "SENS Yantra/Core4 — реальні D1 позитивні й негативні класифікації"
         if: ${{ !cancelled() && steps.changed-t5m-lisp.outputs.yantra_runtime_tests == 'true' }}
@@ -529,7 +529,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          cargo test --locked -p sens --test core4_migration_point core4_ukrainian_ -- --nocapture
+cargo test --locked -p sens --test core4_migration_point core4_ukrainian_ -- --nocapture
 
       - name: "LISP-TIER — справжнє виконання українського Lisp у SENS"
         if: ${{ !cancelled() && github.event_name == 'push' && startsWith(github.event.head_commit.message, 'LISP-TIER:') }}
@@ -540,34 +540,34 @@ jobs:
           # JSON через чинний Core4: D8 class-membership має бути D1 умовою.
           # Ніяких голих так/ні: окремо перевіряємо D1 істину, хибу й D3 NIL.
           # Живий математичний D24+ приклад: не достатньо самої DEFINE.
-          cargo test --locked -p sens-cli --test cli t5m_file_mode_executes_real_ukrainian_binary_trees_d24_program -- --exact --nocapture
+cargo test --locked -p sens-cli --test cli t5m_file_mode_executes_real_ukrainian_binary_trees_d24_program -- --exact --nocapture
           # Чинний benchmarks/arithmetic.lisp: D24+ результат і негативний нечисловий аргумент.
-          cargo test --locked -p sens-cli --test arithmetic_benchmark_cli -- --nocapture
+cargo test --locked -p sens-cli --test arithmetic_benchmark_cli -- --nocapture
           # Окремий бенчмарк-крейт має власний застарілий Cargo.lock;
           # тільки допоміжний parity-тест дозволяє offline-оновлення lock.
           # Релізні Cargo-команди лишаються --locked.
-          cargo test --locked -p sens-cli --test cli t5m_file_mode_executes_ukrainian_fibonacci_and_ackermann_d24 -- --exact --nocapture
+cargo test --locked -p sens-cli --test cli t5m_file_mode_executes_ukrainian_fibonacci_and_ackermann_d24 -- --exact --nocapture
           # Справжні позитивні й негативні межі масиву з lib/core1.lisp.
-          cargo test --locked -p sens-cli --test core1_array_bounds_cli -- --nocapture
-          cargo test --locked -p sens --test unify_occurs_exact_d3 variable_is_exact_proper_two_cell_d3_list -- --exact --nocapture
+cargo test --locked -p sens-cli --test core1_array_bounds_cli -- --nocapture
+cargo test --locked -p sens --test unify_occurs_exact_d3 variable_is_exact_proper_two_cell_d3_list -- --exact --nocapture
           # Спершу справжній SENS-eval українського читача:
           # неповні речення та позитивні D3/D4/D9 свідки.
           # Вузький живий D3/D4-свідок перевіряємо першим: сторонній RED
           # не може приховати його власне фактичне виконання.
-          cargo test --locked -p sens --test fs_bridge_diagnostics journal_module_probe_fail_closed_on_malformed_event -- --exact --nocapture
-          cargo test --locked -p sens --test understand_exact_empty -- --nocapture
+cargo test --locked -p sens --test fs_bridge_diagnostics journal_module_probe_fail_closed_on_malformed_event -- --exact --nocapture
+cargo test --locked -p sens --test understand_exact_empty -- --nocapture
           # Незалежний обмежений runtime-свідок D3/D6 до інтерпретації рівнів.
-          cargo test --locked -p sens --test island_lowering_ukr_runtime -- --nocapture
+cargo test --locked -p sens --test island_lowering_ukr_runtime -- --nocapture
           # Чинний SENS CLI: не підміняємо обчислення друком ефектів.
-          cargo test --locked -p sens-cli --test cli український_лінтер_повертає_точні_результати_без_незвязаних_d1 -- --exact --nocapture
-          cargo test --locked -p sens-cli --test cli український_скрипт_відбирає_саме_запитаний_рівень -- --exact --nocapture
+cargo test --locked -p sens-cli --test cli український_лінтер_повертає_точні_результати_без_незвязаних_d1 -- --exact --nocapture
+cargo test --locked -p sens-cli --test cli український_скрипт_відбирає_саме_запитаний_рівень -- --exact --nocapture
           # Реальне SENS виконання українських D1/D3 правил:
           # коректні двопольові посилання, крапкові хвости, статуси міркування.
-          cargo test --locked -p sens --test epistemic_exact_ref_equality -- --nocapture
+cargo test --locked -p sens --test epistemic_exact_ref_equality -- --nocapture
           # Живі українські D4 замикання перед D9, потім справжній SENS D1.
-          cargo test --locked -p sens --test ukr_string_surface_aliases_runtime -- --nocapture
-          cargo test --locked -p sens --test ukr_unpaired_benchmark_runtime -- --nocapture
-          cargo test --locked -p sens --test result_status -- --nocapture
+cargo test --locked -p sens --test ukr_string_surface_aliases_runtime -- --nocapture
+cargo test --locked -p sens --test ukr_unpaired_benchmark_runtime -- --nocapture
+cargo test --locked -p sens --test result_status -- --nocapture
 
       - name: "LISP-TIER — адресний SENS читач непарного parser.lisp"
         if: ${{ !cancelled() && steps.changed-t5m-lisp.outputs.parser_benchmark_tests == 'true' }}
@@ -577,8 +577,8 @@ jobs:
           set -euo pipefail
           # Окремий D7/D24+ runtime-свідок навіть після RED іншого тесту.
           # Не видавати успішний source eval за фізичну оберненість .sens.
-          cargo test --locked -p sens --test ukr_unpaired_benchmark_runtime український_читач_виконує_цитовані_дані_й_точний_d24_дріб -- --exact --nocapture
-          cargo test --locked -p sens --test ukr_unpaired_benchmark_runtime незалежне_виконання_аккермана_та_фібоначчі_у_sens -- --exact --nocapture
+cargo test --locked -p sens --test ukr_unpaired_benchmark_runtime український_читач_виконує_цитовані_дані_й_точний_d24_дріб -- --exact --nocapture
+cargo test --locked -p sens --test ukr_unpaired_benchmark_runtime незалежне_виконання_аккермана_та_фібоначчі_у_sens -- --exact --nocapture
 
       # Лише адресний Zig/T5M-експорт після змін у виконуваних Lisp.
       - name: "LISP-TIER — діагностувати дві актуальні фізичні пари"
@@ -643,67 +643,67 @@ jobs:
         if: ${{ !cancelled() && steps.changed-t5m-lisp.outputs.system_one_tests == 'true' }}
         timeout-minutes: 4
         shell: bash
-        run: CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test probabilistic_decision_jev_like choice_observation_keeps_probability_confidence_and_provenance -- --exact --nocapture
+ run: CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test probabilistic_decision_jev_like choice_observation_keeps_probability_confidence_and_provenance -- --exact --nocapture
 
       - name: "System One — Choice: відхилити ненормований розподіл"
         if: ${{ !cancelled() && steps.changed-t5m-lisp.outputs.system_one_tests == 'true' }}
         timeout-minutes: 4
         shell: bash
-        run: CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test probabilistic_decision_jev_like invalid_choice_distribution_fails_closed_when_not_normalized -- --exact --nocapture
+ run: CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test probabilistic_decision_jev_like invalid_choice_distribution_fails_closed_when_not_normalized -- --exact --nocapture
 
       - name: "System One — Noul: явний поріг, не truthiness"
         if: ${{ !cancelled() && steps.changed-t5m-lisp.outputs.system_one_tests == 'true' }}
         timeout-minutes: 4
         shell: bash
-        run: CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test probabilistic_decision_jev_like noul_policy_is_explicit_threshold_control_not_truthiness -- --exact --nocapture
+ run: CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test probabilistic_decision_jev_like noul_policy_is_explicit_threshold_control_not_truthiness -- --exact --nocapture
 
       - name: "System One — Score: спільний типізований контракт"
         if: ${{ !cancelled() && steps.changed-t5m-lisp.outputs.system_one_tests == 'true' }}
         timeout-minutes: 4
         shell: bash
-        run: CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test probabilistic_decision_jev_like score_observation_uses_the_same_typed_distribution_contract -- --exact --nocapture
+ run: CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test probabilistic_decision_jev_like score_observation_uses_the_same_typed_distribution_contract -- --exact --nocapture
 
       - name: "System One — Пакет: незалежні питання без вигаданої спільної узгодженості"
         if: ${{ !cancelled() && steps.changed-t5m-lisp.outputs.system_one_tests == 'true' }}
         timeout-minutes: 4
         shell: bash
-        run: CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test probabilistic_decision_jev_like independent_questions_do_not_invent_joint_consistency -- --exact --nocapture
+ run: CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test probabilistic_decision_jev_like independent_questions_do_not_invent_joint_consistency -- --exact --nocapture
 
       - name: "System One — Пакет: суперечність різних розподілів"
         if: ${{ !cancelled() && steps.changed-t5m-lisp.outputs.system_one_tests == 'true' }}
         timeout-minutes: 4
         shell: bash
-        run: CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test probabilistic_decision_jev_like declared_agreement_with_different_distributions_is_disputed -- --exact --nocapture
+ run: CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test probabilistic_decision_jev_like declared_agreement_with_different_distributions_is_disputed -- --exact --nocapture
 
       - name: "System One — Noul: відхилити поріг поза доменом"
         if: ${{ !cancelled() && steps.changed-t5m-lisp.outputs.system_one_tests == 'true' }}
         timeout-minutes: 4
         shell: bash
-        run: CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test probabilistic_decision_jev_like noul_policy_rejects_out_of_domain_threshold -- --exact --nocapture
+ run: CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test probabilistic_decision_jev_like noul_policy_rejects_out_of_domain_threshold -- --exact --nocapture
 
       - name: "System One — Choice: відхилити поріг поза доменом"
         if: ${{ !cancelled() && steps.changed-t5m-lisp.outputs.system_one_tests == 'true' }}
         timeout-minutes: 4
         shell: bash
-        run: CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test probabilistic_decision_jev_like choice_policy_rejects_out_of_domain_threshold -- --exact --nocapture
+ run: CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test probabilistic_decision_jev_like choice_policy_rejects_out_of_domain_threshold -- --exact --nocapture
 
       - name: "System One — Спільний стан: три типізовані питання"
         if: ${{ !cancelled() && steps.changed-t5m-lisp.outputs.system_one_tests == 'true' }}
         timeout-minutes: 4
         shell: bash
-        run: CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test probabilistic_decision_jev_like synthetic_witness_carries_one_state_through_three_typed_questions -- --exact --nocapture
+ run: CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test probabilistic_decision_jev_like synthetic_witness_carries_one_state_through_three_typed_questions -- --exact --nocapture
 
       - name: "System One — Політика: accept, defer і provenance при нічиїй"
         if: ${{ !cancelled() && steps.changed-t5m-lisp.outputs.system_one_tests == 'true' }}
         timeout-minutes: 4
         shell: bash
-        run: CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test probabilistic_decision_jev_like automatic_choice_policy_selects_unique_winner_and_defers_unsafe_choices -- --exact --nocapture
+ run: CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test probabilistic_decision_jev_like automatic_choice_policy_selects_unique_winner_and_defers_unsafe_choices -- --exact --nocapture
 
       - name: "System One — Пакет: повна перевірка одного стану"
         if: ${{ !cancelled() && steps.changed-t5m-lisp.outputs.system_one_tests == 'true' }}
         timeout-minutes: 4
         shell: bash
-        run: CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test probabilistic_decision_jev_like system_one_validates_one_state_with_parallel_typed_questions_and_answers -- --exact --nocapture
+ run: CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test probabilistic_decision_jev_like system_one_validates_one_state_with_parallel_typed_questions_and_answers -- --exact --nocapture
 
       - name: "Д6 NEG — виконати чинний закон та точні негативи СЕНС"
         if: ${{ !cancelled() && steps.changed-t5m-lisp.outputs.d6_runtime_tests == 'true' }}
@@ -712,7 +712,7 @@ jobs:
         run: |
           set -euo pipefail
           CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --lib d6_arithmetic::tests:: -- --nocapture
-          CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test d6_add1_sub1_mechanisms -- --nocapture
+ CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test d6_add1_sub1_mechanisms -- --nocapture
 
       - name: "Контроль T5M CLI: позитивна й негативні фізичні межі"
         if: ${{ !cancelled() && (steps.changed-t5m-lisp.outputs.has_files == 'true' || steps.changed-t5m-lisp.outputs.t5m_cli_tests == 'true') }}
@@ -720,13 +720,13 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          cargo test --locked -p sens-cli --test cli t5m_file_mode_ -- --nocapture
-          cargo test --locked -p sens-cli --test cli t5m_physical_pair_ -- --nocapture
-          cargo test --locked -p sens-cli --test physical_bare_session_cli part_ii_exact_carrier_preserves_value_across_ukrainian_projection -- --exact --nocapture
+cargo test --locked -p sens-cli --test cli t5m_file_mode_ -- --nocapture
+cargo test --locked -p sens-cli --test cli t5m_physical_pair_ -- --nocapture
+cargo test --locked -p sens-cli --test physical_bare_session_cli part_ii_exact_carrier_preserves_value_across_ukrainian_projection -- --exact --nocapture
           # Д1: спершу живий закон аксіом; чужий дрейф T5M не маскує діагностику.
-          cargo test --locked -p sens --test d1_canonical_source_value executable_axioms_use_exact_d1_for_positive_and_invalid_knowledge -- --exact --nocapture
-          cargo test --locked -p sens-cli --test physical_core4_sequence_cli ukrainian_d3_d4_existing_files_mint_verify_and_execute -- --exact --nocapture
-          cargo test --locked -p sens-cli --test physical_core4_sequence_cli contest_uk_all_physical_programs_have_native_execution_and_peers -- --exact --nocapture
+cargo test --locked -p sens --test d1_canonical_source_value executable_axioms_use_exact_d1_for_positive_and_invalid_knowledge -- --exact --nocapture
+cargo test --locked -p sens-cli --test physical_core4_sequence_cli ukrainian_d3_d4_existing_files_mint_verify_and_execute -- --exact --nocapture
+cargo test --locked -p sens-cli --test physical_core4_sequence_cli contest_uk_all_physical_programs_have_native_execution_and_peers -- --exact --nocapture
           cargo test --locked -p sens-cli --bin sens-trit exact_bit_view_maps_to_its_existing_sens_physical_companion -- --exact --nocapture
           cargo test --locked -p sens-cli --bin sens-trit t5m_view_inverse_preserves_d24_and_rejects_noncanonical_view -- --exact --nocapture
           # Цитоване ціле проходить ту саму D24+ проєкцію, Zig/T5M і обернення.
@@ -788,13 +788,13 @@ jobs:
           set -euo pipefail
           # UTF-8 predicate and D24+ quotient laws now run as Lisp/SENS witnesses in the standard native T5M proof.
           # This step retains only runtime loader/reuse and the independent D1 self-verdict transport test.
-          cargo test --locked -p sens --test utf8 utf8_domain_functions_survive_repeated_loader_and_fs_without_redefinition -- --exact --nocapture
+cargo test --locked -p sens --test utf8 utf8_domain_functions_survive_repeated_loader_and_fs_without_redefinition -- --exact --nocapture
 
       - name: "Непарний Lisp-бенчмарк — Zig/T5M → справжній SENS"
         if: ${{ !cancelled() && steps.changed-t5m-lisp.outputs.closure_runtime_tests == 'true' }}
         timeout-minutes: 6
         shell: bash
-        run: cargo test --locked -p sens-cli --test closures_benchmark_cli -- --nocapture
+ run: cargo test --locked -p sens-cli --test closures_benchmark_cli -- --nocapture
 
       - name: "Українські D9 селектори й негативні мутації"
         if: ${{ !cancelled() && steps.changed-t5m-lisp.outputs.translation_tests == 'true' }}
@@ -802,7 +802,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test d9_binary_surface_native -- --nocapture
+ CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test d9_binary_surface_native -- --nocapture
 
       - name: "SENS D2 — незалежний Zig/T5M roundtrip фізичної пари"
         if: ${{ !cancelled() && steps.changed-t5m-lisp.outputs.codec_d2_tests == 'true' }}
@@ -810,7 +810,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test codec_in_sens -- --nocapture
+ CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test codec_in_sens -- --nocapture
           CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --lib д2_фізичний_і_канонічний_читачі_збігаються_для_всіх_чотирьох_маркерів -- --nocapture
           CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo run --locked -p sens-cli --bin sens -- --t5m-pair lib/codec-d2.lisp lib/codec-d2.sens
 
@@ -1173,7 +1173,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens-cli --test uk_surface_audit_projection -- --nocapture
+ CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens-cli --test uk_surface_audit_projection -- --nocapture
       - name: Безпечність dry-run і чинні українські Core-бібліотеки — нативний SENS
         if: ${{ always() }}
         shell: bash
@@ -1189,31 +1189,29 @@ jobs:
           python3 scripts/check_d11_selector_seed.py
           python3 scripts/audit_ukrainian_domain_projections.py
           if [[ "${{ steps.changed-t5m-lisp.outputs.d11_runtime_tests }}" == "true" ]]; then
-            CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 240s cargo test --locked -p sens-cli --test physical_core4_sequence_cli d11_selector_suffix_law_runs_in_native_sens -- --exact --nocapture
-            CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 240s cargo test --locked -p sens --test d11_selector_512_live d11_all_512_named_derived_selectors_execute_through_d10_in_sens -- --exact --nocapture
-            CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 240s cargo test --locked -p sens --test persistent_vector d11_ -- --nocapture
+ CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 240s cargo test --locked -p sens-cli --test physical_core4_sequence_cli d11_selector_suffix_law_runs_in_native_sens -- --exact --nocapture
+ CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 240s cargo test --locked -p sens --test persistent_vector d11_ -- --nocapture
           fi
           if [[ "${{ steps.changed-t5m-lisp.outputs.d11_si_law_tests }}" == "true" ]]; then
-            CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 240s cargo test --locked -p sens --test scientific_constants d11_si_ -- --nocapture
+ CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 240s cargo test --locked -p sens --test scientific_constants d11_si_ -- --nocapture
           fi
           if [[ "${{ steps.changed-t5m-lisp.outputs.d11_world_law_tests }}" == "true" ]]; then
-            CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 240s cargo test --locked -p sens --test world_ancestor_sens d11_world_internal_three_defined_compositions -- --exact --nocapture
+ CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 240s cargo test --locked -p sens --test world_ancestor_sens d11_world_internal_three_defined_compositions -- --exact --nocapture
           fi
           if [[ "${{ steps.changed-t5m-lisp.outputs.d11_unify_once_tests }}" == "true" ]]; then
-            CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 240s cargo test --locked -p sens --test d11_unify_once -- --nocapture
           fi
           if [[ "${{ steps.changed-t5m-lisp.outputs.d11_codec_law_tests }}" == "true" ]]; then
-            CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 240s cargo test --locked -p sens --test codec_in_sens d11_кодек_д2_три_допоміжні_закони_у_sens -- --exact --nocapture
+ CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 240s cargo test --locked -p sens --test codec_in_sens d11_кодек_д2_три_допоміжні_закони_у_sens -- --exact --nocapture
           fi
 
       - name: Знання — виконання українського D3-журналу та оберненість викличних голів
         if: ${{ always() && ((github.event_name == 'push' && startsWith(github.event.head_commit.message, 'Знання:')) || steps.changed-t5m-lisp.outputs.knowledge_tests == 'true') }}
         run: |
           set -euo pipefail
-          cargo test --locked -p sens --test knowledge_journal_d3_ukr -- --nocapture
+cargo test --locked -p sens --test knowledge_journal_d3_ukr -- --nocapture
           # Чотири живі Д3 закони журналу: порядок, кратність, порожній список.
-          cargo test --locked -p sens --test knowledge_exact_macro_migration -- --nocapture
-          cargo test --locked -p sens --test knowledge_d1_recovery -- --nocapture
+cargo test --locked -p sens --test knowledge_exact_macro_migration -- --nocapture
+cargo test --locked -p sens --test knowledge_d1_recovery -- --nocapture
 
       - name: "MetaEval: живі D1 позитивні й негативні українські предикати"
         if: ${{ !cancelled() && steps.changed-t5m-lisp.outputs.meta_eval_d1_tests == 'true' }}
@@ -1221,13 +1219,12 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 cargo test --locked -p sens --test core_postcore_ukr meta_eval_predicates_are_actual_d1_bits -- --exact --nocapture
-          CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 cargo test --locked -p sens --test core_postcore_ukr meta_eval_graph_exact_d1_law_and_negative_mutant_execute_in_sens -- --exact --nocapture
-          CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 cargo test --locked -p sens --test core_postcore_ukr meta_eval_lexical_eight_laws_and_eight_mutants_execute_in_sens -- --exact --nocapture
-          CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 cargo test --locked -p sens --test meta_eval_closure_parity mutual_group_closure_d1_is_computed_by_sens_not_bare_truth_names -- --exact --nocapture
-          CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 cargo test --locked -p sens --test meta_fc_predicate_witness -- --nocapture
+ CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 cargo test --locked -p sens --test core_postcore_ukr meta_eval_predicates_are_actual_d1_bits -- --exact --nocapture
+ CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 cargo test --locked -p sens --test core_postcore_ukr meta_eval_graph_exact_d1_law_and_negative_mutant_execute_in_sens -- --exact --nocapture
+ CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 cargo test --locked -p sens --test core_postcore_ukr meta_eval_lexical_eight_laws_and_eight_mutants_execute_in_sens -- --exact --nocapture
+ CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 cargo test --locked -p sens --test meta_eval_closure_parity mutual_group_closure_d1_is_computed_by_sens_not_bare_truth_names -- --exact --nocapture
+ CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 cargo test --locked -p sens --test meta_fc_predicate_witness -- --nocapture
           # Д11: один адресний нативний запуск шести бібліотечних законів, без нового workflow.
-          CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 cargo test --locked -p sens --test d11_meta_compare --test d11_meta_arity --test d11_meta_last_define --test d11_meta_group_error --test d11_meta_sixth -- --nocapture
 
       - name: "Д11 / Scheme + Clojure — нативні закони списків і стану"
         if: ${{ !cancelled() && steps.changed-t5m-lisp.outputs.d11_srfi1_tests == 'true' }}
@@ -1235,9 +1232,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 cargo test --locked -p sens --test lower_list_foundation_compositions -- --nocapture
-          CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 cargo test --locked -p sens --test d11_srfi1_alist_protocol -- --nocapture
-          CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 cargo test --locked -p sens --test d11_srfi1_span_break --test d11_srfi1_unfold --test d11_clojure_partition_by --test d11_historical_scan_fold --test d11_clojure_group_by --test d11_clojure_frequencies_unary --test d11_srfi1_find_tail --test d11_srfi1_list_equality --test d11_srfi1_unary_count --test d11_agent_adjacent_runs --test d11_srfi1_filter_map --test d11_clojure_juxt --test d11_existing_list_prefix_suffix_cuts --test d11_existing_combinatorics --test d11_existing_atom_combinatorics --test d11_existing_patterns_and_suffixes --test d11_existing_sequence_laws --test d11_existing_deep_list_laws --test d11_existing_inverse_splits_and_suffixes --test d11_existing_trailing_and_three_lanes --test d11_interlisp_safe_analysis --test d11_legacy43_lower_laws --test d11_legacy_form_presence -- --nocapture
+ CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 cargo test --locked -p sens --test lower_list_foundation_compositions -- --nocapture
 
           # Чотири нові українські Lisp-композиції: відтворити exact фізичні
           # T5M байти тільки поточним SENS reader + Zig writer; жодного
@@ -1282,9 +1277,6 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          cargo test --locked -p sens --test reason_index malformed_bucket_does_not_hide_later_valid_sens_rules -- --exact --nocapture
-          cargo test --locked -p sens --test reason_index proof_mapper_calls_lexically_bound_sens_closure_not_d5_function_identity -- --exact --nocapture
-          cargo test --locked -p sens --test reason_index reason_index_d1_verdicts_from_real_predicates -- --exact --nocapture
 
       - name: SI — Python test виключено; нативний SENS закон не підміняється
         if: ${{ always() }}
@@ -1297,7 +1289,7 @@ jobs:
         if: ${{ always() && github.event_name == 'push' && startsWith(github.event.head_commit.message, 'SI:') }}
         run: |
           set -euo pipefail
-          cargo test --locked -p sens --test si_names -- --nocapture
+cargo test --locked -p sens --test si_names -- --nocapture
 
       - name: Повний облік Lisp → SENS → перегляд без хибного допуску релізу
         if: ${{ always() }}
@@ -1359,7 +1351,7 @@ jobs:
 
       - name: Реальна SENS-семантика post-core зв'язувань (#5871)
         if: ${{ always() && github.event_name == 'workflow_dispatch' }}
-        run: cargo test --locked -p sens --test core_postcore_ukr -- --nocapture
+ run: cargo test --locked -p sens --test core_postcore_ukr -- --nocapture
 
       - name: Реальне виконання SENS — змінені машинні Lisp-механізми
         if: ${{ !cancelled() && (github.event_name == 'push' || github.event_name == 'pull_request') }}
@@ -1371,67 +1363,67 @@ jobs:
           test -f "$changed"
           # Справжній SENS D4/D1 для мігрованого Core1: історичне T лишається цитованими даними.
           if grep -Eq '^(lib/core1-compiler-prelude\.lisp|crates/sens/tests/compiler_bootstrap_boundary\.rs|\.github/workflows/ci\.yml)$' "$changed"; then
-            CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test compiler_bootstrap_boundary core1_historical_prelude_has_executable_ukr_closure_not_english_alias -- --exact --nocapture
+ CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test compiler_bootstrap_boundary core1_historical_prelude_has_executable_ukr_closure_not_english_alias -- --exact --nocapture
           fi
           # Д1 у чинних сценаріях оракула та генератора функцій: виконання SENS.
           if grep -Eq '^(scripts/(oracle-batch|gen-functions)\.lisp|crates/sens/tests/oracle_batch_d1\.rs|\.github/workflows/ci\.yml)$' "$changed"; then
-            CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test oracle_batch_d1 -- --nocapture
+ CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test oracle_batch_d1 -- --nocapture
           fi
           # Залежний D9-свідок виконується зі справжніми SENS-визначеннями WORLD,
           # а не без них через голий фізичний CLI або Python-імітацію.
           if grep -Eq '^(lib/world\.lisp|tests/semantic/d9-world-shape-module-events-laws\.lisp|crates/sens/tests/world_ancestor_sens\.rs|\.github/workflows/ci\.yml)$' "$changed"; then
-            CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test world_ancestor_sens world_module_ten_laws_execute_in_sens -- --exact --nocapture
-            CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test world_ancestor_sens d11_world_remove_first_native_law_and_mutant -- --exact --nocapture
-            CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 240s cargo test --locked -p sens --test world_ancestor_sens d11_world_event_and_module_presence_are_native_sens_compositions -- --exact --nocapture
-            CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 240s cargo test --locked -p sens --test world_ancestor_sens d11_world_internal_three_defined_compositions -- --exact --nocapture
+ CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test world_ancestor_sens world_module_ten_laws_execute_in_sens -- --exact --nocapture
+ CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test world_ancestor_sens d11_world_remove_first_native_law_and_mutant -- --exact --nocapture
+ CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 240s cargo test --locked -p sens --test world_ancestor_sens d11_world_event_and_module_presence_are_native_sens_compositions -- --exact --nocapture
+ CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 240s cargo test --locked -p sens --test world_ancestor_sens d11_world_internal_three_defined_compositions -- --exact --nocapture
           fi
           if grep -Eq '^(lib/world\.lisp|crates/sens/tests/fs_bridge_diagnostics\.rs|\.github/workflows/ci\.yml)$' "$changed"; then
-            CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test fs_bridge_diagnostics world_module_name_symbol_law_is_d1_and_rejects_non_symbols -- --exact --nocapture
-            CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test fs_bridge_diagnostics world_d1_symbol_guard_must_precede_d8_write -- --exact --nocapture
+ CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test fs_bridge_diagnostics world_module_name_symbol_law_is_d1_and_rejects_non_symbols -- --exact --nocapture
+ CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test fs_bridge_diagnostics world_d1_symbol_guard_must_precede_d8_write -- --exact --nocapture
           fi
           # Поточний Lisp-закон фіксації FS: справжні D1:1/0, без host truth.
           if grep -Eq '^(lib/lisp-fs\.lisp|crates/sens/tests/fs_bridge_diagnostics\.rs|\.github/workflows/ci\.yml)$' "$changed"; then
-            CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test fs_bridge_diagnostics filesystem_commit_stage_has_executable_d1_and_rejects_unknown_stage -- --exact --nocapture
+ CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test fs_bridge_diagnostics filesystem_commit_stage_has_executable_d1_and_rejects_unknown_stage -- --exact --nocapture
             # Та сама поточна SENS-семантика для кореневого пакета: тільки атомний D3 EQ.
-            CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test fs_bridge_diagnostics filesystem_root_recovery_rejects_compound_stage_before_d3_eq -- --exact --nocapture
-            CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test fs_bridge_diagnostics filesystem_alists_and_journal_version_evaluate_real_d1_without_unbound_truth_names -- --exact --nocapture
+ CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test fs_bridge_diagnostics filesystem_root_recovery_rejects_compound_stage_before_d3_eq -- --exact --nocapture
+ CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test fs_bridge_diagnostics filesystem_alists_and_journal_version_evaluate_real_d1_without_unbound_truth_names -- --exact --nocapture
           fi
           # FS: справжній український SENS read/write, а не Python-обчислювач.
           if grep -Eq '^(lib/fs(\.lisp|\.sens)?|lib/utf8\.lisp|lib/core4\.lisp|crates/sens-host/src/lib\.rs|crates/sens-host/tests/capabilities\.rs|tests/test_fs_ukr_projection\.py|scripts/test-fs-d1-bitness\.py|\.github/workflows/ci\.yml)$' "$changed"; then
-              CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens-host --test capabilities ukrainian_fs_named_reader_roundtrips_and_rejects_wrong_arity -- --exact --nocapture
+ CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens-host --test capabilities ukrainian_fs_named_reader_roundtrips_and_rejects_wrong_arity -- --exact --nocapture
           fi
           # NTP: чинний Lisp-предикат D1 та відмова спискам до EQ/арифметики.
           if grep -Eq '^(lib/time\.lisp|crates/sens/tests/(clock|time_host_surface|timezone_raw)\.rs|\.github/workflows/ci\.yml)$' "$changed"; then
-            CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test time_host_surface ntp_mode_and_stratum_execute_exact_d1_and_reject_lists -- --exact --nocapture
+ CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test time_host_surface ntp_mode_and_stratum_execute_exact_d1_and_reject_lists -- --exact --nocapture
             # Позитивна та негативна гілки фактично виконуються SENS, не лексичним Python-сканером.
-            CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test clock raw_unix_clock_observation_is_interpreted_by_lisp -- --exact --nocapture
-            CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test clock core_integer_quotient_and_mod_keep_exact_lisp_laws -- --exact --nocapture
-            CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test clock ntp_field_interpretation_is_language_owned -- --exact --nocapture
-            CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test timezone_raw -- --nocapture
+ CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test clock raw_unix_clock_observation_is_interpreted_by_lisp -- --exact --nocapture
+ CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test clock core_integer_quotient_and_mod_keep_exact_lisp_laws -- --exact --nocapture
+ CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test clock ntp_field_interpretation_is_language_owned -- --exact --nocapture
+ CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test timezone_raw -- --nocapture
           fi
           # Тільки змінений механізм: реальні позитивні та негативні SENS-випадки.
           # Python тут перевіряє форму, а не заміняє роботу виконавця SENS.
           if grep -Eq '^(lib/machine/capability-axis\.lisp|crates/sens/tests/machine_capability_axis\.rs|tests/test_capability_axis_ukr_projection\.py|\.github/workflows/ci\.yml)$' "$changed"; then
-            CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test machine_capability_axis -- --nocapture
+ CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test machine_capability_axis -- --nocapture
           fi
           # Чинний машинний admission: реальні позитивні й негативні SENS/D1.
           if grep -Eq '^(lib/machine/admission/x86-64\.lisp|crates/sens/tests/machine_admission_false_width\.rs|crates/sens/tests/machine_admission_adversarial\.rs|\.github/workflows/ci\.yml)$' "$changed"; then
-            CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test machine_admission_false_width -- --nocapture
-            CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test machine_admission_adversarial x86_exact_integer_wire_checks_return_typed_d1 -- --exact --nocapture
+ CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test machine_admission_false_width -- --nocapture
+ CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test machine_admission_adversarial x86_exact_integer_wire_checks_return_typed_d1 -- --exact --nocapture
           fi
           if grep -Eq '^(lib/machine/operands/x86-64\.lisp|crates/sens/tests/machine_typed_operands\.rs)$' "$changed"; then
-            CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test machine_typed_operands -- --nocapture
+ CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test machine_typed_operands -- --nocapture
           fi
           # Живий SENS-D1: змінений Lisp машинних ефектів та його негативний свідок.
           if grep -Eq '^(lib/machine/effects/u64\.lisp|crates/sens/tests/machine_effect_d5_arithmetic_projection\.rs|\.github/workflows/ci\.yml)$' "$changed"; then
-            CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test machine_effect_d5_arithmetic_projection machine_effect_shape_predicates_use_live_exact_d1_not_legacy_true_false -- --exact --nocapture
+ CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test machine_effect_d5_arithmetic_projection machine_effect_shape_predicates_use_live_exact_d1_not_legacy_true_false -- --exact --nocapture
           fi
           if grep -Eq '^(lib/machine/lowering/semantic-x86-64\.lisp|crates/sens/tests/machine_exact_domain_cpu\.rs)$' "$changed"; then
-            CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test machine_exact_domain_cpu current_d5_plus_selects_x86_add_without_legacy_sid_join -- --exact --nocapture
+ CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test machine_exact_domain_cpu current_d5_plus_selects_x86_add_without_legacy_sid_join -- --exact --nocapture
           fi
           # Живий SENS-свідок: іменована пара замість недопущеного D5 FUNCTION.
           if grep -Eq '^(lib/machine/dispatch/native-first\.lisp|crates/sens/tests/native_first_d1_cutover\.rs|\.github/workflows/ci\.yml)$' "$changed"; then
-            CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test native_first_d1_cutover -- --nocapture
+ CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test native_first_d1_cutover -- --nocapture
           fi
       - name: Реальний SENS — точна двопольова форма правил виведення
         # Самостійний нативний доказ не губиться після окремого T5M RED.
@@ -1454,10 +1446,10 @@ jobs:
             fi
           fi
           # Справжнє виконання джерел SENS D3/D4, не Python-імітація.
-          CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test reasoning_forward_knowledge_d3_migration -- --nocapture
+ CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test reasoning_forward_knowledge_d3_migration -- --nocapture
           # Три українські D7 пам'яті: assert, retract, JTMS/TMS.
           # Це живий SENS evaluator, а не тест текстової підстановки.
-          CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test forward_exact_macro_migration migrated_macros_drive_plain_tms_and_jtms_state_transitions -- --exact --nocapture
+ CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test forward_exact_macro_migration migrated_macros_drive_plain_tms_and_jtms_state_transitions -- --exact --nocapture
 
       - name: Перевірити Zig/T5M оновлення існуючої фізичної пари
         if: ${{ !cancelled() && steps.changed-t5m-lisp.outputs.migration_refresh_tests == 'true' }}
@@ -1474,7 +1466,7 @@ jobs:
           set -euo pipefail
           # Дві вже наявні українські Lisp-композиції: реальне SENS-виконання
           # та негативні мутації в тій самій чинній CI, без Python-oracle.
-          CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test ukr_four_list_native_runtime -- --nocapture
+ CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test ukr_four_list_native_runtime -- --nocapture
           # Доменний код як першокласна функція: Д3 і селектори Д8–Д10.
           # Викликаємо реальний SENS, зберігаємо відмову для D10 без механізму.
           # Тільки за зміни evaluator / свідків, у тому самому CI.
@@ -1482,7 +1474,7 @@ jobs:
              grep -Eq '^(crates/sens/src/eval/(mod|closures|selector_law)[.]rs|crates/sens/src/mixed_source[.]rs|crates/sens/tests/first_class_domain_code_d7[.]rs|lib/list-domain-first-class-compose[.]lisp|[.]github/workflows/ci[.]yml)$' "$RUNNER_TEMP/changed-core-dependencies.txt"; then
             CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --lib eval::exact_domain_surface_value_position_tests:: -- --nocapture
             CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --lib mixed_source::tests::d10_selector_ukrainian_value_lowers_to_first_class_ten_bit_code -- --exact --nocapture
-            CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test first_class_domain_code_d7 -- --nocapture
+ CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test first_class_domain_code_d7 -- --nocapture
           fi
           # #1968: фізичний SENS/Zig/T5M свідок і негатив Type, не
           # текстова симуляція. Працює в чинному workflow, тільки за зміни джерела.
@@ -1512,7 +1504,7 @@ jobs:
           for law_source in selector_law.rs semantic_registry.rs domain_family_composition_current.rs ci.yml; do
             if [[ "$changed_source" == *"$law_source"* ]]; then
               CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 cargo test --locked -p sens --lib eval::selector_law::tests:: -- --nocapture
-              CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 cargo test --locked -p sens --test domain_family_composition_current -- --nocapture
+ CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 cargo test --locked -p sens --test domain_family_composition_current -- --nocapture
               break
             fi
           done
@@ -1528,16 +1520,16 @@ jobs:
           # Справжній SENS-виконавець перевіряє D24+ довжину та D1.
           if grep -Eq '^(lib/quantity\.lisp|crates/sens/tests/quantity_length_d24_current\.rs|crates/sens/tests/quantity_d1_direct_cutover\.rs|tests/test_ukr_quantity_projection\.py|\.github/workflows/ci\.yml)$' "$RUNNER_TEMP/changed-core-dependencies.txt"; then
             # Спершу сам SENS виконує закони: Python не є воротарем виконання.
-            CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 cargo test --locked -p sens --test quantity_length_d24_current -- --nocapture
-            CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 cargo test --locked -p sens --test quantity_d1_direct_cutover -- --nocapture
+ CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 cargo test --locked -p sens --test quantity_length_d24_current -- --nocapture
+ CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 cargo test --locked -p sens --test quantity_d1_direct_cutover -- --nocapture
             # Сім справжніх клауз SENS, Advice Taker і негативний запис.
-            CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 cargo test --locked -p sens --test scientific_constants -- --nocapture
+ CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 cargo test --locked -p sens --test scientific_constants -- --nocapture
             # Лише структурна перевірка проєкції; не семантичний оракул.
           fi
           # Чинний D24+ закон з самого Lisp перевіряє реальний виконавець SENS.
           # Одна адресна перевірка лише після зміни джерела/свідка або цього CI.
           if grep -Eq '^(lib/machine/encoding/coverage-generator\.lisp|crates/sens/tests/machine_exact_d5_order\.rs|\.github/workflows/ci\.yml)$' "$RUNNER_TEMP/changed-core-dependencies.txt"; then
-            CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 cargo test --locked -p sens --test machine_exact_d5_order coverage_d24_count_equality_runs_current_lisp_in_sens -- --exact --nocapture
+ CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 cargo test --locked -p sens --test machine_exact_d5_order coverage_d24_count_equality_runs_current_lisp_in_sens -- --exact --nocapture
           fi
           # Текстовий .bits — не фізичний T5M .sens; D10/D11 мають власні ширини.
           # Тільки незмінні Lisp-токени дозволяють переприв'язувати SHA після українізації коментарів.
@@ -1717,8 +1709,8 @@ jobs:
           CARGO_INCREMENTAL: '0'
         run: |
           set -euo pipefail
-          cargo test --locked --release -p sens-cli --test t5m_session_benchmark -- --nocapture
-          cargo test --locked --release -p sens-cli --test t5m_session_benchmark -- --ignored --nocapture 2>&1 | tee "$RUNNER_TEMP/t5m-session.log"
+cargo test --locked --release -p sens-cli --test t5m_session_benchmark -- --nocapture
+cargo test --locked --release -p sens-cli --test t5m_session_benchmark -- --ignored --nocapture 2>&1 | tee "$RUNNER_TEMP/t5m-session.log"
           grep -Fq 'T5M_SESSION_BENCH cold_p50_amortized_ns=' "$RUNNER_TEMP/t5m-session.log"
           samples="$(grep -Fc 'T5M_SESSION_SAMPLE lane=' "$RUNNER_TEMP/t5m-session.log" || true)"
           if [[ "$samples" != 22 ]]; then
