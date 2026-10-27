@@ -14,6 +14,10 @@ on:
         required: false
         type: string
         default: ""
+    outputs:
+      published_sha:
+        description: "Точний SHA перевірених джерела й фізичних пар після remint"
+        value: ${{ jobs.remint.outputs.published_sha }}
   workflow_dispatch:
     inputs:
       files:
@@ -30,6 +34,8 @@ permissions:
 
 jobs:
   remint:
+    outputs:
+      published_sha: ${{ steps.published_pairs.outputs.published_sha }}
     runs-on: ubuntu-latest
     timeout-minutes: 150
     steps:
@@ -865,7 +871,12 @@ jobs:
           commit_verified_changes || commit_result=$?
           case "$commit_result" in
             0) ;;
-            1) exit 0 ;;
+            1)
+              published_sha="$(git rev-parse HEAD)"
+              echo "published_sha=$published_sha" >> "$GITHUB_OUTPUT"
+              echo "REMINT_ALREADY_CURRENT_SHA=$published_sha"
+              exit 0
+              ;;
             *) echo "::error::REMINT_NATIVE_COMMIT_FAILED status=$commit_result" >&2; exit "$commit_result" ;;
           esac
           published=0
@@ -1058,6 +1069,9 @@ jobs:
             echo "recovered=true" >> "$GITHUB_OUTPUT"
             echo "REMINT_CURRENT_MAIN_NATIVE_RECOVERED sha=$(git rev-parse HEAD) verified=YES"
           fi
+          published_sha="$(git rev-parse HEAD)"
+          echo "published_sha=$published_sha" >> "$GITHUB_OUTPUT"
+          echo "REMINT_PUBLISHED_EXACT_SHA=$published_sha"
 
       # Показуємо реальний залишок трійок після нативного ремонту.
       # Це облік фізичних файлів; він не оголошує мовний закон доведеним.
