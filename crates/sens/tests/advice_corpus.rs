@@ -127,7 +127,7 @@ fn explicit_conflict_is_rejected_and_cannot_replace_the_existing_fact() {
     let source = r#"
         (порадити ethics (як-є ((mortal socrates))))
         (нехай-послідовно ((decision
-                 (порадити ethics (як-є ((not? (mortal socrates))))))
+                 (порадити ethics (як-є ((хибне? (mortal socrates))))))
                (outcome
                  (міркувати-у-спостерігати (як-є ethics) (як-є (mortal socrates)))))
           (список (перше decision) (результат-стан outcome)))
