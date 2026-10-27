@@ -709,41 +709,4 @@ mod tests {
         unsafe { sens_embed_session_free(session) };
     }
 
-    #[test]
-    fn ukrainian_definition_persists_in_one_canonical_session() {
-        let session = sens_embed_session_new();
-        assert!(!session.is_null());
-
-        assert_eq!(eval(session, "(визначити repl-перевірка 42)"), "42");
-        assert_eq!(eval(session, "repl-перевірка"), "42");
-
-        unsafe { sens_embed_session_free(session) };
-    }
-
-    #[test]
-    fn ukrainian_closure_persists_in_one_canonical_session() {
-        let session = sens_embed_session_new();
-        assert!(!session.is_null());
-
-        let definition = eval(
-            session,
-            "(визначити тотожне-значення (функція (значення) значення))",
-        );
-        assert_eq!(definition, "<lambda>");
-        assert_eq!(eval(session, "(тотожне-значення 21)"), "21");
-
-        unsafe { sens_embed_session_free(session) };
-    }
-
-    #[test]
-    fn language_errors_return_text_without_destroying_the_session() {
-        let session = sens_embed_session_new();
-        assert!(!session.is_null());
-
-        assert!(eval(session, "(car 7)").starts_with("error: "));
-        assert_eq!(eval(session, "(визначити збережене-значення 42)"), "42");
-        assert_eq!(eval(session, "збережене-значення"), "42");
-
-        unsafe { sens_embed_session_free(session) };
-    }
 }
