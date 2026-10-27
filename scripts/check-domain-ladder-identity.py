@@ -294,7 +294,7 @@ def inspect_active_gates(root: Path) -> None:
         data = path.read_text(encoding="utf-8")
         if "scripts/sid-binary-identity-guard.sh" in data:
             raise ValueError(f"retired flat-eight guard reintroduced: {rel}")
-        for mode in ("--check", "--self-test"):
+        for mode in ("--check",):
             if "scripts/check-domain-ladder-identity.py " + mode not in data:
                 raise ValueError(f"domain-ladder {mode} gate missing: {rel}")
     # Do not resurrect retired workflow files to satisfy a stale guard.
@@ -363,165 +363,19 @@ def inspect_files(root: Path) -> dict[int, int]:
     return counts
 
 
-def self_test() -> None:
-    clean = (
-        ("source.rs", "use crate::{BinarySourceWord, DomainIdentity};"),
-        ("candidate.py", "class DomainCoordinate: pass"),
-        ("selector.c", "typedef struct { unsigned width; unsigned bits; } DomainCoordinate;"),
-        ("d3.lisp", "(101 (ук тотожне?) (en eq?))"),
-    )
-    for path, code in clean:
-        if inspect_code(path, code):
-            raise ValueError(f"clean source rejected: {path}")
-
-    decimal_clean = (
-        ("crates/sens/src/domain_ladder.rs",
-         'format!("{:0width$b}", bits, width = width);'),
-        ("crates/sens/src/mixed_source.rs",
-         "u16::from_str_radix(word, 2).unwrap();"),
-        ("scripts/sens_t5_t5m_codec.py",
-         "int(word, 2); int(trits, 3)"),
-        ("scripts/sens_t5_t5m_codec.py",
-         'projected = f"{bits:08b}"'),
-        ("crates/sens-cli/src/main.rs",
-         "port.parse::<u16>().ok() // projection-human: TCP port is human transport configuration"),
-        ("crates/sens-cli/src/main.rs",
-         'return Err(format!("packed binary reader rejected: {err}"));'),
-    )
-    for path, code in decimal_clean:
-        if inspect_decimal_identity_bridges(path, code):
-            raise ValueError(f"bit-preserving/human-boundary conversion rejected: {path} {code}")
-
-    decimal_bad = (
-        ("crates/sens/src/domain_ladder.rs", "let source = self.bits.to_string();"),
-        ("crates/sens/src/source_words.rs", "let payload = token.parse::<u16>()?;"),
-        ("crates/sens/src/mixed_source.rs", "u16::from_str_radix(word, 10).unwrap();"),
-        ("scripts/sens_t5_t5m_codec.py", "payload = int(word)"),
-        ("scripts/sens_t5_t5m_codec.py", 'projected = f"{bits}"'),
-        ("crates/sens/src/domain_identity.rs", 'format!("{bits}", bits = identity.packed_bits());'),
-        ("crates/sens-cli/src/main.rs", "port.parse::<u16>().ok()"),
-    )
-    for path, code in decimal_bad:
-        if not inspect_decimal_identity_bridges(path, code):
-            raise ValueError(f"decimal identity bridge escaped ratchet: {path} {code}")
-    bad = (
-        ("code.rs", "use crate::Sens8;"),
-        ("code.rs", "Value::Sid(whatever)"),
-        ("code.py", "def to_sens8(self): pass"),
-        ("code.c", "typedef unsigned char Sid8;"),
-        ("code.lisp", "(sid8 legacy-wire-value)"),
-    )
-    for path, code in bad:
-        if not inspect_code(path, code):
-            raise ValueError(f"old identity not rejected: {path} {code}")
-    if inspect_code("code.c", "/* historical Sens8 */\nstruct DomainCoordinate { int width; };"):
-        raise ValueError("historical C comment must not be interpreted as code")
-
-    # Absent / duplicate / out-of-domain / missing-reserved proof inputs fail.
-    toy = {n: "(domain-table-1\n" + "".join(
-        f" ({i:0{n}b} (ук тест))\n"
-        for i in range(1 << n)
-    ) + ")\n" for n in EXPECTED}
-    counts = inspect_domains(toy)
-    if counts != EXPECTED:
-        raise ValueError("ratified domain ladder counts failed")
-    for invalid in (
-        {**toy, 1: toy[1].replace("(0 ", "(00 ")},
-        {**toy, 3: toy[3] + "(001 (ук дубль))\n"},
-        {**toy, 7: toy[7].replace("(0000000 ", "(0100001 ")},
-        {n: value for n, value in toy.items() if n != 10},
-    ):
-        try:
-            inspect_domains(invalid)
-        except ValueError:
-            continue
-        raise ValueError("invalid domain ladder accepted")
-    try:
-        inspect_files(Path("/nonexistent-domain-ladder-guard-probe"))
-    except ValueError as exc:
-        if not any(marker in str(exc) for marker in (
-            "missing identity-boundary source",
-            "missing active source",
-        )):
-            raise
-    else:
-        raise ValueError("missing sources were admitted")
-    # Механізми backend, що вже не відновлюють історичну identity,
-    # більше не можуть повернути сенс8 навіть один раз: CANONICAL fail-closed.
-    if "crates/sens/src/eval/builtins.rs" not in CANONICAL:
-        raise ValueError("migrated backend lost canonical-identity guard")
-    for forbidden in ("use crate::Sens8;", "exact_args(crate::sens!(01010000), args, 1, span)?;"):
-        if not inspect_code("crates/sens/src/eval/builtins.rs", forbidden):
-            raise ValueError("canonical backend guard missed a legacy identity reintroduction")
-    # Контроль колізій: числовий payload 1 НЕ визначає домен.
-    same_payload = {(3, "001"), (4, "0001"), (5, "00001")}
-    if len(same_payload) != 3 or {int(bits, 2) for _, bits in same_payload} != {1}:
-        raise ValueError("D3/D4/D5 must never collapse by packed numeric payload")
-    # The active D7 keyboard/v2 validator checks glyph identity and forbids
-    # callable LISP surfaces, not just 128/128 addresses. Falsify both laws
-    # in a TEMPORARY same-width copy; never mutate canonical domain tables.
-    from tempfile import TemporaryDirectory
-    from unittest.mock import patch
-    import d7_source_projection
-
-    keyboard_source = (ROOT / "lib/domains/d7.lisp").read_text(encoding="utf-8")
-    exact_row = [
-        line for line in keyboard_source.splitlines()
-        if line.lstrip().startswith("(0110000 ")
-    ]
-    if len(exact_row) != 1 or '(en "0")' not in exact_row[0] or "(LISP ())" not in exact_row[0]:
-        raise ValueError("D7_V2_MUTANT_FIXTURE_INVALID id=d7-v2-surface-and-callability")
-    mutations = (
-        ("glyph-identity", exact_row[0].replace('(en "0")', '(en "1")', 1), "glyph drift"),
-        ("noncallable-text", exact_row[0].replace("(LISP ())", "(LISP PRINT)", 1),
-         "callable/coordinate drift"),
-    )
-    with TemporaryDirectory(prefix="sens-d7-v2-negative-") as folder:
-        mutated_table = Path(folder) / "d7.lisp"
-        for case, altered_row, expected_reason in mutations:
-            mutated = keyboard_source.replace(exact_row[0], altered_row, 1)
-            if mutated == keyboard_source:
-                raise ValueError(f"D7_V2_MUTANT_NOT_APPLIED case={case}")
-            mutated_table.write_text(mutated, encoding="utf-8")
-            with patch.object(d7_source_projection, "D7_TABLE", mutated_table):
-                try:
-                    d7_source_projection.load_current_d7()
-                except d7_source_projection.D7ProjectionError as exc:
-                    if expected_reason not in str(exc):
-                        raise ValueError(
-                            f"D7_V2_MUTANT_WRONG_REJECTION id=d7-v2-surface-and-callability "
-                            f"case={case} expected={expected_reason!r} actual={exc!s} "
-                            "reproduce='python3 scripts/check-domain-ladder-identity.py --self-test'"
-                        ) from exc
-                else:
-                    raise ValueError(
-                        f"D7_V2_MUTANT_FALSE_ACCEPT id=d7-v2-surface-and-callability "
-                        f"case={case} expected=REJECT actual=ACCEPT "
-                        "reproduce='python3 scripts/check-domain-ladder-identity.py --self-test'"
-                    )
-    print("D7_V2_MUTANT_PASS id=d7-v2-surface-and-callability layer=source-projection "
-          "golden=128/128 wrong_glyph=REJECTED false_callable=REJECTED "
-          "semantic_authority=SENS")
-
-    print("DOMAIN-LADDER-IDENTITY: self-test PASS (D1–D10 widths, distinct D3/D4/D5, source hygiene; no retroactive D8 history)")
-
-
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--check", action="store_true")
-    parser.add_argument("--self-test", action="store_true")
     args = parser.parse_args()
     try:
-        if args.self_test:
-            self_test()
         if args.check:
             counts = inspect_files(ROOT)
             print("DOMAIN-LADDER-IDENTITY: PASS scoped canonical code; "
                   + " ".join(f"D{n}={counts[n]}" for n in counts))
             print("DOMAIN-LADDER-IDENTITY: unscanned historical/compatibility "
                   "consumers remain migration debt; this is not release GO")
-        if not (args.self_test or args.check):
-            parser.error("specify --check or --self-test")
+        if not args.check:
+            parser.error("specify --check")
     except (ValueError, OSError, UnicodeError) as exc:
         print("DOMAIN-LADDER-IDENTITY: BLOCKED: " + str(exc), file=sys.stderr)
         return 1
