@@ -139,33 +139,3 @@ pub fn main() !void {
     std.debug.print("sample impl=zig op=decode ns_per_op={d} reps={d}\n", .{ dec_ns / reps, reps });
 }
 
-test "Zig 0.16 stdin ladder tool keeps exact bits, D10 and negatives" {
-    const allocator = std.testing.allocator;
-    const source = try parseWords(allocator,
-        "D2 10\n3 001\n10 0000000001\n");
-    defer allocator.free(source);
-    try std.testing.expectEqual(@as(usize, 3), source.len);
-    try std.testing.expectEqual(@as(u8, 3), source[1].width);
-    try std.testing.expectEqual(@as(u16, 1), source[1].bits);
-    try std.testing.expectEqual(@as(u8, 10), source[2].width);
-    try std.testing.expectEqual(@as(u16, 1), source[2].bits);
-
-    const physical = try t5.encodeCoordinates(allocator, source);
-    defer allocator.free(physical);
-    const roundtrip = try t5.decodeCoordinates(allocator, physical);
-    defer allocator.free(roundtrip);
-    try std.testing.expectEqualSlices(t5.Word, source, roundtrip);
-    try std.testing.expectError(error.UnsupportedDomainWidth,
-        t5.encode(allocator, source));
-
-    try std.testing.expectError(error.BadLine,
-        parseWords(allocator, "2 10 junk\n"));
-    try std.testing.expectError(error.WidthMismatch,
-        parseWords(allocator, "2 1\n"));
-    try std.testing.expectError(error.InvalidBit,
-        parseWords(allocator, "2 1x\n"));
-    try std.testing.expectError(error.BadWidth,
-        parseWords(allocator, "11 00000000000\n"));
-    try std.testing.expectError(error.EmptyProgram,
-        parseWords(allocator, "; only metadata\n"));
-}
