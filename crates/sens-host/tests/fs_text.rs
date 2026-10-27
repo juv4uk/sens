@@ -70,7 +70,7 @@ fn public_read_file_and_write_file_appear_only_as_language_bindings() {
 }
 
 #[test]
-fn write_file_then_read_file_round_trips_utf8_text() {
+fn write_file_preserves_exact_host_utf8_bytes() {
     let mut session = fs_session();
     let path = unique_path("fs-text-roundtrip");
     let source = format!(
@@ -87,12 +87,10 @@ fn write_file_then_read_file_round_trips_utf8_text() {
     fs::remove_file(&path).ok();
 }
 
-/// Invalid UTF-8 in a file is no longer a raw Rust IO error -- it is the
-/// same structured rejection value `utf8-decode-string` already produces for
-/// process/TCP bytes, mirroring
-/// `process_text.rs`'s `process_result_text_rejects_invalid_utf8_without_lossy_replacement`.
+/// Only the persisted host-file bytes are checked here; a SENS program
+/// owns the language-visible invalid-UTF-8 verdict.
 #[test]
-fn read_file_rejects_invalid_utf8_without_lossy_replacement() {
+fn read_file_does_not_mutate_invalid_host_utf8_bytes() {
     let mut session = fs_session();
     let path = unique_path("fs-text-invalid-utf8");
     fs::write(&path, [0xFFu8]).unwrap();
