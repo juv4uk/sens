@@ -7,7 +7,7 @@
 **Покоління контракту:** Contract 12.0.
 **Дата/SHA випуску:** не встановлені; визначаються лише після GO.  
 **Єдина влада:** [контракт 12.0](contracts/language-contract-12.lisp) і його активна точка входу [language-contract.lisp](language-contract.lisp) → ратифіковані карти доменів, незалежні докази та допущені свідки.
-**Операційна координація:** [#4196](https://github.com/juv4uk/sens/issues/4196) і [#4198](https://github.com/juv4uk/sens/issues/4198).
+**Операційна координація:** [#6183](https://github.com/juv4uk/sens/issues/6183). Історичні release blockers і P0 залишаються прив'язаними до своїх вихідних задач нижче.
 
 ## Що SENS є в межах цього зрізу
 
