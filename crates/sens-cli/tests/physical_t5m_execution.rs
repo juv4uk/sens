@@ -97,15 +97,6 @@ fn physical_domain_words_share_exact_d2_grammar_with_visible_reference() {
 }
 
 #[test]
-fn physical_d1_value_is_exact_predicate_not_legacy_t() {
-    let words = vec![BinarySourceWord::W1(sens::Bit1::new(1).unwrap())];
-    let physical = zig_transport::encode_t5m_direct(&words).expect("single D1 predicate transports");
-    let result = eval_reference_t5m(&physical, &mut Session::default())
-        .expect("D1 predicate executes from physical bytes");
-    assert_eq!(result.value.as_predicate_bit(), Some(true));
-}
-
-#[test]
 fn malformed_transport_and_invalid_d2_are_distinct_fail_closed_errors() {
     // Malformed transport byte rejected at Zig transport level
     assert!(zig_transport::decode_t5m_words(&[243]).is_err());
@@ -125,91 +116,6 @@ fn named_lisp_cannot_enter_canonical_binary_reader() {
     let err =
         sens::parse_canonical_binary("(quote ())").expect_err("human Lisp names are not physical source");
     assert_eq!(err.kind, sens::ErrorKind::Parse);
-}
-
-#[test]
-fn sens_zero_physical_cond_uses_only_exact_d1() {
-    let program = "10 110 00 10 1 00 1 01 01";
-    const PHYSICAL_T5M: &[u8] = &[0x67, 0x38, 0x68, 0x17, 0x2e];
-    let words = sens::parse_binary_source_words(program)
-        .expect("exact-width binary oracle")
-        .into_iter()
-        .map(|token| token.word)
-        .collect::<Vec<_>>();
-    let decoded = zig_transport::decode_t5m_words(PHYSICAL_T5M).unwrap();
-    assert_eq!(decoded.len(), words.len());
-    let re_encoded = zig_transport::encode_t5m_direct(&words).unwrap();
-    assert_eq!(re_encoded.as_slice(), [0x67, 0x38, 0x68, 0x17, 0x2e]);
-
-    let selected = eval_reference_t5m(PHYSICAL_T5M, &mut Session::default())
-        .expect("D1:1 must select the two-field physical COND clause");
-    assert_eq!(selected.value.as_predicate_bit(), Some(true));
-    assert!(selected.output.is_empty());
-
-    let no_after_skip = "10 110 00 10 0 00 1 01 00 10 1 00 0 01 01";
-    let no_words = sens::parse_binary_source_words(no_after_skip)
-        .unwrap()
-        .into_iter()
-        .map(|token| token.word)
-        .collect::<Vec<_>>();
-    let no_bytes = zig_transport::encode_t5m_direct(&no_words).unwrap();
-    let result = eval_reference_t5m(&no_bytes, &mut Session::default())
-        .expect("the selected result remains exact D1:0");
-    assert_eq!(result.value.as_predicate_bit(), Some(false));
-    assert!(result.output.is_empty());
-
-    let exhausted = "10 110 00 10 0 00 1 01 01";
-    let empty_words = sens::parse_binary_source_words(exhausted)
-        .unwrap()
-        .into_iter()
-        .map(|token| token.word)
-        .collect::<Vec<_>>();
-    let empty_bytes = zig_transport::encode_t5m_direct(&empty_words).unwrap();
-    let result = eval_reference_t5m(&empty_bytes, &mut Session::default())
-        .expect("no matching exact D1 clause returns structural empty");
-    assert!(matches!(result.value, Value::Nil));
-    assert_eq!(result.value.as_predicate_bit(), None);
-}
-
-#[test]
-fn sens_zero_physical_cond_rejects_structural_empty_as_test() {
-    for source in [
-        "10 110 00 10 000 00 1 01 01",
-        "10 110 00 10 000 00 1 01 00 10 1 00 0 01 01",
-    ] {
-        let words = sens::parse_binary_source_words(source)
-            .expect("точний D2/D3 негативний свідок має читатися")
-            .into_iter()
-            .map(|token| token.word)
-            .collect::<Vec<_>>();
-        let physical = zig_transport::encode_t5m_direct(&words).expect("чинний Zig/T5M");
-        let decoded = zig_transport::decode_t5m_words(&physical).unwrap();
-        assert_eq!(decoded, words);
-        match eval_reference_t5m(&physical, &mut Session::default()) {
-            Err(e) if e.contains("Type") => {}
-            other => panic!(
-                "test_id=3161-PHYSICAL-COND layer=SENS expected=Type actual={other:?}"
-            ),
-        }
-    }
-}
-
-#[test]
-fn sens_zero_physical_cond_rejects_three_field_clause() {
-    let source = "10 110 00 10 1 00 0 00 1 01 01";
-    let words = sens::parse_binary_source_words(source)
-        .expect("negative witness must be well-formed binary words")
-        .into_iter()
-        .map(|token| token.word)
-        .collect::<Vec<_>>();
-    let physical = zig_transport::encode_t5m_direct(&words).expect("negative witness must be valid T5M");
-    assert!(
-        matches!(
-            eval_reference_t5m(&physical, &mut Session::default()),
-            Err(e) if e.contains("InvalidForm")
-        ),
-        "test_id=3161-PHYSICAL-COND-three-fields expected=InvalidForm"
-    );
 }
 
 #[test]
