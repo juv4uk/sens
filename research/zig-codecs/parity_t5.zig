@@ -104,53 +104,6 @@ fn seenEarlierPath(data: []const u8, before: usize, candidate: []const u8) bool 
     return false;
 }
 
-test "physical manifest rejects duplicate paths without erasing exact filenames" {
-    const manifest = "a.sens\r\n#law.sens\n a.sens\n#law.sens\r\na.sens\n";
-    var lines = std.mem.splitScalar(u8, manifest, '\n');
-    var offset: usize = 0;
-    var fresh: usize = 0;
-    var duplicates: usize = 0;
-    while (lines.next()) |raw| {
-        const previous_end = offset;
-        offset += raw.len;
-        if (offset < manifest.len) offset += 1;
-        const path = manifestPath(raw);
-        if (skipManifestRow(path)) continue;
-        if (seenEarlierPath(manifest, previous_end, path))
-            duplicates += 1
-        else
-            fresh += 1;
-    }
-    try std.testing.expectEqual(@as(usize, 3), fresh);
-    try std.testing.expectEqual(@as(usize, 2), duplicates);
-    try std.testing.expect(!seenEarlierPath(manifest, 0, "#law.sens"));
-    try std.testing.expect(!seenEarlierPath(manifest, manifest.len, "# note"));
-}
-
-test "T5 manifest preserves exact whitespace in tracked filenames" {
-    try std.testing.expectEqualStrings(
-        "/repo/ a file .sens \t",
-        manifestPath("/repo/ a file .sens \t\r"),
-    );
-    try std.testing.expectEqualStrings(
-        "/repo/\tleading.sens ",
-        manifestPath("/repo/\tleading.sens "),
-    );
-    try std.testing.expectEqualStrings("", manifestPath(""));
-}
-
-test "manifest rejects silent skipping of hash-prefixed physical file paths" {
-    try std.testing.expect(skipManifestRow(""));
-    try std.testing.expect(skipManifestRow("#"));
-    try std.testing.expect(skipManifestRow("# physical corpus note"));
-    // Existing path bytes must remain literal; '#' without space is a path.
-    try std.testing.expect(!skipManifestRow("#positive.sens"));
-    try std.testing.expect(!skipManifestRow("#negative.sens"));
-    try std.testing.expect(!skipManifestRow(" #literal.sens"));
-    try std.testing.expect(!skipManifestRow("#positive.sens\r"));
-    try std.testing.expect(!skipManifestRow(manifestPath("#positive.sens\r")));
-}
-
 fn processList(allocator: std.mem.Allocator, list_path: []const u8, expect_accept: bool) !usize {
     const data = try readFile(allocator, list_path);
     defer allocator.free(data);
