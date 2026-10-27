@@ -167,6 +167,13 @@ jobs:
             # ще не проходять точну D7-проєкцію. Не перезапускати її на
             # кожен сторонній push, але зміну самої yantra.lisp з push diff
             # завжди передавати в нативний remint і зберігати її RED.
+            # F6_PRODUCER_REMINT у точному push-коміті адресує
+            # фізичного producer навіть тоді, коли змінено тільки workflow.
+            # Інакше джерел push = 0, а P0 витісняє випадковий backlog.
+            if git show -s --format=%B "$AFTER" | grep -Fq 'F6_PRODUCER_REMINT'; then
+              list="$(printf '%s\n%s' "$list" 'tests/fixtures/wsm-fs-record-producer.lisp')"
+              echo "REMINT_F6_PRODUCER_TARGET source=tests/fixtures/wsm-fs-record-producer.lisp"
+            fi
             # Зберігати точні джерела push, а не тільки їхню кількість:
             # подальше впорядкування непарних трійок змінює позиції.
             declare -A push_changed_sources=()
