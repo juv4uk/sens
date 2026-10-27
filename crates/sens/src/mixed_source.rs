@@ -873,8 +873,12 @@ fn collect_top_level_binding_names(source: &str) -> Result<HashSet<String>, Lang
         if items.len() < 2 || binding_form(source, &items[0]) != Some(3) {
             continue;
         }
-        if matches!(&items[1].kind, ExprKind::Symbol(_)) {
-            if let Some(name) = source_spelling(source, &items[1]) {
+        // Binding position is authoritative within this already-pinned
+        // library even when the mixed reader has projected its spelling to a
+        // D7/D10 identity. Preserve the exact source name for external snippets;
+        // this does not grant callability or infer any domain coordinate.
+        if let Some(name) = source_spelling(source, &items[1]) {
+            if !name.is_empty() {
                 names.insert(name.to_owned());
             }
         }
@@ -1635,6 +1639,14 @@ mod tests {
             &form[1].kind,
             ExprKind::Symbol(name) if name.as_ref() == "непогоджена-функція"
         ));
+    }
+
+    #[test]
+    fn pinned_external_bindings_include_projected_d10_definition_names() {
+        let source = "(визначити перетворити-клаузи-на-події-повідомлення значення)";
+        let names = collect_top_level_binding_names(source)
+            .expect("valid source with one top-level DEFINE");
+        assert!(names.contains("перетворити-клаузи-на-події-повідомлення"));
     }
 
     #[test]
