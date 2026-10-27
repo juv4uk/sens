@@ -1067,12 +1067,36 @@ fn lift_expression(
                 || source_spelling(source, &lifted[0]) == Some("'");
 
             if quote_data {
-                // A canonical D4 negation head can occur as object-language
-                // data inside a knowledge clause. Preserve its exact identity
-                // through QUOTE; ordinary predicate names and macro templates
-                // remain data and never acquire callability from their spelling.
-                for item in lifted.iter_mut().skip(1) {
-                    *item = lift_quoted_d4_identity_data(source, item.clone(), depth + 1)?;
+                // Child spans can be Text7-local after mixed-domain lifting
+                // (D4:0100 may render as the keyboard projection "п-р").
+                // Reparse the complete outer quote from its original source
+                // span so nested D4 identities are recovered from source
+                // spelling, never guessed from the lossy Text7 rendering.
+                let raw_quote = source.get(span.start..span.end);
+                let raw_items = raw_quote.and_then(|form| {
+                    let mut parsed = crate::parser::parse(form).ok()?;
+                    if parsed.len() != 1 {
+                        return None;
+                    }
+                    match parsed.remove(0).kind {
+                        ExprKind::List(items) if items.len() == lifted.len() => Some((form, items)),
+                        _ => None,
+                    }
+                });
+                if let Some((raw_source, raw_items)) = raw_items {
+                    for index in 1..lifted.len() {
+                        lifted[index] = lift_quoted_d4_identity_data(
+                            raw_source,
+                            raw_items[index].clone(),
+                            depth + 1,
+                        )?;
+                    }
+                } else {
+                    // Fail-closed compatibility fallback for quote forms whose
+                    // original source span cannot be reparsed as one exact form.
+                    for item in lifted.iter_mut().skip(1) {
+                        *item = lift_quoted_d4_identity_data(source, item.clone(), depth + 1)?;
+                    }
                 }
             } else {
                 if is_exact_cond(&lifted[0]) {
@@ -1625,6 +1649,28 @@ mod tests {
         };
         assert!(matches!(&goal[0].kind, ExprKind::Symbol(name) if name.as_ref() == "human"));
         assert!(matches!(&goal[1].kind, ExprKind::Symbol(name) if name.as_ref() == "socrates"));
+    }
+
+    #[test]
+    fn nested_quoted_knowledge_negation_uses_original_source_span() {
+        fn contains_exact_d4_not(expression: &Expr) -> bool {
+            match &expression.kind {
+                ExprKind::DomainIdentity(identity) => {
+                    identity.width() == 4 && identity.packed_bits() == 0b0100
+                }
+                ExprKind::List(items) => items.iter().any(contains_exact_d4_not),
+                _ => false,
+            }
+        }
+
+        let expression = only(
+            parse_mixed_exact_domain("(як-є (((хибне? (human socrates)))))")
+                .expect("nested quoted knowledge clause must parse"),
+        );
+        let ExprKind::List(quote) = expression.kind else {
+            panic!("QUOTE");
+        };
+        assert!(contains_exact_d4_not(&quote[1]));
     }
 
     #[test]
