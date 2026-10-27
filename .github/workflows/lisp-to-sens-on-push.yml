@@ -20,7 +20,7 @@ on:
 # Не скасовувати попередні прогони (правило власника) і не ставити в чергу
 # один поверх одного: карбування пише в git, тож паралельність тут шкідлива.
 concurrency:
-  group: lisp-to-sens-on-push
+  group: sens-physical-pair-writer
   cancel-in-progress: false
 
 permissions:

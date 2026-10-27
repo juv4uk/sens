@@ -25,6 +25,12 @@ on:
         required: false
         default: ""
 
+# Serialize both pair-writing lanes (lightweight changed-source mint and heavy drift recovery).
+# Concurrent writers can otherwise race on the same .sens blob and fail rebase.
+concurrency:
+  group: sens-physical-pair-writer
+  cancel-in-progress: false
+
 permissions:
   contents: write
 
