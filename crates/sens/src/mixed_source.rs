@@ -1045,11 +1045,11 @@ fn lift_expression(
             // W8 QUOTE remains opaque in every mode so quoted (100 ...) data
             // is never projected to a callable D3 identity.
             if descend_legacy_machine_wrappers && is_legacy_w8_quote_head(source, &lifted[0]) {
-                // W8 QUOTE blocks callable-head lifting, but exact decimal integer
-                // leaves still need their ordinary D24 numeric carrier. Project
-                // the payload as data only; do not interpret its nested forms.
+                // W8 QUOTE блокує підняття голови до виклику, але цілі десяткові числа
+                // всередині мають зберегти точний числовий носій D24+. Обробляємо
+                // лише дані цитати; вкладені форми не стають викликами.
                 for item in lifted.iter_mut().skip(1) {
-                    *item = project_quoted_numeric_data(source, item.clone(), depth + 1)?;
+                    *item = проєктувати_числові_дані_цитати(source, item.clone(), depth + 1)?;
                 }
                 return Ok(Expr {
                     kind: ExprKind::List(Rc::from(lifted.into_boxed_slice())),
@@ -1441,7 +1441,7 @@ fn lift_head(
     }
 }
 
-fn project_quoted_numeric_data(
+fn проєктувати_числові_дані_цитати(
     source: &str,
     expression: Expr,
     depth: u32,
@@ -1449,7 +1449,7 @@ fn project_quoted_numeric_data(
     if depth > MAX_STRUCTURE_DEPTH {
         return Err(LanguageError::new(
             ErrorKind::Parse,
-            "quoted numeric data exceeds structure depth",
+            "цитовані числові дані перевищують межу вкладеності",
             expression.span,
         ));
     }
@@ -1475,7 +1475,7 @@ fn project_quoted_numeric_data(
             }
             return Err(LanguageError::new(
                 ErrorKind::Parse,
-                "quoted integer projection must return one value",
+                "проєкція цитованого цілого числа має повернути одне значення",
                 span,
             ));
         }
@@ -1486,7 +1486,7 @@ fn project_quoted_numeric_data(
             let projected = items
                 .iter()
                 .cloned()
-                .map(|item| project_quoted_numeric_data(source, item, depth + 1))
+                .map(|item| проєктувати_числові_дані_цитати(source, item, depth + 1))
                 .collect::<Result<Vec<_>, _>>()?;
             Ok(Expr {
                 kind: ExprKind::List(Rc::from(projected.into_boxed_slice())),
@@ -1494,8 +1494,8 @@ fn project_quoted_numeric_data(
             })
         }
         ExprKind::Pair(car, cdr) => {
-            let car = project_quoted_numeric_data(source, (*car).clone(), depth + 1)?;
-            let cdr = project_quoted_numeric_data(source, (*cdr).clone(), depth + 1)?;
+            let car = проєктувати_числові_дані_цитати(source, (*car).clone(), depth + 1)?;
+            let cdr = проєктувати_числові_дані_цитати(source, (*cdr).clone(), depth + 1)?;
             Ok(Expr {
                 kind: ExprKind::Pair(Rc::new(car), Rc::new(cdr)),
                 span,
