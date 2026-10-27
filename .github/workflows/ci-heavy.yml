@@ -376,7 +376,7 @@ jobs:
           fi
           # Кожен адресний Rust-свідок нижче проходить build.rs, який
           # перевіряє pinned Zig навіть тоді, коли сам тест не змінювався.
-          if grep -Eq '^(lib/core\.lisp|lib/core1\.lisp|lib/knowledge\.lisp|lib/forward\.lisp|lib/unify\.lisp|lib/machine/operands/x86-64\.lisp|lib/machine/capability-axis\.lisp|lib/machine/lowering/semantic-x86-64\.lisp|crates/sens/tests/machine_exact_domain_cpu\.rs|crates/sens/tests/machine_capability_axis\.rs|tests/test_capability_axis_ukr_projection\.py|crates/sens/tests/reasoning_forward_knowledge_d3_migration\.rs|crates/sens/tests/machine_typed_operands\.rs|crates/sens/tests/machine_exact_d5_order\.rs|lib/machine/encoding/coverage-generator\.lisp|lib/quantity\.lisp|crates/sens/tests/quantity_length_d24_current\.rs|crates/sens/tests/quantity_d1_direct_cutover\.rs|tests/test_ukr_quantity_projection\.py|crates/sens/src/domain_numeric\.rs|crates/sens/src/binary_number\.rs|crates/sens/src/machine_math\.rs|crates/sens/src/machine_math_skylake\.S|\.github/workflows/ci\.yml)$' "$changed_all"; then
+          if grep -Eq '^(lib/core\.lisp|lib/core1\.lisp|lib/knowledge\.lisp|lib/forward\.lisp|lib/unify\.lisp|lib/machine/operands/x86-64\.lisp|lib/machine/capability-axis\.lisp|lib/machine/lowering/semantic-x86-64\.lisp|crates/sens/tests/machine_exact_domain_cpu\.rs|crates/sens/tests/machine_capability_axis\.rs|tests/test_capability_axis_ukr_projection\.py|crates/sens/tests/reasoning_forward_knowledge_d3_migration\.rs|crates/sens/tests/machine_typed_operands\.rs|crates/sens/tests/machine_exact_d5_order\.rs|lib/machine/encoding/coverage-generator\.lisp|lib/quantity\.lisp|crates/sens/tests/quantity_length_d24_current\.rs|crates/sens/tests/quantity_d1_direct_cutover\.rs|crates/sens/src/domain_numeric\.rs|crates/sens/src/binary_number\.rs|crates/sens/src/machine_math\.rs|crates/sens/src/machine_math_skylake\.S|\.github/workflows/ci\.yml)$' "$changed_all"; then
             echo 'needs_zig=true' >> "$GITHUB_OUTPUT"
           fi
 
@@ -1484,7 +1484,7 @@ jobs:
           # Охорона українських QUOTE/DEFINE/LAMBDA/LET від хибних замін.
           # Перевірки актуальних D1-гілок перевіряча й генератора кодерного покриття.
           # Справжній SENS-виконавець перевіряє D24+ довжину та D1.
-          if grep -Eq '^(lib/quantity\.lisp|crates/sens/tests/quantity_length_d24_current\.rs|crates/sens/tests/quantity_d1_direct_cutover\.rs|tests/test_ukr_quantity_projection\.py|\.github/workflows/ci\.yml)$' "$RUNNER_TEMP/changed-core-dependencies.txt"; then
+          if grep -Eq '^(lib/quantity\.lisp|crates/sens/tests/quantity_length_d24_current\.rs|crates/sens/tests/quantity_d1_direct_cutover\.rs|\.github/workflows/ci\.yml)$' "$RUNNER_TEMP/changed-core-dependencies.txt"; then
             # Спершу сам SENS виконує закони: Python не є воротарем виконання.
             CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 cargo test --locked -p sens --test quantity_length_d24_current -- --nocapture
             CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 cargo test --locked -p sens --test quantity_d1_direct_cutover -- --nocapture
