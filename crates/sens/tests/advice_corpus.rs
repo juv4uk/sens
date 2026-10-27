@@ -86,14 +86,20 @@ fn direct_controlled_fact_reaches_proved_narration() {
 #[test]
 fn multistep_rules_survive_admission_reasoning_and_presentation() {
     let source = r#"
-        (порадити-всі science
-          (як-є (
-            ((planet earth))
-            ((has (мфк x) mass) (planet (мфк x)))
-            ((valuable (мфк x)) (has (мфк x) mass))
-          )))
+        (визначити перехід
+          (порадити-всі-світ
+            (порожній-світ)
+            (як-є science)
+            (як-є (
+              ((planet earth))
+              ((has (мфк x) mass) (planet (мфк x)))
+              ((valuable (мфк x)) (has (мфк x) mass))
+            ))))
+        (визначити світ-із-порадою (друге перехід))
         (нехай-послідовно ((outcome
-                 (міркувати-у-спостерігати (як-є science) (як-є (valuable earth))))
+                 (міркувати-спостерігати
+                   (як-є (valuable earth))
+                   (світ-клаузи світ-із-порадою (як-є science))))
                (words (пояснити-підсумок outcome)))
           (список (результат-стан outcome) (перше words)))
     "#;
@@ -103,19 +109,23 @@ fn multistep_rules_survive_admission_reasoning_and_presentation() {
 #[test]
 fn recursive_rule_survives_the_same_end_to_end_path() {
     let source = r#"
-        (порадити-всі family
-          (як-є (
-            ((parent alice bob))
-            ((parent bob charlie))
-            ((ancestor (мфк x) (мфк y)) (parent (мфк x) (мфк y)))
-            ((ancestor (мфк x) (мфк y))
-              (parent (мфк x) (мфк z))
-              (ancestor (мфк z) (мфк y)))
-          )))
+        (визначити перехід
+          (порадити-всі-світ
+            (порожній-світ)
+            (як-є family)
+            (як-є (
+              ((parent alice bob))
+              ((parent bob charlie))
+              ((ancestor (мфк x) (мфк y)) (parent (мфк x) (мфк y)))
+              ((ancestor (мфк x) (мфк y))
+                (parent (мфк x) (мфк z))
+                (ancestor (мфк z) (мфк y)))
+            ))))
+        (визначити світ-із-порадою (друге перехід))
         (нехай-послідовно ((outcome
-                 (міркувати-у-спостерігати
-                   (як-є family)
-                   (як-є (ancestor alice charlie))))
+                 (міркувати-спостерігати
+                   (як-є (ancestor alice charlie))
+                   (світ-клаузи світ-із-порадою (як-є family))))
                (words (пояснити-підсумок outcome)))
           (список (результат-стан outcome) (перше words)))
     "#;
