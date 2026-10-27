@@ -15,6 +15,9 @@
          ((порожній? відновлене)
           (як-є reconstruction-empty-result))
          (так (як-є reconstruction-non-list-result))))
+      ; Статус відповіді — протокольний атом; пару не передаємо в D3 EQ.
+      ((хибне? (атом? (перше відновлене)))
+       (як-є reconstruction-non-atomic-status))
       ((хибне? (однакові? (перше відновлене) (як-є accepted)))
        (як-є reconstruction-rejected))
       ((атом? (решта відновлене))
