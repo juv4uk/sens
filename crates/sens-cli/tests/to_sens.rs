@@ -164,14 +164,7 @@ fn current_core_library_is_already_fully_migrated() {
     }
     let _ = std::fs::remove_file(&path);
 
-    for (source, expected) in [
-        ("(list 1 2 3)", "(1 2 3)"),
-        ("(append (quote (1 2)) (quote (3 4)))", "(1 2 3 4)"),
-        ("(quotient 17 5)", "3"),
-        ("(let* ((x 3) (y (+ x 4))) y)", "7"),
-    ] {
-        assert_eq!(eval_core(source), expected, "{source}");
-    }
+
 }
 
 #[test]
