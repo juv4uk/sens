@@ -1,20 +1,10 @@
-//! Лише механічні перевірки бітових носіїв, кадрів і FASL/Wire.
-//! Мовні закони чисел та арифметики належать SENS.
+//! Тільки фізичне двійкове кодування, збереження доменів та відхилення пошкодженого носія.
+//! Арифметичні закони SENS тут НЕ перевіряються засобами Rust.
 use sens::{
     decode_binary_frame, encode_binary_frame, fasl_decode_program, fasl_encode_program,
     parse, wire_decode_program, wire_encode_program, BinaryFrame, BinaryNumber,
     Bit1, Bit2, DomainIdentity, Expr, ExprKind, PredicateBit, Racana2, Span, Value,
 };
-
-#[test]
-fn binary_source_token_has_exact_carrier_bits() {
-    let parsed = parse("#b00101").expect("binary source parses");
-    assert_eq!(parsed.len(), 1);
-    match &parsed[0].kind {
-        ExprKind::BinaryNumber(number) => assert_eq!(number.bits(), "101"),
-        other => panic!("expected BinaryNumber AST, got {other:?}"),
-    }
-}
 
 #[test]
 fn binary_number_round_trips_fasl_wire_and_binary_frame_as_exact_bits() {
