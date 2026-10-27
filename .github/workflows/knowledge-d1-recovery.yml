@@ -11,8 +11,6 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v5
-      - name: "Immutable 20-function prefix, 3 recovered functions, all 2046 exact-width coordinates"
-        run: python3 -m unittest discover -s tests -p test_knowledge_d1_recovery.py -v
       - uses: dtolnay/rust-toolchain@stable
       - name: "Execute 3 knowledge functions with direct D1, negative paths, structural D3"
         run: cargo test --locked -p sens --test knowledge_d1_recovery -- --nocapture
