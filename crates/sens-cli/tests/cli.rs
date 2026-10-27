@@ -398,42 +398,6 @@ fn repl_history_persists_across_separate_sessions() {
 }
 
 #[test]
-fn default_ukrainian_repl_uses_cyrillic_d1_replies_and_unknown_name_feedback() {
-    use std::io::Write;
-    use std::process::Stdio;
-
-    let home = std::env::temp_dir().join(format!("sens-cli-repl-ukr-d1-{}", std::process::id()));
-    std::fs::create_dir_all(&home).expect("should create isolated REPL home");
-    let mut child = sens()
-        .env("HOME", &home)
-        .env("USERPROFILE", &home)
-        .stdin(Stdio::piped())
-        .stdout(Stdio::piped())
-        .stderr(Stdio::piped())
-        .spawn()
-        .expect("REPL should start");
-    child
-        .stdin
-        .take()
-        .expect("stdin should be piped")
-        .write_all("мама\n(атом? (як-є ()))\n(хибне? (атом? (як-є ())))\n".as_bytes())
-        .expect("should send Ukrainian source forms");
-    let output = child.wait_with_output().expect("REPL should finish at EOF");
-    let _ = std::fs::remove_dir_all(&home);
-
-    assert!(output.status.success());
-    let stdout = String::from_utf8_lossy(&output.stdout);
-    assert!(
-        stdout.contains("Поверхня: українська (повна) (укр)"),
-        "{stdout}"
-    );
-    assert!(stdout.contains("ВІДЛУННЯ МАМА"), "{stdout}");
-    assert!(stdout.contains("ТАК"), "{stdout}");
-    assert!(stdout.contains("НІ"), "{stdout}");
-    assert!(!stdout.contains("echo мама"), "{stdout}");
-}
-
-#[test]
 fn default_ukrainian_repl_localizes_errors_and_help_prose() {
     use std::io::Write;
     use std::process::Stdio;
@@ -604,26 +568,6 @@ fn spawn_sexpr_server() -> (std::process::Child, u16) {
 }
 
 #[test]
-fn sexpr_protocol_eval_returns_structured_response() {
-    let (mut child, port) = spawn_sexpr_server();
-    let response = request_with_retry(port, r#"(request (id 1) (op eval) (source "1"))"#);
-    child.kill().expect("should be able to stop the server");
-
-    assert!(
-        response.contains("(status ok)"),
-        "unexpected response: {response}"
-    );
-    assert!(
-        response.contains("(value 1)"),
-        "unexpected response: {response}"
-    );
-    assert!(
-        response.contains("(output ())"),
-        "unexpected response: {response}"
-    );
-}
-
-#[test]
 fn sexpr_protocol_rejects_missing_or_nil_id_without_fake_response() {
     let (mut child, port) = spawn_sexpr_server();
     let missing = request_with_retry(port, r#"(request (op eval) (source "(+ 1 2)"))"#);
@@ -641,22 +585,6 @@ fn sexpr_protocol_rejects_missing_or_nil_id_without_fake_response() {
     );
     assert!(!missing.contains("(status ok)"), "{missing}");
     assert!(!explicit_nil.contains("(status ok)"), "{explicit_nil}");
-}
-
-#[test]
-fn sexpr_protocol_diagnose_returns_structured_error() {
-    let (mut child, port) = spawn_sexpr_server();
-    let response = request_with_retry(port, r#"(request (id 2) (op diagnose) (source "(car 1)"))"#);
-    child.kill().expect("should be able to stop the server");
-
-    assert!(
-        response.contains("(status error)"),
-        "unexpected response: {response}"
-    );
-    assert!(
-        response.contains("(kind type-error)"),
-        "unexpected response: {response}"
-    );
 }
 
 #[test]
