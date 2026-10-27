@@ -69,7 +69,7 @@ jobs:
 
           # Дзеркало виключень міграції: generated/surface — не джерела мови,
           # docs/research — історія, superseded — карантин.
-          changed="$(git diff --name-only "$before" "$GITHUB_SHA" -- '*.lisp' \
+          changed="$(git -c core.quotePath=false diff --name-only "$before" "$GITHUB_SHA" -- '*.lisp' \
             | grep -vE '^(lib/generated/|lib/surface/|docs/|research/|superseded/|target/)' || true)"
 
           if [[ -z "$changed" ]]; then
@@ -135,7 +135,7 @@ jobs:
             while IFS= read -r view; do
               [[ -f "$view.lisp" && -f "$view.sens" && ! -L "$view" ]] || continue
               git add -- "$view"
-            done < <( { git ls-files --modified; git ls-files --others --exclude-standard; } | sort -u )
+            done < <( { git -c core.quotePath=false ls-files --modified; git -c core.quotePath=false ls-files --others --exclude-standard; } | sort -u )
           }
 
           stage_physical_pairs
@@ -162,7 +162,7 @@ jobs:
                 stem="$changed"
               fi
               [[ -f "$stem.lisp" && -f "$stem.sens" ]] && printf '%s\n' "$stem.lisp"
-            done < <(git diff --name-only HEAD^ HEAD) | sort -u
+            done < <(git -c core.quotePath=false diff --name-only HEAD^ HEAD) | sort -u
           )
           if [[ "${#generated_sources[@]}" -eq 0 ]]; then
             echo "LISP_TO_SENS_NO_SOURCE_FOR_GENERATED_PAIRS"
