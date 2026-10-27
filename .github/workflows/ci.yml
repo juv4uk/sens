@@ -268,8 +268,7 @@ jobs:
     uses: ./.github/workflows/release-preflight.yml
     with:
       full: true
-      # For marked PRs, run gates against the source head, not GitHub's synthetic merge ref.
-      ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || '' }}
-      ref: ${{ needs.remint.outputs.published_sha || github.sha }}
+      # Prefer exact PR source head; for push prefer the SHA published by canonical remint.
+      ref: ${{ (github.event_name == 'pull_request' && github.event.pull_request.head.sha) || needs.remint.outputs.published_sha || github.sha }}
     permissions:
       contents: read
