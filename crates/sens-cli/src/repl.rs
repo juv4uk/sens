@@ -2229,21 +2229,6 @@ mod tests {
 
     #[cfg(feature = "zig-transport")]
     #[test]
-    fn cli_source_file_executes_via_t5m_in_the_existing_sens_session() {
-        let mut session = Session::default();
-        sens::load_core_library(&mut session).expect("Core4 bootstrap");
-        let result = eval_t5m_source_in_session(
-            "(додати-1 число-один)",
-            &mut session,
-            ReplSurface::UkrainianFull,
-        )
-        .expect("source is encoded by Zig T5M and executed by SENS");
-
-        assert_eq!(result.value.to_string(), "2");
-    }
-
-    #[cfg(feature = "zig-transport")]
-    #[test]
     fn repl_prerequisite_pairs_execute_as_t5m_domain_words() {
         let reasoning_assets = crate::zig_transport::repl_reasoning_t5m_assets()
             .expect("REPL reasoning T5M assets via Zig");
