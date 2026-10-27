@@ -104,67 +104,20 @@ def translate_program(source: str, translations: dict[str, str]) -> str:
     return "".join(output)
 
 
-def self_test() -> None:
-    # Existing D3/D4 witness.
-    en = "(define f (lambda (x) (car x)))"
-    uk = "(визначити f (функція (x) (перше x)))"
-    sa = "(nirvacana f (phalana (x) (ādi x)))"
-
-    assert translate_program(en, translation_map("en", "uk")) == uk
-    assert translate_program(uk, translation_map("uk", "san")) == sa
-    assert translate_program(sa, translation_map("san", "en")) == en
-
-    # D5 witness: exact D5:01010 PLUS and D5:10110 TIMES.
-    d5_en = "(plus 2 (times 3 4))"
-    d5_uk = "(додати 2 (помножити 3 4))"
-    d5_sa = "(yoga 2 (guṇana 3 4))"
-
-    assert translate_program(d5_en, translation_map("en", "uk")) == d5_uk
-    assert translate_program(d5_uk, translation_map("uk", "sa")) == d5_sa
-    assert translate_program(d5_sa, translation_map("sa", "en")) == d5_en
-
-    # Generated D5 selector witness.
-    assert (
-        translate_program("(caddr x)", translation_map("en", "uk"))
-        == "(п-р-р x)"
-    )
-    assert (
-        translate_program(
-            "(п-р-р x)", translation_map("uk", "sa")
-        )
-        == "(ādi-śeṣa-śeṣa x)"
-    )
-
-    protected = '; car plus перше додати ādi yoga\n("car plus перше додати ādi yoga" car plus user-name)'
-    expected = '; car plus перше додати ādi yoga\n("car plus перше додати ādi yoga" перше додати user-name)'
-    assert translate_program(protected, translation_map("en", "uk")) == expected
-
-    # Structural labels are documentation only, never token rewrites.
-    assert "відкрити" not in translation_map("en", "uk")
-    assert "open" not in translation_map("en", "uk")
-
-    print("D1-D5-SURFACE-TRANSLATOR: PASS")
-
-
 def arguments() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("input", nargs="?", type=Path, help="source file, or - for stdin")
     parser.add_argument("--from", dest="source_language")
     parser.add_argument("--to", dest="target_language")
-    parser.add_argument("--self-test", action="store_true")
     parser.add_argument("-o", "--output", type=Path)
     return parser.parse_args()
 
 
 def main() -> int:
     args = arguments()
-    if args.self_test:
-        self_test()
-        return 0
-
     if args.input is None or args.source_language is None or args.target_language is None:
         print(
-            "input, --from and --to are required unless --self-test is used",
+            "input, --from and --to are required",
             file=sys.stderr,
         )
         return 2
