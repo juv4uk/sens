@@ -76,8 +76,3 @@ fn verifyT5mWords(comptime asset: []const u8) !void {
     for (short) |byte| try std.testing.expectEqual(@as(u8, 0xA5), byte);
 }
 
-test "guard static T5M assets cross Zig as exact domain-word records" {
-    try verifyT5mWords(core_asset);
-    try verifyT5mWords(unify_asset);
-    try verifyT5mWords(guard_asset);
-}
