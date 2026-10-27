@@ -353,7 +353,7 @@ cargo test --locked -p sens --test native_first_d1_cutover --test native_first_e
             echo 'needs_zig=true' >> "$GITHUB_OUTPUT"
           fi
           # Адресний Narrate/Understand — тільки справжнє SENS-виконання.
-          if grep -Eq '^(lib/(narrate|understand|result-status)\.lisp|crates/sens/tests/(narrate_outcomes|understand_exact_empty|result_status)\.rs)$' "$changed_all"; then
+          if grep -Eq '^(lib/(narrate|understand|result-status)\.lisp|crates/sens/tests/(understand_exact_empty|result_status)\.rs)$' "$changed_all"; then
             echo 'narrate_runtime_tests=true' >> "$GITHUB_OUTPUT"
           fi
 
@@ -456,9 +456,11 @@ cargo test --locked -p sens --test prolog_bridge_current_d4 -- --list | grep -Fq
         shell: bash
         run: |
           set -euo pipefail
- CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test narrate_outcomes --test understand_exact_empty -- --nocapture
+ CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test understand_exact_empty -- --nocapture
           # Справжній D1 для символу/NIL/пари/D24 замість каталожного D9.
  CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test result_status український_символ_результату_виконується_через_d1_а_не_недопущений_d9 -- --exact --nocapture
+          echo '::error::SENS narration semantics: no native SENS law/mutant proof after deletion of unauthorized Rust oracle (narrate_outcomes.rs)'
+          exit 1
 
       - name: "Process — чинне SENS D4 виконання та двопольовий D1"
         if: ${{ !cancelled() && steps.changed-t5m-lisp.outputs.process_runtime_tests == 'true' }}
