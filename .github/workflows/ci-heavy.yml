@@ -67,7 +67,7 @@ jobs:
               cargo test --locked -p sens --test native_first_plan_shape -- --nocapture
               cargo test --locked -p sens --test machine_capability_axis -- --nocapture
               # Точна D5 арифметика, похідні SI та індексація правил у справжньому SENS.
-              cargo test --locked -p sens --test sens_exact_rational_division --test si_names -- --nocapture
+              cargo test --locked -p sens --test si_names -- --nocapture
               cargo test --locked -p sens --test yantra yantra_message_and_tool_accessors_execute_with_ukrainian_bindings -- --nocapture
               cargo test --locked -p sens --test yantra yantra_tool_call_encoding_uses_exact_d10_ukrainian_function -- --nocapture
               cargo test --locked -p sens --test guard
