@@ -1,4 +1,5 @@
 ; SENS_PAIR_REGEN: producer witness must be reminted from this exact SENS source.
+; #6183 COORDINATED: this source change deliberately triggers physical producer remint.
 ; F6: повне власне виконання SENS без прямого D6 LET*.
 ; Вхід і вихід ті самі, що в канонічному свідку:
 ; серіалізовані два фізичні записи або явна причина відхилення.
