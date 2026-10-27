@@ -4,7 +4,7 @@
 # Zig-коридор. Фізичні перевірки — transport_abi.zig, перевірка обходу READ —
 # zig_transport_root.zig; обидва набори виконуються Zig.
 set -euo pipefail
-zig test -O ReleaseSafe -lc research/zig-codecs/tests.zig
+zig test -lc research/zig-codecs/tests.zig
 # Окремий source-route доказ для колишнього прямого stdin у ядрі READ.
 zig test -lc zig_transport_root.zig --test-filter 'Rust core READ'
 zig test -lc zig_transport_root.zig --test-filter 'Rust build domain projections'
