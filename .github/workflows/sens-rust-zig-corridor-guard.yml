@@ -16,14 +16,29 @@ jobs:
     steps:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
 
-      - name: Sterile source routes — Python checks excluded
-        run: echo 'PYTHON_TESTS_AND_VALIDATORS=EXCLUDED_BY_LANGUAGE_POLICY native_equivalent=NOT_VERIFIED'
+      - uses: ./.github/actions/install-zig
+      - uses: dtolnay/rust-toolchain@1.99.0
+        with:
+          toolchain: "1.99.0"
 
-      - name: Host-neutral R5 — Python checks excluded
-        run: echo 'PYTHON_TESTS_AND_VALIDATORS=EXCLUDED_BY_LANGUAGE_POLICY native_equivalent=NOT_VERIFIED'
+      - name: T5M/F3C ingress-egress — нативні позитивний і негативний свідки
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(zig version)" = "$(tr -d '\r\n' < .zig-version)"
+          cargo test --locked -p sens-cli --bin sens-trit explicit_f3_codec_roundtrip_is_zig_owned -- --nocapture
+          cargo test --locked --no-default-features -p sens-cli --bin sens-trit f3c_physical_ingress_and_egress_require_zig_even_for_valid_bytes -- --nocapture
+          cargo test --locked -p sens-cli --test binary_t5m_zig_roundtrip -- --nocapture
 
-      - name: Host coverage — Python checks excluded
-        run: echo 'PYTHON_TESTS_AND_VALIDATORS=EXCLUDED_BY_LANGUAGE_POLICY native_equivalent=NOT_VERIFIED'
+      - name: Фізичний Zig ABI — нативні свідки
+        shell: bash
+        run: |
+          set -euo pipefail
+          zig test research/zig-codecs/tests.zig -O ReleaseSafe -lc
+          zig test research/zig-codecs/transport_abi.zig -O ReleaseSafe -lc
 
-      - name: Axiom binding — Python checks excluded
-        run: echo 'PYTHON_TESTS_AND_VALIDATORS=EXCLUDED_BY_LANGUAGE_POLICY native_equivalent=NOT_VERIFIED'
+      - name: Host coverage і axiom binding — без нативного оракула не PASS
+        shell: bash
+        run: |
+          printf '%s\n' 'Немає нативного доказу повноти Rust↔SENS host coverage та axiom binding; ручний corridor guard залишається заблокованим.' >&2
+          exit 1
