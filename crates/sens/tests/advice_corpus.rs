@@ -70,7 +70,7 @@ fn eval_advice_corpus(source: &str) -> String {
 fn direct_controlled_fact_reaches_proved_narration() {
     let source = r#"
         (визначити перехід
-          (порадити-світ
+          (порадити-всі-світ
             (порожній-світ)
             (як-є astronomy)
             (розібрати (як-є (earth is a planet)))))
