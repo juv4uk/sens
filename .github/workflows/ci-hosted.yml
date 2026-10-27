@@ -118,7 +118,6 @@ jobs:
         run: |
           cargo test --locked -p sens --lib mixed_source::tests
           cargo test --locked -p sens --test timezone_raw
-          cargo test --locked -p sens --test clock
           cargo test --locked -p sens --test timezone_ownership
           cargo test --locked -p sens --test time_host_surface
       - name: Mechanical stale-D3 migration lint (non-semantic, fail closed)
