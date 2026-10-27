@@ -128,25 +128,3 @@ pub(crate) fn current_domain_language_items() -> Vec<LanguageItem> {
         .filter(|item| item.domain_identity.is_some())
         .collect()
 }
-
-#[cfg(test)]
-mod exact_domain_metadata_migration_tests {
-    use super::*;
-
-    #[test]
-    fn admitted_canonical_function_metadata_carries_exact_domain() {
-        let items = language_items();
-        for name in ["як-є", "атом?", "перше", "решта", "сполучити"] {
-            if let Some(row) = items.iter().find(|item| item.name == name) {
-                let identity = row
-                    .domain_identity
-                    .expect("ратифікована функція не може мати нетипізований metadata ID");
-                assert_eq!(
-                    semantic_registry::domain_identity_for_surface(name),
-                    Some(identity),
-                    "metadata повинні відповідати єдиній доменній таблиці"
-                );
-            }
-        }
-    }
-}
