@@ -40,7 +40,7 @@ jobs:
 
           cargo test --locked -p sens --lib binary_framing::tests
           cargo test --locked -p sens --lib outer_envelope::tests::unratified_outer_n_path
-          cargo test --locked -p sens --features rust-t5-reference --test physical_d2_d7_binding
+          cargo test --locked -p sens-cli --test physical_d2_d7_binding
       - name: Core4 FASL exact-domain reader and wrong-reader rejection
         run: |
           RUST_MIN_STACK=33554432 cargo test --locked -p sens --lib core4_bootstrap_cache_tests::valid_fasl_path_selects_core4_and_evaluates_current_core
