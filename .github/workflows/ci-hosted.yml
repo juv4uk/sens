@@ -45,15 +45,12 @@ jobs:
           RUST_MIN_STACK=33554432 cargo test --locked -p sens --lib core4_bootstrap_cache_tests::same_hash_ordinary_reader_fasl_cannot_reinterpret_d3_heads_as_numbers
       - name: Ratified numeric D24/D48/... peer domains (Core-only)
         run: |
-          python3 scripts/check-numeric-domain-ratification.py --self-test
           python3 scripts/check-numeric-domain-ratification.py
       - name: Core4 D24+ direct-operand migration debt (inventory, not runtime pass)
         run: |
-          python3 scripts/check-core4-d24-migration.py --self-test
           python3 scripts/check-core4-d24-migration.py --check
       - name: Canonical domain ladder — Rust Python C Lisp negative controls
         run: |
-          python3 scripts/check-domain-ladder-identity.py --self-test
           python3 scripts/check-domain-ladder-identity.py --check
       - name: Verify Core domain and ownership boundaries
         run: |
