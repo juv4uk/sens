@@ -3,7 +3,7 @@
 //! Семантику перевіряє лише справжній evaluator SENS.
 
 use sens::{
-    eval_program, lower_program, parse, DomainIdentity, ExprKind, Session, Value,
+    lower_program, parse, DomainIdentity, ExprKind,
 };
 
 #[test]
