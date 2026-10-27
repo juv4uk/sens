@@ -1,3 +1,6 @@
+; F6_PRODUCER_REMINT: носій .sens відставав на 16 хв (b326db55 проти 58bc20c1),
+; тому F6 виконував стару логіку без охоронця ((хибне? (атом? (перше відновлене))) …)
+; і eq отримував пару зліва: non-atomic left · kinds pair/… · physical_form_index=7.
 ; SENS_PAIR_REGEN: повторно карбувати producer після P0 виправлення CDR адреси крапкового зв'язування (#6183 b326db55).
 ; #6183 COORDINATED: this source change deliberately triggers physical producer remint.
 ; F6: повне власне виконання SENS без прямого D6 LET*.
