@@ -1159,6 +1159,7 @@ mod tests {
             assert_eq!(magnitude.width(), width);
             assert_eq!(magnitude.as_bits()[0], 1);
             assert!(magnitude.as_bits()[1..].iter().all(|&bit| bit == 0));
+            let zero_bits = vec![0; width];
             let zero = BinaryNumber::from_numeric_domain_bits(width, &zero_bits).unwrap();
             assert_eq!(zero.to_decimal_string(), "0");
             assert!(zero.can_be_negated_in_numeric_domain());
