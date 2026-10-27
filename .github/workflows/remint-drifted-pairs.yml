@@ -561,8 +561,8 @@ jobs:
         run: |
           set -euo pipefail
           # F6 producer is a required release witness, not rotational backlog.
-          # Mint it on this checkout when the bounded 24-source pass omitted it.
-          if ! grep -Fxq 'tests/fixtures/wsm-fs-record-producer.lisp' "$RUNNER_TEMP/sens-remint-success.txt"; then
+          # Mint only if the 24-source pass did not attempt it; failed native eval stays RED, never retried blindly.
+          if ! grep -Fxq 'tests/fixtures/wsm-fs-record-producer.lisp' "$RUNNER_TEMP/sens-remint-candidates.list"; then
             bash scripts/refresh-verified-t5m-pair.sh \
               tests/fixtures/wsm-fs-record-producer.lisp \
               target/debug/sens target/debug/sens-trit \
