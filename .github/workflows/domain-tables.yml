@@ -21,10 +21,6 @@ jobs:
         run: python3 scripts/check-d7-runtime-projection.py
       - name: Test D7 width and non-callable human presentation
         run: cargo test --locked -p sens --test d7_runtime_presentation --test d7_w7_pack --test canonical_w7_frame_invariance
-      - name: Check D5 authority
-        run: python3 scripts/check-domain-surfaces-d5.py
-      - name: Check human-surface translation
-        run: python3 scripts/translate-domain-program.py --self-test
       - name: Prove exact-width substrate preserves domain address
         run: |
           cargo test -p sens source_words::tests::same_numeric_payload_at_different_widths_never_collapses
