@@ -804,11 +804,9 @@ mod tests {
                 );
                 assert_eq!(
                     left.div_rem(&right).map(|(q, r)| (q.bits(), r.bits())),
-                    if b == 0 {
-                        None
-                    } else {
-                        Some((format!("{:b}", a / b), format!("{:b}", a % b)))
-                    }
+                    a.checked_div(b)
+                        .zip(a.checked_rem(b))
+                        .map(|(q, r)| (format!("{q:b}"), format!("{r:b}")))
                 );
             }
         }
@@ -1134,15 +1132,13 @@ mod tests {
                         .map(|(negative, n)| (negative, n.to_decimal_string())),
                     Some((a < b, a.abs_diff(b).to_string()))
                 );
-                if b == 0 {
-                    assert!(left.div_rem_admitted_numeric(&right).is_none());
-                } else {
-                    let (q, r) = left.div_rem_admitted_numeric(&right).unwrap();
-                    assert_eq!(
-                        (q.to_decimal_string(), r.to_decimal_string()),
-                        ((a / b).to_string(), (a % b).to_string())
-                    );
-                }
+                assert_eq!(
+                    left.div_rem_admitted_numeric(&right)
+                        .map(|(q, r)| (q.to_decimal_string(), r.to_decimal_string())),
+                    a.checked_div(b)
+                        .zip(a.checked_rem(b))
+                        .map(|(q, r)| (q.to_string(), r.to_string()))
+                );
             }
         }
     }
