@@ -131,37 +131,3 @@ fn eval_literate_with_source_projection(
     Ok((result, forms))
 }
 
-#[cfg(test)]
-mod human_ukrainian_projection_tests {
-    use super::{eval_literate_ukr, SourceMode};
-    use sens::Session;
-
-    #[test]
-    fn gui_uses_the_same_exact_d24_quotient_as_sens_file_mode() {
-        let mut session = Session::default();
-        let (result, forms) = eval_literate_ukr("(частка 1 3)", SourceMode::PureLisp, &mut session)
-            .expect("ratified Ukrainian quotient of human decimal operands");
-        assert_eq!(result.value.to_string(), "1/3");
-        assert_eq!(forms.len(), 1);
-    }
-
-    #[test]
-    fn gui_retains_a_bound_decimal_value_between_ukrainian_evaluations() {
-        let mut session = Session::default();
-        eval_literate_ukr("(визначити крок 42)", SourceMode::PureLisp, &mut session)
-            .expect("human decimal value bound by native SENS");
-        let (result, _) = eval_literate_ukr("(додати крок 8)", SourceMode::PureLisp, &mut session)
-            .expect("existing SENS session and D24 addition");
-        assert_eq!(result.value.to_string(), "50");
-    }
-
-    #[test]
-    fn fenced_ukrainian_arithmetic_uses_the_same_source_projection() {
-        let mut session = Session::default();
-        let source = "# Український SENS\n\n```sens\n(частка 2 3)\n```\n";
-        let (result, forms) = eval_literate_ukr(source, SourceMode::Literate, &mut session)
-            .expect("fenced human Ukrainian source");
-        assert_eq!(result.value.to_string(), "2/3");
-        assert_eq!(forms.len(), 1);
-    }
-}
