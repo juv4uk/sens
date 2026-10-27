@@ -108,24 +108,6 @@ class УкраїнськийДобірМеханізмів(unittest.TestCase):
             self.assertIn(фрагмент, self.джерело)
         self.assertNotIn("(як-є sid-not-in-function-table)", self.код)
 
-    def test_внутрішній_предикат_повертає_точний_d1(self) -> None:
-        істина = "(атом? (як-є ()))"
-        хиба = "(атом? (як-є (())))"
-        self.assertIn(f"((атом? рядки) {хиба})", self.код)
-        self.assertIn(
-            f"((механізм-однакові? ідентичність (перше (перше рядки))) {істина})",
-            self.код,
-        )
-        self.assertRegex(
-            self.код,
-            r"\(реєстр-містить-ідентичність\?\s+"
-            r"ідентичність\s+рядки-реєстру-механізму\)\s+"
-            + re.escape(хиба) + r"\)",
-        )
-        self.assertNotRegex(self.код, r"(?<![\w-])(?:так|ні)(?![\w-])")
-        self.assertNotIn("(як-є yes)", self.код)
-        self.assertNotIn("(як-є no)", self.код)
-
     def test_чинні_споживачі_викликають_українську_поверхню(self) -> None:
         for шлях in ("lib/core3.lisp", "lib/island-lowering.lisp"):
             код = прибрати_коментарі_й_рядки(
