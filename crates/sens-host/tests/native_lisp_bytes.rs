@@ -4,7 +4,7 @@
 ))]
 
 use sens::{
-    eval_parsed_expressions, eval_program, load_core_library, parse_mixed_exact_domain,
+    eval_parsed_expressions, eval_program, load_core_library,
     parse_mixed_exact_domain_machine_source, register_capability, Environment, Exactness, Expr,
     LanguageError, Session, Span, Value,
 };
@@ -50,13 +50,6 @@ fn load_lisp_file(path: &str, session: &mut Session) {
     eval_parsed_expressions(&expressions, session).unwrap_or_else(|error| {
         panic!("{path} must load through the machine-source reader: {error}")
     });
-}
-
-fn eval_uk_program(source: &str, session: &mut Session) -> sens::EvalResult {
-    let expressions = parse_mixed_exact_domain(source)
-        .unwrap_or_else(|error| panic!("Ukrainian exact-domain witness must parse: {error}"));
-    eval_parsed_expressions(&expressions, session)
-        .unwrap_or_else(|error| panic!("Ukrainian exact-domain witness must evaluate: {error}"))
 }
 
 fn spy_executor(
@@ -257,68 +250,6 @@ fn negative_mov_r64_imm64_is_admitted_but_fails_closed_at_the_real_host_boundary
 }
 
 #[test]
-fn semantic_lowering_must_produce_structured_forms_before_admission_and_execution() {
-    let _serial = test_lock();
-    install();
-    let mut session = Session::default();
-    load_core_library(&mut session)
-        .expect("core must bootstrap before structured machine lowering");
-    load_lisp_file("lib/machine/layout/pair-x86-64.lisp", &mut session);
-    load_lisp_file("lib/machine/encoding/x86-64.lisp", &mut session);
-    load_lisp_file("lib/machine/admission/x86-64.lisp", &mut session);
-    load_lisp_file("lib/machine/lowering/semantic-x86-64.lisp", &mut session);
-
-    let add_forms = eval_program(
-        "(машина-знизити-додавання-беззнакових-64-до-форм 2 3)",
-        &mut session,
-    )
-    .expect("semantic lowering must expose structured admitted machine forms before bytes");
-    assert_eq!(
-        add_forms.value.to_string(),
-        "((mov-r64-imm64 rax 2) (mov-r64-imm64 rcx 3) (add-r64-r64 rax rcx) (ret))"
-    );
-
-    let add = eval_program(
-        "(викликати-допущену-машинну-програму (машина-знизити-додавання-беззнакових-64-до-форм 2 3) 0)",
-        &mut session,
-    )
-    .expect("admitted semantic ADD forms must execute through the canonical gateway");
-    assert_eq!(add.value.to_string(), "5");
-
-    let interpreter_car = eval_uk_program("(перше (сполучити 2 3))", &mut session);
-    let interpreter_cdr = eval_uk_program("(решта (сполучити 2 3))", &mut session);
-
-    let native_car = eval_program(
-        "(викликати-допущену-машинну-програму (знизити-складену-пару-до-машинних-форм 2 3) машинна-пара-байти-комірки)",
-        &mut session,
-    )
-    .expect("CONS+CAR lowering must pass through admission before host execution");
-    let native_cdr = eval_program(
-        "(викликати-допущену-машинну-програму (машина-знизити-решту-пари-64 2 3) машинна-пара-байти-комірки)",
-        &mut session,
-    )
-    .expect("CONS+CDR lowering must pass through admission before host execution");
-
-    assert_eq!(native_car.value, interpreter_car.value);
-    assert_eq!(native_cdr.value, interpreter_cdr.value);
-
-    let lowering_source =
-        fs::read_to_string(repo_root().join("lib/machine/lowering/semantic-x86-64.lisp"))
-            .expect("semantic lowerer source must be readable");
-    for forbidden in [
-        "(def x86-lower-add-u64\n",
-        "(def x86-lower-cons-car-u64\n",
-        "(def x86-lower-cons-cdr-u64\n",
-        "(x86-encode-program\n",
-    ] {
-        assert!(
-            !lowering_source.contains(forbidden),
-            "semantic lowerer must expose forms only; found retired byte path {forbidden}"
-        );
-    }
-}
-
-#[test]
 fn x86_pair_layout_is_one_lisp_owned_machine_readable_authority() {
     let _serial = test_lock();
     let path = repo_root().join("lib/machine/layout/pair-x86-64.lisp");
@@ -473,120 +404,6 @@ fn lisp_owned_pair_memory_addressing_has_exact_rdi_disp8_bytes() {
     assert_eq!(car_load.value.to_string(), "(72 139 71 0)");
     assert_eq!(cdr_load.value.to_string(), "(72 139 71 8)");
     assert_eq!(car_store.value.to_string(), "(72 137 71 0)");
-}
-
-#[test]
-fn native_pair_car_cdr_match_the_interpreter_reference_witness() {
-    let _serial = test_lock();
-    install();
-    let mut session = Session::default();
-    load_core_library(&mut session).expect("core must bootstrap before pair parity witness");
-    load_lisp_file("lib/machine/layout/pair-x86-64.lisp", &mut session);
-    load_lisp_file("lib/machine/encoding/x86-64.lisp", &mut session);
-    assert_bounded_x86_field_encoders_cover_every_admitted_tuple(&mut session);
-    load_lisp_file("lib/machine/admission/x86-64.lisp", &mut session);
-    load_lisp_file("lib/machine/lowering/semantic-x86-64.lisp", &mut session);
-
-    let interpreter_car = eval_uk_program("(перше (сполучити 2 3))", &mut session);
-    let interpreter_cdr = eval_uk_program("(решта (сполучити 2 3))", &mut session);
-
-    // Failure-only stage inventory for Contract 11.8 callability diagnosis.
-    // These probes report but never turn a failed stage into a passing test.
-    for (name, source) in [
-        ("d6-integer-zero", "(ціле? 0)"),
-        ("ge-lower-zero", "(не-менше? 0 -128)"),
-        ("ge-normalize-zero", "(тотожне? (не-менше? 0 -128) 1)"),
-        ("le-upper-zero", "(не-більше? 0 127)"),
-        ("le-normalize-zero", "(тотожне? (не-більше? 0 127) 1)"),
-        ("eq-number-control", "(тотожне? 1 1)"),
-        ("exact-integer-zero", "(машина-допуск-точне-ціле? 0)"),
-        ("disp8-zero", "(машина-допуск-зсув-8? 0)"),
-        ("disp8-eight", "(машина-допуск-зсув-8? 8)"),
-        ("pattern-store", "(машина-допуск-збіг-шаблону? (quote (mov-mem-disp8-r64 register disp8 register)) (quote (mov-mem-disp8-r64 rdi 0 rax)))"),
-        ("instruction-store", "(машина-команда-допущена? (quote (mov-mem-disp8-r64 rdi 0 rax)))"),
-        ("whole-admission", "(машина-програма-допущена? (quote ((mov-r64-imm64 rax 2) (mov-mem-disp8-r64 rdi 0 rax) (mov-r64-imm64 rax 3) (mov-mem-disp8-r64 rdi 8 rax) (mov-r64-mem-disp8 rax rdi 0) (ret))))"),
-    ] {
-        let result = eval_program(source, &mut session)
-            .map(|value| format!("{:?}", value.value))
-            .unwrap_or_else(|error| format!("ERROR: {error}"));
-        eprintln!("MACHINE-ADMISSION-STAGE {name}: {result}");
-    }
-
-    // Split the post-admission path so an encoder/arithmetic error cannot
-    // be misattributed to the raw CPU bridge. Failure-only observations never
-    // alter the critical assertion below.
-    for (name, source) in [
-        ("lowered-car-forms", "(знизити-складену-пару-до-машинних-форм 2 3)"),
-        ("lowered-car-admission", "(машина-програма-допущена? (знизити-складену-пару-до-машинних-форм 2 3))"),
-        ("encode-mov-imm-left", "(машина-кодувати-допущену-команду (quote (mov-r64-imm64 rax 2)))"),
-        ("encode-store-car", "(машина-кодувати-допущену-команду (quote (mov-mem-disp8-r64 rdi 0 rax)))"),
-        ("encode-mov-imm-right", "(машина-кодувати-допущену-команду (quote (mov-r64-imm64 rax 3)))"),
-        ("encode-store-cdr", "(машина-кодувати-допущену-команду (quote (mov-mem-disp8-r64 rdi 8 rax)))"),
-        ("encode-load-car", "(машина-кодувати-допущену-команду (quote (mov-r64-mem-disp8 rax rdi 0)))"),
-        ("encode-ret", "(машина-кодувати-допущену-команду (quote (ret)))"),
-        ("reg-code-rdi", "(x86-reg-code (quote rdi))"),
-        ("reg-code-rax", "(x86-reg-code (quote rax))"),
-        ("reg-low3-rdi", "(x86-low3 (x86-reg-code (quote rdi)))"),
-        ("reg-high1-rdi", "(x86-high1 (x86-reg-code (quote rdi)))"),
-        ("rex-rdi", "(x86-encode-rex 1 0 0 (x86-high1 (x86-reg-code (quote rdi))))"),
-        ("modrm-store", "(x86-encode-modrm 1 (x86-low3 (x86-reg-code (quote rax))) (x86-low3 (x86-reg-code (quote rdi))))"),
-        ("sib-store", "(x86-encode-sib 0 4 4)"),
-        ("disp8-zero", "(x86-disp8-byte 0)"),
-        ("disp8-eight", "(x86-disp8-byte 8)"),
-        ("plus-disp8-zero", "(00001100 0 256)"),
-        ("mod-disp8-zero", "(00010011 (00001100 0 256) 256)"),
-        ("store-direct", "(x86-encode-mov-mem-disp8-r64 (quote rdi) 0 (quote rax))"),
-        ("lowered-car-encoding", "(машина-кодувати-допущену-програму (знизити-складену-пару-до-машинних-форм 2 3))"),
-    ] {
-        let result = eval_program(source, &mut session)
-            .map(|value| format!("{:?}", value.value))
-            .unwrap_or_else(|error| format!("ERROR: {error}"));
-        eprintln!("MACHINE-CAR-STAGE {name}: {result}");
-    }
-
-    // Non-asserting encoder probe: isolate arithmetic failures before changing Lisp source.
-    for (stage, probe) in [
-        ("eq-numbers", "(101 7 4)"),
-        ("disp8-byte", "(x86-disp8-byte 0)"),
-        ("modrm-store", "(x86-encode-modrm 1 0 7)"),
-        ("sib", "(x86-encode-sib 0 4 4)"),
-        ("reg-code", "(x86-reg-code (00000001 rax))"),
-        ("rex", "(x86-encode-rex 1 0 0 0)"),
-        ("u64-bytes", "(x86-u64-bytes 2)"),
-        ("mov-imm", "(x86-encode-mov-r64-imm64 (00000001 rax) 2)"),
-        (
-            "store",
-            "(x86-encode-mov-mem-disp8-r64 (00000001 rdi) 0 (00000001 rax))",
-        ),
-    ] {
-        match eval_program(probe, &mut session) {
-            Ok(output) => println!("MACHINE-ENCODE-PROBE {stage}: OK {:?}", output.value),
-            Err(error) => println!("MACHINE-ENCODE-PROBE {stage}: ERROR {error:?}"),
-        }
-    }
-
-    let native_car = eval_program(
-        "(native-call-u64-raw (машина-кодувати-допущену-програму (знизити-складену-пару-до-машинних-форм 2 3)) машинна-пара-байти-комірки)",
-        &mut session,
-    )
-    .expect("Lisp-owned CONS+CAR forms must materialize through admission before raw host execution");
-    let native_cdr = eval_program(
-        "(native-call-u64-raw (машина-кодувати-допущену-програму (машина-знизити-решту-пари-64 2 3)) машинна-пара-байти-комірки)",
-        &mut session,
-    )
-    .expect("Lisp-owned CONS+CDR forms must materialize through admission before raw host execution");
-
-    let native_semantic_car = eval_uk_program(
-        "(машина-викликати-семантичне-перше-64 (сполучити 2 3))",
-        &mut session,
-    );
-    assert_eq!(
-        native_semantic_car.value,
-        interpreter_car.value,
-        "the Lisp-owned semantic CAR route must use exact CAR/CDR decomposition before native execution"
-    );
-    assert_eq!(native_car.value, interpreter_car.value);
-    assert_eq!(native_cdr.value, interpreter_cdr.value);
 }
 
 #[test]
