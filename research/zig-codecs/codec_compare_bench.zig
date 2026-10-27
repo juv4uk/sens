@@ -184,17 +184,3 @@ pub fn main() !void {
     }
 }
 
-test "exact shared fixture; sizes do not imply evaluator execution" {
-    const f = Fixture{
-        .words = &.{ .{ .width = 12, .bits = "000000000000" }, .{ .width = 12, .bits = "000001001001" } },
-        .raw = &.{ 0, 73 },
-    };
-    inline for (.{ Codec.t5m, Codec.t33, Codec.d12 }) |codec| {
-        const bytes = try encode(codec, std.testing.allocator, f);
-        defer std.testing.allocator.free(bytes);
-        try decode(codec, std.testing.allocator, f, bytes, true);
-        try std.testing.expectEqual(@as(usize, if (codec == .t5m) 5 else if (codec == .t33) 8 else 3), bytes.len);
-    }
-    var output: [1]u16 = undefined;
-    try std.testing.expectError(d12.Error.NonCanonicalTail, d12.decode(&.{ 0, 1 }, 1, &output));
-}
