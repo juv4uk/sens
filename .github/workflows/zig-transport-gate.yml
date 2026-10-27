@@ -17,11 +17,13 @@ jobs:
     steps:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
       - uses: ./.github/actions/install-zig
+      - uses: dtolnay/rust-toolchain@1.99.0
+        with:
+          toolchain: "1.99.0"
       - name: Unit tests (no semantic admission)
         run: |
           python3 -m unittest tests.test_migration_zig_gate -v
-          python3 scripts/check_sterile_zig_corridor.py
-          python3 -m unittest tests.test_sterile_zig_corridor -v
+          cargo test --locked -p sens-cli --bin sens-trit sterile_f3c_corridor -- --nocapture
           python3 scripts/check_rust_sens_zig_corridor.py .
           python3 -m unittest tests.test_check_rust_sens_zig_corridor -v
           python3 scripts/check_corridor_axiom_binding.py .

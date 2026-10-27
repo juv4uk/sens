@@ -1518,3 +1518,341 @@ mod d7_zig_cli_boundary_tests {
         assert!(!feature_decode.contains("sens::decode_d7_uk_t5(&bytes)"));
     }
 }
+
+
+
+#[cfg(test)]
+mod sterile_f3c_corridor_guard_tests {
+    const TRIT_SOURCE: &str = include_str!("sens-trit.rs");
+    const ZIG_SOURCE: &str = include_str!("../zig_transport.rs");
+
+    // Mask comments and literal payloads while preserving byte offsets. This
+    // keeps comment-only examples and string contents from satisfying source
+    // checks, and prevents braces inside format strings from ending a route.
+    fn mask_non_code(source: &str) -> String {
+        let bytes = source.as_bytes();
+        let mut masked = bytes.to_vec();
+        let mut i = 0usize;
+
+        fn mask(masked: &mut [u8], bytes: &[u8], start: usize, end: usize) {
+            for p in start..end {
+                if bytes[p] != b'\n' && bytes[p] != b'\r' {
+                    masked[p] = b' ';
+                }
+            }
+        }
+
+        fn raw_string_end(bytes: &[u8], start: usize) -> Option<usize> {
+            let prefix = if bytes.get(start) == Some(&b'r') {
+                start
+            } else if bytes.get(start) == Some(&b'b')
+                && bytes.get(start + 1) == Some(&b'r')
+            {
+                start + 1
+            } else {
+                return None;
+            };
+            let mut quote = prefix + 1;
+            while bytes.get(quote) == Some(&b'#') {
+                quote += 1;
+            }
+            if bytes.get(quote) != Some(&b'"') {
+                return None;
+            }
+            let hashes = quote - (prefix + 1);
+            let mut p = quote + 1;
+            while p < bytes.len() {
+                if bytes[p] == b'"'
+                    && p + 1 + hashes <= bytes.len()
+                    && bytes[p + 1..p + 1 + hashes]
+                        .iter()
+                        .all(|&byte| byte == b'#')
+                {
+                    return Some(p + 1 + hashes);
+                }
+                p += 1;
+            }
+            Some(bytes.len())
+        }
+
+        fn quoted_string_end(bytes: &[u8], quote: usize) -> usize {
+            let mut p = quote + 1;
+            while p < bytes.len() {
+                match bytes[p] {
+                    b'\\' => p = (p + 2).min(bytes.len()),
+                    b'"' => return p + 1,
+                    b'\n' => return p,
+                    _ => p += 1,
+                }
+            }
+            bytes.len()
+        }
+
+        fn char_literal_end(bytes: &[u8], quote: usize) -> Option<usize> {
+            let next = *bytes.get(quote + 1)?;
+            if next == b'\\' {
+                let mut p = quote + 2;
+                while p < bytes.len() && p - quote <= 16 {
+                    if bytes[p] == b'\'' {
+                        return Some(p + 1);
+                    }
+                    if bytes[p] == b'\n' {
+                        return None;
+                    }
+                    p += 1;
+                }
+                return None;
+            }
+            let width = if next < 0x80 {
+                1
+            } else if next < 0xe0 {
+                2
+            } else if next < 0xf0 {
+                3
+            } else {
+                4
+            };
+            let end = quote + 1 + width;
+            (bytes.get(end) == Some(&b'\'')).then_some(end + 1)
+        }
+
+        while i < bytes.len() {
+            if bytes.get(i..i + 2) == Some(b"//") {
+                let mut end = i + 2;
+                while end < bytes.len() && bytes[end] != b'\n' {
+                    end += 1;
+                }
+                mask(&mut masked, bytes, i, end);
+                i = end;
+                continue;
+            }
+            if bytes.get(i..i + 2) == Some(b"/*") {
+                let mut depth = 1usize;
+                let mut end = i + 2;
+                while end < bytes.len() && depth > 0 {
+                    if bytes.get(end..end + 2) == Some(b"/*") {
+                        depth += 1;
+                        end += 2;
+                    } else if bytes.get(end..end + 2) == Some(b"*/") {
+                        depth -= 1;
+                        end += 2;
+                    } else {
+                        end += 1;
+                    }
+                }
+                mask(&mut masked, bytes, i, end);
+                i = end;
+                continue;
+            }
+            if let Some(end) = raw_string_end(bytes, i) {
+                mask(&mut masked, bytes, i, end);
+                i = end;
+                continue;
+            }
+            if bytes[i] == b'"' {
+                let end = quoted_string_end(bytes, i);
+                mask(&mut masked, bytes, i, end);
+                i = end;
+                continue;
+            }
+            let quote = if bytes[i] == b'\'' {
+                Some(i)
+            } else if bytes[i] == b'b' && bytes.get(i + 1) == Some(&b'\'') {
+                Some(i + 1)
+            } else {
+                None
+            };
+            if let Some(quote) = quote {
+                if let Some(end) = char_literal_end(bytes, quote) {
+                    mask(&mut masked, bytes, i, end);
+                    i = end;
+                    continue;
+                }
+            }
+            i += 1;
+        }
+
+        String::from_utf8(masked).expect("masking preserves valid UTF-8")
+    }
+
+    fn matching_brace(source: &str, open: usize) -> Result<usize, String> {
+        let bytes = source.as_bytes();
+        if bytes.get(open) != Some(&b'{') {
+            return Err("відсутня відкрита дужка маршруту".into());
+        }
+        let mut depth = 0usize;
+        for (offset, byte) in bytes.iter().enumerate().skip(open) {
+            match byte {
+                b'{' => depth += 1,
+                b'}' => {
+                    depth = depth
+                        .checked_sub(1)
+                        .ok_or("зайва закривна дужка маршруту")?;
+                    if depth == 0 {
+                        return Ok(offset);
+                    }
+                }
+                _ => {}
+            }
+        }
+        Err("маршрут не має закривної дужки".into())
+    }
+
+    fn function_body<'a>(source: &'a str, signature: &str) -> Result<&'a str, String> {
+        let clean = mask_non_code(source);
+        let starts = clean.match_indices(signature).map(|(i, _)| i).collect::<Vec<_>>();
+        if starts.len() != 1 {
+            return Err(format!(
+                "очікував одне живе визначення {signature:?}, знайдено {}",
+                starts.len()
+            ));
+        }
+        let start = starts[0];
+        let open = clean[start..]
+            .find('{')
+            .map(|offset| start + offset)
+            .ok_or_else(|| format!("відсутнє тіло {signature:?}"))?;
+        let close = matching_brace(&clean, open)?;
+        Ok(&source[open + 1..close])
+    }
+
+    fn cfg_body<'a>(body: &'a str, attribute: &str) -> Result<&'a str, String> {
+        let clean = mask_non_code(body);
+        for (start, _) in body.match_indices(attribute) {
+            // An identical spelling in a comment is not an active cfg branch.
+            if !clean[start..].starts_with("#[cfg(") {
+                continue;
+            }
+            let open = clean[start..]
+                .find('{')
+                .map(|offset| start + offset)
+                .ok_or_else(|| format!("відсутнє тіло {attribute:?}"))?;
+            let close = matching_brace(&clean, open)?;
+            return Ok(&body[open + 1..close]);
+        }
+        Err(format!("відсутня жива гілка {attribute:?}"))
+    }
+
+    fn compact_code(source: &str) -> String {
+        mask_non_code(source)
+            .chars()
+            .filter(|character| !character.is_whitespace())
+            .collect()
+    }
+
+    fn verify_routes(trit_source: &str, zig_source: &str) -> Result<(), String> {
+        let decode = function_body(trit_source, "fn decode_f3_carrier(")?;
+        let encode = function_body(trit_source, "fn encode_f3_carrier(")?;
+
+        let decode_zig = compact_code(cfg_body(decode, "#[cfg(feature = \"zig-transport\")]")?);
+        let decode_no_zig = cfg_body(decode, "#[cfg(not(feature = \"zig-transport\"))]")?;
+        let decode_no_zig_code = compact_code(decode_no_zig);
+        if !decode_zig.contains("zig_transport::decode_f3(bytes)?")
+            || !decode_zig.contains("zig_transport::decode_t5m_words(&restored)?")
+            || decode_zig.find("zig_transport::decode_f3(bytes)?")
+                >= decode_zig.find("zig_transport::decode_t5m_words(&restored)?")
+            || !decode_zig.contains("sens::PhysicalT5Program::from_exact_words(&words)")
+        {
+            return Err("F3C ingress не проходить Zig F3 → Zig T5M → точний SENS admission".into());
+        }
+        if !decode_no_zig.contains("no Rust fallback")
+            || !decode_no_zig_code.contains("Err(")
+            || decode_no_zig_code.contains("Ok(")
+            || decode_no_zig_code.contains("zig_transport::")
+            || decode_no_zig_code.contains("sens::")
+        {
+            return Err("F3C ingress без Zig не відмовляється fail-closed".into());
+        }
+
+        let encode_zig = cfg_body(encode, "#[cfg(feature = \"zig-transport\")]")?;
+        let encode_code = compact_code(encode_zig);
+        let decode_at = encode_code.find("zig_transport::decode_t5m_words(bytes)?");
+        let encode_at = encode_code.find("zig_transport::encode_f3(bytes)");
+        if decode_at.is_none()
+            || encode_at.is_none()
+            || decode_at >= encode_at
+            || !encode_code.contains("sens::PhysicalT5Program::from_exact_words(&words)")
+            || !(encode_code.ends_with("zig_transport::encode_f3(bytes)")
+                || encode_code.ends_with("returnzig_transport::encode_f3(bytes);"))
+        {
+            return Err("F3C egress не має живого валідованого T5M → Zig tail/return".into());
+        }
+        let encode_no_zig = cfg_body(encode, "#[cfg(not(feature = \"zig-transport\"))]")?;
+        let encode_no_zig_code = compact_code(encode_no_zig);
+        if !encode_no_zig.contains("no Rust fallback")
+            || !encode_no_zig_code.contains("Err(")
+            || encode_no_zig_code.contains("Ok(")
+            || encode_no_zig_code.contains("zig_transport::")
+            || encode_no_zig_code.contains("sens::")
+        {
+            return Err("F3C egress без Zig не відмовляється fail-closed".into());
+        }
+
+        let zig_encode = compact_code(function_body(zig_source, "pub fn encode_f3(")?);
+        let validate = zig_encode.find("decode_t5m_words(t5)?");
+        let pack = zig_encode.find("sens_zig_f3c_pack(");
+        if validate.is_none()
+            || pack.is_none()
+            || validate >= pack
+            || !zig_encode.contains("encode_legacy_t5(&logical_words)?")
+        {
+            return Err("Zig F3C pack не перевіряє T5M до фізичного кодування".into());
+        }
+
+        let zig_decode = compact_code(function_body(zig_source, "pub fn decode_f3(")?);
+        let unpack = zig_decode.find("sens_zig_f3c_unpack(");
+        let validate_legacy = zig_decode.find("decode_legacy_t5_words(&output)?");
+        let restore_t5m = zig_decode.find("encode_t5m_direct(&words)");
+        if unpack.is_none()
+            || validate_legacy.is_none()
+            || restore_t5m.is_none()
+            || unpack >= validate_legacy
+            || validate_legacy >= restore_t5m
+        {
+            return Err("Zig F3C unpack не перевіряє legacy T5 і не відновлює T5M".into());
+        }
+        Ok(())
+    }
+
+    #[test]
+    fn sterile_f3c_corridor_checks_live_t5m_ingress_and_zig_egress() {
+        verify_routes(TRIT_SOURCE, ZIG_SOURCE)
+            .unwrap_or_else(|error| panic!("стерильний F3C/T5M-коридор: {error}"));
+        println!("Перевірено живі T5M ingress та Zig F3C egress із fail-closed гілками.");
+    }
+
+    #[test]
+    fn sterile_f3c_corridor_rejects_comment_unused_encode_and_rust_fallback_mutants() {
+        let comment_only = TRIT_SOURCE.replacen(
+            "        zig_transport::encode_f3(bytes)\n",
+            "        // zig_transport::encode_f3(bytes)\n        Ok(None)\n",
+            1,
+        );
+        assert_ne!(comment_only, TRIT_SOURCE, "anchor коментарного мутанта має існувати");
+        assert!(verify_routes(&comment_only, ZIG_SOURCE).is_err());
+
+        let unused_encode = TRIT_SOURCE.replacen(
+            "        zig_transport::encode_f3(bytes)\n",
+            "        let _ignored = zig_transport::encode_f3(bytes)?;\n        Ok(None)\n",
+            1,
+        );
+        assert_ne!(unused_encode, TRIT_SOURCE, "anchor невикористаного encode має існувати");
+        assert!(verify_routes(&unused_encode, ZIG_SOURCE).is_err());
+
+        let rust_fallback = TRIT_SOURCE.replacen(
+            "Err(\"F3C physical encode requires Zig; no Rust fallback\".into())",
+            "Ok(Some(bytes.to_vec()))",
+            1,
+        );
+        assert_ne!(rust_fallback, TRIT_SOURCE, "anchor Rust fallback мутанта має існувати");
+        assert!(verify_routes(&rust_fallback, ZIG_SOURCE).is_err());
+
+        let missing_ingress = TRIT_SOURCE.replacen(
+            "let restored = zig_transport::decode_f3(bytes)?;",
+            "// let restored = zig_transport::decode_f3(bytes)?;\n        let restored = bytes.to_vec();",
+            1,
+        );
+        assert_ne!(missing_ingress, TRIT_SOURCE, "anchor ingress мутанта має існувати");
+        assert!(verify_routes(&missing_ingress, ZIG_SOURCE).is_err());
+    }
+}

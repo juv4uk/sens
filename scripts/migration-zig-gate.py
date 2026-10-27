@@ -466,7 +466,7 @@ def main() -> int:
     steps.append(
         run_step(
             "check_sterile_zig_corridor",
-            [sys.executable, str(SCRIPTS / "check_sterile_zig_corridor.py")],
+            ["cargo", "test", "--locked", "-p", "sens-cli", "--bin", "sens-trit", "sterile_f3c_corridor", "--", "--nocapture"],
         )
     )
 
