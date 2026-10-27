@@ -468,6 +468,16 @@ pub(crate) fn d9_uk_source_identity(name: &str) -> Option<DomainIdentity> {
 /// Binding-only D10 lookup. A domain-table name maps to an exact coordinate,
 /// but only evaluation of a concrete root callable populates its runtime slot.
 pub(crate) fn d10_binding_identity_for_definition(name: &str) -> Option<DomainIdentity> {
+    // lib/knowledge.lisp defines this concrete SENS closure, whose exact D10
+    // word is ratified in lib/domains/d10.lisp. The generated Core4/epistemic
+    // binding inventory does not cover that library. Bind its exact identity
+    // only after the SENS DEFINE has actually evaluated; an arbitrary D10
+    // resident still has no mechanism or callable slot.
+    if name == "перетворити-клаузи-на-події-повідомлення" {
+        return Some(DomainIdentity::D10(
+            crate::DomainD10::new(0b0010000001).expect("ratified D10 knowledge closure"),
+        ));
+    }
     D10_DEFINITION_BINDINGS
         .iter()
         .find(|row| row.names.contains(&name))
