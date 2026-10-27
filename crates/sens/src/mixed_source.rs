@@ -265,7 +265,8 @@ fn lift_pinned_d9_language_calls(
     // These Lisp-defined D9 calls are materialized only for pinned reasoning
     // sources. Exact identity does not install a runtime slot; evaluated SENS
     // definitions must still provide the concrete mechanism before dispatch.
-    const UKRAINIAN_D9_LISP_CALLS: [&str; 3] = [
+    const UKRAINIAN_D9_LISP_CALLS: [&str; 4] = [
+        "повідомити-знання",
         "порадити-світ",
         "світ-повідомити-всі",
         "порада-рішення-у-світ",
