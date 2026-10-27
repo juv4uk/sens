@@ -1106,10 +1106,10 @@ mod tests {
             }
         }
         let d24 = BinaryFrame::BinaryNumber(
-            BinaryNumber::from_numeric_domain_bits(24, &vec![0; 24]).unwrap(),
+            BinaryNumber::from_numeric_domain_bits(24, &[0; 24]).unwrap(),
         );
         let d48 = BinaryFrame::BinaryNumber(
-            BinaryNumber::from_numeric_domain_bits(48, &vec![0; 48]).unwrap(),
+            BinaryNumber::from_numeric_domain_bits(48, &[0; 48]).unwrap(),
         );
         assert_ne!(
             encode_binary_frame(&d24).unwrap(),
@@ -1127,7 +1127,7 @@ mod tests {
         ));
         let mut incomplete = Vec::from([1, 1, 1, 1, 0, 1, 1]);
         encode_len_into(24, &mut incomplete).unwrap();
-        incomplete.extend_from_slice(&vec![0; 23]);
+        incomplete.extend_from_slice(&[0; 23]);
         assert!(matches!(
             decode_binary_frame(&incomplete),
             Err(BinaryFrameError::UnexpectedEnd { .. })
