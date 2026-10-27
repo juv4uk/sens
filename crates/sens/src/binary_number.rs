@@ -618,10 +618,10 @@ mod tests {
         assert_eq!(negative_overflow.numeric_domain_width(), Some(24));
         assert_eq!(negative_overflow.to_decimal_string(), "-2049");
 
-        let same_payload_d24 = BinaryNumber::from_numeric_domain_bits(24, &vec![0u8; 24]).unwrap();
+        let same_payload_d24 = BinaryNumber::from_numeric_domain_bits(24, &[0u8; 24]).unwrap();
         assert!(maximum.add_admitted_numeric(&same_payload_d24).is_none());
         assert!(maximum.add_admitted_numeric(&BinaryNumber::one()).is_none());
-        assert!(BinaryNumber::from_numeric_domain_bits(12, &vec![0u8; 11]).is_none());
+        assert!(BinaryNumber::from_numeric_domain_bits(12, &[0u8; 11]).is_none());
     }
 
     #[test]
@@ -1003,7 +1003,7 @@ mod tests {
         maximum_positive_bits[0] = 0;
         let maximum_positive =
             BinaryNumber::from_numeric_domain_bits(24, &maximum_positive_bits).unwrap();
-        let small = BinaryNumber::from_numeric_domain_bits(24, &vec![0; 24]).unwrap();
+        let small = BinaryNumber::from_numeric_domain_bits(24, &[0; 24]).unwrap();
         let same = small.add_admitted_numeric(&small).unwrap();
         assert_eq!(same.numeric_domain_width(), Some(24));
         assert_eq!(same.exact_numeric_domain_bits(), Some(vec![0; 24]));
@@ -1016,7 +1016,7 @@ mod tests {
         assert!(maximum_positive
             .add_admitted_numeric(&BinaryNumber::one())
             .is_none());
-        let another_domain = BinaryNumber::from_numeric_domain_bits(48, &vec![0; 48]).unwrap();
+        let another_domain = BinaryNumber::from_numeric_domain_bits(48, &[0; 48]).unwrap();
         assert!(maximum_positive
             .add_admitted_numeric(&another_domain)
             .is_none());
