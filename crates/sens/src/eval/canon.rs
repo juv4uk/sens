@@ -585,7 +585,6 @@ pub(crate) fn invoke_domain_identity(
     }
 
     if let Some(result) = invoke_domain_primitive(identity, args, environment, span) {
-        super::special_forms::core::note_domain_call(identity);
         return canonicalize_domain_result(identity, result?, span);
     }
 
