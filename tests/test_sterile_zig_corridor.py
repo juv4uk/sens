@@ -499,7 +499,7 @@ class SterileZigCorridorTests(unittest.TestCase):
             ),
             (
                 "zig_transport::encode_f3(bytes)",
-                "let _ = zig_transport::encode_f3(bytes);\\n        Ok(Some(bytes.to_vec()))",
+                "let _ = zig_transport::encode_f3(bytes);\n        Ok(Some(bytes.to_vec()))",
             ),
         )
         for original, forged in changes:
