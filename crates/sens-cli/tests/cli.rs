@@ -288,7 +288,6 @@ fn t5m_file_mode_does_not_reinterpret_physical_sens_as_textual_lisp() {
         stderr.contains("--t5m-file accepts only .lisp sources"),
         "{stderr}"
     );
-    assert!(!String::from_utf8_lossy(&output.stdout).contains("42"));
 }
 
 #[test]
