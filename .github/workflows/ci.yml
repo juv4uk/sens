@@ -103,10 +103,10 @@ jobs:
         with:
           persist-credentials: false
       - uses: dtolnay/rust-toolchain@1.99.0
+      - uses: ./.github/actions/install-zig
       - name: Перевірити типову ідентичність test-build SENS без Python
         shell: bash
         run: cargo test --locked -p sens --no-run
-      - uses: ./.github/actions/install-zig
       - name: Build native SENS
         run: cargo build --locked -p sens-cli --bin sens --bin sens-trit --features benchmark-ast-visits
       - name: Rust mechanism checks
