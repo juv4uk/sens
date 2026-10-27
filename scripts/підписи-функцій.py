@@ -50,6 +50,33 @@ def load() -> list[tuple[str, str]]:
     return out
 
 
+LISP_DEF = re.compile(r"\(визначити\s+([^\s()]+)\s*\n?\s*\(функція\s*\(([^()]*)\)", re.S)
+LISP_MACRO = re.compile(r"\(визначити\s+([^\s()]+)\s*\n?\s*\(макрос\s*\(([^()]*)\)", re.S)
+
+
+def load_lisp() -> list[tuple[str, list[str]]]:
+    """[(ім'я, [аргументи])] із Lisp-визначень — статично, без виконання.
+
+    `(визначити ім'я (функція (a b) …))` дає аргументи прямо в тексті.
+    Це закриває М1 для решти поверхонь, яких немає в таблиці builtins.
+    """
+    out: list[tuple[str, list[str]]] = []
+    for path in sorted((ROOT / "lib").rglob("*.lisp")):
+        rel = str(path)
+        if "/domains/" in rel or "/generated/" in rel or "/surface/" in rel or "/superseded/" in rel:
+            continue
+        try:
+            text = path.read_text(encoding="utf-8", errors="ignore")
+        except OSError:
+            continue
+        for rx in (LISP_DEF, LISP_MACRO):
+            for m in rx.finditer(text):
+                name = m.group(1)
+                args = m.group(2).split()
+                out.append((name, args))
+    return out
+
+
 def split_signature(sig: str) -> tuple[str, list[str]]:
     """`(текст-у-символ текст)` → («текст-у-символ», [«текст»])."""
     inner = sig.strip()
@@ -83,11 +110,36 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--list", nargs="?", const=25, type=int, default=None, metavar="N")
     ap.add_argument("--find", metavar="ЗАПИТ")
     ap.add_argument("--stats", action="store_true")
+    ap.add_argument("--lisp", nargs="?", const=25, type=int, default=None, metavar="N")
+    ap.add_argument("--lisp-stats", action="store_true")
     ap.add_argument("--self-test", action="store_true")
     args = ap.parse_args(argv)
 
     if args.self_test:
         return self_test()
+    if args.lisp is not None or args.lisp_stats:
+        rows_l = load_lisp()
+        if not rows_l:
+            print("НЕ ВИМІРЯНО: Lisp-визначень не знайдено")
+            return 2
+        seen = set()
+        uniq = []
+        for name, a in rows_l:
+            if (name, tuple(a)) in seen:
+                continue
+            seen.add((name, tuple(a)))
+            uniq.append((name, a))
+        if args.lisp_stats:
+            with_args = sum(1 for _, a in uniq if a)
+            print("ПІДПИСИ З LISP")
+            print(f"  унікальних:     {len(uniq)}")
+            print(f"  з аргументами:  {with_args}")
+            print(f"  без аргументів: {len(uniq) - with_args}")
+            return 0
+        print(f"ПІДПИСИ З LISP (перші {min(args.lisp, len(uniq))}):")
+        for name, a in uniq[: args.lisp]:
+            print(f"  {name} ({' '.join(a)})")
+        return 0
     if args.list is None and not args.find and not args.stats:
         ap.print_help()
         return 2
