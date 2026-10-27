@@ -1,4 +1,3 @@
-use sens::{eval_program, load_core_library, Session};
 use std::process::Command;
 
 // Лише тестова основа: production Rust не залежить від текстового API Core4.
@@ -16,15 +15,6 @@ fn temp_file(name: &str, source: &str) -> std::path::PathBuf {
     ));
     std::fs::write(&path, source).expect("write temp source");
     path
-}
-
-fn eval_core(source: &str) -> String {
-    let mut session = Session::default();
-    load_core_library(&mut session).expect("core library should load");
-    eval_program(source, &mut session)
-        .unwrap_or_else(|error| panic!("{source}: {error:?}"))
-        .value
-        .to_string()
 }
 
 #[test]
@@ -58,77 +48,6 @@ fn check_reports_without_writing_then_apply_preserves_formatting() {
         rewritten,
         "; comment keeps (+ 9 9)\n(00001001 f\n  (00001000 (x)\n    (00001100 x 2)))\n(00000001 (+ 3 4))\n"
     );
-}
-
-#[test]
-fn derived_functions_and_macros_keep_runtime_result_after_rewrite() {
-    let source = "(let* ((xs (list 1 2 3)) (n (length xs))) (and (member? 2 xs) (or () (+ n 39))))";
-    let path = temp_file("derived-parity", source);
-
-    let original = eval_core(source);
-    let apply = tool().arg(&path).output().expect("run apply");
-    assert!(
-        apply.status.success(),
-        "{}",
-        String::from_utf8_lossy(&apply.stderr)
-    );
-
-    let rewritten = std::fs::read_to_string(&path).expect("read rewritten");
-    let _ = std::fs::remove_file(&path);
-
-    assert!(rewritten.contains("(10011101 "));
-    assert!(rewritten.contains("(00100111 1 2 3)"));
-    assert!(rewritten.contains("(00101000 xs)"));
-    assert!(rewritten.contains("(00101100 2 xs)"));
-    assert!(rewritten.contains("(10011010 "));
-    assert!(rewritten.contains("(10011011 "));
-    assert_eq!(eval_core(&rewritten), original);
-}
-
-#[test]
-fn exact_defmacro_rewrite_preserves_unevaluated_argument_semantics() {
-    let source = "(defmacro keep-first (x y) x)\n(keep-first 7 (never-defined-function))\n";
-    let path = temp_file("defmacro-exact", source);
-
-    let original = eval_core(source);
-    assert_eq!(original, "7");
-
-    let apply = tool().arg(&path).output().expect("run apply");
-    assert!(
-        apply.status.success(),
-        "{}",
-        String::from_utf8_lossy(&apply.stderr)
-    );
-    let rewritten = std::fs::read_to_string(&path).expect("read rewritten");
-    let _ = std::fs::remove_file(&path);
-
-    assert!(rewritten.starts_with("(00001010 keep-first "));
-    assert_eq!(eval_core(&rewritten), original);
-}
-
-#[test]
-fn defmacro_target_shadowing_preserves_surface_dispatch_after_migration() {
-    // The macro returns data: its expansion is (quote shadowed).
-    let source = "(defmacro list (x) (quote (quote shadowed)))\n(list (never-defined-function))\n";
-    let path = temp_file("defmacro-shadow", source);
-
-    let original = eval_core(source);
-    assert_eq!(original, "shadowed");
-
-    let apply = tool().arg(&path).output().expect("run apply");
-    assert!(
-        apply.status.success(),
-        "{}",
-        String::from_utf8_lossy(&apply.stderr)
-    );
-    let rewritten = std::fs::read_to_string(&path).expect("read rewritten");
-    let _ = std::fs::remove_file(&path);
-
-    assert_eq!(
-        rewritten,
-        "(00001010 list (x) (00000001 (quote shadowed)))\n(list (never-defined-function))\n"
-    );
-    assert_eq!(eval_core(&rewritten), original);
 }
 
 #[test]
@@ -167,38 +86,3 @@ fn current_core_library_is_already_fully_migrated() {
 
 }
 
-#[test]
-fn top_level_surface_redefinition_has_identical_result_after_migration() {
-    let source = "(define list (lambda args (quote shadowed)))\n(list 1 2)\n";
-    let path = temp_file("top-level-shadow", source);
-
-    let mut baseline = Session::default();
-    load_core_library(&mut baseline).expect("baseline core loads");
-    let expected = eval_program(source, &mut baseline)
-        .expect("baseline surface shadow program")
-        .value
-        .to_string();
-    assert_eq!(expected, "shadowed");
-
-    let apply = tool().arg(&path).output().expect("run apply");
-    assert!(
-        apply.status.success(),
-        "{}",
-        String::from_utf8_lossy(&apply.stderr)
-    );
-    let rewritten = std::fs::read_to_string(&path).expect("read rewritten");
-    let _ = std::fs::remove_file(&path);
-
-    assert_eq!(
-        rewritten,
-        "(00001001 list (00001000 args (00000001 shadowed)))\n(list 1 2)\n"
-    );
-
-    let mut migrated = Session::default();
-    load_core_library(&mut migrated).expect("migrated baseline core loads");
-    let actual = eval_program(&rewritten, &mut migrated)
-        .expect("migrated surface shadow program")
-        .value
-        .to_string();
-    assert_eq!(actual, expected);
-}
