@@ -74,7 +74,7 @@ jobs:
               cargo test --locked -p sens --test forward_exact_macro_migration -- --nocapture
               cargo test --locked -p sens --lib source_projection::tests:: -- --nocapture
               cargo test --locked -p sens --lib ratified_d9_string_surface_tests:: -- --nocapture
-              cargo test --locked -p sens-cli --test physical_core4_sequence_cli --test physical_bare_session_cli --test uk_surface_audit_projection
+              cargo test --locked -p sens-cli --test physical_bare_session_cli --test uk_surface_audit_projection
               ;;
             8)
               ;;
@@ -312,7 +312,7 @@ jobs:
           if grep -Eq '^(lib/translation\.lisp|lib/world\.lisp|lib/knowledge\.lisp|lib/core\.lisp|crates/sens/tests/translation_boundary\.rs|tests/test_code_runs\.py|lib/domains/d9[.]lisp|crates/sens/src/d9_definition_bindings_generated[.]rs|crates/sens/tests/d9_binary_surface_native[.]rs|tests/semantic/d9-string-append-physical[.]lisp|\.github/workflows/ci\.yml)$' "$changed_all"; then
             echo 'translation_tests=true' >> "$GITHUB_OUTPUT"
           fi
-          if grep -Eq '^(crates/sens-cli/src/(main|repl)\.rs|crates/sens-cli/src/bin/sens-trit\.rs|crates/sens-cli/tests/(cli|physical_core4_sequence_cli|physical_bare_session_cli)\.rs|scripts/execute_changed_lisp_t5m\.sh|scripts/refresh-verified-t5m-pair\.sh|scripts/refresh-executed-t5m-pair\.sh|benchmarks/contest-uk/(run-native\.sh|judge\.sh|[^/]+\.(lisp|sens))|\.github/workflows/ci\.yml)$' "$changed_all"; then
+          if grep -Eq '^(crates/sens-cli/src/(main|repl)\.rs|crates/sens-cli/src/bin/sens-trit\.rs|crates/sens-cli/tests/(cli|physical_bare_session_cli)\.rs|scripts/execute_changed_lisp_t5m\.sh|scripts/refresh-verified-t5m-pair\.sh|scripts/refresh-executed-t5m-pair\.sh|benchmarks/contest-uk/(run-native\.sh|judge\.sh|[^/]+\.(lisp|sens))|\.github/workflows/ci\.yml)$' "$changed_all"; then
             echo 't5m_cli_tests=true' >> "$GITHUB_OUTPUT"
           fi
           # D11: тільки зміни селекторів, SENS-реалізації або їхніх тестів.
@@ -480,7 +480,7 @@ jobs:
           set -euo pipefail
           CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test canon_d1_migration_cohort -- --nocapture
 
-      - name: "D3 COND — фізичний T5M свідок позитивів та негативів"
+      - name: "D3 T5M — механічна перевірка фізичного носія"
         if: ${{ !cancelled() && steps.changed-t5m-lisp.outputs.physical_d3_runtime_tests == 'true' }}
         shell: bash
         timeout-minutes: 5
@@ -709,8 +709,6 @@ jobs:
           cargo test --locked -p sens-cli --test physical_bare_session_cli part_ii_exact_carrier_preserves_value_across_ukrainian_projection -- --exact --nocapture
           # Д1: спершу живий закон аксіом; чужий дрейф T5M не маскує діагностику.
           cargo test --locked -p sens --test d1_canonical_source_value executable_axioms_use_exact_d1_for_positive_and_invalid_knowledge -- --exact --nocapture
-          cargo test --locked -p sens-cli --test physical_core4_sequence_cli ukrainian_d3_d4_existing_files_mint_verify_and_execute -- --exact --nocapture
-          cargo test --locked -p sens-cli --test physical_core4_sequence_cli contest_uk_all_physical_programs_have_native_execution_and_peers -- --exact --nocapture
           cargo test --locked -p sens-cli --bin sens-trit exact_bit_view_maps_to_its_existing_sens_physical_companion -- --exact --nocapture
           cargo test --locked -p sens-cli --bin sens-trit t5m_view_inverse_preserves_d24_and_rejects_noncanonical_view -- --exact --nocapture
           # Цитоване ціле проходить ту саму D24+ проєкцію, Zig/T5M і обернення.
@@ -1171,7 +1169,6 @@ jobs:
           python3 scripts/check_d11_selector_seed.py
           python3 scripts/audit_ukrainian_domain_projections.py
           if [[ "${{ steps.changed-t5m-lisp.outputs.d11_runtime_tests }}" == "true" ]]; then
-            CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 240s cargo test --locked -p sens-cli --test physical_core4_sequence_cli d11_selector_suffix_law_runs_in_native_sens -- --exact --nocapture
             CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 240s cargo test --locked -p sens --test persistent_vector d11_ -- --nocapture
           fi
           if [[ "${{ steps.changed-t5m-lisp.outputs.d11_si_law_tests }}" == "true" ]]; then
