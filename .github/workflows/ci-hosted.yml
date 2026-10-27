@@ -31,8 +31,6 @@ jobs:
           echo "$RUNNER_TEMP/zig-x86_64-linux-0.16.0" >> "$GITHUB_PATH"
           "$RUNNER_TEMP/zig-x86_64-linux-0.16.0/zig" version
       - uses: dtolnay/rust-toolchain@1.99.0
-        with:
-          toolchain: "1.99.0"
       - name: Compile canonical SENS Core
         run: cargo check --locked -p sens --lib
       - name: Carry-safe D24/D48 numeric and Value evaluator (Core-only Rust)
