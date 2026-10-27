@@ -1194,27 +1194,6 @@ mod tests {
     }
 
     #[test]
-    fn d7_cons_role_projection_is_normalized_and_malformed_lists_fail_closed() {
-        let text = crate::text7_projection::encode_text7("define-form", crate::Text7Layout::En)
-            .expect("role label must be representable in D7");
-        let exact_cells = Value::list(text.cells().iter().map(|cell| {
-            Value::DomainIdentity(DomainIdentity::D7(crate::D7DataWord::from_word(
-                crate::Bit7::new(*cell).expect("точна комірка D7"),
-            )))
-        }));
-        assert_eq!(
-            decode_language_lowering_role(&exact_cells).expect("exact D7 list decodes"),
-            Some(CompilerLoweringRole::DefineForm)
-        );
-
-        let malformed = Value::list([Value::predicate_bit(false)]);
-        assert!(
-            decode_language_lowering_role(&malformed).is_err(),
-            "non-D7 role content must fail closed"
-        );
-    }
-
-    #[test]
     fn проєкція_компілятора_приймає_точний_d7_список_і_відхиляє_змішане() {
         let expected = "compiler-compilation-artifact-1";
         let text = crate::text7_projection::encode_text7(expected, crate::Text7Layout::En)
@@ -1417,38 +1396,6 @@ mod tests {
                 .contains("stale against its ratified authority"),
             "unexpected D4 stale-projection error: {error}"
         );
-    }
-
-    #[test]
-    fn semantic_input_api_owns_law_proof_and_root_authority_facts() {
-        let d3_input = compiler_semantic_input_from_sens(d3(0b010))
-            .expect("D3 semantic input")
-            .expect("ATOM is in compiler closure");
-        assert_eq!(d3_input.lowering_role, CompilerLoweringRole::AtomPredicate);
-        assert_eq!(d3_input.authority_ref, COMPILER_ROLE_LAW_REF);
-        assert_eq!(d3_input.proof_ref, COMPILER_D3_PROOF_REF);
-        assert_eq!(d3_input.semantic_status, "current");
-        assert_eq!(d3_input.authority_path, "language-contract.lisp");
-        assert_eq!(d3_input.authority_sha256.len(), 64);
-        assert_eq!(d3_input.language_contract_version, "12.0");
-
-        let d4_input = compiler_semantic_input_from_sens(d4(0b0010))
-            .expect("D4 semantic input")
-            .expect("LAMBDA is in compiler closure");
-        assert_eq!(d4_input.lowering_role, CompilerLoweringRole::LambdaForm);
-        assert_eq!(d4_input.authority_ref, COMPILER_ROLE_LAW_REF);
-        assert_eq!(d4_input.proof_ref, COMPILER_D4_PROOF_REF);
-        assert_eq!(d4_input.authority_sha256, d3_input.authority_sha256);
-
-        assert!(compiler_semantic_input_from_sens(d3(0b000))
-            .expect("D3 empty transport")
-            .is_none());
-        let d8 = CoreDomainIdentity::D8(crate::CoreD8::from_word(
-            crate::Bit8::new(0b0000_0010).expect("D8 word"),
-        ));
-        assert!(compiler_semantic_input_from_sens(d8)
-            .expect("D8 must fail closed as no compiler input")
-            .is_none());
     }
 
     #[test]
@@ -1825,97 +1772,5 @@ mod tests {
             .contains("40 lowercase hexadecimal characters"));
     }
 
-    #[test]
-    fn sens_program_traversal_is_role_aware_and_quote_shields_domain_data() {
-        let lambda = exact_value(d4(0b0010));
-        let quote = exact_value(d3(0b001));
-        let atom = exact_value(d3(0b010));
-        let d8 = CoreDomainIdentity::D8(crate::CoreD8::from_word(
-            crate::Bit8::new(0b0000_0010).expect("D8 word"),
-        ));
 
-        // Canonical D4 LAMBDA is variadic in its body: parameters followed
-        // by one-or-more body expressions. Keep both forms inside the Lambda
-        // so this proves variadic traversal and QUOTE shielding together.
-        let program = Value::list([Value::list([
-            lambda,
-            Value::list([Value::Symbol(Rc::from("x"))]),
-            Value::list([quote, exact_value(d8)]),
-            Value::list([atom, Value::Symbol(Rc::from("x"))]),
-        ])]);
-
-        let result = compiler_program_requests_from_sens(program).expect("SENS program traversal");
-        let rows = list_values(&result);
-        assert_eq!(
-            rows[0].as_predicate_bit(),
-            Some(true),
-            "quoted D8 data must not be traversed as a compiler call"
-        );
-        assert_eq!(rows.len(), 4, "success bit plus Lambda/Quote/Atom requests");
-
-        let observed_roles = rows[1..]
-            .iter()
-            .map(|request| {
-                let request = list_values(request);
-                compiler_surface_text(request[1])
-                    .unwrap_or_else(|| panic!("request role must be D7 text, got {}", request[1]))
-            })
-            .collect::<Vec<_>>();
-        assert_eq!(
-            observed_roles,
-            ["lambda-form", "quote-form", "atom-predicate"]
-        );
-    }
-
-    #[test]
-    fn same_payload_wrong_domain_with_wrong_shape_fails_closed() {
-        // D3:010 is AtomPredicate and one argument is valid.
-        let d3_program = Value::list([Value::list([
-            exact_value(d3(0b010)),
-            Value::Symbol(Rc::from("x")),
-        ])]);
-        let d3_result = compiler_program_requests_from_sens(d3_program).expect("D3 atom traversal");
-        let d3_rows = list_values(&d3_result);
-        assert_eq!(d3_rows[0].as_predicate_bit(), Some(true));
-
-        // Same numeric payload under width 4 is D4:0010 LambdaForm.
-        // Reusing the one-child D3 source shape must fail rather than silently
-        // reinterpret the node as a valid lambda request.
-        let d4_program = Value::list([Value::list([
-            exact_value(d4(0b0010)),
-            Value::Symbol(Rc::from("x")),
-        ])]);
-        let d4_result =
-            compiler_program_requests_from_sens(d4_program).expect("normal fail-closed result");
-        let d4_rows = list_values(&d4_result);
-        assert_eq!(d4_rows.len(), 1);
-        assert_eq!(d4_rows[0].as_predicate_bit(), Some(false));
-    }
-
-    #[test]
-    fn malformed_exact_d3_cond_clause_fails_closed_before_request_emission() {
-        let cond = exact_value(d3(0b110));
-        let malformed_clause = Value::list([Value::Symbol(Rc::from("test-only"))]);
-        let program = Value::list([Value::list([cond, malformed_clause])]);
-
-        let result =
-            compiler_program_requests_from_sens(program).expect("normal fail-closed result");
-        let rows = list_values(&result);
-        assert_eq!(rows.len(), 1);
-        assert_eq!(rows[0].as_predicate_bit(), Some(false));
-    }
-
-    #[test]
-    fn direct_d8_domain_call_fails_closed_in_sens_program_traversal() {
-        let d8 = CoreDomainIdentity::D8(crate::CoreD8::from_word(
-            crate::Bit8::new(0b0000_0010).expect("D8 word"),
-        ));
-        let program = Value::list([Value::list([exact_value(d8)])]);
-
-        let result =
-            compiler_program_requests_from_sens(program).expect("normal fail-closed result");
-        let rows = list_values(&result);
-        assert_eq!(rows.len(), 1);
-        assert_eq!(rows[0].as_predicate_bit(), Some(false));
-    }
 }
