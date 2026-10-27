@@ -420,6 +420,9 @@ pub fn parse_mixed_exact_domain_reasoning_source(
             | "lib/clips-import.lisp"
     ) {
         parse_mixed_pinned_d8_io(source)?
+    } else if path == "lib/translation.lisp" {
+        let bindings = translation_reasoning_dependency_bindings()?;
+        parse_mixed_source_with_external_bindings(source, true, &bindings)?
     } else {
         parse_mixed_source(source, true)?
     };
@@ -812,18 +815,28 @@ fn parse_mixed_source(
     source: &str,
     descend_legacy_machine_wrappers: bool,
 ) -> Result<Vec<Expr>, LanguageError> {
+    parse_mixed_source_with_external_bindings(source, descend_legacy_machine_wrappers, &HashSet::new())
+}
+
+/// Parse a source fragment with an explicit inventory of names already defined
+/// by path-pinned libraries loaded into the same SENS session. This only
+/// preserves those names as ordinary bound symbols; it does not admit new
+/// callable domain identities or infer width from a word's spelling.
+fn parse_mixed_source_with_external_bindings(
+    source: &str,
+    descend_legacy_machine_wrappers: bool,
+    external_bound_names: &HashSet<String>,
+) -> Result<Vec<Expr>, LanguageError> {
     let parsed = crate::parser::parse(source)?;
     // Project ordinary Ukrainian decimal leaves before callable heads become
     // DomainIdentity nodes, so D5 arithmetic trees can choose one exact width.
     // The projector preserves quote payloads and already typed domain data.
     let expressions =
         crate::source_projection::project_ukr_decimal_integer_literals(&parsed, source)?;
-    // Call-head source spellings are NOT authoritative domain identities
-    // when this very source declares the spelling as a DEFINE or LAMBDA
-    // binding. Protect all such names across this source until the owner
-    // lexical-slot resolver can prove their exact scopes. Conservatively
-    // declining a projection is safer than silently calling a builtin.
-    let mut bound_names = HashSet::new();
+    // A path-pinned caller may supply only names from libraries it has already
+    // loaded. Source-local definitions are still collected independently.
+    // Conservatively declining a projection is safer than silently calling a builtin.
+    let mut bound_names = external_bound_names.clone();
     for expression in &expressions {
         collect_source_bindings(
             source,
@@ -845,6 +858,51 @@ fn parse_mixed_source(
         })
         .collect::<Result<Vec<_>, _>>()?;
     Ok(lifted)
+}
+
+/// Collect only top-level Lisp-defined binding names from one already-approved
+/// source file. Parameter/local names are intentionally excluded: this is an
+/// inventory for a known library boundary, not global lexical scope.
+fn collect_top_level_binding_names(source: &str) -> Result<HashSet<String>, LanguageError> {
+    let parsed = crate::parser::parse(source)?;
+    let mut names = HashSet::new();
+    for expression in &parsed {
+        let ExprKind::List(items) = &expression.kind else {
+            continue;
+        };
+        if items.len() < 2 || binding_form(source, &items[0]) != Some(3) {
+            continue;
+        }
+        if matches!(&items[1].kind, ExprKind::Symbol(_)) {
+            if let Some(name) = source_spelling(source, &items[1]) {
+                names.insert(name.to_owned());
+            }
+        }
+    }
+    Ok(names)
+}
+
+/// The translation-boundary tests and validator snippets execute after these
+/// path-pinned reasoning libraries have been loaded. Preserve their Lisp-owned
+/// helper names as symbols in external snippets; otherwise the reader tries to
+/// project a multi-glyph D7 binding into a callable identity and correctly
+/// refuses it. Names still need to exist in the active SENS environment.
+fn translation_reasoning_dependency_bindings() -> Result<HashSet<String>, LanguageError> {
+    const SOURCES: [&str; 8] = [
+        include_str!("../../../lib/persistent-map.lisp"),
+        include_str!("../../../lib/unify.lisp"),
+        include_str!("../../../lib/reason.lisp"),
+        include_str!("../../../lib/forward.lisp"),
+        include_str!("../../../lib/knowledge.lisp"),
+        include_str!("../../../lib/world.lisp"),
+        include_str!("../../../lib/result-status.lisp"),
+        include_str!("../../../lib/translation.lisp"),
+    ];
+    let mut names = HashSet::new();
+    for library in SOURCES {
+        names.extend(collect_top_level_binding_names(library)?);
+    }
+    Ok(names)
 }
 
 fn binding_form(source: &str, head: &Expr) -> Option<u16> {
@@ -1490,6 +1548,23 @@ mod tests {
             &data[1].kind,
             ExprKind::Symbol(name) if name.as_ref() == "визначити"
         ));
+    }
+
+    #[test]
+    fn translation_reader_preserves_loaded_lisp_bindings_in_external_snippets() {
+        let parsed = parse_mixed_exact_domain_reasoning_source(
+            "lib/translation.lisp",
+            "(переклад-допуск-вміст огляд)",
+        )
+        .expect("translation snippet with a loaded library binding parses");
+        let expression = only(parsed);
+        let ExprKind::List(items) = expression.kind else {
+            panic!("expected a call form");
+        };
+        assert!(matches!(
+            &items[0].kind,
+            ExprKind::Symbol(name) if name.as_ref() == "переклад-допуск-вміст"
+        ), "a loaded Lisp-defined binding stays a symbol, not a guessed callable D7 identity");
     }
 
     #[test]
