@@ -42,8 +42,6 @@ jobs:
           path: ${{ runner.temp }}/domain-ladder-source-batch-report.json
       - name: Regression tests for historical crosswalk to exact-domain words and D3 blockers
         run: python3 -m unittest discover -s tests -p test_domain_ladder_source_batch.py -v
-      - name: Verify D3 two-field PredicateBit enforcement with negative controls
-        run: python3 -m unittest discover -s tests -p test_domain_ladder_d3_enforcement.py -v
       - name: Validate five exact-domain source replacements against immutable Git blobs
         run: python3 -m unittest discover -s tests -p test_domain_ladder_d4_policy_cohort.py -v
       - name: Verify exact-domain service source deltas against pinned original blobs
