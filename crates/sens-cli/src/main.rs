@@ -397,10 +397,15 @@ fn t5m_pair_request(
 fn decode_physical_t5m_words(bytes: &[u8]) -> Result<Vec<sens::ExactDomainWord>, String> {
     #[cfg(feature = "zig-transport")]
     {
-        zig_transport::decode_t5m_exact_words(bytes)?
+        // Явний `return` — не стиль, а контракт коридору: check_sterile_zig_corridor
+        // вимагає саме `return zig_transport::decode_t5m_exact_words(bytes)?`, щоб
+        // символ у коментарі не вважався живим перетином Zig. Хвостовий вираз
+        // гейт не приймає.
+        #[allow(clippy::needless_return)]
+        return zig_transport::decode_t5m_exact_words(bytes)?
             .into_iter()
             .map(|word| sens::ExactDomainWord::from_physical_width_bits(word.width, &word.bits))
-            .collect()
+            .collect();
     }
     #[cfg(not(feature = "zig-transport"))]
     {
