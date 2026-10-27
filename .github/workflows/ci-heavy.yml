@@ -462,7 +462,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test process_d1_direct --test process_d1_reflection -- --nocapture
+          CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo run --locked -p sens-cli --bin sens -- tests/semantic/process-d4-lambda-law.sens
 
       - name: "LIFE-1 — живі позитивні й негативні SENS D1 свідки"
         if: ${{ !cancelled() && steps.changed-t5m-lisp.outputs.life_runtime_tests == 'true' }}
