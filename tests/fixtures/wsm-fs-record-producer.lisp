@@ -10,11 +10,11 @@
     (за-умовою
       ; Перевірити форму результату ДО CAR/CDR.
       ; Порожній або атомний результат не можна читати як (accepted fs).
+      ; NIL у SENS не проходить атомну гілку: відсікаємо його до CAR.
+      ((порожній? відновлене)
+       (як-є reconstruction-empty-result))
       ((атом? відновлене)
-       (за-умовою
-         ((порожній? відновлене)
-          (як-є reconstruction-empty-result))
-         (так (як-є reconstruction-non-list-result))))
+       (як-є reconstruction-non-list-result))
       ; Статус відповіді — протокольний атом; пару не передаємо в D3 EQ.
       ((хибне? (атом? (перше відновлене)))
        (як-є reconstruction-non-atomic-status))
