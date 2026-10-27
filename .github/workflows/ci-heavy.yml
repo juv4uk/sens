@@ -252,7 +252,7 @@ jobs:
           if grep -Eq '^(lib/core\.lisp|lib/core1\.lisp|tests/test_core1_(third|fourth)_domain_canary\.py|tests/fixtures/core1-(third|fourth)-domain-canary/.*|\.github/workflows/ci\.yml)$' "$changed_all"; then
             echo 'core1_tests=true' >> "$GITHUB_OUTPUT"
           fi
-          if grep -Eq '^(lib/core\.lisp|lib/knowledge\.lisp|crates/sens/tests/knowledge_d1_recovery\.rs|tests/test_knowledge_d1_recovery\.py|\.github/workflows/ci\.yml)$' "$changed_all"; then
+          if grep -Eq '^(lib/core\.lisp|lib/knowledge\.lisp|crates/sens/tests/knowledge_d1_recovery\.rs|\.github/workflows/ci\.yml)$' "$changed_all"; then
             echo 'knowledge_tests=true' >> "$GITHUB_OUTPUT"
           fi
           # Адресний запуск чинного D3 механізму та його незалежного SENS тесту.
