@@ -477,14 +477,17 @@ def check_trit_f3_no_rust_fallback(source: str) -> None:
     if route.count(marker) != 2:
         raise CorridorBlocked("sens-trit F3C must gate both missing-Zig branches")
     ingress, egress = route.split("fn encode_f3_carrier(", 1)
-    # Поточна форма коридору: вхід декодує T5M через Zig (decode_t5m_words),
-    # вихід пакує через Zig (encode_f3). Обидва боки лишаються обов'язковими.
-    if ("zig_transport::decode_f3(bytes)?" not in ingress
-            or "zig_transport::decode_t5m_words(&restored)?" not in ingress
-            or "return zig_transport::encode_f3(bytes);" not in egress):
-        raise CorridorBlocked("sens-trit F3C ingress/egress bypasses Zig ABI")
-    # Remove comments before source-level evidence; inert markers are no proof.
+    # Коментарі не є доказом: перевіряємо дієві Zig-гілки до no-Zig відмов.
     live = re.sub(r"/\*.*?\*/|//[^\n]*", "", route, flags=re.S)
+    live_ingress, live_egress = live.split("fn encode_f3_carrier(", 1)
+    zig_ingress = live_ingress.split(marker, 1)[0]
+    zig_egress = live_egress.split(marker, 1)[0]
+    # Хвостовий Rust-вираз і явний return мають однаковий Zig-результат;
+    # не приймати виклик, після якого виконується інший фізичний кодек.
+    if ("zig_transport::decode_f3(bytes)?" not in zig_ingress
+            or "zig_transport::decode_t5m_words(&restored)?" not in zig_ingress
+            or re.search(r"(?:return\s+)?zig_transport::encode_f3\(bytes\)\s*;?\s*\}\s*$", zig_egress) is None):
+        raise CorridorBlocked("sens-trit F3C ingress/egress bypasses Zig ABI")
     if "sens::frame3_small::" in live:
         raise CorridorBlocked("sens-trit F3C retains a Rust physical codec fallback")
     segments = [ingress.split(marker, 1)[1], egress.split(marker, 1)[1]]
