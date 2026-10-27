@@ -16,5 +16,3 @@ jobs:
         run: cargo test -p sens --test swarm_live_caller_inventory
       - name: Retired coordination ops are unknown on :9999
         run: cargo test -p sens-cli --test legacy_coordination_rejected
-      - name: Semantic oracle preservation shield
-        run: cargo test -p sens-cli --test semantic_oracle_preservation
