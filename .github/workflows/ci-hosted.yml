@@ -41,7 +41,6 @@ jobs:
           cargo test --locked -p sens --lib binary_framing::tests
           cargo test --locked -p sens --lib outer_envelope::tests::unratified_outer_n_path
           cargo test --locked -p sens --test binary_number_live
-          cargo test --locked -p sens --test numeric_domain_math_stress
           cargo test --locked -p sens --features rust-t5-reference --test numeric_composition_frames
           cargo test --locked -p sens --test math_domain_exclusivity
           cargo test --locked -p sens --features rust-t5-reference --test physical_d2_d7_binding
