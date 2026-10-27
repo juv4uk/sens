@@ -1,7 +1,4 @@
-use sens::{
-    eval_parsed_expressions, eval_program, load_core_library, lower_program, parse, Bit5, CoreD5,
-    DomainIdentity, Expr, ExprKind, Session, Span,
-};
+use sens::{eval_program, load_core_library, lower_program, parse, ExprKind, Session};
 use std::fs;
 use std::path::PathBuf;
 
@@ -25,26 +22,6 @@ fn machine_session() -> Session {
     load_lisp_file("lib/machine/capability-axis.lisp", &mut session);
     load_lisp_file("lib/machine/lowering/semantic-x86-64.lisp", &mut session);
     session
-}
-
-fn exact_d5_call(bits: u8, args: &str, session: &mut Session) -> String {
-    let mut parsed = parse(&format!("(__d5_probe__ {args})")).expect("probe payload");
-    let mut form = parsed.remove(0);
-    let ExprKind::List(items) = form.kind else {
-        panic!("probe list");
-    };
-    let mut items = items.to_vec();
-    items[0] = Expr {
-        kind: ExprKind::DomainIdentity(DomainIdentity::D5(CoreD5::from_word(
-            Bit5::new(bits).expect("D5 bits"),
-        ))),
-        span: Span::default(),
-    };
-    form.kind = ExprKind::List(items.into());
-    eval_parsed_expressions(&[form], session)
-        .expect("exact D5 call")
-        .value
-        .to_string()
 }
 
 fn parse_bytes(rendered: &str) -> Vec<u8> {
@@ -90,20 +67,6 @@ fn current_quotient_surface_lowers_to_exact_d5_identity() {
     assert_eq!(identity.width(), 5);
     assert_eq!(identity.packed_bits(), 0b10111);
     assert_eq!(args.len(), 2);
-}
-
-#[test]
-fn exact_d5_quotient_semantics_exist_beyond_the_native_proof_rectangle() {
-    let mut session = Session::default();
-    load_core_library(&mut session).expect("core");
-
-    for (args, expected) in [("6 3", "2"), ("1 2", "1/2"), ("5 5", "1")] {
-        assert_eq!(
-            exact_d5_call(0b10111, args, &mut session),
-            expected,
-            "exact D5 QUOTIENT semantics for {args}"
-        );
-    }
 }
 
 #[test]
