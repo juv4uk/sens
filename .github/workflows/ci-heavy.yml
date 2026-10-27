@@ -284,7 +284,7 @@ jobs:
             echo 'needs_zig=true' >> "$GITHUB_OUTPUT"
           fi
           # Канон: адресний реальний SENS, не строкове порівняння Lisp.
-          if grep -Eq '^(lib/canon\.lisp|crates/sens/src/eval/canon\.rs|crates/sens/src/eval/special_forms/core\.rs|crates/sens/tests/canon_d1_migration_cohort\.rs|tests/test_ukr_canon_d4_projection\.py|\.github/workflows/ci\.yml)$' "$changed_all"; then
+          if grep -Eq '^(lib/canon\.lisp|crates/sens/src/eval/canon\.rs|crates/sens/src/eval/special_forms/core\.rs|crates/sens/tests/canon_d1_migration_cohort\.rs|\.github/workflows/ci\.yml)$' "$changed_all"; then
             echo 'canon_runtime_tests=true' >> "$GITHUB_OUTPUT"
             echo 'needs_zig=true' >> "$GITHUB_OUTPUT"
           fi
