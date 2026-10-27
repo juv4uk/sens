@@ -83,7 +83,7 @@ const TRANSLATION_FIXTURE: &str = include_str!("../../../tests/fixtures/translat
 
 fn with_translation_fixture(source: &str) -> String {
     format!(
-        "(визначити корпус-свідчень (як-є {}))\n{source}",
+        "(визначити корпус-свідчень {})\n{source}",
         TRANSLATION_FIXTURE
     )
 }
