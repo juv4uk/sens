@@ -420,23 +420,6 @@ pub(crate) fn cons_values(
 // Контракт 11.8: EQ — атомна операція; пара або значення поза
 // доменом спричиняє іменовану помилку типу, не D1:NO чи D3:000.
 // Затвердження від 2026-10-08 замінює попереднє формулювання #3161.
-thread_local! {
-    /// Останній доменний виклик у потоці. Друкується лише за SENS_EQ_TRACE:
-    /// без нього адресу виклику eq не видно, бо SENS інтерпретується
-    /// і стек містить тільки Rust-кадри.
-    static LAST_DOMAIN: std::cell::RefCell<String> =
-        const { std::cell::RefCell::new(String::new()) };
-}
-
-/// Записати поточний доменний виклик для діагностики eq.
-/// Тип — `CoreDomainIdentity`, бо саме його приймає `invoke_domain_identity`.
-/// Він теж має Display і друкує біти з шириною.
-pub(crate) fn note_domain_call(identity: &crate::CoreDomainIdentity) {
-    if std::env::var_os("SENS_EQ_TRACE").is_some() {
-        LAST_DOMAIN.with(|cell| *cell.borrow_mut() = format!("{identity}"));
-    }
-}
-
 pub(crate) fn eq_values(left: Value, right: Value, span: Span) -> Result<Value, LanguageError> {
     if !left.is_atom() || !right.is_atom() {
         // Діагностика називає БІК і вид носія. Без цього повідомлення
@@ -467,22 +450,11 @@ pub(crate) fn eq_values(left: Value, right: Value, span: Span) -> Result<Value, 
             }
         }
         let (lk, rk) = (kind_tag(&left), kind_tag(&right));
-        // SENS_EQ_TRACE: доменна ідентичність виклику і стек. У звичайному
-        // режимі повідомлення лишається коротким.
-        let trace = if std::env::var_os("SENS_EQ_TRACE").is_some() {
-            let identity = LAST_DOMAIN.with(|cell| cell.borrow().clone());
-            format!(
-                " · domain {identity}\n{}",
-                std::backtrace::Backtrace::force_capture()
-            )
-        } else {
-            String::new()
-        };
         return Err(LanguageError::new(
             ErrorKind::Type,
             format!(
                 "eq expects two atoms · eq ochikuie dva atomy · eq erwartet zwei Atome · \
-                 non-atomic {side} · carrier {carrier} · kinds {lk}/{rk}{trace}"
+                 non-atomic {side} · carrier {carrier} · kinds {lk}/{rk}"
             ),
             span,
         ));
