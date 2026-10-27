@@ -139,19 +139,65 @@ jobs:
 
           git commit -m "Lisp → SENS: перекарбовано змінені джерела (пуш)"
 
-          # main рухається щохвилини (рій). Пуш без rebase відхиляється
-          # non-fast-forward — саме це й валило крок коміту.
+          # .sens — бінарні фізичні артефакти; їх не можна rebase/merge.
+          # Якщо main випередив нас, скидаємо лише наш генерований commit,
+          # перебудовуємо SENS на свіжому main і повторно mint'имо ті самі
+          # джерела. Семантика та порядок байтів визначаються тільки SENS/Zig/T5M.
+          mapfile -t generated_pairs < <(git diff --name-only HEAD^ HEAD -- '*.sens')
+          generated_sources=()
+          for pair in "${generated_pairs[@]}"; do
+            source="${pair%.sens}.lisp"
+            [[ -f "$source" ]] && generated_sources+=("$source")
+          done
+          if [[ "${#generated_sources[@]}" -eq 0 ]]; then
+            echo "LISP_TO_SENS_NO_SOURCE_FOR_GENERATED_PAIRS"
+            exit 1
+          fi
+
           for attempt in 1 2 3 4 5; do
             if git push origin HEAD:main 2>/dev/null; then
               echo "LISP_TO_SENS_PUSHED attempt=$attempt sha=$(git rev-parse HEAD)"
               exit 0
             fi
             echo "LISP_TO_SENS_PUSH_RETRY attempt=$attempt (main рухається)"
-            if ! git pull --rebase --autostash origin main; then
-              git rebase --abort || true
-              echo "::error::LISP_TO_SENS_REBASE_FAILED attempt=$attempt"
+            git fetch origin main
+            git reset --hard origin/main
+            if ! cargo build --locked -p sens-cli --bin sens --bin sens-trit; then
+              echo "::error::LISP_TO_SENS_REBUILD_AFTER_RACE_FAILED attempt=$attempt"
               exit 1
             fi
+
+            for source in "${generated_sources[@]}"; do
+              [[ -f "$source" ]] || continue
+              profile_args=()
+              binding_args=()
+              case "$source" in
+                tests/fixtures/wsm-fs-record-producer.lisp)
+                  binding_args=(--binding-source lib/persistent-map.lisp --binding-source lib/world.lisp --binding-source lib/content-store.lisp --binding-source lib/lisp-fs.lisp)
+                  profile_args=(--core4-runtime);;
+                tests/semantic/unification-occurs-check-law.lisp|tests/semantic/unification-occurs-check-mutant.lisp)
+                  binding_args=(--binding-source lib/unify.lisp);;
+                lib/lisp-fs.lisp|lib/unify.lisp|tests/semantic/d6-derived-research-batch-01.lisp|tests/semantic/d8-rassq-until-batch.lisp|scripts/check-domain-logic-laws.lisp)
+                  profile_args=(--core4-runtime);;
+              esac
+              if ! bash scripts/refresh-verified-t5m-pair.sh "$source" target/debug/sens target/debug/sens-trit "${binding_args[@]}" "${profile_args[@]}"; then
+                echo "::error::LISP_TO_SENS_REMINT_AFTER_RACE_FAILED source=$source attempt=$attempt"
+                exit 1
+              fi
+              if [[ "$source" == "lib/core4.lisp" ]]; then
+                if ! cargo build --locked -p sens-cli --bin sens --bin sens-trit; then
+                  echo "::error::LISP_TO_SENS_CORE4_REBUILD_AFTER_RACE_FAILED"
+                  exit 1
+                fi
+              fi
+            done
+
+            git add -A -- '*.sens'
+            if git diff --cached --quiet; then
+              echo "LISP_TO_SENS_NO_BYTE_CHANGES_AFTER_REFRESH source_head=$(git rev-parse HEAD)"
+              exit 0
+            fi
+            git commit -m "Lisp → SENS: перекарбовано змінені джерела (пуш)"
           done
-          echo "::error::LISP_TO_SENS_PUSH_RACE after 5 attempts; новіший main перекарбує сам"
+          echo "::error::LISP_TO_SENS_PUSH_RACE after 5 remint attempts"
           exit 1
