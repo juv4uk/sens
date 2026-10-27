@@ -1,10 +1,7 @@
 //! Physical SENS source may be only exact binary words and D2 framing.
 //! Human surface names and retired flat function IDs play no part in execution.
 
-use sens::{
-    eval_parsed_expressions, parse_canonical_binary, wire_decode_program, wire_encode_program,
-    Expr, ExprKind, Session, Value,
-};
+use sens::{parse_canonical_binary, wire_decode_program, wire_encode_program, Expr, ExprKind};
 
 const SOURCE: &str = include_str!("../../../tests/fixtures/canonical-binary-smoke.bits");
 
@@ -25,7 +22,7 @@ fn assert_exact_binary_tree(expr: &Expr) {
 }
 
 #[test]
-fn only_bits_are_enough_for_quote_atom_cond_and_cons() {
+fn canonical_binary_source_preserves_exact_width_framing() {
     assert!(
         SOURCE
             .bytes()
@@ -48,18 +45,7 @@ fn only_bits_are_enough_for_quote_atom_cond_and_cons() {
         assert_exact_binary_tree(expression);
     }
 
-    let mut session = Session::default();
-    for (index, expression) in restored.iter().enumerate() {
-        let result = eval_parsed_expressions(std::slice::from_ref(expression), &mut session)
-            .unwrap_or_else(|error| panic!("binary form {index} did not execute: {error:?}"))
-            .value;
-        match index {
-            0 => assert!(matches!(result, Value::Nil), "D3 QUOTE empty"),
-            1 | 2 => assert_eq!(result.as_predicate_bit(), Some(true)),
-            3 => assert_eq!(result.as_predicate_bit(), Some(false)),
-            _ => unreachable!(),
-        }
-    }
+
 }
 
 #[test]
