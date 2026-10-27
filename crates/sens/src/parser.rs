@@ -1353,14 +1353,15 @@ mod tests {
     fn dotted_pair_rejects_combined_tail_and_head_depth() {
         // Кожна частина окремо нижче порога, та складена структура — вище.
         let head_depth = format!(
-            "({} . {})",
+            "({} . {}кінець{})",
             "а ".repeat(400),
-            format!("{}кінець{}", "(".repeat(400), ")".repeat(400))
+            "(".repeat(400),
+            ")".repeat(400)
         );
         let head_item = format!(
-            "({} {} . кінець)",
+            "({} {}мама . кінець)",
             "а ".repeat(400),
-            format!("{}мама", "'".repeat(400))
+            "'".repeat(400)
         );
         for source in [head_depth, head_item] {
             let error = parse(&source).expect_err("складена глибина має бути обмежена");
