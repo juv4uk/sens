@@ -178,6 +178,16 @@ jobs:
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09
+        with:
+          ref: ${{ inputs.ref || github.sha }}
+      - name: Підтвердити той самий SHA для Linux release binary
+        shell: bash
+        env:
+          EXPECTED_SHA: ${{ inputs.ref || github.sha }}
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+          echo "RELEASE_LINUX_EXACT_SHA=$EXPECTED_SHA"
       - uses: ./.github/actions/install-zig
       - uses: dtolnay/rust-toolchain@1.99.0
         with:
