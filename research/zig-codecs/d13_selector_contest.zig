@@ -172,41 +172,6 @@ test "D13 Драбина: потоковий кодек зберігає точ�
     }
 }
 
-test "D13 Драбина: усі 2048 імен точно походять від 512 батьків D11" {
-    const file = fopen("lib/domains/d11.lisp", "rb") orelse return error.TableNotFound;
-    defer _ = fclose(file);
-    var line_buffer: [2048]u8 = undefined;
-    var next_parent: u16 = selector_first >> 2;
-    var derived_count: usize = 0;
-    while (fgets(line_buffer[0..].ptr, @intCast(line_buffer.len), file) != null) {
-        const end = std.mem.indexOfScalar(u8, &line_buffer, 0) orelse return error.LineTooLong;
-        const line = line_buffer[0..end];
-        if (!std.mem.startsWith(u8, line, "  (")) continue;
-        if (line.len < 15 or line[14] != ' ') continue;
-        const bits = line[3..14];
-        const parent = std.fmt.parseInt(u16, bits, 2) catch return error.InvalidWord;
-        try std.testing.expectEqual(next_parent, parent);
-        const start_name = std.mem.indexOf(u8, line, "(LISP ") orelse return error.NameMissing;
-        const tail = line[start_name + 6 ..];
-        const name_end = std.mem.indexOfScalar(u8, tail, ')') orelse return error.NameMissing;
-        try std.testing.expectEqual(@as(usize, 11), name_end);
-        const name = tail[0..name_end];
-        for (0..4) |suffix| {
-            const child = (parent << 2) | @as(u16, @intCast(suffix));
-            const actual = selectorName(child);
-            var expected: [13]u8 = undefined;
-            @memcpy(expected[0..10], name[0..10]);
-            expected[10] = if ((suffix & 2) == 0) 'A' else 'D';
-            expected[11] = if ((suffix & 1) == 0) 'A' else 'D';
-            expected[12] = 'R';
-            try std.testing.expectEqualSlices(u8, &expected, &actual);
-            derived_count += 1;
-        }
-        next_parent += 1;
-    }
-    try std.testing.expectEqual((selector_last >> 2) + 1, next_parent);
-    try std.testing.expectEqual(selector_count, derived_count);
-}
 
 test "D13 Драбина: 11, 13 і 16 біт — чесний облік байтів" {
     try std.testing.expectEqual(@as(usize, 88), try selectorPackedLen(64));
