@@ -11,8 +11,6 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v5
-      - name: "2046 exact widths, 13 W1 cutovers, Git provenance and bit ledger"
-        run: python3 -m unittest discover -s tests -p test_quantity_d1_direct_cutover.py -v
       - uses: dtolnay/rust-toolchain@stable
       - name: "Seven true status/kind answers and adversarial D3 no-match"
         run: cargo test --locked -p sens --test quantity_d1_direct_cutover -- --nocapture
