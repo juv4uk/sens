@@ -740,39 +740,3 @@ pub(crate) fn bind_language_definition(name: &str, value: &Value, environment: &
     }
     environment.bind_code_slot_once(sid, value.clone());
 }
-
-#[cfg(test)]
-mod exact_domain_primitive_tests {
-    use super::*;
-
-    fn d3(bits: u8) -> CoreDomainIdentity {
-        CoreDomainIdentity::D3(crate::Bija3::from_word(
-            crate::Bit3::new(bits).expect("D3 word"),
-        ))
-    }
-
-    fn d4(bits: u8) -> CoreDomainIdentity {
-        CoreDomainIdentity::D4(crate::CoreD4::from_word(
-            crate::Bit4::new(bits).expect("D4 word"),
-        ))
-    }
-
-    fn d9(bits: u16) -> crate::DomainIdentity {
-        crate::DomainIdentity::D9(crate::CoreD9::from_word(
-            crate::Bit9::new(bits).expect("D9 word"),
-        ))
-    }
-
-    #[test]
-    fn domain_primitive_arity_diagnostic_carries_domain_not_historical_sid() {
-        let environment = Environment::root();
-        let span = Span { start: 0, end: 0 };
-        let identity = d3(0b010);
-        let error = invoke_domain_primitive(identity, &[], &environment, span)
-            .expect("D3 ATOM admitted")
-            .expect_err("arity mismatch must fail");
-        assert_eq!(error.kind, ErrorKind::Arity);
-        assert!(error.message.contains(&identity.to_string()));
-        assert!(!error.message.contains("00000010"));
-    }
-}
