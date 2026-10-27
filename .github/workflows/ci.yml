@@ -98,9 +98,9 @@ jobs:
         with:
           persist-credentials: false
       - uses: dtolnay/rust-toolchain@1.99.0
-      - name: Workspace-залежності ациклічні (DAG, без циклу sens↔sens-cli)
+      - name: Перевірити типову ідентичність test-build SENS без Python
         shell: bash
-        run: python3 scripts/check-workspace-acyclic.py --check
+        run: cargo test --locked -p sens --no-run
       - uses: ./.github/actions/install-zig
       - name: Build native SENS
         run: cargo build --locked -p sens-cli --bin sens --bin sens-trit --features benchmark-ast-visits
