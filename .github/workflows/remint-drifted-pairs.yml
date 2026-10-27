@@ -547,6 +547,19 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          # F6 producer is a required release witness, not rotational backlog.
+          # Mint it on this checkout when the bounded 24-source pass omitted it.
+          if ! grep -Fxq 'tests/fixtures/wsm-fs-record-producer.lisp' "$RUNNER_TEMP/sens-remint-success.txt"; then
+            bash scripts/refresh-verified-t5m-pair.sh \
+              tests/fixtures/wsm-fs-record-producer.lisp \
+              target/debug/sens target/debug/sens-trit \
+              --binding-source lib/persistent-map.lisp \
+              --binding-source lib/world.lisp \
+              --binding-source lib/content-store.lisp \
+              --binding-source lib/lisp-fs.lisp \
+              --core4-runtime
+            printf '%s\n' 'tests/fixtures/wsm-fs-record-producer.lisp' >> "$RUNNER_TEMP/sens-remint-success.txt"
+          fi
           SENS_EQ_TRACE=1 cargo test --locked -p sens-cli --test wsm_fs_f6_pipeline -- --nocapture
 
       # Один нативний суд одночасно перевіряє всі фізичні програми
