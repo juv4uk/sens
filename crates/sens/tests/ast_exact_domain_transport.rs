@@ -136,7 +136,7 @@ fn відсутній_d8_механізм_не_стає_виконуваним()
     let data = expression(ExprKind::DomainIdentity(d8.into()));
     assert!(encode_exact_wire_program(&[data]).is_some());
     let call = expression(ExprKind::DomainCall(d8, [].into()));
-    assert!(encode_exact_wire_program(&[call.clone()]).is_none());
+    assert!(encode_exact_wire_program(std::slice::from_ref(&call)).is_none());
     assert!(encode_exact_fasl_program(&[call], &[0; 32]).is_none());
 }
 
