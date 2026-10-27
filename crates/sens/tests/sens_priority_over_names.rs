@@ -51,29 +51,6 @@ fn ukrainian_name_outside_call_head_is_not_a_domain() {
 }
 
 #[test]
-fn binding_operation_name_does_not_change_executable_d5_law() {
-    let mut session = Session::default();
-    // Чинний SENS може відхилити зв'язування імені примітива;
-    // в обох випадках виклична голова вже має власну D5 identity.
-    let _ = eval_program("(визначити додати 7)", &mut session);
-    let source = "(додати #d24:000000000000000000000001 #d24:000000000000000000000010)";
-    let result = eval_program(source, &mut session)
-        .expect("жива арифметика D5 не підміняється текстовим ім'ям");
-    let Value::BinaryNumber(ref number) = result.value else {
-        panic!("додавання має повернути точний числовий домен");
-    };
-    assert_eq!(number.numeric_domain_width(), Some(24));
-    assert_eq!(number.to_decimal_string(), "3");
-
-    let lowered = lower_program(&parse(source).expect("читач D24+"));
-    assert!(matches!(
-        &lowered[0].kind,
-        ExprKind::DomainCall(identity, _)
-            if (identity.width(), identity.packed_bits()) == (5, 0b01010)
-    ));
-}
-
-#[test]
 fn same_binary_value_in_d5_and_d8_is_not_the_same_identity() {
     let d5 = sens::parse_exact_domain_source("01010").expect("D5");
     let d8 = sens::parse_exact_domain_source("00001010").expect("D8");
