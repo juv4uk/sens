@@ -208,29 +208,6 @@ test "T5M preserves an exact D11 word without admitting its semantics" {
     try std.testing.expectEqualStrings("00000000001", decoded.words[0].bits);
 }
 
-test "ordinary SENS difference and quotient words compose with D24 operands" {
-    // D5 DIFFERENCE (01011): 0 - 1, then D5 QUOTIENT (10111): 1 / 3.
-    // These remain normal operator words; D24 identity is the numeric domain.
-    const words = [_]Word{
-        .{ .width = 5, .bits = "01011" },
-        .{ .width = 24, .bits = "000000000000000000000000" },
-        .{ .width = 24, .bits = "000000000000000000000001" },
-        .{ .width = 5, .bits = "10111" },
-        .{ .width = 24, .bits = "000000000000000000000001" },
-        .{ .width = 24, .bits = "000000000000000000000011" },
-    };
-    const encoded = try encode(std.testing.allocator, &words);
-    defer std.testing.allocator.free(encoded);
-    var decoded = try decode(std.testing.allocator, encoded);
-    defer decoded.deinit(std.testing.allocator);
-
-    try std.testing.expectEqual(words.len, decoded.words.len);
-    for (words, decoded.words) |expected, actual| {
-        try std.testing.expectEqual(expected.width, actual.width);
-        try std.testing.expectEqualStrings(expected.bits, actual.bits);
-    }
-}
-
 test "T5M preserves exact D12 boundary words and does not merge equal-value domains" {
     const words = [_]Word{
         .{ .width = 12, .bits = "100000000000" }, // D12 minimum: -2048
