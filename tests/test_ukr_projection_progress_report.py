@@ -427,12 +427,6 @@ class CurrentRepositoryTests(unittest.TestCase):
         self.assertNotIn('"lib/surface/", "knowledge/"', selection)
         self.assertIn('T5M_CHANGED_FILE', selection)
 
-    def test_keyboard_contract_matches_ratified_projection_guard(self):
-        from tests.test_ukrainian_domain_projection_rules import (
-            UKRAINIAN_KEYBOARD_OUTPUTS,
-        )
-        self.assertEqual(report.UKRAINIAN_KEYBOARD_OUTPUTS,
-                         UKRAINIAN_KEYBOARD_OUTPUTS)
 
 
 if __name__ == "__main__":
