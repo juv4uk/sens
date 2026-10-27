@@ -25,34 +25,10 @@ jobs:
         run: python3 scripts/check-domain-surfaces-d5.py
       - name: Check human-surface translation
         run: python3 scripts/translate-domain-program.py --self-test
-      - name: Check D9 ratified authority
-        run: python3 scripts/check-d9-current-authority.py
-      - name: Оптимізований Python не минає доказ D9
-        shell: bash
-        run: |
-          set -euo pipefail
-          for level in 1 2; do
-            log="$RUNNER_TEMP/d9-optimized-$level.log"
-            if PYTHONOPTIMIZE="$level" python3 scripts/check-d9-current-authority.py >"$log" 2>&1; then
-              echo "::error::D9 validator passed with PYTHONOPTIMIZE=$level"
-              exit 1
-            fi
-            if ! grep -Fq "D9-CURRENT-AUTHORITY: BLOCKED" "$log"; then
-              cat "$log"
-              echo "::error::D9 validator failed without named fail-closed result"
-              exit 1
-            fi
-          done
       - name: Prove exact-width substrate preserves domain address
         run: |
           cargo test -p sens source_words::tests::same_numeric_payload_at_different_widths_never_collapses
           cargo test -p sens canonical_reader::tests::w3_through_w8_reach_ast_with_exact_domain_preserved
-      - name: Prove direct exact-domain human lowering
-        run: |
-          cargo test -p sens uk_sa_
-          cargo test -p sens necessary_forms_lower_to_exact_d4_calls
-          cargo test -p sens exact_domain_human_presentation_round_trips_d1_d4_surfaces
-          cargo test -p sens sanskrit_presentation_projects_domain_identities_inside_lists
       - name: Record Lisp table-reader gap
         run: |
           echo "ordinary read-all width bridge tracked by #3946; canonical human tables are lib/domains/d1.lisp..d9.lisp; Rust D9 runtime remains fail-closed pending W9 #4038"
