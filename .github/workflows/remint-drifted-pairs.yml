@@ -54,7 +54,7 @@ jobs:
   remint:
     # У звичайному CI caller-owned запуску лишаємо наявну логіку.
     # Прямий push у цей файл є лише аварійним target remint і вимагає маркера.
-    if: ${{ github.workflow != 'remint-drifted-pairs' || contains(github.event.head_commit.message, 'F6_PRODUCER_REMINT') || contains(github.event.head_commit.message, 'SENS_REMINT_F6_KEY_CANON') }}
+    if: ${{ github.event_name == 'workflow_dispatch' || github.workflow != 'remint-drifted-pairs' || contains(github.event.head_commit.message, 'F6_PRODUCER_REMINT') || contains(github.event.head_commit.message, 'SENS_REMINT_F6_KEY_CANON') }}
     outputs:
       published_sha: ${{ steps.published_pairs.outputs.published_sha }}
     runs-on: ubuntu-latest
