@@ -69,9 +69,16 @@ fn eval_advice_corpus(source: &str) -> String {
 #[test]
 fn direct_controlled_fact_reaches_proved_narration() {
     let source = r#"
-        (порадити astronomy (розібрати (як-є (earth is a planet))))
+        (визначити перехід
+          (порадити-світ
+            (порожній-світ)
+            (як-є astronomy)
+            (розібрати (як-є (earth is a planet)))))
+        (визначити світ-із-порадою (друге перехід))
         (пояснити-підсумок
-          (міркувати-у-спостерігати (як-є astronomy) (як-є (planet earth))))
+          (міркувати-спостерігати
+            (як-є (planet earth))
+            (світ-клаузи світ-із-порадою (як-є astronomy))))
     "#;
     assert_eq!(eval_advice_corpus(source), "(proved earth is a planet)");
 }
