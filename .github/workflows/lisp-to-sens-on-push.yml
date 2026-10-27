@@ -92,6 +92,10 @@ jobs:
                 # remint lane; Core4 alone cannot bind these functions.
                 binding_args=(--binding-source lib/persistent-map.lisp --binding-source lib/world.lisp --binding-source lib/content-store.lisp --binding-source lib/lisp-fs.lisp)
                 profile_args=(--core4-runtime);;
+              tests/semantic/unification-occurs-check-law.lisp|tests/semantic/unification-occurs-check-mutant.lisp)
+                # These laws call SENS-defined unification functions; keep the
+                # same explicit binding source as the canonical remint lane.
+                binding_args=(--binding-source lib/unify.lisp);;
               lib/lisp-fs.lisp|lib/unify.lisp|tests/semantic/d6-derived-research-batch-01.lisp|tests/semantic/d8-rassq-until-batch.lisp|scripts/check-domain-logic-laws.lisp) profile_args=(--core4-runtime);;
             esac
             if ! bash scripts/refresh-verified-t5m-pair.sh "$f" target/debug/sens target/debug/sens-trit "${binding_args[@]}" "${profile_args[@]}"; then
