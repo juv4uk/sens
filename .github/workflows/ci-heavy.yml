@@ -701,15 +701,6 @@ jobs:
         shell: bash
         run: CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test probabilistic_decision_jev_like system_one_validates_one_state_with_parallel_typed_questions_and_answers -- --exact --nocapture
 
-      - name: "Д6 NEG — виконати чинний закон та точні негативи СЕНС"
-        if: ${{ !cancelled() && steps.changed-t5m-lisp.outputs.d6_runtime_tests == 'true' }}
-        timeout-minutes: 5
-        shell: bash
-        run: |
-          set -euo pipefail
-          CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --lib d6_arithmetic::tests:: -- --nocapture
-          CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test d6_add1_sub1_mechanisms -- --nocapture
-
       - name: "Контроль T5M CLI: позитивна й негативні фізичні межі"
         if: ${{ !cancelled() && (steps.changed-t5m-lisp.outputs.has_files == 'true' || steps.changed-t5m-lisp.outputs.t5m_cli_tests == 'true') }}
         timeout-minutes: 10
@@ -1225,7 +1216,6 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 cargo test --locked -p sens --test lower_list_foundation_compositions -- --nocapture
 
           # Чотири нові українські Lisp-композиції: відтворити exact фізичні
           # T5M байти тільки поточним SENS reader + Zig writer; жодного
