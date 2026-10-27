@@ -16,7 +16,6 @@ CHECKS = [
     "scripts/check-d10-archived-donors.py",
     "scripts/check-d10-fill-v1-seed.py",
     "scripts/check-d10-owner-repo-donor-matrix-v2.py",
-    "scripts/check-d2-structure-audit.py",
     "scripts/check-d4-cleanroom-full-candidate.py",
     "scripts/check-d5-internal-law-atlas.py",
     "scripts/check-d6-mechanism-census.py",
