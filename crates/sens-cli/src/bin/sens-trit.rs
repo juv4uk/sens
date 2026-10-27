@@ -1097,6 +1097,7 @@ mod eval_tests {
         assert!(USAGE.contains("eval-f3-sha256 path.senc SHA256"));
     }
 
+    #[cfg(feature = "zig-transport")]
     #[test]
     fn physical_quote_fixture_preserves_t5m_and_exact_d2_structure() {
         let bytes = zig_test_fixture("migration-quote-cohort-main/quote-legacy.sens");
@@ -1110,6 +1111,7 @@ mod eval_tests {
         assert_eq!(forms.len(), 1);
     }
 
+    #[cfg(feature = "zig-transport")]
     #[test]
     fn two_top_level_forms_share_one_physical_file_and_keep_d2_boundaries() {
         let bytes = zig_test_fixture("migration-multiform-cohort-main/two-forms.sens");
@@ -1120,6 +1122,7 @@ mod eval_tests {
         assert_eq!(zig_transport::encode_t5m_direct(&words).unwrap(), bytes);
     }
 
+    #[cfg(feature = "zig-transport")]
     #[test]
     fn physical_or_structural_corruption_fails_closed_before_execution() {
         assert!(zig_transport::decode_t5m_exact_words(&[0xf3]).is_err());
@@ -1132,6 +1135,7 @@ mod eval_tests {
         assert!(sens::parse_canonical_word_sequence(&words).is_err());
     }
 
+    #[cfg(feature = "zig-transport")]
     #[test]
     fn explain_shows_canonical_d2_failure_without_creating_a_second_parser() {
         let words = sens::parse_binary_source_words("10 001").expect("physical words allowed");
@@ -1149,6 +1153,7 @@ mod eval_tests {
         assert!(!err.contains("D2 syntax PASS"), "{err}");
     }
 
+    #[cfg(feature = "zig-transport")]
     #[test]
     fn explain_distinguishes_bad_transport_from_bad_d2_grammar() {
         let bytes = zig_test_fixture("migration-quote-cohort-main/quote-legacy.sens");
