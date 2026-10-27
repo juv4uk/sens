@@ -161,9 +161,10 @@ jobs:
       release_gate_files: ${{ steps.scope.outputs.release_gate_files }}
     steps:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09
-        if: ${{ github.event_name == 'push' }}
+        if: ${{ github.event_name == 'push' || (github.event_name == 'pull_request' && startsWith(github.event.pull_request.title, 'SENS_RELEASE_PREFLIGHT:') && github.event.pull_request.head.repo.full_name == github.repository) }}
         with:
-          fetch-depth: 1
+          ref: ${{ (github.event_name == 'pull_request' && github.event.pull_request.head.sha) || github.sha }}
+          fetch-depth: ${{ (github.event_name == 'pull_request' && '0') || '1' }}
 
       - name: Обчислити точний перелік доданих і змінених джерел
         id: scope
@@ -172,11 +173,20 @@ jobs:
           EVENT_NAME: ${{ github.event_name }}
           PUSH_BEFORE: ${{ github.event.before }}
           PUSH_AFTER: ${{ github.sha }}
+          PR_FULL_PREFLIGHT: ${{ github.event_name == 'pull_request' && startsWith(github.event.pull_request.title, 'SENS_RELEASE_PREFLIGHT:') && github.event.pull_request.head.repo.full_name == github.repository }}
+          PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
         run: |
           set -euo pipefail
           files=()
           release_gate_files=()
-          if [[ "${EVENT_NAME}" == "push" ]]; then
+          paths=""
+          if [[ "${EVENT_NAME}" == "pull_request" && "${PR_FULL_PREFLIGHT}" == "true" ]]; then
+            if ! git cat-file -e "${PR_BASE_SHA}^{commit}" 2>/dev/null; then
+              git fetch --no-tags origin "${PR_BASE_SHA}"
+            fi
+            paths="$(git -c core.quotePath=false diff --no-ext-diff --name-only "${PR_BASE_SHA}" "${PR_HEAD_SHA}")"
+          elif [[ "${EVENT_NAME}" == "push" ]]; then
             if [[ "${PUSH_BEFORE}" =~ ^0+$ ]]; then
               paths="$(git -c core.quotePath=false diff-tree --root --no-commit-id --name-only -r "${PUSH_AFTER}")"
             else
@@ -185,18 +195,18 @@ jobs:
               fi
               paths="$(git -c core.quotePath=false diff --no-ext-diff --name-only "${PUSH_BEFORE}" "${PUSH_AFTER}")"
             fi
-            while IFS= read -r path; do
-              [[ -n "${path}" ]] || continue
-              if [[ "${path}" == *.lisp && -f "${path}" && ! -L "${path}" ]]; then
-                files+=("${path}")
-              fi
-              case "${path}" in
-                lib/*|crates/sens/*|crates/sens-cli/*|crates/sens-host/*|crates/sens-wasm/*|research/zig-codecs/*|zig_transport_root.zig|zig_bitpack_root.zig|domain_projection_assets.zig|wasm_source_assets.zig|Cargo.toml|Cargo.lock|crates/*/Cargo.toml|.github/workflows/ci.yml|.github/workflows/ci-heavy.yml|.github/workflows/release.yml|.github/workflows/release-preflight.yml|.github/workflows/release-publish.yml|tests/fixtures/wsm-fs-record-producer.lisp|benchmarks/contest-uk/*|scripts/refresh-verified-t5m-pair.sh)
-                  release_gate_files+=("${path}")
-                  ;;
-              esac
-            done <<< "${paths:-}"
           fi
+          while IFS= read -r path; do
+            [[ -n "${path}" ]] || continue
+            if [[ "${path}" == *.lisp && -f "${path}" && ! -L "${path}" ]]; then
+              files+=("${path}")
+            fi
+            case "${path}" in
+              lib/*|crates/sens/*|crates/sens-cli/*|crates/sens-host/*|crates/sens-wasm/*|research/zig-codecs/*|zig_transport_root.zig|zig_bitpack_root.zig|domain_projection_assets.zig|wasm_source_assets.zig|Cargo.toml|Cargo.lock|crates/*/Cargo.toml|.github/workflows/ci.yml|.github/workflows/ci-heavy.yml|.github/workflows/release.yml|.github/workflows/release-preflight.yml|.github/workflows/release-publish.yml|tests/fixtures/wsm-fs-record-producer.lisp|benchmarks/contest-uk/*|scripts/refresh-verified-t5m-pair.sh)
+                release_gate_files+=("${path}")
+                ;;
+            esac
+          done <<< "${paths:-}"
           printf 'REMINT_SOURCE_SCOPE count=%s\n' "${#files[@]}"
           printf 'RELEASE_GATE_SCOPE count=%s\n' "${#release_gate_files[@]}"
           {
@@ -234,7 +244,7 @@ jobs:
     name: Канонічний SENS/Zig/T5M remint точних файлів
     needs: remint-source-scope
     # Перелік змін визначається через git diff, а не через крихкі поля події push.
-    if: ${{ always() && ((github.event_name == 'workflow_dispatch' && inputs.suite == 'remint' && inputs.files != '') || (github.event_name == 'push' && (needs['remint-source-scope'].outputs.has_sources == 'true' || contains(github.event.head_commit.message, 'SENS_REMINT_META_EVAL_GRAPH_D1') || contains(github.event.head_commit.message, 'SENS_REMINT_COMPILER_NUCLEUS') || contains(github.event.head_commit.message, 'SENS_REMINT_CORE4_D5') || contains(github.event.head_commit.message, 'SENS_REMINT_F6_KEY_CANON') || contains(github.event.head_commit.message, 'SENS_REMINT_RELEASE_REASONING_F6') || contains(github.event.head_commit.message, 'SENS_RELEASE_PREFLIGHT') || contains(github.event.head_commit.message, 'SENS_REMINT_CORE4_P_R_SELECTOR') || contains(github.event.head_commit.message, 'SENS_REMINT_TRANSLATION_BOUNDARY') || contains(github.event.head_commit.message, 'SENS_PAIR_REGEN')))) }}
+    if: ${{ always() && ((github.event_name == 'workflow_dispatch' && inputs.suite == 'remint' && inputs.files != '') || (github.event_name == 'push' && (needs['remint-source-scope'].outputs.has_sources == 'true' || contains(github.event.head_commit.message, 'SENS_REMINT_META_EVAL_GRAPH_D1') || contains(github.event.head_commit.message, 'SENS_REMINT_COMPILER_NUCLEUS') || contains(github.event.head_commit.message, 'SENS_REMINT_CORE4_D5') || contains(github.event.head_commit.message, 'SENS_REMINT_F6_KEY_CANON') || contains(github.event.head_commit.message, 'SENS_REMINT_RELEASE_REASONING_F6') || contains(github.event.head_commit.message, 'SENS_RELEASE_PREFLIGHT') || contains(github.event.head_commit.message, 'SENS_REMINT_CORE4_P_R_SELECTOR') || contains(github.event.head_commit.message, 'SENS_REMINT_TRANSLATION_BOUNDARY') || contains(github.event.head_commit.message, 'SENS_PAIR_REGEN'))) || (github.event_name == 'pull_request' && startsWith(github.event.pull_request.title, 'SENS_RELEASE_PREFLIGHT:') && github.event.pull_request.head.repo.full_name == github.repository && needs['remint-source-scope'].outputs.has_sources == 'true')) }}
     uses: ./.github/workflows/remint-drifted-pairs.yml
     with:
       files: |
@@ -264,10 +274,10 @@ jobs:
     name: Exact-SHA release preflight — ручний або позначений коміт
     needs: [remint-source-scope, remint]
     # Повний preflight запускається вручну або за явним маркером; звичайний push лишається швидким.
-    if: ${{ always() && ((github.event_name == 'pull_request' && startsWith(github.event.pull_request.title, 'SENS_RELEASE_PREFLIGHT:')) || (github.event_name == 'workflow_dispatch' && inputs.suite == 'release-preflight') || (github.event_name == 'push' && (needs['remint-source-scope'].outputs.has_release_gate_changes == 'true' || contains(needs['remint-source-scope'].outputs.release_gate_files, 'crates/sens-cli/src/bin/wsm-fs-record-producer.rs') || contains(needs['remint-source-scope'].outputs.release_gate_files, 'crates/sens-cli/src/bin/wsm-fs-record-consumer.rs') || contains(needs['remint-source-scope'].outputs.release_gate_files, 'crates/sens/src/eval/special_forms/core.rs') || contains(github.event.head_commit.message, 'SENS_RELEASE_PREFLIGHT') || contains(github.event.head_commit.message, 'SENS_REMINT_RELEASE_REASONING_F6') || contains(github.event.head_commit.message, '#6183') || contains(toJSON(github.event.commits), 'lib/lisp-fs.sens') || contains(toJSON(github.event.commits), 'lib/translation.sens') || contains(toJSON(github.event.commits), 'lib/core4.sens') || contains(toJSON(github.event.commits), 'lib/knowledge.sens') || contains(toJSON(github.event.commits), 'lib/world.sens') || contains(toJSON(github.event.commits), 'lib/reason.sens') || contains(toJSON(github.event.commits), 'lib/forward.sens') || contains(toJSON(github.event.commits), 'lib/compiler-nucleus.sens') || contains(needs['remint-source-scope'].outputs.files, 'lib/') || startsWith(github.event.head_commit.message, 'ремонт пар:') || startsWith(github.event.head_commit.message, 'Translation boundary:') || startsWith(github.event.head_commit.message, 'Переклад:') || startsWith(github.event.head_commit.message, 'SENS:') || startsWith(github.event.head_commit.message, 'Tests:') || startsWith(github.event.head_commit.message, 'CI:') || startsWith(github.event.head_commit.message, 'GPU smoke:') || startsWith(github.event.head_commit.message, 'Release:') || startsWith(github.event.head_commit.message, 'Реліз:') || startsWith(github.event.head_commit.message, 'Мова:') || startsWith(github.event.head_commit.message, 'release:') || contains(github.event.head_commit.modified, '.github/workflows/ci.yml') || contains(toJSON(github.event.commits), '.github/workflows/ci.yml') || contains(github.event.head_commit.modified, '.github/workflows/ci-heavy.yml') || contains(github.event.head_commit.modified, '.github/workflows/release.yml') || contains(github.event.head_commit.modified, '.github/workflows/release-preflight.yml') || contains(github.event.head_commit.modified, '.github/workflows/release-publish.yml') || contains(github.event.head_commit.modified, 'RELEASE-EVIDENCE.md') || contains(join(github.event.head_commit.modified, ','), 'lib/') || contains(join(github.event.head_commit.modified, ','), 'Cargo.toml') || contains(join(github.event.head_commit.modified, ','), 'Cargo.lock') || contains(github.event.head_commit.modified, 'Cargo.toml') || contains(github.event.head_commit.modified, 'Cargo.lock') || contains(github.event.head_commit.modified, 'crates/sens/Cargo.toml') || contains(github.event.head_commit.modified, 'crates/sens-cli/Cargo.toml') || contains(github.event.head_commit.modified, 'crates/sens/tests/translation_boundary.rs') || contains(github.event.head_commit.modified, 'crates/sens/src/mixed_source.rs') || contains(github.event.head_commit.modified, 'crates/sens/src/compiler_language.rs') || contains(github.event.head_commit.modified, 'crates/sens/src/eval/lower.rs') || contains(github.event.head_commit.modified, 'crates/sens/src/parser.rs') || contains(github.event.head_commit.modified, 'crates/sens/src/source_projection.rs') || contains(github.event.head_commit.modified, 'crates/sens/src/semantic_registry.rs') || contains(github.event.head_commit.modified, 'crates/sens-cli/src/bin/sens-trit.rs') || contains(github.event.head_commit.modified, 'crates/sens-cli/src/zig_transport.rs') || contains(github.event.head_commit.modified, 'crates/sens-cli/tests/binary_t5m_zig_roundtrip.rs') || contains(github.event.head_commit.modified, 'crates/sens-cli/tests/physical_t5m_execution.rs') || contains(github.event.head_commit.modified, 'crates/sens-host/src/lib.rs')))) }}
+    if: ${{ always() && (needs.remint.result == 'success' || (needs.remint.result == 'skipped' && needs['remint-source-scope'].outputs.has_sources != 'true')) && ((github.event_name == 'pull_request' && startsWith(github.event.pull_request.title, 'SENS_RELEASE_PREFLIGHT:')) || (github.event_name == 'workflow_dispatch' && inputs.suite == 'release-preflight') || (github.event_name == 'push' && (needs['remint-source-scope'].outputs.has_release_gate_changes == 'true' || contains(needs['remint-source-scope'].outputs.release_gate_files, 'crates/sens-cli/src/bin/wsm-fs-record-producer.rs') || contains(needs['remint-source-scope'].outputs.release_gate_files, 'crates/sens-cli/src/bin/wsm-fs-record-consumer.rs') || contains(needs['remint-source-scope'].outputs.release_gate_files, 'crates/sens/src/eval/special_forms/core.rs') || contains(github.event.head_commit.message, 'SENS_RELEASE_PREFLIGHT') || contains(github.event.head_commit.message, 'SENS_REMINT_RELEASE_REASONING_F6') || contains(github.event.head_commit.message, '#6183') || contains(toJSON(github.event.commits), 'lib/lisp-fs.sens') || contains(toJSON(github.event.commits), 'lib/translation.sens') || contains(toJSON(github.event.commits), 'lib/core4.sens') || contains(toJSON(github.event.commits), 'lib/knowledge.sens') || contains(toJSON(github.event.commits), 'lib/world.sens') || contains(toJSON(github.event.commits), 'lib/reason.sens') || contains(toJSON(github.event.commits), 'lib/forward.sens') || contains(toJSON(github.event.commits), 'lib/compiler-nucleus.sens') || contains(needs['remint-source-scope'].outputs.files, 'lib/') || startsWith(github.event.head_commit.message, 'ремонт пар:') || startsWith(github.event.head_commit.message, 'Translation boundary:') || startsWith(github.event.head_commit.message, 'Переклад:') || startsWith(github.event.head_commit.message, 'SENS:') || startsWith(github.event.head_commit.message, 'Tests:') || startsWith(github.event.head_commit.message, 'CI:') || startsWith(github.event.head_commit.message, 'GPU smoke:') || startsWith(github.event.head_commit.message, 'Release:') || startsWith(github.event.head_commit.message, 'Реліз:') || startsWith(github.event.head_commit.message, 'Мова:') || startsWith(github.event.head_commit.message, 'release:') || contains(github.event.head_commit.modified, '.github/workflows/ci.yml') || contains(toJSON(github.event.commits), '.github/workflows/ci.yml') || contains(github.event.head_commit.modified, '.github/workflows/ci-heavy.yml') || contains(github.event.head_commit.modified, '.github/workflows/release.yml') || contains(github.event.head_commit.modified, '.github/workflows/release-preflight.yml') || contains(github.event.head_commit.modified, '.github/workflows/release-publish.yml') || contains(github.event.head_commit.modified, 'RELEASE-EVIDENCE.md') || contains(join(github.event.head_commit.modified, ','), 'lib/') || contains(join(github.event.head_commit.modified, ','), 'Cargo.toml') || contains(join(github.event.head_commit.modified, ','), 'Cargo.lock') || contains(github.event.head_commit.modified, 'Cargo.toml') || contains(github.event.head_commit.modified, 'Cargo.lock') || contains(github.event.head_commit.modified, 'crates/sens/Cargo.toml') || contains(github.event.head_commit.modified, 'crates/sens-cli/Cargo.toml') || contains(github.event.head_commit.modified, 'crates/sens/tests/translation_boundary.rs') || contains(github.event.head_commit.modified, 'crates/sens/src/mixed_source.rs') || contains(github.event.head_commit.modified, 'crates/sens/src/compiler_language.rs') || contains(github.event.head_commit.modified, 'crates/sens/src/eval/lower.rs') || contains(github.event.head_commit.modified, 'crates/sens/src/parser.rs') || contains(github.event.head_commit.modified, 'crates/sens/src/source_projection.rs') || contains(github.event.head_commit.modified, 'crates/sens/src/semantic_registry.rs') || contains(github.event.head_commit.modified, 'crates/sens-cli/src/bin/sens-trit.rs') || contains(github.event.head_commit.modified, 'crates/sens-cli/src/zig_transport.rs') || contains(github.event.head_commit.modified, 'crates/sens-cli/tests/binary_t5m_zig_roundtrip.rs') || contains(github.event.head_commit.modified, 'crates/sens-cli/tests/physical_t5m_execution.rs') || contains(github.event.head_commit.modified, 'crates/sens-host/src/lib.rs')))) }}
     uses: ./.github/workflows/release-preflight.yml
     with:
       full: true
-      ref: ${{ (github.event_name == 'pull_request' && github.event.pull_request.head.sha) || needs.remint.outputs.published_sha || github.sha }}
+      ref: ${{ needs.remint.outputs.published_sha || (github.event_name == 'pull_request' && github.event.pull_request.head.sha) || github.sha }}
     permissions:
       contents: read

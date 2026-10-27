@@ -57,6 +57,7 @@ jobs:
     steps:
       - uses: actions/checkout@v5
         with:
+          ref: ${{ (github.event_name == 'pull_request' && github.event.pull_request.head.sha) || github.sha }}
           fetch-depth: 0
       - uses: ./.github/actions/install-zig
       - uses: dtolnay/rust-toolchain@1.99.0
@@ -557,7 +558,7 @@ jobs:
         if: ${{ !cancelled() && steps.remint.outcome == 'success' && steps.f6_physical_proof.outcome == 'success' }}
         env:
           REMINT_CONTEST: ${{ steps.remint.outputs.contest }}
-          REMINT_GITHUB_REF: ${{ github.ref }}
+          REMINT_GITHUB_REF: ${{ (github.event_name == 'pull_request' && format('refs/heads/{0}', github.event.pull_request.head.ref)) || github.ref }}
           # Preserve the caller's closed candidate set after a non-fast-forward.
           REMINT_FILES: ${{ inputs.files }}
         run: |
