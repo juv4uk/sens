@@ -1045,6 +1045,12 @@ fn lift_expression(
             // W8 QUOTE remains opaque in every mode so quoted (100 ...) data
             // is never projected to a callable D3 identity.
             if descend_legacy_machine_wrappers && is_legacy_w8_quote_head(source, &lifted[0]) {
+                // W8 QUOTE blocks callable-head lifting, but exact decimal integer
+                // leaves still need their ordinary D24 numeric carrier. Project
+                // the payload as data only; do not interpret its nested forms.
+                for item in lifted.iter_mut().skip(1) {
+                    *item = project_quoted_numeric_data(source, item.clone(), depth + 1)?;
+                }
                 return Ok(Expr {
                     kind: ExprKind::List(Rc::from(lifted.into_boxed_slice())),
                     span,
@@ -1432,6 +1438,73 @@ fn lift_head(
         // Never reinterpret that historical spelling as D8 here.
         8 => Ok(head),
         _ => Ok(head),
+    }
+}
+
+fn project_quoted_numeric_data(
+    source: &str,
+    expression: Expr,
+    depth: u32,
+) -> Result<Expr, LanguageError> {
+    if depth > MAX_STRUCTURE_DEPTH {
+        return Err(LanguageError::new(
+            ErrorKind::Parse,
+            "quoted numeric data exceeds structure depth",
+            expression.span,
+        ));
+    }
+
+    let Expr { kind, span } = expression;
+    if matches!(&kind, ExprKind::Number(_, _)) {
+        let token = source.get(span.start..span.end);
+        let digits = token
+            .and_then(|text| {
+                Some(
+                    text.strip_prefix('-')
+                        .or_else(|| text.strip_prefix('+'))
+                        .unwrap_or(text),
+                )
+            });
+        if digits.is_some_and(|digits| {
+            !digits.is_empty() && digits.bytes().all(|byte| byte.is_ascii_digit())
+        }) {
+            let number = Expr { kind, span };
+            let mut projected = crate::source_projection::project_ukr_decimal_integer_literals(
+                std::slice::from_ref(&number),
+                source,
+            )?;
+            if projected.len() == 1 {
+                return Ok(projected.remove(0));
+            }
+            return Err(LanguageError::new(
+                ErrorKind::Parse,
+                "quoted integer projection must return one value",
+                span,
+            ));
+        }
+    }
+
+    match kind {
+        ExprKind::List(items) => {
+            let projected = items
+                .iter()
+                .cloned()
+                .map(|item| project_quoted_numeric_data(source, item, depth + 1))
+                .collect::<Result<Vec<_>, _>>()?;
+            Ok(Expr {
+                kind: ExprKind::List(Rc::from(projected.into_boxed_slice())),
+                span,
+            })
+        }
+        ExprKind::Pair(car, cdr) => {
+            let car = project_quoted_numeric_data(source, (*car).clone(), depth + 1)?;
+            let cdr = project_quoted_numeric_data(source, (*cdr).clone(), depth + 1)?;
+            Ok(Expr {
+                kind: ExprKind::Pair(Rc::new(car), Rc::new(cdr)),
+                span,
+            })
+        }
+        other => Ok(Expr { kind: other, span }),
     }
 }
 
