@@ -452,7 +452,7 @@ mod exact_t5m_cutover_tests {
             .chain([25, 36, 72, 120])
         {
             assert!(
-                ExactDomainWord::from_physical_width_bits(width, &vec![0; width]).is_err(),
+                ExactDomainWord::from_physical_width_bits(width, &[0; width]).is_err(),
                 "D{width} поза поточними підтриманими родинами фізичного adapter"
             );
         }

@@ -662,7 +662,7 @@ mod tests {
             b[0] = 1;
             assert_eq!(exact_words_add_sub("+", &a, &b), Some(vec![0; len]));
             assert_eq!(
-                exact_words_add_sub("-", &vec![0; len], &b),
+                exact_words_add_sub("-", &[0; len], &b),
                 Some(vec![u64::MAX; len])
             );
             a[0] = 0;
