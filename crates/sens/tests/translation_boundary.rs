@@ -100,7 +100,7 @@ fn reasoning_index_predicate_returns_d1_no_instead_of_cond_nil() {
                                        (як-є linear) (як-є ()) (як-є ()))))
     "#;
     assert_eq!(
-        eval_translation(&source),
+        eval_translation(source),
         "(0 0 1)",
         "реальний SENS D1-предикат на відсутньому та дійсному індексі"
     );
