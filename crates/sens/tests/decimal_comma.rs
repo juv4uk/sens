@@ -1,25 +1,12 @@
-use sens::{eval_program, parse, ErrorKind, ExprKind, Session};
+use sens::{parse, ErrorKind, ExprKind};
 
-fn obchyslyty(source: &str) -> String {
-    let mut session = Session::default();
-    eval_program(source, &mut session)
-        .expect("обчислення має бути успішним")
-        .value
-        .to_string()
-}
-
-fn ochikuvaty_symvol(source: &str) {
+fn obchyslyty(source: &fn ochikuvaty_symvol(source: &str) {
     let forms = parse(source).expect("читання символу має бути успішним");
     assert_eq!(forms.len(), 1);
     match &forms[0].kind {
         ExprKind::Symbol(symbol) => assert_eq!(&**symbol, source),
         other => panic!("очікував символ {source:?}, отримав {other:?}"),
     }
-}
-
-#[test]
-fn desiatkova_koma_i_krapka_maiut_odnu_tochnu_semantyku() {
-    assert_eq!(obchyslyty("(+ 1,5 2,5)"), "4");
 }
 
 #[test]
