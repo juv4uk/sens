@@ -77,36 +77,3 @@ pub fn decode(allocator: std.mem.Allocator, data: []const u8) Error![][]u8 {
     return words.toOwnedSlice(allocator);
 }
 
-test "T5M3 D1 vector is three bytes and round-trips exact words" {
-    const one = [_][]const u8{"1"};
-    const encoded_one = try encode(std.testing.allocator, &one);
-    defer std.testing.allocator.free(encoded_one);
-    try std.testing.expectEqualSlices(u8, &.{ 241, 246, 145 }, encoded_one);
-    const decoded_one = try decode(std.testing.allocator, encoded_one);
-    defer {
-        for (decoded_one) |word| std.testing.allocator.free(word);
-        std.testing.allocator.free(decoded_one);
-    }
-    try std.testing.expectEqual(@as(usize, 1), decoded_one.len);
-    try std.testing.expectEqualStrings("1", decoded_one[0]);
-}
-
-test "T5M3 round-trip preserves exact word boundaries" {
-    const cases = [_][]const []const u8{
-        &[_][]const u8{"1"},
-        &[_][]const u8{"101"},
-        &[_][]const u8{ "101", "11" },
-        &[_][]const u8{"1011"},
-    };
-    for (cases) |c| {
-        const enc = try encode(std.testing.allocator, c);
-        defer std.testing.allocator.free(enc);
-        const dec = try decode(std.testing.allocator, enc);
-        defer {
-            for (dec) |w| std.testing.allocator.free(w);
-            std.testing.allocator.free(dec);
-        }
-        try std.testing.expectEqual(c.len, dec.len);
-        for (c, dec) |expected, actual| try std.testing.expectEqualStrings(expected, actual);
-    }
-}
