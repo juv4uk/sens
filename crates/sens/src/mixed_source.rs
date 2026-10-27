@@ -869,6 +869,14 @@ fn is_source_quote(source: &str, head: &Expr) -> bool {
     if source_spelling(source, head) == Some("001") {
         return true;
     }
+    // The Ukrainian spelling `як-є` is D3:001 QUOTE, but it is a syntax
+    // form, not an ordinary callable source head. The callable-head index
+    // intentionally omits some syntax identities, so resolve QUOTE through
+    // the canonical surface registry before traversing its payload.
+    if source_spelling(source, head) == Some("як-є") {
+        return crate::semantic_registry::domain_identity_for_surface("як-є")
+            .is_some_and(|identity| identity.width() == 3 && identity.packed_bits() == 0b001);
+    }
     source_spelling(source, head)
         .and_then(crate::semantic_registry::exact_uk_callable_for_source_head)
         .is_some_and(|id| id.width() == 3 && id.packed_bits() == 1)
