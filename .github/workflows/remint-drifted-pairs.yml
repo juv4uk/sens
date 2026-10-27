@@ -513,7 +513,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          cargo test --locked -p sens-cli --test wsm_fs_f6_pipeline -- --nocapture
+          SENS_EQ_TRACE=1 cargo test --locked -p sens-cli --test wsm_fs_f6_pipeline -- --nocapture
 
       # Один нативний суд одночасно перевіряє всі фізичні програми
       # й друкує CONTEST_NATIVE_VERIFIED_EXECUTABLES. Другий повний
