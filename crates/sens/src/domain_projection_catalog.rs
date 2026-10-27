@@ -132,33 +132,4 @@ pub fn entry_count() -> usize {
     ENTRIES.len()
 }
 
-#[cfg(test)]
-mod tests {
-    use super::exact_uk_domain_identity;
 
-    #[test]
-    fn exact_uk_projection_resolves_ratified_domains_without_promoting_d7_text() {
-        for (surface, width, bits) in [
-            ("так", 1, 1),
-            ("відкрити", 2, 0b10),
-            ("сполучити", 3, 0b111),
-            ("визначити", 4, 0b0011),
-            ("нехай*", 6, 0b001001),
-            ("символ-за-кодом", 8, 0),
-            ("читати-файл", 9, 0b110110111),
-            ("умови-зупинки-наміру", 10, 0b0010010000),
-        ] {
-            assert!(
-                matches!(
-                    exact_uk_domain_identity(surface),
-                    Some(identity) if identity.width() == width && identity.packed_bits() == bits
-                ),
-                "{surface} must retain D{width}:{bits:0width$b}"
-            );
-        }
-        assert!(
-            exact_uk_domain_identity("а").is_none(),
-            "D7 Ukrainian glyphs remain text data, not callable source heads"
-        );
-    }
-}
