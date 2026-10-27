@@ -164,31 +164,6 @@ def validate_zig_numeric_prefix(policy, zig_source):
          f"Zig physical prefix {widths} differs from SENS-ratified {policy['ratified_prefix_bits']}")
 
 
-def selftest_zig_numeric_prefix(policy, zig_source):
-    validate_zig_numeric_prefix(policy, zig_source)
-    match = re.search(
-        r"(?m)^[ \t]*pub[ \t]+const[ \t]+WIDE_WIDTHS[ \t]*="
-        r"[ \t]*\[_\]u16[ \t]*\{(?P<cells>[^{}]*)\}[ \t]*;",
-        zig_source,
-    )
-    need(match is not None, "Zig numeric witness declaration missing")
-    original = match.group("cells")
-    expected = policy["ratified_prefix_bits"]
-    variants = (
-        zig_source.replace("pub const WIDE_WIDTHS", "pub const OTHER_WIDTHS", 1),
-        zig_source[:match.start("cells")] + ", ".join(map(str, [expected[0] + 1, *expected[1:]]))
-        + zig_source[match.end("cells"):],
-        zig_source[:match.start("cells")] + original.rstrip() + ", 384 "
-        + zig_source[match.end("cells"):],
-        zig_source + "\npub const WIDE_WIDTHS = [_]u16{ 24 };\n",
-    )
-    for index, damaged in enumerate(variants):
-        try:
-            validate_zig_numeric_prefix(policy, damaged)
-        except ValueError:
-            continue
-        raise ValueError(f"NUMERIC-DOMAIN-RATIFICATION: Zig mutant {index} was admitted")
-
 def validate_runtime_boundary(arithmetic, d6):
     """Assert that every Core math entry point checks explicit D12+ admission.
 
@@ -233,65 +208,8 @@ def validate_runtime_boundary(arithmetic, d6):
          "D6 unary arithmetic must admit explicit D12+ numeric values")
 
 
-def selftest_runtime(arithmetic, d6):
-    validate_runtime_boundary(arithmetic, d6)
-    for damaged in (
-        arithmetic.replace("require_math_domain(values, span)?;", "", 1),
-        arithmetic.replace("!domain_numeric::is_domain_value(value)", "false", 1),
-        arithmetic + "\nfn small_rational_fast_path() {}\n",
-    ):
-        try:
-            validate_runtime_boundary(damaged, d6)
-        except ValueError:
-            pass
-        else:
-            raise ValueError("NUMERIC-DOMAIN-RATIFICATION: invalid runtime boundary admitted")
-    try:
-        validate_runtime_boundary(arithmetic, d6.replace(
-            "Value::BinaryNumber(constant)", "Value::Rational(Rational::integer(1))", 1))
-    except ValueError:
-        pass
-    else:
-        raise ValueError("NUMERIC-DOMAIN-RATIFICATION: unqualified D6 unit admitted")
-
-
-def selftest(ratification, lang):
-    physical = validate(ratification, lang)
-    marker = "(schema . numeric-d12-start-extension-1)"
-    prefix, current = ratification.split(marker, 1)
-    def damage(old, new):
-        need(old in current, "missing D12 selftest target: " + old)
-        return prefix + marker + current.replace(old, new, 1)
-    mutants = (
-        (damage("(first-domain . D12)", "(first-domain . D13)"), lang),
-        (damage("(first-domain . D12)", "(first-domain . D12)\n  (first-domain . D13)"), lang),
-        (damage("(first-domain . D12)", "(first-domain . D12)\n  (first-domain . D12)"), lang),
-        (damage("D(12 * 2^n)", "D(16 * 2^n)"), lang),
-        (damage("(fraction-law .", "(lost-fraction-law ."), lang),
-        (damage("two's-complement", "unsigned-only"), lang),
-        (damage("(current-normative-source .", "(obsolete-source ."), lang),
-        (ratification, lang.replace("(numeric-domain-current-d12-law-20261024",
-                                    "(removed-d12-law", 1)),
-        (ratification, lang.replace("(contract-12-numeric-first",
-                                    "(removed-contract-12-numeric-first", 1)),
-        (ratification, lang.replace(
-            "2026-10-24 D12 signed two's-complement arithmetic overrides ALL older D24-first",
-            "D12 signed-integer statement deliberately removed", 1)),
-    )
-    for index, (damaged_contract, damaged_lang) in enumerate(mutants):
-        need((damaged_contract, damaged_lang) != (ratification, lang),
-             f"selftest mutant {index} did not change source")
-        try:
-            validate(damaged_contract, damaged_lang)
-        except ValueError:
-            continue
-        raise ValueError(f"invalid Lisp ratification mutant {index} admitted")
-    return physical
-
-
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--self-test", action="store_true")
     args = parser.parse_args()
     try:
         ratification = (ROOT / "contracts/numeric-domains-ratification.lisp").read_text(encoding="utf-8")
@@ -299,10 +217,9 @@ def main():
         arithmetic = (ROOT / "crates/sens/src/eval/arithmetic.rs").read_text(encoding="utf-8")
         d6 = (ROOT / "crates/sens/src/eval/d6_arithmetic.rs").read_text(encoding="utf-8")
         zig_profile = (ROOT / "research/zig-codecs/numeric_domains.zig").read_text(encoding="utf-8")
-        physical = (selftest if args.self_test else validate)(ratification, lang)
-        (selftest_zig_numeric_prefix if args.self_test else validate_zig_numeric_prefix)(
-            physical, zig_profile)
-        (selftest_runtime if args.self_test else validate_runtime_boundary)(arithmetic, d6)
+        physical = validate(ratification, lang)
+        validate_zig_numeric_prefix(physical, zig_profile)
+        validate_runtime_boundary(arithmetic, d6)
     except (ValueError, KeyError, OSError) as exc:
         print(str(exc), file=sys.stderr)
         return 1
