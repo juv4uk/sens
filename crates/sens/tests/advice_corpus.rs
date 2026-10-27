@@ -89,8 +89,8 @@ fn multistep_rules_survive_admission_reasoning_and_presentation() {
         (порадити-всі science
           (як-є (
             ((planet earth))
-            ((has (var x) mass) (planet (var x)))
-            ((valuable (var x)) (has (var x) mass))
+            ((has (мфк x) mass) (planet (мфк x)))
+            ((valuable (мфк x)) (has (мфк x) mass))
           )))
         (нехай-послідовно ((outcome
                  (міркувати-у-спостерігати (як-є science) (як-є (valuable earth))))
@@ -107,10 +107,10 @@ fn recursive_rule_survives_the_same_end_to_end_path() {
           (як-є (
             ((parent alice bob))
             ((parent bob charlie))
-            ((ancestor (var x) (var y)) (parent (var x) (var y)))
-            ((ancestor (var x) (var y))
-              (parent (var x) (var z))
-              (ancestor (var z) (var y)))
+            ((ancestor (мфк x) (мфк y)) (parent (мфк x) (мфк y)))
+            ((ancestor (мфк x) (мфк y))
+              (parent (мфк x) (мфк z))
+              (ancestor (мфк z) (мфк y)))
           )))
         (нехай-послідовно ((outcome
                  (міркувати-у-спостерігати
