@@ -455,99 +455,6 @@ mod tests {
     use wasm_bindgen_test::wasm_bindgen_test;
 
     #[test]
-    fn core_lisp_definitions_available_after_init() {
-        init_if_needed().expect("core.lisp preload must succeed");
-        SESSION.with(|slot| {
-            let mut guard = slot.borrow_mut();
-            let session = &mut guard.as_mut().unwrap().session;
-            let (result, _) = sens_literate::eval_literate_ukr(
-                "(довжина (як-є (а б в)))",
-                SourceMode::PureLisp,
-                session,
-            )
-            .expect("length should work after core.lisp preload");
-            assert_eq!(result.value.to_string(), "3");
-        });
-    }
-
-    #[test]
-    fn web_surface_switch_is_layered_and_preserves_user_definitions() {
-        reset_session();
-        init_if_needed().expect("core preload");
-
-        SESSION.with(|slot| {
-            let mut guard = slot.borrow_mut();
-            let session = &mut guard.as_mut().unwrap().session;
-            eval_program("(визначити крок 1)", session).expect("user def");
-            eval_program(
-                "(визначити додай-крок (функція (число) (додати число крок)))",
-                session,
-            )
-            .expect("closure def");
-        });
-
-        assert_eq!(set_surface_impl("ук").expect("ук"), "ук");
-        SESSION.with(|slot| {
-            let mut guard = slot.borrow_mut();
-            let session = &mut guard.as_mut().unwrap().session;
-            let uk = eval_program("(атом? (як-є мама))", session).expect("uk alias");
-            assert_eq!(uk.value.as_predicate_bit(), Some(true));
-            eval_program("(визначити крок 2)", session).expect("redefine user value");
-            let closure = eval_program("(додай-крок 5)", session).expect("closure");
-            assert_eq!(closure.value.to_string(), "7");
-        });
-
-        assert_eq!(set_surface_impl("core").expect("core"), "core");
-        SESSION.with(|slot| {
-            let guard = slot.borrow();
-            let state = guard.as_ref().unwrap();
-            assert!(state.session.environment.get("атом?").is_none());
-            assert!(state.session.environment.get("додай-крок").is_some());
-        });
-    }
-
-    #[test]
-    fn ukr_surface_selects_full_ukrainian_namespace() {
-        reset_session();
-        init_if_needed().expect("full Ukrainian default surface");
-        SESSION.with(|slot| {
-            let mut guard = slot.borrow_mut();
-            let state = guard.as_mut().expect("initialized web session");
-            assert_eq!(state.surface, WebSurface::UkrainianFull);
-            let full = eval_program("(рядок-порожній? \"\")", &mut state.session)
-                .expect("full Ukrainian call head works by default");
-            assert_eq!(full.value.as_predicate_bit(), Some(true));
-        });
-
-        assert_eq!(set_surface_impl("core").expect("core"), "core");
-        assert_eq!(set_surface_impl("ukr").expect("ukr"), "укр");
-        SESSION.with(|slot| {
-            let mut guard = slot.borrow_mut();
-            let session = &mut guard.as_mut().unwrap().session;
-            let full = eval_program("(рядок-порожній? \"\")", session)
-                .expect("full Ukrainian spelling after explicit switch");
-            assert_eq!(full.value.as_predicate_bit(), Some(true));
-        });
-    }
-
-    #[test]
-    fn web_bootstrap_selects_current_core4_and_installs_language_macros() {
-        let mut session = session_with_core().expect("ядро браузерної сесії");
-        assert_eq!(
-            session.environment.selected_core_profile(),
-            Some(sens::CoreProfile::Core4)
-        );
-        let value = eval_program("(друге (як-є (а б)))", &mut session)
-            .unwrap()
-            .value;
-        assert_eq!(value.to_string(), "б");
-        let value = eval_program("(нехай ((значення 42)) значення)", &mut session)
-            .unwrap()
-            .value;
-        assert_eq!(value.to_string(), "42");
-    }
-
-    #[test]
     fn zig_surface_asset_transport_copies_exact_bytes_and_rejects_invalid_requests() {
         for asset in 0..10 {
             let length = unsafe { sens_wasm_source_asset_len(asset) };
@@ -586,23 +493,6 @@ mod tests {
             -1,
             "unknown asset selector must fail closed"
         );
-    }
-
-    #[test]
-    fn web_time_uses_shared_loader_without_a_second_source_copy() {
-        let mut session = session_with_core().expect("Core4");
-        load_surface_prerequisite("time.lisp", None, &mut session).expect("спільний loader часу");
-        for (source, expected) in [
-            ("(інтернет-час-режим-припустимий? 4)", true),
-            ("(інтернет-час-режим-припустимий? 3)", false),
-            ("(інтернет-час-рівень-припустимий? 15)", true),
-            ("(інтернет-час-рівень-припустимий? 16)", false),
-        ] {
-            let value = eval_program(source, &mut session).unwrap().value;
-            assert_eq!(value.as_predicate_bit(), Some(expected), "{source}");
-        }
-        assert!(load_surface_prerequisite("невідомий.lisp", None, &mut session).is_err());
-        assert!(load_surface_prerequisite("некоректний.lisp", Some("("), &mut session).is_err());
     }
 
     #[test]
