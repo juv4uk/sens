@@ -42,6 +42,9 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
       - uses: dtolnay/rust-toolchain@1.99.0
+      # sens/build.rs вимагає пінований Zig: без нього cargo check падає
+      # на "binary bootstrap requires pinned Zig".
+      - uses: ./.github/actions/install-zig
       # Компіляційний гейт для crates/sens/src/. Без нього PR зливали зміни,
       # які ламали збірку: саме так стались E0603 і E0308 (виклик функції
       # з непридатного модуля) — обидва виявились аж у preflight, не в PR.
