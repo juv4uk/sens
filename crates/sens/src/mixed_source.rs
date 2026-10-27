@@ -1457,14 +1457,11 @@ fn project_quoted_numeric_data(
     let Expr { kind, span } = expression;
     if matches!(&kind, ExprKind::Number(_, _)) {
         let token = source.get(span.start..span.end);
-        let digits = token
-            .and_then(|text| {
-                Some(
-                    text.strip_prefix('-')
-                        .or_else(|| text.strip_prefix('+'))
-                        .unwrap_or(text),
-                )
-            });
+        let digits = token.map(|text| {
+            text.strip_prefix('-')
+                .or_else(|| text.strip_prefix('+'))
+                .unwrap_or(text)
+        });
         if digits.is_some_and(|digits| {
             !digits.is_empty() && digits.bytes().all(|byte| byte.is_ascii_digit())
         }) {
