@@ -873,8 +873,12 @@ fn collect_top_level_binding_names(source: &str) -> Result<HashSet<String>, Lang
         if items.len() < 2 || binding_form(source, &items[0]) != Some(3) {
             continue;
         }
-        if matches!(&items[1].kind, ExprKind::Symbol(_)) {
-            if let Some(name) = source_spelling(source, &items[1]) {
+        // Binding position is authoritative within this already-pinned
+        // library even when the mixed reader has projected its spelling to a
+        // D7/D10 identity. Preserve the exact source name for external snippets;
+        // this does not grant callability or infer any domain coordinate.
+        if let Some(name) = source_spelling(source, &items[1]) {
+            if !name.is_empty() {
                 names.insert(name.to_owned());
             }
         }
@@ -1280,6 +1284,24 @@ fn lift_quoted_d4_identity_data(
             });
         }
     }
+    // The world/knowledge macros quote this exact ratified D10 call as a
+    // template head, then splice it into executable code. Preserve the D10
+    // identity as data here so macro expansion can later call the admitted
+    // target; do not project arbitrary quoted D7 names into callability.
+    if source_spelling(source, &expression)
+        == Some("перетворити-клаузи-на-події-повідомлення")
+    {
+        if let Some(identity) = crate::semantic_registry::d10_binding_identity_for_definition(
+            "перетворити-клаузи-на-події-повідомлення",
+        )
+        .filter(|identity| identity.width() == 10 && identity.packed_bits() == 0b0010000001)
+        {
+            return Ok(Expr {
+                kind: ExprKind::DomainIdentity(identity),
+                span: expression.span,
+            });
+        }
+    }
     let Expr { kind, span } = expression;
     match kind {
         ExprKind::List(items) => {
@@ -1616,6 +1638,36 @@ mod tests {
         assert!(matches!(
             &form[1].kind,
             ExprKind::Symbol(name) if name.as_ref() == "непогоджена-функція"
+        ));
+    }
+
+    #[test]
+    fn pinned_external_bindings_include_projected_d10_definition_names() {
+        let source = "(визначити перетворити-клаузи-на-події-повідомлення значення)";
+        let names = collect_top_level_binding_names(source)
+            .expect("valid source with one top-level DEFINE");
+        assert!(names.contains("перетворити-клаузи-на-події-повідомлення"));
+    }
+
+    #[test]
+    fn quoted_world_macro_template_keeps_exact_d10_event_builder_identity() {
+        let source = "(як-є перетворити-клаузи-на-події-повідомлення)";
+        let expression = only(
+            parse_mixed_exact_domain_reasoning_source("lib/world.lisp", source)
+                .expect("pinned world macro template"),
+        );
+        let ExprKind::List(quote) = expression.kind else {
+            panic!("QUOTE form");
+        };
+        assert!(matches!(
+            quote[0].kind,
+            ExprKind::DomainIdentity(identity)
+                if identity.width() == 3 && identity.packed_bits() == 0b001
+        ));
+        assert!(matches!(
+            quote[1].kind,
+            ExprKind::DomainIdentity(identity)
+                if identity.width() == 10 && identity.packed_bits() == 0b0010000001
         ));
     }
 
