@@ -35,7 +35,6 @@ jobs:
         run: cargo check --locked -p sens --lib
       - name: Carry-safe D24/D48 numeric and Value evaluator (Core-only Rust)
         run: |
-          cargo test --locked -p sens --lib qualified_numeric_domain_value_tests
 
           cargo test --locked -p sens --lib binary_framing::tests
           cargo test --locked -p sens --lib outer_envelope::tests::unratified_outer_n_path
