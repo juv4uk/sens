@@ -10,6 +10,25 @@
 
 use std::{cmp::Ordering, fmt, sync::Arc};
 
+fn twos_complement_in_place(word: &mut [u8]) {
+    for bit in word.iter_mut() {
+        *bit ^= 1;
+    }
+    let mut carry = 1u8;
+    for bit in word.iter_mut().rev() {
+        let sum = *bit + carry;
+        *bit = sum & 1;
+        carry = sum >> 1;
+        if carry == 0 {
+            break;
+        }
+    }
+}
+
+fn is_nonempty_binary_word(bits: &[u8]) -> bool {
+    !bits.is_empty() && bits.iter().all(|bit| *bit <= 1)
+}
+
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum BinaryNumberError {
     Empty,
@@ -31,9 +50,6 @@ impl BinaryNumber {
     ///
     /// Canonical zero is exactly `0`; every non-zero Number starts with `1`.
     pub fn parse(text: &str) -> Result<Self, BinaryNumberError> {
-        if text.is_empty() {
-            return Err(BinaryNumberError::Empty);
-        }
         let mut bits = Vec::with_capacity(text.len());
         for byte in text.bytes() {
             match byte {
@@ -42,16 +58,19 @@ impl BinaryNumber {
                 _ => return Err(BinaryNumberError::NonBit),
             }
         }
-        Ok(Self::normalize(bits))
+        Self::from_unqualified_bits(bits)
     }
 
     /// Build from mechanism bits, normalizing the same way as source input.
     pub fn from_bits(bits: impl IntoIterator<Item = u8>) -> Result<Self, BinaryNumberError> {
-        let bits = bits.into_iter().collect::<Vec<_>>();
+        Self::from_unqualified_bits(bits.into_iter().collect())
+    }
+
+    fn from_unqualified_bits(bits: Vec<u8>) -> Result<Self, BinaryNumberError> {
         if bits.is_empty() {
             return Err(BinaryNumberError::Empty);
         }
-        if bits.iter().any(|bit| *bit > 1) {
+        if !is_nonempty_binary_word(&bits) {
             return Err(BinaryNumberError::NonBit);
         }
         Ok(Self::normalize(bits))
@@ -63,7 +82,7 @@ impl BinaryNumber {
         if bits.is_empty() {
             return Err(BinaryNumberError::Empty);
         }
-        if bits.iter().any(|bit| *bit > 1) {
+        if !is_nonempty_binary_word(bits) {
             return Err(BinaryNumberError::NonBit);
         }
         if bits.len() > 1 && bits[0] == 0 {
@@ -123,7 +142,7 @@ impl BinaryNumber {
     pub fn from_numeric_domain_bits(width: usize, word: &[u8]) -> Option<Self> {
         if !Self::is_numeric_domain_width(width)
             || word.len() != width
-            || word.iter().any(|&bit| bit > 1)
+            || !is_nonempty_binary_word(word)
         {
             return None;
         }
@@ -147,18 +166,7 @@ impl BinaryNumber {
         let mut word = self.exact_numeric_domain_bits()?;
         let negative = word[0] == 1;
         if negative {
-            for bit in &mut word {
-                *bit ^= 1;
-            }
-            let mut carry = 1u8;
-            for bit in word.iter_mut().rev() {
-                let sum = *bit + carry;
-                *bit = sum & 1;
-                carry = sum >> 1;
-                if carry == 0 {
-                    break;
-                }
-            }
+            twos_complement_in_place(&mut word);
         }
         Some((negative, Self::normalize(word)))
     }
@@ -188,18 +196,7 @@ impl BinaryNumber {
         let mut word = vec![0; width - magnitude.width()];
         word.extend_from_slice(magnitude.as_bits());
         if negative && !magnitude.is_zero() {
-            for bit in &mut word {
-                *bit ^= 1;
-            }
-            let mut carry = 1u8;
-            for bit in word.iter_mut().rev() {
-                let sum = *bit + carry;
-                *bit = sum & 1;
-                carry = sum >> 1;
-                if carry == 0 {
-                    break;
-                }
-            }
+            twos_complement_in_place(&mut word);
         }
         Self::from_numeric_domain_bits(width, &word)
     }
@@ -558,8 +555,7 @@ impl Ord for BinaryNumber {
     fn cmp(&self, other: &Self) -> Ordering {
         self.numeric_domain_width
             .cmp(&other.numeric_domain_width)
-            .then_with(|| self.width().cmp(&other.width()))
-            .then_with(|| self.bits.cmp(&other.bits))
+            .then_with(|| self.cmp_magnitude(other))
     }
 }
 
@@ -939,7 +935,7 @@ mod tests {
             BinaryNumber::one(),
             "legacy unqualified value is not D24"
         );
-        assert_eq!(a.cmp(&b), std::cmp::Ordering::Less);
+        assert_eq!(a.cmp(&b), Ordering::Less);
         assert!(BinaryNumber::from_numeric_domain_bits(24, &[0; 23]).is_none());
         assert!(BinaryNumber::from_numeric_domain_bits(24, &[0; 25]).is_none());
         assert!(BinaryNumber::from_numeric_domain_bits(25, &[0; 25]).is_none());
