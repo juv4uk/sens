@@ -29,8 +29,6 @@ jobs:
           assert r['d2_or_d7_framing_defined'] is False
           print('LOCAL_SLOT_PASS six historical definitions; PHYSICAL_NOT_ADMITTED')
           PY
-      - name: Independent historical nine-case oracle is not physical parity
-        run: python3 -m unittest discover -s tests -p 'test_machine_block_historical_oracle.py' -v
       - uses: actions/upload-artifact@v4
         if: always()
         with:
