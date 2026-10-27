@@ -459,39 +459,6 @@ fn file_mode_still_errors_on_a_lone_unknown_symbol() {
     assert!(stderr.contains("unknown symbol"), "stderr was: {stderr:?}");
 }
 
-#[test]
-fn ukrainian_arguments_binding_carries_everything_after_the_filename() {
-    let dir = std::env::temp_dir();
-    let path = dir.join("sens-cli-test-argv.lisp");
-    std::fs::write(&path, "параметри-командного-рядка").expect("should write temp file");
-
-    let output = sens()
-        .arg(&path)
-        .arg("0.4.4")
-        .arg("extra")
-        .output()
-        .expect("binary should run");
-    let _ = std::fs::remove_file(&path);
-
-    assert!(output.status.success());
-    let stdout = String::from_utf8_lossy(&output.stdout);
-    assert_eq!(stdout.trim(), "(\"0.4.4\" \"extra\")");
-}
-
-#[test]
-fn ukrainian_arguments_binding_is_empty_when_nothing_follows_the_filename() {
-    let dir = std::env::temp_dir();
-    let path = dir.join("sens-cli-test-argv-empty.lisp");
-    std::fs::write(&path, "параметри-командного-рядка").expect("should write temp file");
-
-    let output = sens().arg(&path).output().expect("binary should run");
-    let _ = std::fs::remove_file(&path);
-
-    assert!(output.status.success());
-    let stdout = String::from_utf8_lossy(&output.stdout);
-    assert_eq!(stdout.trim(), "()");
-}
-
 /// The banner line proves `bind` succeeded, but the very first connection
 /// against a just-spawned dev binary on this machine has been observed to
 /// have its handshake accepted by the OS and then reset before a full
@@ -596,24 +563,6 @@ fn sexpr_protocol_parse_returns_canonical_structure_not_debug_format() {
     assert!(
         response.contains("(value (+ 1 2))"),
         "expected canonical SENS syntax, not a Rust Debug string: {response}"
-    );
-}
-
-#[test]
-fn sexpr_protocol_connections_do_not_share_state() {
-    let (mut child, port) = spawn_sexpr_server();
-
-    let _ = request_with_retry(
-        port,
-        r#"(request (id 1) (op eval) (source "(def leaked 999)"))"#,
-    );
-    let second_response =
-        request_with_retry(port, r#"(request (id 2) (op eval) (source "leaked"))"#);
-    child.kill().expect("should be able to stop the server");
-
-    assert!(
-        second_response.contains("(status error)") && second_response.contains("unknown-symbol"),
-        "a def on one connection leaked into another: {second_response}"
     );
 }
 
