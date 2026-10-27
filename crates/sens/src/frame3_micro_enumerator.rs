@@ -854,6 +854,9 @@ mod tests {
     use crate::{eval_parsed_expressions, parse_canonical_binary, Session};
     use std::collections::HashSet;
 
+    type RankedExpr7 = ((u32, usize, usize, usize, usize, usize, u32), Frame3MicroExpr);
+    type RankedExpr6 = ((usize, usize, u32, usize, usize, u32), Frame3MicroExpr);
+
     #[test]
     fn capacities_use_every_payload_code() {
         assert_eq!(profile_program_capacity(Frame3MicroProfile::F3M1), 256);
@@ -908,23 +911,11 @@ mod tests {
 
     #[test]
     fn census_one_byte_cool_programs() {
-        let mut best_overall: Option<(
-            (u32, usize, usize, usize, usize, usize, u32),
-            Frame3MicroExpr,
-        )> = None;
-        let mut deepest: Option<((usize, usize, u32, usize, usize, u32), Frame3MicroExpr)> = None;
-        let mut best_car: Option<(
-            (u32, usize, usize, usize, usize, usize, u32),
-            Frame3MicroExpr,
-        )> = None;
-        let mut best_cdr: Option<(
-            (u32, usize, usize, usize, usize, usize, u32),
-            Frame3MicroExpr,
-        )> = None;
-        let mut best_cons: Option<(
-            (u32, usize, usize, usize, usize, usize, u32),
-            Frame3MicroExpr,
-        )> = None;
+        let mut best_overall: Option<RankedExpr7> = None;
+        let mut deepest: Option<RankedExpr6> = None;
+        let mut best_car: Option<RankedExpr7> = None;
+        let mut best_cdr: Option<RankedExpr7> = None;
+        let mut best_cons: Option<RankedExpr7> = None;
         let mut conditional_count_total = 0usize;
 
         for local in 0u32..=u8::MAX as u32 {
@@ -1076,22 +1067,13 @@ mod tests {
 
     #[test]
     fn census_two_byte_cool_programs() {
-        let mut best_overall: Option<(
-            (u32, usize, usize, usize, usize, usize, u32),
-            Frame3MicroExpr,
-        )> = None;
-        let mut best_conditional: Option<(
-            (u32, usize, usize, usize, usize, usize, u32),
-            Frame3MicroExpr,
-        )> = None;
-        let mut deepest: Option<((usize, usize, u32, usize, usize, u32), Frame3MicroExpr)> = None;
-        let mut most_words: Option<((usize, usize, u32, usize, usize, u32), Frame3MicroExpr)> =
+        let mut best_overall: Option<RankedExpr7> = None;
+        let mut best_conditional: Option<RankedExpr7> = None;
+        let mut deepest: Option<RankedExpr6> = None;
+        let mut most_words: Option<RankedExpr6> =
             None;
         let mut first_conditional: Option<(u32, Frame3MicroExpr)> = None;
-        let mut best_selector_pair: Option<(
-            (u32, usize, usize, usize, usize, usize, u32),
-            Frame3MicroExpr,
-        )> = None;
+        let mut best_selector_pair: Option<RankedExpr7> = None;
 
         for local in 0u32..=u16::MAX as u32 {
             let payload = (local as u16).to_be_bytes();
@@ -1700,10 +1682,7 @@ mod tests {
 
     #[test]
     fn strongest_last_64k_f3m4_rank_is_executable() {
-        let mut best: Option<(
-            (u32, usize, usize, usize, usize, usize, u32),
-            Frame3MicroExpr,
-        )> = None;
+        let mut best: Option<RankedExpr7> = None;
         for local in 0xffff_0000u32..=0xffff_ffff {
             let payload = local.to_be_bytes();
             let expr = decode_payload(&payload).unwrap();
@@ -1844,10 +1823,7 @@ mod tests {
         // Transparent lexicographic search score:
         // capability diversity, COND count, encoded operation count, depth,
         // exact-word count, node count, then the later physical rank.
-        let mut best: Option<(
-            (u32, usize, usize, usize, usize, usize, u32),
-            Frame3MicroExpr,
-        )> = None;
+        let mut best: Option<RankedExpr7> = None;
         for local in 0xff_00_00u32..=0xff_ff_ff {
             let payload = [
                 ((local >> 16) & 0xff) as u8,
