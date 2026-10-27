@@ -18,6 +18,11 @@ on:
           - laws
           - remint
           - release-preflight
+      candidate_sha:
+        description: "Точний SHA опублікованої фізичної пари для release-preflight"
+        required: false
+        type: string
+        default: ""
       files:
         description: "Точні .lisp шляхи для suite=remint, по одному на рядок"
         required: false
@@ -268,6 +273,6 @@ jobs:
     uses: ./.github/workflows/release-preflight.yml
     with:
       full: true
-      ref: ${{ (github.event_name == 'pull_request' && github.event.pull_request.head.sha) || needs.remint.outputs.published_sha || github.sha }}
+      ref: ${{ (github.event_name == 'workflow_dispatch' && inputs.candidate_sha) || (github.event_name == 'pull_request' && github.event.pull_request.head.sha) || needs.remint.outputs.published_sha || github.sha }}
     permissions:
       contents: read
