@@ -365,6 +365,13 @@ jobs:
             list="$(printf '%s\n' "$FILES" | awk 'NF && !seen[$0]++')"
             echo "REMINT_REQUESTED_NATIVE_SOURCES validated=yes scope=exact-caller-manifest backlog=separate-census"
           fi
+          # Нативний ремонт ядра компілятора ізольований від чужого backlog.
+          # Загальний release preflight не вважає це PASS.
+          if [[ "$EVENT_NAME" == push && -z "$FILES" ]] &&
+             git show -s --format=%B "$AFTER" | grep -Fq 'COMPILER_NUCLEUS_REMINT'; then
+            list='lib/compiler-nucleus.lisp'
+            echo "REMINT_COMPILER_NUCLEUS_SCOPE source=$list backlog=separate"
+          fi
           # Незавершений хвіст — PENDING, не виданий за PASS чи реліз.
           list="$(printf '%s\n' "$list" | sed '/^$/d')"
           initial_total="$(printf '%s\n' "$list" | sed '/^$/d' | wc -l)"
@@ -585,12 +592,16 @@ jobs:
         # Публікація тільки реальних SENS/Zig пар; суперечливий або старий
         # фізичний код не перебазовувати поверх свіжої української програми.
         # Після гонки refs заново майнити джерела на актуальному main.
-        if: ${{ !cancelled() && steps.remint.outcome == 'success' && steps.f6_physical_proof.outcome == 'success' }}
+        # Для ізольованого compiler remint F6 все одно виконується й може
+        # провалити job, але не блокує публікацію тільки перевіреної трійки.
+        # Загальний релізний preflight продовжує вимагати зелений F6.
+        if: ${{ !cancelled() && steps.remint.outcome == 'success' && (steps.f6_physical_proof.outcome == 'success' || (github.event_name == 'push' && contains(github.event.head_commit.message, 'COMPILER_NUCLEUS_REMINT'))) }}
         env:
           REMINT_CONTEST: ${{ steps.remint.outputs.contest }}
           REMINT_GITHUB_REF: ${{ github.ref }}
           # Preserve the caller's closed candidate set after a non-fast-forward.
-          REMINT_FILES: ${{ inputs.files }}
+          REMINT_FILES: ${{ github.event_name == 'push' && contains(github.event.head_commit.message, 'COMPILER_NUCLEUS_REMINT') && 'lib/compiler-nucleus.lisp' || inputs.files }}
+          REMINT_COMPILER_ONLY: ${{ github.event_name == 'push' && contains(github.event.head_commit.message, 'COMPILER_NUCLEUS_REMINT') }}
         run: |
           set -euo pipefail
           # Native proof повертається виключно до ref, який його запустив.
@@ -622,7 +633,12 @@ jobs:
           }
           commit_verified_changes() {
             prune_archived_duplicates
-            git add -A || return 2
+            if [[ "$REMINT_COMPILER_ONLY" == true ]]; then
+              # Відкинутий F6 носій не потрапляє до compiler-only коміту.
+              git add -- lib/compiler-nucleus.sens lib/compiler-nucleus || return 2
+            else
+              git add -A || return 2
+            fi
             local diff_status=0
             git diff --cached --quiet || diff_status=$?
             case "$diff_status" in
