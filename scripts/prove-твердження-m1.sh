@@ -33,7 +33,7 @@ run_core4_witness() {
   local label="$1" source="$2" expected="$3"
   local full="$tmp/$label-full.lisp"
   local physical="$tmp/$label.sens"
-  local view="$tmp/$label.view"
+  local view="$tmp/$label"
   local paired="$tmp/$label.paired"
   local standalone="$tmp/$label.standalone"
   local err="$tmp/$label.err"
