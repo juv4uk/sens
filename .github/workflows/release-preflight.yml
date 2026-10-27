@@ -84,6 +84,12 @@ jobs:
       - name: Sterile Zig corridor
         if: ${{ always() }}
         run: zig test research/zig-codecs/tests.zig -O ReleaseSafe -lc
+      - name: F3C corridor behavior — Zig roundtrip
+        if: ${{ always() }}
+        run: cargo test --locked -p sens-cli --bin sens-trit explicit_f3_codec_roundtrip_is_zig_owned -- --nocapture
+      - name: F3C corridor behavior — fail closed without Zig
+        if: ${{ always() }}
+        run: cargo test --locked --no-default-features -p sens-cli --bin sens-trit f3c_physical_ingress_and_egress_require_zig_even_for_valid_bytes -- --nocapture
 
       - name: translation boundary (required for every release preflight)
         if: ${{ always() }}

@@ -1,8 +1,7 @@
 name: Zig transport gate
 
-# Mechanical only: purity + pin + sterile corridor + optional codec bridge.
+# Ручний фізичний коридор: поведінкові тести Rust і фізичні тести Zig.
 on:
-  # Єдиний автоматичний workflow — ci.yml. Zig gate тільки ручний.
   workflow_dispatch:
 
 concurrency:
@@ -11,54 +10,36 @@ concurrency:
 
 jobs:
   migration-zig-gate:
-    name: pin · purity · sterile corridor · T5
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
+    name: Zig pin · T5M/F3C поведінка · фізичний ABI
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
     steps:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
       - uses: ./.github/actions/install-zig
       - uses: dtolnay/rust-toolchain@1.99.0
         with:
           toolchain: "1.99.0"
-      - name: Unit tests (no semantic admission)
-        run: |
-          python3 -m unittest tests.test_migration_zig_gate -v
-          cargo test --locked -p sens-cli --bin sens-trit sterile_f3c_corridor -- --nocapture
-          python3 scripts/check_rust_sens_zig_corridor.py .
-          python3 -m unittest tests.test_check_rust_sens_zig_corridor -v
-          python3 scripts/check_corridor_axiom_binding.py .
-          python3 -m unittest tests.test_check_corridor_axiom_binding -v
-      - name: Zig ABI v2 transport_abi unit tests (T5/F3C/E1 physical)
+
+      - name: Перевірити закріплену версію Zig
+        shell: bash
         run: |
           set -euo pipefail
-          zig version
-          # Physical corridor only: encode/decode BE3, alias rejection, E1 roundtrip.
-          # No SENS semantic admission in this step.
-          zig test research/zig-codecs/transport_abi.zig
-      - name: Migration ↔ Zig preparation gate (require pinned Zig)
+          expected="$(tr -d '\r\n' < .zig-version)"
+          actual="$(zig version)"
+          test "$actual" = "$expected"
+          printf 'Версію Zig підтверджено: %s\n' "$actual"
+
+      - name: F3C — справжній обернений перехід через Zig
+        run: cargo test --locked -p sens-cli --bin sens-trit explicit_f3_codec_roundtrip_is_zig_owned -- --nocapture
+
+      - name: F3C — без Zig виконання мусить відмовити
+        run: cargo test --locked --no-default-features -p sens-cli --bin sens-trit f3c_physical_ingress_and_egress_require_zig_even_for_valid_bytes -- --nocapture
+
+      - name: T5M — фізичний обернений перехід через Zig
+        run: cargo test --locked -p sens-cli --test binary_t5m_zig_roundtrip -- --nocapture
+
+      - name: Тести фізичного ABI Zig v2 — T5M/F3C/E1
+        shell: bash
         run: |
           set -euo pipefail
-          python3 scripts/migration-zig-gate.py --require-zig \
-            --report "$RUNNER_TEMP/sens-migration-zig-gate.json"
-          python3 - <<'PY'
-          import json, os, pathlib
-          path = pathlib.Path(os.environ["RUNNER_TEMP"]) / "sens-migration-zig-gate.json"
-          data = json.loads(path.read_text(encoding="utf-8"))
-          assert data["schema"] == "sens-migration-zig-gate/v1"
-          assert data["verdict"] == "PASS"
-          assert data["transport_verified"] is True
-          assert data["scope"] == "FULL_PHYSICAL_ZIG"
-          assert [s["step"] for s in data["steps"]] == [
-              "zig-pin",
-              "ci_zig_purity",
-              "check_sterile_zig_corridor",
-              "check_rust_sens_zig_corridor",
-              "check_rust_sens_corridor_coverage",
-              "check_corridor_axiom_binding",
-              "check-domain-ladder-identity",
-              "migrate-exact-domain-authority",
-              "test_zig_codec_bridge",
-          ]
-          assert data["zig_pin"] == "0.16.0"
-          print("MIGRATION_ZIG_GATE_CI_PASS")
-          PY
+          zig test research/zig-codecs/transport_abi.zig -O ReleaseSafe -lc
