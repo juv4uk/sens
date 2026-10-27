@@ -522,7 +522,14 @@ python3 scripts/guard-domain-function-reuse.py --better "обробити спи
 ## Чинна мовна політика власника
 
 - Дозволені виконувані мови: SENS, Rust, Zig, Guile, C та Assembler. SENS є єдиним джерелом семантики.
-- Python, JavaScript/TypeScript, C++, Scheme/Racket/Prolog та інші недозволені мови виключені з активного коду, тестів, бенчмарків, оракулів, CI й release-шляху.
+- **Дозволені мови-острови (execution islands): Common Lisp, Prolog, CLIPS, Datalog.**
+  Межа — `contracts/island-compat-contract.lisp` (#749): острів дає
+  **спостереження одного завершеного виклику** (`native-observation`),
+  а не семантику. `kernel-interpretation: forbidden`,
+  `semantic-authority: forbidden`, `universal-result-coercion: forbidden`.
+  Тобто острів можна викликати й порівнювати, але не можна робити з нього
+  джерело істини або спільну онтологію результатів.
+- Python, JavaScript/TypeScript, C++, Scheme/Racket та інші недозволені мови виключені з активного коду, тестів, бенчмарків, оракулів, CI й release-шляху.
 - Тести та бенчмарки недозволеними мовами не запускати; виключення не є успішним проходженням і не є доказом.
 - JSON не є мовою SENS: не створювати JSON-мову, семантичний parser/serializer або JSON oracle для SENS.
 - Не створювати SHA-256 квитанції, hash-манифести чи digest-залежну ідентичність для SENS-коду. Ідентичність визначається канонічним тритовим представленням, доменом і ратифікованими законами.
