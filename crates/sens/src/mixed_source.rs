@@ -121,6 +121,17 @@ fn lift_pinned_d8_io(
         // Quoted knowledge data preserves only already-ratified D4 NOT
         // identity; unknown names remain data and never become callable.
         let mut quoted = items.to_vec();
+        // Recover only ratified source-spelled identities from the whole quote;
+        // a projected D7 child may have a lossy local span.
+        if quoted.len() == 2 {
+            if let Some(identity) = exact_quoted_ratified_identity(source, span) {
+                quoted[1].kind = ExprKind::DomainIdentity(identity);
+                return Ok(Expr {
+                    kind: ExprKind::List(Rc::from(quoted.into_boxed_slice())),
+                    span,
+                });
+            }
+        }
         for item in quoted.iter_mut().skip(1) {
             *item = lift_quoted_d4_identity_data(source, item.clone(), depth + 1)?;
         }
@@ -302,6 +313,17 @@ fn lift_pinned_d9_language_calls(
         // loader. Preserve the quote carrier but normalize only ratified D4
         // identities inside its payload; exact unknown names remain inert data.
         let mut quoted = items.to_vec();
+        // Recover only ratified source-spelled identities from the whole quote;
+        // a projected D7 child may have a lossy local span.
+        if quoted.len() == 2 {
+            if let Some(identity) = exact_quoted_ratified_identity(source, span) {
+                quoted[1].kind = ExprKind::DomainIdentity(identity);
+                return Ok(Expr {
+                    kind: ExprKind::List(Rc::from(quoted.into_boxed_slice())),
+                    span,
+                });
+            }
+        }
         for item in quoted.iter_mut().skip(1) {
             *item = lift_quoted_d4_identity_data(source, item.clone(), depth + 1)?;
         }
@@ -318,7 +340,7 @@ fn lift_pinned_d9_language_calls(
         // Use the enclosing quote's source span, not the payload's lossy
         // Text7-local span. Only exact D4 identity is promoted; unknown data
         // remains inert.
-        if let Some(identity) = exact_quoted_d4_identity(source, span) {
+        if let Some(identity) = exact_quoted_ratified_identity(source, span) {
             quoted[1] = Expr {
                 kind: ExprKind::DomainIdentity(identity),
                 span: quoted[1].span,
@@ -1226,7 +1248,7 @@ fn lift_expression(
 // Recover an exact payload from the outer quote form. The mixed reader may
 // attach a lossy Text7-local span to the payload node (e.g. D4:0100 rendered
 // as "п-р"), so domain preservation must use the enclosing source bytes.
-fn exact_quoted_d4_identity(source: &str, quote_span: Span) -> Option<DomainIdentity> {
+fn exact_quoted_ratified_identity(source: &str, quote_span: Span) -> Option<DomainIdentity> {
     let form = source.get(quote_span.start..quote_span.end)?.trim();
     let payload = form
         .strip_prefix("(як-є")?
@@ -1236,6 +1258,12 @@ fn exact_quoted_d4_identity(source: &str, quote_span: Span) -> Option<DomainIden
     if payload == "хибне?" {
         return crate::semantic_registry::exact_uk_callable_for_source_head("хибне?")
             .filter(|identity| identity.width() == 4 && identity.packed_bits() == 0b0100);
+    }
+    // The admitted world/knowledge macro template has a ratified D10
+    // coordinate. The outer source span is authoritative after D7 projection.
+    if payload == "перетворити-клаузи-на-події-повідомлення" {
+        return crate::semantic_registry::d10_binding_identity_for_definition(payload)
+            .filter(|identity| identity.width() == 10 && identity.packed_bits() == 0b0010000001);
     }
     if payload.len() != 4 || !payload.bytes().all(|byte| matches!(byte, b'0' | b'1')) {
         return None;
