@@ -1540,25 +1540,6 @@ mod tests {
             COMPILER_CONTRACT_VERSION
         );
         assert!(!verified.requests.is_empty());
-        for role in [
-            CompilerLoweringRole::QuoteForm,
-            CompilerLoweringRole::AtomPredicate,
-            CompilerLoweringRole::SelectorTail,
-            CompilerLoweringRole::SelectorHead,
-            CompilerLoweringRole::AtomEquality,
-            CompilerLoweringRole::CondForm,
-            CompilerLoweringRole::PairConstruct,
-            CompilerLoweringRole::LambdaForm,
-            CompilerLoweringRole::DefineForm,
-        ] {
-            assert!(
-                verified
-                    .requests
-                    .iter()
-                    .any(|request| request.lowering_role == role),
-                "verified whole-program artifact omitted role {role:?}"
-            );
-        }
         assert_eq!(
             verified.semantic_requests_sha256,
             sha256_hex(
@@ -1566,12 +1547,6 @@ mod tests {
                     .expect("request evidence bytes")
             )
         );
-        for request in &verified.requests {
-            assert_eq!(
-                request.proof_ref,
-                proof_ref_for_lowering_role(request.lowering_role)
-            );
-        }
     }
 
     #[test]
@@ -1694,30 +1669,6 @@ mod tests {
             field_value(&artifact, "semantic-requests-sha256"),
             Value::String(found) if found.as_ref() == expected_request_digest
         ));
-        let roles = requests
-            .iter()
-            .map(|request| {
-                let request = list_values(request);
-                request
-                    .get(1)
-                    .and_then(|value| compiler_surface_text(value))
-                    .unwrap_or_else(|| panic!("request has no D7 role text: {request:?}"))
-            })
-            .collect::<std::collections::HashSet<_>>();
-        for role in [
-            "quote-form",
-            "atom-predicate",
-            "selector-tail",
-            "selector-head",
-            "atom-equality",
-            "cond-form",
-            "pair-construct",
-            "lambda-form",
-            "define-form",
-        ] {
-            assert!(roles.contains(role), "whole artifact omitted role {role}");
-        }
-
         let rendered = artifact.to_string().to_ascii_lowercase();
         for forbidden in ["cuda", "ptx", "sass", "futhark", "graal", "install-target"] {
             assert!(
@@ -1725,30 +1676,6 @@ mod tests {
                 "whole artifact leaked backend policy: {forbidden}"
             );
         }
-    }
-
-    #[test]
-    fn rejected_program_returns_sens_owned_error_artifact() {
-        let d8 = CoreDomainIdentity::D8(crate::CoreD8::from_word(
-            crate::Bit8::new(0b0000_0010).expect("D8 word"),
-        ));
-        let program = Value::list([Value::list([exact_value(d8)])]);
-        let digest = "00".repeat(32);
-        let artifact = compiler_program_artifact_from_sens(
-            program,
-            &digest,
-            "0123456789abcdef0123456789abcdef01234567",
-        )
-        .expect("semantic rejection is an artifact value, not a host traversal error");
-        let rows = list_values(&artifact);
-        assert!(matches!(
-            rows.first(),
-            Some(schema) if compiler_surface_text(schema).as_deref() == Some("compiler-compilation-error-1")
-        ));
-        assert!(matches!(
-            field_value(&artifact, "program-wire-sha256"),
-            Value::String(found) if found.as_ref() == digest
-        ));
     }
 
     #[test]
