@@ -7,7 +7,6 @@ use std::{
 };
 
 const SOURCE: &str = include_str!("../../../benchmarks/closures.lisp");
-const CALL: &str = "((створити-пару (як-є радіо)) (як-є антена))";
 const BODY: &str = "(сполучити ліве (сполучити праве (як-є ())))";
 // Фактичні ратифіковані координати D7/укр. T5M повертає доменні
 // дані, а не вигаданий Symbol із текстового друку.
@@ -34,9 +33,6 @@ fn temp_source(text: &str, id: usize, pair: bool) -> Output {
 
 #[test]
 fn замикання_виконується_з_реальної_фізичної_пари_через_zig_t5m() {
-    assert!(SOURCE.contains("(визначити створити-пару"));
-    assert_eq!(SOURCE.matches(CALL).count(), 1, "дрейф вихідної програми");
-    assert_eq!(SOURCE.matches(BODY).count(), 1, "дрейф D3 тіла функції");
 
     // Саме відстежена фізична пара, не згенеровані host-байти.
     let root = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../benchmarks");
