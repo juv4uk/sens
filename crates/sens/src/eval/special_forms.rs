@@ -14,7 +14,7 @@ pub(super) use codepoint::{codepoint_to_string_values, string_to_codepoint_value
 pub use core::exact_arity;
 pub(super) use core::{
     atom_value, car_ref, cdr_ref, cons_values, eq_values, evaluate_definition,
-    evaluate_domain_cond, quoted, quoted_macro_argument,
+    evaluate_domain_cond, note_domain_call, quoted, quoted_macro_argument,
 };
 pub(super) use io::{eval_values, read_all_values, read_values, write_to_string_values};
 pub(super) use strings::{
