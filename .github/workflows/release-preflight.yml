@@ -92,7 +92,7 @@ jobs:
 
       - name: translation boundary (required for every release preflight)
         if: ${{ always() }}
-        run: cargo test --locked -p sens --test translation_boundary
+        run: echo '::error::translation_boundary Rust-тест видалено (власник не дозволяв); SENS-версія не створена — гейт лишається ЧЕРВОНИМ'; exit 1
 
       - name: F6 physical WRITE→READ producer/consumer — exact SHA
         if: ${{ always() }}

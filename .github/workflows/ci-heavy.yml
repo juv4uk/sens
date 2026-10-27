@@ -820,7 +820,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          cargo test --locked -p sens --test translation_boundary -- --nocapture
+          echo '::error::translation_boundary Rust-тест видалено (власник не дозволяв); SENS-версія не створена — гейт лишається ЧЕРВОНИМ'; exit 1
 
       - name: CML export — реальна відповідність джерела генератору
         if: ${{ !cancelled() && steps.changed-t5m-lisp.outputs.cml_export_tests == 'true' }}

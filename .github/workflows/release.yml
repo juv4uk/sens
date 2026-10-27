@@ -45,7 +45,7 @@ jobs:
       - name: Узгодженість версій усіх релізних crates
         run: cargo test --locked -p sens-lsp --test release_parity
       - name: translation boundary regression
-        run: cargo test --locked -p sens --test translation_boundary
+        run: echo '::error::translation_boundary Rust-тест видалено (власник не дозволяв); SENS-версія не створена — гейт лишається ЧЕРВОНИМ'; exit 1
       - name: Native physical T5M execution witnesses
         run: cargo test --locked -p sens-cli --test physical_t5m_execution
 

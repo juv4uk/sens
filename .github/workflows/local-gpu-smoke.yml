@@ -70,7 +70,7 @@ jobs:
         shell: bash
         run: |
           set -uo pipefail
-          cargo test --locked -p sens --test translation_boundary 2>&1 | tail -60
+          echo '::error::translation_boundary Rust-тест видалено (власник не дозволяв); SENS-версія не створена — гейт лишається ЧЕРВОНИМ'; exit 1
           rc=${PIPESTATUS[0]}
           echo "TRANSLATION_BOUNDARY_RC=$rc"
           exit 0
