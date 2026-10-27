@@ -31,16 +31,10 @@ on:
         required: false
         default: ""
 
-# Звичайні повні remint усе ще серіалізовані (один спільний writer).
-# COMPILER_NUCLEUS_REMINT комітить ЛИШЕ два фізичні файли ядра компілятора:
-# відокремлюємо цей bounded writer від unrelated F6/backlog, що тримав
-# його в pending. Конкурентний ref перевіряється повторним native mint
-# у regenerate_on_current_main; жоден stale byte не проходить без суду.
-# Manual/workflow_call та інші push зберігають попередню серійну групу.
-concurrency:
-  group: ${{ github.event_name == 'push' && contains(github.event.head_commit.message, 'COMPILER_NUCLEUS_REMINT') && format('sens-compiler-nucleus-{0}', github.ref) || 'sens-explicit-remint' }}
-  cancel-in-progress: false
-  queue: max
+# ВЛАСНИК: без concurrency — усі можливі прогони мають працювати.
+# Черга ставила роботу в заручники: 5 прогонів на одну правку, і жоден
+# не був доказом. Паралельність безпечна: кожен прогін карбує у свою гілку
+# й комітить лише за реальних байтових змін, з retry на гонку refs.
 
 permissions:
   contents: write
