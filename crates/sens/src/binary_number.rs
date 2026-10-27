@@ -1096,6 +1096,7 @@ mod tests {
             let mut expected = vec![0u8; 2 * width - raw_square.width()];
             expected.extend_from_slice(raw_square.as_bits());
             assert_eq!(product_word, expected);
+            let zero_bits = vec![0; width];
             let zero = BinaryNumber::from_numeric_domain_bits(width, &zero_bits).unwrap();
             assert_eq!(
                 max.mul_admitted_numeric(&zero)
