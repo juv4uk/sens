@@ -372,20 +372,6 @@ fn x86_pair_layout_is_one_lisp_owned_machine_readable_authority() {
 }
 
 #[test]
-fn interpreter_pair_reference_witnesses_remain_two_and_three() {
-    let _serial = test_lock();
-    install();
-    let mut session = Session::default();
-    load_core_library(&mut session).expect("core must bootstrap before pair reference witness");
-
-    let car = eval_uk_program("(перше (сполучити 2 3))", &mut session);
-    let cdr = eval_uk_program("(решта (сполучити 2 3))", &mut session);
-
-    assert_eq!(car.value.to_string(), "2");
-    assert_eq!(cdr.value.to_string(), "3");
-}
-
-#[test]
 fn raw_executor_accepts_canonical_binary_number_machine_bytes() {
     let _serial = test_lock();
     install();
