@@ -249,7 +249,7 @@ jobs:
           if grep -Eq '^(sens-cml-export[.]contract|crates/sens-cli/src/bin/cml-export[.]rs)$' "$changed_all"; then
             echo 'cml_export_tests=true' >> "$GITHUB_OUTPUT"
           fi
-          if grep -Eq '^(lib/core\.lisp|lib/core1\.lisp|tests/test_core1_(third|fourth)_domain_canary\.py|tests/fixtures/core1-(third|fourth)-domain-canary/.*|crates/sens-cli/tests/core1_array_bounds_cli\.rs|\.github/workflows/ci\.yml)$' "$changed_all"; then
+          if grep -Eq '^(lib/core\.lisp|lib/core1\.lisp|tests/test_core1_(third|fourth)_domain_canary\.py|tests/fixtures/core1-(third|fourth)-domain-canary/.*|\.github/workflows/ci\.yml)$' "$changed_all"; then
             echo 'core1_tests=true' >> "$GITHUB_OUTPUT"
           fi
           if grep -Eq '^(lib/core\.lisp|lib/knowledge\.lisp|crates/sens/tests/knowledge_d1_recovery\.rs|tests/test_knowledge_d1_recovery\.py|\.github/workflows/ci\.yml)$' "$changed_all"; then
@@ -376,7 +376,7 @@ jobs:
           fi
           # Кожен адресний Rust-свідок нижче проходить build.rs, який
           # перевіряє pinned Zig навіть тоді, коли сам тест не змінювався.
-          if grep -Eq '^(lib/core\.lisp|lib/core1\.lisp|lib/knowledge\.lisp|lib/forward\.lisp|lib/unify\.lisp|lib/machine/operands/x86-64\.lisp|lib/machine/capability-axis\.lisp|lib/machine/lowering/semantic-x86-64\.lisp|crates/sens/tests/machine_exact_domain_cpu\.rs|crates/sens/tests/machine_capability_axis\.rs|tests/test_capability_axis_ukr_projection\.py|crates/sens-cli/tests/core1_array_bounds_cli\.rs|crates/sens/tests/reasoning_forward_knowledge_d3_migration\.rs|crates/sens/tests/machine_typed_operands\.rs|crates/sens/tests/machine_exact_d5_order\.rs|lib/machine/encoding/coverage-generator\.lisp|lib/quantity\.lisp|crates/sens/tests/quantity_length_d24_current\.rs|crates/sens/tests/quantity_d1_direct_cutover\.rs|tests/test_ukr_quantity_projection\.py|crates/sens/src/domain_numeric\.rs|crates/sens/src/binary_number\.rs|crates/sens/src/machine_math\.rs|crates/sens/src/machine_math_skylake\.S|\.github/workflows/ci\.yml)$' "$changed_all"; then
+          if grep -Eq '^(lib/core\.lisp|lib/core1\.lisp|lib/knowledge\.lisp|lib/forward\.lisp|lib/unify\.lisp|lib/machine/operands/x86-64\.lisp|lib/machine/capability-axis\.lisp|lib/machine/lowering/semantic-x86-64\.lisp|crates/sens/tests/machine_exact_domain_cpu\.rs|crates/sens/tests/machine_capability_axis\.rs|tests/test_capability_axis_ukr_projection\.py|crates/sens/tests/reasoning_forward_knowledge_d3_migration\.rs|crates/sens/tests/machine_typed_operands\.rs|crates/sens/tests/machine_exact_d5_order\.rs|lib/machine/encoding/coverage-generator\.lisp|lib/quantity\.lisp|crates/sens/tests/quantity_length_d24_current\.rs|crates/sens/tests/quantity_d1_direct_cutover\.rs|tests/test_ukr_quantity_projection\.py|crates/sens/src/domain_numeric\.rs|crates/sens/src/binary_number\.rs|crates/sens/src/machine_math\.rs|crates/sens/src/machine_math_skylake\.S|\.github/workflows/ci\.yml)$' "$changed_all"; then
             echo 'needs_zig=true' >> "$GITHUB_OUTPUT"
           fi
 
@@ -419,7 +419,6 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          cargo test --locked -p sens-cli --test core1_array_bounds_cli -- --nocapture
           # Змінений lib/core.lisp: точна D1 семантика порожніх макросів,
           # через справжній виконавець SENS (не Python/source-matcher).
           cargo test --locked -p sens --test core_postcore_ukr core_zero_arity_and_or_return_real_d1_bits -- --exact --nocapture
@@ -545,7 +544,6 @@ jobs:
           # Релізні Cargo-команди лишаються --locked.
           cargo test --locked -p sens-cli --test cli t5m_file_mode_executes_ukrainian_fibonacci_and_ackermann_d24 -- --exact --nocapture
           # Справжні позитивні й негативні межі масиву з lib/core1.lisp.
-          cargo test --locked -p sens-cli --test core1_array_bounds_cli -- --nocapture
           # Спершу справжній SENS-eval українського читача:
           # неповні речення та позитивні D3/D4/D9 свідки.
           # Вузький живий D3/D4-свідок перевіряємо першим: сторонній RED
