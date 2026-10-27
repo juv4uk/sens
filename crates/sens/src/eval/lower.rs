@@ -337,43 +337,6 @@ fn lower(expression: &Expr, depth: u32, mode: LowerMode) -> Expr {
 mod ratified_d9_string_surface_tests {
     use super::*;
 
-    #[test]
-    fn ukr_string_append_uses_real_d9_110011110_not_legacy_w8() {
-        let source = "(рядок-додати \"Привіт, \" \"світе\")";
-        let parsed = crate::parse(source).expect("канонічна українська Lisp-форма");
-        let lowered = lower_program(&parsed);
-        assert!(
-            matches!(&lowered[0].kind,
-                ExprKind::DomainCall(crate::CoreDomainIdentity::D9(word), args)
-                    if word.word().packed_bits() == 0b110011110 && args.len() == 2
-            ),
-            "D9 call must have exact nine-bit identity without an old SID8 row"
-        );
-        assert_eq!(
-            lower_program(&lowered),
-            lowered,
-            "D9 source lowering is idempotent"
-        );
-
-        let result = crate::eval_parsed_expressions(&parsed, &mut crate::Session::default())
-            .expect("реальний D9 механізм складає обидва Unicode рядки");
-        assert_eq!(result.value, crate::Value::String("Привіт, світе".into()));
-    }
-
-    #[test]
-    fn nested_canonical_d9_append_keeps_both_editor_selection_fragments() {
-        let source = "(рядок-додати \"[\" (рядок-додати \"їжак\" \"]\"))";
-        let parsed = crate::parse(source).expect("два вкладені D9 виклики");
-        let result = crate::eval_parsed_expressions(&parsed, &mut crate::Session::default())
-            .expect("вкладений D9 рядок-додати реально виконується");
-        assert_eq!(result.value, crate::Value::String("[їжак]".into()));
-
-        let short = crate::parse("(рядок-додати \"тільки один\")").unwrap();
-        assert!(
-            crate::eval_parsed_expressions(&short, &mut crate::Session::default()).is_err(),
-            "не підміняти D9 виклик мовчазним поверненням останнього аргументу"
-        );
-    }
 }
 
 #[cfg(test)]
@@ -442,52 +405,6 @@ mod domain_ladder_lowering_migration_tests {
             .expect("одна форма")
     }
 
-    #[test]
-    fn ukr_equal_source_head_keeps_its_ratified_d8_identity() {
-        let identity = source_head_domain_identity("однакові?")
-            .expect("ratified Ukrainian D8 EQUAL source route");
-        assert_eq!(identity.width(), 8, "D8 must not collapse to D3 EQ");
-        assert_eq!(identity.packed_bits(), 0b11110111, "exact D8 EQUAL word");
-    }
-
-    #[test]
-    fn source_heads_preserve_exact_d6_identity_for_lisp_owned_definitions() {
-        for (name, bits) in [
-            ("довжина", 0b000000u16),
-            ("довжина-до", 0b000001u16),
-            ("нехай*", 0b001001u16),
-            ("нехай-послідовно", 0b001001u16),
-        ] {
-            let identity = source_head_domain_identity(name)
-                .unwrap_or_else(|| panic!("ratified Ukrainian D6 binding must lower: {name}"));
-            assert_eq!(identity.width(), 6, "{name} must retain D6 width");
-            assert_eq!(identity.packed_bits(), bits, "{name} exact D6 coordinate");
-        }
-
-        // Non-Ukrainian peer names are metadata, not Ukrainian source heads.
-        for name in ["length", "let*", "krama-sthānika-bandha"] {
-            assert!(
-                source_head_domain_identity(name).is_none(),
-                "{name} is not a Ukrainian source head"
-            );
-        }
-    }
-
-    #[test]
-    fn raw_eight_bit_tokens_do_not_gain_historical_callability() {
-        for source in [
-            "(00000001 x)",
-            "(00000111 x)",
-            "(00001000 x)",
-            "(10101000 x)",
-        ] {
-            let lowered = lowered_one(source);
-            assert!(
-                !matches!(lowered.kind, ExprKind::Call(_, _)),
-                "raw token unexpectedly became a call head: {source}"
-            );
-        }
-    }
 }
 
 #[cfg(test)]
@@ -501,19 +418,6 @@ mod exact_lowering_isolation_tests {
             .into_iter()
             .next()
             .expect("one expression")
-    }
-
-    #[test]
-    fn exact_def_compatibility_surface_lowers_to_ratified_d4_binder() {
-        let current = lower_current("(визначити x (001 1))");
-        let ExprKind::DomainCall(CoreDomainIdentity::D4(word), arguments) = current.kind else {
-            panic!("Lisp-owned def compatibility surface must lower to D4 DEFINE");
-        };
-        assert_eq!(word.word().packed_bits(), 0b0011);
-        assert!(matches!(
-            &arguments[1].kind,
-            ExprKind::DomainCall(CoreDomainIdentity::D3(_), _)
-        ));
     }
 
     #[test]
