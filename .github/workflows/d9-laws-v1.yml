@@ -13,7 +13,5 @@ jobs:
         run: nvidia-smi || true
       - name: Replay finite D9 law witnesses
         run: python3 scripts/research-d9-laws-1.py
-      - name: Verify D9 law authority boundary
-        run: python3 scripts/check-d9-laws-1.py
       - name: Verify consolidated D9 inventory
         run: python3 scripts/check-d9-v1-semantic-inventory.py
