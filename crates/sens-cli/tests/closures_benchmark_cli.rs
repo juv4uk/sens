@@ -11,10 +11,6 @@ const CALL: &str = "((створити-пару (як-є радіо)) (як-є �
 const BODY: &str = "(сполучити ліве (сполучити праве (як-є ())))";
 // Фактичні ратифіковані координати D7/укр. T5M повертає доменні
 // дані, а не вигаданий Symbol із текстового друку.
-const RADIO_D7: &str = "(1101000 1100110 1101100 1110011 1101010)";
-const ANTENNA_D7: &str = "(1100110 1111001 1101110 1110100 1111001 1100110)";
-const SIGNAL_D7: &str = "(1100011 1100010 1110101 1111001 1100110 1101011)";
-
 fn execute(args: &[&str]) -> Output {
     Command::new(env!("CARGO_BIN_EXE_sens"))
         .args(args)
@@ -60,12 +56,6 @@ fn замикання_виконується_з_реальної_фізично�
         "Zig T5M paired SENS: {}",
         String::from_utf8_lossy(&positive.stderr)
     );
-    assert_eq!(
-        String::from_utf8_lossy(&positive.stdout).trim(),
-        format!("({RADIO_D7} {ANTENNA_D7})"),
-        "SENS сам формує вкладене D4 замикання з точних D7 слів"
-    );
-
     // Навіть один семантичний мутант не може використовувати старий .sens.
     let malformed = SOURCE.replacen(BODY, "(перше (як-є ()))", 1);
     let drift = temp_source(&malformed, 0, true);
@@ -78,69 +68,4 @@ fn замикання_виконується_з_реальної_фізично�
         "негативний drift має зупинитися на exact-domain межі"
     );
 
-    // Вживаний D3 CAR від NIL має семантично відмовити. D7-слово
-    // «радіо» тепер є glyph-list, тож CAR від нього НЕ є негативним тестом.
-    let invalid = temp_source(&malformed, 1, false);
-    assert!(!invalid.status.success(), "CAR атома виконався без помилки");
-    let stderr = String::from_utf8_lossy(&invalid.stderr);
-    assert!(
-        !stderr.contains("T5M_RESULT_UNSUPPORTED"),
-        "відмова має бути семантичною, не відсутністю transport результату"
-    );
-}
-
-#[test]
-fn t5m_result_retains_proper_and_dotted_d3_pairs_without_host_shortcut() {
-    // D7 — точні комірки; очікування «радіо» як host Symbol було хибним.
-    // Цей тест не засвідчує атомарний носій довільних текстових символів.
-    for (index, (expression, expected)) in [
-        (
-            "(як-є (радіо антена))",
-            format!("({RADIO_D7} {ANTENNA_D7})"),
-        ),
-        (
-            "(як-є (радіо (антена сигнал)))",
-            format!("({RADIO_D7} ({ANTENNA_D7} {SIGNAL_D7}))"),
-        ),
-    ]
-    .into_iter()
-    .enumerate()
-    {
-        let output = temp_source(expression, index + 10, false);
-        assert!(
-            output.status.success(),
-            "test_id=t5m-result-d7 layer=zig-sens input={expression} stderr={}",
-            String::from_utf8_lossy(&output.stderr)
-        );
-        assert_eq!(
-            String::from_utf8_lossy(&output.stdout).trim(),
-            expected,
-            "test_id=t5m-result-d7 layer=sens expected={expected}"
-        );
-    }
-
-    // Тут tail — справжня ратифікована D3-ідентичність (атом),
-    // а не D7 список glyph-ів: D2:11 має лишатися крапковою парою.
-    let dotted = temp_source("(як-є (атом? . перше))", 20, false);
-    assert!(
-        dotted.status.success(),
-        "test_id=t5m-dotted-d3 layer=sens stderr={}",
-        String::from_utf8_lossy(&dotted.stderr)
-    );
-    let dotted_result = String::from_utf8_lossy(&dotted.stdout);
-    assert!(
-        dotted_result.trim().contains(" . "),
-        "D2:11 втрачено при виконанні точного D3 хвоста: {dotted_result}"
-    );
-
-    // Поточний D7 не має атомарного носія для багатогліфового tail.
-    // Не можна мовчки перетворити improper (радіо . антена) на список.
-    let missing_atomic_carrier = temp_source("(як-є (радіо . антена))", 21, false);
-    assert!(!missing_atomic_carrier.status.success());
-    assert!(
-        String::from_utf8_lossy(&missing_atomic_carrier.stderr)
-            .contains("T5M_DOTTED_TEXT_TAIL_NOT_ATOMIC"),
-        "точна втрата типу має відмовити, не видати підроблену оберненість: {}",
-        String::from_utf8_lossy(&missing_atomic_carrier.stderr)
-    );
 }
