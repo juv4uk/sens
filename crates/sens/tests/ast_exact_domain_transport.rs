@@ -391,6 +391,6 @@ fn точний_ast_wire_fasl_d24_d5_sens_d1_з_раціональним_нас�
             expression(ExprKind::Number(1.0, Exactness::Exact)),
         ],
     );
-    assert!(encode_exact_wire_program(&[unqualified.clone()]).is_none());
+    assert!(encode_exact_wire_program(std::slice::from_ref(&unqualified)).is_none());
     assert!(encode_exact_fasl_program(&[unqualified], &[0; 32]).is_none());
 }
