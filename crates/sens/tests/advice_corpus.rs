@@ -70,7 +70,7 @@ fn eval_advice_corpus(source: &str) -> String {
 fn direct_controlled_fact_reaches_proved_narration() {
     let source = r#"
         (визначити перехід
-          (порадити-світ
+          (порадити-всі-світ
             (порожній-світ)
             (як-є astronomy)
             (розібрати (як-є (earth is a planet)))))
@@ -136,11 +136,11 @@ fn recursive_rule_survives_the_same_end_to_end_path() {
 fn explicit_conflict_is_rejected_and_cannot_replace_the_existing_fact() {
     let source = r#"
         (визначити перша-порада
-          (порадити-світ
+          (порадити-всі-світ
             (порожній-світ) (як-є ethics) (як-є ((mortal socrates)))))
         (визначити світ-з-фактом (друге перша-порада))
         (визначити друга-порада
-          (порадити-світ
+          (порадити-всі-світ
             світ-з-фактом (як-є ethics)
             (як-є ((хибне? (mortal socrates))))))
         (визначити початкові-клаузи
