@@ -464,6 +464,10 @@ class SterileZigCorridorTests(unittest.TestCase):
             encoding="utf-8"
         )
         check(source)
+        # Both valid Rust egress forms must preserve the Zig path.
+        tail = "zig_transport::encode_f3(bytes)"
+        self.assertIn(tail, source, "missing live F3C Zig egress")
+        check(source.replace(tail, "return zig_transport::encode_f3(bytes);", 1))
 
         changes = (
             (
@@ -490,8 +494,12 @@ class SterileZigCorridorTests(unittest.TestCase):
                 '.map_err(|e| format!("{e:?}"))?;',
             ),
             (
-                "return zig_transport::encode_f3(bytes);",
-                "return Ok(Some(bytes.to_vec())); // zig_transport::encode_f3(bytes);",
+                "zig_transport::encode_f3(bytes)",
+                "return Ok(Some(bytes.to_vec())); // zig_transport::encode_f3(bytes)",
+            ),
+            (
+                "zig_transport::encode_f3(bytes)",
+                "let _ = zig_transport::encode_f3(bytes);\\n        Ok(Some(bytes.to_vec()))",
             ),
         )
         for original, forged in changes:
