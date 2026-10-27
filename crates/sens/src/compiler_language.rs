@@ -1215,7 +1215,7 @@ mod tests {
     }
 
     #[test]
-    fn проєкція_компілятора_приймає_точний_D7_список_і_відхиляє_змішане() {
+    fn проєкція_компілятора_приймає_точний_d7_список_і_відхиляє_змішане() {
         let expected = "compiler-compilation-artifact-1";
         let text = crate::text7_projection::encode_text7(expected, crate::Text7Layout::En)
             .expect("схема має мати точну проєкцію D7 v2");
@@ -1681,10 +1681,15 @@ mod tests {
         assert_eq!(artifact, repeated);
 
         let rows = list_values(&artifact);
-        assert!(matches!(
-            rows.first(),
-            Some(schema) if compiler_surface_text(schema).as_deref() == Some("compiler-compilation-artifact-1")
-        ));
+        let schema = rows.first();
+        assert!(
+            matches!(
+                schema,
+                Some(value) if compiler_surface_text(value).as_deref() == Some("compiler-compilation-artifact-1")
+            ),
+            "Схему артефакту не відтворено: значення={schema:?}, текст={:?}",
+            schema.and_then(|value| compiler_surface_text(value))
+        );
         assert!(matches!(
             field_value(&artifact, "program-wire-sha256"),
             Value::String(found) if found.as_ref() == digest
