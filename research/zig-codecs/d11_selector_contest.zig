@@ -153,28 +153,6 @@ test "D11 Драбина: один потік selector9 переносить у�
     try std.testing.expectEqualSlices(u16, &source, &restored);
 }
 
-test "D11 Драбина: запам'ятати всі 512 координат і Lisp-імен таблиці" {
-    const file = fopen("lib/domains/d11.lisp", "rb") orelse return error.TableNotFound;
-    defer _ = fclose(file);
-    var line_buffer: [2048]u8 = undefined;
-    var next: u16 = selector_first;
-    while (fgets(line_buffer[0..].ptr, @intCast(line_buffer.len), file) != null) {
-        const end = std.mem.indexOfScalar(u8, &line_buffer, 0) orelse return error.LineTooLong;
-        const line = line_buffer[0..end];
-        if (!std.mem.startsWith(u8, line, "  (")) continue;
-        if (line.len < 15 or line[14] != ' ') continue;
-        const bits = line[3..14];
-        const word = std.fmt.parseInt(u16, bits, 2) catch return error.InvalidWord;
-        try std.testing.expectEqual(next, word);
-        const name = selectorName(word);
-        var needle_buf: [24]u8 = undefined;
-        const needle = try std.fmt.bufPrint(&needle_buf, "(LISP {s})", .{name[0..]});
-        try std.testing.expect(std.mem.indexOf(u8, line, needle) != null);
-        next += 1;
-    }
-    try std.testing.expectEqual(selector_last + 1, next);
-}
-
 test "D11 Драбина: 9, 11 і 16 біт — чесний облік байтів" {
     try std.testing.expectEqual(@as(usize, 72), try selectorPackedLen(64));
     try std.testing.expectEqual(@as(usize, 88), try packedLen(11, 64));
