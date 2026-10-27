@@ -33,12 +33,24 @@ jobs:
     name: Охоронець · Rust · Zig · SENS
     if: ${{ github.event_name != 'workflow_dispatch' || inputs.suite == 'quick' }}
     runs-on: ubuntu-24.04
-    timeout-minutes: 8
+    # Піднято з 8: компіляція `sens` (крок нижче) не вкладалась у 8 хвилин,
+    # а без неї PR міг злитись зі зламаною бібліотекою.
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
         with:
           fetch-depth: 0
           persist-credentials: false
+      - uses: dtolnay/rust-toolchain@1.99.0
+      # sens/build.rs вимагає пінований Zig: без нього cargo check падає
+      # на "binary bootstrap requires pinned Zig".
+      - uses: ./.github/actions/install-zig
+      # Компіляційний гейт для crates/sens/src/. Без нього PR зливали зміни,
+      # які ламали збірку: саме так стались E0603 і E0308 (виклик функції
+      # з непридатного модуля) — обидва виявились аж у preflight, не в PR.
+      - name: Компіляція бібліотеки sens
+        shell: bash
+        run: cargo check --locked -p sens --lib
       - name: Перевірити формат diff і синтаксис оболонки
         shell: bash
         run: |
