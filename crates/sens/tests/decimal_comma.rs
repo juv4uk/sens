@@ -1,6 +1,6 @@
 use sens::{parse, ErrorKind, ExprKind};
 
-fn obchyslyty(source: &fn ochikuvaty_symvol(source: &str) {
+fn ochikuvaty_symvol(source: &str) {
     let forms = parse(source).expect("читання символу має бути успішним");
     assert_eq!(forms.len(), 1);
     match &forms[0].kind {
