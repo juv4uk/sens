@@ -747,9 +747,9 @@ mod tests {
                 let mut oracle = vec![0_u64; 2 * n];
                 for i in 0..n {
                     let mut carry = 0_u128;
-                    for j in 0..n {
+                    for (j, &right_word) in right.iter().enumerate().take(n) {
                         let k = i + j;
-                        let value = u128::from(left[i]) * u128::from(right[j])
+                        let value = u128::from(left[i]) * u128::from(right_word)
                             + u128::from(oracle[k])
                             + carry;
                         oracle[k] = value as u64;
