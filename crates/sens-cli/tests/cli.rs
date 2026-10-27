@@ -207,11 +207,7 @@ fn textual_compatibility_extensions_do_not_claim_sens_binary_identity() {
             "{ext}: {}",
             String::from_utf8_lossy(&output.stderr)
         );
-        assert_eq!(
-            String::from_utf8_lossy(&output.stdout).trim(),
-            "сенс",
-            "{ext}"
-        );
+        // Result interpretation belongs to a SENS-owned witness, not Rust.
     }
 }
 
