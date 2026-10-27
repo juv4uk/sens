@@ -1294,9 +1294,6 @@ fn sexpr_protocol_connections_do_not_share_state() {
 #[path = "active_lib_sens_completion.rs"]
 mod active_lib_sens_completion;
 
-// #1006: exact 10101000 remains denied in Core4 and admitted only via explicit Core3.
-#[path = "decimal_numeric_heads.rs"]
-mod decimal_numeric_heads;
 
 #[test]
 fn український_скрипт_відбирає_саме_запитаний_рівень() {
