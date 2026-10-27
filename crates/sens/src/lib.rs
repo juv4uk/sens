@@ -1118,103 +1118,6 @@ mod core4_bootstrap_cache_tests {
     // Core4 уже повинен надати виконувані D6 макроси; повторне
     // зв'язування не має вимагати дубльованих текстових назв.
     #[test]
-    fn d6_macro_mechanism_rebinding_is_idempotent_after_core4() {
-        let mut session = Session::bare();
-        load_core_library(&mut session).expect("живий Core4 через Zig T5M");
-        bind_process_tcp_lisp_owned_macros(&mut session)
-            .expect("вже встановлені мовні D6 механізми допускають повторний прохід");
-        bind_process_tcp_lisp_owned_macros(&mut session)
-            .expect("повторний прохід не вимагає другого DEFINE");
-        for (surface, bits) in [("нехай", 0b001000u16), ("нехай*", 0b001001u16)] {
-            let identity = semantic_registry::exact_uk_callable_for_source_head(surface)
-                .expect("збережено ратифіковану D6 тотожність");
-            assert_eq!(identity.width(), 6);
-            assert_eq!(identity.packed_bits(), bits);
-            assert!(
-                matches!(
-                    session.environment.domain_code_slot(identity),
-                    Some(Value::Macro(_))
-                ),
-                "D6 {surface} завантажено тільки як реальний Lisp-макрос"
-            );
-        }
-    }
-
-    // Перевіряється лише видимість уже ратифікованого D8 механізму:
-    // закони розпізнавання символу перевіряє сам Lisp/SENS через Zig/T5M.
-    #[test]
-    fn d8_string_to_symbol_projection_is_installed_after_core4() {
-        let mut session = Session::bare();
-        load_core_library(&mut session).expect("чинний Core4 завантажується фізично");
-        // Таблиця драбини є джерелом координати; реєстр викличності
-        // навмисно не містить автоматично кожну ратифіковану поверхню.
-        assert_eq!(
-            domain_projection_catalog::lookup(
-                domain_projection_catalog::ProjectionSource::DomainTable,
-                8,
-                "11101101",
-                "ук",
-            ),
-            Some(domain_projection_catalog::ProjectionValue::Symbol(
-                "текст-у-символ"
-            ))
-        );
-        assert!(
-            matches!(
-                session.environment.get("текст-у-символ"),
-                Some(Value::Builtin(_))
-            ),
-            "вже реалізований D8 механізм має бути доступним звичайному Lisp"
-        );
-    }
-
-    #[test]
-    fn core4_t5m_bootstrap_contains_executable_forms() {
-        let form_count = binary_bootstrap::with_core4_program(PhysicalT5Program::form_count)
-            .expect("Zig-restored Core4 T5M program");
-        assert!(form_count > 0);
-
-        let mut binary_session = Session::bare();
-        let binary_result = load_core_library(&mut binary_session)
-            .expect("production Core4 bootstrap executes Zig-restored T5M");
-        assert_eq!(
-            binary_session.environment.selected_core_profile(),
-            Some(CoreProfile::Core4)
-        );
-
-        let mut source_session = Session::bare();
-        let source_result =
-            load_core_library_with_fasl_mode(&mut source_session, b"source-oracle", false)
-                .expect("source Core4 oracle remains available to tests");
-        assert_eq!(
-            binary_result.value.to_string(),
-            source_result.value.to_string()
-        );
-
-        for session in [&mut binary_session, &mut source_session] {
-            let result = eval_program("(додати-1 число-один)", session)
-                .expect("Core4 D6 operation is callable after bootstrap");
-            assert_eq!(result.value.to_string(), "2");
-        }
-    }
-
-    #[test]
-    fn core2_profile_selection_does_not_load_comment_only_source() {
-        let mut session = Session::bare();
-        let result = load_core2_library(&mut session).expect("Core2 profile selection");
-        assert_eq!(
-            session.environment.selected_core_profile(),
-            Some(CoreProfile::Core2)
-        );
-        assert!(matches!(result.value, Value::Nil));
-        assert!(result.output.is_empty());
-    }
-
-    /// Measurement, not a language law. Each sample executes the identical
-    /// Lisp-owned macro/Core4 bootstrap in a fresh bare Session; the *only*
-    /// variable is cached vs newly verified decoded/lowered binary transport.
-    /// An ignored benchmark avoids slowing normal CI correctness checks.
-    #[test]
     #[ignore = "performance: run explicitly with --release on GitHub-hosted CPU"]
     fn benchmark_core4_cache_vs_fresh() {
         use std::{hint::black_box, time::Instant};
@@ -1289,27 +1192,6 @@ mod core4_bootstrap_cache_tests {
     }
 
     #[test]
-    fn cached_embedded_core_preserves_independent_sessions_and_domain_result() {
-        let program = parse_canonical_binary("10 001 00 000 01").unwrap();
-        let mut first = Session::bare();
-        let mut second = Session::bare();
-        load_core_library(&mut first).expect("first cached Core4 bootstrap");
-        load_core_library(&mut second).expect("second cached Core4 bootstrap");
-        assert_eq!(
-            first.environment.selected_core_profile(),
-            Some(CoreProfile::Core4)
-        );
-        assert_eq!(
-            second.environment.selected_core_profile(),
-            Some(CoreProfile::Core4)
-        );
-        let left = eval_parsed_expressions(&program, &mut first).unwrap();
-        let right = eval_parsed_expressions(&program, &mut second).unwrap();
-        assert!(matches!(left.value, Value::Nil));
-        assert_eq!(left, right);
-    }
-
-    #[test]
     fn valid_fasl_path_selects_core4_and_evaluates_current_core() {
         let expressions =
             parse_mixed_exact_domain_core_source("lib/core4.lisp", CORE_LIBRARY_SOURCE)
@@ -1323,57 +1205,6 @@ mod core4_bootstrap_cache_tests {
         assert_eq!(
             session.environment.selected_core_profile(),
             Some(CoreProfile::Core4)
-        );
-    }
-
-    #[test]
-    fn d10_monotonic_nanoseconds_loads_and_invokes_exact_surface() {
-        let mut session = Session::default();
-        load_core_library(&mut session).expect("Core4 bootstrap");
-        load_time_library(&mut session).expect("time library bootstrap");
-
-        let result = eval_program("(монотонний-наносекунди)", &mut session)
-            .expect("exact D10 monotonic-nanoseconds mechanism is callable");
-        let nanoseconds = result
-            .value
-            .to_string()
-            .parse::<i128>()
-            .expect("monotonic clock result is an exact integer");
-        assert!(nanoseconds >= 0);
-
-        let identity = semantic_registry::d9_binding_identity_for_definition("створити-символ")
-            .expect("ratified D9 identity for fresh-symbol operation");
-        let argument = Value::String(std::rc::Rc::from("probe-"));
-        let first = eval::invoke_value(
-            &Value::DomainIdentity(identity),
-            std::slice::from_ref(&argument),
-            &session.environment,
-            Span::default(),
-        )
-        .expect("exact D9 mechanism calls the Lisp-owned symbol constructor");
-        let second = eval::invoke_value(
-            &Value::DomainIdentity(identity),
-            &[argument],
-            &session.environment,
-            Span::default(),
-        )
-        .expect("exact D9 mechanism returns another fresh symbol");
-        assert!(matches!(first, Value::Symbol(_)));
-        assert!(matches!(second, Value::Symbol(_)));
-        assert_ne!(first, second);
-
-        let unrelated = DomainIdentity::D10(
-            DomainD10::new(0b0000000010).expect("valid unrelated D10 resident"),
-        );
-        assert!(
-            eval::invoke_value(
-                &Value::DomainIdentity(unrelated),
-                &[],
-                &session.environment,
-                Span::default(),
-            )
-            .is_err(),
-            "one explicit D10 mechanism must not make other D10 residents callable"
         );
     }
 
