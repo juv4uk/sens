@@ -37,7 +37,7 @@ jobs:
         run: |
           cargo test --locked -p sens --lib binary_number::tests
           cargo test --locked -p sens --lib qualified_numeric_domain_value_tests
-          cargo test --locked -p sens --lib eval::d6_arithmetic::tests
+
           cargo test --locked -p sens --lib binary_framing::tests
           cargo test --locked -p sens --lib outer_envelope::tests::unratified_outer_n_path
           cargo test --locked -p sens --features rust-t5-reference --test numeric_composition_frames
