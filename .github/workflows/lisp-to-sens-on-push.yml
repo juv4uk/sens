@@ -31,6 +31,8 @@ concurrency:
 
 permissions:
   contents: write
+  # GITHUB_TOKEN push does not start downstream CI; explicit workflow_dispatch does.
+  actions: write
 
 jobs:
   mint:
@@ -123,6 +125,8 @@ jobs:
       - name: Закомітити оновлені .sens
         if: success()
         shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
           git config user.name  "sens-mint-bot"
@@ -171,7 +175,16 @@ jobs:
 
           for attempt in 1 2 3 4 5; do
             if git push origin HEAD:main 2>/dev/null; then
-              echo "LISP_TO_SENS_PUSHED attempt=$attempt sha=$(git rev-parse HEAD)"
+              published_sha="$(git rev-parse HEAD)"
+              echo "LISP_TO_SENS_PUSHED attempt=$attempt sha=$published_sha"
+              # A GITHUB_TOKEN push cannot trigger ci.yml's push event. Dispatch
+              # its existing native preflight on the exact generated-pair SHA.
+              if ! gh workflow run ci.yml --ref main \
+                  -f suite=release-preflight -f candidate_sha="$published_sha"; then
+                echo "::error::LISP_TO_SENS_EXACT_SHA_PREFLIGHT_DISPATCH_FAILED sha=$published_sha" >&2
+                exit 1
+              fi
+              echo "LISP_TO_SENS_PREFLIGHT_DISPATCHED sha=$published_sha"
               exit 0
             fi
             echo "LISP_TO_SENS_PUSH_RETRY attempt=$attempt (main рухається)"
