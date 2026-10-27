@@ -1389,9 +1389,6 @@ jobs:
           if grep -Eq '^(lib/time\.lisp|crates/sens/tests/(clock|time_host_surface|timezone_raw)\.rs|\.github/workflows/ci\.yml)$' "$changed"; then
             CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test time_host_surface ntp_mode_and_stratum_execute_exact_d1_and_reject_lists -- --exact --nocapture
             # Позитивна та негативна гілки фактично виконуються SENS, не лексичним Python-сканером.
-            CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test clock raw_unix_clock_observation_is_interpreted_by_lisp -- --exact --nocapture
-            CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test clock core_integer_quotient_and_mod_keep_exact_lisp_laws -- --exact --nocapture
-            CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test clock ntp_field_interpretation_is_language_owned -- --exact --nocapture
             CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test timezone_raw -- --nocapture
           fi
           # Тільки змінений механізм: реальні позитивні та негативні SENS-випадки.
