@@ -1067,12 +1067,36 @@ fn lift_expression(
                 || source_spelling(source, &lifted[0]) == Some("'");
 
             if quote_data {
-                // A canonical D4 negation head can occur as object-language
-                // data inside a knowledge clause. Preserve its exact identity
-                // through QUOTE; ordinary predicate names and macro templates
-                // remain data and never acquire callability from their spelling.
-                for item in lifted.iter_mut().skip(1) {
-                    *item = lift_quoted_d4_identity_data(source, item.clone(), depth + 1)?;
+                // Дочірній span після змішаного підняття може бути локальним
+                // поданням D7 (наприклад, D4:0100 відображається як «п-р»).
+                // Повторно читаємо повну цитовану форму з її початкового
+                // діапазону, щоб D4-ідентичність походила з вихідного написання,
+                // а не відновлювалася з втратного відображення D7.
+                let raw_quote = source.get(span.start..span.end);
+                let raw_items = raw_quote.and_then(|form| {
+                    let mut parsed = crate::parser::parse(form).ok()?;
+                    if parsed.len() != 1 {
+                        return None;
+                    }
+                    match parsed.remove(0).kind {
+                        ExprKind::List(items) if items.len() == lifted.len() => Some((form, items)),
+                        _ => None,
+                    }
+                });
+                if let Some((raw_source, raw_items)) = raw_items {
+                    for index in 1..lifted.len() {
+                        lifted[index] = lift_quoted_d4_identity_data(
+                            raw_source,
+                            raw_items[index].clone(),
+                            depth + 1,
+                        )?;
+                    }
+                } else {
+                    // Fail-closed сумісність, якщо точний діапазон не дає
+                    // повторно розібрати одну повну цитовану форму.
+                    for item in lifted.iter_mut().skip(1) {
+                        *item = lift_quoted_d4_identity_data(source, item.clone(), depth + 1)?;
+                    }
                 }
             } else {
                 if is_exact_cond(&lifted[0]) {
