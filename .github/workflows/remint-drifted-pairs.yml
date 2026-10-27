@@ -54,7 +54,7 @@ jobs:
   remint:
     # У звичайному CI caller-owned запуску лишаємо наявну логіку.
     # Прямий push у цей файл є лише аварійним target remint і вимагає маркера.
-    if: ${{ github.event_name == 'workflow_dispatch' || github.workflow != 'remint-drifted-pairs' || contains(github.event.head_commit.message, 'F6_PRODUCER_REMINT') || contains(github.event.head_commit.message, 'SENS_REMINT_F6_KEY_CANON') }}
+    if: ${{ github.event_name == 'workflow_dispatch' || github.workflow != 'remint-drifted-pairs' || contains(github.event.head_commit.message, 'F6_PRODUCER_REMINT') || contains(github.event.head_commit.message, 'SENS_REMINT_F6_KEY_CANON') || contains(github.event.head_commit.message, 'COMPILER_NUCLEUS_REMINT') }}
     outputs:
       published_sha: ${{ steps.published_pairs.outputs.published_sha }}
     runs-on: ubuntu-latest
@@ -173,6 +173,12 @@ jobs:
             if git show -s --format=%B "$AFTER" | grep -Fq 'F6_PRODUCER_REMINT'; then
               list="$(printf '%s\n%s' "$list" 'tests/fixtures/wsm-fs-record-producer.lisp')"
               echo "REMINT_F6_PRODUCER_TARGET source=tests/fixtures/wsm-fs-record-producer.lisp"
+            fi
+            # Релізна трійка ядра компілятора не повинна чекати позаду backlog:
+            # точний маркер push ставить єдине чинне SENS-джерело в пріоритет.
+            if git show -s --format=%B "$AFTER" | grep -Fq 'COMPILER_NUCLEUS_REMINT'; then
+              list="$(printf '%s\n%s' "$list" 'lib/compiler-nucleus.lisp')"
+              echo "REMINT_COMPILER_NUCLEUS_TARGET source=lib/compiler-nucleus.lisp"
             fi
             # Зберігати точні джерела push, а не тільки їхню кількість:
             # подальше впорядкування непарних трійок змінює позиції.
