@@ -253,7 +253,7 @@ jobs:
           if grep -Eq '^(lib/core\.lisp|lib/core1\.lisp|tests/test_core1_(third|fourth)_domain_canary\.py|tests/fixtures/core1-(third|fourth)-domain-canary/.*|crates/sens-cli/tests/core1_array_bounds_cli\.rs|\.github/workflows/ci\.yml)$' "$changed_all"; then
             echo 'core1_tests=true' >> "$GITHUB_OUTPUT"
           fi
-          if grep -Eq '^(lib/core\.lisp|lib/knowledge\.lisp|crates/sens/tests/knowledge_journal_d3_ukr\.rs|crates/sens/tests/knowledge_exact_macro_migration\.rs|crates/sens/tests/knowledge_d1_recovery\.rs|tests/test_knowledge_d1_recovery\.py|\.github/workflows/ci\.yml)$' "$changed_all"; then
+          if grep -Eq '^(lib/core\.lisp|lib/knowledge\.lisp|crates/sens/tests/knowledge_d1_recovery\.rs|tests/test_knowledge_d1_recovery\.py|\.github/workflows/ci\.yml)$' "$changed_all"; then
             echo 'knowledge_tests=true' >> "$GITHUB_OUTPUT"
           fi
           # Адресний запуск чинного D3 механізму та його незалежного SENS тесту.
@@ -377,7 +377,7 @@ jobs:
           fi
           # Кожен адресний Rust-свідок нижче проходить build.rs, який
           # перевіряє pinned Zig навіть тоді, коли сам тест не змінювався.
-          if grep -Eq '^(lib/core\.lisp|lib/core1\.lisp|lib/knowledge\.lisp|lib/forward\.lisp|lib/unify\.lisp|lib/machine/operands/x86-64\.lisp|lib/machine/capability-axis\.lisp|lib/machine/lowering/semantic-x86-64\.lisp|crates/sens/tests/machine_exact_domain_cpu\.rs|crates/sens/tests/machine_capability_axis\.rs|tests/test_capability_axis_ukr_projection\.py|crates/sens-cli/tests/core1_array_bounds_cli\.rs|crates/sens/tests/knowledge_journal_d3_ukr\.rs|crates/sens/tests/reasoning_forward_knowledge_d3_migration\.rs|crates/sens/tests/machine_typed_operands\.rs|crates/sens/tests/machine_exact_d5_order\.rs|lib/machine/encoding/coverage-generator\.lisp|lib/quantity\.lisp|crates/sens/tests/quantity_length_d24_current\.rs|crates/sens/tests/quantity_d1_direct_cutover\.rs|tests/test_ukr_quantity_projection\.py|crates/sens/src/domain_numeric\.rs|crates/sens/src/binary_number\.rs|crates/sens/src/machine_math\.rs|crates/sens/src/machine_math_skylake\.S|\.github/workflows/ci\.yml)$' "$changed_all"; then
+          if grep -Eq '^(lib/core\.lisp|lib/core1\.lisp|lib/knowledge\.lisp|lib/forward\.lisp|lib/unify\.lisp|lib/machine/operands/x86-64\.lisp|lib/machine/capability-axis\.lisp|lib/machine/lowering/semantic-x86-64\.lisp|crates/sens/tests/machine_exact_domain_cpu\.rs|crates/sens/tests/machine_capability_axis\.rs|tests/test_capability_axis_ukr_projection\.py|crates/sens-cli/tests/core1_array_bounds_cli\.rs|crates/sens/tests/reasoning_forward_knowledge_d3_migration\.rs|crates/sens/tests/machine_typed_operands\.rs|crates/sens/tests/machine_exact_d5_order\.rs|lib/machine/encoding/coverage-generator\.lisp|lib/quantity\.lisp|crates/sens/tests/quantity_length_d24_current\.rs|crates/sens/tests/quantity_d1_direct_cutover\.rs|tests/test_ukr_quantity_projection\.py|crates/sens/src/domain_numeric\.rs|crates/sens/src/binary_number\.rs|crates/sens/src/machine_math\.rs|crates/sens/src/machine_math_skylake\.S|\.github/workflows/ci\.yml)$' "$changed_all"; then
             echo 'needs_zig=true' >> "$GITHUB_OUTPUT"
           fi
 
@@ -1204,9 +1204,8 @@ jobs:
         if: ${{ always() && ((github.event_name == 'push' && startsWith(github.event.head_commit.message, 'Знання:')) || steps.changed-t5m-lisp.outputs.knowledge_tests == 'true') }}
         run: |
           set -euo pipefail
-          cargo test --locked -p sens --test knowledge_journal_d3_ukr -- --nocapture
-          # Чотири живі Д3 закони журналу: порядок, кратність, порожній список.
-          cargo test --locked -p sens --test knowledge_exact_macro_migration -- --nocapture
+          echo '::error::Rust-оракули знань вилучено; потрібні позитивний і негативний нативні свідки SENS через Zig/T5M'; exit 1
+
 
       - name: "MetaEval: живі D1 позитивні й негативні українські предикати"
         if: ${{ !cancelled() && steps.changed-t5m-lisp.outputs.meta_eval_d1_tests == 'true' }}
