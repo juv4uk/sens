@@ -801,6 +801,9 @@ pub fn parse_mixed_exact_domain_core_source(
     // never gains width inference from this migration bridge.
     let parsed = parse_mixed_source(source, true)?
         .into_iter()
+        .map(|expr| проєктувати_цитовані_числа_core4(source, expr, 0))
+        .collect::<Result<Vec<_>, _>>()?
+        .into_iter()
         .map(|expr| lift_pinned_d8_io(source, expr, 0, true))
         .collect::<Result<Vec<_>, _>>()?;
     // Цитовані українські імена залишаються даними: побітовий
@@ -1045,12 +1048,6 @@ fn lift_expression(
             // W8 QUOTE remains opaque in every mode so quoted (100 ...) data
             // is never projected to a callable D3 identity.
             if descend_legacy_machine_wrappers && is_legacy_w8_quote_head(source, &lifted[0]) {
-                // W8 QUOTE блокує підняття голови до виклику, але цілі десяткові числа
-                // всередині мають зберегти точний числовий носій D24+. Обробляємо
-                // лише дані цитати; вкладені форми не стають викликами.
-                for item in lifted.iter_mut().skip(1) {
-                    *item = проєктувати_числові_дані_цитати(source, item.clone(), depth + 1)?;
-                }
                 return Ok(Expr {
                     kind: ExprKind::List(Rc::from(lifted.into_boxed_slice())),
                     span,
@@ -1496,6 +1493,58 @@ fn проєктувати_числові_дані_цитати(
         ExprKind::Pair(car, cdr) => {
             let car = проєктувати_числові_дані_цитати(source, (*car).clone(), depth + 1)?;
             let cdr = проєктувати_числові_дані_цитати(source, (*cdr).clone(), depth + 1)?;
+            Ok(Expr {
+                kind: ExprKind::Pair(Rc::new(car), Rc::new(cdr)),
+                span,
+            })
+        }
+        other => Ok(Expr { kind: other, span }),
+    }
+}
+
+fn проєктувати_цитовані_числа_core4(
+    source: &str,
+    expression: Expr,
+    depth: u32,
+) -> Result<Expr, LanguageError> {
+    if depth > MAX_STRUCTURE_DEPTH {
+        return Err(LanguageError::new(
+            ErrorKind::Parse,
+            "цитовані числа Core4 перевищують межу вкладеності",
+            expression.span,
+        ));
+    }
+
+    let Expr { kind, span } = expression;
+    match kind {
+        ExprKind::List(items) if !items.is_empty() => {
+            let mut projected = items.to_vec();
+            if is_legacy_w8_quote_head(source, &projected[0]) {
+                for item in projected.iter_mut().skip(1) {
+                    *item =
+                        проєктувати_числові_дані_цитати(source, item.clone(), depth + 1)?;
+                }
+            } else {
+                for item in &mut projected {
+                    *item = проєктувати_цитовані_числа_core4(
+                        source,
+                        item.clone(),
+                        depth + 1,
+                    )?;
+                }
+            }
+            Ok(Expr {
+                kind: ExprKind::List(Rc::from(projected.into_boxed_slice())),
+                span,
+            })
+        }
+        ExprKind::List(items) => Ok(Expr {
+            kind: ExprKind::List(items),
+            span,
+        }),
+        ExprKind::Pair(car, cdr) => {
+            let car = проєктувати_цитовані_числа_core4(source, (*car).clone(), depth + 1)?;
+            let cdr = проєктувати_цитовані_числа_core4(source, (*cdr).clone(), depth + 1)?;
             Ok(Expr {
                 kind: ExprKind::Pair(Rc::new(car), Rc::new(cdr)),
                 span,
