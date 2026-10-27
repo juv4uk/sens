@@ -11,6 +11,12 @@ fn eval_outcome_narration(source: &str) -> String {
     for (path, source) in [
         ("lib/unify.lisp", include_str!("../../../lib/unify.lisp")),
         ("lib/reason.lisp", include_str!("../../../lib/reason.lisp")),
+        ("lib/forward.lisp", include_str!("../../../lib/forward.lisp")),
+        (
+            "lib/knowledge.lisp",
+            include_str!("../../../lib/knowledge.lisp"),
+        ),
+        ("lib/world.lisp", include_str!("../../../lib/world.lisp")),
     ] {
         let parsed = parse_mixed_exact_domain_reasoning_source(path, source)
             .unwrap_or_else(|error| panic!("{path}: exact reasoning reader: {error}"));

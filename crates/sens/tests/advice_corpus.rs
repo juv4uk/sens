@@ -3,7 +3,7 @@
 //! The cases are chosen for distinct failure/derivation modes, not fixture count.
 
 use sens::{
-    eval_parsed_expressions, eval_pinned_reasoning_source, load_core_library, parse,
+    eval_parsed_expressions, eval_pinned_reasoning_source, load_core_library,
     parse_exact_domain_source, parse_mixed_exact_domain, Session,
 };
 
@@ -58,7 +58,7 @@ fn eval_advice_corpus(source: &str) -> String {
             panic!("SENS corpus dependency {library_path} failed: {error}")
         });
     }
-    let program = parse(source)
+    let program = parse_mixed_exact_domain(source)
         .unwrap_or_else(|e| panic!("Advice Taker Ukrainian source reader: {e}\nsource: {source}"));
     eval_parsed_expressions(&program, &mut session)
         .unwrap_or_else(|e| panic!("Advice Taker exact-domain eval: {e}\nsource: {source}"))
