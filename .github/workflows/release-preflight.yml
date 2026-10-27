@@ -75,7 +75,6 @@ jobs:
 
       - uses: dtolnay/rust-toolchain@1.99.0
         with:
-          toolchain: "1.99.0"
           components: clippy
       - uses: Swatinem/rust-cache@49a0bdc70d2e1b713ca9e2869b211fcce03d3c1c
         with:
@@ -155,7 +154,7 @@ jobs:
           workflow_source="$(
             awk '
               /^      - name: Мовна межа/ { skip = 1 }
-              /^      - name: "?(Мовна політика|Дозволені мови)/ { skip = 1 }
+              /^      - name: \"?\(Мовна політика|Дозволені мови\)/ { skip = 1 }
               /^      - name:/ {
                 if ($0 !~ /Мовна межа|Мовна політика|Дозволені мови/) skip = 0
               }
@@ -180,8 +179,6 @@ jobs:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09
       - uses: ./.github/actions/install-zig
       - uses: dtolnay/rust-toolchain@1.99.0
-        with:
-          toolchain: "1.99.0"
       - uses: Swatinem/rust-cache@49a0bdc70d2e1b713ca9e2869b211fcce03d3c1c
         with:
           shared-key: linux-release-abi
