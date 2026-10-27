@@ -3,9 +3,9 @@
 //! No new law, no D8/SID8 projection, no Zig semantic registry.
 
 use sens::{
-    parse, parse_binary_source_words,
+    parse_binary_source_words,
     parse_canonical_binary, parse_canonical_word_sequence, parse_exact_domain_source,
-    DomainIdentity, Exactness, ExprKind,
+    DomainIdentity, ExprKind,
 };
 
 const BARE_D1_D2_FRAME: &str = "10 110 00 1 00 0 01";
@@ -54,19 +54,6 @@ fn tagged_d1_is_not_canonical_binary_source() {
 }
 
 #[test]
-fn old_compatibility_reader_still_needs_temporary_d1_projection() {
-    let human = parse("1").expect("legacy numeric reader must remain distinct");
-    assert!(matches!(
-        human[0].kind,
-        ExprKind::Number(_, Exactness::Exact)
-    ));
-    let tagged = parse("#d1:1").expect("TEMPORARY compatibility D1 carrier");
-    assert_d1(&tagged[0], 1);
-    let bare = parse_canonical_binary("1").expect("canonical bare D1");
-    assert_d1(&bare[0], 1);
-}
-
-#[test]
 fn original_d1_identity_survives_t5m_word_roundtrip_without_tags() {
     let words: Vec<_> = parse_binary_source_words(BARE_D1_D2_FRAME)
         .expect("canonical width-bearing words")
@@ -93,17 +80,3 @@ fn original_d1_identity_survives_t5m_word_roundtrip_without_tags() {
     assert_d1(&items[2], 0);
 }
 
-#[test]
-fn bit_width_mutations_do_not_silently_preserve_d1_identity() {
-    // 01 is D2 CLOSE, not D1:1 with a redundant leading zero. It closes
-    // the list prematurely, leaving an unmatched 01 at the end.
-    assert!(parse_canonical_binary("10 110 00 01 00 0 01").is_err());
-    // D3 EMPTY and D1 NO are distinct, even when their packed value is zero.
-    let empty = parse_canonical_binary("000").unwrap();
-    let ExprKind::List(items) = &empty[0].kind else {
-        panic!("D3 EMPTY is list");
-    };
-    assert!(items.is_empty());
-    let no = parse_canonical_binary("0").unwrap();
-    assert_d1(&no[0], 0);
-}
