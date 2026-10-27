@@ -145,7 +145,7 @@ jobs:
         if: ${{ always() && inputs.full }}
         run: cargo clippy --locked --workspace --all-targets -- -D warnings
 
-      - name: "Дозволені мови: SENS/Rust/Zig/Guile/C/Assembler"
+      - name: "Дозволені мови + острови: SENS/Rust/Zig/Guile/C/Assembler; Common Lisp/Prolog/CLIPS/Datalog"
         id: native_language_policy
         if: always()
         shell: bash
@@ -165,7 +165,7 @@ jobs:
             echo "::error title=RELEASE_BLOCKED::активний workflow містить заборонений сторонній виконавець"
             exit 1
           fi
-          echo "RELEASE_NATIVE_LANGUAGE_POLICY=PASS semantic_authority=SENS mechanisms=Rust,Zig,Guile,C,Assembler"
+          echo "RELEASE_NATIVE_LANGUAGE_POLICY=PASS semantic_authority=SENS mechanisms=Rust,Zig,Guile,C,Assembler islands=CommonLisp,Prolog,CLIPS,Datalog island_role=execution_witness_only"
 
 
   linux-release-abi:
