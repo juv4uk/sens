@@ -661,8 +661,9 @@ mod tests {
             let mut b = vec![0_u64; len];
             b[0] = 1;
             assert_eq!(exact_words_add_sub("+", &a, &b), Some(vec![0; len]));
+            let zero_words = vec![0_u64; len];
             assert_eq!(
-                exact_words_add_sub("-", &[0; len], &b),
+                exact_words_add_sub("-", &zero_words, &b),
                 Some(vec![u64::MAX; len])
             );
             a[0] = 0;

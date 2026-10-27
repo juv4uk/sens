@@ -1646,8 +1646,9 @@ mod tests {
                     compute(op, &legacy_one, &maximum).is_none(),
                     "D{width}: {op} must reject unqualified first operand"
                 );
+                let zero_bits = vec![0; 2 * width];
                 let other_domain = Value::BinaryNumber(
-                    BinaryNumber::from_numeric_domain_bits(2 * width, &[0; 2 * width]).unwrap(),
+                    BinaryNumber::from_numeric_domain_bits(2 * width, &zero_bits).unwrap(),
                 );
                 assert!(
                     compute(op, &maximum, &other_domain).is_none(),
