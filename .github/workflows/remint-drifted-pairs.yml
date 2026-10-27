@@ -33,8 +33,13 @@ on:
 
 # Serialize both pair-writing lanes (lightweight changed-source mint and heavy drift recovery).
 # Concurrent writers can otherwise race on the same .sens blob and fail rebase.
+# ВЛАСНА група, не спільна з lisp-to-sens-on-push.
+# Причина: у спільній групі `cancel-in-progress: true` пуш-карбування
+# СКАСОВУВАЛО явний remint (прогін 0509d0c4 → completed/skipped).
+# Явний remint ручний і не має гинути від чужого пушу — тому своя група
+# і false (він не скасовує себе).
 concurrency:
-  group: sens-physical-pair-writer
+  group: sens-explicit-remint
   cancel-in-progress: false
   queue: max
 
