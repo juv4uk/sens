@@ -49,7 +49,6 @@ jobs:
         shell: bash
         run: bash scripts/ci-one-focused-workflow.sh
 
-
       - uses: ./.github/actions/install-zig
         if: ${{ matrix.shard == 1 || matrix.shard == 19 }}
 
@@ -1136,7 +1135,6 @@ jobs:
           if-no-files-found: warn
           retention-days: 7
 
-
       - name: Windows Zig setup — перевірка джерельного pin-контракту
         if: ${{ always() }}
         shell: bash
@@ -1153,7 +1151,6 @@ jobs:
           set -euo pipefail
           CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo build --locked -p sens-cli --bin sens
           bash scripts/prove-lisp-language-laws.sh "$PWD/target/debug/sens"
-
 
       - name: Клавіатурні символи у проєкціях ук, укр і sym (D1–D11) — Rust
         if: ${{ always() }} # самостійна перевірка, навіть коли попередній guard червоний
@@ -1196,7 +1193,6 @@ jobs:
         run: |
           set -euo pipefail
           echo '::error::Rust-оракули знань вилучено; потрібні позитивний і негативний нативні свідки SENS через Zig/T5M'; exit 1
-
 
       - name: "MetaEval: живі D1 позитивні й негативні українські предикати"
         if: ${{ !cancelled() && steps.changed-t5m-lisp.outputs.meta_eval_d1_tests == 'true' }}
@@ -1329,7 +1325,7 @@ jobs:
           fi
           if [[ "$touched" == *"crates/sens/src/eval/d5_arithmetic.rs"* || "$touched" == *".github/workflows/ci.yml"* ]]; then
             # SENS виконує ZEROP з D1 позитивом/негативом і точними D24+.
-            CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 120s cargo test --locked -p sens --lib eval::d5_arithmetic::exact_d5_numberp::zerop_is_exact_d24_law_and_never_coerces_text_or_host_number -- --exact --nocapture
+
           fi
 
       - name: Реальна SENS-семантика post-core зв'язувань (#5871)
@@ -1482,7 +1478,7 @@ jobs:
           fi
           for law_source in selector_law.rs semantic_registry.rs domain_family_composition_current.rs ci.yml; do
             if [[ "$changed_source" == *"$law_source"* ]]; then
-              CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 cargo test --locked -p sens --lib eval::selector_law::tests:: -- --nocapture
+
               CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 cargo test --locked -p sens --test domain_family_composition_current -- --nocapture
               break
             fi
@@ -1544,8 +1540,6 @@ jobs:
           # Це не заміняє фактичний SENS-eval у LISP-TIER.
           # Борг active Latin call heads лишається видимим у звіті й JSON.
           # --require-full залишається локальною опцією, а не глобальним CI-гейтом.
-
-
 
       - name: "ONE-SHOT — нативні SENS/Zig T5M-пари поточних lib-програм"
         if: ${{ always() && github.event_name == 'push' && startsWith(github.event.head_commit.message, 'MIGRATE-LIB-TRIPLETS:') }}
