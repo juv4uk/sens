@@ -1323,10 +1323,6 @@ jobs:
           if [[ "$touched" == *"crates/sens/src/domain_numeric.rs"* || "$touched" == *"crates/sens/src/binary_number.rs"* || "$touched" == *"crates/sens/src/machine_math.rs"* || "$touched" == *"crates/sens/src/machine_math_skylake.S"* || "$touched" == *".github/workflows/ci.yml"* ]]; then
             CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 120s cargo test --locked -p sens --lib domain_numeric::tests::wide_asm_seeded_full_domain_parity -- --exact
           fi
-          if [[ "$touched" == *"crates/sens/src/eval/d5_arithmetic.rs"* || "$touched" == *".github/workflows/ci.yml"* ]]; then
-            # SENS виконує ZEROP з D1 позитивом/негативом і точними D24+.
-
-          fi
 
       - name: Реальна SENS-семантика post-core зв'язувань (#5871)
         if: ${{ always() && github.event_name == 'workflow_dispatch' }}
