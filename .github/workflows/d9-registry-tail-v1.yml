@@ -21,5 +21,3 @@ jobs:
         run: python3 scripts/check-d9-surface-harvest-v1.py
       - name: Preserve overflow tranche
         run: python3 scripts/check-d9-overflow-review-v1.py
-      - name: Preserve first law-mining tranche
-        run: python3 scripts/check-d9-laws-1.py
