@@ -595,7 +595,14 @@ jobs:
         # Для ізольованого compiler remint F6 все одно виконується й може
         # провалити job, але не блокує публікацію тільки перевіреної трійки.
         # Загальний релізний preflight продовжує вимагати зелений F6.
-        if: ${{ !cancelled() && steps.remint.outcome == 'success' && (steps.f6_physical_proof.outcome == 'success' || (github.event_name == 'push' && contains(github.event.head_commit.message, 'COMPILER_NUCLEUS_REMINT'))) }}
+        # ДЕДЛОК (доказ — прогін be4237c0): Remint=success, F6=failure,
+        # Commit=skipped. F6 падає на СТАРОМУ носії, а коміт, який мав би
+        # оновити носій, скасовується через це саме падіння → коло.
+        # Аварійний вихід для push уже був (COMPILER_NUCLEUS_REMINT), але для
+        # ручного запуску його не було — і всі dispatch-remint гинули.
+        # Явний ручний запуск = явна воля: комітимо, F6 лишається червоним
+        # і перевіряється наступним прогоном на вже свіжому носії.
+        if: ${{ !cancelled() && steps.remint.outcome == 'success' && (steps.f6_physical_proof.outcome == 'success' || github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && contains(github.event.head_commit.message, 'COMPILER_NUCLEUS_REMINT'))) }}
         env:
           REMINT_CONTEST: ${{ steps.remint.outputs.contest }}
           REMINT_GITHUB_REF: ${{ github.ref }}
