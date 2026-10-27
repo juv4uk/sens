@@ -23,10 +23,6 @@ jobs:
           tar -xJf "$RUNNER_TEMP/zig-0.16.0.tar.xz" -C "$RUNNER_TEMP"
           echo "$RUNNER_TEMP/zig-x86_64-linux-0.16.0" >> "$GITHUB_PATH"
           "$RUNNER_TEMP/zig-x86_64-linux-0.16.0/zig" version
-      - name: Гра пам'яті — відтворюваний раунд усіх 512 функцій D11
-        run: zig test -lc research/zig-codecs/ladder_memory_game.zig
-      - name: Дослідна D13 — 2048 композицій з чинних 512 селекторів D11
-        run: zig test -lc research/zig-codecs/d13_selector_game.zig
       - name: Тести кодеку — 512 координат, roundtrip і негативні випадки
         run: zig test -lc research/zig-codecs/d11_selector_contest.zig
       - name: Зібрати змагання оптимізовано
@@ -48,6 +44,10 @@ jobs:
           grep -Fq 'p90_ns_per_roundtrip=' "$RUNNER_TEMP/d11_contest.log"
           grep -Fq 'D11_CONTEST_METHOD paired=YES alternating=YES samples=15' "$RUNNER_TEMP/d11_contest.log"
           test "$(grep -c 'roundtrip=EXACT paired=YES' "$RUNNER_TEMP/d11_contest.log")" -eq 6
+      - name: SENS-семантика D11/D13 — потрібен нативний доказ
+        run: |
+          echo '::error::Zig-оракули назв і законів D11/D13 видалено; позитивний і негативний SENS-свідки через Zig/T5M не підтверджені'
+          exit 1
       - name: Зберегти сирі результати
         if: always()
         uses: actions/upload-artifact@v4
