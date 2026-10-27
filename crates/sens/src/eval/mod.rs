@@ -886,6 +886,31 @@ fn dispatch_domain_call(
     environment: &Environment,
     span: Span,
 ) -> Result<EvalStep, LanguageError> {
+    let result = dispatch_domain_call_inner(identity, arguments, environment, span);
+    if std::env::var_os("SENS_EQ_TRACE").is_some() {
+        match result {
+            Err(mut error) if error.message.starts_with("eq expects two atoms") => {
+                let domain_identity: crate::DomainIdentity = identity.into();
+                error.message.push_str(&format!(
+                    "\nSENS_DOMAIN_ID=D{}:{}",
+                    domain_identity.width(),
+                    domain_identity
+                ));
+                Err(error)
+            }
+            other => other,
+        }
+    } else {
+        result
+    }
+}
+
+fn dispatch_domain_call_inner(
+    identity: CoreDomainIdentity,
+    arguments: &[Expr],
+    environment: &Environment,
+    span: Span,
+) -> Result<EvalStep, LanguageError> {
     if is_d3(identity, 0b001) {
         special_forms::exact_arity("D3:001", arguments, 1, span)?;
         return special_forms::quoted(&arguments[0]).map(EvalStep::Value);
