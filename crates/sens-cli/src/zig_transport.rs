@@ -20,18 +20,6 @@ unsafe extern "C" {
         capacity: usize,
     ) -> isize;
     fn sens_zig_t5m_validate(input: *const u8, len: usize) -> i32;
-    fn sens_zig_t5m_encode_be3(
-        input: *const u8,
-        byte_len: usize,
-        output: *mut u8,
-        capacity: usize,
-    ) -> isize;
-    fn sens_zig_t5m_decode_be3(
-        input: *const u8,
-        byte_len: usize,
-        output: *mut u8,
-        capacity: usize,
-    ) -> isize;
     fn sens_zig_t5m_encode_words(
         input: *const u8,
         byte_len: usize,
@@ -838,34 +826,66 @@ fn exact_words_to_be3(words: &[sens::BinarySourceWord]) -> Result<Vec<u8>, Strin
     Ok(be3)
 }
 
-pub fn encode_t5m_direct(words: &[sens::BinarySourceWord]) -> Result<Vec<u8>, String> {
-    version()?;
-    if words.is_empty() {
-        return Err("Zig physical T5M cannot encode an empty record".into());
-    }
-    let semantic_trits = words
+fn source_words_to_t5m_words(
+    words: &[sens::BinarySourceWord],
+) -> Result<Vec<ExactT5MWord>, String> {
+    words
         .iter()
-        .try_fold(0usize, |n, word| n.checked_add(word.width()))
-        .ok_or("Zig T5 semantic bit count overflow")?;
-    let used_trits = semantic_trits
-        .checked_add(words.len() - 1)
-        .ok_or("Zig T5 separator count overflow")?;
-    let physical_capacity = used_trits
-        .checked_add(4)
-        .ok_or("Zig T5M byte count overflow")?
-        / 5;
-    let be3 = exact_words_to_be3(words)?;
-    let mut bytes = vec![0u8; physical_capacity];
-    let len = unsafe {
-        sens_zig_t5m_encode_be3(be3.as_ptr(), be3.len(), bytes.as_mut_ptr(), bytes.len())
-    };
-    if len < 0 || usize::try_from(len).ok() != Some(bytes.len()) {
-        return Err(format!("Zig physical T5M encode rejected: code={len}"));
-    }
-    // Обидва напрями проходять тільки стерильний Zig ABI, без Rust T5 codec.
-    let restored = decode_t5m_words(&bytes)?;
+        .copied()
+        .map(|word| {
+            let width = word.width();
+            let packed = word.packed_bits();
+            let bits = (0..width)
+                .map(|index| ((packed >> (width - index - 1)) & 1) as u8)
+                .collect();
+            ExactT5MWord::new(width, bits)
+        })
+        .collect()
+}
+
+fn t5m_words_to_source_words(
+    words: Vec<ExactT5MWord>,
+) -> Result<Vec<sens::BinarySourceWord>, String> {
+    words
+        .into_iter()
+        .map(|word| {
+            let width = word.width;
+            if !(1..=9).contains(&width) {
+                return Err(if width == 10 {
+                    "Zig T5M D10 coordinate is data, not W1-W9 program ingress".into()
+                } else {
+                    format!("Zig T5M exact word is outside W1-W9: width={width}")
+                });
+            }
+            let packed = word
+                .bits
+                .iter()
+                .fold(0u16, |value, bit| (value << 1) | u16::from(*bit));
+            let low = packed as u8;
+            let source = match width {
+                1 => sens::Bit1::new(low).map(sens::BinarySourceWord::W1),
+                2 => sens::Bit2::new(low).map(sens::BinarySourceWord::W2),
+                3 => sens::Bit3::new(low).map(sens::BinarySourceWord::W3),
+                4 => sens::Bit4::new(low).map(sens::BinarySourceWord::W4),
+                5 => sens::Bit5::new(low).map(sens::BinarySourceWord::W5),
+                6 => sens::Bit6::new(low).map(sens::BinarySourceWord::W6),
+                7 => sens::Bit7::new(low).map(sens::BinarySourceWord::W7),
+                8 => sens::Bit8::new(low).map(sens::BinarySourceWord::W8),
+                9 => sens::Bit9::new(packed).map(sens::BinarySourceWord::W9),
+                _ => None,
+            }
+            .ok_or_else(|| format!("Zig T5M exact word is outside W1-W9: width={width}"))?;
+            Ok(source)
+        })
+        .collect()
+}
+
+pub fn encode_t5m_direct(words: &[sens::BinarySourceWord]) -> Result<Vec<u8>, String> {
+    let exact_words = source_words_to_t5m_words(words)?;
+    let (physical, restored) = encode_t5m_exact_words_and_restore(&exact_words)?;
+    let restored = t5m_words_to_source_words(restored)?;
     require_same_exact_words(words, &restored)?;
-    Ok(bytes)
+    Ok(physical)
 }
 
 fn encode_legacy_t5(words: &[sens::BinarySourceWord]) -> Result<Vec<u8>, String> {
@@ -900,76 +920,20 @@ pub fn verify_t5m_encoding(
 }
 
 pub fn decode_t5m_words(bytes: &[u8]) -> Result<Vec<sens::BinarySourceWord>, String> {
-    validate_t5m(bytes)?;
-    let trits = bytes
-        .len()
-        .checked_mul(5)
-        .ok_or("T5M input length overflow")?;
-    let max_words = trits.checked_add(1).ok_or("T5M word count overflow")? / 2;
-    let capacity = max_words
-        .checked_mul(3)
-        .ok_or("T5M BE3 capacity overflow")?;
-    let mut be3 = vec![0u8; capacity];
-    let written = unsafe {
-        sens_zig_t5m_decode_be3(bytes.as_ptr(), bytes.len(), be3.as_mut_ptr(), be3.len())
-    };
-    if written <= 0
-        || usize::try_from(written)
-        .ok()
-        .filter(|&n| n <= be3.len())
-        .is_none()
-        || written % 3 != 0
-    {
-        if let Ok(exact_words) = decode_t5m_exact_words(bytes) {
-            let mut widths: Vec<usize> = exact_words
-                .iter()
-                .map(|word| word.width)
-                .filter(|&width| width > 9)
-                .collect();
-            widths.sort_unstable();
-            widths.dedup();
-            if !widths.is_empty() {
-                return Err(format!(
-                    "Фізичне T5M-декодування зберегло точні ширини слів {widths:?}; застарілий адаптер BinarySourceWord приймає лише W1–W9. Ширина не є доменною identity, тому належність до D1–24+ або викличність не виведено"
-                ));
-            }
-        }
-        return Err(format!("Zig physical T5M decode rejected: code={written}"));
+    let exact_words = decode_t5m_exact_words(bytes)?;
+    let mut unsupported_widths = exact_words
+        .iter()
+        .map(|word| word.width)
+        .filter(|&width| width > 9)
+        .collect::<Vec<_>>();
+    unsupported_widths.sort_unstable();
+    unsupported_widths.dedup();
+    if !unsupported_widths.is_empty() {
+        return Err(format!(
+            "Фізичне T5M-декодування зберегло точні ширини слів {unsupported_widths:?}; адаптер BinarySourceWord приймає лише W1-W9. Ширина не є доменною тотожністю чи дозволом на виклик"
+        ));
     }
-    be3.truncate(written as usize);
-    let mut words = Vec::with_capacity(be3.len() / 3);
-    let (triples, remainder) = be3.as_slice().as_chunks::<3>();
-    if !remainder.is_empty() {
-        return Err("Zig BE3 output contains a partial triple".into());
-    }
-    for triple in triples {
-        let width = triple[0];
-        let payload = (u16::from(triple[1]) << 8) | u16::from(triple[2]);
-        if width < 9 && payload > u16::from(u8::MAX) {
-            return Err("Zig BE3 payload exceeds declared narrow width".into());
-        }
-        let low = payload as u8;
-        let word = match width {
-            1 => sens::Bit1::new(low).map(sens::BinarySourceWord::W1),
-            2 => sens::Bit2::new(low).map(sens::BinarySourceWord::W2),
-            3 => sens::Bit3::new(low).map(sens::BinarySourceWord::W3),
-            4 => sens::Bit4::new(low).map(sens::BinarySourceWord::W4),
-            5 => sens::Bit5::new(low).map(sens::BinarySourceWord::W5),
-            6 => sens::Bit6::new(low).map(sens::BinarySourceWord::W6),
-            7 => sens::Bit7::new(low).map(sens::BinarySourceWord::W7),
-            8 => sens::Bit8::new(low).map(sens::BinarySourceWord::W8),
-            9 => sens::Bit9::new(payload).map(sens::BinarySourceWord::W9),
-            10 => {
-                return Err(
-                    "Zig BE3 width=10 is a mechanical coordinate, not program ingress".into(),
-                )
-            }
-            _ => None,
-        }
-            .ok_or_else(|| format!("Zig BE3 invalid exact word width={width}"))?;
-        words.push(word);
-    }
-    Ok(words)
+    t5m_words_to_source_words(exact_words)
 }
 
 pub fn decode_legacy_t5_words(bytes: &[u8]) -> Result<Vec<sens::BinarySourceWord>, String> {
@@ -1524,7 +1488,7 @@ mod zig_exact_egress_tests {
     }
 
     #[test]
-    fn one_mechanical_be3_projection_for_t5_and_e1() {
+    fn t5m_uses_exact_word_abi_and_e1_uses_one_be3_projection() {
         // D1:1, D2:01, D3:001 and D9:010101000 are DISTINCT exact words.
         let original = words("1 01 001 010101000");
         let be3 = exact_words_to_be3(&original).expect("single BE3 ABI projection");
@@ -1534,15 +1498,20 @@ mod zig_exact_egress_tests {
         require_same_exact_words(&original, &decode_t5m_words(&t5).unwrap()).unwrap();
         require_same_exact_words(&original, &decode_e1_words(&e1).unwrap()).unwrap();
 
-        // Both production egress paths must call ONE helper and must not
-        // separately rebuild BE3 or use Rust physical encoders.
+        // T5M goes through Zig's exact-word ABI; E1 retains one BE3 ABI
+        // projection. Neither path owns a Rust physical codec.
         let source = include_str!("zig_transport.rs");
         for name in ["encode_t5m_direct", "encode_e1_direct"] {
             let start = source.find(&format!("pub fn {name}(")).unwrap();
             let body = &source[start..];
             let end = body.find("\n}\n").unwrap();
             let route = &body[..end];
-            assert!(route.contains("exact_words_to_be3(words)?"), "{name}");
+            assert!(
+                route.contains("exact_words_to_be3(words)?")
+                    || (name == "encode_t5m_direct"
+                        && route.contains("encode_t5m_exact_words_and_restore(&exact_words)?")),
+                "{name}"
+            );
             assert!(!route.contains("be3.push("), "{name}");
             assert!(!route.contains("be3.extend_from_slice("), "{name}");
             assert!(!route.contains("sens::encode_ternary_words("), "{name}");
