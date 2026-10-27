@@ -886,6 +886,7 @@ fn dispatch_domain_call(
     environment: &Environment,
     span: Span,
 ) -> Result<EvalStep, LanguageError> {
+    // SENS_RELEASE_PREFLIGHT: exercise the EQ trace on this exact source head.
     let result = dispatch_domain_call_inner(identity, arguments, environment, span);
     if std::env::var_os("SENS_EQ_TRACE").is_some() {
         match result {
