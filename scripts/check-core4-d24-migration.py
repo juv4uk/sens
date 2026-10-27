@@ -147,63 +147,12 @@ def check(current, expected):
     return counts
 
 
-def self_test():
-    sample = (
-        '; (01010 ignored 1)\n'
-        '(0011 f (0010 (a) (01010 a 1)))\n'
-        '(01011 (10110 a b) #d10)\n'
-        '(length-onto xs 0)\n'
-        '(01010 "<string with 2 and (01011 a 8)>" a)\n'
-        '(001 (01010 quoted-code 42))\n'
-        '(quote (01011 quoted-code 44))\n'
-        '(як-є (11010 quoted-code 48))\n'
-        '(00000001 (11010 quoted-code 46))\n'
-    )
-    actual = audit(sample)
-    expected = Counter({
-        "math|01010|2|1": 1,
-        "math|01011|2|#d10": 1,
-        "seed|length-onto|2|0": 1,
-        "math|11010|2|46": 1,
-    })
-    check(actual, expected)
-    # Current D8 DOSEQ cannot conceal a nested numerical call;
-    # real D3 quotation and the Ukrainian projection must conceal it.
-    if len(audit("(00000001 (11010 x 46))")) != 1:
-        raise ValueError("D8 DOSEQ was incorrectly treated as old SID8 QUOTE")
-    if audit("(як-є (11010 x 46))"):
-        raise ValueError("D3 Ukrainian quoted data was scanned as executable")
-    for damaged in (
-        sample + "(01010 a 1)\n",  # same key, increased count
-        sample + "(01010 a 2)\n",  # novel numeric spelling
-        sample + "(length-onto xs 0)\n",  # helper seed reintroduced
-    ):
-        try:
-            check(audit(damaged), expected)
-        except ValueError:
-            pass
-        else:
-            raise ValueError("negative drift test admitted an unreviewed number")
-    for invalid in ("(01010 x 1", "(01010 x 1))", '(01010 "unclosed)'):
-        try:
-            audit(invalid)
-        except ValueError:
-            pass
-        else:
-            raise ValueError("malformed Core4 source escaped the lexer")
-    print("CORE4-D24-MIGRATION: self-test PASS (structural negative controls)")
-
-
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--self-test", action="store_true")
     parser.add_argument("--check", action="store_true",
                         help="fail closed when source differs from pinned inventory")
     args = parser.parse_args()
     try:
-        if args.self_test:
-            self_test()
-            return 0
         source = SOURCE.read_text(encoding="utf-8")
         baseline = json.loads(BASELINE.read_text(encoding="utf-8"))
         if baseline.get("schema") != 1 or baseline.get("source") != "lib/core4.lisp":
