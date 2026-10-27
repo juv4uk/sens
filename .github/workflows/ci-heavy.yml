@@ -455,7 +455,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0 timeout 180s cargo test --locked -p sens --test understand_exact_empty -- --nocapture
+          echo '::error::Нативний SENS-свідок Understand ще не відновлено після вилучення Rust-оракула'; exit 1
           # Справжній D1 для символу/NIL/пари/D24 замість каталожного D9.
 
       - name: "Process — чинне SENS D4 виконання та двопольовий D1"
@@ -552,7 +552,7 @@ jobs:
           # Вузький живий D3/D4-свідок перевіряємо першим: сторонній RED
           # не може приховати його власне фактичне виконання.
           cargo test --locked -p sens --test fs_bridge_diagnostics journal_module_probe_fail_closed_on_malformed_event -- --exact --nocapture
-          cargo test --locked -p sens --test understand_exact_empty -- --nocapture
+          echo '::error::Нативний SENS-свідок Understand ще не відновлено після вилучення Rust-оракула'; exit 1
           # Незалежний обмежений runtime-свідок D3/D6 до інтерпретації рівнів.
           cargo test --locked -p sens --test island_lowering_ukr_runtime -- --nocapture
           # Чинний SENS CLI: не підміняємо обчислення друком ефектів.
