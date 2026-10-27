@@ -1,4 +1,4 @@
-; SENS_PAIR_REGEN: producer witness must be reminted from this exact SENS source.
+; SENS_PAIR_REGEN: повторно карбувати producer після P0 виправлення CDR адреси крапкового зв'язування (#6183 b326db55).
 ; #6183 COORDINATED: this source change deliberately triggers physical producer remint.
 ; F6: повне власне виконання SENS без прямого D6 LET*.
 ; Вхід і вихід ті самі, що в канонічному свідку:
