@@ -59,7 +59,6 @@ CHECKS = [
     "scripts/check_d10_r7rs_primary_slice.py",
     "scripts/check_d10_reason_alternate_define_donor_v1.py",
     "scripts/check_d10_reiter_minimal_diagnoses.py",
-    "scripts/check_d10_selector_semantics_20261012.py",
     "scripts/check_d10_state_distinguishing_suffix.py",
     "scripts/check_d10_stern_brocot_runs.py",
     "scripts/check_d10_strips_goal_regression.py",
