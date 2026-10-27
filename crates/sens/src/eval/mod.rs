@@ -888,20 +888,21 @@ fn dispatch_domain_call(
 ) -> Result<EvalStep, LanguageError> {
     let result = dispatch_domain_call_inner(identity, arguments, environment, span);
     if std::env::var_os("SENS_EQ_TRACE").is_some() {
-        if let Err(mut error) = result {
-            if error.message.starts_with("eq expects two atoms") {
+        match result {
+            Err(mut error) if error.message.starts_with("eq expects two atoms") => {
                 let domain_identity: crate::DomainIdentity = identity.into();
                 error.message.push_str(&format!(
                     "\\nSENS_DOMAIN_ID=D{}:{}",
                     domain_identity.width(),
                     domain_identity
                 ));
-                return Err(error);
+                Err(error)
             }
-            return Err(error);
+            other => other,
         }
+    } else {
+        result
     }
-    result
 }
 
 fn dispatch_domain_call_inner(
