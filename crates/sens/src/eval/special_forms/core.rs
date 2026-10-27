@@ -439,14 +439,24 @@ pub(crate) fn eq_values(left: Value, right: Value, span: Span) -> Result<Value, 
         // Діагностика типів БЕЗ рендеру значень (вони можуть бути величезними):
         // лише тег виду. Саме цього бракувало, щоб знайти виклик наосліп.
         fn kind_tag(v: &Value) -> &'static str {
+            // Покриваємо ВСІ варіанти Value: раніше невідомі падали в "other",
+            // і прогін показував `kinds pair/other` — тобто не називав вид.
             match v {
-                Value::Pair(_) => "pair",
+                Value::Nil => "nil",
+                Value::Bool(_) => "bool",
+                Value::Number(..) => "f64",
+                Value::Rational(_) => "rational",
+                Value::BinaryNumber(_) => "binary",
+                Value::NumericComposition(_) => "numeric-composition",
+                Value::Sid(_) => "sid",
+                Value::DomainIdentity(_) => "domain-identity",
+                Value::String(_) => "string",
+                Value::Text7(_) => "text7",
                 Value::Symbol(_) => "symbol",
-                Value::BinaryNumber(_) => "number",
-                Value::Builtin(_) => "builtin",
+                Value::Pair(_) => "pair",
                 Value::Closure(_) => "closure",
                 Value::Macro(_) => "macro",
-                _ => "other",
+                Value::Builtin(_) => "builtin",
             }
         }
         let (lk, rk) = (kind_tag(&left), kind_tag(&right));
