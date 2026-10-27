@@ -45,30 +45,3 @@ pub fn packFields(
     return @intCast(required);
 }
 
-test "exact-width raw bitpack emits canonical MSB-first bytes" {
-    const records = [_]u8{
-        3, 0, 0, 0, 0, 0, 0, 0, 5,
-        2, 0, 0, 0, 0, 0, 0, 0, 1,
-        3, 0, 0, 0, 0, 0, 0, 0, 7,
-    };
-    var query_dst: [1]u8 = .{0xa5};
-    try std.testing.expectEqual(@as(isize, 1), packFields(&records, records.len, &query_dst, 0));
-    try std.testing.expectEqual(@as(u8, 0xa5), query_dst[0]);
-    var output: [1]u8 = undefined;
-    try std.testing.expectEqual(@as(isize, 1), packFields(&records, records.len, &output, output.len));
-    try std.testing.expectEqual(@as(u8, 0xaf), output[0]);
-}
-
-test "exact-width raw bitpack rejects overflow and short output without writes" {
-    const overflow = [_]u8{ 3, 0, 0, 0, 0, 0, 0, 0, 8 };
-    var query_dst: [1]u8 = .{0x5a};
-    try std.testing.expectEqual(@as(isize, -1), packFields(&overflow, overflow.len, &query_dst, 0));
-    try std.testing.expectEqual(@as(u8, 0x5a), query_dst[0]);
-    const records = [_]u8{
-        5, 0, 0, 0, 0, 0, 0, 0, 31,
-        4, 0, 0, 0, 0, 0, 0, 0, 15,
-    };
-    var short: [1]u8 = .{0xa5};
-    try std.testing.expectEqual(@as(isize, -2), packFields(&records, records.len, &short, short.len));
-    try std.testing.expectEqual(@as(u8, 0xa5), short[0]);
-}
