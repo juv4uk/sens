@@ -4,9 +4,13 @@ name: remint-drifted-pairs
 # Використовує той самий reader/writer, що CI (scripts/refresh-verified-t5m-pair.sh),
 # і комітить лише ті пари, чиї байти справді змінилися.
 on:
-  # Одна автоматична подія push у репозиторії: ci.yml викликає цей
-  # нативний remint як reusable job тієї САМОЇ CI-перевірки.
-  # Окремий push-trigger тут дублював запуск і витрачав runner-хвилини.
+  # Незалежна вузька доріжка: тільки зміна цього workflow з маркером
+  # F6_PRODUCER_REMINT може відновити stale F6-пару без cancellation
+  # батьківського CI під час паралельних push.
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/remint-drifted-pairs.yml"
   workflow_call:
     inputs:
       files:
@@ -41,6 +45,9 @@ permissions:
 
 jobs:
   remint:
+    # У звичайному CI caller-owned запуску лишаємо наявну логіку.
+    # Прямий push у цей файл є лише аварійним target remint і вимагає маркера.
+    if: ${{ github.workflow != 'remint-drifted-pairs' || contains(github.event.head_commit.message, 'F6_PRODUCER_REMINT') }}
     outputs:
       published_sha: ${{ steps.published_pairs.outputs.published_sha }}
     runs-on: ubuntu-latest
