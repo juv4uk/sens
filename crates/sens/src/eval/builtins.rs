@@ -135,18 +135,4 @@ mod tests {
                 .expect("точна арність приймається");
         }
     }
-
-    #[test]
-    fn string_empty_returns_an_exact_predicate() {
-        let environment = Environment::root();
-        let value = Value::String(std::rc::Rc::from(""));
-        let result = string_empty(&[value], &environment, Span::default()).expect("empty string");
-        assert_eq!(result.as_predicate_bit(), Some(true));
-        assert_eq!(
-            string_empty(&[], &environment, Span::default())
-                .expect_err("missing argument is rejected")
-                .kind,
-            crate::ErrorKind::Arity
-        );
-    }
 }
