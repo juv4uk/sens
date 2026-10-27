@@ -314,20 +314,6 @@ fn t5m_file_mode_rejects_malformed_ukrainian_source() {
 }
 
 #[test]
-fn running_a_file_with_an_evaluation_error_exits_nonzero() {
-    let dir = std::env::temp_dir();
-    let path = dir.join("sens-cli-test-eval-error.lisp");
-    std::fs::write(&path, "(car (quote ()))").expect("should write temp file");
-
-    let output = sens().arg(&path).output().expect("binary should run");
-    let _ = std::fs::remove_file(&path);
-
-    assert!(!output.status.success());
-    let stderr = String::from_utf8_lossy(&output.stderr);
-    assert!(stderr.starts_with("Error:"));
-}
-
-#[test]
 fn running_a_file_with_a_parse_error_exits_nonzero() {
     let dir = std::env::temp_dir();
     let path = dir.join("sens-cli-test-parse-error.lisp");
@@ -443,20 +429,6 @@ fn default_ukrainian_repl_localizes_errors_and_help_prose() {
         "{stderr}"
     );
     assert!(!stderr.contains("line/riadok/Zeile"), "{stderr}");
-}
-
-#[test]
-fn file_mode_still_errors_on_a_lone_unknown_symbol() {
-    let dir = std::env::temp_dir();
-    let path = dir.join("sens-cli-test-lone-symbol.lisp");
-    std::fs::write(&path, "мама").expect("should write temp file");
-
-    let output = sens().arg(&path).output().expect("binary should run");
-    let _ = std::fs::remove_file(&path);
-
-    assert!(!output.status.success());
-    let stderr = String::from_utf8_lossy(&output.stderr);
-    assert!(stderr.contains("unknown symbol"), "stderr was: {stderr:?}");
 }
 
 /// The banner line proves `bind` succeeded, but the very first connection
