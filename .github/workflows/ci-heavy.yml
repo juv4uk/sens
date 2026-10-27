@@ -316,7 +316,7 @@ jobs:
             echo 't5m_cli_tests=true' >> "$GITHUB_OUTPUT"
           fi
           # D11: тільки зміни селекторів, SENS-реалізації або їхніх тестів.
-          if grep -Eq '^(tests/fixtures/d11-selector-law-witness[.]lisp|crates/sens-cli/tests/physical_core4_sequence_cli[.]rs|crates/sens/tests/d11_selector_512_live[.]rs|crates/sens/tests/persistent_vector[.]rs|lib/persistent-vector[.]lisp|knowledge/d11-selector-seed[.]json|[.]github/workflows/ci[.]yml)$' "$changed_all"; then
+          if grep -Eq '^(tests/fixtures/d11-selector-law-witness[.]lisp|crates/sens/tests/d11_selector_512_live[.]rs|crates/sens/tests/persistent_vector[.]rs|lib/persistent-vector[.]lisp|knowledge/d11-selector-seed[.]json|[.]github/workflows/ci[.]yml)$' "$changed_all"; then
             echo 'd11_runtime_tests=true' >> "$GITHUB_OUTPUT"
             echo 'needs_zig=true' >> "$GITHUB_OUTPUT"
           fi
