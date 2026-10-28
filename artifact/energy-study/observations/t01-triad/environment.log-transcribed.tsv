@@ -1,0 +1,13 @@
+source_sha	6a27d38494a76eb03840e0110a76b1712ff94546
+machine	Linux 7.0.0-1017-azure x86_64 GNU/Linux
+cpu	Intel(R) Xeon(R) 6973P-C
+sens_version	sens 0.42.3
+node_version	v22.23.4
+compiler	cc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0
+source_c	benchmarks/language-energy-study/corpus/c/t01_fib.c
+source_js	benchmarks/language-energy-study/corpus/javascript/t01_fib.mjs
+source_sens	benchmarks/language-energy-study/corpus/sens/t01_fib.lisp
+functional_unit	T01 naive fib(12), stdout 144
+phase	cold process incl. startup; C optimized, SENS debug; build excluded
+energy	ENERGY_NOT_MEASURED
+admission	EXPLORATORY; single shared runner session, no ranking
