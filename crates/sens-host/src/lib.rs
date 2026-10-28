@@ -120,7 +120,7 @@ fn observe_monotonic_nanoseconds(
 
 /// `читати-енергію-у-мікроджоулях` — RAPL-лічильники через powercap sysfs.
 ///
-/// Повертає ПАРУ точних D64-слів: (package, dram), у мікроджоулях.
+/// Повертає ПАРУ точних D96-слів: (package, dram), у мікроджоулях.
 /// Механізм німий: жодної семантики тут — перетворення й нормування
 /// живуть у lib/бенчмарк.lisp (мікроджоулі-у-джоулі, джоулів-на-тисячу-форм).
 ///
@@ -170,8 +170,57 @@ fn read_energy_microjoules(
             .expect("the checked 64-bit RAPL counter is an exact D64 word");
         Ok(Value::BinaryNumber(exact))
     }
+    // powercap indices are not domain identities: intel-rapl:0:0 can be
+    // core/uncore rather than DRAM. Never mislabel that energy as DRAM.
+    let package_root = std::path::Path::new("/sys/class/powercap/intel-rapl:0");
+    let package_name = std::fs::read_to_string(package_root.join("name")).map_err(|error| {
+        LanguageError::new(
+            ErrorKind::InvalidForm,
+            format!("RAPL package identity unavailable: {error}"),
+            span,
+        )
+    })?;
+    if !package_name.trim().starts_with("package-") {
+        return Err(LanguageError::new(
+            ErrorKind::InvalidForm,
+            format!("RAPL source is not a package: {}", package_name.trim()),
+            span,
+        ));
+    }
     let package = read_one("/sys/class/powercap/intel-rapl:0/energy_uj", "package", span)?;
-    let dram = read_one("/sys/class/powercap/intel-rapl:0:0/energy_uj", "dram", span)?;
+    let domains = std::fs::read_dir("/sys/class/powercap").map_err(|error| {
+        LanguageError::new(ErrorKind::InvalidForm, format!("RAPL domains unavailable: {error}"), span)
+    })?;
+    let mut dram_path = None;
+    for entry in domains {
+        let entry = entry.map_err(|error| {
+            LanguageError::new(ErrorKind::InvalidForm, format!("RAPL domain unreadable: {error}"), span)
+        })?;
+        let name = entry.file_name();
+        let name = name.to_string_lossy();
+        if !name.starts_with("intel-rapl:0:") || name.matches(':').count() != 2 {
+            continue;
+        }
+        let label = match std::fs::read_to_string(entry.path().join("name")) {
+            Ok(label) => label,
+            Err(_) => continue,
+        };
+        if label.trim() == "dram" {
+            dram_path = Some(entry.path().join("energy_uj"));
+            break;
+        }
+    }
+    let dram_path = dram_path.ok_or_else(|| {
+        LanguageError::new(
+            ErrorKind::InvalidForm,
+            "RAPL DRAM domain unavailable; package-only measurement is not a package+DRAM pair",
+            span,
+        )
+    })?;
+    let dram_path = dram_path.to_str().ok_or_else(|| {
+        LanguageError::new(ErrorKind::InvalidForm, "RAPL DRAM path is not UTF-8", span)
+    })?;
+    let dram = read_one(dram_path, "dram", span)?;
     Ok(Value::list(vec![package, dram]))
 }
 
