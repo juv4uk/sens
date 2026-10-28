@@ -97,6 +97,11 @@ def environment() -> dict:
         "governor": "unknown",
         "turbo": "unknown",
         "timing_source": "time.perf_counter_ns (wall)",
+        "peak_memory_source": ("Win32 GetProcessMemoryInfo(PeakWorkingSetSize) KiB; "
+                               "NOT directly comparable to POSIX ru_maxrss"
+                               if os.name == "nt" else
+                               "POSIX wait4(ru_maxrss); Linux KiB, macOS bytes; "
+                               "cross-OS raw values NOT directly comparable"),
         "git_sha": os.environ.get("GITHUB_SHA", "not-a-git-checkout"),
         "binary_sha256": "n/a-interpreted",
     }
@@ -138,6 +143,12 @@ def run_once(cmd: str, env: dict, timeout_s: float = 120.0):
     timeout_s реально обмежує очікування (раніше параметр ігнорувався).
     stdout/stderr читаються після wait, щоб не блокуватися на PIPE.
     """
+    # On Windows os.wait4 is absent. A separate Win32 meter measures the
+    # specific child PeakWorkingSetSize and fails closed if it is unavailable.
+    # The SENS/native external-output parity gate remains in build_pairs().
+    if os.name == "nt":
+        from win_process_meter import run_once_windows
+        return run_once_windows(cmd, env, timeout_s)
     import shlex
     argv = shlex.split(cmd)
     start = time.perf_counter_ns()
