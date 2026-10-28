@@ -43,7 +43,7 @@ jobs:
       - name: Перевірити Python-інструменти досліду
         run: |
           python3 --version
+          python3 benchmarks/measurement-triad/test_verdict_simulation.py
           python3 -m unittest discover -s benchmarks/language-energy-study -p 'test_*.py' -v
           python3 -m unittest discover -s docs/research/energy-study -p 'test_*.py' -v
           python3 -m py_compile benchmarks/measurement-triad/verdict.py
-          python3 benchmarks/measurement-triad/test_verdict_simulation.py
