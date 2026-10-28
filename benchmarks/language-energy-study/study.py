@@ -76,9 +76,12 @@ def measure(command: list[str], copies: int, out: Path, meter: Path | None,
         wall_host_ns = time.perf_counter_ns() - begin
         if run.returncode:
             raise RuntimeError(f"execution failed: {run.returncode}: {run.stderr[-600:]}")
-        matches = [line for line in run.stdout.splitlines() if OBS.fullmatch(line)]
-        if matches != [expected]:
-            raise RuntimeError(f"PHYSICAL_PARITY_MISMATCH: expected {expected!r} received {matches!r}")
+        lines = run.stdout.splitlines()
+        matches = [line for line in lines if OBS.fullmatch(line)]
+        meter_lines = [line for line in lines if line.startswith("RUST_RAPL_PACKAGE ")]
+        # No extra stdout or second/conflicting observation is admissible.
+        if matches != [expected] or len(meter_lines) != (1 if meter else 0) or len(lines) != (2 if meter else 1):
+            raise RuntimeError(f"PHYSICAL_PARITY_MISMATCH: expected {expected!r} received {lines!r}")
         match = USAGE.fullmatch(usage.read_text().strip())
         if not match or int(match[1]) <= 0:
             raise RuntimeError("missing physical peak RSS / user / system metrics")
@@ -86,17 +89,15 @@ def measure(command: list[str], copies: int, out: Path, meter: Path | None,
                   "user_s": float(match[2]), "sys_s": float(match[3]),
                   "energy_uj": None}
         if meter:
-            lines = [x for x in run.stdout.splitlines() if x.startswith("RUST_RAPL_PACKAGE ")]
-            if len(lines) != 1:
-                raise RuntimeError("RAPL observation ambiguous/missing")
-            fields = dict(KV.findall(lines[0]))
+            fields = dict(KV.findall(meter_lines[0]))
             if fields.get("status") != "MEASURED":
                 raise RuntimeError("invalid RAPL measurement status")
             energy, elapsed = int(fields["energy_uj"]), int(fields["elapsed_ns"])
             if energy <= 0 or elapsed <= 0:
                 raise RuntimeError("nonpositive hardware energy/time")
-            result.update({"energy_uj": energy, "wall_time_ns": elapsed,
-                           "host_wrapper_wall_ns": wall_host_ns,
+            # wall_time_ns retains the same host-wrapper boundary whether or
+            # not RAPL was available. Sensor time is a separate observation.
+            result.update({"energy_uj": energy, "rapl_child_elapsed_ns": elapsed,
                            "scope": fields["scope"]})
         return result
     finally:
@@ -146,9 +147,9 @@ def experiment(blocks: int, pairs: int, copies: int, seed: int, out: Path) -> No
             "os": platform.platform(), "affinity": affinity,
             "governor": optional_read(Path("/sys/devices/system/cpu/cpu0/cpufreq/scaling_governor")),
             "turbo": optional_read(Path("/sys/devices/system/cpu/intel_pstate/no_turbo")),
-            "timing_source": "Rust Instant(child)/Python perf_counter_ns(process)",
+            "timing_source": "Python perf_counter_ns(outer wrapper), RAPL child elapsed_ns separately",
             "python": platform.python_version(), "cc": checked(["cc", "--version"]).splitlines()[0],
-            "energy_sensor": sensor, "measurement_boundary": "process startup+physical copies",
+            "energy_sensor": sensor, "measurement_boundary": "outer wrapper launch/exit including /usr/bin/time or RAPL meter and process startup",
             "physical_work": f"{copies} byte-buffer copies from lib/core4.lisp",
             "language_semantics": "NOT_TESTED",
         }
@@ -185,7 +186,7 @@ def experiment(blocks: int, pairs: int, copies: int, seed: int, out: Path) -> No
             reports[candidate] = {}
             for metric in ("wall_time_ns", "peak_rss_kib", "energy_uj"):
                 if metric == "energy_uj" and meter is None:
-                    reports[candidate][metric] = {"status": "NOT_MEASURED", "reason": sensor}
+                    reports[candidate][metric] = {"status": "ENERGY_NOT_MEASURED", "reason": sensor}
                     continue
                 doc = {"schema": verdict.PHYSICAL_SCHEMA, "metric": metric,
                        "parity": {"passed": True, "oracle_id": "physical-exact-copy"},
