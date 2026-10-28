@@ -7,7 +7,27 @@ use std::ffi::OsString;
 use std::fs;
 use std::path::{Path, PathBuf};
 use std::process::{Command, ExitCode};
-use std::time::Instant;
+use std::time::{Duration, Instant};
+
+// Conservative upper limit for wrap safety; NOT a measured power/TDP.
+const DEFAULT_MAX_PACKAGE_POWER_WATTS: u64 = 2_000;
+fn power_ceiling_watts() -> Result<u64, String> {
+    match env::var("SENS_RAPL_MAX_POWER_WATTS") {
+        Ok(raw) => match raw.parse::<u64>() {
+            Ok(v) if (1..=100_000).contains(&v) => Ok(v),
+            _ => Err("RAPL_UNRESOLVED invalid SENS_RAPL_MAX_POWER_WATTS".into()),
+        },
+        Err(env::VarError::NotPresent) => Ok(DEFAULT_MAX_PACKAGE_POWER_WATTS),
+        Err(e) => Err(format!("RAPL_UNRESOLVED invalid SENS_RAPL_MAX_POWER_WATTS: {e}")),
+    }
+}
+
+fn at_most_one_wrap(range_uj: u64, duration: Duration, max_power_watts: u64) -> bool {
+    range_uj > 0 && max_power_watts > 0
+        && duration.as_nanos().saturating_mul(u128::from(max_power_watts))
+            < u128::from(range_uj).saturating_mul(1_000)
+}
+
 
 fn number(path: &Path) -> Result<u64, String> {
     let raw = fs::read_to_string(path)
@@ -124,6 +144,9 @@ fn run() -> Result<(), String> {
         ));
     }
     let max = number(&counter.with_file_name("max_energy_range_uj"))?;
+    let ceiling = power_ceiling_watts()?;
+    // Include sensor I/O in the ambiguity window, not merely child elapsed time.
+    let sensor_started = Instant::now();
     let start = number(&counter)?;
     let began = Instant::now();
     // Exactly one subprocess launch. N is supplied by the already-batched
@@ -133,22 +156,26 @@ fn run() -> Result<(), String> {
     let status = child.status().map_err(|error| format!("CHILD_FAILED spawn={error}"))?;
     let elapsed = began.elapsed();
     let end = number(&counter)?;
+    let sensor_window = sensor_started.elapsed();
     if !status.success() {
         return Err(format!("CHILD_FAILED exit={status}; energy result withheld"));
+    }
+    if !at_most_one_wrap(max, sensor_window, ceiling) {
+        return Err(format!("RAPL_UNRESOLVED ambiguous counter wrap range_uj={max} window_ns={} power_ceiling_w={ceiling}", sensor_window.as_nanos()));
     }
     let (energy_uj, wrapped) = delta_uj(start, end, max)?;
     if energy_uj == 0 {
         return Err("RAPL_UNRESOLVED zero observed counter delta; enlarge the batch".into());
     }
     println!(
-        "RUST_RAPL_PACKAGE energy_uj={} energy_j={:.6} elapsed_ns={} wrapped_once={} scope=whole_package_not_process counter={} status=MEASURED",
-        energy_uj, energy_uj as f64 / 1_000_000.0, elapsed.as_nanos(),
+        "RUST_RAPL_PACKAGE energy_uj={} energy_j={:.6} elapsed_ns={} elapsed_s={:.6} wrapped_once={} scope=whole_package_not_process counter={} status=MEASURED",
+        energy_uj, energy_uj as f64 / 1_000_000.0, elapsed.as_nanos(), elapsed.as_secs_f64(),
         wrapped, counter.display()
     );
     if let Some(operations) = declared_operations {
         println!(
-            "RUST_RAPL_NORMALIZED declared_operations={} uj_per_declared_operation={:.9} scope=physical_only status=DECLARED_COUNT_NOT_VERIFIED",
-            operations, energy_uj as f64 / operations as f64
+            "RUST_RAPL_NORMALIZED declared_operations={} uj_per_declared_operation={:.9} joules_per_declared_operation={:.9} scope=physical_only status=DECLARED_COUNT_NOT_VERIFIED",
+            operations, energy_uj as f64 / operations as f64, energy_uj as f64 / 1_000_000.0 / operations as f64
         );
     }
     eprintln!("RAPL_NOTE package includes idle/background energy; no SENS semantic verdict; two samples cannot detect multiple wraps");
@@ -167,7 +194,15 @@ fn main() -> ExitCode {
 
 #[cfg(test)]
 mod mechanism_tests {
-    use super::{delta_uj, is_package_identity};
+    use super::{at_most_one_wrap, delta_uj, is_package_identity};
+    use std::time::Duration;
+
+    #[test]
+    fn wrap_window_requires_strict_energy_bound() {
+        assert!(at_most_one_wrap(100_000_000, Duration::from_millis(40), 2_000));
+        assert!(!at_most_one_wrap(100_000_000, Duration::from_millis(50), 2_000));
+        assert!(!at_most_one_wrap(0, Duration::from_millis(1), 2_000));
+    }
 
     #[test]
     fn monotonic_counter_delta() {
