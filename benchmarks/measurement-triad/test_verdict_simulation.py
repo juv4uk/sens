@@ -263,7 +263,7 @@ def test_no_data_dependent_stopping() -> None:
 
 def test_session_pseudoreplication_guard() -> None:
     """Strong effects from one hosted session must not become language winners."""
-    print("\\n[12] Session hierarchy: no pseudoreplication")
+    print("\n[12] Session hierarchy: no pseudoreplication")
     one = build(lambda p, k: 0.50, seed=52, processes=12,
                 per_process=6, session_id="one-hosted-session")
     result = analyze(one, draws=1200, seed=7)
@@ -319,7 +319,8 @@ def main() -> int:
                test_energy_not_measured, test_autocorrelation_within_block,
                test_order_balance_required, test_too_few_units, test_no_parity_blocked,
                test_holm_correction, test_familywise_inference_is_fail_closed,
-               test_hierarchy_levels, test_no_data_dependent_stopping,\n               test_session_pseudoreplication_guard):
+               test_hierarchy_levels, test_no_data_dependent_stopping,
+               test_session_pseudoreplication_guard):
         fn()
     print("\n" + "=" * 60)
     if FAILURES:
