@@ -30,10 +30,10 @@ else
   echo "== Rust (механізм) == не виконано: немає rustc"; fail=1
 fi
 
-if command -v sens-cli >/dev/null 2>&1; then
-  run "SENS (семантика)" sens-cli "$here/сенс-семантика.lisp"
+if command -v sens >/dev/null 2>&1; then
+  run "SENS (семантика)" sens "$here/сенс-семантика.lisp"
 else
-  echo "== SENS (семантика) == не виконано: немає sens-cli"; fail=1
+  echo "== SENS (семантика) == не виконано: немає sens"; fail=1
 fi
 
 exit "$fail"
