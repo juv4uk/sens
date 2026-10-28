@@ -1,28 +1,39 @@
 #!/usr/bin/env bash
-# Конкурс бенчмарків за сферами. Відсутній інструмент — не успіх, а «не виконано».
+# Конкурс бенчмарків за сферами.
+# Відсутній інструмент — не успіх, а «не виконано».
+# Час міряє оболонка: у Zig 0.16 std.time без годинника, у SENS — без таймера.
 set -uo pipefail
-тут="$(cd "$(dirname "$0")" && pwd)"
-стан=0
+here="$(cd "$(dirname "$0")" && pwd)"
+fail=0
 
-if command -v sens-cli >/dev/null 2>&1; then
-  echo "== SENS (семантика) =="
-  /usr/bin/time -f "  %e с" sens-cli "$тут/сенс-семантика.lisp" || стан=1
-else
-  echo "== SENS (семантика) == не виконано: немає sens-cli"; стан=1
-fi
+run() {
+  local name="$1"; shift
+  echo "== $name =="
+  local t0=$SECONDS
+  if "$@"; then
+    echo "   час: $((SECONDS - t0)) с"
+  else
+    echo "   ПОМИЛКА"; fail=1
+  fi
+}
 
 if command -v zig >/dev/null 2>&1; then
-  echo "== Zig (корідор) =="
-  zig run "$тут/зіг-корідор.zig" || стан=1
+  run "Zig (корідор)" zig run "$here/зіг-корідор.zig"
 else
-  echo "== Zig (корідор) == не виконано: немає zig"; стан=1
+  echo "== Zig (корідор) == не виконано: немає zig"; fail=1
 fi
 
 if command -v rustc >/dev/null 2>&1; then
-  echo "== Rust (механізм) =="
-  rustc -O -o /tmp/раст-механізм "$тут/раст-механізм.rs" && /tmp/раст-механізм || стан=1
+  rustc -O -o /tmp/rast-mehanizm "$here/раст-механізм.rs" || fail=1
+  run "Rust (механізм)" /tmp/rast-mehanizm
 else
-  echo "== Rust (механізм) == не виконано: немає rustc"; стан=1
+  echo "== Rust (механізм) == не виконано: немає rustc"; fail=1
 fi
 
-exit "$стан"
+if command -v sens-cli >/dev/null 2>&1; then
+  run "SENS (семантика)" sens-cli "$here/сенс-семантика.lisp"
+else
+  echo "== SENS (семантика) == не виконано: немає sens-cli"; fail=1
+fi
+
+exit "$fail"
