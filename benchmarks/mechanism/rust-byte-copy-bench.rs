@@ -86,7 +86,7 @@ fn measure_package_energy(dest: &mut [u8]) -> Result<(), String> {
     }
     let elapsed = start.elapsed();
     let after = meter.energy_uj()?;
-    if dest != SOURCE {
+    if dest.as_ref() != SOURCE {
         return Err("Rust mechanism changed source bytes".into());
     }
     if observed == 0 || copies == 0 {
