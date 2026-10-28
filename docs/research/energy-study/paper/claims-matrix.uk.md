@@ -23,9 +23,9 @@
 | C9 | Корекція множинних порівнянь обрана наперед | `holm_adjust()`, `analyze_many()` | `6824f7fdf` | `family_alpha=0.05`; інакше `INCONCLUSIVE` з `FAMILY_WISE_CORRECTION_NOT_MET` | тести #6290 |
 | C10 | Протокол RAPL-калібрування перевіряється offline | `benchmarks/energy-calibration/check_calibration.py` | `ff9dc05d1` | 22 синтетичні контролі | PR #6298 |
 | C11 | Цілісність артефакту перевіряється без мережі | `artifact/energy-study/validate_manifest.py` | `0c379da1c` | SHA-256 raw/provenance/report/summary; 11/11 PASS | PR #6300 |
-| C12 | Метод перевірки висновку на другому корпусі взято з Pereira 2021 | анотація Pereira 2021: Rosetta Code, «rankings do not change apart from one programming language» | — | якісне, не числове | `[НЕ ДОВЕДЕНО: N6]` — другого корпусу ми не маємо |
-| C13 | Rust, Python і незалежний розрахунок дають однаковий результат на тому самому корпусі | прогін `copy.rs` (rustc 1.99.1, `-O`) на корпусі 65536 байт × 100000 копій | — | `observed=12743497` у всіх трьох | `rustc -O copy.rs`, `python3 copy.py` |
-| C14 | Робота в `copy.rs` не винесена компілятором | час проти кількості копій | — | ~37 мс (1000) проти ~2866 мс (1000000) | той самий бінарник |
+| C12 | Метод перевірки висновку на другому корпусі взято з Pereira 2021 | анотація Pereira 2021: Rosetta Code, «rankings do not change apart from one programming language» | джерело, не артефакт | якісне, не числове | `[НЕ ДОВЕДЕНО: N6]` — другого корпусу ми не маємо |
+| C13 | Rust, Python і незалежний розрахунок дають однаковий результат на тому самому корпусі | прогін `copy.rs` (rustc 1.99.1, `-O`) на корпусі 65536 байт × 100000 копій | `888c60d9` | `observed=12743497` у всіх трьох | `rustc -O copy.rs`, `python3 copy.py` |
+| C14 | Робота в `copy.rs` не винесена компілятором | час проти кількості копій | `888c60d9` | ~37 мс (1000) проти ~2866 мс (1000000) | той самий бінарник |
 
 ## 2. Не доведено — і в статтю не піде
 
