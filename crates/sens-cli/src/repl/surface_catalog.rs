@@ -18,6 +18,26 @@ struct SurfaceEntry {
     names: Vec<SurfaceName>,
 }
 
+#[cfg(test)]
+#[derive(Clone, Debug, Eq, PartialEq)]
+struct SurfaceDoc {
+    category: String,
+    identity: String,
+    kind: String,
+    call: String,
+    description: String,
+}
+
+#[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
+struct Counts {
+    present: usize,
+    empty: usize,
+}
+
+impl Counts {
+    fn add(&mut self, present: bool) {
+        if present {
+            self.present += 1;
         } else {
             self.empty += 1;
         }
@@ -265,6 +285,18 @@ fn expr_symbol(expr: &Expr) -> Option<&str> {
     }
 }
 
+#[cfg(test)]
+fn expr_string(expr: &Expr) -> Option<&str> {
+    match &expr.kind {
+        ExprKind::String(text) => Some(text.as_ref()),
+        _ => None,
+    }
+}
+
+/// Documentation key is an exact D1..D10 domain coordinate, not legacy SID8.
+#[cfg(test)]
+fn expr_documentation_key(expr: &Expr) -> Option<String> {
+    let symbol = expr_symbol(expr)?;
     let (domain, bits) = symbol.split_once(':')?;
     let width = domain.strip_prefix('D')?.parse::<usize>().ok()?;
     if (1..=10).contains(&width)
@@ -277,6 +309,11 @@ fn expr_symbol(expr: &Expr) -> Option<&str> {
     }
 }
 
+#[cfg(test)]
+fn uk_docs_source_zig_only() -> Result<String, String> {
+    #[cfg(feature = "zig-transport")]
+    {
+        let bytes = crate::zig_transport::uk_docs_source_bytes()?;
         String::from_utf8(bytes).map_err(|err| format!("ZIG_UK_DOCS_CARRIER invalid UTF-8: {err}"))
     }
     #[cfg(not(feature = "zig-transport"))]
@@ -285,6 +322,9 @@ fn expr_symbol(expr: &Expr) -> Option<&str> {
     }
 }
 
+#[cfg(test)]
+fn ukrainian_docs() -> Result<Vec<SurfaceDoc>, String> {
+    let source = uk_docs_source_zig_only()?;
     let program = parse(&source).map_err(|error| {
         format!(
             "не вдалося прочитати uk-docs.wsm: {}",
