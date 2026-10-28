@@ -74,6 +74,8 @@ jobs:
           }
           grep -F 'ZIG_CORRIDOR_COPY_BENCH ' "$out/byte-copy.log" | tee "$out/byte-copy.tsv"
           grep -Fq 'scope=physical_only' "$out/byte-copy.tsv"
+          grep -Fq 'source=lib/core4.lisp ' "$out/byte-copy.tsv"
+          grep -Fq 'batch=512 samples=11 ' "$out/byte-copy.tsv"
       - name: Exercise physical codecs without any SENS language truth table
         shell: bash
         run: |
@@ -129,9 +131,11 @@ jobs:
           out="$RUNNER_TEMP/contest-sens"
           mkdir -p "$out"
           printf 'git_sha\t%s\n' "$GITHUB_SHA" > "$out/environment.tsv"
-          bash scripts/prove-бенчмарк-структура.sh "$PWD/target/debug/sens" | tee "$out/native-law.tsv"
+          SENS_BENCH_SAMPLES_OUT="$out/raw-samples.tsv" bash scripts/prove-бенчмарк-структура.sh "$PWD/target/debug/sens" | tee "$out/native-law.tsv"
           grep -Fq 'БЕНЧМАРК_СТРУКТУРА=PASS native=SENS' "$out/native-law.tsv"
           grep -Fq 'mutant=D1:ні samples=11' "$out/native-law.tsv"
+          test "$(wc -l < "$out/raw-samples.tsv")" -eq 12
+          test "$(grep -c '^[0-9][0-9]*[[:space:]]' "$out/raw-samples.tsv")" -eq 11
       - name: Preserve actual SENS verdict and elapsed-time samples
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
