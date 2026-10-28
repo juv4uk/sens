@@ -101,6 +101,22 @@ jobs:
             /tmp/sens-out/t01_fib.sens
           ls -l /tmp/sens-out/
 
+      - name: Перші парні дані ДЛЯ НАШОЇ МОВИ
+        run: |
+          export SENS_BIN="$PWD/target/release/sens"
+          python3 benchmarks/language-energy-study/run_study.py \
+            --tasks T01-symbolic-recursion --measure \
+            --languages sens python --processes 8 --per-process 4 \
+            --out "raw-sens-T01.json" || echo "SENS_STUDY_FAILED — дивись лог"
+          python3 benchmarks/language-energy-study/report_table.py --markdown | tail -8 || true
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: raw-sens
+          path: raw-sens-*.json
+          if-no-files-found: warn
+
       - name: Паритет НАШОЇ мови проти Python-еталона
         run: |
           # Якщо це впаде — побачимо справжню причину в лозі, а не припущення.
