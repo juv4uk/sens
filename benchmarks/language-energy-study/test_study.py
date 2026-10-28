@@ -97,7 +97,7 @@ class PhysicalStudyTests(unittest.TestCase):
         from types import SimpleNamespace
 
         good = "PHYSICAL_COPY\tbytes=13\tcopies=4\tobserved=27"
-        rapl = "RUST_RAPL_PACKAGE energy_uj=1500 elapsed_ns=4000 scope=whole_package_not_process status=MEASURED"
+        rapl = "RUST_RAPL_PACKAGE energy_uj=1500 elapsed_ns=4000 scope=whole_package_not_process counter=/sys/class/powercap/intel-rapl:0/energy_uj wrapped_once=false status=MEASURED"
 
         def fake_run(stdout, code=0, rss=100):
             def execute(argv, **kwargs):
@@ -133,6 +133,44 @@ class PhysicalStudyTests(unittest.TestCase):
                 with patch.object(study.subprocess, "run", side_effect=fake_run(output, code, rss)):
                     with self.assertRaises(RuntimeError):
                         study.measure(["/fake/command"], 4, out, meter, good)
+
+    def test_total_traffic_budget_includes_every_process(self):
+        """Resource bound must include 4*blocks*pairs measured + 3 warmups."""
+        sample = study.validate_pilot_budget(8, 4, 64, 322314)
+        self.assertEqual(sample["declared_process_launches"], 131)
+        self.assertEqual(sample["declared_total_copy_bytes"], 131 * 64 * 322314)
+        for args in ((8, 4, 8192, 322314), (8, 4, 64, 0),
+                     (64, 30, 8192, 322314), (8, 4, 64, 65 * 1024 * 1024)):
+            with self.subTest(args=args), self.assertRaises(ValueError):
+                study.validate_pilot_budget(*args)
+
+    def test_rapl_parser_requires_unambiguous_hardware_provenance(self):
+        """Valid package energy is not a synthetic TDP estimate."""
+        valid = ("RUST_RAPL_PACKAGE energy_uj=1500 elapsed_ns=4000 "
+                 "scope=whole_package_not_process "
+                 "counter=/sys/class/powercap/intel-rapl:0/energy_uj "
+                 "wrapped_once=false status=MEASURED")
+        measured = study.parse_rapl_measurement([valid])
+        self.assertEqual(measured["energy_uj"], 1500)
+        self.assertEqual(measured["rapl_child_elapsed_ns"], 4000)
+        self.assertFalse(measured["wrapped_once"])
+        self.assertEqual(measured["counter"],
+                         "/sys/class/powercap/intel-rapl:0/energy_uj")
+        for invalid in (
+            [valid, valid],
+            [valid.replace("energy_uj=1500", "energy_uj=0")],
+            [valid.replace("elapsed_ns=4000", "elapsed_ns=0")],
+            [valid.replace("scope=whole_package_not_process", "scope=process")],
+            [valid.replace("wrapped_once=false", "wrapped_once=maybe")],
+            [valid.replace("status=MEASURED", "status=NOT_MEASURED")],
+            [valid.replace("counter=/sys/class/powercap/intel-rapl:0/energy_uj ", "")],
+            [valid.replace("counter=/sys/class/powercap/intel-rapl:0/energy_uj",
+                           "counter=/sys/class/powercap/intel-rapl:0/power_uw")],
+            [valid + " status=MEASURED"],
+            [valid + " malformed-field"],
+        ):
+            with self.subTest(invalid=invalid), self.assertRaises(RuntimeError):
+                study.parse_rapl_measurement(invalid)
 
     def test_without_exact_parity_no_numeric_verdict(self):
         evidence = {
