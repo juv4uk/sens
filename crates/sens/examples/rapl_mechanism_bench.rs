@@ -128,13 +128,12 @@ fn run() -> Result<(), String> {
         return Err("ENERGY_NOT_MEASURED reason=counter_wrap_ambiguous shorten_batch".into());
     }
     let used_uj = delta_uj(before, after, meter.max_range_uj)?;
+    if used_uj == 0 {
+        return Err("ENERGY_NOT_MEASURED reason=counter_did_not_advance increase_batch".into());
+    }
     let joules = used_uj as f64 / 1_000_000.0;
     let joules_per_op = joules / count as f64;
-    let ops_per_joule = if used_uj == 0 {
-        0.0
-    } else {
-        count as f64 / joules
-    };
+    let ops_per_joule = count as f64 / joules;
     eprintln!(
         "RAPL_PACKAGE_SAMPLE scope=whole_cpu_package zone={} energy_uj={} elapsed_ns={} units={} unit_type={} child_launches={} joules_per_unit={:.12} units_per_joule={:.6} attribution=NOT_PROCESS_SPECIFIC release=NOT_CERTIFIED",
         meter.name, used_uj, elapsed_ns, count, unit_type, child_launches, joules_per_op, ops_per_joule
