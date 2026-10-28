@@ -18,7 +18,10 @@ class ReadinessTests(unittest.TestCase):
                 pairs.append({"process_id": f"{session}-process-{i}",
                               "session_id": session, "machine_id": "host-1",
                               "order": order, "baseline_ns": 100000,
-                              "candidate_ns": 110000, "peak_rss_kib": 1024,
+                              "candidate_ns": 110000,
+                              "baseline_peak_rss_kib": 1024,
+                              "candidate_peak_rss_kib": 2048,
+                              "time_boundary": "host_wrapper_includes_subprocess",
                               "energy_not_measured": True})
         self.record = {"schema": audit.SCHEMA,
                        "tasks": {"T01-symbolic-recursion": {
@@ -57,9 +60,54 @@ class ReadinessTests(unittest.TestCase):
         self.assertIn("PARITY_SELFTEST_ONLY", self.issues())
 
     def test_missing_rss_is_not_zero(self):
-        del self.pairs()[0]["peak_rss_kib"]
+        del self.pairs()[0]["baseline_peak_rss_kib"]
         self.write()
         self.assertIn("PEAK_RSS_NOT_RECORDED", self.issues())
+
+    def test_missing_candidate_rss_rejected(self):
+        del self.pairs()[0]["candidate_peak_rss_kib"]
+        self.write()
+        self.assertIn("PEAK_RSS_NOT_RECORDED", self.issues())
+
+    def test_single_generic_rss_is_not_a_valid_pair(self):
+        row = self.pairs()[0]
+        del row["baseline_peak_rss_kib"]
+        del row["candidate_peak_rss_kib"]
+        row["peak_rss_kib"] = 2048
+        self.write()
+        self.assertIn("PEAK_RSS_NOT_RECORDED", self.issues())
+
+    def test_real_T04_sample_rss_keys_are_accepted(self):
+        # Two exact keys and realistic observed values from the T04 raw corpus.
+        self.pairs()[0].update(baseline_peak_rss_kib=22852,
+                               candidate_peak_rss_kib=162112)
+        self.write()
+        self.assertNotIn("PEAK_RSS_NOT_RECORDED", self.issues())
+
+    def test_zero_or_nonfinite_rss_is_rejected(self):
+        self.pairs()[0]["baseline_peak_rss_kib"] = 0
+        self.write()
+        self.assertIn("PEAK_RSS_NOT_RECORDED", self.issues())
+        self.pairs()[0]["baseline_peak_rss_kib"] = float("nan")
+        self.write()
+        with self.assertRaisesRegex(audit.InvalidRaw, "nonfinite"):
+            audit.inspect(self.path)
+
+    def test_session_level_order_confounded(self):
+        for i, row in enumerate(self.pairs()):
+            row["order"] = "AB" if i < 4 else "BA"
+        self.write()
+        self.assertIn("SESSION_ORDER_UNBALANCED", self.issues())
+
+    def test_missing_time_boundary_blocks(self):
+        del self.pairs()[0]["time_boundary"]
+        self.write()
+        self.assertIn("TIME_BOUNDARY_UNSPECIFIED", self.issues())
+
+    def test_mixed_time_boundaries_block(self):
+        self.pairs()[0]["time_boundary"] = "child_only_no_startup"
+        self.write()
+        self.assertIn("TIME_BOUNDARY_INCONSISTENT", self.issues())
 
     def test_fake_energy_rejected(self):
         self.pairs()[0]["energy_uj"] = 1234
