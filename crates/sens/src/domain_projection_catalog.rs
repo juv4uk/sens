@@ -1,6 +1,9 @@
 //! Read-only, source-derived projection lookup. A projection row does not grant
 //! residency, callability, meaning, or physical encoding behavior.
 
+#[cfg(test)]
+use std::{collections::HashMap, sync::OnceLock};
+
 /// Незалежний простір джерела: однакові назви колонок не зливають різні таблиці.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum ProjectionSource {
@@ -86,6 +89,9 @@ pub fn lookup(
 /// because its Ukrainian cells are text glyph data, not function names. D24+
 /// numeric operands are handled by the numeric source projection instead.
 // Допоміжний індекс потрібен лише тестам проєкцій, не двійковому рантайму.
+#[cfg(test)]
+fn exact_uk_domain_identity(name: &str) -> Option<crate::DomainIdentity> {
+    static INDEX: OnceLock<HashMap<&'static str, Option<crate::DomainIdentity>>> = OnceLock::new();
     let index = INDEX.get_or_init(|| {
         let mut names = HashMap::new();
         for entry in ENTRIES.iter().filter(|entry| {
