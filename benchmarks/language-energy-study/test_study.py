@@ -4,6 +4,7 @@ from pathlib import Path
 import sys
 import tempfile
 import unittest
+from unittest import mock
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "benchmarks" / "measurement-triad"))
@@ -44,6 +45,65 @@ class PhysicalStudyTests(unittest.TestCase):
         evidence["pairs"][0]["candidate_energy_uj"] = 0
         with self.assertRaises(verdict.InvalidEvidence):
             verdict.analyze(evidence, draws=1000, seed=1)
+
+    def test_output_parity_rejects_forged_or_extra_lines(self):
+        expected = "PHYSICAL_COPY\\tbytes=4\\tcopies=8\\tobserved=10"
+        self.assertIsNone(study.parse_sample_output(expected, expected, metered=False))
+        for bad in (
+            expected + "\\nPHYSICAL_COPY\\tbytes=4\\tcopies=8\\tobserved=10",
+            "PHYSICAL_COPY\\tbytes=4\\tcopies=7\\tobserved=10",
+            expected + "\\nWARNING skipped seven copies",
+            "\\n" + expected,
+            expected + "\\n",
+        ):
+            with self.subTest(bad=bad), self.assertRaises(RuntimeError):
+                study.parse_sample_output(bad, expected, metered=False)
+
+    def test_meter_requires_exact_positive_package_observation(self):
+        expected = "PHYSICAL_COPY\\tbytes=4\\tcopies=8\\tobserved=10"
+        meter = ("RUST_RAPL_PACKAGE energy_uj=1234 elapsed_ns=100000000 "
+                 "scope=whole_package_not_process status=MEASURED")
+        got = study.parse_sample_output(expected + "\\n" + meter, expected, metered=True)
+        self.assertEqual(got["energy_uj"], 1234)
+        self.assertEqual(got["elapsed_ns"], 100000000)
+        self.assertEqual(got["scope"], "whole_package_not_process")
+        for bad in (
+            meter.replace("energy_uj=1234", "energy_uj=0"),
+            meter.replace("energy_uj=1234", "energy_uj=NaN"),
+            meter.replace("elapsed_ns=100000000", "elapsed_ns=0"),
+            meter.replace("scope=whole_package_not_process", "scope=process_only"),
+            meter.replace("status=MEASURED", "status=NOT_MEASURED"),
+            meter + " energy_uj=9999",
+            meter.replace(" energy_uj=1234", ""),
+            meter.replace(" elapsed_ns=100000000", ""),
+            meter + " invalidfield",
+        ):
+            with self.subTest(bad=bad), self.assertRaises(RuntimeError):
+                study.parse_sample_output(expected + "\\n" + bad, expected, metered=True)
+        for stdout in (expected, expected + "\\n" + meter + "\\n" + meter,
+                       meter + "\\n" + expected):
+            with self.subTest(stdout=stdout), self.assertRaises(RuntimeError):
+                study.parse_sample_output(stdout, expected, metered=True)
+
+    def test_rss_requires_positive_kernel_peak_and_valid_times(self):
+        actual = study.parse_resource_usage("METRIC_RSS_KIB=1200\\tuser_s=0.02\\tsys_s=0.01")
+        self.assertEqual(actual["peak_rss_kib"], 1200)
+        for bad in ("", "METRIC_RSS_KIB=0\\tuser_s=0\\tsys_s=0",
+                    "METRIC_RSS_KIB=NaN\\tuser_s=0\\tsys_s=0",
+                    "METRIC_RSS_KIB=1200\\tuser_s=nan\\tsys_s=0",
+                    "METRIC_RSS_KIB=1200\\tuser_s=0\\tsys_s=0\\nEXTRA"):
+            with self.subTest(bad=bad), self.assertRaises(RuntimeError):
+                study.parse_resource_usage(bad)
+
+    def test_interrupted_process_is_never_a_measurement(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            out = Path(tmp)
+            with mock.patch.object(study.subprocess, "run",
+                                   return_value=__import__("subprocess").CompletedProcess(
+                                       args=["fake"], returncode=-9, stdout="", stderr="killed")):
+                with self.assertRaisesRegex(RuntimeError, "execution failed: -9"):
+                    study.measure(["fake"], 4, out, None,
+                                  "PHYSICAL_COPY\\tbytes=4\\tcopies=4\\tobserved=10")
 
     def test_without_exact_parity_no_numeric_verdict(self):
         evidence = {
