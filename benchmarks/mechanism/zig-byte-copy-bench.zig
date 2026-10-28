@@ -1,4 +1,4 @@
-//! Бенчмарк механізму копіювання байтів Zig 0.16, без SENS-семантики.
+//! Zig 0.16: допоміжний транспорт ТІЛЬКИ фізичного .sens, без SENS-семантики.
 //! zig test -O ReleaseFast -lc benchmarks/mechanism/zig-byte-copy-bench.zig
 const std = @import("std");
 // Zig 0.16 forbids @embedFile outside a package root. Load before timing.
@@ -10,7 +10,7 @@ extern "c" fn ftell(*CFile) c_long;
 extern "c" fn fread([*]u8, usize, usize, *CFile) usize;
 
 fn readCorpus(allocator: std.mem.Allocator) ![]u8 {
-    const file = fopen("lib/core4.lisp", "rb") orelse return error.CorpusUnavailable;
+    const file = fopen("lib/core4.sens", "rb") orelse return error.CorpusUnavailable;
     defer _ = fclose(file);
     if (fseek(file, 0, 2) != 0) return error.SeekFailure;
     const end = ftell(file);
@@ -76,7 +76,7 @@ test "physical byte-copy corridor: exact bytes and elapsed time" {
         samples[j] = value;
     }
     std.debug.print(
-        "ZIG_CORRIDOR_COPY_BENCH source=lib/core4.lisp bytes={d} batch={d} samples={d} p50_ns={d} p90_ns={d} min_ns={d} max_ns={d} checksum={d} scope=physical_only\n",
+        "ZIG_CORRIDOR_COPY_BENCH source=lib/core4.sens bytes={d} batch={d} samples={d} p50_ns={d} p90_ns={d} min_ns={d} max_ns={d} checksum={d} scope=physical_only\n",
         .{ source.len, batch_count, samples_count, samples[5], samples[9], samples[0], samples[10], checksum },
     );
 }
