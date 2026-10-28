@@ -2,8 +2,8 @@
 """Read-only, fail-closed inventory of obsolete D3 COND/ATOM/EQ logic.
 
 Scans tracked active Lisp source, not historical research or surface tables.
-Also guards the canonical Rust evaluator mechanism against old truth/identity
-semantics. It does not prove runtime behavior of every source file.
+Does not inspect or define Rust evaluator semantics. This is only a
+legacy-source migration inventory, never a SENS language-law oracle.
 
     python3 scripts/check_d3_legacy_logic.py --json
     python3 scripts/check_d3_legacy_logic.py --strict
@@ -26,7 +26,6 @@ QUOTE = {"001", "00000001", "QUOTE", "quote", "як-є"}
 CANONICAL = {"010": ("ATOM", 1), "101": ("EQ", 2)}
 COND = {"110", "за-умовою"}
 NON_D1 = {"T", "NIL", "t", "nil", "#t", "#f", "true", "false"}
-CORE = "crates/sens/src/eval/special_forms/core.rs"
 SCHEMA = "sens-d3-legacy-logic-inventory/v1"
 
 
@@ -199,45 +198,6 @@ def scan_lisp(source: str, path: str) -> list[Finding]:
     return findings
 
 
-def function_body(source: str, name: str) -> str:
-    matched = re.search(r"\bfn\s+" + re.escape(name) + r"\s*\(", source)
-    if matched is None:
-        raise Unscannable(f"missing Rust function {name}")
-    start = source.find("{", matched.end())
-    if start < 0:
-        raise Unscannable(f"missing Rust body for {name}")
-    depth = 0
-    for i in range(start, len(source)):
-        if source[i] == "{":
-            depth += 1
-        elif source[i] == "}":
-            depth -= 1
-            if depth == 0:
-                return source[start:i + 1]
-    raise Unscannable(f"unterminated Rust function {name}")
-
-
-def scan_core_rust(source: str, path: str = CORE) -> list[Finding]:
-    """Guard required semantic shapes; tests/oracle remain final authority."""
-    checks = (
-        ("ATOM", "atom_value", r"Value::predicate_bit\s*\(\s*!matches!\s*\(\s*value\s*,\s*Value::Pair"),
-        ("EQ", "eq_values", r"!left\.is_atom\(\)\s*\|\|\s*!right\.is_atom\(\)"),
-        ("EQ", "eq_values", r"Value::predicate_bit\s*\(\s*left\s*==\s*right\s*\)"),
-        ("COND", "exact_d3_cond_control", r"\.as_predicate_bit\s*\(\)"),
-        ("COND", "evaluate_domain_cond", r"parts\.len\s*\(\)\s*!=\s*2"),
-        ("COND", "evaluate_domain_cond", r"exact_d3_cond_control\s*\("),
-        ("COND", "evaluate_domain_cond", r"EvalStep::Value\s*\(\s*Value::Nil\s*\)"),
-    )
-    findings = []
-    for operation, name, required in checks:
-        body = function_body(source, name)
-        if not re.search(required, body):
-            findings.append(Finding(path, source[:source.find("fn " + name)].count("\n") + 1,
-                                    operation, "RUNTIME_LAW_DRIFT",
-                                    f"{name}: canonical D1/D3 mechanism condition missing: {required}"))
-    return findings
-
-
 def is_live(path: str) -> bool:
     if not path.endswith(".lisp"):
         return False
@@ -270,20 +230,13 @@ def audit(root: Path) -> dict:
             findings.extend(scan_lisp(path.read_text(encoding="utf-8"), relative))
         except (Unscannable, UnicodeError, OSError, RecursionError) as exc:
             errors.append(f"{relative}: {exc}")
-    core = root / CORE
-    try:
-        if CORE not in paths or core.is_symlink() or not core.is_file():
-            raise Unscannable("tracked canonical core evaluator missing")
-        findings.extend(scan_core_rust(core.read_text(encoding="utf-8")))
-    except (Unscannable, UnicodeError, OSError) as exc:
-        errors.append(f"{CORE}: {exc}")
     if not active:
         errors.append("no tracked active Lisp source files; refusing false green")
     findings.sort(key=lambda f: (f.path, f.line, f.operation, f.rule))
     return {"schema": SCHEMA, "tracked_files": len(paths),
             "active_lisp_files_scanned": len(active) - sum(1 for e in errors if e.split(":", 1)[0] in active),
             "historical_and_metadata_not_semantically_scanned": sum(1 for p in paths if p.endswith(".lisp") and not is_live(p)),
-            "runtime_mechanism_checked": not any(e.startswith(CORE + ":") for e in errors),
+            "runtime_mechanism_checked": False,
             "findings": [asdict(f) for f in findings], "errors": errors}
 
 
