@@ -302,12 +302,26 @@ fn append_t5m_expression_context(
             } else {
                 layout
             };
-            let text = sens::encode_text7(name, symbol_layout).map_err(|error| {
-                format!(
-                    "T5M identifier projection: symbol={name:?} source_byte={}: {error}",
-                    expression.span.start
-                )
-            })?;
+            let text = sens::encode_text7(name, symbol_layout)
+                .or_else(|surface_error| {
+                    // An explicit Ukrainian identifier typed on the English
+                    // projection keeps its established D7 keyboard spelling.
+                    // The evaluator still decides whether that Text7 key is bound.
+                    if !quoted_data
+                        && layout == sens::Text7Layout::En
+                        && name.chars().any(|character| !character.is_ascii())
+                    {
+                        sens::encode_text7(name, sens::Text7Layout::Uk)
+                    } else {
+                        Err(surface_error)
+                    }
+                })
+                .map_err(|error| {
+                    format!(
+                        "T5M identifier projection: symbol={name:?} source_byte={}: {error}",
+                        expression.span.start
+                    )
+                })?;
             // A single quoted free glyph is one exact D7 datum. Do not
             // wrap it as a one-element D2 list: ATOM would then observe a
             // pair instead of the source-level atomic glyph. Multi-glyph
@@ -1994,6 +2008,28 @@ fn render_repl_ast_and_eval(
     Ok((preview, execution))
 }
 
+/// Interactive input policy: an unresolved bare name is echoed as displayed
+/// text. Parenthesized forms still surface the original SENS/T5M rejection.
+fn render_interaction_echo(line: &str) -> String {
+    line.to_uppercase()
+}
+
+fn is_interaction_only_unresolved_name(line: &str, error: &str) -> bool {
+    let standalone_name = sens::parse_mixed_exact_domain(line)
+        .ok()
+        .is_some_and(|forms| {
+            forms.len() == 1
+                && matches!(
+                    forms[0].kind,
+                    ExprKind::Symbol(_) | ExprKind::DomainIdentity(DomainIdentity::D7(_))
+                )
+        });
+    let unresolved_name = error.contains("unknown symbol")
+        || error.contains("unknown Text7 binding")
+        || error.contains("domain identity is not callable under its ratified law: D7");
+    standalone_name && unresolved_name
+}
+
 /// `~/.sens-history`, якщо home directory доступний.
 pub(crate) fn history_path() -> Option<PathBuf> {
     let home = env::var_os("HOME").or_else(|| env::var_os("USERPROFILE"))?;
@@ -2315,8 +2351,12 @@ pub(crate) fn run_repl(session: Session, initial_surface: ReplSurface, sens_loop
                         );
                     }
                     Err(error) => {
-                        // Хост лише показує відмову; він не перетворює її на успішний результат.
-                        eprintln!("{}", render_repl_error(&error));
+                        if is_interaction_only_unresolved_name(line, &error) {
+                            println!("{}", render_interaction_echo(line));
+                        } else {
+                            // Хост не підміняє відмову у виконанні складної форми.
+                            eprintln!("{}", render_repl_error(&error));
+                        }
                     }
                 }
             }
