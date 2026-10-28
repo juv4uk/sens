@@ -130,5 +130,5 @@ fi
 [[ "$(git rev-parse --verify HEAD 2>/dev/null)" == "$sha" ]] || die 'HEAD змінився під час вимірювання'
 git diff --quiet -- || die 'файли змінилися під час вимірювання'
 git diff --cached --quiet -- || die 'індекс змінився під час вимірювання'
-[[ -z "$(git ls-files --others --exclude-standard)" ]] || die 'з'явилися незакомічені файли під час вимірювання'
+[[ -z "$(git ls-files --others --exclude-standard)" ]] || die 'виявлено нові незакомічені файли під час вимірювання'
 printf 'КОНКУРС_ПІДСУМОК sha=%s rust=%s zig=%s sens=%s міжмовний-рейтинг=заборонено\n' "$sha" "$rust" "$zig_lane" "$sens"
