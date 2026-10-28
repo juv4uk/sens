@@ -24,7 +24,7 @@ def record():
                 "end_uj": 1_200_000, "peak_rss_bytes": 123_456,
                 "exit_code": 0}
     def session(i):
-        return {"id": "session-" + str(i), "recorded_at_utc": "2026-10-28T12:00:00Z",
+        return {"id": "session-" + str(i), "recorded_at_utc": f"2026-10-28T12:00:{i:02d}Z",
                 "cpu_temperature_c": 44.0, "read_overhead_ns": 1_000,
                 "idle_control": {"start_uj": 10_000, "end_uj": 20_000,
                                  "elapsed_ns": 100_000_000},
@@ -58,6 +58,43 @@ class CheckCalibrationTests(unittest.TestCase):
         self.assertEqual(report["energy"], "PHYSICAL_CALIBRATION_NOT_VERIFIED")
         self.assertEqual(report["result_parity"], "DIGEST_MATCH_ONLY")
         self.assertEqual(report["sessions"], 2)
+
+    def test_reject_duplicate_session_instant_despite_distinct_ids(self):
+        x = record()
+        x["sessions"][1]["recorded_at_utc"] = x["sessions"][0]["recorded_at_utc"]
+        self.reject(x, "DUPLICATE_SESSION_INSTANT")
+
+    def test_reject_same_instant_with_different_fractional_notation(self):
+        x = record()
+        x["sessions"][1]["recorded_at_utc"] = "2026-10-28T12:00:01.000Z"
+        self.reject(x, "DUPLICATE_SESSION_INSTANT")
+
+    def test_reject_impossible_session_calendar_date(self):
+        x = record()
+        x["sessions"][1]["recorded_at_utc"] = "2026-02-30T12:00:02Z"
+        self.reject(x, "INVALID_SESSION_UTC_TIMESTAMP")
+
+    def test_reject_session_with_non_utc_offset(self):
+        x = record()
+        x["sessions"][1]["recorded_at_utc"] = "2026-10-28T14:00:02+02:00"
+        self.reject(x, "INVALID_SESSION_UTC_TIMESTAMP")
+
+    def test_reject_session_missing_timezone(self):
+        x = record()
+        x["sessions"][0]["recorded_at_utc"] = "2026-10-28T12:00:01"
+        self.reject(x, "INVALID_SESSION_UTC_TIMESTAMP")
+
+    def test_reject_malformed_provenance_timestamp(self):
+        x = record()
+        x["provenance"]["recorded_at_utc"] = "2026-13-28T12:00:00Z"
+        self.reject(x, "INVALID_PROVENANCE_UTC_TIMESTAMP")
+
+    def test_distinct_utc_fractional_instants_are_structurally_admissible(self):
+        x = record()
+        x["sessions"][1]["recorded_at_utc"] = "2026-10-28T12:00:02.000001Z"
+        result = validate(x)
+        self.assertEqual(result["status"], "STRUCTURAL_PASS")
+        self.assertEqual(result["energy"], "PHYSICAL_CALIBRATION_NOT_VERIFIED")
 
     def test_sensor_unavailable_never_returns_joules(self):
         x = record()
