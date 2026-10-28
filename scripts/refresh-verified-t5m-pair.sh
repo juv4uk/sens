@@ -245,31 +245,31 @@ if (( ${#binding_sources[@]} != 0 )); then
     # byte-for-byte at an exact newline boundary (never substring matching).
     # This exception is allowed ONLY for the declared F6 producer.
     if [[ "$source_file" == tests/fixtures/wsm-fs-record-producer.lisp ]]; then
-      paired_bytes=$(wc -c < "$scratch/out")
-      complete_bytes=$(wc -c < "$scratch/complete.out")
-      prefix_bytes=$((complete_bytes - paired_bytes))
-      if (( paired_bytes > 0 && prefix_bytes > 0 )); then
-        tail -c "$paired_bytes" "$scratch/complete.out" > "$scratch/f6-source-suffix.out"
-        previous_byte="$(dd if="$scratch/complete.out" bs=1 skip="$((prefix_bytes - 1))" count=1 status=none | od -An -tu1 | tr -d '[:space:]')"
-        if [[ "$previous_byte" == 10 ]] && cmp -s "$scratch/out" "$scratch/f6-source-suffix.out"; then
-          f6_suffix_verified=1
-          echo "T5M_REPAIR_F6_DEPENDENCY_PREFIX_OK source=$source_file prefix_bytes=$prefix_bytes source_bytes=$paired_bytes exact=BYTE_FOR_BYTE"
-        else
-          echo "T5M_REPAIR_DEPENDENCY_COMPLETE_DIVERGENCE source=$source_file paired_bytes=$paired_bytes complete_bytes=$complete_bytes reason=source-transcript-not-exact-suffix" >&2
-          exit 2
-        fi
-      else
-        echo "T5M_REPAIR_DEPENDENCY_COMPLETE_DIVERGENCE source=$source_file paired_bytes=$paired_bytes complete_bytes=$complete_bytes reason=invalid-prefix" >&2
+      # Source-only pair and dependency-complete program have DIFFERENT
+      # stdout scopes: the latter also evaluates library DEFINE forms.
+      # Never declare parity by a guessed text suffix. Instead evaluate
+      # the SAME complete SENS program by both physical entrypoints and
+      # demand identical unmodified stdout, byte for byte.
+      if ! timeout "$native_timeout" "$binary" --t5m-pair "$direct_source" "$complete" "${paired_runtime_args[@]}" > "$scratch/complete-paired.out" 2> "$scratch/complete-paired.err"; then
+        cat "$scratch/complete-paired.err" >&2
+        echo "T5M_REPAIR_F6_COMPLETE_PAIR_EXECUTION_FAILED source=$source_file" >&2
         exit 2
       fi
+      if ! cmp -s "$scratch/complete-paired.out" "$scratch/complete.out"; then
+        echo "T5M_REPAIR_F6_COMPLETE_PARITY_FAILED source=$source_file paired_bytes=$(wc -c < "$scratch/complete-paired.out") complete_bytes=$(wc -c < "$scratch/complete.out") physical=NOT_CERTIFIED" >&2
+        exit 2
+      fi
+      f6_complete_pair_verified=1
+      echo "T5M_REPAIR_F6_COMPLETE_PAIR_PARITY_OK source=$source_file physical=ZIG_T5M two_entrypoints=BYTE_EXACT source_only_pair=EXECUTED"
+
     else
       echo "T5M_REPAIR_DEPENDENCY_COMPLETE_DIVERGENCE source=$source_file paired_bytes=$(wc -c < "$scratch/out") complete_bytes=$(wc -c < "$scratch/complete.out")" >&2
       exit 2
     fi
   fi
   mode=paired-and-dependency-complete
-  if [[ "${f6_suffix_verified:-0}" == 1 ]]; then
-    mode=paired-and-dependency-complete-f6-exact-source-suffix
+  if [[ "${f6_complete_pair_verified:-0}" == 1 ]]; then
+    mode=paired-and-dependency-complete-f6-full-bundle-parity
   fi
 else
 if timeout "$native_timeout" "${standalone_runtime[@]}" "$staged" > "$scratch/standalone.out" 2> "$scratch/standalone.err"; then
