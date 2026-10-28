@@ -63,6 +63,30 @@ jobs:
             fi
           done < "$unique"
           echo "ACTION_CANCEL_SUMMARY selected=$selected requested=$cancelled unconfirmed=$unavailable"
+          # GitHub sometimes continues a run even after successful /cancel.
+          # One bounded follow-up pass force-cancels any runs still active.
+          sleep 5
+          : > "$ids"
+          for state in queued in_progress waiting pending requested; do
+            gh api --paginate --jq '.workflow_runs[].id' \
+              "/repos/$GH_REPO/actions/runs?status=$state&per_page=100" >> "$ids"
+          done
+          sort -un "$ids" > "$unique"
+          forced=0
+          still_unconfirmed=0
+          while IFS= read -r id; do
+            [[ "$id" =~ ^[0-9]+$ ]] || continue
+            [[ "$id" != "$SELF_RUN_ID" ]] || continue
+            if gh api --silent --method POST \
+                "/repos/$GH_REPO/actions/runs/$id/force-cancel"; then
+              echo "ACTION_FORCE_CANCEL_REQUESTED id=$id"
+              forced=$((forced + 1))
+            else
+              echo "ACTION_FORCE_CANCEL_UNCONFIRMED id=$id" >&2
+              still_unconfirmed=$((still_unconfirmed + 1))
+            fi
+          done < "$unique"
+          echo "ACTION_FORCE_CANCEL_SUMMARY requested=$forced unconfirmed=$still_unconfirmed"
           # Do not claim all runs stopped just because GitHub accepted requests.
           if (( unavailable != 0 )); then
             echo "::warning::Some runs were already terminal or their cancellation was refused"
