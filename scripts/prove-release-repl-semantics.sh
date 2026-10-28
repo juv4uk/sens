@@ -16,6 +16,33 @@ bash scripts/prove-repl-environment.sh "$cli"
 tmp="$(mktemp -d)"
 trap 'rm -rf "$tmp"' EXIT
 
+# Наявні SENS-свідки викликають репл-крок/репл-крок-поверхні безпосередньо.
+# Позитивна форма мусить повертати D1:YES; mutant — D1:NO.
+# REPL тільки завантажує їх через Zig/T5M, а не визначає закон.
+run_sens_repl_law() {
+  local path="$1" expected="$2" label="$3"
+  if [[ ! -f "$path" ]]; then
+    printf 'REGRESSION id=release-repl-%s actual=fixture-missing\\n' "$label" >&2
+    exit 1
+  fi
+  if ! printf ':завантажити %s\\n' "$path" |
+    timeout 120s "$cli" --surface=укр >"$tmp/$label.out" 2>"$tmp/$label.err"; then
+    printf 'REGRESSION id=release-repl-%s actual=process-failed\\n' "$label" >&2
+    cat "$tmp/$label.err" >&2
+    exit 1
+  fi
+  if [[ -s "$tmp/$label.err" ]] ||
+    ! grep -Fq "Завантажено: $path" "$tmp/$label.out" ||
+    ! grep -Fqx "$expected" "$tmp/$label.out"; then
+    printf 'REGRESSION id=release-repl-%s expected=%s actual=wrong-verdict\\n' "$label" "$expected" >&2
+    cat "$tmp/$label.out" "$tmp/$label.err" >&2
+    exit 1
+  fi
+}
+
+run_sens_repl_law tests/semantic/repl-uk-step-law.lisp 'ТАК' step-law
+run_sens_repl_law tests/semantic/repl-uk-step-mutant.lisp 'НІ' step-mutant
+
 # Послідовність в ОДНІЙ сесії: невідоме ім'я, заборонений гліф,
 # потім точна арифметика. Відмови не можуть ставати echo-успіхом,
 # а друга відмова не повинна отруювати наступну коректну форму.
