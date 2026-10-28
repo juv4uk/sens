@@ -16,6 +16,7 @@ from pathlib import Path
 HEX40 = re.compile(r"^[0-9a-f]{40}$")
 HEX64 = re.compile(r"^[0-9a-f]{64}$")
 PACKAGE_PATH = re.compile(r"^/sys/class/powercap/intel-rapl:[0-9]+$")
+PACKAGE_NAME = re.compile(r"^package-[0-9]+$")
 
 
 class InvalidRecord(ValueError):
@@ -45,6 +46,25 @@ def natural_int(value: object, code: str) -> int:
 def sha40(value: object, code: str) -> str:
     require(isinstance(value, str) and bool(HEX40.fullmatch(value)), code)
     return value
+
+
+def unique_json_object(pairs: list[tuple[str, object]]) -> dict[str, object]:
+    """Preserve raw provenance: reject ambiguous duplicate keys at every depth."""
+    result: dict[str, object] = {}
+    for key, value in pairs:
+        require(key not in result, f"DUPLICATE_JSON_KEY:{key}")
+        result[key] = value
+    return result
+
+
+def reject_json_constant(value: str) -> None:
+    """Python accepts NaN/Infinity extensions by default; raw JSON must not."""
+    raise InvalidRecord(f"NONFINITE_JSON_CONSTANT:{value}")
+
+
+def parse_raw_json(payload: str) -> object:
+    return json.loads(payload, object_pairs_hook=unique_json_object,
+                      parse_constant=reject_json_constant)
 
 
 def validate_counter(raw: object, *, energy_range: int, max_power_w: int, label: str) -> int:
@@ -83,7 +103,8 @@ def validate(data: object) -> dict[str, object]:
     for key in ("source_sha", "collector_sha", "input_sha"):
         sha40(provenance.get(key), f"INVALID_{key.upper()}")
     require(provenance["clock"] == "monotonic_ns", "CLOCK_NOT_MONOTONIC")
-    require(provenance["sensor_name"].startswith("package-"), "NOT_CPU_PACKAGE_DOMAIN")
+    require(PACKAGE_NAME.fullmatch(provenance["sensor_name"]) is not None,
+            "NOT_CPU_PACKAGE_DOMAIN")
     require(isinstance(provenance.get("sensor_path"), str) and
             PACKAGE_PATH.fullmatch(provenance["sensor_path"]) is not None,
             "INVALID_PACKAGE_SENSOR_PATH")
@@ -174,7 +195,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("record", type=Path, help="JSON raw calibration record; no sensor is queried")
     args = parser.parse_args(argv)
     try:
-        data = json.loads(args.record.read_text(encoding="utf-8"))
+        data = parse_raw_json(args.record.read_text(encoding="utf-8"))
         result = validate(data)
     except (InvalidRecord, OSError, UnicodeError, json.JSONDecodeError) as exc:
         reason = str(exc)

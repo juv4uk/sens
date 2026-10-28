@@ -51,10 +51,12 @@
 Повний **вигаданий позитивний** формат із двома сесіями генерується функцією `record()` у `test_check_calibration.py`; **НЕ** публікувати його як спостереження. Справжній запис без доступу до датчика з `sensor_access_confirmed=false` повертає тільки `ENERGY_NOT_MEASURED`, exit 2.
 
 ```bash
-(cd benchmarks/energy-calibration && python3 -m unittest -v test_check_calibration.py)
+python3 -m unittest -v benchmarks/energy-calibration/test_check_calibration.py
 python3 benchmarks/energy-calibration/check_calibration.py --help
 python3 benchmarks/energy-calibration/check_calibration.py /path/to/calibration-raw.json
 ```
+
+Сирі JSON-записи перевіряються на **дубльовані ключі на будь-якій глибині**, `NaN`/`Infinity` та синтаксис `sensor_name=package-<число>`; конфліктні записи відхиляються до перевірки лічильника. Повторені JSON-ключі не можна мовчки зводити до останнього значення, бо це приховує суперечливі показання/ознаки доступу до сенсора. Ця синтаксична перевірка **не** підтверджує автентичності сенсора або даних.
 
 Результат `STRUCTURAL_PASS` означає лише, що необхідні **метадані присутні**, локальний паритет дайджестів узгоджений, одне переповнення математично припустиме під **задекларованою** верхньою межею та AB/BA записані. Він завжди супроводжується **`PHYSICAL_CALIBRATION_NOT_VERIFIED`**; навіть `mode=PHYSICAL` — неперевірене твердження джерела, а не автоматично фізичне свідчення. Валідатор **не** перевіряє незалежність датчиків, компіляторний DCE, автентичність SHA, реальні показання, фізичну верхню межу чи природу хешованого виходу. Відмови — JSON, `status=CALIBRATION_REJECTED` або `ENERGY_NOT_MEASURED`, exit 2. Справжні підсумки енергії / SCI тут взагалі не обчислюються.
 

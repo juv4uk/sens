@@ -71,6 +71,10 @@ class CheckCalibrationTests(unittest.TestCase):
         x = record(); x["provenance"]["sensor_name"] = "dram"
         self.reject(x, "NOT_CPU_PACKAGE_DOMAIN")
 
+    def test_reject_malformed_package_name(self):
+        x = record(); x["provenance"]["sensor_name"] = "package-"
+        self.reject(x, "NOT_CPU_PACKAGE_DOMAIN")
+
     def test_reject_wrong_unit(self):
         x = record(); x["provenance"]["energy_unit"] = "joules"
         self.reject(x, "ENERGY_UNIT_MISMATCH")
@@ -151,6 +155,55 @@ class CheckCalibrationTests(unittest.TestCase):
     def test_boolean_counter_rejected(self):
         x = record(); x["sessions"][0]["idle_control"]["start_uj"] = True
         self.reject(x, "INVALID_COUNTER_START")
+
+    def run_cli(self, raw_json):
+        with tempfile.TemporaryDirectory() as directory:
+            file = Path(directory) / "raw.json"
+            file.write_text(raw_json, encoding="utf-8")
+            return subprocess.run([sys.executable,
+                                   str(Path(__file__).with_name("check_calibration.py")), str(file)],
+                                  capture_output=True, text=True, check=False)
+
+    def test_cli_valid_synthetic_record_remains_structural_only(self):
+        result = self.run_cli(json.dumps(record()))
+        self.assertEqual(result.returncode, 0, result.stderr)
+        actual = json.loads(result.stdout)
+        self.assertEqual(actual["status"], "STRUCTURAL_PASS")
+        self.assertEqual(actual["energy"], "PHYSICAL_CALIBRATION_NOT_VERIFIED")
+        self.assertNotIn("joules", actual)
+
+    def test_cli_conflicting_duplicate_sensor_access_rejected(self):
+        raw = json.dumps(record())
+        self.assertEqual(raw.count('"sensor_access_confirmed": true'), 1)
+        raw = raw.replace('"sensor_access_confirmed": true',
+                          '"sensor_access_confirmed": false, "sensor_access_confirmed": true', 1)
+        result = self.run_cli(raw)
+        self.assertEqual(result.returncode, 2)
+        actual = json.loads(result.stdout)
+        self.assertEqual(actual["status"], "CALIBRATION_REJECTED")
+        self.assertIn("DUPLICATE_JSON_KEY:sensor_access_confirmed", actual["reason"])
+
+    def test_cli_duplicate_nested_binary_sha_rejected(self):
+        raw = json.dumps(record())
+        self.assertIn('"binary_sha":', raw)
+        raw = raw.replace('"binary_sha":', '"binary_sha": "f" , "binary_sha":', 1)
+        result = self.run_cli(raw)
+        self.assertEqual(result.returncode, 2)
+        self.assertIn("DUPLICATE_JSON_KEY:binary_sha", json.loads(result.stdout)["reason"])
+
+    def test_cli_duplicate_root_schema_rejected(self):
+        raw = json.dumps(record())
+        raw = raw.replace('"schema":', '"schema": "fake", "schema":', 1)
+        result = self.run_cli(raw)
+        self.assertEqual(result.returncode, 2)
+        self.assertIn("DUPLICATE_JSON_KEY:schema", json.loads(result.stdout)["reason"])
+
+    def test_cli_nonfinite_number_in_uninspected_field_rejected(self):
+        raw = json.dumps(record())
+        raw = raw.replace('"mode": "SYNTHETIC",', '"mode": "SYNTHETIC", "uninspected": NaN,', 1)
+        result = self.run_cli(raw)
+        self.assertEqual(result.returncode, 2)
+        self.assertIn("NONFINITE_JSON_CONSTANT:NaN", json.loads(result.stdout)["reason"])
 
 
 if __name__ == "__main__":
