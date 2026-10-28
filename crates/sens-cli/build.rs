@@ -23,6 +23,7 @@ fn pinned_zig_compiler(_pinned: &str) -> std::ffi::OsString {
 
 fn main() {
     println!("cargo:rerun-if-changed=../../.zig-version");
+    println!("cargo:rerun-if-changed=../../zig_compiler_rt_anchor.zig");
     println!("cargo:rerun-if-changed=../../research/zig-codecs/t5/t5.zig");
     println!("cargo:rerun-if-changed=../../research/zig-codecs/t5m.zig");
     println!("cargo:rerun-if-changed=../../research/zig-codecs/t5m3.zig");
@@ -132,10 +133,6 @@ fn main() {
         // Zig ABI reads caller-owned physical bytes: keep optimization AND
         // runtime safety checks at the default Rust-to-Zig ingress.
         .arg("ReleaseSafe")
-        // Zig 0.16 static archives do not bundle compiler-rt by default.
-        // Preserve ReleaseSafe stack probes: provide __zig_probe_stack through
-        // Zig compiler-rt instead of disabling stack checks or inventing a stub.
-        .arg("-fcompiler-rt")
         .arg("-lc");
     if portable_linux {
         assert_eq!(target_os, "linux", "portable Linux Zig target requested for non-Linux build");
@@ -165,4 +162,46 @@ fn main() {
     );
     println!("cargo:rustc-link-search=native={}", out.display());
     println!("cargo:rustc-link-lib=static=sens_zig_transport");
+
+    // Роздільні архіви зберігають compiler-rt stack probes без LLD-конфлікту з -lc.
+    let runtime_name = if target_env == "msvc" {
+        "sens_zig_compiler_rt.lib"
+    } else {
+        "libsens_zig_compiler_rt.a"
+    };
+    let runtime_archive = out.join(runtime_name);
+    let mut runtime = Command::new(&compiler);
+    runtime
+        .current_dir(&root)
+        .arg("build-lib")
+        .arg("zig_compiler_rt_anchor.zig")
+        .arg("-O")
+        .arg("ReleaseSafe")
+        .arg("-fcompiler-rt");
+    if portable_linux {
+        runtime
+            .arg("-target")
+            .arg("x86_64-linux-gnu.2.35")
+            .arg("-mcpu")
+            .arg("baseline");
+    } else if target_env == "msvc" {
+        runtime
+            .arg("-target")
+            .arg(format!("{target_arch}-windows-msvc"));
+    }
+    if target_os != "windows" {
+        runtime.arg("-fPIC");
+    }
+    let runtime_result = runtime
+        .arg(format!("-femit-bin={}", runtime_archive.display()))
+        .status()
+        .expect("zig-transport requested: pinned Zig compiler-rt unavailable");
+    assert!(
+        runtime_result.success(),
+        "zig-transport requested: Zig compiler-rt archive build failed"
+    );
+    println!("cargo:rustc-link-lib=static=sens_zig_compiler_rt");
+    if target_env != "msvc" {
+        println!("cargo:rustc-link-lib=c");
+    }
 }

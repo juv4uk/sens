@@ -318,10 +318,30 @@ fn d8_selector_uk_index() -> &'static HashMap<String, DomainIdentity> {
     })
 }
 
-/// Exact inverse test/support for the owner D9/D10 selector table.
-/// These are metadata-only spelling peers, not another runtime body.
- four-name rows have one deduplicated Ukrainian spelling. Sanskrit,
-/// English, and LISP names remain metadata rather than source-head authority.
+/// Точне D5-зв'язування наявних Lisp-визначень.
+/// Таблиця може надати механізм лише identity, уже ратифікованій контрактом
+/// SENS; вона не надає нового допуску до виклику.
+pub(crate) fn d5_lisp_definition_names() -> impl Iterator<Item = &'static str> {
+    D5_DEFINITION_BINDINGS.iter().map(|row| row.name)
+}
+
+/// Імена вже ратифікованих похідних Lisp-визначень D6.
+/// Ця проєкція не надає нового допуску до виклику.
+pub(crate) fn d6_lisp_definition_names() -> impl Iterator<Item = &'static str> {
+    D6_DEFINITION_BINDINGS
+        .iter()
+        .flat_map(|row| row.names.iter().copied())
+}
+
+pub(crate) fn d5_binding_identity_for_definition(name: &str) -> Option<CoreDomainIdentity> {
+    D5_DEFINITION_BINDINGS
+        .iter()
+        .find(|row| row.name == name)
+        .map(|row| CoreDomainIdentity::D5(CoreD5::from_word(Bit5::new(row.bits).unwrap())))
+}
+
+/// Знаходить ратифіковане українське написання визначення D6.
+/// Цей пошук метаданих не надає написанню права бути головою джерела.
 pub(crate) fn d6_uk_source_identity(name: &str) -> Option<DomainIdentity> {
     D6_DEFINITION_BINDINGS
         .iter()

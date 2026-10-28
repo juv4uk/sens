@@ -25,6 +25,7 @@ fn main() {
     for path in [
         "../../.zig-version",
         "../../guard_source_root.zig",
+        "../../zig_compiler_rt_anchor.zig",
         "../../lib/core.sens",
         "../../lib/unify.sens",
         "../../lib/guard.sens",
@@ -83,12 +84,11 @@ fn main() {
     let archive = out.join(archive_name);
     let mut command = Command::new(&compiler);
     command
-        .current_dir(root)
+        .current_dir(&root)
         .arg("build-lib")
         .arg("guard_source_root.zig")
         .arg("-O")
         .arg("ReleaseSafe")
-        .arg("-fcompiler-rt")
         .arg("-lc");
     if portable_linux {
         assert_eq!(target_os, "linux", "portable Linux Zig target requested for non-Linux build");
@@ -114,4 +114,43 @@ fn main() {
     assert!(result.success(), "Zig Guard source compilation failed");
     println!("cargo:rustc-link-search=native={}", out.display());
     println!("cargo:rustc-link-lib=static=sens_zig_guard_sources");
+
+    // Роздільні архіви зберігають compiler-rt stack probes без LLD-конфлікту з -lc.
+    let runtime_name = if target_env == "msvc" {
+        "sens_zig_compiler_rt.lib"
+    } else {
+        "libsens_zig_compiler_rt.a"
+    };
+    let runtime_archive = out.join(runtime_name);
+    let mut runtime = Command::new(&compiler);
+    runtime
+        .current_dir(&root)
+        .arg("build-lib")
+        .arg("zig_compiler_rt_anchor.zig")
+        .arg("-O")
+        .arg("ReleaseSafe")
+        .arg("-fcompiler-rt");
+    if portable_linux {
+        runtime
+            .arg("-target")
+            .arg("x86_64-linux-gnu.2.35")
+            .arg("-mcpu")
+            .arg("baseline");
+    } else if target_env == "msvc" {
+        runtime
+            .arg("-target")
+            .arg(format!("{target_arch}-windows-msvc"));
+    }
+    if target_os != "windows" {
+        runtime.arg("-fPIC");
+    }
+    let runtime_result = runtime
+        .arg(format!("-femit-bin={}", runtime_archive.display()))
+        .status()
+        .expect("Cannot execute pinned Zig compiler-rt compiler");
+    assert!(runtime_result.success(), "Zig compiler-rt archive compilation failed");
+    println!("cargo:rustc-link-lib=static=sens_zig_compiler_rt");
+    if target_env != "msvc" {
+        println!("cargo:rustc-link-lib=c");
+    }
 }

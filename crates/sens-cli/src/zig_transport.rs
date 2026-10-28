@@ -1246,6 +1246,21 @@ pub fn compiler_d4_authority_bytes() -> Result<Vec<u8>, String> {
     )
 }
 
+#[cfg(test)]
+mod zig_exact_egress_tests {
+    use super::{
+        decode_e1_words, decode_t5m_words, encode_e1_direct, encode_t5m_direct,
+        require_same_exact_words,
+    };
+
+    fn words(source: &str) -> Vec<sens::BinarySourceWord> {
+        sens::parse_binary_source_words(source)
+            .expect("точні двійкові слова")
+            .into_iter()
+            .map(|token| token.word)
+            .collect()
+    }
+
     #[test]
     fn t5_egress_uses_zig_for_exact_roundtrip() {
         let expected = words("1 01 001 010101000");
