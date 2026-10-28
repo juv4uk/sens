@@ -127,6 +127,9 @@ def run_once(cmd: str, env: dict, timeout_s: float = 120.0):
     максимум по всіх дочірніх процесах за сесію — тобто після першого ж
     великого запуску всі наступні показували б його число. wait4 повертає
     rusage конкретного процесу, і саме він потрібен для парних даних.
+
+    timeout_s реально обмежує очікування (раніше параметр ігнорувався).
+    stdout/stderr читаються після wait, щоб не блокуватися на PIPE.
     """
     import shlex
     argv = shlex.split(cmd)
@@ -136,22 +139,92 @@ def run_once(cmd: str, env: dict, timeout_s: float = 120.0):
                                 text=True, env=env)
     except OSError as exc:
         return None, None, f"SPAWN_FAIL:{exc}"
-    try:
-        pid, status, usage = os.wait4(proc.pid, 0)
-    except ChildProcessError:
-        return None, None, "WAIT_FAIL"
+    deadline = time.monotonic() + timeout_s
+    status = None
+    usage = None
+    while True:
+        remaining = deadline - time.monotonic()
+        if remaining <= 0:
+            proc.kill()
+            try:
+                _, killed_status, _ = os.wait4(proc.pid, 0)
+                proc.returncode = os.waitstatus_to_exitcode(killed_status)
+            except ChildProcessError:
+                proc.returncode = -9
+            finally:
+                if proc.stdout:
+                    proc.stdout.close()
+                if proc.stderr:
+                    proc.stderr.close()
+            return None, None, f"TIMEOUT_{timeout_s}s"
+        try:
+            pid, status, usage = os.wait4(proc.pid, os.WNOHANG)
+        except ChildProcessError:
+            return None, None, "WAIT_FAIL"
+        if pid != 0:
+            break
+        time.sleep(min(0.001, max(0.0002, remaining)))
     elapsed = time.perf_counter_ns() - start
     out = proc.stdout.read() if proc.stdout else ""
-    proc.stdout.close(); proc.stderr.close(); proc.returncode = 0
+    err = proc.stderr.read() if proc.stderr else ""
+    if proc.stdout:
+        proc.stdout.close()
+    if proc.stderr:
+        proc.stderr.close()
+    # os.wait4 reaps the child outside Popen.wait(); keep Popen's state consistent.
+    proc.returncode = os.waitstatus_to_exitcode(status)
     if status != 0:
-        return None, None, f"EXIT_{status}"
-    return float(elapsed), float(usage.ru_maxrss), (out.strip().splitlines() or [""])[0]
+        return None, None, f"EXIT_{status}:{err.strip()[:80]}"
+    lines = [ln for ln in out.splitlines() if ln.strip()]
+    if len(lines) != 1:
+        return None, None, f"BAD_STDOUT_LINES_{len(lines)}"
+    return float(elapsed), float(usage.ru_maxrss), lines[0]
+
+
+def active_params(task_id: str) -> dict:
+    """Параметри VERIFY або MEASURE для тієї ж задачі, що й у task_env."""
+    from parity_check import VERIFY_SIZE
+    if SIZES["mode"] == "measure":
+        doc = json.loads(MANIFEST.read_text(encoding="utf-8"))
+        task = next(t for t in doc["tasks"] if t["id"] == task_id)
+        return dict(task["input"])
+    return dict(VERIFY_SIZE[task_id])
+
+
+def golden_for(task_id: str, params: dict) -> str:
+    from parity_check import REFERENCE
+    return REFERENCE[task_id](params)
+
+
+def output_matches(task: dict, actual: str, expected: str) -> tuple[bool, str]:
+    """Порівняння з еталоном для АКТИВНОГО розміру входу (не лише VERIFY_SIZE)."""
+    kind = task["check"]
+    if kind in ("exact", "bitwise"):
+        ok = actual.strip() == expected.strip()
+        return ok, "PARITY_OK" if ok else f"PARITY_FAILED expected={expected[:48]} actual={actual[:48]}"
+    if kind == "tolerance":
+        try:
+            ok = abs(float(actual) - float(expected)) <= float(task["tolerance"])
+        except (TypeError, ValueError):
+            return False, "PARITY_FAILED non-numeric output for tolerance check"
+        return ok, "PARITY_OK" if ok else "PARITY_FAILED beyond tolerance"
+    return False, f"PARITY_FAILED unknown check {kind}"
 
 
 def build_pairs(task: dict, languages: list[str], processes: int,
                 per_process: int, seed: int) -> dict:
-    """Пари baseline=python / candidate=<мова>, порядок AB/BA чергується."""
+    """Пари baseline=python / candidate=<мова>, порядок AB/BA чергується.
+
+    Паритет — не хардкод. Кожна сторона пари мусить дати еталонний вихід
+    для АКТИВНОГО розміру (VERIFY або MEASURE). Інакше пара не потрапляє
+    у valid pairs, а факт відмови зберігається в rejected.
+    """
     pairs = []
+    rejected = []
+    params = active_params(task["id"])
+    expected = golden_for(task["id"], params)
+    parity_ok_count = 0
+    parity_fail_count = 0
     for lang in languages:
         if lang == "python":
             continue
@@ -162,14 +235,38 @@ def build_pairs(task: dict, languages: list[str], processes: int,
                 cmd_cand = LANGUAGES[lang]["cmd"](task["id"])
                 first, second = (cmd_base, cmd_cand) if order == "AB" else (cmd_cand, cmd_base)
                 env = task_env(task["id"])
-                t_first, m_first, _ = run_once(first, env)
-                t_second, m_second, _ = run_once(second, env)
+                t_first, m_first, out_first = run_once(first, env)
+                t_second, m_second, out_second = run_once(second, env)
                 if t_first is None or t_second is None:
+                    rejected.append({
+                        "process_id": f"{lang}-{task['id']}-p{p}-k{k}",
+                        "order": order,
+                        "reason": f"run_fail first={out_first} second={out_second}",
+                    })
+                    parity_fail_count += 1
                     continue
                 if order == "AB":
-                    base_ns, cand_ns, base_rss, cand_rss = t_first, t_second, m_first, m_second
+                    base_ns, cand_ns = t_first, t_second
+                    base_rss, cand_rss = m_first, m_second
+                    base_out, cand_out = out_first, out_second
                 else:
-                    base_ns, cand_ns, base_rss, cand_rss = t_second, t_first, m_second, m_first
+                    base_ns, cand_ns = t_second, t_first
+                    base_rss, cand_rss = m_second, m_first
+                    base_out, cand_out = out_second, out_first
+                ok_b, v_b = output_matches(task, base_out, expected)
+                ok_c, v_c = output_matches(task, cand_out, expected)
+                if not (ok_b and ok_c):
+                    rejected.append({
+                        "process_id": f"{lang}-{task['id']}-p{p}-k{k}",
+                        "order": order,
+                        "reason": f"parity baseline={v_b}; candidate={v_c}",
+                        "baseline_stdout": base_out[:120],
+                        "candidate_stdout": cand_out[:120],
+                        "expected_stdout": expected[:120],
+                    })
+                    parity_fail_count += 1
+                    continue
+                parity_ok_count += 1
                 pairs.append({
                     "process_id": f"{lang}-{task['id']}-p{p}",
                     "order": order,
@@ -181,11 +278,23 @@ def build_pairs(task: dict, languages: list[str], processes: int,
                     "candidate_peak_rss_kib": max(1.0, cand_rss),
                     # Енергія не вимірювана: RAPL недоступний. Не вигадуємо.
                     "energy_not_measured": True,
+                    "parity_checked": True,
+                    "size_mode": SIZES["mode"],
                 })
+    all_checked = parity_ok_count + parity_fail_count
+    passed = parity_ok_count > 0 and parity_fail_count == 0
     return {
         "schema": "sens-paired-physical/v1",
         "metric": "wall_time_ns",
-        "parity": {"passed": True, "oracle_id": "parity_check.py --selftest"},
+        "parity": {
+            "passed": passed,
+            "oracle_id": "parity_check.REFERENCE+output_matches",
+            "size_mode": SIZES["mode"],
+            "ok_pairs": parity_ok_count,
+            "failed_attempts": parity_fail_count,
+            "checked_attempts": all_checked,
+        },
+        "rejected": rejected,
         "provenance": environment(),
         "warmup_note": ("Node is JIT: the first iterations pay compilation. "
                         "No warmup was applied and this is NOT corrected — "
@@ -221,15 +330,21 @@ def main() -> int:
 
     print(f"задач: {len(tasks)} · мов: {available} · процесів: {args.processes} · пар/процес: {args.per_process}")
     results = {}
+    failed_tasks = []
     for task in tasks:
         data = build_pairs(task, available, args.processes, args.per_process, seed=5227)
         results[task["id"]] = data
-        print(f"  {task['id']}: пар={len(data['pairs'])}")
+        if not data["parity"]["passed"]:
+            failed_tasks.append(task["id"])
+        print(f"  {task['id']}: пар={len(data['pairs'])}, parity={data['parity']['passed']}, rejected={len(data['rejected'])}")
     payload = {"schema": "sens-energy-study-raw/v1", "tasks": results,
                "energy": "ENERGY_NOT_MEASURED"}
     args.out.write_text(json.dumps(payload, indent=2), encoding="utf-8")
     print(f"записано: {args.out}")
     print("енергія: ENERGY_NOT_MEASURED (RAPL недоступний)")
+    if failed_tasks:
+        print("PARITY_FAILED: raw збережено лише для аудиту; inference заборонено:", ", ".join(failed_tasks), file=sys.stderr)
+        return 1
     return 0
 
 
