@@ -23,10 +23,10 @@ class ProvenanceIdentityTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as d:
             cpuinfo = Path(d) / "cpuinfo"
             cpuinfo.write_text(
-                "processor : 0\\nmodel name : AMD EPYC 7763 64-Core Processor\\n"
+                "processor : 0\nmodel name : AMD EPYC 7763 64-Core Processor\n"
             )
             from unittest import mock
-            with mock.patch.object(meter.platform, "system", return_value="Linux"), \\
+            with mock.patch.object(meter.platform, "system", return_value="Linux"), \
                  mock.patch.object(meter.platform, "processor", return_value=""):
                 value = meter.cpu_identity(cpuinfo)
             self.assertEqual(value["cpu_model"], "AMD EPYC 7763 64-Core Processor")
@@ -35,7 +35,7 @@ class ProvenanceIdentityTests(unittest.TestCase):
 
     def test_missing_cpu_model_exposes_missing_metadata(self):
         from unittest import mock
-        with mock.patch.object(meter.platform, "system", return_value="Linux"), \\
+        with mock.patch.object(meter.platform, "system", return_value="Linux"), \
              mock.patch.object(meter.platform, "processor", return_value=""):
             result = meter.cpu_identity(Path("/nonexistent-science-cpuinfo"))
         self.assertEqual(result["cpu_model_status"], "CPU_MODEL_NOT_RECORDED")
@@ -43,7 +43,7 @@ class ProvenanceIdentityTests(unittest.TestCase):
 
     def test_nonlinux_processor_fallback_is_labeled(self):
         from unittest import mock
-        with mock.patch.object(meter.platform, "system", return_value="Windows"), \\
+        with mock.patch.object(meter.platform, "system", return_value="Windows"), \
              mock.patch.object(meter.platform, "processor", return_value="Intel Test CPU"):
             result = meter.cpu_identity(Path("/nonexistent-science-cpuinfo"))
         self.assertEqual(result["cpu_model"], "Intel Test CPU")
@@ -65,7 +65,7 @@ class ProvenanceIdentityTests(unittest.TestCase):
             ({"GITHUB_RUN_ID": "-1"}, "INVALID"),
             ({"GITHUB_RUN_ID": "bad"}, "INVALID"),
             ({"GITHUB_RUN_ID": "0"}, "INVALID"),
-            ({"GITHUB_RUN_ID": "123\\n456"}, "INVALID"),
+            ({"GITHUB_RUN_ID": "123\n456"}, "INVALID"),
         ]:
             with self.subTest(env=env):
                 result = meter.github_run_identity(env)
