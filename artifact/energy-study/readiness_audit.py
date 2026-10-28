@@ -95,6 +95,8 @@ def audit_task(task: object) -> dict:
         issues.add("PAIRS_MISSING")
         pairs = []
     processes, sessions, orders = set(), set(), []
+    orders_by_session: dict[str, set[str]] = {}
+    time_boundaries: set[str] = set()
     for i, record in enumerate(pairs):
         if not isinstance(record, dict):
             issues.add("MALFORMED_PAIR")
@@ -113,9 +115,20 @@ def audit_task(task: object) -> dict:
                 issues.add("MISSING_" + field.upper())
             else:
                 storage.add(value)
+        session = record.get("session_id")
+        if isinstance(session, str) and session.strip() and order in ("AB", "BA"):
+            orders_by_session.setdefault(session, set()).add(order)
+        boundary = record.get("time_boundary", provenance.get("time_boundary"))
+        if not isinstance(boundary, str) or not boundary.strip() or boundary in ("unknown", "unspecified"):
+            issues.add("TIME_BOUNDARY_UNSPECIFIED")
+        else:
+            time_boundaries.add(boundary)
         if not isinstance(record.get("machine_id"), str) or not record["machine_id"].strip():
             issues.add("MISSING_MACHINE_ID")
-        if not _positive_number(record.get("peak_rss_kib")):
+        # This schema records two process peaks, NOT one generic peak_rss_kib.
+        # T04/T05/T06 real study samples use these exact two keys.
+        if not (_positive_number(record.get("baseline_peak_rss_kib"))
+                and _positive_number(record.get("candidate_peak_rss_kib"))):
             issues.add("PEAK_RSS_NOT_RECORDED")
         if record.get("energy_not_measured") is not True:
             issues.add("ENERGY_MEASUREMENT_NOT_VERIFIED")
@@ -123,6 +136,10 @@ def audit_task(task: object) -> dict:
             issues.add("ENERGY_CONFLICT_WITH_NOT_MEASURED")
     if orders and not ("AB" in orders and "BA" in orders):
         issues.add("ORDER_UNBALANCED")
+    if any(seen != {"AB", "BA"} for seen in orders_by_session.values()):
+        issues.add("SESSION_ORDER_UNBALANCED")
+    if len(time_boundaries) > 1:
+        issues.add("TIME_BOUNDARY_INCONSISTENT")
     if len(sessions) < 2:
         issues.add("INDEPENDENT_SESSIONS_NOT_DEMONSTRATED")
     note = task.get("energy_note")
