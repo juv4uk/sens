@@ -391,14 +391,6 @@ pub fn diagnose(source: &str, mode: JsValue) -> JsValue {
     .unwrap_or(JsValue::NULL)
 }
 
-/// Non-wasm_bindgen core of diagnose() -- pulled out so native #[test]s
-/// can exercise it directly (JsValue isn't constructible from a plain
-/// native test without the wasm-bindgen-test harness).
-#[cfg(test)]
-fn diagnose_impl(source: &str, is_literate: bool) -> Vec<Diagnostic> {
-    diagnose_impl_with_presentation(source, is_literate, PresentationLanguage::Canonical)
-}
-
 fn diagnose_impl_with_presentation(
     source: &str,
     is_literate: bool,

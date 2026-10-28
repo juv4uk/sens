@@ -101,16 +101,6 @@ fn decode_canonical_t5m_words(bytes: &[u8]) -> Result<Vec<sens::BinarySourceWord
     }
 }
 
-#[cfg(all(test, feature = "zig-transport"))]
-fn eval_t5m_fixture(bytes: &[u8]) -> Result<sens::EvalResult, String> {
-    let words = zig_transport::decode_t5m_words(bytes)?;
-    let program = sens::PhysicalT5Program::from_exact_words(&words)
-        .map_err(|e| format!("canonical SENS D2/admission rejected: {e}"))?;
-    program
-        .execute(&mut sens::Session::default())
-        .map_err(|e| format!("current SENS evaluator rejected: {e}"))
-}
-
 fn render_exact_t5m_words(bytes: &[u8], separator: &str) -> Result<String, String> {
     #[cfg(not(feature = "zig-transport"))]
     {
@@ -754,47 +744,6 @@ fn main() {
         eprintln!("sens-trit: {message}");
         process::exit(1);
     }
-}
-
-#[cfg(test)]
-fn zig_test_fixture(name: &'static str) -> &'static [u8] {
-    // Tests are host-side consumers, not compile-time owners of SENS bytes.
-    // Resolve only these four tracked fixtures; arbitrary paths are rejected.
-    use std::sync::OnceLock;
-    static QUOTE: OnceLock<Vec<u8>> = OnceLock::new();
-    static SELFTEST: OnceLock<Vec<u8>> = OnceLock::new();
-    static MUTANT: OnceLock<Vec<u8>> = OnceLock::new();
-    static MULTIFORM: OnceLock<Vec<u8>> = OnceLock::new();
-    let slot = match name {
-        "migration-quote-cohort-main/quote-legacy.sens" => &QUOTE,
-        "semantic/exact-d3-logic-selftest.sens" => &SELFTEST,
-        "semantic/exact-d3-logic-mutant.sens" => &MUTANT,
-        "migration-multiform-cohort-main/two-forms.sens" => &MULTIFORM,
-        _ => panic!("unapproved SENS test fixture: {name}"),
-    };
-    slot.get_or_init(|| {
-        let path = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
-            .join("../../tests/fixtures")
-            .join(name);
-        let bytes =
-            std::fs::read(&path).unwrap_or_else(|e| panic!("SENS fixture {}: {e}", path.display()));
-        // These tracked vectors are historical T5 fixtures. Convert their
-        // exact words to the current T5M wire in memory; never rewrite them.
-        #[cfg(feature = "zig-transport")]
-        {
-            let legacy_words = zig_transport::decode_legacy_t5_words(&bytes)
-                .unwrap_or_else(|e| panic!("legacy T5 fixture decode {name}: {e:?}"));
-            let t5m = zig_transport::encode_t5m_direct(&legacy_words)
-                .unwrap_or_else(|e| panic!("T5M fixture carry {name}: {e}"));
-            let restored = zig_transport::decode_t5m_words(&t5m)
-                .unwrap_or_else(|e| panic!("T5M fixture read {name}: {e}"));
-            assert_eq!(restored, legacy_words, "fixture word identity {name}");
-            t5m
-        }
-        #[cfg(not(feature = "zig-transport"))]
-        bytes
-    })
-    .as_slice()
 }
 
 #[cfg(all(test, feature = "zig-transport"))]

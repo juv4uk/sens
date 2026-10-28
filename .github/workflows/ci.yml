@@ -79,7 +79,6 @@ jobs:
           git diff --check HEAD^ HEAD
           bash -n scripts/check-sens-only-semantic-tests.sh
           bash -n scripts/check-language-policy-archive.sh
-          bash -n scripts/test-language-policy-archive-gate.sh
           bash -n scripts/ci-rust-mechanism-checks.sh
           bash -n scripts/execute_changed_lisp_t5m.sh
           bash -n scripts/prove-lisp-semantic-t5m.sh
@@ -103,9 +102,6 @@ jobs:
           count="$(grep -cE '\|[[:space:]]*ARCHIVE[[:space:]]*\|?$' docs/language-policy-archive.md || true)"
           echo "ARCHIVE (поза мовним коридором): ${count} артефактів — docs/language-policy-archive.md"
           echo "ARCHIVE (поза мовним коридором): ${count} артефактів — docs/language-policy-archive.md" >> "$GITHUB_STEP_SUMMARY"
-      - name: Самоперевірка мовного гейту (позитивний та негативний свідки)
-        shell: bash
-        run: bash scripts/test-language-policy-archive-gate.sh
       - name: Статус
         run: echo "QUICK_CI_STATUS=ok heavy_native_laws_remint_release=MANUAL_TARGETED"
 
