@@ -430,11 +430,11 @@ impl Environment {
         self.2.borrow().arena_enabled
     }
 
-    /// Шов алокації `cons`: виділити комірку в арені й **прочитати значення
-    /// назад крізь арену**. Ребро на дитину стає `Edge::Cell`, якщо дитина вже
-    /// має комірку в арені (за `arena_handles`), інакше — листове `Edge::Atom`.
-    /// Це та сама семантика, що й `Value::Pair(Rc::new(PairNode { .. }))`,
-    /// лише матеріалізована з комірки арени.
+    /// Шов алокації `cons`: зареєструвати одну нову комірку арени.
+    /// Існуючі діти вже є точними Value: їх не можна рекурсивно
+    /// матеріалізувати на кожному кроці (100k CONS → O(n²) та WASM stack overflow).
+    /// Дескриптори Edge::Cell забезпечують обхід арени/GC, а та сама
+    /// пара Rc<PairNode> лишається виконавним значенням із поділеними хвостами.
     pub(crate) fn arena_cons(&self, head: Value, tail: Value) -> Value {
         let mut guard = self.2.borrow_mut();
         let state: &mut SessionState = &mut guard;
@@ -443,9 +443,15 @@ impl Environment {
         let head_edge = arena_edge_for(&state.arena, &state.arena_handles, &head);
         let tail_edge = arena_edge_for(&state.arena, &state.arena_handles, &tail);
         let cell = state.arena.alloc_with(head_edge, tail_edge);
-        state
-            .arena
-            .to_value_registered(cell, &mut state.arena_handles)
+        // Створюємо лише кореневу пару, без рекурсивного read-back
+        // усіх дочірніх Edge::Cell. Наявні Rc залишаються розділеними;
+        // кожен CONS виконує O(1) роботи, а арена зберігає точні ребра.
+        let node = Rc::new(PairNode { head, tail });
+        state.arena_handles.insert(
+            Rc::as_ptr(&node) as usize,
+            (Rc::downgrade(&node), cell),
+        );
+        Value::Pair(node)
     }
 
     /// Кількість слотів арени (свідок).
