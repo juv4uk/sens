@@ -1,6 +1,6 @@
 [package]
 name = "sens-wasm"
-version = "0.42.2"
+version = "0.42.3"
 edition = "2021"
 license-file = "../../LICENSE"
 description = "WebAssembly bindings for the sens engine · WASM-прив'язки до рушія sens · WebAssembly-Bindungen für die sens-Engine"

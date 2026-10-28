@@ -15,11 +15,11 @@ fi
 
 # Перевіряємо платформу до створення каталогів або встановлення пакетів.
 if [ "$OS" = "Linux" ] && [ "$ARCH" = "x86_64" ]; then
-    ASSET_NAME="sens-cli_0.42.2_linux_amd64"
+    ASSET_NAME="sens-cli_0.42.3_linux_amd64"
 elif [ "$OS" = "Darwin" ] && [ "$ARCH" = "arm64" ]; then
-    ASSET_NAME="sens-cli_0.42.2_macos_arm64"
+    ASSET_NAME="sens-cli_0.42.3_macos_arm64"
 elif [ "$OS" = "Darwin" ] && [ "$ARCH" = "x86_64" ]; then
-    ASSET_NAME="sens-cli_0.42.2_macos_x64"
+    ASSET_NAME="sens-cli_0.42.3_macos_x64"
 else
     echo "Помилка: непідтримувана платформа: $OS $ARCH" >&2
     exit 1
@@ -202,7 +202,7 @@ LEGACY_TARGET="${INSTALL_DIR}/my-lisp"
 # Оновлюємо саме користувацьку копію, незалежно від старих CLI у PATH.
 # Тимчасовий файл поруч із ціллю дозволяє замінити її одним rename.
 echo "==> Завантаження sens (${ASSET_NAME})..."
-DOWNLOAD_URL="https://github.com/juv4uk/sens/releases/download/s0.42.2/${ASSET_NAME}"
+DOWNLOAD_URL="https://github.com/juv4uk/sens/releases/download/s0.42.3/${ASSET_NAME}"
 CLI_TEMP="$(mktemp "${INSTALL_DIR}/.sens.XXXXXX")"
 trap 'rm -f "$CLI_TEMP"' EXIT
 curl -fL --silent --show-error --connect-timeout 15 --max-time 120 \
@@ -214,8 +214,8 @@ chmod 755 "$CLI_TEMP"
 CLI_VERSION="$("$CLI_TEMP" --version)"
 # Do not replace a working CLI with a runnable asset from another release.
 # The version comes from the downloaded executable, not the asset filename.
-if [ "$CLI_VERSION" != "sens 0.42.2" ]; then
-    echo "RELEASE_VERSION_MISMATCH: очікується sens 0.42.2; отримано: ${CLI_VERSION}" >&2
+if [ "$CLI_VERSION" != "sens 0.42.3" ]; then
+    echo "RELEASE_VERSION_MISMATCH: очікується sens 0.42.3; отримано: ${CLI_VERSION}" >&2
     exit 1
 fi
 mv -f "$CLI_TEMP" "$SENS_TARGET"
