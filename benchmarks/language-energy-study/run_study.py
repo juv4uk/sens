@@ -164,20 +164,17 @@ def _windows_process_peak_rss_kib(proc) -> float | None:
         return None
 
 
-def _unix_peak_rss_kib(ru_maxrss: float) -> float | None:
-    """wait4 ru_maxrss: Darwin returns bytes; Linux returns KiB."""
-    value = ru_maxrss / 1024.0 if sys.platform == "darwin" else float(ru_maxrss)
-    return value if value > 0 else None
-
-
 def run_once(cmd: str, env: dict, timeout_s: float = 120.0):
     """Один запуск. Повертає (wall_ns, peak_rss_kib, вихід) або (None, None, причина).
 
-    Пікова пам'ять береться через os.wait4, а не через
+    POSIX peak RSS береться через os.wait4 (окрема #6288 normalization), а не через
     resource.getrusage(RUSAGE_CHILDREN): RUSAGE_CHILDREN дає НАКОПИЧУВАЛЬНИЙ
     максимум по всіх дочірніх процесах за сесію — тобто після першого ж
     великого запуску всі наступні показували б його число. wait4 повертає
     rusage конкретного процесу, і саме він потрібен для парних даних.
+
+    На Windows: PSAPI PeakWorkingSetSize з дочірнього process HANDLE, навіть
+    після exit, у KiB. Не вважаємо Win32 working set і Linux RSS тотожними.
 
     timeout_s реально обмежує очікування (раніше параметр ігнорувався).
     stdout/stderr читаються після wait, щоб не блокуватися на PIPE.
@@ -254,10 +251,8 @@ def run_once(cmd: str, env: dict, timeout_s: float = 120.0):
     lines = [ln for ln in out.splitlines() if ln.strip()]
     if len(lines) != 1:
         return None, None, f"BAD_STDOUT_LINES_{len(lines)}"
-    rss = _unix_peak_rss_kib(usage.ru_maxrss)
-    if rss is None:
-        return None, None, "RSS_UNAVAILABLE_WAIT4"
-    return float(elapsed), rss, lines[0]
+    # POSIX RSS normalization is owned by #6288 / PR #6337; no overlap.
+    return float(elapsed), float(usage.ru_maxrss), lines[0]
 
 
 def active_params(task_id: str) -> dict:

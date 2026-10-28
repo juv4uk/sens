@@ -13,8 +13,6 @@ on:
   push:
     paths:
       - 'benchmarks/language-energy-study/corpus/**'
-      # TEMP: trigger this bounded proof while fixing Windows runner
-      - 'benchmarks/language-energy-study/run_study.py'
       - '.github/workflows/energy-study-matrix.yml'
 
 permissions:
@@ -39,6 +37,11 @@ jobs:
         with:
           node-version: '20'
 
+      - name: Реальний Windows peak RSS per-PID (не SENS-паритет)
+        if: runner.os == 'Windows'
+        shell: bash
+        run: python3 -m unittest discover -s benchmarks/language-energy-study -p 'test_windows_peak_rss.py' -v
+
       - name: Паритет на цій платформі
         shell: bash
         run: |
@@ -52,10 +55,6 @@ jobs:
             --task T01-symbolic-recursion \
             --run "node benchmarks/language-energy-study/corpus/javascript/t01_fib.mjs"
 
-      # TEMP research-branch physical meter proof; remove before PR merge.
-      - name: Перевірити Win32/Linux/macOS RSS і відмови
-        shell: bash
-        run: python3 -m unittest discover -s benchmarks/language-energy-study -p 'test_process_rss_platform.py' -v
       - name: Парні дані на цій платформі
         shell: bash
         run: |
