@@ -82,8 +82,9 @@ fn delta_uj(before: u64, after: u64, max_range_uj: u64) -> Result<u64, String> {
 
 fn run() -> Result<(), String> {
     let mut args = env::args().skip(1);
-    if args.next().as_deref() != Some("--operations") {
-        return Err("ENERGY_BENCH_INVALID usage=rapl_mechanism_bench --operations N -- PROGRAM [ARGS...]".into());
+    let unit_flag = args.next().ok_or("ENERGY_BENCH_INVALID reason=missing_mode")?;
+    if unit_flag != "--operations" && unit_flag != "--runs" {
+        return Err("ENERGY_BENCH_INVALID usage=rapl_mechanism_bench (--operations N | --runs N) -- PROGRAM [ARGS...]".into());
     }
     let count = args
         .next()
@@ -100,22 +101,26 @@ fn run() -> Result<(), String> {
         .next()
         .ok_or("ENERGY_BENCH_INVALID reason=missing_program")?;
     let program_args: Vec<String> = args.collect();
+    let child_launches = if unit_flag == "--runs" { count } else { 1 };
+    let unit_type = if unit_flag == "--runs" { "process_launch" } else { "declared_internal_operation" };
     // Powercap can be inaccessible under WSL2, non-privileged containers
     // and some Linux hosts. Do not silently substitute watts or TDP.
     let meter = discover_package()?;
     let before = read_u64(&meter.energy)
         .map_err(|error| format!("ENERGY_NOT_MEASURED reason=read_before_failed detail={error}"))?;
     let clock = Instant::now();
-    let status = Command::new(&program)
-        .args(&program_args)
-        .status()
-        .map_err(|error| format!("ENERGY_NOT_MEASURED reason=program_launch_failed detail={error}"))?;
+    for launch in 0..child_launches {
+        let status = Command::new(&program)
+            .args(&program_args)
+            .status()
+            .map_err(|error| format!("ENERGY_NOT_MEASURED reason=program_launch_failed detail={error}"))?;
+        if !status.success() {
+            return Err(format!("ENERGY_BENCH_NOT_VERIFIED reason=program_failed launch={} status={status}", launch + 1));
+        }
+    }
     let after = read_u64(&meter.energy)
         .map_err(|error| format!("ENERGY_NOT_MEASURED reason=read_after_failed detail={error}"))?;
     let elapsed_ns = clock.elapsed().as_nanos();
-    if !status.success() {
-        return Err(format!("ENERGY_BENCH_NOT_VERIFIED reason=program_failed status={status}"));
-    }
     // At a very conservative 1 kW package bound, elapsed_ns numerically
     // equals the possible energy in uJ. This rejects long runs where two
     // RAPL reads cannot rule out multiple counter wraps; not a power claim.
@@ -123,16 +128,15 @@ fn run() -> Result<(), String> {
         return Err("ENERGY_NOT_MEASURED reason=counter_wrap_ambiguous shorten_batch".into());
     }
     let used_uj = delta_uj(before, after, meter.max_range_uj)?;
+    if used_uj == 0 {
+        return Err("ENERGY_NOT_MEASURED reason=counter_did_not_advance increase_batch".into());
+    }
     let joules = used_uj as f64 / 1_000_000.0;
     let joules_per_op = joules / count as f64;
-    let ops_per_joule = if used_uj == 0 {
-        0.0
-    } else {
-        count as f64 / joules
-    };
+    let ops_per_joule = count as f64 / joules;
     eprintln!(
-        "RAPL_PACKAGE_SAMPLE scope=whole_cpu_package zone={} energy_uj={} elapsed_ns={} operations={} joules_per_op={:.12} operations_per_joule={:.6} attribution=NOT_PROCESS_SPECIFIC release=NOT_CERTIFIED",
-        meter.name, used_uj, elapsed_ns, count, joules_per_op, ops_per_joule
+        "RAPL_PACKAGE_SAMPLE scope=whole_cpu_package zone={} energy_uj={} elapsed_ns={} units={} unit_type={} child_launches={} joules_per_unit={:.12} units_per_joule={:.6} attribution=NOT_PROCESS_SPECIFIC release=NOT_CERTIFIED",
+        meter.name, used_uj, elapsed_ns, count, unit_type, child_launches, joules_per_op, ops_per_joule
     );
     Ok(())
 }

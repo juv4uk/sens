@@ -42,6 +42,44 @@ jobs:
           grep -Eq '^PACK_BENCH_SAMPLE[[:space:]]' "$out/packed.tsv"
           grep -Eq '^PACK_BENCH_SUMMARY[[:space:]]' "$out/packed.tsv"
           grep -Fq 'parity=exact' "$out/packed.tsv"
+      - name: Validate RAPL counter math (Rust mechanism only)
+        shell: bash
+        run: |
+          set -euo pipefail
+          out="$RUNNER_TEMP/contest-rust"
+          export SENS_ROOT="$PWD"
+          # Separate research workspace: invoke Cargo from /tmp to avoid root vendor overrides.
+          ( cd /tmp && cargo test \
+              --manifest-path "$SENS_ROOT/benchmarks/measurement-triad/Cargo.toml" \
+              --bin rapl_mechanism ) > "$out/rapl-unit-tests.log" 2>&1 || {
+            cat "$out/rapl-unit-tests.log" >&2
+            exit 1
+          }
+      - name: Measure optional Linux RAPL CPU package energy
+        shell: bash
+        run: |
+          set -euo pipefail
+          out="$RUNNER_TEMP/contest-rust"
+          export SENS_ROOT="$PWD"
+          available=false
+          for pkg in /sys/class/powercap/intel-rapl:[0-9]*; do
+            [[ -d "$pkg" && -r "$pkg/energy_uj" ]] || continue
+            [[ "${pkg##*/}" == *:*:* ]] && continue
+            available=true
+            break
+          done
+          if [[ "$available" != true ]]; then
+            printf '%s\n' 'RAPL_MECHANISM_NOT_MEASURED reason=package-counter-unavailable' > "$out/rapl.tsv"
+          else
+            ( cd /tmp && cargo run --release \
+                --manifest-path "$SENS_ROOT/benchmarks/measurement-triad/Cargo.toml" \
+                --bin rapl_mechanism -- 1000000 7 ) > "$out/rapl.tsv" 2> "$out/rapl.stderr" || {
+              cat "$out/rapl.stderr" >&2
+              cat "$out/rapl.tsv" >&2
+              exit 1  # Accessible but unreliable sensor is a genuine mechanical failure.
+            }
+          fi
+          cat "$out/rapl.tsv"
       - name: Preserve raw Rust mechanism observations
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
@@ -74,6 +112,8 @@ jobs:
           }
           grep -F 'ZIG_CORRIDOR_COPY_BENCH ' "$out/byte-copy.log" | tee "$out/byte-copy.tsv"
           grep -Fq 'scope=physical_only' "$out/byte-copy.tsv"
+          grep -Fq 'source=lib/core4.lisp ' "$out/byte-copy.tsv"
+          grep -Fq 'batch=512 samples=11 ' "$out/byte-copy.tsv"
       - name: Exercise physical codecs without any SENS language truth table
         shell: bash
         run: |
@@ -129,9 +169,11 @@ jobs:
           out="$RUNNER_TEMP/contest-sens"
           mkdir -p "$out"
           printf 'git_sha\t%s\n' "$GITHUB_SHA" > "$out/environment.tsv"
-          bash scripts/prove-бенчмарк-структура.sh "$PWD/target/debug/sens" | tee "$out/native-law.tsv"
+          SENS_BENCH_SAMPLES_OUT="$out/raw-samples.tsv" bash scripts/prove-бенчмарк-структура.sh "$PWD/target/debug/sens" | tee "$out/native-law.tsv"
           grep -Fq 'БЕНЧМАРК_СТРУКТУРА=PASS native=SENS' "$out/native-law.tsv"
           grep -Fq 'mutant=D1:ні samples=11' "$out/native-law.tsv"
+          test "$(wc -l < "$out/raw-samples.tsv")" -eq 12
+          test "$(grep -c '^[0-9][0-9]*[[:space:]]' "$out/raw-samples.tsv")" -eq 11
       - name: Preserve actual SENS verdict and elapsed-time samples
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4

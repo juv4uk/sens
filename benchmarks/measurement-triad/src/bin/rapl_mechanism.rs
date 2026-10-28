@@ -12,6 +12,32 @@ use std::{
 struct Package {
     zone: PathBuf,
     max_uj: u64,
+    max_power_watts: u64,
+}
+
+// An explicit *upper bound*, not a measured TDP. Used only to reject
+// measurements in which more than one counter wrap could be hidden.
+const DEFAULT_MAX_PACKAGE_POWER_WATTS: u64 = 2_000;
+
+fn power_ceiling_watts() -> Result<u64, String> {
+    match env::var("SENS_RAPL_MAX_POWER_WATTS") {
+        Ok(raw) => match raw.parse::<u64>() {
+            Ok(watts) if (1..=100_000).contains(&watts) => Ok(watts),
+            _ => Err("SENS_RAPL_MAX_POWER_WATTS must be in 1..=100000".into()),
+        },
+        Err(env::VarError::NotPresent) => Ok(DEFAULT_MAX_PACKAGE_POWER_WATTS),
+        Err(e) => Err(format!("invalid SENS_RAPL_MAX_POWER_WATTS: {e}")),
+    }
+}
+
+/// Two counter reads are only sufficient if the entire read-to-read window
+/// cannot consume the full advertised counter range. The power ceiling is
+/// an external upper bound and must not be misrepresented as a measurement.
+fn at_most_one_wrap(range_uj: u64, window: Duration, ceiling_watts: u64) -> bool {
+    range_uj > 0
+        && ceiling_watts > 0
+        && window.as_nanos().saturating_mul(u128::from(ceiling_watts))
+            < u128::from(range_uj).saturating_mul(1_000)
 }
 
 fn counter(path: &Path) -> Result<u64, String> {
@@ -59,7 +85,7 @@ fn package() -> Result<Package, String> {
     if initial >= max_uj {
         return Err("RAPL counter is outside its published wrap range".into());
     }
-    Ok(Package { zone, max_uj })
+    Ok(Package { zone, max_uj, max_power_watts: power_ceiling_watts()? })
 }
 
 fn delta_uj(before: u64, after: u64, modulus: u64) -> Option<u64> {
@@ -73,14 +99,19 @@ fn delta_uj(before: u64, after: u64, modulus: u64) -> Option<u64> {
 }
 
 fn measure(pkg: &Package, iterations: usize) -> Result<(u64, Duration, usize), String> {
+    // Include both sysfs reads in the wrap-safety window, not just the CPU loop.
+    let sensor_window_start = Instant::now();
     let before = counter(&pkg.zone.join("energy_uj"))?;
     let begin = Instant::now();
     let observed = black_box(scan_d3_owner_residency(black_box(iterations)));
     let elapsed = begin.elapsed();
     let after = counter(&pkg.zone.join("energy_uj"))?;
-    // A long measurement could span several counter wraps, which two reads cannot detect.
-    if elapsed > Duration::from_secs(5) {
-        return Err("sample exceeds 5 s; RAPL wrap count is ambiguous".into());
+    let sensor_window = sensor_window_start.elapsed();
+    if !at_most_one_wrap(pkg.max_uj, sensor_window, pkg.max_power_watts) {
+        return Err(format!(
+            "RAPL wrap ambiguity: sensor window {} ns may consume >= {} uJ at ceiling {} W",
+            sensor_window.as_nanos(), pkg.max_uj, pkg.max_power_watts
+        ));
     }
     let uj = delta_uj(before, after, pkg.max_uj)
         .ok_or_else(|| "RAPL counter outside max_energy_range_uj".to_owned())?;
@@ -127,9 +158,10 @@ fn run() -> Result<(), String> {
     }
 
     println!(
-        "RAPL_MECHANISM zone={} max_uj={} iterations={} samples={} unit=owner_lookup",
+        "RAPL_MECHANISM zone={} max_uj={} power_ceiling_watts={} iterations={} samples={} unit=owner_lookup",
         pkg.zone.display(),
         pkg.max_uj,
+        pkg.max_power_watts,
         iterations,
         samples
     );
@@ -164,7 +196,8 @@ fn main() -> ExitCode {
 
 #[cfg(test)]
 mod tests {
-    use super::delta_uj;
+    use super::{at_most_one_wrap, delta_uj};
+    use std::time::Duration;
 
     #[test]
     fn rapl_counter_delta_and_wrap_are_mechanical_only() {
@@ -172,5 +205,15 @@ mod tests {
         assert_eq!(delta_uj(18, 3, 20), Some(5));
         assert_eq!(delta_uj(20, 3, 20), None);
         assert_eq!(delta_uj(1, 3, 0), None);
+    }
+
+    #[test]
+    fn reject_power_ceiling_windows_that_can_hide_full_counter_wrap() {
+        let max = 100_000_000; // 100 J
+        assert!(at_most_one_wrap(max, Duration::from_millis(40), 2_000));
+        assert!(!at_most_one_wrap(max, Duration::from_millis(50), 2_000));
+        assert!(!at_most_one_wrap(max, Duration::from_millis(90), 2_000));
+        assert!(!at_most_one_wrap(0, Duration::from_nanos(1), 2_000));
+        assert!(!at_most_one_wrap(max, Duration::from_nanos(1), 0));
     }
 }

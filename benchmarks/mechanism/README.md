@@ -15,7 +15,7 @@ rustc -O benchmarks/mechanism/rust-byte-copy-bench.rs -o /tmp/sens-rust-bench
 ```
 
 Основний механічний стенд робить один прогрів, 11 проб по 512 точних
-копій **бінарних байтів** `lib/core4.sens` — того самого корпусу, який читає Zig. Цілісність байтів звіряє **після**
+копій **бінарних байтів** `lib/core4.lisp` — того самого корпусу, який читає Zig. Цілісність байтів звіряє **після**
 кожного таймера; друкує p50/p90/min/max (нс). Це не виконання мови.
 
 `--rapl` додає окремий адаптивний енергетичний пакет тривалістю
@@ -38,18 +38,18 @@ rustc -O benchmarks/mechanism/rust-byte-copy-bench.rs -o /tmp/sens-rust-bench
 ## Zig: коридор, а не друга семантика
 
 ```sh
-# Реальний T5M encode/decode на закоміченому фізичному корпусі.
+# Реальний T5M encode/decode на детермінованому наборі opaque бітових слів.
 zig run -O ReleaseFast -lc bench_t5m.zig
 
 # Лише допоміжна перевірка транспорту байтів (НЕ кодек T5M):
 zig test -O ReleaseFast -lc benchmarks/mechanism/zig-byte-copy-bench.zig
 ```
 
-Додатковий Zig byte-copy probe транспортує саме фізичні байти
-`lib/core4.sens` (не текстову проєкцію) і має прогрів, 11 проб по 512
+Додатковий Zig byte-copy probe копіює сирі байти текстової проєкції
+`lib/core4.lisp` (жодного виконання тексту) і має прогрів, 11 проб по 512
 копіювань та точний byte parity; він не доводить T5M-відповідність
 і не встановлює жодного мовного закону. Для T5M використовувати
-`bench_t5m.zig`, який реально кодує та декодує фізичний корпус.
+`bench_t5m.zig`, який реально кодує та декодує детермінований фізичний T5M-корпус.
 
 ## SENS: семантика та логіка
 
@@ -76,12 +76,14 @@ warmup, парний порядок ABBA/BAAB і сирі вибірки.
 
 ## Вимірювання трьох крил на одному корпусі
 
-Для ручного workflow `.github/workflows/native-rust-zig-sens-bench.yml`
-додано ізольовані механічні перевірки: `rustc --test` для RAPL
-(лише арифметика фізичних лічильників), Rust byte-copy для
-`lib/core4.sens`, Zig byte-copy для **тих самих байтів**, а потім
-чинний нативний SENS закон. Ці три метрики не можна скласти в один
-рейтинг без спільного workload і контролю умов вимірювання.
+Чинний ручний workflow — `.github/workflows/sens-performance.yml`.
+Його **три незалежні jobs** проводять Rust byte-copy/packed і RAPL
+(лише фізичні лічильники), Zig byte-copy/T5M коридор і виконуваний
+SENS law+mutant. Старий `native-rust-zig-sens-bench.yml` був дублем із
+порожніми failed runs та не є конкурсним entrypoint.
+Ці метрики не можна скласти в один рейтинг без спільного workload,
+одиниці роботи й контролю умов вимірювання. Джоулі на shared CI без
+доступного RAPL — `NOT_MEASURED`, а не нуль або семантичний PASS.
 
 Окремий Rust-модуль `rapl-energy-bench.rs` підтримує
 `--counter` та `--operations` для вже пакетованої програми.

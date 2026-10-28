@@ -1,22 +1,23 @@
 //! Сфера Zig: корідор.
 //! ЦІЛЬ: D6 додати-1 (001110), lib/domains/d6.lisp:23.
-//! Міряє лише перенесення T5M: кодування й декодування числа без втрат.
+//! Міряє лише перенесення T5M: запис числа в десятковий вигляд і читання назад.
+//! Власного годинника немає: у Zig 0.16 std.time має лише константи,
+//! а std.Io вимагає екземпляра. Час міряє оболонка навколо процесу.
 const std = @import("std");
 
-pub fn main() !void {
-    var буфер: [64]u8 = undefined;
-    const значення: u64 = 1;
-    var найкраще: u64 = std.math.maxInt(u64);
+const rounds: usize = 1_000_000;
 
-    var оберт: usize = 0;
-    while (оберт < 100_000) : (оберт += 1) {
-        const початок = std.time.nanoTimestamp();
-        const записано = try std.fmt.bufPrint(&буфер, "{d}", .{значення});
-        const прочитано = try std.fmt.parseInt(u64, записано, 10);
-        const кінець = std.time.nanoTimestamp();
-        if (прочитано != значення) return error.ВтратаПриПеренесенні;
-        const тривало = @as(u64, @intCast(кінець - початок));
-        if (тривало < найкраще) найкраще = тривало;
+pub fn main() !void {
+    var buf: [64]u8 = undefined;
+    var checksum: u64 = 0;
+
+    var round: usize = 0;
+    while (round < rounds) : (round += 1) {
+        const value: u64 = @intCast(round);
+        const written = try std.fmt.bufPrint(&buf, "{d}", .{value});
+        const read_back = try std.fmt.parseInt(u64, written, 10);
+        if (read_back != value) return error.TransportLoss;
+        checksum +%= read_back;
     }
-    std.debug.print("зіг-корідор: найкращий оберт {d} нс\n", .{найкраще});
+    std.debug.print("зіг-корідор: {d} обертів, контрольна сума {d}\n", .{ rounds, checksum });
 }

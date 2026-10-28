@@ -64,4 +64,13 @@ if (( ${#sorted_wall[@]} != 11 )); then
   printf 'REGRESSION id=%s layer=benchmark expected=11-samples actual=%s\n' "$id" "${#sorted_wall[@]}" >&2
   exit 1
 fi
+# Export unaggregated measurements only after both SENS-owned verdicts pass.
+# This is evidence for time, NOT an independent host-language semantic law.
+if [[ -n "${SENS_BENCH_SAMPLES_OUT:-}" ]]; then
+  if [[ -L "$SENS_BENCH_SAMPLES_OUT" ]]; then
+    echo 'REGRESSION id=бенчмарк-структура layer=evidence actual=symlink-destination' >&2
+    exit 1
+  fi
+  cp -- "$tmp/samples.tsv" "$SENS_BENCH_SAMPLES_OUT"
+fi
 printf 'БЕНЧМАРК_СТРУКТУРА=PASS native=SENS positive=D1:так mutant=D1:ні samples=11 p50_us=%s p90_us=%s output=cmp\n' "${sorted_wall[5]}" "${sorted_wall[9]}"

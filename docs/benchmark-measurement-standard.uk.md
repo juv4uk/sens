@@ -21,6 +21,26 @@
 Дата 2026-10-09. Цей етап підготовлено для впровадження **після зеленого immutable L0** згідно з [вікном стабілізації #5224](https://github.com/juv4uk/sens/issues/5224).
 **Це не семантична ратифікація й не дозвіл зливати perf-коміти в червоний main.**
 
+### Фізичний RAPL-вимір Rust-механізму (28.10.2026)
+
+Файл crates/sens/examples/rapl_mechanism_bench.rs читає Linux powercap sysfs до і після запуску, але не перевіряє закони мови SENS.
+
+```bash
+cargo build --locked --release -p sens --example rapl_mechanism_bench
+cargo build --locked --release -p sens-cli --bin sens-trit
+
+# Повторювані окремі процеси: із startup, одиниця = запуск.
+target/release/examples/rapl_mechanism_bench --runs 100 -- \
+  target/release/sens-trit eval-core4 benchmarks/contest-uk/квадрат-унарний.sens >/dev/null
+
+# Для вже доведеного внутрішнього batch: одиниця = операція.
+# target/release/examples/rapl_mechanism_bench --operations N -- BENCH_BINARY ...
+```
+
+У режимі --runs N сам Rust робить рівно N запусків. У режимі --operations N число внутрішніх операцій лише заявляє викликач; його слід довести окремо у SENS. Значення енергії виводяться у stderr як RAPL_PACKAGE_SAMPLE із unit_type та child_launches, щоб не змінювати stdout програми.
+
+RAPL package вимірює енергію усього процесорного пакета, включно з фоновими процесами, а не лише SENS. Відсутність датчика, доступу або неоднозначне багаторазове переповнення дає ENERGY_NOT_MEASURED, а не вигаданий результат із TDP. Два читання мінімізують overhead. Застосовувати достатні batch, тиху машину, парні повтори та той самий SHA. Rust unit-тести лічильника перевіряють тільки механіку. Якщо нативне виконання не проведене, статус NOT_VERIFIED.
+
 ## Два незалежні виміри
 
 | Вимір | Інструмент | Що можна стверджувати |
