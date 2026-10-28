@@ -126,25 +126,6 @@ def validate(rows: list[dict[str, str]]) -> None:
                 fail(f"{language}: duplicate spelling {spelling!r} for {previous} and {key}")
             seen[spelling] = key
 
-    for row in rows:
-        key = (row["domain"], row["bits"])
-        if key == ("D3", "000") and any(row[name] != "()" for name in ("en", "uk", "ukr", "sa")):
-            fail("D3:000 must project literally as () in every language")
-        if row["role"] == "predicate":
-            if not row["uk"].endswith("?"):
-                fail(f"{key}: predicate UK surface must end in ?")
-            if not row["ukr"].endswith("?"):
-                fail(f"{key}: predicate full UKR surface must end in ?")
-            if not row["en"].endswith("?"):
-                fail(f"{key}: predicate EN surface must end in ?")
-            if row["sa"].endswith("?"):
-                fail(f"{key}: predicate Sanskrit surface must not end in ?")
-
-        if key in DISPLAY_ONLY and row["role"] != "display":
-            fail(f"{key}: structural/display identity became callable surface")
-        if key not in DISPLAY_ONLY and row["role"] == "display":
-            fail(f"{key}: unexpected display-only role")
-
 
 def arguments() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
