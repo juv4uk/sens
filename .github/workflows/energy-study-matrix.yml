@@ -37,6 +37,11 @@ jobs:
         with:
           node-version: '20'
 
+      - name: Реальний Windows peak RSS per-PID (не SENS-паритет)
+        if: runner.os == 'Windows'
+        shell: bash
+        run: python3 -m unittest discover -s benchmarks/language-energy-study -p 'test_windows_peak_rss.py' -v
+
       - name: Паритет на цій платформі
         shell: bash
         run: |
