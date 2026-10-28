@@ -22,19 +22,19 @@ trap 'rm -rf "$tmp"' EXIT
 run_sens_repl_law() {
   local path="$1" expected="$2" label="$3"
   if [[ ! -f "$path" ]]; then
-    printf 'REGRESSION id=release-repl-%s actual=fixture-missing\\n' "$label" >&2
+    printf 'REGRESSION id=release-repl-%s actual=fixture-missing\n' "$label" >&2
     exit 1
   fi
-  if ! printf ':завантажити %s\\n' "$path" |
+  if ! printf ':завантажити %s\n' "$path" |
     timeout 120s "$cli" --surface=укр >"$tmp/$label.out" 2>"$tmp/$label.err"; then
-    printf 'REGRESSION id=release-repl-%s actual=process-failed\\n' "$label" >&2
+    printf 'REGRESSION id=release-repl-%s actual=process-failed\n' "$label" >&2
     cat "$tmp/$label.err" >&2
     exit 1
   fi
   if [[ -s "$tmp/$label.err" ]] ||
     ! grep -Fq "Завантажено: $path" "$tmp/$label.out" ||
     ! grep -Fqx "$expected" "$tmp/$label.out"; then
-    printf 'REGRESSION id=release-repl-%s expected=%s actual=wrong-verdict\\n' "$label" "$expected" >&2
+    printf 'REGRESSION id=release-repl-%s expected=%s actual=wrong-verdict\n' "$label" "$expected" >&2
     cat "$tmp/$label.out" "$tmp/$label.err" >&2
     exit 1
   fi
