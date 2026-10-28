@@ -100,10 +100,11 @@ run_case d3-d4-selection-positive ТАК tests/semantic/d3-d4-logic-selection-la
 run_case d3-d4-selection-negative НІ tests/semantic/d3-d4-logic-selection-mutant.lisp
 run_case d3-demorgan-positive ТАК tests/semantic/d3-demorgan-truth-table-law.lisp
 run_case d3-demorgan-negative НІ tests/semantic/d3-demorgan-truth-table-mutant.lisp
+run_case d9-d10-defined-functions '(ТАК ТАК ТАК ТАК ТАК ТАК ТАК ТАК ТАК ТАК)' tests/semantic/d9-d10-defined-functions-law.lisp lib/core4.lisp
 
-[[ "$verified" -eq 32 ]] || { echo "SENS_REPL_CORPUS_FAIL incomplete=$verified" >&2; exit 1; }
-echo "SENS_REPL_CORPUS=PASS witnesses=$verified families=16 scope=explicit-current-only extended-semantic-coverage=NOT_VERIFIED"
+[[ "$verified" -eq 33 ]] || { echo "SENS_REPL_CORPUS_FAIL incomplete=$verified" >&2; exit 1; }
+echo "SENS_REPL_CORPUS=PASS witnesses=$verified families=17 scope=explicit-current-only extended-semantic-coverage=NOT_VERIFIED"
 
 # The corpus is the declared release-scope smoke proof, not the entire language.
 tracked_laws="$(find tests/semantic -maxdepth 1 -type f -name '*-law.lisp' -print | wc -l | tr -d ' ')"
-echo "REPL_SEMANTIC_COVERAGE=PARTIAL tracked_law_sources=$tracked_laws repl_families=16 complete_language_proof=NOT_VERIFIED"
+echo "REPL_SEMANTIC_COVERAGE=PARTIAL tracked_law_sources=$tracked_laws repl_families=17 complete_language_proof=NOT_VERIFIED"
