@@ -17,6 +17,12 @@ from pathlib import Path
 
 
 SCHEMA = "sens-paired-wall-time/v1"
+PHYSICAL_SCHEMA = "sens-paired-physical/v1"
+PHYSICAL_METRICS = {
+    "wall_time_ns": ("baseline_ns", "candidate_ns"),
+    "energy_uj": ("baseline_energy_uj", "candidate_energy_uj"),
+    "peak_rss_kib": ("baseline_peak_rss_kib", "candidate_peak_rss_kib"),
+}
 OUTPUT_SCHEMA = "sens-paired-verdict/v1"
 MIN_PROCESSES = 8
 MIN_PAIRS_EACH = 4
@@ -49,12 +55,14 @@ def _percentile(values: list[float], percent: float) -> float:
 
 def analyze(document: dict, *, draws: int = 4000, seed: int = 5227,
             min_effect: float = 0.01) -> dict:
-    if not isinstance(document, dict) or document.get("schema") != SCHEMA:
-        raise InvalidEvidence(f"schema must be {SCHEMA}")
+    if not isinstance(document, dict) or document.get("schema") not in (SCHEMA, PHYSICAL_SCHEMA):
+        raise InvalidEvidence(f"schema must be {SCHEMA} or {PHYSICAL_SCHEMA}")
     if not (0 <= min_effect < 1) or draws < 1000:
         raise InvalidEvidence("minimum effect must be [0,1); draws >= 1000")
-    if document.get("metric") != "wall_time_ns":
-        raise InvalidEvidence("paired verdict only accepts wall_time_ns, not I refs")
+    metric = document.get("metric")
+    if metric not in PHYSICAL_METRICS or (document["schema"] == SCHEMA and metric != "wall_time_ns"):
+        raise InvalidEvidence("metric must be a supported physical metric for this schema")
+    baseline_key, candidate_key = PHYSICAL_METRICS[metric]
     parity = document.get("parity")
     if not isinstance(parity, dict) or parity.get("passed") is not True or not parity.get("oracle_id"):
         return {"schema": OUTPUT_SCHEMA, "status": "BLOCKED",
@@ -79,8 +87,8 @@ def analyze(document: dict, *, draws: int = 4000, seed: int = 5227,
         order = item.get("order")
         if order not in ("AB", "BA"):
             raise InvalidEvidence(f"pairs[{n}]: order must be AB or BA")
-        a = _finite_positive(item.get("baseline_ns"), f"pairs[{n}].baseline_ns")
-        b = _finite_positive(item.get("candidate_ns"), f"pairs[{n}].candidate_ns")
+        a = _finite_positive(item.get(baseline_key), f"pairs[{n}].{baseline_key}")
+        b = _finite_positive(item.get(candidate_key), f"pairs[{n}].{candidate_key}")
         groups[item["process_id"]].append(math.log(b / a))
         order_counts[item["process_id"]].add(order)
 
@@ -117,7 +125,7 @@ def analyze(document: dict, *, draws: int = 4000, seed: int = 5227,
         "schema": OUTPUT_SCHEMA, "status": status,
         "comparison": "candidate / baseline; lower is better",
         "method": "hierarchical-paired-log-ratio-bootstrap; not exact KJ estimator",
-        "metric": "wall_time_ns",
+        "metric": metric,
         "ratio": math.exp(point_log_ratio),
         "ci95_ratio": [low_ratio, high_ratio],
         "relative_change": math.exp(point_log_ratio) - 1,
