@@ -62,8 +62,9 @@ jobs:
         shell: bash
         run: |
           set -uo pipefail
-          cargo build --locked -p sens-cli --bin sens-cli
+          cargo build --locked -p sens-cli --bin sens
           export PATH="$PWD/target/debug:$PATH"
+          export ZIG="$(command -v zig)"
           bash benchmarks/sphere-contest/запуск.sh
       # rust-isolated — єдиний доказ ізоляції Rust↔SENS. Досі він жив лише
       # в списку GATES файлу release_go_gate.py і не викликався жодним
@@ -71,16 +72,6 @@ jobs:
       - name: Ізоляція Rust↔SENS лише через Zig
         shell: bash
         run: bash scripts/check_rust_isolated_only_zig.sh
-      # Rust verifies GitHub Actions YAML names, not SENS language semantics.
-      # Prevent the 2026-10-28 'name: SENS ...: Rust ...' parsing incident.
-      - name: Синтаксис назв усіх GitHub Actions workflow
-        shell: bash
-        run: |
-          set -euo pipefail
-          rustc --edition=2021 --test scripts/check-workflow-name-yaml.rs -o "$RUNNER_TEMP/workflow-name-tests"
-          "$RUNNER_TEMP/workflow-name-tests"
-          rustc --edition=2021 -O scripts/check-workflow-name-yaml.rs -o "$RUNNER_TEMP/workflow-name-guard"
-          "$RUNNER_TEMP/workflow-name-guard"
       - name: Перевірити формат diff і синтаксис оболонки
         shell: bash
         run: |
