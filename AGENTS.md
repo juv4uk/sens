@@ -1,5 +1,20 @@
 ## ЧИННИЙ РЕЖИМ РЕЛІЗУ
 
+
+<!-- OWNER-STANDARD-HOSTED-RUNNERS-20261028:BEGIN -->
+### Рішення власника · 28.10.2026 · безкоштовні GitHub-hosted runners для SENS
+
+- Для публічного `juv4uk/sens` за замовчуванням використовувати лише **стандартні безкоштовні GitHub-hosted runners**: `ubuntu-24.04` (Linux x64), `ubuntu-24.04-arm` (Linux ARM64), `windows-2025` (Windows x64). За окремої потреби — стандартний `macos-15`; це не дозвіл на необмежену матрицю.
+- Не замовляти **larger/GPU платні runners**, не маршрутизувати CI на **self-hosted** або локальний ПК без нового явного дозволу власника. На звичайних безкоштовних runners NVIDIA CUDA GPU/FPGA не доступні: такий тест позначати `не виконано`, а не PASS.
+- Зберегти **один центральний автоматичний** `.github/workflows/ci.yml`; не розмножувати workflow, не послаблювати релізні гейти та не перетворювати кожний push на повний Cargo/бенчмарк. Важкі набори — тільки ручні цільові запуски з дозволом власника.
+- Розділяти задачі: Linux x64 — компіляція механізму Rust і точний Zig-транспорт; Linux ARM64 — переносимість хоста та безпечні перевірки джерел; Windows x64 — переносимість оболонки/checkout; GPU/FPGA — лише окремий апаратний план. **Мовну семантику доводить виключно SENS REPL зі справжніми позитивними/негативними свідками та фізичним T5M**; успішний host smoke не доводить D1–D10, READER, REPL або Rust-free.
+- Для проби існує обмежений набір `runner-smoke` у центральному `ci.yml`: три короткі jobs на стандартних runner-образах, автоматично тільки на PR з гілки `agent/free-hosted-runners-20261028` або вручну через `workflow_dispatch` на `main`. Тест перевіряє **реальну машину, точний SHA checkout і технічну сумісність**; не змінює семантику чи політику релізу.
+- Кожен звіт: фактичні `run id`, `job`, `runner`, **head SHA**, `status/conclusion`, посилання на журнал. Для `pull_request` треба checkout **PR head SHA**, бо `github.sha` може означати синтетичний merge commit. Не називати `queued` або `skipped` перевіреним.
+- Чинний `.github/actions/install-zig/action.yml` **не підтримує `Linux-ARM64`**; не запускати його на ARM, доки не з'явиться підтверджений нативний інсталятор. Підтримка Zig на x64 не означає, що ARM64 компіляція вже перевірена.
+
+<!-- OWNER-STANDARD-HOSTED-RUNNERS-20261028:END -->
+
+
 Нормативний перелік гейтів — [RELEASE-SCOPE.md](RELEASE-SCOPE.md), реалізація —
 `.github/workflows/release.yml`, `.github/workflows/release-preflight.yml` і
 `.github/workflows/release-sens-laws.yml`.
