@@ -194,8 +194,13 @@ def analyze_many(documents: list[dict], *, draws: int = 4000, seed: int = 5227,
     INCONCLUSIVE for any family-level FASTER/SLOWER claim, preserving the
     per-comparison effect ratio and confidence interval for inspection.
     """
+    if (type(family_alpha) not in (int, float) or
+            not 0.0 < family_alpha < 1.0 or
+            not math.isfinite(family_alpha)):
+        raise InvalidEvidence("family_alpha must be finite and strictly in (0, 1)")
     reports = [analyze(d, draws=draws, seed=seed, min_effect=min_effect)
                for d in documents]
+    blocked = next((r for r in reports if r.get("status") == "BLOCKED"), None)
     for report in reports:
         # Individual, unadjusted decisions cannot be promoted into a family
         # verdict. Do not invent adjusted p-values or erase descriptive data.
@@ -205,9 +210,11 @@ def analyze_many(documents: list[dict], *, draws: int = 4000, seed: int = 5227,
             report["reason"] = "VALID_FAMILY_P_VALUES_UNAVAILABLE"
     return {
         "schema": OUTPUT_SCHEMA,
-        "status": "INCONCLUSIVE",
-        "reason": ("VALID_FAMILY_P_VALUES_UNAVAILABLE" if reports
-                   else "NO_COMPARISONS"),
+        "status": "BLOCKED" if blocked is not None else "INCONCLUSIVE",
+        "reason": ("MEMBER_BLOCKED: " + str(blocked.get("reason", "UNKNOWN"))
+                   if blocked is not None else
+                   ("VALID_FAMILY_P_VALUES_UNAVAILABLE" if reports
+                    else "NO_COMPARISONS")),
         "family_alpha": family_alpha,
         "comparisons": reports,
         "survivors": 0,
