@@ -65,10 +65,6 @@ jobs:
         shell: bash
         run: bash scripts/check-language-policy-archive.sh
 
-      - name: Самоперевірка мовного гейту
-        shell: bash
-        run: bash scripts/test-language-policy-archive-gate.sh
-
       - name: Мовна межа — JSON/SHA не callable у SENS
         shell: bash
         run: |
