@@ -53,6 +53,37 @@ def sensor_state() -> str:
         "MULTIPLE_RAPL_PACKAGES" if zones else "RAPL_UNAVAILABLE")
 
 
+def parse_rapl_measurement(lines: list[str]) -> dict[str, object]:
+    """Validate the physical package meter contract, never estimate missing joules."""
+    if len(lines) != 1 or not lines[0].startswith("RUST_RAPL_PACKAGE "):
+        raise RuntimeError("RAPL observation ambiguous/missing")
+    fields = {}
+    for token in lines[0].split()[1:]:
+        match = KV.fullmatch(token)
+        if not match or match[1] in fields:
+            raise RuntimeError("RAPL observation invalid or duplicate field")
+        fields[match[1]] = match[2]
+    required = ("energy_uj", "elapsed_ns", "scope", "counter", "wrapped_once", "status")
+    if any(not fields.get(name) for name in required):
+        raise RuntimeError("RAPL observation missing required physical fields")
+    if fields["status"] != "MEASURED" or fields["scope"] != "whole_package_not_process":
+        raise RuntimeError("RAPL observation invalid status/scope")
+    if fields["wrapped_once"] not in ("true", "false"):
+        raise RuntimeError("RAPL observation invalid wrap indicator")
+    counter = Path(fields["counter"])
+    if counter.name != "energy_uj":
+        raise RuntimeError("RAPL observation invalid counter")
+    try:
+        energy, elapsed = int(fields["energy_uj"]), int(fields["elapsed_ns"])
+    except ValueError as error:
+        raise RuntimeError("RAPL observation invalid energy/time integer") from error
+    if energy <= 0 or elapsed <= 0:
+        raise RuntimeError("RAPL observation nonpositive hardware energy/time")
+    return {"energy_uj": energy, "rapl_child_elapsed_ns": elapsed,
+            "scope": fields["scope"], "counter": str(counter),
+            "wrapped_once": fields["wrapped_once"] == "true"}
+
+
 def physical_expected(copies: int) -> str:
     data = CORPUS.read_bytes()
     if not data:
@@ -89,29 +120,40 @@ def measure(command: list[str], copies: int, out: Path, meter: Path | None,
                   "user_s": float(match[2]), "sys_s": float(match[3]),
                   "energy_uj": None}
         if meter:
-            fields = dict(KV.findall(meter_lines[0]))
-            if fields.get("status") != "MEASURED" or fields.get("scope") != "whole_package_not_process":
-                raise RuntimeError("invalid RAPL measurement status/scope")
-            try:
-                energy, elapsed = int(fields["energy_uj"]), int(fields["elapsed_ns"])
-            except (KeyError, ValueError) as error:
-                raise RuntimeError(f"invalid RAPL physical reading: {error}") from error
-            if energy <= 0 or elapsed <= 0:
-                raise RuntimeError("nonpositive hardware energy/time")
-            # wall_time_ns retains the same host-wrapper boundary whether or
-            # not RAPL was available. Sensor time is a separate observation.
-            result.update({"energy_uj": energy, "rapl_child_elapsed_ns": elapsed,
-                           "scope": fields["scope"]})
+            # Strict physical parser from closed donor PR #6295; preserve
+            # host outer wall_time_ns rather than replacing with Rust Instant.
+            result.update(parse_rapl_measurement(meter_lines))
+            result["time_boundary"] = "RAPL_meter_wraps_usr_bin_time"
+        else:
+            result["time_boundary"] = "host_wrapper_includes_subprocess"
         return result
     finally:
         usage.unlink(missing_ok=True)
 
 
-def experiment(blocks: int, pairs: int, copies: int, seed: int, out: Path) -> None:
+def validate_pilot_budget(blocks: int, pairs: int, copies: int,
+                          corpus_size: int) -> dict[str, int]:
+    """Bound the complete physical study, including three untimed warmups."""
     if not 8 <= blocks <= 64 or not 4 <= pairs <= 30 or not 1 <= copies <= 8_192:
         raise ValueError("requires 8..64 blocks, 4..30 balanced pairs, 1..8192 copies")
-    if CORPUS.stat().st_size * copies > 3 * 1024 ** 3:
+    if corpus_size <= 0 or corpus_size > 64 * 1024 * 1024:
+        raise ValueError("requires nonempty corpus up to 64 MiB")
+    per_process = corpus_size * copies
+    if per_process > 3 * 1024 ** 3:
         raise ValueError("copy-traffic-per-process exceeds 3 GiB budget")
+    # Each pair runs Rust then candidate (or vice versa); two candidates,
+    # two variants each. Three warmups run once per implementation.
+    launches = 4 * blocks * pairs + 3
+    declared_bytes = launches * per_process
+    if declared_bytes > 8 * 1024 ** 3:
+        raise ValueError("DECLARED_TOTAL_COPY_BUDGET_EXCEEDED: max=8_GiB; "
+                         "reduce --copies, --blocks or --pairs")
+    return {"declared_total_copy_bytes": declared_bytes,
+            "declared_process_launches": launches}
+
+
+def experiment(blocks: int, pairs: int, copies: int, seed: int, out: Path) -> None:
+    resource_budget = validate_pilot_budget(blocks, pairs, copies, CORPUS.stat().st_size)
     out.mkdir(parents=True, exist_ok=True)
     with tempfile.TemporaryDirectory(prefix="sens-physical-") as tmp:
         binary_dir = Path(tmp)
@@ -152,7 +194,10 @@ def experiment(blocks: int, pairs: int, copies: int, seed: int, out: Path) -> No
             "turbo": optional_read(Path("/sys/devices/system/cpu/intel_pstate/no_turbo")),
             "timing_source": "Python perf_counter_ns(outer wrapper), RAPL child elapsed_ns separately",
             "python": platform.python_version(), "cc": checked(["cc", "--version"]).splitlines()[0],
-            "energy_sensor": sensor, "measurement_boundary": "outer wrapper launch/exit including /usr/bin/time or RAPL meter and process startup",
+            "energy_sensor": sensor,
+            "energy_status": "MEASURED" if meter else "ENERGY_NOT_MEASURED",
+            "declared_budget": resource_budget,
+            "measurement_boundary": "outer wrapper launch/exit including /usr/bin/time or RAPL meter and process startup",
             "physical_work": f"{copies} byte-buffer copies from lib/core4.lisp",
             "language_semantics": "NOT_TESTED",
         }
@@ -229,7 +274,7 @@ def main() -> int:
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("--blocks", type=int, default=8)
     p.add_argument("--pairs", type=int, default=4)
-    p.add_argument("--copies", type=int, default=8192)
+    p.add_argument("--copies", type=int, default=64)
     p.add_argument("--seed", type=int, default=20261028)
     p.add_argument("--out", type=Path, default=Path(".ci-physical-study"))
     a = p.parse_args()
