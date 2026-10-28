@@ -20,6 +20,7 @@
 Запуск:
   python3 benchmarks/language-energy-study/run_study.py --smoke
   python3 benchmarks/language-energy-study/run_study.py --processes 8 --out raw.json
+  SENS_BIN=target/release/sens python3 ... --languages sens --tasks T01-symbolic-recursion
 """
 from __future__ import annotations
 
@@ -36,6 +37,7 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 CORPUS = HERE / "corpus"
 MANIFEST = CORPUS / "manifest.json"
+REPO_ROOT = HERE.parents[1]
 
 # Реалізації, які РЕАЛЬНО існують у дереві. Немає компілятора — немає запису.
 LANGUAGES = {
@@ -46,6 +48,10 @@ LANGUAGES = {
     "javascript": {
         "kind": "jit",
         "cmd": lambda task_id: f"node {CORPUS / 'javascript' / JS_FILES[task_id]}",
+    },
+    "sens": {
+        "kind": "physical-t5m",
+        "cmd": lambda task_id: sens_cmd(task_id),
     },
 }
 
@@ -59,6 +65,15 @@ JS_FILES = {
     "T07-matrices": "t07_matrices.mjs",
     "T08-persistent-structures": "t08_persistent.mjs",
     "T09-bit-operations": "t09_bitcount.mjs",
+}
+
+# SENS physical programs: size baked into .sens (CLI takes one file, no TASK_N).
+# VERIFY ships in-tree; MEASURE is minted on the runner into SENS_PROGRAM_DIR.
+SENS_PROGRAMS = {
+    "T01-symbolic-recursion": {
+        "verify": "t01_fib.sens",
+        "measure": "t01_fib_measure.sens",
+    },
 }
 
 # Python-реалізації: референс із parity_check.py вже виконує ту саму роботу.
@@ -80,6 +95,33 @@ def python_cmd(task_id: str) -> str:
     return f"{sys.executable} {CORPUS / 'python' / 'run.py'}"
 
 
+def resolve_sens_bin() -> str | None:
+    env = os.environ.get("SENS_BIN")
+    if env and Path(env).is_file() and os.access(env, os.X_OK):
+        return env
+    cand = REPO_ROOT / "target" / "release" / "sens"
+    if cand.is_file() and os.access(cand, os.X_OK):
+        return str(cand)
+    return None
+
+
+def sens_cmd(task_id: str) -> str:
+    """Physical SENS entry: sens <program.sens>. Size is fixed in the binary."""
+    binary = resolve_sens_bin()
+    if binary is None:
+        return f'{sys.executable} -c "import sys; print(\"SENS_BIN_MISSING\", file=sys.stderr); sys.exit(2)"'
+    if task_id not in SENS_PROGRAMS:
+        return f'{sys.executable} -c "import sys; print(\"SENS_TASK_UNSUPPORTED\", file=sys.stderr); sys.exit(2)"'
+    mode = "measure" if SIZES["mode"] == "measure" else "verify"
+    name = SENS_PROGRAMS[task_id][mode]
+    base = Path(os.environ.get("SENS_PROGRAM_DIR", str(CORPUS / "sens")))
+    program = base / name
+    if not program.is_file():
+        # fall back to in-tree corpus/sens for verify
+        program = CORPUS / "sens" / name
+    return f"{binary} {program}"
+
+
 def environment() -> dict:
     """Provenance. Без нього verdict.py повертає BLOCKED — і це правильно."""
     return {
@@ -92,6 +134,7 @@ def environment() -> dict:
         "timing_source": "time.perf_counter_ns (wall)",
         "git_sha": os.environ.get("GITHUB_SHA", "not-a-git-checkout"),
         "binary_sha256": "n/a-interpreted",
+        "sens_bin": resolve_sens_bin() or "absent",
     }
 
 
@@ -104,6 +147,8 @@ def task_env(task_id: str) -> dict:
     Два режими, і їх не можна плутати:
       verify  — малий вхід, перевірка коректності (паритет);
       measure — великий вхід з маніфесту, де обчислення переважає старт.
+
+    SENS physical .sens ignores TASK_*; size is baked into the program file.
     """
     from parity_check import VERIFY_SIZE
     env = dict(os.environ)
@@ -175,8 +220,19 @@ def run_once(cmd: str, env: dict, timeout_s: float = 120.0):
     proc.returncode = os.waitstatus_to_exitcode(status)
     if status != 0:
         return None, None, f"EXIT_{status}:{err.strip()[:80]}"
-    lines = [ln for ln in out.splitlines() if ln.strip()]
+    # SENS REPL may prefix 'sens[укр]>'; keep last pure decimal/token line.
+    lines = []
+    for ln in out.splitlines():
+        s = ln.strip()
+        if s.startswith("sens[") and ">" in s:
+            s = s.split(">", 1)[-1].strip()
+        if s:
+            lines.append(s)
     if len(lines) != 1:
+        # allow multi-line define noise: last numeric line wins
+        nums = [ln for ln in lines if ln.lstrip("-").isdigit()]
+        if len(nums) == 1:
+            return float(elapsed), float(usage.ru_maxrss), nums[0]
         return None, None, f"BAD_STDOUT_LINES_{len(lines)}"
     return float(elapsed), float(usage.ru_maxrss), lines[0]
 
@@ -280,6 +336,7 @@ def build_pairs(task: dict, languages: list[str], processes: int,
                     "energy_not_measured": True,
                     "parity_checked": True,
                     "size_mode": SIZES["mode"],
+                    "candidate_language": lang,
                 })
     all_checked = parity_ok_count + parity_fail_count
     passed = parity_ok_count > 0 and parity_fail_count == 0
@@ -297,11 +354,21 @@ def build_pairs(task: dict, languages: list[str], processes: int,
         "rejected": rejected,
         "provenance": environment(),
         "warmup_note": ("Node is JIT: the first iterations pay compilation. "
-                        "No warmup was applied and this is NOT corrected — "
-                        "the bias is recorded, not hidden."),
+                        "SENS is physical T5M: cold process each run, no JIT note. "
+                        "Bias is recorded in provenance, not hidden."),
         "energy_note": "ENERGY_NOT_MEASURED: no RAPL in this environment",
         "pairs": pairs,
     }
+
+
+def language_available(name: str) -> bool:
+    if name == "python":
+        return True
+    if name == "javascript":
+        return bool(shutil.which("node"))
+    if name == "sens":
+        return resolve_sens_bin() is not None
+    return name in LANGUAGES
 
 
 def main() -> int:
@@ -323,7 +390,7 @@ def main() -> int:
         args.processes, args.per_process = 2, 2
 
     SIZES["mode"] = "measure" if args.measure else "verify"
-    available = [l for l in args.languages if l == "python" or shutil.which("node")]
+    available = [l for l in args.languages if language_available(l)]
     if not available:
         print("немає доступних мов для запуску")
         return 2
