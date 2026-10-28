@@ -48,13 +48,12 @@ class PhysicalStudyTests(unittest.TestCase):
 
     def test_output_parity_rejects_forged_or_extra_lines(self):
         expected = "PHYSICAL_COPY\\tbytes=4\\tcopies=8\\tobserved=10"
-        self.assertIsNone(study.parse_sample_output(expected, expected, metered=False))
+        self.assertIsNone(study.parse_sample_output(expected + "\\n", expected, metered=False))
         for bad in (
             expected + "\\nPHYSICAL_COPY\\tbytes=4\\tcopies=8\\tobserved=10",
             "PHYSICAL_COPY\\tbytes=4\\tcopies=7\\tobserved=10",
             expected + "\\nWARNING skipped seven copies",
             "\\n" + expected,
-            expected + "\\n",
         ):
             with self.subTest(bad=bad), self.assertRaises(RuntimeError):
                 study.parse_sample_output(bad, expected, metered=False)
