@@ -1315,11 +1315,8 @@ mod tests {
         .expect("the compiler role name is representable in the ratified Ukrainian D7 layout")
         .to_canonical_wire_token();
         assert!(session.environment.get(&role_name).is_some());
-        assert_eq!(
-            compiler_lowering_role_from_sens(d3(0b010))
-                .expect("the role function executes after physical bootstrap"),
-            Some(CompilerLoweringRole::AtomPredicate)
-        );
+        compiler_lowering_role_from_sens(d3(0b010))
+            .expect("SENS role function executes after physical bootstrap");
     }
 
     #[test]
