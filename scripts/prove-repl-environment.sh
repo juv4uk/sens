@@ -6,31 +6,27 @@ cli="${1:-target/debug/sens}"
 tmp="$(mktemp -d)"
 trap 'rm -rf "$tmp"' EXIT
 
-run_fixture() {
-  local fixture="$1"
-  if [[ ! -f "$fixture" ]]; then
-    printf 'REGRESSION fixture=%s actual=absent\n' "$fixture" >&2
-    exit 1
-  fi
-  if ! printf ':завантажити %s\n' "$fixture" | "$cli" --surface=укр >"$tmp/out" 2>"$tmp/err"; then
-    printf 'REGRESSION fixture=%s layer=SENS-REPL actual=execution-error\n' "$fixture" >&2
+run_repl_form() {
+  local label="$1" form="$2"
+  if ! printf '%s\n' "$form" | "$cli" --surface=укр >"$tmp/out" 2>"$tmp/err"; then
+    printf 'REGRESSION case=%s layer=SENS-REPL actual=execution-error\n' "$label" >&2
     cat "$tmp/err" >&2
     exit 1
   fi
   if grep -Eq 'Помилка REPL/T5M|Помилка завантаження' "$tmp/err"; then
-    printf 'REGRESSION fixture=%s layer=SENS-REPL actual=language-error\n' "$fixture" >&2
+    printf 'REGRESSION case=%s layer=SENS-REPL actual=language-error\n' "$label" >&2
     cat "$tmp/err" >&2
     exit 1
   fi
-  if ! grep -Fq "Завантажено: $fixture" "$tmp/out" || ! grep -Fqx 'НІ' "$tmp/out"; then
-    printf 'REGRESSION fixture=%s expected=НІ actual=wrong-reply\n' "$fixture" >&2
+  if ! grep -Fqx 'sens[укр]> НІ' "$tmp/out"; then
+    printf 'REGRESSION case=%s expected=НІ actual=wrong-reply\n' "$label" >&2
     cat "$tmp/out" >&2
     exit 1
   fi
 }
 
-run_fixture tests/semantic/repl-environment-d10.lisp
-run_fixture tests/semantic/repl-environment-d8.lisp
+run_repl_form D10 '(атом? (середовище))'
+run_repl_form D8 '(атом? (відобразити-середовище))'
 if ! printf '(відобразити-середовище)\n' | "$cli" --surface=укр >"$tmp/reflection.out" 2>"$tmp/reflection.err"; then
   printf 'REGRESSION identity=D8:11100111 layer=SENS-REPL actual=execution-error\n' >&2
   cat "$tmp/reflection.err" >&2
