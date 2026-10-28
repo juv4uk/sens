@@ -131,11 +131,29 @@ def measure(command: list[str], copies: int, out: Path, meter: Path | None,
         usage.unlink(missing_ok=True)
 
 
-def experiment(blocks: int, pairs: int, copies: int, seed: int, out: Path) -> None:
+def validate_pilot_budget(blocks: int, pairs: int, copies: int,
+                          corpus_size: int) -> dict[str, int]:
+    """Bound the complete physical study, including three untimed warmups."""
     if not 8 <= blocks <= 64 or not 4 <= pairs <= 30 or not 1 <= copies <= 8_192:
         raise ValueError("requires 8..64 blocks, 4..30 balanced pairs, 1..8192 copies")
-    if CORPUS.stat().st_size * copies > 3 * 1024 ** 3:
+    if corpus_size <= 0 or corpus_size > 64 * 1024 * 1024:
+        raise ValueError("requires nonempty corpus up to 64 MiB")
+    per_process = corpus_size * copies
+    if per_process > 3 * 1024 ** 3:
         raise ValueError("copy-traffic-per-process exceeds 3 GiB budget")
+    # Each pair runs Rust then candidate (or vice versa); two candidates,
+    # two variants each. Three warmups run once per implementation.
+    launches = 4 * blocks * pairs + 3
+    declared_bytes = launches * per_process
+    if declared_bytes > 8 * 1024 ** 3:
+        raise ValueError("DECLARED_TOTAL_COPY_BUDGET_EXCEEDED: max=8_GiB; "
+                         "reduce --copies, --blocks or --pairs")
+    return {"declared_total_copy_bytes": declared_bytes,
+            "declared_process_launches": launches}
+
+
+def experiment(blocks: int, pairs: int, copies: int, seed: int, out: Path) -> None:
+    resource_budget = validate_pilot_budget(blocks, pairs, copies, CORPUS.stat().st_size)
     out.mkdir(parents=True, exist_ok=True)
     with tempfile.TemporaryDirectory(prefix="sens-physical-") as tmp:
         binary_dir = Path(tmp)
@@ -178,6 +196,9 @@ def experiment(blocks: int, pairs: int, copies: int, seed: int, out: Path) -> No
             "python": platform.python_version(), "cc": checked(["cc", "--version"]).splitlines()[0],
             "energy_sensor": sensor, "measurement_boundary": "process startup+physical copies",
             "physical_work": f"{copies} requested buffer copies from lib/core4.lisp",
+            "declared_total_copy_bytes": resource_budget["declared_total_copy_bytes"],
+            "declared_process_launches": resource_budget["declared_process_launches"],
+            "resource_ceiling_bytes": 8 * 1024 ** 3,
             "copy_work_validation": "NOT_INDEPENDENTLY_CERTIFIED",
             "note": ("one-byte-per-iteration checksum and final byte parity do not "
                      "prove every full memcpy/copy_from_slice/slice-write survived "
@@ -260,7 +281,7 @@ def main() -> int:
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("--blocks", type=int, default=8)
     p.add_argument("--pairs", type=int, default=4)
-    p.add_argument("--copies", type=int, default=8192)
+    p.add_argument("--copies", type=int, default=64)
     p.add_argument("--seed", type=int, default=20261028)
     p.add_argument("--out", type=Path, default=Path(".ci-physical-study"))
     a = p.parse_args()
