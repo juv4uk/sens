@@ -56,6 +56,14 @@ run_case() {
 # 1024 D10 names or every historical semantic fixture are callable.
 run_case d1-positive ТАК tests/semantic/lisp-language-laws.lisp
 run_case d1-negative НІ tests/semantic/lisp-language-negative.lisp
+# Fundamental D1/D2/D3 truth is decided inside executable SENS programs.
+# A mutant returns exact D1 false; this shell does not reimplement any law.
+run_case not-positive ТАК tests/semantic/d1-not-law.lisp
+run_case not-negative НІ tests/semantic/d1-not-mutant.lisp
+run_case cond-positive ТАК tests/semantic/d2-cond-laziness-law.lisp
+run_case cond-negative НІ tests/semantic/d2-cond-laziness-mutant.lisp
+run_case d3-positive ТАК tests/semantic/d3-structure-law.lisp
+run_case d3-negative НІ tests/semantic/d3-structure-mutant.lisp
 run_case structure-positive ТАК tests/semantic/бенчмарк-структура-law.lisp lib/твердження.lisp
 run_case structure-negative НІ tests/semantic/бенчмарк-структура-mutant.lisp lib/твердження.lisp
 run_case trits-positive ТАК tests/semantic/ідентичність-тритів-law.lisp lib/твердження.lisp
@@ -65,5 +73,5 @@ run_case quote-negative НІ tests/semantic/d3-як-є-щит-mutant.lisp lib/co
 run_case median-positive ТАК tests/semantic/бенчмарк-медіана-law.lisp lib/твердження.lisp lib/бенчмарк.lisp
 run_case median-negative НІ tests/semantic/бенчмарк-медіана-mutant.lisp lib/твердження.lisp lib/бенчмарк.lisp
 
-[[ "$verified" -eq 10 ]] || { echo "SENS_REPL_CORPUS_FAIL incomplete=$verified" >&2; exit 1; }
-echo "SENS_REPL_CORPUS=PASS witnesses=$verified families=5 scope=explicit-current-only extended-semantic-coverage=NOT_VERIFIED"
+[[ "$verified" -eq 16 ]] || { echo "SENS_REPL_CORPUS_FAIL incomplete=$verified" >&2; exit 1; }
+echo "SENS_REPL_CORPUS=PASS witnesses=$verified families=8 scope=explicit-current-only extended-semantic-coverage=NOT_VERIFIED"
