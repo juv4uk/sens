@@ -36,5 +36,6 @@
          "util-linux"
          "procps"
          "valgrind"
+         "perf"
          "sed"
          "racket")))))
