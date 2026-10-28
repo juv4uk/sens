@@ -70,9 +70,13 @@ def parse_rapl_measurement(lines: list[str]) -> dict[str, object]:
         raise RuntimeError("RAPL observation invalid status/scope")
     if fields["wrapped_once"] not in ("true", "false"):
         raise RuntimeError("RAPL observation invalid wrap indicator")
+    # Do not accept a made-up absolute path such as /tmp/energy_uj as
+    # measured CPU-package energy. The Rust meter validates package labels;
+    # this reporting boundary additionally restricts canonical sysfs paths.
+    if not re.fullmatch(r"/sys/class/powercap/intel-rapl:[0-9]+/energy_uj",
+                        fields["counter"]):
+        raise RuntimeError("RAPL observation invalid package counter path")
     counter = Path(fields["counter"])
-    if counter.name != "energy_uj" or not counter.is_absolute():
-        raise RuntimeError("RAPL observation invalid counter path")
     try:
         energy, elapsed = int(fields["energy_uj"]), int(fields["elapsed_ns"])
     except ValueError as error:
