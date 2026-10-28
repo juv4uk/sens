@@ -65,10 +65,6 @@ fn sibling_sens(path: &Path) -> Result<std::path::PathBuf, String> {
     }
 }
 
-#[cfg(test)]
-#[test]
-fn exact_bit_view_maps_to_its_existing_sens_physical_companion() {
-    let bits = Path::new("tests/semantic/x86-lowering-d1-law.bits");
     let legacy = Path::new("tests/fixtures/migration-quote-cohort/quote-legacy.lisp");
     assert_eq!(
         sibling_sens(bits).unwrap().as_path(),
@@ -756,10 +752,7 @@ fn main() {
     }
 }
 
-#[cfg(test)]
-fn zig_test_fixture(name: &'static str) -> &'static [u8] {
-    // Tests are host-side consumers, not compile-time owners of SENS bytes.
-    // Resolve only these four tracked fixtures; arbitrary paths are rejected.
+ arbitrary paths are rejected.
     use std::sync::OnceLock;
     static QUOTE: OnceLock<Vec<u8>> = OnceLock::new();
     static SELFTEST: OnceLock<Vec<u8>> = OnceLock::new();
