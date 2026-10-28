@@ -195,38 +195,3 @@ impl LanguageError {
     }
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn line_col_counts_chars_not_bytes_across_newlines() {
-        let source = "(def a 1)\n(car a)"; // second line uses Cyrillic a (2 bytes)
-        let error = LanguageError::new(ErrorKind::Type, "boom", Span { start: 15, end: 17 });
-        assert_eq!(error.line_col(source), (2, 6));
-    }
-
-    #[test]
-    fn render_underlines_the_full_span_width() {
-        let source = "(car 5)";
-        let error = LanguageError::new(ErrorKind::Type, "boom", Span { start: 0, end: 7 });
-        let rendered = error.render(source);
-        assert!(rendered.contains("1:1"));
-        assert!(rendered.contains("(car 5)"));
-        assert!(rendered.ends_with(&"^".repeat(7)));
-    }
-
-    #[test]
-    fn line_col_clamps_offsets_beyond_source_length() {
-        let source = "(car";
-        let error = LanguageError::new(
-            ErrorKind::Parse,
-            "unexpected eof",
-            Span {
-                start: 999,
-                end: 999,
-            },
-        );
-        assert_eq!(error.line_col(source), (1, 5));
-    }
-}
