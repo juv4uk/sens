@@ -192,10 +192,31 @@ Minimum manifest schema:
   `input_sha256`, integer `verified_units` > 0,
   `reference_output_sha256`, and `implementations` listing
   language+source SHA with Rust baseline and at least one candidate.
+- **All 24 candidate/task cells must be declared before measurements**:
+  the first confirmatory slate is 8 tasks × `C`, `Python`, `SENS`
+  against `Rust`. Every task lists its actual implementations **and**
+  an explicit `ineligible_candidates` array for candidates lacking
+  a valid implementation. Each N/A record requires `language`,
+  a substantive `reason` (at least 20 characters) and an HTTPS
+  `evidence_url`. The same candidate cannot be implemented **and**
+  marked N/A. A genuine N/A remains visible and is not a zero-value
+  observation, a lost measurement or evidence of inferiority.
+  Any other language remains allowed as an exploratory implementation,
+  but is outside this **predeclared primary inference family** until
+  an independently timestamped amendment defines a new study.
 - `contrasts` must reference **only frozen task IDs**,
   match the pinned input digest, name candidate + Rust baseline
-  both found in the task, and declare `wall_time_ns`,
-  `peak_rss_kib` and `energy_uj` where supported.
+  both found in the task, and declare all three primary metrics:
+  `wall_time_ns`, `peak_rss_kib` and `energy_uj`. There is
+  **exactly one primary contrast for every eligible candidate/task
+  cell**, not just one contrast per task. An absent energy reading
+  later becomes `ENERGY_NOT_MEASURED`; it is **not** a reason
+  to remove an eligible primary contrast from the preregistered slate.
+  Ineligible cells and missing-energy outcomes are distinct.
+- The structural JSON validator rejects duplicate keys (including
+  nested keys) and `NaN`/`Infinity`. A passed structural check
+  cannot prove that a claimed URL, SHA or timestamp exists in GitHub;
+  those require independent reviewer inspection.
 
 The checker verifies **structure and contradictions**, never
 machine measurement, cryptographic truth of an arbitrary SHA, a
