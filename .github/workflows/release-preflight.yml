@@ -207,4 +207,7 @@ jobs:
           # release-mode binary, not the separate debug test executable.
           bash scripts/prove-meta-eval-graph-d1.sh "$binary"
           bash scripts/prove-ідентичність-тритів.sh "$binary"
-          echo "RELEASE_LINUX_RUNTIME_WITNESSES=PASS binary=release/sens authority=SENS"
+          # Check the actual publishable optimized binary through the same
+          # interactive REPL semantic corpus, not only a debug build.
+          bash scripts/prove-repl-semantic-corpus.sh "$binary"
+          echo "RELEASE_LINUX_RUNTIME_WITNESSES=PASS binary=release/sens authority=SENS repl_corpus=REQUIRED"
