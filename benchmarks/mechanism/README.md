@@ -45,8 +45,9 @@ zig run -O ReleaseFast -lc bench_t5m.zig
 zig test -O ReleaseFast -lc benchmarks/mechanism/zig-byte-copy-bench.zig
 ```
 
-Додатковий Zig byte-copy probe має прогрів, 11 проб по 512
-копіювань і точний byte parity; він не доводить T5M-відповідність
+Додатковий Zig byte-copy probe транспортує саме фізичні байти
+`lib/core4.sens` (не текстову проєкцію) і має прогрів, 11 проб по 512
+копіювань та точний byte parity; він не доводить T5M-відповідність
 і не встановлює жодного мовного закону. Для T5M використовувати
 `bench_t5m.zig`, який реально кодує та декодує фізичний корпус.
 
