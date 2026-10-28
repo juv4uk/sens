@@ -3,7 +3,7 @@
 //! is bootstrapped from `lib/macro.lisp`; the Rust kernel no longer implements it.
 
 use crate::eval::canon;
-use crate::eval::{evaluate, evaluate_step, EvalStep};
+use crate::eval::{evaluate, EvalStep};
 use crate::{
     Bit4, CoreD4, CoreDomainIdentity, Environment, ErrorKind, Expr, ExprKind, LanguageError,
     PairNode, Span, Value,
@@ -71,7 +71,15 @@ pub(crate) fn evaluate_domain_cond(
         }
         let value = evaluate(&parts[0], environment)?;
         match exact_d3_cond_control(&value, parts[0].span)? {
-            ExactD3CondControl::Select => return evaluate_step(&parts[1], environment),
+            // Конкретну гілку COND виконає зовнішній trampoline-loop.
+            // Не заходити в evaluate_step рекурсивно: 100k хвостових
+            // викликів мають зберігати O(1) кадрів host/WASM стека.
+            ExactD3CondControl::Select => {
+                return Ok(EvalStep::TailCall {
+                    expression: parts[1].clone(),
+                    environment: environment.clone(),
+                });
+            }
             ExactD3CondControl::SkipNo => {}
         }
     }
