@@ -1871,9 +1871,10 @@ while IFS= read -r file || [[ -n "$file" ]]; do
                      --binding-source lib/world.lisp
                      --binding-source lib/yantra.lisp
                      --binding-source lib/result-status.lisp)
-  elif [[ "$file" == "tests/semantic/d9-world-shape-module-events-laws.lisp" ||
+  elif [[ "$file" == "tests/semantic/d9-d10-defined-functions-law.lisp" ||
+          "$file" == "tests/semantic/d9-world-shape-module-events-laws.lisp" ||
           "$file" == "tests/semantic/world-exact-arity-witness.lisp" ]]; then
-    # Обидва живі свідки світу викликають DEFINE з lib/world.lisp.
+    # D9 свідки світу викликають DEFINE з lib/world.lisp.
     # Без цього SENS правильно відхиляє невідомий D7 Text7-символ «світ?».
     # Не підміняємо виконання хостовим оракулом і не тягнемо весь Reason.
     binding_sources=(--binding-source lib/world.lisp)

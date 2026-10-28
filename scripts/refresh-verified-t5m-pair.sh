@@ -61,19 +61,18 @@ done
 # Не допускати тихої зміни профілю решти джерел або неперевірених комбінацій.
 if (( core4_runtime )); then
   case "$source_file" in
-    tests/semantic/exact-arithmetic-laws.lisp|tests/semantic/exact-arithmetic-mutant.lisp|tests/semantic/d5-arithmetic-native-t5m-law.lisp|tests/semantic/d5-arithmetic-native-t5m-mutant.lisp|lib/lisp-fs.lisp|lib/unify.lisp|tests/fixtures/wsm-fs-record-producer.lisp|tests/semantic/meta-eval-graph-d1-law.lisp|tests/semantic/meta-eval-graph-d1-mutant.lisp|tests/semantic/d6-derived-research-batch-01.lisp|tests/semantic/d8-rassq-until-batch.lisp|scripts/check-domain-logic-laws.lisp) ;;
+    tests/semantic/exact-arithmetic-laws.lisp|tests/semantic/exact-arithmetic-mutant.lisp|tests/semantic/d5-arithmetic-native-t5m-law.lisp|tests/semantic/d5-arithmetic-native-t5m-mutant.lisp|tests/semantic/d9-d10-defined-functions-law.lisp|lib/lisp-fs.lisp|lib/unify.lisp|tests/fixtures/wsm-fs-record-producer.lisp|tests/semantic/meta-eval-graph-d1-law.lisp|tests/semantic/meta-eval-graph-d1-mutant.lisp|tests/semantic/d6-derived-research-batch-01.lisp|tests/semantic/d8-rassq-until-batch.lisp|scripts/check-domain-logic-laws.lisp) ;;
     *) echo "T5M_REPAIR_CORE4_PROFILE_UNREGISTERED source=$source_file" >&2; exit 2 ;;
   esac
   if (( ${#binding_args[@]} != 0 )) || [[ -n "$expected_error" ]]; then
-    # The F6 producer fixture is a Core4 consumer AND needs the exact same
-    # SENS-owned dependency stack as its WRITE→READ semantic laws. Keep this
-    # one combination closed; do not generalize arbitrary Core4+binding runs.
+    # Core4 plus external SENS definitions is admitted only for these exact
+    # witnesses and their named binding sources; do not generalize the profile.
     if [[ -n "$expected_error" ]]; then
       echo "T5M_REPAIR_CORE4_PROFILE_INCOMPATIBLE source=$source_file" >&2
       exit 2
     fi
     case "$source_file|${binding_sources[*]}" in
-      'tests/fixtures/wsm-fs-record-producer.lisp|lib/persistent-map.lisp lib/world.lisp lib/content-store.lisp lib/lisp-fs.lisp'|'tests/semantic/meta-eval-graph-d1-law.lisp|lib/meta-eval.lisp'|'tests/semantic/meta-eval-graph-d1-mutant.lisp|lib/meta-eval.lisp') ;;
+      'tests/fixtures/wsm-fs-record-producer.lisp|lib/persistent-map.lisp lib/world.lisp lib/content-store.lisp lib/lisp-fs.lisp'|'tests/semantic/meta-eval-graph-d1-law.lisp|lib/meta-eval.lisp'|'tests/semantic/meta-eval-graph-d1-mutant.lisp|lib/meta-eval.lisp'|'tests/semantic/d9-d10-defined-functions-law.lisp|lib/world.lisp') ;;
       *)
         echo "T5M_REPAIR_CORE4_PROFILE_INCOMPATIBLE source=$source_file" >&2
         exit 2
