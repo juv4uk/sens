@@ -96,7 +96,11 @@ case "$role" in
   *) echo "невідома роль: $role" >&2; usage >&2; exit 2 ;;
 esac
 
-shell_args=(shell --pure)
+# Глобальний Cargo config може вказувати на host-linked /usr/bin/sccache.
+# Rust-пакунок pinned Guix задає власний LD_LIBRARY_PATH; host-wrapper під цією
+# змішаною бібліотечною доріжкою зависає або падає. Поки wrapper не входить до
+# manifest, pinned Guix-toolchain не повинен підхоплювати його із системи.
+shell_args=(shell --pure --preserve=RUSTC_WRAPPER)
 [[ $dry_run -eq 1 ]] && shell_args+=(--dry-run)
 [[ -n "$gc_root" ]] && shell_args+=(--root="$gc_root")
 if [[ $local_skylake -eq 1 ]]; then
@@ -114,8 +118,8 @@ cmd+=("${shell_args[@]}")
 cmd+=("${manifests[@]}")
 
 if [[ $dry_run -eq 1 && $# -eq 0 ]]; then
-  exec "${cmd[@]}"
+  exec env RUSTC_WRAPPER= "${cmd[@]}"
 fi
 
 cmd+=(-- "$@")
-exec "${cmd[@]}"
+exec env RUSTC_WRAPPER= "${cmd[@]}"
