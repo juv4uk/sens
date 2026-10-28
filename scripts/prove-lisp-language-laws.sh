@@ -16,7 +16,11 @@ fi
 tmp="$(mktemp -d)"; trap 'rm -rf "$tmp"' EXIT
 run_repl_fixture() {
   local fixture="$1" expected="$2" label="$3"
-  if ! printf ':завантажити %s\n' "$fixture" | "$cli" --surface=укр >"$tmp/$label.out" 2>"$tmp/$label.err"; then
+  if [[ ! -f "$fixture" || -L "$fixture" ]]; then
+    printf 'REGRESSION id=%s-%s layer=source actual=missing-or-symlink path=%s\n' "$id" "$label" "$fixture" >&2
+    exit 1
+  fi
+  if ! printf ':завантажити %s\n' "$fixture" | timeout 45s "$cli" --surface=укр >"$tmp/$label.out" 2>"$tmp/$label.err"; then
     printf 'REGRESSION id=%s-%s layer=REPL/T5M actual=execution-error\n' "$id" "$label" >&2
     cat "$tmp/$label.err" >&2
     exit 1
@@ -43,4 +47,7 @@ for domain in d1-not d2-cond-laziness d3-structure; do
   run_repl_fixture "tests/semantic/${domain}-law.lisp" 'ТАК' "${domain}-law"
   run_repl_fixture "tests/semantic/${domain}-mutant.lisp" 'НІ' "${domain}-mutant"
 done
-printf 'SENS_REPL_LANGUAGE_LAWS=OK path=REPL->Zig/T5M->SENS positive=ТАК negative=НІ domains=D1,D2,D3 witness_pairs=4 runs=8\n'
+# Рекурсивний закон належить SENS і оцінюється тим самим REPL/Zig/T5M шляхом.
+run_repl_fixture tests/semantic/d5-recursive-list-law.lisp 'ТАК' d5-recursive-law
+run_repl_fixture tests/semantic/d5-recursive-list-mutant.lisp 'НІ' d5-recursive-mutant
+printf 'SENS_REPL_LANGUAGE_LAWS=OK path=REPL->Zig/T5M->SENS positive=ТАК negative=НІ domains=D1,D2,D3,D5 witness_pairs=5 runs=10\n'
