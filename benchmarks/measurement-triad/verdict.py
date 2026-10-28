@@ -184,45 +184,45 @@ def independent_units(document: dict) -> dict:
 
 def analyze_many(documents: list[dict], *, draws: int = 4000, seed: int = 5227,
                  min_effect: float = 0.01, family_alpha: float = 0.05) -> dict:
-    """Analyze several comparisons and apply a pre-declared Holm correction.
+    """Report descriptive paired effects; refuse unsupported family inference.
 
-    Each document yields its own 95% bootstrap interval. Because the family of
-    comparisons grows, a per-comparison 95% interval is no longer a 95% family
-    statement; this function widens decisions accordingly and reports both.
+    Holm-adjusted p-values require *valid* unadjusted p-values from a
+    prespecified null distribution that respects paired, hierarchical samples.
+    A 95% CI excluding 1.0 is NOT p=0. The previous implementation converted
+    each individual CI into p=0/1 and falsely claimed family-wise error
+    control. Until a valid null test is implemented and calibrated, return
+    INCONCLUSIVE for any family-level FASTER/SLOWER claim, preserving the
+    per-comparison effect ratio and confidence interval for inspection.
     """
-    reports = [analyze(d, draws=draws, seed=seed, min_effect=min_effect) for d in documents]
-    decisive = [r for r in reports if r.get("ci95_ratio")]
-    if not decisive:
-        return {"schema": OUTPUT_SCHEMA, "status": "INCONCLUSIVE",
-                "reason": "NO_COMPARISON_SURVIVED_ADEQUACY", "comparisons": reports}
-    # Two-sided bootstrap p-value: share of replicates on the wrong side of 1.0,
-    # doubled and clipped. This is a resampling p, not a parametric one.
-    p_values = []
-    for r in reports:
-        ci = r.get("ci95_ratio")
-        if not ci:
-            p_values.append(1.0)
-            continue
-        ratio = r["ratio"]
-        lo, hi = ci
-        if ratio == 0:
-            p_values.append(1.0)
-            continue
-        # Conservative proxy: a comparison whose interval excludes 1.0 is at most
-        # family_alpha/len strong; otherwise it is not evidence at all.
-        p_values.append(0.0 if (hi < 1.0 or lo > 1.0) else 1.0)
-    adjusted = holm_adjust(p_values)
-    for r, adj in zip(reports, adjusted):
-        r["holm_adjusted_p"] = adj
-        if r.get("status") in ("FASTER", "SLOWER") and adj > family_alpha:
-            r["status"] = "INCONCLUSIVE"
-            r["reason"] = "FAMILY_WISE_CORRECTION_NOT_MET"
-    return {"schema": OUTPUT_SCHEMA,
-            "family_alpha": family_alpha,
-            "comparisons": reports,
-            "survivors": sum(1 for r in reports if r.get("status") in ("FASTER", "SLOWER")),
-            "warning": "Family-wise correction chosen in advance; do not re-select after seeing results"}
-
+    if (type(family_alpha) not in (int, float) or
+            not 0.0 < family_alpha < 1.0 or
+            not math.isfinite(family_alpha)):
+        raise InvalidEvidence("family_alpha must be finite and strictly in (0, 1)")
+    reports = [analyze(d, draws=draws, seed=seed, min_effect=min_effect)
+               for d in documents]
+    blocked = next((r for r in reports if r.get("status") == "BLOCKED"), None)
+    for report in reports:
+        # Individual, unadjusted decisions cannot be promoted into a family
+        # verdict. Do not invent adjusted p-values or erase descriptive data.
+        report["holm_adjusted_p"] = None
+        if report.get("status") in ("FASTER", "SLOWER"):
+            report["status"] = "INCONCLUSIVE"
+            report["reason"] = "VALID_FAMILY_P_VALUES_UNAVAILABLE"
+    return {
+        "schema": OUTPUT_SCHEMA,
+        "status": "BLOCKED" if blocked is not None else "INCONCLUSIVE",
+        "reason": ("MEMBER_BLOCKED: " + str(blocked.get("reason", "UNKNOWN"))
+                   if blocked is not None else
+                   ("VALID_FAMILY_P_VALUES_UNAVAILABLE" if reports
+                    else "NO_COMPARISONS")),
+        "family_alpha": family_alpha,
+        "comparisons": reports,
+        "survivors": 0,
+        "family_inference": "NOT_PERFORMED",
+        "warning": ("Descriptive per-comparison CIs only. No Holm-adjusted "
+                    "inference until calibrated paired/hierarchical p-values "
+                    "are implemented and independently validated."),
+    }
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)

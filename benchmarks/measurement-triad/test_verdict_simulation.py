@@ -196,6 +196,47 @@ def test_holm_correction() -> None:
     check("family_alpha 0.05", multi.get("family_alpha") == 0.05, f"{multi.get('family_alpha')}")
 
 
+
+def test_familywise_inference_is_fail_closed() -> None:
+    """A CI crossing a single-test threshold must never become Holm p=0."""
+    print("\n[9b] Family-wise: no invented adjusted p-values")
+    docs = [build(lambda p, k: 0.6, seed=701 + i) for i in range(3)]
+    result = analyze_many(docs, draws=1200, seed=7)
+    comparisons = result["comparisons"]
+    check("сімейний результат INCONCLUSIVE",
+          result.get("status") == "INCONCLUSIVE", str(result.get("status")))
+    check("жодного сімейного переможця",
+          result.get("survivors") == 0 and
+          all(r["status"] not in ("FASTER", "SLOWER") for r in comparisons))
+    check("сильні індивідуальні ДІ збережені як описові",
+          len(comparisons) == 3 and
+          all(r.get("ci95_ratio") and r["ci95_ratio"][1] < 1.0
+              for r in comparisons))
+    check("немає сфабрикованих Holm-p",
+          all(r.get("holm_adjusted_p") is None for r in comparisons))
+    check("family inference явно не виконано",
+          result.get("family_inference") == "NOT_PERFORMED")
+
+    failed = build(lambda p, k: 0.6, seed=708)
+    failed["parity"] = {"passed": False, "oracle_id": "negative-control"}
+    bad_result = analyze_many([failed], draws=1000, seed=7)
+    check("невдалий паритет лишається BLOCKED на обох рівнях",
+          bad_result["status"] == "BLOCKED" and
+          bad_result["comparisons"][0]["status"] == "BLOCKED")
+    check("причину блокування передано на рівень сім'ї",
+          "PARITY_NOT_PROVED" in bad_result.get("reason", ""),
+          str(bad_result.get("reason")))
+    for invalid_alpha in (0, 1, -0.1, float("nan"), float("inf"), True):
+        rejected = False
+        try:
+            analyze_many([docs[0]], draws=1000, seed=7,
+                         family_alpha=invalid_alpha)
+        except InvalidEvidence:
+            rejected = True
+        check(f"некоректне сімейне alpha={invalid_alpha!r} відхилено", rejected)
+
+
+
 def test_hierarchy_levels() -> None:
     """Рівні machine/session/block/pair рахуються окремо."""
     print("\n[10] Рівні ієрархії")
@@ -224,7 +265,8 @@ def main() -> int:
     for fn in (test_level_no_effect, test_known_effect, test_heavy_tails_and_outlier,
                test_energy_not_measured, test_autocorrelation_within_block,
                test_order_balance_required, test_too_few_units, test_no_parity_blocked,
-               test_holm_correction, test_hierarchy_levels, test_no_data_dependent_stopping):
+               test_holm_correction, test_familywise_inference_is_fail_closed,
+               test_hierarchy_levels, test_no_data_dependent_stopping):
         fn()
     print("\n" + "=" * 60)
     if FAILURES:
