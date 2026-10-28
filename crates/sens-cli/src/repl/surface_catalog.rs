@@ -10,6 +10,7 @@ const FIXED_SURFACES: [&str; 6] = ["ук", "укр", "san", "en", "LISP", "sym"]
 struct SurfaceName {
     surface: String,
     name: Option<String>,
+    symbolic_name: bool,
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -104,6 +105,7 @@ fn load_registry_entries() -> Result<Vec<SurfaceEntry>, String> {
                 .map(|surface| SurfaceName {
                     surface: (*surface).to_string(),
                     name: None,
+                    symbolic_name: false,
                 })
                 .collect::<Vec<_>>();
             for field in row_fields.iter().skip(1) {
@@ -119,6 +121,7 @@ fn load_registry_entries() -> Result<Vec<SurfaceEntry>, String> {
                     .find(|slot| slot.surface == surface)
                     .ok_or_else(|| format!("D{width}:{bits}: невідома проєкція {surface}"))?;
                 slot.name = projection_value(&parts[1]).map(str::to_string);
+                slot.symbolic_name = matches!(&parts[1].kind, ExprKind::Symbol(_));
             }
             entries.push(SurfaceEntry {
                 identity: format!("D{width}:{bits}"),
@@ -248,6 +251,26 @@ pub(super) fn identity_for_surface_name(
 ) -> Result<Option<String>, String> {
     let key = (normalize_surface(surface).to_owned(), requested.to_owned());
     Ok(surface_index()?.get(&key).cloned().flatten())
+}
+
+/// Return every exact identity whose `sym` column contains an unquoted
+/// symbolic alias. Quoted strings in that column describe text glyphs; they
+/// must not become callable surface names. Callability filtering belongs to
+/// the REPL admission boundary.
+pub(super) fn identities_for_surface_name(
+    surface: &str,
+    requested: &str,
+) -> Result<Vec<String>, String> {
+    let surface = normalize_surface(surface);
+    Ok(registry_entries()?
+        .iter()
+        .filter(|entry| {
+            surface_name(entry, surface).is_some_and(|name| {
+                name.symbolic_name && name.name.as_deref() == Some(requested)
+            })
+        })
+        .map(|entry| entry.identity.clone())
+        .collect())
 }
 
 /// Return the full Ukrainian spelling paired with one exact table identity.

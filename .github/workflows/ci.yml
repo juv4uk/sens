@@ -61,11 +61,14 @@ jobs:
       - name: Конкурс бенчмарків за сферами
         shell: bash
         run: |
-          set -uo pipefail
+          set -euo pipefail
           cargo build --locked -p sens-cli --bin sens
           export PATH="$PWD/target/debug:$PATH"
           export ZIG="$(command -v zig)"
           bash benchmarks/sphere-contest/запуск.sh
+      - name: Мовні закони через інтерактивний SENS REPL
+        shell: bash
+        run: bash scripts/prove-lisp-language-laws.sh "$PWD/target/debug/sens"
       # rust-isolated — єдиний доказ ізоляції Rust↔SENS. Досі він жив лише
       # в списку GATES файлу release_go_gate.py і не викликався жодним
       # workflow: тобто не перевірявся ніде, крім ручного прогону.

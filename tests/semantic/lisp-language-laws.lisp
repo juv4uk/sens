@@ -1,6 +1,4 @@
 ; SENS_SOURCE=tests/semantic/lisp-language-laws.lisp
-; NATIVE_SENS_POSITIVE=NOT_VERIFIED
-; NATIVE_SENS_NEGATIVE=NOT_VERIFIED
 ;
 ; Базові закони мови: тотожність, умова, порожність. Без чужих носіїв.
 

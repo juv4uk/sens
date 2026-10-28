@@ -36,6 +36,10 @@ jobs:
       - name: Зібрати виконавець SENS та тритовий читач
         run: cargo build --locked -p sens-cli --bin sens --bin sens-trit
 
+      - name: Мовні закони через інтерактивний SENS REPL
+        shell: bash
+        run: bash scripts/prove-lisp-language-laws.sh "$PWD/target/debug/sens"
+
       - name: Довести чинні мовні закони через фізичний T5M
         shell: bash
         run: |

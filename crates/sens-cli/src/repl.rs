@@ -495,34 +495,81 @@ fn selected_surface_callable(
         }
     }
 
-    let Some(identity_text) =
+    // `sym` is an orthogonal projection shared by every REPL surface, not a
+    // selectable language mode. Prefer the selected human spelling, then
+    // resolve a symbolic spelling from the same domain table. The result is
+    // still only a candidate identity; the admission checks below decide
+    // whether this resident has a callable mechanism.
+    if let Some(identity_text) =
         surface_catalog::identity_for_surface_name(surface.code(), &projected_name)?
-    else {
+    {
+        if let Some(identity) = admitted_catalog_callable(surface, &projected_name, &identity_text)?
+        {
+            return Ok(Some(identity));
+        }
+    }
+
+    // `sym` is shared by every surface. A symbolic alias may occur in more
+    // than one domain, so resolve all exact candidates and retain only
+    // identities with an already admitted mechanism. Accept it only when one
+    // exact callable identity remains.
+    let mut admitted = Vec::new();
+    for identity_text in surface_catalog::identities_for_surface_name("sym", name)? {
+        if let Some(identity) = admitted_catalog_callable(surface, &projected_name, &identity_text)? {
+            admitted.push(identity);
+        }
+    }
+    admitted.sort_by_key(|identity| (identity.width(), identity.packed_bits()));
+    admitted.dedup();
+    match admitted.as_slice() {
+        [] => Ok(None),
+        [identity] => Ok(Some(*identity)),
+        identities => {
+            let coordinates = identities
+                .iter()
+                .map(|identity| {
+                    format!(
+                        "D{}:{:0width$b}",
+                        identity.width(),
+                        identity.packed_bits(),
+                        width = identity.width()
+                    )
+                })
+                .collect::<Vec<_>>()
+                .join(", ");
+            Err(format!(
+                "ambiguous sym spelling {name:?}; callable identities: {coordinates}"
+            ))
+        }
+    }
+}
+
+fn admitted_catalog_callable(
+    surface: ReplSurface,
+    projected_name: &str,
+    identity_text: &str,
+) -> Result<Option<DomainIdentity>, String> {
+    let Some(identity) = catalog_domain_identity(identity_text)? else {
         return Ok(None);
     };
-    let Some(identity) = catalog_domain_identity(&identity_text)? else {
+    let Some(ukr_name) = surface_catalog::ukr_name_for_identity(identity_text)? else {
         return Ok(None);
     };
-    let Some(ukr_name) = surface_catalog::ukr_name_for_identity(&identity_text)? else {
-        return Ok(None);
-    };
-    Ok(
-        sens::semantic_registry_export::exact_uk_callable_for_source_head(&ukr_name)
-            .filter(|admitted| *admitted == identity)
-            .and_then(DomainIdentity::core_operation)
-            .map(DomainIdentity::from)
-            .or_else(|| {
-                sens::semantic_registry_export::is_admitted_exact_definition_target(identity)
-                    .then_some(identity)
-            })
-            .or_else(|| {
-                (identity.width() == 8
-                    && projected_name == ukr_name
-                    && matches!(surface, ReplSurface::UkrainianFull | ReplSurface::Ukrainian))
-                .then(|| identity.core_operation().map(DomainIdentity::from))
-                .flatten()
-            }),
-    )
+    Ok(sens::semantic_registry_export::exact_uk_callable_for_source_head(&ukr_name)
+        .filter(|admitted| *admitted == identity)
+        .and_then(DomainIdentity::core_operation)
+        .map(DomainIdentity::from)
+        .or_else(|| {
+            sens::semantic_registry_export::is_admitted_exact_definition_target(identity)
+                .then_some(identity)
+        })
+        .or_else(|| {
+            (identity.width() == 8
+                && projected_name == ukr_name
+                && matches!(surface, ReplSurface::UkrainianFull | ReplSurface::Ukrainian))
+            .then(|| identity.core_operation().map(DomainIdentity::from))
+            .flatten()
+        }))
 }
 
 fn is_t5m_callable_definition_form(expression: &Expr) -> bool {

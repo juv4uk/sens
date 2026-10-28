@@ -1,11 +1,12 @@
 #!/usr/bin/env bash
-# CI_GLUE_NO_SEMANTICS: закони мови Lisp/SENS. Без Python/JSON/SHA-256/квитанцій.
+# CI_GLUE_NO_SEMANTICS: SENS-закон виконується інтерактивним REPL через Zig/T5M.
+# Оболонка лише передає фікстури й порівнює видимі відповіді; закон живе у SENS.
 set -euo pipefail
 cd "$(dirname "$0")/.."
 cli="${1:-target/debug/sens}"
 id=lisp-language-laws
 law=tests/semantic/lisp-language-laws.lisp
-mutant=tests/semantic/lisp-language-laws-mutant.lisp
+negative=tests/semantic/lisp-language-negative.lisp
 if [[ ! -x "$cli" ]]; then
   printf 'REGRESSION test_id=%s actual=executor-missing\n' "$id" >&2; exit 1
 fi
@@ -13,16 +14,26 @@ if [[ ! -f "$law" ]]; then
   printf 'REGRESSION id=%s actual=fixture-absent\n' "$id" >&2; exit 1
 fi
 tmp="$(mktemp -d)"; trap 'rm -rf "$tmp"' EXIT
-printf '1\n' > "$tmp/expected"
-if ! "$cli" "$law" > "$tmp/actual" 2>"$tmp/err"; then
-  printf 'REGRESSION id=%s actual=execution-error\n' "$id" >&2; cat "$tmp/err" >&2; exit 1
-fi
-if ! cmp -s "$tmp/expected" "$tmp/actual"; then
-  printf 'REGRESSION id=%s actual=wrong-verdict\n' "$id" >&2; exit 1
-fi
-if "$cli" "$mutant" > "$tmp/m.out" 2>/dev/null; then
-  if cmp -s "$tmp/expected" "$tmp/m.out"; then
-    printf 'REGRESSION id=%s-mutant actual=false-positive\n' "$id" >&2; exit 1
+run_repl_fixture() {
+  local fixture="$1" expected="$2" label="$3"
+  if ! printf ':завантажити %s\n' "$fixture" | "$cli" --surface=укр >"$tmp/$label.out" 2>"$tmp/$label.err"; then
+    printf 'REGRESSION id=%s-%s layer=REPL/T5M actual=execution-error\n' "$id" "$label" >&2
+    cat "$tmp/$label.err" >&2
+    exit 1
   fi
-fi
-echo "LISP_LANGUAGE_LAWS=OK authority=SENS_form"
+  if grep -Eq 'Помилка REPL/T5M|Помилка завантаження' "$tmp/$label.err"; then
+    printf 'REGRESSION id=%s-%s layer=REPL/T5M actual=language-error\n' "$id" "$label" >&2
+    cat "$tmp/$label.err" >&2
+    exit 1
+  fi
+  if ! grep -Fq "Завантажено: $fixture" "$tmp/$label.out" ||
+     ! grep -Fqx "$expected" "$tmp/$label.out"; then
+    printf 'REGRESSION id=%s-%s layer=REPL/T5M expected=%s actual=wrong-reply\n' "$id" "$label" "$expected" >&2
+    cat "$tmp/$label.out" >&2
+    exit 1
+  fi
+}
+
+run_repl_fixture "$law" 'ТАК' positive
+run_repl_fixture "$negative" 'НІ' negative
+printf 'SENS_REPL_LANGUAGE_LAWS=OK path=REPL->Zig/T5M->SENS positive=ТАК negative=НІ\n'
