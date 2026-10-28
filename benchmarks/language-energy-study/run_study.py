@@ -184,6 +184,11 @@ def run_once(cmd: str, env: dict, timeout_s: float = 120.0):
     """
     import shlex
     argv = shlex.split(cmd, posix=(os.name != 'nt'))
+    if os.name == 'nt':
+        # posix=False keeps path backslashes but also keeps outer quote marks.
+        # Popen(argv) must receive unquoted -c payloads and executable paths.
+        argv = [a[1:-1] if len(a) >= 2 and a[0] in ('"', "'") and a[-1] == a[0] else a
+                for a in argv]
     start = time.perf_counter_ns()
     try:
         proc = subprocess.Popen(argv, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
