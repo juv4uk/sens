@@ -43,6 +43,13 @@ LANGUAGES = {
         "kind": "interpreted",
         "cmd": lambda task_id: f'{sys.executable} -c "import runpy,sys;sys.exit(0)"',
     },
+    # НАША МОВА. Розмір вшитий у джерело (варіант А): sens приймає рівно один
+    # файл і не передає аргументів програмі. Тому для кожного режиму — свій
+    # закарбований .sens, а не параметр у середовищі.
+    "sens": {
+        "cmd": lambda task_id: f"{os.environ.get('SENS_BIN', './target/release/sens')} "
+                               f"/tmp/sens-out/{task_id.split('-')[0].lower()}_measure.sens",
+    },
     "javascript": {
         "kind": "jit",
         "cmd": lambda task_id: f"node {CORPUS / 'javascript' / JS_FILES[task_id]}",
@@ -323,7 +330,10 @@ def main() -> int:
         args.processes, args.per_process = 2, 2
 
     SIZES["mode"] = "measure" if args.measure else "verify"
-    available = [l for l in args.languages if l == "python" or shutil.which("node")]
+    available = [l for l in args.languages
+                 if l == "python"
+                 or (l == "javascript" and shutil.which("node"))
+                 or (l == "sens" and Path(os.environ.get("SENS_BIN", "./target/release/sens")).exists())]
     if not available:
         print("немає доступних мов для запуску")
         return 2
