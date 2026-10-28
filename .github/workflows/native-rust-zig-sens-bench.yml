@@ -58,6 +58,11 @@ jobs:
           { echo "sha=$GITHUB_SHA"; zig version; uname -m; } > "$out/environment.txt"
           zig test -lc research/zig-codecs/tests.zig > "$out/codec-tests.log" 2>&1
           zig test -O ReleaseFast -lc bench_t5m_test.zig > "$out/t5m-tests.log" 2>&1
+          if ! grep -q "All 5 tests passed" "$out/t5m-tests.log"; then
+            cat "$out/t5m-tests.log" >&2
+            echo "::error title=Zig T5M::Expected five physical corridor tests, not an empty test suite" >&2
+            exit 1
+          fi
           zig run -O ReleaseFast -lc bench_t5m.zig > "$out/raw.tsv" 2>&1
           test "$(grep -c '^ZIG_T5M_SAMPLE ' "$out/raw.tsv" || true)" -eq 11
           test "$(grep -c '^ZIG_T5M_BENCH ' "$out/raw.tsv" || true)" -eq 1
@@ -92,11 +97,13 @@ jobs:
             cat "$out/build.log" >&2
             exit 1
           }
-          bash scripts/prove-бенчмарк-структура.sh "$PWD/target/debug/sens" > "$out/native-law.log" 2>&1 || {
+          SENS_BENCH_SAMPLES_OUT="$out/samples.tsv" \
+            bash scripts/prove-бенчмарк-структура.sh "$PWD/target/debug/sens" > "$out/native-law.log" 2>&1 || {
             cat "$out/native-law.log" >&2
             exit 1
           }
           grep -q '^БЕНЧМАРК_СТРУКТУРА=PASS native=SENS positive=D1:так mutant=D1:ні samples=11 ' "$out/native-law.log"
+          test "$(wc -l < "$out/samples.tsv")" -eq 12
           cat "$out/native-law.log"
       - name: Нативний доказ SENS і його час
         if: ${{ always() }}
