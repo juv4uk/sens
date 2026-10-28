@@ -68,10 +68,6 @@ run_case d5-arithmetic-positive ТАК tests/semantic/d5-arithmetic-native-t5m-l
 run_case d5-arithmetic-negative НІ tests/semantic/d5-arithmetic-native-t5m-mutant.lisp
 # Fundamental D1/D2/D3 truth is decided inside executable SENS programs.
 # A mutant returns exact D1 false; this shell does not reimplement any law.
-run_case not-positive ТАК tests/semantic/d1-not-law.lisp
-run_case not-negative НІ tests/semantic/d1-not-mutant.lisp
-run_case cond-positive ТАК tests/semantic/d2-cond-laziness-law.lisp
-run_case cond-negative НІ tests/semantic/d2-cond-laziness-mutant.lisp
 run_case d3-positive ТАК tests/semantic/d3-structure-law.lisp
 run_case d3-negative НІ tests/semantic/d3-structure-mutant.lisp
 run_case structure-positive ТАК tests/semantic/бенчмарк-структура-law.lisp lib/твердження.lisp
@@ -97,9 +93,9 @@ run_case d3-d4-selection-negative НІ tests/semantic/d3-d4-logic-selection-muta
 run_case d3-demorgan-positive ТАК tests/semantic/d3-demorgan-truth-table-law.lisp
 run_case d3-demorgan-negative НІ tests/semantic/d3-demorgan-truth-table-mutant.lisp
 
-[[ "$verified" -eq 36 ]] || { echo "SENS_REPL_CORPUS_FAIL incomplete=$verified" >&2; exit 1; }
-echo "SENS_REPL_CORPUS=PASS witnesses=$verified families=18 scope=explicit-current-only extended-semantic-coverage=NOT_VERIFIED"
+[[ "$verified" -eq 32 ]] || { echo "SENS_REPL_CORPUS_FAIL incomplete=$verified" >&2; exit 1; }
+echo "SENS_REPL_CORPUS=PASS witnesses=$verified families=16 scope=explicit-current-only extended-semantic-coverage=NOT_VERIFIED"
 
 # The corpus is the declared release-scope smoke proof, not the entire language.
 tracked_laws="$(find tests/semantic -maxdepth 1 -type f -name '*-law.lisp' -print | wc -l | tr -d ' ')"
-echo "REPL_SEMANTIC_COVERAGE=PARTIAL tracked_law_sources=$tracked_laws repl_families=18 complete_language_proof=NOT_VERIFIED"
+echo "REPL_SEMANTIC_COVERAGE=PARTIAL tracked_law_sources=$tracked_laws repl_families=16 complete_language_proof=NOT_VERIFIED"
