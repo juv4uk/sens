@@ -50,6 +50,10 @@ jobs:
             --task T01-symbolic-recursion \
             --run "node benchmarks/language-energy-study/corpus/javascript/t01_fib.mjs"
 
+      # TEMP research-branch physical meter proof; remove before PR merge.
+      - name: Перевірити Win32/Linux/macOS RSS і відмови
+        shell: bash
+        run: python3 -m unittest discover -s benchmarks/language-energy-study -p 'test_process_rss_platform.py' -v
       - name: Парні дані на цій платформі
         shell: bash
         run: |
