@@ -108,7 +108,7 @@ for trial in 1 2 3 4 5; do
     exit 1
   fi
   check_output 46368 "$tmp/stdout" "measure_n24_sample_$trial"
-  if ! awk -F '\t' 'NF != 4 {exit 1} $1 !~ /^[0-9]+(\.[0-9]+)?$/ {exit 1} $2 !~ /^[0-9]+$/ {exit 1} $3 !~ /^[0-9]+(\.[0-9]+)/$/ {exit 1} $4 !~ /^[0-9]+(\.[0-9]+)?$/ {exit 1} END {if (NR != 1) exit 1}' "$tmp/metrics"; then
+  if ! awk -F '\t' 'NF != 4 {exit 1} $1 !~ /^[0-9]+(\.[0-9]+)?$/ {exit 1} $2 !~ /^[0-9]+$/ {exit 1} $3 !~ /^[0-9]+(\.[0-9]+)?$/ {exit 1} $4 !~ /^[0-9]+(\.[0-9]+)?$/ {exit 1} END {if (NR != 1) exit 1}' "$tmp/metrics"; then
     printf 'BLOCKED invalid_GNU_time_sample=%s\n' "$trial" >&2
     exit 1
   fi
