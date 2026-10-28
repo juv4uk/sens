@@ -20,6 +20,8 @@ def main() -> int:
     dest = bytearray(len(source))
     observed = 0
     for i in range(copies):
+        # Each round damages the destination: a real new copy must repair it.
+        dest[i % len(source)] ^= 1
         dest[:] = source
         observed += dest[i % len(source)]
     if dest != source:

@@ -9,6 +9,7 @@ from pathlib import Path
 import platform
 import random
 import re
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -53,6 +54,37 @@ def sensor_state() -> str:
         "MULTIPLE_RAPL_PACKAGES" if zones else "RAPL_UNAVAILABLE")
 
 
+def parse_rapl_measurement(lines: list[str]) -> dict[str, object]:
+    """Validate the physical package meter contract, never estimate missing joules."""
+    if len(lines) != 1 or not lines[0].startswith("RUST_RAPL_PACKAGE "):
+        raise RuntimeError("RAPL observation ambiguous/missing")
+    fields = {}
+    for token in lines[0].split()[1:]:
+        match = KV.fullmatch(token)
+        if not match or match[1] in fields:
+            raise RuntimeError("RAPL observation invalid or duplicate field")
+        fields[match[1]] = match[2]
+    required = ("energy_uj", "elapsed_ns", "scope", "counter", "wrapped_once", "status")
+    if any(not fields.get(name) for name in required):
+        raise RuntimeError("RAPL observation missing required physical fields")
+    if fields["status"] != "MEASURED" or fields["scope"] != "whole_package_not_process":
+        raise RuntimeError("RAPL observation invalid status/scope")
+    if fields["wrapped_once"] not in ("true", "false"):
+        raise RuntimeError("RAPL observation invalid wrap indicator")
+    counter = Path(fields["counter"])
+    if counter.name != "energy_uj" or not counter.is_absolute():
+        raise RuntimeError("RAPL observation invalid counter path")
+    try:
+        energy, elapsed = int(fields["energy_uj"]), int(fields["elapsed_ns"])
+    except ValueError as error:
+        raise RuntimeError("RAPL observation invalid energy/time integer") from error
+    if energy <= 0 or elapsed <= 0:
+        raise RuntimeError("RAPL observation nonpositive hardware energy/time")
+    return {"energy_uj": energy, "rapl_child_elapsed_ns": elapsed,
+            "scope": fields["scope"], "counter": str(counter),
+            "wrapped_once": fields["wrapped_once"] == "true"}
+
+
 def physical_expected(copies: int) -> str:
     data = CORPUS.read_bytes()
     if not data:
@@ -62,11 +94,11 @@ def physical_expected(copies: int) -> str:
 
 
 def measure(command: list[str], copies: int, out: Path, meter: Path | None,
-            expected: str) -> dict:
+            time_tool: str, expected: str) -> dict:
     with tempfile.NamedTemporaryFile(dir=out, suffix=".usage", delete=False) as f:
         usage = Path(f.name)
     try:
-        command = ["/usr/bin/time", "-f",
+        command = [time_tool, "-f",
                    "METRIC_RSS_KIB=%M\tuser_s=%U\tsys_s=%S",
                    "-o", str(usage), *command, str(CORPUS), str(copies)]
         if meter:
@@ -76,9 +108,12 @@ def measure(command: list[str], copies: int, out: Path, meter: Path | None,
         wall_host_ns = time.perf_counter_ns() - begin
         if run.returncode:
             raise RuntimeError(f"execution failed: {run.returncode}: {run.stderr[-600:]}")
-        matches = [line for line in run.stdout.splitlines() if OBS.fullmatch(line)]
-        if matches != [expected]:
-            raise RuntimeError(f"PHYSICAL_PARITY_MISMATCH: expected {expected!r} received {matches!r}")
+        lines = run.stdout.splitlines()
+        matches = [line for line in lines if OBS.fullmatch(line)]
+        meter_lines = [line for line in lines if line.startswith("RUST_RAPL_PACKAGE ")]
+        # No extra stdout or second/conflicting observation is admissible.
+        if matches != [expected] or len(meter_lines) != (1 if meter else 0) or len(lines) != (2 if meter else 1):
+            raise RuntimeError(f"PHYSICAL_PARITY_MISMATCH: expected {expected!r} received {lines!r}")
         match = USAGE.fullmatch(usage.read_text().strip())
         if not match or int(match[1]) <= 0:
             raise RuntimeError("missing physical peak RSS / user / system metrics")
@@ -86,28 +121,46 @@ def measure(command: list[str], copies: int, out: Path, meter: Path | None,
                   "user_s": float(match[2]), "sys_s": float(match[3]),
                   "energy_uj": None}
         if meter:
-            lines = [x for x in run.stdout.splitlines() if x.startswith("RUST_RAPL_PACKAGE ")]
-            if len(lines) != 1:
-                raise RuntimeError("RAPL observation ambiguous/missing")
-            fields = dict(KV.findall(lines[0]))
-            if fields.get("status") != "MEASURED":
-                raise RuntimeError("invalid RAPL measurement status")
-            energy, elapsed = int(fields["energy_uj"]), int(fields["elapsed_ns"])
-            if energy <= 0 or elapsed <= 0:
-                raise RuntimeError("nonpositive hardware energy/time")
-            result.update({"energy_uj": energy, "wall_time_ns": elapsed,
-                           "host_wrapper_wall_ns": wall_host_ns,
-                           "scope": fields["scope"]})
+            # Strict physical parser from closed donor PR #6295; preserve
+            # host outer wall_time_ns rather than replacing with Rust Instant.
+            result.update(parse_rapl_measurement(meter_lines))
+            result["time_boundary"] = "RAPL_meter_wraps_usr_bin_time"
+        else:
+            result["time_boundary"] = "host_wrapper_includes_subprocess"
         return result
     finally:
         usage.unlink(missing_ok=True)
 
 
-def experiment(blocks: int, pairs: int, copies: int, seed: int, out: Path) -> None:
+def validate_pilot_budget(blocks: int, pairs: int, copies: int,
+                          corpus_size: int) -> dict[str, int]:
+    """Bound the complete physical study, including three untimed warmups."""
     if not 8 <= blocks <= 64 or not 4 <= pairs <= 30 or not 1 <= copies <= 8_192:
         raise ValueError("requires 8..64 blocks, 4..30 balanced pairs, 1..8192 copies")
-    if CORPUS.stat().st_size * copies > 3 * 1024 ** 3:
+    if corpus_size <= 0 or corpus_size > 64 * 1024 * 1024:
+        raise ValueError("requires nonempty corpus up to 64 MiB")
+    per_process = corpus_size * copies
+    if per_process > 3 * 1024 ** 3:
         raise ValueError("copy-traffic-per-process exceeds 3 GiB budget")
+    # Each pair runs Rust then candidate (or vice versa); two candidates,
+    # two variants each. Three warmups run once per implementation.
+    launches = 4 * blocks * pairs + 3
+    declared_bytes = launches * per_process
+    if declared_bytes > 8 * 1024 ** 3:
+        raise ValueError("DECLARED_TOTAL_COPY_BUDGET_EXCEEDED: max=8_GiB; "
+                         "reduce --copies, --blocks or --pairs")
+    return {"declared_total_copy_bytes": declared_bytes,
+            "declared_process_launches": launches}
+
+
+def experiment(blocks: int, pairs: int, copies: int, seed: int, out: Path) -> None:
+    resource_budget = validate_pilot_budget(blocks, pairs, copies, CORPUS.stat().st_size)
+    if checked(["git", "status", "--porcelain"]):
+        raise RuntimeError("SOURCE_TREE_DIRTY: commit the study inputs before measurement")
+    time_tool = shutil.which("time")
+    if time_tool is None:
+        raise RuntimeError("GNU time is missing from the pinned Guix profile PATH")
+    time_version = checked([time_tool, "--version"]).splitlines()[0]
     out.mkdir(parents=True, exist_ok=True)
     with tempfile.TemporaryDirectory(prefix="sens-physical-") as tmp:
         binary_dir = Path(tmp)
@@ -146,9 +199,13 @@ def experiment(blocks: int, pairs: int, copies: int, seed: int, out: Path) -> No
             "os": platform.platform(), "affinity": affinity,
             "governor": optional_read(Path("/sys/devices/system/cpu/cpu0/cpufreq/scaling_governor")),
             "turbo": optional_read(Path("/sys/devices/system/cpu/intel_pstate/no_turbo")),
-            "timing_source": "Rust Instant(child)/Python perf_counter_ns(process)",
+            "timing_source": "Python perf_counter_ns(outer wrapper), RAPL child elapsed_ns separately",
+            "gnu_time_path": time_tool, "gnu_time_version": time_version,
             "python": platform.python_version(), "cc": checked(["cc", "--version"]).splitlines()[0],
-            "energy_sensor": sensor, "measurement_boundary": "process startup+physical copies",
+            "energy_sensor": sensor,
+            "energy_status": "MEASURED" if meter else "ENERGY_NOT_MEASURED",
+            "declared_budget": resource_budget,
+            "measurement_boundary": "outer wrapper launch/exit including /usr/bin/time or RAPL meter and process startup",
             "physical_work": f"{copies} byte-buffer copies from lib/core4.lisp",
             "language_semantics": "NOT_TESTED",
         }
@@ -166,7 +223,8 @@ def experiment(blocks: int, pairs: int, copies: int, seed: int, out: Path) -> No
                     observations = {}
                     for label in order:
                         language = "rust" if label == "A" else candidate
-                        observations[label] = measure(commands[language], copies, out, meter, expected)
+                        observations[label] = measure(commands[language], copies, out, meter,
+                                                      time_tool, expected)
                         samples.append({"block": block + 1, "pair": index + 1,
                                         "order": order, "language": language,
                                         **observations[label]})
@@ -185,7 +243,7 @@ def experiment(blocks: int, pairs: int, copies: int, seed: int, out: Path) -> No
             reports[candidate] = {}
             for metric in ("wall_time_ns", "peak_rss_kib", "energy_uj"):
                 if metric == "energy_uj" and meter is None:
-                    reports[candidate][metric] = {"status": "NOT_MEASURED", "reason": sensor}
+                    reports[candidate][metric] = {"status": "ENERGY_NOT_MEASURED", "reason": sensor}
                     continue
                 doc = {"schema": verdict.PHYSICAL_SCHEMA, "metric": metric,
                        "parity": {"passed": True, "oracle_id": "physical-exact-copy"},
@@ -206,7 +264,7 @@ def experiment(blocks: int, pairs: int, copies: int, seed: int, out: Path) -> No
                 return f"{item['ratio']:.3f} [{lo:.3f}, {hi:.3f}]"
             lines.append(f"| {candidate} | {fmt('wall_time_ns')} | "
                          f"{fmt('peak_rss_kib')} | {fmt('energy_uj')} |")
-        lines.extend(["", f"RAPL: {sensor}. Дослід на shared GitHub runner — не рейтинг.",
+        lines.extend(["", f"RAPL: {sensor}. Дослід на середовищі з provenance — не рейтинг.",
                       "Витрати компіляції виключено. Старт процесу включено. "
                       "CPU package RAPL включає фон; без датчика джоулі не виміряно.",
                       "SENS-мовні закони цим фізичним стендом НЕ перевіряються."])
@@ -225,7 +283,7 @@ def main() -> int:
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("--blocks", type=int, default=8)
     p.add_argument("--pairs", type=int, default=4)
-    p.add_argument("--copies", type=int, default=8192)
+    p.add_argument("--copies", type=int, default=64)
     p.add_argument("--seed", type=int, default=20261028)
     p.add_argument("--out", type=Path, default=Path(".ci-physical-study"))
     a = p.parse_args()

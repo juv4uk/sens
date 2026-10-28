@@ -83,10 +83,11 @@ python3 benchmarks/language-energy-study/study.py \
   --out .ci-physical-study
 ```
 
-GitHub Actions → **SENS — швидкий CI та ручні цільові перевірки** →
-Run workflow → `suite=language-energy-pilot` на `main` після
-включення PR. Пробний PR-head запуск виконується окремо.
-Жоден реліз від цього не стартує.
+GitHub Actions автоматично запускає обмежені синтетичні перевірки для PR у
+`main` і змін у `main`; вони перевіряють інструментарій, але не проводять
+фізичний дослід. Для вимірювань використовуй окремий контрольований запуск
+`study.py` на підготовленому Linux-хості з RAPL. Відсутній датчик означає
+`ENERGY_NOT_MEASURED`; цей CI не запускає вимірювань і не публікує реліз.
 
 Артефакт: `raw-samples.json`, `paired-report.json`,
 `provenance.json`, `summary.md`; у Summary — короткий

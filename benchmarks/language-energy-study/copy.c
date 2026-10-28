@@ -4,6 +4,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
+/* Volatile function pointer: require a genuine copy call each iteration. */
+typedef void *(*physical_copy_fn)(void *, const void *, size_t);
+static physical_copy_fn volatile physical_copy = memcpy;
 int main(int argc, char **argv) {
     if (argc != 3) return 2;
     errno = 0;
@@ -21,11 +24,14 @@ int main(int argc, char **argv) {
     if (!source || !dest) return 2;
     if (fread(source, 1, size, file) != size) return 2;
     fclose(file);
+    memset(dest, 0, size);
     volatile unsigned char *observed_bytes = dest;
     unsigned long long observed = 0;
     for (unsigned long long i = 0; i < copies; i++) {
-        memcpy(dest, source, size);
-        observed += observed_bytes[i % size];
+        size_t index = (size_t)(i % size);
+        observed_bytes[index] ^= 1;
+        physical_copy(dest, source, size);
+        observed += observed_bytes[index];
     }
     if (memcmp(source, dest, size) != 0) {
         fputs("PHYSICAL_COPY_FAIL byte-parity\n", stderr);

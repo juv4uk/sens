@@ -94,18 +94,37 @@ def ref_T07(n: int) -> str:
 
 
 def ref_T08(n: int) -> str:
-    versions = []
-    current = ()
+    """T08 — персистентна структура з ДОДАВАННЯМ ЗА O(1).
+
+    Раніше тут був tuple-concat: `current = current + (i,)` — це O(n) на крок,
+    тобто O(n^2) на весь прогін. Через це JS-реалізація на concat виходила у
+    17 разів повільнішою за Python, і T08 міряла б вибір структури, а не мову.
+    Тепер обидві мови будують конс-список (вузол + покажчик), додавання O(1),
+    а всі версії лишаються живими, бо старі вузли не змінюються.
+    Вихід (довжини на контрольних точках) ідентичний попередньому.
+    """
+    node = None          # (value, next)
+    length = 0
+    marks = []
     for i in range(n):
-        current = current + (i,)
+        node = (i, node)
+        length += 1
         if i % 1000 == 0:
-            versions.append(len(current))
-    return hashlib.sha256(",".join(map(str, versions + [len(current)])).encode()).hexdigest()
+            marks.append(length)
+    return hashlib.sha256(",".join(map(str, marks + [length])).encode()).hexdigest()
 
 
 def ref_T09(n: int, seed: int) -> str:
     return str(sum(bin(v).count("1") for v in _lcg(seed, n)))
 
+
+PY_MODULES = {
+    "T01-symbolic-recursion": "ref_T01", "T02-exact-rationals": "ref_T02",
+    "T03-parsing-text": "ref_T03", "T04-sorting": "ref_T04",
+    "T05-allocation-gc": "ref_T05", "T06-io": "ref_T06",
+    "T07-matrices": "ref_T07", "T08-persistent-structures": "ref_T08",
+    "T09-bit-operations": "ref_T09",
+}
 
 REFERENCE = {
     "T01-symbolic-recursion": lambda i: ref_T01(i["n"]),
