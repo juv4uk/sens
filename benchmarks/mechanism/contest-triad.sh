@@ -24,6 +24,23 @@ die() {
   exit 2
 }
 
+# Фізичні метрики мають бути додатними числами, не просто рядком у stdout.
+# Це НЕ тест і НЕ визначення семантики SENS.
+metric() {
+  local line="$1" name="$2" token
+  for token in $line; do
+    if [[ "$token" == "$name="* ]]; then
+      printf '%s' "${token#*=}"
+      return 0
+    fi
+  done
+  return 1
+}
+
+positive_integer() {
+  [[ "$1" =~ ^[0-9]+$ && "$1" =~ [1-9] ]]
+}
+
 lane=all
 rapl=0
 while (( $# )); do
@@ -45,6 +62,7 @@ sha="$(git rev-parse --verify HEAD 2>/dev/null)" || die 'це не Git checkout'
 # Незакомічені зміни не отримують доказової сили.
 git diff --quiet -- || die 'незакомічені зміни робочого дерева: відмовлено у звіті'
 git diff --cached --quiet -- || die 'незакомічені staged зміни: відмовлено у звіті'
+[[ -z "$(git ls-files --others --exclude-standard)" ]] || die 'незакомічені нові файли: відмовлено у звіті'
 printf 'КОНКУРС_ДЖЕРЕЛО sha=%s os=%s mode=%s rapl=%s\n' "$sha" "$(uname -s)" "$lane" "$rapl"
 
 tmp="$(mktemp -d)" || die 'не вдалося створити tmp'
@@ -59,11 +77,20 @@ if [[ "$lane" == all || "$lane" == rust ]]; then
   rustc --edition=2021 -O benchmarks/mechanism/rust-byte-copy-bench.rs -o "$tmp/rust-mechanism" || die 'помилка збірки Rust'
   "$tmp/rust-mechanism" > "$tmp/rust.stdout" || die 'помилка бенчмарку Rust'
   grep -q '^RUST_BYTE_COPY_BENCH ' "$tmp/rust.stdout" || die 'Rust не видав фізичні виміри'
+  rust_report="$(grep '^RUST_BYTE_COPY_BENCH ' "$tmp/rust.stdout")"
+  [[ "$(grep -c '^RUST_BYTE_COPY_BENCH ' "$tmp/rust.stdout")" == 1 ]] || die 'Rust: очікується рівно один підсумок'
+  [[ "$(metric "$rust_report" samples)" == 11 && "$(metric "$rust_report" batch)" == 512 ]] || die 'Rust: невірне число проб чи копій'
+  positive_integer "$(metric "$rust_report" p50_ns)" || die 'Rust: немає додатної медіани'
+  positive_integer "$(metric "$rust_report" p90_ns)" || die 'Rust: немає додатного p90'
   cat "$tmp/rust.stdout"
   rust=виміряно
   if (( rapl )); then
     "$tmp/rust-mechanism" --rapl > "$tmp/rapl.stdout" || die 'RAPL недоступний або бенчмарк відхилив показ; джоулі НЕ виміряно'
     grep -q '^RUST_MECHANISM_RAPL ' "$tmp/rapl.stdout" || die 'відсутні реальні покази RAPL'
+    rapl_report="$(grep '^RUST_MECHANISM_RAPL ' "$tmp/rapl.stdout")"
+    [[ "$(grep -c '^RUST_MECHANISM_RAPL ' "$tmp/rapl.stdout")" == 1 ]] || die 'RAPL: очікується рівно одна фізична проба'
+    positive_integer "$(metric "$rapl_report" measured_uj)" || die 'RAPL: немає додатної енергії'
+    positive_integer "$(metric "$rapl_report" copies)" || die 'RAPL: немає фактичних копій'
     cat "$tmp/rapl.stdout"
   fi
 fi
@@ -77,6 +104,11 @@ if [[ "$lane" == all || "$lane" == zig ]]; then
   }
   [[ "$(grep -c '^ZIG_T5M_SAMPLE ' "$tmp/zig.stderr" || true)" == 11 ]] || die 'Zig: немає 11 сирих проб'
   grep -q '^ZIG_T5M_BENCH ' "$tmp/zig.stderr" || die 'Zig: немає підсумку T5M'
+  zig_report="$(grep '^ZIG_T5M_BENCH ' "$tmp/zig.stderr")"
+  [[ "$(grep -c '^ZIG_T5M_BENCH ' "$tmp/zig.stderr")" == 1 ]] || die 'Zig: очікується рівно один фізичний підсумок'
+  [[ "$(metric "$zig_report" samples)" == 11 ]] || die 'Zig: невірна кількість проб'
+  positive_integer "$(metric "$zig_report" decode_p50_ns_per_op)" || die 'Zig: невірна медіана decode'
+  positive_integer "$(metric "$zig_report" encode_p50_ns_per_op)" || die 'Zig: невірна медіана encode'
   cat "$tmp/zig.stdout"
   cat "$tmp/zig.stderr"
   zig_lane=виміряно
