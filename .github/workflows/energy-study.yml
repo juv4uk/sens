@@ -62,17 +62,14 @@ jobs:
 
   build-sens:
     # Власник: «мене цікавить щоб ви почали вимірювати нашу мову».
-    # Перший крок до цього — зібрати SENS там, де є rustc. У sandbox агента
-    # компілятора немає, тому досі SENS у вимірах не брав участі взагалі.
+    # Порядок: Zig → cargo build → T01 parity проти Python-еталона.
+    # Невдача паритету = RED, не маскувати. Енергія без RAPL = ENERGY_NOT_MEASURED.
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
 
-      # Порядок критичний: crates/sens/build.rs запускає ПІННУТИЙ Zig-компілятор
-      # (Command::new(compiler) … .expect("… pinned Zig")). Без Zig збірка падає
-      # з "failed to run custom build command", і це не проблема раннера —
-      # це вимога мови: коридор Rust<->SENS стерильний і йде через Zig.
+      # crates/sens/build.rs потребує pinned Zig ДО cargo build.
       - name: Встановити Zig
         uses: mlugg/setup-zig@v2
         with:
@@ -92,3 +89,30 @@ jobs:
         run: |
           ./target/release/sens --version
           echo "--- SENS збирається на раннері: передумова вимірювання мови виконана ---"
+
+      - name: Паритет SENS T01 (VERIFY_SIZE n=12)
+        env:
+          SENS_BIN: ${{ github.workspace }}/target/release/sens
+        run: |
+          chmod +x benchmarks/language-energy-study/corpus/sens/run_t01.sh
+          python3 benchmarks/language-energy-study/parity_check.py \
+            --task T01-symbolic-recursion \
+            --run "benchmarks/language-energy-study/corpus/sens/run_t01.sh"
+
+      - name: SENS T01 негатив (без TASK_N → exit≠0)
+        env:
+          SENS_BIN: ${{ github.workspace }}/target/release/sens
+        run: |
+          if env -u TASK_N benchmarks/language-energy-study/corpus/sens/run_t01.sh; then
+            echo "expected failure without TASK_N" >&2
+            exit 1
+          fi
+          echo "NEGATIVE_OK exit_nonzero_without_TASK_N"
+
+      - name: Статус енергії на раннері
+        run: |
+          if [ -r /sys/class/powercap/intel-rapl:0/energy_uj ]; then
+            echo "RAPL_AVAILABLE=yes"
+          else
+            echo "ENERGY_NOT_MEASURED — no RAPL package counter on this runner"
+          fi
