@@ -82,6 +82,7 @@ def analyze(document: dict, *, draws: int = 4000, seed: int = 5227,
     # Each GitHub-hosted run is normally one experimental session.  Multiple
     # child processes in that session are correlated; using them as independent
     # bootstrap top-level units creates pseudoreplication.
+    legacy_groups: dict[str, list[float]] = defaultdict(list)
     groups: dict[tuple[str, str], list[float]] = defaultdict(list)
     order_counts: dict[tuple[str, str], set[str]] = defaultdict(set)
     machines: set[str] = set()
@@ -94,6 +95,7 @@ def analyze(document: dict, *, draws: int = 4000, seed: int = 5227,
             raise InvalidEvidence(f"pairs[{n}]: order must be AB or BA")
         a = _finite_positive(item.get(baseline_key), f"pairs[{n}].{baseline_key}")
         b = _finite_positive(item.get(candidate_key), f"pairs[{n}].{candidate_key}")
+        legacy_groups[item["process_id"]].append(math.log(b / a))
         session = item.get("session_id")
         machine = item.get("machine_id")
         if not isinstance(session, str) or not session.strip() or not isinstance(machine, str) or not machine.strip():
@@ -112,9 +114,20 @@ def analyze(document: dict, *, draws: int = 4000, seed: int = 5227,
     base_counts = {"independent_sessions": session_count,
                    "independent_processes": count, "pairs": len(pairs)}
     if missing_session_or_machine:
+        # Backward-compatible descriptive ratio for legacy pilot files.  This
+        # value has NO confidence interval, significance or language ranking:
+        # session independence cannot be reconstructed from process IDs.
+        descriptive_ratio = (math.exp(statistics.mean(
+            statistics.mean(group) for group in legacy_groups.values()))
+            if legacy_groups else None)
         return {"schema": OUTPUT_SCHEMA, "status": "INCONCLUSIVE",
                 "reason": "SESSION_OR_MACHINE_ID_NOT_RECORDED",
-                **base_counts, "ratio": None, "ci95_ratio": None}
+                "metric": metric,
+                "independent_processes": len(legacy_groups),
+                "independent_sessions": session_count,
+                "pairs": len(pairs), "ratio": descriptive_ratio,
+                "ci95_ratio": None,
+                "ratio_scope": "LEGACY_DESCRIPTIVE_ONLY_NO_SESSION_INFERENCE"}
     if len(machines) != 1:
         return {"schema": OUTPUT_SCHEMA, "status": "INCONCLUSIVE",
                 "reason": "UNSTRATIFIED_MULTIPLE_MACHINES",
