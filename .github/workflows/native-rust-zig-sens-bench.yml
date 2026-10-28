@@ -1,4 +1,4 @@
-name: SENS — нативні бенчмарки Rust, Zig та фізичного Lisp
+name: SENS — три незалежні заліки: Rust механізм, Zig коридор, SENS логіка
 
 # Лише ручний дослід: власник дозволив один автоматичний workflow (ci.yml).
 # Результати на shared runner — виміри, а не допуск релізу чи доказ прискорення.
@@ -10,7 +10,7 @@ permissions:
 
 jobs:
   native-triad:
-    name: Rust T5 ↔ Zig T5 ↔ фізичний SENS
+    name: Rust host-механізм / Zig T5M коридор / SENS самосвідки
     runs-on: ubuntu-24.04
     timeout-minutes: 35
     steps:
@@ -20,7 +20,7 @@ jobs:
       - uses: dtolnay/rust-toolchain@1.99.0
       - uses: ./.github/actions/install-zig
 
-      - name: Rust і Zig — T5 механізм, точні байти до вимірювання
+      - name: Rust host-виклик Zig проти прямого Zig — лише механічна ціна
         shell: bash
         timeout-minutes: 18
         run: |
@@ -35,7 +35,7 @@ jobs:
             rustc --version
             zig version
           } > "$out/environment.txt"
-          # Rust: механіка енкодера/декодера, жодного Lisp-оракула.
+          # Rust: накладні витрати host-виклику Zig-owned T5M, НЕ власний T5-кодек або Lisp-оракул.
           CARGO_BUILD_JOBS=2 cargo run --locked --release -p sens \
             --example zig_t5_matched_bench > "$out/rust-raw.log" 2> "$out/rust-build.log"
           # Zig 0.16: власний monotonic clock_gettime, без вилученого std.time.Timer.
@@ -56,7 +56,7 @@ jobs:
           grep '^sample impl=zig ' "$out/zig-raw.log" > "$out/zig-samples.txt"
           test "$(wc -l < "$out/rust-samples.txt")" -eq 40
           test "$(wc -l < "$out/zig-samples.txt")" -eq 40
-          echo '::notice title=Rust/Zig T5::PASS fixture_forms=1,16,128,1024 equal_bytes=true native_samples=40-per-backend scope=mechanism-only'
+          echo '::notice title=Rust host/Zig corridor::PASS fixture_forms=1,16,128,1024 equal_bytes=true native_samples=40-per-path scope=transport-fixture-only-not-semantic-proof'
 
       - name: SENS — Lisp-закон → Zig/T5M → самостійні фізичні виміри
         shell: bash
