@@ -1,6 +1,8 @@
 ;; Базове dev-середовище SENS. Evidence-grade запуск: ./guix/run dev -- <команда>
 ;; gcc-toolchain оголошений явно, щоб --pure не успадковував linker з host PATH.
 ;; Rust-пакет оголошує LD_LIBRARY_PATH для запуску Cargo build-script у --pure.
+;; Наукові виміри/діагностика: GNU time, util-linux (lscpu/taskset), procps-ng,
+;; Valgrind/Cachegrind. Cachegrind рахує модельовані події, а не фізичну енергію.
 (use-modules (guix profiles) (gnu packages))
 
 (define sens-rust-toolchain
@@ -30,5 +32,9 @@
          "python@3.12"
          "node"
          "lua@5.4"
+         "time"
+         "util-linux"
+         "procps"
+         "valgrind"
          "sed"
          "racket")))))
