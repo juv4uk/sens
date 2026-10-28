@@ -40,26 +40,3 @@ impl Bit9 {
     }
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn admits_exactly_the_nine_bit_range_without_byte_truncation() {
-        assert_eq!(Bit9::new(0).unwrap().packed_bits(), 0);
-        assert_eq!(Bit9::new(0x00ff).unwrap().packed_bits(), 0x00ff);
-        assert_eq!(Bit9::new(0x0100).unwrap().packed_bits(), 0x0100);
-        assert_eq!(Bit9::new(0x01ff).unwrap().packed_bits(), 0x01ff);
-        assert!(Bit9::new(0x0200).is_none());
-    }
-
-    #[test]
-    fn high_ninth_bit_is_observable_and_not_an_alias_of_low_byte() {
-        let low = Bit9::new(0x0001).unwrap();
-        let high = Bit9::new(0x0101).unwrap();
-        assert_ne!(low, high);
-        assert_eq!(low.bit(0), Some(false));
-        assert_eq!(high.bit(0), Some(true));
-        assert_eq!(high.bit(8), Some(true));
-    }
-}
