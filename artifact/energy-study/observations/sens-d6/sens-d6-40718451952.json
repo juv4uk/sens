@@ -1,0 +1,45 @@
+{
+  "schema": "sens-ci-exploratory-observation/v1",
+  "status": "EXPLORATORY_NOT_ADMITTED",
+  "reason": "native SENS result/output parity and independent measurement blocks were not verified",
+  "source": {
+    "repository": "juv4uk/sens",
+    "commit_sha": "979f09772fd370c1374468f665b875f0c4a60bef",
+    "workflow_run_id": 40718451952,
+    "job_id": 122922468383,
+    "job_conclusion": "success",
+    "job_log_url": "https://github.com/juv4uk/sens/actions/runs/40718451952/job/122922468383",
+    "exit_propagation": "GitHub bash -e -o pipefail; step successful",
+    "workload_source": "benchmarks/sphere-contest/сенс-семантика.lisp"
+  },
+  "boundary": "one fresh sens process loading D6 program per round, GNU /usr/bin/time -v, build excluded",
+  "declared_target": "D6 додати-1 over a ten-element list; execution count/output not independently certified",
+  "environment": {
+    "runner_label": "ubuntu-latest",
+    "cpu_model": null,
+    "governor": null,
+    "compiler_flags": "cargo build --locked -p sens-cli --bin sens (debug)"
+  },
+  "samples": [
+    {
+      "round": 1,
+      "wall_seconds": 1.11,
+      "peak_rss_kib": 46668
+    },
+    {
+      "round": 2,
+      "wall_seconds": 1.09,
+      "peak_rss_kib": 48668
+    },
+    {
+      "round": 3,
+      "wall_seconds": 1.1,
+      "peak_rss_kib": 48168
+    }
+  ],
+  "output_parity": "NOT_VERIFIED",
+  "independent_sessions": "NOT_VERIFIED",
+  "energy_status": "ENERGY_NOT_MEASURED",
+  "energy_j": null,
+  "publication_claim": "NONE"
+}
