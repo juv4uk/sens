@@ -266,6 +266,13 @@ jobs:
           zig version
           cargo build --locked --release -p sens-cli --bin sens --features zig-transport
           test -x "${{ matrix.binary }}"
+      - name: RAPL Rust механізм · арифметика wrap і domain (не семантика SENS)
+        if: matrix.label == 'linux-x64'
+        shell: bash
+        run: |
+          set -euo pipefail
+          rustc --edition=2021 --test benchmarks/mechanism/rapl-energy-bench.rs -o "$RUNNER_TEMP/rapl-mechanism-tests"
+          "$RUNNER_TEMP/rapl-mechanism-tests"
       - name: Нативний SENS REPL · 32 позитивні/негативні свідки
         shell: bash
         run: |
