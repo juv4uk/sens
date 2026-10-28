@@ -167,16 +167,18 @@ jobs:
           echo "Ubuntu ARM64: source and shell portability only; Zig installer unsupported"
 
   free-runner-windows-x64:
-    name: Runner smoke · Windows x64 · exact checkout
+    name: Windows x64 · SENS CLI native build · Zig transport
     if: ${{ (github.event_name == 'workflow_dispatch' && inputs.suite == 'runner-smoke') || (github.event_name == 'pull_request' && github.head_ref == 'agent/free-hosted-runners-20261028') }}
     runs-on: windows-2025
-    timeout-minutes: 5
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09
         with:
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
           persist-credentials: false
-      - name: Exact PR head і Windows файловий маршрут
+      - uses: dtolnay/rust-toolchain@1.99.0
+      - uses: ./.github/actions/install-zig
+      - name: Exact PR head і Windows native SENS збірка
         shell: pwsh
         env:
           EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
@@ -188,7 +190,22 @@ jobs:
           foreach ($path in @('AGENTS.md', 'lib/repl-core.lisp', 'lib/meta-eval.lisp', 'Cargo.toml')) {
             if (-not (Test-Path -LiteralPath $path -PathType Leaf)) { throw "Missing file: $path" }
           }
-          Write-Host "Windows x64: checkout and SENS source files available at $actual; no semantic proof"
+          & zig version
+          if ($LASTEXITCODE -ne 0) { throw 'Pinned Zig unavailable on Windows' }
+          & cargo build --locked -p sens-cli --bin sens --features zig-transport
+          if ($LASTEXITCODE -ne 0) { throw "Windows cargo build failed with code $LASTEXITCODE" }
+          $binary = 'target/debug/sens.exe'
+          if (-not (Test-Path -LiteralPath $binary -PathType Leaf) -or (Get-Item -LiteralPath $binary).Length -le 0) {
+            throw 'Windows SENS binary not produced'
+          }
+          Write-Host "Windows SENS CLI built from $actual with Zig transport; no semantic proof"
+      - name: Зберегти Windows sens.exe як CI artifact (не реліз)
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: sens-windows-x64-${{ github.event.pull_request.head.sha || github.sha }}
+          path: target/debug/sens.exe
+          if-no-files-found: error
+          retention-days: 3
 
   native:
     name: Ручний native Rust/Zig smoke
