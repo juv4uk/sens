@@ -74,6 +74,8 @@ class NativeRunnerTest(unittest.TestCase):
         self.assertEqual(len(raw["checkout_head_sha"]), 40)
         self.assertEqual(len(raw["program_sha256"]), 64)
         self.assertTrue(all(x["admitted"] for x in raw["samples"]))
+        self.assertTrue(all(x["stderr_clean"] for x in raw["samples"]))
+        self.assertTrue(all(len(x["stdout_sha256"]) == 64 for x in raw["samples"]))
 
     def test_wrong_output_rejected(self):
         self.assertEqual(
@@ -89,6 +91,33 @@ class NativeRunnerTest(unittest.TestCase):
             "import time; time.sleep(.03); print('10\\n10')",
         ):
             self.assertEqual(self.run_fixture(source), 1)
+
+    def test_noncanonical_stdout_bytes_rejected(self):
+        # Even though splitlines() would accept both, native byte parity must not.
+        sources = [
+            "import sys, time; time.sleep(.03); sys.stdout.write('10')",
+            "import sys, time; time.sleep(.03); sys.stdout.buffer.write(b'10\\r\\n')",
+            "import sys, time; time.sleep(.03); sys.stdout.buffer.write(b'10\\n\\n')",
+        ]
+        for source in sources:
+            with self.subTest(source=source):
+                self.assertEqual(self.run_fixture(source), 1)
+                data = json.loads(self.output.read_text())
+                self.assertEqual(data["status"], "BLOCKED_PARITY_OR_MEASUREMENT")
+                self.assertFalse(data["samples"][0]["output_matches"])
+                self.assertEqual(len(data["samples"]), 1)
+
+    def test_stdout_warning_on_stderr_rejected(self):
+        source = (
+            "import time, sys; time.sleep(.03); "
+            "print('10'); print('WARNING', file=sys.stderr)"
+        )
+        self.assertEqual(self.run_fixture(source), 1)
+        sample = json.loads(self.output.read_text())["samples"][0]
+        self.assertTrue(sample["output_matches"])
+        self.assertFalse(sample["stderr_clean"])
+        self.assertFalse(sample["admitted"])
+        self.assertIn("WARNING", sample["stderr_excerpt"])
 
     def test_nonzero_exit_rejected(self):
         self.assertEqual(

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Fail-closed exploratory SENS process measurements; never a language-law oracle.
 
-Only stdout/exit parity is checked here. The native SENS witness suite is separate.
+Exact stdout bytes, clean stderr, and both exit codes are checked here. The native SENS witness suite is separate.
 No physical energy sensor is used; energy is always ENERGY_NOT_MEASURED.
 """
 from __future__ import annotations
@@ -103,8 +103,10 @@ def measure(binary: Path, program: Path, expected: str, time_tool: Path,
                    "-o", str(out), *command]
             sample: dict = {"repeat": index, "admitted": False}
             try:
+                # Read unmodified bytes: text=True silently normalizes CRLF to LF,
+                # and splitlines() admits missing or extra newline variants.
                 proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                                        text=True, start_new_session=True)
+                                        start_new_session=True)
                 try:
                     stdout, stderr = proc.communicate(timeout=timeout_s)
                 except subprocess.TimeoutExpired:
@@ -112,17 +114,22 @@ def measure(binary: Path, program: Path, expected: str, time_tool: Path,
                     proc.communicate()
                     raise
                 sample["wrapper_exit"] = proc.returncode
-                sample["stdout"] = stdout[:512]
-                sample["stderr_excerpt"] = stderr[:1024]
+                sample["stdout"] = stdout[:512].decode("utf-8", errors="replace")
+                sample["stdout_sha256"] = hashlib.sha256(stdout).hexdigest()
+                sample["stderr_excerpt"] = stderr[:1024].decode("utf-8", errors="replace")
+                sample["stderr_sha256"] = hashlib.sha256(stderr).hexdigest()
                 metric = parse_time(out.read_text(encoding="utf-8"))
                 sample.update(metric)
-                lines = stdout.splitlines()
-                sample["output_matches"] = lines == [expected]
+                # A numeric value hidden among warnings or missing its final LF
+                # cannot be admitted as the defined physical workload result.
+                sample["output_matches"] = stdout == (expected + "\n").encode("utf-8")
+                sample["stderr_clean"] = stderr == b""
                 sample["admitted"] = (proc.returncode == 0 and
                                       metric["child_exit"] == 0 and
-                                      sample["output_matches"])
+                                      sample["output_matches"] and
+                                      sample["stderr_clean"])
                 if not sample["admitted"]:
-                    sample["rejection"] = "CHILD_EXIT_OR_OUTPUT_MISMATCH"
+                    sample["rejection"] = "CHILD_EXIT_OR_NONCANONICAL_OUTPUT_OR_STDERR"
             except subprocess.TimeoutExpired:
                 sample["rejection"] = "TIMEOUT"
             except (OSError, ValueError, UnicodeError) as exc:
