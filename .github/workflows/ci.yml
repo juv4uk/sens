@@ -297,11 +297,11 @@ jobs:
           retention-days: 3
 
 
-  # Manual scientific pilot; temporary exact-head PR trial on this rollout branch.
+  # Manual scientific pilot; PR trial only while the owner explicitly marks [energy-pilot].
   # Python, C and Rust implement a matched physical copy; no SENS-language law.
   physical-language-study:
     name: Дослід · Python/C/Rust · час/енергія/пам'ять
-    if: ${{ (github.event_name == 'workflow_dispatch' && inputs.suite == 'language-energy-pilot') || (github.event_name == 'pull_request' && github.head_ref == 'agent/free-hosted-runners-20261028') }}
+    if: ${{ (github.event_name == 'workflow_dispatch' && inputs.suite == 'language-energy-pilot') || (github.event_name == 'pull_request' && github.head_ref == 'agent/free-hosted-runners-20261028' && contains(github.event.pull_request.title, '[energy-pilot]')) }}
     runs-on: ubuntu-24.04
     timeout-minutes: 35
     steps:
