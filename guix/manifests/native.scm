@@ -21,6 +21,7 @@
          "bzip2"
          "curl"
          "qemu"
+         "kmod"
          "pkg-config"
          "llvm"
          "lld"
