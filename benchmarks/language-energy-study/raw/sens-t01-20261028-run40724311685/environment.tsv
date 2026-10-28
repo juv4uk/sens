@@ -1,0 +1,19 @@
+repository_sha	1a4635d8fc812bb889e09a01dbb79ebdcdb274f5
+source_verify	benchmarks/language-energy-study/corpus/sens/t01_fib.lisp
+source_measure	/home/runner/work/_temp/t01_fib_measure.lisp
+source_measure_git_blob	ecaead4c0f7ffa881b936396bdececbd4f5b2153
+source_verify_git_blob	93d82a343bd90b13fb61dd9188110578e99821ef
+runner_name	GitHub Actions 1000229689
+runner_run_id	40724311685
+utc_started	2026-10-28T16:18:33Z
+rustc_version	rustc 1.99.0 (b940084d7 2026-09-28)
+zig_version	0.16.0
+functional_unit	T01 naive Fibonacci n=24
+verification	T01 n=12 -> 144; measure n=24 -> 46368; exact stdout
+measurement_boundary	separate cold process incl. startup; prior verification warms CPU/cache
+samples	5 process launches in ONE session (not independent sessions)
+energy	ENERGY_NOT_MEASURED (no sensor integration in this harness)
+rss_scope	GNU time %M KiB, peak child-process resident set
+os	Linux 6.17.0-1022-azure x86_64 GNU/Linux
+cpu	AMD EPYC 7763 64-Core Processor
+sens_version	sens 0.42.3
