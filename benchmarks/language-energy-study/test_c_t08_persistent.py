@@ -38,6 +38,19 @@ class T08CParityTests(unittest.TestCase):
                            check=True, capture_output=True, text=True, timeout=25)
             cls.binaries.append(binary)
 
+        # Separate opt-in witness binary: its traversal is never included in
+        # the timed C workload. A deliberately corrupted node must fail closed.
+        cls.structural_binaries = {}
+        for name, extra in (
+            ("witness", ("-DT08_STRUCTURAL_WITNESS",)),
+            ("mutant", ("-DT08_STRUCTURAL_WITNESS", "-DT08_STRUCTURAL_FAULT_INJECTION")),
+        ):
+            binary = Path(cls.tmp.name) / ("t08_" + name)
+            subprocess.run([cc, "-std=c11", "-O2", "-Wall", "-Wextra", "-Werror",
+                            *extra, str(SOURCE), "-o", str(binary)],
+                           check=True, capture_output=True, text=True, timeout=25)
+            cls.structural_binaries[name] = binary
+
     @classmethod
     def tearDownClass(cls):
         cls.tmp.cleanup()
@@ -82,6 +95,22 @@ class T08CParityTests(unittest.TestCase):
                     self.assertEqual(p.returncode, 2)
                     self.assertEqual(p.stdout, "")
                     self.assertIn("T08_INVALID_INPUT", p.stderr)
+
+
+    def test_structural_witness_rejects_corruption(self):
+        """The length-only digest cannot detect a corrupted node, the witness must."""
+        witness = self.structural_binaries["witness"]
+        mutant = self.structural_binaries["mutant"]
+        for n in (500, 20000):
+            with self.subTest(n=n):
+                expected = reference(n) + "\n"
+                good = self.execute(witness, n=str(n))
+                self.assertEqual((good.returncode, good.stdout, good.stderr),
+                                 (0, expected, ""))
+                corrupted = self.execute(mutant, n=str(n))
+                self.assertEqual(corrupted.returncode, 3)
+                self.assertEqual(corrupted.stdout, "")
+                self.assertEqual(corrupted.stderr, "T08_STRUCTURE_INVALID\n")
 
 
 if __name__ == "__main__":
