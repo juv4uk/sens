@@ -49,7 +49,7 @@ def check(name: str, condition: bool, detail: str = "") -> None:
 
 def build(ratio_fn, *, processes: int = 12, per_process: int = 6,
           seed: int = 1, metric: str = "wall_time_ns", noise: float = 0.02,
-          balance: bool = True, machine_id: str = "m1", session_id: str = "s1") -> dict:
+          balance: bool = True, machine_id: str = "m1", session_id: str | None = None) -> dict:
     """Генерує парні дані з відомим відношенням candidate/baseline.
 
     ratio_fn(process_index, pair_index) -> float
@@ -63,7 +63,7 @@ def build(ratio_fn, *, processes: int = 12, per_process: int = 6,
             cand = base * ratio_fn(p, k) * math.exp(rng.gauss(0, noise))
             item = {
                 "process_id": f"proc-{p}", "order": order,
-                "machine_id": machine_id, "session_id": session_id,
+                "machine_id": machine_id, "session_id": (session_id if session_id is not None else f"s{p % 4}"),
                 "baseline_ns": base, "candidate_ns": cand,
                 "baseline_energy_uj": base / 1000.0, "candidate_energy_uj": cand / 1000.0,
                 "baseline_peak_rss_kib": base / 10000.0, "candidate_peak_rss_kib": cand / 10000.0,
@@ -240,7 +240,7 @@ def test_familywise_inference_is_fail_closed() -> None:
 def test_hierarchy_levels() -> None:
     """Рівні machine/session/block/pair рахуються окремо."""
     print("\n[10] Рівні ієрархії")
-    doc = build(lambda p, k: 1.0, seed=21, processes=5, per_process=4)
+    doc = build(lambda p, k: 1.0, seed=21, processes=5, per_process=4, session_id="s1")
     lv = independent_units(doc)
     check("machine=1", lv["machine"] == 1, f"{lv['machine']}")
     check("session=1", lv["session"] == 1, f"{lv['session']}")
@@ -260,13 +260,66 @@ def test_no_data_dependent_stopping() -> None:
           f"{large['status']} — ефекту немає, висновку бути не може")
 
 
+
+def test_session_pseudoreplication_guard() -> None:
+    """Strong effects from one hosted session must not become language winners."""
+    print("\\n[12] Session hierarchy: no pseudoreplication")
+    one = build(lambda p, k: 0.50, seed=52, processes=12,
+                per_process=6, session_id="one-hosted-session")
+    result = analyze(one, draws=1200, seed=7)
+    check("12 process restarts are not 12 independent sessions",
+          result["status"] == "INCONCLUSIVE" and
+          result.get("reason") == "INSUFFICIENT_INDEPENDENT_SESSIONS",
+          str(result))
+    check("session count disclosed instead of inferred from process IDs",
+          result.get("independent_sessions") == 1 and
+          result.get("independent_processes") == 12,
+          str(result))
+    check("single session cannot yield scientific CI or ratio",
+          result.get("ci95_ratio") is None and result.get("ratio") is None)
+
+    missing = build(lambda p, k: 0.50, seed=53)
+    del missing["pairs"][0]["session_id"]
+    r = analyze(missing, draws=1200, seed=7)
+    check("missing session metadata refuses inference",
+          r["status"] == "INCONCLUSIVE" and
+          r.get("reason") == "SESSION_OR_MACHINE_ID_NOT_RECORDED",
+          str(r))
+
+    mixed = build(lambda p, k: 0.50, seed=54)
+    mixed["pairs"][0]["machine_id"] = "different-physical-host"
+    r = analyze(mixed, draws=1200, seed=7)
+    check("mixed machines cannot share one unstratified verdict",
+          r["status"] == "INCONCLUSIVE" and
+          r.get("reason") == "UNSTRATIFIED_MULTIPLE_MACHINES",
+          str(r))
+
+    many = build(lambda p, k: 0.50, seed=55)
+    r = analyze(many, draws=1200, seed=7)
+    check("four distinguishable sessions preserve an exploratory effect",
+          r["status"] == "FASTER" and
+          r.get("independent_sessions") == 4 and
+          r.get("independent_processes") == 12,
+          str(r))
+
+    # Do not count 12 process IDs as 12 top-level bootstrap units.
+    distorted = build(lambda p, k: 1.0, seed=56, noise=0.0)
+    by_session = {"s0": 0.5, "s1": 0.5, "s2": 1.5, "s3": 1.5}
+    for pair in distorted["pairs"]:
+        pair["candidate_ns"] *= by_session[pair["session_id"]]
+    r = analyze(distorted, draws=1200, seed=7)
+    check("session-level drift includes uncertainty instead of fake confidence",
+          r["status"] == "INCONCLUSIVE" and
+          r["ci95_ratio"][0] < 1.0 < r["ci95_ratio"][1],
+          str(r))
+
 def main() -> int:
     print("СИМУЛЯЦІЙНІ ТЕСТИ verdict.py — істина задана генератором")
     for fn in (test_level_no_effect, test_known_effect, test_heavy_tails_and_outlier,
                test_energy_not_measured, test_autocorrelation_within_block,
                test_order_balance_required, test_too_few_units, test_no_parity_blocked,
                test_holm_correction, test_familywise_inference_is_fail_closed,
-               test_hierarchy_levels, test_no_data_dependent_stopping):
+               test_hierarchy_levels, test_no_data_dependent_stopping,\n               test_session_pseudoreplication_guard):
         fn()
     print("\n" + "=" * 60)
     if FAILURES:
