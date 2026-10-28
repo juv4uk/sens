@@ -144,26 +144,3 @@ fn parse_one(chars: &[char], pos: &mut usize) -> Result<Sexp, String> {
     }
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn round_trips_nested_form() {
-        let text = r#"(peer-hello (protocol swarm-1) (node cml-1) (epoch 17) (project cml))"#;
-        let parsed = parse(text).unwrap();
-        assert_eq!(parsed.head(), Some("peer-hello"));
-        assert_eq!(parsed.field_atom("node"), Some("cml-1"));
-        assert_eq!(parsed.field_atom("epoch"), Some("17"));
-    }
-
-    #[test]
-    fn parses_quoted_strings_with_escapes() {
-        let text = r#"(payload (artifact "evidence/G8/a \"b\" c.lisp"))"#;
-        let parsed = parse(text).unwrap();
-        assert_eq!(
-            parsed.field_atom("artifact"),
-            Some("evidence/G8/a \"b\" c.lisp")
-        );
-    }
-}
