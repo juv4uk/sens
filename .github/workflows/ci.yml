@@ -128,7 +128,7 @@ jobs:
         shell: bash
         run: cargo test --locked -p sens --no-run
       - name: Build native SENS
-        run: cargo build --locked -p sens-cli --bin sens --bin sens-trit --features benchmark-ast-visits,zig-transport,zig-transport
+        run: cargo build --locked -p sens-cli --bin sens --bin sens-trit --features benchmark-ast-visits,zig-transport
       - name: Rust mechanism checks
         run: bash scripts/ci-rust-mechanism-checks.sh
       - name: Zig codec and transport smoke
@@ -152,7 +152,7 @@ jobs:
       - uses: dtolnay/rust-toolchain@1.99.0
       - uses: ./.github/actions/install-zig
       - name: Build native SENS
-        run: cargo build --locked -p sens-cli --bin sens --bin sens-trit --features benchmark-ast-visits
+        run: cargo build --locked -p sens-cli --bin sens --bin sens-trit --features benchmark-ast-visits,zig-transport
       - name: F6 physical WRITE→READ producer/consumer
         run: cargo test --locked -p sens-cli --test wsm_fs_f6_pipeline -- --nocapture
       # Мовна семантика — не Rust-test oracle: її засвідчує SENS REPL.
