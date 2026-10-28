@@ -42,6 +42,8 @@ run_sens_repl_law() {
 
 run_sens_repl_law tests/semantic/repl-uk-step-law.lisp 'ТАК' step-law
 run_sens_repl_law tests/semantic/repl-uk-step-mutant.lisp 'НІ' step-mutant
+run_sens_repl_law tests/semantic/repl-uk-loop-law.lisp 'ТАК' loop-law
+run_sens_repl_law tests/semantic/repl-uk-loop-mutant.lisp 'НІ' loop-mutant
 
 # Послідовність в ОДНІЙ сесії: невідоме ім'я, заборонений гліф,
 # потім точна арифметика. Відмови не можуть ставати echo-успіхом,
