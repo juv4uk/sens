@@ -1464,6 +1464,43 @@ pub(crate) fn mint_t5m_source_file(source: &str) -> Result<Vec<u8>, String> {
 /// обов'язковий до SENS D2 та виконання. Однакова ширина НЕ є доказом домену.
 /// На відміну від --t5m-file, виконується саме наданий фізичний носій.
 #[cfg(feature = "zig-transport")]
+#[cfg(test)]
+pub(crate) fn eval_t5m_paired_file(
+    source: &str,
+    physical: &[u8],
+) -> Result<sens::EvalResult, String> {
+    eval_t5m_paired_file_with_bindings(source, physical, &[])
+}
+
+#[cfg(feature = "zig-transport")]
+pub(crate) fn eval_t5m_paired_file_with_bindings(
+    source: &str,
+    physical: &[u8],
+    bindings: &[String],
+) -> Result<sens::EvalResult, String> {
+    eval_t5m_paired_file_with_runtime(source, physical, bindings, false)
+}
+
+#[cfg(feature = "zig-transport")]
+pub(crate) fn eval_t5m_paired_file_with_core4(
+    source: &str,
+    physical: &[u8],
+    bindings: &[String],
+) -> Result<sens::EvalResult, String> {
+    eval_t5m_paired_file_with_runtime(source, physical, bindings, true)
+}
+
+#[cfg(feature = "zig-transport")]
+fn eval_t5m_paired_file_with_runtime(
+    source: &str,
+    physical: &[u8],
+    bindings: &[String],
+    load_core4: bool,
+) -> Result<sens::EvalResult, String> {
+    // Mint always projects with Core4's exact D24+ roots available. Use the
+    // same projection environment here, but keep runtime Core4 opt-in and
+    // separate so source identity is established before runtime admission.
+    let mut projection_session = core4_t5m_source_session()?;
     preload_t5m_binding_sources(&mut projection_session, bindings)?;
     let expected = prepare_t5m_repl_words(source, ReplSurface::UkrainianFull, &projection_session)?;
     let actual = crate::zig_transport::decode_t5m_exact_words(physical)?;
@@ -1606,6 +1643,11 @@ fn init_sens_loop(session: &mut Session) -> Result<(), String> {
 }
 
 // The original Sanskrit source is Zig-owned opaque bytes, never a Rust embed.
+#[cfg(test)]
+fn sanskrit_surface_source() -> Result<String, String> {
+    #[cfg(feature = "zig-transport")]
+    {
+        let bytes = super::zig_transport::sanskrit_surface_bytes()?;
         String::from_utf8(bytes).map_err(|e| format!("ZIG_SANSKRIT_CARRIER UTF-8 error: {e}"))
     }
     #[cfg(not(feature = "zig-transport"))]
