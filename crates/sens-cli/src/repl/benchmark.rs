@@ -75,7 +75,7 @@ fn memory_delta(start: Option<ProcessMemory>, end: Option<ProcessMemory>) -> Opt
 struct BenchmarkRow {
     name: &'static str,
     source: String,
-    expected: &'static str,
+    observed: String,
     percentiles: Percentiles,
     footprint: ProgramFootprint,
 }
@@ -136,7 +136,7 @@ struct BenchmarkCase {
     name: &'static str,
     setup: Option<String>,
     source: String,
-    expected: &'static str,
+
 }
 
 fn benchmark_surface(surface: ReplSurface) -> ReplSurface {
@@ -167,19 +167,16 @@ fn cases_for(surface: ReplSurface) -> Result<Vec<BenchmarkCase>, String> {
             name: "арифметика",
             setup: None,
             source: format!("({add} 123 456)"),
-            expected: "579",
         },
         BenchmarkCase {
             name: "доступ-до-пари",
             setup: None,
             source: format!("({car} ({cons} 123 456))"),
-            expected: "123",
         },
         BenchmarkCase {
             name: "вкладені-виклики",
             setup: None,
             source: format!("({add} ({car} ({cons} 123 456)) ({car} ({cons} 789 101)))"),
-            expected: "912",
         },
     ])
 }
@@ -236,13 +233,6 @@ fn run_suite(
         let physical_t5m = crate::zig_transport::encode_t5m_exact_words(&carrier_words)?;
         let footprint = program_footprint(&carrier_words, &physical_t5m)?;
         let baseline = evaluate_visible(&mut state, &case.source)?;
-        if baseline != case.expected {
-            return Err(format!(
-                "{} result mismatch: expected {:?}, got {:?}",
-                case.name, case.expected, baseline
-            ));
-        }
-
         for _ in 0..warmups {
             let visible = evaluate_visible(&mut state, black_box(&case.source))?;
             if visible != baseline {
@@ -266,7 +256,7 @@ fn run_suite(
         rows.push(BenchmarkRow {
             name: case.name,
             source: case.source,
-            expected: case.expected,
+            observed: baseline,
             percentiles,
             footprint,
         });
@@ -349,7 +339,7 @@ fn draw_report(frame: &mut Frame, report: &BenchmarkReport) {
         let throughput = 1_000_000_000u128.checked_div(p.p50).unwrap_or(0);
         lines.push(Line::from(format!(
             "{:<18} {:>9} {:>9} {:>9} {:>9}  {:<8}",
-            row.name, p.p50, p.p95, p.p99, throughput, row.expected
+            row.name, p.p50, p.p95, p.p99, throughput, row.observed
         )));
         lines.push(Line::from(format!("  {}", row.source)));
         lines.push(Line::from(format!(
@@ -361,6 +351,7 @@ fn draw_report(frame: &mut Frame, report: &BenchmarkReport) {
     lines.push(Line::from(
         "Мікровимірювання: порівнюй те саме обладнання, профіль збірки й SHA.",
     ));
+    lines.push(Line::from("Результат = спостереження SENS; семантичну правильність доводять SENS-свідки."));
     lines.push(Line::from("Звіт виведено без зміни стану REPL."));
 
     let block = Block::default()
