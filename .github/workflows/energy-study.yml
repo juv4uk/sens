@@ -1,0 +1,61 @@
+name: Дослід енергії · паритет і виміри
+
+# Навіщо: агентський sandbox не має компіляторів, тому C/Rust/SENS там не
+# перевірити. Раннери GitHub мають gcc і rustc — тут паритет і виміри
+# стають справжніми, а не «Python проти Python-еталона».
+#
+# Запуск: вручну або на push, що змінює корпус/інструменти досліду.
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'benchmarks/language-energy-study/**'
+      - 'benchmarks/measurement-triad/**'
+      - '.github/workflows/energy-study.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  parity-and-measure:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Інструменти
+        run: |
+          gcc --version | head -1
+          python3 --version
+          node --version
+
+      - name: Паритет-машина (самоперевірка)
+        run: python3 benchmarks/language-energy-study/parity_check.py --selftest
+
+      - name: Зібрати C-реалізації
+        run: |
+          mkdir -p /tmp/bin
+          gcc -O2 -o /tmp/bin/t09 benchmarks/language-energy-study/corpus/c/t09_bitcount.c
+          gcc -O2 -o /tmp/bin/t01 benchmarks/language-energy-study/corpus/c/t01_fib.c
+
+      - name: Паритет C проти Python-еталона
+        run: |
+          python3 benchmarks/language-energy-study/parity_check.py \
+            --task T09-bit-operations --run "/tmp/bin/t09"
+          python3 benchmarks/language-energy-study/parity_check.py \
+            --task T01-symbolic-recursion --run "/tmp/bin/t01"
+
+      - name: Симуляційні тести статистики
+        run: python3 benchmarks/measurement-triad/test_verdict_simulation.py
+
+      - name: Чи відтворюється таблиця з сирих даних
+        run: python3 benchmarks/language-energy-study/report_table.py --markdown | tail -5
+
+      - name: Чи є RAPL на раннері
+        run: |
+          if [ -r /sys/class/powercap/intel-rapl:0/energy_uj ]; then
+            echo "RAPL_AVAILABLE=yes"; head -1 /sys/class/powercap/intel-rapl:0/energy_uj
+          else
+            echo "RAPL_AVAILABLE=no — енергія лишається ENERGY_NOT_MEASURED"
+          fi
