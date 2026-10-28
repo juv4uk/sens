@@ -78,6 +78,8 @@ class PhysicalStudyTests(unittest.TestCase):
             [valid.replace("elapsed_ns=765432", "elapsed_ns=0")],
             [valid.replace("elapsed_ns=765432", "elapsed_ns=nan")],
             [valid.replace("counter=/sys/class/powercap/intel-rapl:0/energy_uj ", "")],
+            [valid + " status=MEASURED"],
+            [valid + " malformed-field"],
         ]
         for lines in bad:
             with self.subTest(lines=lines), self.assertRaises(RuntimeError):
@@ -100,6 +102,9 @@ class PhysicalStudyTests(unittest.TestCase):
             for stdout, usage, rc in [
                 ("PHYSICAL_COPY\tbytes=1\tcopies=3\tobserved=1", good_usage, 0),
                 (expected + "\n" + expected, good_usage, 0),
+                (expected + "\nDEBUG=unexpected", good_usage, 0),
+                ("noise\n" + expected, good_usage, 0),
+                (expected + "\nRUST_RAPL_PACKAGE status=MEASURED", good_usage, 0),
                 (expected, "METRIC_RSS_KIB=0\tuser_s=0.01\tsys_s=0", 0),
                 (expected, "METRIC_RSS_KIB=nan\tuser_s=0.01\tsys_s=0", 0),
                 (expected, "", 0),
