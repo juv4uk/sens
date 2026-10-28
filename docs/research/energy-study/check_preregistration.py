@@ -17,7 +17,7 @@ import sys
 
 SHA1 = re.compile(r"[0-9a-f]{40}")
 SHA256 = re.compile(r"[0-9a-f]{64}")
-TASK_ID = re.compile(r"[a-z0-9][a-z0-9_-]{2,63}")
+TASK_ID = re.compile(r"[A-Za-z0-9][A-Za-z0-9_-]{2,63}")
 METRICS = frozenset({"energy_uj", "wall_time_ns", "peak_rss_kib"})
 # Predeclared primary contrast slate: every candidate is either eligible or
 # explicitly N/A in each of eight tasks BEFORE observations are inspected.
@@ -113,7 +113,7 @@ def validate(plan: object) -> dict[str, int]:
            "analysis_state: #6290 must validate the method before locking")
 
     tasks = p.get("tasks")
-    demand(type(tasks) is list and len(tasks) == 8, "tasks: exactly eight frozen tasks required")
+    demand(type(tasks) is list and len(tasks) == 9, "tasks: exactly nine frozen tasks required")
     task_impls: dict[str, set[str]] = {}
     task_input: dict[str, str] = {}
     expected_contrasts: set[tuple[str, str]] = set()
