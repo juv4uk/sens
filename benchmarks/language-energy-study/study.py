@@ -104,8 +104,10 @@ def measure(command: list[str], copies: int, out: Path, meter: Path | None,
 
 
 def experiment(blocks: int, pairs: int, copies: int, seed: int, out: Path) -> None:
-    if not 8 <= blocks <= 64 or not 4 <= pairs <= 30 or not 1 <= copies <= 5_000_000:
-        raise ValueError("requires 8..64 blocks, 4..30 balanced pairs, 1..5M copies")
+    if not 8 <= blocks <= 64 or not 4 <= pairs <= 30 or not 1 <= copies <= 8_192:
+        raise ValueError("requires 8..64 blocks, 4..30 balanced pairs, 1..8192 copies")
+    if CORPUS.stat().st_size * copies > 3 * 1024 ** 3:
+        raise ValueError("copy-traffic-per-process exceeds 3 GiB budget")
     out.mkdir(parents=True, exist_ok=True)
     with tempfile.TemporaryDirectory(prefix="sens-physical-") as tmp:
         binary_dir = Path(tmp)
@@ -223,7 +225,7 @@ def main() -> int:
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("--blocks", type=int, default=8)
     p.add_argument("--pairs", type=int, default=4)
-    p.add_argument("--copies", type=int, default=300000)
+    p.add_argument("--copies", type=int, default=8192)
     p.add_argument("--seed", type=int, default=20261028)
     p.add_argument("--out", type=Path, default=Path(".ci-physical-study"))
     a = p.parse_args()
