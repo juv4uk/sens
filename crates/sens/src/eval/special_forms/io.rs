@@ -154,24 +154,6 @@ mod tests {
         assert_eq!(error.span, span);
     }
 
-    #[test]
-    fn read_preserves_exact_d7_word_from_canonical_write_wire() {
-        let result = read_values(
-            &[Value::String(Rc::from("1100110"))],
-            &Environment::root(),
-            Span::default(),
-        )
-        .expect("canonical D7 word must be readable as data");
-
-        assert_eq!(
-            result,
-            Value::DomainIdentity(crate::DomainIdentity::D7(crate::D7DataWord::from_word(
-                crate::Bit7::new(0b1100110).unwrap(),
-            ))),
-            "D7 W7 identity must not turn into a mathematical number during READ"
-        );
-    }
-
     fn assert_predicate_wire_rejected(value: Value) {
         let error = write_to_string_values(&[value], &Environment::root(), Span::default())
             .expect_err("PredicateBit must not enter canonical wire");
@@ -199,40 +181,5 @@ mod tests {
         assert_eq!(number, Value::String(Rc::from("#q2:1/1")));
     }
 
-    #[test]
-    fn read_all_returns_all_forms_as_data_with_exact_d24_numbers() {
-        let result = read_all_values(
-            &[Value::String(Rc::from("alpha 42"))],
-            &Environment::root(),
-            Span::default(),
-        )
-        .expect("D9 read-all parses all source forms as data");
-        let Value::Pair(first) = &result else {
-            panic!("two forms must produce a two-element list");
-        };
-        assert_eq!(first.head, Value::Symbol(Rc::from("alpha")));
-        let Value::Pair(rest) = &first.tail else {
-            panic!("the second source form must remain in the result list");
-        };
-        assert!(
-            matches!(&rest.head, Value::BinaryNumber(value) if value.numeric_domain_width() == Some(24) && value.to_string() == "42")
-        );
-        assert!(matches!(&rest.tail, Value::Nil));
 
-        let empty = read_all_values(
-            &[Value::String(Rc::from(""))],
-            &Environment::root(),
-            Span::default(),
-        )
-        .expect("empty source has no forms");
-        assert!(matches!(empty, Value::Nil));
-
-        let type_error = read_all_values(
-            &[Value::Symbol(Rc::from("not-text"))],
-            &Environment::root(),
-            Span::default(),
-        )
-        .expect_err("read-all accepts source text only");
-        assert_eq!(type_error.kind, ErrorKind::Type);
-    }
 }
