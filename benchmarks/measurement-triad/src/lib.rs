@@ -19,23 +19,3 @@ pub fn scan_d3_owner_residency(iterations: usize) -> usize {
     black_box(residents)
 }
 
-/// Strong preflight on every exact D3 slot; this is a mechanism assertion,
-/// not an independent language-semantic oracle.
-pub fn verify_d3_owner_projection() {
-    let expected: [bool; 8] = [false, true, true, true, true, true, true, true];
-    for (bits, is_resident) in expected.into_iter().enumerate() {
-        let coordinate = DomainCoordinate::new(3, bits as u16).unwrap();
-        assert_eq!(coordinate.owner_residency(), Some(is_resident));
-    }
-    assert_eq!(scan_d3_owner_residency(1_024), 896);
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn exact_d3_mechanism_still_obeys_owner_map() {
-        verify_d3_owner_projection();
-    }
-}

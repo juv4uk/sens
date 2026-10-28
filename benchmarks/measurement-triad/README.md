@@ -80,6 +80,41 @@ python3 benchmarks/measurement-triad/verdict.py --input paired.json --out verdic
 відсутні числові оцінки; при недостатній кількості незалежних процесів
 — `INCONCLUSIVE`. Тести використовують **лише синтетичні дані**.
 
+## 4. Енергія механізму (Linux RAPL)
+
+Це **четверта фізична метрика Rust**, окрема від Callgrind I-refs і
+Criterion wall-time. Rust відповідає за енергетичну вартість механізму,
+Zig — за точні біти коридору, **SENS одноосібно за мовні закони**.
+Інструмент не називає зайнятість D3-слотів мовним еталоном.
+
+На **фізичному Linux-хості**, де доступна RAPL package-zone:
+
+```sh
+export SENS_ROOT="$(pwd)"
+( cd /tmp && cargo run --release \
+    --manifest-path "$SENS_ROOT/benchmarks/measurement-triad/Cargo.toml" \
+    --bin rapl_mechanism -- 1000000 7 )
+```
+
+Перший аргумент — мінімум lookup у пакеті, другий — кількість вимірів.
+Калібрування збільшує пакет до ≥100 мс. Лічильник зчитується лише **до**
+та **після** пакета. Формула: `J/lookup = Δenergy_uj / 10^6 / N`.
+Вивід містить сирі `energy_uj`, `elapsed_ns`, `operations`,
+`joules_per_op`, RAPL шлях та максимальний діапазон лічильника.
+Один перехід через нуль обробляється за `max_energy_range_uj`;
+нульова дельта чи надто довге вікно — **BLOCKED**.
+
+На багатосокетному хості задайте `SENS_RAPL_PACKAGE` як шлях до
+`/sys/class/powercap/intel-rapl:N`. Це **CPU package**, не ватметр
+розетки; DRAM, CPU cores та GPU не включаються автоматично.
+У WSL2/VM датчик може бути недоступний — тоді чесний
+`RAPL_MECHANISM_BLOCKED`, без фальшивих показників.
+
+Для справжнього A/B енергорегресу спершу потрібен **SENS-owned law PASS**,
+спільний workload, SHA, CPU governor, температура, черговані незалежні
+серії. Самі `RAPL_SAMPLE` — фізичні спостереження, не релізний GO.
+Цей стенд не додає Python, JSON, runtime залежностей чи CI workflow.
+
 ## Доказовий шлюз і вихід на пенсію
 
 Порівняння можливе лише після parity на тій самій роботі і тому самому

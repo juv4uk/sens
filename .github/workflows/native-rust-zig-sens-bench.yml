@@ -1,4 +1,4 @@
-name: SENS — нативні бенчмарки Rust, Zig та фізичного Lisp
+name: SENS — три незалежні заліки: Rust механізм, Zig коридор, SENS логіка
 
 # Лише ручний дослід: власник дозволив один автоматичний workflow (ci.yml).
 # Результати на shared runner — виміри, а не допуск релізу чи доказ прискорення.
@@ -10,7 +10,7 @@ permissions:
 
 jobs:
   native-triad:
-    name: Rust T5 ↔ Zig T5 ↔ фізичний SENS
+    name: Rust host-механізм / Zig T5M коридор / SENS самосвідки
     runs-on: ubuntu-24.04
     timeout-minutes: 35
     steps:
@@ -20,7 +20,7 @@ jobs:
       - uses: dtolnay/rust-toolchain@1.99.0
       - uses: ./.github/actions/install-zig
 
-      - name: Rust і Zig — T5 механізм, точні байти до вимірювання
+      - name: Rust host-виклик Zig проти прямого Zig — лише механічна ціна
         shell: bash
         timeout-minutes: 18
         run: |
@@ -35,7 +35,7 @@ jobs:
             rustc --version
             zig version
           } > "$out/environment.txt"
-          # Rust: механіка енкодера/декодера, жодного Lisp-оракула.
+          # Rust: накладні витрати host-виклику Zig-owned T5M, НЕ власний T5-кодек або Lisp-оракул.
           CARGO_BUILD_JOBS=2 cargo run --locked --release -p sens \
             --example zig_t5_matched_bench > "$out/rust-raw.log" 2> "$out/rust-build.log"
           # Zig 0.16: власний monotonic clock_gettime, без вилученого std.time.Timer.
@@ -56,7 +56,26 @@ jobs:
           grep '^sample impl=zig ' "$out/zig-raw.log" > "$out/zig-samples.txt"
           test "$(wc -l < "$out/rust-samples.txt")" -eq 40
           test "$(wc -l < "$out/zig-samples.txt")" -eq 40
-          echo '::notice title=Rust/Zig T5::PASS fixture_forms=1,16,128,1024 equal_bytes=true native_samples=40-per-backend scope=mechanism-only'
+          echo '::notice title=Rust host/Zig corridor::PASS fixture_forms=1,16,128,1024 equal_bytes=true native_samples=40-per-path scope=transport-fixture-only-not-semantic-proof'
+
+      - name: Rust-механізм і Zig-коридор на одному бінарному корпусі
+        shell: bash
+        timeout-minutes: 4
+        run: |
+          set -euo pipefail
+          out="$RUNNER_TEMP/native-triad"
+          mkdir -p "$out"
+          # Лише Rust-фізика RAPL; unit-тести не мають мовного SENS-оракула.
+          rustc --test benchmarks/mechanism/rapl-energy-bench.rs -o "$out/rapl-unit"
+          "$out/rapl-unit" > "$out/rapl-unit.log" 2>&1
+          rustc -O benchmarks/mechanism/rust-byte-copy-bench.rs -o "$out/rust-copy"
+          "$out/rust-copy" > "$out/rust-copy.log" 2>&1
+          grep -q 'RUST_BYTE_COPY_BENCH source=lib/core4.sens' "$out/rust-copy.log"
+          # Zig має право звіряти лише фізичні байти .sens, не мовний результат.
+          zig test -O ReleaseFast -lc benchmarks/mechanism/zig-byte-copy-bench.zig             > "$out/zig-copy.log" 2>&1
+          grep -q 'ZIG_CORRIDOR_COPY_BENCH source=lib/core4.sens' "$out/zig-copy.log"
+          echo '::notice title=Benchmark lanes::Rust bytes + RAPL counter arithmetic and Zig physical transport recorded; SENS semantic verdict separate'
+          # На shared runner RAPL не припускаємо; джоулі без датчика НЕ друкуємо.
 
       - name: SENS — Lisp-закон → Zig/T5M → самостійні фізичні виміри
         shell: bash
@@ -70,7 +89,7 @@ jobs:
           sens="$PWD/target/debug/sens"
           trit="$PWD/target/debug/sens-trit"
           test -x "$sens" && test -x "$trit"
-          printf 'source\trepeat\twall_ns\tsource_sha256\tphysical_sha256\tstdout_sha256\tcommit\trunner\n' \
+          printf 'source\trepeat\twall_ns\tphysical_bytes\tcommit\trunner\n' \
             > "$out/sens-samples.tsv"
           for source in tests/semantic/d1-not-law.lisp tests/semantic/d3-structural-native-t5m-law.lisp; do
             id="$(basename "$source" .lisp)"
@@ -92,9 +111,7 @@ jobs:
               echo "::error file=$source,title=SENS::REGRESSION layer=semantics expected=D1:1 actual=other"
               exit 1
             fi
-            src_hash="$(sha256sum "$source" | cut -d' ' -f1)"
-            bin_hash="$(sha256sum "$physical" | cut -d' ' -f1)"
-            out_hash="$(sha256sum "$dir/standalone.out" | cut -d' ' -f1)"
+            physical_bytes="$(wc -c < "$physical" | tr -d ' ')"
             timeout 45s "$sens" "$physical" > "$dir/warmup.out" 2> "$dir/warmup.err"
             cmp "$dir/standalone.out" "$dir/warmup.out"
             : > "$dir/samples.ns"
@@ -109,8 +126,8 @@ jobs:
                 exit 1
               fi
               printf '%s\n' "$elapsed" >> "$dir/samples.ns"
-              printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
-                "$source" "$repeat" "$elapsed" "$src_hash" "$bin_hash" "$out_hash" \
+              printf '%s\t%s\t%s\t%s\t%s\t%s\n' \
+                "$source" "$repeat" "$elapsed" "$physical_bytes" \
                 "$GITHUB_SHA" "${RUNNER_NAME:-unknown}" >> "$out/sens-samples.tsv"
             done
             median_ns="$(sort -n "$dir/samples.ns" | sed -n '4p')"

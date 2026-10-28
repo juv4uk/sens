@@ -1,10 +1,9 @@
 //! Zig 0.16: тільки механіка T5M encode/decode, без Lisp-оракула.
-//! Фізичний файл із репозиторію, SHA/версія фіксуються CI; 11 парних проб із чергуванням порядку.
+//! Детермінований корпус точних бітових слів (жодних SENS-функцій); 11 парних проб.
 //! Замість видаленого std.time.Timer використовується Io.Clock.awake.
 
 const std = @import("std");
 const codec = @import("research/zig-codecs/t5m.zig");
-const physical: []const u8 = @embedFile("benchmarks/lists.sens");
 
 fn sortedCopy(values: [11]u64) [11]u64 {
     var sorted = values;
@@ -70,6 +69,19 @@ pub fn main(init: std.process.Init) !void {
     const allocator = std.heap.page_allocator;
     const io = init.io;
     const iterations: usize = 128;
+
+    // Zig owns only opaque exact-width bits. Generate a reproducible physical
+    // T5M input in this corridor, with no SENS language law or corpus filename.
+    var input_bits: [128][7]u8 = undefined;
+    var input_words: [128]codec.Word = undefined;
+    for (0..input_words.len) |i| {
+        for (0..7) |j| {
+            input_bits[i][j] = if ((i + j) % 3 == 0) '1' else '0';
+        }
+        input_words[i] = .{ .width = 7, .bits = input_bits[i][0..] };
+    }
+    const physical = try codec.encode(allocator, input_words[0..]);
+    defer allocator.free(physical);
 
     var original = try codec.decode(allocator, physical);
     defer original.deinit(allocator);
@@ -159,7 +171,7 @@ pub fn main(init: std.process.Init) !void {
     const e = sortedCopy(encode_ns_per_op);
     if (d[0] == 0 or e[0] == 0) return error.InsufficientClockResolution;
     std.debug.print(
-        "ZIG_T5M_BENCH physical_bytes={d} words={d} samples={d} min_sample_ns={d} decode_min_ns_per_op={d} decode_p50_ns_per_op={d} decode_p90_ns_per_op={d} decode_max_ns_per_op={d} encode_min_ns_per_op={d} encode_p50_ns_per_op={d} encode_p90_ns_per_op={d} encode_max_ns_per_op={d} scope=zig-codec-only guard={d}\n",
+        "ZIG_T5M_BENCH physical_bytes={d} words={d} samples={d} min_sample_ns={d} decode_min_ns_per_op={d} decode_p50_ns_per_op={d} decode_p90_ns_per_op={d} decode_max_ns_per_op={d} encode_min_ns_per_op={d} encode_p50_ns_per_op={d} encode_p90_ns_per_op={d} encode_max_ns_per_op={d} scope=zig-codec-only input=deterministic-opaque-words guard={d}\n",
         .{ physical.len, words.len, sample_count, min_sample_ns, d[0], d[5], d[9], d[sample_count - 1], e[0], e[5], e[9], e[sample_count - 1], guard },
     );
 }

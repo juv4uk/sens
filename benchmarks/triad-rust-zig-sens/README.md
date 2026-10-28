@@ -1,78 +1,81 @@
-# Три незалежні бенчмарки SENS: Rust, Zig, Lisp/SENS
+# Конкурс бенчмарків: три незалежні сфери
 
-Це **діагностика механізмів та фізичного мовного виконавця**, не порівняння
-швидкості трьох мов і не нове джерело семантики. Відхилення продуктивності
-на спільному CI-runner не блокує реліз без каліброваного бюджету.
+**Rust відповідає за механізм; Zig — за фізичний коридор; SENS — за семантику та логіку.**
+Механічна точність байтів не є доказом мовного закону. Мовний закон
+перевіряється виконанням SENS-свідка та його негативного мутанта.
 
-| Шар | Реалізація | Фактична операція | Проби | Метрика |
-|---|---|---|---|---|
-| Rust / I/O | `crates/sens-cli/tests/mechanism_file_io_benchmark.rs` | `std::fs::read` байтів справжнього `benchmarks/lists.lisp` | 3 warmup + 11 timed samples; кожен ≥25 ms | raw sample + p50/p90/min/max ns/read, bytes |
-| Rust / exact-width ingest | `crates/sens/examples/packed_vs_visible_bench.rs` | Видимі exact-width слова проти packed-носія, той самий D2 AST; межі ширин передаються явно | 32 парні warmup + 9 чергованих проб у кожному напрямку, кожна ≥25 ms | Сирі проби, p50/p90 ns/program, співвідношення, байти й semantic bits |
-| Zig / ABI | `research/zig-codecs/tests.zig` | `transport_abi.zig`: точний D8 BE3 → T5 | 1 batch warmup + 7 timed samples; кожен ≥25 ms, batches адаптивні | raw elapsed/word counts + p50/p90/min/max ns/word |
-| Zig / T5M | `bench_t5m.zig` (виконується центральним `ci.yml`) | Реальний `benchmarks/lists.sens`: encode/decode з канонічною byte parity | прогрів + 11 адаптивних проб, кожна ≥25 ms | raw elapsed/operation counts + min/p50/p90/max ns/op; фізичні негативи окремо |
-| Lisp → Zig/T5M → SENS | `benchmarks/{lists,arithmetic,parser,recursion}.lisp` і `tests/semantic/` | Чотири мовні навантаження, вимір лише після успішного Lisp-закону | 11 + контрольний прогін | p50/p90 wall-time повного процесу (CLI + bootstrap + eval), AST та фізичний розмір |
+Активний ручний workflow: [`.github/workflows/sens-performance.yml`](../../.github/workflows/sens-performance.yml).
+Він складається з **трьох незалежних jobs**, а не змішаного рейтингу.
+Кожен job зберігає сирі дані окремо й позначає їх SHA Git-коміту.
+Відсутність свідка або зламана збірка = RED, не синтетичний PASS.
 
-Для D11 окремо діють `benchmarks/d11-families.lisp` та пара
-`tests/semantic/d11-families-benchmark-{law,mutant}.lisp`.
-Їхні вердикти видає **тільки SENS**, а Zig/T5M передає точні слова.
-Використовуємо повний `scripts/prove-lisp-semantic-t5m.sh`:
-нативний Lisp, mint, Zig open/verify, paired і standalone.
+| Учасник | Що реально виконує | Де код | Дані |
+|---|---|---|---|
+| Rust · механізм | 512 копій незмінних байтів `lib/core4.lisp` у кожній пробі; точність `dest == source` за межами таймера | `benchmarks/mechanism/rust-byte-copy-bench.rs` | 1 прогрів + 11 проб, p50/p90/min/max наносекунд на batch |
+| Rust · механізм | Packed/decoded exact-width слова без приписування їм функцій SENS | `crates/sens/examples/byte_pack_bench.rs` | 9 проб, фізичні байти, біти, raw p50/p90 ns/word |
+| Rust · енергія механізму | Пакет справжніх D3 `owner_residency()` lookup; **без** перевірки мовної істини | `benchmarks/measurement-triad/src/bin/rapl_mechanism.rs` | Linux RAPL package, сирі µJ, тривалість, `J/lookup`; BLOCKED без лічильника |
+| Zig · коридор | Той самий файл, 512 фізичних копій; порівняння байтів поза таймером | `benchmarks/mechanism/zig-byte-copy-bench.zig` | 1 прогрів + 11 проб, p50/p90/min/max наносекунд на batch |
+| Zig · коридор | Справжній T5M encode/decode, фізична byte parity, від'ємні кадри | `bench_t5m.zig`, `bench_t5m_test.zig`, `research/zig-codecs/tests.zig` | 11 адаптивних проб T5M, ns/op, перевірки кодеків |
+| SENS · логіка | Нативний SENS закон структури та хибний мутант через `--t5m-files`; два реальні D1-вердикти | `tests/semantic/бенчмарк-структура-{law,mutant}.lisp`, `scripts/prove-бенчмарк-структура.sh` | 11 виконань, p50/p90 мкс повного процесу, позитив/негатив |
 
-## Відтворення
+## Відтворення локально
+
+У корені репозиторію:
 
 ```sh
-# Rust: власний механізм читання, без виклику Lisp evaluator.
-cargo test --locked -p sens-cli --test mechanism_file_io_benchmark -- --include-ignored --nocapture
+# Rust: механічне копіювання, байти без Lisp-eval
+rustc -O --edition=2021 benchmarks/mechanism/rust-byte-copy-bench.rs -o /tmp/sens-rust-copy
+/tmp/sens-rust-copy
 
-# Rust: exact-width visible/packed ingestion; verifies matching D2 AST before timing.
-bash benchmarks/rust-packed-visible/run.sh /tmp/rust-packed-visible
+# Rust: exact-width pack/decode, а не таблиця SENS-логіки
+cargo run --locked --release -p sens --example byte_pack_bench -- series mixed 1024 9
 
-# Zig 0.16: точний ABI і adaptive ≥25 ms samples, без SENS-семантики.
+# Rust: джоулі механізму через Linux powercap/RAPL; без сенсового оракула.
+# Потрібен фізичний Linux-хост із package RAPL, інакше чесний BLOCKED.
+export SENS_ROOT="$PWD"
+( cd /tmp && cargo run --release \
+    --manifest-path "$SENS_ROOT/benchmarks/measurement-triad/Cargo.toml" \
+    --bin rapl_mechanism -- 1000000 7 )
+# Zig 0.16: фізичний коридор, тести БАЙТІВ, не функцій
+zig test -O ReleaseFast -lc benchmarks/mechanism/zig-byte-copy-bench.zig
 zig test -lc research/zig-codecs/tests.zig
-
-# Центральний CI викликає цей exact-corpus T5M benchmark і fail-closed negatives.
+zig test -O ReleaseFast -lc bench_t5m_test.zig
 zig run -O ReleaseFast -lc bench_t5m.zig
 
-# Фізичний SENS: спочатку наявна збірка, далі лише реальне виконання.
+# SENS: лише виконуваний власний закон + негативний мутант
 cargo build --locked -p sens-cli --bin sens --bin sens-trit --features benchmark-ast-visits
-bash scripts/prove-lisp-semantic-t5m.sh \
-  "$PWD/target/debug/sens" "$PWD/target/debug/sens-trit" \
-  "$PWD/target/sens-benchmark-evidence"
+bash scripts/prove-бенчмарк-структура.sh "$PWD/target/debug/sens"
 ```
 
-## Правила достовірності
+Той самий протокол у GitHub Actions можна запускати вручну через
+**Actions → SENS contest → Run workflow**. Workflow не публікує артефакти
+з неіснуючих Rust-тестів, не вигадує `results.txt`/`law-timings.tsv`
+і не сертифікує відсутні свідки.
 
-1. Rust/I/O міряє лише файлове читання **warm-cache**, без SENS bootstrap чи семантики.
-   Rust exact-width ingestion перевіряє однакову D2/domain-AST форму до таймера;
-   межі ширин подано окремим розкладом і вони **не входять** у packed payload.
-   Кожна проба адаптивно триває щонайменше 25 ms. Це порівняння reader paths,
-   не self-describing container і не вимір семантики.
-2. Zig вимірює **реальний** ABI T5 encode, не імітацію D8. Час
-   `CLOCK_MONOTONIC` включає виклик кодувальника, перевірку статусу та
-   накладні витрати циклу; це не незалежне вимірювання CPU instructions.
-3. SENS визначає D1:1/D1:0 у `.lisp` і `.sens`; Rust або Zig не
-   оголошують семантичного PASS. Діагностика часу ніколи не приховує RED.
-4. **Не порівнювати числові p50 між стовпцями:** Rust вимірює файл, Zig
-   окреме слово, SENS — цілий процес; різні знаменники і прогрів.
-5. Для тверджень про прискорення потрібні однаковий корпус, машинне оточення,
-   контроль компіляцій і парний дизайн ABBA/BAAB, як у
-   `benchmarks/bench-methodology/README.md`. Поточні цифри — `MEASURED`,
-   не `CERTIFIED_SPEEDUP`.
+## Як судити результати
 
-## Актуальні зразки методики
+1. **Не складати швидкості різних сфер.** Rust вимірює механізм, Zig —
+   транспорт, SENS — повний процес із завантаженням, читанням та виконанням.
+   Навіть byte-copy у Rust/Zig — порівняльне фізичне навантаження, не доказ
+   «швидкості мови».
+2. **Точність завжди перед рейтингом.** Для Rust/Zig необхідна побайтова
+   тотожність; для SENS — позитивний закон і негативний мутант.
+   Будь-який RED дискваліфікує відповідну пробу.
+3. **Публікувати raw, SHA, компілятори, апаратну платформу й одиниці.**
+   Жодних чисел із попереднього коміту. На shared CI шум, різні job-машини
+   й cache роблять міжмовний speedup непідтвердженим.
+4. **Енергія — окрема метрика.** Джоулі можна вказувати лише за вимірюванням
+   RAPL/powercap/perf на конкретній машині з вказаним доменом, інтервалом і
+   похибкою; за відсутності лічильника писати `NOT_MEASURED`, не `0 J`.
+5. **Не підмінювати SENS-оракул shell-таблицею.** Історичний
+   `benchmarks/contest-uk/judge.sh` ще має очікувані результати всередині Bash.
+   Поки ці твердження не перенесено до самоперевірних SENS-свідків,
+   його результати НЕ є семантично сертифікованими для цього тристороннього конкурсу.
 
-- [Criterion.rs](https://criterion-rs.github.io/book/) — прогрів,
-  статистичні інтервали, виявлення шуму для Rust мікробенчмарків. Не додано
-  нової залежності, щоб зберегти `Cargo.lock` та `cargo --locked`.
-- [hyperfine](https://github.com/sharkdp/hyperfine) — окремі прогріви,
-  багатократні запуски CLI, експорт сирих даних.
-- [Zig Bench](https://github.com/zig-utils/zig-bench) — адаптивна кількість
-  ітерацій, час прогріву та p50/p75/p99; беремо ці ідеї, не нову залежність.
-- [Common Lisp cl-bench](https://cl-bench.common-lisp.dev/) — приклад
-  розділення I/O, числових, рядкових, бітових і пам'яттєвих навантажень.
-  Це набір для Common Lisp, не прямий performance ranking SENS.
-- [Zig 0.16 release notes](https://ziglang.org/download/0.16.0/release-notes.html)
-  і [приклад проблеми std.time.Timer](https://github.com/mattrobenolt/zig-benchmark/issues/1)
-  — Linux Zig-бенчмарк використовує `CLOCK_MONOTONIC`.
+## Межа релізу
 
-Жоден із цих інструментів не підміняє фізичний виконуваний SENS-коридор.
+Цей workflow — **ручне вимірювання**. Він не замінює P0 релізу
+`translation_boundary` і `wsm_fs_f6_pipeline`, не додає дозволу
+публікувати реліз і не оголошує всі мовні закони SENS доведеними.
+
+Методика: [paired benchmarking](../bench-methodology/README.md).

@@ -21,6 +21,7 @@ fn pinned_zig_compiler(_pinned: &str) -> std::ffi::OsString {
 fn main() {
     println!("cargo:rerun-if-changed=../../.zig-version");
     println!("cargo:rerun-if-changed=../../wasm_source_assets.zig");
+    println!("cargo:rerun-if-changed=../../zig_compiler_rt_anchor.zig");
     for source in [
         "../../lib/unify.lisp",
         "../../lib/reason.lisp",
@@ -76,10 +77,12 @@ fn main() {
         .arg("--name")
         .arg("sens_wasm_source_assets")
         .arg("-O")
-        .arg("ReleaseSafe")
-        .arg("-fcompiler-rt");
+        .arg("ReleaseSafe");
     if is_wasm {
-        command.arg("-target").arg("wasm32-freestanding");
+        command
+            .arg("-fcompiler-rt")
+            .arg("-target")
+            .arg("wasm32-freestanding");
     } else {
         command.arg("-lc");
         if target_env == "msvc" {
@@ -101,4 +104,42 @@ fn main() {
     );
     println!("cargo:rustc-link-search=native={}", out.display());
     println!("cargo:rustc-link-lib=static=sens_wasm_source_assets");
+
+    if !is_wasm {
+        // Роздільні архіви зберігають compiler-rt stack probes без LLD-конфлікту з -lc.
+        let runtime_name = if target_env == "msvc" {
+            "sens_wasm_compiler_rt.lib"
+        } else {
+            "libsens_wasm_compiler_rt.a"
+        };
+        let runtime_archive = out.join(runtime_name);
+        let mut runtime = Command::new(&compiler);
+        runtime
+            .current_dir(&root)
+            .arg("build-lib")
+            .arg("zig_compiler_rt_anchor.zig")
+            .arg("-O")
+            .arg("ReleaseSafe")
+            .arg("-fcompiler-rt");
+        if target_env == "msvc" {
+            runtime
+                .arg("-target")
+                .arg(format!("{target_arch}-windows-msvc"));
+        }
+        if target_os != "windows" {
+            runtime.arg("-fPIC");
+        }
+        let runtime_result = runtime
+            .arg(format!("-femit-bin={}", runtime_archive.display()))
+            .status()
+            .expect("sens-wasm source transport requested: pinned Zig compiler-rt unavailable");
+        assert!(
+            runtime_result.success(),
+            "sens-wasm source transport: Zig compiler-rt archive build failed"
+        );
+        println!("cargo:rustc-link-lib=static=sens_wasm_compiler_rt");
+        if target_env != "msvc" {
+            println!("cargo:rustc-link-lib=c");
+        }
+    }
 }

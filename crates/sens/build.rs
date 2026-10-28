@@ -401,11 +401,10 @@ fn build_zig_transport(root: &Path, output: &Path, compiler: &std::ffi::OsStr) {
     command.current_dir(root)
         .arg("build-lib")
         .arg(if wasm { "zig_bitpack_root.zig" } else { "zig_transport_root.zig" })
-        .arg("-O").arg("ReleaseSafe")
-        .arg("-fcompiler-rt");
+        .arg("-O").arg("ReleaseSafe");
     if wasm {
         // Match the rustc wasm32-unknown-unknown profile; no host libc or PIC.
-        command.arg("-target").arg("wasm32-freestanding");
+        command.arg("-fcompiler-rt").arg("-target").arg("wasm32-freestanding");
     } else {
         command.arg("-lc");
         if portable_linux {
@@ -431,6 +430,40 @@ fn build_zig_transport(root: &Path, output: &Path, compiler: &std::ffi::OsStr) {
     assert!(result.success(), "sens core: Zig transport archive build failed");
     println!("cargo:rustc-link-search=native={}", output.display());
     println!("cargo:rustc-link-lib=static=sens_zig_transport");
+
+    if !wasm {
+        // Роздільні архіви зберігають compiler-rt stack probes без LLD-конфлікту з -lc.
+        println!("cargo:rerun-if-changed={}", root.join("zig_compiler_rt_anchor.zig").display());
+        let runtime_name = if target_env == "msvc" {
+            "sens_zig_compiler_rt.lib"
+        } else {
+            "libsens_zig_compiler_rt.a"
+        };
+        let runtime_archive = output.join(runtime_name);
+        let mut runtime = Command::new(compiler);
+        runtime.current_dir(root)
+            .arg("build-lib")
+            .arg("zig_compiler_rt_anchor.zig")
+            .arg("-O").arg("ReleaseSafe")
+            .arg("-fcompiler-rt");
+        if portable_linux {
+            runtime.arg("-target").arg("x86_64-linux-gnu.2.35")
+                .arg("-mcpu").arg("baseline");
+        } else if target_env == "msvc" {
+            runtime.arg("-target").arg(format!("{target_arch}-windows-msvc"));
+        }
+        if target_os != "windows" {
+            runtime.arg("-fPIC");
+        }
+        let runtime_result = runtime.arg(format!("-femit-bin={}", runtime_archive.display()))
+            .status()
+            .expect("sens core requires the pinned Zig compiler-rt");
+        assert!(runtime_result.success(), "sens core: Zig compiler-rt archive build failed");
+        println!("cargo:rustc-link-lib=static=sens_zig_compiler_rt");
+        if target_env != "msvc" {
+            println!("cargo:rustc-link-lib=c");
+        }
+    }
 }
 
 fn main() {

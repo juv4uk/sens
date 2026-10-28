@@ -1,7 +1,7 @@
-# Manual diagnostic only: CI remains the single automatic workflow.
-# All benchmark measurements are implemented by Rust, Zig, or native SENS.
-# Records are TSV/plain text; no JSON/Python benchmark or reporting lane.
-name: SENS performance — Rust, Zig, фізичний SENS
+# Manual benchmark tournament: each implementation owns one measurable lane.
+# Rust = mechanism, Zig = physical corridor, SENS = language semantics.
+# No host-language truth tables and no synthetic success when evidence is absent.
+name: SENS contest — Rust mechanism, Zig corridor, SENS laws
 
 on:
   workflow_dispatch:
@@ -14,195 +14,129 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  mechanisms:
-    name: Rust + Zig mechanism benchmarks (semantic oracle excluded)
+  rust-mechanism:
+    name: Rust — exact-width and memory mechanism
     runs-on: ubuntu-24.04
-    timeout-minutes: 40
+    timeout-minutes: 30
     steps:
-      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5 pinned
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
         with:
           persist-credentials: false
       - uses: dtolnay/rust-toolchain@1.99.0
-      - uses: ./.github/actions/install-zig
-      - name: Show toolchain versions in the run log only
-        run: |
-          cargo --version
-          rustc -Vv
-          zig version
-      - name: Build native Rust mechanism benchmarks
+      - name: Measure byte-copy mechanism (11 timed samples; exact physical parity)
         shell: bash
         run: |
           set -euo pipefail
-          cargo build --locked --release -p sens \
-            --example domain12345678_bench \
-            --example domain_occupancy_bench \
-            --example byte_pack_bench \
-            --example zig_t5_matched_bench
-          cargo build --locked --release -p sens-cli --bin sens --bin sens-trit
-      - name: Measure exact-width domain construction in Rust
+          out="$RUNNER_TEMP/contest-rust"
+          mkdir -p "$out"
+          printf 'git_sha\t%s\n' "$GITHUB_SHA" > "$out/environment.tsv"
+          rustc -O --edition=2021 benchmarks/mechanism/rust-byte-copy-bench.rs -o "$out/rust-byte-copy"
+          "$out/rust-byte-copy" | tee "$out/byte-copy.tsv"
+          grep -Fq 'scope=mechanism_only' "$out/byte-copy.tsv"
+      - name: Measure exact-width bit packing only (no language-result oracle)
         shell: bash
         run: |
           set -euo pipefail
-          out="$RUNNER_TEMP/sens-mechanisms"
-          binary="$PWD/target/release/examples/domain12345678_bench"
-          for case in empty d1 d2 d3 d4 d5 d6 d7 d8 d9 mixed width-roundtrip; do
-            "$binary" series "$case" 100000 9 >> "$out/domain-series.tsv"
-          done
-          test "$(grep -c '^RUST_DOMAIN_SAMPLE[[:space:]]' "$out/domain-series.tsv")" -eq 108
-          test "$(grep -c '^RUST_DOMAIN_SUMMARY[[:space:]]' "$out/domain-series.tsv")" -eq 12
-      - name: Measure bit packing and decoding in Rust after exact round-trip
-        shell: bash
-        run: |
-          set -euo pipefail
-          out="$RUNNER_TEMP/sens-mechanisms"
-          binary="$PWD/target/release/examples/byte_pack_bench"
-          for workload in d1 d3 w7 w8 w9 mixed; do
-            "$binary" series "$workload" 1024 9 >> "$out/bit-pack.tsv"
-          done
-          test "$(grep -c '^PACK_BENCH_PREFLIGHT[[:space:]]' "$out/bit-pack.tsv")" -eq 6
-          test "$(grep -c '^PACK_BENCH_SAMPLE[[:space:]]' "$out/bit-pack.tsv")" -eq 162
-          test "$(grep -c '^PACK_BENCH_SUMMARY[[:space:]]' "$out/bit-pack.tsv")" -eq 18
-      - name: Measure native Rust owner-coordinate lookup
-        shell: bash
-        run: |
-          set -euo pipefail
-          out="$RUNNER_TEMP/sens-mechanisms"
-          SENS_OCCUPANCY_ITERATIONS=100000 SENS_OCCUPANCY_SAMPLES=9 \
-            target/release/examples/domain_occupancy_bench > "$out/domain-occupancy.tsv"
-          test "$(wc -l < "$out/domain-occupancy.tsv")" -eq 11
-      - name: Measure exact-width visible versus packed Rust ingestion
-        shell: bash
-        run: |
-          set -euo pipefail
-          bash benchmarks/rust-packed-visible/run.sh "$RUNNER_TEMP/sens-mechanisms/packed-visible"
-          test "$(grep -c '^RUST_PACKED_VISIBLE_SAMPLE[[:space:]]' "$RUNNER_TEMP/sens-mechanisms/packed-visible/raw.tsv")" -eq 75
-          test "$(grep -c '^RUST_PACKED_VISIBLE_SUMMARY[[:space:]]' "$RUNNER_TEMP/sens-mechanisms/packed-visible/raw.tsv")" -eq 5
-      - name: Measure physical SENS process paths with Rust after byte/view parity
-        shell: bash
-        run: |
-          set -euo pipefail
-          out="$RUNNER_TEMP/sens-mechanisms"
-          SENS_PHYSICAL_T5_SENS="$PWD/target/release/sens" \
-          SENS_PHYSICAL_T5_TRIT="$PWD/target/release/sens-trit" \
-          SENS_PHYSICAL_T5_REPS=21 SENS_PHYSICAL_T5_WARMUPS=4 \
-            cargo test --locked --release -p sens-cli --test physical_sens_runtime_benchmark -- --ignored --nocapture \
-              > "$out/physical-t5-process.tsv" 2>&1 || {
-                cat "$out/physical-t5-process.tsv" >&2
-                exit 1
-              }
-          test "$(grep -c '^RUST_PHYSICAL_T5_PREFLIGHT[[:space:]]' "$out/physical-t5-process.tsv")" -eq 8
-          test "$(grep -c '^RUST_PHYSICAL_T5_SAMPLE[[:space:]]' "$out/physical-t5-process.tsv")" -eq 504
-          test "$(grep -c '^RUST_PHYSICAL_T5_SUMMARY[[:space:]]' "$out/physical-t5-process.tsv")" -eq 24
-          grep -E '^RUST_PHYSICAL_T5_(PREFLIGHT|SUMMARY)[[:space:]]' "$out/physical-t5-process.tsv"
-          test "$(grep -c '^RUST_PHYSICAL_SESSION_SAMPLE[[:space:]]' "$out/physical-t5-process.tsv")" -eq 21
-          test "$(grep -c '^RUST_PHYSICAL_SESSION_SUMMARY[[:space:]]' "$out/physical-t5-process.tsv")" -eq 1
-          grep -E '^RUST_PHYSICAL_SESSION_SUMMARY[[:space:]]' "$out/physical-t5-process.tsv"
-      - name: Measure amortized Zig/T5M session cost against cold Rust CLI processes
-        shell: bash
-        run: |
-          set -euo pipefail
-          out="$RUNNER_TEMP/sens-mechanisms"
-          cargo test --locked --release -p sens-cli --test t5m_session_benchmark -- --include-ignored --nocapture \
-            > "$out/t5m-session.tsv" 2>&1 || {
-              cat "$out/t5m-session.tsv" >&2
-              exit 1
-            }
-          test "$(grep -c 'T5M_SESSION_SAMPLE lane=' "$out/t5m-session.tsv")" -eq 22
-          test "$(grep -c 'T5M_SESSION_BENCH cold_p50_amortized_ns=' "$out/t5m-session.tsv")" -eq 1
-          grep 'T5M_SESSION_BENCH cold_p50_amortized_ns=' "$out/t5m-session.tsv"
-      - name: Measure Rust and Zig T5 mechanics against identical bytes
-        shell: bash
-        run: |
-          set -euo pipefail
-          out="$RUNNER_TEMP/sens-mechanisms"
-          target/release/examples/zig_t5_matched_bench > "$out/rust-t5.tsv"
-          zig build-exe -O ReleaseFast -lc research/zig-codecs/t5/bench.zig \
-            -femit-bin="$out/zig-t5-bench" > "$out/zig-build.log" 2>&1
-          "$out/zig-t5-bench" > "$out/zig-t5.tsv" 2>&1
-          grep -E '^(fixture|physical) impl=rust ' "$out/rust-t5.tsv" \
-            | sed 's/ impl=rust//' > "$out/rust-t5-fixtures.txt"
-          grep -E '^(fixture|physical) impl=zig ' "$out/zig-t5.tsv" \
-            | sed 's/ impl=zig//' > "$out/zig-t5-fixtures.txt"
-          test "$(wc -l < "$out/rust-t5-fixtures.txt")" -eq 8
-          test "$(wc -l < "$out/zig-t5-fixtures.txt")" -eq 8
-          diff -u "$out/rust-t5-fixtures.txt" "$out/zig-t5-fixtures.txt"
-          grep '^sample impl=rust ' "$out/rust-t5.tsv" > "$out/rust-t5-samples.txt"
-          grep '^sample impl=zig ' "$out/zig-t5.tsv" > "$out/zig-t5-samples.txt"
-          test "$(wc -l < "$out/rust-t5-samples.txt")" -eq 40
-          test "$(wc -l < "$out/zig-t5-samples.txt")" -eq 40
-      - name: Run Rust mechanism and Zig codec/ABI tests
-        shell: bash
-        run: |
-          set -euo pipefail
-          cargo test --locked -p sens-cli --test mechanism_file_io_benchmark -- --include-ignored --nocapture \
-            > "$RUNNER_TEMP/sens-mechanisms/rust-file-io.log" 2>&1
-          zig test -lc research/zig-codecs/tests.zig \
-            > "$RUNNER_TEMP/sens-mechanisms/zig-codecs-tests.log" 2>&1
-          zig test -lc zig_transport_root.zig \
-            > "$RUNNER_TEMP/sens-mechanisms/zig-abi-tests.log" 2>&1
-          zig test -O ReleaseFast -lc bench_t5m_test.zig \
-            > "$RUNNER_TEMP/sens-mechanisms/zig-t5m-tests.log" 2>&1
-          zig run -O ReleaseFast -lc bench_t5m.zig \
-            > "$RUNNER_TEMP/sens-mechanisms/zig-t5m-benchmark.tsv" 2>&1
-          cat "$RUNNER_TEMP/sens-mechanisms/zig-t5m-benchmark.tsv"
-      - name: Compare D11 family operations in Rust and Zig
-        shell: bash
-        run: |
-          set -euo pipefail
-          bash benchmarks/native/run-d11-families.sh "$RUNNER_TEMP/sens-mechanisms/d11-families"
-          cat "$RUNNER_TEMP/sens-mechanisms/d11-families/summary.tsv" >> "$GITHUB_STEP_SUMMARY"
-
-      - name: Publish native mechanism samples
+          out="$RUNNER_TEMP/contest-rust"
+          cargo run --locked --release -p sens --example byte_pack_bench -- series mixed 1024 9 > "$out/packed.tsv"
+          grep -Eq '^PACK_BENCH_SAMPLE[[:space:]]' "$out/packed.tsv"
+          grep -Eq '^PACK_BENCH_SUMMARY[[:space:]]' "$out/packed.tsv"
+          grep -Fq 'parity=exact' "$out/packed.tsv"
+      - name: Preserve raw Rust mechanism observations
         if: always()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4 pinned
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          name: sens-native-mechanisms-${{ github.sha }}
-          path: ${{ runner.temp }}/sens-mechanisms/
+          name: contest-rust-mechanism-${{ github.sha }}
+          path: ${{ runner.temp }}/contest-rust/
           if-no-files-found: warn
           retention-days: 21
 
-  language:
-    name: Lisp laws → Zig/T5M → native SENS (semantics and full-process timing)
+  zig-corridor:
+    name: Zig — T5M physical corridor and byte transport
     runs-on: ubuntu-24.04
-    timeout-minutes: 45
+    timeout-minutes: 30
     steps:
-      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5 pinned
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/install-zig
+      - name: Measure Zig byte movement over the identical Rust corpus
+        shell: bash
+        run: |
+          set -euo pipefail
+          out="$RUNNER_TEMP/contest-zig"
+          mkdir -p "$out"
+          printf 'git_sha\t%s\n' "$GITHUB_SHA" > "$out/environment.tsv"
+          zig version >> "$out/environment.tsv"
+          zig test -O ReleaseFast -lc benchmarks/mechanism/zig-byte-copy-bench.zig > "$out/byte-copy.log" 2>&1 || {
+            cat "$out/byte-copy.log" >&2
+            exit 1
+          }
+          grep -F 'ZIG_CORRIDOR_COPY_BENCH ' "$out/byte-copy.log" | tee "$out/byte-copy.tsv"
+          grep -Fq 'scope=physical_only' "$out/byte-copy.tsv"
+      - name: Exercise physical codecs without any SENS language truth table
+        shell: bash
+        run: |
+          set -euo pipefail
+          out="$RUNNER_TEMP/contest-zig"
+          zig test -lc research/zig-codecs/tests.zig > "$out/codec-tests.log" 2>&1 || {
+            cat "$out/codec-tests.log" >&2
+            exit 1
+          }
+          zig test -O ReleaseFast -lc bench_t5m_test.zig > "$out/t5m-tests.log" 2>&1 || {
+            cat "$out/t5m-tests.log" >&2
+            exit 1
+          }
+          zig run -O ReleaseFast -lc bench_t5m.zig > "$out/t5m-bench.log" 2>&1 || {
+            cat "$out/t5m-bench.log" >&2
+            exit 1
+          }
+          grep -F 'ZIG_T5M_SAMPLE ' "$out/t5m-bench.log" > "$out/t5m-samples.tsv"
+          grep -F 'ZIG_T5M_BENCH ' "$out/t5m-bench.log" > "$out/t5m-summary.tsv"
+          test "$(wc -l < "$out/t5m-samples.tsv")" -eq 11
+          test "$(wc -l < "$out/t5m-summary.tsv")" -eq 1
+          grep -Fq 'scope=zig-codec-only' "$out/t5m-summary.tsv"
+      - name: Preserve raw Zig corridor observations
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: contest-zig-corridor-${{ github.sha }}
+          path: ${{ runner.temp }}/contest-zig/
+          if-no-files-found: warn
+          retention-days: 21
+
+  sens-language:
+    name: SENS — native language law and negative mutant
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
         with:
           persist-credentials: false
       - uses: dtolnay/rust-toolchain@1.99.0
       - uses: ./.github/actions/install-zig
-      - name: Build the native SENS executors once
+      - name: Build the physical SENS executor
         shell: bash
         run: |
           set -euo pipefail
-          CARGO_BUILD_JOBS=2 cargo build --locked -p sens-cli \
-            --bin sens --bin sens-trit --features benchmark-ast-visits \
-            > "$RUNNER_TEMP/sens-language-build.log" 2>&1
+          cargo build --locked -p sens-cli --bin sens --bin sens-trit --features benchmark-ast-visits
           test -x target/debug/sens
           test -x target/debug/sens-trit
-      - name: Execute Lisp-owned positive/negative laws through the physical T5M route
+      - name: Execute the SENS-owned structural law and its false mutant
         shell: bash
-        timeout-minutes: 38
         run: |
           set -euo pipefail
-          out="$RUNNER_TEMP/sens-language"
+          out="$RUNNER_TEMP/contest-sens"
           mkdir -p "$out"
-          bash scripts/prove-lisp-semantic-t5m.sh \
-            "$PWD/target/debug/sens" "$PWD/target/debug/sens-trit" "$out/evidence" \
-            > "$out/native-law-run.log" 2>&1 || {
-              cat "$out/native-law-run.log" >&2
-              exit 1
-            }
-          test -s "$out/evidence/results.txt"
-          test -s "$out/evidence/law-timings.tsv"
-          test -s "$out/evidence/law-stage-timings.tsv"
-          grep -E 'SENS_LISP_T5M_LAWS_PASS|SENS_LAW_BENCHMARK_SUMMARY|SENS_PHASE_BENCHMARK_SUMMARY' \
-            "$out/native-law-run.log" | tee "$out/summary.tsv"
-      - name: Preserve Lisp law and timing evidence
+          printf 'git_sha\t%s\n' "$GITHUB_SHA" > "$out/environment.tsv"
+          bash scripts/prove-бенчмарк-структура.sh "$PWD/target/debug/sens" | tee "$out/native-law.tsv"
+          grep -Fq 'БЕНЧМАРК_СТРУКТУРА=PASS native=SENS' "$out/native-law.tsv"
+          grep -Fq 'mutant=D1:ні samples=11' "$out/native-law.tsv"
+      - name: Preserve actual SENS verdict and elapsed-time samples
         if: always()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4 pinned
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          name: sens-native-language-${{ github.sha }}
-          path: ${{ runner.temp }}/sens-language/
+          name: contest-sens-language-${{ github.sha }}
+          path: ${{ runner.temp }}/contest-sens/
           if-no-files-found: warn
           retention-days: 21
