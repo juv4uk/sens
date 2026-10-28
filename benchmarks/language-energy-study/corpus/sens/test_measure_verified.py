@@ -18,7 +18,9 @@ sys.modules[spec.name] = meter
 spec.loader.exec_module(meter)
 
 
-class ProvenanceIdentityTests(unittest.TestCase):
+# Mixin: CI adapter imports only TimeParserTest and NativeRunnerTest.
+# Keep the independent provenance cases inherited by the imported class.
+class ProvenanceIdentityChecks:
     def test_linux_cpu_model_from_realistic_cpuinfo(self):
         with tempfile.TemporaryDirectory() as d:
             cpuinfo = Path(d) / "cpuinfo"
@@ -73,7 +75,7 @@ class ProvenanceIdentityTests(unittest.TestCase):
                 self.assertEqual(result["github_run_id_status"], status)
 
 
-class TimeParserTest(unittest.TestCase):
+class TimeParserTest(ProvenanceIdentityChecks, unittest.TestCase):
     def test_time_accepted(self):
         self.assertEqual(
             meter.parse_time("WALL_SECONDS=1.23\nMAX_RSS_KIB=400\nCHILD_EXIT=0\n"),
