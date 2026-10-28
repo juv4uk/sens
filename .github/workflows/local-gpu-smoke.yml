@@ -70,7 +70,7 @@ jobs:
         shell: bash
         run: |
           set -uo pipefail
-          echo '::error::translation_boundary Rust-тест видалено (власник не дозволяв); SENS-версія не створена — гейт лишається ЧЕРВОНИМ'; exit 1
+          bash scripts/prove-lisp-language-laws.sh "$PWD/target/debug/sens"
           rc=${PIPESTATUS[0]}
           echo "TRANSLATION_BOUNDARY_RC=$rc"
           exit 0

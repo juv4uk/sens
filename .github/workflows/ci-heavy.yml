@@ -802,7 +802,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          echo '::error::translation_boundary Rust-тест видалено (власник не дозволяв); SENS-версія не створена — гейт лишається ЧЕРВОНИМ'; exit 1
+          bash scripts/prove-lisp-language-laws.sh "$PWD/target/debug/sens"
 
       - name: CML export — реальна відповідність джерела генератору
         if: ${{ !cancelled() && steps.changed-t5m-lisp.outputs.cml_export_tests == 'true' }}
