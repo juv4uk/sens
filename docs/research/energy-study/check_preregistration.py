@@ -84,7 +84,8 @@ def validate(plan: object) -> dict[str, int]:
     nonempty(p.get("host_id"), "host_id")
     nonempty(p.get("host_cpu"), "host_cpu")
     sensor = p.get("energy_sensor")
-    demand(sensor in SENSORS, "energy_sensor: no valid physical instrument")
+    demand(type(sensor) is str and sensor in SENSORS,
+           "energy_sensor: no valid physical instrument")
     demand(p.get("energy_scope") == SENSORS[sensor],
            "energy_scope: conflicts with physical sensor")
     proof = nonempty(p.get("sensor_proof_url"), "sensor_proof_url")
@@ -157,6 +158,7 @@ def validate(plan: object) -> dict[str, int]:
                f"contrasts[{index}]: input digest mismatch (parity BLOCKED)")
         metrics = c.get("metrics")
         demand(type(metrics) is list and len(metrics) == 3
+               and all(type(m) is str for m in metrics)
                and set(metrics) == METRICS,
                f"contrasts[{index}].metrics: all three primaries required")
         key = (tid, candidate)
