@@ -107,6 +107,14 @@ def ref_T09(n: int, seed: int) -> str:
     return str(sum(bin(v).count("1") for v in _lcg(seed, n)))
 
 
+PY_MODULES = {
+    "T01-symbolic-recursion": "ref_T01", "T02-exact-rationals": "ref_T02",
+    "T03-parsing-text": "ref_T03", "T04-sorting": "ref_T04",
+    "T05-allocation-gc": "ref_T05", "T06-io": "ref_T06",
+    "T07-matrices": "ref_T07", "T08-persistent-structures": "ref_T08",
+    "T09-bit-operations": "ref_T09",
+}
+
 REFERENCE = {
     "T01-symbolic-recursion": lambda i: ref_T01(i["n"]),
     "T02-exact-rationals": lambda i: ref_T02(i["n"]),
