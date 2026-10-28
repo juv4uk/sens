@@ -119,17 +119,33 @@ def task_env(task_id: str) -> dict:
     return env
 
 
-def run_once(cmd: str, env: dict, timeout_s: float = 120.0) -> tuple[float | None, str]:
+def run_once(cmd: str, env: dict, timeout_s: float = 120.0):
+    """Один запуск. Повертає (wall_ns, peak_rss_kib, вихід) або (None, None, причина).
+
+    Пікова пам'ять береться через os.wait4, а не через
+    resource.getrusage(RUSAGE_CHILDREN): RUSAGE_CHILDREN дає НАКОПИЧУВАЛЬНИЙ
+    максимум по всіх дочірніх процесах за сесію — тобто після першого ж
+    великого запуску всі наступні показували б його число. wait4 повертає
+    rusage конкретного процесу, і саме він потрібен для парних даних.
+    """
+    import shlex
+    argv = shlex.split(cmd)
     start = time.perf_counter_ns()
     try:
-        proc = subprocess.run(cmd, shell=True, capture_output=True, text=True,
-                              timeout=timeout_s, env=env)
-    except subprocess.TimeoutExpired:
-        return None, "TIMEOUT"
+        proc = subprocess.Popen(argv, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                                text=True, env=env)
+    except OSError as exc:
+        return None, None, f"SPAWN_FAIL:{exc}"
+    try:
+        pid, status, usage = os.wait4(proc.pid, 0)
+    except ChildProcessError:
+        return None, None, "WAIT_FAIL"
     elapsed = time.perf_counter_ns() - start
-    if proc.returncode != 0:
-        return None, f"EXIT_{proc.returncode}"
-    return float(elapsed), (proc.stdout.strip().splitlines() or [""])[0]
+    out = proc.stdout.read() if proc.stdout else ""
+    proc.stdout.close(); proc.stderr.close(); proc.returncode = 0
+    if status != 0:
+        return None, None, f"EXIT_{status}"
+    return float(elapsed), float(usage.ru_maxrss), (out.strip().splitlines() or [""])[0]
 
 
 def build_pairs(task: dict, languages: list[str], processes: int,
@@ -146,11 +162,14 @@ def build_pairs(task: dict, languages: list[str], processes: int,
                 cmd_cand = LANGUAGES[lang]["cmd"](task["id"])
                 first, second = (cmd_base, cmd_cand) if order == "AB" else (cmd_cand, cmd_base)
                 env = task_env(task["id"])
-                t_first, _ = run_once(first, env)
-                t_second, _ = run_once(second, env)
+                t_first, m_first, _ = run_once(first, env)
+                t_second, m_second, _ = run_once(second, env)
                 if t_first is None or t_second is None:
                     continue
-                base_ns, cand_ns = (t_first, t_second) if order == "AB" else (t_second, t_first)
+                if order == "AB":
+                    base_ns, cand_ns, base_rss, cand_rss = t_first, t_second, m_first, m_second
+                else:
+                    base_ns, cand_ns, base_rss, cand_rss = t_second, t_first, m_second, m_first
                 pairs.append({
                     "process_id": f"{lang}-{task['id']}-p{p}",
                     "order": order,
@@ -158,6 +177,8 @@ def build_pairs(task: dict, languages: list[str], processes: int,
                     "session_id": f"session-{seed}",
                     "baseline_ns": base_ns,
                     "candidate_ns": cand_ns,
+                    "baseline_peak_rss_kib": max(1.0, base_rss),
+                    "candidate_peak_rss_kib": max(1.0, cand_rss),
                     # Енергія не вимірювана: RAPL недоступний. Не вигадуємо.
                     "energy_not_measured": True,
                 })
