@@ -9,7 +9,7 @@ use std::hint::black_box;
 use std::path::{Path, PathBuf};
 use std::time::{Duration, Instant};
 
-const SOURCE: &[u8] = include_bytes!("../../lib/core4.lisp");
+const SOURCE: &[u8] = include_bytes!("../../lib/core4.sens");
 const SAMPLES: usize = 11;
 const BATCH: usize = 512;
 const RAPL_MIN_INTERVAL: Duration = Duration::from_millis(300);
@@ -137,7 +137,7 @@ fn main() {
     samples.sort_unstable();
     assert!(samples[0] > 0, "clock resolution too coarse");
     println!(
-        "RUST_BYTE_COPY_BENCH source=lib/core4.lisp bytes={} batch={} samples={} p50_ns={} p90_ns={} min_ns={} max_ns={} checksum={} scope=mechanism_only",
+        "RUST_BYTE_COPY_BENCH source=lib/core4.sens bytes={} batch={} samples={} p50_ns={} p90_ns={} min_ns={} max_ns={} checksum={} scope=mechanism_only",
         SOURCE.len(), BATCH, SAMPLES, samples[5], samples[9], samples[0], samples[10], checksum
     );
     if energy_requested {
