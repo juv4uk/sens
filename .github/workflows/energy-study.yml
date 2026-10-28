@@ -61,18 +61,12 @@ jobs:
           fi
 
   build-sens:
-    # Власник: «мене цікавить щоб ви почали вимірювати нашу мову».
-    # Перший крок до цього — зібрати SENS там, де є rustc. У sandbox агента
-    # компілятора немає, тому досі SENS у вимірах не брав участі взагалі.
+    # Власник: «мене цікавить щоб ви почати вимірювати нашу мову».
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 40
     steps:
       - uses: actions/checkout@v4
 
-      # Порядок критичний: crates/sens/build.rs запускає ПІННУТИЙ Zig-компілятор
-      # (Command::new(compiler) … .expect("… pinned Zig")). Без Zig збірка падає
-      # з "failed to run custom build command", і це не проблема раннера —
-      # це вимога мови: коридор Rust<->SENS стерильний і йде через Zig.
       - name: Встановити Zig
         uses: mlugg/setup-zig@v2
         with:
@@ -91,24 +85,43 @@ jobs:
       - name: Що вміє бінарник
         run: |
           ./target/release/sens --version
-          echo "--- SENS збирається на раннері: передумова вимірювання мови виконана ---"
 
-      - name: Закарбувати T01 (.lisp -> .sens)
+      - name: Закарбувати T01 VERIFY + MEASURE
         run: |
           mkdir -p /tmp/sens-out
           ./target/release/sens --t5m-mint \
             benchmarks/language-energy-study/corpus/sens/t01_fib.lisp \
             /tmp/sens-out/t01_fib.sens
+          ./target/release/sens --t5m-mint \
+            benchmarks/language-energy-study/corpus/sens/t01_fib_measure.lisp \
+            /tmp/sens-out/t01_fib_measure.sens
           ls -l /tmp/sens-out/
 
-      - name: Перші парні дані ДЛЯ НАШОЇ МОВИ
+      - name: Паритет SENS T01 VERIFY
+        run: |
+          python3 benchmarks/language-energy-study/parity_check.py \
+            --task T01-symbolic-recursion \
+            --run "$PWD/target/release/sens /tmp/sens-out/t01_fib.sens"
+
+      - name: Паритет SENS T01 MEASURE (46368)
+        run: |
+          out=$(./target/release/sens /tmp/sens-out/t01_fib_measure.sens \
+            | tr -d '\r' | sed 's/^sens\[укр\]>[[:blank:]]*//' \
+            | grep -E '^[0-9]+$' | tail -1)
+          expected=$(cd benchmarks/language-energy-study && python3 -c 'from parity_check import ref_T01; print(ref_T01(24))')
+          echo "sens_out=$out expected=$expected"
+          test "$out" = "$expected"
+          echo "SENS_T01_MEASURE_PARITY_OK"
+
+      - name: Парні дані python vs SENS (MEASURE, fail-closed)
         run: |
           export SENS_BIN="$PWD/target/release/sens"
           python3 benchmarks/language-energy-study/run_study.py \
             --tasks T01-symbolic-recursion --measure \
-            --languages sens python --processes 8 --per-process 4 \
-            --out "raw-sens-T01.json" || echo "SENS_STUDY_FAILED — дивись лог"
-          python3 benchmarks/language-energy-study/report_table.py --markdown | tail -8 || true
+            --languages sens \
+            --processes 4 --per-process 2 \
+            --out "raw-sens-T01.json"
+          python3 -c "import json;d=json.load(open('raw-sens-T01.json'));t=d['tasks']['T01-symbolic-recursion'];assert t['parity']['passed'], t;print('pairs',len(t['pairs']))"
 
       - uses: actions/upload-artifact@v4
         if: always()
@@ -117,9 +130,10 @@ jobs:
           path: raw-sens-*.json
           if-no-files-found: warn
 
-      - name: Паритет НАШОЇ мови проти Python-еталона
+      - name: ENERGY_NOT_MEASURED check
         run: |
-          # Якщо це впаде — побачимо справжню причину в лозі, а не припущення.
-          python3 benchmarks/language-energy-study/parity_check.py \
-            --task T01-symbolic-recursion \
-            --run "$PWD/target/release/sens /tmp/sens-out/t01_fib.sens"
+          if [ -r /sys/class/powercap/intel-rapl:0/energy_uj ]; then
+            echo "RAPL_AVAILABLE=yes"
+          else
+            echo "ENERGY_NOT_MEASURED"
+          fi

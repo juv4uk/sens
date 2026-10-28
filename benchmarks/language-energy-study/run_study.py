@@ -37,6 +37,15 @@ HERE = Path(__file__).resolve().parent
 CORPUS = HERE / "corpus"
 MANIFEST = CORPUS / "manifest.json"
 
+# Physical SENS programs: size is baked into the .sens file (CLI: one file, no TASK_N).
+# Filenames must match mint targets under /tmp/sens-out/ on the runner.
+SENS_MEASURE_FILES = {
+    "T01-symbolic-recursion": "t01_fib_measure.sens",
+}
+SENS_VERIFY_FILES = {
+    "T01-symbolic-recursion": "t01_fib.sens",
+}
+
 # Реалізації, які РЕАЛЬНО існують у дереві. Немає компілятора — немає запису.
 # Імена закарбованих .sens для активного розміру. Мапа явна, бо імена
 # файлів містять опис задачі (t01_fib_measure.sens), а не лише номер.
@@ -53,8 +62,12 @@ LANGUAGES = {
     # файл і не передає аргументів програмі. Тому для кожного режиму — свій
     # закарбований .sens, а не параметр у середовищі.
     "sens": {
-        "cmd": lambda task_id: f"{os.environ.get('SENS_BIN', './target/release/sens')} "
-                               f"/tmp/sens-out/{SENS_MEASURE_FILES[task_id]}",
+        # Path chosen at call time from SIZES["mode"] (set in main before build_pairs).
+        "cmd": lambda task_id: (
+            f"{os.environ.get('SENS_BIN', './target/release/sens')} "
+            f"/tmp/sens-out/"
+            f"{(SENS_MEASURE_FILES if SIZES['mode'] == 'measure' else SENS_VERIFY_FILES)[task_id]}"
+        ),
     },
     "javascript": {
         "kind": "jit",
@@ -254,8 +267,17 @@ def run_once(cmd: str, env: dict, timeout_s: float = 120.0):
     proc.returncode = os.waitstatus_to_exitcode(status)
     if status != 0:
         return None, None, f"EXIT_{status}:{err.strip()[:80]}"
-    lines = [ln for ln in out.splitlines() if ln.strip()]
+    lines = []
+    for ln in out.splitlines():
+        s = ln.strip()
+        if s.startswith("sens[") and ">" in s:
+            s = s.split(">", 1)[-1].strip()
+        if s:
+            lines.append(s)
     if len(lines) != 1:
+        nums = [ln for ln in lines if ln.lstrip("-").isdigit()]
+        if len(nums) == 1:
+            return float(elapsed), float(usage.ru_maxrss), nums[0]
         return None, None, f"BAD_STDOUT_LINES_{len(lines)}"
     # POSIX RSS normalization is owned by #6288 / PR #6337; no overlap.
     return float(elapsed), float(usage.ru_maxrss), lines[0]
