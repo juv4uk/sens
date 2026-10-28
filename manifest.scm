@@ -27,5 +27,6 @@
          "grep"
          "nss-certs"
          "git"
+         "python@3.12"
          "sed"
          "racket")))))

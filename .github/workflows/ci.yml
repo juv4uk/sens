@@ -1,81 +1,48 @@
-name: "SENS — трійка .lisp → .sens → без розширення"
+name: SENS CI
 
-# Одна умова: створено або змінено .lisp — перекарбувати фізичний носій.
-# Нічого більше цей workflow не робить.
 on:
   push:
     branches: [main]
-    paths:
-      - "**.lisp"
+  pull_request:
+    branches: [main]
   workflow_dispatch:
 
-concurrency:
-  group: lisp-triplet-mint
-  cancel-in-progress: false
-
 permissions:
-  contents: write
+  contents: read
 
 jobs:
-  mint:
-    name: Перекарбувати трійку
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
+  sens-and-mechanisms:
+    name: Rust/Zig механізми та SENS REPL
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0
+          persist-credentials: false
+      - uses: dtolnay/rust-toolchain@1.99.0
+      - uses: ./.github/actions/install-zig
+      - name: Перевірити компіляцію workspace
+        run: cargo check --locked --workspace
+      - name: Зібрати REPL SENS
+        run: cargo build --locked -p sens-cli --bin sens
+      - name: Перевірити Zig транспортні механізми
+        run: zig test -lc research/zig-codecs/tests.zig
+      - name: Перевірити мовні закони тільки виконанням SENS REPL
+        run: bash scripts/prove-repl-semantic-corpus.sh "$PWD/target/debug/sens"
+      - name: Перевірити D8/D10 огляд середовища через SENS REPL
+        run: bash scripts/prove-repl-environment.sh "$PWD/target/debug/sens"
 
-      - name: Пінований Zig
-        uses: ./.github/actions/install-zig
-
-      - name: Тулчейн Rust
-        uses: dtolnay/rust-toolchain@1.99.0
-
-      - name: Зібрати карбувальник
-        run: cargo build --locked -p sens-cli --bin sens --bin sens-trit
-
-      - name: Перекарбувати змінені .lisp
-        shell: bash
+  research-tools:
+    name: Інструменти досліду · синтетичні перевірки
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Перевірити Python-інструменти досліду
         run: |
-          set -euo pipefail
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            changed="$(git ls-files '*.lisp')"
-          else
-            changed="$(git diff --name-only "${{ github.event.before }}" "${{ github.sha }}" -- '*.lisp')"
-          fi
-          if [ -z "$changed" ]; then
-            echo "TRIPLET_NO_LISP_CHANGED"
-            exit 0
-          fi
-          while IFS= read -r f; do
-            [ -f "$f" ] || continue
-            echo "TRIPLET_MINT source=$f"
-            binding_args=()
-            profile_args=()
-            case "$f" in
-              tests/semantic/d9-d10-defined-functions-law.lisp)
-                binding_args=(--binding-source lib/world.lisp)
-                profile_args=(--core4-runtime)
-                ;;
-            esac
-            bash scripts/refresh-verified-t5m-pair.sh "$f" \
-              target/debug/sens target/debug/sens-trit \
-              "${binding_args[@]}" "${profile_args[@]}"
-          done <<< "$changed"
-
-      - name: Закомітити трійки
-        shell: bash
-        run: |
-          set -euo pipefail
-          git config user.name  "sens-triplet"
-          git config user.email "sens-triplet@users.noreply.github.com"
-          # Комітимо лише те, що породило карбування: .sens і файл без
-          # розширення. Самі .lisp не чіпаємо — вони джерело, не продукт.
-          git add -A -- ':!*.lisp'
-          if git diff --cached --quiet; then
-            echo "TRIPLET_NOTHING_TO_COMMIT"
-            exit 0
-          fi
-          git commit -m "трійка: перекарбовано .sens і файл без розширення після зміни .lisp"
-          git push
+          python3 --version
+          python3 -m unittest discover -s benchmarks/language-energy-study -p 'test_*.py' -v
+          python3 -m unittest discover -s docs/research/energy-study -p 'test_*.py' -v
+          python3 -m py_compile benchmarks/measurement-triad/verdict.py
