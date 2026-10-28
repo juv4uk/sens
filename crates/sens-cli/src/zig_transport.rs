@@ -920,6 +920,8 @@ pub fn verify_t5m_encoding(
 }
 
 pub fn decode_t5m_words(bytes: &[u8]) -> Result<Vec<sens::BinarySourceWord>, String> {
+    // Стерильний коридор: T5M перевіряється ДО декодування Zig.
+    validate_t5m(bytes)?;
     let exact_words = decode_t5m_exact_words(bytes)?;
     let mut unsupported_widths = exact_words
         .iter()
