@@ -17,6 +17,15 @@ fn number(path: &Path) -> Result<u64, String> {
         .map_err(|error| format!("invalid RAPL counter {}: {error}", path.display()))
 }
 
+// Validate the actual powercap domain label, not only the filename.
+// An explicit --counter to DRAM/cores must never be reported as PACKAGE.
+fn is_package_identity(label: &str) -> bool {
+    let Some(number) = label.trim().strip_prefix("package-") else {
+        return false;
+    };
+    !number.is_empty() && number.bytes().all(|byte| byte.is_ascii_digit())
+}
+
 // Select a top-level package counter, never a subdomain (cores/DRAM).
 // No interpolation or TDP fallback: missing hardware remains UNAVAILABLE.
 fn find_package_counter() -> Result<PathBuf, String> {
@@ -34,7 +43,7 @@ fn find_package_counter() -> Result<PathBuf, String> {
         if id.is_empty() || !id.bytes().all(|byte| byte.is_ascii_digit()) { continue; }
         let dir = entry.path();
         let Ok(domain) = fs::read_to_string(dir.join("name")) else { continue };
-        if !domain.trim().starts_with("package-") { continue; }
+        if !is_package_identity(&domain) { continue; }
         let energy = dir.join("energy_uj");
         if energy.is_file() && dir.join("max_energy_range_uj").is_file() {
             matches.push(energy);
@@ -100,6 +109,20 @@ fn run() -> Result<(), String> {
     if counter.file_name().and_then(|x| x.to_str()) != Some("energy_uj") {
         return Err("RAPL_UNAVAILABLE --counter must name energy_uj".into());
     }
+    let domain_path = counter.parent().ok_or(
+        "RAPL_UNAVAILABLE energy_uj counter has no domain parent"
+    )?;
+    let domain_name = fs::read_to_string(domain_path.join("name"))
+        .map_err(|error| format!(
+            "RAPL_UNAVAILABLE no verified powercap domain label for {}: {error}",
+            counter.display()
+        ))?;
+    if !is_package_identity(&domain_name) {
+        return Err(format!(
+            "RAPL_UNAVAILABLE {} has domain '{}', not package-N; refuse mislabeled package energy",
+            counter.display(), domain_name.trim()
+        ));
+    }
     let max = number(&counter.with_file_name("max_energy_range_uj"))?;
     let start = number(&counter)?;
     let began = Instant::now();
@@ -144,7 +167,7 @@ fn main() -> ExitCode {
 
 #[cfg(test)]
 mod mechanism_tests {
-    use super::delta_uj;
+    use super::{delta_uj, is_package_identity};
 
     #[test]
     fn monotonic_counter_delta() {
@@ -160,5 +183,16 @@ mod mechanism_tests {
     fn invalid_hardware_reading_rejected() {
         assert!(delta_uj(1000, 10, 1000).is_err());
         assert!(delta_uj(1, 1, 0).is_err());
+    }
+
+    #[test]
+    fn powercap_package_name_is_not_a_dram_or_core_domain() {
+        assert!(is_package_identity("package-0\n"));
+        assert!(is_package_identity("package-12"));
+        assert!(!is_package_identity("dram\n"));
+        assert!(!is_package_identity("core"));
+        assert!(!is_package_identity("uncore"));
+        assert!(!is_package_identity("package-"));
+        assert!(!is_package_identity("package-unknown"));
     }
 }
