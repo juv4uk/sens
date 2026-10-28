@@ -1,0 +1,10 @@
+round	language	wall_seconds	peak_rss_kib	child_exit	stdout
+1	C	0.00	1700	0	144
+1	JS	0.10	43092	0	144
+1	SENS	0.01	25088	0	144
+2	JS	0.02	43772	0	144
+2	SENS	0.01	25212	0	144
+2	C	0.00	1700	0	144
+3	SENS	0.01	24924	0	144
+3	C	0.00	1764	0	144
+3	JS	0.02	43736	0	144
