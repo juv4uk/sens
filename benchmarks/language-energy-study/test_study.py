@@ -85,7 +85,7 @@ class PhysicalStudyTests(unittest.TestCase):
 
     def test_measure_refuses_mismatch_bad_rss_and_failed_process(self):
         expected = study.physical_expected(3)
-        good_usage = "METRIC_RSS_KIB=2048\\tuser_s=0.01\\tsys_s=0.00"
+        good_usage = "METRIC_RSS_KIB=2048\tuser_s=0.01\tsys_s=0.00"
         with tempfile.TemporaryDirectory() as directory:
             out = Path(directory)
 
@@ -98,10 +98,10 @@ class PhysicalStudyTests(unittest.TestCase):
                 return fake_run
 
             for stdout, usage, rc in [
-                ("PHYSICAL_COPY\\tbytes=1\\tcopies=3\\tobserved=1", good_usage, 0),
-                (expected + "\\n" + expected, good_usage, 0),
-                (expected, "METRIC_RSS_KIB=0\\tuser_s=0.01\\tsys_s=0", 0),
-                (expected, "METRIC_RSS_KIB=nan\\tuser_s=0.01\\tsys_s=0", 0),
+                ("PHYSICAL_COPY\tbytes=1\tcopies=3\tobserved=1", good_usage, 0),
+                (expected + "\n" + expected, good_usage, 0),
+                (expected, "METRIC_RSS_KIB=0\tuser_s=0.01\tsys_s=0", 0),
+                (expected, "METRIC_RSS_KIB=nan\tuser_s=0.01\tsys_s=0", 0),
                 (expected, "", 0),
                 (expected, good_usage, 137),
             ]:
@@ -116,7 +116,7 @@ class PhysicalStudyTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             def fake_run(args, **_kwargs):
                 Path(args[args.index("-o") + 1]).write_text(
-                    "METRIC_RSS_KIB=2048\\tuser_s=0.01\\tsys_s=0.00")
+                    "METRIC_RSS_KIB=2048\tuser_s=0.01\tsys_s=0.00")
                 return SimpleNamespace(stdout=expected, stderr="", returncode=0)
             with patch.object(study.subprocess, "run", fake_run):
                 sample = study.measure(["fake-copy"], 3, Path(directory), None, expected)
