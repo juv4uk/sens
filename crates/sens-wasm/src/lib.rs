@@ -394,23 +394,6 @@ pub fn diagnose(source: &str, mode: JsValue) -> JsValue {
 /// Non-wasm_bindgen core of diagnose() -- pulled out so native #[test]s
 /// can exercise it directly (JsValue isn't constructible from a plain
 /// native test without the wasm-bindgen-test harness).
-#[cfg(test)]
-fn diagnose_impl(source: &str, is_literate: bool) -> Vec<Diagnostic> {
-    diagnose_impl_with_presentation(source, is_literate, PresentationLanguage::Canonical)
-}
-
-fn diagnose_impl_with_presentation(
-    source: &str,
-    is_literate: bool,
-    presentation: PresentationLanguage,
-) -> Vec<Diagnostic> {
-    // extract_code/remap_offset are the same functions parse_literate()
-    // itself uses internally (sens-literate/src/lib.rs) -- called
-    // directly here, instead of going through parse_literate(), so the
-    // offset_maps are available afterward to remap arity_diagnostics'
-    // spans too, not just a parse error's.
-    let (concatenated, offset_maps) = sens_literate::extract_code(source, is_literate);
-
     let mut diagnostics: Vec<Diagnostic> = Vec::new();
 
     if is_literate && offset_maps.is_empty() {
