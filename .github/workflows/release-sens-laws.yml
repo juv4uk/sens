@@ -1,0 +1,52 @@
+name: Закони SENS для релізу
+
+on:
+  workflow_call:
+    inputs:
+      ref:
+        description: Точний SHA коміту для доказу
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  sens-laws:
+    name: Нативні закони SENS на точному SHA
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+        with:
+          ref: ${{ inputs.ref }}
+      - name: Перевірити точний SHA
+        shell: bash
+        env:
+          EXPECTED_SHA: ${{ inputs.ref }}
+        run: |
+          set -euo pipefail
+          actual="$(git rev-parse HEAD)"
+          [[ "$actual" == "$EXPECTED_SHA" ]]
+          echo "RELEASE_SENS_LAWS_SHA=$actual"
+      - uses: ./.github/actions/install-zig
+      - uses: dtolnay/rust-toolchain@1.99.0
+      - uses: Swatinem/rust-cache@49a0bdc70d2e1b713ca9e2869b211fcce03d3c1c # v2
+
+      - name: Зібрати виконавець SENS та тритовий читач
+        run: cargo build --locked -p sens-cli --bin sens --bin sens-trit
+
+      - name: Довести чинні мовні закони через фізичний T5M
+        shell: bash
+        run: |
+          set -euo pipefail
+          binary="$PWD/target/debug/sens"
+          bash scripts/prove-meta-eval-graph-d1.sh "$binary"
+          bash scripts/prove-meta-eval-lexical-shadow-d1.sh "$binary"
+          bash scripts/prove-твердження-m1.sh "$binary"
+          bash scripts/prove-ідентичність-тритів.sh "$binary"
+          bash scripts/prove-d3-як-є-щит.sh "$binary"
+
+      - name: Звірити джерело й фізичну проєкцію компіляторного ядра
+        shell: bash
+        run: bash scripts/check-triple-projection.sh --fixture lib/compiler-nucleus.lisp

@@ -45,7 +45,7 @@ jobs:
           set -euo pipefail
           required_checks=(
             "Охоронець · Rust · Zig · SENS"
-            "focused release smoke before publish"
+            "механічні release-перевірки перед публікацією"
             "focused release preflight"
             "sens-cli · ubuntu-22.04"
             "sens-cli · windows-latest"

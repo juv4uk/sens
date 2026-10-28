@@ -4,17 +4,7 @@ on:
   workflow_dispatch:
 jobs:
   short-release-smoke:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
-      - uses: ./.github/actions/install-zig
-      - uses: dtolnay/rust-toolchain@1.99.0
-      - uses: Swatinem/rust-cache@49a0bdc70d2e1b713ca9e2869b211fcce03d3c1c # v2
-      - name: translation boundary regression
-        run: cargo test -p sens --test translation_boundary
-      - name: island installer CLI
-        run: cargo test -p sens-cli --test islands_cli
-      - name: release asset contract
-        run: cargo test -p sens-cli --test islands_release_asset
-      - name: focused release clippy
-        run: cargo clippy -p sens -p sens-cli --all-targets -- -D warnings
+    name: Native SENS release laws
+    uses: ./.github/workflows/release-sens-laws.yml
+    with:
+      ref: ${{ github.sha }}

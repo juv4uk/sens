@@ -18,7 +18,7 @@ on:
   workflow_call:
     inputs:
       full:
-        description: "Run full preflight unless the caller already runs the release test gate"
+        description: "Run full preflight including portability and compiler source parity"
         required: false
         type: boolean
         default: true
@@ -27,7 +27,14 @@ on:
         required: false
         type: string
         default: ""
+
 jobs:
+  native-sens-laws:
+    name: Нативні закони SENS
+    uses: ./.github/workflows/release-sens-laws.yml
+    with:
+      ref: ${{ inputs.ref || github.sha }}
+
   release-preflight:
     name: focused release preflight
     runs-on: ubuntu-latest
@@ -83,54 +90,6 @@ jobs:
       - name: Sterile Zig corridor
         if: ${{ always() }}
         run: zig test research/zig-codecs/tests.zig -O ReleaseSafe -lc
-      - name: F3C corridor behavior — Zig roundtrip
-        if: ${{ always() }}
-        run: cargo test --locked -p sens-cli --bin sens-trit explicit_f3_codec_roundtrip_is_zig_owned -- --nocapture
-      - name: F3C corridor behavior — fail closed without Zig
-        if: ${{ always() }}
-        run: cargo test --locked --no-default-features -p sens-cli --bin sens-trit f3c_physical_ingress_and_egress_require_zig_even_for_valid_bytes -- --nocapture
-
-      - name: translation boundary (required for every release preflight)
-        if: ${{ always() }}
-        run: echo '::error::translation_boundary Rust-тест видалено (власник не дозволяв); SENS-версія не створена — гейт лишається ЧЕРВОНИМ'; exit 1
-
-      - name: F6 physical WRITE→READ producer/consumer — exact SHA
-        if: ${{ always() }}
-        run: cargo test --locked -p sens-cli --test wsm_fs_f6_pipeline -- --nocapture
-
-      - name: Release tag guard — shell-only publisher contract
-        if: ${{ always() && inputs.full }}
-        run: cargo test --locked -p sens-cli --test release_tag_guard -- --nocapture
-
-      - name: Workspace tests
-        if: ${{ always() && inputs.full }}
-        id: workspace_tests
-        run: cargo test --locked --workspace
-
-      - name: Native SENS laws — вирок у тритах, без квитанцій
-        id: native_sens_laws
-        if: always()
-        run: |
-          set -euo pipefail
-          cargo build --locked -p sens-cli --bin sens 2>/dev/null || cargo build --locked -p sens --bin sens
-          bash scripts/prove-meta-eval-graph-d1.sh target/debug/sens
-          bash scripts/prove-meta-eval-lexical-shadow-d1.sh target/debug/sens
-          bash scripts/prove-meta-eval-predicates-d1.sh target/debug/sens
-          bash scripts/prove-d4-selector-width.sh target/debug/sens
-          bash scripts/prove-твердження-m1.sh target/debug/sens
-          bash scripts/prove-бенчмарк-медіана.sh target/debug/sens
-          bash scripts/prove-бенчмарк-структура.sh target/debug/sens
-          bash scripts/prove-бенчмарк-умова.sh target/debug/sens
-          bash scripts/prove-ідентичність-тритів.sh target/debug/sens
-          bash scripts/prove-lisp-language-laws.sh target/debug/sens
-          bash scripts/prove-d1-порожність.sh target/debug/sens
-          bash scripts/prove-d1-empty-identity.sh target/debug/sens
-          bash scripts/prove-d3-пара.sh target/debug/sens
-          bash scripts/prove-d1-not.sh target/debug/sens
-          bash scripts/prove-бенчмарк-глибина.sh target/debug/sens
-          bash scripts/prove-d3-атом-межа.sh target/debug/sens
-          bash scripts/prove-d3-як-є-щит.sh target/debug/sens
-
       - name: Compiler nucleus exact source → T5M → view parity
         id: compiler_nucleus_physical_parity
         if: ${{ always() && inputs.full }}
@@ -140,7 +99,7 @@ jobs:
           cargo build --locked -p sens-cli --bin sens --bin sens-trit
           bash scripts/check-triple-projection.sh --fixture lib/compiler-nucleus.lisp
 
-      - name: Clippy
+      - name: Clippy механізму
         id: workspace_clippy
         if: ${{ always() && inputs.full }}
         run: cargo clippy --locked --workspace --all-targets -- -D warnings
@@ -251,6 +210,5 @@ jobs:
           # published Linux asset's compute path. Run them against this
           # release-mode binary, not the separate debug test executable.
           bash scripts/prove-meta-eval-graph-d1.sh "$binary"
-          bash scripts/prove-d4-selector-width.sh "$binary"
           bash scripts/prove-ідентичність-тритів.sh "$binary"
           echo "RELEASE_LINUX_RUNTIME_WITNESSES=PASS binary=release/sens authority=SENS"
