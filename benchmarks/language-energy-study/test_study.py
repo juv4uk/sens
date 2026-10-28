@@ -141,5 +141,20 @@ class PhysicalStudyTests(unittest.TestCase):
 
 
 
+    def test_total_resource_budget_bounds_full_run_not_only_one_process(self):
+        # The declared budget includes all A/B, candidate, block and warmup
+        # launches. It is a resource guard, not independent copy-work proof.
+        small = study.validate_pilot_budget(8, 4, 64, 322314)
+        self.assertEqual(small["declared_process_launches"], 131)
+        self.assertEqual(small["declared_total_copy_bytes"], 131 * 64 * 322314)
+        with self.assertRaisesRegex(ValueError, "TOTAL_COPY_BUDGET"):
+            study.validate_pilot_budget(8, 4, 8192, 322314)
+        with self.assertRaises(ValueError):
+            study.validate_pilot_budget(8, 4, 64, 0)
+        with self.assertRaises(ValueError):
+            study.validate_pilot_budget(8, 4, 0, 322314)
+
+
+
 if __name__ == "__main__":
     unittest.main()
