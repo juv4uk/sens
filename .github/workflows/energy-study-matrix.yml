@@ -26,6 +26,10 @@ jobs:
         os: [ubuntu-latest, windows-latest, macos-latest]
     runs-on: ${{ matrix.os }}
     timeout-minutes: 20
+    env:
+      # Windows Git Bash / Python інакше можуть мати cp1252 для stdout.
+      PYTHONIOENCODING: utf-8
+      PYTHONUTF8: '1'
     steps:
       - uses: actions/checkout@v4
 
@@ -36,6 +40,8 @@ jobs:
       - name: Паритет на цій платформі
         shell: bash
         run: |
+          # Відсутність справжнього UTF-8 — явний RED, а не хибне падіння паритету.
+          python3 -c "import codecs,sys; assert codecs.lookup(sys.stdout.encoding).name == 'utf-8', sys.stdout.encoding"
           python3 benchmarks/language-energy-study/parity_check.py --selftest
           python3 benchmarks/language-energy-study/parity_check.py \
             --task T09-bit-operations \
