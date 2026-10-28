@@ -53,9 +53,9 @@ jobs:
             "sens-cli · macos-14"
             "sens-cli · Windows MSI installer"
           )
-          check_runs="$(gh api --paginate --slurp \
+          check_runs="$(gh api --paginate \
             -H 'Accept: application/vnd.github+json' \
-            --jq '.[].check_runs[] | [.id, .name, .head_sha, .status, (.conclusion // ""), (.app.slug // ""), (.details_url // "")] | @tsv' \
+            --jq '.check_runs[] | [.id, .name, .head_sha, .status, (.conclusion // ""), (.app.slug // ""), (.details_url // "")] | @tsv' \
             "repos/${GITHUB_REPOSITORY}/commits/${GITHUB_SHA}/check-runs?per_page=100")"
           for required in "${required_checks[@]}"; do
             selected_id=0
