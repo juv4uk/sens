@@ -75,7 +75,8 @@ run_case quote-negative НІ tests/semantic/d3-як-є-щит-mutant.lisp lib/co
 run_case median-positive ТАК tests/semantic/бенчмарк-медіана-law.lisp lib/твердження.lisp lib/бенчмарк.lisp
 run_case median-negative НІ tests/semantic/бенчмарк-медіана-mutant.lisp lib/твердження.lisp lib/бенчмарк.lisp
 
-# Додаткові автономні SENS D1/D3/D4 докази без хостового інтерпретатора.\nrun_case d1-empty-positive ТАК tests/semantic/d1-empty-identity-law.lisp
+# Додаткові автономні SENS D1/D3/D4 докази без хостового інтерпретатора.
+run_case d1-empty-positive ТАК tests/semantic/d1-empty-identity-law.lisp
 run_case d1-empty-negative НІ tests/semantic/d1-empty-identity-mutant.lisp
 run_case d1-empty-predicate-positive ТАК tests/semantic/d1-порожність-law.lisp
 run_case d1-empty-predicate-negative НІ tests/semantic/d1-порожність-mutant.lisp
@@ -88,9 +89,9 @@ run_case d3-d4-selection-negative НІ tests/semantic/d3-d4-logic-selection-muta
 run_case d3-demorgan-positive ТАК tests/semantic/d3-demorgan-truth-table-law.lisp
 run_case d3-demorgan-negative НІ tests/semantic/d3-demorgan-truth-table-mutant.lisp
 
-[[ "$verified" -eq 27 ]] || { echo "SENS_REPL_CORPUS_FAIL incomplete=$verified" >&2; exit 1; }
-echo "SENS_REPL_CORPUS=PASS witnesses=$verified families=13.5 scope=explicit-current-only extended-semantic-coverage=NOT_VERIFIED"
+[[ "$verified" -eq 28 ]] || { echo "SENS_REPL_CORPUS_FAIL incomplete=$verified" >&2; exit 1; }
+echo "SENS_REPL_CORPUS=PASS witnesses=$verified families=14 scope=explicit-current-only extended-semantic-coverage=NOT_VERIFIED"
 
 # The corpus is the declared release-scope smoke proof, not the entire language.
 tracked_laws="$(find tests/semantic -maxdepth 1 -type f -name '*-law.lisp' -print | wc -l | tr -d ' ')"
-echo "REPL_SEMANTIC_COVERAGE=PARTIAL tracked_law_sources=$tracked_laws repl_families=13.5 complete_language_proof=NOT_VERIFIED"
+echo "REPL_SEMANTIC_COVERAGE=PARTIAL tracked_law_sources=$tracked_laws repl_families=14 complete_language_proof=NOT_VERIFIED"
