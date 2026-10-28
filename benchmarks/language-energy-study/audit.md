@@ -41,6 +41,23 @@
 - Немає `meter` → `energy_uj=None`, report status `ENERGY_NOT_MEASURED` (ніколи `0 J`).
 - Збалансований порядок AB/BA не замінює незалежних сесій і не доводить фізичного трафіку.
 
+## Ізольований локальний негативний/дизасемблерний smoke (не офіційний корпус)
+
+Локальний Linux x86-64, `gcc (Debian 14.2.0-19) 14.2.0`, без RAPL. Для **тимчасового перенесення джерела `copy.c`**, `cc -std=c11 -O2 -Wall -Wextra`, синтетичний вхід 1024 байти (`bytes(range(256))*4`) і N=8192:
+
+```text
+EXPECTED PHYSICAL_COPY  bytes=1024  copies=8192  observed=1044480
+ACTUAL   PHYSICAL_COPY  bytes=1024  copies=8192  observed=1044480
+objdump: 1240 call 10b0 <memcpy@plt>
+         125d jne 1237 <main+0x127>
+compiler: gcc (Debian 14.2.0-19) 14.2.0
+C source sha256: eb4fc1a6ef510bb7ec6e6523743c67aa76a65b13413f58eb21f804
+C binary sha256: 36ad7cd355d72e5a24fdb5657ad4fd5e52d57feb75f84395d4e51edcd345aef1
+input sha256:    785b0751fc2c53dc14a4ce3d800e69ef9ce1009eb327ccf458afe09c242c26c9
+```
+
+Це **локальний контрзразок проти DCE для C/GCC14 на синтетичному вході**: дизасемблер показав виклик `memcpy` всередині циклу. **Не поширювати висновок на Rust, GCC іншої версії, точний GitHub runner, `lib/core4.lisp` або енергію.** Ізольована версія нових pure-функцій parser пройшла 3 позитивні та 8 негативних smoke-умов; **повний файл `test_study.py` з репозиторію та міжмовний пілот у цьому середовищі не запускалися**, бо доступу до checkout / `rustc` немає. Статус нових тестів на точному PR SHA до CI — `NOT_VERIFIED`.
+
 ## Збір даних для подальшого аудиту
 
 Ручний обмежений пілот за **попередньо записаним** seed; 8 блоків × 4 пари для кожного з двох порівнянь:
