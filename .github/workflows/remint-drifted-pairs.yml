@@ -566,7 +566,15 @@ jobs:
               --core4-runtime
             printf '%s\n' 'tests/fixtures/wsm-fs-record-producer.lisp' >> "$RUNNER_TEMP/sens-remint-success.txt"
           fi
-          SENS_EQ_TRACE=1 cargo test --locked -p sens-cli --test wsm_fs_f6_pipeline -- --nocapture
+          # The old Rust integration test was removed because semantics belong
+          # to SENS. A failed native mint stays RED; never quietly replace it
+          # with a green host build or a missing Cargo test target.
+          if ! grep -Fxq 'tests/fixtures/wsm-fs-record-producer.lisp' "$RUNNER_TEMP/sens-remint-success.txt"; then
+            echo "::error::F6_NATIVE_SENS_PROOF_MISSING: source not verified by Zig/T5M → SENS" >&2
+            exit 1
+          fi
+          # Rust owns only the producer/consumer *mechanism* compilation.
+          cargo build --locked -p sens-cli --bin wsm-fs-record-producer --bin wsm-fs-record-consumer
 
       # Один нативний суд одночасно перевіряє всі фізичні програми
       # й друкує CONTEST_NATIVE_VERIFIED_EXECUTABLES. Другий повний
