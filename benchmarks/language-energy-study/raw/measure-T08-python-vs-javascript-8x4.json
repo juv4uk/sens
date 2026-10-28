@@ -1,0 +1,381 @@
+{
+  "schema": "sens-energy-study-raw/v1",
+  "tasks": {
+    "T08-persistent-structures": {
+      "schema": "sens-paired-physical/v1",
+      "metric": "wall_time_ns",
+      "parity": {
+        "passed": true,
+        "oracle_id": "parity_check.py --selftest"
+      },
+      "provenance": {
+        "cpu_model": "x86_64",
+        "os": "Linux 4.19.0-gvisor",
+        "rustc": "absent",
+        "affinity": "not-pinned",
+        "governor": "unknown",
+        "turbo": "unknown",
+        "timing_source": "time.perf_counter_ns (wall)",
+        "git_sha": "not-a-git-checkout",
+        "binary_sha256": "n/a-interpreted"
+      },
+      "warmup_note": "Node is JIT: the first iterations pay compilation. No warmup was applied and this is NOT corrected \u2014 the bias is recorded, not hidden.",
+      "energy_note": "ENERGY_NOT_MEASURED: no RAPL in this environment",
+      "pairs": [
+        {
+          "process_id": "javascript-T08-persistent-structures-p0",
+          "order": "AB",
+          "machine_id": "x86_64",
+          "session_id": "session-5227",
+          "baseline_ns": 146974215.0,
+          "candidate_ns": 154972492.0,
+          "baseline_peak_rss_kib": 24636.0,
+          "candidate_peak_rss_kib": 117148.0,
+          "energy_not_measured": true
+        },
+        {
+          "process_id": "javascript-T08-persistent-structures-p0",
+          "order": "BA",
+          "machine_id": "x86_64",
+          "session_id": "session-5227",
+          "baseline_ns": 156595873.0,
+          "candidate_ns": 156197220.0,
+          "baseline_peak_rss_kib": 24764.0,
+          "candidate_peak_rss_kib": 113856.0,
+          "energy_not_measured": true
+        },
+        {
+          "process_id": "javascript-T08-persistent-structures-p0",
+          "order": "AB",
+          "machine_id": "x86_64",
+          "session_id": "session-5227",
+          "baseline_ns": 158545017.0,
+          "candidate_ns": 135830273.0,
+          "baseline_peak_rss_kib": 24764.0,
+          "candidate_peak_rss_kib": 115676.0,
+          "energy_not_measured": true
+        },
+        {
+          "process_id": "javascript-T08-persistent-structures-p0",
+          "order": "BA",
+          "machine_id": "x86_64",
+          "session_id": "session-5227",
+          "baseline_ns": 143955682.0,
+          "candidate_ns": 168209007.0,
+          "baseline_peak_rss_kib": 24764.0,
+          "candidate_peak_rss_kib": 113860.0,
+          "energy_not_measured": true
+        },
+        {
+          "process_id": "javascript-T08-persistent-structures-p1",
+          "order": "BA",
+          "machine_id": "x86_64",
+          "session_id": "session-5227",
+          "baseline_ns": 144925120.0,
+          "candidate_ns": 159549506.0,
+          "baseline_peak_rss_kib": 24764.0,
+          "candidate_peak_rss_kib": 118540.0,
+          "energy_not_measured": true
+        },
+        {
+          "process_id": "javascript-T08-persistent-structures-p1",
+          "order": "AB",
+          "machine_id": "x86_64",
+          "session_id": "session-5227",
+          "baseline_ns": 151311057.0,
+          "candidate_ns": 138465214.0,
+          "baseline_peak_rss_kib": 24764.0,
+          "candidate_peak_rss_kib": 113640.0,
+          "energy_not_measured": true
+        },
+        {
+          "process_id": "javascript-T08-persistent-structures-p1",
+          "order": "BA",
+          "machine_id": "x86_64",
+          "session_id": "session-5227",
+          "baseline_ns": 151611309.0,
+          "candidate_ns": 167253212.0,
+          "baseline_peak_rss_kib": 24764.0,
+          "candidate_peak_rss_kib": 115788.0,
+          "energy_not_measured": true
+        },
+        {
+          "process_id": "javascript-T08-persistent-structures-p1",
+          "order": "AB",
+          "machine_id": "x86_64",
+          "session_id": "session-5227",
+          "baseline_ns": 151561437.0,
+          "candidate_ns": 140431706.0,
+          "baseline_peak_rss_kib": 24764.0,
+          "candidate_peak_rss_kib": 118164.0,
+          "energy_not_measured": true
+        },
+        {
+          "process_id": "javascript-T08-persistent-structures-p2",
+          "order": "AB",
+          "machine_id": "x86_64",
+          "session_id": "session-5227",
+          "baseline_ns": 165802940.0,
+          "candidate_ns": 167401562.0,
+          "baseline_peak_rss_kib": 24764.0,
+          "candidate_peak_rss_kib": 107596.0,
+          "energy_not_measured": true
+        },
+        {
+          "process_id": "javascript-T08-persistent-structures-p2",
+          "order": "BA",
+          "machine_id": "x86_64",
+          "session_id": "session-5227",
+          "baseline_ns": 155131243.0,
+          "candidate_ns": 150753921.0,
+          "baseline_peak_rss_kib": 24764.0,
+          "candidate_peak_rss_kib": 111304.0,
+          "energy_not_measured": true
+        },
+        {
+          "process_id": "javascript-T08-persistent-structures-p2",
+          "order": "AB",
+          "machine_id": "x86_64",
+          "session_id": "session-5227",
+          "baseline_ns": 145173600.0,
+          "candidate_ns": 159254873.0,
+          "baseline_peak_rss_kib": 24764.0,
+          "candidate_peak_rss_kib": 111360.0,
+          "energy_not_measured": true
+        },
+        {
+          "process_id": "javascript-T08-persistent-structures-p2",
+          "order": "BA",
+          "machine_id": "x86_64",
+          "session_id": "session-5227",
+          "baseline_ns": 158711149.0,
+          "candidate_ns": 136912461.0,
+          "baseline_peak_rss_kib": 24764.0,
+          "candidate_peak_rss_kib": 116088.0,
+          "energy_not_measured": true
+        },
+        {
+          "process_id": "javascript-T08-persistent-structures-p3",
+          "order": "BA",
+          "machine_id": "x86_64",
+          "session_id": "session-5227",
+          "baseline_ns": 173909539.0,
+          "candidate_ns": 128550130.0,
+          "baseline_peak_rss_kib": 24764.0,
+          "candidate_peak_rss_kib": 109756.0,
+          "energy_not_measured": true
+        },
+        {
+          "process_id": "javascript-T08-persistent-structures-p3",
+          "order": "AB",
+          "machine_id": "x86_64",
+          "session_id": "session-5227",
+          "baseline_ns": 139825212.0,
+          "candidate_ns": 155068232.0,
+          "baseline_peak_rss_kib": 24764.0,
+          "candidate_peak_rss_kib": 116792.0,
+          "energy_not_measured": true
+        },
+        {
+          "process_id": "javascript-T08-persistent-structures-p3",
+          "order": "BA",
+          "machine_id": "x86_64",
+          "session_id": "session-5227",
+          "baseline_ns": 188956177.0,
+          "candidate_ns": 146219117.0,
+          "baseline_peak_rss_kib": 24764.0,
+          "candidate_peak_rss_kib": 111608.0,
+          "energy_not_measured": true
+        },
+        {
+          "process_id": "javascript-T08-persistent-structures-p3",
+          "order": "AB",
+          "machine_id": "x86_64",
+          "session_id": "session-5227",
+          "baseline_ns": 236359109.0,
+          "candidate_ns": 202479044.0,
+          "baseline_peak_rss_kib": 24764.0,
+          "candidate_peak_rss_kib": 116420.0,
+          "energy_not_measured": true
+        },
+        {
+          "process_id": "javascript-T08-persistent-structures-p4",
+          "order": "AB",
+          "machine_id": "x86_64",
+          "session_id": "session-5227",
+          "baseline_ns": 193746592.0,
+          "candidate_ns": 158805970.0,
+          "baseline_peak_rss_kib": 24764.0,
+          "candidate_peak_rss_kib": 111180.0,
+          "energy_not_measured": true
+        },
+        {
+          "process_id": "javascript-T08-persistent-structures-p4",
+          "order": "BA",
+          "machine_id": "x86_64",
+          "session_id": "session-5227",
+          "baseline_ns": 166906409.0,
+          "candidate_ns": 197323289.0,
+          "baseline_peak_rss_kib": 24764.0,
+          "candidate_peak_rss_kib": 109320.0,
+          "energy_not_measured": true
+        },
+        {
+          "process_id": "javascript-T08-persistent-structures-p4",
+          "order": "AB",
+          "machine_id": "x86_64",
+          "session_id": "session-5227",
+          "baseline_ns": 180549978.0,
+          "candidate_ns": 164435941.0,
+          "baseline_peak_rss_kib": 24764.0,
+          "candidate_peak_rss_kib": 108800.0,
+          "energy_not_measured": true
+        },
+        {
+          "process_id": "javascript-T08-persistent-structures-p4",
+          "order": "BA",
+          "machine_id": "x86_64",
+          "session_id": "session-5227",
+          "baseline_ns": 163029804.0,
+          "candidate_ns": 152694238.0,
+          "baseline_peak_rss_kib": 24764.0,
+          "candidate_peak_rss_kib": 110780.0,
+          "energy_not_measured": true
+        },
+        {
+          "process_id": "javascript-T08-persistent-structures-p5",
+          "order": "BA",
+          "machine_id": "x86_64",
+          "session_id": "session-5227",
+          "baseline_ns": 177397268.0,
+          "candidate_ns": 139591763.0,
+          "baseline_peak_rss_kib": 24764.0,
+          "candidate_peak_rss_kib": 113664.0,
+          "energy_not_measured": true
+        },
+        {
+          "process_id": "javascript-T08-persistent-structures-p5",
+          "order": "AB",
+          "machine_id": "x86_64",
+          "session_id": "session-5227",
+          "baseline_ns": 180233268.0,
+          "candidate_ns": 162377049.0,
+          "baseline_peak_rss_kib": 24764.0,
+          "candidate_peak_rss_kib": 113948.0,
+          "energy_not_measured": true
+        },
+        {
+          "process_id": "javascript-T08-persistent-structures-p5",
+          "order": "BA",
+          "machine_id": "x86_64",
+          "session_id": "session-5227",
+          "baseline_ns": 174935542.0,
+          "candidate_ns": 167744558.0,
+          "baseline_peak_rss_kib": 24764.0,
+          "candidate_peak_rss_kib": 110440.0,
+          "energy_not_measured": true
+        },
+        {
+          "process_id": "javascript-T08-persistent-structures-p5",
+          "order": "AB",
+          "machine_id": "x86_64",
+          "session_id": "session-5227",
+          "baseline_ns": 156876111.0,
+          "candidate_ns": 148357189.0,
+          "baseline_peak_rss_kib": 24764.0,
+          "candidate_peak_rss_kib": 106036.0,
+          "energy_not_measured": true
+        },
+        {
+          "process_id": "javascript-T08-persistent-structures-p6",
+          "order": "AB",
+          "machine_id": "x86_64",
+          "session_id": "session-5227",
+          "baseline_ns": 147571963.0,
+          "candidate_ns": 185054416.0,
+          "baseline_peak_rss_kib": 24764.0,
+          "candidate_peak_rss_kib": 117544.0,
+          "energy_not_measured": true
+        },
+        {
+          "process_id": "javascript-T08-persistent-structures-p6",
+          "order": "BA",
+          "machine_id": "x86_64",
+          "session_id": "session-5227",
+          "baseline_ns": 136744312.0,
+          "candidate_ns": 172071110.0,
+          "baseline_peak_rss_kib": 24764.0,
+          "candidate_peak_rss_kib": 116688.0,
+          "energy_not_measured": true
+        },
+        {
+          "process_id": "javascript-T08-persistent-structures-p6",
+          "order": "AB",
+          "machine_id": "x86_64",
+          "session_id": "session-5227",
+          "baseline_ns": 147429050.0,
+          "candidate_ns": 132580092.0,
+          "baseline_peak_rss_kib": 24764.0,
+          "candidate_peak_rss_kib": 113780.0,
+          "energy_not_measured": true
+        },
+        {
+          "process_id": "javascript-T08-persistent-structures-p6",
+          "order": "BA",
+          "machine_id": "x86_64",
+          "session_id": "session-5227",
+          "baseline_ns": 136088407.0,
+          "candidate_ns": 155462569.0,
+          "baseline_peak_rss_kib": 24764.0,
+          "candidate_peak_rss_kib": 113372.0,
+          "energy_not_measured": true
+        },
+        {
+          "process_id": "javascript-T08-persistent-structures-p7",
+          "order": "BA",
+          "machine_id": "x86_64",
+          "session_id": "session-5227",
+          "baseline_ns": 160629675.0,
+          "candidate_ns": 169222508.0,
+          "baseline_peak_rss_kib": 24764.0,
+          "candidate_peak_rss_kib": 113384.0,
+          "energy_not_measured": true
+        },
+        {
+          "process_id": "javascript-T08-persistent-structures-p7",
+          "order": "AB",
+          "machine_id": "x86_64",
+          "session_id": "session-5227",
+          "baseline_ns": 146327731.0,
+          "candidate_ns": 137210685.0,
+          "baseline_peak_rss_kib": 24764.0,
+          "candidate_peak_rss_kib": 116024.0,
+          "energy_not_measured": true
+        },
+        {
+          "process_id": "javascript-T08-persistent-structures-p7",
+          "order": "BA",
+          "machine_id": "x86_64",
+          "session_id": "session-5227",
+          "baseline_ns": 164737125.0,
+          "candidate_ns": 179076139.0,
+          "baseline_peak_rss_kib": 24764.0,
+          "candidate_peak_rss_kib": 117200.0,
+          "energy_not_measured": true
+        },
+        {
+          "process_id": "javascript-T08-persistent-structures-p7",
+          "order": "AB",
+          "machine_id": "x86_64",
+          "session_id": "session-5227",
+          "baseline_ns": 133590409.0,
+          "candidate_ns": 160676545.0,
+          "baseline_peak_rss_kib": 24764.0,
+          "candidate_peak_rss_kib": 117164.0,
+          "energy_not_measured": true
+        }
+      ]
+    }
+  },
+  "energy": "ENERGY_NOT_MEASURED"
+}
