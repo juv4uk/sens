@@ -256,9 +256,7 @@ fn append_fixed(value: u64, width: usize, out: &mut BitPacker) {
 
 // Independent old bit-for-bit oracle retained ONLY for negative/golden tests;
 // production never allocates one host byte per semantic bit.
-#[cfg(test)]
-fn pack_bits(bits: &[u8]) -> PackedBitstream {
-    let mut bytes = vec![0u8; bits.len().div_ceil(8)];
+ bits.len().div_ceil(8)];
 
     for (index, &bit) in bits.iter().enumerate() {
         debug_assert!(bit <= 1);
