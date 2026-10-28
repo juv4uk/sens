@@ -159,6 +159,11 @@ struct WebSession {
 
 impl WebSession {
     fn new(mut session: Session) -> Result<Self, String> {
+        // `time.lisp` installs its exact D10 mechanism in the root frame.
+        // Load it before making the child frame used by UI projections;
+        // the shared bootstrap state then makes the surface prerequisite a no-op.
+        sens::load_time_library(&mut session)
+            .map_err(|error| format!("Помилка штатного завантаження time.lisp: {}", error))?;
         let base_environment = session.environment.clone();
         let surface_environment =
             build_surface_layer(&base_environment, WebSurface::UkrainianFull)?;
@@ -440,7 +445,22 @@ fn diagnose_impl_with_presentation(
 
 // ── native tests ──
 
+#[cfg(test)]
+mod tests {
+    use super::{session_with_core, WebSession};
 
+    #[test]
+    fn initial_full_ukrainian_surface_bootstraps_time_before_child_frame() {
+        let session = session_with_core().expect("Core4 bootstrap succeeds");
+        let web_session = WebSession::new(session);
+
+        assert!(
+            web_session.is_ok(),
+            "the default browser surface must load the canonical time mechanism at root before creating its child projection: {:?}",
+            web_session.err()
+        );
+    }
+}
 
 /// Direct JS-callable string-slice: char-indexed substring with clamping.
 /// Convenience for browser text processing without full sens evaluation.
