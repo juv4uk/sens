@@ -92,3 +92,18 @@ jobs:
         run: |
           ./target/release/sens --version
           echo "--- SENS збирається на раннері: передумова вимірювання мови виконана ---"
+
+      - name: Закарбувати T01 (.lisp -> .sens)
+        run: |
+          mkdir -p /tmp/sens-out
+          ./target/release/sens --t5m-mint \
+            benchmarks/language-energy-study/corpus/sens/t01_fib.lisp \
+            /tmp/sens-out/t01_fib.sens
+          ls -l /tmp/sens-out/
+
+      - name: Паритет НАШОЇ мови проти Python-еталона
+        run: |
+          # Якщо це впаде — побачимо справжню причину в лозі, а не припущення.
+          python3 benchmarks/language-energy-study/parity_check.py \
+            --task T01-symbolic-recursion \
+            --run "$PWD/target/release/sens /tmp/sens-out/t01_fib.sens"
