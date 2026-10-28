@@ -9,7 +9,10 @@ import sys
 import tempfile
 import unittest
 
-from audit_corpus_evidence import InvalidRaw, audit, strict_json
+if __package__:
+    from .audit_corpus_evidence import InvalidRaw, audit, strict_json
+else:
+    from audit_corpus_evidence import InvalidRaw, audit, strict_json
 
 SHA = "a" * 40
 OUT = "42"
