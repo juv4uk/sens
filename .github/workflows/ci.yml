@@ -259,7 +259,7 @@ jobs:
     name: Канонічний SENS/Zig/T5M remint точних файлів
     needs: remint-source-scope
     # Перелік змін визначається через git diff, а не через крихкі поля події push.
-    if: ${{ always() && ((github.event_name == 'workflow_dispatch' && inputs.suite == 'remint' && inputs.files != '') || (github.event_name == 'push' && (needs['remint-source-scope'].outputs.has_sources == 'true' || contains(github.event.head_commit.message, 'SENS_REMINT_META_EVAL_GRAPH_D1') || contains(github.event.head_commit.message, 'SENS_REMINT_COMPILER_NUCLEUS') || contains(github.event.head_commit.message, 'SENS_REMINT_CORE4_D5') || contains(github.event.head_commit.message, 'SENS_REMINT_F6_KEY_CANON') || contains(github.event.head_commit.message, 'F6_PRODUCER_REMINT') || contains(github.event.head_commit.message, 'SENS_REMINT_RELEASE_REASONING_F6') || contains(github.event.head_commit.message, 'SENS_REMINT_CORE4_P_R_SELECTOR') || contains(github.event.head_commit.message, 'SENS_REMINT_TRANSLATION_BOUNDARY') || contains(github.event.head_commit.message, 'SENS_PAIR_REGEN')))) }}
+    if: ${{ always() && ((github.event_name == 'workflow_dispatch' && inputs.suite == 'remint' && inputs.files != '') || (github.event_name == 'push' && (needs['remint-source-scope'].outputs.has_sources == 'true' || contains(github.event.head_commit.message, 'SENS_REMINT_META_EVAL_GRAPH_D1') || contains(github.event.head_commit.message, 'SENS_REMINT_COMPILER_NUCLEUS') || contains(github.event.head_commit.message, 'SENS_REMINT_CORE4_D5') || contains(github.event.head_commit.message, 'SENS_REMINT_F6_KEY_CANON') || contains(github.event.head_commit.message, 'F6_PRODUCER_REMINT') || contains(github.event.head_commit.modified, 'scripts/refresh-verified-t5m-pair.sh') || contains(github.event.head_commit.message, 'SENS_REMINT_RELEASE_REASONING_F6') || contains(github.event.head_commit.message, 'SENS_REMINT_CORE4_P_R_SELECTOR') || contains(github.event.head_commit.message, 'SENS_REMINT_TRANSLATION_BOUNDARY') || contains(github.event.head_commit.message, 'SENS_PAIR_REGEN')))) }}
     uses: ./.github/workflows/remint-drifted-pairs.yml
     with:
       files: |
@@ -271,7 +271,7 @@ jobs:
         ${{ github.event_name == 'push' && contains(github.event.head_commit.message, 'SENS_REMINT_CORE4_D5') && 'lib/core4.lisp' || '' }}
         ${{ github.event_name == 'push' && contains(github.event.head_commit.message, 'SENS_REMINT_CORE4_P_R_SELECTOR') && 'lib/core4.lisp' || '' }}
         ${{ github.event_name == 'push' && contains(github.event.head_commit.message, 'SENS_REMINT_F6_KEY_CANON') && 'lib/lisp-fs.lisp' || '' }}
-        ${{ github.event_name == 'push' && contains(github.event.head_commit.message, 'F6_PRODUCER_REMINT') && 'tests/fixtures/wsm-fs-record-producer.lisp' || '' }}
+        ${{ github.event_name == 'push' && (contains(github.event.head_commit.message, 'F6_PRODUCER_REMINT') || contains(github.event.head_commit.modified, 'scripts/refresh-verified-t5m-pair.sh')) && 'tests/fixtures/wsm-fs-record-producer.lisp' || '' }}
         ${{ github.event_name == 'push' && contains(github.event.head_commit.message, 'SENS_REMINT_RELEASE_REASONING_F6') && 'lib/core4.lisp' || '' }}
         ${{ github.event_name == 'push' && contains(github.event.head_commit.message, 'SENS_REMINT_RELEASE_REASONING_F6') && 'lib/forward.lisp' || '' }}
         ${{ github.event_name == 'push' && contains(github.event.head_commit.message, 'SENS_REMINT_RELEASE_REASONING_F6') && 'lib/knowledge.lisp' || '' }}
