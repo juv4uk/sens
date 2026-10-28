@@ -1912,6 +1912,33 @@ pub(crate) fn history_path() -> Option<PathBuf> {
     Some(PathBuf::from(home).join(".sens-history"))
 }
 
+// REPL host inspection only: snapshot the bindings visible to lexical lookup.
+// This is NOT a D10 ENV call, not a SENS value and not a semantic oracle.
+// Avoid rendering arbitrary recursive/large data or leaking opaque host tokens.
+fn render_lexical_bindings(session: &Session, surface: ReplSurface) -> String {
+    let bindings = session.environment.snapshot();
+    let mut lines = Vec::with_capacity(bindings.len() + 2);
+    lines.push(format!(
+        "Лексичне середовище REPL: {} прив'язок (без фільтра поверхнею; складні значення — типами).",
+        bindings.len()
+    ));
+    for (name, value) in bindings {
+        let shown = match &value {
+            Value::Closure(_) => "<замикання SENS>".to_owned(),
+            Value::Macro(_) => "<макрос SENS>".to_owned(),
+            Value::Builtin(_) => "<механізм хоста>".to_owned(),
+            Value::HostHandle { .. } => "<непрозорий ресурс>".to_owned(),
+            Value::Pair(_) => "<список або пара>".to_owned(),
+            Value::Vector(_) => "<вектор>".to_owned(),
+            Value::NumericBuffer(_) => "<числовий буфер>".to_owned(),
+            Value::String(text) if text.len() > 256 => "<довгий рядок>".to_owned(),
+            _ => render_repl_reply(&value, surface.presentation()),
+        };
+        lines.push(format!("{name} = {shown}"));
+    }
+    lines.join("\n")
+}
+
 fn print_surface_help() {
     println!("Завантажити файл у поточну сесію: :завантажити <шлях>");
     println!("Показати дерево розбору без виконання: :розбір <форма>");
@@ -1924,7 +1951,8 @@ fn print_surface_help() {
     println!(
         "Виміряти REPL через Zig T5M і переглянути термінальний звіт: :бенч [вимірів 100..10000]"
     );
-    println!("Сире лексичне середовище без фільтрації поверхнею: (середовище) / (env)");
+    println!("Лексичні прив'язки без фільтра поверхнею: :середовище / :env (діагностика REPL).");
+    println!("D10 (середовище) / (env) — не реалізований мовний виклик; каталог ≠ виконання.");
     println!("LISP — окрема проєкція з доменних таблиць; core — канонічний машинний шар.");
     println!("Перемикання змінює лише поверхню; ваші визначення й замикання лишаються доступними.");
 }
@@ -2003,6 +2031,14 @@ fn handle_meta_command(line: &str, state: &mut ReplState) -> bool {
             match state.switch_surface(surface) {
                 Ok(()) => println!("Поверхня: {} ({})", surface.title(), surface.code()),
                 Err(error) => eprintln!("Помилка перемикання поверхні: {error}"),
+            }
+            true
+        }
+        ":середовище" | ":env" => {
+            if parts.next().is_some() {
+                eprintln!("Команда :середовище не приймає аргументів.");
+            } else {
+                println!("{}", render_lexical_bindings(&state.session, state.surface));
             }
             true
         }
