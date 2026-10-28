@@ -35,10 +35,6 @@ unsafe extern "C" {
         -> isize;
     pub(super) fn sens_zig_d9_string_append_bytes_copy(output: *mut u8, capacity: usize) -> isize;
     pub(super) fn sens_zig_sanskrit_bytes_copy(output: *mut u8, capacity: usize) -> isize;
-    #[cfg(test)]
-    pub(super) fn sens_zig_ukr_bytes_copy(output: *mut u8, capacity: usize) -> isize;
-    #[cfg(test)]
-    pub(super) fn sens_zig_uk_bytes_copy(output: *mut u8, capacity: usize) -> isize;
     pub(super) fn sens_zig_islands_manifest_bytes_copy(output: *mut u8, capacity: usize) -> isize;
     pub(super) fn sens_zig_uk_docs_bytes_copy(output: *mut u8, capacity: usize) -> isize;
     pub(super) fn sens_zig_unify_bytes_copy(output: *mut u8, capacity: usize) -> isize;
