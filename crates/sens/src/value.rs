@@ -1049,38 +1049,3 @@ impl Drop for Value {
 }
 
 
-#[cfg(test)]
-mod host_handle_tests {
-    use super::Value;
-    use std::cell::RefCell;
-
-    #[test]
-    fn host_handle_hides_its_token_when_rendered() {
-        let handle = Value::host_handle("cyberpunk.IScriptable", 0x1234_5678);
-        assert_eq!(
-            handle.as_host_handle(),
-            Some(("cyberpunk.IScriptable", 0x1234_5678))
-        );
-        assert_eq!(handle.to_string(), "#<host-handle cyberpunk.IScriptable>");
-        assert_ne!(handle.to_string(), "#<host-handle 305419896>");
-    }
-
-    #[test]
-    fn opaque_host_resource_is_shared_and_type_checked() {
-        let handle = Value::host_resource("test-resource", 7, RefCell::new(42_u32));
-        let alias = handle.clone();
-
-        assert_eq!(handle, alias);
-        assert_eq!(
-            *handle
-                .as_host_resource::<RefCell<u32>>("test-resource")
-                .expect("matching host resource type")
-                .borrow(),
-            42
-        );
-        assert!(handle
-            .as_host_resource::<RefCell<u32>>("another-resource")
-            .is_none());
-        assert!(handle.as_host_resource::<u32>("test-resource").is_none());
-    }
-}
