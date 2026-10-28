@@ -18,7 +18,64 @@ sys.modules[spec.name] = meter
 spec.loader.exec_module(meter)
 
 
-class TimeParserTest(unittest.TestCase):
+# Mixin: CI adapter imports only TimeParserTest and NativeRunnerTest.
+# Keep the independent provenance cases inherited by the imported class.
+class ProvenanceIdentityChecks:
+    def test_linux_cpu_model_from_realistic_cpuinfo(self):
+        with tempfile.TemporaryDirectory() as d:
+            cpuinfo = Path(d) / "cpuinfo"
+            cpuinfo.write_text(
+                "processor : 0\nmodel name : AMD EPYC 7763 64-Core Processor\n"
+            )
+            from unittest import mock
+            with mock.patch.object(meter.platform, "system", return_value="Linux"), \
+                 mock.patch.object(meter.platform, "processor", return_value=""):
+                value = meter.cpu_identity(cpuinfo)
+            self.assertEqual(value["cpu_model"], "AMD EPYC 7763 64-Core Processor")
+            self.assertEqual(value["cpu_model_source"], "/proc/cpuinfo")
+            self.assertEqual(value["cpu_model_status"], "RECORDED")
+
+    def test_missing_cpu_model_exposes_missing_metadata(self):
+        from unittest import mock
+        with mock.patch.object(meter.platform, "system", return_value="Linux"), \
+             mock.patch.object(meter.platform, "processor", return_value=""):
+            result = meter.cpu_identity(Path("/nonexistent-science-cpuinfo"))
+        self.assertEqual(result["cpu_model_status"], "CPU_MODEL_NOT_RECORDED")
+        self.assertIsNone(result["cpu_model"])
+
+    def test_nonlinux_processor_fallback_is_labeled(self):
+        from unittest import mock
+        with mock.patch.object(meter.platform, "system", return_value="Windows"), \
+             mock.patch.object(meter.platform, "processor", return_value="Intel Test CPU"):
+            result = meter.cpu_identity(Path("/nonexistent-science-cpuinfo"))
+        self.assertEqual(result["cpu_model"], "Intel Test CPU")
+        self.assertEqual(result["cpu_model_source"], "platform.processor")
+
+    def test_real_run_id_only_not_fictional_job_id(self):
+        result = meter.github_run_identity(
+            {"GITHUB_RUN_ID": "40724311685", "GITHUB_JOB": "build-sens"}
+        )
+        self.assertEqual(result["github_run_id"], 40724311685)
+        self.assertEqual(result["github_run_id_status"], "RECORDED")
+        self.assertEqual(result["github_job_label"], "build-sens")
+        self.assertEqual(result["github_job_label_kind"],
+                         "LOGICAL_JOB_NAME_NOT_NUMERIC_JOB_ID")
+
+    def test_missing_or_invalid_run_id_not_fabricated(self):
+        for env, status in [
+            ({}, "NOT_PROVIDED"),
+            ({"GITHUB_RUN_ID": "-1"}, "INVALID"),
+            ({"GITHUB_RUN_ID": "bad"}, "INVALID"),
+            ({"GITHUB_RUN_ID": "0"}, "INVALID"),
+            ({"GITHUB_RUN_ID": "123\n456"}, "INVALID"),
+        ]:
+            with self.subTest(env=env):
+                result = meter.github_run_identity(env)
+                self.assertIsNone(result["github_run_id"])
+                self.assertEqual(result["github_run_id_status"], status)
+
+
+class TimeParserTest(ProvenanceIdentityChecks, unittest.TestCase):
     def test_time_accepted(self):
         self.assertEqual(
             meter.parse_time("WALL_SECONDS=1.23\nMAX_RSS_KIB=400\nCHILD_EXIT=0\n"),
@@ -73,6 +130,9 @@ class NativeRunnerTest(unittest.TestCase):
         self.assertIsNone(raw["energy_joules"])
         self.assertEqual(len(raw["checkout_head_sha"]), 40)
         self.assertEqual(len(raw["program_sha256"]), 64)
+        self.assertIn(raw["host"]["cpu_model_status"],
+                      ("RECORDED", "CPU_MODEL_NOT_RECORDED"))
+        self.assertIn("github_run_id_status", raw["github_actions"])
         self.assertTrue(all(x["admitted"] for x in raw["samples"]))
         self.assertTrue(all(x["stderr_clean"] for x in raw["samples"]))
         self.assertTrue(all(len(x["stdout_sha256"]) == 64 for x in raw["samples"]))

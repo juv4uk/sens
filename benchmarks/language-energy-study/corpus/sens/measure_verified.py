@@ -65,6 +65,54 @@ def checkout_head(root: Path) -> str:
     return head
 
 
+def cpu_identity(cpuinfo: Path = Path("/proc/cpuinfo")) -> dict:
+    """Expose the real host CPU model or explicit absence, never invent one.
+
+    On Linux platform.processor() is often empty; /proc/cpuinfo usually
+    contains the physical model label of the runner host/virtual CPU.
+    The exact origin is retained because VMs can present virtualized models.
+    """
+    if platform.system() == "Linux":
+        try:
+            for line in cpuinfo.read_text(encoding="utf-8").splitlines():
+                key, separator, value = line.partition(":")
+                if separator and key.strip().lower() in (
+                    "model name", "hardware", "cpu model"
+                ) and value.strip():
+                    return {"cpu_model": value.strip(),
+                            "cpu_model_source": "/proc/cpuinfo",
+                            "cpu_model_status": "RECORDED"}
+        except (OSError, UnicodeError):
+            pass
+    model = platform.processor().strip()
+    if model:
+        return {"cpu_model": model, "cpu_model_source": "platform.processor",
+                "cpu_model_status": "RECORDED"}
+    return {"cpu_model": None, "cpu_model_source": None,
+            "cpu_model_status": "CPU_MODEL_NOT_RECORDED"}
+
+
+def github_run_identity(env: dict[str, str] | None = None) -> dict:
+    """Record GitHub run metadata only when supplied; no fictional job ID.
+
+    GITHUB_JOB is a logical job label, NOT a numeric Actions job ID.
+    """
+    if env is None:
+        env = os.environ
+    raw = env.get("GITHUB_RUN_ID", "")
+    if not raw:
+        status, run_id = "NOT_PROVIDED", None
+    elif re.fullmatch(r"[0-9]{1,20}", raw) and int(raw) > 0:
+        status, run_id = "RECORDED", int(raw)
+    else:
+        status, run_id = "INVALID", None
+    job = env.get("GITHUB_JOB", "")
+    job_label = job if re.fullmatch(r"[A-Za-z0-9_-]{1,128}", job) else None
+    return {"github_run_id": run_id, "github_run_id_status": status,
+            "github_job_label": job_label,
+            "github_job_label_kind": "LOGICAL_JOB_NAME_NOT_NUMERIC_JOB_ID"}
+
+
 def measure(binary: Path, program: Path, expected: str, time_tool: Path,
             timeout_s: float, runs: int, git_head: str, task_id: str) -> dict:
     command = [str(binary.resolve()), str(program.resolve())]
@@ -85,7 +133,9 @@ def measure(binary: Path, program: Path, expected: str, time_tool: Path,
         "energy_status": "ENERGY_NOT_MEASURED",
         "energy_joules": None,
         "host": {"system": platform.system(), "release": platform.release(),
-                 "machine": platform.machine(), "processor": platform.processor()},
+                 "machine": platform.machine(), "processor": platform.processor(),
+                 **cpu_identity()},
+        "github_actions": github_run_identity(),
         "samples": [],
         "limitations": [
             "Matching final output does not prove every algorithmic step or a SENS language law.",
