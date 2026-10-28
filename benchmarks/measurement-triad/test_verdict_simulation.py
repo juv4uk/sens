@@ -220,8 +220,20 @@ def test_familywise_inference_is_fail_closed() -> None:
     failed = build(lambda p, k: 0.6, seed=708)
     failed["parity"] = {"passed": False, "oracle_id": "negative-control"}
     bad_result = analyze_many([failed], draws=1000, seed=7)
-    check("невдалий паритет лишається BLOCKED",
+    check("невдалий паритет лишається BLOCKED на обох рівнях",
+          bad_result["status"] == "BLOCKED" and
           bad_result["comparisons"][0]["status"] == "BLOCKED")
+    check("причину блокування передано на рівень сім'ї",
+          "PARITY_NOT_PROVED" in bad_result.get("reason", ""),
+          str(bad_result.get("reason")))
+    for invalid_alpha in (0, 1, -0.1, float("nan"), float("inf"), True):
+        rejected = False
+        try:
+            analyze_many([docs[0]], draws=1000, seed=7,
+                         family_alpha=invalid_alpha)
+        except InvalidEvidence:
+            rejected = True
+        check(f"некоректне сімейне alpha={invalid_alpha!r} відхилено", rejected)
 
 
 
