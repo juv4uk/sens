@@ -68,7 +68,7 @@ Pereira 2021: 10 задач із Computer Language Benchmark Game, до 27 мо�
 Межі: startup усередині, компіляція зовні. `/usr/bin/time` для RSS, user, sys.
 RAPL package — де є; інакше `ENERGY_NOT_MEASURED`.
 
-`[НЕ ДОВЕДЕНО: N1, N2, N4]` — жодного фізичного джоуля не виміряно;
+`[НЕ ДОВЕДЕНО: N1, N2, N4]` (parity Rust закрито — C13, C14) — жодного фізичного джоуля не виміряно;
 енергія package ≠ енергія процесу; RSS групи процесів не мірявся.
 
 ## 6. Results
@@ -76,7 +76,7 @@ RAPL package — де є; інакше `ENERGY_NOT_MEASURED`.
 **Розділ порожній.** Числових результатів немає. Заповнювати його зараз
 означало б вигадати дані.
 
-`[НЕ ДОВЕДЕНО: N1, N3, N5]`
+`[НЕ ДОВЕДЕНО: N1, N5]`
 
 ## 7. Statistical uncertainty
 
@@ -94,6 +94,7 @@ RAPL package — де є; інакше `ENERGY_NOT_MEASURED`.
 | CPU / OS confound | не ранжуємо між різними CPU |
 | Power attribution | **відкрито** (N2) |
 | Caching / JIT / GC | не вимірювано (N5) |
+| DCE у Rust | закрито виміром (C14) |
 | Sensor failure | закрито (C3, C4) |
 | Data-dependent stopping | закрито (C9) |
 | Independent reproduction | **відкрито** (N6) |
