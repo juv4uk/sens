@@ -13,7 +13,8 @@ run_repl_form() {
     cat "$tmp/err" >&2
     exit 1
   fi
-  if grep -Eq 'Помилка REPL/T5M|Помилка завантаження' "$tmp/err"; then
+  # REPL can print a language error on stdout and still exit zero.
+  if grep -Eq 'Помилка (REPL/T5M|завантаження|виконання)|unknown Text7 binding|#t7:' "$tmp/out" "$tmp/err"; then
     printf 'REGRESSION case=%s layer=SENS-REPL actual=language-error\n' "$label" >&2
     cat "$tmp/err" >&2
     exit 1
@@ -24,8 +25,34 @@ run_repl_form() {
   # The REPL may add CR and trailing terminal blanks on a redirected stream.
   # Remove only presentation whitespace; do NOT accept a substring as a D1 proof.
   tr -d '\r' < "$tmp/out" | sed 's/[[:blank:]]*$//' > "$tmp/normalized.out"
-  if ! grep -Fqx 'НІ' "$tmp/normalized.out" &&
-     ! grep -Fqx 'sens[укр]> НІ' "$tmp/normalized.out"; then
+  # Prevent a second or contradictory D1 answer from hiding a failure.
+  local d1_answers
+  d1_answers="$(grep -Ec '^(sens\\[укр\\]> )?(ТАК|НІ)
+    printf 'REGRESSION case=%s expected=НІ actual=wrong-reply\n' "$label" >&2
+    cat "$tmp/out" >&2
+    printf 'REPL_REPLY_RAW_BYTES case=%s\n' "$label" >&2
+    od -An -tx1 "$tmp/out" >&2
+    exit 1
+  fi
+}
+
+run_repl_form D10 '(атом? (середовище))'
+run_repl_form D8 '(атом? (відобразити-середовище))'
+if ! printf '(відобразити-середовище)\n' | timeout 45s "$cli" --surface=укр >"$tmp/reflection.out" 2>"$tmp/reflection.err"; then
+  printf 'REGRESSION identity=D8:11100111 layer=SENS-REPL actual=execution-error\n' >&2
+  cat "$tmp/reflection.err" >&2
+  exit 1
+fi
+if grep -Eq 'Помилка (REPL/T5M|завантаження|виконання)|unknown Text7 binding|#t7:' "$tmp/reflection.out" "$tmp/reflection.err" ||
+   ! grep -Fq 'БУДЬ-ЯКЕ?' "$tmp/reflection.out"; then
+  printf 'REGRESSION identity=D8:11100111 expected=surface-names actual=wire-tokens\n' >&2
+  exit 1
+fi
+printf 'SENS_REPL_ENVIRONMENT=OK route=Zig/T5M->SENS D10=1 D8=1\n'
+ "$tmp/normalized.out" || true)"
+  if [[ "$d1_answers" != 1 ]] ||
+     { ! grep -Fqx 'НІ' "$tmp/normalized.out" &&
+       ! grep -Fqx 'sens[укр]> НІ' "$tmp/normalized.out"; }; then
     printf 'REGRESSION case=%s expected=НІ actual=wrong-reply\n' "$label" >&2
     cat "$tmp/out" >&2
     printf 'REPL_REPLY_RAW_BYTES case=%s\n' "$label" >&2
