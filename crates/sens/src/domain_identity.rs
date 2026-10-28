@@ -144,13 +144,14 @@ impl DomainIdentity {
                         | 0b11101010
                         | 0b11101101
                         | 0b11101110
+                        | 0b11100111
                         | 0b11110100
                         | 0b11110111
                 ) =>
             {
                 // Exact D8 CODE-CHAR and MOD use their concrete mechanisms;
-                // only listed D8 identities project here. Residency alone
-                // never grants callability to any other D8 coordinate.
+                // D8:11100111 is the environment-reflection mechanism;
+                // its exact identity routes to the same environment law.
                 Some(CoreDomainIdentity::D8(value))
             }
             Self::D9(value)

@@ -149,6 +149,7 @@ pub(crate) enum DomainPrimitiveKind {
     AtomPredicate,
     AtomEquality,
     PairConstruct,
+    EnvironmentReflection,
 }
 
 /// Backend-neutral classification of current exact-domain value primitives.
@@ -179,6 +180,7 @@ pub(crate) fn domain_primitive_kind(identity: CoreDomainIdentity) -> Option<Doma
             0b11101010 => Some(DomainPrimitiveKind::Read),
             0b11110100 => Some(DomainPrimitiveKind::WriteToString),
             0b11110111 => Some(DomainPrimitiveKind::Equal),
+            0b11100111 => Some(DomainPrimitiveKind::EnvironmentReflection),
             _ => None,
         },
         _ => None,
@@ -206,6 +208,7 @@ fn invoke_domain_primitive(
             DomainPrimitiveKind::AtomEquality => 2,
             DomainPrimitiveKind::PairConstruct => 2,
             DomainPrimitiveKind::Equal => 2,
+            DomainPrimitiveKind::EnvironmentReflection => 0,
         };
         if matches!(kind, DomainPrimitiveKind::Read) && args.len() > 1 {
             return Err(LanguageError::new(
@@ -238,6 +241,9 @@ fn invoke_domain_primitive(
                 special_forms::cons_values(args[0].clone(), args[1].clone(), environment, span)
             }
             DomainPrimitiveKind::Equal => Ok(Value::predicate_bit(args[0] == args[1])),
+            DomainPrimitiveKind::EnvironmentReflection => {
+                builtins::environment_reflection(args, environment, span)
+            }
             DomainPrimitiveKind::StringToSymbol => {
                 // D8:11101101, direct scalar/string mechanism, no byte fallback.
                 special_forms::string_to_symbol_values(args, span)

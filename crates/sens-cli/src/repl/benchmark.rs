@@ -205,7 +205,7 @@ fn evaluate_visible(state: &mut ReplState, source: &str) -> Result<String, Strin
     }
     Ok(render_repl_reply(
         &result.value,
-        state.surface.presentation(),
+        state.surface,
     ))
 }
 

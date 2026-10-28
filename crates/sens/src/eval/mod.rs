@@ -40,6 +40,14 @@ pub(crate) fn d10_monotonic_nanoseconds_builtin() -> Value {
     }))
 }
 
+/// D10 ENV exposes the same current lexical snapshot used by D8 ENV-REFLECTION.
+/// The exact domain identity remains separate from the shared mechanism.
+pub(crate) fn d10_environment_builtin() -> Value {
+    Value::host_function(std::rc::Rc::new(|args, environment, span| {
+        builtins::environment_reflection(args, environment, span)
+    }))
+}
+
 /// Першокласне значення вже допущеного D8:11110100 механізму запису в текст.
 pub(crate) fn d8_write_to_string_builtin() -> Value {
     Value::host_function(std::rc::Rc::new(|args, environment, span| {

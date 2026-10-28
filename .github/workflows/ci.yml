@@ -69,6 +69,9 @@ jobs:
       - name: Мовні закони через інтерактивний SENS REPL
         shell: bash
         run: bash scripts/prove-lisp-language-laws.sh "$PWD/target/debug/sens"
+      - name: D8/D10 огляд середовища через інтерактивний SENS REPL
+        shell: bash
+        run: bash scripts/prove-repl-environment.sh "$PWD/target/debug/sens"
       # rust-isolated — єдиний доказ ізоляції Rust↔SENS. Досі він жив лише
       # в списку GATES файлу release_go_gate.py і не викликався жодним
       # workflow: тобто не перевірявся ніде, крім ручного прогону.

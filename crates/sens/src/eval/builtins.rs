@@ -34,6 +34,20 @@ pub(super) fn monotonic_nanoseconds(
     Ok(exact_value(Rational::integer(elapsed.as_nanos() as i64)))
 }
 
+/// Snapshot the current lexical environment as a Lisp list of name/value pairs.
+/// The Environment owns scope and shadowing; this function only exposes its
+/// already-resolved visible bindings as ordinary SENS data.
+pub(super) fn environment_reflection(
+    args: &[Value],
+    environment: &Environment,
+    span: Span,
+) -> Result<Value, crate::LanguageError> {
+    exact_args(args, 0, span)?;
+    Ok(Value::list(environment.snapshot().into_iter().map(
+        |(name, value)| Value::list([Value::Symbol(name), value]),
+    )))
+}
+
 /// Конвертує рядкове представлення символу в точне числове значення.
 pub(super) fn string_to_codepoint(
     args: &[Value],

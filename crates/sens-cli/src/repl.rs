@@ -454,6 +454,12 @@ fn catalog_domain_identity(identity: &str) -> Result<Option<DomainIdentity>, Str
         .strip_prefix('D')
         .and_then(|value| value.parse::<usize>().ok())
         .ok_or_else(|| format!("projection catalog domain is malformed: {identity}"))?;
+    // The current exact executable identity carrier models D1–D10. D11
+    // projection data is retained in the surface catalog, but it cannot be
+    // lowered into this runtime carrier until its exact identity type exists.
+    if width > 10 {
+        return Ok(None);
+    }
     if bits.len() != width || !bits.bytes().all(|bit| matches!(bit, b'0' | b'1')) {
         return Err(format!(
             "projection catalog word is not exact-width: {identity}"
@@ -470,6 +476,7 @@ fn catalog_domain_identity(identity: &str) -> Result<Option<DomainIdentity>, Str
 fn selected_surface_callable(
     surface: ReplSurface,
     name: &str,
+    session: &Session,
 ) -> Result<Option<DomainIdentity>, String> {
     let projected_name = match surface {
         // The projection is displayed in its canonical uppercase spelling,
@@ -506,6 +513,23 @@ fn selected_surface_callable(
         if let Some(identity) = admitted_catalog_callable(surface, &projected_name, &identity_text)?
         {
             return Ok(Some(identity));
+        }
+    }
+
+    // Resolve every exact table surface against mechanisms that are actually
+    // present: built-in evaluator laws or a concrete runtime code slot. This
+    // keeps the REPL projection general across D1–D10 instead of maintaining
+    // a second list of callable spellings here. A table row alone is only an
+    // identity; it becomes a call head only when SENS has an implementation.
+    if let Some(identity_text) =
+        surface_catalog::identity_for_surface_name(surface.code(), &projected_name)?
+    {
+        if let Some(identity) = catalog_domain_identity(&identity_text)? {
+            if sens::semantic_registry_export::has_exact_domain_mechanism(identity)
+                || session.environment.has_domain_code_slot(identity)
+            {
+                return Ok(Some(identity));
+            }
         }
     }
 
@@ -724,7 +748,7 @@ fn project_repl_surface_expression_in_scope(
             // D8 structural equality must not stay a stale D3 EQ identity.
             // Quote/data is shielded by the enclosing QUOTE branch above; bound
             // lexical names are shielded by the binder check immediately above.
-            if let Some(projected) = selected_surface_callable(surface, name)? {
+            if let Some(projected) = selected_surface_callable(surface, name, session)? {
                 return Ok(Expr {
                     kind: ExprKind::DomainIdentity(projected),
                     span: expression.span,
@@ -758,7 +782,7 @@ fn project_repl_surface_expression_in_scope(
                     Some(*identity)
                 }
                 ExprKind::Symbol(head) if session.environment.get(head).is_none() => {
-                    selected_surface_callable(surface, head)?.filter(|identity| {
+                    selected_surface_callable(surface, head, session)?.filter(|identity| {
                         matches!(
                             identity,
                             DomainIdentity::D4(word) if word.word().packed_bits() == 0b0010
@@ -824,7 +848,7 @@ fn project_repl_surface_expression_in_scope(
                     word.word().packed_bits() == 0b0011
                 }
                 ExprKind::Symbol(head) if session.environment.get(head).is_none() => {
-                    selected_surface_callable(surface, head)?.is_some_and(|identity| {
+                    selected_surface_callable(surface, head, session)?.is_some_and(|identity| {
                         matches!(identity, DomainIdentity::D4(word) if word.word().packed_bits() == 0b0011)
                     })
                 }
@@ -833,7 +857,9 @@ fn project_repl_surface_expression_in_scope(
             if define_head {
                 if let Some(target) = items.get(1) {
                     if let Some(target_name) = source.get(target.span.start..target.span.end) {
-                        if let Some(identity) = selected_surface_callable(surface, target_name)? {
+                        if let Some(identity) =
+                            selected_surface_callable(surface, target_name, session)?
+                        {
                             if sens::semantic_registry_export::is_admitted_exact_definition_target(
                                 identity,
                             ) && items.get(2).is_some_and(is_t5m_callable_definition_form)
@@ -861,7 +887,7 @@ fn project_repl_surface_expression_in_scope(
                     .any(|candidate| candidate.as_ref() == head.as_ref())
                     && session.environment.get(head).is_none()
                 {
-                    if let Some(identity) = selected_surface_callable(surface, head)? {
+                    if let Some(identity) = selected_surface_callable(surface, head, session)? {
                         let arguments = projected.drain(1..).collect::<Vec<_>>();
                         if let Some(core_identity) = identity.core_operation() {
                             return Ok(Expr {
@@ -889,7 +915,7 @@ fn project_repl_surface_expression_in_scope(
                     .iter()
                     .any(|candidate| candidate.as_ref() == head.as_ref())
                 {
-                    if let Some(identity) = selected_surface_callable(surface, head)? {
+                    if let Some(identity) = selected_surface_callable(surface, head, session)? {
                         if session.environment.has_domain_code_slot(identity) {
                             let arguments = projected.drain(1..).collect::<Vec<_>>();
                             let mut call = Vec::with_capacity(arguments.len() + 1);
@@ -918,7 +944,7 @@ fn project_repl_surface_expression_in_scope(
         .any(|candidate| candidate.as_ref() == name.as_ref())
         && session.environment.get(name).is_none()
     {
-        if let Some(identity) = selected_surface_callable(surface, name)? {
+        if let Some(identity) = selected_surface_callable(surface, name, session)? {
             return Ok(Expr {
                 kind: ExprKind::DomainIdentity(identity),
                 span: expression.span,
@@ -1371,7 +1397,7 @@ fn prepare_t5m_repl_words(
     // domain slot is already occupied in this session. Otherwise the ratified
     // D10 target and its call sites must remain exact DomainIdentity words.
     source_bindings.retain(|(name, is_lambda)| {
-        let exact_target = selected_surface_callable(surface, name)
+        let exact_target = selected_surface_callable(surface, name, session)
             .ok()
             .flatten()
             .filter(|identity| {
@@ -1609,7 +1635,14 @@ fn eval_t5m_repl_line(
     if matches!(&result.value, Value::Closure(_)) {
         return Ok(result);
     }
-    result.value = roundtrip_repl_result(result.value)?;
+    match roundtrip_repl_result(result.value.clone()) {
+        Ok(restored) => result.value = restored,
+        // Runtime values such as the lexical environment can contain closures
+        // and host mechanisms. They remain valid SENS results even though
+        // today's exact T5M result constructors do not serialize those values.
+        Err(error) if error.starts_with("T5M_RESULT_UNSUPPORTED") => {}
+        Err(error) => return Err(error),
+    }
     Ok(result)
 }
 
@@ -1863,26 +1896,34 @@ fn eval_repl_step_t5m(state: &mut ReplState, line: &str) -> Result<sens::EvalRes
 /// while replies print symbol data in uppercase. This is presentation only:
 /// runtime values, semantic identities, strings, numbers and machine protocols
 /// are unchanged.
-fn render_repl_reply(value: &Value, language: PresentationLanguage) -> String {
+fn render_repl_reply(value: &Value, surface: ReplSurface) -> String {
     match value {
-        Value::Symbol(_) => render_value_for_presentation(value, language).to_uppercase(),
-        Value::DomainIdentity(sens::DomainIdentity::D1(_)) => {
-            render_value_for_presentation(value, language).to_uppercase()
+        Value::Symbol(symbol) => {
+            if let Ok(text7) = sens::Text7::from_canonical_wire_token(symbol) {
+                sens::render_text7(&text7, t5m_surface_layout(surface))
+                    .unwrap_or_else(|_| render_value_for_presentation(value, surface.presentation()))
+                    .to_uppercase()
+            } else {
+                render_value_for_presentation(value, surface.presentation()).to_uppercase()
+            }
         }
-        Value::Pair(_) => render_repl_pair(value, language),
+        Value::DomainIdentity(sens::DomainIdentity::D1(_)) => {
+            render_value_for_presentation(value, surface.presentation()).to_uppercase()
+        }
+        Value::Pair(_) => render_repl_pair(value, surface),
         Value::Vector(vector) => {
             let items = vector
                 .borrow()
                 .iter()
-                .map(|item| render_repl_reply(item, language))
+                .map(|item| render_repl_reply(item, surface))
                 .collect::<Vec<_>>();
             format!("#({})", items.join(" "))
         }
-        _ => render_value_for_presentation(value, language),
+        _ => render_value_for_presentation(value, surface.presentation()),
     }
 }
 
-fn render_repl_pair(value: &Value, language: PresentationLanguage) -> String {
+fn render_repl_pair(value: &Value, surface: ReplSurface) -> String {
     let mut output = String::from("(");
     let mut current = value;
     let mut first = true;
@@ -1893,7 +1934,7 @@ fn render_repl_pair(value: &Value, language: PresentationLanguage) -> String {
                 if !first {
                     output.push(' ');
                 }
-                output.push_str(&render_repl_reply(&node.head, language));
+                output.push_str(&render_repl_reply(&node.head, surface));
                 current = &node.tail;
                 first = false;
             }
@@ -1903,7 +1944,7 @@ fn render_repl_pair(value: &Value, language: PresentationLanguage) -> String {
             }
             tail => {
                 output.push_str(" . ");
-                output.push_str(&render_repl_reply(tail, language));
+                output.push_str(&render_repl_reply(tail, surface));
                 output.push(')');
                 return output;
             }
@@ -1979,7 +2020,7 @@ fn render_lexical_bindings(session: &Session, surface: ReplSurface) -> String {
             Value::Vector(_) => "<вектор>".to_owned(),
             Value::NumericBuffer(_) => "<числовий буфер>".to_owned(),
             Value::String(text) if text.len() > 256 => "<довгий рядок>".to_owned(),
-            _ => render_repl_reply(&value, surface.presentation()),
+            _ => render_repl_reply(&value, surface),
         };
         lines.push(format!("{name} = {shown}"));
     }
@@ -1998,8 +2039,8 @@ fn print_surface_help() {
     println!(
         "Виміряти REPL через Zig T5M і переглянути термінальний звіт: :бенч [вимірів 100..10000]"
     );
-    println!("Лексичні прив'язки без фільтра поверхнею: :середовище / :env (діагностика REPL).");
-    println!("D10 (середовище) / (env) — не реалізований мовний виклик; каталог ≠ виконання.");
+    println!("Мовний перегляд лексичного середовища: (середовище) / (env); D8: (відобразити-середовище).");
+    println!("Технічний знімок REPL: :env / :середовище (команда оболонки).");
     println!("LISP — окрема проєкція з доменних таблиць; core — канонічний машинний шар.");
     println!("Перемикання змінює лише поверхню; ваші визначення й замикання лишаються доступними.");
 }
@@ -2043,7 +2084,7 @@ fn handle_meta_command(line: &str, state: &mut ReplState) -> bool {
                         println!("Завантажено: {path}");
                         println!(
                             "{}",
-                            render_repl_reply(&result.value, state.surface.presentation())
+                            render_repl_reply(&result.value, state.surface)
                         );
                     }
                     Err(error) => eprintln!("Помилка завантаження {path}: {error}"),
@@ -2169,7 +2210,7 @@ fn handle_meta_command(line: &str, state: &mut ReplState) -> bool {
                                 }
                                 println!(
                                     "{}",
-                                    render_repl_reply(&result.value, state.surface.presentation())
+                                    render_repl_reply(&result.value, state.surface)
                                 );
                             }
                             Err(error) => eprintln!("Помилка виконання SENS:\n{error}"),
@@ -2268,7 +2309,7 @@ pub(crate) fn run_repl(session: Session, initial_surface: ReplSurface, sens_loop
                         }
                         println!(
                             "{}",
-                            render_repl_reply(&result.value, state.surface.presentation())
+                            render_repl_reply(&result.value, state.surface)
                         );
                     }
                     Err(error) => {

@@ -160,6 +160,22 @@ pub mod semantic_registry_export {
         super::semantic_registry::exact_uk_callable_for_source_head(name)
     }
 
+    /// Whether an exact identity has a concrete evaluator mechanism already
+    /// implemented by SENS. This is mechanism discovery, not identity
+    /// construction: callers must still resolve the exact coordinate from an
+    /// authoritative domain source, and D10 language closures are discovered
+    /// separately from their populated runtime code slots.
+    pub fn has_exact_domain_mechanism(identity: super::DomainIdentity) -> bool {
+        if super::eval::selector_law::is_selector(identity) {
+            return true;
+        }
+        identity.core_operation().is_some_and(|core| {
+            super::eval::canon::has_primitive(core)
+                || super::eval::canon::domain_primitive_kind(core).is_some()
+                || super::eval::necessary_forms::identity_for_domain_identity(core).is_some()
+        })
+    }
+
     /// Whether an exact current D6/D9/D10 identity may be an explicit D4
     /// DEFINE target. D6 targets must appear in the generated definition map
     /// and must not already be a Core operation. Evaluation still requires a
@@ -556,6 +572,7 @@ fn load_core_library_with_fasl_mode(
 /// Джерело identity: `lib/domains/d10.lisp`, точне слово `0011110110`.
 /// Це один іменований механізм, а не загальна викличність D10 за резидентністю.
 fn bind_core_runtime_mechanisms(environment: &Environment) {
+    bind_d10_environment_mechanism(environment);
     // The D8 ladder identifies MOD at exactly 00101100. Core4 supplies its
     // executable Lisp closure; Rust only places that existing closure in the
     // exact domain slot. If Core4 did not define it, there is no fallback or
@@ -611,6 +628,23 @@ fn bind_core_runtime_mechanisms(environment: &Environment) {
             environment.define(surface, string_to_symbol.clone());
         }
     }
+}
+
+fn bind_d10_environment_mechanism(environment: &Environment) {
+    const ENVIRONMENT_D10: u16 = 0b1100011110;
+    let identity = DomainIdentity::D10(
+        DomainD10::new(ENVIRONMENT_D10).expect("the exact D10 environment coordinate is ten bits"),
+    );
+    if environment.domain_code_slot(identity).is_none() {
+        let _ = environment
+            .bind_domain_code_slot_once(identity, eval::d10_environment_builtin());
+    }
+}
+
+/// Install the default exact-domain runtime mechanisms that do not require
+/// loading the larger Core4 Lisp library. `Session::bare()` remains empty.
+pub(crate) fn install_default_language_mechanisms(environment: &Environment) {
+    bind_d10_environment_mechanism(environment);
 }
 
 /// Механічне зв'язування вже обчислених замикань SENS з точними D5.

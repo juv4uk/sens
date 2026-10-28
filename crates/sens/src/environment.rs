@@ -868,6 +868,7 @@ impl Default for Session {
         };
         crate::load_macro_library(&mut session)
             .expect("embedded lib/macro.lisp must bootstrap a default Session");
+        crate::install_default_language_mechanisms(&session.environment);
         session
     }
 }
