@@ -14,7 +14,7 @@ import tempfile
 import unittest
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from check_preregistration import InvalidPlan, validate
+from check_preregistration import InvalidPlan, strict_json, validate
 
 
 def frozen_fixture() -> dict:
@@ -32,6 +32,12 @@ def frozen_fixture() -> dict:
             "implementations": [
                 {"language": "Rust", "source_sha": "a"*40},
                 {"language": "Python", "source_sha": "b"*40},
+            ],
+            "ineligible_candidates": [
+                {"language": "C", "reason": "Synthetic C implementation not yet available",
+                 "evidence_url": "https://github.com/juv4uk/sens/issues/6287"},
+                {"language": "SENS", "reason": "Synthetic SENS implementation not yet available",
+                 "evidence_url": "https://github.com/juv4uk/sens/issues/6287"},
             ],
         })
         contrasts.append({
@@ -79,6 +85,8 @@ class PreregistrationMechanismTests(unittest.TestCase):
         facts = validate(frozen_fixture())
         self.assertEqual(facts["tasks"], 8)
         self.assertEqual(facts["contrasts"], 8)
+        self.assertEqual(facts["planned_candidate_cells"], 24)
+        self.assertEqual(facts["explicit_na_cells"], 16)
         self.assertNotIn("energy_uj", facts)  # no measurements!
 
     def test_wrong_input_digest_blocks_parity_admission(self):
@@ -122,6 +130,59 @@ class PreregistrationMechanismTests(unittest.TestCase):
                             "no valid physical instrument")
         self.assert_blocked(lambda p: p.update(max_work_bytes_per_invocation=0),
                             "expected positive integer")
+
+    def test_undeclared_candidate_is_blocked(self):
+        self.assert_blocked(lambda p: p["tasks"][0]["ineligible_candidates"].pop(),
+                            "missing candidate or explicit N/A")
+
+    def test_implemented_candidate_cannot_be_marked_na(self):
+        self.assert_blocked(lambda p: p["tasks"][0]["ineligible_candidates"].append(
+            {"language": "Python", "reason": "Incorrectly masking an implemented candidate",
+             "evidence_url": "https://github.com/juv4uk/sens/issues/6287"}),
+            "implemented language")
+
+    def test_duplicate_na_record_is_blocked(self):
+        self.assert_blocked(lambda p: p["tasks"][0]["ineligible_candidates"].append(
+            copy.deepcopy(p["tasks"][0]["ineligible_candidates"][0])), "duplicate language")
+
+    def test_unsubstantiated_na_is_blocked(self):
+        self.assert_blocked(lambda p: p["tasks"][0]["ineligible_candidates"][0].update(
+            reason="slow"), "substantive reason")
+
+    def test_missing_eligible_comparison_is_blocked(self):
+        self.assert_blocked(lambda p: p["contrasts"].pop(),
+                            "missing primary contrast")
+
+    def test_all_24_cells_can_be_explicitly_eligible(self):
+        plan = frozen_fixture()
+        for task in plan["tasks"]:
+            task["implementations"] += [
+                {"language": "C", "source_sha": "1"*40},
+                {"language": "SENS", "source_sha": "2"*40},
+            ]
+            task["ineligible_candidates"] = []
+            for candidate in ("C", "SENS"):
+                plan["contrasts"].append({
+                    "task": task["id"], "baseline": "Rust", "candidate": candidate,
+                    "input_sha256": task["input_sha256"],
+                    "metrics": ["wall_time_ns", "peak_rss_kib", "energy_uj"],
+                })
+        facts = validate(plan)
+        self.assertEqual(facts["planned_candidate_cells"], 24)
+        self.assertEqual(facts["contrasts"], 24)
+        self.assertEqual(facts["explicit_na_cells"], 0)
+
+    def test_duplicate_json_key_is_blocked(self):
+        # JSON otherwise silently accepts the last duplicate key, allowing
+        # mismatches between a reviewer-visible field and the parsed plan.
+        with self.assertRaisesRegex(InvalidPlan, "duplicate key"):
+            strict_json('{"state":"FROZEN","state":"DRAFT"}')
+        with self.assertRaisesRegex(InvalidPlan, "duplicate key"):
+            strict_json('{"tasks":[{"id":"task-a","id":"task-b"}]}')
+
+    def test_nonfinite_json_number_is_blocked(self):
+        with self.assertRaisesRegex(InvalidPlan, "nonfinite constant"):
+            strict_json('{"alpha": NaN}')
 
     def test_command_line_shows_structure_only(self):
         path = Path(__file__).with_name("check_preregistration.py")
