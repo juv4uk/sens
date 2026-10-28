@@ -37,12 +37,18 @@ Each future task in [#6287](https://github.com/juv4uk/sens/issues/6287)
 has a frozen task ID, input content hash, **counted unit of work**, reference
 result hash or documented numerical error tolerance, algorithmic rules,
 language-implementation source revision and launch mode. The task set
-must consist of **exactly 8 preregistered heterogeneous tasks** for
-this first confirmatory study (list/recursion, exact arithmetic,
-parsing/text, sorting, allocation/GC, IO, numeric calculation,
-persistent/symbolic structures). This list is *classes*, **not yet
-frozen concrete programs**. #6287 must pin all eight before any
-confirmatory measurements. A language unsupported for a task is marked
+must consist of **exactly 9 preregistered heterogeneous tasks** for
+this first confirmatory study, matching the existing nine-task
+`benchmarks/language-energy-study/corpus/manifest.json` in main:
+T01 symbolic recursion, T02 exact rationals, T03 parsing/text,
+T04 sorting, T05 allocation/GC, T06 I/O, T07 matrices,
+T08 persistent structures, and T09 bit operations.
+The corpus manifest has `frozen: true` but that **does not freeze this
+confirmatory preregistration**. Before confirmatory measurement,
+#6287 must supply validated implementations, exact input/output digests,
+and a pinned SHA-256 of that corpus manifest in the independently
+reviewed frozen protocol. The historical nine-task corpus is an
+exploratory design input, not retrospectively registered data. A language unsupported for a task is marked
 `N/A` **before** outcomes and remains visible as a missing cell; no
 replacement task after inspecting its performance.
 
@@ -69,7 +75,7 @@ reason to delete the task after observing a bad result**.
 ## C. Contrasts and multiplicity (frozen before measurement)
 
 The prospective first comparison slate is `C/Rust`, `Python/Rust`
-and `SENS/Rust` **within each of the 8 tasks**, if eligibility is
+and `SENS/Rust` **within each of the 9 tasks**, if eligibility is
 proven for both implementations. Baseline means the pinned *Rust
 implementation*, never a statement that Rust is a truth oracle.
 Compare the same task/input/algorithm and host. Do not compare absent
@@ -83,9 +89,9 @@ SENS functionality as a slowdown.
 | CPU user/system time | s / verified task | Secondary / descriptive | OS accounted child resource usage |
 | Startup/compile/JIT/GC | ns by stated phase | Secondary; never silently merged | Distinct mutually documented timing boundaries |
 
-The planned confirmatory family contains **8 × 3 = 24
-candidate/baseline contrasts per endpoint, 72 total endpoint claims**,
-subject to pre-frozen missing cells. Avoid writing “72 significant
+The planned confirmatory family contains **9 × 3 = 27
+candidate/baseline contrasts per endpoint, 81 total endpoint claims**,
+subject to pre-frozen missing cells. Avoid writing “81 significant
 findings”: these are *potential* tests. The multiplicity family is
 **all admissible preregistered contrasts × the three primary endpoints**
 within the same host and execution mode. Plan: two-sided
@@ -188,12 +194,13 @@ Minimum manifest schema:
   data from confirmatory observations), `precision_target`=0.10,
   `alpha`=0.05, `multiplicity`=`HOLM_FWER`,
   `analysis_state`=`VALIDATED` only after #6290 actually validates it.
-- exactly 8 `tasks`: unique IDs, full lowercase 64-character
+- exactly 9 `tasks`: unique IDs matching the frozen nine-task corpus,
+  including uppercase `T01`–`T09` prefixes; full lowercase 64-character
   `input_sha256`, integer `verified_units` > 0,
   `reference_output_sha256`, and `implementations` listing
   language+source SHA with Rust baseline and at least one candidate.
-- **All 24 candidate/task cells must be declared before measurements**:
-  the first confirmatory slate is 8 tasks × `C`, `Python`, `SENS`
+- **All 27 candidate/task cells must be declared before measurements**:
+  the first confirmatory slate is 9 tasks × `C`, `Python`, `SENS`
   against `Rust`. Every task lists its actual implementations **and**
   an explicit `ineligible_candidates` array for candidates lacking
   a valid implementation. Each N/A record requires `language`,
@@ -250,7 +257,7 @@ all missing cells.
   executable version/compiler flags, sensor metadata and raw JSON/TSV.
   Graphs can be regenerated and show confidence bounds.
 - No scientifically justified universal language ranking can follow
-  from only these eight tasks / one machine. A failure to reject H0
+  from only these nine tasks / one machine. A failure to reject H0
   does not establish equivalence.
 
 ## H. Sources and rationale (read before drafting)
