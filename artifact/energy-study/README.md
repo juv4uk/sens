@@ -24,40 +24,22 @@
   manifest.json            # власний SHA та SHA-256 чотирьох файлів
 ```
 
-Створіть `manifest.json` тільки **після** фактичного запуску: цей приклад формує метадані із наявних файлів; він **не створює проб**.
+### Створення маніфесту без ручного копіювання SHA
+
+Спочатку перевірте `provenance.json.git_sha` та незалежно зафіксуйте SHA **того коміту, з якого запускався експеримент**. Ніколи не підміняйте його SHA поточного `HEAD`, якщо checkout уже змінився. Після фактичного запуску, з checkout інструмента:
 
 ```sh
-cd /tmp/energy-study-evidence
-python3 - <<'PY'
-import hashlib, json
-from pathlib import Path
-base = Path(".")
-source = json.loads((base/"provenance.json").read_text())
-names = {
-    "raw_samples": "raw-samples.json",
-    "provenance": "provenance.json",
-    "paired_report": "paired-report.json",
-    "summary": "summary.md",
-}
-status = ("MEASURED" if source.get("energy_sensor") == "RAPL_AVAILABLE"
-          else "ENERGY_NOT_MEASURED")
-manifest = {
-    "schema": "sens-energy-artifact/pilot-v1",
-    "source_sha": source["git_sha"],
-    "energy_status": status,
-    "independent_reproduction": "NOT_REPRODUCED",
-    "files": {
-        key: {"path": name, "sha256": hashlib.sha256((base/name).read_bytes()).hexdigest()}
-        for key, name in names.items()
-    },
-}
-(base/"manifest.json").write_text(json.dumps(manifest, indent=2)+"\n")
-PY
+EXPERIMENT_SHA="ЗАМІНІТЬ_НА_40_HEX_SHA_ЗАФІКСОВАНОГО_ЗАПУСКУ"
+python3 artifact/energy-study/prepare_manifest.py /tmp/energy-study-evidence \
+  --expected-sha "$EXPERIMENT_SHA"
 
-# У checkout тієї самої гілки/коміту:
-cd /absolute/path/to/juv4uk-sens
+# Незалежна перевірка нового manifest.json:
 python3 artifact/energy-study/validate_manifest.py /tmp/energy-study-evidence/manifest.json
 ```
+
+`prepare_manifest.py` зчитує **лише чотири вже існуючі файли**, обчислює побайтові SHA-256 і створює `manifest.json` **лише після** того, як чинний `verify()` прийняв точний пакет. Операція create-only (без перезапису), із тимчасовим файлом у тому самому каталозі та атомарним ексклюзивним hard-link. Неіснуюча або неправильна залежність, невідповідність SHA, помилкові джоулі, застарілий schema або вже наявний маніфест → `ARTIFACT_PACKAGING_BLOCKED` з ненульовим кодом, **без створення правдоподібного файла**. Файлова система без hard-link підтримки дає блокування, а не fallback із можливим перезаписом. Результат `ARTIFACT_PACKAGED=PASS` означає **лише integrity пакування**, не перевірену фізичну енергію, не незалежне відтворення, не FAIR-сертифікацію.
+
+**Важлива поточна залежність #6288:** до завершення сумісності пілотної схеми цей інструмент навмисно відхиляє реальний старий `study.py` output; `prepare_manifest.py` **не ремонтує** його дані автоматично. Власники #6288 мають погодити поля й власні тести до першого end-to-end на реальному досліді.
 
 Валідатор припиняє роботу з ненульовим кодом при зміні SHA, невідповідності provenance, неіснуючому/пов'язаному симлінком/занадто великому файлі, пустому raw, неприйнятному RSS, фальшивих джоулях або неправдивому `REPRODUCED`. Успіх означає тільки `ARTIFACT_INTEGRITY=PASS`, **не** `SCIENCE_RESULT=PASS`.
 
@@ -67,10 +49,10 @@ python3 artifact/energy-study/validate_manifest.py /tmp/energy-study-evidence/ma
 
 ```sh
 cd artifact/energy-study
-python3 -m unittest -v test_validate_manifest.py
+python3 -m unittest -v test_validate_manifest.py test_prepare_manifest.py
 ```
 
-На 2026-10-28, локальна Python 3.13.5: **17/17 синтетичних тестів PASS**; `git hash-object` локальних файлів тесту та валідатора збігається з GitHub blob SHA `b49b1ba54f70b28501cad7eda3ceb4bac2f51c6a` і `e428bb60f53c15e00eeacc361463de6540ac31fd`. Це лише доказ правильної поведінки валідатора на синтетичних fixture. Жодних реальних енергетичних даних, сторонньої машини/DOI або авторитетного висновку тут немає.
+На 2026-10-28, локальна Python 3.13.5: попередній валідатор **17/17 синтетичних тестів PASS**; нове пакування **16/16 PASS** (разом 33/33); `git hash-object` локальних файлів тесту та валідатора збігається з GitHub blob SHA `b49b1ba54f70b28501cad7eda3ceb4bac2f51c6a` і `e428bb60f53c15e00eeacc361463de6540ac31fd`. Це лише доказ правильної поведінки валідатора на синтетичних fixture. Жодних реальних енергетичних даних, сторонньої машини/DOI або авторитетного висновку тут немає.
 
 ## Джерела й конкретні рішення
 
