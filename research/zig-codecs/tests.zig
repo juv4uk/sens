@@ -39,3 +39,33 @@ fn benchMonotonicNs() !u64 {
         @as(u64, @intCast(ts.tv_nsec));
 }
 
+test "T5M preserves exact mixed widths and leading zeros" {
+    const allocator = std.testing.allocator;
+    const source = [_]t5m.Word{
+        .{ .width = 1, .bits = "1" },
+        .{ .width = 2, .bits = "01" },
+        .{ .width = 3, .bits = "001" },
+        .{ .width = 9, .bits = "010101000" },
+    };
+
+    const physical = try t5m.encode(allocator, &source);
+    defer allocator.free(physical);
+    var restored = try t5m.decode(allocator, physical);
+    defer restored.deinit(allocator);
+
+    try std.testing.expectEqual(source.len, restored.words.len);
+    for (source, restored.words) |expected, actual| {
+        try std.testing.expectEqual(expected.width, actual.width);
+        try std.testing.expectEqualSlices(u8, expected.bits, actual.bits);
+    }
+}
+
+test "T5M rejects physical bytes outside the base-three alphabet" {
+    const allocator = std.testing.allocator;
+    const invalid = [_]u8{243};
+    try std.testing.expectError(
+        t5m.Error.InvalidPhysicalByte,
+        t5m.decode(allocator, invalid[0..]),
+    );
+}
+

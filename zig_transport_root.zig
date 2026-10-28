@@ -364,3 +364,62 @@ pub export fn sens_zig_guard_reference_bytes_copy(dst: [*]u8, capacity: usize) i
     return @intCast(len);
 }
 
+fn expectOpaqueAssetCopy(copy_fn: anytype) !void {
+    const allocator = std.testing.allocator;
+    var short = [_]u8{0xa5};
+    const required = copy_fn(short[0..].ptr, 0);
+    try std.testing.expect(required > 1);
+    try std.testing.expectEqual(@as(isize, -2), copy_fn(short[0..].ptr, short.len));
+    try std.testing.expectEqual(@as(u8, 0xa5), short[0]);
+
+    const len: usize = @intCast(required);
+    const bytes = try allocator.alloc(u8, len);
+    defer allocator.free(bytes);
+    try std.testing.expectEqual(required, copy_fn(bytes.ptr, bytes.len));
+}
+
+fn expectDomainProjectionCopy(domain: u8) !void {
+    const allocator = std.testing.allocator;
+    var short = [_]u8{0xa5};
+    const required = sens_zig_domain_table_bytes_copy(domain, short[0..].ptr, 0);
+    try std.testing.expect(required > 1);
+    try std.testing.expectEqual(
+        @as(isize, -2),
+        sens_zig_domain_table_bytes_copy(domain, short[0..].ptr, short.len),
+    );
+    try std.testing.expectEqual(@as(u8, 0xa5), short[0]);
+
+    const len: usize = @intCast(required);
+    const bytes = try allocator.alloc(u8, len);
+    defer allocator.free(bytes);
+    try std.testing.expectEqual(
+        required,
+        sens_zig_domain_table_bytes_copy(domain, bytes.ptr, bytes.len),
+    );
+}
+
+test "Rust core READ T5M assets use bounded caller-owned copies" {
+    try expectOpaqueAssetCopy(sens_zig_f6_lisp_fs_t5m_bytes_copy);
+    try expectOpaqueAssetCopy(sens_zig_f6_producer_witness_t5m_bytes_copy);
+}
+
+test "Rust build domain projections copy D1 and D11 without inventing indexes" {
+    var probe = [_]u8{0xa5};
+    try std.testing.expectEqual(
+        @as(isize, -1),
+        sens_zig_domain_table_bytes_copy(0, probe[0..].ptr, 0),
+    );
+    try std.testing.expectEqual(
+        @as(isize, -1),
+        sens_zig_domain_table_bytes_copy(12, probe[0..].ptr, 0),
+    );
+    try expectDomainProjectionCopy(1);
+    try expectDomainProjectionCopy(11);
+}
+
+test "Rust bootstrap slot checks copy nonempty SENS-owned T5M assets" {
+    try expectOpaqueAssetCopy(sens_zig_repl_core_t5m_bytes_copy);
+    try expectOpaqueAssetCopy(sens_zig_meta_eval_t5m_bytes_copy);
+    try expectOpaqueAssetCopy(sens_zig_linter_t5m_bytes_copy);
+}
+
