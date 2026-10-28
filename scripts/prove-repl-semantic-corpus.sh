@@ -27,7 +27,12 @@ run_case() {
     fi
     printf ':завантажити %s\n' "$source" >> "$request"
   done
-  if ! timeout 90s "$cli" --surface=укр < "$request" > "$output" 2> "$error"; then
+  # macOS lacks GNU timeout; Windows Git Bash may resolve a different timeout.exe.
+  # Keep the existing Linux timeout by default; the cross-platform matrix uses
+  # SENS_REPL_PORTABLE=1 and relies on the GitHub job's strict timeout.
+  local -a limit=(timeout 90s)
+  if [[ "${SENS_REPL_PORTABLE:-}" == 1 ]]; then limit=(); fi
+  if ! "${limit[@]}" "$cli" --surface=укр < "$request" > "$output" 2> "$error"; then
     printf 'SENS_REPL_CORPUS_FAIL label=%s executor=error\n' "$label" >&2
     cat "$error" >&2
     return 1
@@ -42,6 +47,7 @@ run_case() {
   # cannot turn a later wrong verdict into a false PASS.
   # Non-TTY REPL has no prompt; allow the exact interactive-prefix form too.
   if ! awk -v marker="Завантажено: $witness" -v wanted="$expected" '
+    { sub(/\r$/, "", $0); sub(/[ \t]+$/, "", $0) }
     index($0, marker) { admitted = 1; last = ""; next }
     admitted && NF { last = $0 }
     END { exit (admitted && (last == wanted || last == "sens[укр]> " wanted) ? 0 : 1) }
