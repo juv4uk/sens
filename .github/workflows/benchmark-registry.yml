@@ -17,5 +17,5 @@ jobs:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5 pinned
         with:
           persist-credentials: false
-      - name: Python registry tests and validators excluded (NOT_VERIFIED)
-        run: echo "PYTHON_TESTS=EXCLUDED_BY_LANGUAGE_POLICY PYTHON_VALIDATORS=EXCLUDED native_equivalent=NOT_VERIFIED"
+      - name: Дозвіл на всі мови; відсутній доказ не є PASS
+        run: echo "LANGUAGES=ALL_ALLOWED registry_proof=NOT_EXECUTED_BY_THIS_STEP"
