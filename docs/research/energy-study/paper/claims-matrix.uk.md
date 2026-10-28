@@ -15,14 +15,14 @@
 | C1 | Фізичне копіювання байтів дає однаковий результат у C і Python | `AUDIT.uk.md`; parity C ↔ Python ↔ незалежне очікуване на корпусі 65536 байт × 100000 копій | `56e24228` | `observed=12769042` у всіх трьох | `zig cc -O2`, `python3 copy.py` |
 | C2 | У `copy.c` компілятор не виносить `memcpy` з циклу | `AUDIT.uk.md`; час проти кількості копій | `56e24228` | 73 → 368 → 2884 → 14241 мс на 1000 → 5000000 | той самий бінарник |
 | C3 | Без енергодатчика пілот не обчислює джоулів | `study.py:87` `energy_uj: None`, `:187` `NOT_MEASURED` з причиною | `56e24228` | `ENERGY_NOT_MEASURED` | `test_study.py` |
-| C4 | Нульова або відсутня енергія не дає числового вердикту | `test_study.py`; `verdict.analyze` | `56e24228`, `aaa2d6f8` | `InvalidEvidence` / `BLOCKED`, `ratio = None` | `python3 -m unittest` |
-| C5 | Пререєстрація гіпотез існує й перевіряється машинно | `docs/research/energy-study/preregistration.md`, `docs/research/energy-study/check_preregistration.py` | `d8130edeb` | 12 синтетичних контролів, CI SUCCESS | PR #6293 |
-| C6 | Корпус із 9 задач зафіксовано **до** вимірювань | `corpus/manifest.json`, `"frozen": true` | `0e0a42e5a` | 9 різних осей | PR #6299 |
-| C7 | Перевірка коректності й вимірювання розділені | `parity_check.py`; `VERIFY_SIZE` ≠ `MEASURE_SIZE` | `0e0a42e5a` | три контракти: `exact`, `bitwise`, `tolerance` | PR #6299 |
-| C8 | Ресемплінг іде на рівні блока, не внутрішніх ітерацій | `verdict.py`, `LEVELS = (machine, session, block, pair)`, `independent_units()` | `aaa2d6f8` | ≥8 процесів, ≥4 пари, баланс AB/BA | PR #6300-серія |
-| C9 | Корекція множинних порівнянь обрана наперед | `holm_adjust()`, `analyze_many()` | `aaa2d6f8` | `family_alpha=0.05`; інакше `INCONCLUSIVE` з `FAMILY_WISE_CORRECTION_NOT_MET` | тести #6290 |
-| C10 | Протокол RAPL-калібрування перевіряється offline | `benchmarks/energy-calibration/check_calibration.py` | `ded5ffb16` | 22 синтетичні контролі | PR #6298 |
-| C11 | Цілісність артефакту перевіряється без мережі | `artifact/energy-study/validate_manifest.py` | `aa91e3d09` | SHA-256 raw/provenance/report/summary; 11/11 PASS | PR #6300 |
+| C4 | Нульова або відсутня енергія не дає числового вердикту | `test_study.py`; `verdict.analyze` | `56e24228`, `6824f7fdf` | `InvalidEvidence` / `BLOCKED`, `ratio = None` | `python3 -m unittest` |
+| C5 | Пререєстрація гіпотез існує й перевіряється машинно | `docs/research/energy-study/preregistration.md`, `docs/research/energy-study/check_preregistration.py` | `d0ff34b2c` | 12 синтетичних контролів, CI SUCCESS | PR #6293 |
+| C6 | Корпус із 9 задач зафіксовано **до** вимірювань | `corpus/manifest.json`, `"frozen": true` | `6500832c7` | 9 різних осей | PR #6299 |
+| C7 | Перевірка коректності й вимірювання розділені | `parity_check.py`; `VERIFY_SIZE` ≠ `MEASURE_SIZE` | `6500832c7` | три контракти: `exact`, `bitwise`, `tolerance` | PR #6299 |
+| C8 | Ресемплінг іде на рівні блока, не внутрішніх ітерацій | `verdict.py`, `LEVELS = (machine, session, block, pair)`, `independent_units()` | `6824f7fdf` | ≥8 процесів, ≥4 пари, баланс AB/BA | PR #6300-серія |
+| C9 | Корекція множинних порівнянь обрана наперед | `holm_adjust()`, `analyze_many()` | `6824f7fdf` | `family_alpha=0.05`; інакше `INCONCLUSIVE` з `FAMILY_WISE_CORRECTION_NOT_MET` | тести #6290 |
+| C10 | Протокол RAPL-калібрування перевіряється offline | `benchmarks/energy-calibration/check_calibration.py` | `ff9dc05d1` | 22 синтетичні контролі | PR #6298 |
+| C11 | Цілісність артефакту перевіряється без мережі | `artifact/energy-study/validate_manifest.py` | `0c379da1c` | SHA-256 raw/provenance/report/summary; 11/11 PASS | PR #6300 |
 | C12 | Метод перевірки висновку на другому корпусі взято з Pereira 2021 | анотація Pereira 2021: Rosetta Code, «rankings do not change apart from one programming language» | — | якісне, не числове | `[НЕ ДОВЕДЕНО: N6]` — другого корпусу ми не маємо |
 | C13 | Rust, Python і незалежний розрахунок дають однаковий результат на тому самому корпусі | прогін `copy.rs` (rustc 1.99.1, `-O`) на корпусі 65536 байт × 100000 копій | — | `observed=12743497` у всіх трьох | `rustc -O copy.rs`, `python3 copy.py` |
 | C14 | Робота в `copy.rs` не винесена компілятором | час проти кількості копій | — | ~37 мс (1000) проти ~2866 мс (1000000) | той самий бінарник |
@@ -174,11 +174,11 @@ SHA у розділі 1 я брав із SCIENCE REPORT інших агенті�
 | SHA | Задача | Існує | Повідомлення коміту |
 |---|---|---|---|
 | `56e2422817c0` | #6288 | ✓ | аудит пілоту language-energy-study |
-| `aaa2d6f8336b` | #6290 | ✓ | ENERGY-05: рівні ієрархії, Holm-корекція і симуляційні тести |
-| `d8130edebe48` | #6286 | ✓ | CI #6286: короткі незалежні тести структури пререєстрації |
-| `0e0a42e5af8d` | #6287 | ✓ | ENERGY-02: корпус із 9 задач і паритет-машина |
-| `ded5ffb16e8b` | #6289 | ✓ | docs(#6289): виправити робочий каталог для unit-команди |
-| `aa91e3d096c3` | #6291 | ✓ | Fix copy-paste reproduction path for artifact validator |
+| `6824f7fdf336b` | #6290 | ✓ | ENERGY-05: рівні ієрархії, Holm-корекція і симуляційні тести |
+| `d0ff34b2ce48` | #6286 | ✓ | CI #6286: короткі незалежні тести структури пререєстрації |
+| `6500832c7f8d` | #6287 | ✓ | ENERGY-02: корпус із 9 задач і паритет-машина |
+| `ff9dc05d1e8b` | #6289 | ✓ | docs(#6289): виправити робочий каталог для unit-команди |
+| `0c379da1c6c3` | #6291 | ✓ | Fix copy-paste reproduction path for artifact validator |
 
 **Результат: 6 з 6 існують, повідомлення відповідають заявленій роботі.**
 
@@ -277,3 +277,28 @@ T03 розбір     rss  SLOWER    ratio 4.832  CI [4.782, 4.883]
 3. **`ENERGY_NOT_MEASURED`.** RAPL недоступний, SENS не бере участі — компілятора немає.
 
 **Чому це головне свідчення програми:** методика відмовилась оголосити результат, який виглядав вигідним. Саме це і є критерій #6285 — правильність **навіть тоді, коли SENS програє**. Тут вона спрацювала на задачі, де SENS взагалі не брав участі.
+
+### 7.4 Виправлення: посилання вели в гілки, а не в main (28.10)
+
+**Знайдено самоперевіркою.** Я цитував SHA з SCIENCE REPORT інших агентів — це були
+коміти **у гілках**. Перевірка належності до історії `main`:
+
+```
+✗ aaa2d6f8  ✗ d8130edeb  ✗ 0e0a42e5a  ✗ ded5ffb16  ✗ aa91e3d09
+```
+
+Причина: PR зливались **squash'ем**, тобто в `main` з'явились нові коміти з тим самим
+вмістом. Артефакти в `main` є — але за іншими адресами.
+
+**Виправлено.** Тепер цитати ведуть туди, де файл справді лежить:
+
+| Артефакт | Коміт у `main` |
+|---|---|
+| `docs/research/energy-study/preregistration.md` | `d0ff34b2c` |
+| `benchmarks/language-energy-study/corpus/manifest.json` | `6500832c7` |
+| `benchmarks/measurement-triad/verdict.py` | `6824f7fdf` |
+| `benchmarks/energy-calibration/check_calibration.py` | `ff9dc05d1` |
+| `artifact/energy-study/validate_manifest.py` | `0c379da1c` |
+
+**Чому це важливо:** посилання на коміт у гілці не є доказом, що артефакт у main. Читач
+статті, який спробує знайти файл за таким SHA, його не знайде. Тепер знайде.
