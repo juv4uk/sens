@@ -34,6 +34,8 @@ fi
 
 # Single load = cold REPL per process, batch = 10 loads inside one process.
 # Both are measured over 11 launches; samples are not normalized across CPUs.
+# Only issue one Actions notice AFTER both suites have completed successfully.
+single_p50='' single_p90='' batch_p50='' batch_p90=''
 for workload in single-load batch-10-loads; do
   request="$tmp/$workload.input"
   : > "$request"
@@ -77,8 +79,31 @@ for workload in single-load batch-10-loads; do
   p90="$(tail -n +2 "$samples" | cut -f2 | sort -n | sed -n '10p')"
   printf 'SENS_REPL_BENCH workload=%s samples=11 p50_s=%s p90_s=%s target=D5 platform=%s/%s sha=%s\n' \
     "$workload" "$median" "$p90" "${RUNNER_OS:-unknown}" "${RUNNER_ARCH:-unknown}" "$(git rev-parse HEAD)"
-  if [[ -n "${GITHUB_STEP_SUMMARY:-}" ]]; then
-    printf '%s: 11 samples; p50=%s s, p90=%s s (not cross-platform normalized)\n' \
-      "$workload" "$median" "$p90" >> "$GITHUB_STEP_SUMMARY"
+  if [[ "$workload" == single-load ]]; then
+    single_p50="$median"
+    single_p90="$p90"
+  else
+    batch_p50="$median"
+    batch_p90="$p90"
   fi
 done
+
+# Both workload suites must pass. This is a timing report, never a host
+# semantic oracle or a claim that different CPU models can be fairly ranked.
+[[ -n "$single_p50" && -n "$single_p90" && -n "$batch_p50" && -n "$batch_p90" ]]
+platform="${RUNNER_OS:-unknown}/${RUNNER_ARCH:-unknown}"
+head="$(git rev-parse HEAD)"
+if [[ "${GITHUB_ACTIONS:-}" == true ]]; then
+  printf '::notice title=SENS REPL bench (%s)::D5 | cold n=11 p50=%ss p90=%ss | batch10 n=11 p50=%ss p90=%ss | SHA=%s | host timings, not cross-CPU comparable\n' \
+    "$platform" "$single_p50" "$single_p90" "$batch_p50" "$batch_p90" "${head:0:12}"
+fi
+if [[ -n "${GITHUB_STEP_SUMMARY:-}" ]]; then
+  {
+    printf '### SENS REPL benchmark · %s\n\n' "$platform"
+    printf '| Навантаження D5 | Запусків | p50 (с) | p90 (с) |\n'
+    printf '|:--|--:|--:|--:|\n'
+    printf '| Один REPL-запуск | 11 | %s | %s |\n' "$single_p50" "$single_p90"
+    printf '| 10 завантажень в одному REPL | 11 | %s | %s |\n' "$batch_p50" "$batch_p90"
+    printf '\nТочний SHA: `%s`. Це вимірювання часу; порівнювати різні CPU без нормалізації не можна.\n' "$head"
+  } >> "$GITHUB_STEP_SUMMARY"
+fi
