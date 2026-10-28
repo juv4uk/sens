@@ -96,3 +96,36 @@ N=8192: `observed=1036693`, `copies=8192`, `bytes=271`.
 - **Green Software Foundation SCI** [Specification](https://greensoftware.foundation/standards/sci/): потрібна функціональна одиниця; з одного RAPL CPU package без I/M/R та інших компонентів неможливо коректно отримати SCI.
 
 **Залишкові ризики:** Rust optimizer-level witness; контроль CPU/governor/фонового шуму; окремі cold/warm та compile/time budgets; коректна незалежність session/machine; калібрування RAPL за #6289 і пререгістрація #6286. Поки вони не закриті, цей пілот **НЕ готовий до наукового рейтингу**.
+
+## Інтеграція після handoff від #6295 (28.10.2026)
+
+Автор закрив PR #6295 **без merge** і передав відмінні виправлення
+до канонічного PR #6296; донорський SHA:
+1a17b6963c1775b56ba3effb7e318c246166b876.
+
+**Визначений ресурсний бюджет:** до будь-якої роботи застосовується
+validate_pilot_budget(blocks, pairs, copies, corpus_size): 4 × blocks ×
+pairs + 3 запусків (включно з трьома parity-прогонами), не більше 3 GiB
+на дочірній процес, не більше 8 GiB загалом і корпус не більше 64 MiB.
+Безпечний типовий --copies=64 замість 8192. Для 322314 байт,
+8 блоків і 4 пар: 131 × 64 × 322314 = 2702280576 B (~2.52 GiB)
+декларованого копіювання. Це ресурсний ліміт, а не доказ машинного DCE.
+
+**RAPL:** перенесено parse_rapl_measurement із #6295: лише один
+фізичний запис із недубльованими полями, додатними energy_uj та
+elapsed_ns, MEASURED / whole_package_not_process, абсолютний шлях
+counter до energy_uj і коректний булевий wrapped_once. Помилка
+будь-якого поля -> BLOCKED, не оцінка TDP. Збережено наш узгоджений
+wall_time_ns як зовнішній wrapper clock; RAPL child time йде окремо
+як rapl_child_elapsed_ns.
+
+**FAIR schema (#6291, #6300):** кожна raw sample містить time_boundary
+(host_wrapper_includes_subprocess без сенсора,
+RAPL_meter_wraps_usr_bin_time із ним), а енергетична проба також
+counter, wrapped_once, scope; provenance.energy_status та
+paired-report позначають ENERGY_NOT_MEASURED без сенсора.
+Незалежний FAIR validator і повний raw artifact ще не перевірені.
+
+**Статус:** негативні parser/budget unit tests додано, проте повний
+unittest на інтегрованому SHA і фізична енергія поки НЕ підтверджені.
+До успішної перевірки цей PR залишається draft і **не готовий до main**.
