@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """Fail-closed hierarchical paired A/B wall-time verdict (Kalibera–Jones-inspired).
 
-An independently restarted process is the resampling unit; repetitions inside
-one process are not independent observations. This tool is NOT an implementation
-of the exact Kalibera–Jones variance-component estimator, nor proof of speedup.
+An experimental session is the outer resampling unit, with nested processes
+and AB/BA pairs. A restarted process within one shared session is NOT an
+independent session. This is NOT the exact Kalibera–Jones estimator.
 """
 from __future__ import annotations
 
@@ -79,8 +79,13 @@ def analyze(document: dict, *, draws: int = 4000, seed: int = 5227,
     pairs = document.get("pairs")
     if not isinstance(pairs, list):
         raise InvalidEvidence("pairs must be a list")
-    groups: dict[str, list[float]] = defaultdict(list)
-    order_counts: dict[str, set[str]] = defaultdict(set)
+    # Each GitHub-hosted run is normally one experimental session.  Multiple
+    # child processes in that session are correlated; using them as independent
+    # bootstrap top-level units creates pseudoreplication.
+    groups: dict[tuple[str, str], list[float]] = defaultdict(list)
+    order_counts: dict[tuple[str, str], set[str]] = defaultdict(set)
+    machines: set[str] = set()
+    missing_session_or_machine = False
     for n, item in enumerate(pairs):
         if not isinstance(item, dict) or not isinstance(item.get("process_id"), str) or not item["process_id"].strip():
             raise InvalidEvidence(f"pairs[{n}]: process_id required")
@@ -89,31 +94,71 @@ def analyze(document: dict, *, draws: int = 4000, seed: int = 5227,
             raise InvalidEvidence(f"pairs[{n}]: order must be AB or BA")
         a = _finite_positive(item.get(baseline_key), f"pairs[{n}].{baseline_key}")
         b = _finite_positive(item.get(candidate_key), f"pairs[{n}].{candidate_key}")
-        groups[item["process_id"]].append(math.log(b / a))
-        order_counts[item["process_id"]].add(order)
+        session = item.get("session_id")
+        machine = item.get("machine_id")
+        if not isinstance(session, str) or not session.strip() or not isinstance(machine, str) or not machine.strip():
+            missing_session_or_machine = True
+            continue
+        machines.add(machine)
+        key = (session, item["process_id"])
+        groups[key].append(math.log(b / a))
+        order_counts[key].add(order)
 
     count = len(groups)
+    sessions: dict[str, list[list[float]]] = defaultdict(list)
+    for (session_id, _process_id), samples in groups.items():
+        sessions[session_id].append(samples)
+    session_count = len(sessions)
+    base_counts = {"independent_sessions": session_count,
+                   "independent_processes": count, "pairs": len(pairs)}
+    if missing_session_or_machine:
+        return {"schema": OUTPUT_SCHEMA, "status": "INCONCLUSIVE",
+                "reason": "SESSION_OR_MACHINE_ID_NOT_RECORDED",
+                **base_counts, "ratio": None, "ci95_ratio": None}
+    if len(machines) != 1:
+        return {"schema": OUTPUT_SCHEMA, "status": "INCONCLUSIVE",
+                "reason": "UNSTRATIFIED_MULTIPLE_MACHINES",
+                **base_counts, "ratio": None, "ci95_ratio": None}
+
     adequate = (count >= MIN_PROCESSES and
                 all(len(x) >= MIN_PAIRS_EACH for x in groups.values()) and
                 all(order_counts[key] == {"AB", "BA"} for key in groups))
     if not adequate:
         return {"schema": OUTPUT_SCHEMA, "status": "INCONCLUSIVE",
                 "reason": "INSUFFICIENT_INDEPENDENT_PAIRED_SAMPLES_OR_ORDER_BALANCE",
-                "independent_processes": count, "pairs": len(pairs),
-                "ratio": None, "ci95_ratio": None}
+                **base_counts, "ratio": None, "ci95_ratio": None}
+    # The prospective protocol (§D) requires at least four real sessions.
+    # A session label is only recorded evidence, not proof of independent
+    # physical hosts/days or of a frozen preregistration.
+    if session_count < 4:
+        return {"schema": OUTPUT_SCHEMA, "status": "INCONCLUSIVE",
+                "reason": "INSUFFICIENT_INDEPENDENT_SESSIONS",
+                **base_counts, "ratio": None, "ci95_ratio": None}
 
-    samples = list(groups.values())
-    # Equal weight for independent process restarts, not each inner iteration.
-    point_log_ratio = statistics.mean(statistics.mean(sample) for sample in samples)
+    session_samples = list(sessions.values())
+    point_log_ratio = statistics.mean(
+        statistics.mean(statistics.mean(process) for process in session)
+        for session in session_samples
+    )
     rng = random.Random(seed)
     replicates = []
     for _ in range(draws):
-        chosen = [samples[rng.randrange(count)] for _ in range(count)]
-        process_means = [
-            statistics.mean(sample[rng.randrange(len(sample))] for _ in sample)
-            for sample in chosen
-        ]
-        replicates.append(statistics.mean(process_means))
+        # Three-level hierarchical bootstrap: sessions -> processes -> pairs.
+        # Samples within the same session are never treated as top-level
+        # independent replicates. Each actual session has equal weight.
+        selected_sessions = [session_samples[rng.randrange(session_count)]
+                             for _ in range(session_count)]
+        session_means = []
+        for session in selected_sessions:
+            chosen_processes = [session[rng.randrange(len(session))]
+                                for _ in range(len(session))]
+            process_means = [
+                statistics.mean(process[rng.randrange(len(process))]
+                                for _ in process)
+                for process in chosen_processes
+            ]
+            session_means.append(statistics.mean(process_means))
+        replicates.append(statistics.mean(session_means))
     lo, hi = (_percentile(replicates, 0.025), _percentile(replicates, 0.975))
     low_ratio, high_ratio = math.exp(lo), math.exp(hi)
     status = "INCONCLUSIVE"
@@ -124,16 +169,17 @@ def analyze(document: dict, *, draws: int = 4000, seed: int = 5227,
     return {
         "schema": OUTPUT_SCHEMA, "status": status,
         "comparison": "candidate / baseline; lower is better",
-        "method": "hierarchical-paired-log-ratio-bootstrap; not exact KJ estimator",
+        "method": "session-process-pair-hierarchical-log-ratio-bootstrap; exploratory; not exact KJ estimator",
         "metric": metric,
         "ratio": math.exp(point_log_ratio),
         "ci95_ratio": [low_ratio, high_ratio],
         "relative_change": math.exp(point_log_ratio) - 1,
         "minimum_practical_effect": min_effect,
-        "independent_processes": count, "pairs": len(pairs),
+        **base_counts,
         "bootstrap_draws": draws, "seed": seed,
         "git_sha": provenance["git_sha"],
-        "warning": "Interpret only within matching measured provenance and proved parity",
+        "warning": ("EXPLORATORY only: session labels alone do not prove "
+                    "independent days/hosts, pre-registration, or null-test validity"),
     }
 
 
@@ -162,7 +208,7 @@ def holm_adjust(p_values: list[float]) -> list[float]:
 
 
 def independent_units(document: dict) -> dict:
-    """Report how many independent units exist at each hierarchy level.
+    """Count recorded units at each hierarchy level, not proof of independence.
 
     WHY: a restarted process is not automatically an independent block. Neighbouring
     runs share CPU, cache state, frequency and temperature, so pairs that live in
@@ -178,7 +224,7 @@ def independent_units(document: dict) -> dict:
         "session": len(sessions - {None}),
         "block": len(blocks - {None}),
         "pair": len(pairs),
-        "note": "resampling unit is the block (independent process restart)",
+        "note": "resampling unit is session; process/pair observations are nested",
     }
 
 
