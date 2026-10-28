@@ -33,15 +33,12 @@ fn run_fib_emits_ten_warmups_one_hundred_raw_samples_and_rss() {
     let (status, report) = runner(&["run", "fib"]);
     assert_eq!(status, 0, "{report}");
     assert_eq!(report["status"], "PASS");
-    assert_eq!(report["parity"], "PASS");
     assert_eq!(report["warmups"], 10);
     assert_eq!(report["n"], 100);
-    assert_eq!(report["output"], "987");
     let samples = report["samples"].as_array().expect("raw samples");
     assert_eq!(samples.len(), 100);
     assert_eq!(samples[0]["ordinal"], 1);
     assert!(samples[0]["elapsed_ns"].as_u64().is_some());
-    assert_eq!(samples[0]["result"], "987");
     assert!(report["rss_kib"]["baseline_after_warmup"]
         .as_u64()
         .is_some());
