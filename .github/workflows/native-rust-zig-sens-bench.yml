@@ -72,7 +72,7 @@ jobs:
           "$out/rust-copy" > "$out/rust-copy.log" 2>&1
           grep -q 'RUST_BYTE_COPY_BENCH source=lib/core4.sens' "$out/rust-copy.log"
           # Zig має право звіряти лише фізичні байти .sens, не мовний результат.
-          zig test -O ReleaseFast -lc benchmarks/mechanism/zig-byte-copy-bench.zig             > "$out/zig-copy.log" 2>&1
+          zig test -O ReleaseFast -lc benchmarks/mechanism/zig-byte-copy-bench.zig > "$out/zig-copy.log" 2>&1
           grep -q 'ZIG_CORRIDOR_COPY_BENCH source=lib/core4.sens' "$out/zig-copy.log"
           echo '::notice title=Benchmark lanes::Rust bytes + RAPL counter arithmetic and Zig physical transport recorded; SENS semantic verdict separate'
           # На shared runner RAPL не припускаємо; джоулі без датчика НЕ друкуємо.
