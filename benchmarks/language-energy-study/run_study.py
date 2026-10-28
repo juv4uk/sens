@@ -126,26 +126,92 @@ def task_env(task_id: str) -> dict:
     return env
 
 
+def _windows_process_peak_rss_kib(proc) -> float | None:
+    """Native per-process *peak working set* via PSAPI; never substitute current RSS.
+
+    A live Windows process handle remains valid after exit while Popen owns it.
+    PeakWorkingSetSize is supplied by the OS in bytes (not KiB).
+    API/zero failures are unavailable evidence, never 0 KiB observations.
+    """
+    import ctypes
+    from ctypes import wintypes
+
+    class ProcessMemoryCounters(ctypes.Structure):
+        _fields_ = [
+            ("cb", wintypes.DWORD),
+            ("PageFaultCount", wintypes.DWORD),
+            ("PeakWorkingSetSize", ctypes.c_size_t),
+            ("WorkingSetSize", ctypes.c_size_t),
+            ("QuotaPeakPagedPoolUsage", ctypes.c_size_t),
+            ("QuotaPagedPoolUsage", ctypes.c_size_t),
+            ("QuotaPeakNonPagedPoolUsage", ctypes.c_size_t),
+            ("QuotaNonPagedPoolUsage", ctypes.c_size_t),
+            ("PagefileUsage", ctypes.c_size_t),
+            ("PeakPagefileUsage", ctypes.c_size_t),
+        ]
+
+    try:
+        psapi = ctypes.WinDLL("psapi.dll", use_last_error=True)
+        func = psapi.GetProcessMemoryInfo
+        func.argtypes = [wintypes.HANDLE, ctypes.POINTER(ProcessMemoryCounters), wintypes.DWORD]
+        func.restype = wintypes.BOOL
+        sample = ProcessMemoryCounters()
+        sample.cb = ctypes.sizeof(sample)
+        if not func(proc._handle, ctypes.byref(sample), sample.cb):
+            return None
+        return sample.PeakWorkingSetSize / 1024.0 if sample.PeakWorkingSetSize > 0 else None
+    except (AttributeError, OSError, ValueError):
+        return None
+
+
 def run_once(cmd: str, env: dict, timeout_s: float = 120.0):
     """Один запуск. Повертає (wall_ns, peak_rss_kib, вихід) або (None, None, причина).
 
-    Пікова пам'ять береться через os.wait4, а не через
+    POSIX peak RSS береться через os.wait4 (окрема #6288 normalization), а не через
     resource.getrusage(RUSAGE_CHILDREN): RUSAGE_CHILDREN дає НАКОПИЧУВАЛЬНИЙ
     максимум по всіх дочірніх процесах за сесію — тобто після першого ж
     великого запуску всі наступні показували б його число. wait4 повертає
     rusage конкретного процесу, і саме він потрібен для парних даних.
 
+    На Windows: PSAPI PeakWorkingSetSize з дочірнього process HANDLE, навіть
+    після exit, у KiB. Не вважаємо Win32 working set і Linux RSS тотожними.
+
     timeout_s реально обмежує очікування (раніше параметр ігнорувався).
     stdout/stderr читаються після wait, щоб не блокуватися на PIPE.
     """
     import shlex
-    argv = shlex.split(cmd)
+    argv = shlex.split(cmd, posix=(os.name != 'nt'))
+    if os.name == 'nt':
+        # posix=False keeps path backslashes but also keeps outer quote marks.
+        # Popen(argv) must receive unquoted -c payloads and executable paths.
+        argv = [a[1:-1] if len(a) >= 2 and a[0] in ('"', "'") and a[-1] == a[0] else a
+                for a in argv]
     start = time.perf_counter_ns()
     try:
         proc = subprocess.Popen(argv, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                                 text=True, env=env)
     except OSError as exc:
         return None, None, f"SPAWN_FAIL:{exc}"
+    if os.name == "nt":
+        # Windows has no wait4. communicate() reaps the child while retaining
+        # its native process handle for PSAPI peak working-set retrieval.
+        try:
+            out, err = proc.communicate(timeout=timeout_s)
+        except subprocess.TimeoutExpired:
+            proc.kill()
+            proc.communicate()
+            return None, None, f"TIMEOUT_{timeout_s}s"
+        elapsed = time.perf_counter_ns() - start
+        if proc.returncode != 0:
+            return None, None, f"EXIT_{proc.returncode}:{err.strip()[:80]}"
+        rss = _windows_process_peak_rss_kib(proc)
+        if rss is None:
+            return None, None, "RSS_UNAVAILABLE_WIN32"
+        lines = [ln for ln in out.splitlines() if ln.strip()]
+        if len(lines) != 1:
+            return None, None, f"BAD_STDOUT_LINES_{len(lines)}"
+        return float(elapsed), rss, lines[0]
+
     deadline = time.monotonic() + timeout_s
     status = None
     usage = None
@@ -185,6 +251,7 @@ def run_once(cmd: str, env: dict, timeout_s: float = 120.0):
     lines = [ln for ln in out.splitlines() if ln.strip()]
     if len(lines) != 1:
         return None, None, f"BAD_STDOUT_LINES_{len(lines)}"
+    # POSIX RSS normalization is owned by #6288 / PR #6337; no overlap.
     return float(elapsed), float(usage.ru_maxrss), lines[0]
 
 
