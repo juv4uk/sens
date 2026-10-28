@@ -1,0 +1,73 @@
+name: Дослід енергії · міжплатформна реплікація
+
+# Навіщо: #6291 стоїть NOT_REPRODUCED, бо все знято на одній машині.
+# Раннери GitHub дають ТРИ різні ОС — це і є незалежна реплікація
+# (незалежні машини, незалежні інсталяції інтерпретаторів).
+#
+# Що НЕ дають раннери: RAPL. GitHub-hosted раннери — віртуальні машини
+# без /sys/class/powercap, тому енергія лишається ENERGY_NOT_MEASURED.
+# Це перевіряється явно, а не припускається.
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'benchmarks/language-energy-study/corpus/**'
+      - '.github/workflows/energy-study-matrix.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  replicate:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Паритет на цій платформі
+        shell: bash
+        run: |
+          python3 benchmarks/language-energy-study/parity_check.py --selftest
+          python3 benchmarks/language-energy-study/parity_check.py \
+            --task T09-bit-operations \
+            --run "node benchmarks/language-energy-study/corpus/javascript/t09_bitcount.mjs"
+          python3 benchmarks/language-energy-study/parity_check.py \
+            --task T01-symbolic-recursion \
+            --run "node benchmarks/language-energy-study/corpus/javascript/t01_fib.mjs"
+
+      - name: Парні дані на цій платформі
+        shell: bash
+        run: |
+          python3 benchmarks/language-energy-study/run_study.py \
+            --tasks T01-symbolic-recursion --measure \
+            --processes 8 --per-process 4 \
+            --out "raw-${{ matrix.os }}.json"
+
+      - name: ДІ на цій платформі
+        shell: bash
+        run: python3 benchmarks/language-energy-study/report_table.py --markdown || true
+
+      - name: Чи є RAPL
+        shell: bash
+        run: |
+          if [ -r /sys/class/powercap/intel-rapl:0/energy_uj ]; then
+            echo "RAPL_AVAILABLE=yes"
+          else
+            echo "RAPL_AVAILABLE=no — ENERGY_NOT_MEASURED (очікувано на hosted-раннері)"
+          fi
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: raw-${{ matrix.os }}
+          path: raw-*.json
+          if-no-files-found: warn
