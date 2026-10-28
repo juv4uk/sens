@@ -7,9 +7,6 @@
 
 use crate::semantic_registry::{self, LegacyRegistrySlot};
 use crate::CoreDomainIdentity;
-#[cfg(test)]
-use crate::{Bit4, CoreD4};
-
 mod generated {
     include!("necessary_forms_generated.rs");
 }
