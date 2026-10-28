@@ -76,7 +76,7 @@ test "physical byte-copy corridor: exact bytes and elapsed time" {
         samples[j] = value;
     }
     std.debug.print(
-        "ZIG_CORRIDOR_COPY_BENCH source=lib/core4.lisp bytes={d} batch={d} samples={d} p50_ns={d} p90_ns={d} min_ns={d} max_ns={d} checksum={d} scope=physical_only\\n",
+        "ZIG_CORRIDOR_COPY_BENCH source=lib/core4.lisp bytes={d} batch={d} samples={d} p50_ns={d} p90_ns={d} min_ns={d} max_ns={d} checksum={d} scope=physical_only\n",
         .{ source.len, batch_count, samples_count, samples[5], samples[9], samples[0], samples[10], checksum },
     );
 }
