@@ -33,6 +33,8 @@ import sys
 import time
 from pathlib import Path
 
+from rss_units import InvalidPeakRSS, normalize_peak_rss_kib
+
 HERE = Path(__file__).resolve().parent
 CORPUS = HERE / "corpus"
 MANIFEST = CORPUS / "manifest.json"
@@ -137,8 +139,12 @@ def run_once(cmd: str, env: dict, timeout_s: float = 120.0):
 
     timeout_s реально обмежує очікування (раніше параметр ігнорувався).
     stdout/stderr читаються після wait, щоб не блокуватися на PIPE.
+    Linux ru_maxrss — KiB, Darwin — bytes; Windows os.wait4 unavailable:
+    reject rather than silently invent a per-child RSS metric.
     """
     import shlex
+    if not hasattr(os, "wait4"):
+        return None, None, "UNSUPPORTED_PER_CHILD_RSS:os.wait4 unavailable"
     argv = shlex.split(cmd)
     start = time.perf_counter_ns()
     try:
@@ -185,7 +191,11 @@ def run_once(cmd: str, env: dict, timeout_s: float = 120.0):
     lines = [ln for ln in out.splitlines() if ln.strip()]
     if len(lines) != 1:
         return None, None, f"BAD_STDOUT_LINES_{len(lines)}"
-    return float(elapsed), float(usage.ru_maxrss), lines[0]
+    try:
+        peak_kib = normalize_peak_rss_kib(usage.ru_maxrss, platform.system())
+    except InvalidPeakRSS as exc:
+        return None, None, f"INVALID_PER_CHILD_RSS:{exc}"
+    return float(elapsed), peak_kib, lines[0]
 
 
 def active_params(task_id: str) -> dict:
