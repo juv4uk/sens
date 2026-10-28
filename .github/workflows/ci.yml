@@ -39,8 +39,8 @@ jobs:
           cc -O2 -o "$RUNNER_TEMP/t01_c" "$CORP/c/t01_fib.c"
           for round in 1 2 3; do
             echo "--- повтор $round ---"
-            echo "[C]";        /usr/bin/time -v "$RUNNER_TEMP/t01_c" 2>&1 | grep -E "^[0-9]+$|Maximum resident|Elapsed " | head -3
-            echo "[JS]";       /usr/bin/time -v node "$CORP/javascript/t01_fib.mjs" 2>&1 | grep -E "^[0-9]+$|Maximum resident|Elapsed " | head -3
+            echo "[C]";        TASK_N=12 /usr/bin/time -v "$RUNNER_TEMP/t01_c" 2>&1 | grep -E "^[0-9]+$|Maximum resident|Elapsed " | head -3
+            echo "[JS]";       TASK_N=12 /usr/bin/time -v node "$CORP/javascript/t01_fib.mjs" 2>&1 | grep -E "^[0-9]+$|Maximum resident|Elapsed " | head -3
             echo "[SENS]";     /usr/bin/time -v "$BIN" "$CORP/sens/t01_fib.lisp" 2>&1 | grep -E "^[0-9]+$|Maximum resident|Elapsed " | head -3
           done
       - name: Виміряти SENS — час і піковий RSS (D6 додати-1)
