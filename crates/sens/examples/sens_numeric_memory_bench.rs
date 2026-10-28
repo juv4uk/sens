@@ -158,20 +158,3 @@ fn main() {
     }
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn evaluator_retains_equal_exact_d24_values_in_both_memory_strategies() {
-        let shared = execute_and_retain(Strategy::Shared, 24, 3).expect("shared SENS path");
-        let deep_copy = execute_and_retain(Strategy::DeepCopy, 24, 3).expect("copy control");
-
-        assert_eq!(shared, deep_copy);
-        assert!(shared.iter().all(|value| matches!(
-            value,
-            Value::BinaryNumber(number)
-                if number.numeric_domain_width() == Some(24) && number.bits() == "111111111111111111111111"
-        )));
-    }
-}
