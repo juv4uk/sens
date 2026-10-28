@@ -53,9 +53,15 @@ jobs:
           binary="$PWD/target/debug/sens"
           bash scripts/prove-meta-eval-graph-d1.sh "$binary"
           bash scripts/prove-meta-eval-lexical-shadow-d1.sh "$binary"
+          bash scripts/prove-meta-eval-predicates-d1.sh "$binary"
+          bash scripts/prove-d3-атом-межа.sh "$binary"
+          bash scripts/prove-d3-як-є-щит.sh "$binary"
+          bash scripts/prove-d4-selector-width.sh "$binary"
           bash scripts/prove-твердження-m1.sh "$binary"
           bash scripts/prove-ідентичність-тритів.sh "$binary"
-          bash scripts/prove-d3-як-є-щит.sh "$binary"
+          bash scripts/prove-бенчмарк-медіана.sh "$binary"
+          bash scripts/prove-бенчмарк-структура.sh "$binary"
+          bash scripts/prove-бенчмарк-умова.sh "$binary"
 
       - name: Звірити джерело й фізичну проєкцію компіляторного ядра
         shell: bash

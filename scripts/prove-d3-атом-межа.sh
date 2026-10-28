@@ -17,9 +17,19 @@ fi
 if ! cmp -s "$tmp/expected" "$tmp/actual"; then
   printf 'REGRESSION id=%s actual=wrong-verdict\n' "$id" >&2; exit 1
 fi
-if "$cli" "$mutant" > "$tmp/m.out" 2>/dev/null; then
-  if cmp -s "$tmp/expected" "$tmp/m.out"; then
-    printf 'REGRESSION id=%s-mutant actual=false-positive\n' "$id" >&2; exit 1
-  fi
+if [[ ! -f "$mutant" || -L "$mutant" ]]; then
+  printf 'REGRESSION id=%s-mutant actual=source-missing-or-symlink\n' "$id" >&2
+  exit 1
+fi
+if ! timeout 45s "$cli" "$mutant" > "$tmp/m.out" 2>"$tmp/m.err"; then
+  printf 'REGRESSION id=%s-mutant actual=execution-error\n' "$id" >&2
+  cat "$tmp/m.err" >&2
+  exit 1
+fi
+printf '0\n' > "$tmp/expected-mutant"
+if ! cmp -s "$tmp/expected-mutant" "$tmp/m.out"; then
+  printf 'REGRESSION id=%s-mutant expected=D1:0 actual=wrong-verdict\n' "$id" >&2
+  cat "$tmp/m.out" >&2
+  exit 1
 fi
 echo "D3_АТОМ_МЕЖА=OK authority=SENS_form"
