@@ -95,12 +95,26 @@ def environment() -> dict:
     }
 
 
+SIZES = {"mode": "verify"}
+
+
 def task_env(task_id: str) -> dict:
-    """TASK_ID + TASK_* — єдиний спосіб передати вхід будь-якій мові."""
+    """TASK_ID + TASK_* — єдиний спосіб передати вхід будь-якій мові.
+
+    Два режими, і їх не можна плутати:
+      verify  — малий вхід, перевірка коректності (паритет);
+      measure — великий вхід з маніфесту, де обчислення переважає старт.
+    """
     from parity_check import VERIFY_SIZE
     env = dict(os.environ)
     env["TASK_ID"] = task_id
-    for key, value in VERIFY_SIZE[task_id].items():
+    if SIZES["mode"] == "measure":
+        doc = json.loads(MANIFEST.read_text(encoding="utf-8"))
+        task = next(t for t in doc["tasks"] if t["id"] == task_id)
+        params = task["input"]
+    else:
+        params = VERIFY_SIZE[task_id]
+    for key, value in params.items():
         env["TASK_" + key.upper()] = str(value)
     return env
 
@@ -168,6 +182,8 @@ def main() -> int:
     ap.add_argument("--languages", nargs="*", default=["javascript"])
     ap.add_argument("--out", type=Path, default=Path("raw-pairs.json"))
     ap.add_argument("--smoke", action="store_true", help="1 задача, 2 процеси, 2 пари")
+    ap.add_argument("--measure", action="store_true",
+                    help="використати MEASURE_SIZE з маніфесту замість VERIFY_SIZE")
     args = ap.parse_args()
 
     doc = json.loads(MANIFEST.read_text(encoding="utf-8"))
@@ -176,6 +192,7 @@ def main() -> int:
         tasks = tasks[:1]
         args.processes, args.per_process = 2, 2
 
+    SIZES["mode"] = "measure" if args.measure else "verify"
     available = [l for l in args.languages if l == "python" or shutil.which("node")]
     if not available:
         print("немає доступних мов для запуску")
