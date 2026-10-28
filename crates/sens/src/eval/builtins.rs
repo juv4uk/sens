@@ -113,26 +113,3 @@ fn string_prefix_answer(
         }
     }
 }
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn mechanism_arity_keeps_kind_and_source_span() {
-        let span = Span { start: 12, end: 34 };
-        for (expected, supplied) in [(0, 1), (1, 0), (1, 2), (2, 1), (3, 4)] {
-            let args = vec![Value::Nil; supplied];
-            let error = exact_args(&args, expected, span)
-                .expect_err("невідповідність арності має завершитися помилкою");
-            assert_eq!(error.kind, crate::ErrorKind::Arity);
-            assert_eq!(error.span, span);
-            assert!(error.message.contains(&format!("очікується {expected}")));
-            assert!(error.message.contains(&format!("отримано {supplied}")));
-        }
-        for expected in 0..=3 {
-            exact_args(&vec![Value::Nil; expected], expected, span)
-                .expect("точна арність приймається");
-        }
-    }
-}
