@@ -24,6 +24,7 @@ int main(int argc, char **argv) {
     if (!source || !dest) return 2;
     if (fread(source, 1, size, file) != size) return 2;
     fclose(file);
+    memset(dest, 0, size);
     volatile unsigned char *observed_bytes = dest;
     unsigned long long observed = 0;
     for (unsigned long long i = 0; i < copies; i++) {

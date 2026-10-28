@@ -90,9 +90,12 @@ def measure(command: list[str], copies: int, out: Path, meter: Path | None,
                   "energy_uj": None}
         if meter:
             fields = dict(KV.findall(meter_lines[0]))
-            if fields.get("status") != "MEASURED":
-                raise RuntimeError("invalid RAPL measurement status")
-            energy, elapsed = int(fields["energy_uj"]), int(fields["elapsed_ns"])
+            if fields.get("status") != "MEASURED" or fields.get("scope") != "whole_package_not_process":
+                raise RuntimeError("invalid RAPL measurement status/scope")
+            try:
+                energy, elapsed = int(fields["energy_uj"]), int(fields["elapsed_ns"])
+            except (KeyError, ValueError) as error:
+                raise RuntimeError(f"invalid RAPL physical reading: {error}") from error
             if energy <= 0 or elapsed <= 0:
                 raise RuntimeError("nonpositive hardware energy/time")
             # wall_time_ns retains the same host-wrapper boundary whether or
