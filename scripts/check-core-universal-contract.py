@@ -2,12 +2,11 @@
 """#1664 — executable checker for the Core1–4 universal foundation contract.
 
 This is a *structural* checker: it validates that the contract states the
-universal predicate/control law and that the shared corpus (#1709, living in
-`tests/fixtures/semantic/`) actually carries that law. It decides no meaning of
-its own — the law is Lisp-owned data and the corpus is Lisp-owned data; this
-script only refuses to let either drift silently.
+the sections and witness metadata of a Lisp-owned language contract.
+It never compares language outcomes to Python-maintained truth tables; only
+native SENS execution can establish the semantics.
 
-Named failures, fail-closed: any missing section, wrong law value, malformed
+Named structural failures, fail-closed: any missing section, malformed
 corpus row, or uncovered governing issue is reported by name and the process
 exits non-zero.
 
@@ -39,33 +38,6 @@ REQUIRED_SECTIONS = [
     "scope", "predicate-answer", "010", "101", "110", "reader",
     "shared-identities", "negative-laws", "profile-coverage",
 ]
-
-EXPECTED_LAW = {
-    "predicate-answer": {
-        "predicate-answer": "one-bit", "yes": 1, "no": 0,
-        "graded-answers": "forbidden",
-        "empty-list-as-predicate-result": "forbidden",
-        "host-boolean-defines-semantics": "forbidden",
-    },
-    "010": {"identity": "D3:010", "укр": "атом?", "empty-structure": 1,
-            "non-pair": 1, "pair-structure": 0},
-    "101": {"identity": "D3:101", "укр": "тотожне?", "same-admitted-atom": 1,
-            "distinct-admitted-atom": 0, "pair-operand": "named-error"},
-    "110": {"identity": "D3:110", "укр": "за-умовою", "clause-shape": "two-part",
-            "test-1": "select", "test-0": "skip",
-            "unselected-expression": "not-evaluated",
-            "exhaustion": [], "three-part-clause": "rejected"},
-    "reader": {"malformed-source": "rejected-not-repaired"},
-}
-
-SHARED_IDENTITIES = ["D3:001", "D3:010", "D3:101", "D3:011",
-                     "D3:100", "D3:111", "D3:110"]
-
-NEGATIVE_LAWS = ["graded-predicate-answer", "empty-list-predicate-result",
-                 "structural-kind-substitution", "host-truth-substitution"]
-
-PROFILE_COVERAGE = {"native": "proven", "core3": "proven", "core2": "measured-blocked",
-                    "core1": "not-yet-exercisable", "core4": "not-yet-exercisable"}
 
 ROW_FIELDS = ["expect", "expr", "expected", "active", "name", "semantic-id", "governs", "note"]
 ASSERTION_KINDS = {"expect-value", "expect-error", "expect-rejected"}
@@ -192,38 +164,6 @@ def check_contract(fail):
         if as_str(sec.get("governs")) != issue:
             fail(f"{CONTRACT}: `{key}` governs={sec.get('governs')!r}, want {issue}")
 
-    for key, expected in EXPECTED_LAW.items():
-        sec = sections.get(key)
-        if sec is None:
-            continue
-        # Law sections nest their law table: ((key . ((field . value) ...))).
-        # Exact-width D3 keys are quoted bit strings so leading zeroes survive.
-        # A section whose own value is scalar keeps that scalar as a field.
-        fields = {k: v for k, v in sec.items()}
-        if isinstance(sec.get(key), list):
-            fields.update(alist(sec[key]))
-        for field, want in expected.items():
-            got = fields.get(field)
-            if isinstance(want, list):
-                if not (isinstance(got, list) and len(got) == 0):
-                    fail(f"{CONTRACT}: `{key}.{field}` = {got!r}, want empty list")
-            elif got != want:
-                fail(f"{CONTRACT}: `{key}.{field}` = {got!r}, want {want!r}")
-
-    ids = sections.get("shared-identities", {}).get("shared-identities")
-    if [as_str(x) for x in ids] != SHARED_IDENTITIES if isinstance(ids, list) else True:
-        fail(f"{CONTRACT}: shared-identities = {ids!r}, want {SHARED_IDENTITIES}")
-
-    neg = sections.get("negative-laws", {}).get("negative-laws")
-    if not (isinstance(neg, list) and [str(x) for x in neg] == NEGATIVE_LAWS):
-        fail(f"{CONTRACT}: negative-laws = {neg!r}, want {NEGATIVE_LAWS}")
-
-    cov = sections.get("profile-coverage", {}).get("profile-coverage")
-    cov_map = alist(cov) if isinstance(cov, list) else {}
-    for prof, want in PROFILE_COVERAGE.items():
-        if as_str(cov_map.get(prof)) != want:
-            fail(f"{CONTRACT}: profile-coverage.{prof} = {cov_map.get(prof)!r}, want {want!r}")
-
     return sections
 
 
@@ -292,10 +232,11 @@ def main():
             print(f"  - {f}")
         return 1
 
-    verdict = ("(core-universal-contract-ok "
-               f"(laws {len(EXPECTED_LAW)}) (governs {len(GOVERNING)}) "
-               f"(corpus-rows {len(rows)}) "
-               f"(profiles proven 2 measured-blocked 1 not-yet-exercisable 2))")
+    # Structural inventory only; no Python verdict for SENS language laws.
+    verdict = (f"(core-universal-contract-inventory "
+               f"(sections {len(REQUIRED_SECTIONS)}) "
+               f"(governs {len(GOVERNING)}) "
+               f"(corpus-rows {len(rows)}))")
     print(verdict)
     return 0
 
