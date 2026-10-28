@@ -252,6 +252,7 @@ if (( ${#binding_sources[@]} != 0 )); then
         tail -c "$paired_bytes" "$scratch/complete.out" > "$scratch/f6-source-suffix.out"
         previous_byte="$(dd if="$scratch/complete.out" bs=1 skip="$((prefix_bytes - 1))" count=1 status=none | od -An -tu1 | tr -d '[:space:]')"
         if [[ "$previous_byte" == 10 ]] && cmp -s "$scratch/out" "$scratch/f6-source-suffix.out"; then
+          f6_suffix_verified=1
           echo "T5M_REPAIR_F6_DEPENDENCY_PREFIX_OK source=$source_file prefix_bytes=$prefix_bytes source_bytes=$paired_bytes exact=BYTE_FOR_BYTE"
         else
           echo "T5M_REPAIR_DEPENDENCY_COMPLETE_DIVERGENCE source=$source_file paired_bytes=$paired_bytes complete_bytes=$complete_bytes reason=source-transcript-not-exact-suffix" >&2
@@ -267,6 +268,9 @@ if (( ${#binding_sources[@]} != 0 )); then
     fi
   fi
   mode=paired-and-dependency-complete
+  if [[ "${f6_suffix_verified:-0}" == 1 ]]; then
+    mode=paired-and-dependency-complete-f6-exact-source-suffix
+  fi
 else
 if timeout "$native_timeout" "${standalone_runtime[@]}" "$staged" > "$scratch/standalone.out" 2> "$scratch/standalone.err"; then
   if ! cmp -s "$scratch/out" "$scratch/standalone.out"; then
