@@ -22,9 +22,14 @@ int main(int argc, char **argv) {
     if (fread(source, 1, size, file) != size) return 2;
     fclose(file);
     volatile unsigned char *observed_bytes = dest;
+    /* Volatile indirect call prevents the compiler from folding repeated
+     * identical memcpy calls into a final copy. It does not by itself prove
+     * full cross-language workload equivalence: disassembly and native
+     * measurements are still required before any language ranking. */
+    void *(* volatile copy_once)(void *, const void *, size_t) = memcpy;
     unsigned long long observed = 0;
     for (unsigned long long i = 0; i < copies; i++) {
-        memcpy(dest, source, size);
+        copy_once(dest, source, size);
         observed += observed_bytes[i % size];
     }
     if (memcmp(source, dest, size) != 0) {
