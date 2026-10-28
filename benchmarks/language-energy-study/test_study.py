@@ -166,6 +166,12 @@ class PhysicalStudyTests(unittest.TestCase):
             [valid.replace("counter=/sys/class/powercap/intel-rapl:0/energy_uj ", "")],
             [valid.replace("counter=/sys/class/powercap/intel-rapl:0/energy_uj",
                            "counter=/sys/class/powercap/intel-rapl:0/power_uw")],
+            [valid.replace("counter=/sys/class/powercap/intel-rapl:0/energy_uj",
+                           "counter=/tmp/energy_uj")],
+            [valid.replace("counter=/sys/class/powercap/intel-rapl:0/energy_uj",
+                           "counter=/sys/class/powercap/intel-rapl:0:1/energy_uj")],
+            [valid.replace("counter=/sys/class/powercap/intel-rapl:0/energy_uj",
+                           "counter=/sys/class/powercap/intel-rapl:0/../intel-rapl:0/energy_uj")],
             [valid + " status=MEASURED"],
             [valid + " malformed-field"],
         ):
