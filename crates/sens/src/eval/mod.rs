@@ -300,6 +300,19 @@ pub(crate) enum EvalStep {
 
 /// Допоміжний виклик значення лише для предметних тестів SENS.
 /// Виробничий обчислювач використовує справжній dispatch із хвостовими викликами.
+#[cfg(test)]
+pub(crate) fn invoke_value(
+    function: &Value,
+    arguments: &[Value],
+    environment: &Environment,
+    span: Span,
+) -> Result<Value, LanguageError> {
+    match function {
+        Value::DomainIdentity(identity) => {
+            // D8–D10 селектори — одна сім'я точного закону. D9 не має
+            // втрачати свій закон при приведенні до CoreDomainIdentity.
+            if let Some(result) = selector_law::invoke(*identity, arguments, span) {
+                return result;
             }
             if let Some(core_identity) = identity.core_operation() {
                 return canon::invoke_domain_identity(core_identity, arguments, environment, span);
