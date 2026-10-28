@@ -1,0 +1,317 @@
+{
+  "schema": "sens-energy-study-raw/v1",
+  "tasks": {
+    "T01-symbolic-recursion": {
+      "schema": "sens-paired-physical/v1",
+      "metric": "wall_time_ns",
+      "parity": {
+        "passed": true,
+        "oracle_id": "parity_check.py --selftest"
+      },
+      "provenance": {
+        "cpu_model": "x86_64",
+        "os": "Linux 4.19.0-gvisor",
+        "rustc": "absent",
+        "affinity": "not-pinned",
+        "governor": "unknown",
+        "turbo": "unknown",
+        "timing_source": "time.perf_counter_ns (wall)",
+        "git_sha": "not-a-git-checkout",
+        "binary_sha256": "n/a-interpreted"
+      },
+      "warmup_note": "Node is JIT: the first iterations pay compilation. No warmup was applied and this is NOT corrected \u2014 the bias is recorded, not hidden.",
+      "energy_note": "ENERGY_NOT_MEASURED: no RAPL in this environment",
+      "pairs": [
+        {
+          "process_id": "javascript-T01-symbolic-recursion-p0",
+          "order": "AB",
+          "machine_id": "x86_64",
+          "session_id": "session-5227",
+          "baseline_ns": 164751137.0,
+          "candidate_ns": 126251875.0,
+          "energy_not_measured": true
+        },
+        {
+          "process_id": "javascript-T01-symbolic-recursion-p0",
+          "order": "BA",
+          "machine_id": "x86_64",
+          "session_id": "session-5227",
+          "baseline_ns": 167741450.0,
+          "candidate_ns": 151136465.0,
+          "energy_not_measured": true
+        },
+        {
+          "process_id": "javascript-T01-symbolic-recursion-p0",
+          "order": "AB",
+          "machine_id": "x86_64",
+          "session_id": "session-5227",
+          "baseline_ns": 187802126.0,
+          "candidate_ns": 158314755.0,
+          "energy_not_measured": true
+        },
+        {
+          "process_id": "javascript-T01-symbolic-recursion-p0",
+          "order": "BA",
+          "machine_id": "x86_64",
+          "session_id": "session-5227",
+          "baseline_ns": 170309190.0,
+          "candidate_ns": 136074676.0,
+          "energy_not_measured": true
+        },
+        {
+          "process_id": "javascript-T01-symbolic-recursion-p1",
+          "order": "BA",
+          "machine_id": "x86_64",
+          "session_id": "session-5227",
+          "baseline_ns": 182017962.0,
+          "candidate_ns": 148146122.0,
+          "energy_not_measured": true
+        },
+        {
+          "process_id": "javascript-T01-symbolic-recursion-p1",
+          "order": "AB",
+          "machine_id": "x86_64",
+          "session_id": "session-5227",
+          "baseline_ns": 152057247.0,
+          "candidate_ns": 169658554.0,
+          "energy_not_measured": true
+        },
+        {
+          "process_id": "javascript-T01-symbolic-recursion-p1",
+          "order": "BA",
+          "machine_id": "x86_64",
+          "session_id": "session-5227",
+          "baseline_ns": 169014637.0,
+          "candidate_ns": 160291259.0,
+          "energy_not_measured": true
+        },
+        {
+          "process_id": "javascript-T01-symbolic-recursion-p1",
+          "order": "AB",
+          "machine_id": "x86_64",
+          "session_id": "session-5227",
+          "baseline_ns": 169408492.0,
+          "candidate_ns": 134197394.0,
+          "energy_not_measured": true
+        },
+        {
+          "process_id": "javascript-T01-symbolic-recursion-p2",
+          "order": "AB",
+          "machine_id": "x86_64",
+          "session_id": "session-5227",
+          "baseline_ns": 161371418.0,
+          "candidate_ns": 134343285.0,
+          "energy_not_measured": true
+        },
+        {
+          "process_id": "javascript-T01-symbolic-recursion-p2",
+          "order": "BA",
+          "machine_id": "x86_64",
+          "session_id": "session-5227",
+          "baseline_ns": 174905309.0,
+          "candidate_ns": 145436679.0,
+          "energy_not_measured": true
+        },
+        {
+          "process_id": "javascript-T01-symbolic-recursion-p2",
+          "order": "AB",
+          "machine_id": "x86_64",
+          "session_id": "session-5227",
+          "baseline_ns": 157989780.0,
+          "candidate_ns": 136103485.0,
+          "energy_not_measured": true
+        },
+        {
+          "process_id": "javascript-T01-symbolic-recursion-p2",
+          "order": "BA",
+          "machine_id": "x86_64",
+          "session_id": "session-5227",
+          "baseline_ns": 184871053.0,
+          "candidate_ns": 138510993.0,
+          "energy_not_measured": true
+        },
+        {
+          "process_id": "javascript-T01-symbolic-recursion-p3",
+          "order": "BA",
+          "machine_id": "x86_64",
+          "session_id": "session-5227",
+          "baseline_ns": 155863189.0,
+          "candidate_ns": 137553052.0,
+          "energy_not_measured": true
+        },
+        {
+          "process_id": "javascript-T01-symbolic-recursion-p3",
+          "order": "AB",
+          "machine_id": "x86_64",
+          "session_id": "session-5227",
+          "baseline_ns": 165417415.0,
+          "candidate_ns": 130640456.0,
+          "energy_not_measured": true
+        },
+        {
+          "process_id": "javascript-T01-symbolic-recursion-p3",
+          "order": "BA",
+          "machine_id": "x86_64",
+          "session_id": "session-5227",
+          "baseline_ns": 158007393.0,
+          "candidate_ns": 151102365.0,
+          "energy_not_measured": true
+        },
+        {
+          "process_id": "javascript-T01-symbolic-recursion-p3",
+          "order": "AB",
+          "machine_id": "x86_64",
+          "session_id": "session-5227",
+          "baseline_ns": 163137961.0,
+          "candidate_ns": 126743063.0,
+          "energy_not_measured": true
+        },
+        {
+          "process_id": "javascript-T01-symbolic-recursion-p4",
+          "order": "AB",
+          "machine_id": "x86_64",
+          "session_id": "session-5227",
+          "baseline_ns": 157471698.0,
+          "candidate_ns": 130610076.0,
+          "energy_not_measured": true
+        },
+        {
+          "process_id": "javascript-T01-symbolic-recursion-p4",
+          "order": "BA",
+          "machine_id": "x86_64",
+          "session_id": "session-5227",
+          "baseline_ns": 166216807.0,
+          "candidate_ns": 127903635.0,
+          "energy_not_measured": true
+        },
+        {
+          "process_id": "javascript-T01-symbolic-recursion-p4",
+          "order": "AB",
+          "machine_id": "x86_64",
+          "session_id": "session-5227",
+          "baseline_ns": 143414281.0,
+          "candidate_ns": 159555063.0,
+          "energy_not_measured": true
+        },
+        {
+          "process_id": "javascript-T01-symbolic-recursion-p4",
+          "order": "BA",
+          "machine_id": "x86_64",
+          "session_id": "session-5227",
+          "baseline_ns": 177461894.0,
+          "candidate_ns": 137711667.0,
+          "energy_not_measured": true
+        },
+        {
+          "process_id": "javascript-T01-symbolic-recursion-p5",
+          "order": "BA",
+          "machine_id": "x86_64",
+          "session_id": "session-5227",
+          "baseline_ns": 174001075.0,
+          "candidate_ns": 144632775.0,
+          "energy_not_measured": true
+        },
+        {
+          "process_id": "javascript-T01-symbolic-recursion-p5",
+          "order": "AB",
+          "machine_id": "x86_64",
+          "session_id": "session-5227",
+          "baseline_ns": 163958322.0,
+          "candidate_ns": 154703819.0,
+          "energy_not_measured": true
+        },
+        {
+          "process_id": "javascript-T01-symbolic-recursion-p5",
+          "order": "BA",
+          "machine_id": "x86_64",
+          "session_id": "session-5227",
+          "baseline_ns": 149826604.0,
+          "candidate_ns": 122156913.0,
+          "energy_not_measured": true
+        },
+        {
+          "process_id": "javascript-T01-symbolic-recursion-p5",
+          "order": "AB",
+          "machine_id": "x86_64",
+          "session_id": "session-5227",
+          "baseline_ns": 197993625.0,
+          "candidate_ns": 147315115.0,
+          "energy_not_measured": true
+        },
+        {
+          "process_id": "javascript-T01-symbolic-recursion-p6",
+          "order": "AB",
+          "machine_id": "x86_64",
+          "session_id": "session-5227",
+          "baseline_ns": 171684276.0,
+          "candidate_ns": 140350604.0,
+          "energy_not_measured": true
+        },
+        {
+          "process_id": "javascript-T01-symbolic-recursion-p6",
+          "order": "BA",
+          "machine_id": "x86_64",
+          "session_id": "session-5227",
+          "baseline_ns": 168321298.0,
+          "candidate_ns": 140364344.0,
+          "energy_not_measured": true
+        },
+        {
+          "process_id": "javascript-T01-symbolic-recursion-p6",
+          "order": "AB",
+          "machine_id": "x86_64",
+          "session_id": "session-5227",
+          "baseline_ns": 168713881.0,
+          "candidate_ns": 150454607.0,
+          "energy_not_measured": true
+        },
+        {
+          "process_id": "javascript-T01-symbolic-recursion-p6",
+          "order": "BA",
+          "machine_id": "x86_64",
+          "session_id": "session-5227",
+          "baseline_ns": 162920592.0,
+          "candidate_ns": 146930369.0,
+          "energy_not_measured": true
+        },
+        {
+          "process_id": "javascript-T01-symbolic-recursion-p7",
+          "order": "BA",
+          "machine_id": "x86_64",
+          "session_id": "session-5227",
+          "baseline_ns": 177501026.0,
+          "candidate_ns": 132887975.0,
+          "energy_not_measured": true
+        },
+        {
+          "process_id": "javascript-T01-symbolic-recursion-p7",
+          "order": "AB",
+          "machine_id": "x86_64",
+          "session_id": "session-5227",
+          "baseline_ns": 154596258.0,
+          "candidate_ns": 129723649.0,
+          "energy_not_measured": true
+        },
+        {
+          "process_id": "javascript-T01-symbolic-recursion-p7",
+          "order": "BA",
+          "machine_id": "x86_64",
+          "session_id": "session-5227",
+          "baseline_ns": 158530252.0,
+          "candidate_ns": 141788965.0,
+          "energy_not_measured": true
+        },
+        {
+          "process_id": "javascript-T01-symbolic-recursion-p7",
+          "order": "AB",
+          "machine_id": "x86_64",
+          "session_id": "session-5227",
+          "baseline_ns": 168094310.0,
+          "candidate_ns": 124144836.0,
+          "energy_not_measured": true
+        }
+      ]
+    }
+  },
+  "energy": "ENERGY_NOT_MEASURED"
+}
