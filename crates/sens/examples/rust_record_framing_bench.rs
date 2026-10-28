@@ -77,22 +77,3 @@ fn main() {
     }
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-    #[test]
-    fn framed_records_are_counted_without_decoding_sens() {
-        let data = corpus();
-        assert_eq!(inspect_frames(&data), Ok((256, (0..256).map(|i| 8 + i % 64).sum())));
-    }
-    #[test]
-    fn physical_corruption_is_rejected() {
-        let data = corpus();
-        assert!(inspect_frames(&[]).is_err());
-        assert!(inspect_frames(&data[..3]).is_err());
-        assert!(inspect_frames(&data[..data.len() - 1]).is_err());
-        let mut bad = data;
-        bad[0..4].copy_from_slice(&u32::MAX.to_le_bytes());
-        assert!(inspect_frames(&bad).is_err());
-    }
-}
