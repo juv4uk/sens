@@ -327,7 +327,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          python3 benchmarks/language-energy-study/study.py --blocks 8 --pairs 4 --copies 300000 --seed 20261028 --out .ci-physical-study
+          python3 benchmarks/language-energy-study/study.py --blocks 8 --pairs 4 --copies 8192 --seed 20261028 --out .ci-physical-study
       - name: Сирі вимірювання і протокол (не release gate)
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
