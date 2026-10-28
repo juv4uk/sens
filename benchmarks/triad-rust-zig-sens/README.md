@@ -6,54 +6,48 @@
 
 | Шар | Реалізація | Фактична операція | Проби | Метрика |
 |---|---|---|---|---|
-| Rust / I/O | `crates/sens-cli/tests/mechanism_file_io_benchmark.rs` | `std::fs::read` байтів справжнього `benchmarks/lists.lisp` | 3 warmup + 11 timed samples; кожен ≥25 ms | raw sample + p50/p90/min/max ns/read, bytes |
-| Rust / exact-width ingest | `crates/sens/examples/packed_vs_visible_bench.rs` | Видимі exact-width слова проти packed-носія, той самий D2 AST; межі ширин передаються явно | 32 парні warmup + 9 чергованих проб у кожному напрямку, кожна ≥25 ms | Сирі проби, p50/p90 ns/program, співвідношення, байти й semantic bits |
-| Zig / ABI | `research/zig-codecs/tests.zig` | `transport_abi.zig`: точний D8 BE3 → T5 | 1 batch warmup + 7 timed samples; кожен ≥25 ms, batches адаптивні | raw elapsed/word counts + p50/p90/min/max ns/word |
-| Zig / T5M | `bench_t5m.zig` (виконується центральним `ci.yml`) | Реальний `benchmarks/lists.sens`: encode/decode з канонічною byte parity | прогрів + 11 адаптивних проб, кожна ≥25 ms | raw elapsed/operation counts + min/p50/p90/max ns/op; фізичні негативи окремо |
-| Lisp → Zig/T5M → SENS | `benchmarks/{lists,arithmetic,parser,recursion}.lisp` і `tests/semantic/` | Чотири мовні навантаження, вимір лише після успішного Lisp-закону | 11 + контрольний прогін | p50/p90 wall-time повного процесу (CLI + bootstrap + eval), AST та фізичний розмір |
+| Rust / exact-width ingest | `crates/sens/examples/packed_vs_visible_bench.rs` | Видимі exact-width слова проти packed-носія, той самий D2 AST; межі ширин передаються явно | 32 парні warmup + 15 чергованих проб у кожному напрямку, кожна ≥25 ms | Сирі проби, p50/p90 ns/program, співвідношення, байти й semantic bits |
+| Zig / ABI | `research/zig-codecs/tests.zig` | Перевірка фізичного транспортного ABI, без логічного оракула | Виконується перед вимірюванням T5M | Тестовий вердикт коридору, не швидкість |
+| Zig / T5M | `bench_t5m.zig` (ручний конкурс; центральний `ci.yml` окремо) | Реальний `benchmarks/lists.sens`: encode/decode з канонічною byte parity | прогрів + 11 адаптивних проб, кожна ≥25 ms | raw elapsed/operation counts + min/p50/p90/max ns/op; фізичні негативи окремо |
+| SENS / логіка | `tests/semantic/бенчмарк-структура-{law,mutant}.lisp` через `scripts/prove-бенчмарк-структура.sh` | Нативний позитивний закон і негативний мутант; Zig/T5M як коридор | 11 часових проб після обох свідків | p50/p90 мкс на нативний CLI-прогін, без висновку про прискорення |
 
 Для D11 окремо діють `benchmarks/d11-families.lisp` та пара
 `tests/semantic/d11-families-benchmark-{law,mutant}.lisp`.
 Їхні вердикти видає **тільки SENS**, а Zig/T5M передає точні слова.
-Використовуємо повний `scripts/prove-lisp-semantic-t5m.sh`:
-нативний Lisp, mint, Zig open/verify, paired і standalone.
+Цей D11-корпус **не входить** до ручного workflow конкурсу: без розширення релізного scope.
+
+Центральний `ci.yml` не змінюється. Існуючий `native-rust-zig-sens-bench.yml` — **тільки `workflow_dispatch`**, три незалежні jobs, без Python/JSON і без зміни семантики або релізного гейта.
 
 ## Відтворення
 
 ```sh
-# Rust: власний механізм читання, без виклику Lisp evaluator.
-cargo test --locked -p sens-cli --test mechanism_file_io_benchmark -- --include-ignored --nocapture
+# Rust: механічний exact-width reader, 15 проб на кожен із 5 випадків.
+cargo run --locked --release -p sens --example packed_vs_visible_bench -- --samples 15
 
-# Rust: exact-width visible/packed ingestion; verifies matching D2 AST before timing.
-bash benchmarks/rust-packed-visible/run.sh /tmp/rust-packed-visible
-
-# Zig 0.16: точний ABI і adaptive ≥25 ms samples, без SENS-семантики.
+# Zig: спершу транспортні негативи, потім 11 фізичних T5M-проб.
 zig test -lc research/zig-codecs/tests.zig
-
-# Центральний CI викликає цей exact-corpus T5M benchmark і fail-closed negatives.
+zig test -O ReleaseFast -lc bench_t5m_test.zig
 zig run -O ReleaseFast -lc bench_t5m.zig
 
-# Фізичний SENS: спочатку наявна збірка, далі лише реальне виконання.
-cargo build --locked -p sens-cli --bin sens --bin sens-trit --features benchmark-ast-visits
-bash scripts/prove-lisp-semantic-t5m.sh \
-  "$PWD/target/debug/sens" "$PWD/target/debug/sens-trit" \
-  "$PWD/target/sens-benchmark-evidence"
+# SENS: лише сам SENS вирішує закон і мутант; shell фіксує фактичний вихід.
+cargo build --locked -p sens-cli --bin sens
+bash scripts/prove-бенчмарк-структура.sh "$PWD/target/debug/sens"
 ```
 
 ## Правила достовірності
 
-1. Rust/I/O міряє лише файлове читання **warm-cache**, без SENS bootstrap чи семантики.
-   Rust exact-width ingestion перевіряє однакову D2/domain-AST форму до таймера;
+1. Rust exact-width ingestion вимірює лише механізм і перевіряє однакову D2/domain-AST форму до таймера;
    межі ширин подано окремим розкладом і вони **не входять** у packed payload.
-   Кожна проба адаптивно триває щонайменше 25 ms. Це порівняння reader paths,
+   Кожна Rust-проба адаптивно триває щонайменше 25 ms. Це порівняння reader paths,
    не self-describing container і не вимір семантики.
 2. Zig вимірює **реальний** ABI T5 encode, не імітацію D8. Час
    `CLOCK_MONOTONIC` включає виклик кодувальника, перевірку статусу та
    накладні витрати циклу; це не незалежне вимірювання CPU instructions.
-3. SENS визначає D1:1/D1:0 у `.lisp` і `.sens`; Rust або Zig не
-   оголошують семантичного PASS. Діагностика часу ніколи не приховує RED.
-4. **Не порівнювати числові p50 між стовпцями:** Rust вимірює файл, Zig
-   окреме слово, SENS — цілий процес; різні знаменники і прогрів.
+3. SENS перевіряє позитивний закон і негативний мутант у власній мові;
+   Rust або Zig не оголошують семантичного PASS. Діагностика часу ніколи не приховує RED.
+4. **Не порівнювати числові p50 між стовпцями:** Rust вимірює читання
+   exact-width форм, Zig — T5M транспорт, SENS — цілий процес;
+   різні знаменники і прогрів.
 5. Для тверджень про прискорення потрібні однаковий корпус, машинне оточення,
    контроль компіляцій і парний дизайн ABBA/BAAB, як у
    `benchmarks/bench-methodology/README.md`. Поточні цифри — `MEASURED`,
