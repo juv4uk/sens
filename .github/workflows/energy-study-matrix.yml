@@ -13,6 +13,8 @@ on:
   push:
     paths:
       - 'benchmarks/language-energy-study/corpus/**'
+      # TEMP: trigger this bounded proof while fixing Windows runner
+      - 'benchmarks/language-energy-study/run_study.py'
       - '.github/workflows/energy-study-matrix.yml'
 
 permissions:
