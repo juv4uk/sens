@@ -37,12 +37,14 @@ run_case() {
     cat "$error" "$output" >&2
     return 1
   fi
-  # Require a witnessed LAST source, not a D1 printed by any prerequisite.
-  # The REPL may attach its prompt to stdout for piped stdin.
+  # Require the final *non-empty* REPL reply following the last witness
+  # load. Earlier matching output (from a prerequisite or side effect)
+  # cannot turn a later wrong verdict into a false PASS.
+  # Non-TTY REPL has no prompt; allow the exact interactive-prefix form too.
   if ! awk -v marker="Завантажено: $witness" -v wanted="$expected" '
-    index($0, marker) { admitted = 1; next }
-    admitted && ($0 == wanted || $0 == "sens[укр]> " wanted) { correct = 1 }
-    END { exit (admitted && correct ? 0 : 1) }
+    index($0, marker) { admitted = 1; last = ""; next }
+    admitted && NF { last = $0 }
+    END { exit (admitted && (last == wanted || last == "sens[укр]> " wanted) ? 0 : 1) }
   ' "$output"; then
     printf 'SENS_REPL_CORPUS_FAIL label=%s expected=D1:%s actual=missing-or-wrong\n' "$label" "$expected" >&2
     cat "$output" >&2
