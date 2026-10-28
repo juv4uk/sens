@@ -532,16 +532,6 @@ impl Eq for Magnitude {}
 /// Internal convenience mirroring the former tuple-struct constructor: build
 /// a canonical magnitude from raw little-endian limbs. Used by the unit tests
 /// below; kept out of non-test builds.
-#[cfg(test)]
-#[allow(non_snake_case)]
-fn Magnitude(limbs: Vec<u32>) -> Magnitude {
-    Magnitude::from_limbs(limbs)
-}
-
-impl fmt::Display for Magnitude {
-    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
-        if self.is_zero() {
-            return write!(formatter, "0");
         }
         // Repeatedly divide by 10^9 so each step peels off up to nine decimal
         // digits at once instead of one, keeping this from being needlessly
