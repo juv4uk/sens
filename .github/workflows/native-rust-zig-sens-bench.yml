@@ -1,7 +1,7 @@
-name: SENS — нативні бенчмарки Rust, Zig та фізичного Lisp
+name: SENS — конкурс: Rust механізм / Zig коридор / SENS логіка
 
-# Лише ручний дослід: власник дозволив один автоматичний workflow (ci.yml).
-# Результати на shared runner — виміри, а не допуск релізу чи доказ прискорення.
+# Ручний конкурс на трьох незалежних осях. Не релізний гейт.
+# Rust не визначає семантику, Zig не визначає логіку, SENS не підміняє транспорт.
 on:
   workflow_dispatch:
 
@@ -9,119 +9,100 @@ permissions:
   contents: read
 
 jobs:
-  native-triad:
-    name: Rust T5 ↔ Zig T5 ↔ фізичний SENS
+  rust-mechanism:
+    name: Rust — механізм exact-width ingestion
     runs-on: ubuntu-24.04
-    timeout-minutes: 35
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5 pinned
+        with:
+          persist-credentials: false
+      - uses: dtolnay/rust-toolchain@1.99.0
+      - name: Виміряти Rust reader без семантичного оракула
+        shell: bash
+        run: |
+          set -euo pipefail
+          out="$RUNNER_TEMP/bench-rust-mechanism"
+          mkdir -p "$out"
+          { echo "sha=$GITHUB_SHA"; rustc --version; cargo --version; uname -m; } > "$out/environment.txt"
+          CARGO_BUILD_JOBS=2 cargo run --locked --release -p sens \
+            --example packed_vs_visible_bench -- --samples 15 \
+            > "$out/raw.tsv" 2> "$out/build.log"
+          test "$(grep -c '^RUST_PACKED_VISIBLE_SAMPLE[[:space:]]' "$out/raw.tsv" || true)" -eq 75
+          test "$(grep -c '^RUST_PACKED_VISIBLE_SUMMARY[[:space:]]' "$out/raw.tsv" || true)" -eq 5
+          grep '^RUST_PACKED_VISIBLE_SUMMARY[[:space:]]' "$out/raw.tsv"
+      - name: Сирі виміри Rust
+        if: ${{ always() }}
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4 pinned
+        with:
+          name: bench-rust-mechanism-${{ github.sha }}
+          path: ${{ runner.temp }}/bench-rust-mechanism/
+          if-no-files-found: warn
+          retention-days: 14
+
+  zig-corridor:
+    name: Zig — точність і пропускна здатність T5M
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5 pinned
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/install-zig
+      - name: Перевірити фізичний коридор до вимірювання
+        shell: bash
+        run: |
+          set -euo pipefail
+          out="$RUNNER_TEMP/bench-zig-corridor"
+          mkdir -p "$out"
+          { echo "sha=$GITHUB_SHA"; zig version; uname -m; } > "$out/environment.txt"
+          zig test -lc research/zig-codecs/tests.zig > "$out/codec-tests.log" 2>&1
+          zig test -O ReleaseFast -lc bench_t5m_test.zig > "$out/t5m-tests.log" 2>&1
+          zig run -O ReleaseFast -lc bench_t5m.zig > "$out/raw.tsv" 2>&1
+          test "$(grep -c '^ZIG_T5M_SAMPLE ' "$out/raw.tsv" || true)" -eq 11
+          test "$(grep -c '^ZIG_T5M_BENCH ' "$out/raw.tsv" || true)" -eq 1
+          grep '^ZIG_T5M_BENCH ' "$out/raw.tsv"
+      - name: Сирі виміри Zig
+        if: ${{ always() }}
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4 pinned
+        with:
+          name: bench-zig-corridor-${{ github.sha }}
+          path: ${{ runner.temp }}/bench-zig-corridor/
+          if-no-files-found: warn
+          retention-days: 14
+
+  sens-semantics:
+    name: SENS — нативний закон і негативний мутант
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5 pinned
         with:
           persist-credentials: false
       - uses: dtolnay/rust-toolchain@1.99.0
       - uses: ./.github/actions/install-zig
-
-      - name: Rust і Zig — T5 механізм, точні байти до вимірювання
+      - name: Виконати SENS-власний закон через Zig/T5M
         shell: bash
-        timeout-minutes: 18
         run: |
           set -euo pipefail
-          out="$RUNNER_TEMP/native-triad"
+          out="$RUNNER_TEMP/bench-sens-semantics"
           mkdir -p "$out"
-          {
-            echo "commit=$GITHUB_SHA"
-            echo "runner=${RUNNER_NAME:-unknown}"
-            echo "arch=$(uname -m)"
-            cargo --version
-            rustc --version
-            zig version
-          } > "$out/environment.txt"
-          # Rust: механіка енкодера/декодера, жодного Lisp-оракула.
-          CARGO_BUILD_JOBS=2 cargo run --locked --release -p sens \
-            --example zig_t5_matched_bench > "$out/rust-raw.log" 2> "$out/rust-build.log"
-          # Zig 0.16: власний monotonic clock_gettime, без вилученого std.time.Timer.
-          zig build-exe -O ReleaseFast -lc research/zig-codecs/t5/bench.zig \
-            -femit-bin="$out/zig-t5-bench" > "$out/zig-build.log" 2>&1
-          "$out/zig-t5-bench" > "$out/zig-raw.log" 2>&1
-          grep -E '^(fixture|physical) impl=rust ' "$out/rust-raw.log" \
-            | sed 's/ impl=rust//' > "$out/rust-fixtures.txt"
-          grep -E '^(fixture|physical) impl=zig ' "$out/zig-raw.log" \
-            | sed 's/ impl=zig//' > "$out/zig-fixtures.txt"
-          test "$(wc -l < "$out/rust-fixtures.txt")" -eq 8
-          test "$(wc -l < "$out/zig-fixtures.txt")" -eq 8
-          if ! diff -u "$out/rust-fixtures.txt" "$out/zig-fixtures.txt"; then
-            echo '::error title=Rust/Zig T5::REGRESSION layer=transport expected=byte-exact-fixture-parity actual=divergent'
+          { echo "sha=$GITHUB_SHA"; rustc --version; zig version; uname -m; } > "$out/environment.txt"
+          CARGO_BUILD_JOBS=2 cargo build --locked -p sens-cli --bin sens > "$out/build.log" 2>&1 || {
+            cat "$out/build.log" >&2
             exit 1
-          fi
-          grep '^sample impl=rust ' "$out/rust-raw.log" > "$out/rust-samples.txt"
-          grep '^sample impl=zig ' "$out/zig-raw.log" > "$out/zig-samples.txt"
-          test "$(wc -l < "$out/rust-samples.txt")" -eq 40
-          test "$(wc -l < "$out/zig-samples.txt")" -eq 40
-          echo '::notice title=Rust/Zig T5::PASS fixture_forms=1,16,128,1024 equal_bytes=true native_samples=40-per-backend scope=mechanism-only'
-
-      - name: SENS — Lisp-закон → Zig/T5M → самостійні фізичні виміри
-        shell: bash
-        timeout-minutes: 16
-        run: |
-          set -euo pipefail
-          out="$RUNNER_TEMP/native-triad"
-          mkdir -p "$out"
-          CARGO_BUILD_JOBS=2 cargo build --locked -p sens-cli --bin sens --bin sens-trit \
-            --features benchmark-ast-visits > "$out/sens-build.log" 2>&1
-          sens="$PWD/target/debug/sens"
-          trit="$PWD/target/debug/sens-trit"
-          test -x "$sens" && test -x "$trit"
-          printf 'source\trepeat\twall_ns\tsource_sha256\tphysical_sha256\tstdout_sha256\tcommit\trunner\n' \
-            > "$out/sens-samples.tsv"
-          for source in tests/semantic/d1-not-law.lisp tests/semantic/d3-structural-native-t5m-law.lisp; do
-            id="$(basename "$source" .lisp)"
-            dir="$out/$id"
-            mkdir -p "$dir"
-            physical="$dir/program.sens"
-            timeout 45s "$sens" "$source" > "$dir/direct.out" 2> "$dir/direct.err"
-            # verify-view читає парний безрозширений sibling ($dir/program),
-            # не view.txt; --t5m-mint-pair публікує його разом із носієм.
-            timeout 45s "$sens" --t5m-mint-pair "$source" "$physical" > "$dir/mint.out" 2> "$dir/mint.err"
-            test -s "$physical"
-            timeout 45s "$trit" open "$physical" > "$dir/view.txt"
-            timeout 45s "$trit" verify-view "$physical" > "$dir/verify.txt"
-            timeout 45s "$sens" --t5m-pair "$source" "$physical" > "$dir/paired.out" 2> "$dir/paired.err"
-            timeout 45s "$sens" "$physical" > "$dir/standalone.out" 2> "$dir/standalone.err"
-            cmp "$dir/direct.out" "$dir/paired.out"
-            cmp "$dir/paired.out" "$dir/standalone.out"
-            if [[ "$(tail -n 1 "$dir/standalone.out")" != 1 ]]; then
-              echo "::error file=$source,title=SENS::REGRESSION layer=semantics expected=D1:1 actual=other"
-              exit 1
-            fi
-            src_hash="$(sha256sum "$source" | cut -d' ' -f1)"
-            bin_hash="$(sha256sum "$physical" | cut -d' ' -f1)"
-            out_hash="$(sha256sum "$dir/standalone.out" | cut -d' ' -f1)"
-            timeout 45s "$sens" "$physical" > "$dir/warmup.out" 2> "$dir/warmup.err"
-            cmp "$dir/standalone.out" "$dir/warmup.out"
-            : > "$dir/samples.ns"
-            for repeat in 1 2 3 4 5 6 7; do
-              started="$(date +%s%N)"
-              timeout 45s "$sens" "$physical" > "$dir/sample-$repeat.out" 2> "$dir/sample-$repeat.err"
-              finished="$(date +%s%N)"
-              cmp "$dir/standalone.out" "$dir/sample-$repeat.out"
-              elapsed="$((finished - started))"
-              if (( elapsed <= 0 )); then
-                echo "::error file=$source,title=SENS::REGRESSION layer=clock expected=positive-wall-ns actual=$elapsed"
-                exit 1
-              fi
-              printf '%s\n' "$elapsed" >> "$dir/samples.ns"
-              printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
-                "$source" "$repeat" "$elapsed" "$src_hash" "$bin_hash" "$out_hash" \
-                "$GITHUB_SHA" "${RUNNER_NAME:-unknown}" >> "$out/sens-samples.tsv"
-            done
-            median_ns="$(sort -n "$dir/samples.ns" | sed -n '4p')"
-            echo "::notice file=$source,title=SENS physical::MEASURED p50_wall_ns=$median_ns samples=7 warmup=1 scope=CLI_bootstrap_eval codec=Zig/T5M output_parity=direct-paired-standalone release=NOT_CERTIFIED"
-          done
-
-      - name: Сирі бенчмарки та байтові докази
+          }
+          bash scripts/prove-бенчмарк-структура.sh "$PWD/target/debug/sens" > "$out/native-law.log" 2>&1 || {
+            cat "$out/native-law.log" >&2
+            exit 1
+          }
+          grep -q '^БЕНЧМАРК_СТРУКТУРА=PASS native=SENS positive=D1:так mutant=D1:ні samples=11 ' "$out/native-law.log"
+          cat "$out/native-law.log"
+      - name: Нативний доказ SENS і його час
         if: ${{ always() }}
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4 pinned
         with:
-          name: sens-native-triad-${{ github.sha }}
-          path: ${{ runner.temp }}/native-triad/
+          name: bench-sens-semantics-${{ github.sha }}
+          path: ${{ runner.temp }}/bench-sens-semantics/
           if-no-files-found: warn
           retention-days: 14
