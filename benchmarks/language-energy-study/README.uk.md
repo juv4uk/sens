@@ -31,14 +31,14 @@
 навантаженні. Висновок щодо загальної мови робити **не можна** навіть
 якщо H1 отримає підтримку.
 
-Функціональна одиниця — **300000 копій ідентичного буфера**
-з `lib/core4.lisp`, із повним byte-exact порівнянням кінцевого буфера
+Функціональна одиниця — **8192 копій ідентичного буфера**
+з `lib/core4.lisp` (не більше 3 GiB трафіку за один запуск), із повним byte-exact порівнянням кінцевого буфера
 і однаковим спостережуваним checksum. Це **не виконання SENS** і не
 мовний закон: ніхто не називає ці цифри «енергією логіки SENS».
 Rust, C та Python виконують власні інструментовані копіювання
 `copy.rs`, `copy.c`, `copy.py`.
 
-Первинні метрики: **wall-time одного нового процесу з 300000 копіями**
+Первинні метрики: **wall-time одного нового процесу з 8192 копіями**
 в нс, **peak RSS** у KiB, CPU user/system час. Компіляція **поза**
 вимірюваним вікном; startup/include interpreter входить у нього.
 Вторинна метрика: **RAPL CPU package energy_uj** для того самого
@@ -79,7 +79,7 @@ embodied emissions.
 ```bash
 python3 -m unittest discover -s benchmarks/language-energy-study -p 'test_*.py' -v
 python3 benchmarks/language-energy-study/study.py \
-  --blocks 8 --pairs 4 --copies 300000 --seed 20261028 \
+  --blocks 8 --pairs 4 --copies 8192 --seed 20261028 \
   --out .ci-physical-study
 ```
 
