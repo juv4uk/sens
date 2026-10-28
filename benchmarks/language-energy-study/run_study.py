@@ -126,6 +126,50 @@ def task_env(task_id: str) -> dict:
     return env
 
 
+def _windows_process_peak_rss_kib(proc) -> float | None:
+    """Native per-process *peak working set* via PSAPI; never substitute current RSS.
+
+    A live Windows process handle remains valid after exit while Popen owns it.
+    PeakWorkingSetSize is supplied by the OS in bytes (not KiB).
+    API/zero failures are unavailable evidence, never 0 KiB observations.
+    """
+    import ctypes
+    from ctypes import wintypes
+
+    class ProcessMemoryCounters(ctypes.Structure):
+        _fields_ = [
+            ("cb", wintypes.DWORD),
+            ("PageFaultCount", wintypes.DWORD),
+            ("PeakWorkingSetSize", ctypes.c_size_t),
+            ("WorkingSetSize", ctypes.c_size_t),
+            ("QuotaPeakPagedPoolUsage", ctypes.c_size_t),
+            ("QuotaPagedPoolUsage", ctypes.c_size_t),
+            ("QuotaPeakNonPagedPoolUsage", ctypes.c_size_t),
+            ("QuotaNonPagedPoolUsage", ctypes.c_size_t),
+            ("PagefileUsage", ctypes.c_size_t),
+            ("PeakPagefileUsage", ctypes.c_size_t),
+        ]
+
+    try:
+        psapi = ctypes.WinDLL("psapi.dll", use_last_error=True)
+        func = psapi.GetProcessMemoryInfo
+        func.argtypes = [wintypes.HANDLE, ctypes.POINTER(ProcessMemoryCounters), wintypes.DWORD]
+        func.restype = wintypes.BOOL
+        sample = ProcessMemoryCounters()
+        sample.cb = ctypes.sizeof(sample)
+        if not func(proc._handle, ctypes.byref(sample), sample.cb):
+            return None
+        return sample.PeakWorkingSetSize / 1024.0 if sample.PeakWorkingSetSize > 0 else None
+    except (AttributeError, OSError, ValueError):
+        return None
+
+
+def _unix_peak_rss_kib(ru_maxrss: float) -> float | None:
+    """wait4 ru_maxrss: Darwin returns bytes; Linux returns KiB."""
+    value = ru_maxrss / 1024.0 if sys.platform == "darwin" else float(ru_maxrss)
+    return value if value > 0 else None
+
+
 def run_once(cmd: str, env: dict, timeout_s: float = 120.0):
     """Один запуск. Повертає (wall_ns, peak_rss_kib, вихід) або (None, None, причина).
 
@@ -139,13 +183,33 @@ def run_once(cmd: str, env: dict, timeout_s: float = 120.0):
     stdout/stderr читаються після wait, щоб не блокуватися на PIPE.
     """
     import shlex
-    argv = shlex.split(cmd)
+    argv = shlex.split(cmd, posix=(os.name != 'nt'))
     start = time.perf_counter_ns()
     try:
         proc = subprocess.Popen(argv, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                                 text=True, env=env)
     except OSError as exc:
         return None, None, f"SPAWN_FAIL:{exc}"
+    if os.name == "nt":
+        # Windows has no wait4. communicate() reaps the child while retaining
+        # its native process handle for PSAPI peak working-set retrieval.
+        try:
+            out, err = proc.communicate(timeout=timeout_s)
+        except subprocess.TimeoutExpired:
+            proc.kill()
+            proc.communicate()
+            return None, None, f"TIMEOUT_{timeout_s}s"
+        elapsed = time.perf_counter_ns() - start
+        if proc.returncode != 0:
+            return None, None, f"EXIT_{proc.returncode}:{err.strip()[:80]}"
+        rss = _windows_process_peak_rss_kib(proc)
+        if rss is None:
+            return None, None, "RSS_UNAVAILABLE_WIN32"
+        lines = [ln for ln in out.splitlines() if ln.strip()]
+        if len(lines) != 1:
+            return None, None, f"BAD_STDOUT_LINES_{len(lines)}"
+        return float(elapsed), rss, lines[0]
+
     deadline = time.monotonic() + timeout_s
     status = None
     usage = None
@@ -185,7 +249,10 @@ def run_once(cmd: str, env: dict, timeout_s: float = 120.0):
     lines = [ln for ln in out.splitlines() if ln.strip()]
     if len(lines) != 1:
         return None, None, f"BAD_STDOUT_LINES_{len(lines)}"
-    return float(elapsed), float(usage.ru_maxrss), lines[0]
+    rss = _unix_peak_rss_kib(usage.ru_maxrss)
+    if rss is None:
+        return None, None, "RSS_UNAVAILABLE_WAIT4"
+    return float(elapsed), rss, lines[0]
 
 
 def active_params(task_id: str) -> dict:
