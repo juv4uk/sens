@@ -69,6 +69,20 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # Порядок критичний: crates/sens/build.rs запускає ПІННУТИЙ Zig-компілятор
+      # (Command::new(compiler) … .expect("… pinned Zig")). Без Zig збірка падає
+      # з "failed to run custom build command", і це не проблема раннера —
+      # це вимога мови: коридор Rust<->SENS стерильний і йде через Zig.
+      - name: Встановити Zig
+        uses: mlugg/setup-zig@v2
+        with:
+          version: 0.16.0
+
+      - name: Перевірити Zig ДО збірки
+        run: |
+          zig version
+          echo "ZIG_AVAILABLE=yes"
+
       - name: Зібрати SENS
         run: |
           cargo --version
@@ -77,12 +91,4 @@ jobs:
       - name: Що вміє бінарник
         run: |
           ./target/release/sens --version
-          echo "--- SENS збирається на раннері: це передумова вимірювання мови ---"
-
-      - name: Чи є Zig (потрібен для карбування .lisp -> .sens)
-        run: |
-          if command -v zig >/dev/null 2>&1; then
-            zig version; echo "ZIG_AVAILABLE=yes"
-          else
-            echo "ZIG_AVAILABLE=no — карбування пар неможливе без Zig"
-          fi
+          echo "--- SENS збирається на раннері: передумова вимірювання мови виконана ---"
