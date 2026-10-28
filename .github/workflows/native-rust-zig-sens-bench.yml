@@ -70,7 +70,7 @@ jobs:
           sens="$PWD/target/debug/sens"
           trit="$PWD/target/debug/sens-trit"
           test -x "$sens" && test -x "$trit"
-          printf 'source\trepeat\twall_ns\tsource_sha256\tphysical_sha256\tstdout_sha256\tcommit\trunner\n' \
+          printf 'source\trepeat\twall_ns\tphysical_bytes\tcommit\trunner\n' \
             > "$out/sens-samples.tsv"
           for source in tests/semantic/d1-not-law.lisp tests/semantic/d3-structural-native-t5m-law.lisp; do
             id="$(basename "$source" .lisp)"
@@ -92,9 +92,7 @@ jobs:
               echo "::error file=$source,title=SENS::REGRESSION layer=semantics expected=D1:1 actual=other"
               exit 1
             fi
-            src_hash="$(sha256sum "$source" | cut -d' ' -f1)"
-            bin_hash="$(sha256sum "$physical" | cut -d' ' -f1)"
-            out_hash="$(sha256sum "$dir/standalone.out" | cut -d' ' -f1)"
+            physical_bytes="$(wc -c < "$physical" | tr -d ' ')"
             timeout 45s "$sens" "$physical" > "$dir/warmup.out" 2> "$dir/warmup.err"
             cmp "$dir/standalone.out" "$dir/warmup.out"
             : > "$dir/samples.ns"
@@ -109,8 +107,8 @@ jobs:
                 exit 1
               fi
               printf '%s\n' "$elapsed" >> "$dir/samples.ns"
-              printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
-                "$source" "$repeat" "$elapsed" "$src_hash" "$bin_hash" "$out_hash" \
+              printf '%s\t%s\t%s\t%s\t%s\t%s\n' \
+                "$source" "$repeat" "$elapsed" "$physical_bytes" \
                 "$GITHUB_SHA" "${RUNNER_NAME:-unknown}" >> "$out/sens-samples.tsv"
             done
             median_ns="$(sort -n "$dir/samples.ns" | sed -n '4p')"
