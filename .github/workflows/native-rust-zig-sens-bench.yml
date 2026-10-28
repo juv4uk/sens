@@ -35,6 +35,15 @@ jobs:
             rustc --version
             zig version
           } > "$out/environment.txt"
+          # RAPL — Rust-mechanism lane. Check physical counter identity without
+          # attributing any GitHub-hosted package joules to the SENS process.
+          rustc --edition=2021 --test benchmarks/mechanism/rapl-energy-bench.rs \
+            -o "$out/rapl-mechanism-tests" > "$out/rapl-build.log" 2>&1
+          "$out/rapl-mechanism-tests" > "$out/rapl-mechanism-tests.log" 2>&1
+          rustc --edition=2021 -O benchmarks/mechanism/rapl-energy-bench.rs \
+            -o "$out/rapl-energy" >> "$out/rapl-build.log" 2>&1
+          echo 'RAPL_STATUS=NOT_MEASURED reason=shared_GitHub_runner_no_isolated_physical_meter' \
+            > "$out/rapl-status.txt"
           # Rust: накладні витрати host-виклику Zig-owned T5M, НЕ власний T5-кодек або Lisp-оракул.
           CARGO_BUILD_JOBS=2 cargo run --locked --release -p sens \
             --example zig_t5_matched_bench > "$out/rust-raw.log" 2> "$out/rust-build.log"
