@@ -9,6 +9,7 @@ from pathlib import Path
 import platform
 import random
 import re
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -93,11 +94,11 @@ def physical_expected(copies: int) -> str:
 
 
 def measure(command: list[str], copies: int, out: Path, meter: Path | None,
-            expected: str) -> dict:
+            time_tool: str, expected: str) -> dict:
     with tempfile.NamedTemporaryFile(dir=out, suffix=".usage", delete=False) as f:
         usage = Path(f.name)
     try:
-        command = ["/usr/bin/time", "-f",
+        command = [time_tool, "-f",
                    "METRIC_RSS_KIB=%M\tuser_s=%U\tsys_s=%S",
                    "-o", str(usage), *command, str(CORPUS), str(copies)]
         if meter:
@@ -154,6 +155,12 @@ def validate_pilot_budget(blocks: int, pairs: int, copies: int,
 
 def experiment(blocks: int, pairs: int, copies: int, seed: int, out: Path) -> None:
     resource_budget = validate_pilot_budget(blocks, pairs, copies, CORPUS.stat().st_size)
+    if checked(["git", "status", "--porcelain"]):
+        raise RuntimeError("SOURCE_TREE_DIRTY: commit the study inputs before measurement")
+    time_tool = shutil.which("time")
+    if time_tool is None:
+        raise RuntimeError("GNU time is missing from the pinned Guix profile PATH")
+    time_version = checked([time_tool, "--version"]).splitlines()[0]
     out.mkdir(parents=True, exist_ok=True)
     with tempfile.TemporaryDirectory(prefix="sens-physical-") as tmp:
         binary_dir = Path(tmp)
@@ -193,6 +200,7 @@ def experiment(blocks: int, pairs: int, copies: int, seed: int, out: Path) -> No
             "governor": optional_read(Path("/sys/devices/system/cpu/cpu0/cpufreq/scaling_governor")),
             "turbo": optional_read(Path("/sys/devices/system/cpu/intel_pstate/no_turbo")),
             "timing_source": "Python perf_counter_ns(outer wrapper), RAPL child elapsed_ns separately",
+            "gnu_time_path": time_tool, "gnu_time_version": time_version,
             "python": platform.python_version(), "cc": checked(["cc", "--version"]).splitlines()[0],
             "energy_sensor": sensor,
             "energy_status": "MEASURED" if meter else "ENERGY_NOT_MEASURED",
@@ -215,7 +223,8 @@ def experiment(blocks: int, pairs: int, copies: int, seed: int, out: Path) -> No
                     observations = {}
                     for label in order:
                         language = "rust" if label == "A" else candidate
-                        observations[label] = measure(commands[language], copies, out, meter, expected)
+                        observations[label] = measure(commands[language], copies, out, meter,
+                                                      time_tool, expected)
                         samples.append({"block": block + 1, "pair": index + 1,
                                         "order": order, "language": language,
                                         **observations[label]})
@@ -255,7 +264,7 @@ def experiment(blocks: int, pairs: int, copies: int, seed: int, out: Path) -> No
                 return f"{item['ratio']:.3f} [{lo:.3f}, {hi:.3f}]"
             lines.append(f"| {candidate} | {fmt('wall_time_ns')} | "
                          f"{fmt('peak_rss_kib')} | {fmt('energy_uj')} |")
-        lines.extend(["", f"RAPL: {sensor}. Дослід на shared GitHub runner — не рейтинг.",
+        lines.extend(["", f"RAPL: {sensor}. Дослід на середовищі з provenance — не рейтинг.",
                       "Витрати компіляції виключено. Старт процесу включено. "
                       "CPU package RAPL включає фон; без датчика джоулі не виміряно.",
                       "SENS-мовні закони цим фізичним стендом НЕ перевіряються."])
