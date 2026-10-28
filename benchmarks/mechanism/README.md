@@ -76,12 +76,14 @@ warmup, парний порядок ABBA/BAAB і сирі вибірки.
 
 ## Вимірювання трьох крил на одному корпусі
 
-Для ручного workflow `.github/workflows/native-rust-zig-sens-bench.yml`
-додано ізольовані механічні перевірки: `rustc --test` для RAPL
-(лише арифметика фізичних лічильників), Rust byte-copy для
-`lib/core4.lisp`, Zig byte-copy для **тих самих байтів**, а потім
-чинний нативний SENS закон. Ці три метрики не можна скласти в один
-рейтинг без спільного workload і контролю умов вимірювання.
+Чинний ручний workflow — `.github/workflows/sens-performance.yml`.
+Його **три незалежні jobs** проводять Rust byte-copy/packed і RAPL
+(лише фізичні лічильники), Zig byte-copy/T5M коридор і виконуваний
+SENS law+mutant. Старий `native-rust-zig-sens-bench.yml` був дублем із
+порожніми failed runs та не є конкурсним entrypoint.
+Ці метрики не можна скласти в один рейтинг без спільного workload,
+одиниці роботи й контролю умов вимірювання. Джоулі на shared CI без
+доступного RAPL — `NOT_MEASURED`, а не нуль або семантичний PASS.
 
 Окремий Rust-модуль `rapl-energy-bench.rs` підтримує
 `--counter` та `--operations` для вже пакетованої програми.
