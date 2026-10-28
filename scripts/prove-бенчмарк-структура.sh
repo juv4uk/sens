@@ -59,6 +59,15 @@ for iteration in {1..11}; do
   sample_bytes="$(wc -c < "$tmp/sample-$iteration.out" | tr -d '[:space:]')"
   printf '%s\t%s\t%s\n' "$iteration" "$((end_us - start_us))" "$sample_bytes" >> "$tmp/samples.tsv"
 done
+# За запитом ручного конкурсу зберегти первинні виміри без зміни
+# нативного семантичного свідка або звичайного CI-виводу.
+if [[ -n "${SENS_BENCH_SAMPLES_OUT:-}" ]]; then
+  if [[ -L "$SENS_BENCH_SAMPLES_OUT" ]]; then
+    printf 'REGRESSION id=%s layer=benchmark actual=symlink-output\n' "$id" >&2
+    exit 1
+  fi
+  cp -- "$tmp/samples.tsv" "$SENS_BENCH_SAMPLES_OUT"
+fi
 mapfile -t sorted_wall < <(tail -n +2 "$tmp/samples.tsv" | cut -f2 | sort -n)
 if (( ${#sorted_wall[@]} != 11 )); then
   printf 'REGRESSION id=%s layer=benchmark expected=11-samples actual=%s\n' "$id" "${#sorted_wall[@]}" >&2
