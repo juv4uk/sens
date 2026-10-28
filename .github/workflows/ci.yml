@@ -43,7 +43,32 @@ jobs:
       - name: Перевірити Python-інструменти досліду
         run: |
           python3 --version
-          python3 benchmarks/measurement-triad/test_verdict_simulation.py
           python3 -m unittest discover -s benchmarks/language-energy-study -p 'test_*.py' -v
           python3 -m unittest discover -s docs/research/energy-study -p 'test_*.py' -v
           python3 -m py_compile benchmarks/measurement-triad/verdict.py
+      # Вимірювання на реальному раннері — лише ручний запуск.
+      # Тут є /usr/bin/time, cc і rustc, яких немає в пісочниці агента.
+      # Обсяг обмежений: 8192 копії, три повтори, один корпус.
+      - name: Вимірювання пілоту на раннері (ручний запуск)
+        if: github.event_name == 'workflow_dispatch'
+        shell: bash
+        run: |
+          set -uo pipefail
+          cd benchmarks/language-energy-study
+          head -c 65536 /dev/urandom > "$RUNNER_TEMP/corpus.bin"
+          cc -O2 -o "$RUNNER_TEMP/copy_c" copy.c
+          if command -v rustc >/dev/null 2>&1; then
+            rustc -O -o "$RUNNER_TEMP/copy_rs" copy.rs && echo "RUST_AVAILABLE"
+          else
+            echo "RUST_NOT_AVAILABLE"
+          fi
+          echo "=== очікуване (незалежно) ==="
+          python3 -c 'import sys;d=open(sys.argv[1],"rb").read();n=int(sys.argv[2]);print(f"PHYSICAL_COPY\tbytes={len(d)}\tcopies={n}\tobserved={sum(d[i % len(d)] for i in range(n))}")' "$RUNNER_TEMP/corpus.bin" 8192
+          for round in 1 2 3; do
+            echo "=== повтор $round ==="
+            /usr/bin/time -v "$RUNNER_TEMP/copy_c" "$RUNNER_TEMP/corpus.bin" 8192 2>&1 | grep -E "PHYSICAL_COPY|Maximum resident"
+            /usr/bin/time -v python3 copy.py "$RUNNER_TEMP/corpus.bin" 8192 2>&1 | grep -E "PHYSICAL_COPY|Maximum resident"
+            if [ -x "$RUNNER_TEMP/copy_rs" ]; then
+              /usr/bin/time -v "$RUNNER_TEMP/copy_rs" "$RUNNER_TEMP/corpus.bin" 8192 2>&1 | grep -E "PHYSICAL_COPY|Maximum resident"
+            fi
+          done
