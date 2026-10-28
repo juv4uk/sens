@@ -1,0 +1,381 @@
+{
+  "schema": "sens-energy-study-raw/v1",
+  "tasks": {
+    "T02-exact-rationals": {
+      "schema": "sens-paired-physical/v1",
+      "metric": "wall_time_ns",
+      "parity": {
+        "passed": true,
+        "oracle_id": "parity_check.py --selftest"
+      },
+      "provenance": {
+        "cpu_model": "x86_64",
+        "os": "Linux 4.19.0-gvisor",
+        "rustc": "absent",
+        "affinity": "not-pinned",
+        "governor": "unknown",
+        "turbo": "unknown",
+        "timing_source": "time.perf_counter_ns (wall)",
+        "git_sha": "not-a-git-checkout",
+        "binary_sha256": "n/a-interpreted"
+      },
+      "warmup_note": "Node is JIT: the first iterations pay compilation. No warmup was applied and this is NOT corrected \u2014 the bias is recorded, not hidden.",
+      "energy_note": "ENERGY_NOT_MEASURED: no RAPL in this environment",
+      "pairs": [
+        {
+          "process_id": "javascript-T02-exact-rationals-p0",
+          "order": "AB",
+          "machine_id": "x86_64",
+          "session_id": "session-5227",
+          "baseline_ns": 156113325.0,
+          "candidate_ns": 179038267.0,
+          "baseline_peak_rss_kib": 23632.0,
+          "candidate_peak_rss_kib": 107580.0,
+          "energy_not_measured": true
+        },
+        {
+          "process_id": "javascript-T02-exact-rationals-p0",
+          "order": "BA",
+          "machine_id": "x86_64",
+          "session_id": "session-5227",
+          "baseline_ns": 166257360.0,
+          "candidate_ns": 176663919.0,
+          "baseline_peak_rss_kib": 23800.0,
+          "candidate_peak_rss_kib": 113084.0,
+          "energy_not_measured": true
+        },
+        {
+          "process_id": "javascript-T02-exact-rationals-p0",
+          "order": "AB",
+          "machine_id": "x86_64",
+          "session_id": "session-5227",
+          "baseline_ns": 150739000.0,
+          "candidate_ns": 168036949.0,
+          "baseline_peak_rss_kib": 23800.0,
+          "candidate_peak_rss_kib": 115772.0,
+          "energy_not_measured": true
+        },
+        {
+          "process_id": "javascript-T02-exact-rationals-p0",
+          "order": "BA",
+          "machine_id": "x86_64",
+          "session_id": "session-5227",
+          "baseline_ns": 144888306.0,
+          "candidate_ns": 174922551.0,
+          "baseline_peak_rss_kib": 23800.0,
+          "candidate_peak_rss_kib": 114408.0,
+          "energy_not_measured": true
+        },
+        {
+          "process_id": "javascript-T02-exact-rationals-p1",
+          "order": "BA",
+          "machine_id": "x86_64",
+          "session_id": "session-5227",
+          "baseline_ns": 131810748.0,
+          "candidate_ns": 175046582.0,
+          "baseline_peak_rss_kib": 23800.0,
+          "candidate_peak_rss_kib": 110396.0,
+          "energy_not_measured": true
+        },
+        {
+          "process_id": "javascript-T02-exact-rationals-p1",
+          "order": "AB",
+          "machine_id": "x86_64",
+          "session_id": "session-5227",
+          "baseline_ns": 138258158.0,
+          "candidate_ns": 158643293.0,
+          "baseline_peak_rss_kib": 23800.0,
+          "candidate_peak_rss_kib": 107428.0,
+          "energy_not_measured": true
+        },
+        {
+          "process_id": "javascript-T02-exact-rationals-p1",
+          "order": "BA",
+          "machine_id": "x86_64",
+          "session_id": "session-5227",
+          "baseline_ns": 142577412.0,
+          "candidate_ns": 171984703.0,
+          "baseline_peak_rss_kib": 23800.0,
+          "candidate_peak_rss_kib": 116608.0,
+          "energy_not_measured": true
+        },
+        {
+          "process_id": "javascript-T02-exact-rationals-p1",
+          "order": "AB",
+          "machine_id": "x86_64",
+          "session_id": "session-5227",
+          "baseline_ns": 161899247.0,
+          "candidate_ns": 165746506.0,
+          "baseline_peak_rss_kib": 23800.0,
+          "candidate_peak_rss_kib": 115112.0,
+          "energy_not_measured": true
+        },
+        {
+          "process_id": "javascript-T02-exact-rationals-p2",
+          "order": "AB",
+          "machine_id": "x86_64",
+          "session_id": "session-5227",
+          "baseline_ns": 152325013.0,
+          "candidate_ns": 174457117.0,
+          "baseline_peak_rss_kib": 23800.0,
+          "candidate_peak_rss_kib": 116828.0,
+          "energy_not_measured": true
+        },
+        {
+          "process_id": "javascript-T02-exact-rationals-p2",
+          "order": "BA",
+          "machine_id": "x86_64",
+          "session_id": "session-5227",
+          "baseline_ns": 159276844.0,
+          "candidate_ns": 148958016.0,
+          "baseline_peak_rss_kib": 23800.0,
+          "candidate_peak_rss_kib": 116240.0,
+          "energy_not_measured": true
+        },
+        {
+          "process_id": "javascript-T02-exact-rationals-p2",
+          "order": "AB",
+          "machine_id": "x86_64",
+          "session_id": "session-5227",
+          "baseline_ns": 165499241.0,
+          "candidate_ns": 188369401.0,
+          "baseline_peak_rss_kib": 23800.0,
+          "candidate_peak_rss_kib": 114952.0,
+          "energy_not_measured": true
+        },
+        {
+          "process_id": "javascript-T02-exact-rationals-p2",
+          "order": "BA",
+          "machine_id": "x86_64",
+          "session_id": "session-5227",
+          "baseline_ns": 167728769.0,
+          "candidate_ns": 169789923.0,
+          "baseline_peak_rss_kib": 23800.0,
+          "candidate_peak_rss_kib": 114636.0,
+          "energy_not_measured": true
+        },
+        {
+          "process_id": "javascript-T02-exact-rationals-p3",
+          "order": "BA",
+          "machine_id": "x86_64",
+          "session_id": "session-5227",
+          "baseline_ns": 157580254.0,
+          "candidate_ns": 150569950.0,
+          "baseline_peak_rss_kib": 23800.0,
+          "candidate_peak_rss_kib": 107432.0,
+          "energy_not_measured": true
+        },
+        {
+          "process_id": "javascript-T02-exact-rationals-p3",
+          "order": "AB",
+          "machine_id": "x86_64",
+          "session_id": "session-5227",
+          "baseline_ns": 165136920.0,
+          "candidate_ns": 194526741.0,
+          "baseline_peak_rss_kib": 23800.0,
+          "candidate_peak_rss_kib": 108984.0,
+          "energy_not_measured": true
+        },
+        {
+          "process_id": "javascript-T02-exact-rationals-p3",
+          "order": "BA",
+          "machine_id": "x86_64",
+          "session_id": "session-5227",
+          "baseline_ns": 139874060.0,
+          "candidate_ns": 189195240.0,
+          "baseline_peak_rss_kib": 23800.0,
+          "candidate_peak_rss_kib": 111620.0,
+          "energy_not_measured": true
+        },
+        {
+          "process_id": "javascript-T02-exact-rationals-p3",
+          "order": "AB",
+          "machine_id": "x86_64",
+          "session_id": "session-5227",
+          "baseline_ns": 129571153.0,
+          "candidate_ns": 177803724.0,
+          "baseline_peak_rss_kib": 23800.0,
+          "candidate_peak_rss_kib": 115744.0,
+          "energy_not_measured": true
+        },
+        {
+          "process_id": "javascript-T02-exact-rationals-p4",
+          "order": "AB",
+          "machine_id": "x86_64",
+          "session_id": "session-5227",
+          "baseline_ns": 160586345.0,
+          "candidate_ns": 160475355.0,
+          "baseline_peak_rss_kib": 23800.0,
+          "candidate_peak_rss_kib": 111636.0,
+          "energy_not_measured": true
+        },
+        {
+          "process_id": "javascript-T02-exact-rationals-p4",
+          "order": "BA",
+          "machine_id": "x86_64",
+          "session_id": "session-5227",
+          "baseline_ns": 145389243.0,
+          "candidate_ns": 174724052.0,
+          "baseline_peak_rss_kib": 23800.0,
+          "candidate_peak_rss_kib": 116628.0,
+          "energy_not_measured": true
+        },
+        {
+          "process_id": "javascript-T02-exact-rationals-p4",
+          "order": "AB",
+          "machine_id": "x86_64",
+          "session_id": "session-5227",
+          "baseline_ns": 164286574.0,
+          "candidate_ns": 197714176.0,
+          "baseline_peak_rss_kib": 23800.0,
+          "candidate_peak_rss_kib": 108160.0,
+          "energy_not_measured": true
+        },
+        {
+          "process_id": "javascript-T02-exact-rationals-p4",
+          "order": "BA",
+          "machine_id": "x86_64",
+          "session_id": "session-5227",
+          "baseline_ns": 194722883.0,
+          "candidate_ns": 185854007.0,
+          "baseline_peak_rss_kib": 23800.0,
+          "candidate_peak_rss_kib": 110748.0,
+          "energy_not_measured": true
+        },
+        {
+          "process_id": "javascript-T02-exact-rationals-p5",
+          "order": "BA",
+          "machine_id": "x86_64",
+          "session_id": "session-5227",
+          "baseline_ns": 191811391.0,
+          "candidate_ns": 228223185.0,
+          "baseline_peak_rss_kib": 23800.0,
+          "candidate_peak_rss_kib": 112176.0,
+          "energy_not_measured": true
+        },
+        {
+          "process_id": "javascript-T02-exact-rationals-p5",
+          "order": "AB",
+          "machine_id": "x86_64",
+          "session_id": "session-5227",
+          "baseline_ns": 166428587.0,
+          "candidate_ns": 215465113.0,
+          "baseline_peak_rss_kib": 23800.0,
+          "candidate_peak_rss_kib": 110152.0,
+          "energy_not_measured": true
+        },
+        {
+          "process_id": "javascript-T02-exact-rationals-p5",
+          "order": "BA",
+          "machine_id": "x86_64",
+          "session_id": "session-5227",
+          "baseline_ns": 135937375.0,
+          "candidate_ns": 160869417.0,
+          "baseline_peak_rss_kib": 23800.0,
+          "candidate_peak_rss_kib": 115244.0,
+          "energy_not_measured": true
+        },
+        {
+          "process_id": "javascript-T02-exact-rationals-p5",
+          "order": "AB",
+          "machine_id": "x86_64",
+          "session_id": "session-5227",
+          "baseline_ns": 161073025.0,
+          "candidate_ns": 161604179.0,
+          "baseline_peak_rss_kib": 23800.0,
+          "candidate_peak_rss_kib": 110756.0,
+          "energy_not_measured": true
+        },
+        {
+          "process_id": "javascript-T02-exact-rationals-p6",
+          "order": "AB",
+          "machine_id": "x86_64",
+          "session_id": "session-5227",
+          "baseline_ns": 171199487.0,
+          "candidate_ns": 201700735.0,
+          "baseline_peak_rss_kib": 23800.0,
+          "candidate_peak_rss_kib": 115776.0,
+          "energy_not_measured": true
+        },
+        {
+          "process_id": "javascript-T02-exact-rationals-p6",
+          "order": "BA",
+          "machine_id": "x86_64",
+          "session_id": "session-5227",
+          "baseline_ns": 164106099.0,
+          "candidate_ns": 217094854.0,
+          "baseline_peak_rss_kib": 23800.0,
+          "candidate_peak_rss_kib": 113012.0,
+          "energy_not_measured": true
+        },
+        {
+          "process_id": "javascript-T02-exact-rationals-p6",
+          "order": "AB",
+          "machine_id": "x86_64",
+          "session_id": "session-5227",
+          "baseline_ns": 173349355.0,
+          "candidate_ns": 195533294.0,
+          "baseline_peak_rss_kib": 23800.0,
+          "candidate_peak_rss_kib": 114884.0,
+          "energy_not_measured": true
+        },
+        {
+          "process_id": "javascript-T02-exact-rationals-p6",
+          "order": "BA",
+          "machine_id": "x86_64",
+          "session_id": "session-5227",
+          "baseline_ns": 211906110.0,
+          "candidate_ns": 210188489.0,
+          "baseline_peak_rss_kib": 23800.0,
+          "candidate_peak_rss_kib": 114440.0,
+          "energy_not_measured": true
+        },
+        {
+          "process_id": "javascript-T02-exact-rationals-p7",
+          "order": "BA",
+          "machine_id": "x86_64",
+          "session_id": "session-5227",
+          "baseline_ns": 191907764.0,
+          "candidate_ns": 235961129.0,
+          "baseline_peak_rss_kib": 23800.0,
+          "candidate_peak_rss_kib": 117088.0,
+          "energy_not_measured": true
+        },
+        {
+          "process_id": "javascript-T02-exact-rationals-p7",
+          "order": "AB",
+          "machine_id": "x86_64",
+          "session_id": "session-5227",
+          "baseline_ns": 277505063.0,
+          "candidate_ns": 268210617.0,
+          "baseline_peak_rss_kib": 23800.0,
+          "candidate_peak_rss_kib": 109796.0,
+          "energy_not_measured": true
+        },
+        {
+          "process_id": "javascript-T02-exact-rationals-p7",
+          "order": "BA",
+          "machine_id": "x86_64",
+          "session_id": "session-5227",
+          "baseline_ns": 157159529.0,
+          "candidate_ns": 190575826.0,
+          "baseline_peak_rss_kib": 23800.0,
+          "candidate_peak_rss_kib": 115204.0,
+          "energy_not_measured": true
+        },
+        {
+          "process_id": "javascript-T02-exact-rationals-p7",
+          "order": "AB",
+          "machine_id": "x86_64",
+          "session_id": "session-5227",
+          "baseline_ns": 163058391.0,
+          "candidate_ns": 173934528.0,
+          "baseline_peak_rss_kib": 23800.0,
+          "candidate_peak_rss_kib": 112408.0,
+          "energy_not_measured": true
+        }
+      ]
+    }
+  },
+  "energy": "ENERGY_NOT_MEASURED"
+}
