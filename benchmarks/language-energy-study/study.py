@@ -25,6 +25,53 @@ USAGE = re.compile(r"^METRIC_RSS_KIB=(\d+)\tuser_s=([0-9.]+)\tsys_s=([0-9.]+)$")
 KV = re.compile(r"([A-Za-z_]+)=([^ \r\n]+)")
 
 
+def parse_sample_output(stdout: str, expected: str, *, metered: bool) -> dict | None:
+    """Fail closed on extra lines, missing/duplicate observations, and forged meter scope.
+
+    This verifies the *reported* byte parity. It does not prove that an
+    optimizer retained every memcpy/copy_from_slice (see #6288 audit).
+    """
+    lines = stdout.splitlines()
+    observations = [line for line in lines if OBS.fullmatch(line)]
+    if observations != [expected]:
+        raise RuntimeError(
+            f"PHYSICAL_PARITY_MISMATCH: expected {expected!r} received {observations!r}")
+    if not metered:
+        if lines != [expected]:
+            raise RuntimeError("unexpected physical stdout (unmetered)")
+        return None
+    rapl = [line for line in lines if line.startswith("RUST_RAPL_PACKAGE ")]
+    if len(rapl) != 1 or len(lines) != 2 or lines[0] != expected:
+        raise RuntimeError("RAPL observation ambiguous/missing or unexpected stdout")
+    fields: dict[str, str] = {}
+    for field in rapl[0].split()[1:]:
+        if field.count("=") != 1:
+            raise RuntimeError("malformed RAPL observation field")
+        key, value = field.split("=", 1)
+        if not re.fullmatch(r"[A-Za-z_]+", key) or not value or key in fields:
+            raise RuntimeError("duplicate/invalid RAPL observation field")
+        fields[key] = value
+    if fields.get("status") != "MEASURED" or fields.get("scope") != "whole_package_not_process":
+        raise RuntimeError("invalid RAPL status/scope; CPU package != process energy")
+    try:
+        energy, elapsed = int(fields["energy_uj"]), int(fields["elapsed_ns"])
+    except (KeyError, ValueError) as exc:
+        raise RuntimeError("invalid RAPL energy/time counters") from exc
+    if energy <= 0 or elapsed <= 0:
+        raise RuntimeError("nonpositive hardware energy/time")
+    return {"energy_uj": energy, "elapsed_ns": elapsed,
+            "scope": "whole_package_not_process"}
+
+
+def parse_resource_usage(raw: str) -> dict:
+    """GNU time %M: peak process RSS on Linux, not total system memory."""
+    match = USAGE.fullmatch(raw.strip())
+    if not match or int(match[1]) <= 0:
+        raise RuntimeError("missing/invalid process peak RSS / user / system metrics")
+    return {"peak_rss_kib": int(match[1]),
+            "user_s": float(match[2]), "sys_s": float(match[3])}
+
+
 def checked(args: list[str]) -> str:
     p = subprocess.run(args, cwd=ROOT, text=True, capture_output=True, timeout=120)
     if p.returncode:
@@ -76,28 +123,14 @@ def measure(command: list[str], copies: int, out: Path, meter: Path | None,
         wall_host_ns = time.perf_counter_ns() - begin
         if run.returncode:
             raise RuntimeError(f"execution failed: {run.returncode}: {run.stderr[-600:]}")
-        matches = [line for line in run.stdout.splitlines() if OBS.fullmatch(line)]
-        if matches != [expected]:
-            raise RuntimeError(f"PHYSICAL_PARITY_MISMATCH: expected {expected!r} received {matches!r}")
-        match = USAGE.fullmatch(usage.read_text().strip())
-        if not match or int(match[1]) <= 0:
-            raise RuntimeError("missing physical peak RSS / user / system metrics")
-        result = {"wall_time_ns": wall_host_ns, "peak_rss_kib": int(match[1]),
-                  "user_s": float(match[2]), "sys_s": float(match[3]),
+        measured = parse_sample_output(run.stdout, expected, metered=meter is not None)
+        result = {"wall_time_ns": wall_host_ns, **parse_resource_usage(usage.read_text()),
                   "energy_uj": None}
-        if meter:
-            lines = [x for x in run.stdout.splitlines() if x.startswith("RUST_RAPL_PACKAGE ")]
-            if len(lines) != 1:
-                raise RuntimeError("RAPL observation ambiguous/missing")
-            fields = dict(KV.findall(lines[0]))
-            if fields.get("status") != "MEASURED":
-                raise RuntimeError("invalid RAPL measurement status")
-            energy, elapsed = int(fields["energy_uj"]), int(fields["elapsed_ns"])
-            if energy <= 0 or elapsed <= 0:
-                raise RuntimeError("nonpositive hardware energy/time")
-            result.update({"energy_uj": energy, "wall_time_ns": elapsed,
+        if measured is not None:
+            result.update({"energy_uj": measured["energy_uj"],
+                           "wall_time_ns": measured["elapsed_ns"],
                            "host_wrapper_wall_ns": wall_host_ns,
-                           "scope": fields["scope"]})
+                           "scope": measured["scope"]})
         return result
     finally:
         usage.unlink(missing_ok=True)
@@ -150,6 +183,11 @@ def experiment(blocks: int, pairs: int, copies: int, seed: int, out: Path) -> No
             "python": platform.python_version(), "cc": checked(["cc", "--version"]).splitlines()[0],
             "energy_sensor": sensor, "measurement_boundary": "process startup+physical copies",
             "physical_work": f"{copies} byte-buffer copies from lib/core4.lisp",
+            "audit_copy_retention": "NOT_VERIFIED_BY_BYTE_PARITY_OR_CHECKSUM",
+            "measurement_phase": "warm-cache; every invocation includes fresh process startup; compilation excluded",
+            "study_seed": seed, "study_blocks": blocks, "study_pairs_per_candidate": pairs,
+            "rust_flags": "--edition=2021 -O -C target-cpu=x86-64",
+            "c_flags": "-std=c11 -O2 -Wall -Wextra",
             "language_semantics": "NOT_TESTED",
         }
         (out / "provenance.json").write_text(json.dumps(provenance, indent=2) + "\n")
@@ -185,7 +223,7 @@ def experiment(blocks: int, pairs: int, copies: int, seed: int, out: Path) -> No
             reports[candidate] = {}
             for metric in ("wall_time_ns", "peak_rss_kib", "energy_uj"):
                 if metric == "energy_uj" and meter is None:
-                    reports[candidate][metric] = {"status": "NOT_MEASURED", "reason": sensor}
+                    reports[candidate][metric] = {"status": "ENERGY_NOT_MEASURED", "reason": sensor}
                     continue
                 doc = {"schema": verdict.PHYSICAL_SCHEMA, "metric": metric,
                        "parity": {"passed": True, "oracle_id": "physical-exact-copy"},
@@ -207,6 +245,7 @@ def experiment(blocks: int, pairs: int, copies: int, seed: int, out: Path) -> No
             lines.append(f"| {candidate} | {fmt('wall_time_ns')} | "
                          f"{fmt('peak_rss_kib')} | {fmt('energy_uj')} |")
         lines.extend(["", f"RAPL: {sensor}. Дослід на shared GitHub runner — не рейтинг.",
+                      "AUDIT: retention of each full copy under C/Rust optimizer NOT_VERIFIED; checksum is insufficient.",
                       "Витрати компіляції виключено. Старт процесу включено. "
                       "CPU package RAPL включає фон; без датчика джоулі не виміряно.",
                       "SENS-мовні закони цим фізичним стендом НЕ перевіряються."])
