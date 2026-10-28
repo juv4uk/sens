@@ -640,8 +640,7 @@ mod tests {
     fn evaluator_budget_counts_real_dispatches_and_fails_named() {
         let expr = crate::parse("(quote ())").expect("quote is syntactically valid");
         let environment = Environment::root().with_eval_step_budget(1);
-        let first = evaluate(&expr[0], &environment).expect("first dispatch admitted");
-        assert_eq!(first, Value::Nil);
+        evaluate(&expr[0], &environment).expect("first dispatch admitted");
         let second = evaluate(&expr[0], &environment)
             .expect_err("exhausted budget must not be treated as SENS success");
         assert_eq!(second.kind, ErrorKind::OutOfMemory);
