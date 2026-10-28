@@ -70,8 +70,6 @@ pub use domain_ladder::DomainD10;
 mod binary_bootstrap;
 mod binary_execution;
 mod binary_framing;
-#[cfg(test)]
-mod bootstrap_measurement;
 #[allow(dead_code)]
 mod domain_owner_generated;
 pub mod domain_projection_catalog;
@@ -84,8 +82,6 @@ mod mixed_source;
 // Legacy Rust bit-packer retained only as a unit-test reference. Production
 // SENS exposes no Rust OuterEnvelope carrier; physical packing belongs to the
 // sterile Zig corridor.
-#[cfg(test)]
-mod outer_envelope;
 mod packed_bits;
 mod parser;
 mod presentation;
@@ -313,27 +309,15 @@ pub use syntax::wire::{
 };
 
 /// The current Core4 sens bootstrap library, evaluated after the macro layer.
-#[cfg(test)]
-pub const CORE_LIBRARY_SOURCE: &str = include_str!("../../../lib/core4.lisp");
-
 /// Parse-output кеш для точного вбудованого Core4 source. Це лише bootstrap-
 /// оптимізація: hash source перевіряється перед використанням, а stale/invalid
 /// bytes переходять на parsing CORE_LIBRARY_SOURCE.
-#[cfg(test)]
-const CORE_LIBRARY_FASL: &[u8] = include_bytes!("../../../lib/core4.lisp.fasl");
-
 /// Process-result interpretation owned by Lisp. The host contributes only the
 /// `process-run-raw` capability; this layer decides how captured bytes become
 /// text and how decoding failures are represented.
-#[cfg(test)]
-pub const PROCESS_LIBRARY_SOURCE: &str = include_str!("../../../lib/process.lisp");
-
 /// TCP text interpretation owned by Lisp. The host contributes only the raw
 /// socket-read bytes through `tcp-read-raw`; this layer defines public
 /// `tcp-read` by applying the shared UTF-8 semantics.
-#[cfg(test)]
-pub const TCP_LIBRARY_SOURCE: &str = include_str!("../../../lib/tcp.lisp");
-
 /// Install the one primitive macro-construction mechanism required by the
 /// language-owned macro layer, evaluate the Lisp derivation exactly once, and
 /// bind every admitted peer spelling for the registry identity selected by
@@ -453,11 +437,6 @@ fn bind_missing_stable_surface_peers(environment: &Environment) {
 /// Canonical Core4 FASL is determined by the path-bound exact-domain reader,
 /// never by a source hash alone. Cache only this mechanical reference encoding
 /// per thread, independently of the decoded/lowered bootstrap cache.
-#[cfg(test)]
-fn canonical_core4_fasl_bytes() -> Option<std::rc::Rc<[u8]>> {
-    thread_local! {
-        static EXPECTED: std::cell::OnceCell<Option<std::rc::Rc<[u8]>>> =
-            const { std::cell::OnceCell::new() };
     }
     EXPECTED.with(|slot| {
         slot.get_or_init(|| {
@@ -473,20 +452,12 @@ fn canonical_core4_fasl_bytes() -> Option<std::rc::Rc<[u8]>> {
 /// A forged or incorrectly parsed FASL may carry the correct source hash but
 /// represent short D3/D4 callable heads as Numbers. Admit only the exact
 /// canonical path-bound Core4 encoding; otherwise fall back to source.
-#[cfg(test)]
-fn decode_verified_core4_fasl(fasl: &[u8]) -> Option<Vec<Expr>> {
-    let expected = canonical_core4_fasl_bytes()?;
     if fasl != expected.as_ref() {
         return None;
     }
     fasl_decode_program(fasl).map(|(expressions, _)| expressions)
 }
 
-#[cfg(test)]
-fn current_core_verified_lowered() -> Option<std::rc::Rc<[Expr]>> {
-    thread_local! {
-        static LOWERED: std::cell::OnceCell<Option<std::rc::Rc<[Expr]>>> =
-            const { std::cell::OnceCell::new() };
     }
     LOWERED.with(|slot| {
         slot.get_or_init(|| {
@@ -503,22 +474,9 @@ fn current_core_verified_lowered() -> Option<std::rc::Rc<[Expr]>> {
 /// bit spellings such as `100` numeric outside this exact source context;
 /// parsing Core4 that way leaves executable CAR heads as Numbers whenever the
 /// checked-in FASL is stale. Other libraries retain their ordinary reader.
-#[cfg(test)]
-fn eval_core4_source_fallback(session: &mut Session) -> Result<EvalResult, LanguageError> {
-    let expressions = parse_mixed_exact_domain_core_source("lib/core4.lisp", CORE_LIBRARY_SOURCE)?;
     eval_parsed_expressions(&expressions, session)
 }
 
-#[cfg(test)]
-fn load_core_library_with_fasl_mode(
-    session: &mut Session,
-    core_fasl: &[u8],
-    use_verified_cache: bool,
-) -> Result<EvalResult, LanguageError> {
-    // `Session::default()` already installs the same language-owned macro
-    // layer. Its exact D5 mechanism slot is bind-once, so bootstrapping Core4
-    // must not install the identical layer a second time.
-    let macro_identity = semantic_registry::domain_identity_for_surface("макрос");
     if macro_identity
         .and_then(|identity| session.environment.domain_code_slot(identity))
         .is_none()
@@ -722,16 +680,6 @@ fn bind_existing_d9_language_mechanisms(environment: &Environment) {
 /// Production always uses the owner-verified binary decode/lowering cache.
 /// An internal-only switch exists solely to compare identical full Core4
 /// bootstrap paths with and without cached transport on the *same* CPU.
-#[cfg(test)]
-fn load_core_library_with_fasl(
-    session: &mut Session,
-    core_fasl: &[u8],
-) -> Result<EvalResult, LanguageError> {
-    load_core_library_with_fasl_mode(session, core_fasl, true)
-}
-
-pub fn load_core_library(session: &mut Session) -> Result<EvalResult, LanguageError> {
-    let macro_identity = semantic_registry::domain_identity_for_surface("макрос");
     if macro_identity
         .and_then(|identity| session.environment.domain_code_slot(identity))
         .is_none()
@@ -751,16 +699,7 @@ pub fn load_core_library(session: &mut Session) -> Result<EvalResult, LanguageEr
 
 /// Read-only діагностика для embedder-а: чи відповідає Core4 FASL точному
 /// вбудованому source. Не вибирає profile і не змінює bootstrap.
-#[cfg(test)]
-pub fn core_library_fasl_is_current() -> bool {
-    decode_verified_core4_fasl(CORE_LIBRARY_FASL).is_some()
-}
-
-/// Activate the frozen Core2/Contract-6 compatibility profile.
-///
-/// This loader deliberately does not install the current Core4 macro layer:
-/// Core2 is a historical compatibility profile, not Core4 plus legacy answers.
-/// All profiles now use D3's exact-D1 conditional mechanism; selecting a
+ selecting a
 /// historical profile changes provenance, not the language's truth model.
 pub fn load_core2_library(session: &mut Session) -> Result<EvalResult, LanguageError> {
     session.environment.select_core_profile(CoreProfile::Core2);
