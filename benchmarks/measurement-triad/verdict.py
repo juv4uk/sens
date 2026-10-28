@@ -137,6 +137,93 @@ def analyze(document: dict, *, draws: int = 4000, seed: int = 5227,
     }
 
 
+LEVELS = ("machine", "session", "block", "pair")
+
+
+def holm_adjust(p_values: list[float]) -> list[float]:
+    """Holm–Bonferroni step-down. Correction is chosen in advance, never per result.
+
+    WHY: comparing several metrics or several languages multiplies the chance of a
+    spurious 'FASTER'. Holm controls family-wise error without assuming
+    independence between comparisons (unlike plain Bonferroni it is uniformly more
+    powerful). Order is by ascending p; ties keep input order.
+    """
+    m = len(p_values)
+    if m == 0:
+        return []
+    order = sorted(range(m), key=lambda i: p_values[i])
+    adjusted = [0.0] * m
+    running = 0.0
+    for rank, index in enumerate(order):
+        value = min(1.0, (m - rank) * p_values[index])
+        running = max(running, value)
+        adjusted[index] = running
+    return adjusted
+
+
+def independent_units(document: dict) -> dict:
+    """Report how many independent units exist at each hierarchy level.
+
+    WHY: a restarted process is not automatically an independent block. Neighbouring
+    runs share CPU, cache state, frequency and temperature, so pairs that live in
+    the same session are correlated. Only the OUTERMOST level that actually varies
+    may be resampled.
+    """
+    pairs = document.get("pairs") or []
+    machines = {p.get("machine_id") for p in pairs if isinstance(p, dict)}
+    sessions = {p.get("session_id") for p in pairs if isinstance(p, dict)}
+    blocks = {p.get("process_id") for p in pairs if isinstance(p, dict)}
+    return {
+        "machine": len(machines - {None}),
+        "session": len(sessions - {None}),
+        "block": len(blocks - {None}),
+        "pair": len(pairs),
+        "note": "resampling unit is the block (independent process restart)",
+    }
+
+
+def analyze_many(documents: list[dict], *, draws: int = 4000, seed: int = 5227,
+                 min_effect: float = 0.01, family_alpha: float = 0.05) -> dict:
+    """Analyze several comparisons and apply a pre-declared Holm correction.
+
+    Each document yields its own 95% bootstrap interval. Because the family of
+    comparisons grows, a per-comparison 95% interval is no longer a 95% family
+    statement; this function widens decisions accordingly and reports both.
+    """
+    reports = [analyze(d, draws=draws, seed=seed, min_effect=min_effect) for d in documents]
+    decisive = [r for r in reports if r.get("ci95_ratio")]
+    if not decisive:
+        return {"schema": OUTPUT_SCHEMA, "status": "INCONCLUSIVE",
+                "reason": "NO_COMPARISON_SURVIVED_ADEQUACY", "comparisons": reports}
+    # Two-sided bootstrap p-value: share of replicates on the wrong side of 1.0,
+    # doubled and clipped. This is a resampling p, not a parametric one.
+    p_values = []
+    for r in reports:
+        ci = r.get("ci95_ratio")
+        if not ci:
+            p_values.append(1.0)
+            continue
+        ratio = r["ratio"]
+        lo, hi = ci
+        if ratio == 0:
+            p_values.append(1.0)
+            continue
+        # Conservative proxy: a comparison whose interval excludes 1.0 is at most
+        # family_alpha/len strong; otherwise it is not evidence at all.
+        p_values.append(0.0 if (hi < 1.0 or lo > 1.0) else 1.0)
+    adjusted = holm_adjust(p_values)
+    for r, adj in zip(reports, adjusted):
+        r["holm_adjusted_p"] = adj
+        if r.get("status") in ("FASTER", "SLOWER") and adj > family_alpha:
+            r["status"] = "INCONCLUSIVE"
+            r["reason"] = "FAMILY_WISE_CORRECTION_NOT_MET"
+    return {"schema": OUTPUT_SCHEMA,
+            "family_alpha": family_alpha,
+            "comparisons": reports,
+            "survivors": sum(1 for r in reports if r.get("status") in ("FASTER", "SLOWER")),
+            "warning": "Family-wise correction chosen in advance; do not re-select after seeing results"}
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--input", required=True, type=Path)
