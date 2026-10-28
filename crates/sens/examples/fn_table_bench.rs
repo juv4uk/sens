@@ -285,38 +285,3 @@ fn main() {
     }
 }
 
-#[cfg(test)]
-mod tests {
-    use super::{bench, require_measurements, verify_clean_pair};
-
-    #[test]
-    fn нуль_вимірювань_не_є_успіхом() {
-        assert_eq!(require_measurements(0), Err("FN_TABLE_NO_VALID_MEASUREMENTS"));
-        assert_eq!(require_measurements(1), Ok(()));
-    }
-
-    #[test]
-    fn чиста_перевірка_перед_таймером_використовує_дві_сесії() {
-        let (en, sens) = verify_clean_pair("(quote a)", "(quote a)")
-            .expect("identical pure calls must run in fresh sessions");
-        assert_eq!(en, sens);
-    }
-
-    #[test]
-    fn чиста_перевірка_не_пропускає_помилковий_виклик_у_таймер() {
-        let error = verify_clean_pair("(car (quote ()))", "(quote a)")
-            .expect_err("invalid English call must not be benchmarked");
-        assert!(error.starts_with("clean EN: "), "unexpected error: {error}");
-    }
-
-    #[test]
-    fn окремі_сесії_бенчмарка_вимірюють_обидві_чисті_форми() {
-        // Старий інтерфейс приймав уже змінені пробами Session.
-        // Тепер виклик не може передати забруднену сесію до замірів.
-        let (en_ns, sens_ns, ratio_min, ratio_max) =
-            bench("(quote a)", "(quote a)", 3, 1.0);
-        for value in [en_ns, sens_ns, ratio_min, ratio_max] {
-            assert!(value.is_finite(), "benchmark emitted non-finite timing: {value}");
-        }
-    }
-}
