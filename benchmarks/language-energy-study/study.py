@@ -71,8 +71,8 @@ def parse_rapl_measurement(lines: list[str]) -> dict[str, object]:
     if fields["wrapped_once"] not in ("true", "false"):
         raise RuntimeError("RAPL observation invalid wrap indicator")
     counter = Path(fields["counter"])
-    if counter.name != "energy_uj":
-        raise RuntimeError("RAPL observation invalid counter")
+    if counter.name != "energy_uj" or not counter.is_absolute():
+        raise RuntimeError("RAPL observation invalid counter path")
     try:
         energy, elapsed = int(fields["energy_uj"]), int(fields["elapsed_ns"])
     except ValueError as error:
