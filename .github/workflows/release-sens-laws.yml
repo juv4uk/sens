@@ -40,6 +40,10 @@ jobs:
         shell: bash
         run: bash scripts/prove-lisp-language-laws.sh "$PWD/target/debug/sens"
 
+      - name: D8/D10 огляд середовища через інтерактивний SENS REPL
+        shell: bash
+        run: bash scripts/prove-repl-environment.sh "$PWD/target/debug/sens"
+
       - name: Довести чинні мовні закони через фізичний T5M
         shell: bash
         run: |
