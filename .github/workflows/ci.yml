@@ -66,9 +66,9 @@ jobs:
           export PATH="$PWD/target/debug:$PATH"
           export ZIG="$(command -v zig)"
           bash benchmarks/sphere-contest/запуск.sh
-      - name: Мовні закони через інтерактивний SENS REPL
+      - name: Мовний SENS REPL · позитивні закони та негативні мутанти
         shell: bash
-        run: bash scripts/prove-lisp-language-laws.sh "$PWD/target/debug/sens"
+        run: bash scripts/prove-repl-semantic-corpus.sh "$PWD/target/debug/sens"
       - name: D8/D10 огляд середовища через інтерактивний SENS REPL
         shell: bash
         run: bash scripts/prove-repl-environment.sh "$PWD/target/debug/sens"
@@ -88,6 +88,7 @@ jobs:
           bash -n scripts/ci-rust-mechanism-checks.sh
           bash -n scripts/execute_changed_lisp_t5m.sh
           bash -n scripts/prove-lisp-semantic-t5m.sh
+          bash -n scripts/prove-repl-semantic-corpus.sh
           bash -n scripts/check-sens-rust-zig-only-tests.sh
           bash scripts/check-sens-rust-zig-only-tests.sh
       - name: Перевірити межу власності мовних тестів
@@ -122,9 +123,9 @@ jobs:
           persist-credentials: false
       - uses: dtolnay/rust-toolchain@1.99.0
       - uses: ./.github/actions/install-zig
-      - name: Перевірити типову ідентичність test-build SENS без Python
+      - name: Перевірити native Rust-механізм без запуску чужих мовних тестів
         shell: bash
-        run: cargo test --locked -p sens --no-run
+        run: cargo check --locked -p sens --lib
       - name: Build native SENS
         run: cargo build --locked -p sens-cli --bin sens --bin sens-trit --features benchmark-ast-visits
       - name: Rust mechanism checks
@@ -151,10 +152,11 @@ jobs:
       - uses: ./.github/actions/install-zig
       - name: Build native SENS
         run: cargo build --locked -p sens-cli --bin sens --bin sens-trit --features benchmark-ast-visits
-      - name: F6 physical WRITE→READ producer/consumer
-        run: cargo test --locked -p sens-cli --test wsm_fs_f6_pipeline -- --nocapture
-      - name: Точковий SENS REPL — некоректний стан повертає мовну відмову
-        run: cargo test --locked -p sens --test repl_core_malformed_tails repl_step_rejects_atomic_state_as_sens_data -- --nocapture
+      # Legacy Rust semantic test targets were removed; never invoke them
+      # or credit a deleted target with a successful native language proof.
+      - name: SENS REPL · мовні закони, мутації та фізичний Zig/T5M
+        shell: bash
+        run: bash scripts/prove-repl-semantic-corpus.sh "$PWD/target/debug/sens"
       - name: MetaEval — SENS law, mutant і точна фізична T5M-пара
         shell: bash
         run: bash scripts/prove-meta-eval-graph-d1.sh "$PWD/target/debug/sens"
@@ -172,7 +174,7 @@ jobs:
           bash scripts/prove-ідентичність-тритів.sh "$PWD/target/debug/sens"
           bash scripts/prove-d3-атом-межа.sh "$PWD/target/debug/sens"
           bash scripts/prove-d3-як-є-щит.sh "$PWD/target/debug/sens"
-          bash scripts/prove-lisp-language-laws.sh "$PWD/target/debug/sens"
+          # Basic D1 is covered by the same interactive REPL semantic corpus.
 
   remint-source-scope:
     name: Виявити змінені джерела SENS
