@@ -16,6 +16,16 @@
 
 **Джоулі:** Linux RAPL package, додатково DRAM тільки за наявності; energy_uj до й після достатнього пакета N, обробка max_energy_range_uj, фону та overhead вимірювача. Публікувати J/операцію, операцій/J, кількість і повтори, середовище, commit SHA. Host-capability read-energy-uj читає фізичний лічильник, але не створює семантику. Без апаратного датчика статус ENERGY_NOT_MEASURED, а не оцінка з TDP. Не вигадувати абсолютних порогів.
 
+### Нічний exact-head SENS REPL: парні с/Дж (28.10.2026)
+
+У чинному `.github/workflows/ci.yml` `suite=platform-repl-bench` (також нічний `schedule` після злиття в `main`) виконує **один і той самий** SENS D5 позитивний свідок через SENS REPL/Zig/T5M на Linux x64, Windows x64, macOS Intel та Apple Silicon. Спершу `scripts/prove-repl-semantic-corpus.sh` має виконати всі 32 позитивні/негативні мовні свідки. Ні Rust, ні Zig, ні shell не формують мовний вердикт.
+
+`scripts/ci-cross-platform-repl-benchmark.sh` виконує **11 cold-процесів** (по одному `:завантажити`) і **11 batch-процесів** (10 завантажень у тому самому REPL). Час — секунди за монотонним таймером Bash або, коли RAPL справді доступний, `std::time::Instant` Rust-механізму. Енергія — лише апаратний `energy_uj` всього CPU package на Linux, **до та після того самого REPL-процесу**, засобом наявного `benchmarks/mechanism/rapl-energy-bench.rs`. Зберігаються p50/p90 та всі 11 сирих спостережень; облік `max_energy_range_uj` і conservative upper-power wrap guard не дозволяє непомітно зарахувати неоднозначне переповнення.
+
+**Енергетична інтерпретація:** `J/package` включає простої та паралельні процеси, це не ватметр розетки й не енергія окремого SENS. `J/declared-load` лише ділить фізичні джоулі на **1 або 10 заявлених завантажень** і **не є** J/семантичну функцію D5 або J/машинну інструкцію. Для енергорегресій потрібен контрольований фізичний Linux-хост, той самий workload, сталі governor/temperature та matched repetitions — на shared GitHub-hosted ці числа лише дослідницькі.
+
+**Без датчика** (Windows/macOS, Linux VM без RAPL) анотація пише `ENERGY_NOT_MEASURED` із причиною, а час продовжує вимірюватися; ніяких нулів або оцінок через TDP. Якщо апаратний сенсор доступний, але RAPL-вимір невалідний, числового успіху не створюємо. CI `::notice` містить платформу, SHA, p50/p90 с та Дж або `не виміряно`; `GITHUB_STEP_SUMMARY` — таблицю, артефакт — `environment.tsv`, `*-energy.tsv` і `rapl-observations.log` лише за фактичного вимірювання. Збереження — 3 дні. Релізних гейтів та автоматичного workflow не додано.
+
 Пріоритет релізного P0 у #6183 залишається: правило не дозволяє новий автоматичний perf workflow і не заміняє release GO.
 
 Дата 2026-10-09. Цей етап підготовлено для впровадження **після зеленого immutable L0** згідно з [вікном стабілізації #5224](https://github.com/juv4uk/sens/issues/5224).
