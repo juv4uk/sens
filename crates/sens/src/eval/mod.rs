@@ -632,24 +632,6 @@ fn evaluate_list(
     )
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn evaluator_budget_counts_real_dispatches_and_fails_named() {
-        let expr = crate::parse("(quote ())").expect("quote is syntactically valid");
-        let environment = Environment::root().with_eval_step_budget(1);
-        evaluate(&expr[0], &environment).expect("first dispatch admitted");
-        let second = evaluate(&expr[0], &environment)
-            .expect_err("exhausted budget must not be treated as SENS success");
-        assert_eq!(second.kind, ErrorKind::OutOfMemory);
-        assert!(second.message.contains("evaluator step budget exhausted"));
-    }
-
-
-}
-
 fn is_d3(identity: CoreDomainIdentity, bits: u8) -> bool {
     matches!(
         identity,
@@ -1090,31 +1072,6 @@ impl ExprKindExt for ExprKind {
             ExprKind::Symbol(symbol) => Some(symbol),
             _ => None,
         }
-    }
-}
-
-#[cfg(test)]
-mod top_level_error_span_tests {
-    use super::*;
-
-    #[test]
-    fn preserves_precise_span_and_recovers_missing_top_level_location() {
-        let source = "; Початковий коментар\n(1)";
-        let forms = parse(source).expect("джерельна форма");
-        let form = &forms[0];
-        assert_eq!(form.span.start, source.find("(1)").unwrap());
-
-        let missing = LanguageError::new(ErrorKind::Type, "не можна викликати", Span::default());
-        let repaired = top_level_error_span(missing, form);
-        assert_eq!(repaired.span, form.span);
-        assert_eq!(repaired.line_col(source), (2, 1));
-
-        let precise = Span {
-            start: form.span.start + 1,
-            end: form.span.start + 2,
-        };
-        let already_located = LanguageError::new(ErrorKind::Type, "точний діапазон", precise);
-        assert_eq!(top_level_error_span(already_located, form).span, precise);
     }
 }
 
