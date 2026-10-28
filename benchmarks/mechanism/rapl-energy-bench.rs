@@ -41,9 +41,15 @@ fn find_package_counter() -> Result<PathBuf, String> {
         }
     }
     matches.sort();
-    matches.into_iter().next().ok_or_else(|| {
-        format!("RAPL_UNAVAILABLE no readable package energy_uj under {}", root.display())
-    })
+    match matches.len() {
+        1 => Ok(matches.remove(0)),
+        0 => Err(format!(
+            "RAPL_UNAVAILABLE no package energy_uj under {}", root.display()
+        )),
+        count => Err(format!(
+            "RAPL_UNAVAILABLE {count} packages detected; refusing to report one socket as whole-machine energy"
+        )),
+    }
 }
 
 // RAPL counters are modular. This supports zero or one wrap; a second wrap
