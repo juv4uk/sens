@@ -22,6 +22,11 @@ METRICS = frozenset({"energy_uj", "wall_time_ns", "peak_rss_kib"})
 # Predeclared primary contrast slate: every candidate is either eligible or
 # explicitly N/A in each of eight tasks BEFORE observations are inspected.
 PLANNED_CANDIDATES = frozenset({"C", "Python", "SENS"})
+EXPECTED_TASK_IDS = frozenset({
+    "T01-symbolic-recursion", "T02-exact-rationals", "T03-parsing-text",
+    "T04-sorting", "T05-allocation-gc", "T06-io", "T07-matrices",
+    "T08-persistent-structures", "T09-bit-operations",
+})
 SENSORS = {
     "RAPL_PACKAGE": "WHOLE_PACKAGE",
     "CALIBRATED_WATTMETER": "WHOLE_SYSTEM",
@@ -170,6 +175,8 @@ def validate(plan: object) -> dict[str, int]:
         task_impls[tid] = langs
         task_input[tid] = digest
 
+    demand(set(task_impls) == EXPECTED_TASK_IDS,
+           "tasks: IDs must match the nine published frozen corpus tasks")
     contrasts = p.get("contrasts")
     demand(type(contrasts) is list and len(contrasts) > 0,
            "contrasts: missing comparisons")
