@@ -124,5 +124,31 @@ class EvidenceTests(unittest.TestCase):
             self.assertIn("MEASURED_OUTPUTS_MISSING", report["tasks"]["T01-symbolic-recursion"]["blockers"])
 
 
+    def test_published_t01_raw_cannot_be_admitted_as_confirmatory(self):
+        """Read historical corpus as-is; do not rewrite exploratory observations."""
+        source = (Path(__file__).resolve().parents[4]
+                  / "benchmarks/language-energy-study/raw/T01-python-vs-javascript-8x4.json")
+        document = strict_json(source.read_text(encoding="utf-8"))
+        result = audit(document, SHA)
+        task = result["tasks"]["T01-symbolic-recursion"]
+        self.assertEqual(result["status"], "BLOCKED")
+        self.assertEqual(task["recorded_pairs"], 32)
+        self.assertEqual(task["recorded_processes"], 8)
+        self.assertEqual(task["recorded_sessions"], 1)
+        self.assertEqual(task["energy"], "ENERGY_NOT_MEASURED")
+        expected = {
+            "SOURCE_SHA_UNPINNED_OR_MISMATCHED",
+            "PARITY_SELFTEST_IS_NOT_MEASURED_OUTPUT_PROOF",
+            "MEASURED_INPUT_NOT_PINNED",
+            "REFERENCE_OUTPUT_NOT_PINNED",
+            "MEASURED_OUTPUTS_MISSING",
+            "SESSION_TIMESTAMP_MISSING",
+            "INSUFFICIENT_INDEPENDENT_SESSION_EVIDENCE",
+        }
+        self.assertEqual(set(task["blockers"]), expected)
+        self.assertEqual(result["scientific_conclusion"], "NONE")
+        self.assertEqual(result["independent_reproduction"], "NOT_REPRODUCED")
+
+
 if __name__ == "__main__":
     unittest.main()
