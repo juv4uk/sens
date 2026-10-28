@@ -77,7 +77,7 @@ pub fn parse_literate(source: &str, mode: SourceMode) -> Result<Vec<Expr>, Langu
 }
 
 /// Eval of the canonical human Ukrainian source surface for embedded IDEs.
-/// Decimal source tokens are projected by SENS into exact D24+ operands before
+/// Decimal source tokens are projected by SENS into exact D12+ operands before
 /// the existing SENS evaluator sees them. This is the same operation as the
 /// SENS file-mode CLI, not a host-owned arithmetic interpreter.
 pub fn eval_literate_ukr(

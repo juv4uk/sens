@@ -26,14 +26,15 @@ pub fn project_ukr_decimal_integer_literals(
     expressions: &[Expr],
     source: &str,
 ) -> Result<Vec<Expr>, LanguageError> {
-    project_ukr_decimal_integer_literals_with_minimum_width(expressions, source, 24)
+    project_ukr_decimal_integer_literals_with_minimum_width(expressions, source, 12)
 }
 
 /// Project source integers using an explicit numeric-domain floor.
 ///
-/// D12-first execution passes 12; callers which deliberately operate inside an
-/// established D24+ Core4 profile pass 24. This is a source-profile choice, not
-/// inference from a bit carrier or silent mixed-domain coercion.
+/// Ordinary execution starts at D12; callers which deliberately operate inside
+/// an established wider profile may pass 24 or another ratified rung. This is
+/// a source-profile choice, not an inference from a bit carrier or silent
+/// mixed-domain coercion.
 pub fn project_ukr_decimal_integer_literals_with_minimum_width(
     expressions: &[Expr],
     source: &str,

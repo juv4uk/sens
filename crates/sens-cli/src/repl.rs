@@ -349,7 +349,7 @@ fn append_t5m_expression_context(
         }
         ExprKind::Number(value, _exactness) => {
             // Усередині QUOTE числовий вузол може залишитися у людському AST.
-            // Точне зниження до D24+ вже існує для звичайних числових джерел;
+            // Точне зниження до D12+ вже існує для звичайних числових джерел;
             // використовуємо його ж, без текстового W7 або host-арифметики.
             let exact = exact_integer_source_word(&value.to_string())?;
             append_t5m_expression_context(&exact, layout, words, depth, quoted_data)?;
@@ -453,7 +453,7 @@ fn exact_integer_source_word(source: &str) -> Result<Expr, String> {
             ..
         }] => Ok(expression.clone()),
         _ => Err(format!(
-            "T5M exact ratio component did not lower to D24+: {source}"
+            "T5M exact ratio component did not lower to D12+: {source}"
         )),
     }
 }
@@ -715,7 +715,7 @@ fn project_repl_surface_expression_in_scope(
     if depth > 768 {
         return Err("REPL projection lowering exceeds the SENS nesting limit".into());
     }
-    // The two ratified D24+ roots are immutable named values in the
+    // The two ratified D12+ roots are immutable named values in the
     // Core environment. Identify them from their exact W7 cells, not source
     // byte spans: mixed-source projection can create a D2/W7 atom whose AST
     // span is not a trustworthy way to rediscover the original spelling.
@@ -729,7 +729,7 @@ fn project_repl_surface_expression_in_scope(
         {
             if let Some(number) = session.environment.get(&name).as_ref().and_then(|value| {
                 match value {
-                    Value::BinaryNumber(number) if number.numeric_domain_width() == Some(24) => {
+                    Value::BinaryNumber(number) if number.numeric_domain_width().is_some() => {
                         Some(number)
                     }
                     _ => None,
@@ -1029,7 +1029,7 @@ fn exact_t5m_carrier_words(
             ExactDomainWord::Number(number) => {
                 let width = number
                     .numeric_domain_width()
-                    .ok_or("T5M number lost its D24+ identity")?;
+                    .ok_or("T5M number lost its D12+ identity")?;
                 crate::zig_transport::ExactT5MWord::new(
                     width,
                     number
@@ -1078,7 +1078,7 @@ fn restore_t5m_words(
                 ExactDomainWord::Number(number) => (
                     number
                         .numeric_domain_width()
-                        .ok_or("T5M number lost its D24+ identity")?,
+                        .ok_or("T5M number lost its D12+ identity")?,
                     number
                         .exact_numeric_domain_bits()
                         .ok_or("T5M number has no exact bits")?,
@@ -1241,8 +1241,11 @@ fn result_t5m_words(value: &Value) -> Result<Vec<ExactDomainWord>, String> {
                 }
             };
             if negative {
-                let zero = BinaryNumber::from_numeric_domain_bits(24, &[0; 24])
-                    .ok_or("could not form exact D24+ zero for NEG result")?;
+                let width = numerator
+                    .numeric_domain_width()
+                    .ok_or("T5M NEG component lost its D12+ identity")?;
+                let zero = BinaryNumber::from_numeric_domain_bits(width, &vec![0; width])
+                    .ok_or("could not form exact Dn zero for NEG result")?;
                 expression = Expr {
                     kind: ExprKind::DomainCall(
                         difference,
@@ -1503,7 +1506,7 @@ pub(crate) fn mint_t5m_source_pair_with_bindings(
     bindings: &[String],
 ) -> Result<(Vec<u8>, String), String> {
     // Пряме виконання .lisp працює з Core4, а не лише з D4 MACRO.
-    // Без того самого SENS bootstrap корені D24+ (число-нуль/один)
+    // Без того самого SENS bootstrap корені D12+ (число-нуль/один)
     // лишаються непов'язаними D7 гліфами і помилково викликаються як Lisp.
     // Визначення і числа надає тільки SENS Core4, не Rust-підстановка.
     let mut session = core4_t5m_source_session()?;
@@ -1584,7 +1587,7 @@ fn eval_t5m_paired_file_with_runtime(
     bindings: &[String],
     load_core4: bool,
 ) -> Result<sens::EvalResult, String> {
-    // Mint always projects with Core4's exact D24+ roots available. Use the
+    // Mint always projects with Core4's exact D12+ roots available. Use the
     // same projection environment here, but keep runtime Core4 opt-in and
     // separate so source identity is established before runtime admission.
     let mut projection_session = core4_t5m_source_session()?;
