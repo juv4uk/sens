@@ -19,6 +19,9 @@ SHA1 = re.compile(r"[0-9a-f]{40}")
 SHA256 = re.compile(r"[0-9a-f]{64}")
 TASK_ID = re.compile(r"[a-z0-9][a-z0-9_-]{2,63}")
 METRICS = frozenset({"energy_uj", "wall_time_ns", "peak_rss_kib"})
+# Predeclared primary contrast slate: every candidate is either eligible or
+# explicitly N/A in each of eight tasks BEFORE observations are inspected.
+PLANNED_CANDIDATES = frozenset({"C", "Python", "SENS"})
 SENSORS = {
     "RAPL_PACKAGE": "WHOLE_PACKAGE",
     "CALIBRATED_WATTMETER": "WHOLE_SYSTEM",
@@ -113,6 +116,7 @@ def validate(plan: object) -> dict[str, int]:
     demand(type(tasks) is list and len(tasks) == 8, "tasks: exactly eight frozen tasks required")
     task_impls: dict[str, set[str]] = {}
     task_input: dict[str, str] = {}
+    expected_contrasts: set[tuple[str, str]] = set()
     for index, entry in enumerate(tasks):
         t = obj(entry, f"tasks[{index}]")
         tid = t.get("id")
@@ -137,6 +141,32 @@ def validate(plan: object) -> dict[str, int]:
                 f"tasks[{index}].implementations[{impl_index}].source_sha", SHA1)
             langs.add(language)
         demand("Rust" in langs, f"tasks[{index}].implementations: no Rust baseline")
+        excluded = t.get("ineligible_candidates")
+        demand(type(excluded) is list,
+               f"tasks[{index}].ineligible_candidates: explicit N/A inventory required")
+        ineligible: set[str] = set()
+        for excluded_index, item in enumerate(excluded):
+            entry_na = obj(item, f"tasks[{index}].ineligible_candidates[{excluded_index}]")
+            language = nonempty(entry_na.get("language"), "ineligible language")
+            demand(language in PLANNED_CANDIDATES,
+                   f"tasks[{index}].ineligible_candidates: unknown primary language {language}")
+            demand(language not in langs,
+                   f"tasks[{index}].ineligible_candidates: implemented language {language} declared N/A")
+            demand(language not in ineligible,
+                   f"tasks[{index}].ineligible_candidates: duplicate language {language}")
+            reason = nonempty(entry_na.get("reason"),
+                              f"tasks[{index}].ineligible_candidates[{excluded_index}].reason")
+            demand(len(reason.strip()) >= 20,
+                   f"tasks[{index}].ineligible_candidates: N/A needs a substantive reason")
+            evidence = nonempty(entry_na.get("evidence_url"),
+                                f"tasks[{index}].ineligible_candidates[{excluded_index}].evidence_url")
+            demand(evidence.startswith("https://"),
+                   f"tasks[{index}].ineligible_candidates: evidence must be HTTPS URL")
+            ineligible.add(language)
+        eligible = langs & PLANNED_CANDIDATES
+        demand(eligible | ineligible == PLANNED_CANDIDATES,
+               f"tasks[{index}].ineligible_candidates: missing candidate or explicit N/A")
+        expected_contrasts.update((tid, language) for language in eligible)
         task_impls[tid] = langs
         task_input[tid] = digest
 
@@ -165,10 +195,30 @@ def validate(plan: object) -> dict[str, int]:
         demand(key not in seen, f"contrasts[{index}]: duplicate {tid}/{candidate}")
         seen.add(key)
         coverage.add(tid)
-    demand(coverage == set(task_impls), "contrasts: at least one contrast per task")
+    demand(seen == expected_contrasts,
+           "contrasts: all eligible candidate/task cells must be declared; missing primary contrast")
     # Notice: structural matching is NOT output parity or metrology evidence.
     return {"tasks": len(tasks), "contrasts": len(contrasts),
+            "planned_candidate_cells": len(tasks) * len(PLANNED_CANDIDATES),
+            "explicit_na_cells": len(tasks) * len(PLANNED_CANDIDATES) - len(seen),
             "sessions": p["sessions"], "pairs_per_session": pairs}
+
+
+def strict_json(text: str) -> object:
+    """Reject ambiguous duplicate keys at every nesting level."""
+    def no_duplicate_keys(pairs: list[tuple[str, object]]) -> dict:
+        unique = {}
+        for key, value in pairs:
+            if key in unique:
+                raise InvalidPlan(f"JSON duplicate key: {key}")
+            unique[key] = value
+        return unique
+
+    def invalid_constant(value: str) -> None:
+        raise InvalidPlan(f"JSON nonfinite constant: {value}")
+
+    return json.loads(text, object_pairs_hook=no_duplicate_keys,
+                      parse_constant=invalid_constant)
 
 
 def main() -> int:
@@ -176,7 +226,7 @@ def main() -> int:
     parser.add_argument("manifest", type=Path, help="frozen prospective plan JSON")
     args = parser.parse_args()
     try:
-        plan = json.loads(args.manifest.read_text(encoding="utf-8"))
+        plan = strict_json(args.manifest.read_text(encoding="utf-8"))
         facts = validate(plan)
     except (InvalidPlan, OSError, json.JSONDecodeError) as error:
         print(f"PREREG_BLOCKED reason={error}", file=sys.stderr)
