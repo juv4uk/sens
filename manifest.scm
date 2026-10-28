@@ -28,5 +28,7 @@
          "nss-certs"
          "git"
          "python@3.12"
+         "node"
+         "lua@5.4"
          "sed"
          "racket")))))
