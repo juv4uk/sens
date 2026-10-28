@@ -36,9 +36,15 @@ jobs:
       - name: Зібрати виконавець SENS та тритовий читач
         run: cargo build --locked -p sens-cli --bin sens --bin sens-trit
 
-      - name: Мовні закони через інтерактивний SENS REPL
+      - name: Усі заявлені release-scope SENS REPL свідки (закони + мутанти)
         shell: bash
-        run: bash scripts/prove-lisp-language-laws.sh "$PWD/target/debug/sens"
+        run: |
+          set -euo pipefail
+          bash -n scripts/prove-repl-semantic-corpus.sh
+          bash scripts/prove-repl-semantic-corpus.sh "$PWD/target/debug/sens"
+      - name: D8/D10 інтроспекція через SENS REPL
+        shell: bash
+        run: bash scripts/prove-repl-environment.sh "$PWD/target/debug/sens"
 
       - name: D8/D10 огляд середовища через інтерактивний SENS REPL
         shell: bash
