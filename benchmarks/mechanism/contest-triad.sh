@@ -118,6 +118,8 @@ if [[ "$lane" == all || "$lane" == sens ]]; then
   sens_bin="${SENS_BIN:-$repo/target/debug/sens}"
   if [[ "$sens_bin" != /* ]]; then sens_bin="$repo/$sens_bin"; fi
   [[ -x "$sens_bin" ]] || die "SENS: виконавчий файл відсутній: $sens_bin"
+  # Git HEAD є SHA вихідного дерева, не доказом походження вже зібраного виконуваного файла.
+  printf 'КОНКУРС_SENS_ВИКОНАВЕЦЬ path=%s build_sha=не-підтверджено\n' "$sens_bin"
   # Логіку позитивного й негативного свідків обчислює тільки SENS.
   bash scripts/prove-бенчмарк-структура.sh "$sens_bin" > "$tmp/sens.stdout" || die 'SENS: позитивний/негативний свідок або час не доведено'
   grep -q '^БЕНЧМАРК_СТРУКТУРА=PASS native=SENS positive=D1:так mutant=D1:ні samples=11 ' "$tmp/sens.stdout" || die 'SENS: немає повного нативного звіту'
@@ -125,4 +127,8 @@ if [[ "$lane" == all || "$lane" == sens ]]; then
   sens=нативний-свідок
 fi
 
+[[ "$(git rev-parse --verify HEAD 2>/dev/null)" == "$sha" ]] || die 'HEAD змінився під час вимірювання'
+git diff --quiet -- || die 'файли змінилися під час вимірювання'
+git diff --cached --quiet -- || die 'індекс змінився під час вимірювання'
+[[ -z "$(git ls-files --others --exclude-standard)" ]] || die 'з'явилися незакомічені файли під час вимірювання'
 printf 'КОНКУРС_ПІДСУМОК sha=%s rust=%s zig=%s sens=%s міжмовний-рейтинг=заборонено\n' "$sha" "$rust" "$zig_lane" "$sens"
