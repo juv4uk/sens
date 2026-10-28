@@ -14,6 +14,7 @@ on:
         default: quick
         options:
           - quick
+          - runner-smoke
           - native
           - laws
           - remint
@@ -111,6 +112,83 @@ jobs:
           echo "ARCHIVE (поза мовним коридором): ${count} артефактів — docs/language-policy-archive.md" >> "$GITHUB_STEP_SUMMARY"
       - name: Статус
         run: echo "QUICK_CI_STATUS=ok heavy_native_laws_remint_release=MANUAL_TARGETED"
+
+
+  # Обмежений тест стандартних безкоштовних GitHub-hosted runners.
+  # Ніякої семантичної влади: ці jobs перевіряють host, exact-head та компіляцію.
+  free-runner-linux-x64:
+    name: Runner smoke · Ubuntu x64 · Rust/Zig host
+    if: ${{ (github.event_name == 'workflow_dispatch' && inputs.suite == 'runner-smoke') || (github.event_name == 'pull_request' && github.head_ref == 'agent/free-hosted-runners-20261028') }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - uses: dtolnay/rust-toolchain@1.99.0
+      - uses: ./.github/actions/install-zig
+      - name: Exact PR head і host compilation
+        shell: bash
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+          test "$RUNNER_OS" = Linux
+          test "$RUNNER_ARCH" = X64
+          zig version
+          cargo check --locked -p sens-cli --features zig-transport
+          echo "Ubuntu x64: host build complete at $EXPECTED_SHA; not SENS semantic verification"
+
+  free-runner-linux-arm64:
+    name: Runner smoke · Ubuntu ARM64 · source portability
+    if: ${{ (github.event_name == 'workflow_dispatch' && inputs.suite == 'runner-smoke') || (github.event_name == 'pull_request' && github.head_ref == 'agent/free-hosted-runners-20261028') }}
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - name: Exact PR head і ARM64 джерела
+        shell: bash
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+          test "$RUNNER_OS" = Linux
+          test "$RUNNER_ARCH" = ARM64
+          test -s lib/repl-core.lisp
+          test -s lib/meta-eval.lisp
+          bash -n scripts/prove-repl-semantic-corpus.sh
+          bash -n scripts/prove-meta-eval-graph-d1.sh
+          echo "Ubuntu ARM64: source and shell portability only; Zig installer unsupported"
+
+  free-runner-windows-x64:
+    name: Runner smoke · Windows x64 · exact checkout
+    if: ${{ (github.event_name == 'workflow_dispatch' && inputs.suite == 'runner-smoke') || (github.event_name == 'pull_request' && github.head_ref == 'agent/free-hosted-runners-20261028') }}
+    runs-on: windows-2025
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - name: Exact PR head і Windows файловий маршрут
+        shell: pwsh
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $actual = (git rev-parse HEAD).Trim()
+          if ($LASTEXITCODE -ne 0 -or $actual -ne $env:EXPECTED_SHA) { throw 'Wrong checkout SHA' }
+          if ($env:RUNNER_OS -ne 'Windows' -or $env:RUNNER_ARCH -ne 'X64') { throw 'Wrong runner architecture' }
+          foreach ($path in @('AGENTS.md', 'lib/repl-core.lisp', 'lib/meta-eval.lisp', 'Cargo.toml')) {
+            if (-not (Test-Path -LiteralPath $path -PathType Leaf)) { throw "Missing file: $path" }
+          }
+          Write-Host "Windows x64: checkout and SENS source files available at $actual; no semantic proof"
 
   native:
     name: Ручний native Rust/Zig smoke
