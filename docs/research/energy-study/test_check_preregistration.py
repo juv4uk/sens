@@ -21,8 +21,8 @@ def frozen_fixture() -> dict:
     """A synthetic fixture, explicitly not a real registered study."""
     tasks = []
     contrasts = []
-    for number in range(8):
-        tid = f"task-{number+1:02d}"
+    for number in range(9):
+        tid = f"T{number+1:02d}-synthetic"
         input_digest = f"{number + 1:064x}"
         tasks.append({
             "id": tid,
@@ -83,10 +83,10 @@ class PreregistrationMechanismTests(unittest.TestCase):
 
     def test_complete_structure_passes_only_structure(self):
         facts = validate(frozen_fixture())
-        self.assertEqual(facts["tasks"], 8)
-        self.assertEqual(facts["contrasts"], 8)
-        self.assertEqual(facts["planned_candidate_cells"], 24)
-        self.assertEqual(facts["explicit_na_cells"], 16)
+        self.assertEqual(facts["tasks"], 9)
+        self.assertEqual(facts["contrasts"], 9)
+        self.assertEqual(facts["planned_candidate_cells"], 27)
+        self.assertEqual(facts["explicit_na_cells"], 18)
         self.assertNotIn("energy_uj", facts)  # no measurements!
 
     def test_wrong_input_digest_blocks_parity_admission(self):
@@ -119,7 +119,7 @@ class PreregistrationMechanismTests(unittest.TestCase):
 
     def test_missing_task_is_blocked(self):
         self.assert_blocked(lambda p: p["tasks"].pop(),
-                            "exactly eight")
+                            "exactly nine")
 
     def test_duplicate_contrast_is_blocked(self):
         self.assert_blocked(lambda p: p["contrasts"].append(
@@ -153,7 +153,7 @@ class PreregistrationMechanismTests(unittest.TestCase):
         self.assert_blocked(lambda p: p["contrasts"].pop(),
                             "missing primary contrast")
 
-    def test_all_24_cells_can_be_explicitly_eligible(self):
+    def test_all_27_cells_can_be_explicitly_eligible(self):
         plan = frozen_fixture()
         for task in plan["tasks"]:
             task["implementations"] += [
@@ -168,8 +168,8 @@ class PreregistrationMechanismTests(unittest.TestCase):
                     "metrics": ["wall_time_ns", "peak_rss_kib", "energy_uj"],
                 })
         facts = validate(plan)
-        self.assertEqual(facts["planned_candidate_cells"], 24)
-        self.assertEqual(facts["contrasts"], 24)
+        self.assertEqual(facts["planned_candidate_cells"], 27)
+        self.assertEqual(facts["contrasts"], 27)
         self.assertEqual(facts["explicit_na_cells"], 0)
 
     def test_duplicate_json_key_is_blocked(self):
