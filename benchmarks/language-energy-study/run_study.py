@@ -147,9 +147,15 @@ def run_once(cmd: str, env: dict, timeout_s: float = 120.0):
         if remaining <= 0:
             proc.kill()
             try:
-                os.wait4(proc.pid, 0)
+                _, killed_status, _ = os.wait4(proc.pid, 0)
+                proc.returncode = os.waitstatus_to_exitcode(killed_status)
             except ChildProcessError:
-                pass
+                proc.returncode = -9
+            finally:
+                if proc.stdout:
+                    proc.stdout.close()
+                if proc.stderr:
+                    proc.stderr.close()
             return None, None, f"TIMEOUT_{timeout_s}s"
         try:
             pid, status, usage = os.wait4(proc.pid, os.WNOHANG)
@@ -165,6 +171,8 @@ def run_once(cmd: str, env: dict, timeout_s: float = 120.0):
         proc.stdout.close()
     if proc.stderr:
         proc.stderr.close()
+    # os.wait4 reaps the child outside Popen.wait(); keep Popen's state consistent.
+    proc.returncode = os.waitstatus_to_exitcode(status)
     if status != 0:
         return None, None, f"EXIT_{status}:{err.strip()[:80]}"
     lines = [ln for ln in out.splitlines() if ln.strip()]
