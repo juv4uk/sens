@@ -92,7 +92,7 @@ def audit(document: object, source_sha: str) -> dict:
         process_sessions: dict[str, str] = {}
         sessions: dict[str, set[str]] = defaultdict(set)
         dates: set[str] = set()
-        for i, pair in enumerate(pairs):
+        for pair in pairs:
             if not isinstance(pair, dict):
                 blocked.add("MALFORMED_PAIR")
                 continue
