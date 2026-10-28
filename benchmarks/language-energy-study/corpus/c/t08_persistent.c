@@ -80,6 +80,26 @@ static void sha256(const unsigned char *in, size_t len, unsigned char out[32]) {
         out[i*4+3]=(unsigned char)h[i];
     }
 }
+/* TEST-ONLY structural witness. Not part of the timed workload: the
+ * other corpus languages have no equivalent traversal in their benchmark.
+ * The witness proves actual node values and complete chain reachability,
+ * while the frozen stdout digest alone proves only marker lengths.
+ */
+#if defined(T08_STRUCTURAL_FAULT_INJECTION) && !defined(T08_STRUCTURAL_WITNESS)
+#error "fault injection requires the structural witness"
+#endif
+#ifdef T08_STRUCTURAL_WITNESS
+static int verify_chain(const Node *head, unsigned n) {
+    const Node *node = head;
+    for (unsigned remaining = n; remaining > 0u; --remaining) {
+        if (node == NULL || node->value != remaining - 1u)
+            return 0;
+        node = node->previous;
+    }
+    return node == NULL;
+}
+#endif
+
 static int append_mark(char *buf, size_t capacity, size_t *used, unsigned n) {
     int wrote = snprintf(buf+*used, capacity-*used, "%s%u",
                          *used ? "," : "", n);
@@ -123,6 +143,16 @@ int main(void) {
             return reject("marker overflow");
     }
     retained_head=head;
+#ifdef T08_STRUCTURAL_FAULT_INJECTION
+    /* Deliberately corrupt a value; marker-only digest would not notice. */
+    ((Node *)head)->value = n;
+#endif
+#ifdef T08_STRUCTURAL_WITNESS
+    if (!verify_chain(head, n)) {
+        fprintf(stderr, "T08_STRUCTURE_INVALID\n");
+        return 3;
+    }
+#endif
     if (!append_mark(marks,sizeof marks,&used,n))
         return reject("marker overflow");
     unsigned char digest[32];
