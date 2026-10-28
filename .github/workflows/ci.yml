@@ -1,6 +1,10 @@
 name: "SENS — швидкий CI та ручні цільові перевірки"
 
 on:
+  # 01:43 UTC = 03:43 Kyiv (winter) / 04:43 Kyiv (summer).
+  # schedule only operates after this workflow lands on the default branch.
+  schedule:
+    - cron: '43 1 * * *'
   push:
     branches: [main]
   pull_request:
@@ -15,6 +19,7 @@ on:
         options:
           - quick
           - runner-smoke
+          - platform-repl-bench
           - native
           - laws
           - remint
@@ -37,7 +42,7 @@ permissions:
 jobs:
   sens:
     name: Охоронець · Rust · Zig · SENS
-    if: ${{ github.event_name != 'workflow_dispatch' || inputs.suite == 'quick' }}
+    if: ${{ github.event_name == 'push' || github.event_name == 'pull_request' || (github.event_name == 'workflow_dispatch' && inputs.suite == 'quick') }}
     runs-on: ubuntu-24.04
     # Піднято з 8: компіляція `sens` (крок нижче) не вкладалась у 8 хвилин,
     # а без неї PR міг злитись зі зламаною бібліотекою.
@@ -118,7 +123,7 @@ jobs:
   # Ніякої семантичної влади: ці jobs перевіряють host, exact-head та компіляцію.
   free-runner-linux-x64:
     name: Runner smoke · Ubuntu x64 · Rust/Zig host
-    if: ${{ (github.event_name == 'workflow_dispatch' && inputs.suite == 'runner-smoke') || (github.event_name == 'pull_request' && github.head_ref == 'agent/free-hosted-runners-20261028') }}
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.suite == 'runner-smoke' }}
     runs-on: ubuntu-24.04
     timeout-minutes: 18
     steps:
@@ -143,7 +148,7 @@ jobs:
 
   free-runner-linux-arm64:
     name: Runner smoke · Ubuntu ARM64 · source portability
-    if: ${{ (github.event_name == 'workflow_dispatch' && inputs.suite == 'runner-smoke') || (github.event_name == 'pull_request' && github.head_ref == 'agent/free-hosted-runners-20261028') }}
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.suite == 'runner-smoke' }}
     runs-on: ubuntu-24.04-arm
     timeout-minutes: 5
     steps:
@@ -168,7 +173,7 @@ jobs:
 
   free-runner-windows-x64:
     name: Windows x64 · SENS CLI native build · Zig transport
-    if: ${{ (github.event_name == 'workflow_dispatch' && inputs.suite == 'runner-smoke') || (github.event_name == 'pull_request' && github.head_ref == 'agent/free-hosted-runners-20261028') }}
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.suite == 'runner-smoke' }}
     runs-on: windows-2025
     timeout-minutes: 30
     steps:
@@ -205,6 +210,82 @@ jobs:
           name: sens-windows-x64-${{ github.event.pull_request.head.sha || github.sha }}
           path: target/debug/sens.exe
           if-no-files-found: error
+          retention-days: 3
+
+
+  # Nightly only on default branch; manual before release via suite=platform-repl-bench.
+  # Temporary PR activation strictly for this short-lived rollout branch.
+  # Every result is exact-head and real native SENS: Rust mechanism, Zig transport.
+  cross-platform-repl-bench:
+    name: SENS REPL + benchmarks · ${{ matrix.label }}
+    if: ${{ github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.suite == 'platform-repl-bench') || (github.event_name == 'pull_request' && github.head_ref == 'agent/free-hosted-runners-20261028') }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        include:
+          - os: ubuntu-24.04
+            label: linux-x64
+            binary: target/release/sens
+            arch: X64
+          - os: windows-2025
+            label: windows-x64
+            binary: target/release/sens.exe
+            arch: X64
+          - os: macos-15-intel
+            label: macos-intel
+            binary: target/release/sens
+            arch: X64
+          - os: macos-15
+            label: macos-arm64
+            binary: target/release/sens
+            arch: ARM64
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - uses: dtolnay/rust-toolchain@1.99.0
+      - uses: ./.github/actions/install-zig
+      - uses: Swatinem/rust-cache@49a0bdc70d2e1b713ca9e2869b211fcce03d3c1c # v2
+        with:
+          key: nightly-repl-${{ matrix.label }}
+      - name: Exact-head і SENS CLI release build з Zig
+        shell: bash
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          EXPECTED_ARCH: ${{ matrix.arch }}
+          CARGO_BUILD_JOBS: "2"
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+          test "$RUNNER_ARCH" = "$EXPECTED_ARCH"
+          test "$RUNNER_NAME" != ""
+          zig version
+          cargo build --locked --release -p sens-cli --bin sens --features zig-transport
+          test -x "${{ matrix.binary }}"
+      - name: Нативний SENS REPL · 32 позитивні/негативні свідки
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p .ci-metrics
+          # GNU timeout does not exist on stock macOS; a strict job timeout
+          # applies to ALL platforms. No language-law checks in the host.
+          SENS_REPL_PORTABLE=1 bash scripts/prove-repl-semantic-corpus.sh "$PWD/${{ matrix.binary }}" | tee .ci-metrics/repl-corpus.log
+      - name: SENS REPL bench · 11 cold/batch samples
+        shell: bash
+        run: |
+          set -euo pipefail
+          bash scripts/ci-cross-platform-repl-benchmark.sh "$PWD/${{ matrix.binary }}" ".ci-metrics" | tee .ci-metrics/benchmark.log
+      - name: Зберегти raw evidence (успіх або RED; це не реліз)
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: sens-repl-bench-${{ matrix.label }}-${{ github.event.pull_request.head.sha || github.sha }}-${{ github.run_attempt }}
+          path: .ci-metrics/
+          if-no-files-found: warn
           retention-days: 3
 
   native:
@@ -273,6 +354,7 @@ jobs:
 
   remint-source-scope:
     name: Виявити змінені джерела SENS
+    if: ${{ github.event_name != 'schedule' && (github.event_name != 'workflow_dispatch' || inputs.suite != 'platform-repl-bench') }}
     runs-on: ubuntu-24.04
     outputs:
       has_sources: ${{ steps.scope.outputs.has_sources }}
