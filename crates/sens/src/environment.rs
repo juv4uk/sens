@@ -1,5 +1,5 @@
 use crate::arena::{Arena, ArenaHandles, CellRef, Edge};
-use crate::{DomainIdentity, Value};
+use crate::{DomainIdentity, PairNode, Value};
 use std::{
     cell::RefCell,
     collections::{hash_map::Entry, HashMap},
