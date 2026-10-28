@@ -18,7 +18,7 @@ if [[ ! -x "$cli" ]]; then
   exit 1
 fi
 cli="$(cd "$(dirname "$cli")" && pwd)/$(basename "$cli")"
-for executable in /usr/bin/time timeout awk git uname; do
+for executable in /usr/bin/time timeout awk git uname date; do
   if ! command -v "$executable" > /dev/null 2>&1; then
     printf 'BLOCKED missing_tool=%s\n' "$executable" >&2
     exit 1
@@ -27,9 +27,17 @@ done
 
 src="benchmarks/language-energy-study/corpus/sens"
 verify="$src/t01_fib.lisp"
-measure="$src/t01_fib_measure.lisp"
+measure="${SENS_T01_MEASURE_SOURCE:-$src/t01_fib_measure.lisp}"
 if [[ ! -f "$verify" || ! -f "$measure" ]]; then
   printf 'BLOCKED missing_T01_source\n' >&2
+  exit 1
+fi
+
+# The n=24 source may be supplied from the other agent's independently verified Git
+# commit. The optional exact blob gate prevents substituting a different program.
+measure_blob="$(git hash-object -- "$measure")"
+if [[ -n "${SENS_T01_MEASURE_BLOB:-}" && "$measure_blob" != "$SENS_T01_MEASURE_BLOB" ]]; then
+  printf 'BLOCKED source_blob_mismatch expected=%s actual=%s\n' "$SENS_T01_MEASURE_BLOB" "$measure_blob" >&2
   exit 1
 fi
 
@@ -86,6 +94,13 @@ sha="$(git rev-parse HEAD)"
   printf 'repository_sha\t%s\n' "$sha"
   printf 'source_verify\t%s\n' "$verify"
   printf 'source_measure\t%s\n' "$measure"
+  printf 'source_measure_git_blob\t%s\n' "$measure_blob"
+  printf 'source_verify_git_blob\t%s\n' "$(git hash-object -- "$verify")"
+  printf 'runner_name\t%s\n' "${RUNNER_NAME:-unknown}"
+  printf 'runner_run_id\t%s\n' "${GITHUB_RUN_ID:-not_actions}"
+  printf 'utc_started\t%s\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+  printf 'rustc_version\t%s\n' "$(rustc --version 2>/dev/null || echo unknown)"
+  printf 'zig_version\t%s\n' "$(zig version 2>/dev/null || echo unknown)"
   printf 'functional_unit\tT01 naive Fibonacci n=24\n'
   printf 'verification\tT01 n=12 -> 144; measure n=24 -> 46368; exact stdout\n'
   printf 'measurement_boundary\tseparate cold process incl. startup; prior verification warms CPU/cache\n'
