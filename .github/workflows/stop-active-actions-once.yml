@@ -1,0 +1,63 @@
+# One-shot cancellation requested by the repository owner.
+# Triggered only by adding/updating THIS file in the named commit on main.
+# This workflow is not a permanent push-time cancellation policy.
+name: "One-shot cancel active GitHub Actions"
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/stop-active-actions-once.yml"
+
+permissions:
+  actions: write
+  contents: read
+
+jobs:
+  stop-current-queue:
+    name: "Cancel in-progress and queued runs (once)"
+    if: ${{ github.event.head_commit.message == 'ops(actions): one-shot cancel all active and queued runs (#6183)' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - name: Cancel current runs except the cancellation job itself
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          SELF_RUN_ID: ${{ github.run_id }}
+        run: |
+          set -euo pipefail
+          ids="$(mktemp)"
+          unique="$(mktemp)"
+          trap 'rm -f "$ids" "$unique"' EXIT
+          # Freeze a one-time snapshot. Do not run an hourly/push-time monitor.
+          for state in queued in_progress waiting pending requested; do
+            gh api --paginate --jq '.workflow_runs[].id' \
+              "/repos/$GH_REPO/actions/runs?status=$state&per_page=100" >> "$ids"
+          done
+          sort -un "$ids" > "$unique"
+          selected="$(wc -l < "$unique")"
+          echo "ACTION_CANCEL_SNAPSHOT selected=$selected self=$SELF_RUN_ID"
+          cancelled=0
+          unavailable=0
+          while IFS= read -r id; do
+            [[ "$id" =~ ^[0-9]+$ ]] || continue
+            if [[ "$id" == "$SELF_RUN_ID" ]]; then
+              echo "ACTION_CANCEL_SKIP_SELF id=$id"
+              continue
+            fi
+            if gh api --silent --method POST \
+                "/repos/$GH_REPO/actions/runs/$id/cancel"; then
+              echo "ACTION_CANCEL_REQUESTED id=$id"
+              cancelled=$((cancelled + 1))
+            else
+              # A run may have completed between snapshot and cancellation.
+              echo "ACTION_CANCEL_UNCONFIRMED id=$id" >&2
+              unavailable=$((unavailable + 1))
+            fi
+          done < "$unique"
+          echo "ACTION_CANCEL_SUMMARY selected=$selected requested=$cancelled unconfirmed=$unavailable"
+          # Do not claim all runs stopped just because GitHub accepted requests.
+          if (( unavailable != 0 )); then
+            echo "::warning::Some runs were already terminal or their cancellation was refused"
+          fi
