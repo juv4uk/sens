@@ -25,6 +25,19 @@ jobs:
         run: cargo check --locked --workspace
       - name: Зібрати REPL SENS
         run: cargo build --locked -p sens-cli --bin sens
+      # Вимірювання власної мови. ЦІЛЬ із реєстру: D6 додати-1 (001110).
+      # Обсяг обмежений: три повтори, один фіксований бенчмарк.
+      - name: Виміряти SENS — час і піковий RSS (D6 додати-1)
+        shell: bash
+        run: |
+          set -uo pipefail
+          BIN="$PWD/target/debug/sens"
+          BENCH="benchmarks/sphere-contest/сенс-семантика.lisp"
+          [ -x "$BIN" ] || { echo "SENS_BINARY_NOT_BUILT"; exit 1; }
+          for round in 1 2 3; do
+            echo "--- повтор $round ---"
+            /usr/bin/time -v "$BIN" "$BENCH" 2>&1 | grep -E "PHYSICAL|Maximum resident|Elapsed|SENS_|так|ні" | head -8
+          done
       - name: Перевірити Zig транспортні механізми
         run: zig test -lc research/zig-codecs/tests.zig
       - name: Перевірити мовні закони тільки виконанням SENS REPL
@@ -103,35 +116,3 @@ jobs:
           "$RUNNER_TEMP/copy_c" "$RUNNER_TEMP/corpus.bin" 8192
           python3 copy.py "$RUNNER_TEMP/corpus.bin" 8192
           python3 -c 'import sys;d=open(sys.argv[1],"rb").read();n=int(sys.argv[2]);print(f"PHYSICAL_COPY\tbytes={len(d)}\tcopies={n}\tobserved={sum(d[i % len(d)] for i in range(n))}")' "$RUNNER_TEMP/corpus.bin" 8192
-
-  sens-measurement:
-    name: Вимірювання SENS на раннері (ручний запуск)
-    if: github.event_name == 'workflow_dispatch'
-    runs-on: ubuntu-24.04
-    timeout-minutes: 40
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          persist-credentials: false
-      # build.rs вимагає пінований Zig — на раннері його немає без цього кроку.
-      - uses: ./.github/actions/install-zig
-      - name: Зібрати інтерпретатор SENS
-        shell: bash
-        run: |
-          set -euo pipefail
-          export ZIG="$(command -v zig || true)"
-          cargo build --locked -p sens-cli --bin sens
-      - name: Виміряти SENS (D6 додати-1, ЦІЛЬ із реєстру)
-        shell: bash
-        run: |
-          set -uo pipefail
-          BIN="$PWD/target/debug/sens"
-          BENCH="benchmarks/sphere-contest/сенс-семантика.lisp"
-          if [ ! -x "$BIN" ]; then
-            echo "SENS_BINARY_NOT_BUILT"; exit 1
-          fi
-          echo "=== три повтори, /usr/bin/time -v ==="
-          for round in 1 2 3; do
-            echo "--- повтор $round ---"
-            /usr/bin/time -v "$BIN" "$BENCH" 2>&1 | grep -E "SENS_|PHYSICAL|Maximum resident|Elapsed"
-          done
