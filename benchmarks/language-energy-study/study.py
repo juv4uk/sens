@@ -53,6 +53,33 @@ def sensor_state() -> str:
         "MULTIPLE_RAPL_PACKAGES" if zones else "RAPL_UNAVAILABLE")
 
 
+
+def parse_rapl_measurement(lines: list[str]) -> dict[str, object]:
+    """Validate the physical package meter contract, never estimate missing joules."""
+    if len(lines) != 1 or not lines[0].startswith("RUST_RAPL_PACKAGE "):
+        raise RuntimeError("RAPL observation ambiguous/missing")
+    fields = dict(KV.findall(lines[0]))
+    required = ("energy_uj", "elapsed_ns", "scope", "counter", "wrapped_once", "status")
+    if any(not fields.get(name) for name in required):
+        raise RuntimeError("RAPL observation missing required physical fields")
+    if fields["status"] != "MEASURED" or fields["scope"] != "whole_package_not_process":
+        raise RuntimeError("RAPL observation invalid status/scope")
+    if fields["wrapped_once"] not in ("true", "false"):
+        raise RuntimeError("RAPL observation invalid wrap indicator")
+    counter = Path(fields["counter"])
+    if counter.name != "energy_uj":
+        raise RuntimeError("RAPL observation invalid counter")
+    try:
+        energy, elapsed = int(fields["energy_uj"]), int(fields["elapsed_ns"])
+    except ValueError as error:
+        raise RuntimeError("RAPL observation invalid energy/time integer") from error
+    if energy <= 0 or elapsed <= 0:
+        raise RuntimeError("RAPL observation nonpositive hardware energy/time")
+    return {"energy_uj": energy, "wall_time_ns": elapsed,
+            "scope": fields["scope"], "rapl_counter": str(counter),
+            "rapl_wrapped_once": fields["wrapped_once"] == "true"}
+
+
 def physical_expected(copies: int) -> str:
     data = CORPUS.read_bytes()
     if not data:
@@ -87,17 +114,8 @@ def measure(command: list[str], copies: int, out: Path, meter: Path | None,
                   "energy_uj": None}
         if meter:
             lines = [x for x in run.stdout.splitlines() if x.startswith("RUST_RAPL_PACKAGE ")]
-            if len(lines) != 1:
-                raise RuntimeError("RAPL observation ambiguous/missing")
-            fields = dict(KV.findall(lines[0]))
-            if fields.get("status") != "MEASURED":
-                raise RuntimeError("invalid RAPL measurement status")
-            energy, elapsed = int(fields["energy_uj"]), int(fields["elapsed_ns"])
-            if energy <= 0 or elapsed <= 0:
-                raise RuntimeError("nonpositive hardware energy/time")
-            result.update({"energy_uj": energy, "wall_time_ns": elapsed,
-                           "host_wrapper_wall_ns": wall_host_ns,
-                           "scope": fields["scope"]})
+            result.update(parse_rapl_measurement(lines))
+            result["host_wrapper_wall_ns"] = wall_host_ns
         return result
     finally:
         usage.unlink(missing_ok=True)
@@ -149,7 +167,11 @@ def experiment(blocks: int, pairs: int, copies: int, seed: int, out: Path) -> No
             "timing_source": "Rust Instant(child)/Python perf_counter_ns(process)",
             "python": platform.python_version(), "cc": checked(["cc", "--version"]).splitlines()[0],
             "energy_sensor": sensor, "measurement_boundary": "process startup+physical copies",
-            "physical_work": f"{copies} byte-buffer copies from lib/core4.lisp",
+            "physical_work": f"{copies} requested buffer copies from lib/core4.lisp",
+            "copy_work_validation": "NOT_INDEPENDENTLY_CERTIFIED",
+            "note": ("one-byte-per-iteration checksum and final byte parity do not "
+                     "prove every full memcpy/copy_from_slice/slice-write survived "
+                     "optimization; cross-language ranking prohibited"),
             "language_semantics": "NOT_TESTED",
         }
         (out / "provenance.json").write_text(json.dumps(provenance, indent=2) + "\n")
@@ -206,7 +228,10 @@ def experiment(blocks: int, pairs: int, copies: int, seed: int, out: Path) -> No
                 return f"{item['ratio']:.3f} [{lo:.3f}, {hi:.3f}]"
             lines.append(f"| {candidate} | {fmt('wall_time_ns')} | "
                          f"{fmt('peak_rss_kib')} | {fmt('energy_uj')} |")
-        lines.extend(["", f"RAPL: {sensor}. Дослід на shared GitHub runner — не рейтинг.",
+        lines.extend(["", "**COPY_WORK_NOT_CERTIFIED:** checksum спостерігає один байт на ітерацію "
+                      "і повний буфер лише наприкінці; 8192 фактичні повні копії ще не доведено "
+                      "дизасемблером або незалежним інструментуванням. Усі ratio — exploratory.",
+                      f"RAPL: {sensor}. Дослід на shared GitHub runner — не рейтинг.",
                       "Витрати компіляції виключено. Старт процесу включено. "
                       "CPU package RAPL включає фон; без датчика джоулі не виміряно.",
                       "SENS-мовні закони цим фізичним стендом НЕ перевіряються."])
