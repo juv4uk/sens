@@ -963,19 +963,19 @@ fn dispatch_call(
             .map(EvalStep::Value);
     }
 
-    // The ordinary Lisp reader retains a Ukrainian call head as a Symbol.
-    // Admit only the small exact D8 spelling list shared with the T5M reader,
-    // and only when canon.rs has an implemented mechanism at that exact D8
-    // coordinate. D8 residency or an English/legacy spelling is not enough.
+    // The ordinary reader retains a Ukrainian or symbolic D8 call head as a
+    // Symbol. Resolve it through the exact D8 table, then require either an
+    // implemented primitive or a concrete language-owned callable in that
+    // exact identity slot. Residency alone never makes a resident callable.
     if let Some(name) = head_name {
-        if crate::semantic_registry::admitted_d8_uk_callable_bits(name).is_some() {
-            if let Some(crate::DomainIdentity::D8(word)) =
-                crate::semantic_registry::exact_uk_callable_for_source_head(name)
+        if let Some(crate::DomainIdentity::D8(word)) =
+            crate::semantic_registry::exact_uk_callable_for_source_head(name)
+        {
+            let identity = CoreDomainIdentity::D8(word);
+            if canon::domain_primitive_kind(identity).is_some()
+                || environment.domain_code_slot(identity).is_some()
             {
-                let identity = CoreDomainIdentity::D8(word);
-                if canon::domain_primitive_kind(identity).is_some() {
-                    return dispatch_domain_call(identity, arguments, environment, span);
-                }
+                return apply_exact_domain_value(&identity.into(), arguments, environment, span);
             }
         }
     }

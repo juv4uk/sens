@@ -73,17 +73,7 @@ pub fn parse_mixed_exact_domain_machine_source(
 /// Shared by ordinary Ukrainian source and path-pinned readers. Neither bare
 /// historical W8 bytes nor quoted/bound words obtain callable authority.
 fn admitted_d8_uk_bits(spelling: &str) -> Option<&'static str> {
-    // Admit only exact ratified words alongside their Ukrainian surfaces.
-    // Ordinary source cannot infer width from arbitrary numeric-looking text;
-    // quoted payloads remain opaque and do not acquire callable authority.
-    match spelling {
-        "код-символу" | "11100000" => Some("11100000"),
-        "текст-у-символ" | "11101101" => Some("11101101"),
-        "символ-у-текст" | "11101110" => Some("11101110"),
-        "значення-у-текст" | "11110100" => Some("11110100"),
-        "однакові?" | "11110111" => Some("11110111"),
-        _ => None,
-    }
+    crate::semantic_registry::admitted_d8_uk_callable_bits(spelling)
 }
 
 fn lift_pinned_d8_io(

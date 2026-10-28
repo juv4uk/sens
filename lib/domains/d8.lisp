@@ -213,7 +213,7 @@
   (11001001 (ук повернути-друге) (укр послідовність-повернути-друге) (san krama-dvitīya-phala) (en prog2) (LISP PROG2) (sym ()))
   (11001010 (ук жодне-істинне?) (укр жодне-істинне?) (san na-kaścit-satya) (en never?) (LISP NEVER) (sym ()))
   (11001011 (ук функціональна-лямбда) (укр функціональна-лямбда) (san phalana-lambda) (en flambda) (LISP FLAMBDA) (sym ()))
-  (11001100 (ук частка+остача) (укр поділити-з-часткою-й-остачею) (san bhāga-śeṣa) (en div) (LISP DIV) (sym ()))
+  (11001100 (ук частка+остача) (укр поділити-з-часткою-й-остачею) (san bhāga-śeṣa) (en div) (LISP DIV) (sym :))
   (11001101 (ук доки-істина+застосувати) (укр продовжувати-поки-істина-й-застосувати-результат) (san satya-yāvat-pravṛtti-phala-prayoga) (en continue-while-true+apply-result) (LISP continue-while-true+apply-result) (sym ()))
   (11001110 (ук вибір-перезапуску) (укр вибір-перезапуску) (san punarārambha-vikalpa) (en restart-case) (LISP RESTART-CASE) (sym ()))
   (11001111 (ук зупинити-на-істині+стан) (укр зупинити-коли-істина-й-повернути-стан) (san satya-sati-virāma-avasthā-pratyāvartana) (en stop-when-true+return-state) (LISP stop-when-true+return-state) (sym ()))

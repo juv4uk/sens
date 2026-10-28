@@ -8,7 +8,7 @@
 (domain-table-1
   (0000 (ук застосувати) (укр застосувати) (san prayoga) (en apply) (LISP APPLY) (sym "№"))
   (0001 (ук обчислити) (укр обчислити) (san vicāraṇa) (en eval) (LISP EVAL) (sym "!"))
-  (0010 (ук функція) (укр функція) (san phalana) (en lambda) (LISP LAMBDA) (sym "/"))
+  (0010 (ук функція) (укр функція) (san phalana) (en lambda) (LISP LAMBDA) (sym ()))
   (0011 (ук визначити) (укр визначити) (san nirvacana) (en define) (LISP DEFINE) (sym ":="))
   (0100 (ук хибне?) (укр хибне?) (san niṣedha) (en not?) (LISP NOT) (sym ":?"))
   (0101 (ук порожнє?) (укр порожній?) (san śūnya-parīkṣā) (en null?) (LISP NULL) (sym "0?"))

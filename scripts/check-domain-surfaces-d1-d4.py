@@ -34,6 +34,7 @@ def parse_rows() -> list[dict[str, str]]:
                 "uk": row.uk,
                 "ukr": row.ukr,
                 "sa": row.san,
+                "sym": row.sym,
             }
         )
     return rows
@@ -85,6 +86,10 @@ def render_generated(rows: list[dict[str, str]]) -> str:
                 + rust_string("sa")
                 + ", name: "
                 + rust_string(row["sa"])
+                + " }, DomainSurfaceName { namespace: "
+                + rust_string("sym")
+                + ", name: "
+                + rust_string(row["sym"] or "")
                 + " }",
             ]
         )

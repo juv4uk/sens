@@ -13,7 +13,7 @@
 use std::{collections::HashMap, sync::OnceLock};
 
 use crate::{
-    BinarySourceWord, Bit1, Bit3, Bit4, Bit5, Bit6, Bit9, CoreD5, CoreD6, CoreD9,
+    BinarySourceWord, Bit1, Bit2, Bit3, Bit4, Bit5, Bit6, Bit9, CoreD5, CoreD6, CoreD9,
     CoreDomainIdentity, DomainIdentity,
 };
 
@@ -23,6 +23,10 @@ mod generated {
 
 mod domain_surface_generated {
     include!("domain_surface_registry_generated.rs");
+}
+
+mod domain_symbol_surfaces_d8_d10_generated {
+    include!("domain_symbol_surfaces_d8_d10_generated.rs");
 }
 
 mod d7_display_generated {
@@ -51,6 +55,7 @@ use d6_definition_bindings_generated::D6_DEFINITION_BINDINGS;
 use d7_display_generated::D7_DISPLAY_ROWS;
 use d9_definition_bindings_generated::D9_DEFINITION_BINDINGS;
 use domain_surface_generated::{DomainSurfaceRow, DOMAIN_SURFACE_ROWS};
+use domain_symbol_surfaces_d8_d10_generated::SYMBOL_SURFACES_D8_D10;
 use generated::{SemanticRow, SEMANTIC_ROWS};
 
 /// Only the historical W8 surface-table slot. Although the carrier type can
@@ -99,17 +104,34 @@ pub(crate) fn legacy_slot_for_exact_identity(identity: CoreDomainIdentity) -> Op
     matched
 }
 
-/// Convert only explicit generated D3–D6 coordinates into resident identity.
+/// Convert explicit generated D1–D6 and D8–D10 coordinates into resident identity.
 ///
-/// No W8 slot, packed payload, or name may select the width. Higher domains
-/// require their own generated coordinate authority (never an implicit lift).
-fn exact_domain_resident_from_projection(width: u8, bits: u8) -> Option<DomainIdentity> {
+/// D7 remains a text-only projection. No historical W8 slot, packed payload,
+/// or name may select the width.
+fn exact_domain_resident_from_projection(width: u8, bits: u16) -> Option<DomainIdentity> {
     use crate::BinarySourceWord;
+    if width == 1 {
+        return Some(DomainIdentity::from_source_word(BinarySourceWord::W1(
+            Bit1::new(u8::try_from(bits).ok()?)?,
+        )));
+    }
+    if width == 2 {
+        return Some(DomainIdentity::from_source_word(BinarySourceWord::W2(
+            Bit2::new(u8::try_from(bits).ok()?)?,
+        )));
+    }
+    if width == 9 {
+        return Some(DomainIdentity::D9(CoreD9::from_word(crate::Bit9::new(bits)?)));
+    }
+    if width == 10 {
+        return Some(DomainIdentity::D10(crate::DomainD10::new(bits)?));
+    }
     let source = match width {
-        3 => BinarySourceWord::W3(Bit3::new(bits)?),
-        4 => BinarySourceWord::W4(Bit4::new(bits)?),
-        5 => BinarySourceWord::W5(Bit5::new(bits)?),
-        6 => BinarySourceWord::W6(crate::Bit6::new(bits)?),
+        3 => BinarySourceWord::W3(Bit3::new(u8::try_from(bits).ok()?)?),
+        4 => BinarySourceWord::W4(Bit4::new(u8::try_from(bits).ok()?)?),
+        5 => BinarySourceWord::W5(Bit5::new(u8::try_from(bits).ok()?)?),
+        6 => BinarySourceWord::W6(crate::Bit6::new(u8::try_from(bits).ok()?)?),
+        8 => BinarySourceWord::W8(crate::Bit8::new(u8::try_from(bits).ok()?)?),
         _ => return None,
     };
     Some(DomainIdentity::from_source_word(source))
@@ -122,6 +144,7 @@ fn exact_domain_resident_from_projection(width: u8, bits: u8) -> Option<DomainId
 struct ExactDomainSourceIndex {
     all: HashMap<&'static str, Option<DomainIdentity>>,
     uk: HashMap<&'static str, Option<DomainIdentity>>,
+    sym: HashMap<&'static str, Option<DomainIdentity>>,
 }
 
 fn insert_exact_source(
@@ -154,9 +177,18 @@ fn insert_exact_source(
 /// new executable source head.
 fn build_exact_source_index(rows: &[DomainSurfaceRow]) -> ExactDomainSourceIndex {
     let mut index = ExactDomainSourceIndex::default();
-    for row in rows.iter().filter(|row| row.source_routable) {
-        let identity = exact_domain_resident_from_projection(row.width, row.bits);
+    for row in rows.iter() {
+        let identity = exact_domain_resident_from_projection(row.width, u16::from(row.bits));
         for surface in row.surfaces.iter() {
+            if surface.namespace == "sym" {
+                if !surface.name.is_empty() {
+                    insert_exact_source(&mut index.sym, surface.name, identity);
+                }
+                continue;
+            }
+            if !row.source_routable {
+                continue;
+            }
             if !matches!(surface.namespace, "uk" | "ukr" | "sa" | "en") {
                 continue;
             }
@@ -165,6 +197,10 @@ fn build_exact_source_index(rows: &[DomainSurfaceRow]) -> ExactDomainSourceIndex
                 insert_exact_source(&mut index.uk, surface.name, identity);
             }
         }
+    }
+    for (width, bits, name) in SYMBOL_SURFACES_D8_D10 {
+        let identity = exact_domain_resident_from_projection(*width, *bits);
+        insert_exact_source(&mut index.sym, name, identity);
     }
     index
 }
@@ -231,18 +267,24 @@ pub(crate) fn admitted_d8_uk_callable_bits(spelling: &str) -> Option<&'static st
         "символ-у-текст" => Some("11101110"),
         "значення-у-текст" => Some("11110100"),
         "однакові?" => Some("11110111"),
+        "поділити" | "/" => Some("11110110"),
+        ":" | "частка+остача" => Some("11001100"),
         _ => None,
     }
 }
 
-/// Canonical Ukrainian *source-head* projection, before evaluation.
+/// Canonical human/symbolic *source-head identity* projection, before evaluation.
 ///
-/// Only owner-ratified source-routable uk/ukr peer rows are eligible, together
-/// with the small explicit D8 mechanism list above. This is NOT the legacy SID
-/// compatibility index: no en alias, old W8, D2 structure, or unratified D7
-/// binder can become a callable head via this API.
+/// Ukrainian names use source-routable uk/ukr rows. The shared `sym` namespace
+/// resolves exact symbol cells from D1–D6 and D8–D10; its result is still only
+/// identity. `dispatch_call` separately requires a concrete evaluator mechanism.
+/// This is not the legacy SID index: no English alias, old W8, or D7 text cell
+/// can create a current callable route via this API.
 pub(crate) fn exact_uk_callable_for_source_head(name: &str) -> Option<crate::DomainIdentity> {
     if let Some(identity) = exact_source_index().uk.get(name).copied().flatten() {
+        return Some(identity);
+    }
+    if let Some(identity) = exact_source_index().sym.get(name).copied().flatten() {
         return Some(identity);
     }
     if let Some(bits) = admitted_d8_uk_callable_bits(name) {
@@ -474,7 +516,15 @@ pub(crate) fn is_admitted_exact_definition_target(identity: DomainIdentity) -> b
 /// Канонічний surface → domain маршрут читає тільки ратифіковану
 /// exact-width проєкцію. Історичний SID/байт не визначає домен.
 pub(crate) fn domain_identity_for_surface(name: &str) -> Option<CoreDomainIdentity> {
-    direct_domain_identity_for_surface(name)
+    direct_domain_identity_for_surface(name).or_else(|| {
+        let bits = admitted_d8_uk_callable_bits(name)?;
+        let word = crate::parse_binary_source_words(bits)
+            .ok()?
+            .into_iter()
+            .next()?
+            .word;
+        DomainIdentity::from_source_word(word).core_operation()
+    })
 }
 
 /// Resolve Ukrainian D1 predicate literals as values, never callable heads.

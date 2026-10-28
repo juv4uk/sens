@@ -146,12 +146,14 @@ impl DomainIdentity {
                         | 0b11101110
                         | 0b11100111
                         | 0b11110100
+                        | 0b11110110
                         | 0b11110111
+                        | 0b11001100
                 ) =>
             {
-                // Exact D8 CODE-CHAR and MOD use their concrete mechanisms;
-                // D8:11100111 is the environment-reflection mechanism;
-                // its exact identity routes to the same environment law.
+                // D8 callable identities include the language-defined DIV
+                // and DIV-with-remainder functions; their exact slots are
+                // populated only when the corresponding Lisp definitions load.
                 Some(CoreDomainIdentity::D8(value))
             }
             Self::D9(value)
