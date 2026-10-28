@@ -12,12 +12,14 @@ import json
 import math
 import re
 import sys
+from datetime import datetime, timezone
 from pathlib import Path
 
 HEX40 = re.compile(r"^[0-9a-f]{40}$")
 HEX64 = re.compile(r"^[0-9a-f]{64}$")
 PACKAGE_PATH = re.compile(r"^/sys/class/powercap/intel-rapl:[0-9]+$")
 PACKAGE_NAME = re.compile(r"^package-[0-9]+$")
+UTC_TIMESTAMP = re.compile(r"^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\.[0-9]{1,6})?Z$")
 
 
 class InvalidRecord(ValueError):
@@ -80,6 +82,21 @@ def parse_raw_json(payload: str) -> object:
     )
 
 
+def utc_instant(value: object, code: str) -> datetime:
+    """Require a real RFC3339 UTC instant; normalize fractional forms for equality.
+
+    Timestamp integrity is necessary for provenance, never proof that sessions
+    were independent physical repetitions.
+    """
+    require(isinstance(value, str) and UTC_TIMESTAMP.fullmatch(value) is not None, code)
+    try:
+        instant = datetime.fromisoformat(value[:-1] + "+00:00")
+    except ValueError as exc:
+        raise InvalidRecord(code) from exc
+    require(instant.tzinfo == timezone.utc, code)
+    return instant
+
+
 def validate_counter(raw: object, *, energy_range: int, max_power_w: int, label: str) -> int:
     """Validate single-wrap *plausibility* using an externally documented ceiling.
 
@@ -116,6 +133,7 @@ def validate(data: object) -> dict[str, object]:
     for key in ("source_sha", "collector_sha", "input_sha"):
         sha40(provenance.get(key), f"INVALID_{key.upper()}")
     require(provenance["clock"] == "monotonic_ns", "CLOCK_NOT_MONOTONIC")
+    utc_instant(provenance["recorded_at_utc"], "INVALID_PROVENANCE_UTC_TIMESTAMP")
     require(PACKAGE_NAME.fullmatch(provenance["sensor_name"]) is not None,
             "NOT_CPU_PACKAGE_DOMAIN")
     require(isinstance(provenance.get("sensor_path"), str) and
@@ -134,6 +152,7 @@ def validate(data: object) -> dict[str, object]:
     require(isinstance(sessions, list) and len(sessions) >= 2,
             "NOT_ENOUGH_SESSION_RECORDS")
     seen_sessions: set[str] = set()
+    seen_session_instants: set[datetime] = set()
     binary_shas: dict[str, str] = {}
     outputs: set[str] = set()
     unit_count: int | None = None
@@ -143,7 +162,10 @@ def validate(data: object) -> dict[str, object]:
         name = nonempty(session.get("id"), "SESSION_ID_MISSING")
         require(name not in seen_sessions, "DUPLICATE_SESSION_ID")
         seen_sessions.add(name)
-        nonempty(session.get("recorded_at_utc"), "SESSION_TIME_MISSING")
+        instant = utc_instant(session.get("recorded_at_utc"),
+                              "INVALID_SESSION_UTC_TIMESTAMP")
+        require(instant not in seen_session_instants, "DUPLICATE_SESSION_INSTANT")
+        seen_session_instants.add(instant)
         temperature = session.get("cpu_temperature_c")
         require(type(temperature) in (int, float) and 0 <= temperature <= 110,
                 "INVALID_TEMPERATURE_C")
