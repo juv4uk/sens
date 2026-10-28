@@ -62,9 +62,9 @@ jobs:
 
   build-sens:
     # Власник: «мене цікавить щоб ви почати вимірювати нашу мову».
-    # VERIFY n=12 уже на main; MEASURE n=24 — matched unit для часу/RSS.
+    # VERIFY → MEASURE parity → smoke wall pairs (python vs sens).
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 40
     steps:
       - uses: actions/checkout@v4
 
@@ -94,6 +94,8 @@ jobs:
           ./target/release/sens --t5m-mint \
             benchmarks/language-energy-study/corpus/sens/t01_fib.lisp \
             /tmp/sens-out/t01_fib.sens
+          # also refresh in-tree name for run_study default path
+          cp /tmp/sens-out/t01_fib.sens benchmarks/language-energy-study/corpus/sens/t01_fib.sens
           ls -l /tmp/sens-out/
 
       - name: Паритет SENS T01 VERIFY (n=12)
@@ -111,7 +113,6 @@ jobs:
 
       - name: Паритет SENS T01 MEASURE (n=24 → 46368)
         run: |
-          # parity_check.golden uses VERIFY_SIZE; MEASURE is checked explicitly.
           out=$(./target/release/sens /tmp/sens-out/t01_fib_measure.sens \
             | tr -d '\r' \
             | sed 's/^sens\[укр\]>[[:blank:]]*//' \
@@ -122,6 +123,31 @@ jobs:
           test -n "$out"
           test "$out" = "$expected"
           echo "SENS_T01_MEASURE_PARITY_OK"
+
+      - name: Smoke wall pairs python vs SENS (VERIFY)
+        env:
+          SENS_BIN: ${{ github.workspace }}/target/release/sens
+          SENS_PROGRAM_DIR: /tmp/sens-out
+        run: |
+          python3 benchmarks/language-energy-study/run_study.py \
+            --languages sens \
+            --tasks T01-symbolic-recursion \
+            --smoke \
+            --out /tmp/raw-sens-t01-verify.json
+          python3 -c "import json;d=json.load(open('/tmp/raw-sens-t01-verify.json'));t=d['tasks']['T01-symbolic-recursion'];assert t['parity']['passed'], t;print('pairs',len(t['pairs']),'ok')"
+
+      - name: Smoke wall pairs python vs SENS (MEASURE n=24)
+        env:
+          SENS_BIN: ${{ github.workspace }}/target/release/sens
+          SENS_PROGRAM_DIR: /tmp/sens-out
+        run: |
+          python3 benchmarks/language-energy-study/run_study.py \
+            --languages sens \
+            --tasks T01-symbolic-recursion \
+            --smoke \
+            --measure \
+            --out /tmp/raw-sens-t01-measure.json
+          python3 -c "import json;d=json.load(open('/tmp/raw-sens-t01-measure.json'));t=d['tasks']['T01-symbolic-recursion'];assert t['parity']['passed'], t;print('pairs',len(t['pairs']),'ok');print('sample_ns',t['pairs'][0]['baseline_ns'],t['pairs'][0]['candidate_ns'])"
 
       - name: Статус енергії на раннері
         run: |
