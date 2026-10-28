@@ -309,7 +309,7 @@ fn append_t5m_expression_context(
                     // The evaluator still decides whether that Text7 key is bound.
                     if !quoted_data
                         && layout == sens::Text7Layout::En
-                        && name.chars().any(|character| !character.is_ascii())
+                        && !name.is_ascii()
                     {
                         sens::encode_text7(name, sens::Text7Layout::Uk)
                     } else {
