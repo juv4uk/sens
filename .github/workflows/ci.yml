@@ -33,16 +33,89 @@ jobs:
       - name: Виміряти T01 (fib 12) у C, JavaScript і SENS
         shell: bash
         run: |
-          set -uo pipefail
-          BIN="$PWD/target/debug/sens"
+          set -euo pipefail
           CORP="benchmarks/language-energy-study/corpus"
-          cc -O2 -o "$RUNNER_TEMP/t01_c" "$CORP/c/t01_fib.c"
+          BIN="$PWD/target/debug/sens"
+          OUT="$RUNNER_TEMP/t01-triad"
+          mkdir -p "$OUT"
+          export TASK_ID="T01-symbolic-recursion" TASK_N=12
+          test -x "$BIN"
+          command -v node >/dev/null
+          test -x /usr/bin/time
+          command -v timeout >/dev/null
+          cc -std=c11 -O2 -o "$OUT/t01_c" "$CORP/c/t01_fib.c"
+          "$BIN" --t5m-mint "$CORP/sens/t01_fib.lisp" "$OUT/t01.sens"
+          test -s "$OUT/t01.sens"
+          printf '144\n' > "$OUT/expected.stdout"
+          {
+            printf 'source_sha\t%s\n' "$(git rev-parse HEAD)"
+            printf 'machine\t%s\n' "$(uname -srmo)"
+            printf 'cpu\t%s\n' "$(awk -F: '/^model name/{gsub(/^[ \t]+/,"",$2); print $2; exit}' /proc/cpuinfo)"
+            printf 'sens_version\t%s\n' "$("$BIN" --version)"
+            printf 'node_version\t%s\n' "$(node --version)"
+            printf 'compiler\t%s\n' "$(cc --version | head -1)"
+            printf 'source_c\t%s\n' "$CORP/c/t01_fib.c"
+            printf 'source_js\t%s\n' "$CORP/javascript/t01_fib.mjs"
+            printf 'source_sens\t%s\n' "$CORP/sens/t01_fib.lisp"
+            printf 'functional_unit\tT01 naive fib(12), stdout 144\n'
+            printf 'phase\tcold process incl. startup; C optimized, SENS debug; build excluded\n'
+            printf 'energy\tENERGY_NOT_MEASURED\n'
+            printf 'admission\tEXPLORATORY; single shared runner session, no ranking\n'
+          } > "$OUT/environment.tsv"
+          printf 'round\tlanguage\twall_seconds\tpeak_rss_kib\tchild_exit\tstdout\n' > "$OUT/samples.tsv"
+          measure() {
+            local round="$1" language="$2"
+            shift 2
+            local prefix="$OUT/$round-$language" wall rss exit_code trailing
+            if ! timeout 30s /usr/bin/time -f '%e %M %x' -o "$prefix.time" \
+                 "$@" > "$prefix.stdout" 2> "$prefix.stderr"; then
+              echo "BLOCKED child_failure round=$round language=$language" >&2
+              cat "$prefix.stderr" >&2
+              return 1
+            fi
+            if ! cmp -s "$OUT/expected.stdout" "$prefix.stdout"; then
+              echo "BLOCKED wrong_output round=$round language=$language" >&2
+              cat "$prefix.stdout" >&2
+              return 1
+            fi
+            if ! read -r wall rss exit_code trailing < "$prefix.time"; then
+              echo "BLOCKED missing_time round=$round language=$language" >&2
+              return 1
+            fi
+            if [[ ! "$wall" =~ ^[0-9]+([.][0-9]+)?$ || ! "$rss" =~ ^[0-9]+$ || "$rss" == 0 ||
+                  "$exit_code" != 0 || -n "$trailing" ]]; then
+              echo "BLOCKED invalid_time round=$round language=$language" >&2
+              return 1
+            fi
+            printf '%s\t%s\t%s\t%s\t%s\t144\n' "$round" "$language" "$wall" "$rss" "$exit_code" \
+              >> "$OUT/samples.tsv"
+          }
           for round in 1 2 3; do
-            echo "--- повтор $round ---"
-            echo "[C]";        /usr/bin/time -v "$RUNNER_TEMP/t01_c" 2>&1 | grep -E "^[0-9]+$|Maximum resident|Elapsed (wall" | head -3
-            echo "[JS]";       /usr/bin/time -v node "$CORP/javascript/t01_fib.mjs" 2>&1 | grep -E "^[0-9]+$|Maximum resident|Elapsed (wall" | head -3
-            echo "[SENS]";     /usr/bin/time -v "$BIN" "$CORP/sens/t01_fib.lisp" 2>&1 | grep -E "^[0-9]+$|Maximum resident|Elapsed (wall" | head -3
+            case "$round" in
+              1) order=(C JS SENS) ;;
+              2) order=(JS SENS C) ;;
+              3) order=(SENS C JS) ;;
+            esac
+            for language in "${order[@]}"; do
+              case "$language" in
+                C) measure "$round" C "$OUT/t01_c" ;;
+                JS) measure "$round" JS node "$CORP/javascript/t01_fib.mjs" ;;
+                SENS) measure "$round" SENS "$BIN" "$OUT/t01.sens" ;;
+              esac
+            done
           done
+          cat "$OUT/environment.tsv"
+          cat "$OUT/samples.tsv"
+          echo "T01_TRIAD_EXPLORATORY_OUTPUT_VERIFIED; ENERGY_NOT_MEASURED"
+
+      - name: Зберегти сирі T01 проби навіть при RED
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: t01-triad-${{ github.run_id }}
+          path: ${{ runner.temp }}/t01-triad/
+          if-no-files-found: warn
+          retention-days: 3
       - name: Виміряти SENS — час і піковий RSS (D6 додати-1)
         shell: bash
         run: |
