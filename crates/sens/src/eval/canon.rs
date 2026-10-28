@@ -474,6 +474,84 @@ fn invoke_d4_eval(
     })())
 }
 
+/// Точний механізм D4:0000: викликає функцію елементами правильного списку
+/// аргументів. Список є даними, а його елементи вже обчислені.
+fn invoke_d4_apply(
+    identity: CoreDomainIdentity,
+    args: &[Value],
+    environment: &Environment,
+    span: Span,
+) -> Option<Result<Value, LanguageError>> {
+    let CoreDomainIdentity::D4(word) = identity else {
+        return None;
+    };
+    if word.word().packed_bits() != 0b0000 {
+        return None;
+    }
+    Some((|| {
+        exact_args(identity, args, 2, span)?;
+        let mut applied_arguments = Vec::new();
+        let mut cursor = &args[1];
+        loop {
+            match cursor {
+                Value::Nil => break,
+                Value::Pair(pair) => {
+                    applied_arguments.push(pair.head.clone());
+                    cursor = &pair.tail;
+                }
+                _ => {
+                    return Err(LanguageError::new(
+                        ErrorKind::Type,
+                        "D4:0000 застосувати очікує правильний список аргументів",
+                        span,
+                    ));
+                }
+            }
+        }
+        apply_callable_value(&args[0], &applied_arguments, environment, span)
+    })())
+}
+
+/// Викликає лише вже обчислене значення з наявним механізмом SENS.
+fn apply_callable_value(
+    function: &Value,
+    arguments: &[Value],
+    environment: &Environment,
+    span: Span,
+) -> Result<Value, LanguageError> {
+    match function {
+        Value::Closure(closure) => closures::apply_values(closure.clone(), arguments, span),
+        Value::Builtin(builtin) => (builtin.func)(arguments, environment, span),
+        Value::DomainIdentity(identity) => {
+            if let Some(core_identity) = identity.core_operation() {
+                return invoke_domain_identity(core_identity, arguments, environment, span);
+            }
+            match environment.domain_code_slot(*identity) {
+                Some(Value::Closure(ref closure)) => {
+                    closures::apply_values(closure.clone(), arguments, span)
+                }
+                Some(Value::Builtin(ref builtin)) => {
+                    (builtin.func)(arguments, environment, span)
+                }
+                _ => Err(LanguageError::new(
+                    ErrorKind::Type,
+                    format!(
+                        "D4:0000 застосувати: D{} {} не має допущеного механізму виклику",
+                        identity.width(),
+                        identity
+                    ),
+                    span,
+                )),
+            }
+        }
+        _ => Err(LanguageError::new(
+            ErrorKind::Type,
+            "D4:0000 застосувати очікує значення функції з допущеним механізмом",
+            span,
+        )),
+    }
+}
+
 fn invoke_compact_derived_d4(
     identity: CoreDomainIdentity,
     args: &[Value],
@@ -570,6 +648,9 @@ pub(crate) fn invoke_domain_identity(
         );
     }
 
+    if let Some(result) = invoke_d4_apply(identity, args, environment, span) {
+        return result;
+    }
     if let Some(result) = invoke_d4_eval(identity, args, environment, span) {
         return result;
     }

@@ -39,6 +39,32 @@ run_repl_fixture() {
   fi
 }
 
+run_repl_rejects_d3_pair_eq() {
+  local label=d3-eq-pair
+  printf '%s\n' \
+    '(тотожне? (сполучити (як-є а) (як-є ())) (сполучити (як-є а) (як-є ())))' |
+    timeout 45s "$cli" --surface=укр >"$tmp/$label.out" 2>&1 || true
+  if ! grep -Fq 'тотожне? очікує два атоми' "$tmp/$label.out"; then
+    printf 'REGRESSION id=%s-%s layer=REPL/T5M expected=atomic-eq-type-error actual=wrong-result\n' "$id" "$label" >&2
+    cat "$tmp/$label.out" >&2
+    exit 1
+  fi
+}
+
+run_repl_rejects_improper_apply_list() {
+  local label=d4-apply-improper-list
+  printf '%s\n' \
+    '(застосувати (функція (х) х) (сполучити (як-є а) (як-є 7)))' |
+    timeout 45s "$cli" --surface=укр >"$tmp/$label.out" 2>&1 || true
+  if ! grep -Fq 'D4:0000 застосувати очікує правильний список аргументів' "$tmp/$label.out"; then
+    printf 'REGRESSION id=%s-%s layer=REPL/T5M expected=proper-list-type-error actual=wrong-result\n' "$id" "$label" >&2
+    cat "$tmp/$label.out" >&2
+    exit 1
+  fi
+}
+
+run_repl_rejects_d3_pair_eq
+run_repl_rejects_improper_apply_list
 run_repl_fixture "$law" 'ТАК' core-positive
 run_repl_fixture "$negative" 'НІ' core-negative
 # These are existing SENS-authored programs, not formulas reimplemented in shell.
@@ -50,4 +76,4 @@ done
 # Рекурсивний закон належить SENS і оцінюється тим самим REPL/Zig/T5M шляхом.
 run_repl_fixture tests/semantic/d5-recursive-list-law.lisp 'ТАК' d5-recursive-law
 run_repl_fixture tests/semantic/d5-recursive-list-mutant.lisp 'НІ' d5-recursive-mutant
-printf 'SENS_REPL_LANGUAGE_LAWS=OK path=REPL->Zig/T5M->SENS positive=ТАК negative=НІ domains=D1,D2,D3,D5 witness_pairs=5 runs=10\n'
+printf 'SENS_REPL_LANGUAGE_LAWS=OK path=REPL->Zig/T5M->SENS positive=ТАК negative=НІ domains=D1,D2,D3,D4,D5 witness_pairs=5 runs=12\n'
