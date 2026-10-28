@@ -59,3 +59,30 @@ jobs:
           else
             echo "RAPL_AVAILABLE=no — енергія лишається ENERGY_NOT_MEASURED"
           fi
+
+  build-sens:
+    # Власник: «мене цікавить щоб ви почали вимірювати нашу мову».
+    # Перший крок до цього — зібрати SENS там, де є rustc. У sandbox агента
+    # компілятора немає, тому досі SENS у вимірах не брав участі взагалі.
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Зібрати SENS
+        run: |
+          cargo --version
+          cargo build --release -p sens-cli --bin sens
+
+      - name: Що вміє бінарник
+        run: |
+          ./target/release/sens --version
+          echo "--- SENS збирається на раннері: це передумова вимірювання мови ---"
+
+      - name: Чи є Zig (потрібен для карбування .lisp -> .sens)
+        run: |
+          if command -v zig >/dev/null 2>&1; then
+            zig version; echo "ZIG_AVAILABLE=yes"
+          else
+            echo "ZIG_AVAILABLE=no — карбування пар неможливе без Zig"
+          fi
