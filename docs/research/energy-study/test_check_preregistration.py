@@ -21,8 +21,12 @@ def frozen_fixture() -> dict:
     """A synthetic fixture, explicitly not a real registered study."""
     tasks = []
     contrasts = []
-    for number in range(9):
-        tid = f"T{number+1:02d}-synthetic"
+    task_ids = [
+        "T01-symbolic-recursion", "T02-exact-rationals", "T03-parsing-text",
+        "T04-sorting", "T05-allocation-gc", "T06-io", "T07-matrices",
+        "T08-persistent-structures", "T09-bit-operations",
+    ]
+    for number, tid in enumerate(task_ids):
         input_digest = f"{number + 1:064x}"
         tasks.append({
             "id": tid,
@@ -152,6 +156,13 @@ class PreregistrationMechanismTests(unittest.TestCase):
     def test_missing_eligible_comparison_is_blocked(self):
         self.assert_blocked(lambda p: p["contrasts"].pop(),
                             "missing primary contrast")
+
+    def test_cannot_replace_registered_corpus_task_after_results(self):
+        plan = frozen_fixture()
+        plan["tasks"][0]["id"] = "T01-unregistered-replacement"
+        plan["contrasts"][0]["task"] = "T01-unregistered-replacement"
+        with self.assertRaisesRegex(InvalidPlan, "IDs must match"):
+            validate(plan)
 
     def test_all_27_cells_can_be_explicitly_eligible(self):
         plan = frozen_fixture()
