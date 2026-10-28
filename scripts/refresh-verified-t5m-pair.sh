@@ -238,8 +238,33 @@ if (( ${#binding_sources[@]} != 0 )); then
     exit 2
   fi
   if ! cmp -s "$scratch/out" "$scratch/complete.out"; then
-    echo "T5M_REPAIR_DEPENDENCY_COMPLETE_DIVERGENCE source=$source_file paired_bytes=$(wc -c < "$scratch/out") complete_bytes=$(wc -c < "$scratch/complete.out")" >&2
-    exit 2
+    # F6 is a source-only carrier with four independent Lisp DEFINE libraries.
+    # Evaluating the bundled source prints library definition replies first;
+    # --t5m-pair emits only replies of the F6 source itself. The native F6
+    # source transcript must still match the complete physical transcript
+    # byte-for-byte at an exact newline boundary (never substring matching).
+    # This exception is allowed ONLY for the declared F6 producer.
+    if [[ "$source_file" == tests/fixtures/wsm-fs-record-producer.lisp ]]; then
+      paired_bytes=$(wc -c < "$scratch/out")
+      complete_bytes=$(wc -c < "$scratch/complete.out")
+      prefix_bytes=$((complete_bytes - paired_bytes))
+      if (( paired_bytes > 0 && prefix_bytes > 0 )); then
+        tail -c "$paired_bytes" "$scratch/complete.out" > "$scratch/f6-source-suffix.out"
+        previous_byte="$(dd if="$scratch/complete.out" bs=1 skip="$((prefix_bytes - 1))" count=1 status=none | od -An -tu1 | tr -d '[:space:]')"
+        if [[ "$previous_byte" == 10 ]] && cmp -s "$scratch/out" "$scratch/f6-source-suffix.out"; then
+          echo "T5M_REPAIR_F6_DEPENDENCY_PREFIX_OK source=$source_file prefix_bytes=$prefix_bytes source_bytes=$paired_bytes exact=BYTE_FOR_BYTE"
+        else
+          echo "T5M_REPAIR_DEPENDENCY_COMPLETE_DIVERGENCE source=$source_file paired_bytes=$paired_bytes complete_bytes=$complete_bytes reason=source-transcript-not-exact-suffix" >&2
+          exit 2
+        fi
+      else
+        echo "T5M_REPAIR_DEPENDENCY_COMPLETE_DIVERGENCE source=$source_file paired_bytes=$paired_bytes complete_bytes=$complete_bytes reason=invalid-prefix" >&2
+        exit 2
+      fi
+    else
+      echo "T5M_REPAIR_DEPENDENCY_COMPLETE_DIVERGENCE source=$source_file paired_bytes=$(wc -c < "$scratch/out") complete_bytes=$(wc -c < "$scratch/complete.out")" >&2
+      exit 2
+    fi
   fi
   mode=paired-and-dependency-complete
 else
