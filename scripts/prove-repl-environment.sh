@@ -8,7 +8,7 @@ trap 'rm -rf "$tmp"' EXIT
 
 run_repl_form() {
   local label="$1" form="$2"
-  if ! printf '%s\n' "$form" | "$cli" --surface=укр >"$tmp/out" 2>"$tmp/err"; then
+  if ! printf '%s\n' "$form" | timeout 45s "$cli" --surface=укр >"$tmp/out" 2>"$tmp/err"; then
     printf 'REGRESSION case=%s layer=SENS-REPL actual=execution-error\n' "$label" >&2
     cat "$tmp/err" >&2
     exit 1
@@ -21,17 +21,22 @@ run_repl_form() {
   # A piped (non-TTY) REPL prints the D1 answer without an interactive
   # prompt. A terminal may prefix the same *exact* line with 'sens[укр]>'.
   # Neither case authorizes a partial substring or an error banner.
-  if ! grep -Fqx 'НІ' "$tmp/out" &&
-     ! grep -Fqx 'sens[укр]> НІ' "$tmp/out"; then
+  # The REPL may add CR and trailing terminal blanks on a redirected stream.
+  # Remove only presentation whitespace; do NOT accept a substring as a D1 proof.
+  tr -d '\r' < "$tmp/out" | sed 's/[[:blank:]]*$//' > "$tmp/normalized.out"
+  if ! grep -Fqx 'НІ' "$tmp/normalized.out" &&
+     ! grep -Fqx 'sens[укр]> НІ' "$tmp/normalized.out"; then
     printf 'REGRESSION case=%s expected=НІ actual=wrong-reply\n' "$label" >&2
     cat "$tmp/out" >&2
+    printf 'REPL_REPLY_RAW_BYTES case=%s\n' "$label" >&2
+    od -An -tx1 "$tmp/out" >&2
     exit 1
   fi
 }
 
 run_repl_form D10 '(атом? (середовище))'
 run_repl_form D8 '(атом? (відобразити-середовище))'
-if ! printf '(відобразити-середовище)\n' | "$cli" --surface=укр >"$tmp/reflection.out" 2>"$tmp/reflection.err"; then
+if ! printf '(відобразити-середовище)\n' | timeout 45s "$cli" --surface=укр >"$tmp/reflection.out" 2>"$tmp/reflection.err"; then
   printf 'REGRESSION identity=D8:11100111 layer=SENS-REPL actual=execution-error\n' >&2
   cat "$tmp/reflection.err" >&2
   exit 1
