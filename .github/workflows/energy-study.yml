@@ -99,6 +99,11 @@ jobs:
           ./target/release/sens --t5m-mint \
             benchmarks/language-energy-study/corpus/sens/t01_fib.lisp \
             /tmp/sens-out/t01_fib.sens
+          # ВИМІРЮВАЛЬНИЙ варіант: run_study шукає саме його. Без цього
+          # кроку всі 32 пари падали з run_fail, і гейт правильно відмовляв.
+          ./target/release/sens --t5m-mint \
+            benchmarks/language-energy-study/corpus/sens/t01_fib_measure.lisp \
+            /tmp/sens-out/t01_fib_measure.sens
           ls -l /tmp/sens-out/
 
       - name: Перші парні дані ДЛЯ НАШОЇ МОВИ
