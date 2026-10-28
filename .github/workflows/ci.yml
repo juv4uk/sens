@@ -51,8 +51,17 @@ jobs:
           while IFS= read -r f; do
             [ -f "$f" ] || continue
             echo "TRIPLET_MINT source=$f"
+            binding_args=()
+            profile_args=()
+            case "$f" in
+              tests/semantic/d9-d10-defined-functions-law.lisp)
+                binding_args=(--binding-source lib/world.lisp)
+                profile_args=(--core4-runtime)
+                ;;
+            esac
             bash scripts/refresh-verified-t5m-pair.sh "$f" \
-              target/debug/sens target/debug/sens-trit
+              target/debug/sens target/debug/sens-trit \
+              "${binding_args[@]}" "${profile_args[@]}"
           done <<< "$changed"
 
       - name: Закомітити трійки

@@ -480,6 +480,7 @@ jobs:
             expect_args=()
             case "$f" in
               benchmarks/contest-uk/*.lisp) profile_args=(--core4-runtime);;
+              tests/semantic/d9-d10-defined-functions-law.lisp) bs=(--binding-source lib/world.lisp); profile_args=(--core4-runtime);;
               tests/semantic/d9-f6-package-key-canonicalization-law.lisp|tests/semantic/d9-f6-package-key-canonicalization-mutant.lisp) bs=(--binding-source lib/lisp-fs.lisp); profile_args=(--core4-runtime);;
               tests/semantic/meta-eval-graph-d1-law.lisp|tests/semantic/meta-eval-graph-d1-mutant.lisp) bs=(--binding-source lib/meta-eval.lisp); profile_args=(--core4-runtime);;
               tests/semantic/exact-arithmetic-laws.lisp|tests/semantic/exact-arithmetic-mutant.lisp|lib/lisp-fs.lisp|lib/unify.lisp|tests/semantic/d6-derived-research-batch-01.lisp|tests/semantic/d8-rassq-until-batch.lisp|scripts/check-domain-logic-laws.lisp) profile_args=(--core4-runtime);;
@@ -880,6 +881,7 @@ jobs:
               expect_args=()
               case "$f" in
                 benchmarks/contest-uk/*.lisp) profile_args=(--core4-runtime);;
+                tests/semantic/d9-d10-defined-functions-law.lisp) bs=(--binding-source lib/world.lisp); profile_args=(--core4-runtime);;
                 tests/semantic/d9-f6-package-key-canonicalization-law.lisp|tests/semantic/d9-f6-package-key-canonicalization-mutant.lisp) bs=(--binding-source lib/lisp-fs.lisp); profile_args=(--core4-runtime);;
               tests/semantic/meta-eval-graph-d1-law.lisp|tests/semantic/meta-eval-graph-d1-mutant.lisp) bs=(--binding-source lib/meta-eval.lisp); profile_args=(--core4-runtime);;
               tests/semantic/exact-arithmetic-laws.lisp|tests/semantic/exact-arithmetic-mutant.lisp|lib/lisp-fs.lisp|lib/unify.lisp|tests/semantic/d6-derived-research-batch-01.lisp|tests/semantic/d8-rassq-until-batch.lisp|scripts/check-domain-logic-laws.lisp) profile_args=(--core4-runtime);;

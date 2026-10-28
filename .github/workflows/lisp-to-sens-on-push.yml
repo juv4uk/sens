@@ -99,6 +99,10 @@ jobs:
             profile_args=()
             binding_args=()
             case "$f" in
+              tests/semantic/d9-d10-defined-functions-law.lisp)
+                # The D9 witness invokes real world functions, which Core4 does not bind itself.
+                binding_args=(--binding-source lib/world.lisp)
+                profile_args=(--core4-runtime);;
               tests/fixtures/wsm-fs-record-producer.lisp)
                 # The F6 witness calls the real filesystem functions. Mint it
                 # against the same explicit SENS sources as the canonical
