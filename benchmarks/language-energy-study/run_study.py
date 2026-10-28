@@ -38,6 +38,12 @@ CORPUS = HERE / "corpus"
 MANIFEST = CORPUS / "manifest.json"
 
 # Реалізації, які РЕАЛЬНО існують у дереві. Немає компілятора — немає запису.
+# Імена закарбованих .sens для активного розміру. Мапа явна, бо імена
+# файлів містять опис задачі (t01_fib_measure.sens), а не лише номер.
+SENS_MEASURE_FILES = {
+    "T01-symbolic-recursion": "t01_fib_measure.sens",
+}
+
 LANGUAGES = {
     "python": {
         "kind": "interpreted",
