@@ -55,6 +55,10 @@ jobs:
             --task T01-symbolic-recursion \
             --run "node benchmarks/language-energy-study/corpus/javascript/t01_fib.mjs"
 
+      - name: Win32 per-process memory and subprocess checks
+        shell: bash
+        run: python3 -m unittest -v benchmarks/language-energy-study/test_win_process_meter.py
+
       - name: Парні дані на цій платформі
         shell: bash
         run: |
