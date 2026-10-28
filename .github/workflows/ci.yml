@@ -27,6 +27,22 @@ jobs:
         run: cargo build --locked -p sens-cli --bin sens
       # Вимірювання власної мови. ЦІЛЬ із реєстру: D6 додати-1 (001110).
       # Обсяг обмежений: три повтори, один фіксований бенчмарк.
+      # Однакова функціональна одиниця для трьох мов: T01 наївна рекурсія
+      # Фібоначчі, n=12, очікуваний результат 144. Тут SENS можна ставити
+      # поруч із C і JavaScript — задача та сама.
+      - name: Виміряти T01 (fib 12) у C, JavaScript і SENS
+        shell: bash
+        run: |
+          set -uo pipefail
+          BIN="$PWD/target/debug/sens"
+          CORP="benchmarks/language-energy-study/corpus"
+          cc -O2 -o "$RUNNER_TEMP/t01_c" "$CORP/c/t01_fib.c"
+          for round in 1 2 3; do
+            echo "--- повтор $round ---"
+            echo "[C]";        /usr/bin/time -v "$RUNNER_TEMP/t01_c" 2>&1 | grep -E "^[0-9]+$|Maximum resident|Elapsed (wall" | head -3
+            echo "[JS]";       /usr/bin/time -v node "$CORP/javascript/t01_fib.mjs" 2>&1 | grep -E "^[0-9]+$|Maximum resident|Elapsed (wall" | head -3
+            echo "[SENS]";     /usr/bin/time -v "$BIN" "$CORP/sens/t01_fib.lisp" 2>&1 | grep -E "^[0-9]+$|Maximum resident|Elapsed (wall" | head -3
+          done
       - name: Виміряти SENS — час і піковий RSS (D6 додати-1)
         shell: bash
         run: |
