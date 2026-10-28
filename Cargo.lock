@@ -667,7 +667,7 @@ dependencies = [
 
 [[package]]
 name = "sens"
-version = "0.42.1"
+version = "0.42.2"
 dependencies = [
  "sens-host",
  "serde_json",
@@ -675,7 +675,7 @@ dependencies = [
 
 [[package]]
 name = "sens-cli"
-version = "0.42.1"
+version = "0.42.2"
 dependencies = [
  "ratatui",
  "rustyline",
@@ -700,7 +700,7 @@ dependencies = [
 
 [[package]]
 name = "sens-host"
-version = "0.42.1"
+version = "0.42.2"
 dependencies = [
  "sens",
  "serde_json",
@@ -708,7 +708,7 @@ dependencies = [
 
 [[package]]
 name = "sens-literate"
-version = "0.42.1"
+version = "0.42.2"
 dependencies = [
  "pulldown-cmark",
  "sens",
@@ -716,21 +716,21 @@ dependencies = [
 
 [[package]]
 name = "sens-lsp"
-version = "0.42.1"
+version = "0.42.2"
 dependencies = [
  "sens",
 ]
 
 [[package]]
 name = "sens-semantic"
-version = "0.42.1"
+version = "0.42.2"
 dependencies = [
  "sens",
 ]
 
 [[package]]
 name = "sens-wasm"
-version = "0.42.1"
+version = "0.42.2"
 dependencies = [
  "sens",
  "sens-literate",

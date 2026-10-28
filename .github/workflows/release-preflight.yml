@@ -65,6 +65,10 @@ jobs:
         shell: bash
         run: bash scripts/check-language-policy-archive.sh
 
+      - name: Узгодити версію crates, Cargo.lock, Guix та installer
+        shell: bash
+        run: bash scripts/check-release-version-alignment.sh
+
       - name: Мовна межа — JSON/SHA не callable у SENS
         shell: bash
         run: |
