@@ -36,6 +36,13 @@ for mode in verify measure; do
   printf 'minted_%s_sha256\t%s\n' "$mode" "$(sha256sum "$tmp/$mode.sens" | cut -d' ' -f1)" >> "$out/environment.tsv"
   printf 'minted_%s_bytes\t%s\n' "$mode" "$(wc -c < "$tmp/$mode.sens")" >> "$out/environment.tsv"
 done
+# Run the actual native source once outside timing and persist COMPLETE stderr.
+# The shared parity wrapper truncates stderr to 120 characters by design.
+if ! timeout 30s "$cli" "$tmp/verify.sens" > "$out/verify-stdout.txt" 2> "$out/verify-stderr.txt"; then
+  echo 'SENS_T02_NATIVE_VERIFY_RED full_native_stderr:' >&2
+  tail -c 3000 "$out/verify-stderr.txt" >&2
+  exit 2
+fi
 # Independent cross-language output parity, not SENS semantic authority.
 python3 benchmarks/language-energy-study/parity_check.py \
   --task T02-exact-rationals --run "$cli $tmp/verify.sens"
