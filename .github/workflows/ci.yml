@@ -64,6 +64,12 @@ jobs:
           fi
           echo "=== очікуване (незалежно) ==="
           python3 -c 'import sys;d=open(sys.argv[1],"rb").read();n=int(sys.argv[2]);print(f"PHYSICAL_COPY\tbytes={len(d)}\tcopies={n}\tobserved={sum(d[i % len(d)] for i in range(n))}")' "$RUNNER_TEMP/corpus.bin" 8192
+          echo "=== пік групи (cgroup v2, N4) ==="
+          if [ -r /sys/fs/cgroup/memory.peak ]; then
+            cat /sys/fs/cgroup/memory.peak || true
+          else
+            echo "CGROUP_PEAK_NOT_AVAILABLE"
+          fi
           for round in 1 2 3; do
             echo "=== повтор $round ==="
             /usr/bin/time -v "$RUNNER_TEMP/copy_c" "$RUNNER_TEMP/corpus.bin" 8192 2>&1 | grep -E "PHYSICAL_COPY|Maximum resident"
@@ -72,3 +78,28 @@ jobs:
               /usr/bin/time -v "$RUNNER_TEMP/copy_rs" "$RUNNER_TEMP/corpus.bin" 8192 2>&1 | grep -E "PHYSICAL_COPY|Maximum resident"
             fi
           done
+
+  cross-platform-parity:
+    name: Відтворення parity на другій платформі (ручний запуск)
+    if: github.event_name == 'workflow_dispatch'
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, macos-14]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Parity на ${{ matrix.os }}
+        shell: bash
+        run: |
+          set -uo pipefail
+          cd benchmarks/language-energy-study
+          head -c 65536 /dev/urandom > "$RUNNER_TEMP/corpus.bin"
+          cc -O2 -o "$RUNNER_TEMP/copy_c" copy.c
+          echo "PLATFORM=${{ matrix.os }}"
+          "$RUNNER_TEMP/copy_c" "$RUNNER_TEMP/corpus.bin" 8192
+          python3 copy.py "$RUNNER_TEMP/corpus.bin" 8192
+          python3 -c 'import sys;d=open(sys.argv[1],"rb").read();n=int(sys.argv[2]);print(f"PHYSICAL_COPY\tbytes={len(d)}\tcopies={n}\tobserved={sum(d[i % len(d)] for i in range(n))}")' "$RUNNER_TEMP/corpus.bin" 8192
