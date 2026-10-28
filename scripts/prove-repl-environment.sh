@@ -18,7 +18,11 @@ run_repl_form() {
     cat "$tmp/err" >&2
     exit 1
   fi
-  if ! grep -Fqx 'sens[укр]> НІ' "$tmp/out"; then
+  # A piped (non-TTY) REPL prints the D1 answer without an interactive
+  # prompt. A terminal may prefix the same *exact* line with 'sens[укр]>'.
+  # Neither case authorizes a partial substring or an error banner.
+  if ! grep -Fqx 'НІ' "$tmp/out" &&
+     ! grep -Fqx 'sens[укр]> НІ' "$tmp/out"; then
     printf 'REGRESSION case=%s expected=НІ actual=wrong-reply\n' "$label" >&2
     cat "$tmp/out" >&2
     exit 1
