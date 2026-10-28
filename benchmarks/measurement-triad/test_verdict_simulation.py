@@ -199,9 +199,9 @@ def test_holm_correction() -> None:
 
 def test_familywise_inference_is_fail_closed() -> None:
     """A CI crossing a single-test threshold must never become Holm p=0."""
-    print("\\n[9b] Family-wise: no invented adjusted p-values")
+    print("\n[9b] Family-wise: no invented adjusted p-values")
     docs = [build(lambda p, k: 0.6, seed=701 + i) for i in range(3)]
-    result = analyze_many(docs, draws=600, seed=7)
+    result = analyze_many(docs, draws=1200, seed=7)
     comparisons = result["comparisons"]
     check("сімейний результат INCONCLUSIVE",
           result.get("status") == "INCONCLUSIVE", str(result.get("status")))
@@ -219,7 +219,7 @@ def test_familywise_inference_is_fail_closed() -> None:
 
     failed = build(lambda p, k: 0.6, seed=708)
     failed["parity"] = {"passed": False, "oracle_id": "negative-control"}
-    bad_result = analyze_many([failed], draws=300, seed=7)
+    bad_result = analyze_many([failed], draws=1000, seed=7)
     check("невдалий паритет лишається BLOCKED",
           bad_result["comparisons"][0]["status"] == "BLOCKED")
 
