@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 import re
 import sys
 from pathlib import Path
@@ -62,9 +63,21 @@ def reject_json_constant(value: str) -> None:
     raise InvalidRecord(f"NONFINITE_JSON_CONSTANT:{value}")
 
 
+def reject_nonfinite_float(raw: str) -> float:
+    """Reject JSON exponent overflow before it can become an infinite float."""
+    value = float(raw)
+    require(math.isfinite(value), "NONFINITE_JSON_FLOAT")
+    return value
+
+
 def parse_raw_json(payload: str) -> object:
-    return json.loads(payload, object_pairs_hook=unique_json_object,
-                      parse_constant=reject_json_constant)
+    """Read JSON without discarding duplicates or admitting nonfinite values."""
+    return json.loads(
+        payload,
+        object_pairs_hook=unique_json_object,
+        parse_constant=reject_json_constant,
+        parse_float=reject_nonfinite_float,
+    )
 
 
 def validate_counter(raw: object, *, energy_range: int, max_power_w: int, label: str) -> int:
@@ -197,8 +210,10 @@ def main(argv: list[str] | None = None) -> int:
     try:
         data = parse_raw_json(args.record.read_text(encoding="utf-8"))
         result = validate(data)
-    except (InvalidRecord, OSError, UnicodeError, json.JSONDecodeError) as exc:
-        reason = str(exc)
+    except (InvalidRecord, OSError, UnicodeError, json.JSONDecodeError,
+            RecursionError) as exc:
+        reason = ("JSON_TOO_DEEP" if isinstance(exc, RecursionError)
+                  else str(exc))
         status = "ENERGY_NOT_MEASURED" if "ENERGY_NOT_MEASURED" in reason else "CALIBRATION_REJECTED"
         print(json.dumps({"status": status, "reason": reason}, ensure_ascii=False, sort_keys=True))
         return 2

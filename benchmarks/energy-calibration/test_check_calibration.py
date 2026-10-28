@@ -205,6 +205,34 @@ class CheckCalibrationTests(unittest.TestCase):
         self.assertEqual(result.returncode, 2)
         self.assertIn("NONFINITE_JSON_CONSTANT:NaN", json.loads(result.stdout)["reason"])
 
+    def test_cli_overflowing_json_exponent_in_uninspected_field_rejected(self):
+        """A JSON numeric literal can overflow Python float without NaN text."""
+        raw = json.dumps(record())
+        raw = raw.replace('"mode": "SYNTHETIC",',
+                          '"mode": "SYNTHETIC", "uninspected": 1e10000,', 1)
+        result = self.run_cli(raw)
+        self.assertEqual(result.returncode, 2)
+        self.assertIn("NONFINITE_JSON_FLOAT", json.loads(result.stdout)["reason"])
+
+    def test_cli_overflowing_json_temperature_rejected(self):
+        """An oversized exponent must be rejected before the measurement check."""
+        raw = json.dumps(record())
+        raw = raw.replace('"cpu_temperature_c": 44.0',
+                          '"cpu_temperature_c": 1e10000', 1)
+        result = self.run_cli(raw)
+        self.assertEqual(result.returncode, 2)
+        self.assertIn("NONFINITE_JSON_FLOAT", json.loads(result.stdout)["reason"])
+
+    def test_cli_extreme_json_depth_rejected_not_crashed(self):
+        """Deep untrusted JSON should return the structured rejection contract."""
+        raw = json.dumps(record())
+        raw = raw.replace('"mode": "SYNTHETIC",',
+                          '"mode": "SYNTHETIC", "uninspected": '
+                          + ('[' * 10000) + '0' + (']' * 10000) + ',', 1)
+        result = self.run_cli(raw)
+        self.assertEqual(result.returncode, 2)
+        self.assertIn("JSON_TOO_DEEP", json.loads(result.stdout)["reason"])
+
 
 if __name__ == "__main__":
     unittest.main()
