@@ -130,9 +130,6 @@ fn extract_cli_core(args: Vec<String>) -> Result<(Vec<String>, CliCore), String>
 /// Людська українська .lisp-проєкція належить SENS, а не GUI/TUI.
 /// Звичайні десяткові операнди набувають точного домену D24+ перед
 /// обчисленням. Фізичний .sens іде окремим T5M шляхом, без цього reader.
-#[cfg(test)]
-fn parse_human_lisp_file(source: &str) -> Result<Vec<sens::Expr>, sens::LanguageError> {
-    let parsed = parse(source)?;
     sens::source_projection::project_ukr_decimal_integer_literals(&parsed, source)
 }
 
