@@ -191,6 +191,37 @@ def compare(task: dict, actual: str) -> tuple[bool, str]:
     return False, f"PARITY_FAILED unknown check {kind}"
 
 
+def run_external(task: dict, command: str, timeout_s: float = 120.0) -> tuple[bool, str]:
+    """Запускає ЗОВНІШНЮ реалізацію задачі й порівнює її вихід з еталоном.
+
+    Чому так: інакше паритет лишається паперовим — маніфест без способу
+    перевірити реальний бінарник. Команда отримує вхід задачі через змінні
+    середовища (VERIFY_SIZE) і мусить надрукувати рівно один рядок — вихід.
+
+    НЕ міряє час/енергію. Лише вердикт «та сама дія чи ні».
+    """
+    import os
+    import subprocess
+
+    env = dict(os.environ)
+    env["TASK_ID"] = task["id"]
+    for key, value in VERIFY_SIZE[task["id"]].items():
+        env["TASK_" + key.upper()] = str(value)
+    try:
+        proc = subprocess.run(command, shell=True, capture_output=True, text=True,
+                              timeout=timeout_s, env=env)
+    except subprocess.TimeoutExpired:
+        return False, f"PARITY_FAILED timeout after {timeout_s}s"
+    except OSError as exc:
+        return False, f"PARITY_FAILED cannot execute: {exc}"
+    if proc.returncode != 0:
+        return False, f"PARITY_FAILED exit={proc.returncode} stderr={proc.stderr.strip()[:120]}"
+    lines = [ln for ln in proc.stdout.splitlines() if ln.strip()]
+    if len(lines) != 1:
+        return False, f"PARITY_FAILED expected exactly 1 output line, got {len(lines)}"
+    return compare(task, lines[0])
+
+
 def selftest() -> int:
     """Доводить, що паритет ЛОВИТЬ підміну, а не погоджується на все."""
     doc = load_manifest()
@@ -246,10 +277,25 @@ def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--selftest", action="store_true")
     ap.add_argument("--golden", metavar="TASK_ID")
+    ap.add_argument("--run", metavar="COMMAND",
+                    help="зовнішня реалізація; отримує TASK_* у середовищі, друкує 1 рядок")
+    ap.add_argument("--task", metavar="TASK_ID", help="з --run: яку задачу перевіряти")
     args = ap.parse_args()
     if args.golden:
         print(golden(args.golden))
         return 0
+    if args.run:
+        if not args.task:
+            print("--run потребує --task")
+            return 2
+        doc = load_manifest()
+        task = next((t for t in doc["tasks"] if t["id"] == args.task), None)
+        if task is None:
+            print(f"невідома задача {args.task}")
+            return 2
+        ok, verdict = run_external(task, args.run)
+        print(f"{task['id']}: {verdict}")
+        return 0 if ok else 1
     if args.selftest:
         return selftest()
     problems = validate_manifest(load_manifest())
