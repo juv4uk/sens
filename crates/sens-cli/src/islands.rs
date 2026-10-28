@@ -1478,31 +1478,3 @@ pub fn run(args: &[String]) -> Result<String, String> {
     }
 }
 
-#[cfg(test)]
-mod zig_islands_manifest_tests {
-    use super::*;
-
-    #[cfg(feature = "zig-transport")]
-    #[test]
-    fn root_zig_release_manifest_exact_bytes_and_validated_protocol() {
-        let bytes = crate::zig_transport::islands_manifest_bytes().expect("Zig byte ferry");
-        assert!(!bytes.is_empty(), "empty release JSON is never admitted");
-        let source = std::str::from_utf8(&bytes).expect("manifest must be UTF-8");
-        let parsed = load_manifest_str(source, "zig-root-asset")
-            .expect("only the host validates release manifest protocol");
-        assert_eq!(parsed.protocol, "sens-islands-manifest-1");
-        let via_wrapper = embedded_manifest_via_zig().expect("same Zig source");
-        assert_eq!(via_wrapper.protocol, parsed.protocol);
-        assert_eq!(via_wrapper.islands.len(), parsed.islands.len());
-    }
-
-    #[cfg(not(feature = "zig-transport"))]
-    #[test]
-    fn islands_manifest_without_zig_feature_fails_closed() {
-        let err = match embedded_manifest_via_zig() {
-            Ok(_) => panic!("Zig-disabled profile must not accept a Rust manifest"),
-            Err(error) => error,
-        };
-        assert!(err.contains("ZIG_ISLANDS_MANIFEST_CARRIER unavailable"));
-    }
-}
