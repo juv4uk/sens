@@ -37,16 +37,28 @@ run_case() {
     cat "$error" "$output" >&2
     return 1
   fi
-  # Require the final *non-empty* REPL reply following the last witness
-  # load. Earlier matching output (from a prerequisite or side effect)
-  # cannot turn a later wrong verdict into a false PASS.
-  # Non-TTY REPL has no prompt; allow the exact interactive-prefix form too.
-  if ! awk -v marker="Завантажено: $witness" -v wanted="$expected" '
-    index($0, marker) { admitted = 1; last = ""; next }
-    admitted && NF { last = $0 }
-    END { exit (admitted && (last == wanted || last == "sens[укр]> " wanted) ? 0 : 1) }
+  # Every requested :завантажити must complete. Accept exactly one D1
+  # reply after the final witness; earlier matching output is not evidence.
+  # Ignore the empty prompt at EOF but reject additional result lines.
+  local expected_loads=$(( $# + 1 ))
+  if ! awk -v marker="Завантажено: $witness" -v wanted="$expected" -v required="$expected_loads" '
+    index($0, "Завантажено: ") { loads++ }
+    index($0, marker) { witness_loads++; after_witness = 1; next }
+    after_witness {
+      line = $0
+      sub(/^[[:space:]]*/, "", line)
+      sub(/^sens\[укр\]>[[:space:]]*/, "", line)
+      sub(/[[:space:]\r]+$/, "", line)
+      if (line == "") next
+      if (line == wanted) { replies++; next }
+      unexpected++
+    }
+    END {
+      exit (loads == required && witness_loads == 1 &&
+            replies == 1 && unexpected == 0 ? 0 : 1)
+    }
   ' "$output"; then
-    printf 'SENS_REPL_CORPUS_FAIL label=%s expected=D1:%s actual=missing-or-wrong\n' "$label" "$expected" >&2
+    printf 'SENS_REPL_CORPUS_FAIL label=%s expected=single-final-D1:%s actual=missing-load-or-ambiguous-response\n' "$label" "$expected" >&2
     cat "$output" >&2
     return 1
   fi
