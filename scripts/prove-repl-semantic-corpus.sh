@@ -40,9 +40,11 @@ run_case() {
   # Require the final *non-empty* REPL reply following the last witness
   # load. Earlier matching output (from a prerequisite or side effect)
   # cannot turn a later wrong verdict into a false PASS.
-  # Non-TTY REPL has no prompt; allow the exact interactive-prefix form too.
+  # A piped REPL leaves a bare prompt after the last reply at EOF. Ignore
+  # only that presentation line; any subsequent non-prompt answer still wins.
   if ! awk -v marker="Завантажено: $witness" -v wanted="$expected" '
     index($0, marker) { admitted = 1; last = ""; next }
+    admitted && $0 ~ /^sens\[укр\]>[[:blank:]]*$/ { next }
     admitted && NF { last = $0 }
     END { exit (admitted && (last == wanted || last == "sens[укр]> " wanted) ? 0 : 1) }
   ' "$output"; then

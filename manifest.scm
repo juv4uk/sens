@@ -22,7 +22,10 @@
          "bash"
          "coreutils"
          "diffutils"
+         "findutils"
+         "gawk"
          "grep"
          "nss-certs"
          "git"
+         "sed"
          "racket")))))
