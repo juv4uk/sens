@@ -20,6 +20,7 @@ on:
           - quick
           - runner-smoke
           - platform-repl-bench
+          - language-energy-pilot
           - native
           - laws
           - remint
@@ -294,6 +295,47 @@ jobs:
           path: .ci-metrics/
           if-no-files-found: warn
           retention-days: 3
+
+
+  # Manual scientific pilot; temporary exact-head PR trial on this rollout branch.
+  # Python, C and Rust implement a matched physical copy; no SENS-language law.
+  physical-language-study:
+    name: Дослід · Python/C/Rust · час/енергія/пам'ять
+    if: ${{ (github.event_name == 'workflow_dispatch' && inputs.suite == 'language-energy-pilot') || (github.event_name == 'pull_request' && github.head_ref == 'agent/free-hosted-runners-20261028') }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - uses: dtolnay/rust-toolchain@1.99.0
+      - name: Exact-head і фізичні вимірювальні засоби
+        shell: bash
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+          command -v python3 rustc cc
+          test -x /usr/bin/time
+          python3 --version
+          rustc --version
+          cc --version | head -1
+          python3 -m unittest discover -s benchmarks/language-energy-study -p 'test_*.py' -v
+      - name: 8 незалежних блоків · парні AB/BA · parity · Rust/Python/C
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 benchmarks/language-energy-study/study.py --blocks 8 --pairs 4 --copies 300000 --seed 20261028 --out .ci-physical-study
+      - name: Сирі вимірювання і протокол (не release gate)
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: physical-language-study-${{ github.event.pull_request.head.sha || github.sha }}-${{ github.run_attempt }}
+          path: .ci-physical-study/
+          if-no-files-found: warn
+          retention-days: 7
 
   native:
     name: Ручний native Rust/Zig smoke
