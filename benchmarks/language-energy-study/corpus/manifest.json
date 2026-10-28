@@ -1,0 +1,80 @@
+{
+  "schema": "sens-energy-corpus/v1",
+  "frozen": true,
+  "note": "Кількість задач зафіксована ДО вимірювань. Не підбирати склад за рейтингом мов.",
+  "tasks": [
+    {
+      "id": "T01-symbolic-recursion",
+      "axis": "recursion + symbolic lists",
+      "functional_unit": "обчислити n-те число Фібоначчі наївною рекурсією",
+      "input": {"n": 24},
+      "contract": "точний цілий результат, без переповнення",
+      "check": "exact"
+    },
+    {
+      "id": "T02-exact-rationals",
+      "axis": "exact arithmetic / big numbers",
+      "functional_unit": "сума 1/1 + 1/2 + ... + 1/N як точний дріб",
+      "input": {"n": 400},
+      "contract": "чисельник і знаменник у скороченому вигляді",
+      "check": "exact"
+    },
+    {
+      "id": "T03-parsing-text",
+      "axis": "parsing / text",
+      "functional_unit": "розібрати N рядків 'key=value' і повернути відсортований список ключів",
+      "input": {"lines": 5000},
+      "contract": "порядок лексикографічний, дублікати збережено",
+      "check": "exact"
+    },
+    {
+      "id": "T04-sorting",
+      "axis": "sorting",
+      "functional_unit": "відсортувати N псевдовипадкових 64-бітних цілих (seed фіксований)",
+      "input": {"n": 200000, "seed": 12345},
+      "contract": "детермінований масив; перевірка побітова",
+      "check": "bitwise"
+    },
+    {
+      "id": "T05-allocation-gc",
+      "axis": "memory allocation / GC pressure",
+      "functional_unit": "створити й відкинути N короткоживучих списків по K елементів",
+      "input": {"n": 200000, "k": 16},
+      "contract": "пікова пам'ять вимірюється; вихід — контрольна сума довжин",
+      "check": "exact"
+    },
+    {
+      "id": "T06-io",
+      "axis": "I/O",
+      "functional_unit": "записати N рядків у файл і прочитати назад, порахувати байти",
+      "input": {"lines": 100000},
+      "contract": "кількість байтів і рядків збігається",
+      "check": "exact"
+    },
+    {
+      "id": "T07-matrices",
+      "axis": "matrices / floating point",
+      "functional_unit": "множення двох матриць NxN у double",
+      "input": {"n": 120},
+      "contract": "похибка відносно еталона <= 1e-9 (не побітова)",
+      "check": "tolerance",
+      "tolerance": 1e-09
+    },
+    {
+      "id": "T08-persistent-structures",
+      "axis": "persistent / immutable structures",
+      "functional_unit": "N разів додати елемент у незмінний вектор, зберігаючи всі версії",
+      "input": {"n": 20000},
+      "contract": "довжина останньої версії = N; перевірка побітова по зрізу",
+      "check": "bitwise"
+    },
+    {
+      "id": "T09-bit-operations",
+      "axis": "bit operations",
+      "functional_unit": "порахувати popcount для N псевдовипадкових 64-бітних слів",
+      "input": {"n": 1000000, "seed": 999},
+      "contract": "точне ціле, побітова перевірка",
+      "check": "bitwise"
+    }
+  ]
+}
