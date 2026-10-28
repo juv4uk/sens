@@ -320,59 +320,7 @@ fn d8_selector_uk_index() -> &'static HashMap<String, DomainIdentity> {
 
 /// Exact inverse test/support for the owner D9/D10 selector table.
 /// These are metadata-only spelling peers, not another runtime body.
-#[cfg(test)]
-pub(crate) fn selector_ukr_for_exact(identity: DomainIdentity) -> Option<&'static str> {
-    match identity {
-        DomainIdentity::D9(word) => D9_DEFINITION_BINDINGS
-            .iter()
-            .find(|row| {
-                row.bits == word.word().packed_bits() && matches!(row.bits >> 6, 0b011 | 0b100)
-            })
-            .and_then(|row| (row.names.len() == 5).then(|| row.names[1])),
-        DomainIdentity::D10(word) => D10_DEFINITION_BINDINGS
-            .iter()
-            .find(|row| row.bits == word.packed_bits() && matches!(row.bits >> 7, 0b011 | 0b100))
-            .and_then(|row| (row.names.len() == 5).then(|| row.names[1])),
-        _ => None,
-    }
-}
-
-/// Binding-only OD-005 bootstrap projection for Lisp-owned definitions.
-///
-/// This MUST NOT be used to reinterpret historical CoreDomainIdentity calls. Its only
-/// consumer is `bind_language_definition`: a definition discovered through
-/// the compatibility surface registry is bound once into an already-ratified
-/// exact D5 slot. #3062 removes this bootstrap detour.
-/// Binding-only exact D5 lookup for existing Lisp definitions.
-///
-/// The table is generated from Lisp-owned projection data and may only supply
-/// a mechanism to an identity already ratified by #3305/#3331.
-/// Перелік вже ратифікованих власником SENS-визначень D5.
-/// У цьому переліку немає нового допуску: лише наявні імена проєкції.
-pub(crate) fn d5_lisp_definition_names() -> impl Iterator<Item = &'static str> {
-    D5_DEFINITION_BINDINGS.iter().map(|row| row.name)
-}
-
-/// Перелік уже ратифікованих власником похідних SENS-визначень D6.
-/// Дзеркало D5: сам перелік не надає нового допуску, лише наявні імена
-/// проєкції для механічного зв'язування вже обчислених замикань.
-pub(crate) fn d6_lisp_definition_names() -> impl Iterator<Item = &'static str> {
-    D6_DEFINITION_BINDINGS
-        .iter()
-        .flat_map(|row| row.names.iter().copied())
-}
-
-pub(crate) fn d5_binding_identity_for_definition(name: &str) -> Option<CoreDomainIdentity> {
-    D5_DEFINITION_BINDINGS
-        .iter()
-        .find(|row| row.name == name)
-        .map(|row| CoreDomainIdentity::D5(CoreD5::from_word(Bit5::new(row.bits).unwrap())))
-}
-
-/// Resolve a ratified Ukrainian `ук` or `укр` source spelling for a D6 Lisp-owned definition.
-///
-/// In generated five-name rows, the first two spellings are the distinct Ukrainian
-/// peers; four-name rows have one deduplicated Ukrainian spelling. Sanskrit,
+ four-name rows have one deduplicated Ukrainian spelling. Sanskrit,
 /// English, and LISP names remain metadata rather than source-head authority.
 pub(crate) fn d6_uk_source_identity(name: &str) -> Option<DomainIdentity> {
     D6_DEFINITION_BINDINGS
