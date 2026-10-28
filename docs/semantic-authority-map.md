@@ -2,7 +2,9 @@
 
 Status: CURRENT ARCHITECTURE MAP. This file does not create new language semantics. It records where a current claim must be checked before prose is trusted.
 
-Contract 11.9 (2026-10-12) adds whole-domain owner ratification of D10 1024/1024 over the unchanged D1–D9 foundation. This does not admit each D10 resident individually, prove F1/F2/F3, or authorize T5 execution. See `knowledge/d10-owner-whole-domain-ratification-20261012.json` and `knowledge/d10-current-inventory.json`. D24+ numeric domains remain independently ratified under `contracts/numeric-domains-ratification.lisp`.
+**Current numeric rule (ratified 2026-10-24): mathematics starts at D12, then D24/D48/D96/D192/… (`D(12·2^n)`). D24-first passages retained below describe dated 2026-10-11/12 decisions and are historical only as to the first rung; consult `contracts/numeric-domains-ratification.lisp` and `language-contract.lisp` for current authority.**
+
+Contract 11.9 (2026-10-12) adds whole-domain owner ratification of D10 1024/1024 over the unchanged D1–D9 foundation. This does not admit each D10 resident individually, prove F1/F2/F3, or authorize physical execution. See `knowledge/d10-owner-whole-domain-ratification-20261012.json` and `knowledge/d10-current-inventory.json`. The current numeric ladder starts at D12 under `contracts/numeric-domains-ratification.lisp`.
 
 ## One rule
 
@@ -14,7 +16,7 @@ No implementation file, README paragraph, agent note, benchmark, or historical p
 
 When two sources disagree, use this order:
 
-1. **`language-contract.lisp`** — the current machine-readable contract and ratified observable invariants.
+1. **`contracts/language-contract-12.lisp`** — the current canonical Contract 12.0 and ratified observable invariants. `language-contract.lisp` is its compatibility entrypoint.
 2. **Ratified ADRs under `docs/adr/`** — scoped decision records. A historical ADR can preserve McCarthy/Lisp provenance without turning historical names into current function identities.
 3. **Executable conformance evidence** — admitted fixtures such as `tests/fixtures/conformance.lisp`, `tests/fixtures/macro-conformance.lisp`, and focused executable witnesses.
 4. **Reference implementation** — `crates/sens` (Rust). It is the current reference mechanism, not the owner of semantics merely because it is Rust.
@@ -37,9 +39,9 @@ exact binary word (digits 0/1)
 + admitted / proved law
 ```
 
-Current Core domains include D1 PredicateBit, D2 structure, D3 foundation, D4 bootstrap, owner-ratified D5/D6, D7 keyboard v2 128/128 (current, ratified 2026-10-13; sound/Text v1 126/128 under #3572 is historical provenance only), D8 256/256 under #3960, D9 512/512 under #4008, and peer numeric D24/D48/D96/D192/... ratified 2026-10-11. Equal packed numeric payloads in two domains do not imply equal semantic identity, and width alone does not grant occupancy or callability.
+Current Core domains include D1 PredicateBit, D2 structure, D3 foundation, D4 bootstrap, owner-ratified D5/D6, D7 keyboard v2 128/128 (current, ratified 2026-10-13; sound/Text v1 126/128 under #3572 is historical provenance only), D8 256/256 under #3960, D9 512/512 under #4008, and the numeric ladder D12/D24/D48/D96/D192/... (first rung ratified 2026-10-24). Equal packed numeric payloads in two domains do not imply equal semantic identity, and width alone does not grant occupancy or callability.
 
-**Уточнення власника 12.10.2026 (Contract 11.9):** D1–D10 — це точні двійкові слова, тобто записи з цифр 0 і 1 та збереженою доменною identity, **але не математичні операнди**. На них заборонено числові `+ - * /` і математичні `< > =`, автоматичне перетворення на число чи арифметичне розширення. Виконувана арифметика допускає тільки явно доменно-кваліфіковані значення D24/D48/D96/… (включно з канонічними NEG/RATIO). Самі коди операторів у D5/D6 можуть запускати ці механізми над D24+, не стаючи числами. D3 EQ і D1 логіка залишаються законами ідентичності/предикатів, а не числовим порівнянням. Історичні Number/Rational та бездоменний BinaryNumber — сумісність/дані, не підстава для математичного виконання.
+**Історичне уточнення власника 12.10.2026 (Contract 11.9; першу числову сходинку уточнено):** D1–D10 — це точні двійкові слова, тобто записи з цифр 0 і 1 та збереженою доменною identity, **але не математичні операнди**. На них заборонено числові `+ - * /` і математичні `< > =`, автоматичне перетворення на число чи арифметичне розширення. Чинний Contract 12.0 встановлює перший числовий домен D12; D24/D48/D96/… — його наступники. Самі коди операторів у D5/D6 можуть запускати допущені механізми над D12+, не стаючи числами. D3 EQ і D1 логіка залишаються окремими законами. Історичні Number/Rational та бездоменний BinaryNumber — сумісність/дані, не підстава для математичного виконання.
 
 Historical exact-eight-bit Sens8/Sid8/Function8 values remain bounded compatibility, transport, backend, and provenance projections while #2817 migrates runtime consumers. They are not the universal current ontology.
 
@@ -57,6 +59,10 @@ Current Core profiles may select mechanisms and separately ratified profile beha
 
 ## Математика є спільною для всіх ядер
 
+**Чинна межа:** математичні значення починаються з D12. Твердження нижче,
+які називають лише D24+, є датованим описом законів і механізмів після
+першої сходинки D24; вони не виключають D12.
+
 **Нормативне джерело:** `language-contract.lisp`, інваріанти
 `mathematics-all-kernels`, `number-ladder-all-kernels` і `math-parity-proof`.
 `contracts/core-profile-contract.lisp` не дозволяє профілю змінювати математичну семантику.
@@ -67,9 +73,8 @@ AOT/compiler та CPU/GPU/FPGA/GraalVM/Futhark й інші ядра** спожи
 **ті самі допущені закони SENS**. Ядро може бути ще не готовим до їх виконання;
 це `UNSUPPORTED/BLOCKED`, а не інша арифметика.
 
-- **D24, D48, D96, D192, … є справжніми числовими доменами SENS,
-  рівноправними з D1–D9** за семантичним статусом. Їхня драбина:
-  `D(24·2^n)`, `n≥0`. Вони не просто фізичні `Number24`-місткості,
+- **D12, D24, D48, D96, D192, … є справжніми числовими доменами SENS.**
+  Їхня драбина `D(12·2^n)`, `n≥0`. Вони не просто фізичні `NumberN`-місткості,
   не псевдоніми функцій та не GPU-регістри. Акти:
   `contracts/numeric-domains-ratification.lisp` і
   `knowledge/number-width-ratified.json`. Цифри `Text7` не замінюють D24.
@@ -98,7 +103,11 @@ CI на тому самому SHA. `UNKNOWN`, `UNSUPPORTED`, `BLOCKED` та `FAI
 не перетворюються на `PASS`. Відсутній механізм — відкрита робота цього
 ядра, **не** привід створювати нове математичне ядро чи гілку.
 
-## Ратифіковані числові домени D24/D48/D96/…
+## Історичне рішення 11.10: числові домени D24/D48/D96/… (першу сходинку замінено)
+
+Цей розділ зберігає рішення 11.10.2026. Його твердження про D24 як перший
+домен superseded рішенням 24.10.2026: чинна драбина починається з D12.
+Закони для самих D24 та ширших доменів лишаються чинними.
 
 Пряме рішення власника від 11.10.2026: **D24, D48, D96, D192, … — повноцінні
 домени SENS, рівноправні D1–D9**, а не просто ступені місткості
@@ -183,8 +192,8 @@ n бітів отримуємо рівно `2^n` різних натуральн
   старого `BinaryNumber`.
 
 **Сувора межа:** цей фреймінг **не переозначує канонічний
-`.sens` / T5**. `ternary_transport.rs` і чинний фізичний
-рідер розбирають лише слова D1–D9; канонічні T5-програми
+`.sens` / T5M**. `ternary_transport.rs` і чинний фізичний
+рідер розбирають лише слова D1–D9; канонічні T5M-програми
 не отримали нового бінарного роздільника, числового resident
 чи узгодженого синтаксису NEG/RATIO. Формат Expr/FASL та
 переведення композиції в source через макроси також потребують
@@ -292,7 +301,7 @@ opcode для композицій NEG/RATIO.
   `Value::BinaryNumber` уже зберігає явний `numeric_domain_width` для
   D24/D48/... у своїй ідентичності, а FASL/wire та Core binary frame
   підтримують їхній точний round-trip. Це **не** означає завершення
-  фізичного T5 reader чи **фізичного кодування** композицій
+  фізичного T5M reader чи **фізичного кодування** композицій
   NEG/RATIO; їхні виконувані Core Value вже працюють.
 - Математичні закони зміни знака та скороченого дробу вже
   **виконуються Core** як канонічні композиції існуючих D24+
