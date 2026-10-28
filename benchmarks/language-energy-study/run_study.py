@@ -48,7 +48,7 @@ LANGUAGES = {
     # закарбований .sens, а не параметр у середовищі.
     "sens": {
         "cmd": lambda task_id: f"{os.environ.get('SENS_BIN', './target/release/sens')} "
-                               f"/tmp/sens-out/{task_id.split('-')[0].lower()}_measure.sens",
+                               f"/tmp/sens-out/{SENS_MEASURE_FILES[task_id]}",
     },
     "javascript": {
         "kind": "jit",
