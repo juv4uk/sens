@@ -15,8 +15,8 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Checker self-test — Python excluded
-        run: echo 'PYTHON_TESTS=EXCLUDED_BY_LANGUAGE_POLICY native_equivalent=NOT_VERIFIED'
+      - name: Мови дозволені; семантика SENS лише у SENS
+        run: echo 'LANGUAGES=ALL_ALLOWED language_laws=NOT_EXECUTED_BY_THIS_STEP'
 
       - name: Binary-only authority ratchet
         shell: bash
@@ -29,7 +29,7 @@ jobs:
           else
             base="$(git rev-parse HEAD^)"
           fi
-          echo 'PYTHON_VALIDATOR=EXCLUDED_BY_LANGUAGE_POLICY native_equivalent=NOT_VERIFIED'
+          echo 'PYTHON_VALIDATOR=ALLOWED_BY_OWNER_20261028 validator_not_run=NOT_VERIFIED'
 
       - uses: dtolnay/rust-toolchain@stable
       - name: Execute real binary T5 programs

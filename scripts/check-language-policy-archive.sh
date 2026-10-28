@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Перевірка реєстру ARCHIVE та заборона нових сторонніх test/benchmark runners.
+# Перевірка історичного реєстру ARCHIVE; всі мови дозволені з 2026-10-28.
 set -euo pipefail
 root="$(git rev-parse --show-toplevel)"
 while (($#)); do
@@ -45,21 +45,10 @@ contains_digest_generator() {
   fi
 }
 
-contains_foreign_semantic_runner() {
-  local candidate="$1"
-  # Канонічні носії не запускають зовнішні семантичні оракули.
-  # Перевіряємо лише виконувальні рядки, не коментарі з описом політики.
-  sed '/^[[:space:]]*#/d; s/[[:space:]]#.*$//' "$candidate" |
-    grep -Eiq '^[[:space:]]*(env[[:space:]]+)?(python3?|pytest|jq)([[:space:]]|$)|[|;&][[:space:]]*(python3?|pytest|jq)([[:space:]]|$)|\$\((python3?|pytest|jq)([[:space:]]|$)'
-}
 for path in "${digest_free_paths[@]}"; do
   [[ -f "$path" ]] || continue
   if contains_digest_generator "$path"; then
     echo "LANGUAGE_POLICY_ARCHIVE=FAIL digest_creation_forbidden path=$path" >&2
-    exit 1
-  fi
-  if contains_foreign_semantic_runner "$path"; then
-    echo "LANGUAGE_POLICY_ARCHIVE=FAIL foreign_semantic_runner_forbidden path=$path" >&2
     exit 1
   fi
 done
@@ -117,51 +106,8 @@ while IFS= read -r line || [[ -n "$line" ]]; do
   rows=$((rows + 1))
 done < "$registry"
 
-is_testbench_location() {
-  case "$1" in
-    tests/*|benchmarks/*|packaging/tests/*|*/tests/*|*/benches/*|*/benchmarks/*|scripts/test_*.py|.github/scripts/test_*.py) return 0 ;;
-    *) return 1 ;;
-  esac
-}
-is_foreign_testbench() {
-  is_testbench_location "$1" || return 1
-  case "$1" in
-    *.py|*.pyi|*.js|*.mjs|*.cjs|*.ts|*.tsx|*.jsx|*.rb|*.go|*.php|*.rkt|*.lua|*.swift|*.java|*.kt|*.scala|*.pl|*.jl|*.sh|*.f90|*.clp|*.sbcl|*.fs|*.v) return 0 ;;
-    *) return 1 ;;
-  esac
-}
-
-while IFS= read -r path; do
-  [[ -z "$path" ]] && continue
-  if is_foreign_testbench "$path" && [[ -z "${archived[$path]+x}" ]]; then
-    echo "LANGUAGE_POLICY_ARCHIVE=FAIL unregistered_exclusion=$path"
-    bad=1
-  fi
-done <<<"$(git ls-files | grep -E '\.(py|pyi|js|mjs|cjs|ts|tsx|jsx|rb|go|php|rkt|lua|swift|java|kt|scala|pl|jl|sh|f90|clp|sbcl|fs|v)$' || true)"
-
-for path in "${!archived[@]}"; do
-  if ! is_foreign_testbench "$path"; then
-    echo "LANGUAGE_POLICY_ARCHIVE=FAIL row_not_excluded_artifact=$path"
-    bad=1
-  fi
-done
-
-added=()
-if git rev-parse --verify HEAD^ >/dev/null 2>&1; then
-  while IFS= read -r path; do
-    [[ -n "$path" ]] && added+=("$path")
-  done <<<"$(git diff --diff-filter=A --name-only HEAD^ HEAD || true)"
-fi
-for path in "${added[@]:-}"; do
-  if is_testbench_location "$path"; then
-    # Never admit a newly added foreign-language test or benchmark runner.
-    if is_foreign_testbench "$path"; then
-      echo "LANGUAGE_POLICY_ARCHIVE=FAIL NEW_FOREIGN_TEST_ARCHIVE_FORBIDDEN path=$path"
-      bad=1
-    fi
-  fi
-done
-
+# 2026-10-28: archive is a historical registry, not a denylist for languages.
+# Keep evidence/row consistency, but allow new research code in any language.
 echo "ARCHIVE (поза мовним коридором): $rows артефактів — $registry"
 if (( bad != 0 )); then
   echo "LANGUAGE_POLICY_ARCHIVE=FAIL rows=$rows"
