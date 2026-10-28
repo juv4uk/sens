@@ -217,10 +217,54 @@ jobs:
           path: ${{ env.MSI_ASSET_PATH }}
           if-no-files-found: error
 
+  build-web:
+    name: sens-cli · Portable Web HTML
+    needs: [test, release-preflight]
+    if: ${{ needs.test.result == 'success' && needs.release-preflight.result == 'success' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+      - uses: ./.github/actions/install-zig
+      - uses: dtolnay/rust-toolchain@1.99.0
+        with:
+          targets: wasm32-unknown-unknown
+      - uses: Swatinem/rust-cache@49a0bdc70d2e1b713ca9e2869b211fcce03d3c1c # v2
+        with:
+          key: wasm32-web
+
+      - name: Install pinned wasm-pack
+        uses: jetli/wasm-pack-action@0d096b08b4e5a7de8c28de67e11e945404e9eefa # v0.4.0
+        with:
+          version: 'v0.15.0'
+
+      - name: Build SENS WASM bindings
+        run: wasm-pack build crates/sens-wasm --target web --out-dir ../../public/wasm --release
+
+      - name: Bundle standalone web REPL and installer
+        shell: bash
+        run: |
+          set -euo pipefail
+          node scripts/make-portable-web.mjs public/my-lisp-cli-web.html sens-cli-web.html
+          cp sens-cli-web.html my-lisp-cli-web.html
+          cp packaging/install.sh install.sh
+          test -s sens-cli-web.html
+          test -s install.sh
+          cmp -s sens-cli-web.html my-lisp-cli-web.html
+
+      - name: Stage web assets without digest sidecars
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: release-web
+          path: |
+            sens-cli-web.html
+            my-lisp-cli-web.html
+            install.sh
+          if-no-files-found: error
+
   release-publish:
     name: Публікація лише після успіху всіх перевірок і збірок
-    needs: [test, release-preflight, build-cli, build-msi]
-    if: ${{ needs.test.result == 'success' && needs.release-preflight.result == 'success' && needs.build-cli.result == 'success' && needs.build-msi.result == 'success' }}
+    needs: [test, release-preflight, build-cli, build-msi, build-web]
+    if: ${{ needs.test.result == 'success' && needs.release-preflight.result == 'success' && needs.build-cli.result == 'success' && needs.build-msi.result == 'success' && needs.build-web.result == 'success' }}
     uses: ./.github/workflows/release-publish.yml
     secrets: inherit
     permissions:
