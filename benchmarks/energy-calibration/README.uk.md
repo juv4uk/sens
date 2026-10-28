@@ -51,7 +51,7 @@
 Повний **вигаданий позитивний** формат із двома сесіями генерується функцією `record()` у `test_check_calibration.py`; **НЕ** публікувати його як спостереження. Справжній запис без доступу до датчика з `sensor_access_confirmed=false` повертає тільки `ENERGY_NOT_MEASURED`, exit 2.
 
 ```bash
-python3 -m unittest -v benchmarks/energy-calibration/test_check_calibration.py
+(cd benchmarks/energy-calibration && python3 -m unittest -v test_check_calibration.py)
 python3 benchmarks/energy-calibration/check_calibration.py --help
 python3 benchmarks/energy-calibration/check_calibration.py /path/to/calibration-raw.json
 ```
