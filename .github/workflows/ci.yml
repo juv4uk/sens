@@ -113,6 +113,8 @@ jobs:
       - uses: actions/checkout@v4
         with:
           persist-credentials: false
+      # build.rs вимагає пінований Zig — на раннері його немає без цього кроку.
+      - uses: ./.github/actions/install-zig
       - name: Зібрати інтерпретатор SENS
         shell: bash
         run: |
