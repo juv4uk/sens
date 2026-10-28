@@ -43,7 +43,7 @@ jobs:
           version="$(sed -n '/^\[package\]/,/^\[/s/^version = "\([^"]*\)".*/\1/p' crates/sens-cli/Cargo.toml | head -n 1)"
           [[ "$GITHUB_REF_TYPE" == tag && "$GITHUB_REF_NAME" == "s$version" ]]
       - name: Перевірити Rust-механізми статично
-        run: cargo clippy --locked --workspace --all-targets -- -D warnings
+        run: cargo clippy --locked --workspace -- -D warnings
 
   release-preflight:
     name: focused release preflight

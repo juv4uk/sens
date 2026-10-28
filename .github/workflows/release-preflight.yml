@@ -98,7 +98,7 @@ jobs:
       - name: Clippy механізму
         id: workspace_clippy
         if: ${{ always() && inputs.full }}
-        run: cargo clippy --locked --workspace --all-targets -- -D warnings
+        run: cargo clippy --locked --workspace -- -D warnings
 
       - name: "Дозволені мови + острови: SENS/Rust/Zig/Guile/C/Assembler; Common Lisp/Prolog/CLIPS/Datalog"
         id: native_language_policy

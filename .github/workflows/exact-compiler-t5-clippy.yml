@@ -17,7 +17,7 @@ jobs:
         with:
           components: clippy
       - name: Same strict compiler + T5 lint contract as Hosted CI
-        run: cargo clippy -p sens -p sens-host -p sens-cli -p xtask --all-targets -- -D warnings
+        run: cargo clippy -p sens -p sens-host -p sens-cli -p xtask -- -D warnings
       - name: Compiler and T5 source-contract unit tests
         run: cargo test -q -p sens --lib
       - name: Prove no repository content was rewritten

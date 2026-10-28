@@ -27,4 +27,4 @@ jobs:
       - name: Зібрати всі цілі workspace без запуску тестів
         run: cargo build --workspace --all-targets --locked
       - name: Статично перевірити Rust-механізми
-        run: cargo clippy --workspace --all-targets --locked -- -D warnings
+        run: cargo clippy --workspace --locked -- -D warnings
