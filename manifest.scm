@@ -8,9 +8,14 @@
    (string-append (dirname (current-filename))
                   "/packaging/guix/rust-toolchain.scm")))
 
+(define sens-sccache
+  (primitive-load
+   (string-append (dirname (current-filename))
+                  "/packaging/guix/sccache.scm")))
+
 (concatenate-manifests
  (list
-  (packages->manifest (list sens-rust-toolchain))
+  (packages->manifest (list sens-rust-toolchain sens-sccache))
   (specifications->manifest
    (quote ("zig@0.16.0"
          "gcc-toolchain"

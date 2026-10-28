@@ -32,10 +32,11 @@ Rust/Cargo закріплено на **1.99.0**, Zig — на **0.16.0**. Rust �
 ./guix/run dev -- zig version
 ```
 
-Перевірка ядра без мережі та без зовнішнього кеш-сервера компіляції:
-`./guix/run dev -- env RUSTC_WRAPPER= cargo check --offline --locked -p sens --lib --jobs 2`.
-Порожній `RUSTC_WRAPPER` вимикає лише wrapper із користувацького Cargo config;
-версію компілятора й залежності визначає цей Guix-профіль.
+Перевірка ядра з локальним дисковим кешем компіляції:
+`./guix/run dev -- cargo check --offline --locked -p sens --lib --jobs 2`.
+Pinned manifest містить статичний sccache 0.18.0; він використовує локальний
+кеш і не вмикає віддалене чи розподілене виконання. `guix/run` передає Cargo
+саме цей wrapper замість абсолютного шляху із користувацького Cargo config.
 
 ## Ролі
 
