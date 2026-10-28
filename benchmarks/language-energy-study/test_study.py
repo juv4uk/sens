@@ -109,11 +109,11 @@ class PhysicalStudyTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as folder:
             out = Path(folder)
             with patch.object(study.subprocess, "run", side_effect=fake_run(good)):
-                valid = study.measure(["/fake/command"], 4, out, None, good)
+                valid = study.measure(["/fake/command"], 4, out, None, "time", good)
             self.assertGreater(valid["wall_time_ns"], 0)
             self.assertIsNone(valid["energy_uj"])
             with patch.object(study.subprocess, "run", side_effect=fake_run(good + "\n" + rapl)):
-                metered = study.measure(["/fake/command"], 4, out, Path("/fake/rapl"), good)
+                metered = study.measure(["/fake/command"], 4, out, Path("/fake/rapl"), "time", good)
             self.assertGreater(metered["wall_time_ns"], 0)
             self.assertEqual(metered["rapl_child_elapsed_ns"], 4000)
             self.assertEqual(metered["energy_uj"], 1500)
@@ -132,7 +132,7 @@ class PhysicalStudyTests(unittest.TestCase):
             ):
                 with patch.object(study.subprocess, "run", side_effect=fake_run(output, code, rss)):
                     with self.assertRaises(RuntimeError):
-                        study.measure(["/fake/command"], 4, out, meter, good)
+                        study.measure(["/fake/command"], 4, out, meter, "time", good)
 
     def test_total_traffic_budget_includes_every_process(self):
         """Resource bound must include 4*blocks*pairs measured + 3 warmups."""
