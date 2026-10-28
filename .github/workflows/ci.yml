@@ -60,6 +60,18 @@ jobs:
         run: bash scripts/prove-repl-semantic-corpus.sh "$PWD/target/debug/sens"
       - name: Перевірити D8/D10 огляд середовища через SENS REPL
         run: bash scripts/prove-repl-environment.sh "$PWD/target/debug/sens"
+      # ТИМЧАСОВИЙ PR-only вимір T02 на реальному раннері; видалити з diff перед merge.
+      - name: PR-only науковий вимір SENS T02 exact rationals
+        if: always() && github.event_name == 'pull_request' && github.head_ref == 'agent/science-sens-t02-physical-20261028'
+        shell: bash
+        run: bash benchmarks/language-energy-study/corpus/sens/measure_t02.sh "$PWD/target/debug/sens" "$RUNNER_TEMP/t02-sens-observation"
+      - name: Артефакт T02 (включно з RED)
+        if: always() && github.event_name == 'pull_request' && github.head_ref == 'agent/science-sens-t02-physical-20261028'
+        uses: actions/upload-artifact@v4
+        with:
+          name: sens-t02-exploratory
+          path: ${{ runner.temp }}/t02-sens-observation/
+          if-no-files-found: warn
 
   research-tools:
     name: Інструменти досліду · синтетичні перевірки
