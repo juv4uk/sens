@@ -13,6 +13,7 @@
 |---|---|---|---|
 | Rust · механізм | 512 копій незмінних байтів `lib/core4.lisp` у кожній пробі; точність `dest == source` за межами таймера | `benchmarks/mechanism/rust-byte-copy-bench.rs` | 1 прогрів + 11 проб, p50/p90/min/max наносекунд на batch |
 | Rust · механізм | Packed/decoded exact-width слова без приписування їм функцій SENS | `crates/sens/examples/byte_pack_bench.rs` | 9 проб, фізичні байти, біти, raw p50/p90 ns/word |
+| Rust · енергія механізму | Пакет справжніх D3 `owner_residency()` lookup; **без** перевірки мовної істини | `benchmarks/measurement-triad/src/bin/rapl_mechanism.rs` | Linux RAPL package, сирі µJ, тривалість, `J/lookup`; BLOCKED без лічильника |
 | Zig · коридор | Той самий файл, 512 фізичних копій; порівняння байтів поза таймером | `benchmarks/mechanism/zig-byte-copy-bench.zig` | 1 прогрів + 11 проб, p50/p90/min/max наносекунд на batch |
 | Zig · коридор | Справжній T5M encode/decode, фізична byte parity, від'ємні кадри | `bench_t5m.zig`, `bench_t5m_test.zig`, `research/zig-codecs/tests.zig` | 11 адаптивних проб T5M, ns/op, перевірки кодеків |
 | SENS · логіка | Нативний SENS закон структури та хибний мутант через `--t5m-files`; два реальні D1-вердикти | `tests/semantic/бенчмарк-структура-{law,mutant}.lisp`, `scripts/prove-бенчмарк-структура.sh` | 11 виконань, p50/p90 мкс повного процесу, позитив/негатив |
@@ -29,6 +30,12 @@ rustc -O --edition=2021 benchmarks/mechanism/rust-byte-copy-bench.rs -o /tmp/sen
 # Rust: exact-width pack/decode, а не таблиця SENS-логіки
 cargo run --locked --release -p sens --example byte_pack_bench -- series mixed 1024 9
 
+# Rust: джоулі механізму через Linux powercap/RAPL; без сенсового оракула.
+# Потрібен фізичний Linux-хост із package RAPL, інакше чесний BLOCKED.
+export SENS_ROOT="$PWD"
+( cd /tmp && cargo run --release \
+    --manifest-path "$SENS_ROOT/benchmarks/measurement-triad/Cargo.toml" \
+    --bin rapl_mechanism -- 1000000 7 )
 # Zig 0.16: фізичний коридор, тести БАЙТІВ, не функцій
 zig test -O ReleaseFast -lc benchmarks/mechanism/zig-byte-copy-bench.zig
 zig test -lc research/zig-codecs/tests.zig
