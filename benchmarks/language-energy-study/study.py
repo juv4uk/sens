@@ -58,7 +58,12 @@ def parse_rapl_measurement(lines: list[str]) -> dict[str, object]:
     """Validate the physical package meter contract, never estimate missing joules."""
     if len(lines) != 1 or not lines[0].startswith("RUST_RAPL_PACKAGE "):
         raise RuntimeError("RAPL observation ambiguous/missing")
-    fields = dict(KV.findall(lines[0]))
+    fields = {}
+    for token in lines[0].split()[1:]:
+        match = KV.fullmatch(token)
+        if not match or match[1] in fields:
+            raise RuntimeError("RAPL observation invalid or duplicate field")
+        fields[match[1]] = match[2]
     required = ("energy_uj", "elapsed_ns", "scope", "counter", "wrapped_once", "status")
     if any(not fields.get(name) for name in required):
         raise RuntimeError("RAPL observation missing required physical fields")
@@ -103,9 +108,15 @@ def measure(command: list[str], copies: int, out: Path, meter: Path | None,
         wall_host_ns = time.perf_counter_ns() - begin
         if run.returncode:
             raise RuntimeError(f"execution failed: {run.returncode}: {run.stderr[-600:]}")
-        matches = [line for line in run.stdout.splitlines() if OBS.fullmatch(line)]
-        if matches != [expected]:
-            raise RuntimeError(f"PHYSICAL_PARITY_MISMATCH: expected {expected!r} received {matches!r}")
+        stdout_lines = run.stdout.splitlines()
+        # Do not silently ignore extra output from the benchmark or meter:
+        # a hidden failure/second record invalidates the observed workload.
+        rapl_lines = [x for x in stdout_lines if x.startswith("RUST_RAPL_PACKAGE ")]
+        allowed_lines = [expected, *rapl_lines] if meter else [expected]
+        if (stdout_lines != allowed_lines or
+                (meter and len(rapl_lines) != 1) or
+                not OBS.fullmatch(stdout_lines[0] if stdout_lines else "")):
+            raise RuntimeError(f"PHYSICAL_PARITY_MISMATCH: expected {allowed_lines!r} received {stdout_lines!r}")
         match = USAGE.fullmatch(usage.read_text().strip())
         if not match or int(match[1]) <= 0:
             raise RuntimeError("missing physical peak RSS / user / system metrics")
@@ -113,8 +124,7 @@ def measure(command: list[str], copies: int, out: Path, meter: Path | None,
                   "user_s": float(match[2]), "sys_s": float(match[3]),
                   "energy_uj": None}
         if meter:
-            lines = [x for x in run.stdout.splitlines() if x.startswith("RUST_RAPL_PACKAGE ")]
-            result.update(parse_rapl_measurement(lines))
+            result.update(parse_rapl_measurement(rapl_lines))
             result["host_wrapper_wall_ns"] = wall_host_ns
         return result
     finally:
