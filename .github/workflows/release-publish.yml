@@ -114,7 +114,6 @@ jobs:
             "sens-cli_${version}_windows_x64.exe" \
             "sens-cli_${version}_windows_x64.msi" \
             "sens-cli_${version}_macos_x64" \
-            "sens-cli_${version}_macos_arm64" \
             "sens-cli_${version}_macos_arm64" | LC_ALL=C sort > "$expected"
           find dist -mindepth 1 -maxdepth 1 -printf '%f\n' | LC_ALL=C sort > "$actual"
           cmp -- "$expected" "$actual"
