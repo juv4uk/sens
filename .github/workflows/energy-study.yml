@@ -123,3 +123,25 @@ jobs:
           python3 benchmarks/language-energy-study/parity_check.py \
             --task T01-symbolic-recursion \
             --run "$PWD/target/release/sens /tmp/sens-out/t01_fib.sens"
+
+      - name: Temporary T01 n24 process-cold measurement (research branch only)
+        shell: bash
+        env:
+          SENS_T01_MEASURE_BLOB: ecaead4c0f7ffa881b936396bdececbd4f5b2153
+        run: |
+          set -euo pipefail
+          git fetch --no-tags --depth=1 origin 6537412e4b3dc33ff86d5f2d36432901c5cd21e0
+          git show FETCH_HEAD:benchmarks/language-energy-study/corpus/sens/t01_fib_measure.lisp > "$RUNNER_TEMP/t01_fib_measure.lisp"
+          export SENS_T01_MEASURE_SOURCE="$RUNNER_TEMP/t01_fib_measure.lisp"
+          bash benchmarks/language-energy-study/corpus/sens/measure_t01.sh "$PWD/target/release/sens" "$RUNNER_TEMP/sens-t01-cold"
+          cat "$RUNNER_TEMP/sens-t01-cold/environment.tsv"
+          cat "$RUNNER_TEMP/sens-t01-cold/samples.tsv"
+
+      - name: Upload temporary raw T01 n24 measurements
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sens-t01-cold-raw
+          path: ${{ runner.temp }}/sens-t01-cold/
+          if-no-files-found: warn
+          retention-days: 3
