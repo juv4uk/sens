@@ -151,5 +151,86 @@ def main() -> int:
     return 0
 
 
+
+
+# ---------------------------------------------------------------------------
+# Доменні таблиці: lib/domains/d<N>.lisp
+#
+# ВАЖЛИВО: це НЕ визначення функцій. Це таблиці координат:
+#   (domain-table-1
+#     (0 (ук ні) (укр ні) (san na) (en no) (LISP NIL) (sym ()))
+#     (1 (ук так) (укр так) (san ām) (en yes) (LISP T) (sym ())))
+# Тому «домен функції» — не властивість функції, а властивість координати.
+# Охоронець це розрізняє й не змішує.
+# ---------------------------------------------------------------------------
+
+PROJECTIONS = ["ук", "укр", "san", "en", "LISP", "sym"]
+
+
+def index_domains(root: pathlib.Path) -> dict:
+    """Порахувати координати й перевірити шість проєкцій у кожній таблиці."""
+    result = {}
+    for path in sorted((root / "lib" / "domains").glob("d*.lisp")):
+        match = re.search(r"d(\d+)\.lisp$", path.name)
+        if not match:
+            continue
+        domain = "д" + match.group(1)
+        text = path.read_text(encoding="utf-8")
+        # Кожен рядок координати: ( <число> (ук ...) (укр ...) ... )
+        coords = re.findall(r"^\s*\((\d+)\s+\(ук ", text, re.MULTILINE)
+        missing = [p for p in PROJECTIONS if f"({p} " not in text]
+        result[domain] = {
+            "файл": str(path.relative_to(root)),
+            "координат": len(coords),
+            "перша": coords[0] if coords else None,
+            "остання": coords[-1] if coords else None,
+            "проєкцій": len(PROJECTIONS) - len(missing),
+            "відсутні": missing,
+        }
+    return result
+
+
+def write_domains(root: pathlib.Path) -> int:
+    domains = index_domains(root)
+    if not domains:
+        print("доменних таблиць не знайдено", file=sys.stderr)
+        return 1
+    out = [
+        "# Драбина доменів — таблиці координат",
+        "",
+        "Домен тут — **координата**, а не простір імен функцій.",
+        "Кожен рядок таблиці має шість проєкцій: ук · укр · san · en · LISP · sym.",
+        "",
+        "| домен | координат | проєкцій | перша | остання | файл |",
+        "|---|---|---|---|---|---|",
+    ]
+    total = 0
+    for domain, entry in sorted(domains.items(), key=lambda kv: int(kv[0][1:])):
+        total += entry["координат"]
+        out.append(
+            f"| {domain} | {entry['координат']} | {entry['проєкцій']}/6 | "
+            f"{entry['перша']} | {entry['остання']} | {entry['файл']} |"
+        )
+    out += [
+        "",
+        f"**Разом координат: {total}**",
+        "",
+        "Якщо в рядку проєкцій менше шести — таблиця неповна, і це видно тут,",
+        "а не виявляється під час виконання.",
+    ]
+    (root / "knowledge" / "drabyna-domains.md").write_text(
+        "\n".join(out) + "\n", encoding="utf-8"
+    )
+    for domain, entry in sorted(domains.items(), key=lambda kv: int(kv[0][1:])):
+        print(
+            f"{domain}: {entry['координат']} координат, "
+            f"{entry['проєкцій']}/6 проєкцій"
+            + (f", ВІДСУТНІ {entry['відсутні']}" if entry["відсутні"] else "")
+        )
+    return 0
+
+
 if __name__ == "__main__":
+    if len(sys.argv) > 1 and sys.argv[1] == "--domains":
+        raise SystemExit(write_domains(pathlib.Path(".")))
     raise SystemExit(main())
