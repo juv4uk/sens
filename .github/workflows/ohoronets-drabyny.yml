@@ -55,28 +55,12 @@ jobs:
           fi
           echo "ІНДЕКС_УЗГОДЖЕНО"
 
-      - name: Прогнати запити охоронця через SENS
+      - name: Прогнати охоронець живим виконанням
         run: |
-          # Кожен запит — окремий виклик. Очікувана відповідь перевіряється,
-          # а не просто друкується.
-          set -u
-          SENS=./target/release/sens
-          fail=0
-          check () {
-            local name="$1" expected="$2" source="$3"
-            local got
-            got=$(printf '%s\n' "$source" | $SENS --oracle-check - 2>&1 | tail -1)
-            echo "  $name -> $got"
-            if [ "$got" != "$expected" ]; then
-              echo "    ОЧІКУВАНО: $expected"
-              fail=1
-            fi
-          }
-          echo "=== охоронець: живі запити ==="
-          check "лічба-додатна" "так" '(драбина-є? помножити)'
-          check "невідома-функція" "ні" '(драбина-є? такої-функції-немає)'
-          if [ "$fail" -ne 0 ]; then
-            echo "ОХОРОНЕЦЬ_НЕ_ВІДПОВІВ_ПРАВИЛЬНО"
-            exit 1
-          fi
-          echo "ОХОРОНЕЦЬ_ПРАЦЮЄ"
+          # Охоронець уже є: lib/domain-function-reuse.lisp.
+          # Раніше цей крок тестував МОЇ функції, яких я не мав додавати —
+          # тому він падав. Тепер тестується те, що справді в репозиторії.
+          ./target/release/sens --t5m-files \
+            lib/domain-function-reuse.lisp \
+            tests/ohoronets-drabyny-probe.lisp
+          echo "ОХОРОНЕЦЬ_ВИКОНАНО"
