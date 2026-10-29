@@ -19,6 +19,10 @@ core::arch::global_asm!(include_str!("machine_math_skylake.S"), options(att_synt
 #[cfg(all(target_arch = "x86_64", target_os = "linux"))]
 unsafe extern "C" {
     fn sens_dot_avx2(a: *const f64, b: *const f64, n: usize) -> f64;
+    // sens_dot_scalar експортований у machine_math_skylake.S (.globl), але
+    // досі не був оголошений тут — тому скалярний шлях ішов чистим Rust-фолдом,
+    // а написаний вручну SSE2-асемблер просто не виконувався.
+    fn sens_dot_scalar(a: *const f64, b: *const f64, n: usize) -> f64;
 }
 
 #[cfg(all(target_arch = "x86_64", target_os = "linux"))]
@@ -409,8 +413,23 @@ pub fn backend() -> Backend {
     Backend::Scalar
 }
 
+/// Скалярний добуток. На x86_64/linux іде через написаний вручну SSE2-асемблер
+/// `sens_dot_scalar` — саме для нього він і був написаний. Rust-фолд лишається
+/// запасним шляхом для інших цілей.
 fn scalar_dot(a: &[f64], b: &[f64]) -> f64 {
-    a.iter().zip(b.iter()).fold(0.0, |sum, (x, y)| sum + x * y)
+    #[cfg(all(target_arch = "x86_64", target_os = "linux"))]
+    {
+        if a.is_empty() {
+            return 0.0;
+        }
+        // SAFETY: довжини рівні, елементи доступні для читання,
+        // ASM зберігає x86-64 System V ABI.
+        return unsafe { sens_dot_scalar(a.as_ptr(), b.as_ptr(), a.len()) };
+    }
+    #[cfg(not(all(target_arch = "x86_64", target_os = "linux")))]
+    {
+        a.iter().zip(b.iter()).fold(0.0, |sum, (x, y)| sum + x * y)
+    }
 }
 
 fn dot_same_length(a: &[f64], b: &[f64]) -> f64 {
