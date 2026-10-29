@@ -1,33 +1,33 @@
 # Драбина доменів — довідник охоронця
 
-Визначень: **5110** у **412** файлах.
+Визначень: **5115** у **413** файлах.
 
 ## Скільки в кожному домені
 
 | домен | визначень |
 |---|---|
-| загальна | 5108 |
+| загальна | 5113 |
 | д11 | 2 |
 
 ## Найуживаніші — на чому стоїть мова
 
 | функція | домен | уживань | де |
 |---|---|---|---|
-| `функція` | загальна | 5049 | lib/surface/function-signatures.lisp:6 |
+| `функція` | загальна | 5056 | lib/surface/function-signatures.lisp:6 |
 | `так` | загальна | 4123 | lib/repl-core.lisp:37 |
 | `пара` | загальна | 2396 | lib/core4-parts/core4-d8-d9.lisp:1847 |
 | `хибне?` | загальна | 1893 | lib/core.lisp:20 |
-| `порожній?` | загальна | 1878 | lib/core.lisp:12 |
+| `порожній?` | загальна | 1884 | lib/core.lisp:12 |
 | `значення` | загальна | 1725 | lib/core4-parts/core4-codec.lisp:387 |
-| `друге` | загальна | 1046 | lib/core.lisp:29 |
+| `друге` | загальна | 1048 | lib/core.lisp:29 |
 | `ні` | загальна | 956 | lib/repl-core.lisp:38 |
 | `число-один` | загальна | 763 | lib/core4-parts/core4-language.lisp:12 |
 | `та` | загальна | 638 | lib/core.lisp:123 |
 | `число-нуль` | загальна | 591 | lib/core4-parts/core4-language.lisp:11 |
 | `однакові?` | загальна | 426 | lib/core4-parts/core4-language.lisp:634 |
 | `результат` | загальна | 309 | lib/rotate-four-left.lisp:14 |
+| `або` | загальна | 299 | lib/core.lisp:125 |
 | `назва` | загальна | 299 | lib/macro.lisp:8 |
-| `або` | загальна | 298 | lib/core.lisp:125 |
 | `третє` | загальна | 296 | lib/core.lisp:79 |
 | `довжина` | загальна | 246 | lib/core4-parts/core4-language.lisp:276 |
 | `решта-решти` | загальна | 206 | lib/core.lisp:39 |
@@ -42,10 +42,10 @@
 | `число-сім` | загальна | 99 | lib/core4-parts/core4-language.lisp:299 |
 | `машина-число-шість` | загальна | 92 | lib/machine/encoding/x86-64.lisp:4 |
 | `нуль?` | загальна | 87 | lib/core4-parts/core4-language.lisp:357 |
+| `ім'я` | загальна | 87 | lib/surface/uk-docs.lisp:22 |
 | `машина-молодші-три-біти` | загальна | 82 | lib/machine/encoding/x86-64.lisp:324 |
 | `модуль` | загальна | 79 | lib/core4-parts/core4-d8-d9.lisp:645 |
 | `машина-старший-біт` | загальна | 76 | lib/machine/encoding/x86-64.lisp:345 |
-| `ім'я` | загальна | 74 | lib/surface/uk-docs.lisp:22 |
 | `тотожність` | загальна | 63 | lib/core.lisp:10 |
 | `знайти-за-ключем` | загальна | 60 | lib/core4-parts/core4-d6.lisp:61 |
 | `машина-код-регістра` | загальна | 58 | lib/machine/encoding/x86-64.lisp:256 |
@@ -58,9 +58,9 @@
 | `частка-через-подвоєння` | загальна | 45 | lib/core4-parts/core4-d8-d9.lisp:476 |
 | `машинна-форма-двох-64-розрядних-регістрів` | загальна | 45 | lib/machine/atoms/x86-64.lisp:36 |
 | `четверте` | загальна | 44 | lib/core.lisp:83 |
+| `якщо` | загальна | 44 | lib/core.lisp:92 |
 | `остача` | загальна | 44 | lib/core4-parts/core4-codec.lisp:134 |
 | `машина-кодувати-модрм` | загальна | 44 | lib/machine/encoding/x86-64.lisp:449 |
-| `якщо` | загальна | 43 | lib/core.lisp:92 |
 | `фс-пакет-поле` | загальна | 41 | lib/core4-parts/core4-d8-d9.lisp:3698 |
 | `паліндром-лінійний?` | загальна | 41 | lib/list-palindrome-linear-atoms-general.lisp:32 |
 | `перевірити-паліндром-лінійний` | загальна | 41 | lib/list-palindrome-linear-atoms-general.lisp:36 |
