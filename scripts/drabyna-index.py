@@ -230,7 +230,43 @@ def write_domains(root: pathlib.Path) -> int:
     return 0
 
 
+def write_lisp_data(root: pathlib.Path) -> int:
+    index = json.loads((root / "knowledge" / "drabyna-index.json").read_text(encoding="utf-8"))
+    functions = index["функції"]
+    out_dir = root / "lib" / "generated"
+    out_dir.mkdir(parents=True, exist_ok=True)
+    lines = [
+        "; Згенеровано scripts/drabyna-index.py — не правити руками.",
+        "; Індекс драбини для охоронця: (ім'я файл рядок уживань арність).",
+        "",
+        "(визначити (драбина-записи)",
+        "  (список",
+    ]
+    for name, entry in sorted(functions.items(), key=lambda kv: -kv[1]["уживань"]):
+        arity = entry["арність"]
+        arity_text = "()" if arity is None else str(arity)
+        lines.append(
+            f'    (список "{name}" "{entry["файл"]}" {entry["рядок"]} '
+            f'{entry["уживань"]} {arity_text})'
+        )
+    lines += ["  ))"]
+    (out_dir / "drabyna-data.lisp").write_text("\n".join(lines) + "\n", encoding="utf-8")
+    print(f"lib/generated/drabyna-data.lisp: {len(functions)} записів")
+    return 0
+
+
 if __name__ == "__main__":
+    if len(sys.argv) > 1 and sys.argv[1] == "--lisp":
+        raise SystemExit(write_lisp_data(pathlib.Path(".")))
     if len(sys.argv) > 1 and sys.argv[1] == "--domains":
         raise SystemExit(write_domains(pathlib.Path(".")))
     raise SystemExit(main())
+
+
+# ---------------------------------------------------------------------------
+# Генерація Lisp-даних для охоронця.
+#
+# Навіщо: щоб охоронцем користувались ІЗ REPL, а не лише з Python.
+# Формат — звичайний список SENS, без JSON: наша мова не залежить від
+# чужих форматів.
+# ---------------------------------------------------------------------------
