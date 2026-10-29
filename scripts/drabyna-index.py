@@ -75,15 +75,26 @@ def main() -> int:
         except (UnicodeDecodeError, OSError):
             continue
         rel = str(path.relative_to(root))
-        for number, line in enumerate(text.splitlines(), 1):
+        lines = text.splitlines()
+        for number, line in enumerate(lines, 1):
             found = re.search(r"\(\s*визначити\s+\(?\s*([^\s()]+)", line)
             if found and found.group(1) not in definitions:
                 name = found.group(1)
+                # Арність шукаємо не лише в цьому рядку: чинна форма SENS
+                # ставить (функція ( ... )) на наступному рядку.
+                arity = arity_of(line)
+                if arity is None:
+                    for offset in range(1, 5):
+                        if number - 1 + offset >= len(lines):
+                            break
+                        arity = arity_of(lines[number - 1 + offset])
+                        if arity is not None:
+                            break
                 definitions[name] = {
                     "домен": domain_of(name),
                     "файл": rel,
                     "рядок": number,
-                    "арність": arity_of(line),
+                    "арність": arity,
                 }
             for token in re.findall(r"[^\s()\[\]]+", line):
                 usage[token] += 1
