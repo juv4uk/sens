@@ -60,7 +60,11 @@ jobs:
           # Охоронець уже є: lib/domain-function-reuse.lisp.
           # Раніше цей крок тестував МОЇ функції, яких я не мав додавати —
           # тому він падав. Тепер тестується те, що справді в репозиторії.
+          # Шаблон узятий із наявних скриптів (scripts/prove-*.sh):
+          # спершу lib/твердження.lisp, потім бібліотека, потім перевірка.
+          # Без твердження першим sens не має чим звіряти.
           ./target/release/sens --t5m-files \
+            lib/твердження.lisp \
             lib/domain-function-reuse.lisp \
             tests/ohoronets-drabyny-probe.lisp
           echo "ОХОРОНЕЦЬ_ВИКОНАНО"
