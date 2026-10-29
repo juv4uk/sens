@@ -1,7 +1,8 @@
 # Бенчмарк машинного шару SENS: sens_dot_scalar (SSE2) проти sens_dot_avx2 (AVX2/FMA).
 #
-# Що дає: BACKEND (який варіант обрано), WALL_NS, SUM на детермінованому масиві.
-# Це порівняння ВСЕРЕДИНІ мови — не залежить від міжмовної коректності.
+# Що дає: 8 НЕЗАЛЕЖНИХ процесів на кожен розмір, середнє, ДІ95 і висновок
+# про перекриття інтервалів. Результат пишеться у SUMMARY.txt (ASCII),
+# а не тільки в лог — кирилиця в лозі читається ненадійно.
 #
 # Чого НЕ дає: джоулів. RAPL на hosted-раннері немає (перевірено:
 # RAPL_AVAILABLE=no). Енергія — окремо, у wsm-lazarus/scripts/energy/measure.py
@@ -22,7 +23,7 @@ permissions:
 jobs:
   dot:
     runs-on: ubuntu-24.04
-    timeout-minutes: 25
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
         with:
@@ -47,17 +48,9 @@ jobs:
       - name: Зібрати бенчмарк
         run: cargo build --release --example dot_bench
 
-      - name: Прогнати (малий, середній, великий)
+      - name: 8 незалежних процесів на кожен розмір
         run: |
-          for n in 4096 262144 1048576; do
-            echo "=== n=$n ==="
-            ./target/release/examples/dot_bench "$n" 32 || echo "DOT_BENCH_FAILED n=$n"
-          done
-
-      - name: Незалежні повтори — 8 процесів на розмір
-        run: |
-          # Один прогін не дає ДІ. Тут кожен повтор — ОКРЕМИЙ процес,
-          # як вимагає методика (незалежна одиниця ресемплінгу).
+          # Кожен повтор — ОКРЕМИЙ процес: це незалежна одиниця ресемплінгу.
           mkdir -p build/dot
           for n in 4096 262144 1048576; do
             : > "build/dot/n$n.txt"
@@ -67,30 +60,11 @@ jobs:
           done
           ls -l build/dot/
 
-      - name: Довірчі інтервали (95%) на 8 незалежних процесах
-        run: |
-          python3 - <<'PY'
-          import re, statistics, math, pathlib
-          for f in sorted(pathlib.Path("build/dot").glob("n*.txt")):
-              txt = f.read_text(encoding="utf-8", errors="replace")
-              sc = [int(x) for x in re.findall(r"SCALAR_WALL_NS (\d+)", txt)]
-              av = [int(x) for x in re.findall(r"AVX2_WALL_NS (\d+)", txt)]
-              if len(sc) < 2 or len(av) < 2:
-                  print(f"{f.name}: замало повторів ({len(sc)}/{len(av)})")
-                  continue
-              def ci(v):
-                  m = statistics.mean(v); s = statistics.stdev(v)
-                  h = 2.365 * s / math.sqrt(len(v))   # t(0.975, df=7)
-                  return m, m - h, m + h
-              ms, ls, hs = ci(sc); ma, la, ha = ci(av)
-              print(f"{f.name}: n={len(sc)}")
-              print(f"  SSE2 {ms:,.0f} нс  ДІ95 [{ls:,.0f}, {hs:,.0f}]")
-              print(f"  AVX2 {ma:,.0f} нс  ДІ95 [{la:,.0f}, {ha:,.0f}]")
-              print(f"  відношення {ms/ma:.3f}")
-              # ДІ відношення через перекриття: якщо [ls,hs] і [la,ha] не перетинаються — різниця стійка
-              overlap = not (hs < la or ha < ls)
-              print(f"  ДІ перетинаються: {'ТАК — висновок нестійкий' if overlap else 'НІ — різниця стійка'}")
-          PY
+      - name: Порахувати ДІ95 у SUMMARY.txt
+        run: python3 scripts/dot-summary.py build/dot
+
+      - name: Показати SUMMARY
+        run: cat build/dot/SUMMARY.txt
 
       - uses: actions/upload-artifact@v4
         if: always()
