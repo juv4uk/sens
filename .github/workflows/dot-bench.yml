@@ -1,0 +1,70 @@
+# Бенчмарк машинного шару SENS: sens_dot_scalar (SSE2) проти sens_dot_avx2 (AVX2/FMA).
+#
+# Що дає: BACKEND (який варіант обрано), WALL_NS, SUM на детермінованому масиві.
+# Це порівняння ВСЕРЕДИНІ мови — не залежить від міжмовної коректності.
+#
+# Чого НЕ дає: джоулів. RAPL на hosted-раннері немає (перевірено:
+# RAPL_AVAILABLE=no). Енергія — окремо, у wsm-lazarus/scripts/energy/measure.py
+# на залізі з датчиком.
+name: Дослід · dot_f64 машинний шар
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'crates/sens/examples/dot_bench.rs'
+      - '.github/workflows/dot-bench.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  dot:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: false
+
+      # build.rs вимагає піннутий Zig — без нього крейт не збирається.
+      - name: Встановити Zig
+        uses: mlugg/setup-zig@v2
+        with:
+          version: 0.16.0
+
+      - name: Інструменти
+        run: |
+          zig version
+          cargo --version
+          rustc --version
+
+      - name: Чи підтримує процесор AVX2
+        run: |
+          if grep -q avx2 /proc/cpuinfo; then echo "AVX2=yes"; else echo "AVX2=no"; fi
+
+      - name: Зібрати бенчмарк
+        run: cargo build --release --example dot_bench
+
+      - name: Прогнати (малий, середній, великий)
+        run: |
+          for n in 4096 262144 1048576; do
+            echo "=== n=$n ==="
+            ./target/release/examples/dot_bench "$n" 32 || echo "DOT_BENCH_FAILED n=$n"
+          done
+
+      - name: Зберегти вивід
+        run: |
+          mkdir -p build/dot
+          for n in 4096 262144 1048576; do
+            ./target/release/examples/dot_bench "$n" 32 > "build/dot/n$n.txt" 2>&1 || true
+          done
+          ls -l build/dot/
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: dot-bench
+          path: build/dot/*.txt
+          if-no-files-found: warn
