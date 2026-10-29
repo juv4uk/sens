@@ -1,0 +1,82 @@
+# Охоронець драбини — живий прогін, а не заява.
+#
+# Що робить: збирає sens, генерує індекс із джерел, проганяє запити
+# охоронця через справжній SENS і перевіряє, що відповіді правильні.
+#
+# Навіщо окремий workflow: попередній коміт додав lib/ohoronets-drabyny.lisp,
+# але НЕ прогнав його. Файл, який ніколи не виконувався, — це не механізм,
+# а текст. Тут він виконується.
+name: Охоронець драбини
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'lib/ohoronets-drabyny.lisp'
+      - 'lib/generated/drabyna-data.lisp'
+      - 'scripts/drabyna-index.py'
+      - '.github/workflows/ohoronets-drabyny.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  ohoronets:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: false
+
+      - name: Встановити Zig (потрібен build.rs)
+        uses: mlugg/setup-zig@v2
+        with:
+          version: 0.16.0
+
+      - name: Зібрати sens
+        run: cargo build --release -p sens-cli
+
+      - name: Перегенерувати індекс із джерел
+        run: |
+          python3 scripts/drabyna-index.py .
+          python3 scripts/drabyna-index.py --domains
+          python3 scripts/drabyna-index.py --lisp
+
+      - name: Індекс мусить збігтися з тим, що в репозиторії
+        run: |
+          # Якщо джерела змінились, а згенеровані дані ні — це розбіжність,
+          # і вона мусить бути видимою, а не тихою.
+          if ! git diff --quiet -- lib/generated/drabyna-data.lisp; then
+            echo "РОЗБІЖНІСТЬ: lib/generated/drabyna-data.lisp не відповідає джерелам"
+            git diff --stat -- lib/generated/drabyna-data.lisp
+            exit 1
+          fi
+          echo "ІНДЕКС_УЗГОДЖЕНО"
+
+      - name: Прогнати запити охоронця через SENS
+        run: |
+          # Кожен запит — окремий виклик. Очікувана відповідь перевіряється,
+          # а не просто друкується.
+          set -u
+          SENS=./target/release/sens
+          fail=0
+          check () {
+            local name="$1" expected="$2" source="$3"
+            local got
+            got=$(printf '%s\n' "$source" | $SENS --oracle-check - 2>&1 | tail -1)
+            echo "  $name -> $got"
+            if [ "$got" != "$expected" ]; then
+              echo "    ОЧІКУВАНО: $expected"
+              fail=1
+            fi
+          }
+          echo "=== охоронець: живі запити ==="
+          check "лічба-додатна" "так" '(драбина-є? помножити)'
+          check "невідома-функція" "ні" '(драбина-є? такої-функції-немає)'
+          if [ "$fail" -ne 0 ]; then
+            echo "ОХОРОНЕЦЬ_НЕ_ВІДПОВІВ_ПРАВИЛЬНО"
+            exit 1
+          fi
+          echo "ОХОРОНЕЦЬ_ПРАЦЮЄ"
