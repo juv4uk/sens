@@ -143,3 +143,28 @@ impl fmt::Display for Text7ProjectionError {
     }
 }
 impl std::error::Error for Text7ProjectionError {}
+
+#[cfg(test)]
+mod tests {
+    use super::{encode_text7, render_text7, Text7Layout};
+
+    #[test]
+    fn ukrainian_projection_encodes_glyphs_as_exact_w7_text_cells() {
+        // UTF-8 "а" occupies two host bytes, but the ratified Ukrainian
+        // projection maps that one glyph to the exact D7/W7 cell 1100110.
+        // The following ASCII digit maps to its own cell; neither spelling
+        // becomes a numeric value or a callable function identity here.
+        let text = encode_text7("а1", Text7Layout::Uk).expect("admitted D7 text");
+
+        assert_eq!(text.cells(), &[0b1100110, 0b0110001]);
+        assert_eq!(text.to_canonical_wire_token(), "#t7:6631");
+        assert_eq!(text.to_packed_w7().bit_len(), 14);
+        assert_eq!(render_text7(&text, Text7Layout::Uk).unwrap(), "а1");
+        assert_eq!(render_text7(&text, Text7Layout::En).unwrap(), "f1");
+    }
+
+    #[test]
+    fn ukrainian_projection_rejects_glyphs_without_a_ratified_d7_cell() {
+        assert!(encode_text7("ё", Text7Layout::Uk).is_err());
+    }
+}
