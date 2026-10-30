@@ -464,6 +464,14 @@ check_core1_semantic_witness d5-selector-derived-law \
   tests/semantic/d5-selector-derived-law.lisp 1
 check_core1_semantic_witness d5-selector-derived-mutant \
   tests/semantic/d5-selector-derived-mutant.lisp 0
+check_core1_semantic_witness d9-core1-fifth-law \
+  tests/semantic/d9-core1-fifth-law.lisp 1
+check_core1_semantic_witness d9-core1-fifth-mutant \
+  tests/semantic/d9-core1-fifth-mutant.lisp 0
+check_core1_semantic_witness d9-core1-identity-law \
+  tests/semantic/d9-core1-identity-law.lisp 1
+check_core1_semantic_witness d9-core1-identity-mutant \
+  tests/semantic/d9-core1-identity-mutant.lisp 0
 printf '%s\n' \
   '(відсіяти-до (функція (елемент) так) (сполучити (як-є а) ні) (як-є ()))' \
   > "$scratch/core1-filter-onto-improper-tail.lisp"
@@ -777,4 +785,4 @@ cmp -s "$scratch/core1-gc.expected" "$scratch/core1-gc.out" || {
   exit 1
 }
 
-echo 'CORE1_NATIVE_OK self_loaded=YES arrays=YES array_boundaries=YES properties=YES reader_markers=YES exact_conditions=YES call_arity=YES domain_functions=YES d7_data_not_callable=YES gc_model=YES exact_domains=YES negatives=14'
+echo 'CORE1_NATIVE_OK self_loaded=YES arrays=YES array_boundaries=YES properties=YES reader_markers=YES exact_conditions=YES call_arity=YES domain_functions=YES d7_data_not_callable=YES d9_fifth=YES d9_identity=YES gc_model=YES exact_domains=YES negatives=16'

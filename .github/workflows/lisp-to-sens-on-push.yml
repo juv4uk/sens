@@ -106,6 +106,9 @@ jobs:
               tests/semantic/d6-compose-flip-law.lisp|tests/semantic/d6-compose-flip-laws.lisp|tests/semantic/d6-compose-flip-mutant.lisp)
                 # D6 closure witnesses require the Core1-local function laws.
                 binding_args=(--binding-source lib/core1.lisp);;
+              tests/semantic/d9-core1-*.lisp)
+                # D9 Core1 witnesses exercise definitions shipped by Core1.
+                binding_args=(--binding-source lib/core1.lisp);;
               tests/integration/core1/reject-core1-cond-empty.lisp|tests/integration/core1/reject-core1-cond-number-zero.lisp)
                 binding_args=(--binding-source lib/core1.lisp)
                 expected_error='D4:0100 NOT requires an exact D1 PredicateBit';;
@@ -229,6 +232,8 @@ jobs:
                 tests/integration/core1/core1-*.lisp|tests/semantic/core1-gc-reachability-laws.lisp)
                   binding_args=(--binding-source lib/core1.lisp);;
                 tests/semantic/d6-compose-flip-law.lisp|tests/semantic/d6-compose-flip-laws.lisp|tests/semantic/d6-compose-flip-mutant.lisp)
+                  binding_args=(--binding-source lib/core1.lisp);;
+                tests/semantic/d9-core1-*.lisp)
                   binding_args=(--binding-source lib/core1.lisp);;
                 tests/integration/core1/reject-core1-cond-empty.lisp|tests/integration/core1/reject-core1-cond-number-zero.lisp)
                   binding_args=(--binding-source lib/core1.lisp)
