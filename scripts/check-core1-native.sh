@@ -190,6 +190,38 @@ cmp -s "$scratch/core1-list-length.expected" \
   exit 1
 }
 
+"$sens" --t5m-mint tests/integration/core1/core1-length-onto.lisp \
+  "$scratch/core1-length-onto-fixture.sens"
+cmp -s "$scratch/core1-length-onto-fixture.sens" \
+  tests/integration/core1/core1-length-onto.sens || {
+  echo 'CORE1_LENGTH_ONTO_T5M_PAIR_MISMATCH' >&2
+  exit 1
+}
+"$sens" --t5m-files lib/core1.lisp \
+  tests/integration/core1/core1-length-onto.lisp \
+  > "$scratch/core1-length-onto.out"
+printf '%s\n' '(3 1 3)' > "$scratch/core1-length-onto.expected"
+cmp -s "$scratch/core1-length-onto.expected" \
+  "$scratch/core1-length-onto.out" || {
+  echo 'CORE1_LENGTH_ONTO_MISMATCH' >&2
+  diff -u "$scratch/core1-length-onto.expected" \
+    "$scratch/core1-length-onto.out" >&2 || true
+  exit 1
+}
+if "$sens" --t5m-files lib/core1.lisp \
+    tests/semantic/d6-length-onto-d1-root-negative.lisp \
+    > "$scratch/core1-length-onto-negative.out" \
+    2> "$scratch/core1-length-onto-negative.err"; then
+  echo 'CORE1_LENGTH_ONTO_ACCEPTED_D1_ROOT' >&2
+  exit 1
+fi
+grep -Fq 'решта очікує непорожній список' \
+  "$scratch/core1-length-onto-negative.err" || {
+  echo 'CORE1_LENGTH_ONTO_NEGATIVE_DIAGNOSTIC_MISMATCH' >&2
+  cat "$scratch/core1-length-onto-negative.err" >&2
+  exit 1
+}
+
 "$sens" --t5m-mint tests/integration/core1/core1-reverse.lisp \
   "$scratch/core1-reverse-fixture.sens"
 cmp -s "$scratch/core1-reverse-fixture.sens" \
@@ -378,4 +410,4 @@ cmp -s "$scratch/core1-gc.expected" "$scratch/core1-gc.out" || {
   exit 1
 }
 
-echo 'CORE1_NATIVE_OK self_loaded=YES arrays=YES array_boundaries=YES properties=YES reader_markers=YES exact_conditions=YES call_arity=YES domain_functions=YES d7_data_not_callable=YES gc_model=YES exact_domains=YES negatives=3'
+echo 'CORE1_NATIVE_OK self_loaded=YES arrays=YES array_boundaries=YES properties=YES reader_markers=YES exact_conditions=YES call_arity=YES domain_functions=YES d7_data_not_callable=YES gc_model=YES exact_domains=YES negatives=4'
