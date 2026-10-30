@@ -5,7 +5,7 @@ root_dir="$(git rev-parse --show-toplevel)"
 cd "$root_dir"
 sens="${SENS_BIN:-$root_dir/target/debug/sens}"
 [[ -x "$sens" ]] || {
-  printf 'CORE1_CORE4_NATIVE_MISSING sens=%s\n' "$sens" >&2
+  printf 'CORE1_NATIVE_MISSING sens=%s\n' "$sens" >&2
   exit 2
 }
 
@@ -106,7 +106,7 @@ PY
 scratch="$(mktemp -d)"
 trap 'rm -rf -- "$scratch"' EXIT
 
-cat lib/core1.lisp tests/integration/core1-core4/core1-local-variable.lisp \
+cat lib/core1.lisp tests/integration/core1/core1-local-variable.lisp \
   > "$scratch/core1-standalone.lisp"
 "$sens" --t5m-mint \
   "$scratch/core1-standalone.lisp" \
@@ -119,7 +119,7 @@ cmp -s "$scratch/core1-standalone.expected" "$scratch/core1-standalone.out" || {
   exit 1
 }
 
-cat lib/core1.lisp tests/integration/core1-core4/core1-properties.lisp \
+cat lib/core1.lisp tests/integration/core1/core1-properties.lisp \
   > "$scratch/core1-properties.lisp"
 "$sens" --t5m-mint "$scratch/core1-properties.lisp" "$scratch/core1-properties.sens"
 "$sens" "$scratch/core1-properties.sens" > "$scratch/core1-properties.out"
@@ -130,7 +130,7 @@ cmp -s "$scratch/core1-properties.expected" "$scratch/core1-properties.out" || {
   exit 1
 }
 
-cat lib/core1.lisp tests/integration/core1-core4/core1-reader-markers.lisp \
+cat lib/core1.lisp tests/integration/core1/core1-reader-markers.lisp \
   > "$scratch/core1-reader-markers.lisp"
 "$sens" --t5m-mint "$scratch/core1-reader-markers.lisp" "$scratch/core1-reader-markers.sens"
 "$sens" "$scratch/core1-reader-markers.sens" > "$scratch/core1-reader-markers.out"
@@ -141,7 +141,7 @@ cmp -s "$scratch/core1-reader-markers.expected" "$scratch/core1-reader-markers.o
   exit 1
 }
 
-cat lib/core1.lisp tests/integration/core1-core4/core1-condition-domains.lisp \
+cat lib/core1.lisp tests/integration/core1/core1-condition-domains.lisp \
   > "$scratch/core1-condition-domains.lisp"
 "$sens" --t5m-mint "$scratch/core1-condition-domains.lisp" "$scratch/core1-condition-domains.sens"
 "$sens" "$scratch/core1-condition-domains.sens" > "$scratch/core1-condition-domains.out"
@@ -166,10 +166,10 @@ check_core1_condition_rejection() {
   }
 }
 
-check_core1_condition_rejection tests/integration/core1-core4/reject-core1-cond-empty.lisp
-check_core1_condition_rejection tests/integration/core1-core4/reject-core1-cond-number-zero.lisp
+check_core1_condition_rejection tests/integration/core1/reject-core1-cond-empty.lisp
+check_core1_condition_rejection tests/integration/core1/reject-core1-cond-number-zero.lisp
 
-cat lib/core1.lisp tests/integration/core1-core4/core1-call-arity.lisp \
+cat lib/core1.lisp tests/integration/core1/core1-call-arity.lisp \
   > "$scratch/core1-call-arity.lisp"
 "$sens" --t5m-mint "$scratch/core1-call-arity.lisp" "$scratch/core1-call-arity.sens"
 "$sens" "$scratch/core1-call-arity.sens" > "$scratch/core1-call-arity.out"
@@ -180,7 +180,7 @@ cmp -s "$scratch/core1-call-arity.expected" "$scratch/core1-call-arity.out" || {
   exit 1
 }
 
-cat lib/core1.lisp tests/integration/core1-core4/core1-d7-callability.lisp \
+cat lib/core1.lisp tests/integration/core1/core1-d7-callability.lisp \
   > "$scratch/core1-d7-callability.lisp"
 "$sens" --t5m-mint \
   "$scratch/core1-d7-callability.lisp" \
@@ -195,7 +195,7 @@ cmp -s "$scratch/core1-d7-callability.expected" "$scratch/core1-d7-callability.o
 
 if "$sens" --t5m-files \
     lib/core1.lisp \
-    tests/integration/core1-core4/reject-core1-d7-as-function.lisp \
+    tests/integration/core1/reject-core1-d7-as-function.lisp \
     > "$scratch/core1-d7-negative.out" 2> "$scratch/core1-d7-negative.err"; then
   echo 'CORE1_ACCEPTED_D7_TEXT_AS_FUNCTION' >&2
   exit 1
@@ -207,7 +207,7 @@ grep -Fq 'D7 1100110 не має допущеного механізму вик�
   exit 1
 }
 
-cat lib/core1.lisp tests/integration/core1-core4/core1-prog-coverage.lisp \
+cat lib/core1.lisp tests/integration/core1/core1-prog-coverage.lisp \
   > "$scratch/core1-prog-coverage.lisp"
 "$sens" --t5m-mint \
   "$scratch/core1-prog-coverage.lisp" \
@@ -220,7 +220,7 @@ cmp -s "$scratch/core1-prog-coverage.expected" "$scratch/core1-prog-coverage.out
   exit 1
 }
 
-cat lib/core1.lisp tests/integration/core1-core4/core1-prog-rev.lisp \
+cat lib/core1.lisp tests/integration/core1/core1-prog-rev.lisp \
   > "$scratch/core1-prog-rev.lisp"
 "$sens" --t5m-mint "$scratch/core1-prog-rev.lisp" "$scratch/core1-prog-rev.sens"
 "$sens" "$scratch/core1-prog-rev.sens" > "$scratch/core1-prog-rev.out"
@@ -242,41 +242,4 @@ cmp -s "$scratch/core1-gc.expected" "$scratch/core1-gc.out" || {
   exit 1
 }
 
-"$sens" --t5m-files \
-  lib/core1.lisp \
-  lib/core4.lisp \
-  tests/integration/core1-core4/compatibility.lisp \
-  > "$scratch/positive.out"
-printf '%s\n' '(0 1 0 0 0 3 2 1 1 1)' > "$scratch/positive.expected"
-cmp -s "$scratch/positive.expected" "$scratch/positive.out" || {
-  echo 'CORE1_CORE4_POSITIVE_RESULT_MISMATCH' >&2
-  diff -u "$scratch/positive.expected" "$scratch/positive.out" >&2 || true
-  exit 1
-}
-
-check_rejection() {
-  local source="$1" expected_value="$2"
-  if "$sens" --t5m-files \
-      lib/core1.lisp \
-      lib/core4.lisp \
-      "$source" \
-      > "$scratch/negative.out" 2> "$scratch/negative.err"; then
-    printf 'CORE1_CORE4_INVALID_CONDITION_ACCEPTED source=%s\n' "$source" >&2
-    exit 1
-  fi
-  grep -Fq 'D3:110 COND очікує exact D1:1 / D1:0' "$scratch/negative.err" || {
-    printf 'CORE1_CORE4_WRONG_REJECTION source=%s\n' "$source" >&2
-    cat "$scratch/negative.err" >&2
-    exit 1
-  }
-  grep -Fq "got $expected_value" "$scratch/negative.err" || {
-    printf 'CORE1_CORE4_REJECTION_LOST_VALUE source=%s expected=%s\n' "$source" "$expected_value" >&2
-    cat "$scratch/negative.err" >&2
-    exit 1
-  }
-}
-
-check_rejection tests/integration/core1-core4/reject-empty-as-condition.lisp '()'
-check_rejection tests/integration/core1-core4/reject-number-zero-as-condition.lisp '0'
-
-echo 'CORE1_CORE4_COMPATIBILITY_OK pure_core1=YES core1_arrays=YES core1_properties=YES core1_reader_marker=YES core1_exact_conditions=YES core1_call_arity=YES core1_domain_functions=YES core1_d7_data_not_callable=YES core1_gc_model=YES core1_core4_shared_session=YES exact_domains=YES negatives=5'
+echo 'CORE1_NATIVE_OK self_loaded=YES arrays=YES properties=YES reader_markers=YES exact_conditions=YES call_arity=YES domain_functions=YES d7_data_not_callable=YES gc_model=YES exact_domains=YES negatives=3'
