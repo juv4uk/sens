@@ -252,8 +252,11 @@ cmp -s "$scratch/core1-min-max-list-laws.expected" \
     "$scratch/core1-min-max-list-laws.out" >&2 || true
   exit 1
 }
+printf '%s\n' \
+  '(найменше-у-списку (список 1 (як-є нечислове-значення) 0))' \
+  > "$scratch/core1-min-max-nonnumeric.lisp"
 if "$sens" --t5m-files lib/core1.lisp \
-    tests/integration/core1/reject-core1-min-max-nonnumeric.lisp \
+    "$scratch/core1-min-max-nonnumeric.lisp" \
     > "$scratch/core1-min-max-nonnumeric.out" \
     2> "$scratch/core1-min-max-nonnumeric.err"; then
   echo 'CORE1_MIN_MAX_ACCEPTED_D7_DATA_AS_NUMBER' >&2
@@ -265,8 +268,11 @@ grep -Fq 'для математики потрібні явні операнди
   cat "$scratch/core1-min-max-nonnumeric.err" >&2
   exit 1
 }
+printf '%s\n' \
+  '(найменше-у-списку (сполучити 1 (сполучити 2 ні)))' \
+  > "$scratch/core1-min-max-improper-tail.lisp"
 if "$sens" --t5m-files lib/core1.lisp \
-    tests/integration/core1/reject-core1-min-max-improper-tail.lisp \
+    "$scratch/core1-min-max-improper-tail.lisp" \
     > "$scratch/core1-min-max-improper-tail.out" \
     2> "$scratch/core1-min-max-improper-tail.err"; then
   echo 'CORE1_MIN_MAX_ACCEPTED_IMPROPER_TAIL' >&2
