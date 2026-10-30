@@ -119,6 +119,35 @@ cmp -s "$scratch/core1-standalone.expected" "$scratch/core1-standalone.out" || {
   exit 1
 }
 
+cat lib/core1.lisp tests/integration/core1/core1-array-boundaries.lisp \
+  > "$scratch/core1-array-boundaries.lisp"
+"$sens" --t5m-mint \
+  tests/integration/core1/core1-array-boundaries.lisp \
+  "$scratch/core1-array-boundaries-fixture.sens"
+cmp -s "$scratch/core1-array-boundaries-fixture.sens" \
+  tests/integration/core1/core1-array-boundaries.sens || {
+  echo 'CORE1_ARRAY_BOUNDARY_T5M_PAIR_MISMATCH' >&2
+  exit 1
+}
+"${SENS_TRIT_BIN:-$root_dir/target/debug/sens-trit}" verify-view \
+  tests/integration/core1/core1-array-boundaries.sens >/dev/null
+"$sens" --t5m-mint \
+  "$scratch/core1-array-boundaries.lisp" \
+  "$scratch/core1-array-boundaries.sens"
+"$sens" --t5m-pair \
+  "$scratch/core1-array-boundaries.lisp" \
+  "$scratch/core1-array-boundaries.sens" \
+  > "$scratch/core1-array-boundaries.out"
+printf '%s\n' '(1 1 1 0 () 10 (10 20 99) 1 1 1)' \
+  > "$scratch/core1-array-boundaries.expected"
+cmp -s "$scratch/core1-array-boundaries.expected" \
+  "$scratch/core1-array-boundaries.out" || {
+  echo 'CORE1_ARRAY_BOUNDARY_MISMATCH' >&2
+  diff -u "$scratch/core1-array-boundaries.expected" \
+    "$scratch/core1-array-boundaries.out" >&2 || true
+  exit 1
+}
+
 cat lib/core1.lisp tests/integration/core1/core1-properties.lisp \
   > "$scratch/core1-properties.lisp"
 "$sens" --t5m-mint "$scratch/core1-properties.lisp" "$scratch/core1-properties.sens"
@@ -242,4 +271,4 @@ cmp -s "$scratch/core1-gc.expected" "$scratch/core1-gc.out" || {
   exit 1
 }
 
-echo 'CORE1_NATIVE_OK self_loaded=YES arrays=YES properties=YES reader_markers=YES exact_conditions=YES call_arity=YES domain_functions=YES d7_data_not_callable=YES gc_model=YES exact_domains=YES negatives=3'
+echo 'CORE1_NATIVE_OK self_loaded=YES arrays=YES array_boundaries=YES properties=YES reader_markers=YES exact_conditions=YES call_arity=YES domain_functions=YES d7_data_not_callable=YES gc_model=YES exact_domains=YES negatives=3'
