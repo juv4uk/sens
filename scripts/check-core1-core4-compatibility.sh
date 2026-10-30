@@ -145,7 +145,7 @@ cat lib/core1.lisp tests/integration/core1-core4/core1-condition-domains.lisp \
   > "$scratch/core1-condition-domains.lisp"
 "$sens" --t5m-mint "$scratch/core1-condition-domains.lisp" "$scratch/core1-condition-domains.sens"
 "$sens" "$scratch/core1-condition-domains.sens" > "$scratch/core1-condition-domains.out"
-printf '%s\n' '(22 11)' > "$scratch/core1-condition-domains.expected"
+printf '%s\n' '(22 11 1)' > "$scratch/core1-condition-domains.expected"
 cmp -s "$scratch/core1-condition-domains.expected" "$scratch/core1-condition-domains.out" || {
   echo 'CORE1_CONDITION_DOMAIN_MISMATCH' >&2
   diff -u "$scratch/core1-condition-domains.expected" "$scratch/core1-condition-domains.out" >&2 || true
