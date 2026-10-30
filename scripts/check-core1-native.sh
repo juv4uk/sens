@@ -121,7 +121,7 @@ def check_expression(expr, bound, owner):
     if head == 'як-є':
         return
     if head == 'функція':
-        parameters = set(expr[1][1:]) if len(expr) > 1 and isinstance(expr[1], list) else set()
+        parameters = set(expr[1]) if len(expr) > 1 and isinstance(expr[1], list) else set()
         for body in expr[2:]:
             check_expression(body, bound | parameters, owner)
         return
@@ -267,6 +267,30 @@ printf '%s\n' '(1 1 1 1)' > "$scratch/core1-nth.expected"
 cmp -s "$scratch/core1-nth.expected" "$scratch/core1-nth.out" || {
   echo 'CORE1_NTH_MISMATCH' >&2
   diff -u "$scratch/core1-nth.expected" "$scratch/core1-nth.out" >&2 || true
+  exit 1
+}
+"$sens" --t5m-files lib/core1.lisp \
+  tests/semantic/d6-map-onto-accumulator-law.lisp \
+  > "$scratch/core1-map-onto-law.out"
+printf '%s\n' '1' > "$scratch/core1-map-onto-law.expected"
+cmp -s "$scratch/core1-map-onto-law.expected" \
+  "$scratch/core1-map-onto-law.out" || {
+  echo 'CORE1_MAP_ONTO_LAW_MISMATCH' >&2
+  diff -u "$scratch/core1-map-onto-law.expected" \
+    "$scratch/core1-map-onto-law.out" >&2 || true
+  exit 1
+}
+if "$sens" --t5m-files lib/core1.lisp \
+    tests/semantic/d6-map-onto-improper-tail-negative.lisp \
+    > "$scratch/core1-map-onto-improper-tail.out" \
+    2> "$scratch/core1-map-onto-improper-tail.err"; then
+  echo 'CORE1_MAP_ONTO_ACCEPTED_IMPROPER_TAIL' >&2
+  exit 1
+fi
+grep -Fq 'перше очікує непорожній список' \
+  "$scratch/core1-map-onto-improper-tail.err" || {
+  echo 'CORE1_MAP_ONTO_TAIL_DIAGNOSTIC_MISMATCH' >&2
+  cat "$scratch/core1-map-onto-improper-tail.err" >&2
   exit 1
 }
 printf '%s\n' \
@@ -553,4 +577,4 @@ cmp -s "$scratch/core1-gc.expected" "$scratch/core1-gc.out" || {
   exit 1
 }
 
-echo 'CORE1_NATIVE_OK self_loaded=YES arrays=YES array_boundaries=YES properties=YES reader_markers=YES exact_conditions=YES call_arity=YES domain_functions=YES d7_data_not_callable=YES gc_model=YES exact_domains=YES negatives=10'
+echo 'CORE1_NATIVE_OK self_loaded=YES arrays=YES array_boundaries=YES properties=YES reader_markers=YES exact_conditions=YES call_arity=YES domain_functions=YES d7_data_not_callable=YES gc_model=YES exact_domains=YES negatives=11'
