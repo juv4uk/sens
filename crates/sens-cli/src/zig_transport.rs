@@ -1349,3 +1349,45 @@ mod zig_exact_egress_tests {
             .contains("word_count expected=2 actual=3"));
     }
 }
+
+#[cfg(test)]
+mod core1_t5m_d7_inventory_tests {
+    use super::decode_t5m_exact_words;
+    use std::{collections::BTreeMap, fs, path::PathBuf};
+
+    #[test]
+    fn report_exact_d7_words_in_committed_core1_t5m() {
+        let path = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../lib/core1.sens");
+        let physical = fs::read(&path).expect("read committed Core1 T5M");
+        let words = decode_t5m_exact_words(&physical).expect("decode Core1 T5M through Zig");
+        let physical_word_count = words.len();
+        let mut d7_cells = BTreeMap::<u8, usize>::new();
+
+        for word in words {
+            let exact = sens::ExactDomainWord::from_physical_width_bits(word.width, &word.bits)
+                .expect("Core1 T5M word has a ratified exact domain");
+            if let sens::ExactDomainWord::Identity(identity @ sens::DomainIdentity::D7(_)) = exact {
+                *d7_cells.entry(identity.packed_bits() as u8).or_default() += 1;
+            }
+        }
+
+        assert!(
+            !d7_cells.is_empty(),
+            "Core1 T5M should contain D7 data words"
+        );
+        let d7_word_count: usize = d7_cells.values().sum();
+        println!(
+            "CORE1_T5M_D7_INVENTORY physical_words={physical_word_count} d7_words={d7_word_count} distinct_d7_cells={}",
+            d7_cells.len()
+        );
+        for (cell, occurrences) in d7_cells {
+            let source_word = sens::BinarySourceWord::W7(
+                sens::Bit7::new(cell).expect("D7 cell remains exact W7"),
+            );
+            let projection = sens::decode_d7_uk_words(&[source_word])
+                .map(|glyph| format!("{glyph:?}"))
+                .unwrap_or_else(|_| "<немає однозначної укр-гліфеми>".to_string());
+            println!("D7:{cell:07b} occurrences={occurrences} укр={projection}");
+        }
+    }
+}
