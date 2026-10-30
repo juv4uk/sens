@@ -98,7 +98,17 @@ jobs:
             echo "LISP_TO_SENS_MINT $f"
             profile_args=()
             binding_args=()
+            expected_error=""
             case "$f" in
+              tests/integration/core1/core1-*.lisp|tests/semantic/core1-gc-reachability-laws.lisp)
+                # Core1 witnesses execute with Core1's own definitions only.
+                binding_args=(--binding-source lib/core1.lisp);;
+              tests/integration/core1/reject-core1-cond-empty.lisp|tests/integration/core1/reject-core1-cond-number-zero.lisp)
+                binding_args=(--binding-source lib/core1.lisp)
+                expected_error='D4:0100 NOT requires an exact D1 PredicateBit';;
+              tests/integration/core1/reject-core1-d7-as-function.lisp)
+                binding_args=(--binding-source lib/core1.lisp)
+                expected_error='D7 1100110 не має допущеного механізму виклику';;
               tests/semantic/d9-d10-defined-functions-law.lisp)
                 # The D9 witness invokes real world functions, which Core4 does not bind itself.
                 binding_args=(--binding-source lib/world.lisp)
@@ -115,6 +125,9 @@ jobs:
                 binding_args=(--binding-source lib/unify.lisp);;
               lib/lisp-fs.lisp|lib/unify.lisp|tests/semantic/d6-derived-research-batch-01.lisp|tests/semantic/d8-rassq-until-batch.lisp|scripts/check-domain-logic-laws.lisp) profile_args=(--core4-runtime);;
             esac
+            if [[ -n "$expected_error" ]]; then
+              profile_args+=(--expect-error "$expected_error")
+            fi
             if ! bash scripts/refresh-verified-t5m-pair.sh "$f" target/debug/sens target/debug/sens-trit "${binding_args[@]}" "${profile_args[@]}"; then
               echo "::error::LISP_TO_SENS_MINT_FAILED $f"
               fail=1
@@ -208,7 +221,16 @@ jobs:
               [[ -f "$source" ]] || continue
               profile_args=()
               binding_args=()
+              expected_error=""
               case "$source" in
+                tests/integration/core1/core1-*.lisp|tests/semantic/core1-gc-reachability-laws.lisp)
+                  binding_args=(--binding-source lib/core1.lisp);;
+                tests/integration/core1/reject-core1-cond-empty.lisp|tests/integration/core1/reject-core1-cond-number-zero.lisp)
+                  binding_args=(--binding-source lib/core1.lisp)
+                  expected_error='D4:0100 NOT requires an exact D1 PredicateBit';;
+                tests/integration/core1/reject-core1-d7-as-function.lisp)
+                  binding_args=(--binding-source lib/core1.lisp)
+                  expected_error='D7 1100110 не має допущеного механізму виклику';;
                 tests/fixtures/wsm-fs-record-producer.lisp)
                   binding_args=(--binding-source lib/persistent-map.lisp --binding-source lib/world.lisp --binding-source lib/content-store.lisp --binding-source lib/lisp-fs.lisp)
                   profile_args=(--core4-runtime);;
@@ -217,6 +239,9 @@ jobs:
                 lib/lisp-fs.lisp|lib/unify.lisp|tests/semantic/d6-derived-research-batch-01.lisp|tests/semantic/d8-rassq-until-batch.lisp|scripts/check-domain-logic-laws.lisp)
                   profile_args=(--core4-runtime);;
               esac
+              if [[ -n "$expected_error" ]]; then
+                profile_args+=(--expect-error "$expected_error")
+              fi
               if ! bash scripts/refresh-verified-t5m-pair.sh "$source" target/debug/sens target/debug/sens-trit "${binding_args[@]}" "${profile_args[@]}"; then
                 echo "::error::LISP_TO_SENS_REMINT_AFTER_RACE_FAILED source=$source attempt=$attempt"
                 exit 1
