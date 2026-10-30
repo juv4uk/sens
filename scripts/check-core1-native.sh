@@ -464,6 +464,23 @@ check_core1_semantic_witness d5-selector-derived-law \
   tests/semantic/d5-selector-derived-law.lisp 1
 check_core1_semantic_witness d5-selector-derived-mutant \
   tests/semantic/d5-selector-derived-mutant.lisp 0
+check_core1_semantic_witness d5-assoc-core1-law \
+  tests/semantic/d5-assoc-total-list-law.lisp 1
+for source in \
+  tests/semantic/d5-assoc-hidden-tail-negative.lisp \
+  tests/semantic/d5-assoc-late-record-negative.lisp; do
+  label="${source##*/}"
+  if "$sens" --t5m-files lib/core1.lisp "$source" \
+      > "$scratch/$label.out" 2> "$scratch/$label.err"; then
+    echo "CORE1_ASSOC_ACCEPTED_MALFORMED_INPUT $source" >&2
+    exit 1
+  fi
+  grep -Fq 'перше очікує непорожній список' "$scratch/$label.err" || {
+    echo "CORE1_ASSOC_WRONG_MALFORMED_INPUT_REJECTION $source" >&2
+    cat "$scratch/$label.err" >&2
+    exit 1
+  }
+done
 check_core1_semantic_witness d9-core1-fifth-law \
   tests/semantic/d9-core1-fifth-law.lisp 1
 check_core1_semantic_witness d9-core1-fifth-mutant \
@@ -702,6 +719,58 @@ cmp -s "$scratch/core1-properties.expected" "$scratch/core1-properties.out" || {
   exit 1
 }
 
+# Core1 owns the ordinary SENS definition of D5:11100 ASSOC. Prove first
+# match, missing key, and a found record whose payload is the empty list.
+cat lib/core1.lisp tests/integration/core1/core1-assoc.lisp \
+  > "$scratch/core1-assoc.lisp"
+"$sens" --t5m-mint "$scratch/core1-assoc.lisp" "$scratch/core1-assoc.sens"
+"$sens" "$scratch/core1-assoc.sens" > "$scratch/core1-assoc.out"
+printf '%s\n' '(1 1 1)' > "$scratch/core1-assoc.expected"
+cmp -s "$scratch/core1-assoc.expected" "$scratch/core1-assoc.out" || {
+  diff -u "$scratch/core1-assoc.expected" "$scratch/core1-assoc.out" >&2 || true
+  exit 1
+}
+
+# A match at the head must not hide an improper outer-list tail.
+cat lib/core1.lisp > "$scratch/core1-assoc-improper-tail.lisp"
+cat >> "$scratch/core1-assoc-improper-tail.lisp" <<'SENS'
+(знайти-за-ключем (як-є а)
+  (сполучити (сполучити (як-є а) (як-є перший)) ні))
+SENS
+"$sens" --t5m-mint "$scratch/core1-assoc-improper-tail.lisp" \
+  "$scratch/core1-assoc-improper-tail.sens"
+if "$sens" "$scratch/core1-assoc-improper-tail.sens" \
+    > "$scratch/core1-assoc-improper-tail.out" \
+    2> "$scratch/core1-assoc-improper-tail.err"; then
+  echo 'CORE1_ASSOC_ACCEPTED_IMPROPER_TAIL' >&2
+  exit 1
+fi
+grep -Fq 'car expects a non-empty list' \
+  "$scratch/core1-assoc-improper-tail.err" || {
+  echo 'CORE1_ASSOC_WRONG_IMPROPER_TAIL_REJECTION' >&2
+  cat "$scratch/core1-assoc-improper-tail.err" >&2
+  exit 1
+}
+
+# Exact D5 resident arity is two; no default/fabricated argument is allowed.
+cat lib/core1.lisp > "$scratch/core1-assoc-arity.lisp"
+printf '%s\n' '(знайти-за-ключем (як-є а))' \
+  >> "$scratch/core1-assoc-arity.lisp"
+"$sens" --t5m-mint "$scratch/core1-assoc-arity.lisp" \
+  "$scratch/core1-assoc-arity.sens"
+if "$sens" "$scratch/core1-assoc-arity.sens" \
+    > "$scratch/core1-assoc-arity.out" \
+    2> "$scratch/core1-assoc-arity.err"; then
+  echo 'CORE1_ASSOC_ACCEPTED_WRONG_ARITY' >&2
+  exit 1
+fi
+grep -Fq 'expected / ochikuvalosia / erwartet 2; received / otrymano / erhalten 1' \
+  "$scratch/core1-assoc-arity.err" || {
+  echo 'CORE1_ASSOC_WRONG_ARITY_REJECTION' >&2
+  cat "$scratch/core1-assoc-arity.err" >&2
+  exit 1
+}
+
 cat lib/core1.lisp tests/integration/core1/core1-reader-markers.lisp \
   > "$scratch/core1-reader-markers.lisp"
 "$sens" --t5m-mint "$scratch/core1-reader-markers.lisp" "$scratch/core1-reader-markers.sens"
@@ -869,4 +938,4 @@ cmp -s "$scratch/core1-gc.expected" "$scratch/core1-gc.out" || {
   exit 1
 }
 
-echo 'CORE1_NATIVE_OK self_loaded=YES arrays=YES array_boundaries=YES properties=YES reader_markers=YES exact_conditions=YES call_arity=YES quote_arity=YES evaluated_arguments=YES list_data_not_callable=YES domain_functions=YES d7_data_not_callable=YES d8_logic=YES d9_fifth=YES d9_identity=YES d10_if=YES gc_model=YES exact_domains=YES negatives=23'
+echo 'CORE1_NATIVE_OK self_loaded=YES arrays=YES array_boundaries=YES properties=YES reader_markers=YES exact_conditions=YES call_arity=YES quote_arity=YES evaluated_arguments=YES list_data_not_callable=YES domain_functions=YES d7_data_not_callable=YES d8_logic=YES d9_fifth=YES d9_identity=YES d10_if=YES gc_model=YES exact_domains=YES negatives=27'
