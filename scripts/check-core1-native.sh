@@ -15,9 +15,7 @@ import sys
 from pathlib import Path
 
 def read_forms(path):
-    # Core1 currently has no string literals; strip its Lisp line comments,
-    # then parse balanced S-expressions so call heads are audited structurally.
-    source = '\n'.join(line.split(';', 1)[0] for line in Path(path).read_text().splitlines())
+    source = strip_lisp_comments(Path(path).read_text())
     tokens = re.findall(r'"(?:\\.|[^"\\])*"|[^\s()]+|[()]', source)
     forms = []
     cursor = 0
@@ -41,6 +39,34 @@ def read_forms(path):
         forms.append(read_one())
     return forms
 
+def strip_lisp_comments(source):
+    output = []
+    in_string = False
+    escaped = False
+    in_comment = False
+    for char in source:
+        if in_comment:
+            if char == '\n':
+                output.append(char)
+                in_comment = False
+            continue
+        if in_string:
+            output.append(char)
+            if escaped:
+                escaped = False
+            elif char == '\\':
+                escaped = True
+            elif char == '"':
+                in_string = False
+        elif char == '"':
+            output.append(char)
+            in_string = True
+        elif char == ';':
+            in_comment = True
+        else:
+            output.append(char)
+    return ''.join(output)
+
 try:
     core1_forms = read_forms('lib/core1.lisp')
 except ValueError as error:
@@ -51,13 +77,39 @@ core1_names = {
     form[1] for form in core1_forms
     if isinstance(form, list) and len(form) >= 3 and form[0] == 'визначити'
 }
-resident_names = set()
+resident_names = {}
 for path in Path('lib/domains').glob('d*.lisp'):
-    resident_names.update(re.findall(r'\(укр\s+([^\s()]+)', path.read_text()))
-collisions = sorted(core1_names & resident_names)
-if collisions:
-    print('CORE1_DOMAIN_NAME_COLLISION ' + ' '.join(collisions), file=sys.stderr)
+    try:
+        tables = read_forms(path)
+    except ValueError as error:
+        print(f'CORE1_DOMAIN_TABLE_PARSE_ERROR file={path} error={error}', file=sys.stderr)
+        raise SystemExit(1)
+    for table in tables:
+        if not isinstance(table, list) or not table or table[0] != 'domain-table-1':
+            continue
+        for row in table[1:]:
+            if not isinstance(row, list) or not row or not isinstance(row[0], str):
+                continue
+            for surface in row[1:]:
+                if (isinstance(surface, list) and len(surface) == 2
+                        and surface[0] == 'укр' and isinstance(surface[1], str)):
+                    resident_names.setdefault(surface[1], set()).add((path.stem, row[0]))
+
+domain_definitions = {}
+ambiguous_definitions = []
+for name in sorted(core1_names & resident_names.keys()):
+    identities = resident_names[name]
+    if len(identities) != 1:
+        ambiguous_definitions.append(name)
+    else:
+        domain_definitions[name] = next(iter(identities))
+if ambiguous_definitions:
+    print('CORE1_AMBIGUOUS_DOMAIN_DEFINITION ' + ' '.join(ambiguous_definitions), file=sys.stderr)
     raise SystemExit(1)
+domain_definition_summary = ','.join(
+    f'{name}@{domain}:{bits}'
+    for name, (domain, bits) in sorted(domain_definitions.items())
+)
 
 special_forms = {'визначити', 'функція', 'мітка', 'за-умовою', 'як-є'}
 unresolved = []
@@ -100,7 +152,7 @@ if unresolved:
     details = ' '.join(f'{owner}:{name}' for owner, name in sorted(set(unresolved)))
     print('CORE1_UNRESOLVED_CALLS ' + details, file=sys.stderr)
     raise SystemExit(1)
-print(f'CORE1_STATIC_AUDIT_OK definitions={len(core1_names)} domain_residents={len(resident_names)} unresolved_calls=0 name_collisions=0')
+print(f'CORE1_STATIC_AUDIT_OK definitions={len(core1_names)} domain_residents={len(resident_names)} core1_source_domain_definitions={len(domain_definitions)} exact_bindings={domain_definition_summary or "none"} unresolved_calls=0 ambiguous_domain_definitions=0')
 PY
 
 scratch="$(mktemp -d)"
@@ -135,6 +187,44 @@ cmp -s "$scratch/core1-list-length.expected" \
   echo 'CORE1_LIST_LENGTH_MISMATCH' >&2
   diff -u "$scratch/core1-list-length.expected" \
     "$scratch/core1-list-length.out" >&2 || true
+  exit 1
+}
+
+"$sens" --t5m-mint tests/integration/core1/core1-reverse.lisp \
+  "$scratch/core1-reverse-fixture.sens"
+cmp -s "$scratch/core1-reverse-fixture.sens" \
+  tests/integration/core1/core1-reverse.sens || {
+  echo 'CORE1_REVERSE_T5M_PAIR_MISMATCH' >&2
+  exit 1
+}
+"$sens" --t5m-files lib/core1.lisp \
+  tests/integration/core1/core1-reverse.lisp \
+  > "$scratch/core1-reverse.out"
+printf '%s\n' '(1 1 1)' > "$scratch/core1-reverse.expected"
+cmp -s "$scratch/core1-reverse.expected" \
+  "$scratch/core1-reverse.out" || {
+  echo 'CORE1_REVERSE_MISMATCH' >&2
+  diff -u "$scratch/core1-reverse.expected" \
+    "$scratch/core1-reverse.out" >&2 || true
+  exit 1
+}
+
+"$sens" --t5m-mint tests/integration/core1/core1-append.lisp \
+  "$scratch/core1-append-fixture.sens"
+cmp -s "$scratch/core1-append-fixture.sens" \
+  tests/integration/core1/core1-append.sens || {
+  echo 'CORE1_APPEND_T5M_PAIR_MISMATCH' >&2
+  exit 1
+}
+"$sens" --t5m-files lib/core1.lisp \
+  tests/integration/core1/core1-append.lisp \
+  > "$scratch/core1-append.out"
+printf '%s\n' '(1 1 1)' > "$scratch/core1-append.expected"
+cmp -s "$scratch/core1-append.expected" \
+  "$scratch/core1-append.out" || {
+  echo 'CORE1_APPEND_MISMATCH' >&2
+  diff -u "$scratch/core1-append.expected" \
+    "$scratch/core1-append.out" >&2 || true
   exit 1
 }
 
