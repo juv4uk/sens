@@ -180,6 +180,24 @@ cmp -s "$scratch/core1-call-arity.expected" "$scratch/core1-call-arity.out" || {
   exit 1
 }
 
+cat lib/core1.lisp tests/integration/core1/core1-quote-arity.lisp \
+  > "$scratch/core1-quote-arity.lisp"
+"$sens" --t5m-mint \
+  "$scratch/core1-quote-arity.lisp" \
+  "$scratch/core1-quote-arity.sens"
+"$sens" "$scratch/core1-quote-arity.sens" \
+  > "$scratch/core1-quote-arity.out"
+printf '%s\n' '(17 1 1)' > "$scratch/core1-quote-arity.expected"
+cmp -s \
+  "$scratch/core1-quote-arity.expected" \
+  "$scratch/core1-quote-arity.out" || {
+  echo 'CORE1_QUOTE_ARITY_MISMATCH' >&2
+  diff -u \
+    "$scratch/core1-quote-arity.expected" \
+    "$scratch/core1-quote-arity.out" >&2 || true
+  exit 1
+}
+
 cat lib/core1.lisp tests/integration/core1/core1-evaluated-arguments.lisp \
   > "$scratch/core1-evaluated-arguments.lisp"
 "$sens" --t5m-mint \
@@ -279,4 +297,4 @@ cmp -s "$scratch/core1-gc.expected" "$scratch/core1-gc.out" || {
   exit 1
 }
 
-echo 'CORE1_NATIVE_OK self_loaded=YES arrays=YES properties=YES reader_markers=YES exact_conditions=YES call_arity=YES evaluated_arguments=YES list_data_not_callable=YES domain_functions=YES d7_data_not_callable=YES gc_model=YES exact_domains=YES negatives=4'
+echo 'CORE1_NATIVE_OK self_loaded=YES arrays=YES properties=YES reader_markers=YES exact_conditions=YES call_arity=YES quote_arity=YES evaluated_arguments=YES list_data_not_callable=YES domain_functions=YES d7_data_not_callable=YES gc_model=YES exact_domains=YES negatives=4'
