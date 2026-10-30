@@ -118,6 +118,9 @@ jobs:
               tests/integration/core1/reject-core1-d7-as-function.lisp)
                 binding_args=(--binding-source lib/core1.lisp)
                 expected_error='D7 1100110 не має допущеного механізму виклику';;
+              tests/integration/core1/reject-core1-list-as-function.lisp)
+                binding_args=(--binding-source lib/core1.lisp)
+                expected_error='D4:0000 застосувати: D7 1101100 не має допущеного механізму виклику';;
               tests/semantic/d9-d10-defined-functions-law.lisp)
                 # The D9 witness invokes real world functions, which Core4 does not bind itself.
                 binding_args=(--binding-source lib/world.lisp)
@@ -247,6 +250,9 @@ jobs:
                 tests/integration/core1/reject-core1-d7-as-function.lisp)
                   binding_args=(--binding-source lib/core1.lisp)
                   expected_error='D7 1100110 не має допущеного механізму виклику';;
+                tests/integration/core1/reject-core1-list-as-function.lisp)
+                  binding_args=(--binding-source lib/core1.lisp)
+                  expected_error='D4:0000 застосувати: D7 1101100 не має допущеного механізму виклику';;
                 tests/fixtures/wsm-fs-record-producer.lisp)
                   binding_args=(--binding-source lib/persistent-map.lisp --binding-source lib/world.lisp --binding-source lib/content-store.lisp --binding-source lib/lisp-fs.lisp)
                   profile_args=(--core4-runtime);;

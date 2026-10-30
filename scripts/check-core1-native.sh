@@ -752,6 +752,61 @@ cmp -s "$scratch/core1-call-arity.expected" "$scratch/core1-call-arity.out" || {
   exit 1
 }
 
+cat lib/core1.lisp tests/integration/core1/core1-quote-arity.lisp \
+  > "$scratch/core1-quote-arity.lisp"
+"$sens" --t5m-mint \
+  "$scratch/core1-quote-arity.lisp" \
+  "$scratch/core1-quote-arity.sens"
+"$sens" "$scratch/core1-quote-arity.sens" \
+  > "$scratch/core1-quote-arity.out"
+printf '%s\n' '((1101100 1100110 1111001 1110011) 1 1)' > "$scratch/core1-quote-arity.expected"
+cmp -s \
+  "$scratch/core1-quote-arity.expected" \
+  "$scratch/core1-quote-arity.out" || {
+  echo 'CORE1_QUOTE_ARITY_MISMATCH' >&2
+  diff -u \
+    "$scratch/core1-quote-arity.expected" \
+    "$scratch/core1-quote-arity.out" >&2 || true
+  exit 1
+}
+
+cat lib/core1.lisp tests/integration/core1/core1-evaluated-arguments.lisp \
+  > "$scratch/core1-evaluated-arguments.lisp"
+"$sens" --t5m-mint \
+  "$scratch/core1-evaluated-arguments.lisp" \
+  "$scratch/core1-evaluated-arguments.sens"
+"$sens" "$scratch/core1-evaluated-arguments.sens" \
+  > "$scratch/core1-evaluated-arguments.out"
+printf '%s\n' '((1100110 0101100))' > "$scratch/core1-evaluated-arguments.expected"
+cmp -s \
+  "$scratch/core1-evaluated-arguments.expected" \
+  "$scratch/core1-evaluated-arguments.out" || {
+  echo 'CORE1_EVALUATED_ARGUMENTS_MISMATCH' >&2
+  diff -u \
+    "$scratch/core1-evaluated-arguments.expected" \
+    "$scratch/core1-evaluated-arguments.out" >&2 || true
+  exit 1
+}
+
+cat lib/core1.lisp tests/integration/core1/reject-core1-list-as-function.lisp \
+  > "$scratch/reject-core1-list-as-function.lisp"
+"$sens" --t5m-mint \
+  "$scratch/reject-core1-list-as-function.lisp" \
+  "$scratch/reject-core1-list-as-function.sens"
+if "$sens" "$scratch/reject-core1-list-as-function.sens" \
+    > "$scratch/reject-core1-list-as-function.out" \
+    2> "$scratch/reject-core1-list-as-function.err"; then
+  echo 'CORE1_ACCEPTED_LIST_AS_FUNCTION' >&2
+  cat "$scratch/reject-core1-list-as-function.out" >&2
+  exit 1
+fi
+grep -Fq 'D4:0000 застосувати: D7 1101100 не має допущеного механізму виклику' \
+  "$scratch/reject-core1-list-as-function.err" || {
+  echo 'CORE1_LIST_AS_FUNCTION_WRONG_REJECTION' >&2
+  cat "$scratch/reject-core1-list-as-function.err" >&2
+  exit 1
+}
+
 cat lib/core1.lisp tests/integration/core1/core1-d7-callability.lisp \
   > "$scratch/core1-d7-callability.lisp"
 "$sens" --t5m-mint \
@@ -814,4 +869,4 @@ cmp -s "$scratch/core1-gc.expected" "$scratch/core1-gc.out" || {
   exit 1
 }
 
-echo 'CORE1_NATIVE_OK self_loaded=YES arrays=YES array_boundaries=YES properties=YES reader_markers=YES exact_conditions=YES call_arity=YES domain_functions=YES d7_data_not_callable=YES d8_logic=YES d9_fifth=YES d9_identity=YES d10_if=YES gc_model=YES exact_domains=YES negatives=20'
+echo 'CORE1_NATIVE_OK self_loaded=YES arrays=YES array_boundaries=YES properties=YES reader_markers=YES exact_conditions=YES call_arity=YES quote_arity=YES evaluated_arguments=YES list_data_not_callable=YES domain_functions=YES d7_data_not_callable=YES d8_logic=YES d9_fifth=YES d9_identity=YES d10_if=YES gc_model=YES exact_domains=YES negatives=23'
