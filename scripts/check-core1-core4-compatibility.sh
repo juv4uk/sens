@@ -180,6 +180,33 @@ cmp -s "$scratch/core1-call-arity.expected" "$scratch/core1-call-arity.out" || {
   exit 1
 }
 
+cat lib/core1.lisp tests/integration/core1-core4/core1-d7-callability.lisp \
+  > "$scratch/core1-d7-callability.lisp"
+"$sens" --t5m-mint \
+  "$scratch/core1-d7-callability.lisp" \
+  "$scratch/core1-d7-callability.sens"
+"$sens" "$scratch/core1-d7-callability.sens" > "$scratch/core1-d7-callability.out"
+printf '%s\n' '(22 33 44)' > "$scratch/core1-d7-callability.expected"
+cmp -s "$scratch/core1-d7-callability.expected" "$scratch/core1-d7-callability.out" || {
+  echo 'CORE1_D7_DOMAIN_FUNCTION_MISMATCH' >&2
+  diff -u "$scratch/core1-d7-callability.expected" "$scratch/core1-d7-callability.out" >&2 || true
+  exit 1
+}
+
+if "$sens" --t5m-files \
+    lib/core1.lisp \
+    tests/integration/core1-core4/reject-core1-d7-as-function.lisp \
+    > "$scratch/core1-d7-negative.out" 2> "$scratch/core1-d7-negative.err"; then
+  echo 'CORE1_ACCEPTED_D7_TEXT_AS_FUNCTION' >&2
+  exit 1
+fi
+grep -Fq 'D7 1100110 не має допущеного механізму виклику' \
+  "$scratch/core1-d7-negative.err" || {
+  echo 'CORE1_D7_REJECTION_DIAGNOSTIC_MISMATCH' >&2
+  cat "$scratch/core1-d7-negative.err" >&2
+  exit 1
+}
+
 cat lib/core1.lisp tests/integration/core1-core4/core1-prog-coverage.lisp \
   > "$scratch/core1-prog-coverage.lisp"
 "$sens" --t5m-mint \
@@ -252,4 +279,4 @@ check_rejection() {
 check_rejection tests/integration/core1-core4/reject-empty-as-condition.lisp '()'
 check_rejection tests/integration/core1-core4/reject-number-zero-as-condition.lisp '0'
 
-echo 'CORE1_CORE4_COMPATIBILITY_OK pure_core1=YES core1_arrays=YES core1_properties=YES core1_reader_marker=YES core1_exact_conditions=YES core1_call_arity=YES core1_gc_model=YES core1_core4_shared_session=YES exact_domains=YES negatives=4'
+echo 'CORE1_CORE4_COMPATIBILITY_OK pure_core1=YES core1_arrays=YES core1_properties=YES core1_reader_marker=YES core1_exact_conditions=YES core1_call_arity=YES core1_domain_functions=YES core1_d7_data_not_callable=YES core1_gc_model=YES core1_core4_shared_session=YES exact_domains=YES negatives=5'
