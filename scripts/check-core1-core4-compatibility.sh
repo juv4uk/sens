@@ -130,6 +130,34 @@ cmp -s "$scratch/core1-properties.expected" "$scratch/core1-properties.out" || {
   exit 1
 }
 
+cat lib/core1.lisp tests/integration/core1-core4/core1-condition-domains.lisp \
+  > "$scratch/core1-condition-domains.lisp"
+"$sens" --t5m-mint "$scratch/core1-condition-domains.lisp" "$scratch/core1-condition-domains.sens"
+"$sens" "$scratch/core1-condition-domains.sens" > "$scratch/core1-condition-domains.out"
+printf '%s\n' '(22 11)' > "$scratch/core1-condition-domains.expected"
+cmp -s "$scratch/core1-condition-domains.expected" "$scratch/core1-condition-domains.out" || {
+  echo 'CORE1_CONDITION_DOMAIN_MISMATCH' >&2
+  diff -u "$scratch/core1-condition-domains.expected" "$scratch/core1-condition-domains.out" >&2 || true
+  exit 1
+}
+
+check_core1_condition_rejection() {
+  local source="$1"
+  if "$sens" --t5m-files lib/core1.lisp "$source" \
+      > "$scratch/core1-condition-negative.out" 2> "$scratch/core1-condition-negative.err"; then
+    printf 'CORE1_INVALID_CONDITION_ACCEPTED source=%s\n' "$source" >&2
+    exit 1
+  fi
+  grep -Fq 'D4:0100 NOT requires an exact D1 PredicateBit' "$scratch/core1-condition-negative.err" || {
+    printf 'CORE1_WRONG_CONDITION_REJECTION source=%s\n' "$source" >&2
+    cat "$scratch/core1-condition-negative.err" >&2
+    exit 1
+  }
+}
+
+check_core1_condition_rejection tests/integration/core1-core4/reject-core1-cond-empty.lisp
+check_core1_condition_rejection tests/integration/core1-core4/reject-core1-cond-number-zero.lisp
+
 cat lib/core1.lisp tests/integration/core1-core4/core1-prog-coverage.lisp \
   > "$scratch/core1-prog-coverage.lisp"
 "$sens" --t5m-mint \
@@ -202,4 +230,4 @@ check_rejection() {
 check_rejection tests/integration/core1-core4/reject-empty-as-condition.lisp '()'
 check_rejection tests/integration/core1-core4/reject-number-zero-as-condition.lisp '0'
 
-echo 'CORE1_CORE4_COMPATIBILITY_OK pure_core1=YES core1_arrays=YES core1_properties=YES core1_gc_model=YES core1_core4_shared_session=YES exact_domains=YES negatives=2'
+echo 'CORE1_CORE4_COMPATIBILITY_OK pure_core1=YES core1_arrays=YES core1_properties=YES core1_exact_conditions=YES core1_gc_model=YES core1_core4_shared_session=YES exact_domains=YES negatives=4'
