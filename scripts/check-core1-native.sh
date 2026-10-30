@@ -476,6 +476,10 @@ check_core1_semantic_witness d8-core1-logic-law \
   tests/semantic/d8-core1-logic-law.lisp 1
 check_core1_semantic_witness d8-core1-logic-mutant \
   tests/semantic/d8-core1-logic-mutant.lisp 0
+check_core1_semantic_witness d10-core1-if-law \
+  tests/semantic/d10-core1-if-law.lisp 1
+check_core1_semantic_witness d10-core1-if-mutant \
+  tests/semantic/d10-core1-if-mutant.lisp 0
 check_core1_semantic_witness d8-and-or-d9-fifth-laws \
   tests/semantic/d8-and-or-d9-fifth-laws.lisp '(1 1 1 1 1 1 1 1)'
 printf '%s\n' \
@@ -791,4 +795,4 @@ cmp -s "$scratch/core1-gc.expected" "$scratch/core1-gc.out" || {
   exit 1
 }
 
-echo 'CORE1_NATIVE_OK self_loaded=YES arrays=YES array_boundaries=YES properties=YES reader_markers=YES exact_conditions=YES call_arity=YES domain_functions=YES d7_data_not_callable=YES d8_logic=YES d9_fifth=YES d9_identity=YES gc_model=YES exact_domains=YES negatives=18'
+echo 'CORE1_NATIVE_OK self_loaded=YES arrays=YES array_boundaries=YES properties=YES reader_markers=YES exact_conditions=YES call_arity=YES domain_functions=YES d7_data_not_callable=YES d8_logic=YES d9_fifth=YES d9_identity=YES d10_if=YES gc_model=YES exact_domains=YES negatives=20'
