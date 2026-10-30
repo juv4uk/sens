@@ -252,6 +252,18 @@ cmp -s "$scratch/core1-min-max-list-laws.expected" \
     "$scratch/core1-min-max-list-laws.out" >&2 || true
   exit 1
 }
+"$sens" --t5m-files lib/core1.lisp \
+  tests/semantic/d6-list-uk-laws.lisp \
+  > "$scratch/core1-d6-list-laws.out"
+printf '%s\n' '(1 1 1 1 1 1 1 1 1)' \
+  > "$scratch/core1-d6-list-laws.expected"
+cmp -s "$scratch/core1-d6-list-laws.expected" \
+  "$scratch/core1-d6-list-laws.out" || {
+  echo 'CORE1_D6_LIST_LAWS_MISMATCH' >&2
+  diff -u "$scratch/core1-d6-list-laws.expected" \
+    "$scratch/core1-d6-list-laws.out" >&2 || true
+  exit 1
+}
 
 "$sens" --t5m-mint tests/integration/core1/core1-nth.lisp \
   "$scratch/core1-nth-fixture.sens"
@@ -278,6 +290,44 @@ cmp -s "$scratch/core1-map-onto-law.expected" \
   echo 'CORE1_MAP_ONTO_LAW_MISMATCH' >&2
   diff -u "$scratch/core1-map-onto-law.expected" \
     "$scratch/core1-map-onto-law.out" >&2 || true
+  exit 1
+}
+"$sens" --t5m-files lib/core1.lisp \
+  tests/semantic/d6-filter-onto-accumulator-law.lisp \
+  > "$scratch/core1-filter-onto-law.out"
+printf '%s\n' '1' > "$scratch/core1-filter-onto-law.expected"
+cmp -s "$scratch/core1-filter-onto-law.expected" \
+  "$scratch/core1-filter-onto-law.out" || {
+  echo 'CORE1_FILTER_ONTO_LAW_MISMATCH' >&2
+  diff -u "$scratch/core1-filter-onto-law.expected" \
+    "$scratch/core1-filter-onto-law.out" >&2 || true
+  exit 1
+}
+"$sens" --t5m-files lib/core1.lisp \
+  tests/semantic/d6-filter-onto-accumulator-mutant.lisp \
+  > "$scratch/core1-filter-onto-mutant.out"
+printf '%s\n' '0' > "$scratch/core1-filter-onto-mutant.expected"
+cmp -s "$scratch/core1-filter-onto-mutant.expected" \
+  "$scratch/core1-filter-onto-mutant.out" || {
+  echo 'CORE1_FILTER_ONTO_ACCEPTED_ORDER_MUTANT' >&2
+  diff -u "$scratch/core1-filter-onto-mutant.expected" \
+    "$scratch/core1-filter-onto-mutant.out" >&2 || true
+  exit 1
+}
+printf '%s\n' \
+  '(відсіяти-до (функція (елемент) так) (сполучити (як-є а) ні) (як-є ()))' \
+  > "$scratch/core1-filter-onto-improper-tail.lisp"
+if "$sens" --t5m-files lib/core1.lisp \
+    "$scratch/core1-filter-onto-improper-tail.lisp" \
+    > "$scratch/core1-filter-onto-improper-tail.out" \
+    2> "$scratch/core1-filter-onto-improper-tail.err"; then
+  echo 'CORE1_FILTER_ONTO_ACCEPTED_IMPROPER_TAIL' >&2
+  exit 1
+fi
+grep -Fq 'перше очікує непорожній список' \
+  "$scratch/core1-filter-onto-improper-tail.err" || {
+  echo 'CORE1_FILTER_ONTO_TAIL_DIAGNOSTIC_MISMATCH' >&2
+  cat "$scratch/core1-filter-onto-improper-tail.err" >&2
   exit 1
 }
 if "$sens" --t5m-files lib/core1.lisp \
@@ -577,4 +627,4 @@ cmp -s "$scratch/core1-gc.expected" "$scratch/core1-gc.out" || {
   exit 1
 }
 
-echo 'CORE1_NATIVE_OK self_loaded=YES arrays=YES array_boundaries=YES properties=YES reader_markers=YES exact_conditions=YES call_arity=YES domain_functions=YES d7_data_not_callable=YES gc_model=YES exact_domains=YES negatives=11'
+echo 'CORE1_NATIVE_OK self_loaded=YES arrays=YES array_boundaries=YES properties=YES reader_markers=YES exact_conditions=YES call_arity=YES domain_functions=YES d7_data_not_callable=YES gc_model=YES exact_domains=YES negatives=12'
