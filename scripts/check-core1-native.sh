@@ -222,6 +222,63 @@ grep -Fq 'решта очікує непорожній список' \
   exit 1
 }
 
+"$sens" --t5m-mint tests/integration/core1/core1-min-max-list.lisp \
+  "$scratch/core1-min-max-list-fixture.sens"
+cmp -s "$scratch/core1-min-max-list-fixture.sens" \
+  tests/integration/core1/core1-min-max-list.sens || {
+  echo 'CORE1_MIN_MAX_LIST_T5M_PAIR_MISMATCH' >&2
+  exit 1
+}
+"$sens" --t5m-files lib/core1.lisp \
+  tests/integration/core1/core1-min-max-list.lisp \
+  > "$scratch/core1-min-max-list.out"
+printf '%s\n' '(1 3 () () 5)' > "$scratch/core1-min-max-list.expected"
+cmp -s "$scratch/core1-min-max-list.expected" \
+  "$scratch/core1-min-max-list.out" || {
+  echo 'CORE1_MIN_MAX_LIST_MISMATCH' >&2
+  diff -u "$scratch/core1-min-max-list.expected" \
+    "$scratch/core1-min-max-list.out" >&2 || true
+  exit 1
+}
+"$sens" --t5m-files lib/core1.lisp \
+  tests/semantic/d6-min-max-list-laws.lisp \
+  > "$scratch/core1-min-max-list-laws.out"
+printf '%s\n' '(1 1 1 1 1 1 1 1)' \
+  > "$scratch/core1-min-max-list-laws.expected"
+cmp -s "$scratch/core1-min-max-list-laws.expected" \
+  "$scratch/core1-min-max-list-laws.out" || {
+  echo 'CORE1_MIN_MAX_LIST_SEMANTIC_LAWS_MISMATCH' >&2
+  diff -u "$scratch/core1-min-max-list-laws.expected" \
+    "$scratch/core1-min-max-list-laws.out" >&2 || true
+  exit 1
+}
+if "$sens" --t5m-files lib/core1.lisp \
+    tests/integration/core1/reject-core1-min-max-nonnumeric.lisp \
+    > "$scratch/core1-min-max-nonnumeric.out" \
+    2> "$scratch/core1-min-max-nonnumeric.err"; then
+  echo 'CORE1_MIN_MAX_ACCEPTED_D7_DATA_AS_NUMBER' >&2
+  exit 1
+fi
+grep -Fq 'для математики потрібні явні операнди D12+' \
+  "$scratch/core1-min-max-nonnumeric.err" || {
+  echo 'CORE1_MIN_MAX_NUMERIC_DIAGNOSTIC_MISMATCH' >&2
+  cat "$scratch/core1-min-max-nonnumeric.err" >&2
+  exit 1
+}
+if "$sens" --t5m-files lib/core1.lisp \
+    tests/integration/core1/reject-core1-min-max-improper-tail.lisp \
+    > "$scratch/core1-min-max-improper-tail.out" \
+    2> "$scratch/core1-min-max-improper-tail.err"; then
+  echo 'CORE1_MIN_MAX_ACCEPTED_IMPROPER_TAIL' >&2
+  exit 1
+fi
+grep -Fq 'перше очікує непорожній список' \
+  "$scratch/core1-min-max-improper-tail.err" || {
+  echo 'CORE1_MIN_MAX_TAIL_DIAGNOSTIC_MISMATCH' >&2
+  cat "$scratch/core1-min-max-improper-tail.err" >&2
+  exit 1
+}
+
 "$sens" --t5m-mint tests/integration/core1/core1-reverse.lisp \
   "$scratch/core1-reverse-fixture.sens"
 cmp -s "$scratch/core1-reverse-fixture.sens" \
@@ -410,4 +467,4 @@ cmp -s "$scratch/core1-gc.expected" "$scratch/core1-gc.out" || {
   exit 1
 }
 
-echo 'CORE1_NATIVE_OK self_loaded=YES arrays=YES array_boundaries=YES properties=YES reader_markers=YES exact_conditions=YES call_arity=YES domain_functions=YES d7_data_not_callable=YES gc_model=YES exact_domains=YES negatives=4'
+echo 'CORE1_NATIVE_OK self_loaded=YES arrays=YES array_boundaries=YES properties=YES reader_markers=YES exact_conditions=YES call_arity=YES domain_functions=YES d7_data_not_callable=YES gc_model=YES exact_domains=YES negatives=6'
