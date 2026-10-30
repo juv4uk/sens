@@ -398,6 +398,40 @@ cmp -s "$scratch/core1-map-filter-laws.expected" \
     "$scratch/core1-map-filter-laws.out" >&2 || true
   exit 1
 }
+"$sens" --t5m-files lib/core1.lisp \
+  tests/semantic/d6-compose-flip-law.lisp \
+  > "$scratch/core1-compose-flip-law.out"
+printf '%s\n' '1' > "$scratch/core1-compose-flip-law.expected"
+cmp -s "$scratch/core1-compose-flip-law.expected" \
+  "$scratch/core1-compose-flip-law.out" || {
+  echo 'CORE1_COMPOSE_FLIP_CURRY_LAW_MISMATCH' >&2
+  diff -u "$scratch/core1-compose-flip-law.expected" \
+    "$scratch/core1-compose-flip-law.out" >&2 || true
+  exit 1
+}
+"$sens" --t5m-files lib/core1.lisp \
+  tests/semantic/d6-compose-flip-laws.lisp \
+  > "$scratch/core1-compose-flip-laws.out"
+printf '%s\n' '(1 1 1 1 1 1 1 1 1 1 1 1)' \
+  > "$scratch/core1-compose-flip-laws.expected"
+cmp -s "$scratch/core1-compose-flip-laws.expected" \
+  "$scratch/core1-compose-flip-laws.out" || {
+  echo 'CORE1_COMPOSE_FLIP_CURRY_LAWS_MISMATCH' >&2
+  diff -u "$scratch/core1-compose-flip-laws.expected" \
+    "$scratch/core1-compose-flip-laws.out" >&2 || true
+  exit 1
+}
+"$sens" --t5m-files lib/core1.lisp \
+  tests/semantic/d6-compose-flip-mutant.lisp \
+  > "$scratch/core1-compose-mutant.out"
+printf '%s\n' '0' > "$scratch/core1-compose-mutant.expected"
+cmp -s "$scratch/core1-compose-mutant.expected" \
+  "$scratch/core1-compose-mutant.out" || {
+  echo 'CORE1_COMPOSE_ACCEPTED_REVERSED_ORDER_MUTANT' >&2
+  diff -u "$scratch/core1-compose-mutant.expected" \
+    "$scratch/core1-compose-mutant.out" >&2 || true
+  exit 1
+}
 printf '%s\n' \
   '(відсіяти-до (функція (елемент) так) (сполучити (як-є а) ні) (як-є ()))' \
   > "$scratch/core1-filter-onto-improper-tail.lisp"
