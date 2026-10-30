@@ -341,6 +341,52 @@ grep -Fq 'перше очікує непорожній список' \
   cat "$scratch/core1-filter-improper-tail.err" >&2
   exit 1
 }
+"$sens" --t5m-files lib/core1.lisp \
+  tests/semantic/d6-maplist-signature-law.lisp \
+  > "$scratch/core1-maplist-signature.out"
+printf '%s\n' '(1 1 1)' > "$scratch/core1-maplist-signature.expected"
+cmp -s "$scratch/core1-maplist-signature.expected" \
+  "$scratch/core1-maplist-signature.out" || {
+  echo 'CORE1_MAPLIST_SIGNATURE_MISMATCH' >&2
+  diff -u "$scratch/core1-maplist-signature.expected" \
+    "$scratch/core1-maplist-signature.out" >&2 || true
+  exit 1
+}
+"$sens" --t5m-files lib/core1.lisp \
+  tests/semantic/d6-maplist-preflight-laws.lisp \
+  > "$scratch/core1-maplist-preflight.out"
+printf '%s\n' '1' > "$scratch/core1-maplist-preflight.expected"
+cmp -s "$scratch/core1-maplist-preflight.expected" \
+  "$scratch/core1-maplist-preflight.out" || {
+  echo 'CORE1_MAPLIST_PREFLIGHT_MISMATCH' >&2
+  diff -u "$scratch/core1-maplist-preflight.expected" \
+    "$scratch/core1-maplist-preflight.out" >&2 || true
+  exit 1
+}
+"$sens" --t5m-files lib/core1.lisp \
+  tests/semantic/d6-maplist-suffix-order-mutant.lisp \
+  > "$scratch/core1-maplist-order-mutant.out"
+printf '%s\n' '0' > "$scratch/core1-maplist-order-mutant.expected"
+cmp -s "$scratch/core1-maplist-order-mutant.expected" \
+  "$scratch/core1-maplist-order-mutant.out" || {
+  echo 'CORE1_MAPLIST_ACCEPTED_SUFFIX_ORDER_MUTANT' >&2
+  diff -u "$scratch/core1-maplist-order-mutant.expected" \
+    "$scratch/core1-maplist-order-mutant.out" >&2 || true
+  exit 1
+}
+if "$sens" --t5m-files lib/core1.lisp \
+    tests/semantic/d6-maplist-poison-improper-tail-negative.lisp \
+    > "$scratch/core1-maplist-improper-tail.out" \
+    2> "$scratch/core1-maplist-improper-tail.err"; then
+  echo 'CORE1_MAPLIST_ACCEPTED_IMPROPER_TAIL' >&2
+  exit 1
+fi
+grep -Fq 'перше очікує непорожній список' \
+  "$scratch/core1-maplist-improper-tail.err" || {
+  echo 'CORE1_MAPLIST_PREFLIGHT_DIAGNOSTIC_MISMATCH' >&2
+  cat "$scratch/core1-maplist-improper-tail.err" >&2
+  exit 1
+}
 printf '%s\n' \
   '(відсіяти-до (функція (елемент) так) (сполучити (як-є а) ні) (як-є ()))' \
   > "$scratch/core1-filter-onto-improper-tail.lisp"
@@ -654,4 +700,4 @@ cmp -s "$scratch/core1-gc.expected" "$scratch/core1-gc.out" || {
   exit 1
 }
 
-echo 'CORE1_NATIVE_OK self_loaded=YES arrays=YES array_boundaries=YES properties=YES reader_markers=YES exact_conditions=YES call_arity=YES domain_functions=YES d7_data_not_callable=YES gc_model=YES exact_domains=YES negatives=13'
+echo 'CORE1_NATIVE_OK self_loaded=YES arrays=YES array_boundaries=YES properties=YES reader_markers=YES exact_conditions=YES call_arity=YES domain_functions=YES d7_data_not_callable=YES gc_model=YES exact_domains=YES negatives=14'
