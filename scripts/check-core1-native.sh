@@ -158,6 +158,18 @@ PY
 scratch="$(mktemp -d)"
 trap 'rm -rf -- "$scratch"' EXIT
 
+check_core1_semantic_witness() {
+  local label="$1" source="$2" expected="$3"
+  "$sens" --t5m-files lib/core1.lisp "$source" \
+    > "$scratch/$label.out"
+  printf '%s\n' "$expected" > "$scratch/$label.expected"
+  cmp -s "$scratch/$label.expected" "$scratch/$label.out" || {
+    echo "CORE1_SEMANTIC_WITNESS_MISMATCH $label" >&2
+    diff -u "$scratch/$label.expected" "$scratch/$label.out" >&2 || true
+    exit 1
+  }
+}
+
 cat lib/core1.lisp tests/integration/core1/core1-local-variable.lisp \
   > "$scratch/core1-standalone.lisp"
 "$sens" --t5m-mint \
@@ -432,6 +444,26 @@ cmp -s "$scratch/core1-compose-mutant.expected" \
     "$scratch/core1-compose-mutant.out" >&2 || true
   exit 1
 }
+check_core1_semantic_witness d4-second-selector-law \
+  tests/semantic/d4-second-selector-law.lisp 1
+check_core1_semantic_witness d4-second-selector-mutant \
+  tests/semantic/d4-second-selector-mutant.lisp 0
+check_core1_semantic_witness d4-nested-selectors-law \
+  tests/semantic/d4-nested-pair-selectors-law.lisp 1
+check_core1_semantic_witness d4-nested-selectors-mutant \
+  tests/semantic/d4-nested-pair-selectors-mutant.lisp 0
+check_core1_semantic_witness d4-selector-composition-law \
+  tests/semantic/d4-selector-composition-law.lisp 1
+check_core1_semantic_witness d4-selector-composition-mutant \
+  tests/semantic/d4-selector-composition-mutant.lisp 0
+check_core1_semantic_witness d4-selector-domain-law \
+  tests/semantic/d4-selector-domain-law.lisp 1
+check_core1_semantic_witness d4-selector-domain-mutant \
+  tests/semantic/d4-selector-domain-mutant.lisp 0
+check_core1_semantic_witness d5-selector-derived-law \
+  tests/semantic/d5-selector-derived-law.lisp 1
+check_core1_semantic_witness d5-selector-derived-mutant \
+  tests/semantic/d5-selector-derived-mutant.lisp 0
 printf '%s\n' \
   '(відсіяти-до (функція (елемент) так) (сполучити (як-є а) ні) (як-є ()))' \
   > "$scratch/core1-filter-onto-improper-tail.lisp"
