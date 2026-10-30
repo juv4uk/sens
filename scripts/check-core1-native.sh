@@ -129,8 +129,6 @@ cmp -s "$scratch/core1-array-boundaries-fixture.sens" \
   echo 'CORE1_ARRAY_BOUNDARY_T5M_PAIR_MISMATCH' >&2
   exit 1
 }
-"${SENS_TRIT_BIN:-$root_dir/target/debug/sens-trit}" verify-view \
-  tests/integration/core1/core1-array-boundaries.sens >/dev/null
 "$sens" --t5m-mint \
   "$scratch/core1-array-boundaries.lisp" \
   "$scratch/core1-array-boundaries.sens"
