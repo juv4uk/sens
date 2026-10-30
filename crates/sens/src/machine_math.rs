@@ -424,7 +424,7 @@ fn scalar_dot(a: &[f64], b: &[f64]) -> f64 {
         }
         // SAFETY: довжини рівні, елементи доступні для читання,
         // ASM зберігає x86-64 System V ABI.
-        return unsafe { sens_dot_scalar(a.as_ptr(), b.as_ptr(), a.len()) };
+        unsafe { sens_dot_scalar(a.as_ptr(), b.as_ptr(), a.len()) }
     }
     #[cfg(not(all(target_arch = "x86_64", target_os = "linux")))]
     {
