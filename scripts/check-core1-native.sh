@@ -252,6 +252,86 @@ cmp -s "$scratch/core1-min-max-list-laws.expected" \
     "$scratch/core1-min-max-list-laws.out" >&2 || true
   exit 1
 }
+
+"$sens" --t5m-mint tests/integration/core1/core1-nth.lisp \
+  "$scratch/core1-nth-fixture.sens"
+cmp -s "$scratch/core1-nth-fixture.sens" \
+  tests/integration/core1/core1-nth.sens || {
+  echo 'CORE1_NTH_T5M_PAIR_MISMATCH' >&2
+  exit 1
+}
+"$sens" --t5m-files lib/core1.lisp \
+  tests/integration/core1/core1-nth.lisp \
+  > "$scratch/core1-nth.out"
+printf '%s\n' '(1 1 1 1)' > "$scratch/core1-nth.expected"
+cmp -s "$scratch/core1-nth.expected" "$scratch/core1-nth.out" || {
+  echo 'CORE1_NTH_MISMATCH' >&2
+  diff -u "$scratch/core1-nth.expected" "$scratch/core1-nth.out" >&2 || true
+  exit 1
+}
+printf '%s\n' \
+  '(елемент-списку-за-індексом 0 (сполучити (як-є а) ні))' \
+  > "$scratch/core1-nth-improper-tail.lisp"
+if "$sens" --t5m-files lib/core1.lisp \
+    "$scratch/core1-nth-improper-tail.lisp" \
+    > "$scratch/core1-nth-improper-tail.out" \
+    2> "$scratch/core1-nth-improper-tail.err"; then
+  echo 'CORE1_NTH_ACCEPTED_IMPROPER_TAIL' >&2
+  exit 1
+fi
+grep -Fq 'решта очікує непорожній список' \
+  "$scratch/core1-nth-improper-tail.err" || {
+  echo 'CORE1_NTH_TAIL_DIAGNOSTIC_MISMATCH' >&2
+  cat "$scratch/core1-nth-improper-tail.err" >&2
+  exit 1
+}
+printf '%s\n' \
+  '(елемент-списку-за-індексом (відняти 0 1) (список (як-є а)))' \
+  > "$scratch/core1-nth-negative-index.lisp"
+if "$sens" --t5m-files lib/core1.lisp \
+    "$scratch/core1-nth-negative-index.lisp" \
+    > "$scratch/core1-nth-negative-index.out" \
+    2> "$scratch/core1-nth-negative-index.err"; then
+  echo 'CORE1_NTH_ACCEPTED_NEGATIVE_INDEX' >&2
+  exit 1
+fi
+grep -Fq 'перше очікує непорожній список' \
+  "$scratch/core1-nth-negative-index.err" || {
+  echo 'CORE1_NTH_NEGATIVE_INDEX_DIAGNOSTIC_MISMATCH' >&2
+  cat "$scratch/core1-nth-negative-index.err" >&2
+  exit 1
+}
+printf '%s\n' \
+  '(елемент-списку-за-індексом (частка 1 2) (список (як-є а)))' \
+  > "$scratch/core1-nth-fractional-index.lisp"
+if "$sens" --t5m-files lib/core1.lisp \
+    "$scratch/core1-nth-fractional-index.lisp" \
+    > "$scratch/core1-nth-fractional-index.out" \
+    2> "$scratch/core1-nth-fractional-index.err"; then
+  echo 'CORE1_NTH_ACCEPTED_NONINTEGER_INDEX' >&2
+  exit 1
+fi
+grep -Fq 'перше очікує непорожній список' \
+  "$scratch/core1-nth-fractional-index.err" || {
+  echo 'CORE1_NTH_FRACTIONAL_INDEX_DIAGNOSTIC_MISMATCH' >&2
+  cat "$scratch/core1-nth-fractional-index.err" >&2
+  exit 1
+}
+printf '%s\n' '(елемент-списку-за-індексом 0 ні)' \
+  > "$scratch/core1-nth-invalid-root.lisp"
+if "$sens" --t5m-files lib/core1.lisp \
+    "$scratch/core1-nth-invalid-root.lisp" \
+    > "$scratch/core1-nth-invalid-root.out" \
+    2> "$scratch/core1-nth-invalid-root.err"; then
+  echo 'CORE1_NTH_ACCEPTED_D1_AS_LIST' >&2
+  exit 1
+fi
+grep -Fq 'решта очікує непорожній список' \
+  "$scratch/core1-nth-invalid-root.err" || {
+  echo 'CORE1_NTH_INVALID_ROOT_DIAGNOSTIC_MISMATCH' >&2
+  cat "$scratch/core1-nth-invalid-root.err" >&2
+  exit 1
+}
 printf '%s\n' \
   '(найменше-у-списку (список 1 (як-є нечислове-значення) 0))' \
   > "$scratch/core1-min-max-nonnumeric.lisp"
@@ -473,4 +553,4 @@ cmp -s "$scratch/core1-gc.expected" "$scratch/core1-gc.out" || {
   exit 1
 }
 
-echo 'CORE1_NATIVE_OK self_loaded=YES arrays=YES array_boundaries=YES properties=YES reader_markers=YES exact_conditions=YES call_arity=YES domain_functions=YES d7_data_not_callable=YES gc_model=YES exact_domains=YES negatives=6'
+echo 'CORE1_NATIVE_OK self_loaded=YES arrays=YES array_boundaries=YES properties=YES reader_markers=YES exact_conditions=YES call_arity=YES domain_functions=YES d7_data_not_callable=YES gc_model=YES exact_domains=YES negatives=10'
