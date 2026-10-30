@@ -387,6 +387,17 @@ grep -Fq 'перше очікує непорожній список' \
   cat "$scratch/core1-maplist-improper-tail.err" >&2
   exit 1
 }
+"$sens" --t5m-files lib/core1.lisp \
+  tests/semantic/d6-map-filter-uk-laws.lisp \
+  > "$scratch/core1-map-filter-laws.out"
+printf '%s\n' '(1 1 1 1 1 1)' > "$scratch/core1-map-filter-laws.expected"
+cmp -s "$scratch/core1-map-filter-laws.expected" \
+  "$scratch/core1-map-filter-laws.out" || {
+  echo 'CORE1_MAP_FILTER_LAWS_MISMATCH' >&2
+  diff -u "$scratch/core1-map-filter-laws.expected" \
+    "$scratch/core1-map-filter-laws.out" >&2 || true
+  exit 1
+}
 printf '%s\n' \
   '(відсіяти-до (функція (елемент) так) (сполучити (як-є а) ні) (як-є ()))' \
   > "$scratch/core1-filter-onto-improper-tail.lisp"
