@@ -466,9 +466,13 @@ check_core1_semantic_witness d5-selector-derived-mutant \
   tests/semantic/d5-selector-derived-mutant.lisp 0
 check_core1_semantic_witness d5-assoc-core1-law \
   tests/semantic/d5-assoc-total-list-law.lisp 1
+check_core1_semantic_witness d5-member-core1-law \
+  tests/semantic/d5-member-total-list-law.lisp 1
 for source in \
   tests/semantic/d5-assoc-hidden-tail-negative.lisp \
-  tests/semantic/d5-assoc-late-record-negative.lisp; do
+  tests/semantic/d5-assoc-late-record-negative.lisp \
+  tests/semantic/d5-member-hidden-tail-negative.lisp \
+  tests/semantic/d5-member-nonlist-negative.lisp; do
   label="${source##*/}"
   if "$sens" --t5m-files lib/core1.lisp "$source" \
       > "$scratch/$label.out" 2> "$scratch/$label.err"; then
@@ -938,4 +942,4 @@ cmp -s "$scratch/core1-gc.expected" "$scratch/core1-gc.out" || {
   exit 1
 }
 
-echo 'CORE1_NATIVE_OK self_loaded=YES arrays=YES array_boundaries=YES properties=YES reader_markers=YES exact_conditions=YES call_arity=YES quote_arity=YES evaluated_arguments=YES list_data_not_callable=YES domain_functions=YES d7_data_not_callable=YES d8_logic=YES d9_fifth=YES d9_identity=YES d10_if=YES gc_model=YES exact_domains=YES negatives=27'
+echo 'CORE1_NATIVE_OK self_loaded=YES arrays=YES array_boundaries=YES properties=YES reader_markers=YES exact_conditions=YES call_arity=YES quote_arity=YES evaluated_arguments=YES list_data_not_callable=YES domain_functions=YES d7_data_not_callable=YES d8_logic=YES d9_fifth=YES d9_identity=YES d10_if=YES gc_model=YES exact_domains=YES negatives=29'
