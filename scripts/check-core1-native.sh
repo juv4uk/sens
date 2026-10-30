@@ -119,6 +119,25 @@ cmp -s "$scratch/core1-standalone.expected" "$scratch/core1-standalone.out" || {
   exit 1
 }
 
+"$sens" --t5m-mint tests/integration/core1/core1-list-length.lisp \
+  "$scratch/core1-list-length-fixture.sens"
+cmp -s "$scratch/core1-list-length-fixture.sens" \
+  tests/integration/core1/core1-list-length.sens || {
+  echo 'CORE1_LIST_LENGTH_T5M_PAIR_MISMATCH' >&2
+  exit 1
+}
+"$sens" --t5m-files lib/core1.lisp \
+  tests/integration/core1/core1-list-length.lisp \
+  > "$scratch/core1-list-length.out"
+printf '%s\n' '(5 5 0)' > "$scratch/core1-list-length.expected"
+cmp -s "$scratch/core1-list-length.expected" \
+  "$scratch/core1-list-length.out" || {
+  echo 'CORE1_LIST_LENGTH_MISMATCH' >&2
+  diff -u "$scratch/core1-list-length.expected" \
+    "$scratch/core1-list-length.out" >&2 || true
+  exit 1
+}
+
 cat lib/core1.lisp tests/integration/core1/core1-array-boundaries.lisp \
   > "$scratch/core1-array-boundaries.lisp"
 "$sens" --t5m-mint \
