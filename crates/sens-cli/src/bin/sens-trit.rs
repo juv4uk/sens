@@ -810,4 +810,29 @@ mod d7_zig_cli_boundary_tests {
         assert!(!feature_decode.contains("sens::decode_d7_uk_t5(&bytes)"));
     }
 
+    #[test]
+    fn mccarthy_lisp15_functions_run_from_exact_binary_domain_heads() {
+        let result = eval_t5m_bytes_core4(
+            include_bytes!("../../../../tests/semantic/mccarthy-lisp15-domain-ops.sens"),
+            true,
+        )
+        .expect("binary program should execute existing exact-domain functions");
+        assert_eq!(
+            result.value.to_string(),
+            "((1000001 1000010 1000011 1000100) 3 (1000011 1000010 1000001) 1 (1011000 1000010 1011000) ((1011000) (1011001) 1000011))"
+        );
+    }
+
+    #[test]
+    fn lisp15_pair_name_does_not_grant_callable_status_to_d8_identity() {
+        let error = eval_t5m_bytes_core4(
+            include_bytes!(
+                "../../../../tests/semantic/mccarthy-lisp15-domain-ops-unavailable-pair.sens"
+            ),
+            true,
+        )
+        .expect_err("D8 PAIR has no admitted value-call mechanism");
+        assert!(error.contains("D8 11111101"), "unexpected diagnostic: {error}");
+    }
+
 }

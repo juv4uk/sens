@@ -25,6 +25,8 @@ jobs:
         run: cargo check --locked --workspace
       - name: Зібрати REPL SENS
         run: cargo build --locked -p sens-cli --bin sens
+      - name: Перевірити двійкові свідки функцій Ліспа 1.5
+        run: cargo test --locked -p sens-cli --bin sens-trit d7_zig_cli_boundary_tests
       # Вимірювання власної мови. ЦІЛЬ із реєстру: D6 додати-1 (001110).
       # Обсяг обмежений: три повтори, один фіксований бенчмарк.
       # Однакова функціональна одиниця для трьох мов: T01 наївна рекурсія
