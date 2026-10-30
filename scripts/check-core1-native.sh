@@ -314,6 +314,33 @@ cmp -s "$scratch/core1-filter-onto-mutant.expected" \
     "$scratch/core1-filter-onto-mutant.out" >&2 || true
   exit 1
 }
+"$sens" --t5m-files lib/core1.lisp \
+  tests/semantic/d6-filter-independent-law.lisp \
+  > "$scratch/core1-filter-law.out"
+printf '%s\n' '1' > "$scratch/core1-filter-law.expected"
+cmp -s "$scratch/core1-filter-law.expected" \
+  "$scratch/core1-filter-law.out" || {
+  echo 'CORE1_FILTER_LAW_MISMATCH' >&2
+  diff -u "$scratch/core1-filter-law.expected" \
+    "$scratch/core1-filter-law.out" >&2 || true
+  exit 1
+}
+printf '%s\n' \
+  '(відсіяти (функція (елемент) так) (сполучити (як-є а) ні))' \
+  > "$scratch/core1-filter-improper-tail.lisp"
+if "$sens" --t5m-files lib/core1.lisp \
+    "$scratch/core1-filter-improper-tail.lisp" \
+    > "$scratch/core1-filter-improper-tail.out" \
+    2> "$scratch/core1-filter-improper-tail.err"; then
+  echo 'CORE1_FILTER_ACCEPTED_IMPROPER_TAIL' >&2
+  exit 1
+fi
+grep -Fq 'перше очікує непорожній список' \
+  "$scratch/core1-filter-improper-tail.err" || {
+  echo 'CORE1_FILTER_TAIL_DIAGNOSTIC_MISMATCH' >&2
+  cat "$scratch/core1-filter-improper-tail.err" >&2
+  exit 1
+}
 printf '%s\n' \
   '(відсіяти-до (функція (елемент) так) (сполучити (як-є а) ні) (як-є ()))' \
   > "$scratch/core1-filter-onto-improper-tail.lisp"
@@ -627,4 +654,4 @@ cmp -s "$scratch/core1-gc.expected" "$scratch/core1-gc.out" || {
   exit 1
 }
 
-echo 'CORE1_NATIVE_OK self_loaded=YES arrays=YES array_boundaries=YES properties=YES reader_markers=YES exact_conditions=YES call_arity=YES domain_functions=YES d7_data_not_callable=YES gc_model=YES exact_domains=YES negatives=12'
+echo 'CORE1_NATIVE_OK self_loaded=YES arrays=YES array_boundaries=YES properties=YES reader_markers=YES exact_conditions=YES call_arity=YES domain_functions=YES d7_data_not_callable=YES gc_model=YES exact_domains=YES negatives=13'
