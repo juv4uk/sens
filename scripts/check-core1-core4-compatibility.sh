@@ -169,6 +169,17 @@ check_core1_condition_rejection() {
 check_core1_condition_rejection tests/integration/core1-core4/reject-core1-cond-empty.lisp
 check_core1_condition_rejection tests/integration/core1-core4/reject-core1-cond-number-zero.lisp
 
+cat lib/core1.lisp tests/integration/core1-core4/core1-call-arity.lisp \
+  > "$scratch/core1-call-arity.lisp"
+"$sens" --t5m-mint "$scratch/core1-call-arity.lisp" "$scratch/core1-call-arity.sens"
+"$sens" "$scratch/core1-call-arity.sens" > "$scratch/core1-call-arity.out"
+printf '%s\n' '(8 1 1)' > "$scratch/core1-call-arity.expected"
+cmp -s "$scratch/core1-call-arity.expected" "$scratch/core1-call-arity.out" || {
+  echo 'CORE1_CALL_ARITY_MISMATCH' >&2
+  diff -u "$scratch/core1-call-arity.expected" "$scratch/core1-call-arity.out" >&2 || true
+  exit 1
+}
+
 cat lib/core1.lisp tests/integration/core1-core4/core1-prog-coverage.lisp \
   > "$scratch/core1-prog-coverage.lisp"
 "$sens" --t5m-mint \
@@ -241,4 +252,4 @@ check_rejection() {
 check_rejection tests/integration/core1-core4/reject-empty-as-condition.lisp '()'
 check_rejection tests/integration/core1-core4/reject-number-zero-as-condition.lisp '0'
 
-echo 'CORE1_CORE4_COMPATIBILITY_OK pure_core1=YES core1_arrays=YES core1_properties=YES core1_reader_marker=YES core1_exact_conditions=YES core1_gc_model=YES core1_core4_shared_session=YES exact_domains=YES negatives=4'
+echo 'CORE1_CORE4_COMPATIBILITY_OK pure_core1=YES core1_arrays=YES core1_properties=YES core1_reader_marker=YES core1_exact_conditions=YES core1_call_arity=YES core1_gc_model=YES core1_core4_shared_session=YES exact_domains=YES negatives=4'
