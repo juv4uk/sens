@@ -262,11 +262,22 @@ fn binary_bootstrap_words(root: &Path, output: &Path, compiler: &std::ffi::OsStr
     ] {
         println!("cargo:rerun-if-changed={}", root.join(path).display());
     }
+    // Zig 0.16 may reuse an `@embedFile` run result after Cargo reruns this
+    // build script for a changed physical library. Give this small bootstrap
+    // decoder a private cache and clear it on every invocation so generated
+    // words always correspond to the exact current .sens files.
+    let cache = output.join("bootstrap-t5m-zig-cache");
+    if cache.exists() {
+        fs::remove_dir_all(&cache).expect("clear stale Zig T5M bootstrap cache");
+    }
     // Генератор Zig отримує фізичний носій, а Rust — лише точні слова.
     // Жодного читання Lisp або запасного Rust-декодера.
     let restored = Command::new(compiler)
         .current_dir(root)
-        .args(["run", "bootstrap_t5m.zig", "-O", "ReleaseSafe"])
+        .arg("run")
+        .arg("--cache-dir")
+        .arg(&cache)
+        .args(["bootstrap_t5m.zig", "-O", "ReleaseSafe"])
         .output()
         .expect("run pinned Zig T5M bootstrap decoder");
     assert!(

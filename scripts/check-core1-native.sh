@@ -480,6 +480,25 @@ check_core1_semantic_witness d10-core1-if-law \
   tests/semantic/d10-core1-if-law.lisp 1
 check_core1_semantic_witness d10-core1-if-mutant \
   tests/semantic/d10-core1-if-mutant.lisp 0
+# Exercise Core1's local D10 definition in a physical carrier with no Core4
+# bootstrap, so the test cannot pass by observing Core4's occupied slot.
+cat lib/core1.lisp tests/semantic/d10-core1-if-law.lisp \
+  > "$scratch/core1-if-profile.lisp"
+"$sens" --t5m-mint \
+  "$scratch/core1-if-profile.lisp" \
+  "$scratch/core1-if-profile.sens" \
+  --core1-profile
+"$sens" --t5m-pair \
+  "$scratch/core1-if-profile.lisp" \
+  "$scratch/core1-if-profile.sens" \
+  --core1-profile > "$scratch/core1-if-profile.out"
+printf '%s\n' '1' > "$scratch/core1-if-profile.expected"
+cmp -s "$scratch/core1-if-profile.expected" "$scratch/core1-if-profile.out" || {
+  echo 'CORE1_EXACT_D10_PROFILE_MISMATCH' >&2
+  diff -u "$scratch/core1-if-profile.expected" \
+    "$scratch/core1-if-profile.out" >&2 || true
+  exit 1
+}
 check_core1_semantic_witness d8-and-or-d9-fifth-laws \
   tests/semantic/d8-and-or-d9-fifth-laws.lisp '(1 1 1 1 1 1 1 1)'
 printf '%s\n' \

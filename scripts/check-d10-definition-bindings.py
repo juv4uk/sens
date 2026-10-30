@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Перевірка binding-only проєкції конкретних D10-визначень SENS."""
+"""Перевірка binding-only проєкції конкретних D10-функцій і макросів SENS."""
 from __future__ import annotations
 
 import argparse
@@ -56,7 +56,7 @@ def render() -> str:
             seen[name] = bits
     lines = [
         "// GENERATED — DO NOT EDIT BY HAND.",
-        "// Identity: lib/domains/d10.lisp; definitions: concrete SENS library closures.",
+        "// Identity: lib/domains/d10.lisp; definitions: concrete SENS library closures and macros.",
         "// Binding-only: concrete definitions, never generic D10 callability.",
         "// Checked by: scripts/check-d10-definition-bindings.py",
         "",

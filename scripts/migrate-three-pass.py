@@ -982,6 +982,22 @@ def core4_d10_defined_rows():
     aliases = []
     define_heads = {"00001001", "0011", "define", "def", "визначити"}
     lambda_heads = {"0010", "lambda", "лямбда", "функція"}
+    macro_heads = {"макрос", "macro"}
+
+    def has_executable_body(value):
+        if not isinstance(value, ListNode) or not value.items or not isinstance(value.items[0], Atom):
+            return False
+        head = value.items[0].tok.text
+        if head in lambda_heads:
+            return True
+        # A macro is a concrete D10 definition only when its payload is an
+        # actual SENS lambda; mere residence never grants callability.
+        if head in macro_heads and len(value.items) >= 2:
+            payload = value.items[1]
+            return (isinstance(payload, ListNode) and payload.items
+                    and isinstance(payload.items[0], Atom)
+                    and payload.items[0].tok.text in lambda_heads)
+        return False
 
     for form in forms:
         if (not isinstance(form, ListNode) or form.tail is not None
@@ -995,9 +1011,7 @@ def core4_d10_defined_rows():
         if not isinstance(target, Atom):
             continue
         value = form.items[2]
-        if (isinstance(value, ListNode) and value.items
-                and isinstance(value.items[0], Atom)
-                and value.items[0].tok.text in lambda_heads):
+        if has_executable_body(value):
             defined_names.add(target.tok.text)
         elif isinstance(value, Atom):
             aliases.append((target.tok.text, value.tok.text))

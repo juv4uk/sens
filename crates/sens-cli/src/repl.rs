@@ -1488,11 +1488,6 @@ fn preload_t5m_binding_sources(session: &mut Session, bindings: &[String]) -> Re
 }
 
 #[cfg(feature = "zig-transport")]
-pub(crate) fn mint_t5m_source_pair(source: &str) -> Result<(Vec<u8>, String), String> {
-    mint_t5m_source_pair_with_bindings(source, &[])
-}
-
-#[cfg(feature = "zig-transport")]
 fn core4_t5m_source_session() -> Result<Session, String> {
     let mut session = Session::default();
     sens::load_core_library(&mut session)
@@ -1501,15 +1496,22 @@ fn core4_t5m_source_session() -> Result<Session, String> {
 }
 
 #[cfg(feature = "zig-transport")]
-pub(crate) fn mint_t5m_source_pair_with_bindings(
+pub(crate) fn mint_t5m_source_pair_with_bindings_profile(
     source: &str,
     bindings: &[String],
+    core1_profile: bool,
 ) -> Result<(Vec<u8>, String), String> {
     // Пряме виконання .lisp працює з Core4, а не лише з D4 MACRO.
     // Без того самого SENS bootstrap корені D12+ (число-нуль/один)
     // лишаються непов'язаними D7 гліфами і помилково викликаються як Lisp.
     // Визначення і числа надає тільки SENS Core4, не Rust-підстановка.
-    let mut session = core4_t5m_source_session()?;
+    // Core1 містить базове визначення D10 «якщо»; його треба зв'язати без
+    // попередньо зайнятого Core4 слота, інакше джерельне DEFINE стає D7-текстом.
+    let mut session = if core1_profile {
+        Session::default()
+    } else {
+        core4_t5m_source_session()?
+    };
     preload_t5m_binding_sources(&mut session, bindings)?;
     mint_t5m_source_pair_in_session(source, &session)
 }
@@ -1545,8 +1547,12 @@ fn mint_t5m_source_pair_in_session(
 }
 
 #[cfg(feature = "zig-transport")]
-pub(crate) fn mint_t5m_source_file(source: &str) -> Result<Vec<u8>, String> {
-    mint_t5m_source_pair(source).map(|(physical, _)| physical)
+pub(crate) fn mint_t5m_source_file_with_profile(
+    source: &str,
+    core1_profile: bool,
+) -> Result<Vec<u8>, String> {
+    mint_t5m_source_pair_with_bindings_profile(source, &[], core1_profile)
+        .map(|(physical, _)| physical)
 }
 
 /// Явно парний фізичний шлях: .lisp НАДАЄ перевірену доменну ідентичність,
@@ -1568,7 +1574,7 @@ pub(crate) fn eval_t5m_paired_file_with_bindings(
     physical: &[u8],
     bindings: &[String],
 ) -> Result<sens::EvalResult, String> {
-    eval_t5m_paired_file_with_runtime(source, physical, bindings, false)
+    eval_t5m_paired_file_with_runtime(source, physical, bindings, false, false)
 }
 
 #[cfg(feature = "zig-transport")]
@@ -1577,7 +1583,16 @@ pub(crate) fn eval_t5m_paired_file_with_core4(
     physical: &[u8],
     bindings: &[String],
 ) -> Result<sens::EvalResult, String> {
-    eval_t5m_paired_file_with_runtime(source, physical, bindings, true)
+    eval_t5m_paired_file_with_runtime(source, physical, bindings, true, false)
+}
+
+#[cfg(feature = "zig-transport")]
+pub(crate) fn eval_t5m_paired_file_with_core1_profile(
+    source: &str,
+    physical: &[u8],
+    bindings: &[String],
+) -> Result<sens::EvalResult, String> {
+    eval_t5m_paired_file_with_runtime(source, physical, bindings, false, true)
 }
 
 #[cfg(feature = "zig-transport")]
@@ -1586,11 +1601,15 @@ fn eval_t5m_paired_file_with_runtime(
     physical: &[u8],
     bindings: &[String],
     load_core4: bool,
+    core1_profile: bool,
 ) -> Result<sens::EvalResult, String> {
-    // Mint always projects with Core4's exact D12+ roots available. Use the
-    // same projection environment here, but keep runtime Core4 opt-in and
-    // separate so source identity is established before runtime admission.
-    let mut projection_session = core4_t5m_source_session()?;
+    // Project under the same bootstrap profile used to mint. Core4's exact
+    // D10 slot must not shadow Core1's own definition during pair validation.
+    let mut projection_session = if core1_profile {
+        Session::default()
+    } else {
+        core4_t5m_source_session()?
+    };
     preload_t5m_binding_sources(&mut projection_session, bindings)?;
     let expected = prepare_t5m_repl_words(source, ReplSurface::UkrainianFull, &projection_session)?;
     let actual = crate::zig_transport::decode_t5m_exact_words(physical)?;

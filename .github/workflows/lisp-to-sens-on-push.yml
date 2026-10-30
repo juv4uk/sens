@@ -109,6 +109,9 @@ jobs:
               tests/semantic/d8-core1-*.lisp|tests/semantic/d9-core1-*.lisp|tests/semantic/d10-core1-*.lisp|tests/semantic/d8-and-or-d9-fifth-laws.lisp)
                 # D8/D9/D10 Core1 witnesses execute definitions shipped by Core1.
                 binding_args=(--binding-source lib/core1.lisp);;
+              tests/semantic/d10-core4-if-*.lisp)
+                # Core4 is the runtime profile; do not reload its root D10 definition.
+                profile_args=(--core4-runtime);;
               tests/integration/core1/reject-core1-cond-empty.lisp|tests/integration/core1/reject-core1-cond-number-zero.lisp)
                 binding_args=(--binding-source lib/core1.lisp)
                 expected_error='D4:0100 NOT requires an exact D1 PredicateBit';;
@@ -235,6 +238,9 @@ jobs:
                   binding_args=(--binding-source lib/core1.lisp);;
                 tests/semantic/d8-core1-*.lisp|tests/semantic/d9-core1-*.lisp|tests/semantic/d10-core1-*.lisp|tests/semantic/d8-and-or-d9-fifth-laws.lisp)
                   binding_args=(--binding-source lib/core1.lisp);;
+                tests/semantic/d10-core4-if-*.lisp)
+                  # Core4 is the runtime profile; do not reload its root D10 definition.
+                  profile_args=(--core4-runtime);;
                 tests/integration/core1/reject-core1-cond-empty.lisp|tests/integration/core1/reject-core1-cond-number-zero.lisp)
                   binding_args=(--binding-source lib/core1.lisp)
                   expected_error='D4:0100 NOT requires an exact D1 PredicateBit';;

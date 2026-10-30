@@ -1144,3 +1144,50 @@ pub fn string_slice_text(text: &str, start: usize, end: usize) -> String {
     chars[start..end].iter().collect()
 }
 
+#[cfg(test)]
+mod d10_core4_if_tests {
+    use super::*;
+
+    #[test]
+    fn core4_bootstrap_binds_the_exact_if_macro() {
+        let identity = DomainIdentity::D10(
+            DomainD10::new(0b0000000110).expect("ratified D10 identity for якщо"),
+        );
+        let embedded_if_definitions = binary_bootstrap::with_core4_program(|program| {
+            let define_identity = semantic_registry::exact_uk_callable_for_source_head("визначити")
+                .and_then(DomainIdentity::core_operation)
+                .expect("exact D4 define identity");
+            program
+                .forms()
+                .iter()
+                .filter(|form| match &form.kind {
+                    ExprKind::DomainCall(call, arguments) if *call == define_identity =>
+                    {
+                        matches!(arguments.first().map(|target| &target.kind), Some(ExprKind::DomainIdentity(target)) if *target == identity)
+                    }
+                    _ => false,
+                })
+                .count()
+        })
+        .expect("decode embedded Core4 program");
+        assert_eq!(embedded_if_definitions, 1, "embedded Core4 T5M must contain D10 якщо");
+        let mut session = Session::default();
+        load_core_library(&mut session).expect("load pinned Core4 T5M");
+        assert!(
+            session.environment.has_domain_code_slot(identity),
+            "Core4 bootstrap must install the concrete exact D10 якщо macro"
+        );
+        let result = eval_core_library_source(
+            "(якщо (однакові? (як-є а) (як-є а)) так ні)",
+            &mut session,
+        )
+        .expect("execute Core4's exact D10 якщо macro");
+        assert_eq!(
+            result.value,
+            Value::DomainIdentity(DomainIdentity::D1(PredicateBit::from_word(
+                Bit1::new(1).expect("true predicate bit"),
+            )))
+        );
+    }
+}
+

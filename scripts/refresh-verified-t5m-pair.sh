@@ -3,18 +3,18 @@
 # Не є семантичним сертифікатом усієї бібліотеки або релізним GO.
 set -euo pipefail
 if (( $# < 1 )); then
-  echo "usage: bash $0 SOURCE.lisp [SENS_BINARY] [SENS_TRIT_BINARY] [--binding-source SOURCE.lisp ...] [--core4-runtime]" >&2
+  echo "usage: bash $0 SOURCE.lisp [SENS_BINARY] [SENS_TRIT_BINARY] [--binding-source SOURCE.lisp ...] [--core4-runtime] [--core1-profile]" >&2
   exit 2
 fi
 source_file="$1"
 shift
 binary="target/debug/sens"
 reader="target/debug/sens-trit"
-if (( $# > 0 )) && [[ "$1" != --binding-source && "$1" != --expect-error && "$1" != --core4-runtime ]]; then
+if (( $# > 0 )) && [[ "$1" != --binding-source && "$1" != --expect-error && "$1" != --core4-runtime && "$1" != --core1-profile ]]; then
   binary="$1"
   shift
 fi
-if (( $# > 0 )) && [[ "$1" != --binding-source && "$1" != --expect-error && "$1" != --core4-runtime ]]; then
+if (( $# > 0 )) && [[ "$1" != --binding-source && "$1" != --expect-error && "$1" != --core4-runtime && "$1" != --core1-profile ]]; then
   reader="$1"
   shift
 fi
@@ -24,8 +24,17 @@ binding_args=()
 binding_sources=()
 expected_error=""
 core4_runtime=0
+core1_profile=0
 while (( $# > 0 )); do
   case "${1:-}" in
+    --core1-profile)
+      if (( core1_profile )) || [[ "$source_file" != lib/core1.lisp ]]; then
+        echo "T5M_REPAIR_CORE1_PROFILE_INVALID source=$source_file" >&2
+        exit 2
+      fi
+      core1_profile=1
+      shift
+      ;;
     --core4-runtime)
       if (( core4_runtime )); then
         echo "T5M_REPAIR_CORE4_PROFILE_DUPLICATE source=$source_file" >&2
@@ -61,7 +70,7 @@ done
 # Не допускати тихої зміни профілю решти джерел або неперевірених комбінацій.
 if (( core4_runtime )); then
   case "$source_file" in
-    tests/semantic/exact-arithmetic-laws.lisp|tests/semantic/exact-arithmetic-mutant.lisp|tests/semantic/d5-arithmetic-native-t5m-law.lisp|tests/semantic/d5-arithmetic-native-t5m-mutant.lisp|tests/semantic/d9-d10-defined-functions-law.lisp|lib/lisp-fs.lisp|lib/unify.lisp|tests/fixtures/wsm-fs-record-producer.lisp|tests/semantic/meta-eval-graph-d1-law.lisp|tests/semantic/meta-eval-graph-d1-mutant.lisp|tests/semantic/d6-derived-research-batch-01.lisp|tests/semantic/d8-rassq-until-batch.lisp|scripts/check-domain-logic-laws.lisp) ;;
+    tests/semantic/exact-arithmetic-laws.lisp|tests/semantic/exact-arithmetic-mutant.lisp|tests/semantic/d5-arithmetic-native-t5m-law.lisp|tests/semantic/d5-arithmetic-native-t5m-mutant.lisp|tests/semantic/d9-d10-defined-functions-law.lisp|lib/lisp-fs.lisp|lib/unify.lisp|tests/fixtures/wsm-fs-record-producer.lisp|tests/semantic/meta-eval-graph-d1-law.lisp|tests/semantic/meta-eval-graph-d1-mutant.lisp|tests/semantic/d6-derived-research-batch-01.lisp|tests/semantic/d8-rassq-until-batch.lisp|tests/semantic/d10-core4-if-law.lisp|tests/semantic/d10-core4-if-mutant.lisp|scripts/check-domain-logic-laws.lisp) ;;
     *) echo "T5M_REPAIR_CORE4_PROFILE_UNREGISTERED source=$source_file" >&2; exit 2 ;;
   esac
   if (( ${#binding_args[@]} != 0 )) || [[ -n "$expected_error" ]]; then
@@ -79,6 +88,14 @@ if (( core4_runtime )); then
         ;;
     esac
   fi
+fi
+if (( core1_profile && core4_runtime )); then
+  echo "T5M_REPAIR_CORE1_PROFILE_CORE4_RUNTIME_CONFLICT source=$source_file" >&2
+  exit 2
+fi
+if (( core1_profile && ${#binding_args[@]} != 0 )); then
+  echo "T5M_REPAIR_CORE1_PROFILE_BINDING_SOURCES_UNSUPPORTED source=$source_file" >&2
+  exit 2
 fi
 if [[ "$source_file" != *.lisp || ! -f "$source_file" || -L "$source_file" ]]; then
   echo "T5M_REPAIR_SOURCE_INVALID path=$source_file" >&2
@@ -133,7 +150,11 @@ mint_flag=--t5m-mint
 if (( ${#binding_args[@]} != 0 )); then
   mint_flag=--t5m-mint-pair
 fi
-if timeout "$native_timeout" "$binary" "$mint_flag" "$source_file" "$staged" "${binding_args[@]}"; then
+mint_profile_args=()
+if (( core1_profile )); then
+  mint_profile_args+=(--core1-profile)
+fi
+if timeout "$native_timeout" "$binary" "$mint_flag" "$source_file" "$staged" "${binding_args[@]}" "${mint_profile_args[@]}"; then
   :
 else
   mint_status=$?
@@ -155,6 +176,8 @@ standalone_runtime=("$binary")
 if (( core4_runtime )); then
   paired_runtime_args=(--core4-runtime)
   standalone_runtime=("$reader" eval-core4)
+elif (( core1_profile )); then
+  paired_runtime_args=(--core1-profile)
 fi
 if [[ -n "$expected_error" ]]; then
   if timeout "$native_timeout" "$binary" "$direct_source" > "$scratch/direct.out" 2> "$scratch/direct.err"; then

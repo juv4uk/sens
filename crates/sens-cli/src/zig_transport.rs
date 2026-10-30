@@ -1417,38 +1417,42 @@ mod core1_t5m_d7_inventory_tests {
         expression: &sens::Expr,
         quoted_identity: sens::CoreDomainIdentity,
         text_heads: &mut BTreeMap<String, usize>,
-        domain_heads: &mut HashMap<sens::CoreDomainIdentity, usize>,
+        exact_heads: &mut HashMap<sens::DomainIdentity, usize>,
     ) {
         match &expression.kind {
             sens::ExprKind::DomainCall(identity, arguments) => {
-                *domain_heads.entry(*identity).or_default() += 1;
                 if *identity == quoted_identity {
                     return;
                 }
                 for argument in arguments.iter() {
-                    collect_call_heads(argument, quoted_identity, text_heads, domain_heads);
+                    collect_call_heads(argument, quoted_identity, text_heads, exact_heads);
                 }
             }
             sens::ExprKind::List(items) if !items.is_empty() => {
-                if let Some(name) = d7_text_frame(&items[0]) {
+                if let sens::ExprKind::DomainIdentity(identity) = &items[0].kind {
+                    *exact_heads.entry(*identity).or_default() += 1;
+                    for argument in &items[1..] {
+                        collect_call_heads(argument, quoted_identity, text_heads, exact_heads);
+                    }
+                } else if let Some(name) = d7_text_frame(&items[0]) {
                     *text_heads.entry(name).or_default() += 1;
                     for argument in &items[1..] {
-                        collect_call_heads(argument, quoted_identity, text_heads, domain_heads);
+                        collect_call_heads(argument, quoted_identity, text_heads, exact_heads);
                     }
                 } else {
                     for item in items.iter() {
-                        collect_call_heads(item, quoted_identity, text_heads, domain_heads);
+                        collect_call_heads(item, quoted_identity, text_heads, exact_heads);
                     }
                 }
             }
             sens::ExprKind::Call(_, arguments) => {
                 for argument in arguments.iter() {
-                    collect_call_heads(argument, quoted_identity, text_heads, domain_heads);
+                    collect_call_heads(argument, quoted_identity, text_heads, exact_heads);
                 }
             }
             sens::ExprKind::Pair(head, tail) => {
-                collect_call_heads(head, quoted_identity, text_heads, domain_heads);
-                collect_call_heads(tail, quoted_identity, text_heads, domain_heads);
+                collect_call_heads(head, quoted_identity, text_heads, exact_heads);
+                collect_call_heads(tail, quoted_identity, text_heads, exact_heads);
             }
             _ => {}
         }
@@ -1513,31 +1517,42 @@ mod core1_t5m_d7_inventory_tests {
         )
         .and_then(sens::DomainIdentity::core_operation)
         .expect("як-є has an exact domain call identity");
-        let selector_identity = exact_selector
-            .core_operation()
-            .expect("друге is represented by an exact core operation");
+        let if_identity = sens::DomainIdentity::D10(
+            sens::DomainD10::new(0b0000000110).expect("якщо is the ratified D10 identity"),
+        );
         let mut defined_names = Vec::new();
+        let mut exact_definition_identities = Vec::new();
+        let mut definition_count = 0usize;
         let mut text_names = BTreeMap::new();
         let mut text_call_heads = BTreeMap::new();
-        let mut domain_call_heads = HashMap::new();
+        let mut exact_call_heads = HashMap::new();
         for form in program.forms() {
             collect_d7_names(form, &mut text_names);
             collect_call_heads(
                 form,
                 quote_identity,
                 &mut text_call_heads,
-                &mut domain_call_heads,
+                &mut exact_call_heads,
             );
             if let sens::ExprKind::DomainCall(identity, arguments) = &form.kind {
                 if *identity == define_identity {
+                    definition_count += 1;
                     if let Some(name) = arguments.first().and_then(d7_text_frame) {
                         defined_names.push(name);
+                    } else if let Some(sens::ExprKind::DomainIdentity(identity)) =
+                        arguments.first().map(|target| &target.kind)
+                    {
+                        exact_definition_identities.push(*identity);
                     }
                 }
             }
         }
         defined_names.sort();
-        assert_eq!(defined_names.len(), program.form_count());
+        assert_eq!(definition_count, program.form_count());
+        assert_eq!(
+            defined_names.len() + exact_definition_identities.len(),
+            definition_count
+        );
         // Heads not defined at the top level can be valid callable values in
         // local slots (for example a function-valued parameter), so report
         // them separately instead of treating every such name as a typo.
@@ -1546,20 +1561,55 @@ mod core1_t5m_d7_inventory_tests {
             .filter(|name| !defined_names.contains(name))
             .cloned()
             .collect::<Vec<_>>();
-        let exact_selector_calls = domain_call_heads.get(&selector_identity).copied().unwrap_or(0);
-        assert!(exact_selector_calls > 0, "Core1 should call exact D4:1001 selector");
+        assert!(
+            exact_definition_identities.contains(&if_identity),
+            "Core1 should define if at exact D10:0000000110"
+        );
+        let core4_path = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../lib/core4.sens");
+        let core4_physical = fs::read(&core4_path).expect("read committed Core4 T5M");
+        let core4_words = decode_t5m_exact_words(&core4_physical).expect("decode Core4 through Zig");
+        let core4_exact_words = core4_words
+            .iter()
+            .map(|word| {
+                sens::ExactDomainWord::from_physical_width_bits(word.width, &word.bits)
+                    .expect("Core4 T5M word has a ratified exact domain")
+            })
+            .collect::<Vec<_>>();
+        let core4_program = sens::PhysicalT5Program::from_exact_domain_words_owned(core4_exact_words)
+            .expect("Core4 physical forms parse as SENS");
+        let core4_if_definitions = core4_program
+            .forms()
+            .iter()
+            .filter(|form| match &form.kind {
+                sens::ExprKind::DomainCall(identity, arguments) if *identity == define_identity => {
+                    matches!(arguments.first().map(|target| &target.kind), Some(sens::ExprKind::DomainIdentity(target)) if *target == if_identity)
+                }
+                _ => false,
+            })
+            .count();
+        assert_eq!(
+            core4_if_definitions, 1,
+            "Core4 physical T5M should define exact D10:0000000110 once"
+        );
+        // The physical source carrier stores readable identifiers as D7 text
+        // frames. Exact callable binding is established when SENS reads and
+        // executes the source, and is covered by check-core1-native.sh; this
+        // raw T5M inventory must not mislabel those source frames as D4 words.
+        let exact_selector_calls = exact_call_heads.get(&exact_selector).copied().unwrap_or(0);
         let defined_text_call_names = text_call_heads
             .keys()
             .filter(|name| defined_names.contains(name))
             .count();
         println!(
-            "CORE1_T5M_FUNCTION_AUDIT definitions={} d7_text_call_sites={} distinct_d7_call_heads={} heads_matching_definitions={} heads_without_top_level_definition={} d4_druhe_calls={}",
+            "CORE1_T5M_FUNCTION_AUDIT definitions={} exact_domain_definitions={} d7_text_call_sites={} distinct_d7_call_heads={} heads_matching_definitions={} heads_without_top_level_definition={} raw_d4_druhe_heads={} d10_yakshcho_calls={}",
             defined_names.len(),
+            exact_definition_identities.len(),
             text_call_heads.values().sum::<usize>(),
             text_call_heads.len(),
             defined_text_call_names,
             non_global_text_heads.len(),
-            exact_selector_calls
+            exact_selector_calls,
+            exact_call_heads.get(&if_identity).copied().unwrap_or(0)
         );
         for name in &defined_names {
             println!("CORE1_D7_BINDING_NAME {name}");

@@ -1,5 +1,5 @@
 // GENERATED — DO NOT EDIT BY HAND.
-// Identity: lib/domains/d10.lisp; definitions: concrete SENS library closures.
+// Identity: lib/domains/d10.lisp; definitions: concrete SENS library closures and macros.
 // Binding-only: concrete definitions, never generic D10 callability.
 // Checked by: scripts/check-d10-definition-bindings.py
 
@@ -11,6 +11,7 @@ pub(super) struct D10DefinitionBinding {
 
 pub(super) const D10_DEFINITION_BINDINGS: &[D10DefinitionBinding] = &[
     D10DefinitionBinding { bits: 0b0000000001, names: &["кількість-результатів", "кількість-результатів-спостереження", "phala-saṃkhyā", "result-count", "RESULT-COUNT"] },
+    D10DefinitionBinding { bits: 0b0000000110, names: &["якщо", "yadi", "if", "IF"] },
     D10DefinitionBinding { bits: 0b0000000111, names: &["числа-нерівні?", "saṃkhyā-asama", "numeric-not-equal?", "NUMERIC-NOT-EQUAL"] },
     D10DefinitionBinding { bits: 0b0000011000, names: &["список-усіх-значень", "зібрати-всі-повернені-значення-у-список", "bahu-mūlya-sūcī", "multiple-value-list", "MULTIPLE-VALUE-LIST"] },
     D10DefinitionBinding { bits: 0b0000101100, names: &["вектор-у-список", "перетворити-вектор-на-список", "sadisa-prati-sūcī", "vector->list", "VECTOR->LIST"] },

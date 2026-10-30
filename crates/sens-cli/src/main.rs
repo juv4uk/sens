@@ -228,13 +228,18 @@ fn t5m_files_request(args: &[String]) -> Option<Result<&[String], &'static str>>
 
 /// Генерувати фізичні байти SENS за тим самим reader, що --t5m-pair.
 /// Zig пакує точні слова T5M; жодного Python-eval чи старого T5.
-fn t5m_mint_request(args: &[String]) -> Option<Result<(&str, &str), &'static str>> {
+fn t5m_mint_request(args: &[String]) -> Option<Result<(&str, &str, bool), &'static str>> {
     if !args.iter().skip(1).any(|part| part == "--t5m-mint") {
         return None;
     }
-    if args.len() != 4 || args[1] != "--t5m-mint" {
-        return Some(Err("usage: sens --t5m-mint <source.lisp> <output.sens>"));
+    if !(args.len() == 4 || (args.len() == 5 && args[4] == "--core1-profile"))
+        || args[1] != "--t5m-mint"
+    {
+        return Some(Err(
+            "usage: sens --t5m-mint <source.lisp> <output.sens> [--core1-profile]",
+        ));
     }
+    let core1_profile = args.len() == 5;
     let source = std::path::Path::new(&args[2]);
     let physical = std::path::Path::new(&args[3]);
     if source.extension().and_then(|ext| ext.to_str()) != Some("lisp")
@@ -242,7 +247,7 @@ fn t5m_mint_request(args: &[String]) -> Option<Result<(&str, &str), &'static str
     {
         return Some(Err("--t5m-mint requires .lisp input and .sens output"));
     }
-    Some(Ok((&args[2], &args[3])))
+    Some(Ok((&args[2], &args[3], core1_profile)))
 }
 
 // Явні Lisp-залежності SENS; жодного Python/JSON resolver.
@@ -336,7 +341,8 @@ fn write_new_t5m_pair(path: &str, bytes: &[u8], view: &str) -> Result<(), String
     Ok(())
 }
 
-type T5mPairRequest<'a> = Option<Result<(&'a str, &'a str, Vec<&'a str>, bool), &'static str>>;
+type T5mPairRequest<'a> =
+    Option<Result<(&'a str, &'a str, Vec<&'a str>, bool, bool), &'static str>>;
 
 /// Парне виконання дозволяє читати D24+ з реальних байтів Zig T5M,
 /// лише якщо український Lisp свідчить ТОЧНО ту саму доменну послідовність.
@@ -361,14 +367,22 @@ fn t5m_pair_request(
     }
     let mut bindings = Vec::new();
     let mut load_core4 = false;
+    let mut core1_profile = false;
     let mut index = 4;
     while index < args.len() {
         match args[index].as_str() {
             "--core4-runtime" => {
-                if load_core4 {
+                if load_core4 || core1_profile {
                     return Some(Err("--core4-runtime may be specified only once"));
                 }
                 load_core4 = true;
+                index += 1;
+            }
+            "--core1-profile" => {
+                if core1_profile || load_core4 {
+                    return Some(Err("--core1-profile may be specified once and without --core4-runtime"));
+                }
+                core1_profile = true;
                 index += 1;
             }
             "--binding-source" => {
@@ -388,7 +402,16 @@ fn t5m_pair_request(
             _ => return Some(Err("unsupported --t5m-pair option")),
         }
     }
-    Some(Ok((&args[2][..], &args[3][..], bindings, load_core4)))
+    if core1_profile && !bindings.is_empty() {
+        return Some(Err("--core1-profile does not accept --binding-source"));
+    }
+    Some(Ok((
+        &args[2][..],
+        &args[3][..],
+        bindings,
+        load_core4,
+        core1_profile,
+    )))
 }
 
 /// Фізичний вхід: байти -> стерильний Zig ABI v2 -> точні слова SENS.
@@ -587,16 +610,17 @@ fn main() {
     }
     if let Some(request) = t5m_mint_request(&raw_args) {
         let result = match request {
-            Ok((source_path, physical_path)) => fs::read_to_string(source_path)
+            Ok((source_path, physical_path, core1_profile)) => fs::read_to_string(source_path)
                 .map_err(|error| format!("read Ukrainian Lisp source: {error}"))
                 .and_then(|source| {
                     #[cfg(feature = "zig-transport")]
                     {
-                        repl::mint_t5m_source_file(&source)
+                        repl::mint_t5m_source_file_with_profile(&source, core1_profile)
                     }
                     #[cfg(not(feature = "zig-transport"))]
                     {
                         let _ = source;
+                        let _ = core1_profile;
                         Err("--t5m-mint requires the Zig T5M transport corridor".into())
                     }
                 })
@@ -620,7 +644,11 @@ fn main() {
                     let bindings = read_t5m_binding_sources(&binding_paths)?;
                     #[cfg(feature = "zig-transport")]
                     {
-                        repl::mint_t5m_source_pair_with_bindings(&source, &bindings)
+                        repl::mint_t5m_source_pair_with_bindings_profile(
+                            &source,
+                            &bindings,
+                            false,
+                        )
                     }
                     #[cfg(not(feature = "zig-transport"))]
                     {
@@ -639,7 +667,7 @@ fn main() {
     }
     if let Some(request) = t5m_pair_request(&raw_args) {
         let result = match request {
-            Ok((source_path, physical_path, binding_paths, load_core4)) => fs::read_to_string(source_path)
+            Ok((source_path, physical_path, binding_paths, load_core4, core1_profile)) => fs::read_to_string(source_path)
                 .map_err(|error| format!("read Ukrainian Lisp source: {error}"))
                 .and_then(|source| {
                     let physical = fs::read(physical_path)
@@ -647,7 +675,9 @@ fn main() {
                     let bindings = read_t5m_binding_sources(&binding_paths)?;
                     #[cfg(feature = "zig-transport")]
                     {
-                        if load_core4 {
+                        if core1_profile {
+                            repl::eval_t5m_paired_file_with_core1_profile(&source, &physical, &bindings)
+                        } else if load_core4 {
                             repl::eval_t5m_paired_file_with_core4(&source, &physical, &bindings)
                         } else {
                             repl::eval_t5m_paired_file_with_bindings(&source, &physical, &bindings)
@@ -889,7 +919,7 @@ fn main() {
             println!("  sens program.sens            Run exact physical T5M with pure SENS (no implicit Core4/host effects)");
             println!("  sens --t5m-file program.lisp Run Ukrainian Lisp source through Zig T5M and execute its SENS words");
             println!("  sens --t5m-files a.lisp b.lisp Load ordered Lisp parts through T5M in one SENS session");
-            println!("  sens --t5m-mint program.lisp program.sens Mint physical Zig/T5M from the same SENS reader as --t5m-pair");
+            println!("  sens --t5m-mint program.lisp program.sens [--core1-profile] Mint physical Zig/T5M from the same SENS reader as --t5m-pair");
             println!("  sens-trit open program.sens  Display exact binary words without running");
             println!("\nOptions:");
             println!("  lsp                          Run the Language Server (LSP over stdio)");
