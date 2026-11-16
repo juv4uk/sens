@@ -1,0 +1,27 @@
+# Зібрані артефакти — їх створює run-bench.ps1, у репозиторій не потрапляють.
+# Сирці (*.c, *.rs, *.swift, ...) і результати (results/) комітяться.
+
+bench_c.exe
+bench_c.obj
+bench_cpp.exe
+bench_cpp.obj
+bench_rust.exe
+bench_rust.pdb
+bench_swift.exe
+bench_swift.exp
+bench_swift.lib
+bench_swift.pdb
+bench_zig.exe
+bench_zig.pdb
+bench_go.exe
+bench_pascal.exe
+bench_pascal.o
+bench_deno.exe
+Bench.class
+
+cs/bin/
+cs/obj/
+
+*.pdb
+*.ilk
+*.o
