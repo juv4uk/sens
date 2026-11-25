@@ -1,27 +1,59 @@
-"""Integration checks for per-child RSS units in run_study.run_once()."""
+"""Integration and boundary tests for physical per-child RSS units."""
 from io import StringIO
+import math
 from types import SimpleNamespace
 import unittest
 from unittest.mock import patch
 
 import run_study
+from rss_units import InvalidPeakRSS, normalize_peak_rss_kib
 
 
 class FakeChild:
     pid = 4242
     returncode = None
-    stdout = StringIO("144\\n")
-    stderr = StringIO("")
 
     def __init__(self):
-        self.stdout = StringIO("144\\n")
+        self.stdout = StringIO("144\n")
         self.stderr = StringIO("")
 
     def communicate(self, timeout):
-        return "144\\n", ""
+        return "144\n", ""
 
 
-class RunOnceRSSIntegrationTests(unittest.TestCase):
+class PeakRSSUnitsTests(unittest.TestCase):
+    def test_linux_wait4_is_already_kib(self):
+        self.assertEqual(normalize_peak_rss_kib(22136, "Linux"), 22136.0)
+
+    def test_darwin_wait4_bytes_to_kib(self):
+        self.assertEqual(normalize_peak_rss_kib(22667264, "Darwin"), 22136.0)
+
+    def test_darwin_preserves_fractional_kib(self):
+        self.assertEqual(normalize_peak_rss_kib(1536, "Darwin"), 1.5)
+
+    def test_unsupported_platforms_are_rejected(self):
+        for os_name in ("Windows", "FreeBSD"):
+            with self.subTest(os_name=os_name), self.assertRaises(InvalidPeakRSS):
+                normalize_peak_rss_kib(22136, os_name)
+
+    def test_zero_and_negative_counters_are_rejected(self):
+        for value in (0, -1, -0.5):
+            with self.subTest(value=value), self.assertRaises(InvalidPeakRSS):
+                normalize_peak_rss_kib(value, "Linux")
+
+    def test_non_finite_counters_are_rejected(self):
+        for value in (math.nan, math.inf, -math.inf):
+            with self.subTest(value=value), self.assertRaises(InvalidPeakRSS):
+                normalize_peak_rss_kib(value, "Darwin")
+
+    def test_non_numeric_and_boolean_counters_are_rejected(self):
+        for value in (None, True, "22136", [], {}, 10**10000):
+            with self.subTest(value_type=type(value).__name__), self.assertRaises(InvalidPeakRSS):
+                normalize_peak_rss_kib(value, "Linux")
+
+
+@unittest.skipUnless(hasattr(run_study.os, "wait4"), "POSIX wait4 is unavailable")
+class PosixRunOnceRSSIntegrationTests(unittest.TestCase):
     def run_posix_once(self, system_name, raw_peak):
         child = FakeChild()
         usage = SimpleNamespace(ru_maxrss=raw_peak)
@@ -50,6 +82,8 @@ class RunOnceRSSIntegrationTests(unittest.TestCase):
         self.assertIsNone(peak_kib)
         self.assertTrue(reason.startswith("INVALID_PER_CHILD_RSS:"))
 
+
+class WindowsPSAPIPathTests(unittest.TestCase):
     def test_windows_psapi_measurement_path_remains_available(self):
         child = FakeChild()
         child.returncode = 0

@@ -33,6 +33,8 @@ import sys
 import time
 from pathlib import Path
 
+from rss_units import InvalidPeakRSS, normalize_peak_rss_kib
+
 HERE = Path(__file__).resolve().parent
 CORPUS = HERE / "corpus"
 MANIFEST = CORPUS / "manifest.json"
@@ -184,6 +186,7 @@ def run_once(cmd: str, env: dict, timeout_s: float = 120.0):
 
     timeout_s реально обмежує очікування (раніше параметр ігнорувався).
     stdout/stderr читаються після wait, щоб не блокуватися на PIPE.
+    Linux ru_maxrss is KiB; Darwin reports bytes. Normalize only this POSIX path.
     """
     import shlex
     argv = shlex.split(cmd, posix=(os.name != 'nt'))
@@ -258,7 +261,11 @@ def run_once(cmd: str, env: dict, timeout_s: float = 120.0):
     if len(lines) != 1:
         return None, None, f"BAD_STDOUT_LINES_{len(lines)}"
     # POSIX RSS normalization is owned by #6288 / PR #6337; no overlap.
-    return float(elapsed), float(usage.ru_maxrss), lines[0]
+    try:
+        peak_kib = normalize_peak_rss_kib(usage.ru_maxrss, platform.system())
+    except InvalidPeakRSS as exc:
+        return None, None, f"INVALID_PER_CHILD_RSS:{exc}"
+    return float(elapsed), peak_kib, lines[0]
 
 
 def active_params(task_id: str) -> dict:
