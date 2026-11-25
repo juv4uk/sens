@@ -42,26 +42,26 @@ static int compare_u64(const void *a, const void *b) {
     return (x > y) - (x < y);
 }
 
-int main(void) {
+static int read_task_inputs(uint64_t *n, uint64_t *seed) {
     const char *task = getenv("TASK_ID");
-    uint64_t n, seed;
     if (task == NULL || strcmp(task, "T04-sorting") != 0 ||
-        !parse_u64(getenv("TASK_N"), &n) ||
-        !parse_u64(getenv("TASK_SEED"), &seed) ||
-        n == 0 || n > MAX_WORDS) {
+        !parse_u64(getenv("TASK_N"), n) ||
+        !parse_u64(getenv("TASK_SEED"), seed) ||
+        *n == 0 || *n > MAX_WORDS) {
         fputs("T04_INPUT_INVALID: expected TASK_ID=T04-sorting, "
               "1<=TASK_N<=1000000, unsigned decimal TASK_SEED\n", stderr);
-        return 2;
+        return 0;
     }
-    if (n > SIZE_MAX / sizeof(uint64_t)) {
+    if (*n > SIZE_MAX / sizeof(uint64_t)) {
         fputs("T04_INPUT_INVALID: allocation overflow\n", stderr);
-        return 2;
+        return 0;
     }
+    return 1;
+}
+
+static uint64_t *generate_sorted_values(uint64_t n, uint64_t seed) {
     uint64_t *values = malloc((size_t)n * sizeof(*values));
-    if (values == NULL) {
-        fputs("T04_RESOURCE_UNAVAILABLE: allocation failed\n", stderr);
-        return 3;
-    }
+    if (values == NULL) return NULL;
 
     uint64_t x = seed;
     for (uint64_t i = 0; i < n; ++i) {
@@ -70,11 +70,16 @@ int main(void) {
         values[i] = x;
     }
     qsort(values, (size_t)n, sizeof(*values), compare_u64);
+    return values;
+}
 
+static int hash_sorted_values(const uint64_t *values, uint64_t n,
+                              unsigned char digest[EVP_MAX_MD_SIZE],
+                              unsigned int *digest_len) {
     EVP_MD_CTX *ctx = EVP_MD_CTX_new();
-    unsigned char digest[EVP_MAX_MD_SIZE];
-    unsigned int digest_len = 0;
-    int valid = (ctx != NULL && EVP_DigestInit_ex(ctx, EVP_sha256(), NULL) == 1);
+    if (ctx == NULL) return 0;
+
+    int valid = EVP_DigestInit_ex(ctx, EVP_sha256(), NULL) == 1;
     for (uint64_t i = 0; valid && i < n; ++i) {
         char word[32]; /* 20 digits for uint64_t + terminating NUL. */
         int size = snprintf(word, sizeof(word), "%" PRIu64, values[i]);
@@ -85,10 +90,26 @@ int main(void) {
         if (i && EVP_DigestUpdate(ctx, ",", 1) != 1) valid = 0;
         if (valid && EVP_DigestUpdate(ctx, word, (size_t)size) != 1) valid = 0;
     }
-    if (valid) valid = (EVP_DigestFinal_ex(ctx, digest, &digest_len) == 1);
+    if (valid) valid = EVP_DigestFinal_ex(ctx, digest, digest_len) == 1;
     EVP_MD_CTX_free(ctx);
+    return valid && *digest_len == 32;
+}
+
+int main(void) {
+    uint64_t n, seed;
+    if (!read_task_inputs(&n, &seed)) return 2;
+
+    uint64_t *values = generate_sorted_values(n, seed);
+    if (values == NULL) {
+        fputs("T04_RESOURCE_UNAVAILABLE: allocation failed\n", stderr);
+        return 3;
+    }
+
+    unsigned char digest[EVP_MAX_MD_SIZE];
+    unsigned int digest_len = 0;
+    int valid = hash_sorted_values(values, n, digest, &digest_len);
     free(values);
-    if (!valid || digest_len != 32) {
+    if (!valid) {
         fputs("T04_HASH_FAILURE\n", stderr);
         return 3;
     }
