@@ -260,7 +260,7 @@ def run_once(cmd: str, env: dict, timeout_s: float = 120.0):
     lines = [ln for ln in out.splitlines() if ln.strip()]
     if len(lines) != 1:
         return None, None, f"BAD_STDOUT_LINES_{len(lines)}"
-    # POSIX RSS normalization is owned by #6288 / PR #6337; no overlap.
+    # POSIX wait4 reports platform-specific ru_maxrss units; normalize only this path.
     try:
         peak_kib = normalize_peak_rss_kib(usage.ru_maxrss, platform.system())
     except InvalidPeakRSS as exc:
