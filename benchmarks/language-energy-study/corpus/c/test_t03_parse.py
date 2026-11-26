@@ -4,6 +4,7 @@
 The frozen Python reference owns the expected T03 output. This test compiles
 only the independent C implementation and checks the same declared input.
 """
+import hashlib
 import os
 from pathlib import Path
 import shutil
@@ -88,7 +89,7 @@ class CParserParity(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertEqual(result.stdout, golden(lines) + "\n")
         deduplicated = sorted(set(f"k{(i * 7919) % 1000}" for i in range(lines)))
-        wrong = parity_check.hashlib.sha256("\n".join(deduplicated).encode()).hexdigest()
+        wrong = hashlib.sha256("\n".join(deduplicated).encode()).hexdigest()
         self.assertNotEqual(result.stdout.strip(), wrong)
 
     def test_negative_wrong_generator_is_detected(self):
