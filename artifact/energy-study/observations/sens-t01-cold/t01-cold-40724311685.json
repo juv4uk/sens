@@ -1,0 +1,89 @@
+{
+  "schema": "sens-t01-cold-observation/v1",
+  "status": "EXPLORATORY_NOT_ADMITTED",
+  "provenance": {
+    "repository": "juv4uk/sens",
+    "git_sha": "1a4635d8fc812bb889e09a01dbb79ebdcdb274f5",
+    "github_run_id": 40724311685,
+    "github_job_id": 122943309505,
+    "github_job_url": "https://github.com/juv4uk/sens/actions/runs/40724311685/job/122943309505",
+    "observed_at_utc": "2026-10-28T16:18:33Z",
+    "source_measure_git_blob": "ecaead4c0f7ffa881b936396bdececbd4f5b2153",
+    "source_verify_git_blob": "93d82a343bd90b13fb61dd9188110578e99821ef"
+  },
+  "workload": {
+    "id": "T01-symbolic-recursion",
+    "functional_unit": "One naive recursive Fibonacci(24) exact result",
+    "input_n": 24,
+    "verified_output": "46368",
+    "verification": "SENS n=12 -> 144; n=24 -> 46368; exact stdout validated by SENS-native harness",
+    "language": "SENS",
+    "sens_version": "0.42.3"
+  },
+  "environment": {
+    "os": "Linux 6.17.0-1022-azure x86_64 GNU/Linux",
+    "cpu": "AMD EPYC 7763 64-Core Processor",
+    "rustc": "rustc 1.99.0 (b940084d7 2026-09-28)",
+    "zig": "0.16.0",
+    "runner": "GitHub Actions 1000229689",
+    "sessions": 1,
+    "independent_sessions": 1
+  },
+  "measurement": {
+    "boundary": "Five distinct process launches including process startup, same GitHub-hosted session; CPU and caches already used during verification",
+    "time_unit": "seconds",
+    "memory_metric": "GNU time peak child-process resident set",
+    "memory_unit": "KiB",
+    "energy_status": "ENERGY_NOT_MEASURED",
+    "energy_joules": null,
+    "energy_sensor": "not integrated in this harness",
+    "confidence_interval": null,
+    "comparison_winner": null
+  },
+  "samples": [
+    {
+      "trial": 1,
+      "elapsed_seconds": "0.53",
+      "peak_rss_kib": 22136,
+      "user_seconds": "0.52",
+      "system_seconds": "0.00"
+    },
+    {
+      "trial": 2,
+      "elapsed_seconds": "0.52",
+      "peak_rss_kib": 22076,
+      "user_seconds": "0.51",
+      "system_seconds": "0.00"
+    },
+    {
+      "trial": 3,
+      "elapsed_seconds": "0.52",
+      "peak_rss_kib": 21948,
+      "user_seconds": "0.51",
+      "system_seconds": "0.00"
+    },
+    {
+      "trial": 4,
+      "elapsed_seconds": "0.53",
+      "peak_rss_kib": 21956,
+      "user_seconds": "0.52",
+      "system_seconds": "0.00"
+    },
+    {
+      "trial": 5,
+      "elapsed_seconds": "0.51",
+      "peak_rss_kib": 22108,
+      "user_seconds": "0.51",
+      "system_seconds": "0.00"
+    }
+  ],
+  "limitations": [
+    "Single session, not independent blocks/sessions",
+    "Shared hosted AMD CPU: background contention, governor and thermal state not controlled",
+    "Two-decimal time resolution from GNU time; no nanosecond claims",
+    "No physical energy sensor and no measured joules",
+    "Source measure was fetched as Git blob during runner job; current main need not contain it",
+    "Prior verification warmed CPU/cache; process start is cold but whole platform is not",
+    "Paired comparison with any other language is NOT admitted by this observation"
+  ]
+}
