@@ -8,8 +8,9 @@
  *
  * The volatile address publication makes malloc's returned pointer observable
  * to the abstract machine, preventing an optimizer from proving all allocations
- * dead merely because the final output is N*K. It does NOT guarantee that the
- * C allocator, Python list, and JS array have equal underlying allocation cost.
+ * dead merely because the final output is N*K. Volatile element writes also
+ * preserve the specified initialization in optimized builds. This does NOT
+ * guarantee equal allocator/GC costs across C, Python, or JavaScript.
  */
 #include <errno.h>
 #include <inttypes.h>
@@ -50,15 +51,19 @@ int main(void) {
 
     uint64_t total = 0;
     for (size_t i = 0; i < n; ++i) {
-        uint32_t *items = malloc(k * sizeof(*items));
-        if (items == NULL) {
+        uint32_t *allocation = malloc(k * sizeof(*allocation));
+        if (allocation == NULL) {
             fputs("T05_ALLOCATION_FAILED\n", stderr);
             return 3;
         }
+        /* Volatile element writes keep the specified initialization in -O2
+         * builds; publishing the address separately keeps the allocation
+         * itself observable until it is freed. */
+        volatile uint32_t *items = allocation;
+        published_allocation = allocation;
         for (size_t j = 0; j < k; ++j) items[j] = (uint32_t)j;
-        published_allocation = items;
         total += (uint64_t)k;
-        free(items);
+        free(allocation);
         published_allocation = NULL;
     }
     printf("%" PRIu64 "\n", total);
