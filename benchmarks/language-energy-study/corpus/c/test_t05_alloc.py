@@ -1,74 +1,94 @@
 #!/usr/bin/env python3
-"""Bounded T05 external-result parity and negative I/O tests; NOT a SENS oracle.
-
-Usage: python3 benchmarks/language-energy-study/corpus/c/test_t05_alloc.py /path/to/t05
-Requires only Python stdlib; uses the existing T05 reference, never redefines it.
-"""
+"""Physical C T05 output parity; this does not adjudicate SENS semantics."""
 import os
 from pathlib import Path
+import shutil
 import subprocess
 import sys
+import tempfile
 import unittest
 
 CORPUS = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(CORPUS))
 import parity_check  # noqa: E402
 
+SOURCE = Path(__file__).with_name("t05_alloc.c")
+TASK = "T05-allocation-gc"
+
 
 class T05PhysicalOutputParity(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        if len(sys.argv) != 2:
-            raise RuntimeError("usage: test_t05_alloc.py /path/to/compiled/t05")
-        cls.binary = str(Path(sys.argv[1]).resolve())
+        cls.compiler = shutil.which("cc")
+        if cls.compiler is None:
+            raise unittest.SkipTest("NO_C_COMPILER: T05 C parity not verified")
+        cls.temp = tempfile.TemporaryDirectory(prefix="sens-t05-c-")
+        cls.binary = Path(cls.temp.name) / "t05_alloc"
+        result = subprocess.run(
+            [cls.compiler, "-std=c11", "-O2", "-Wall", "-Wextra", "-Werror",
+             "-pedantic", str(SOURCE), "-o", str(cls.binary)],
+            capture_output=True, text=True, check=False, timeout=30,
+        )
+        if result.returncode != 0:
+            cls.temp.cleanup()
+            raise AssertionError(
+                f"C11 BUILD FAILED (exit={result.returncode})\n"
+                f"stdout:\n{result.stdout}\nstderr:\n{result.stderr}"
+            )
 
-    def execute(self, n: str, k: str, task: str = "T05-allocation-gc"):
-        env = dict(os.environ, TASK_ID=task, TASK_N=n, TASK_K=k)
-        return subprocess.run([self.binary], env=env, text=True,
-                              capture_output=True, timeout=20, check=False)
+    @classmethod
+    def tearDownClass(cls):
+        if hasattr(cls, "temp"):
+            cls.temp.cleanup()
+
+    def execute(self, n=None, k=None, task=TASK):
+        env = dict(os.environ)
+        for key in ("TASK_ID", "TASK_N", "TASK_K"):
+            env.pop(key, None)
+        if task is not None:
+            env["TASK_ID"] = task
+        if n is not None:
+            env["TASK_N"] = str(n)
+        if k is not None:
+            env["TASK_K"] = str(k)
+        return subprocess.run(
+            [str(self.binary)], env=env, text=True, capture_output=True,
+            timeout=20, check=False,
+        )
 
     def test_verify_size_exact_parity(self):
-        doc = next(t for t in parity_check.load_manifest()["tasks"]
-                   if t["id"] == "T05-allocation-gc")
-        args = parity_check.VERIFY_SIZE[doc["id"]]
-        p = self.execute(str(args["n"]), str(args["k"]))
-        self.assertEqual(p.returncode, 0, p.stderr)
-        self.assertEqual(len(p.stdout.splitlines()), 1)
-        self.assertEqual(parity_check.compare(doc, p.stdout.strip()), (True, "PARITY_OK"))
+        args = parity_check.VERIFY_SIZE[TASK]
+        result = self.execute(**args)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(result.stdout, parity_check.ref_T05(**args) + "\n")
+        self.assertEqual(result.stderr, "")
 
-    def test_no_allocation_elision_shortcut_at_variable_shape(self):
-        for n, k in [(1, 1), (3, 7), (200, 4)]:
+    def test_variable_shapes_match_frozen_reference(self):
+        for n, k in ((1, 1), (3, 7), (200, 4)):
             with self.subTest(n=n, k=k):
-                p = self.execute(str(n), str(k))
-                self.assertEqual(p.returncode, 0, p.stderr)
-                self.assertEqual(p.stdout, parity_check.ref_T05(n, k) + "\n")
+                result = self.execute(n, k)
+                self.assertEqual(result.returncode, 0, result.stderr)
+                self.assertEqual(result.stdout, parity_check.ref_T05(n, k) + "\n")
 
-    def test_negative_parameters_fail_closed(self):
-        for n, k, task in [("abc", "4", "T05-allocation-gc"),
-                           ("-1", "4", "T05-allocation-gc"),
-                           ("2", "0", "T05-allocation-gc"),
-                           ("2", "4.0", "T05-allocation-gc"),
-                           ("2", "4", "T06-io"),
-                           ("1000001", "4", "T05-allocation-gc"),
-                           ("500000", "4096", "T05-allocation-gc")]:
+    def test_invalid_parameters_fail_closed(self):
+        cases = (
+            ("abc", "4", TASK), ("-1", "4", TASK), ("2", "0", TASK),
+            ("2", "4.0", TASK), ("2", "4", "T06-io"),
+            ("1000001", "4", TASK), ("500000", "4096", TASK),
+        )
+        for n, k, task in cases:
             with self.subTest(n=n, k=k, task=task):
-                p = self.execute(n, k, task)
-                self.assertNotEqual(p.returncode, 0)
-                self.assertEqual(p.stdout, "")
-                self.assertIn("T05_INVALID_INPUT", p.stderr)
+                result = self.execute(n, k, task)
+                self.assertEqual(result.returncode, 2)
+                self.assertEqual(result.stdout, "")
+                self.assertIn("T05_INVALID_INPUT", result.stderr)
 
-    def test_missing_required_env_fails_closed(self):
-        env = dict(os.environ)
-        env.pop("TASK_K", None)
-        env["TASK_ID"] = "T05-allocation-gc"
-        env["TASK_N"] = "2"
-        p = subprocess.run([self.binary], env=env, text=True,
-                           capture_output=True, timeout=20, check=False)
-        self.assertEqual(p.returncode, 2)
-        self.assertEqual(p.stdout, "")
+    def test_missing_required_input_fails_closed(self):
+        result = self.execute(n="2", k=None)
+        self.assertEqual(result.returncode, 2)
+        self.assertEqual(result.stdout, "")
+        self.assertIn("T05_INVALID_INPUT", result.stderr)
 
 
 if __name__ == "__main__":
-    if len(sys.argv) != 2:
-        raise SystemExit("usage: test_t05_alloc.py /path/to/compiled/t05")
-    unittest.main(argv=[sys.argv[0]], verbosity=2)
+    unittest.main(verbosity=2)
