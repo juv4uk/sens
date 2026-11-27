@@ -5,7 +5,9 @@
 (use-modules (rustup build toolchain)
              (rustup build manifest)
              (guix packages)
+             (guix build-system gnu)
              (guix search-paths)
+             (guix utils)
              (rnrs enums))
 
 (let ((manifest-module (resolve-module '(rustup build manifest))))
@@ -22,6 +24,15 @@
 (let ((toolchain (rustup "1.99.0" #:profile 'minimal #:components '(rustfmt clippy))))
   (package
     (inherit toolchain)
+    ;; Спостережений дефект пакування: успадкована Guix-фаза
+    ;; install-license-files падає з match-error #f, не доходячи до Cargo.
+    ;; Причину всередині самої фази не стверджуємо. Це технічний дефект,
+    ;; не зміна семантики SENS і не новий release-gate. Видаляємо лише цю фазу.
+    (arguments
+     (substitute-keyword-arguments (package-arguments toolchain)
+       ((#:phases phases)
+        `(modify-phases ,phases
+           (delete 'install-license-files)))))
     ;; Upstream rustc створює build-script без Guix rpath. Динамічний
     ;; libgcc береться виключно з lib поточного Guix-профілю.
     (native-search-paths
